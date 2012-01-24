@@ -1,3 +1,4 @@
 *.a
 *.6
-bin/*
+bin
+.settings

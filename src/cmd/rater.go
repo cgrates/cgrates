@@ -1,11 +1,11 @@
 package main
 
 import (
-	"net/rpc"
-	"net/http"
-	"math"
-	"log"
 	"flag"
+	"log"
+	"math"
+	"net"
+	"net/rpc"
 )
 
 var (
@@ -20,14 +20,14 @@ func (t *Sumer) Square(n float64, reply *float64) error {
 	return nil
 }
 
-func registerToServer(){	
-	client,err := rpc.DialHTTP("tcp", *server)
+func registerToServer() {
+	client, err := rpc.DialHTTP("tcp", *server)
 	if err != nil {
 		log.Panic("Cannot register to server!")
 	}
-	var reply byte	
+	var reply byte
 	log.Print("Registering to server ", *server)
-	client.Call("RaterList.RegisterRater", *listen, &reply)	
+	client.Call("RaterList.RegisterRater", *listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Panic("Could not close server registration!")
 	}
@@ -39,5 +39,10 @@ func main() {
 	rpc.Register(arith)
 	rpc.HandleHTTP()
 	go registerToServer()
-	http.ListenAndServe(*listen, nil)
+	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
+	l, err2 := net.ListenTCP("tcp", addr)
+	if err1 != nil || err2 != nil {
+		log.Panic("cannot create listener for specified address ", *listen)
+	}
+	rpc.Accept(l)
 }
