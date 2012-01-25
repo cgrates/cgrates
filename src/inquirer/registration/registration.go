@@ -31,16 +31,21 @@ func (rl *RaterList) RegisterRater(clientAddress string, replay *byte) error {
 		return err
 	}
 	rl.Clients[clientAddress] = client
-	log.Print(fmt.Sprintf("Server %v registered succesfully", clientAddress))
+	log.Print(fmt.Sprintf("Rater %v registered succesfully.", clientAddress))
 	rl.balancer_mutex.Unlock()
 	return nil
 }
 
 func (rl *RaterList) UnRegisterRater(clientAddress string, replay *byte) error {
-	client := rl.Clients[clientAddress]
-	client.Close()	
-	delete(rl.Clients, clientAddress)
-	log.Print(fmt.Sprintf("Server %v unregistered succesfully", clientAddress))		
+	
+	client, ok := rl.Clients[clientAddress]
+	if ok {
+		client.Close()	
+		delete(rl.Clients, clientAddress)
+		log.Print(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))		
+	} else {
+		log.Print(fmt.Sprintf("Server %v was not on my watch!", clientAddress))		
+	}
 	return nil
 }
 
