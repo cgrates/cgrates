@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 	"net/rpc"
-	//"time"
+	"time"
 	"errors"
 )
 
@@ -34,9 +34,9 @@ func callRater() {
 }
 
 func testCallRater(){
-	for i:= 0; i<10; i++ {
+	for {
 		go callRater()
-		//time.Sleep(1 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
 }
 
