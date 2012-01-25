@@ -1,5 +1,5 @@
 *.a
 *.6
 .settings
-inquirer/inquirer
-rater/rater
+src/inquirer/inquirer
+src/rater/rater

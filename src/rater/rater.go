@@ -26,7 +26,7 @@ func main() {
 	rpc.Register(arith)
 	rpc.HandleHTTP()
 	go RegisterToServer(server, listen)
-	go registration.StopSingnalHandler(server, listen)
+	go StopSingnalHandler(server, listen)
 	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
 	l, err2 := net.ListenTCP("tcp", addr)
 	if err1 != nil || err2 != nil {
