@@ -32,7 +32,10 @@ func (rl *RaterList) RegisterRater(clientAddress string, replay *byte) error {
 	}
 	rl.Clients[clientAddress] = client
 	log.Print(fmt.Sprintf("Rater %v registered succesfully.", clientAddress))
-	rl.balancer_mutex.Unlock()
+	if len(rl.Clients) == 1 {
+		// unlock the balancer on first rater
+		rl.balancer_mutex.Unlock()
+	}
 	return nil
 }
 
@@ -54,8 +57,8 @@ func (rl *RaterList) startBalance() {
 	go func(){		
 		for {
 			rl.balancer_mutex.Lock()
-			for addr, client := range rl.Clients {
-				log.Printf("using server %s:", addr)
+			for _, client := range rl.Clients {
+				//log.Printf("using server %s:", addr)
 				rl.Balancer <- client			
 			}
 			if len(rl.Clients) != 0 {			

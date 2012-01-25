@@ -28,7 +28,7 @@ func callRater(key string) (reply string) {
 			log.Printf("Got en error from rater: %v", err)
 		}			
 	}
-	log.Print(fmt.Sprintf("Result: %v", reply))
+	//log.Print(fmt.Sprintf("Result: %v", reply))
 	return 
 }
 

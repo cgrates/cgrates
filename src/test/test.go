@@ -9,8 +9,11 @@ import (
 func main(){
 	client, _ := rpc.DialHTTPPath("tcp", "localhost:2000", "/rpc")
 	var reply string
-	client.Call("Responder.Get", "test", &reply)
-	fmt.Println(reply)
+	i:= 0
+	for ; i < 5 * 10e4; i++ {
+		client.Call("Responder.Get", "test", &reply)
+	}
+	fmt.Println(i, reply)
 }
 
 

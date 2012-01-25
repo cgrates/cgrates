@@ -29,10 +29,10 @@ func (s *Storage) Get(args string, reply *string) (err error) {
 
 func main() {	
 	flag.Parse()
-	//getter, err := NewKyotoStorage("storage.kch")
-	//defer getter.Close()
-	getter, err := NewRedisStorage("tcp:127.0.0.1:6379")
+	getter, err := NewKyotoStorage("storage.kch")
 	defer getter.Close()
+	//getter, err := NewRedisStorage("tcp:127.0.0.1:6379")
+	//defer getter.Close()
 	if err != nil {
 		log.Printf("Cannot open storage file: %v", err)
 		os.Exit(1)
