@@ -20,12 +20,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func callRater() {
-	var reply float64
-	arg := 9.0		
+	var reply string
 	err := errors.New("") //not nil value
 	for err != nil {
 		client:= <-raterList.Balancer
-		err = client.Call("Sumer.Square", arg, &reply)
+		err = client.Call("Storage.Get", "test", &reply)
 		if err != nil {
 			log.Print("Got en error from rater... recovering")
 		}			

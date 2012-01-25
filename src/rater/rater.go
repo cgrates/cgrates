@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"math"
 	"net"
 	"net/rpc"
 	"os"
@@ -12,19 +11,29 @@ import (
 var (
 	server = flag.String("server", "127.0.0.1:2000", "target host:port")
 	listen = flag.String("listen", "127.0.0.1:1234", "target host:port")
+	storage Storage
 )
 
-type Sumer int
-
-func (t *Sumer) Square(n float64, reply *float64) error {
-	*reply = math.Sqrt(n)
-	return nil
+type Storage struct {
+	sg StorageGetter
 }
 
-func main() {
+func NewStorage(nsg StorageGetter) *Storage{
+	s := &Storage{sg: nsg}
+	s.sg.Open("storage.kch")
+	return s
+}
+
+func (s *Storage) Get(args string, reply *string) (err error) {
+	*reply, err = s.sg.Get(args)
+	return err
+}
+
+func main() {	
 	flag.Parse()
-	arith := new(Sumer)
-	rpc.Register(arith)
+	kyoto := KyotoStorage{}
+	storage := NewStorage(kyoto)
+	rpc.Register(storage)
 	rpc.HandleHTTP()
 	go RegisterToServer(server, listen)
 	go StopSingnalHandler(server, listen)
