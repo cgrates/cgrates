@@ -6,6 +6,9 @@ import (
 	"math"
 	"net"
 	"net/rpc"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 var (
@@ -18,6 +21,31 @@ type Sumer int
 func (t *Sumer) Square(n float64, reply *float64) error {
 	*reply = math.Sqrt(n)
 	return nil
+}
+
+func stopSingnalHandler() {
+	sig := <-signal.Incoming
+	if usig, ok := sig.(os.UnixSignal); ok {
+		switch usig {
+		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
+			log.Printf("Caught signal %v, unregistering from server\n", usig)			
+			unregisterFromServer()
+			os.Exit(1)
+		}
+	}
+}
+
+func unregisterFromServer() {
+	client, err := rpc.DialHTTP("tcp", *server)
+	if err != nil {
+		log.Panic("Cannot register to server!")
+	}
+	var reply byte
+	log.Print("Unregistering from server ", *server)
+	client.Call("RaterList.UnRegisterRater", *listen, &reply)
+	if err := client.Close(); err != nil {
+		log.Panic("Could not close server unregistration!")
+	}
 }
 
 func registerToServer() {
@@ -39,6 +67,7 @@ func main() {
 	rpc.Register(arith)
 	rpc.HandleHTTP()
 	go registerToServer()
+	go stopSingnalHandler()
 	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
 	l, err2 := net.ListenTCP("tcp", addr)
 	if err1 != nil || err2 != nil {

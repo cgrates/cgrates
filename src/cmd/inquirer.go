@@ -25,6 +25,14 @@ func (rl *RaterList) RegisterRater(clientAddress string, replay *byte) error {
 	return nil
 }
 
+func (rl *RaterList) UnRegisterRater(clientAddress string, replay *byte) error {
+	client := rl.clients[clientAddress]
+	client.Close()	
+	delete(rl.clients, clientAddress)
+	log.Print(fmt.Sprintf("Server %v unregistered succesfully", clientAddress))
+	return nil
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<html><body><ol>")
 	for addr, _ := range raterList.clients {
