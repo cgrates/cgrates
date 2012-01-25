@@ -19,32 +19,41 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "</ol></body></html>")
 }
 
-func callRater() {
-	var reply string
+func callRater(key string) (reply string) {
 	err := errors.New("") //not nil value
 	for err != nil {
 		client:= <-raterList.Balancer
-		err = client.Call("Storage.Get", "test", &reply)
+		err = client.Call("Storage.Get", key, &reply)
 		if err != nil {
 			log.Printf("Got en error from rater: %v", err)
 		}			
 	}
-	fmt.Println(fmt.Sprintf("Result: %v", reply))
+	log.Print(fmt.Sprintf("Result: %v", reply))
+	return 
 }
 
-func testCallRater(){
+func testCallRater(key string){
 	for {
-		callRater()
+		callRater(key)
 		time.Sleep(1 * time.Second)
 	}
 }
 
 func main() {
 	raterList = NewRaterList()	
-	go testCallRater()
+	//go testCallRater("test")	
 	rpc.Register(raterList)
 	rpc.HandleHTTP()
-	http.HandleFunc("/", handler)
+	
+	responder := new(Responder)
+	srvr := rpc.NewServer()
+	srvr.Register(responder)
+	f1 := func(w http.ResponseWriter, req *http.Request) {
+  		srvr.ServeHTTP(w, req)
+	}
+	http.HandleFunc("/rpc", f1)
+	
+	http.HandleFunc("/", handler)	
 	log.Print("The server is listening...")
 	http.ListenAndServe(":2000", nil)
 }

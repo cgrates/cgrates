@@ -1,5 +1,6 @@
 *.a
 *.6
+*.pyc
 .settings
 src/inquirer/inquirer
 src/rater/rater
