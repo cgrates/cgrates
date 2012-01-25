@@ -6,5 +6,6 @@ GOFILES=\
 	registration/registration.go\
 	storage/interface.go\
 	storage/kyoto_storage.go\
+	storage/redis_storage.go\
 
 include $(GOROOT)/src/Make.cmd

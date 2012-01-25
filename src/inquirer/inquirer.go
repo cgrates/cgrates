@@ -26,7 +26,7 @@ func callRater() {
 		client:= <-raterList.Balancer
 		err = client.Call("Storage.Get", "test", &reply)
 		if err != nil {
-			log.Print("Got en error from rater... recovering")
+			log.Printf("Got en error from rater: %v", err)
 		}			
 	}
 	fmt.Println(fmt.Sprintf("Result: %v", reply))
@@ -34,7 +34,7 @@ func callRater() {
 
 func testCallRater(){
 	for {
-		go callRater()
+		callRater()
 		time.Sleep(1 * time.Second)
 	}
 }

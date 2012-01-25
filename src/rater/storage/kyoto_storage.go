@@ -8,11 +8,11 @@ type KyotoStorage struct {
 	db *kc.DB
 }
 
-func (ks KyotoStorage) Open(fileName string) error {
-	db, err := kc.Open(fileName, kc.READ)
-	ks.db = db
-	return err
+func NewKyotoStorage(filaName string) (KyotoStorage, error) {
+	ndb, err := kc.Open(filaName, kc.READ)
+	return KyotoStorage{db: ndb}, err	
 }
+
 
 func (ks KyotoStorage) Close() {
 	ks.db.Close()

@@ -19,9 +19,7 @@ type Storage struct {
 }
 
 func NewStorage(nsg StorageGetter) *Storage{
-	s := &Storage{sg: nsg}
-	s.sg.Open("storage.kch")
-	return s
+	return &Storage{sg: nsg}
 }
 
 func (s *Storage) Get(args string, reply *string) (err error) {
@@ -31,8 +29,15 @@ func (s *Storage) Get(args string, reply *string) (err error) {
 
 func main() {	
 	flag.Parse()
-	kyoto := KyotoStorage{}
-	storage := NewStorage(kyoto)
+	//getter, err := NewKyotoStorage("storage.kch")
+	//defer getter.Close()
+	getter, err := NewRedisStorage("tcp:127.0.0.1:6379")
+	defer getter.Close()
+	if err != nil {
+		log.Printf("Cannot open storage file: %v", err)
+		os.Exit(1)
+	}
+	storage := NewStorage(getter)
 	rpc.Register(storage)
 	rpc.HandleHTTP()
 	go RegisterToServer(server, listen)

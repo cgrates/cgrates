@@ -54,7 +54,6 @@ func (rl *RaterList) startBalance() {
 	go func(){		
 		for {
 			rl.balancer_mutex.Lock()
-			log.Print("balancing")
 			for addr, client := range rl.Clients {
 				log.Printf("using server %s:", addr)
 				rl.Balancer <- client			
