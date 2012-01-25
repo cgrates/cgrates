@@ -6,9 +6,7 @@ import (
 	"math"
 	"net"
 	"net/rpc"
-	"os"
-	"os/signal"
-	"syscall"
+	"registration"
 )
 
 var (
@@ -23,51 +21,13 @@ func (t *Sumer) Square(n float64, reply *float64) error {
 	return nil
 }
 
-func stopSingnalHandler() {
-	sig := <-signal.Incoming
-	if usig, ok := sig.(os.UnixSignal); ok {
-		switch usig {
-		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
-			log.Printf("Caught signal %v, unregistering from server\n", usig)			
-			unregisterFromServer()
-			os.Exit(1)
-		}
-	}
-}
-
-func unregisterFromServer() {
-	client, err := rpc.DialHTTP("tcp", *server)
-	if err != nil {
-		log.Panic("Cannot register to server!")
-	}
-	var reply byte
-	log.Print("Unregistering from server ", *server)
-	client.Call("RaterList.UnRegisterRater", *listen, &reply)
-	if err := client.Close(); err != nil {
-		log.Panic("Could not close server unregistration!")
-	}
-}
-
-func registerToServer() {
-	client, err := rpc.DialHTTP("tcp", *server)
-	if err != nil {
-		log.Panic("Cannot register to server!")
-	}
-	var reply byte
-	log.Print("Registering to server ", *server)
-	client.Call("RaterList.RegisterRater", *listen, &reply)
-	if err := client.Close(); err != nil {
-		log.Panic("Could not close server registration!")
-	}
-}
-
 func main() {
 	flag.Parse()
 	arith := new(Sumer)
 	rpc.Register(arith)
 	rpc.HandleHTTP()
-	go registerToServer()
-	go stopSingnalHandler()
+	go registration.RegisterToServer(server, listen)
+	go registration.StopSingnalHandler(server, listen)
 	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
 	l, err2 := net.ListenTCP("tcp", addr)
 	if err1 != nil || err2 != nil {

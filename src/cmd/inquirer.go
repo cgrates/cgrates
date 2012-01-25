@@ -6,52 +6,30 @@ import (
 	"net/http"
 	"net/rpc"
 	"time"
+	"registration"
 )
 
-type RaterList struct {
-	clients map[string]*rpc.Client
-}
-
-var raterList *RaterList
-
-func (rl *RaterList) RegisterRater(clientAddress string, replay *byte) error {
-	time.Sleep(1 * time.Second) // wait a second for Rater to start serving
-	client, err := rpc.Dial("tcp", clientAddress)
-	if err != nil {
-		log.Panic("Could not connect to client!")
-	}
-	rl.clients[clientAddress] = client
-	log.Print(fmt.Sprintf("Server %v registered succesfully", clientAddress))
-	return nil
-}
-
-func (rl *RaterList) UnRegisterRater(clientAddress string, replay *byte) error {
-	client := rl.clients[clientAddress]
-	client.Close()	
-	delete(rl.clients, clientAddress)
-	log.Print(fmt.Sprintf("Server %v unregistered succesfully", clientAddress))
-	return nil
-}
+var raterList *registration.RaterList
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<html><body><ol>")
-	for addr, _ := range raterList.clients {
+	for addr, _ := range raterList.Clients {
 		fmt.Fprint(w, fmt.Sprintf("<li>%s</li>", addr))
 	}
 	fmt.Fprint(w, "</ol></body></html>")
 }
 
-func callRater(rl *RaterList) {
+func callRater(rl *registration.RaterList) {
 	var reply float64
 	arg := 9.0
 
 	log.Print("Starting client polling.")
 	for {
-		for addr, client := range rl.clients {
+		for addr, client := range rl.Clients {
 			err := client.Call("Sumer.Square", arg, &reply)
 			if err != nil {
 				log.Print("Closing client!")
-				delete(rl.clients, addr)
+				delete(rl.Clients, addr)
 			}
 			fmt.Println(fmt.Sprintf("Result from rater(%v): %v", addr, reply))
 		}
@@ -60,7 +38,7 @@ func callRater(rl *RaterList) {
 }
 
 func main() {
-	raterList = &RaterList{clients: make(map[string]*rpc.Client)}
+	raterList = &registration.RaterList{Clients: make(map[string]*rpc.Client)}
 	go callRater(raterList)
 	rpc.Register(raterList)
 	rpc.HandleHTTP()
