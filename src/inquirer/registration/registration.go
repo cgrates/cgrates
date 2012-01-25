@@ -27,7 +27,8 @@ func (rl *RaterList) RegisterRater(clientAddress string, replay *byte) error {
 	time.Sleep(1 * time.Second) // wait a second for Rater to start serving
 	client, err := rpc.Dial("tcp", clientAddress)
 	if err != nil {
-		log.Panic("Could not connect to client!")
+		log.Print("Could not connect to client!")
+		return err
 	}
 	rl.Clients[clientAddress] = client
 	log.Print(fmt.Sprintf("Server %v registered succesfully", clientAddress))

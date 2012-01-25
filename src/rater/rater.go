@@ -6,6 +6,7 @@ import (
 	"math"
 	"net"
 	"net/rpc"
+	"os"
 )
 
 var (
@@ -30,7 +31,8 @@ func main() {
 	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
 	l, err2 := net.ListenTCP("tcp", addr)
 	if err1 != nil || err2 != nil {
-		log.Panic("cannot create listener for specified address ", *listen)
+		log.Print("cannot create listener for specified address ", *listen)
+		os.Exit(1)
 	}
 	rpc.Accept(l)
 }

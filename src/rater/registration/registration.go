@@ -24,25 +24,29 @@ func StopSingnalHandler(server, listen *string) {
 func unregisterFromServer(server, listen *string) {
 	client, err := rpc.DialHTTP("tcp", *server)
 	if err != nil {
-		log.Panic("Cannot register to server!")
+		log.Print("Cannot contact the server!")
+		os.Exit(1)
 	}
 	var reply byte
 	log.Print("Unregistering from server ", *server)
 	client.Call("RaterList.UnRegisterRater", *listen, &reply)
 	if err := client.Close(); err != nil {
-		log.Panic("Could not close server unregistration!")
+		log.Print("Could not close server unregistration!")
+		os.Exit(1)
 	}
 }
 
 func RegisterToServer(server, listen *string) {
 	client, err := rpc.DialHTTP("tcp", *server)
 	if err != nil {
-		log.Panic("Cannot register to server!")
+		log.Print("Cannot contact the server!")
+		os.Exit(1)
 	}
 	var reply byte
 	log.Print("Registering to server ", *server)
 	client.Call("RaterList.RegisterRater", *listen, &reply)
 	if err := client.Close(); err != nil {
-		log.Panic("Could not close server registration!")
+		log.Print("Could not close server registration!")
+		os.Exit(1)
 	}
 }
