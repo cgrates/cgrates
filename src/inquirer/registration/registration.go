@@ -1,4 +1,4 @@
-package registration
+package main
 
 import (
 	"fmt"

@@ -6,7 +6,6 @@ import (
 	"math"
 	"net"
 	"net/rpc"
-	"registration"
 )
 
 var (
@@ -26,8 +25,8 @@ func main() {
 	arith := new(Sumer)
 	rpc.Register(arith)
 	rpc.HandleHTTP()
-	go registration.RegisterToServer(server, listen)
-	//go registration.StopSingnalHandler(server, listen)
+	go RegisterToServer(server, listen)
+	go registration.StopSingnalHandler(server, listen)
 	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
 	l, err2 := net.ListenTCP("tcp", addr)
 	if err1 != nil || err2 != nil {

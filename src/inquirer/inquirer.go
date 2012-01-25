@@ -5,12 +5,11 @@ import (
 	"log"
 	"net/http"
 	"net/rpc"
-	"registration"
 	//"time"
 	"errors"
 )
 
-var raterList *registration.RaterList
+var raterList *RaterList
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<html><body><ol>")
@@ -42,7 +41,7 @@ func testCallRater(){
 }
 
 func main() {
-	raterList = registration.NewRaterList()	
+	raterList = NewRaterList()	
 	go testCallRater()
 	rpc.Register(raterList)
 	rpc.HandleHTTP()
