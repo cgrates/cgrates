@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"net/rpc"
-	"time"
 	"errors"
 )
 
@@ -28,20 +27,11 @@ func callRater(key string) (reply string) {
 			log.Printf("Got en error from rater: %v", err)
 		}			
 	}
-	//log.Print(fmt.Sprintf("Result: %v", reply))
 	return 
 }
 
-func testCallRater(key string){
-	for {
-		callRater(key)
-		time.Sleep(1 * time.Second)
-	}
-}
-
 func main() {
-	raterList = NewRaterList()	
-	//go testCallRater("test")	
+	raterList = NewRaterList()
 	rpc.Register(raterList)
 	rpc.HandleHTTP()
 	
