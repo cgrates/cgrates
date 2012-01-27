@@ -1,7 +1,8 @@
 package main
 
 import (
-    "github.com/simonz05/godis"    
+	"log"
+	"github.com/simonz05/godis"    
 )
 
 type RedisStorage struct {
@@ -10,11 +11,13 @@ type RedisStorage struct {
 
 func NewRedisStorage(address string) (*RedisStorage, error) {
 	ndb:= godis.New(address, 10, "")
+	log.Print("Starting redis storage")
 	return &RedisStorage{db: ndb}, nil
 }
 
 
 func (rs *RedisStorage) Close() {
+	log.Print("Closing redis storage")
 	rs.db.Quit()
 }
 
