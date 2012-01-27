@@ -2,5 +2,8 @@
 *.6
 *.pyc
 .settings
-src/inquirer/inquirer
-src/rater/rater
+inquirer
+rater
+kyoto_loader
+redis_loader
+test
