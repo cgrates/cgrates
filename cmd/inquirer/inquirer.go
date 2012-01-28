@@ -11,6 +11,9 @@ import (
 
 var raterList *RaterList
 
+/*
+Handler for the statistics web client
+*/
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<html><body><ol>")
 	for addr, _ := range raterList.clientAddresses {
@@ -19,6 +22,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "</ol></body></html>")
 }
 
+/*
+The function that gets the information from the raters using balancer.
+*/
 func CallRater(key string) (reply string) {
 	err := errors.New("") //not nil value
 	for err != nil {
