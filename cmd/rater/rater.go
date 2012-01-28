@@ -30,7 +30,6 @@ func (s *Storage) Get(args string, reply *string) (err error) {
 func main() {	
 	flag.Parse()
 	getter, err := NewKyotoStorage("storage.kch")
-	defer getter.Close()
 	//getter, err := NewRedisStorage("tcp:127.0.0.1:6379")
 	//defer getter.Close()
 	if err != nil {
@@ -41,7 +40,7 @@ func main() {
 	rpc.Register(storage)
 	rpc.HandleHTTP()
 	go RegisterToServer(server, listen)
-	go StopSingnalHandler(server, listen)
+	go StopSingnalHandler(server, listen, getter)
 	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
 	l, err2 := net.ListenTCP("tcp", addr)
 	if err1 != nil || err2 != nil {

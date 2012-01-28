@@ -8,7 +8,7 @@ import (
 	"syscall"
 )
 
-func StopSingnalHandler(server, listen *string) {
+func StopSingnalHandler(server, listen *string, getter *KyotoStorage) {
 	log.Print("Handling stop signals...")
 	sig := <-signal.Incoming
 	if usig, ok := sig.(os.UnixSignal); ok {
@@ -16,6 +16,7 @@ func StopSingnalHandler(server, listen *string) {
 		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
 			log.Printf("Caught signal %v, unregistering from server\n", usig)
 			unregisterFromServer(server, listen)
+			getter.Close()
 			os.Exit(1)
 		}
 	}

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-    "github.com/fsouza/gokabinet/kc"
-    "flag"
+	"github.com/fsouza/gokabinet/kc"
+	"flag"
 )
 
 var (
@@ -11,8 +11,8 @@ var (
 )
 func main() {
 	flag.Parse()
-    db, _ := kc.Open(*fileName, kc.WRITE)
-    defer db.Close()
+	db, _ := kc.Open(*fileName, kc.WRITE)
+	defer db.Close()
 
    	db.Set("test", "12223")
    	fmt.Println("Done!")

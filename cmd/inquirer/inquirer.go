@@ -12,7 +12,7 @@ var raterList *RaterList
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<html><body><ol>")
-	for addr, _ := range raterList.Clients {
+	for addr, _ := range raterList.clientAddresses {
 		fmt.Fprint(w, fmt.Sprintf("<li>%s</li>", addr))
 	}
 	fmt.Fprint(w, "</ol></body></html>")
@@ -21,7 +21,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func callRater(key string) (reply string) {
 	err := errors.New("") //not nil value
 	for err != nil {
-		client:= <-raterList.Balancer
+		client:= raterList.Balance()
 		err = client.Call("Storage.Get", key, &reply)
 		if err != nil {
 			log.Printf("Got en error from rater: %v", err)
