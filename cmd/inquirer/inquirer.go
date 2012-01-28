@@ -25,7 +25,7 @@ func CallRater(key string) (reply string) {
 		client:= raterList.Balance()
 		if client == nil {
 			log.Print("Waiting for raters to register...")
-			time.Sleep(1 * time.Second) // white one second and retry
+			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			err = client.Call("Storage.Get", key, &reply)
 			if err != nil {
