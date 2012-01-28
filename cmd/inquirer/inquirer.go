@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"errors"
+	"time"
 )
 
 var raterList *RaterList
@@ -18,13 +19,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "</ol></body></html>")
 }
 
-func callRater(key string) (reply string) {
+func CallRater(key string) (reply string) {
 	err := errors.New("") //not nil value
 	for err != nil {
 		client:= raterList.Balance()
-		err = client.Call("Storage.Get", key, &reply)
-		if err != nil {
-			log.Printf("Got en error from rater: %v", err)
+		if client == nil {
+			log.Print("Waiting for raters to register...")
+			time.Sleep(1 * time.Second) // white one second and retry
+		} else {
+			err = client.Call("Storage.Get", key, &reply)
+			if err != nil {
+				log.Printf("Got en error from rater: %v", err)
+			}
 		}			
 	}
 	return 
@@ -32,7 +38,8 @@ func callRater(key string) (reply string) {
 
 func main() {
 	raterList = NewRaterList()
-	rpc.Register(raterList)
+	raterServer := new(RaterServer)
+	rpc.Register(raterServer)
 	rpc.HandleHTTP()
 	
 	responder := new(Responder)

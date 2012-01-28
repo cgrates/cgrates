@@ -30,7 +30,7 @@ func unregisterFromServer(server, listen *string) {
 	}
 	var reply byte
 	log.Print("Unregistering from server ", *server)
-	client.Call("RaterList.UnRegisterRater", *listen, &reply)
+	client.Call("RaterServer.UnRegisterRater", *listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Print("Could not close server unregistration!")
 		os.Exit(1)
@@ -45,7 +45,7 @@ func RegisterToServer(server, listen *string) {
 	}
 	var reply byte
 	log.Print("Registering to server ", *server)
-	client.Call("RaterList.RegisterRater", *listen, &reply)
+	client.Call("RaterServer.RegisterRater", *listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Print("Could not close server registration!")
 		os.Exit(1)
