@@ -22,11 +22,17 @@ func NewStorage(nsg StorageGetter) *Storage{
 	return &Storage{sg: nsg}
 }
 
+/*
+RPC method providing the rating information from the storage.
+*/
 func (s *Storage) Get(args string, reply *string) (err error) {
 	*reply, err = s.sg.Get(args)
 	return err
 }
 
+/*
+RPC method that trigers rater shutdown in case of server exit.
+*/
 func (s *Storage) Shutdown(args string, reply *string) (err error) {
 	s.sg.Close()
 	defer os.Exit(0)

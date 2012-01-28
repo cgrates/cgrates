@@ -8,6 +8,9 @@ import (
 	"syscall"
 )
 
+/*
+Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from inquirer and closes the storage before exiting.
+*/
 func StopSingnalHandler(server, listen *string, getter *KyotoStorage) {
 	log.Print("Handling stop signals...")
 	sig := <-signal.Incoming
@@ -22,6 +25,9 @@ func StopSingnalHandler(server, listen *string, getter *KyotoStorage) {
 	}
 }
 
+/*
+Connects to the inquirer and calls unregister RPC method.
+*/
 func unregisterFromServer(server, listen *string) {
 	client, err := rpc.DialHTTP("tcp", *server)
 	if err != nil {
@@ -37,6 +43,9 @@ func unregisterFromServer(server, listen *string) {
 	}
 }
 
+/*
+Connects to the inquirer and rehisters the rater to the server.
+*/
 func RegisterToServer(server, listen *string) {
 	client, err := rpc.DialHTTP("tcp", *server)
 	if err != nil {
