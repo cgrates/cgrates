@@ -27,6 +27,13 @@ func (s *Storage) Get(args string, reply *string) (err error) {
 	return err
 }
 
+func (s *Storage) Shutdown(args string, reply *string) (err error) {
+	s.sg.Close()
+	defer os.Exit(0)
+	*reply = "Done!"
+	return nil
+}
+
 func main() {	
 	flag.Parse()
 	getter, err := NewKyotoStorage("storage.kch")

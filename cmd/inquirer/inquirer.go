@@ -42,6 +42,8 @@ func main() {
 	rpc.Register(raterServer)
 	rpc.HandleHTTP()
 	
+	go StopSingnalHandler()
+
 	responder := new(Responder)
 	srvr := rpc.NewServer()
 	srvr.Register(responder)
