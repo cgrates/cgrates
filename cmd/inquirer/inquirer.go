@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"errors"
 	"time"
 )
@@ -42,22 +44,40 @@ func CallRater(key string) (reply string) {
 	return 
 }
 
+func listenToTheWorld() {
+	l, err := net.Listen("tcp", ":5090")
+	defer l.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Print("listening:", l.Addr())
+
+	responder := new(Responder)
+	rpc.Register(responder)
+
+	for {
+		c, err := l.Accept()		
+		if err != nil {
+			log.Printf("accept error: %s", c)
+			continue
+		}
+
+		log.Printf("connection started: %v", c.RemoteAddr())
+		go jsonrpc.ServeConn(c)
+	}
+}
+
 func main() {
 	raterList = NewRaterList()
 	raterServer := new(RaterServer)
 	rpc.Register(raterServer)
 	rpc.HandleHTTP()
 	
-	go StopSingnalHandler()
+	go StopSingnalHandler()	
+	go listenToTheWorld()
 
-	responder := new(Responder)
-	srvr := rpc.NewServer()
-	srvr.Register(responder)
-	f1 := func(w http.ResponseWriter, req *http.Request) {
-  		srvr.ServeHTTP(w, req)
-	}
-	http.HandleFunc("/rpc", f1)
-	
 	http.HandleFunc("/", handler)	
 	log.Print("The server is listening...")
 	http.ListenAndServe(":2000", nil)

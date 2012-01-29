@@ -1,14 +1,14 @@
 package main
 
 import (
-	"net/rpc"
+	"net/rpc/jsonrpc"
 	"fmt"
 	//"time"
 ) 
 
 
 func main(){
-	client, _ := rpc.DialHTTPPath("tcp", "localhost:2000", "/rpc")
+	client, _ := jsonrpc.Dial("tcp", "localhost:5090")
 	var reply string
 	i:= 0
 	for ; i < 5 * 10e3; i++ {
