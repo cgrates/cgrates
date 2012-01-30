@@ -26,9 +26,10 @@ func NewStorage(nsg timeslots.StorageGetter) *Storage{
 /*
 RPC method providing the rating information from the storage.
 */
-func (s *Storage) GetCost(in *timeslots.CallDescription, reply *string) (err error) {
-	*reply, err = timeslots.GetCost(in, s.sg)
-	return err
+func (s *Storage) GetCost(in *timeslots.CallDescription, reply *CallCost) (error) {
+	r, e := timeslots.GetCost(in, s.sg)
+	*replay, err = r, e
+	return e
 }
 
 /*

@@ -31,12 +31,19 @@ const (
 )
 
 type CallDescription struct {
-	tOR int
-	cstmId, subject, destination string
-	timeStart, timeEnd time.Time
+	TOR int
+	CstmId, Subject, Destination string
+	TimeStart, TimeEnd time.Time
 }
 
-func GetCost(in *CallDescription, sg StorageGetter) (result string, err error) {
-	return "", nil
+type CallCost struct {
+	TOR int
+	CstmId, Subjext, Prefix string
+	Cost, ConnectFee float32
+//	ratesInfo *RatingProfile
+}
+
+func GetCost(in *CallDescription, sg StorageGetter) (result *CallCost, err error) {
+	return &CallCost{TOR: 1, CstmId:"",Subjext:"",Prefix:"", Cost:1, ConnectFee:1}, nil
 }
 
