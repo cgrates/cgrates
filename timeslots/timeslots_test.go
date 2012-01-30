@@ -9,7 +9,7 @@ func TestSimple(t *testing.T){
 	if err != nil {
 		t.Error("Got error on getting cost")
 	}
-	expected:= &CallCost{TOR: 1, CstmId:"",Subjext:"",Prefix:"", Cost:1, ConnectFee:1}
+	expected:= &CallCost{TOR: 1, CstmId:"",Subject:"",Prefix:"", Cost:1, ConnectFee:1}
 	if *cc != *expected {
 		t.Errorf("Expected %v got %v", expected, cc)
 	}

@@ -38,12 +38,12 @@ type CallDescription struct {
 
 type CallCost struct {
 	TOR int
-	CstmId, Subjext, Prefix string
+	CstmId, Subject, Prefix string
 	Cost, ConnectFee float32
 //	ratesInfo *RatingProfile
 }
 
 func GetCost(in *CallDescription, sg StorageGetter) (result *CallCost, err error) {
-	return &CallCost{TOR: 1, CstmId:"",Subjext:"",Prefix:"", Cost:1, ConnectFee:1}, nil
+	return &CallCost{TOR: 1, CstmId:"",Subject:"", Prefix:"", Cost:1, ConnectFee:1}, nil
 }
 
