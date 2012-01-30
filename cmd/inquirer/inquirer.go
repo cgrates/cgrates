@@ -9,19 +9,66 @@ import (
 	"net/rpc/jsonrpc"
 	"errors"
 	"time"
+	"runtime"
+	"sync"
 )
 
-var raterList *RaterList
+const NCPU = 4
+
+var (
+	raterList *RaterList
+	inChannels [NCPU]chan string
+	outChannels [NCPU]chan string
+	multiplexerIndex int 
+	mu sync.Mutex
+	sem = make(chan int, NCPU)
+)
+
+
 
 /*
 Handler for the statistics web client
 */
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<html><body><ol>")
-	for addr, _ := range raterList.clientAddresses {
-		fmt.Fprint(w, fmt.Sprintf("<li>%s</li>", addr))
+	for _, addr := range raterList.clientAddresses {
+		fmt.Fprint(w, fmt.Sprintf("<li>Client: %v</li>", addr))
 	}
+	fmt.Fprint(w, fmt.Sprintf("<li>Gorutines: %v</li>", runtime.Goroutines()))
 	fmt.Fprint(w, "</ol></body></html>")
+}
+
+/*
+Creates a gorutine for every cpu core and the multiplexses the calls to each of them.
+*/
+func initThreadedCallRater(){
+	multiplexerIndex = 0
+	runtime.GOMAXPROCS(NCPU)
+	fmt.Println(runtime.GOMAXPROCS(NCPU))
+	for i:= 0; i< NCPU; i++ {
+		inChannels[i] = make(chan string)
+		outChannels[i] = make(chan string)
+		go func(in, out chan string){
+			for {
+				key := <- in
+				out <- CallRater(key)
+			}
+		}(inChannels[i], outChannels[i])
+	}	
+}
+
+/*
+*/
+func ThreadedCallRater(key string) (replay string) {
+	mu.Lock()
+	defer mu.Unlock()
+	if multiplexerIndex >= NCPU {
+		multiplexerIndex = 0
+	}
+	inChannels[multiplexerIndex] <- key
+	replay = <- outChannels[multiplexerIndex]
+	multiplexerIndex++
+	return
 }
 
 /*
@@ -77,7 +124,7 @@ func main() {
 	
 	go StopSingnalHandler()	
 	go listenToTheWorld()
-
+	//initThreadedCallRater()
 	http.HandleFunc("/", handler)	
 	log.Print("The server is listening...")
 	http.ListenAndServe(":2000", nil)

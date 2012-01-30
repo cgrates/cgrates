@@ -49,6 +49,6 @@ print s.recv(4096)
 
 i = 0
 result = ""
-for i in xrange(5 * int(10e3) + 1):
+for i in xrange(5 * int(10e4) + 1):
     result = rpc.call("Responder.Get", "test")
 print i, result

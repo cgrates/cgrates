@@ -6,12 +6,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"github.com/rif/cgrates/timeslots"
 )
 
 /*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from inquirer and closes the storage before exiting.
 */
-func StopSingnalHandler(server, listen *string, getter *KyotoStorage) {
+func StopSingnalHandler(server, listen *string, sg timeslots.StorageGetter) {
 	log.Print("Handling stop signals...")
 	sig := <-signal.Incoming
 	if usig, ok := sig.(os.UnixSignal); ok {
@@ -19,7 +20,7 @@ func StopSingnalHandler(server, listen *string, getter *KyotoStorage) {
 		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
 			log.Printf("Caught signal %v, unregistering from server\n", usig)
 			unregisterFromServer(server, listen)
-			getter.Close()
+			sg.Close()
 			os.Exit(1)
 		}
 	}

@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/rpc"
 	"os"
+	"github.com/rif/cgrates/timeslots"
 )
 
 var (
@@ -15,18 +16,18 @@ var (
 )
 
 type Storage struct {
-	sg StorageGetter
+	sg timeslots.StorageGetter
 }
 
-func NewStorage(nsg StorageGetter) *Storage{
+func NewStorage(nsg timeslots.StorageGetter) *Storage{
 	return &Storage{sg: nsg}
 }
 
 /*
 RPC method providing the rating information from the storage.
 */
-func (s *Storage) Get(args string, reply *string) (err error) {
-	*reply, err = s.sg.Get(args)
+func (s *Storage) GetCost(in *timeslots.CallDescription, reply *string) (err error) {
+	*reply, err = timeslots.GetCost(in, s.sg)
 	return err
 }
 
@@ -42,7 +43,7 @@ func (s *Storage) Shutdown(args string, reply *string) (err error) {
 
 func main() {	
 	flag.Parse()
-	getter, err := NewKyotoStorage("storage.kch")
+	getter, err := timeslots.NewKyotoStorage("storage.kch")
 	//getter, err := NewRedisStorage("tcp:127.0.0.1:6379")
 	//defer getter.Close()
 	if err != nil {
