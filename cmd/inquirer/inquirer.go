@@ -13,15 +13,15 @@ import (
 	"sync"
 )
 
-const NCPU = 4
 
 var (
+	nCPU = runtime.NumCPU()
 	raterList *RaterList
-	inChannels [NCPU]chan string
-	outChannels [NCPU]chan string
+	inChannels []chan string
+	outChannels []chan string
 	multiplexerIndex int 
 	mu sync.Mutex
-	sem = make(chan int, NCPU)
+	sem = make(chan int, nCPU)
 )
 
 
@@ -43,9 +43,10 @@ Creates a gorutine for every cpu core and the multiplexses the calls to each of 
 */
 func initThreadedCallRater(){
 	multiplexerIndex = 0
-	runtime.GOMAXPROCS(NCPU)
-	fmt.Println(runtime.GOMAXPROCS(NCPU))
-	for i:= 0; i< NCPU; i++ {
+	runtime.GOMAXPROCS(nCPU)
+	inChannels = make([]chan string, nCPU)
+	outChannels = make([]chan string, nCPU)
+	for i:= 0; i< nCPU; i++ {
 		inChannels[i] = make(chan string)
 		outChannels[i] = make(chan string)
 		go func(in, out chan string){
@@ -62,7 +63,7 @@ func initThreadedCallRater(){
 func ThreadedCallRater(key string) (replay string) {
 	mu.Lock()
 	defer mu.Unlock()
-	if multiplexerIndex >= NCPU {
+	if multiplexerIndex >= nCPU {
 		multiplexerIndex = 0
 	}
 	inChannels[multiplexerIndex] <- key

@@ -4,37 +4,73 @@ import (
 	"time"
 )
 
-type BilingUnit int
-
 type RatingProfile struct {
-	StartTime time.Time
-	ConnectFee float32
-	Price float32
-	BillingUnit BilingUnit
+	StartTime time.Duration
+	ConnectFee, Price, BillingUnit float32
 }
 
 type ActivationPeriod struct {
 	ActivationTime time.Time
-	RatingProfiles []RatingProfile
+	RatingProfiles []*RatingProfile
+}
+
+func (cd *ActivationPeriod) SplitInTimeSpans(t []*ActivationPeriods) (timespans []*TimeSpans) {
+	for i, ap := range aps {
+		t := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cdTimeEnd}
+		timespans = append(timespans, aps.SplitInTimeSlots(t))
+	}
+	return
+}
+
+func (c *ActivationPeriod) AddRatingProfile(rp ...*RatingProfile) {
+	for _, r := range rp {
+		c.RatingProfiles = append(c.RatingProfiles, r)
+	}
 }
 
 type Customer struct {
-	Id string
-	Prefix string
-	ActivationPeriods []ActivationPeriod
+	CstmId string
+	DestinationPrefix string
+	ActivationPeriods []*ActivationPeriod
 }
 
-const (
-	SECONDS =iota
-	COUNT
-	BYTES
-)
+func (c *Customer) AddActivationPeriod(ap ...*ActivationPeriod) {
+	for _,a := range ap {
+		c.ActivationPeriods = append(c.ActivationPeriods, a)
+	}
+}
+
+func (c *Customer) SplitInTimeSpans(cd *CallDescription) (timespans []*TimeSpans) {
+	t := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cdTimeEnd}
+	for i, ap := range c.ActivationPeriods {
+		timespans = append(timespans, aps.SplitInTimeSlots(t))
+	}
+	return
+}
+
+func (c *Customer) CleanOldActivationPeriods() {
+	now := time.Now()
+	obsoleteIndex := -1
+	for i, ap := range c.ActivationPeriods {
+		if i > len(c.ActivationPeriods) - 2 {
+			break
+		}
+		if a
+	}
+}
+
 
 type CallDescription struct {
 	TOR int
 	CstmId, Subject, Destination string
 	TimeStart, TimeEnd time.Time
 }
+
+type TimeSpan struct {
+	TimeStart, TimeEnd time.Time
+	RatingProfile *RatingProfile
+}
+
 
 type CallCost struct {
 	TOR int
