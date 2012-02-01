@@ -1,8 +1,1 @@
 Rating system for telecom providers.
-
-Match datetime objects instead of timestamp. Example
-Year \d{4} #any year
-Month \d{2} #any month
-Day \d{2} # any day
-Hour (0[89]|1\d) #from 08 till 19
-Minute \d{2}

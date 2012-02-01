@@ -12,8 +12,8 @@ func setUp() {
 	c1.AddActivationPeriod(ap1)
 	d1,_ := time.ParseDuration("1m")
 	d2,_ := time.ParseDuration("2m")
-	r1 := &RatingProfile{StartTime: d1, ConnectFee: 1.1, Price: 0.1, BillingUnit: SECOND}
-	r2 := &RatingProfile{StartTime: d2, ConnectFee: 2.2, Price: 0.2, BillingUnit: SECOND}
+	r1 := &RatingProfile{StartTime: d1, ConnectFee: 1.1, Price: 0.1, BillingUnit: 0.1}
+	r2 := &RatingProfile{StartTime: d2, ConnectFee: 2.2, Price: 0.2, BillingUnit: 0.1}
 	ap1.AddRatingProfile(r1, r2)
 }
 
