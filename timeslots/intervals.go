@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+/*
+Defines a time interval for which a certain set of prices will apply
+*/
 type Interval struct {
 	Month time.Month
 	MonthDay int
@@ -15,6 +18,9 @@ type Interval struct {
 	ConnectFee, Price, BillingUnit float32
 }
 
+/*
+Returns true if the received time is inside the interval
+*/
 func (i *Interval) Contains(t time.Time) bool {
 	// chec for month
 	if i.Month > 0 && t.Month() != i.Month {		
@@ -57,14 +63,23 @@ func (i *Interval) Contains(t time.Time) bool {
 	return true
 }
 
+/*
+Returns true if the timespan has at list one margin in the interval
+*/
 func (i *Interval) ContainsSpan(t *TimeSpan) bool {
 	return i.Contains(t.TimeStart) || i.Contains(t.TimeEnd)
 }
 
+/*
+Returns true if the timespan is fully enclosed in the interval
+*/
 func (i *Interval) ContainsFullSpan(t *TimeSpan) bool {
 	return i.Contains(t.TimeStart) && i.Contains(t.TimeEnd)
 }
 
+/*
+Returns a time object that represents the end of the interval realtive to the received time
+*/
 func (i *Interval) getRightMargin(t time.Time) (rigthtTime time.Time){
 	year, month, day := t.Year(), t.Month(), t.Day() 
 	hour, min, sec, nsec := 23,59,59,0
@@ -80,6 +95,9 @@ func (i *Interval) getRightMargin(t time.Time) (rigthtTime time.Time){
 	return time.Date(year, month, day, hour, min, sec, nsec, loc)
 }
 
+/*
+Returns a time object that represents the start of the interval realtive to the received time
+*/
 func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time){
 	year, month, day := t.Year(), t.Month(), t.Day() 
 	hour, min, sec, nsec := 0,0,0,0
@@ -95,7 +113,11 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time){
 	return time.Date(year, month, day, hour, min, sec, nsec, loc)
 }
 
-
+/*
+Returns nil if the time span has no period in the interval, a slice with the received timespan
+if the timespan is fully enclosed in the interval or a slice with two timespans if the timespan
+has only a margin in the interval.
+*/
 func (i *Interval) Split(ts *TimeSpan) (spans []*TimeSpan) {
 	// if the span is not in interval return nil
 	if !i.ContainsSpan(ts) {		

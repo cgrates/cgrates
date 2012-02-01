@@ -4,7 +4,10 @@ import (
 	"time"
 )
 
-
+/*
+A structure containing the time intervals with the cost information and the 
+ActivationTime when those intervals will be applied.
+*/
 type ActivationPeriod struct {
 	ActivationTime time.Time
 	Interval []*Interval
@@ -16,6 +19,11 @@ func (c *ActivationPeriod) AddInterval(is ...*Interval) {
 	}
 }
 
+/*
+A structure that contains the data extracted from the storage.
+The CstmId and the Destination prefix represent the key and the 
+ActivationPeriods slice is the value.
+*/
 type Customer struct {
 	CstmId string
 	DestinationPrefix string
@@ -28,22 +36,34 @@ func (c *Customer) AddActivationPeriod(ap ...*ActivationPeriod) {
 	}
 }
 
+/*
+A unit in which a call will be split that has a specific price related interval attached to it.
+*/
+type TimeSpan struct {
+	TimeStart, TimeEnd time.Time
+	Interval *Interval
+}
+
+/*
+Returns the duration of the timespan
+*/
+func (ts *TimeSpan) GetDuration() time.Duration {
+	return ts.TimeEnd.Sub(ts.TimeStart)
+}
+
+/*
+The input stucture that contains call information.
+*/
 type CallDescription struct {
 	TOR int
 	CstmId, Subject, Destination string
 	TimeStart, TimeEnd time.Time
 }
 
-type TimeSpan struct {
-	TimeStart, TimeEnd time.Time
-	Interval *Interval
-}
 
-func (ts *TimeSpan) GetDuration() time.Duration {
-	return ts.TimeEnd.Sub(ts.TimeStart)
-}
-
-
+/*
+The output structure that will be returned with the call cost information.
+*/
 type CallCost struct {
 	TOR int
 	CstmId, Subject, Prefix string
