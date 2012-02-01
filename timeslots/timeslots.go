@@ -3,19 +3,16 @@ package timeslots
 import (
 	"time"
 	"strings"
-	"strconv"	
+	"strconv"
 )
-
-type RatingProfile struct {
-	StartTime time.Duration
-	ConnectFee, Price, BillingUnit float32
-}
 
 type Interval struct {
 	Month time.Month
 	MonthDay int
 	WeekDays []time.Weekday
 	StartHour, EndHour string // ##:## format
+	Ponder float32
+	ConnectFee, Price, BillingUnit float32
 }
 
 func (i *Interval) Contains(t time.Time) bool {
@@ -68,28 +65,74 @@ func (i *Interval) ContainsFullSpan(t *TimeSpan) bool {
 	return i.Contains(t.TimeStart) && i.Contains(t.TimeEnd)
 }
 
-func (i *Interval) Split(t *TimeSpan) (spans []*TimeSpan) {
-	if !i.ContainsSpan(t) {
+func (i *Interval) getRightMargin(t time.Time) (rigthtTime time.Time){
+	year, month, day := t.Year(), t.Month(), t.Day() 
+	hour, min, sec, nsec := 23,59,59,0
+	loc := t.Location()	 
+	if i.Month > 0 { month = i.Month }
+	if i.MonthDay > 0 { day = i.MonthDay }
+	if i.EndHour != "" {
+		split := strings.Split(i.EndHour, ":")
+		hour, _ = strconv.Atoi(split[0])
+		min, _ = strconv.Atoi(split[1])
+		sec = 0
+	}
+	return time.Date(year, month, day, hour, min, sec, nsec, loc)
+}
+
+func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time){
+	year, month, day := t.Year(), t.Month(), t.Day() 
+	hour, min, sec, nsec := 0,0,0,0
+	loc := t.Location()	 
+	if i.Month > 0 { month = i.Month }
+	if i.MonthDay > 0 { day = i.MonthDay }
+	if i.EndHour != "" {
+		split := strings.Split(i.EndHour, ":")
+		hour, _ = strconv.Atoi(split[0])
+		min, _ = strconv.Atoi(split[1])
+		sec = 0
+	}
+	return time.Date(year, month, day, hour, min, sec, nsec, loc)
+}
+
+
+func (i *Interval) Split(ts *TimeSpan) (spans []*TimeSpan) {
+	// if the span is not in interval return nil
+	if !i.ContainsSpan(ts) {		
 		return
 	}
-	if !i.ContainsFullSpan(t){
-		spans = append(spans, t)
+	// if the span is enclosed in the interval return the whole span
+	if i.ContainsFullSpan(ts){		
+		ts.Interval = i
+		spans = append(spans, ts)
+		return
 	}
-	if !i.Contains(t.TimeStart){
-
-		spans = append(spans, t)
+	// if only the start time is in the interval splitt he interval
+	if i.Contains(ts.TimeStart){		
+		splitTime := i.getRightMargin(ts.TimeStart)
+		t1 := &TimeSpan{TimeStart: ts.TimeStart, TimeEnd: splitTime, Interval: i}
+		t2 := &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}		
+		
+		spans = append(spans, t1, t2)
+	}
+	// if only the end time is in the interval split the interval
+	if i.Contains(ts.TimeEnd){		
+		splitTime := i.getLeftMargin(ts.TimeEnd)
+		t1 := &TimeSpan{TimeStart: ts.TimeStart, TimeEnd: splitTime}
+		t2 := &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd, Interval: i}		
+		spans = append(spans, t1, t2)
 	}
 	return 
 }
 
 type ActivationPeriod struct {
 	ActivationTime time.Time
-	RatingProfiles []*RatingProfile
+	Interval []*Interval
 }
 
-func (c *ActivationPeriod) AddRatingProfile(rp ...*RatingProfile) {
-	for _, r := range rp {
-		c.RatingProfiles = append(c.RatingProfiles, r)
+func (c *ActivationPeriod) AddInterval(is ...*Interval) {
+	for _, i := range is {
+		c.Interval = append(c.Interval, i)
 	}
 }
 
@@ -125,7 +168,7 @@ type CallDescription struct {
 
 type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
-	RatingProfile *RatingProfile
+	Interval *Interval
 }
 
 
