@@ -2,6 +2,9 @@ package timeslots
 
 import (
 	"time"
+	"fmt"
+	"log"
+	"encoding/json"
 )
 
 /*
@@ -10,12 +13,12 @@ ActivationTime when those intervals will be applied.
 */
 type ActivationPeriod struct {
 	ActivationTime time.Time
-	Interval []*Interval
+	Intervals []*Interval
 }
 
 func (c *ActivationPeriod) AddInterval(is ...*Interval) {
 	for _, i := range is {
-		c.Interval = append(c.Interval, i)
+		c.Intervals = append(c.Intervals, i)
 	}
 }
 
@@ -26,14 +29,37 @@ ActivationPeriods slice is the value.
 */
 type Customer struct {
 	CstmId string
+	Subject string
 	DestinationPrefix string
 	ActivationPeriods []*ActivationPeriod
 }
 
-func (c *Customer) AddActivationPeriod(ap ...*ActivationPeriod) {
+/*
+Adds an activation period to the internal slice
+*/
+func (c *Customer) addActivationPeriod(ap ...*ActivationPeriod) {
 	for _,a := range ap {
 		c.ActivationPeriods = append(c.ActivationPeriods, a)
 	}
+}
+
+func (c *Customer) getKey() string {	
+	return fmt.Sprintf("%s%s%s", c.CstmId, c.Subject, c.DestinationPrefix)	
+}
+
+func (c *Customer) encodeValue() []byte {
+	jo, err := json.Marshal(c.ActivationPeriods)
+	if err != nil {
+		log.Print("Cannot encode intervals: ", err)
+	}
+	return jo
+}
+
+func (c *Customer) decodeValue(v []byte) {
+	err := json.Unmarshal(v, &c.ActivationPeriods)
+	if err != nil {
+		log.Print("Cannot decode intervals: ", err)
+	}	
 }
 
 /*
