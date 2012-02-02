@@ -9,7 +9,7 @@ import (
 
 func main(){
 	client, _ := jsonrpc.Dial("tcp", "localhost:5090")
-	runs := int(5 * 10e3);
+	runs := int(5 * 1e4);
 	i:= 0
 	c := make(chan string)
 	for ; i < runs; i++ {

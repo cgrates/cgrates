@@ -1,4 +1,4 @@
-package timeslots
+package timespans
 
 import (
 	"time"
@@ -14,7 +14,7 @@ type Interval struct {
 	MonthDay int
 	WeekDays []time.Weekday
 	StartHour, EndHour string // ##:## format	 
-	Ponder, ConnectFee, Price, BillingUnit float32
+	Ponder, ConnectFee, Price, BillingUnit float64
 }
 
 /*

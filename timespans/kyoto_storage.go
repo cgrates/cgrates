@@ -1,4 +1,4 @@
-package timeslots
+package timespans
 
 import (
 	"log"
