@@ -78,6 +78,19 @@ func (ts *TimeSpan) GetDuration() time.Duration {
 }
 
 /*
+will set ne interval as spans's interval if new ponder is greater then span's interval ponder
+or if the ponders are equal and new price is lower then spans's interval price
+*/
+func (ts *TimeSpan) SetInterval(i *Interval) {
+	if ts.Interval == nil || ts.Interval.Ponder < i.Ponder {
+		ts.Interval = i
+	}
+	if ts.Interval.Ponder == i.Ponder && i.Price < ts.Interval.Price {
+		ts.Interval = i
+	}
+}
+
+/*
 The input stucture that contains call information.
 */
 type CallDescription struct {

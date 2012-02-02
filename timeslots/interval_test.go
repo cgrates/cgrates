@@ -2,7 +2,7 @@ package timeslots
 
 import (
 	"time"
-	"testing"	
+	"testing"
 )
 
 func TestMonth(t *testing.T){
@@ -120,20 +120,24 @@ func TestRightMargin(t *testing.T){
 	t1 := time.Date(2012, time.February, 3, 23, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 4, 0, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
-	result := i.Split(ts)
-	ts1, ts2 := result[0], result[1]
-	if ts1.TimeStart != t1 || ts1.TimeEnd != time.Date(2012, time.February, 3, 23, 59, 59, 0, time.UTC) {
-		t.Error("Incorrect first half", ts1)
+	oldDuration := ts.GetDuration()
+	nts := i.Split(ts)
+	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 23, 59, 59, 0, time.UTC) {
+		t.Error("Incorrect first half", ts)
 	}
-	if ts2.TimeStart != time.Date(2012, time.February, 3, 23, 59, 59, 0, time.UTC) || ts2.TimeEnd != t2 {
-		t.Error("Incorrect second half", ts2)
+	if nts.TimeStart != time.Date(2012, time.February, 3, 23, 59, 59, 0, time.UTC) || nts.TimeEnd != t2 {
+		t.Error("Incorrect second half", nts)
 	}
-	if ts1.Interval != i {
+	if ts.Interval != i {
 		t.Error("Interval not attached correctly")
 	}
 
-	if ts1.GetDuration().Seconds() != 15 * 60 - 1 || ts2.GetDuration().Seconds() != 10 * 60 + 1 {
-		t.Error("Wrong durations.for Intervals", ts1.GetDuration().Seconds(), ts2.GetDuration().Seconds())
+	if ts.GetDuration().Seconds() != 15 * 60 - 1 || nts.GetDuration().Seconds() != 10 * 60 + 1 {
+		t.Error("Wrong durations.for Intervals", ts.GetDuration().Seconds(), ts.GetDuration().Seconds())
+	}
+
+	if ts.GetDuration().Seconds() + nts.GetDuration().Seconds() != oldDuration.Seconds() {
+		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
 }
 
@@ -142,20 +146,23 @@ func TestRightHourMargin(t *testing.T){
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
-	result := i.Split(ts)
-	ts1, ts2 := result[0], result[1]
-	if ts1.TimeStart != t1 || ts1.TimeEnd != time.Date(2012, time.February, 3, 17, 59, 00, 0, time.UTC) {
-		t.Error("Incorrect first half", ts1)
+	oldDuration := ts.GetDuration()
+	nts := i.Split(ts)	
+	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 17, 59, 00, 0, time.UTC) {
+		t.Error("Incorrect first half", ts)
 	}
-	if ts2.TimeStart != time.Date(2012, time.February, 3, 17, 59, 00, 0, time.UTC) || ts2.TimeEnd != t2 {
-		t.Error("Incorrect second half", ts2)
+	if nts.TimeStart != time.Date(2012, time.February, 3, 17, 59, 00, 0, time.UTC) || nts.TimeEnd != t2 {
+		t.Error("Incorrect second half", nts)
 	}
-	if ts1.Interval != i {
+	if ts.Interval != i {
 		t.Error("Interval not attached correctly")
 	}
 
-	if ts1.GetDuration().Seconds() != 29 * 60 || ts2.GetDuration().Seconds() != 1 * 60 {
-		t.Error("Wrong durations.for Intervals", ts1.GetDuration().Seconds(), ts2.GetDuration().Seconds())
+	if ts.GetDuration().Seconds() != 29 * 60 || nts.GetDuration().Seconds() != 1 * 60 {
+		t.Error("Wrong durations.for Intervals", ts.GetDuration().Seconds(), nts.GetDuration().Seconds())
+	}
+	if ts.GetDuration().Seconds() + nts.GetDuration().Seconds() != oldDuration.Seconds() {
+		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
 }
 
@@ -164,19 +171,22 @@ func TestLeftMargin(t *testing.T){
 	t1 := time.Date(2012, time.February, 5, 23, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 6, 0, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
-	result := i.Split(ts)
-	ts1, ts2 := result[0], result[1]
-	if ts1.TimeStart != t1 || ts1.TimeEnd != time.Date(2012, time.February, 6, 0, 0, 0, 0, time.UTC) {
-		t.Error("Incorrect first half", ts1)
+	oldDuration := ts.GetDuration()
+	nts := i.Split(ts)	
+	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 6, 0, 0, 0, 0, time.UTC) {
+		t.Error("Incorrect first half", ts)
 	}
-	if ts2.TimeStart != time.Date(2012, time.February, 6, 0, 0, 0, 0, time.UTC) || ts2.TimeEnd != t2 {
-		t.Error("Incorrect second half", ts2)
+	if nts.TimeStart != time.Date(2012, time.February, 6, 0, 0, 0, 0, time.UTC) || nts.TimeEnd != t2 {
+		t.Error("Incorrect second half", nts)
 	}
-	if ts2.Interval != i {
+	if nts.Interval != i {
 		t.Error("Interval not attached correctly")
 	}
-	if ts1.GetDuration().Seconds() != 15 * 60 || ts2.GetDuration().Seconds() != 10 * 60 {
-		t.Error("Wrong durations.for Intervals", ts1.GetDuration().Seconds(), ts2.GetDuration().Seconds())
+	if ts.GetDuration().Seconds() != 15 * 60 || nts.GetDuration().Seconds() != 10 * 60 {
+		t.Error("Wrong durations.for Intervals", ts.GetDuration().Seconds(), nts.GetDuration().Seconds())
+	}
+	if ts.GetDuration().Seconds() + nts.GetDuration().Seconds() != oldDuration.Seconds() {
+		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
 }
 
@@ -185,19 +195,22 @@ func TestLeftHourMargin(t *testing.T){
 	t1 := time.Date(2012, time.December, 1, 8, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.December, 1, 9, 20, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
-	result := i.Split(ts)
-	ts1, ts2 := result[0], result[1]
-	if ts1.TimeStart != t1 || ts1.TimeEnd != time.Date(2012, time.December, 1, 9, 0, 0, 0, time.UTC) {
-		t.Error("Incorrect first half", ts1)
+	oldDuration := ts.GetDuration()
+	nts := i.Split(ts)	
+	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.December, 1, 9, 0, 0, 0, time.UTC) {
+		t.Error("Incorrect first half", ts)
 	}
-	if ts2.TimeStart != time.Date(2012, time.December, 1, 9, 0, 0, 0, time.UTC) || ts2.TimeEnd != t2 {
-		t.Error("Incorrect second half", ts2)
+	if nts.TimeStart != time.Date(2012, time.December, 1, 9, 0, 0, 0, time.UTC) || nts.TimeEnd != t2 {
+		t.Error("Incorrect second half", nts)
 	}
-	if ts2.Interval != i {
+	if nts.Interval != i {
 		t.Error("Interval not attached correctly")
 	}
-	if ts1.GetDuration().Seconds() != 15 * 60 || ts2.GetDuration().Seconds() != 20 * 60 {
-		t.Error("Wrong durations.for Intervals", ts1.GetDuration().Seconds(), ts2.GetDuration().Seconds())
+	if ts.GetDuration().Seconds() != 15 * 60 || nts.GetDuration().Seconds() != 20 * 60 {
+		t.Error("Wrong durations.for Intervals", ts.GetDuration().Seconds(), nts.GetDuration().Seconds())
+	}
+	if ts.GetDuration().Seconds() + nts.GetDuration().Seconds() != oldDuration.Seconds() {
+		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
 }
 
@@ -206,17 +219,16 @@ func TestEnclosingMargin(t *testing.T){
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
-	result := i.Split(ts)
-	ts1 := result[0]
-	if ts1.TimeStart != t1 || ts1.TimeEnd != t2 {
-		t.Error("Incorrect enclosing", ts1)
+	nts := i.Split(ts)	
+	if ts.TimeStart != t1 || ts.TimeEnd != t2 || nts != nil{
+		t.Error("Incorrect enclosing", ts)
 	}	
-	if ts1.Interval != i {
+	if ts.Interval != i {
 		t.Error("Interval not attached correctly")
 	}
 }
 
-func TestOutsideMargin(t *testing.T){
+/*func TestOutsideMargin(t *testing.T){
 	i := &Interval{WeekDays: []time.Weekday{time.Monday}}
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
@@ -225,7 +237,7 @@ func TestOutsideMargin(t *testing.T){
 	if result != nil {
 		t.Error("Interval not split correctly")
 	}
-}
+}*/
 
 func BenchmarkIntervalFull(b *testing.B) {
 	i := &Interval{Month: time.February, MonthDay: 1, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartHour: "14:30", EndHour: "15:00"}

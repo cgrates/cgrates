@@ -3,7 +3,7 @@ package timeslots
 import (
 	"time"
 	"strings"
-	"strconv"
+	"strconv"	
 )
 
 /*
@@ -13,9 +13,8 @@ type Interval struct {
 	Month time.Month
 	MonthDay int
 	WeekDays []time.Weekday
-	StartHour, EndHour string // ##:## format
-	Ponder float32
-	ConnectFee, Price, BillingUnit float32
+	StartHour, EndHour string // ##:## format	 
+	Ponder, ConnectFee, Price, BillingUnit float32
 }
 
 /*
@@ -114,35 +113,36 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time){
 }
 
 /*
-Returns nil if the time span has no period in the interval, a slice with the received timespan
-if the timespan is fully enclosed in the interval or a slice with two timespans if the timespan
-has only a margin in the interval.
+
 */
-func (i *Interval) Split(ts *TimeSpan) (spans []*TimeSpan) {
+func (i *Interval) Split(ts *TimeSpan) (nts *TimeSpan) {
 	// if the span is not in interval return nil
 	if !i.ContainsSpan(ts) {		
 		return
 	}
-	// if the span is enclosed in the interval return the whole span
+	// if the span is enclosed in the interval try to set as new interval and return nil
 	if i.ContainsFullSpan(ts){		
-		ts.Interval = i
-		spans = append(spans, ts)
+		ts.SetInterval(i)		
 		return
 	}
 	// if only the start time is in the interval splitt he interval
 	if i.Contains(ts.TimeStart){		
-		splitTime := i.getRightMargin(ts.TimeStart)
-		t1 := &TimeSpan{TimeStart: ts.TimeStart, TimeEnd: splitTime, Interval: i}
-		t2 := &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}		
-		
-		spans = append(spans, t1, t2)
+		splitTime := i.getRightMargin(ts.TimeStart)		
+		oldTimeEnd := ts.TimeEnd
+		ts.TimeEnd = splitTime		
+		ts.SetInterval(i)		
+		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: oldTimeEnd}				
+		return
 	}
 	// if only the end time is in the interval split the interval
-	if i.Contains(ts.TimeEnd){		
+	if i.Contains(ts.TimeEnd){			
 		splitTime := i.getLeftMargin(ts.TimeEnd)
-		t1 := &TimeSpan{TimeStart: ts.TimeStart, TimeEnd: splitTime}
-		t2 := &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd, Interval: i}		
-		spans = append(spans, t1, t2)
+		oldTimeEnd := ts.TimeEnd
+		ts.TimeEnd = splitTime		
+		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: oldTimeEnd}				
+		nts.SetInterval(i)
+		return
 	}
 	return 
 }
+
