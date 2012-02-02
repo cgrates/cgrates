@@ -111,8 +111,8 @@ func TestEverything(t *testing.T){
 			EndTime: "15:00:00"}
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 1, 14, 29, 1, 0, time.UTC)
-	d2 := time.Date(2012, time.February, 1, 14, 59, 59, 0, time.UTC)
-	d3 := time.Date(2012, time.February, 1, 15, 0, 0, 0, time.UTC)
+	d2 := time.Date(2012, time.February, 1, 15, 00, 00, 0, time.UTC)
+	d3 := time.Date(2012, time.February, 1, 15, 0, 1, 0, time.UTC)
 	if !i.Contains(d) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}	

@@ -20,7 +20,7 @@ func TestSplitSpans(t *testing.T){
 	intervals := cd.getActiveIntervals()
 	timespans := cd.splitInTimeSpans(intervals)
 	if len(timespans) != 2 {
-		t.Error("Wrong number of timespans!")
+		t.Error("Wrong number of timespans: ", len(timespans))
 	}	
 }
 

@@ -48,7 +48,7 @@ func (i *Interval) Contains(t time.Time) bool {
 		// if the hour is before or is the same hour but the minute is before 
 		if t.Hour() < sh ||
 			(t.Hour() == sh && t.Minute() < sm) ||
-			(t.Hour() == sh && t.Minute() == sm && t.Second() <= ss) { 			
+			(t.Hour() == sh && t.Minute() == sm && t.Second() < ss) { 			
 			return false
 		}
 	}
@@ -61,7 +61,7 @@ func (i *Interval) Contains(t time.Time) bool {
 		// if the hour is after or is the same hour but the minute is after 
 		if t.Hour() > eh ||
 		(t.Hour() == eh && t.Minute() > em) ||
-		(t.Hour() == eh && t.Minute() == em && t.Second() >= es) {
+		(t.Hour() == eh && t.Minute() == em && t.Second() > es) {
 			return false			
 		}
 	}
@@ -78,8 +78,8 @@ func (i *Interval) ContainsSpan(t *TimeSpan) bool {
 /*
 Returns true if the timespan is fully enclosed in the interval
 */
-func (i *Interval) ContainsFullSpan(t *TimeSpan) bool {
-	return i.Contains(t.TimeStart) && i.Contains(t.TimeEnd)
+func (i *Interval) ContainsFullSpan(ts *TimeSpan) bool {	
+	return i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd)
 }
 
 /*
@@ -130,15 +130,15 @@ func (i *Interval) Split(ts *TimeSpan) (nts *TimeSpan) {
 		return
 	}
 	// if the span is enclosed in the interval try to set as new interval and return nil
-	if i.ContainsFullSpan(ts){		
+	if i.ContainsFullSpan(ts){
 		ts.SetInterval(i)		
 		return
 	}
-	// if only the start time is in the interval splitt he interval
+	// if only the start time is in the interval split he interval
 	if i.Contains(ts.TimeStart){		
 		splitTime := i.getRightMargin(ts.TimeStart)		
 		ts.SetInterval(i)		
-		if splitTime == ts.TimeStart {
+		if splitTime == ts.TimeEnd {
 			return
 		}
 		oldTimeEnd := ts.TimeEnd
@@ -150,7 +150,7 @@ func (i *Interval) Split(ts *TimeSpan) (nts *TimeSpan) {
 	// if only the end time is in the interval split the interval
 	if i.Contains(ts.TimeEnd){					
 		splitTime := i.getLeftMargin(ts.TimeEnd)		
-		if splitTime == ts.TimeStart {			
+		if splitTime == ts.TimeEnd {			
 			ts.SetInterval(i)
 			return 
 		}
