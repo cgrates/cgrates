@@ -12,6 +12,17 @@ type CallCost struct {
 //	ratesInfo *RatingProfile
 }
 
+type ActivationPeriod struct {
+	ActivationTime time.Time
+	Intervals []*Interval
+}
+
+func (ap *ActivationPeriod) AddInterval( is ...*Interval) {	
+	for _, i := range is {
+		ap.Intervals = append(ap.Intervals, i)
+	}	
+}
+
 /*
 The input stucture that contains call information.
 */
@@ -19,21 +30,13 @@ type CallDescriptor struct {
 	TOR int
 	CstmId, Subject, DestinationPrefix string
 	TimeStart, TimeEnd time.Time
-	ActivationPeriods map[time.Time] []*Interval
+	ActivationPeriods []*ActivationPeriod
 }
 
-func (cd *CallDescriptor) AddInterval(t time.Time, is ...*Interval) {
-	if cd.ActivationPeriods == nil {
-		cd.ActivationPeriods = make(map[time.Time] []*Interval)
-	}
-	intervals, ok := cd.ActivationPeriods[t]	
-	for _, i := range is {
-		intervals = append(intervals, i)
-	}
-	// if the intervals is new add it to the map
-	if !ok {
-		cd.ActivationPeriods[t] = intervals
-	}
+func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {	
+	for _, ap := range aps {
+		cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+	}	
 }
 
 func (cd *CallDescriptor) EncodeValues() []byte {
@@ -62,10 +65,11 @@ func (cd *CallDescriptor) getActiveIntervals() (is []*Interval) {
 	sec,_ := time.ParseDuration("1s")
 	now.Add(sec) 
 	bestTime := time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)
-	for time, intervals := range cd.ActivationPeriods {
-		if time.After(bestTime) && time.Before(now) {
-			bestTime = time
-			is = intervals
+	for _, ap := range cd.ActivationPeriods {
+		t := ap.ActivationTime
+		if t.After(bestTime) && t.Before(now) {
+			bestTime = t
+			is = ap.Intervals
 		}		
 	}
 	return 
@@ -73,13 +77,12 @@ func (cd *CallDescriptor) getActiveIntervals() (is []*Interval) {
 
 func (cd *CallDescriptor) splitInTimeSpans(intervals []*Interval) (timespans []*TimeSpan) {
 	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
-	timespans = append(timespans, ts1)
-
+	timespans = append(timespans, ts1)	
 	for _, interval := range intervals {
-		for _, ts := range timespans {
-			newTs := interval.Split(ts)
-			if newTs != nil {
-				timespans = append(timespans, interval.Split(ts))
+		for _, ts := range timespans {			
+			newTs := interval.Split(ts)			
+			if newTs != nil {				
+				timespans = append(timespans, newTs)
 			}
 		}
 	}	

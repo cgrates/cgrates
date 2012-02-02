@@ -6,7 +6,6 @@ import (
 )
 
 func TestStorageEncoding(t *testing.T){
-	
 }
 
 func BenchmarkDecoding(b *testing.B) {	

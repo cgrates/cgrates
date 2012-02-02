@@ -4,15 +4,15 @@ import (
 	"log"
 	"net/rpc"
 	"os"
-	"os/signal"
+	"exp/signal"
 	"syscall"
-	"github.com/rif/cgrates/timeslots"
+	"github.com/rif/cgrates/timespans"
 )
 
 /*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from inquirer and closes the storage before exiting.
 */
-func StopSingnalHandler(server, listen *string, sg timeslots.StorageGetter) {
+func StopSingnalHandler(server, listen *string, sg timespans.StorageGetter) {
 	log.Print("Handling stop signals...")
 	sig := <-signal.Incoming
 	if usig, ok := sig.(os.UnixSignal); ok {

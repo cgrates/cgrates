@@ -3,7 +3,7 @@ package timespans
 import (
 	"time"
 	"strings"
-	"strconv"	
+	"strconv"
 )
 
 /*
