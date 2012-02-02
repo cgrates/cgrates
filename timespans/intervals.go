@@ -113,7 +113,10 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time){
 }
 
 /*
-
+Splits the given timespan according to how it relates to the interval.
+It will modify the endtime of the received timespan and it will return
+a new timespan starting from the end of the received one.
+The interval will attach itself to the timespan that overlaps the interval.
 */
 func (i *Interval) Split(ts *TimeSpan) (nts *TimeSpan) {
 	// if the span is not in interval return nil
