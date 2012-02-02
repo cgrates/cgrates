@@ -228,7 +228,7 @@ func TestEnclosingMargin(t *testing.T){
 	}
 }
 
-/*func TestOutsideMargin(t *testing.T){
+func TestOutsideMargin(t *testing.T){
 	i := &Interval{WeekDays: []time.Weekday{time.Monday}}
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
@@ -237,7 +237,7 @@ func TestEnclosingMargin(t *testing.T){
 	if result != nil {
 		t.Error("Interval not split correctly")
 	}
-}*/
+}
 
 func BenchmarkIntervalFull(b *testing.B) {
 	i := &Interval{Month: time.February, MonthDay: 1, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartHour: "14:30", EndHour: "15:00"}
