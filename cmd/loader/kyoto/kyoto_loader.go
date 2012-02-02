@@ -22,13 +22,13 @@ func main() {
 	ap1 := &timespans.ActivationPeriod{ActivationTime: t1}	
 	ap1.AddInterval(&timespans.Interval{
 		WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, 
-		EndHour:"18:00",
+		EndTime:"18:00:00",
 		ConnectFee: 0,
 		Price: 0.2,
 		BillingUnit: 1.0})
 	ap1.AddInterval(&timespans.Interval{
 		WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, 
-		StartHour:"18:00",
+		StartTime:"18:00:00",
 		ConnectFee: 0,
 		Price: 0.1,
 		BillingUnit: 1.0})

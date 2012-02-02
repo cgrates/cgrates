@@ -84,8 +84,8 @@ func TestMonthAndMonthDayAndWeekDays(t *testing.T){
 }
 
 func TestHours(t *testing.T){
-	i := &Interval{StartHour: "14:30", EndHour: "15:00"}
-	d := time.Date(2012, time.February, 10, 14, 30, 0, 0, time.UTC)
+	i := &Interval{StartTime: "14:30:00", EndTime: "15:00:00"}
+	d := time.Date(2012, time.February, 10, 14, 30, 1, 0, time.UTC)
 	d1 := time.Date(2012, time.January, 10, 14, 29, 0, 0, time.UTC)
 	d2 := time.Date(2012, time.January, 10, 14, 59, 0, 0, time.UTC)
 	d3 := time.Date(2012, time.January, 10, 15, 01, 0, 0, time.UTC)
@@ -104,15 +104,27 @@ func TestHours(t *testing.T){
 }
 
 func TestEverything(t *testing.T){
-	i := &Interval{Month: time.February, MonthDay: 1, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartHour: "14:30", EndHour: "15:00"}
-	d := time.Date(2012, time.February, 1, 14, 30, 0, 0, time.UTC)
-	d1 := time.Date(2012, time.January, 1, 14, 29, 0, 0, time.UTC)
+	i := &Interval{Month: time.February,
+			MonthDay: 1,
+			WeekDays: []time.Weekday{time.Wednesday, time.Thursday},
+			StartTime: "14:30:00",
+			EndTime: "15:00:00"}
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	d1 := time.Date(2012, time.February, 1, 14, 29, 1, 0, time.UTC)
+	d2 := time.Date(2012, time.February, 1, 14, 59, 59, 0, time.UTC)
+	d3 := time.Date(2012, time.February, 1, 15, 0, 0, 0, time.UTC)
 	if !i.Contains(d) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}	
 	if i.Contains(d1) {
 		t.Errorf("Date %v shoud not be in interval %v", d1, i)
 	}	
+	if !i.Contains(d2) {
+		t.Errorf("Date %v shoud be in interval %v", d2, i)
+	}	
+	if i.Contains(d3) {
+		t.Errorf("Date %v shoud not be in interval %v", d3, i)
+	}
 }
 
 func TestRightMargin(t *testing.T){
@@ -142,7 +154,7 @@ func TestRightMargin(t *testing.T){
 }
 
 func TestRightHourMargin(t *testing.T){
-	i := &Interval{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, EndHour: "17:59"}
+	i := &Interval{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, EndTime: "17:59:00"}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -191,7 +203,7 @@ func TestLeftMargin(t *testing.T){
 }
 
 func TestLeftHourMargin(t *testing.T){
-	i := &Interval{Month: time.December, MonthDay: 1, StartHour: "09:00"}
+	i := &Interval{Month: time.December, MonthDay: 1, StartTime: "09:00:00"}
 	t1 := time.Date(2012, time.December, 1, 8, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.December, 1, 9, 20, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -240,7 +252,7 @@ func TestOutsideMargin(t *testing.T){
 }
 
 func BenchmarkIntervalFull(b *testing.B) {
-	i := &Interval{Month: time.February, MonthDay: 1, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartHour: "14:30", EndHour: "15:00"}
+	i := &Interval{Month: time.February, MonthDay: 1, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00"}
 	d := time.Date(2012, time.February, 1, 14, 30, 0, 0, time.UTC)
     for x := 0; x < b.N; x++ {
     	i.Contains(d)

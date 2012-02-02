@@ -83,6 +83,7 @@ func (cd *CallDescriptor) splitInTimeSpans(intervals []*Interval) (timespans []*
 			newTs := interval.Split(ts)			
 			if newTs != nil {				
 				timespans = append(timespans, newTs)
+				break
 			}
 		}
 	}	

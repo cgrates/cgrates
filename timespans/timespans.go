@@ -23,6 +23,9 @@ func (ts *TimeSpan) GetDuration() time.Duration {
 Returns the cost of the timespan according to the relevant cost interval.
 */
 func (ts *TimeSpan) GetCost() (cost float64) {
+	if ts.Interval == nil {
+		return 0
+	}
 	if ts.Interval.BillingUnit > 0 {
 		cost = (ts.GetDuration().Seconds() / ts.Interval.BillingUnit) * ts.Interval.Price
 	} else {

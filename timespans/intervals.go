@@ -13,7 +13,7 @@ type Interval struct {
 	Month time.Month
 	MonthDay int
 	WeekDays []time.Weekday
-	StartHour, EndHour string // ##:## format	 
+	StartTime, EndTime string // ##:##:## format	 
 	Ponder, ConnectFee, Price, BillingUnit float64
 }
 
@@ -37,26 +37,32 @@ func (i *Interval) Contains(t time.Time) bool {
 		}		
 	}	
 	if len(i.WeekDays) > 0 && !found {
-		return false
+		return false		
 	}
 	// check for start hour
-	if i.StartHour != ""{
-		split:= strings.Split(i.StartHour, ":")
+	if i.StartTime != "" {
+		split:= strings.Split(i.StartTime, ":")
 		sh, _ := strconv.Atoi(split[0])
 		sm, _ := strconv.Atoi(split[1])
+		ss, _ := strconv.Atoi(split[2])
 		// if the hour is before or is the same hour but the minute is before 
-		if t.Hour() < sh || (t.Hour() == sh && t.Minute() < sm) { 			
+		if t.Hour() < sh ||
+			(t.Hour() == sh && t.Minute() < sm) ||
+			(t.Hour() == sh && t.Minute() == sm && t.Second() <= ss) { 			
 			return false
 		}
 	}
 	// check for end hour
-	if i.EndHour != ""{
-		split := strings.Split(i.EndHour, ":")
+	if i.EndTime != "" {
+		split := strings.Split(i.EndTime, ":")
 		eh, _ := strconv.Atoi(split[0])
 		em, _ := strconv.Atoi(split[1])
+		es, _ := strconv.Atoi(split[2])
 		// if the hour is after or is the same hour but the minute is after 
-		if t.Hour() > eh || (t.Hour() == eh && t.Minute() > em) { 			
-			return false
+		if t.Hour() > eh ||
+		(t.Hour() == eh && t.Minute() > em) ||
+		(t.Hour() == eh && t.Minute() == em && t.Second() >= es) {
+			return false			
 		}
 	}
 	return true
@@ -85,11 +91,11 @@ func (i *Interval) getRightMargin(t time.Time) (rigthtTime time.Time){
 	loc := t.Location()	 
 	if i.Month > 0 { month = i.Month }
 	if i.MonthDay > 0 { day = i.MonthDay }
-	if i.EndHour != "" {
-		split := strings.Split(i.EndHour, ":")
+	if i.EndTime != "" {
+		split := strings.Split(i.EndTime, ":")
 		hour, _ = strconv.Atoi(split[0])
 		min, _ = strconv.Atoi(split[1])
-		sec = 0
+		sec,_ = strconv.Atoi(split[2])
 	}
 	return time.Date(year, month, day, hour, min, sec, nsec, loc)
 }
@@ -103,11 +109,11 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time){
 	loc := t.Location()	 
 	if i.Month > 0 { month = i.Month }
 	if i.MonthDay > 0 { day = i.MonthDay }
-	if i.StartHour != "" {
-		split := strings.Split(i.StartHour, ":")
+	if i.StartTime != "" {
+		split := strings.Split(i.StartTime, ":")
 		hour, _ = strconv.Atoi(split[0])
 		min, _ = strconv.Atoi(split[1])
-		sec = 0
+		sec, _ = strconv.Atoi(split[2])
 	}
 	return time.Date(year, month, day, hour, min, sec, nsec, loc)
 }
@@ -131,17 +137,26 @@ func (i *Interval) Split(ts *TimeSpan) (nts *TimeSpan) {
 	// if only the start time is in the interval splitt he interval
 	if i.Contains(ts.TimeStart){		
 		splitTime := i.getRightMargin(ts.TimeStart)		
+		ts.SetInterval(i)		
+		if splitTime == ts.TimeStart {
+			return
+		}
 		oldTimeEnd := ts.TimeEnd
 		ts.TimeEnd = splitTime		
-		ts.SetInterval(i)		
+		
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: oldTimeEnd}				
 		return
 	}
 	// if only the end time is in the interval split the interval
-	if i.Contains(ts.TimeEnd){			
-		splitTime := i.getLeftMargin(ts.TimeEnd)
+	if i.Contains(ts.TimeEnd){					
+		splitTime := i.getLeftMargin(ts.TimeEnd)		
+		if splitTime == ts.TimeStart {			
+			ts.SetInterval(i)
+			return 
+		}
 		oldTimeEnd := ts.TimeEnd
 		ts.TimeEnd = splitTime		
+
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: oldTimeEnd}				
 		nts.SetInterval(i)
 		return
