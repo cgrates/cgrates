@@ -63,25 +63,6 @@ func (c *Customer) decodeValue(v []byte) {
 }
 
 /*
-func (c *Customer) encodeValue() (result bytes.Buffer) {	
-	enc := gob.NewEncoder(&result)
-	err:= enc.Encode(c.ActivationPeriods)	
-	if err != nil {
-		log.Print("Cannot encode intervals: ", err)
-	}
-	return result
-}
-
-func (c *Customer) decodeValue(v bytes.Buffer) {
-	dec := gob.NewDecoder(&v)
-	err := dec.Decode(&c.ActivationPeriods)	
-	if err != nil {
-		log.Print("Cannot decode intervals: ", err)
-	}	
-}
-*/
-
-/*
 A unit in which a call will be split that has a specific price related interval attached to it.
 */
 type TimeSpan struct {
