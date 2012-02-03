@@ -3,19 +3,22 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/simonz05/godis"
 	"github.com/fsouza/gokabinet/kc"
 	"github.com/rif/cgrates/timespans"
 	"time"
 )
 
-var (
-	filename = flag.String("filename", "storage.kch", "kyoto storage file")
+var (	
+	storage = flag.String("storage", "kyoto", "kyoto | redis")
+	filename = flag.String("filename", "storage.kch", "kyoto storage file (storage.kch)")
+	redisserver = flag.String("server", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
+	redisdb = flag.Int("db", 10, "redis database number (10)")
+	redispass = flag.String("pass", "", "redis database password")
 )
 
 func main() {
 	flag.Parse()
-	db, _ := kc.Open(*filename, kc.WRITE)
-	defer db.Close()
 
 	t1 := time.Date(2012, time.January, 1, 0, 0, 0, 0, time.UTC)
 	cd1 := &timespans.CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256"}
@@ -42,6 +45,14 @@ func main() {
 
 	value := cd1.EncodeValues()
 
-	db.Set(key, string(value))
+	if *storage == "kyoto" {
+		db, _ := kc.Open(*filename, kc.WRITE)
+		db.Set(key, string(value))
+		db.Close()
+	} else {		
+		db := godis.New(*redisserver, *redisdb, *redispass)
+		db.Set(key, string(value))
+		db.Quit()
+	}	
 	fmt.Println("Done!")
 }
