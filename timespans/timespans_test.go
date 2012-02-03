@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestGetCost(t *testing.T) {
+func TestTimespanGetCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	ts1 := TimeSpan{TimeStart: t1, TimeEnd: t2}

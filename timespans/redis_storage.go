@@ -2,21 +2,21 @@ package timespans
 
 import (
 	"github.com/simonz05/godis"
-	"log"
+	//"log"
 )
 
 type RedisStorage struct {
 	db *godis.Client
 }
 
-func NewRedisStorage(address string) (*RedisStorage, error) {
-	ndb := godis.New(address, 10, "")
-	log.Print("Starting redis storage")
+func NewRedisStorage(address string, db int) (*RedisStorage, error) {
+	ndb := godis.New(address, db, "")
+	//log.Print("Starting redis storage")
 	return &RedisStorage{db: ndb}, nil
 }
 
 func (rs *RedisStorage) Close() {
-	log.Print("Closing redis storage")
+	//log.Print("Closing redis storage")
 	rs.db.Quit()
 }
 
