@@ -1,7 +1,7 @@
 package timespans
 
 import (
-	"time"	
+	"time"
 )
 
 /*
@@ -9,7 +9,7 @@ A unit in which a call will be split that has a specific price related interval 
 */
 type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
-	Interval *Interval
+	Interval           *Interval
 }
 
 /*
@@ -46,3 +46,5 @@ func (ts *TimeSpan) SetInterval(i *Interval) {
 		ts.Interval = i
 	}
 }
+
+
