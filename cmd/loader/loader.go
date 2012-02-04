@@ -51,7 +51,7 @@ func main() {
 		db.Close()
 	} else {		
 		db := godis.New(*redisserver, *redisdb, *redispass)
-		db.Set(key, string(value))
+		db.Set(key, value)
 		db.Quit()
 	}	
 	fmt.Println("Done!")

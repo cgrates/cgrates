@@ -15,7 +15,7 @@ func TestKyotoSplitSpans(t *testing.T) {
 	key := cd.GetKey()
 	values, _ := getter.Get(key)
 
-	cd.decodeValues([]byte(values))
+	cd.decodeValues(values)
 
 	intervals := cd.getActiveIntervals()
 	timespans := cd.splitInTimeSpans(intervals)
@@ -34,7 +34,7 @@ func TestRedisSplitSpans(t *testing.T) {
 	key := cd.GetKey()
 	values, _ := getter.Get(key)
 
-	cd.decodeValues([]byte(values))
+	cd.decodeValues(values)
 
 	intervals := cd.getActiveIntervals()
 	timespans := cd.splitInTimeSpans(intervals)
@@ -73,7 +73,8 @@ func TestRedisGetCost(t *testing.T) {
 }
 
 func TestApStoreRestore(t *testing.T) {
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	loc, _ := time.LoadLocation("Local")
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, loc)
 	i := &Interval{Month: time.February,
 		MonthDay:  1,
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
@@ -81,13 +82,13 @@ func TestApStoreRestore(t *testing.T) {
 		EndTime:   "15:00:00"}	
 	ap := ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
-	result := ap.Store()
-	expected := "1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
+	result := ap.store()
+	expected := "1328099401;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
 	if result != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
 	ap1 := ActivationPeriod{}
-	ap1.Restore(result)
+	ap1.restore(result)
 	if ap1.ActivationTime != ap.ActivationTime {
 		t.Errorf("Expected %v was %v", ap.ActivationTime, ap1.ActivationTime)
 	}
@@ -205,13 +206,13 @@ func BenchmarkDecoding(b *testing.B) {
 	
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.decodeValues([]byte(values))
+		cd.decodeValues(values)
 	}
 }
 
 func BenchmarkRestore(b *testing.B) {	
 	ap1 := ActivationPeriod{}
 	for i := 0; i < b.N; i++ {
-		ap1.Restore("1328106601,1328106601000000000;2|1|3,4|14:30:00|15:00:00|0|0|0|0;")
+		ap1.restore("1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;")
 	}
 }

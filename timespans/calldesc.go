@@ -1,9 +1,7 @@
 package timespans
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 	"strings"
 	"strconv"
@@ -23,7 +21,7 @@ func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 	}
 }
 
-func (ap *ActivationPeriod) Store() (result string){	
+func (ap *ActivationPeriod) store() (result string){	
 	result += strconv.FormatInt(ap.ActivationTime.Unix(), 10) + ";"
 	var is string
 	for _,i := range ap.Intervals {
@@ -44,11 +42,11 @@ func (ap *ActivationPeriod) Store() (result string){
 	return 
 }
 
-func (ap *ActivationPeriod) Restore(input string) {		
+func (ap *ActivationPeriod) restore(input string) {			
 	elements := strings.Split(input, ";")	
 	unix, _ := strconv.ParseInt(elements[0], 0, 64)		
-	ap.ActivationTime = time.Unix(unix, 0)	
-	for _, is := range elements[1:len(elements) - 1]{
+	ap.ActivationTime = time.Unix(unix, 0)			
+	for _, is := range elements[1:len(elements) - 1]{		
 		i := &Interval{}
 		ise := strings.Split(is, "|")		
 		month, _ := strconv.Atoi(ise[0])
@@ -85,23 +83,25 @@ func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {
 	}
 }
 
-func (cd *CallDescriptor) EncodeValues() []byte {
-	jo, err := json.Marshal(cd.ActivationPeriods)
-	if err != nil {
-		log.Print("Cannot encode intervals: ", err)
+func (cd *CallDescriptor) EncodeValues() (result string) {
+	for _, ap := range cd.ActivationPeriods {
+		result += ap.store() + "\n"
 	}
-	return jo
+	return 
+}
+
+func (cd *CallDescriptor) decodeValues(v string) {
+	for _, aps := range strings.Split(v, "\n") {
+		if(len(aps)>0){
+			ap := &ActivationPeriod{}
+			ap.restore(aps)
+			cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+		}
+	}
 }
 
 func (cd *CallDescriptor) GetKey() string {
 	return fmt.Sprintf("%s:%s:%s", cd.CstmId, cd.Subject, cd.DestinationPrefix)
-}
-
-func (cd *CallDescriptor) decodeValues(v []byte) {
-	err := json.Unmarshal(v, &cd.ActivationPeriods)
-	if err != nil {
-		log.Print("Cannot decode intervals: ", err)
-	}
 }
 
 func (cd *CallDescriptor) getActiveIntervals() (is []*Interval) {
@@ -143,7 +143,7 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 	key := cd.GetKey()
 	values, err := sg.Get(key)
 
-	cd.decodeValues([]byte(values))
+	cd.decodeValues(values)
 
 	intervals := cd.getActiveIntervals()
 	timespans := cd.splitInTimeSpans(intervals)
