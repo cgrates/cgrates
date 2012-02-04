@@ -5,17 +5,9 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"strings"
+	"strconv"
 )
-
-/*
-The output structure that will be returned with the call cost information.
-*/
-type CallCost struct {
-	TOR                                int
-	CstmId, Subject, DestinationPrefix string
-	Cost, ConnectFee                   float64
-	//	ratesInfo *RatingProfile
-}
 
 /*
 The struture that is saved to storage.
@@ -29,6 +21,54 @@ func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 	for _, i := range is {
 		ap.Intervals = append(ap.Intervals, i)
 	}
+}
+
+func (ap *ActivationPeriod) Store() (result string){	
+	result += strconv.FormatInt(ap.ActivationTime.Unix(), 10) + ","+ strconv.FormatInt(ap.ActivationTime.UnixNano(), 10) + ";"
+	var is string
+	for _,i := range ap.Intervals {
+		is = strconv.Itoa(int(i.Month)) + "|"
+		is += strconv.Itoa(i.MonthDay) + "|"
+		for _, wd := range i.WeekDays {
+			is += strconv.Itoa(int(wd)) + ","
+		}
+		is = strings.TrimRight(is, ",")  + "|"
+		is += i.StartTime + "|"
+		is += i.EndTime + "|"
+		is += strconv.FormatFloat(i.Ponder, 'f', -1, 64) + "|"
+		is += strconv.FormatFloat(i.ConnectFee, 'f', -1, 64) + "|"
+		is += strconv.FormatFloat(i.Price, 'f', -1, 64) + "|"
+		is += strconv.FormatFloat(i.BillingUnit, 'f', -1, 64)
+		result += is + ";"
+	}	
+	return 
+}
+
+func (ap *ActivationPeriod) Restore(input string) {		
+	elements := strings.Split(input, ";")
+	at := strings.Split(elements[0], ",")	
+	unix, _ := strconv.ParseInt(at[0], 0, 64)	
+	unixNano, _ := strconv.ParseInt(at[1], 0, 64)		
+	ap.ActivationTime = time.Unix(unix, unixNano)	
+	for _, is := range elements[1:len(elements) - 1]{
+		i := &Interval{}
+		ise := strings.Split(is, "|")		
+		month, _ := strconv.Atoi(ise[0])
+		i.Month = time.Month(month)
+		i.MonthDay, _ = strconv.Atoi(ise[1])		 
+		for _,d := range strings.Split(ise[2], ","){
+			wd,_ :=  strconv.Atoi(d)
+			i.WeekDays = append(i.WeekDays, time.Weekday(wd))
+		}
+		i.StartTime = ise[3]
+		i.EndTime = ise[4]		
+		i.Ponder, _ = strconv.ParseFloat(ise[5], 64)		 
+		i.ConnectFee, _ = strconv.ParseFloat(ise[6], 64)
+		i.Price, _ = strconv.ParseFloat(ise[7], 64)
+		i.BillingUnit, _ = strconv.ParseFloat(ise[8], 64)
+		
+		ap.Intervals = append(ap.Intervals, i)
+	}	
 }
 
 /*
@@ -121,4 +161,14 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 		Cost:              cost,
 		ConnectFee:        timespans[0].Interval.ConnectFee}
 	return cc, err
+}
+
+/*
+The output structure that will be returned with the call cost information.
+*/
+type CallCost struct {
+	TOR                                int
+	CstmId, Subject, DestinationPrefix string
+	Cost, ConnectFee                   float64
+	//	ratesInfo *RatingProfile
 }
