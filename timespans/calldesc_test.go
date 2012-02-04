@@ -82,14 +82,14 @@ func TestApStoreRestore(t *testing.T) {
 	ap := ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result := ap.Store()
-	expected := "1328106601,1328106601000000000;2|1||14:30:00|15:00:00|0|0|0|0;"
+	expected := "1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
 	if result != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
 	ap1 := ActivationPeriod{}
 	ap1.Restore(result)
 	if ap1.ActivationTime != ap.ActivationTime {
-		//t.Errorf("Expected %v was %v", ap.ActivationTime, ap1.ActivationTime)
+		t.Errorf("Expected %v was %v", ap.ActivationTime, ap1.ActivationTime)
 	}
 	i1 := ap1.Intervals[0]
 	if i1.Month != i.Month {

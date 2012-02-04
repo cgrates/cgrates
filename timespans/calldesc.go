@@ -24,7 +24,7 @@ func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 }
 
 func (ap *ActivationPeriod) Store() (result string){	
-	result += strconv.FormatInt(ap.ActivationTime.Unix(), 10) + ","+ strconv.FormatInt(ap.ActivationTime.UnixNano(), 10) + ";"
+	result += strconv.FormatInt(ap.ActivationTime.Unix(), 10) + ";"
 	var is string
 	for _,i := range ap.Intervals {
 		is = strconv.Itoa(int(i.Month)) + "|"
@@ -45,11 +45,9 @@ func (ap *ActivationPeriod) Store() (result string){
 }
 
 func (ap *ActivationPeriod) Restore(input string) {		
-	elements := strings.Split(input, ";")
-	at := strings.Split(elements[0], ",")	
-	unix, _ := strconv.ParseInt(at[0], 0, 64)	
-	unixNano, _ := strconv.ParseInt(at[1], 0, 64)		
-	ap.ActivationTime = time.Unix(unix, unixNano)	
+	elements := strings.Split(input, ";")	
+	unix, _ := strconv.ParseInt(elements[0], 0, 64)		
+	ap.ActivationTime = time.Unix(unix, 0)	
 	for _, is := range elements[1:len(elements) - 1]{
 		i := &Interval{}
 		ise := strings.Split(is, "|")		
