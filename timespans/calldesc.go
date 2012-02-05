@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+const LAYOUT = "2006-01-02T15:04:05Z07:00"
+
 /*
 The struture that is saved to storage.
 */
@@ -22,7 +24,7 @@ func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 }
 
 func (ap *ActivationPeriod) store() (result string){	
-	result += strconv.FormatInt(ap.ActivationTime.Unix(), 10) + ";"
+	result += ap.ActivationTime.Format(LAYOUT) + ";"
 	var is string
 	for _,i := range ap.Intervals {
 		is = strconv.Itoa(int(i.Month)) + "|"
@@ -44,8 +46,7 @@ func (ap *ActivationPeriod) store() (result string){
 
 func (ap *ActivationPeriod) restore(input string) {			
 	elements := strings.Split(input, ";")	
-	unix, _ := strconv.ParseInt(elements[0], 0, 64)		
-	ap.ActivationTime = time.Unix(unix, 0)			
+	ap.ActivationTime, _ = time.Parse(LAYOUT, elements[0])
 	for _, is := range elements[1:len(elements) - 1]{		
 		i := &Interval{}
 		ise := strings.Split(is, "|")		

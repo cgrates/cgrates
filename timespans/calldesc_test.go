@@ -72,9 +72,8 @@ func TestRedisGetCost(t *testing.T) {
 	}
 }
 
-func TestApStoreRestore(t *testing.T) {
-	loc, _ := time.LoadLocation("Local")
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, loc)
+func TestApStoreRestore(t *testing.T) {	
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Month: time.February,
 		MonthDay:  1,
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
@@ -83,7 +82,7 @@ func TestApStoreRestore(t *testing.T) {
 	ap := ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result := ap.store()
-	expected := "1328099401;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
+	expected := "2012-02-01T14:30:01Z;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
 	if result != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
