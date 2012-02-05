@@ -158,8 +158,7 @@ func (i *Interval) Split(ts *TimeSpan) (nts *TimeSpan) {
 	// if only the end time is in the interval split the interval
 	if i.Contains(ts.TimeEnd) {
 		splitTime := i.getLeftMargin(ts.TimeEnd)
-		if splitTime == ts.TimeEnd {
-			ts.SetInterval(i)
+		if splitTime == ts.TimeEnd {			
 			return
 		}
 		oldTimeEnd := ts.TimeEnd

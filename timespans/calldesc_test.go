@@ -3,6 +3,7 @@ package timespans
 import (
 	"testing"
 	"time"
+	//"log"
 )
 
 func TestKyotoSplitSpans(t *testing.T) {
@@ -30,14 +31,14 @@ func TestRedisSplitSpans(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2}
 	key := cd.GetKey()
 	values, _ := getter.Get(key)
 
 	cd.decodeValues(values)
 
 	intervals := cd.getActiveIntervals()
-	timespans := cd.splitInTimeSpans(intervals)
+	timespans := cd.splitInTimeSpans(intervals)	
 	if len(timespans) != 2 {
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
@@ -52,7 +53,13 @@ func TestKyotoGetCost(t *testing.T) {
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost(getter)
-	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 360, ConnectFee: 0}
+	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
+	if *result != *expected {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2}
+	result, _ = cd.GetCost(getter)
+	expected = &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", Cost: 540, ConnectFee: 0}
 	if *result != *expected {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -66,7 +73,7 @@ func TestRedisGetCost(t *testing.T) {
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost(getter)
-	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 360, ConnectFee: 0}
+	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
 	if *result != *expected {
 		t.Errorf("Expected %v was %v", expected, result)
 	}

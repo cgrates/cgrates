@@ -1,58 +1,60 @@
 package main
 
 import (
-	"flag"
-	"fmt"
+	"flag"	
 	"github.com/simonz05/godis"
 	"github.com/fsouza/gokabinet/kc"
-	"github.com/rif/cgrates/timespans"
-	"time"
+	"github.com/rif/cgrates/timespans"	
+	"log"
+	"os"	
+	"encoding/json"		
 )
 
 var (	
 	storage = flag.String("storage", "kyoto", "kyoto | redis")
-	filename = flag.String("filename", "storage.kch", "kyoto storage file (storage.kch)")
+	kyotofile = flag.String("kyotofile", "storage.kch", "kyoto storage file (storage.kch)")
 	redisserver = flag.String("server", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
 	redisdb = flag.Int("db", 10, "redis database number (10)")
 	redispass = flag.String("pass", "", "redis database password")
+	inputfile = flag.String("inputfile", "input.json", "redis database password")
 )
 
 func main() {
 	flag.Parse()
 
-	t1 := time.Date(2012, time.January, 1, 0, 0, 0, 0, time.UTC)
-	cd1 := &timespans.CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256"}
-	ap1 := &timespans.ActivationPeriod{ActivationTime: t1}
-	ap1.AddInterval(&timespans.Interval{
-		WeekDays:    []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
-		EndTime:     "18:00:00",
-		ConnectFee:  0,
-		Price:       0.2,
-		BillingUnit: 1.0})
-	ap1.AddInterval(&timespans.Interval{
-		WeekDays:    []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
-		StartTime:   "18:00:00",
-		ConnectFee:  0,
-		Price:       0.1,
-		BillingUnit: 1.0})	
-	ap1.AddInterval(&timespans.Interval{
-		WeekDays:    []time.Weekday{time.Saturday, time.Sunday},
-		ConnectFee:  0,
-		Price:       0.1,
-		BillingUnit: 1.0})
-	cd1.AddActivationPeriod(ap1)
-	key := cd1.GetKey()
+	log.Printf("Reading from %q", *inputfile)	
 
-	value := cd1.EncodeValues()
+	fin, err := os.Open(*inputfile)
+	defer fin.Close()	
+
+	if err != nil {
+		log.Print("Cannot open input file", err)
+		return
+	}	
+	
+	dec := json.NewDecoder(fin)
+
+	var callDescriptors []*timespans.CallDescriptor	
+	if err := dec.Decode(&callDescriptors); err != nil {
+            log.Println(err)
+            return
+    }	
 
 	if *storage == "kyoto" {
-		db, _ := kc.Open(*filename, kc.WRITE)
-		db.Set(key, string(value))
-		db.Close()
+		db, _ := kc.Open(*kyotofile, kc.WRITE)
+		defer db.Close()
+		for _, cd := range callDescriptors{
+			key := cd.GetKey()
+			db.Set(key, cd.EncodeValues())
+			log.Printf("Storing %q", key)
+		}	
 	} else {		
 		db := godis.New(*redisserver, *redisdb, *redispass)
-		db.Set(key, value)
-		db.Quit()
+		defer db.Quit()
+		for _, cd := range callDescriptors{
+			key := cd.GetKey()
+			db.Set(key, cd.EncodeValues())
+			log.Printf("Storing %q", key)
+		}		
 	}	
-	fmt.Println("Done!")
 }
