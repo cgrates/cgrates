@@ -36,3 +36,4 @@ func TestSetInterval(t *testing.T) {
 		t.Error("Bigger ponder interval should win")
 	}
 }
+
