@@ -1,8 +1,6 @@
 [
-{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0256","TimeEnd":"0001-01-01T00:00:00Z","TimeStart":"0001-01-01T00:00:00Z",
-    "ActivationPeriods": [
-        {"ActivationTime": "2012-01-01T00:00:00Z", 
-            "Intervals": [
+{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0256", "ActivationPeriods": [
+        {"ActivationTime": "2012-01-01T00:00:00Z", "Intervals": [
                 {"BillingUnit":1,"ConnectFee":0,"EndTime":"18:00:00","Month":0,"MonthDay":0,"Ponder":0,"Price":0.2,"StartTime":"","WeekDays":[1,2,3,4,5]}, 
                 {"BillingUnit":1,"ConnectFee":0,"EndTime":"","Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,"StartTime":"18:00:00","WeekDays":[1,2,3,4,5]}, 
                 {"BillingUnit":1,"ConnectFee":0,"EndTime":"","Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,"StartTime":"","WeekDays":[6,0]}
@@ -10,10 +8,8 @@
         }
     ]
 },
-{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0257","TimeEnd":"0001-01-01T00:00:00Z","TimeStart":"0001-01-01T00:00:00Z",
-    "ActivationPeriods": [
-        {"ActivationTime": "2012-01-01T00:00:00Z", 
-            "Intervals": [
+{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0257", "ActivationPeriods": [
+        {"ActivationTime": "2012-01-01T00:00:00Z", "Intervals": [
                 {"BillingUnit":1,"ConnectFee":0,"EndTime":"","Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,"StartTime":"18:00:00","WeekDays":[1,2,3,4,5]},
                 {"BillingUnit":1,"ConnectFee":0,"EndTime":"18:00:00","Month":0,"MonthDay":0,"Ponder":0,"Price":0.2,"StartTime":"","WeekDays":[1,2,3,4,5]}, 
                 {"BillingUnit":1,"ConnectFee":0,"EndTime":"","Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,"StartTime":"","WeekDays":[6,0]}

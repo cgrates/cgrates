@@ -16,7 +16,7 @@ func TestApStoreRestore(t *testing.T) {
 	ap := ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result := ap.store()
-	expected := "2012-02-01T14:30:01Z;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
+	expected := "1328106601000000000;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
 	if result != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}

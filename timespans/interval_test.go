@@ -127,7 +127,7 @@ func TestEverything(t *testing.T) {
 	}
 }
 
-func BenchmarkIntervalFull(b *testing.B) {
+func BenchmarkIntervalContainsDate(b *testing.B) {
 	i := &Interval{Month: time.February, MonthDay: 1, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}
 	d := time.Date(2012, time.February, 1, 14, 30, 0, 0, time.UTC)
 	for x := 0; x < b.N; x++ {

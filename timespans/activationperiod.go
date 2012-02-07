@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-const LAYOUT = "2006-01-02T15:04:05Z07:00"
-
 /*
 The struture that is saved to storage.
 */
@@ -29,7 +27,7 @@ func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 Serializes the objects for the storage.
 */
 func (ap *ActivationPeriod) store() (result string) {
-	result += ap.ActivationTime.Format(LAYOUT) + ";"
+	result += strconv.FormatInt(ap.ActivationTime.UnixNano(), 10) + ";"
 	var is string
 	for _, i := range ap.Intervals {
 		is = strconv.Itoa(int(i.Month)) + "|"
@@ -54,7 +52,8 @@ De-serializes the objects for the storage.
 */
 func (ap *ActivationPeriod) restore(input string) {
 	elements := strings.Split(input, ";")
-	ap.ActivationTime, _ = time.Parse(LAYOUT, elements[0])
+	unixNano, _ := strconv.ParseInt(elements[0], 10, 64)
+	ap.ActivationTime = time.Unix(0, unixNano).In(time.UTC)
 	for _, is := range elements[1 : len(elements)-1] {
 		i := &Interval{}
 		ise := strings.Split(is, "|")
