@@ -4,69 +4,7 @@ import (
 	"fmt"
 	"time"
 	"strings"
-	"strconv"
 )
-
-const LAYOUT = "2006-01-02T15:04:05Z07:00"
-
-/*
-The struture that is saved to storage.
-*/
-type ActivationPeriod struct {
-	ActivationTime time.Time
-	Intervals      []*Interval
-}
-
-func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
-	for _, i := range is {
-		ap.Intervals = append(ap.Intervals, i)
-	}
-}
-
-func (ap *ActivationPeriod) store() (result string){	
-	result += ap.ActivationTime.Format(LAYOUT) + ";"
-	var is string
-	for _,i := range ap.Intervals {
-		is = strconv.Itoa(int(i.Month)) + "|"
-		is += strconv.Itoa(i.MonthDay) + "|"
-		for _, wd := range i.WeekDays {
-			is += strconv.Itoa(int(wd)) + ","
-		}
-		is = strings.TrimRight(is, ",")  + "|"
-		is += i.StartTime + "|"
-		is += i.EndTime + "|"
-		is += strconv.FormatFloat(i.Ponder, 'f', -1, 64) + "|"
-		is += strconv.FormatFloat(i.ConnectFee, 'f', -1, 64) + "|"
-		is += strconv.FormatFloat(i.Price, 'f', -1, 64) + "|"
-		is += strconv.FormatFloat(i.BillingUnit, 'f', -1, 64)
-		result += is + ";"
-	}	
-	return 
-}
-
-func (ap *ActivationPeriod) restore(input string) {			
-	elements := strings.Split(input, ";")	
-	ap.ActivationTime, _ = time.Parse(LAYOUT, elements[0])
-	for _, is := range elements[1:len(elements) - 1]{		
-		i := &Interval{}
-		ise := strings.Split(is, "|")		
-		month, _ := strconv.Atoi(ise[0])
-		i.Month = time.Month(month)
-		i.MonthDay, _ = strconv.Atoi(ise[1])		 
-		for _,d := range strings.Split(ise[2], ","){
-			wd,_ :=  strconv.Atoi(d)
-			i.WeekDays = append(i.WeekDays, time.Weekday(wd))
-		}
-		i.StartTime = ise[3]
-		i.EndTime = ise[4]		
-		i.Ponder, _ = strconv.ParseFloat(ise[5], 64)		 
-		i.ConnectFee, _ = strconv.ParseFloat(ise[6], 64)
-		i.Price, _ = strconv.ParseFloat(ise[7], 64)
-		i.BillingUnit, _ = strconv.ParseFloat(ise[8], 64)
-		
-		ap.Intervals = append(ap.Intervals, i)
-	}	
-}
 
 /*
 The input stucture that contains call information.
@@ -78,12 +16,19 @@ type CallDescriptor struct {
 	ActivationPeriods                  []*ActivationPeriod
 }
 
+/*
+Adds an activation period that applyes to current call descriptor.
+*/
 func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {
 	for _, ap := range aps {
 		cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
 	}
 }
 
+/*
+Creates a string ready for storage containing the serialization of all
+activation periods held in the internal list.
+*/
 func (cd *CallDescriptor) EncodeValues() (result string) {
 	for _, ap := range cd.ActivationPeriods {
 		result += ap.store() + "\n"
@@ -91,6 +36,9 @@ func (cd *CallDescriptor) EncodeValues() (result string) {
 	return 
 }
 
+/*
+Restores the activation periods list from a storage string.
+*/
 func (cd *CallDescriptor) decodeValues(v string) {
 	for _, aps := range strings.Split(v, "\n") {
 		if(len(aps)>0){
@@ -101,10 +49,16 @@ func (cd *CallDescriptor) decodeValues(v string) {
 	}
 }
 
+/*
+Constructs the key for the storage lookup.
+*/
 func (cd *CallDescriptor) GetKey() string {
 	return fmt.Sprintf("%s:%s:%s", cd.CstmId, cd.Subject, cd.DestinationPrefix)
 }
 
+/*
+Finds the intervals applicable to the call descriptior.
+*/
 func (cd *CallDescriptor) getActiveIntervals() (is []*Interval) {
 	now := time.Now()
 	// add a second in the future to be able to pick the active timestamp
@@ -122,6 +76,9 @@ func (cd *CallDescriptor) getActiveIntervals() (is []*Interval) {
 	return
 }
 
+/*
+Splits the call timespan into sub time spans accordin to the received intervals.
+*/
 func (cd *CallDescriptor) splitInTimeSpans(intervals []*Interval) (timespans []*TimeSpan) {
 	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
 	timespans = append(timespans, ts1)
@@ -138,6 +95,7 @@ func (cd *CallDescriptor) splitInTimeSpans(intervals []*Interval) (timespans []*
 }
 
 /*
+Creates a CallCost structure with the cost nformation calculated for the received CallDescriptor.
  */
 func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error) {
 
