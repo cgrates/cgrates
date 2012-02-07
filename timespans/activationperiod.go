@@ -1,9 +1,9 @@
-package	timespans
+package timespans
 
 import (
-	"time"
-	"strings"
 	"strconv"
+	"strings"
+	"time"
 )
 
 const LAYOUT = "2006-01-02T15:04:05Z07:00"
@@ -28,16 +28,16 @@ func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 /*
 Serializes the objects for the storage.
 */
-func (ap *ActivationPeriod) store() (result string){	
+func (ap *ActivationPeriod) store() (result string) {
 	result += ap.ActivationTime.Format(LAYOUT) + ";"
 	var is string
-	for _,i := range ap.Intervals {
+	for _, i := range ap.Intervals {
 		is = strconv.Itoa(int(i.Month)) + "|"
 		is += strconv.Itoa(i.MonthDay) + "|"
 		for _, wd := range i.WeekDays {
 			is += strconv.Itoa(int(wd)) + ","
 		}
-		is = strings.TrimRight(is, ",")  + "|"
+		is = strings.TrimRight(is, ",") + "|"
 		is += i.StartTime + "|"
 		is += i.EndTime + "|"
 		is += strconv.FormatFloat(i.Ponder, 'f', -1, 64) + "|"
@@ -45,33 +45,33 @@ func (ap *ActivationPeriod) store() (result string){
 		is += strconv.FormatFloat(i.Price, 'f', -1, 64) + "|"
 		is += strconv.FormatFloat(i.BillingUnit, 'f', -1, 64)
 		result += is + ";"
-	}	
-	return 
+	}
+	return
 }
 
 /*
 De-serializes the objects for the storage.
 */
-func (ap *ActivationPeriod) restore(input string) {			
-	elements := strings.Split(input, ";")	
+func (ap *ActivationPeriod) restore(input string) {
+	elements := strings.Split(input, ";")
 	ap.ActivationTime, _ = time.Parse(LAYOUT, elements[0])
-	for _, is := range elements[1:len(elements) - 1]{		
+	for _, is := range elements[1 : len(elements)-1] {
 		i := &Interval{}
-		ise := strings.Split(is, "|")		
+		ise := strings.Split(is, "|")
 		month, _ := strconv.Atoi(ise[0])
 		i.Month = time.Month(month)
-		i.MonthDay, _ = strconv.Atoi(ise[1])		 
-		for _,d := range strings.Split(ise[2], ","){
-			wd,_ :=  strconv.Atoi(d)
+		i.MonthDay, _ = strconv.Atoi(ise[1])
+		for _, d := range strings.Split(ise[2], ",") {
+			wd, _ := strconv.Atoi(d)
 			i.WeekDays = append(i.WeekDays, time.Weekday(wd))
 		}
 		i.StartTime = ise[3]
-		i.EndTime = ise[4]		
-		i.Ponder, _ = strconv.ParseFloat(ise[5], 64)		 
+		i.EndTime = ise[4]
+		i.Ponder, _ = strconv.ParseFloat(ise[5], 64)
 		i.ConnectFee, _ = strconv.ParseFloat(ise[6], 64)
 		i.Price, _ = strconv.ParseFloat(ise[7], 64)
 		i.BillingUnit, _ = strconv.ParseFloat(ise[8], 64)
-		
+
 		ap.Intervals = append(ap.Intervals, i)
-	}	
+	}
 }
