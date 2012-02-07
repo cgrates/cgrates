@@ -158,5 +158,3 @@ func BenchmarkKyotoGetCost(b *testing.B) {
 		cd.GetCost(getter)
 	}
 }
-
-

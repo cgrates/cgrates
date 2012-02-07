@@ -92,7 +92,7 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 		}
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 		ts.TimeEnd = splitTime
-		
+
 		nts.SetInterval(i)
 		return
 	}
@@ -105,8 +105,8 @@ Splits the given timespan on activation period's activation time.
 func (ts *TimeSpan) SplitByActivationPeriod(ap *ActivationPeriod) (newTs *TimeSpan) {
 	if !ts.Contains(ap.ActivationTime) {
 		return nil
-	}	
+	}
 	newTs = &TimeSpan{TimeStart: ap.ActivationTime, TimeEnd: ts.TimeEnd, ActivationPeriod: ap}
 	ts.TimeEnd = ap.ActivationTime
-	return 
+	return
 }

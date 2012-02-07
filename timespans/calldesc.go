@@ -52,7 +52,7 @@ func (cd *CallDescriptor) getActivePeriods() (is []*ActivationPeriod) {
 	bestTime := cd.ActivationPeriods[0].ActivationTime
 	is = append(is, cd.ActivationPeriods[0])
 
-	for _, ap := range cd.ActivationPeriods {		
+	for _, ap := range cd.ActivationPeriods {
 		if ap.ActivationTime.After(bestTime) && ap.ActivationTime.Before(cd.TimeStart) {
 			bestTime = ap.ActivationTime
 			is[0] = ap
@@ -70,9 +70,9 @@ Splits the call timespan into sub time spans accordin to the activation periods 
 func (cd *CallDescriptor) splitInTimeSpans(aps []*ActivationPeriod) (timespans []*TimeSpan) {
 	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
 	ts1.ActivationPeriod = aps[0] // first activation period starts before the timespan
-	
-	timespans = append(timespans, ts1)	
-	
+
+	timespans = append(timespans, ts1)
+
 	for _, ap := range aps {
 		for i := 0; i < len(timespans); i++ {
 			ts := timespans[i]
@@ -82,7 +82,7 @@ func (cd *CallDescriptor) splitInTimeSpans(aps []*ActivationPeriod) (timespans [
 			}
 		}
 	}
-		
+
 	for i := 0; i < len(timespans); i++ {
 		ts := timespans[i]
 		for _, interval := range ts.ActivationPeriod.Intervals {
@@ -106,12 +106,13 @@ func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix strin
 		destPrefix = cd.DestinationPrefix[:i]
 		key = base + destPrefix
 	}
-	
-	for _, aps := range strings.Split(values, "\n") {
-		if len(aps) > 0 {
-			ap := &ActivationPeriod{}
-			ap.restore(aps)
-			cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+	if err == nil {
+		for _, aps := range strings.Split(values, "\n") {
+			if len(aps) > 0 {
+				ap := &ActivationPeriod{}
+				ap.restore(aps)
+				cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+			}
 		}
 	}
 	return
@@ -125,10 +126,10 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 	timespans := cd.splitInTimeSpans(cd.getActivePeriods())
 
 	cost := 0.0
-	for _, ts := range timespans {		
+	for _, ts := range timespans {
 		cost += ts.GetCost()
 	}
-	
+
 	cc := &CallCost{TOR: cd.TOR,
 		CstmId:            cd.CstmId,
 		Subject:           cd.Subject,

@@ -153,7 +153,7 @@ func TestSplitByActivationTime(t *testing.T) {
 	ap1 := &ActivationPeriod{ActivationTime: t1}
 	ap2 := &ActivationPeriod{ActivationTime: t2}
 	ap3 := &ActivationPeriod{ActivationTime: t3}
-	
+
 	if ts.SplitByActivationPeriod(ap1) != nil {
 		t.Error("Error spliting on left margin")
 	}
