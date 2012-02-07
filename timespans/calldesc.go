@@ -38,20 +38,8 @@ func (cd *CallDescriptor) EncodeValues() (result string) {
 }
 
 /*
-Restores the activation periods list from a storage string.
-*/
-func (cd *CallDescriptor) decodeValues(v string) {
-	for _, aps := range strings.Split(v, "\n") {
-		if len(aps) > 0 {
-			ap := &ActivationPeriod{}
-			ap.restore(aps)
-			cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
-		}
-	}
-}
-
-/*
 Constructs the key for the storage lookup.
+The prefixLen is limiting the length of the destination prefix.
 */
 func (cd *CallDescriptor) GetKey() string {
 	return fmt.Sprintf("%s:%s:%s", cd.CstmId, cd.Subject, cd.DestinationPrefix)
@@ -108,25 +96,43 @@ func (cd *CallDescriptor) splitInTimeSpans(aps []*ActivationPeriod) (timespans [
 	return
 }
 
+func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix string, err error) {
+	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
+	destPrefix = cd.DestinationPrefix
+	key := base + destPrefix
+	values, err := sg.Get(key)
+	for i := len(cd.DestinationPrefix); err != nil && i > 1; values, err = sg.Get(key) {
+		i--
+		destPrefix = cd.DestinationPrefix[:i]
+		key = base + destPrefix
+	}
+	
+	for _, aps := range strings.Split(values, "\n") {
+		if len(aps) > 0 {
+			ap := &ActivationPeriod{}
+			ap.restore(aps)
+			cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+		}
+	}
+	return
+}
+
 /*
 Creates a CallCost structure with the cost nformation calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error) {
-
-	key := cd.GetKey()
-	values, err := sg.Get(key)
-
-	cd.decodeValues(values)
+	destPrefix, err := cd.RestoreFromStorage(sg)
 	timespans := cd.splitInTimeSpans(cd.getActivePeriods())
 
 	cost := 0.0
 	for _, ts := range timespans {		
 		cost += ts.GetCost()
 	}
+	
 	cc := &CallCost{TOR: cd.TOR,
 		CstmId:            cd.CstmId,
 		Subject:           cd.Subject,
-		DestinationPrefix: cd.DestinationPrefix,
+		DestinationPrefix: destPrefix,
 		Cost:              cost,
 		ConnectFee:        timespans[0].Interval.ConnectFee}
 	return cc, err

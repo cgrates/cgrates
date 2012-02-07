@@ -13,10 +13,8 @@ func TestKyotoSplitSpans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	key := cd.GetKey()
-	values, _ := getter.Get(key)
 
-	cd.decodeValues(values)
+	cd.RestoreFromStorage(getter)
 
 	periods := cd.getActivePeriods()
 	timespans := cd.splitInTimeSpans(periods)
@@ -32,10 +30,7 @@ func TestRedisSplitSpans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2}
-	key := cd.GetKey()
-	values, _ := getter.Get(key)
-
-	cd.decodeValues(values)
+	cd.RestoreFromStorage(getter)
 
 	periods := cd.getActivePeriods()
 	timespans := cd.splitInTimeSpans(periods)
@@ -71,6 +66,20 @@ func TestRedisGetCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	result, _ := cd.GetCost(getter)
+	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
+	if *result != *expected {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
+func TestFullDestNotFound(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+
+	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost(getter)
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
 	if *result != *expected {
@@ -121,23 +130,6 @@ func BenchmarkKyotoGetting(b *testing.B) {
 	}
 }
 
-func BenchmarkDecoding(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	key := cd.GetKey()
-	values, _ := getter.Get(key)
-
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.decodeValues(values)
-	}
-}
-
 func BenchmarkSplitting(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewKyotoStorage("test.kch")
@@ -146,9 +138,7 @@ func BenchmarkSplitting(b *testing.B) {
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	key := cd.GetKey()
-	values, _ := getter.Get(key)
-	cd.decodeValues(values)
+	cd.RestoreFromStorage(getter)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.splitInTimeSpans(cd.getActivePeriods())
@@ -169,21 +159,4 @@ func BenchmarkKyotoGetCost(b *testing.B) {
 	}
 }
 
-func BenchmarkGetCostExp(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		key := cd.GetKey()
-		values, _ := getter.Get(key)
-
-		cd.decodeValues(values)
-		cd.splitInTimeSpans(cd.getActivePeriods())
-	}
-}
 
