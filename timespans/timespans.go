@@ -79,10 +79,9 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 		if splitTime == ts.TimeStart {
 			return
 		}
-		oldTimeEnd := ts.TimeEnd
+		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 		ts.TimeEnd = splitTime
 
-		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: oldTimeEnd}
 		return
 	}
 	// if only the end time is in the interval split the interval
@@ -91,10 +90,9 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 		if splitTime == ts.TimeEnd {
 			return
 		}
-		oldTimeEnd := ts.TimeEnd
+		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 		ts.TimeEnd = splitTime
-
-		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: oldTimeEnd}
+		
 		nts.SetInterval(i)
 		return
 	}
@@ -104,11 +102,11 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 /*
 Splits the given timespan on activation period's activation time.
 */
-func (ts *TimeSpan) SplitByActivationPeriod(ap *ActivationPeriod) *TimeSpan {
+func (ts *TimeSpan) SplitByActivationPeriod(ap *ActivationPeriod) (newTs *TimeSpan) {
 	if !ts.Contains(ap.ActivationTime) {
 		return nil
-	}
-	oldTimeEnd := ts.TimeEnd
+	}	
+	newTs = &TimeSpan{TimeStart: ap.ActivationTime, TimeEnd: ts.TimeEnd, ActivationPeriod: ap}
 	ts.TimeEnd = ap.ActivationTime
-	return &TimeSpan{TimeStart: ap.ActivationTime, TimeEnd: oldTimeEnd, ActivationPeriod: ap}
+	return 
 }

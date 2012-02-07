@@ -61,15 +61,15 @@ func (cd *CallDescriptor) GetKey() string {
 Finds the activation periods applicable to the call descriptior.
 */
 func (cd *CallDescriptor) getActivePeriods() (is []*ActivationPeriod) {
-	is = make([]*ActivationPeriod, 1) // make room for the initial activation period
-	bestTime := time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)
-	for _, ap := range cd.ActivationPeriods {
-		t := ap.ActivationTime
-		if t.After(bestTime) && t.Before(cd.TimeStart) {
-			bestTime = t
+	bestTime := cd.ActivationPeriods[0].ActivationTime
+	is = append(is, cd.ActivationPeriods[0])
+
+	for _, ap := range cd.ActivationPeriods {		
+		if ap.ActivationTime.After(bestTime) && ap.ActivationTime.Before(cd.TimeStart) {
+			bestTime = ap.ActivationTime
 			is[0] = ap
 		}
-		if t.After(cd.TimeStart) && t.Before(cd.TimeEnd) {
+		if ap.ActivationTime.After(cd.TimeStart) && ap.ActivationTime.Before(cd.TimeEnd) {
 			is = append(is, ap)
 		}
 	}
@@ -86,11 +86,11 @@ func (cd *CallDescriptor) splitInTimeSpans(aps []*ActivationPeriod) (timespans [
 	timespans = append(timespans, ts1)	
 	
 	for _, ap := range aps {
-		for _, ts := range timespans {
+		for i := 0; i < len(timespans); i++ {
+			ts := timespans[i]
 			newTs := ts.SplitByActivationPeriod(ap)
 			if newTs != nil {
 				timespans = append(timespans, newTs)
-				break
 			}
 		}
 	}
@@ -117,9 +117,7 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 	values, err := sg.Get(key)
 
 	cd.decodeValues(values)
-
-	periods := cd.getActivePeriods()
-	timespans := cd.splitInTimeSpans(periods)
+	timespans := cd.splitInTimeSpans(cd.getActivePeriods())
 
 	cost := 0.0
 	for _, ts := range timespans {		

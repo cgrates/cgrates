@@ -78,9 +78,9 @@ func TestRedisGetCost(t *testing.T) {
 	}
 }
 
-func BenchmarkKyotoGetCost(b *testing.B) {
+func BenchmarkRedisGetting(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewRedisStorage("", 10)
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
@@ -88,7 +88,7 @@ func BenchmarkKyotoGetCost(b *testing.B) {
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetCost(getter)
+		getter.Get(cd.GetKey())
 	}
 }
 
@@ -106,24 +106,6 @@ func BenchmarkRedisGetCost(b *testing.B) {
 	}
 }
 
-func BenchmarkSplitting(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewRedisStorage("", 10)
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	key := cd.GetKey()
-	values, _ := getter.Get(key)
-	cd.decodeValues(values)
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		periods := cd.getActivePeriods()
-		cd.splitInTimeSpans(periods)
-	}
-}
-
 func BenchmarkKyotoGetting(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewKyotoStorage("test.kch")
@@ -134,21 +116,8 @@ func BenchmarkKyotoGetting(b *testing.B) {
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		getter.Get(cd.GetKey())
-	}
-}
-
-func BenchmarkRedisGetting(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewRedisStorage("", 10)
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		getter.Get(cd.GetKey())
+		key := cd.GetKey()
+		getter.Get(key)
 	}
 }
 
@@ -157,7 +126,9 @@ func BenchmarkDecoding(b *testing.B) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
 
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256"}
+	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	key := cd.GetKey()
 	values, _ := getter.Get(key)
 
@@ -166,3 +137,53 @@ func BenchmarkDecoding(b *testing.B) {
 		cd.decodeValues(values)
 	}
 }
+
+func BenchmarkSplitting(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+
+	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	key := cd.GetKey()
+	values, _ := getter.Get(key)
+	cd.decodeValues(values)
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.splitInTimeSpans(cd.getActivePeriods())
+	}
+}
+
+func BenchmarkKyotoGetCost(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+
+	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.GetCost(getter)
+	}
+}
+
+func BenchmarkGetCostExp(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+
+	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		key := cd.GetKey()
+		values, _ := getter.Get(key)
+
+		cd.decodeValues(values)
+		cd.splitInTimeSpans(cd.getActivePeriods())
+	}
+}
+
