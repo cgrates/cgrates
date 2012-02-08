@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/rpc"
-	"time"
-	"os/signal"
 	"os"
+	"exp/signal"
 	"syscall"
+	"time"
 )
 
 /*
@@ -26,7 +26,7 @@ func StopSingnalHandler() {
 		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
 			log.Printf("Caught signal %v, sending shutdownto raters\n", usig)
 			var reply string
-			for i,client:= range raterList.clientConnections {
+			for i, client := range raterList.clientConnections {
 				client.Call("Storage.Shutdown", "", &reply)
 				log.Printf("Shutdown rater %v: %v ", raterList.clientAddresses[i], reply)
 			}
@@ -53,14 +53,14 @@ func (rs *RaterServer) RegisterRater(clientAddress string, replay *byte) error {
 /*
 RPC method that recives a rater addres gets the connections and closes it and removes the pair from rater list.
 */
-func (rs *RaterServer) UnRegisterRater(clientAddress string, replay *byte) error {	
+func (rs *RaterServer) UnRegisterRater(clientAddress string, replay *byte) error {
 	client, ok := raterList.GetClient(clientAddress)
 	if ok {
-		client.Close()	
+		client.Close()
 		raterList.RemoveClient(clientAddress)
-		log.Print(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))		
+		log.Print(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))
 	} else {
-		log.Print(fmt.Sprintf("Server %v was not on my watch!", clientAddress))		
+		log.Print(fmt.Sprintf("Server %v was not on my watch!", clientAddress))
 	}
 	return nil
 }

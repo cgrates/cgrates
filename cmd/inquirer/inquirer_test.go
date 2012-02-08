@@ -28,4 +28,3 @@ func TestRPCGet(t *testing.T) {
 		t.Errorf("replay == %q, want %q", reply, expect)
 	}
 }
-

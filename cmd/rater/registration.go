@@ -1,12 +1,12 @@
 package main
 
 import (
+	"exp/signal"
+	"github.com/rif/cgrates/timespans"
 	"log"
 	"net/rpc"
 	"os"
-	"exp/signal"
 	"syscall"
-	"github.com/rif/cgrates/timespans"
 )
 
 /*

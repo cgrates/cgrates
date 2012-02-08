@@ -3,6 +3,7 @@
 # Written by Stephen Day
 # Modified by Bruce Eckel to work with both Python 2 & 3
 import json, socket, itertools
+from datetime import datetime
 
 class JSONClient(object):
 
@@ -42,13 +43,15 @@ class JSONClient(object):
 
 rpc =JSONClient(("127.0.0.1", 5090))
 
+cd = {"Tor":0, "CstmId": "vdf", "Subject": "rif", "DestinationPrefix": "0256", "TimeStart": "2012-02-02T17:30:00Z", "TimeEnd": "2012-02-02T18:30:00Z"}
+
 # alternative to the above
 s = socket.create_connection(("127.0.0.1", 5090))
-s.sendall(json.dumps(({"id": 1, "method": "Responder.Get", "params": ["test"]})))
+s.sendall(json.dumps(({"id": 1, "method": "Responder.Get", "params": [cd]})))
 print s.recv(4096)
 
 i = 0
 result = ""
 for i in xrange(5 * int(1e4) + 1):
-    result = rpc.call("Responder.Get", "test")
+    result = rpc.call("Responder.Get", cd)
 print i, result

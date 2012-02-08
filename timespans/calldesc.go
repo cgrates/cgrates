@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	//"log"
+	"log"
 )
 
 /*
@@ -49,6 +49,10 @@ func (cd *CallDescriptor) GetKey() string {
 Finds the activation periods applicable to the call descriptior.
 */
 func (cd *CallDescriptor) getActivePeriods() (is []*ActivationPeriod) {
+	if len(cd.ActivationPeriods) == 0{
+		log.Print("No activation periods available!", cd)
+		return
+	}
 	bestTime := cd.ActivationPeriods[0].ActivationTime
 	is = append(is, cd.ActivationPeriods[0])
 
@@ -68,6 +72,10 @@ func (cd *CallDescriptor) getActivePeriods() (is []*ActivationPeriod) {
 Splits the call timespan into sub time spans accordin to the activation periods intervals.
 */
 func (cd *CallDescriptor) splitInTimeSpans(aps []*ActivationPeriod) (timespans []*TimeSpan) {
+	if len(aps) == 0 {
+		log.Print("Nothing to split, move along...")
+		return
+	}
 	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
 	ts1.ActivationPeriod = aps[0] // first activation period starts before the timespan
 

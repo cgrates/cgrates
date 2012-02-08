@@ -2,16 +2,16 @@ package main
 
 import (
 	"flag"
+	"github.com/rif/cgrates/timespans"
 	"log"
 	"net"
 	"net/rpc"
 	"os"
-	"github.com/rif/cgrates/timespans"
 )
 
 var (
-	server = flag.String("server", "127.0.0.1:2000", "target host:port")
-	listen = flag.String("listen", "127.0.0.1:1234", "target host:port")
+	server  = flag.String("server", "127.0.0.1:2000", "target host:port")
+	listen  = flag.String("listen", "127.0.0.1:1234", "target host:port")
 	storage Storage
 )
 
@@ -19,15 +19,16 @@ type Storage struct {
 	sg timespans.StorageGetter
 }
 
-func NewStorage(nsg timespans.StorageGetter) *Storage{
+func NewStorage(nsg timespans.StorageGetter) *Storage {
 	return &Storage{sg: nsg}
 }
 
 /*
 RPC method providing the rating information from the storage.
 */
-func (s *Storage) GetCost(in *timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
-	r, e := in.GetCost(s.sg)	
+func (s *Storage) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
+	descriptor := &cd
+	r, e := descriptor.GetCost(s.sg)
 	*reply, err = *r, e
 	return nil
 }
@@ -42,7 +43,7 @@ func (s *Storage) Shutdown(args string, reply *string) (err error) {
 	return nil
 }
 
-func main() {	
+func main() {
 	flag.Parse()
 	getter, err := timespans.NewKyotoStorage("storage.kch")
 	//getter, err := NewRedisStorage("tcp:127.0.0.1:6379", 10)

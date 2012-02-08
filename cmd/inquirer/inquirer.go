@@ -1,30 +1,28 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"errors"
-	"time"
 	"runtime"
 	"sync"
+	"time"
+	"github.com/rif/cgrates/timespans"
 )
-
 
 var (
-	nCPU = runtime.NumCPU()
-	raterList *RaterList
-	inChannels []chan string
-	outChannels []chan string
-	multiplexerIndex int 
-	mu sync.Mutex
-	sem = make(chan int, nCPU)
+	nCPU             = runtime.NumCPU()
+	raterList        *RaterList
+	inChannels       []chan *timespans.CallDescriptor
+	outChannels      []chan *timespans.CallCost
+	multiplexerIndex int
+	mu               sync.Mutex
+	sem              = make(chan int, nCPU)
 )
-
-
 
 /*
 Handler for the statistics web client
@@ -41,33 +39,33 @@ func handler(w http.ResponseWriter, r *http.Request) {
 /*
 Creates a gorutine for every cpu core and the multiplexses the calls to each of them.
 */
-func initThreadedCallRater(){
+func initThreadedCallRater() {
 	multiplexerIndex = 0
 	runtime.GOMAXPROCS(nCPU)
-	inChannels = make([]chan string, nCPU)
-	outChannels = make([]chan string, nCPU)
-	for i:= 0; i< nCPU; i++ {
-		inChannels[i] = make(chan string)
-		outChannels[i] = make(chan string)
-		go func(in, out chan string){
+	inChannels = make([]chan *timespans.CallDescriptor, nCPU)
+	outChannels = make([]chan *timespans.CallCost, nCPU)
+	for i := 0; i < nCPU; i++ {
+		inChannels[i] = make(chan *timespans.CallDescriptor)
+		outChannels[i] = make(chan *timespans.CallCost)
+		go func(in chan *timespans.CallDescriptor, out chan *timespans.CallCost) {
 			for {
-				key := <- in
+				key := <-in
 				out <- CallRater(key)
 			}
 		}(inChannels[i], outChannels[i])
-	}	
+	}
 }
 
 /*
-*/
-func ThreadedCallRater(key string) (replay string) {
+ */
+func ThreadedCallRater(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
 	mu.Lock()
 	defer mu.Unlock()
 	if multiplexerIndex >= nCPU {
 		multiplexerIndex = 0
 	}
 	inChannels[multiplexerIndex] <- key
-	replay = <- outChannels[multiplexerIndex]
+	reply = <-outChannels[multiplexerIndex]
 	multiplexerIndex++
 	return
 }
@@ -75,21 +73,22 @@ func ThreadedCallRater(key string) (replay string) {
 /*
 The function that gets the information from the raters using balancer.
 */
-func CallRater(key string) (reply string) {
+func CallRater(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
 	err := errors.New("") //not nil value
 	for err != nil {
-		client:= raterList.Balance()
+		client := raterList.Balance()
 		if client == nil {
 			log.Print("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
-			err = client.Call("Storage.Get", key, &reply)
+			reply = &timespans.CallCost{}
+			err = client.Call("Storage.GetCost", *key, reply)			
 			if err != nil {
 				log.Printf("Got en error from rater: %v", err)
 			}
-		}			
+		}
 	}
-	return 
+	return
 }
 
 func listenToTheWorld() {
@@ -106,7 +105,7 @@ func listenToTheWorld() {
 	rpc.Register(responder)
 
 	for {
-		c, err := l.Accept()		
+		c, err := l.Accept()
 		if err != nil {
 			log.Printf("accept error: %s", c)
 			continue
@@ -122,11 +121,11 @@ func main() {
 	raterServer := new(RaterServer)
 	rpc.Register(raterServer)
 	rpc.HandleHTTP()
-	
-	go StopSingnalHandler()	
+
+	go StopSingnalHandler()
 	go listenToTheWorld()
 	//initThreadedCallRater()
-	http.HandleFunc("/", handler)	
+	http.HandleFunc("/", handler)
 	log.Print("The server is listening...")
 	http.ListenAndServe(":2000", nil)
 }

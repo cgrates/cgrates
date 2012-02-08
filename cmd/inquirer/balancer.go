@@ -6,24 +6,24 @@ import (
 )
 
 type RaterList struct {
-	clientAddresses []string
+	clientAddresses   []string
 	clientConnections []*rpc.Client
-	balancerIndex int
-	mu sync.RWMutex
+	balancerIndex     int
+	mu                sync.RWMutex
 }
 
 /*
 Constructor for RateList holding one slice for addreses and one slice for connections.
 */
 func NewRaterList() *RaterList {
-	r:= &RaterList{balancerIndex: 0} // leaving both slices to nil
+	r := &RaterList{balancerIndex: 0} // leaving both slices to nil
 	return r
 }
 
 /*
 Adds a client to the two  internal slices.
 */
-func (rl *RaterList) AddClient(address string, client *rpc.Client){
+func (rl *RaterList) AddClient(address string, client *rpc.Client) {
 	rl.clientAddresses = append(rl.clientAddresses, address)
 	rl.clientConnections = append(rl.clientConnections, client)
 	return
@@ -32,7 +32,7 @@ func (rl *RaterList) AddClient(address string, client *rpc.Client){
 /*
 Removes a client from the slices locking the readers and reseting the balancer index.
 */
-func (rl *RaterList) RemoveClient(address string){
+func (rl *RaterList) RemoveClient(address string) {
 	index := -1
 	for i, v := range rl.clientAddresses {
 		if v == address {
@@ -53,7 +53,7 @@ func (rl *RaterList) RemoveClient(address string){
 /*
 Returns a client for the specifed address.
 */
-func (rl *RaterList) GetClient(address string) (*rpc.Client, bool){
+func (rl *RaterList) GetClient(address string) (*rpc.Client, bool) {
 	for i, v := range rl.clientAddresses {
 		if v == address {
 			return rl.clientConnections[i], true
@@ -74,7 +74,7 @@ func (rl *RaterList) Balance() (result *rpc.Client) {
 	if len(rl.clientAddresses) > 0 {
 		result = rl.clientConnections[rl.balancerIndex]
 		rl.balancerIndex++
-	} 
-	
-	return 
+	}
+
+	return
 }
