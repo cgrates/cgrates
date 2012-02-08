@@ -13,7 +13,7 @@ func main() {
 	cd := timespans.CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	result := timespans.CallCost{}
 	client, _ := jsonrpc.Dial("tcp", "localhost:5090")
-	runs := int(5 * 1e4)
+	runs := int(1e5)
 	i := 0
 	c := make(chan string)
 	for ; i < runs; i++ {
