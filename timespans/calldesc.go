@@ -56,8 +56,9 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
 	ts1.ActivationPeriod = cd.ActivationPeriods[0]
 	
+	// split on activation periods
 	timespans = append(timespans, ts1)
-	afterStart, afterEnd := false, false
+	afterStart, afterEnd := false, false //optimization for multiple activation periods
 	for _, ap := range cd.ActivationPeriods {
 		if !afterStart && !afterEnd && ap.ActivationTime.Before(cd.TimeStart) {
 			ts1.ActivationPeriod = ap
@@ -74,7 +75,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			}
 		}
 	}	
-
+	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
 		for _, interval := range timespans[i].ActivationPeriod.Intervals {
 			newTs := timespans[i].SplitByInterval(interval)
@@ -88,7 +89,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 }
 
 func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix string, err error) {
-	cd.ActivationPeriods = make([]*ActivationPeriod, 2)
+	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
 	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
 	destPrefix = cd.DestinationPrefix
 	key := base + destPrefix

@@ -1,7 +1,7 @@
 package main
 
 import (
-		"github.com/rif/cgrates/timespans"
+	"github.com/rif/cgrates/timespans"
 )
 
 type Responder byte
