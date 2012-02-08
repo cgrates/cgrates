@@ -69,20 +69,6 @@ func (i *Interval) Contains(t time.Time) bool {
 }
 
 /*
-Returns true if the timespan has at list one margin in the interval
-*/
-func (i *Interval) ContainsSpan(t *TimeSpan) bool {
-	return i.Contains(t.TimeStart) || i.Contains(t.TimeEnd)
-}
-
-/*
-Returns true if the timespan is fully enclosed in the interval
-*/
-func (i *Interval) ContainsFullSpan(ts *TimeSpan) bool {
-	return i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd)
-}
-
-/*
 Returns a time object that represents the end of the interval realtive to the received time
 */
 func (i *Interval) getRightMargin(t time.Time) (rigthtTime time.Time) {

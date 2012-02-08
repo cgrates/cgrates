@@ -64,11 +64,11 @@ The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 	// if the span is not in interval return nil
-	if !i.ContainsSpan(ts) {
+	if !(i.Contains(ts.TimeStart) || i.Contains(ts.TimeEnd)) {
 		return
 	}
 	// if the span is enclosed in the interval try to set as new interval and return nil
-	if i.ContainsFullSpan(ts) {
+	if i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd) {
 		ts.SetInterval(i)
 		return
 	}

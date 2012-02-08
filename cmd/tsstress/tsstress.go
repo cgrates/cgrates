@@ -33,8 +33,7 @@ func main() {
 	getter, _ := timespans.NewRedisStorage("", 10)
 	defer getter.Close()
 
-	for ; i < 1e4; i++ {
-
+	for ; i < 1e5; i++ {
 		result, _ = cd.GetCost(getter)
 	}
 	log.Print(result)

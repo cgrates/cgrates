@@ -1,10 +1,10 @@
-package timespans
+	package timespans
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"time"
-	"log"
 )
 
 /*
@@ -46,56 +46,40 @@ func (cd *CallDescriptor) GetKey() string {
 }
 
 /*
-Finds the activation periods applicable to the call descriptior.
-*/
-func (cd *CallDescriptor) getActivePeriods() (is []*ActivationPeriod) {
-	if len(cd.ActivationPeriods) == 0{
-		log.Print("No activation periods available! ", cd)
-		return
-	}
-	bestTime := cd.ActivationPeriods[0].ActivationTime
-	is = append(is, cd.ActivationPeriods[0])
-	for _, ap := range cd.ActivationPeriods {
-		if ap.ActivationTime.After(bestTime) && ap.ActivationTime.Before(cd.TimeStart) {
-			bestTime = ap.ActivationTime
-			is[0] = ap
-		}
-		if ap.ActivationTime.After(cd.TimeStart) && ap.ActivationTime.Before(cd.TimeEnd) {
-			is = append(is, ap)
-		}
-	}
-	return
-}
-
-/*
 Splits the call timespan into sub time spans accordin to the activation periods intervals.
 */
-func (cd *CallDescriptor) splitInTimeSpans(aps []*ActivationPeriod) (timespans []*TimeSpan) {
-	if len(aps) == 0 {
+func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
+	if len(cd.ActivationPeriods) == 0 {
 		log.Print("Nothing to split, move along... ", cd)
 		return
 	}
 	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
-	ts1.ActivationPeriod = aps[0] // first activation period starts before the timespan
-
+	ts1.ActivationPeriod = cd.ActivationPeriods[0]
+	
 	timespans = append(timespans, ts1)
-
-	for _, ap := range aps {
-		for i := 0; i < len(timespans); i++ {
-			ts := timespans[i]
-			newTs := ts.SplitByActivationPeriod(ap)
-			if newTs != nil {
-				timespans = append(timespans, newTs)
+	afterStart, afterEnd := false, false
+	for _, ap := range cd.ActivationPeriods {
+		if !afterStart && !afterEnd && ap.ActivationTime.Before(cd.TimeStart) {
+			ts1.ActivationPeriod = ap
+		} else {
+			afterStart = true
+			for i := 0; i < len(timespans); i++ {
+				newTs := timespans[i].SplitByActivationPeriod(ap)
+				if newTs != nil {
+					timespans = append(timespans, newTs)
+				} else {
+					afterEnd = true
+					break
+				}
 			}
 		}
-	}
+	}	
 
 	for i := 0; i < len(timespans); i++ {
-		ts := timespans[i]
-		for _, interval := range ts.ActivationPeriod.Intervals {
-			newTs := ts.SplitByInterval(interval)
+		for _, interval := range timespans[i].ActivationPeriod.Intervals {
+			newTs := timespans[i].SplitByInterval(interval)
 			if newTs != nil {
-				newTs.ActivationPeriod = ts.ActivationPeriod
+				newTs.ActivationPeriod = timespans[i].ActivationPeriod
 				timespans = append(timespans, newTs)
 			}
 		}
@@ -104,6 +88,7 @@ func (cd *CallDescriptor) splitInTimeSpans(aps []*ActivationPeriod) (timespans [
 }
 
 func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix string, err error) {
+	cd.ActivationPeriods = make([]*ActivationPeriod, 2)
 	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
 	destPrefix = cd.DestinationPrefix
 	key := base + destPrefix
@@ -130,17 +115,18 @@ Creates a CallCost structure with the cost nformation calculated for the receive
 */
 func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error) {
 	destPrefix, err := cd.RestoreFromStorage(sg)
-	timespans := cd.splitInTimeSpans(cd.getActivePeriods())
-	
+
+	timespans := cd.splitInTimeSpans()
+
 	cost := 0.0
 	for _, ts := range timespans {
 		cost += ts.GetCost()
 	}
-	
+
 	connectionFee := 0.0
 	if len(timespans) > 0 {
 		connectionFee = timespans[0].Interval.ConnectFee
-	} 
+	}
 	cc := &CallCost{TOR: cd.TOR,
 		CstmId:            cd.CstmId,
 		Subject:           cd.Subject,
