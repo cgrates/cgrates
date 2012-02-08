@@ -50,12 +50,11 @@ Finds the activation periods applicable to the call descriptior.
 */
 func (cd *CallDescriptor) getActivePeriods() (is []*ActivationPeriod) {
 	if len(cd.ActivationPeriods) == 0{
-		log.Print("No activation periods available!", cd)
+		log.Print("No activation periods available! ", cd)
 		return
 	}
 	bestTime := cd.ActivationPeriods[0].ActivationTime
 	is = append(is, cd.ActivationPeriods[0])
-
 	for _, ap := range cd.ActivationPeriods {
 		if ap.ActivationTime.After(bestTime) && ap.ActivationTime.Before(cd.TimeStart) {
 			bestTime = ap.ActivationTime
@@ -73,7 +72,7 @@ Splits the call timespan into sub time spans accordin to the activation periods 
 */
 func (cd *CallDescriptor) splitInTimeSpans(aps []*ActivationPeriod) (timespans []*TimeSpan) {
 	if len(aps) == 0 {
-		log.Print("Nothing to split, move along...")
+		log.Print("Nothing to split, move along... ", cd)
 		return
 	}
 	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
@@ -132,18 +131,22 @@ Creates a CallCost structure with the cost nformation calculated for the receive
 func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error) {
 	destPrefix, err := cd.RestoreFromStorage(sg)
 	timespans := cd.splitInTimeSpans(cd.getActivePeriods())
-
+	
 	cost := 0.0
 	for _, ts := range timespans {
 		cost += ts.GetCost()
 	}
-
+	
+	connectionFee := 0.0
+	if len(timespans) > 0 {
+		connectionFee = timespans[0].Interval.ConnectFee
+	} 
 	cc := &CallCost{TOR: cd.TOR,
 		CstmId:            cd.CstmId,
 		Subject:           cd.Subject,
 		DestinationPrefix: destPrefix,
 		Cost:              cost,
-		ConnectFee:        timespans[0].Interval.ConnectFee}
+		ConnectFee:        connectionFee}
 	return cc, err
 }
 
