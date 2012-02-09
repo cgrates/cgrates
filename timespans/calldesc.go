@@ -118,7 +118,7 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 	destPrefix, err := cd.RestoreFromStorage(sg)
 
 	timespans := cd.splitInTimeSpans()
-
+	
 	cost := 0.0
 	for _, ts := range timespans {
 		cost += ts.GetCost()

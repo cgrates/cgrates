@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	//"log"
 )
 
 /*
@@ -61,8 +62,10 @@ func (ap *ActivationPeriod) restore(input string) {
 		i.Month = time.Month(month)
 		i.MonthDay, _ = strconv.Atoi(ise[1])
 		for _, d := range strings.Split(ise[2], ",") {
-			wd, _ := strconv.Atoi(d)
-			i.WeekDays = append(i.WeekDays, time.Weekday(wd))
+			if d != ""{
+				wd, _ := strconv.Atoi(d)
+				i.WeekDays = append(i.WeekDays, time.Weekday(wd))
+			}
 		}
 		i.StartTime = ise[3]
 		i.EndTime = ise[4]
