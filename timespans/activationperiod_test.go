@@ -57,7 +57,7 @@ func TestApStoreRestore(t *testing.T) {
 	}
 }
 
-func BenchmarkRestore(b *testing.B) {
+func BenchmarkActivationPeriodRestore(b *testing.B) {
 	ap1 := ActivationPeriod{}
 	for i := 0; i < b.N; i++ {
 		ap1.restore("1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;")

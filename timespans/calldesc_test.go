@@ -155,6 +155,20 @@ func BenchmarkRedisGetting(b *testing.B) {
 	}
 }
 
+func BenchmarkRedisRestoring(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewRedisStorage("", 10)
+	defer getter.Close()
+
+	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.RestoreFromStorage(getter)
+	}
+}
+
 func BenchmarkRedisGetCost(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewRedisStorage("", 10)
@@ -181,6 +195,20 @@ func BenchmarkKyotoGetting(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		key := cd.GetKey()
 		getter.Get(key)
+	}
+}
+
+func BenchmarkKyotoRestoring(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+
+	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.RestoreFromStorage(getter)
 	}
 }
 
