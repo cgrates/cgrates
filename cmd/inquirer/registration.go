@@ -1,7 +1,7 @@
 package main
 
 import (
-	"exp/signal"
+	"os/signal"
 	"fmt"
 	"log"
 	"net/rpc"
@@ -20,19 +20,17 @@ Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the regis
 */
 func StopSingnalHandler() {
 	log.Print("Handling stop signals...")
-	sig := <-signal.Incoming
-	if usig, ok := sig.(os.UnixSignal); ok {
-		switch usig {
-		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
-			log.Printf("Caught signal %v, sending shutdownto raters\n", usig)
-			var reply string
-			for i, client := range raterList.clientConnections {
-				client.Call("Storage.Shutdown", "", &reply)
-				log.Printf("Shutdown rater %v: %v ", raterList.clientAddresses[i], reply)
-			}
-			os.Exit(1)
-		}
+	c := make(chan os.Signal)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	
+	sig := <-c
+	log.Printf("Caught signal %v, sending shutdownto raters\n", sig)
+	var reply string
+	for i, client := range raterList.clientConnections {
+		client.Call("Storage.Shutdown", "", &reply)
+		log.Printf("Shutdown rater %v: %v ", raterList.clientAddresses[i], reply)
 	}
+	os.Exit(1)
 }
 
 /*

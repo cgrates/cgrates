@@ -77,10 +77,12 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	}
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
-		for _, interval := range timespans[i].ActivationPeriod.Intervals {
+		ap := timespans[i].ActivationPeriod
+		//timespans[i].ActivationPeriod = nil
+		for _, interval := range ap.Intervals {
 			newTs := timespans[i].SplitByInterval(interval)
 			if newTs != nil {
-				newTs.ActivationPeriod = timespans[i].ActivationPeriod
+				newTs.ActivationPeriod = ap
 				timespans = append(timespans, newTs)
 			}
 		}
@@ -128,6 +130,7 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 	if len(timespans) > 0 {
 		connectionFee = timespans[0].Interval.ConnectFee
 	}
+	
 	cc := &CallCost{TOR: cd.TOR,
 		CstmId:            cd.CstmId,
 		Subject:           cd.Subject,

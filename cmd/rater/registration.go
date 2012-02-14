@@ -1,7 +1,7 @@
 package main
 
 import (
-	"exp/signal"
+	"os/signal"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net/rpc"
@@ -14,16 +14,14 @@ Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregiste
 */
 func StopSingnalHandler(server, listen *string, sg timespans.StorageGetter) {
 	log.Print("Handling stop signals...")
-	sig := <-signal.Incoming
-	if usig, ok := sig.(os.UnixSignal); ok {
-		switch usig {
-		case syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT:
-			log.Printf("Caught signal %v, unregistering from server\n", usig)
-			unregisterFromServer(server, listen)
-			sg.Close()
-			os.Exit(1)
-		}
-	}
+	c := make(chan os.Signal)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)	
+	sig := <-c
+
+	log.Printf("Caught signal %v, unregistering from server\n", sig)
+	unregisterFromServer(server, listen)
+	sg.Close()
+	os.Exit(1)
 }
 
 /*
