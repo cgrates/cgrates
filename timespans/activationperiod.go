@@ -62,7 +62,7 @@ func (ap *ActivationPeriod) restore(input string) {
 		i.Month = time.Month(month)
 		i.MonthDay, _ = strconv.Atoi(ise[1])
 		for _, d := range strings.Split(ise[2], ",") {
-			if d != ""{
+			if d != "" {
 				wd, _ := strconv.Atoi(d)
 				i.WeekDays = append(i.WeekDays, time.Weekday(wd))
 			}

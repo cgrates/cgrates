@@ -1,4 +1,4 @@
-	package timespans
+package timespans
 
 import (
 	"fmt"
@@ -55,7 +55,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	}
 	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
 	ts1.ActivationPeriod = cd.ActivationPeriods[0]
-	
+
 	// split on activation periods
 	timespans = append(timespans, ts1)
 	afterStart, afterEnd := false, false //optimization for multiple activation periods
@@ -74,7 +74,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				}
 			}
 		}
-	}	
+	}
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
 		for _, interval := range timespans[i].ActivationPeriod.Intervals {
@@ -118,7 +118,7 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 	destPrefix, err := cd.RestoreFromStorage(sg)
 
 	timespans := cd.splitInTimeSpans()
-	
+
 	cost := 0.0
 	for _, ts := range timespans {
 		cost += ts.GetCost()
@@ -133,7 +133,8 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 		Subject:           cd.Subject,
 		DestinationPrefix: destPrefix,
 		Cost:              cost,
-		ConnectFee:        connectionFee}
+		ConnectFee:        connectionFee,
+		Timespans:         timespans}
 	return cc, err
 }
 
@@ -144,5 +145,5 @@ type CallCost struct {
 	TOR                                int
 	CstmId, Subject, DestinationPrefix string
 	Cost, ConnectFee                   float64
-	//	ratesInfo *RatingProfile
+	Timespans                          []*TimeSpan
 }
