@@ -46,22 +46,28 @@ func (cd *CallDescriptor) GetKey() string {
 }
 
 /*
-Splits the call timespan into sub time spans accordin to the activation periods intervals.
+Splits the call descriptor timespan into sub time spans according to the activation periods intervals.
 */
 func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
+	return cd.splitTimeSpan(&TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd})
+}
+
+/*
+Splits the received timespan into sub time spans according to the activation periods intervals.
+*/
+func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeSpan) {
 	if len(cd.ActivationPeriods) == 0 {
 		log.Print("Nothing to split, move along... ", cd)
 		return
 	}
-	ts1 := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
-	ts1.ActivationPeriod = cd.ActivationPeriods[0]
+	firstSpan.ActivationPeriod = cd.ActivationPeriods[0]
 
 	// split on activation periods
-	timespans = append(timespans, ts1)
+	timespans = append(timespans, firstSpan)
 	afterStart, afterEnd := false, false //optimization for multiple activation periods
 	for _, ap := range cd.ActivationPeriods {
 		if !afterStart && !afterEnd && ap.ActivationTime.Before(cd.TimeStart) {
-			ts1.ActivationPeriod = ap
+			firstSpan.ActivationPeriod = ap
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
@@ -116,7 +122,7 @@ func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix strin
 /*
 Creates a CallCost structure with the cost nformation calculated for the received CallDescriptor.
 */
-func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error) {
+func (cd *CallDescriptor) GetCost(sg StorageGetter) (*CallCost, error) {
 	destPrefix, err := cd.RestoreFromStorage(sg)
 
 	timespans := cd.splitInTimeSpans()
@@ -139,6 +145,20 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (result *CallCost, err error
 		ConnectFee:        connectionFee,
 		Timespans:         timespans}
 	return cc, err
+}
+
+/*
+Returns
+*/
+func (cd *CallDescriptor) getPresentSecondCost(sg StorageGetter) (cost float64, err error) {
+	_, err = cd.RestoreFromStorage(sg)
+	now := time.Now()
+	oneSecond,_ := time.ParseDuration("1s")
+	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(oneSecond)}
+	timespans := cd.splitTimeSpan(ts)
+
+	cost = timespans[0].GetCost()
+	return 
 }
 
 /*

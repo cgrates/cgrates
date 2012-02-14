@@ -35,10 +35,6 @@ func (ub *UserBudget) GetSecondsForPrefix(prefix string) (seconds int) {
 	return 
 }
 
-func (ub *UserBudget) GetSecondsForSecondPrice(price float64) (seconds int) {
-	return
-}
-
 type Destination struct {
 	id       string
 	prefixes []string
