@@ -3,9 +3,27 @@ package timespans
 import (
 	"fmt"
 	"log"
+	"math"
 	"strings"
 	"time"
 )
+
+/*
+Utility function for rounding a float to a certain number of decimals (not present in math).
+*/
+func round(val float64, prec int) float64 {
+
+	var rounder float64
+	intermed := val * math.Pow(10, float64(prec))
+
+	if val >= 0.5 {
+		rounder = math.Ceil(intermed)
+	} else {
+		rounder = math.Floor(intermed)
+	}
+
+	return rounder / math.Pow(10, float64(prec))
+}
 
 /*
 The input stucture that contains call information.
@@ -33,6 +51,34 @@ activation periods held in the internal list.
 func (cd *CallDescriptor) EncodeValues() (result string) {
 	for _, ap := range cd.ActivationPeriods {
 		result += ap.store() + "\n"
+	}
+	return
+}
+
+/*
+Restores the activation periods from storage.
+*/
+func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix string, err error) {
+	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
+	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
+	destPrefix = cd.DestinationPrefix
+	key := base + destPrefix
+	values, err := sg.Get(key)
+	//get for a smaller prefix if the orignal one was not found
+	for i := len(cd.DestinationPrefix); err != nil && i > 1; values, err = sg.Get(key) {
+		i--
+		destPrefix = cd.DestinationPrefix[:i]
+		key = base + destPrefix
+	}
+	//load the activation preriods
+	if err == nil {
+		for _, aps := range strings.Split(values, "\n") {
+			if len(aps) > 0 {
+				ap := &ActivationPeriod{}
+				ap.restore(aps)
+				cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+			}
+		}
 	}
 	return
 }
@@ -96,29 +142,6 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	return
 }
 
-func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix string, err error) {
-	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
-	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
-	destPrefix = cd.DestinationPrefix
-	key := base + destPrefix
-	values, err := sg.Get(key)
-	for i := len(cd.DestinationPrefix); err != nil && i > 1; values, err = sg.Get(key) {
-		i--
-		destPrefix = cd.DestinationPrefix[:i]
-		key = base + destPrefix
-	}
-	if err == nil {
-		for _, aps := range strings.Split(values, "\n") {
-			if len(aps) > 0 {
-				ap := &ActivationPeriod{}
-				ap.restore(aps)
-				cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
-			}
-		}
-	}
-	return
-}
-
 /*
 Creates a CallCost structure with the cost nformation calculated for the received CallDescriptor.
 */
@@ -128,15 +151,14 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (*CallCost, error) {
 	timespans := cd.splitInTimeSpans()
 
 	cost := 0.0
-	for _, ts := range timespans {
+	connectionFee := 0.0
+	for i, ts := range timespans {
+		if i == 0 {
+			connectionFee = ts.Interval.ConnectFee
+		}
 		cost += ts.GetCost()
 	}
 
-	connectionFee := 0.0
-	if len(timespans) > 0 {
-		connectionFee = timespans[0].Interval.ConnectFee
-	}
-	
 	cc := &CallCost{TOR: cd.TOR,
 		CstmId:            cd.CstmId,
 		Subject:           cd.Subject,
@@ -148,17 +170,38 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (*CallCost, error) {
 }
 
 /*
-Returns
+Returns the cost of a second in the present time conditions.
 */
 func (cd *CallDescriptor) getPresentSecondCost(sg StorageGetter) (cost float64, err error) {
 	_, err = cd.RestoreFromStorage(sg)
 	now := time.Now()
-	oneSecond,_ := time.ParseDuration("1s")
+	oneSecond, _ := time.ParseDuration("1s")
 	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(oneSecond)}
 	timespans := cd.splitTimeSpan(ts)
 
-	cost = timespans[0].GetCost()
-	return 
+	cost = round(timespans[0].GetCost(), 3)
+	return
+}
+
+/*
+Returns the cost of a second in the present time conditions.
+*/
+func (cd *CallDescriptor) GetMaxSessionTime(sg StorageGetter, maxSessionSeconds int) (seconds int, err error) {
+	_, err = cd.RestoreFromStorage(sg)
+	now := time.Now()
+	maxDuration, _ := time.ParseDuration(fmt.Sprintf("%ds", maxSessionSeconds))
+	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
+	timespans := cd.splitTimeSpan(ts)
+
+	cost := 0.0
+	for i, ts := range timespans {
+		if i == 0 {
+			cost += ts.Interval.ConnectFee
+		}
+		cost += ts.GetCost()
+	}
+
+	return
 }
 
 /*
