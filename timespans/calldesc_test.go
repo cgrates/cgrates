@@ -67,6 +67,20 @@ func TestRedisGetCost(t *testing.T) {
 	}
 }
 
+func TestMongoGetCost(t *testing.T) {
+	getter, _ := NewMongoStorage("127.0.0.1", "test")
+	defer getter.Close()
+
+	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	result, _ := cd.GetCost(getter)
+	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
+	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
 func TestFullDestNotFound(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
@@ -91,6 +105,8 @@ func TestMultipleActivationPeriods(t *testing.T) {
 	result, _ := cd.GetCost(getter)
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", Cost: 330, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+		t.Log(result.Timespans[0].ActivationPeriod)
+		t.Log(result.Timespans[1].ActivationPeriod)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -262,21 +278,20 @@ func BenchmarkMongoGetting(b *testing.B) {
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		key := cd.GetKey()
-		getter.Get(key)
+		getter.GetActivationPeriods(cd.GetKey())
 	}
 }
 
-//func BenchmarkMongoGetCost(b *testing.B) {
-//	b.StopTimer()
-//	getter, _ := NewMongoStorage("127.0.0.1", "test")
-//	defer getter.Close()
+func BenchmarkMongoGetCost(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewMongoStorage("127.0.0.1", "test")
+	defer getter.Close()
 
-//	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-//	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-//	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-//	b.StartTimer()
-//	for i := 0; i < b.N; i++ {
-//		cd.GetCost(getter)
-//	}
-//}
+	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.GetCost(getter)
+	}
+}

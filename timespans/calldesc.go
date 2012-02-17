@@ -161,7 +161,9 @@ func (cd *CallDescriptor) getPresentSecondCost(sg StorageGetter) (cost float64, 
 	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(oneSecond)}
 	timespans := cd.splitTimeSpan(ts)
 
-	cost = round(timespans[0].GetCost(), 3)
+	if len(timespans)>0 {
+		cost = round(timespans[0].GetCost(), 3)
+	}
 	return
 }
 

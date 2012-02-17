@@ -6,8 +6,8 @@ import (
 )
 
 type KeyValue struct {
-	_id   string
-	value string
+	Key   string
+	ActivationPeriods []*ActivationPeriod
 }
 
 type MongoStorage struct {
@@ -30,8 +30,12 @@ func (ms *MongoStorage) Close() {
 	ms.session.Close()
 }
 
-func (ms *MongoStorage) Get(key string) (string, error) {
+func (ms *MongoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
 	result := KeyValue{}
-	err := ms.db.Find(bson.M{"_id": key}).One(&result)
-	return result.value, err
+	err = ms.db.Find(bson.M{"key": key}).One(&result)
+	return result.ActivationPeriods, err
+}
+
+func (ms *MongoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod){
+	ms.db.Insert(&KeyValue{key, aps})
 }
