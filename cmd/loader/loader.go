@@ -2,9 +2,6 @@ package main
 
 import (
 	"flag"
-	"github.com/simonz05/godis"
-	"github.com/fsouza/gokabinet/kc"
-    "launchpad.net/mgo"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"os"
@@ -45,14 +42,13 @@ func main() {
 
 	switch *storage {
 	case "kyoto":
-		db, _ := kc.Open(*kyotofile, kc.WRITE)
-		defer db.Close()
+		storage, _ := timespans.NewKyotoStorage(*kyotofile)
+		defer storage.Close()
 		for _, cd := range callDescriptors{
-			key := cd.GetKey()
-			db.Set(key, cd.EncodeValues())
-			log.Printf("Storing %q", key)
+			storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
+			log.Printf("Storing %q", cd.GetKey())
 		}
-	case "mongo":
+	/*case "mongo":
 		 session, err := mgo.Dial(*mongoserver)
         if err != nil {
                 panic(err)
@@ -63,17 +59,17 @@ func main() {
         c := session.DB(*mongodb).C("ap")
         for _, cd := range callDescriptors{
 			key := cd.GetKey()
-			c.Insert(&timespans.KeyValue{key, cd.EncodeValues()})
+			c.Insert(&map[string]string{"_id":key, "value":cd.EncodeValues()})
 			log.Printf("Storing %q", key)
-		}
+		}*/
 
 	default:
-		db := godis.New(*redisserver, *redisdb, *redispass)
-		defer db.Quit()
+		storage, _ := timespans.NewKyotoStorage(*redisserver, *redisdb)
+		defer storage.Close()
 		for _, cd := range callDescriptors{
 			key := cd.GetKey()
-			db.Set(key, cd.EncodeValues())
-			log.Printf("Storing %q", key)
+			storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
+			log.Printf("Storing %q", cd.GetKey())
 		}
 	}
 }

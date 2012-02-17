@@ -162,7 +162,7 @@ func BenchmarkRedisGetting(b *testing.B) {
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		getter.Get(cd.GetKey())
+		getter.GetActivationPeriods(cd.GetKey())
 	}
 }
 
@@ -205,7 +205,7 @@ func BenchmarkKyotoGetting(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		key := cd.GetKey()
-		getter.Get(key)
+		getter.GetActivationPeriods(key)
 	}
 }
 
@@ -254,7 +254,7 @@ func BenchmarkKyotoGetCost(b *testing.B) {
 
 func BenchmarkMongoGetting(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewMongoStorage("127.0.0.1","test")
+	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
@@ -267,16 +267,16 @@ func BenchmarkMongoGetting(b *testing.B) {
 	}
 }
 
-func BenchmarkMongoGetCost(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewMongoStorage("127.0.0.1","test")
-	defer getter.Close()
+//func BenchmarkMongoGetCost(b *testing.B) {
+//	b.StopTimer()
+//	getter, _ := NewMongoStorage("127.0.0.1", "test")
+//	defer getter.Close()
 
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.GetCost(getter)
-	}
-}
+//	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+//	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
+//	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+//	b.StartTimer()
+//	for i := 0; i < b.N; i++ {
+//		cd.GetCost(getter)
+//	}
+//}

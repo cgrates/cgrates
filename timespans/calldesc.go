@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"strings"
 	"time"
 )
 
@@ -45,17 +44,6 @@ func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {
 }
 
 /*
-Creates a string ready for storage containing the serialization of all
-activation periods held in the internal list.
-*/
-func (cd *CallDescriptor) EncodeValues() (result string) {
-	for _, ap := range cd.ActivationPeriods {
-		result += ap.store() + "\n"
-	}
-	return
-}
-
-/*
 Restores the activation periods from storage.
 */
 func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix string, err error) {
@@ -63,22 +51,16 @@ func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix strin
 	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
 	destPrefix = cd.DestinationPrefix
 	key := base + destPrefix
-	values, err := sg.Get(key)
+	values, err := sg.GetActivationPeriods(key)
 	//get for a smaller prefix if the orignal one was not found
-	for i := len(cd.DestinationPrefix); err != nil && i > 1; values, err = sg.Get(key) {
+	for i := len(cd.DestinationPrefix); err != nil && i > 1; values, err = sg.GetActivationPeriods(key) {
 		i--
 		destPrefix = cd.DestinationPrefix[:i]
 		key = base + destPrefix
 	}
 	//load the activation preriods
 	if err == nil {
-		for _, aps := range strings.Split(values, "\n") {
-			if len(aps) > 0 {
-				ap := &ActivationPeriod{}
-				ap.restore(aps)
-				cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
-			}
-		}
+		cd.ActivationPeriods = values
 	}
 	return
 }

@@ -5,5 +5,6 @@ Interface for storage providers.
 */
 type StorageGetter interface {
 	Close()
-	Get(key string) (string, error)
+	GetActivationPeriods(key string) ([]*ActivationPeriod, error)
+	SetActivationPeriods(key string, aps []*ActivationPeriod)
 }
