@@ -29,7 +29,7 @@ class JSONClient(object):
 
         if response.get('id') != id:
             raise Exception("expected id=%s, received id=%s: %s"
-                            %(id, response.get('id'), 
+                            %(id, response.get('id'),
                               response.get('error')))
 
         if response.get('error') is not None:
@@ -41,12 +41,12 @@ class JSONClient(object):
         self._socket.close()
 
 
-rpc =JSONClient(("127.0.0.1", 5090))
+rpc =JSONClient(("127.0.0.1", 2001))
 
 cd = {"Tor":0, "CstmId": "vdf", "Subject": "rif", "DestinationPrefix": "0256", "TimeStart": "2012-02-02T17:30:00Z", "TimeEnd": "2012-02-02T18:30:00Z"}
 
 # alternative to the above
-s = socket.create_connection(("127.0.0.1", 5090))
+s = socket.create_connection(("127.0.0.1", 2001))
 s.sendall(json.dumps(({"id": 1, "method": "Responder.Get", "params": [cd]})))
 print s.recv(4096)
 

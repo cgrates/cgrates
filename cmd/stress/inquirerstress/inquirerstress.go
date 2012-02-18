@@ -19,7 +19,7 @@ func main() {
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := timespans.CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	result := timespans.CallCost{}
-	client, _ := jsonrpc.Dial("tcp", "localhost:5090")
+	client, _ := jsonrpc.Dial("tcp", "localhost:2001")
 	i := 0
 	if *parallel {
 		c := make(chan string)

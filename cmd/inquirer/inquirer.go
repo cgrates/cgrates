@@ -5,15 +5,19 @@ import (
 	"fmt"
 	"github.com/rif/cgrates/timespans"
 	"log"
-	"net"
 	"net/http"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"runtime"
 	"time"
+	"flag"
 )
 
-var raterList        *RaterList
+var (
+	raterAddress     = flag.String("rateraddr", ":2000", "Rater server address (localhost:2000)")
+	jsonRpcAddress     = flag.String("jsonrpcaddr", ":2001", "Json RPC server address (localhost:2001)")
+	htpApiAddress     = flag.String("httpapiaddr", ":2002", "Http API server address (localhost:2002)")
+	raterList        *RaterList
+)
 
 /*
 Handler for the statistics web client
@@ -23,7 +27,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	for _, addr := range raterList.clientAddresses {
 		fmt.Fprint(w, fmt.Sprintf("<li>Client: %v</li>", addr))
 	}
-	fmt.Fprint(w, fmt.Sprintf("<li>Gorutines: %v</li>", runtime.Goroutines()))
 	fmt.Fprint(w, "</ol></body></html>")
 }
 
@@ -48,41 +51,21 @@ func CallRater(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
 	return
 }
 
-func listenToTheWorld() {
-	l, err := net.Listen("tcp", ":5090")
-	defer l.Close()
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print("listening:", l.Addr())
-
-	responder := new(Responder)
-	rpc.Register(responder)
-
-	for {
-		c, err := l.Accept()
-		if err != nil {
-			log.Printf("accept error: %s", c)
-			continue
-		}
-
-		log.Printf("connection started: %v", c.RemoteAddr())
-		go jsonrpc.ServeConn(c)
-	}
-}
 
 func main() {
+	flag.Parse()
 	raterList = NewRaterList()
 	raterServer := new(RaterServer)
 	rpc.Register(raterServer)
 	rpc.HandleHTTP()
 
 	go StopSingnalHandler()
-	go listenToTheWorld()
+	go listenToJsonRPCRequests()
+
 	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
+
 	http.HandleFunc("/", handler)
 	log.Print("The server is listening...")
-	http.ListenAndServe(":2000", nil)
+	http.ListenAndServe(*raterAddress, nil)
 }
