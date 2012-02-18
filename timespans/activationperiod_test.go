@@ -15,13 +15,13 @@ func TestApStoreRestore(t *testing.T) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
-	storage, _ := NewKyotoStorage("test.kch")
-	result := storage.store(ap)
+	result := ap.store()
 	expected := "1328106601000000000;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
 	if result != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
-	ap1 := storage.restore(result)
+	ap1 := ActivationPeriod{}
+	ap1.restore(result)
 	if ap1.ActivationTime != ap.ActivationTime {
 		t.Errorf("Expected %v was %v", ap.ActivationTime, ap1.ActivationTime)
 	}
@@ -58,8 +58,8 @@ func TestApStoreRestore(t *testing.T) {
 }
 
 func BenchmarkActivationPeriodRestore(b *testing.B) {
-	storage, _ := NewKyotoStorage("test.kch")
+	ap := ActivationPeriod{}
 	for i := 0; i < b.N; i++ {
-		storage.restore("1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;")
+		ap.restore("1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;")
 	}
 }
