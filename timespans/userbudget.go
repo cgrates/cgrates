@@ -40,8 +40,23 @@ func (ub *UserBudget) GetSecondsForPrefix(prefix string) (seconds int) {
 }
 
 type Destination struct {
-	id       string
-	prefixes []string
+	Id       string
+	Prefixes []string
+}
+
+func (d *Destination) GetKey() (result string) {
+	return d.Id
+}
+
+func (d *Destination) store() (result string) {
+	for _, p := range d.Prefixes {
+		result += p + ","
+	}
+	return
+}
+
+func (d *Destination) restore(input string) {
+	d.Prefixes := strings.Split(input, ",")
 }
 
 type MinuteBucket struct {
