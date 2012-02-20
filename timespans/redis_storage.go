@@ -56,3 +56,16 @@ func (rs *RedisStorage) SetDestination(dest *Destination) {
 	rs.db.Select(rs.dbNb + 1)
 	rs.db.Set(dest.Id, dest.store())
 }
+
+func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
+	rs.db.Select(rs.dbNb + 2)
+	values, err := rs.db.Get(key)
+	tp = &TariffPlan{Id: key}
+	tp.restore(values.String())
+	return
+}
+
+func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) {
+	rs.db.Select(rs.dbNb + 2)
+	rs.db.Set(tp.Id, tp.store())
+}

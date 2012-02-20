@@ -57,3 +57,15 @@ func (ms *MongoStorage) SetDestination(dest *Destination) {
 	ndb := ms.db.C("dest")
 	ndb.Insert(&dest)
 }
+
+func (ms *MongoStorage) GetTariffPlan(key string) (result *TariffPlan, err error) {
+	ndb := ms.db.C("tp")
+	result = &TariffPlan{}
+	err = ndb.Find(bson.M{"id": key}).One(result)
+	return
+}
+
+func (ms *MongoStorage) SetTariffPlan(tp *TariffPlan) {
+	ndb := ms.db.C("tp")
+	ndb.Insert(&tp)
+}

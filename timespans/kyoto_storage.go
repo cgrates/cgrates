@@ -51,3 +51,14 @@ func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error
 func (ks *KyotoStorage) SetDestination(dest *Destination) {
 	ks.db.Set(dest.Id, dest.store())
 }
+
+func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
+	values, err := ks.db.Get(key)
+	tp = &TariffPlan{Id: key}
+	tp.restore(values)
+	return
+}
+
+func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) {
+	ks.db.Set(tp.Id, tp.store())
+}

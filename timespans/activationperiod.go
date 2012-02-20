@@ -28,9 +28,9 @@ func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 Serializes the activation periods for the storage. Used for key-value storages.
 */
 func (ap *ActivationPeriod) store() (result string) {
-	result += strconv.FormatInt(ap.ActivationTime.UnixNano(), 10) + ";"
-	var is string
+    result += strconv.FormatInt(ap.ActivationTime.UnixNano(), 10) + ";"
 	for _, i := range ap.Intervals {
+		var is string
 		is = strconv.Itoa(int(i.Month)) + "|"
 		is += strconv.Itoa(i.MonthDay) + "|"
 		for _, wd := range i.WeekDays {

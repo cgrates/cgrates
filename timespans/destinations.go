@@ -24,3 +24,15 @@ func (d *Destination) store() (result string) {
 func (d *Destination) restore(input string) {
 	d.Prefixes = strings.Split(input, ",")
 }
+
+/*
+Returns true if the bucket contains specified prefix.
+*/
+func (d *Destination) containsPrefix(prefix string) bool {
+	for _, p := range d.Prefixes {
+		if prefix == p {
+			return true
+		}
+	}
+	return false
+}

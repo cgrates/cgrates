@@ -20,7 +20,7 @@ type UserBudget struct {
 /*
 Returns user's avaliable minutes for the specified destination
 */
-func (ub *UserBudget) GetSecondsForPrefix(prefix string) (seconds int) {
+func (ub *UserBudget) GetSecondsForPrefix(storage StorageGetter, prefix string) (seconds int) {
 	if len(ub.minuteBuckets) == 0 {
 		log.Print("There are no minute buckets to check for user", ub.id)
 		return
@@ -28,7 +28,8 @@ func (ub *UserBudget) GetSecondsForPrefix(prefix string) (seconds int) {
 	bestBucket := ub.minuteBuckets[0]
 
 	for _, mb := range ub.minuteBuckets {
-		if mb.containsPrefix(prefix) && mb.priority > bestBucket.priority {
+		d := mb.getDestination(storage)
+		if d.containsPrefix(prefix) && mb.priority > bestBucket.priority {
 			bestBucket = mb
 		}
 	}

@@ -4,17 +4,13 @@ type MinuteBucket struct {
 	seconds     int
 	priority    int
 	price       float64
+	destinationId string
 	destination *Destination
 }
 
-/*
-Returns true if the bucket contains specified prefix.
-*/
-func (mb *MinuteBucket) containsPrefix(prefix string) bool {
-	for _, p := range mb.destination.Prefixes {
-		if prefix == p {
-			return true
-		}
+func (mb *MinuteBucket) getDestination(storage StorageGetter) (dest *Destination) {
+	if mb.destination == nil {
+		mb.destination,_ = storage.GetDestination(mb.destinationId)
 	}
-	return false
+	return mb.destination
 }
