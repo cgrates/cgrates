@@ -11,4 +11,6 @@ type StorageGetter interface {
 	SetDestination(*Destination)
 	GetTariffPlan(string) (*TariffPlan, error)
 	SetTariffPlan(*TariffPlan)
+	GetUserBudget(string) (*UserBudget, error)
+	SetUserBudget(*UserBudget)
 }

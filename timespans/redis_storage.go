@@ -20,7 +20,7 @@ func (rs *RedisStorage) Close() {
 }
 
 func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
-	rs.db.Select(rs.dbNb)
+	//rs.db.Select(rs.dbNb)
 	elem, err := rs.db.Get(key)
 	values := elem.String()
 	if err == nil {
@@ -36,7 +36,7 @@ func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 }
 
 func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) {
-	rs.db.Select(rs.dbNb)
+	//.db.Select(rs.dbNb)
 	result := ""
 	for _, ap := range aps {
 		result += ap.store() + "\n"
@@ -45,7 +45,7 @@ func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
-	rs.db.Select(rs.dbNb + 1)
+	//rs.db.Select(rs.dbNb + 1)
 	values, err := rs.db.Get(key)
 	dest = &Destination{Id: key}
 	dest.restore(values.String())
@@ -53,12 +53,12 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 }
 
 func (rs *RedisStorage) SetDestination(dest *Destination) {
-	rs.db.Select(rs.dbNb + 1)
+	//rs.db.Select(rs.dbNb + 1)
 	rs.db.Set(dest.Id, dest.store())
 }
 
 func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
-	rs.db.Select(rs.dbNb + 2)
+	//rs.db.Select(rs.dbNb + 2)
 	values, err := rs.db.Get(key)
 	tp = &TariffPlan{Id: key}
 	tp.restore(values.String())
@@ -66,6 +66,19 @@ func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
 }
 
 func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) {
-	rs.db.Select(rs.dbNb + 2)
+	//rs.db.Select(rs.dbNb + 2)
 	rs.db.Set(tp.Id, tp.store())
+}
+
+func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
+	//rs.db.Select(rs.dbNb + 3)
+	values, err := rs.db.Get(key)
+	ub = &UserBudget{Id: key}
+	ub.restore(values.String())
+	return
+}
+
+func (rs *RedisStorage) SetUserBudget(ub *UserBudget) {
+	//rs.db.Select(rs.dbNb + 3)
+	rs.db.Set(ub.Id, ub.store())
 }

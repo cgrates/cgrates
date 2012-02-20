@@ -62,3 +62,14 @@ func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
 func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) {
 	ks.db.Set(tp.Id, tp.store())
 }
+
+func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
+	values, err := ks.db.Get(key)
+	ub = &UserBudget{Id: key}
+	ub.restore(values)
+	return
+}
+
+func (ks *KyotoStorage) SetUserBudget(ub *UserBudget) {
+	ks.db.Set(ub.Id, ub.store())
+}
