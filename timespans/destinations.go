@@ -4,15 +4,17 @@ import (
 	"strings"
 )
 
+/*
+Structure that gathers multiple destination prefixes under a common id.
+*/
 type Destination struct {
 	Id       string
 	Prefixes []string
 }
 
-func (d *Destination) GetKey() (result string) {
-	return d.Id
-}
-
+/*
+Serializes the destination for the storage. Used for key-value storages.
+*/
 func (d *Destination) store() (result string) {
 	for _, p := range d.Prefixes {
 		result += p + ","
@@ -26,7 +28,7 @@ func (d *Destination) restore(input string) {
 }
 
 /*
-Returns true if the bucket contains specified prefix.
+De-serializes the destination for the storage. Used for key-value storages.
 */
 func (d *Destination) containsPrefix(prefix string) bool {
 	for _, p := range d.Prefixes {

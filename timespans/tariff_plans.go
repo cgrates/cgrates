@@ -11,12 +11,12 @@ these numbers to the user budget every month.
 */
 type TariffPlan struct {
 	Id            string
-	SmsCredit          int
+	SmsCredit     int
 	MinuteBuckets []*MinuteBucket
 }
 
 /*
-Serializes the activation periods for the storage. Used for key-value storages.
+Serializes the tariff plan for the storage. Used for key-value storages.
 */
 func (tp *TariffPlan) store() (result string) {
 	result += strconv.Itoa(tp.SmsCredit) + ";"
@@ -32,17 +32,17 @@ func (tp *TariffPlan) store() (result string) {
 }
 
 /*
-De-serializes the activation periods for the storage. Used for key-value storages.
+De-serializes the tariff plan for the storage. Used for key-value storages.
 */
 func (tp *TariffPlan) restore(input string) {
 	elements := strings.Split(input, ";")
-	tp.SmsCredit,_ = strconv.Atoi(elements[0])
+	tp.SmsCredit, _ = strconv.Atoi(elements[0])
 	for _, mbs := range elements[1 : len(elements)-1] {
 		mb := &MinuteBucket{}
 		mbse := strings.Split(mbs, "|")
-		mb.Seconds,_ = strconv.Atoi(mbse[0])
-		mb.Priority,_ = strconv.Atoi(mbse[1])
-		mb.Price,_ = strconv.ParseFloat(mbse[2], 64)
+		mb.Seconds, _ = strconv.Atoi(mbse[0])
+		mb.Priority, _ = strconv.Atoi(mbse[1])
+		mb.Price, _ = strconv.ParseFloat(mbse[2], 64)
 		mb.DestinationId = mbse[3]
 
 		tp.MinuteBuckets = append(tp.MinuteBuckets, mb)
