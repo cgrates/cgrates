@@ -38,23 +38,3 @@ func (ub *UserBudget) GetSecondsForPrefix(prefix string) (seconds int) {
 	}
 	return
 }
-
-type MinuteBucket struct {
-	seconds     int
-	priority    int
-	price       float64
-	destination *Destination
-}
-
-func (mb *MinuteBucket) containsPrefix(prefix string) bool {
-	for _, p := range mb.destination.Prefixes {
-		if prefix == p {
-			return true
-		}
-	}
-	return false
-}
-
-type TariffPlan struct {
-	minuteBuckets []*MinuteBucket
-}
