@@ -29,13 +29,13 @@ func (ub *UserBudget) GetSecondsForPrefix(storage StorageGetter, prefix string) 
 
 	for _, mb := range ub.minuteBuckets {
 		d := mb.getDestination(storage)
-		if d.containsPrefix(prefix) && mb.priority > bestBucket.priority {
+		if d.containsPrefix(prefix) && mb.Priority > bestBucket.Priority {
 			bestBucket = mb
 		}
 	}
-	seconds = bestBucket.seconds
-	if bestBucket.price > 0 {
-		seconds = int(math.Min(ub.credit/bestBucket.price, float64(seconds)))
+	seconds = bestBucket.Seconds
+	if bestBucket.Price > 0 {
+		seconds = int(math.Min(ub.credit/bestBucket.Price, float64(seconds)))
 	}
 	return
 }

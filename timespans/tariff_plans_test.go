@@ -5,10 +5,9 @@ import (
 )
 
 func TestTariffPlanStoreRestore(t *testing.T) {
-	b1 := &MinuteBucket{seconds: 10, priority: 10, price: 0.01, destinationId: "nationale"}
-	b2 := &MinuteBucket{seconds: 100, priority: 20, price: 0.0, destinationId: "retea"}
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100,  MinuteBuckets: []*MinuteBucket{b1, b2}}
-
 	s := seara.store()
 	tp1 := &TariffPlan{Id: "seara"}
 	tp1.restore(s)
@@ -20,8 +19,8 @@ func TestTariffPlanStoreRestore(t *testing.T) {
 func TestTariffPlanKyotoStore(t *testing.T) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
-	b1 := &MinuteBucket{seconds: 10, priority: 10, price: 0.01, destinationId: "nationale"}
-	b2 := &MinuteBucket{seconds: 100, priority: 20, price: 0.0, destinationId: "retea"}
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100,  MinuteBuckets: []*MinuteBucket{b1, b2}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
@@ -33,8 +32,8 @@ func TestTariffPlanKyotoStore(t *testing.T) {
 func TestTariffPlanRedisStore(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
-	b1 := &MinuteBucket{seconds: 10, priority: 10, price: 0.01, destinationId: "nationale"}
-	b2 := &MinuteBucket{seconds: 100, priority: 20, price: 0.0, destinationId: "retea"}
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100,  MinuteBuckets: []*MinuteBucket{b1, b2}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
@@ -46,8 +45,8 @@ func TestTariffPlanRedisStore(t *testing.T) {
 func TestTariffPlanMongoStore(t *testing.T) {
 	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
-	b1 := &MinuteBucket{seconds: 10, priority: 10, price: 0.01, destinationId: "nationale"}
-	b2 := &MinuteBucket{seconds: 100, priority: 20, price: 0.0, destinationId: "retea"}
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100,  MinuteBuckets: []*MinuteBucket{b1, b2}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
@@ -61,8 +60,8 @@ func TestTariffPlanMongoStore(t *testing.T) {
 func BenchmarkTariffPlanKyotoStoreRestore(b *testing.B) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
-	b1 := &MinuteBucket{seconds: 10, priority: 10, price: 0.01, destinationId: "nationale"}
-	b2 := &MinuteBucket{seconds: 100, priority: 20, price: 0.0, destinationId: "retea"}
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100,  MinuteBuckets: []*MinuteBucket{b1, b2}}
 	for i := 0; i < b.N; i++ {
 		getter.SetTariffPlan(seara)
@@ -73,8 +72,8 @@ func BenchmarkTariffPlanKyotoStoreRestore(b *testing.B) {
 func BenchmarkTariffPlanRedisStoreRestore(b *testing.B) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
-	b1 := &MinuteBucket{seconds: 10, priority: 10, price: 0.01, destinationId: "nationale"}
-	b2 := &MinuteBucket{seconds: 100, priority: 20, price: 0.0, destinationId: "retea"}
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100,  MinuteBuckets: []*MinuteBucket{b1, b2}}
 	for i := 0; i < b.N; i++ {
 		getter.SetTariffPlan(seara)
@@ -85,8 +84,8 @@ func BenchmarkTariffPlanRedisStoreRestore(b *testing.B) {
 func BenchmarkTariffPlanMongoStoreRestore(b *testing.B) {
 	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
-	b1 := &MinuteBucket{seconds: 10, priority: 10, price: 0.01, destinationId: "nationale"}
-	b2 := &MinuteBucket{seconds: 100, priority: 20, price: 0.0, destinationId: "retea"}
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100,  MinuteBuckets: []*MinuteBucket{b1, b2}}
 	for i := 0; i < b.N; i++ {
 		getter.SetTariffPlan(seara)

@@ -42,7 +42,7 @@ func writeToStorage(storage timespans.StorageGetter,
 func main() {
 	flag.Parse()
 
-	log.Print("Reading from ", *apfile, *destfile)
+	log.Printf("Reading from %s, %s, %s", *apfile, *destfile, *tpfile)
 
 	// reading activation periods
 	fin, err := os.Open(*apfile)

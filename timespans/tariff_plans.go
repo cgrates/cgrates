@@ -22,10 +22,10 @@ func (tp *TariffPlan) store() (result string) {
 	result += strconv.Itoa(tp.SmsCredit) + ";"
 	for _, mb := range tp.MinuteBuckets {
 		var mbs string
-		mbs += strconv.Itoa(int(mb.seconds)) + "|"
-		mbs += strconv.Itoa(int(mb.priority)) + "|"
-		mbs += strconv.FormatFloat(mb.price, 'f', -1, 64) + "|"
-		mbs += mb.destinationId
+		mbs += strconv.Itoa(int(mb.Seconds)) + "|"
+		mbs += strconv.Itoa(int(mb.Priority)) + "|"
+		mbs += strconv.FormatFloat(mb.Price, 'f', -1, 64) + "|"
+		mbs += mb.DestinationId
 		result += mbs + ";"
 	}
 	return
@@ -40,10 +40,10 @@ func (tp *TariffPlan) restore(input string) {
 	for _, mbs := range elements[1 : len(elements)-1] {
 		mb := &MinuteBucket{}
 		mbse := strings.Split(mbs, "|")
-		mb.seconds,_ = strconv.Atoi(mbse[0])
-		mb.priority,_ = strconv.Atoi(mbse[1])
-		mb.price,_ = strconv.ParseFloat(mbse[2], 64)
-		mb.destinationId = mbse[3]
+		mb.Seconds,_ = strconv.Atoi(mbse[0])
+		mb.Priority,_ = strconv.Atoi(mbse[1])
+		mb.Price,_ = strconv.ParseFloat(mbse[2], 64)
+		mb.DestinationId = mbse[3]
 
 		tp.MinuteBuckets = append(tp.MinuteBuckets, mb)
 	}

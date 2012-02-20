@@ -10,8 +10,8 @@ var (
 )
 
 func TestGetSeconds(t *testing.T) {
-	b1 := &MinuteBucket{seconds: 10, priority: 10, destination: nationale}
-	b2 := &MinuteBucket{seconds: 100, priority: 20, destination: retea}
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, destination: nationale}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, destination: retea}
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
 
 	ub1 := &UserBudget{id: "rif", minuteBuckets: []*MinuteBucket{b1, b2}, credit: 200, tariffPlan: tf1, resetDayOfTheMonth: 10}
@@ -23,8 +23,8 @@ func TestGetSeconds(t *testing.T) {
 }
 
 func TestGetPricedSeconds(t *testing.T) {
-	b1 := &MinuteBucket{seconds: 10, price: 10, priority: 10, destination: nationale}
-	b2 := &MinuteBucket{seconds: 100, price: 1, priority: 20, destination: retea}
+	b1 := &MinuteBucket{Seconds: 10, Price: 10, Priority: 10, destination: nationale}
+	b2 := &MinuteBucket{Seconds: 100, Price: 1, Priority: 20, destination: retea}
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
 
 	ub1 := &UserBudget{id: "rif", minuteBuckets: []*MinuteBucket{b1, b2}, credit: 21, tariffPlan: tf1, resetDayOfTheMonth: 10}
@@ -39,8 +39,8 @@ func TestGetPricedSeconds(t *testing.T) {
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
 	b.StopTimer()
-	b1 := &MinuteBucket{seconds: 10, price: 10, priority: 10, destination: nationale}
-	b2 := &MinuteBucket{seconds: 100, price: 1, priority: 20, destination: retea}
+	b1 := &MinuteBucket{Seconds: 10, Price: 10, Priority: 10, destination: nationale}
+	b2 := &MinuteBucket{Seconds: 100, Price: 1, Priority: 20, destination: retea}
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
 
 	ub1 := &UserBudget{id: "rif", minuteBuckets: []*MinuteBucket{b1, b2}, credit: 21, tariffPlan: tf1, resetDayOfTheMonth: 10}

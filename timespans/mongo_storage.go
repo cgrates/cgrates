@@ -26,6 +26,8 @@ func NewMongoStorage(address, db string) (*MongoStorage, error) {
 	err = session.DB(db).C("ap").EnsureIndex(index)
 	index = mgo.Index{Key: []string{"id"}, Unique: true, DropDups: true, Background: true}
 	err = session.DB(db).C("dest").EnsureIndex(index)
+	index = mgo.Index{Key: []string{"id"}, Unique: true, DropDups: true, Background: true}
+	err = session.DB(db).C("tp").EnsureIndex(index)
 
 	return &MongoStorage{db: session.DB(db), session: session}, nil
 }
