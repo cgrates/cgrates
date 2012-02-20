@@ -43,7 +43,7 @@ func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 
 func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
 	values, err := ks.db.Get(key)
-	dest = &Destination{Id:key}
+	dest = &Destination{Id: key}
 	dest.restore(values)
 	return
 }

@@ -6,12 +6,13 @@ import (
 )
 
 type RedisStorage struct {
-	db *godis.Client
+	dbNb int
+	db   *godis.Client
 }
 
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	ndb := godis.New(address, db, "")
-	return &RedisStorage{db: ndb}, nil
+	return &RedisStorage{db: ndb, dbNb: db}, nil
 }
 
 func (rs *RedisStorage) Close() {
@@ -19,6 +20,7 @@ func (rs *RedisStorage) Close() {
 }
 
 func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
+	rs.db.Select(rs.dbNb)
 	elem, err := rs.db.Get(key)
 	values := elem.String()
 	if err == nil {
@@ -34,6 +36,7 @@ func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 }
 
 func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) {
+	rs.db.Select(rs.dbNb)
 	result := ""
 	for _, ap := range aps {
 		result += ap.store() + "\n"
@@ -42,12 +45,14 @@ func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
+	rs.db.Select(rs.dbNb + 1)
 	values, err := rs.db.Get(key)
-	dest = &Destination{Id:key}
+	dest = &Destination{Id: key}
 	dest.restore(values.String())
 	return
 }
 
 func (rs *RedisStorage) SetDestination(dest *Destination) {
+	rs.db.Select(rs.dbNb + 1)
 	rs.db.Set(dest.Id, dest.store())
 }

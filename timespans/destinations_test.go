@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestDestinationStoreRestore(t *testing.T){
+func TestDestinationStoreRestore(t *testing.T) {
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	s := nationale.store()
 	d1 := &Destination{Id: "nationale"}
@@ -14,7 +14,7 @@ func TestDestinationStoreRestore(t *testing.T){
 	}
 }
 
-func TestKyotoStore(t *testing.T){
+func TestKyotoStore(t *testing.T) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
@@ -25,7 +25,7 @@ func TestKyotoStore(t *testing.T){
 	}
 }
 
-func TestRedisStore(t *testing.T){
+func TestRedisStore(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
@@ -36,7 +36,7 @@ func TestRedisStore(t *testing.T){
 	}
 }
 
-func TestMongoStore(t *testing.T){
+func TestMongoStore(t *testing.T) {
 	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
@@ -49,7 +49,7 @@ func TestMongoStore(t *testing.T){
 
 /********************************* Benchmarks **********************************/
 
-func BenchmarkDestinationKyotoStoreRestore(b *testing.B){
+func BenchmarkDestinationKyotoStoreRestore(b *testing.B) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
@@ -59,7 +59,7 @@ func BenchmarkDestinationKyotoStoreRestore(b *testing.B){
 	}
 }
 
-func BenchmarkDestinationRedisStoreRestore(b *testing.B){
+func BenchmarkDestinationRedisStoreRestore(b *testing.B) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
@@ -69,7 +69,7 @@ func BenchmarkDestinationRedisStoreRestore(b *testing.B){
 	}
 }
 
-func BenchmarkDestinationMongoStoreRestore(b *testing.B){
+func BenchmarkDestinationMongoStoreRestore(b *testing.B) {
 	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
