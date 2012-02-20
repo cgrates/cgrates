@@ -5,8 +5,8 @@ import (
 )
 
 var (
-	nationale = &Destination{id: "nationale", prefixes: []string{"0257", "0256", "0723"}}
-	retea     = &Destination{id: "retea", prefixes: []string{"0723", "0724"}}
+	nationale = &Destination{Id: "nationale", Prefixes: []string{"0257", "0256", "0723"}}
+	retea     = &Destination{Id: "retea", Prefixes: []string{"0723", "0724"}}
 )
 
 func TestGetSeconds(t *testing.T) {

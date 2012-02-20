@@ -7,4 +7,6 @@ type StorageGetter interface {
 	Close()
 	GetActivationPeriods(key string) ([]*ActivationPeriod, error)
 	SetActivationPeriods(key string, aps []*ActivationPeriod)
+	GetDestination(key string) (*Destination, error)
+	SetDestination(dest *Destination)
 }

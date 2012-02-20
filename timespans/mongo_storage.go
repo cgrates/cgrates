@@ -6,12 +6,12 @@ import (
 )
 
 type KeyValue struct {
-	Key   string
+	Key               string
 	ActivationPeriods []*ActivationPeriod
 }
 
 type MongoStorage struct {
-	db      *mgo.Collection
+	db *mgo.Database
 	session *mgo.Session
 }
 
@@ -22,8 +22,12 @@ func NewMongoStorage(address, db string) (*MongoStorage, error) {
 	}
 	session.SetMode(mgo.Monotonic, true)
 
-	ndb := session.DB(db).C("ap")
-	return &MongoStorage{db: ndb, session: session}, nil
+	index := mgo.Index{Key: []string{"key"},Unique: true,DropDups: true,Background: true}
+	err = session.DB(db).C("ap").EnsureIndex(index)
+	index = mgo.Index{Key: []string{"id"},Unique: true,DropDups: true,Background: true}
+	err = session.DB(db).C("dest").EnsureIndex(index)
+
+	return &MongoStorage{db: session.DB(db), session: session}, nil
 }
 
 func (ms *MongoStorage) Close() {
@@ -31,11 +35,25 @@ func (ms *MongoStorage) Close() {
 }
 
 func (ms *MongoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
+	ndb := ms.db.C("ap")
 	result := KeyValue{}
-	err = ms.db.Find(bson.M{"key": key}).One(&result)
+	err = ndb.Find(bson.M{"key": key}).One(&result)
 	return result.ActivationPeriods, err
 }
 
-func (ms *MongoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod){
-	ms.db.Insert(&KeyValue{key, aps})
+func (ms *MongoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) {
+	ndb := ms.db.C("ap")
+	ndb.Insert(&KeyValue{key, aps})
+}
+
+func (ms *MongoStorage) GetDestination(key string) (result *Destination, err error) {
+	ndb := ms.db.C("dest")
+	result = &Destination{}
+	err = ndb.Find(bson.M{"id": key}).One(result)
+	return
+}
+
+func (ms *MongoStorage) SetDestination(dest *Destination) {
+	ndb := ms.db.C("dest")
+	ndb.Insert(&dest)
 }

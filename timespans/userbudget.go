@@ -39,26 +39,6 @@ func (ub *UserBudget) GetSecondsForPrefix(prefix string) (seconds int) {
 	return
 }
 
-type Destination struct {
-	Id       string
-	Prefixes []string
-}
-
-func (d *Destination) GetKey() (result string) {
-	return d.Id
-}
-
-func (d *Destination) store() (result string) {
-	for _, p := range d.Prefixes {
-		result += p + ","
-	}
-	return
-}
-
-func (d *Destination) restore(input string) {
-	d.Prefixes := strings.Split(input, ",")
-}
-
 type MinuteBucket struct {
 	seconds     int
 	priority    int
@@ -67,7 +47,7 @@ type MinuteBucket struct {
 }
 
 func (mb *MinuteBucket) containsPrefix(prefix string) bool {
-	for _, p := range mb.destination.prefixes {
+	for _, p := range mb.destination.Prefixes {
 		if prefix == p {
 			return true
 		}

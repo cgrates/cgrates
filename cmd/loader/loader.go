@@ -16,21 +16,31 @@ var (
 	mongoserver = flag.String("mongoserver", "127.0.0.1:27017", "mongo server address (127.0.0.1:27017)")
 	mongodb     = flag.String("mdb", "test", "mongo database name (test)")
 	redispass   = flag.String("pass", "", "redis database password")
-	inputfile   = flag.String("inputfile", "input.json", "redis database password")
+	apfile   = flag.String("apfile", "ap.json", "Activation Periods containing intervals file")
+	destfile   = flag.String("destfile", "dest.json", "Destinations file")
 )
+
+func writeToStorage(storage timespans.StorageGetter,callDescriptors []*timespans.CallDescriptor,destinations []*timespans.Destination){
+	for _, cd := range callDescriptors {
+		storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
+		log.Printf("Storing %q", cd.GetKey())
+	}
+	for _, d := range destinations {
+		storage.SetDestination(d)
+		log.Printf("Storing %q", d.Id)
+	}
+}
 
 func main() {
 	flag.Parse()
 
-	log.Printf("Reading from %q", *inputfile)
 
-	fin, err := os.Open(*inputfile)
-	defer fin.Close()
+	log.Print("Reading from ", *apfile, *destfile)
 
-	if err != nil {
-		log.Print("Cannot open input file", err)
-		return
-	}
+	// reading activation periods
+	fin, err := os.Open(*apfile)
+
+	if err != nil {log.Print("Cannot open activation periods input file", err)}
 
 	dec := json.NewDecoder(fin)
 
@@ -39,29 +49,35 @@ func main() {
 		log.Println(err)
 		return
 	}
+	fin.Close()
+
+	// reading destinations
+	fin, err = os.Open(*destfile)
+
+	if err != nil {log.Print("Cannot open destinations input file", err)}
+
+	dec = json.NewDecoder(fin)
+
+	var destinations []*timespans.Destination
+	if err := dec.Decode(&destinations); err != nil {
+		log.Println(err)
+		return
+	}
+	fin.Close()
 
 	switch *storage {
 	case "kyoto":
 		storage, _ := timespans.NewKyotoStorage(*kyotofile)
 		defer storage.Close()
-		for _, cd := range callDescriptors {
-			storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
-			log.Printf("Storing %q", cd.GetKey())
-		}
+		writeToStorage(storage, callDescriptors, destinations)
 	case "mongo":
 		storage, _ := timespans.NewMongoStorage("127.0.0.1", "test")
 		defer storage.Close()
-		for _, cd := range callDescriptors {
-			storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
-			log.Printf("Storing %q", cd.GetKey())
-		}
+		writeToStorage(storage, callDescriptors, destinations)
 
 	default:
 		storage, _ := timespans.NewRedisStorage(*redisserver, *redisdb)
 		defer storage.Close()
-		for _, cd := range callDescriptors {
-			storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
-			log.Printf("Storing %q", cd.GetKey())
-		}
+		writeToStorage(storage, callDescriptors, destinations)
 	}
 }

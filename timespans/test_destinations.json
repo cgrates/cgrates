@@ -1,3 +1,5 @@
-{"Id":"nationale", "Prefixes":["0256","0257","0723","0740"]}
-{"Id":"mobil", "Prefixes":["0723","0740"]}
+[
+{"Id":"nationale", "Prefixes":["0256","0257","0723","0740"]},
+{"Id":"mobil", "Prefixes":["0723","0740"]},
 {"Id":"radu", "Prefixes":["0723045326"]}
+]
