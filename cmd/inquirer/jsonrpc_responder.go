@@ -10,6 +10,9 @@ import (
 
 type Responder byte
 
+/*
+Creates the json rpc server.
+*/
 func listenToJsonRPCRequests() {
 	l, err := net.Listen("tcp", *jsonRpcAddress)
 	defer l.Close()
@@ -18,7 +21,7 @@ func listenToJsonRPCRequests() {
 		log.Fatal(err)
 	}
 
-	log.Print("listening:", l.Addr())
+	log.Print("Listening for incomming json RPC requests on ", l.Addr())
 
 	responder := new(Responder)
 	rpc.Register(responder)

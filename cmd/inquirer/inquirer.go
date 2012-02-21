@@ -2,33 +2,20 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/rif/cgrates/timespans"
 	"log"
-	"net/http"
-	"net/rpc"
 	"runtime"
 	"time"
 	"flag"
 )
 
 var (
-	raterAddress     = flag.String("rateraddr", ":2000", "Rater server address (localhost:2000)")
-	jsonRpcAddress     = flag.String("jsonrpcaddr", ":2001", "Json RPC server address (localhost:2001)")
-	htpApiAddress     = flag.String("httpapiaddr", ":2002", "Http API server address (localhost:2002)")
+	raterAddress     = flag.String("rateraddr", "127.0.0.1:2000", "Rater server address (localhost:2000)")
+	jsonRpcAddress     = flag.String("jsonrpcaddr", "127.0.0.1:2001", "Json RPC server address (localhost:2001)")
+	httpApiAddress     = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:2002)")
 	raterList        *RaterList
 )
 
-/*
-Handler for the statistics web client
-*/
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<html><body><ol>")
-	for _, addr := range raterList.clientAddresses {
-		fmt.Fprint(w, fmt.Sprintf("<li>Client: %v</li>", addr))
-	}
-	fmt.Fprint(w, "</ol></body></html>")
-}
 
 /*
 The function that gets the information from the raters using balancer.
@@ -55,17 +42,12 @@ func CallRater(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
 
 func main() {
 	flag.Parse()
+	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 	raterList = NewRaterList()
-	raterServer := new(RaterServer)
-	rpc.Register(raterServer)
-	rpc.HandleHTTP()
 
 	go StopSingnalHandler()
+	go listenToRPCRaterRequests()
 	go listenToJsonRPCRequests()
 
-	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
-
-	http.HandleFunc("/", handler)
-	log.Print("The server is listening...")
-	http.ListenAndServe(*raterAddress, nil)
+	listenToHttpRequests()
 }

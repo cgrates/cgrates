@@ -15,7 +15,7 @@ Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregiste
 func StopSingnalHandler(server, listen *string, sg timespans.StorageGetter) {
 	log.Print("Handling stop signals...")
 	c := make(chan os.Signal)
-	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)	
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	sig := <-c
 
 	log.Printf("Caught signal %v, unregistering from server\n", sig)
@@ -58,4 +58,5 @@ func RegisterToServer(server, listen *string) {
 		log.Print("Could not close server registration!")
 		os.Exit(1)
 	}
+	log.Print("Registration finished!")
 }

@@ -4,7 +4,9 @@ import (
 	"os/signal"
 	"fmt"
 	"log"
+	"net"
 	"net/rpc"
+	"net/http"
 	"os"
 	"syscall"
 	"time"
@@ -15,6 +17,19 @@ RPC Server that handles the registering and unregistering of raters.
 */
 type RaterServer byte
 
+func listenToRPCRaterRequests(){
+	raterServer := new(RaterServer)
+	rpc.Register(raterServer)
+	rpc.HandleHTTP()
+	l, e := net.Listen("tcp", *raterAddress)
+
+	if e != nil {
+		log.Fatal("listen error:", e)
+	}
+	log.Print("Listening for raters on ", *raterAddress)
+	http.Serve(l, nil)
+}
+
 /*
 Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered raters.
 */
@@ -22,7 +37,7 @@ func StopSingnalHandler() {
 	log.Print("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-	
+
 	sig := <-c
 	log.Printf("Caught signal %v, sending shutdownto raters\n", sig)
 	var reply string
