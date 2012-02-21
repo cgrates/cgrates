@@ -11,6 +11,14 @@ import (
 type Responder byte
 
 /*
+RPC method thet provides the external RPC interface for getting the rating information.
+*/
+func (r *Responder) Get(arg timespans.CallDescriptor, replay *timespans.CallCost) error {
+	*replay = *CallRater(&arg)
+	return nil
+}
+
+/*
 Creates the json rpc server.
 */
 func listenToJsonRPCRequests() {
@@ -36,12 +44,4 @@ func listenToJsonRPCRequests() {
 		log.Printf("connection started: %v", c.RemoteAddr())
 		go jsonrpc.ServeConn(c)
 	}
-}
-
-/*
-RPC method thet provides the external RPC interface for getting the rating information.
-*/
-func (r *Responder) Get(arg timespans.CallDescriptor, replay *timespans.CallCost) error {
-	*replay = *CallRater(&arg)
-	return nil
 }

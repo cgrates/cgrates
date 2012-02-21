@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/rif/cgrates/timespans"
 	"log"
+	"net/rpc"
 	"net/rpc/jsonrpc"
 	"time"
 )
@@ -22,18 +23,11 @@ func main() {
 	client, _ := jsonrpc.Dial("tcp", "localhost:2001")
 	i := 0
 	if *parallel {
-		c := make(chan string)
+		var divCall *rpc.Call
 		for ; i < *runs; i++ {
-			go func() {
-				var reply string
-				client.Call("Responder.Get", cd, &result)
-				c <- reply
-			}()
-			//time.Sleep(1*time.Second)
+			divCall = client.Go("Responder.Get", cd, &result, nil)
 		}
-		for j := 0; j < *runs; j++ {
-			<-c
-		}
+		<-divCall.Done
 	} else {
 		for j := 0; j < *runs; j++ {
 			client.Call("Responder.Get", cd, &result)
