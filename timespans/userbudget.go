@@ -74,7 +74,7 @@ func (ub *UserBudget) getTariffPlan(storage StorageGetter) (tp *TariffPlan) {
 /*
 Returns user's avaliable minutes for the specified destination
 */
-func (ub *UserBudget) GetSecondsForPrefix(storage StorageGetter, prefix string) (seconds int) {
+func (ub *UserBudget) getSecondsForPrefix(storage StorageGetter, prefix string) (seconds float64) {
 	if len(ub.MinuteBuckets) == 0 {
 		log.Print("There are no minute buckets to check for user", ub.Id)
 		return
@@ -87,9 +87,9 @@ func (ub *UserBudget) GetSecondsForPrefix(storage StorageGetter, prefix string) 
 			bestBucket = mb
 		}
 	}
-	seconds = bestBucket.Seconds
+	seconds = float64(bestBucket.Seconds)
 	if bestBucket.Price > 0 {
-		seconds = int(math.Min(ub.Credit/bestBucket.Price, float64(seconds)))
+		seconds = math.Min(ub.Credit/bestBucket.Price, float64(seconds))
 	}
 	return
 }

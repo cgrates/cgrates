@@ -16,8 +16,8 @@ func TestGetSeconds(t *testing.T) {
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
 
 	ub1 := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 200, tariffPlan: tf1, ResetDayOfTheMonth: 10}
-	seconds := ub1.GetSecondsForPrefix(nil, "0723")
-	expected := 100
+	seconds := ub1.getSecondsForPrefix(nil, "0723")
+	expected := 100.0
 	if seconds != expected {
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
@@ -29,8 +29,8 @@ func TestGetPricedSeconds(t *testing.T) {
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
 
 	ub1 := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: tf1, ResetDayOfTheMonth: 10}
-	seconds := ub1.GetSecondsForPrefix(nil, "0723")
-	expected := 21
+	seconds := ub1.getSecondsForPrefix(nil, "0723")
+	expected := 21.0
 	if seconds != expected {
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
@@ -102,7 +102,7 @@ func BenchmarkGetSecondForPrefix(b *testing.B) {
 	ub1 := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: tf1, ResetDayOfTheMonth: 10}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		ub1.GetSecondsForPrefix(nil, "0723")
+		ub1.getSecondsForPrefix(nil, "0723")
 	}
 }
 

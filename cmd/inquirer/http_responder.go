@@ -42,7 +42,7 @@ func getCostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func listenToHttpRequests(){
-	http.HandleFunc("/status", statusHandler)
+	http.HandleFunc("/", statusHandler)
 	http.HandleFunc("/getcost", getCostHandler)
 	log.Print("The server is listening on ", *httpApiAddress)
 	http.ListenAndServe(*httpApiAddress, nil)

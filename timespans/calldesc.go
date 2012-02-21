@@ -130,6 +130,15 @@ Creates a CallCost structure with the cost nformation calculated for the receive
 func (cd *CallDescriptor) GetCost(sg StorageGetter) (*CallCost, error) {
 	destPrefix, err := cd.RestoreFromStorage(sg)
 
+	userBudget, err := sg.GetUserBudget(cd.Subject)
+	if err != nil {
+		nbSeconds := cd.TimeEnd.Sub(cd.TimeStart).Seconds()
+		avaliableNbSeconds := userBudget.getSecondsForPrefix(sg, cd.DestinationPrefix)
+		if nbSeconds < avaliableNbSeconds {
+			return nil, nil
+		}
+	}
+
 	timespans := cd.splitInTimeSpans()
 
 	cost := 0.0
