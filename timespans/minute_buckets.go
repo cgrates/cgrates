@@ -1,7 +1,9 @@
 package timespans
 
+import "math"
+
 type MinuteBucket struct {
-	Seconds       int
+	Seconds       float64
 	Priority      int
 	Price         float64
 	DestinationId string
@@ -17,4 +19,12 @@ func (mb *MinuteBucket) getDestination(storage StorageGetter) (dest *Destination
 		mb.destination, _ = storage.GetDestination(mb.DestinationId)
 	}
 	return mb.destination
+}
+
+func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {
+	seconds = mb.Seconds
+	if mb.Price > 0 {
+		seconds = math.Min(credit/mb.Price, mb.Seconds)
+	}
+	return
 }

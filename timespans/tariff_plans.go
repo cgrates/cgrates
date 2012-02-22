@@ -40,7 +40,7 @@ func (tp *TariffPlan) restore(input string) {
 	for _, mbs := range elements[1 : len(elements)-1] {
 		mb := &MinuteBucket{}
 		mbse := strings.Split(mbs, "|")
-		mb.Seconds, _ = strconv.Atoi(mbse[0])
+		mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)
 		mb.Priority, _ = strconv.Atoi(mbse[1])
 		mb.Price, _ = strconv.ParseFloat(mbse[2], 64)
 		mb.DestinationId = mbse[3]

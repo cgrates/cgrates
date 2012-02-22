@@ -16,9 +16,9 @@ func TestGetSeconds(t *testing.T) {
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
 
 	ub1 := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 200, tariffPlan: tf1, ResetDayOfTheMonth: 10}
-	seconds := ub1.getSecondsForPrefix(nil, "0723")
+	seconds, bucketList := ub1.getSecondsForPrefix(nil, "0723")
 	expected := 110.0
-	if seconds != expected {
+	if seconds != expected || bucketList[0].Priority < bucketList[1].Priority {
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }
@@ -29,9 +29,9 @@ func TestGetPricedSeconds(t *testing.T) {
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
 
 	ub1 := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: tf1, ResetDayOfTheMonth: 10}
-	seconds := ub1.getSecondsForPrefix(nil, "0723")
+	seconds, bucketList := ub1.getSecondsForPrefix(nil, "0723")
 	expected := 21.0
-	if seconds != expected {
+	if seconds != expected || bucketList[0].Priority < bucketList[1].Priority {
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }

@@ -28,7 +28,8 @@ RPC method providing the rating information from the storage.
 */
 func (s *Storage) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
 	descriptor := &cd
-	r, e := descriptor.GetCost(s.sg)
+	descriptor.storageGetter = s.sg
+	r, e := descriptor.GetCost()
 	*reply, err = *r, e
 	return nil
 }

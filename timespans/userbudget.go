@@ -2,9 +2,8 @@ package timespans
 
 import (
 	"log"
-	"math"
-	"strconv"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -37,7 +36,7 @@ func (bs BucketSorter) Swap(i, j int) {
 func (bs BucketSorter) Less(j, i int) bool {
 	return bs[i].Priority < bs[j].Priority ||
 		bs[i].precision < bs[j].precision ||
-		bs[i].Price < bs[j].Price
+		bs[i].Price > bs[j].Price
 }
 
 /*
@@ -71,7 +70,7 @@ func (ub *UserBudget) restore(input string) {
 	for _, mbs := range elements[4 : len(elements)-1] {
 		mb := &MinuteBucket{}
 		mbse := strings.Split(mbs, "|")
-		mb.Seconds, _ = strconv.Atoi(mbse[0])
+		mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)
 		mb.Priority, _ = strconv.Atoi(mbse[1])
 		mb.Price, _ = strconv.ParseFloat(mbse[2], 64)
 		mb.DestinationId = mbse[3]
@@ -93,12 +92,12 @@ func (ub *UserBudget) getTariffPlan(storage StorageGetter) (tp *TariffPlan) {
 /*
 Returns user's avaliable minutes for the specified destination
 */
-func (ub *UserBudget) getSecondsForPrefix(storage StorageGetter, prefix string) (seconds float64) {
+func (ub *UserBudget) getSecondsForPrefix(storage StorageGetter, prefix string) (seconds float64, bucketList BucketSorter) {
 	if len(ub.MinuteBuckets) == 0 {
 		log.Print("There are no minute buckets to check for user", ub.Id)
 		return
 	}
-	var bucketList BucketSorter
+
 	for _, mb := range ub.MinuteBuckets {
 		d := mb.getDestination(storage)
 		if d == nil {
@@ -107,17 +106,16 @@ func (ub *UserBudget) getSecondsForPrefix(storage StorageGetter, prefix string) 
 		contains, precision := d.containsPrefix(prefix)
 		if contains {
 			mb.precision = precision
-			bucketList = append(bucketList, mb)
+			if mb.Seconds > 0 {
+				bucketList = append(bucketList, mb)
+			}
 		}
 	}
-	sort.Sort(bucketList)
+	sort.Sort(bucketList) // sorts the buckets according to priority, precision or price
 	credit := ub.Credit
 	for _, mb := range bucketList {
-		s := float64(mb.Seconds)
-		if mb.Price > 0 {
-			s = math.Min(credit/mb.Price, s)
-			credit -= s
-		}
+		s := mb.GetSecondsForCredit(credit)
+		credit -= s
 		seconds += s
 	}
 	return

@@ -2,6 +2,7 @@ package timespans
 
 import (
 	"time"
+	"fmt"
 	//"log"
 )
 
@@ -12,6 +13,7 @@ type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
 	ActivationPeriod   *ActivationPeriod
 	Interval           *Interval
+	MinuteBucket       *MinuteBucket
 }
 
 /*
@@ -108,5 +110,23 @@ func (ts *TimeSpan) SplitByActivationPeriod(ap *ActivationPeriod) (newTs *TimeSp
 	}
 	newTs = &TimeSpan{TimeStart: ap.ActivationTime, TimeEnd: ts.TimeEnd, ActivationPeriod: ap}
 	ts.TimeEnd = ap.ActivationTime
+	return
+}
+
+/*
+Splits the given timespan on activation period's activation time.
+*/
+func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
+	ts.MinuteBucket = mb
+	s := ts.GetDuration().Seconds()
+	if s <= mb.Seconds {
+		mb.Seconds -= s
+		return nil
+	}
+	secDuration,_ := time.ParseDuration(fmt.Sprintf("%ds", mb.Seconds))
+	newTimeEnd := ts.TimeStart.Add(secDuration)
+	newTs = &TimeSpan{TimeStart: newTimeEnd, TimeEnd: ts.TimeEnd}
+	ts.TimeEnd = newTimeEnd
+	mb.Seconds = 0
 	return
 }

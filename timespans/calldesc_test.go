@@ -12,9 +12,9 @@ func TestKyotoSplitSpans(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 
-	cd.RestoreFromStorage(getter)
+	cd.RestoreFromStorage()
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Error("Wrong number of timespans: ", len(timespans))
@@ -27,8 +27,8 @@ func TestRedisSplitSpans(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2}
-	cd.RestoreFromStorage(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd.RestoreFromStorage()
 
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
@@ -42,14 +42,14 @@ func TestKyotoGetCost(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
-	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2}
-	result, _ = cd.GetCost(getter)
+	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ = cd.GetCost()
 	expected = &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", Cost: 540, ConnectFee: 0}
 }
 
@@ -59,8 +59,8 @@ func TestRedisGetCost(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -73,8 +73,8 @@ func TestMongoGetCost(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -87,8 +87,8 @@ func TestFullDestNotFound(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256308200", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256308200", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -101,8 +101,8 @@ func TestMultipleActivationPeriods(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 8, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257308200", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257308200", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", Cost: 330, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Log(result.Timespans[0].ActivationPeriod)
@@ -117,8 +117,8 @@ func TestSpansMultipleActivationPeriods(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 7, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 0, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257308200", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257308200", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", Cost: 360, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -131,8 +131,8 @@ func TestLessThanAMinute(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 8, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 30, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257308200", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257308200", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", Cost: 0.5, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -145,8 +145,8 @@ func TestUniquePrice(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723045326", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723045326", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", Cost: 60.35, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -159,8 +159,8 @@ func TestPresentSecodCost(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.getPresentSecondCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.getPresentSecondCost()
 	expected := 0.016
 	if result != expected {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -173,8 +173,8 @@ func TestMinutesCost(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", Cost: 0, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -203,10 +203,10 @@ func BenchmarkRedisRestoring(b *testing.B) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.RestoreFromStorage(getter)
+		cd.RestoreFromStorage()
 	}
 }
 
@@ -217,10 +217,10 @@ func BenchmarkRedisGetCost(b *testing.B) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetCost(getter)
+		cd.GetCost()
 	}
 }
 
@@ -231,7 +231,7 @@ func BenchmarkKyotoGetting(b *testing.B) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		key := cd.GetKey()
@@ -246,10 +246,10 @@ func BenchmarkKyotoRestoring(b *testing.B) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.RestoreFromStorage(getter)
+		cd.RestoreFromStorage()
 	}
 }
 
@@ -260,8 +260,8 @@ func BenchmarkSplitting(b *testing.B) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
-	cd.RestoreFromStorage(getter)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd.RestoreFromStorage()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.splitInTimeSpans()
@@ -275,10 +275,10 @@ func BenchmarkKyotoGetCost(b *testing.B) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetCost(getter)
+		cd.GetCost()
 	}
 }
 
@@ -303,9 +303,9 @@ func BenchmarkMongoGetCost(b *testing.B) {
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetCost(getter)
+		cd.GetCost()
 	}
 }

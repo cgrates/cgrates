@@ -37,6 +37,7 @@ type CallDescriptor struct {
 	CstmId, Subject, DestinationPrefix string
 	TimeStart, TimeEnd                 time.Time
 	ActivationPeriods                  []*ActivationPeriod
+	storageGetter					StorageGetter
 }
 
 /*
@@ -51,15 +52,15 @@ func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {
 /*
 Restores the activation periods from storage.
 */
-func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix string, err error) {
+func (cd *CallDescriptor) RestoreFromStorage() (destPrefix string, err error) {
 	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
 	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
 	destPrefix = cd.DestinationPrefix
 	key := base + destPrefix
-	values, err := sg.GetActivationPeriods(key)
+	values, err := cd.storageGetter.GetActivationPeriods(key)
 	//get for a smaller prefix if the orignal one was not found
 
-	for i := len(cd.DestinationPrefix); err != nil && i >= MinPrefixLength; values, err = sg.GetActivationPeriods(key) {
+	for i := len(cd.DestinationPrefix); err != nil && i >= MinPrefixLength; values, err = cd.storageGetter.GetActivationPeriods(key) {
 		i--
 		destPrefix = cd.DestinationPrefix[:i]
 		key = base + destPrefix
@@ -90,6 +91,24 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 Splits the received timespan into sub time spans according to the activation periods intervals.
 */
 func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeSpan) {
+	timespans = append(timespans, firstSpan)
+	// split on (free) minute buckets
+	if userBudget, err := cd.storageGetter.GetUserBudget(cd.Subject); err == nil {
+		_, bucketList := userBudget.getSecondsForPrefix(cd.storageGetter, cd.DestinationPrefix)
+		for _, mb := range bucketList {
+			for i := 0; i < len(timespans); i++ {
+				newTs := timespans[i].SplitByMinuteBucket(mb)
+				if newTs != nil {
+					timespans = append(timespans, newTs)
+					firstSpan = newTs // we move the firstspan to the newly created one for further spliting
+					break
+				}
+			}
+		}
+	}
+	if firstSpan.MinuteBucket != nil {
+		return // all the timespans are on minutes
+	}
 	if len(cd.ActivationPeriods) == 0 {
 		log.Print("Nothing to split, move along... ", cd)
 		return
@@ -97,7 +116,6 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	firstSpan.ActivationPeriod = cd.ActivationPeriods[0]
 
 	// split on activation periods
-	timespans = append(timespans, firstSpan)
 	afterStart, afterEnd := false, false //optimization for multiple activation periods
 	for _, ap := range cd.ActivationPeriods {
 		if !afterStart && !afterEnd && ap.ActivationTime.Before(cd.TimeStart) {
@@ -105,6 +123,9 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
+				if timespans[i].MinuteBucket != nil {
+					continue
+				}
 				newTs := timespans[i].SplitByActivationPeriod(ap)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
@@ -118,6 +139,9 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
 		ap := timespans[i].ActivationPeriod
+		if timespans[i].MinuteBucket != nil {
+			continue
+		}
 		//timespans[i].ActivationPeriod = nil
 		for _, interval := range ap.Intervals {
 			newTs := timespans[i].SplitByInterval(interval)
@@ -133,33 +157,26 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 /*
 Creates a CallCost structure with the cost nformation calculated for the received CallDescriptor.
 */
-func (cd *CallDescriptor) GetCost(sg StorageGetter) (*CallCost, error) {
-	destPrefix, err := cd.RestoreFromStorage(sg)
-	cc := &CallCost{TOR: cd.TOR, CstmId: cd.CstmId, Subject: cd.Subject, DestinationPrefix: destPrefix}
-
-	if userBudget, err := sg.GetUserBudget(cd.Subject); err == nil {
-		nbSeconds := cd.TimeEnd.Sub(cd.TimeStart).Seconds()
-		log.Print("seconds: ", nbSeconds)
-		avaliableNbSeconds := userBudget.getSecondsForPrefix(sg, cd.DestinationPrefix)
-		log.Print("available: ", avaliableNbSeconds)
-		if nbSeconds < avaliableNbSeconds {
-			cc.Cost, cc.ConnectFee = 0, 0
-			return cc, nil
-		}
-	}
+func (cd *CallDescriptor) GetCost() (*CallCost, error) {
+	destPrefix, err := cd.RestoreFromStorage()
 
 	timespans := cd.splitInTimeSpans()
 
 	cost := 0.0
 	connectionFee := 0.0
 	for i, ts := range timespans {
-		if i == 0 {
+		if ts.MinuteBucket == nil && i == 0 {
 			connectionFee = ts.Interval.ConnectFee
 		}
 		cost += ts.GetCost()
 	}
-
-	cc.Cost, cc.ConnectFee, cc.Timespans = cost, connectionFee, timespans
+	cc := &CallCost{TOR: cd.TOR,
+		CstmId:            cd.CstmId,
+		Subject:           cd.Subject,
+		DestinationPrefix: destPrefix,
+		Cost:              cost,
+		ConnectFee:        connectionFee,
+		Timespans:         timespans}
 
 	return cc, err
 }
@@ -167,8 +184,8 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (*CallCost, error) {
 /*
 Returns the cost of a second in the present time conditions.
 */
-func (cd *CallDescriptor) getPresentSecondCost(sg StorageGetter) (cost float64, err error) {
-	_, err = cd.RestoreFromStorage(sg)
+func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
+	_, err = cd.RestoreFromStorage()
 	now := time.Now()
 	oneSecond, _ := time.ParseDuration("1s")
 	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(oneSecond)}
@@ -183,8 +200,8 @@ func (cd *CallDescriptor) getPresentSecondCost(sg StorageGetter) (cost float64, 
 /*
 Returns the cost of a second in the present time conditions.
 */
-func (cd *CallDescriptor) GetMaxSessionTime(sg StorageGetter, maxSessionSeconds int) (seconds int, err error) {
-	_, err = cd.RestoreFromStorage(sg)
+func (cd *CallDescriptor) GetMaxSessionTime(maxSessionSeconds int) (seconds int, err error) {
+	_, err = cd.RestoreFromStorage()
 	now := time.Now()
 	maxDuration, _ := time.ParseDuration(fmt.Sprintf("%ds", maxSessionSeconds))
 	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
