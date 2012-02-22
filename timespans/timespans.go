@@ -13,7 +13,12 @@ type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
 	ActivationPeriod   *ActivationPeriod
 	Interval           *Interval
-	MinuteBucket       *MinuteBucket
+	MinuteInfo       *MinuteInfo
+}
+
+type MinuteInfo struct {
+	DestinationId string
+	Quantity	float64
 }
 
 /*
@@ -117,16 +122,19 @@ func (ts *TimeSpan) SplitByActivationPeriod(ap *ActivationPeriod) (newTs *TimeSp
 Splits the given timespan on activation period's activation time.
 */
 func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
-	ts.MinuteBucket = mb
 	s := ts.GetDuration().Seconds()
+	ts.MinuteInfo = &MinuteInfo{mb.DestinationId, s}
 	if s <= mb.Seconds {
 		mb.Seconds -= s
 		return nil
 	}
-	secDuration,_ := time.ParseDuration(fmt.Sprintf("%ds", mb.Seconds))
+	secDuration,_ := time.ParseDuration(fmt.Sprintf("%vs", mb.Seconds))
+
 	newTimeEnd := ts.TimeStart.Add(secDuration)
 	newTs = &TimeSpan{TimeStart: newTimeEnd, TimeEnd: ts.TimeEnd}
 	ts.TimeEnd = newTimeEnd
+	ts.MinuteInfo.Quantity = mb.Seconds
 	mb.Seconds = 0
+
 	return
 }

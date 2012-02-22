@@ -97,22 +97,25 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 		_, bucketList := userBudget.getSecondsForPrefix(cd.storageGetter, cd.DestinationPrefix)
 		for _, mb := range bucketList {
 			for i := 0; i < len(timespans); i++ {
-				newTs := timespans[i].SplitByMinuteBucket(mb)
-				if newTs != nil {
-					timespans = append(timespans, newTs)
-					firstSpan = newTs // we move the firstspan to the newly created one for further spliting
-					break
+				if timespans[i].MinuteInfo == nil {
+					newTs := timespans[i].SplitByMinuteBucket(mb)
+					if newTs != nil {
+						timespans = append(timespans, newTs)
+						firstSpan = newTs // we move the firstspan to the newly created one for further spliting
+						break
+					}
 				}
 			}
 		}
 	}
-	if firstSpan.MinuteBucket != nil {
+	if firstSpan.MinuteInfo != nil {
 		return // all the timespans are on minutes
 	}
 	if len(cd.ActivationPeriods) == 0 {
 		log.Print("Nothing to split, move along... ", cd)
 		return
 	}
+
 	firstSpan.ActivationPeriod = cd.ActivationPeriods[0]
 
 	// split on activation periods
@@ -123,12 +126,13 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
-				if timespans[i].MinuteBucket != nil {
+				if timespans[i].MinuteInfo != nil {
 					continue
 				}
 				newTs := timespans[i].SplitByActivationPeriod(ap)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
+					log.Print("NewTS: ", newTs)
 				} else {
 					afterEnd = true
 					break
@@ -138,10 +142,10 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	}
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
-		ap := timespans[i].ActivationPeriod
-		if timespans[i].MinuteBucket != nil {
+		if timespans[i].MinuteInfo != nil {
 			continue
 		}
+		ap := timespans[i].ActivationPeriod
 		//timespans[i].ActivationPeriod = nil
 		for _, interval := range ap.Intervals {
 			newTs := timespans[i].SplitByInterval(interval)
@@ -165,7 +169,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cost := 0.0
 	connectionFee := 0.0
 	for i, ts := range timespans {
-		if ts.MinuteBucket == nil && i == 0 {
+		if ts.MinuteInfo == nil && i == 0 {
 			connectionFee = ts.Interval.ConnectFee
 		}
 		cost += ts.GetCost()

@@ -17,6 +17,7 @@ func TestKyotoSplitSpans(t *testing.T) {
 	cd.RestoreFromStorage()
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
+
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 }
