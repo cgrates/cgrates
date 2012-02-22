@@ -17,7 +17,7 @@ func TestGetSeconds(t *testing.T) {
 
 	ub1 := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 200, tariffPlan: tf1, ResetDayOfTheMonth: 10}
 	seconds := ub1.getSecondsForPrefix(nil, "0723")
-	expected := 100.0
+	expected := 110.0
 	if seconds != expected {
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}

@@ -1,6 +1,7 @@
 package timespans
 
 import (
+	//"log"
 	"strings"
 )
 
@@ -30,11 +31,15 @@ func (d *Destination) restore(input string) {
 /*
 De-serializes the destination for the storage. Used for key-value storages.
 */
-func (d *Destination) containsPrefix(prefix string) bool {
-	for _, p := range d.Prefixes {
-		if prefix == p {
-			return true
+func (d *Destination) containsPrefix(prefix string) (bool, int) {
+	for i := len(prefix); i >= MinPrefixLength; {
+		for _, p := range d.Prefixes {
+			if p == prefix[:i] {
+				return true, i
+			}
 		}
+		i--
 	}
-	return false
+
+	return false, 0
 }

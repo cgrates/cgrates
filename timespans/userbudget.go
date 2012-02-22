@@ -4,6 +4,7 @@ import (
 	"log"
 	"math"
 	"strconv"
+	"sort"
 	"strings"
 )
 
@@ -18,6 +19,25 @@ type UserBudget struct {
 	TariffPlanId       string
 	tariffPlan         *TariffPlan
 	MinuteBuckets      []*MinuteBucket
+}
+
+/*
+Structure to store minute buckets according to priority, precision or price.
+*/
+type BucketSorter []*MinuteBucket
+
+func (bs BucketSorter) Len() int {
+	return len(bs)
+}
+
+func (bs BucketSorter) Swap(i, j int) {
+	bs[i], bs[j] = bs[j], bs[i]
+}
+
+func (bs BucketSorter) Less(j, i int) bool {
+	return bs[i].Priority < bs[j].Priority ||
+		bs[i].precision < bs[j].precision ||
+		bs[i].Price < bs[j].Price
 }
 
 /*
@@ -60,7 +80,6 @@ func (ub *UserBudget) restore(input string) {
 	}
 }
 
-
 /*
 Returns the tariff plan loading it from the storage if necessary.
 */
@@ -79,17 +98,27 @@ func (ub *UserBudget) getSecondsForPrefix(storage StorageGetter, prefix string) 
 		log.Print("There are no minute buckets to check for user", ub.Id)
 		return
 	}
-	bestBucket := ub.MinuteBuckets[0]
-
+	var bucketList BucketSorter
 	for _, mb := range ub.MinuteBuckets {
 		d := mb.getDestination(storage)
-		if d.containsPrefix(prefix) && mb.Priority > bestBucket.Priority {
-			bestBucket = mb
+		if d == nil {
+			continue
+		}
+		contains, precision := d.containsPrefix(prefix)
+		if contains {
+			mb.precision = precision
+			bucketList = append(bucketList, mb)
 		}
 	}
-	seconds = float64(bestBucket.Seconds)
-	if bestBucket.Price > 0 {
-		seconds = math.Min(ub.Credit/bestBucket.Price, float64(seconds))
+	sort.Sort(bucketList)
+	credit := ub.Credit
+	for _, mb := range bucketList {
+		s := float64(mb.Seconds)
+		if mb.Price > 0 {
+			s = math.Min(credit/mb.Price, s)
+			credit -= s
+		}
+		seconds += s
 	}
 	return
 }

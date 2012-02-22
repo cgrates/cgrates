@@ -46,9 +46,10 @@ func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
 	//rs.db.Select(rs.dbNb + 1)
-	values, err := rs.db.Get(key)
-	dest = &Destination{Id: key}
-	dest.restore(values.String())
+	if values, err := rs.db.Get(key); err == nil {
+		dest = &Destination{Id: key}
+		dest.restore(values.String())
+	}
 	return
 }
 
@@ -59,9 +60,10 @@ func (rs *RedisStorage) SetDestination(dest *Destination) {
 
 func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
 	//rs.db.Select(rs.dbNb + 2)
-	values, err := rs.db.Get(key)
-	tp = &TariffPlan{Id: key}
-	tp.restore(values.String())
+	if values, err := rs.db.Get(key); err == nil {
+		tp = &TariffPlan{Id: key}
+		tp.restore(values.String())
+	}
 	return
 }
 
@@ -72,9 +74,10 @@ func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) {
 
 func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
 	//rs.db.Select(rs.dbNb + 3)
-	values, err := rs.db.Get(key)
-	ub = &UserBudget{Id: key}
-	ub.restore(values.String())
+	if values, err := rs.db.Get(key); err == nil {
+		ub = &UserBudget{Id: key}
+		ub.restore(values.String())
+	}
 	return
 }
 

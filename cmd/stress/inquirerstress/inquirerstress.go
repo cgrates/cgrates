@@ -21,10 +21,9 @@ func main() {
 	cd := timespans.CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	result := timespans.CallCost{}
 	client, _ := jsonrpc.Dial("tcp", "localhost:2001")
-	i := 0
 	if *parallel {
 		var divCall *rpc.Call
-		for ; i < *runs; i++ {
+		for i := 0; i < *runs; i++ {
 			divCall = client.Go("Responder.Get", cd, &result, nil)
 		}
 		<-divCall.Done
@@ -34,6 +33,5 @@ func main() {
 		}
 	}
 	log.Println(result)
-	log.Println(i)
 	client.Close()
 }

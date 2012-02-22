@@ -14,7 +14,7 @@ type Interval struct {
 	Month                                  time.Month
 	MonthDay                               int
 	WeekDays                               []time.Weekday
-	StartTime, EndTime                     string // ##:##:## format	 
+	StartTime, EndTime                     string // ##:##:## format
 	Ponder, ConnectFee, Price, BillingUnit float64
 }
 
@@ -46,7 +46,7 @@ func (i *Interval) Contains(t time.Time) bool {
 		sh, _ := strconv.Atoi(split[0])
 		sm, _ := strconv.Atoi(split[1])
 		ss, _ := strconv.Atoi(split[2])
-		// if the hour is before or is the same hour but the minute is before 
+		// if the hour is before or is the same hour but the minute is before
 		if t.Hour() < sh ||
 			(t.Hour() == sh && t.Minute() < sm) ||
 			(t.Hour() == sh && t.Minute() == sm && t.Second() < ss) {
@@ -59,7 +59,7 @@ func (i *Interval) Contains(t time.Time) bool {
 		eh, _ := strconv.Atoi(split[0])
 		em, _ := strconv.Atoi(split[1])
 		es, _ := strconv.Atoi(split[2])
-		// if the hour is after or is the same hour but the minute is after 
+		// if the hour is after or is the same hour but the minute is after
 		if t.Hour() > eh ||
 			(t.Hour() == eh && t.Minute() > em) ||
 			(t.Hour() == eh && t.Minute() == em && t.Second() > es) {

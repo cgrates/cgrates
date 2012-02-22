@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	storage     = flag.String("storage", "kyoto", "kyoto|redis|mongo")
+	storage     = flag.String("storage", "all", "kyoto|redis|mongo")
 	kyotofile   = flag.String("kyotofile", "storage.kch", "kyoto storage file (storage.kch)")
 	redisserver = flag.String("redisserver", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
 	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
@@ -120,13 +120,22 @@ func main() {
 		defer storage.Close()
 		writeToStorage(storage, callDescriptors, destinations, tariffPlans, userBudgets)
 	case "mongo":
-		storage, _ := timespans.NewMongoStorage("127.0.0.1", "test")
+		storage, _ := timespans.NewMongoStorage(*mongoserver, *mongodb)
 		defer storage.Close()
 		writeToStorage(storage, callDescriptors, destinations, tariffPlans, userBudgets)
-
-	default:
+	case "redis":
 		storage, _ := timespans.NewRedisStorage(*redisserver, *redisdb)
 		defer storage.Close()
 		writeToStorage(storage, callDescriptors, destinations, tariffPlans, userBudgets)
+	default:
+		kyoto, _ := timespans.NewKyotoStorage(*kyotofile)
+		writeToStorage(kyoto, callDescriptors, destinations, tariffPlans, userBudgets)
+		kyoto.Close()
+		mongo, _ := timespans.NewMongoStorage(*mongoserver, *mongodb)
+		writeToStorage(mongo, callDescriptors, destinations, tariffPlans, userBudgets)
+		mongo.Close()
+		redis, _ := timespans.NewRedisStorage(*redisserver, *redisdb)
+		writeToStorage(redis, callDescriptors, destinations, tariffPlans, userBudgets)
+		redis.Close()
 	}
 }

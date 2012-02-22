@@ -153,7 +153,7 @@ func TestUniquePrice(t *testing.T) {
 	}
 }
 
-func TestSecodCost(t *testing.T) {
+func TestPresentSecodCost(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 
@@ -163,6 +163,20 @@ func TestSecodCost(t *testing.T) {
 	result, _ := cd.getPresentSecondCost(getter)
 	expected := 0.016
 	if result != expected {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
+func TestMinutesCost(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+
+	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2}
+	result, _ := cd.GetCost(getter)
+	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", Cost: 0, ConnectFee: 0}
+	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }

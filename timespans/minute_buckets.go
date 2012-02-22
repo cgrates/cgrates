@@ -6,6 +6,7 @@ type MinuteBucket struct {
 	Price         float64
 	DestinationId string
 	destination   *Destination
+	precision     int
 }
 
 /*

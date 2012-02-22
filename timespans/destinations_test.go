@@ -51,7 +51,8 @@ func TestDestinationContainsPrefix(t *testing.T) {
 	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	if !nationale.containsPrefix("0256") {
+	contains, precision := nationale.containsPrefix("0256")
+	if !contains || precision != len("0256") {
 		t.Error("Should contain prefix: ", nationale)
 	}
 

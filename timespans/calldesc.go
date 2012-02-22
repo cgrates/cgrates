@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+const (
+	// the minimum length for a destination prefix to be matched.
+	MinPrefixLength = 2
+)
+
 /*
 Utility function for rounding a float to a certain number of decimals (not present in math).
 */
@@ -53,7 +58,8 @@ func (cd *CallDescriptor) RestoreFromStorage(sg StorageGetter) (destPrefix strin
 	key := base + destPrefix
 	values, err := sg.GetActivationPeriods(key)
 	//get for a smaller prefix if the orignal one was not found
-	for i := len(cd.DestinationPrefix); err != nil && i > 1; values, err = sg.GetActivationPeriods(key) {
+
+	for i := len(cd.DestinationPrefix); err != nil && i >= MinPrefixLength; values, err = sg.GetActivationPeriods(key) {
 		i--
 		destPrefix = cd.DestinationPrefix[:i]
 		key = base + destPrefix
@@ -129,13 +135,16 @@ Creates a CallCost structure with the cost nformation calculated for the receive
 */
 func (cd *CallDescriptor) GetCost(sg StorageGetter) (*CallCost, error) {
 	destPrefix, err := cd.RestoreFromStorage(sg)
+	cc := &CallCost{TOR: cd.TOR, CstmId: cd.CstmId, Subject: cd.Subject, DestinationPrefix: destPrefix}
 
-	userBudget, err := sg.GetUserBudget(cd.Subject)
-	if err != nil {
+	if userBudget, err := sg.GetUserBudget(cd.Subject); err == nil {
 		nbSeconds := cd.TimeEnd.Sub(cd.TimeStart).Seconds()
+		log.Print("seconds: ", nbSeconds)
 		avaliableNbSeconds := userBudget.getSecondsForPrefix(sg, cd.DestinationPrefix)
+		log.Print("available: ", avaliableNbSeconds)
 		if nbSeconds < avaliableNbSeconds {
-			return nil, nil
+			cc.Cost, cc.ConnectFee = 0, 0
+			return cc, nil
 		}
 	}
 
@@ -150,13 +159,8 @@ func (cd *CallDescriptor) GetCost(sg StorageGetter) (*CallCost, error) {
 		cost += ts.GetCost()
 	}
 
-	cc := &CallCost{TOR: cd.TOR,
-		CstmId:            cd.CstmId,
-		Subject:           cd.Subject,
-		DestinationPrefix: destPrefix,
-		Cost:              cost,
-		ConnectFee:        connectionFee,
-		Timespans:         timespans}
+	cc.Cost, cc.ConnectFee, cc.Timespans = cost, connectionFee, timespans
+
 	return cc, err
 }
 

@@ -2,6 +2,7 @@ package timespans
 
 import (
 	"github.com/fsouza/gokabinet/kc"
+	//"log"
 	"strings"
 )
 
@@ -42,9 +43,10 @@ func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 }
 
 func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
-	values, err := ks.db.Get(key)
-	dest = &Destination{Id: key}
-	dest.restore(values)
+	if values, err := ks.db.Get(key); err == nil {
+		dest = &Destination{Id: key}
+		dest.restore(values)
+	}
 	return
 }
 
@@ -53,9 +55,10 @@ func (ks *KyotoStorage) SetDestination(dest *Destination) {
 }
 
 func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
-	values, err := ks.db.Get(key)
-	tp = &TariffPlan{Id: key}
-	tp.restore(values)
+	if values, err := ks.db.Get(key); err == nil {
+		tp = &TariffPlan{Id: key}
+		tp.restore(values)
+	}
 	return
 }
 
@@ -64,9 +67,10 @@ func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) {
 }
 
 func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
-	values, err := ks.db.Get(key)
-	ub = &UserBudget{Id: key}
-	ub.restore(values)
+	if values, err := ks.db.Get(key); err == nil {
+		ub = &UserBudget{Id: key}
+		ub.restore(values)
+	}
 	return
 }
 

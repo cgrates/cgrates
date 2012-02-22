@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/rif/cgrates/timespans"
 	"log"
-	"runtime"
+	//"runtime"
 	"time"
 	"flag"
 )
@@ -42,7 +42,7 @@ func CallRater(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
 
 func main() {
 	flag.Parse()
-	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
+	//runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 	raterList = NewRaterList()
 
 	go StopSingnalHandler()

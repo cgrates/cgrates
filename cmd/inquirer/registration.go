@@ -4,7 +4,6 @@ import (
 	"os/signal"
 	"fmt"
 	"log"
-	"net"
 	"net/rpc"
 	"net/http"
 	"os"
@@ -21,13 +20,7 @@ func listenToRPCRaterRequests(){
 	raterServer := new(RaterServer)
 	rpc.Register(raterServer)
 	rpc.HandleHTTP()
-	l, e := net.Listen("tcp", *raterAddress)
-
-	if e != nil {
-		log.Fatal("listen error:", e)
-	}
-	log.Print("Listening for raters on ", *raterAddress)
-	http.Serve(l, nil)
+	http.ListenAndServe(*raterAddress, nil)
 }
 
 /*
