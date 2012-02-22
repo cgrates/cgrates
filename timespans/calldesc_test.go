@@ -17,7 +17,6 @@ func TestKyotoSplitSpans(t *testing.T) {
 	cd.RestoreFromStorage()
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
-
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 }
@@ -32,6 +31,7 @@ func TestRedisSplitSpans(t *testing.T) {
 	cd.RestoreFromStorage()
 
 	timespans := cd.splitInTimeSpans()
+
 	if len(timespans) != 2 {
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
@@ -174,9 +174,9 @@ func TestMinutesCost(t *testing.T) {
 
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	result, _ := cd.GetCost()
-	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", Cost: 0, ConnectFee: 0}
+	expected := &CallCost{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", Cost: 0, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Errorf("Expected %v was %v", expected, result)
 	}

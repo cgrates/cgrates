@@ -2,7 +2,7 @@ package timespans
 
 import (
 	"fmt"
-	"log"
+	//"log"
 	"math"
 	"time"
 )
@@ -37,7 +37,7 @@ type CallDescriptor struct {
 	CstmId, Subject, DestinationPrefix string
 	TimeStart, TimeEnd                 time.Time
 	ActivationPeriods                  []*ActivationPeriod
-	storageGetter					StorageGetter
+	storageGetter                      StorageGetter
 }
 
 /*
@@ -93,17 +93,18 @@ Splits the received timespan into sub time spans according to the activation per
 func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeSpan) {
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets
-	if userBudget, err := cd.storageGetter.GetUserBudget(cd.Subject); err == nil {
+	if userBudget, err := cd.storageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
 		_, bucketList := userBudget.getSecondsForPrefix(cd.storageGetter, cd.DestinationPrefix)
 		for _, mb := range bucketList {
 			for i := 0; i < len(timespans); i++ {
-				if timespans[i].MinuteInfo == nil {
-					newTs := timespans[i].SplitByMinuteBucket(mb)
-					if newTs != nil {
-						timespans = append(timespans, newTs)
-						firstSpan = newTs // we move the firstspan to the newly created one for further spliting
-						break
-					}
+				if timespans[i].MinuteInfo != nil {
+					continue
+				}
+				newTs := timespans[i].SplitByMinuteBucket(mb)
+				if newTs != nil {
+					timespans = append(timespans, newTs)
+					firstSpan = newTs // we move the firstspan to the newly created one for further spliting
+					break
 				}
 			}
 		}
@@ -112,7 +113,6 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 		return // all the timespans are on minutes
 	}
 	if len(cd.ActivationPeriods) == 0 {
-		log.Print("Nothing to split, move along... ", cd)
 		return
 	}
 
@@ -132,7 +132,6 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 				newTs := timespans[i].SplitByActivationPeriod(ap)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
-					log.Print("NewTS: ", newTs)
 				} else {
 					afterEnd = true
 					break

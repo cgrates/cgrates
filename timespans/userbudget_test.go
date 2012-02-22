@@ -40,9 +40,9 @@ func TestUserBudgetStoreRestore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
-	rifsBudget := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
 	s := rifsBudget.store()
-	ub1 := &UserBudget{Id: "rif"}
+	ub1 := &UserBudget{Id: "other"}
 	ub1.restore(s)
 	if ub1.store() != s {
 		t.Errorf("Expected %q was %q", s, ub1.store())
@@ -55,7 +55,7 @@ func TestUserBudgetKyotoStore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
-	rifsBudget := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
 	getter.SetUserBudget(rifsBudget)
 	result, _ := getter.GetUserBudget(rifsBudget.Id)
 	if result.SmsCredit != rifsBudget.SmsCredit || len(result.MinuteBuckets) != len(rifsBudget.MinuteBuckets) {
@@ -69,7 +69,7 @@ func TestUserBudgetRedisStore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
-	rifsBudget := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
 	getter.SetUserBudget(rifsBudget)
 	result, _ := getter.GetUserBudget(rifsBudget.Id)
 	if result.SmsCredit != rifsBudget.SmsCredit || len(result.MinuteBuckets) != len(rifsBudget.MinuteBuckets) {
@@ -83,7 +83,7 @@ func TestUserBudgetMongoStore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
-	rifsBudget := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
 	getter.SetUserBudget(rifsBudget)
 	result, _ := getter.GetUserBudget(rifsBudget.Id)
 	if result.SmsCredit != rifsBudget.SmsCredit || len(result.MinuteBuckets) != len(rifsBudget.MinuteBuckets) {
@@ -99,7 +99,7 @@ func BenchmarkGetSecondForPrefix(b *testing.B) {
 	b2 := &MinuteBucket{Seconds: 100, Price: 1, Priority: 20, destination: retea}
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
 
-	ub1 := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: tf1, ResetDayOfTheMonth: 10}
+	ub1 := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: tf1, ResetDayOfTheMonth: 10}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		ub1.getSecondsForPrefix(nil, "0723")
@@ -112,7 +112,7 @@ func BenchmarkUserBudgetKyotoStoreRestore(b *testing.B) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
-	rifsBudget := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
 	for i := 0; i < b.N; i++ {
 		getter.SetUserBudget(rifsBudget)
 		getter.GetUserBudget(rifsBudget.Id)
@@ -125,7 +125,7 @@ func BenchmarkUserBudgetRedisStoreRestore(b *testing.B) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
-	rifsBudget := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
 	for i := 0; i < b.N; i++ {
 		getter.SetUserBudget(rifsBudget)
 		getter.GetUserBudget(rifsBudget.Id)
@@ -138,7 +138,7 @@ func BenchmarkUserBudgetMongoStoreRestore(b *testing.B) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
-	rifsBudget := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
 	for i := 0; i < b.N; i++ {
 		getter.SetUserBudget(rifsBudget)
 		getter.GetUserBudget(rifsBudget.Id)

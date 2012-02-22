@@ -1,8 +1,8 @@
 package timespans
 
 import (
-	"time"
 	"fmt"
+	"time"
 	//"log"
 )
 
@@ -13,12 +13,12 @@ type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
 	ActivationPeriod   *ActivationPeriod
 	Interval           *Interval
-	MinuteInfo       *MinuteInfo
+	MinuteInfo         *MinuteInfo
 }
 
 type MinuteInfo struct {
 	DestinationId string
-	Quantity	float64
+	Quantity      float64
 }
 
 /*
@@ -128,7 +128,7 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 		mb.Seconds -= s
 		return nil
 	}
-	secDuration,_ := time.ParseDuration(fmt.Sprintf("%vs", mb.Seconds))
+	secDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", mb.Seconds))
 
 	newTimeEnd := ts.TimeStart.Add(secDuration)
 	newTs = &TimeSpan{TimeStart: newTimeEnd, TimeEnd: ts.TimeEnd}
