@@ -153,6 +153,29 @@ func (ub *UserBudget) debitMinutesBudget(sg StorageGetter, amount float64, prefi
 	if avaliableNbSeconds < amount {
 		return new(AmountTooBig)
 	}
+	credit := ub.Credit
+	// calculating money debit
+	// this is needed because if the credit is less then the amount needed to be debited
+	// we need to keep everithing in place and return an error
+	for _, mb := range bucketList {
+		if mb.Seconds < amount {
+			if mb.Price > 0 { // debit the money if the bucket has price
+				credit -= mb.Seconds * mb.Price
+			}
+		} else {
+			if mb.Price > 0 { // debit the money if the bucket has price
+				credit -= amount * mb.Price
+			}
+			break
+		}
+		if credit < 0 {
+			break
+		}
+	}
+	if credit < 0 {
+		return new(AmountTooBig)
+	}
+	ub.Credit = credit // credit is > 0
 	for _, mb := range bucketList {
 		if mb.Seconds < amount {
 			amount -= mb.Seconds

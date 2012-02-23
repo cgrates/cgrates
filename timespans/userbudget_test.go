@@ -162,7 +162,6 @@ func TestDebitAllMinuteBudget(t *testing.T) {
 	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, ResetDayOfTheMonth: 10}
 	err := rifsBudget.debitMinutesBudget(getter, 110, "0723")
 	if b2.Seconds != 0 || b1.Seconds != 0 || err != nil {
-		t.Log(err)
 		t.Errorf("Expected %v was %v", 0, b2.Seconds)
 	}
 }
@@ -176,6 +175,44 @@ func TestDebitMoreMinuteBudget(t *testing.T) {
 	err := rifsBudget.debitMinutesBudget(getter, 115, "0723")
 	if b2.Seconds != 100 || b1.Seconds != 10 || err == nil {
 		t.Errorf("Expected %v was %v", 1000, b2.Seconds)
+	}
+}
+
+func TestDebitPriceMinuteBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.0, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 1.0, DestinationId: "retea"}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, ResetDayOfTheMonth: 10}
+	err := rifsBudget.debitMinutesBudget(getter, 5, "0723")
+	if b2.Seconds != 95 || b1.Seconds != 10 || err != nil || rifsBudget.Credit != 16 {
+		t.Log(rifsBudget.Credit)
+		t.Errorf("Expected %v was %v", 16, rifsBudget.Credit)
+	}
+}
+
+func TestDebitPriceAllMinuteBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.0, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 1.0, DestinationId: "retea"}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, ResetDayOfTheMonth: 10}
+	err := rifsBudget.debitMinutesBudget(getter, 21, "0723")
+	if b2.Seconds != 79 || b1.Seconds != 10 || err != nil || rifsBudget.Credit != 0 {
+		t.Errorf("Expected %v was %v", 0, rifsBudget.Credit)
+	}
+}
+
+func TestDebitPriceMoreMinuteBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.0, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 1.0, DestinationId: "retea"}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, ResetDayOfTheMonth: 10}
+	err := rifsBudget.debitMinutesBudget(getter, 25, "0723")
+	if b2.Seconds != 100 || b1.Seconds != 10 || err == nil || rifsBudget.Credit != 21 {
+		t.Log(b1, b2, err)
+		t.Errorf("Expected %v was %v", 21, rifsBudget.Credit)
 	}
 }
 
