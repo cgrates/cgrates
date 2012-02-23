@@ -29,5 +29,12 @@
             ]
         }
     ]     
+},
+{"TOR": 0,"CstmId":"vdf","Subject":"minutosu","DestinationPrefix":"0723", "ActivationPeriods": [
+        {"ActivationTime": "2012-01-01T00:00:00Z", "Intervals": [
+                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":1,"StartTime":"","EndTime":""}
+            ]
+        }
+    ]     
 }
 ]

@@ -173,12 +173,33 @@ func TestMinutesCost(t *testing.T) {
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 8, 22, 51, 50, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2, StorageGetter: getter}
 	result, _ := cd.GetCost()
-	expected := &CallCost{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", Cost: 0, ConnectFee: 0}
+	expected := &CallCost{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", Cost: 0.1, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+		t.Log(result.Timespans[0])
 		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
+func TestMaxSessionTimeNoUserBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", StorageGetter: getter}
+	result, err := cd.GetMaxSessionTime(1000)
+	if result != 1000 || err != nil {
+		t.Errorf("Expected %v was %v", 1000, result)
+	}
+}
+
+func TestMaxSessionTimeWithUserBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	result, err := cd.GetMaxSessionTime(5400)
+	if result != 1080 || err != nil {
+		t.Errorf("Expected %v was %v", 1080, result)
 	}
 }
 

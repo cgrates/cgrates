@@ -19,6 +19,7 @@ type TimeSpan struct {
 type MinuteInfo struct {
 	DestinationId string
 	Quantity      float64
+	Price         float64
 }
 
 /*
@@ -32,6 +33,9 @@ func (ts *TimeSpan) GetDuration() time.Duration {
 Returns the cost of the timespan according to the relevant cost interval.
 */
 func (ts *TimeSpan) GetCost() (cost float64) {
+	if ts.MinuteInfo != nil {
+		return ts.GetDuration().Seconds() * ts.MinuteInfo.Price
+	}
 	if ts.Interval == nil {
 		return 0
 	}
@@ -123,7 +127,7 @@ Splits the given timespan on activation period's activation time.
 */
 func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 	s := ts.GetDuration().Seconds()
-	ts.MinuteInfo = &MinuteInfo{mb.DestinationId, s}
+	ts.MinuteInfo = &MinuteInfo{mb.DestinationId, s, mb.Price}
 	if s <= mb.Seconds {
 		mb.Seconds -= s
 		return nil

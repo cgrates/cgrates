@@ -1,4 +1,5 @@
 [
-{"Id":"minutosu","Credit":21,"SmsCredit":0,"ResetDayOfTheMonth":10,"TariffPlanId":"","MinuteBuckets":        							        [{"Seconds":10,"Priority":10,"Price":0.01,"DestinationId":"nationale"},
- {"Seconds":100,"Priority":20,"Price":0,"DestinationId":"retea"}]}
+{"Id":"minutosu","Credit":21,"SmsCredit":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":    
+    [{"Seconds":10,"Priority":10,"Price":0.01,"DestinationId":"nationale"},
+	 {"Seconds":100,"Priority":20,"Price":0,"DestinationId":"retea"}]}
 ]

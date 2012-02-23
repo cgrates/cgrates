@@ -2,7 +2,7 @@ package timespans
 
 import (
 	"fmt"
-	//"log"
+	// "log"
 	"math"
 	"time"
 )
@@ -209,19 +209,32 @@ Returns the cost of a second in the present time conditions.
 func (cd *CallDescriptor) GetMaxSessionTime(maxSessionSeconds int) (seconds int, err error) {
 	_, err = cd.RestoreFromStorage()
 	now := time.Now()
-	maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds))
-	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
-	timespans := cd.splitTimeSpan(ts)
-
-	cost := 0.0
-	for i, ts := range timespans {
-		if i == 0 {
-			cost += ts.Interval.ConnectFee
-		}
-		cost += ts.GetCost()
+	availableCredit := 0.0
+	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
+		availableCredit = userBudget.Credit
+	} else {
+		return maxSessionSeconds, err
 	}
+	orig_maxSessionSeconds := maxSessionSeconds
+	for i := 0; i < 10; i++ {
+		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds))
+		ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
+		timespans := cd.splitTimeSpan(ts)
 
-	return
+		cost := 0.0
+		for i, ts := range timespans {
+			if ts.MinuteInfo == nil && i == 0 {
+				cost += ts.Interval.ConnectFee
+			}
+			cost += ts.GetCost()
+		}
+		if cost < availableCredit {
+			return maxSessionSeconds, nil
+		} else { //decrease the period by 10% and try again
+			maxSessionSeconds -= int(float64(orig_maxSessionSeconds) * 0.1)
+		}
+	}
+	return 0, nil
 }
 
 /*
