@@ -37,7 +37,7 @@ type CallDescriptor struct {
 	CstmId, Subject, DestinationPrefix string
 	TimeStart, TimeEnd                 time.Time
 	ActivationPeriods                  []*ActivationPeriod
-	storageGetter                      StorageGetter
+	StorageGetter                      StorageGetter
 }
 
 /*
@@ -57,10 +57,10 @@ func (cd *CallDescriptor) RestoreFromStorage() (destPrefix string, err error) {
 	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
 	destPrefix = cd.DestinationPrefix
 	key := base + destPrefix
-	values, err := cd.storageGetter.GetActivationPeriods(key)
+	values, err := cd.StorageGetter.GetActivationPeriods(key)
 	//get for a smaller prefix if the orignal one was not found
 
-	for i := len(cd.DestinationPrefix); err != nil && i >= MinPrefixLength; values, err = cd.storageGetter.GetActivationPeriods(key) {
+	for i := len(cd.DestinationPrefix); err != nil && i >= MinPrefixLength; values, err = cd.StorageGetter.GetActivationPeriods(key) {
 		i--
 		destPrefix = cd.DestinationPrefix[:i]
 		key = base + destPrefix
@@ -92,9 +92,10 @@ Splits the received timespan into sub time spans according to the activation per
 */
 func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeSpan) {
 	timespans = append(timespans, firstSpan)
-	// split on (free) minute buckets
-	if userBudget, err := cd.storageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
-		_, bucketList := userBudget.getSecondsForPrefix(cd.storageGetter, cd.DestinationPrefix)
+	// split on (free) minute buckets	
+	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
+		userBudget.mux.RLock()
+		_, bucketList := userBudget.getSecondsForPrefix(cd.StorageGetter, cd.DestinationPrefix)
 		for _, mb := range bucketList {
 			for i := 0; i < len(timespans); i++ {
 				if timespans[i].MinuteInfo != nil {
@@ -108,7 +109,9 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 				}
 			}
 		}
+		userBudget.mux.RUnlock()
 	}
+
 	if firstSpan.MinuteInfo != nil {
 		return // all the timespans are on minutes
 	}
@@ -206,7 +209,7 @@ Returns the cost of a second in the present time conditions.
 func (cd *CallDescriptor) GetMaxSessionTime(maxSessionSeconds int) (seconds int, err error) {
 	_, err = cd.RestoreFromStorage()
 	now := time.Now()
-	maxDuration, _ := time.ParseDuration(fmt.Sprintf("%ds", maxSessionSeconds))
+	maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds))
 	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
 	timespans := cd.splitTimeSpan(ts)
 

@@ -34,12 +34,14 @@ func main() {
 
 	getter, _ := timespans.NewRedisStorage("", 10)
 	defer getter.Close()
-	
+
+	cd.StorageGetter = getter
+
 	i := 0
 	log.Printf("Runnning %d cycles...", *runs)
 
 	for j := 0; j < *runs; j++ {
-		result, _ = cd.GetCost(getter)
+		result, _ = cd.GetCost()
 	}
 
 	log.Print(result)
