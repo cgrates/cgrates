@@ -31,7 +31,31 @@ func (s *Storage) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost
 	descriptor.StorageGetter = s.sg
 	r, e := descriptor.GetCost()
 	*reply, err = *r, e
-	return nil
+	return err
+}
+
+func (s *Storage) DebitCents(cd timespans.CallDescriptor, reply *float64) (err error) {
+	descriptor := &cd
+	descriptor.StorageGetter = s.sg
+	r, e := descriptor.DebitCents()
+	*reply, err = r, e
+	return err
+}
+
+func (s *Storage) DebitSMS(cd timespans.CallDescriptor, reply *float64) (err error) {
+	descriptor := &cd
+	descriptor.StorageGetter = s.sg
+	r, e := descriptor.DebitSMS()
+	*reply, err = r, e
+	return err
+}
+
+func (s *Storage) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
+	descriptor := &cd
+	descriptor.StorageGetter = s.sg
+	e := descriptor.DebitSeconds()
+	*reply, err = 0.0, e
+	return err
 }
 
 /*

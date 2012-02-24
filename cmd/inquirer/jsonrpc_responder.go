@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/rif/cgrates/timespans"
+	"log"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"log"
 )
 
 type Responder byte
@@ -13,9 +13,24 @@ type Responder byte
 /*
 RPC method thet provides the external RPC interface for getting the rating information.
 */
-func (r *Responder) Get(arg timespans.CallDescriptor, replay *timespans.CallCost) error {
-	*replay = *CallRater(&arg)
-	return nil
+func (r *Responder) GetGost(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
+	*replay = *GetCost(&arg)
+	return
+}
+
+func (r *Responder) DebitBalance(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay = Debit(&arg, "Storage.DebitCents")
+	return
+}
+
+func (r *Responder) DebitSMS(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay = Debit(&arg, "Storage.DebitSMS")
+	return
+}
+
+func (r *Responder) DebitSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay = Debit(&arg, "Storage.DebitSeconds")
+	return
 }
 
 /*

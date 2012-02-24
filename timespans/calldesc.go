@@ -36,6 +36,7 @@ type CallDescriptor struct {
 	TOR                                int
 	CstmId, Subject, DestinationPrefix string
 	TimeStart, TimeEnd                 time.Time
+	Amount                             float64
 	ActivationPeriods                  []*ActivationPeriod
 	StorageGetter                      StorageGetter
 }
@@ -235,6 +236,27 @@ func (cd *CallDescriptor) GetMaxSessionTime(maxSessionSeconds int) (seconds int,
 		}
 	}
 	return 0, nil
+}
+
+func (cd *CallDescriptor) DebitCents() (left float64, err error) {
+	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
+		return userBudget.debitMoneyBudget(cd.StorageGetter, cd.Amount), nil
+	}
+	return 0.0, err
+}
+
+func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
+	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
+		return userBudget.debitSMSBuget(cd.StorageGetter, cd.Amount)
+	}
+	return 0, err
+}
+
+func (cd *CallDescriptor) DebitSeconds() (err error) {
+	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
+		return userBudget.debitMinutesBudget(cd.StorageGetter, cd.Amount, cd.DestinationPrefix)
+	}
+	return err
 }
 
 /*

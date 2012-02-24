@@ -14,7 +14,7 @@ Structure conatining information about user's credit (minutes, cents, sms...).'
 type UserBudget struct {
 	Id                 string
 	Credit             float64
-	SmsCredit          int
+	SmsCredit          float64
 	ResetDayOfTheMonth int
 	TariffPlanId       string
 	tariffPlan         *TariffPlan
@@ -22,6 +22,9 @@ type UserBudget struct {
 	mux                sync.RWMutex
 }
 
+/*
+Error type for overflowed debit methods.
+*/
 type AmountTooBig byte
 
 func (a AmountTooBig) Error() string {
@@ -52,7 +55,7 @@ Serializes the user budget for the storage. Used for key-value storages.
 */
 func (ub *UserBudget) store() (result string) {
 	result += strconv.FormatFloat(ub.Credit, 'f', -1, 64) + ";"
-	result += strconv.Itoa(ub.SmsCredit) + ";"
+	result += strconv.FormatFloat(ub.SmsCredit, 'f', -1, 64) + ";"
 	result += strconv.Itoa(ub.ResetDayOfTheMonth) + ";"
 	result += ub.TariffPlanId + ";"
 	for _, mb := range ub.MinuteBuckets {
@@ -72,7 +75,7 @@ De-serializes the user budget for the storage. Used for key-value storages.
 func (ub *UserBudget) restore(input string) {
 	elements := strings.Split(input, ";")
 	ub.Credit, _ = strconv.ParseFloat(elements[0], 64)
-	ub.SmsCredit, _ = strconv.Atoi(elements[1])
+	ub.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
 	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[2])
 	ub.TariffPlanId = elements[3]
 	for _, mbs := range elements[4 : len(elements)-1] {
@@ -193,7 +196,7 @@ func (ub *UserBudget) debitMinutesBudget(sg StorageGetter, amount float64, prefi
 Debits some amount of user's SMS budget. Returns the remaining SMS in user's budget.
 If the amount is bigger than the budget than nothing wil be debited and an error will be returned
 */
-func (ub *UserBudget) debitSMSBuget(sg StorageGetter, amount int) (int, error) {
+func (ub *UserBudget) debitSMSBuget(sg StorageGetter, amount float64) (float64, error) {
 	ub.mux.Lock()
 	defer ub.mux.Unlock()
 	if ub.SmsCredit < amount {

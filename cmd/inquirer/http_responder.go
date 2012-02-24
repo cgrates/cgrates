@@ -1,11 +1,12 @@
 package main
 
-import(
+import (
+	"encoding/json"
 	"fmt"
+	"github.com/rif/cgrates/timespans"
 	"log"
 	"net/http"
-	"encoding/json"
-	"github.com/rif/cgrates/timespans"
+	"strconv"
 )
 
 type IncorrectParameters struct {
@@ -30,20 +31,83 @@ func getCostHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
 	cstmid, ok1 := r.Form["cstmid"]
-	subj, ok2 :=r.Form["subj"]
+	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	if !ok1 || !ok2 || !ok3 {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
-	callCost := CallRater(arg)
+	callCost := GetCost(arg)
 	enc.Encode(callCost)
 }
 
-func listenToHttpRequests(){
+/*
+curl "http://127.0.0.1:8000/getcost?cstmid=vdf&subj=rif&dest=0257@amount=100"
+*/
+func debitBalanceHandler(w http.ResponseWriter, r *http.Request) {
+	enc := json.NewEncoder(w)
+	r.ParseForm()
+	cstmid, ok1 := r.Form["cstmid"]
+	subj, ok2 := r.Form["subj"]
+	dest, ok3 := r.Form["dest"]
+	amount_s, ok4 := r.Form["amount"]
+	amount, err := strconv.ParseFloat(amount_s[0], 64)
+	if !ok1 || !ok2 || !ok3 || ok4 || err != nil {
+		enc.Encode(IncorrectParameters{"Incorrect parameters"})
+		return
+	}
+	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	result := Debit(arg, "Storage.DebitCents")
+	enc.Encode(result)
+}
+
+/*
+curl "http://127.0.0.1:8000/getcost?cstmid=vdf&subj=rif&dest=0257@amount=100"
+*/
+func debitSMSHandler(w http.ResponseWriter, r *http.Request) {
+	enc := json.NewEncoder(w)
+	r.ParseForm()
+	cstmid, ok1 := r.Form["cstmid"]
+	subj, ok2 := r.Form["subj"]
+	dest, ok3 := r.Form["dest"]
+	amount_s, ok4 := r.Form["amount"]
+	amount, err := strconv.ParseFloat(amount_s[0], 64)
+	if !ok1 || !ok2 || !ok3 || !ok4 || err != nil {
+		enc.Encode(IncorrectParameters{"Incorrect parameters"})
+		return
+	}
+	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	result := Debit(arg, "Storage.DebitSMS")
+	enc.Encode(result)
+}
+
+/*
+curl "http://127.0.0.1:8000/getcost?cstmid=vdf&subj=rif&dest=0257@amount=100"
+*/
+func debitSecondsHandler(w http.ResponseWriter, r *http.Request) {
+	enc := json.NewEncoder(w)
+	r.ParseForm()
+	cstmid, ok1 := r.Form["cstmid"]
+	subj, ok2 := r.Form["subj"]
+	dest, ok3 := r.Form["dest"]
+	amount_s, ok4 := r.Form["amount"]
+	amount, err := strconv.ParseFloat(amount_s[0], 64)
+	if !ok1 || !ok2 || !ok3 || !ok4 || err != nil {
+		enc.Encode(IncorrectParameters{"Incorrect parameters"})
+		return
+	}
+	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	result := Debit(arg, "Storage.DebitSeconds")
+	enc.Encode(result)
+}
+
+func listenToHttpRequests() {
 	http.HandleFunc("/", statusHandler)
 	http.HandleFunc("/getcost", getCostHandler)
+	http.HandleFunc("/debitbalance", debitBalanceHandler)
+	http.HandleFunc("/debitsms", debitSMSHandler)
+	http.HandleFunc("/debitseconds", debitSecondsHandler)
 	log.Print("The server is listening on ", *httpApiAddress)
 	http.ListenAndServe(*httpApiAddress, nil)
 }
