@@ -58,6 +58,14 @@ func (s *Storage) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (err
 	return err
 }
 
+func (s *Storage) GetMaxSessionTime(cd timespans.CallDescriptor, reply *float64) (err error) {
+	descriptor := &cd
+	descriptor.StorageGetter = s.sg
+	r, e := descriptor.GetMaxSessionTime()
+	*reply, err = r, e
+	return err
+}
+
 /*
 RPC method that trigers rater shutdown in case of server exit.
 */

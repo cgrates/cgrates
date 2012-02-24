@@ -331,3 +331,69 @@ func BenchmarkMongoGetCost(b *testing.B) {
 		cd.GetCost()
 	}
 }
+
+func BenchmarkKyotoSingleGetSessionTime(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.GetMaxSessionTime(100)
+	}
+}
+
+func BenchmarkKyotoMultipleGetSessionTime(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.GetMaxSessionTime(5400)
+	}
+}
+
+func BenchmarkRedisSingleGetSessionTime(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewRedisStorage("", 10)
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.GetMaxSessionTime(100)
+	}
+}
+
+func BenchmarkRedisMultipleGetSessionTime(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewRedisStorage("", 10)
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.GetMaxSessionTime(5400)
+	}
+}
+
+func BenchmarkMongoSingleGetSessionTime(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewMongoStorage("127.0.0.1", "test")
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.GetMaxSessionTime(100)
+	}
+}
+
+func BenchmarkMongoMultipleGetSessionTime(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewMongoStorage("127.0.0.1", "test")
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		cd.GetMaxSessionTime(5400)
+	}
+}

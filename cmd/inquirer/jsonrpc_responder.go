@@ -19,17 +19,22 @@ func (r *Responder) GetGost(arg timespans.CallDescriptor, replay *timespans.Call
 }
 
 func (r *Responder) DebitBalance(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = Debit(&arg, "Storage.DebitCents")
+	*replay = CallMethod(&arg, "Storage.DebitCents")
 	return
 }
 
 func (r *Responder) DebitSMS(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = Debit(&arg, "Storage.DebitSMS")
+	*replay = CallMethod(&arg, "Storage.DebitSMS")
 	return
 }
 
 func (r *Responder) DebitSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = Debit(&arg, "Storage.DebitSeconds")
+	*replay = CallMethod(&arg, "Storage.DebitSeconds")
+	return
+}
+
+func (r *Responder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay = CallMethod(&arg, "Storage.GetMaxSessionTime")
 	return
 }
 

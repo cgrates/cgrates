@@ -207,16 +207,16 @@ func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
 /*
 Returns the cost of a second in the present time conditions.
 */
-func (cd *CallDescriptor) GetMaxSessionTime(maxSessionSeconds int) (seconds int, err error) {
+func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	_, err = cd.RestoreFromStorage()
 	now := time.Now()
 	availableCredit := 0.0
 	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
 		availableCredit = userBudget.Credit
 	} else {
-		return maxSessionSeconds, err
+		return cd.Amount, err
 	}
-	orig_maxSessionSeconds := maxSessionSeconds
+	maxSessionSeconds := cd.Amount
 	for i := 0; i < 10; i++ {
 		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds))
 		ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
@@ -232,7 +232,7 @@ func (cd *CallDescriptor) GetMaxSessionTime(maxSessionSeconds int) (seconds int,
 		if cost < availableCredit {
 			return maxSessionSeconds, nil
 		} else { //decrease the period by 10% and try again
-			maxSessionSeconds -= int(float64(orig_maxSessionSeconds) * 0.1)
+			maxSessionSeconds -= cd.Amount * 0.1
 		}
 	}
 	return 0, nil

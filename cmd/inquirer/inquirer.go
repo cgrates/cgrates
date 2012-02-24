@@ -40,7 +40,7 @@ func GetCost(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
 /*
 The function that gets the information from the raters using balancer.
 */
-func Debit(key *timespans.CallDescriptor, method string) (reply float64) {
+func CallMethod(key *timespans.CallDescriptor, method string) (reply float64) {
 	err := errors.New("") //not nil value
 	for err != nil {
 		client := raterList.Balance()
