@@ -12,14 +12,15 @@ import (
 Structure conatining information about user's credit (minutes, cents, sms...).'
 */
 type UserBudget struct {
-	Id                 string
-	Credit             float64
-	SmsCredit          float64
-	ResetDayOfTheMonth int
-	TariffPlanId       string
-	tariffPlan         *TariffPlan
-	MinuteBuckets      []*MinuteBucket
-	mux                sync.RWMutex
+	Id                    string
+	Credit                float64
+	SmsCredit             float64
+	VolumeDiscountSeconds float64
+	ResetDayOfTheMonth    int
+	TariffPlanId          string
+	tariffPlan            *TariffPlan
+	MinuteBuckets         []*MinuteBucket
+	mux                   sync.RWMutex
 }
 
 /*
@@ -56,6 +57,7 @@ Serializes the user budget for the storage. Used for key-value storages.
 func (ub *UserBudget) store() (result string) {
 	result += strconv.FormatFloat(ub.Credit, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(ub.SmsCredit, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(ub.VolumeDiscountSeconds, 'f', -1, 64) + ";"
 	result += strconv.Itoa(ub.ResetDayOfTheMonth) + ";"
 	result += ub.TariffPlanId + ";"
 	for _, mb := range ub.MinuteBuckets {
@@ -76,9 +78,10 @@ func (ub *UserBudget) restore(input string) {
 	elements := strings.Split(input, ";")
 	ub.Credit, _ = strconv.ParseFloat(elements[0], 64)
 	ub.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
-	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[2])
-	ub.TariffPlanId = elements[3]
-	for _, mbs := range elements[4 : len(elements)-1] {
+	ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[2], 64)
+	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[3])
+	ub.TariffPlanId = elements[4]
+	for _, mbs := range elements[5 : len(elements)-1] {
 		mb := &MinuteBucket{}
 		mbse := strings.Split(mbs, "|")
 		mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)
@@ -104,6 +107,8 @@ func (ub *UserBudget) getTariffPlan(storage StorageGetter) (tp *TariffPlan) {
 Returns user's avaliable minutes for the specified destination
 */
 func (ub *UserBudget) getSecondsForPrefix(sg StorageGetter, prefix string) (seconds float64, bucketList bucketsorter) {
+	ub.mux.Lock()
+	defer ub.mux.Unlock()
 	if len(ub.MinuteBuckets) == 0 {
 		log.Print("There are no minute buckets to check for user", ub.Id)
 		return
@@ -190,6 +195,13 @@ func (ub *UserBudget) debitMinutesBudget(sg StorageGetter, amount float64, prefi
 	}
 	sg.SetUserBudget(ub)
 	return nil
+}
+
+func (ub *UserBudget) setVolumeDiscountSeconds(sg StorageGetter, amount float64) error {
+	ub.mux.Lock()
+	defer ub.mux.Unlock()
+	ub.VolumeDiscountSeconds = amount
+	return sg.SetUserBudget(ub)
 }
 
 /*

@@ -34,12 +34,12 @@ func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 	return aps, err
 }
 
-func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) {
+func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
 	result := ""
 	for _, ap := range aps {
 		result += ap.store() + "\n"
 	}
-	ks.db.Set(key, result)
+	return ks.db.Set(key, result)
 }
 
 func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
@@ -50,8 +50,8 @@ func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error
 	return
 }
 
-func (ks *KyotoStorage) SetDestination(dest *Destination) {
-	ks.db.Set(dest.Id, dest.store())
+func (ks *KyotoStorage) SetDestination(dest *Destination) error {
+	return ks.db.Set(dest.Id, dest.store())
 }
 
 func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
@@ -62,8 +62,8 @@ func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
 	return
 }
 
-func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) {
-	ks.db.Set(tp.Id, tp.store())
+func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) error {
+	return ks.db.Set(tp.Id, tp.store())
 }
 
 func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
@@ -74,6 +74,6 @@ func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
 	return
 }
 
-func (ks *KyotoStorage) SetUserBudget(ub *UserBudget) {
-	ks.db.Set(ub.Id, ub.store())
+func (ks *KyotoStorage) SetUserBudget(ub *UserBudget) error {
+	return ks.db.Set(ub.Id, ub.store())
 }

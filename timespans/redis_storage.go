@@ -35,13 +35,13 @@ func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 	return aps, err
 }
 
-func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) {
+func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
 	//.db.Select(rs.dbNb)
 	result := ""
 	for _, ap := range aps {
 		result += ap.store() + "\n"
 	}
-	rs.db.Set(key, result)
+	return rs.db.Set(key, result)
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
@@ -53,9 +53,9 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 	return
 }
 
-func (rs *RedisStorage) SetDestination(dest *Destination) {
+func (rs *RedisStorage) SetDestination(dest *Destination) error {
 	//rs.db.Select(rs.dbNb + 1)
-	rs.db.Set(dest.Id, dest.store())
+	return rs.db.Set(dest.Id, dest.store())
 }
 
 func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
@@ -67,9 +67,9 @@ func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) {
+func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) error {
 	//rs.db.Select(rs.dbNb + 2)
-	rs.db.Set(tp.Id, tp.store())
+	return rs.db.Set(tp.Id, tp.store())
 }
 
 func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
@@ -81,7 +81,7 @@ func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetUserBudget(ub *UserBudget) {
+func (rs *RedisStorage) SetUserBudget(ub *UserBudget) error {
 	//rs.db.Select(rs.dbNb + 3)
-	rs.db.Set(ub.Id, ub.store())
+	return rs.db.Set(ub.Id, ub.store())
 }

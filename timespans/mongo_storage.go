@@ -43,9 +43,9 @@ func (ms *MongoStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 	return result.ActivationPeriods, err
 }
 
-func (ms *MongoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) {
+func (ms *MongoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
 	ndb := ms.db.C("activationPeriods")
-	ndb.Insert(&KeyValue{key, aps})
+	return ndb.Insert(&KeyValue{key, aps})
 }
 
 func (ms *MongoStorage) GetDestination(key string) (result *Destination, err error) {
@@ -55,9 +55,9 @@ func (ms *MongoStorage) GetDestination(key string) (result *Destination, err err
 	return
 }
 
-func (ms *MongoStorage) SetDestination(dest *Destination) {
+func (ms *MongoStorage) SetDestination(dest *Destination) error {
 	ndb := ms.db.C("destinations")
-	ndb.Insert(&dest)
+	return ndb.Insert(&dest)
 }
 
 func (ms *MongoStorage) GetTariffPlan(key string) (result *TariffPlan, err error) {
@@ -67,9 +67,9 @@ func (ms *MongoStorage) GetTariffPlan(key string) (result *TariffPlan, err error
 	return
 }
 
-func (ms *MongoStorage) SetTariffPlan(tp *TariffPlan) {
+func (ms *MongoStorage) SetTariffPlan(tp *TariffPlan) error {
 	ndb := ms.db.C("tariffPlans")
-	ndb.Insert(&tp)
+	return ndb.Insert(&tp)
 }
 
 func (ms *MongoStorage) GetUserBudget(key string) (result *UserBudget, err error) {
@@ -79,7 +79,7 @@ func (ms *MongoStorage) GetUserBudget(key string) (result *UserBudget, err error
 	return
 }
 
-func (ms *MongoStorage) SetUserBudget(ub *UserBudget) {
+func (ms *MongoStorage) SetUserBudget(ub *UserBudget) error {
 	ndb := ms.db.C("userBudget")
-	ndb.Insert(&ub)
+	return ndb.Insert(&ub)
 }
