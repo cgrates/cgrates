@@ -10,7 +10,7 @@ var (
 	retea     = &Destination{Id: "retea", Prefixes: []string{"0723", "0724"}}
 )
 
-func TestGetSeconds(t *testing.T) {
+func TestGetSecondsForPrefix(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, destination: nationale}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, destination: retea}
 	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
@@ -303,5 +303,16 @@ func BenchmarkUserBudgetMongoStoreRestore(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		getter.SetUserBudget(rifsBudget)
 		getter.GetUserBudget(rifsBudget.Id)
+	}
+}
+
+func BenchmarkGetSecondsForPrefix(b *testing.B) {
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, destination: nationale}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, destination: retea}
+	tf1 := &TariffPlan{MinuteBuckets: []*MinuteBucket{b1, b2}}
+
+	ub1 := &UserBudget{Id: "rif", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 200, tariffPlan: tf1, ResetDayOfTheMonth: 10}
+	for i := 0; i < b.N; i++ {
+		ub1.getSecondsForPrefix(nil, "0723")
 	}
 }

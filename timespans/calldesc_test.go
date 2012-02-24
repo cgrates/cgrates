@@ -186,8 +186,8 @@ func TestMinutesCost(t *testing.T) {
 func TestMaxSessionTimeNoUserBudget(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", StorageGetter: getter}
-	result, err := cd.GetMaxSessionTime(1000)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", StorageGetter: getter, Amount: 1000}
+	result, err := cd.GetMaxSessionTime()
 	if result != 1000 || err != nil {
 		t.Errorf("Expected %v was %v", 1000, result)
 	}
@@ -196,10 +196,20 @@ func TestMaxSessionTimeNoUserBudget(t *testing.T) {
 func TestMaxSessionTimeWithUserBudget(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
-	result, err := cd.GetMaxSessionTime(5400)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter, Amount: 5400}
+	result, err := cd.GetMaxSessionTime()
 	if result != 1080 || err != nil {
 		t.Errorf("Expected %v was %v", 1080, result)
+	}
+}
+
+func TestMaxSessionTimeNoCredit(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "broker", DestinationPrefix: "0723", StorageGetter: getter, Amount: 5400}
+	result, err := cd.GetMaxSessionTime()
+	if result != 100 || err != nil {
+		t.Errorf("Expected %v was %v", 100, result)
 	}
 }
 
@@ -336,10 +346,10 @@ func BenchmarkKyotoSingleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter, Amount: 100}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime(100)
+		cd.GetMaxSessionTime()
 	}
 }
 
@@ -347,10 +357,10 @@ func BenchmarkKyotoMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter, Amount: 5400}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime(5400)
+		cd.GetMaxSessionTime()
 	}
 }
 
@@ -358,10 +368,10 @@ func BenchmarkRedisSingleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewRedisStorage("", 10)
 	defer getter.Close()
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter, Amount: 100}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime(100)
+		cd.GetMaxSessionTime()
 	}
 }
 
@@ -369,10 +379,10 @@ func BenchmarkRedisMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewRedisStorage("", 10)
 	defer getter.Close()
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter, Amount: 5400}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime(5400)
+		cd.GetMaxSessionTime()
 	}
 }
 
@@ -380,10 +390,10 @@ func BenchmarkMongoSingleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter, Amount: 100}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime(100)
+		cd.GetMaxSessionTime()
 	}
 }
 
@@ -391,9 +401,9 @@ func BenchmarkMongoMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter}
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", StorageGetter: getter, Amount: 5400}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime(5400)
+		cd.GetMaxSessionTime()
 	}
 }
