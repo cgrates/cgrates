@@ -43,7 +43,10 @@ func TestDestinationKyotoStore(t *testing.T) {
 }
 
 func TestDestinationRedisStore(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	getter, err := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	if err != nil {
+		return
+	}
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	getter.SetDestination(nationale)
@@ -54,7 +57,10 @@ func TestDestinationRedisStore(t *testing.T) {
 }
 
 func TestDestinationMongoStore(t *testing.T) {
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
+	getter, err := NewMongoStorage("127.0.0.1", "test")
+	if err != nil {
+		return
+	}
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	getter.SetDestination(nationale)

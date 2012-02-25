@@ -95,7 +95,10 @@ func TestUserBudgetRedisStore(t *testing.T) {
 }
 
 func TestUserBudgetMongoStore(t *testing.T) {
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
+	getter, err := NewMongoStorage("127.0.0.1", "test")
+	if err != nil {
+		return
+	}
 	defer getter.Close()
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}

@@ -35,15 +35,15 @@ var (
 	redispass   = flag.String("pass", "", "redis database password")
 	apfile      = flag.String("apfile", "ap.json", "Activation Periods containing intervals file")
 	destfile    = flag.String("destfile", "dest.json", "Destinations file")
-	tpfile    = flag.String("tpfile", "tp.json", "Tariff plans file")
-	ubfile    = flag.String("ubfile", "ub.json", "User budgets file")
+	tpfile      = flag.String("tpfile", "tp.json", "Tariff plans file")
+	ubfile      = flag.String("ubfile", "ub.json", "User budgets file")
 )
 
 func writeToStorage(storage timespans.StorageGetter,
-					callDescriptors []*timespans.CallDescriptor,
-					destinations []*timespans.Destination,
-					tariffPlans []*timespans.TariffPlan,
-					userBudgets []*timespans.UserBudget) {
+	callDescriptors []*timespans.CallDescriptor,
+	destinations []*timespans.Destination,
+	tariffPlans []*timespans.TariffPlan,
+	userBudgets []*timespans.UserBudget) {
 	for _, cd := range callDescriptors {
 		storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
 		log.Printf("Storing %q", cd.GetKey())

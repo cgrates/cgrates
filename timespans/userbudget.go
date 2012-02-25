@@ -79,13 +79,11 @@ func (ub *UserBudget) store() (result string) {
 	result += strconv.FormatFloat(ub.VolumeDiscountSeconds, 'f', -1, 64) + ";"
 	result += strconv.Itoa(ub.ResetDayOfTheMonth) + ";"
 	result += ub.TariffPlanId + ";"
-	for _, mb := range ub.MinuteBuckets {
-		var mbs string
-		mbs += strconv.Itoa(int(mb.Seconds)) + "|"
-		mbs += strconv.Itoa(int(mb.Priority)) + "|"
-		mbs += strconv.FormatFloat(mb.Price, 'f', -1, 64) + "|"
-		mbs += mb.DestinationId
-		result += mbs + ";"
+	for i, mb := range ub.MinuteBuckets {
+		if i > 0 {
+			result += ","
+		}
+		result += mb.store()
 	}
 	return
 }
@@ -101,14 +99,9 @@ func (ub *UserBudget) restore(input string) {
 	ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[3], 64)
 	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[4])
 	ub.TariffPlanId = elements[5]
-	for _, mbs := range elements[6 : len(elements)-1] {
+	for _, mbs := range strings.Split(elements[6], ",") {
 		mb := &MinuteBucket{}
-		mbse := strings.Split(mbs, "|")
-		mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)
-		mb.Priority, _ = strconv.Atoi(mbse[1])
-		mb.Price, _ = strconv.ParseFloat(mbse[2], 64)
-		mb.DestinationId = mbse[3]
-
+		mb.restore(mbs)
 		ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
 	}
 }
@@ -127,10 +120,8 @@ func (ub *UserBudget) getTariffPlan(storage StorageGetter) (tp *TariffPlan, err 
 Returns user's avaliable minutes for the specified destination
 */
 func (ub *UserBudget) getSecondsForPrefix(sg StorageGetter, prefix string) (seconds float64, bucketList bucketsorter) {
-	ub.mux.Lock()
-	defer ub.mux.Unlock()
 	if len(ub.MinuteBuckets) == 0 {
-		log.Print("There are no minute buckets to check for user", ub.Id)
+		log.Print("There are no minute buckets to check for user: ", ub.Id)
 		return
 	}
 
@@ -217,6 +208,9 @@ func (ub *UserBudget) debitMinutesBudget(sg StorageGetter, amount float64, prefi
 	return nil
 }
 
+/*
+Adds the spcifeied amount of seconds to the vlume discount budget.
+*/
 func (ub *UserBudget) setVolumeDiscountSeconds(sg StorageGetter, amount float64) error {
 	ub.mux.Lock()
 	defer ub.mux.Unlock()
@@ -224,6 +218,9 @@ func (ub *UserBudget) setVolumeDiscountSeconds(sg StorageGetter, amount float64)
 	return sg.SetUserBudget(ub)
 }
 
+/*
+Resets the user budget items to their tariff plan values.
+*/
 func (ub *UserBudget) resetUserBudget(sg StorageGetter) (err error) {
 	ub.mux.Lock()
 	defer ub.mux.Unlock()

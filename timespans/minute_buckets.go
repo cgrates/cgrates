@@ -17,7 +17,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package timespans
 
-import "math"
+import (
+	"math"
+	"strconv"
+	"strings"
+)
 
 type MinuteBucket struct {
 	Seconds       float64
@@ -26,6 +30,28 @@ type MinuteBucket struct {
 	DestinationId string
 	destination   *Destination
 	precision     int
+}
+
+/*
+Serializes the minute bucket for the storage. Used for key-value storages.
+*/
+func (mb *MinuteBucket) store() (result string) {
+	result += strconv.Itoa(int(mb.Seconds)) + "|"
+	result += strconv.Itoa(int(mb.Priority)) + "|"
+	result += strconv.FormatFloat(mb.Price, 'f', -1, 64) + "|"
+	result += mb.DestinationId
+	return
+}
+
+/*
+De-serializes the minute bucket for the storage. Used for key-value storages.
+*/
+func (mb *MinuteBucket) restore(input string) {
+	mbse := strings.Split(input, "|")
+	mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)
+	mb.Priority, _ = strconv.Atoi(mbse[1])
+	mb.Price, _ = strconv.ParseFloat(mbse[2], 64)
+	mb.DestinationId = mbse[3]
 }
 
 /*

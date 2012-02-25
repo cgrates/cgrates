@@ -27,10 +27,20 @@ Structure describing a tariff plan's number of bonus items. It is uset to restor
 these numbers to the user budget every month.
 */
 type TariffPlan struct {
-	Id            string
-	SmsCredit     float64
-	Traffic       float64
-	MinuteBuckets []*MinuteBucket
+	Id                        string
+	SmsCredit                 float64
+	Traffic                   float64
+	ReceivedCallsSecondsLimit float64
+	VolumeDiscountThresholds  []*VolumeDiscount
+	MinuteBuckets             []*MinuteBucket
+}
+
+/*
+Structure that holds the thresholds and  for which 
+*/
+type VolumeDiscount struct {
+	Volume   float64
+	Discount float64 // procentage
 }
 
 /*
@@ -39,14 +49,23 @@ Serializes the tariff plan for the storage. Used for key-value storages.
 func (tp *TariffPlan) store() (result string) {
 	result += strconv.FormatFloat(tp.SmsCredit, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(tp.Traffic, 'f', -1, 64) + ";"
-	for _, mb := range tp.MinuteBuckets {
-		var mbs string
-		mbs += strconv.Itoa(int(mb.Seconds)) + "|"
-		mbs += strconv.Itoa(int(mb.Priority)) + "|"
-		mbs += strconv.FormatFloat(mb.Price, 'f', -1, 64) + "|"
-		mbs += mb.DestinationId
-		result += mbs + ";"
+	result += strconv.FormatFloat(tp.ReceivedCallsSecondsLimit, 'f', -1, 64) + ";"
+	for i, mb := range tp.MinuteBuckets {
+		if i > 0 {
+			result += ","
+		}
+		result += mb.store()
 	}
+	result += ";"
+	for i, vd := range tp.VolumeDiscountThresholds {
+		if i > 0 {
+			result += ","
+		}
+		result += strconv.FormatFloat(vd.Volume, 'f', -1, 64) +
+			"|" +
+			strconv.FormatFloat(vd.Discount, 'f', -1, 64)
+	}
+	result = strings.TrimRight(result, ";")
 	return
 }
 
@@ -57,14 +76,17 @@ func (tp *TariffPlan) restore(input string) {
 	elements := strings.Split(input, ";")
 	tp.SmsCredit, _ = strconv.ParseFloat(elements[0], 64)
 	tp.Traffic, _ = strconv.ParseFloat(elements[1], 64)
-	for _, mbs := range elements[2 : len(elements)-1] {
+	tp.ReceivedCallsSecondsLimit, _ = strconv.ParseFloat(elements[2], 64)
+	for _, mbs := range strings.Split(elements[3], ",") {
 		mb := &MinuteBucket{}
-		mbse := strings.Split(mbs, "|")
-		mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)
-		mb.Priority, _ = strconv.Atoi(mbse[1])
-		mb.Price, _ = strconv.ParseFloat(mbse[2], 64)
-		mb.DestinationId = mbse[3]
-
+		mb.restore(mbs)
 		tp.MinuteBuckets = append(tp.MinuteBuckets, mb)
+	}
+	for _, vdss := range strings.Split(elements[4], ",") {
+		vd := &VolumeDiscount{}
+		vds := strings.Split(vdss, "|")
+		vd.Volume, _ = strconv.ParseFloat(vds[0], 64)
+		vd.Discount, _ = strconv.ParseFloat(vds[1], 64)
+		tp.VolumeDiscountThresholds = append(tp.VolumeDiscountThresholds, vd)
 	}
 }

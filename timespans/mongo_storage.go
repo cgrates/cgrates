@@ -20,6 +20,7 @@ package timespans
 import (
 	"launchpad.net/mgo"
 	"launchpad.net/mgo/bson"
+	"log"
 )
 
 type KeyValue struct {
@@ -35,7 +36,8 @@ type MongoStorage struct {
 func NewMongoStorage(address, db string) (*MongoStorage, error) {
 	session, err := mgo.Dial(address)
 	if err != nil {
-		panic(err)
+		log.Print("Could not contact mongo server")
+		return nil, err
 	}
 	session.SetMode(mgo.Monotonic, true)
 

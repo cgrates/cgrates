@@ -86,7 +86,10 @@ func TestRedisGetCost(t *testing.T) {
 }
 
 func TestMongoGetCost(t *testing.T) {
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
+	getter, err := NewMongoStorage("127.0.0.1", "test")
+	if err != nil {
+		return
+	}
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
