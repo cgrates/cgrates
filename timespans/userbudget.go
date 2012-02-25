@@ -116,6 +116,21 @@ func (ub *UserBudget) getTariffPlan(storage StorageGetter) (tp *TariffPlan, err 
 	return ub.tariffPlan, err
 }
 
+func (ub *UserBudget) getVolumeDiscount(storage StorageGetter) (float64, error) {
+	tariffPlan, err := ub.getTariffPlan(storage)
+	if err != nil {
+		return 0.0, err
+	}
+	thresholds := len(tariffPlan.VolumeDiscountThresholds)
+	for i, vd := range tariffPlan.VolumeDiscountThresholds {
+		if ub.VolumeDiscountSeconds >= vd.Volume &&
+			(i > thresholds-2 || ub.VolumeDiscountSeconds < tariffPlan.VolumeDiscountThresholds[i+1].Volume) {
+			return vd.Discount, nil
+		}
+	}
+	return 0, nil
+}
+
 /*
 Returns user's avaliable minutes for the specified destination
 */

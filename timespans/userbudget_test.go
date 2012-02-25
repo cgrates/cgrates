@@ -295,6 +295,37 @@ func TestResetUserBudget(t *testing.T) {
 
 }
 
+func TestGetVolumeDiscountHaving(t *testing.T) {
+	vd := &VolumeDiscount{100, 11}
+	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
+	rifsBudget := &UserBudget{Id: "other", Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10, VolumeDiscountSeconds: 100}
+	result, err := rifsBudget.getVolumeDiscount(nil)
+	if err != nil || result != 11 {
+		t.Errorf("Expected %v was %v", 11, result)
+	}
+}
+
+func TestGetVolumeDiscountNotHaving(t *testing.T) {
+	vd := &VolumeDiscount{100, 11}
+	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
+	rifsBudget := &UserBudget{Id: "other", Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10, VolumeDiscountSeconds: 99}
+	result, err := rifsBudget.getVolumeDiscount(nil)
+	if err != nil || result != 0 {
+		t.Errorf("Expected %v was %v", 0, result)
+	}
+}
+
+func TestGetVolumeDiscountNotSteps(t *testing.T) {
+	vd1 := &VolumeDiscount{100, 11}
+	vd2 := &VolumeDiscount{500, 20}
+	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd1, vd2}}
+	rifsBudget := &UserBudget{Id: "other", Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10, VolumeDiscountSeconds: 551}
+	result, err := rifsBudget.getVolumeDiscount(nil)
+	if err != nil || result != 20 {
+		t.Errorf("Expected %v was %v", 20, result)
+	}
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
