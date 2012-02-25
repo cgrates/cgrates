@@ -11,7 +11,8 @@ these numbers to the user budget every month.
 */
 type TariffPlan struct {
 	Id            string
-	SmsCredit     int
+	SmsCredit     float64
+	Traffic       float64
 	MinuteBuckets []*MinuteBucket
 }
 
@@ -19,7 +20,8 @@ type TariffPlan struct {
 Serializes the tariff plan for the storage. Used for key-value storages.
 */
 func (tp *TariffPlan) store() (result string) {
-	result += strconv.Itoa(tp.SmsCredit) + ";"
+	result += strconv.FormatFloat(tp.SmsCredit, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(tp.Traffic, 'f', -1, 64) + ";"
 	for _, mb := range tp.MinuteBuckets {
 		var mbs string
 		mbs += strconv.Itoa(int(mb.Seconds)) + "|"
@@ -36,8 +38,9 @@ De-serializes the tariff plan for the storage. Used for key-value storages.
 */
 func (tp *TariffPlan) restore(input string) {
 	elements := strings.Split(input, ";")
-	tp.SmsCredit, _ = strconv.Atoi(elements[0])
-	for _, mbs := range elements[1 : len(elements)-1] {
+	tp.SmsCredit, _ = strconv.ParseFloat(elements[0], 64)
+	tp.Traffic, _ = strconv.ParseFloat(elements[1], 64)
+	for _, mbs := range elements[2 : len(elements)-1] {
 		mb := &MinuteBucket{}
 		mbse := strings.Split(mbs, "|")
 		mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)

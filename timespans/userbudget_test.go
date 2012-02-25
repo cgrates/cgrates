@@ -252,6 +252,29 @@ func TestDebitMoreSMSBudget(t *testing.T) {
 	}
 }
 
+func TestResetUserBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
+	seara := &TariffPlan{Id: "seara", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10}
+	rifsBudget.MinuteBuckets[0].Seconds, rifsBudget.MinuteBuckets[1].Seconds = 0.0, 0.0
+	err := rifsBudget.resetUserBudget(getter)
+	if err != nil ||
+		rifsBudget.MinuteBuckets[0] == b1 ||
+		rifsBudget.MinuteBuckets[0].Seconds != seara.MinuteBuckets[0].Seconds ||
+		rifsBudget.MinuteBuckets[1].Seconds != seara.MinuteBuckets[1].Seconds ||
+		rifsBudget.SmsCredit != seara.SmsCredit {
+		t.Log(rifsBudget.MinuteBuckets[0])
+		t.Log(rifsBudget.MinuteBuckets[1])
+		t.Log(rifsBudget.SmsCredit)
+		t.Log(rifsBudget.Traffic)
+		t.Errorf("Expected %v was %v", seara, rifsBudget)
+	}
+
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {

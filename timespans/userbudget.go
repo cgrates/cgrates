@@ -15,6 +15,7 @@ type UserBudget struct {
 	Id                    string
 	Credit                float64
 	SmsCredit             float64
+	Traffic               float64
 	VolumeDiscountSeconds float64
 	ResetDayOfTheMonth    int
 	TariffPlanId          string
@@ -57,6 +58,7 @@ Serializes the user budget for the storage. Used for key-value storages.
 func (ub *UserBudget) store() (result string) {
 	result += strconv.FormatFloat(ub.Credit, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(ub.SmsCredit, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(ub.Traffic, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(ub.VolumeDiscountSeconds, 'f', -1, 64) + ";"
 	result += strconv.Itoa(ub.ResetDayOfTheMonth) + ";"
 	result += ub.TariffPlanId + ";"
@@ -78,10 +80,11 @@ func (ub *UserBudget) restore(input string) {
 	elements := strings.Split(input, ";")
 	ub.Credit, _ = strconv.ParseFloat(elements[0], 64)
 	ub.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
-	ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[2], 64)
-	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[3])
-	ub.TariffPlanId = elements[4]
-	for _, mbs := range elements[5 : len(elements)-1] {
+	ub.Traffic, _ = strconv.ParseFloat(elements[2], 64)
+	ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[3], 64)
+	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[4])
+	ub.TariffPlanId = elements[5]
+	for _, mbs := range elements[6 : len(elements)-1] {
 		mb := &MinuteBucket{}
 		mbse := strings.Split(mbs, "|")
 		mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)
@@ -96,11 +99,11 @@ func (ub *UserBudget) restore(input string) {
 /*
 Returns the tariff plan loading it from the storage if necessary.
 */
-func (ub *UserBudget) getTariffPlan(storage StorageGetter) (tp *TariffPlan) {
+func (ub *UserBudget) getTariffPlan(storage StorageGetter) (tp *TariffPlan, err error) {
 	if ub.tariffPlan == nil {
-		ub.tariffPlan, _ = storage.GetTariffPlan(ub.TariffPlanId)
+		ub.tariffPlan, err = storage.GetTariffPlan(ub.TariffPlanId)
 	}
-	return ub.tariffPlan
+	return ub.tariffPlan, err
 }
 
 /*
@@ -202,6 +205,25 @@ func (ub *UserBudget) setVolumeDiscountSeconds(sg StorageGetter, amount float64)
 	defer ub.mux.Unlock()
 	ub.VolumeDiscountSeconds = amount
 	return sg.SetUserBudget(ub)
+}
+
+func (ub *UserBudget) resetUserBudget(sg StorageGetter) (err error) {
+	ub.mux.Lock()
+	defer ub.mux.Unlock()
+	if tp, err := ub.getTariffPlan(sg); err == nil {
+		ub.SmsCredit = tp.SmsCredit
+		ub.Traffic = tp.Traffic
+		ub.MinuteBuckets = make([]*MinuteBucket, 0)
+		for _, bucket := range tp.MinuteBuckets {
+			mb := &MinuteBucket{Seconds: bucket.Seconds,
+				Priority:      bucket.Priority,
+				Price:         bucket.Price,
+				DestinationId: bucket.DestinationId}
+			ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
+		}
+		err = sg.SetUserBudget(ub)
+	}
+	return
 }
 
 /*
