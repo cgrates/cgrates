@@ -34,6 +34,7 @@ type UserBudget struct {
 	SmsCredit             float64
 	Traffic               float64
 	VolumeDiscountSeconds float64
+	ReceivedCallSeconds   float64
 	ResetDayOfTheMonth    int
 	TariffPlanId          string
 	tariffPlan            *TariffPlan
@@ -77,6 +78,7 @@ func (ub *UserBudget) store() (result string) {
 	result += strconv.FormatFloat(ub.SmsCredit, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(ub.Traffic, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(ub.VolumeDiscountSeconds, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(ub.ReceivedCallSeconds, 'f', -1, 64) + ";"
 	result += strconv.Itoa(ub.ResetDayOfTheMonth) + ";"
 	result += ub.TariffPlanId + ";"
 	for i, mb := range ub.MinuteBuckets {
@@ -97,9 +99,10 @@ func (ub *UserBudget) restore(input string) {
 	ub.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
 	ub.Traffic, _ = strconv.ParseFloat(elements[2], 64)
 	ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[3], 64)
-	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[4])
-	ub.TariffPlanId = elements[5]
-	for _, mbs := range strings.Split(elements[6], ",") {
+	ub.ReceivedCallSeconds, _ = strconv.ParseFloat(elements[4], 64)
+	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[5])
+	ub.TariffPlanId = elements[6]
+	for _, mbs := range strings.Split(elements[7], ",") {
 		mb := &MinuteBucket{}
 		mb.restore(mbs)
 		ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
@@ -227,12 +230,28 @@ func (ub *UserBudget) debitMinutesBudget(sg StorageGetter, amount float64, prefi
 }
 
 /*
-Adds the spcifeied amount of seconds to the vlume discount budget.
+Serts the volume discount seconds budget to the specified amount.
 */
 func (ub *UserBudget) setVolumeDiscountSeconds(sg StorageGetter, amount float64) error {
 	ub.mux.Lock()
 	defer ub.mux.Unlock()
 	ub.VolumeDiscountSeconds = amount
+	return sg.SetUserBudget(ub)
+}
+
+/*
+Adds the spcifeied amount of seconds to the reci.
+*/
+func (ub *UserBudget) addReceivedCallSeconds(sg StorageGetter, amount float64) error {
+	ub.mux.Lock()
+	defer ub.mux.Unlock()
+	ub.ReceivedCallSeconds += amount
+	if tariffPlan, err := ub.getTariffPlan(sg); tariffPlan != nil && err == nil {
+		if ub.ReceivedCallSeconds >= tariffPlan.ReceivedCallsSecondsLimit {
+			ub.ReceivedCallSeconds -= tariffPlan.ReceivedCallsSecondsLimit
+			// do the dew
+		}
+	}
 	return sg.SetUserBudget(ub)
 }
 
@@ -269,6 +288,7 @@ func (ub *UserBudget) debitSMSBuget(sg StorageGetter, amount float64) (float64, 
 		return ub.SmsCredit, new(AmountTooBig)
 	}
 	ub.SmsCredit -= amount
+
 	sg.SetUserBudget(ub)
 	return ub.SmsCredit, nil
 }
