@@ -239,7 +239,7 @@ func TestGetCostWithVolumeDiscount(t *testing.T) {
 	vd1 := &VolumeDiscount{100, 10}
 	vd2 := &VolumeDiscount{500, 20}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd1, vd2}}
-	rifsBudget := &UserBudget{Id: "other", Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10, VolumeDiscountSeconds: 105}
+	rifsBudget := &UserBudget{Id: "rif", Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10, VolumeDiscountSeconds: 105}
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", TimeStart: t1, TimeEnd: t2, storageGetter: getter, userBudget: rifsBudget}

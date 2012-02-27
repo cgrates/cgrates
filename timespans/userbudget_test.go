@@ -148,6 +148,18 @@ func TestDebitMoreMoneyBudget(t *testing.T) {
 	}
 }
 
+func TestDebitNegativeMoneyBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.0, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, ResetDayOfTheMonth: 10}
+	result := rifsBudget.debitMoneyBudget(getter, -15)
+	if rifsBudget.Credit != 36 || result != rifsBudget.Credit {
+		t.Errorf("Expected %v was %v", 36, rifsBudget.Credit)
+	}
+}
+
 func TestDebitMinuteBudget(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
@@ -236,6 +248,32 @@ func TestDebitPriceMoreMinuteBudget(t *testing.T) {
 	}
 }
 
+func TestDebitPriceNegativeMinuteBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.0, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 1.0, DestinationId: "retea"}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, ResetDayOfTheMonth: 10}
+	err := rifsBudget.debitMinutesBudget(getter, -15, "0723")
+	if b2.Seconds != 115 || b1.Seconds != 10 || err != nil || rifsBudget.Credit != 36 {
+		t.Log(b1, b2, err)
+		t.Errorf("Expected %v was %v", 36, rifsBudget.Credit)
+	}
+}
+
+func TestDebitNegativeMinuteBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.0, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, ResetDayOfTheMonth: 10}
+	err := rifsBudget.debitMinutesBudget(getter, -15, "0723")
+	if b2.Seconds != 115 || b1.Seconds != 10 || err != nil || rifsBudget.Credit != 21 {
+		t.Log(b1, b2, err)
+		t.Errorf("Expected %v was %v", 21, rifsBudget.Credit)
+	}
+}
+
 func TestDebitSMSBudget(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
@@ -269,6 +307,18 @@ func TestDebitMoreSMSBudget(t *testing.T) {
 	result, err := rifsBudget.debitSMSBuget(getter, 110)
 	if rifsBudget.SmsCredit != 100 || result != rifsBudget.SmsCredit || err == nil {
 		t.Errorf("Expected %v was %v", 100, rifsBudget.SmsCredit)
+	}
+}
+
+func TestDebitNegativeSMSBudget(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.0, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
+	rifsBudget := &UserBudget{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, Credit: 21, SmsCredit: 100, ResetDayOfTheMonth: 10}
+	result, err := rifsBudget.debitSMSBuget(getter, -15)
+	if rifsBudget.SmsCredit != 115 || result != rifsBudget.SmsCredit || err != nil {
+		t.Errorf("Expected %v was %v", 115, rifsBudget.SmsCredit)
 	}
 }
 

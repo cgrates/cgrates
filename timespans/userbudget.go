@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"log"
+	// "log"
 	"sort"
 	"strconv"
 	"strings"
@@ -139,7 +139,7 @@ Returns user's avaliable minutes for the specified destination
 */
 func (ub *UserBudget) getSecondsForPrefix(sg StorageGetter, prefix string) (seconds float64, bucketList bucketsorter) {
 	if len(ub.MinuteBuckets) == 0 {
-		log.Print("There are no minute buckets to check for user: ", ub.Id)
+		// log.Print("There are no minute buckets to check for user: ", ub.Id)
 		return
 	}
 
