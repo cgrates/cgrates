@@ -49,7 +49,7 @@ func (ts *TimeSpan) GetDuration() time.Duration {
 /*
 Returns the cost of the timespan according to the relevant cost interval.
 */
-func (ts *TimeSpan) GetCost() (cost float64) {
+func (ts *TimeSpan) GetCost(cd *CallDescriptor) (cost float64) {
 	if ts.MinuteInfo != nil {
 		return ts.GetDuration().Seconds() * ts.MinuteInfo.Price
 	}
@@ -60,6 +60,13 @@ func (ts *TimeSpan) GetCost() (cost float64) {
 		cost = (ts.GetDuration().Seconds() / ts.Interval.BillingUnit) * ts.Interval.Price
 	} else {
 		cost = ts.GetDuration().Seconds() * ts.Interval.Price
+	}
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		userBudget.mux.RLock()
+		if percentageDiscount, err := userBudget.getVolumeDiscount(cd.storageGetter); err == nil && percentageDiscount > 0 {
+			cost *= (100 - percentageDiscount) / 100
+		}
+		userBudget.mux.RUnlock()
 	}
 	return
 }

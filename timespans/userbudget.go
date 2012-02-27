@@ -116,9 +116,12 @@ func (ub *UserBudget) getTariffPlan(storage StorageGetter) (tp *TariffPlan, err 
 	return ub.tariffPlan, err
 }
 
+/*
+Returns thevolume discount procentage according to the nuber of acumulated volume discount seconds.
+*/
 func (ub *UserBudget) getVolumeDiscount(storage StorageGetter) (float64, error) {
 	tariffPlan, err := ub.getTariffPlan(storage)
-	if err != nil {
+	if err != nil || tariffPlan == nil {
 		return 0.0, err
 	}
 	thresholds := len(tariffPlan.VolumeDiscountThresholds)

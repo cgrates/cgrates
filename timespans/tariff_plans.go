@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	// "log"
 	"strconv"
 	"strings"
 )
@@ -82,11 +83,13 @@ func (tp *TariffPlan) restore(input string) {
 		mb.restore(mbs)
 		tp.MinuteBuckets = append(tp.MinuteBuckets, mb)
 	}
-	for _, vdss := range strings.Split(elements[4], ",") {
-		vd := &VolumeDiscount{}
-		vds := strings.Split(vdss, "|")
-		vd.Volume, _ = strconv.ParseFloat(vds[0], 64)
-		vd.Discount, _ = strconv.ParseFloat(vds[1], 64)
-		tp.VolumeDiscountThresholds = append(tp.VolumeDiscountThresholds, vd)
+	if len(elements) > 4 {
+		for _, vdss := range strings.Split(elements[4], ",") {
+			vd := &VolumeDiscount{}
+			vds := strings.Split(vdss, "|")
+			vd.Volume, _ = strconv.ParseFloat(vds[0], 64)
+			vd.Discount, _ = strconv.ParseFloat(vds[1], 64)
+			tp.VolumeDiscountThresholds = append(tp.VolumeDiscountThresholds, vd)
+		}
 	}
 }

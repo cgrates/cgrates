@@ -55,7 +55,8 @@ type CallDescriptor struct {
 	TimeStart, TimeEnd                 time.Time
 	Amount                             float64
 	ActivationPeriods                  []*ActivationPeriod
-	StorageGetter                      StorageGetter
+	storageGetter                      StorageGetter
+	userBudget                         *UserBudget
 }
 
 /*
@@ -68,6 +69,23 @@ func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {
 }
 
 /*
+Gets and caches the user budget information.
+*/
+func (cd *CallDescriptor) getUserBudget() (ub *UserBudget, err error) {
+	if cd.userBudget == nil {
+		cd.userBudget, err = cd.storageGetter.GetUserBudget(cd.Subject)
+	}
+	return cd.userBudget, err
+}
+
+/*
+Exported method to set the storage getter.
+*/
+func (cd *CallDescriptor) SetStorageGetter(sg StorageGetter) {
+	cd.storageGetter = sg
+}
+
+/*
 Restores the activation periods from storage.
 */
 func (cd *CallDescriptor) RestoreFromStorage() (destPrefix string, err error) {
@@ -75,10 +93,10 @@ func (cd *CallDescriptor) RestoreFromStorage() (destPrefix string, err error) {
 	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
 	destPrefix = cd.DestinationPrefix
 	key := base + destPrefix
-	values, err := cd.StorageGetter.GetActivationPeriods(key)
+	values, err := cd.storageGetter.GetActivationPeriods(key)
 	//get for a smaller prefix if the orignal one was not found
 
-	for i := len(cd.DestinationPrefix); err != nil && i >= MinPrefixLength; values, err = cd.StorageGetter.GetActivationPeriods(key) {
+	for i := len(cd.DestinationPrefix); err != nil && i >= MinPrefixLength; values, err = cd.storageGetter.GetActivationPeriods(key) {
 		i--
 		destPrefix = cd.DestinationPrefix[:i]
 		key = base + destPrefix
@@ -111,9 +129,9 @@ Splits the received timespan into sub time spans according to the activation per
 func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeSpan) {
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets	
-	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
 		userBudget.mux.RLock()
-		_, bucketList := userBudget.getSecondsForPrefix(cd.StorageGetter, cd.DestinationPrefix)
+		_, bucketList := userBudget.getSecondsForPrefix(cd.storageGetter, cd.DestinationPrefix)
 		for _, mb := range bucketList {
 			for i := 0; i < len(timespans); i++ {
 				if timespans[i].MinuteInfo != nil {
@@ -192,7 +210,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		if ts.MinuteInfo == nil && i == 0 {
 			connectionFee = ts.Interval.ConnectFee
 		}
-		cost += ts.GetCost()
+		cost += ts.GetCost(cd)
 	}
 	cc := &CallCost{TOR: cd.TOR,
 		CstmId:            cd.CstmId,
@@ -216,7 +234,7 @@ func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
 	timespans := cd.splitTimeSpan(ts)
 
 	if len(timespans) > 0 {
-		cost = round(timespans[0].GetCost(), 3)
+		cost = round(timespans[0].GetCost(cd), 3)
 	}
 	return
 }
@@ -230,10 +248,10 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	_, err = cd.RestoreFromStorage()
 	now := time.Now()
 	availableCredit, availableSeconds := 0.0, 0.0
-	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
 		userBudget.mux.RLock()
 		availableCredit = userBudget.Credit
-		availableSeconds, _ = userBudget.getSecondsForPrefix(cd.StorageGetter, cd.DestinationPrefix)
+		availableSeconds, _ = userBudget.getSecondsForPrefix(cd.storageGetter, cd.DestinationPrefix)
 		userBudget.mux.RUnlock()
 	} else {
 		return cd.Amount, err
@@ -254,7 +272,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 			if ts.MinuteInfo == nil && i == 0 {
 				cost += ts.Interval.ConnectFee
 			}
-			cost += ts.GetCost()
+			cost += ts.GetCost(cd)
 		}
 		if cost < availableCredit {
 			return maxSessionSeconds, nil
@@ -266,22 +284,22 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 }
 
 func (cd *CallDescriptor) DebitCents() (left float64, err error) {
-	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
-		return userBudget.debitMoneyBudget(cd.StorageGetter, cd.Amount), nil
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		return userBudget.debitMoneyBudget(cd.storageGetter, cd.Amount), nil
 	}
 	return 0.0, err
 }
 
 func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
-	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
-		return userBudget.debitSMSBuget(cd.StorageGetter, cd.Amount)
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		return userBudget.debitSMSBuget(cd.storageGetter, cd.Amount)
 	}
 	return 0, err
 }
 
 func (cd *CallDescriptor) DebitSeconds() (err error) {
-	if userBudget, err := cd.StorageGetter.GetUserBudget(cd.Subject); err == nil && userBudget != nil {
-		return userBudget.debitMinutesBudget(cd.StorageGetter, cd.Amount, cd.DestinationPrefix)
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		return userBudget.debitMinutesBudget(cd.storageGetter, cd.Amount, cd.DestinationPrefix)
 	}
 	return err
 }

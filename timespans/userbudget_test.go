@@ -315,7 +315,7 @@ func TestGetVolumeDiscountNotHaving(t *testing.T) {
 	}
 }
 
-func TestGetVolumeDiscountNotSteps(t *testing.T) {
+func TestGetVolumeDiscountSteps(t *testing.T) {
 	vd1 := &VolumeDiscount{100, 11}
 	vd2 := &VolumeDiscount{500, 20}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd1, vd2}}
