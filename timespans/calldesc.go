@@ -94,9 +94,9 @@ func (cd *CallDescriptor) RestoreFromStorage() (destPrefix string, err error) {
 	destPrefix = cd.DestinationPrefix
 	key := base + destPrefix
 	values, err := cd.storageGetter.GetActivationPeriods(key)
-	//get for a smaller prefix if the orignal one was not found
-
-	for i := len(cd.DestinationPrefix); err != nil && i >= MinPrefixLength; values, err = cd.storageGetter.GetActivationPeriods(key) {
+	//get for a smaller prefix if the orignal one was not found	
+	for i := len(cd.DestinationPrefix); err != nil &&
+		i >= MinPrefixLength; values, err = cd.storageGetter.GetActivationPeriods(key) {
 		i--
 		destPrefix = cd.DestinationPrefix[:i]
 		key = base + destPrefix

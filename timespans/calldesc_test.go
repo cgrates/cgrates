@@ -23,6 +23,29 @@ import (
 	//"log"
 )
 
+func TestKyotoStoreRestore(t *testing.T) {
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Month: time.February,
+		MonthDay:  1,
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "storerestore", DestinationPrefix: "0256"}
+	cd.AddActivationPeriod(ap)
+
+	getter.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
+	aps, err := getter.GetActivationPeriods(cd.GetKey())
+	if err != nil || len(aps) != 1 {
+		t.Log(aps)
+		t.Errorf("Expected %v was %v ", ap, aps)
+	}
+}
+
 func TestKyotoSplitSpans(t *testing.T) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
@@ -34,6 +57,7 @@ func TestKyotoSplitSpans(t *testing.T) {
 	cd.RestoreFromStorage()
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
+		t.Log(cd.ActivationPeriods)
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 }
@@ -45,11 +69,11 @@ func TestRedisSplitSpans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+
 	cd.RestoreFromStorage()
-
 	timespans := cd.splitInTimeSpans()
-
 	if len(timespans) != 2 {
+		t.Log(cd.ActivationPeriods)
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 }

@@ -46,19 +46,19 @@ func writeToStorage(storage timespans.StorageGetter,
 	userBudgets []*timespans.UserBudget) {
 	for _, cd := range callDescriptors {
 		storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
-		log.Printf("Storing %q", cd.GetKey())
+		log.Printf("Storing activation periods for %q", cd.GetKey())
 	}
 	for _, d := range destinations {
 		storage.SetDestination(d)
-		log.Printf("Storing %q", d.Id)
+		log.Printf("Storing destination: %q", d.Id)
 	}
 	for _, tp := range tariffPlans {
 		storage.SetTariffPlan(tp)
-		log.Printf("Storing %q", tp.Id)
+		log.Printf("Storing tariff plan: %q", tp.Id)
 	}
 	for _, ub := range userBudgets {
 		storage.SetUserBudget(ub)
-		log.Printf("Storing %q", ub.Id)
+		log.Printf("Storing user budget: %q", ub.Id)
 	}
 }
 

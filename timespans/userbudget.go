@@ -247,8 +247,8 @@ func (ub *UserBudget) addReceivedCallSeconds(sg StorageGetter, amount float64) e
 	defer ub.mux.Unlock()
 	ub.ReceivedCallSeconds += amount
 	if tariffPlan, err := ub.getTariffPlan(sg); tariffPlan != nil && err == nil {
-		if ub.ReceivedCallSeconds >= tariffPlan.ReceivedCallsSecondsLimit {
-			ub.ReceivedCallSeconds -= tariffPlan.ReceivedCallsSecondsLimit
+		if ub.ReceivedCallSeconds >= tariffPlan.ReceivedCallSecondsLimit {
+			ub.ReceivedCallSeconds -= tariffPlan.ReceivedCallSecondsLimit
 			// do the dew
 		}
 	}

@@ -28,12 +28,13 @@ Structure describing a tariff plan's number of bonus items. It is uset to restor
 these numbers to the user budget every month.
 */
 type TariffPlan struct {
-	Id                        string
-	SmsCredit                 float64
-	Traffic                   float64
-	ReceivedCallsSecondsLimit float64
-	VolumeDiscountThresholds  []*VolumeDiscount
-	MinuteBuckets             []*MinuteBucket
+	Id                       string
+	SmsCredit                float64
+	Traffic                  float64
+	ReceivedCallSecondsLimit float64
+	RecivedCallBonus         *RecivedCallBonus
+	MinuteBuckets            []*MinuteBucket
+	VolumeDiscountThresholds []*VolumeDiscount
 }
 
 /*
@@ -44,13 +45,20 @@ type VolumeDiscount struct {
 	Discount float64 // procentage
 }
 
+type RecivedCallBonus struct {
+	Credit        float64
+	SmsCredit     float64
+	Traffic       float64
+	MinuteBuckets *MinuteBucket
+}
+
 /*
 Serializes the tariff plan for the storage. Used for key-value storages.
 */
 func (tp *TariffPlan) store() (result string) {
 	result += strconv.FormatFloat(tp.SmsCredit, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(tp.Traffic, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(tp.ReceivedCallsSecondsLimit, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(tp.ReceivedCallSecondsLimit, 'f', -1, 64) + ";"
 	for i, mb := range tp.MinuteBuckets {
 		if i > 0 {
 			result += ","
@@ -62,9 +70,7 @@ func (tp *TariffPlan) store() (result string) {
 		if i > 0 {
 			result += ","
 		}
-		result += strconv.FormatFloat(vd.Volume, 'f', -1, 64) +
-			"|" +
-			strconv.FormatFloat(vd.Discount, 'f', -1, 64)
+		result += strconv.FormatFloat(vd.Volume, 'f', -1, 64) + "|" + strconv.FormatFloat(vd.Discount, 'f', -1, 64)
 	}
 	result = strings.TrimRight(result, ";")
 	return
@@ -77,7 +83,7 @@ func (tp *TariffPlan) restore(input string) {
 	elements := strings.Split(input, ";")
 	tp.SmsCredit, _ = strconv.ParseFloat(elements[0], 64)
 	tp.Traffic, _ = strconv.ParseFloat(elements[1], 64)
-	tp.ReceivedCallsSecondsLimit, _ = strconv.ParseFloat(elements[2], 64)
+	tp.ReceivedCallSecondsLimit, _ = strconv.ParseFloat(elements[2], 64)
 	for _, mbs := range strings.Split(elements[3], ",") {
 		mb := &MinuteBucket{}
 		mb.restore(mbs)
