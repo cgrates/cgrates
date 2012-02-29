@@ -21,7 +21,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"github.com/simonz05/godis"
-	"log"
+	// "log"
 	"sync"
 )
 
@@ -29,7 +29,6 @@ type RedisStorage struct {
 	dbNb int
 	db   *godis.Client
 	buf  bytes.Buffer
-	enc  *gob.Encoder
 	dec  *gob.Decoder
 	mux  sync.Mutex
 }
@@ -38,7 +37,6 @@ func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	ndb := godis.New(address, db, "")
 	rs := &RedisStorage{db: ndb, dbNb: db}
 
-	rs.enc = gob.NewEncoder(&rs.buf)
 	rs.dec = gob.NewDecoder(&rs.buf)
 	return rs, nil
 }
@@ -51,10 +49,10 @@ func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 	//.db.Select(rs.dbNb)
 	rs.mux.Lock()
 	defer rs.mux.Unlock()
-
-	rs.buf.Reset()
-	rs.enc.Encode(aps)
-	return rs.db.Set(key, rs.buf.Bytes())
+	var writeBuf bytes.Buffer
+	encoder := gob.NewEncoder(&writeBuf)
+	encoder.Encode(aps)
+	return rs.db.Set(key, writeBuf.Bytes())
 }
 
 func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
@@ -66,8 +64,7 @@ func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 	rs.buf.Reset()
 	rs.buf.Write(elem.Bytes())
 
-	e := rs.dec.Decode(&aps)
-	log.Print(e)
+	rs.dec.Decode(&aps)
 	return
 }
 

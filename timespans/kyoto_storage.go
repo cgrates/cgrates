@@ -28,7 +28,6 @@ import (
 type KyotoStorage struct {
 	db  *kc.DB
 	buf bytes.Buffer
-	enc *gob.Encoder
 	dec *gob.Decoder
 	mux sync.Mutex // we need norma lock because we reset the buf variable
 }
@@ -36,7 +35,6 @@ type KyotoStorage struct {
 func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
 	ndb, err := kc.Open(filaName, kc.WRITE)
 	ks := &KyotoStorage{db: ndb}
-	ks.enc = gob.NewEncoder(&ks.buf)
 	ks.dec = gob.NewDecoder(&ks.buf)
 	return ks, err
 }
@@ -49,9 +47,10 @@ func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 	ks.mux.Lock()
 	defer ks.mux.Unlock()
 
-	ks.buf.Reset()
-	ks.enc.Encode(aps)
-	return ks.db.Set(key, ks.buf.String())
+	var writeBuf bytes.Buffer
+	encoder := gob.NewEncoder(&writeBuf)
+	encoder.Encode(aps)
+	return ks.db.Set(key, writeBuf.String())
 }
 
 func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {

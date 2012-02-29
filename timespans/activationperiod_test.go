@@ -22,6 +22,24 @@ import (
 	//"log"
 )
 
-func TestApStoreRestore(t *testing.T) {
+func TestApRestoreKyoto(t *testing.T) {
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
 
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", storageGetter: getter}
+	cd.SearchStorageForPrefix()
+	if len(cd.ActivationPeriods) != 2 {
+		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
+	}
+}
+
+func TestApRestoreRedis(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", storageGetter: getter}
+	cd.SearchStorageForPrefix()
+	if len(cd.ActivationPeriods) != 2 {
+		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
+	}
 }
