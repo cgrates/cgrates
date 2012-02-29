@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"bytes"
+	//"encoding/gob"
 	"encoding/json"
 	"flag"
 	"github.com/rif/cgrates/timespans"
@@ -39,6 +41,27 @@ var (
 	ubfile      = flag.String("ubfile", "ub.json", "User budgets file")
 )
 
+func testGob(key string, aps []*timespans.ActivationPeriod) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	dec := json.NewDecoder(&buf)
+
+	enc.Encode(aps)
+	result := buf.String()
+
+	aps1 := make([]*timespans.ActivationPeriod, 0)
+	buf.Reset()
+	buf.WriteString(result)
+	err := dec.Decode(&aps1)
+	log.Print("Err: ", err)
+
+	buf.Reset()
+	enc.Encode(aps1)
+	result1 := buf.String()
+
+	log.Print("Equal? ", result == result1, len(result), len(result1))
+}
+
 func writeToStorage(storage timespans.StorageGetter,
 	callDescriptors []*timespans.CallDescriptor,
 	destinations []*timespans.Destination,
@@ -47,6 +70,7 @@ func writeToStorage(storage timespans.StorageGetter,
 	for _, cd := range callDescriptors {
 		storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
 		log.Printf("Storing activation periods for %q", cd.GetKey())
+		testGob(cd.GetKey(), cd.ActivationPeriods)
 	}
 	for _, d := range destinations {
 		storage.SetDestination(d)
@@ -64,7 +88,6 @@ func writeToStorage(storage timespans.StorageGetter,
 
 func main() {
 	flag.Parse()
-
 	log.Printf("Reading from %s, %s, %s", *apfile, *destfile, *tpfile)
 
 	// reading activation periods

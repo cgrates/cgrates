@@ -18,45 +18,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"bytes"
+	"encoding/gob"
 	"github.com/fsouza/gokabinet/kc"
-	//"log"
-	"strings"
+	// "log"
+	"sync"
 )
 
 type KyotoStorage struct {
-	db *kc.DB
+	db  *kc.DB
+	buf bytes.Buffer
+	enc *gob.Encoder
+	dec *gob.Decoder
+	mux sync.Mutex // we need norma lock because we reset the buf variable
 }
 
 func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
 	ndb, err := kc.Open(filaName, kc.WRITE)
-	return &KyotoStorage{db: ndb}, err
+	ks := &KyotoStorage{db: ndb}
+	ks.enc = gob.NewEncoder(&ks.buf)
+	ks.dec = gob.NewDecoder(&ks.buf)
+	return ks, err
 }
 
 func (ks *KyotoStorage) Close() {
 	ks.db.Close()
 }
 
-func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
-	values, err := ks.db.Get(key)
+func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
+	ks.mux.Lock()
+	defer ks.mux.Unlock()
 
-	if err == nil {
-		for _, ap_string := range strings.Split(values, "\n") {
-			if len(ap_string) > 0 {
-				ap := &ActivationPeriod{}
-				ap.restore(ap_string)
-				aps = append(aps, ap)
-			}
-		}
-	}
-	return aps, err
+	ks.buf.Reset()
+	ks.enc.Encode(aps)
+	return ks.db.Set(key, ks.buf.String())
 }
 
-func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
-	result := ""
-	for _, ap := range aps {
-		result += ap.store() + "\n"
-	}
-	return ks.db.Set(key, result)
+func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
+	ks.mux.Lock()
+	defer ks.mux.Unlock()
+
+	values, err := ks.db.Get(key)
+
+	ks.buf.Reset()
+	ks.buf.WriteString(values)
+	ks.dec.Decode(&aps)
+	return
 }
 
 func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
