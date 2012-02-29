@@ -72,6 +72,7 @@ func (ap *ActivationPeriod) restore(input string) {
 	elements := strings.Split(input, ";")
 	unixNano, _ := strconv.ParseInt(elements[0], 10, 64)
 	ap.ActivationTime = time.Unix(0, unixNano).In(time.UTC)
+	ap.Intervals = make([]*Interval, 0)
 	for _, is := range elements[1 : len(elements)-1] {
 		i := &Interval{}
 		ise := strings.Split(is, "|")

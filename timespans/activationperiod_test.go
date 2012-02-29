@@ -74,9 +74,30 @@ func TestApStoreRestore(t *testing.T) {
 	}
 }
 
+/**************************** Benchmarks *************************************/
+
 func BenchmarkActivationPeriodRestore(b *testing.B) {
 	ap := ActivationPeriod{}
 	for i := 0; i < b.N; i++ {
 		ap.restore("1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;")
+	}
+}
+
+func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
+	b.StopTimer()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Month: time.February,
+		MonthDay:  1,
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	ap1 := ActivationPeriod{}
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		result := ap.store()
+		ap1.restore(result)
 	}
 }
