@@ -18,47 +18,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"bytes"
+	"encoding/gob"
 	"github.com/simonz05/godis"
-	"strings"
+	// "log"
+	"sync"
 )
 
 type RedisStorage struct {
 	dbNb int
 	db   *godis.Client
+	buf  bytes.Buffer
+	dec  *gob.Decoder
+	mux  sync.Mutex
 }
 
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	ndb := godis.New(address, db, "")
-	return &RedisStorage{db: ndb, dbNb: db}, nil
+	rs := &RedisStorage{db: ndb, dbNb: db}
+
+	rs.dec = gob.NewDecoder(&rs.buf)
+	return rs, nil
 }
 
 func (rs *RedisStorage) Close() {
 	rs.db.Quit()
 }
 
-func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
-	//rs.db.Select(rs.dbNb)
-	elem, err := rs.db.Get(key)
-	values := elem.String()
-	if err == nil {
-		for _, ap_string := range strings.Split(values, "\n") {
-			if len(ap_string) > 0 {
-				ap := &ActivationPeriod{}
-				ap.restore(ap_string)
-				aps = append(aps, ap)
-			}
-		}
-	}
-	return aps, err
-}
-
 func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
 	//.db.Select(rs.dbNb)
-	result := ""
-	for _, ap := range aps {
-		result += ap.store() + "\n"
-	}
-	return rs.db.Set(key, result)
+	rs.mux.Lock()
+	defer rs.mux.Unlock()
+	var writeBuf bytes.Buffer
+	encoder := gob.NewEncoder(&writeBuf)
+	encoder.Encode(aps)
+	return rs.db.Set(key, writeBuf.Bytes())
+}
+
+func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
+	//rs.db.Select(rs.dbNb)
+	rs.mux.Lock()
+	defer rs.mux.Unlock()
+
+	elem, err := rs.db.Get(key)
+	rs.buf.Reset()
+	rs.buf.Write(elem.Bytes())
+
+	rs.dec.Decode(&aps)
+	return
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {

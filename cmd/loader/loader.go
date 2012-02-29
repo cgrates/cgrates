@@ -64,7 +64,6 @@ func writeToStorage(storage timespans.StorageGetter,
 
 func main() {
 	flag.Parse()
-
 	log.Printf("Reading from %s, %s, %s", *apfile, *destfile, *tpfile)
 
 	// reading activation periods

@@ -23,29 +23,6 @@ import (
 	//"log"
 )
 
-func TestKyotoStoreRestore(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
-	defer getter.Close()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Month: time.February,
-		MonthDay:  1,
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
-
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "storerestore", DestinationPrefix: "0256"}
-	cd.AddActivationPeriod(ap)
-
-	getter.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
-	aps, err := getter.GetActivationPeriods(cd.GetKey())
-	if err != nil || len(aps) != 1 {
-		t.Log(aps)
-		t.Errorf("Expected %v was %v ", ap, aps)
-	}
-}
-
 func TestKyotoSplitSpans(t *testing.T) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
@@ -54,7 +31,7 @@ func TestKyotoSplitSpans(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 
-	cd.RestoreFromStorage()
+	cd.SearchStorageForPrefix()
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Log(cd.ActivationPeriods)
@@ -70,7 +47,7 @@ func TestRedisSplitSpans(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 
-	cd.RestoreFromStorage()
+	cd.SearchStorageForPrefix()
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Log(cd.ActivationPeriods)
@@ -136,6 +113,7 @@ func TestFullDestNotFound(t *testing.T) {
 	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", Cost: 540, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+		t.Log(cd.ActivationPeriods)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -150,8 +128,7 @@ func TestMultipleActivationPeriods(t *testing.T) {
 	result, _ := cd.GetCost()
 	expected := &CallCost{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", Cost: 330, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
-		t.Log(result.Timespans[0].ActivationPeriod)
-		t.Log(result.Timespans[1].ActivationPeriod)
+		t.Log(result.Timespans)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -258,7 +235,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 }
 
 func TestGetCostWithVolumeDiscount(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 	vd1 := &VolumeDiscount{100, 10}
 	vd2 := &VolumeDiscount{500, 20}
@@ -298,7 +275,7 @@ func BenchmarkRedisRestoring(b *testing.B) {
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.RestoreFromStorage()
+		cd.SearchStorageForPrefix()
 	}
 }
 
@@ -341,7 +318,7 @@ func BenchmarkKyotoRestoring(b *testing.B) {
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.RestoreFromStorage()
+		cd.SearchStorageForPrefix()
 	}
 }
 
@@ -353,7 +330,7 @@ func BenchmarkSplitting(b *testing.B) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
-	cd.RestoreFromStorage()
+	cd.SearchStorageForPrefix()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.splitInTimeSpans()

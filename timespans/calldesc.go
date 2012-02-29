@@ -86,9 +86,9 @@ func (cd *CallDescriptor) SetStorageGetter(sg StorageGetter) {
 }
 
 /*
-Restores the activation periods from storage.
+Restores the activation periods for the specified prefix from storage.
 */
-func (cd *CallDescriptor) RestoreFromStorage() (destPrefix string, err error) {
+func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error) {
 	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
 	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
 	destPrefix = cd.DestinationPrefix
@@ -200,14 +200,14 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 Creates a CallCost structure with the cost nformation calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	destPrefix, err := cd.RestoreFromStorage()
+	destPrefix, err := cd.SearchStorageForPrefix()
 
 	timespans := cd.splitInTimeSpans()
 
 	cost := 0.0
 	connectionFee := 0.0
 	for i, ts := range timespans {
-		if ts.MinuteInfo == nil && i == 0 {
+		if i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
 			connectionFee = ts.Interval.ConnectFee
 		}
 		cost += ts.GetCost(cd)
@@ -227,7 +227,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 Returns the cost of a second in the present time conditions.
 */
 func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
-	_, err = cd.RestoreFromStorage()
+	_, err = cd.SearchStorageForPrefix()
 	now := time.Now()
 	oneSecond, _ := time.ParseDuration("1s")
 	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(oneSecond)}
@@ -245,7 +245,7 @@ and will decrease it by 10% for nine times. So if the user has little credit it 
 If the user has no credit then it will return 0.
 */
 func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
-	_, err = cd.RestoreFromStorage()
+	_, err = cd.SearchStorageForPrefix()
 	now := time.Now()
 	availableCredit, availableSeconds := 0.0, 0.0
 	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
