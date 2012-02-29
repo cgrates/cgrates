@@ -23,29 +23,6 @@ import (
 	//"log"
 )
 
-func TestKyotoStoreRestore(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Month: time.February,
-		MonthDay:  1,
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
-
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "storerestore", DestinationPrefix: "0256"}
-	cd.AddActivationPeriod(ap)
-
-	getter.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
-	aps, err := getter.GetActivationPeriods(cd.GetKey())
-	if err != nil || len(aps) != 1 {
-		t.Log(aps)
-		t.Errorf("Expected %v was %v ", ap, aps)
-	}
-}
-
 func TestKyotoSplitSpans(t *testing.T) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
@@ -258,7 +235,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 }
 
 func TestGetCostWithVolumeDiscount(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 	vd1 := &VolumeDiscount{100, 10}
 	vd2 := &VolumeDiscount{500, 20}

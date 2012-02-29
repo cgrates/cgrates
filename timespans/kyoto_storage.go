@@ -18,22 +18,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"bitbucket.org/ww/cabinet"
 	"bytes"
 	"encoding/gob"
-	"github.com/fsouza/gokabinet/kc"
+	//"github.com/fsouza/gokabinet/kc"
 	// "log"
 	"sync"
 )
 
 type KyotoStorage struct {
-	db  *kc.DB
+	//db  *kc.DB
+	db  *cabinet.KCDB
 	buf bytes.Buffer
 	dec *gob.Decoder
 	mux sync.Mutex // we need norma lock because we reset the buf variable
 }
 
 func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
-	ndb, err := kc.Open(filaName, kc.WRITE)
+	//ndb, err := kc.Open(filaName, kc.WRITE)
+	ndb := cabinet.New()
+	err := ndb.Open(filaName, cabinet.KCOWRITER|cabinet.KCOCREATE)
 	ks := &KyotoStorage{db: ndb}
 	ks.dec = gob.NewDecoder(&ks.buf)
 	return ks, err
@@ -50,53 +54,53 @@ func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 	var writeBuf bytes.Buffer
 	encoder := gob.NewEncoder(&writeBuf)
 	encoder.Encode(aps)
-	return ks.db.Set(key, writeBuf.String())
+	return ks.db.Set([]byte(key), writeBuf.Bytes())
 }
 
 func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
 	ks.mux.Lock()
 	defer ks.mux.Unlock()
 
-	values, err := ks.db.Get(key)
+	values, err := ks.db.Get([]byte(key))
 
 	ks.buf.Reset()
-	ks.buf.WriteString(values)
+	ks.buf.Write(values)
 	ks.dec.Decode(&aps)
 	return
 }
 
 func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
-	if values, err := ks.db.Get(key); err == nil {
+	if values, err := ks.db.Get([]byte(key)); err == nil {
 		dest = &Destination{Id: key}
-		dest.restore(values)
+		dest.restore(string(values))
 	}
 	return
 }
 
 func (ks *KyotoStorage) SetDestination(dest *Destination) error {
-	return ks.db.Set(dest.Id, dest.store())
+	return ks.db.Set([]byte(dest.Id), []byte(dest.store()))
 }
 
 func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
-	if values, err := ks.db.Get(key); err == nil {
+	if values, err := ks.db.Get([]byte(key)); err == nil {
 		tp = &TariffPlan{Id: key}
-		tp.restore(values)
+		tp.restore(string(values))
 	}
 	return
 }
 
 func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) error {
-	return ks.db.Set(tp.Id, tp.store())
+	return ks.db.Set([]byte(tp.Id), []byte(tp.store()))
 }
 
 func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
-	if values, err := ks.db.Get(key); err == nil {
+	if values, err := ks.db.Get([]byte(key)); err == nil {
 		ub = &UserBudget{Id: key}
-		ub.restore(values)
+		ub.restore(string(values))
 	}
 	return
 }
 
 func (ks *KyotoStorage) SetUserBudget(ub *UserBudget) error {
-	return ks.db.Set(ub.Id, ub.store())
+	return ks.db.Set([]byte(ub.Id), []byte(ub.store()))
 }

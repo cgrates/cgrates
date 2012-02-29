@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"reflect"
 	"testing"
+	"time"
 	//"log"
 )
 
@@ -41,5 +43,25 @@ func TestApRestoreRedis(t *testing.T) {
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 2 {
 		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
+	}
+}
+
+func TestApStoreRestore(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Month: time.February,
+		MonthDay:  1,
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	getter.SetActivationPeriods("storerestore", []*ActivationPeriod{ap})
+	aps, err := getter.GetActivationPeriods("storerestore")
+	if err != nil || len(aps) != 1 || !reflect.DeepEqual(ap, aps[0]) {
+		t.Log(aps)
+		t.Errorf("Expected %v was %v ", ap, aps)
 	}
 }
