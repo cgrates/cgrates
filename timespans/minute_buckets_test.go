@@ -30,3 +30,29 @@ func TestGetDestination(t *testing.T) {
 		t.Error("Got wrong destination: ", d)
 	}
 }
+
+func TestMultipleGetDestination(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	mb := &MinuteBucket{DestinationId: "nationale"}
+	d := mb.getDestination(getter)
+	d = mb.getDestination(getter)
+	d = mb.getDestination(getter)
+	if d.Id != "nationale" || len(d.Prefixes) != 4 {
+		t.Error("Got wrong destination: ", d)
+	}
+	/*mb = &MinuteBucket{DestinationId: "retea"}
+	d = mb.getDestination(getter)
+	d = mb.getDestination(getter)
+	d = mb.getDestination(getter)
+	if d.Id != "retea" || len(d.Prefixes) != 2 {
+		t.Error("Got wrong destination: ", d)
+	}
+	mb = &MinuteBucket{DestinationId: "mobil"}
+	d = mb.getDestination(getter)
+	d = mb.getDestination(getter)
+	d = mb.getDestination(getter)
+	if d.Id != "mobil" || len(d.Prefixes) != 2 {
+		t.Error("Got wrong destination: ", d)
+	}*/
+}

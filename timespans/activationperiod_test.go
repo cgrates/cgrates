@@ -47,7 +47,7 @@ func TestApRestoreRedis(t *testing.T) {
 }
 
 func TestApStoreRestore(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Month: time.February,
@@ -68,3 +68,23 @@ func TestApStoreRestore(t *testing.T) {
 }
 
 /**************************** Benchmarks *************************************/
+
+func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
+	b.StopTimer()
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Month: time.February,
+		MonthDay:  1,
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	b.StartTimer()
+	for i := 0; i < b.N; i++ {
+		getter.SetActivationPeriods("storerestore", []*ActivationPeriod{ap})
+		getter.GetActivationPeriods("storerestore")
+	}
+}

@@ -21,23 +21,29 @@ import (
 	"bytes"
 	"encoding/gob"
 	"github.com/simonz05/godis"
-	// "log"
+	"log"
 	"sync"
 )
 
 type RedisStorage struct {
-	dbNb int
-	db   *godis.Client
-	buf  bytes.Buffer
-	dec  *gob.Decoder
-	mux  sync.Mutex
+	dbNb    int
+	db      *godis.Client
+	buf     bytes.Buffer
+	decAP   *gob.Decoder
+	decDest *gob.Decoder
+	decTP   *gob.Decoder
+	decUB   *gob.Decoder
+	mux     sync.Mutex
 }
 
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	ndb := godis.New(address, db, "")
 	rs := &RedisStorage{db: ndb, dbNb: db}
 
-	rs.dec = gob.NewDecoder(&rs.buf)
+	rs.decAP = gob.NewDecoder(&rs.buf)
+	rs.decDest = gob.NewDecoder(&rs.buf)
+	rs.decTP = gob.NewDecoder(&rs.buf)
+	rs.decUB = gob.NewDecoder(&rs.buf)
 	return rs, nil
 }
 
@@ -49,6 +55,7 @@ func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 	//.db.Select(rs.dbNb)
 	rs.mux.Lock()
 	defer rs.mux.Unlock()
+
 	var writeBuf bytes.Buffer
 	encoder := gob.NewEncoder(&writeBuf)
 	encoder.Encode(aps)
@@ -64,48 +71,76 @@ func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 	rs.buf.Reset()
 	rs.buf.Write(elem.Bytes())
 
-	rs.dec.Decode(&aps)
-	return
-}
-
-func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
-	//rs.db.Select(rs.dbNb + 1)
-	if values, err := rs.db.Get(key); err == nil {
-		dest = &Destination{Id: key}
-		dest.restore(values.String())
-	}
+	rs.decAP.Decode(&aps)
 	return
 }
 
 func (rs *RedisStorage) SetDestination(dest *Destination) error {
-	//rs.db.Select(rs.dbNb + 1)
-	return rs.db.Set(dest.Id, dest.store())
+	//rs.db.Select(rs.dbNb + 1)	
+	rs.mux.Lock()
+	defer rs.mux.Unlock()
+
+	var writeBuf bytes.Buffer
+	encoder := gob.NewEncoder(&writeBuf)
+	encoder.Encode(dest)
+	return rs.db.Set(dest.Id, writeBuf.Bytes())
 }
 
-func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
-	//rs.db.Select(rs.dbNb + 2)
-	if values, err := rs.db.Get(key); err == nil {
-		tp = &TariffPlan{Id: key}
-		tp.restore(values.String())
-	}
+func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
+	//rs.db.Select(rs.dbNb + 1)
+	rs.mux.Lock()
+	defer rs.mux.Unlock()
+
+	elem, err := rs.db.Get(key)
+	rs.buf.Reset()
+	rs.buf.Write(elem.Bytes())
+	err = rs.decDest.Decode(&dest)
+	log.Print(err)
 	return
 }
 
 func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) error {
 	//rs.db.Select(rs.dbNb + 2)
-	return rs.db.Set(tp.Id, tp.store())
+	rs.mux.Lock()
+	defer rs.mux.Unlock()
+
+	var writeBuf bytes.Buffer
+	encoder := gob.NewEncoder(&writeBuf)
+	encoder.Encode(tp)
+	return rs.db.Set(tp.Id, writeBuf.Bytes())
 }
 
-func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
-	//rs.db.Select(rs.dbNb + 3)
-	if values, err := rs.db.Get(key); err == nil {
-		ub = &UserBudget{Id: key}
-		ub.restore(values.String())
-	}
+func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
+	//rs.db.Select(rs.dbNb + 2)
+	rs.mux.Lock()
+	defer rs.mux.Unlock()
+
+	elem, err := rs.db.Get(key)
+	rs.buf.Reset()
+	rs.buf.Write(elem.Bytes())
+	rs.decTP.Decode(&tp)
 	return
 }
 
 func (rs *RedisStorage) SetUserBudget(ub *UserBudget) error {
 	//rs.db.Select(rs.dbNb + 3)
-	return rs.db.Set(ub.Id, ub.store())
+	rs.mux.Lock()
+	defer rs.mux.Unlock()
+
+	var writeBuf bytes.Buffer
+	encoder := gob.NewEncoder(&writeBuf)
+	encoder.Encode(ub)
+	return rs.db.Set(ub.Id, writeBuf.Bytes())
+}
+
+func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
+	//rs.db.Select(rs.dbNb + 3)
+	rs.mux.Lock()
+	defer rs.mux.Unlock()
+
+	elem, err := rs.db.Get(key)
+	rs.buf.Reset()
+	rs.buf.Write(elem.Bytes())
+	rs.decUB.Decode(&ub)
+	return
 }

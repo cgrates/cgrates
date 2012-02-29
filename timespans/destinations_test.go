@@ -21,16 +21,6 @@ import (
 	"testing"
 )
 
-func TestDestinationStoreRestore(t *testing.T) {
-	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	s := nationale.store()
-	d1 := &Destination{Id: "nat"}
-	d1.restore(s)
-	if d1.store() != s {
-		t.Errorf("Expected %q was %q", s, d1.store())
-	}
-}
-
 func TestDestinationKyotoStore(t *testing.T) {
 	getter, _ := NewKyotoStorage("test.kch")
 	defer getter.Close()

@@ -20,8 +20,6 @@ package timespans
 import (
 	// "log"
 	"math"
-	"strconv"
-	"strings"
 )
 
 type MinuteBucket struct {
@@ -31,28 +29,6 @@ type MinuteBucket struct {
 	DestinationId string
 	destination   *Destination
 	precision     int
-}
-
-/*
-Serializes the minute bucket for the storage. Used for key-value storages.
-*/
-func (mb *MinuteBucket) store() (result string) {
-	result += strconv.Itoa(int(mb.Seconds)) + "|"
-	result += strconv.Itoa(int(mb.Priority)) + "|"
-	result += strconv.FormatFloat(mb.Price, 'f', -1, 64) + "|"
-	result += mb.DestinationId
-	return
-}
-
-/*
-De-serializes the minute bucket for the storage. Used for key-value storages.
-*/
-func (mb *MinuteBucket) restore(input string) {
-	elements := strings.Split(input, "|")
-	mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
-	mb.Priority, _ = strconv.Atoi(elements[1])
-	mb.Price, _ = strconv.ParseFloat(elements[2], 64)
-	mb.DestinationId = elements[3]
 }
 
 /*

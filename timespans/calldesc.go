@@ -269,7 +269,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 
 		cost := 0.0
 		for i, ts := range timespans {
-			if ts.MinuteInfo == nil && i == 0 {
+			if i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
 				cost += ts.Interval.ConnectFee
 			}
 			cost += ts.GetCost(cd)

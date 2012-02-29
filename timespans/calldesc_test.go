@@ -209,7 +209,7 @@ func TestMaxSessionTimeNoUserBudget(t *testing.T) {
 	defer getter.Close()
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0723", storageGetter: getter, Amount: 1000}
 	result, err := cd.GetMaxSessionTime()
-	if result != 1000 || err != nil {
+	if result != 1000 || err == nil {
 		t.Errorf("Expected %v was %v", 1000, result)
 	}
 }

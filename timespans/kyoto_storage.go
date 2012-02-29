@@ -1,11 +1,11 @@
 /*
-Rating system designed to be used in VoIP Carriers World
+Rating system designed to be used in VoIP Carrieks World
 Copyright (C) 2012  Radu Ioan Fericean
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+the Free Software Foundation, either veksion 3 of the License, or
+(at your option) any later veksion.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,25 +21,38 @@ import (
 	"bitbucket.org/ww/cabinet"
 	"bytes"
 	"encoding/gob"
-	//"github.com/fsouza/gokabinet/kc"
-	// "log"
+	//"log"
 	"sync"
 )
 
 type KyotoStorage struct {
 	//db  *kc.DB
-	db  *cabinet.KCDB
-	buf bytes.Buffer
-	dec *gob.Decoder
-	mux sync.Mutex // we need norma lock because we reset the buf variable
+	db      *cabinet.KCDB
+	buf     bytes.Buffer
+	decAP   *gob.Decoder
+	encAP   *gob.Encoder
+	decDest *gob.Decoder
+	encDest *gob.Encoder
+	decTP   *gob.Decoder
+	encTP   *gob.Encoder
+	decUB   *gob.Decoder
+	encUB   *gob.Encoder
+	mux     sync.Mutex // we need norma lock because we reset the buf variable
 }
 
 func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
-	//ndb, err := kc.Open(filaName, kc.WRITE)
 	ndb := cabinet.New()
 	err := ndb.Open(filaName, cabinet.KCOWRITER|cabinet.KCOCREATE)
 	ks := &KyotoStorage{db: ndb}
-	ks.dec = gob.NewDecoder(&ks.buf)
+
+	ks.decAP = gob.NewDecoder(&ks.buf)
+	ks.encAP = gob.NewEncoder(&ks.buf)
+	ks.decDest = gob.NewDecoder(&ks.buf)
+	ks.encDest = gob.NewEncoder(&ks.buf)
+	ks.decTP = gob.NewDecoder(&ks.buf)
+	ks.encTP = gob.NewEncoder(&ks.buf)
+	ks.decUB = gob.NewDecoder(&ks.buf)
+	ks.encUB = gob.NewEncoder(&ks.buf)
 	return ks, err
 }
 
@@ -51,10 +64,9 @@ func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 	ks.mux.Lock()
 	defer ks.mux.Unlock()
 
-	var writeBuf bytes.Buffer
-	encoder := gob.NewEncoder(&writeBuf)
-	encoder.Encode(aps)
-	return ks.db.Set([]byte(key), writeBuf.Bytes())
+	ks.buf.Reset()
+	ks.encAP.Encode(aps)
+	return ks.db.Set([]byte(key), ks.buf.Bytes())
 }
 
 func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
@@ -65,42 +77,69 @@ func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 
 	ks.buf.Reset()
 	ks.buf.Write(values)
-	ks.dec.Decode(&aps)
-	return
-}
-
-func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
-	if values, err := ks.db.Get([]byte(key)); err == nil {
-		dest = &Destination{Id: key}
-		dest.restore(string(values))
-	}
+	ks.decAP.Decode(&aps)
 	return
 }
 
 func (ks *KyotoStorage) SetDestination(dest *Destination) error {
-	return ks.db.Set([]byte(dest.Id), []byte(dest.store()))
+	ks.mux.Lock()
+	defer ks.mux.Unlock()
+
+	ks.buf.Reset()
+	ks.encDest.Encode(dest)
+	return ks.db.Set([]byte(dest.Id), ks.buf.Bytes())
 }
 
-func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
-	if values, err := ks.db.Get([]byte(key)); err == nil {
-		tp = &TariffPlan{Id: key}
-		tp.restore(string(values))
-	}
+func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
+	ks.mux.Lock()
+	defer ks.mux.Unlock()
+
+	values, err := ks.db.Get([]byte(key))
+
+	ks.buf.Reset()
+	ks.buf.Write(values)
+	ks.decDest.Decode(&dest)
 	return
 }
 
 func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) error {
-	return ks.db.Set([]byte(tp.Id), []byte(tp.store()))
+	ks.mux.Lock()
+	defer ks.mux.Unlock()
+
+	ks.buf.Reset()
+	ks.encTP.Encode(tp)
+	return ks.db.Set([]byte(tp.Id), ks.buf.Bytes())
 }
 
-func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
-	if values, err := ks.db.Get([]byte(key)); err == nil {
-		ub = &UserBudget{Id: key}
-		ub.restore(string(values))
-	}
+func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
+	ks.mux.Lock()
+	defer ks.mux.Unlock()
+
+	values, err := ks.db.Get([]byte(key))
+
+	ks.buf.Reset()
+	ks.buf.Write(values)
+	ks.decTP.Decode(&tp)
 	return
 }
 
 func (ks *KyotoStorage) SetUserBudget(ub *UserBudget) error {
-	return ks.db.Set([]byte(ub.Id), []byte(ub.store()))
+	ks.mux.Lock()
+	defer ks.mux.Unlock()
+
+	ks.buf.Reset()
+	ks.encUB.Encode(ub)
+	return ks.db.Set([]byte(ub.Id), ks.buf.Bytes())
+}
+
+func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
+	ks.mux.Lock()
+	defer ks.mux.Unlock()
+
+	values, err := ks.db.Get([]byte(key))
+
+	ks.buf.Reset()
+	ks.buf.Write(values)
+	ks.decUB.Decode(&ub)
+	return
 }

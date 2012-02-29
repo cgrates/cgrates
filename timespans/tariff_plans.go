@@ -19,8 +19,6 @@ package timespans
 
 import (
 	// "log"
-	"strconv"
-	"strings"
 )
 
 /*
@@ -46,62 +44,6 @@ type VolumeDiscount struct {
 }
 
 /*
-Serializes the tariff plan for the storage. Used for key-value storages.
-*/
-func (tp *TariffPlan) store() (result string) {
-	result += strconv.FormatFloat(tp.SmsCredit, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(tp.Traffic, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(tp.ReceivedCallSecondsLimit, 'f', -1, 64) + ";"
-	if tp.RecivedCallBonus == nil {
-		tp.RecivedCallBonus = &RecivedCallBonus{}
-	}
-	result += tp.RecivedCallBonus.store() + ";"
-	for i, mb := range tp.MinuteBuckets {
-		if i > 0 {
-			result += ","
-		}
-		result += mb.store()
-	}
-	if tp.VolumeDiscountThresholds != nil {
-		result += ";"
-	}
-	for i, vd := range tp.VolumeDiscountThresholds {
-		if i > 0 {
-			result += ","
-		}
-		result += strconv.FormatFloat(vd.Volume, 'f', -1, 64) + "|" + strconv.FormatFloat(vd.Discount, 'f', -1, 64)
-	}
-	result = strings.TrimRight(result, ";")
-	return
-}
-
-/*
-De-serializes the tariff plan for the storage. Used for key-value storages.
-*/
-func (tp *TariffPlan) restore(input string) {
-	elements := strings.Split(input, ";")
-	tp.SmsCredit, _ = strconv.ParseFloat(elements[0], 64)
-	tp.Traffic, _ = strconv.ParseFloat(elements[1], 64)
-	tp.ReceivedCallSecondsLimit, _ = strconv.ParseFloat(elements[2], 64)
-	tp.RecivedCallBonus = &RecivedCallBonus{}
-	tp.RecivedCallBonus.restore(elements[3])
-	for _, mbs := range strings.Split(elements[4], ",") {
-		mb := &MinuteBucket{}
-		mb.restore(mbs)
-		tp.MinuteBuckets = append(tp.MinuteBuckets, mb)
-	}
-	if len(elements) > 5 {
-		for _, vdss := range strings.Split(elements[5], ",") {
-			vd := &VolumeDiscount{}
-			vds := strings.Split(vdss, "|")
-			vd.Volume, _ = strconv.ParseFloat(vds[0], 64)
-			vd.Discount, _ = strconv.ParseFloat(vds[1], 64)
-			tp.VolumeDiscountThresholds = append(tp.VolumeDiscountThresholds, vd)
-		}
-	}
-}
-
-/*
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type RecivedCallBonus struct {
@@ -109,32 +51,4 @@ type RecivedCallBonus struct {
 	SmsCredit    float64
 	Traffic      float64
 	MinuteBucket *MinuteBucket
-}
-
-/*
-Serializes the tariff plan for the storage. Used for key-value storages.
-*/
-func (rcb *RecivedCallBonus) store() (result string) {
-	result += strconv.FormatFloat(rcb.Credit, 'f', -1, 64) + ","
-	result += strconv.FormatFloat(rcb.SmsCredit, 'f', -1, 64) + ","
-	result += strconv.FormatFloat(rcb.Traffic, 'f', -1, 64)
-	if rcb.MinuteBucket != nil {
-		result += ","
-		result += rcb.MinuteBucket.store()
-	}
-	return
-}
-
-/*
-De-serializes the tariff plan for the storage. Used for key-value storages.
-*/
-func (rcb *RecivedCallBonus) restore(input string) {
-	elements := strings.Split(input, ",")
-	rcb.Credit, _ = strconv.ParseFloat(elements[0], 64)
-	rcb.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
-	rcb.Traffic, _ = strconv.ParseFloat(elements[2], 64)
-	if len(elements) > 3 {
-		rcb.MinuteBucket = &MinuteBucket{}
-		rcb.MinuteBucket.restore(elements[3])
-	}
 }
