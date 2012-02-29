@@ -80,7 +80,10 @@ func (ub *UserBudget) store() (result string) {
 	result += strconv.FormatFloat(ub.VolumeDiscountSeconds, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(ub.ReceivedCallSeconds, 'f', -1, 64) + ";"
 	result += strconv.Itoa(ub.ResetDayOfTheMonth) + ";"
-	result += ub.TariffPlanId + ";"
+	result += ub.TariffPlanId
+	if ub.MinuteBuckets != nil {
+		result += ";"
+	}
 	for i, mb := range ub.MinuteBuckets {
 		if i > 0 {
 			result += ","
@@ -102,10 +105,12 @@ func (ub *UserBudget) restore(input string) {
 	ub.ReceivedCallSeconds, _ = strconv.ParseFloat(elements[4], 64)
 	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[5])
 	ub.TariffPlanId = elements[6]
-	for _, mbs := range strings.Split(elements[7], ",") {
-		mb := &MinuteBucket{}
-		mb.restore(mbs)
-		ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
+	if len(elements) > 7 {
+		for _, mbs := range strings.Split(elements[7], ",") {
+			mb := &MinuteBucket{}
+			mb.restore(mbs)
+			ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
+		}
 	}
 }
 
@@ -249,7 +254,18 @@ func (ub *UserBudget) addReceivedCallSeconds(sg StorageGetter, amount float64) e
 	if tariffPlan, err := ub.getTariffPlan(sg); tariffPlan != nil && err == nil {
 		if ub.ReceivedCallSeconds >= tariffPlan.ReceivedCallSecondsLimit {
 			ub.ReceivedCallSeconds -= tariffPlan.ReceivedCallSecondsLimit
-			// do the dew
+			if tariffPlan.RecivedCallBonus != nil { // apply the bonus
+				ub.Credit += tariffPlan.RecivedCallBonus.Credit
+				ub.SmsCredit += tariffPlan.RecivedCallBonus.SmsCredit
+				ub.Traffic += tariffPlan.RecivedCallBonus.Traffic
+				if tariffPlan.RecivedCallBonus.MinuteBucket != nil {
+					for _, mb := range ub.MinuteBuckets {
+						if mb.DestinationId == tariffPlan.RecivedCallBonus.MinuteBucket.DestinationId {
+							mb.Seconds += tariffPlan.RecivedCallBonus.MinuteBucket.Seconds
+						}
+					}
+				}
+			}
 		}
 	}
 	return sg.SetUserBudget(ub)

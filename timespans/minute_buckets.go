@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	// "log"
 	"math"
 	"strconv"
 	"strings"
@@ -47,11 +48,11 @@ func (mb *MinuteBucket) store() (result string) {
 De-serializes the minute bucket for the storage. Used for key-value storages.
 */
 func (mb *MinuteBucket) restore(input string) {
-	mbse := strings.Split(input, "|")
-	mb.Seconds, _ = strconv.ParseFloat(mbse[0], 64)
-	mb.Priority, _ = strconv.Atoi(mbse[1])
-	mb.Price, _ = strconv.ParseFloat(mbse[2], 64)
-	mb.DestinationId = mbse[3]
+	elements := strings.Split(input, "|")
+	mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
+	mb.Priority, _ = strconv.Atoi(elements[1])
+	mb.Price, _ = strconv.ParseFloat(elements[2], 64)
+	mb.DestinationId = elements[3]
 }
 
 /*

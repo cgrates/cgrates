@@ -376,6 +376,18 @@ func TestGetVolumeDiscountSteps(t *testing.T) {
 	}
 }
 
+func TestRecivedCallsBonus(t *testing.T) {
+	getter, _ := NewKyotoStorage("test.kch")
+	defer getter.Close()
+	rcb := &RecivedCallBonus{Credit: 100}
+	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 10, RecivedCallBonus: rcb}
+	rifsBudget := &UserBudget{Id: "other", Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10, ReceivedCallSeconds: 1}
+	err := rifsBudget.addReceivedCallSeconds(getter, 12)
+	if err != nil || rifsBudget.Credit != 121 || rifsBudget.ReceivedCallSeconds != 3 {
+		t.Error("Wrong Received call bonus procedure: ", rifsBudget)
+	}
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
