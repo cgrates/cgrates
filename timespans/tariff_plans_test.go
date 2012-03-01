@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	// "log"
+	"reflect"
 	"testing"
 )
 
@@ -30,7 +32,7 @@ func TestTariffPlanKyotoStore(t *testing.T) {
 	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0, MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
-	if result.SmsCredit != seara.SmsCredit || len(result.MinuteBuckets) != len(seara.MinuteBuckets) {
+	if !reflect.DeepEqual(seara, result) {
 		t.Errorf("Expected %q was %q", seara, result)
 	}
 }
@@ -44,7 +46,7 @@ func TestTariffPlanRedisStore(t *testing.T) {
 	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0, MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
-	if result.SmsCredit != seara.SmsCredit || len(result.MinuteBuckets) != len(seara.MinuteBuckets) {
+	if !reflect.DeepEqual(seara, result) {
 		t.Errorf("Expected %q was %q", seara, result)
 	}
 }
@@ -54,10 +56,13 @@ func TestTariffPlanMongoStore(t *testing.T) {
 	defer getter.Close()
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
-	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}
+	vd := &VolumeDiscount{100, 10}
+	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0, MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
-	if result.SmsCredit != seara.SmsCredit || len(result.MinuteBuckets) != len(seara.MinuteBuckets) {
+	if !reflect.DeepEqual(seara, result) {
+		t.Log(seara)
+		t.Log(result)
 		t.Errorf("Expected %q was %q", seara, result)
 	}
 }

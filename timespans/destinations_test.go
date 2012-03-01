@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestDestinationKyotoStore(t *testing.T) {
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	getter.SetDestination(nationale)
 	result, _ := getter.GetDestination(nationale.Id)
-	if result.Id != nationale.Id || result.Prefixes[2] != nationale.Prefixes[2] {
+	if !reflect.DeepEqual(nationale, result) {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
 }
@@ -41,7 +42,7 @@ func TestDestinationRedisStore(t *testing.T) {
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	getter.SetDestination(nationale)
 	result, _ := getter.GetDestination(nationale.Id)
-	if result.Id != nationale.Id || result.Prefixes[2] != nationale.Prefixes[2] {
+	if !reflect.DeepEqual(nationale, result) {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
 }
@@ -55,7 +56,7 @@ func TestDestinationMongoStore(t *testing.T) {
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	getter.SetDestination(nationale)
 	result, _ := getter.GetDestination(nationale.Id)
-	if result.Id != nationale.Id || result.Prefixes[2] != nationale.Prefixes[2] {
+	if !reflect.DeepEqual(nationale, result) {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
 }
