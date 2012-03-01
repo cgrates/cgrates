@@ -82,10 +82,11 @@ func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 	defer ks.mux.Unlock()
 
 	values, err := ks.db.Get([]byte(key))
-
-	ks.buf.Reset()
-	ks.buf.Write(values)
-	ks.dec.Decode(&aps)
+	if err == nil {
+		ks.buf.Reset()
+		ks.buf.Write(values)
+		err = ks.dec.Decode(&aps)
+	}
 	return
 }
 
@@ -103,10 +104,11 @@ func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error
 	defer ks.mux.Unlock()
 
 	values, err := ks.db.Get([]byte(key))
-
-	ks.buf.Reset()
-	ks.buf.Write(values)
-	ks.dec.Decode(&dest)
+	if err == nil {
+		ks.buf.Reset()
+		ks.buf.Write(values)
+		err = ks.dec.Decode(&dest)
+	}
 	return
 }
 
@@ -124,10 +126,11 @@ func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
 	defer ks.mux.Unlock()
 
 	values, err := ks.db.Get([]byte(key))
-
-	ks.buf.Reset()
-	ks.buf.Write(values)
-	ks.dec.Decode(&tp)
+	if err == nil {
+		ks.buf.Reset()
+		ks.buf.Write(values)
+		err = ks.dec.Decode(&tp)
+	}
 	return
 }
 
@@ -145,9 +148,10 @@ func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
 	defer ks.mux.Unlock()
 
 	values, err := ks.db.Get([]byte(key))
-
-	ks.buf.Reset()
-	ks.buf.Write(values)
-	ks.dec.Decode(&ub)
+	if err == nil {
+		ks.buf.Reset()
+		ks.buf.Write(values)
+		ks.dec.Decode(&ub)
+	}
 	return
 }

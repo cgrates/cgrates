@@ -28,6 +28,7 @@ The struture that is saved to storage.
 type ActivationPeriod struct {
 	ActivationTime time.Time
 	Intervals      []*Interval
+	Moaca          string
 }
 
 /*

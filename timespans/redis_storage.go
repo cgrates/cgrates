@@ -80,12 +80,13 @@ func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 	//rs.db.Select(rs.dbNb)
 	rs.mux.Lock()
 	defer rs.mux.Unlock()
-
 	elem, err := rs.db.Get(key)
-	rs.buf.Reset()
-	rs.buf.Write(elem.Bytes())
+	if err == nil {
+		rs.buf.Reset()
+		rs.buf.Write(elem.Bytes())
 
-	rs.dec.Decode(&aps)
+		err = rs.dec.Decode(&aps)
+	}
 	return
 }
 
@@ -105,9 +106,11 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 	defer rs.mux.Unlock()
 
 	elem, err := rs.db.Get(key)
-	rs.buf.Reset()
-	rs.buf.Write(elem.Bytes())
-	rs.dec.Decode(&dest)
+	if err == nil {
+		rs.buf.Reset()
+		rs.buf.Write(elem.Bytes())
+		err = rs.dec.Decode(&dest)
+	}
 	return
 }
 
@@ -127,9 +130,11 @@ func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
 	defer rs.mux.Unlock()
 
 	elem, err := rs.db.Get(key)
-	rs.buf.Reset()
-	rs.buf.Write(elem.Bytes())
-	rs.dec.Decode(&tp)
+	if err == nil {
+		rs.buf.Reset()
+		rs.buf.Write(elem.Bytes())
+		err = rs.dec.Decode(&tp)
+	}
 	return
 }
 
@@ -149,8 +154,10 @@ func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
 	defer rs.mux.Unlock()
 
 	elem, err := rs.db.Get(key)
-	rs.buf.Reset()
-	rs.buf.Write(elem.Bytes())
-	rs.dec.Decode(&ub)
+	if err == nil {
+		rs.buf.Reset()
+		rs.buf.Write(elem.Bytes())
+		err = rs.dec.Decode(&ub)
+	}
 	return
 }
