@@ -29,7 +29,8 @@ func TestTariffPlanKyotoStore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	vd := &VolumeDiscount{100, 10}
-	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0, MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
+	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0,
+		MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
 	if !reflect.DeepEqual(seara, result) {
@@ -43,7 +44,8 @@ func TestTariffPlanRedisStore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	vd := &VolumeDiscount{100, 10}
-	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0, MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
+	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0,
+		MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
 	if !reflect.DeepEqual(seara, result) {
@@ -57,7 +59,8 @@ func TestTariffPlanMongoStore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
 	vd := &VolumeDiscount{100, 10}
-	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0, MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
+	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 0,
+		MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
 	if !reflect.DeepEqual(seara, result) {
