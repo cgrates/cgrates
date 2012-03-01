@@ -41,11 +41,11 @@ func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
 
 	ks.dec = gob.NewDecoder(&ks.buf)
 	ks.enc = gob.NewEncoder(&ks.buf)
-	ks.trainGobEncoderAndDecoder()
+	ks.traingobEncoderAndDecoder()
 	return ks, err
 }
 
-func (ks *KyotoStorage) trainGobEncoderAndDecoder() {
+func (ks *KyotoStorage) traingobEncoderAndDecoder() {
 	aps := []*ActivationPeriod{&ActivationPeriod{}}
 	ks.enc.Encode(aps)
 	ks.dec.Decode(&aps)

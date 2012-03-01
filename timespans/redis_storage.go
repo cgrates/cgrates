@@ -39,11 +39,11 @@ func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	rs := &RedisStorage{db: ndb, dbNb: db}
 	rs.dec = gob.NewDecoder(&rs.buf)
 	rs.enc = gob.NewEncoder(&rs.buf)
-	rs.trainGobEncoderAndDecoder()
+	rs.traingobEncoderAndDecoder()
 	return rs, nil
 }
 
-func (rs *RedisStorage) trainGobEncoderAndDecoder() {
+func (rs *RedisStorage) traingobEncoderAndDecoder() {
 	aps := []*ActivationPeriod{&ActivationPeriod{}}
 	rs.enc.Encode(aps)
 	rs.dec.Decode(&aps)
