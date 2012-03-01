@@ -53,7 +53,27 @@ func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
 	ks.encTP = gob.NewEncoder(&ks.buf)
 	ks.decUB = gob.NewDecoder(&ks.buf)
 	ks.encUB = gob.NewEncoder(&ks.buf)
+	ks.trainGobEncodersAndDecoders()
 	return ks, err
+}
+
+func (ks *KyotoStorage) trainGobEncodersAndDecoders() {
+	aps := []*ActivationPeriod{&ActivationPeriod{}}
+	ks.encAP.Encode(aps)
+	ks.decAP.Decode(&aps)
+	ks.buf.Reset()
+	dest := &Destination{}
+	ks.encDest.Encode(dest)
+	ks.decDest.Decode(&dest)
+	ks.buf.Reset()
+	tp := &TariffPlan{}
+	ks.encTP.Encode(tp)
+	ks.decTP.Decode(&tp)
+	ks.buf.Reset()
+	ub := &UserBudget{}
+	ks.encUB.Encode(ub)
+	ks.decUB.Decode(&ub)
+	ks.buf.Reset()
 }
 
 func (ks *KyotoStorage) Close() {

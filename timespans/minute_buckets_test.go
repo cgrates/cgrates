@@ -41,7 +41,7 @@ func TestMultipleGetDestination(t *testing.T) {
 	if d.Id != "nationale" || len(d.Prefixes) != 4 {
 		t.Error("Got wrong destination: ", d)
 	}
-	/*mb = &MinuteBucket{DestinationId: "retea"}
+	mb = &MinuteBucket{DestinationId: "retea"}
 	d = mb.getDestination(getter)
 	d = mb.getDestination(getter)
 	d = mb.getDestination(getter)
@@ -54,5 +54,5 @@ func TestMultipleGetDestination(t *testing.T) {
 	d = mb.getDestination(getter)
 	if d.Id != "mobil" || len(d.Prefixes) != 2 {
 		t.Error("Got wrong destination: ", d)
-	}*/
+	}
 }
