@@ -27,17 +27,11 @@ import (
 
 type KyotoStorage struct {
 	//db  *kc.DB
-	db      *cabinet.KCDB
-	buf     bytes.Buffer
-	decAP   *gob.Decoder
-	encAP   *gob.Encoder
-	decDest *gob.Decoder
-	encDest *gob.Encoder
-	decTP   *gob.Decoder
-	encTP   *gob.Encoder
-	decUB   *gob.Decoder
-	encUB   *gob.Encoder
-	mux     sync.Mutex // we need norma lock because we reset the buf variable
+	db  *cabinet.KCDB
+	buf bytes.Buffer
+	dec *gob.Decoder
+	enc *gob.Encoder
+	mux sync.Mutex // we need norma lock because we reset the buf variable
 }
 
 func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
@@ -45,34 +39,28 @@ func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
 	err := ndb.Open(filaName, cabinet.KCOWRITER|cabinet.KCOCREATE)
 	ks := &KyotoStorage{db: ndb}
 
-	ks.decAP = gob.NewDecoder(&ks.buf)
-	ks.encAP = gob.NewEncoder(&ks.buf)
-	ks.decDest = gob.NewDecoder(&ks.buf)
-	ks.encDest = gob.NewEncoder(&ks.buf)
-	ks.decTP = gob.NewDecoder(&ks.buf)
-	ks.encTP = gob.NewEncoder(&ks.buf)
-	ks.decUB = gob.NewDecoder(&ks.buf)
-	ks.encUB = gob.NewEncoder(&ks.buf)
-	ks.trainGobEncodersAndDecoders()
+	ks.dec = gob.NewDecoder(&ks.buf)
+	ks.enc = gob.NewEncoder(&ks.buf)
+	ks.trainGobEncoderAndDecoder()
 	return ks, err
 }
 
-func (ks *KyotoStorage) trainGobEncodersAndDecoders() {
+func (ks *KyotoStorage) trainGobEncoderAndDecoder() {
 	aps := []*ActivationPeriod{&ActivationPeriod{}}
-	ks.encAP.Encode(aps)
-	ks.decAP.Decode(&aps)
+	ks.enc.Encode(aps)
+	ks.dec.Decode(&aps)
 	ks.buf.Reset()
 	dest := &Destination{}
-	ks.encDest.Encode(dest)
-	ks.decDest.Decode(&dest)
+	ks.enc.Encode(dest)
+	ks.dec.Decode(&dest)
 	ks.buf.Reset()
 	tp := &TariffPlan{}
-	ks.encTP.Encode(tp)
-	ks.decTP.Decode(&tp)
+	ks.enc.Encode(tp)
+	ks.dec.Decode(&tp)
 	ks.buf.Reset()
 	ub := &UserBudget{}
-	ks.encUB.Encode(ub)
-	ks.decUB.Decode(&ub)
+	ks.enc.Encode(ub)
+	ks.dec.Decode(&ub)
 	ks.buf.Reset()
 }
 
@@ -85,7 +73,7 @@ func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod
 	defer ks.mux.Unlock()
 
 	ks.buf.Reset()
-	ks.encAP.Encode(aps)
+	ks.enc.Encode(aps)
 	return ks.db.Set([]byte(key), ks.buf.Bytes())
 }
 
@@ -97,7 +85,7 @@ func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPerio
 
 	ks.buf.Reset()
 	ks.buf.Write(values)
-	ks.decAP.Decode(&aps)
+	ks.dec.Decode(&aps)
 	return
 }
 
@@ -106,7 +94,7 @@ func (ks *KyotoStorage) SetDestination(dest *Destination) error {
 	defer ks.mux.Unlock()
 
 	ks.buf.Reset()
-	ks.encDest.Encode(dest)
+	ks.enc.Encode(dest)
 	return ks.db.Set([]byte(dest.Id), ks.buf.Bytes())
 }
 
@@ -118,7 +106,7 @@ func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error
 
 	ks.buf.Reset()
 	ks.buf.Write(values)
-	ks.decDest.Decode(&dest)
+	ks.dec.Decode(&dest)
 	return
 }
 
@@ -127,7 +115,7 @@ func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) error {
 	defer ks.mux.Unlock()
 
 	ks.buf.Reset()
-	ks.encTP.Encode(tp)
+	ks.enc.Encode(tp)
 	return ks.db.Set([]byte(tp.Id), ks.buf.Bytes())
 }
 
@@ -139,7 +127,7 @@ func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
 
 	ks.buf.Reset()
 	ks.buf.Write(values)
-	ks.decTP.Decode(&tp)
+	ks.dec.Decode(&tp)
 	return
 }
 
@@ -148,7 +136,7 @@ func (ks *KyotoStorage) SetUserBudget(ub *UserBudget) error {
 	defer ks.mux.Unlock()
 
 	ks.buf.Reset()
-	ks.encUB.Encode(ub)
+	ks.enc.Encode(ub)
 	return ks.db.Set([]byte(ub.Id), ks.buf.Bytes())
 }
 
@@ -160,6 +148,6 @@ func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
 
 	ks.buf.Reset()
 	ks.buf.Write(values)
-	ks.decUB.Decode(&ub)
+	ks.dec.Decode(&ub)
 	return
 }
