@@ -30,7 +30,7 @@ type Responder byte
 /*
 RPC method thet provides the external RPC interface for getting the rating information.
 */
-func (r *Responder) GetGost(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
+func (r *Responder) GetCost(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
 	*replay = *GetCost(&arg)
 	return
 }

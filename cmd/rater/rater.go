@@ -129,7 +129,7 @@ func main() {
 	flag.Parse()
 	getter, err := timespans.NewKyotoStorage("storage.kch")
 	//getter, err := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	//defer getter.Close()
+	defer getter.Close()
 	if err != nil {
 		log.Printf("Cannot open storage file: %v", err)
 		os.Exit(1)

@@ -41,12 +41,12 @@ func main() {
 	if *parallel {
 		var divCall *rpc.Call
 		for i := 0; i < *runs; i++ {
-			divCall = client.Go("Responder.Get", cd, &result, nil)
+			divCall = client.Go("Responder.GetCost", cd, &result, nil)
 		}
 		<-divCall.Done
 	} else {
 		for j := 0; j < *runs; j++ {
-			client.Call("Responder.Get", cd, &result)
+			client.Call("Responder.GetCost", cd, &result)
 		}
 	}
 	log.Println(result)
