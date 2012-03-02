@@ -139,6 +139,82 @@ func getMaxSessionTimeHandler(w http.ResponseWriter, r *http.Request) {
 	enc.Encode(result)
 }
 
+/*
+curl "http://127.0.0.1:8000/addvolumediscountseconds?cstmid=vdf&subj=rif&dest=0257@amount=100"
+*/
+func addVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
+	enc := json.NewEncoder(w)
+	r.ParseForm()
+	cstmid, ok1 := r.Form["cstmid"]
+	subj, ok2 := r.Form["subj"]
+	dest, ok3 := r.Form["dest"]
+	amount_s, ok4 := r.Form["amount"]
+	amount, err := strconv.ParseFloat(amount_s[0], 64)
+	if !ok1 || !ok2 || !ok3 || !ok4 || err != nil {
+		enc.Encode(IncorrectParameters{"Incorrect parameters"})
+		return
+	}
+	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	result := CallMethod(arg, "Storage.AddVolumeDiscountSeconds")
+	enc.Encode(result)
+}
+
+/*
+curl "http://127.0.0.1:8000/resetvolumediscountseconds?cstmid=vdf&subj=rif&dest=0257"
+*/
+func resetVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
+	enc := json.NewEncoder(w)
+	r.ParseForm()
+	cstmid, ok1 := r.Form["cstmid"]
+	subj, ok2 := r.Form["subj"]
+	dest, ok3 := r.Form["dest"]
+	if !ok1 || !ok2 || !ok3 {
+		enc.Encode(IncorrectParameters{"Incorrect parameters"})
+		return
+	}
+	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
+	result := CallMethod(arg, "Storage.ResetVolumeDiscountSeconds")
+	enc.Encode(result)
+}
+
+/*
+curl "http://127.0.0.1:8000/addrecievedcallseconds?cstmid=vdf&subj=rif&dest=0257@amount=100"
+*/
+func addRecievedCallSeconds(w http.ResponseWriter, r *http.Request) {
+	enc := json.NewEncoder(w)
+	r.ParseForm()
+	cstmid, ok1 := r.Form["cstmid"]
+	subj, ok2 := r.Form["subj"]
+	dest, ok3 := r.Form["dest"]
+	amount_s, ok4 := r.Form["amount"]
+	amount, err := strconv.ParseFloat(amount_s[0], 64)
+	if !ok1 || !ok2 || !ok3 || !ok4 || err != nil {
+		enc.Encode(IncorrectParameters{"Incorrect parameters"})
+		return
+	}
+	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	result := CallMethod(arg, "Storage.AddRecievedCallSeconds")
+	enc.Encode(result)
+}
+
+/*
+curl "http://127.0.0.1:8000/resetuserbudget?cstmid=vdf&subj=rif&dest=0257"
+*/
+func resetUserBudget(w http.ResponseWriter, r *http.Request) {
+	enc := json.NewEncoder(w)
+	r.ParseForm()
+	cstmid, ok1 := r.Form["cstmid"]
+	subj, ok2 := r.Form["subj"]
+	dest, ok3 := r.Form["dest"]
+	if !ok1 || !ok2 || !ok3 {
+		enc.Encode(IncorrectParameters{"Incorrect parameters"})
+		return
+	}
+	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
+	result := CallMethod(arg, "Storage.ResetUserBudget")
+	enc.Encode(result)
+}
+
 func listenToHttpRequests() {
 	http.HandleFunc("/", statusHandler)
 	http.HandleFunc("/getcost", getCostHandler)
@@ -146,6 +222,10 @@ func listenToHttpRequests() {
 	http.HandleFunc("/debitsms", debitSMSHandler)
 	http.HandleFunc("/debitseconds", debitSecondsHandler)
 	http.HandleFunc("/getmaxsessiontime", debitSecondsHandler)
+	http.HandleFunc("/addvolumediscountseconds", addVolumeDiscountSeconds)
+	http.HandleFunc("/resetvolumediscountseconds", resetVolumeDiscountSeconds)
+	http.HandleFunc("/addrecievedcallseconds", addRecievedCallSeconds)
+	http.HandleFunc("/resetuserbudget", resetUserBudget)
 	log.Print("The server is listening on ", *httpApiAddress)
 	http.ListenAndServe(*httpApiAddress, nil)
 }

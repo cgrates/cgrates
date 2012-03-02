@@ -83,6 +83,38 @@ func (s *Storage) GetMaxSessionTime(cd timespans.CallDescriptor, reply *float64)
 	return err
 }
 
+func (s *Storage) AddVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
+	descriptor := &cd
+	descriptor.SetStorageGetter(s.sg)
+	e := descriptor.AddVolumeDiscountSeconds()
+	*reply, err = 0, e
+	return err
+}
+
+func (s *Storage) ResetVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
+	descriptor := &cd
+	descriptor.SetStorageGetter(s.sg)
+	e := descriptor.ResetVolumeDiscountSeconds()
+	*reply, err = 0, e
+	return err
+}
+
+func (s *Storage) AddRecievedCallSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
+	descriptor := &cd
+	descriptor.SetStorageGetter(s.sg)
+	e := descriptor.AddRecievedCallSeconds()
+	*reply, err = 0, e
+	return err
+}
+
+func (s *Storage) ResetUserBudget(cd timespans.CallDescriptor, reply *float64) (err error) {
+	descriptor := &cd
+	descriptor.SetStorageGetter(s.sg)
+	e := descriptor.ResetUserBudget()
+	*reply, err = 0, e
+	return err
+}
+
 /*
 RPC method that trigers rater shutdown in case of server exit.
 */

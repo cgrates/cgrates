@@ -55,6 +55,26 @@ func (r *Responder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *floa
 	return
 }
 
+func (r *Responder) AddVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay = CallMethod(&arg, "Storage.AddVolumeDiscountSeconds")
+	return
+}
+
+func (r *Responder) ResetVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay = CallMethod(&arg, "Storage.ResetVolumeDiscountSeconds")
+	return
+}
+
+func (r *Responder) AddRecievedCallSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay = CallMethod(&arg, "Storage.AddRecievedCallSeconds")
+	return
+}
+
+func (r *Responder) ResetUserBudget(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay = CallMethod(&arg, "Storage.ResetUserBudget")
+	return
+}
+
 /*
 Creates the json rpc server.
 */

@@ -224,6 +224,17 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 }
 
 /*
+The output structure that will be returned with the call cost information.
+*/
+type CallCost struct {
+	TOR                                int
+	CstmId, Subject, DestinationPrefix string
+	Cost, ConnectFee                   float64
+	Timespans                          []*TimeSpan
+}
+
+
+/*
 Returns the cost of a second in the present time conditions.
 */
 func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
@@ -360,14 +371,4 @@ func (cd *CallDescriptor) ResetUserBudget() (err error) {
 		return userBudget.resetUserBudget(cd.storageGetter)
 	}
 	return err
-}
-
-/*
-The output structure that will be returned with the call cost information.
-*/
-type CallCost struct {
-	TOR                                int
-	CstmId, Subject, DestinationPrefix string
-	Cost, ConnectFee                   float64
-	Timespans                          []*TimeSpan
 }
