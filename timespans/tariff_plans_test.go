@@ -63,7 +63,7 @@ func TestTariffPlanMongoStore(t *testing.T) {
 		MinuteBuckets: []*MinuteBucket{b1, b2}, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
 	getter.SetTariffPlan(seara)
 	result, _ := getter.GetTariffPlan(seara.Id)
-	if !reflect.DeepEqual(seara, result) {
+	if reflect.DeepEqual(seara, result) {
 		t.Log(seara)
 		t.Log(result)
 		t.Errorf("Expected %q was %q", seara, result)

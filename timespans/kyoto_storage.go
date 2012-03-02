@@ -20,7 +20,7 @@ package timespans
 import (
 	"bitbucket.org/ww/cabinet"
 	"bytes"
-	"encoding/gob"
+	"encoding/json"
 	//"log"
 	"sync"
 )
@@ -29,8 +29,8 @@ type KyotoStorage struct {
 	//db  *kc.DB
 	db  *cabinet.KCDB
 	buf bytes.Buffer
-	dec *gob.Decoder
-	enc *gob.Encoder
+	dec *json.Decoder
+	enc *json.Encoder
 	mux sync.Mutex // we need norma lock because we reset the buf variable
 }
 
@@ -39,29 +39,9 @@ func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
 	err := ndb.Open(filaName, cabinet.KCOWRITER|cabinet.KCOCREATE)
 	ks := &KyotoStorage{db: ndb}
 
-	ks.dec = gob.NewDecoder(&ks.buf)
-	ks.enc = gob.NewEncoder(&ks.buf)
-	ks.traingobEncoderAndDecoder()
+	ks.dec = json.NewDecoder(&ks.buf)
+	ks.enc = json.NewEncoder(&ks.buf)
 	return ks, err
-}
-
-func (ks *KyotoStorage) traingobEncoderAndDecoder() {
-	aps := []*ActivationPeriod{&ActivationPeriod{}}
-	ks.enc.Encode(aps)
-	ks.dec.Decode(&aps)
-	ks.buf.Reset()
-	dest := &Destination{}
-	ks.enc.Encode(dest)
-	ks.dec.Decode(&dest)
-	ks.buf.Reset()
-	tp := &TariffPlan{}
-	ks.enc.Encode(tp)
-	ks.dec.Decode(&tp)
-	ks.buf.Reset()
-	ub := &UserBudget{}
-	ks.enc.Encode(ub)
-	ks.dec.Decode(&ub)
-	ks.buf.Reset()
 }
 
 func (ks *KyotoStorage) Close() {

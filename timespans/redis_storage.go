@@ -19,7 +19,7 @@ package timespans
 
 import (
 	"bytes"
-	"encoding/gob"
+	"encoding/json"
 	"github.com/simonz05/godis"
 	// "log"
 	"sync"
@@ -29,37 +29,17 @@ type RedisStorage struct {
 	dbNb int
 	db   *godis.Client
 	buf  bytes.Buffer
-	dec  *gob.Decoder
-	enc  *gob.Encoder
+	dec  *json.Decoder
+	enc  *json.Encoder
 	mux  sync.Mutex
 }
 
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	ndb := godis.New(address, db, "")
 	rs := &RedisStorage{db: ndb, dbNb: db}
-	rs.dec = gob.NewDecoder(&rs.buf)
-	rs.enc = gob.NewEncoder(&rs.buf)
-	rs.traingobEncoderAndDecoder()
+	rs.dec = json.NewDecoder(&rs.buf)
+	rs.enc = json.NewEncoder(&rs.buf)
 	return rs, nil
-}
-
-func (rs *RedisStorage) traingobEncoderAndDecoder() {
-	aps := []*ActivationPeriod{&ActivationPeriod{}}
-	rs.enc.Encode(aps)
-	rs.dec.Decode(&aps)
-	rs.buf.Reset()
-	dest := &Destination{}
-	rs.enc.Encode(dest)
-	rs.dec.Decode(&dest)
-	rs.buf.Reset()
-	tp := &TariffPlan{}
-	rs.enc.Encode(tp)
-	rs.dec.Decode(&tp)
-	rs.buf.Reset()
-	ub := &UserBudget{}
-	rs.enc.Encode(ub)
-	rs.dec.Decode(&ub)
-	rs.buf.Reset()
 }
 
 func (rs *RedisStorage) Close() {
