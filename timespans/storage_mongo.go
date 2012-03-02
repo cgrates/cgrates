@@ -23,11 +23,6 @@ import (
 	"log"
 )
 
-type KeyValue struct {
-	Key               string
-	ActivationPeriods []*ActivationPeriod
-}
-
 type MongoStorage struct {
 	db      *mgo.Database
 	session *mgo.Session
@@ -53,6 +48,14 @@ func NewMongoStorage(address, db string) (*MongoStorage, error) {
 
 func (ms *MongoStorage) Close() {
 	ms.session.Close()
+}
+
+/*
+Helper type for activation periods storage.
+*/
+type KeyValue struct {
+	Key               string
+	ActivationPeriods []*ActivationPeriod
 }
 
 func (ms *MongoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
