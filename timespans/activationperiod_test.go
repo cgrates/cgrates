@@ -25,7 +25,7 @@ import (
 )
 
 func TestApRestoreKyoto(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0257", storageGetter: getter}

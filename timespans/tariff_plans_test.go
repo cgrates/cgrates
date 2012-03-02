@@ -24,28 +24,26 @@ import (
 )
 
 func TestTariffPlanStoreRestore(t *testing.T) {
-        b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
-        b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
-        rcb := &RecivedCallBonus{Credit: 100}
-        vd := &VolumeDiscount{100, 10}
-        seara := &TariffPlan{Id: "seara_voo",
-                SmsCredit:                100,
-                ReceivedCallSecondsLimit: 0,
-                RecivedCallBonus:         rcb,
-                MinuteBuckets:            []*MinuteBucket{b1, b2},
-                VolumeDiscountThresholds: []*VolumeDiscount{vd}}
-        s := seara.store()
-        tp1 := &TariffPlan{Id: "seara_voo"}
-        tp1.restore(s)
-        if tp1.store() != s {
-                t.Errorf("Expected %q was %q", s, tp1.store())
-        }
+	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
+	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
+	rcb := &RecivedCallBonus{Credit: 100}
+	vd := &VolumeDiscount{100, 10}
+	seara := &TariffPlan{Id: "seara_voo",
+		SmsCredit:                100,
+		ReceivedCallSecondsLimit: 0,
+		RecivedCallBonus:         rcb,
+		MinuteBuckets:            []*MinuteBucket{b1, b2},
+		VolumeDiscountThresholds: []*VolumeDiscount{vd}}
+	s := seara.store()
+	tp1 := &TariffPlan{Id: "seara_voo"}
+	tp1.restore(s)
+	if tp1.store() != s {
+		t.Errorf("Expected %q was %q", s, tp1.store())
+	}
 }
 
-
-
 func TestTariffPlanKyotoStore(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
@@ -94,7 +92,7 @@ func TestTariffPlanMongoStore(t *testing.T) {
 /********************************* Benchmarks **********************************/
 
 func BenchmarkTariffPlanKyotoStoreRestore(b *testing.B) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}

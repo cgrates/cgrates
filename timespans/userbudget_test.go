@@ -68,7 +68,7 @@ func TestGetPricedSeconds(t *testing.T) {
 }
 
 func TestUserBudgetKyotoStore(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}
@@ -377,7 +377,7 @@ func TestGetVolumeDiscountSteps(t *testing.T) {
 }
 
 func TestRecivedCallsBonus(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	rcb := &RecivedCallBonus{Credit: 100}
 	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 10, RecivedCallBonus: rcb}
@@ -404,7 +404,7 @@ func BenchmarkGetSecondForPrefix(b *testing.B) {
 }
 
 func BenchmarkUserBudgetKyotoStoreRestore(b *testing.B) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	b1 := &MinuteBucket{Seconds: 10, Priority: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Priority: 20, Price: 0.0, DestinationId: "retea"}

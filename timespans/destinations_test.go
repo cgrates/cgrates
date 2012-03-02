@@ -23,17 +23,17 @@ import (
 )
 
 func TestDestinationStoreRestore(t *testing.T) {
-        nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-        s := nationale.store()
-        d1 := &Destination{Id: "nat"}
-        d1.restore(s)
-        if d1.store() != s {
-                t.Errorf("Expected %q was %q", s, d1.store())
-        }
+	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	s := nationale.store()
+	d1 := &Destination{Id: "nat"}
+	d1.restore(s)
+	if d1.store() != s {
+		t.Errorf("Expected %q was %q", s, d1.store())
+	}
 }
 
 func TestDestinationKyotoStore(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	getter.SetDestination(nationale)
@@ -85,7 +85,7 @@ func TestDestinationContainsPrefix(t *testing.T) {
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationKyotoStoreRestore(b *testing.B) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	nationale = &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {

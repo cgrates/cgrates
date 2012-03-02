@@ -36,7 +36,7 @@ BenchmarkMongoGetCost	   10000	    323262 ns/op
 */
 
 func TestKyotoSplitSpans(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
@@ -68,7 +68,7 @@ func TestRedisSplitSpans(t *testing.T) {
 }
 
 func TestKyotoGetCost(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
@@ -307,7 +307,7 @@ func BenchmarkRedisGetCost(b *testing.B) {
 
 func BenchmarkKyotoGetting(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
@@ -322,7 +322,7 @@ func BenchmarkKyotoGetting(b *testing.B) {
 
 func BenchmarkKyotoRestoring(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
@@ -336,7 +336,7 @@ func BenchmarkKyotoRestoring(b *testing.B) {
 
 func BenchmarkSplitting(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
@@ -351,7 +351,7 @@ func BenchmarkSplitting(b *testing.B) {
 
 func BenchmarkKyotoGetCost(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
@@ -393,7 +393,7 @@ func BenchmarkMongoGetCost(b *testing.B) {
 
 func BenchmarkKyotoSingleGetSessionTime(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", storageGetter: getter, Amount: 100}
 	b.StartTimer()
@@ -404,7 +404,7 @@ func BenchmarkKyotoSingleGetSessionTime(b *testing.B) {
 
 func BenchmarkKyotoMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
+	getter, _ := NewKyotoStorage("../data/test.kch")
 	defer getter.Close()
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "minutosu", DestinationPrefix: "0723", storageGetter: getter, Amount: 5400}
 	b.StartTimer()
