@@ -47,20 +47,20 @@ func main() {
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := timespans.CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 
-	var result *timespans.CallCost
-
-	getter, _ := timespans.NewRedisStorage("", 10)
+	//getter, _ := timespans.NewRedisStorage("", 10)
+	getter, err := timespans.NewKyotoStorage("storage.kch")
 	defer getter.Close()
 
-	cd.StorageGetter = getter
+	cd.SetStorageGetter(getter)
 
-	i := 0
 	log.Printf("Runnning %d cycles...", *runs)
+	var result *timespans.CallCost
+	j := 0
 
-	for j := 0; j < *runs; j++ {
-		result, _ = cd.GetCost()
+	for i := 0; i < *runs; i++ {
+		result, err = cd.GetCost()
+		j = i
 	}
 
-	log.Print(result)
-	log.Print(i)
+	log.Print(result, j, err)
 }

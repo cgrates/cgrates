@@ -188,12 +188,38 @@ func (ub *UserBudget) debitMinutesBudget(sg StorageGetter, amount float64, prefi
 }
 
 /*
-Serts the volume discount seconds budget to the specified amount.
+Debits some amount of user's SMS budget. Returns the remaining SMS in user's budget.
+If the amount is bigger than the budget than nothing wil be debited and an error will be returned
 */
-func (ub *UserBudget) setVolumeDiscountSeconds(sg StorageGetter, amount float64) error {
+func (ub *UserBudget) debitSMSBuget(sg StorageGetter, amount float64) (float64, error) {
 	ub.mux.Lock()
 	defer ub.mux.Unlock()
-	ub.VolumeDiscountSeconds = amount
+	if ub.SmsCredit < amount {
+		return ub.SmsCredit, new(AmountTooBig)
+	}
+	ub.SmsCredit -= amount
+
+	sg.SetUserBudget(ub)
+	return ub.SmsCredit, nil
+}
+
+/*
+Adds the the specified amount to volume discount seconds budget.
+*/
+func (ub *UserBudget) addVolumeDiscountSeconds(sg StorageGetter, amount float64) error {
+	ub.mux.Lock()
+	defer ub.mux.Unlock()
+	ub.VolumeDiscountSeconds += amount
+	return sg.SetUserBudget(ub)
+}
+
+/*
+Resets the volume discounts seconds (sets zero value).
+*/
+func (ub *UserBudget) resetVolumeDiscountSeconds(sg StorageGetter) error {
+	ub.mux.Lock()
+	defer ub.mux.Unlock()
+	ub.VolumeDiscountSeconds = 0
 	return sg.SetUserBudget(ub)
 }
 
@@ -244,20 +270,4 @@ func (ub *UserBudget) resetUserBudget(sg StorageGetter) (err error) {
 		err = sg.SetUserBudget(ub)
 	}
 	return
-}
-
-/*
-Debits some amount of user's SMS budget. Returns the remaining SMS in user's budget.
-If the amount is bigger than the budget than nothing wil be debited and an error will be returned
-*/
-func (ub *UserBudget) debitSMSBuget(sg StorageGetter, amount float64) (float64, error) {
-	ub.mux.Lock()
-	defer ub.mux.Unlock()
-	if ub.SmsCredit < amount {
-		return ub.SmsCredit, new(AmountTooBig)
-	}
-	ub.SmsCredit -= amount
-
-	sg.SetUserBudget(ub)
-	return ub.SmsCredit, nil
 }

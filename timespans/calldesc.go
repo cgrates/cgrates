@@ -227,6 +227,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 Returns the cost of a second in the present time conditions.
 */
 func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
+	// TODO: remove this method if if not still used
 	_, err = cd.SearchStorageForPrefix()
 	now := time.Now()
 	oneSecond, _ := time.ParseDuration("1s")
@@ -283,6 +284,10 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	return 0, nil
 }
 
+/*
+Interface method used to add/substract an amount of cents from user's money budget.
+The amount filed has to be filled in call descriptor.
+*/
 func (cd *CallDescriptor) DebitCents() (left float64, err error) {
 	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
 		return userBudget.debitMoneyBudget(cd.storageGetter, cd.Amount), nil
@@ -290,6 +295,10 @@ func (cd *CallDescriptor) DebitCents() (left float64, err error) {
 	return 0.0, err
 }
 
+/*
+Interface method used to add/substract an amount of units from user's sms budget.
+The amount filed has to be filled in call descriptor.
+*/
 func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
 	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
 		return userBudget.debitSMSBuget(cd.storageGetter, cd.Amount)
@@ -297,9 +306,58 @@ func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
 	return 0, err
 }
 
+/*
+Interface method used to add/substract an amount of seconds from user's minutes budget.
+The amount filed has to be filled in call descriptor.
+*/
 func (cd *CallDescriptor) DebitSeconds() (err error) {
 	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
 		return userBudget.debitMinutesBudget(cd.storageGetter, cd.Amount, cd.DestinationPrefix)
+	}
+	return err
+}
+
+/*
+Interface method used to add an amount to the accumulated placed call seconds
+to be used for volume discount.
+The amount filed has to be filled in call descriptor.
+*/
+func (cd *CallDescriptor) AddVolumeDiscountSeconds() (err error) {
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		return userBudget.addVolumeDiscountSeconds(cd.storageGetter, cd.Amount)
+	}
+	return err
+}
+
+/*
+Resets the accumulated volume discount seconds (to zero).
+*/
+func (cd *CallDescriptor) ResetVolumeDiscountSeconds() (err error) {
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		return userBudget.resetVolumeDiscountSeconds(cd.storageGetter)
+	}
+	return err
+}
+
+/*
+Adds the specified amount of seconds to the recived call seconds. When the threshold specified
+in the user's tariff plan is reached then the recived call budget is reseted and the bonus
+specified in the tariff plan is applyed.
+The amount filed has to be filled in call descriptor.
+*/
+func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		return userBudget.addReceivedCallSeconds(cd.storageGetter, cd.Amount)
+	}
+	return err
+}
+
+/*
+Resets user budgets value to the amounts specified in the tariff plan.
+*/
+func (cd *CallDescriptor) ResetUserBudget() (err error) {
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		return userBudget.resetUserBudget(cd.storageGetter)
 	}
 	return err
 }
