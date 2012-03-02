@@ -47,8 +47,6 @@ func TestApRestoreRedis(t *testing.T) {
 }
 
 func TestApStoreRestore(t *testing.T) {
-	getter, _ := NewKyotoStorage("test.kch")
-	defer getter.Close()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Month: time.February,
 		MonthDay:  1,
@@ -57,22 +55,29 @@ func TestApStoreRestore(t *testing.T) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
-
-	getter.SetActivationPeriods("storerestore", []*ActivationPeriod{ap})
-	aps, err := getter.GetActivationPeriods("storerestore")
-	if err != nil || len(aps) != 1 || !reflect.DeepEqual(ap, aps[0]) {
-		t.Log(aps)
-		t.Errorf("Expected %v was %v ", ap, aps)
+	result := ap.store()
+	expected := "1328106601000000000;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
+	if result != expected {
+		t.Errorf("Expected %q was %q", expected, result)
 	}
-
+	ap1 := ActivationPeriod{}
+	ap1.restore(result)
+	if reflect.DeepEqual(ap, ap1) {
+		t.Errorf("Expected %v was %v", ap, ap1)
+	}
 }
 
 /**************************** Benchmarks *************************************/
 
+func BenchmarkActivationPeriodRestore(b *testing.B) {
+	ap := ActivationPeriod{}
+	for i := 0; i < b.N; i++ {
+		ap.restore("1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;")
+	}
+}
+
 func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("test.kch")
-	defer getter.Close()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Month: time.February,
 		MonthDay:  1,
@@ -82,9 +87,10 @@ func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 
+	ap1 := ActivationPeriod{}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		getter.SetActivationPeriods("storerestore", []*ActivationPeriod{ap})
-		getter.GetActivationPeriods("storerestore")
+		result := ap.store()
+		ap1.restore(result)
 	}
 }

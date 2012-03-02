@@ -18,126 +18,86 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/simonz05/godis"
-	// "log"
-	"sync"
+	"strings"
 )
 
 type RedisStorage struct {
 	dbNb int
 	db   *godis.Client
-	buf  bytes.Buffer
-	dec  *json.Decoder
-	enc  *json.Encoder
-	mux  sync.Mutex
 }
 
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	ndb := godis.New(address, db, "")
-	rs := &RedisStorage{db: ndb, dbNb: db}
-	rs.dec = json.NewDecoder(&rs.buf)
-	rs.enc = json.NewEncoder(&rs.buf)
-	return rs, nil
+	return &RedisStorage{db: ndb, dbNb: db}, nil
 }
 
 func (rs *RedisStorage) Close() {
 	rs.db.Quit()
 }
 
-func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
-	//.db.Select(rs.dbNb)
-	rs.mux.Lock()
-	defer rs.mux.Unlock()
-
-	rs.buf.Reset()
-	rs.enc.Encode(aps)
-	return rs.db.Set(key, rs.buf.Bytes())
-}
-
 func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
 	//rs.db.Select(rs.dbNb)
-	rs.mux.Lock()
-	defer rs.mux.Unlock()
 	elem, err := rs.db.Get(key)
+	values := elem.String()
 	if err == nil {
-		rs.buf.Reset()
-		rs.buf.Write(elem.Bytes())
-
-		err = rs.dec.Decode(&aps)
+		for _, ap_string := range strings.Split(values, "\n") {
+			if len(ap_string) > 0 {
+				ap := &ActivationPeriod{}
+				ap.restore(ap_string)
+				aps = append(aps, ap)
+			}
+		}
 	}
-	return
+	return aps, err
 }
 
-func (rs *RedisStorage) SetDestination(dest *Destination) error {
-	//rs.db.Select(rs.dbNb + 1)	
-	rs.mux.Lock()
-	defer rs.mux.Unlock()
-
-	rs.buf.Reset()
-	rs.enc.Encode(dest)
-	return rs.db.Set(dest.Id, rs.buf.Bytes())
+func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
+	//.db.Select(rs.dbNb)
+	result := ""
+	for _, ap := range aps {
+		result += ap.store() + "\n"
+	}
+	return rs.db.Set(key, result)
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
 	//rs.db.Select(rs.dbNb + 1)
-	rs.mux.Lock()
-	defer rs.mux.Unlock()
+	if values, err := rs.db.Get(key); err == nil {
+		dest = &Destination{Id: key}
+		dest.restore(values.String())
+	}
+	return
+}
+func (rs *RedisStorage) SetDestination(dest *Destination) error {
+	//rs.db.Select(rs.dbNb + 1)
+	return rs.db.Set(dest.Id, dest.store())
+}
 
-	elem, err := rs.db.Get(key)
-	if err == nil {
-		rs.buf.Reset()
-		rs.buf.Write(elem.Bytes())
-		err = rs.dec.Decode(&dest)
+func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
+	//rs.db.Select(rs.dbNb + 2)
+	if values, err := rs.db.Get(key); err == nil {
+		tp = &TariffPlan{Id: key}
+		tp.restore(values.String())
 	}
 	return
 }
 
 func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) error {
 	//rs.db.Select(rs.dbNb + 2)
-	rs.mux.Lock()
-	defer rs.mux.Unlock()
-
-	rs.buf.Reset()
-	rs.enc.Encode(tp)
-	return rs.db.Set(tp.Id, rs.buf.Bytes())
+	return rs.db.Set(tp.Id, tp.store())
 }
 
-func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
-	//rs.db.Select(rs.dbNb + 2)
-	rs.mux.Lock()
-	defer rs.mux.Unlock()
-
-	elem, err := rs.db.Get(key)
-	if err == nil {
-		rs.buf.Reset()
-		rs.buf.Write(elem.Bytes())
-		err = rs.dec.Decode(&tp)
+func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
+	//rs.db.Select(rs.dbNb + 3)
+	if values, err := rs.db.Get(key); err == nil {
+		ub = &UserBudget{Id: key}
+		ub.restore(values.String())
 	}
 	return
 }
 
 func (rs *RedisStorage) SetUserBudget(ub *UserBudget) error {
 	//rs.db.Select(rs.dbNb + 3)
-	rs.mux.Lock()
-	defer rs.mux.Unlock()
-
-	rs.buf.Reset()
-	rs.enc.Encode(ub)
-	return rs.db.Set(ub.Id, rs.buf.Bytes())
-}
-
-func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
-	//rs.db.Select(rs.dbNb + 3)
-	rs.mux.Lock()
-	defer rs.mux.Unlock()
-
-	elem, err := rs.db.Get(key)
-	if err == nil {
-		rs.buf.Reset()
-		rs.buf.Write(elem.Bytes())
-		err = rs.dec.Decode(&ub)
-	}
-	return
+	return rs.db.Set(ub.Id, ub.store())
 }

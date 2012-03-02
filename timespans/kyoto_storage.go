@@ -15,123 +15,83 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package timespans
 
 import (
-	"bitbucket.org/ww/cabinet"
-	"bytes"
-	"encoding/json"
+	"github.com/fsouza/gokabinet/kc"
 	//"log"
-	"sync"
+	"strings"
 )
 
 type KyotoStorage struct {
-	//db  *kc.DB
-	db  *cabinet.KCDB
-	buf bytes.Buffer
-	dec *json.Decoder
-	enc *json.Encoder
-	mux sync.Mutex // we need norma lock because we reset the buf variable
+	db *kc.DB
 }
 
 func NewKyotoStorage(filaName string) (*KyotoStorage, error) {
-	ndb := cabinet.New()
-	err := ndb.Open(filaName, cabinet.KCOWRITER|cabinet.KCOCREATE)
-	ks := &KyotoStorage{db: ndb}
-
-	ks.dec = json.NewDecoder(&ks.buf)
-	ks.enc = json.NewEncoder(&ks.buf)
-	return ks, err
+	ndb, err := kc.Open(filaName, kc.WRITE)
+	return &KyotoStorage{db: ndb}, err
 }
 
 func (ks *KyotoStorage) Close() {
 	ks.db.Close()
 }
 
-func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
-	ks.mux.Lock()
-	defer ks.mux.Unlock()
+func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
+	values, err := ks.db.Get(key)
 
-	ks.buf.Reset()
-	ks.enc.Encode(aps)
-	return ks.db.Set([]byte(key), ks.buf.Bytes())
+	if err == nil {
+		for _, ap_string := range strings.Split(values, "\n") {
+			if len(ap_string) > 0 {
+				ap := &ActivationPeriod{}
+				ap.restore(ap_string)
+				aps = append(aps, ap)
+			}
+		}
+	}
+	return aps, err
 }
 
-func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
-	ks.mux.Lock()
-	defer ks.mux.Unlock()
+func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
+	result := ""
+	for _, ap := range aps {
+		result += ap.store() + "\n"
+	}
+	return ks.db.Set(key, result)
+}
 
-	values, err := ks.db.Get([]byte(key))
-	if err == nil {
-		ks.buf.Reset()
-		ks.buf.Write(values)
-		err = ks.dec.Decode(&aps)
+func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
+	if values, err := ks.db.Get(key); err == nil {
+		dest = &Destination{Id: key}
+		dest.restore(values)
 	}
 	return
 }
 
 func (ks *KyotoStorage) SetDestination(dest *Destination) error {
-	ks.mux.Lock()
-	defer ks.mux.Unlock()
-
-	ks.buf.Reset()
-	ks.enc.Encode(dest)
-	return ks.db.Set([]byte(dest.Id), ks.buf.Bytes())
+	return ks.db.Set(dest.Id, dest.store())
 }
 
-func (ks *KyotoStorage) GetDestination(key string) (dest *Destination, err error) {
-	ks.mux.Lock()
-	defer ks.mux.Unlock()
-
-	values, err := ks.db.Get([]byte(key))
-	if err == nil {
-		ks.buf.Reset()
-		ks.buf.Write(values)
-		err = ks.dec.Decode(&dest)
+func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
+	if values, err := ks.db.Get(key); err == nil {
+		tp = &TariffPlan{Id: key}
+		tp.restore(values)
 	}
 	return
 }
 
 func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) error {
-	ks.mux.Lock()
-	defer ks.mux.Unlock()
-
-	ks.buf.Reset()
-	ks.enc.Encode(tp)
-	return ks.db.Set([]byte(tp.Id), ks.buf.Bytes())
+	return ks.db.Set(tp.Id, tp.store())
 }
 
-func (ks *KyotoStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
-	ks.mux.Lock()
-	defer ks.mux.Unlock()
-
-	values, err := ks.db.Get([]byte(key))
-	if err == nil {
-		ks.buf.Reset()
-		ks.buf.Write(values)
-		err = ks.dec.Decode(&tp)
+func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
+	if values, err := ks.db.Get(key); err == nil {
+		ub = &UserBudget{Id: key}
+		ub.restore(values)
 	}
 	return
 }
 
 func (ks *KyotoStorage) SetUserBudget(ub *UserBudget) error {
-	ks.mux.Lock()
-	defer ks.mux.Unlock()
-
-	ks.buf.Reset()
-	ks.enc.Encode(ub)
-	return ks.db.Set([]byte(ub.Id), ks.buf.Bytes())
-}
-
-func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
-	ks.mux.Lock()
-	defer ks.mux.Unlock()
-
-	values, err := ks.db.Get([]byte(key))
-	if err == nil {
-		ks.buf.Reset()
-		ks.buf.Write(values)
-		ks.dec.Decode(&ub)
-	}
-	return
+	return ks.db.Set(ub.Id, ub.store())
 }

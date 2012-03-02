@@ -17,12 +17,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package timespans
 
+import (
+	"strings"
+)
+
 /*
 Structure that gathers multiple destination prefixes under a common id.
 */
 type Destination struct {
 	Id       string
 	Prefixes []string
+}
+
+/*
+Serializes the destination for the storage. Used for key-value storages.
+*/
+func (d *Destination) store() (result string) {
+        for _, p := range d.Prefixes {
+                result += p + ","
+        }
+        result = strings.TrimRight(result, ",")
+        return
+}
+
+func (d *Destination) restore(input string) {
+        d.Prefixes = strings.Split(input, ",")
 }
 
 /*
