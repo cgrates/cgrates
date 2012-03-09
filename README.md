@@ -12,4 +12,7 @@
 + Paid support
 
 ## Documentation ##
-http://readthedocs.org/docs/cgrates/
+Browsable HTML:
+	http://readthedocs.org/docs/cgrates/
+PDF:
+	http://media.readthedocs.org/pdf/cgrates/latest/cgrates.pdf
