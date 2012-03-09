@@ -1,9 +1,15 @@
 # Rating system designed to be used in VoIP Carriers World #
 
 ## Features ##
-+ Fast RatingEngine, holds all rating information into memory
-+ Unlimited spanned timebased rating: considers both ActiveFrom/RateStartsAt
-+ Unlimited rate profiles chanining for fallback
-+ Rating Fields: ConnectFee, RateIn, RateOut
++ Rates for prepaid and for postpaid
++ The budget expressed in money and/or minutes (seconds)
 + High accuracy rating: configurable to miliseconds
-+ Flexible rates storage - plugin based rates loading
++ Handles volume dicount
++ Received calls bonus
++ Fully/Easy configurable 
++ Very fast (5000+ req/sec)
++ Good documentation
++ Paid support
+
+## Documentation ##
+http://readthedocs.org/docs/cgrates/

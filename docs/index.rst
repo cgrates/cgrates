@@ -13,6 +13,7 @@ Contents:
    
    intro
    tutorial
+   apicalls
    arhitecture
 
 Indices and tables

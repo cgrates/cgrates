@@ -2,6 +2,7 @@ a.out
 *.a
 *.6
 *.pyc
+*~
 .settings
 *project
 *workspace
