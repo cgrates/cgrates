@@ -46,7 +46,8 @@ Timespans
 
 Instalation
 -----------
-
+**Using packages**
+**Using source**
 Running
 -------
 
