@@ -197,7 +197,7 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 }
 
 /*
-Creates a CallCost structure with the cost nformation calculated for the received CallDescriptor.
+Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	destPrefix, err := cd.SearchStorageForPrefix()
@@ -233,7 +233,6 @@ type CallCost struct {
 	Timespans                          []*TimeSpan
 }
 
-
 /*
 Returns the cost of a second in the present time conditions.
 */
@@ -252,7 +251,7 @@ func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
 }
 
 /*
-Returns the aproximate max allowed session for user budget. It will try the max amount received in the call descriptor 
+Returns the approximate max allowed session for user budget. It will try the max amount received in the call descriptor 
 and will decrease it by 10% for nine times. So if the user has little credit it will still allow 10% of the initial amount.
 If the user has no credit then it will return 0.
 */
@@ -351,9 +350,9 @@ func (cd *CallDescriptor) ResetVolumeDiscountSeconds() (err error) {
 }
 
 /*
-Adds the specified amount of seconds to the recived call seconds. When the threshold specified
-in the user's tariff plan is reached then the recived call budget is reseted and the bonus
-specified in the tariff plan is applyed.
+Adds the specified amount of seconds to the received call seconds. When the threshold specified
+in the user's tariff plan is reached then the received call budget is reseted and the bonus
+specified in the tariff plan is applied.
 The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {

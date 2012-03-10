@@ -4,14 +4,14 @@ Api Calls
 JSON RPC
 --------
 GetCost
-	Creates a CallCost structure with the cost nformation calculated for the received CallDescriptor.
+	Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 
 DebitBalance
 	Interface method used to add/substract an amount of cents from user's money budget.
 	The amount filed has to be filled in call descriptor.
 
 DebitSMS
-	Interface method used to add/substract an amount of units from user's sms budget.
+	Interface method used to add/substract an amount of units from user's SMS budget.
 	The amount filed has to be filled in call descriptor.
 
 DebitSeconds
@@ -19,7 +19,7 @@ DebitSeconds
 	The amount filed has to be filled in call descriptor.
 
 GetMaxSessionTime
-	Returns the aproximate max allowed session for user budget. It will try the max amount received in the call descriptor 
+	Returns the approximate max allowed session for user budget. It will try the max amount received in the call descriptor 
 	and will decrease it by 10% for nine times. So if the user has little credit it will still allow 10% of the initial amount.
 	If the user has no credit then it will return 0.
 
@@ -31,13 +31,13 @@ ResetVolumeDiscountSeconds
 	Resets the accumulated volume discount seconds (to zero).
 
 AddRecievedCallSeconds
-	Adds the specified amount of seconds to the recived call seconds. When the threshold specified in the user's tariff plan is reached then the recived call budget is reseted and the bonus specified in the tariff plan is applyed.
+	Adds the specified amount of seconds to the received call seconds. When the threshold specified in the user's tariff plan is reached then the received call budget is reseted and the bonus specified in the tariff plan is applied.
 	The amount filed has to be filled in call descriptor.
 
 ResetUserBudget
 	Resets user budgets value to the amounts specified in the tariff plan.
 
-Http
+HTTP
 ----
 
 getcost

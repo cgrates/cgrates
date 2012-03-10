@@ -27,9 +27,9 @@ import (
 )
 
 var (
-	server  = flag.String("server", "127.0.0.1:2000", "target host:port")
-	listen  = flag.String("listen", "127.0.0.1:1234", "target host:port")
-	storage Storage
+	balancer = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
+	listen   = flag.String("listen", "127.0.0.1:1234", "listening address host:port")
+	storage  Storage
 )
 
 type Storage struct {
@@ -116,7 +116,7 @@ func (s *Storage) ResetUserBudget(cd timespans.CallDescriptor, reply *float64) (
 }
 
 /*
-RPC method that trigers rater shutdown in case of server exit.
+RPC method that triggers rater shutdown in case of balancer exit.
 */
 func (s *Storage) Shutdown(args string, reply *string) (err error) {
 	s.sg.Close()
@@ -137,8 +137,8 @@ func main() {
 	storage := NewStorage(getter)
 	rpc.Register(storage)
 	rpc.HandleHTTP()
-	go RegisterToServer(server, listen)
-	go StopSingnalHandler(server, listen, getter)
+	go RegisterToServer(balancer, listen)
+	go StopSingnalHandler(balancer, listen, getter)
 	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
 	l, err2 := net.ListenTCP("tcp", addr)
 	if err1 != nil || err2 != nil {
