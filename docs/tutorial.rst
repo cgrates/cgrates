@@ -65,6 +65,7 @@ Running
 There are only three main command to used with CGRates:
 
 balancer
+	The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open and rater server on witch the raters will register themselves when they start.
 ::
 
 	rif@grace:~$ balancer --help
@@ -74,14 +75,23 @@ balancer
   		-rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
 
 rater
+	The rater can be provided with the balancer server address and can be configured to listen to a specific interface and port.
 ::
+
 	rif@grace:~$ rater --help
 	Usage of rater:
 	  -listen="127.0.0.1:1234": listening address host:port
 	  -balancer="127.0.0.1:2000": balancer address host:port
 
 loader
+	The loader is the most configurable tool because it has options for each of the three supported databases (kyoto, redis and mongodb).
+	Apart from that multi-database options it is quite easy to be used.
+	The apfile, destfile, tpfile and ubfile parameters are for specifying the input json files.
+	The storage parameter specifies the database to be used and then the databses access information (host:port or file) has to be provided.
+
+	:Example: loader -storage=kyoto -kyotofile=storage.kch -apfile=activationperiods.json -destfile=destinations.json -tpfile=tariffplans.json -ubfile=userbudgets.json
 ::
+
 	rif@grace:~$ loader --help
 	Usage of loader:
 	  -apfile="ap.json": Activation Periods containing intervals file
@@ -105,19 +115,25 @@ Data importing
 ::
 	{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0257", "ActivationPeriods": [
 	        {"ActivationTime": "2012-01-01T00:00:00Z", "Intervals": [
-	                {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,"StartTime":"18:00:00","EndTime":"","WeekDays":[1,2,3,4,5]},
-	                {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.2,"StartTime":"","EndTime":"18:00:00","WeekDays":[1,2,3,4,5]}, 
-	                {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,"StartTime":"","EndTime":"","WeekDays":[6,0]}
+	                {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,
+	                	"StartTime":"18:00:00","EndTime":"","WeekDays":[1,2,3,4,5]},
+	                {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.2,
+	                	"StartTime":"","EndTime":"18:00:00","WeekDays":[1,2,3,4,5]}, 
+	                {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,
+	                	"StartTime":"","EndTime":"","WeekDays":[6,0]}
 	            ]
 	        },
 	        {"ActivationTime": "2012-02-08T00:00:00Z", "Intervals": [                
-	                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":10,"StartTime":"","EndTime":"18:00:00","WeekDays":[1,2,3,4,5]}, 
-	                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":1,"StartTime":"18:00:00","EndTime":"","WeekDays":[1,2,3,4,5]},
-	                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":1,"StartTime":"","EndTime":"","WeekDays":[6,0]}
+	                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":10,
+	                	"StartTime":"","EndTime":"18:00:00","WeekDays":[1,2,3,4,5]}, 
+	                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":1,
+	                	"StartTime":"18:00:00","EndTime":"","WeekDays":[1,2,3,4,5]},
+	                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":1,
+	                	"StartTime":"","EndTime":"","WeekDays":[6,0]}
 	            ]
 	        }
 	    ]     
-	},
+	}
 
 **Destinations**
 ::
@@ -132,13 +148,46 @@ Data importing
 	{"Id":"dimineata","SmsCredit":100,"ReceivedCallsSecondsLimit": 100,
 			"RecivedCallBonus" : {"Credit": 100},
 			"MinuteBuckets":
-				[{"Seconds":100,"Priority":10,"Price":0.01,"DestinationId":"nationale"}, {"Seconds":1000,"Priority":20,"Price":0,"DestinationId":"retea"}],
+				[{"Seconds":100,"Priority":10,"Price":0.01,"DestinationId":"nationale"},
+					{"Seconds":1000,"Priority":20,"Price":0,"DestinationId":"retea"}],
 			"VolumeDiscountThresholds":
-				[{"Volume": 100, "Discount": 10},{"Volume": 500, "Discount": 15},{"Volume": 1000, "Discount": 20}]			
+				[{"Volume": 100, "Discount": 10},
+					{"Volume": 500, "Discount": 15},
+					{"Volume": 1000, "Discount": 20}]			
 	}
 
 **User budgets**
 ::
-	{"Id":"broker","Credit":0,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,"ReceivedCallSeconds":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":
-	    [{"Seconds":10,"Priority":10,"Price":0.01,"DestinationId":"nationale"},
-		 {"Seconds":100,"Priority":20,"Price":0,"DestinationId":"retea"}]}
+	{"Id":"broker","Credit":0,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,
+		"ReceivedCallSeconds":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":
+	    	[{"Seconds":10,"Priority":10,"Price":0.01,"DestinationId":"nationale"},
+		 		{"Seconds":100,"Priority":20,"Price":0,"DestinationId":"retea"}]
+	}
+
+Database selection
+-------------------
+
+**Kyoto cabinet**
+
+Pros:
+	- super fast (the in memory data is accessed directly by the rater processes)
+	- easy backup
+Cons:
+	- harder to synchronize different raters	
+
+**Redis**
+
+Pros:
+	- easy configuration
+	- easy master-server configuration	
+Cons:
+	- slower than kyoto
+	- less features than mongodb
+
+**MongoDB**
+
+Pros:
+	- most features
+	- most advanced clustering options
+Cons:
+	- slowest of the three

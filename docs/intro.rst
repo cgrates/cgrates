@@ -7,7 +7,7 @@ It is written in go (http://golang.net) and accesible from any language via JSON
 Supported databases: kyoto_ cabinet, redis_, mongodb_.
 
 .. _kyoto: http://fallabs.com/kyotocabinet
-.. _redis: http://redis.io0
+.. _redis: http://redis.io
 .. _mongodb: http://www.mongodb.org
 
 Features
