@@ -20,9 +20,9 @@ package timespans
 import (
 	// "log"
 	"sort"
-	"sync"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 /*
@@ -74,44 +74,44 @@ func (bs bucketsorter) Less(j, i int) bool {
 Serializes the user budget for the storage. Used for key-value storages.
 */
 func (ub *UserBudget) store() (result string) {
-        result += strconv.FormatFloat(ub.Credit, 'f', -1, 64) + ";"
-        result += strconv.FormatFloat(ub.SmsCredit, 'f', -1, 64) + ";"
-        result += strconv.FormatFloat(ub.Traffic, 'f', -1, 64) + ";"
-        result += strconv.FormatFloat(ub.VolumeDiscountSeconds, 'f', -1, 64) + ";"
-        result += strconv.FormatFloat(ub.ReceivedCallSeconds, 'f', -1, 64) + ";"
-        result += strconv.Itoa(ub.ResetDayOfTheMonth) + ";"
-        result += ub.TariffPlanId
-        if ub.MinuteBuckets != nil {
-                result += ";"
-        }
-        for i, mb := range ub.MinuteBuckets {
-                if i > 0 {
-                        result += ","
-                }
-                result += mb.store()
-        }
-        return
+	result += strconv.FormatFloat(ub.Credit, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(ub.SmsCredit, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(ub.Traffic, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(ub.VolumeDiscountSeconds, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(ub.ReceivedCallSeconds, 'f', -1, 64) + ";"
+	result += strconv.Itoa(ub.ResetDayOfTheMonth) + ";"
+	result += ub.TariffPlanId
+	if ub.MinuteBuckets != nil {
+		result += ";"
+	}
+	for i, mb := range ub.MinuteBuckets {
+		if i > 0 {
+			result += ","
+		}
+		result += mb.store()
+	}
+	return
 }
 
 /*
 De-serializes the user budget for the storage. Used for key-value storages.
 */
 func (ub *UserBudget) restore(input string) {
-        elements := strings.Split(input, ";")
-        ub.Credit, _ = strconv.ParseFloat(elements[0], 64)
-        ub.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
-        ub.Traffic, _ = strconv.ParseFloat(elements[2], 64)
-        ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[3], 64)
-        ub.ReceivedCallSeconds, _ = strconv.ParseFloat(elements[4], 64)
-        ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[5])
-        ub.TariffPlanId = elements[6]
-        if len(elements) > 7 {
-                for _, mbs := range strings.Split(elements[7], ",") {
-                        mb := &MinuteBucket{}
-                        mb.restore(mbs)
-                        ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
-                }
-        }
+	elements := strings.Split(input, ";")
+	ub.Credit, _ = strconv.ParseFloat(elements[0], 64)
+	ub.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
+	ub.Traffic, _ = strconv.ParseFloat(elements[2], 64)
+	ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[3], 64)
+	ub.ReceivedCallSeconds, _ = strconv.ParseFloat(elements[4], 64)
+	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[5])
+	ub.TariffPlanId = elements[6]
+	if len(elements) > 7 {
+		for _, mbs := range strings.Split(elements[7], ",") {
+			mb := &MinuteBucket{}
+			mb.restore(mbs)
+			ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
+		}
+	}
 }
 
 /*
