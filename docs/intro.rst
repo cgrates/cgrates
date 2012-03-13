@@ -1,6 +1,6 @@
 Introduction
 ============
-CGRates is a very fast and easy scalable rating engine targeted especially for telecom providers.
+CGRateS is a very fast and easy scalable rating engine targeted especially for telecom providers.
 
 It is written in go (http://golang.net) and accessible from any language via JSON RPC. The code is well documented (go doc compliant API docs) and heavily tested.
 
@@ -19,12 +19,12 @@ Features
 + Received calls bonus
 + Fully/Easy configurable 
 + Very fast (5000+ req/sec)
-+ Good documentation
++ Good documentation ( that's me :)
 + Commercial support available
 
-How does CGRates work?
+How does CGRateS work?
 ----------------------
-Let's start with the most important function: finding the cost of a certain call. The call information comes to CGRates as the following values: subject, destination, start time and end time. The engine will lookup in the database for the activation periods applicable to the received subject and destination. What are the activation periods?
+Let's start with the most important function: finding the cost of a certain call. The call information comes to CGRateS as the following values: subject, destination, start time and end time. The engine will lookup in the database for the activation periods applicable to the received subject and destination. What are the activation periods?
 
 The activation period is a structure describing different prices for a call on different intervals of time. This structure has an activation time, from this time on the activation period is in effect and one ore more (usually more than one) intervals with prices. An interval is looking like this:
 

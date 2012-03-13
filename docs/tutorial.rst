@@ -1,8 +1,8 @@
 Tutorial
 ========
-The general usage of the CGRates involves creating a CallDescriptor structure sending it to the balancer via JSON RPC and getting a response from the balancer inf form of a CallCost structure or a numeric value for requested information.
+The general usage of the CGRateS involves creating a CallDescriptor structure sending it to the balancer via JSON RPC and getting a response from the balancer inf form of a CallCost structure or a numeric value for requested information.
 
-The general steps to get up and running with CGRates are:
+The general steps to get up and running with CGRateS are:
 
 #. Create JSON files containing rates, budgets, tariff plans and destinations, see :ref:`data-importing`.
 #. Load the data in the databases using the loader tool.
@@ -62,7 +62,7 @@ Instalation
 Running
 -------
 
-There are only three main command to used with CGRates:
+There are only three main command to used with CGRateS:
 
 balancer
 	The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open and rater server on witch the raters will register themselves when they start.
