@@ -135,6 +135,8 @@ Data importing
 	    ]     
 	}
 
+The above snippet describes prices for subject "rif" and destination "0257". There are two activation periods, the first one is active starting 2012-01-01 and the second one starting from 2012-02-08. Each deine multiple intervals with different prices for various time periods.
+
 **Destinations**
 ::
 	{"Id":"nationale", "Prefixes":["0256","0257","0723","0740"]},
