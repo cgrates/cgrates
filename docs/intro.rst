@@ -44,4 +44,21 @@ For example the interval {"Month": 1, "WeekDays":[1,2,3,4,5]. "StartTime":"18:00
 
 The ConnectFee specifies the connection price for the call if this interval is the first one from the call and the Ponder will establishes which interval will set the price for a call segment if more then one applies to it. 
 
-The other functions relay on a user budget structure to manage the postpaid and prepaid different quotas.
+For example there is an interval defining price for the weekdays and another interval that defines a special holiday prices. As that holiday is also one of the regular weekdays than both intervals are applicable to a call made on that day so the interval with the greater Ponder will give the price for the call in question. If both intervals have the same Ponder than the interval with the smaller price wins. It is, however, a good practice to set the Ponder for the defined intervals. For more information see :ref:`data-importing`.
+
+So when there is a need to define new sets of prices just define new ActivationPeriods with the StartTime set to the moment when they become active.
+
+Let's get back to the engine. After it finds the applicable ActivationPeriod(s) it will split the call interval in multiple time-spans attaching the appropriate ActivationPeriod and Interval to each them. The final price will be the sum of the prices of these times spans plus the ConnectionFee from the first time-span of the call.
+
+The other functions relay on a user budget structure to manage the postpaid and prepaid different quotas. The UserBudget keeps track of user credit, free SMS and minutes for every destination, Internet traffic and offers the volume discount and received call bonus. Let's take them one by one.
+
+CGRateS provide api for adding/substracting user's money credit. The prepaid and postpaid are uniformly treated except that the prepaid is checked to be alway greater than zero and the postpaid is always lower than zero.
+
+Both prepaid and postpaid can have a limited number of free SMS and Internet traffic per month and this budget is replenished at regular intervals conforming to user tariff plan or as the user buys more free SMS.
+
+The free (or special price) minutes must be handled a little differently because usually they are grouped by specific destinations (e.g. national minutes, ore minutes in the same network). So they are grouped in buckets and when a call is made the engine checks all applicable buckets to consume minutes according to that call.
+
+Another special feature allows user to get a better price as the call volume increases each month. This can be added on one ore more thresholds so the more he/she talks the cheaper the calls.
+
+Finally bonuses can be reworded to users who received a certain volume of calls. For information on how to define the bonuses see :ref:`data-importing`.
+
