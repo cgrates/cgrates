@@ -182,7 +182,7 @@ Destinations are list of prefixes that together define a destination. These dest
 Parameters:
 
 Id
-	The id of this destination. Can be anything (letters and/or numbers).	
+	The Id of this destination. Can be anything (letters and/or numbers).
 Prefixes
 	List with destination's prefixes. A prefix can appear in more than one destination.
 
@@ -198,6 +198,25 @@ Prefixes
 					{"Volume": 500, "Discount": 15},
 					{"Volume": 1000, "Discount": 20}]			
 	}
+
+Tariff plans define the free quotas for network users. These amount are refilling the user budgets at specified intervals.
+
+Parameters:
+
+Id
+	An Id for this tariff plan. Can be anything (letters and/or numbers).
+SmsCredit
+	The available free number of SMS.
+Traffic
+	The available free amount of traffic.
+ReceivedCallSecondsLimit
+	The threshold for receiving the incoming call volume bonus. When the user will receive this amount of incoming call seconds he/she will get the below described bonus.
+RecivedCallBonus
+	The bonus that will be awarded when the incoming calls amount of seconds is reached. It can be one ore more of the following entities: Credit, SmsCredit, Traffic, MinuteBucket (an amount of free/cheaper seconds to a specific destination). 
+MinuteBuckets
+	A list of available special minutes for specific destinations. Each bucket can specify the available number of Seconds for a specific destination. It can also specify a priority Priority to establish the order of the bucket usage and a Price if he minutes are not free (but cheaper). 
+VolumeDiscountThresholds
+	A list threshold for placed calls volume discounts. Each threshold specifies a Volume and a Discount discount percentage.
 
 **User budgets**
 ::
