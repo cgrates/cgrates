@@ -226,6 +226,30 @@ VolumeDiscountThresholds
 		 		{"Seconds":100,"Priority":20,"Price":0,"DestinationId":"retea"}]
 	}
 
+User budget describes the amount of various free quotas for every client of the network. It contains the entities from the tariff plan plus more items to track user status.
+
+Parameters:
+
+Id
+	The Id uniquely identifies the client.
+Credit
+	The amount of the available credit for prepaid or the total cost for postpaid.
+SmsCredit
+	The number of avaliable free SMS.
+Traffic
+	The amount of available free internet traffic.
+VolumeDiscountSeconds
+	The accumulated number of placed call seconds to be used for volume discounts.
+ReceivedCallSeconds
+	The accumulated amount of received call seconds to be used for received call bonus.
+ResetDayOfTheMonth
+	The day of the month when the free quotas will be refiled.
+TariffPlanId
+	The Id of the client's tariff plan. This is used to refill the free quotas 
+MinuteBuckets
+	A list of buckets containing the available seconds to various destinations.
+
+
 Database selection
 -------------------
 
