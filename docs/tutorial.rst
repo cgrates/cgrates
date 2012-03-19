@@ -123,7 +123,7 @@ Data importing
 	                	"StartTime":"","EndTime":"","WeekDays":[6,0]}
 	            ]
 	        },
-	        {"ActivationTime": "2012-02-08T00:00:00Z", "Intervals": [                
+	        {"ActivationTime": "2012-02-08T00:00:00Z", "Intervals": [
 	                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":10,
 	                	"StartTime":"","EndTime":"18:00:00","WeekDays":[1,2,3,4,5]}, 
 	                {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":1,
@@ -132,10 +132,43 @@ Data importing
 	                	"StartTime":"","EndTime":"","WeekDays":[6,0]}
 	            ]
 	        }
-	    ]     
+	    ]
 	}
 
-The above snippet describes prices for subject "rif" and destination "0257". There are two activation periods, the first one is active starting 2012-01-01 and the second one starting from 2012-02-08. Each deine multiple intervals with different prices for various time periods.
+The above snippet describes prices for subject "rif" and destination "0257". There are two activation periods, the first one is active starting 2012-01-01 and the second one starting from 2012-02-08. Each define multiple intervals with different prices for various time periods.
+
+Parameters:
+
+TOR
+	Type Of Service. For future extensions.
+CstmId
+	Customer Id. Used for multi tenant databases.
+Subject
+	The code that uniquely identifies a user.
+DestinationPrefix
+	The destination network number. For speed reasons we are not using here the below described destinations. We are trading memory space for speed.
+ActivationPeriods
+	A list of one ore more price descriptive periods. These periods must be contiguous and non overlapping.
+ActivationTime
+	The time when current period becomes active.
+Intervals
+	A list of price intervals intervals
+Month
+	The month for this interval. Zero value means all months.
+MonthDay
+	The day of the month for this interval. Zero value means all month days.
+WeekDays
+	A list with the days of the week for this interval. An empty list means all week days.
+StartTime, EndTime
+	The start and end hours in a day for this interval. Zero value means from/to start/end of the day.
+Ponder
+	Used to set the priority of the interval in relation with other applicable intervals.
+ConnectFee
+	The connection price for this interval.
+Price
+	The unit price for this interval.
+BillingUnit
+	The billing unit for this interval (in seconds). Value can be below one up to nanoseconds.
 
 **Destinations**
 ::
@@ -144,6 +177,14 @@ The above snippet describes prices for subject "rif" and destination "0257". The
 	{"Id":"mobil", "Prefixes":["0723","0740"]},
 	{"Id":"radu", "Prefixes":["0723045326"]}
 
+Destinations are list of prefixes that together define a destination. These destinations are used for definition of minute buckets.
+
+Parameters:
+
+Id
+	The id of this destination. Can be anything (letters and/or numbers).	
+Prefixes
+	List with destination's prefixes. A prefix can appear in more than one destination.
 
 **Tariff plans**
 ::

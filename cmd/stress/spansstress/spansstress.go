@@ -24,6 +24,7 @@ import (
 	"os"
 	"runtime/pprof"
 	"time"
+	"runtime"
 )
 
 var (
@@ -63,4 +64,8 @@ func main() {
 	}
 
 	log.Print(result, j, err)
+	memstats := new(runtime.MemStats)
+        runtime.ReadMemStats(memstats)
+        log.Printf("memstats before GC: Kbytes = %d footprint = %d",
+		memstats.HeapAlloc/1024, memstats.Sys/1024)
 }
