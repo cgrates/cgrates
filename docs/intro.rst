@@ -28,7 +28,6 @@ Let's start with the most important function: finding the cost of a certain call
 
 The activation period is a structure describing different prices for a call on different intervals of time. This structure has an activation time, from this time on the activation period is in effect and one ore more (usually more than one) intervals with prices. An interval is looking like this:
 
-.. index:: interval
 ::
 
 	type Interval struct {

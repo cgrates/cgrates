@@ -16,9 +16,4 @@ Contents:
    apicalls
    arhitecture
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
 

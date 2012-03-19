@@ -1,5 +1,3 @@
-.. index:: design, arhitecture
-
 Software design
 ===============
 
