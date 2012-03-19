@@ -10,6 +10,8 @@ The general steps to get up and running with CGRateS are:
 #. Start one ore more raters.
 #. Make API calls to the balancer.
 
+.. index:: CallDescriptor
+
 CallDescriptor structure
 ------------------------
 	- TOR                                int
@@ -28,6 +30,8 @@ TimeStart, TimeEnd
 	The start end end of the call in question
 Amount
 	The amount requested in various API calls (e.g. DebitSMS amount)
+
+.. index:: CallCost
 
 CallCost structure
 ------------------
@@ -63,7 +67,7 @@ Running
 -------
 
 There are only three main command to used with CGRateS:
-
+.. index:: balancer
 balancer
 	The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open and rater server on witch the raters will register themselves when they start.
 ::
@@ -73,7 +77,7 @@ balancer
   		-httpapiaddr="127.0.0.1:8000": HTTP API server address (localhost:2002)
   		-jsonrpcaddr="127.0.0.1:2001": JSON RPC server address (localhost:2001)
   		-rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
-
+.. index:: rater
 rater
 	The rater can be provided with the balancer server address and can be configured to listen to a specific interface and port.
 ::
@@ -82,7 +86,7 @@ rater
 	Usage of rater:
 	  -listen="127.0.0.1:1234": listening address host:port
 	  -balancer="127.0.0.1:2000": balancer address host:port
-
+.. index:: loader
 loader
 	The loader is the most configurable tool because it has options for each of the three supported databases (kyoto, redis and mongodb).
 	Apart from that multi-database options it is quite easy to be used.
@@ -108,9 +112,9 @@ loader
 
 .. _data-importing:
 
+.. index:: activation period, interval
 Data importing
 --------------
-
 **Activation periods**
 ::
 	{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0257", "ActivationPeriods": [
@@ -170,6 +174,7 @@ Price
 BillingUnit
 	The billing unit for this interval (in seconds). Value can be below one up to nanoseconds.
 
+.. index:: destination
 **Destinations**
 ::
 	{"Id":"nationale", "Prefixes":["0256","0257","0723","0740"]},
@@ -186,6 +191,7 @@ Id
 Prefixes
 	List with destination's prefixes. A prefix can appear in more than one destination.
 
+.. index:: tariff plan, minute bucket
 **Tariff plans**
 ::
 	{"Id":"dimineata","SmsCredit":100,"ReceivedCallsSecondsLimit": 100,
@@ -218,6 +224,7 @@ MinuteBuckets
 VolumeDiscountThresholds
 	A list threshold for placed calls volume discounts. Each threshold specifies a Volume and a Discount discount percentage.
 
+.. index:: user budget, minute bucket
 **User budgets**
 ::
 	{"Id":"broker","Credit":0,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,
