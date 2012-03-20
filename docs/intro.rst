@@ -50,7 +50,7 @@ So when there is a need to define new sets of prices just define new ActivationP
 
 Let's get back to the engine. After it finds the applicable ActivationPeriod(s) it will split the call interval in multiple time-spans attaching the appropriate ActivationPeriod and Interval to each them. The final price will be the sum of the prices of these times spans plus the ConnectionFee from the first time-span of the call.
 
-The other functions relay on a user budget structure to manage the postpaid and prepaid different quotas. The UserBudget keeps track of user credit, free SMS and minutes for every destination, Internet traffic and offers the volume discount and received call bonus. Let's take them one by one.
+The other functions relay on a user budget structure to manage the different quotas for postpaid and prepaid clients. The UserBudget keeps track of user credit, free SMS and minutes for every destination, Internet traffic and offers the volume discount and received call bonus. Let's take them one by one.
 
 CGRateS provide api for adding/substracting user's money credit. The prepaid and postpaid are uniformly treated except that the prepaid is checked to be alway greater than zero and the postpaid is always lower than zero.
 
