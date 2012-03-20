@@ -1,6 +1,32 @@
 Api Calls
-=========
+========
+As stated before the balancer (or the rater directly) can be accesed via json rpc. 
 
+The smallest python snippet to acces the CGRateS balancer is this:
+
+::
+
+	cd = {"Tor":0,
+		"CstmId": "vdf",
+		"Subject": "rif",
+		"DestinationPrefix": "0256",
+		"TimeStart": "2012-02-02T17:30:00Z",
+		"TimeEnd": "2012-02-02T18:30:00Z"}
+
+	s = socket.create_connection(("127.0.0.1", 2001))
+	s.sendall(json.dumps(({"id": 1, "method": "Responder.Get", "params": [cd]})))
+	print s.recv(4096)
+
+This also gives you a pretty good idea of how JSON-RPC works. You can find details in the specification_. A call to a JSON-RPC server simply sends a block of data through a socket. The data is formatted as a JSON structure, and a call consists of an id (so you can sort out the results when they come back), the name of the method to execute on the server, and params, an array of parameters which can itself consist of complex JSON objects. The dumps() call converts the Python structure into JSON.
+
+.. _specification:  http://json-rpc.org/wiki/specification
+
+In the stress folder you can find a better example of python client using a class that reduces tha ctual call code to::
+
+	rpc =JSONClient(("127.0.0.1", 2001))
+	result = rpc.call("Responder.Get", cd)
+	print result
+	
 JSON RPC
 --------
 GetCost

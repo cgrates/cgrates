@@ -57,7 +57,16 @@ Instalation
 **Using packages**
 **Using source**
 
-.. _running:
+After the go environment is installed_ and setup_ just issue the following command:
+::
+
+	go get github.com/rif/cgrates
+	
+After that navigate
+
+.. _installed: http://golang.org/doc/install
+.. _setup: http://golang.org/doc/code.html
+
 
 Running
 -------
