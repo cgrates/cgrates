@@ -57,10 +57,12 @@ Instalation
 **Using packages**
 **Using source**
 
-After the go environment is installed_ and setup_ just issue the following command:
+After the go environment is installed_ and setup_ just issue the following commands:
 ::
 
-	go get github.com/rif/cgrates
+	go get -v github.com/rif/cgrates/cmd/rater
+	go get -v github.com/rif/cgrates/cmd/balancer
+	go get -v github.com/rif/cgrates/cmd/loader
 	
 After that navigate
 
