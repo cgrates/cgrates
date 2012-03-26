@@ -47,11 +47,11 @@ cd = {"Tor":0, "CstmId": "vdf", "Subject": "rif", "DestinationPrefix": "0256", "
 
 # alternative to the above
 s = socket.create_connection(("127.0.0.1", 2001))
-s.sendall(json.dumps(({"id": 1, "method": "Responder.Get", "params": [cd]})))
+s.sendall(json.dumps(({"id": 1, "method": "Responder.GetCost", "params": [cd]})))
 print s.recv(4096)
 
 i = 0
 result = ""
 for i in xrange(int(1e5) + 1):
-    result = rpc.call("Responder.Get", cd)
+    result = rpc.call("Responder.GetCost", cd)
 print i, result

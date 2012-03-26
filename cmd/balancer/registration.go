@@ -20,7 +20,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"net/rpc"
 	"os"
@@ -35,36 +34,9 @@ RPC Server that handles the registering and unregistering of raters.
 type RaterServer byte
 
 func listenToRPCRaterRequests() {
-	/*rpc.Register(new(RaterServer))
-	rpc.HandleHTTP()
-	http.ListenAndServe(*raterAddress, nil)*/
-
 	rpc.Register(new(RaterServer))
 	rpc.HandleHTTP()
-	l, e := net.Listen("tcp", *raterAddress)
-	if e != nil {
-		log.Fatal("listen error:", e)
-	}
-	go http.Serve(l, nil)
-
-	/*log.Print("Starting Server...")
-	l, err := net.Listen("tcp", *raterAddress)
-	defer l.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Print("listening on: ", l.Addr())
-	rpc.Register(new(RaterServer))
-	for {
-		log.Print("waiting for connections ...")
-		conn, err := l.Accept()
-		if err != nil {
-			log.Printf("accept error: %s", conn)
-			continue
-		}
-		log.Printf("connection started: %v", conn.RemoteAddr())
-		go rpc.ServeConn(conn)
-	}*/
+	http.ListenAndServe(*raterAddress, nil)
 }
 
 /*
@@ -89,14 +61,15 @@ func StopSingnalHandler() {
 RPC method that receives a rater address, connects to it and ads the pair to the rater list for balancing
 */
 func (rs *RaterServer) RegisterRater(clientAddress string, replay *byte) error {
-	time.Sleep(1 * time.Second) // wait a second for Rater to start serving
+	log.Printf("Started rater %v registration...", clientAddress)
+	time.Sleep(2 * time.Second) // wait a second for Rater to start serving
 	client, err := rpc.Dial("tcp", clientAddress)
 	if err != nil {
 		log.Print("Could not connect to client!")
 		return err
 	}
 	raterList.AddClient(clientAddress, client)
-	log.Print(fmt.Sprintf("Rater %v registered succesfully.", clientAddress))
+	log.Printf("Rater %v registered succesfully.", clientAddress)
 	return nil
 }
 

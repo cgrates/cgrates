@@ -36,42 +36,42 @@ func (r *Responder) GetCost(arg timespans.CallDescriptor, replay *timespans.Call
 }
 
 func (r *Responder) DebitBalance(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Storage.DebitCents")
+	*replay = CallMethod(&arg, "Responder.DebitCents")
 	return
 }
 
 func (r *Responder) DebitSMS(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Storage.DebitSMS")
+	*replay = CallMethod(&arg, "Responder.DebitSMS")
 	return
 }
 
 func (r *Responder) DebitSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Storage.DebitSeconds")
+	*replay = CallMethod(&arg, "Responder.DebitSeconds")
 	return
 }
 
 func (r *Responder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Storage.GetMaxSessionTime")
+	*replay = CallMethod(&arg, "Responder.GetMaxSessionTime")
 	return
 }
 
 func (r *Responder) AddVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Storage.AddVolumeDiscountSeconds")
+	*replay = CallMethod(&arg, "Responder.AddVolumeDiscountSeconds")
 	return
 }
 
 func (r *Responder) ResetVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Storage.ResetVolumeDiscountSeconds")
+	*replay = CallMethod(&arg, "Responder.ResetVolumeDiscountSeconds")
 	return
 }
 
 func (r *Responder) AddRecievedCallSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Storage.AddRecievedCallSeconds")
+	*replay = CallMethod(&arg, "Responder.AddRecievedCallSeconds")
 	return
 }
 
 func (r *Responder) ResetUserBudget(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Storage.ResetUserBudget")
+	*replay = CallMethod(&arg, "Responder.ResetUserBudget")
 	return
 }
 

@@ -23,27 +23,29 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"os"
 )
 
 var (
 	balancer = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
 	listen   = flag.String("listen", "127.0.0.1:1234", "listening address host:port")
-	storage  Storage
+	json     = flag.Bool("json", false, "use json for rpc encoding")
+	storage  Responder
 )
 
-type Storage struct {
+type Responder struct {
 	sg timespans.StorageGetter
 }
 
-func NewStorage(nsg timespans.StorageGetter) *Storage {
-	return &Storage{sg: nsg}
+func NewStorage(nsg timespans.StorageGetter) *Responder {
+	return &Responder{sg: nsg}
 }
 
 /*
 RPC method providing the rating information from the storage.
 */
-func (s *Storage) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
+func (s *Responder) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	r, e := descriptor.GetCost()
@@ -51,7 +53,7 @@ func (s *Storage) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost
 	return err
 }
 
-func (s *Storage) DebitCents(cd timespans.CallDescriptor, reply *float64) (err error) {
+func (s *Responder) DebitCents(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	r, e := descriptor.DebitCents()
@@ -59,7 +61,7 @@ func (s *Storage) DebitCents(cd timespans.CallDescriptor, reply *float64) (err e
 	return err
 }
 
-func (s *Storage) DebitSMS(cd timespans.CallDescriptor, reply *float64) (err error) {
+func (s *Responder) DebitSMS(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	r, e := descriptor.DebitSMS()
@@ -67,7 +69,7 @@ func (s *Storage) DebitSMS(cd timespans.CallDescriptor, reply *float64) (err err
 	return err
 }
 
-func (s *Storage) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
+func (s *Responder) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	e := descriptor.DebitSeconds()
@@ -75,7 +77,7 @@ func (s *Storage) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (err
 	return err
 }
 
-func (s *Storage) GetMaxSessionTime(cd timespans.CallDescriptor, reply *float64) (err error) {
+func (s *Responder) GetMaxSessionTime(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	r, e := descriptor.GetMaxSessionTime()
@@ -83,7 +85,7 @@ func (s *Storage) GetMaxSessionTime(cd timespans.CallDescriptor, reply *float64)
 	return err
 }
 
-func (s *Storage) AddVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
+func (s *Responder) AddVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	e := descriptor.AddVolumeDiscountSeconds()
@@ -91,7 +93,7 @@ func (s *Storage) AddVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *f
 	return err
 }
 
-func (s *Storage) ResetVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
+func (s *Responder) ResetVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	e := descriptor.ResetVolumeDiscountSeconds()
@@ -99,7 +101,7 @@ func (s *Storage) ResetVolumeDiscountSeconds(cd timespans.CallDescriptor, reply 
 	return err
 }
 
-func (s *Storage) AddRecievedCallSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
+func (s *Responder) AddRecievedCallSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	e := descriptor.AddRecievedCallSeconds()
@@ -107,7 +109,7 @@ func (s *Storage) AddRecievedCallSeconds(cd timespans.CallDescriptor, reply *flo
 	return err
 }
 
-func (s *Storage) ResetUserBudget(cd timespans.CallDescriptor, reply *float64) (err error) {
+func (s *Responder) ResetUserBudget(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
 	descriptor.SetStorageGetter(s.sg)
 	e := descriptor.ResetUserBudget()
@@ -118,7 +120,7 @@ func (s *Storage) ResetUserBudget(cd timespans.CallDescriptor, reply *float64) (
 /*
 RPC method that triggers rater shutdown in case of balancer exit.
 */
-func (s *Storage) Shutdown(args string, reply *string) (err error) {
+func (s *Responder) Shutdown(args string, reply *string) (err error) {
 	s.sg.Close()
 	defer os.Exit(0)
 	*reply = "Done!"
@@ -134,16 +136,43 @@ func main() {
 		log.Printf("Cannot open storage file: %v", err)
 		os.Exit(1)
 	}
-	storage := NewStorage(getter)
-	rpc.Register(storage)
+	if !*json {
+		go RegisterToServer(balancer, listen)
+		go StopSingnalHandler(balancer, listen, getter)
+	}
+	/*rpc.Register(NewStorage(getter))
 	rpc.HandleHTTP()
-	go RegisterToServer(balancer, listen)
-	go StopSingnalHandler(balancer, listen, getter)
 	addr, err1 := net.ResolveTCPAddr("tcp", *listen)
 	l, err2 := net.ListenTCP("tcp", addr)
 	if err1 != nil || err2 != nil {
 		log.Print("cannot create listener for specified address ", *listen)
 		os.Exit(1)
 	}
-	rpc.Accept(l)
+	rpc.Accept(l)*/
+
+	log.Print("Starting Server...")
+	l, err := net.Listen("tcp", *listen)
+	defer l.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print("listening on: ", l.Addr())
+	rpc.Register(NewStorage(getter))
+	for {
+		log.Print("waiting for connections ...")
+		conn, err := l.Accept()
+		if err != nil {
+			log.Printf("accept error: %s", conn)
+			continue
+		}
+		log.Printf("connection started: %v", conn.RemoteAddr())
+		if *json {
+			log.Print("json encoding")
+			go jsonrpc.ServeConn(conn)
+		} else {
+			log.Print("gob encoding")
+			go rpc.ServeConn(conn)
+		}
+
+	}
 }

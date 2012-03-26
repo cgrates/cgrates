@@ -63,7 +63,7 @@ func debitBalanceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
-	result := CallMethod(arg, "Storage.DebitCents")
+	result := CallMethod(arg, "Responder.DebitCents")
 	enc.Encode(result)
 }
 
@@ -83,7 +83,7 @@ func debitSMSHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
-	result := CallMethod(arg, "Storage.DebitSMS")
+	result := CallMethod(arg, "Responder.DebitSMS")
 	enc.Encode(result)
 }
 
@@ -103,7 +103,7 @@ func debitSecondsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
-	result := CallMethod(arg, "Storage.DebitSeconds")
+	result := CallMethod(arg, "Responder.DebitSeconds")
 	enc.Encode(result)
 }
 
@@ -123,7 +123,7 @@ func getMaxSessionTimeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
-	result := CallMethod(arg, "Storage.GetMaxSessionTime")
+	result := CallMethod(arg, "Responder.GetMaxSessionTime")
 	enc.Encode(result)
 }
 
@@ -143,7 +143,7 @@ func addVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
-	result := CallMethod(arg, "Storage.AddVolumeDiscountSeconds")
+	result := CallMethod(arg, "Responder.AddVolumeDiscountSeconds")
 	enc.Encode(result)
 }
 
@@ -161,7 +161,7 @@ func resetVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
-	result := CallMethod(arg, "Storage.ResetVolumeDiscountSeconds")
+	result := CallMethod(arg, "Responder.ResetVolumeDiscountSeconds")
 	enc.Encode(result)
 }
 
@@ -181,7 +181,7 @@ func addRecievedCallSeconds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
-	result := CallMethod(arg, "Storage.AddRecievedCallSeconds")
+	result := CallMethod(arg, "Responder.AddRecievedCallSeconds")
 	enc.Encode(result)
 }
 
@@ -199,7 +199,7 @@ func resetUserBudget(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
-	result := CallMethod(arg, "Storage.ResetUserBudget")
+	result := CallMethod(arg, "Responder.ResetUserBudget")
 	enc.Encode(result)
 }
 

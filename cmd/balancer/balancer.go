@@ -45,7 +45,7 @@ func GetCost(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			reply = &timespans.CallCost{}
-			err = client.Call("Storage.GetCost", *key, reply)
+			err = client.Call("Responder.GetCost", *key, reply)
 			if err != nil {
 				log.Printf("Got en error from rater: %v", err)
 			}
