@@ -18,11 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"os/signal"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net/rpc"
 	"os"
+	"os/signal"
 	"syscall"
 )
 

@@ -19,7 +19,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -51,5 +50,6 @@ Ajax Handler for current used memory value
 func memoryHandler(w http.ResponseWriter, r *http.Request) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
-	fmt.Fprint(w, memstats.HeapAlloc/1024, memstats.Sys/1024)
+	enc := json.NewEncoder(w)
+	enc.Encode([]uint64{memstats.HeapAlloc / 1024, memstats.Sys / 1024})
 }

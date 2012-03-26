@@ -92,8 +92,7 @@
                 limit = limit.slice(1);                
             }
 
-            $.get("/getmem", function(memValue){
-              memValue = memValue.split(" ");
+            $.getJSON("/getmem", function(memValue){              
               now = new Date()
               timeOffsetInHours = (now.getTimezoneOffset()/60) * (-1);
               now.setHours(now.getHours() + timeOffsetInHours);
@@ -125,7 +124,7 @@
 
         update();  
         $("#rater-refresh").click(function(){
-          $.get("/raters", function(raters){            
+          $.getJSON("/raters", function(raters){            
             $("tr", "#rater-table").remove()
             console.log(raters);
             for(var i=0; i<raters.length; i++){              

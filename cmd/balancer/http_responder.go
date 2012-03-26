@@ -19,7 +19,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net/http"
@@ -28,17 +27,6 @@ import (
 
 type IncorrectParameters struct {
 	Error string
-}
-
-/*
-Handler for the statistics web client
-*/
-func statusHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<html><body><ol>")
-	for _, addr := range raterList.clientAddresses {
-		fmt.Fprint(w, fmt.Sprintf("<li>Client: %v</li>", addr))
-	}
-	fmt.Fprint(w, "</ol></body></html>")
 }
 
 /*
@@ -216,7 +204,7 @@ func resetUserBudget(w http.ResponseWriter, r *http.Request) {
 }
 
 func listenToHttpRequests() {
-	http.HandleFunc("/", statusHandler)
+	http.Handle("/static/", http.FileServer(http.Dir("")))
 	http.HandleFunc("/getcost", getCostHandler)
 	http.HandleFunc("/debitbalance", debitBalanceHandler)
 	http.HandleFunc("/debitsms", debitSMSHandler)
@@ -226,12 +214,9 @@ func listenToHttpRequests() {
 	http.HandleFunc("/resetvolumediscountseconds", resetVolumeDiscountSeconds)
 	http.HandleFunc("/addrecievedcallseconds", addRecievedCallSeconds)
 	http.HandleFunc("/resetuserbudget", resetUserBudget)
-<<<<<<< Updated upstream
-=======
 	http.HandleFunc("/", statusHandler)
 	http.HandleFunc("/getmem", memoryHandler)
 	http.HandleFunc("/raters", ratersHandler)
->>>>>>> Stashed changes
 	log.Print("The server is listening on ", *httpApiAddress)
 	http.ListenAndServe(*httpApiAddress, nil)
 }

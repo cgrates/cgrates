@@ -127,8 +127,8 @@ func (s *Storage) Shutdown(args string, reply *string) (err error) {
 
 func main() {
 	flag.Parse()
-	getter, err := timespans.NewKyotoStorage("storage.kch")
-	//getter, err := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	//getter, err := timespans.NewKyotoStorage("storage.kch")
+	getter, err := timespans.NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 	if err != nil {
 		log.Printf("Cannot open storage file: %v", err)

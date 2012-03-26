@@ -18,12 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"os/signal"
 	"fmt"
 	"log"
-	"net/rpc"
+	"net"
 	"net/http"
+	"net/rpc"
 	"os"
+	"os/signal"
 	"syscall"
 	"time"
 )
@@ -33,11 +34,37 @@ RPC Server that handles the registering and unregistering of raters.
 */
 type RaterServer byte
 
-func listenToRPCRaterRequests(){
-	raterServer := new(RaterServer)
-	rpc.Register(raterServer)
+func listenToRPCRaterRequests() {
+	/*rpc.Register(new(RaterServer))
 	rpc.HandleHTTP()
-	http.ListenAndServe(*raterAddress, nil)
+	http.ListenAndServe(*raterAddress, nil)*/
+
+	rpc.Register(new(RaterServer))
+	rpc.HandleHTTP()
+	l, e := net.Listen("tcp", *raterAddress)
+	if e != nil {
+		log.Fatal("listen error:", e)
+	}
+	go http.Serve(l, nil)
+
+	/*log.Print("Starting Server...")
+	l, err := net.Listen("tcp", *raterAddress)
+	defer l.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Print("listening on: ", l.Addr())
+	rpc.Register(new(RaterServer))
+	for {
+		log.Print("waiting for connections ...")
+		conn, err := l.Accept()
+		if err != nil {
+			log.Printf("accept error: %s", conn)
+			continue
+		}
+		log.Printf("connection started: %v", conn.RemoteAddr())
+		go rpc.ServeConn(conn)
+	}*/
 }
 
 /*
