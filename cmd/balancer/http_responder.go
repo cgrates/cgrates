@@ -226,6 +226,12 @@ func listenToHttpRequests() {
 	http.HandleFunc("/resetvolumediscountseconds", resetVolumeDiscountSeconds)
 	http.HandleFunc("/addrecievedcallseconds", addRecievedCallSeconds)
 	http.HandleFunc("/resetuserbudget", resetUserBudget)
+<<<<<<< Updated upstream
+=======
+	http.HandleFunc("/", statusHandler)
+	http.HandleFunc("/getmem", memoryHandler)
+	http.HandleFunc("/raters", ratersHandler)
+>>>>>>> Stashed changes
 	log.Print("The server is listening on ", *httpApiAddress)
 	http.ListenAndServe(*httpApiAddress, nil)
 }
