@@ -125,8 +125,7 @@
         update();  
         $("#rater-refresh").click(function(){
           $.getJSON("/raters", function(raters){            
-            $("tr", "#rater-table").remove()
-            console.log(raters);
+            $("tr", "#rater-table").remove()            
             for(var i=0; i<raters.length; i++){              
               $("#rater-table").append("<tr><td>" + raters[i] + "</td></tr>");
             }
