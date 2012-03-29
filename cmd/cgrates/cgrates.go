@@ -73,11 +73,47 @@ func main() {
 		if err = client.Call("Responder.GetMaxSessionTime", cd, &result); err == nil {
 			fmt.Println(result)
 		}
+	case "debitbalance":
+		var result float64
+		if err = client.Call("Responder.DebitBalance", cd, &result); err == nil {
+			fmt.Println(result)
+		}
+	case "debitsms":
+		var result float64
+		if err = client.Call("Responder.DebitSMS", cd, &result); err == nil {
+			fmt.Println(result)
+		}
+	case "debitseconds":
+		var result float64
+		if err = client.Call("Responder.DebitSeconds", cd, &result); err == nil {
+			fmt.Println(result)
+		}
+	case "addvolumediscountseconds":
+		var result float64
+		if err = client.Call("Responder.AddVolumeDiscountSeconds", cd, &result); err == nil {
+			fmt.Println(result)
+		}
+	case "resetvolumediscountseconds":
+		var result float64
+		if err = client.Call("Responder.ResetVolumeDiscountSeconds", cd, &result); err == nil {
+			fmt.Println(result)
+		}
+	case "addrecievedcallseconds":
+		var result float64
+		if err = client.Call("Responder.AddRecievedCallSeconds", cd, &result); err == nil {
+			fmt.Println(result)
+		}
+	case "resetuserbudget":
+		var result float64
+		if err = client.Call("Responder.ResetUserBudget", cd, &result); err == nil {
+			fmt.Println(result)
+		}
 	case "status":
 		var result string
 		if err = client.Call("Responder.Status", cd, &result); err == nil {
 			fmt.Println(result)
 		}
+
 	default:
 		fmt.Print("hello!")
 	}

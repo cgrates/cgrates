@@ -52,7 +52,7 @@ func (r *Responder) DebitSeconds(arg timespans.CallDescriptor, replay *float64) 
 	return
 }
 
-func (r *Responder) GetMaxSessionTimae(arg timespans.CallDescriptor, replay *float64) (err error) {
+func (r *Responder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay = CallMethod(&arg, "Responder.GetMaxSessionTime")
 	return
 }
