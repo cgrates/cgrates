@@ -79,7 +79,7 @@ Running
 There are only three main command to used with CGRateS:
 
 balancer
-	The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open and rater server on witch the raters will register themselves when they start.
+	The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open a rater server on witch the raters will register themselves when they start.
 ::
 
 	rif@grace:~$ balancer --help
