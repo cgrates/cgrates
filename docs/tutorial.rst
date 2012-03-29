@@ -62,10 +62,10 @@ Instalation
 After the go environment is installed_ and setup_ just issue the following commands:
 ::
 
-	go get github.com/rif/cgrates/cmd/rater
-	go get github.com/rif/cgrates/cmd/balancer
-	go get github.com/rif/cgrates/cmd/loader
-	go get github.com/rif/cgrates/cmd/cgrates
+	go get github.com/rif/cgrates/cmd/cgr-rater
+	go get github.com/rif/cgrates/cmd/cgr-balancer
+	go get github.com/rif/cgrates/cmd/cgr-loader
+	go get github.com/rif/cgrates/cmd/cgr-console
 	
 After that navigate
 
@@ -78,32 +78,32 @@ Running
 
 There are only three main command to used with CGRateS:
 
-balancer
-	The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open a rater server on witch the raters will register themselves when they start.
+cgr-balancer
+	The cgr-balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open a rater server on witch the raters will register themselves when they start.
 ::
 
-	rif@grace:~$ balancer --help
+	rif@grace:~$ cgr-balancer --help
 	Usage of balancer:
   		-httpapiaddr="127.0.0.1:8000": HTTP API server address (localhost:2002)
   		-jsonrpcaddr="127.0.0.1:2001": JSON RPC server address (localhost:2001)
   		-rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
 
-rater
-	The rater can be provided with the balancer server address and can be configured to listen to a specific interface and port.
+cgr-rater
+	The cgr-rater can be provided with the balancer server address and can be configured to listen to a specific interface and port.
 ::
 	
-	rif@grace:~$ rater --help
+	rif@grace:~$ cgr-rater --help
 	Usage of rater:
 	  -balancer="127.0.0.1:2000": balancer address host:port
 	  -json=false: use json for rpc encoding
 	  -listen="127.0.0.1:1234": listening address host:port
 
-gcrates
-	The cgrates is a command line tool used to access the balancer (or the rater directly) to call all the API methods offered by CGRateS.
+cgr-console
+	The cgr-console is a command line tool used to access the balancer (or the rater directly) to call all the API methods offered by CGRateS.
 ::
 	
-	rif@grace:~$ cgrates --help
-	Usage of cgrates:
+	rif@grace:~$ cgr-console --help
+	Usage of cgr-console:
 	  -amount=100: Amount for different operations
 	  -balancer="127.0.0.1:2001": balancer address host:port
 	  -cstmid="vdf": Customer identification
@@ -113,7 +113,7 @@ gcrates
 	  -tor=0: Type of record
 	  -ts="2012-02-09T00:00:00Z": Time start
 
-	rif@grace:~$ cgrates 
+	rif@grace:~$ cgr-cgrates 
 	List of commands:
 		getcost
 		getmaxsessiontime
@@ -126,17 +126,17 @@ gcrates
 		resetuserbudget
 		status
 
-loader
+cgr-loader
 	The loader is the most configurable tool because it has options for each of the three supported databases (kyoto, redis and mongodb).
 	Apart from that multi-database options it is quite easy to be used.
 	The apfile, destfile, tpfile and ubfile parameters are for specifying the input json files.
 	The storage parameter specifies the database to be used and then the databases access information (host:port or file) has to be provided.
 
-	:Example: loader -storage=kyoto -kyotofile=storage.kch -apfile=activationperiods.json -destfile=destinations.json -tpfile=tariffplans.json -ubfile=userbudgets.json
+	:Example: cgr-loader -storage=kyoto -kyotofile=storage.kch -apfile=activationperiods.json -destfile=destinations.json -tpfile=tariffplans.json -ubfile=userbudgets.json
 ::
 
-	rif@grace:~$ loader --help
-	Usage of loader:
+	rif@grace:~$ cgr-loader --help
+	Usage of cgr-loader:
 	  -apfile="ap.json": Activation Periods containing intervals file
 	  -destfile="dest.json": Destinations file
 	  -kyotofile="storage.kch": kyoto storage file (storage.kch)
