@@ -8,7 +8,11 @@ The general steps to get up and running with CGRateS are:
 #. Load the data in the databases using the loader tool.
 #. Start the balancer, see :ref:`running`.
 #. Start one ore more raters.
-#. Make API calls to the balancer.
+#. Make API calls to the balancer/rater.
+
+.. image::  images/general.png
+
+If the network does not require more than one rater to handle the calls. The balancer can be left out and the rater can be queried directly. In this case the rater must be started with --json=true option to instruct the application to offer the JSON-RPC interface.
 
 CallDescriptor structure
 ------------------------
@@ -50,8 +54,6 @@ ConnectFee
 Timespans
 	The timespans in witch the initial TimeStart-TimeEnd was split in for cost determination with all pricing and cost information attached. 
 
-.. image::  images/general.png
-
 Instalation
 -----------
 **Using packages**
@@ -89,11 +91,12 @@ balancer
 rater
 	The rater can be provided with the balancer server address and can be configured to listen to a specific interface and port.
 ::
-
+	
 	rif@grace:~$ rater --help
 	Usage of rater:
-	  -listen="127.0.0.1:1234": listening address host:port
 	  -balancer="127.0.0.1:2000": balancer address host:port
+	  -json=false: use json for rpc encoding
+	  -listen="127.0.0.1:1234": listening address host:port
 
 gcrates
 	The cgrates is a command line tool used to access the balancer (or the rater directly) to call all the API methods offered by CGRateS.
@@ -103,7 +106,7 @@ gcrates
 	Usage of cgrates:
 	  -amount=100: Amount for different operations
 	  -balancer="127.0.0.1:2001": balancer address host:port
-	  -cstmid="vdf": Customer identificator
+	  -cstmid="vdf": Customer identification
 	  -dest="0256": Destination prefix
 	  -subject="rif": The client who made the call
 	  -te="2012-02-09T00:10:00Z": Time end
@@ -127,7 +130,7 @@ loader
 	The loader is the most configurable tool because it has options for each of the three supported databases (kyoto, redis and mongodb).
 	Apart from that multi-database options it is quite easy to be used.
 	The apfile, destfile, tpfile and ubfile parameters are for specifying the input json files.
-	The storage parameter specifies the database to be used and then the databses access information (host:port or file) has to be provided.
+	The storage parameter specifies the database to be used and then the databases access information (host:port or file) has to be provided.
 
 	:Example: loader -storage=kyoto -kyotofile=storage.kch -apfile=activationperiods.json -destfile=destinations.json -tpfile=tariffplans.json -ubfile=userbudgets.json
 ::
@@ -252,7 +255,7 @@ Traffic
 ReceivedCallSecondsLimit
 	The threshold for receiving the incoming call volume bonus. When the user will receive this amount of incoming call seconds he/she will get the below described bonus.
 RecivedCallBonus
-	The bonus that will be awarded when the incoming calls amount of seconds is reached. It can be one ore more of the following entities: Credit, SmsCredit, Traffic, MinuteBucket (an amount of free/cheaper seconds to a specific destination). 
+	The bonus that will be awarded when the incoming calls amount of seconds is reached. It can be one ore more of the following entities: Credit, SmsCredit, Traffic, MinuteBucket (an amount of free / cheaper seconds to a specific destination). 
 MinuteBuckets
 	A list of available special minutes for specific destinations. Each bucket can specify the available number of Seconds for a specific destination. It can also specify a priority Priority to establish the order of the bucket usage and a Price if he minutes are not free (but cheaper). 
 VolumeDiscountThresholds
@@ -276,9 +279,9 @@ Id
 Credit
 	The amount of the available credit for prepaid or the total cost for postpaid.
 SmsCredit
-	The number of avaliable free SMS.
+	The number of available free SMS.
 Traffic
-	The amount of available free internet traffic.
+	The amount of available free Internet traffic.
 VolumeDiscountSeconds
 	The accumulated number of placed call seconds to be used for volume discounts.
 ReceivedCallSeconds
