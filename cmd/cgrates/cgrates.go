@@ -115,7 +115,17 @@ func main() {
 		}
 
 	default:
-		fmt.Print("hello!")
+		fmt.Println("List of commands:")
+		fmt.Println("\tgetcost")
+		fmt.Println("\tgetmaxsessiontime")
+		fmt.Println("\tdebitbalance")
+		fmt.Println("\tdebitsms")
+		fmt.Println("\tdebitseconds")
+		fmt.Println("\taddvolumediscountseconds")
+		fmt.Println("\tresetvolumediscountseconds")
+		fmt.Println("\taddrecievedcallseconds")
+		fmt.Println("\tresetuserbudget")
+		fmt.Println("\tstatus")
 	}
 	if err != nil {
 		log.Print(err)

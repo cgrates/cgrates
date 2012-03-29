@@ -80,7 +80,12 @@ func (r *Responder) ResetUserBudget(arg timespans.CallDescriptor, replay *float6
 func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
-	*replay = fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
+	*replay = "Connected raters:\n"
+	for _, rater := range raterList.clientAddresses {
+		log.Print(rater)
+		*replay += fmt.Sprintf("%v\n", rater)
+	}
+	*replay += fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
 	return
 }
 

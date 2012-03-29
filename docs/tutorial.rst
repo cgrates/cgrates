@@ -60,9 +60,10 @@ Instalation
 After the go environment is installed_ and setup_ just issue the following commands:
 ::
 
-	go get -v github.com/rif/cgrates/cmd/rater
-	go get -v github.com/rif/cgrates/cmd/balancer
-	go get -v github.com/rif/cgrates/cmd/loader
+	go get github.com/rif/cgrates/cmd/rater
+	go get github.com/rif/cgrates/cmd/balancer
+	go get github.com/rif/cgrates/cmd/loader
+	go get github.com/rif/cgrates/cmd/cgrates
 	
 After that navigate
 
@@ -93,6 +94,34 @@ rater
 	Usage of rater:
 	  -listen="127.0.0.1:1234": listening address host:port
 	  -balancer="127.0.0.1:2000": balancer address host:port
+
+gcrates
+	The cgrates is a command line tool used to access the balancer (or the rater directly) to call all the API methods offered by CGRateS.
+::
+	
+	rif@grace:~$ cgrates --help
+	Usage of cgrates:
+	  -amount=100: Amount for different operations
+	  -balancer="127.0.0.1:2001": balancer address host:port
+	  -cstmid="vdf": Customer identificator
+	  -dest="0256": Destination prefix
+	  -subject="rif": The client who made the call
+	  -te="2012-02-09T00:10:00Z": Time end
+	  -tor=0: Type of record
+	  -ts="2012-02-09T00:00:00Z": Time start
+
+	rif@grace:~$ cgrates 
+	List of commands:
+		getcost
+		getmaxsessiontime
+		debitbalance
+		debitsms
+		debitseconds
+		addvolumediscountseconds
+		resetvolumediscountseconds
+		addrecievedcallseconds
+		resetuserbudget
+		status
 
 loader
 	The loader is the most configurable tool because it has options for each of the three supported databases (kyoto, redis and mongodb).

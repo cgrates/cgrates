@@ -19,12 +19,14 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
+	"runtime"
 )
 
 var (
@@ -115,6 +117,13 @@ func (s *Responder) ResetUserBudget(cd timespans.CallDescriptor, reply *float64)
 	e := descriptor.ResetUserBudget()
 	*reply, err = 0, e
 	return err
+}
+
+func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err error) {
+	memstats := new(runtime.MemStats)
+	runtime.ReadMemStats(memstats)
+	*replay = fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
+	return
 }
 
 /*
