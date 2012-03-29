@@ -51,7 +51,7 @@ func StopSingnalHandler() {
 	log.Printf("Caught signal %v, sending shutdownto raters\n", sig)
 	var reply string
 	for i, client := range raterList.clientConnections {
-		client.Call("Storage.Shutdown", "", &reply)
+		client.Call("Responder.Shutdown", "", &reply)
 		log.Printf("Shutdown rater %v: %v ", raterList.clientAddresses[i], reply)
 	}
 	os.Exit(1)

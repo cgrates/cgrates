@@ -1,7 +1,25 @@
+/*
+Rating system designed to be used in VoIP Carriers World
+Copyright (C) 2012  Radu Ioan Fericean
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
 package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net/rpc/jsonrpc"
@@ -17,6 +35,7 @@ var (
 	dest     = flag.String("dest", "0256", "Destination prefix")
 	ts       = flag.String("ts", "2012-02-09T00:00:00Z", "Time start")
 	te       = flag.String("te", "2012-02-09T00:10:00Z", "Time end")
+	amount   = flag.Float64("amount", 100, "Amount for different operations")
 )
 
 func main() {
@@ -40,16 +59,27 @@ func main() {
 		DestinationPrefix: *dest,
 		TimeStart:         timestart,
 		TimeEnd:           timeend,
+		Amount:            *amount,
 	}
-	result := timespans.CallCost{}
 
 	switch flag.Arg(0) {
 	case "getcost":
+		result := timespans.CallCost{}
 		if err = client.Call("Responder.GetCost", cd, &result); err == nil {
-			log.Print(result)
+			fmt.Println(result)
+		}
+	case "getmaxsessiontime":
+		var result float64
+		if err = client.Call("Responder.GetMaxSessionTime", cd, &result); err == nil {
+			fmt.Println(result)
+		}
+	case "status":
+		var result string
+		if err = client.Call("Responder.Status", cd, &result); err == nil {
+			fmt.Println(result)
 		}
 	default:
-		log.Print("hello!")
+		fmt.Print("hello!")
 	}
 	if err != nil {
 		log.Print(err)

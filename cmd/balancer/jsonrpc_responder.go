@@ -18,11 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"fmt"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"runtime"
 )
 
 type Responder byte
@@ -50,7 +52,7 @@ func (r *Responder) DebitSeconds(arg timespans.CallDescriptor, replay *float64) 
 	return
 }
 
-func (r *Responder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *float64) (err error) {
+func (r *Responder) GetMaxSessionTimae(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay = CallMethod(&arg, "Responder.GetMaxSessionTime")
 	return
 }
@@ -72,6 +74,13 @@ func (r *Responder) AddRecievedCallSeconds(arg timespans.CallDescriptor, replay 
 
 func (r *Responder) ResetUserBudget(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay = CallMethod(&arg, "Responder.ResetUserBudget")
+	return
+}
+
+func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err error) {
+	memstats := new(runtime.MemStats)
+	runtime.ReadMemStats(memstats)
+	*replay = fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
 	return
 }
 
