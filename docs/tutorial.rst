@@ -83,7 +83,7 @@ cgr-balancer
 ::
 
 	rif@grace:~$ cgr-balancer --help
-	Usage of balancer:
+	Usage of cgr-balancer:
   		-httpapiaddr="127.0.0.1:8000": HTTP API server address (localhost:2002)
   		-jsonrpcaddr="127.0.0.1:2001": JSON RPC server address (localhost:2001)
   		-rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
@@ -93,7 +93,7 @@ cgr-rater
 ::
 	
 	rif@grace:~$ cgr-rater --help
-	Usage of rater:
+	Usage of cgr-rater:
 	  -balancer="127.0.0.1:2000": balancer address host:port
 	  -json=false: use json for rpc encoding
 	  -listen="127.0.0.1:1234": listening address host:port
