@@ -15,3 +15,5 @@
 Browsable HTML http://readthedocs.org/docs/cgrates/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
+
+API http://gopkgdoc.appspot.com/pkg/github.com/rif/cgrates/timespans
