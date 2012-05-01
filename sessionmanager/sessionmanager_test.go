@@ -25,13 +25,10 @@ import (
 
 func TestConnect(t *testing.T) {
 	sm := &SessionManager{}
-	sm.Connect("localhost:8021")
+	sm.Connect("localhost:8021", "ClueCon")
 	for {
 		ev := sm.ReadNextEvent()
-		if name, err := ev.GetField("Event-Name"); err == nil {
-			log.Println(name)
-		} else {
-			log.Print("cannot get requested field!", err)
-		}
+		log.Print(ev.Fields["Event-Name"])
+		log.Print(ev)
 	}
 }

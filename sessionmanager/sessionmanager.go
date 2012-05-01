@@ -9,30 +9,34 @@ import (
 )
 
 type Event struct {
-	body string
+	Fields map[string]string
 }
 
-func (ev *Event) GetField(field string) (result string, err error) {
-	if re, err := regexp.Compile(fmt.Sprintf(`"%s":\s+"(.*?)"`, field)); err == nil {
-		results := re.FindStringSubmatch(ev.body)
-		if len(results) > 1 {
-			result = results[1]
-		}
+func NewEvent() (ev *Event) {
+	return &Event{Fields: make(map[string]string)}
+}
+
+func (ev *Event) String() (result string) {
+	for k, v := range ev.Fields {
+		result += fmt.Sprintf("%s = %s\n", k, v)
 	}
+	result += "=============================================================="
 	return
 }
 
 type SessionManager struct {
-	conn net.Conn
+	conn        net.Conn
+	eventBodyRE *regexp.Regexp
 }
 
-func (sm *SessionManager) Connect(address string) {
+func (sm *SessionManager) Connect(address, pass string) {
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		log.Fatal("Could not connect to freeswitch server!")
 	}
 	sm.conn = conn
-	fmt.Fprint(sm.conn, "auth ClueCon\n\n")
+	sm.eventBodyRE, _ = regexp.Compile(`"(.*?)":\s+"(.*?)"`)
+	fmt.Fprint(sm.conn, fmt.Sprintf("auth %s\n\n", pass))
 	fmt.Fprint(sm.conn, "event json all\n\n")
 }
 
@@ -45,8 +49,10 @@ func (sm *SessionManager) ReadNextEvent() (ev *Event) {
 	if err != nil {
 		log.Print("Could not read from freeswitch connection!")
 	}
-	ev = &Event{}
-	ev.body = body
+	ev = NewEvent()
+	for _, fields := range sm.eventBodyRE.FindAllStringSubmatch(body, -1) {
+		ev.Fields[fields[1]] = fields[2]
+	}
 	return
 }
 
