@@ -39,7 +39,7 @@ func (s *Session) GetSessionCostFrom(now time.Time) (callCosts []*timespans.Call
 	for i, st := range s.startTimes {
 		cd := &timespans.CallDescriptor{TOR: 1, CstmId: s.customer, Subject: s.subject, DestinationPrefix: s.destinations[i], TimeStart: st, TimeEnd: now}
 		cd.SetStorageGetter(storageGetter)
-		if cc, err := cd.GetCost(); err != nil {
+		if cc, err := cd.GetCost(); err == nil {
 			callCosts = append(callCosts, cc)
 		} else {
 			break

@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"log"
 	"testing"
 	"time"
 )
@@ -47,13 +46,12 @@ func TestSessionDurationMultiple(t *testing.T) {
 func TestSessionCostSingle(t *testing.T) {
 	s := &Session{customer: "vdf", subject: "rif"}
 	s.AddCallToSession("0723", time.Now())
-	twoSeconds, _ := time.ParseDuration("2s")
+	twoSeconds, _ := time.ParseDuration("60s")
 	if ccs, err := s.GetSessionCostFrom(time.Now().Add(twoSeconds)); err != nil {
 		t.Errorf("Get cost returned error %v", err)
 	} else {
-		log.Print(ccs)
-		for i, cc := range ccs {
-			log.Printf("here: %d. %v", i, cc.Cost)
+		if len(ccs) != 1 || ccs[0].Cost < 1 || ccs[0].Cost > 1.1 {
+			t.Errorf("Expected %v got %v", "between 1 and 1.1", ccs[0].Cost)
 		}
 	}
 }
@@ -61,15 +59,18 @@ func TestSessionCostSingle(t *testing.T) {
 func TestSessionCostMultiple(t *testing.T) {
 	s := &Session{customer: "vdf", subject: "rif"}
 	s.AddCallToSession("0723", time.Now())
-	s.AddCallToSession("0723", time.Now())
-	s.AddCallToSession("0723", time.Now())
-	twoSeconds, _ := time.ParseDuration("2s")
+	s.AddCallToSession("0257", time.Now())
+	s.AddCallToSession("0256", time.Now())
+	twoSeconds, _ := time.ParseDuration("60s")
 	if ccs, err := s.GetSessionCostFrom(time.Now().Add(twoSeconds)); err != nil {
 		t.Errorf("Get cost returned error %v", err)
 	} else {
-		log.Print(ccs)
-		for i, cc := range ccs {
-			log.Printf("here: %d. %v", i, cc.Cost)
+		sum := 0.0
+		for _, cc := range ccs {
+			sum += cc.Cost
+		}
+		if len(ccs) != 3 || sum < 23 || sum > 23.1 {
+			t.Errorf("Expected %v got %v", "between 23 and 23.1", sum)
 		}
 	}
 }
