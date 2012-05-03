@@ -19,18 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	//"log"
-	"testing"
+	"fmt"
 )
 
-func TestConnect(t *testing.T) {
-	sm := &SessionManager{}
-	sm.Connect("localhost:8021", "ClueCon")
-	for {
-		ev := sm.ReadNextEvent()
-		if ev == nil {
-			t.Error("Got nil event!")
-		}
-		//log.Print(ev)
+type Event struct {
+	Fields map[string]string
+}
+
+func NewEvent() (ev *Event) {
+	return &Event{Fields: make(map[string]string)}
+}
+
+func (ev *Event) String() (result string) {
+	for k, v := range ev.Fields {
+		result += fmt.Sprintf("%s = %s\n", k, v)
 	}
+	result += "=============================================================="
+	return
 }

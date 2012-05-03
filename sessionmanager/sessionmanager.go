@@ -27,25 +27,9 @@ import (
 	"regexp"
 )
 
-type Event struct {
-	Fields map[string]string
-}
-
-func NewEvent() (ev *Event) {
-	return &Event{Fields: make(map[string]string)}
-}
-
 var (
 	storageGetter, _ = timespans.NewRedisStorage("tcp:127.0.0.1:6379", 10)
 )
-
-func (ev *Event) String() (result string) {
-	for k, v := range ev.Fields {
-		result += fmt.Sprintf("%s = %s\n", k, v)
-	}
-	result += "=============================================================="
-	return
-}
 
 type SessionManager struct {
 	buf         *bufio.Reader
@@ -77,9 +61,19 @@ func (sm *SessionManager) ReadNextEvent() (ev *Event) {
 			log.Printf("malformed event field: %v", fields)
 		}
 	}
+	switch ev.Fields["Event-Name"] {
+	case "HEARTBEAT":
+		sm.OnHeartBeat(ev)
+	case "RE_SCHEDULE":
+		sm.OnReSchedule(ev)
+	}
 	return
 }
 
-func (ssm *SessionManager) onHeartBeat(event string) {
-	log.Printf("hear beat event: %s", event)
+func (sm *SessionManager) OnHeartBeat(ev *Event) {
+	log.Print("heartbeat")
+}
+
+func (sm *SessionManager) OnReSchedule(ev *Event) {
+	log.Print("re_schedule")
 }
