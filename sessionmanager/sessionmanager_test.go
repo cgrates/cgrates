@@ -28,7 +28,7 @@ func TestConnect(t *testing.T) {
 	sm.Connect("localhost:8021", "ClueCon")
 	for {
 		ev := sm.ReadNextEvent()
-		log.Print(ev.Fields["Event-Name"])
+		log.Printf("%s : %s", ev.Fields["Event-Name"], ev.Fields["Event-Subclass"])
 		log.Print(ev)
 	}
 }

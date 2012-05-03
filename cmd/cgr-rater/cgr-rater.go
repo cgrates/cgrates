@@ -143,7 +143,7 @@ func main() {
 	getter, err := timespans.NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 	if err != nil {
-		log.Printf("Cannot open storage file: %v", err)
+		log.Printf("Cannot open storage: %v", err)
 		os.Exit(1)
 	}
 	if !*json {
