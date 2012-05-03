@@ -13,6 +13,10 @@ type Session struct {
 	startTimes        []time.Time
 }
 
+func NewSession() *Session {
+	return &Session{}
+}
+
 func (s *Session) AddCallToSession(destination string, startTime time.Time) {
 	s.destinations = append(s.destinations, destination)
 	s.startTimes = append(s.startTimes, startTime)

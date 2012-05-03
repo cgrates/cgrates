@@ -48,7 +48,7 @@ func (ev *Event) String() (result string) {
 }
 
 type SessionManager struct {
-	conn        net.Conn
+	buf         *bufio.Reader
 	eventBodyRE *regexp.Regexp
 	sessions    []*Session
 }
@@ -58,18 +58,14 @@ func (sm *SessionManager) Connect(address, pass string) {
 	if err != nil {
 		log.Fatal("Could not connect to freeswitch server!")
 	}
-	sm.conn = conn
+	sm.buf = bufio.NewReaderSize(conn, 8192)
 	sm.eventBodyRE, _ = regexp.Compile(`"(.*?)":\s+"(.*?)"`)
-	fmt.Fprint(sm.conn, fmt.Sprintf("auth %s\n\n", pass))
-	fmt.Fprint(sm.conn, "event json all\n\n")
-}
-
-func (sm *SessionManager) Close() {
-	sm.conn.Close()
+	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
+	fmt.Fprint(conn, "event json all\n\n")
 }
 
 func (sm *SessionManager) ReadNextEvent() (ev *Event) {
-	body, err := bufio.NewReader(sm.conn).ReadString('}')
+	body, err := sm.buf.ReadString('}')
 	if err != nil {
 		log.Print("Could not read from freeswitch connection!")
 	}

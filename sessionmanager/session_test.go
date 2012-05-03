@@ -25,29 +25,32 @@ import (
 
 func TestSessionDurationSingle(t *testing.T) {
 	s := &Session{}
-	s.AddCallToSession("", time.Now())
+	start := time.Date(2012, 5, 3, 14, 30, 0, 0, time.UTC)
+	s.AddCallToSession("", start)
 	twoSeconds, _ := time.ParseDuration("2s")
-	if d := s.GetSessionDurationFrom(time.Now().Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
+	if d := s.GetSessionDurationFrom(start.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
 		t.Errorf("Wrong duration %v", d)
 	}
 }
 
 func TestSessionDurationMultiple(t *testing.T) {
 	s := &Session{}
-	s.AddCallToSession("", time.Now())
-	s.AddCallToSession("", time.Now())
-	s.AddCallToSession("", time.Now())
+	start := time.Date(2012, 5, 3, 14, 30, 0, 0, time.UTC)
+	s.AddCallToSession("", start)
+	s.AddCallToSession("", start)
+	s.AddCallToSession("", start)
 	twoSeconds, _ := time.ParseDuration("2s")
-	if d := s.GetSessionDurationFrom(time.Now().Add(twoSeconds)); d.Seconds() < 6 || d.Seconds() > 7 {
+	if d := s.GetSessionDurationFrom(start.Add(twoSeconds)); d.Seconds() < 6 || d.Seconds() > 7 {
 		t.Errorf("Wrong duration %v", d)
 	}
 }
 
 func TestSessionCostSingle(t *testing.T) {
 	s := &Session{customer: "vdf", subject: "rif"}
-	s.AddCallToSession("0723", time.Now())
+	start := time.Date(2012, 5, 3, 14, 30, 0, 0, time.UTC)
+	s.AddCallToSession("0723", start)
 	twoSeconds, _ := time.ParseDuration("60s")
-	if ccs, err := s.GetSessionCostFrom(time.Now().Add(twoSeconds)); err != nil {
+	if ccs, err := s.GetSessionCostFrom(start.Add(twoSeconds)); err != nil {
 		t.Errorf("Get cost returned error %v", err)
 	} else {
 		if len(ccs) != 1 || ccs[0].Cost < 1 || ccs[0].Cost > 1.1 {
@@ -58,11 +61,12 @@ func TestSessionCostSingle(t *testing.T) {
 
 func TestSessionCostMultiple(t *testing.T) {
 	s := &Session{customer: "vdf", subject: "rif"}
-	s.AddCallToSession("0723", time.Now())
-	s.AddCallToSession("0257", time.Now())
-	s.AddCallToSession("0256", time.Now())
+	start := time.Date(2012, 5, 3, 14, 30, 0, 0, time.UTC)
+	s.AddCallToSession("0723", start)
+	s.AddCallToSession("0257", start)
+	s.AddCallToSession("0256", start)
 	twoSeconds, _ := time.ParseDuration("60s")
-	if ccs, err := s.GetSessionCostFrom(time.Now().Add(twoSeconds)); err != nil {
+	if ccs, err := s.GetSessionCostFrom(start.Add(twoSeconds)); err != nil {
 		t.Errorf("Get cost returned error %v", err)
 	} else {
 		sum := 0.0
