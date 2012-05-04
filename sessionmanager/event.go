@@ -20,14 +20,30 @@ package sessionmanager
 
 import (
 	"fmt"
+	"log"
+	"regexp"
 )
 
 type Event struct {
 	Fields map[string]string
 }
 
-func NewEvent() (ev *Event) {
-	return &Event{Fields: make(map[string]string)}
+var (
+	eventBodyRE = regexp.MustCompile(`"(.*?)":\s+"(.*?)"`)
+)
+
+//eventBodyRE *regexp.Regexp
+
+func NewEvent(body string) (ev *Event) {
+	ev = &Event{Fields: make(map[string]string)}
+	for _, fields := range eventBodyRE.FindAllStringSubmatch(body, -1) {
+		if len(fields) == 3 {
+			ev.Fields[fields[1]] = fields[2]
+		} else {
+			log.Printf("malformed event field: %v", fields)
+		}
+	}
+	return
 }
 
 func (ev *Event) String() (result string) {

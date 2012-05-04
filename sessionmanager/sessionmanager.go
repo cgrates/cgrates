@@ -24,7 +24,6 @@ import (
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net"
-	"regexp"
 )
 
 var (
@@ -32,9 +31,8 @@ var (
 )
 
 type SessionManager struct {
-	buf         *bufio.Reader
-	eventBodyRE *regexp.Regexp
-	sessions    []*Session
+	buf      *bufio.Reader
+	sessions []*Session
 }
 
 func (sm *SessionManager) Connect(address, pass string) {
@@ -43,7 +41,6 @@ func (sm *SessionManager) Connect(address, pass string) {
 		log.Fatal("Could not connect to freeswitch server!")
 	}
 	sm.buf = bufio.NewReaderSize(conn, 8192)
-	sm.eventBodyRE, _ = regexp.Compile(`"(.*?)":\s+"(.*?)"`)
 	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
 	fmt.Fprint(conn, "event json all\n\n")
 }
@@ -53,19 +50,16 @@ func (sm *SessionManager) ReadNextEvent() (ev *Event) {
 	if err != nil {
 		log.Print("Could not read from freeswitch connection!")
 	}
-	ev = NewEvent()
-	for _, fields := range sm.eventBodyRE.FindAllStringSubmatch(body, -1) {
-		if len(fields) == 3 {
-			ev.Fields[fields[1]] = fields[2]
-		} else {
-			log.Printf("malformed event field: %v", fields)
-		}
-	}
+	ev = NewEvent(body)
 	switch ev.Fields["Event-Name"] {
 	case "HEARTBEAT":
 		sm.OnHeartBeat(ev)
-	case "RE_SCHEDULE":
-		sm.OnReSchedule(ev)
+	case "CHANNEL_ANSWER":
+		sm.OnChannelAnswer(ev)
+	case "CHANNEL_HANGUP_COMPLETE":
+		sm.OnChannelHangupComplete(ev)
+	default:
+		sm.OnOther(ev)
 	}
 	return
 }
@@ -74,6 +68,14 @@ func (sm *SessionManager) OnHeartBeat(ev *Event) {
 	log.Print("heartbeat")
 }
 
-func (sm *SessionManager) OnReSchedule(ev *Event) {
-	log.Print("re_schedule")
+func (sm *SessionManager) OnChannelAnswer(ev *Event) {
+	log.Printf("answer")
+}
+
+func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
+	log.Print("hangup")
+}
+
+func (sm *SessionManager) OnOther(ev *Event) {
+	//log.Printf("Other event: %s", ev.Fields["Event-Name"])
 }
