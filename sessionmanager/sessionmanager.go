@@ -64,16 +64,35 @@ func (sm *SessionManager) ReadNextEvent() (ev *Event) {
 	return
 }
 
+func (sm *SessionManager) GetSessionByUUID(uuid string) *Session {
+	for _, s := range sm.sessions {
+		if s.uuid == uuid {
+			return s
+		}
+	}
+	return nil
+}
+
+func (sm *SessionManager) GetSessionBySubject(subj string) (s *Session) {
+	for _, s := range sm.sessions {
+		if s.subject == subj {
+			return s
+		}
+	}
+	return
+}
+
 func (sm *SessionManager) OnHeartBeat(ev *Event) {
 	log.Print("heartbeat")
 }
 
 func (sm *SessionManager) OnChannelAnswer(ev *Event) {
-	log.Printf("answer")
+	s := NewSession(ev)
+	log.Printf("answer: %v", s)
 }
 
 func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
-	log.Print("hangup")
+	//s := GetSessionByUUID(ev.Fields[UUID])	
 }
 
 func (sm *SessionManager) OnOther(ev *Event) {

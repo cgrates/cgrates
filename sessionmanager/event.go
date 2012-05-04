@@ -32,6 +32,15 @@ var (
 	eventBodyRE = regexp.MustCompile(`"(.*?)":\s+"(.*?)"`)
 )
 
+const (
+	CALL_DIRECTION = "Call-Direction"
+	SUBJECT        = "variable_sip_full_from"
+	DESTINATION    = "variable_sip_full_to"
+	UUID           = "Unique-ID"
+	CSTMID         = "Caller-Dialplan"
+	START_TIME     = "Event-Date-GMT"
+)
+
 //eventBodyRE *regexp.Regexp
 
 func NewEvent(body string) (ev *Event) {

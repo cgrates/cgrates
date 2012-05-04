@@ -26,24 +26,25 @@ import (
 )
 
 type Session struct {
-	id, cstmId, subject string
-	callsMap            map[string]time.Time
+	uuid, cstmId, subject, destination string
+	startTime                          time.Time // destination: startTime
 }
 
-func NewSession(cstmId, subject string) *Session {
-	return &Session{cstmId: cstmId, subject: subject, callsMap: make(map[string]time.Time)}
-}
-
-func (s *Session) AddCallToSession(destination string, startTime time.Time) {
-	s.callsMap[destination] = startTime
+func NewSession(ev *Event) *Session {
+	startTime, err := time.Parse(time.RFC1123, ev.Fields[START_TIME])
+	if err != nil {
+		log.Print("Error parsing answer event start time, using time.Now!")
+		startTime = time.Now()
+	}
+	return &Session{uuid: ev.Fields[UUID],
+		cstmId:      ev.Fields[CSTMID],
+		subject:     ev.Fields[SUBJECT],
+		destination: ev.Fields[DESTINATION],
+		startTime:   startTime}
 }
 
 func (s *Session) GetSessionDurationFrom(now time.Time) (d time.Duration) {
-	seconds := 0.0
-
-	for _, st := range s.callsMap {
-		seconds += now.Sub(st).Seconds()
-	}
+	seconds := now.Sub(s.startTime).Seconds()
 	d, err := time.ParseDuration(fmt.Sprintf("%ds", int(seconds)))
 	if err != nil {
 		log.Printf("Cannot parse session duration %v", seconds)
@@ -55,19 +56,16 @@ func (s *Session) GetSessionDuration() time.Duration {
 	return s.GetSessionDurationFrom(time.Now())
 }
 
-func (s *Session) GetSessionCostFrom(now time.Time) (callCosts []*timespans.CallCost, err error) {
-	for dest, st := range s.callsMap {
-		cd := &timespans.CallDescriptor{TOR: 1, CstmId: s.cstmId, Subject: s.subject, DestinationPrefix: dest, TimeStart: st, TimeEnd: now}
-		cd.SetStorageGetter(storageGetter)
-		if cc, err := cd.GetCost(); err == nil {
-			callCosts = append(callCosts, cc)
-		} else {
-			break
-		}
+func (s *Session) GetSessionCostFrom(now time.Time) (callCosts *timespans.CallCost, err error) {
+	cd := &timespans.CallDescriptor{TOR: 1, CstmId: s.cstmId, Subject: s.subject, DestinationPrefix: s.destination, TimeStart: s.startTime, TimeEnd: now}
+	cd.SetStorageGetter(storageGetter)
+	callCosts, err = cd.GetCost()
+	if err != nil {
+		log.Printf("Error getting call cost for session %v", s)
 	}
 	return
 }
 
-func (s *Session) GetSessionCost() (callCosts []*timespans.CallCost, err error) {
+func (s *Session) GetSessionCost() (callCosts *timespans.CallCost, err error) {
 	return s.GetSessionCostFrom(time.Now())
 }

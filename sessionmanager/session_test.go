@@ -23,58 +23,50 @@ import (
 	"time"
 )
 
-func TestSessionDurationSingle(t *testing.T) {
-	s := NewSession("", "")
-	start := time.Date(2012, 5, 3, 14, 30, 0, 0, time.UTC)
-	s.AddCallToSession("", start)
-	twoSeconds, _ := time.ParseDuration("2s")
-	if d := s.GetSessionDurationFrom(start.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
-		t.Errorf("Wrong session duration %v", d)
-	}
-}
+var (
+	newEvent = NewEvent(`
+"Event-Name":	"HEARTBEAT",
+"Core-UUID":	"d5abc5b0-95c6-11e1-be05-43c90197c914",
+"FreeSWITCH-Hostname":	"grace",
+"FreeSWITCH-Switchname":	"grace",
+"FreeSWITCH-IPv4":	"172.17.77.126",
+"variable_sip_full_from":	"rif",
+"variable_sip_full_to":	"0723045326",
+"Caller-Dialplan":	"vdf",
+"FreeSWITCH-IPv6":	"::1",
+"Event-Date-Local":	"2012-05-04 14:38:23",
+"Event-Date-GMT":	"Fri, 03 May 2012 11:38:23 GMT",
+"Event-Date-Timestamp":	"1336131503218867",
+"Event-Calling-File":	"switch_core.c",
+"Event-Calling-Function":	"send_heartbeat",
+"Event-Calling-Line-Number":	"68",
+"Event-Sequence":	"4171",
+"Event-Info":	"System Ready",
+"Up-Time":	"0 years, 0 days, 2 hours, 43 minutes, 21 seconds, 349 milliseconds, 683 microseconds",
+"Session-Count":	"0",
+"Max-Sessions":	"1000",
+"Session-Per-Sec":	"30",
+"Session-Since-Startup":	"122",
+"Idle-CPU":	"100.000000"
+`)
+)
 
-func TestSessionDurationMultiple(t *testing.T) {
-	s := NewSession("", "")
-	start := time.Date(2012, 5, 3, 14, 30, 0, 0, time.UTC)
-	s.AddCallToSession("", start)
-	s.AddCallToSession("", start)
-	s.AddCallToSession("", start)
+func TestSessionDurationSingle(t *testing.T) {
+	s := NewSession(newEvent)
 	twoSeconds, _ := time.ParseDuration("2s")
-	if d := s.GetSessionDurationFrom(start.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
+	if d := s.GetSessionDurationFrom(s.startTime.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
 		t.Errorf("Wrong session duration %v", d)
 	}
 }
 
 func TestSessionCostSingle(t *testing.T) {
-	s := NewSession("vdf", "rif")
-	start := time.Date(2012, 5, 3, 14, 30, 0, 0, time.UTC)
-	s.AddCallToSession("0723", start)
+	s := NewSession(newEvent)
 	twoSeconds, _ := time.ParseDuration("60s")
-	if ccs, err := s.GetSessionCostFrom(start.Add(twoSeconds)); err != nil {
+	if cc, err := s.GetSessionCostFrom(s.startTime.Add(twoSeconds)); err != nil {
 		t.Errorf("Get cost returned error %v", err)
 	} else {
-		if len(ccs) != 1 || ccs[0].Cost < 1 || ccs[0].Cost > 1.1 {
-			t.Errorf("Expected %v got %v", "between 1 and 1.1", ccs[0].Cost)
-		}
-	}
-}
-
-func TestSessionCostMultiple(t *testing.T) {
-	s := NewSession("vdf", "rif")
-	start := time.Date(2012, 5, 3, 14, 30, 0, 0, time.UTC)
-	s.AddCallToSession("0723", start)
-	s.AddCallToSession("0257", start)
-	s.AddCallToSession("0256", start)
-	twoSeconds, _ := time.ParseDuration("60s")
-	if ccs, err := s.GetSessionCostFrom(start.Add(twoSeconds)); err != nil {
-		t.Errorf("Get cost returned error %v", err)
-	} else {
-		sum := 0.0
-		for _, cc := range ccs {
-			sum += cc.Cost
-		}
-		if len(ccs) != 3 || sum < 23 || sum > 23.1 {
-			t.Errorf("Expected %v got %v", "between 23 and 23.1", sum)
+		if cc.Cost < 1 || cc.Cost > 1.1 {
+			t.Errorf("Expected %v got %v", "between 1 and 1.1", cc.Cost)
 		}
 	}
 }
