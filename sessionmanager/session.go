@@ -43,6 +43,12 @@ func NewSession(ev *Event) *Session {
 		startTime:   startTime}
 }
 
+func (s *Session) StartDebitLoop() {
+	for {
+
+	}
+}
+
 func (s *Session) GetSessionDurationFrom(now time.Time) (d time.Duration) {
 	seconds := now.Sub(s.startTime).Seconds()
 	d, err := time.ParseDuration(fmt.Sprintf("%ds", int(seconds)))
@@ -68,4 +74,8 @@ func (s *Session) GetSessionCostFrom(now time.Time) (callCosts *timespans.CallCo
 
 func (s *Session) GetSessionCost() (callCosts *timespans.CallCost, err error) {
 	return s.GetSessionCostFrom(time.Now())
+}
+
+func (s *Session) Close() {
+
 }

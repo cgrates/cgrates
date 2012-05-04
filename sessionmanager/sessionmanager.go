@@ -64,22 +64,13 @@ func (sm *SessionManager) ReadNextEvent() (ev *Event) {
 	return
 }
 
-func (sm *SessionManager) GetSessionByUUID(uuid string) *Session {
+func (sm *SessionManager) GetSession(uuid string) *Session {
 	for _, s := range sm.sessions {
 		if s.uuid == uuid {
 			return s
 		}
 	}
 	return nil
-}
-
-func (sm *SessionManager) GetSessionBySubject(subj string) (s *Session) {
-	for _, s := range sm.sessions {
-		if s.subject == subj {
-			return s
-		}
-	}
-	return
 }
 
 func (sm *SessionManager) OnHeartBeat(ev *Event) {
@@ -92,7 +83,8 @@ func (sm *SessionManager) OnChannelAnswer(ev *Event) {
 }
 
 func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
-	//s := GetSessionByUUID(ev.Fields[UUID])	
+	s := sm.GetSession(ev.Fields[UUID])
+	s.Close()
 }
 
 func (sm *SessionManager) OnOther(ev *Event) {

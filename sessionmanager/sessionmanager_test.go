@@ -26,11 +26,11 @@ import (
 func TestConnect(t *testing.T) {
 	sm := &SessionManager{}
 	sm.Connect("localhost:8021", "ClueCon")
-	for {
-		ev := sm.ReadNextEvent()
-		if ev == nil {
-			t.Error("Got nil event!")
-		}
-		//log.Print(ev)
+	//for {
+	ev := sm.ReadNextEvent()
+	if ev == nil {
+		t.Error("Got nil event!")
 	}
+	//log.Print(ev)
+	//}
 }
