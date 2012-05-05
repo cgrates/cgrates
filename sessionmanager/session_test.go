@@ -53,6 +53,7 @@ var (
 
 func TestSessionDurationSingle(t *testing.T) {
 	s := NewSession(newEvent)
+	defer s.Close()
 	twoSeconds, _ := time.ParseDuration("2s")
 	if d := s.GetSessionDurationFrom(s.startTime.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
 		t.Errorf("Wrong session duration %v", d)
@@ -61,6 +62,7 @@ func TestSessionDurationSingle(t *testing.T) {
 
 func TestSessionCostSingle(t *testing.T) {
 	s := NewSession(newEvent)
+	defer s.Close()
 	twoSeconds, _ := time.ParseDuration("60s")
 	if cc, err := s.GetSessionCostFrom(s.startTime.Add(twoSeconds)); err != nil {
 		t.Errorf("Get cost returned error %v", err)

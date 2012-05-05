@@ -25,27 +25,42 @@ import (
 	"time"
 )
 
+const (
+	DEBIT_PERIOD = 10 * time.Second
+)
+
 type Session struct {
 	uuid, cstmId, subject, destination string
 	startTime                          time.Time // destination: startTime
+	stopDebit                          chan byte
 }
 
-func NewSession(ev *Event) *Session {
+func NewSession(ev *Event) (s *Session) {
 	startTime, err := time.Parse(time.RFC1123, ev.Fields[START_TIME])
 	if err != nil {
 		log.Print("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
-	return &Session{uuid: ev.Fields[UUID],
+	s = &Session{uuid: ev.Fields[UUID],
 		cstmId:      ev.Fields[CSTMID],
 		subject:     ev.Fields[SUBJECT],
 		destination: ev.Fields[DESTINATION],
-		startTime:   startTime}
+		startTime:   startTime,
+		stopDebit:   make(chan byte)}
+	go s.StartDebitLoop()
+	return
 }
 
 func (s *Session) StartDebitLoop() {
 	for {
-
+		select {
+		case <-s.stopDebit:
+			log.Print("Put back!")
+			return
+		default:
+		}
+		log.Print("Debit")
+		time.Sleep(DEBIT_PERIOD)
 	}
 }
 
@@ -77,5 +92,5 @@ func (s *Session) GetSessionCost() (callCosts *timespans.CallCost, err error) {
 }
 
 func (s *Session) Close() {
-
+	s.stopDebit <- 1
 }
