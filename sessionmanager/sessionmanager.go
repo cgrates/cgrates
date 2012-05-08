@@ -31,9 +31,9 @@ var (
 )
 
 type SessionManager struct {
-	buf           *bufio.Reader
-	sessions      []*Session
-	eventDelegate EventDelegate
+	buf             *bufio.Reader
+	sessions        []*Session
+	sessionDelegate SessionDelegate
 }
 
 func (sm *SessionManager) Connect(address, pass string) {
@@ -46,8 +46,8 @@ func (sm *SessionManager) Connect(address, pass string) {
 	fmt.Fprint(conn, "event json all\n\n")
 }
 
-func (sm *SessionManager) AddEventDelegate(ed EventDelegate) {
-	sm.eventDelegate = ed
+func (sm *SessionManager) SetSessionDelegate(ed SessionDelegate) {
+	sm.sessionDelegate = ed
 }
 
 func (sm *SessionManager) ReadNextEvent() (ev *Event) {
@@ -79,17 +79,17 @@ func (sm *SessionManager) GetSession(uuid string) *Session {
 }
 
 func (sm *SessionManager) OnHeartBeat(ev *Event) {
-	if sm.eventDelegate != nil {
-		sm.eventDelegate.OnHeartBeat(ev)
+	if sm.sessionDelegate != nil {
+		sm.sessionDelegate.OnHeartBeat(ev)
 	} else {
 		log.Print("heartbeat")
 	}
 }
 
 func (sm *SessionManager) OnChannelAnswer(ev *Event) {
-	s := NewSession(ev)
-	if sm.eventDelegate != nil {
-		sm.eventDelegate.OnChannelAnswer(ev, s)
+	if sm.sessionDelegate != nil {
+		s := NewSession(ev, sm.sessionDelegate)
+		sm.sessionDelegate.OnChannelAnswer(ev, s)
 	} else {
 		log.Print("answer")
 	}
@@ -97,8 +97,8 @@ func (sm *SessionManager) OnChannelAnswer(ev *Event) {
 
 func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
 	s := sm.GetSession(ev.Fields[UUID])
-	if sm.eventDelegate != nil {
-		sm.eventDelegate.OnChannelHangupComplete(ev, s)
+	if sm.sessionDelegate != nil {
+		sm.sessionDelegate.OnChannelHangupComplete(ev, s)
 	} else {
 		log.Print("HangupComplete")
 	}

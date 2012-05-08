@@ -26,7 +26,7 @@ import (
 func TestConnect(t *testing.T) {
 	sm := &SessionManager{}
 	sm.Connect("localhost:8021", "ClueCon")
-	sm.AddEventDelegate(new(DirectEventDelegate))
+	sm.SetSessionDelegate(new(DirectSessionDelegate))
 	//for {
 	ev := sm.ReadNextEvent()
 	if ev == nil {

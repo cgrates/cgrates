@@ -22,22 +22,46 @@ import (
 	"log"
 )
 
-type EventDelegate interface {
+type SessionDelegate interface {
 	OnHeartBeat(*Event)
 	OnChannelAnswer(*Event, *Session)
 	OnChannelHangupComplete(*Event, *Session)
+	LoopAction()
 }
 
-type DirectEventDelegate byte
+type DirectSessionDelegate byte
 
-func (ded *DirectEventDelegate) OnHeartBeat(ev *Event) {
+func (dsd *DirectSessionDelegate) OnHeartBeat(ev *Event) {
 	log.Print("direct hearbeat")
 }
 
-func (ded *DirectEventDelegate) OnChannelAnswer(ev *Event, s *Session) {
+func (dsd *DirectSessionDelegate) OnChannelAnswer(ev *Event, s *Session) {
 	log.Print("direct answer")
 }
 
-func (ded *DirectEventDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
+func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
 	log.Print("direct hangup")
+}
+
+func (dsd *DirectSessionDelegate) LoopAction() {
+	log.Print("Direct debit")
+}
+
+// 
+type RPCSessionDelegate byte
+
+func (rsd *RPCSessionDelegate) OnHeartBeat(ev *Event) {
+	log.Print("rpc hearbeat")
+}
+
+func (rsd *RPCSessionDelegate) OnChannelAnswer(ev *Event, s *Session) {
+	log.Print("rpc answer")
+}
+
+func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
+	log.Print("rpc hangup")
+}
+
+func (rsd *RPCSessionDelegate) LoopAction() {
+	log.Print("Rpc debit")
 }

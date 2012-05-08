@@ -32,10 +32,11 @@ const (
 type Session struct {
 	uuid, cstmId, subject, destination string
 	startTime                          time.Time // destination: startTime
+	sessionDelegate                    SessionDelegate
 	stopDebit                          chan byte
 }
 
-func NewSession(ev *Event) (s *Session) {
+func NewSession(ev *Event, ed SessionDelegate) (s *Session) {
 	startTime, err := time.Parse(time.RFC1123, ev.Fields[START_TIME])
 	if err != nil {
 		log.Print("Error parsing answer event start time, using time.Now!")
@@ -47,6 +48,7 @@ func NewSession(ev *Event) (s *Session) {
 		destination: ev.Fields[DESTINATION],
 		startTime:   startTime,
 		stopDebit:   make(chan byte)}
+	s.sessionDelegate = ed
 	go s.StartDebitLoop()
 	return
 }
@@ -55,11 +57,10 @@ func (s *Session) StartDebitLoop() {
 	for {
 		select {
 		case <-s.stopDebit:
-			log.Print("Put back!")
 			return
 		default:
 		}
-		log.Print("Debit")
+		s.sessionDelegate.LoopAction()
 		time.Sleep(DEBIT_PERIOD)
 	}
 }
