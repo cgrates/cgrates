@@ -19,19 +19,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	//"log"
-	"testing"
+	"log"
 )
 
-func TestConnect(t *testing.T) {
-	sm := &SessionManager{}
-	sm.Connect("localhost:8021", "ClueCon")
-	sm.AddEventDelegate(new(DirectEventDelegate))
-	//for {
-	ev := sm.ReadNextEvent()
-	if ev == nil {
-		t.Error("Got nil event!")
-	}
-	//log.Print(ev)
-	//}
+type EventDelegate interface {
+	OnHeartBeat(*Event)
+	OnChannelAnswer(*Event, *Session)
+	OnChannelHangupComplete(*Event, *Session)
+}
+
+type DirectEventDelegate byte
+
+func (ded *DirectEventDelegate) OnHeartBeat(ev *Event) {
+	log.Print("direct hearbeat")
+}
+
+func (ded *DirectEventDelegate) OnChannelAnswer(ev *Event, s *Session) {
+	log.Print("direct answer")
+}
+
+func (ded *DirectEventDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
+	log.Print("direct hangup")
 }
