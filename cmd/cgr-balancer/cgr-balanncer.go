@@ -21,6 +21,7 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/rif/cgrates/sessionmanager"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"runtime"
@@ -31,6 +32,8 @@ var (
 	raterAddress   = flag.String("rateraddr", "127.0.0.1:2000", "Rater server address (localhost:2000)")
 	jsonRpcAddress = flag.String("jsonrpcaddr", "127.0.0.1:2001", "Json RPC server address (localhost:2001)")
 	httpApiAddress = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:2002)")
+	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
+	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
 	raterList      *RaterList
 )
 
@@ -83,6 +86,11 @@ func main() {
 	go StopSingnalHandler()
 	go listenToRPCRaterRequests()
 	go listenToJsonRPCRequests()
+
+	sm := &sessionmanager.SessionManager{}
+	sm.Connect(*freeswitchsrv, *freeswitchpass)
+	sm.SetSessionDelegate(new(sessionmanager.DirectSessionDelegate))
+	sm.StartEventLoop()
 
 	listenToHttpRequests()
 }

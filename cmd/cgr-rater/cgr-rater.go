@@ -32,10 +32,14 @@ import (
 )
 
 var (
-	balancer   = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
-	listen     = flag.String("listen", "127.0.0.1:1234", "listening address host:port")
-	standalone = flag.Bool("standalone", false, "start standalone server (no balancer), and use json for rpc encoding")
-	storage    Responder
+	balancer       = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
+	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
+	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
+	redissrv       = flag.String("redissrv", "127.0.0.1:6379", "redis address host:port")
+	redisdb        = flag.Int("redisdb", 10, "redis database number")
+	listen         = flag.String("listen", "127.0.0.1:1234", "listening address host:port")
+	standalone     = flag.Bool("standalone", false, "start standalone server (no balancer), and use json for rpc encoding")
+	storage        Responder
 )
 
 type Responder struct {
@@ -141,16 +145,16 @@ func (s *Responder) Shutdown(args string, reply *string) (err error) {
 func main() {
 	flag.Parse()
 	//getter, err := timespans.NewKyotoStorage("storage.kch")
-	getter, err := timespans.NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	getter, err := timespans.NewRedisStorage(*redissrv, *redisdb)
 	defer getter.Close()
 	if err != nil {
 		log.Printf("Cannot open storage: %v", err)
 		os.Exit(1)
 	}
-	if standalone {
-		sm = &sessionmanager.SessionManager{}
-		sm.Connect("localhost:8021", "ClueCon")
-		sm.SetSessionDelegate(new(DirectSessionDelegate))
+	if *standalone {
+		sm := &sessionmanager.SessionManager{}
+		sm.Connect(*freeswitchsrv, *freeswitchpass)
+		sm.SetSessionDelegate(new(sessionmanager.DirectSessionDelegate))
 		sm.StartEventLoop()
 	} else {
 		go RegisterToServer(balancer, listen)
