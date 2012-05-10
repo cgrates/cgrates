@@ -21,6 +21,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/rif/cgrates/sessionmanager"
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net"
@@ -31,10 +32,10 @@ import (
 )
 
 var (
-	balancer = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
-	listen   = flag.String("listen", "127.0.0.1:1234", "listening address host:port")
-	json     = flag.Bool("json", false, "use json for rpc encoding")
-	storage  Responder
+	balancer   = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
+	listen     = flag.String("listen", "127.0.0.1:1234", "listening address host:port")
+	standalone = flag.Bool("standalone", false, "start standalone server (no balancer), and use json for rpc encoding")
+	storage    Responder
 )
 
 type Responder struct {
@@ -146,7 +147,12 @@ func main() {
 		log.Printf("Cannot open storage: %v", err)
 		os.Exit(1)
 	}
-	if !*json {
+	if standalone {
+		sm = &sessionmanager.SessionManager{}
+		sm.Connect("localhost:8021", "ClueCon")
+		sm.SetSessionDelegate(new(DirectSessionDelegate))
+		sm.StartEventLoop()
+	} else {
 		go RegisterToServer(balancer, listen)
 		go StopSingnalHandler(balancer, listen, getter)
 	}
@@ -176,7 +182,7 @@ func main() {
 			continue
 		}
 		log.Printf("connection started: %v", conn.RemoteAddr())
-		if *json {
+		if *standalone {
 			log.Print("json encoding")
 			go jsonrpc.ServeConn(conn)
 		} else {

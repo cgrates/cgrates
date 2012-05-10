@@ -46,6 +46,14 @@ func (sm *SessionManager) Connect(address, pass string) {
 	fmt.Fprint(conn, "event json all\n\n")
 }
 
+func (sm *SessionManager) StartEventLoop() {
+	go func() {
+		for {
+			sm.ReadNextEvent()
+		}
+	}()
+}
+
 func (sm *SessionManager) SetSessionDelegate(ed SessionDelegate) {
 	sm.sessionDelegate = ed
 }

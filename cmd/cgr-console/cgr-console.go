@@ -28,22 +28,24 @@ import (
 )
 
 var (
-	balancer = flag.String("balancer", "127.0.0.1:2001", "balancer address host:port")
-	tor      = flag.Int("tor", 0, "Type of record")
-	cstmid   = flag.String("cstmid", "vdf", "Customer identificator")
-	subject  = flag.String("subject", "rif", "The client who made the call")
-	dest     = flag.String("dest", "0256", "Destination prefix")
-	ts       = flag.String("ts", "2012-02-09T00:00:00Z", "Time start")
-	te       = flag.String("te", "2012-02-09T00:10:00Z", "Time end")
-	amount   = flag.Float64("amount", 100, "Amount for different operations")
+	server  = flag.String("server", "127.0.0.1:2001", "server address host:port")
+	tor     = flag.Int("tor", 0, "Type of record")
+	cstmid  = flag.String("cstmid", "vdf", "Customer identificator")
+	subject = flag.String("subject", "rif", "The client who made the call")
+	dest    = flag.String("dest", "0256", "Destination prefix")
+	ts      = flag.String("ts", "2012-02-09T00:00:00Z", "Time start")
+	te      = flag.String("te", "2012-02-09T00:10:00Z", "Time end")
+	amount  = flag.Float64("amount", 100, "Amount for different operations")
 )
 
 func main() {
 	flag.Parse()
-	client, _ := jsonrpc.Dial("tcp", "localhost:2001")
+	client, err := jsonrpc.Dial("tcp", *server)
+	if err != nil {
+		log.Fatal("Could not connect to server " + *server)
+	}
 	defer client.Close()
 
-	var err error
 	timestart, err := time.Parse(time.RFC3339, *ts)
 	if err != nil {
 		log.Fatal("Time start format is invalid: ", err)
