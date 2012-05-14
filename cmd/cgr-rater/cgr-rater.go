@@ -153,9 +153,7 @@ func main() {
 	}
 	if *standalone {
 		sm := &sessionmanager.SessionManager{}
-		sm.Connect(*freeswitchsrv, *freeswitchpass)
-		sm.SetSessionDelegate(new(sessionmanager.DirectSessionDelegate))
-		sm.StartEventLoop()
+		sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
 	} else {
 		go RegisterToServer(balancer, listen)
 		go StopSingnalHandler(balancer, listen, getter)

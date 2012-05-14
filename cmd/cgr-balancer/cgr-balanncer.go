@@ -88,9 +88,7 @@ func main() {
 	go listenToJsonRPCRequests()
 
 	sm := &sessionmanager.SessionManager{}
-	sm.Connect(*freeswitchsrv, *freeswitchpass)
-	sm.SetSessionDelegate(new(sessionmanager.DirectSessionDelegate))
-	sm.StartEventLoop()
+	sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
 
 	listenToHttpRequests()
 }

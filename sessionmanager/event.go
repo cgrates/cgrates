@@ -24,15 +24,17 @@ import (
 	"regexp"
 )
 
+// Event type holding a mapping of all event's proprieties
 type Event struct {
 	Fields map[string]string
 }
 
 var (
-	eventBodyRE = regexp.MustCompile(`"(.*?)":\s+"(.*?)"`)
+	eventBodyRE = regexp.MustCompile(`"(.*?)":\s+"(.*?)"`) // for parsing the proprieties
 )
 
 const (
+	// Freswitch event proprities names
 	CALL_DIRECTION = "Call-Direction"
 	SUBJECT        = "variable_sip_full_from"
 	DESTINATION    = "variable_sip_full_to"
@@ -41,8 +43,8 @@ const (
 	START_TIME     = "Event-Date-GMT"
 )
 
-//eventBodyRE *regexp.Regexp
-
+// Creates a new event from a bod of text containing the key value proprieties.
+// It stores the parsed proprieties in the internal map.
 func NewEvent(body string) (ev *Event) {
 	ev = &Event{Fields: make(map[string]string)}
 	for _, fields := range eventBodyRE.FindAllStringSubmatch(body, -1) {
@@ -55,6 +57,7 @@ func NewEvent(body string) (ev *Event) {
 	return
 }
 
+// Nice printing for the event object.
 func (ev *Event) String() (result string) {
 	for k, v := range ev.Fields {
 		result += fmt.Sprintf("%s = %s\n", k, v)

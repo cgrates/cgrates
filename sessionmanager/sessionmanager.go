@@ -21,22 +21,25 @@ package sessionmanager
 import (
 	"bufio"
 	"fmt"
-	"github.com/rif/cgrates/timespans"
 	"log"
 	"net"
 )
 
-var (
-	storageGetter, _ = timespans.NewRedisStorage("tcp:127.0.0.1:6379", 10)
-)
-
+// The freeswitch session manager type holding a buffer for the network connection,
+// the active sessions, and a session delegate doing specific actions on every session.
 type SessionManager struct {
 	buf             *bufio.Reader
 	sessions        []*Session
 	sessionDelegate SessionDelegate
 }
 
-func (sm *SessionManager) Connect(address, pass string) {
+// Connects to the freeswitch mod_event_socket server and starts
+// listening for events in json format.
+func (sm *SessionManager) Connect(ed SessionDelegate, address, pass string) {
+	if ed == nil {
+		log.Fatal("Please provide a non nil SessionDelegate")
+	}
+	sm.sessionDelegate = ed
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		log.Fatal("Could not connect to freeswitch server!")
@@ -44,21 +47,17 @@ func (sm *SessionManager) Connect(address, pass string) {
 	sm.buf = bufio.NewReaderSize(conn, 8192)
 	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
 	fmt.Fprint(conn, "event json all\n\n")
-}
-
-func (sm *SessionManager) StartEventLoop() {
 	go func() {
 		for {
-			sm.ReadNextEvent()
+			sm.readNextEvent()
 		}
 	}()
 }
 
-func (sm *SessionManager) SetSessionDelegate(ed SessionDelegate) {
-	sm.sessionDelegate = ed
-}
-
-func (sm *SessionManager) ReadNextEvent() (ev *Event) {
+// Reads from freeswitch server buffer until it encounters a '}',
+// than it creates an event object and calls the appropriate method
+// on the session delegate.
+func (sm *SessionManager) readNextEvent() (ev *Event) {
 	body, err := sm.buf.ReadString('}')
 	if err != nil {
 		log.Print("Could not read from freeswitch connection!")
@@ -77,6 +76,7 @@ func (sm *SessionManager) ReadNextEvent() (ev *Event) {
 	return
 }
 
+// Searches and return the session with the specifed uuid
 func (sm *SessionManager) GetSession(uuid string) *Session {
 	for _, s := range sm.sessions {
 		if s.uuid == uuid {
@@ -86,6 +86,7 @@ func (sm *SessionManager) GetSession(uuid string) *Session {
 	return nil
 }
 
+// Called on freeswitch's hearbeat event
 func (sm *SessionManager) OnHeartBeat(ev *Event) {
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnHeartBeat(ev)
@@ -94,6 +95,7 @@ func (sm *SessionManager) OnHeartBeat(ev *Event) {
 	}
 }
 
+// Called on freeswitch's answer event
 func (sm *SessionManager) OnChannelAnswer(ev *Event) {
 	if sm.sessionDelegate != nil {
 		s := NewSession(ev, sm.sessionDelegate)
@@ -103,6 +105,7 @@ func (sm *SessionManager) OnChannelAnswer(ev *Event) {
 	}
 }
 
+// Called on freeswitch's hangup event
 func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
 	s := sm.GetSession(ev.Fields[UUID])
 	if sm.sessionDelegate != nil {
@@ -113,6 +116,8 @@ func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
 	s.Close()
 }
 
+// Called on freeswitch's events not processed by the session manger,
+// for logging purposes (maybe).
 func (sm *SessionManager) OnOther(ev *Event) {
 	//log.Printf("Other event: %s", ev.Fields["Event-Name"])
 }

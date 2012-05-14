@@ -19,16 +19,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"github.com/rif/cgrates/timespans"
 	"log"
 )
 
+var (
+	// sample storage for the provided direct implementation
+	storageGetter, _ = timespans.NewRedisStorage("tcp:127.0.0.1:6379", 10)
+)
+
+// Interface for the session delegate objects
 type SessionDelegate interface {
+	// Called on freeswitch's hearbeat event
 	OnHeartBeat(*Event)
+	// Called on freeswitch's answer event
 	OnChannelAnswer(*Event, *Session)
+	// Called on freeswitch's hangup event
 	OnChannelHangupComplete(*Event, *Session)
+	// The method to be called inside the debit loop
 	LoopAction()
+	// Returns a storage getter for the sesssion to use
+	GetStorageGetter() timespans.StorageGetter
 }
 
+// Sample SessionDelegate calling the timespans methods directly
 type DirectSessionDelegate byte
 
 func (dsd *DirectSessionDelegate) OnHeartBeat(ev *Event) {
@@ -47,7 +61,11 @@ func (dsd *DirectSessionDelegate) LoopAction() {
 	log.Print("Direct debit")
 }
 
-// 
+func (dsd *DirectSessionDelegate) GetStorageGetter() timespans.StorageGetter {
+	return storageGetter
+}
+
+// Sample SessionDelegate calling the timespans methods through the RPC interface
 type RPCSessionDelegate byte
 
 func (rsd *RPCSessionDelegate) OnHeartBeat(ev *Event) {
@@ -64,4 +82,8 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
 
 func (rsd *RPCSessionDelegate) LoopAction() {
 	log.Print("Rpc debit")
+}
+
+func (rsd *RPCSessionDelegate) GetStorageGetter() timespans.StorageGetter {
+	return storageGetter
 }

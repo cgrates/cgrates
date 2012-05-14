@@ -25,10 +25,9 @@ import (
 
 func TestConnect(t *testing.T) {
 	sm := &SessionManager{}
-	sm.Connect("localhost:8021", "ClueCon")
-	sm.SetSessionDelegate(new(DirectSessionDelegate))
+	sm.Connect(new(DirectSessionDelegate), "localhost:8021", "ClueCon")
 	//for {
-	ev := sm.ReadNextEvent()
+	ev := sm.readNextEvent()
 	if ev == nil {
 		t.Error("Got nil event!")
 	}
