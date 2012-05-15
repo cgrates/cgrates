@@ -55,7 +55,14 @@ func (dsd *DirectSessionDelegate) OnHeartBeat(ev *Event) {
 }
 
 func (dsd *DirectSessionDelegate) OnChannelAnswer(ev *Event, s *Session) {
-	log.Print("direct answer")
+	s.callDescriptor.Amount = DEBIT_PERIOD.Seconds()
+	remainingSeconds, err := s.callDescriptor.GetMaxSessionTime()
+	if remainingSeconds == 0 || err != nil {
+		log.Print("No credit left: Disconnect!")
+	}
+	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
+		log.Print("Not enough money for a debit period!")
+	}
 }
 
 func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
@@ -69,7 +76,11 @@ func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescr
 	}
 	s.CallCosts = append(s.CallCosts, cc)
 	cd.Amount = DEBIT_PERIOD.Seconds()
-	if remainingSeconds, err := cd.GetMaxSessionTime(); remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
+	remainingSeconds, err := cd.GetMaxSessionTime()
+	if remainingSeconds == 0 || err != nil {
+		log.Print("No credit left: Disconnect!")
+	}
+	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
 		log.Print("Not enough money for another debit period!")
 	}
 }

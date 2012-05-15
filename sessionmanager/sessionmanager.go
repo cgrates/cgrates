@@ -113,7 +113,9 @@ func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
 	} else {
 		log.Print("HangupComplete")
 	}
-	s.Close()
+	if s != nil {
+		s.Close()
+	}
 }
 
 // Called on freeswitch's events not processed by the session manger,
