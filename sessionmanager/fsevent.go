@@ -36,11 +36,17 @@ var (
 const (
 	// Freswitch event proprities names
 	CALL_DIRECTION = "Call-Direction"
-	SUBJECT        = "variable_sip_full_from"
-	DESTINATION    = "variable_sip_full_to"
-	UUID           = "Unique-ID"
-	CSTMID         = "Caller-Dialplan"
+	ORIG_ID        = "variable_sip_call_id" //- originator_id - match cdrs
+	SUBJECT        = "variable_cgr_subject"
+	DESTINATION    = "variable_cgr_destination"
+	TOR            = "variable_cgr_tor"
+	UUID           = "Unique-ID" // -Unique ID for this call leg
+	CSTMID         = "variable_cgr_cstmid"
 	START_TIME     = "Event-Date-GMT"
+	NAME           = "Event-Name"
+	HEARTBEAT      = "HEARTBEAT"
+	ANSWER         = "CHANNEL_ANSWER"
+	HANGUP         = "CHANNEL_HANGUP_COMPLETE"
 )
 
 // Creates a new event from a bod of text containing the key value proprieties.

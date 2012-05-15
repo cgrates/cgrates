@@ -1,5 +1,5 @@
 [
-{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0256", "ActivationPeriods": [
+{"TOR": "0","CstmId":"vdf","Subject":"rif","DestinationPrefix":"0256", "ActivationPeriods": [
         {"ActivationTime": "2012-01-01T00:00:00Z", "Intervals": [
                 {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.2,"StartTime":"","EndTime":"18:00:00","WeekDays":[1,2,3,4,5]}, 
                 {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,"StartTime":"18:00:00","EndTime":"","WeekDays":[1,2,3,4,5]}, 
@@ -8,7 +8,7 @@
         }
     ]
 },
-{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0257", "ActivationPeriods": [
+{"TOR": "0","CstmId":"vdf","Subject":"rif","DestinationPrefix":"0257", "ActivationPeriods": [
         {"ActivationTime": "2012-01-01T00:00:00Z", "Intervals": [
                 {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.1,"StartTime":"18:00:00","EndTime":"","WeekDays":[1,2,3,4,5]},
                 {"BillingUnit":1,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":0.2,"StartTime":"","EndTime":"18:00:00","WeekDays":[1,2,3,4,5]}, 
@@ -23,14 +23,14 @@
         }
     ]     
 },
-{"TOR": 0,"CstmId":"vdf","Subject":"rif","DestinationPrefix":"0723", "ActivationPeriods": [
+{"TOR": "0","CstmId":"vdf","Subject":"rif","DestinationPrefix":"0723", "ActivationPeriods": [
         {"ActivationTime": "2012-01-01T00:00:00Z", "Intervals": [
                 {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":1,"StartTime":"","EndTime":""}
             ]
         }
     ]     
 },
-{"TOR": 0,"CstmId":"vdf","Subject":"minutosu","DestinationPrefix":"0723", "ActivationPeriods": [
+{"TOR": "0","CstmId":"vdf","Subject":"minutosu","DestinationPrefix":"0723", "ActivationPeriods": [
         {"ActivationTime": "2012-01-01T00:00:00Z", "Intervals": [
                 {"BillingUnit":60,"ConnectFee":0,"Month":0,"MonthDay":0,"Ponder":0,"Price":1,"StartTime":"","EndTime":""}
             ]

@@ -51,7 +51,7 @@ func round(val float64, prec int) float64 {
 The input stucture that contains call information.
 */
 type CallDescriptor struct {
-	TOR                                int
+	TOR                                string
 	CstmId, Subject, DestinationPrefix string
 	TimeStart, TimeEnd                 time.Time
 	Amount                             float64
@@ -228,10 +228,9 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 The output structure that will be returned with the call cost information.
 */
 type CallCost struct {
-	TOR                                int
-	CstmId, Subject, DestinationPrefix string
-	Cost, ConnectFee                   float64
-	Timespans                          []*TimeSpan
+	TOR, CstmId, Subject, DestinationPrefix string
+	Cost, ConnectFee                        float64
+	Timespans                               []*TimeSpan
 }
 
 /*

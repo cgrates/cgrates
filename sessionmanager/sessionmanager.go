@@ -63,12 +63,12 @@ func (sm *SessionManager) readNextEvent() (ev *Event) {
 		log.Print("Could not read from freeswitch connection!")
 	}
 	ev = NewEvent(body)
-	switch ev.Fields["Event-Name"] {
-	case "HEARTBEAT":
+	switch ev.Fields[NAME] {
+	case HEARTBEAT:
 		sm.OnHeartBeat(ev)
-	case "CHANNEL_ANSWER":
+	case ANSWER:
 		sm.OnChannelAnswer(ev)
-	case "CHANNEL_HANGUP_COMPLETE":
+	case HANGUP:
 		sm.OnChannelHangupComplete(ev)
 	default:
 		sm.OnOther(ev)

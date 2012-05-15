@@ -42,7 +42,8 @@ func NewSession(ev *Event, ed SessionDelegate) (s *Session) {
 		log.Print("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
-	cd := &timespans.CallDescriptor{CstmId: ev.Fields[CSTMID],
+	cd := &timespans.CallDescriptor{TOR: ev.Fields[TOR],
+		CstmId:            ev.Fields[CSTMID],
 		Subject:           ev.Fields[SUBJECT],
 		DestinationPrefix: ev.Fields[DESTINATION],
 		TimeStart:         startTime}
