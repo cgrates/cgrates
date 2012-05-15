@@ -295,6 +295,21 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	return 0, nil
 }
 
+// Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
+// from user's money budget.
+func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+	cc, err = cd.GetCost()
+	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
+		if cc.Cost != 0 || cc.ConnectFee != 0 {
+			userBudget.debitMoneyBudget(cd.storageGetter, cc.Cost+cc.ConnectFee)
+		}
+		for _, ts := range cc.Timespans {
+			userBudget.debitMinutesBudget(cd.storageGetter, ts.MinuteInfo.Quantity, cd.DestinationPrefix)
+		}
+	}
+	return
+}
+
 /*
 Interface method used to add/substract an amount of cents from user's money budget.
 The amount filed has to be filled in call descriptor.

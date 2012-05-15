@@ -25,17 +25,14 @@ import (
 	"time"
 )
 
-const (
-	DEBIT_PERIOD = 10 * time.Second
-)
-
 // Session type holding the call information fields, a session delegate for specific
 // actions and a channel to signal end of the debit loop.
 type Session struct {
-	uuid, cstmId, subject, destination string
-	startTime                          time.Time // destination: startTime
-	sessionDelegate                    SessionDelegate
-	stopDebit                          chan byte
+	uuid            string
+	callDescriptor  *timespans.CallDescriptor
+	sessionDelegate SessionDelegate
+	stopDebit       chan byte
+	CallCosts       []*timespans.CallCost
 }
 
 // Creates a new session and starts the debit loop
@@ -45,12 +42,13 @@ func NewSession(ev *Event, ed SessionDelegate) (s *Session) {
 		log.Print("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
+	cd := &timespans.CallDescriptor{CstmId: ev.Fields[CSTMID],
+		Subject:           ev.Fields[SUBJECT],
+		DestinationPrefix: ev.Fields[DESTINATION],
+		TimeStart:         startTime}
 	s = &Session{uuid: ev.Fields[UUID],
-		cstmId:      ev.Fields[CSTMID],
-		subject:     ev.Fields[SUBJECT],
-		destination: ev.Fields[DESTINATION],
-		startTime:   startTime,
-		stopDebit:   make(chan byte)}
+		callDescriptor: cd,
+		stopDebit:      make(chan byte)}
 	s.sessionDelegate = ed
 	go s.startDebitLoop()
 	return
@@ -58,20 +56,25 @@ func NewSession(ev *Event, ed SessionDelegate) (s *Session) {
 
 // the debit loop method (to be stoped by sending somenting on stopDebit channel)
 func (s *Session) startDebitLoop() {
+	nextCd := *s.callDescriptor
 	for {
 		select {
 		case <-s.stopDebit:
 			return
 		default:
 		}
-		s.sessionDelegate.LoopAction()
-		time.Sleep(DEBIT_PERIOD)
+		if nextCd.TimeEnd == s.callDescriptor.TimeEnd { // first time use the session start time
+			nextCd.TimeStart = time.Now()
+		}
+		nextCd.TimeEnd = time.Now().Add(s.sessionDelegate.GetDebitPeriod())
+		s.sessionDelegate.LoopAction(s, &nextCd)
+		time.Sleep(s.sessionDelegate.GetDebitPeriod())
 	}
 }
 
 // Returns the session duration till the specified time
 func (s *Session) getSessionDurationFrom(now time.Time) (d time.Duration) {
-	seconds := now.Sub(s.startTime).Seconds()
+	seconds := now.Sub(s.callDescriptor.TimeStart).Seconds()
 	d, err := time.ParseDuration(fmt.Sprintf("%ds", int(seconds)))
 	if err != nil {
 		log.Printf("Cannot parse session duration %v", seconds)
@@ -84,23 +87,8 @@ func (s *Session) GetSessionDuration() time.Duration {
 	return s.getSessionDurationFrom(time.Now())
 }
 
-// Returns the session cost till the specified time
-func (s *Session) getSessionCostFrom(now time.Time) (callCosts *timespans.CallCost, err error) {
-	cd := &timespans.CallDescriptor{TOR: 1, CstmId: s.cstmId, Subject: s.subject, DestinationPrefix: s.destination, TimeStart: s.startTime, TimeEnd: now}
-	cd.SetStorageGetter(s.sessionDelegate.GetStorageGetter())
-	callCosts, err = cd.GetCost()
-	if err != nil {
-		log.Printf("Error getting call cost for session %v", s)
-	}
-	return
-}
-
-// Returns the session duration till now
-func (s *Session) GetSessionCost() (callCosts *timespans.CallCost, err error) {
-	return s.getSessionCostFrom(time.Now())
-}
-
 // Stops the debit loop
 func (s *Session) Close() {
 	s.stopDebit <- 1
+	s.callDescriptor.TimeEnd = time.Now()
 }

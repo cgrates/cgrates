@@ -55,20 +55,7 @@ func TestSessionDurationSingle(t *testing.T) {
 	s := NewSession(newEvent, new(DirectSessionDelegate))
 	defer s.Close()
 	twoSeconds, _ := time.ParseDuration("2s")
-	if d := s.getSessionDurationFrom(s.startTime.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
+	if d := s.getSessionDurationFrom(s.callDescriptor.TimeStart.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
 		t.Errorf("Wrong session duration %v", d)
-	}
-}
-
-func TestSessionCostSingle(t *testing.T) {
-	s := NewSession(newEvent, new(DirectSessionDelegate))
-	defer s.Close()
-	twoSeconds, _ := time.ParseDuration("60s")
-	if cc, err := s.getSessionCostFrom(s.startTime.Add(twoSeconds)); err != nil {
-		t.Errorf("Get cost returned error %v", err)
-	} else {
-		if cc.Cost < 1 || cc.Cost > 1.1 {
-			t.Errorf("Expected %v got %v", "between 1 and 1.1", cc.Cost)
-		}
 	}
 }

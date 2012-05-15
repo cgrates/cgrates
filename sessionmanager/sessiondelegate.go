@@ -21,6 +21,11 @@ package sessionmanager
 import (
 	"github.com/rif/cgrates/timespans"
 	"log"
+	"time"
+)
+
+const (
+	DEBIT_PERIOD = 10 * time.Second
 )
 
 var (
@@ -37,9 +42,9 @@ type SessionDelegate interface {
 	// Called on freeswitch's hangup event
 	OnChannelHangupComplete(*Event, *Session)
 	// The method to be called inside the debit loop
-	LoopAction()
+	LoopAction(*Session, *timespans.CallDescriptor)
 	// Returns a storage getter for the sesssion to use
-	GetStorageGetter() timespans.StorageGetter
+	GetDebitPeriod() time.Duration
 }
 
 // Sample SessionDelegate calling the timespans methods directly
@@ -57,12 +62,20 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session)
 	log.Print("direct hangup")
 }
 
-func (dsd *DirectSessionDelegate) LoopAction() {
-	log.Print("Direct debit")
+func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
+	cc, err := cd.Debit()
+	if err != nil {
+		log.Printf("Could not complete debit opperation: %v", err)
+	}
+	s.CallCosts = append(s.CallCosts, cc)
+	cd.Amount = DEBIT_PERIOD.Seconds()
+	if remainingSeconds, err := cd.GetMaxSessionTime(); remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
+		log.Print("Not enough money for another debit period!")
+	}
 }
 
-func (dsd *DirectSessionDelegate) GetStorageGetter() timespans.StorageGetter {
-	return storageGetter
+func (dsd *DirectSessionDelegate) GetDebitPeriod() time.Duration {
+	return DEBIT_PERIOD
 }
 
 // Sample SessionDelegate calling the timespans methods through the RPC interface
@@ -80,10 +93,10 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
 	log.Print("rpc hangup")
 }
 
-func (rsd *RPCSessionDelegate) LoopAction() {
+func (rsd *RPCSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
 	log.Print("Rpc debit")
 }
 
-func (rsd *RPCSessionDelegate) GetStorageGetter() timespans.StorageGetter {
-	return storageGetter
+func (rsd *RPCSessionDelegate) GetDebitPeriod() time.Duration {
+	return DEBIT_PERIOD
 }

@@ -34,6 +34,7 @@ type TimeSpan struct {
 	MinuteInfo         *MinuteInfo
 }
 
+// Holds the bonus minute information related to a specified timespan
 type MinuteInfo struct {
 	DestinationId string
 	Quantity      float64
