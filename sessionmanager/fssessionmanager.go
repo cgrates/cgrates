@@ -119,10 +119,12 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	s := sm.GetSession(ev.GetUUID())
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnChannelHangupComplete(ev, s)
+		s.SaveMOperations()
 	} else {
 		log.Print("HangupComplete")
 	}
 	if s != nil {
+
 		s.Close()
 	}
 }

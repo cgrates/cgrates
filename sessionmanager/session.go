@@ -104,3 +104,12 @@ func (s *Session) Disconnect() {
 func (s *Session) String() string {
 	return fmt.Sprintf("%v: %s -> %s", s.callDescriptor.TimeStart, s.callDescriptor.Subject, s.callDescriptor.DestinationPrefix)
 }
+
+// 
+func (s *Session) SaveMOperations() {
+	go func() {
+		for _, cc := range s.CallCosts {
+			log.Print(cc)
+		}
+	}()
+}
