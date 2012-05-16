@@ -22,10 +22,11 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"time"
 )
 
 // Event type holding a mapping of all event's proprieties
-type Event struct {
+type FSEvent struct {
 	Fields map[string]string
 }
 
@@ -49,25 +50,54 @@ const (
 	HANGUP         = "CHANNEL_HANGUP_COMPLETE"
 )
 
-// Creates a new event from a bod of text containing the key value proprieties.
+// Nice printing for the event object.
+func (fsev *FSEvent) String() (result string) {
+	for k, v := range fsev.Fields {
+		result += fmt.Sprintf("%s = %s\n", k, v)
+	}
+	result += "=============================================================="
+	return
+}
+
+// Loads the new event data from a body of text containing the key value proprieties.
 // It stores the parsed proprieties in the internal map.
-func NewEvent(body string) (ev *Event) {
-	ev = &Event{Fields: make(map[string]string)}
+func (fsev *FSEvent) New(body string) Event {
+	fsev.Fields = make(map[string]string)
 	for _, fields := range eventBodyRE.FindAllStringSubmatch(body, -1) {
 		if len(fields) == 3 {
-			ev.Fields[fields[1]] = fields[2]
+			fsev.Fields[fields[1]] = fields[2]
 		} else {
 			log.Printf("malformed event field: %v", fields)
 		}
 	}
-	return
+	return fsev
 }
 
-// Nice printing for the event object.
-func (ev *Event) String() (result string) {
-	for k, v := range ev.Fields {
-		result += fmt.Sprintf("%s = %s\n", k, v)
-	}
-	result += "=============================================================="
+func (fsev *FSEvent) GetName() string {
+	return fsev.Fields[NAME]
+}
+func (fsev *FSEvent) GetDirection() string {
+	return fsev.Fields[CALL_DIRECTION]
+}
+func (fsev *FSEvent) GetOrigId() string {
+	return fsev.Fields[ORIG_ID]
+}
+func (fsev *FSEvent) GetSubject() string {
+	return fsev.Fields[SUBJECT]
+}
+func (fsev *FSEvent) GetDestination() string {
+	return fsev.Fields[DESTINATION]
+}
+func (fsev *FSEvent) GetTOR() string {
+	return fsev.Fields[TOR]
+}
+func (fsev *FSEvent) GetUUID() string {
+	return fsev.Fields[UUID]
+}
+func (fsev *FSEvent) GetCstmId() string {
+	return fsev.Fields[CSTMID]
+}
+func (fsev *FSEvent) GetStartTime() (t time.Time, err error) {
+	t, err = time.Parse(time.RFC1123, fsev.Fields[START_TIME])
 	return
 }

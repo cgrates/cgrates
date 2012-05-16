@@ -24,7 +24,7 @@ import (
 )
 
 func TestConnect(t *testing.T) {
-	sm := &SessionManager{}
+	sm := &FSSessionManager{}
 	sm.Connect(new(DirectSessionDelegate), "localhost:8021", "ClueCon")
 	//for {
 	ev := sm.readNextEvent()

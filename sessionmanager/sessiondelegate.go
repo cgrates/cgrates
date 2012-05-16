@@ -36,11 +36,11 @@ var (
 // Interface for the session delegate objects
 type SessionDelegate interface {
 	// Called on freeswitch's hearbeat event
-	OnHeartBeat(*Event)
+	OnHeartBeat(Event)
 	// Called on freeswitch's answer event
-	OnChannelAnswer(*Event, *Session)
+	OnChannelAnswer(Event, *Session)
 	// Called on freeswitch's hangup event
-	OnChannelHangupComplete(*Event, *Session)
+	OnChannelHangupComplete(Event, *Session)
 	// The method to be called inside the debit loop
 	LoopAction(*Session, *timespans.CallDescriptor)
 	// Returns a storage getter for the sesssion to use
@@ -50,11 +50,11 @@ type SessionDelegate interface {
 // Sample SessionDelegate calling the timespans methods directly
 type DirectSessionDelegate byte
 
-func (dsd *DirectSessionDelegate) OnHeartBeat(ev *Event) {
+func (dsd *DirectSessionDelegate) OnHeartBeat(ev Event) {
 	log.Print("direct hearbeat")
 }
 
-func (dsd *DirectSessionDelegate) OnChannelAnswer(ev *Event, s *Session) {
+func (dsd *DirectSessionDelegate) OnChannelAnswer(ev Event, s *Session) {
 	s.callDescriptor.Amount = DEBIT_PERIOD.Seconds()
 	s.callDescriptor.SetStorageGetter(storageGetter)
 	remainingSeconds, err := s.callDescriptor.GetMaxSessionTime()
@@ -63,16 +63,18 @@ func (dsd *DirectSessionDelegate) OnChannelAnswer(ev *Event, s *Session) {
 		return
 	}
 	if remainingSeconds == 0 || err != nil {
-		log.Print("No credit left: Disconnect!")
+		log.Printf("No credit left: Disconnect %v", s)
+		s.Disconnect()
 		return
 	}
 	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
-		log.Print("Not enough money for a debit period!")
+		log.Printf("Not enough money for another debit period %v", s)
+		s.Disconnect()
 		return
 	}
 }
 
-func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
+func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	log.Print("direct hangup")
 }
 
@@ -90,10 +92,12 @@ func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescr
 		return
 	}
 	if remainingSeconds == 0 || err != nil {
-		log.Print("No credit left: Disconnect!")
+		log.Printf("No credit left: Disconnect %v", s)
+		s.Disconnect()
 	}
 	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
-		log.Print("Not enough money for another debit period!")
+		log.Printf("Not enough money for another debit period %v", s)
+		s.Disconnect()
 	}
 }
 
@@ -104,15 +108,15 @@ func (dsd *DirectSessionDelegate) GetDebitPeriod() time.Duration {
 // Sample SessionDelegate calling the timespans methods through the RPC interface
 type RPCSessionDelegate byte
 
-func (rsd *RPCSessionDelegate) OnHeartBeat(ev *Event) {
+func (rsd *RPCSessionDelegate) OnHeartBeat(ev Event) {
 	log.Print("rpc hearbeat")
 }
 
-func (rsd *RPCSessionDelegate) OnChannelAnswer(ev *Event, s *Session) {
+func (rsd *RPCSessionDelegate) OnChannelAnswer(ev Event, s *Session, sm SessionManager) {
 	log.Print("rpc answer")
 }
 
-func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session) {
+func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	log.Print("rpc hangup")
 }
 

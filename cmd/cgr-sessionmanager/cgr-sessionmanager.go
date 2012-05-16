@@ -32,7 +32,7 @@ var (
 
 func main() {
 	flag.Parse()
-	sm := &sessionmanager.SessionManager{}
+	sm := &sessionmanager.FSSessionManager{}
 	sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
 	waitChan := make(<-chan byte)
 	log.Print("Session manager!")

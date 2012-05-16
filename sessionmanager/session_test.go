@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	newEvent = NewEvent(`
+	newEventBody = `
 "Event-Name":	"HEARTBEAT",
 "Core-UUID":	"d5abc5b0-95c6-11e1-be05-43c90197c914",
 "FreeSWITCH-Hostname":	"grace",
@@ -48,11 +48,13 @@ var (
 "Session-Per-Sec":	"30",
 "Session-Since-Startup":	"122",
 "Idle-CPU":	"100.000000"
-`)
+`
 )
 
 func TestSessionDurationSingle(t *testing.T) {
-	s := NewSession(newEvent, new(DirectSessionDelegate))
+	newEvent := new(FSEvent).New(newEventBody)
+	sm := &FSSessionManager{}
+	s := NewSession(newEvent, sm)
 	defer s.Close()
 	twoSeconds, _ := time.ParseDuration("2s")
 	if d := s.getSessionDurationFrom(s.callDescriptor.TimeStart.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {

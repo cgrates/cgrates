@@ -152,7 +152,7 @@ func main() {
 		os.Exit(1)
 	}
 	if *standalone {
-		sm := &sessionmanager.SessionManager{}
+		sm := &sessionmanager.FSSessionManager{}
 		sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
 	} else {
 		go RegisterToServer(balancer, listen)

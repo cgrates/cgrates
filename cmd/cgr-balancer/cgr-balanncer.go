@@ -87,7 +87,7 @@ func main() {
 	go listenToRPCRaterRequests()
 	go listenToJsonRPCRequests()
 
-	sm := &sessionmanager.SessionManager{}
+	sm := &sessionmanager.FSSessionManager{}
 	sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
 
 	listenToHttpRequests()

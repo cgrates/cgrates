@@ -27,7 +27,8 @@ import (
 
 // The freeswitch session manager type holding a buffer for the network connection,
 // the active sessions, and a session delegate doing specific actions on every session.
-type SessionManager struct {
+type FSSessionManager struct {
+	conn            net.Conn
 	buf             *bufio.Reader
 	sessions        []*Session
 	sessionDelegate SessionDelegate
@@ -35,7 +36,7 @@ type SessionManager struct {
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events in json format.
-func (sm *SessionManager) Connect(ed SessionDelegate, address, pass string) {
+func (sm *FSSessionManager) Connect(ed SessionDelegate, address, pass string) {
 	if ed == nil {
 		log.Fatal("Please provide a non nil SessionDelegate")
 	}
@@ -44,6 +45,7 @@ func (sm *SessionManager) Connect(ed SessionDelegate, address, pass string) {
 	if err != nil {
 		log.Fatal("Could not connect to freeswitch server!")
 	}
+	sm.conn = conn
 	sm.buf = bufio.NewReaderSize(conn, 8192)
 	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
 	fmt.Fprint(conn, "event json all\n\n")
@@ -57,13 +59,13 @@ func (sm *SessionManager) Connect(ed SessionDelegate, address, pass string) {
 // Reads from freeswitch server buffer until it encounters a '}',
 // than it creates an event object and calls the appropriate method
 // on the session delegate.
-func (sm *SessionManager) readNextEvent() (ev *Event) {
+func (sm *FSSessionManager) readNextEvent() (ev Event) {
 	body, err := sm.buf.ReadString('}')
 	if err != nil {
 		log.Print("Could not read from freeswitch connection!")
 	}
-	ev = NewEvent(body)
-	switch ev.Fields[NAME] {
+	ev = new(FSEvent).New(body)
+	switch ev.GetName() {
 	case HEARTBEAT:
 		sm.OnHeartBeat(ev)
 	case ANSWER:
@@ -77,7 +79,7 @@ func (sm *SessionManager) readNextEvent() (ev *Event) {
 }
 
 // Searches and return the session with the specifed uuid
-func (sm *SessionManager) GetSession(uuid string) *Session {
+func (sm *FSSessionManager) GetSession(uuid string) *Session {
 	for _, s := range sm.sessions {
 		if s.uuid == uuid {
 			return s
@@ -86,8 +88,13 @@ func (sm *SessionManager) GetSession(uuid string) *Session {
 	return nil
 }
 
+func (sm *FSSessionManager) DisconnectSession(s *Session) {
+	fmt.Fprint(sm.conn, fmt.Sprintf("SendMsg %s\ncall-command: hangup\nhangup-cause: \n\n", s.uuid, "MANAGER_REQUEST"))
+	s.Close()
+}
+
 // Called on freeswitch's hearbeat event
-func (sm *SessionManager) OnHeartBeat(ev *Event) {
+func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnHeartBeat(ev)
 	} else {
@@ -96,9 +103,9 @@ func (sm *SessionManager) OnHeartBeat(ev *Event) {
 }
 
 // Called on freeswitch's answer event
-func (sm *SessionManager) OnChannelAnswer(ev *Event) {
+func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	if sm.sessionDelegate != nil {
-		s := NewSession(ev, sm.sessionDelegate)
+		s := NewSession(ev, sm)
 		sm.sessions = append(sm.sessions, s)
 		sm.sessionDelegate.OnChannelAnswer(ev, s)
 	} else {
@@ -107,8 +114,8 @@ func (sm *SessionManager) OnChannelAnswer(ev *Event) {
 }
 
 // Called on freeswitch's hangup event
-func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
-	s := sm.GetSession(ev.Fields[UUID])
+func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
+	s := sm.GetSession(ev.GetUUID())
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnChannelHangupComplete(ev, s)
 	} else {
@@ -121,6 +128,10 @@ func (sm *SessionManager) OnChannelHangupComplete(ev *Event) {
 
 // Called on freeswitch's events not processed by the session manger,
 // for logging purposes (maybe).
-func (sm *SessionManager) OnOther(ev *Event) {
+func (sm *FSSessionManager) OnOther(ev Event) {
 	//log.Printf("Other event: %s", ev.Fields["Event-Name"])
+}
+
+func (sm *FSSessionManager) GetSessionDelegate() SessionDelegate {
+	return sm.sessionDelegate
 }

@@ -28,29 +28,29 @@ import (
 // Session type holding the call information fields, a session delegate for specific
 // actions and a channel to signal end of the debit loop.
 type Session struct {
-	uuid            string
-	callDescriptor  *timespans.CallDescriptor
-	sessionDelegate SessionDelegate
-	stopDebit       chan byte
-	CallCosts       []*timespans.CallCost
+	uuid           string
+	callDescriptor *timespans.CallDescriptor
+	sessionManager SessionManager
+	stopDebit      chan byte
+	CallCosts      []*timespans.CallCost
 }
 
 // Creates a new session and starts the debit loop
-func NewSession(ev *Event, ed SessionDelegate) (s *Session) {
-	startTime, err := time.Parse(time.RFC1123, ev.Fields[START_TIME])
+func NewSession(ev Event, sm SessionManager) (s *Session) {
+	startTime, err := ev.GetStartTime()
 	if err != nil {
 		log.Print("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
-	cd := &timespans.CallDescriptor{TOR: ev.Fields[TOR],
-		CstmId:            ev.Fields[CSTMID],
-		Subject:           ev.Fields[SUBJECT],
-		DestinationPrefix: ev.Fields[DESTINATION],
+	cd := &timespans.CallDescriptor{TOR: ev.GetTOR(),
+		CstmId:            ev.GetCstmId(),
+		Subject:           ev.GetSubject(),
+		DestinationPrefix: ev.GetDestination(),
 		TimeStart:         startTime}
-	s = &Session{uuid: ev.Fields[UUID],
+	s = &Session{uuid: ev.GetUUID(),
 		callDescriptor: cd,
 		stopDebit:      make(chan byte)}
-	s.sessionDelegate = ed
+	s.sessionManager = sm
 	go s.startDebitLoop()
 	return
 }
@@ -67,9 +67,10 @@ func (s *Session) startDebitLoop() {
 		if nextCd.TimeEnd == s.callDescriptor.TimeEnd { // first time use the session start time
 			nextCd.TimeStart = time.Now()
 		}
-		nextCd.TimeEnd = time.Now().Add(s.sessionDelegate.GetDebitPeriod())
-		s.sessionDelegate.LoopAction(s, &nextCd)
-		time.Sleep(s.sessionDelegate.GetDebitPeriod())
+		sd := s.sessionManager.GetSessionDelegate()
+		nextCd.TimeEnd = time.Now().Add(sd.GetDebitPeriod())
+		sd.LoopAction(s, &nextCd)
+		time.Sleep(sd.GetDebitPeriod())
 	}
 }
 
@@ -92,4 +93,8 @@ func (s *Session) GetSessionDuration() time.Duration {
 func (s *Session) Close() {
 	s.stopDebit <- 1
 	s.callDescriptor.TimeEnd = time.Now()
+}
+
+func (s *Session) Disconnect() {
+	s.sessionManager.DisconnectSession(s)
 }
