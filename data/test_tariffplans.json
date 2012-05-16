@@ -12,6 +12,6 @@
 			[{"Seconds":100,"Priority":10,"Price":0.01,"DestinationId":"nationale"}, {"Seconds":1000,"Priority":20,"Price":0,"DestinationId":"retea"}],
 		"VolumeDiscountThresholds":
 			[{"Volume": 100, "Discount": 10},{"Volume": 500, "Discount": 15},{"Volume": 1000, "Discount": 20}]
-	}
+	}	
 ]
 

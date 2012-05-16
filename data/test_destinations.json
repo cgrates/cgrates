@@ -2,5 +2,6 @@
 {"Id":"nationale", "Prefixes":["0256","0257","0723","0740"]},
 {"Id":"retea", "Prefixes":["0723","0724"]},
 {"Id":"mobil", "Prefixes":["0723","0740"]},
-{"Id":"radu", "Prefixes":["0723045326"]}
+{"Id":"radu", "Prefixes":["0723045326"]},
+{"Id":"freeswitch", "Prefixes":["service"]}
 ]

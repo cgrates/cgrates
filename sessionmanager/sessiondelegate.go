@@ -56,6 +56,7 @@ func (dsd *DirectSessionDelegate) OnHeartBeat(ev *Event) {
 
 func (dsd *DirectSessionDelegate) OnChannelAnswer(ev *Event, s *Session) {
 	s.callDescriptor.Amount = DEBIT_PERIOD.Seconds()
+	s.callDescriptor.SetStorageGetter(storageGetter)
 	remainingSeconds, err := s.callDescriptor.GetMaxSessionTime()
 	if remainingSeconds == 0 || err != nil {
 		log.Print("No credit left: Disconnect!")
@@ -70,6 +71,7 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev *Event, s *Session)
 }
 
 func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
+	cd.SetStorageGetter(storageGetter)
 	cc, err := cd.Debit()
 	if err != nil {
 		log.Printf("Could not complete debit opperation: %v", err)

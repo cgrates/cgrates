@@ -20,7 +20,7 @@ package timespans
 
 import (
 	"fmt"
-	// "log"
+	"log"
 	"math"
 	"time"
 )
@@ -298,12 +298,17 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 // from user's money budget.
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
+	if err != nil {
+		log.Printf("error getting cost %v", err)
+	}
 	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
 			userBudget.debitMoneyBudget(cd.storageGetter, cc.Cost+cc.ConnectFee)
 		}
 		for _, ts := range cc.Timespans {
-			userBudget.debitMinutesBudget(cd.storageGetter, ts.MinuteInfo.Quantity, cd.DestinationPrefix)
+			if ts.MinuteInfo != nil {
+				userBudget.debitMinutesBudget(cd.storageGetter, ts.MinuteInfo.Quantity, cd.DestinationPrefix)
+			}
 		}
 	}
 	return

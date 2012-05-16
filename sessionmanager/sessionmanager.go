@@ -99,6 +99,7 @@ func (sm *SessionManager) OnHeartBeat(ev *Event) {
 func (sm *SessionManager) OnChannelAnswer(ev *Event) {
 	if sm.sessionDelegate != nil {
 		s := NewSession(ev, sm.sessionDelegate)
+		sm.sessions = append(sm.sessions, s)
 		sm.sessionDelegate.OnChannelAnswer(ev, s)
 	} else {
 		log.Print("answer")
