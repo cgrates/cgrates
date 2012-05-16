@@ -49,7 +49,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 		TimeStart:         startTime}
 	s = &Session{uuid: ev.GetUUID(),
 		callDescriptor: cd,
-		stopDebit:      make(chan byte)}
+		stopDebit:      make(chan byte, 2)} //buffer it for multiple close signals
 	s.sessionManager = sm
 	go s.startDebitLoop()
 	return
@@ -95,6 +95,12 @@ func (s *Session) Close() {
 	s.callDescriptor.TimeEnd = time.Now()
 }
 
+// Disconects a session using session manager
 func (s *Session) Disconnect() {
 	s.sessionManager.DisconnectSession(s)
+}
+
+// Nice print for session
+func (s *Session) String() string {
+	return fmt.Sprintf("%v: %s -> %s", s.callDescriptor.TimeStart, s.callDescriptor.Subject, s.callDescriptor.DestinationPrefix)
 }

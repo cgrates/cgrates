@@ -88,8 +88,9 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 	return nil
 }
 
+// Disconnects a session by sending hangup command to freeswitch
 func (sm *FSSessionManager) DisconnectSession(s *Session) {
-	fmt.Fprint(sm.conn, fmt.Sprintf("SendMsg %s\ncall-command: hangup\nhangup-cause: \n\n", s.uuid, "MANAGER_REQUEST"))
+	fmt.Fprint(sm.conn, fmt.Sprintf("SendMsg %s\ncall-command: hangup\nhangup-cause: MANAGER_REQUEST\n\n", s.uuid))
 	s.Close()
 }
 
@@ -129,7 +130,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 // Called on freeswitch's events not processed by the session manger,
 // for logging purposes (maybe).
 func (sm *FSSessionManager) OnOther(ev Event) {
-	//log.Printf("Other event: %s", ev.Fields["Event-Name"])
+	//log.Printf("Other event: %s", ev.GetName())
 }
 
 func (sm *FSSessionManager) GetSessionDelegate() SessionDelegate {

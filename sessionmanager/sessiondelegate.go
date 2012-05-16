@@ -55,23 +55,7 @@ func (dsd *DirectSessionDelegate) OnHeartBeat(ev Event) {
 }
 
 func (dsd *DirectSessionDelegate) OnChannelAnswer(ev Event, s *Session) {
-	s.callDescriptor.Amount = DEBIT_PERIOD.Seconds()
-	s.callDescriptor.SetStorageGetter(storageGetter)
-	remainingSeconds, err := s.callDescriptor.GetMaxSessionTime()
-	if remainingSeconds == -1 || err == nil {
-		log.Print("Postpaying client: happy talking!")
-		return
-	}
-	if remainingSeconds == 0 || err != nil {
-		log.Printf("No credit left: Disconnect %v", s)
-		s.Disconnect()
-		return
-	}
-	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
-		log.Printf("Not enough money for another debit period %v", s)
-		s.Disconnect()
-		return
-	}
+	log.Print("direct answer")
 }
 
 func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
@@ -87,17 +71,19 @@ func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescr
 	s.CallCosts = append(s.CallCosts, cc)
 	cd.Amount = DEBIT_PERIOD.Seconds()
 	remainingSeconds, err := cd.GetMaxSessionTime()
-	if remainingSeconds == -1 || err == nil {
+	if remainingSeconds == -1 && err == nil {
 		log.Print("Postpaying client: happy talking!")
 		return
 	}
 	if remainingSeconds == 0 || err != nil {
 		log.Printf("No credit left: Disconnect %v", s)
 		s.Disconnect()
+		return
 	}
 	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
 		log.Printf("Not enough money for another debit period %v", s)
 		s.Disconnect()
+		return
 	}
 }
 

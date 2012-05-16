@@ -35,6 +35,6 @@ func main() {
 	sm := &sessionmanager.FSSessionManager{}
 	sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
 	waitChan := make(<-chan byte)
-	log.Print("Session manager!")
+	log.Print("CGRateS is listening!")
 	<-waitChan
 }
