@@ -26,11 +26,17 @@ import (
 	"sync"
 )
 
+const (
+	UB_TYPE_POSTPAID = "postpaid"
+	UB_TYPE_PREPAID  = "prepaid"
+)
+
 /*
 Structure conatining information about user's credit (minutes, cents, sms...).'
 */
 type UserBudget struct {
 	Id                    string
+	Type                  string // prepaid/postpaid
 	Credit                float64
 	SmsCredit             float64
 	Traffic               float64
@@ -75,6 +81,7 @@ func (bs bucketsorter) Less(j, i int) bool {
 Serializes the user budget for the storage. Used for key-value storages.
 */
 func (ub *UserBudget) store() (result string) {
+	result += ub.Type + ";"
 	result += strconv.FormatFloat(ub.Credit, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(ub.SmsCredit, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(ub.Traffic, 'f', -1, 64) + ";"
@@ -99,15 +106,16 @@ De-serializes the user budget for the storage. Used for key-value storages.
 */
 func (ub *UserBudget) restore(input string) {
 	elements := strings.Split(input, ";")
-	ub.Credit, _ = strconv.ParseFloat(elements[0], 64)
-	ub.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
-	ub.Traffic, _ = strconv.ParseFloat(elements[2], 64)
-	ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[3], 64)
-	ub.ReceivedCallSeconds, _ = strconv.ParseFloat(elements[4], 64)
-	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[5])
-	ub.TariffPlanId = elements[6]
-	if len(elements) > 7 {
-		for _, mbs := range strings.Split(elements[7], ",") {
+	ub.Type = elements[0]
+	ub.Credit, _ = strconv.ParseFloat(elements[1], 64)
+	ub.SmsCredit, _ = strconv.ParseFloat(elements[2], 64)
+	ub.Traffic, _ = strconv.ParseFloat(elements[3], 64)
+	ub.VolumeDiscountSeconds, _ = strconv.ParseFloat(elements[4], 64)
+	ub.ReceivedCallSeconds, _ = strconv.ParseFloat(elements[5], 64)
+	ub.ResetDayOfTheMonth, _ = strconv.Atoi(elements[6])
+	ub.TariffPlanId = elements[7]
+	if len(elements) > 8 {
+		for _, mbs := range strings.Split(elements[8], ",") {
 			mb := &MinuteBucket{}
 			mb.restore(mbs)
 			ub.MinuteBuckets = append(ub.MinuteBuckets, mb)

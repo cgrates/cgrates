@@ -1,11 +1,11 @@
 [
-{"Id":"minutosu","Credit":21,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,"ReceivedCallSeconds":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":    
+{"Id":"minutosu","Type":"prepaid","Credit":21,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,"ReceivedCallSeconds":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":    
     [{"Seconds":10,"Priority":10,"Price":0.01,"DestinationId":"nationale"},
 	 {"Seconds":100,"Priority":20,"Price":0,"DestinationId":"retea"}]},
-{"Id":"broker","Credit":0,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,"ReceivedCallSeconds":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":    
+{"Id":"broker","Type":"prepaid","Credit":0,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,"ReceivedCallSeconds":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":    
     [{"Seconds":10,"Priority":10,"Price":0.01,"DestinationId":"nationale"},
 	 {"Seconds":100,"Priority":20,"Price":0,"DestinationId":"retea"}]},
-{"Id":"1000","Credit":0,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,"ReceivedCallSeconds":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":    
+{"Id":"1000","Type":"postpaid","Credit":0,"SmsCredit":0,"Traffic":0,"VolumeDiscountSeconds":0,"ReceivedCallSeconds":0,"ResetDayOfTheMonth":10,"TariffPlanId":"seara","MinuteBuckets":    
     [{"Seconds":10,"Priority":10,"Price":0.01,"DestinationId":"nationale"},
 	 {"Seconds":100,"Priority":20,"Price":0,"DestinationId":"retea"}]}
 ]

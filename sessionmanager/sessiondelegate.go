@@ -58,11 +58,17 @@ func (dsd *DirectSessionDelegate) OnChannelAnswer(ev *Event, s *Session) {
 	s.callDescriptor.Amount = DEBIT_PERIOD.Seconds()
 	s.callDescriptor.SetStorageGetter(storageGetter)
 	remainingSeconds, err := s.callDescriptor.GetMaxSessionTime()
+	if remainingSeconds == -1 || err == nil {
+		log.Print("Postpaying client: happy talking!")
+		return
+	}
 	if remainingSeconds == 0 || err != nil {
 		log.Print("No credit left: Disconnect!")
+		return
 	}
 	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
 		log.Print("Not enough money for a debit period!")
+		return
 	}
 }
 
@@ -79,6 +85,10 @@ func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescr
 	s.CallCosts = append(s.CallCosts, cc)
 	cd.Amount = DEBIT_PERIOD.Seconds()
 	remainingSeconds, err := cd.GetMaxSessionTime()
+	if remainingSeconds == -1 || err == nil {
+		log.Print("Postpaying client: happy talking!")
+		return
+	}
 	if remainingSeconds == 0 || err != nil {
 		log.Print("No credit left: Disconnect!")
 	}
