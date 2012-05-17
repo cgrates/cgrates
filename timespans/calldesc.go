@@ -233,6 +233,16 @@ type CallCost struct {
 	Timespans                               []*TimeSpan
 }
 
+// Pretty printing for call cost
+func (cc *CallCost) String() (r string) {
+	r = fmt.Sprintf("%v[%v] : %s -> %s (", cc.Cost, cc.ConnectFee, cc.Subject, cc.DestinationPrefix)
+	for _, ts := range cc.Timespans {
+		r += fmt.Sprintf(" %v,", ts.GetDuration())
+	}
+	r += " )"
+	return
+}
+
 /*
 Returns the cost of a second in the present time conditions.
 */

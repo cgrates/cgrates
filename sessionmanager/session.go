@@ -64,7 +64,7 @@ func (s *Session) startDebitLoop() {
 			return
 		default:
 		}
-		if nextCd.TimeEnd == s.callDescriptor.TimeEnd { // first time use the session start time
+		if nextCd.TimeEnd != s.callDescriptor.TimeEnd { // first time use the session start time
 			nextCd.TimeStart = time.Now()
 		}
 		sd := s.sessionManager.GetSessionDelegate()
