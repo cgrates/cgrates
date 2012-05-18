@@ -68,7 +68,7 @@ func TestMultipleResultMerge(t *testing.T) {
 	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 6 {
-		t.Errorf("expected 12 was %v", cc2.Cost)
+		t.Errorf("expected 6 was %v", cc2.Cost)
 	}
 	result := cc1.Merge(cc2)
 	if result == nil {
@@ -97,7 +97,7 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 6 {
-		t.Errorf("expected 12 was %v", cc2.Cost)
+		t.Errorf("expected 6 was %v", cc2.Cost)
 	}
 	result := cc1.Merge(cc2)
 	if result != nil {
@@ -105,9 +105,38 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 	}
 	if len(cc1.Timespans) != 2 || cc1.Timespans[1].GetDuration().Seconds() != 120 {
 		t.Error("wrong resulted timespan")
-		t.Log(cc1.Timespans[1].GetDuration())
 	}
 	if cc1.Cost != 24 {
 		t.Errorf("Exdpected 24 was %v", cc1.Cost)
+	}
+}
+
+func TestMultipleInputRightMerge(t *testing.T) {
+	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer getter.Close()
+	t1 := time.Date(2012, time.February, 2, 17, 58, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
+	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cc1, _ := cd.GetCost()
+	if cc1.Cost != 12 {
+		t.Errorf("expected 12 was %v", cc1.Cost)
+	}
+	t1 = time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
+	t2 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
+	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cc2, _ := cd.GetCost()
+	if cc2.Cost != 18 {
+		t.Errorf("expected 18 was %v", cc2.Cost)
+	}
+	result := cc1.Merge(cc2)
+	if result != nil {
+		t.Error("expected nil result")
+	}
+	if len(cc1.Timespans) != 2 || cc1.Timespans[0].GetDuration().Seconds() != 120 {
+		t.Error("wrong resulted timespan")
+		t.Log(cc1.Timespans[0].GetDuration())
+	}
+	if cc1.Cost != 30 {
+		t.Errorf("Exdpected 30 was %v", cc1.Cost)
 	}
 }
