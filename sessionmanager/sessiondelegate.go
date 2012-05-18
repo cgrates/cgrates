@@ -59,7 +59,41 @@ func (dsd *DirectSessionDelegate) OnChannelAnswer(ev Event, s *Session) {
 }
 
 func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
-	log.Print("direct hangup")
+	lastCC := s.CallCosts[len(s.CallCosts)-1]
+	// put credit back	
+	start := time.Now()
+	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
+	cost := 0
+	seconds := 0
+	for _, ts := range lastCC.Timespans {
+		if ts.TimeEnd > start {
+			sec := ts.TimeEnd.Sub(start)
+			if ts.Interval.BillingUnit > 0 {
+				cost = (sec / ts.Interval.BillingUnit) * ts.Interval.Price
+			} else {
+				cost = sec * ts.Interval.Price
+			}
+		}
+	}
+	if cost > 0 {
+		cd := &timespans.CallDescriptor{TOR: lastCC.TOR,
+			CstmId:            lastCC.CstmId,
+			Subject:           lastCC.CstmId,
+			DestinationPrefix: lastCC.DestinationPrefix,
+			Amount:            -cost,
+		}
+		cd.DebitCents()
+	}
+	if seconds > 0 {
+		cd := &timespans.CallDescriptor{TOR: lastCC.TOR,
+			CstmId:            lastCC.CstmId,
+			Subject:           lastCC.CstmId,
+			DestinationPrefix: lastCC.DestinationPrefix,
+			Amount:            -seconds,
+		}
+		cd.DebitSeconds()
+	}
+	log.Print("Rambursed %v cents, %v seconds")
 }
 
 func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
@@ -69,6 +103,7 @@ func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescr
 		log.Printf("Could not complete debit opperation: %v", err)
 	}
 	s.CallCosts = append(s.CallCosts, cc)
+	log.Print(cc)
 	cd.Amount = DEBIT_PERIOD.Seconds()
 	remainingSeconds, err := cd.GetMaxSessionTime()
 	if remainingSeconds == -1 && err == nil {

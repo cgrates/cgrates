@@ -42,17 +42,18 @@ func (cc *CallCost) String() (r string) {
 }
 
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.
-func (cc *CallCost) Merge(other *CallCost) *CallCost {
+func (cc *CallCost) Merge(other *CallCost) {
 	ts := cc.Timespans[len(cc.Timespans)-1]
 	otherTs := other.Timespans[0]
 	if reflect.DeepEqual(ts.ActivationPeriod, otherTs.ActivationPeriod) &&
 		reflect.DeepEqual(ts.MinuteInfo, otherTs.MinuteInfo) && reflect.DeepEqual(ts.Interval, otherTs.Interval) {
-		cc.Cost += other.Cost
 		// extend the last timespan with
 		ts.TimeEnd = ts.TimeEnd.Add(otherTs.GetDuration())
 		// add the rest of the timspans				
 		cc.Timespans = append(cc.Timespans, other.Timespans[1:]...)
-		return nil
+	} else {
+		// just add all timespans
+		cc.Timespans = append(cc.Timespans, other.Timespans...)
 	}
-	return other
+	cc.Cost += other.Cost
 }

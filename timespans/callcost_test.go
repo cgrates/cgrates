@@ -41,10 +41,7 @@ func TestSingleResultMerge(t *testing.T) {
 	if cc2.Cost != 12 {
 		t.Errorf("expected 12 was %v", cc2.Cost)
 	}
-	result := cc1.Merge(cc2)
-	if result != nil {
-		t.Error("expected nil result")
-	}
+	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 1 || cc1.Timespans[0].GetDuration().Seconds() != 120 {
 		t.Error("wrong resulted timespan")
 	}
@@ -70,10 +67,7 @@ func TestMultipleResultMerge(t *testing.T) {
 	if cc2.Cost != 6 {
 		t.Errorf("expected 6 was %v", cc2.Cost)
 	}
-	result := cc1.Merge(cc2)
-	if result == nil {
-		t.Error("expected non nil result")
-	}
+	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 1 || cc1.Timespans[0].GetDuration().Seconds() != 60 {
 		t.Error("wrong resulted timespan")
 	}
@@ -99,10 +93,7 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 	if cc2.Cost != 6 {
 		t.Errorf("expected 6 was %v", cc2.Cost)
 	}
-	result := cc1.Merge(cc2)
-	if result != nil {
-		t.Error("expected nil result")
-	}
+	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 2 || cc1.Timespans[1].GetDuration().Seconds() != 120 {
 		t.Error("wrong resulted timespan")
 	}
@@ -128,10 +119,7 @@ func TestMultipleInputRightMerge(t *testing.T) {
 	if cc2.Cost != 18 {
 		t.Errorf("expected 18 was %v", cc2.Cost)
 	}
-	result := cc1.Merge(cc2)
-	if result != nil {
-		t.Error("expected nil result")
-	}
+	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 2 || cc1.Timespans[0].GetDuration().Seconds() != 120 {
 		t.Error("wrong resulted timespan")
 		t.Log(cc1.Timespans[0].GetDuration())

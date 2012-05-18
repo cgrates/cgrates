@@ -108,8 +108,10 @@ func (s *Session) String() string {
 // 
 func (s *Session) SaveMOperations() {
 	go func() {
-		for _, cc := range s.CallCosts {
-			log.Print(cc)
+		firstCC := s.CallCosts[0]
+		for _, cc := range s.CallCosts[1:] {
+			firstCC.Merge(cc)
 		}
+		log.Print(firstCC)
 	}()
 }
