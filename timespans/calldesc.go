@@ -225,25 +225,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 }
 
 /*
-The output structure that will be returned with the call cost information.
-*/
-type CallCost struct {
-	TOR, CstmId, Subject, DestinationPrefix string
-	Cost, ConnectFee                        float64
-	Timespans                               []*TimeSpan
-}
-
-// Pretty printing for call cost
-func (cc *CallCost) String() (r string) {
-	r = fmt.Sprintf("%v[%v] : %s -> %s (", cc.Cost, cc.ConnectFee, cc.Subject, cc.DestinationPrefix)
-	for _, ts := range cc.Timespans {
-		r += fmt.Sprintf(" %v,", ts.GetDuration())
-	}
-	r += " )"
-	return
-}
-
-/*
 Returns the cost of a second in the present time conditions.
 */
 func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {

@@ -20,8 +20,8 @@ package timespans
 
 import (
 	"fmt"
+	// "log"
 	"time"
-	//"log"
 )
 
 /*
@@ -81,7 +81,7 @@ func (ts *TimeSpan) Contains(t time.Time) bool {
 }
 
 /*
-will set the interval as spans's interval if new ponder is greater then span's interval ponder
+Will set the interval as spans's interval if new ponder is greater then span's interval ponder
 or if the ponders are equal and new price is lower then spans's interval price
 */
 func (ts *TimeSpan) SetInterval(i *Interval) {
