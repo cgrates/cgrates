@@ -51,7 +51,7 @@ type SessionDelegate interface {
 type DirectSessionDelegate byte
 
 func (dsd *DirectSessionDelegate) OnHeartBeat(ev Event) {
-	log.Print("direct hearbeat")
+	log.Print("♥")
 }
 
 func (dsd *DirectSessionDelegate) OnChannelAnswer(ev Event, s *Session) {
@@ -63,16 +63,35 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 	// put credit back	
 	start := time.Now()
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
-	cost := 0
-	seconds := 0
-	for _, ts := range lastCC.Timespans {
-		if ts.TimeEnd > start {
-			sec := ts.TimeEnd.Sub(start)
-			if ts.Interval.BillingUnit > 0 {
-				cost = (sec / ts.Interval.BillingUnit) * ts.Interval.Price
-			} else {
-				cost = sec * ts.Interval.Price
+	refoundDuration := end.Sub(start).Seconds()
+	cost := 0.0
+	seconds := 0.0
+	log.Printf("Refund duration: %v", refoundDuration)
+	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
+		ts := lastCC.Timespans[i]
+		tsDuration := ts.GetDuration().Seconds()
+		if refoundDuration <= tsDuration {
+			// find procentage
+			procentage := (refoundDuration * 100) / tsDuration
+			tmpCost := (procentage * ts.Cost) / 100
+			ts.Cost -= tmpCost
+			cost += tmpCost
+			if ts.MinuteInfo != nil {
+				// DestinationPrefix and Price take from lastCC and above caclulus
+				seconds += (procentage * ts.MinuteInfo.Quantity) / 100
 			}
+			// set the end time to now
+			ts.TimeEnd = start
+			break // do not go to other timespans
+		} else {
+			cost += ts.Cost
+			if ts.MinuteInfo != nil {
+				seconds += ts.MinuteInfo.Quantity
+			}
+			// remove the timestamp entirely
+			lastCC.Timespans = lastCC.Timespans[:i]
+			// continue to the next timespan with what is left to refound
+			refoundDuration -= tsDuration
 		}
 	}
 	if cost > 0 {
@@ -82,6 +101,7 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 			DestinationPrefix: lastCC.DestinationPrefix,
 			Amount:            -cost,
 		}
+		cd.SetStorageGetter(storageGetter)
 		cd.DebitCents()
 	}
 	if seconds > 0 {
@@ -91,9 +111,11 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 			DestinationPrefix: lastCC.DestinationPrefix,
 			Amount:            -seconds,
 		}
+		cd.SetStorageGetter(storageGetter)
 		cd.DebitSeconds()
 	}
-	log.Print("Rambursed %v cents, %v seconds")
+	lastCC.Cost -= cost
+	log.Printf("Rambursed %v cents, %v seconds", cost, seconds)
 }
 
 func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {

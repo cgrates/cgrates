@@ -211,7 +211,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		if i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
 			connectionFee = ts.Interval.ConnectFee
 		}
-		cost += ts.GetCost(cd)
+		cost += ts.getCost(cd)
 	}
 	cc := &CallCost{TOR: cd.TOR,
 		CstmId:            cd.CstmId,
@@ -236,7 +236,7 @@ func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
 	timespans := cd.splitTimeSpan(ts)
 
 	if len(timespans) > 0 {
-		cost = round(timespans[0].GetCost(cd), 3)
+		cost = round(timespans[0].getCost(cd), 3)
 	}
 	return
 }
@@ -278,7 +278,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 			if i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
 				cost += ts.Interval.ConnectFee
 			}
-			cost += ts.GetCost(cd)
+			cost += ts.getCost(cd)
 		}
 		if cost < availableCredit {
 			return maxSessionSeconds, nil

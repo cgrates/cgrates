@@ -29,6 +29,7 @@ A unit in which a call will be split that has a specific price related interval 
 */
 type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
+	Cost               float64
 	ActivationPeriod   *ActivationPeriod
 	Interval           *Interval
 	MinuteInfo         *MinuteInfo
@@ -48,10 +49,10 @@ func (ts *TimeSpan) GetDuration() time.Duration {
 	return ts.TimeEnd.Sub(ts.TimeStart)
 }
 
-/*
-Returns the cost of the timespan according to the relevant cost interval.
-*/
-func (ts *TimeSpan) GetCost(cd *CallDescriptor) (cost float64) {
+// Returns the cost of the timespan according to the relevant cost interval.
+// It also sets the Cost field of this timespan (used for refound on session
+// manager debit loop where the cost cannot be recalculated)
+func (ts *TimeSpan) getCost(cd *CallDescriptor) (cost float64) {
 	if ts.MinuteInfo != nil {
 		return ts.GetDuration().Seconds() * ts.MinuteInfo.Price
 	}
@@ -70,6 +71,7 @@ func (ts *TimeSpan) GetCost(cd *CallDescriptor) (cost float64) {
 		}
 		userBudget.mux.RUnlock()
 	}
+	ts.Cost = cost
 	return
 }
 
