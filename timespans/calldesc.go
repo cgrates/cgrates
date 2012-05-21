@@ -55,6 +55,7 @@ type CallDescriptor struct {
 	CstmId, Subject, DestinationPrefix string
 	TimeStart, TimeEnd                 time.Time
 	Amount                             float64
+	FallbackSubject                    string // the subject to check for destination if not found on primary subject
 	ActivationPeriods                  []*ActivationPeriod
 	storageGetter                      StorageGetter
 	userBudget                         *UserBudget

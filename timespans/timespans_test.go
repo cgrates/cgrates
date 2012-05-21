@@ -191,16 +191,16 @@ func TestTimespanGetCost(t *testing.T) {
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	ts1 := TimeSpan{TimeStart: t1, TimeEnd: t2}
 	cd := &CallDescriptor{Subject: "other", storageGetter: getter}
-	if ts1.GetCost(cd) != 0 {
+	if ts1.getCost(cd) != 0 {
 		t.Error("No interval and still kicking")
 	}
 	ts1.Interval = &Interval{Price: 1}
-	if ts1.GetCost(cd) != 600 {
-		t.Error("Expected 10 got ", ts1.GetCost(cd))
+	if ts1.getCost(cd) != 600 {
+		t.Error("Expected 10 got ", ts1.getCost(cd))
 	}
 	ts1.Interval.BillingUnit = .1
-	if ts1.GetCost(cd) != 6000 {
-		t.Error("Expected 6000 got ", ts1.GetCost(cd))
+	if ts1.getCost(cd) != 6000 {
+		t.Error("Expected 6000 got ", ts1.getCost(cd))
 	}
 }
 

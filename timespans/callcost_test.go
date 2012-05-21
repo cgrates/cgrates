@@ -68,11 +68,11 @@ func TestMultipleResultMerge(t *testing.T) {
 		t.Errorf("expected 6 was %v", cc2.Cost)
 	}
 	cc1.Merge(cc2)
-	if len(cc1.Timespans) != 1 || cc1.Timespans[0].GetDuration().Seconds() != 60 {
+	if len(cc1.Timespans) != 2 || cc1.Timespans[0].GetDuration().Seconds() != 60 {
 		t.Error("wrong resulted timespan")
 	}
-	if cc1.Cost != 12 {
-		t.Errorf("Exdpected 12 was %v", cc1.Cost)
+	if cc1.Cost != 18 {
+		t.Errorf("Exdpected 18 was %v", cc1.Cost)
 	}
 }
 
