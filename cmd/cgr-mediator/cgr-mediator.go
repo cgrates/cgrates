@@ -74,6 +74,8 @@ func main() {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		uuid := record[10]
+		t, _ := time.Parse("2012-05-21 17:48:20", record[5])
+		fmt.Println(t)
 		if useDB {
 			cc, timespansText, err := readDbRecord(db, uuid)
 			if err != nil && useRPC {
@@ -92,7 +94,8 @@ func main() {
 					TimeEnd:           t2}
 				client.Call("Responder.GetCost", cd, cc)
 			}
-			log.Print(cc, timespansText)
+			_ = timespansText
+			//log.Print(cc, timespansText)
 		}
 	}
 }

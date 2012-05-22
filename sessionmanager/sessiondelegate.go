@@ -21,6 +21,8 @@ package sessionmanager
 import (
 	"github.com/rif/cgrates/timespans"
 	"log"
+	"net/rpc"
+	"net/rpc/jsonrpc"
 	"time"
 )
 
@@ -149,7 +151,17 @@ func (dsd *DirectSessionDelegate) GetDebitPeriod() time.Duration {
 }
 
 // Sample SessionDelegate calling the timespans methods through the RPC interface
-type RPCSessionDelegate byte
+type RPCSessionDelegate struct {
+	client *rpc.Client
+}
+
+func NewRPCSessionDelegate(host string) (rpc *RPCSessionDelegate) {
+	client, err := jsonrpc.Dial("tcp", host)
+	if err != nil {
+		log.Fatalf("Could not connect to rater server %v!", err)
+	}
+	return &RPCSessionDelegate{client}
+}
 
 func (rsd *RPCSessionDelegate) OnHeartBeat(ev Event) {
 	log.Print("rpc hearbeat")
@@ -164,9 +176,34 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 }
 
 func (rsd *RPCSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
-	log.Print("Rpc debit")
+	cc := &timespans.CallCost{}
+	err := rsd.client.Call("Responder.Debit", cd, cc)
+	if err != nil {
+		log.Printf("Could not complete debit opperation: %v", err)
+	}
+	s.CallCosts = append(s.CallCosts, cc)
+	log.Print(cc)
+	cd.Amount = DEBIT_PERIOD.Seconds()
+	var remainingSeconds float64
+	err = rsd.client.Call("Responder.GetMaxSessionTime", cd, &remainingSeconds)
+	if err != nil {
+		log.Printf("Could not get max session time: %v", err)
+	}
+	if remainingSeconds == -1 && err == nil {
+		log.Print("Postpaying client: happy talking!")
+		return
+	}
+	if remainingSeconds == 0 || err != nil {
+		log.Printf("No credit left: Disconnect %v", s)
+		s.Disconnect()
+		return
+	}
+	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
+		log.Printf("Not enough money for another debit period %v", s)
+		s.Disconnect()
+		return
+	}
 }
-
 func (rsd *RPCSessionDelegate) GetDebitPeriod() time.Duration {
 	return DEBIT_PERIOD
 }
