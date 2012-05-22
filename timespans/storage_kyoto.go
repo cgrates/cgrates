@@ -22,7 +22,7 @@ import (
 	//"github.com/fsouza/gokabinet/kc"
 	"bitbucket.org/ww/cabinet"
 	//"log"
-	"bytes"
+	"strings"
 )
 
 type KyotoStorage struct {
@@ -40,25 +40,35 @@ func (ks *KyotoStorage) Close() {
 	ks.db.Close()
 }
 
-func (ks *KyotoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
-	values, err := ks.db.Get([]byte(key))
-
-	if err == nil {
-		for _, ap_string := range bytes.Split(values, []byte{'\n'}) {
+func (ks *KyotoStorage) GetActivationPeriodsOrFallback(key string) (aps []*ActivationPeriod, fallbackKey string, err error) {
+	valuesBytes, err := ks.db.Get([]byte(key))
+	if err != nil {
+		return
+	}
+	valuesString := string(valuesBytes)
+	values := strings.Split(valuesString, "\n")
+	if len(values) > 1 {
+		for _, ap_string := range values {
 			if len(ap_string) > 0 {
 				ap := &ActivationPeriod{}
-				ap.restore(string(ap_string))
+				ap.restore(ap_string)
 				aps = append(aps, ap)
 			}
 		}
+	} else { // fallback case
+		fallbackKey = valuesString
 	}
-	return aps, err
+	return
 }
 
-func (ks *KyotoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
+func (ks *KyotoStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) error {
 	result := ""
-	for _, ap := range aps {
-		result += ap.store() + "\n"
+	if len(aps) > 0 {
+		for _, ap := range aps {
+			result += ap.store() + "\n"
+		}
+	} else {
+		result = fallbackKey
 	}
 	return ks.db.Set([]byte(key), []byte(result))
 }

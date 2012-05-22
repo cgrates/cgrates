@@ -45,7 +45,7 @@ func writeToStorage(storage timespans.StorageGetter,
 	tariffPlans []*timespans.TariffPlan,
 	userBudgets []*timespans.UserBudget) {
 	for _, cd := range callDescriptors {
-		storage.SetActivationPeriods(cd.GetKey(), cd.ActivationPeriods)
+		storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
 		log.Printf("Storing activation periods for %q", cd.GetKey())
 	}
 	for _, d := range destinations {

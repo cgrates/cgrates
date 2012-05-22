@@ -274,7 +274,7 @@ func BenchmarkRedisGetting(b *testing.B) {
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		getter.GetActivationPeriods(cd.GetKey())
+		getter.GetActivationPeriodsOrFallback(cd.GetKey())
 	}
 }
 
@@ -317,7 +317,7 @@ func BenchmarkKyotoGetting(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		key := cd.GetKey()
-		getter.GetActivationPeriods(key)
+		getter.GetActivationPeriodsOrFallback(key)
 	}
 }
 
@@ -374,7 +374,7 @@ func BenchmarkMongoGetting(b *testing.B) {
 	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		getter.GetActivationPeriods(cd.GetKey())
+		getter.GetActivationPeriodsOrFallback(cd.GetKey())
 	}
 }
 

@@ -56,19 +56,20 @@ Helper type for activation periods storage.
 */
 type KeyValue struct {
 	Key               string
+	FallbackKey       string
 	ActivationPeriods []*ActivationPeriod
 }
 
-func (ms *MongoStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
+func (ms *MongoStorage) GetActivationPeriodsOrFallback(key string) (aps []*ActivationPeriod, fallbackKey string, err error) {
 	ndb := ms.db.C("activationPeriods")
 	result := KeyValue{}
 	err = ndb.Find(bson.M{"key": key}).One(&result)
-	return result.ActivationPeriods, err
+	return result.ActivationPeriods, result.FallbackKey, err
 }
 
-func (ms *MongoStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
+func (ms *MongoStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) error {
 	ndb := ms.db.C("activationPeriods")
-	return ndb.Insert(&KeyValue{key, aps})
+	return ndb.Insert(&KeyValue{key, fallbackKey, aps})
 }
 
 func (ms *MongoStorage) GetDestination(key string) (result *Destination, err error) {

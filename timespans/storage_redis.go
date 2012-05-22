@@ -37,27 +37,37 @@ func (rs *RedisStorage) Close() {
 	rs.db.Quit()
 }
 
-func (rs *RedisStorage) GetActivationPeriods(key string) (aps []*ActivationPeriod, err error) {
+func (rs *RedisStorage) GetActivationPeriodsOrFallback(key string) (aps []*ActivationPeriod, fallbackKey string, err error) {
 	//rs.db.Select(rs.dbNb)
 	elem, err := rs.db.Get(key)
-	values := elem.String()
-	if err == nil {
-		for _, ap_string := range strings.Split(values, "\n") {
+	if err != nil {
+		return
+	}
+	valuesString := elem.String()
+	values := strings.Split(valuesString, "\n")
+	if len(values) > 1 {
+		for _, ap_string := range values {
 			if len(ap_string) > 0 {
 				ap := &ActivationPeriod{}
 				ap.restore(ap_string)
 				aps = append(aps, ap)
 			}
 		}
+	} else { // fallback case
+		fallbackKey = valuesString
 	}
-	return aps, err
+	return
 }
 
-func (rs *RedisStorage) SetActivationPeriods(key string, aps []*ActivationPeriod) error {
+func (rs *RedisStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) error {
 	//.db.Select(rs.dbNb)
 	result := ""
-	for _, ap := range aps {
-		result += ap.store() + "\n"
+	if len(aps) > 0 {
+		for _, ap := range aps {
+			result += ap.store() + "\n"
+		}
+	} else {
+		result = fallbackKey
 	}
 	return rs.db.Set(key, result)
 }

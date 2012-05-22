@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -27,7 +28,8 @@ import (
 
 const (
 	// the minimum length for a destination prefix to be matched.
-	MinPrefixLength = 2
+	MinPrefixLength   = 2
+	RecursionMaxDepth = 4
 )
 
 /*
@@ -57,6 +59,7 @@ type CallDescriptor struct {
 	Amount                             float64
 	FallbackSubject                    string // the subject to check for destination if not found on primary subject
 	ActivationPeriods                  []*ActivationPeriod
+	FallbackKey                        string
 	storageGetter                      StorageGetter
 	userBudget                         *UserBudget
 }
@@ -95,17 +98,47 @@ func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error
 	base := fmt.Sprintf("%s:%s:", cd.CstmId, cd.Subject)
 	destPrefix = cd.DestinationPrefix
 	key := base + destPrefix
-	values, err := cd.storageGetter.GetActivationPeriods(key)
-	//get for a smaller prefix if the orignal one was not found	
-	for i := len(cd.DestinationPrefix); err != nil &&
-		i >= MinPrefixLength; values, err = cd.storageGetter.GetActivationPeriods(key) {
-		i--
-		destPrefix = cd.DestinationPrefix[:i]
-		key = base + destPrefix
+	values, err := cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
+	if err != nil {
+		key := base + "*"
+		values, err = cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
 	}
 	//load the activation preriods
-	if err == nil {
+	if err == nil && len(values) > 0 {
 		cd.ActivationPeriods = values
+	}
+	return
+}
+
+func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix string, recursionDepth int) (values []*ActivationPeriod, err error) {
+	if recursionDepth > RecursionMaxDepth {
+		err = errors.New("Max fallback recursion depth reached!" + key)
+		log.Print(err)
+		return
+	}
+	values, fallbackKey, err := cd.storageGetter.GetActivationPeriodsOrFallback(key)
+	if fallbackKey != "" {
+		base = fallbackKey + ":"
+		key = base + destPrefix
+		recursionDepth++
+		return cd.getActivationPeriodsOrFallback(key, base, destPrefix, recursionDepth)
+	}
+	//get for a smaller prefix if the orignal one was not found	
+	for i := len(cd.DestinationPrefix); err != nil || fallbackKey != ""; {
+		if fallbackKey != "" {
+			base = fallbackKey + ":"
+			key = base + destPrefix
+			recursionDepth++
+			return cd.getActivationPeriodsOrFallback(key, base, destPrefix, recursionDepth)
+		}
+		i--
+		if i >= MinPrefixLength {
+			destPrefix = cd.DestinationPrefix[:i]
+			key = base + destPrefix
+		} else {
+			break
+		}
+		values, fallbackKey, err = cd.storageGetter.GetActivationPeriodsOrFallback(key)
 	}
 	return
 }
