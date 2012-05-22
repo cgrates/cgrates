@@ -19,17 +19,80 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"bufio"
+	"database/sql"
+	"encoding/csv"
 	"flag"
+	"fmt"
+	_ "github.com/bmizerany/pq"
+	"github.com/rif/cgrates/timespans"
 	"log"
+	"net/rpc/jsonrpc"
+	"os"
+	"time"
 )
 
 var (
-	balancer       = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
-	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
-	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
+	cdrFile    = flag.String("freeswitchcdr", "Master.csv", "Freeswitch Master CSV CDR file.")
+	resultFile = flag.String("resultfile", "out.csv", "Generated file containing CDR and price info.")
+	host       = flag.String("host", "localhost", "The host to connect to. Values that start with / are for unix domain sockets.")
+	port       = flag.String("port", "5432", "The port to bind to.")
+	dbName     = flag.String("dbname", "cgrates", "The name of the database to connect to.")
+	user       = flag.String("user", "", "The user to sign in as.")
+	password   = flag.String("password", "", "The user's password.")
 )
+
+func readDbRecord(db *sql.DB, searchedUUID string) (cc *timespans.CallCost, timespansText string, err error) {
+	row := db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s'", searchedUUID))
+	var uuid string
+	cc = &timespans.CallCost{}
+	err = row.Scan(&uuid, &cc.TOR, &cc.CstmId, &cc.Subject, &cc.DestinationPrefix, &cc.Cost, &cc.ConnectFee, &timespansText)
+
+	return
+}
 
 func main() {
 	flag.Parse()
-	log.Print("Mediator!")
+	useDB := true
+	file, err := os.Open(*cdrFile)
+	defer file.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", *host, *port, *dbName, *user, *password))
+	defer db.Close()
+	if err != nil {
+		log.Printf("failed to open the database: %v", err)
+		useDB = false
+	}
+	csvReader := csv.NewReader(bufio.NewReader(file))
+	client, err := jsonrpc.Dial("tcp", "localhost:2001")
+	useRPC := true
+	if err != nil {
+		log.Printf("Could not connect to rater server: %v!", err)
+		useRPC = false
+	}
+	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+		uuid := record[10]
+		if useDB {
+			cc, timespansText, err := readDbRecord(db, uuid)
+			if err != nil && useRPC {
+				// try getting the price from the rater
+				cstmid := record[0]
+				subject := record[1]
+				dest := record[2]
+				t1, _ := time.Parse("2012-05-21 17:48:20", record[5])
+				t2, _ := time.Parse("2012-05-21 17:48:20", record[6])
+				cd := timespans.CallDescriptor{
+					TOR:               "0",
+					CstmId:            cstmid,
+					Subject:           subject,
+					DestinationPrefix: dest,
+					TimeStart:         t1,
+					TimeEnd:           t2}
+				client.Call("Responder.GetCost", cd, cc)
+			}
+			log.Print(cc, timespansText)
+		}
+	}
 }
