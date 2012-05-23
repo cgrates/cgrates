@@ -33,7 +33,12 @@ type Responder byte
 RPC method thet provides the external RPC interface for getting the rating information.
 */
 func (r *Responder) GetCost(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
-	*replay = *GetCost(&arg)
+	*replay = *GetCallCost(&arg, "Responder.GetCost")
+	return
+}
+
+func (r *Responder) Debit(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
+	*replay = *GetCallCost(&arg, "Responder.Debit")
 	return
 }
 

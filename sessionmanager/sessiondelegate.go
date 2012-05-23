@@ -22,17 +22,11 @@ import (
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"time"
 )
 
 const (
 	DEBIT_PERIOD = 10 * time.Second
-)
-
-var (
-	// sample storage for the provided direct implementation
-	storageGetter, _ = timespans.NewRedisStorage("tcp:127.0.0.1:6379", 10)
 )
 
 // Interface for the session delegate objects
@@ -50,7 +44,13 @@ type SessionDelegate interface {
 }
 
 // Sample SessionDelegate calling the timespans methods directly
-type DirectSessionDelegate byte
+type DirectSessionDelegate struct {
+	storageGetter timespans.StorageGetter
+}
+
+func NewDirectSessionDelegate(storageGetter timespans.StorageGetter) *DirectSessionDelegate {
+	return &DirectSessionDelegate{storageGetter}
+}
 
 func (dsd *DirectSessionDelegate) OnHeartBeat(ev Event) {
 	log.Print("♥")
@@ -103,7 +103,7 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 			DestinationPrefix: lastCC.DestinationPrefix,
 			Amount:            -cost,
 		}
-		cd.SetStorageGetter(storageGetter)
+		cd.SetStorageGetter(dsd.storageGetter)
 		cd.DebitCents()
 	}
 	if seconds > 0 {
@@ -113,7 +113,7 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 			DestinationPrefix: lastCC.DestinationPrefix,
 			Amount:            -seconds,
 		}
-		cd.SetStorageGetter(storageGetter)
+		cd.SetStorageGetter(dsd.storageGetter)
 		cd.DebitSeconds()
 	}
 	lastCC.Cost -= cost
@@ -121,7 +121,7 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 }
 
 func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
-	cd.SetStorageGetter(storageGetter)
+	cd.SetStorageGetter(dsd.storageGetter)
 	cc, err := cd.Debit()
 	if err != nil {
 		log.Printf("Could not complete debit opperation: %v", err)
@@ -155,11 +155,7 @@ type RPCSessionDelegate struct {
 	client *rpc.Client
 }
 
-func NewRPCSessionDelegate(host string) (rpc *RPCSessionDelegate) {
-	client, err := jsonrpc.Dial("tcp", host)
-	if err != nil {
-		log.Fatalf("Could not connect to rater server %v!", err)
-	}
+func NewRPCSessionDelegate(client *rpc.Client) (rpc *RPCSessionDelegate) {
 	return &RPCSessionDelegate{client}
 }
 
@@ -172,7 +168,69 @@ func (rsd *RPCSessionDelegate) OnChannelAnswer(ev Event, s *Session, sm SessionM
 }
 
 func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
-	log.Print("rpc hangup")
+	lastCC := s.CallCosts[len(s.CallCosts)-1]
+	// put credit back	
+	start := time.Now()
+	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
+	refoundDuration := end.Sub(start).Seconds()
+	cost := 0.0
+	seconds := 0.0
+	log.Printf("Refund duration: %v", refoundDuration)
+	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
+		ts := lastCC.Timespans[i]
+		tsDuration := ts.GetDuration().Seconds()
+		if refoundDuration <= tsDuration {
+			// find procentage
+			procentage := (refoundDuration * 100) / tsDuration
+			tmpCost := (procentage * ts.Cost) / 100
+			ts.Cost -= tmpCost
+			cost += tmpCost
+			if ts.MinuteInfo != nil {
+				// DestinationPrefix and Price take from lastCC and above caclulus
+				seconds += (procentage * ts.MinuteInfo.Quantity) / 100
+			}
+			// set the end time to now
+			ts.TimeEnd = start
+			break // do not go to other timespans
+		} else {
+			cost += ts.Cost
+			if ts.MinuteInfo != nil {
+				seconds += ts.MinuteInfo.Quantity
+			}
+			// remove the timestamp entirely
+			lastCC.Timespans = lastCC.Timespans[:i]
+			// continue to the next timespan with what is left to refound
+			refoundDuration -= tsDuration
+		}
+	}
+	if cost > 0 {
+		cd := &timespans.CallDescriptor{TOR: lastCC.TOR,
+			CstmId:            lastCC.CstmId,
+			Subject:           lastCC.CstmId,
+			DestinationPrefix: lastCC.DestinationPrefix,
+			Amount:            -cost,
+		}
+		var response float64
+		err := rsd.client.Call("Responder.DebitCents", cd, &response)
+		if err != nil {
+			log.Printf("Debit cents failed: %v", err)
+		}
+	}
+	if seconds > 0 {
+		cd := &timespans.CallDescriptor{TOR: lastCC.TOR,
+			CstmId:            lastCC.CstmId,
+			Subject:           lastCC.CstmId,
+			DestinationPrefix: lastCC.DestinationPrefix,
+			Amount:            -seconds,
+		}
+		var response float64
+		err := rsd.client.Call("Responder.DebitSeconds", cd, &response)
+		if err != nil {
+			log.Printf("Debit seconds failed: %v", err)
+		}
+	}
+	lastCC.Cost -= cost
+	log.Printf("Rambursed %v cents, %v seconds", cost, seconds)
 }
 
 func (rsd *RPCSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {

@@ -21,6 +21,7 @@ package main
 import (
 	"flag"
 	"github.com/rif/cgrates/sessionmanager"
+	"github.com/rif/cgrates/timespans"
 	"log"
 )
 
@@ -28,12 +29,19 @@ var (
 	balancer       = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
 	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
 	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
+	redissrv       = flag.String("redissrv", "127.0.0.1:6379", "redis address host:port")
+	redisdb        = flag.Int("redisdb", 10, "redis database number")
 )
 
 func main() {
 	flag.Parse()
 	sm := &sessionmanager.FSSessionManager{}
-	sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
+	getter, err := timespans.NewRedisStorage(*redissrv, *redisdb)
+	defer getter.Close()
+	if err != nil {
+		log.Fatalf("Cannot open storage: %v", err)
+	}
+	sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), *freeswitchsrv, *freeswitchpass)
 	waitChan := make(<-chan byte)
 	log.Print("CGRateS is listening!")
 	<-waitChan

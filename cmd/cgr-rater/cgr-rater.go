@@ -148,12 +148,11 @@ func main() {
 	getter, err := timespans.NewRedisStorage(*redissrv, *redisdb)
 	defer getter.Close()
 	if err != nil {
-		log.Printf("Cannot open storage: %v", err)
-		os.Exit(1)
+		log.Fatalf("Cannot open storage: %v", err)
 	}
 	if *standalone {
 		sm := &sessionmanager.FSSessionManager{}
-		sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
+		sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), *freeswitchsrv, *freeswitchpass)
 	} else {
 		go RegisterToServer(balancer, listen)
 		go StopSingnalHandler(balancer, listen, getter)

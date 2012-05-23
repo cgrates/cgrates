@@ -43,7 +43,7 @@ func getCostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
-	callCost := GetCost(arg)
+	callCost := GetCallCost(arg, "Responder.GetCost")
 	enc.Encode(callCost)
 }
 

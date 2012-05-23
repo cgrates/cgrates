@@ -40,7 +40,7 @@ var (
 /*
 The function that gets the information from the raters using balancer.
 */
-func GetCost(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
+func GetCallCost(key *timespans.CallDescriptor, method string) (reply *timespans.CallCost) {
 	err := errors.New("") //not nil value
 	for err != nil {
 		client := raterList.Balance()
@@ -49,7 +49,7 @@ func GetCost(key *timespans.CallDescriptor) (reply *timespans.CallCost) {
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			reply = &timespans.CallCost{}
-			err = client.Call("Responder.GetCost", *key, reply)
+			err = client.Call(method, *key, reply)
 			if err != nil {
 				log.Printf("Got en error from rater: %v", err)
 			}
@@ -88,7 +88,7 @@ func main() {
 	go listenToJsonRPCRequests()
 
 	sm := &sessionmanager.FSSessionManager{}
-	sm.Connect(new(sessionmanager.DirectSessionDelegate), *freeswitchsrv, *freeswitchpass)
+	sm.Connect(sessionmanager.NewRPCSessionDelegate(), *freeswitchsrv, *freeswitchpass)
 
 	listenToHttpRequests()
 }

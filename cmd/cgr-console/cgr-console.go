@@ -29,7 +29,7 @@ import (
 
 var (
 	server  = flag.String("server", "127.0.0.1:2001", "server address host:port")
-	tor     = flag.Int("tor", 0, "Type of record")
+	tor     = flag.String("tor", "0", "Type of record")
 	cstmid  = flag.String("cstmid", "vdf", "Customer identificator")
 	subject = flag.String("subject", "rif", "The client who made the call")
 	dest    = flag.String("dest", "0256", "Destination prefix")
@@ -68,6 +68,11 @@ func main() {
 	case "getcost":
 		result := timespans.CallCost{}
 		if err = client.Call("Responder.GetCost", cd, &result); err == nil {
+			fmt.Println(result)
+		}
+	case "debit":
+		result := timespans.CallCost{}
+		if err = client.Call("Responder.Debit", cd, &result); err == nil {
 			fmt.Println(result)
 		}
 	case "getmaxsessiontime":
