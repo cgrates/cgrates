@@ -26,17 +26,17 @@ import (
 )
 
 var (
-	storage     = flag.String("storage", "all", "kyoto|redis|mongo")
-	kyotofile   = flag.String("kyotofile", "storage.kch", "kyoto storage file (storage.kch)")
-	redisserver = flag.String("redisserver", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
-	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
-	mongoserver = flag.String("mongoserver", "127.0.0.1:27017", "mongo server address (127.0.0.1:27017)")
-	mongodb     = flag.String("mdb", "test", "mongo database name (test)")
-	redispass   = flag.String("pass", "", "redis database password")
-	apfile      = flag.String("apfile", "ap.json", "Activation Periods containing intervals file")
-	destfile    = flag.String("destfile", "dest.json", "Destinations file")
-	tpfile      = flag.String("tpfile", "tp.json", "Tariff plans file")
-	ubfile      = flag.String("ubfile", "ub.json", "User budgets file")
+	storage		= flag.String("storage", "all", "kyoto|redis|mongo")
+	kyotofile	= flag.String("kyotofile", "storage.kch", "kyoto storage file (storage.kch)")
+	redisserver	= flag.String("redisserver", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
+	redisdb		= flag.Int("rdb", 10, "redis database number (10)")
+	mongoserver	= flag.String("mongoserver", "127.0.0.1:27017", "mongo server address (127.0.0.1:27017)")
+	mongodb		= flag.String("mdb", "test", "mongo database name (test)")
+	redispass	= flag.String("pass", "", "redis database password")
+	apfile		= flag.String("apfile", "ap.json", "Activation Periods containing intervals file")
+	destfile	= flag.String("destfile", "dest.json", "Destinations file")
+	tpfile		= flag.String("tpfile", "tp.json", "Tariff plans file")
+	ubfile		= flag.String("ubfile", "ub.json", "User budgets file")
 )
 
 func writeToStorage(storage timespans.StorageGetter,
@@ -147,11 +147,13 @@ func main() {
 		kyoto, _ := timespans.NewKyotoStorage(*kyotofile)
 		writeToStorage(kyoto, callDescriptors, destinations, tariffPlans, userBudgets)
 		kyoto.Close()
-		mongo, _ := timespans.NewMongoStorage(*mongoserver, *mongodb)
-		writeToStorage(mongo, callDescriptors, destinations, tariffPlans, userBudgets)
-		mongo.Close()
-		redis, _ := timespans.NewRedisStorage(*redisserver, *redisdb)
-		writeToStorage(redis, callDescriptors, destinations, tariffPlans, userBudgets)
-		redis.Close()
+		if mongo, err := timespans.NewMongoStorage(*mongoserver, *mongodb); err == nil {
+			writeToStorage(mongo, callDescriptors, destinations, tariffPlans, userBudgets)
+			mongo.Close()
+		}
+		if redis, _ := timespans.NewRedisStorage(*redisserver, *redisdb); err == nil {
+			writeToStorage(redis, callDescriptors, destinations, tariffPlans, userBudgets)
+			redis.Close()
+		}
 	}
 }

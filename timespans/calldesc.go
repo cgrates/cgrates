@@ -28,8 +28,8 @@ import (
 
 const (
 	// the minimum length for a destination prefix to be matched.
-	MinPrefixLength   = 2
-	RecursionMaxDepth = 4
+	MinPrefixLength		= 2
+	RecursionMaxDepth	= 4
 )
 
 /*
@@ -53,15 +53,15 @@ func round(val float64, prec int) float64 {
 The input stucture that contains call information.
 */
 type CallDescriptor struct {
-	TOR                                string
-	CstmId, Subject, DestinationPrefix string
-	TimeStart, TimeEnd                 time.Time
-	Amount                             float64
-	FallbackSubject                    string // the subject to check for destination if not found on primary subject
-	ActivationPeriods                  []*ActivationPeriod
-	FallbackKey                        string
-	storageGetter                      StorageGetter
-	userBudget                         *UserBudget
+	TOR					string
+	CstmId, Subject, DestinationPrefix	string
+	TimeStart, TimeEnd			time.Time
+	Amount					float64
+	FallbackSubject				string	// the subject to check for destination if not found on primary subject
+	ActivationPeriods			[]*ActivationPeriod
+	FallbackKey				string
+	storageGetter				StorageGetter
+	userBudget				*UserBudget
 }
 
 /*
@@ -113,7 +113,6 @@ func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error
 func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix string, recursionDepth int) (values []*ActivationPeriod, err error) {
 	if recursionDepth > RecursionMaxDepth {
 		err = errors.New("Max fallback recursion depth reached!" + key)
-		log.Print(err)
 		return
 	}
 	values, fallbackKey, err := cd.storageGetter.GetActivationPeriodsOrFallback(key)
@@ -175,7 +174,7 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 				newTs := timespans[i].SplitByMinuteBucket(mb)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
-					firstSpan = newTs // we move the firstspan to the newly created one for further spliting
+					firstSpan = newTs	// we move the firstspan to the newly created one for further spliting
 					break
 				}
 			}
@@ -184,7 +183,7 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	}
 
 	if firstSpan.MinuteInfo != nil {
-		return // all the timespans are on minutes
+		return	// all the timespans are on minutes
 	}
 	if len(cd.ActivationPeriods) == 0 {
 		return
@@ -193,7 +192,7 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	firstSpan.ActivationPeriod = cd.ActivationPeriods[0]
 
 	// split on activation periods
-	afterStart, afterEnd := false, false //optimization for multiple activation periods
+	afterStart, afterEnd := false, false	//optimization for multiple activation periods
 	for _, ap := range cd.ActivationPeriods {
 		if !afterStart && !afterEnd && ap.ActivationTime.Before(cd.TimeStart) {
 			firstSpan.ActivationPeriod = ap
@@ -247,13 +246,13 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 		cost += ts.getCost(cd)
 	}
-	cc := &CallCost{TOR: cd.TOR,
-		CstmId:            cd.CstmId,
-		Subject:           cd.Subject,
-		DestinationPrefix: destPrefix,
-		Cost:              cost,
-		ConnectFee:        connectionFee,
-		Timespans:         timespans}
+	cc := &CallCost{TOR:	cd.TOR,
+		CstmId:			cd.CstmId,
+		Subject:		cd.Subject,
+		DestinationPrefix:	destPrefix,
+		Cost:			cost,
+		ConnectFee:		connectionFee,
+		Timespans:		timespans}
 
 	return cc, err
 }
@@ -316,7 +315,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 		}
 		if cost < availableCredit {
 			return maxSessionSeconds, nil
-		} else { //decrease the period by 10% and try again
+		} else {	//decrease the period by 10% and try again
 			maxSessionSeconds -= cd.Amount * 0.1
 		}
 	}
