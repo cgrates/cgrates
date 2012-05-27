@@ -23,9 +23,11 @@ import (
 	"github.com/rif/cgrates/sessionmanager"
 	"github.com/rif/cgrates/timespans"
 	"log"
+	"net/rpc/jsonrpc"
 )
 
 var (
+	standalone     = flag.Bool("standalone", false, "run standalone (run as a rater)")
 	balancer       = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
 	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
 	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
@@ -41,7 +43,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("Cannot open storage: %v", err)
 	}
-	sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), *freeswitchsrv, *freeswitchpass)
+	if *standalone {
+		sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), *freeswitchsrv, *freeswitchpass)
+	} else {
+		client, err := jsonrpc.Dial("tcp", *balancer)
+		if err != nil {
+			log.Fatalf("could not connect to balancer: %v", err)
+		}
+		sm.Connect(sessionmanager.NewRPCClientSessionDelegate(client), *freeswitchsrv, *freeswitchpass)
+	}
 	waitChan := make(<-chan byte)
 	log.Print("CGRateS is listening!")
 	<-waitChan

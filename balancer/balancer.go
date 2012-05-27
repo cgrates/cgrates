@@ -21,10 +21,11 @@ package balancer
 import (
 	"net/rpc"
 	"sync"
+	"log"
 )
 
 type Balancer struct {
-	clientAddresses   []string
+	clientAddresses   []string // we need to hold these two slices because maps fo not keep order
 	clientConnections []*rpc.Client
 	balancerIndex     int
 	mu                sync.RWMutex
@@ -95,4 +96,16 @@ func (bl *Balancer) Balance() (result *rpc.Client) {
 	}
 
 	return
+}
+
+func (bl *Balancer) Shutdown() {
+	var reply string
+	for i, client := range bl.clientConnections {
+		client.Call("Responder.Shutdown", "", &reply)
+		log.Printf("Shutdown rater %v: %v ", bl.clientAddresses[i], reply)
+	}
+}
+
+func (bl *Balancer) GetClientAddresses() []string {
+	return bl.clientAddresses
 }

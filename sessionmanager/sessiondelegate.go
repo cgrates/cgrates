@@ -22,6 +22,7 @@ import (
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"github.com/rif/cgrates/balancer"
+	"net/rpc"
 	"time"
 )
 
@@ -153,23 +154,35 @@ func (dsd *DirectSessionDelegate) GetDebitPeriod() time.Duration {
 // Sample SessionDelegate calling the timespans methods through the RPC interface
 type RPCSessionDelegate struct {
 	balancer *balancer.Balancer
+	client   *rpc.Client
 }
 
-func NewRPCSessionDelegate(balancer *balancer.Balancer) (rpc *RPCSessionDelegate) {
-	return &RPCSessionDelegate{balancer}
+func NewRPCBalancerSessionDelegate(balancer *balancer.Balancer) (rpc *RPCSessionDelegate) {
+	return &RPCSessionDelegate{balancer: balancer}
+}
+
+func NewRPCClientSessionDelegate(client *rpc.Client) (rpc *RPCSessionDelegate) {
+	return &RPCSessionDelegate{client: client}
+}
+
+func (rsd *RPCSessionDelegate) getClient() *rpc.Client {
+	if rsd.client == nil {
+		return rsd.balancer.Balance()
+	}
+	return rsd.client
 }
 
 func (rsd *RPCSessionDelegate) OnHeartBeat(ev Event) {
 	log.Print("rpc hearbeat")
 }
 
-func (rsd *RPCSessionDelegate) OnChannelAnswer(ev Event, s *Session, sm SessionManager) {
+func (rsd *RPCSessionDelegate) OnChannelAnswer(ev Event, s *Session) {
 	log.Print("rpc answer")
 }
 
 func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	lastCC := s.CallCosts[len(s.CallCosts)-1]
-	client := rsd.balancer.Balance()
+	client := rsd.getClient()
 	// put credit back	
 	start := time.Now()
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
@@ -236,7 +249,7 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 
 func (rsd *RPCSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
 	cc := &timespans.CallCost{}
-	client := rsd.balancer.Balance()
+	client := rsd.getClient()
 	err := client.Call("Responder.Debit", cd, cc)
 	if err != nil {
 		log.Printf("Could not complete debit opperation: %v", err)

@@ -30,7 +30,7 @@ Handler for the statistics web client
 */
 func statusHandler(w http.ResponseWriter, r *http.Request) {
 	if t, err := template.ParseFiles("templates/status.html"); err == nil {
-		t.Execute(w, raterList.clientAddresses)
+		t.Execute(w, bal.GetClientAddresses())
 	} else {
 		log.Print("Error rendering status: ", err)
 	}
@@ -41,7 +41,7 @@ Ajax Handler for the connected raters
 */
 func ratersHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
-	enc.Encode(raterList.clientAddresses)
+	enc.Encode(bal.GetClientAddresses())
 }
 
 /*

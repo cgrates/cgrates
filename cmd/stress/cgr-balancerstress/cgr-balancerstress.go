@@ -27,6 +27,7 @@ import (
 )
 
 var (
+	balancer = flag.String("balancer", "localhost:2001", "balancer server address")
 	runs     = flag.Int("runs", 10000, "stress cycle number")
 	parallel = flag.Bool("parallel", false, "run requests in parallel")
 )
@@ -37,7 +38,10 @@ func main() {
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := timespans.CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
 	result := timespans.CallCost{}
-	client, _ := jsonrpc.Dial("tcp", "localhost:2001")
+	client, err := jsonrpc.Dial("tcp", *balancer)
+	if err != nil {
+		log.Fatalf("could not connect to balancer: %v", err)
+	}
 	if *parallel {
 		var divCall *rpc.Call
 		for i := 0; i < *runs; i++ {

@@ -86,7 +86,7 @@ func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err er
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	*replay = "Connected raters:\n"
-	for _, rater := range raterList.clientAddresses {
+	for _, rater := range bal.GetClientAddresses() {
 		log.Print(rater)
 		*replay += fmt.Sprintf("%v\n", rater)
 	}

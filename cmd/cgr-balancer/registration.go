@@ -49,11 +49,7 @@ func StopSingnalHandler() {
 
 	sig := <-c
 	log.Printf("Caught signal %v, sending shutdownto raters\n", sig)
-	var reply string
-	for i, client := range raterList.clientConnections {
-		client.Call("Responder.Shutdown", "", &reply)
-		log.Printf("Shutdown rater %v: %v ", raterList.clientAddresses[i], reply)
-	}
+	bal.Shutdown()
 	os.Exit(1)
 }
 
@@ -68,7 +64,7 @@ func (rs *RaterServer) RegisterRater(clientAddress string, replay *byte) error {
 		log.Print("Could not connect to client!")
 		return err
 	}
-	raterList.AddClient(clientAddress, client)
+	bal.AddClient(clientAddress, client)
 	log.Printf("Rater %v registered succesfully.", clientAddress)
 	return nil
 }
@@ -77,10 +73,10 @@ func (rs *RaterServer) RegisterRater(clientAddress string, replay *byte) error {
 RPC method that recives a rater addres gets the connections and closes it and removes the pair from rater list.
 */
 func (rs *RaterServer) UnRegisterRater(clientAddress string, replay *byte) error {
-	client, ok := raterList.GetClient(clientAddress)
+	client, ok := bal.GetClient(clientAddress)
 	if ok {
 		client.Close()
-		raterList.RemoveClient(clientAddress)
+		bal.RemoveClient(clientAddress)
 		log.Print(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))
 	} else {
 		log.Print(fmt.Sprintf("Server %v was not on my watch!", clientAddress))

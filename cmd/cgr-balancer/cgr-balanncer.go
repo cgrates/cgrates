@@ -23,6 +23,7 @@ import (
 	"flag"
 	"github.com/rif/cgrates/sessionmanager"
 	"github.com/rif/cgrates/timespans"
+	"github.com/rif/cgrates/balancer"
 	"log"
 	"runtime"
 	"time"
@@ -34,7 +35,7 @@ var (
 	httpApiAddress = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:2002)")
 	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
 	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
-	raterList      *RaterList
+	bal       *balancer.Balancer
 )
 
 /*
@@ -43,7 +44,7 @@ The function that gets the information from the raters using balancer.
 func GetCallCost(key *timespans.CallDescriptor, method string) (reply *timespans.CallCost) {
 	err := errors.New("") //not nil value
 	for err != nil {
-		client := raterList.Balance()
+		client := bal.Balance()
 		if client == nil {
 			log.Print("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
@@ -64,7 +65,7 @@ The function that gets the information from the raters using balancer.
 func CallMethod(key *timespans.CallDescriptor, method string) (reply float64) {
 	err := errors.New("") //not nil value
 	for err != nil {
-		client := raterList.Balance()
+		client := bal.Balance()
 		if client == nil {
 			log.Print("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
@@ -81,14 +82,14 @@ func CallMethod(key *timespans.CallDescriptor, method string) (reply float64) {
 func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
-	raterList = NewRaterList()
+	bal = balancer.NewBalancer()
 
 	go StopSingnalHandler()
 	go listenToRPCRaterRequests()
 	go listenToJsonRPCRequests()
 
 	sm := &sessionmanager.FSSessionManager{}
-	sm.Connect(sessionmanager.NewRPCSessionDelegate(), *freeswitchsrv, *freeswitchpass)
+	sm.Connect(sessionmanager.NewRPCBalancerSessionDelegate(bal), *freeswitchsrv, *freeswitchpass)
 
 	listenToHttpRequests()
 }
