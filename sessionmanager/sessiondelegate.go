@@ -21,7 +21,7 @@ package sessionmanager
 import (
 	"github.com/rif/cgrates/timespans"
 	"log"
-	"net/rpc"
+	"github.com/rif/cgrates/balancer"
 	"time"
 )
 
@@ -152,11 +152,11 @@ func (dsd *DirectSessionDelegate) GetDebitPeriod() time.Duration {
 
 // Sample SessionDelegate calling the timespans methods through the RPC interface
 type RPCSessionDelegate struct {
-	client *rpc.Client
+	balancer *balancer.Balancer
 }
 
-func NewRPCSessionDelegate(client *rpc.Client) (rpc *RPCSessionDelegate) {
-	return &RPCSessionDelegate{client}
+func NewRPCSessionDelegate(balancer *balancer.Balancer) (rpc *RPCSessionDelegate) {
+	return &RPCSessionDelegate{balancer}
 }
 
 func (rsd *RPCSessionDelegate) OnHeartBeat(ev Event) {
@@ -169,6 +169,7 @@ func (rsd *RPCSessionDelegate) OnChannelAnswer(ev Event, s *Session, sm SessionM
 
 func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	lastCC := s.CallCosts[len(s.CallCosts)-1]
+	client := rsd.balancer.Balance()
 	// put credit back	
 	start := time.Now()
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
@@ -211,7 +212,7 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 			Amount:            -cost,
 		}
 		var response float64
-		err := rsd.client.Call("Responder.DebitCents", cd, &response)
+		err := client.Call("Responder.DebitCents", cd, &response)
 		if err != nil {
 			log.Printf("Debit cents failed: %v", err)
 		}
@@ -224,7 +225,7 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 			Amount:            -seconds,
 		}
 		var response float64
-		err := rsd.client.Call("Responder.DebitSeconds", cd, &response)
+		err := client.Call("Responder.DebitSeconds", cd, &response)
 		if err != nil {
 			log.Printf("Debit seconds failed: %v", err)
 		}
@@ -235,7 +236,8 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 
 func (rsd *RPCSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
 	cc := &timespans.CallCost{}
-	err := rsd.client.Call("Responder.Debit", cd, cc)
+	client := rsd.balancer.Balance()
+	err := client.Call("Responder.Debit", cd, cc)
 	if err != nil {
 		log.Printf("Could not complete debit opperation: %v", err)
 	}
@@ -243,7 +245,7 @@ func (rsd *RPCSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescript
 	log.Print(cc)
 	cd.Amount = DEBIT_PERIOD.Seconds()
 	var remainingSeconds float64
-	err = rsd.client.Call("Responder.GetMaxSessionTime", cd, &remainingSeconds)
+	err = client.Call("Responder.GetMaxSessionTime", cd, &remainingSeconds)
 	if err != nil {
 		log.Printf("Could not get max session time: %v", err)
 	}
