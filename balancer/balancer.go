@@ -85,7 +85,6 @@ Returns the next available connection at each call looping at the end of connect
 func (bl *Balancer) Balance() (result *rpc.Client) {
 	bl.mu.RLock()
 	defer bl.mu.RUnlock()
-
 	return <-bl.balancerChannel
 }
 

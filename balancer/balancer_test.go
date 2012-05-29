@@ -78,6 +78,9 @@ func Test100Balancer(t *testing.T) {
 	}
 	for i := 0; i < 100; i++ {
 		c := balancer.Balance()
+		if c == nil {
+			t.Error("Retuned nil client!")
+		}
 		for _, o := range clients {
 			if c == o {
 				t.Error("Balance did not iterate all the available clients")
@@ -85,10 +88,6 @@ func Test100Balancer(t *testing.T) {
 			}
 		}
 		clients = append(clients, c)
-	}
-	c := balancer.Balance()
-	if c != clients[0] {
-		t.Error("Balance did not lopped from the begining")
 	}
 
 }
