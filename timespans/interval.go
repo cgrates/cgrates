@@ -25,8 +25,6 @@ import (
 	//"log"
 )
 
-type Months []time.Month
-
 /*
 Defines a time interval for which a certain set of prices will apply
 */
@@ -42,7 +40,7 @@ type Interval struct {
 Returns true if the received time is inside the interval
 */
 func (i *Interval) Contains(t time.Time) bool {
-	// chec for month
+	// check for month
 	if i.Month > 0 && t.Month() != i.Month {
 		return false
 	}
