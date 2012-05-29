@@ -20,6 +20,7 @@ package balancer
 import (
 	"net/rpc"
 	"testing"
+	"fmt"
 )
 
 func BenchmarkBalance(b *testing.B) {
@@ -41,9 +42,9 @@ func TestRemoving(t *testing.T) {
 	balancer.AddClient("client 2", c2)
 	balancer.AddClient("client 3", c3)
 	balancer.RemoveClient("client 2")
-	if balancer.clientConnections[0] != c1 ||
-		balancer.clientConnections[1] != c3 ||
-		len(balancer.clientConnections) != 2 {
+	if balancer.clients["client 1"] != c1 ||
+		balancer.clients["client 3"] != c3 ||
+		len(balancer.clients) != 2 {
 		t.Error("Failed removing rater")
 	}
 }
@@ -73,14 +74,17 @@ func Test100Balancer(t *testing.T) {
 	var clients []*rpc.Client
 	for i := 0; i < 100; i++ {
 		c := new(rpc.Client)
-		clients = append(clients, c)
-		balancer.AddClient("client 1", c)
+		balancer.AddClient(fmt.Sprintf("client%v", i), c)
 	}
 	for i := 0; i < 100; i++ {
 		c := balancer.Balance()
-		if c != clients[i] {
-			t.Error("Balance did not iterate all the available clients")
+		for _, o := range clients {
+			if c == o {
+				t.Error("Balance did not iterate all the available clients")
+				break
+			}
 		}
+		clients = append(clients, c)
 	}
 	c := balancer.Balance()
 	if c != clients[0] {
