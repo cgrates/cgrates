@@ -1,0 +1,3 @@
+Account;AccountType;MonetaryBalance;SMSBalance;TrafficBalance;MonthsTag;MonthDaysTag;WeekDaysTag;StartTime;RecurrentTopupTag;RecurrentClears
+rif;postpaid;10;50;100;ALL;20th;ALL;00:00:00;STARTER_PACK;1
+danb;prepaid;10;50;500;ALL;20th;ALL;00:00:00;STARTER_PACK;1

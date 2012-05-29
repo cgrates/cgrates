@@ -25,6 +25,8 @@ import (
 	//"log"
 )
 
+type Months []time.Month
+
 /*
 Defines a time interval for which a certain set of prices will apply
 */

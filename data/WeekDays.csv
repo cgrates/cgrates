@@ -1,0 +1,4 @@
+Tag;Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday
+ALL;1;1;1;1;1;1;1
+WORKDAYS;1;1;1;1;1;0;0
+WEEKENDS;0;0;0;0;0;1;1
