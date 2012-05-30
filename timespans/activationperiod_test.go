@@ -55,8 +55,8 @@ func TestApRestoreRedis(t *testing.T) {
 
 func TestApStoreRestore(t *testing.T) {
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Month: time.February,
-		MonthDay:  1,
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
@@ -130,8 +130,8 @@ func BenchmarkActivationPeriodRestore(b *testing.B) {
 func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Month: time.February,
-		MonthDay:  1,
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}

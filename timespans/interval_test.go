@@ -24,7 +24,7 @@ import (
 )
 
 func TestMonth(t *testing.T) {
-	i := &Interval{Month: time.February}
+	i := &Interval{Months: Months{time.February}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d) {
@@ -36,7 +36,7 @@ func TestMonth(t *testing.T) {
 }
 
 func TestMonthDay(t *testing.T) {
-	i := &Interval{MonthDay: 10}
+	i := &Interval{MonthDays: MonthDays{10}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d) {
@@ -48,7 +48,7 @@ func TestMonthDay(t *testing.T) {
 }
 
 func TestMonthAndMonthDay(t *testing.T) {
-	i := &Interval{Month: time.February, MonthDay: 10}
+	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{10}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
 	d2 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
@@ -83,8 +83,8 @@ func TestWeekDays(t *testing.T) {
 }
 
 func TestMonthAndMonthDayAndWeekDays(t *testing.T) {
-	i := &Interval{Month: time.February, MonthDay: 1, WeekDays: []time.Weekday{time.Wednesday}}
-	i2 := &Interval{Month: time.February, MonthDay: 2, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
+	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday}}
+	i2 := &Interval{Months: Months{time.February}, MonthDays: MonthDays{2}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
 	d := time.Date(2012, time.February, 1, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 2, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d) {
@@ -122,8 +122,8 @@ func TestHours(t *testing.T) {
 }
 
 func TestEverything(t *testing.T) {
-	i := &Interval{Month: time.February,
-		MonthDay:  1,
+	i := &Interval{Months: Months{time.February},
+		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
@@ -146,7 +146,7 @@ func TestEverything(t *testing.T) {
 }
 
 func BenchmarkIntervalContainsDate(b *testing.B) {
-	i := &Interval{Month: time.February, MonthDay: 1, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}
+	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}
 	d := time.Date(2012, time.February, 1, 14, 30, 0, 0, time.UTC)
 	for x := 0; x < b.N; x++ {
 		i.Contains(d)

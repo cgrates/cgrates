@@ -29,9 +29,9 @@ import (
 Defines a time interval for which a certain set of prices will apply
 */
 type Interval struct {
-	Month                                  time.Month
-	MonthDay                               int
-	WeekDays                               []time.Weekday
+	Months                                 Months
+	MonthDays                              MonthDays
+	WeekDays                               WeekDays
 	StartTime, EndTime                     string // ##:##:## format
 	Ponder, ConnectFee, Price, BillingUnit float64
 }
@@ -40,22 +40,16 @@ type Interval struct {
 Returns true if the received time is inside the interval
 */
 func (i *Interval) Contains(t time.Time) bool {
-	// check for month
-	if i.Month > 0 && t.Month() != i.Month {
+	// check for months
+	if len(i.Months) > 0 && !i.Months.Contains(t.Month()) {
 		return false
 	}
-	// check for month day
-	if i.MonthDay > 0 && t.Day() != i.MonthDay {
+	// check for month days
+	if len(i.MonthDays) > 0 && !i.MonthDays.Contains(t.Day()) {
 		return false
 	}
 	// check for weekdays
-	found := false
-	for _, wd := range i.WeekDays {
-		if t.Weekday() == wd {
-			found = true
-		}
-	}
-	if len(i.WeekDays) > 0 && !found {
+	if len(i.WeekDays) > 0 && !i.WeekDays.Contains(t.Weekday()) {
 		return false
 	}
 	// check for start hour
@@ -94,11 +88,11 @@ func (i *Interval) getRightMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 23, 59, 59, 0
 	loc := t.Location()
-	if i.Month > 0 {
-		month = i.Month
+	if len(i.Months) > 0 {
+		month = i.Months[len(i.Months)-1]
 	}
-	if i.MonthDay > 0 {
-		day = i.MonthDay
+	if len(i.MonthDays) > 0 {
+		day = i.MonthDays[len(i.MonthDays)-1]
 	}
 	if i.EndTime != "" {
 		split := strings.Split(i.EndTime, ":")
@@ -116,11 +110,11 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 0, 0, 0, 0
 	loc := t.Location()
-	if i.Month > 0 {
-		month = i.Month
+	if len(i.Months) > 0 {
+		month = i.Months[0]
 	}
-	if i.MonthDay > 0 {
-		day = i.MonthDay
+	if len(i.MonthDays) > 0 {
+		day = i.MonthDays[0]
 	}
 	if i.StartTime != "" {
 		split := strings.Split(i.StartTime, ":")

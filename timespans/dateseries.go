@@ -22,18 +22,16 @@ import (
 	"time"
 	"strings"
 	"strconv"
+	"log"
 )
 
 // Defines months series
-type Months struct {
-	Id     string
-	Series []time.Month
-}
+type Months []time.Month
 
 // Return true if the specified date is inside the series
-func (m *Months) Contains(month time.Month) (result bool) {
+func (m Months) Contains(month time.Month) (result bool) {
 	result = false
-	for _, ms := range m.Series {
+	for _, ms := range m {
 		if ms == month {
 			result = true
 			break
@@ -45,9 +43,9 @@ func (m *Months) Contains(month time.Month) (result bool) {
 /*
 Serializes the month for the storage. Used for key-value storages.
 */
-func (m *Months) store() (result string) {
-	for _, ms := range m.Series {
-		result += strconv.Itoa(int(ms)) + "|"
+func (m Months) store() (result string) {
+	for _, ms := range m {
+		result += strconv.Itoa(int(ms)) + ","
 	}
 	return
 }
@@ -56,24 +54,22 @@ func (m *Months) store() (result string) {
 De-serializes the month for the storage. Used for key-value storages.
 */
 func (m *Months) restore(input string) {
-	elements := strings.Split(input, "|")
+	elements := strings.Split(input, ",")
 	for _, ms := range elements {
 		if month, err := strconv.Atoi(ms); err == nil {
-			m.Series = append(m.Series, time.Month(month))
+			*m = append(*m, time.Month(month))
 		}
 	}
+	log.Print("here: ", m)
 }
 
 // Defines month days series
-type MonthDays struct {
-	Id     string
-	Series []int
-}
+type MonthDays []int
 
 // Return true if the specified date is inside the series
-func (md *MonthDays) Contains(monthDay int) (result bool) {
+func (md MonthDays) Contains(monthDay int) (result bool) {
 	result = false
-	for _, mds := range md.Series {
+	for _, mds := range md {
 		if mds == monthDay {
 			result = true
 			break
@@ -85,9 +81,9 @@ func (md *MonthDays) Contains(monthDay int) (result bool) {
 /*
 Serializes the month days for the storage. Used for key-value storages.
 */
-func (md *MonthDays) store() (result string) {
-	for _, mds := range md.Series {
-		result += strconv.Itoa(mds) + "|"
+func (md MonthDays) store() (result string) {
+	for _, mds := range md {
+		result += strconv.Itoa(mds) + ","
 	}
 	return
 }
@@ -96,24 +92,21 @@ func (md *MonthDays) store() (result string) {
 De-serializes the month days for the storage. Used for key-value storages.
 */
 func (md *MonthDays) restore(input string) {
-	elements := strings.Split(input, "|")
+	elements := strings.Split(input, ",")
 	for _, mds := range elements {
 		if day, err := strconv.Atoi(mds); err == nil {
-			md.Series = append(md.Series, day)
+			*md = append(*md, day)
 		}
 	}
 }
 
 // Defines week days series
-type WeekDays struct {
-	Id     string
-	Series []time.Weekday
-}
+type WeekDays []time.Weekday
 
 // Return true if the specified date is inside the series
-func (wd *WeekDays) Contains(weekDay time.Weekday) (result bool) {
+func (wd WeekDays) Contains(weekDay time.Weekday) (result bool) {
 	result = false
-	for _, wds := range wd.Series {
+	for _, wds := range wd {
 		if wds == weekDay {
 			result = true
 			break
@@ -125,9 +118,9 @@ func (wd *WeekDays) Contains(weekDay time.Weekday) (result bool) {
 /*
 Serializes the week days for the storage. Used for key-value storages.
 */
-func (wd *WeekDays) store() (result string) {
-	for _, wds := range wd.Series {
-		result += strconv.Itoa(int(wds)) + "|"
+func (wd WeekDays) store() (result string) {
+	for _, wds := range wd {
+		result += strconv.Itoa(int(wds)) + ","
 	}
 	return
 }
@@ -136,10 +129,10 @@ func (wd *WeekDays) store() (result string) {
 De-serializes the week days for the storage. Used for key-value storages.
 */
 func (wd *WeekDays) restore(input string) {
-	elements := strings.Split(input, "|")
+	elements := strings.Split(input, ",")
 	for _, wds := range elements {
 		if day, err := strconv.Atoi(wds); err == nil {
-			wd.Series = append(wd.Series, time.Weekday(day))
+			*wd = append(*wd, time.Weekday(day))
 		}
 	}
 }

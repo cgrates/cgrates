@@ -99,7 +99,7 @@ func TestLeftMargin(t *testing.T) {
 }
 
 func TestLeftHourMargin(t *testing.T) {
-	i := &Interval{Month: time.December, MonthDay: 1, StartTime: "09:00:00"}
+	i := &Interval{Months: Months{time.December}, MonthDays: MonthDays{1}, StartTime: "09:00:00"}
 	t1 := time.Date(2012, time.December, 1, 8, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.December, 1, 9, 20, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
