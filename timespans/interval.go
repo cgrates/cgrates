@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 	//"log"
 )
 
@@ -33,7 +34,7 @@ type Interval struct {
 	MonthDays                              MonthDays
 	WeekDays                               WeekDays
 	StartTime, EndTime                     string // ##:##:## format
-	Ponder, ConnectFee, Price, BillingUnit float64
+	Weight, ConnectFee, Price, BillingUnit float64
 }
 
 /*
@@ -123,4 +124,8 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 		sec, _ = strconv.Atoi(split[2])
 	}
 	return time.Date(year, month, day, hour, min, sec, nsec, loc)
+}
+
+func (i *Interval) String() string {
+	return fmt.Sprintf("%v %v %v %v %v", i.Months, i.MonthDays, i.WeekDays, i.StartTime, i.EndTime)
 }

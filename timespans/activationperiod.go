@@ -54,7 +54,7 @@ func (ap *ActivationPeriod) store() (result string) {
 		is += i.WeekDays.store() + "|"
 		is += i.StartTime + "|"
 		is += i.EndTime + "|"
-		is += strconv.FormatFloat(i.Ponder, 'f', -1, 64) + "|"
+		is += strconv.FormatFloat(i.Weight, 'f', -1, 64) + "|"
 		is += strconv.FormatFloat(i.ConnectFee, 'f', -1, 64) + "|"
 		is += strconv.FormatFloat(i.Price, 'f', -1, 64) + "|"
 		is += strconv.FormatFloat(i.BillingUnit, 'f', -1, 64)
@@ -79,7 +79,7 @@ func (ap *ActivationPeriod) restore(input string) {
 		i.WeekDays.restore(ise[2])
 		i.StartTime = ise[3]
 		i.EndTime = ise[4]
-		i.Ponder, _ = strconv.ParseFloat(ise[5], 64)
+		i.Weight, _ = strconv.ParseFloat(ise[5], 64)
 		i.ConnectFee, _ = strconv.ParseFloat(ise[6], 64)
 		i.Price, _ = strconv.ParseFloat(ise[7], 64)
 		i.BillingUnit, _ = strconv.ParseFloat(ise[8], 64)
