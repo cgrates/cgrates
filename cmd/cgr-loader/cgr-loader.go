@@ -22,7 +22,6 @@ import (
 	"github.com/rif/cgrates/timespans"
 	"log"
 	"os"
-	"strconv"
 	"encoding/csv"
 	"time"
 )
@@ -37,6 +36,7 @@ var (
 	weekdaysFn       = flag.String("weekdays", "WeekDays.csv", "Week days file")
 	destinationsFn   = flag.String("destinations", "Destinations.csv", "Destinations file")
 	ratesFn          = flag.String("rates", "Rates.csv", "Rates file")
+	ratestimingFn    = flag.String("ratestiming", "RatesTiming.csv", "Rates timing file")
 	ratingprofilesFn = flag.String("ratingprofiles", "RatingProfiles.csv", "Rating profiles file")
 )
 
@@ -45,86 +45,88 @@ var (
 	monthdays      = make(map[string][]int)
 	weekdays       = make(map[string][]time.Weekday)
 	destinations   = make(map[string][]string)
-	rates          = make(map[string][]*timespans.Interval)
-	ratingProfiles = make(map[string][]*timespans.ActivationPeriod)
+	rates          = make(map[string][]*Rate)
+	ratesTiming    = make(map[string][]*RateTiming)
+	ratingProfiles = make(map[string][]*timespans.CallDescriptor)
 )
 
 func loadDataSeries() {
+	sep := []rune(*separator)[0]
 	// MONTHS
 	fp, err := os.Open(*monthsFn)
 	if err != nil {
 		log.Printf("Could not open months file: %v", err)
-	}
-	csvReader := csv.NewReader(fp)
-	sep := []rune(*separator)[0]
-	csvReader.Comma = sep
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-		for i, m := range record[1:] {
-			if m == "1" {
-				months[tag] = append(months[tag], time.Month(i+1))
+	} else {
+		csvReader := csv.NewReader(fp)
+		csvReader.Comma = sep
+		for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+			tag := record[0]
+			if tag == "Tag" {
+				// skip header line
+				continue
 			}
+			for i, m := range record[1:] {
+				if m == "1" {
+					months[tag] = append(months[tag], time.Month(i+1))
+				}
+			}
+			log.Print(tag, months[tag])
 		}
-		log.Print(tag, months[tag])
+		fp.Close()
 	}
-	fp.Close()
-
 	// MONTH DAYS
 	fp, err = os.Open(*monthdaysFn)
 	if err != nil {
 		log.Printf("Could not open month days file: %v", err)
-	}
-	csvReader = csv.NewReader(fp)
-	csvReader.Comma = sep
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-		for i, m := range record[1:] {
-			if m == "1" {
-				monthdays[tag] = append(monthdays[tag], i+1)
+	} else {
+		csvReader := csv.NewReader(fp)
+		csvReader.Comma = sep
+		for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+			tag := record[0]
+			if tag == "Tag" {
+				// skip header line
+				continue
 			}
+			for i, m := range record[1:] {
+				if m == "1" {
+					monthdays[tag] = append(monthdays[tag], i+1)
+				}
+			}
+			log.Print(tag, monthdays[tag])
 		}
-		log.Print(tag, monthdays[tag])
+		fp.Close()
 	}
-	fp.Close()
-
 	// WEEK DAYS
 	fp, err = os.Open(*weekdaysFn)
 	if err != nil {
 		log.Printf("Could not open week days file: %v", err)
-	}
-	csvReader = csv.NewReader(fp)
-	csvReader.Comma = sep
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-		for i, m := range record[1:] {
-			if m == "1" {
-				weekdays[tag] = append(weekdays[tag], time.Weekday(((i + 1) % 7)))
+	} else {
+		csvReader := csv.NewReader(fp)
+		csvReader.Comma = sep
+		for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+			tag := record[0]
+			if tag == "Tag" {
+				// skip header line
+				continue
 			}
+			for i, m := range record[1:] {
+				if m == "1" {
+					weekdays[tag] = append(weekdays[tag], time.Weekday(((i + 1) % 7)))
+				}
+			}
+			log.Print(tag, weekdays[tag])
 		}
-		log.Print(tag, weekdays[tag])
+		fp.Close()
 	}
-	fp.Close()
 }
 
 func loadDestinations() {
 	fp, err := os.Open(*destinationsFn)
-	defer fp.Close()
 	if err != nil {
 		log.Printf("Could not open destinations file: %v", err)
 		return
 	}
+	defer fp.Close()
 	csvReader := csv.NewReader(fp)
 	sep := []rune(*separator)[0]
 	csvReader.Comma = sep
@@ -134,20 +136,18 @@ func loadDestinations() {
 			// skip header line
 			continue
 		}
-		for _, m := range record[1:] {
-			destinations[tag] = append(destinations[tag], m)
-		}
+		destinations[tag] = record[1:]
 		log.Print(tag, destinations[tag])
 	}
 }
 
 func loadRates() {
 	fp, err := os.Open(*ratesFn)
-	defer fp.Close()
 	if err != nil {
-		log.Printf("Could not open rates file: %v", err)
+		log.Printf("Could not open rates timing file: %v", err)
 		return
 	}
+	defer fp.Close()
 	csvReader := csv.NewReader(fp)
 	sep := []rune(*separator)[0]
 	csvReader.Comma = sep
@@ -157,69 +157,104 @@ func loadRates() {
 			// skip header line
 			continue
 		}
-		if len(record) < 9 {
-			log.Printf("Malformed rates record: %v", record)
-			continue
-		}
-		cf, err := strconv.ParseFloat(record[5], 64)
+		r, err := NewRate(record[1], record[2], record[3], record[4], record[5])
 		if err != nil {
-			log.Printf("Error parsing connect fee from: %v", record)
 			continue
 		}
-		p, err := strconv.ParseFloat(record[6], 64)
-		if err != nil {
-			log.Printf("Error parsing price from: %v", record)
+		rates[tag] = append(rates[tag], r)
+		log.Print(tag, rates[tag])
+	}
+}
+
+func loadRatesTiming() {
+	fp, err := os.Open(*ratestimingFn)
+	if err != nil {
+		log.Printf("Could not open rates file: %v", err)
+		return
+	}
+	defer fp.Close()
+	csvReader := csv.NewReader(fp)
+	sep := []rune(*separator)[0]
+	csvReader.Comma = sep
+	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+		tag := record[0]
+		if tag == "Tag" {
+			// skip header line
 			continue
 		}
-		bu, err := strconv.ParseFloat(record[7], 64)
-		if err != nil {
-			log.Printf("Error parsing billing unit from: %v", record)
-			continue
-		}
-		w, err := strconv.ParseFloat(record[8], 64)
-		if err != nil {
-			log.Printf("Error parsing weight from: %v", record)
-			continue
-		}
-		i := &timespans.Interval{
-			Months:      timespans.Months(months[record[1]]),
-			MonthDays:   timespans.MonthDays(monthdays[record[2]]),
-			WeekDays:    timespans.WeekDays(weekdays[record[3]]),
-			StartTime:   record[4],
-			ConnectFee:  cf,
-			Price:       p,
-			BillingUnit: bu,
-			Weight:      w,
-		}
-		rates[tag] = append(rates[tag], i)
+
+		rt := NewRateTiming(record[1], record[2], record[3], record[4], record[5])
+		ratesTiming[tag] = append(ratesTiming[tag], rt)
 
 		log.Print(tag)
-		for _, i := range rates[tag] {
+		for _, i := range ratesTiming[tag] {
 			log.Print(i)
 		}
 	}
 }
 
 func loadRatingProfiles() {
-	fp, err := os.Open(*destinationsFn)
-	defer fp.Close()
+	fp, err := os.Open(*ratingprofilesFn)
 	if err != nil {
-		log.Printf("Could not open destinations file: %v", err)
+		log.Printf("Could not open destinations rates file: %v", err)
 		return
 	}
+	defer fp.Close()
 	csvReader := csv.NewReader(fp)
 	sep := []rune(*separator)[0]
 	csvReader.Comma = sep
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
+		if tag == "Tenant" {
 			// skip header line
 			continue
 		}
-		for _, m := range record[1:] {
-			destinations[tag] = append(destinations[tag], m)
+		tenant, tor, subject := record[0], record[1], record[2]
+		at, err := time.Parse(time.RFC3339, record[5])
+		if err != nil {
+			log.Printf("Cannot parse activation time from %v", record[5])
+			continue
 		}
-		log.Print(tag, destinations[tag])
+		rts, exists := ratesTiming[record[4]]
+		if !exists {
+			log.Printf("Could not get rate timing for tag %v", record[4])
+			continue
+		}
+		for _, rt := range rts { // rates timing
+			rs, exists := rates[rt.RatesTag]
+			if !exists {
+				log.Printf("Could not get rates for tag %v", rt.RatesTag)
+				continue
+			}
+			ap := &timespans.ActivationPeriod{
+				ActivationTime: at,
+			}
+			for _, r := range rs { //rates
+				ds, exists := destinations[r.DestinationsTag]
+				if !exists {
+					log.Printf("Could not get destinations for tag %v", r.DestinationsTag)
+					continue
+				}
+				ap.AddInterval(rt.GetInterval(r))
+				for _, d := range ds { //destinations
+					cd := &timespans.CallDescriptor{
+						Tenant:            tenant,
+						TOR:               tor,
+						Subject:           subject,
+						DestinationPrefix: d,
+					}
+					cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+					ratingProfiles[d] = append(ratingProfiles[d], cd)
+				}
+			}
+		}
+
+		for key, cds := range ratingProfiles {
+			log.Print(key)
+			for _, cd := range cds {
+				log.Print(cd, cd.ActivationPeriods[0])
+			}
+		}
 	}
 }
 
@@ -228,4 +263,6 @@ func main() {
 	loadDataSeries()
 	loadDestinations()
 	loadRates()
+	loadRatesTiming()
+	loadRatingProfiles()
 }

@@ -29,14 +29,14 @@ func TestSingleResultMerge(t *testing.T) {
 	defer getter.Close()
 	t1 := time.Date(2012, time.February, 2, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 01, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc1, _ := cd.GetCost()
 	if cc1.Cost != 12 {
 		t.Errorf("expected 12 was %v", cc1.Cost)
 	}
 	t1 = time.Date(2012, time.February, 2, 17, 01, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 17, 02, 0, 0, time.UTC)
-	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd = &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 12 {
 		t.Errorf("expected 12 was %v", cc2.Cost)
@@ -55,14 +55,14 @@ func TestMultipleResultMerge(t *testing.T) {
 	defer getter.Close()
 	t1 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 00, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc1, _ := cd.GetCost()
 	if cc1.Cost != 12 {
 		t.Errorf("expected 12 was %v", cc1.Cost)
 	}
 	t1 = time.Date(2012, time.February, 2, 18, 00, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd = &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 6 {
 		t.Errorf("expected 6 was %v", cc2.Cost)
@@ -81,14 +81,14 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 	defer getter.Close()
 	t1 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc1, _ := cd.GetCost()
 	if cc1.Cost != 18 {
 		t.Errorf("expected 12 was %v", cc1.Cost)
 	}
 	t1 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 02, 0, 0, time.UTC)
-	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd = &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 6 {
 		t.Errorf("expected 6 was %v", cc2.Cost)
@@ -107,14 +107,14 @@ func TestMultipleInputRightMerge(t *testing.T) {
 	defer getter.Close()
 	t1 := time.Date(2012, time.February, 2, 17, 58, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
-	cd := &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc1, _ := cd.GetCost()
 	if cc1.Cost != 12 {
 		t.Errorf("expected 12 was %v", cc1.Cost)
 	}
 	t1 = time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd = &CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
+	cd = &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2, storageGetter: getter}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 18 {
 		t.Errorf("expected 18 was %v", cc2.Cost)

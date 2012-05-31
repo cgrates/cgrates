@@ -22,7 +22,7 @@ import (
 	"time"
 	"strings"
 	"strconv"
-	"log"
+	// "log"
 )
 
 // Defines months series
@@ -60,7 +60,6 @@ func (m *Months) restore(input string) {
 			*m = append(*m, time.Month(month))
 		}
 	}
-	log.Print("here: ", m)
 }
 
 // Defines month days series

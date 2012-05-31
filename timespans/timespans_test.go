@@ -212,7 +212,7 @@ func TestSetInterval(t *testing.T) {
 	if ts1.Interval != i1 {
 		t.Error("Smaller price interval should win")
 	}
-	i2.Ponder = 1
+	i2.Weight = 1
 	ts1.SetInterval(i2)
 	if ts1.Interval != i2 {
 		t.Error("Bigger ponder interval should win")
