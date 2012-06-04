@@ -28,12 +28,10 @@ import (
 json
 BenchmarkRedisGetCost	    5000	    462787 ns/op
 BenchmarkKyotoGetCost	   10000	    203543 ns/op
-BenchmarkMongoGetCost	   10000	    320457 ns/op
 
 gob
 BenchmarkRedisGetCost	   10000	    258751 ns/op
 BenchmarkKyotoGetCost	   50000	     38449 ns/op
-BenchmarkMongoGetCost	   10000	    323262 ns/op
 */
 
 func TestKyotoSplitSpans(t *testing.T) {

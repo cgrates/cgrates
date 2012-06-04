@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
 	//"log"
 )
 

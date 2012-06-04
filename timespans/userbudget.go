@@ -35,18 +35,18 @@ const (
 Structure conatining information about user's credit (minutes, cents, sms...).'
 */
 type UserBudget struct {
-	Id                    string
-	Type                  string // prepaid/postpaid
-	Credit                float64
-	SmsCredit             float64
-	Traffic               float64
-	VolumeDiscountSeconds float64
-	ReceivedCallSeconds   float64
-	ResetDayOfTheMonth    int
-	TariffPlanId          string
-	tariffPlan            *TariffPlan
-	MinuteBuckets         []*MinuteBucket
-	mux                   sync.RWMutex
+	Id                 string
+	Type               string // prepaid/postpaid
+	Credit             float64
+	SmsCredit          float64
+	Traffic            float64
+	OutboundVolumes    []*Volume
+	InboundVolumes     []*Volume
+	ResetDayOfTheMonth int
+	TariffPlanId       string
+	tariffPlan         *TariffPlan
+	MinuteBuckets      []*MinuteBucket
+	mux                sync.RWMutex
 }
 
 /*
