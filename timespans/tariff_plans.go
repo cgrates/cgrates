@@ -24,14 +24,19 @@ import (
 	"strings"
 )
 
+const (
+	CREDIT = "CREDIT"
+	SMS = "SMS"
+	TRAFFIC = "TRAFFIC"
+)
+
 /*
 Structure describing a tariff plan's number of bonus items. It is uset to restore
 these numbers to the user budget every month.
 */
 type TariffPlan struct {
 	Id                       string
-	SmsCredit                float64
-	Traffic                  float64
+	balanceMap               map[string]float64
 	Bonuses                  []*Bonus
 	MinuteBuckets            []*MinuteBucket
 	VolumeDiscountThresholds []*VolumeDiscount

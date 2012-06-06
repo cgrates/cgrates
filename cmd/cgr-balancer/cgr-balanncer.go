@@ -21,9 +21,9 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/rif/cgrates/sessionmanager"
-	"github.com/rif/cgrates/timespans"
-	"github.com/rif/cgrates/balancer"
+	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/balancer"
 	"log"
 	"runtime"
 	"time"

@@ -288,7 +288,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 			return -1, nil
 		} else {
 			userBudget.mux.RLock()
-			availableCredit = userBudget.Credit
+			availableCredit = userBudget.BalanceMap[CREDIT]
 			availableSeconds, _ = userBudget.getSecondsForPrefix(cd.storageGetter, cd.DestinationPrefix)
 			userBudget.mux.RUnlock()
 		}

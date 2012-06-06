@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"strconv"
-	"github.com/rif/cgrates/timespans"
 )
 
 type Rate struct {
@@ -60,27 +60,39 @@ func NewRate(destinationsTag, connectFee, price, billingUnit, weight string) (r 
 	return
 }
 
-type RateTiming struct {
-	RatesTag, MonthsTag, MonthDaysTag, WeekDaysTag, StartTime string
+type Timing struct {
+	MonthsTag, MonthDaysTag, WeekDaysTag, StartTime string
 }
 
-func NewRateTiming(ratesTag, monthsTag, monthDaysTag, weekDaysTag, startTime string) (rt *RateTiming) {
+func NewTiming(timeingInfo ...string) (rt *Timing) {
 	rt = &RateTiming{
-		RatesTag:     ratesTag,
-		MonthsTag:    monthsTag,
-		MonthDaysTag: monthDaysTag,
-		WeekDaysTag:  weekDaysTag,
-		StartTime:    startTime,
+		MonthsTag:    timeingInfo[0],
+		MonthDaysTag: timeingInfo[1],
+		WeekDaysTag:  timeingInfo[2],
+		StartTime:    timeingInfo[3],
+	}
+	return
+}
+
+type RateTiming struct {
+	RatesTag string
+	timing   *Timing
+}
+
+func NewRateTiming(ratesTag string, timing *Timing) (rt *RateTiming) {
+	rt = &RateTiming{
+		RatesTag: ratesTag,
+		timing:   timing,
 	}
 	return
 }
 
 func (rt *RateTiming) GetInterval(r *Rate) (i *timespans.Interval) {
 	i = &timespans.Interval{
-		Months:      timespans.Months(months[rt.MonthsTag]),
-		MonthDays:   timespans.MonthDays(monthdays[rt.MonthDaysTag]),
-		WeekDays:    timespans.WeekDays(weekdays[rt.WeekDaysTag]),
-		StartTime:   rt.StartTime,
+		Months:      timespans.Months(months[rt.timing.MonthsTag]),
+		MonthDays:   timespans.MonthDays(monthdays[rt.timing.MonthDaysTag]),
+		WeekDays:    timespans.WeekDays(weekdays[rt.timing.WeekDaysTag]),
+		StartTime:   rt.timing.StartTime,
 		ConnectFee:  r.ConnectFee,
 		Price:       r.Price,
 		BillingUnit: r.BillingUnit,

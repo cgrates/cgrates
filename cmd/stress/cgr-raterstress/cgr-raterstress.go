@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"github.com/rif/cgrates/timespans"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net/rpc/jsonrpc"
 	"time"

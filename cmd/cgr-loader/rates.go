@@ -18,10 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"github.com/rif/cgrates/timespans"
+	"encoding/csv"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"os"
-	"encoding/csv"
 	"time"
 )
 
@@ -31,7 +31,8 @@ var (
 	weekdays       = make(map[string][]time.Weekday)
 	destinations   = make(map[string][]string)
 	rates          = make(map[string][]*Rate)
-	ratesTiming    = make(map[string][]*RateTiming)
+	timings        = make(map[string][]*Timing)
+	ratesTimings   = make(map[string][]*RateTiming)
 	ratingProfiles = make(map[string][]*timespans.CallDescriptor)
 )
 
@@ -148,10 +149,10 @@ func loadRates() {
 	}
 }
 
-func loadRatesTiming() {
-	fp, err := os.Open(*ratestimingFn)
+func loadTiming() {
+	fp, err := os.Open(*timingsFn)
 	if err != nil {
-		log.Printf("Could not open rates file: %v", err)
+		log.Printf("Could not open timings file: %v", err)
 		return
 	}
 	defer fp.Close()
@@ -164,9 +165,42 @@ func loadRatesTiming() {
 			continue
 		}
 
-		rt := NewRateTiming(record[1], record[2], record[3], record[4], record[5])
-		ratesTiming[tag] = append(ratesTiming[tag], rt)
+		t := NewTiming(rates[1:]...)
+		timings[tag] = append(timings[tag], t)
 
+		log.Print(tag)
+		for _, i := range ratesTiming[tag] {
+			log.Print(i)
+		}
+	}
+}
+
+func loadRatesTiming() {
+	fp, err := os.Open(*ratestimingsFn)
+	if err != nil {
+		log.Printf("Could not open rates timings file: %v", err)
+		return
+	}
+	defer fp.Close()
+	csvReader := csv.NewReader(fp)
+	csvReader.Comma = sep
+	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+		tag := record[0]
+		if tag == "Tag" {
+			// skip header line
+			continue
+		}
+
+		ts, exists := timings[record[2]]
+		if !exists {
+			log.Printf("Could not get timing for tag %v", record[2])
+			continue
+		}
+
+		for _, t := range ts {
+			rt := NewRateTiming(record[1], t)
+			ratesTiming[tag] = append(ratesTiming[tag], rt)
+		}
 		log.Print(tag)
 		for _, i := range ratesTiming[tag] {
 			log.Print(i)

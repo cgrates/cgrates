@@ -19,7 +19,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/rif/cgrates/timespans"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net"
 	"net/rpc"

@@ -19,7 +19,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/rif/cgrates/timespans"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net/http"
 	"strconv"

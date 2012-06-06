@@ -36,12 +36,10 @@ Structure conatining information about user's credit (minutes, cents, sms...).'
 */
 type UserBudget struct {
 	Id                 string
-	Type               string // prepaid/postpaid
-	Credit             float64
-	SmsCredit          float64
-	Traffic            float64
-	OutboundVolumes    []*Volume
-	InboundVolumes     []*Volume
+	Type               string // prepaid-postpaid
+	BalanceMap           map[string]float64
+	OutboundVolumes    []*TrafficVolume
+	InboundVolumes     []*TrafficVolume
 	ResetDayOfTheMonth int
 	TariffPlanId       string
 	tariffPlan         *TariffPlan

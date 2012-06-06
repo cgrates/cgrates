@@ -25,7 +25,7 @@ import (
 	"flag"
 	"fmt"
 	_ "github.com/bmizerany/pq"
-	"github.com/rif/cgrates/timespans"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net/rpc/jsonrpc"
 	"os"

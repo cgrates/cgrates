@@ -20,8 +20,8 @@ package main
 
 import (
 	"flag"
-	"github.com/rif/cgrates/sessionmanager"
-	"github.com/rif/cgrates/timespans"
+	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net/rpc/jsonrpc"
 )

@@ -20,7 +20,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/rif/cgrates/timespans"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net/rpc/jsonrpc"
 	"os"
