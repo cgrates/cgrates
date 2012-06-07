@@ -31,7 +31,7 @@ func TestApRestoreKyoto(t *testing.T) {
 
 	cd := &CallDescriptor{Tenant: "vdf",
 		Subject:           "rif",
-		DestinationPrefix: "0257",
+		Destination: "0257",
 		storageGetter:     getter}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 2 {
@@ -45,7 +45,7 @@ func TestApRestoreRedis(t *testing.T) {
 
 	cd := &CallDescriptor{Tenant: "vdf",
 		Subject:           "rif",
-		DestinationPrefix: "0257",
+		Destination: "0257",
 		storageGetter:     getter}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 2 {
@@ -78,7 +78,7 @@ func TestFallbackDirect(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0745", storageGetter: getter}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0745", storageGetter: getter}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 1 {
 		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
@@ -89,7 +89,7 @@ func TestFallbackWithBackTrace(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0745121", storageGetter: getter}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0745121", storageGetter: getter}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 1 {
 		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
@@ -100,7 +100,7 @@ func TestFallbackDefault(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "00000", storageGetter: getter}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "00000", storageGetter: getter}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 1 {
 		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
@@ -111,7 +111,7 @@ func TestFallbackNoInfiniteLoop(t *testing.T) {
 	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	defer getter.Close()
 
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", DestinationPrefix: "0721", storageGetter: getter}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0721", storageGetter: getter}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 0 {
 		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)

@@ -99,16 +99,16 @@ func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) error {
 	return rs.db.Set(tp.Id, tp.store())
 }
 
-func (rs *RedisStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
+func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
 	//rs.db.Select(rs.dbNb + 3)
 	if values, err := rs.db.Get(key); err == nil {
-		ub = &UserBudget{Id: key}
+		ub = &UserBalance{Id: key}
 		ub.restore(values.String())
 	}
 	return
 }
 
-func (rs *RedisStorage) SetUserBudget(ub *UserBudget) error {
+func (rs *RedisStorage) SetUserBalance(ub *UserBalance) error {
 	//rs.db.Select(rs.dbNb + 3)
 	return rs.db.Set(ub.Id, ub.store())
 }

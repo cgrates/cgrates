@@ -26,14 +26,14 @@ import (
 The output structure that will be returned with the call cost information.
 */
 type CallCost struct {
-	TOR, Tenant, Subject, DestinationPrefix string
+	TOR, Tenant, Subject, Destination string
 	Cost, ConnectFee                        float64
 	Timespans                               []*TimeSpan
 }
 
 // Pretty printing for call cost
 func (cc *CallCost) String() (r string) {
-	r = fmt.Sprintf("%v[%v] : %s -> %s (", cc.Cost, cc.ConnectFee, cc.Subject, cc.DestinationPrefix)
+	r = fmt.Sprintf("%v[%v] : %s -> %s (", cc.Cost, cc.ConnectFee, cc.Subject, cc.Destination)
 	for _, ts := range cc.Timespans {
 		r += fmt.Sprintf(" %v,", ts.GetDuration())
 	}

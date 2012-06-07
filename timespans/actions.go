@@ -19,46 +19,55 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-//"log"
+	"bytes"
+	"encoding/gob"
 )
 
 // Amount of a trafic of a certain type (TOR)
-type TrafficVolume struct {
+type UnitsCounter struct {
+	Direction     string
 	TOR           string
 	Units         float64
+	Weight        float64
 	DestinationId string
+	destination   *Destination
 }
 
-// Volume discount to be applyed after the Units are reached
-// in a certain time period.
-type VolumeDiscount struct {
-	TOR                string
-	DestinationsId     string
-	Units              float64
-	AbsoulteValue      float64 // either this or the procentage below
-	DiscountProcentage float64 // use only one
-	Weight             float64
+// Structure to store actions according to weight
+type countersorter []*UnitsCounter
+
+func (s countersorter) Len() int {
+	return len(s)
+}
+
+func (s countersorter) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s countersorter) Less(j, i int) bool {
+	return s[i].Weight < s[j].Weight
 }
 
 /*
 Returns the destination loading it from the storage if necessary.
 */
-func (vd *VolumeDiscount) getDestination(storage StorageGetter) (dest *Destination) {
-	if vd.destination == nil {
-		vd.destination, _ = storage.GetDestination(vd.DestinationId)
+func (uc *UnitsCounter) getDestination() (dest *Destination) {
+	if uc.destination == nil {
+		uc.destination, _ = storageGetter.GetDestination(uc.DestinationId)
 	}
-	return vd.destination
+	return uc.destination
 }
 
 /*
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
-type Bonus struct {
+type Action struct {
 	Direction      string
 	TOR            string
 	Units          float64
 	balanceMap     map[string]float64
 	MinuteBuckets  []*MinuteBucket
+	Weight         float64
 	DestinationsId string
 	destination    *Destination
 }
@@ -66,27 +75,30 @@ type Bonus struct {
 /*
 Serializes the tariff plan for the storage. Used for key-value storages.
 */
-func (rcb *Bonus) store() (result string) {
-	result += strconv.FormatFloat(rcb.Credit, 'f', -1, 64) + ","
-	result += strconv.FormatFloat(rcb.SmsCredit, 'f', -1, 64) + ","
-	result += strconv.FormatFloat(rcb.Traffic, 'f', -1, 64)
-	if rcb.MinuteBucket != nil {
-		result += ","
-		result += rcb.MinuteBucket.store()
-	}
-	return
+func (a *Action) store() (result string) {
+	buf := new(bytes.Buffer)
+	gob.NewEncoder(buf).Encode(a)
+	return buf.String()
 }
 
 /*
 De-serializes the tariff plan for the storage. Used for key-value storages.
 */
-func (rcb *Bonus) restore(input string) {
-	elements := strings.Split(input, ",")
-	rcb.Credit, _ = strconv.ParseFloat(elements[0], 64)
-	rcb.SmsCredit, _ = strconv.ParseFloat(elements[1], 64)
-	rcb.Traffic, _ = strconv.ParseFloat(elements[2], 64)
-	if len(elements) > 3 {
-		rcb.MinuteBucket = &MinuteBucket{}
-		rcb.MinuteBucket.restore(elements[3])
-	}
+func (a *Action) restore(input string) {
+	gob.NewDecoder(bytes.NewBuffer([]byte(input))).Decode(a)
+}
+
+// Structure to store actions according to weight
+type actionsorter []*Action
+
+func (s actionsorter) Len() int {
+	return len(s)
+}
+
+func (s actionsorter) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s actionsorter) Less(j, i int) bool {
+	return s[i].Weight < s[j].Weight
 }

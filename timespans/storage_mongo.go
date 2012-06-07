@@ -42,7 +42,7 @@ func NewMongoStorage(address, db string) (*MongoStorage, error) {
 	index = mgo.Index{Key: []string{"id"}, Unique: true, DropDups: true, Background: true}
 	err = session.DB(db).C("destinations").EnsureIndex(index)
 	err = session.DB(db).C("tariffPlans").EnsureIndex(index)
-	err = session.DB(db).C("userBudget").EnsureIndex(index)
+	err = session.DB(db).C("userBalance").EnsureIndex(index)
 
 	return &MongoStorage{db: session.DB(db), session: session}, nil
 }
@@ -96,14 +96,14 @@ func (ms *MongoStorage) SetTariffPlan(tp *TariffPlan) error {
 	return ndb.Insert(&tp)
 }
 
-func (ms *MongoStorage) GetUserBudget(key string) (result *UserBudget, err error) {
-	ndb := ms.db.C("userBudget")
-	result = &UserBudget{}
+func (ms *MongoStorage) GetUserBalance(key string) (result *UserBalance, err error) {
+	ndb := ms.db.C("userBalance")
+	result = &UserBalance{}
 	err = ndb.Find(bson.M{"id": key}).One(result)
 	return
 }
 
-func (ms *MongoStorage) SetUserBudget(ub *UserBudget) error {
-	ndb := ms.db.C("userBudget")
+func (ms *MongoStorage) SetUserBalance(ub *UserBalance) error {
+	ndb := ms.db.C("userBalance")
 	return ndb.Insert(&ub)
 }

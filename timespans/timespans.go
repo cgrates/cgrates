@@ -64,13 +64,13 @@ func (ts *TimeSpan) getCost(cd *CallDescriptor) (cost float64) {
 	} else {
 		cost = ts.GetDuration().Seconds() * ts.Interval.Price
 	}
-	if userBudget, err := cd.getUserBudget(); err == nil && userBudget != nil {
-		userBudget.mux.RLock()
-		if percentageDiscount, err := userBudget.getVolumeDiscount(cd.storageGetter); err == nil && percentageDiscount > 0 {
-			cost *= (100 - percentageDiscount) / 100
-		}
-		userBudget.mux.RUnlock()
-	}
+	// if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+	// 	userBalance.mux.RLock()
+	// 	if percentageDiscount, err := userBalance.getVolumeDiscount(cd.Destination, INBOUND); err == nil && percentageDiscount > 0 {
+	// 		cost *= (100 - percentageDiscount) / 100
+	// 	}
+	// 	userBalance.mux.RUnlock()
+	// }
 	ts.Cost = cost
 	return
 }

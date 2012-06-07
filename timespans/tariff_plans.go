@@ -20,80 +20,43 @@ package timespans
 
 import (
 	// "log"
-	"strconv"
-	"strings"
+	"bytes"
+	"encoding/gob"
 )
 
 const (
-	CREDIT = "CREDIT"
-	SMS = "SMS"
-	TRAFFIC = "TRAFFIC"
+	// Direction type
+	INBOUND  = "IN"
+	OUTBOUND = "OUT"
+	// Balance types
+	CREDIT  = "MONETARY"
+	SMS     = "SMS"
+	TRAFFIC = "INTERNET"
 )
 
 /*
 Structure describing a tariff plan's number of bonus items. It is uset to restore
-these numbers to the user budget every month.
+these numbers to the user balance every month.
 */
 type TariffPlan struct {
-	Id                       string
-	balanceMap               map[string]float64
-	Bonuses                  []*Bonus
-	MinuteBuckets            []*MinuteBucket
-	VolumeDiscountThresholds []*VolumeDiscount
+	Id            string
+	balanceMap    map[string]float64
+	Actions       []*Action
+	MinuteBuckets []*MinuteBucket
 }
 
 /*
 Serializes the tariff plan for the storage. Used for key-value storages.
 */
 func (tp *TariffPlan) store() (result string) {
-	result += strconv.FormatFloat(tp.SmsCredit, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(tp.Traffic, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(tp.ReceivedCallSecondsLimit, 'f', -1, 64) + ";"
-	if tp.RecivedCallBonus == nil {
-		tp.RecivedCallBonus = &RecivedCallBonus{}
-	}
-	result += tp.RecivedCallBonus.store() + ";"
-	for i, mb := range tp.MinuteBuckets {
-		if i > 0 {
-			result += ","
-		}
-		result += mb.store()
-	}
-	if tp.VolumeDiscountThresholds != nil {
-		result += ";"
-	}
-	for i, vd := range tp.VolumeDiscountThresholds {
-		if i > 0 {
-			result += ","
-		}
-		result += strconv.FormatFloat(vd.Volume, 'f', -1, 64) + "|" + strconv.FormatFloat(vd.Discount, 'f', -1, 64)
-	}
-	result = strings.TrimRight(result, ";")
-	return
+	buf := new(bytes.Buffer)
+	gob.NewEncoder(buf).Encode(tp)
+	return buf.String()
 }
 
 /*
 De-serializes the tariff plan for the storage. Used for key-value storages.
 */
 func (tp *TariffPlan) restore(input string) {
-	elements := strings.Split(input, ";")
-	tp.SmsCredit, _ = strconv.ParseFloat(elements[0], 64)
-	tp.Traffic, _ = strconv.ParseFloat(elements[1], 64)
-	tp.ReceivedCallSecondsLimit, _ = strconv.ParseFloat(elements[2], 64)
-	tp.RecivedCallBonus = &RecivedCallBonus{}
-	tp.RecivedCallBonus.restore(elements[3])
-	for _, mbs := range strings.Split(elements[4], ",") {
-		mb := &MinuteBucket{}
-		mb.restore(mbs)
-		tp.MinuteBuckets = append(tp.MinuteBuckets, mb)
-	}
-	if len(elements) > 5 {
-		for _, vdss := range strings.Split(elements[5], ",") {
-			vd := &VolumeDiscount{}
-			vds := strings.Split(vdss, "|")
-			vd.Volume, _ = strconv.ParseFloat(vds[0], 64)
-			vd.Discount, _ = strconv.ParseFloat(vds[1], 64)
-			tp.VolumeDiscountThresholds = append(tp.VolumeDiscountThresholds, vd)
-		}
-	}
+	gob.NewDecoder(bytes.NewBuffer([]byte(input))).Decode(tp)
 }

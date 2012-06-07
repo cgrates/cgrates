@@ -27,8 +27,9 @@ import (
 
 type MinuteBucket struct {
 	Seconds       float64
-	Priority      int
+	Weight        float64
 	Price         float64
+	Percentage    float64 // percentage from standard price
 	DestinationId string
 	destination   *Destination
 	precision     int
@@ -39,7 +40,7 @@ Serializes the minute bucket for the storage. Used for key-value storages.
 */
 func (mb *MinuteBucket) store() (result string) {
 	result += strconv.Itoa(int(mb.Seconds)) + "|"
-	result += strconv.Itoa(int(mb.Priority)) + "|"
+	result += strconv.FormatFloat(mb.Weight, 'f', -1, 64) + "|"
 	result += strconv.FormatFloat(mb.Price, 'f', -1, 64) + "|"
 	result += mb.DestinationId
 	return
@@ -51,7 +52,7 @@ De-serializes the minute bucket for the storage. Used for key-value storages.
 func (mb *MinuteBucket) restore(input string) {
 	elements := strings.Split(input, "|")
 	mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
-	mb.Priority, _ = strconv.Atoi(elements[1])
+	mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
 	mb.Price, _ = strconv.ParseFloat(elements[2], 64)
 	mb.DestinationId = elements[3]
 }
@@ -59,9 +60,9 @@ func (mb *MinuteBucket) restore(input string) {
 /*
 Returns the destination loading it from the storage if necessary.
 */
-func (mb *MinuteBucket) getDestination(storage StorageGetter) (dest *Destination) {
+func (mb *MinuteBucket) getDestination() (dest *Destination) {
 	if mb.destination == nil {
-		mb.destination, _ = storage.GetDestination(mb.DestinationId)
+		mb.destination, _ = storageGetter.GetDestination(mb.DestinationId)
 	}
 	return mb.destination
 }

@@ -97,14 +97,14 @@ func (ks *KyotoStorage) SetTariffPlan(tp *TariffPlan) error {
 	return ks.db.Set([]byte(tp.Id), []byte(tp.store()))
 }
 
-func (ks *KyotoStorage) GetUserBudget(key string) (ub *UserBudget, err error) {
+func (ks *KyotoStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
 	if values, err := ks.db.Get([]byte(key)); err == nil {
-		ub = &UserBudget{Id: key}
+		ub = &UserBalance{Id: key}
 		ub.restore(string(values))
 	}
 	return
 }
 
-func (ks *KyotoStorage) SetUserBudget(ub *UserBudget) error {
+func (ks *KyotoStorage) SetUserBalance(ub *UserBalance) error {
 	return ks.db.Set([]byte(ub.Id), []byte(ub.store()))
 }
