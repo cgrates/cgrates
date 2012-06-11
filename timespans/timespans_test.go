@@ -185,12 +185,10 @@ func TestSplitByActivationTime(t *testing.T) {
 }
 
 func TestTimespanGetCost(t *testing.T) {
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	ts1 := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	cd := &CallDescriptor{Subject: "other", storageGetter: getter}
+	cd := &CallDescriptor{Subject: "other"}
 	if ts1.getCost(cd) != 0 {
 		t.Error("No interval and still kicking")
 	}

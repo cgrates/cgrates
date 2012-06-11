@@ -380,12 +380,12 @@ in the user's tariff plan is reached then the received call balance is reseted a
 specified in the tariff plan is applied.
 The amount filed has to be filled in call descriptor.
 */
-func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		return userBalance.addReceivedCallSeconds(INBOUND, cd.TOR, cd.Destination, cd.Amount)
-	}
-	return err
-}
+// func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
+// 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+// 		return userBalance.addReceivedCallSeconds(INBOUND, cd.TOR, cd.Destination, cd.Amount)
+// 	}
+// 	return err
+// }
 
 /*
 Resets user balances value to the amounts specified in the tariff plan.

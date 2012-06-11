@@ -40,7 +40,7 @@ these numbers to the user balance every month.
 */
 type TariffPlan struct {
 	Id            string
-	balanceMap    map[string]float64
+	BalanceMap    map[string]float64
 	Actions       []*Action
 	MinuteBuckets []*MinuteBucket
 }

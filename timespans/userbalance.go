@@ -213,30 +213,29 @@ func (ub *UserBalance) debitSMSBuget(amount float64) (float64, error) {
 /*
 Adds the specified amount of seconds.
 */
-func (ub *UserBalance) addReceivedCallSeconds(direction, tor, destination string, amount float64) error {
-	ub.mux.Lock()
-	defer ub.mux.Unlock()
-	for 
-	ub.ReceivedCallSeconds += amount
-	if tariffPlan, err := ub.getTariffPlan(); tariffPlan != nil && err == nil {
-		if ub.ReceivedCallSeconds >= tariffPlan.ReceivedCallSecondsLimit {
-			ub.ReceivedCallSeconds -= tariffPlan.ReceivedCallSecondsLimit
-			if tariffPlan.RecivedCallBonus != nil { // apply the bonus
-				ub.BalanceMap[CREDIT] += tariffPlan.RecivedCallBonus.Credit
-				ub.BalanceMap[SMS] += tariffPlan.RecivedCallBonus.SmsCredit
-				ub.BalanceMap[TRAFFIC] += tariffPlan.RecivedCallBonus.Traffic
-				if tariffPlan.RecivedCallBonus.MinuteBucket != nil {
-					for _, mb := range ub.MinuteBuckets {
-						if mb.DestinationId == tariffPlan.RecivedCallBonus.MinuteBucket.DestinationId {
-							mb.Seconds += tariffPlan.RecivedCallBonus.MinuteBucket.Seconds
-						}
-					}
-				}
-			}
-		}
-	}
-	return storageGetter.SetUserBalance(ub)
-}
+// func (ub *UserBalance) addReceivedCallSeconds(direction, tor, destination string, amount float64) error {
+// 	ub.mux.Lock()
+// 	defer ub.mux.Unlock()
+// 	ub.ReceivedCallSeconds += amount
+// 	if tariffPlan, err := ub.getTariffPlan(); tariffPlan != nil && err == nil {
+// 		if ub.ReceivedCallSeconds >= tariffPlan.ReceivedCallSecondsLimit {
+// 			ub.ReceivedCallSeconds -= tariffPlan.ReceivedCallSecondsLimit
+// 			if tariffPlan.RecivedCallBonus != nil { // apply the bonus
+// 				ub.BalanceMap[CREDIT] += tariffPlan.RecivedCallBonus.Credit
+// 				ub.BalanceMap[SMS] += tariffPlan.RecivedCallBonus.SmsCredit
+// 				ub.BalanceMap[TRAFFIC] += tariffPlan.RecivedCallBonus.Traffic
+// 				if tariffPlan.RecivedCallBonus.MinuteBucket != nil {
+// 					for _, mb := range ub.MinuteBuckets {
+// 						if mb.DestinationId == tariffPlan.RecivedCallBonus.MinuteBucket.DestinationId {
+// 							mb.Seconds += tariffPlan.RecivedCallBonus.MinuteBucket.Seconds
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return storageGetter.SetUserBalance(ub)
+// }
 
 /*
 Resets the user balance items to their tariff plan values.
@@ -244,13 +243,14 @@ Resets the user balance items to their tariff plan values.
 func (ub *UserBalance) resetUserBalance() (err error) {
 	ub.mux.Lock()
 	defer ub.mux.Unlock()
-	if tp, err := ub.getTariffPlan(storageGetter); err == nil {
-		ub.SmsCredit = tp.SmsCredit
-		ub.Traffic = tp.Traffic
+	if tp, err := ub.getTariffPlan(); err == nil {
+		for k, _ := range ub.BalanceMap {
+			ub.BalanceMap[k] = tp.BalanceMap[k]
+		}
 		ub.MinuteBuckets = make([]*MinuteBucket, 0)
 		for _, bucket := range tp.MinuteBuckets {
 			mb := &MinuteBucket{Seconds: bucket.Seconds,
-				Priority:      bucket.Priority,
+				Weight:        bucket.Weight,
 				Price:         bucket.Price,
 				DestinationId: bucket.DestinationId}
 			ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
