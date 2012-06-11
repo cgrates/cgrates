@@ -180,14 +180,12 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 		}
 		userBalance.mux.RUnlock()
 	}
-
 	if firstSpan.MinuteInfo != nil {
 		return // all the timespans are on minutes
 	}
 	if len(cd.ActivationPeriods) == 0 {
 		return
 	}
-
 	firstSpan.ActivationPeriod = cd.ActivationPeriods[0]
 
 	// split on activation periods
@@ -236,7 +234,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	destPrefix, err := cd.SearchStorageForPrefix()
 
 	timespans := cd.splitInTimeSpans()
-
 	cost := 0.0
 	connectionFee := 0.0
 	for i, ts := range timespans {

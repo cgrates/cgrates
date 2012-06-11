@@ -39,10 +39,7 @@ func init() {
 	SetStorageGetter(sg)
 }
 
-func TestKyotoSplitSpans(t *testing.T) {
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-
+func TestSplitSpans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
@@ -56,9 +53,6 @@ func TestKyotoSplitSpans(t *testing.T) {
 }
 
 func TestRedisSplitSpans(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0257", TimeStart: t1, TimeEnd: t2}
@@ -72,9 +66,6 @@ func TestRedisSplitSpans(t *testing.T) {
 }
 
 func TestKyotoGetCost(t *testing.T) {
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}

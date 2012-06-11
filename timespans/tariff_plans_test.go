@@ -18,16 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package timespans
 
-/*import (
-	// "log"
-	"reflect"
-	"testing"
+import (
+// "log"
+//"reflect"
+//"testing"
 )
 
-func TestTariffPlanStoreRestore(t *testing.T) {
+/*func TestTariffPlanStoreRestore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "retea"}
-	rcb := &RecivedCallBonus{Credit: 100}
+	rcb := &RecivedCallBonus{}
 	vd := &VolumeDiscount{100, 10}
 	seara := &TariffPlan{Id: "seara_voo",
 		SmsCredit:                100,
@@ -88,13 +88,12 @@ func TestTariffPlanMongoStore(t *testing.T) {
 		t.Log(result)
 		t.Errorf("Expected %v was %v", seara.VolumeDiscountThresholds, result.VolumeDiscountThresholds)
 	}
-}*/
+}
+*/
 
 /********************************* Benchmarks **********************************/
 
 /*func BenchmarkTariffPlanKyotoStoreRestore(b *testing.B) {
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "retea"}
 	seara := &TariffPlan{Id: "seara_other", SmsCredit: 100, MinuteBuckets: []*MinuteBucket{b1, b2}}

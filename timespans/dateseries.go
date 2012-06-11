@@ -47,6 +47,7 @@ func (m Months) store() (result string) {
 	for _, ms := range m {
 		result += strconv.Itoa(int(ms)) + ","
 	}
+	result = strings.TrimRight(result, ",")
 	return
 }
 
@@ -84,6 +85,7 @@ func (md MonthDays) store() (result string) {
 	for _, mds := range md {
 		result += strconv.Itoa(mds) + ","
 	}
+	result = strings.TrimRight(result, ",")
 	return
 }
 
@@ -121,6 +123,7 @@ func (wd WeekDays) store() (result string) {
 	for _, wds := range wd {
 		result += strconv.Itoa(int(wds)) + ","
 	}
+	result = strings.TrimRight(result, ",")
 	return
 }
 

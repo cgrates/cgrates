@@ -24,9 +24,12 @@ import (
 	"time"
 )
 
+func init() {
+	sg, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	SetStorageGetter(sg)
+}
+
 func TestSingleResultMerge(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
 	t1 := time.Date(2012, time.February, 2, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 01, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
@@ -51,8 +54,6 @@ func TestSingleResultMerge(t *testing.T) {
 }
 
 func TestMultipleResultMerge(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
 	t1 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 00, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}

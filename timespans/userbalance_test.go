@@ -18,10 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package timespans
 
-/*import (
-	// "log"
-	"reflect"
-	"testing"
+import (
+// "log"
+//"reflect"
+//"testing"
 )
 
 var (
@@ -29,6 +29,7 @@ var (
 	retea     = &Destination{Id: "retea", Prefixes: []string{"0723", "0724"}}
 )
 
+/*
 func TestUserBalanceStoreRestore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "nationale"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "retea"}

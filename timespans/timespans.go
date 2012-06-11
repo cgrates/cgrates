@@ -102,7 +102,7 @@ a new timespan starting from the end of the received one.
 The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
-	// if the span is not in interval return nil
+	// if the span is not in interval return nil	
 	if !(i.Contains(ts.TimeStart) || i.Contains(ts.TimeEnd)) {
 		return
 	}

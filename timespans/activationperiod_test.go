@@ -31,9 +31,6 @@ func init() {
 }
 
 func TestApRestoreKyoto(t *testing.T) {
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-
 	cd := &CallDescriptor{Tenant: "vdf",
 		Subject:     "rif",
 		Destination: "0257"}
@@ -44,9 +41,6 @@ func TestApRestoreKyoto(t *testing.T) {
 }
 
 func TestApRestoreRedis(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	cd := &CallDescriptor{Tenant: "vdf",
 		Subject:     "rif",
 		Destination: "0257"}
@@ -67,6 +61,23 @@ func TestApStoreRestore(t *testing.T) {
 	ap.AddInterval(i)
 	result := ap.store()
 	expected := "1328106601000000000;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
+	if result != expected {
+		t.Errorf("Expected %q was %q", expected, result)
+	}
+	ap1 := ActivationPeriod{}
+	ap1.restore(result)
+	if reflect.DeepEqual(ap, ap1) {
+		t.Errorf("Expected %v was %v", ap, ap1)
+	}
+}
+
+func TestApStoreRestoreBlank(t *testing.T) {
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+	result := ap.store()
+	expected := "1328106601000000000;|||||0|0|0|0;"
 	if result != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
