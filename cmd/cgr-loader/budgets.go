@@ -19,24 +19,20 @@ package main
 
 import (
 	"encoding/csv"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"os"
 )
 
 var (
-	volumeDiscounts = make(map[string][]string)
-	volumeRates     = make(map[string][]string)
-	inboundBonuses  = make(map[string][]string)
-	outboundBonuses = make(map[string][]string)
-	recurrentDebits = make(map[string][]string)
-	recurrentTopups = make(map[string][]string)
-	balanceProfiles = make(map[string][]string)
+	primaryBalanceActions    []*timespans.Action
+	destinatioBalanceActions []*timespans.Action
 )
 
-func loadVolumeDicounts() {
-	fp, err := os.Open(*volumediscountsFn)
+func loadPrimaryBalanceActions() {
+	fp, err := os.Open(*primaryBalanceActionsFn)
 	if err != nil {
-		log.Printf("Could not open volume discounts file: %v", err)
+		log.Printf("Could not open primary balance actions file: %v", err)
 		return
 	}
 	defer fp.Close()
@@ -48,15 +44,15 @@ func loadVolumeDicounts() {
 			// skip header line
 			continue
 		}
-		volumeDiscounts[tag] = append(volumeDiscounts[tag], record[1:]...)
-		log.Print(tag, volumeDiscounts[tag])
+		//primaryBalanceActions = append(primaryBalanceActions, record[1:]...)
+		log.Print(tag, primaryBalanceActions)
 	}
 }
 
-func loadVolumeRates() {
-	fp, err := os.Open(*volumeratesFn)
+func loadDestinationBalanceActions() {
+	fp, err := os.Open(*destinationBalanceActionsFn)
 	if err != nil {
-		log.Printf("Could not open volume rates file: %v", err)
+		log.Printf("Could not open destination balance actions file: %v", err)
 		return
 	}
 	defer fp.Close()
@@ -68,107 +64,7 @@ func loadVolumeRates() {
 			// skip header line
 			continue
 		}
-		volumeRates[tag] = append(volumeRates[tag], record[1:]...)
-		log.Print(tag, volumeRates[tag])
-	}
-}
-
-func loadInboundBonuses() {
-	fp, err := os.Open(*inboundbonusesFn)
-	if err != nil {
-		log.Printf("Could not open inbound bonueses file: %v", err)
-		return
-	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-		inboundBonuses[tag] = append(inboundBonuses[tag], record[1:]...)
-		log.Print(tag, inboundBonuses[tag])
-	}
-}
-
-func loadOutboundBonuses() {
-	fp, err := os.Open(*inboundbonusesFn)
-	if err != nil {
-		log.Printf("Could not open outbound bonueses file: %v", err)
-		return
-	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-		outboundBonuses[tag] = append(outboundBonuses[tag], record[1:]...)
-		log.Print(tag, outboundBonuses[tag])
-	}
-}
-
-func loadRecurrentDebits() {
-	fp, err := os.Open(*recurrentdebitsFn)
-	if err != nil {
-		log.Printf("Could not open recurent debits file: %v", err)
-		return
-	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-		recurrentDebits[tag] = append(recurrentDebits[tag], record[1:]...)
-		log.Print(tag, recurrentDebits[tag])
-	}
-}
-
-func loadRecurrentTopups() {
-	fp, err := os.Open(*recurrenttopupsFn)
-	if err != nil {
-		log.Printf("Could not open recurent topups file: %v", err)
-		return
-	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-		recurrentTopups[tag] = append(recurrentTopups[tag], record[1:]...)
-		log.Print(tag, recurrentTopups[tag])
-	}
-}
-
-func loadBalanceProfiles() {
-	fp, err := os.Open(*balanceprofilesFn)
-	if err != nil {
-		log.Printf("Could not open balance profiles file: %v", err)
-		return
-	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Account" {
-			// skip header line
-			continue
-		}
-		balanceProfiles[tag] = append(balanceProfiles[tag], record...)
-		log.Print(tag, balanceProfiles[tag])
+		//destinatioBalanceActions = append(destinatioBalanceActions, record[1:]...)
+		log.Print(tag, destinatioBalanceActions)
 	}
 }
