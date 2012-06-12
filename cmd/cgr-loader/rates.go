@@ -34,7 +34,7 @@ var (
 	rates          = make(map[string][]*Rate)
 	timings        = make(map[string][]*Timing)
 	ratesTimings   = make(map[string][]*RateTiming)
-	ratingProfiles = make(map[string][]*timespans.CallDescriptor)
+	ratingProfiles = make(map[string]CallDescriptors)
 )
 
 func loadDataSeries() {
@@ -235,13 +235,17 @@ func loadRatingProfiles() {
 			// skip header line
 			continue
 		}
-		tenant, tor, subject, fallbacksubject := record[0], record[1], record[2], record[3]
-		at, err := time.Parse(time.RFC3339, record[5])
+		if len(record) != 7 {
+			log.Printf("Malformed rating profile: %v", record)
+			continue
+		}
+		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[4]
+		at, err := time.Parse(time.RFC3339, record[6])
 		if err != nil {
 			log.Printf("Cannot parse activation time from %v", record[5])
 			continue
 		}
-		rts, exists := ratesTimings[record[4]]
+		rts, exists := ratesTimings[record[5]]
 		if !exists {
 			log.Printf("Could not get rate timing for tag %v", record[4])
 			continue
@@ -263,12 +267,13 @@ func loadRatingProfiles() {
 							// Search for a CallDescriptor with the same key
 							var cd *timespans.CallDescriptor
 							for _, c := range ratingProfiles[p] {
-								if c.GetKey() == fmt.Sprintf("%s:%s:%s", tenant, subject, p) {
+								if c.GetKey() == r.DestinationsTag {
 									cd = c
 								}
 							}
 							if cd == nil {
 								cd = &timespans.CallDescriptor{
+									Direction:   direction,
 									Tenant:      tenant,
 									TOR:         tor,
 									Subject:     subject,
@@ -276,10 +281,19 @@ func loadRatingProfiles() {
 								}
 								ratingProfiles[p] = append(ratingProfiles[p], cd)
 							}
-							if fallbacksubject != "" {
-								// construct a new cd!!!!
-							}
 							cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+							if fallbacksubject != "" &&
+								ratingProfiles[p].getKey(fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, timespans.FallbackDestination)) == nil {
+								cd = &timespans.CallDescriptor{
+									Direction:   direction,
+									Tenant:      tenant,
+									TOR:         tor,
+									Subject:     subject,
+									Destination: timespans.FallbackDestination,
+									FallbackKey: fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject),
+								}
+								ratingProfiles[p] = append(ratingProfiles[p], cd)
+							}
 						}
 					}
 				}

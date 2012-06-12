@@ -23,6 +23,7 @@ Interface for storage providers.
 */
 type StorageGetter interface {
 	Close()
+	Flush() error
 	GetActivationPeriodsOrFallback(string) ([]*ActivationPeriod, string, error)
 	SetActivationPeriodsOrFallback(string, []*ActivationPeriod, string) error
 	GetDestination(string) (*Destination, error)

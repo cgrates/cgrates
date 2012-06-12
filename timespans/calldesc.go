@@ -28,8 +28,9 @@ import (
 
 const (
 	// the minimum length for a destination prefix to be matched.
-	MinPrefixLength   = 2
-	RecursionMaxDepth = 4
+	MinPrefixLength     = 2
+	RecursionMaxDepth   = 4
+	FallbackDestination = "fallback" // the string to be used to mark the fallback destination
 )
 
 /*
@@ -95,12 +96,12 @@ Restores the activation periods for the specified prefix from storage.
 */
 func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error) {
 	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
-	base := fmt.Sprintf("%s:%s:", cd.Tenant, cd.Subject)
+	base := fmt.Sprintf("%s:%s:%s:%s:", cd.Destination, cd.Tenant, cd.TOR, cd.Subject)
 	destPrefix = cd.Destination
 	key := base + destPrefix
 	values, err := cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
 	if err != nil {
-		key := base + "*"
+		key := base + FallbackDestination
 		values, err = cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
 	}
 	//load the activation preriods
@@ -147,7 +148,7 @@ Constructs the key for the storage lookup.
 The prefixLen is limiting the length of the destination prefix.
 */
 func (cd *CallDescriptor) GetKey() string {
-	return fmt.Sprintf("%s:%s:%s", cd.Tenant, cd.Subject, cd.Destination)
+	return fmt.Sprintf("%s:%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, cd.Subject, cd.Destination)
 }
 
 /*

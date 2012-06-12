@@ -28,6 +28,7 @@ var (
 	redisserver       = flag.String("redisserver", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
 	redisdb           = flag.Int("rdb", 10, "redis database number (10)")
 	redispass         = flag.String("pass", "", "redis database password")
+	flush             = flag.Bool("flush", false, "Flush the database before importing")
 	monthsFn          = flag.String("month", "Months.csv", "Months file")
 	monthdaysFn       = flag.String("monthdays", "MonthDays.csv", "Month days file")
 	weekdaysFn        = flag.String("weekdays", "WeekDays.csv", "Week days file")
@@ -51,13 +52,16 @@ func writeToDatabase() {
 	if err != nil {
 		log.Fatalf("Could not open database connection: %v", err)
 	}
+	if *flush {
+		storage.Flush()
+	}
 	for _, d := range destinations {
 		storage.SetDestination(d)
 	}
 	for k, cds := range ratingProfiles {
 		log.Print(k)
 		for _, cd := range cds {
-			storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, "")
+			storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
 			log.Print(cd.GetKey())
 		}
 	}

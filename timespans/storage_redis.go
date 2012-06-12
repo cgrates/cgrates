@@ -37,6 +37,10 @@ func (rs *RedisStorage) Close() {
 	rs.db.Quit()
 }
 
+func (rs *RedisStorage) Flush() error {
+	return rs.db.Flushdb()
+}
+
 func (rs *RedisStorage) GetActivationPeriodsOrFallback(key string) (aps []*ActivationPeriod, fallbackKey string, err error) {
 	//rs.db.Select(rs.dbNb)
 	elem, err := rs.db.Get(key)

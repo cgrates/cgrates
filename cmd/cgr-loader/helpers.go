@@ -100,3 +100,14 @@ func (rt *RateTiming) GetInterval(r *Rate) (i *timespans.Interval) {
 	}
 	return
 }
+
+type CallDescriptors []*timespans.CallDescriptor
+
+func (cds CallDescriptors) getKey(key string) *timespans.CallDescriptor {
+	for _, cd := range cds {
+		if cd.GetKey() == key {
+			return cd
+		}
+	}
+	return nil
+}

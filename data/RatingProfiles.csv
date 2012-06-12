@@ -1,4 +1,4 @@
-Tenant,TOR,Subject,RatesFallbackSubject,RatesTimingTag,ActivationTime
-CUSTOMER_1,0,rif,danb,STANDARD,2012-01-01T00:00:00Z
-CUSTOMER_2,0,danb,,STANDARD,2012-01-01T00:00:00Z
-CUSTOMER_1,0,danb,,PREMIUM,2012-01-01T00:00:00Z
+Tenant,TOR,Direction,Subject,RatesFallbackSubject,RatesTimingTag,ActivationTime
+CUSTOMER_1,0,OUT,rif:from:tm,danb,STANDARD,2012-01-01T00:00:00Z
+CUSTOMER_2,0,OUT,danb:87.139.12.167,danb,STANDARD,2012-01-01T00:00:00Z
+CUSTOMER_1,0,OUT,danb,,PREMIUM,2012-01-01T00:00:00Z
