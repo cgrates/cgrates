@@ -53,6 +53,7 @@ func round(val float64, prec int) float64 {
 The input stucture that contains call information.
 */
 type CallDescriptor struct {
+	Direction                    string
 	TOR                          string
 	Tenant, Subject, Destination string
 	TimeStart, TimeEnd           time.Time

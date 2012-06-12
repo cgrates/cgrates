@@ -19,6 +19,8 @@ package main
 
 import (
 	"flag"
+	"github.com/cgrates/cgrates/timespans"
+	"log"
 )
 
 var (
@@ -44,6 +46,23 @@ var (
 	sep               rune
 )
 
+func writeToDatabase() {
+	storage, err := timespans.NewRedisStorage(*redisserver, *redisdb)
+	if err != nil {
+		log.Fatalf("Could not open database connection: %v", err)
+	}
+	for _, d := range destinations {
+		storage.SetDestination(d)
+	}
+	for k, cds := range ratingProfiles {
+		log.Print(k)
+		for _, cd := range cds {
+			storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, "")
+			log.Print(cd.GetKey())
+		}
+	}
+}
+
 func main() {
 	flag.Parse()
 	sep = []rune(*separator)[0]
@@ -60,4 +79,5 @@ func main() {
 	loadRecurrentDebits()
 	loadRecurrentTopups()
 	loadBalanceProfiles()
+	writeToDatabase()
 }

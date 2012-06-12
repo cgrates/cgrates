@@ -65,7 +65,7 @@ type Timing struct {
 }
 
 func NewTiming(timeingInfo ...string) (rt *Timing) {
-	rt = &RateTiming{
+	rt = &Timing{
 		MonthsTag:    timeingInfo[0],
 		MonthDaysTag: timeingInfo[1],
 		WeekDaysTag:  timeingInfo[2],

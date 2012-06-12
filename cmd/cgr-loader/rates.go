@@ -21,6 +21,7 @@ import (
 	"encoding/csv"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
+	"fmt"
 	"os"
 	"time"
 )
@@ -29,7 +30,7 @@ var (
 	months         = make(map[string][]time.Month)
 	monthdays      = make(map[string][]int)
 	weekdays       = make(map[string][]time.Weekday)
-	destinations   = make(map[string][]string)
+	destinations   []*timespans.Destination
 	rates          = make(map[string][]*Rate)
 	timings        = make(map[string][]*Timing)
 	ratesTimings   = make(map[string][]*RateTiming)
@@ -120,9 +121,20 @@ func loadDestinations() {
 			// skip header line
 			continue
 		}
-		destinations[tag] = record[1:]
-		log.Print(tag, destinations[tag])
+		var dest *timespans.Destination
+		for _, d := range destinations {
+			if d.Id == tag {
+				dest = d
+				break
+			}
+		}
+		if dest == nil {
+			dest = &timespans.Destination{Id: tag}
+			destinations = append(destinations, dest)
+		}
+		dest.Prefixes = append(dest.Prefixes, record[1:]...)
 	}
+	log.Print(destinations)
 }
 
 func loadRates() {
@@ -149,7 +161,7 @@ func loadRates() {
 	}
 }
 
-func loadTiming() {
+func loadTimings() {
 	fp, err := os.Open(*timingsFn)
 	if err != nil {
 		log.Printf("Could not open timings file: %v", err)
@@ -165,17 +177,17 @@ func loadTiming() {
 			continue
 		}
 
-		t := NewTiming(rates[1:]...)
+		t := NewTiming(record[1:]...)
 		timings[tag] = append(timings[tag], t)
 
 		log.Print(tag)
-		for _, i := range ratesTiming[tag] {
+		for _, i := range timings[tag] {
 			log.Print(i)
 		}
 	}
 }
 
-func loadRatesTiming() {
+func loadRatesTimings() {
 	fp, err := os.Open(*ratestimingsFn)
 	if err != nil {
 		log.Printf("Could not open rates timings file: %v", err)
@@ -199,10 +211,10 @@ func loadRatesTiming() {
 
 		for _, t := range ts {
 			rt := NewRateTiming(record[1], t)
-			ratesTiming[tag] = append(ratesTiming[tag], rt)
+			ratesTimings[tag] = append(ratesTimings[tag], rt)
 		}
 		log.Print(tag)
-		for _, i := range ratesTiming[tag] {
+		for _, i := range ratesTimings[tag] {
 			log.Print(i)
 		}
 	}
@@ -229,7 +241,7 @@ func loadRatingProfiles() {
 			log.Printf("Cannot parse activation time from %v", record[5])
 			continue
 		}
-		rts, exists := ratesTiming[record[4]]
+		rts, exists := ratesTimings[record[4]]
 		if !exists {
 			log.Printf("Could not get rate timing for tag %v", record[4])
 			continue
@@ -243,25 +255,33 @@ func loadRatingProfiles() {
 			ap := &timespans.ActivationPeriod{
 				ActivationTime: at,
 			}
-			for _, r := range rs { //rates
-				ds, exists := destinations[r.DestinationsTag]
-				if !exists {
-					log.Printf("Could not get destinations for tag %v", r.DestinationsTag)
-					continue
-				}
-				ap.AddInterval(rt.GetInterval(r))
-				for _, d := range ds { //destinations
-					cd := &timespans.CallDescriptor{
-						Tenant:            tenant,
-						TOR:               tor,
-						Subject:           subject,
-						DestinationPrefix: d,
+			for _, r := range rs { //rates				
+				for _, d := range destinations {
+					if d.Id == r.DestinationsTag {
+						ap.AddInterval(rt.GetInterval(r))
+						for _, p := range d.Prefixes { //destinations
+							// Search for a CallDescriptor with the same key
+							var cd *timespans.CallDescriptor
+							for _, c := range ratingProfiles[p] {
+								if c.GetKey() == fmt.Sprintf("%s:%s:%s", tenant, subject, p) {
+									cd = c
+								}
+							}
+							if cd == nil {
+								cd = &timespans.CallDescriptor{
+									Tenant:      tenant,
+									TOR:         tor,
+									Subject:     subject,
+									Destination: p,
+								}
+								ratingProfiles[p] = append(ratingProfiles[p], cd)
+							}
+							if fallbacksubject != "" {
+								// construct a new cd!!!!
+							}
+							cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+						}
 					}
-					if fallbacksubject != "" {
-						// construct a new cd!!!!
-					}
-					cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
-					ratingProfiles[d] = append(ratingProfiles[d], cd)
 				}
 			}
 		}
