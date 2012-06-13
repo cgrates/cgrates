@@ -21,6 +21,7 @@ package timespans
 import (
 	"reflect"
 	"testing"
+	"encoding/json"
 	"time"
 	//"log"
 )
@@ -28,16 +29,6 @@ import (
 func init() {
 	sg, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	SetStorageGetter(sg)
-}
-
-func TestApRestoreKyoto(t *testing.T) {
-	cd := &CallDescriptor{Tenant: "vdf",
-		Subject:     "rif",
-		Destination: "0257"}
-	cd.SearchStorageForPrefix()
-	if len(cd.ActivationPeriods) != 2 {
-		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
-	}
 }
 
 func TestApRestoreRedis(t *testing.T) {
@@ -59,13 +50,13 @@ func TestApStoreRestore(t *testing.T) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
-	result := ap.store()
-	expected := "1328106601000000000;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"
-	if result != expected {
+	result, _ := json.Marshal(ap)
+	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Months\":[2],\"MonthDays\":[1],\"WeekDays\":[3,4],\"StartTime\":\"14:30:00\",\"EndTime\":\"15:00:00\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"BillingUnit\":0}]}"
+	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
 	ap1 := ActivationPeriod{}
-	ap1.restore(result)
+	json.Unmarshal(result, &ap1)
 	if reflect.DeepEqual(ap, ap1) {
 		t.Errorf("Expected %v was %v", ap, ap1)
 	}
@@ -76,22 +67,19 @@ func TestApStoreRestoreBlank(t *testing.T) {
 	i := &Interval{}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
-	result := ap.store()
-	expected := "1328106601000000000;|||||0|0|0|0;"
-	if result != expected {
+	result, _ := json.Marshal(ap)
+	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Months\":null,\"MonthDays\":null,\"WeekDays\":null,\"StartTime\":\"\",\"EndTime\":\"\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"BillingUnit\":0}]}"
+	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
 	ap1 := ActivationPeriod{}
-	ap1.restore(result)
+	json.Unmarshal(result, &ap1)
 	if reflect.DeepEqual(ap, ap1) {
 		t.Errorf("Expected %v was %v", ap, ap1)
 	}
 }
 
 func TestFallbackDirect(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0745"}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 1 {
@@ -100,9 +88,6 @@ func TestFallbackDirect(t *testing.T) {
 }
 
 func TestFallbackWithBackTrace(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0745121"}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 1 {
@@ -111,9 +96,6 @@ func TestFallbackWithBackTrace(t *testing.T) {
 }
 
 func TestFallbackDefault(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "00000"}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 1 {
@@ -122,9 +104,6 @@ func TestFallbackDefault(t *testing.T) {
 }
 
 func TestFallbackNoInfiniteLoop(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0721"}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 0 {
@@ -137,7 +116,7 @@ func TestFallbackNoInfiniteLoop(t *testing.T) {
 func BenchmarkActivationPeriodRestore(b *testing.B) {
 	ap := ActivationPeriod{}
 	for i := 0; i < b.N; i++ {
-		ap.restore("1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;")
+		json.Unmarshal([]byte("1328106601;2|1|3,4|14:30:00|15:00:00|0|0|0|0;"), &ap)
 	}
 }
 
@@ -155,7 +134,7 @@ func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
 	ap1 := ActivationPeriod{}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		result := ap.store()
-		ap1.restore(result)
+		result, _ := json.Marshal(ap)
+		json.Unmarshal(result, &ap1)
 	}
 }

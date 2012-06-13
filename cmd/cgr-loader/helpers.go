@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"strconv"
+	"time"
 )
 
 type Rate struct {
@@ -68,12 +69,15 @@ type Timing struct {
 }
 
 func NewTiming(timeingInfo ...string) (rt *Timing) {
-	rt = &Timing{
-		StartTime: timeingInfo[3],
-	}
+	rt = &Timing{}
 	rt.Months.Parse(timeingInfo[0], ";")
 	rt.MonthDays.Parse(timeingInfo[1], ";")
 	rt.WeekDays.Parse(timeingInfo[2], ";")
+	if timeingInfo[3] == "*now" {
+		rt.StartTime = time.Now().Format("00:00:00")
+	} else {
+		rt.StartTime = timeingInfo[3]
+	}
 	return
 }
 

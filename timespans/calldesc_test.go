@@ -80,26 +80,6 @@ func TestKyotoGetCost(t *testing.T) {
 }
 
 func TestRedisGetCost(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 540, ConnectFee: 0}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
-		t.Errorf("Expected %v was %v", expected, result)
-	}
-}
-
-func TestMongoGetCost(t *testing.T) {
-	getter, err := NewMongoStorage("127.0.0.1", "test")
-	if err != nil {
-		return
-	}
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
@@ -111,8 +91,6 @@ func TestMongoGetCost(t *testing.T) {
 }
 
 func TestFullDestNotFound(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
@@ -126,9 +104,6 @@ func TestFullDestNotFound(t *testing.T) {
 }
 
 func TestMultipleActivationPeriods(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 8, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
@@ -301,39 +276,8 @@ func BenchmarkRedisGetCost(b *testing.B) {
 	}
 }
 
-func BenchmarkKyotoGetting(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		key := cd.GetKey()
-		getter.GetActivationPeriodsOrFallback(key)
-	}
-}
-
-func BenchmarkKyotoRestoring(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.SearchStorageForPrefix()
-	}
-}
-
 func BenchmarkSplitting(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
 
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
@@ -342,70 +286,6 @@ func BenchmarkSplitting(b *testing.B) {
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.splitInTimeSpans()
-	}
-}
-
-func BenchmarkKyotoGetCost(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.GetCost()
-	}
-}
-
-func BenchmarkMongoGetting(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		getter.GetActivationPeriodsOrFallback(cd.GetKey())
-	}
-}
-
-func BenchmarkMongoGetCost(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
-	defer getter.Close()
-
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.GetCost()
-	}
-}
-
-func BenchmarkKyotoSingleGetSessionTime(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 100}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime()
-	}
-}
-
-func BenchmarkKyotoMultipleGetSessionTime(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime()
 	}
 }
 
@@ -423,28 +303,6 @@ func BenchmarkRedisSingleGetSessionTime(b *testing.B) {
 func BenchmarkRedisMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	getter, _ := NewRedisStorage("", 10)
-	defer getter.Close()
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime()
-	}
-}
-
-func BenchmarkMongoSingleGetSessionTime(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
-	defer getter.Close()
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 100}
-	b.StartTimer()
-	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime()
-	}
-}
-
-func BenchmarkMongoMultipleGetSessionTime(b *testing.B) {
-	b.StopTimer()
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
 	defer getter.Close()
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
 	b.StartTimer()

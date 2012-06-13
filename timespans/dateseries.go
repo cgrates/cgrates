@@ -40,30 +40,20 @@ func (m Months) Contains(month time.Month) (result bool) {
 	return
 }
 
-/*
-Serializes the month for the storage. Used for key-value storages.
-*/
-func (m Months) store() (result string) {
-	for _, ms := range m {
-		result += strconv.Itoa(int(ms)) + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-/*
-De-serializes the month for the storage. Used for key-value storages.
-*/
-func (m *Months) restore(input string) {
-	m.Parse(input, ",")
-}
-
 // Loades Month elemnents from a string separated by sep.
 func (m *Months) Parse(input, sep string) {
-	elements := strings.Split(input, sep)
-	for _, ms := range elements {
-		if month, err := strconv.Atoi(ms); err == nil {
-			*m = append(*m, time.Month(month))
+	switch input {
+	case "*all":
+		*m = []time.Month{time.January, time.February, time.March, time.April, time.May, time.June,
+			time.July, time.August, time.September, time.October, time.November, time.December}
+	case "*none":
+		*m = []time.Month{}
+	default:
+		elements := strings.Split(input, sep)
+		for _, ms := range elements {
+			if month, err := strconv.Atoi(ms); err == nil {
+				*m = append(*m, time.Month(month))
+			}
 		}
 	}
 }
@@ -83,30 +73,19 @@ func (md MonthDays) Contains(monthDay int) (result bool) {
 	return
 }
 
-/*
-Serializes the month days for the storage. Used for key-value storages.
-*/
-func (md MonthDays) store() (result string) {
-	for _, mds := range md {
-		result += strconv.Itoa(mds) + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-/*
-De-serializes the month days for the storage. Used for key-value storages.
-*/
-func (md *MonthDays) restore(input string) {
-	md.Parse(input, ",")
-}
-
 // Parse MonthDay elements from string separated by sep.
 func (md *MonthDays) Parse(input, sep string) {
-	elements := strings.Split(input, sep)
-	for _, mds := range elements {
-		if day, err := strconv.Atoi(mds); err == nil {
-			*md = append(*md, day)
+	switch input {
+	case "*all":
+		*md = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
+	case "*none":
+		*md = []int{}
+	default:
+		elements := strings.Split(input, sep)
+		for _, mds := range elements {
+			if day, err := strconv.Atoi(mds); err == nil {
+				*md = append(*md, day)
+			}
 		}
 	}
 }
@@ -126,29 +105,18 @@ func (wd WeekDays) Contains(weekDay time.Weekday) (result bool) {
 	return
 }
 
-/*
-Serializes the week days for the storage. Used for key-value storages.
-*/
-func (wd WeekDays) store() (result string) {
-	for _, wds := range wd {
-		result += strconv.Itoa(int(wds)) + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-/*
-De-serializes the week days for the storage. Used for key-value storages.
-*/
-func (wd *WeekDays) restore(input string) {
-	wd.Parse(input, ",")
-}
-
 func (wd *WeekDays) Parse(input, sep string) {
-	elements := strings.Split(input, sep)
-	for _, wds := range elements {
-		if day, err := strconv.Atoi(wds); err == nil {
-			*wd = append(*wd, time.Weekday(day))
+	switch input {
+	case "*all":
+		*wd = []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday}
+	case "*none":
+		*wd = []time.Weekday{}
+	default:
+		elements := strings.Split(input, sep)
+		for _, wds := range elements {
+			if day, err := strconv.Atoi(wds); err == nil {
+				*wd = append(*wd, time.Weekday(day%7)) // %7 for sunday = 7 normalization
+			}
 		}
 	}
 }

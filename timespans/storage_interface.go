@@ -28,8 +28,8 @@ type StorageGetter interface {
 	SetActivationPeriodsOrFallback(string, []*ActivationPeriod, string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
-	GetTariffPlan(string) (*TariffPlan, error)
-	SetTariffPlan(*TariffPlan) error
+	GetActions(string) ([]*Action, error)
+	SetActions(string, []*Action) error
 	GetUserBalance(string) (*UserBalance, error)
 	SetUserBalance(*UserBalance) error
 }

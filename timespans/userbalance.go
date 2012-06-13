@@ -21,14 +21,18 @@ package timespans
 import (
 	// "log"
 	"sort"
-	"bytes"
-	"encoding/gob"
-	"sync"
 )
 
 const (
 	UB_TYPE_POSTPAID = "postpaid"
 	UB_TYPE_PREPAID  = "prepaid"
+	// Direction type
+	INBOUND  = "IN"
+	OUTBOUND = "OUT"
+	// Balance types
+	CREDIT  = "MONETARY"
+	SMS     = "SMS"
+	TRAFFIC = "INTERNET"
 )
 
 var (
@@ -39,14 +43,13 @@ var (
 Structure containing information about user's credit (minutes, cents, sms...).'
 */
 type UserBalance struct {
-	Id            string
-	Type          string // prepaid-postpaid
-	BalanceMap    map[string]float64
-	UnitsCounters []*UnitsCounter
-	TariffPlanId  string
-	tariffPlan    *TariffPlan
-	MinuteBuckets []*MinuteBucket
-	mux           sync.RWMutex
+	Id               string
+	Type             string // prepaid-postpaid
+	BalanceMap       map[string]float64
+	MinuteBuckets    []*MinuteBucket
+	InUnitsCounters  []*UnitsCounter
+	OutUnitsCounters []*UnitsCounter
+	ActionTriggers   []*ActionTrigger
 }
 
 /*
@@ -75,32 +78,6 @@ func (bs bucketsorter) Less(j, i int) bool {
 	return bs[i].Weight < bs[j].Weight ||
 		bs[i].precision < bs[j].precision ||
 		bs[i].Price > bs[j].Price
-}
-
-/*
-Serializes the user balance for the storage. Used for key-value storage.
-*/
-func (ub *UserBalance) store() (result string) {
-	buf := new(bytes.Buffer)
-	gob.NewEncoder(buf).Encode(ub)
-	return buf.String()
-}
-
-/*
-De-serializes the user balance for the storage. Used for key-value storage.
-*/
-func (ub *UserBalance) restore(input string) {
-	gob.NewDecoder(bytes.NewBuffer([]byte(input))).Decode(ub)
-}
-
-/*
-Returns the tariff plan loading it from the storage if necessary.
-*/
-func (ub *UserBalance) getTariffPlan() (tp *TariffPlan, err error) {
-	if ub.tariffPlan == nil && ub.TariffPlanId != "" {
-		ub.tariffPlan, err = storageGetter.GetTariffPlan(ub.TariffPlanId)
-	}
-	return ub.tariffPlan, err
 }
 
 /*
@@ -138,8 +115,6 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds float64, buck
 Debits some amount of user's money credit. Returns the remaining credit in user's balance.
 */
 func (ub *UserBalance) debitMoneyBalance(amount float64) float64 {
-	ub.mux.Lock()
-	defer ub.mux.Unlock()
 	ub.BalanceMap[CREDIT] -= amount
 	storageGetter.SetUserBalance(ub)
 	return ub.BalanceMap[CREDIT]
@@ -152,8 +127,6 @@ If the amount is bigger than the sum of all seconds in the minute buckets than n
 debited and an error will be returned.
 */
 func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string) error {
-	ub.mux.Lock()
-	defer ub.mux.Unlock()
 	avaliableNbSeconds, bucketList := ub.getSecondsForPrefix(prefix)
 	if avaliableNbSeconds < amount {
 		return new(AmountTooBig)
@@ -199,8 +172,6 @@ Debits some amount of user's SMS balance. Returns the remaining SMS in user's ba
 If the amount is bigger than the balance than nothing wil be debited and an error will be returned
 */
 func (ub *UserBalance) debitSMSBuget(amount float64) (float64, error) {
-	ub.mux.Lock()
-	defer ub.mux.Unlock()
 	if ub.BalanceMap[SMS] < amount {
 		return ub.BalanceMap[SMS], new(AmountTooBig)
 	}
@@ -214,8 +185,6 @@ func (ub *UserBalance) debitSMSBuget(amount float64) (float64, error) {
 Adds the specified amount of seconds.
 */
 // func (ub *UserBalance) addReceivedCallSeconds(direction, tor, destination string, amount float64) error {
-// 	ub.mux.Lock()
-// 	defer ub.mux.Unlock()
 // 	ub.ReceivedCallSeconds += amount
 // 	if tariffPlan, err := ub.getTariffPlan(); tariffPlan != nil && err == nil {
 // 		if ub.ReceivedCallSeconds >= tariffPlan.ReceivedCallSecondsLimit {
@@ -240,10 +209,8 @@ Adds the specified amount of seconds.
 /*
 Resets the user balance items to their tariff plan values.
 */
-func (ub *UserBalance) resetUserBalance() (err error) {
-	ub.mux.Lock()
-	defer ub.mux.Unlock()
-	if tp, err := ub.getTariffPlan(); err == nil {
+/*func (ub *UserBalance) resetUserBalance() (err error) {
+	if tp, err := ub.getAccountActions(); err == nil {
 		for k, _ := range ub.BalanceMap {
 			ub.BalanceMap[k] = tp.BalanceMap[k]
 		}
@@ -259,3 +226,4 @@ func (ub *UserBalance) resetUserBalance() (err error) {
 	}
 	return
 }
+*/

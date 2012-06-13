@@ -165,7 +165,6 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets	
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		userBalance.mux.RLock()
 		_, bucketList := userBalance.getSecondsForPrefix(cd.Destination)
 		for _, mb := range bucketList {
 			for i := 0; i < len(timespans); i++ {
@@ -180,7 +179,6 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 				}
 			}
 		}
-		userBalance.mux.RUnlock()
 	}
 	if firstSpan.MinuteInfo != nil {
 		return // all the timespans are on minutes
@@ -285,10 +283,8 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 		if userBalance.Type == UB_TYPE_POSTPAID {
 			return -1, nil
 		} else {
-			userBalance.mux.RLock()
 			availableCredit = userBalance.BalanceMap[CREDIT]
 			availableSeconds, _ = userBalance.getSecondsForPrefix(cd.Destination)
-			userBalance.mux.RUnlock()
 		}
 	} else {
 		return cd.Amount, err
@@ -389,9 +385,9 @@ The amount filed has to be filled in call descriptor.
 /*
 Resets user balances value to the amounts specified in the tariff plan.
 */
-func (cd *CallDescriptor) ResetUserBalance() (err error) {
+/*func (cd *CallDescriptor) ResetUserBalance() (err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		return userBalance.resetUserBalance()
 	}
 	return err
-}
+}*/

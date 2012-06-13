@@ -21,8 +21,6 @@ package timespans
 import (
 	"time"
 	//"log"
-	"strconv"
-	"strings"
 )
 
 /*
@@ -38,52 +36,6 @@ Adds one ore more intervals to the internal interval list.
 */
 func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 	for _, i := range is {
-		ap.Intervals = append(ap.Intervals, i)
-	}
-}
-
-/*
-Serializes the activation periods for the storage. Used for key-value storages.
-*/
-func (ap *ActivationPeriod) store() (result string) {
-	result += strconv.FormatInt(ap.ActivationTime.UnixNano(), 10) + ";"
-	for _, i := range ap.Intervals {
-		var is string
-		is = i.Months.store() + "|"
-		is += i.MonthDays.store() + "|"
-		is += i.WeekDays.store() + "|"
-		is += i.StartTime + "|"
-		is += i.EndTime + "|"
-		is += strconv.FormatFloat(i.Weight, 'f', -1, 64) + "|"
-		is += strconv.FormatFloat(i.ConnectFee, 'f', -1, 64) + "|"
-		is += strconv.FormatFloat(i.Price, 'f', -1, 64) + "|"
-		is += strconv.FormatFloat(i.BillingUnit, 'f', -1, 64)
-		result += is + ";"
-	}
-	return
-}
-
-/*
-De-serializes the activation periods for the storage. Used for key-value storages.
-*/
-func (ap *ActivationPeriod) restore(input string) {
-	elements := strings.Split(input, ";")
-	unixNano, _ := strconv.ParseInt(elements[0], 10, 64)
-	ap.ActivationTime = time.Unix(0, unixNano).In(time.UTC)
-	ap.Intervals = make([]*Interval, 0)
-	for _, is := range elements[1 : len(elements)-1] {
-		i := &Interval{}
-		ise := strings.Split(is, "|")
-		i.Months.restore(ise[0])
-		i.MonthDays.restore(ise[1])
-		i.WeekDays.restore(ise[2])
-		i.StartTime = ise[3]
-		i.EndTime = ise[4]
-		i.Weight, _ = strconv.ParseFloat(ise[5], 64)
-		i.ConnectFee, _ = strconv.ParseFloat(ise[6], 64)
-		i.Price, _ = strconv.ParseFloat(ise[7], 64)
-		i.BillingUnit, _ = strconv.ParseFloat(ise[8], 64)
-
 		ap.Intervals = append(ap.Intervals, i)
 	}
 }

@@ -21,60 +21,35 @@ package timespans
 import (
 	"reflect"
 	"testing"
+	"encoding/json"
 )
+
+func init() {
+	sg, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	SetStorageGetter(sg)
+}
 
 func TestDestinationStoreRestore(t *testing.T) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	s := nationale.store()
+	s, _ := json.Marshal(nationale)
 	d1 := &Destination{Id: "nat"}
-	d1.restore(s)
-	if d1.store() != s {
-		t.Errorf("Expected %q was %q", s, d1.store())
-	}
-}
-
-func TestDestinationKyotoStore(t *testing.T) {
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	getter.SetDestination(nationale)
-	result, _ := getter.GetDestination(nationale.Id)
-	if !reflect.DeepEqual(nationale, result) {
-		t.Errorf("Expected %q was %q", nationale, result)
+	json.Unmarshal(s, d1)
+	s1, _ := json.Marshal(d1)
+	if reflect.DeepEqual(s1, s) {
+		t.Errorf("Expected %q was %q", s, s1)
 	}
 }
 
 func TestDestinationRedisStore(t *testing.T) {
-	getter, err := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	if err != nil {
-		return
-	}
-	defer getter.Close()
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	getter.SetDestination(nationale)
-	result, _ := getter.GetDestination(nationale.Id)
-	if !reflect.DeepEqual(nationale, result) {
-		t.Errorf("Expected %q was %q", nationale, result)
-	}
-}
-
-func TestDestinationMongoStore(t *testing.T) {
-	getter, err := NewMongoStorage("127.0.0.1", "test")
-	if err != nil {
-		return
-	}
-	defer getter.Close()
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	getter.SetDestination(nationale)
-	result, _ := getter.GetDestination(nationale.Id)
+	storageGetter.SetDestination(nationale)
+	result, _ := storageGetter.GetDestination(nationale.Id)
 	if !reflect.DeepEqual(nationale, result) {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
 }
 
 func TestDestinationContainsPrefix(t *testing.T) {
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
-	defer getter.Close()
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	contains, precision := nationale.containsPrefix("0256")
 	if !contains || precision != len("0256") {
@@ -85,32 +60,10 @@ func TestDestinationContainsPrefix(t *testing.T) {
 
 /********************************* Benchmarks **********************************/
 
-func BenchmarkDestinationKyotoStoreRestore(b *testing.B) {
-	getter, _ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	for i := 0; i < b.N; i++ {
-		getter.SetDestination(nationale)
-		getter.GetDestination(nationale.Id)
-	}
-}
-
 func BenchmarkDestinationRedisStoreRestore(b *testing.B) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
-		getter.SetDestination(nationale)
-		getter.GetDestination(nationale.Id)
-	}
-}
-
-func BenchmarkDestinationMongoStoreRestore(b *testing.B) {
-	getter, _ := NewMongoStorage("127.0.0.1", "test")
-	defer getter.Close()
-	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	for i := 0; i < b.N; i++ {
-		getter.SetDestination(nationale)
-		getter.GetDestination(nationale.Id)
+		storageGetter.SetDestination(nationale)
+		storageGetter.GetDestination(nationale.Id)
 	}
 }

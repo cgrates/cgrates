@@ -20,7 +20,7 @@ package timespans
 
 import (
 	"github.com/simonz05/godis"
-	"strings"
+	"encoding/json"
 )
 
 type RedisStorage struct {
@@ -47,31 +47,20 @@ func (rs *RedisStorage) GetActivationPeriodsOrFallback(key string) (aps []*Activ
 	if err != nil {
 		return
 	}
-	valuesString := elem.String()
-	values := strings.Split(valuesString, "\n")
-	if len(values) > 1 {
-		for _, ap_string := range values {
-			if len(ap_string) > 0 {
-				ap := &ActivationPeriod{}
-				ap.restore(ap_string)
-				aps = append(aps, ap)
-			}
-		}
-	} else { // fallback case
-		fallbackKey = valuesString
+	err = json.Unmarshal(elem, &aps)
+	if err != nil {
+		err = json.Unmarshal(elem, &fallbackKey)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) error {
+func (rs *RedisStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) (err error) {
 	//.db.Select(rs.dbNb)
-	result := ""
+	var result []byte
 	if len(aps) > 0 {
-		for _, ap := range aps {
-			result += ap.store() + "\n"
-		}
+		result, err = json.Marshal(aps)
 	} else {
-		result = fallbackKey
+		result, err = json.Marshal(fallbackKey)
 	}
 	return rs.db.Set(key, result)
 }
@@ -80,39 +69,41 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 	//rs.db.Select(rs.dbNb + 1)
 	if values, err := rs.db.Get(key); err == nil {
 		dest = &Destination{Id: key}
-		dest.restore(values.String())
+		err = json.Unmarshal(values, dest)
 	}
 	return
 }
-func (rs *RedisStorage) SetDestination(dest *Destination) error {
+func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	//rs.db.Select(rs.dbNb + 1)
-	return rs.db.Set(dest.Id, dest.store())
+	result, err := json.Marshal(dest)
+	return rs.db.Set(dest.Id, result)
 }
 
-func (rs *RedisStorage) GetTariffPlan(key string) (tp *TariffPlan, err error) {
+func (rs *RedisStorage) GetActions(key string) (as []*Action, err error) {
 	//rs.db.Select(rs.dbNb + 2)
 	if values, err := rs.db.Get(key); err == nil {
-		tp = &TariffPlan{Id: key}
-		tp.restore(values.String())
+		err = json.Unmarshal(values, as)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetTariffPlan(tp *TariffPlan) error {
+func (rs *RedisStorage) SetActions(key string, as []*Action) (err error) {
 	//rs.db.Select(rs.dbNb + 2)
-	return rs.db.Set(tp.Id, tp.store())
+	result, err := json.Marshal(as)
+	return rs.db.Set(key, result)
 }
 
 func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
 	//rs.db.Select(rs.dbNb + 3)
 	if values, err := rs.db.Get(key); err == nil {
 		ub = &UserBalance{Id: key}
-		ub.restore(values.String())
+		err = json.Unmarshal(values, ub)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetUserBalance(ub *UserBalance) error {
+func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 	//rs.db.Select(rs.dbNb + 3)
-	return rs.db.Set(ub.Id, ub.store())
+	result, err := json.Marshal(ub)
+	return rs.db.Set(ub.Id, result)
 }

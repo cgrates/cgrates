@@ -18,10 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package timespans
 
-import (
-	"bytes"
-	"encoding/gob"
-)
+import ()
 
 // Amount of a trafic of a certain type (TOR)
 type UnitsCounter struct {
@@ -62,30 +59,16 @@ func (uc *UnitsCounter) getDestination() (dest *Destination) {
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
+	Id             string
+	ActionType     string
 	Direction      string
 	TOR            string
 	Units          float64
-	balanceMap     map[string]float64
+	BalanceMap     map[string]float64
 	MinuteBuckets  []*MinuteBucket
 	Weight         float64
 	DestinationsId string
 	destination    *Destination
-}
-
-/*
-Serializes the tariff plan for the storage. Used for key-value storages.
-*/
-func (a *Action) store() (result string) {
-	buf := new(bytes.Buffer)
-	gob.NewEncoder(buf).Encode(a)
-	return buf.String()
-}
-
-/*
-De-serializes the tariff plan for the storage. Used for key-value storages.
-*/
-func (a *Action) restore(input string) {
-	gob.NewDecoder(bytes.NewBuffer([]byte(input))).Decode(a)
 }
 
 // Structure to store actions according to weight
@@ -101,4 +84,19 @@ func (s actionsorter) Swap(i, j int) {
 
 func (s actionsorter) Less(j, i int) bool {
 	return s[i].Weight < s[j].Weight
+}
+
+type ActionTrigger struct {
+	BalanceId      string
+	ThresholdValue float64
+	DestinationId  string
+	destination    *Destination
+	ActionsId      string
+	actions        []*Action
+}
+
+type ActionTiming struct {
+	Id        string
+	ActionsId string
+	actions   []*Action
 }
