@@ -61,16 +61,19 @@ func NewRate(destinationsTag, connectFee, price, billingUnit, weight string) (r 
 }
 
 type Timing struct {
-	MonthsTag, MonthDaysTag, WeekDaysTag, StartTime string
+	Months    timespans.Months
+	MonthDays timespans.MonthDays
+	WeekDays  timespans.WeekDays
+	StartTime string
 }
 
 func NewTiming(timeingInfo ...string) (rt *Timing) {
 	rt = &Timing{
-		MonthsTag:    timeingInfo[0],
-		MonthDaysTag: timeingInfo[1],
-		WeekDaysTag:  timeingInfo[2],
-		StartTime:    timeingInfo[3],
+		StartTime: timeingInfo[3],
 	}
+	rt.Months.Parse(timeingInfo[0], ";")
+	rt.MonthDays.Parse(timeingInfo[1], ";")
+	rt.WeekDays.Parse(timeingInfo[2], ";")
 	return
 }
 
@@ -89,9 +92,9 @@ func NewRateTiming(ratesTag string, timing *Timing) (rt *RateTiming) {
 
 func (rt *RateTiming) GetInterval(r *Rate) (i *timespans.Interval) {
 	i = &timespans.Interval{
-		Months:      timespans.Months(months[rt.timing.MonthsTag]),
-		MonthDays:   timespans.MonthDays(monthdays[rt.timing.MonthDaysTag]),
-		WeekDays:    timespans.WeekDays(weekdays[rt.timing.WeekDaysTag]),
+		Months:      rt.timing.Months,
+		MonthDays:   rt.timing.MonthDays,
+		WeekDays:    rt.timing.WeekDays,
 		StartTime:   rt.timing.StartTime,
 		ConnectFee:  r.ConnectFee,
 		Price:       r.Price,

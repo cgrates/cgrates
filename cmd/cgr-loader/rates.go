@@ -27,84 +27,12 @@ import (
 )
 
 var (
-	months         = make(map[string][]time.Month)
-	monthdays      = make(map[string][]int)
-	weekdays       = make(map[string][]time.Weekday)
 	destinations   []*timespans.Destination
 	rates          = make(map[string][]*Rate)
 	timings        = make(map[string][]*Timing)
 	ratesTimings   = make(map[string][]*RateTiming)
 	ratingProfiles = make(map[string]CallDescriptors)
 )
-
-func loadDataSeries() {
-	// MONTHS
-	fp, err := os.Open(*monthsFn)
-	if err != nil {
-		log.Printf("Could not open months file: %v", err)
-	} else {
-		csvReader := csv.NewReader(fp)
-		csvReader.Comma = sep
-		for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-			tag := record[0]
-			if tag == "Tag" {
-				// skip header line
-				continue
-			}
-			for i, m := range record[1:] {
-				if m == "1" {
-					months[tag] = append(months[tag], time.Month(i+1))
-				}
-			}
-			log.Print(tag, months[tag])
-		}
-		fp.Close()
-	}
-	// MONTH DAYS
-	fp, err = os.Open(*monthdaysFn)
-	if err != nil {
-		log.Printf("Could not open month days file: %v", err)
-	} else {
-		csvReader := csv.NewReader(fp)
-		csvReader.Comma = sep
-		for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-			tag := record[0]
-			if tag == "Tag" {
-				// skip header line
-				continue
-			}
-			for i, m := range record[1:] {
-				if m == "1" {
-					monthdays[tag] = append(monthdays[tag], i+1)
-				}
-			}
-			log.Print(tag, monthdays[tag])
-		}
-		fp.Close()
-	}
-	// WEEK DAYS
-	fp, err = os.Open(*weekdaysFn)
-	if err != nil {
-		log.Printf("Could not open week days file: %v", err)
-	} else {
-		csvReader := csv.NewReader(fp)
-		csvReader.Comma = sep
-		for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-			tag := record[0]
-			if tag == "Tag" {
-				// skip header line
-				continue
-			}
-			for i, m := range record[1:] {
-				if m == "1" {
-					weekdays[tag] = append(weekdays[tag], time.Weekday(((i + 1) % 7)))
-				}
-			}
-			log.Print(tag, weekdays[tag])
-		}
-		fp.Close()
-	}
-}
 
 func loadDestinations() {
 	fp, err := os.Open(*destinationsFn)

@@ -1,7 +1,0 @@
-Tag,January,February,March,April,May,June,Jully,August,September,October,November,December
-ALL,1,1,1,1,1,1,1,1,1,1,1,1
-WINTER,1,1,0,0,0,0,0,0,0,0,0,1
-SPRING,0,0,1,1,1,0,0,0,0,0,0,0
-SUMMER,0,0,0,0,0,1,1,1,0,0,0,0
-AUTUMN,0,0,0,0,0,0,0,0,1,1,1,0
-JANUARY,1,0,0,0,0,0,0,0,0,0,0,0

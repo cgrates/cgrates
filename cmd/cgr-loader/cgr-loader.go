@@ -65,7 +65,6 @@ func writeToDatabase() {
 func main() {
 	flag.Parse()
 	sep = []rune(*separator)[0]
-	loadDataSeries()
 	loadDestinations()
 	loadRates()
 	loadTimings()

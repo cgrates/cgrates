@@ -55,7 +55,12 @@ func (m Months) store() (result string) {
 De-serializes the month for the storage. Used for key-value storages.
 */
 func (m *Months) restore(input string) {
-	elements := strings.Split(input, ",")
+	m.Parse(input, ",")
+}
+
+// Loades Month elemnents from a string separated by sep.
+func (m *Months) Parse(input, sep string) {
+	elements := strings.Split(input, sep)
 	for _, ms := range elements {
 		if month, err := strconv.Atoi(ms); err == nil {
 			*m = append(*m, time.Month(month))
@@ -93,7 +98,12 @@ func (md MonthDays) store() (result string) {
 De-serializes the month days for the storage. Used for key-value storages.
 */
 func (md *MonthDays) restore(input string) {
-	elements := strings.Split(input, ",")
+	md.Parse(input, ",")
+}
+
+// Parse MonthDay elements from string separated by sep.
+func (md *MonthDays) Parse(input, sep string) {
+	elements := strings.Split(input, sep)
 	for _, mds := range elements {
 		if day, err := strconv.Atoi(mds); err == nil {
 			*md = append(*md, day)
@@ -131,7 +141,11 @@ func (wd WeekDays) store() (result string) {
 De-serializes the week days for the storage. Used for key-value storages.
 */
 func (wd *WeekDays) restore(input string) {
-	elements := strings.Split(input, ",")
+	wd.Parse(input, ",")
+}
+
+func (wd *WeekDays) Parse(input, sep string) {
+	elements := strings.Split(input, sep)
 	for _, wds := range elements {
 		if day, err := strconv.Atoi(wds); err == nil {
 			*wd = append(*wd, time.Weekday(day))
