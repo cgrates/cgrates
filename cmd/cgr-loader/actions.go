@@ -22,6 +22,7 @@ import (
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"os"
+	"fmt"
 	"strconv"
 )
 
@@ -29,7 +30,7 @@ var (
 	actions         = make(map[string][]*timespans.Action)
 	actionsTimings  = make(map[string][]*timespans.ActionTiming)
 	actionsTriggers = make(map[string][]*timespans.ActionTrigger)
-	accountActions  []*timespans.Action
+	accountActions  = make(map[string][]string)
 )
 
 func loadActions() {
@@ -172,12 +173,11 @@ func loadAccountActions() {
 	csvReader := csv.NewReader(fp)
 	csvReader.Comma = sep
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
+		if record[0] == "Tenant" {
 			continue
 		}
-		//destinatioBalanceActions = append(destinatioBalanceActions, record[1:]...)
-		log.Print(tag, accountActions)
+		tag := fmt.Sprintf("%s:%s:%s", record[0], record[1], record[2])
+		accountActions[tag] = append(accountActions[tag], record[3:]...)
 	}
+	log.Print(accountActions)
 }
