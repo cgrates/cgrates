@@ -85,7 +85,6 @@ func loadRates() {
 			continue
 		}
 		rates[tag] = append(rates[tag], r)
-		log.Print(tag, rates[tag])
 	}
 }
 
@@ -107,11 +106,6 @@ func loadTimings() {
 
 		t := NewTiming(record[1:]...)
 		timings[tag] = append(timings[tag], t)
-
-		log.Print(tag)
-		for _, i := range timings[tag] {
-			log.Print(i)
-		}
 	}
 }
 
@@ -140,10 +134,6 @@ func loadRatesTimings() {
 		for _, t := range ts {
 			rt := NewRateTiming(record[1], t)
 			ratesTimings[tag] = append(ratesTimings[tag], rt)
-		}
-		log.Print(tag)
-		for _, i := range ratesTimings[tag] {
-			log.Print(i)
 		}
 	}
 }

@@ -22,12 +22,13 @@ import (
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"os"
+	"strconv"
 )
 
 var (
 	actions         = make(map[string][]*timespans.Action)
-	actionsTimings  []*timespans.Action
-	actionsTriggers []*timespans.Action
+	actionsTimings  = make(map[string][]*timespans.ActionTiming)
+	actionsTriggers = make(map[string][]*timespans.ActionTrigger)
 	accountActions  []*timespans.Action
 )
 
@@ -46,13 +47,55 @@ func loadActions() {
 			// skip header line
 			continue
 		}
-		//primaryBalanceActions = append(primaryBalanceActions, record[1:]...)
-		log.Print(tag, actions)
+		units, err := strconv.ParseFloat(record[3], 64)
+		if err != nil {
+			log.Printf("Could not parse action units: %v", err)
+			continue
+		}
+		var a *timespans.Action
+		if record[2] != timespans.MINUTES {
+			a = &timespans.Action{
+				ActionType: record[1],
+				BalanceId:  record[2],
+				Units:      units,
+			}
+		} else {
+			price, percent := 0.0, 0.0
+			value, err := strconv.ParseFloat(record[6], 64)
+			if err != nil {
+				log.Printf("Could not parse action price: %v", err)
+				continue
+			}
+			if record[5] == timespans.PERCENT {
+				percent = value
+			}
+			if record[5] == timespans.ABSOLUTE {
+				price = value
+			}
+			weight, err := strconv.ParseFloat(record[7], 64)
+			if err != nil {
+				log.Printf("Could not parse action units: %v", err)
+				continue
+			}
+			a = &timespans.Action{
+				ActionType: record[1],
+				BalanceId:  record[2],
+				MinuteBucket: &timespans.MinuteBucket{
+					Seconds:       units,
+					Weight:        weight,
+					Price:         price,
+					Percent:       percent,
+					DestinationId: record[4],
+				},
+			}
+		}
+		actions[tag] = append(actions[tag], a)
 	}
+	log.Print(actions)
 }
 
-func loadActionsTimings() {
-	fp, err := os.Open(*actionstimingsFn)
+func loadActionTimings() {
+	fp, err := os.Open(*actiontimingsFn)
 	if err != nil {
 		log.Printf("Could not open actions timings file: %v", err)
 		return
@@ -66,13 +109,30 @@ func loadActionsTimings() {
 			// skip header line
 			continue
 		}
-		//destinatioBalanceActions = append(destinatioBalanceActions, record[1:]...)
-		log.Print(tag, actionsTimings)
+		ts, exists := timings[record[2]]
+		if !exists {
+			log.Printf("Could not load the timing for tag: %v", record[2])
+			continue
+		}
+		for _, t := range ts {
+			at := &timespans.ActionTiming{
+				Timing: &timespans.Interval{
+					Months:    t.Months,
+					MonthDays: t.MonthDays,
+					WeekDays:  t.WeekDays,
+					StartTime: t.StartTime,
+				},
+				ActionsId: record[1],
+			}
+			actionsTimings[tag] = append(actionsTimings[tag], at)
+		}
+
 	}
+	log.Print(actionsTimings)
 }
 
-func loadActionsTriggers() {
-	fp, err := os.Open(*actionstriggersFn)
+func loadActionTriggers() {
+	fp, err := os.Open(*actiontriggersFn)
 	if err != nil {
 		log.Printf("Could not open destination balance actions file: %v", err)
 		return
@@ -86,9 +146,20 @@ func loadActionsTriggers() {
 			// skip header line
 			continue
 		}
-		//destinatioBalanceActions = append(destinatioBalanceActions, record[1:]...)
-		log.Print(tag, actionsTriggers)
+		value, err := strconv.ParseFloat(record[2], 64)
+		if err != nil {
+			log.Printf("Could not parse action trigger value: %v", err)
+			continue
+		}
+		at := &timespans.ActionTrigger{
+			BalanceId:      record[1],
+			ThresholdValue: value,
+			DestinationId:  record[3],
+			ActionsId:      record[4],
+		}
+		actionsTriggers[tag] = append(actionsTriggers[tag], at)
 	}
+	log.Print(actionsTriggers)
 }
 
 func loadAccountActions() {

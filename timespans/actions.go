@@ -59,16 +59,10 @@ func (uc *UnitsCounter) getDestination() (dest *Destination) {
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id             string
-	ActionType     string
-	Direction      string
-	TOR            string
-	Units          float64
-	BalanceMap     map[string]float64
-	MinuteBuckets  []*MinuteBucket
-	Weight         float64
-	DestinationsId string
-	destination    *Destination
+	ActionType   string
+	BalanceId    string
+	Units        float64
+	MinuteBucket *MinuteBucket
 }
 
 // Structure to store actions according to weight
@@ -83,7 +77,7 @@ func (s actionsorter) Swap(i, j int) {
 }
 
 func (s actionsorter) Less(j, i int) bool {
-	return s[i].Weight < s[j].Weight
+	return s[i].MinuteBucket.Weight < s[j].MinuteBucket.Weight
 }
 
 type ActionTrigger struct {
@@ -96,7 +90,7 @@ type ActionTrigger struct {
 }
 
 type ActionTiming struct {
-	Id        string
+	Timing    *Interval
 	ActionsId string
 	actions   []*Action
 }

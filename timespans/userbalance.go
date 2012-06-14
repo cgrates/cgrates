@@ -33,6 +33,10 @@ const (
 	CREDIT  = "MONETARY"
 	SMS     = "SMS"
 	TRAFFIC = "INTERNET"
+	MINUTES = "MINUTES"
+	// Price types
+	PERCENT  = "PERCENT"
+	ABSOLUTE = "ABSOLUTE"
 )
 
 var (

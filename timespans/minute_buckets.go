@@ -27,7 +27,7 @@ type MinuteBucket struct {
 	Seconds       float64
 	Weight        float64
 	Price         float64
-	Percentage    float64 // percentage from standard price
+	Percent       float64 // percentage from standard price
 	DestinationId string
 	destination   *Destination
 	precision     int
