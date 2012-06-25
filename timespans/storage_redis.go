@@ -20,7 +20,11 @@ package timespans
 
 import (
 	"github.com/simonz05/godis"
-	"encoding/json"
+	"encoding/json"	
+)
+
+const (
+	ACTION_TIMING_PREFIX = "acttmg"
 )
 
 type RedisStorage struct {
@@ -110,7 +114,6 @@ func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 
 func (rs *RedisStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
 	if values, err := rs.db.Get(key); err == nil {
-		var ats []*ActionTiming
 		err = json.Unmarshal(values, ats)
 	}
 	return
@@ -119,4 +122,21 @@ func (rs *RedisStorage) GetActionTimings(key string) (ats []*ActionTiming, err e
 func (rs *RedisStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
 	result, err := json.Marshal(ats)
 	return rs.db.Set(key, result)
+}
+
+func (rs *RedisStorage) GetAllActionTimings() (ats []*ActionTiming, err error) {
+	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
+	if err != nil {
+		return
+	}
+	values, err := rs.db.Mget(keys...)
+	if err != nil {
+		return
+	}
+	for _, v := range values.BytesArray() {
+		var tempAts []*ActionTiming		
+		err = json.Unmarshal(v, &tempAts)
+		ats = append(ats, tempAts...)
+	}
+	return
 }

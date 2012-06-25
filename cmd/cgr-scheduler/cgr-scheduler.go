@@ -20,8 +20,28 @@ package main
 
 import (
 	"log"
+	"github.com/cgrates/cgrates/timespans"
+	"flag"
+)
+
+var (
+	separator   = flag.String("separator", ",", "Default field separator")
+	redisserver = flag.String("redisserver", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
+	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
+	redispass   = flag.String("pass", "", "redis database password")
 )
 
 func main() {
-	log.Print("CGR Scheduler")
+	flag.Parse()
+	storage, err := timespans.NewRedisStorage(*redisserver, *redisdb)
+	if err != nil {
+		log.Fatalf("Could not open database connection: %v", err)
+	}
+	actionTimings, err := storage.GetAllActionTimings()
+	if err != nil {
+		log.Fatalf("Cannot get action timings:", err)
+	}
+	for _, at := range actionTimings {
+		log.Print(at)
+	}
 }
