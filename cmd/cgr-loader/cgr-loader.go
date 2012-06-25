@@ -44,6 +44,10 @@ var (
 	sep              rune
 )
 
+const (
+	ACTION_TIMING_PREFIX = "acttmg"
+)
+
 func writeToDatabase() {
 	storage, err := timespans.NewRedisStorage(*redisserver, *redisdb)
 	if err != nil {
@@ -66,11 +70,9 @@ func writeToDatabase() {
 	}
 	log.Print("Action timings")
 	// action timings
-	for _, ats := range actionsTimings {
-		for _, at := range ats {
-			storage.SetActionTiming(at)
-			log.Println(at.Id)
-		}
+	for k, ats := range actionsTimings {
+		storage.SetActionTimings(ACTION_TIMING_PREFIX+":"+k, ats)
+		log.Println(k)
 	}
 	log.Print("Account actions")
 	// account actions

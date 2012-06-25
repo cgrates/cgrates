@@ -33,10 +33,6 @@ var (
 	accountActions  = make(map[string][]*timespans.UserBalance)
 )
 
-const (
-	ACTION_TIMING_PREFIX = "acttmg"
-)
-
 func loadActions() {
 	fp, err := os.Open(*actionsFn)
 	if err != nil {
@@ -112,8 +108,8 @@ func loadActionTimings() {
 	csvReader.Comma = sep
 	csvReader.TrailingComma = true
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := ACTION_TIMING_PREFIX + ":" + record[0]
-		if record[0] == "Tag" {
+		tag := record[0]
+		if tag == "Tag" {
 			// skip header line
 			continue
 		}
@@ -125,7 +121,6 @@ func loadActionTimings() {
 		}
 		for _, t := range ts {
 			at := &timespans.ActionTiming{
-				Id: tag,
 				Timing: &timespans.Interval{
 					Months:    t.Months,
 					MonthDays: t.MonthDays,
@@ -195,18 +190,20 @@ func loadAccountActions() {
 			log.Printf("Could not get action triggers for tag %v", record[4])
 			continue
 		}
-		aTimings, exists := actionsTimings[record[3]]
-		if !exists {
-			log.Printf("Could not get action triggers for tag %v", record[3])
-			// must not continue here
-		}
+		aTimingsTag := record[3]
 		ub := &timespans.UserBalance{
 			Id:             tag,
 			ActionTriggers: aTriggers,
 		}
 		accountActions[tag] = append(accountActions[tag], ub)
+
+		aTimings, exists := actionsTimings[aTimingsTag]
+		if !exists {
+			log.Printf("Could not get action triggers for tag %v", aTimingsTag)
+			// must not continue here
+		}
 		for _, at := range aTimings {
-			at.UserBalanceId = tag
+			at.UserBalanceIds = append(at.UserBalanceIds, tag)
 		}
 	}
 	log.Print("Account actions:")

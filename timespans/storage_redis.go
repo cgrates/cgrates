@@ -108,15 +108,15 @@ func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 	return rs.db.Set(ub.Id, result)
 }
 
-func (rs *RedisStorage) GetActionTiming(key string) (at *ActionTiming, err error) {
+func (rs *RedisStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
 	if values, err := rs.db.Get(key); err == nil {
-		at = &ActionTiming{Id: key}
-		err = json.Unmarshal(values, at)
+		var ats []*ActionTiming
+		err = json.Unmarshal(values, ats)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetActionTiming(at *ActionTiming) (err error) {
-	result, err := json.Marshal(at)
-	return rs.db.Set(at.Id, result)
+func (rs *RedisStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
+	result, err := json.Marshal(ats)
+	return rs.db.Set(key, result)
 }

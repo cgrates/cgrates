@@ -90,9 +90,8 @@ type ActionTrigger struct {
 }
 
 type ActionTiming struct {
-	Id            string
-	UserBalanceId string
-	Timing        *Interval
-	ActionsId     string
-	actions       []*Action
+	UserBalanceIds []string
+	Timing         *Interval
+	ActionsId      string
+	actions        []*Action
 }
