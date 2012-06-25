@@ -52,14 +52,32 @@ func writeToDatabase() {
 	if *flush {
 		storage.Flush()
 	}
+	// destinations
 	for _, d := range destinations {
 		storage.SetDestination(d)
 	}
-	for k, cds := range ratingProfiles {
-		log.Print(k)
+	log.Print("Rating profiles")
+	// rating profiles
+	for _, cds := range ratingProfiles {
 		for _, cd := range cds {
 			storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
 			log.Print(cd.GetKey())
+		}
+	}
+	log.Print("Action timings")
+	// action timings
+	for _, ats := range actionsTimings {
+		for _, at := range ats {
+			storage.SetActionTiming(at)
+			log.Println(at.Id)
+		}
+	}
+	log.Print("Account actions")
+	// account actions
+	for _, aas := range accountActions {
+		for _, ub := range aas {
+			storage.SetUserBalance(ub)
+			log.Println(ub.Id)
 		}
 	}
 }

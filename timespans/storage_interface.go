@@ -32,4 +32,6 @@ type StorageGetter interface {
 	SetActions(string, []*Action) error
 	GetUserBalance(string) (*UserBalance, error)
 	SetUserBalance(*UserBalance) error
+	SetActionTiming(*ActionTiming) error
+	GetActionTiming(string) (*ActionTiming, error)
 }

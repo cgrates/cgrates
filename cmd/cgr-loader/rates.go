@@ -43,6 +43,7 @@ func loadDestinations() {
 	defer fp.Close()
 	csvReader := csv.NewReader(fp)
 	csvReader.Comma = sep
+	csvReader.TrailingComma = true
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -62,7 +63,6 @@ func loadDestinations() {
 		}
 		dest.Prefixes = append(dest.Prefixes, record[1:]...)
 	}
-	log.Print(destinations)
 }
 
 func loadRates() {
@@ -74,6 +74,7 @@ func loadRates() {
 	defer fp.Close()
 	csvReader := csv.NewReader(fp)
 	csvReader.Comma = sep
+	csvReader.TrailingComma = true
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -97,6 +98,7 @@ func loadTimings() {
 	defer fp.Close()
 	csvReader := csv.NewReader(fp)
 	csvReader.Comma = sep
+	csvReader.TrailingComma = true
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -118,6 +120,7 @@ func loadRatesTimings() {
 	defer fp.Close()
 	csvReader := csv.NewReader(fp)
 	csvReader.Comma = sep
+	csvReader.TrailingComma = true
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -147,6 +150,7 @@ func loadRatingProfiles() {
 	defer fp.Close()
 	csvReader := csv.NewReader(fp)
 	csvReader.Comma = sep
+	csvReader.TrailingComma = true
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tenant" {
@@ -218,6 +222,7 @@ func loadRatingProfiles() {
 			}
 		}
 	}
+	log.Print("Call descriptors:")
 	for dest, cds := range ratingProfiles {
 		log.Print(dest)
 		for _, cd := range cds {
