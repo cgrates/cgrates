@@ -47,18 +47,19 @@ var (
 Structure containing information about user's credit (minutes, cents, sms...).'
 */
 type UserBalance struct {
-	Id             string
-	Type           string // prepaid-postpaid
-	BalanceMap     map[string]float64
-	MinuteBuckets  []*MinuteBucket
-	UnitsCounters  []*UnitsCounter
-	ActionTriggers []*ActionTrigger
+	Id                 string
+	Type               string // prepaid-postpaid
+	BalanceMap         map[string]float64
+	MinuteBuckets      []*MinuteBucket
+	UnitsCounters      []*UnitsCounter
+	ActionTriggers     []*ActionTrigger
+	usedActionTriggers []*ActionTrigger
 }
 
 /*
 Error type for overflowed debit methods.
 */
-type AmountTooBig byte
+type AmountTooBig struct{}
 
 func (a AmountTooBig) Error() string {
 	return "Amount excedes balance!"
@@ -81,6 +82,11 @@ func (bs bucketsorter) Less(j, i int) bool {
 	return bs[i].Weight < bs[j].Weight ||
 		bs[i].precision < bs[j].precision ||
 		bs[i].Price > bs[j].Price
+}
+
+func (ub *UserBalance) ResetActionTriggers() {
+	ub.ActionTriggers = append(ub.ActionTriggers, ub.usedActionTriggers...)
+	ub.usedActionTriggers = make([]*ActionTrigger, 0)
 }
 
 /*

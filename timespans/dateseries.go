@@ -28,9 +28,20 @@ import (
 // Defines months series
 type Months []time.Month
 
+func (m Months) Len() int {
+	return len(m)
+}
+
+func (m Months) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
+}
+
+func (m Months) Less(j, i int) bool {
+	return m[j] < m[i]
+}
+
 // Return true if the specified date is inside the series
 func (m Months) Contains(month time.Month) (result bool) {
-	result = false
 	for _, ms := range m {
 		if ms == month {
 			result = true
@@ -60,6 +71,18 @@ func (m *Months) Parse(input, sep string) {
 
 // Defines month days series
 type MonthDays []int
+
+func (md MonthDays) Len() int {
+	return len(md)
+}
+
+func (md MonthDays) Swap(i, j int) {
+	md[i], md[j] = md[j], md[i]
+}
+
+func (md MonthDays) Less(j, i int) bool {
+	return md[j] < md[i]
+}
 
 // Return true if the specified date is inside the series
 func (md MonthDays) Contains(monthDay int) (result bool) {
@@ -92,6 +115,18 @@ func (md *MonthDays) Parse(input, sep string) {
 
 // Defines week days series
 type WeekDays []time.Weekday
+
+func (wd WeekDays) Len() int {
+	return len(wd)
+}
+
+func (wd WeekDays) Swap(i, j int) {
+	wd[i], wd[j] = wd[j], wd[i]
+}
+
+func (wd WeekDays) Less(j, i int) bool {
+	return wd[j] < wd[i]
+}
 
 // Return true if the specified date is inside the series
 func (wd WeekDays) Contains(weekDay time.Weekday) (result bool) {

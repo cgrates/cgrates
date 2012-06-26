@@ -20,7 +20,7 @@ package timespans
 
 import (
 	"github.com/simonz05/godis"
-	"encoding/json"	
+	"encoding/json"
 )
 
 const (
@@ -134,7 +134,7 @@ func (rs *RedisStorage) GetAllActionTimings() (ats []*ActionTiming, err error) {
 		return
 	}
 	for _, v := range values.BytesArray() {
-		var tempAts []*ActionTiming		
+		var tempAts []*ActionTiming
 		err = json.Unmarshal(v, &tempAts)
 		ats = append(ats, tempAts...)
 	}

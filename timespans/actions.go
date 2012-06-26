@@ -18,7 +18,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package timespans
 
-import ()
+import (
+	"time"
+	"log"
+	"fmt"
+	"sort"
+)
+
+const (
+	FORMAT = "2006-1-2 15:04:05 MST"
+)
 
 // Amount of a trafic of a certain type (TOR)
 type UnitsCounter struct {
@@ -94,4 +103,87 @@ type ActionTiming struct {
 	Timing         *Interval
 	ActionsId      string
 	actions        []*Action
+}
+
+func (at *ActionTiming) getActions() (a []*Action, err error) {
+	if at.actions == nil {
+		a, err = storageGetter.GetActions(at.ActionsId)
+		at.actions = a
+	}
+	return
+}
+
+func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
+	i := at.Timing
+	if i == nil {
+		return
+	}
+	now := time.Now()
+	y, m, d := now.Date()
+	z, _ := now.Zone()
+	if i.StartTime != "" {
+		l := fmt.Sprintf("%d-%d-%d %s %s", y, m, d, i.StartTime, z)
+		t, err = time.Parse(FORMAT, l)
+	}
+
+	if i.WeekDays != nil && len(i.WeekDays) > 0 {
+		sort.Sort(i.WeekDays)
+	}
+
+	if i.MonthDays != nil && len(i.MonthDays) > 0 {
+		sort.Sort(i.MonthDays)
+		now := time.Now()
+		x := sort.SearchInts(i.MonthDays, now.Day())
+		d = i.MonthDays[0]
+		if x < len(i.MonthDays) {
+			if i.MonthDays[x] == now.Day() {
+				if now.Before(t) {
+					h, m, s := t.Clock()
+					t = time.Date(now.Year(), now.Month(), now.Day(), h, m, s, 0, time.Local)
+					return
+				}
+				if x+1 < len(i.MonthDays) { // today was found in the list, jump to the next grater day
+					d = i.MonthDays[x+1]
+				}
+			} else { // today was not found in the list, x is the first greater day
+				d = i.MonthDays[x]
+			}
+		}
+		h, m, s := t.Clock()
+		t = time.Date(now.Year(), now.Month(), d, h, m, s, 0, time.Local)
+	}
+
+	if i.Months != nil && len(i.Months) > 0 {
+		sort.Sort(i.Months)
+		now := time.Now()
+		x := sort.Search(len(i.Months), func(x int) bool { return i.Months[x] >= now.Month() })
+		m = i.Months[0]
+		if x < len(i.Months) {
+			if i.Months[x] == now.Month() {
+				if now.Before(t) {
+					h, m, s := t.Clock()
+					t = time.Date(now.Year(), now.Month(), t.Day(), h, m, s, 0, time.Local)
+					return
+				}
+				if x+1 < len(i.Months) { // today was found in the list, jump to the next grater day
+					m = i.Months[x+1]
+				}
+			} else { // today was not found in the list, x is the first greater day
+				m = i.Months[x]
+			}
+		}
+		h, min, s := t.Clock()
+		t = time.Date(now.Year(), m, t.Day(), h, min, s, 0, time.Local)
+	}
+	return
+}
+
+func (at *ActionTiming) Execute() {
+	aac, err := at.getActions()
+	if err != nil {
+		return
+	}
+	for _, a := range aac {
+		log.Print(a)
+	}
 }

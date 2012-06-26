@@ -22,6 +22,8 @@ import (
 	"log"
 	"github.com/cgrates/cgrates/timespans"
 	"flag"
+	"time"
+	"sort"
 )
 
 var (
@@ -30,6 +32,43 @@ var (
 	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
 	redispass   = flag.String("pass", "", "redis database password")
 )
+
+/*
+Structure to store action timings according to next activation time.
+*/
+type actiontimingqueue []*timespans.ActionTiming
+
+func (atq actiontimingqueue) Len() int {
+	return len(atq)
+}
+
+func (atq actiontimingqueue) Swap(i, j int) {
+	atq[i], atq[j] = atq[j], atq[i]
+}
+
+func (atq actiontimingqueue) Less(j, i int) bool {
+	return atq[j].GetNextStartTime().Before(atq[i].GetNextStartTime())
+}
+
+type scheduler struct {
+	queue actiontimingqueue
+}
+
+func (s scheduler) loop() {
+	for {
+		a0 := s.queue[0]
+		now := time.Now()
+		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
+			a0.Execute()
+			s.queue = append(s.queue, a0)
+			s.queue = s.queue[1:]
+			sort.Sort(s.queue)
+		} else {
+			d := a0.GetNextStartTime().Sub(now)
+			time.Sleep(d)
+		}
+	}
+}
 
 func main() {
 	flag.Parse()
@@ -41,7 +80,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Cannot get action timings:", err)
 	}
-	for _, at := range actionTimings {
-		log.Print(at)
-	}
+	s := scheduler{}
+	s.queue = append(s.queue, actionTimings...)
+	s.loop()
 }
