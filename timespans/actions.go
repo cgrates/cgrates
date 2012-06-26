@@ -140,7 +140,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
 				if now.Before(t) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), now.Month(), now.Day(), h, m, s, 0, time.Local)
-					return
+					goto Months
 				}
 				if x+1 < len(i.MonthDays) { // today was found in the list, jump to the next grater day
 					d = i.MonthDays[x+1]
@@ -152,7 +152,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
 		h, m, s := t.Clock()
 		t = time.Date(now.Year(), now.Month(), d, h, m, s, 0, time.Local)
 	}
-
+Months:
 	if i.Months != nil && len(i.Months) > 0 {
 		sort.Sort(i.Months)
 		now := time.Now()
@@ -167,9 +167,19 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
 				}
 				if x+1 < len(i.Months) { // today was found in the list, jump to the next grater day
 					m = i.Months[x+1]
+					// reset the monthday
+					if i.MonthDays != nil {
+						t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+						log.Print("here: ", i.MonthDays)
+					}
 				}
 			} else { // today was not found in the list, x is the first greater day
 				m = i.Months[x]
+				// reset the monthday
+				if i.MonthDays != nil {
+					t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+					log.Print("here1: ", i.MonthDays)
+				}
 			}
 		}
 		h, min, s := t.Clock()
