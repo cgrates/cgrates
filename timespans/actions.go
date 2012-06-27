@@ -186,7 +186,6 @@ MONTHS:
 					// reset the monthday
 					if i.MonthDays != nil {
 						t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
-						log.Print("here: ", i.MonthDays)
 					}
 				}
 			} else { // today was not found in the list, x is the first greater day
@@ -194,7 +193,6 @@ MONTHS:
 				// reset the monthday
 				if i.MonthDays != nil {
 					t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
-					log.Print("here1: ", i.MonthDays)
 				}
 			}
 		}

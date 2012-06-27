@@ -19,11 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"log"
-	"github.com/cgrates/cgrates/timespans"
 	"flag"
-	"time"
+	"github.com/cgrates/cgrates/timespans"
+	"log"
+	"os"
 	"sort"
+	"time"
+	"os/signal"
+	"syscall"
 )
 
 var (
@@ -72,17 +75,35 @@ func (s scheduler) loop() {
 	}
 }
 
-func main() {
-	flag.Parse()
+// Listens for the HUP system signal and gracefuly reloads the timers from database.
+func stopSingnalHandler() {
+	log.Print("Handling HUP signal...")
+	c := make(chan os.Signal)
+	signal.Notify(c, syscall.SIGHUP)
+	sig := <-c
+
+	log.Printf("Caught signal %v, reloading action timings.\n", sig)
+	loadActionTimings()
+}
+
+func loadActionTimings() (actionTimings []*timespans.ActionTiming, err error) {
 	storage, err := timespans.NewRedisStorage(*redisserver, *redisdb)
+	defer storage.Close()
 	if err != nil {
 		log.Fatalf("Could not open database connection: %v", err)
 	}
-	actionTimings, err := storage.GetAllActionTimings()
+	actionTimings, err = storage.GetAllActionTimings()
+	return
+}
+
+func main() {
+	flag.Parse()
+	actionTimings, err := loadActionTimings()
 	if err != nil {
 		log.Fatalf("Cannot get action timings:", err)
 	}
 	s := scheduler{}
 	s.queue = append(s.queue, actionTimings...)
+	go stopSingnalHandler()
 	s.loop()
 }
