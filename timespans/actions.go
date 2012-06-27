@@ -113,7 +113,7 @@ func (at *ActionTiming) getActions() (a []*Action, err error) {
 	return
 }
 
-func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
+func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	i := at.Timing
 	if i == nil {
 		return
@@ -123,12 +123,17 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
 	z, _ := now.Zone()
 	if i.StartTime != "" {
 		l := fmt.Sprintf("%d-%d-%d %s %s", y, m, d, i.StartTime, z)
+		var err error
 		t, err = time.Parse(FORMAT, l)
+		if err != nil {
+			log.Printf("Cannot parse action timing's StartTime %v", l)
+			return
+		}
 	}
 
 	if i.WeekDays != nil && len(i.WeekDays) > 0 {
 		sort.Sort(i.WeekDays)
-		if t.Equal(time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)) {
+		if t.IsZero() {
 			t = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
 		}
 		for _, j := range []int{0, 1, 2, 3, 4, 5, 6} {

@@ -31,6 +31,7 @@ var (
 	redisserver = flag.String("redisserver", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
 	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
 	redispass   = flag.String("pass", "", "redis database password")
+	timer       *time.Timer
 )
 
 /*
@@ -65,7 +66,8 @@ func (s scheduler) loop() {
 			sort.Sort(s.queue)
 		} else {
 			d := a0.GetNextStartTime().Sub(now)
-			time.Sleep(d)
+			timer = time.NewTimer(d)
+			<-timer.C
 		}
 	}
 }
