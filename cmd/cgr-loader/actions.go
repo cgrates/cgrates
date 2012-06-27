@@ -192,6 +192,7 @@ func loadAccountActions() {
 		}
 		aTimingsTag := record[3]
 		ub := &timespans.UserBalance{
+			Type:           timespans.UB_TYPE_PREPAID,
 			Id:             tag,
 			ActionTriggers: aTriggers,
 		}

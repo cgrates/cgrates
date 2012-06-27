@@ -74,16 +74,45 @@ type Action struct {
 	MinuteBucket *MinuteBucket
 }
 
-type actionTypeFunc func(a *Action) error
+type actionTypeFunc func(*UserBalance, *Action) error
 
 var (
 	actionTypeFuncMap = map[string]actionTypeFunc{
-		"LOG": logAction,
+		"LOG":                logAction,
+		"RESET_TRIGGERS":     resetTriggersAction,
+		"CHANGE_TO_POSTPAID": changeToPostpaidAction,
+		"CHANGE_TO_PREPAID":  changeToPrepaidAction,
+		"TOPUP_RESET":        topupResetAction,
+		"TOPUP_ADD":          topupAddAction,
 	}
 )
 
-func logAction(a *Action) (err error) {
+func logAction(ub *UserBalance, a *Action) (err error) {
 	log.Printf("%v %v %v", a.BalanceId, a.Units, a.MinuteBucket)
+	return
+}
+
+func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
+	ub.ResetActionTriggers()
+	return
+}
+
+func changeToPostpaidAction(ub *UserBalance, a *Action) (err error) {
+	ub.Type = UB_TYPE_POSTPAID
+	return
+}
+
+func changeToPrepaidAction(ub *UserBalance, a *Action) (err error) {
+	ub.Type = UB_TYPE_PREPAID
+	return
+}
+
+func topupResetAction(ub *UserBalance, a *Action) (err error) {
+
+	return
+}
+
+func topupAddAction(ub *UserBalance, a *Action) (err error) {
 	return
 }
 
@@ -122,6 +151,17 @@ func (at *ActionTiming) getActions() (a []*Action, err error) {
 	if at.actions == nil {
 		a, err = storageGetter.GetActions(at.ActionsId)
 		at.actions = a
+	}
+	return
+}
+
+func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
+	for _, ubId := range at.UserBalanceIds {
+		ub, err := storageGetter.GetUserBalance(ubId)
+		if err != nil {
+			log.Printf("Could not get user balances for therse id: %v. Skipping!", ubId)
+		}
+		ubs = append(ubs, ub)
 	}
 	return
 }
@@ -226,7 +266,9 @@ func (at *ActionTiming) Execute() (err error) {
 			log.Printf("Function type %v not available, aborting execution!", a.ActionType)
 			return
 		}
-		err = actionFunction(a)
+		for _, ub := range at.getUserBalances() {
+			err = actionFunction(ub, a)
+		}
 	}
 	return
 }
