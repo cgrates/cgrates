@@ -63,7 +63,7 @@ func (s scheduler) loop() {
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
-			a0.Execute()
+			go a0.Execute()
 			s.queue = append(s.queue, a0)
 			s.queue = s.queue[1:]
 			sort.Sort(s.queue)

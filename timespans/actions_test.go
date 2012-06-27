@@ -161,3 +161,19 @@ func TestActionTimingHourMonthdaysMonths(t *testing.T) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
 }
+
+func TestLogFunction(t *testing.T) {
+	a := &Action{
+		ActionType:   "LOG",
+		BalanceId:    "test",
+		Units:        1.1,
+		MinuteBucket: &MinuteBucket{},
+	}
+	at := &ActionTiming{
+		actions: []*Action{a},
+	}
+	err := at.Execute()
+	if err != nil {
+		t.Errorf("Could not execute LOG action: %v", err)
+	}
+}

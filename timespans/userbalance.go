@@ -30,10 +30,11 @@ const (
 	INBOUND  = "IN"
 	OUTBOUND = "OUT"
 	// Balance types
-	CREDIT  = "MONETARY"
-	SMS     = "SMS"
-	TRAFFIC = "INTERNET"
-	MINUTES = "MINUTES"
+	CREDIT       = "MONETARY"
+	SMS          = "SMS"
+	TRAFFIC      = "INTERNET"
+	TRAFFIC_TIME = "INTERNET_TIME"
+	MINUTES      = "MINUTES"
 	// Price types
 	PERCENT  = "PERCENT"
 	ABSOLUTE = "ABSOLUTE"

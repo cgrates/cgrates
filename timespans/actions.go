@@ -74,6 +74,19 @@ type Action struct {
 	MinuteBucket *MinuteBucket
 }
 
+type actionTypeFunc func(a *Action) error
+
+var (
+	actionTypeFuncMap = map[string]actionTypeFunc{
+		"LOG": logAction,
+	}
+)
+
+func logAction(a *Action) (err error) {
+	log.Printf("%v %v %v", a.BalanceId, a.Units, a.MinuteBucket)
+	return
+}
+
 // Structure to store actions according to weight
 type actionsorter []*Action
 
@@ -202,12 +215,18 @@ MONTHS:
 	return
 }
 
-func (at *ActionTiming) Execute() {
+func (at *ActionTiming) Execute() (err error) {
 	aac, err := at.getActions()
 	if err != nil {
 		return
 	}
 	for _, a := range aac {
-		log.Print(a)
+		actionFunction, exists := actionTypeFuncMap[a.ActionType]
+		if !exists {
+			log.Printf("Function type %v not available, aborting execution!", a.ActionType)
+			return
+		}
+		err = actionFunction(a)
 	}
+	return
 }
