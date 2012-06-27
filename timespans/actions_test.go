@@ -49,7 +49,7 @@ func TestActionTimingOnlyHour(t *testing.T) {
 	}
 }
 
-/*func TestActionTimingOnlyWeekdays(t *testing.T) {
+func TestActionTimingOnlyWeekdays(t *testing.T) {
 	at := &ActionTiming{Timing: &Interval{WeekDays: []time.Weekday{time.Monday}}}
 	st, err := at.GetNextStartTime()
 	if err != nil {
@@ -57,13 +57,20 @@ func TestActionTimingOnlyHour(t *testing.T) {
 	}
 	now := time.Now()
 	y, m, d := now.Date()
-	expected := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	if !st.Equal(expected) {
-		t.Errorf("Expected %v was %v", expected, st)
+	h, min, s := now.Clock()
+	e := time.Date(y, m, d, h, min, s, 0, time.Local)
+	for _, i := range []int{0, 1, 2, 3, 4, 5, 6} {
+		e = time.Date(e.Year(), e.Month(), e.Day()+i, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
+		if e.Weekday() == time.Monday {
+			break
+		}
+	}
+	if !st.Equal(e) {
+		t.Errorf("Expected %v was %v", e, st)
 	}
 }
 
-func TestActionTimingWeekdaysHour(t *testing.T) {
+func TestActionTimingHourWeekdays(t *testing.T) {
 	at := &ActionTiming{Timing: &Interval{WeekDays: []time.Weekday{time.Monday}, StartTime: "10:01:00"}}
 	st, err := at.GetNextStartTime()
 	if err != nil {
@@ -71,11 +78,17 @@ func TestActionTimingWeekdaysHour(t *testing.T) {
 	}
 	now := time.Now()
 	y, m, d := now.Date()
-	expected := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	if !st.Equal(expected) {
-		t.Errorf("Expected %v was %v", expected, st)
+	e := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
+	for _, i := range []int{0, 1, 2, 3, 4, 5, 6} {
+		e = time.Date(e.Year(), e.Month(), e.Day()+i, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
+		if e.Weekday() == time.Monday {
+			break
+		}
 	}
-}*/
+	if !st.Equal(e) {
+		t.Errorf("Expected %v was %v", e, st)
+	}
+}
 
 func TestActionTimingOnlyMonthdays(t *testing.T) {
 	now := time.Now()

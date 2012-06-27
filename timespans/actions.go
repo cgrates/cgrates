@@ -128,6 +128,17 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
 
 	if i.WeekDays != nil && len(i.WeekDays) > 0 {
 		sort.Sort(i.WeekDays)
+		if t.Equal(time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)) {
+			t = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
+		}
+		for _, j := range []int{0, 1, 2, 3, 4, 5, 6} {
+			t = time.Date(t.Year(), t.Month(), t.Day()+j, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
+			for _, wd := range i.WeekDays {
+				if t.Weekday() == wd {
+					return
+				}
+			}
+		}
 	}
 
 	if i.MonthDays != nil && len(i.MonthDays) > 0 {
@@ -140,7 +151,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
 				if now.Before(t) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), now.Month(), now.Day(), h, m, s, 0, time.Local)
-					goto Months
+					goto MONTHS
 				}
 				if x+1 < len(i.MonthDays) { // today was found in the list, jump to the next grater day
 					d = i.MonthDays[x+1]
@@ -152,7 +163,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time, err error) {
 		h, m, s := t.Clock()
 		t = time.Date(now.Year(), now.Month(), d, h, m, s, 0, time.Local)
 	}
-Months:
+MONTHS:
 	if i.Months != nil && len(i.Months) > 0 {
 		sort.Sort(i.Months)
 		now := time.Now()
