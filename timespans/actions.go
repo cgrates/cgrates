@@ -84,6 +84,7 @@ var (
 		"CHANGE_TO_PREPAID":  changeToPrepaidAction,
 		"TOPUP_RESET":        topupResetAction,
 		"TOPUP_ADD":          topupAddAction,
+		"DEBIT":              debitAction,
 	}
 )
 
@@ -108,11 +109,16 @@ func changeToPrepaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func topupResetAction(ub *UserBalance, a *Action) (err error) {
-
-	return
+	ub.BalanceMap[a.BalanceId] = a.Units
+	return storageGetter.SetUserBalance(ub)
 }
 
 func topupAddAction(ub *UserBalance, a *Action) (err error) {
+	ub.BalanceMap[a.BalanceId] += a.Units
+	return storageGetter.SetUserBalance(ub)
+}
+
+func debitAction(ub *UserBalance, a *Action) (err error) {
 	return
 }
 

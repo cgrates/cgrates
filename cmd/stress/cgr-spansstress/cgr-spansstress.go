@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package main
 
 import (
@@ -65,7 +66,7 @@ func main() {
 
 	log.Print(result, j, err)
 	memstats := new(runtime.MemStats)
-        runtime.ReadMemStats(memstats)
-        log.Printf("memstats before GC: Kbytes = %d footprint = %d",
+	runtime.ReadMemStats(memstats)
+	log.Printf("memstats before GC: Kbytes = %d footprint = %d",
 		memstats.HeapAlloc/1024, memstats.Sys/1024)
 }

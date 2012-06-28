@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"github.com/simonz05/godis"
+	// "bytes"
+	// "encoding/gob"
 	"encoding/json"
+	"github.com/simonz05/godis"
 )
 
 const (
@@ -30,6 +32,7 @@ const (
 type RedisStorage struct {
 	dbNb int
 	db   *godis.Client
+	//net  bytes.Buffer
 }
 
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
@@ -51,8 +54,12 @@ func (rs *RedisStorage) GetActivationPeriodsOrFallback(key string) (aps []*Activ
 	if err != nil {
 		return
 	}
+	// rs.net.Reset()
+	// rs.net.Write(elem)
+	// err = gob.NewDecoder(&rs.net).Decode(&aps)
 	err = json.Unmarshal(elem, &aps)
 	if err != nil {
+		// err = gob.NewDecoder(&rs.net).Decode(&fallbackKey)
 		err = json.Unmarshal(elem, &fallbackKey)
 	}
 	return
@@ -61,11 +68,15 @@ func (rs *RedisStorage) GetActivationPeriodsOrFallback(key string) (aps []*Activ
 func (rs *RedisStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) (err error) {
 	//.db.Select(rs.dbNb)
 	var result []byte
+	//rs.net.Reset()
 	if len(aps) > 0 {
+		//gob.NewEncoder(&rs.net).Encode(aps)
 		result, err = json.Marshal(aps)
 	} else {
+		//gob.NewEncoder(&rs.net).Encode(fallbackKey)
 		result, err = json.Marshal(fallbackKey)
 	}
+	//result = rs.net.Bytes()
 	return rs.db.Set(key, result)
 }
 

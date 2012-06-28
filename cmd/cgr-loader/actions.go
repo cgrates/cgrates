@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package main
 
 import (
@@ -185,7 +186,7 @@ func loadAccountActions() {
 		if record[0] == "Tenant" {
 			continue
 		}
-		tag := fmt.Sprintf("%s:%s:%s", record[0], record[1], record[2])
+		tag := fmt.Sprintf("%s:%s:%s", record[2], record[0], record[1])
 		aTriggers, exists := actionsTriggers[record[4]]
 		if !exists {
 			log.Printf("Could not get action triggers for tag %v", record[4])

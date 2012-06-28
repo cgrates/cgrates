@@ -24,19 +24,13 @@ import (
 	//"log"
 )
 
-/*
-json
-BenchmarkRedisGetCost	    5000	    462787 ns/op
-BenchmarkKyotoGetCost	   10000	    203543 ns/op
-
-gob
-BenchmarkRedisGetCost	   10000	    258751 ns/op
-BenchmarkKyotoGetCost	   50000	     38449 ns/op
-*/
+var (
+	getter StorageGetter
+)
 
 func init() {
-	sg, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	SetStorageGetter(sg)
+	getter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	SetStorageGetter(getter)
 }
 
 func TestSplitSpans(t *testing.T) {
@@ -116,9 +110,6 @@ func TestMultipleActivationPeriods(t *testing.T) {
 }
 
 func TestSpansMultipleActivationPeriods(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 7, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 0, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
@@ -130,9 +121,6 @@ func TestSpansMultipleActivationPeriods(t *testing.T) {
 }
 
 func TestLessThanAMinute(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 8, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 30, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
@@ -144,9 +132,6 @@ func TestLessThanAMinute(t *testing.T) {
 }
 
 func TestUniquePrice(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0723045326", TimeStart: t1, TimeEnd: t2}
@@ -158,9 +143,6 @@ func TestUniquePrice(t *testing.T) {
 }
 
 func TestPresentSecodCost(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0723", TimeStart: t1, TimeEnd: t2}
@@ -172,9 +154,6 @@ func TestPresentSecodCost(t *testing.T) {
 }
 
 func TestMinutesCost(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 22, 51, 50, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", TimeStart: t1, TimeEnd: t2}
@@ -187,8 +166,6 @@ func TestMinutesCost(t *testing.T) {
 }
 
 func TestMaxSessionTimeNoUserBalance(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0723", Amount: 1000}
 	result, err := cd.GetMaxSessionTime()
 	if result != 1000 || err != nil {
@@ -197,8 +174,6 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithUserBalance(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
 	result, err := cd.GetMaxSessionTime()
 	if result != 1080 || err != nil {
@@ -207,8 +182,6 @@ func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 }
 
 func TestMaxSessionTimeNoCredit(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "broker", Destination: "0723", Amount: 5400}
 	result, err := cd.GetMaxSessionTime()
 	if result != 100 || err != nil {
@@ -236,9 +209,6 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 /*********************************** BENCHMARKS ***************************************/
 func BenchmarkRedisGetting(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewRedisStorage("", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
@@ -250,9 +220,6 @@ func BenchmarkRedisGetting(b *testing.B) {
 
 func BenchmarkRedisRestoring(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewRedisStorage("", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
@@ -264,9 +231,6 @@ func BenchmarkRedisRestoring(b *testing.B) {
 
 func BenchmarkRedisGetCost(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewRedisStorage("", 10)
-	defer getter.Close()
-
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
@@ -278,7 +242,6 @@ func BenchmarkRedisGetCost(b *testing.B) {
 
 func BenchmarkSplitting(b *testing.B) {
 	b.StopTimer()
-
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
@@ -291,8 +254,6 @@ func BenchmarkSplitting(b *testing.B) {
 
 func BenchmarkRedisSingleGetSessionTime(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewRedisStorage("", 10)
-	defer getter.Close()
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 100}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -302,8 +263,6 @@ func BenchmarkRedisSingleGetSessionTime(b *testing.B) {
 
 func BenchmarkRedisMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
-	getter, _ := NewRedisStorage("", 10)
-	defer getter.Close()
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {

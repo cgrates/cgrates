@@ -15,6 +15,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package main
 
 import (
@@ -60,7 +61,7 @@ func writeToDatabase() {
 	// rating profiles
 	for _, cds := range ratingProfiles {
 		for _, cd := range cds {
-			storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
+			err = storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
 			log.Print(cd.GetKey())
 		}
 	}
