@@ -23,6 +23,7 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"strings"
 )
 
 type Rate struct {
@@ -74,7 +75,7 @@ func NewTiming(timeingInfo ...string) (rt *Timing) {
 	rt.MonthDays.Parse(timeingInfo[1], ";")
 	rt.WeekDays.Parse(timeingInfo[2], ";")
 	if timeingInfo[3] == "*now" {
-		rt.StartTime = time.Now().Format("00:00:00")
+		rt.StartTime = strings.Split(time.Now().Format(time.Stamp), " ")[2]
 	} else {
 		rt.StartTime = timeingInfo[3]
 	}

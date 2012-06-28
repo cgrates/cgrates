@@ -141,6 +141,7 @@ type ActionTrigger struct {
 }
 
 type ActionTiming struct {
+	Tag            string // informative purpos only
 	UserBalanceIds []string
 	Timing         *Interval
 	ActionsId      string
@@ -192,7 +193,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		for _, j := range []int{0, 1, 2, 3, 4, 5, 6} {
 			t = time.Date(t.Year(), t.Month(), t.Day()+j, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
 			for _, wd := range i.WeekDays {
-				if t.Weekday() == wd {
+				if t.Weekday() == wd && (t.Equal(now) || t.After(now)) {
 					return
 				}
 			}
@@ -206,7 +207,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		d = i.MonthDays[0]
 		if x < len(i.MonthDays) {
 			if i.MonthDays[x] == now.Day() {
-				if now.Before(t) {
+				if t.Equal(now) || t.After(now) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), now.Month(), now.Day(), h, m, s, 0, time.Local)
 					goto MONTHS
@@ -229,7 +230,7 @@ MONTHS:
 		m = i.Months[0]
 		if x < len(i.Months) {
 			if i.Months[x] == now.Month() {
-				if now.Before(t) {
+				if t.Equal(now) || t.After(now) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), now.Month(), t.Day(), h, m, s, 0, time.Local)
 					return
@@ -271,4 +272,12 @@ func (at *ActionTiming) Execute() (err error) {
 		}
 	}
 	return
+}
+
+func (at *ActionTiming) IsOneTimeRun() bool {
+	i := at.Timing
+	if i == nil {
+		return true
+	}
+	return len(i.Months) == 0 && len(i.MonthDays) == 0 && len(i.WeekDays) == 0
 }

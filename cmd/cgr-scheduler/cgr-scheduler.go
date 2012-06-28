@@ -34,7 +34,10 @@ var (
 	redisserver = flag.String("redisserver", "tcp:127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
 	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
 	redispass   = flag.String("pass", "", "redis database password")
+	storage     timespans.StorageGetter
 	timer       *time.Timer
+	restartLoop = make(chan byte)
+	s           = scheduler{}
 )
 
 /*
@@ -63,14 +66,24 @@ func (s scheduler) loop() {
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
+			log.Printf("%v - %v", a0.Tag, a0.Timing)
+			log.Print(a0.GetNextStartTime(), now)
 			go a0.Execute()
 			s.queue = append(s.queue, a0)
 			s.queue = s.queue[1:]
 			sort.Sort(s.queue)
 		} else {
 			d := a0.GetNextStartTime().Sub(now)
+			log.Printf("Timer set to wait for %v", d)
 			timer = time.NewTimer(d)
-			<-timer.C
+			select {
+			case <-timer.C:
+				// timer has expired
+				log.Printf("Time for action on %v", s.queue[0])
+			case <-restartLoop:
+				// nothing to do, just continue the loop
+			}
+
 		}
 	}
 }
@@ -78,32 +91,46 @@ func (s scheduler) loop() {
 // Listens for the HUP system signal and gracefuly reloads the timers from database.
 func stopSingnalHandler() {
 	log.Print("Handling HUP signal...")
-	c := make(chan os.Signal)
-	signal.Notify(c, syscall.SIGHUP)
-	sig := <-c
+	for {
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGHUP)
+		sig := <-c
 
-	log.Printf("Caught signal %v, reloading action timings.\n", sig)
-	loadActionTimings()
+		log.Printf("Caught signal %v, reloading action timings.\n", sig)
+		loadActionTimings()
+		// check the tip of the queue for new actions
+		restartLoop <- 1
+		timer.Stop()
+	}
 }
 
-func loadActionTimings() (actionTimings []*timespans.ActionTiming, err error) {
-	storage, err := timespans.NewRedisStorage(*redisserver, *redisdb)
-	defer storage.Close()
+func loadActionTimings() {
+	actionTimings, err := storage.GetAllActionTimings()
 	if err != nil {
-		log.Fatalf("Could not open database connection: %v", err)
+		log.Fatalf("Cannot get action timings:", err)
 	}
-	actionTimings, err = storage.GetAllActionTimings()
-	return
+	// recreate the queue
+	s.queue = actiontimingqueue{}
+	for _, at := range actionTimings {
+		if at.IsOneTimeRun() {
+			go at.Execute()
+			continue
+		}
+		s.queue = append(s.queue, at)
+	}
+	sort.Sort(s.queue)
 }
 
 func main() {
 	flag.Parse()
-	actionTimings, err := loadActionTimings()
+	var err error
+	storage, err = timespans.NewRedisStorage(*redisserver, *redisdb)
 	if err != nil {
-		log.Fatalf("Cannot get action timings:", err)
+		log.Fatalf("Could not open database connection: %v", err)
 	}
-	s := scheduler{}
-	s.queue = append(s.queue, actionTimings...)
+	defer storage.Close()
+	timespans.SetStorageGetter(storage)
+	loadActionTimings()
 	go stopSingnalHandler()
 	s.loop()
 }

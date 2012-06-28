@@ -121,6 +121,7 @@ func loadActionTimings() {
 		}
 		for _, t := range ts {
 			at := &timespans.ActionTiming{
+				Tag: record[2],
 				Timing: &timespans.Interval{
 					Months:    t.Months,
 					MonthDays: t.MonthDays,

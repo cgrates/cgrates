@@ -162,7 +162,55 @@ func TestActionTimingHourMonthdaysMonths(t *testing.T) {
 	}
 }
 
-func TestLogFunction(t *testing.T) {
+func TestActionTimingFisrtOfTheMonth(t *testing.T) {
+	now := time.Now()
+	y, m, _ := now.Date()
+	nextMonth := time.Date(y, m+1, 1, 0, 0, 0, 0, time.Local)
+	at := &ActionTiming{Timing: &Interval{
+		Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays: MonthDays{1},
+		StartTime: "00:00:00",
+	}}
+	st := at.GetNextStartTime()
+	expected := nextMonth
+	if !st.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, st)
+	}
+}
+
+func TestActionTimingIsOneTimeRunNoInterval(t *testing.T) {
+	at := &ActionTiming{}
+	if !at.IsOneTimeRun() {
+		t.Errorf("%v should be one time run!", at)
+	}
+}
+
+func TestActionTimingIsOneTimeRunNothing(t *testing.T) {
+	at := &ActionTiming{Timing: &Interval{}}
+	if !at.IsOneTimeRun() {
+		t.Errorf("%v should be one time run!", at)
+	}
+}
+
+func TestActionTimingIsOneTimeRunStartTime(t *testing.T) {
+	at := &ActionTiming{Timing: &Interval{
+		StartTime: "00:00:00",
+	}}
+	if !at.IsOneTimeRun() {
+		t.Errorf("%v should be one time run!", at)
+	}
+}
+
+func TestActionTimingIsOneTimeRunWeekDay(t *testing.T) {
+	at := &ActionTiming{Timing: &Interval{
+		WeekDays: WeekDays{time.Monday},
+	}}
+	if at.IsOneTimeRun() {
+		t.Errorf("%v should NOT be one time run!", at)
+	}
+}
+
+func TestActionTimingLogFunction(t *testing.T) {
 	a := &Action{
 		ActionType:   "LOG",
 		BalanceId:    "test",
