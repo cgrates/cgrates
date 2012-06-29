@@ -32,12 +32,18 @@ func init() {
 }
 
 func TestApRestoreRedis(t *testing.T) {
-	cd := &CallDescriptor{Tenant: "vdf",
-		Subject:     "rif",
-		Destination: "0257"}
+	cd := &CallDescriptor{
+		Direction:   "OUT",
+		TOR:         "0",
+		Tenant:      "CUSTOMER_1",
+		Subject:     "rif:from:tm",
+		Destination: "49"}
 	cd.SearchStorageForPrefix()
-	if len(cd.ActivationPeriods) != 2 {
-		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
+	if len(cd.ActivationPeriods) != 4 {
+		for _, ap := range cd.ActivationPeriods {
+			t.Log(ap)
+		}
+		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
 	}
 }
 
@@ -80,26 +86,26 @@ func TestApStoreRestoreBlank(t *testing.T) {
 }
 
 func TestFallbackDirect(t *testing.T) {
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0745"}
+	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "CUSTOMER_2", Subject: "danb:87.139.12.167", Destination: "41"}
 	cd.SearchStorageForPrefix()
-	if len(cd.ActivationPeriods) != 1 {
-		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
+	if len(cd.ActivationPeriods) != 3 {
+		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
 	}
 }
 
 func TestFallbackWithBackTrace(t *testing.T) {
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0745121"}
+	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "CUSTOMER_2", Subject: "danb:87.139.12.167", Destination: "4123"}
 	cd.SearchStorageForPrefix()
-	if len(cd.ActivationPeriods) != 1 {
-		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
+	if len(cd.ActivationPeriods) != 3 {
+		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
 	}
 }
 
 func TestFallbackDefault(t *testing.T) {
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "00000"}
+	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "CUSTOMER_2", Subject: "danb:87.139.12.167", Destination: "0000"}
 	cd.SearchStorageForPrefix()
-	if len(cd.ActivationPeriods) != 1 {
-		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
+	if len(cd.ActivationPeriods) != 3 {
+		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
 	}
 }
 
@@ -107,7 +113,7 @@ func TestFallbackNoInfiniteLoop(t *testing.T) {
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0721"}
 	cd.SearchStorageForPrefix()
 	if len(cd.ActivationPeriods) != 0 {
-		t.Error("Error restoring activation periods: ", cd.ActivationPeriods)
+		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
 	}
 }
 

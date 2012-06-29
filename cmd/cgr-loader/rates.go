@@ -163,6 +163,7 @@ func loadRatingProfiles() {
 			continue
 		}
 		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[4]
+		fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject)
 		at, err := time.Parse(time.RFC3339, record[6])
 		if err != nil {
 			log.Printf("Cannot parse activation time from %v", record[5])
@@ -189,8 +190,9 @@ func loadRatingProfiles() {
 						for _, p := range d.Prefixes { //destinations
 							// Search for a CallDescriptor with the same key
 							var cd *timespans.CallDescriptor
+							key := fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, p)
 							for _, c := range ratingProfiles[p] {
-								if c.GetKey() == r.DestinationsTag {
+								if c.GetKey() == key {
 									cd = c
 								}
 							}

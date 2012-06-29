@@ -96,7 +96,7 @@ Restores the activation periods for the specified prefix from storage.
 */
 func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error) {
 	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
-	base := fmt.Sprintf("%s:%s:%s:%s:", cd.Destination, cd.Tenant, cd.TOR, cd.Subject)
+	base := fmt.Sprintf("%s:%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR, cd.Subject)
 	destPrefix = cd.Destination
 	key := base + destPrefix
 	values, err := cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
@@ -123,7 +123,7 @@ func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix s
 		recursionDepth++
 		return cd.getActivationPeriodsOrFallback(key, base, destPrefix, recursionDepth)
 	}
-	//get for a smaller prefix if the orignal one was not found	
+	//get for a smaller prefix if the orignal one was not found		
 	for i := len(cd.Destination); err != nil || fallbackKey != ""; {
 		if fallbackKey != "" {
 			base = fallbackKey + ":"
