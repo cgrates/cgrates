@@ -28,8 +28,8 @@ import (
 func TestMonthStoreRestore(t *testing.T) {
 	m := Months{5, 6, 7, 8}
 	r, _ := json.Marshal(m)
-	if string(r) != "5,6,7,8," {
-		t.Errorf("Error serializing months: %v", r)
+	if string(r) != "[5,6,7,8]" {
+		t.Errorf("Error serializing months: %v", string(r))
 	}
 	o := Months{}
 	json.Unmarshal(r, &o)
@@ -41,8 +41,8 @@ func TestMonthStoreRestore(t *testing.T) {
 func TestMonthDayStoreRestore(t *testing.T) {
 	md := MonthDays{24, 25, 26}
 	r, _ := json.Marshal(md)
-	if string(r) != "24,25,26," {
-		t.Errorf("Error serializing month days: %v", r)
+	if string(r) != "[24,25,26]" {
+		t.Errorf("Error serializing month days: %v", string(r))
 	}
 	o := MonthDays{}
 	json.Unmarshal(r, &o)
@@ -54,8 +54,8 @@ func TestMonthDayStoreRestore(t *testing.T) {
 func TestWeekDayStoreRestore(t *testing.T) {
 	wd := WeekDays{time.Saturday, time.Sunday}
 	r, _ := json.Marshal(wd)
-	if string(r) != "6,0," {
-		t.Errorf("Error serializing week days: %v", r)
+	if string(r) != "[6,0]" {
+		t.Errorf("Error serializing week days: %v", string(r))
 	}
 	o := WeekDays{}
 	json.Unmarshal(r, &o)

@@ -187,7 +187,9 @@ func loadRatingProfiles() {
 				for _, d := range destinations {
 					if d.Id == r.DestinationsTag {
 						ap.AddInterval(rt.GetInterval(r))
+						log.Print(d)
 						for _, p := range d.Prefixes { //destinations
+							log.Print("P: ", p)
 							// Search for a CallDescriptor with the same key
 							var cd *timespans.CallDescriptor
 							key := fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, p)
@@ -206,7 +208,19 @@ func loadRatingProfiles() {
 								}
 								ratingProfiles[p] = append(ratingProfiles[p], cd)
 							}
-							cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+							// check the activation periods for the same activation time
+							foundAp := false
+							for _, actPer := range cd.ActivationPeriods {
+								if actPer.ActivationTime == ap.ActivationTime {
+									actPer.AddInterval(ap.Intervals...)
+									foundAp = true
+									break
+								}
+							}
+							// if not found then add a new actvation time
+							if !foundAp {
+								cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+							}
 							if fallbacksubject != "" &&
 								ratingProfiles[p].getKey(fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, timespans.FallbackDestination)) == nil {
 								cd = &timespans.CallDescriptor{

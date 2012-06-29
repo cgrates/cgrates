@@ -23,33 +23,19 @@ import (
 )
 
 func TestGetDestination(t *testing.T) {
-	mb := &MinuteBucket{DestinationId: "nationale"}
+	mb := &MinuteBucket{DestinationId: "nat"}
 	d := mb.getDestination()
-	if d == nil || d.Id != "nationale" || len(d.Prefixes) != 4 {
+	if d == nil || d.Id != "nat" || len(d.Prefixes) != 3 {
 		t.Error("Got wrong destination: ", d)
 	}
 }
 
 func TestMultipleGetDestination(t *testing.T) {
-	mb := &MinuteBucket{DestinationId: "nationale"}
+	mb := &MinuteBucket{DestinationId: "nat"}
 	d := mb.getDestination()
 	d = mb.getDestination()
 	d = mb.getDestination()
-	if d == nil || d.Id != "nationale" || len(d.Prefixes) != 4 {
-		t.Error("Got wrong destination: ", d)
-	}
-	mb = &MinuteBucket{DestinationId: "retea"}
-	d = mb.getDestination()
-	d = mb.getDestination()
-	d = mb.getDestination()
-	if d == nil || d.Id != "retea" || len(d.Prefixes) != 2 {
-		t.Error("Got wrong destination: ", d)
-	}
-	mb = &MinuteBucket{DestinationId: "mobil"}
-	d = mb.getDestination()
-	d = mb.getDestination()
-	d = mb.getDestination()
-	if d == nil || d.Id != "mobil" || len(d.Prefixes) != 2 {
+	if d == nil || d.Id != "nat" || len(d.Prefixes) != 3 {
 		t.Error("Got wrong destination: ", d)
 	}
 }

@@ -35,7 +35,7 @@ func TestDestinationStoreRestore(t *testing.T) {
 	d1 := &Destination{Id: "nat"}
 	json.Unmarshal(s, d1)
 	s1, _ := json.Marshal(d1)
-	if reflect.DeepEqual(s1, s) {
+	if string(s1) != string(s) {
 		t.Errorf("Expected %q was %q", s, s1)
 	}
 }
