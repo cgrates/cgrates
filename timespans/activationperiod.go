@@ -35,6 +35,7 @@ type ActivationPeriod struct {
 Adds one ore more intervals to the internal interval list.
 */
 func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
+	//copy(ap.Intervals, is)
 	ap.Intervals = append(ap.Intervals, is...)
 }
 

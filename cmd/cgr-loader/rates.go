@@ -28,11 +28,12 @@ import (
 )
 
 var (
-	destinations   []*timespans.Destination
-	rates          = make(map[string][]*Rate)
-	timings        = make(map[string][]*Timing)
-	ratesTimings   = make(map[string][]*RateTiming)
-	ratingProfiles = make(map[string]CallDescriptors)
+	destinations      []*timespans.Destination
+	rates             = make(map[string][]*Rate)
+	timings           = make(map[string][]*Timing)
+	ratesTimings      = make(map[string][]*RateTiming)
+	activationPeriods = make(map[string]*timespans.ActivationPeriod)
+	ratingProfiles    = make(map[string]CallDescriptors)
 )
 
 func loadDestinations() {
@@ -137,11 +138,100 @@ func loadRatesTimings() {
 		for _, t := range ts {
 			rt := NewRateTiming(record[1], t)
 			ratesTimings[tag] = append(ratesTimings[tag], rt)
+			rs, exists := rates[record[1]]
+			if !exists {
+				log.Printf("Could not rate for tag %v", record[2])
+				continue
+			}
+			for _, r := range rs {
+				_, exists := activationPeriods[tag]
+				if !exists {
+					activationPeriods[tag] = &timespans.ActivationPeriod{}
+				}
+				activationPeriods[tag].AddInterval(rt.GetInterval(r))
+			}
 		}
+	}
+	for tag, ap := range activationPeriods {
+		log.Println(tag)
+		log.Print(ap)
 	}
 }
 
 func loadRatingProfiles() {
+	fp, err := os.Open(*ratingprofilesFn)
+	if err != nil {
+		log.Printf("Could not open destinations rates file: %v", err)
+		return
+	}
+	defer fp.Close()
+	csvReader := csv.NewReader(fp)
+	csvReader.Comma = sep
+	csvReader.TrailingComma = true
+	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+		tag := record[0]
+		if tag == "Tenant" {
+			// skip header line
+			continue
+		}
+		if len(record) != 7 {
+			log.Printf("Malformed rating profile: %v", record)
+			continue
+		}
+		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[4]
+		at, err := time.Parse(time.RFC3339, record[6])
+		if err != nil {
+			log.Printf("Cannot parse activation time from %v", record[6])
+			continue
+		}
+		for _, d := range destinations {
+			for _, p := range d.Prefixes { //destinations
+				// Search for a CallDescriptor with the same key
+				var cd *timespans.CallDescriptor
+				key := fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, p)
+				for _, c := range ratingProfiles[p] {
+					if c.GetKey() == key {
+						cd = c
+					}
+				}
+				if cd == nil {
+					cd = &timespans.CallDescriptor{
+						Direction:   direction,
+						Tenant:      tenant,
+						TOR:         tor,
+						Subject:     subject,
+						Destination: p,
+					}
+					ratingProfiles[p] = append(ratingProfiles[p], cd)
+				}
+				ap, exists := activationPeriods[record[5]]
+				if !exists {
+					log.Print("Could not load ratinTiming for tag: ", record[5])
+					continue
+				}
+				newAP := &timespans.ActivationPeriod{}
+				//copy(newAP.Intervals, ap.Intervals)
+				newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
+				newAP.ActivationTime = at
+				cd.AddActivationPeriod(newAP)
+				if fallbacksubject != "" &&
+					ratingProfiles[p].getKey(fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, timespans.FallbackDestination)) == nil {
+					cd = &timespans.CallDescriptor{
+						Direction:   direction,
+						Tenant:      tenant,
+						TOR:         tor,
+						Subject:     subject,
+						Destination: timespans.FallbackDestination,
+						FallbackKey: fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject),
+					}
+					ratingProfiles[p] = append(ratingProfiles[p], cd)
+				}
+			}
+		}
+	}
+}
+
+/*func loadRatingProfiles1() {
 	fp, err := os.Open(*ratingprofilesFn)
 	if err != nil {
 		log.Printf("Could not open destinations rates file: %v", err)
@@ -185,7 +275,7 @@ func loadRatingProfiles() {
 				ap.AddIntervalIfNotPresent(rt.GetInterval(r))
 				for _, d := range destinations {
 					if d.Id == r.DestinationsTag {
-						for _, p := range d.Prefixes { //destinations							
+						for _, p := range d.Prefixes { //destinations
 							// Search for a CallDescriptor with the same key
 							var cd *timespans.CallDescriptor
 							key := fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, p)
@@ -243,4 +333,4 @@ func loadRatingProfiles() {
 			log.Print(cd)
 		}
 	}
-}
+}*/
