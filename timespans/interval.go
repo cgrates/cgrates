@@ -119,7 +119,7 @@ func (i *Interval) String() string {
 	return fmt.Sprintf("%v %v %v %v %v", i.Months, i.MonthDays, i.WeekDays, i.StartTime, i.EndTime)
 }
 
-func (i *Interval) Equals(o *Interval) bool {
+func (i *Interval) Equal(o *Interval) bool {
 	return reflect.DeepEqual(i.Months, o.Months) &&
 		reflect.DeepEqual(i.MonthDays, o.MonthDays) &&
 		reflect.DeepEqual(i.WeekDays, o.WeekDays) &&

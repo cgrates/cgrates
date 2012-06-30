@@ -148,7 +148,7 @@ func loadRatesTimings() {
 				if !exists {
 					activationPeriods[tag] = &timespans.ActivationPeriod{}
 				}
-				activationPeriods[tag].AddInterval(rt.GetInterval(r))
+				activationPeriods[tag].AddIntervalIfNotPresent(rt.GetInterval(r))
 			}
 		}
 	}
@@ -213,7 +213,7 @@ func loadRatingProfiles() {
 				//copy(newAP.Intervals, ap.Intervals)
 				newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
 				newAP.ActivationTime = at
-				cd.AddActivationPeriod(newAP)
+				cd.AddActivationPeriodIfNotPresent(newAP)
 				if fallbacksubject != "" &&
 					ratingProfiles[p].getKey(fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, timespans.FallbackDestination)) == nil {
 					cd = &timespans.CallDescriptor{

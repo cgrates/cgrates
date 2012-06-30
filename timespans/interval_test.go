@@ -145,7 +145,7 @@ func TestIntervalEverything(t *testing.T) {
 	}
 }
 
-func TestIntervalEquals(t *testing.T) {
+func TestIntervalEqual(t *testing.T) {
 	i1 := &Interval{Months: Months{time.February},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
@@ -156,12 +156,12 @@ func TestIntervalEquals(t *testing.T) {
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	if !i1.Equals(i2) || !i2.Equals(i1) {
+	if !i1.Equal(i2) || !i2.Equal(i1) {
 		t.Errorf("%v and %v are not equal", i1, i2)
 	}
 }
 
-func TestIntervalNotEquals(t *testing.T) {
+func TestIntervalNotEqual(t *testing.T) {
 	i1 := &Interval{Months: Months{time.February},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday},
@@ -172,7 +172,7 @@ func TestIntervalNotEquals(t *testing.T) {
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	if i1.Equals(i2) || i2.Equals(i1) {
+	if i1.Equal(i2) || i2.Equal(i1) {
 		t.Errorf("%v and %v not equal", i1, i2)
 	}
 }

@@ -65,12 +65,24 @@ type CallDescriptor struct {
 	userBalance                  *UserBalance
 }
 
-/*
-Adds an activation period that applyes to current call descriptor.
-*/
+// Adds an activation period that applyes to current call descriptor.
 func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {
+	cd.ActivationPeriods = append(cd.ActivationPeriods, aps...)
+}
+
+// Adds an activation period that applyes to current call descriptor if not already present.
+func (cd *CallDescriptor) AddActivationPeriodIfNotPresent(aps ...*ActivationPeriod) {
 	for _, ap := range aps {
-		cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+		found := false
+		for _, eap := range cd.ActivationPeriods {
+			if ap.Equal(eap) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
+		}
 	}
 }
 

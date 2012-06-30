@@ -20,7 +20,7 @@ package timespans
 
 import (
 	"time"
-	//"log"
+	// "log"
 )
 
 /*
@@ -35,7 +35,6 @@ type ActivationPeriod struct {
 Adds one ore more intervals to the internal interval list.
 */
 func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
-	//copy(ap.Intervals, is)
 	ap.Intervals = append(ap.Intervals, is...)
 }
 
@@ -46,7 +45,7 @@ func (ap *ActivationPeriod) AddIntervalIfNotPresent(is ...*Interval) {
 	for _, i := range is {
 		found := false
 		for _, ei := range ap.Intervals {
-			if i.Equals(ei) {
+			if i.Equal(ei) {
 				found = true
 				break
 			}
@@ -55,4 +54,8 @@ func (ap *ActivationPeriod) AddIntervalIfNotPresent(is ...*Interval) {
 			ap.Intervals = append(ap.Intervals, i)
 		}
 	}
+}
+
+func (ap *ActivationPeriod) Equal(o *ActivationPeriod) bool {
+	return ap.ActivationTime == o.ActivationTime
 }
