@@ -182,10 +182,9 @@ func loadRatingProfiles() {
 				ActivationTime: at,
 			}
 			for _, r := range rs { //rates				
+				ap.AddIntervalIfNotPresent(rt.GetInterval(r))
 				for _, d := range destinations {
 					if d.Id == r.DestinationsTag {
-						log.Print("dId: ", d.Id)
-						ap.AddInterval(rt.GetInterval(r))
 						for _, p := range d.Prefixes { //destinations							
 							// Search for a CallDescriptor with the same key
 							var cd *timespans.CallDescriptor
@@ -209,7 +208,7 @@ func loadRatingProfiles() {
 							foundAp := false
 							for _, actPer := range cd.ActivationPeriods {
 								if actPer.ActivationTime == ap.ActivationTime {
-									actPer.AddInterval(ap.Intervals...)
+									actPer.AddIntervalIfNotPresent(ap.Intervals...)
 									foundAp = true
 									break
 								}

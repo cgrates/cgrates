@@ -35,7 +35,23 @@ type ActivationPeriod struct {
 Adds one ore more intervals to the internal interval list.
 */
 func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
+	ap.Intervals = append(ap.Intervals, is...)
+}
+
+/*
+Adds one ore more intervals to the internal interval list only if it is not allready in the list.
+*/
+func (ap *ActivationPeriod) AddIntervalIfNotPresent(is ...*Interval) {
 	for _, i := range is {
-		ap.Intervals = append(ap.Intervals, i)
+		found := false
+		for _, ei := range ap.Intervals {
+			if i.Equals(ei) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			ap.Intervals = append(ap.Intervals, i)
+		}
 	}
 }

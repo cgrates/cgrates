@@ -20,6 +20,7 @@ package timespans
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -89,12 +90,6 @@ func (i *Interval) getRightMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 23, 59, 59, 0
 	loc := t.Location()
-	if len(i.Months) > 0 {
-		month = i.Months[len(i.Months)-1]
-	}
-	if len(i.MonthDays) > 0 {
-		day = i.MonthDays[len(i.MonthDays)-1]
-	}
 	if i.EndTime != "" {
 		split := strings.Split(i.EndTime, ":")
 		hour, _ = strconv.Atoi(split[0])
@@ -111,12 +106,6 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 0, 0, 0, 0
 	loc := t.Location()
-	if len(i.Months) > 0 {
-		month = i.Months[0]
-	}
-	if len(i.MonthDays) > 0 {
-		day = i.MonthDays[0]
-	}
 	if i.StartTime != "" {
 		split := strings.Split(i.StartTime, ":")
 		hour, _ = strconv.Atoi(split[0])
@@ -128,4 +117,12 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 
 func (i *Interval) String() string {
 	return fmt.Sprintf("%v %v %v %v %v", i.Months, i.MonthDays, i.WeekDays, i.StartTime, i.EndTime)
+}
+
+func (i *Interval) Equals(o *Interval) bool {
+	return reflect.DeepEqual(i.Months, o.Months) &&
+		reflect.DeepEqual(i.MonthDays, o.MonthDays) &&
+		reflect.DeepEqual(i.WeekDays, o.WeekDays) &&
+		i.StartTime == o.StartTime &&
+		i.EndTime == o.EndTime
 }

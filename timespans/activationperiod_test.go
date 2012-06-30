@@ -114,6 +114,33 @@ func TestFallbackNoInfiniteLoop(t *testing.T) {
 	}
 }
 
+func TestApAddIntervalIfNotPresent(t *testing.T) {
+	i1 := &Interval{Months: Months{time.February},
+		MonthDays: MonthDays{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	i2 := &Interval{Months: Months{time.February},
+		MonthDays: MonthDays{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	i3 := &Interval{Months: Months{time.February},
+		MonthDays: MonthDays{1},
+		WeekDays:  []time.Weekday{time.Wednesday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{Intervals: []*Interval{i1}}
+	ap.AddIntervalIfNotPresent(i2)
+	if len(ap.Intervals) != 1 {
+		t.Error("Wronfully appended interval ;)")
+	}
+	ap.AddIntervalIfNotPresent(i3)
+	if len(ap.Intervals) != 2 {
+		t.Error("Wronfully not appended interval ;)")
+	}
+}
+
 /**************************** Benchmarks *************************************/
 
 func BenchmarkActivationPeriodRestore(b *testing.B) {
