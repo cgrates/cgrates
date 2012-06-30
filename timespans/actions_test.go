@@ -146,17 +146,17 @@ func TestActionTimingHourMonthdaysMonths(t *testing.T) {
 	if now.After(testTime) {
 		day = tomorrow.Day()
 	}
-	/*month := now.Month()
+	month := now.Month()
 	if now.After(testTime) {
 		month = nextMonth.Month()
-	}*/
+	}
 	at := &ActionTiming{Timing: &Interval{
 		Months:    Months{now.Month(), nextMonth.Month()},
 		MonthDays: MonthDays{now.Day(), tomorrow.Day()},
 		StartTime: "10:01:00",
 	}}
 	st := at.GetNextStartTime()
-	expected := time.Date(y, m, day, 10, 1, 0, 0, time.Local)
+	expected := time.Date(y, month, day, 10, 1, 0, 0, time.Local)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}

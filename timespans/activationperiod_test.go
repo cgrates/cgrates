@@ -39,10 +39,7 @@ func TestApRestoreRedis(t *testing.T) {
 		Subject:     "rif:from:tm",
 		Destination: "49"}
 	cd.SearchStorageForPrefix()
-	if len(cd.ActivationPeriods) != 4 {
-		for _, ap := range cd.ActivationPeriods {
-			t.Log(ap)
-		}
+	if len(cd.ActivationPeriods) != 2 {
 		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
 	}
 }

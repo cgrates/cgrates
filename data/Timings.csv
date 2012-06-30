@@ -1,6 +1,6 @@
 TimingTag,Months,MonthDays,WeekDays,StartTime
-WORKDAYS_00,*all,*all,*all,00:00:00
-WORKDAYS_18,*all,*all,*all,18:00:00
+WORKDAYS_00,*all,*all,1;2;3;4;5,00:00:00
+WORKDAYS_18,*all,*all,6;7,18:00:00
 WEEKENDS,*all,*all,6;7,00:00:00
 WEEKLY_SAME_TIME,*all,*all,1,*now
 FIRST_DAY_OF_MONTH,*all,1,*all,00:00:00

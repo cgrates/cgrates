@@ -119,3 +119,15 @@ func (cds CallDescriptors) getKey(key string) *timespans.CallDescriptor {
 	}
 	return nil
 }
+
+/*func (cds CallDescriptors) setIntervalEndTime() {
+	for _, cd := range cds {
+		for _, ap := range cd.ActivationPeriods {
+			for x, i := range ap.Intervals {
+				if x < len(ap.Intervals)-1 {
+					i.EndTime = ap.Intervals[x+1].StartTime
+				}
+			}
+		}
+	}
+}*/

@@ -134,7 +134,6 @@ func loadRatesTimings() {
 			log.Printf("Could not get timing for tag %v", record[2])
 			continue
 		}
-
 		for _, t := range ts {
 			rt := NewRateTiming(record[1], t)
 			ratesTimings[tag] = append(ratesTimings[tag], rt)
@@ -163,18 +162,17 @@ func loadRatingProfiles() {
 			continue
 		}
 		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[4]
-		fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject)
 		at, err := time.Parse(time.RFC3339, record[6])
 		if err != nil {
-			log.Printf("Cannot parse activation time from %v", record[5])
+			log.Printf("Cannot parse activation time from %v", record[6])
 			continue
 		}
 		rts, exists := ratesTimings[record[5]]
 		if !exists {
-			log.Printf("Could not get rate timing for tag %v", record[4])
+			log.Printf("Could not get rate timing for tag %v", record)
 			continue
 		}
-		for _, rt := range rts { // rates timing
+		for _, rt := range rts { // rates timing			
 			rs, exists := rates[rt.RatesTag]
 			if !exists {
 				log.Printf("Could not get rates for tag %v", rt.RatesTag)
@@ -186,10 +184,9 @@ func loadRatingProfiles() {
 			for _, r := range rs { //rates				
 				for _, d := range destinations {
 					if d.Id == r.DestinationsTag {
+						log.Print("dId: ", d.Id)
 						ap.AddInterval(rt.GetInterval(r))
-						log.Print(d)
-						for _, p := range d.Prefixes { //destinations
-							log.Print("P: ", p)
+						for _, p := range d.Prefixes { //destinations							
 							// Search for a CallDescriptor with the same key
 							var cd *timespans.CallDescriptor
 							key := fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, p)
@@ -242,6 +239,7 @@ func loadRatingProfiles() {
 	log.Print("Call descriptors:")
 	for dest, cds := range ratingProfiles {
 		log.Print(dest)
+		//cds.setIntervalEndTime()
 		for _, cd := range cds {
 			log.Print(cd)
 		}
