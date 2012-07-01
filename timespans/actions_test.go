@@ -146,9 +146,12 @@ func TestActionTimingHourMonthdaysMonths(t *testing.T) {
 	if now.After(testTime) {
 		day = tomorrow.Day()
 	}
+	nextDay := time.Date(y, m, day, 10, 1, 0, 0, time.Local)
 	month := now.Month()
-	if now.After(testTime) {
-		month = nextMonth.Month()
+	if nextDay.Before(now) {
+		if now.After(testTime) {
+			month = nextMonth.Month()
+		}
 	}
 	at := &ActionTiming{Timing: &Interval{
 		Months:    Months{now.Month(), nextMonth.Month()},

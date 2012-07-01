@@ -31,7 +31,7 @@ var (
 	actions         = make(map[string][]*timespans.Action)
 	actionsTimings  = make(map[string][]*timespans.ActionTiming)
 	actionsTriggers = make(map[string][]*timespans.ActionTrigger)
-	accountActions  = make(map[string][]*timespans.UserBalance)
+	accountActions  []*timespans.UserBalance
 )
 
 func loadActions() {
@@ -198,7 +198,7 @@ func loadAccountActions() {
 			Id:             tag,
 			ActionTriggers: aTriggers,
 		}
-		accountActions[tag] = append(accountActions[tag], ub)
+		accountActions = append(accountActions, ub)
 
 		aTimings, exists := actionsTimings[aTimingsTag]
 		if !exists {

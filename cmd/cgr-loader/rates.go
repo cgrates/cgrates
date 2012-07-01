@@ -28,10 +28,10 @@ import (
 )
 
 var (
-	destinations      []*timespans.Destination
-	rates             = make(map[string][]*Rate)
-	timings           = make(map[string][]*Timing)
-	ratesTimings      = make(map[string][]*RateTiming)
+	destinations []*timespans.Destination
+	rates        = make(map[string][]*Rate)
+	timings      = make(map[string][]*Timing)
+	//ratesTimings      = make(map[string][]*RateTiming)
 	activationPeriods = make(map[string]*timespans.ActivationPeriod)
 	ratingProfiles    = make(map[string]CallDescriptors)
 )
@@ -137,7 +137,7 @@ func loadRatesTimings() {
 		}
 		for _, t := range ts {
 			rt := NewRateTiming(record[1], t)
-			ratesTimings[tag] = append(ratesTimings[tag], rt)
+			//ratesTimings[tag] = append(ratesTimings[tag], rt)
 			rs, exists := rates[record[1]]
 			if !exists {
 				log.Printf("Could not rate for tag %v", record[2])
@@ -151,10 +151,6 @@ func loadRatesTimings() {
 				activationPeriods[tag].AddIntervalIfNotPresent(rt.GetInterval(r))
 			}
 		}
-	}
-	for tag, ap := range activationPeriods {
-		log.Println(tag)
-		log.Print(ap)
 	}
 }
 

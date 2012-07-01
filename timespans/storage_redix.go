@@ -69,7 +69,7 @@ func (rs *RedixStorage) SetActivationPeriodsOrFallback(key string, aps []*Activa
 	//rs.net.Reset()
 	if len(aps) > 0 {
 		//gob.NewEncoder(&rs.net).Encode(aps)
-		result, err = json.Marshal(aps)
+		result, err = json.Marshal(&aps)
 	} else {
 		//gob.NewEncoder(&rs.net).Encode(fallbackKey)
 		result, err = json.Marshal(fallbackKey)
@@ -92,7 +92,7 @@ func (rs *RedixStorage) SetDestination(dest *Destination) (err error) {
 
 func (rs *RedixStorage) GetActions(key string) (as []*Action, err error) {
 	if values, err := rs.db.Get(key).Bytes(); err == nil {
-		err = json.Unmarshal(values, as)
+		err = json.Unmarshal(values, &as)
 	}
 	return
 }
@@ -138,7 +138,7 @@ func (rs *RedixStorage) GetAllActionTimings() (ats []*ActionTiming, err error) {
 	}
 	for _, v := range values {
 		var tempAts []*ActionTiming
-		err = json.Unmarshal([]byte(v), &tempAts)
+		err = json.Unmarshal([]byte(v), &ats)
 		ats = append(ats, tempAts...)
 	}
 	return

@@ -109,12 +109,19 @@ func changeToPrepaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func topupResetAction(ub *UserBalance, a *Action) (err error) {
+	if ub.BalanceMap == nil {
+		ub.BalanceMap = make(map[string]float64)
+	}
 	ub.BalanceMap[a.BalanceId] = a.Units
 	return storageGetter.SetUserBalance(ub)
 }
 
 func topupAddAction(ub *UserBalance, a *Action) (err error) {
+	if ub.BalanceMap == nil {
+		ub.BalanceMap = make(map[string]float64)
+	}
 	ub.BalanceMap[a.BalanceId] += a.Units
+	ub.MinuteBuckets = append(ub.MinuteBuckets, a.MinuteBucket)
 	return storageGetter.SetUserBalance(ub)
 }
 
@@ -154,10 +161,9 @@ type ActionTiming struct {
 	actions        []*Action
 }
 
-func (at *ActionTiming) getActions() (a []*Action, err error) {
+func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		a, err = storageGetter.GetActions(at.ActionsId)
-		at.actions = a
+		at.actions, err = storageGetter.GetActions(at.ActionsId)
 	}
 	return
 }
@@ -263,8 +269,10 @@ MONTHS:
 }
 
 func (at *ActionTiming) Execute() (err error) {
+	log.Print("Executingx: ", at)
 	aac, err := at.getActions()
 	if err != nil {
+		log.Print("Failed to get actions: ", err)
 		return
 	}
 	for _, a := range aac {

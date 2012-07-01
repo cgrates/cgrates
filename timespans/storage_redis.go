@@ -21,6 +21,7 @@ package timespans
 import (
 	// "bytes"
 	// "encoding/gob"
+	// "log"
 	"encoding/json"
 	"github.com/simonz05/godis"
 )
@@ -95,9 +96,8 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 }
 
 func (rs *RedisStorage) GetActions(key string) (as []*Action, err error) {
-	//rs.db.Select(rs.dbNb + 2)
 	if values, err := rs.db.Get(key); err == nil {
-		err = json.Unmarshal(values, as)
+		err = json.Unmarshal(values, &as)
 	}
 	return
 }
@@ -125,7 +125,7 @@ func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 
 func (rs *RedisStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
 	if values, err := rs.db.Get(key); err == nil {
-		err = json.Unmarshal(values, ats)
+		err = json.Unmarshal(values, &ats)
 	}
 	return
 }

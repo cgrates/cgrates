@@ -75,7 +75,8 @@ func NewTiming(timeingInfo ...string) (rt *Timing) {
 	rt.MonthDays.Parse(timeingInfo[1], ";")
 	rt.WeekDays.Parse(timeingInfo[2], ";")
 	if timeingInfo[3] == "*now" {
-		rt.StartTime = strings.Split(time.Now().Format(time.Stamp), " ")[2]
+		timeTokens := strings.Split(time.Now().Format(time.Stamp), " ")
+		rt.StartTime = timeTokens[len(timeTokens)-1]
 	} else {
 		rt.StartTime = timeingInfo[3]
 	}

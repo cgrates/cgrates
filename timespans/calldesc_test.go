@@ -141,9 +141,9 @@ func TestPresentSecodCost(t *testing.T) {
 func TestMinutesCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 22, 51, 50, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Cost: 0.1, ConnectFee: 0}
+	expected := &CallCost{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Cost: 55, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
 		t.Log(result.Timespans[0])
 		t.Errorf("Expected %v was %v", expected, result)

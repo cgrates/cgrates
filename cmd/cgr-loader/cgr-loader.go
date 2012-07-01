@@ -53,12 +53,12 @@ func writeToDatabase() {
 	if *flush {
 		storage.Flush()
 	}
-	// destinations
+	log.Print("Destinations")
 	for _, d := range destinations {
 		storage.SetDestination(d)
+		log.Print(d.Id, " : ", d.Prefixes)
 	}
 	log.Print("Rating profiles")
-	// rating profiles
 	for _, cds := range ratingProfiles {
 		for _, cd := range cds {
 			err = storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
@@ -66,18 +66,19 @@ func writeToDatabase() {
 		}
 	}
 	log.Print("Action timings")
-	// action timings
 	for k, ats := range actionsTimings {
 		storage.SetActionTimings(timespans.ACTION_TIMING_PREFIX+":"+k, ats)
 		log.Println(k)
 	}
+	log.Print("Actions")
+	for k, as := range actions {
+		storage.SetActions(k, as)
+		log.Println(k)
+	}
 	log.Print("Account actions")
-	// account actions
-	for _, aas := range accountActions {
-		for _, ub := range aas {
-			storage.SetUserBalance(ub)
-			log.Println(ub.Id)
-		}
+	for _, ub := range accountActions {
+		storage.SetUserBalance(ub)
+		log.Println(ub.Id)
 	}
 }
 
