@@ -159,10 +159,11 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithUserBalance(t *testing.T) {
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
+	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minitsboy", Destination: "0723", Amount: 5400}
 	result, err := cd.GetMaxSessionTime()
-	if result != 1080 || err != nil {
-		t.Errorf("Expected %v was %v", 1080, result)
+	expected := 300.0
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
 

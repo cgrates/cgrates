@@ -269,7 +269,6 @@ MONTHS:
 }
 
 func (at *ActionTiming) Execute() (err error) {
-	log.Print("Executingx: ", at)
 	aac, err := at.getActions()
 	if err != nil {
 		log.Print("Failed to get actions: ", err)

@@ -91,7 +91,8 @@ Gets and caches the user balance information.
 */
 func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 	if cd.userBalance == nil {
-		cd.userBalance, err = storageGetter.GetUserBalance(cd.Subject)
+		key := fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, cd.Subject)
+		cd.userBalance, err = storageGetter.GetUserBalance(key)
 	}
 	return cd.userBalance, err
 }

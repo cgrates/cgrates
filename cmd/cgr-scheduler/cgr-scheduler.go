@@ -113,6 +113,7 @@ func loadActionTimings() {
 	s.queue = actiontimingqueue{}
 	for _, at := range actionTimings {
 		if at.IsOneTimeRun() {
+			log.Print("Executing: ", at)
 			go at.Execute()
 			continue
 		}
