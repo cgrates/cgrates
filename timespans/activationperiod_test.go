@@ -130,7 +130,8 @@ func TestApAddIntervalIfNotPresent(t *testing.T) {
 		WeekDays:  []time.Weekday{time.Wednesday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{Intervals: []*Interval{i1}}
+	ap := &ActivationPeriod{}
+	ap.AddIntervalIfNotPresent(i1)
 	ap.AddIntervalIfNotPresent(i2)
 	if len(ap.Intervals) != 1 {
 		t.Error("Wronfully appended interval ;)")

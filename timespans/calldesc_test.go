@@ -164,7 +164,7 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minitsboy", Destination: "0723", Amount: 5400}
 	result, err := cd.GetMaxSessionTime()
-	expected := 300.0
+	expected := 200.0
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -194,6 +194,22 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 	}
 }
 */
+
+func TestApAddAPIfNotPresent(t *testing.T) {
+	ap1 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
+	ap2 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
+	ap3 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 1, time.UTC)}
+	cd := &CallDescriptor{}
+	cd.AddActivationPeriodIfNotPresent(ap1)
+	cd.AddActivationPeriodIfNotPresent(ap2)
+	if len(cd.ActivationPeriods) != 1 {
+		t.Error("Wronfully appended activation period ;)", len(cd.ActivationPeriods))
+	}
+	cd.AddActivationPeriodIfNotPresent(ap3)
+	if len(cd.ActivationPeriods) != 2 {
+		t.Error("Wronfully not appended activation period ;)", len(cd.ActivationPeriods))
+	}
+}
 
 /*********************************** BENCHMARKS ***************************************/
 func BenchmarkRedisGetting(b *testing.B) {

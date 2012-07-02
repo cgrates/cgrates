@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"encoding/gob"
 	"bytes"
+	//"log"
 )
 
 /*
@@ -89,7 +90,7 @@ func (jbm *JSONBufMarshaler) Marshal(v interface{}) (data []byte, err error) {
 func (jbm *JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
 	jbm.buf.Reset()
 	jbm.buf.Write(data)
-	return json.NewDecoder(&jbm.buf).Decode(&v)
+	return json.NewDecoder(&jbm.buf).Decode(v)
 }
 
 type GOBMarshaler struct {
@@ -107,5 +108,5 @@ func (gm *GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
 func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 	gm.buf.Reset()
 	gm.buf.Write(data)
-	return gob.NewDecoder(&gm.buf).Decode(&v)
+	return gob.NewDecoder(&gm.buf).Decode(v)
 }

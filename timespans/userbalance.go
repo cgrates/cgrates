@@ -191,6 +191,22 @@ func (ub *UserBalance) debitSMSBuget(amount float64) (float64, error) {
 	return ub.BalanceMap[SMS], nil
 }
 
+// Adds the minutes from the received minute bucket to an existing bucket if the destination
+// is the same or ads the minutye bucket to the list if none matches.
+func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
+	found := false
+	for _, mb := range ub.MinuteBuckets {
+		if mb.DestinationId == newMb.DestinationId {
+			mb.Seconds += newMb.Seconds
+			found = true
+			break
+		}
+	}
+	if !found {
+		ub.MinuteBuckets = append(ub.MinuteBuckets, newMb)
+	}
+}
+
 /*
 Adds the specified amount of seconds.
 */

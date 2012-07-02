@@ -78,13 +78,15 @@ type actionTypeFunc func(*UserBalance, *Action) error
 
 var (
 	actionTypeFuncMap = map[string]actionTypeFunc{
-		"LOG":                logAction,
-		"RESET_TRIGGERS":     resetTriggersAction,
-		"CHANGE_TO_POSTPAID": changeToPostpaidAction,
-		"CHANGE_TO_PREPAID":  changeToPrepaidAction,
-		"TOPUP_RESET":        topupResetAction,
-		"TOPUP_ADD":          topupAddAction,
-		"DEBIT":              debitAction,
+		"LOG":            logAction,
+		"RESET_TRIGGERS": resetTriggersAction,
+		"SET_POSTPAID":   setPostpaidAction,
+		"RESET_POSTPAID": resetPostpaidAction,
+		"SET_PREPAID":    setPrepaidAction,
+		"RESET_PREPAID":  resetPrepaidAction,
+		"TOPUP_RESET":    topupResetAction,
+		"TOPUP":          topupAction,
+		"DEBIT":          debitAction,
 	}
 )
 
@@ -98,12 +100,22 @@ func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
 	return
 }
 
-func changeToPostpaidAction(ub *UserBalance, a *Action) (err error) {
+func setPostpaidAction(ub *UserBalance, a *Action) (err error) {
 	ub.Type = UB_TYPE_POSTPAID
 	return
 }
 
-func changeToPrepaidAction(ub *UserBalance, a *Action) (err error) {
+func resetPostpaidAction(ub *UserBalance, a *Action) (err error) {
+	ub.Type = UB_TYPE_POSTPAID
+	return
+}
+
+func setPrepaidAction(ub *UserBalance, a *Action) (err error) {
+	ub.Type = UB_TYPE_PREPAID
+	return
+}
+
+func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
 	ub.Type = UB_TYPE_PREPAID
 	return
 }
@@ -116,12 +128,12 @@ func topupResetAction(ub *UserBalance, a *Action) (err error) {
 	return storageGetter.SetUserBalance(ub)
 }
 
-func topupAddAction(ub *UserBalance, a *Action) (err error) {
+func topupAction(ub *UserBalance, a *Action) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]float64)
 	}
 	ub.BalanceMap[a.BalanceId] += a.Units
-	ub.MinuteBuckets = append(ub.MinuteBuckets, a.MinuteBucket)
+	ub.addMinuteBucket(a.MinuteBucket)
 	return storageGetter.SetUserBalance(ub)
 }
 
@@ -165,7 +177,7 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
 		at.actions, err = storageGetter.GetActions(at.ActionsId)
 	}
-	return
+	return at.actions, err
 }
 
 func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
