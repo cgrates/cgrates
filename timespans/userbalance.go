@@ -48,13 +48,12 @@ var (
 Structure containing information about user's credit (minutes, cents, sms...).'
 */
 type UserBalance struct {
-	Id                 string
-	Type               string // prepaid-postpaid
-	BalanceMap         map[string]float64
-	MinuteBuckets      []*MinuteBucket
-	UnitsCounters      []*UnitsCounter
-	ActionTriggers     []*ActionTrigger
-	usedActionTriggers []*ActionTrigger
+	Id             string
+	Type           string // prepaid-postpaid
+	BalanceMap     map[string]float64
+	MinuteBuckets  []*MinuteBucket
+	UnitsCounters  []*UnitsCounter
+	ActionTriggers ActionTriggerPriotityList
 }
 
 /*
@@ -86,8 +85,9 @@ func (bs bucketsorter) Less(j, i int) bool {
 }
 
 func (ub *UserBalance) ResetActionTriggers() {
-	ub.ActionTriggers = append(ub.ActionTriggers, ub.usedActionTriggers...)
-	ub.usedActionTriggers = make([]*ActionTrigger, 0)
+	for _, at := range ub.ActionTriggers {
+		at.executed = false
+	}
 }
 
 /*
@@ -99,8 +99,8 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds float64, buck
 		return
 	}
 	for _, mb := range ub.MinuteBuckets {
-		d := mb.getDestination()
-		if d == nil {
+		d, exists := DestinationCacheMap[mb.DestinationId]
+		if !exists {
 			continue
 		}
 		contains, precision := d.containsPrefix(prefix)
@@ -204,6 +204,33 @@ func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
 	}
 	if !found {
 		ub.MinuteBuckets = append(ub.MinuteBuckets, newMb)
+	}
+}
+
+func (ub *UserBalance) ExecuteActionTriggers() {
+	ub.ActionTriggers.Sort()
+	for _, at := range ub.ActionTriggers {
+		if at.executed {
+			// trigger is marked as executed, so skipp it until
+			// the next reset (see RESET_TRIGGERS action type)
+			continue
+		}
+		for _, uc := range ub.UnitsCounters {
+			if uc.BalanceId == at.BalanceId {
+				if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safty
+					for _, mb := range uc.MinuteBuckets {
+						if mb.DestinationId == at.DestinationId && mb.Seconds >= at.ThresholdValue {
+							// run the actions
+							at.Execute(ub)
+						}
+					}
+				}
+				if uc.Units >= at.ThresholdValue {
+					// run the actions					
+					at.Execute(ub)
+				}
+			}
+		}
 	}
 }
 

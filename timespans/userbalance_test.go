@@ -46,8 +46,8 @@ func TestUserBalanceStoreRestore(t *testing.T) {
 }
 
 func TestGetSecondsForPrefix(t *testing.T) {
-	b1 := &MinuteBucket{Seconds: 10, Weight: 10, destination: NAT}
-	b2 := &MinuteBucket{Seconds: 100, Weight: 20, destination: RET}
+	b1 := &MinuteBucket{Seconds: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &MinuteBucket{Seconds: 100, Weight: 20, DestinationId: "RET"}
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 200}}
 	seconds, bucketList := ub1.getSecondsForPrefix("0723")
 	expected := 110.0
@@ -57,8 +57,8 @@ func TestGetSecondsForPrefix(t *testing.T) {
 }
 
 func TestGetPricedSeconds(t *testing.T) {
-	b1 := &MinuteBucket{Seconds: 10, Price: 10, Weight: 10, destination: NAT}
-	b2 := &MinuteBucket{Seconds: 100, Price: 1, Weight: 20, destination: RET}
+	b1 := &MinuteBucket{Seconds: 10, Price: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &MinuteBucket{Seconds: 100, Price: 1, Weight: 20, DestinationId: "RET"}
 
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
 	seconds, bucketList := ub1.getSecondsForPrefix("0723")
@@ -340,8 +340,8 @@ func TestUBAddMinutBucket(t *testing.T) {
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
 	b.StopTimer()
-	b1 := &MinuteBucket{Seconds: 10, Price: 10, Weight: 10, destination: NAT}
-	b2 := &MinuteBucket{Seconds: 100, Price: 1, Weight: 20, destination: RET}
+	b1 := &MinuteBucket{Seconds: 10, Price: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &MinuteBucket{Seconds: 100, Price: 1, Weight: 20, DestinationId: "RET"}
 
 	ub1 := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
 	b.StartTimer()
@@ -361,8 +361,8 @@ func BenchmarkUserBalanceRedisStoreRestore(b *testing.B) {
 }
 
 func BenchmarkGetSecondsForPrefix(b *testing.B) {
-	b1 := &MinuteBucket{Seconds: 10, Weight: 10, destination: NAT}
-	b2 := &MinuteBucket{Seconds: 100, Weight: 20, destination: RET}
+	b1 := &MinuteBucket{Seconds: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &MinuteBucket{Seconds: 100, Weight: 20, DestinationId: "RET"}
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
 	for i := 0; i < b.N; i++ {
 		ub1.getSecondsForPrefix("0723")

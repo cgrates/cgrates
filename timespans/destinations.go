@@ -26,6 +26,12 @@ type Destination struct {
 	Prefixes []string
 }
 
+type destinationCacheMap map[string]*Destination
+
+var (
+	DestinationCacheMap = make(destinationCacheMap)
+)
+
 /*
 De-serializes the destination for the storage. Used for key-value storages.
 */

@@ -29,18 +29,7 @@ type MinuteBucket struct {
 	Price         float64
 	Percent       float64 // percentage from standard price
 	DestinationId string
-	destination   *Destination
 	precision     int
-}
-
-/*
-Returns the destination loading it from the storage if necessary.
-*/
-func (mb *MinuteBucket) getDestination() (dest *Destination) {
-	if mb.destination == nil {
-		mb.destination, _ = storageGetter.GetDestination(mb.DestinationId)
-	}
-	return mb.destination
 }
 
 func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {

@@ -29,14 +29,13 @@ const (
 	FORMAT = "2006-1-2 15:04:05 MST"
 )
 
-// Amount of a trafic of a certain type (TOR)
+// Amount of a trafic of a certain type
 type UnitsCounter struct {
 	Direction     string
-	TOR           string
+	BalanceId     string
 	Units         float64
 	Weight        float64
-	DestinationId string
-	destination   *Destination
+	MinuteBuckets []*MinuteBucket
 }
 
 // Structure to store actions according to weight
@@ -50,18 +49,8 @@ func (s countersorter) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (s countersorter) Less(j, i int) bool {
+func (s countersorter) Less(i, j int) bool {
 	return s[i].Weight < s[j].Weight
-}
-
-/*
-Returns the destination loading it from the storage if necessary.
-*/
-func (uc *UnitsCounter) getDestination() (dest *Destination) {
-	if uc.destination == nil {
-		uc.destination, _ = storageGetter.GetDestination(uc.DestinationId)
-	}
-	return uc.destination
 }
 
 /*
@@ -141,28 +130,50 @@ func debitAction(ub *UserBalance, a *Action) (err error) {
 	return
 }
 
-// Structure to store actions according to weight
-type actionsorter []*Action
-
-func (s actionsorter) Len() int {
-	return len(s)
-}
-
-func (s actionsorter) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s actionsorter) Less(j, i int) bool {
-	return s[i].MinuteBucket.Weight < s[j].MinuteBucket.Weight
-}
-
 type ActionTrigger struct {
 	BalanceId      string
 	ThresholdValue float64
 	DestinationId  string
-	destination    *Destination
+	Priority       float64
 	ActionsId      string
-	actions        []*Action
+	executed       bool
+}
+
+func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
+	aac, err := storageGetter.GetActions(at.ActionsId)
+	if err != nil {
+		log.Print("Failed to get actions: ", err)
+		return
+	}
+	for _, a := range aac {
+		actionFunction, exists := actionTypeFuncMap[a.ActionType]
+		if !exists {
+			log.Printf("Function type %v not available, aborting execution!", a.ActionType)
+			return
+		}
+		err = actionFunction(ub, a)
+	}
+	at.executed = true
+	return
+}
+
+// Structure to store actions according to weight
+type ActionTriggerPriotityList []*ActionTrigger
+
+func (atpl ActionTriggerPriotityList) Len() int {
+	return len(atpl)
+}
+
+func (atpl ActionTriggerPriotityList) Swap(i, j int) {
+	atpl[i], atpl[j] = atpl[j], atpl[i]
+}
+
+func (atpl ActionTriggerPriotityList) Less(i, j int) bool {
+	return atpl[i].Priority < atpl[j].Priority
+}
+
+func (atpl ActionTriggerPriotityList) Sort() {
+	sort.Sort(atpl)
 }
 
 type ActionTiming struct {
