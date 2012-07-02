@@ -50,9 +50,10 @@ func TestActionTimingOnlyWeekdays(t *testing.T) {
 	y, m, d := now.Date()
 	h, min, s := now.Clock()
 	e := time.Date(y, m, d, h, min, s, 0, time.Local)
-	for _, i := range []int{0, 1, 2, 3, 4, 5, 6} {
-		e = time.Date(e.Year(), e.Month(), e.Day()+i, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
-		if e.Weekday() == time.Monday {
+	day := e.Day()
+	for _, i := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
+		e = time.Date(e.Year(), e.Month(), day+i, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
+		if e.Weekday() == time.Monday && (e.Equal(now) || e.After(now)) {
 			break
 		}
 	}
@@ -67,9 +68,10 @@ func TestActionTimingHourWeekdays(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
 	e := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	for _, i := range []int{0, 1, 2, 3, 4, 5, 6} {
-		e = time.Date(e.Year(), e.Month(), e.Day()+i, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
-		if e.Weekday() == time.Monday {
+	day := e.Day()
+	for _, i := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
+		e = time.Date(e.Year(), e.Month(), day+i, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
+		if e.Weekday() == time.Monday && (e.Equal(now) || e.After(now)) {
 			break
 		}
 	}

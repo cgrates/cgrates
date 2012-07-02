@@ -196,14 +196,15 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 			return
 		}
 	}
-
+	// weekdays
 	if i.WeekDays != nil && len(i.WeekDays) > 0 {
 		sort.Sort(i.WeekDays)
 		if t.IsZero() {
 			t = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
 		}
-		for _, j := range []int{0, 1, 2, 3, 4, 5, 6} {
-			t = time.Date(t.Year(), t.Month(), t.Day()+j, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
+		d := t.Day()
+		for _, j := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
+			t = time.Date(t.Year(), t.Month(), d+j, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
 			for _, wd := range i.WeekDays {
 				if t.Weekday() == wd && (t.Equal(now) || t.After(now)) {
 					return
@@ -211,7 +212,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 			}
 		}
 	}
-
+	// monthdays
 	if i.MonthDays != nil && len(i.MonthDays) > 0 {
 		sort.Sort(i.MonthDays)
 		now := time.Now()

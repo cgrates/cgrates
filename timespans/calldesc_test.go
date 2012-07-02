@@ -128,11 +128,14 @@ func TestUniquePrice(t *testing.T) {
 }
 
 func TestPresentSecodCost(t *testing.T) {
-	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723"}
 	result, _ := cd.getPresentSecondCost()
-	expected := 0.5
+	expected := 1.0
+	now := time.Now()
+	after18 := time.Date(now.Year(), now.Month(), now.Day(), 18, 0, 0, 1, now.Location())
+	if now.After(after18) {
+		expected = 0.5
+	}
 	if result != expected {
 		t.Errorf("Expected %v was %v", expected, result)
 	}

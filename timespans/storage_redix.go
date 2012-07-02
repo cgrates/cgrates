@@ -20,15 +20,12 @@ package timespans
 
 import (
 	"github.com/fzzbt/radix/redis"
-	"encoding/json"
-	// "encoding/gob"
-	// "bytes"
 	"log"
 )
 
 type RedixStorage struct {
 	db *redis.Client
-	//net bytes.Buffer
+	ms *MarshalStrategy
 }
 
 func NewRedixStorage(address string, db int) (*RedixStorage, error) {
@@ -36,7 +33,9 @@ func NewRedixStorage(address string, db int) (*RedixStorage, error) {
 	if err != nil {
 		log.Fatalf("Could not connect to redis server: %v", err)
 	}
-	return &RedixStorage{db: ndb}, nil
+	ms := &MarshalStrategy{}
+	ms.SetMarshaler(&JSONMarshaler{})
+	return &RedixStorage{db: ndb, ms: ms}, nil
 }
 
 func (rs *RedixStorage) Close() {
@@ -53,77 +52,69 @@ func (rs *RedixStorage) GetActivationPeriodsOrFallback(key string) (aps []*Activ
 	if err != nil {
 		return
 	}
-	//rs.net.Reset()
-	//rs.net.Write(elem)
-	//err = gob.NewDecoder(&rs.net).Decode(&aps)
-	err = json.Unmarshal(elem, &aps)
+	err = rs.ms.Unmarshal(elem, &aps)
 	if err != nil {
-		//err = gob.NewDecoder(&rs.net).Decode(&fallbackKey)
-		err = json.Unmarshal(elem, &fallbackKey)
+		err = rs.ms.Unmarshal(elem, &fallbackKey)
 	}
 	return
 }
 
 func (rs *RedixStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) (err error) {
 	var result []byte
-	//rs.net.Reset()
 	if len(aps) > 0 {
-		//gob.NewEncoder(&rs.net).Encode(aps)
-		result, err = json.Marshal(&aps)
+		result, err = rs.ms.Marshal(&aps)
 	} else {
-		//gob.NewEncoder(&rs.net).Encode(fallbackKey)
-		result, err = json.Marshal(fallbackKey)
+		result, err = rs.ms.Marshal(fallbackKey)
 	}
-	//result = rs.net.Bytes()
 	return rs.db.Set(key, result).Err
 }
 
 func (rs *RedixStorage) GetDestination(key string) (dest *Destination, err error) {
 	if values, err := rs.db.Get(key).Bytes(); err == nil {
 		dest = &Destination{Id: key}
-		err = json.Unmarshal(values, dest)
+		err = rs.ms.Unmarshal(values, dest)
 	}
 	return
 }
 func (rs *RedixStorage) SetDestination(dest *Destination) (err error) {
-	result, err := json.Marshal(dest)
+	result, err := rs.ms.Marshal(dest)
 	return rs.db.Set(dest.Id, result).Err
 }
 
 func (rs *RedixStorage) GetActions(key string) (as []*Action, err error) {
 	if values, err := rs.db.Get(key).Bytes(); err == nil {
-		err = json.Unmarshal(values, &as)
+		err = rs.ms.Unmarshal(values, &as)
 	}
 	return
 }
 
 func (rs *RedixStorage) SetActions(key string, as []*Action) (err error) {
-	result, err := json.Marshal(as)
+	result, err := rs.ms.Marshal(as)
 	return rs.db.Set(key, result).Err
 }
 
 func (rs *RedixStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
 	if values, err := rs.db.Get(key).Bytes(); err == nil {
 		ub = &UserBalance{Id: key}
-		err = json.Unmarshal(values, ub)
+		err = rs.ms.Unmarshal(values, ub)
 	}
 	return
 }
 
 func (rs *RedixStorage) SetUserBalance(ub *UserBalance) (err error) {
-	result, err := json.Marshal(ub)
+	result, err := rs.ms.Marshal(ub)
 	return rs.db.Set(ub.Id, result).Err
 }
 
 func (rs *RedixStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
 	if values, err := rs.db.Get(key).Bytes(); err == nil {
-		err = json.Unmarshal(values, ats)
+		err = rs.ms.Unmarshal(values, ats)
 	}
 	return
 }
 
 func (rs *RedixStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
-	result, err := json.Marshal(ats)
+	result, err := rs.ms.Marshal(ats)
 	return rs.db.Set(key, result).Err
 }
 
@@ -138,7 +129,7 @@ func (rs *RedixStorage) GetAllActionTimings() (ats []*ActionTiming, err error) {
 	}
 	for _, v := range values {
 		var tempAts []*ActionTiming
-		err = json.Unmarshal([]byte(v), &ats)
+		err = rs.ms.Unmarshal([]byte(v), &ats)
 		ats = append(ats, tempAts...)
 	}
 	return
