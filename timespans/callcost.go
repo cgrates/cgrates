@@ -26,9 +26,9 @@ import (
 The output structure that will be returned with the call cost information.
 */
 type CallCost struct {
-	TOR, Tenant, Subject, Destination string
-	Cost, ConnectFee                        float64
-	Timespans                               []*TimeSpan
+	Direction, TOR, Tenant, Subject, Destination string
+	Cost, ConnectFee                             float64
+	Timespans                                    []*TimeSpan
 }
 
 // Pretty printing for call cost
