@@ -20,6 +20,7 @@ package timespans
 
 import (
 	// "log"
+	"sort"
 	"math"
 )
 
@@ -38,4 +39,33 @@ func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {
 		seconds = math.Min(credit/mb.Price, mb.Seconds)
 	}
 	return
+}
+
+/*
+Structure to store minute buckets according to weight, precision or price.
+*/
+type bucketsorter []*MinuteBucket
+
+func (bs bucketsorter) Len() int {
+	return len(bs)
+}
+
+func (bs bucketsorter) Swap(i, j int) {
+	bs[i], bs[j] = bs[j], bs[i]
+}
+
+func (bs bucketsorter) Less(j, i int) bool {
+	return bs[i].Weight < bs[j].Weight ||
+		bs[i].precision < bs[j].precision ||
+		bs[i].Price > bs[j].Price
+}
+
+func (bs bucketsorter) Sort() {
+	sort.Sort(bs)
+}
+
+func (ub *UserBalance) ResetActionTriggers() {
+	for _, at := range ub.ActionTriggers {
+		at.executed = false
+	}
 }

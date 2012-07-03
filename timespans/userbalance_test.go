@@ -30,16 +30,16 @@ var (
 )
 
 func init() {
-	getter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	SetStorageGetter(getter)
+	storageGetter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	SetStorageGetter(storageGetter)
 }
 
 func TestUserBalanceStoreRestore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	getter.SetUserBalance(rifsBalance)
-	ub1, err := getter.GetUserBalance("other")
+	storageGetter.SetUserBalance(rifsBalance)
+	ub1, err := storageGetter.GetUserBalance("other")
 	if err != nil || ub1.BalanceMap[CREDIT] != rifsBalance.BalanceMap[CREDIT] {
 		t.Errorf("Expected %v was %v", rifsBalance.BalanceMap[CREDIT], ub1.BalanceMap[CREDIT])
 	}
@@ -72,8 +72,8 @@ func TestUserBalanceRedisStore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	getter.SetUserBalance(rifsBalance)
-	result, _ := getter.GetUserBalance(rifsBalance.Id)
+	storageGetter.SetUserBalance(rifsBalance)
+	result, _ := storageGetter.GetUserBalance(rifsBalance.Id)
 	if !reflect.DeepEqual(rifsBalance, result) {
 		t.Errorf("Expected %v was %v", rifsBalance, result)
 	}
@@ -261,7 +261,7 @@ func TestDebitNegativeSMSBalance(t *testing.T) {
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
 	rifsBalance.MinuteBuckets[0].Seconds, rifsBalance.MinuteBuckets[1].Seconds = 0.0, 0.0
-	err := rifsBalance.resetUserBalance(getter)
+	err := rifsBalance.resetUserBalance(storageGetter)
 	if err != nil ||
 		rifsBalance.MinuteBuckets[0] == b1 ||
 		rifsBalance.BalanceMap[SMS] != seara.SmsCredit {
@@ -307,7 +307,7 @@ func TestGetVolumeDiscountSteps(t *testing.T) {
 
 func TestRecivedCallsBonus(t *testing.T) {
 	_ := NewKyotoStorage("../data/test.kch")
-	defer getter.Close()
+	defer storageGetter.Close()
 	rcb := &RecivedCallBonus{Credit: 100}
 	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 10, RecivedCallBonus: rcb}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]float64{CREDIT: 21}, tariffPlan: seara, ReceivedCallSeconds: 1}
@@ -355,8 +355,8 @@ func BenchmarkUserBalanceRedisStoreRestore(b *testing.B) {
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
 	for i := 0; i < b.N; i++ {
-		getter.SetUserBalance(rifsBalance)
-		getter.GetUserBalance(rifsBalance.Id)
+		storageGetter.SetUserBalance(rifsBalance)
+		storageGetter.GetUserBalance(rifsBalance.Id)
 	}
 }
 

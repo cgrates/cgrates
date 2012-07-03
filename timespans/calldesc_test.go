@@ -24,13 +24,25 @@ import (
 	//"log"
 )
 
-var (
-	getter StorageGetter
-)
-
 func init() {
-	getter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	SetStorageGetter(getter)
+	storageGetter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	SetStorageGetter(storageGetter)
+	populateDB()
+}
+
+func populateDB() {
+	ub := &UserBalance{
+		Id:   "OUT:vdf:minu",
+		Type: UB_TYPE_PREPAID,
+		/*BalanceMap: map[string]float64{
+			CREDIT: 21,
+		},*/
+		MinuteBuckets: []*MinuteBucket{
+			&MinuteBucket{Seconds: 200, DestinationId: "NAT", Weight: 10},
+			&MinuteBucket{Seconds: 100, DestinationId: "RET", Weight: 20},
+		},
+	}
+	storageGetter.SetUserBalance(ub)
 }
 
 func TestSplitSpans(t *testing.T) {
@@ -162,9 +174,9 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithUserBalance(t *testing.T) {
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minitsboy", Destination: "0723", Amount: 5400}
+	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minu", Destination: "0723", Amount: 5400}
 	result, err := cd.GetMaxSessionTime()
-	expected := 200.0
+	expected := 300.0
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -179,8 +191,8 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 }
 
 /*func TestGetCostWithVolumeDiscount(t *testing.T) {
-	getter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer getter.Close()
+	storageGetter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	defer storageGetter.Close()
 	vd1 := &VolumeDiscount{100, 10}
 	vd2 := &VolumeDiscount{500, 20}
 	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd1, vd2}}
@@ -219,7 +231,7 @@ func BenchmarkRedisGetting(b *testing.B) {
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		getter.GetActivationPeriodsOrFallback(cd.GetKey())
+		storageGetter.GetActivationPeriodsOrFallback(cd.GetKey())
 	}
 }
 

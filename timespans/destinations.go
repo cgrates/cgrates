@@ -32,6 +32,17 @@ var (
 	DestinationCacheMap = make(destinationCacheMap)
 )
 
+func GetDestination(dId string) (d *Destination, err error) {
+	d, exists := DestinationCacheMap[dId]
+	if !exists {
+		d, err = storageGetter.GetDestination(dId)
+		if err == nil && d != nil {
+			DestinationCacheMap[dId] = d
+		}
+	}
+	return
+}
+
 /*
 De-serializes the destination for the storage. Used for key-value storages.
 */

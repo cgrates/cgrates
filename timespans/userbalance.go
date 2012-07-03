@@ -66,31 +66,6 @@ func (a AmountTooBig) Error() string {
 }
 
 /*
-Structure to store minute buckets according to weight, precision or price.
-*/
-type bucketsorter []*MinuteBucket
-
-func (bs bucketsorter) Len() int {
-	return len(bs)
-}
-
-func (bs bucketsorter) Swap(i, j int) {
-	bs[i], bs[j] = bs[j], bs[i]
-}
-
-func (bs bucketsorter) Less(j, i int) bool {
-	return bs[i].Weight < bs[j].Weight ||
-		bs[i].precision < bs[j].precision ||
-		bs[i].Price > bs[j].Price
-}
-
-func (ub *UserBalance) ResetActionTriggers() {
-	for _, at := range ub.ActionTriggers {
-		at.executed = false
-	}
-}
-
-/*
 Returns user's available minutes for the specified destination
 */
 func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds float64, bucketList bucketsorter) {
@@ -99,8 +74,8 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds float64, buck
 		return
 	}
 	for _, mb := range ub.MinuteBuckets {
-		d, exists := DestinationCacheMap[mb.DestinationId]
-		if !exists {
+		d, err := GetDestination(mb.DestinationId)
+		if err != nil {
 			continue
 		}
 		contains, precision := d.containsPrefix(prefix)
@@ -207,7 +182,7 @@ func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
 	}
 }
 
-func (ub *UserBalance) ExecuteActionTriggers() {
+func (ub *UserBalance) executeActionTriggers() {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
 		if at.executed {

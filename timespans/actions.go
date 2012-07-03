@@ -76,6 +76,7 @@ var (
 		"TOPUP_RESET":    topupResetAction,
 		"TOPUP":          topupAction,
 		"DEBIT":          debitAction,
+		"RESET_COUNTERS": resetCountersAction,
 	}
 )
 
@@ -127,6 +128,11 @@ func topupAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func debitAction(ub *UserBalance, a *Action) (err error) {
+	return
+}
+
+func resetCountersAction(ub *UserBalance, a *Action) (err error) {
+	//ub.UnitsCounters
 	return
 }
 

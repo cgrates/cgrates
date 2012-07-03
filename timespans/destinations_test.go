@@ -58,6 +58,34 @@ func TestDestinationContainsPrefix(t *testing.T) {
 
 }
 
+func TestDestinationGetExists(t *testing.T) {
+	d, err := GetDestination("NAT")
+	if err != nil || d == nil {
+		t.Error("Could not get destination: ", d)
+	}
+}
+
+func TestDestinationGetExistsCache(t *testing.T) {
+	GetDestination("NAT")
+	if _, exists := DestinationCacheMap["NAT"]; !exists {
+		t.Error("Destination not cached!")
+	}
+}
+
+func TestDestinationGetNotExists(t *testing.T) {
+	d, err := GetDestination("not existing")
+	if d != nil {
+		t.Error("Got false destination: ", err)
+	}
+}
+
+func TestDestinationGetNotExistsCache(t *testing.T) {
+	GetDestination("not existing")
+	if _, exists := DestinationCacheMap["not existing"]; exists {
+		t.Error("Bad destination cached")
+	}
+}
+
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationRedisStoreRestore(b *testing.B) {
