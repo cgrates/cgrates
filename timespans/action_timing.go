@@ -29,183 +29,13 @@ const (
 	FORMAT = "2006-1-2 15:04:05 MST"
 )
 
-// Amount of a trafic of a certain type
-type UnitsCounter struct {
-	Direction     string
-	BalanceId     string
-	Units         float64
-	Weight        float64
-	MinuteBuckets []*MinuteBucket
-}
-
-// Structure to store actions according to weight
-type countersorter []*UnitsCounter
-
-func (s countersorter) Len() int {
-	return len(s)
-}
-
-func (s countersorter) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s countersorter) Less(i, j int) bool {
-	return s[i].Weight < s[j].Weight
-}
-
-/*
-Structure to be filled for each tariff plan with the bonus value for received calls minutes.
-*/
-type Action struct {
-	ActionType   string
-	BalanceId    string
-	Units        float64
-	MinuteBucket *MinuteBucket
-}
-
-type actionTypeFunc func(*UserBalance, *Action) error
-
-var (
-	actionTypeFuncMap = map[string]actionTypeFunc{
-		"LOG":            logAction,
-		"RESET_TRIGGERS": resetTriggersAction,
-		"SET_POSTPAID":   setPostpaidAction,
-		"RESET_POSTPAID": resetPostpaidAction,
-		"SET_PREPAID":    setPrepaidAction,
-		"RESET_PREPAID":  resetPrepaidAction,
-		"TOPUP_RESET":    topupResetAction,
-		"TOPUP":          topupAction,
-		"DEBIT":          debitAction,
-		"RESET_COUNTERS": resetCountersAction,
-	}
-)
-
-func logAction(ub *UserBalance, a *Action) (err error) {
-	log.Printf("%v %v %v", a.BalanceId, a.Units, a.MinuteBucket)
-	return
-}
-
-func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
-	ub.resetActionTriggers()
-	return
-}
-
-func setPostpaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_POSTPAID
-	return
-}
-
-func resetPostpaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_POSTPAID
-	return
-}
-
-func setPrepaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_PREPAID
-	return
-}
-
-func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_PREPAID
-	return
-}
-
-func topupResetAction(ub *UserBalance, a *Action) (err error) {
-	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]float64)
-	}
-	ub.BalanceMap[a.BalanceId] = a.Units
-	return storageGetter.SetUserBalance(ub)
-}
-
-func topupAction(ub *UserBalance, a *Action) (err error) {
-	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]float64)
-	}
-	ub.BalanceMap[a.BalanceId] += a.Units
-	ub.addMinuteBucket(a.MinuteBucket)
-	return storageGetter.SetUserBalance(ub)
-}
-
-func debitAction(ub *UserBalance, a *Action) (err error) {
-	return
-}
-
-func resetCountersAction(ub *UserBalance, a *Action) (err error) {
-	//ub.UnitsCounters
-	return
-}
-
-type ActionTrigger struct {
-	BalanceId      string
-	ThresholdValue float64
-	DestinationId  string
-	Priority       float64
-	ActionsId      string
-	executed       bool
-}
-
-func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
-	aac, err := storageGetter.GetActions(at.ActionsId)
-	if err != nil {
-		log.Print("Failed to get actions: ", err)
-		return
-	}
-	for _, a := range aac {
-		actionFunction, exists := actionTypeFuncMap[a.ActionType]
-		if !exists {
-			log.Printf("Function type %v not available, aborting execution!", a.ActionType)
-			return
-		}
-		err = actionFunction(ub, a)
-	}
-	at.executed = true
-	return
-}
-
-// Structure to store actions according to weight
-type ActionTriggerPriotityList []*ActionTrigger
-
-func (atpl ActionTriggerPriotityList) Len() int {
-	return len(atpl)
-}
-
-func (atpl ActionTriggerPriotityList) Swap(i, j int) {
-	atpl[i], atpl[j] = atpl[j], atpl[i]
-}
-
-func (atpl ActionTriggerPriotityList) Less(i, j int) bool {
-	return atpl[i].Priority < atpl[j].Priority
-}
-
-func (atpl ActionTriggerPriotityList) Sort() {
-	sort.Sort(atpl)
-}
-
 type ActionTiming struct {
 	Tag            string // informative purpos only
 	UserBalanceIds []string
 	Timing         *Interval
+	Weight         float64
 	ActionsId      string
-	actions        []*Action
-}
-
-func (at *ActionTiming) getActions() (as []*Action, err error) {
-	if at.actions == nil {
-		at.actions, err = storageGetter.GetActions(at.ActionsId)
-	}
-	return at.actions, err
-}
-
-func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
-	for _, ubId := range at.UserBalanceIds {
-		ub, err := storageGetter.GetUserBalance(ubId)
-		if err != nil {
-			log.Printf("Could not get user balances for therse id: %v. Skipping!", ubId)
-		}
-		ubs = append(ubs, ub)
-	}
-	return
+	actions        ActionPriotityList
 }
 
 func (at *ActionTiming) GetNextStartTime() (t time.Time) {
@@ -298,7 +128,28 @@ MONTHS:
 	return
 }
 
+func (at *ActionTiming) getActions() (as []*Action, err error) {
+	if at.actions == nil {
+		at.actions, err = storageGetter.GetActions(at.ActionsId)
+	}
+	at.actions.Sort()
+	return at.actions, err
+}
+
+func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
+	for _, ubId := range at.UserBalanceIds {
+		ub, err := storageGetter.GetUserBalance(ubId)
+		if err != nil {
+			log.Printf("Could not get user balances for therse id: %v. Skipping!", ubId)
+		}
+		ubs = append(ubs, ub)
+	}
+	return
+}
+
 func (at *ActionTiming) Execute() (err error) {
+	userBalancesRWMutex.Lock()
+	defer userBalancesRWMutex.Unlock()
 	aac, err := at.getActions()
 	if err != nil {
 		log.Print("Failed to get actions: ", err)
@@ -312,6 +163,7 @@ func (at *ActionTiming) Execute() (err error) {
 		}
 		for _, ub := range at.getUserBalances() {
 			err = actionFunction(ub, a)
+			storageGetter.SetUserBalance(ub)
 		}
 	}
 	return
@@ -323,4 +175,23 @@ func (at *ActionTiming) IsOneTimeRun() bool {
 		return true
 	}
 	return len(i.Months) == 0 && len(i.MonthDays) == 0 && len(i.WeekDays) == 0
+}
+
+// Structure to store actions according to weight
+type ActionTimingPriotityList []*ActionTiming
+
+func (atpl ActionTimingPriotityList) Len() int {
+	return len(atpl)
+}
+
+func (atpl ActionTimingPriotityList) Swap(i, j int) {
+	atpl[i], atpl[j] = atpl[j], atpl[i]
+}
+
+func (atpl ActionTimingPriotityList) Less(i, j int) bool {
+	return atpl[i].GetNextStartTime().Before(atpl[j].GetNextStartTime()) || atpl[i].Weight < atpl[j].Weight
+}
+
+func (atpl ActionTimingPriotityList) Sort() {
+	sort.Sort(atpl)
 }

@@ -27,21 +27,25 @@ import (
 	"log"
 	"runtime"
 	"time"
+	"sync"
 )
 
 var (
-	raterAddress   = flag.String("rateraddr", "127.0.0.1:2000", "Rater server address (localhost:2000)")
-	jsonRpcAddress = flag.String("jsonrpcaddr", "127.0.0.1:2001", "Json RPC server address (localhost:2001)")
-	httpApiAddress = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:2002)")
-	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
-	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
-	bal       *balancer.Balancer
+	raterAddress    = flag.String("rateraddr", "127.0.0.1:2000", "Rater server address (localhost:2000)")
+	jsonRpcAddress  = flag.String("jsonrpcaddr", "127.0.0.1:2001", "Json RPC server address (localhost:2001)")
+	httpApiAddress  = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:2002)")
+	freeswitchsrv   = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
+	freeswitchpass  = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
+	bal             *balancer.Balancer
+	balancerRWMutex sync.RWMutex
 )
 
 /*
 The function that gets the information from the raters using balancer.
 */
 func GetCallCost(key *timespans.CallDescriptor, method string) (reply *timespans.CallCost) {
+	balancerRWMutex.RLock()
+	defer balancerRWMutex
 	err := errors.New("") //not nil value
 	for err != nil {
 		client := bal.Balance()

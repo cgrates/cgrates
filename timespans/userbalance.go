@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-// "log"
+	// "log"
+	"sync"
 )
 
 const (
@@ -40,7 +41,8 @@ const (
 )
 
 var (
-	storageGetter StorageGetter
+	storageGetter       StorageGetter
+	userBalancesRWMutex sync.RWMutex
 )
 
 /*
@@ -263,3 +265,26 @@ Resets the user balance items to their tariff plan values.
 	return
 }
 */
+// Amount of a trafic of a certain type
+type UnitsCounter struct {
+	Direction     string
+	BalanceId     string
+	Units         float64
+	Weight        float64
+	MinuteBuckets []*MinuteBucket
+}
+
+// Structure to store actions according to weight
+type countersorter []*UnitsCounter
+
+func (s countersorter) Len() int {
+	return len(s)
+}
+
+func (s countersorter) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s countersorter) Less(i, j int) bool {
+	return s[i].Weight < s[j].Weight
+}

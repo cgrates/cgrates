@@ -232,9 +232,9 @@ func TestActionTimingLogFunction(t *testing.T) {
 }
 
 func TestActionTriggerPriotityList(t *testing.T) {
-	at1 := &ActionTrigger{Priority: 10}
-	at2 := &ActionTrigger{Priority: 20}
-	at3 := &ActionTrigger{Priority: 30}
+	at1 := &ActionTrigger{Weight: 10}
+	at2 := &ActionTrigger{Weight: 20}
+	at3 := &ActionTrigger{Weight: 30}
 	var atpl ActionTriggerPriotityList
 	atpl = append(atpl, at2, at1, at3)
 	atpl.Sort()

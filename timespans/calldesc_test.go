@@ -199,23 +199,6 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 	}
 }
 
-/*func TestGetCostWithVolumeDiscount(t *testing.T) {
-	storageGetter, _ := NewRedisStorage("tcp:127.0.0.1:6379", 10)
-	defer storageGetter.Close()
-	vd1 := &VolumeDiscount{100, 10}
-	vd2 := &VolumeDiscount{500, 20}
-	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd1, vd2}}
-	rifsBalance := &UserBalance{Id: "rif", Credit: 21, tariffPlan: seara, ResetDayOfTheMonth: 10, VolumeDiscountSeconds: 105}
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "rif", Destination: "0723", TimeStart: t1, TimeEnd: t2, userBalance: rifsBalance}
-	callCost, err := cd.GetCost()
-	if callCost.Cost != 54.0 || err != nil {
-		t.Errorf("Expected %v was %v", 54.0, callCost)
-	}
-}
-*/
-
 func TestApAddAPIfNotPresent(t *testing.T) {
 	ap1 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
 	ap2 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}

@@ -40,25 +40,8 @@ var (
 	s           = scheduler{}
 )
 
-/*
-Structure to store action timings according to next activation time.
-*/
-type actiontimingqueue []*timespans.ActionTiming
-
-func (atq actiontimingqueue) Len() int {
-	return len(atq)
-}
-
-func (atq actiontimingqueue) Swap(i, j int) {
-	atq[i], atq[j] = atq[j], atq[i]
-}
-
-func (atq actiontimingqueue) Less(j, i int) bool {
-	return atq[j].GetNextStartTime().Before(atq[i].GetNextStartTime())
-}
-
 type scheduler struct {
-	queue actiontimingqueue
+	queue timespans.ActionTimingPriotityList
 }
 
 func (s scheduler) loop() {
@@ -110,7 +93,7 @@ func loadActionTimings() {
 		log.Fatalf("Cannot get action timings:", err)
 	}
 	// recreate the queue
-	s.queue = actiontimingqueue{}
+	s.queue = timespans.ActionTimingPriotityList{}
 	for _, at := range actionTimings {
 		if at.IsOneTimeRun() {
 			log.Print("Executing: ", at)

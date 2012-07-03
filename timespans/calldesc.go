@@ -175,6 +175,8 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 Splits the received timespan into sub time spans according to the activation periods intervals.
 */
 func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeSpan) {
+	userBalancesRWMutex.RLock()
+	defer userBalancesRWMutex.RUnlock()
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets	
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
@@ -289,6 +291,8 @@ and will decrease it by 10% for nine times. So if the user has little credit it 
 If the user has no credit then it will return 0.
 */
 func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
+	userBalancesRWMutex.RLock()
+	defer userBalancesRWMutex.RUnlock()
 	_, err = cd.SearchStorageForPrefix()
 	now := time.Now()
 	availableCredit, availableSeconds := 0.0, 0.0
@@ -331,6 +335,8 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+	userBalancesRWMutex.Lock()
+	defer userBalancesRWMutex.Unlock()
 	cc, err = cd.GetCost()
 	if err != nil {
 		log.Printf("error getting cost %v", err)
@@ -353,6 +359,8 @@ Interface method used to add/substract an amount of cents from user's money bala
 The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitCents() (left float64, err error) {
+	userBalancesRWMutex.Lock()
+	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		return userBalance.debitMoneyBalance(cd.Amount), nil
 	}
@@ -364,6 +372,8 @@ Interface method used to add/substract an amount of units from user's sms balanc
 The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
+	userBalancesRWMutex.Lock()
+	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		return userBalance.debitSMSBuget(cd.Amount)
 	}
@@ -375,6 +385,8 @@ Interface method used to add/substract an amount of seconds from user's minutes 
 The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitSeconds() (err error) {
+	userBalancesRWMutex.Lock()
+	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		return userBalance.debitMinutesBalance(cd.Amount, cd.Destination)
 	}
@@ -388,6 +400,8 @@ specified in the tariff plan is applied.
 The amount filed has to be filled in call descriptor.
 */
 // func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
+// userBalancesRWMutex.Lock()
+// defer userBalancesRWMutex.Unlock()
 // 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 // 		return userBalance.addReceivedCallSeconds(INBOUND, cd.TOR, cd.Destination, cd.Amount)
 // 	}
@@ -398,6 +412,8 @@ The amount filed has to be filled in call descriptor.
 Resets user balances value to the amounts specified in the tariff plan.
 */
 /*func (cd *CallDescriptor) ResetUserBalance() (err error) {
+	userBalancesRWMutex.Lock()
+	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		return userBalance.resetUserBalance()
 	}
