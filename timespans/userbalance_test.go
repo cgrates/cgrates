@@ -49,9 +49,9 @@ func TestGetSecondsForPrefix(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, DestinationId: "RET"}
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 200}}
-	seconds, bucketList := ub1.getSecondsForPrefix("0723")
+	seconds, credit, bucketList := ub1.getSecondsForPrefix("0723")
 	expected := 110.0
-	if seconds != expected || bucketList[0].Weight < bucketList[1].Weight {
+	if credit != 200 || seconds != expected || bucketList[0].Weight < bucketList[1].Weight {
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }
@@ -61,9 +61,9 @@ func TestGetPricedSeconds(t *testing.T) {
 	b2 := &MinuteBucket{Seconds: 100, Price: 1, Weight: 20, DestinationId: "RET"}
 
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	seconds, bucketList := ub1.getSecondsForPrefix("0723")
+	seconds, credit, bucketList := ub1.getSecondsForPrefix("0723")
 	expected := 21.0
-	if seconds != expected || bucketList[0].Weight < bucketList[1].Weight {
+	if credit != 0 || seconds != expected || bucketList[0].Weight < bucketList[1].Weight {
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }
@@ -168,7 +168,6 @@ func TestDebitPriceMinuteBalance(t *testing.T) {
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
 	err := rifsBalance.debitMinutesBalance(5, "0723")
 	if b2.Seconds != 95 || b1.Seconds != 10 || err != nil || rifsBalance.BalanceMap[CREDIT] != 16 {
-		t.Log(rifsBalance.BalanceMap[CREDIT])
 		t.Errorf("Expected %v was %v", 16, rifsBalance.BalanceMap[CREDIT])
 	}
 }

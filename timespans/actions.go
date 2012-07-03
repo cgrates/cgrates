@@ -86,7 +86,7 @@ func logAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
-	ub.ResetActionTriggers()
+	ub.resetActionTriggers()
 	return
 }
 

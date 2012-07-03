@@ -19,8 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	// "log"
-	"sort"
+// "log"
 )
 
 const (
@@ -68,7 +67,7 @@ func (a AmountTooBig) Error() string {
 /*
 Returns user's available minutes for the specified destination
 */
-func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds float64, bucketList bucketsorter) {
+func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float64, bucketList bucketsorter) {
 	if len(ub.MinuteBuckets) == 0 {
 		// log.Print("There are no minute buckets to check for user: ", ub.Id)
 		return
@@ -86,8 +85,8 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds float64, buck
 			}
 		}
 	}
-	sort.Sort(bucketList) // sorts the buckets according to priority, precision or price
-	credit := ub.BalanceMap[CREDIT]
+	bucketList.Sort() // sorts the buckets according to priority, precision or price
+	credit = ub.BalanceMap[CREDIT]
 	for _, mb := range bucketList {
 		s := mb.GetSecondsForCredit(credit)
 		credit -= s * mb.Price
@@ -112,7 +111,7 @@ If the amount is bigger than the sum of all seconds in the minute buckets than n
 debited and an error will be returned.
 */
 func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string) error {
-	avaliableNbSeconds, bucketList := ub.getSecondsForPrefix(prefix)
+	avaliableNbSeconds, _, bucketList := ub.getSecondsForPrefix(prefix)
 	if avaliableNbSeconds < amount {
 		return new(AmountTooBig)
 	}
@@ -139,6 +138,7 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string) error 
 		return new(AmountTooBig)
 	}
 	ub.BalanceMap[CREDIT] = credit // credit is > 0
+
 	for _, mb := range bucketList {
 		if mb.Seconds < amount {
 			amount -= mb.Seconds
@@ -182,6 +182,7 @@ func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
 	}
 }
 
+// Scans the action trigers and execute the actions for which trigger is met
 func (ub *UserBalance) executeActionTriggers() {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
@@ -206,6 +207,13 @@ func (ub *UserBalance) executeActionTriggers() {
 				}
 			}
 		}
+	}
+}
+
+// Mark all action trigers as ready for execution
+func (ub *UserBalance) resetActionTriggers() {
+	for _, at := range ub.ActionTriggers {
+		at.executed = false
 	}
 }
 

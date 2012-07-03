@@ -31,18 +31,27 @@ func init() {
 }
 
 func populateDB() {
-	ub := &UserBalance{
+	minu := &UserBalance{
 		Id:   "OUT:vdf:minu",
 		Type: UB_TYPE_PREPAID,
-		/*BalanceMap: map[string]float64{
+		BalanceMap: map[string]float64{
 			CREDIT: 21,
-		},*/
+		},
 		MinuteBuckets: []*MinuteBucket{
 			&MinuteBucket{Seconds: 200, DestinationId: "NAT", Weight: 10},
 			&MinuteBucket{Seconds: 100, DestinationId: "RET", Weight: 20},
 		},
 	}
-	storageGetter.SetUserBalance(ub)
+	broker := &UserBalance{
+		Id:   "OUT:vdf:broker",
+		Type: UB_TYPE_PREPAID,
+		MinuteBuckets: []*MinuteBucket{
+			&MinuteBucket{Seconds: 20, DestinationId: "NAT", Weight: 10, Price: 1},
+			&MinuteBucket{Seconds: 100, DestinationId: "RET", Weight: 20},
+		},
+	}
+	storageGetter.SetUserBalance(broker)
+	storageGetter.SetUserBalance(minu)
 }
 
 func TestSplitSpans(t *testing.T) {
@@ -174,7 +183,7 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithUserBalance(t *testing.T) {
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minu", Destination: "0723", Amount: 5400}
+	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minu", Destination: "0723", Amount: 1000}
 	result, err := cd.GetMaxSessionTime()
 	expected := 300.0
 	if result != expected || err != nil {

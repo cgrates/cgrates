@@ -33,6 +33,7 @@ type MinuteBucket struct {
 	precision     int
 }
 
+// Returns the available number of seconds for a specified credit
 func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {
 	seconds = mb.Seconds
 	if mb.Price > 0 {
@@ -62,10 +63,4 @@ func (bs bucketsorter) Less(j, i int) bool {
 
 func (bs bucketsorter) Sort() {
 	sort.Sort(bs)
-}
-
-func (ub *UserBalance) ResetActionTriggers() {
-	for _, at := range ub.ActionTriggers {
-		at.executed = false
-	}
 }

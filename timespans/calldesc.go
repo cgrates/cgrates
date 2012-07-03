@@ -178,7 +178,7 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets	
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		_, bucketList := userBalance.getSecondsForPrefix(cd.Destination)
+		_, _, bucketList := userBalance.getSecondsForPrefix(cd.Destination)
 		for _, mb := range bucketList {
 			for i := 0; i < len(timespans); i++ {
 				if timespans[i].MinuteInfo != nil {
@@ -296,8 +296,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 		if userBalance.Type == UB_TYPE_POSTPAID {
 			return -1, nil
 		} else {
-			availableCredit = userBalance.BalanceMap[CREDIT]
-			availableSeconds, _ = userBalance.getSecondsForPrefix(cd.Destination)
+			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd.Destination)
 		}
 	} else {
 		return cd.Amount, err
@@ -306,10 +305,9 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	if availableCredit == 0 {
 		return availableSeconds, nil
 	}
-
 	maxSessionSeconds := cd.Amount
 	for i := 0; i < 10; i++ {
-		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds))
+		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds-availableSeconds))
 		ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
 		timespans := cd.splitTimeSpan(ts)
 
@@ -320,6 +318,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 			}
 			cost += ts.getCost(cd)
 		}
+		//log.Print(availableCredit, availableSeconds, cost)
 		if cost < availableCredit {
 			return maxSessionSeconds, nil
 		} else { //decrease the period by 10% and try again
