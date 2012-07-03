@@ -162,7 +162,7 @@ func TestDebitMoreMinuteBalance(t *testing.T) {
 	}
 }
 
-func TestDebitPriceMinuteBalance(t *testing.T) {
+func TestDebitPriceMinuteBalance0(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 1.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
@@ -219,7 +219,7 @@ func TestDebitSMSBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21, SMS: 100}}
-	result, err := rifsBalance.debitSMSBuget(12)
+	result, err := rifsBalance.debitSMSBalance(12)
 	if rifsBalance.BalanceMap[SMS] != 88 || result != rifsBalance.BalanceMap[SMS] || err != nil {
 		t.Errorf("Expected %v was %v", 88, rifsBalance.BalanceMap[SMS])
 	}
@@ -229,7 +229,7 @@ func TestDebitAllSMSBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21, SMS: 100}}
-	result, err := rifsBalance.debitSMSBuget(100)
+	result, err := rifsBalance.debitSMSBalance(100)
 	if rifsBalance.BalanceMap[SMS] != 0 || result != rifsBalance.BalanceMap[SMS] || err != nil {
 		t.Errorf("Expected %v was %v", 0, rifsBalance.BalanceMap[SMS])
 	}
@@ -239,7 +239,7 @@ func TestDebitMoreSMSBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21, SMS: 100}}
-	result, err := rifsBalance.debitSMSBuget(110)
+	result, err := rifsBalance.debitSMSBalance(110)
 	if rifsBalance.BalanceMap[SMS] != 100 || result != rifsBalance.BalanceMap[SMS] || err == nil {
 		t.Errorf("Expected %v was %v", 100, rifsBalance.BalanceMap[SMS])
 	}
@@ -249,7 +249,7 @@ func TestDebitNegativeSMSBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21, SMS: 100}}
-	result, err := rifsBalance.debitSMSBuget(-15)
+	result, err := rifsBalance.debitSMSBalance(-15)
 	if rifsBalance.BalanceMap[SMS] != 115 || result != rifsBalance.BalanceMap[SMS] || err != nil {
 		t.Errorf("Expected %v was %v", 115, rifsBalance.BalanceMap[SMS])
 	}

@@ -342,6 +342,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		log.Printf("error getting cost %v", err)
 	}
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+		defer storageGetter.SetUserBalance(userBalance)
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
 			userBalance.debitMoneyBalance(cc.Cost + cc.ConnectFee)
 		}
@@ -362,6 +363,7 @@ func (cd *CallDescriptor) DebitCents() (left float64, err error) {
 	userBalancesRWMutex.Lock()
 	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+		defer storageGetter.SetUserBalance(userBalance)
 		return userBalance.debitMoneyBalance(cd.Amount), nil
 	}
 	return 0.0, err
@@ -375,7 +377,8 @@ func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
 	userBalancesRWMutex.Lock()
 	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		return userBalance.debitSMSBuget(cd.Amount)
+		defer storageGetter.SetUserBalance(userBalance)
+		return userBalance.debitSMSBalance(cd.Amount)
 	}
 	return 0, err
 }
@@ -388,6 +391,7 @@ func (cd *CallDescriptor) DebitSeconds() (err error) {
 	userBalancesRWMutex.Lock()
 	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+		defer storageGetter.SetUserBalance(userBalance)
 		return userBalance.debitMinutesBalance(cd.Amount, cd.Destination)
 	}
 	return err

@@ -54,3 +54,12 @@ func TestMinutBucketSortPrice(t *testing.T) {
 		t.Error("Buckets not sorted by price!")
 	}
 }
+
+func TestMinutBucketEqual(t *testing.T) {
+	mb1 := &MinuteBucket{Weight: 1, precision: 1, Price: 1, Percent: 1, DestinationId: ""}
+	mb2 := &MinuteBucket{Weight: 1, precision: 1, Price: 1, Percent: 1, DestinationId: ""}
+	mb3 := &MinuteBucket{Weight: 1, precision: 1, Price: 2, Percent: 1, DestinationId: ""}
+	if !mb1.Equal(mb2) || mb2.Equal(mb3) {
+		t.Error("Equal failure!", mb1, mb2, mb3)
+	}
+}

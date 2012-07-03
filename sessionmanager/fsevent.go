@@ -94,7 +94,7 @@ func (fsev *FSEvent) GetTOR() string {
 func (fsev *FSEvent) GetUUID() string {
 	return fsev.Fields[UUID]
 }
-func (fsev *FSEvent) GetCstmId() string {
+func (fsev *FSEvent) GetTenant() string {
 	return fsev.Fields[CSTMID]
 }
 func (fsev *FSEvent) GetStartTime() (t time.Time, err error) {

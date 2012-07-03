@@ -53,7 +53,7 @@ type UserBalance struct {
 	Type           string // prepaid-postpaid
 	BalanceMap     map[string]float64
 	MinuteBuckets  []*MinuteBucket
-	UnitsCounters  []*UnitsCounter
+	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
 }
 
@@ -102,8 +102,18 @@ Debits some amount of user's money credit. Returns the remaining credit in user'
 */
 func (ub *UserBalance) debitMoneyBalance(amount float64) float64 {
 	ub.BalanceMap[CREDIT] -= amount
-	storageGetter.SetUserBalance(ub)
+
 	return ub.BalanceMap[CREDIT]
+}
+
+// Debit seconds from specified minute bucket
+func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
+	for _, mb := range ub.MinuteBuckets {
+		if mb.Equal(newMb) {
+			mb.Seconds -= newMb.Seconds
+		}
+	}
+	return nil
 }
 
 /*
@@ -150,7 +160,6 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string) error 
 			break
 		}
 	}
-	storageGetter.SetUserBalance(ub)
 	return nil
 }
 
@@ -158,13 +167,30 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string) error 
 Debits some amount of user's SMS balance. Returns the remaining SMS in user's balance.
 If the amount is bigger than the balance than nothing wil be debited and an error will be returned
 */
-func (ub *UserBalance) debitSMSBuget(amount float64) (float64, error) {
+func (ub *UserBalance) debitSMSBalance(amount float64) (float64, error) {
 	if ub.BalanceMap[SMS] < amount {
 		return ub.BalanceMap[SMS], new(AmountTooBig)
 	}
 	ub.BalanceMap[SMS] -= amount
 
-	storageGetter.SetUserBalance(ub)
+	return ub.BalanceMap[SMS], nil
+}
+
+func (ub *UserBalance) debitTrafficBalance(amount float64) (float64, error) {
+	if ub.BalanceMap[SMS] < amount {
+		return ub.BalanceMap[SMS], new(AmountTooBig)
+	}
+	ub.BalanceMap[SMS] -= amount
+
+	return ub.BalanceMap[SMS], nil
+}
+
+func (ub *UserBalance) debitTrafficTimeBalance(amount float64) (float64, error) {
+	if ub.BalanceMap[SMS] < amount {
+		return ub.BalanceMap[SMS], new(AmountTooBig)
+	}
+	ub.BalanceMap[SMS] -= amount
+
 	return ub.BalanceMap[SMS], nil
 }
 
@@ -193,7 +219,7 @@ func (ub *UserBalance) executeActionTriggers() {
 			// the next reset (see RESET_TRIGGERS action type)
 			continue
 		}
-		for _, uc := range ub.UnitsCounters {
+		for _, uc := range ub.UnitCounters {
 			if uc.BalanceId == at.BalanceId {
 				if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safty
 					for _, mb := range uc.MinuteBuckets {
@@ -241,7 +267,7 @@ Adds the specified amount of seconds.
 // 			}
 // 		}
 // 	}
-// 	return storageGetter.SetUserBalance(ub)
+// 	return 
 // }
 
 /*
@@ -260,7 +286,7 @@ Resets the user balance items to their tariff plan values.
 				DestinationId: bucket.DestinationId}
 			ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
 		}
-		err = storageGetter.SetUserBalance(ub)
+		err = 
 	}
 	return
 }

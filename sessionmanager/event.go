@@ -31,6 +31,6 @@ type Event interface {
 	GetDestination() string
 	GetTOR() string
 	GetUUID() string
-	GetCstmId() string
+	GetTenant() string
 	GetStartTime() (time.Time, error)
 }

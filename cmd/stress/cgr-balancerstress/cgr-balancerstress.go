@@ -37,7 +37,7 @@ func main() {
 	flag.Parse()
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := timespans.CallDescriptor{CstmId: "vdf", Subject: "rif", DestinationPrefix: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := timespans.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	result := timespans.CallCost{}
 	client, err := jsonrpc.Dial("tcp", *balancer)
 	if err != nil {

@@ -46,11 +46,13 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 		log.Print("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
-	cd := &timespans.CallDescriptor{TOR: ev.GetTOR(),
-		CstmId:            ev.GetCstmId(),
-		Subject:           ev.GetSubject(),
-		DestinationPrefix: ev.GetDestination(),
-		TimeStart:         startTime}
+	cd := &timespans.CallDescriptor{
+		Direction:   ev.GetDirection(),
+		TOR:         ev.GetTOR(),
+		Tenant:      ev.GetTenant(),
+		Subject:     ev.GetSubject(),
+		Destination: ev.GetDestination(),
+		TimeStart:   startTime}
 	s = &Session{uuid: ev.GetUUID(),
 		callDescriptor: cd,
 		stopDebit:      make(chan byte, 2)} //buffer it for multiple close signals
@@ -106,7 +108,7 @@ func (s *Session) Disconnect() {
 
 // Nice print for session
 func (s *Session) String() string {
-	return fmt.Sprintf("%v: %s -> %s", s.callDescriptor.TimeStart, s.callDescriptor.Subject, s.callDescriptor.DestinationPrefix)
+	return fmt.Sprintf("%v: %s -> %s", s.callDescriptor.TimeStart, s.callDescriptor.Subject, s.callDescriptor.Destination)
 }
 
 // 

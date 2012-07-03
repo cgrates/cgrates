@@ -29,14 +29,15 @@ import (
 )
 
 var (
-	server  = flag.String("server", "127.0.0.1:2001", "server address host:port")
-	tor     = flag.String("tor", "0", "Type of record")
-	cstmid  = flag.String("cstmid", "vdf", "Customer identificator")
-	subject = flag.String("subject", "rif", "The client who made the call")
-	dest    = flag.String("dest", "0256", "Destination prefix")
-	ts      = flag.String("ts", "2012-02-09T00:00:00Z", "Time start")
-	te      = flag.String("te", "2012-02-09T00:10:00Z", "Time end")
-	amount  = flag.Float64("amount", 100, "Amount for different operations")
+	server    = flag.String("server", "127.0.0.1:2001", "server address host:port")
+	tor       = flag.String("tor", "0", "Type of record")
+	direction = flag.String("direction", "OUT", "Call direction")
+	tenant    = flag.String("tenant", "vdf", "Tenant identificator")
+	subject   = flag.String("subject", "rif", "The client who made the call")
+	dest      = flag.String("dest", "0256", "Call destination")
+	ts        = flag.String("ts", "2012-02-09T00:00:00Z", "Time start")
+	te        = flag.String("te", "2012-02-09T00:10:00Z", "Time end")
+	amount    = flag.Float64("amount", 100, "Amount for different operations")
 )
 
 func main() {
@@ -56,13 +57,15 @@ func main() {
 		log.Fatal("Time end format is invalid: ", err)
 	}
 
-	cd := &timespans.CallDescriptor{TOR: *tor,
-		CstmId:            *cstmid,
-		Subject:           *subject,
-		DestinationPrefix: *dest,
-		TimeStart:         timestart,
-		TimeEnd:           timeend,
-		Amount:            *amount,
+	cd := &timespans.CallDescriptor{
+		Direction:   *direction,
+		TOR:         *tor,
+		Tenant:      *tenant,
+		Subject:     *subject,
+		Destination: *dest,
+		TimeStart:   timestart,
+		TimeEnd:     timeend,
+		Amount:      *amount,
 	}
 
 	switch flag.Arg(0) {

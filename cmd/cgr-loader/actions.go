@@ -75,17 +75,23 @@ func loadActions() {
 			if record[5] == timespans.ABSOLUTE {
 				price = value
 			}
-			weight, err := strconv.ParseFloat(record[7], 64)
+			minutesWeight, err := strconv.ParseFloat(record[7], 64)
 			if err != nil {
-				log.Printf("Could not parse action units: %v", err)
+				log.Printf("Could not parse action minutes weight: %v", err)
+				continue
+			}
+			weight, err := strconv.ParseFloat(record[8], 64)
+			if err != nil {
+				log.Printf("Could not parse action weight: %v", err)
 				continue
 			}
 			a = &timespans.Action{
 				ActionType: record[1],
 				BalanceId:  record[2],
+				Weight:     weight,
 				MinuteBucket: &timespans.MinuteBucket{
 					Seconds:       units,
-					Weight:        weight,
+					Weight:        minutesWeight,
 					Price:         price,
 					Percent:       percent,
 					DestinationId: record[4],
@@ -120,9 +126,15 @@ func loadActionTimings() {
 			log.Printf("Could not load the timing for tag: %v", record[2])
 			continue
 		}
+		weight, err := strconv.ParseFloat(record[3], 64)
+		if err != nil {
+			log.Printf("Could not parse action timing weight: %v", err)
+			continue
+		}
 		for _, t := range ts {
 			at := &timespans.ActionTiming{
-				Tag: record[2],
+				Tag:    record[2],
+				Weight: weight,
 				Timing: &timespans.Interval{
 					Months:    t.Months,
 					MonthDays: t.MonthDays,
@@ -160,11 +172,17 @@ func loadActionTriggers() {
 			log.Printf("Could not parse action trigger value: %v", err)
 			continue
 		}
+		weight, err := strconv.ParseFloat(record[5], 64)
+		if err != nil {
+			log.Printf("Could not parse action trigger weight: %v", err)
+			continue
+		}
 		at := &timespans.ActionTrigger{
 			BalanceId:      record[1],
 			ThresholdValue: value,
 			DestinationId:  record[3],
 			ActionsId:      record[4],
+			Weight:         weight,
 		}
 		actionsTriggers[tag] = append(actionsTriggers[tag], at)
 	}

@@ -42,6 +42,14 @@ func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {
 	return
 }
 
+// 
+func (mb *MinuteBucket) Equal(o *MinuteBucket) bool {
+	return mb.DestinationId == o.DestinationId &&
+		mb.Weight == o.Weight &&
+		mb.Price == o.Price &&
+		mb.Percent == o.Percent
+}
+
 /*
 Structure to store minute buckets according to weight, precision or price.
 */

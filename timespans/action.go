@@ -67,8 +67,8 @@ func setPostpaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func resetPostpaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_POSTPAID
-	return
+	genericReset(ub)
+	return setPostpaidAction(ub, a)
 }
 
 func setPrepaidAction(ub *UserBalance, a *Action) (err error) {
@@ -77,8 +77,8 @@ func setPrepaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_PREPAID
-	return
+	genericReset(ub)
+	return setPrepaidAction(ub, a)
 }
 
 func topupResetAction(ub *UserBalance, a *Action) (err error) {
@@ -99,12 +99,33 @@ func topupAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func debitAction(ub *UserBalance, a *Action) (err error) {
+	switch a.ActionType {
+	case CREDIT:
+		ub.debitMoneyBalance(a.Units)
+	case SMS:
+		ub.debitSMSBalance(a.Units)
+	case MINUTES:
+		ub.debitMinuteBucket(a.MinuteBucket)
+	case TRAFFIC:
+		ub.debitTrafficBalance(a.Units)
+	case TRAFFIC_TIME:
+		ub.debitTrafficTimeBalance(a.Units)
+	}
 	return
 }
 
 func resetCountersAction(ub *UserBalance, a *Action) (err error) {
-	//ub.UnitsCounters
+	ub.UnitCounters = make([]*UnitsCounter, 0)
 	return
+}
+
+func genericReset(ub *UserBalance) {
+	for k, _ := range ub.BalanceMap {
+		ub.BalanceMap[k] = 0
+	}
+	ub.MinuteBuckets = make([]*MinuteBucket, 0)
+	ub.UnitCounters = make([]*UnitsCounter, 0)
+	ub.resetActionTriggers()
 }
 
 // Structure to store actions according to weight

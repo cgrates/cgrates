@@ -45,7 +45,7 @@ The function that gets the information from the raters using balancer.
 */
 func GetCallCost(key *timespans.CallDescriptor, method string) (reply *timespans.CallCost) {
 	balancerRWMutex.RLock()
-	defer balancerRWMutex
+	defer balancerRWMutex.RUnlock()
 	err := errors.New("") //not nil value
 	for err != nil {
 		client := bal.Balance()
@@ -67,6 +67,8 @@ func GetCallCost(key *timespans.CallDescriptor, method string) (reply *timespans
 The function that gets the information from the raters using balancer.
 */
 func CallMethod(key *timespans.CallDescriptor, method string) (reply float64) {
+	balancerRWMutex.Lock()
+	defer balancerRWMutex.Unlock()
 	err := errors.New("") //not nil value
 	for err != nil {
 		client := bal.Balance()

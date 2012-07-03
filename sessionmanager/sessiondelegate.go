@@ -50,6 +50,7 @@ type DirectSessionDelegate struct {
 }
 
 func NewDirectSessionDelegate(storageGetter timespans.StorageGetter) *DirectSessionDelegate {
+	timespans.SetStorageGetter(storageGetter)
 	return &DirectSessionDelegate{storageGetter}
 }
 
@@ -98,23 +99,24 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 		}
 	}
 	if cost > 0 {
-		cd := &timespans.CallDescriptor{TOR: lastCC.TOR,
-			CstmId:            lastCC.CstmId,
-			Subject:           lastCC.CstmId,
-			DestinationPrefix: lastCC.DestinationPrefix,
-			Amount:            -cost,
+		cd := &timespans.CallDescriptor{
+			TOR:         lastCC.TOR,
+			Tenant:      lastCC.Tenant,
+			Subject:     lastCC.Subject,
+			Destination: lastCC.Destination,
+			Amount:      -cost,
 		}
-		cd.SetStorageGetter(dsd.storageGetter)
 		cd.DebitCents()
 	}
 	if seconds > 0 {
-		cd := &timespans.CallDescriptor{TOR: lastCC.TOR,
-			CstmId:            lastCC.CstmId,
-			Subject:           lastCC.CstmId,
-			DestinationPrefix: lastCC.DestinationPrefix,
-			Amount:            -seconds,
+		cd := &timespans.CallDescriptor{
+			TOR:         lastCC.TOR,
+			Tenant:      lastCC.Tenant,
+			Subject:     lastCC.Subject,
+			Destination: lastCC.Destination,
+			Amount:      -seconds,
 		}
-		cd.SetStorageGetter(dsd.storageGetter)
+
 		cd.DebitSeconds()
 	}
 	lastCC.Cost -= cost
@@ -122,7 +124,7 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 }
 
 func (dsd *DirectSessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
-	cd.SetStorageGetter(dsd.storageGetter)
+	timespans.SetStorageGetter(dsd.storageGetter)
 	cc, err := cd.Debit()
 	if err != nil {
 		log.Printf("Could not complete debit opperation: %v", err)
@@ -218,11 +220,12 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 		}
 	}
 	if cost > 0 {
-		cd := &timespans.CallDescriptor{TOR: lastCC.TOR,
-			CstmId:            lastCC.CstmId,
-			Subject:           lastCC.CstmId,
-			DestinationPrefix: lastCC.DestinationPrefix,
-			Amount:            -cost,
+		cd := &timespans.CallDescriptor{
+			TOR:         lastCC.TOR,
+			Tenant:      lastCC.Tenant,
+			Subject:     lastCC.Subject,
+			Destination: lastCC.Destination,
+			Amount:      -cost,
 		}
 		var response float64
 		err := client.Call("Responder.DebitCents", cd, &response)
@@ -231,11 +234,12 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 		}
 	}
 	if seconds > 0 {
-		cd := &timespans.CallDescriptor{TOR: lastCC.TOR,
-			CstmId:            lastCC.CstmId,
-			Subject:           lastCC.CstmId,
-			DestinationPrefix: lastCC.DestinationPrefix,
-			Amount:            -seconds,
+		cd := &timespans.CallDescriptor{
+			TOR:         lastCC.TOR,
+			Tenant:      lastCC.Tenant,
+			Subject:     lastCC.Subject,
+			Destination: lastCC.Destination,
+			Amount:      -seconds,
 		}
 		var response float64
 		err := client.Call("Responder.DebitSeconds", cd, &response)

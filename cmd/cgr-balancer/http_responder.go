@@ -30,30 +30,30 @@ type IncorrectParameters struct {
 }
 
 /*
-curl "http://127.0.0.1:8000/getcost?cstmid=vdf&subj=rif&dest=0257"
+curl "http://127.0.0.1:8000/getcost?tenant=vdf&subj=rif&dest=0257"
 */
 func getCostHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	if !ok1 || !ok2 || !ok3 {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0]}
 	callCost := GetCallCost(arg, "Responder.GetCost")
 	enc.Encode(callCost)
 }
 
 /*
-curl "http://127.0.0.1:8000/debitbalance?cstmid=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/debitbalance?tenant=vdf&subj=rif&dest=0257@amount=100"
 */
 func debitBalanceHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	amount_s, ok4 := r.Form["amount"]
@@ -62,18 +62,18 @@ func debitBalanceHandler(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.DebitCents")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/debitsms?cstmid=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/debitsms?tenant=vdf&subj=rif&dest=0257@amount=100"
 */
 func debitSMSHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	amount_s, ok4 := r.Form["amount"]
@@ -82,18 +82,18 @@ func debitSMSHandler(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.DebitSMS")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/debitseconds?cstmid=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/debitseconds?tenant=vdf&subj=rif&dest=0257@amount=100"
 */
 func debitSecondsHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	amount_s, ok4 := r.Form["amount"]
@@ -102,18 +102,18 @@ func debitSecondsHandler(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.DebitSeconds")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/getmaxsessiontime?cstmid=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/getmaxsessiontime?tenant=vdf&subj=rif&dest=0257@amount=100"
 */
 func getMaxSessionTimeHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	amount_s, ok4 := r.Form["amount"]
@@ -122,18 +122,18 @@ func getMaxSessionTimeHandler(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.GetMaxSessionTime")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/addvolumediscountseconds?cstmid=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/addvolumediscountseconds?tenant=vdf&subj=rif&dest=0257@amount=100"
 */
 func addVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	amount_s, ok4 := r.Form["amount"]
@@ -142,36 +142,36 @@ func addVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.AddVolumeDiscountSeconds")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/resetvolumediscountseconds?cstmid=vdf&subj=rif&dest=0257"
+curl "http://127.0.0.1:8000/resetvolumediscountseconds?tenant=vdf&subj=rif&dest=0257"
 */
 func resetVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	if !ok1 || !ok2 || !ok3 {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0]}
 	result := CallMethod(arg, "Responder.ResetVolumeDiscountSeconds")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/addrecievedcallseconds?cstmid=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/addrecievedcallseconds?tenant=vdf&subj=rif&dest=0257@amount=100"
 */
 func addRecievedCallSeconds(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	amount_s, ok4 := r.Form["amount"]
@@ -180,25 +180,25 @@ func addRecievedCallSeconds(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.AddRecievedCallSeconds")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/resetuserbudget?cstmid=vdf&subj=rif&dest=0257"
+curl "http://127.0.0.1:8000/resetuserbudget?tenant=vdf&subj=rif&dest=0257"
 */
 func resetUserBudget(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	cstmid, ok1 := r.Form["cstmid"]
+	tenant, ok1 := r.Form["tenant"]
 	subj, ok2 := r.Form["subj"]
 	dest, ok3 := r.Form["dest"]
 	if !ok1 || !ok2 || !ok3 {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{CstmId: cstmid[0], Subject: subj[0], DestinationPrefix: dest[0]}
+	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0]}
 	result := CallMethod(arg, "Responder.ResetUserBudget")
 	enc.Encode(result)
 }
