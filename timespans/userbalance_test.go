@@ -35,6 +35,41 @@ func init() {
 }
 
 func TestUserBalanceStoreRestore(t *testing.T) {
+	uc := &UnitsCounter{
+		Direction:     OUTBOUND,
+		BalanceId:     SMS,
+		Units:         100,
+		Weight:        10,
+		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+	}
+	at := &ActionTrigger{
+		BalanceId:      CREDIT,
+		ThresholdValue: 100.0,
+		DestinationId:  "NAT",
+		Weight:         10.0,
+		ActionsId:      "Commando",
+	}
+	ub := &UserBalance{
+		Id:             "rif",
+		Type:           UB_TYPE_POSTPAID,
+		BalanceMap:     map[string]float64{SMS: 14, TRAFFIC: 1024},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		UnitCounters:   []*UnitsCounter{uc, uc},
+		ActionTriggers: ActionTriggerPriotityList{at, at, at},
+	}
+	r := ub.store()
+	if string(r) != "rif|postpaid|SMS:14#INTERNET:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10#MONETARY;NAT;Commando;100;10#MONETARY;NAT;Commando;100;10" &&
+		string(r) != "rif|postpaid|INTERNET:1024#SMS:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10#MONETARY;NAT;Commando;100;10#MONETARY;NAT;Commando;100;10" {
+		t.Errorf("Error serializing action timing: %v", string(r))
+	}
+	o := &UserBalance{}
+	o.restore(r)
+	if !reflect.DeepEqual(o, ub) {
+		t.Errorf("Expected %v was  %v", ub, o)
+	}
+}
+
+func TestUserBalanceStorageStoreRestore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}

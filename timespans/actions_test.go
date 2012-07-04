@@ -44,10 +44,29 @@ func TestActionTimingStoreRestore(t *testing.T) {
 		ActionsId:      "Commando",
 	}
 	r := at.store()
-	if string(r) != "test|one;two;three|1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;1|10|Commando" {
+	if string(r) != "test|one,two,three|1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;1|10|Commando" {
 		t.Errorf("Error serializing action timing: %v", string(r))
 	}
 	o := &ActionTiming{}
+	o.restore(r)
+	if !reflect.DeepEqual(o, at) {
+		t.Errorf("Expected %v was  %v", at, o)
+	}
+}
+
+func TestActionTriggerStoreRestore(t *testing.T) {
+	at := &ActionTrigger{
+		BalanceId:      CREDIT,
+		ThresholdValue: 100.0,
+		DestinationId:  "NAT",
+		Weight:         10.0,
+		ActionsId:      "Commando",
+	}
+	r := at.store()
+	if string(r) != "MONETARY;NAT;Commando;100;10" {
+		t.Errorf("Error serializing action trigger: %v", string(r))
+	}
+	o := &ActionTrigger{}
 	o.restore(r)
 	if !reflect.DeepEqual(o, at) {
 		t.Errorf("Expected %v was  %v", at, o)

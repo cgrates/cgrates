@@ -21,6 +21,8 @@ package timespans
 import (
 	"log"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 type ActionTrigger struct {
@@ -72,4 +74,31 @@ func (atpl ActionTriggerPriotityList) Less(i, j int) bool {
 
 func (atpl ActionTriggerPriotityList) Sort() {
 	sort.Sort(atpl)
+}
+
+/*
+Serializes the action trigger for the storage. Used for key-value storages.
+*/
+func (at *ActionTrigger) store() (result string) {
+	result += at.BalanceId + ";"
+	result += at.DestinationId + ";"
+	result += at.ActionsId + ";"
+	result += strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(at.Weight, 'f', -1, 64)
+	return
+}
+
+/*
+De-serializes the action timing for the storage. Used for key-value storages.
+*/
+func (at *ActionTrigger) restore(input string) {
+	elements := strings.Split(input, ";")
+	if len(elements) != 5 {
+		return
+	}
+	at.BalanceId = elements[0]
+	at.DestinationId = elements[1]
+	at.ActionsId = elements[2]
+	at.ThresholdValue, _ = strconv.ParseFloat(elements[3], 64)
+	at.Weight, _ = strconv.ParseFloat(elements[4], 64)
 }

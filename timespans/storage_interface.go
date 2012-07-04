@@ -23,6 +23,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"errors"
+	"log"
 	"strings"
 )
 
@@ -194,6 +195,7 @@ func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) (err error) {
 		return nil
 
 	}
+	log.Print("Using default gob marshalling!")
 	mm.buf.Reset()
 	mm.buf.Write(data)
 	return gob.NewDecoder(&mm.buf).Decode(v)

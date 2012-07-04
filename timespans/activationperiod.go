@@ -69,6 +69,7 @@ func (ap *ActivationPeriod) store() (result string) {
 	for _, i := range ap.Intervals {
 		result += i.store() + "|"
 	}
+	result = strings.TrimRight(result, "|")
 	return
 }
 

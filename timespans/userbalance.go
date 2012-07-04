@@ -19,7 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	// "log"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -291,26 +292,72 @@ Resets the user balance items to their tariff plan values.
 	return
 }
 */
-// Amount of a trafic of a certain type
-type UnitsCounter struct {
-	Direction     string
-	BalanceId     string
-	Units         float64
-	Weight        float64
-	MinuteBuckets []*MinuteBucket
+
+/*
+Serializes the user balance for the storage. Used for key-value storages.
+*/
+func (ub *UserBalance) store() (result string) {
+	result += ub.Id + "|"
+	result += ub.Type + "|"
+	for k, v := range ub.BalanceMap {
+		result += k + ":" + strconv.FormatFloat(v, 'f', -1, 64) + "#"
+	}
+	result = strings.TrimRight(result, "#") + "|"
+	for _, mb := range ub.MinuteBuckets {
+		result += mb.store() + "#"
+	}
+	result = strings.TrimRight(result, "#") + "|"
+	for _, uc := range ub.UnitCounters {
+		result += uc.store() + "#"
+	}
+	result = strings.TrimRight(result, "#") + "|"
+	for _, at := range ub.ActionTriggers {
+		result += at.store() + "#"
+	}
+	result = strings.TrimRight(result, "#")
+	return
 }
 
-// Structure to store actions according to weight
-type countersorter []*UnitsCounter
-
-func (s countersorter) Len() int {
-	return len(s)
-}
-
-func (s countersorter) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s countersorter) Less(i, j int) bool {
-	return s[i].Weight < s[j].Weight
+/*
+De-serializes the user balance for the storage. Used for key-value storages.
+*/
+func (ub *UserBalance) restore(input string) {
+	elements := strings.Split(input, "|")
+	ub.Id = elements[0]
+	ub.Type = elements[1]
+	if ub.BalanceMap == nil {
+		ub.BalanceMap = make(map[string]float64, 0)
+	}
+	for _, maps := range strings.Split(elements[2], "#") {
+		kv := strings.Split(maps, ":")
+		if len(kv) != 2 {
+			continue
+		}
+		value, _ := strconv.ParseFloat(kv[1], 64)
+		ub.BalanceMap[kv[0]] = value
+	}
+	for _, mbs := range strings.Split(elements[3], "#") {
+		if mbs == "" {
+			continue
+		}
+		mb := &MinuteBucket{}
+		mb.restore(mbs)
+		ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
+	}
+	for _, ucs := range strings.Split(elements[4], "#") {
+		if ucs == "" {
+			continue
+		}
+		uc := &UnitsCounter{}
+		uc.restore(ucs)
+		ub.UnitCounters = append(ub.UnitCounters, uc)
+	}
+	for _, ats := range strings.Split(elements[5], "#") {
+		if ats == "" {
+			continue
+		}
+		at := &ActionTrigger{}
+		at.restore(ats)
+		ub.ActionTriggers = append(ub.ActionTriggers, at)
+	}
 }
