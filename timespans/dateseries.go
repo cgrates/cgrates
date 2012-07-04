@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	// "log"
 	"strconv"
 	"strings"
 	"time"
@@ -69,6 +70,23 @@ func (m *Months) Parse(input, sep string) {
 	}
 }
 
+func (ms Months) store() (result string) {
+	for _, m := range ms {
+		result += strconv.Itoa(int(m)) + ","
+	}
+	result = strings.TrimRight(result, ",")
+	return
+}
+
+func (ms *Months) restore(input string) {
+	for _, m := range strings.Split(input, ",") {
+		if m != "" {
+			mm, _ := strconv.Atoi(m)
+			*ms = append(*ms, time.Month(mm))
+		}
+	}
+}
+
 // Defines month days series
 type MonthDays []int
 
@@ -113,6 +131,23 @@ func (md *MonthDays) Parse(input, sep string) {
 	}
 }
 
+func (mds MonthDays) store() (result string) {
+	for _, md := range mds {
+		result += strconv.Itoa(int(md)) + ","
+	}
+	result = strings.TrimRight(result, ",")
+	return
+}
+
+func (mds *MonthDays) restore(input string) {
+	for _, md := range strings.Split(input, ",") {
+		if md != "" {
+			mm, _ := strconv.Atoi(md)
+			*mds = append(*mds, mm)
+		}
+	}
+}
+
 // Defines week days series
 type WeekDays []time.Weekday
 
@@ -152,6 +187,23 @@ func (wd *WeekDays) Parse(input, sep string) {
 			if day, err := strconv.Atoi(wds); err == nil {
 				*wd = append(*wd, time.Weekday(day%7)) // %7 for sunday = 7 normalization
 			}
+		}
+	}
+}
+
+func (wds WeekDays) store() (result string) {
+	for _, wd := range wds {
+		result += strconv.Itoa(int(wd)) + ","
+	}
+	result = strings.TrimRight(result, ",")
+	return
+}
+
+func (wds *WeekDays) restore(input string) {
+	for _, wd := range strings.Split(input, ",") {
+		if wd != "" {
+			mm, _ := strconv.Atoi(wd)
+			*wds = append(*wds, time.Weekday(mm))
 		}
 	}
 }

@@ -27,6 +27,45 @@ import (
 
 func TestMonthStoreRestore(t *testing.T) {
 	m := Months{5, 6, 7, 8}
+	r := m.store()
+	if string(r) != "5,6,7,8" {
+		t.Errorf("Error serializing months: %v", string(r))
+	}
+	o := Months{}
+	o.restore(r)
+	if !reflect.DeepEqual(o, m) {
+		t.Errorf("Expected %v was  %v", m, o)
+	}
+}
+
+func TestMonthDayStoreRestore(t *testing.T) {
+	md := MonthDays{24, 25, 26}
+	r := md.store()
+	if string(r) != "24,25,26" {
+		t.Errorf("Error serializing month days: %v", string(r))
+	}
+	o := MonthDays{}
+	o.restore(r)
+	if !reflect.DeepEqual(o, md) {
+		t.Errorf("Expected %v was  %v", md, o)
+	}
+}
+
+func TestWeekDayStoreRestore(t *testing.T) {
+	wd := WeekDays{time.Saturday, time.Sunday}
+	r := wd.store()
+	if string(r) != "6,0" {
+		t.Errorf("Error serializing week days: %v", string(r))
+	}
+	o := WeekDays{}
+	o.restore(r)
+	if !reflect.DeepEqual(o, wd) {
+		t.Errorf("Expected %v was  %v", wd, o)
+	}
+}
+
+func TestMonthStoreRestoreJson(t *testing.T) {
+	m := Months{5, 6, 7, 8}
 	r, _ := json.Marshal(m)
 	if string(r) != "[5,6,7,8]" {
 		t.Errorf("Error serializing months: %v", string(r))
@@ -38,7 +77,7 @@ func TestMonthStoreRestore(t *testing.T) {
 	}
 }
 
-func TestMonthDayStoreRestore(t *testing.T) {
+func TestMonthDayStoreRestoreJson(t *testing.T) {
 	md := MonthDays{24, 25, 26}
 	r, _ := json.Marshal(md)
 	if string(r) != "[24,25,26]" {
@@ -51,7 +90,7 @@ func TestMonthDayStoreRestore(t *testing.T) {
 	}
 }
 
-func TestWeekDayStoreRestore(t *testing.T) {
+func TestWeekDayStoreRestoreJson(t *testing.T) {
 	wd := WeekDays{time.Saturday, time.Sunday}
 	r, _ := json.Marshal(wd)
 	if string(r) != "[6,0]" {

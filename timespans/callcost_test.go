@@ -34,6 +34,7 @@ func TestSingleResultMerge(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 17, 01, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.GetCost()
+	t.Log(len(cd.ActivationPeriods[0].Intervals))
 	if cc1.Cost != 60 {
 		t.Errorf("expected 60 was %v", cc1.Cost)
 	}

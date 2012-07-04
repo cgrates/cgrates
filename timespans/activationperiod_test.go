@@ -31,6 +31,28 @@ func init() {
 	SetStorageGetter(sg)
 }
 
+func TestApStoreRestore(t *testing.T) {
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{
+		Months:    Months{time.February},
+		MonthDays: MonthDays{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+	result := ap.store()
+	expected := "1328106601000000000|2;1;3,4;14:30:00;15:00:00;0;0;0;0|"
+	if result != expected {
+		t.Errorf("Expected %q was %q", expected, result)
+	}
+	ap1 := ActivationPeriod{}
+	ap1.restore(result)
+	if reflect.DeepEqual(ap, ap1) {
+		t.Errorf("Expected %v was %v", ap, ap1)
+	}
+}
+
 func TestApRestoreRedis(t *testing.T) {
 	cd := &CallDescriptor{
 		Direction:   "OUT",
@@ -44,7 +66,7 @@ func TestApRestoreRedis(t *testing.T) {
 	}
 }
 
-func TestApStoreRestore(t *testing.T) {
+func TestApStoreRestoreJson(t *testing.T) {
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Months: []time.Month{time.February},
 		MonthDays: []int{1},

@@ -19,11 +19,35 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"reflect"
 	"testing"
 	"time"
 )
 
-func TestMonth(t *testing.T) {
+func TestIntervalStoreRestore(t *testing.T) {
+	i := &Interval{
+		Months:      Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays:   MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
+		WeekDays:    WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+		StartTime:   "18:00:00",
+		EndTime:     "00:00:00",
+		Weight:      10.0,
+		ConnectFee:  0.0,
+		Price:       1.0,
+		BillingUnit: 1.0,
+	}
+	r := i.store()
+	if string(r) != "1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;1" {
+		t.Errorf("Error serializing interval: %v", string(r))
+	}
+	o := &Interval{}
+	o.restore(r)
+	if !reflect.DeepEqual(o, i) {
+		t.Errorf("Expected %v was  %v", i, o)
+	}
+}
+
+func TestIntervalMonth(t *testing.T) {
 	i := &Interval{Months: Months{time.February}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
@@ -35,7 +59,7 @@ func TestMonth(t *testing.T) {
 	}
 }
 
-func TestMonthDay(t *testing.T) {
+func TestIntervalMonthDay(t *testing.T) {
 	i := &Interval{MonthDays: MonthDays{10}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
@@ -47,7 +71,7 @@ func TestMonthDay(t *testing.T) {
 	}
 }
 
-func TestMonthAndMonthDay(t *testing.T) {
+func TestIntervalMonthAndMonthDay(t *testing.T) {
 	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{10}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
@@ -63,7 +87,7 @@ func TestMonthAndMonthDay(t *testing.T) {
 	}
 }
 
-func TestWeekDays(t *testing.T) {
+func TestIntervalWeekDays(t *testing.T) {
 	i := &Interval{WeekDays: []time.Weekday{time.Wednesday}}
 	i2 := &Interval{WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
 	d := time.Date(2012, time.February, 1, 23, 0, 0, 0, time.UTC)
@@ -82,7 +106,7 @@ func TestWeekDays(t *testing.T) {
 	}
 }
 
-func TestMonthAndMonthDayAndWeekDays(t *testing.T) {
+func TestIntervalMonthAndMonthDayAndWeekDays(t *testing.T) {
 	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday}}
 	i2 := &Interval{Months: Months{time.February}, MonthDays: MonthDays{2}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
 	d := time.Date(2012, time.February, 1, 23, 0, 0, 0, time.UTC)
@@ -101,7 +125,7 @@ func TestMonthAndMonthDayAndWeekDays(t *testing.T) {
 	}
 }
 
-func TestHours(t *testing.T) {
+func TestIntervalHours(t *testing.T) {
 	i := &Interval{StartTime: "14:30:00", EndTime: "15:00:00"}
 	d := time.Date(2012, time.February, 10, 14, 30, 1, 0, time.UTC)
 	d1 := time.Date(2012, time.January, 10, 14, 29, 0, 0, time.UTC)

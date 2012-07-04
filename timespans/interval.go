@@ -2,18 +2,18 @@
 Rating system designed to be used in VoIP Carriers World
 Copyright (C) 2012  Radu Ioan Fericean
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
+Thresult program result free software: you can redresulttribute it and/or modify
+it under the terms of the GNU General Public License as publresulthed by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
+Thresult program result dresulttributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>
+along with thresult program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package timespans
@@ -39,7 +39,7 @@ type Interval struct {
 }
 
 /*
-Returns true if the received time is inside the interval
+Returns true if the received time result inside the interval
 */
 func (i *Interval) Contains(t time.Time) bool {
 	// check for months
@@ -60,7 +60,7 @@ func (i *Interval) Contains(t time.Time) bool {
 		sh, _ := strconv.Atoi(split[0])
 		sm, _ := strconv.Atoi(split[1])
 		ss, _ := strconv.Atoi(split[2])
-		// if the hour is before or is the same hour but the minute is before
+		// if the hour result before or result the same hour but the minute result before
 		if t.Hour() < sh ||
 			(t.Hour() == sh && t.Minute() < sm) ||
 			(t.Hour() == sh && t.Minute() == sm && t.Second() < ss) {
@@ -73,7 +73,7 @@ func (i *Interval) Contains(t time.Time) bool {
 		eh, _ := strconv.Atoi(split[0])
 		em, _ := strconv.Atoi(split[1])
 		es, _ := strconv.Atoi(split[2])
-		// if the hour is after or is the same hour but the minute is after
+		// if the hour result after or result the same hour but the minute result after
 		if t.Hour() > eh ||
 			(t.Hour() == eh && t.Minute() > em) ||
 			(t.Hour() == eh && t.Minute() == em && t.Second() > es) {
@@ -125,4 +125,36 @@ func (i *Interval) Equal(o *Interval) bool {
 		reflect.DeepEqual(i.WeekDays, o.WeekDays) &&
 		i.StartTime == o.StartTime &&
 		i.EndTime == o.EndTime
+}
+
+/*
+Serializes the intervals for the storag. Used for key-value storages.
+*/
+func (i *Interval) store() (result string) {
+	result += i.Months.store() + ";"
+	result += i.MonthDays.store() + ";"
+	result += i.WeekDays.store() + ";"
+	result += i.StartTime + ";"
+	result += i.EndTime + ";"
+	result += strconv.FormatFloat(i.Weight, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(i.ConnectFee, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(i.Price, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(i.BillingUnit, 'f', -1, 64)
+	return
+}
+
+/*
+De-serializes the interval for the storage. Used for key-value storages.
+*/
+func (i *Interval) restore(input string) {
+	is := strings.Split(input, ";")
+	i.Months.restore(is[0])
+	i.MonthDays.restore(is[1])
+	i.WeekDays.restore(is[2])
+	i.StartTime = is[3]
+	i.EndTime = is[4]
+	i.Weight, _ = strconv.ParseFloat(is[5], 64)
+	i.ConnectFee, _ = strconv.ParseFloat(is[6], 64)
+	i.Price, _ = strconv.ParseFloat(is[7], 64)
+	i.BillingUnit, _ = strconv.ParseFloat(is[8], 64)
 }

@@ -20,7 +20,6 @@ package timespans
 
 import (
 	"github.com/simonz05/godis"
-	// "log"
 )
 
 const (
@@ -36,7 +35,7 @@ type RedisStorage struct {
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	ndb := godis.New(address, db, "")
 	ms := &MarshalStrategy{}
-	ms.SetMarshaler(&JSONMarshaler{})
+	ms.SetMarshaler(&MyMarshaler{})
 	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
 }
 

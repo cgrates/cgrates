@@ -20,8 +20,10 @@ package timespans
 
 import (
 	// "log"
-	"sort"
 	"math"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 type MinuteBucket struct {
@@ -71,4 +73,28 @@ func (bs bucketsorter) Less(j, i int) bool {
 
 func (bs bucketsorter) Sort() {
 	sort.Sort(bs)
+}
+
+/*
+Serializes the minute bucket for the storage. Used for key-value storages.
+*/
+func (mb *MinuteBucket) store() (result string) {
+	result += strconv.FormatFloat(mb.Seconds, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(mb.Weight, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(mb.Price, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(mb.Percent, 'f', -1, 64) + ";"
+	result += mb.DestinationId
+	return
+}
+
+/*
+De-serializes the minute bucket for the storage. Used for key-value storages.
+*/
+func (mb *MinuteBucket) restore(input string) {
+	elements := strings.Split(input, ";")
+	mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
+	mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
+	mb.Price, _ = strconv.ParseFloat(elements[2], 64)
+	mb.Percent, _ = strconv.ParseFloat(elements[3], 64)
+	mb.DestinationId = elements[4]
 }

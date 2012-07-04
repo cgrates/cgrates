@@ -19,10 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"time"
-	"log"
 	"fmt"
+	"log"
 	"sort"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const (
@@ -194,4 +196,34 @@ func (atpl ActionTimingPriotityList) Less(i, j int) bool {
 
 func (atpl ActionTimingPriotityList) Sort() {
 	sort.Sort(atpl)
+}
+
+/*
+Serializes the action timing for the storage. Used for key-value storages.
+*/
+func (at *ActionTiming) store() (result string) {
+	result += at.Tag + "|"
+	for _, ubi := range at.UserBalanceIds {
+		result += ubi + ";"
+	}
+	result = strings.TrimRight(result, ";") + "|"
+	result += at.Timing.store() + "|"
+	result += strconv.FormatFloat(at.Weight, 'f', -1, 64) + "|"
+	result += at.ActionsId
+	return
+}
+
+/*
+De-serializes the action timing for the storage. Used for key-value storages.
+*/
+func (at *ActionTiming) restore(input string) {
+	elements := strings.Split(input, "|")
+	at.Tag = elements[0]
+	for _, ubi := range strings.Split(elements[1], ";") {
+		at.UserBalanceIds = append(at.UserBalanceIds, ubi)
+	}
+	at.Timing = &Interval{}
+	at.Timing.restore(elements[2])
+	at.Weight, _ = strconv.ParseFloat(elements[3], 64)
+	at.ActionsId = elements[4]
 }

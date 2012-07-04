@@ -34,7 +34,7 @@ func NewRedixStorage(address string, db int) (*RedixStorage, error) {
 		log.Fatalf("Could not connect to redis server: %v", err)
 	}
 	ms := &MarshalStrategy{}
-	ms.SetMarshaler(&JSONMarshaler{})
+	ms.SetMarshaler(&MyMarshaler{})
 	return &RedixStorage{db: ndb, ms: ms}, nil
 }
 

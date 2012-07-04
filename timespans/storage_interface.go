@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"encoding/json"
-	"encoding/gob"
 	"bytes"
-	//"log"
+	"encoding/gob"
+	"encoding/json"
+	"errors"
+	"strings"
 )
 
 /*
@@ -109,4 +110,91 @@ func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 	gm.buf.Reset()
 	gm.buf.Write(data)
 	return gob.NewDecoder(&gm.buf).Decode(v)
+}
+
+type storer interface {
+	store() string
+	restore(string)
+}
+
+type MyMarshaler struct {
+	buf bytes.Buffer
+}
+
+func (mm *MyMarshaler) Marshal(v interface{}) (data []byte, err error) {
+	switch v.(type) {
+	case []*ActivationPeriod:
+		result := ""
+		for _, ap := range v.([]*ActivationPeriod) {
+			result += ap.store() + "\n"
+		}
+		return []byte(result), nil
+	case []*Action:
+		result := ""
+		for _, a := range v.([]*Action) {
+			result += a.store() + "\n"
+		}
+		return []byte(result), nil
+	case []*ActionTiming:
+		result := ""
+		for _, at := range v.([]*ActionTiming) {
+			result += at.store() + "\n"
+		}
+		return []byte(result), nil
+	case storer:
+		s := v.(storer)
+		return []byte(s.store()), nil
+	}
+	mm.buf.Reset()
+	if err = gob.NewEncoder(&mm.buf).Encode(v); err == nil {
+		data = mm.buf.Bytes()
+	}
+	return
+}
+
+func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) (err error) {
+	switch v.(type) {
+	case *[]*ActivationPeriod:
+		aps := v.(*[]*ActivationPeriod)
+		splits := strings.Split(string(data), "\n")
+		if len(splits) == 0 {
+			return errors.New("")
+		}
+		for _, ap_string := range splits {
+			if len(ap_string) > 0 {
+				ap := &ActivationPeriod{}
+				ap.restore(ap_string)
+				*aps = append(*aps, ap)
+			}
+		}
+		return nil
+	case *[]*Action:
+		as := v.(*[]*Action)
+		for _, a_string := range strings.Split(string(data), "\n") {
+			if len(a_string) > 0 {
+				a := &Action{}
+				a.restore(a_string)
+				*as = append(*as, a)
+			}
+		}
+		return nil
+	case *[]*ActionTiming:
+		ats := v.(*[]*ActionTiming)
+		for _, at_string := range strings.Split(string(data), "\n") {
+			if len(at_string) > 0 {
+				at := &ActionTiming{}
+				at.restore(at_string)
+				*ats = append(*ats, at)
+			}
+		}
+		return nil
+	case storer:
+		s := v.(storer)
+		s.restore(string(data))
+		return nil
+
+	}
+	mm.buf.Reset()
+	mm.buf.Write(data)
+	return gob.NewDecoder(&mm.buf).Decode(v)
 }
