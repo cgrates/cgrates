@@ -50,6 +50,9 @@ func (s countersorter) Less(i, j int) bool {
 // Adds the minutes from the received minute bucket to an existing bucket if the destination
 // is the same or ads the minutye bucket to the list if none matches.
 func (uc *UnitsCounter) addMinuteBucket(newMb *MinuteBucket) {
+	if newMb == nil {
+		return
+	}
 	found := false
 	for _, mb := range uc.MinuteBuckets {
 		if mb.DestinationId == newMb.DestinationId {

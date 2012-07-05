@@ -174,6 +174,7 @@ func (a *Action) restore(input string) {
 	a.Units, _ = strconv.ParseFloat(elements[2], 64)
 	a.Weight, _ = strconv.ParseFloat(elements[3], 64)
 	if len(elements) == 5 {
+		a.MinuteBucket = &MinuteBucket{}
 		a.MinuteBucket.restore(elements[4])
 	}
 }

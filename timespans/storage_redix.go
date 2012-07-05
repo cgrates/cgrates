@@ -25,7 +25,7 @@ import (
 
 type RedixStorage struct {
 	db *redis.Client
-	ms *MarshalStrategy
+	ms Marshaler
 }
 
 func NewRedixStorage(address string, db int) (*RedixStorage, error) {
@@ -33,8 +33,7 @@ func NewRedixStorage(address string, db int) (*RedixStorage, error) {
 	if err != nil {
 		log.Fatalf("Could not connect to redis server: %v", err)
 	}
-	ms := &MarshalStrategy{}
-	ms.SetMarshaler(&MyMarshaler{})
+	ms := &MyMarshaler{}
 	return &RedixStorage{db: ndb, ms: ms}, nil
 }
 

@@ -51,22 +51,6 @@ type Marshaler interface {
 	Unmarshal(data []byte, v interface{}) error
 }
 
-type MarshalStrategy struct {
-	marshaler Marshaler
-}
-
-func (ms *MarshalStrategy) SetMarshaler(m Marshaler) {
-	ms.marshaler = m
-}
-
-func (ms *MarshalStrategy) Marshal(v interface{}) ([]byte, error) {
-	return ms.marshaler.Marshal(v)
-}
-
-func (ms *MarshalStrategy) Unmarshal(data []byte, v interface{}) error {
-	return ms.marshaler.Unmarshal(data, v)
-}
-
 type JSONMarshaler struct{}
 
 func (jm *JSONMarshaler) Marshal(v interface{}) ([]byte, error) {

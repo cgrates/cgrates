@@ -198,6 +198,9 @@ func (ub *UserBalance) debitTrafficTimeBalance(amount float64) (float64, error) 
 // Adds the minutes from the received minute bucket to an existing bucket if the destination
 // is the same or ads the minutye bucket to the list if none matches.
 func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
+	if newMb == nil {
+		return
+	}
 	found := false
 	for _, mb := range ub.MinuteBuckets {
 		if mb.DestinationId == newMb.DestinationId {
@@ -215,7 +218,7 @@ func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
 func (ub *UserBalance) executeActionTriggers() {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
-		if at.executed {
+		if at.Executed {
 			// trigger is marked as executed, so skipp it until
 			// the next reset (see RESET_TRIGGERS action type)
 			continue
@@ -229,10 +232,11 @@ func (ub *UserBalance) executeActionTriggers() {
 							at.Execute(ub)
 						}
 					}
-				}
-				if uc.Units >= at.ThresholdValue {
-					// run the actions					
-					at.Execute(ub)
+				} else {
+					if uc.Units >= at.ThresholdValue {
+						// run the actions					
+						at.Execute(ub)
+					}
 				}
 			}
 		}
@@ -242,11 +246,11 @@ func (ub *UserBalance) executeActionTriggers() {
 // Mark all action trigers as ready for execution
 func (ub *UserBalance) resetActionTriggers() {
 	for _, at := range ub.ActionTriggers {
-		at.executed = false
+		at.Executed = false
 	}
 }
 
-func (ub *UserBalance) CountUnits(a *Action) {
+func (ub *UserBalance) countUnits(a *Action) {
 	var unitsCounter *UnitsCounter
 	for _, uc := range ub.UnitCounters {
 		if uc.BalanceId == a.BalanceId {
@@ -254,13 +258,17 @@ func (ub *UserBalance) CountUnits(a *Action) {
 			break
 		}
 	}
-	if unitsCounter != nil {
-		if unitsCounter.BalanceId == MINUTES && a.MinuteBucket != nil {
-			unitsCounter.addMinuteBucket(a.MinuteBucket)
-			goto TRIGGERS
-		}
-		unitsCounter.Units += a.Units
+	// if not found add the counter
+	if unitsCounter == nil {
+		unitsCounter = &UnitsCounter{BalanceId: a.BalanceId}
+		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
 	}
+
+	if unitsCounter.BalanceId == MINUTES && a.MinuteBucket != nil {
+		unitsCounter.addMinuteBucket(a.MinuteBucket)
+		goto TRIGGERS
+	}
+	unitsCounter.Units += a.Units
 TRIGGERS:
 	ub.executeActionTriggers()
 }

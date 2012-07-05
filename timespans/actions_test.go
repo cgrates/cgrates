@@ -63,7 +63,7 @@ func TestActionTriggerStoreRestore(t *testing.T) {
 		ActionsId:      "Commando",
 	}
 	r := at.store()
-	if string(r) != "MONETARY;NAT;Commando;100;10" {
+	if string(r) != "MONETARY;NAT;Commando;100;10;false" {
 		t.Errorf("Error serializing action trigger: %v", string(r))
 	}
 	o := &ActionTrigger{}

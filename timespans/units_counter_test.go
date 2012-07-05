@@ -71,3 +71,17 @@ func TestUnitsCounterAddMinuteBucketExists(t *testing.T) {
 		t.Error("Error adding minute bucket!")
 	}
 }
+
+func TestUnitsCounterAddMinuteBucketNil(t *testing.T) {
+	uc := &UnitsCounter{
+		Direction:     OUTBOUND,
+		BalanceId:     SMS,
+		Units:         100,
+		Weight:        10,
+		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+	}
+	uc.addMinuteBucket(nil)
+	if len(uc.MinuteBuckets) != 2 {
+		t.Error("Error adding minute bucket!")
+	}
+}

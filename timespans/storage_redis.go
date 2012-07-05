@@ -29,13 +29,12 @@ const (
 type RedisStorage struct {
 	dbNb int
 	db   *godis.Client
-	ms   *MarshalStrategy
+	ms   Marshaler
 }
 
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
 	ndb := godis.New(address, db, "")
-	ms := &MarshalStrategy{}
-	ms.SetMarshaler(&MyMarshaler{})
+	ms := &MyMarshaler{}
 	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
 }
 

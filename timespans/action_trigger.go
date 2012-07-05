@@ -31,12 +31,11 @@ type ActionTrigger struct {
 	DestinationId  string
 	Weight         float64
 	ActionsId      string
-	executed       bool
+	Executed       bool
 }
 
 func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
-	userBalancesRWMutex.Lock()
-	defer userBalancesRWMutex.Unlock()
+	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac ActionPriotityList
 	aac, err = storageGetter.GetActions(at.ActionsId)
 	aac.Sort()
@@ -52,7 +51,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		}
 		err = actionFunction(ub, a)
 	}
-	at.executed = true
+	at.Executed = true
 	storageGetter.SetUserBalance(ub)
 	return
 }
@@ -84,7 +83,8 @@ func (at *ActionTrigger) store() (result string) {
 	result += at.DestinationId + ";"
 	result += at.ActionsId + ";"
 	result += strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(at.Weight, 'f', -1, 64)
+	result += strconv.FormatFloat(at.Weight, 'f', -1, 64) + ";"
+	result += strconv.FormatBool(at.Executed)
 	return
 }
 
@@ -93,7 +93,7 @@ De-serializes the action timing for the storage. Used for key-value storages.
 */
 func (at *ActionTrigger) restore(input string) {
 	elements := strings.Split(input, ";")
-	if len(elements) != 5 {
+	if len(elements) != 6 {
 		return
 	}
 	at.BalanceId = elements[0]
@@ -101,4 +101,5 @@ func (at *ActionTrigger) restore(input string) {
 	at.ActionsId = elements[2]
 	at.ThresholdValue, _ = strconv.ParseFloat(elements[3], 64)
 	at.Weight, _ = strconv.ParseFloat(elements[4], 64)
+	at.Executed, _ = strconv.ParseBool(elements[5])
 }

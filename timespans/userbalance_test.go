@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	// "log"
 	"reflect"
 	"testing"
 )
@@ -32,6 +31,20 @@ var (
 func init() {
 	storageGetter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	SetStorageGetter(storageGetter)
+	populateTestActions()
+}
+
+func populateTestActions() {
+	ats := []*Action{
+		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Units: 10},
+		&Action{ActionType: "TOPUP", BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 10, DestinationId: "NAT"}},
+	}
+	storageGetter.SetActions("TEST_ACTIONS", ats)
+	ats1 := []*Action{
+		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Units: 10, Weight: 20},
+		&Action{ActionType: "RESET_PREPAID", Weight: 10},
+	}
+	storageGetter.SetActions("TEST_ACTIONS_ORDER", ats1)
 }
 
 func TestUserBalanceStoreRestore(t *testing.T) {
@@ -58,8 +71,8 @@ func TestUserBalanceStoreRestore(t *testing.T) {
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}
 	r := ub.store()
-	if string(r) != "rif|postpaid|SMS:14#INTERNET:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10#MONETARY;NAT;Commando;100;10#MONETARY;NAT;Commando;100;10" &&
-		string(r) != "rif|postpaid|INTERNET:1024#SMS:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10#MONETARY;NAT;Commando;100;10#MONETARY;NAT;Commando;100;10" {
+	if string(r) != "rif|postpaid|SMS:14#INTERNET:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false" &&
+		string(r) != "rif|postpaid|INTERNET:1024#SMS:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false" {
 		t.Errorf("Error serializing action timing: %v", string(r))
 	}
 	o := &UserBalance{}
@@ -305,6 +318,7 @@ func TestUserBalanceAddMinuteBucket(t *testing.T) {
 }
 
 func TestUserBalanceAddMinuteBucketExists(t *testing.T) {
+
 	ub := &UserBalance{
 		Id:            "rif",
 		Type:          UB_TYPE_POSTPAID,
@@ -318,68 +332,20 @@ func TestUserBalanceAddMinuteBucketExists(t *testing.T) {
 	}
 }
 
-/*func TestResetUserBalance(t *testing.T) {
-	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "NAT"}
-	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
-	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	rifsBalance.MinuteBuckets[0].Seconds, rifsBalance.MinuteBuckets[1].Seconds = 0.0, 0.0
-	err := rifsBalance.resetUserBalance(storageGetter)
-	if err != nil ||
-		rifsBalance.MinuteBuckets[0] == b1 ||
-		rifsBalance.BalanceMap[SMS] != seara.SmsCredit {
-		t.Log(rifsBalance.MinuteBuckets[0])
-		t.Log(rifsBalance.MinuteBuckets[1])
-		t.Log(rifsBalance.BalanceMap[SMS])
-		t.Log(rifsBalance.BalanceMap[TRAFFIC])
-		t.Errorf("Expected %v was %v", "xxx", rifsBalance)
+func TestUserBalanceAddMinuteNil(t *testing.T) {
+	ub := &UserBalance{
+		Id:            "rif",
+		Type:          UB_TYPE_POSTPAID,
+		BalanceMap:    map[string]float64{SMS: 14, TRAFFIC: 1024},
+		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
-
-}*/
-
-/*func TestGetVolumeDiscountHaving(t *testing.T) {
-	vd := &VolumeDiscount{100, 11}
-	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
-	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]float64{CREDIT: 21}, tariffPlan: seara, VolumeDiscountSeconds: 100}
-	result, err := rifsBalance.getVolumeDiscount(nil)
-	if err != nil || result != 11 {
-		t.Errorf("Expected %v was %v", 11, result)
+	ub.addMinuteBucket(nil)
+	if len(ub.MinuteBuckets) != 2 {
+		t.Error("Error adding minute bucket!")
 	}
 }
 
-func TestGetVolumeDiscountNotHaving(t *testing.T) {
-	vd := &VolumeDiscount{100, 11}
-	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd}}
-	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]float64{CREDIT: 21}, tariffPlan: seara, VolumeDiscountSeconds: 99}
-	result, err := rifsBalance.getVolumeDiscount(nil)
-	if err != nil || result != 0 {
-		t.Errorf("Expected %v was %v", 0, result)
-	}
-}
-
-func TestGetVolumeDiscountSteps(t *testing.T) {
-	vd1 := &VolumeDiscount{100, 11}
-	vd2 := &VolumeDiscount{500, 20}
-	seara := &TariffPlan{Id: "seara", SmsCredit: 100, VolumeDiscountThresholds: []*VolumeDiscount{vd1, vd2}}
-	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]float64{CREDIT: 21}, tariffPlan: seara, VolumeDiscountSeconds: 551}
-	result, err := rifsBalance.getVolumeDiscount(nil)
-	if err != nil || result != 20 {
-		t.Errorf("Expected %v was %v", 20, result)
-	}
-}
-
-func TestRecivedCallsBonus(t *testing.T) {
-	_ := NewKyotoStorage("../data/test.kch")
-	defer storageGetter.Close()
-	rcb := &RecivedCallBonus{Credit: 100}
-	seara := &TariffPlan{Id: "seara_voo", SmsCredit: 100, ReceivedCallSecondsLimit: 10, RecivedCallBonus: rcb}
-	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]float64{CREDIT: 21}, tariffPlan: seara, ReceivedCallSeconds: 1}
-	err := rifsBalance.addReceivedCallSeconds(12)
-	if err != nil || rifsBalance.BalanceMap[CREDIT] != 121 || rifsBalance.ReceivedCallSeconds != 3 {
-		t.Error("Wrong Received call bonus procedure: ", rifsBalance)
-	}
-}*/
-
-func TestUBAddMinutBucket(t *testing.T) {
+func TestUserBalanceAddMinutBucketEmpty(t *testing.T) {
 	mb1 := &MinuteBucket{Seconds: 10, DestinationId: "NAT"}
 	mb2 := &MinuteBucket{Seconds: 10, DestinationId: "NAT"}
 	mb3 := &MinuteBucket{Seconds: 10, DestinationId: "OTHER"}
@@ -395,6 +361,58 @@ func TestUBAddMinutBucket(t *testing.T) {
 	ub.addMinuteBucket(mb3)
 	if len(ub.MinuteBuckets) != 2 {
 		t.Error("Error adding minute bucket: ", ub.MinuteBuckets)
+	}
+}
+
+func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS"}},
+	}
+	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
+	t.Log(ub, ub.MinuteBuckets[0])
+	if ub.BalanceMap[CREDIT] != 110 || ub.MinuteBuckets[0].Seconds != 20 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT], ub.MinuteBuckets[0].Seconds)
+	}
+	// are set to executed
+	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
+	if ub.BalanceMap[CREDIT] != 110 || ub.MinuteBuckets[0].Seconds != 20 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT], ub.MinuteBuckets[0].Seconds)
+	}
+
+	// we can reset them
+	ub.resetActionTriggers()
+	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
+	if ub.BalanceMap[CREDIT] != 120 || ub.MinuteBuckets[0].Seconds != 30 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT], ub.MinuteBuckets[0].Seconds)
+	}
+}
+
+func TestUserBalanceExecuteTriggeredActionsOrder(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB_OREDER",
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS_ORDER"}},
+	}
+	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
+	if ub.BalanceMap[CREDIT] != 10 {
+		t.Error("Error executing triggered actions in order", ub.BalanceMap[CREDIT])
+	}
+}
+
+func TestUserBalanceUnitCounting(t *testing.T) {
+	ub := &UserBalance{}
+	ub.countUnits(&Action{BalanceId: CREDIT, Units: 10})
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 10 {
+		t.Error("Error counting units")
+	}
+	ub.countUnits(&Action{BalanceId: CREDIT, Units: 10})
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 20 {
+		t.Error("Error counting units")
 	}
 }
 
