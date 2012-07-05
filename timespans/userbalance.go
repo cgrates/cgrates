@@ -246,52 +246,24 @@ func (ub *UserBalance) resetActionTriggers() {
 	}
 }
 
-/*
-Adds the specified amount of seconds.
-*/
-// func (ub *UserBalance) addReceivedCallSeconds(direction, tor, destination string, amount float64) error {
-// 	ub.ReceivedCallSeconds += amount
-// 	if tariffPlan, err := ub.getTariffPlan(); tariffPlan != nil && err == nil {
-// 		if ub.ReceivedCallSeconds >= tariffPlan.ReceivedCallSecondsLimit {
-// 			ub.ReceivedCallSeconds -= tariffPlan.ReceivedCallSecondsLimit
-// 			if tariffPlan.RecivedCallBonus != nil { // apply the bonus
-// 				ub.BalanceMap[CREDIT] += tariffPlan.RecivedCallBonus.Credit
-// 				ub.BalanceMap[SMS] += tariffPlan.RecivedCallBonus.SmsCredit
-// 				ub.BalanceMap[TRAFFIC] += tariffPlan.RecivedCallBonus.Traffic
-// 				if tariffPlan.RecivedCallBonus.MinuteBucket != nil {
-// 					for _, mb := range ub.MinuteBuckets {
-// 						if mb.DestinationId == tariffPlan.RecivedCallBonus.MinuteBucket.DestinationId {
-// 							mb.Seconds += tariffPlan.RecivedCallBonus.MinuteBucket.Seconds
-// 						}
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return 
-// }
-
-/*
-Resets the user balance items to their tariff plan values.
-*/
-/*func (ub *UserBalance) resetUserBalance() (err error) {
-	if tp, err := ub.getAccountActions(); err == nil {
-		for k, _ := range ub.BalanceMap {
-			ub.BalanceMap[k] = tp.BalanceMap[k]
+func (ub *UserBalance) CountUnits(a *Action) {
+	var unitsCounter *UnitsCounter
+	for _, uc := range ub.UnitCounters {
+		if uc.BalanceId == a.BalanceId {
+			unitsCounter = uc
+			break
 		}
-		ub.MinuteBuckets = make([]*MinuteBucket, 0)
-		for _, bucket := range tp.MinuteBuckets {
-			mb := &MinuteBucket{Seconds: bucket.Seconds,
-				Weight:        bucket.Weight,
-				Price:         bucket.Price,
-				DestinationId: bucket.DestinationId}
-			ub.MinuteBuckets = append(ub.MinuteBuckets, mb)
-		}
-		err = 
 	}
-	return
+	if unitsCounter != nil {
+		if unitsCounter.BalanceId == MINUTES && a.MinuteBucket != nil {
+			unitsCounter.addMinuteBucket(a.MinuteBucket)
+			goto TRIGGERS
+		}
+		unitsCounter.Units += a.Units
+	}
+TRIGGERS:
+	ub.executeActionTriggers()
 }
-*/
 
 /*
 Serializes the user balance for the storage. Used for key-value storages.

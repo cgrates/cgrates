@@ -47,6 +47,22 @@ func (s countersorter) Less(i, j int) bool {
 	return s[i].Weight < s[j].Weight
 }
 
+// Adds the minutes from the received minute bucket to an existing bucket if the destination
+// is the same or ads the minutye bucket to the list if none matches.
+func (uc *UnitsCounter) addMinuteBucket(newMb *MinuteBucket) {
+	found := false
+	for _, mb := range uc.MinuteBuckets {
+		if mb.DestinationId == newMb.DestinationId {
+			mb.Seconds += newMb.Seconds
+			found = true
+			break
+		}
+	}
+	if !found {
+		uc.MinuteBuckets = append(uc.MinuteBuckets, newMb)
+	}
+}
+
 /*
 Serializes the unit counter for the storage. Used for key-value storages.
 */

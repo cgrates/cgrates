@@ -290,6 +290,34 @@ func TestDebitNegativeSMSBalance(t *testing.T) {
 	}
 }
 
+func TestUserBalanceAddMinuteBucket(t *testing.T) {
+	ub := &UserBalance{
+		Id:            "rif",
+		Type:          UB_TYPE_POSTPAID,
+		BalanceMap:    map[string]float64{SMS: 14, TRAFFIC: 1024},
+		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+	}
+	newMb := &MinuteBucket{Weight: 20, Price: 1, DestinationId: "NEW"}
+	ub.addMinuteBucket(newMb)
+	if len(ub.MinuteBuckets) != 3 || ub.MinuteBuckets[2] != newMb {
+		t.Error("Error adding minute bucket!")
+	}
+}
+
+func TestUserBalanceAddMinuteBucketExists(t *testing.T) {
+	ub := &UserBalance{
+		Id:            "rif",
+		Type:          UB_TYPE_POSTPAID,
+		BalanceMap:    map[string]float64{SMS: 14, TRAFFIC: 1024},
+		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 15, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+	}
+	newMb := &MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}
+	ub.addMinuteBucket(newMb)
+	if len(ub.MinuteBuckets) != 2 || ub.MinuteBuckets[0].Seconds != 25 {
+		t.Error("Error adding minute bucket!")
+	}
+}
+
 /*func TestResetUserBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
