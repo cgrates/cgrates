@@ -28,23 +28,7 @@ type UnitsCounter struct {
 	Direction     string
 	BalanceId     string
 	Units         float64
-	Weight        float64
 	MinuteBuckets []*MinuteBucket
-}
-
-// Structure to store actions according to weight
-type countersorter []*UnitsCounter
-
-func (s countersorter) Len() int {
-	return len(s)
-}
-
-func (s countersorter) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s countersorter) Less(i, j int) bool {
-	return s[i].Weight < s[j].Weight
 }
 
 // Adds the minutes from the received minute bucket to an existing bucket if the destination
@@ -73,7 +57,6 @@ func (uc *UnitsCounter) store() (result string) {
 	result += uc.Direction + "/"
 	result += uc.BalanceId + "/"
 	result += strconv.FormatFloat(uc.Units, 'f', -1, 64) + "/"
-	result += strconv.FormatFloat(uc.Weight, 'f', -1, 64) + "/"
 	for _, mb := range uc.MinuteBuckets {
 		result += mb.store() + ","
 	}
@@ -86,14 +69,13 @@ De-serializes the unit counter for the storage. Used for key-value storages.
 */
 func (uc *UnitsCounter) restore(input string) {
 	elements := strings.Split(input, "/")
-	if len(elements) != 5 {
+	if len(elements) != 4 {
 		return
 	}
 	uc.Direction = elements[0]
 	uc.BalanceId = elements[1]
 	uc.Units, _ = strconv.ParseFloat(elements[2], 64)
-	uc.Weight, _ = strconv.ParseFloat(elements[3], 64)
-	for _, mbs := range strings.Split(elements[4], ",") {
+	for _, mbs := range strings.Split(elements[3], ",") {
 		mb := &MinuteBucket{}
 		mb.restore(mbs)
 		uc.MinuteBuckets = append(uc.MinuteBuckets, mb)

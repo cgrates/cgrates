@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"sync"
@@ -109,12 +110,32 @@ func (ub *UserBalance) debitMoneyBalance(amount float64) float64 {
 
 // Debit seconds from specified minute bucket
 func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
+	if newMb == nil {
+		return errors.New("Nil minute bucket!")
+	}
+
+	found := false
 	for _, mb := range ub.MinuteBuckets {
 		if mb.Equal(newMb) {
 			mb.Seconds -= newMb.Seconds
+			found = true
+			break
 		}
 	}
+	// if it is not found and the Seconds are negative (topup)
+	// then we adde it to the list	
+	if !found && newMb.Seconds <= 0 {
+		newMb.Seconds = -newMb.Seconds
+		ub.MinuteBuckets = append(ub.MinuteBuckets, newMb)
+	}
 	return nil
+}
+
+// Adds the minutes from the received minute bucket to an existing bucket if the destination
+// is the same or ads the minute bucket to the list if none matches.
+func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
+	newMb.Seconds = -newMb.Seconds
+	ub.debitMinuteBucket(newMb)
 }
 
 /*
@@ -195,25 +216,6 @@ func (ub *UserBalance) debitTrafficTimeBalance(amount float64) (float64, error) 
 	return ub.BalanceMap[SMS], nil
 }
 
-// Adds the minutes from the received minute bucket to an existing bucket if the destination
-// is the same or ads the minutye bucket to the list if none matches.
-func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
-	if newMb == nil {
-		return
-	}
-	found := false
-	for _, mb := range ub.MinuteBuckets {
-		if mb.DestinationId == newMb.DestinationId {
-			mb.Seconds += newMb.Seconds
-			found = true
-			break
-		}
-	}
-	if !found {
-		ub.MinuteBuckets = append(ub.MinuteBuckets, newMb)
-	}
-}
-
 // Scans the action trigers and execute the actions for which trigger is met
 func (ub *UserBalance) executeActionTriggers() {
 	ub.ActionTriggers.Sort()
@@ -250,14 +252,19 @@ func (ub *UserBalance) resetActionTriggers() {
 	}
 }
 
-func (ub *UserBalance) countUnits(a *Action) {
-	var unitsCounter *UnitsCounter
+func (ub *UserBalance) getUnitCounter(a *Action) *UnitsCounter {
 	for _, uc := range ub.UnitCounters {
 		if uc.BalanceId == a.BalanceId {
-			unitsCounter = uc
-			break
+			return uc
 		}
 	}
+	return nil
+}
+
+// Increments the counter for the type specified in the received Action
+// with the actions values
+func (ub *UserBalance) countUnits(a *Action) {
+	unitsCounter := ub.getUnitCounter(a)
 	// if not found add the counter
 	if unitsCounter == nil {
 		unitsCounter = &UnitsCounter{BalanceId: a.BalanceId}

@@ -52,7 +52,6 @@ func TestUserBalanceStoreRestore(t *testing.T) {
 		Direction:     OUTBOUND,
 		BalanceId:     SMS,
 		Units:         100,
-		Weight:        10,
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
@@ -71,8 +70,8 @@ func TestUserBalanceStoreRestore(t *testing.T) {
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}
 	r := ub.store()
-	if string(r) != "rif|postpaid|SMS:14#INTERNET:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false" &&
-		string(r) != "rif|postpaid|INTERNET:1024#SMS:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false" {
+	if string(r) != "rif|postpaid|SMS:14#INTERNET:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false" &&
+		string(r) != "rif|postpaid|INTERNET:1024#SMS:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false#MONETARY;NAT;Commando;100;10;false" {
 		t.Errorf("Error serializing action timing: %v", string(r))
 	}
 	o := &UserBalance{}
@@ -313,7 +312,7 @@ func TestUserBalanceAddMinuteBucket(t *testing.T) {
 	newMb := &MinuteBucket{Weight: 20, Price: 1, DestinationId: "NEW"}
 	ub.addMinuteBucket(newMb)
 	if len(ub.MinuteBuckets) != 3 || ub.MinuteBuckets[2] != newMb {
-		t.Error("Error adding minute bucket!")
+		t.Error("Error adding minute bucket!", len(ub.MinuteBuckets), ub.MinuteBuckets)
 	}
 }
 

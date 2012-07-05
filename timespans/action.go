@@ -84,23 +84,43 @@ func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func topupResetAction(ub *UserBalance, a *Action) (err error) {
-	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]float64)
+	counter := ub.getUnitCounter(a)
+	if counter != nil {
+		if counter.BalanceId == MINUTES {
+			counter.MinuteBuckets = make([]*MinuteBucket, 0)
+		} else {
+			counter.Units = 0
+		}
 	}
-	ub.BalanceMap[a.BalanceId] = a.Units
+	genericMakeNegative(a)
+	genericDebit(ub, a)
 	return
 }
 
 func topupAction(ub *UserBalance, a *Action) (err error) {
-	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]float64)
-	}
-	ub.BalanceMap[a.BalanceId] += a.Units
-	ub.addMinuteBucket(a.MinuteBucket)
+	genericMakeNegative(a)
+	genericDebit(ub, a)
 	return
 }
 
 func debitAction(ub *UserBalance, a *Action) (err error) {
+	return genericDebit(ub, a)
+}
+
+func resetCountersAction(ub *UserBalance, a *Action) (err error) {
+	ub.UnitCounters = make([]*UnitsCounter, 0)
+	return
+}
+
+func genericMakeNegative(a *Action) {
+	a.Units = -a.Units
+	a.MinuteBucket.Seconds = -a.MinuteBucket.Seconds
+}
+
+func genericDebit(ub *UserBalance, a *Action) (err error) {
+	if ub.BalanceMap == nil {
+		ub.BalanceMap = make(map[string]float64)
+	}
 	switch a.ActionType {
 	case CREDIT:
 		ub.debitMoneyBalance(a.Units)
@@ -113,11 +133,6 @@ func debitAction(ub *UserBalance, a *Action) (err error) {
 	case TRAFFIC_TIME:
 		ub.debitTrafficTimeBalance(a.Units)
 	}
-	return
-}
-
-func resetCountersAction(ub *UserBalance, a *Action) (err error) {
-	ub.UnitCounters = make([]*UnitsCounter, 0)
 	return
 }
 

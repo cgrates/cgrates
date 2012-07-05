@@ -28,11 +28,10 @@ func TestUnitsCounterStoreRestore(t *testing.T) {
 		Direction:     OUTBOUND,
 		BalanceId:     SMS,
 		Units:         100,
-		Weight:        10,
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	r := uc.store()
-	if string(r) != "OUT/SMS/100/10/0;20;1;0;NAT,0;10;10;0;RET" {
+	if string(r) != "OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET" {
 		t.Errorf("Error serializing units counter: %v", string(r))
 	}
 	o := &UnitsCounter{}
@@ -47,7 +46,6 @@ func TestUnitsCounterAddMinuteBucket(t *testing.T) {
 		Direction:     OUTBOUND,
 		BalanceId:     SMS,
 		Units:         100,
-		Weight:        10,
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	newMb := &MinuteBucket{Weight: 20, Price: 1, DestinationId: "NEW"}
@@ -62,7 +60,6 @@ func TestUnitsCounterAddMinuteBucketExists(t *testing.T) {
 		Direction:     OUTBOUND,
 		BalanceId:     SMS,
 		Units:         100,
-		Weight:        10,
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	newMb := &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationId: "NAT"}
@@ -77,7 +74,6 @@ func TestUnitsCounterAddMinuteBucketNil(t *testing.T) {
 		Direction:     OUTBOUND,
 		BalanceId:     SMS,
 		Units:         100,
-		Weight:        10,
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	uc.addMinuteBucket(nil)
