@@ -191,11 +191,18 @@ func (atpl ActionTimingPriotityList) Swap(i, j int) {
 }
 
 func (atpl ActionTimingPriotityList) Less(i, j int) bool {
-	return atpl[i].GetNextStartTime().Before(atpl[j].GetNextStartTime()) || atpl[i].Weight < atpl[j].Weight
+	if atpl[i].GetNextStartTime().Equal(atpl[j].GetNextStartTime()) {
+		return atpl[i].Weight < atpl[j].Weight
+	}
+	return atpl[i].GetNextStartTime().Before(atpl[j].GetNextStartTime())
 }
 
 func (atpl ActionTimingPriotityList) Sort() {
 	sort.Sort(atpl)
+}
+
+func (at *ActionTiming) String() string {
+	return at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
 }
 
 /*

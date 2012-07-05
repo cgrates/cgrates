@@ -281,6 +281,53 @@ func TestActionTimingLogFunction(t *testing.T) {
 	}
 }
 
+func TestActionTimingPriotityList(t *testing.T) {
+	at1 := &ActionTiming{Timing: &Interval{
+		Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays: MonthDays{1},
+		StartTime: "00:00:00",
+		Weight:    20,
+	}}
+	at2 := &ActionTiming{Timing: &Interval{
+		Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays: MonthDays{2},
+		StartTime: "00:00:00",
+		Weight:    10,
+	}}
+	var atpl ActionTimingPriotityList
+	atpl = append(atpl, at2, at1)
+	t.Log(atpl)
+	atpl.Sort()
+	if atpl[0] != at1 || atpl[1] != at2 {
+		t.Error("Timing list not sorted correctly: ", atpl)
+	}
+}
+
+func TestActionTimingPriotityListWeight(t *testing.T) {
+	at1 := &ActionTiming{
+		Timing: &Interval{
+			Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+			MonthDays: MonthDays{1},
+			StartTime: "00:00:00",
+		},
+		Weight: 10.0,
+	}
+	at2 := &ActionTiming{
+		Timing: &Interval{
+			Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+			MonthDays: MonthDays{1},
+			StartTime: "00:00:00",
+		},
+		Weight: 20.0,
+	}
+	var atpl ActionTimingPriotityList
+	atpl = append(atpl, at2, at1)
+	atpl.Sort()
+	if atpl[0] != at1 || atpl[1] != at2 {
+		t.Error("Timing list not sorted correctly: ", atpl)
+	}
+}
+
 func TestActionTriggerPriotityList(t *testing.T) {
 	at1 := &ActionTrigger{Weight: 10}
 	at2 := &ActionTrigger{Weight: 20}
