@@ -47,6 +47,7 @@ type Responder struct {
 }
 
 func NewStorage(nsg timespans.StorageGetter) *Responder {
+	timespans.SetStorageGetter(nsg)
 	return &Responder{sg: nsg}
 }
 
@@ -55,7 +56,6 @@ RPC method providing the rating information from the storage.
 */
 func (s *Responder) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
 	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
 	r, e := descriptor.GetCost()
 	*reply, err = *r, e
 	return err
@@ -63,7 +63,6 @@ func (s *Responder) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCo
 
 func (s *Responder) DebitCents(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
 	r, e := descriptor.DebitCents()
 	*reply, err = r, e
 	return err
@@ -71,7 +70,6 @@ func (s *Responder) DebitCents(cd timespans.CallDescriptor, reply *float64) (err
 
 func (s *Responder) DebitSMS(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
 	r, e := descriptor.DebitSMS()
 	*reply, err = r, e
 	return err
@@ -79,7 +77,6 @@ func (s *Responder) DebitSMS(cd timespans.CallDescriptor, reply *float64) (err e
 
 func (s *Responder) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
 	e := descriptor.DebitSeconds()
 	*reply, err = 0.0, e
 	return err
@@ -87,43 +84,24 @@ func (s *Responder) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (e
 
 func (s *Responder) GetMaxSessionTime(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
 	r, e := descriptor.GetMaxSessionTime()
 	*reply, err = r, e
 	return err
 }
 
-func (s *Responder) AddVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
-	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
-	e := descriptor.AddVolumeDiscountSeconds()
-	*reply, err = 0, e
-	return err
-}
-
-func (s *Responder) ResetVolumeDiscountSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
-	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
-	e := descriptor.ResetVolumeDiscountSeconds()
-	*reply, err = 0, e
-	return err
-}
-
 func (s *Responder) AddRecievedCallSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
 	e := descriptor.AddRecievedCallSeconds()
 	*reply, err = 0, e
 	return err
 }
 
-func (s *Responder) ResetUserBudget(cd timespans.CallDescriptor, reply *float64) (err error) {
+/*func (s *Responder) ResetUserBudget(cd timespans.CallDescriptor, reply *float64) (err error) {
 	descriptor := &cd
-	descriptor.SetStorageGetter(s.sg)
 	e := descriptor.ResetUserBudget()
 	*reply, err = 0, e
 	return err
-}
+}*/
 
 func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err error) {
 	memstats := new(runtime.MemStats)

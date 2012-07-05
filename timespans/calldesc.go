@@ -403,23 +403,15 @@ in the user's tariff plan is reached then the received call balance is reseted a
 specified in the tariff plan is applied.
 The amount filed has to be filled in call descriptor.
 */
-// func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
-// userBalancesRWMutex.Lock()
-// defer userBalancesRWMutex.Unlock()
-// 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-// 		return userBalance.addReceivedCallSeconds(INBOUND, cd.TOR, cd.Destination, cd.Amount)
-// 	}
-// 	return err
-// }
-
-/*
-Resets user balances value to the amounts specified in the tariff plan.
-*/
-/*func (cd *CallDescriptor) ResetUserBalance() (err error) {
+func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 	userBalancesRWMutex.Lock()
 	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		return userBalance.resetUserBalance()
+		a := &Action{
+			MinuteBucket: &MinuteBucket{Seconds: cd.Amount, DestinationId: cd.Destination},
+		}
+		userBalance.countUnits(a)
+		return nil
 	}
 	return err
-}*/
+}
