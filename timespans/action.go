@@ -84,13 +84,10 @@ func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func topupResetAction(ub *UserBalance, a *Action) (err error) {
-	counter := ub.getUnitCounter(a)
-	if counter != nil {
-		if counter.BalanceId == MINUTES {
-			counter.MinuteBuckets = make([]*MinuteBucket, 0)
-		} else {
-			counter.Units = 0
-		}
+	if a.BalanceId == MINUTES {
+		ub.MinuteBuckets = make([]*MinuteBucket, 0)
+	} else {
+		ub.BalanceMap[a.BalanceId] = 0
 	}
 	genericMakeNegative(a)
 	genericDebit(ub, a)

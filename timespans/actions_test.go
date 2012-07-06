@@ -27,20 +27,6 @@ import (
 func init() {
 	storageGetter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	SetStorageGetter(storageGetter)
-	populateTestActions()
-}
-
-func populateTestActions() {
-	/*ats := []*Action{
-		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Units: 10},
-		&Action{ActionType: "TOPUP", BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 10, DestinationId: "NAT"}},
-	}
-	storageGetter.SetActions("TEST_ACTIONS", ats)
-	ats1 := []*Action{
-		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Units: 10, Weight: 20},
-		&Action{ActionType: "RESET_PREPAID", Weight: 10},
-	}
-	storageGetter.SetActions("TEST_ACTIONS_ORDER", ats1)*/
 }
 
 func TestActionTimingStoreRestore(t *testing.T) {
@@ -356,5 +342,240 @@ func TestActionTriggerPriotityList(t *testing.T) {
 	atpl.Sort()
 	if atpl[0] != at1 || atpl[2] != at3 || atpl[1] != at2 {
 		t.Error("List not sorted: ", atpl)
+	}
+}
+
+/*func TestActionLog(t *testing.T) {
+	a := &Action{
+		ActionType:   "TEST",
+		BalanceId:    "BALANCE",
+		Units:        10,
+		Weight:       11,
+		MinuteBucket: &MinuteBucket{},
+	}
+	logAction(nil, a)
+}*/
+
+func TestActionResetTriggres(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	resetTriggersAction(ub, nil)
+	if ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
+		t.Error("Reset triggers action failed!")
+	}
+}
+
+func TestActionSetPostpaid(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_PREPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	setPostpaidAction(ub, nil)
+	if ub.Type != UB_TYPE_POSTPAID {
+		t.Error("Set postpaid action failed!")
+	}
+}
+
+func TestActionSetPrepaid(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_POSTPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	setPrepaidAction(ub, nil)
+	if ub.Type != UB_TYPE_PREPAID {
+		t.Error("Set prepaid action failed!")
+	}
+}
+
+func TestActionResetPrepaid(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_POSTPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	resetPrepaidAction(ub, nil)
+	if ub.Type != UB_TYPE_PREPAID ||
+		ub.BalanceMap[CREDIT] != 0 ||
+		len(ub.UnitCounters) != 0 ||
+		len(ub.MinuteBuckets) != 0 ||
+		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
+		t.Error("Reset prepaid action failed!")
+	}
+}
+
+func TestActionResetPostpaid(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_PREPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	resetPostpaidAction(ub, nil)
+	if ub.Type != UB_TYPE_POSTPAID ||
+		ub.BalanceMap[CREDIT] != 0 ||
+		len(ub.UnitCounters) != 0 ||
+		len(ub.MinuteBuckets) != 0 ||
+		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
+		t.Error("Reset postpaid action failed!")
+	}
+}
+
+func TestActionTopupResetCredit(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_PREPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	a := &Action{BalanceId: CREDIT, Units: 10}
+	topupResetAction(ub, a)
+	if ub.Type != UB_TYPE_PREPAID ||
+		ub.BalanceMap[CREDIT] != 10 ||
+		len(ub.UnitCounters) != 1 ||
+		len(ub.MinuteBuckets) != 2 ||
+		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
+		t.Error("Topup reset action failed!", ub)
+	}
+}
+
+func TestActionTopupResetMinutes(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_PREPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	a := &Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationId: "NAT"}}
+	topupResetAction(ub, a)
+	if ub.Type != UB_TYPE_PREPAID ||
+		ub.MinuteBuckets[0].Seconds != 5 ||
+		ub.BalanceMap[CREDIT] != 100 ||
+		len(ub.UnitCounters) != 1 ||
+		len(ub.MinuteBuckets) != 1 ||
+		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
+		t.Error("Topup reset minutes action failed!", ub.MinuteBuckets[0])
+	}
+}
+
+func TestActionTopupCredit(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_PREPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	a := &Action{BalanceId: CREDIT, Units: 10}
+	topupAction(ub, a)
+	if ub.Type != UB_TYPE_PREPAID ||
+		ub.BalanceMap[CREDIT] != 110 ||
+		len(ub.UnitCounters) != 1 ||
+		len(ub.MinuteBuckets) != 2 ||
+		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
+		t.Error("Topup action failed!", ub)
+	}
+}
+
+func TestActionTopupMinutes(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_PREPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	a := &Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationId: "NAT"}}
+	topupAction(ub, a)
+	if ub.Type != UB_TYPE_PREPAID ||
+		ub.MinuteBuckets[0].Seconds != 15 ||
+		ub.BalanceMap[CREDIT] != 100 ||
+		len(ub.UnitCounters) != 1 ||
+		len(ub.MinuteBuckets) != 2 ||
+		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
+		t.Error("Topup minutes action failed!", ub.MinuteBuckets[0])
+	}
+}
+
+func TestActionDebitCredit(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_PREPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	a := &Action{BalanceId: CREDIT, Units: 10}
+	debitAction(ub, a)
+	if ub.Type != UB_TYPE_PREPAID ||
+		ub.BalanceMap[CREDIT] != 90 ||
+		len(ub.UnitCounters) != 1 ||
+		len(ub.MinuteBuckets) != 2 ||
+		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
+		t.Error("Debit action failed!", ub)
+	}
+}
+
+func TestActionDebitMinutes(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_PREPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	a := &Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationId: "NAT"}}
+	debitAction(ub, a)
+	if ub.Type != UB_TYPE_PREPAID ||
+		ub.MinuteBuckets[0].Seconds != 5 ||
+		ub.BalanceMap[CREDIT] != 100 ||
+		len(ub.UnitCounters) != 1 ||
+		len(ub.MinuteBuckets) != 2 ||
+		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
+		t.Error("Debit minutes action failed!", ub.MinuteBuckets[0])
+	}
+}
+
+func TestActionResetCounters(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_POSTPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	resetCountersAction(ub, nil)
+	if ub.Type != UB_TYPE_POSTPAID ||
+		ub.BalanceMap[CREDIT] != 100 ||
+		len(ub.UnitCounters) != 0 ||
+		len(ub.MinuteBuckets) != 2 ||
+		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
+		t.Error("Reset counters action failed!")
 	}
 }
