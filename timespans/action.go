@@ -114,14 +114,16 @@ func resetCountersAction(ub *UserBalance, a *Action) (err error) {
 
 func genericMakeNegative(a *Action) {
 	a.Units = -a.Units
-	a.MinuteBucket.Seconds = -a.MinuteBucket.Seconds
+	if a.MinuteBucket != nil {
+		a.MinuteBucket.Seconds = -a.MinuteBucket.Seconds
+	}
 }
 
 func genericDebit(ub *UserBalance, a *Action) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]float64)
 	}
-	switch a.ActionType {
+	switch a.BalanceId {
 	case CREDIT:
 		ub.debitMoneyBalance(a.Units)
 	case SMS:

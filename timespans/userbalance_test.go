@@ -31,13 +31,13 @@ var (
 func init() {
 	storageGetter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
 	SetStorageGetter(storageGetter)
-	populateTestActions()
+	populateTestActionsForTriggers()
 }
 
-func populateTestActions() {
+func populateTestActionsForTriggers() {
 	ats := []*Action{
 		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Units: 10},
-		&Action{ActionType: "TOPUP", BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 10, DestinationId: "NAT"}},
+		&Action{ActionType: "TOPUP", BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Weight: 20, Price: 1, Seconds: 10, DestinationId: "NAT"}},
 	}
 	storageGetter.SetActions("TEST_ACTIONS", ats)
 	ats1 := []*Action{

@@ -24,6 +24,25 @@ import (
 	"time"
 )
 
+func init() {
+	storageGetter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	SetStorageGetter(storageGetter)
+	populateTestActions()
+}
+
+func populateTestActions() {
+	/*ats := []*Action{
+		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Units: 10},
+		&Action{ActionType: "TOPUP", BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 10, DestinationId: "NAT"}},
+	}
+	storageGetter.SetActions("TEST_ACTIONS", ats)
+	ats1 := []*Action{
+		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Units: 10, Weight: 20},
+		&Action{ActionType: "RESET_PREPAID", Weight: 10},
+	}
+	storageGetter.SetActions("TEST_ACTIONS_ORDER", ats1)*/
+}
+
 func TestActionTimingStoreRestore(t *testing.T) {
 	i := &Interval{
 		Months:      Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},

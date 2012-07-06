@@ -104,7 +104,6 @@ Debits some amount of user's money credit. Returns the remaining credit in user'
 */
 func (ub *UserBalance) debitMoneyBalance(amount float64) float64 {
 	ub.BalanceMap[CREDIT] -= amount
-
 	return ub.BalanceMap[CREDIT]
 }
 
@@ -113,7 +112,6 @@ func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
 	if newMb == nil {
 		return errors.New("Nil minute bucket!")
 	}
-
 	found := false
 	for _, mb := range ub.MinuteBuckets {
 		if mb.Equal(newMb) {
@@ -123,7 +121,7 @@ func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
 		}
 	}
 	// if it is not found and the Seconds are negative (topup)
-	// then we adde it to the list	
+	// then we add it to the list	
 	if !found && newMb.Seconds <= 0 {
 		newMb.Seconds = -newMb.Seconds
 		ub.MinuteBuckets = append(ub.MinuteBuckets, newMb)
@@ -133,9 +131,12 @@ func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
 
 // Adds the minutes from the received minute bucket to an existing bucket if the destination
 // is the same or ads the minute bucket to the list if none matches.
-func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) {
+func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) error {
+	if newMb == nil {
+		return errors.New("Nil minute bucket!")
+	}
 	newMb.Seconds = -newMb.Seconds
-	ub.debitMinuteBucket(newMb)
+	return ub.debitMinuteBucket(newMb)
 }
 
 /*
