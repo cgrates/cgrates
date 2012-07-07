@@ -43,6 +43,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not connect to balancer: %v", err)
 	}
+	start := time.Now()
 	if *parallel {
 		var divCall *rpc.Call
 		for i := 0; i < *runs; i++ {
@@ -54,6 +55,8 @@ func main() {
 			client.Call("Responder.GetCost", cd, &result)
 		}
 	}
+	duration := time.Since(start)
 	log.Println(result)
 	client.Close()
+	log.Printf("Elapsed: %v resulted: %v req/s.", duration, float64(*runs)/duration.Seconds())
 }

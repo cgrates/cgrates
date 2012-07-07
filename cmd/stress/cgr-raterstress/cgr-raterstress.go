@@ -36,12 +36,15 @@ func main() {
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := timespans.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	result := timespans.CallCost{}
-	client, _ := jsonrpc.Dial("tcp", "localhost:5090")
+	client, _ := jsonrpc.Dial("tcp", "localhost:1234")
 	i := 0
+	start := time.Now()
 	for j := 0; j < *runs; j++ {
-		client.Call("Storage.GetCost", cd, &result)
+		client.Call("Responder.GetCost", cd, &result)
 	}
+	duration := time.Since(start)
 	log.Println(result)
 	log.Println(i)
+	log.Printf("Elapsed: %v resulted: %v req/s.", duration, float64(*runs)/duration.Seconds())
 	client.Close()
 }

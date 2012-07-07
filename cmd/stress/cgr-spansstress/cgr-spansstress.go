@@ -58,15 +58,16 @@ func main() {
 	log.Printf("Runnning %d cycles...", *runs)
 	var result *timespans.CallCost
 	j := 0
-
+	start := time.Now()
 	for i := 0; i < *runs; i++ {
 		result, err = cd.GetCost()
 		j = i
 	}
-
+	duration := time.Since(start)
 	log.Print(result, j, err)
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	log.Printf("memstats before GC: Kbytes = %d footprint = %d",
 		memstats.HeapAlloc/1024, memstats.Sys/1024)
+	log.Printf("Elapsed: %v resulted: %v req/s.", duration, float64(*runs)/duration.Seconds())
 }
