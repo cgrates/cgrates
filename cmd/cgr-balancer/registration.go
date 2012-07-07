@@ -56,7 +56,7 @@ func StopSingnalHandler() {
 /*
 RPC method that receives a rater address, connects to it and ads the pair to the rater list for balancing
 */
-func (rs *RaterServer) RegisterRater(clientAddress string, replay *byte) error {
+func (rs *RaterServer) RegisterRater(clientAddress string, replay *int) error {
 	log.Printf("Started rater %v registration...", clientAddress)
 	time.Sleep(2 * time.Second) // wait a second for Rater to start serving
 	client, err := rpc.Dial("tcp", clientAddress)
@@ -72,7 +72,7 @@ func (rs *RaterServer) RegisterRater(clientAddress string, replay *byte) error {
 /*
 RPC method that recives a rater addres gets the connections and closes it and removes the pair from rater list.
 */
-func (rs *RaterServer) UnRegisterRater(clientAddress string, replay *byte) error {
+func (rs *RaterServer) UnRegisterRater(clientAddress string, replay *int) error {
 	client, ok := bal.GetClient(clientAddress)
 	if ok {
 		client.Close()

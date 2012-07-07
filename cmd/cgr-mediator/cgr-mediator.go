@@ -46,8 +46,7 @@ func readDbRecord(db *sql.DB, searchedUUID string) (cc *timespans.CallCost, time
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s'", searchedUUID))
 	var uuid string
 	cc = &timespans.CallCost{}
-	err = row.Scan(&uuid, &cc.TOR, &cc.CstmId, &cc.Subject, &cc.DestinationPrefix, &cc.Cost, &cc.ConnectFee, &timespansText)
-
+	err = row.Scan(&uuid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansText)
 	return
 }
 
@@ -80,18 +79,20 @@ func main() {
 			cc, timespansText, err := readDbRecord(db, uuid)
 			if err != nil && useRPC {
 				// try getting the price from the rater
-				cstmid := record[0]
+
+				tenant := record[0]
 				subject := record[1]
 				dest := record[2]
 				t1, _ := time.Parse("2012-05-21 17:48:20", record[5])
 				t2, _ := time.Parse("2012-05-21 17:48:20", record[6])
 				cd := timespans.CallDescriptor{
-					TOR:               "0",
-					CstmId:            cstmid,
-					Subject:           subject,
-					DestinationPrefix: dest,
-					TimeStart:         t1,
-					TimeEnd:           t2}
+					Direction:   "OUT",
+					Tenant:      tenant,
+					TOR:         "0",
+					Subject:     subject,
+					Destination: dest,
+					TimeStart:   t1,
+					TimeEnd:     t2}
 				client.Call("Responder.GetCost", cd, cc)
 			}
 			_ = timespansText

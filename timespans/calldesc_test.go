@@ -25,7 +25,7 @@ import (
 )
 
 func init() {
-	storageGetter, _ = NewRedisStorage("tcp:127.0.0.1:6379", 10)
+	storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 10)
 	SetStorageGetter(storageGetter)
 	populateDB()
 }

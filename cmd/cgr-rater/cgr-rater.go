@@ -38,7 +38,7 @@ var (
 	redissrv       = flag.String("redissrv", "127.0.0.1:6379", "redis address host:port")
 	redisdb        = flag.Int("redisdb", 10, "redis database number")
 	listen         = flag.String("listen", "127.0.0.1:1234", "listening address host:port")
-	standalone     = flag.Bool("standalone", false, "start standalone server (no balancer), and use json for rpc encoding")
+	standalone     = flag.Bool("standalone", false, "start standalone server (no balancer), and use JSON for RPC encoding")
 	storage        Responder
 )
 
@@ -47,7 +47,6 @@ type Responder struct {
 }
 
 func NewStorage(nsg timespans.StorageGetter) *Responder {
-	timespans.SetStorageGetter(nsg)
 	return &Responder{sg: nsg}
 }
 
@@ -55,43 +54,37 @@ func NewStorage(nsg timespans.StorageGetter) *Responder {
 RPC method providing the rating information from the storage.
 */
 func (s *Responder) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
-	descriptor := &cd
-	r, e := descriptor.GetCost()
+	r, e := (&cd).GetCost()
 	*reply, err = *r, e
 	return err
 }
 
 func (s *Responder) DebitCents(cd timespans.CallDescriptor, reply *float64) (err error) {
-	descriptor := &cd
-	r, e := descriptor.DebitCents()
+	r, e := (&cd).DebitCents()
 	*reply, err = r, e
 	return err
 }
 
 func (s *Responder) DebitSMS(cd timespans.CallDescriptor, reply *float64) (err error) {
-	descriptor := &cd
-	r, e := descriptor.DebitSMS()
+	r, e := (&cd).DebitSMS()
 	*reply, err = r, e
 	return err
 }
 
 func (s *Responder) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
-	descriptor := &cd
-	e := descriptor.DebitSeconds()
+	e := (&cd).DebitSeconds()
 	*reply, err = 0.0, e
 	return err
 }
 
 func (s *Responder) GetMaxSessionTime(cd timespans.CallDescriptor, reply *float64) (err error) {
-	descriptor := &cd
-	r, e := descriptor.GetMaxSessionTime()
+	r, e := (&cd).GetMaxSessionTime()
 	*reply, err = r, e
 	return err
 }
 
 func (s *Responder) AddRecievedCallSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
-	descriptor := &cd
-	e := descriptor.AddRecievedCallSeconds()
+	e := (&cd).AddRecievedCallSeconds()
 	*reply, err = 0, e
 	return err
 }
@@ -125,6 +118,7 @@ func main() {
 	//getter, err := timespans.NewKyotoStorage("storage.kch")
 	getter, err := timespans.NewRedisStorage(*redissrv, *redisdb)
 	defer getter.Close()
+	timespans.SetStorageGetter(getter)
 	if err != nil {
 		log.Fatalf("Cannot open storage: %v", err)
 	}
@@ -153,8 +147,8 @@ func main() {
 	}
 	log.Print("listening on: ", l.Addr())
 	rpc.Register(NewStorage(getter))
+	log.Print("waiting for connections ...")
 	for {
-		log.Print("waiting for connections ...")
 		conn, err := l.Accept()
 		if err != nil {
 			log.Printf("accept error: %s", conn)
@@ -162,10 +156,10 @@ func main() {
 		}
 		log.Printf("connection started: %v", conn.RemoteAddr())
 		if *standalone {
-			log.Print("json encoding")
+			// log.Print("json encoding")
 			go jsonrpc.ServeConn(conn)
 		} else {
-			log.Print("gob encoding")
+			// log.Print("gob encoding")
 			go rpc.ServeConn(conn)
 		}
 

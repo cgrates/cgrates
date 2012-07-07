@@ -67,7 +67,7 @@ func (r *Responder) AddVolumeDiscountSeconds(arg timespans.CallDescriptor, repla
 	return
 }
 
-func (r *Responder) ResetVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
+/*func (r *Responder) ResetVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay = CallMethod(&arg, "Responder.ResetVolumeDiscountSeconds")
 	return
 }
@@ -80,7 +80,7 @@ func (r *Responder) AddRecievedCallSeconds(arg timespans.CallDescriptor, replay 
 func (r *Responder) ResetUserBudget(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay = CallMethod(&arg, "Responder.ResetUserBudget")
 	return
-}
+}*/
 
 func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err error) {
 	memstats := new(runtime.MemStats)

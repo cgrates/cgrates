@@ -124,7 +124,6 @@ func main() {
 		if err = client.Call("Responder.Status", cd, &result); err == nil {
 			fmt.Println(result)
 		}
-
 	default:
 		fmt.Println("List of commands:")
 		fmt.Println("\tgetcost")
@@ -137,6 +136,7 @@ func main() {
 		fmt.Println("\taddrecievedcallseconds")
 		fmt.Println("\tresetuserbudget")
 		fmt.Println("\tstatus")
+		flag.PrintDefaults()
 	}
 	if err != nil {
 		log.Print(err)

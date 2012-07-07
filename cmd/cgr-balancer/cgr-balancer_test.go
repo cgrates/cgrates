@@ -36,7 +36,7 @@ func BenchmarkRPCGet(b *testing.B) {
 func TestRPCGet(t *testing.T) {
 	client, err := rpc.DialHTTPPath("tcp", "localhost:2000", "/rpc")
 	if err != nil {
-		t.Error("Inquirer server not started!")
+		t.Error("Balancer server not started!")
 		t.FailNow()
 	}
 	var reply string

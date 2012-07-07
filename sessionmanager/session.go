@@ -48,8 +48,8 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	}
 	cd := &timespans.CallDescriptor{
 		Direction:   ev.GetDirection(),
-		TOR:         ev.GetTOR(),
 		Tenant:      ev.GetTenant(),
+		TOR:         ev.GetTOR(),
 		Subject:     ev.GetSubject(),
 		Destination: ev.GetDestination(),
 		TimeStart:   startTime}

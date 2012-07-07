@@ -99,7 +99,7 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnHeartBeat(ev)
 	} else {
-		log.Print("heartbeat")
+		log.Print("♥")
 	}
 }
 

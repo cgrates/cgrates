@@ -50,8 +50,9 @@ func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
 	}
 	_, err = psl.db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
-		cc.TOR,
+		cc.Destination,
 		cc.Tenant,
+		cc.TOR,
 		cc.Subject,
 		cc.Destination,
 		cc.Cost,

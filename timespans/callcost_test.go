@@ -25,7 +25,7 @@ import (
 )
 
 func init() {
-	sg, _ := NewRedixStorage("tcp:127.0.0.1:6379", 10)
+	sg, _ := NewRedixStorage("127.0.0.1:6379", 10)
 	SetStorageGetter(sg)
 }
 

@@ -33,7 +33,7 @@ type RedisStorage struct {
 }
 
 func NewRedisStorage(address string, db int) (*RedisStorage, error) {
-	ndb := godis.New(address, db, "")
+	ndb := godis.New("tcp:"+address, db, "")
 	ms := &MyMarshaler{}
 	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
 }

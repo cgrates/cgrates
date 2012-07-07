@@ -100,8 +100,9 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 	}
 	if cost > 0 {
 		cd := &timespans.CallDescriptor{
-			TOR:         lastCC.TOR,
+			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
+			TOR:         lastCC.TOR,
 			Subject:     lastCC.Subject,
 			Destination: lastCC.Destination,
 			Amount:      -cost,
@@ -110,8 +111,9 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 	}
 	if seconds > 0 {
 		cd := &timespans.CallDescriptor{
-			TOR:         lastCC.TOR,
+			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
+			TOR:         lastCC.TOR,
 			Subject:     lastCC.Subject,
 			Destination: lastCC.Destination,
 			Amount:      -seconds,
@@ -175,7 +177,7 @@ func (rsd *RPCSessionDelegate) getClient() *rpc.Client {
 }
 
 func (rsd *RPCSessionDelegate) OnHeartBeat(ev Event) {
-	log.Print("rpc hearbeat")
+	log.Print("rpc ♥")
 }
 
 func (rsd *RPCSessionDelegate) OnChannelAnswer(ev Event, s *Session) {
@@ -221,8 +223,9 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	}
 	if cost > 0 {
 		cd := &timespans.CallDescriptor{
-			TOR:         lastCC.TOR,
+			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
+			TOR:         lastCC.TOR,
 			Subject:     lastCC.Subject,
 			Destination: lastCC.Destination,
 			Amount:      -cost,

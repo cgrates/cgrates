@@ -247,7 +247,6 @@ Creates a CallCost structure with the cost information calculated for the receiv
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	destPrefix, err := cd.SearchStorageForPrefix()
-
 	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 	connectionFee := 0.0
@@ -264,7 +263,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Cost:        cost,
 		ConnectFee:  connectionFee,
 		Timespans:   timespans}
-
 	return cc, err
 }
 
