@@ -267,23 +267,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 }
 
 /*
-Returns the cost of a second in the present time conditions.
-*/
-func (cd *CallDescriptor) getPresentSecondCost() (cost float64, err error) {
-	// TODO: remove this method if if not still used
-	_, err = cd.SearchStorageForPrefix()
-	now := time.Now()
-	oneSecond, _ := time.ParseDuration("1s")
-	ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(oneSecond)}
-	timespans := cd.splitTimeSpan(ts)
-
-	if len(timespans) > 0 {
-		cost = round(timespans[0].getCost(cd), 3)
-	}
-	return
-}
-
-/*
 Returns the approximate max allowed session for user balance. It will try the max amount received in the call descriptor 
 and will decrease it by 10% for nine times. So if the user has little credit it will still allow 10% of the initial amount.
 If the user has no credit then it will return 0.
@@ -307,6 +290,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	if availableCredit == 0 {
 		return availableSeconds, nil
 	}
+
 	maxSessionSeconds := cd.Amount
 	for i := 0; i < 10; i++ {
 		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds-availableSeconds))

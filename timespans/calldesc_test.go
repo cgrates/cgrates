@@ -35,7 +35,7 @@ func populateDB() {
 		Id:   "OUT:vdf:minu",
 		Type: UB_TYPE_PREPAID,
 		BalanceMap: map[string]float64{
-			CREDIT: 21,
+			CREDIT: 0,
 		},
 		MinuteBuckets: []*MinuteBucket{
 			&MinuteBucket{Seconds: 200, DestinationId: "NAT", Weight: 10},
@@ -144,20 +144,6 @@ func TestUniquePrice(t *testing.T) {
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0723", Cost: 1810.5, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
-		t.Errorf("Expected %v was %v", expected, result)
-	}
-}
-
-func TestPresentSecodCost(t *testing.T) {
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723"}
-	result, _ := cd.getPresentSecondCost()
-	expected := 1.0
-	now := time.Now()
-	after18 := time.Date(now.Year(), now.Month(), now.Day(), 18, 0, 0, 1, now.Location())
-	if now.After(after18) {
-		expected = 0.5
-	}
-	if result != expected {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
