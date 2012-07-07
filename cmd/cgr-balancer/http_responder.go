@@ -30,107 +30,117 @@ type IncorrectParameters struct {
 }
 
 /*
-curl "http://127.0.0.1:8000/getcost?tenant=vdf&subj=rif&dest=0257"
+curl "http://127.0.0.1:8000/getcost?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257"
 */
 func getCostHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	tenant, ok1 := r.Form["tenant"]
-	subj, ok2 := r.Form["subj"]
-	dest, ok3 := r.Form["dest"]
-	if !ok1 || !ok2 || !ok3 {
+	direction, ok1 := r.Form["direction"]
+	tenant, ok2 := r.Form["tenant"]
+	tor, ok3 := r.Form["tor"]
+	subj, ok4 := r.Form["subj"]
+	dest, ok5 := r.Form["dest"]
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0]}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0]}
 	callCost := GetCallCost(arg, "Responder.GetCost")
 	enc.Encode(callCost)
 }
 
 /*
-curl "http://127.0.0.1:8000/debitbalance?tenant=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/debitbalance?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257@amount=100"
 */
 func debitBalanceHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	tenant, ok1 := r.Form["tenant"]
-	subj, ok2 := r.Form["subj"]
-	dest, ok3 := r.Form["dest"]
-	amount_s, ok4 := r.Form["amount"]
+	direction, ok1 := r.Form["direction"]
+	tenant, ok2 := r.Form["tenant"]
+	tor, ok3 := r.Form["tor"]
+	subj, ok4 := r.Form["subj"]
+	dest, ok5 := r.Form["dest"]
+	amount_s, ok6 := r.Form["amount"]
 	amount, err := strconv.ParseFloat(amount_s[0], 64)
-	if !ok1 || !ok2 || !ok3 || ok4 || err != nil {
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 || err != nil {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.DebitCents")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/debitsms?tenant=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/debitsms?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257@amount=100"
 */
 func debitSMSHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	tenant, ok1 := r.Form["tenant"]
-	subj, ok2 := r.Form["subj"]
-	dest, ok3 := r.Form["dest"]
-	amount_s, ok4 := r.Form["amount"]
+	direction, ok1 := r.Form["direction"]
+	tenant, ok2 := r.Form["tenant"]
+	tor, ok3 := r.Form["tor"]
+	subj, ok4 := r.Form["subj"]
+	dest, ok5 := r.Form["dest"]
+	amount_s, ok6 := r.Form["amount"]
 	amount, err := strconv.ParseFloat(amount_s[0], 64)
-	if !ok1 || !ok2 || !ok3 || !ok4 || err != nil {
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 || err != nil {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.DebitSMS")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/debitseconds?tenant=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/debitseconds?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257@amount=100"
 */
 func debitSecondsHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	tenant, ok1 := r.Form["tenant"]
-	subj, ok2 := r.Form["subj"]
-	dest, ok3 := r.Form["dest"]
-	amount_s, ok4 := r.Form["amount"]
+	direction, ok1 := r.Form["direction"]
+	tenant, ok2 := r.Form["tenant"]
+	tor, ok3 := r.Form["tor"]
+	subj, ok4 := r.Form["subj"]
+	dest, ok5 := r.Form["dest"]
+	amount_s, ok6 := r.Form["amount"]
 	amount, err := strconv.ParseFloat(amount_s[0], 64)
-	if !ok1 || !ok2 || !ok3 || !ok4 || err != nil {
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 || err != nil {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.DebitSeconds")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/getmaxsessiontime?tenant=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/getmaxsessiontime?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257@amount=100"
 */
 func getMaxSessionTimeHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	tenant, ok1 := r.Form["tenant"]
-	subj, ok2 := r.Form["subj"]
-	dest, ok3 := r.Form["dest"]
-	amount_s, ok4 := r.Form["amount"]
+	direction, ok1 := r.Form["direction"]
+	tenant, ok2 := r.Form["tenant"]
+	tor, ok3 := r.Form["tor"]
+	subj, ok4 := r.Form["subj"]
+	dest, ok5 := r.Form["dest"]
+	amount_s, ok6 := r.Form["amount"]
 	amount, err := strconv.ParseFloat(amount_s[0], 64)
-	if !ok1 || !ok2 || !ok3 || !ok4 || err != nil {
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 || err != nil {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.GetMaxSessionTime")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/addvolumediscountseconds?tenant=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/addvolumediscountseconds?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257@amount=100"
 */
-func addVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
+/*func addVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
 	tenant, ok1 := r.Form["tenant"]
@@ -142,15 +152,15 @@ func addVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.AddVolumeDiscountSeconds")
 	enc.Encode(result)
-}
+}*/
 
 /*
-curl "http://127.0.0.1:8000/resetvolumediscountseconds?tenant=vdf&subj=rif&dest=0257"
+curl "http://127.0.0.1:8000/resetvolumediscountseconds?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257"
 */
-func resetVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
+/*func resetVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
 	tenant, ok1 := r.Form["tenant"]
@@ -160,35 +170,37 @@ func resetVolumeDiscountSeconds(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0]}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0]}
 	result := CallMethod(arg, "Responder.ResetVolumeDiscountSeconds")
 	enc.Encode(result)
-}
+}*/
 
 /*
-curl "http://127.0.0.1:8000/addrecievedcallseconds?tenant=vdf&subj=rif&dest=0257@amount=100"
+curl "http://127.0.0.1:8000/addrecievedcallseconds?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257@amount=100"
 */
 func addRecievedCallSeconds(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
-	tenant, ok1 := r.Form["tenant"]
-	subj, ok2 := r.Form["subj"]
-	dest, ok3 := r.Form["dest"]
-	amount_s, ok4 := r.Form["amount"]
+	direction, ok1 := r.Form["direction"]
+	tenant, ok2 := r.Form["tenant"]
+	tor, ok3 := r.Form["tor"]
+	subj, ok4 := r.Form["subj"]
+	dest, ok5 := r.Form["dest"]
+	amount_s, ok6 := r.Form["amount"]
 	amount, err := strconv.ParseFloat(amount_s[0], 64)
-	if !ok1 || !ok2 || !ok3 || !ok4 || err != nil {
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 || err != nil {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0], Amount: amount}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
 	result := CallMethod(arg, "Responder.AddRecievedCallSeconds")
 	enc.Encode(result)
 }
 
 /*
-curl "http://127.0.0.1:8000/resetuserbudget?tenant=vdf&subj=rif&dest=0257"
+curl "http://127.0.0.1:8000/resetuserbudget?direction=out&tenant=vdf&tor=0&subj=rif&dest=0257"
 */
-func resetUserBudget(w http.ResponseWriter, r *http.Request) {
+/*func resetUserBudget(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	r.ParseForm()
 	tenant, ok1 := r.Form["tenant"]
@@ -198,10 +210,10 @@ func resetUserBudget(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(IncorrectParameters{"Incorrect parameters"})
 		return
 	}
-	arg := &timespans.CallDescriptor{Tenant: tenant[0], Subject: subj[0], Destination: dest[0]}
+	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0]}
 	result := CallMethod(arg, "Responder.ResetUserBudget")
 	enc.Encode(result)
-}
+}*/
 
 func listenToHttpRequests() {
 	http.Handle("/static/", http.FileServer(http.Dir("")))
@@ -210,10 +222,10 @@ func listenToHttpRequests() {
 	http.HandleFunc("/debitsms", debitSMSHandler)
 	http.HandleFunc("/debitseconds", debitSecondsHandler)
 	http.HandleFunc("/getmaxsessiontime", debitSecondsHandler)
-	http.HandleFunc("/addvolumediscountseconds", addVolumeDiscountSeconds)
-	http.HandleFunc("/resetvolumediscountseconds", resetVolumeDiscountSeconds)
+	// http.HandleFunc("/addvolumediscountseconds", addVolumeDiscountSeconds)
+	// http.HandleFunc("/resetvolumediscountseconds", resetVolumeDiscountSeconds)
 	http.HandleFunc("/addrecievedcallseconds", addRecievedCallSeconds)
-	http.HandleFunc("/resetuserbudget", resetUserBudget)
+	// http.HandleFunc("/resetuserbudget", resetUserBudget)
 	http.HandleFunc("/", statusHandler)
 	http.HandleFunc("/getmem", memoryHandler)
 	http.HandleFunc("/raters", ratersHandler)

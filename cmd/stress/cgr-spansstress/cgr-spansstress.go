@@ -30,6 +30,7 @@ import (
 
 var (
 	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+	memprofile = flag.String("memprofile", "", "write memory profile to this file")
 	runs       = flag.Int("runs", 10000, "stress cycle number")
 )
 
@@ -45,7 +46,15 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-
+	if *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.WriteHeapProfile(f)
+		f.Close()
+		return
+	}
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := timespans.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
