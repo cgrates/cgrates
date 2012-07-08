@@ -21,6 +21,7 @@ package main
 import (
 	"github.com/cgrates/cgrates/timespans"
 	"log"
+	"net/rpc"
 	"net/rpc/jsonrpc"
 	"time"
 	"flag"
@@ -28,6 +29,7 @@ import (
 
 var (
 	runs = flag.Int("runs", 10000, "stress cycle number")
+	json = flag.Bool("json", false, "use JSON for RPC encoding")
 )
 
 func main() {
@@ -36,7 +38,16 @@ func main() {
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := timespans.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	result := timespans.CallCost{}
-	client, _ := jsonrpc.Dial("tcp", "localhost:1234")
+	var client *rpc.Client
+	var err error
+	if *json {
+		client, err = jsonrpc.Dial("tcp", "localhost:1234")
+	} else {
+		client, err = rpc.Dial("tcp", "localhost:1234")
+	}
+	if err != nil {
+		log.Panic("Could not connect to rater: ", err)
+	}
 	i := 0
 	start := time.Now()
 	for j := 0; j < *runs; j++ {

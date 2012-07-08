@@ -38,7 +38,9 @@ var (
 	redissrv       = flag.String("redissrv", "127.0.0.1:6379", "redis address host:port")
 	redisdb        = flag.Int("redisdb", 10, "redis database number")
 	listen         = flag.String("listen", "127.0.0.1:1234", "listening address host:port")
-	standalone     = flag.Bool("standalone", false, "start standalone server (no balancer), and use JSON for RPC encoding")
+	standalone     = flag.Bool("standalone", false, "start standalone server (no balancer)")
+	freeswitch     = flag.Bool("freeswitch", false, "connect to freeswitch server")
+	json           = flag.Bool("json", false, "use JSON for RPC encoding")
 	storage        Responder
 )
 
@@ -122,10 +124,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Cannot open storage: %v", err)
 	}
-	if *standalone {
+	if *freeswitch {
 		sm := &sessionmanager.FSSessionManager{}
 		sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), *freeswitchsrv, *freeswitchpass)
-	} else {
+	}
+	if !*standalone {
 		go RegisterToServer(balancer, listen)
 		go StopSingnalHandler(balancer, listen, getter)
 	}
@@ -155,7 +158,7 @@ func main() {
 			continue
 		}
 		log.Printf("connection started: %v", conn.RemoteAddr())
-		if *standalone {
+		if *json {
 			// log.Print("json encoding")
 			go jsonrpc.ServeConn(conn)
 		} else {

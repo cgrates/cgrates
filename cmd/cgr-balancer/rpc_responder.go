@@ -97,7 +97,7 @@ func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err er
 /*
 Creates the json rpc server.
 */
-func listenToJsonRPCRequests() {
+func listenToRPCRequests() {
 	l, err := net.Listen("tcp", *jsonRpcAddress)
 	defer l.Close()
 
@@ -111,13 +111,19 @@ func listenToJsonRPCRequests() {
 	rpc.Register(responder)
 
 	for {
-		c, err := l.Accept()
+		conn, err := l.Accept()
 		if err != nil {
-			log.Printf("accept error: %s", c)
+			log.Printf("accept error: %s", conn)
 			continue
 		}
 
-		log.Printf("connection started: %v", c.RemoteAddr())
-		go jsonrpc.ServeConn(c)
+		log.Printf("connection started: %v", conn.RemoteAddr())
+		if *js {
+			// log.Print("json encoding")
+			go jsonrpc.ServeConn(conn)
+		} else {
+			// log.Print("gob encoding")
+			go rpc.ServeConn(conn)
+		}
 	}
 }

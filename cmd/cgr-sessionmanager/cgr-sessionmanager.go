@@ -23,11 +23,13 @@ import (
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
+	"net/rpc"
 	"net/rpc/jsonrpc"
 )
 
 var (
 	standalone     = flag.Bool("standalone", false, "run standalone (run as a rater)")
+	json           = flag.Bool("json", false, "use JSON for RPC encoding")
 	balancer       = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
 	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
 	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
@@ -46,7 +48,12 @@ func main() {
 	if *standalone {
 		sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), *freeswitchsrv, *freeswitchpass)
 	} else {
-		client, err := jsonrpc.Dial("tcp", *balancer)
+		var client *rpc.Client
+		if *json {
+			client, err = jsonrpc.Dial("tcp", *balancer)
+		} else {
+			client, err = rpc.Dial("tcp", *balancer)
+		}
 		if err != nil {
 			log.Fatalf("could not connect to balancer: %v", err)
 		}

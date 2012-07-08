@@ -36,6 +36,7 @@ var (
 	httpApiAddress  = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:2002)")
 	freeswitchsrv   = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
 	freeswitchpass  = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
+	js              = flag.Bool("json", false, "use JSON for RPC encoding")
 	bal             *balancer.Balancer
 	balancerRWMutex sync.RWMutex
 )
@@ -92,7 +93,7 @@ func main() {
 
 	go StopSingnalHandler()
 	go listenToRPCRaterRequests()
-	go listenToJsonRPCRequests()
+	go listenToRPCRequests()
 
 	sm := &sessionmanager.FSSessionManager{}
 	sm.Connect(sessionmanager.NewRPCBalancerSessionDelegate(bal), *freeswitchsrv, *freeswitchpass)
