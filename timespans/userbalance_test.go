@@ -171,7 +171,7 @@ func TestDebitMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(6, "0723")
+	err := rifsBalance.debitMinutesBalance(6, "0723", false)
 	if b2.Seconds != 94 || err != nil {
 		t.Log(err)
 		t.Errorf("Expected %v was %v", 94, b2.Seconds)
@@ -182,7 +182,7 @@ func TestDebitMultipleBucketsMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(105, "0723")
+	err := rifsBalance.debitMinutesBalance(105, "0723", false)
 	if b2.Seconds != 0 || b1.Seconds != 5 || err != nil {
 		t.Log(err)
 		t.Errorf("Expected %v was %v", 0, b2.Seconds)
@@ -193,7 +193,7 @@ func TestDebitAllMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(110, "0723")
+	err := rifsBalance.debitMinutesBalance(110, "0723", false)
 	if b2.Seconds != 0 || b1.Seconds != 0 || err != nil {
 		t.Errorf("Expected %v was %v", 0, b2.Seconds)
 	}
@@ -203,7 +203,7 @@ func TestDebitMoreMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(115, "0723")
+	err := rifsBalance.debitMinutesBalance(115, "0723", false)
 	if b2.Seconds != 100 || b1.Seconds != 10 || err == nil {
 		t.Errorf("Expected %v was %v", 1000, b2.Seconds)
 	}
@@ -213,7 +213,7 @@ func TestDebitPriceMinuteBalance0(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 1.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(5, "0723")
+	err := rifsBalance.debitMinutesBalance(5, "0723", false)
 	if b2.Seconds != 95 || b1.Seconds != 10 || err != nil || rifsBalance.BalanceMap[CREDIT] != 16 {
 		t.Errorf("Expected %v was %v", 16, rifsBalance.BalanceMap[CREDIT])
 	}
@@ -223,7 +223,7 @@ func TestDebitPriceAllMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 1.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(21, "0723")
+	err := rifsBalance.debitMinutesBalance(21, "0723", false)
 	if b2.Seconds != 79 || b1.Seconds != 10 || err != nil || rifsBalance.BalanceMap[CREDIT] != 0 {
 		t.Errorf("Expected %v was %v", 0, rifsBalance.BalanceMap[CREDIT])
 	}
@@ -233,7 +233,7 @@ func TestDebitPriceMoreMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 1.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(25, "0723")
+	err := rifsBalance.debitMinutesBalance(25, "0723", false)
 	if b2.Seconds != 100 || b1.Seconds != 10 || err == nil || rifsBalance.BalanceMap[CREDIT] != 21 {
 		t.Log(b1, b2, err)
 		t.Errorf("Expected %v was %v", 21, rifsBalance.BalanceMap[CREDIT])
@@ -244,7 +244,7 @@ func TestDebitPriceNegativeMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 1.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(-15, "0723")
+	err := rifsBalance.debitMinutesBalance(-15, "0723", false)
 	if b2.Seconds != 115 || b1.Seconds != 10 || err != nil || rifsBalance.BalanceMap[CREDIT] != 36 {
 		t.Log(b1, b2, err)
 		t.Errorf("Expected %v was %v", 36, rifsBalance.BalanceMap[CREDIT])
@@ -255,7 +255,7 @@ func TestDebitNegativeMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT: 21}}
-	err := rifsBalance.debitMinutesBalance(-15, "0723")
+	err := rifsBalance.debitMinutesBalance(-15, "0723", false)
 	if b2.Seconds != 115 || b1.Seconds != 10 || err != nil || rifsBalance.BalanceMap[CREDIT] != 21 {
 		t.Log(b1, b2, err)
 		t.Errorf("Expected %v was %v", 21, rifsBalance.BalanceMap[CREDIT])
@@ -302,7 +302,7 @@ func TestDebitNegativeSMSBalance(t *testing.T) {
 	}
 }
 
-func TestUserBalanceAddMinuteBucket(t *testing.T) {
+func TestUserBalancedebitMinuteBucket(t *testing.T) {
 	ub := &UserBalance{
 		Id:            "rif",
 		Type:          UB_TYPE_POSTPAID,
@@ -310,13 +310,13 @@ func TestUserBalanceAddMinuteBucket(t *testing.T) {
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	newMb := &MinuteBucket{Weight: 20, Price: 1, DestinationId: "NEW"}
-	ub.addMinuteBucket(newMb)
+	ub.debitMinuteBucket(newMb)
 	if len(ub.MinuteBuckets) != 3 || ub.MinuteBuckets[2] != newMb {
 		t.Error("Error adding minute bucket!", len(ub.MinuteBuckets), ub.MinuteBuckets)
 	}
 }
 
-func TestUserBalanceAddMinuteBucketExists(t *testing.T) {
+func TestUserBalancedebitMinuteBucketExists(t *testing.T) {
 
 	ub := &UserBalance{
 		Id:            "rif",
@@ -324,8 +324,8 @@ func TestUserBalanceAddMinuteBucketExists(t *testing.T) {
 		BalanceMap:    map[string]float64{SMS: 14, TRAFFIC: 1024},
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 15, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
-	newMb := &MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}
-	ub.addMinuteBucket(newMb)
+	newMb := &MinuteBucket{Seconds: -10, Weight: 20, Price: 1, DestinationId: "NAT"}
+	ub.debitMinuteBucket(newMb)
 	if len(ub.MinuteBuckets) != 2 || ub.MinuteBuckets[0].Seconds != 25 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -338,26 +338,26 @@ func TestUserBalanceAddMinuteNil(t *testing.T) {
 		BalanceMap:    map[string]float64{SMS: 14, TRAFFIC: 1024},
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
-	ub.addMinuteBucket(nil)
+	ub.debitMinuteBucket(nil)
 	if len(ub.MinuteBuckets) != 2 {
 		t.Error("Error adding minute bucket!")
 	}
 }
 
 func TestUserBalanceAddMinutBucketEmpty(t *testing.T) {
-	mb1 := &MinuteBucket{Seconds: 10, DestinationId: "NAT"}
-	mb2 := &MinuteBucket{Seconds: 10, DestinationId: "NAT"}
-	mb3 := &MinuteBucket{Seconds: 10, DestinationId: "OTHER"}
+	mb1 := &MinuteBucket{Seconds: -10, DestinationId: "NAT"}
+	mb2 := &MinuteBucket{Seconds: -10, DestinationId: "NAT"}
+	mb3 := &MinuteBucket{Seconds: -10, DestinationId: "OTHER"}
 	ub := &UserBalance{}
-	ub.addMinuteBucket(mb1)
+	ub.debitMinuteBucket(mb1)
 	if len(ub.MinuteBuckets) != 1 {
 		t.Error("Error adding minute bucket: ", ub.MinuteBuckets)
 	}
-	ub.addMinuteBucket(mb2)
+	ub.debitMinuteBucket(mb2)
 	if len(ub.MinuteBuckets) != 1 || ub.MinuteBuckets[0].Seconds != 20 {
 		t.Error("Error adding minute bucket: ", ub.MinuteBuckets)
 	}
-	ub.addMinuteBucket(mb3)
+	ub.debitMinuteBucket(mb3)
 	if len(ub.MinuteBuckets) != 2 {
 		t.Error("Error adding minute bucket: ", ub.MinuteBuckets)
 	}

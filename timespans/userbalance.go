@@ -138,10 +138,10 @@ All the appropriate buckets will be debited until all amount of minutes is consu
 If the amount is bigger than the sum of all seconds in the minute buckets than nothing will be
 debited and an error will be returned.
 */
-func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string) error {
-	// if count && amount > 0 {
-	// 	ub.countUnits(&Action{BalanceId: TRAFFIC_TIME, Units: amount})
-	// }
+func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count bool) error {
+	if count && amount > 0 {
+		ub.countUnits(&Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: amount, DestinationId: prefix}})
+	}
 	avaliableNbSeconds, _, bucketList := ub.getSecondsForPrefix(prefix)
 	if avaliableNbSeconds < amount {
 		return new(AmountTooBig)

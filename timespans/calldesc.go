@@ -330,7 +330,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		}
 		for _, ts := range cc.Timespans {
 			if ts.MinuteInfo != nil {
-				userBalance.debitMinutesBalance(ts.MinuteInfo.Quantity, cd.Destination)
+				userBalance.debitMinutesBalance(ts.MinuteInfo.Quantity, cd.Destination, true)
 			}
 		}
 	}
@@ -374,7 +374,7 @@ func (cd *CallDescriptor) DebitSeconds() (err error) {
 	defer userBalancesRWMutex.Unlock()
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitMinutesBalance(cd.Amount, cd.Destination)
+		return userBalance.debitMinutesBalance(cd.Amount, cd.Destination, true)
 	}
 	return err
 }
