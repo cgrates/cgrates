@@ -21,7 +21,6 @@ package main
 import (
 	"log"
 	"time"
-	"sync"
 )
 
 var (
@@ -33,18 +32,18 @@ type Command struct {
 	data string
 }
 
-func (c *Command) Execute() {
+func (c *Command) Execute() (err error) {
 	ch := cm.pipe[c.name]
 	ch <- c
 	log.Print(c.data)
 	time.Sleep(1 * time.Second)
 	log.Print("end ", c.data)
 	<-ch
+	return
 }
 
 type ChanMutex struct {
 	pipe map[string]chan *Command
-	mu   sync.Mutex
 }
 
 func NewChanMutex() *ChanMutex {
@@ -52,20 +51,15 @@ func NewChanMutex() *ChanMutex {
 }
 
 func (cm *ChanMutex) Execute(c *Command) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	ch, exists := cm.pipe[c.name]
-	if !exists {
-		log.Print("make chanell for: ", c.name)
-		ch = make(chan *Command, 1)
-		cm.pipe[c.name] = ch
+	if _, exists := cm.pipe[c.name]; !exists {
+		cm.pipe[c.name] = make(chan *Command, 1)
 	}
-	go c.Execute()
+	c.Execute()
 }
 
 func main() {
-	cm.Execute(&Command{"vdf:rif", "prima rif"})
-	cm.Execute(&Command{"vdf:dan", "prima Dan"})
-	cm.Execute(&Command{"vdf:rif", "a doua rif"})
-	time.Sleep(8 * time.Second)
+	go cm.Execute(&Command{"vdf:rif", "prima rif"})
+	go cm.Execute(&Command{"vdf:dan", "prima Dan"})
+	go cm.Execute(&Command{"vdf:rif", "a doua rif"})
+	time.Sleep(5 * time.Second)
 }
