@@ -103,7 +103,7 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 Debits some amount of user's money credit. Returns the remaining credit in user's balance.
 */
 func (ub *UserBalance) debitMoneyBalance(amount float64, count bool) float64 {
-	if count {
+	if count && amount > 0 {
 		ub.countUnits(&Action{BalanceId: CREDIT, Units: amount})
 	}
 	ub.BalanceMap[CREDIT] -= amount
@@ -132,16 +132,6 @@ func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
 	return nil
 }
 
-// Adds the minutes from the received minute bucket to an existing bucket if the destination
-// is the same or ads the minute bucket to the list if none matches.
-func (ub *UserBalance) addMinuteBucket(newMb *MinuteBucket) error {
-	if newMb == nil {
-		return errors.New("Nil minute bucket!")
-	}
-	newMb.Seconds = -newMb.Seconds
-	return ub.debitMinuteBucket(newMb)
-}
-
 /*
 Debits the received amount of seconds from user's minute buckets.
 All the appropriate buckets will be debited until all amount of minutes is consumed.
@@ -149,6 +139,9 @@ If the amount is bigger than the sum of all seconds in the minute buckets than n
 debited and an error will be returned.
 */
 func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string) error {
+	// if count && amount > 0 {
+	// 	ub.countUnits(&Action{BalanceId: TRAFFIC_TIME, Units: amount})
+	// }
 	avaliableNbSeconds, _, bucketList := ub.getSecondsForPrefix(prefix)
 	if avaliableNbSeconds < amount {
 		return new(AmountTooBig)
@@ -194,7 +187,7 @@ Debits some amount of user's SMS balance. Returns the remaining SMS in user's ba
 If the amount is bigger than the balance than nothing wil be debited and an error will be returned
 */
 func (ub *UserBalance) debitSMSBalance(amount float64, count bool) (float64, error) {
-	if count {
+	if count && amount > 0 {
 		ub.countUnits(&Action{BalanceId: SMS, Units: amount})
 	}
 	if ub.BalanceMap[SMS] < amount {
@@ -206,7 +199,7 @@ func (ub *UserBalance) debitSMSBalance(amount float64, count bool) (float64, err
 }
 
 func (ub *UserBalance) debitTrafficBalance(amount float64, count bool) (float64, error) {
-	if count {
+	if count && amount > 0 {
 		ub.countUnits(&Action{BalanceId: TRAFFIC, Units: amount})
 	}
 	if ub.BalanceMap[TRAFFIC] < amount {
@@ -218,7 +211,7 @@ func (ub *UserBalance) debitTrafficBalance(amount float64, count bool) (float64,
 }
 
 func (ub *UserBalance) debitTrafficTimeBalance(amount float64, count bool) (float64, error) {
-	if count {
+	if count && amount > 0 {
 		ub.countUnits(&Action{BalanceId: TRAFFIC_TIME, Units: amount})
 	}
 	if ub.BalanceMap[TRAFFIC_TIME] < amount {
