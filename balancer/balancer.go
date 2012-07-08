@@ -25,9 +25,9 @@ import (
 )
 
 type Balancer struct {
+	sync.RWMutex
 	clients         map[string]*rpc.Client
 	balancerChannel chan *rpc.Client
-	mu              sync.RWMutex
 }
 
 /*
@@ -53,8 +53,8 @@ func NewBalancer() *Balancer {
 Adds a client to the two  internal slices.
 */
 func (bl *Balancer) AddClient(address string, client *rpc.Client) {
-	bl.mu.Lock()
-	defer bl.mu.Unlock()
+	bl.Lock()
+	defer bl.Unlock()
 	bl.clients[address] = client
 	return
 }
@@ -63,8 +63,8 @@ func (bl *Balancer) AddClient(address string, client *rpc.Client) {
 Removes a client from the slices locking the readers and reseting the balancer index.
 */
 func (bl *Balancer) RemoveClient(address string) {
-	bl.mu.Lock()
-	defer bl.mu.Unlock()
+	bl.Lock()
+	defer bl.Unlock()
 	delete(bl.clients, address)
 	<-bl.balancerChannel
 }
@@ -73,8 +73,8 @@ func (bl *Balancer) RemoveClient(address string) {
 Returns a client for the specifed address.
 */
 func (bl *Balancer) GetClient(address string) (c *rpc.Client, exists bool) {
-	bl.mu.RLock()
-	defer bl.mu.RUnlock()
+	bl.RLock()
+	defer bl.RUnlock()
 	c, exists = bl.clients[address]
 	return
 }
@@ -83,14 +83,14 @@ func (bl *Balancer) GetClient(address string) (c *rpc.Client, exists bool) {
 Returns the next available connection at each call looping at the end of connections.
 */
 func (bl *Balancer) Balance() (result *rpc.Client) {
-	bl.mu.RLock()
-	defer bl.mu.RUnlock()
+	bl.RLock()
+	defer bl.RUnlock()
 	return <-bl.balancerChannel
 }
 
 func (bl *Balancer) Shutdown() {
-	bl.mu.Lock()
-	defer bl.mu.Unlock()
+	bl.Lock()
+	defer bl.Unlock()
 	var reply string
 	for address, client := range bl.clients {
 		client.Call("Responder.Shutdown", "", &reply)
@@ -99,8 +99,8 @@ func (bl *Balancer) Shutdown() {
 }
 
 func (bl *Balancer) GetClientAddresses() []string {
-	bl.mu.RLock()
-	defer bl.mu.RUnlock()
+	bl.RLock()
+	defer bl.RUnlock()
 	var addresses []string
 	for a, _ := range bl.clients {
 		addresses = append(addresses, a)
