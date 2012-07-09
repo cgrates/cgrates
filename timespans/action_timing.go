@@ -150,7 +150,7 @@ func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
 }
 
 func (at *ActionTiming) Execute() (err error) {
-	// TODO: add sync mutex here
+
 	aac, err := at.getActions()
 	if err != nil {
 		log.Print("Failed to get actions: ", err)
@@ -163,8 +163,11 @@ func (at *ActionTiming) Execute() (err error) {
 			return
 		}
 		for _, ub := range at.getUserBalances() {
-			err = actionFunction(ub, a)
-			storageGetter.SetUserBalance(ub)
+			AccLock.Guard(ub.Id, func() (float64, error) {
+				err = actionFunction(ub, a)
+				storageGetter.SetUserBalance(ub)
+				return 0, nil
+			})
 		}
 	}
 	return
