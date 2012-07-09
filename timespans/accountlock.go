@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package timespans
 
+import (
+	"sync"
+)
+
 var AccLock *AccountLock
 
 func init() {
@@ -26,6 +30,7 @@ func init() {
 
 type AccountLock struct {
 	queue map[string]chan bool
+	sync.Mutex
 }
 
 func NewAccountLock() *AccountLock {
@@ -33,11 +38,13 @@ func NewAccountLock() *AccountLock {
 }
 
 func (cm *AccountLock) GuardGetCost(name string, handler func() (*CallCost, error)) (reply *CallCost, err error) {
+	cm.Lock()
 	lock, exists := AccLock.queue[name]
 	if !exists {
 		lock = make(chan bool, 1)
 		AccLock.queue[name] = lock
 	}
+	cm.Unlock()
 	lock <- true
 	reply, err = handler()
 	<-lock
