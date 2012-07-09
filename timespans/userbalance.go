@@ -218,6 +218,7 @@ func (ub *UserBalance) resetActionTriggers() {
 	}
 }
 
+// Returns the unit counter that matches the specified action type
 func (ub *UserBalance) getUnitCounter(a *Action) *UnitsCounter {
 	for _, uc := range ub.UnitCounters {
 		if uc.BalanceId == a.BalanceId {
@@ -238,7 +239,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 	}
 
 	if unitsCounter.BalanceId == MINUTES && a.MinuteBucket != nil {
-		unitsCounter.addMinuteBucket(a.MinuteBucket)
+		unitsCounter.addMinutes(a.MinuteBucket)
 		goto TRIGGERS
 	}
 	unitsCounter.Units += a.Units

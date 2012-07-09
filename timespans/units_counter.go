@@ -31,22 +31,31 @@ type UnitsCounter struct {
 	MinuteBuckets []*MinuteBucket
 }
 
+func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
+	for _, at := range ats {
+		acs, err := storageGetter.GetActions(at.ActionsId)
+		if err != nil {
+			continue
+		}
+		for _, a := range acs {
+			if a.MinuteBucket != nil {
+				uc.MinuteBuckets = append(uc.MinuteBuckets, a.MinuteBucket.Clone())
+			}
+		}
+	}
+}
+
 // Adds the minutes from the received minute bucket to an existing bucket if the destination
 // is the same or ads the minutye bucket to the list if none matches.
-func (uc *UnitsCounter) addMinuteBucket(newMb *MinuteBucket) {
+func (uc *UnitsCounter) addMinutes(newMb *MinuteBucket) {
 	if newMb == nil {
 		return
 	}
-	found := false
 	for _, mb := range uc.MinuteBuckets {
-		if mb.DestinationId == newMb.DestinationId {
+		if mb.Equal(newMb) {
 			mb.Seconds += newMb.Seconds
-			found = true
 			break
 		}
-	}
-	if !found {
-		uc.MinuteBuckets = append(uc.MinuteBuckets, newMb)
 	}
 }
 

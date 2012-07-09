@@ -49,8 +49,8 @@ func TestUnitsCounterAddMinuteBucket(t *testing.T) {
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	newMb := &MinuteBucket{Weight: 20, Price: 1, DestinationId: "NEW"}
-	uc.addMinuteBucket(newMb)
-	if len(uc.MinuteBuckets) != 3 || uc.MinuteBuckets[2] != newMb {
+	uc.addMinutes(newMb)
+	if len(uc.MinuteBuckets) != 2 {
 		t.Error("Error adding minute bucket!")
 	}
 }
@@ -63,7 +63,7 @@ func TestUnitsCounterAddMinuteBucketExists(t *testing.T) {
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	newMb := &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationId: "NAT"}
-	uc.addMinuteBucket(newMb)
+	uc.addMinutes(newMb)
 	if len(uc.MinuteBuckets) != 2 || uc.MinuteBuckets[0].Seconds != 15 {
 		t.Error("Error adding minute bucket!")
 	}
@@ -76,7 +76,7 @@ func TestUnitsCounterAddMinuteBucketNil(t *testing.T) {
 		Units:         100,
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
-	uc.addMinuteBucket(nil)
+	uc.addMinutes(nil)
 	if len(uc.MinuteBuckets) != 2 {
 		t.Error("Error adding minute bucket!")
 	}

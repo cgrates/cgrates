@@ -43,7 +43,18 @@ func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {
 	return
 }
 
-// 
+// Creates a similar minute
+func (mb *MinuteBucket) Clone() *MinuteBucket {
+	return &MinuteBucket{
+		Seconds:       mb.Seconds,
+		Weight:        mb.Weight,
+		Price:         mb.Price,
+		Percent:       mb.Percent,
+		DestinationId: mb.DestinationId,
+	}
+}
+
+// Equal method
 func (mb *MinuteBucket) Equal(o *MinuteBucket) bool {
 	return mb.DestinationId == o.DestinationId &&
 		mb.Weight == o.Weight &&
