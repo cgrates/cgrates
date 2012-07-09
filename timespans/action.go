@@ -122,15 +122,15 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 	}
 	switch a.BalanceId {
 	case CREDIT:
-		ub.debitMoneyBalance(a.Units, false)
+		ub.debitBalance(CREDIT, a.Units, false)
 	case SMS:
-		ub.debitSMSBalance(a.Units, false)
+		ub.debitBalance(SMS, a.Units, false)
 	case MINUTES:
 		ub.debitMinuteBucket(a.MinuteBucket)
 	case TRAFFIC:
-		ub.debitTrafficBalance(a.Units, false)
+		ub.debitBalance(TRAFFIC, a.Units, false)
 	case TRAFFIC_TIME:
-		ub.debitTrafficTimeBalance(a.Units, false)
+		ub.debitBalance(TRAFFIC_TIME, a.Units, false)
 	}
 	return
 }

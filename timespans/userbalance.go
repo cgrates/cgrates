@@ -99,17 +99,6 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 	return
 }
 
-/*
-Debits some amount of user's money credit. Returns the remaining credit in user's balance.
-*/
-func (ub *UserBalance) debitMoneyBalance(amount float64, count bool) float64 {
-	if count && amount > 0 {
-		ub.countUnits(&Action{BalanceId: CREDIT, Units: amount})
-	}
-	ub.BalanceMap[CREDIT] -= amount
-	return ub.BalanceMap[CREDIT]
-}
-
 // Debit seconds from specified minute bucket
 func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
 	if newMb == nil {
@@ -183,43 +172,14 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 }
 
 /*
-Debits some amount of user's SMS balance. Returns the remaining SMS in user's balance.
-If the amount is bigger than the balance than nothing wil be debited and an error will be returned
+Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
 */
-func (ub *UserBalance) debitSMSBalance(amount float64, count bool) (float64, error) {
+func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool) float64 {
 	if count && amount > 0 {
-		ub.countUnits(&Action{BalanceId: SMS, Units: amount})
+		ub.countUnits(&Action{BalanceId: balanceId, Units: amount})
 	}
-	if ub.BalanceMap[SMS] < amount {
-		return ub.BalanceMap[SMS], new(AmountTooBig)
-	}
-	ub.BalanceMap[SMS] -= amount
-
-	return ub.BalanceMap[SMS], nil
-}
-
-func (ub *UserBalance) debitTrafficBalance(amount float64, count bool) (float64, error) {
-	if count && amount > 0 {
-		ub.countUnits(&Action{BalanceId: TRAFFIC, Units: amount})
-	}
-	if ub.BalanceMap[TRAFFIC] < amount {
-		return ub.BalanceMap[TRAFFIC], new(AmountTooBig)
-	}
-	ub.BalanceMap[TRAFFIC] -= amount
-
-	return ub.BalanceMap[TRAFFIC], nil
-}
-
-func (ub *UserBalance) debitTrafficTimeBalance(amount float64, count bool) (float64, error) {
-	if count && amount > 0 {
-		ub.countUnits(&Action{BalanceId: TRAFFIC_TIME, Units: amount})
-	}
-	if ub.BalanceMap[TRAFFIC_TIME] < amount {
-		return ub.BalanceMap[TRAFFIC_TIME], new(AmountTooBig)
-	}
-	ub.BalanceMap[TRAFFIC_TIME] -= amount
-
-	return ub.BalanceMap[TRAFFIC_TIME], nil
+	ub.BalanceMap[balanceId] -= amount
+	return ub.BalanceMap[balanceId]
 }
 
 // Scans the action trigers and execute the actions for which trigger is met
