@@ -22,7 +22,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 const (
@@ -43,8 +42,7 @@ const (
 )
 
 var (
-	storageGetter       StorageGetter
-	userBalancesRWMutex sync.RWMutex
+	storageGetter StorageGetter
 )
 
 /*
@@ -237,13 +235,11 @@ func (ub *UserBalance) countUnits(a *Action) {
 		unitsCounter = &UnitsCounter{BalanceId: a.BalanceId}
 		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
 	}
-
-	if unitsCounter.BalanceId == MINUTES && a.MinuteBucket != nil {
-		unitsCounter.addMinutes(a.MinuteBucket)
-		goto TRIGGERS
+	if a.BalanceId == MINUTES && a.MinuteBucket != nil {
+		unitsCounter.addMinutes(a.MinuteBucket.Seconds, a.MinuteBucket.DestinationId)
+	} else {
+		unitsCounter.Units += a.Units
 	}
-	unitsCounter.Units += a.Units
-TRIGGERS:
 	ub.executeActionTriggers()
 }
 

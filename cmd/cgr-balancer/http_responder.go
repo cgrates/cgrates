@@ -45,7 +45,7 @@ func getCostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0]}
-	callCost := GetCallCost(arg, "Responder.GetCost")
+	callCost, _ := GetCallCost(arg, "Responder.GetCost")
 	enc.Encode(callCost)
 }
 
@@ -67,7 +67,7 @@ func debitBalanceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
-	result := CallMethod(arg, "Responder.DebitCents")
+	result, _ := CallMethod(arg, "Responder.DebitCents")
 	enc.Encode(result)
 }
 
@@ -89,7 +89,7 @@ func debitSMSHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
-	result := CallMethod(arg, "Responder.DebitSMS")
+	result, _ := CallMethod(arg, "Responder.DebitSMS")
 	enc.Encode(result)
 }
 
@@ -111,7 +111,7 @@ func debitSecondsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
-	result := CallMethod(arg, "Responder.DebitSeconds")
+	result, _ := CallMethod(arg, "Responder.DebitSeconds")
 	enc.Encode(result)
 }
 
@@ -133,7 +133,7 @@ func getMaxSessionTimeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
-	result := CallMethod(arg, "Responder.GetMaxSessionTime")
+	result, _ := CallMethod(arg, "Responder.GetMaxSessionTime")
 	enc.Encode(result)
 }
 
@@ -193,7 +193,7 @@ func addRecievedCallSeconds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	arg := &timespans.CallDescriptor{Direction: direction[0], Tenant: tenant[0], TOR: tor[0], Subject: subj[0], Destination: dest[0], Amount: amount}
-	result := CallMethod(arg, "Responder.AddRecievedCallSeconds")
+	result, _ := CallMethod(arg, "Responder.AddRecievedCallSeconds")
 	enc.Encode(result)
 }
 

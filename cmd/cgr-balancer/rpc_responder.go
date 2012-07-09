@@ -33,37 +33,39 @@ type Responder byte
 RPC method thet provides the external RPC interface for getting the rating information.
 */
 func (r *Responder) GetCost(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
-	*replay = *GetCallCost(&arg, "Responder.GetCost")
+	rs, err := GetCallCost(&arg, "Responder.GetCost")
+	*replay = *rs
 	return
 }
 
 func (r *Responder) Debit(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
-	*replay = *GetCallCost(&arg, "Responder.Debit")
+	rs, err := GetCallCost(&arg, "Responder.Debit")
+	*replay = *rs
 	return
 }
 
 func (r *Responder) DebitBalance(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Responder.DebitCents")
+	*replay, err = CallMethod(&arg, "Responder.DebitCents")
 	return
 }
 
 func (r *Responder) DebitSMS(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Responder.DebitSMS")
+	*replay, err = CallMethod(&arg, "Responder.DebitSMS")
 	return
 }
 
 func (r *Responder) DebitSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Responder.DebitSeconds")
+	*replay, err = CallMethod(&arg, "Responder.DebitSeconds")
 	return
 }
 
 func (r *Responder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Responder.GetMaxSessionTime")
+	*replay, err = CallMethod(&arg, "Responder.GetMaxSessionTime")
 	return
 }
 
 func (r *Responder) AddVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Responder.AddVolumeDiscountSeconds")
+	*replay, err = CallMethod(&arg, "Responder.AddVolumeDiscountSeconds")
 	return
 }
 

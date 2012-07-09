@@ -150,8 +150,7 @@ func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
 }
 
 func (at *ActionTiming) Execute() (err error) {
-	userBalancesRWMutex.Lock()
-	defer userBalancesRWMutex.Unlock()
+	// TODO: add sync mutex here
 	aac, err := at.getActions()
 	if err != nil {
 		log.Print("Failed to get actions: ", err)

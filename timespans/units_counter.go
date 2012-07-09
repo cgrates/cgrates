@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"log"
 	"strconv"
 	"strings"
 )
@@ -28,7 +29,7 @@ type UnitsCounter struct {
 	Direction     string
 	BalanceId     string
 	Units         float64
-	MinuteBuckets []*MinuteBucket
+	MinuteBuckets bucketsorter
 }
 
 func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
@@ -43,17 +44,20 @@ func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
 			}
 		}
 	}
+	uc.MinuteBuckets.Sort()
 }
 
 // Adds the minutes from the received minute bucket to an existing bucket if the destination
 // is the same or ads the minutye bucket to the list if none matches.
-func (uc *UnitsCounter) addMinutes(newMb *MinuteBucket) {
-	if newMb == nil {
-		return
-	}
+func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
 	for _, mb := range uc.MinuteBuckets {
-		if mb.Equal(newMb) {
-			mb.Seconds += newMb.Seconds
+		d, err := GetDestination(mb.DestinationId)
+		if err != nil {
+			log.Print("Minutes counter: unknown destination: ", mb.DestinationId)
+			continue
+		}
+		if ok, _ := d.containsPrefix(prefix); ok {
+			mb.Seconds += amount
 			break
 		}
 	}

@@ -56,38 +56,50 @@ func NewStorage(nsg timespans.StorageGetter) *Responder {
 RPC method providing the rating information from the storage.
 */
 func (s *Responder) GetCost(cd timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
-	r, e := (&cd).GetCost()
+	r, e := timespans.AccLock.GuardGetCost(cd.GetKey(), func() (*timespans.CallCost, error) {
+		return (&cd).GetCost()
+	})
 	*reply, err = *r, e
 	return err
 }
 
 func (s *Responder) DebitCents(cd timespans.CallDescriptor, reply *float64) (err error) {
-	r, e := (&cd).DebitCents()
+	r, e := timespans.AccLock.Guard(cd.GetKey(), func() (float64, error) {
+		return (&cd).DebitCents()
+	})
 	*reply, err = r, e
 	return err
 }
 
 func (s *Responder) DebitSMS(cd timespans.CallDescriptor, reply *float64) (err error) {
-	r, e := (&cd).DebitSMS()
+	r, e := timespans.AccLock.Guard(cd.GetKey(), func() (float64, error) {
+		return (&cd).DebitSMS()
+	})
 	*reply, err = r, e
 	return err
 }
 
 func (s *Responder) DebitSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
-	e := (&cd).DebitSeconds()
-	*reply, err = 0.0, e
+	r, e := timespans.AccLock.Guard(cd.GetKey(), func() (float64, error) {
+		return 0, (&cd).DebitSeconds()
+	})
+	*reply, err = r, e
 	return err
 }
 
 func (s *Responder) GetMaxSessionTime(cd timespans.CallDescriptor, reply *float64) (err error) {
-	r, e := (&cd).GetMaxSessionTime()
+	r, e := timespans.AccLock.Guard(cd.GetKey(), func() (float64, error) {
+		return (&cd).GetMaxSessionTime()
+	})
 	*reply, err = r, e
 	return err
 }
 
 func (s *Responder) AddRecievedCallSeconds(cd timespans.CallDescriptor, reply *float64) (err error) {
-	e := (&cd).AddRecievedCallSeconds()
-	*reply, err = 0, e
+	r, e := timespans.AccLock.Guard(cd.GetKey(), func() (float64, error) {
+		return 0, (&cd).AddRecievedCallSeconds()
+	})
+	*reply, err = r, e
 	return err
 }
 

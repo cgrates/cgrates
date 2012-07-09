@@ -36,6 +36,7 @@ var (
 	DestinationCacheMap = make(destinationCacheMap)
 )
 
+// Gets the specified destination from the storage and caches it.
 func GetDestination(dId string) (d *Destination, err error) {
 	d, exists := DestinationCacheMap[dId]
 	if !exists {
