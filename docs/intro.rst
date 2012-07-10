@@ -4,11 +4,23 @@ CGRateS is a very fast and easy scalable rating engine targeted especially for t
 
 It is written in go (http://golang.net) and accessible from any language via JSON RPC. The code is well documented (go doc compliant API docs) and heavily tested.
 
-Supported databases: kyoto_ cabinet, redis_, mongodb_.
+After testing various databases like Kyoto_ cabinet, Redis_ or Mongodb_, the project focused on Redis as it delivers the best trade-off between speed, configuration and scalability.
 
 .. _kyoto: http://fallabs.com/kyotocabinet
-.. _redis: http://redis.io
-.. _mongodb: http://www.mongodb.org
+.. _Redis: http://redis.io
+.. _Mongodb: http://www.mongodb.org
+
+Here are some of the configurations in which CGRateS can operate:
+
+.. image::  images/Simple.png
+If the network does not require more than one rater to handle the calls. The balancer can be left out and the rater can be queried directly. In this case the rater must be started with -standalone=true and -freeswitch=true options.
+
+.. image::  images/Normal.png
+While the network grows more raters can be thrown into the stack to offer more requests per seconds workload. This implies the usage of the balancer to distribute the requests to the raters running on the different machines.
+
+.. image::  images/Complicated.png
+Of course more session managers can serve multiple call switches and all of them are connected to the same balancer. We are planning to support multiple balancers for huge networks if the need arises.
+
 
 Features
 --------
