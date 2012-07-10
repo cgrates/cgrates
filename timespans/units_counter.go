@@ -33,6 +33,7 @@ type UnitsCounter struct {
 }
 
 func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
+	uc.MinuteBuckets = make(bucketsorter, 0)
 	for _, at := range ats {
 		acs, err := storageGetter.GetActions(at.ActionsId)
 		if err != nil {

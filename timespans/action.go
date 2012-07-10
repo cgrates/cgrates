@@ -40,16 +40,17 @@ type actionTypeFunc func(*UserBalance, *Action) error
 
 var (
 	actionTypeFuncMap = map[string]actionTypeFunc{
-		"LOG":            logAction,
-		"RESET_TRIGGERS": resetTriggersAction,
-		"SET_POSTPAID":   setPostpaidAction,
-		"RESET_POSTPAID": resetPostpaidAction,
-		"SET_PREPAID":    setPrepaidAction,
-		"RESET_PREPAID":  resetPrepaidAction,
-		"TOPUP_RESET":    topupResetAction,
-		"TOPUP":          topupAction,
-		"DEBIT":          debitAction,
-		"RESET_COUNTERS": resetCountersAction,
+		"LOG":                logAction,
+		"RESET_TRIGGERS":     resetTriggersAction,
+		"SET_POSTPAID":       setPostpaidAction,
+		"RESET_POSTPAID":     resetPostpaidAction,
+		"SET_PREPAID":        setPrepaidAction,
+		"RESET_PREPAID":      resetPrepaidAction,
+		"TOPUP_RESET":        topupResetAction,
+		"TOPUP":              topupAction,
+		"DEBIT":              debitAction,
+		"RESET_COUNTER":      resetCounterAction,
+		"RESET_ALL_COUNTERS": resetAllCountersAction,
 	}
 )
 
@@ -104,7 +105,21 @@ func debitAction(ub *UserBalance, a *Action) (err error) {
 	return genericDebit(ub, a)
 }
 
-func resetCountersAction(ub *UserBalance, a *Action) (err error) {
+func resetCounterAction(ub *UserBalance, a *Action) (err error) {
+	uc := ub.getUnitCounter(a)
+	if uc == nil {
+		uc = &UnitsCounter{BalanceId: MINUTES}
+		ub.UnitCounters = append(ub.UnitCounters, uc)
+	}
+	if a.BalanceId == MINUTES {
+		uc.initMinuteBuckets(ub.ActionTriggers)
+	} else {
+		uc.Units = 0
+	}
+	return
+}
+
+func resetAllCountersAction(ub *UserBalance, a *Action) (err error) {
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	uc := &UnitsCounter{BalanceId: MINUTES}
 	uc.initMinuteBuckets(ub.ActionTriggers)

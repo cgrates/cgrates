@@ -24,7 +24,7 @@ import (
 	"log"
 )
 
-func TestAccountLock(t *testing.T) {
+func ATestAccountLock(t *testing.T) {
 	go AccLock.Guard("1", func() (float64, error) {
 		log.Print("first 1")
 		time.Sleep(1 * time.Second)

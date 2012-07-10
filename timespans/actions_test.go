@@ -561,7 +561,7 @@ func TestActionDebitMinutes(t *testing.T) {
 	}
 }
 
-func TestActionResetCounters(t *testing.T) {
+func TestActionResetAllCounters(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_POSTPAID,
@@ -570,7 +570,7 @@ func TestActionResetCounters(t *testing.T) {
 		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	resetCountersAction(ub, nil)
+	resetAllCountersAction(ub, nil)
 	if ub.Type != UB_TYPE_POSTPAID ||
 		ub.BalanceMap[CREDIT] != 100 ||
 		len(ub.UnitCounters) != 1 ||
@@ -582,5 +582,50 @@ func TestActionResetCounters(t *testing.T) {
 	mb := ub.UnitCounters[0].MinuteBuckets[0]
 	if mb.Weight != 20 || mb.Price != 1 || mb.Seconds != 10 || mb.DestinationId != "NAT" {
 		t.Errorf("Minute bucked cloned incorrectly: %v!", mb)
+	}
+}
+
+func TestActionResetCounterMinutes(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_POSTPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	a := &Action{BalanceId: MINUTES}
+	resetCounterAction(ub, a)
+	if ub.Type != UB_TYPE_POSTPAID ||
+		ub.BalanceMap[CREDIT] != 100 ||
+		len(ub.UnitCounters) != 2 ||
+		len(ub.UnitCounters[1].MinuteBuckets) != 1 ||
+		len(ub.MinuteBuckets) != 2 ||
+		ub.ActionTriggers[0].Executed != true {
+		t.Error("Reset counters action failed!", ub.UnitCounters[1].MinuteBuckets)
+	}
+	mb := ub.UnitCounters[1].MinuteBuckets[0]
+	if mb.Weight != 20 || mb.Price != 1 || mb.Seconds != 10 || mb.DestinationId != "NAT" {
+		t.Errorf("Minute bucked cloned incorrectly: %v!", mb)
+	}
+}
+
+func TestActionResetCounterCREDIT(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		Type:           UB_TYPE_POSTPAID,
+		BalanceMap:     map[string]float64{CREDIT: 100},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}, &UnitsCounter{BalanceId: SMS, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+	}
+	a := &Action{BalanceId: CREDIT}
+	resetCounterAction(ub, a)
+	if ub.Type != UB_TYPE_POSTPAID ||
+		ub.BalanceMap[CREDIT] != 100 ||
+		len(ub.UnitCounters) != 2 ||
+		len(ub.MinuteBuckets) != 2 ||
+		ub.ActionTriggers[0].Executed != true {
+		t.Error("Reset counters action failed!")
 	}
 }
