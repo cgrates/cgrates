@@ -83,7 +83,7 @@ func loadRates() {
 			// skip header line
 			continue
 		}
-		r, err := NewRate(record[1], record[2], record[3], record[4], record[5])
+		r, err := NewRate(record[1], record[2], record[3], record[4])
 		if err != nil {
 			continue
 		}
@@ -113,8 +113,8 @@ func loadTimings() {
 	}
 }
 
-func loadRatesTimings() {
-	fp, err := os.Open(*ratestimingsFn)
+func loadRateTimings() {
+	fp, err := os.Open(*ratetimingsFn)
 	if err != nil {
 		log.Printf("Could not open rates timings file: %v", err)
 		return
@@ -136,8 +136,7 @@ func loadRatesTimings() {
 			continue
 		}
 		for _, t := range ts {
-			rt := NewRateTiming(record[1], t)
-			//ratesTimings[tag] = append(ratesTimings[tag], rt)
+			rt := NewRateTiming(record[1], t, record[3])
 			rs, exists := rates[record[1]]
 			if !exists {
 				log.Printf("Could not rate for tag %v", record[2])

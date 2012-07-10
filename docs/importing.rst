@@ -18,40 +18,43 @@ The rates profile describes the prices to be applied for various calls to variou
 | CUSTOMER_1 | 0   | OUT       | rif:from:tm | danb                 | STANDARD       | 2012-02-28T00:00:00Z |
 +------------+-----+-----------+-------------+----------------------+----------------+----------------------+
 
-+ Tenant
+Tenant
     Used to distinguish between carriers if more than one share the same database in the CGRates system.
-+ TOR
+TOR
     Type of record specifies the kind of transmission this rate profile applies to.
-+ Direction
+Direction
     Can be IN or OUT for the INBOUND and OUTBOUND calls.
-+ Subject
+Subject
     The client/user for who this profile is detailing the rates.
-+ RatesFallbackSubject
+RatesFallbackSubject
     This specifies another profile to be used in case the call destination will not be found in the current profile. The same tenant, tor and direction will be used.
-+ RatesTimingTag
+RatesTimingTag
     Forwards to a tag described in the rates timing file to be used for this profile.
-+ ActivationTime
+ActivationTime
     Multiple rates timings/prices can be created for one profile with different activation times. When a call is made the appropriate profile(s) will be used to rate the call.
 
-Rates timings
+Rates timing
 -------------
 
 This file makes links between a ratings and timings so each of them can be described once and various combinations are made possible.
 
-+----------+----------------+--------------+
-| Tag      | RatesTag       | TimingTag    |
-+==========+================+==============+
-| STANDARD | RT_STANDARD    | WORKDAYS_00  |
-+----------+----------------+--------------+
-| STANDARD | RT_STD_WEEKEND |  WORKDAYS_18 |
-+----------+----------------+--------------+
++----------+----------------+--------------+--------+
+| Tag      | RatesTag       | TimingTag    | Weight |
++==========+================+==============+========+
+| STANDARD | RT_STANDARD    | WORKDAYS_00  | 10     |
++----------+----------------+--------------+--------+
+| STANDARD | RT_STD_WEEKEND |  WORKDAYS_18 | 10     |
++----------+----------------+--------------+--------+
 
-+ Tag
+Tag
     A string by witch this rates timing will be referenced in other places by.
-+ RatesTag
+RatesTag
     The rating tag described in the rates file.
-+ TimingTag
+TimingTag
     The timing tag described in the timing file
+Weight
+    If multiple timings cab be applied to a call the one with the lower weight wins.
+
 
 Rates
 -----
@@ -65,36 +68,34 @@ Rates
 +---------------------+-----------------+------------+-------+-------------+
 
 
-+ Tag
+Tag
     A string by witch this rate will be referenced in other places by.
-+ DestinationsTag
+DestinationsTag
     The destination tag witch these rates apply to.
-+ ConnectFee
+ConnectFee
     The price to be charged once at the beginning of the call to the specified destination.
-+ Price
+Price
     The price for the billing unit expressed in cents.    
-+ BillingUnit
+BillingUnit
     The billing unit expressed in seconds
 
 Timings
 -------
 
-+-------------+--------+-----------+-----------+----------+--------+
-| Tag         | Months | MonthDays |  WeekDays | StartTime| Weight |
-+=============+========+===========+===========+==========+========+
-| WORKDAYS_00 | *all   | *all      | 1;2;3;4;5 | 00:00:00 | 10     |
-+-------------+--------+-----------+-----------+----------+--------+
-| WORKDAYS_18 | *all   | *all      | 1;2;3;4;5 | 18:00:00 | 10     |
-+-------------+--------+-----------+-----------+----------+--------+
++-------------+--------+-----------+-----------+----------+
+| Tag         | Months | MonthDays |  WeekDays | StartTime|
++=============+========+===========+===========+==========+
+| WORKDAYS_00 | *all   | *all      | 1;2;3;4;5 | 00:00:00 |
++-------------+--------+-----------+-----------+----------+
+| WORKDAYS_18 | *all   | *all      | 1;2;3;4;5 | 18:00:00 |
++-------------+--------+-----------+-----------+----------+
 
-+ Tag
+Tag
     A string by witch this timing will be referenced in other places by.
-+ Months
-+ MonthDays
-+ WeekDays
-+ StartTime
-+ Weight
-    If multiple timings cab be applied to a call the one with the lower weight wins.
+Months
+MonthDays
+WeekDays
+StartTime
 
 Destinations
 ------------
@@ -109,9 +110,9 @@ The destinations are binding together various prefixes / caller ids to define a 
 | GERMANY_O2 | 49176 |
 +------------+-------+
 
-+ Tag
+Tag
     A string by witch this destination will be referenced in other places by.
-+ Prefix
+Prefix
     The prefix or caller id to be added to the specified destination.
 
 Account actions
@@ -125,11 +126,11 @@ Account actions
 | CUSTOMER_1 | dan     | OUT       | STANDARD_ABO     | STANDARD_TRIGGER |
 +------------+---------+-----------+------------------+------------------+
 
-+ Tenant
-+ Account
-+ Direction 
-+ ActionTimingsTag
-+ ActionTriggersTag
+Tenant
+Account
+Direction 
+ActionTimingsTag
+ActionTriggersTag
 
 Action triggers
 ---------------
@@ -142,13 +143,13 @@ Action triggers
 | STANDARD_TRIGGER | SMS        | 30             | *all           |SOME_2      | 10     |
 +------------------+------------+----------------+----------------+------------+--------+
 
-+ Tag
+Tag
     A string by witch this action trigger will be referenced in other places by.
-+ BalanceTag
-+ ThresholdValue
-+ DestinationTag
-+ ActionsTag 
-+ Weight
+BalanceTag
+ThresholdValue
+DestinationTag
+ActionsTag 
+Weight
 
 Action timings
 --------------
@@ -161,11 +162,11 @@ Action timings
 | STANDARD_ABO | SOME       | WEEKLY_SAME_TIME | 10     |
 +--------------+------------+------------------+--------+
 
-+ Tag
+Tag
     A string by witch this action timing will be referenced in other places by.
-+ ActionsTag 
-+ TimingTag
-+ Weight
+ActionsTag 
+TimingTag
+Weight
 
 Actions
 -------
@@ -178,13 +179,13 @@ Actions
 | SOME_1 | DEBIT       | MINUTES    | 10    | GERMANY_O2     | PERCENT   | 25         | 10            | 10     |
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
 
-+ Tag
+Tag
     A string by witch this action will be referenced in other places by.
-+ Action
-+ BalanceTag
-+ Units
-+ DestinationTag
-+ PriceType
-+ PriceValue
-+ MinutesWeight
-+ Weight
+Action
+BalanceTag
+Units
+DestinationTag
+PriceType
+PriceValue
+MinutesWeight
+Weight

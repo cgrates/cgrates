@@ -27,11 +27,11 @@ import (
 )
 
 type Rate struct {
-	DestinationsTag                        string
-	ConnectFee, Price, BillingUnit, Weight float64
+	DestinationsTag                string
+	ConnectFee, Price, BillingUnit float64
 }
 
-func NewRate(destinationsTag, connectFee, price, billingUnit, weight string) (r *Rate, err error) {
+func NewRate(destinationsTag, connectFee, price, billingUnit string) (r *Rate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -47,17 +47,11 @@ func NewRate(destinationsTag, connectFee, price, billingUnit, weight string) (r 
 		log.Printf("Error parsing billing unit from: %v", billingUnit)
 		return
 	}
-	w, err := strconv.ParseFloat(weight, 64)
-	if err != nil {
-		log.Printf("Error parsing weight from: %v", weight)
-		return
-	}
 	r = &Rate{
 		DestinationsTag: destinationsTag,
 		ConnectFee:      cf,
 		Price:           p,
 		BillingUnit:     bu,
-		Weight:          w,
 	}
 	return
 }
@@ -85,12 +79,19 @@ func NewTiming(timeingInfo ...string) (rt *Timing) {
 
 type RateTiming struct {
 	RatesTag string
+	Weight   float64
 	timing   *Timing
 }
 
-func NewRateTiming(ratesTag string, timing *Timing) (rt *RateTiming) {
+func NewRateTiming(ratesTag string, timing *Timing, weight string) (rt *RateTiming) {
+	w, err := strconv.ParseFloat(weight, 64)
+	if err != nil {
+		log.Printf("Error parsing weight unit from: %v", weight)
+		return
+	}
 	rt = &RateTiming{
 		RatesTag: ratesTag,
+		Weight:   w,
 		timing:   timing,
 	}
 	return
@@ -102,10 +103,10 @@ func (rt *RateTiming) GetInterval(r *Rate) (i *timespans.Interval) {
 		MonthDays:   rt.timing.MonthDays,
 		WeekDays:    rt.timing.WeekDays,
 		StartTime:   rt.timing.StartTime,
+		Weight:      rt.Weight,
 		ConnectFee:  r.ConnectFee,
 		Price:       r.Price,
 		BillingUnit: r.BillingUnit,
-		Weight:      r.Weight,
 	}
 	return
 }
