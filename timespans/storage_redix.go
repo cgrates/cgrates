@@ -20,7 +20,6 @@ package timespans
 
 import (
 	"github.com/fzzbt/radix/redis"
-	"log"
 )
 
 type RedixStorage struct {
@@ -29,10 +28,7 @@ type RedixStorage struct {
 }
 
 func NewRedixStorage(address string, db int) (*RedixStorage, error) {
-	ndb, err := redis.NewClient(redis.Configuration{Address: address, Database: db})
-	if err != nil {
-		log.Fatalf("Could not connect to redis server: %v", err)
-	}
+	ndb := redis.NewClient(redis.Config{Address: address, Database: db})
 	ms := &MyMarshaler{}
 	return &RedixStorage{db: ndb, ms: ms}, nil
 }
