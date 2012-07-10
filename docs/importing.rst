@@ -210,7 +210,7 @@ Actions
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
 | Tag    | Action      | BalanceTag | Units | DestinationTag | PriceType | PriceValue | MinutesWeight | Weight |
 +========+=============+============+=======+================+===========+============+===============+========+
-| SOME   | TOPUP_RESET | MONETARY   | 10    | *all           |                                        | 10     |
+| SOME   | TOPUP_RESET | MONETARY   | 10    | *all           |           |            |               | 10     |
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
 | SOME_1 | DEBIT       | MINUTES    | 10    | GERMANY_O2     | PERCENT   | 25         | 10            | 10     |
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
@@ -219,22 +219,30 @@ Tag
     A string by witch this action will be referenced in other places by.
 Action
     The action type. Can have one of the following:
-    LOG:
-    RESET_TRIGGERS
-    SET_POSTPAID: Sets account to postpaid, maintains it's balances.
-    RESET_POSTPAID: Set account to postpaid, reset all it's balances.
-    SET_PREPAID: Sets account to prepaid, maintains it's balances. Makes sense after an account was set to POSTPAID and admin wants it back.
-    RESET_PREPAID: Set account to prepaid, reset all it's balances.
-    TOPUP_RESET:  Add account balance. If previous balance found of the same type, reset it before adding.
-    TOPUP: Add account balance. If the specific balance is not defined, define it (eg: minutes per destination).
-    DEBIT: Debit account balance.
-    RESET_COUNTER: Sets the counter for the BalanceId to 0
-    RESET_ALL_COUNTER: Sets all counters to 0
+
+    + LOG: Logs the other action values (for debugging purposes).
+    + RESET_TRIGGERS: Marks all action triggers as ready to be executed.
+    + SET_POSTPAID: Sets account to postpaid, maintains it's balances.
+    + RESET_POSTPAID: Set account to postpaid, reset all it's balances.
+    + SET_PREPAID: Sets account to prepaid, maintains it's balances. Makes sense after an account was set to POSTPAID and admin wants it back.
+    + RESET_PREPAID: Set account to prepaid, reset all it's balances.
+    + TOPUP_RESET:  Add account balance. If previous balance found of the same type, reset it before adding.
+    + TOPUP: Add account balance. If the specific balance is not defined, define it (eg: minutes per destination).
+    + DEBIT: Debit account balance.
+    + RESET_COUNTER: Sets the counter for the BalanceId to 0
+    + RESET_ALL_COUNTER: Sets all counters to 0
 
 BalanceTag
+    The balance on which the action will operate
 Units
+    The units which will be operated on the balance BalanceTag.
 DestinationTag
+    This field is used only if the balanceTag is MINUTES. Specifies the destination of the minutes to be operated.
 PriceType
+    This field is used only if the balanceTag is MINUTES. Specifies if the minutes price will be absolute or a percent of the normal price, Can be ABSOLUTE or PERCENT. If the value is percent the
 PriceValue
+    This field is used only if the balanceTag is MINUTES. The price for each second.
 MinutesWeight
+    This field is used only if the balanceTag is MINUTES. If more minute balances are suitable for a call the one with smaller weight will be used first.
 Weight
+    If there are multiple actions in a group, they will be executed in the order of their weight (smaller first).
