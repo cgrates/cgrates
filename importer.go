@@ -26,5 +26,4 @@ import (
 	_ "github.com/cgrates/cgrates/cmd/cgr-rater"
 	_ "github.com/cgrates/cgrates/cmd/cgr-scheduler"
 	_ "github.com/cgrates/cgrates/cmd/cgr-sessionmanager"
-	"log"
 )
