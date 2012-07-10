@@ -1,8 +1,14 @@
 Data importing
 =============
 
+For importing the data into CGRateS database we are using cvs files. The import process can be started as many times it is desired with one ore more csv files and the existing values are overwritten. If the -flush option is used then the database is cleaned before importing.For more details see the cgr-loader tool from the tutorial chapter.
+
+The rest of this section we will describe the content of every csv files.
+
 Rates profile
 --------------
+
+The rates profile describes the prices to be applied for various calls to various destinations in various time frames. When a call is made the CGRateS system will locate the rates to be applied to the call using the rating profiles.
 
 +------------+-----+-----------+-------------+----------------------+----------------+----------------------+
 | Tenant     | TOR | Direction | Subject     | RatesFallbackSubject | RatesTimingTag | ActivationTime       |
@@ -13,16 +19,24 @@ Rates profile
 +------------+-----+-----------+-------------+----------------------+----------------+----------------------+
 
 + Tenant
-    Ceva text explicativ.
+    Used to distinguish between carriers if more than one share the same database in the CGRates system.
 + TOR
+    Type of record specifies the kind of transmission this rate profile applies to.
 + Direction
+    Can be IN or OUT for the INBOUND and OUTBOUND calls.
 + Subject
+    The client/user for who this profile is detailing the rates.
 + RatesFallbackSubject
+    This specifies another profile to be used in case the call destination will not be found in the current profile. The same tenant, tor and direction will be used.
 + RatesTimingTag
+    Forwards to a tag described in the rates timing file to be used for this profile.
 + ActivationTime
+    Multiple rates timings/prices can be created for one profile with different activation times. When a call is made the appropriate profile(s) will be used to rate the call.
 
 Rates timings
 -------------
+
+This file makes links between a ratings and timings so each of them can be described once and various combinations are made possible.
 
 +----------+----------------+--------------+
 | Tag      | RatesTag       | TimingTag    |
@@ -33,29 +47,54 @@ Rates timings
 +----------+----------------+--------------+
 
 + Tag
-    A string by witch this timing will be referenced in other places by.
+    A string by witch this rates timing will be referenced in other places by.
 + RatesTag
+    The rating tag described in the rates file.
 + TimingTag
+    The timing tag described in the timing file
 
 Rates
 -----
 
-+---------------------+-----------------+------------+-------+-------------+--------+
-| Tag                 | DestinationsTag | ConnectFee | Price | BillingUnit | Weight |
-+=====================+=================+============+=======+=============+========+
-| RT_STANDARD         | GERMANY         | 0          | 0.2   | 1           | 10     |
-+---------------------+-----------------+------------+-------+-------------+--------+
-| RT_STANDARD         | GERMANY_O2      | 0          | 0.1   | 1           | 10     |
-+---------------------+-----------------+------------+-------+-------------+--------+
++---------------------+-----------------+------------+-------+-------------+
+| Tag                 | DestinationsTag | ConnectFee | Price | BillingUnit |
++=====================+=================+============+=======+=============+
+| RT_STANDARD         | GERMANY         | 0          | 0.2   | 1           |
++---------------------+-----------------+------------+-------+-------------+
+| RT_STANDARD         | GERMANY_O2      | 0          | 0.1   | 1           |
++---------------------+-----------------+------------+-------+-------------+
 
 
 + Tag
     A string by witch this rate will be referenced in other places by.
 + DestinationsTag
+    The destination tag witch these rates apply to.
 + ConnectFee
+    The price to be charged once at the beginning of the call to the specified destination.
 + Price
+    The price for the billing unit expressed in cents.    
 + BillingUnit
+    The billing unit expressed in seconds
+
+Timings
+-------
+
++-------------+--------+-----------+-----------+----------+--------+
+| Tag         | Months | MonthDays |  WeekDays | StartTime| Weight |
++=============+========+===========+===========+==========+========+
+| WORKDAYS_00 | *all   | *all      | 1;2;3;4;5 | 00:00:00 | 10     |
++-------------+--------+-----------+-----------+----------+--------+
+| WORKDAYS_18 | *all   | *all      | 1;2;3;4;5 | 18:00:00 | 10     |
++-------------+--------+-----------+-----------+----------+--------+
+
++ Tag
+    A string by witch this timing will be referenced in other places by.
++ Months
++ MonthDays
++ WeekDays
++ StartTime
 + Weight
+    If multiple timings cab be applied to a call the one with the lower weight wins.
 
 Destinations
 ------------
@@ -74,24 +113,6 @@ The destinations are binding together various prefixes / caller ids to define a 
     A string by witch this destination will be referenced in other places by.
 + Prefix
     The prefix or caller id to be added to the specified destination.
-
-Timings
--------
-
-+-------------+--------+-----------+-----------+----------+
-| Tag         | Months | MonthDays |  WeekDays | StartTime|
-+=============+========+===========+===========+==========+
-| WORKDAYS_00 | *all   | *all      | 1;2;3;4;5 | 00:00:00 |
-+-------------+--------+-----------+-----------+----------+
-| WORKDAYS_18 | *all   | *all      | 1;2;3;4;5 | 18:00:00 |
-+-------------+--------+-----------+-----------+----------+
-
-+ Tag
-    A string by witch this timing will be referenced in other places by.
-+ Months
-+ MonthDays
-+ WeekDays
-+ StartTime
 
 Account actions
 ---------------
