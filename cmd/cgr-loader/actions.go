@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"encoding/csv"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"os"
 	"fmt"
 	"strconv"
 )
@@ -34,16 +32,14 @@ var (
 	accountActions  []*timespans.UserBalance
 )
 
-func loadActions() {
-	fp, err := os.Open(*actionsFn)
+func (csvr *CSVReader) loadActions(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open actions file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -104,16 +100,14 @@ func loadActions() {
 	log.Print(actions)
 }
 
-func loadActionTimings() {
-	fp, err := os.Open(*actiontimingsFn)
+func (csvr *CSVReader) loadActionTimings(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open actions timings file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -151,16 +145,14 @@ func loadActionTimings() {
 	log.Print(actionsTimings)
 }
 
-func loadActionTriggers() {
-	fp, err := os.Open(*actiontriggersFn)
+func (csvr *CSVReader) loadActionTriggers(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open destination balance actions file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -190,16 +182,14 @@ func loadActionTriggers() {
 	log.Print(actionsTriggers)
 }
 
-func loadAccountActions() {
-	fp, err := os.Open(*accountactionsFn)
+func (csvr *CSVReader) loadAccountActions(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open account actions file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		if record[0] == "Tenant" {
 			continue

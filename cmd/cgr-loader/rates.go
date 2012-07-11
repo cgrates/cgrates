@@ -19,11 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"encoding/csv"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"fmt"
-	"os"
 	"time"
 )
 
@@ -36,17 +34,16 @@ var (
 	ratingProfiles    = make(map[string]CallDescriptors)
 )
 
-func loadDestinations() {
-	fp, err := os.Open(*destinationsFn)
+func (csvr *CSVReader) loadDestinations(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open destinations file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+
 		tag := record[0]
 		if tag == "Tag" {
 			// skip header line
@@ -63,20 +60,18 @@ func loadDestinations() {
 			dest = &timespans.Destination{Id: tag}
 			destinations = append(destinations, dest)
 		}
-		dest.Prefixes = append(dest.Prefixes, record[1:]...)
+		dest.Prefixes = append(dest.Prefixes, record[1])
 	}
 }
 
-func loadRates() {
-	fp, err := os.Open(*ratesFn)
+func (csvr *CSVReader) loadRates(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open rates timing file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -91,16 +86,14 @@ func loadRates() {
 	}
 }
 
-func loadTimings() {
-	fp, err := os.Open(*timingsFn)
+func (csvr *CSVReader) loadTimings(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open timings file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -113,16 +106,14 @@ func loadTimings() {
 	}
 }
 
-func loadRateTimings() {
-	fp, err := os.Open(*ratetimingsFn)
+func (csvr *CSVReader) loadRateTimings(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open rates timings file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tag" {
@@ -153,16 +144,14 @@ func loadRateTimings() {
 	}
 }
 
-func loadRatingProfiles() {
-	fp, err := os.Open(*ratingprofilesFn)
+func (csvr *CSVReader) loadRatingProfiles(fn string) {
+	csvReader, fp, err := csvr.readerFunc(fn)
 	if err != nil {
-		log.Printf("Could not open destinations rates file: %v", err)
 		return
 	}
-	defer fp.Close()
-	csvReader := csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
+	if fp != nil {
+		defer fp.Close()
+	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		if tag == "Tenant" {
@@ -232,7 +221,7 @@ func loadRatingProfiles() {
 		log.Printf("Could not open destinations rates file: %v", err)
 		return
 	}
-	defer fp.Close()
+	if fp != nil {defer fp.Close()}
 	csvReader := csv.NewReader(fp)
 	csvReader.Comma = sep
 	csvReader.TrailingComma = true

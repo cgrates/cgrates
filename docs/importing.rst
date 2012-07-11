@@ -1,3 +1,4 @@
+.. _`data-importing`:
 Data importing
 =============
 

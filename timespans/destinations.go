@@ -64,6 +64,15 @@ func (d *Destination) containsPrefix(prefix string) (bool, int) {
 	return false, 0
 }
 
+func (d *Destination) String() (result string) {
+	result = d.Id + ": "
+	for _, p := range d.Prefixes {
+		result += p + ", "
+	}
+	result = strings.TrimRight(result, ", ")
+	return result
+}
+
 func (d *Destination) store() (result string) {
 	for _, p := range d.Prefixes {
 		result += p + ","

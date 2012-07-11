@@ -1,58 +1,18 @@
 Tutorial
 ========
-The general usage of the CGRateS involves creating a CallDescriptor structure sending it to the balancer via JSON RPC and getting a response from the balancer inf form of a CallCost structure or a numeric value for requested information.
 
 The general steps to get up and running with CGRateS are:
 
-#. Create JSON files containing rates, budgets, tariff plans and destinations, see :ref:`data-importing`.
+#. Create CSV files containing the initial data for CGRateS, see :ref:`data-importing`.
 #. Load the data in the databases using the loader tool.
-#. Start the balancer, see :ref:`running`.
+#. Start the balancer or rater and connect it to the call switch, see :ref:`running`.
 #. Start one ore more raters.
-#. Make API calls to the balancer/rater.
-
-CallDescriptor structure
-------------------------
-	- TOR                                int
-	- CstmId, Subject, DestinationPrefix string
-	- TimeStart, TimeEnd                 time.Time
-	- Amount                             float64
-TOR
-	Type Of Record, used to differentiate between various type of records
-CstmId
-	Customer Identification used for multi tenant databases
-Subject
-	Subject for this query
-DestinationPrefix
-	Destination prefix to be matched
-TimeStart, TimeEnd
-	The start end end of the call in question
-Amount
-	The amount requested in various API calls (e.g. DebitSMS amount)
-
-CallCost structure
-------------------
-	- TOR                                int
-	- CstmId, Subject, DestinationPrefix string
-	- Cost, ConnectFee                   float64
-	- Timespans                          []*TimeSpan
-TOR
-	Type Of Record, used to differentiate between various type of records (for query identification and confirmation)
-CstmId
-	Customer Identification used for multi tenant databases (for query identification and confirmation)
-Subject
-	Subject for this query (for query identification and confirmation)
-DestinationPrefix
-	Destination prefix to be matched (for query identification and confirmation)
-Cost
-	The requested cost
-ConnectFee
-	The requested connection cost
-Timespans
-	The timespans in witch the initial TimeStart-TimeEnd was split in for cost determination with all pricing and cost information attached. 
+#. Make API calls to the balancer/rater or just let the session manager do the work.
 
 Instalation
 -----------
 **Using packages**
+
 **Using source**
 
 After the go environment is installed_ and setup_ just issue the following commands:
@@ -62,8 +22,6 @@ After the go environment is installed_ and setup_ just issue the following comma
 
 This will install the sources and compile all available tools	
 	
-After that navigate
-
 .. _installed: http://golang.org/doc/install
 .. _setup: http://golang.org/doc/code.html
 
@@ -79,9 +37,13 @@ cgr-balancer
 
 	rif@grace:~$ cgr-balancer --help
 	Usage of cgr-balancer:
-  		-httpapiaddr="127.0.0.1:8000": HTTP API server address (localhost:2002)
-  		-jsonrpcaddr="127.0.0.1:2001": JSON RPC server address (localhost:2001)
-  		-rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
+	  -freeswitchpass="ClueCon": freeswitch address host:port
+	  -freeswitchsrv="localhost:8021": freeswitch address host:port
+	  -httpapiaddr="127.0.0.1:8000": Http API server address (localhost:2002)
+	  -json=false: use JSON for RPC encoding
+	  -jsonrpcaddr="127.0.0.1:2001": Json RPC server address (localhost:2001)
+	  -rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
+
 
 cgr-rater
 	The cgr-rater can be provided with the balancer server address and can be configured to listen to a specific interface and port.
@@ -90,8 +52,14 @@ cgr-rater
 	rif@grace:~$ cgr-rater --help
 	Usage of cgr-rater:
 	  -balancer="127.0.0.1:2000": balancer address host:port
-	  -json=false: use json for rpc encoding
+	  -freeswitch=false: connect to freeswitch server
+	  -freeswitchpass="ClueCon": freeswitch address host:port
+	  -freeswitchsrv="localhost:8021": freeswitch address host:port
+	  -json=false: use JSON for RPC encoding
 	  -listen="127.0.0.1:1234": listening address host:port
+	  -redisdb=10: redis database number
+	  -redissrv="127.0.0.1:6379": redis address host:port
+	  -standalone=false: start standalone server (no balancer)
 
 cgr-console
 	The cgr-console is a command line tool used to access the balancer (or the rater directly) to call all the API methods offered by CGRateS.
@@ -108,20 +76,6 @@ cgr-console
 	  -tor=0: Type of record
 	  -ts="2012-02-09T00:00:00Z": Time start
 
-	rif@grace:~$ cgr-cgrates 
-	List of commands:
-		getcost
-		getmaxsessiontime
-		debitbalance
-		debitsms
-		debitseconds
-		addvolumediscountseconds
-		resetvolumediscountseconds
-		addrecievedcallseconds
-		resetuserbudget
-		status
-
-
 cgr-loader
 	The loader is the most configurable tool because it has options for each of the three supported databases (kyoto, redis and mongodb).
 	Apart from that multi-database options it is quite easy to be used.
@@ -133,17 +87,50 @@ cgr-loader
 
 	rif@grace:~$ cgr-loader --help
 	Usage of cgr-loader:
-	  -apfile="ap.json": Activation Periods containing intervals file
-	  -destfile="dest.json": Destinations file
-	  -kyotofile="storage.kch": kyoto storage file (storage.kch)
-	  -mdb="test": mongo database name (test)
-	  -mongoserver="127.0.0.1:27017": mongo server address (127.0.0.1:27017)
+	  -accountactions="AccountActions.csv": Account actions file
+	  -actions="Actions.csv": Actions file
+	  -actiontimings="ActionTimings.csv": Actions timings file
+	  -actiontriggers="ActionTriggers.csv": Actions triggers file
+	  -destinations="Destinations.csv": Destinations file
+	  -flush=false: Flush the database before importing
+	  -month="Months.csv": Months file
+	  -monthdays="MonthDays.csv": Month days file
 	  -pass="": redis database password
+	  -rates="Rates.csv": Rates file
+	  -ratetimings="RateTimings.csv": Rates timings file
+	  -ratingprofiles="RatingProfiles.csv": Rating profiles file
 	  -rdb=10: redis database number (10)
-	  -redisserver="tcp:127.0.0.1:6379": redis server address (tcp:127.0.0.1:6379)
-	  -storage="all": kyoto|redis|mongo
-	  -tpfile="tp.json": Tariff plans file
-	  -ubfile="ub.json": User budgets file
+	  -redisserver="127.0.0.1:6379": redis server address (tcp:127.0.0.1:6379)
+	  -separator=",": Default field separator
+	  -timings="Timings.csv": Timings file
+	  -weekdays="WeekDays.csv": Week days file
 
 
+rif@grace:~$ cgr-balancer --help
+Usage of cgr-balancer:
+  -freeswitchpass="ClueCon": freeswitch address host:port
+  -freeswitchsrv="localhost:8021": freeswitch address host:port
+  -httpapiaddr="127.0.0.1:8000": Http API server address (localhost:2002)
+  -json=false: use JSON for RPC encoding
+  -jsonrpcaddr="127.0.0.1:2001": Json RPC server address (localhost:2001)
+  -rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
 
+rif@grace:~$ cgr-sessionmanager --help
+Usage of cgr-sessionmanager:
+  -balancer="127.0.0.1:2000": balancer address host:port
+  -freeswitchpass="ClueCon": freeswitch address host:port
+  -freeswitchsrv="localhost:8021": freeswitch address host:port
+  -json=false: use JSON for RPC encoding
+  -redisdb=10: redis database number
+  -redissrv="127.0.0.1:6379": redis address host:port
+  -standalone=false: run standalone (run as a rater)
+
+rif@grace:~$ cgr-mediator --help
+Usage of cgr-mediator:
+  -dbname="cgrates": The name of the database to connect to.
+  -freeswitchcdr="Master.csv": Freeswitch Master CSV CDR file.
+  -host="localhost": The host to connect to. Values that start with / are for unix domain sockets.
+  -password="": The user's password.
+  -port="5432": The port to bind to.
+  -resultfile="out.csv": Generated file containing CDR and price info.
+  -user="": The user to sign in as.

@@ -22,12 +22,15 @@ import (
 	"flag"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
+	"encoding/csv"
+	"strings"
+	"os"
 )
 
 var (
 	separator        = flag.String("separator", ",", "Default field separator")
-	redisserver      = flag.String("redisserver", "127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
-	redisdb          = flag.Int("rdb", 10, "redis database number (10)")
+	redissrv         = flag.String("redissrv", "127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
+	redisdb          = flag.Int("redisdb", 10, "redis database number (10)")
 	redispass        = flag.String("pass", "", "redis database password")
 	flush            = flag.Bool("flush", false, "Flush the database before importing")
 	monthsFn         = flag.String("month", "Months.csv", "Months file")
@@ -46,7 +49,7 @@ var (
 )
 
 func writeToDatabase() {
-	storage, err := timespans.NewRedisStorage(*redisserver, *redisdb)
+	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb)
 	if err != nil {
 		log.Fatalf("Could not open database connection: %v", err)
 	}
@@ -82,17 +85,40 @@ func writeToDatabase() {
 	}
 }
 
+func openFileCSVReader(fn string) (csvReader *csv.Reader, fp *os.File, err error) {
+	fp, err = os.Open(fn)
+	if err != nil {
+		return
+	}
+	csvReader = csv.NewReader(fp)
+	csvReader.Comma = sep
+	csvReader.TrailingComma = true
+	return
+}
+
+func openStringCSVReader(data string) (csvReader *csv.Reader, fp *os.File, err error) {
+	csvReader = csv.NewReader(strings.NewReader(data))
+	csvReader.Comma = ','
+	csvReader.TrailingComma = true
+	return
+}
+
+type CSVReader struct {
+	readerFunc func(string) (*csv.Reader, *os.File, error)
+}
+
 func main() {
 	flag.Parse()
 	sep = []rune(*separator)[0]
-	loadDestinations()
-	loadRates()
-	loadTimings()
-	loadRateTimings()
-	loadRatingProfiles()
-	loadActions()
-	loadActionTimings()
-	loadActionTriggers()
-	loadAccountActions()
+	csvr := &CSVReader{openFileCSVReader}
+	csvr.loadDestinations(*destinationsFn)
+	csvr.loadRates(*ratesFn)
+	csvr.loadTimings(*timingsFn)
+	csvr.loadRateTimings(*ratetimingsFn)
+	csvr.loadRatingProfiles(*ratingprofilesFn)
+	csvr.loadActions(*actionsFn)
+	csvr.loadActionTimings(*actiontimingsFn)
+	csvr.loadActionTriggers(*actiontriggersFn)
+	csvr.loadAccountActions(*accountactionsFn)
 	writeToDatabase()
 }
