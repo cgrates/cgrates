@@ -31,8 +31,9 @@ import (
 
 var (
 	raterAddress   = flag.String("rateraddr", "127.0.0.1:2000", "Rater server address (localhost:2000)")
-	jsonRpcAddress = flag.String("jsonrpcaddr", "127.0.0.1:2001", "Json RPC server address (localhost:2001)")
+	rpcAddress     = flag.String("rpcaddr", "127.0.0.1:2001", "Json RPC server address (localhost:2001)")
 	httpApiAddress = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:2002)")
+	freeswitch     = flag.Bool("freeswitch", false, "connect to freeswitch server")
 	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
 	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
 	js             = flag.Bool("json", false, "use JSON for RPC encoding")
@@ -68,8 +69,6 @@ func GetCallCost(key *timespans.CallDescriptor, method string) (reply *timespans
 The function that gets the information from the raters using balancer.
 */
 func CallMethod(key *timespans.CallDescriptor, method string) (reply float64, err error) {
-	// balancerRWMutex.Lock()
-	// defer balancerRWMutex.Unlock()
 	err = errors.New("") //not nil value
 	for err != nil {
 		client := bal.Balance()
@@ -94,12 +93,13 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 	bal = balancer.NewBalancer()
 
-	go StopSingnalHandler()
+	go stopSingnalHandler()
 	go listenToRPCRaterRequests()
 	go listenToRPCRequests()
 
-	sm := &sessionmanager.FSSessionManager{}
-	sm.Connect(sessionmanager.NewRPCBalancerSessionDelegate(bal), *freeswitchsrv, *freeswitchpass)
-
+	if *freeswitch {
+		sm := &sessionmanager.FSSessionManager{}
+		sm.Connect(sessionmanager.NewRPCBalancerSessionDelegate(bal), *freeswitchsrv, *freeswitchpass)
+	}
 	listenToHttpRequests()
 }

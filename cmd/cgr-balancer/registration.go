@@ -42,7 +42,7 @@ func listenToRPCRaterRequests() {
 /*
 Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered raters.
 */
-func StopSingnalHandler() {
+func stopSingnalHandler() {
 	log.Print("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)

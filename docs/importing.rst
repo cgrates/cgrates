@@ -230,8 +230,8 @@ Action
     + TOPUP_RESET:  Add account balance. If previous balance found of the same type, reset it before adding.
     + TOPUP: Add account balance. If the specific balance is not defined, define it (eg: minutes per destination).
     + DEBIT: Debit account balance.
-    + RESET_COUNTER: Sets the counter for the BalanceId to 0
-    + RESET_ALL_COUNTER: Sets all counters to 0
+    + RESET_COUNTER: Sets the counter for the BalanceTag to 0
+    + RESET_ALL_COUNTERS: Sets all counters to 0
 
 BalanceTag
     The balance on which the action will operate

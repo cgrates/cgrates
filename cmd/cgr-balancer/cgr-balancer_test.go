@@ -43,6 +43,6 @@ func TestRPCGet(t *testing.T) {
 	client.Call("Responder.Get", "test", &reply)
 	const expect = "12223"
 	if reply != expect {
-		t.Errorf("replay == %q, want %q", reply, expect)
+		t.Errorf("replay == %v, want %v", reply, expect)
 	}
 }

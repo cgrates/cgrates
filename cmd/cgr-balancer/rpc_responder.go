@@ -100,7 +100,7 @@ func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err er
 Creates the json rpc server.
 */
 func listenToRPCRequests() {
-	l, err := net.Listen("tcp", *jsonRpcAddress)
+	l, err := net.Listen("tcp", *rpcAddress)
 	defer l.Close()
 
 	if err != nil {

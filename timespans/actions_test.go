@@ -570,7 +570,7 @@ func TestActionResetAllCounters(t *testing.T) {
 		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	resetAllCountersAction(ub, nil)
+	resetCountersAction(ub, nil)
 	if ub.Type != UB_TYPE_POSTPAID ||
 		ub.BalanceMap[CREDIT] != 100 ||
 		len(ub.UnitCounters) != 1 ||

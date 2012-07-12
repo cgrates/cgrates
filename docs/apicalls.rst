@@ -3,14 +3,15 @@ Api Calls
 The general API usage of the CGRateS involves creating a CallDescriptor structure sending it to the balancer via JSON/GOB RPC and getting a response from the balancer in form of a CallCost structure or a numeric value for requested information.
 
 CallDescriptor structure
-------------------------
-	- TOR                                int
-	- CstmId, Subject, DestinationPrefix string
+------------------------	
+	- Direction, TOR, Tener, Subject, DestinationPrefix string
 	- TimeStart, TimeEnd                 time.Time
 	- Amount                             float64
+Direction
+	The direction of the call
 TOR
 	Type Of Record, used to differentiate between various type of records
-CstmId
+Tener
 	Customer Identification used for multi tenant databases
 Subject
 	Subject for this query

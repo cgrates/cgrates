@@ -56,11 +56,12 @@ func (csvr *CSVReader) loadActions(fn string) {
 			a = &timespans.Action{
 				ActionType: record[1],
 				BalanceId:  record[2],
+				Direction:  record[3],
 				Units:      units,
 			}
 		} else {
 			price, percent := 0.0, 0.0
-			value, err := strconv.ParseFloat(record[6], 64)
+			value, err := strconv.ParseFloat(record[7], 64)
 			if err != nil {
 				log.Printf("Could not parse action price: %v", err)
 				continue
@@ -71,12 +72,12 @@ func (csvr *CSVReader) loadActions(fn string) {
 			if record[5] == timespans.ABSOLUTE {
 				price = value
 			}
-			minutesWeight, err := strconv.ParseFloat(record[7], 64)
+			minutesWeight, err := strconv.ParseFloat(record[8], 64)
 			if err != nil {
 				log.Printf("Could not parse action minutes weight: %v", err)
 				continue
 			}
-			weight, err := strconv.ParseFloat(record[8], 64)
+			weight, err := strconv.ParseFloat(record[9], 64)
 			if err != nil {
 				log.Printf("Could not parse action weight: %v", err)
 				continue
@@ -84,13 +85,14 @@ func (csvr *CSVReader) loadActions(fn string) {
 			a = &timespans.Action{
 				ActionType: record[1],
 				BalanceId:  record[2],
+				Direction:  record[3],
 				Weight:     weight,
 				MinuteBucket: &timespans.MinuteBucket{
 					Seconds:       units,
 					Weight:        minutesWeight,
 					Price:         price,
 					Percent:       percent,
-					DestinationId: record[4],
+					DestinationId: record[5],
 				},
 			}
 		}

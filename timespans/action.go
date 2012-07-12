@@ -31,6 +31,7 @@ Structure to be filled for each tariff plan with the bonus value for received ca
 type Action struct {
 	ActionType   string
 	BalanceId    string
+	Direction    string
 	Units        float64
 	Weight       float64
 	MinuteBucket *MinuteBucket
@@ -40,17 +41,17 @@ type actionTypeFunc func(*UserBalance, *Action) error
 
 var (
 	actionTypeFuncMap = map[string]actionTypeFunc{
-		"LOG":                logAction,
-		"RESET_TRIGGERS":     resetTriggersAction,
-		"SET_POSTPAID":       setPostpaidAction,
-		"RESET_POSTPAID":     resetPostpaidAction,
-		"SET_PREPAID":        setPrepaidAction,
-		"RESET_PREPAID":      resetPrepaidAction,
-		"TOPUP_RESET":        topupResetAction,
-		"TOPUP":              topupAction,
-		"DEBIT":              debitAction,
-		"RESET_COUNTER":      resetCounterAction,
-		"RESET_ALL_COUNTERS": resetAllCountersAction,
+		"LOG":            logAction,
+		"RESET_TRIGGERS": resetTriggersAction,
+		"SET_POSTPAID":   setPostpaidAction,
+		"RESET_POSTPAID": resetPostpaidAction,
+		"SET_PREPAID":    setPrepaidAction,
+		"RESET_PREPAID":  resetPrepaidAction,
+		"TOPUP_RESET":    topupResetAction,
+		"TOPUP":          topupAction,
+		"DEBIT":          debitAction,
+		"RESET_COUNTER":  resetCounterAction,
+		"RESET_COUNTERS": resetCountersAction,
 	}
 )
 
@@ -119,7 +120,7 @@ func resetCounterAction(ub *UserBalance, a *Action) (err error) {
 	return
 }
 
-func resetAllCountersAction(ub *UserBalance, a *Action) (err error) {
+func resetCountersAction(ub *UserBalance, a *Action) (err error) {
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	uc := &UnitsCounter{BalanceId: MINUTES}
 	uc.initMinuteBuckets(ub.ActionTriggers)
