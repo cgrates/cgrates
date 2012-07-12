@@ -89,7 +89,7 @@ func topupResetAction(ub *UserBalance, a *Action) (err error) {
 	if a.BalanceId == MINUTES {
 		ub.MinuteBuckets = make([]*MinuteBucket, 0)
 	} else {
-		ub.BalanceMap[a.BalanceId] = 0
+		ub.BalanceMap[a.BalanceId+a.Direction] = 0
 	}
 	genericMakeNegative(a)
 	genericDebit(ub, a)
@@ -188,6 +188,7 @@ Serializes the action for the storage. Used for key-value storages.
 func (a *Action) store() (result string) {
 	result += a.ActionType + "|"
 	result += a.BalanceId + "|"
+	result += a.Direction + "|"
 	result += strconv.FormatFloat(a.Units, 'f', -1, 64) + "|"
 	result += strconv.FormatFloat(a.Weight, 'f', -1, 64)
 	if a.MinuteBucket != nil {
@@ -204,10 +205,11 @@ func (a *Action) restore(input string) {
 	elements := strings.Split(input, "|")
 	a.ActionType = elements[0]
 	a.BalanceId = elements[1]
-	a.Units, _ = strconv.ParseFloat(elements[2], 64)
-	a.Weight, _ = strconv.ParseFloat(elements[3], 64)
-	if len(elements) == 5 {
+	a.Direction = elements[2]
+	a.Units, _ = strconv.ParseFloat(elements[3], 64)
+	a.Weight, _ = strconv.ParseFloat(elements[4], 64)
+	if len(elements) == 6 {
 		a.MinuteBucket = &MinuteBucket{}
-		a.MinuteBucket.restore(elements[4])
+		a.MinuteBucket.restore(elements[5])
 	}
 }

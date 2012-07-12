@@ -46,7 +46,7 @@ func (csvr *CSVReader) loadActions(fn string) {
 			// skip header line
 			continue
 		}
-		units, err := strconv.ParseFloat(record[3], 64)
+		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			log.Printf("Could not parse action units: %v", err)
 			continue
@@ -66,10 +66,10 @@ func (csvr *CSVReader) loadActions(fn string) {
 				log.Printf("Could not parse action price: %v", err)
 				continue
 			}
-			if record[5] == timespans.PERCENT {
+			if record[6] == timespans.PERCENT {
 				percent = value
 			}
-			if record[5] == timespans.ABSOLUTE {
+			if record[6] == timespans.ABSOLUTE {
 				price = value
 			}
 			minutesWeight, err := strconv.ParseFloat(record[8], 64)
@@ -98,8 +98,6 @@ func (csvr *CSVReader) loadActions(fn string) {
 		}
 		actions[tag] = append(actions[tag], a)
 	}
-	log.Print("Actions:")
-	log.Print(actions)
 }
 
 func (csvr *CSVReader) loadActionTimings(fn string) {
@@ -143,8 +141,6 @@ func (csvr *CSVReader) loadActionTimings(fn string) {
 		}
 
 	}
-	log.Print("Actions timings:")
-	log.Print(actionsTimings)
 }
 
 func (csvr *CSVReader) loadActionTriggers(fn string) {
@@ -161,27 +157,26 @@ func (csvr *CSVReader) loadActionTriggers(fn string) {
 			// skip header line
 			continue
 		}
-		value, err := strconv.ParseFloat(record[2], 64)
+		value, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
 			log.Printf("Could not parse action trigger value: %v", err)
 			continue
 		}
-		weight, err := strconv.ParseFloat(record[5], 64)
+		weight, err := strconv.ParseFloat(record[6], 64)
 		if err != nil {
 			log.Printf("Could not parse action trigger weight: %v", err)
 			continue
 		}
 		at := &timespans.ActionTrigger{
 			BalanceId:      record[1],
+			Direction:      record[2],
 			ThresholdValue: value,
-			DestinationId:  record[3],
-			ActionsId:      record[4],
+			DestinationId:  record[4],
+			ActionsId:      record[5],
 			Weight:         weight,
 		}
 		actionsTriggers[tag] = append(actionsTriggers[tag], at)
 	}
-	log.Print("Actions triggers:")
-	log.Print(actionsTriggers)
 }
 
 func (csvr *CSVReader) loadAccountActions(fn string) {
@@ -219,6 +214,4 @@ func (csvr *CSVReader) loadAccountActions(fn string) {
 			at.UserBalanceIds = append(at.UserBalanceIds, tag)
 		}
 	}
-	log.Print("Account actions:")
-	log.Print(accountActions)
 }

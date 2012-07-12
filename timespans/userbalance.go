@@ -88,7 +88,7 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 		}
 	}
 	bucketList.Sort() // sorts the buckets according to priority, precision or price
-	credit = ub.BalanceMap[CREDIT]
+	credit = ub.BalanceMap[CREDIT+OUTBOUND]
 	for _, mb := range bucketList {
 		s := mb.GetSecondsForCredit(credit)
 		credit -= s * mb.Price
@@ -133,7 +133,7 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 	if avaliableNbSeconds < amount {
 		return new(AmountTooBig)
 	}
-	credit := ub.BalanceMap[CREDIT]
+	credit := ub.BalanceMap[CREDIT+OUTBOUND]
 	// calculating money debit
 	// this is needed because if the credit is less then the amount needed to be debited
 	// we need to keep everything in place and return an error
@@ -155,7 +155,7 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 	if credit < 0 {
 		return new(AmountTooBig)
 	}
-	ub.BalanceMap[CREDIT] = credit // credit is > 0
+	ub.BalanceMap[CREDIT+OUTBOUND] = credit // credit is > 0
 
 	for _, mb := range bucketList {
 		if mb.Seconds < amount {
@@ -176,8 +176,8 @@ func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool
 	if count && amount > 0 {
 		ub.countUnits(&Action{BalanceId: balanceId, Units: amount})
 	}
-	ub.BalanceMap[balanceId] -= amount
-	return ub.BalanceMap[balanceId]
+	ub.BalanceMap[balanceId+OUTBOUND] -= amount
+	return ub.BalanceMap[balanceId+OUTBOUND]
 }
 
 // Scans the action trigers and execute the actions for which trigger is met

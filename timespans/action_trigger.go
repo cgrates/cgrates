@@ -27,6 +27,7 @@ import (
 
 type ActionTrigger struct {
 	BalanceId      string
+	Direction      string
 	ThresholdValue float64
 	DestinationId  string
 	Weight         float64
@@ -80,6 +81,7 @@ Serializes the action trigger for the storage. Used for key-value storages.
 */
 func (at *ActionTrigger) store() (result string) {
 	result += at.BalanceId + ";"
+	result += at.Direction + ";"
 	result += at.DestinationId + ";"
 	result += at.ActionsId + ";"
 	result += strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64) + ";"
@@ -93,13 +95,14 @@ De-serializes the action timing for the storage. Used for key-value storages.
 */
 func (at *ActionTrigger) restore(input string) {
 	elements := strings.Split(input, ";")
-	if len(elements) != 6 {
+	if len(elements) != 7 {
 		return
 	}
 	at.BalanceId = elements[0]
-	at.DestinationId = elements[1]
-	at.ActionsId = elements[2]
-	at.ThresholdValue, _ = strconv.ParseFloat(elements[3], 64)
-	at.Weight, _ = strconv.ParseFloat(elements[4], 64)
-	at.Executed, _ = strconv.ParseBool(elements[5])
+	at.Direction = elements[1]
+	at.DestinationId = elements[2]
+	at.ActionsId = elements[3]
+	at.ThresholdValue, _ = strconv.ParseFloat(elements[4], 64)
+	at.Weight, _ = strconv.ParseFloat(elements[5], 64)
+	at.Executed, _ = strconv.ParseBool(elements[6])
 }
