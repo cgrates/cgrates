@@ -91,6 +91,17 @@ func TestGetCost(t *testing.T) {
 	}
 }
 
+func TestGetCostAccount(t *testing.T) {
+	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Account: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	result, _ := cd.GetCost()
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700, ConnectFee: 0}
+	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
 func TestFullDestNotFound(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
@@ -170,6 +181,15 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 
 func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minu", Destination: "0723", Amount: 1000}
+	result, err := cd.GetMaxSessionTime()
+	expected := 300.0
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
+func TestMaxSessionTimeWithUserBalanceAccount(t *testing.T) {
+	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minu_from_tm", Account: "minu", Destination: "0723", Amount: 1000}
 	result, err := cd.GetMaxSessionTime()
 	expected := 300.0
 	if result != expected || err != nil {
