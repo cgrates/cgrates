@@ -204,7 +204,7 @@ func (atpl ActionTimingPriotityList) Sort() {
 }
 
 func (at *ActionTiming) String() string {
-	return at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
+	return at.Tag + " " + at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
 }
 
 /*
