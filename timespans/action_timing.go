@@ -150,7 +150,6 @@ func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
 }
 
 func (at *ActionTiming) Execute() (err error) {
-
 	aac, err := at.getActions()
 	if err != nil {
 		log.Print("Failed to get actions: ", err)

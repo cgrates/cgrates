@@ -251,6 +251,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 	ub.executeActionTriggers()
 }
 
+// Create minute counters for all triggered actions that have actions operating on minute buckets
 func (ub *UserBalance) initMinuteCounters() {
 	ucTempMap := make(map[string]*UnitsCounter, 2)
 	for _, at := range ub.ActionTriggers {

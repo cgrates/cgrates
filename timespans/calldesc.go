@@ -86,17 +86,21 @@ func (cd *CallDescriptor) AddActivationPeriodIfNotPresent(aps ...*ActivationPeri
 	}
 }
 
+// Returns the key used to retrive the user balance involved in this call
+func (cd *CallDescriptor) GetUserBalanceKey() string {
+	subj := cd.Subject
+	if cd.Account != "" {
+		subj = cd.Account
+	}
+	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
+}
+
 /*
 Gets and caches the user balance information.
 */
 func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 	if cd.userBalance == nil {
-		subj := cd.Subject
-		if cd.Account != "" {
-			subj = cd.Account
-		}
-		key := fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
-		cd.userBalance, err = storageGetter.GetUserBalance(key)
+		cd.userBalance, err = storageGetter.GetUserBalance(cd.GetUserBalanceKey())
 	}
 	return cd.userBalance, err
 }

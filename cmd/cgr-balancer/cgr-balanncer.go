@@ -53,7 +53,7 @@ func GetCallCost(key *timespans.CallDescriptor, method string) (reply *timespans
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			reply = &timespans.CallCost{}
-			reply, err = timespans.AccLock.GuardGetCost(key.GetKey(), func() (*timespans.CallCost, error) {
+			reply, err = accLock.GuardGetCost(key.GetKey(), func() (*timespans.CallCost, error) {
 				err = client.Call(method, *key, reply)
 				return reply, err
 			})
@@ -76,7 +76,7 @@ func CallMethod(key *timespans.CallDescriptor, method string) (reply float64, er
 			log.Print("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
-			reply, err = timespans.AccLock.Guard(key.GetKey(), func() (float64, error) {
+			reply, err = accLock.Guard(key.GetKey(), func() (float64, error) {
 				err = client.Call(method, *key, &reply)
 				return reply, err
 			})
