@@ -395,7 +395,7 @@ func TestUserBalanceExecuteTriggeredActionsOrder(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]float64{CREDIT + OUTBOUND: 100},
-		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1})

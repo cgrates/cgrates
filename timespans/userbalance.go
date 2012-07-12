@@ -127,7 +127,7 @@ debited and an error will be returned.
 */
 func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count bool) error {
 	if count && amount > 0 {
-		ub.countUnits(&Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: amount, DestinationId: prefix}})
+		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Seconds: amount, DestinationId: prefix}})
 	}
 	avaliableNbSeconds, _, bucketList := ub.getSecondsForPrefix(prefix)
 	if avaliableNbSeconds < amount {
@@ -174,7 +174,7 @@ Debits some amount of user's specified balance. Returns the remaining credit in 
 */
 func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool) float64 {
 	if count && amount > 0 {
-		ub.countUnits(&Action{BalanceId: balanceId, Units: amount})
+		ub.countUnits(&Action{BalanceId: balanceId, Direction: OUTBOUND, Units: amount})
 	}
 	ub.BalanceMap[balanceId+OUTBOUND] -= amount
 	return ub.BalanceMap[balanceId+OUTBOUND]
@@ -219,7 +219,7 @@ func (ub *UserBalance) resetActionTriggers() {
 // Returns the unit counter that matches the specified action type
 func (ub *UserBalance) getUnitCounter(a *Action) *UnitsCounter {
 	for _, uc := range ub.UnitCounters {
-		if uc.BalanceId == a.BalanceId {
+		if uc.BalanceId == a.BalanceId && uc.Direction == a.Direction {
 			return uc
 		}
 	}
@@ -232,7 +232,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 	unitsCounter := ub.getUnitCounter(a)
 	// if not found add the counter
 	if unitsCounter == nil {
-		unitsCounter = &UnitsCounter{BalanceId: a.BalanceId}
+		unitsCounter = &UnitsCounter{BalanceId: a.BalanceId, Direction: a.Direction}
 		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
 	}
 	if a.BalanceId == MINUTES && a.MinuteBucket != nil {

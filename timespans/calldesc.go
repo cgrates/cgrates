@@ -376,6 +376,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		a := &Action{
+			Direction:    INBOUND,
 			MinuteBucket: &MinuteBucket{Seconds: cd.Amount, DestinationId: cd.Destination},
 		}
 		userBalance.countUnits(a)
