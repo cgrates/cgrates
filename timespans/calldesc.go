@@ -54,15 +54,15 @@ func round(val float64, prec int) float64 {
 The input stucture that contains call information.
 */
 type CallDescriptor struct {
-	Direction                    string
-	TOR                          string
-	Tenant, Subject, Destination string
-	TimeStart, TimeEnd           time.Time
-	Amount                       float64
-	FallbackSubject              string // the subject to check for destination if not found on primary subject
-	ActivationPeriods            []*ActivationPeriod
-	FallbackKey                  string
-	userBalance                  *UserBalance
+	Direction                             string
+	TOR                                   string
+	Tenant, Subject, Account, Destination string
+	TimeStart, TimeEnd                    time.Time
+	Amount                                float64
+	FallbackSubject                       string // the subject to check for destination if not found on primary subject
+	ActivationPeriods                     []*ActivationPeriod
+	FallbackKey                           string
+	userBalance                           *UserBalance
 }
 
 // Adds an activation period that applyes to current call descriptor.
@@ -91,7 +91,11 @@ Gets and caches the user balance information.
 */
 func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 	if cd.userBalance == nil {
-		key := fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, cd.Subject)
+		subj := cd.Subject
+		if cd.Account != "" {
+			subj = cd.Account
+		}
+		key := fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 		cd.userBalance, err = storageGetter.GetUserBalance(key)
 	}
 	return cd.userBalance, err

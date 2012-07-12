@@ -64,6 +64,10 @@ func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
 	}
 }
 
+func (uc *UnitsCounter) String() string {
+	return uc.BalanceId + " " + uc.Direction
+}
+
 /*
 Serializes the unit counter for the storage. Used for key-value storages.
 */

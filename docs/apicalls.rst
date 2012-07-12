@@ -8,15 +8,17 @@ CallDescriptor structure
 	- TimeStart, TimeEnd                 time.Time
 	- Amount                             float64
 Direction
-	The direction of the call
+	The direction of the call (inbound or aoutbound)
 TOR
 	Type Of Record, used to differentiate between various type of records
 Tener
 	Customer Identification used for multi tenant databases
 Subject
 	Subject for this query
-DestinationPrefix
-	Destination prefix to be matched
+Account
+	Used when different from subject
+Destination
+	Destination call id to be matched
 TimeStart, TimeEnd
 	The start end end of the call in question
 Amount

@@ -109,7 +109,7 @@ func debitAction(ub *UserBalance, a *Action) (err error) {
 func resetCounterAction(ub *UserBalance, a *Action) (err error) {
 	uc := ub.getUnitCounter(a)
 	if uc == nil {
-		uc = &UnitsCounter{BalanceId: MINUTES}
+		uc = &UnitsCounter{BalanceId: MINUTES, Direction: a.Direction}
 		ub.UnitCounters = append(ub.UnitCounters, uc)
 	}
 	if a.BalanceId == MINUTES {
@@ -122,9 +122,7 @@ func resetCounterAction(ub *UserBalance, a *Action) (err error) {
 
 func resetCountersAction(ub *UserBalance, a *Action) (err error) {
 	ub.UnitCounters = make([]*UnitsCounter, 0)
-	uc := &UnitsCounter{BalanceId: MINUTES}
-	uc.initMinuteBuckets(ub.ActionTriggers)
-	ub.UnitCounters = append(ub.UnitCounters, uc)
+	ub.initMinuteCounters()
 	return
 }
 

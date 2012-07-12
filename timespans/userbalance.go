@@ -219,7 +219,11 @@ func (ub *UserBalance) resetActionTriggers() {
 // Returns the unit counter that matches the specified action type
 func (ub *UserBalance) getUnitCounter(a *Action) *UnitsCounter {
 	for _, uc := range ub.UnitCounters {
-		if uc.BalanceId == a.BalanceId && uc.Direction == a.Direction {
+		direction := a.Direction
+		if direction == "" {
+			direction = OUTBOUND
+		}
+		if uc.BalanceId == a.BalanceId && uc.Direction == direction {
 			return uc
 		}
 	}
@@ -232,7 +236,11 @@ func (ub *UserBalance) countUnits(a *Action) {
 	unitsCounter := ub.getUnitCounter(a)
 	// if not found add the counter
 	if unitsCounter == nil {
-		unitsCounter = &UnitsCounter{BalanceId: a.BalanceId, Direction: a.Direction}
+		direction := a.Direction
+		if direction == "" {
+			direction = OUTBOUND
+		}
+		unitsCounter = &UnitsCounter{BalanceId: a.BalanceId, Direction: direction}
 		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
 	}
 	if a.BalanceId == MINUTES && a.MinuteBucket != nil {
@@ -241,6 +249,33 @@ func (ub *UserBalance) countUnits(a *Action) {
 		unitsCounter.Units += a.Units
 	}
 	ub.executeActionTriggers()
+}
+
+func (ub *UserBalance) initMinuteCounters() {
+	ucTempMap := make(map[string]*UnitsCounter, 2)
+	for _, at := range ub.ActionTriggers {
+		acs, err := storageGetter.GetActions(at.ActionsId)
+		if err != nil {
+			continue
+		}
+		for _, a := range acs {
+			if a.MinuteBucket != nil {
+				direction := at.Direction
+				if direction == "" {
+					direction = OUTBOUND
+				}
+				uc, exists := ucTempMap[direction]
+				if !exists {
+					uc = &UnitsCounter{BalanceId: MINUTES, Direction: direction}
+					ucTempMap[direction] = uc
+					uc.MinuteBuckets = bucketsorter{}
+					ub.UnitCounters = append(ub.UnitCounters, uc)
+				}
+				uc.MinuteBuckets = append(uc.MinuteBuckets, a.MinuteBucket.Clone())
+				uc.MinuteBuckets.Sort()
+			}
+		}
+	}
 }
 
 /*
