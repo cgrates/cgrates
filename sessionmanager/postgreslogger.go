@@ -48,12 +48,13 @@ func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
 	if err != nil {
 		log.Printf("Error marshalling timespans to json: %v", err)
 	}
-	_, err = psl.db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = psl.db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
 		cc.Destination,
 		cc.Tenant,
 		cc.TOR,
 		cc.Subject,
+		cc.Account,
 		cc.Destination,
 		cc.Cost,
 		cc.ConnectFee,

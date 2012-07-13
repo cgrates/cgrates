@@ -128,7 +128,7 @@ This tool is used for importing the data from CSV files into the CGRateS databas
 cgr-sessionmanager
 ~~~~~~~~~~~~~~~~~~
 
-Session manager connects and monitors the freeswitch server issuing API request to other CGRateS components. It can run in standalone mode for minimal system configuration.
+Session manager connects and monitors the freeswitch server issuing API request to other CGRateS components. It can run in standalone mode for minimal system configuration. It logs the calls information to a postgres database in order to be used by the mediator tool.
 
 ::
 
@@ -147,7 +147,7 @@ Session manager connects and monitors the freeswitch server issuing API request 
 cgr-mediator
 ~~~~~~~~~~~~
 
-The mediator parses the CDR file and writes the calls cost to a postgress database.
+The mediator parses the call logs written in a postgres database by the session manager and writes the call costs to a freeswitch CDR file.
 
 The structure of the table (as an SQL command) is the following::
 
@@ -155,6 +155,7 @@ The structure of the table (as an SQL command) is the following::
 	uuid varchar(80) primary key,direction varchar(32),
 	tenant varchar(32),tor varchar(32),
 	subject varchar(32),
+	account varchar(32),
 	destination varchar(32),
 	cost real,
 	conect_fee real,

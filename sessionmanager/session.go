@@ -51,6 +51,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 		Tenant:      ev.GetTenant(),
 		TOR:         ev.GetTOR(),
 		Subject:     ev.GetSubject(),
+		Account:     ev.GetAccount(),
 		Destination: ev.GetDestination(),
 		TimeStart:   startTime}
 	s = &Session{uuid: ev.GetUUID(),
@@ -108,7 +109,7 @@ func (s *Session) Disconnect() {
 
 // Nice print for session
 func (s *Session) String() string {
-	return fmt.Sprintf("%v: %s -> %s", s.callDescriptor.TimeStart, s.callDescriptor.Subject, s.callDescriptor.Destination)
+	return fmt.Sprintf("%v: %s(%s) -> %s", s.callDescriptor.TimeStart, s.callDescriptor.Subject, s.callDescriptor.Account, s.callDescriptor.Destination)
 }
 
 // 

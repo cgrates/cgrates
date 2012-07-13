@@ -104,6 +104,7 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 			Tenant:      lastCC.Tenant,
 			TOR:         lastCC.TOR,
 			Subject:     lastCC.Subject,
+			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
 			Amount:      -cost,
 		}
@@ -115,6 +116,7 @@ func (dsd *DirectSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) 
 			Tenant:      lastCC.Tenant,
 			TOR:         lastCC.TOR,
 			Subject:     lastCC.Subject,
+			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
 			Amount:      -seconds,
 		}
@@ -227,6 +229,7 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 			Tenant:      lastCC.Tenant,
 			TOR:         lastCC.TOR,
 			Subject:     lastCC.Subject,
+			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
 			Amount:      -cost,
 		}
@@ -241,6 +244,7 @@ func (rsd *RPCSessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 			TOR:         lastCC.TOR,
 			Tenant:      lastCC.Tenant,
 			Subject:     lastCC.Subject,
+			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
 			Amount:      -seconds,
 		}

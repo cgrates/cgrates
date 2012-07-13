@@ -265,6 +265,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cc := &CallCost{TOR: cd.TOR,
 		Tenant:      cd.Tenant,
 		Subject:     cd.Subject,
+		Account:     cd.Account,
 		Destination: destPrefix,
 		Cost:        cost,
 		ConnectFee:  connectionFee,

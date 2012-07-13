@@ -28,6 +28,7 @@ type Event interface {
 	GetDirection() string
 	GetOrigId() string
 	GetSubject() string
+	GetAccount() string
 	GetDestination() string
 	GetTOR() string
 	GetUUID() string

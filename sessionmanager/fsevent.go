@@ -39,6 +39,7 @@ const (
 	CALL_DIRECTION = "Call-Direction"
 	ORIG_ID        = "variable_sip_call_id" //- originator_id - match cdrs
 	SUBJECT        = "variable_cgr_subject"
+	ACCOUNT        = ""
 	DESTINATION    = "variable_cgr_destination"
 	TOR            = "variable_cgr_tor"
 	UUID           = "Unique-ID" // -Unique ID for this call leg
@@ -84,6 +85,9 @@ func (fsev *FSEvent) GetOrigId() string {
 }
 func (fsev *FSEvent) GetSubject() string {
 	return fsev.Fields[SUBJECT]
+}
+func (fsev *FSEvent) GetAccount() string {
+	return fsev.Fields[ACCOUNT]
 }
 func (fsev *FSEvent) GetDestination() string {
 	return fsev.Fields[DESTINATION]
