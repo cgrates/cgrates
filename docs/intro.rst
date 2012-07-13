@@ -42,21 +42,21 @@ The activation period is a structure describing different prices for a call on d
 
 ::
 
-	type Interval struct {
-		Month                                  time.Month
-		MonthDay                               int
-		WeekDays                               []time.Weekday
-		StartTime, EndTime                     string // ##:##:## format
-		Ponder, ConnectFee, Price, BillingUnit float64
+	Interval {
+		Months 
+		MonthDays
+		WeekDays
+		StartTime, EndTime
+		Weight, ConnectFee, Price, BillingUnit
 	}
 
 It specifies the Month, the MonthDay, the WeekDays and the StartTime and the EndTime when the Interval's Price is in effect. 
 
-For example the interval {"Month": 1, "WeekDays":[1,2,3,4,5]. "StartTime":"18:00:00", "Price":0.1, "BillingUnit": 1} specifies that the Price for the first month of each year from Monday to Friday starting 18:00 is 0.1 cents per second. Most structure elements are optional and they can be combined in any way it makes sense. If an element is omitted it means it is zero ore any.
+For example the interval {"Month": [1], "WeekDays":[1,2,3,4,5]. "StartTime":"18:00:00", "Price":0.1, "BillingUnit": 1} specifies that the Price for the first month of each year from Monday to Friday starting 18:00 is 0.1 cents per second. Most structure elements are optional and they can be combined in any way it makes sense. If an element is omitted it means it is zero ore any.
 
-The ConnectFee specifies the connection price for the call if this interval is the first one from the call and the Ponder will establishes which interval will set the price for a call segment if more then one applies to it. 
+The ConnectFee specifies the connection price for the call if this interval is the first one from the call and the Weight will establishes which interval will set the price for a call segment if more then one applies to it. 
 
-For example there is an interval defining price for the weekdays and another interval that defines a special holiday prices. As that holiday is also one of the regular weekdays than both intervals are applicable to a call made on that day so the interval with the greater Ponder will give the price for the call in question. If both intervals have the same Ponder than the interval with the smaller price wins. It is, however, a good practice to set the Ponder for the defined intervals. For more information see :ref:`data-importing`.
+For example there is an interval defining price for the weekdays and another interval that defines a special holiday prices. As that holiday is also one of the regular weekdays than both intervals are applicable to a call made on that day so the interval with the smaller Weight will give the price for the call in question. If both intervals have the same Weight than the interval with the smaller price wins. It is, however, a good practice to set the Weight for the defined intervals. For more information see :ref:`data-importing`.
 
 So when there is a need to define new sets of prices just define new ActivationPeriods with the StartTime set to the moment when they become active.
 
@@ -66,7 +66,7 @@ The other functions relay on a user budget structure to manage the different quo
 
 CGRateS provide api for adding/substracting user's money credit. The prepaid and postpaid are uniformly treated except that the prepaid is checked to be alway greater than zero and the postpaid is always lower than zero.
 
-Both prepaid and postpaid can have a limited number of free SMS and Internet traffic per month and this budget is replenished at regular intervals conforming to user tariff plan or as the user buys more free SMS.
+Both prepaid and postpaid can have a limited number of free SMS and Internet traffic per month and this budget is replenished at regular intervals conforming to user tariff plan or as the user buys more free SMS (for example).
 
 The free (or special price) minutes must be handled a little differently because usually they are grouped by specific destinations (e.g. national minutes, ore minutes in the same network). So they are grouped in buckets and when a call is made the engine checks all applicable buckets to consume minutes according to that call.
 

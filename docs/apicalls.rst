@@ -1,17 +1,17 @@
-Api Calls
+API Calls
 ========
 The general API usage of the CGRateS involves creating a CallDescriptor structure sending it to the balancer via JSON/GOB RPC and getting a response from the balancer in form of a CallCost structure or a numeric value for requested information.
 
 CallDescriptor structure
 ------------------------	
-	- Direction, TOR, Tener, Subject, DestinationPrefix string
-	- TimeStart, TimeEnd                 time.Time
+	- Direction, TOR, Tenant, Subject, Account, DestinationPrefix string
+	- TimeStart, TimeEnd                 Time
 	- Amount                             float64
 Direction
-	The direction of the call (inbound or aoutbound)
+	The direction of the call (inbound or outbound)
 TOR
 	Type Of Record, used to differentiate between various type of records
-Tener
+Tenant
 	Customer Identification used for multi tenant databases
 Subject
 	Subject for this query
@@ -23,6 +23,9 @@ TimeStart, TimeEnd
 	The start end end of the call in question
 Amount
 	The amount requested in various API calls (e.g. DebitSMS amount)
+
+The **Subject** field is used usually used to identify both the client in the detailed cost list and the user in the balances database. When there is some additional info added to the subject for the call price list then the **Account** attribute is used to specify the balance for the client. For example: the subject can be rif:from:ha or rif:form:mu and for both we would use the rif account.
+
 
 CallCost structure
 ------------------

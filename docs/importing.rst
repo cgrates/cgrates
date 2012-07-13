@@ -1,6 +1,7 @@
-.. _`data-importing`:
+.. _data-importing:
+
 Data importing
-=============
+==============
 
 For importing the data into CGRateS database we are using cvs files. The import process can be started as many times it is desired with one ore more csv files and the existing values are overwritten. If the -flush option is used then the database is cleaned before importing.For more details see the cgr-loader tool from the tutorial chapter.
 
@@ -32,7 +33,7 @@ RatesFallbackSubject
 RatesTimingTag
     Forwards to a tag described in the rates timing file to be used for this profile.
 ActivationTime
-    Multiple rates timings/prices can be created for one profile with different activation times. When a call is made the appropriate profile(s) will be used to rate the call.
+    Multiple rates timings/prices can be created for one profile with different activation times. When a call is made the appropriate profile(s) will be used to rate the call. So future prices can be defined here and the activation time can be set as appropriate.
 
 Rates timing
 ~~~~~~~~~~~~
@@ -54,7 +55,7 @@ RatesTag
 TimingTag
     The timing tag described in the timing file
 Weight
-    If multiple timings cab be applied to a call the one with the lower weight wins.
+    If multiple timings cab be applied to a call the one with the lower weight wins. An example here can be the Christmas day: we can have a special timing for this day but the regular day of the week timing can also be applied to this day. The weight will differentiate between the two timings.
 
 
 Rates
@@ -88,13 +89,13 @@ Describes the time periods that have different rates attached to them.
 +-----------------+--------+-----------+-----------+----------+
 | Tag             | Months | MonthDays |  WeekDays | StartTime|
 +=================+========+===========+===========+==========+
-| WORKDAYS        | *all   | *all      | 1;2;3;4;5 | 00:00:00 |
+| WORKDAYS        | \*all  | \*all     | 1;2;3;4;5 | 00:00:00 |
 +-----------------+--------+-----------+-----------+----------+
-| WEEKENDS        | *all   | *all      | 6,7       | 00:00:00 |
+| WEEKENDS        | \*all  | \*all     | 6,7       | 00:00:00 |
 +-----------------+--------+-----------+-----------+----------+
-| DAILY_SAME_TIME | *all   | *all      | *all      | *now     |
+| DAILY_SAME_TIME | \*all  | \*all     | \*all     | \*now    |
 +-----------------+--------+-----------+-----------+----------+
-| ONE_TIME_RUN    | *none  | *none     | *none     | *now     |
+| ONE_TIME_RUN    | \*none | \*none    | \*none    | \*now    |
 +-----------------+--------+-----------+-----------+----------+
 
 Tag
@@ -106,7 +107,7 @@ MonthDays
 WeekDays
     Integers from 1=Monday to 7=Sunday separated by semicolons (;) specifying the week days for this time period.
 StartTime
-    The start time for this time period. *now will be replaced with the time of the data importing.
+    The start time for this time period. \*now will be replaced with the time of the data importing.
 
 Destinations
 ~~~~~~~~~~~~
@@ -133,13 +134,7 @@ Describes the actions to be applied to the clients/users accounts. There are two
 
 The accounts hold the various balances and counters to activate the triggered actions for each the client.
 
-Balance types are:
- MONETARY
- SMS
-    The integer number of SMSeses
- INTERNET    
- INTERNET_TIME
- MINUTES
+Balance types are: MONETARY, SMS, INTERNET, INTERNET_TIME, MINUTES.
 
 +------------+---------+-----------+------------------+------------------+
 |Tenant      | Account | Direction | ActionTimingsTag | ActionTriggersTag|
@@ -167,9 +162,9 @@ For each account there are counters that record the activity on various balances
 +------------------+------------+----------------+----------------+------------+--------+
 | Tag              | BalanceTag | ThresholdValue | DestinationTag | ActionsTag | Weight |
 +==================+============+================+================+============+========+
-| STANDARD_TRIGGER | MONETARY   | 30             | *all           | SOME_1     | 10     |
+| STANDARD_TRIGGER | MONETARY   | 30             | \*all          | SOME_1     | 10     |
 +------------------+------------+----------------+----------------+------------+--------+
-| STANDARD_TRIGGER | SMS        | 30             | *all           | SOME_2     | 10     |
+| STANDARD_TRIGGER | SMS        | 30             | \*all          | SOME_2     | 10     |
 +------------------+------------+----------------+----------------+------------+--------+
 
 Tag
@@ -211,7 +206,7 @@ Actions
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
 | Tag    | Action      | BalanceTag | Units | DestinationTag | PriceType | PriceValue | MinutesWeight | Weight |
 +========+=============+============+=======+================+===========+============+===============+========+
-| SOME   | TOPUP_RESET | MONETARY   | 10    | *all           |           |            |               | 10     |
+| SOME   | TOPUP_RESET | MONETARY   | 10    | \*all          |           |            |               | 10     |
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
 | SOME_1 | DEBIT       | MINUTES    | 10    | GERMANY_O2     | PERCENT   | 25         | 10            | 10     |
 +--------+-------------+------------+-------+----------------+-----------+------------+---------------+--------+
