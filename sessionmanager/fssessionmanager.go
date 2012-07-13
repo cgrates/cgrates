@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 // The freeswitch session manager type holding a buffer for the network connection,
@@ -63,6 +64,9 @@ func (sm *FSSessionManager) readNextEvent() (ev Event) {
 	body, err := sm.buf.ReadString('}')
 	if err != nil {
 		log.Print("Could not read from freeswitch connection!")
+		// wait until retrying to read 
+		// TODO: maybe kill the manager?
+		time.Sleep(5 * time.Second)
 	}
 	ev = new(FSEvent).New(body)
 	switch ev.GetName() {

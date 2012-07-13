@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"github.com/cgrates/cgrates/balancer"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"github.com/cgrates/cgrates/balancer"
 	"net/rpc"
 	"time"
 )
