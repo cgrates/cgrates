@@ -31,7 +31,7 @@ This will install the sources and compile all available tools
 Running
 -------
 
-There are only three main command to used with CGRateS:
+The CGRateS suite is formed by seven tools described bellow.
 
 cgr-balancer
 ~~~~~~~~~~~~
@@ -40,6 +40,7 @@ The cgr-balancer will open a JSON RPC server and an HTTP server ready for taking
 
 	rif@grace:~$ cgr-balancer --help
 	Usage of cgr-balancer:
+	  -freeswitch=false: connect to freeswitch server
 	  -freeswitchpass="ClueCon": freeswitch address host:port
 	  -freeswitchsrv="localhost:8021": freeswitch address host:port
 	  -httpapiaddr="127.0.0.1:8000": Http API server address (localhost:2002)
@@ -47,10 +48,11 @@ The cgr-balancer will open a JSON RPC server and an HTTP server ready for taking
 	  -jsonrpcaddr="127.0.0.1:2001": Json RPC server address (localhost:2001)
 	  -rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
 
+:Example: cgr-balancer -freeswitch=true -httpapiaddr=127.0.0.1:6060 -json=true
 
 cgr-rater
 ~~~~~~~~~
-The cgr-rater can be provided with the balancer server address and can be configured to listen to a specific interface and port.
+The cgr-rater can be provided with the balancer server address and can be configured to listen to a specific interface and port. It is an auxiliary tool only and is meant to be used for housekeeping duties (better alternative to curl inspection).
 ::
 
 	rif@grace:~$ cgr-rater --help
@@ -65,49 +67,68 @@ The cgr-rater can be provided with the balancer server address and can be config
 	  -redissrv="127.0.0.1:6379": redis address host:port
 	  -standalone=false: start standalone server (no balancer)
 
+:Example: cgr-rater -balancer=127.0.0.1:2000
+
 cgr-console
 ~~~~~~~~~~~
-	The cgr-console is a command line tool used to access the balancer (or the rater directly) to call all the API methods offered by CGRateS.
+The cgr-console is a command line tool used to access the balancer (or the rater directly) to call all the API methods offered by CGRateS. It is
 ::
 
-	rif@grace:~$ cgr-console --help
-	Usage of cgr-console:
+	rif@grace:~$ cgr-console 
+	List of commands:
+	        getcost
+	        getmaxsessiontime
+	        debitbalance
+	        debitsms
+	        debitseconds
+	        resetuserbudget
+	        status
+	  -direction="OUT": Call direction
+	  -tenant="vdf": Tenant identificator
+	  -tor="0": Type of record
 	  -amount=100: Amount for different operations
-	  -balancer="127.0.0.1:2001": balancer address host:port
-	  -cstmid="vdf": Customer identification
-	  -dest="0256": Destination prefix
+	  -dest="041": Call destination	  
+	  -server="127.0.0.1:2001": server address host:port
 	  -subject="rif": The client who made the call
-	  -te="2012-02-09T00:10:00Z": Time end
-	  -tor=0: Type of record
-	  -ts="2012-02-09T00:00:00Z": Time start
+	  -account="rif": The the user balance to be used
+	  -start="2012-02-09T00:00:00Z": Time start
+	  -end="2012-02-09T00:10:00Z": Time end	  
+
+:Example: cgr-console getcost -subject=rif -dest=0723045326 -start=2012-07-13T15:38:00Z -end=2012-07-13T15:39:00Z
 
 cgr-loader
 ~~~~~~~~~~
+
+This tool is used for importing the data from CSV files into the CGRateS database system. The structure of the CSV files is described in the :ref:`data-importing` chapter.
 
 ::
 
 	rif@grace:~$ cgr-loader --help
 	Usage of cgr-loader:
-	  -accountactions="AccountActions.csv": Account actions file
-	  -actions="Actions.csv": Actions file
-	  -actiontimings="ActionTimings.csv": Actions timings file
-	  -actiontriggers="ActionTriggers.csv": Actions triggers file
-	  -destinations="Destinations.csv": Destinations file
+	  -accountactions="": Account actions file
+	  -actions="": Actions file
+	  -actiontimings="": Actions timings file
+	  -actiontriggers="": Actions triggers file
+	  -destinations="": Destinations file
 	  -flush=false: Flush the database before importing
-	  -month="Months.csv": Months file
-	  -monthdays="MonthDays.csv": Month days file
+	  -month="": Months file
+	  -monthdays="": Month days file
 	  -pass="": redis database password
-	  -rates="Rates.csv": Rates file
-	  -ratetimings="RateTimings.csv": Rates timings file
-	  -ratingprofiles="RatingProfiles.csv": Rating profiles file
-	  -rdb=10: redis database number (10)
-	  -redisserver="127.0.0.1:6379": redis server address (tcp:127.0.0.1:6379)
+	  -rates="": Rates file
+	  -ratetimings="": Rates timings file
+	  -ratingprofiles="": Rating profiles file
+	  -redisdb=10: redis database number (10)
+	  -redissrv="127.0.0.1:6379": redis server address (tcp:127.0.0.1:6379)
 	  -separator=",": Default field separator
-	  -timings="Timings.csv": Timings file
-	  -weekdays="WeekDays.csv": Week days file
+	  -timings="": Timings file
+	  -weekdays="": Week days file
+
+:Example: cgr-loader -destinations=Destinations.csv
 
 cgr-sessionmanager
 ~~~~~~~~~~~~~~~~~~
+
+Session manager connects and monitors the freeswitch server issuing API request to other CGRateS components. It can run in standalone mode for minimal system configuration.
 
 ::
 
@@ -121,8 +142,24 @@ cgr-sessionmanager
 	  -redissrv="127.0.0.1:6379": redis address host:port
 	  -standalone=false: run standalone (run as a rater)
 
+:Example: cgr-sessionmanager -standalone=true
+
 cgr-mediator
 ~~~~~~~~~~~~
+
+The mediator parses the CDR file and writes the calls cost to a postgress database.
+
+The structure of the table (as an SQL command) is the following::
+
+	CREATE TABLE callcosts (
+	uuid varchar(80) primary key,direction varchar(32),
+	tenant varchar(32),tor varchar(32),
+	subject varchar(32),
+	destination varchar(32),
+	cost real,
+	conect_fee real,
+	timespans text
+	);
 
 ::
 
@@ -130,22 +167,25 @@ cgr-mediator
 	Usage of cgr-mediator:
 	  -dbname="cgrates": The name of the database to connect to.
 	  -freeswitchcdr="Master.csv": Freeswitch Master CSV CDR file.
-	  -host="localhost": The host to connect to. Values that start with / are for unix domain sockets.
+	  -host="localhost": The host to connect to. Values that start with / are for UNIX domain sockets.
 	  -password="": The user's password.
 	  -port="5432": The port to bind to.
 	  -resultfile="out.csv": Generated file containing CDR and price info.
 	  -user="": The user to sign in as.
 
+:Example: cgr-mediator -freeswitchcdr="logs.csv"
+
 cgr-scheduler
 ~~~~~~~~~~~~~
 
+The scheduler is loading the timed actions form database and executes them as appropriate, It will execute all run once actions as they are loaded. It will reload all the action timings from the database when it received system HUP signal (pkill -1 cgr-schedule).
+
 ::
 
-	rif@grace:~$ cgr-balancer --help
-	Usage of cgr-balancer:
-	  -freeswitchpass="ClueCon": freeswitch address host:port
-	  -freeswitchsrv="localhost:8021": freeswitch address host:port
-	  -httpapiaddr="127.0.0.1:8000": Http API server address (localhost:2002)
-	  -json=false: use JSON for RPC encoding
-	  -jsonrpcaddr="127.0.0.1:2001": Json RPC server address (localhost:2001)
-	  -rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
+	rif@grace:~$ cgr-scheduler --help
+	Usage of cgr-scheduler:
+	  -pass="": redis database password
+	  -rdb=10: redis database number (10)
+	  -redisserver="127.0.0.1:6379": redis server address (tcp:127.0.0.1:6379)	  
+
+:Example: cgr-scheduler -rdb=2 -pass="secret"

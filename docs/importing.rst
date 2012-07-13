@@ -114,13 +114,13 @@ Destinations
 
 The destinations are binding together various prefixes / caller ids to define a logical destination group. A prefix can appear in multiple destination groups.
 
-+------------+-------+
-| Tag        | Prefix|
-+============+=======+
-| GERMANY    | 49    |
-+------------+-------+
-| GERMANY_O2 | 49176 |
-+------------+-------+
++------------+--------+
+| Tag        | Prefix |
++============+========+
+| GERMANY    | 49     |
++------------+--------+
+| GERMANY_O2 | 49176  |
++------------+--------+
 
 Tag
     A string by witch this destination will be referenced in other places by.

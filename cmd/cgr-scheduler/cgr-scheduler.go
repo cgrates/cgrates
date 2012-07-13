@@ -30,7 +30,6 @@ import (
 )
 
 var (
-	separator   = flag.String("separator", ",", "Default field separator")
 	redisserver = flag.String("redisserver", "127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
 	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
 	redispass   = flag.String("pass", "", "redis database password")

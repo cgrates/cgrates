@@ -34,9 +34,10 @@ var (
 	direction = flag.String("direction", "OUT", "Call direction")
 	tenant    = flag.String("tenant", "vdf", "Tenant identificator")
 	subject   = flag.String("subject", "rif", "The client who made the call")
-	dest      = flag.String("dest", "0256", "Call destination")
-	ts        = flag.String("ts", "2012-02-09T00:00:00Z", "Time start")
-	te        = flag.String("te", "2012-02-09T00:10:00Z", "Time end")
+	account   = flag.String("account", "rif", "The the user balance to be used")
+	dest      = flag.String("dest", "041", "Call destination")
+	start     = flag.String("start", "2012-02-09T00:00:00Z", "Time start")
+	end       = flag.String("end", "2012-02-09T00:10:00Z", "Time end")
 	amount    = flag.Float64("amount", 100, "Amount for different operations")
 )
 
@@ -48,11 +49,11 @@ func main() {
 	}
 	defer client.Close()
 
-	timestart, err := time.Parse(time.RFC3339, *ts)
+	timestart, err := time.Parse(time.RFC3339, *start)
 	if err != nil {
 		log.Fatal("Time start format is invalid: ", err)
 	}
-	timeend, err := time.Parse(time.RFC3339, *te)
+	timeend, err := time.Parse(time.RFC3339, *end)
 	if err != nil {
 		log.Fatal("Time end format is invalid: ", err)
 	}
@@ -62,6 +63,7 @@ func main() {
 		TOR:         *tor,
 		Tenant:      *tenant,
 		Subject:     *subject,
+		Account:     *account,
 		Destination: *dest,
 		TimeStart:   timestart,
 		TimeEnd:     timeend,
@@ -99,7 +101,7 @@ func main() {
 		if err = client.Call("Responder.DebitSeconds", cd, &result); err == nil {
 			fmt.Println(result)
 		}
-	case "addvolumediscountseconds":
+	/*case "addvolumediscountseconds":
 		var result float64
 		if err = client.Call("Responder.AddVolumeDiscountSeconds", cd, &result); err == nil {
 			fmt.Println(result)
@@ -113,7 +115,7 @@ func main() {
 		var result float64
 		if err = client.Call("Responder.AddRecievedCallSeconds", cd, &result); err == nil {
 			fmt.Println(result)
-		}
+		}*/
 	case "resetuserbudget":
 		var result float64
 		if err = client.Call("Responder.ResetUserBudget", cd, &result); err == nil {
@@ -131,9 +133,9 @@ func main() {
 		fmt.Println("\tdebitbalance")
 		fmt.Println("\tdebitsms")
 		fmt.Println("\tdebitseconds")
-		fmt.Println("\taddvolumediscountseconds")
-		fmt.Println("\tresetvolumediscountseconds")
-		fmt.Println("\taddrecievedcallseconds")
+		// fmt.Println("\taddvolumediscountseconds")
+		// fmt.Println("\tresetvolumediscountseconds")
+		// fmt.Println("\taddrecievedcallseconds")
 		fmt.Println("\tresetuserbudget")
 		fmt.Println("\tstatus")
 		flag.PrintDefaults()
