@@ -59,7 +59,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	}
 	// weekdays
 	if i.WeekDays != nil && len(i.WeekDays) > 0 {
-		sort.Sort(i.WeekDays)
+		i.WeekDays.Sort()
 		if t.IsZero() {
 			t = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
 		}
@@ -75,7 +75,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	}
 	// monthdays
 	if i.MonthDays != nil && len(i.MonthDays) > 0 {
-		sort.Sort(i.MonthDays)
+		i.MonthDays.Sort()
 		now := time.Now()
 		x := sort.SearchInts(i.MonthDays, now.Day())
 		d = i.MonthDays[0]
@@ -98,7 +98,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	}
 MONTHS:
 	if i.Months != nil && len(i.Months) > 0 {
-		sort.Sort(i.Months)
+		i.Months.Sort()
 		now := time.Now()
 		x := sort.Search(len(i.Months), func(x int) bool { return i.Months[x] >= now.Month() })
 		m = i.Months[0]

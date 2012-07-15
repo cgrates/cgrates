@@ -20,6 +20,7 @@ package timespans
 
 import (
 	// "log"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -28,6 +29,10 @@ import (
 
 // Defines months series
 type Months []time.Month
+
+func (m Months) Sort() {
+	sort.Sort(m)
+}
 
 func (m Months) Len() int {
 	return len(m)
@@ -90,6 +95,10 @@ func (ms *Months) restore(input string) {
 // Defines month days series
 type MonthDays []int
 
+func (md MonthDays) Sort() {
+	sort.Sort(md)
+}
+
 func (md MonthDays) Len() int {
 	return len(md)
 }
@@ -150,6 +159,10 @@ func (mds *MonthDays) restore(input string) {
 
 // Defines week days series
 type WeekDays []time.Weekday
+
+func (wd WeekDays) Sort() {
+	sort.Sort(wd)
+}
 
 func (wd WeekDays) Len() int {
 	return len(wd)
