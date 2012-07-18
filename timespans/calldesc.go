@@ -22,15 +22,30 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/syslog"
 	"math"
+	"os"
 	"time"
 )
+
+func init() {
+	var err error
+	logger, err = syslog.NewLogger(syslog.LOG_ALERT, log.LstdFlags)
+	if err != nil {
+		logger = log.New(os.Stderr, "", log.LstdFlags)
+	}
+}
 
 const (
 	// the minimum length for a destination prefix to be matched.
 	MinPrefixLength     = 2
 	RecursionMaxDepth   = 4
 	FallbackDestination = "fallback" // the string to be used to mark the fallback destination
+)
+
+var (
+	storageGetter StorageGetter
+	logger        *log.Logger
 )
 
 /*
@@ -270,6 +285,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Cost:        cost,
 		ConnectFee:  connectionFee,
 		Timespans:   timespans}
+	logger.Printf("Get Cost: %v => %v", cd, cc)
 	return cc, err
 }
 
@@ -309,7 +325,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 			}
 			cost += ts.getCost(cd)
 		}
-		//log.Print(availableCredit, availableSeconds, cost)
+		//logger.Print(availableCredit, availableSeconds, cost)
 		if cost < availableCredit {
 			return maxSessionSeconds, nil
 		} else { //decrease the period by 10% and try again
@@ -324,7 +340,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
 	if err != nil {
-		log.Printf("error getting cost %v", err)
+		logger.Printf("error getting cost %v", err)
 	}
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)

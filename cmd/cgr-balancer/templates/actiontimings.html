@@ -1,0 +1,45 @@
+{{define "title"}}CGRateS Action Timings{{end}}
+{{define "content"}}
+      <div class="modal hide fade" id="myModal">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">×</button>
+          <h3>Modal header</h3>
+        </div>
+        <div class="modal-body">
+          <p>One fine body…</p>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn" data-dismiss="modal">Close</a>
+          <a href="#" class="btn btn-primary">Save changes</a>
+        </div>
+      </div>            
+      <div class="row">
+        <div class="span7">
+          <h1>Action timings</h1>        
+          <table id="rater-table" class="table table-striped">
+          {{range .}}
+          <tr>
+            <td>{{.}}</td>
+            <td><a class="btn" data-toggle="modal" href="#myModal" >Edit</a></td>
+          </tr>
+          {{end}}           
+          </table>
+        </div>        
+        <div class="span5">
+          <h2>Heading</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+          <p><a class="btn" href="#">View details &raquo;</a></p>
+        </div>
+      </div>
+{{end}}
+
+{{define "extrascripts"}}
+ <script src="static/js/jquery.flot.min.js" type="text/javascript"></script>
+    <script type="text/javascript">   
+    $(function(){
+      $('#myModal').modal({
+  show: false
+})
+    });  
+    </script>
+{{end}}

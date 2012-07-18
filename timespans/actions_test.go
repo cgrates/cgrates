@@ -42,6 +42,7 @@ func TestActionTimingStoreRestore(t *testing.T) {
 		BillingUnit: 1.0,
 	}
 	at := &ActionTiming{
+		Id:             "some uuid",
 		Tag:            "test",
 		UserBalanceIds: []string{"one", "two", "three"},
 		Timing:         i,
@@ -49,7 +50,7 @@ func TestActionTimingStoreRestore(t *testing.T) {
 		ActionsId:      "Commando",
 	}
 	r := at.store()
-	if string(r) != "test|one,two,three|1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;1|10|Commando" {
+	if string(r) != "some uuid|test|one,two,three|1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;1|10|Commando" {
 		t.Errorf("Error serializing action timing: %v", string(r))
 	}
 	o := &ActionTiming{}
@@ -628,5 +629,32 @@ func TestActionResetCounterCREDIT(t *testing.T) {
 		len(ub.MinuteBuckets) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
 		t.Error("Reset counters action failed!", ub.UnitCounters)
+	}
+}
+
+func TestUUID(t *testing.T) {
+	uuid := GenUUID()
+	if len(uuid) == 0 {
+		t.Fatalf("GenUUID error %s", uuid)
+	}
+	t.Logf("uuid[%s]\n", uuid)
+}
+
+/********************************** Benchmarks ********************************/
+
+func BenchmarkUUID(b *testing.B) {
+	m := make(map[string]int, 1000)
+	for i := 0; i < b.N; i++ {
+		uuid := GenUUID()
+		if len(uuid) == 0 {
+			b.Fatalf("GenUUID error %s", uuid)
+		}
+		b.StopTimer()
+		c := m[uuid]
+		if c > 0 {
+			b.Fatalf("duplicate uuid[%s] count %d", uuid, c)
+		}
+		m[uuid] = c + 1
+		b.StartTimer()
 	}
 }

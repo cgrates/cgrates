@@ -41,10 +41,6 @@ const (
 	ABSOLUTE = "ABSOLUTE"
 )
 
-var (
-	storageGetter StorageGetter
-)
-
 /*
 Structure containing information about user's credit (minutes, cents, sms...).'
 */

@@ -15,41 +15,32 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package main
 
 import (
-	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
-	"runtime"
 )
 
-/*
-Handler for the statistics web client
-*/
-func statusHandler(w http.ResponseWriter, r *http.Request) {
-	if t, err := template.ParseFiles("templates/base.html", "templates/status.html"); err == nil {
-		t.Execute(w, bal.GetClientAddresses())
+func handler(w http.ResponseWriter, r *http.Request) {
+	actionTimings, err := storage.GetAllActionTimings()
+	if err != nil {
+		log.Print("Cannot get action timings:", err)
+	}
+	if t, err := template.ParseFiles("templates/base.html", "templates/actiontimings.html"); err == nil {
+		t.Execute(w, actionTimings)
 	} else {
 		log.Print("Error rendering status: ", err)
 	}
 }
 
-/*
-Ajax Handler for the connected raters
-*/
-func ratersHandler(w http.ResponseWriter, r *http.Request) {
-	enc := json.NewEncoder(w)
-	enc.Encode(bal.GetClientAddresses())
-}
-
-/*
-Ajax Handler for current used memory value
-*/
-func memoryHandler(w http.ResponseWriter, r *http.Request) {
-	memstats := new(runtime.MemStats)
-	runtime.ReadMemStats(memstats)
-	enc := json.NewEncoder(w)
-	enc.Encode([]uint64{memstats.HeapAlloc / 1024, memstats.Sys / 1024})
+func startWebApp() {
+	http.Handle("/static/", http.FileServer(http.Dir("")))
+	http.HandleFunc("/", handler)
+	err := http.ListenAndServe(*httpAddress, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"fmt"
 	"strconv"
 )
 
@@ -127,6 +127,7 @@ func (csvr *CSVReader) loadActionTimings(fn string) {
 		}
 		for _, t := range ts {
 			at := &timespans.ActionTiming{
+				Id:     timespans.GenUUID(),
 				Tag:    record[2],
 				Weight: weight,
 				Timing: &timespans.Interval{
@@ -139,7 +140,6 @@ func (csvr *CSVReader) loadActionTimings(fn string) {
 			}
 			actionsTimings[tag] = append(actionsTimings[tag], at)
 		}
-
 	}
 }
 

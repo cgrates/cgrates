@@ -21,9 +21,9 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/cgrates/cgrates/balancer"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
-	"github.com/cgrates/cgrates/balancer"
 	"log"
 	"runtime"
 	"time"
@@ -32,7 +32,7 @@ import (
 var (
 	raterAddress   = flag.String("rateraddr", "127.0.0.1:2000", "Rater server address (localhost:2000)")
 	rpcAddress     = flag.String("rpcaddr", "127.0.0.1:2001", "Json RPC server address (localhost:2001)")
-	httpApiAddress = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:2002)")
+	httpApiAddress = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:8000)")
 	freeswitch     = flag.Bool("freeswitch", false, "connect to freeswitch server")
 	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
 	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")

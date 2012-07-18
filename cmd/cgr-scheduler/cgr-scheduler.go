@@ -23,16 +23,17 @@ import (
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"os"
-	"sort"
-	"time"
 	"os/signal"
+	"sort"
 	"syscall"
+	"time"
 )
 
 var (
 	redisserver = flag.String("redisserver", "127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
 	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
 	redispass   = flag.String("pass", "", "redis database password")
+	httpAddress = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:8000)")
 	storage     timespans.StorageGetter
 	timer       *time.Timer
 	restartLoop = make(chan byte)
@@ -115,5 +116,6 @@ func main() {
 	timespans.SetStorageGetter(storage)
 	loadActionTimings()
 	go stopSingnalHandler()
+	// go startWebApp()
 	s.loop()
 }

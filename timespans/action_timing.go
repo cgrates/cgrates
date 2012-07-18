@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"sort"
@@ -32,6 +34,7 @@ const (
 )
 
 type ActionTiming struct {
+	Id             string // identify the timing
 	Tag            string // informative purpos only
 	UserBalanceIds []string
 	Timing         *Interval
@@ -210,6 +213,7 @@ func (at *ActionTiming) String() string {
 Serializes the action timing for the storage. Used for key-value storages.
 */
 func (at *ActionTiming) store() (result string) {
+	result += at.Id + "|"
 	result += at.Tag + "|"
 	for _, ubi := range at.UserBalanceIds {
 		result += ubi + ","
@@ -226,13 +230,28 @@ De-serializes the action timing for the storage. Used for key-value storages.
 */
 func (at *ActionTiming) restore(input string) {
 	elements := strings.Split(input, "|")
-	at.Tag = elements[0]
-	for _, ubi := range strings.Split(elements[1], ",") {
+	at.Id = elements[0]
+	at.Tag = elements[1]
+	for _, ubi := range strings.Split(elements[2], ",") {
 		at.UserBalanceIds = append(at.UserBalanceIds, ubi)
 	}
 
 	at.Timing = &Interval{}
-	at.Timing.restore(elements[2])
-	at.Weight, _ = strconv.ParseFloat(elements[3], 64)
-	at.ActionsId = elements[4]
+	at.Timing.restore(elements[3])
+	at.Weight, _ = strconv.ParseFloat(elements[4], 64)
+	at.ActionsId = elements[5]
+}
+
+// helper function for uuid generation
+func GenUUID() string {
+	uuid := make([]byte, 16)
+	n, err := rand.Read(uuid)
+	if n != len(uuid) || err != nil {
+		return strconv.FormatInt(time.Now().UnixNano(), 10)
+	}
+	// TODO: verify the two lines implement RFC 4122 correctly
+	uuid[8] = 0x80 // variant bits see page 5
+	uuid[4] = 0x40 // version 4 Pseudo Random, see page 7
+
+	return hex.EncodeToString(uuid)
 }
