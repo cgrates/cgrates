@@ -20,7 +20,7 @@ Using source
 After the go environment is installed_ and setup_ just issue the following commands:
 ::
 
-	go get github.com/cgrate/cgrates
+	go get github.com/cgrates/cgrates
 
 This will install the sources and compile all available tools	
 	
