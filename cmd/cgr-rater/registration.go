@@ -36,7 +36,7 @@ func StopSingnalHandler(server, listen *string, sg timespans.StorageGetter) {
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	sig := <-c
 
-	log.Printf("Caught signal %v, unregistering from server\n", sig)
+	log.Printf("Caught signal %v, unregistering from balancer\n", sig)
 	unregisterFromServer(server, listen)
 	sg.Close()
 	os.Exit(1)
@@ -48,14 +48,14 @@ Connects to the inquirer and calls unregister RPC method.
 func unregisterFromServer(server, listen *string) {
 	client, err := rpc.DialHTTP("tcp", *server)
 	if err != nil {
-		log.Print("Cannot contact the server!")
+		log.Print("Cannot contact the balancer!")
 		os.Exit(1)
 	}
 	var reply int
-	log.Print("Unregistering from server ", *server)
+	log.Print("Unregistering from balancer ", *server)
 	client.Call("RaterServer.UnRegisterRater", *listen, &reply)
 	if err := client.Close(); err != nil {
-		log.Print("Could not close server unregistration!")
+		log.Print("Could not close balancer unregistration!")
 		os.Exit(1)
 	}
 }
@@ -66,14 +66,14 @@ Connects to the inquirer and rehisters the rater to the server.
 func RegisterToServer(server, listen *string) {
 	client, err := rpc.DialHTTP("tcp", *server)
 	if err != nil {
-		log.Print("Cannot contact the server!")
+		log.Print("Cannot contact the balancer!")
 		os.Exit(1)
 	}
 	var reply int
-	log.Print("Registering to server ", *server)
+	log.Print("Registering to balancer ", *server)
 	client.Call("RaterServer.RegisterRater", *listen, &reply)
 	if err := client.Close(); err != nil {
-		log.Print("Could not close server registration!")
+		log.Print("Could not close balancer registration!")
 		os.Exit(1)
 	}
 	log.Print("Registration finished!")
