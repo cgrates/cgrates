@@ -105,7 +105,7 @@ func loadActionTimings() {
 	sort.Sort(s.queue)
 }
 
-func main() {
+func mainb() {
 	flag.Parse()
 	var err error
 	storage, err = timespans.NewRedisStorage(*redisserver, *redisdb)

@@ -88,7 +88,7 @@ func CallMethod(key *timespans.CallDescriptor, method string) (reply float64, er
 	return
 }
 
-func main() {
+func maind() {
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU() - 1)
 	bal = balancer.NewBalancer()

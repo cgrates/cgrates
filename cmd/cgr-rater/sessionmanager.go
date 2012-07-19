@@ -37,7 +37,7 @@ var (
 	redisdb        = flag.Int("redisdb", 10, "redis database number")
 )
 
-func main() {
+func mainc() {
 	flag.Parse()
 	sm := &sessionmanager.FSSessionManager{}
 	getter, err := timespans.NewRedisStorage(*redissrv, *redisdb)

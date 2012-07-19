@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"code.google.com/p/goconf/conf"
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/sessionmanager"
@@ -128,7 +127,7 @@ func (s *Responder) Shutdown(args string, reply *string) (err error) {
 	return nil
 }
 
-func main() {
+func maina() {
 	flag.Parse()
 	//getter, err := timespans.NewKyotoStorage("storage.kch")
 	getter, err := timespans.NewRedisStorage(*redissrv, *redisdb)
