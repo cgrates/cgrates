@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"code.google.com/p/goconf/conf"
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/sessionmanager"
