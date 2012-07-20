@@ -19,21 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"flag"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"os"
-	"os/signal"
 	"sort"
-	"syscall"
 	"time"
 )
 
 var (
-	redisserver = flag.String("redisserver", "127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
-	redisdb     = flag.Int("rdb", 10, "redis database number (10)")
-	redispass   = flag.String("pass", "", "redis database password")
-	httpAddress = flag.String("httpapiaddr", "127.0.0.1:8000", "Http API server address (localhost:8000)")
 	storage     timespans.StorageGetter
 	timer       *time.Timer
 	restartLoop = make(chan byte)
@@ -71,20 +63,12 @@ func (s scheduler) loop() {
 	}
 }
 
-// Listens for the HUP system signal and gracefuly reloads the timers from database.
-func stopSingnalHandler() {
-	log.Print("Handling HUP signal...")
-	for {
-		c := make(chan os.Signal)
-		signal.Notify(c, syscall.SIGHUP)
-		sig := <-c
-
-		log.Printf("Caught signal %v, reloading action timings.\n", sig)
-		loadActionTimings()
-		// check the tip of the queue for new actions
-		restartLoop <- 1
-		timer.Stop()
-	}
+func reloadActionTimings() {
+	log.Print("Reloading action timings.")
+	loadActionTimings()
+	// check the tip of the queue for new actions
+	restartLoop <- 1
+	timer.Stop()
 }
 
 func loadActionTimings() {
@@ -103,19 +87,4 @@ func loadActionTimings() {
 		s.queue = append(s.queue, at)
 	}
 	sort.Sort(s.queue)
-}
-
-func mainb() {
-	flag.Parse()
-	var err error
-	storage, err = timespans.NewRedisStorage(*redisserver, *redisdb)
-	if err != nil {
-		log.Fatalf("Could not open database connection: %v", err)
-	}
-	defer storage.Close()
-	timespans.SetStorageGetter(storage)
-	loadActionTimings()
-	go stopSingnalHandler()
-	// go startWebApp()
-	s.loop()
 }

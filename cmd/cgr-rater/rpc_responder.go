@@ -15,9 +15,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
+
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
@@ -25,66 +27,52 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"runtime"
+	"time"
 )
 
-type Responder byte
+type RpcResponder struct{}
 
 /*
 RPC method thet provides the external RPC interface for getting the rating information.
 */
-func (r *Responder) GetCost(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
+func (r *RpcResponder) GetCost(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
 	rs, err := GetCallCost(&arg, "Responder.GetCost")
 	*replay = *rs
 	return
 }
 
-func (r *Responder) Debit(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
+func (r *RpcResponder) Debit(arg timespans.CallDescriptor, replay *timespans.CallCost) (err error) {
 	rs, err := GetCallCost(&arg, "Responder.Debit")
 	*replay = *rs
 	return
 }
 
-func (r *Responder) DebitBalance(arg timespans.CallDescriptor, replay *float64) (err error) {
+func (r *RpcResponder) DebitBalance(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay, err = CallMethod(&arg, "Responder.DebitCents")
 	return
 }
 
-func (r *Responder) DebitSMS(arg timespans.CallDescriptor, replay *float64) (err error) {
+func (r *RpcResponder) DebitSMS(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay, err = CallMethod(&arg, "Responder.DebitSMS")
 	return
 }
 
-func (r *Responder) DebitSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
+func (r *RpcResponder) DebitSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay, err = CallMethod(&arg, "Responder.DebitSeconds")
 	return
 }
 
-func (r *Responder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *float64) (err error) {
+func (r *RpcResponder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay, err = CallMethod(&arg, "Responder.GetMaxSessionTime")
 	return
 }
 
-func (r *Responder) AddVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
+func (r *RpcResponder) AddVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay, err = CallMethod(&arg, "Responder.AddVolumeDiscountSeconds")
 	return
 }
 
-/*func (r *Responder) ResetVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Responder.ResetVolumeDiscountSeconds")
-	return
-}
-
-func (r *Responder) AddRecievedCallSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Responder.AddRecievedCallSeconds")
-	return
-}
-
-func (r *Responder) ResetUserBudget(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay = CallMethod(&arg, "Responder.ResetUserBudget")
-	return
-}*/
-
-func (r *Responder) Status(arg timespans.CallDescriptor, replay *string) (err error) {
+func (r *RpcResponder) Status(arg timespans.CallDescriptor, replay *string) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	*replay = "Connected raters:\n"
@@ -128,4 +116,51 @@ func listenToRPCRequests() {
 			go rpc.ServeConn(conn)
 		}
 	}
+}
+
+/*
+The function that gets the information from the raters using balancer.
+*/
+func GetCallCost(key *timespans.CallDescriptor, method string) (reply *timespans.CallCost, err error) {
+	err = errors.New("") //not nil value
+	for err != nil {
+		client := bal.Balance()
+		if client == nil {
+			log.Print("Waiting for raters to register...")
+			time.Sleep(1 * time.Second) // wait one second and retry
+		} else {
+			reply = &timespans.CallCost{}
+			reply, err = accLock.GuardGetCost(key.GetKey(), func() (*timespans.CallCost, error) {
+				err = client.Call(method, *key, reply)
+				return reply, err
+			})
+			if err != nil {
+				log.Printf("Got en error from rater: %v", err)
+			}
+		}
+	}
+	return
+}
+
+/*
+The function that gets the information from the raters using balancer.
+*/
+func CallMethod(key *timespans.CallDescriptor, method string) (reply float64, err error) {
+	err = errors.New("") //not nil value
+	for err != nil {
+		client := bal.Balance()
+		if client == nil {
+			log.Print("Waiting for raters to register...")
+			time.Sleep(1 * time.Second) // wait one second and retry
+		} else {
+			reply, err = accLock.Guard(key.GetKey(), func() (float64, error) {
+				err = client.Call(method, *key, &reply)
+				return reply, err
+			})
+			if err != nil {
+				log.Printf("Got en error from rater: %v", err)
+			}
+		}
+	}
+	return
 }

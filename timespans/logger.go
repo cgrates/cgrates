@@ -20,7 +20,6 @@ package timespans
 
 import (
 	"log"
-	"log/syslog"
 )
 
 type LoggerInterface interface {
@@ -35,43 +34,7 @@ type LoggerInterface interface {
 	Warning(m string) error
 }
 
-type SyslogLogger struct {
-	*syslog.Writer
-}
-
-func NewSyslogLogger() (*SyslogLogger, error) {
-	logger, err := syslog.New(syslog.LOG_INFO, "CGRateS")
-	return &SyslogLogger{logger}, err
-}
-
-func (sl *SyslogLogger) Alert(m string) (err error) {
-	return sl.Alert(m)
-}
-func (sl *SyslogLogger) Close() error {
-	return sl.Close()
-}
-func (sl *SyslogLogger) Crit(m string) (err error) {
-	return sl.Crit(m)
-}
-func (sl *SyslogLogger) Debug(m string) (err error) {
-	return sl.Debug(m)
-}
-func (sl *SyslogLogger) Emerg(m string) (err error) {
-	return sl.Emerg(m)
-}
-func (sl *SyslogLogger) Err(m string) (err error) {
-	return sl.Err(m)
-}
-func (sl *SyslogLogger) Info(m string) (err error) {
-	return sl.Info(m)
-}
-func (sl *SyslogLogger) Notice(m string) (err error) {
-	return sl.Notice(m)
-}
-func (sl *SyslogLogger) Warning(m string) (err error) {
-	return sl.Warning(m)
-}
-
+// Logs to standard output
 type StdLogger struct{}
 
 func (sl *StdLogger) Alert(m string) (err error) {

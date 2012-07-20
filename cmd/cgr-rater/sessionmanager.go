@@ -27,16 +27,6 @@ import (
 	"net/rpc/jsonrpc"
 )
 
-var (
-	standalone     = flag.Bool("standalone", false, "run standalone (run as a rater)")
-	json           = flag.Bool("json", false, "use JSON for RPC encoding")
-	balancer       = flag.String("balancer", "127.0.0.1:2000", "balancer address host:port")
-	freeswitchsrv  = flag.String("freeswitchsrv", "localhost:8021", "freeswitch address host:port")
-	freeswitchpass = flag.String("freeswitchpass", "ClueCon", "freeswitch address host:port")
-	redissrv       = flag.String("redissrv", "127.0.0.1:6379", "redis address host:port")
-	redisdb        = flag.Int("redisdb", 10, "redis database number")
-)
-
 func mainc() {
 	flag.Parse()
 	sm := &sessionmanager.FSSessionManager{}

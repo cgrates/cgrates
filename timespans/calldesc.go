@@ -21,15 +21,16 @@ package timespans
 import (
 	"errors"
 	"fmt"
+	"log/syslog"
 	"math"
 	"time"
 )
 
 func init() {
 	var err error
-	logger, err = NewSyslogLogger()
+	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
 	if err != nil {
-		logger = new(StdLogger)
+		Logger = new(StdLogger)
 	}
 }
 
@@ -42,7 +43,7 @@ const (
 
 var (
 	storageGetter StorageGetter
-	logger        LoggerInterface
+	Logger        LoggerInterface
 )
 
 /*
@@ -282,7 +283,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Cost:        cost,
 		ConnectFee:  connectionFee,
 		Timespans:   timespans}
-	logger.Info(fmt.Sprintf("Get Cost: %v => %v", cd, cc))
+	Logger.Info(fmt.Sprintf("Get Cost: %v => %v", cd, cc))
 	return cc, err
 }
 
@@ -337,7 +338,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
 	if err != nil {
-		logger.Err(fmt.Sprintf("error getting cost %v", err))
+		Logger.Err(fmt.Sprintf("error getting cost %v", err))
 	}
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
+	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
 	"time"
@@ -39,11 +40,18 @@ var (
 	start     = flag.String("start", "2012-02-09T00:00:00Z", "Time start")
 	end       = flag.String("end", "2012-02-09T00:10:00Z", "Time end")
 	amount    = flag.Float64("amount", 100, "Amount for different operations")
+	json      = flag.Bool("json", false, "Use JSON for RPC encoding.")
 )
 
 func main() {
 	flag.Parse()
-	client, err := jsonrpc.Dial("tcp", *server)
+	var client *rpc.Client
+	var err error
+	if *json {
+		client, err = jsonrpc.Dial("tcp", *server)
+	} else {
+		client, err = rpc.Dial("tcp", *server)
+	}
 	if err != nil {
 		log.Fatal("Could not connect to server " + *server)
 	}
@@ -101,21 +109,6 @@ func main() {
 		if err = client.Call("Responder.DebitSeconds", cd, &result); err == nil {
 			fmt.Println(result)
 		}
-	/*case "addvolumediscountseconds":
-		var result float64
-		if err = client.Call("Responder.AddVolumeDiscountSeconds", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "resetvolumediscountseconds":
-		var result float64
-		if err = client.Call("Responder.ResetVolumeDiscountSeconds", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "addrecievedcallseconds":
-		var result float64
-		if err = client.Call("Responder.AddRecievedCallSeconds", cd, &result); err == nil {
-			fmt.Println(result)
-		}*/
 	case "resetuserbudget":
 		var result float64
 		if err = client.Call("Responder.ResetUserBudget", cd, &result); err == nil {
@@ -133,9 +126,6 @@ func main() {
 		fmt.Println("\tdebitbalance")
 		fmt.Println("\tdebitsms")
 		fmt.Println("\tdebitseconds")
-		// fmt.Println("\taddvolumediscountseconds")
-		// fmt.Println("\tresetvolumediscountseconds")
-		// fmt.Println("\taddrecievedcallseconds")
 		fmt.Println("\tresetuserbudget")
 		fmt.Println("\tstatus")
 		flag.PrintDefaults()
