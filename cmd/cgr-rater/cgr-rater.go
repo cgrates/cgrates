@@ -192,5 +192,13 @@ func main() {
 		}()
 	}
 
+	if sm_enabled {
+		go startSessionManager()
+	}
+
+	if mediator_enabled {
+		go startMediator()
+	}
+
 	<-exitChan
 }

@@ -32,16 +32,6 @@ import (
 	"time"
 )
 
-/*var (
-	cdrFile    = flag.String("freeswitchcdr", "Master.csv", "Freeswitch Master CSV CDR file.")
-	resultFile = flag.String("resultfile", "out.csv", "Generated file containing CDR and price info.")
-	host       = flag.String("host", "localhost", "The host to connect to. Values that start with / are for UNIX domain sockets.")
-	port       = flag.String("port", "5432", "The port to bind to.")
-	dbName     = flag.String("dbname", "cgrates", "The name of the database to connect to.")
-	user       = flag.String("user", "", "The user to sign in as.")
-	password   = flag.String("password", "", "The user's password.")
-)*/
-
 func readDbRecord(db *sql.DB, searchedUUID string) (cc *timespans.CallCost, timespansText string, err error) {
 	row := db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s'", searchedUUID))
 	var uuid string
@@ -50,7 +40,7 @@ func readDbRecord(db *sql.DB, searchedUUID string) (cc *timespans.CallCost, time
 	return
 }
 
-func maina() {
+func startMediator() {
 	flag.Parse()
 	useDB := true
 	file, err := os.Open(mediator_cdr_file)

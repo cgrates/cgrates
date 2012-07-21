@@ -27,7 +27,7 @@ import (
 	"net/rpc/jsonrpc"
 )
 
-func mainc() {
+func startSessionManager() {
 	flag.Parse()
 	sm := &sessionmanager.FSSessionManager{}
 	getter, err := timespans.NewRedisStorage(redis_server, redis_db)
@@ -49,7 +49,4 @@ func mainc() {
 		}
 		sm.Connect(sessionmanager.NewRPCClientSessionDelegate(client), sm_freeswitch_server, sm_freeswitch_pass)
 	}
-	waitChan := make(<-chan byte)
-	log.Print("CGRateS is listening!")
-	<-waitChan
 }
