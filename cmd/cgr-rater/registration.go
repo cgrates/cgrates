@@ -20,10 +20,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/balancer"
+
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"net/http"
 	"net/rpc"
 	"os"
 	"os/signal"
@@ -31,20 +30,7 @@ import (
 	"time"
 )
 
-/*
-RPC Server that handles the registering and unregistering of raters.
-*/
 type RaterServer struct{}
-
-func listenToRPCRaterRequests() {
-	rpc.Register(new(RaterServer))
-	rpc.HandleHTTP()
-	http.ListenAndServe(*raterAddress, nil)
-}
-
-var (
-	bal = balancer.NewBalancer()
-)
 
 /*
 Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered raters.

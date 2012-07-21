@@ -40,6 +40,14 @@ func (s *DirectResponder) GetCost(cd timespans.CallDescriptor, reply *timespans.
 	return err
 }
 
+func (s *DirectResponder) Debit(cd timespans.CallDescriptor, reply *timespans.CallCost) (err error) {
+	r, e := timespans.AccLock.GuardGetCost(cd.GetUserBalanceKey(), func() (*timespans.CallCost, error) {
+		return (&cd).Debit()
+	})
+	*reply, err = *r, e
+	return err
+}
+
 func (s *DirectResponder) DebitCents(cd timespans.CallDescriptor, reply *float64) (err error) {
 	r, e := timespans.AccLock.Guard(cd.GetUserBalanceKey(), func() (float64, error) {
 		return (&cd).DebitCents()

@@ -23,9 +23,6 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"net"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"runtime"
 	"time"
 )
@@ -47,7 +44,7 @@ func (r *RpcResponder) Debit(arg timespans.CallDescriptor, replay *timespans.Cal
 	return
 }
 
-func (r *RpcResponder) DebitBalance(arg timespans.CallDescriptor, replay *float64) (err error) {
+func (r *RpcResponder) DebitCents(arg timespans.CallDescriptor, replay *float64) (err error) {
 	*replay, err = CallMethod(&arg, "Responder.DebitCents")
 	return
 }
@@ -82,40 +79,6 @@ func (r *RpcResponder) Status(arg timespans.CallDescriptor, replay *string) (err
 	}
 	*replay += fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
 	return
-}
-
-/*
-Creates the json rpc server.
-*/
-func listenToRPCRequests() {
-	l, err := net.Listen("tcp", *rpcAddress)
-	defer l.Close()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print("Listening for incomming json RPC requests on ", l.Addr())
-
-	responder := new(Responder)
-	rpc.Register(responder)
-
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			log.Printf("accept error: %s", conn)
-			continue
-		}
-
-		log.Printf("connection started: %v", conn.RemoteAddr())
-		if *js {
-			// log.Print("json encoding")
-			go jsonrpc.ServeConn(conn)
-		} else {
-			// log.Print("gob encoding")
-			go rpc.ServeConn(conn)
-		}
-	}
 }
 
 /*

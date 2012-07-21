@@ -30,24 +30,24 @@ import (
 func mainc() {
 	flag.Parse()
 	sm := &sessionmanager.FSSessionManager{}
-	getter, err := timespans.NewRedisStorage(*redissrv, *redisdb)
+	getter, err := timespans.NewRedisStorage(redis_server, redis_db)
 	defer getter.Close()
 	if err != nil {
 		log.Fatalf("Cannot open storage: %v", err)
 	}
-	if *standalone {
-		sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), *freeswitchsrv, *freeswitchpass)
+	if sm_standalone {
+		sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), sm_freeswitch_server, sm_freeswitch_pass)
 	} else {
 		var client *rpc.Client
-		if *json {
-			client, err = jsonrpc.Dial("tcp", *balancer)
+		if sm_json {
+			client, err = jsonrpc.Dial("tcp", sm_api_server)
 		} else {
-			client, err = rpc.Dial("tcp", *balancer)
+			client, err = rpc.Dial("tcp", sm_api_server)
 		}
 		if err != nil {
 			log.Fatalf("could not connect to balancer: %v", err)
 		}
-		sm.Connect(sessionmanager.NewRPCClientSessionDelegate(client), *freeswitchsrv, *freeswitchpass)
+		sm.Connect(sessionmanager.NewRPCClientSessionDelegate(client), sm_freeswitch_server, sm_freeswitch_pass)
 	}
 	waitChan := make(<-chan byte)
 	log.Print("CGRateS is listening!")
