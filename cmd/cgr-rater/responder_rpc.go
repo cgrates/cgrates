@@ -81,6 +81,18 @@ func (r *RpcResponder) Status(arg timespans.CallDescriptor, replay *string) (err
 	return
 }
 
+func (r *RpcResponder) Shutdown(arg string, replay *string) (err error) {
+	memstats := new(runtime.MemStats)
+	runtime.ReadMemStats(memstats)
+	*replay = "Connected raters:\n"
+	for _, rater := range bal.GetClientAddresses() {
+		log.Print(rater)
+		*replay += fmt.Sprintf("%v\n", rater)
+	}
+	*replay += fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
+	return
+}
+
 /*
 The function that gets the information from the raters using balancer.
 */

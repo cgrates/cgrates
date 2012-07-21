@@ -43,7 +43,7 @@ func stopSingnalHandler() {
 	sig := <-c
 	log.Printf("Caught signal %v, sending shutdownto raters\n", sig)
 	bal.Shutdown()
-	os.Exit(1)
+	exitChan <- true
 }
 
 /*
@@ -80,7 +80,7 @@ func (rs *RaterServer) UnRegisterRater(clientAddress string, replay *int) error 
 /*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from balancer and closes the storage before exiting.
 */
-func stopRaterSingnalHandler(server, listen *string, sg timespans.StorageGetter) {
+func stopRaterSingnalHandler(server, listen string, sg timespans.StorageGetter) {
 	log.Print("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
@@ -89,42 +89,42 @@ func stopRaterSingnalHandler(server, listen *string, sg timespans.StorageGetter)
 	log.Printf("Caught signal %v, unregistering from balancer\n", sig)
 	unregisterFromBalancer(server, listen)
 	sg.Close()
-	os.Exit(1)
+	exitChan <- true
 }
 
 /*
 Connects to the balancer and calls unregister RPC method.
 */
-func unregisterFromBalancer(server, listen *string) {
-	client, err := rpc.DialHTTP("tcp", *server)
+func unregisterFromBalancer(server, listen string) {
+	client, err := rpc.DialHTTP("tcp", server)
 	if err != nil {
 		log.Print("Cannot contact the balancer!")
 		os.Exit(1)
 	}
 	var reply int
-	log.Print("Unregistering from balancer ", *server)
-	client.Call("RaterServer.UnRegisterRater", *listen, &reply)
+	log.Print("Unregistering from balancer ", server)
+	client.Call("RaterServer.UnRegisterRater", listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Print("Could not close balancer unregistration!")
-		os.Exit(1)
+		exitChan <- true
 	}
 }
 
 /*
 Connects to the balancer and rehisters the rater to the server.
 */
-func registerToBalancer(server, listen *string) {
-	client, err := rpc.DialHTTP("tcp", *server)
+func registerToBalancer(server, listen string) {
+	client, err := rpc.DialHTTP("tcp", server)
 	if err != nil {
 		log.Print("Cannot contact the balancer!")
-		os.Exit(1)
+		exitChan <- true
 	}
 	var reply int
-	log.Print("Registering to balancer ", *server)
-	client.Call("RaterServer.RegisterRater", *listen, &reply)
+	log.Print("Registering to balancer ", server)
+	client.Call("RaterServer.RegisterRater", listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Print("Could not close balancer registration!")
-		os.Exit(1)
+		exitChan <- true
 	}
 	log.Print("Registration finished!")
 }

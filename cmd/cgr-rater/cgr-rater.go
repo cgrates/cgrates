@@ -80,18 +80,22 @@ func readConfig(configFn string) {
 	}
 	redis_server, _ = c.GetString("global", "redis_server")
 	redis_db, _ = c.GetInt("global", "redis_db")
+
 	rater_standalone, _ = c.GetBool("rater", "standalone")
 	rater_balancer_server, _ = c.GetString("rater", "balancer_server")
 	rater_listen, _ = c.GetString("rater", "listen_api")
 	rater_json, _ = c.GetBool("rater", "json")
+
 	balancer_enabled, _ = c.GetBool("balancer", "enabled")
 	balancer_standalone, _ = c.GetBool("balancer", "standalone")
 	balancer_listen_rater, _ = c.GetString("balancer", "listen_rater")
 	balancer_listen_api, _ = c.GetString("balancer", "listen_api")
 	balancer_json, _ = c.GetBool("balancer", "json")
+
 	scheduler_enabled, _ = c.GetBool("scheduler", "enabled")
 	scheduler_standalone, _ = c.GetBool("scheduler", "standalone")
 	scheduler_json, _ = c.GetBool("scheduler", "json")
+
 	sm_enabled, _ = c.GetBool("session_manager", "enabled")
 	sm_standalone, _ = c.GetBool("session_manager", "standalone")
 	sm_api_server, _ = c.GetString("session_manager", "api_server")
@@ -179,16 +183,10 @@ func main() {
 	defer getter.Close()
 	timespans.SetStorageGetter(getter)
 
+	if !rater_standalone {
+		go registerToBalancer(rater_balancer_server, rater_listen)
+		go stopRaterSingnalHandler(rater_balancer_server, rater_listen, getter)
+	}
 	go listenToRPCRequests(&Responder{new(DirectResponder)}, rater_listen, false)
 	<-exitChan
 }
-
-/*	if *freeswitch {
-		sm := &sessionmanager.FSSessionManager{}
-		sm.Connect(sessionmanager.NewDirectSessionDelegate(getter), *freeswitchsrv, *freeswitchpass)
-	}
-	if !*standalone {
-		go RegisterToServer(balancer, listen)
-		go StopSingnalHandler(balancer, listen, getter)
-	}
-*/

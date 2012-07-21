@@ -21,7 +21,6 @@ package main
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
-	"os"
 	"runtime"
 )
 
@@ -100,7 +99,7 @@ RPC method that triggers rater shutdown in case of balancer exit.
 */
 func (s *DirectResponder) Shutdown(args string, reply *string) (err error) {
 	s.sg.Close()
-	defer os.Exit(0)
+	defer func() { exitChan <- true }()
 	*reply = "Done!"
 	return nil
 }
