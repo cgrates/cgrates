@@ -26,7 +26,6 @@ import (
 )
 
 var (
-	storage     timespans.StorageGetter
 	timer       *time.Timer
 	restartLoop = make(chan byte)
 	s           = scheduler{}
@@ -63,15 +62,7 @@ func (s scheduler) loop() {
 	}
 }
 
-func reloadActionTimings() {
-	log.Print("Reloading action timings.")
-	loadActionTimings()
-	// check the tip of the queue for new actions
-	restartLoop <- 1
-	timer.Stop()
-}
-
-func loadActionTimings() {
+func loadActionTimings(storage timespans.StorageGetter) {
 	actionTimings, err := storage.GetAllActionTimings()
 	if err != nil {
 		log.Fatalf("Cannot get action timings:", err)

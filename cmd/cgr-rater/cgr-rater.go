@@ -70,6 +70,7 @@ var (
 
 	bal      = balancer.NewBalancer()
 	accLock  = timespans.NewAccountLock()
+	getter   timespans.StorageGetter
 	exitChan = make(chan bool)
 )
 
@@ -120,7 +121,9 @@ func listenToRPCRequests(responder interface{}, rpcAddress string, json bool) {
 	defer l.Close()
 
 	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("could not connect to rpc server: %v", err))
+		timespans.Logger.Err(fmt.Sprintf("could start the rpc server: %v", err))
+		exitChan <- true
+		return
 	}
 
 	timespans.Logger.Info(fmt.Sprintf("Listening for incomming RPC requests on %v", l.Addr()))
@@ -183,7 +186,7 @@ func main() {
 
 	if scheduler_enabled {
 		go func() {
-			loadActionTimings()
+			loadActionTimings(getter)
 			go reloadSchedulerSingnalHandler()
 			s.loop()
 		}()

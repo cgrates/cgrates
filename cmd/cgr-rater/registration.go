@@ -139,7 +139,7 @@ func reloadSchedulerSingnalHandler() {
 		sig := <-c
 
 		timespans.Logger.Info(fmt.Sprintf("Caught signal %v, reloading action timings.\n", sig))
-		loadActionTimings()
+		loadActionTimings(getter)
 		// check the tip of the queue for new actions
 		restartLoop <- 1
 		timer.Stop()
