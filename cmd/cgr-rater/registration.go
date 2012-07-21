@@ -33,20 +33,6 @@ import (
 type RaterServer struct{}
 
 /*
-Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered raters.
-*/
-func stopSingnalHandler() {
-	log.Print("Handling stop signals...")
-	c := make(chan os.Signal)
-	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-
-	sig := <-c
-	log.Printf("Caught signal %v, sending shutdownto raters\n", sig)
-	bal.Shutdown()
-	exitChan <- true
-}
-
-/*
 RPC method that receives a rater address, connects to it and ads the pair to the rater list for balancing
 */
 func (rs *RaterServer) RegisterRater(clientAddress string, replay *int) error {
@@ -78,6 +64,20 @@ func (rs *RaterServer) UnRegisterRater(clientAddress string, replay *int) error 
 }
 
 /*
+Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered raters.
+*/
+func stopBalancerSingnalHandler() {
+	log.Print("Handling stop signals...")
+	c := make(chan os.Signal)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+
+	sig := <-c
+	log.Printf("Caught signal %v, sending shutdownto raters\n", sig)
+	bal.Shutdown()
+	exitChan <- true
+}
+
+/*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from balancer and closes the storage before exiting.
 */
 func stopRaterSingnalHandler(server, listen string, sg timespans.StorageGetter) {
@@ -99,7 +99,7 @@ func unregisterFromBalancer(server, listen string) {
 	client, err := rpc.DialHTTP("tcp", server)
 	if err != nil {
 		log.Print("Cannot contact the balancer!")
-		os.Exit(1)
+		exitChan <- true
 	}
 	var reply int
 	log.Print("Unregistering from balancer ", server)

@@ -64,8 +64,8 @@ func (r *RpcResponder) GetMaxSessionTime(arg timespans.CallDescriptor, replay *f
 	return
 }
 
-func (r *RpcResponder) AddVolumeDiscountSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
-	*replay, err = CallMethod(&arg, "Responder.AddVolumeDiscountSeconds")
+func (r *RpcResponder) AddRecievedCallSeconds(arg timespans.CallDescriptor, replay *float64) (err error) {
+	*replay, err = CallMethod(&arg, "Responder.AddRecievedCallSeconds")
 	return
 }
 

@@ -37,6 +37,7 @@ func TestConfig(t *testing.T) {
 		balancer_standalone != true ||
 		balancer_listen_rater != "test" ||
 		balancer_listen_api != "test" ||
+		balancer_web_status_server != "test" ||
 		balancer_json != true ||
 
 		scheduler_enabled != true ||

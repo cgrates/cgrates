@@ -25,12 +25,14 @@ import (
 	"github.com/cgrates/cgrates/balancer"
 	"github.com/cgrates/cgrates/timespans"
 	"net"
+	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"runtime"
 )
 
 var (
-	config       = flag.String("config", "/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/conf/rater.config", "Configuration file location.")
+	config       = flag.String("config", "/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/conf/rater_standalone.config", "Configuration file location.")
 	redis_server = "127.0.0.1:6379" // redis address host:port
 	redis_db     = 10               // redis database number
 
@@ -39,11 +41,12 @@ var (
 	rater_listen          = "127.0.0.1:1234" // listening address host:port
 	rater_json            = false            // use JSON for RPC encoding
 
-	balancer_enabled      = false
-	balancer_standalone   = false            // run standalone
-	balancer_listen_rater = "127.0.0.1:2000" // Rater server address
-	balancer_listen_api   = "127.0.0.1:2001" // Json RPC server address
-	balancer_json         = false            // use JSON for RPC encoding
+	balancer_enabled           = false
+	balancer_standalone        = false            // run standalone
+	balancer_listen_rater      = "127.0.0.1:2000" // Rater server address	
+	balancer_listen_api        = "127.0.0.1:2001" // Json RPC server address
+	balancer_web_status_server = "127.0.0.1:8000" // Web server address
+	balancer_json              = false            // use JSON for RPC encoding
 
 	scheduler_enabled    = false
 	scheduler_standalone = false // run standalone (no other service)
@@ -72,7 +75,6 @@ var (
 )
 
 func readConfig(configFn string) {
-	flag.Parse()
 	c, err := conf.ReadConfigFile(configFn)
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("Could not open the configuration file: %v", err))
@@ -90,6 +92,7 @@ func readConfig(configFn string) {
 	balancer_standalone, _ = c.GetBool("balancer", "standalone")
 	balancer_listen_rater, _ = c.GetString("balancer", "listen_rater")
 	balancer_listen_api, _ = c.GetString("balancer", "listen_api")
+	balancer_web_status_server, _ = c.GetString("balancer", "web_status_server")
 	balancer_json, _ = c.GetBool("balancer", "json")
 
 	scheduler_enabled, _ = c.GetBool("scheduler", "enabled")
@@ -164,15 +167,17 @@ func listenToRPCRequests(responder interface{}, rpcAddress string, json bool) {
 	}
 }
 
-/*func listenToHttpRequests() {
+func listenToHttpRequests() {
 	http.HandleFunc("/", statusHandler)
 	http.HandleFunc("/getmem", memoryHandler)
 	http.HandleFunc("/raters", ratersHandler)
-	log.Print("The server is listening on ", *httpApiAddress)
-	http.ListenAndServe(*httpApiAddress, nil)
+	timespans.Logger.Info(fmt.Sprintf("The server is listening on %s", balancer_web_status_server))
+	http.ListenAndServe(balancer_web_status_server, nil)
 }
-*/
+
 func main() {
+	flag.Parse()
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	readConfig(*config)
 	resolveStandaloneConfilcts()
 	getter, err := timespans.NewRedisStorage(redis_server, redis_db)
@@ -183,10 +188,19 @@ func main() {
 	defer getter.Close()
 	timespans.SetStorageGetter(getter)
 
-	if !rater_standalone {
+	if !rater_standalone && !balancer_enabled {
 		go registerToBalancer(rater_balancer_server, rater_listen)
 		go stopRaterSingnalHandler(rater_balancer_server, rater_listen, getter)
 	}
-	go listenToRPCRequests(&Responder{new(DirectResponder)}, rater_listen, false)
+	if !balancer_enabled {
+		go listenToRPCRequests(&Responder{new(DirectResponder)}, rater_listen, rater_json)
+	}
+	if balancer_enabled {
+		go stopBalancerSingnalHandler()
+		go listenToRPCRequests(new(RaterServer), balancer_listen_rater, false)
+		go listenToRPCRequests(&Responder{new(RpcResponder)}, balancer_listen_api, balancer_json)
+		go listenToHttpRequests()
+	}
+
 	<-exitChan
 }
