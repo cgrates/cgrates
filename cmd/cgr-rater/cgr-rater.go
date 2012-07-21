@@ -48,9 +48,8 @@ var (
 	balancer_web_status_server = "127.0.0.1:8000" // Web server address
 	balancer_json              = false            // use JSON for RPC encoding
 
-	scheduler_enabled    = false
-	scheduler_standalone = false // run standalone (no other service)
-	scheduler_json       = false
+	scheduler_enabled = false
+	scheduler_json    = false
 
 	sm_enabled           = false
 	sm_standalone        = false            // run standalone 
@@ -96,7 +95,6 @@ func readConfig(configFn string) {
 	balancer_json, _ = c.GetBool("balancer", "json")
 
 	scheduler_enabled, _ = c.GetBool("scheduler", "enabled")
-	scheduler_standalone, _ = c.GetBool("scheduler", "standalone")
 	scheduler_json, _ = c.GetBool("scheduler", "json")
 
 	sm_enabled, _ = c.GetBool("session_manager", "enabled")
@@ -115,27 +113,6 @@ func readConfig(configFn string) {
 	mediator_db, _ = c.GetString("mediator", "db")
 	mediator_user, _ = c.GetString("mediator", "user")
 	mediator_password, _ = c.GetString("mediator", "password")
-}
-
-func resolveStandaloneConfilcts() {
-	if balancer_standalone {
-		rater_standalone = false
-	}
-	if scheduler_standalone {
-		rater_standalone = false
-		balancer_standalone = false
-	}
-	if sm_standalone {
-		rater_standalone = false
-		balancer_standalone = false
-		scheduler_standalone = false
-	}
-	if mediator_standalone {
-		rater_standalone = false
-		balancer_standalone = false
-		scheduler_standalone = false
-		sm_standalone = false
-	}
 }
 
 func listenToRPCRequests(responder interface{}, rpcAddress string, json bool) {
@@ -179,7 +156,9 @@ func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	readConfig(*config)
-	resolveStandaloneConfilcts()
+	if balancer_standalone {
+		rater_standalone = false
+	}
 	getter, err := timespans.NewRedisStorage(redis_server, redis_db)
 	if err != nil {
 		timespans.Logger.Crit("Could not connect to redis, exiting!")
@@ -189,8 +168,8 @@ func main() {
 	timespans.SetStorageGetter(getter)
 
 	if !rater_standalone && !balancer_enabled {
-		go registerToBalancer(rater_balancer_server, rater_listen)
-		go stopRaterSingnalHandler(rater_balancer_server, rater_listen, getter)
+		go registerToBalancer()
+		go stopRaterSingnalHandler()
 	}
 	if !balancer_enabled {
 		go listenToRPCRequests(&Responder{new(DirectResponder)}, rater_listen, rater_json)
@@ -200,6 +179,14 @@ func main() {
 		go listenToRPCRequests(new(RaterServer), balancer_listen_rater, false)
 		go listenToRPCRequests(&Responder{new(RpcResponder)}, balancer_listen_api, balancer_json)
 		go listenToHttpRequests()
+	}
+
+	if scheduler_enabled {
+		go func() {
+			loadActionTimings()
+			go reloadSchedulerSingnalHandler()
+			s.loop()
+		}()
 	}
 
 	<-exitChan

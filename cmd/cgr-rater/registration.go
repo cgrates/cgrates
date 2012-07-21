@@ -80,30 +80,30 @@ func stopBalancerSingnalHandler() {
 /*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from balancer and closes the storage before exiting.
 */
-func stopRaterSingnalHandler(server, listen string, sg timespans.StorageGetter) {
+func stopRaterSingnalHandler() {
 	log.Print("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	sig := <-c
 
 	log.Printf("Caught signal %v, unregistering from balancer\n", sig)
-	unregisterFromBalancer(server, listen)
-	sg.Close()
+	unregisterFromBalancer()
 	exitChan <- true
 }
 
 /*
 Connects to the balancer and calls unregister RPC method.
 */
-func unregisterFromBalancer(server, listen string) {
-	client, err := rpc.DialHTTP("tcp", server)
+func unregisterFromBalancer() {
+	client, err := rpc.Dial("tcp", rater_balancer_server)
 	if err != nil {
 		log.Print("Cannot contact the balancer!")
 		exitChan <- true
+		return
 	}
 	var reply int
-	log.Print("Unregistering from balancer ", server)
-	client.Call("RaterServer.UnRegisterRater", listen, &reply)
+	log.Print("Unregistering from balancer ", rater_balancer_server)
+	client.Call("RaterServer.UnRegisterRater", rater_listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Print("Could not close balancer unregistration!")
 		exitChan <- true
@@ -113,18 +113,35 @@ func unregisterFromBalancer(server, listen string) {
 /*
 Connects to the balancer and rehisters the rater to the server.
 */
-func registerToBalancer(server, listen string) {
-	client, err := rpc.DialHTTP("tcp", server)
+func registerToBalancer() {
+	client, err := rpc.Dial("tcp", rater_balancer_server)
 	if err != nil {
 		log.Print("Cannot contact the balancer!")
 		exitChan <- true
+		return
 	}
 	var reply int
-	log.Print("Registering to balancer ", server)
-	client.Call("RaterServer.RegisterRater", listen, &reply)
+	log.Print("Registering to balancer ", rater_balancer_server)
+	client.Call("RaterServer.RegisterRater", rater_listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Print("Could not close balancer registration!")
 		exitChan <- true
 	}
 	log.Print("Registration finished!")
+}
+
+// Listens for the HUP system signal and gracefuly reloads the timers from database.
+func reloadSchedulerSingnalHandler() {
+	timespans.Logger.Info("Handling HUP signal...")
+	for {
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGHUP)
+		sig := <-c
+
+		timespans.Logger.Info(fmt.Sprintf("Caught signal %v, reloading action timings.\n", sig))
+		loadActionTimings()
+		// check the tip of the queue for new actions
+		restartLoop <- 1
+		timer.Stop()
+	}
 }

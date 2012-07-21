@@ -41,18 +41,15 @@ func TestConfig(t *testing.T) {
 		balancer_json != true ||
 
 		scheduler_enabled != true ||
-		scheduler_standalone != true ||
 		scheduler_json != true ||
 
 		sm_enabled != true ||
-		sm_standalone != true ||
 		sm_api_server != "test" ||
 		sm_freeswitch_server != "test" ||
 		sm_freeswitch_pass != "test" ||
 		sm_json != true ||
 
 		mediator_enabled != true ||
-		mediator_standalone != true ||
 		mediator_cdr_file != "test" ||
 		mediator_result_file != "test" ||
 		mediator_host != "test" ||
@@ -71,16 +68,13 @@ func TestConfig(t *testing.T) {
 		t.Log(balancer_listen_api)
 		t.Log(balancer_json)
 		t.Log(scheduler_enabled)
-		t.Log(scheduler_standalone)
 		t.Log(scheduler_json)
 		t.Log(sm_enabled)
-		t.Log(sm_standalone)
 		t.Log(sm_api_server)
 		t.Log(sm_freeswitch_server)
 		t.Log(sm_freeswitch_pass)
 		t.Log(sm_json)
 		t.Log(mediator_enabled)
-		t.Log(mediator_standalone)
 		t.Log(mediator_cdr_file)
 		t.Log(mediator_result_file)
 		t.Log(mediator_host)
