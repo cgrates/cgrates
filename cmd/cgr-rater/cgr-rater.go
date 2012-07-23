@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/balancer"
+	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
 	"net"
 	"net/http"
@@ -116,7 +117,7 @@ func readConfig(configFn string) {
 	mediator_password, _ = c.GetString("mediator", "password")
 }
 
-func listenToRPCRequests(responder interface{}, rpcAddress string, json bool) {
+func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, json bool) {
 	l, err := net.Listen("tcp", rpcAddress)
 	defer l.Close()
 
@@ -127,7 +128,7 @@ func listenToRPCRequests(responder interface{}, rpcAddress string, json bool) {
 	}
 
 	timespans.Logger.Info(fmt.Sprintf("Listening for incomming RPC requests on %v", l.Addr()))
-	rpc.Register(responder)
+	rpc.Register(rpcResponder)
 
 	for {
 		conn, err := l.Accept()
@@ -175,13 +176,16 @@ func main() {
 		go registerToBalancer()
 		go stopRaterSingnalHandler()
 	}
+	responder := &timespans.Responder{Bal: bal, ExitChan: exitChan}
 	if !balancer_enabled {
-		go listenToRPCRequests(&Responder{rpc: true}, rater_listen, rater_json)
+		responder.Rpc = false
+		go listenToRPCRequests(responder, rater_listen, rater_json)
 	}
 	if balancer_enabled {
 		go stopBalancerSingnalHandler()
 		go listenToRPCRequests(new(RaterServer), balancer_listen_rater, false)
-		go listenToRPCRequests(&Responder{rpc: true}, balancer_listen_api, balancer_json)
+		responder.Rpc = false
+		go listenToRPCRequests(responder, balancer_listen_api, balancer_json)
 		go listenToHttpRequests()
 	}
 
@@ -194,7 +198,10 @@ func main() {
 	}
 
 	if sm_enabled {
-		go startSessionManager()
+		go func() {
+			sm := &sessionmanager.FSSessionManager{}
+			sm.Connect(&sessionmanager.SessionDelegate{responder}, sm_freeswitch_server, sm_freeswitch_pass)
+		}()
 	}
 
 	if mediator_enabled {

@@ -32,12 +32,12 @@ type FSSessionManager struct {
 	conn            net.Conn
 	buf             *bufio.Reader
 	sessions        []*Session
-	sessionDelegate SessionDelegate
+	sessionDelegate *SessionDelegate
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events in json format.
-func (sm *FSSessionManager) Connect(ed SessionDelegate, address, pass string) {
+func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) {
 	if ed == nil {
 		log.Fatal("Please provide a non nil SessionDelegate")
 	}
@@ -139,6 +139,6 @@ func (sm *FSSessionManager) OnOther(ev Event) {
 	//log.Printf("Other event: %s", ev.GetName())
 }
 
-func (sm *FSSessionManager) GetSessionDelegate() SessionDelegate {
+func (sm *FSSessionManager) GetSessionDelegate() *SessionDelegate {
 	return sm.sessionDelegate
 }

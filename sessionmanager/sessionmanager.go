@@ -20,5 +20,5 @@ package sessionmanager
 
 type SessionManager interface {
 	DisconnectSession(*Session)
-	GetSessionDelegate() SessionDelegate
+	GetSessionDelegate() *SessionDelegate
 }
