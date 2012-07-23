@@ -34,11 +34,11 @@ type SessionDelegate struct {
 }
 
 func (rsd *SessionDelegate) OnHeartBeat(ev Event) {
-	log.Print("rpc ♥")
+	log.Print("freeswitch ♥")
 }
 
 func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {
-	log.Print("rpc answer")
+	log.Print("freeswitch answer")
 }
 
 func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {

@@ -131,7 +131,7 @@ func registerToBalancer() {
 }
 
 // Listens for the HUP system signal and gracefuly reloads the timers from database.
-func reloadSchedulerSingnalHandler() {
+func reloadSchedulerSingnalHandler(getter timespans.StorageGetter) {
 	timespans.Logger.Info("Handling HUP signal...")
 	for {
 		c := make(chan os.Signal)

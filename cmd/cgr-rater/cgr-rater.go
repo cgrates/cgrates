@@ -50,14 +50,11 @@ var (
 	balancer_json              = false            // use JSON for RPC encoding
 
 	scheduler_enabled = false
-	scheduler_json    = false
 
 	sm_enabled           = false
-	sm_standalone        = false            // run standalone 
 	sm_api_server        = "127.0.0.1:2000" // balancer address host:port
 	sm_freeswitch_server = "localhost:8021" // freeswitch address host:port
-	sm_freeswitch_pass   = "ClueCon"        // reeswitch address host:port
-	sm_json              = false            // use JSON for RPC encoding
+	sm_freeswitch_pass   = "ClueCon"        // reeswitch address host:port	
 
 	mediator_enabled     = false
 	mediator_standalone  = false        // run standalone
@@ -70,8 +67,6 @@ var (
 	mediator_password    = ""           // The user's password.
 
 	bal      = balancer.NewBalancer()
-	accLock  = timespans.NewAccountLock()
-	getter   timespans.StorageGetter
 	exitChan = make(chan bool)
 )
 
@@ -97,17 +92,13 @@ func readConfig(configFn string) {
 	balancer_json, _ = c.GetBool("balancer", "json")
 
 	scheduler_enabled, _ = c.GetBool("scheduler", "enabled")
-	scheduler_json, _ = c.GetBool("scheduler", "json")
 
 	sm_enabled, _ = c.GetBool("session_manager", "enabled")
-	sm_standalone, _ = c.GetBool("session_manager", "standalone")
 	sm_api_server, _ = c.GetString("session_manager", "api_server")
 	sm_freeswitch_server, _ = c.GetString("session_manager", "freeswitch_server")
 	sm_freeswitch_pass, _ = c.GetString("session_manager", "freeswitch_pass")
-	sm_json, _ = c.GetBool("session_manager", "json")
 
 	mediator_enabled, _ = c.GetBool("mediator", "enabled")
-	mediator_standalone, _ = c.GetBool("mediator", "standalone")
 	mediator_cdr_file, _ = c.GetString("mediator", "cdr_file")
 	mediator_result_file, _ = c.GetString("mediator", "result_file")
 	mediator_host, _ = c.GetString("mediator", "host")
@@ -184,7 +175,7 @@ func main() {
 	if balancer_enabled {
 		go stopBalancerSingnalHandler()
 		go listenToRPCRequests(new(RaterServer), balancer_listen_rater, false)
-		responder.Rpc = false
+		responder.Rpc = true
 		go listenToRPCRequests(responder, balancer_listen_api, balancer_json)
 		go listenToHttpRequests()
 	}
@@ -192,7 +183,7 @@ func main() {
 	if scheduler_enabled {
 		go func() {
 			loadActionTimings(getter)
-			go reloadSchedulerSingnalHandler()
+			go reloadSchedulerSingnalHandler(getter)
 			s.loop()
 		}()
 	}
