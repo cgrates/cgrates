@@ -148,6 +148,7 @@ func listenToRPCRequests(responder interface{}, rpcAddress string, json bool) {
 }
 
 func listenToHttpRequests() {
+	http.Handle("/static/", http.FileServer(http.Dir("")))
 	http.HandleFunc("/", statusHandler)
 	http.HandleFunc("/getmem", memoryHandler)
 	http.HandleFunc("/raters", ratersHandler)
@@ -175,12 +176,12 @@ func main() {
 		go stopRaterSingnalHandler()
 	}
 	if !balancer_enabled {
-		go listenToRPCRequests(&Responder{new(DirectResponder)}, rater_listen, rater_json)
+		go listenToRPCRequests(&Responder{rpc: true}, rater_listen, rater_json)
 	}
 	if balancer_enabled {
 		go stopBalancerSingnalHandler()
 		go listenToRPCRequests(new(RaterServer), balancer_listen_rater, false)
-		go listenToRPCRequests(&Responder{new(RpcResponder)}, balancer_listen_api, balancer_json)
+		go listenToRPCRequests(&Responder{rpc: true}, balancer_listen_api, balancer_json)
 		go listenToHttpRequests()
 	}
 
