@@ -31,11 +31,11 @@ import (
 Defines a time interval for which a certain set of prices will apply
 */
 type Interval struct {
-	Months                                 Months
-	MonthDays                              MonthDays
-	WeekDays                               WeekDays
-	StartTime, EndTime                     string // ##:##:## format
-	Weight, ConnectFee, Price, BillingUnit float64
+	Months                                                 Months
+	MonthDays                                              MonthDays
+	WeekDays                                               WeekDays
+	StartTime, EndTime                                     string // ##:##:## format
+	Weight, ConnectFee, Price, PricedUnits, RateIncrements float64
 }
 
 /*
@@ -139,7 +139,8 @@ func (i *Interval) store() (result string) {
 	result += strconv.FormatFloat(i.Weight, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(i.ConnectFee, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(i.Price, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(i.BillingUnit, 'f', -1, 64)
+	result += strconv.FormatFloat(i.PricedUnits, 'f', -1, 64) + ";"
+	result += strconv.FormatFloat(i.RateIncrements, 'f', -1, 64)
 	return
 }
 
@@ -156,5 +157,6 @@ func (i *Interval) restore(input string) {
 	i.Weight, _ = strconv.ParseFloat(is[5], 64)
 	i.ConnectFee, _ = strconv.ParseFloat(is[6], 64)
 	i.Price, _ = strconv.ParseFloat(is[7], 64)
-	i.BillingUnit, _ = strconv.ParseFloat(is[8], 64)
+	i.PricedUnits, _ = strconv.ParseFloat(is[8], 64)
+	i.RateIncrements, _ = strconv.ParseFloat(is[9], 64)
 }

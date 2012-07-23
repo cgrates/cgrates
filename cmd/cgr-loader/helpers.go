@@ -27,11 +27,11 @@ import (
 )
 
 type Rate struct {
-	DestinationsTag                string
-	ConnectFee, Price, BillingUnit float64
+	DestinationsTag                                string
+	ConnectFee, Price, PricedUnits, RateIncrements float64
 }
 
-func NewRate(destinationsTag, connectFee, price, billingUnit string) (r *Rate, err error) {
+func NewRate(destinationsTag, connectFee, price, pricedUnits, rateIncrements string) (r *Rate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -42,16 +42,22 @@ func NewRate(destinationsTag, connectFee, price, billingUnit string) (r *Rate, e
 		log.Printf("Error parsing price from: %v", price)
 		return
 	}
-	bu, err := strconv.ParseFloat(billingUnit, 64)
+	pu, err := strconv.ParseFloat(pricedUnits, 64)
 	if err != nil {
-		log.Printf("Error parsing billing unit from: %v", billingUnit)
+		log.Printf("Error parsing priced units from: %v", pricedUnits)
+		return
+	}
+	ri, err := strconv.ParseFloat(rateIncrements, 64)
+	if err != nil {
+		log.Printf("Error parsing rates increments from: %v", rateIncrements)
 		return
 	}
 	r = &Rate{
 		DestinationsTag: destinationsTag,
 		ConnectFee:      cf,
 		Price:           p,
-		BillingUnit:     bu,
+		PricedUnits:     pu,
+		RateIncrements:  ri,
 	}
 	return
 }
@@ -99,14 +105,15 @@ func NewRateTiming(ratesTag string, timing *Timing, weight string) (rt *RateTimi
 
 func (rt *RateTiming) GetInterval(r *Rate) (i *timespans.Interval) {
 	i = &timespans.Interval{
-		Months:      rt.timing.Months,
-		MonthDays:   rt.timing.MonthDays,
-		WeekDays:    rt.timing.WeekDays,
-		StartTime:   rt.timing.StartTime,
-		Weight:      rt.Weight,
-		ConnectFee:  r.ConnectFee,
-		Price:       r.Price,
-		BillingUnit: r.BillingUnit,
+		Months:         rt.timing.Months,
+		MonthDays:      rt.timing.MonthDays,
+		WeekDays:       rt.timing.WeekDays,
+		StartTime:      rt.timing.StartTime,
+		Weight:         rt.Weight,
+		ConnectFee:     r.ConnectFee,
+		Price:          r.Price,
+		PricedUnits:    r.PricedUnits,
+		RateIncrements: r.RateIncrements,
 	}
 	return
 }

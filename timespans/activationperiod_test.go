@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
-	"encoding/json"
 	"time"
 	//"log"
 )
@@ -42,7 +42,7 @@ func TestApStoreRestore(t *testing.T) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result := ap.store()
-	expected := "1328106601000000000|2;1;3,4;14:30:00;15:00:00;0;0;0;0"
+	expected := "1328106601000000000|2;1;3,4;14:30:00;15:00:00;0;0;0;0;0"
 	if result != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
@@ -76,7 +76,7 @@ func TestApStoreRestoreJson(t *testing.T) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result, _ := json.Marshal(ap)
-	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Months\":[2],\"MonthDays\":[1],\"WeekDays\":[3,4],\"StartTime\":\"14:30:00\",\"EndTime\":\"15:00:00\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"BillingUnit\":0}]}"
+	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Months\":[2],\"MonthDays\":[1],\"WeekDays\":[3,4],\"StartTime\":\"14:30:00\",\"EndTime\":\"15:00:00\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"PricedUnits\":0,\"RateIncrements\":0}]}"
 	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
@@ -93,7 +93,7 @@ func TestApStoreRestoreBlank(t *testing.T) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result, _ := json.Marshal(ap)
-	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Months\":null,\"MonthDays\":null,\"WeekDays\":null,\"StartTime\":\"\",\"EndTime\":\"\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"BillingUnit\":0}]}"
+	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Months\":null,\"MonthDays\":null,\"WeekDays\":null,\"StartTime\":\"\",\"EndTime\":\"\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"PricedUnits\":0,\"RateIncrements\":0}]}"
 	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}

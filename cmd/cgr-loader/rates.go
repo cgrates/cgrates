@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"fmt"
 	"time"
 )
 
@@ -78,7 +78,7 @@ func (csvr *CSVReader) loadRates(fn string) {
 			// skip header line
 			continue
 		}
-		r, err := NewRate(record[1], record[2], record[3], record[4])
+		r, err := NewRate(record[1], record[2], record[3], record[4], record[5])
 		if err != nil {
 			continue
 		}

@@ -21,6 +21,7 @@ package timespans
 import (
 	"fmt"
 	//"log"
+	"math"
 	"time"
 )
 
@@ -59,10 +60,15 @@ func (ts *TimeSpan) getCost(cd *CallDescriptor) (cost float64) {
 	if ts.Interval == nil {
 		return 0
 	}
-	if ts.Interval.BillingUnit > 0 {
-		cost = (ts.GetDuration().Seconds() / ts.Interval.BillingUnit) * ts.Interval.Price
+	duration := ts.GetDuration().Seconds()
+	i := ts.Interval
+	if i.RateIncrements == 0 {
+		i.RateIncrements = 1
+	}
+	if i.PricedUnits != 0 {
+		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * (i.Price / i.PricedUnits)
 	} else {
-		cost = ts.GetDuration().Seconds() * ts.Interval.Price
+		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * i.Price
 	}
 	// if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 	// 	userBalance.mux.RLock()

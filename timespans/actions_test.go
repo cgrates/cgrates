@@ -31,15 +31,16 @@ func init() {
 
 func TestActionTimingStoreRestore(t *testing.T) {
 	i := &Interval{
-		Months:      Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
-		MonthDays:   MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
-		WeekDays:    WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
-		StartTime:   "18:00:00",
-		EndTime:     "00:00:00",
-		Weight:      10.0,
-		ConnectFee:  0.0,
-		Price:       1.0,
-		BillingUnit: 1.0,
+		Months:         Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays:      MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
+		WeekDays:       WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+		StartTime:      "18:00:00",
+		EndTime:        "00:00:00",
+		Weight:         10.0,
+		ConnectFee:     0.0,
+		Price:          1.0,
+		PricedUnits:    60,
+		RateIncrements: 1,
 	}
 	at := &ActionTiming{
 		Id:             "some uuid",
@@ -50,7 +51,7 @@ func TestActionTimingStoreRestore(t *testing.T) {
 		ActionsId:      "Commando",
 	}
 	r := at.store()
-	if string(r) != "some uuid|test|one,two,three|1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;1|10|Commando" {
+	if string(r) != "some uuid|test|one,two,three|1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|Commando" {
 		t.Errorf("Error serializing action timing: %v", string(r))
 	}
 	o := &ActionTiming{}

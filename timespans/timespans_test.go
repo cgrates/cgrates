@@ -196,8 +196,9 @@ func TestTimespanGetCost(t *testing.T) {
 	if ts1.getCost(cd) != 600 {
 		t.Error("Expected 10 got ", ts1.getCost(cd))
 	}
-	ts1.Interval.BillingUnit = .1
-	if ts1.getCost(cd) != 6000 {
+	ts1.Interval.PricedUnits = 60
+	ts1.Interval.RateIncrements = 1
+	if ts1.getCost(cd) != 10 {
 		t.Error("Expected 6000 got ", ts1.getCost(cd))
 	}
 }
