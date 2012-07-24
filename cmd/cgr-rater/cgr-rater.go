@@ -160,6 +160,11 @@ func main() {
 		rater_enabled = false
 		rater_standalone = false
 	}
+	if !rater_enabled && !balancer_enabled {
+		rater_enabled = true
+		rater_standalone = true
+	}
+
 	getter, err := timespans.NewRedisStorage(redis_server, redis_db)
 	if err != nil {
 		timespans.Logger.Crit("Could not connect to redis, exiting!")
@@ -183,7 +188,7 @@ func main() {
 		go listenToRPCRequests(responder, balancer_listen_api, balancer_json)
 		go listenToHttpRequests()
 		if !balancer_standalone {
-			bal.AddClient("local", &timespans.ResponderWorker{&timespans.Responder{ExitChan: exitChan}})
+			bal.AddClient("local", new(timespans.ResponderWorker))
 		}
 	}
 

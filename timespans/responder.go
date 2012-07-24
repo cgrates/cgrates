@@ -38,15 +38,12 @@ type Responder struct {
 RPC method thet provides the external RPC interface for getting the rating information.
 */
 func (rs *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
-	log.Print("Ready: ", rs.Bal)
 	if rs.Bal != nil {
 		r, e := rs.getCallCost(&arg, "Responder.GetCost")
 		*reply, err = *r, e
 	} else {
-		log.Print("1", arg.GetUserBalanceKey())
 		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
-			log.Print("here", arg)
-			return (&arg).GetCost()
+			return arg.GetCost()
 		})
 		*reply, err = *r, e
 	}
@@ -59,7 +56,7 @@ func (rs *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
 		*reply, err = *r, e
 	} else {
 		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
-			return (&arg).Debit()
+			return arg.Debit()
 		})
 		*reply, err = *r, e
 	}
@@ -71,7 +68,7 @@ func (rs *Responder) DebitCents(arg CallDescriptor, reply *float64) (err error) 
 		*reply, err = rs.callMethod(&arg, "Responder.DebitCents")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
-			return (&arg).DebitCents()
+			return arg.DebitCents()
 		})
 		*reply, err = r, e
 	}
@@ -83,7 +80,7 @@ func (rs *Responder) DebitSMS(arg CallDescriptor, reply *float64) (err error) {
 		*reply, err = rs.callMethod(&arg, "Responder.DebitSMS")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
-			return (&arg).DebitSMS()
+			return arg.DebitSMS()
 		})
 		*reply, err = r, e
 	}
@@ -95,7 +92,7 @@ func (rs *Responder) DebitSeconds(arg CallDescriptor, reply *float64) (err error
 		*reply, err = rs.callMethod(&arg, "Responder.DebitSeconds")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
-			return 0, (&arg).DebitSeconds()
+			return 0, arg.DebitSeconds()
 		})
 		*reply, err = r, e
 	}
@@ -107,7 +104,7 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 		*reply, err = rs.callMethod(&arg, "Responder.GetMaxSessionTime")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
-			return (&arg).GetMaxSessionTime()
+			return arg.GetMaxSessionTime()
 		})
 		*reply, err = r, e
 	}
@@ -120,14 +117,14 @@ func (rs *Responder) AddRecievedCallSeconds(arg CallDescriptor, reply *float64) 
 	} else {
 
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
-			return 0, (&arg).AddRecievedCallSeconds()
+			return 0, arg.AddRecievedCallSeconds()
 		})
 		*reply, err = r, e
 	}
 	return
 }
 
-func (rs *Responder) Status(arg CallDescriptor, reply *string) (err error) {
+func (rs *Responder) Status(arg string, reply *string) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
 	if rs.Bal != nil {
@@ -201,22 +198,35 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 	return
 }
 
-type ResponderWorker struct {
-	R *Responder
-}
+type ResponderWorker struct{}
 
 func (rw *ResponderWorker) Call(serviceMethod string, args interface{}, reply interface{}) error {
-	log.Printf("Calling by reflection: %v %v", strings.TrimLeft(serviceMethod, "Responder."), reply)
+	methodName := strings.TrimLeft(serviceMethod, "Responder.")
+	switch args.(type) {
+	case CallDescriptor:
+		cd := args.(CallDescriptor)
+		switch reply.(type) {
+		case *CallCost:
+			rep := reply.(*CallCost)
+			method := reflect.ValueOf(&cd).MethodByName(methodName)
+			ret := method.Call([]reflect.Value{})
+			*rep = *(ret[0].Interface().(*CallCost))
+		case *float64:
+			rep := reply.(*float64)
+			method := reflect.ValueOf(&cd).MethodByName(methodName)
+			ret := method.Call([]reflect.Value{})
+			*rep = *(ret[0].Interface().(*float64))
+		}
+	case string:
+		switch methodName {
+		case "Status":
+			*(reply.(*string)) = "Local!"
+		case "Shutdown":
+			*(reply.(*string)) = "Done!"
+		}
 
-	method := reflect.ValueOf(rw.R).MethodByName(strings.TrimLeft(serviceMethod, "Responder."))
-	r := method.Call([]reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)})
-
-	response := r[0].Interface()
-	log.Printf("Called: %v %v", reply, response)
-	if response == nil {
-		return nil
 	}
-	return response.(error)
+	return nil
 }
 
 func (rw *ResponderWorker) Close() error {

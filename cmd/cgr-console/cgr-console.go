@@ -116,7 +116,12 @@ func main() {
 		}
 	case "status":
 		var result string
-		if err = client.Call("Responder.Status", cd, &result); err == nil {
+		if err = client.Call("Responder.Status", "", &result); err == nil {
+			fmt.Println(result)
+		}
+	case "shutdown":
+		var result string
+		if err = client.Call("Responder.Shutdown", "", &result); err == nil {
 			fmt.Println(result)
 		}
 	default:
@@ -128,6 +133,7 @@ func main() {
 		fmt.Println("\tdebitseconds")
 		fmt.Println("\tresetuserbudget")
 		fmt.Println("\tstatus")
+		fmt.Println("\tshutdown")
 		flag.PrintDefaults()
 	}
 	if err != nil {
