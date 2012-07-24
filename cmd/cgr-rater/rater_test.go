@@ -28,6 +28,7 @@ func TestConfig(t *testing.T) {
 	if redis_server != "test" ||
 		redis_db != 1 ||
 
+		rater_enabled != true ||
 		rater_standalone != true ||
 		rater_balancer_server != "test" ||
 		rater_listen != "test" ||
@@ -57,6 +58,7 @@ func TestConfig(t *testing.T) {
 		mediator_password != "test" {
 		t.Log(redis_server)
 		t.Log(redis_db)
+		t.Log(rater_enabled)
 		t.Log(rater_standalone)
 		t.Log(rater_balancer_server)
 		t.Log(rater_json)
@@ -65,7 +67,6 @@ func TestConfig(t *testing.T) {
 		t.Log(balancer_listen_rater)
 		t.Log(balancer_listen_api)
 		t.Log(scheduler_enabled)
-		t.Log(scheduler_json)
 		t.Log(sm_enabled)
 		t.Log(sm_api_server)
 		t.Log(sm_freeswitch_server)

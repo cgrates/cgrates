@@ -37,6 +37,7 @@ var (
 	redis_server = "127.0.0.1:6379" // redis address host:port
 	redis_db     = 10               // redis database number
 
+	rater_enabled         = false            // start standalone server (no balancer)
 	rater_standalone      = false            // start standalone server (no balancer)
 	rater_balancer_server = "127.0.0.1:2000" // balancer address host:port
 	rater_listen          = "127.0.0.1:1234" // listening address host:port
@@ -79,6 +80,7 @@ func readConfig(configFn string) {
 	redis_server, _ = c.GetString("global", "redis_server")
 	redis_db, _ = c.GetInt("global", "redis_db")
 
+	rater_enabled, _ = c.GetBool("rater", "enabled")
 	rater_standalone, _ = c.GetBool("rater", "standalone")
 	rater_balancer_server, _ = c.GetString("rater", "balancer_server")
 	rater_listen, _ = c.GetString("rater", "listen_api")
@@ -152,7 +154,10 @@ func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	readConfig(*config)
-	if balancer_standalone {
+	// some consitency checks
+	if balancer_standalone || balancer_enabled {
+		balancer_enabled = true
+		rater_enabled = false
 		rater_standalone = false
 	}
 	getter, err := timespans.NewRedisStorage(redis_server, redis_db)
@@ -163,21 +168,23 @@ func main() {
 	defer getter.Close()
 	timespans.SetStorageGetter(getter)
 
-	if !rater_standalone && !balancer_enabled {
+	if rater_enabled && !rater_standalone && !balancer_enabled {
 		go registerToBalancer()
 		go stopRaterSingnalHandler()
 	}
-	responder := &timespans.Responder{Bal: bal, ExitChan: exitChan}
-	if !balancer_enabled {
-		responder.Rpc = false
+	responder := &timespans.Responder{ExitChan: exitChan}
+	if rater_enabled {
 		go listenToRPCRequests(responder, rater_listen, rater_json)
 	}
 	if balancer_enabled {
 		go stopBalancerSingnalHandler()
 		go listenToRPCRequests(new(RaterServer), balancer_listen_rater, false)
-		responder.Rpc = true
+		responder.Bal = bal
 		go listenToRPCRequests(responder, balancer_listen_api, balancer_json)
 		go listenToHttpRequests()
+		if !balancer_standalone {
+			bal.AddClient("local", &timespans.ResponderWorker{&timespans.Responder{ExitChan: exitChan}})
+		}
 	}
 
 	if scheduler_enabled {

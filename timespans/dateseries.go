@@ -27,6 +27,69 @@ import (
 	// "log"
 )
 
+// Defines years days series
+type Years []int
+
+func (ys Years) Sort() {
+	sort.Sort(ys)
+}
+
+func (ys Years) Len() int {
+	return len(ys)
+}
+
+func (ys Years) Swap(i, j int) {
+	ys[i], ys[j] = ys[j], ys[i]
+}
+
+func (ys Years) Less(j, i int) bool {
+	return ys[j] < ys[i]
+}
+
+// Return true if the specified date is inside the series
+func (ys Years) Contains(year int) (result bool) {
+	result = false
+	for _, yss := range ys {
+		if yss == year {
+			result = true
+			break
+		}
+	}
+	return
+}
+
+// Parse MonthDay elements from string separated by sep.
+func (ys *Years) Parse(input, sep string) {
+	switch input {
+	case "*all", "*none":
+		*ys = []int{}
+	default:
+		elements := strings.Split(input, sep)
+		for _, yss := range elements {
+			if year, err := strconv.Atoi(yss); err == nil {
+				*ys = append(*ys, year)
+			}
+		}
+	}
+}
+
+func (yss Years) store() (result string) {
+	for _, ys := range yss {
+		result += strconv.Itoa(int(ys)) + ","
+	}
+	result = strings.TrimRight(result, ",")
+	return
+}
+
+func (yss *Years) restore(input string) {
+	for _, ys := range strings.Split(input, ",") {
+		if ys != "" {
+			mm, _ := strconv.Atoi(ys)
+			*yss = append(*yss, mm)
+		}
+	}
+}
+
 // Defines months series
 type Months []time.Month
 

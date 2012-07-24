@@ -31,6 +31,7 @@ import (
 
 const (
 	FORMAT = "2006-1-2 15:04:05 MST"
+	ASAP   = "*asap"
 )
 
 type ActionTiming struct {
@@ -175,12 +176,12 @@ func (at *ActionTiming) Execute() (err error) {
 	return
 }
 
-func (at *ActionTiming) IsOneTimeRun() bool {
-	i := at.Timing
-	if i == nil {
-		return true
+func (at *ActionTiming) CheckForASAP() {
+	if at.Timing.StartTime == ASAP {
+		oneMinute, _ := time.ParseDuration("1m")
+		timeTokens := strings.Split(time.Now().Add(oneMinute).Format(time.Stamp), " ")
+		at.Timing.StartTime = timeTokens[len(timeTokens)-1]
 	}
-	return len(i.Months) == 0 && len(i.MonthDays) == 0 && len(i.WeekDays) == 0
 }
 
 // Structure to store actions according to weight

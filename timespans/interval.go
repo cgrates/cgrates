@@ -31,6 +31,7 @@ import (
 Defines a time interval for which a certain set of prices will apply
 */
 type Interval struct {
+	Years                                                  Years
 	Months                                                 Months
 	MonthDays                                              MonthDays
 	WeekDays                                               WeekDays
@@ -42,6 +43,10 @@ type Interval struct {
 Returns true if the received time result inside the interval
 */
 func (i *Interval) Contains(t time.Time) bool {
+	// check for years
+	if len(i.Years) > 0 && !i.Years.Contains(t.Year()) {
+		return false
+	}
 	// check for months
 	if len(i.Months) > 0 && !i.Months.Contains(t.Month()) {
 		return false
@@ -116,11 +121,12 @@ func (i *Interval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 }
 
 func (i *Interval) String() string {
-	return fmt.Sprintf("%v %v %v %v %v", i.Months, i.MonthDays, i.WeekDays, i.StartTime, i.EndTime)
+	return fmt.Sprintf("%v %v %v %v %v %v", i.Years, i.Months, i.MonthDays, i.WeekDays, i.StartTime, i.EndTime)
 }
 
 func (i *Interval) Equal(o *Interval) bool {
-	return reflect.DeepEqual(i.Months, o.Months) &&
+	return reflect.DeepEqual(i.Years, o.Years) &&
+		reflect.DeepEqual(i.Months, o.Months) &&
 		reflect.DeepEqual(i.MonthDays, o.MonthDays) &&
 		reflect.DeepEqual(i.WeekDays, o.WeekDays) &&
 		i.StartTime == o.StartTime &&
@@ -131,6 +137,7 @@ func (i *Interval) Equal(o *Interval) bool {
 Serializes the intervals for the storag. Used for key-value storages.
 */
 func (i *Interval) store() (result string) {
+	result += i.Years.store() + ";"
 	result += i.Months.store() + ";"
 	result += i.MonthDays.store() + ";"
 	result += i.WeekDays.store() + ";"
@@ -149,14 +156,15 @@ De-serializes the interval for the storage. Used for key-value storages.
 */
 func (i *Interval) restore(input string) {
 	is := strings.Split(input, ";")
-	i.Months.restore(is[0])
-	i.MonthDays.restore(is[1])
-	i.WeekDays.restore(is[2])
-	i.StartTime = is[3]
-	i.EndTime = is[4]
-	i.Weight, _ = strconv.ParseFloat(is[5], 64)
-	i.ConnectFee, _ = strconv.ParseFloat(is[6], 64)
-	i.Price, _ = strconv.ParseFloat(is[7], 64)
-	i.PricedUnits, _ = strconv.ParseFloat(is[8], 64)
-	i.RateIncrements, _ = strconv.ParseFloat(is[9], 64)
+	i.Years.restore(is[0])
+	i.Months.restore(is[1])
+	i.MonthDays.restore(is[2])
+	i.WeekDays.restore(is[3])
+	i.StartTime = is[4]
+	i.EndTime = is[5]
+	i.Weight, _ = strconv.ParseFloat(is[6], 64)
+	i.ConnectFee, _ = strconv.ParseFloat(is[7], 64)
+	i.Price, _ = strconv.ParseFloat(is[8], 64)
+	i.PricedUnits, _ = strconv.ParseFloat(is[9], 64)
+	i.RateIncrements, _ = strconv.ParseFloat(is[10], 64)
 }

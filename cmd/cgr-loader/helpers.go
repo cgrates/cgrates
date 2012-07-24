@@ -63,6 +63,7 @@ func NewRate(destinationsTag, connectFee, price, pricedUnits, rateIncrements str
 }
 
 type Timing struct {
+	Years     timespans.Years
 	Months    timespans.Months
 	MonthDays timespans.MonthDays
 	WeekDays  timespans.WeekDays
@@ -71,15 +72,11 @@ type Timing struct {
 
 func NewTiming(timeingInfo ...string) (rt *Timing) {
 	rt = &Timing{}
-	rt.Months.Parse(timeingInfo[0], ";")
-	rt.MonthDays.Parse(timeingInfo[1], ";")
-	rt.WeekDays.Parse(timeingInfo[2], ";")
-	if timeingInfo[3] == "*now" {
-		timeTokens := strings.Split(time.Now().Format(time.Stamp), " ")
-		rt.StartTime = timeTokens[len(timeTokens)-1]
-	} else {
-		rt.StartTime = timeingInfo[3]
-	}
+	rt.Years.Parse(timeingInfo[0], ";")
+	rt.Months.Parse(timeingInfo[1], ";")
+	rt.MonthDays.Parse(timeingInfo[2], ";")
+	rt.WeekDays.Parse(timeingInfo[3], ";")
+	rt.StartTime = timeingInfo[4]
 	return
 }
 
@@ -105,6 +102,7 @@ func NewRateTiming(ratesTag string, timing *Timing, weight string) (rt *RateTimi
 
 func (rt *RateTiming) GetInterval(r *Rate) (i *timespans.Interval) {
 	i = &timespans.Interval{
+		Years:          rt.timing.Years,
 		Months:         rt.timing.Months,
 		MonthDays:      rt.timing.MonthDays,
 		WeekDays:       rt.timing.WeekDays,

@@ -70,11 +70,7 @@ func loadActionTimings(storage timespans.StorageGetter) {
 	// recreate the queue
 	s.queue = timespans.ActionTimingPriotityList{}
 	for _, at := range actionTimings {
-		if at.IsOneTimeRun() {
-			log.Print("Executing: ", at)
-			go at.Execute()
-			continue
-		}
+		at.CheckForASAP()
 		s.queue = append(s.queue, at)
 	}
 	sort.Sort(s.queue)

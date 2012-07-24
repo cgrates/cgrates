@@ -23,12 +23,13 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/balancer"
 	"log"
+	"reflect"
 	"runtime"
+	"strings"
 	"time"
 )
 
 type Responder struct {
-	Rpc      bool
 	Bal      *balancer.Balancer
 	ExitChan chan bool
 }
@@ -36,12 +37,15 @@ type Responder struct {
 /*
 RPC method thet provides the external RPC interface for getting the rating information.
 */
-func (r *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
-	if r.Rpc {
-		r, e := r.getCallCost(&arg, "Responder.GetCost")
+func (rs *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
+	log.Print("Ready: ", rs.Bal)
+	if rs.Bal != nil {
+		r, e := rs.getCallCost(&arg, "Responder.GetCost")
 		*reply, err = *r, e
 	} else {
+		log.Print("1", arg.GetUserBalanceKey())
 		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
+			log.Print("here", arg)
 			return (&arg).GetCost()
 		})
 		*reply, err = *r, e
@@ -49,9 +53,9 @@ func (r *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
-func (r *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
-	if r.Rpc {
-		r, e := r.getCallCost(&arg, "Responder.Debit")
+func (rs *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
+	if rs.Bal != nil {
+		r, e := rs.getCallCost(&arg, "Responder.Debit")
 		*reply, err = *r, e
 	} else {
 		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
@@ -62,9 +66,9 @@ func (r *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
-func (r *Responder) DebitCents(arg CallDescriptor, reply *float64) (err error) {
-	if r.Rpc {
-		*reply, err = r.callMethod(&arg, "Responder.DebitCents")
+func (rs *Responder) DebitCents(arg CallDescriptor, reply *float64) (err error) {
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(&arg, "Responder.DebitCents")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
 			return (&arg).DebitCents()
@@ -74,9 +78,9 @@ func (r *Responder) DebitCents(arg CallDescriptor, reply *float64) (err error) {
 	return
 }
 
-func (r *Responder) DebitSMS(arg CallDescriptor, reply *float64) (err error) {
-	if r.Rpc {
-		*reply, err = r.callMethod(&arg, "Responder.DebitSMS")
+func (rs *Responder) DebitSMS(arg CallDescriptor, reply *float64) (err error) {
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(&arg, "Responder.DebitSMS")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
 			return (&arg).DebitSMS()
@@ -86,9 +90,9 @@ func (r *Responder) DebitSMS(arg CallDescriptor, reply *float64) (err error) {
 	return
 }
 
-func (r *Responder) DebitSeconds(arg CallDescriptor, reply *float64) (err error) {
-	if r.Rpc {
-		*reply, err = r.callMethod(&arg, "Responder.DebitSeconds")
+func (rs *Responder) DebitSeconds(arg CallDescriptor, reply *float64) (err error) {
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(&arg, "Responder.DebitSeconds")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
 			return 0, (&arg).DebitSeconds()
@@ -98,9 +102,9 @@ func (r *Responder) DebitSeconds(arg CallDescriptor, reply *float64) (err error)
 	return
 }
 
-func (r *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err error) {
-	if r.Rpc {
-		*reply, err = r.callMethod(&arg, "Responder.GetMaxSessionTime")
+func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err error) {
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(&arg, "Responder.GetMaxSessionTime")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
 			return (&arg).GetMaxSessionTime()
@@ -110,9 +114,9 @@ func (r *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err e
 	return
 }
 
-func (r *Responder) AddRecievedCallSeconds(arg CallDescriptor, reply *float64) (err error) {
-	if r.Rpc {
-		*reply, err = r.callMethod(&arg, "Responder.AddRecievedCallSeconds")
+func (rs *Responder) AddRecievedCallSeconds(arg CallDescriptor, reply *float64) (err error) {
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(&arg, "Responder.AddRecievedCallSeconds")
 	} else {
 
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
@@ -123,13 +127,13 @@ func (r *Responder) AddRecievedCallSeconds(arg CallDescriptor, reply *float64) (
 	return
 }
 
-func (r *Responder) Status(arg CallDescriptor, reply *string) (err error) {
+func (rs *Responder) Status(arg CallDescriptor, reply *string) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
-	if r.Rpc {
+	if rs.Bal != nil {
 
 		*reply = "Connected raters:\n"
-		for _, rater := range r.Bal.GetClientAddresses() {
+		for _, rater := range rs.Bal.GetClientAddresses() {
 			log.Print(rater)
 			*reply += fmt.Sprintf("%v\n", rater)
 		}
@@ -140,10 +144,12 @@ func (r *Responder) Status(arg CallDescriptor, reply *string) (err error) {
 	return
 }
 
-func (r *Responder) Shutdown(arg string, reply *string) (err error) {
-	r.Bal.Shutdown()
+func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
+	if rs.Bal != nil {
+		rs.Bal.Shutdown()
+	}
 	storageGetter.Close()
-	defer func() { r.ExitChan <- true }()
+	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"
 	return
 }
@@ -151,10 +157,10 @@ func (r *Responder) Shutdown(arg string, reply *string) (err error) {
 /*
 The function that gets the information from the raters using balancer.
 */
-func (r *Responder) getCallCost(key *CallDescriptor, method string) (reply *CallCost, err error) {
+func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *CallCost, err error) {
 	err = errors.New("") //not nil value
 	for err != nil {
-		client := r.Bal.Balance()
+		client := rs.Bal.Balance()
 		if client == nil {
 			log.Print("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
@@ -175,10 +181,10 @@ func (r *Responder) getCallCost(key *CallDescriptor, method string) (reply *Call
 /*
 The function that gets the information from the raters using balancer.
 */
-func (r *Responder) callMethod(key *CallDescriptor, method string) (reply float64, err error) {
+func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float64, err error) {
 	err = errors.New("") //not nil value
 	for err != nil {
-		client := r.Bal.Balance()
+		client := rs.Bal.Balance()
 		if client == nil {
 			log.Print("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
@@ -193,4 +199,26 @@ func (r *Responder) callMethod(key *CallDescriptor, method string) (reply float6
 		}
 	}
 	return
+}
+
+type ResponderWorker struct {
+	R *Responder
+}
+
+func (rw *ResponderWorker) Call(serviceMethod string, args interface{}, reply interface{}) error {
+	log.Printf("Calling by reflection: %v %v", strings.TrimLeft(serviceMethod, "Responder."), reply)
+
+	method := reflect.ValueOf(rw.R).MethodByName(strings.TrimLeft(serviceMethod, "Responder."))
+	r := method.Call([]reflect.Value{reflect.ValueOf(args), reflect.ValueOf(reply)})
+
+	response := r[0].Interface()
+	log.Printf("Called: %v %v", reply, response)
+	if response == nil {
+		return nil
+	}
+	return response.(error)
+}
+
+func (rw *ResponderWorker) Close() error {
+	return nil
 }

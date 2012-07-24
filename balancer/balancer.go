@@ -19,22 +19,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package balancer
 
 import (
-	"net/rpc"
-	"sync"
 	"log"
+	"sync"
 )
 
 type Balancer struct {
 	sync.RWMutex
-	clients         map[string]*rpc.Client
-	balancerChannel chan *rpc.Client
+	clients         map[string]Worker
+	balancerChannel chan Worker
+}
+
+type Worker interface {
+	Call(serviceMethod string, args interface{}, reply interface{}) error
+	Close() error
 }
 
 /*
 Constructor for RateList holding one slice for addreses and one slice for connections.
 */
 func NewBalancer() *Balancer {
-	r := &Balancer{clients: make(map[string]*rpc.Client), balancerChannel: make(chan *rpc.Client)} // leaving both slices to nil
+	r := &Balancer{clients: make(map[string]Worker), balancerChannel: make(chan Worker)} // leaving both slices to nil
 	go func() {
 		for {
 			if len(r.clients) > 0 {
@@ -52,7 +56,7 @@ func NewBalancer() *Balancer {
 /*
 Adds a client to the two  internal slices.
 */
-func (bl *Balancer) AddClient(address string, client *rpc.Client) {
+func (bl *Balancer) AddClient(address string, client Worker) {
 	bl.Lock()
 	defer bl.Unlock()
 	bl.clients[address] = client
@@ -72,7 +76,7 @@ func (bl *Balancer) RemoveClient(address string) {
 /*
 Returns a client for the specifed address.
 */
-func (bl *Balancer) GetClient(address string) (c *rpc.Client, exists bool) {
+func (bl *Balancer) GetClient(address string) (c Worker, exists bool) {
 	bl.RLock()
 	defer bl.RUnlock()
 	c, exists = bl.clients[address]
@@ -82,7 +86,7 @@ func (bl *Balancer) GetClient(address string) (c *rpc.Client, exists bool) {
 /*
 Returns the next available connection at each call looping at the end of connections.
 */
-func (bl *Balancer) Balance() (result *rpc.Client) {
+func (bl *Balancer) Balance() (result Worker) {
 	bl.RLock()
 	defer bl.RUnlock()
 	return <-bl.balancerChannel
