@@ -69,9 +69,16 @@ func loadActionTimings(storage timespans.StorageGetter) {
 	}
 	// recreate the queue
 	s.queue = timespans.ActionTimingPriotityList{}
-	for _, at := range actionTimings {
-		at.CheckForASAP()
-		s.queue = append(s.queue, at)
+	for key, ats := range actionTimings {
+		toBeSaved := false
+		for _, at := range ats {
+			asapFound := at.CheckForASAP()
+			toBeSaved = toBeSaved || asapFound
+			s.queue = append(s.queue, at)
+		}
+		if toBeSaved {
+			storage.SetActionTimings(key, ats)
+		}
 	}
 	sort.Sort(s.queue)
 }

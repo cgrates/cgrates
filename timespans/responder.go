@@ -198,6 +198,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 	return
 }
 
+// Reflection worker type for not standalone balancer
 type ResponderWorker struct{}
 
 func (rw *ResponderWorker) Call(serviceMethod string, args interface{}, reply interface{}) error {

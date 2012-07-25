@@ -43,7 +43,7 @@ type StorageGetter interface {
 	SetUserBalance(*UserBalance) error
 	GetActionTimings(string) ([]*ActionTiming, error)
 	SetActionTimings(string, []*ActionTiming) error
-	GetAllActionTimings() ([]*ActionTiming, error)
+	GetAllActionTimings() (map[string][]*ActionTiming, error)
 }
 
 type Marshaler interface {

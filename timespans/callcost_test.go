@@ -25,7 +25,7 @@ import (
 )
 
 func init() {
-	sg, _ := NewRedixStorage("127.0.0.1:6379", 10)
+	sg, _ := NewRedisStorage("127.0.0.1:6379", 10)
 	SetStorageGetter(sg)
 }
 
@@ -35,6 +35,7 @@ func TestSingleResultMerge(t *testing.T) {
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.GetCost()
 	t.Log(len(cd.ActivationPeriods[0].Intervals))
+	t.Log(cd.ActivationPeriods[0].Intervals[0])
 	if cc1.Cost != 60 {
 		t.Errorf("expected 60 was %v", cc1.Cost)
 	}

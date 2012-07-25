@@ -30,8 +30,9 @@ import (
 )
 
 const (
-	FORMAT = "2006-1-2 15:04:05 MST"
-	ASAP   = "*asap"
+	FORMAT     = "2006-1-2 15:04:05 MST"
+	ASAP       = "*asap"
+	ASAP_DELAY = "5m"
 )
 
 type ActionTiming struct {
@@ -176,12 +177,14 @@ func (at *ActionTiming) Execute() (err error) {
 	return
 }
 
-func (at *ActionTiming) CheckForASAP() {
+func (at *ActionTiming) CheckForASAP() bool {
 	if at.Timing.StartTime == ASAP {
-		oneMinute, _ := time.ParseDuration("1m")
+		oneMinute, _ := time.ParseDuration(ASAP_DELAY)
 		timeTokens := strings.Split(time.Now().Add(oneMinute).Format(time.Stamp), " ")
 		at.Timing.StartTime = timeTokens[len(timeTokens)-1]
+		return true
 	}
+	return false
 }
 
 // Structure to store actions according to weight

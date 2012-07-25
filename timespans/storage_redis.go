@@ -120,19 +120,20 @@ func (rs *RedisStorage) SetActionTimings(key string, ats []*ActionTiming) (err e
 	return rs.db.Set(key, result)
 }
 
-func (rs *RedisStorage) GetAllActionTimings() (ats []*ActionTiming, err error) {
+func (rs *RedisStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
 	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
 	if err != nil {
 		return
 	}
-	values, err := rs.db.Mget(keys...)
-	if err != nil {
-		return
-	}
-	for _, v := range values.BytesArray() {
+	for _, key := range keys {
+		values, err := rs.db.Get(key)
+		if err != nil {
+			continue
+		}
 		var tempAts []*ActionTiming
-		err = rs.ms.Unmarshal(v, &tempAts)
-		ats = append(ats, tempAts...)
+		err = rs.ms.Unmarshal(values, &tempAts)
+		ats[key] = tempAts
 	}
+
 	return
 }
