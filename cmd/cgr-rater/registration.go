@@ -95,14 +95,14 @@ func stopRaterSingnalHandler() {
 Connects to the balancer and calls unregister RPC method.
 */
 func unregisterFromBalancer() {
-	client, err := rpc.Dial("tcp", rater_balancer_server)
+	client, err := rpc.Dial("tcp", rater_balancer)
 	if err != nil {
 		log.Print("Cannot contact the balancer!")
 		exitChan <- true
 		return
 	}
 	var reply int
-	log.Print("Unregistering from balancer ", rater_balancer_server)
+	log.Print("Unregistering from balancer ", rater_balancer)
 	client.Call("RaterServer.UnRegisterRater", rater_listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Print("Could not close balancer unregistration!")
@@ -114,14 +114,14 @@ func unregisterFromBalancer() {
 Connects to the balancer and rehisters the rater to the server.
 */
 func registerToBalancer() {
-	client, err := rpc.Dial("tcp", rater_balancer_server)
+	client, err := rpc.Dial("tcp", rater_balancer)
 	if err != nil {
 		log.Print("Cannot contact the balancer!")
 		exitChan <- true
 		return
 	}
 	var reply int
-	log.Print("Registering to balancer ", rater_balancer_server)
+	log.Print("Registering to balancer ", rater_balancer)
 	client.Call("RaterServer.RegisterRater", rater_listen, &reply)
 	if err := client.Close(); err != nil {
 		log.Print("Could not close balancer registration!")

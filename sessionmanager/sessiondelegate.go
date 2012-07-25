@@ -21,6 +21,7 @@ package sessionmanager
 import (
 	"github.com/cgrates/cgrates/timespans"
 	"log"
+	"net/rpc"
 	"time"
 )
 
@@ -28,9 +29,33 @@ const (
 	DEBIT_PERIOD = 10 * time.Second
 )
 
+type Connector interface {
+	Debit(timespans.CallDescriptor, *timespans.CallCost) error
+	DebitCents(timespans.CallDescriptor, *float64) error
+	DebitSeconds(timespans.CallDescriptor, *float64) error
+	GetMaxSessionTime(timespans.CallDescriptor, *float64) error
+}
+
+type RPCClientConnector struct {
+	Client *rpc.Client
+}
+
+func (rcc *RPCClientConnector) Debit(cd timespans.CallDescriptor, cc *timespans.CallCost) error {
+	return rcc.Client.Call("Responder.Debit", cd, cc)
+}
+func (rcc *RPCClientConnector) DebitCents(cd timespans.CallDescriptor, resp *float64) error {
+	return rcc.Client.Call("Responder.DebitCents", cd, resp)
+}
+func (rcc *RPCClientConnector) DebitSeconds(cd timespans.CallDescriptor, resp *float64) error {
+	return rcc.Client.Call("Responder.DebitSeconds", cd, resp)
+}
+func (rcc *RPCClientConnector) GetMaxSessionTime(cd timespans.CallDescriptor, resp *float64) error {
+	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
+}
+
 // Sample SessionDelegate calling the timespans methods through the RPC interface
 type SessionDelegate struct {
-	Responder *timespans.Responder
+	Connector Connector
 }
 
 func (rsd *SessionDelegate) OnHeartBeat(ev Event) {
@@ -88,7 +113,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 			Amount:      -cost,
 		}
 		var response float64
-		err := rsd.Responder.DebitCents(*cd, &response)
+		err := rsd.Connector.DebitCents(*cd, &response)
 		if err != nil {
 			log.Printf("Debit cents failed: %v", err)
 		}
@@ -103,7 +128,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 			Amount:      -seconds,
 		}
 		var response float64
-		err := rsd.Responder.DebitSeconds(*cd, &response)
+		err := rsd.Connector.DebitSeconds(*cd, &response)
 		if err != nil {
 			log.Printf("Debit seconds failed: %v", err)
 		}
@@ -114,7 +139,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 
 func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
 	cc := &timespans.CallCost{}
-	err := rsd.Responder.Debit(*cd, cc)
+	err := rsd.Connector.Debit(*cd, cc)
 	if err != nil {
 		log.Printf("Could not complete debit opperation: %v", err)
 	}
@@ -122,7 +147,7 @@ func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor)
 	log.Print(cc)
 	cd.Amount = DEBIT_PERIOD.Seconds()
 	var remainingSeconds float64
-	err = rsd.Responder.GetMaxSessionTime(*cd, &remainingSeconds)
+	err = rsd.Connector.GetMaxSessionTime(*cd, &remainingSeconds)
 	if err != nil {
 		log.Printf("Could not get max session time: %v", err)
 	}
