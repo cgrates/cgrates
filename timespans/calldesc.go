@@ -21,7 +21,6 @@ package timespans
 import (
 	"errors"
 	"fmt"
-	"log"
 	"log/syslog"
 	"math"
 	"time"
@@ -268,7 +267,6 @@ Creates a CallCost structure with the cost information calculated for the receiv
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	destPrefix, err := cd.SearchStorageForPrefix()
 	timespans := cd.splitInTimeSpans()
-	log.Print(timespans[0].Interval)
 	cost := 0.0
 	connectionFee := 0.0
 	for i, ts := range timespans {

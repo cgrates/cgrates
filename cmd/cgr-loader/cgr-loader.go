@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"encoding/csv"
-	"strings"
 	"os"
+	"strings"
 )
 
 var (

@@ -22,8 +22,6 @@ import (
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"strconv"
-	"strings"
-	"time"
 )
 
 type Rate struct {
