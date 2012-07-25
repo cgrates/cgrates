@@ -125,6 +125,7 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, e
 	if err != nil {
 		return
 	}
+	ats = make(map[string][]*ActionTiming, len(keys))
 	for _, key := range keys {
 		values, err := rs.db.Get(key)
 		if err != nil {

@@ -172,7 +172,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	readConfig(*config)
 	// some consitency checks
-	checkConfigSanity()
+	go checkConfigSanity()
 
 	getter, err := timespans.NewRedisStorage(redis_server, redis_db)
 	if err != nil {
