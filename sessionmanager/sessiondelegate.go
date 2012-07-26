@@ -30,6 +30,7 @@ const (
 )
 
 type Connector interface {
+	GetCost(timespans.CallDescriptor, *timespans.CallCost) error
 	Debit(timespans.CallDescriptor, *timespans.CallCost) error
 	DebitCents(timespans.CallDescriptor, *float64) error
 	DebitSeconds(timespans.CallDescriptor, *float64) error
@@ -38,6 +39,10 @@ type Connector interface {
 
 type RPCClientConnector struct {
 	Client *rpc.Client
+}
+
+func (rcc *RPCClientConnector) GetCost(cd timespans.CallDescriptor, cc *timespans.CallCost) error {
+	return rcc.Client.Call("Responder.GetCost", cd, cc)
 }
 
 func (rcc *RPCClientConnector) Debit(cd timespans.CallDescriptor, cc *timespans.CallCost) error {

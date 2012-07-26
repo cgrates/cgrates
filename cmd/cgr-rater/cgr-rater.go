@@ -20,6 +20,7 @@ package main
 
 import (
 	"code.google.com/p/goconf/conf"
+	"database/sql"
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/balancer"
@@ -156,6 +157,28 @@ func listenToHttpRequests() {
 	http.ListenAndServe(stats_listen, nil)
 }
 
+func startSessionManager(responder *timespans.Responder) {
+	var connector sessionmanager.Connector
+	if sm_rater == INTERNAL {
+		connector = responder
+	} else {
+		var client *rpc.Client
+		var err error
+		if sm_json {
+			client, err = jsonrpc.Dial("tcp", sm_rater)
+		} else {
+			client, err = rpc.Dial("tcp", sm_rater)
+		}
+		if err != nil {
+			timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
+			exitChan <- true
+		}
+		connector = &sessionmanager.RPCClientConnector{client}
+	}
+	sm := &sessionmanager.FSSessionManager{}
+	sm.Connect(&sessionmanager.SessionDelegate{connector}, sm_freeswitch_server, sm_freeswitch_pass)
+}
+
 func checkConfigSanity() {
 	if sm_enabled && rater_enabled && rater_balancer != DISABLED {
 		timespans.Logger.Crit("The session manager must not be enabled on a worker rater (change [rater]/balancer to disabled)!")
@@ -213,30 +236,34 @@ func main() {
 	}
 
 	if sm_enabled {
-		go func() {
-			var connector sessionmanager.Connector
-			if sm_rater == INTERNAL {
-				connector = responder
-			} else {
-				var client *rpc.Client
-				if sm_json {
-					client, err = jsonrpc.Dial("tcp", sm_rater)
-				} else {
-					client, err = rpc.Dial("tcp", sm_rater)
-				}
-				if err != nil {
-					timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
-					exitChan <- true
-				}
-				connector = &sessionmanager.RPCClientConnector{client}
-			}
-			sm := &sessionmanager.FSSessionManager{}
-			sm.Connect(&sessionmanager.SessionDelegate{connector}, sm_freeswitch_server, sm_freeswitch_pass)
-		}()
+		go startSessionManager(responder)
 	}
 
 	if mediator_enabled {
-		go startMediator()
+		db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", mediator_host, mediator_port, mediator_db, mediator_user, mediator_password))
+		//defer db.Close()
+		if err != nil {
+			timespans.Logger.Err(fmt.Sprintf("failed to open the database: %v", err))
+		}
+		var connector sessionmanager.Connector
+		if sm_rater == INTERNAL {
+			connector = responder
+		} else {
+			var client *rpc.Client
+			var err error
+			if sm_json {
+				client, err = jsonrpc.Dial("tcp", sm_rater)
+			} else {
+				client, err = rpc.Dial("tcp", sm_rater)
+			}
+			if err != nil {
+				timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
+				exitChan <- true
+			}
+			connector = &sessionmanager.RPCClientConnector{client}
+		}
+		m := &Mediator{connector, db}
+		_ = m
 	}
 
 	<-exitChan

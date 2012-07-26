@@ -112,16 +112,16 @@ MONTHS:
 				if t.Equal(now) || t.After(now) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), now.Month(), t.Day(), h, m, s, 0, time.Local)
-					return
+					goto YEARS
 				}
-				if x+1 < len(i.Months) { // today was found in the list, jump to the next grater day
+				if x+1 < len(i.Months) { // this month was found in the list so jump to next available month
 					m = i.Months[x+1]
 					// reset the monthday
 					if i.MonthDays != nil {
 						t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 					}
 				}
-			} else { // today was not found in the list, x is the first greater day
+			} else { // this month was not found in the list, x is the first greater month
 				m = i.Months[x]
 				// reset the monthday
 				if i.MonthDays != nil {
@@ -131,6 +131,45 @@ MONTHS:
 		}
 		h, min, s := t.Clock()
 		t = time.Date(now.Year(), m, t.Day(), h, min, s, 0, time.Local)
+	}
+YEARS:
+	if i.Years != nil && len(i.Years) > 0 {
+		i.Years.Sort()
+		now := time.Now()
+		x := sort.Search(len(i.Years), func(x int) bool { return i.Years[x] >= now.Year() })
+		y = i.Years[0]
+		if x < len(i.Years) {
+			if i.Years[x] == now.Year() {
+				if t.Equal(now) || t.After(now) {
+					h, m, s := t.Clock()
+					t = time.Date(now.Year(), t.Month(), t.Day(), h, m, s, 0, time.Local)
+					return
+				}
+				if x+1 < len(i.Years) { // this year was found in the list so jump to next available year
+					y = i.Years[x+1]
+					// reset the month
+					if i.Months != nil {
+						t = time.Date(t.Year(), i.Months[0], t.Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+					}
+					// reset the monthday
+					if i.MonthDays != nil {
+						t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+					}
+				}
+			} else { // this year was not found in the list, x is the first greater year
+				y = i.Years[x]
+				// reset the month
+				if i.Months != nil {
+					t = time.Date(t.Year(), i.Months[0], t.Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+				}
+				// reset the monthday
+				if i.MonthDays != nil {
+					t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+				}
+			}
+		}
+		h, min, s := t.Clock()
+		t = time.Date(y, t.Month(), t.Day(), h, min, s, 0, time.Local)
 	}
 	return
 }
