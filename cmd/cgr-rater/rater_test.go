@@ -31,12 +31,12 @@ func TestConfig(t *testing.T) {
 		rater_enabled != true ||
 		rater_balancer != "test" ||
 		rater_listen != "test" ||
-		rater_json != true ||
+		rater_rpc_encoding != "test" ||
 
 		balancer_enabled != true ||
 		balancer_listen_rater != "test" ||
 		balancer_listen != "test" ||
-		balancer_json != true ||
+		balancer_rpc_encoding != "test" ||
 
 		scheduler_enabled != true ||
 
@@ -44,18 +44,19 @@ func TestConfig(t *testing.T) {
 		sm_rater != "test" ||
 		sm_freeswitch_server != "test" ||
 		sm_freeswitch_pass != "test" ||
-		sm_json != true ||
+		sm_rpc_encoding != "test" ||
 
 		mediator_enabled != true ||
 		mediator_cdr_file != "test" ||
 		mediator_result_file != "test" ||
 		mediator_rater != "test" ||
+		mediator_type != "test" ||
 		mediator_host != "test" ||
 		mediator_port != "test" ||
 		mediator_db != "test" ||
 		mediator_user != "test" ||
 		mediator_password != "test" ||
-		mediator_json != true ||
+		mediator_rpc_encoding != "test" ||
 		mediator_skipdb != true ||
 		stats_enabled != true ||
 		stats_listen != "test" {
@@ -64,21 +65,22 @@ func TestConfig(t *testing.T) {
 		t.Log(rater_enabled)
 		t.Log(rater_balancer)
 		t.Log(rater_listen)
-		t.Log(rater_json)
+		t.Log(rater_rpc_encoding)
 		t.Log(balancer_enabled)
 		t.Log(balancer_listen_rater)
 		t.Log(balancer_listen)
-		t.Log(balancer_json)
+		t.Log(balancer_rpc_encoding)
 		t.Log(scheduler_enabled)
 		t.Log(sm_enabled)
 		t.Log(sm_rater)
 		t.Log(sm_freeswitch_server)
 		t.Log(sm_freeswitch_pass)
-		t.Log(sm_json)
+		t.Log(sm_rpc_encoding)
 		t.Log(mediator_enabled)
 		t.Log(mediator_cdr_file)
 		t.Log(mediator_result_file)
 		t.Log(mediator_rater)
+		t.Log(mediator_type)
 		t.Log(mediator_host)
 		t.Log(mediator_port)
 		t.Log(mediator_db)
