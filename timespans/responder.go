@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/balancer"
 	"log"
+	"net/rpc"
 	"reflect"
 	"runtime"
 	"strings"
@@ -196,6 +197,37 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 		}
 	}
 	return
+}
+
+/*
+RPC method that receives a rater address, connects to it and ads the pair to the rater list for balancing
+*/
+func (rs *Responder) RegisterRater(clientAddress string, replay *int) error {
+	log.Printf("Started rater %v registration...", clientAddress)
+	time.Sleep(2 * time.Second) // wait a second for Rater to start serving
+	client, err := rpc.Dial("tcp", clientAddress)
+	if err != nil {
+		log.Print("Could not connect to client!")
+		return err
+	}
+	rs.Bal.AddClient(clientAddress, client)
+	log.Printf("Rater %v registered succesfully.", clientAddress)
+	return nil
+}
+
+/*
+RPC method that recives a rater addres gets the connections and closes it and removes the pair from rater list.
+*/
+func (rs *Responder) UnRegisterRater(clientAddress string, replay *int) error {
+	client, ok := rs.Bal.GetClient(clientAddress)
+	if ok {
+		client.Close()
+		rs.Bal.RemoveClient(clientAddress)
+		log.Print(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))
+	} else {
+		log.Print(fmt.Sprintf("Server %v was not on my watch!", clientAddress))
+	}
+	return nil
 }
 
 // Reflection worker type for not standalone balancer

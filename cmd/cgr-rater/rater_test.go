@@ -34,7 +34,6 @@ func TestConfig(t *testing.T) {
 		rater_rpc_encoding != "test" ||
 
 		balancer_enabled != true ||
-		balancer_listen_rater != "test" ||
 		balancer_listen != "test" ||
 		balancer_rpc_encoding != "test" ||
 
@@ -67,7 +66,6 @@ func TestConfig(t *testing.T) {
 		t.Log(rater_listen)
 		t.Log(rater_rpc_encoding)
 		t.Log(balancer_enabled)
-		t.Log(balancer_listen_rater)
 		t.Log(balancer_listen)
 		t.Log(balancer_rpc_encoding)
 		t.Log(scheduler_enabled)

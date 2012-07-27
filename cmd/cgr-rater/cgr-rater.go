@@ -52,7 +52,6 @@ var (
 	rater_rpc_encoding = GOB              // use JSON for RPC encoding
 
 	balancer_enabled      = false
-	balancer_listen_rater = "127.0.0.1:2000" // Rater server address	
 	balancer_listen       = "127.0.0.1:2001" // Json RPC server address	
 	balancer_rpc_encoding = GOB              // use JSON for RPC encoding
 
@@ -99,7 +98,6 @@ func readConfig(configFn string) {
 	rater_rpc_encoding, _ = c.GetString("rater", "rpc_encoding")
 
 	balancer_enabled, _ = c.GetBool("balancer", "enabled")
-	balancer_listen_rater, _ = c.GetString("balancer", "listen_rater")
 	balancer_listen, _ = c.GetString("balancer", "listen")
 	balancer_rpc_encoding, _ = c.GetString("balancer", "rpc_encoding")
 
@@ -258,7 +256,6 @@ func main() {
 	}
 	if balancer_enabled {
 		go stopBalancerSingnalHandler()
-		go listenToRPCRequests(new(RaterServer), balancer_listen_rater, GOB)
 		responder.Bal = bal
 		go listenToRPCRequests(responder, balancer_listen, balancer_rpc_encoding)
 		if rater_enabled {
