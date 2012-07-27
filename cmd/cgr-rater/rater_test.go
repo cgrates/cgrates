@@ -29,56 +29,63 @@ func TestConfig(t *testing.T) {
 		redis_db != 1 ||
 
 		rater_enabled != true ||
-		rater_standalone != true ||
-		rater_balancer_server != "test" ||
+		rater_balancer != "test" ||
 		rater_listen != "test" ||
 		rater_json != true ||
 
 		balancer_enabled != true ||
-		balancer_standalone != true ||
 		balancer_listen_rater != "test" ||
-		balancer_listen_api != "test" ||
-		balancer_web_status_server != "test" ||
+		balancer_listen != "test" ||
 		balancer_json != true ||
 
 		scheduler_enabled != true ||
 
 		sm_enabled != true ||
-		sm_api_server != "test" ||
+		sm_rater != "test" ||
 		sm_freeswitch_server != "test" ||
 		sm_freeswitch_pass != "test" ||
+		sm_json != true ||
 
 		mediator_enabled != true ||
 		mediator_cdr_file != "test" ||
 		mediator_result_file != "test" ||
+		mediator_rater != "test" ||
 		mediator_host != "test" ||
 		mediator_port != "test" ||
 		mediator_db != "test" ||
 		mediator_user != "test" ||
-		mediator_password != "test" {
+		mediator_password != "test" ||
+		mediator_json != true ||
+		mediator_skipdb != true ||
+		stats_enabled != true ||
+		stats_listen != "test" {
 		t.Log(redis_server)
 		t.Log(redis_db)
 		t.Log(rater_enabled)
-		t.Log(rater_standalone)
-		t.Log(rater_balancer_server)
+		t.Log(rater_balancer)
+		t.Log(rater_listen)
 		t.Log(rater_json)
 		t.Log(balancer_enabled)
-		t.Log(balancer_standalone)
 		t.Log(balancer_listen_rater)
-		t.Log(balancer_listen_api)
+		t.Log(balancer_listen)
+		t.Log(balancer_json)
 		t.Log(scheduler_enabled)
 		t.Log(sm_enabled)
-		t.Log(sm_api_server)
+		t.Log(sm_rater)
 		t.Log(sm_freeswitch_server)
 		t.Log(sm_freeswitch_pass)
+		t.Log(sm_json)
 		t.Log(mediator_enabled)
 		t.Log(mediator_cdr_file)
 		t.Log(mediator_result_file)
+		t.Log(mediator_rater)
 		t.Log(mediator_host)
 		t.Log(mediator_port)
 		t.Log(mediator_db)
 		t.Log(mediator_user)
 		t.Log(mediator_password)
+		t.Log(stats_enabled)
+		t.Log(stats_listen)
 
 		t.Error("Config file read failed!")
 	}

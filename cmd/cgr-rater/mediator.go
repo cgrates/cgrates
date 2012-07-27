@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"database/sql"
 	"encoding/csv"
+	"encoding/json"
 	"flag"
 	"fmt"
 	_ "github.com/bmizerany/pq"
@@ -35,6 +36,7 @@ import (
 type Mediator struct {
 	Connector sessionmanager.Connector
 	Db        *sql.DB
+	SkipDb    bool
 }
 
 /*func readDbRecord(db *sql.DB, searchedUUID string) (cc *timespans.CallCost, timespansText string, err error) {
@@ -50,19 +52,32 @@ func (m *Mediator) parseCSV() {
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
 
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		uuid := record[10]
-		_ = uuid
-		t, _ := time.Parse("2012-05-21 17:48:20", record[5])
-		fmt.Println(t)
+	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
+		//t, _ := time.Parse("2012-05-21 17:48:20", record[5])		
+		var cc *timespans.CallCost
+		if !m.SkipDb {
+			cc, err = m.GetCostsFromDB(record)
+		} else {
+			cc, err = m.GetCostsFromRater(record)
+
+		}
+		if err != nil {
+			timespans.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record (%v): %v", record, err))
+		}
+		fmt.Println(cc)
 	}
 }
 
-func (m *Mediator) GetCostsFromDB(searchedUUID string) (cc *timespans.CallCost, timespansText string, err error) {
+func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err error) {
+	searchedUUID := record[10]
 	row := m.Db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s'", searchedUUID))
 	var uuid string
-	cc = &timespans.CallCost{}
-	err = row.Scan(&uuid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansText)
+	var timespansJson string
+	err = row.Scan(&uuid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
+	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)
+	if err != nil {
+		cc, err = m.GetCostsFromRater(record)
+	}
 	return
 }
 
