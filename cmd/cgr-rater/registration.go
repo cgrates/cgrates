@@ -82,7 +82,7 @@ Connects to the balancer and rehisters the rater to the server.
 func registerToBalancer() {
 	client, err := rpc.Dial("tcp", rater_balancer)
 	if err != nil {
-		log.Print("Cannot contact the balancer!")
+		log.Print("Cannot contact the balancer!", err)
 		exitChan <- true
 		return
 	}

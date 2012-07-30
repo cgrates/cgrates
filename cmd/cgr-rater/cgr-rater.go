@@ -128,6 +128,11 @@ func readConfig(configFn string) {
 
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
 	l, err := net.Listen("tcp", rpcAddress)
+	if err != nil {
+		timespans.Logger.Err(fmt.Sprintf("could not connect to %v: %v", rpcAddress, err))
+		exitChan <- true
+		return
+	}
 	defer l.Close()
 
 	if err != nil {
