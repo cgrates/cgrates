@@ -43,9 +43,13 @@ type ActionTiming struct {
 	Weight         float64
 	ActionsId      string
 	actions        ActionPriotityList
+	stCache        time.Time
 }
 
 func (at *ActionTiming) GetNextStartTime() (t time.Time) {
+	if !at.stCache.IsZero() {
+		return at.stCache
+	}
 	i := at.Timing
 	if i == nil {
 		return
@@ -59,6 +63,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		t, err = time.Parse(FORMAT, l)
 		if err != nil {
 			log.Printf("Cannot parse action timing's StartTime %v", l)
+			at.stCache = t
 			return
 		}
 	}
@@ -73,6 +78,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 			t = time.Date(t.Year(), t.Month(), d+j, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
 			for _, wd := range i.WeekDays {
 				if t.Weekday() == wd && (t.Equal(now) || t.After(now)) {
+					at.stCache = t
 					return
 				}
 			}
@@ -143,6 +149,7 @@ YEARS:
 				if t.Equal(now) || t.After(now) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), t.Month(), t.Day(), h, m, s, 0, time.Local)
+					at.stCache = t
 					return
 				}
 				if x+1 < len(i.Years) { // this year was found in the list so jump to next available year
@@ -171,7 +178,12 @@ YEARS:
 		h, min, s := t.Clock()
 		t = time.Date(y, t.Month(), t.Day(), h, min, s, 0, time.Local)
 	}
+	at.stCache = t
 	return
+}
+
+func (at *ActionTiming) resetStartTimeCache() {
+	at.stCache = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
 func (at *ActionTiming) getActions() (as []*Action, err error) {
@@ -194,6 +206,7 @@ func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
 }
 
 func (at *ActionTiming) Execute() (err error) {
+	at.resetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
 		log.Print("Failed to get actions: ", err)
