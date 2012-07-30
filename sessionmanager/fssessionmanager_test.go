@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	//"log"
+	"github.com/cgrates/cgrates/timespans"
 	"testing"
 )
 
 func TestConnect(t *testing.T) {
 	sm := &FSSessionManager{}
-	sm.Connect(new(DirectSessionDelegate), "localhost:8021", "ClueCon")
+	sm.Connect(&SessionDelegate{&timespans.Responder{}}, "localhost:8021", "ClueCon")
 	//for {
 	ev := sm.readNextEvent()
 	if ev == nil {
