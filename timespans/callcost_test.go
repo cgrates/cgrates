@@ -25,7 +25,7 @@ import (
 )
 
 func init() {
-	sg, _ := NewRedisStorage("127.0.0.1:6379", 10)
+	sg, _ := NewRedisStorage("127.0.0.1:6379", 10, "")
 	SetStorageGetter(sg)
 }
 

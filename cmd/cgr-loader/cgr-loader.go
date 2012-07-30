@@ -46,7 +46,7 @@ var (
 )
 
 func writeToDatabase() {
-	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb)
+	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb, *redispass)
 	if err != nil {
 		log.Fatalf("Could not open database connection: %v", err)
 	}

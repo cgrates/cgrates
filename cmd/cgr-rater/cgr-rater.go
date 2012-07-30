@@ -45,7 +45,6 @@ var (
 	config              = flag.String("config", "/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/conf/rater_standalone.config", "Configuration file location.")
 	redis_server        = "127.0.0.1:6379" // redis address host:port
 	redis_db            = 10               // redis database number
-	redis_user          = ""
 	redis_pass          = ""
 	logging_db_type     = DBTYPE
 	logging_db_host     = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
@@ -93,7 +92,6 @@ func readConfig(configFn string) {
 	}
 	redis_server, _ = c.GetString("global", "redis_server")
 	redis_db, _ = c.GetInt("global", "redis_db")
-	redis_user, _ = c.GetString("global", "redis_user")
 	redis_pass, _ = c.GetString("global", "redis_pass")
 	logging_db_type, _ = c.GetString("global", "db_type")
 	logging_db_host, _ = c.GetString("global", "db_host")
@@ -247,7 +245,7 @@ func main() {
 	// some consitency checks
 	go checkConfigSanity()
 
-	getter, err := timespans.NewRedisStorage(redis_server, redis_db)
+	getter, err := timespans.NewRedisStorage(redis_server, redis_db, redis_pass)
 	if err != nil {
 		timespans.Logger.Crit("Could not connect to redis, exiting!")
 		exitChan <- true

@@ -32,14 +32,14 @@ RET,0723
 RET,0724
 `
 	rts = `
-P1,NAT,0,1,1
-P2,NAT,0,0.5,1
+P1,NAT,0,1,1,1
+P2,NAT,0,0.5,1,1
 `
 	ts = `
-WORKDAYS_00,*all,*all,1;2;3;4;5,00:00:00
-WORKDAYS_18,*all,*all,1;2;3;4;5,18:00:00
-WEEKENDS,*all,*all,6;7,00:00:00
-ONE_TIME_RUN,*none,*none,*none,*now
+WORKDAYS_00,*all,*all,*all,1;2;3;4;5,00:00:00
+WORKDAYS_18,*all,*all,*all,1;2;3;4;5,18:00:00
+WEEKENDS,*all,*all,*all,6;7,00:00:00
+ONE_TIME_RUN,2012,*none,*none,*none,*asap
 `
 	rtts = `
 EVENING,P1,WORKDAYS_00,10

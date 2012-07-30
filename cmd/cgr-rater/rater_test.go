@@ -27,7 +27,6 @@ func TestConfig(t *testing.T) {
 	readConfig("/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/data/test.config")
 	if redis_server != "test" ||
 		redis_db != 1 ||
-		redis_user != "test" ||
 		redis_pass != "test" ||
 		logging_db_type != "test" ||
 		logging_db_host != "test" ||
@@ -63,7 +62,6 @@ func TestConfig(t *testing.T) {
 		stats_listen != "test" {
 		t.Log(redis_server)
 		t.Log(redis_db)
-		t.Log(redis_user)
 		t.Log(redis_pass)
 		t.Log(logging_db_type)
 		t.Log(logging_db_host)
