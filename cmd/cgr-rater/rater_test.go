@@ -27,6 +27,14 @@ func TestConfig(t *testing.T) {
 	readConfig("/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/data/test.config")
 	if redis_server != "test" ||
 		redis_db != 1 ||
+		redis_user != "test" ||
+		redis_pass != "test" ||
+		logging_db_type != "test" ||
+		logging_db_host != "test" ||
+		logging_db_port != "test" ||
+		logging_db_db != "test" ||
+		logging_db_user != "test" ||
+		logging_db_password != "test" ||
 
 		rater_enabled != true ||
 		rater_balancer != "test" ||
@@ -49,18 +57,20 @@ func TestConfig(t *testing.T) {
 		mediator_cdr_file != "test" ||
 		mediator_result_file != "test" ||
 		mediator_rater != "test" ||
-		mediator_type != "test" ||
-		mediator_host != "test" ||
-		mediator_port != "test" ||
-		mediator_db != "test" ||
-		mediator_user != "test" ||
-		mediator_password != "test" ||
 		mediator_rpc_encoding != "test" ||
 		mediator_skipdb != true ||
 		stats_enabled != true ||
 		stats_listen != "test" {
 		t.Log(redis_server)
 		t.Log(redis_db)
+		t.Log(redis_user)
+		t.Log(redis_pass)
+		t.Log(logging_db_type)
+		t.Log(logging_db_host)
+		t.Log(logging_db_port)
+		t.Log(logging_db_db)
+		t.Log(logging_db_user)
+		t.Log(logging_db_password)
 		t.Log(rater_enabled)
 		t.Log(rater_balancer)
 		t.Log(rater_listen)
@@ -78,12 +88,6 @@ func TestConfig(t *testing.T) {
 		t.Log(mediator_cdr_file)
 		t.Log(mediator_result_file)
 		t.Log(mediator_rater)
-		t.Log(mediator_type)
-		t.Log(mediator_host)
-		t.Log(mediator_port)
-		t.Log(mediator_db)
-		t.Log(mediator_user)
-		t.Log(mediator_password)
 		t.Log(stats_enabled)
 		t.Log(stats_listen)
 

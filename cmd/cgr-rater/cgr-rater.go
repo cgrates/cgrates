@@ -42,9 +42,17 @@ const (
 )
 
 var (
-	config       = flag.String("config", "/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/conf/rater_standalone.config", "Configuration file location.")
-	redis_server = "127.0.0.1:6379" // redis address host:port
-	redis_db     = 10               // redis database number
+	config              = flag.String("config", "/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/conf/rater_standalone.config", "Configuration file location.")
+	redis_server        = "127.0.0.1:6379" // redis address host:port
+	redis_db            = 10               // redis database number
+	redis_user          = ""
+	redis_pass          = ""
+	logging_db_type     = DBTYPE
+	logging_db_host     = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
+	logging_db_port     = "5432"      // The port to bind to.
+	logging_db_db       = "cgrates"   // The name of the database to connect to.
+	logging_db_user     = ""          // The user to sign in as.
+	logging_db_password = ""          // The user's password.
 
 	rater_enabled      = false            // start standalone server (no balancer)
 	rater_balancer     = DISABLED         // balancer address host:port
@@ -66,14 +74,8 @@ var (
 	mediator_enabled      = false
 	mediator_cdr_file     = "Master.csv" // Freeswitch Master CSV CDR file.
 	mediator_result_file  = "out.csv"    // Generated file containing CDR and price info.
-	mediator_rater        = INTERNAL     // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	mediator_type         = DBTYPE
-	mediator_host         = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
-	mediator_port         = "5432"      // The port to bind to.
-	mediator_db           = "cgrates"   // The name of the database to connect to.
-	mediator_user         = ""          // The user to sign in as.
-	mediator_password     = ""          // The user's password.
-	mediator_rpc_encoding = GOB         // use JSON for RPC encoding
+	mediator_rater        = INTERNAL     // address where to access rater. Can be internal, direct rater address or the address of a balancer	
+	mediator_rpc_encoding = GOB          // use JSON for RPC encoding
 	mediator_skipdb       = false
 
 	stats_enabled = false
@@ -91,6 +93,14 @@ func readConfig(configFn string) {
 	}
 	redis_server, _ = c.GetString("global", "redis_server")
 	redis_db, _ = c.GetInt("global", "redis_db")
+	redis_user, _ = c.GetString("global", "redis_user")
+	redis_pass, _ = c.GetString("global", "redis_pass")
+	logging_db_type, _ = c.GetString("global", "db_type")
+	logging_db_host, _ = c.GetString("global", "db_host")
+	logging_db_port, _ = c.GetString("global", "db_port")
+	logging_db_db, _ = c.GetString("global", "db_name")
+	logging_db_user, _ = c.GetString("global", "db_user")
+	logging_db_password, _ = c.GetString("global", "db_passwd")
 
 	rater_enabled, _ = c.GetBool("rater", "enabled")
 	rater_balancer, _ = c.GetString("rater", "balancer")
@@ -113,12 +123,6 @@ func readConfig(configFn string) {
 	mediator_cdr_file, _ = c.GetString("mediator", "cdr_file")
 	mediator_result_file, _ = c.GetString("mediator", "result_file")
 	mediator_rater, _ = c.GetString("mediator", "rater")
-	mediator_type, _ = c.GetString("mediator", "db_type")
-	mediator_host, _ = c.GetString("mediator", "db_host")
-	mediator_port, _ = c.GetString("mediator", "db_port")
-	mediator_db, _ = c.GetString("mediator", "db_name")
-	mediator_user, _ = c.GetString("mediator", "db_user")
-	mediator_password, _ = c.GetString("mediator", "db_passwd")
 	mediator_rpc_encoding, _ = c.GetString("mediator", "rpc_encoding")
 	mediator_skipdb, _ = c.GetBool("mediator", "skipdb")
 
@@ -175,7 +179,7 @@ func startMediator(responder *timespans.Responder) {
 	var db *sql.DB
 	var err error
 	if !mediator_skipdb {
-		db, err = sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", mediator_host, mediator_port, mediator_db, mediator_user, mediator_password))
+		db, err = sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_db, logging_db_user, logging_db_password))
 		//defer db.Close()
 
 		if err != nil {
