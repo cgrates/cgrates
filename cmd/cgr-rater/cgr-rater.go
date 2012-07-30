@@ -256,7 +256,7 @@ func main() {
 		go stopRaterSingnalHandler()
 	}
 	responder := &timespans.Responder{ExitChan: exitChan}
-	if rater_enabled && !balancer_enabled {
+	if rater_enabled && !balancer_enabled && rater_listen != INTERNAL {
 		go listenToRPCRequests(responder, rater_listen, rater_rpc_encoding)
 	}
 	if balancer_enabled {

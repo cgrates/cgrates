@@ -37,6 +37,9 @@ type scheduler struct {
 
 func (s scheduler) loop() {
 	for {
+		if len(s.queue) == 0 {
+			<-restartLoop
+		}
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
