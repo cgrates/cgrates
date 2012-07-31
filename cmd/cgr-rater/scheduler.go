@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"sort"
@@ -68,7 +69,7 @@ func (s scheduler) loop() {
 func loadActionTimings(storage timespans.StorageGetter) {
 	actionTimings, err := storage.GetAllActionTimings()
 	if err != nil {
-		log.Fatalf("Cannot get action timings:", err)
+		timespans.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
 	}
 	// recreate the queue
 	s.queue = timespans.ActionTimingPriotityList{}
