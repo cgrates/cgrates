@@ -173,17 +173,7 @@ func listenToHttpRequests() {
 	http.ListenAndServe(stats_listen, nil)
 }
 
-func startMediator(responder *timespans.Responder) {
-	var db *sql.DB
-	var err error
-	if !mediator_skipdb {
-		db, err = sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_db, logging_db_user, logging_db_password))
-		//defer db.Close()
-
-		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("failed to open the database: %v", err))
-		}
-	}
+func startMediator(responder *timespans.Responder, db *sql.DB) {
 	var connector sessionmanager.Connector
 	if mediator_rater == INTERNAL {
 		connector = responder
@@ -205,7 +195,7 @@ func startMediator(responder *timespans.Responder) {
 	m.parseCSV()
 }
 
-func startSessionManager(responder *timespans.Responder) {
+func startSessionManager(responder *timespans.Responder, db *sql.DB) {
 	var connector sessionmanager.Connector
 	if sm_rater == INTERNAL {
 		connector = responder
@@ -223,7 +213,7 @@ func startSessionManager(responder *timespans.Responder) {
 		}
 		connector = &sessionmanager.RPCClientConnector{client}
 	}
-	sm := &sessionmanager.FSSessionManager{}
+	sm := sessionmanager.NewFSSessionManager(db)
 	sm.Connect(&sessionmanager.SessionDelegate{connector}, sm_freeswitch_server, sm_freeswitch_pass)
 }
 
@@ -252,6 +242,18 @@ func main() {
 	}
 	defer getter.Close()
 	timespans.SetStorageGetter(getter)
+
+	db, err := sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_db, logging_db_user, logging_db_password))
+	if err != nil {
+		timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
+	}
+	if db != nil {
+		defer db.Close()
+	}
+
+	if err != nil {
+		timespans.Logger.Err(fmt.Sprintf("failed to open the database: %v", err))
+	}
 
 	if rater_enabled && rater_balancer != DISABLED && !balancer_enabled {
 		go registerToBalancer()
@@ -283,11 +285,11 @@ func main() {
 	}
 
 	if sm_enabled {
-		go startSessionManager(responder)
+		go startSessionManager(responder, db)
 	}
 
 	if mediator_enabled {
-		go startMediator(responder)
+		go startMediator(responder, db)
 	}
 
 	<-exitChan

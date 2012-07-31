@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"log"
 	"net"
@@ -33,6 +34,11 @@ type FSSessionManager struct {
 	buf             *bufio.Reader
 	sessions        []*Session
 	sessionDelegate *SessionDelegate
+	postgresLogger  *PostgresLogger //NewPostgresLogger("gosqltest", "rif", "testus")
+}
+
+func NewFSSessionManager(db *sql.DB) *FSSessionManager {
+	return &FSSessionManager{postgresLogger: &PostgresLogger{db}}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
@@ -123,7 +129,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	s := sm.GetSession(ev.GetUUID())
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnChannelHangupComplete(ev, s)
-		s.SaveMOperations()
+		s.SaveOperations()
 	} else {
 		log.Print("HangupComplete")
 	}
@@ -141,4 +147,8 @@ func (sm *FSSessionManager) OnOther(ev Event) {
 
 func (sm *FSSessionManager) GetSessionDelegate() *SessionDelegate {
 	return sm.sessionDelegate
+}
+
+func (sm *FSSessionManager) GetDbLogger() *PostgresLogger {
+	return sm.postgresLogger
 }

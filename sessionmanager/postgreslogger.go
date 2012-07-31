@@ -31,14 +31,6 @@ type PostgresLogger struct {
 	db *sql.DB
 }
 
-func NewPostgresLogger(dbName, user, pass string) *PostgresLogger {
-	db, err := sql.Open("postgres", fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable", dbName, user, pass))
-	if err != nil {
-		log.Printf("Failed to open the database: %v", err)
-	}
-	return &PostgresLogger{db}
-}
-
 func (psl *PostgresLogger) Close() {
 	psl.db.Close()
 }
