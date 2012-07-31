@@ -36,6 +36,10 @@ func (psl *PostgresLogger) Close() {
 }
 
 func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
+	if psl.db == nil {
+		timespans.Logger.Warning("Cannot write log to database.")
+		return
+	}
 	tss, err := json.Marshal(cc.Timespans)
 	if err != nil {
 		log.Printf("Error marshalling timespans to json: %v", err)

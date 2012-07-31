@@ -34,7 +34,7 @@ type FSSessionManager struct {
 	buf             *bufio.Reader
 	sessions        []*Session
 	sessionDelegate *SessionDelegate
-	postgresLogger  *PostgresLogger //NewPostgresLogger("gosqltest", "rif", "testus")
+	postgresLogger  *PostgresLogger
 }
 
 func NewFSSessionManager(db *sql.DB) *FSSessionManager {
