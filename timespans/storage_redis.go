@@ -37,7 +37,7 @@ func NewRedisStorage(address string, db int, pass string) (*RedisStorage, error)
 		address = "tcp:" + address
 	}
 	ndb := godis.New(address, db, pass)
-	ms := &MyMarshaler{}
+	ms := new(MyMarshaler)
 	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
 }
 
