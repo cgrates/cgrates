@@ -2,7 +2,7 @@
 Rating system designed to be used in VoIP Carriers World
 Copyright (C) 2012  Radu Ioan Fericean
 
-This program is free software: you can redistribute it and/or modify
+This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
@@ -26,6 +26,7 @@ import (
 
 func init() {
 	storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 10, "")
+	//storageGetter, _ = NewMapStorage()
 	SetStorageGetter(storageGetter)
 	populateDB()
 }
@@ -222,7 +223,7 @@ func TestApAddAPIfNotPresent(t *testing.T) {
 }
 
 /*********************************** BENCHMARKS ***************************************/
-func BenchmarkRedisGetting(b *testing.B) {
+func BenchmarkStorageGetting(b *testing.B) {
 	b.StopTimer()
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
@@ -233,7 +234,7 @@ func BenchmarkRedisGetting(b *testing.B) {
 	}
 }
 
-func BenchmarkRedisRestoring(b *testing.B) {
+func BenchmarkStorageRestoring(b *testing.B) {
 	b.StopTimer()
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
@@ -244,7 +245,7 @@ func BenchmarkRedisRestoring(b *testing.B) {
 	}
 }
 
-func BenchmarkRedisGetCost(b *testing.B) {
+func BenchmarkStorageGetCost(b *testing.B) {
 	b.StopTimer()
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
@@ -267,7 +268,7 @@ func BenchmarkSplitting(b *testing.B) {
 	}
 }
 
-func BenchmarkRedisSingleGetSessionTime(b *testing.B) {
+func BenchmarkStorageSingleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 100}
 	b.StartTimer()
@@ -276,7 +277,7 @@ func BenchmarkRedisSingleGetSessionTime(b *testing.B) {
 	}
 }
 
-func BenchmarkRedisMultipleGetSessionTime(b *testing.B) {
+func BenchmarkStorageMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
 	b.StartTimer()

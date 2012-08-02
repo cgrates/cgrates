@@ -19,12 +19,66 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"code.google.com/p/goconf/conf"
 	"net/rpc"
 	"testing"
 )
 
+const (
+	configText = `
+[global]
+redis_server = test #redis address host:port
+redis_db = 1 # redis database number
+redis_pass = test
+db_type = test # 
+db_host = test # The host to connect to. Values that start with / are for UNIX domain sockets.
+db_port = test # The port to bind to.
+db_name = test # The name of the database to connect to.
+db_user =  test # The user to sign in as.
+db_passwd =  test # The user's password.root
+
+[balancer]
+enabled = true # Start balancer server
+listen = test # Balancer listen interface
+rpc_encoding = test # use JSON for RPC encoding	
+
+[rater]
+enabled = true
+listen = test # listening address host:port, internal for internal communication only
+balancer = test # if defined it will register to balancer as worker
+rpc_encoding = test # use JSON for RPC encoding
+
+[mediator]
+enabled = true
+cdr_file = test # Freeswitch Master CSV CDR file.
+result_file = test # Generated file containing CDR and price info.
+rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
+rpc_encoding = test # use JSON for RPC encoding
+skipdb = true
+
+[scheduler]
+enabled = true
+
+[session_manager]
+enabled = true
+rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
+freeswitch_server = test # freeswitch address host:port
+freeswitch_pass = test # freeswitch address host:port
+rpc_encoding = test # use JSON for RPC encoding
+
+[stats_server]
+enabled = true
+listen = test # Web server address (for stat reports)
+`
+)
+
 func TestConfig(t *testing.T) {
-	readConfig("/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/data/test.config")
+	c, err := conf.ReadConfigBytes([]byte(configText))
+	if err != nil {
+		t.Log("Could not parse configuration!")
+		t.FailNow()
+	}
+	readConfig(c)
 	if redis_server != "test" ||
 		redis_db != 1 ||
 		redis_pass != "test" ||
@@ -93,7 +147,7 @@ func TestConfig(t *testing.T) {
 	}
 }
 
-func TestRPCGet(t *testing.T) {
+/*func TestRPCGet(t *testing.T) {
 	client, err := rpc.DialHTTPPath("tcp", "localhost:2000", "/rpc")
 	if err != nil {
 		t.Error("Balancer server not started!")
@@ -105,7 +159,7 @@ func TestRPCGet(t *testing.T) {
 	if reply != expect {
 		t.Errorf("replay == %v, want %v", reply, expect)
 	}
-}
+}*/
 
 func BenchmarkRPCGet(b *testing.B) {
 	b.StopTimer()

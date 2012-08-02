@@ -84,12 +84,8 @@ var (
 	exitChan = make(chan bool)
 )
 
-func readConfig(configFn string) {
-	c, err := conf.ReadConfigFile(configFn)
-	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Could not open the configuration file: %v", err))
-		return
-	}
+func readConfig(c *conf.ConfigFile) {
+
 	redis_server, _ = c.GetString("global", "redis_server")
 	redis_db, _ = c.GetInt("global", "redis_db")
 	redis_pass, _ = c.GetString("global", "redis_pass")
@@ -231,7 +227,12 @@ func checkConfigSanity() {
 func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	readConfig(*config)
+	c, err := conf.ReadConfigFile(*config)
+	if err != nil {
+		timespans.Logger.Err(fmt.Sprintf("Could not open the configuration file: %v", err))
+		return
+	}
+	readConfig(c)
 	// some consitency checks
 	go checkConfigSanity()
 
