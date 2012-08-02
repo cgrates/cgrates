@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package balancer
 
 import (
+	"fmt"
 	"net/rpc"
 	"testing"
-	"fmt"
 )
 
 func BenchmarkBalance(b *testing.B) {
@@ -72,7 +72,7 @@ func TestOneBalancer(t *testing.T) {
 
 func Test100Balancer(t *testing.T) {
 	balancer := NewBalancer()
-	var clients []*rpc.Client
+	var clients []Worker
 	for i := 0; i < 100; i++ {
 		c := new(rpc.Client)
 		balancer.AddClient(fmt.Sprintf("client%v", i), c)
