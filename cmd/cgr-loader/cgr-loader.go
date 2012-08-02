@@ -45,7 +45,7 @@ var (
 func main() {
 	flag.Parse()
 	sep = []rune(*separator)[0]
-	csvr := &timespans.CSVReader{timespans.OpenFileCSVReader}
+	csvr := timespans.NewFileCSVReader()
 	csvr.LoadDestinations(*destinationsFn, sep)
 	csvr.LoadRates(*ratesFn, sep)
 	csvr.LoadTimings(*timingsFn, sep)
@@ -59,5 +59,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not open database connection: %v", err)
 	}
-	timespans.WriteToDatabase(storage, *flush, true)
+	csvr.WriteToDatabase(storage, *flush, true)
 }

@@ -88,8 +88,10 @@ vdf,minitsboy,OUT,MORE_MINUTES,STANDARD_TRIGGER
 `
 )
 
+var csvr *CSVReader
+
 func init() {
-	csvr := &CSVReader{OpenStringCSVReader}
+	csvr = NewStringCSVReader()
 	csvr.LoadDestinations(dest, ',')
 	csvr.LoadRates(rts, ',')
 	csvr.LoadTimings(ts, ',')
@@ -99,60 +101,60 @@ func init() {
 	csvr.LoadActionTimings(atms, ',')
 	csvr.LoadActionTriggers(atrs, ',')
 	csvr.LoadAccountActions(accs, ',')
-	WriteToDatabase(storageGetter, false, false)
+	csvr.WriteToDatabase(storageGetter, false, false)
 
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(destinations) != 6 {
-		t.Error("Failed to load destinations: ", destinations)
+	if len(csvr.destinations) != 6 {
+		t.Error("Failed to load destinations: ", csvr.destinations)
 	}
 }
 
 func TestLoadRates(t *testing.T) {
-	if len(rates) != 5 {
-		t.Error("Failed to load rates: ", rates)
+	if len(csvr.rates) != 5 {
+		t.Error("Failed to load rates: ", csvr.rates)
 	}
 }
 
 func TestLoadTimimgs(t *testing.T) {
-	if len(timings) != 4 {
-		t.Error("Failed to load timings: ", timings)
+	if len(csvr.timings) != 4 {
+		t.Error("Failed to load timings: ", csvr.timings)
 	}
 }
 
 func TestLoadRateTimings(t *testing.T) {
-	if len(activationPeriods) != 4 {
-		t.Error("Failed to load rate timings: ", activationPeriods)
+	if len(csvr.activationPeriods) != 4 {
+		t.Error("Failed to load rate timings: ", csvr.activationPeriods)
 	}
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(ratingProfiles) != 7 {
-		t.Error("Failed to load rating profiles: ", len(ratingProfiles), ratingProfiles)
+	if len(csvr.ratingProfiles) != 7 {
+		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(actions) != 1 {
-		t.Error("Failed to load actions: ", actions)
+	if len(csvr.actions) != 1 {
+		t.Error("Failed to load actions: ", csvr.actions)
 	}
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(actionsTimings) != 1 {
-		t.Error("Failed to load action timings: ", actionsTimings)
+	if len(csvr.actionsTimings) != 1 {
+		t.Error("Failed to load action timings: ", csvr.actionsTimings)
 	}
 }
 
 func TestLoadActionTriggers(t *testing.T) {
-	if len(actionsTriggers) != 1 {
-		t.Error("Failed to load action triggers: ", actionsTriggers)
+	if len(csvr.actionsTriggers) != 1 {
+		t.Error("Failed to load action triggers: ", csvr.actionsTriggers)
 	}
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(accountActions) != 1 {
-		t.Error("Failed to load account actions: ", accountActions)
+	if len(csvr.accountActions) != 1 {
+		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
 }
