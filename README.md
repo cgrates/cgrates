@@ -7,7 +7,7 @@
 + Handles volume discount
 + Received calls bonus
 + Fully/Easy configurable 
-+ Very fast (5000+ req/sec)
++ Very fast (5000+ req/sec on a single machine)
 + Good documentation
 + Commercial support available
 
@@ -19,4 +19,4 @@ PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 API reference http://gopkgdoc.appspot.com/pkg/github.com/cgrates/cgrates/timespans
 
 
-[![build](http://goci.me/project/image/github.com/cgrates/cgrates "Continous integration")](http://goci.me/project/github.com/cgrates/cgrates).
+Current build status: [![build](http://goci.me/project/image/github.com/cgrates/cgrates "Continous integration")](http://goci.me/project/github.com/cgrates/cgrates)
