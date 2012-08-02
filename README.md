@@ -18,4 +18,4 @@ PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
 API reference http://gopkgdoc.appspot.com/pkg/github.com/cgrates/cgrates
 
-Current build status: [![build](http://goci.me/project/image/github.com/cgrates/cgrates "Continous integration")](http://goci.me/project/github.com/cgrates/cgrates)
+Continous integration: [![build](http://goci.me/project/image/github.com/cgrates/cgrates "Continous integration")](http://goci.me/project/github.com/cgrates/cgrates)

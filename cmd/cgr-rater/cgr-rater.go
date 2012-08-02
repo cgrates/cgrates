@@ -245,12 +245,15 @@ func main() {
 	defer getter.Close()
 	timespans.SetStorageGetter(getter)
 
-	db, err := sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_db, logging_db_user, logging_db_password))
-	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
-	}
-	if db != nil {
-		defer db.Close()
+	var db *sql.DB
+	if logging_db_type != DISABLED {
+		db, err = sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_db, logging_db_user, logging_db_password))
+		if err != nil {
+			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
+		}
+		if db != nil {
+			defer db.Close()
+		}
 	}
 
 	if err != nil {
