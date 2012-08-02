@@ -26,11 +26,6 @@ import (
 	//"log"
 )
 
-func init() {
-	sg, _ := NewRedisStorage("127.0.0.1:6379", 10, "")
-	SetStorageGetter(sg)
-}
-
 func TestApStoreRestore(t *testing.T) {
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{
@@ -53,7 +48,7 @@ func TestApStoreRestore(t *testing.T) {
 	}
 }
 
-func TestApRestoreRedis(t *testing.T) {
+func TestApRestoreFromStorage(t *testing.T) {
 	cd := &CallDescriptor{
 		Direction:   "OUT",
 		TOR:         "0",

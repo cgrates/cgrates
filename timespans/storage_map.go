@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -27,7 +29,7 @@ type MapStorage struct {
 	ms   Marshaler
 }
 
-func NewMapStorage() (*MapStorage, error) {
+func NewMapStorage() (StorageGetter, error) {
 	return &MapStorage{dict: make(map[string][]byte), ms: new(MyMarshaler)}, nil
 }
 
@@ -41,6 +43,7 @@ func (ms *MapStorage) Flush() error {
 func (ms *MapStorage) GetActivationPeriodsOrFallback(key string) (aps []*ActivationPeriod, fallbackKey string, err error) {
 	elem, ok := ms.dict[key]
 	if !ok {
+		err = errors.New(fmt.Sprintf("%s not found!", key))
 		return
 	}
 	err = ms.ms.Unmarshal(elem, &aps)

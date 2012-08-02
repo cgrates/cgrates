@@ -19,12 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"encoding/csv"
 	"flag"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
-	"os"
-	"strings"
 )
 
 var (
@@ -45,77 +42,22 @@ var (
 	sep              rune
 )
 
-func writeToDatabase() {
+func main() {
+	flag.Parse()
+	sep = []rune(*separator)[0]
+	csvr := &timespans.CSVReader{timespans.OpenFileCSVReader}
+	csvr.LoadDestinations(*destinationsFn, sep)
+	csvr.LoadRates(*ratesFn, sep)
+	csvr.LoadTimings(*timingsFn, sep)
+	csvr.LoadRateTimings(*ratetimingsFn, sep)
+	csvr.LoadRatingProfiles(*ratingprofilesFn, sep)
+	csvr.LoadActions(*actionsFn, sep)
+	csvr.LoadActionTimings(*actiontimingsFn, sep)
+	csvr.LoadActionTriggers(*actiontriggersFn, sep)
+	csvr.LoadAccountActions(*accountactionsFn, sep)
 	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb, *redispass)
 	if err != nil {
 		log.Fatalf("Could not open database connection: %v", err)
 	}
-	if *flush {
-		storage.Flush()
-	}
-	log.Print("Destinations")
-	for _, d := range destinations {
-		storage.SetDestination(d)
-		log.Print(d.Id, " : ", d.Prefixes)
-	}
-	log.Print("Rating profiles")
-	for _, cds := range ratingProfiles {
-		for _, cd := range cds {
-			err = storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
-			log.Print(cd.GetKey())
-		}
-	}
-	log.Print("Action timings")
-	for k, ats := range actionsTimings {
-		storage.SetActionTimings(timespans.ACTION_TIMING_PREFIX+":"+k, ats)
-		log.Println(k)
-	}
-	log.Print("Actions")
-	for k, as := range actions {
-		storage.SetActions(k, as)
-		log.Println(k)
-	}
-	log.Print("Account actions")
-	for _, ub := range accountActions {
-		storage.SetUserBalance(ub)
-		log.Println(ub.Id)
-	}
-}
-
-func openFileCSVReader(fn string) (csvReader *csv.Reader, fp *os.File, err error) {
-	fp, err = os.Open(fn)
-	if err != nil {
-		return
-	}
-	csvReader = csv.NewReader(fp)
-	csvReader.Comma = sep
-	csvReader.TrailingComma = true
-	return
-}
-
-func openStringCSVReader(data string) (csvReader *csv.Reader, fp *os.File, err error) {
-	csvReader = csv.NewReader(strings.NewReader(data))
-	csvReader.Comma = ','
-	csvReader.TrailingComma = true
-	return
-}
-
-type CSVReader struct {
-	readerFunc func(string) (*csv.Reader, *os.File, error)
-}
-
-func main() {
-	flag.Parse()
-	sep = []rune(*separator)[0]
-	csvr := &CSVReader{openFileCSVReader}
-	csvr.loadDestinations(*destinationsFn)
-	csvr.loadRates(*ratesFn)
-	csvr.loadTimings(*timingsFn)
-	csvr.loadRateTimings(*ratetimingsFn)
-	csvr.loadRatingProfiles(*ratingprofilesFn)
-	csvr.loadActions(*actionsFn)
-	csvr.loadActionTimings(*actiontimingsFn)
-	csvr.loadActionTriggers(*actiontriggersFn)
-	csvr.loadAccountActions(*accountactionsFn)
-	writeToDatabase()
+	timespans.WriteToDatabase(storage, *flush, true)
 }

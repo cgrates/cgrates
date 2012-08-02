@@ -16,10 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package main
+package timespans
 
 import (
-	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"strconv"
 )
@@ -61,10 +60,10 @@ func NewRate(destinationsTag, connectFee, price, pricedUnits, rateIncrements str
 }
 
 type Timing struct {
-	Years     timespans.Years
-	Months    timespans.Months
-	MonthDays timespans.MonthDays
-	WeekDays  timespans.WeekDays
+	Years     Years
+	Months    Months
+	MonthDays MonthDays
+	WeekDays  WeekDays
 	StartTime string
 }
 
@@ -98,8 +97,8 @@ func NewRateTiming(ratesTag string, timing *Timing, weight string) (rt *RateTimi
 	return
 }
 
-func (rt *RateTiming) GetInterval(r *Rate) (i *timespans.Interval) {
-	i = &timespans.Interval{
+func (rt *RateTiming) GetInterval(r *Rate) (i *Interval) {
+	i = &Interval{
 		Years:          rt.timing.Years,
 		Months:         rt.timing.Months,
 		MonthDays:      rt.timing.MonthDays,
@@ -114,9 +113,9 @@ func (rt *RateTiming) GetInterval(r *Rate) (i *timespans.Interval) {
 	return
 }
 
-type CallDescriptors []*timespans.CallDescriptor
+type CallDescriptors []*CallDescriptor
 
-func (cds CallDescriptors) getKey(key string) *timespans.CallDescriptor {
+func (cds CallDescriptors) getKey(key string) *CallDescriptor {
 	for _, cd := range cds {
 		if cd.GetKey() == key {
 			return cd

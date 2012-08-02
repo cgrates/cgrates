@@ -19,15 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	// "log"
+	// "log"	
 	"testing"
 	"time"
 )
-
-func init() {
-	sg, _ := NewRedisStorage("127.0.0.1:6379", 10, "")
-	SetStorageGetter(sg)
-}
 
 func TestSingleResultMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 00, 0, 0, time.UTC)

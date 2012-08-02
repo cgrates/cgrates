@@ -24,11 +24,6 @@ import (
 	"time"
 )
 
-func init() {
-	storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 10, "")
-	SetStorageGetter(storageGetter)
-}
-
 func TestActionTimingStoreRestore(t *testing.T) {
 	i := &Interval{
 		Months:         Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},

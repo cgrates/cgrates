@@ -42,8 +42,8 @@ const (
 )
 
 var (
-	storageGetter StorageGetter
-	Logger        LoggerInterface
+	storageGetter, _ = NewMapStorage()
+	Logger           LoggerInterface
 )
 
 /*
@@ -157,7 +157,7 @@ func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix s
 		recursionDepth++
 		return cd.getActivationPeriodsOrFallback(key, base, destPrefix, recursionDepth)
 	}
-	//get for a smaller prefix if the orignal one was not found		
+	//get for a smaller prefix if the orignal one was not found			
 	for i := len(cd.Destination); err != nil || fallbackKey != ""; {
 		if fallbackKey != "" {
 			base = fallbackKey + ":"
@@ -165,6 +165,7 @@ func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix s
 			recursionDepth++
 			return cd.getActivationPeriodsOrFallback(key, base, destPrefix, recursionDepth)
 		}
+
 		i--
 		if i >= MinPrefixLength {
 			destPrefix = cd.Destination[:i]

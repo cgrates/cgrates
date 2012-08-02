@@ -24,11 +24,6 @@ import (
 	"testing"
 )
 
-func init() {
-	sg, _ := NewRedisStorage("127.0.0.1:6379", 10, "")
-	SetStorageGetter(sg)
-}
-
 func TestDestinationStoreRestore(t *testing.T) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	s, _ := json.Marshal(nationale)

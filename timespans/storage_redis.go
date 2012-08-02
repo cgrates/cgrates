@@ -28,7 +28,7 @@ type RedisStorage struct {
 	ms   Marshaler
 }
 
-func NewRedisStorage(address string, db int, pass string) (*RedisStorage, error) {
+func NewRedisStorage(address string, db int, pass string) (StorageGetter, error) {
 	if address != "" {
 		address = "tcp:" + address
 	}

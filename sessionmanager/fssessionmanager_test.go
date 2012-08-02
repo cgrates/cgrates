@@ -23,7 +23,7 @@ import (
 	"testing"
 )
 
-func TestConnect(t *testing.T) {
+/*func TestConnect(t *testing.T) {
 	sm := &FSSessionManager{}
 	sm.Connect(&SessionDelegate{&timespans.Responder{}}, "localhost:8021", "ClueCon")
 	//for {
@@ -33,4 +33,4 @@ func TestConnect(t *testing.T) {
 	}
 	//log.Print(ev)
 	//}
-}
+}*/

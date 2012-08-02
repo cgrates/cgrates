@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package main
+package timespans
 
 import (
 	"testing"
@@ -25,6 +25,12 @@ import (
 var (
 	dest = `
 Tag,Prefix
+GERMANY,49
+GERMANY_O2,41
+GERMANY_PREMIUM,43
+ALL,49
+ALL,41
+ALL,43
 NAT,0256
 NAT,0257
 NAT,0723
@@ -32,6 +38,12 @@ RET,0723
 RET,0724
 `
 	rts = `
+RT_STANDARD,GERMANY,0,0.2,60,1
+RT_STANDARD,GERMANY_O2,0,0.1,60,1
+RT_STANDARD,GERMANY_PREMIUM,0,0.1,60,1
+RT_DEFAULT,ALL,0,0.1,60,1
+RT_STD_WEEKEND,GERMANY,0,0.1,60,1
+RT_STD_WEEKEND,GERMANY_O2,0,0.05,60,1
 P1,NAT,0,1,1,1
 P2,NAT,0,0.5,1,1
 `
@@ -42,11 +54,20 @@ WEEKENDS,*all,*all,*all,6;7,00:00:00
 ONE_TIME_RUN,2012,*none,*none,*none,*asap
 `
 	rtts = `
+STANDARD,RT_STANDARD,WORKDAYS_00,10
+STANDARD,RT_STD_WEEKEND,WORKDAYS_18,10
+STANDARD,RT_STD_WEEKEND,WEEKENDS,10
+PREMIUM,RT_STD_WEEKEND,WEEKENDS,10
+DEFAULT,RT_DEFAULT,WORKDAYS_00,10
 EVENING,P1,WORKDAYS_00,10
 EVENING,P2,WORKDAYS_18,10
 EVENING,P2,WEEKENDS,10
 `
 	rp = `
+CUSTOMER_1,0,OUT,rif:from:tm,danb,PREMIUM,2012-01-01T00:00:00Z
+CUSTOMER_1,0,OUT,rif:from:tm,danb,STANDARD,2012-02-28T00:00:00Z
+CUSTOMER_2,0,OUT,danb:87.139.12.167,danb,STANDARD,2012-01-01T00:00:00Z
+CUSTOMER_1,0,OUT,danb,,PREMIUM,2012-01-01T00:00:00Z
 vdf,0,OUT,rif,,EVENING,2012-01-01T00:00:00Z
 vdf,0,OUT,rif,,EVENING,2012-02-28T00:00:00Z
 vdf,0,OUT,minu,,EVENING,2012-01-01T00:00:00Z
@@ -67,73 +88,70 @@ vdf,minitsboy,OUT,MORE_MINUTES,STANDARD_TRIGGER
 `
 )
 
-func TestDestinations(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadDestinations(dest)
-	if len(destinations) != 2 {
+func init() {
+	csvr := &CSVReader{OpenStringCSVReader}
+	csvr.LoadDestinations(dest, ',')
+	csvr.LoadRates(rts, ',')
+	csvr.LoadTimings(ts, ',')
+	csvr.LoadRateTimings(rtts, ',')
+	csvr.LoadRatingProfiles(rp, ',')
+	csvr.LoadActions(a, ',')
+	csvr.LoadActionTimings(atms, ',')
+	csvr.LoadActionTriggers(atrs, ',')
+	csvr.LoadAccountActions(accs, ',')
+	WriteToDatabase(storageGetter, false, false)
+
+}
+
+func TestLoadDestinations(t *testing.T) {
+	if len(destinations) != 6 {
 		t.Error("Failed to load destinations: ", destinations)
 	}
 }
 
-func TestRates(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadRates(rts)
-	if len(rates) != 2 {
+func TestLoadRates(t *testing.T) {
+	if len(rates) != 5 {
 		t.Error("Failed to load rates: ", rates)
 	}
 }
 
-func TestTimimgs(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadTimings(ts)
+func TestLoadTimimgs(t *testing.T) {
 	if len(timings) != 4 {
 		t.Error("Failed to load timings: ", timings)
 	}
 }
 
-func TestRateTimings(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadRateTimings(rtts)
-	if len(activationPeriods) != 1 {
+func TestLoadRateTimings(t *testing.T) {
+	if len(activationPeriods) != 4 {
 		t.Error("Failed to load rate timings: ", activationPeriods)
 	}
 }
 
-func TestRatingProfiles(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadRatingProfiles(rp)
-	if len(ratingProfiles) != 4 {
-		t.Error("Failed to load rating profiles: ", ratingProfiles)
+func TestLoadRatingProfiles(t *testing.T) {
+	if len(ratingProfiles) != 7 {
+		t.Error("Failed to load rating profiles: ", len(ratingProfiles), ratingProfiles)
 	}
 }
 
-func TestActions(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadActions(a)
+func TestLoadActions(t *testing.T) {
 	if len(actions) != 1 {
 		t.Error("Failed to load actions: ", actions)
 	}
 }
 
-func TestActionTimings(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadActionTimings(atms)
+func TestLoadActionTimings(t *testing.T) {
 	if len(actionsTimings) != 1 {
 		t.Error("Failed to load action timings: ", actionsTimings)
 	}
 }
 
-func TestActionTriggers(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadActionTriggers(atrs)
+func TestLoadActionTriggers(t *testing.T) {
 	if len(actionsTriggers) != 1 {
 		t.Error("Failed to load action triggers: ", actionsTriggers)
 	}
 }
 
-func TestAccountActions(t *testing.T) {
-	csvr := &CSVReader{openStringCSVReader}
-	csvr.loadAccountActions(accs)
+func TestLoadAccountActions(t *testing.T) {
 	if len(accountActions) != 1 {
 		t.Error("Failed to load account actions: ", accountActions)
 	}
