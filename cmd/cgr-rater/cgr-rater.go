@@ -23,6 +23,7 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	_ "github.com/bmizerany/pq"
 	"github.com/cgrates/cgrates/balancer"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
