@@ -19,17 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"flag"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net/rpc"
+	//"net/rpc/jsonrpc"
 	"net/rpc/jsonrpc"
 	"time"
-	"flag"
 )
 
 var (
-	runs = flag.Int("runs", 10000, "stress cycle number")
-	json = flag.Bool("json", false, "use JSON for RPC encoding")
+	balancer = flag.String("balancer", "localhost:2001", "balancer server address")
+	runs     = flag.Int("runs", 10000, "stress cycle number")
+	parallel = flag.Bool("parallel", false, "run requests in parallel")
+	json     = flag.Bool("json", false, "use JSON for RPC encoding")
 )
 
 func main() {
@@ -48,14 +51,20 @@ func main() {
 	if err != nil {
 		log.Panic("Could not connect to rater: ", err)
 	}
-	i := 0
 	start := time.Now()
-	for j := 0; j < *runs; j++ {
-		client.Call("Responder.GetCost", cd, &result)
+	if *parallel {
+		var divCall *rpc.Call
+		for i := 0; i < *runs; i++ {
+			divCall = client.Go("Responder.GetCost", cd, &result, nil)
+		}
+		<-divCall.Done
+	} else {
+		for j := 0; j < *runs; j++ {
+			client.Call("Responder.GetCost", cd, &result)
+		}
 	}
 	duration := time.Since(start)
 	log.Println(result)
-	log.Println(i)
-	log.Printf("Elapsed: %v resulted: %v req/s.", duration, float64(*runs)/duration.Seconds())
 	client.Close()
+	log.Printf("Elapsed: %v resulted: %v req/s.", duration, float64(*runs)/duration.Seconds())
 }

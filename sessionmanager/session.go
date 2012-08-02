@@ -25,10 +25,6 @@ import (
 	"time"
 )
 
-var (
-	postgresLogger = NewPostgresLogger("gosqltest", "rif", "testus")
-)
-
 // Session type holding the call information fields, a session delegate for specific
 // actions and a channel to signal end of the debit loop.
 type Session struct {
@@ -113,13 +109,13 @@ func (s *Session) String() string {
 }
 
 // 
-func (s *Session) SaveMOperations() {
+func (s *Session) SaveOperations() {
 	go func() {
 		firstCC := s.CallCosts[0]
 		for _, cc := range s.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		postgresLogger.Log(s.uuid, firstCC)
+		s.sessionManager.GetDbLogger().Log(s.uuid, firstCC)
 		log.Print(firstCC)
 	}()
 }

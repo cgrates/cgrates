@@ -31,19 +31,15 @@ type PostgresLogger struct {
 	db *sql.DB
 }
 
-func NewPostgresLogger(dbName, user, pass string) *PostgresLogger {
-	db, err := sql.Open("postgres", fmt.Sprintf("dbname=%s user=%s password=%s sslmode=disable", dbName, user, pass))
-	if err != nil {
-		log.Printf("Failed to open the database: %v", err)
-	}
-	return &PostgresLogger{db}
-}
-
 func (psl *PostgresLogger) Close() {
 	psl.db.Close()
 }
 
 func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
+	if psl.db == nil {
+		timespans.Logger.Warning("Cannot write log to database.")
+		return
+	}
 	tss, err := json.Marshal(cc.Timespans)
 	if err != nil {
 		log.Printf("Error marshalling timespans to json: %v", err)
