@@ -42,7 +42,7 @@ const (
 )
 
 var (
-	config              = flag.String("config", "/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/conf/rater_standalone.config", "Configuration file location.")
+	config              = flag.String("config", "rater_standalone.config", "Configuration file location.")
 	redis_server        = "127.0.0.1:6379" // redis address host:port
 	redis_db            = 10               // redis database number
 	redis_pass          = ""
@@ -89,12 +89,12 @@ func readConfig(c *conf.ConfigFile) {
 	redis_server, _ = c.GetString("global", "redis_server")
 	redis_db, _ = c.GetInt("global", "redis_db")
 	redis_pass, _ = c.GetString("global", "redis_pass")
-	logging_db_type, _ = c.GetString("global", "db_type")
-	logging_db_host, _ = c.GetString("global", "db_host")
-	logging_db_port, _ = c.GetString("global", "db_port")
-	logging_db_db, _ = c.GetString("global", "db_name")
-	logging_db_user, _ = c.GetString("global", "db_user")
-	logging_db_password, _ = c.GetString("global", "db_passwd")
+	logging_db_type, _ = c.GetString("global", "logdb_type")
+	logging_db_host, _ = c.GetString("global", "logdb_host")
+	logging_db_port, _ = c.GetString("global", "logdb_port")
+	logging_db_db, _ = c.GetString("global", "logdb_name")
+	logging_db_user, _ = c.GetString("global", "logdb_user")
+	logging_db_password, _ = c.GetString("global", "logdb_passwd")
 
 	rater_enabled, _ = c.GetBool("rater", "enabled")
 	rater_balancer, _ = c.GetString("rater", "balancer")

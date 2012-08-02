@@ -30,12 +30,12 @@ const (
 redis_server = test #redis address host:port
 redis_db = 1 # redis database number
 redis_pass = test
-db_type = test # 
-db_host = test # The host to connect to. Values that start with / are for UNIX domain sockets.
-db_port = test # The port to bind to.
-db_name = test # The name of the database to connect to.
-db_user =  test # The user to sign in as.
-db_passwd =  test # The user's password.root
+logdb_type = test # 
+logdb_host = test # The host to connect to. Values that start with / are for UNIX domain sockets.
+logdb_port = test # The port to bind to.
+logdb_name = test # The name of the database to connect to.
+logdb_user =  test # The user to sign in as.
+logdb_passwd =  test # The user's password.root
 
 [balancer]
 enabled = true # Start balancer server
