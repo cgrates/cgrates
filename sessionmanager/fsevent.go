@@ -39,7 +39,7 @@ const (
 	CALL_DIRECTION = "Call-Direction"
 	ORIG_ID        = "variable_sip_call_id" //- originator_id - match cdrs
 	SUBJECT        = "variable_cgr_subject"
-	ACCOUNT        = ""
+	ACCOUNT        = "variable_cgr_account"
 	DESTINATION    = "variable_cgr_destination"
 	TOR            = "variable_cgr_tor"
 	UUID           = "Unique-ID" // -Unique ID for this call leg
