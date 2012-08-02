@@ -22,10 +22,6 @@ import (
 	"github.com/simonz05/godis"
 )
 
-const (
-	ACTION_TIMING_PREFIX = "acttmg"
-)
-
 type RedisStorage struct {
 	dbNb int
 	db   *godis.Client

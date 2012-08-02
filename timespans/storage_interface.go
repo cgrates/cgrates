@@ -27,6 +27,10 @@ import (
 	"strings"
 )
 
+const (
+	ACTION_TIMING_PREFIX = "acttmg"
+)
+
 /*
 Interface for storage providers.
 */
