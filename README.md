@@ -16,7 +16,6 @@ Browsable HTML http://readthedocs.org/docs/cgrates/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
-API reference http://gopkgdoc.appspot.com/pkg/github.com/cgrates/cgrates/timespans
-
+API reference http://gopkgdoc.appspot.com/pkg/github.com/cgrates/cgrates
 
 Current build status: [![build](http://goci.me/project/image/github.com/cgrates/cgrates "Continous integration")](http://goci.me/project/github.com/cgrates/cgrates)
