@@ -111,7 +111,7 @@ func (s *Session) String() string {
 // 
 func (s *Session) SaveOperations() {
 	go func() {
-		if len(s.CallCosts) == 0 {
+		if s == nil || len(s.CallCosts) == 0 {
 			return
 		}
 		firstCC := s.CallCosts[0]
