@@ -72,6 +72,8 @@ func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {
 }
 
 func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
+	log.Print(s)
+	log.Print(s.CallCosts)
 	if len(s.CallCosts) == 0 {
 		return // why would we have 0 callcosts
 	}
