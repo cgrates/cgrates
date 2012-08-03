@@ -139,8 +139,10 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	if sm.sessionDelegate != nil {
 		s := NewSession(ev, sm)
-		sm.sessions = append(sm.sessions, s)
-		sm.sessionDelegate.OnChannelAnswer(ev, s)
+		if s != nil {
+			sm.sessions = append(sm.sessions, s)
+			sm.sessionDelegate.OnChannelAnswer(ev, s)
+		}
 	} else {
 		log.Print("answer")
 	}

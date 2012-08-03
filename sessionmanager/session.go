@@ -23,6 +23,7 @@ import (
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"time"
+	"strings"
 )
 
 // Session type holding the call information fields, a session delegate for specific
@@ -41,6 +42,10 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	if err != nil {
 		log.Print("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
+	}
+	// if there is no account configured leave the call alone
+	if strings.TrimSpace(ev.GetAccount()) == "" {
+		return nil
 	}
 	cd := &timespans.CallDescriptor{
 		Direction:   ev.GetDirection(),
