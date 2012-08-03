@@ -31,6 +31,7 @@ var (
 "FreeSWITCH-Switchname":	"grace",
 "FreeSWITCH-IPv4":	"172.17.77.126",
 "variable_sip_full_from":	"rif",
+"variable_cgr_account":	"rif",
 "variable_sip_full_to":	"0723045326",
 "Caller-Dialplan":	"vdf",
 "FreeSWITCH-IPv6":	"::1",
@@ -59,5 +60,14 @@ func TestSessionDurationSingle(t *testing.T) {
 	twoSeconds, _ := time.ParseDuration("2s")
 	if d := s.getSessionDurationFrom(s.callDescriptor.TimeStart.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
 		t.Errorf("Wrong session duration %v", d)
+	}
+}
+
+func TestSessionNilSession(t *testing.T) {
+	newEvent := new(FSEvent).New("")
+	sm := &FSSessionManager{}
+	s := NewSession(newEvent, sm)
+	if s != nil {
+		t.Error("no account and it still created session.")
 	}
 }

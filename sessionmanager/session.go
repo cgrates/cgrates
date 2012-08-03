@@ -99,6 +99,9 @@ func (s *Session) GetSessionDuration() time.Duration {
 
 // Stops the debit loop
 func (s *Session) Close() {
+	if s == nil {
+		return
+	}
 	s.stopDebit <- 1
 	s.callDescriptor.TimeEnd = time.Now()
 }
