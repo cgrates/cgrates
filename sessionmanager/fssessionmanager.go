@@ -35,38 +35,41 @@ type FSSessionManager struct {
 	sessions        []*Session
 	sessionDelegate *SessionDelegate
 	postgresLogger  *PostgresLogger
-	address, pass string
-	keepRunning bool
+	address, pass   string
 }
 
 func NewFSSessionManager(db *sql.DB) *FSSessionManager {
-	return &FSSessionManager{postgresLogger: &PostgresLogger{db}, keepRunning: true}
+	return &FSSessionManager{postgresLogger: &PostgresLogger{db}}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events in json format.
-func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) error {
+func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string)  {
 	if ed == nil {
 		log.Fatal("Please provide a non nil SessionDelegate")
 	}
 	sm.sessionDelegate = ed
 	sm.address = address
 	sm.pass = pass
+	if sm.conn != nil {
+		// in case it is a reconnect
+		sm.conn.Close()
+	}
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		log.Print("Could not connect to freeswitch server!")
-		return err
+		return
 	}
+	log.Print("Successfuly connected to freeswitch! ")
 	sm.conn = conn
 	sm.buf = bufio.NewReaderSize(conn, 8192)
 	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
 	fmt.Fprint(conn, "event json all\n\n")
 	go func() {
-		for sm.keepRunning {
+		for {
 			sm.readNextEvent()
 		}
 	}()
-	return nil
 }
 
 // Reads from freeswitch server buffer until it encounters a '}',
@@ -77,13 +80,9 @@ func (sm *FSSessionManager) readNextEvent() (ev Event) {
 	if err != nil {
 		log.Print("Could not read from freeswitch connection!")
 		// wait until a sec
-		time.Sleep(5 * time.Second)		
+		time.Sleep(5 * time.Second)
 		// try to reconnect
-		err := sm.Connect(sm.sessionDelegate, sm.address, sm.pass)
-		if err == nil {
-		    // the recconection was sucesfull you can stop trying
-    		sm.keepRunning = false
-		}
+		sm.Connect(sm.sessionDelegate, sm.address, sm.pass)
 	}
 	ev = new(FSEvent).New(body)
 	switch ev.GetName() {
