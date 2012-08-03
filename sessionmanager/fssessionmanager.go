@@ -36,6 +36,7 @@ type FSSessionManager struct {
 	sessionDelegate *SessionDelegate
 	postgresLogger  *PostgresLogger
 	address, pass   string
+	delayFunc       func() int
 }
 
 func NewFSSessionManager(db *sql.DB) *FSSessionManager {
@@ -44,7 +45,7 @@ func NewFSSessionManager(db *sql.DB) *FSSessionManager {
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events in json format.
-func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string)  {
+func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) error {
 	if ed == nil {
 		log.Fatal("Please provide a non nil SessionDelegate")
 	}
@@ -58,31 +59,42 @@ func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string)  
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		log.Print("Could not connect to freeswitch server!")
-		return
+		return nil
 	}
-	log.Print("Successfuly connected to freeswitch! ")
 	sm.conn = conn
 	sm.buf = bufio.NewReaderSize(conn, 8192)
 	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
 	fmt.Fprint(conn, "event json all\n\n")
 	go func() {
+		sm.delayFunc = fib()
+		exitChan := make(chan bool)
 		for {
-			sm.readNextEvent()
+			select {
+			case <-exitChan:
+				break
+			default:
+				sm.readNextEvent(exitChan)
+			}
 		}
 	}()
+	return nil
 }
 
 // Reads from freeswitch server buffer until it encounters a '}',
 // than it creates an event object and calls the appropriate method
 // on the session delegate.
-func (sm *FSSessionManager) readNextEvent() (ev Event) {
+func (sm *FSSessionManager) readNextEvent(exitChan chan bool) (ev Event) {
 	body, err := sm.buf.ReadString('}')
 	if err != nil {
 		log.Print("Could not read from freeswitch connection!")
 		// wait until a sec
-		time.Sleep(5 * time.Second)
+		time.Sleep(time.Duration(sm.delayFunc()) * time.Second)
 		// try to reconnect
-		sm.Connect(sm.sessionDelegate, sm.address, sm.pass)
+		err = sm.Connect(sm.sessionDelegate, sm.address, sm.pass)
+		if err == nil {
+			log.Print("Successfuly reconnected to freeswitch! ")
+			exitChan <- true
+		}
 	}
 	ev = new(FSEvent).New(body)
 	switch ev.GetName() {
@@ -161,4 +173,13 @@ func (sm *FSSessionManager) GetSessionDelegate() *SessionDelegate {
 
 func (sm *FSSessionManager) GetDbLogger() *PostgresLogger {
 	return sm.postgresLogger
+}
+
+// successive Fibonacci numbers.
+func fib() func() int {
+	a, b := 0, 1
+	return func() int {
+		a, b = b, a+b
+		return a
+	}
 }
