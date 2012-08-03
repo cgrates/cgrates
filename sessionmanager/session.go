@@ -111,6 +111,9 @@ func (s *Session) String() string {
 // 
 func (s *Session) SaveOperations() {
 	go func() {
+		if len(s.CallCosts) == 0 {
+			return
+		}
 		firstCC := s.CallCosts[0]
 		for _, cc := range s.CallCosts[1:] {
 			firstCC.Merge(cc)
