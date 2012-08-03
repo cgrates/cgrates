@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"github.com/cgrates/cgrates/timespans"
-	"testing"
+// "github.com/cgrates/cgrates/timespans"
+// "testing"
 )
 
 /*func TestConnect(t *testing.T) {
