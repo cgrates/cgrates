@@ -59,7 +59,7 @@ func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) e
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		log.Print("Could not connect to freeswitch server!")
-		return nil
+		return err
 	}
 	sm.conn = conn
 	sm.buf = bufio.NewReaderSize(conn, 8192)
