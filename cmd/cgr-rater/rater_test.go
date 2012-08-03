@@ -161,6 +161,30 @@ func TestConfig(t *testing.T) {
 	}
 }*/
 
+func TestVarReset(t *testing.T) {
+	c, err := conf.ReadConfigBytes([]byte(configText))
+	if err != nil {
+		t.Log("Could not parse configuration!")
+		t.FailNow()
+	}
+	myString := "default"
+	myString, err = c.GetString("default", "non_existing")
+	if err == nil {
+		t.Error("Reding non exitsing variable did not issue error!")
+	}
+	if myString != "" {
+	    t.Error("Variable has not been reseted")
+	}
+	myBool := true
+	myBool, err = c.GetBool("default", "non_existing")
+	if err == nil {
+		t.Error("Reding non exitsing variable did not issue error!")
+	}
+	if myBool {
+	    t.Error("Variable has not been reseted")
+	}
+}
+
 func BenchmarkRPCGet(b *testing.B) {
 	b.StopTimer()
 	client, _ := rpc.DialHTTPPath("tcp", "localhost:2000", "/rpc")

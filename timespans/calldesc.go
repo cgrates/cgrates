@@ -339,7 +339,8 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost %v", err))
+		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetKey(), err))
+		return
 	}
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)

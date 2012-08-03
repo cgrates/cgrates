@@ -27,9 +27,9 @@ import (
 )
 
 var (
-	timer       *time.Timer
+	sched = new(scheduler)
+	timer *time.Timer
 	restartLoop = make(chan byte)
-	s           = scheduler{}
 )
 
 type scheduler struct {
@@ -47,9 +47,9 @@ func (s scheduler) loop() {
 			log.Printf("%v - %v", a0.Tag, a0.Timing)
 			log.Print(a0.GetNextStartTime(), now)
 			go a0.Execute()
-			s.queue = append(s.queue, a0)
-			s.queue = s.queue[1:]
-			sort.Sort(s.queue)
+			sched.queue = append(s.queue, a0)
+			sched.queue = s.queue[1:]
+			sort.Sort(sched.queue)
 		} else {
 			d := a0.GetNextStartTime().Sub(now)
 			log.Printf("Timer set to wait for %v", d)
@@ -72,17 +72,17 @@ func loadActionTimings(storage timespans.StorageGetter) {
 		timespans.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
 	}
 	// recreate the queue
-	s.queue = timespans.ActionTimingPriotityList{}
+	sched.queue = timespans.ActionTimingPriotityList{}
 	for key, ats := range actionTimings {
 		toBeSaved := false
 		for _, at := range ats {
 			asapFound := at.CheckForASAP()
 			toBeSaved = toBeSaved || asapFound
-			s.queue = append(s.queue, at)
+			sched.queue = append(sched.queue, at)
 		}
 		if toBeSaved {
 			storage.SetActionTimings(key, ats)
 		}
 	}
-	sort.Sort(s.queue)
+	sort.Sort(sched.queue)
 }

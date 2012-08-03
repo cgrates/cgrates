@@ -85,8 +85,8 @@ var (
 	exitChan = make(chan bool)
 )
 
+// this function will reset to zero values the variables that are not present
 func readConfig(c *conf.ConfigFile) {
-
 	redis_server, _ = c.GetString("global", "redis_server")
 	redis_db, _ = c.GetInt("global", "redis_db")
 	redis_pass, _ = c.GetString("global", "redis_pass")
@@ -256,10 +256,6 @@ func main() {
 		}
 	}
 
-	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("failed to open the database: %v", err))
-	}
-
 	if rater_enabled && rater_balancer != DISABLED && !balancer_enabled {
 		go registerToBalancer()
 		go stopRaterSingnalHandler()
@@ -285,7 +281,7 @@ func main() {
 		go func() {
 			loadActionTimings(getter)
 			go reloadSchedulerSingnalHandler(getter)
-			s.loop()
+			sched.loop()
 		}()
 	}
 
