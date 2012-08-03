@@ -150,6 +150,7 @@ func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor)
 	err := rsd.Connector.Debit(*cd, cc)
 	if err != nil {
 		log.Printf("Could not complete debit opperation: %v", err)
+		// disconnect session
 		s.sessionManager.DisconnectSession(s)
 	}
 	s.CallCosts = append(s.CallCosts, cc)
