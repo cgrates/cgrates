@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/balancer"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
+	"io"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -142,7 +143,12 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 
 	timespans.Logger.Info(fmt.Sprintf("Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
-
+	var serveFunc func(io.ReadWriteCloser)
+	if rpc_encoding == JSON {
+		serveFunc = jsonrpc.ServeConn
+	} else {
+		serveFunc = rpc.ServeConn
+	}
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -151,13 +157,7 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 		}
 
 		timespans.Logger.Info(fmt.Sprintf("connection started: %v", conn.RemoteAddr()))
-		if rpc_encoding == JSON {
-			// log.Print("json encoding")
-			go jsonrpc.ServeConn(conn)
-		} else {
-			// log.Print("gob encoding")
-			go rpc.ServeConn(conn)
-		}
+		go serveFunc(conn)
 	}
 }
 
