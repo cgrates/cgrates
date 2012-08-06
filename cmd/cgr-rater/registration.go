@@ -20,9 +20,7 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/cgrates/cgrates/timespans"
-	"log"
 	"net/rpc"
 	"os"
 	"os/signal"
@@ -33,12 +31,12 @@ import (
 Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered raters.
 */
 func stopBalancerSingnalHandler() {
-	log.Print("Handling stop signals...")
+	timespans.Logger.Info("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
 	sig := <-c
-	log.Printf("Caught signal %v, sending shutdownto raters\n", sig)
+	timespans.Logger.Info(fmt.Sprintf("Caught signal %v, sending shutdownto raters\n", sig))
 	bal.Shutdown()
 	exitChan <- true
 }
@@ -47,12 +45,12 @@ func stopBalancerSingnalHandler() {
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from balancer and closes the storage before exiting.
 */
 func stopRaterSingnalHandler() {
-	log.Print("Handling stop signals...")
+	timespans.Logger.Info("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	sig := <-c
 
-	log.Printf("Caught signal %v, unregistering from balancer\n", sig)
+	timespans.Logger.Info(fmt.Sprintf("Caught signal %v, unregistering from balancer\n", sig))
 	unregisterFromBalancer()
 	exitChan <- true
 }
@@ -63,15 +61,15 @@ Connects to the balancer and calls unregister RPC method.
 func unregisterFromBalancer() {
 	client, err := rpc.Dial("tcp", rater_balancer)
 	if err != nil {
-		log.Print("Cannot contact the balancer!")
+		timespans.Logger.Crit("Cannot contact the balancer!")
 		exitChan <- true
 		return
 	}
 	var reply int
-	log.Print("Unregistering from balancer ", rater_balancer)
+	timespans.Logger.Info(fmt.Sprintf("Unregistering from balancer ", rater_balancer))
 	client.Call("Responder.UnRegisterRater", rater_listen, &reply)
 	if err := client.Close(); err != nil {
-		log.Print("Could not close balancer unregistration!")
+		timespans.Logger.Crit("Could not close balancer unregistration!")
 		exitChan <- true
 	}
 }
@@ -82,18 +80,18 @@ Connects to the balancer and rehisters the rater to the server.
 func registerToBalancer() {
 	client, err := rpc.Dial("tcp", rater_balancer)
 	if err != nil {
-		log.Print("Cannot contact the balancer!", err)
+		timespans.Logger.Crit(fmt.Sprintf("Cannot contact the balancer!", err))
 		exitChan <- true
 		return
 	}
 	var reply int
-	log.Print("Registering to balancer ", rater_balancer)
+	timespans.Logger.Info(fmt.Sprintf("Registering to balancer ", rater_balancer))
 	client.Call("Responder.RegisterRater", rater_listen, &reply)
 	if err := client.Close(); err != nil {
-		log.Print("Could not close balancer registration!")
+		timespans.Logger.Crit("Could not close balancer registration!")
 		exitChan <- true
 	}
-	log.Print("Registration finished!")
+	timespans.Logger.Info("Registration finished!")
 }
 
 // Listens for the HUP system signal and gracefuly reloads the timers from database.

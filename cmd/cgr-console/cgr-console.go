@@ -22,7 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
-	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -53,17 +52,20 @@ func main() {
 		client, err = rpc.Dial("tcp", *server)
 	}
 	if err != nil {
-		log.Fatal("Could not connect to server " + *server)
+		timespans.Logger.Crit(fmt.Sprintf("Could not connect to server " + *server))
+		os.Exit(1)
 	}
 	defer client.Close()
 
 	timestart, err := time.Parse(time.RFC3339, *start)
 	if err != nil {
-		log.Fatal("Time start format is invalid: ", err)
+		timespans.Logger.Crit(fmt.Sprintf("Time start format is invalid: ", err))
+		os.Exit(2)
 	}
 	timeend, err := time.Parse(time.RFC3339, *end)
 	if err != nil {
-		log.Fatal("Time end format is invalid: ", err)
+		timespans.Logger.Crit(fmt.Sprintf("Time end format is invalid: ", err))
+		os.Exit(3)
 	}
 
 	cd := &timespans.CallDescriptor{
@@ -137,7 +139,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 	if err != nil {
-		log.Print(err)
+		timespans.Logger.Crit(err.Error())
 		os.Exit(1)
 	}
 }

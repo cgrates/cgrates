@@ -28,7 +28,6 @@ import (
 	_ "github.com/bmizerany/pq"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
-	"log"
 	"os"
 	"time"
 )
@@ -48,7 +47,8 @@ func (m *Mediator) parseCSV() {
 	file, err := os.Open(mediator_cdr_file)
 	defer file.Close()
 	if err != nil {
-		log.Fatal(err)
+		timespans.Logger.Crit(err.Error())
+		os.Exit(1)
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
 

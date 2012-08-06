@@ -67,7 +67,7 @@ Returns user's available minutes for the specified destination
 */
 func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float64, bucketList bucketsorter) {
 	if len(ub.MinuteBuckets) == 0 {
-		// log.Print("There are no minute buckets to check for user: ", ub.Id)
+		// Logger.Debug("There are no minute buckets to check for user: ", ub.Id)
 		return
 	}
 	for _, mb := range ub.MinuteBuckets {

@@ -21,14 +21,13 @@ package main
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
-	"log"
 	"sort"
 	"time"
 )
 
 var (
-	sched = new(scheduler)
-	timer *time.Timer
+	sched       = new(scheduler)
+	timer       *time.Timer
 	restartLoop = make(chan byte)
 )
 
@@ -44,20 +43,19 @@ func (s scheduler) loop() {
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
-			log.Printf("%v - %v", a0.Tag, a0.Timing)
-			log.Print(a0.GetNextStartTime(), now)
+			timespans.Logger.Debug(fmt.Sprintf("%v - %v", a0.Tag, a0.Timing))
 			go a0.Execute()
 			sched.queue = append(s.queue, a0)
 			sched.queue = s.queue[1:]
 			sort.Sort(sched.queue)
 		} else {
 			d := a0.GetNextStartTime().Sub(now)
-			log.Printf("Timer set to wait for %v", d)
+			timespans.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
 			timer = time.NewTimer(d)
 			select {
 			case <-timer.C:
 				// timer has expired
-				log.Printf("Time for action on %v", s.queue[0])
+				timespans.Logger.Info(fmt.Sprintf("Time for action on %v", s.queue[0]))
 			case <-restartLoop:
 				// nothing to do, just continue the loop
 			}

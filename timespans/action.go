@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"log"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -56,7 +56,7 @@ var (
 )
 
 func logAction(ub *UserBalance, a *Action) (err error) {
-	log.Printf("%v %v %v", a.BalanceId, a.Units, a.MinuteBucket)
+	Logger.Info(fmt.Sprintf("%v %v %v", a.BalanceId, a.Units, a.MinuteBucket))
 	return
 }
 

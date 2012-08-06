@@ -19,8 +19,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/cgrates/cgrates/timespans"
 	"html/template"
-	"log"
 	"net/http"
 	"runtime"
 )
@@ -32,7 +33,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	if t, err := template.ParseFiles("templates/base.html", "templates/status.html"); err == nil {
 		t.Execute(w, bal.GetClientAddresses())
 	} else {
-		log.Print("Error rendering status: ", err)
+		timespans.Logger.Err(fmt.Sprintf("Error rendering status: ", err))
 	}
 }
 

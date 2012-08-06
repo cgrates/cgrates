@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"log"
+	"fmt"
 	"strconv"
 )
 
@@ -31,22 +31,22 @@ type Rate struct {
 func NewRate(destinationsTag, connectFee, price, pricedUnits, rateIncrements string) (r *Rate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
-		log.Printf("Error parsing connect fee from: %v", connectFee)
+		Logger.Err(fmt.Sprintf("Error parsing connect fee from: %v", connectFee))
 		return
 	}
 	p, err := strconv.ParseFloat(price, 64)
 	if err != nil {
-		log.Printf("Error parsing price from: %v", price)
+		Logger.Err(fmt.Sprintf("Error parsing price from: %v", price))
 		return
 	}
 	pu, err := strconv.ParseFloat(pricedUnits, 64)
 	if err != nil {
-		log.Printf("Error parsing priced units from: %v", pricedUnits)
+		Logger.Err(fmt.Sprintf("Error parsing priced units from: %v", pricedUnits))
 		return
 	}
 	ri, err := strconv.ParseFloat(rateIncrements, 64)
 	if err != nil {
-		log.Printf("Error parsing rates increments from: %v", rateIncrements)
+		Logger.Err(fmt.Sprintf("Error parsing rates increments from: %v", rateIncrements))
 		return
 	}
 	r = &Rate{
@@ -86,7 +86,7 @@ type RateTiming struct {
 func NewRateTiming(ratesTag string, timing *Timing, weight string) (rt *RateTiming) {
 	w, err := strconv.ParseFloat(weight, 64)
 	if err != nil {
-		log.Printf("Error parsing weight unit from: %v", weight)
+		Logger.Err(fmt.Sprintf("Error parsing weight unit from: %v", weight))
 		return
 	}
 	rt = &RateTiming{

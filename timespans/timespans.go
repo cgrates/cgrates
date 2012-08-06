@@ -20,7 +20,6 @@ package timespans
 
 import (
 	"fmt"
-	//"log"
 	"math"
 	"time"
 )
@@ -108,21 +107,21 @@ a new timespan starting from the end of the received one.
 The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
-	//log.Print("here: ", ts, " +++ ", i)
+	//Logger.Debug("here: ", ts, " +++ ", i)
 	// if the span is not in interval return nil	
 	if !(i.Contains(ts.TimeStart) || i.Contains(ts.TimeEnd)) {
-		//log.Print("Not in interval")
+		//Logger.Debug("Not in interval")
 		return
 	}
 	// if the span is enclosed in the interval try to set as new interval and return nil
 	if i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd) {
-		//log.Print("All in interval")
+		//Logger.Debug("All in interval")
 		ts.SetInterval(i)
 		return
 	}
 	// if only the start time is in the interval split the interval
 	if i.Contains(ts.TimeStart) {
-		//log.Print("Start in interval")
+		//Logger.Debug("Start in interval")
 		splitTime := i.getRightMargin(ts.TimeStart)
 		ts.SetInterval(i)
 		if splitTime == ts.TimeStart {
@@ -135,7 +134,7 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 	}
 	// if only the end time is in the interval split the interval
 	if i.Contains(ts.TimeEnd) {
-		//log.Print("End in interval")
+		//Logger.Debug("End in interval")
 		splitTime := i.getLeftMargin(ts.TimeEnd)
 		if splitTime == ts.TimeEnd {
 			return

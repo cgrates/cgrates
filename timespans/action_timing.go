@@ -22,7 +22,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -62,7 +61,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		var err error
 		t, err = time.Parse(FORMAT, l)
 		if err != nil {
-			log.Printf("Cannot parse action timing's StartTime %v", l)
+			Logger.Err(fmt.Sprintf("Cannot parse action timing's StartTime %v", l))
 			at.stCache = t
 			return
 		}
@@ -198,7 +197,7 @@ func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
 	for _, ubId := range at.UserBalanceIds {
 		ub, err := storageGetter.GetUserBalance(ubId)
 		if err != nil {
-			log.Printf("Could not get user balances for therse id: %v. Skipping!", ubId)
+			Logger.Warning(fmt.Sprintf("Could not get user balances for therse id: %v. Skipping!", ubId))
 		}
 		ubs = append(ubs, ub)
 	}
@@ -209,13 +208,13 @@ func (at *ActionTiming) Execute() (err error) {
 	at.resetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
-		log.Print("Failed to get actions: ", err)
+		Logger.Err(fmt.Sprintf("Failed to get actions: ", err))
 		return
 	}
 	for _, a := range aac {
 		actionFunction, exists := actionTypeFuncMap[a.ActionType]
 		if !exists {
-			log.Printf("Function type %v not available, aborting execution!", a.ActionType)
+			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
 		for _, ub := range at.getUserBalances() {

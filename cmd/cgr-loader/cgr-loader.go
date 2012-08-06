@@ -20,8 +20,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/cgrates/cgrates/timespans"
-	"log"
+	"os"
 )
 
 var (
@@ -57,7 +58,8 @@ func main() {
 	csvr.LoadAccountActions(*accountactionsFn, sep)
 	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb, *redispass)
 	if err != nil {
-		log.Fatalf("Could not open database connection: %v", err)
+		timespans.Logger.Crit(fmt.Sprintf("Could not open database connection: %v", err))
+		os.Exit(1)
 	}
 	csvr.WriteToDatabase(storage, *flush, true)
 }

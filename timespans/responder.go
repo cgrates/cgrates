@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/balancer"
-	"log"
 	"net/rpc"
 	"reflect"
 	"runtime"
@@ -132,7 +131,6 @@ func (rs *Responder) Status(arg string, reply *string) (err error) {
 
 		*reply = "Connected raters:\n"
 		for _, rater := range rs.Bal.GetClientAddresses() {
-			log.Print(rater)
 			*reply += fmt.Sprintf("%v\n", rater)
 		}
 		*reply += fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
@@ -160,7 +158,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 	for err != nil {
 		client := rs.Bal.Balance()
 		if client == nil {
-			log.Print("Waiting for raters to register...")
+			Logger.Info("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			reply = &CallCost{}
@@ -169,7 +167,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 				return reply, err
 			})
 			if err != nil {
-				log.Printf("Got en error from rater: %v", err)
+				Logger.Err(fmt.Sprintf("Got en error from rater: %v", err))
 			}
 		}
 	}
@@ -184,7 +182,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 	for err != nil {
 		client := rs.Bal.Balance()
 		if client == nil {
-			log.Print("Waiting for raters to register...")
+			Logger.Info("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			reply, err = AccLock.Guard(key.GetUserBalanceKey(), func() (float64, error) {
@@ -192,7 +190,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 				return reply, err
 			})
 			if err != nil {
-				log.Printf("Got en error from rater: %v", err)
+				Logger.Info(fmt.Sprintf("Got en error from rater: %v", err))
 			}
 		}
 	}
@@ -203,15 +201,15 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 RPC method that receives a rater address, connects to it and ads the pair to the rater list for balancing
 */
 func (rs *Responder) RegisterRater(clientAddress string, replay *int) error {
-	log.Printf("Started rater %v registration...", clientAddress)
+	Logger.Info(fmt.Sprintf("Started rater %v registration...", clientAddress))
 	time.Sleep(2 * time.Second) // wait a second for Rater to start serving
 	client, err := rpc.Dial("tcp", clientAddress)
 	if err != nil {
-		log.Print("Could not connect to client!")
+		Logger.Err("Could not connect to client!")
 		return err
 	}
 	rs.Bal.AddClient(clientAddress, client)
-	log.Printf("Rater %v registered succesfully.", clientAddress)
+	Logger.Info(fmt.Sprintf("Rater %v registered succesfully.", clientAddress))
 	return nil
 }
 
@@ -223,9 +221,9 @@ func (rs *Responder) UnRegisterRater(clientAddress string, replay *int) error {
 	if ok {
 		client.Close()
 		rs.Bal.RemoveClient(clientAddress)
-		log.Print(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))
+		Logger.Info(fmt.Sprintf("Rater %v unregistered succesfully.", clientAddress))
 	} else {
-		log.Print(fmt.Sprintf("Server %v was not on my watch!", clientAddress))
+		Logger.Info(fmt.Sprintf("Server %v was not on my watch!", clientAddress))
 	}
 	return nil
 }

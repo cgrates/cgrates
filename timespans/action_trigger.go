@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"log"
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
@@ -41,13 +41,13 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	aac, err = storageGetter.GetActions(at.ActionsId)
 	aac.Sort()
 	if err != nil {
-		log.Print("Failed to get actions: ", err)
+		Logger.Err(fmt.Sprintf("Failed to get actions: ", err))
 		return
 	}
 	for _, a := range aac {
 		actionFunction, exists := actionTypeFuncMap[a.ActionType]
 		if !exists {
-			log.Printf("Function type %v not available, aborting execution!", a.ActionType)
+			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
 		err = actionFunction(ub, a)

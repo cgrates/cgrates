@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"log"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -54,7 +54,7 @@ func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
 	for _, mb := range uc.MinuteBuckets {
 		d, err := GetDestination(mb.DestinationId)
 		if err != nil {
-			log.Print("Minutes counter: unknown destination: ", mb.DestinationId)
+			Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: ", mb.DestinationId))
 			continue
 		}
 		if ok, _ := d.containsPrefix(prefix); ok {
