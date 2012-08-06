@@ -25,18 +25,21 @@ import (
 	"net/rpc"
 	//"net/rpc/jsonrpc"
 	"net/rpc/jsonrpc"
+	"runtime"
 	"time"
 )
 
 var (
 	balancer = flag.String("balancer", "localhost:2001", "balancer server address")
 	runs     = flag.Int("runs", 10000, "stress cycle number")
-	parallel = flag.Bool("parallel", false, "run requests in parallel")
+	parallel = flag.Int("parallel", 0, "run n requests in parallel")
 	json     = flag.Bool("json", false, "use JSON for RPC encoding")
 )
 
 func main() {
 	flag.Parse()
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := timespans.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
@@ -44,20 +47,31 @@ func main() {
 	var client *rpc.Client
 	var err error
 	if *json {
-		client, err = jsonrpc.Dial("tcp", "localhost:1234")
+		client, err = jsonrpc.Dial("tcp", *balancer)
 	} else {
-		client, err = rpc.Dial("tcp", "localhost:1234")
+		client, err = rpc.Dial("tcp", *balancer)
 	}
 	if err != nil {
-		log.Panic("Could not connect to rater: ", err)
+		log.Fatal("Could not connect to rater: ", err)
 	}
 	start := time.Now()
-	if *parallel {
-		var divCall *rpc.Call
+	if *parallel > 0 {
+		// var divCall *rpc.Call
+		var sem = make(chan int, *parallel)
+		var finish = make(chan int)
 		for i := 0; i < *runs; i++ {
-			divCall = client.Go("Responder.GetCost", cd, &result, nil)
+			go func() {
+				sem <- 1
+				client.Call("Responder.GetCost", cd, &result)
+				<-sem
+				finish <- 1
+				// divCall = client.Go("Responder.GetCost", cd, &result, nil)	
+			}()
 		}
-		<-divCall.Done
+		for i := 0; i < *runs; i++ {
+			<-finish
+		}
+		// <-divCall.Done
 	} else {
 		for j := 0; j < *runs; j++ {
 			client.Call("Responder.GetCost", cd, &result)
