@@ -19,11 +19,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 	"time"
-	"encoding/json"
 )
+
+func TestMonthYearStoreRestore(t *testing.T) {
+	y := Years{2010, 2011, 2012}
+	r := y.store()
+	if string(r) != "2010,2011,2012" {
+		t.Errorf("Error serializing years: %v", string(r))
+	}
+	o := Years{}
+	o.restore(r)
+	if !reflect.DeepEqual(o, y) {
+		t.Errorf("Expected %v was  %v", y, o)
+	}
+}
 
 func TestMonthStoreRestore(t *testing.T) {
 	m := Months{5, 6, 7, 8}

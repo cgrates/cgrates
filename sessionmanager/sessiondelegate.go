@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/timespans"
-	"log"
 	"net/rpc"
 	"time"
 )
@@ -64,11 +64,11 @@ type SessionDelegate struct {
 }
 
 func (rsd *SessionDelegate) OnHeartBeat(ev Event) {
-	log.Print("freeswitch ♥")
+	timespans.Logger.Info("freeswitch ♥")
 }
 
 func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {
-	log.Print("freeswitch answer")
+	timespans.Logger.Info("freeswitch answer")
 }
 
 func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
@@ -82,7 +82,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	refoundDuration := end.Sub(start).Seconds()
 	cost := 0.0
 	seconds := 0.0
-	log.Printf("Refund duration: %v", refoundDuration)
+	timespans.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
 		tsDuration := ts.GetDuration().Seconds()
@@ -123,7 +123,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 		var response float64
 		err := rsd.Connector.DebitCents(*cd, &response)
 		if err != nil {
-			log.Printf("Debit cents failed: %v", err)
+			timespans.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 		}
 	}
 	if seconds > 0 {
@@ -138,40 +138,39 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 		var response float64
 		err := rsd.Connector.DebitSeconds(*cd, &response)
 		if err != nil {
-			log.Printf("Debit seconds failed: %v", err)
+			timespans.Logger.Err(fmt.Sprintf("Debit seconds failed: %v", err))
 		}
 	}
 	lastCC.Cost -= cost
-	log.Printf("Rambursed %v cents, %v seconds", cost, seconds)
+	timespans.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
 }
 
 func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
 	cc := &timespans.CallCost{}
 	err := rsd.Connector.Debit(*cd, cc)
 	if err != nil {
-		log.Printf("Could not complete debit opperation: %v", err)
+		timespans.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 		// disconnect session
 		s.sessionManager.DisconnectSession(s)
 	}
 	s.CallCosts = append(s.CallCosts, cc)
-	log.Print(cc)
 	cd.Amount = DEBIT_PERIOD.Seconds()
 	var remainingSeconds float64
 	err = rsd.Connector.GetMaxSessionTime(*cd, &remainingSeconds)
 	if err != nil {
-		log.Printf("Could not get max session time: %v", err)
+		timespans.Logger.Err(fmt.Sprintf("Could not get max session time: %v", err))
 	}
 	if remainingSeconds == -1 && err == nil {
-		log.Print("Postpaying client: happy talking!")
+		timespans.Logger.Info("Postpaying client: happy talking!")
 		return
 	}
 	if remainingSeconds == 0 || err != nil {
-		log.Printf("No credit left: Disconnect %v", s)
+		timespans.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		s.Disconnect()
 		return
 	}
 	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
-		log.Printf("Not enough money for another debit period %v", s)
+		timespans.Logger.Info(fmt.Sprintf("Not enough money for another debit period %v", s))
 		s.Disconnect()
 		return
 	}

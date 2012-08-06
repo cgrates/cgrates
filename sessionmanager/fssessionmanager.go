@@ -21,8 +21,9 @@ package sessionmanager
 import (
 	"bufio"
 	"database/sql"
+	"errors"
 	"fmt"
-	"log"
+	"github.com/cgrates/cgrates/timespans"
 	"net"
 	"time"
 )
@@ -47,7 +48,8 @@ func NewFSSessionManager(db *sql.DB) *FSSessionManager {
 // listening for events in json format.
 func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) error {
 	if ed == nil {
-		log.Fatal("Please provide a non nil SessionDelegate")
+		timespans.Logger.Crit("Please provide a non nil SessionDelegate")
+		return errors.New("nil session delegate")
 	}
 	sm.sessionDelegate = ed
 	sm.address = address
@@ -58,7 +60,7 @@ func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) e
 	}
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		log.Print("Could not connect to freeswitch server!")
+		timespans.Logger.Warning("Could not connect to freeswitch server!")
 		return err
 	}
 	sm.conn = conn
@@ -86,13 +88,13 @@ func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) e
 func (sm *FSSessionManager) readNextEvent(exitChan chan bool) (ev Event) {
 	body, err := sm.buf.ReadString('}')
 	if err != nil {
-		log.Print("Could not read from freeswitch connection!")
+		timespans.Logger.Warning("Could not read from freeswitch connection!")
 		// wait until a sec
 		time.Sleep(time.Duration(sm.delayFunc()) * time.Second)
 		// try to reconnect
 		err = sm.Connect(sm.sessionDelegate, sm.address, sm.pass)
 		if err == nil {
-			log.Print("Successfuly reconnected to freeswitch! ")
+			timespans.Logger.Info("Successfuly reconnected to freeswitch! ")
 			exitChan <- true
 		}
 	}
@@ -131,7 +133,7 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnHeartBeat(ev)
 	} else {
-		log.Print("♥")
+		timespans.Logger.Info("♥")
 	}
 }
 
@@ -144,7 +146,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 			sm.sessionDelegate.OnChannelAnswer(ev, s)
 		}
 	} else {
-		log.Print("answer")
+		timespans.Logger.Info("answer")
 	}
 }
 
@@ -155,7 +157,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		sm.sessionDelegate.OnChannelHangupComplete(ev, s)
 		s.SaveOperations()
 	} else {
-		log.Print("HangupComplete")
+		timespans.Logger.Info("HangupComplete")
 	}
 	if s != nil {
 

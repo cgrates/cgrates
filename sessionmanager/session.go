@@ -21,9 +21,8 @@ package sessionmanager
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
-	"log"
-	"time"
 	"strings"
+	"time"
 )
 
 // Session type holding the call information fields, a session delegate for specific
@@ -32,7 +31,7 @@ type Session struct {
 	uuid           string
 	callDescriptor *timespans.CallDescriptor
 	sessionManager SessionManager
-	stopDebit      chan byte
+	stopDebit      chan bool
 	CallCosts      []*timespans.CallCost
 }
 
@@ -40,7 +39,7 @@ type Session struct {
 func NewSession(ev Event, sm SessionManager) (s *Session) {
 	startTime, err := ev.GetStartTime()
 	if err != nil {
-		log.Print("Error parsing answer event start time, using time.Now!")
+		timespans.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
@@ -57,7 +56,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 		TimeStart:   startTime}
 	s = &Session{uuid: ev.GetUUID(),
 		callDescriptor: cd,
-		stopDebit:      make(chan byte, 2)} //buffer it for multiple close signals
+		stopDebit:      make(chan bool, 2)} //buffer it for multiple close signals
 	s.sessionManager = sm
 	go s.startDebitLoop()
 	return
@@ -87,7 +86,7 @@ func (s *Session) getSessionDurationFrom(now time.Time) (d time.Duration) {
 	seconds := now.Sub(s.callDescriptor.TimeStart).Seconds()
 	d, err := time.ParseDuration(fmt.Sprintf("%ds", int(seconds)))
 	if err != nil {
-		log.Printf("Cannot parse session duration %v", seconds)
+		timespans.Logger.Err(fmt.Sprintf("Cannot parse session duration %v", seconds))
 	}
 	return
 }
@@ -102,7 +101,7 @@ func (s *Session) Close() {
 	if s == nil {
 		return
 	}
-	s.stopDebit <- 1
+	s.stopDebit <- true
 	s.callDescriptor.TimeEnd = time.Now()
 }
 
@@ -127,6 +126,6 @@ func (s *Session) SaveOperations() {
 			firstCC.Merge(cc)
 		}
 		s.sessionManager.GetDbLogger().Log(s.uuid, firstCC)
-		log.Print(firstCC)
+		timespans.Logger.Debug(firstCC.String())
 	}()
 }

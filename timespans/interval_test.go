@@ -148,6 +148,7 @@ func TestIntervalHours(t *testing.T) {
 
 func TestIntervalEverything(t *testing.T) {
 	i := &Interval{Months: Months{time.February},
+		Years:     Years{2012},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
@@ -156,6 +157,7 @@ func TestIntervalEverything(t *testing.T) {
 	d1 := time.Date(2012, time.February, 1, 14, 29, 1, 0, time.UTC)
 	d2 := time.Date(2012, time.February, 1, 15, 00, 00, 0, time.UTC)
 	d3 := time.Date(2012, time.February, 1, 15, 0, 1, 0, time.UTC)
+	d4 := time.Date(2011, time.February, 1, 15, 00, 00, 0, time.UTC)
 	if !i.Contains(d) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}
@@ -166,6 +168,9 @@ func TestIntervalEverything(t *testing.T) {
 		t.Errorf("Date %v shoud be in interval %v", d2, i)
 	}
 	if i.Contains(d3) {
+		t.Errorf("Date %v shoud not be in interval %v", d3, i)
+	}
+	if i.Contains(d4) {
 		t.Errorf("Date %v shoud not be in interval %v", d3, i)
 	}
 }

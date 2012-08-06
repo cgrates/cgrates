@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
-	"log"
 )
 
 type PostgresLogger struct {
@@ -41,7 +40,7 @@ func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
 	}
 	tss, err := json.Marshal(cc.Timespans)
 	if err != nil {
-		log.Printf("Error marshalling timespans to json: %v", err)
+		timespans.Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
 	_, err = psl.db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
@@ -55,6 +54,6 @@ func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
 		cc.ConnectFee,
 		tss))
 	if err != nil {
-		log.Printf("failed to execute insert statement: %v", err)
+		timespans.Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
 	}
 }
