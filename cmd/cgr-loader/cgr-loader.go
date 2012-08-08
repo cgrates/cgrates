@@ -48,15 +48,39 @@ func main() {
 	flag.Parse()
 	sep = []rune(*separator)[0]
 	csvr := timespans.NewFileCSVReader()
-	csvr.LoadDestinations(path.Join(*dataPath, destinationsFn), sep)
-	csvr.LoadRates(path.Join(*dataPath, ratesFn), sep)
-	csvr.LoadTimings(path.Join(*dataPath, timingsFn), sep)
-	csvr.LoadRateTimings(path.Join(*dataPath, ratetimingsFn), sep)
-	csvr.LoadRatingProfiles(path.Join(*dataPath, ratingprofilesFn), sep)
-	csvr.LoadActions(path.Join(*dataPath, actionsFn), sep)
-	csvr.LoadActionTimings(path.Join(*dataPath, actiontimingsFn), sep)
-	csvr.LoadActionTriggers(path.Join(*dataPath, actiontriggersFn), sep)
-	csvr.LoadAccountActions(path.Join(*dataPath, accountactionsFn), sep)
+	err := csvr.LoadDestinations(path.Join(*dataPath, destinationsFn), sep)
+	err = csvr.LoadRates(path.Join(*dataPath, ratesFn), sep)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = csvr.LoadTimings(path.Join(*dataPath, timingsFn), sep)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = csvr.LoadRateTimings(path.Join(*dataPath, ratetimingsFn), sep)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = csvr.LoadRatingProfiles(path.Join(*dataPath, ratingprofilesFn), sep)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = csvr.LoadActions(path.Join(*dataPath, actionsFn), sep)
+	if err != nil {
+		log.Print(err)
+	}
+	err = csvr.LoadActionTimings(path.Join(*dataPath, actiontimingsFn), sep)
+	if err != nil {
+		log.Print(err)
+	}
+	err = csvr.LoadActionTriggers(path.Join(*dataPath, actiontriggersFn), sep)
+	if err != nil {
+		log.Print(err)
+	}
+	err = csvr.LoadAccountActions(path.Join(*dataPath, accountactionsFn), sep)
+	if err != nil {
+		log.Fatal(err)
+	}
 	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb, *redispass)
 	if err != nil {
 		log.Fatal("Could not open database connection: %v", err)

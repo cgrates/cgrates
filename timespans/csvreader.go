@@ -20,6 +20,7 @@ package timespans
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -78,7 +79,7 @@ func openStringCSVReader(data string, comma rune) (csvReader *csv.Reader, fp *os
 	return
 }
 
-func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose bool) {
+func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose bool) (err error) {
 	if flush {
 		storage.Flush()
 	}
@@ -86,7 +87,10 @@ func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose boo
 		log.Print("Destinations")
 	}
 	for _, d := range csvr.destinations {
-		storage.SetDestination(d)
+		err = storage.SetDestination(d)
+		if err != nil {
+			return err
+		}
 		if verbose {
 			log.Print(d.Id, " : ", d.Prefixes)
 		}
@@ -96,7 +100,10 @@ func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose boo
 	}
 	for _, cds := range csvr.ratingProfiles {
 		for _, cd := range cds {
-			storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
+			err = storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
+			if err != nil {
+				return err
+			}
 			if verbose {
 				log.Print(cd.GetKey())
 			}
@@ -106,7 +113,10 @@ func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose boo
 		log.Print("Action timings")
 	}
 	for k, ats := range csvr.actionsTimings {
-		storage.SetActionTimings(ACTION_TIMING_PREFIX+":"+k, ats)
+		err = storage.SetActionTimings(ACTION_TIMING_PREFIX+":"+k, ats)
+		if err != nil {
+			return err
+		}
 		if verbose {
 			log.Println(k)
 		}
@@ -115,7 +125,10 @@ func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose boo
 		log.Print("Actions")
 	}
 	for k, as := range csvr.actions {
-		storage.SetActions(k, as)
+		err = storage.SetActions(k, as)
+		if err != nil {
+			return err
+		}
 		if verbose {
 			log.Println(k)
 		}
@@ -124,14 +137,18 @@ func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose boo
 		log.Print("Account actions")
 	}
 	for _, ub := range csvr.accountActions {
-		storage.SetUserBalance(ub)
+		err = storage.SetUserBalance(ub)
+		if err != nil {
+			return err
+		}
 		if verbose {
 			log.Println(ub.Id)
 		}
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadDestinations(fn string, comma rune) {
+func (csvr *CSVReader) LoadDestinations(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
 		return
@@ -159,9 +176,10 @@ func (csvr *CSVReader) LoadDestinations(fn string, comma rune) {
 		}
 		dest.Prefixes = append(dest.Prefixes, record[1])
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadRates(fn string, comma rune) {
+func (csvr *CSVReader) LoadRates(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
 		return
@@ -175,15 +193,17 @@ func (csvr *CSVReader) LoadRates(fn string, comma rune) {
 			// skip header line
 			continue
 		}
-		r, err := NewRate(record[1], record[2], record[3], record[4], record[5])
+		var r *Rate
+		r, err = NewRate(record[1], record[2], record[3], record[4], record[5])
 		if err != nil {
-			continue
+			return err
 		}
 		csvr.rates[tag] = append(csvr.rates[tag], r)
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadTimings(fn string, comma rune) {
+func (csvr *CSVReader) LoadTimings(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
 		return
@@ -201,9 +221,10 @@ func (csvr *CSVReader) LoadTimings(fn string, comma rune) {
 		t := NewTiming(record[1:]...)
 		csvr.timings[tag] = append(csvr.timings[tag], t)
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadRateTimings(fn string, comma rune) {
+func (csvr *CSVReader) LoadRateTimings(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
 		return
@@ -220,15 +241,13 @@ func (csvr *CSVReader) LoadRateTimings(fn string, comma rune) {
 
 		ts, exists := csvr.timings[record[2]]
 		if !exists {
-			log.Printf("Could not get timing for tag %v", record[2])
-			continue
+			return errors.New(fmt.Sprintf("Could not get timing for tag %v", record[2]))
 		}
 		for _, t := range ts {
 			rt := NewRateTiming(record[1], t, record[3])
 			rs, exists := csvr.rates[record[1]]
 			if !exists {
-				log.Printf("Could not rate for tag %v", record[2])
-				continue
+				return errors.New(fmt.Sprintf("Could not rate for tag %v", record[2]))
 			}
 			for _, r := range rs {
 				_, exists := csvr.activationPeriods[tag]
@@ -239,9 +258,10 @@ func (csvr *CSVReader) LoadRateTimings(fn string, comma rune) {
 			}
 		}
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) {
+func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
 		return
@@ -256,14 +276,12 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) {
 			continue
 		}
 		if len(record) != 7 {
-			log.Printf("Malformed rating profile: %v", record)
-			continue
+			return errors.New(fmt.Sprintf("Malformed rating profile: %v", record))
 		}
 		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[4]
 		at, err := time.Parse(time.RFC3339, record[6])
 		if err != nil {
-			log.Printf("Cannot parse activation time from %v", record[6])
-			continue
+			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[6]))
 		}
 		for _, d := range csvr.destinations {
 			for _, p := range d.Prefixes { //destinations
@@ -287,8 +305,7 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) {
 				}
 				ap, exists := csvr.activationPeriods[record[5]]
 				if !exists {
-					log.Print("Could not load ratinTiming for tag: ", record[5])
-					continue
+					return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: ", record[5]))
 				}
 				newAP := &ActivationPeriod{}
 				//copy(newAP.Intervals, ap.Intervals)
@@ -310,9 +327,10 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) {
 			}
 		}
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadActions(fn string, comma rune) {
+func (csvr *CSVReader) LoadActions(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
 		return
@@ -328,8 +346,7 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) {
 		}
 		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
-			log.Printf("Could not parse action units: %v", err)
-			continue
+			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
 		var a *Action
 		if record[2] != MINUTES {
@@ -343,8 +360,7 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) {
 			price, percent := 0.0, 0.0
 			value, err := strconv.ParseFloat(record[7], 64)
 			if err != nil {
-				log.Printf("Could not parse action price: %v", err)
-				continue
+				return errors.New(fmt.Sprintf("Could not parse action price: %v", err))
 			}
 			if record[6] == PERCENT {
 				percent = value
@@ -354,13 +370,11 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) {
 			}
 			minutesWeight, err := strconv.ParseFloat(record[8], 64)
 			if err != nil {
-				log.Printf("Could not parse action minutes weight: %v", err)
-				continue
+				return errors.New(fmt.Sprintf("Could not parse action minutes weight: %v", err))
 			}
 			weight, err := strconv.ParseFloat(record[9], 64)
 			if err != nil {
-				log.Printf("Could not parse action weight: %v", err)
-				continue
+				return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
 			}
 			a = &Action{
 				ActionType: record[1],
@@ -378,9 +392,10 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) {
 		}
 		csvr.actions[tag] = append(csvr.actions[tag], a)
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadActionTimings(fn string, comma rune) {
+func (csvr *CSVReader) LoadActionTimings(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
 		return
@@ -397,13 +412,11 @@ func (csvr *CSVReader) LoadActionTimings(fn string, comma rune) {
 
 		ts, exists := csvr.timings[record[2]]
 		if !exists {
-			log.Printf("Could not load the timing for tag: %v", record[2])
-			continue
+			return errors.New(fmt.Sprintf("Could not load the timing for tag: %v", record[2]))
 		}
 		weight, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			log.Printf("Could not parse action timing weight: %v", err)
-			continue
+			return errors.New(fmt.Sprintf("Could not parse action timing weight: %v", err))
 		}
 		for _, t := range ts {
 			at := &ActionTiming{
@@ -421,9 +434,10 @@ func (csvr *CSVReader) LoadActionTimings(fn string, comma rune) {
 			csvr.actionsTimings[tag] = append(csvr.actionsTimings[tag], at)
 		}
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadActionTriggers(fn string, comma rune) {
+func (csvr *CSVReader) LoadActionTriggers(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
 		return
@@ -439,13 +453,11 @@ func (csvr *CSVReader) LoadActionTriggers(fn string, comma rune) {
 		}
 		value, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			log.Printf("Could not parse action trigger value: %v", err)
-			continue
+			return errors.New(fmt.Sprintf("Could not parse action trigger value: %v", err))
 		}
 		weight, err := strconv.ParseFloat(record[6], 64)
 		if err != nil {
-			log.Printf("Could not parse action trigger weight: %v", err)
-			continue
+			return errors.New(fmt.Sprintf("Could not parse action trigger weight: %v", err))
 		}
 		at := &ActionTrigger{
 			BalanceId:      record[1],
@@ -457,12 +469,15 @@ func (csvr *CSVReader) LoadActionTriggers(fn string, comma rune) {
 		}
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)
 	}
+	return
 }
 
-func (csvr *CSVReader) LoadAccountActions(fn string, comma rune) {
+func (csvr *CSVReader) LoadAccountActions(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load account actions file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
@@ -474,8 +489,7 @@ func (csvr *CSVReader) LoadAccountActions(fn string, comma rune) {
 		tag := fmt.Sprintf("%s:%s:%s", record[2], record[0], record[1])
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
 		if !exists {
-			log.Printf("Could not get action triggers for tag %v", record[4])
-			continue
+			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", record[4]))
 		}
 		aTimingsTag := record[3]
 		ub := &UserBalance{
@@ -494,4 +508,5 @@ func (csvr *CSVReader) LoadAccountActions(fn string, comma rune) {
 			at.UserBalanceIds = append(at.UserBalanceIds, tag)
 		}
 	}
+	return
 }
