@@ -1,5 +1,7 @@
 language: go
 
+before_install: sudo apt-get install bzr -qq
+
 branches:
   only: master
 
@@ -13,5 +15,4 @@ notifications:
     on_success: change
     on_failure: always
 
-after_script:
-    ./build_and_test.sh
+after_script: ./build_and_test.sh
