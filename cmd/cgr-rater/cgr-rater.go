@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
 	"io"
+	"labix.org/v2/mgo"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -36,11 +37,13 @@ import (
 )
 
 const (
-	DISABLED = "disabled"
-	INTERNAL = "internal"
-	JSON     = "json"
-	GOB      = "gob"
-	DBTYPE   = "postgres"
+	DISABLED         = "disabled"
+	INTERNAL         = "internal"
+	JSON             = "json"
+	GOB              = "gob"
+	POSTGRES         = "postgres"
+	MONGO            = "mongo"
+	MONGO_COLLECTION = "cdr"
 )
 
 var (
@@ -48,10 +51,10 @@ var (
 	redis_server        = "127.0.0.1:6379" // redis address host:port
 	redis_db            = 10               // redis database number
 	redis_pass          = ""
-	logging_db_type     = DBTYPE
+	logging_db_type     = MONGO
 	logging_db_host     = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
 	logging_db_port     = "5432"      // The port to bind to.
-	logging_db_db       = "cgrates"   // The name of the database to connect to.
+	logging_db_name     = "cgrates"   // The name of the database to connect to.
 	logging_db_user     = ""          // The user to sign in as.
 	logging_db_password = ""          // The user's password.
 
@@ -94,7 +97,7 @@ func readConfig(c *conf.ConfigFile) {
 	logging_db_type, _ = c.GetString("global", "logdb_type")
 	logging_db_host, _ = c.GetString("global", "logdb_host")
 	logging_db_port, _ = c.GetString("global", "logdb_port")
-	logging_db_db, _ = c.GetString("global", "logdb_name")
+	logging_db_name, _ = c.GetString("global", "logdb_name")
 	logging_db_user, _ = c.GetString("global", "logdb_user")
 	logging_db_password, _ = c.GetString("global", "logdb_passwd")
 
@@ -170,7 +173,7 @@ func listenToHttpRequests() {
 	http.ListenAndServe(stats_listen, nil)
 }
 
-func startMediator(responder *timespans.Responder, db *sql.DB) {
+func startMediator(responder *timespans.Responder, loggerDb sessionmanager.LogDb) {
 	var connector sessionmanager.Connector
 	if mediator_rater == INTERNAL {
 		connector = responder
@@ -188,11 +191,11 @@ func startMediator(responder *timespans.Responder, db *sql.DB) {
 		}
 		connector = &sessionmanager.RPCClientConnector{client}
 	}
-	m := &Mediator{connector, db, mediator_skipdb}
+	m := &Mediator{connector, loggerDb, mediator_skipdb}
 	m.parseCSV()
 }
 
-func startSessionManager(responder *timespans.Responder, db *sql.DB) {
+func startSessionManager(responder *timespans.Responder, loggerDb sessionmanager.LogDb) {
 	var connector sessionmanager.Connector
 	if sm_rater == INTERNAL {
 		connector = responder
@@ -210,7 +213,7 @@ func startSessionManager(responder *timespans.Responder, db *sql.DB) {
 		}
 		connector = &sessionmanager.RPCClientConnector{client}
 	}
-	sm := sessionmanager.NewFSSessionManager(db)
+	sm := sessionmanager.NewFSSessionManager(loggerDb)
 	sm.Connect(&sessionmanager.SessionDelegate{connector}, sm_freeswitch_server, sm_freeswitch_pass)
 }
 
@@ -245,14 +248,32 @@ func main() {
 	defer getter.Close()
 	timespans.SetStorageGetter(getter)
 
-	var db *sql.DB
+	var loggerDb sessionmanager.LogDb
 	if logging_db_type != DISABLED {
-		db, err = sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_db, logging_db_user, logging_db_password))
-		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
-		}
-		if db != nil {
-			defer db.Close()
+		switch logging_db_type {
+		case POSTGRES:
+			db, err := sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password))
+			if err != nil {
+				timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
+			}
+			if db != nil {
+				defer db.Close()
+			}
+			loggerDb = &sessionmanager.PostgresLogger{db}
+		case MONGO:
+			session, err := mgo.Dial(fmt.Sprintf("%s:%s@%s:%s", logging_db_user, logging_db_password, logging_db_host, logging_db_port))
+			if err != nil {
+				timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
+			}
+			if session != nil {
+				defer session.Close()
+			}
+
+			// Optional. Switch the session to a monotonic behavior.
+			session.SetMode(mgo.Monotonic, true)
+
+			c := session.DB(logging_db_name).C(MONGO_COLLECTION)
+			loggerDb = &sessionmanager.MongoLogger{c}
 		}
 	}
 
@@ -286,11 +307,11 @@ func main() {
 	}
 
 	if sm_enabled {
-		go startSessionManager(responder, db)
+		go startSessionManager(responder, loggerDb)
 	}
 
 	if mediator_enabled {
-		go startMediator(responder, db)
+		go startMediator(responder, loggerDb)
 	}
 
 	<-exitChan

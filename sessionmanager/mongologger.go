@@ -18,8 +18,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessionmanager
 
-type SessionManager interface {
-	DisconnectSession(*Session)
-	GetSessionDelegate() *SessionDelegate
-	GetDbLogger() LogDb
+import (
+	"fmt"
+	"github.com/cgrates/cgrates/timespans"
+	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
+)
+
+type LogEntry struct {
+	UUID     string
+	CallCost *timespans.CallCost
+}
+
+type MongoLogger struct {
+	Col *mgo.Collection
+}
+
+func (ml *MongoLogger) Log(uuid string, cc *timespans.CallCost) {
+	if ml.Col == nil {
+		//timespans.Logger.Warning("Cannot write log to database.")
+		return
+	}
+
+	err := ml.Col.Insert(&LogEntry{uuid, cc})
+	if err != nil {
+		timespans.Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
+	}
+}
+
+func (ml *MongoLogger) GetLog(uuid string)(cc *timespans.CallCost, err error) {
+	result := new(LogEntry)
+	err = ml.Col.Find(bson.M{"uuid": uuid}).One(result)
+	cc = result.CallCost
+    return 
 }

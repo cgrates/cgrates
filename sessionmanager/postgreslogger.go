@@ -26,15 +26,11 @@ import (
 )
 
 type PostgresLogger struct {
-	db *sql.DB
-}
-
-func (psl *PostgresLogger) Close() {
-	psl.db.Close()
+	Db *sql.DB
 }
 
 func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
-	if psl.db == nil {
+	if psl.Db == nil {
 		//timespans.Logger.Warning("Cannot write log to database.")
 		return
 	}
@@ -42,7 +38,7 @@ func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = psl.db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
 		cc.Destination,
 		cc.Tenant,
@@ -56,4 +52,13 @@ func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
 	}
+}
+
+func (psl *PostgresLogger) GetLog(uuid string) (cc *timespans.CallCost, err error) {
+	row := psl.Db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s'", uuid))
+	var uuid_found string
+	var timespansJson string
+	err = row.Scan(&uuid_found, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
+	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)
+	return 
 }

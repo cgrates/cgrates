@@ -20,7 +20,6 @@ package sessionmanager
 
 import (
 	"bufio"
-	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
@@ -35,13 +34,13 @@ type FSSessionManager struct {
 	buf             *bufio.Reader
 	sessions        []*Session
 	sessionDelegate *SessionDelegate
-	postgresLogger  *PostgresLogger
+	loggerDB        LogDb
 	address, pass   string
 	delayFunc       func() int
 }
 
-func NewFSSessionManager(db *sql.DB) *FSSessionManager {
-	return &FSSessionManager{postgresLogger: &PostgresLogger{db}}
+func NewFSSessionManager(ldb LogDb) *FSSessionManager {
+	return &FSSessionManager{loggerDB: ldb}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
@@ -175,8 +174,8 @@ func (sm *FSSessionManager) GetSessionDelegate() *SessionDelegate {
 	return sm.sessionDelegate
 }
 
-func (sm *FSSessionManager) GetDbLogger() *PostgresLogger {
-	return sm.postgresLogger
+func (sm *FSSessionManager) GetDbLogger() LogDb {
+	return sm.loggerDB
 }
 
 // successive Fibonacci numbers.

@@ -18,8 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessionmanager
 
-type SessionManager interface {
-	DisconnectSession(*Session)
-	GetSessionDelegate() *SessionDelegate
-	GetDbLogger() LogDb
+import (
+	"github.com/cgrates/cgrates/timespans"
+)
+
+type LogDb interface {
+	Log(uuid string, cc *timespans.CallCost)
+	GetLog(uuid string)(*timespans.CallCost, error)
 }

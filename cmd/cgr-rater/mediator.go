@@ -20,12 +20,9 @@ package main
 
 import (
 	"bufio"
-	"database/sql"
 	"encoding/csv"
-	"encoding/json"
 	"flag"
 	"fmt"
-	_ "github.com/bmizerany/pq"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
 	"os"
@@ -34,7 +31,7 @@ import (
 
 type Mediator struct {
 	Connector sessionmanager.Connector
-	Db        *sql.DB
+	loggerDb  sessionmanager.LogDb
 	SkipDb    bool
 }
 
@@ -70,11 +67,7 @@ func (m *Mediator) parseCSV() {
 
 func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err error) {
 	searchedUUID := record[10]
-	row := m.Db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s'", searchedUUID))
-	var uuid string
-	var timespansJson string
-	err = row.Scan(&uuid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
-	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)
+	cc, err = m.loggerDb.GetLog(searchedUUID)
 	if err != nil {
 		cc, err = m.GetCostsFromRater(record)
 	}

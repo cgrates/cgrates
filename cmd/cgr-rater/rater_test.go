@@ -85,7 +85,7 @@ func TestConfig(t *testing.T) {
 		logging_db_type != "test" ||
 		logging_db_host != "test" ||
 		logging_db_port != "test" ||
-		logging_db_db != "test" ||
+		logging_db_name != "test" ||
 		logging_db_user != "test" ||
 		logging_db_password != "test" ||
 
@@ -120,7 +120,7 @@ func TestConfig(t *testing.T) {
 		t.Log(logging_db_type)
 		t.Log(logging_db_host)
 		t.Log(logging_db_port)
-		t.Log(logging_db_db)
+		t.Log(logging_db_name)
 		t.Log(logging_db_user)
 		t.Log(logging_db_password)
 		t.Log(rater_enabled)
@@ -173,7 +173,7 @@ func TestVarReset(t *testing.T) {
 		t.Error("Reding non exitsing variable did not issue error!")
 	}
 	if myString != "" {
-	    t.Error("Variable has not been reseted")
+		t.Error("Variable has not been reseted")
 	}
 	myBool := true
 	myBool, err = c.GetBool("default", "non_existing")
@@ -181,7 +181,7 @@ func TestVarReset(t *testing.T) {
 		t.Error("Reding non exitsing variable did not issue error!")
 	}
 	if myBool {
-	    t.Error("Variable has not been reseted")
+		t.Error("Variable has not been reseted")
 	}
 }
 
