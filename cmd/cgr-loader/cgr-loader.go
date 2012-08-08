@@ -67,15 +67,15 @@ func main() {
 	}
 	err = csvr.LoadActions(path.Join(*dataPath, actionsFn), sep)
 	if err != nil {
-		log.Print(err)
+		log.Fatal(err)
 	}
 	err = csvr.LoadActionTimings(path.Join(*dataPath, actiontimingsFn), sep)
 	if err != nil {
-		log.Print(err)
+		log.Fatal(err)
 	}
 	err = csvr.LoadActionTriggers(path.Join(*dataPath, actiontriggersFn), sep)
 	if err != nil {
-		log.Print(err)
+		log.Fatal(err)
 	}
 	err = csvr.LoadAccountActions(path.Join(*dataPath, accountactionsFn), sep)
 	if err != nil {

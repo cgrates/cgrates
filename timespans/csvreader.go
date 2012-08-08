@@ -333,7 +333,9 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) (err error) {
 func (csvr *CSVReader) LoadActions(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load action triggers file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
@@ -398,7 +400,9 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) (err error) {
 func (csvr *CSVReader) LoadActionTimings(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load action triggers file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
@@ -440,7 +444,9 @@ func (csvr *CSVReader) LoadActionTimings(fn string, comma rune) (err error) {
 func (csvr *CSVReader) LoadActionTriggers(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load action triggers file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
