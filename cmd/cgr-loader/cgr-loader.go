@@ -20,9 +20,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/cgrates/cgrates/timespans"
-	"os"
+	"log"
+	"path"
 )
 
 var (
@@ -31,15 +31,16 @@ var (
 	redisdb          = flag.Int("redisdb", 10, "redis database number (10)")
 	redispass        = flag.String("pass", "", "redis database password")
 	flush            = flag.Bool("flush", false, "Flush the database before importing")
-	destinationsFn   = flag.String("destinations", "", "Destinations file")
-	ratesFn          = flag.String("rates", "", "Rates file")
-	timingsFn        = flag.String("timings", "", "Timings file")
-	ratetimingsFn    = flag.String("ratetimings", "", "Rates timings file")
-	ratingprofilesFn = flag.String("ratingprofiles", "", "Rating profiles file")
-	actionsFn        = flag.String("actions", "", "Actions file")
-	actiontimingsFn  = flag.String("actiontimings", "", "Actions timings file")
-	actiontriggersFn = flag.String("actiontriggers", "", "Actions triggers file")
-	accountactionsFn = flag.String("accountactions", "", "Account actions file")
+	dataPath         = flag.String("path", ".", "The path containing the data files")
+	destinationsFn   = "Destinations.csv"
+	ratesFn          = "Rates.csv"
+	timingsFn        = "Timings.csv"
+	ratetimingsFn    = "RateTimings.csv"
+	ratingprofilesFn = "RatingProfiles.csv"
+	actionsFn        = "Actions.csv"
+	actiontimingsFn  = "ActionTimings.csv"
+	actiontriggersFn = "ActionTriggers.csv"
+	accountactionsFn = "AccountActions.csv"
 	sep              rune
 )
 
@@ -47,19 +48,18 @@ func main() {
 	flag.Parse()
 	sep = []rune(*separator)[0]
 	csvr := timespans.NewFileCSVReader()
-	csvr.LoadDestinations(*destinationsFn, sep)
-	csvr.LoadRates(*ratesFn, sep)
-	csvr.LoadTimings(*timingsFn, sep)
-	csvr.LoadRateTimings(*ratetimingsFn, sep)
-	csvr.LoadRatingProfiles(*ratingprofilesFn, sep)
-	csvr.LoadActions(*actionsFn, sep)
-	csvr.LoadActionTimings(*actiontimingsFn, sep)
-	csvr.LoadActionTriggers(*actiontriggersFn, sep)
-	csvr.LoadAccountActions(*accountactionsFn, sep)
+	csvr.LoadDestinations(path.Join(*dataPath, destinationsFn), sep)
+	csvr.LoadRates(path.Join(*dataPath, ratesFn), sep)
+	csvr.LoadTimings(path.Join(*dataPath, timingsFn), sep)
+	csvr.LoadRateTimings(path.Join(*dataPath, ratetimingsFn), sep)
+	csvr.LoadRatingProfiles(path.Join(*dataPath, ratingprofilesFn), sep)
+	csvr.LoadActions(path.Join(*dataPath, actionsFn), sep)
+	csvr.LoadActionTimings(path.Join(*dataPath, actiontimingsFn), sep)
+	csvr.LoadActionTriggers(path.Join(*dataPath, actiontriggersFn), sep)
+	csvr.LoadAccountActions(path.Join(*dataPath, accountactionsFn), sep)
 	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb, *redispass)
 	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Could not open database connection: %v", err))
-		os.Exit(1)
+		log.Fatal("Could not open database connection: %v", err)
 	}
 	csvr.WriteToDatabase(storage, *flush, true)
 }

@@ -21,6 +21,7 @@ package timespans
 import (
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -82,50 +83,50 @@ func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose boo
 		storage.Flush()
 	}
 	if verbose {
-		Logger.Info("Destinations")
+		log.Print("Destinations")
 	}
 	for _, d := range csvr.destinations {
 		storage.SetDestination(d)
 		if verbose {
-			Logger.Info(fmt.Sprintf("%v : %v", d.Id, d.Prefixes))
+			log.Print(d.Id, " : ", d.Prefixes)
 		}
 	}
 	if verbose {
-		Logger.Info("Rating profiles")
+		log.Print("Rating profiles")
 	}
 	for _, cds := range csvr.ratingProfiles {
 		for _, cd := range cds {
 			storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
 			if verbose {
-				Logger.Debug(cd.GetKey())
+				log.Print(cd.GetKey())
 			}
 		}
 	}
 	if verbose {
-		Logger.Info("Action timings")
+		log.Print("Action timings")
 	}
 	for k, ats := range csvr.actionsTimings {
 		storage.SetActionTimings(ACTION_TIMING_PREFIX+":"+k, ats)
 		if verbose {
-			Logger.Debug(k)
+			log.Println(k)
 		}
 	}
 	if verbose {
-		Logger.Info("Actions")
+		log.Print("Actions")
 	}
 	for k, as := range csvr.actions {
 		storage.SetActions(k, as)
 		if verbose {
-			Logger.Debug(k)
+			log.Println(k)
 		}
 	}
 	if verbose {
-		Logger.Info("Account actions")
+		log.Print("Account actions")
 	}
 	for _, ub := range csvr.accountActions {
 		storage.SetUserBalance(ub)
 		if verbose {
-			Logger.Debug(ub.Id)
+			log.Println(ub.Id)
 		}
 	}
 }
@@ -219,14 +220,14 @@ func (csvr *CSVReader) LoadRateTimings(fn string, comma rune) {
 
 		ts, exists := csvr.timings[record[2]]
 		if !exists {
-			Logger.Warning(fmt.Sprintf("Could not get timing for tag %v", record[2]))
+			log.Printf("Could not get timing for tag %v", record[2])
 			continue
 		}
 		for _, t := range ts {
 			rt := NewRateTiming(record[1], t, record[3])
 			rs, exists := csvr.rates[record[1]]
 			if !exists {
-				Logger.Warning(fmt.Sprintf("Could not rate for tag %v", record[2]))
+				log.Printf("Could not rate for tag %v", record[2])
 				continue
 			}
 			for _, r := range rs {
@@ -255,13 +256,13 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) {
 			continue
 		}
 		if len(record) != 7 {
-			Logger.Warning(fmt.Sprintf("Malformed rating profile: %v", record))
+			log.Printf("Malformed rating profile: %v", record)
 			continue
 		}
 		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[4]
 		at, err := time.Parse(time.RFC3339, record[6])
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("Cannot parse activation time from %v", record[6]))
+			log.Printf("Cannot parse activation time from %v", record[6])
 			continue
 		}
 		for _, d := range csvr.destinations {
@@ -286,7 +287,7 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) {
 				}
 				ap, exists := csvr.activationPeriods[record[5]]
 				if !exists {
-					Logger.Warning(fmt.Sprintf("Could not load ratinTiming for tag: ", record[5]))
+					log.Print("Could not load ratinTiming for tag: ", record[5])
 					continue
 				}
 				newAP := &ActivationPeriod{}
@@ -327,7 +328,7 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) {
 		}
 		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("Could not parse action units: %v", err))
+			log.Printf("Could not parse action units: %v", err)
 			continue
 		}
 		var a *Action
@@ -342,7 +343,7 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) {
 			price, percent := 0.0, 0.0
 			value, err := strconv.ParseFloat(record[7], 64)
 			if err != nil {
-				Logger.Warning(fmt.Sprintf("Could not parse action price: %v", err))
+				log.Printf("Could not parse action price: %v", err)
 				continue
 			}
 			if record[6] == PERCENT {
@@ -353,12 +354,12 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) {
 			}
 			minutesWeight, err := strconv.ParseFloat(record[8], 64)
 			if err != nil {
-				Logger.Warning(fmt.Sprintf("Could not parse action minutes weight: %v", err))
+				log.Printf("Could not parse action minutes weight: %v", err)
 				continue
 			}
 			weight, err := strconv.ParseFloat(record[9], 64)
 			if err != nil {
-				Logger.Warning(fmt.Sprintf("Could not parse action weight: %v", err))
+				log.Printf("Could not parse action weight: %v", err)
 				continue
 			}
 			a = &Action{
@@ -396,12 +397,12 @@ func (csvr *CSVReader) LoadActionTimings(fn string, comma rune) {
 
 		ts, exists := csvr.timings[record[2]]
 		if !exists {
-			Logger.Warning(fmt.Sprintf("Could not load the timing for tag: %v", record[2]))
+			log.Printf("Could not load the timing for tag: %v", record[2])
 			continue
 		}
 		weight, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("Could not parse action timing weight: %v", err))
+			log.Printf("Could not parse action timing weight: %v", err)
 			continue
 		}
 		for _, t := range ts {
@@ -438,12 +439,12 @@ func (csvr *CSVReader) LoadActionTriggers(fn string, comma rune) {
 		}
 		value, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("Could not parse action trigger value: %v", err))
+			log.Printf("Could not parse action trigger value: %v", err)
 			continue
 		}
 		weight, err := strconv.ParseFloat(record[6], 64)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("Could not parse action trigger weight: %v", err))
+			log.Printf("Could not parse action trigger weight: %v", err)
 			continue
 		}
 		at := &ActionTrigger{
@@ -473,7 +474,7 @@ func (csvr *CSVReader) LoadAccountActions(fn string, comma rune) {
 		tag := fmt.Sprintf("%s:%s:%s", record[2], record[0], record[1])
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
 		if !exists {
-			Logger.Warning(fmt.Sprintf("Could not get action triggers for tag %v", record[4]))
+			log.Printf("Could not get action triggers for tag %v", record[4])
 			continue
 		}
 		aTimingsTag := record[3]
@@ -486,7 +487,7 @@ func (csvr *CSVReader) LoadAccountActions(fn string, comma rune) {
 
 		aTimings, exists := csvr.actionsTimings[aTimingsTag]
 		if !exists {
-			Logger.Warning(fmt.Sprintf("Could not get action triggers for tag %v", aTimingsTag))
+			log.Printf("Could not get action triggers for tag %v", aTimingsTag)
 			// must not continue here
 		}
 		for _, at := range aTimings {

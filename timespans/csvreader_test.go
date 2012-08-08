@@ -38,7 +38,6 @@ RET,0723
 RET,0724
 `
 	rts = `
-Tag,DestinationsTag,ConnectFee,Price,PricedUnits,RateIncrements
 RT_STANDARD,GERMANY,0,0.2,60,1
 RT_STANDARD,GERMANY_O2,0,0.1,60,1
 RT_STANDARD,GERMANY_PREMIUM,0,0.1,60,1
@@ -49,14 +48,12 @@ P1,NAT,0,1,1,1
 P2,NAT,0,0.5,1,1
 `
 	ts = `
-Tag,Years,Months,MonthDays,WeekDays,Time
 WORKDAYS_00,*all,*all,*all,1;2;3;4;5,00:00:00
 WORKDAYS_18,*all,*all,*all,1;2;3;4;5,18:00:00
 WEEKENDS,*all,*all,*all,6;7,00:00:00
 ONE_TIME_RUN,2012,*none,*none,*none,*asap
 `
 	rtts = `
-Tag,RatesTag,TimingProfile,Weight
 STANDARD,RT_STANDARD,WORKDAYS_00,10
 STANDARD,RT_STD_WEEKEND,WORKDAYS_18,10
 STANDARD,RT_STD_WEEKEND,WEEKENDS,10
@@ -67,7 +64,6 @@ EVENING,P2,WORKDAYS_18,10
 EVENING,P2,WEEKENDS,10
 `
 	rp = `
-Tenant,TOR,Direction,Subject,RatesFallbackSubject,RatesTimingTag,ActivationTime
 CUSTOMER_1,0,OUT,rif:from:tm,danb,PREMIUM,2012-01-01T00:00:00Z
 CUSTOMER_1,0,OUT,rif:from:tm,danb,STANDARD,2012-02-28T00:00:00Z
 CUSTOMER_2,0,OUT,danb:87.139.12.167,danb,STANDARD,2012-01-01T00:00:00Z
@@ -78,20 +74,16 @@ vdf,0,OUT,minu,,EVENING,2012-01-01T00:00:00Z
 vdf,0,OUT,minu,,EVENING,2012-02-28T00:00:00Z
 `
 	a = `
-Tag,Action,BalanceTag,Direction,Units,DestinationTag,PriceType,PriceValue,MinutesWeight,Weight
 MINI,TOPUP,MINUTES,OUT,100,NAT,ABSOLUTE,0,10,10
 `
 	atms = `
-Tag,ActionsTag,TimingTag, Weight
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 `
 	atrs = `
-Tag,BalanceTag,ThresholdValue,Direction,DestinationTag,ActionsTag,Weight
 STANDARD_TRIGGER,MINUTES,OUT,10,GERMANY_O2,SOME_1,10
 STANDARD_TRIGGER,MINUTES,OUT,200,GERMANY,SOME_2,10
 `
 	accs = `
-Tenant,Account,Direction,ActionTimingsTag,ActionTriggersTag
 vdf,minitsboy,OUT,MORE_MINUTES,STANDARD_TRIGGER
 `
 )
