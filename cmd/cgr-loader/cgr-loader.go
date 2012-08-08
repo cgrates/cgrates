@@ -49,6 +49,9 @@ func main() {
 	sep = []rune(*separator)[0]
 	csvr := timespans.NewFileCSVReader()
 	err := csvr.LoadDestinations(path.Join(*dataPath, destinationsFn), sep)
+	if err != nil {
+		log.Fatal(err)
+	}
 	err = csvr.LoadRates(path.Join(*dataPath, ratesFn), sep)
 	if err != nil {
 		log.Fatal(err)
