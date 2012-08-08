@@ -88,5 +88,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not open database connection: %v", err)
 	}
+
+	// writing to database
 	csvr.WriteToDatabase(storage, *flush, true)
 }
