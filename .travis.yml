@@ -1,1 +1,17 @@
 language: go
+
+branches:
+  only: master
+
+notifications:
+  irc:
+    channels:
+      - "irc.freenode.net#cgrates"
+    on_success: change
+    on_failure: always
+  email:
+    on_success: change
+    on_failure: always
+
+after_script:
+    ./build_and_test.sh
