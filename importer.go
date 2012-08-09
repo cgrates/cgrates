@@ -22,4 +22,5 @@ import (
 	_ "github.com/cgrates/cgrates/cmd/cgr-console"
 	_ "github.com/cgrates/cgrates/cmd/cgr-loader"
 	_ "github.com/cgrates/cgrates/cmd/cgr-rater"
+	_ "labix.org/v2/mgo" // importin bson directly does not work
 )
