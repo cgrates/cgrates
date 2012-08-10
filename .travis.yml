@@ -1,6 +1,6 @@
 language: go
 
-before_install: sudo apt-get install bzr -qq
+before_install: sudo apt-get -qq install bzr
 
 branches:
   only: master
