@@ -112,6 +112,11 @@ func (rs *RedisStorage) GetActionTimings(key string) (ats []*ActionTiming, err e
 }
 
 func (rs *RedisStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
+	if len(ats) == 0 {
+		// delete the key
+		_, err = rs.db.Del(key)
+		return
+	}
 	result, err := rs.ms.Marshal(ats)
 	return rs.db.Set(key, result)
 }

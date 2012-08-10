@@ -112,6 +112,11 @@ func (ms *MapStorage) GetActionTimings(key string) (ats []*ActionTiming, err err
 }
 
 func (ms *MapStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
+	if len(ats) == 0 {
+		// delete the key
+		delete(ms.dict, key)
+		return
+	}
 	result, err := ms.ms.Marshal(ats)
 	ms.dict[key] = result
 	return
