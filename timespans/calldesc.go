@@ -301,7 +301,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Cost:        cost,
 		ConnectFee:  connectionFee,
 		Timespans:   timespans}
-	Logger.Info(fmt.Sprintf("Get Cost: %v => %v", cd, cc))
+	Logger.Info(fmt.Sprintf("Get Cost: %s => %v", cd.GetKey(), cc))
 	return cc, err
 }
 
@@ -362,10 +362,10 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return
 	}
+	Logger.Debug(fmt.Sprintf("Debiting from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
-			Logger.Debug(fmt.Sprintf("Debiting from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 			userBalance.debitBalance(CREDIT, cc.Cost+cc.ConnectFee, true)
 		}
 		for _, ts := range cc.Timespans {
