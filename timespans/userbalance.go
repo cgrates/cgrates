@@ -67,6 +67,8 @@ func (a AmountTooBig) Error() string {
 Returns user's available minutes for the specified destination
 */
 func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float64, bucketList bucketsorter) {
+	credit = ub.BalanceMap[CREDIT+OUTBOUND]
+	Logger.Debug(fmt.Sprintf("Initial credit: %v from %+v", credit, ub.BalanceMap))
 	if len(ub.MinuteBuckets) == 0 {
 		// Logger.Debug("There are no minute buckets to check for user: ", ub.Id)
 		return
@@ -85,8 +87,6 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 		}
 	}
 	bucketList.Sort() // sorts the buckets according to priority, precision or price
-	credit = ub.BalanceMap[CREDIT+OUTBOUND]
-	Logger.Debug(fmt.Sprintf("Initial credit: %v from %+v", credit, ub.BalanceMap))
 	for _, mb := range bucketList {
 		s := mb.GetSecondsForCredit(credit)
 		credit -= s * mb.Price
