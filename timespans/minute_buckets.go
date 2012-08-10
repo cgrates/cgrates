@@ -102,9 +102,11 @@ De-serializes the minute bucket for the storage. Used for key-value storages.
 */
 func (mb *MinuteBucket) restore(input string) {
 	elements := strings.Split(input, ";")
-	mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
-	mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
-	mb.Price, _ = strconv.ParseFloat(elements[2], 64)
-	mb.Percent, _ = strconv.ParseFloat(elements[3], 64)
-	mb.DestinationId = elements[4]
+	if len(elements) == 5 {
+		mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
+		mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
+		mb.Price, _ = strconv.ParseFloat(elements[2], 64)
+		mb.Percent, _ = strconv.ParseFloat(elements[3], 64)
+		mb.DestinationId = elements[4]
+	}
 }

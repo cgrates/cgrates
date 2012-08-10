@@ -48,6 +48,15 @@ func TestIntervalStoreRestore(t *testing.T) {
 	}
 }
 
+func TestIntervalRestoreFromString(t *testing.T) {
+	s := ";1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0.2;60;1"
+	i := Interval{}
+	i.restore(s)
+	if i.Price != 0.2 {
+		t.Errorf("Error restoring inteval period from string %+v", i)
+	}
+}
+
 func TestIntervalMonth(t *testing.T) {
 	i := &Interval{Months: Months{time.February}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)

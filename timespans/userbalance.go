@@ -122,7 +122,7 @@ If the amount is bigger than the sum of all seconds in the minute buckets than n
 debited and an error will be returned.
 */
 func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count bool) error {
-	if count && amount > 0 {
+	if count {
 		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Seconds: amount, DestinationId: prefix}})
 	}
 	avaliableNbSeconds, _, bucketList := ub.getSecondsForPrefix(prefix)
@@ -169,7 +169,7 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
 */
 func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool) float64 {
-	if count && amount > 0 {
+	if count {
 		ub.countUnits(&Action{BalanceId: balanceId, Direction: OUTBOUND, Units: amount})
 	}
 	ub.BalanceMap[balanceId+OUTBOUND] -= amount
