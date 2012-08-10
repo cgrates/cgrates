@@ -28,7 +28,7 @@ type MongoStorage struct {
 	session *mgo.Session
 }
 
-func NewMongoStorage(address, db string) (*MongoStorage, error) {
+func NewMongoStorage(address, db string) (StorageGetter, error) {
 	session, err := mgo.Dial(address)
 	if err != nil {
 		Logger.Err("Could not contact mongo server")
@@ -40,14 +40,39 @@ func NewMongoStorage(address, db string) (*MongoStorage, error) {
 	err = session.DB(db).C("activationPeriods").EnsureIndex(index)
 	index = mgo.Index{Key: []string{"id"}, Unique: true, DropDups: true, Background: true}
 	err = session.DB(db).C("destinations").EnsureIndex(index)
-	err = session.DB(db).C("tariffPlans").EnsureIndex(index)
+	err = session.DB(db).C("actions").EnsureIndex(index)
 	err = session.DB(db).C("userBalance").EnsureIndex(index)
+	err = session.DB(db).C("actionTimings").EnsureIndex(index)
 
 	return &MongoStorage{db: session.DB(db), session: session}, nil
 }
 
 func (ms *MongoStorage) Close() {
 	ms.session.Close()
+}
+
+func (ms *MongoStorage) Flush() (err error) {
+	err = ms.db.C("activationPeriods").DropCollection()
+	if err != nil {
+		return
+	}
+	err = ms.db.C("destinations").DropCollection()
+	if err != nil {
+		return
+	}
+	err = ms.db.C("actions").DropCollection()
+	if err != nil {
+		return
+	}
+	err = ms.db.C("userBalance").DropCollection()
+	if err != nil {
+		return
+	}
+	err = ms.db.C("actionTimings").DropCollection()
+	if err != nil {
+		return
+	}
+	return nil
 }
 
 /*
@@ -83,6 +108,17 @@ func (ms *MongoStorage) SetDestination(dest *Destination) error {
 	return ndb.Insert(&dest)
 }
 
+func (ms *MongoStorage) GetActions(key string) (as []*Action, err error) {
+	ndb := ms.db.C("actions")
+	err = ndb.Find(bson.M{"id": key}).One(as)
+	return
+}
+
+func (ms *MongoStorage) SetActions(key string, as []*Action) error {
+	ndb := ms.db.C("actions")
+	return ndb.Insert(&as)
+}
+
 func (ms *MongoStorage) GetUserBalance(key string) (result *UserBalance, err error) {
 	ndb := ms.db.C("userBalance")
 	result = &UserBalance{}
@@ -93,4 +129,35 @@ func (ms *MongoStorage) GetUserBalance(key string) (result *UserBalance, err err
 func (ms *MongoStorage) SetUserBalance(ub *UserBalance) error {
 	ndb := ms.db.C("userBalance")
 	return ndb.Insert(&ub)
+}
+
+func (ms *MongoStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
+	ndb := ms.db.C("actionTimings")
+	err = ndb.Find(bson.M{"id": key}).One(ats)
+	return
+}
+
+func (ms *MongoStorage) SetActionTimings(key string, ats []*ActionTiming) error {
+	ndb := ms.db.C("actionTimings")
+	return ndb.Insert(&ats)
+}
+
+func (ms *MongoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
+	/*ndb := ms.db.C("actionTimings")
+	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
+	if err != nil {
+		return
+	}
+	ats = make(map[string][]*ActionTiming, len(keys))
+	for _, key := range keys {
+		values, err := rs.db.Get(key)
+		if err != nil {
+			continue
+		}
+		var tempAts []*ActionTiming
+		err = rs.ms.Unmarshal(values, &tempAts)
+		ats[key] = tempAts
+	}*/
+
+	return
 }
