@@ -76,7 +76,7 @@ func loadActionTimings(storage timespans.StorageGetter) {
 		for i, at := range ats {
 			toBeSaved = toBeSaved || at.CheckForASAP()
 			if at.IsOneTimeRun() {
-				timespans.Logger.Info(fmt.Sprintf("Time for one time action on %v", at)
+				timespans.Logger.Info(fmt.Sprintf("Time for one time action on %v", at))
 				go at.Execute()
 				// remove it from list
 				ats = append(ats[:i], ats[i+1:]...)
