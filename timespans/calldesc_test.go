@@ -112,6 +112,18 @@ func TestFullDestNotFound(t *testing.T) {
 	}
 }
 
+func TestFullSubjectNotFound(t *testing.T) {
+	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "not_exiting", Destination: "025740532", TimeStart: t1, TimeEnd: t2}
+	result, _ := cd.GetCost()
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2700, ConnectFee: 0}
+	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+		t.Log(cd.ActivationPeriods)
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
 func TestMultipleActivationPeriods(t *testing.T) {
 	t1 := time.Date(2012, time.February, 8, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 18, 30, 0, 0, time.UTC)

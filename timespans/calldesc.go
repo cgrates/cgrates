@@ -38,7 +38,8 @@ const (
 	// the minimum length for a destination prefix to be matched.
 	MinPrefixLength     = 2
 	RecursionMaxDepth   = 4
-	FallbackDestination = "*all" // the string to be used to mark the fallback destination
+	FallbackDestination = "fallback" // the string to be used to mark the fallback destination
+	FallbackSubject     = "*all"
 )
 
 var (
@@ -135,9 +136,22 @@ func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error
 	key := base + destPrefix
 	values, err := cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
 	if err != nil {
+		// use the default destination
 		key := base + FallbackDestination
 		values, err = cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
 	}
+	if err != nil {
+		// use the default subject
+		base = fmt.Sprintf("%s:%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR, FallbackSubject)
+		key = base + destPrefix
+		values, err = cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
+		if err != nil {
+			// use the default destination
+			key := base + FallbackDestination
+			values, err = cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
+		}
+	}
+
 	//load the activation preriods
 	if err == nil && len(values) > 0 {
 		cd.ActivationPeriods = values
@@ -157,6 +171,7 @@ func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix s
 		recursionDepth++
 		return cd.getActivationPeriodsOrFallback(key, base, destPrefix, recursionDepth)
 	}
+
 	//get for a smaller prefix if the orignal one was not found			
 	for i := len(cd.Destination); err != nil || fallbackKey != ""; {
 		if fallbackKey != "" {
