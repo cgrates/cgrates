@@ -276,7 +276,9 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 		cost += ts.getCost(cd)
 	}
-	cc := &CallCost{TOR: cd.TOR,
+	cc := &CallCost{
+		Direction:   cd.Direction,
+		TOR:         cd.TOR,
 		Tenant:      cd.Tenant,
 		Subject:     cd.Subject,
 		Account:     cd.Account,

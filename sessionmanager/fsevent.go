@@ -36,19 +36,19 @@ var (
 
 const (
 	// Freswitch event proprities names
-	CALL_DIRECTION = "Call-Direction"
-	ORIG_ID        = "variable_sip_call_id" //- originator_id - match cdrs
-	SUBJECT        = "variable_cgr_subject"
-	ACCOUNT        = "variable_cgr_account"
-	DESTINATION    = "variable_cgr_destination"
-	TOR            = "variable_cgr_tor"
-	UUID           = "Unique-ID" // -Unique ID for this call leg
-	CSTMID         = "variable_cgr_cstmid"
-	START_TIME     = "Event-Date-GMT"
-	NAME           = "Event-Name"
-	HEARTBEAT      = "HEARTBEAT"
-	ANSWER         = "CHANNEL_ANSWER"
-	HANGUP         = "CHANNEL_HANGUP_COMPLETE"
+	DIRECTION   = "Call-Direction"
+	ORIG_ID     = "variable_sip_call_id" //- originator_id - match cdrs
+	SUBJECT     = "variable_cgr_subject"
+	ACCOUNT     = "variable_cgr_account"
+	DESTINATION = "variable_cgr_destination"
+	TOR         = "variable_cgr_tor"
+	UUID        = "Unique-ID" // -Unique ID for this call leg
+	CSTMID      = "variable_cgr_cstmid"
+	START_TIME  = "Event-Date-GMT"
+	NAME        = "Event-Name"
+	HEARTBEAT   = "HEARTBEAT"
+	ANSWER      = "CHANNEL_ANSWER"
+	HANGUP      = "CHANNEL_HANGUP_COMPLETE"
 )
 
 // Nice printing for the event object.
@@ -78,7 +78,9 @@ func (fsev *FSEvent) GetName() string {
 	return fsev.Fields[NAME]
 }
 func (fsev *FSEvent) GetDirection() string {
-	return fsev.Fields[CALL_DIRECTION]
+	//TODO: temporary hack
+	return "OUT"
+	//return fsev.Fields[DIRECTION]
 }
 func (fsev *FSEvent) GetOrigId() string {
 	return fsev.Fields[ORIG_ID]

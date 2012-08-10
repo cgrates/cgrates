@@ -40,7 +40,7 @@ func (psl *PostgresLogger) Log(uuid string, cc *timespans.CallCost) {
 	}
 	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdr VALUES ('%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
-		cc.Destination,
+		cc.Direction,
 		cc.Tenant,
 		cc.TOR,
 		cc.Subject,

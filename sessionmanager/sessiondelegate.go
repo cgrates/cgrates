@@ -128,6 +128,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	}
 	if seconds > 0 {
 		cd := &timespans.CallDescriptor{
+			Direction:   lastCC.Direction,
 			TOR:         lastCC.TOR,
 			Tenant:      lastCC.Tenant,
 			Subject:     lastCC.Subject,
