@@ -51,7 +51,7 @@ P2,NAT,0,0.5,1,1
 WORKDAYS_00,*all,*all,*all,1;2;3;4;5,00:00:00
 WORKDAYS_18,*all,*all,*all,1;2;3;4;5,18:00:00
 WEEKENDS,*all,*all,*all,6;7,00:00:00
-ONE_TIME_RUN,2012,*none,*none,*none,*asap
+ONE_TIME_RUN,2012,,,,*asap
 `
 	rtts = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10

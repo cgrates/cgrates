@@ -61,7 +61,7 @@ func (ys Years) Contains(year int) (result bool) {
 // Parse MonthDay elements from string separated by sep.
 func (ys *Years) Parse(input, sep string) {
 	switch input {
-	case "*all", "*none":
+	case "*all", "":
 		*ys = []int{}
 	default:
 		elements := strings.Split(input, sep)
@@ -126,7 +126,7 @@ func (m *Months) Parse(input, sep string) {
 	case "*all":
 		*m = []time.Month{time.January, time.February, time.March, time.April, time.May, time.June,
 			time.July, time.August, time.September, time.October, time.November, time.December}
-	case "*none":
+	case "":
 		*m = []time.Month{}
 	default:
 		elements := strings.Split(input, sep)
@@ -191,7 +191,7 @@ func (md *MonthDays) Parse(input, sep string) {
 	switch input {
 	case "*all":
 		*md = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
-	case "*none":
+	case "":
 		*md = []int{}
 	default:
 		elements := strings.Split(input, sep)
@@ -255,7 +255,7 @@ func (wd *WeekDays) Parse(input, sep string) {
 	switch input {
 	case "*all":
 		*wd = []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday}
-	case "*none":
+	case "":
 		*wd = []time.Weekday{}
 	default:
 		elements := strings.Split(input, sep)

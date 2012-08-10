@@ -5,7 +5,7 @@ WEEKENDS,*all,*all,*all,6;7,00:00:00
 WEEKLY_SAME_TIME,*all,*all,*all,1,*asap
 FIRST_DAY_OF_MONTH,*all,*all,1,*all,00:00:00
 DAILY_SAME_TIME,*all,*all,*all,*all,*asap
-ONE_TIME_RUN,2012,*none,*none,*none,*asap
-WINTER_FIRST_DAYS,*all,1;2;12,1,*none,00:00:00
+ONE_TIME_RUN,2012,,,,*asap
+WINTER_FIRST_DAYS,*all,1;2;12,1,,00:00:00
 SAT_00,*all,*all,*all,6,00:00:00
 SUN_13,*all,*all,*all,7,13:00:00

@@ -53,7 +53,7 @@ var (
 	redis_pass          = ""
 	logging_db_type     = MONGO
 	logging_db_host     = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
-	logging_db_port     = "5432"      // The port to bind to.
+	logging_db_port     = ""          // The port to bind to.
 	logging_db_name     = "cgrates"   // The name of the database to connect to.
 	logging_db_user     = ""          // The user to sign in as.
 	logging_db_password = ""          // The user's password.
@@ -261,19 +261,26 @@ func main() {
 			}
 			loggerDb = &sessionmanager.PostgresLogger{db}
 		case MONGO:
-			session, err := mgo.Dial(fmt.Sprintf("%s:%s@%s:%s", logging_db_user, logging_db_password, logging_db_host, logging_db_port))
+			dial := fmt.Sprintf(logging_db_host)
+			if logging_db_user != "" && logging_db_password != "" {
+				dial = fmt.Sprintf("%s:%s@%s", logging_db_user, logging_db_password, dial)
+			}
+			if logging_db_port != "" {
+				dial += ":" + logging_db_port
+			}
+			session, err := mgo.Dial(dial)
 			if err != nil {
 				timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
 			}
 			if session != nil {
 				defer session.Close()
+
+				// Optional. Switch the session to a monotonic behavior.
+				session.SetMode(mgo.Monotonic, true)
+
+				c := session.DB(logging_db_name).C(MONGO_COLLECTION)
+				loggerDb = &sessionmanager.MongoLogger{c}
 			}
-
-			// Optional. Switch the session to a monotonic behavior.
-			session.SetMode(mgo.Monotonic, true)
-
-			c := session.DB(logging_db_name).C(MONGO_COLLECTION)
-			loggerDb = &sessionmanager.MongoLogger{c}
 		}
 	}
 

@@ -494,10 +494,10 @@ func (csvr *CSVReader) LoadAccountActions(fn string, comma rune) (err error) {
 		}
 		tag := fmt.Sprintf("%s:%s:%s", record[2], record[0], record[1])
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
-		if !exists {
+		if record[4] != "" && !exists {
+			// only return error if there was something ther for the tag
 			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", record[4]))
 		}
-		aTimingsTag := record[3]
 		ub := &UserBalance{
 			Type:           UB_TYPE_PREPAID,
 			Id:             tag,
@@ -505,9 +505,9 @@ func (csvr *CSVReader) LoadAccountActions(fn string, comma rune) (err error) {
 		}
 		csvr.accountActions = append(csvr.accountActions, ub)
 
-		aTimings, exists := csvr.actionsTimings[aTimingsTag]
+		aTimings, exists := csvr.actionsTimings[record[3]]
 		if !exists {
-			log.Printf("Could not get action triggers for tag %v", aTimingsTag)
+			log.Printf("Could not get action timing for tag %v", record[3])
 			// must not continue here
 		}
 		for _, at := range aTimings {

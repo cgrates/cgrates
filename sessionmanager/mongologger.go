@@ -26,7 +26,7 @@ import (
 )
 
 type LogEntry struct {
-	UUID     string
+	Id       string `bson:"_id,omitempty"`
 	CallCost *timespans.CallCost
 }
 
@@ -48,7 +48,7 @@ func (ml *MongoLogger) Log(uuid string, cc *timespans.CallCost) {
 
 func (ml *MongoLogger) GetLog(uuid string)(cc *timespans.CallCost, err error) {
 	result := new(LogEntry)
-	err = ml.Col.Find(bson.M{"uuid": uuid}).One(result)
+	err = ml.Col.Find(bson.M{"_id": uuid}).One(result)
 	cc = result.CallCost
     return 
 }
