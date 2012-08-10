@@ -15,4 +15,6 @@ notifications:
     on_success: change
     on_failure: always
 
-after_script: ./test.sh
+after_script:
+    ./build.sh
+    ./test.sh
