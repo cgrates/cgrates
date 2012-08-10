@@ -38,7 +38,7 @@ const (
 	// the minimum length for a destination prefix to be matched.
 	MinPrefixLength     = 2
 	RecursionMaxDepth   = 4
-	FallbackDestination = "fallback" // the string to be used to mark the fallback destination
+	FallbackDestination = "*all" // the string to be used to mark the fallback destination
 )
 
 var (
