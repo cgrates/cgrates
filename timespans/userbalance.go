@@ -20,6 +20,7 @@ package timespans
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -85,6 +86,7 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 	}
 	bucketList.Sort() // sorts the buckets according to priority, precision or price
 	credit = ub.BalanceMap[CREDIT+OUTBOUND]
+	Logger.Debug(fmt.Sprintf("Initial credit: %v from %+v", credit, ub.BalanceMap))
 	for _, mb := range bucketList {
 		s := mb.GetSecondsForCredit(credit)
 		credit -= s * mb.Price

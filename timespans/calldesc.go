@@ -320,7 +320,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 			return -1, nil
 		} else {
 			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd.Destination)
-			Logger.Debug(fmt.Sprintf("\t=> second: %v, credit: %v", availableSeconds, availableCredit))
+			Logger.Debug(fmt.Sprintf("=> second: %v, credit: %v", availableSeconds, availableCredit))
 		}
 	} else {
 		return cd.Amount, err
