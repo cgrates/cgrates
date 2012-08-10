@@ -153,7 +153,9 @@ func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error
 	}
 	//load the activation preriods
 	if err == nil && len(values) > 0 {
-		Logger.Debug(fmt.Sprintf("Activation periods: ", values[0].Intervals))
+		if len(values[0].Intervals) > 0 {
+			Logger.Debug(fmt.Sprintf("Activation periods: ", values[0].Intervals))
+		}
 		cd.ActivationPeriods = values
 	}
 	return
