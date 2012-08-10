@@ -348,10 +348,29 @@ func TestActionTimingFirstOfTheYear(t *testing.T) {
 	}
 }
 
-func TestActionTimingIsOneTimeRunNoInterval(t *testing.T) {
+func TestActionTimingCheckForASAP(t *testing.T) {
 	at := &ActionTiming{Timing: &Interval{StartTime: ASAP}}
 	if !at.CheckForASAP() {
 		t.Errorf("%v should be asap!", at)
+	}
+}
+
+func TestActionTimingIsOneTimeRun(t *testing.T) {
+	at := &ActionTiming{Timing: &Interval{StartTime: ASAP}}
+	if !at.CheckForASAP() {
+		t.Errorf("%v should be asap!", at)
+	}
+	if !at.IsOneTimeRun() {
+		t.Errorf("%v should be one time run!", at)
+	}
+}
+
+func TestActionTimingOneTimeRun(t *testing.T) {
+	at := &ActionTiming{Timing: &Interval{StartTime: ASAP}}
+	at.CheckForASAP()
+	nextRun := at.GetNextStartTime()
+	if nextRun.IsZero() {
+		t.Error("next time failed for asap")
 	}
 }
 

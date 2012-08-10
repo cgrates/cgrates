@@ -228,18 +228,25 @@ func (at *ActionTiming) Execute() (err error) {
 	return
 }
 
+// checks for *asap string as start time and replaces it wit an actual time in the newar future
+// returns true if the *asap string was found
 func (at *ActionTiming) CheckForASAP() bool {
 	if at.Timing.StartTime == ASAP {
 		oneMinute, _ := time.ParseDuration(ASAP_DELAY)
-		timeToRun := time.Now().Add(oneMinute)
-		timeTokens := strings.Split(timeToRun.Format(time.Stamp), " ")
-		at.Timing.Years = Years{timeToRun.Year()}
-		at.Timing.Months = Months{timeToRun.Month()}
-		at.Timing.MonthDays = MonthDays{timeToRun.Day()}
+		timeTokens := strings.Split(time.Now().Add(oneMinute).Format(time.Stamp), " ")
 		at.Timing.StartTime = timeTokens[len(timeTokens)-1]
 		return true
 	}
 	return false
+}
+
+// returns true if only the starting time was is filled in the Timing field
+func (at *ActionTiming) IsOneTimeRun() bool {
+	return len(at.Timing.Years) == 0 &&
+		len(at.Timing.Months) == 0 &&
+		len(at.Timing.MonthDays) == 0 &&
+		len(at.Timing.WeekDays) == 0 &&
+		len(at.Timing.StartTime) != 0
 }
 
 // Structure to store actions according to weight
