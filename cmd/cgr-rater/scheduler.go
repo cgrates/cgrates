@@ -74,8 +74,7 @@ func loadActionTimings(storage timespans.StorageGetter) {
 	for key, ats := range actionTimings {
 		toBeSaved := false
 		for _, at := range ats {
-			asapFound := at.CheckForASAP()
-			toBeSaved = toBeSaved || asapFound
+			toBeSaved = toBeSaved || at.CheckForASAP()
 			sched.queue = append(sched.queue, at)
 		}
 		if toBeSaved {

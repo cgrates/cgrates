@@ -31,7 +31,7 @@ import (
 const (
 	FORMAT     = "2006-1-2 15:04:05 MST"
 	ASAP       = "*asap"
-	ASAP_DELAY = "5m"
+	ASAP_DELAY = "1m"
 )
 
 type ActionTiming struct {
@@ -231,7 +231,11 @@ func (at *ActionTiming) Execute() (err error) {
 func (at *ActionTiming) CheckForASAP() bool {
 	if at.Timing.StartTime == ASAP {
 		oneMinute, _ := time.ParseDuration(ASAP_DELAY)
-		timeTokens := strings.Split(time.Now().Add(oneMinute).Format(time.Stamp), " ")
+		timeToRun := time.Now().Add(oneMinute)
+		timeTokens := strings.Split(timeToRun.Format(time.Stamp), " ")
+		at.Timing.Years = Years{timeToRun.Year()}
+		at.Timing.Months = Months{timeToRun.Month()}
+		at.Timing.MonthDays = MonthDays{timeToRun.Day()}
 		at.Timing.StartTime = timeTokens[len(timeTokens)-1]
 		return true
 	}

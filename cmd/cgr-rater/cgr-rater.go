@@ -290,22 +290,27 @@ func main() {
 	}
 	responder := &timespans.Responder{ExitChan: exitChan}
 	if rater_enabled && !balancer_enabled && rater_listen != INTERNAL {
+		timespans.Logger.Info(fmt.Sprintf("CGRateS rater started on %s.", rater_listen))
 		go listenToRPCRequests(responder, rater_listen, rater_rpc_encoding)
 	}
 	if balancer_enabled {
+		timespans.Logger.Info(fmt.Sprintf("CGRateS balancer started on %s.", balancer_listen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
 		go listenToRPCRequests(responder, balancer_listen, balancer_rpc_encoding)
 		if rater_enabled {
+			timespans.Logger.Info("Internal rater started.")
 			bal.AddClient("local", new(timespans.ResponderWorker))
 		}
 	}
 
 	if stats_enabled {
+		timespans.Logger.Info(fmt.Sprintf("CGRateS stats server started on %v.", stats_listen))
 		go listenToHttpRequests()
 	}
 
 	if scheduler_enabled {
+		timespans.Logger.Info("CGRateS scheduler started.")
 		go func() {
 			loadActionTimings(getter)
 			go reloadSchedulerSingnalHandler(getter)
@@ -314,10 +319,12 @@ func main() {
 	}
 
 	if sm_enabled {
+		timespans.Logger.Info("CGRateS session manager started.")
 		go startSessionManager(responder, loggerDb)
 	}
 
 	if mediator_enabled {
+		timespans.Logger.Info("CGRateS mediator started.")
 		go startMediator(responder, loggerDb)
 	}
 

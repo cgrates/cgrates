@@ -112,7 +112,7 @@ func TestFullDestNotFound(t *testing.T) {
 	}
 }
 
-func TestFullSubjectNotFound(t *testing.T) {
+func TestSubjectNotFound(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "not_exiting", Destination: "025740532", TimeStart: t1, TimeEnd: t2}
