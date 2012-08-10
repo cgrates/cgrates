@@ -50,6 +50,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
+		Logger.Info(fmt.Sprintf("Executing %v: %v", ub.Id, a))
 		err = actionFunction(ub, a)
 	}
 	at.Executed = true
