@@ -85,6 +85,7 @@ func main() {
 		log.Fatal(err)
 	}
 	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb, *redispass)
+	//storage, err := timespans.NewMongoStorage("localhost", "cgrates")
 	if err != nil {
 		log.Fatal("Could not open database connection: %v", err)
 	}

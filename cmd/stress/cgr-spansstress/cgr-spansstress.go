@@ -60,6 +60,7 @@ func main() {
 	cd := timespans.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 
 	getter, err := timespans.NewRedisStorage("", 10, "")
+	//getter, err := timespans.NewMongoStorage("localhost", "cgrates")
 	defer getter.Close()
 
 	timespans.SetStorageGetter(getter)

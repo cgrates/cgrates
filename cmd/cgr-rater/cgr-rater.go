@@ -241,6 +241,7 @@ func main() {
 	go checkConfigSanity()
 
 	getter, err := timespans.NewRedisStorage(redis_server, redis_db, redis_pass)
+	//getter, err := timespans.NewMongoStorage("localhost", "cgrates")
 	if err != nil {
 		timespans.Logger.Crit("Could not connect to redis, exiting!")
 		exitChan <- true

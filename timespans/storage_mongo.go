@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
@@ -143,21 +144,10 @@ func (ms *MongoStorage) SetActionTimings(key string, ats []*ActionTiming) error 
 }
 
 func (ms *MongoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
-	/*ndb := ms.db.C("actionTimings")
-	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
+	ndb := ms.db.C("actionTimings")
+	err = ndb.Find(bson.M{"id": fmt.Sprintf("/^%s/", ACTION_TIMING_PREFIX)}).All(ats)
 	if err != nil {
 		return
 	}
-	ats = make(map[string][]*ActionTiming, len(keys))
-	for _, key := range keys {
-		values, err := rs.db.Get(key)
-		if err != nil {
-			continue
-		}
-		var tempAts []*ActionTiming
-		err = rs.ms.Unmarshal(values, &tempAts)
-		ats[key] = tempAts
-	}*/
-
 	return
 }
