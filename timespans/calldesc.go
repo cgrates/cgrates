@@ -43,8 +43,8 @@ const (
 )
 
 var (
-	//storageGetter, _ = NewMapStorage()
-	storageGetter, _ = NewMongoStorage("localhost", "cgrates")
+	storageGetter, _ = NewMapStorage()
+	//storageGetter, _ = NewMongoStorage("localhost", "cgrates")
 	//storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 10, "")
 	Logger LoggerInterface
 )
