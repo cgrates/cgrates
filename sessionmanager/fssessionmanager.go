@@ -34,13 +34,13 @@ type FSSessionManager struct {
 	buf             *bufio.Reader
 	sessions        []*Session
 	sessionDelegate *SessionDelegate
-	loggerDB        LogDb
+	loggerDB        timespans.StorageGetter
 	address, pass   string
 	delayFunc       func() int
 }
 
-func NewFSSessionManager(ldb LogDb) *FSSessionManager {
-	return &FSSessionManager{loggerDB: ldb}
+func NewFSSessionManager(storage timespans.StorageGetter) *FSSessionManager {
+	return &FSSessionManager{loggerDB: storage}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
@@ -176,7 +176,7 @@ func (sm *FSSessionManager) GetSessionDelegate() *SessionDelegate {
 	return sm.sessionDelegate
 }
 
-func (sm *FSSessionManager) GetDbLogger() LogDb {
+func (sm *FSSessionManager) GetDbLogger() timespans.StorageGetter {
 	return sm.loggerDB
 }
 

@@ -18,8 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package sessionmanager
 
+import (
+	"github.com/cgrates/cgrates/timespans"
+)
+
 type SessionManager interface {
 	DisconnectSession(*Session)
 	GetSessionDelegate() *SessionDelegate
-	GetDbLogger() LogDb
+	GetDbLogger() timespans.StorageGetter
 }

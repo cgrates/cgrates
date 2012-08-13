@@ -28,7 +28,6 @@ import (
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
 	"io"
-	"labix.org/v2/mgo"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -38,14 +37,13 @@ import (
 )
 
 const (
-	DISABLED         = "disabled"
-	INTERNAL         = "internal"
-	JSON             = "json"
-	GOB              = "gob"
-	POSTGRES         = "postgres"
-	MONGO            = "mongo"
-	MONGO_COLLECTION = "cdr"
-	FS               = "freeswitch"
+	DISABLED = "disabled"
+	INTERNAL = "internal"
+	JSON     = "json"
+	GOB      = "gob"
+	POSTGRES = "postgres"
+	MONGO    = "mongo"
+	FS       = "freeswitch"
 )
 
 var (
@@ -179,7 +177,7 @@ func listenToHttpRequests() {
 	http.ListenAndServe(stats_listen, nil)
 }
 
-func startMediator(responder *timespans.Responder, loggerDb sessionmanager.LogDb) {
+func startMediator(responder *timespans.Responder, loggerDb timespans.StorageGetter) {
 	var connector sessionmanager.Connector
 	if mediator_rater == INTERNAL {
 		connector = responder
@@ -201,7 +199,7 @@ func startMediator(responder *timespans.Responder, loggerDb sessionmanager.LogDb
 	m.parseCSV()
 }
 
-func startSessionManager(responder *timespans.Responder, loggerDb sessionmanager.LogDb) {
+func startSessionManager(responder *timespans.Responder, loggerDb timespans.StorageGetter) {
 	var connector sessionmanager.Connector
 	if sm_rater == INTERNAL {
 		connector = responder
@@ -260,7 +258,7 @@ func main() {
 	defer getter.Close()
 	timespans.SetStorageGetter(getter)
 
-	var loggerDb sessionmanager.LogDb
+	var loggerDb timespans.StorageGetter
 	if logging_db_type != DISABLED {
 		switch logging_db_type {
 		case POSTGRES:
@@ -271,28 +269,9 @@ func main() {
 			if db != nil {
 				defer db.Close()
 			}
-			loggerDb = &sessionmanager.PostgresLogger{db}
+			loggerDb = &timespans.PostgresLogger{db}
 		case MONGO:
-			dial := fmt.Sprintf(logging_db_host)
-			if logging_db_user != "" && logging_db_password != "" {
-				dial = fmt.Sprintf("%s:%s@%s", logging_db_user, logging_db_password, dial)
-			}
-			if logging_db_port != "" {
-				dial += ":" + logging_db_port
-			}
-			session, err := mgo.Dial(dial)
-			if err != nil {
-				timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
-			}
-			if session != nil {
-				defer session.Close()
-
-				// Optional. Switch the session to a monotonic behavior.
-				session.SetMode(mgo.Monotonic, true)
-
-				c := session.DB(logging_db_name).C(MONGO_COLLECTION)
-				loggerDb = &sessionmanager.MongoLogger{c}
-			}
+			loggerDb, err = timespans.NewMongoStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
 		}
 	}
 

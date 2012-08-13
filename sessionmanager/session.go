@@ -126,7 +126,7 @@ func (s *Session) SaveOperations() {
 			firstCC.Merge(cc)
 		}
 		if s.sessionManager.GetDbLogger() != nil {
-			s.sessionManager.GetDbLogger().Log(s.uuid, firstCC)
+			s.sessionManager.GetDbLogger().LogCallCost(s.uuid, firstCC)
 		}
 		timespans.Logger.Debug(firstCC.String())
 	}()

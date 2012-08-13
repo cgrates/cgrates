@@ -47,6 +47,8 @@ type StorageGetter interface {
 	GetActionTimings(string) ([]*ActionTiming, error)
 	SetActionTimings(string, []*ActionTiming) error
 	GetAllActionTimings() (map[string][]*ActionTiming, error)
+	LogCallCost(uuid string, cc *CallCost) error
+	GetCallCostLog(uuid string) (*CallCost, error)
 }
 
 type Marshaler interface {

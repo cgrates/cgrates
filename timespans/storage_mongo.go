@@ -30,10 +30,17 @@ type MongoStorage struct {
 	db      *mgo.Database
 }
 
-func NewMongoStorage(address, db string) (StorageGetter, error) {
-	session, err := mgo.Dial(address)
+func NewMongoStorage(host, port, db, user, pass string) (StorageGetter, error) {
+	dial := fmt.Sprintf(host)
+	if user != "" && pass != "" {
+		dial = fmt.Sprintf("%s:%s@%s", user, pass, dial)
+	}
+	if port != "" {
+		dial += ":" + port
+	}
+	session, err := mgo.Dial(dial)
 	if err != nil {
-		Logger.Err("Could not contact mongo server")
+		Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
 		return nil, err
 	}
 	ndb := session.DB(db)
@@ -96,6 +103,11 @@ type AtKeyValue struct {
 	Value []*ActionTiming
 }
 
+type LogEntry struct {
+	Id       string `bson:"_id,omitempty"`
+	CallCost *CallCost
+}
+
 func (ms *MongoStorage) GetActivationPeriodsOrFallback(key string) ([]*ActivationPeriod, string, error) {
 	result := new(ApKeyValue)
 	err := ms.db.C("activationperiods").Find(bson.M{"key": key}).One(&result)
@@ -156,5 +168,17 @@ func (ms *MongoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, e
 	for iter.Next(&result) {
 		ats[result.Key] = result.Value
 	}
+	return
+}
+
+func (ms *MongoStorage) LogCallCost(uuid string, cc *CallCost) error {
+	return ms.db.C("cclog").Insert(&LogEntry{uuid, cc})
+
+}
+
+func (ms *MongoStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
+	result := new(LogEntry)
+	err = ms.db.C("cclog").Find(bson.M{"_id": uuid}).One(result)
+	cc = result.CallCost
 	return
 }

@@ -31,7 +31,7 @@ import (
 
 type Mediator struct {
 	Connector sessionmanager.Connector
-	loggerDb  sessionmanager.LogDb
+	loggerDb  timespans.StorageGetter
 	SkipDb    bool
 }
 
@@ -67,7 +67,7 @@ func (m *Mediator) parseCSV() {
 
 func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err error) {
 	searchedUUID := record[10]
-	cc, err = m.loggerDb.GetLog(searchedUUID)
+	cc, err = m.loggerDb.GetCallCostLog(searchedUUID)
 	if err != nil {
 		cc, err = m.GetCostsFromRater(record)
 	}

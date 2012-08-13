@@ -147,3 +147,17 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, e
 
 	return
 }
+
+func (rs *RedisStorage) LogCallCost(uuid string, cc *CallCost) (err error) {
+	result, err := rs.ms.Marshal(cc)
+	return rs.db.Set(uuid, result)
+}
+
+func (rs *RedisStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
+	if values, err := rs.db.Get(uuid); err == nil {
+		err = rs.ms.Unmarshal(values, &cc)
+	} else {
+		return nil, err
+	}
+	return
+}

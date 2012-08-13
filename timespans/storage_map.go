@@ -143,3 +143,18 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err
 
 	return
 }
+
+func (ms *MapStorage) LogCallCost(uuid string, cc *CallCost) error {
+	result, err := ms.ms.Marshal(cc)
+	ms.dict[uuid] = result
+	return err
+}
+
+func (ms *MapStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
+	if values, ok := ms.dict[uuid]; ok {
+		err = ms.ms.Unmarshal(values, &cc)
+	} else {
+		return nil, errors.New("not found")
+	}
+	return
+}
