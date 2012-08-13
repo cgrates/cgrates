@@ -71,6 +71,8 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 	if values, err := rs.db.Get(key); err == nil {
 		dest = &Destination{Id: key}
 		err = rs.ms.Unmarshal(values, dest)
+	} else {
+		return nil, err
 	}
 	return
 }
@@ -82,6 +84,8 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 func (rs *RedisStorage) GetActions(key string) (as []*Action, err error) {
 	if values, err := rs.db.Get(key); err == nil {
 		err = rs.ms.Unmarshal(values, &as)
+	} else {
+		return nil, err
 	}
 	return
 }
@@ -95,6 +99,8 @@ func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) 
 	if values, err := rs.db.Get(key); err == nil {
 		ub = &UserBalance{Id: key}
 		err = rs.ms.Unmarshal(values, ub)
+	} else {
+		return nil, err
 	}
 	return
 }
@@ -107,6 +113,8 @@ func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 func (rs *RedisStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
 	if values, err := rs.db.Get(key); err == nil {
 		err = rs.ms.Unmarshal(values, &ats)
+	} else {
+		return nil, err
 	}
 	return
 }

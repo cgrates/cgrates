@@ -22,11 +22,12 @@ import (
 	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	//"log"
 )
 
 type MongoStorage struct {
-	db      *mgo.Database
-	session *mgo.Session
+	ap, d, a, ub, at *mgo.Collection
+	session          *mgo.Session
 }
 
 func NewMongoStorage(address, db string) (StorageGetter, error) {
@@ -35,17 +36,29 @@ func NewMongoStorage(address, db string) (StorageGetter, error) {
 		Logger.Err("Could not contact mongo server")
 		return nil, err
 	}
+	ndb := session.DB(db)
+	ap := ndb.C("activationPeriods")
+	d := ndb.C("destinations")
+	a := ndb.C("actions")
+	ub := ndb.C("userBalance")
+	at := ndb.C("actionTimings")
 	session.SetMode(mgo.Monotonic, true)
+	index := mgo.Index{Key: []string{"key"}, Background: true}
+	err = ap.EnsureIndex(index)
+	err = at.EnsureIndex(index)
+	err = a.EnsureIndex(index)
+	index = mgo.Index{Key: []string{"id"}, Background: true}
+	err = d.EnsureIndex(index)
+	err = ub.EnsureIndex(index)
 
-	index := mgo.Index{Key: []string{"key"}, Unique: true, DropDups: true, Background: true}
-	err = session.DB(db).C("activationPeriods").EnsureIndex(index)
-	index = mgo.Index{Key: []string{"id"}, Unique: true, DropDups: true, Background: true}
-	err = session.DB(db).C("destinations").EnsureIndex(index)
-	err = session.DB(db).C("actions").EnsureIndex(index)
-	err = session.DB(db).C("userBalance").EnsureIndex(index)
-	err = session.DB(db).C("actionTimings").EnsureIndex(index)
-
-	return &MongoStorage{db: session.DB(db), session: session}, nil
+	return &MongoStorage{
+		ap:      ap,
+		d:       d,
+		a:       a,
+		ub:      ub,
+		at:      at,
+		session: session,
+	}, nil
 }
 
 func (ms *MongoStorage) Close() {
@@ -53,23 +66,23 @@ func (ms *MongoStorage) Close() {
 }
 
 func (ms *MongoStorage) Flush() (err error) {
-	err = ms.db.C("activationPeriods").DropCollection()
+	err = ms.ap.DropCollection()
 	if err != nil {
 		return
 	}
-	err = ms.db.C("destinations").DropCollection()
+	err = ms.d.DropCollection()
 	if err != nil {
 		return
 	}
-	err = ms.db.C("actions").DropCollection()
+	err = ms.a.DropCollection()
 	if err != nil {
 		return
 	}
-	err = ms.db.C("userBalance").DropCollection()
+	err = ms.ub.DropCollection()
 	if err != nil {
 		return
 	}
-	err = ms.db.C("actionTimings").DropCollection()
+	err = ms.at.DropCollection()
 	if err != nil {
 		return
 	}
@@ -79,75 +92,81 @@ func (ms *MongoStorage) Flush() (err error) {
 /*
 Helper type for activation periods storage.
 */
-type KeyValue struct {
-	Key               string
-	FallbackKey       string
-	ActivationPeriods []*ActivationPeriod
+type ApKeyValue struct {
+	Key         string
+	FallbackKey string `omitempty`
+	Value       []*ActivationPeriod
+}
+
+type AcKeyValue struct {
+	Key   string
+	Value []*Action
+}
+
+type AtKeyValue struct {
+	Key   string
+	Value []*ActionTiming
 }
 
 func (ms *MongoStorage) GetActivationPeriodsOrFallback(key string) (aps []*ActivationPeriod, fallbackKey string, err error) {
-	ndb := ms.db.C("activationPeriods")
-	result := KeyValue{}
-	err = ndb.Find(bson.M{"key": key}).One(&result)
-	return result.ActivationPeriods, result.FallbackKey, err
+	result := ApKeyValue{}
+	err = ms.ap.Find(bson.M{"key": key}).One(&result)
+	return result.Value, result.FallbackKey, err
 }
 
 func (ms *MongoStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) error {
-	ndb := ms.db.C("activationPeriods")
-	return ndb.Insert(&KeyValue{key, fallbackKey, aps})
+	return ms.ap.Insert(&ApKeyValue{Key: key, FallbackKey: fallbackKey, Value: aps})
 }
 
 func (ms *MongoStorage) GetDestination(key string) (result *Destination, err error) {
-	ndb := ms.db.C("destinations")
-	result = &Destination{}
-	err = ndb.Find(bson.M{"id": key}).One(result)
+	result = new(Destination)
+	err = ms.d.Find(bson.M{"id": key}).One(result)
+	if err != nil {
+		result = nil
+	}
 	return
 }
 
 func (ms *MongoStorage) SetDestination(dest *Destination) error {
-	ndb := ms.db.C("destinations")
-	return ndb.Insert(&dest)
+	return ms.d.Insert(dest)
 }
 
 func (ms *MongoStorage) GetActions(key string) (as []*Action, err error) {
-	ndb := ms.db.C("actions")
-	err = ndb.Find(bson.M{"id": key}).One(as)
-	return
+	result := AcKeyValue{}
+	err = ms.a.Find(bson.M{"key": key}).One(&result)
+	return result.Value, err
 }
 
 func (ms *MongoStorage) SetActions(key string, as []*Action) error {
-	ndb := ms.db.C("actions")
-	return ndb.Insert(&as)
+	return ms.a.Insert(&AcKeyValue{Key: key, Value: as})
 }
 
 func (ms *MongoStorage) GetUserBalance(key string) (result *UserBalance, err error) {
-	ndb := ms.db.C("userBalance")
-	result = &UserBalance{}
-	err = ndb.Find(bson.M{"id": key}).One(result)
+	result = new(UserBalance)
+	err = ms.ub.Find(bson.M{"id": key}).One(result)
 	return
 }
 
 func (ms *MongoStorage) SetUserBalance(ub *UserBalance) error {
-	ndb := ms.db.C("userBalance")
-	return ndb.Insert(&ub)
+	return ms.ub.Insert(ub)
 }
 
 func (ms *MongoStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
-	ndb := ms.db.C("actionTimings")
-	err = ndb.Find(bson.M{"id": key}).One(ats)
-	return
+	result := AtKeyValue{}
+	err = ms.at.Find(bson.M{"key": key}).One(&result)
+	return result.Value, err
 }
 
 func (ms *MongoStorage) SetActionTimings(key string, ats []*ActionTiming) error {
-	ndb := ms.db.C("actionTimings")
-	return ndb.Insert(&ats)
+	return ms.at.Insert(&AtKeyValue{key, ats})
 }
 
 func (ms *MongoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
-	ndb := ms.db.C("actionTimings")
-	err = ndb.Find(bson.M{"id": fmt.Sprintf("/^%s/", ACTION_TIMING_PREFIX)}).All(ats)
-	if err != nil {
-		return
+	result := AtKeyValue{}
+	iter := ms.at.Find(bson.M{"key": fmt.Sprintf("/^%s/", ACTION_TIMING_PREFIX)}).Iter()
+	ats = make(map[string][]*ActionTiming)
+	for iter.Next(&result) {
+		ats[result.Key] = result.Value
 	}
 	return
 }

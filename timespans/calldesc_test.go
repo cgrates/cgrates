@@ -184,8 +184,8 @@ func TestMinutesCost(t *testing.T) {
 func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723", Amount: 1000}
 	result, err := cd.GetMaxSessionTime()
-	if result != 1000 || err != nil {
-		t.Errorf("Expected %v was %v", 1000, result)
+	if result != 1000 || err == nil {
+		t.Errorf("Expected %v was %v (%v)", 1000, result, err)
 	}
 }
 

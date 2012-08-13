@@ -102,7 +102,6 @@ func init() {
 	csvr.LoadActionTriggers(actionTriggers, ',')
 	csvr.LoadAccountActions(accountActions, ',')
 	csvr.WriteToDatabase(storageGetter, false, false)
-
 }
 
 func TestLoadDestinations(t *testing.T) {

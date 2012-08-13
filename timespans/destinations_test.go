@@ -35,7 +35,8 @@ func TestDestinationStoreRestore(t *testing.T) {
 	}
 }
 
-func TestDestinationRedisStore(t *testing.T) {
+func TestDestinationStorageStore(t *testing.T) {
+	t.Log(storageGetter)
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	storageGetter.SetDestination(nationale)
 	result, _ := storageGetter.GetDestination(nationale.Id)
@@ -70,7 +71,7 @@ func TestDestinationGetExistsCache(t *testing.T) {
 func TestDestinationGetNotExists(t *testing.T) {
 	d, err := GetDestination("not existing")
 	if d != nil {
-		t.Error("Got false destination: ", err)
+		t.Error("Got false destination: ", d, err)
 	}
 }
 

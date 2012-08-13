@@ -68,6 +68,8 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 	if values, ok := ms.dict[key]; ok {
 		dest = &Destination{Id: key}
 		err = ms.ms.Unmarshal(values, dest)
+	} else {
+		return nil, errors.New("not found")
 	}
 	return
 }
@@ -80,6 +82,8 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 func (ms *MapStorage) GetActions(key string) (as []*Action, err error) {
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
+	} else {
+		return nil, errors.New("not found")
 	}
 	return
 }
@@ -94,6 +98,8 @@ func (ms *MapStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
 	if values, ok := ms.dict[key]; ok {
 		ub = &UserBalance{Id: key}
 		err = ms.ms.Unmarshal(values, ub)
+	} else {
+		return nil, errors.New("not found")
 	}
 	return
 }
@@ -107,6 +113,8 @@ func (ms *MapStorage) SetUserBalance(ub *UserBalance) (err error) {
 func (ms *MapStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
 	if values, ok := ms.dict[key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
+	} else {
+		return nil, errors.New("not found")
 	}
 	return
 }
