@@ -44,7 +44,8 @@ const (
 
 var (
 	storageGetter, _ = NewMapStorage()
-	Logger           LoggerInterface
+	//storageGetter, _ = NewMongoStorage("localhost", "cgrates")
+	Logger LoggerInterface
 )
 
 /*
@@ -329,6 +330,8 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 		return availableSeconds, nil
 	}
 
+	// the price of a seccond cannot be determined because all the seconds can have a different cost.
+	// therfore we get the cost for the whole period and then if there are not enough money we backout in steps of 10%.
 	maxSessionSeconds := cd.Amount
 	for i := 0; i < 10; i++ {
 		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds-availableSeconds))

@@ -156,6 +156,9 @@ De-serializes the interval for the storage. Used for key-value storages.
 */
 func (i *Interval) restore(input string) {
 	is := strings.Split(input, ";")
+	if len(is) != 11 {
+		return
+	}
 	i.Years.restore(is[0])
 	i.Months.restore(is[1])
 	i.MonthDays.restore(is[2])

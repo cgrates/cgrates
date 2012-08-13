@@ -681,7 +681,10 @@ func TestActionResetAllCounters(t *testing.T) {
 		len(ub.UnitCounters[0].MinuteBuckets) != 1 ||
 		len(ub.MinuteBuckets) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
-		t.Error("Reset counters action failed!", ub.UnitCounters[0].MinuteBuckets)
+		t.Error("Reset counters action failed!")
+	}
+	if len(ub.UnitCounters) < 1 {
+		t.FailNow()
 	}
 	mb := ub.UnitCounters[0].MinuteBuckets[0]
 	if mb.Weight != 20 || mb.Price != 1 || mb.Seconds != 10 || mb.DestinationId != "NAT" {
@@ -707,6 +710,9 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		len(ub.MinuteBuckets) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
 		t.Error("Reset counters action failed!", ub.UnitCounters[1].MinuteBuckets)
+	}
+	if len(ub.UnitCounters) < 2 || len(ub.UnitCounters[1].MinuteBuckets) < 1 {
+		t.FailNow()
 	}
 	mb := ub.UnitCounters[1].MinuteBuckets[0]
 	if mb.Weight != 20 || mb.Price != 1 || mb.Seconds != 10 || mb.DestinationId != "NAT" {

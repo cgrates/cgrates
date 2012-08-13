@@ -34,6 +34,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"runtime"
+	"time"
 )
 
 const (
@@ -44,6 +45,7 @@ const (
 	POSTGRES         = "postgres"
 	MONGO            = "mongo"
 	MONGO_COLLECTION = "cdr"
+	FS               = "freeswitch"
 )
 
 var (
@@ -70,9 +72,11 @@ var (
 	scheduler_enabled = false
 
 	sm_enabled           = false
+	sm_type              = FS
 	sm_rater             = INTERNAL         // address where to access rater. Can be internal, direct rater address or the address of a balancer
 	sm_freeswitch_server = "localhost:8021" // freeswitch address host:port
 	sm_freeswitch_pass   = "ClueCon"        // reeswitch address host:port	
+	sm_debit_period      = 10               // the period to be debited in advanced during a call (in seconds)
 	sm_rpc_encoding      = GOB              // use JSON for RPC encoding
 
 	mediator_enabled      = false
@@ -113,7 +117,9 @@ func readConfig(c *conf.ConfigFile) {
 	scheduler_enabled, _ = c.GetBool("scheduler", "enabled")
 
 	sm_enabled, _ = c.GetBool("session_manager", "enabled")
+	sm_type, _ = c.GetString("session_manager", "type")
 	sm_rater, _ = c.GetString("session_manager", "rater")
+	sm_debit_period, _ = c.GetInt("session_manager", "debit_period")
 	sm_freeswitch_server, _ = c.GetString("session_manager", "freeswitch_server")
 	sm_freeswitch_pass, _ = c.GetString("session_manager", "freeswitch_pass")
 	sm_rpc_encoding, _ = c.GetString("session_manager", "rpc_encoding")
@@ -213,8 +219,13 @@ func startSessionManager(responder *timespans.Responder, loggerDb sessionmanager
 		}
 		connector = &sessionmanager.RPCClientConnector{client}
 	}
-	sm := sessionmanager.NewFSSessionManager(loggerDb)
-	sm.Connect(&sessionmanager.SessionDelegate{connector}, sm_freeswitch_server, sm_freeswitch_pass)
+	switch sm_type {
+	case FS:
+		sm := sessionmanager.NewFSSessionManager(loggerDb)
+		sm.Connect(&sessionmanager.SessionDelegate{connector, time.Duration(sm_debit_period) * time.Second}, sm_freeswitch_server, sm_freeswitch_pass)
+	default:
+		timespans.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_type))
+	}
 }
 
 func checkConfigSanity() {
@@ -291,27 +302,27 @@ func main() {
 	}
 	responder := &timespans.Responder{ExitChan: exitChan}
 	if rater_enabled && !balancer_enabled && rater_listen != INTERNAL {
-		timespans.Logger.Info(fmt.Sprintf("CGRateS rater started on %s.", rater_listen))
+		timespans.Logger.Info(fmt.Sprintf("Starting CGRateS rater on %s.", rater_listen))
 		go listenToRPCRequests(responder, rater_listen, rater_rpc_encoding)
 	}
 	if balancer_enabled {
-		timespans.Logger.Info(fmt.Sprintf("CGRateS balancer started on %s.", balancer_listen))
+		timespans.Logger.Info(fmt.Sprintf("Starting CGRateS balancer on %s.", balancer_listen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
 		go listenToRPCRequests(responder, balancer_listen, balancer_rpc_encoding)
 		if rater_enabled {
-			timespans.Logger.Info("Internal rater started.")
+			timespans.Logger.Info("Starting internal rater.")
 			bal.AddClient("local", new(timespans.ResponderWorker))
 		}
 	}
 
 	if stats_enabled {
-		timespans.Logger.Info(fmt.Sprintf("CGRateS stats server started on %v.", stats_listen))
+		timespans.Logger.Info(fmt.Sprintf("Starting CGRateS stats server on %v.", stats_listen))
 		go listenToHttpRequests()
 	}
 
 	if scheduler_enabled {
-		timespans.Logger.Info("CGRateS scheduler started.")
+		timespans.Logger.Info("Starting CGRateS scheduler.")
 		go func() {
 			loadActionTimings(getter)
 			go reloadSchedulerSingnalHandler(getter)
@@ -320,12 +331,12 @@ func main() {
 	}
 
 	if sm_enabled {
-		timespans.Logger.Info("CGRateS session manager started.")
+		timespans.Logger.Info("Starting CGRateS session manager.")
 		go startSessionManager(responder, loggerDb)
 	}
 
 	if mediator_enabled {
-		timespans.Logger.Info("CGRateS mediator started.")
+		timespans.Logger.Info("Starting CGRateS mediator.")
 		go startMediator(responder, loggerDb)
 	}
 

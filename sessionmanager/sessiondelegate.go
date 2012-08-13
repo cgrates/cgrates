@@ -25,10 +25,6 @@ import (
 	"time"
 )
 
-const (
-	DEBIT_PERIOD = 10 * time.Second
-)
-
 type Connector interface {
 	GetCost(timespans.CallDescriptor, *timespans.CallCost) error
 	Debit(timespans.CallDescriptor, *timespans.CallCost) error
@@ -60,7 +56,8 @@ func (rcc *RPCClientConnector) GetMaxSessionTime(cd timespans.CallDescriptor, re
 
 // Sample SessionDelegate calling the timespans methods through the RPC interface
 type SessionDelegate struct {
-	Connector Connector
+	Connector   Connector
+	DebitPeriod time.Duration
 }
 
 func (rsd *SessionDelegate) OnHeartBeat(ev Event) {
@@ -155,7 +152,7 @@ func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor)
 		s.sessionManager.DisconnectSession(s)
 	}
 	s.CallCosts = append(s.CallCosts, cc)
-	cd.Amount = DEBIT_PERIOD.Seconds()
+	cd.Amount = rsd.DebitPeriod.Seconds()
 	var remainingSeconds float64
 	err = rsd.Connector.GetMaxSessionTime(*cd, &remainingSeconds)
 	if err != nil {
@@ -170,12 +167,12 @@ func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor)
 		s.Disconnect()
 		return
 	}
-	if remainingSeconds < DEBIT_PERIOD.Seconds() || err != nil {
+	if remainingSeconds < rsd.DebitPeriod.Seconds() || err != nil {
 		timespans.Logger.Info(fmt.Sprintf("Not enough money for another debit period %v", s))
 		s.Disconnect()
 		return
 	}
 }
 func (rsd *SessionDelegate) GetDebitPeriod() time.Duration {
-	return DEBIT_PERIOD
+	return rsd.DebitPeriod
 }

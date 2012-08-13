@@ -61,7 +61,9 @@ enabled = true
 
 [session_manager]
 enabled = true
+type = test
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
+debit_period = 11
 freeswitch_server = test # freeswitch address host:port
 freeswitch_pass = test # freeswitch address host:port
 rpc_encoding = test # use JSON for RPC encoding
@@ -101,8 +103,10 @@ func TestConfig(t *testing.T) {
 		scheduler_enabled != true ||
 
 		sm_enabled != true ||
+		sm_type != "test" ||
 		sm_rater != "test" ||
 		sm_freeswitch_server != "test" ||
+		sm_debit_period != 11 ||
 		sm_freeswitch_pass != "test" ||
 		sm_rpc_encoding != "test" ||
 
@@ -132,7 +136,9 @@ func TestConfig(t *testing.T) {
 		t.Log(balancer_rpc_encoding)
 		t.Log(scheduler_enabled)
 		t.Log(sm_enabled)
+		t.Log(sm_type)
 		t.Log(sm_rater)
+		t.Log(sm_debit_period)
 		t.Log(sm_freeswitch_server)
 		t.Log(sm_freeswitch_pass)
 		t.Log(sm_rpc_encoding)

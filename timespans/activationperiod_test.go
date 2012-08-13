@@ -192,7 +192,7 @@ func BenchmarkActivationPeriodStoreRestoreJson(b *testing.B) {
 func BenchmarkActivationPeriodRestore(b *testing.B) {
 	ap := ActivationPeriod{}
 	for i := 0; i < b.N; i++ {
-		ap.restore("1328106601000000000|2;1;3,4;14:30:00;15:00:00;0;0;0;0")
+		ap.restore("1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0")
 	}
 }
 
