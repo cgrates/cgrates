@@ -258,6 +258,10 @@ func main() {
 	defer getter.Close()
 	timespans.SetStorageGetter(getter)
 
+	if sm_debit_period > 0 {
+		timespans.SetDebitPeriod(time.Duration(sm_debit_period))
+	}
+
 	var loggerDb timespans.StorageGetter
 	if logging_db_type != DISABLED {
 		switch logging_db_type {
