@@ -19,7 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"bufio"
+	"errors"
+	"fmt"
 	"log"
+	"os"
+	"regexp"
 	"strconv"
 )
 
@@ -124,14 +129,29 @@ func (cds CallDescriptors) getKey(key string) *CallDescriptor {
 	return nil
 }
 
-/*func (cds CallDescriptors) setIntervalEndTime() {
-	for _, cd := range cds {
-		for _, ap := range cd.ActivationPeriods {
-			for x, i := range ap.Intervals {
-				if x < len(ap.Intervals)-1 {
-					i.EndTime = ap.Intervals[x+1].StartTime
-				}
+func ValidateCSVData(fn string, re *regexp.Regexp) (err error) {
+	fin, err := os.Open(fn)
+	if err != nil {
+		return
+	}
+	defer fin.Close()
+	r := bufio.NewReader(fin)
+	line_number := 1
+	for {
+		line, truncated, err := r.ReadLine()
+		if err != nil {
+			break
+		}
+		if truncated {
+			return errors.New("line too long")
+		}
+		// skip the header line
+		if line_number > 1 {
+			if !re.Match(line) {
+				return errors.New(fmt.Sprintf("%s: error on line %d: %s", fn, line_number, line))
 			}
 		}
+		line_number++
 	}
-}*/
+	return
+}
