@@ -20,7 +20,7 @@ package timespans
 
 import (
 	"encoding/json"
-	"github.com/rif/cache"
+	"github.com/rif/cache2go"
 	"reflect"
 	"testing"
 )

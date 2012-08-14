@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"github.com/rif/cache2go"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +31,12 @@ The struture that is saved to storage.
 type ActivationPeriod struct {
 	ActivationTime time.Time
 	Intervals      []*Interval
+}
+
+type xCachedActivationPeriods struct {
+	destPrefix string
+	aps        []*ActivationPeriod
+	*cache.XEntry
 }
 
 /*

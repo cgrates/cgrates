@@ -21,6 +21,7 @@ package timespans
 import (
 	"errors"
 	"fmt"
+	"github.com/rif/cache2go"
 	"log/syslog"
 	"math"
 	"time"
@@ -44,6 +45,7 @@ const (
 
 var (
 	storageGetter, _ = NewMapStorage()
+	debitPeriod      = 10 * time.Second
 	//storageGetter, _ = NewMongoStorage("localhost", "cgrates")
 	//storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 10, "")
 	Logger LoggerInterface
@@ -129,9 +131,21 @@ func SetStorageGetter(sg StorageGetter) {
 }
 
 /*
+Exported method to set the debit period for caching purposes.
+*/
+func SetDebitPeriod(d time.Duration) {
+	debitPeriod = d
+}
+
+/*
 Restores the activation periods for the specified prefix from storage.
 */
 func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error) {
+	if val, err := cache.GetXCached(cd.GetKey()); err == nil {
+		xaps := val.(xCachedActivationPeriods)
+		cd.ActivationPeriods = xaps.aps
+		return xaps.destPrefix, nil
+	}
 	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
 	base := fmt.Sprintf("%s:%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR, cd.Subject)
 	destPrefix = cd.Destination
@@ -155,6 +169,8 @@ func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error
 	}
 	//load the activation preriods
 	if err == nil && len(values) > 0 {
+		xaps := xCachedActivationPeriods{destPrefix, values, new(cache.XEntry)}
+		xaps.XCache(cd.GetKey(), debitPeriod+5*time.Second, xaps)
 		cd.ActivationPeriods = values
 	}
 	return
