@@ -20,6 +20,7 @@ package timespans
 
 import (
 	"encoding/json"
+	"github.com/rif/cache"
 	"reflect"
 	"testing"
 )
@@ -63,7 +64,7 @@ func TestDestinationGetExists(t *testing.T) {
 
 func TestDestinationGetExistsCache(t *testing.T) {
 	GetDestination("NAT")
-	if _, exists := DestinationCacheMap["NAT"]; !exists {
+	if _, err := cache.GetCached("NAT"); err != nil {
 		t.Error("Destination not cached!")
 	}
 }
@@ -77,7 +78,7 @@ func TestDestinationGetNotExists(t *testing.T) {
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
 	GetDestination("not existing")
-	if _, exists := DestinationCacheMap["not existing"]; exists {
+	if _, err := cache.GetCached("not existing"); err == nil {
 		t.Error("Bad destination cached")
 	}
 }

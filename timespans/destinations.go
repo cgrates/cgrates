@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"github.com/rif/cache"
 	"strings"
 )
 
@@ -30,20 +31,16 @@ type Destination struct {
 	Prefixes []string
 }
 
-type destinationCacheMap map[string]*Destination
-
-var (
-	DestinationCacheMap = make(destinationCacheMap)
-)
-
 // Gets the specified destination from the storage and caches it.
 func GetDestination(dId string) (d *Destination, err error) {
-	d, exists := DestinationCacheMap[dId]
-	if !exists {
+	x, err := cache.GetCached(dId)
+	if err != nil {
 		d, err = storageGetter.GetDestination(dId)
 		if err == nil && d != nil {
-			DestinationCacheMap[dId] = d
+			cache.Cache(dId, d)
 		}
+	} else {
+		d = x.(*Destination)
 	}
 	return
 }
