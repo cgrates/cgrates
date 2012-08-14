@@ -269,7 +269,7 @@ func main() {
 			if db != nil {
 				defer db.Close()
 			}
-			loggerDb = &timespans.PostgresLogger{db}
+			loggerDb = &timespans.PostgresStorage{db}
 		case MONGO:
 			loggerDb, err = timespans.NewMongoStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
 		}
