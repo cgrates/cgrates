@@ -61,16 +61,18 @@ enabled = true
 
 [session_manager]
 enabled = true
-type = test
+switch_type = test
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
 debit_period = 11
-freeswitch_server = test # freeswitch address host:port
-freeswitch_pass = test # freeswitch address host:port
 rpc_encoding = test # use JSON for RPC encoding
 
 [stats_server]
 enabled = true
 listen = test # Web server address (for stat reports)
+
+[freeswitch]
+server = test # freeswitch address host:port
+pass = test # freeswitch address host:port
 `
 )
 
@@ -103,11 +105,9 @@ func TestConfig(t *testing.T) {
 		scheduler_enabled != true ||
 
 		sm_enabled != true ||
-		sm_type != "test" ||
+		sm_switch_type != "test" ||
 		sm_rater != "test" ||
-		sm_freeswitch_server != "test" ||
 		sm_debit_period != 11 ||
-		sm_freeswitch_pass != "test" ||
 		sm_rpc_encoding != "test" ||
 
 		mediator_enabled != true ||
@@ -116,8 +116,11 @@ func TestConfig(t *testing.T) {
 		mediator_rater != "test" ||
 		mediator_rpc_encoding != "test" ||
 		mediator_skipdb != true ||
+
 		stats_enabled != true ||
-		stats_listen != "test" {
+		stats_listen != "test" ||
+		freeswitch_server != "test" ||
+		freeswitch_pass != "test" {
 		t.Log(redis_server)
 		t.Log(redis_db)
 		t.Log(redis_pass)
@@ -136,11 +139,9 @@ func TestConfig(t *testing.T) {
 		t.Log(balancer_rpc_encoding)
 		t.Log(scheduler_enabled)
 		t.Log(sm_enabled)
-		t.Log(sm_type)
+		t.Log(sm_switch_type)
 		t.Log(sm_rater)
 		t.Log(sm_debit_period)
-		t.Log(sm_freeswitch_server)
-		t.Log(sm_freeswitch_pass)
 		t.Log(sm_rpc_encoding)
 		t.Log(mediator_enabled)
 		t.Log(mediator_cdr_file)
@@ -148,7 +149,8 @@ func TestConfig(t *testing.T) {
 		t.Log(mediator_rater)
 		t.Log(stats_enabled)
 		t.Log(stats_listen)
-
+		t.Log(freeswitch_server)
+		t.Log(freeswitch_pass)
 		t.Error("Config file read failed!")
 	}
 }

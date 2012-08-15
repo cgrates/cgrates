@@ -69,13 +69,11 @@ var (
 
 	scheduler_enabled = false
 
-	sm_enabled           = false
-	sm_type              = FS
-	sm_rater             = INTERNAL         // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	sm_freeswitch_server = "localhost:8021" // freeswitch address host:port
-	sm_freeswitch_pass   = "ClueCon"        // reeswitch address host:port	
-	sm_debit_period      = 10               // the period to be debited in advanced during a call (in seconds)
-	sm_rpc_encoding      = GOB              // use JSON for RPC encoding
+	sm_enabled      = false
+	sm_switch_type  = FS
+	sm_rater        = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	sm_debit_period = 10       // the period to be debited in advanced during a call (in seconds)
+	sm_rpc_encoding = GOB      // use JSON for RPC encoding
 
 	mediator_enabled      = false
 	mediator_cdr_file     = "Master.csv" // Freeswitch Master CSV CDR file.
@@ -86,6 +84,9 @@ var (
 
 	stats_enabled = false
 	stats_listen  = "127.0.0.1:8000" // Web server address (for stat reports)
+
+	freeswitch_server = "localhost:8021" // freeswitch address host:port
+	freeswitch_pass   = "ClueCon"        // reeswitch address host:port	
 
 	bal      = balancer.NewBalancer()
 	exitChan = make(chan bool)
@@ -115,11 +116,9 @@ func readConfig(c *conf.ConfigFile) {
 	scheduler_enabled, _ = c.GetBool("scheduler", "enabled")
 
 	sm_enabled, _ = c.GetBool("session_manager", "enabled")
-	sm_type, _ = c.GetString("session_manager", "type")
+	sm_switch_type, _ = c.GetString("session_manager", "switch_type")
 	sm_rater, _ = c.GetString("session_manager", "rater")
 	sm_debit_period, _ = c.GetInt("session_manager", "debit_period")
-	sm_freeswitch_server, _ = c.GetString("session_manager", "freeswitch_server")
-	sm_freeswitch_pass, _ = c.GetString("session_manager", "freeswitch_pass")
 	sm_rpc_encoding, _ = c.GetString("session_manager", "rpc_encoding")
 
 	mediator_enabled, _ = c.GetBool("mediator", "enabled")
@@ -131,6 +130,10 @@ func readConfig(c *conf.ConfigFile) {
 
 	stats_enabled, _ = c.GetBool("stats_server", "enabled")
 	stats_listen, _ = c.GetString("stats_server", "listen")
+
+	freeswitch_server, _ = c.GetString("freeswitch", "server")
+	freeswitch_pass, _ = c.GetString("freeswitch", "pass")
+
 }
 
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
@@ -217,12 +220,12 @@ func startSessionManager(responder *timespans.Responder, loggerDb timespans.Stor
 		}
 		connector = &sessionmanager.RPCClientConnector{client}
 	}
-	switch sm_type {
+	switch sm_switch_type {
 	case FS:
 		sm := sessionmanager.NewFSSessionManager(loggerDb)
-		sm.Connect(&sessionmanager.SessionDelegate{connector, time.Duration(sm_debit_period) * time.Second}, sm_freeswitch_server, sm_freeswitch_pass)
+		sm.Connect(&sessionmanager.SessionDelegate{connector, time.Duration(sm_debit_period) * time.Second}, freeswitch_server, freeswitch_pass)
 	default:
-		timespans.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_type))
+		timespans.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
 	}
 }
 
