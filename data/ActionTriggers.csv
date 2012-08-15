@@ -1,4 +1,4 @@
-Tag,BalanceTag,ThresholdValue,Direction,DestinationTag,ActionsTag,Weight
+Tag,BalanceTag,Direction,ThresholdValue,DestinationTag,ActionsTag,Weight
 STANDARD_TRIGGER,MONETARY,OUT,30,*all,SOME_1,10
 STANDARD_TRIGGER,SMS,OUT,30,*all,SOME_2,10
 STANDARD_TRIGGER,MINUTES,OUT,10,GERMANY_O2,SOME_1,10
