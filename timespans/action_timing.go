@@ -287,7 +287,11 @@ func (at *ActionTiming) store() (result string) {
 		result += ubi + ","
 	}
 	result = strings.TrimRight(result, ",") + "|"
-	result += at.Timing.store() + "|"
+	if at.Timing != nil {
+		result += at.Timing.store() + "|"
+	} else {
+		result += " |"
+	}
 	result += strconv.FormatFloat(at.Weight, 'f', -1, 64) + "|"
 	result += at.ActionsId
 	return

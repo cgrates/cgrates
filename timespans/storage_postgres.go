@@ -100,3 +100,8 @@ func (psl *PostgresStorage) GetCallCostLog(uuid string) (cc *CallCost, err error
 	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)
 	return
 }
+
+func (psl *PostgresStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
+	return
+}
+func (psl *PostgresStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) { return }
