@@ -20,6 +20,7 @@ package timespans
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -746,6 +747,71 @@ func TestUUID(t *testing.T) {
 		t.Fatalf("GenUUID error %s", uuid)
 	}
 	t.Logf("uuid[%s]\n", uuid)
+}
+
+func TestActionTriggerLogging(t *testing.T) {
+	at := &ActionTrigger{
+		BalanceId:      CREDIT,
+		Direction:      OUTBOUND,
+		ThresholdValue: 100.0,
+		DestinationId:  "NAT",
+		Weight:         10.0,
+		ActionsId:      "TEST_ACTIONS",
+	}
+	as, err := storageGetter.GetActions(at.ActionsId)
+	if err != nil {
+		t.Error("Error getting actions for the action timing: ", err)
+	}
+	storageGetter.LogActionTrigger("rif", at, as)
+	expected := "rif*MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*TOPUP|MONETARY|OUT|10|0"
+	var key string
+	for k, v := range storageGetter.(*MapStorage).dict {
+		if strings.Contains(k, LOG_PREFIX) && strings.Contains(string(v), expected) {
+			key = k
+			break
+		}
+	}
+	if key == "" {
+		t.Error("Action timing was not logged")
+	}
+}
+
+func TestActionTimingLogging(t *testing.T) {
+	i := &Interval{
+		Months:         Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays:      MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
+		WeekDays:       WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+		StartTime:      "18:00:00",
+		EndTime:        "00:00:00",
+		Weight:         10.0,
+		ConnectFee:     0.0,
+		Price:          1.0,
+		PricedUnits:    60,
+		RateIncrements: 1,
+	}
+	at := &ActionTiming{
+		Id:             "some uuid",
+		Tag:            "test",
+		UserBalanceIds: []string{"one", "two", "three"},
+		Timing:         i,
+		Weight:         10.0,
+		ActionsId:      "TEST_ACTIONS",
+	}
+	as, err := storageGetter.GetActions(at.ActionsId)
+	if err != nil {
+		t.Error("Error getting actions for the action trigger: ", err)
+	}
+	storageGetter.LogActionTiming(at, as)
+	expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*TOPUP|MONETARY|OUT|10|0"
+	var key string
+	for k, v := range storageGetter.(*MapStorage).dict {
+		if strings.Contains(k, LOG_PREFIX) && strings.Contains(string(v), expected) {
+			key = k
+		}
+	}
+	if key == "" {
+		t.Error("Action trigger was not logged")
+	}
 }
 
 /********************************** Benchmarks ********************************/
