@@ -103,9 +103,20 @@ type AtKeyValue struct {
 	Value []*ActionTiming
 }
 
-type LogEntry struct {
+type LogCostEntry struct {
 	Id       string `bson:"_id,omitempty"`
 	CallCost *CallCost
+}
+
+type LogTimingEntry struct {
+	ActionTiming *ActionTiming
+	Actions      []*Action
+}
+
+type LogTriggerEntry struct {
+	ubId          string
+	ActionTrigger *ActionTrigger
+	Actions       []*Action
 }
 
 func (ms *MongoStorage) GetActivationPeriodsOrFallback(key string) ([]*ActivationPeriod, string, error) {
@@ -172,13 +183,20 @@ func (ms *MongoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, e
 }
 
 func (ms *MongoStorage) LogCallCost(uuid string, cc *CallCost) error {
-	return ms.db.C("cclog").Insert(&LogEntry{uuid, cc})
-
+	return ms.db.C("cclog").Insert(&LogCostEntry{uuid, cc})
 }
 
 func (ms *MongoStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
-	result := new(LogEntry)
+	result := new(LogCostEntry)
 	err = ms.db.C("cclog").Find(bson.M{"_id": uuid}).One(result)
 	cc = result.CallCost
 	return
+}
+
+func (ms *MongoStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
+	return ms.db.C("cclog").Insert(&LogTriggerEntry{ubId, at, as})
+}
+
+func (ms *MongoStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
+	return ms.db.C("cclog").Insert(&LogTimingEntry{at, as})
 }

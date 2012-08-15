@@ -43,6 +43,7 @@ const (
 	GOB      = "gob"
 	POSTGRES = "postgres"
 	MONGO    = "mongo"
+	SAME     = "same"
 	FS       = "freeswitch"
 )
 
@@ -266,21 +267,26 @@ func main() {
 	}
 
 	var loggerDb timespans.StorageGetter
-	if logging_db_type != DISABLED {
-		switch logging_db_type {
-		case POSTGRES:
-			db, err := sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password))
-			if err != nil {
-				timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
-			}
-			if db != nil {
-				defer db.Close()
-			}
-			loggerDb = &timespans.PostgresStorage{db}
-		case MONGO:
-			loggerDb, err = timespans.NewMongoStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
+	switch logging_db_type {
+	case POSTGRES:
+		db, err := sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password))
+		if err != nil {
+			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
 		}
+		if db != nil {
+			defer db.Close()
+		}
+		loggerDb = &timespans.PostgresStorage{db}
+	case MONGO:
+		loggerDb, err = timespans.NewMongoStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
+	case SAME:
+		loggerDb = getter
+	default:
+		timespans.Logger.Crit("Could not open logging database")
+		exitChan <- true
 	}
+
+	timespans.SetStorageLogger(loggerDb)
 
 	if rater_enabled && rater_balancer != DISABLED && !balancer_enabled {
 		go registerToBalancer()

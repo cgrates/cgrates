@@ -219,13 +219,14 @@ func (at *ActionTiming) Execute() (err error) {
 		}
 		for _, ub := range at.getUserBalances() {
 			AccLock.Guard(ub.Id, func() (float64, error) {
-				Logger.Info(fmt.Sprintf("Executing %v: %v", ub.Id, a))
+				go Logger.Info(fmt.Sprintf("Executing %v: %v", ub.Id, a))
 				err = actionFunction(ub, a)
 				storageGetter.SetUserBalance(ub)
 				return 0, nil
 			})
 		}
 	}
+	go storageLogger.LogActionTiming(at, aac)
 	return
 }
 

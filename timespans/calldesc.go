@@ -45,6 +45,7 @@ const (
 
 var (
 	storageGetter, _ = NewMapStorage()
+	storageLogger    = storageGetter
 	debitPeriod      = 10 * time.Second
 	//storageGetter, _ = NewMongoStorage("localhost", "cgrates")
 	//storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 10, "")
@@ -128,6 +129,13 @@ Exported method to set the storage getter.
 */
 func SetStorageGetter(sg StorageGetter) {
 	storageGetter = sg
+}
+
+/*
+Sets the database for logging (can be de same  as storage getter or different db)
+*/
+func SetStorageLogger(sg StorageGetter) {
+	storageLogger = sg
 }
 
 /*

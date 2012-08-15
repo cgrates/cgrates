@@ -28,6 +28,7 @@ import (
 
 const (
 	ACTION_TIMING_PREFIX = "acttmg"
+	LOG_PREFIX           = "log:"
 )
 
 /*
@@ -49,6 +50,8 @@ type StorageGetter interface {
 	GetAllActionTimings() (map[string][]*ActionTiming, error)
 	LogCallCost(uuid string, cc *CallCost) error
 	GetCallCostLog(uuid string) (*CallCost, error)
+	LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) error
+	LogActionTiming(at *ActionTiming, as []*Action) error
 }
 
 type Marshaler interface {

@@ -158,3 +158,29 @@ func (ms *MapStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
 	}
 	return
 }
+
+func (ms *MapStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
+	mat, err := ms.ms.Marshal(at)
+	if err != nil {
+		return
+	}
+	mas, err := ms.ms.Marshal(as)
+	if err != nil {
+		return
+	}
+	ms.dict[LOG_PREFIX+GenUUID()] = []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
+	return
+}
+
+func (ms *MapStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
+	mat, err := ms.ms.Marshal(at)
+	if err != nil {
+		return
+	}
+	mas, err := ms.ms.Marshal(as)
+	if err != nil {
+		return
+	}
+	ms.dict[LOG_PREFIX+GenUUID()] = []byte(fmt.Sprintf("%s*%s", string(mat), string(mas)))
+	return
+}

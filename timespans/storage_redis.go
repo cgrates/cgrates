@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
+	"fmt"
 	"github.com/simonz05/godis"
 )
 
@@ -150,6 +151,9 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, e
 
 func (rs *RedisStorage) LogCallCost(uuid string, cc *CallCost) (err error) {
 	result, err := rs.ms.Marshal(cc)
+	if err != nil {
+		return
+	}
 	return rs.db.Set(uuid, result)
 }
 
@@ -159,5 +163,31 @@ func (rs *RedisStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
 	} else {
 		return nil, err
 	}
+	return
+}
+
+func (rs *RedisStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
+	mat, err := rs.ms.Marshal(at)
+	if err != nil {
+		return
+	}
+	mas, err := rs.ms.Marshal(as)
+	if err != nil {
+		return
+	}
+	rs.db.Set(LOG_PREFIX+GenUUID(), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
+	return
+}
+
+func (rs *RedisStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
+	mat, err := rs.ms.Marshal(at)
+	if err != nil {
+		return
+	}
+	mas, err := rs.ms.Marshal(as)
+	if err != nil {
+		return
+	}
+	rs.db.Set(LOG_PREFIX+GenUUID(), []byte(fmt.Sprintf("%s*%s", string(mat), string(mas))))
 	return
 }
