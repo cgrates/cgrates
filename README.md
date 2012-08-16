@@ -20,4 +20,4 @@ API reference http://gopkgdoc.appspot.com/pkg/github.com/cgrates/cgrates
 
 Also check irc.freenode.net#cgrates and [Google group](https://groups.google.com/forum/#!forum/cgrates) for live info.
 
-Continous integration: [![Build Status](http://goci.me/project/image/github.com/cgrates/cgrates "Continous integration")](http://goci.me/project/github.com/cgrates/cgrates) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
+Continous integration: [![Build Status](https://goci.me/project/image/github.com/cgrates/cgrates "Continous integration")](http://goci.me/project/github.com/cgrates/cgrates) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
