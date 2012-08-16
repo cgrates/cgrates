@@ -20,7 +20,6 @@ package main
 
 import (
 	"code.google.com/p/goconf/conf"
-	"database/sql"
 	"flag"
 	"fmt"
 	_ "github.com/bmizerany/pq"
@@ -269,16 +268,15 @@ func main() {
 	var loggerDb timespans.StorageGetter
 	switch logging_db_type {
 	case POSTGRES:
-		db, err := sql.Open(logging_db_type, fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password))
+		loggerDb, err = timespans.NewPostgresStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
 		if err != nil {
 			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
 		}
-		if db != nil {
-			defer db.Close()
-		}
-		loggerDb = &timespans.PostgresStorage{db}
 	case MONGO:
 		loggerDb, err = timespans.NewMongoStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
+		if err != nil {
+			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
+		}
 	case SAME:
 		loggerDb = getter
 	default:

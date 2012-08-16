@@ -28,6 +28,14 @@ type PostgresStorage struct {
 	Db *sql.DB
 }
 
+func NewPostgresStorage(host, port, name, user, password string) (StorageGetter, error) {
+	db, err := sql.Open("postgress", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password))
+	if err != nil {
+		return nil, err
+	}
+	return &PostgresStorage{db}, nil
+}
+
 func (psl *PostgresStorage) Close() {}
 
 func (psl *PostgresStorage) Flush() (err error) {
