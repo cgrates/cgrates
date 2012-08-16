@@ -339,13 +339,11 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	_, err = cd.SearchStorageForPrefix()
 	now := time.Now()
 	availableCredit, availableSeconds := 0.0, 0.0
-	Logger.Debug(fmt.Sprintf("Max session time for: %s", cd.GetUserBalanceKey()))
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		if userBalance.Type == UB_TYPE_POSTPAID {
 			return -1, nil
 		} else {
 			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd.Destination)
-			Logger.Debug(fmt.Sprintf("=> second: %v, credit: %v", availableSeconds, availableCredit))
 		}
 	} else {
 		return cd.Amount, err

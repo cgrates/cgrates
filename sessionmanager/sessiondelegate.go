@@ -159,7 +159,7 @@ func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor)
 	}
 	nbts := len(cc.Timespans)
 	remainingSeconds := 0.0
-	timespans.Logger.Debug(fmt.Sprintf("MaxDebited and got this: %v", cc))
+	timespans.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
 	if nbts > 0 {
 		remainingSeconds = cc.Timespans[nbts-1].TimeEnd.Sub(cc.Timespans[0].TimeStart).Seconds()
 	}

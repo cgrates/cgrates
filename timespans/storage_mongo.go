@@ -196,9 +196,9 @@ func (ms *MongoStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
 }
 
 func (ms *MongoStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
-	return ms.db.C("cclog").Insert(&LogTriggerEntry{ubId, at, as, time.Now()})
+	return ms.db.C("actlog").Insert(&LogTriggerEntry{ubId, at, as, time.Now()})
 }
 
 func (ms *MongoStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
-	return ms.db.C("cclog").Insert(&LogTimingEntry{at, as, time.Now()})
+	return ms.db.C("actlog").Insert(&LogTimingEntry{at, as, time.Now()})
 }
