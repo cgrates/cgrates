@@ -47,26 +47,19 @@ func (rs *RedisStorage) Flush() error {
 	return rs.db.Flushdb()
 }
 
-func (rs *RedisStorage) GetActivationPeriodsOrFallback(key string) (aps []*ActivationPeriod, fallbackKey string, err error) {
-	elem, err := rs.db.Get(key)
-	if err != nil {
-		return
-	}
-	err = rs.ms.Unmarshal(elem, &aps)
-	if err != nil {
-		err = rs.ms.Unmarshal(elem, &fallbackKey)
+func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
+	if values, err := rs.db.Get(key); err == nil {
+		rp = new(RatingProfile)
+		err = rs.ms.Unmarshal(values, rp)
+	} else {
+		return nil, err
 	}
 	return
 }
 
-func (rs *RedisStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) (err error) {
-	var result []byte
-	if len(aps) > 0 {
-		result, err = rs.ms.Marshal(aps)
-	} else {
-		result, err = rs.ms.Marshal(fallbackKey)
-	}
-	return rs.db.Set(key, result)
+func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
+	result, err := rs.ms.Marshal(rp)
+	return rs.db.Set(rp.Id, result)
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {

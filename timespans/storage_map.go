@@ -41,27 +41,19 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
-func (ms *MapStorage) GetActivationPeriodsOrFallback(key string) (aps []*ActivationPeriod, fallbackKey string, err error) {
-	elem, ok := ms.dict[key]
-	if !ok {
-		err = errors.New(fmt.Sprintf("%s not found!", key))
-		return
-	}
-	err = ms.ms.Unmarshal(elem, &aps)
-	if err != nil {
-		err = ms.ms.Unmarshal(elem, &fallbackKey)
+func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
+	if values, ok := ms.dict[key]; ok {
+		rp = new(RatingProfile)
+		err = ms.ms.Unmarshal(values, rp)
+	} else {
+		return nil, errors.New("not found")
 	}
 	return
 }
 
-func (ms *MapStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) (err error) {
-	var result []byte
-	if len(aps) > 0 {
-		result, err = ms.ms.Marshal(aps)
-	} else {
-		result, err = ms.ms.Marshal(fallbackKey)
-	}
-	ms.dict[key] = result
+func (ms *MapStorage) SetRatingProfile(rp *RatingProfile) (err error) {
+	result, err := ms.ms.Marshal(rp.Id)
+	ms.dict[rp.Id] = result
 	return
 }
 

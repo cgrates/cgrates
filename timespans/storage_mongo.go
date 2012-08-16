@@ -46,12 +46,11 @@ func NewMongoStorage(host, port, db, user, pass string) (StorageGetter, error) {
 	ndb := session.DB(db)
 	session.SetMode(mgo.Monotonic, true)
 	index := mgo.Index{Key: []string{"key"}, Background: true}
-	err = ndb.C("activationperiods").EnsureIndex(index)
-	err = ndb.C("destinations").EnsureIndex(index)
 	err = ndb.C("actions").EnsureIndex(index)
-	index = mgo.Index{Key: []string{"id"}, Background: true}
-	err = ndb.C("userbalances").EnsureIndex(index)
 	err = ndb.C("actiontimings").EnsureIndex(index)
+	index = mgo.Index{Key: []string{"id"}, Background: true}
+	err = ndb.C("destinations").EnsureIndex(index)
+	err = ndb.C("userbalances").EnsureIndex(index)
 
 	return &MongoStorage{db: ndb, session: session}, nil
 }
@@ -61,7 +60,7 @@ func (ms *MongoStorage) Close() {
 }
 
 func (ms *MongoStorage) Flush() (err error) {
-	err = ms.db.C("activationperiods").DropCollection()
+	err = ms.db.C("ratingprofiles").DropCollection()
 	if err != nil {
 		return
 	}
@@ -82,15 +81,6 @@ func (ms *MongoStorage) Flush() (err error) {
 		return
 	}
 	return nil
-}
-
-/*
-Helper type for activation periods storage.
-*/
-type ApKeyValue struct {
-	Key         string
-	FallbackKey string `omitempty`
-	Value       []*ActivationPeriod
 }
 
 type AcKeyValue struct {
@@ -121,14 +111,14 @@ type LogTriggerEntry struct {
 	LogTime       time.Time
 }
 
-func (ms *MongoStorage) GetActivationPeriodsOrFallback(key string) ([]*ActivationPeriod, string, error) {
-	result := new(ApKeyValue)
-	err := ms.db.C("activationperiods").Find(bson.M{"key": key}).One(&result)
-	return result.Value, result.FallbackKey, err
+func (ms *MongoStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
+	rp = new(RatingProfile)
+	err = ms.db.C("ratingprofiles").Find(bson.M{"_id": key}).One(&rp)
+	return
 }
 
-func (ms *MongoStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallbackKey string) error {
-	return ms.db.C("activationperiods").Insert(&ApKeyValue{Key: key, FallbackKey: fallbackKey, Value: aps})
+func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
+	return ms.db.C("ratingprofiles").Insert(rp)
 }
 
 func (ms *MongoStorage) GetDestination(key string) (result *Destination, err error) {

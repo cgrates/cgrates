@@ -99,12 +99,16 @@ func (ap *ActivationPeriod) restore(input string) {
 }
 
 type RatingProfile struct {
+	Id                string `bson:"_id,omitempty"`
 	DestinationInfo   string
+	FallbackKey       string
 	ActivationPeriods []*ActivationPeriod
 }
 
 func (rp *RatingProfile) store() (result string) {
+	result += rp.Id + ">"
 	result += rp.DestinationInfo + ">"
+	result += rp.FallbackKey + ">"
 	for _, ap := range rp.ActivationPeriods {
 		result += ap.store() + "<"
 	}
@@ -114,8 +118,10 @@ func (rp *RatingProfile) store() (result string) {
 
 func (rp *RatingProfile) restore(input string) {
 	elements := strings.Split(input, ">")
-	rp.DestinationInfo = elements[0]
-	apsList := strings.Split(elements[1], "<")
+	rp.Id = elements[0]
+	rp.DestinationInfo = elements[1]
+	rp.FallbackKey = elements[2]
+	apsList := strings.Split(elements[3], "<")
 	for _, aps := range apsList {
 		ap := new(ActivationPeriod)
 		ap.restore(aps)
