@@ -73,19 +73,22 @@ func loadActionTimings(storage timespans.StorageGetter) {
 	sched.queue = timespans.ActionTimingPriotityList{}
 	for key, ats := range actionTimings {
 		toBeSaved := false
-		for i, at := range ats {
-			toBeSaved = toBeSaved || at.CheckForASAP()
+		isAsap := false
+		newAts := make([]*timespans.ActionTiming, 0)
+		for _, at := range ats {
+			isAsap = at.CheckForASAP()
+			toBeSaved = toBeSaved || isAsap
 			if at.IsOneTimeRun() {
 				timespans.Logger.Info(fmt.Sprintf("Time for one time action on %v", at))
 				go at.Execute()
-				// remove it from list
-				ats = append(ats[:i], ats[i+1:]...)
+				// do not append it to the newAts list to be saved
 			} else {
 				sched.queue = append(sched.queue, at)
+				newAts = append(newAts, at)
 			}
 		}
 		if toBeSaved {
-			storage.SetActionTimings(key, ats)
+			storage.SetActionTimings(key, newAts)
 		}
 	}
 	sort.Sort(sched.queue)
