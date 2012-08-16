@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
-	//"log"
+	"time"
 )
 
 type MongoStorage struct {
@@ -111,12 +111,14 @@ type LogCostEntry struct {
 type LogTimingEntry struct {
 	ActionTiming *ActionTiming
 	Actions      []*Action
+	LogTime      time.Time
 }
 
 type LogTriggerEntry struct {
 	ubId          string
 	ActionTrigger *ActionTrigger
 	Actions       []*Action
+	LogTime       time.Time
 }
 
 func (ms *MongoStorage) GetActivationPeriodsOrFallback(key string) ([]*ActivationPeriod, string, error) {
@@ -194,9 +196,9 @@ func (ms *MongoStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
 }
 
 func (ms *MongoStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
-	return ms.db.C("cclog").Insert(&LogTriggerEntry{ubId, at, as})
+	return ms.db.C("cclog").Insert(&LogTriggerEntry{ubId, at, as, time.Now()})
 }
 
 func (ms *MongoStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
-	return ms.db.C("cclog").Insert(&LogTimingEntry{at, as})
+	return ms.db.C("cclog").Insert(&LogTimingEntry{at, as, time.Now()})
 }

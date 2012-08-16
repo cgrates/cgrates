@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 type MapStorage struct {
@@ -146,7 +147,7 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err
 
 func (ms *MapStorage) LogCallCost(uuid string, cc *CallCost) error {
 	result, err := ms.ms.Marshal(cc)
-	ms.dict[uuid] = result
+	ms.dict[CALL_COST_LOG_PREFIX+uuid] = result
 	return err
 }
 
@@ -168,7 +169,7 @@ func (ms *MapStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Act
 	if err != nil {
 		return
 	}
-	ms.dict[LOG_PREFIX+GenUUID()] = []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
+	ms.dict[LOG_PREFIX+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
 	return
 }
 
@@ -181,6 +182,6 @@ func (ms *MapStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error
 	if err != nil {
 		return
 	}
-	ms.dict[LOG_PREFIX+GenUUID()] = []byte(fmt.Sprintf("%s*%s", string(mat), string(mas)))
+	ms.dict[LOG_PREFIX+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s", string(mat), string(mas)))
 	return
 }

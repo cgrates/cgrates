@@ -27,7 +27,8 @@ import (
 )
 
 const (
-	ACTION_TIMING_PREFIX = "acttmg"
+	ACTION_TIMING_PREFIX = "acttmg:"
+	CALL_COST_LOG_PREFIX = "cc:"
 	LOG_PREFIX           = "log:"
 )
 

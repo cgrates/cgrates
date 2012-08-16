@@ -21,6 +21,7 @@ package timespans
 import (
 	"fmt"
 	"github.com/simonz05/godis"
+	"time"
 )
 
 type RedisStorage struct {
@@ -154,7 +155,7 @@ func (rs *RedisStorage) LogCallCost(uuid string, cc *CallCost) (err error) {
 	if err != nil {
 		return
 	}
-	return rs.db.Set(uuid, result)
+	return rs.db.Set(CALL_COST_LOG_PREFIX+uuid, result)
 }
 
 func (rs *RedisStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
@@ -175,7 +176,7 @@ func (rs *RedisStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*A
 	if err != nil {
 		return
 	}
-	rs.db.Set(LOG_PREFIX+GenUUID(), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
+	rs.db.Set(LOG_PREFIX+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
 	return
 }
 
@@ -188,6 +189,6 @@ func (rs *RedisStorage) LogActionTiming(at *ActionTiming, as []*Action) (err err
 	if err != nil {
 		return
 	}
-	rs.db.Set(LOG_PREFIX+GenUUID(), []byte(fmt.Sprintf("%s*%s", string(mat), string(mas))))
+	rs.db.Set(LOG_PREFIX+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s", string(mat), string(mas))))
 	return
 }
