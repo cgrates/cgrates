@@ -223,7 +223,8 @@ func startSessionManager(responder *timespans.Responder, loggerDb timespans.Stor
 	switch sm_switch_type {
 	case FS:
 		sm := sessionmanager.NewFSSessionManager(loggerDb)
-		sm.Connect(&sessionmanager.SessionDelegate{connector, time.Duration(sm_debit_period) * time.Second}, freeswitch_server, freeswitch_pass)
+		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period))
+		sm.Connect(&sessionmanager.SessionDelegate{connector, dp}, freeswitch_server, freeswitch_pass)
 	default:
 		timespans.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
 	}
@@ -295,7 +296,9 @@ func main() {
 	timespans.SetStorageGetter(getter)
 
 	if sm_debit_period > 0 {
-		timespans.SetDebitPeriod(time.Duration(sm_debit_period))
+		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period)); err == nil {
+			timespans.SetDebitPeriod(dp)
+		}
 	}
 
 	var loggerDb timespans.StorageGetter
@@ -304,11 +307,13 @@ func main() {
 		loggerDb, err = timespans.NewPostgresStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
 		if err != nil {
 			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
+			exitChan <- true
 		}
 	case MONGO:
 		loggerDb, err = timespans.NewMongoStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
 		if err != nil {
 			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
+			exitChan <- true
 		}
 	case SAME:
 		loggerDb = getter

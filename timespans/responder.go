@@ -63,6 +63,19 @@ func (rs *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
+func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
+	if rs.Bal != nil {
+		r, e := rs.getCallCost(&arg, "Responder.MaxDebit")
+		*reply, err = *r, e
+	} else {
+		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
+			return arg.MaxDebit()
+		})
+		*reply, err = *r, e
+	}
+	return
+}
+
 func (rs *Responder) DebitCents(arg CallDescriptor, reply *float64) (err error) {
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.DebitCents")

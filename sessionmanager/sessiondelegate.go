@@ -28,6 +28,7 @@ import (
 type Connector interface {
 	GetCost(timespans.CallDescriptor, *timespans.CallCost) error
 	Debit(timespans.CallDescriptor, *timespans.CallCost) error
+	MaxDebit(timespans.CallDescriptor, *timespans.CallCost) error
 	DebitCents(timespans.CallDescriptor, *float64) error
 	DebitSeconds(timespans.CallDescriptor, *float64) error
 	GetMaxSessionTime(timespans.CallDescriptor, *float64) error
@@ -43,6 +44,10 @@ func (rcc *RPCClientConnector) GetCost(cd timespans.CallDescriptor, cc *timespan
 
 func (rcc *RPCClientConnector) Debit(cd timespans.CallDescriptor, cc *timespans.CallCost) error {
 	return rcc.Client.Call("Responder.Debit", cd, cc)
+}
+
+func (rcc *RPCClientConnector) MaxDebit(cd timespans.CallDescriptor, cc *timespans.CallCost) error {
+	return rcc.Client.Call("Responder.MaxDebit", cd, cc)
 }
 func (rcc *RPCClientConnector) DebitCents(cd timespans.CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.DebitCents", cd, resp)
@@ -145,33 +150,20 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 
 func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
 	cc := &timespans.CallCost{}
-	err := rsd.Connector.Debit(*cd, cc)
+	err := rsd.Connector.MaxDebit(*cd, cc)
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 		// disconnect session
 		s.sessionManager.DisconnectSession(s)
 	}
-	s.CallCosts = append(s.CallCosts, cc)
-	cd.Amount = rsd.DebitPeriod.Seconds()
-	var remainingSeconds float64
-	err = rsd.Connector.GetMaxSessionTime(*cd, &remainingSeconds)
-	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Could not get max session time: %v", err))
-	}
-	if remainingSeconds == -1 && err == nil {
-		timespans.Logger.Info("Postpaying client: happy talking!")
-		return
-	}
+	nbts := len(cc.Timespans)
+	remainingSeconds := cc.Timespans[nbts-1].TimeEnd.Sub(cc.Timespans[0].TimeStart).Seconds()
 	if remainingSeconds == 0 || err != nil {
 		timespans.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		s.Disconnect()
 		return
 	}
-	if remainingSeconds < rsd.DebitPeriod.Seconds() || err != nil {
-		timespans.Logger.Info(fmt.Sprintf("Not enough money for another debit period %v", s))
-		s.Disconnect()
-		return
-	}
+	s.CallCosts = append(s.CallCosts, cc)
 }
 func (rsd *SessionDelegate) GetDebitPeriod() time.Duration {
 	return rsd.DebitPeriod

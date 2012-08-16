@@ -404,6 +404,39 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	return
 }
 
+// Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
+// from user's money balance.
+// This methods combines the Debit and GetMaxSessionTime and will debit the max available time as returned
+// by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
+func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
+	remainingSeconds, err := cd.GetMaxSessionTime()
+	if err != nil || remainingSeconds == 0 {
+		return nil, errors.New("no more credit")
+	}
+	if remainingSeconds > 0 { // for postpaying client returns -1
+		rs, _ := time.ParseDuration(fmt.Sprintf("%vs", remainingSeconds))
+		cd.TimeEnd = cd.TimeStart.Add(rs)
+	}
+	cc, err = cd.GetCost()
+	if err != nil {
+		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
+		return
+	}
+	Logger.Debug(fmt.Sprintf("Debiting from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
+	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+		defer storageGetter.SetUserBalance(userBalance)
+		if cc.Cost != 0 || cc.ConnectFee != 0 {
+			userBalance.debitBalance(CREDIT, cc.Cost+cc.ConnectFee, true)
+		}
+		for _, ts := range cc.Timespans {
+			if ts.MinuteInfo != nil {
+				userBalance.debitMinutesBalance(ts.MinuteInfo.Quantity, cd.Destination, true)
+			}
+		}
+	}
+	return
+}
+
 /*
 Interface method used to add/substract an amount of cents from user's money balance.
 The amount filed has to be filled in call descriptor.
