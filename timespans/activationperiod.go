@@ -97,3 +97,28 @@ func (ap *ActivationPeriod) restore(input string) {
 		ap.Intervals = append(ap.Intervals, i)
 	}
 }
+
+type RatingProfile struct {
+	DestinationInfo   string
+	ActivationPeriods []*ActivationPeriod
+}
+
+func (rp *RatingProfile) store() (result string) {
+	result += rp.DestinationInfo + ">"
+	for _, ap := range rp.ActivationPeriods {
+		result += ap.store() + "<"
+	}
+	result = strings.TrimRight(result, "<")
+	return
+}
+
+func (rp *RatingProfile) restore(input string) {
+	elements := strings.Split(input, ">")
+	rp.DestinationInfo = elements[0]
+	apsList := strings.Split(elements[1], "<")
+	for _, aps := range apsList {
+		ap := new(ActivationPeriod)
+		ap.restore(aps)
+		rp.ActivationPeriods = append(rp.ActivationPeriods, ap)
+	}
+}
