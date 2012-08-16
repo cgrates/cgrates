@@ -410,8 +410,9 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	remainingSeconds, err := cd.GetMaxSessionTime()
+	Logger.Debug(fmt.Sprintf("In MaxDebitd remaining seconds: %v", remainingSeconds))
 	if err != nil || remainingSeconds == 0 {
-		return nil, errors.New("no more credit")
+		return new(CallCost), errors.New("no more credit")
 	}
 	if remainingSeconds > 0 { // for postpaying client returns -1
 		rs, _ := time.ParseDuration(fmt.Sprintf("%vs", remainingSeconds))

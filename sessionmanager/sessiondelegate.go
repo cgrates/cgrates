@@ -150,6 +150,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 
 func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
 	cc := &timespans.CallCost{}
+	cd.Amount = rsd.DebitPeriod.Seconds()
 	err := rsd.Connector.MaxDebit(*cd, cc)
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
@@ -157,7 +158,11 @@ func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor)
 		s.sessionManager.DisconnectSession(s)
 	}
 	nbts := len(cc.Timespans)
-	remainingSeconds := cc.Timespans[nbts-1].TimeEnd.Sub(cc.Timespans[0].TimeStart).Seconds()
+	remainingSeconds := 0.0
+	timespans.Logger.Debug(fmt.Sprintf("MaxDebited and got this: %v", cc))
+	if nbts > 0 {
+		remainingSeconds = cc.Timespans[nbts-1].TimeEnd.Sub(cc.Timespans[0].TimeStart).Seconds()
+	}
 	if remainingSeconds == 0 || err != nil {
 		timespans.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		s.Disconnect()

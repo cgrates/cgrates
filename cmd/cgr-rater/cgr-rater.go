@@ -227,6 +227,7 @@ func startSessionManager(responder *timespans.Responder, loggerDb timespans.Stor
 		sm.Connect(&sessionmanager.SessionDelegate{connector, dp}, freeswitch_server, freeswitch_pass)
 	default:
 		timespans.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
+		exitChan <- true
 	}
 }
 
