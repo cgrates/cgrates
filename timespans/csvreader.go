@@ -379,6 +379,7 @@ func (csvr *CSVReader) LoadActions(fn string, comma rune) (err error) {
 				return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
 			}
 			a = &Action{
+				Id:         GenUUID(),
 				ActionType: record[1],
 				BalanceId:  record[2],
 				Direction:  record[3],
@@ -466,6 +467,7 @@ func (csvr *CSVReader) LoadActionTriggers(fn string, comma rune) (err error) {
 			return errors.New(fmt.Sprintf("Could not parse action trigger weight: %v", err))
 		}
 		at := &ActionTrigger{
+			Id:             GenUUID(),
 			BalanceId:      record[1],
 			Direction:      record[2],
 			ThresholdValue: value,

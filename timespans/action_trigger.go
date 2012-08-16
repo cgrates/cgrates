@@ -26,6 +26,7 @@ import (
 )
 
 type ActionTrigger struct {
+	Id             string // uniquely identify the timing
 	BalanceId      string
 	Direction      string
 	ThresholdValue float64
@@ -82,6 +83,7 @@ func (atpl ActionTriggerPriotityList) Sort() {
 Serializes the action trigger for the storage. Used for key-value storages.
 */
 func (at *ActionTrigger) store() (result string) {
+	result += at.Id + ";"
 	result += at.BalanceId + ";"
 	result += at.Direction + ";"
 	result += at.DestinationId + ";"
@@ -97,14 +99,15 @@ De-serializes the action timing for the storage. Used for key-value storages.
 */
 func (at *ActionTrigger) restore(input string) {
 	elements := strings.Split(input, ";")
-	if len(elements) != 7 {
+	if len(elements) != 8 {
 		return
 	}
-	at.BalanceId = elements[0]
-	at.Direction = elements[1]
-	at.DestinationId = elements[2]
-	at.ActionsId = elements[3]
-	at.ThresholdValue, _ = strconv.ParseFloat(elements[4], 64)
-	at.Weight, _ = strconv.ParseFloat(elements[5], 64)
-	at.Executed, _ = strconv.ParseBool(elements[6])
+	at.Id = elements[0]
+	at.BalanceId = elements[1]
+	at.Direction = elements[2]
+	at.DestinationId = elements[3]
+	at.ActionsId = elements[4]
+	at.ThresholdValue, _ = strconv.ParseFloat(elements[5], 64)
+	at.Weight, _ = strconv.ParseFloat(elements[6], 64)
+	at.Executed, _ = strconv.ParseBool(elements[7])
 }

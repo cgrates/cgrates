@@ -53,6 +53,7 @@ func TestUserBalanceStoreRestore(t *testing.T) {
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
+		Id:             "some_uuid",
 		BalanceId:      CREDIT,
 		Direction:      OUTBOUND,
 		ThresholdValue: 100.0,
@@ -69,8 +70,8 @@ func TestUserBalanceStoreRestore(t *testing.T) {
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}
 	r := ub.store()
-	if string(r) != "rif|postpaid|SMSOUT:14#INTERNETOUT:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;OUT;NAT;Commando;100;10;false#MONETARY;OUT;NAT;Commando;100;10;false#MONETARY;OUT;NAT;Commando;100;10;false" &&
-		string(r) != "rif|postpaid|INTERNETOUT:1024#SMSOUT:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|MONETARY;OUT;NAT;Commando;100;10;false#MONETARY;OUT;NAT;Commando;100;10;false#MONETARY;OUT;NAT;Commando;100;10;false" {
+	if string(r) != "rif|postpaid|SMSOUT:14#INTERNETOUT:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false" &&
+		string(r) != "rif|postpaid|INTERNETOUT:1024#SMSOUT:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false" {
 		t.Errorf("Error serializing action timing: %v", string(r))
 	}
 	o := &UserBalance{}

@@ -59,6 +59,7 @@ func TestActionTimingStoreRestore(t *testing.T) {
 
 func TestActionTriggerStoreRestore(t *testing.T) {
 	at := &ActionTrigger{
+		Id:             "some_uuid",
 		BalanceId:      CREDIT,
 		Direction:      OUTBOUND,
 		ThresholdValue: 100.0,
@@ -67,7 +68,7 @@ func TestActionTriggerStoreRestore(t *testing.T) {
 		ActionsId:      "Commando",
 	}
 	r := at.store()
-	if string(r) != "MONETARY;OUT;NAT;Commando;100;10;false" {
+	if string(r) != "some_uuid;MONETARY;OUT;NAT;Commando;100;10;false" {
 		t.Errorf("Error serializing action trigger: %v", string(r))
 	}
 	o := &ActionTrigger{}
@@ -751,6 +752,7 @@ func TestUUID(t *testing.T) {
 
 func TestActionTriggerLogging(t *testing.T) {
 	at := &ActionTrigger{
+		Id:             "some_uuid",
 		BalanceId:      CREDIT,
 		Direction:      OUTBOUND,
 		ThresholdValue: 100.0,
@@ -763,7 +765,7 @@ func TestActionTriggerLogging(t *testing.T) {
 		t.Error("Error getting actions for the action timing: ", err)
 	}
 	storageGetter.LogActionTrigger("rif", at, as)
-	expected := "rif*MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*TOPUP|MONETARY|OUT|10|0"
+	expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"
 	var key string
 	for k, v := range storageGetter.(*MapStorage).dict {
 		if strings.Contains(k, LOG_PREFIX) && strings.Contains(string(v), expected) {
@@ -802,7 +804,7 @@ func TestActionTimingLogging(t *testing.T) {
 		t.Error("Error getting actions for the action trigger: ", err)
 	}
 	storageGetter.LogActionTiming(at, as)
-	expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*TOPUP|MONETARY|OUT|10|0"
+	expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*|TOPUP|MONETARY|OUT|10|0"
 	var key string
 	for k, v := range storageGetter.(*MapStorage).dict {
 		if strings.Contains(k, LOG_PREFIX) && strings.Contains(string(v), expected) {

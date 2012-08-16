@@ -29,6 +29,7 @@ import (
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
+	Id           string
 	ActionType   string
 	BalanceId    string
 	Direction    string
@@ -184,6 +185,7 @@ func (apl ActionPriotityList) Sort() {
 Serializes the action for the storage. Used for key-value storages.
 */
 func (a *Action) store() (result string) {
+	result += a.Id + "|"
 	result += a.ActionType + "|"
 	result += a.BalanceId + "|"
 	result += a.Direction + "|"
@@ -201,13 +203,14 @@ De-serializes the action for the storage. Used for key-value storages.
 */
 func (a *Action) restore(input string) {
 	elements := strings.Split(input, "|")
-	a.ActionType = elements[0]
-	a.BalanceId = elements[1]
-	a.Direction = elements[2]
-	a.Units, _ = strconv.ParseFloat(elements[3], 64)
-	a.Weight, _ = strconv.ParseFloat(elements[4], 64)
-	if len(elements) == 6 {
+	a.Id = elements[0]
+	a.ActionType = elements[1]
+	a.BalanceId = elements[2]
+	a.Direction = elements[3]
+	a.Units, _ = strconv.ParseFloat(elements[4], 64)
+	a.Weight, _ = strconv.ParseFloat(elements[5], 64)
+	if len(elements) == 7 {
 		a.MinuteBucket = &MinuteBucket{}
-		a.MinuteBucket.restore(elements[5])
+		a.MinuteBucket.restore(elements[6])
 	}
 }

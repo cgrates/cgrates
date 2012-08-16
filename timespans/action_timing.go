@@ -35,7 +35,7 @@ const (
 )
 
 type ActionTiming struct {
-	Id             string // identify the timing
+	Id             string // uniquely identify the timing
 	Tag            string // informative purpos only
 	UserBalanceIds []string
 	Timing         *Interval
