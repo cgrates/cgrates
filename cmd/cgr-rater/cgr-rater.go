@@ -22,7 +22,6 @@ import (
 	"code.google.com/p/goconf/conf"
 	"flag"
 	"fmt"
-	_ "github.com/bmizerany/pq"
 	"github.com/cgrates/cgrates/balancer"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
@@ -32,6 +31,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -237,6 +237,39 @@ func checkConfigSanity() {
 	if balancer_enabled && rater_enabled && rater_balancer != DISABLED {
 		timespans.Logger.Crit("The balancer is enabled so it cannot connect to anatoher balancer (change [rater]/balancer to disabled)!")
 		exitChan <- true
+	}
+
+	// check if the session manager or mediator is connectting via loopback 
+	// if they are using the same encoding as the rater/balancer
+	// this scenariou should be used for debug puropses only (it is racy anyway)
+	// and it might be forbidden in the future
+	if strings.Contains(sm_rater, "localhost") || strings.Contains(sm_rater, "127.0.0.1") {
+		if balancer_enabled {
+			if balancer_rpc_encoding != sm_rpc_encoding {
+				timespans.Logger.Crit("If you are connecting the session manager via the loopback to the balancer use the same type of rpc encoding!")
+				exitChan <- true
+			}
+		}
+		if rater_enabled {
+			if rater_rpc_encoding != sm_rpc_encoding {
+				timespans.Logger.Crit("If you are connecting the session manager via the loopback to the arter use the same type of rpc encoding!")
+				exitChan <- true
+			}
+		}
+	}
+	if strings.Contains(mediator_rater, "localhost") || strings.Contains(mediator_rater, "127.0.0.1") {
+		if balancer_enabled {
+			if balancer_rpc_encoding != mediator_rpc_encoding {
+				timespans.Logger.Crit("If you are connecting the mediator via the loopback to the balancer use the same type of rpc encoding!")
+				exitChan <- true
+			}
+		}
+		if rater_enabled {
+			if rater_rpc_encoding != mediator_rpc_encoding {
+				timespans.Logger.Crit("If you are connecting the mediator via the loopback to the arter use the same type of rpc encoding!")
+				exitChan <- true
+			}
+		}
 	}
 }
 
