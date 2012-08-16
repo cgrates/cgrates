@@ -111,7 +111,7 @@ func (cd *CallDescriptor) GetUserBalanceKey() string {
 	if cd.Account != "" {
 		subj = cd.Account
 	}
-	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
+	return ACCOUNT_PREFIX + fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 }
 
 /*
@@ -184,17 +184,17 @@ func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error
 	return
 }
 
-func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix string, recursionDepth int) (values []*ActivationPeriod, err error) {
+func (cd *CallDescriptor) getRatinPprofile(key, base, destPrefix string, recursionDepth int) (values []*ActivationPeriod, err error) {
 	if recursionDepth > RecursionMaxDepth {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
-	values, fallbackKey, err := storageGetter.GetActivationPeriodsOrFallback(key)
-	if fallbackKey != "" {
-		base = fallbackKey + ":"
+	rp, err := storageGetter.GetRatingProfile(key)
+	if rp.FallbackKey != "" {
+		base = rp.FallbackKey + ":"
 		key = base + destPrefix
 		recursionDepth++
-		return cd.getActivationPeriodsOrFallback(key, base, destPrefix, recursionDepth)
+		return cd.getRatingProfile(key, base, destPrefix, recursionDepth)
 	}
 
 	//get for a smaller prefix if the orignal one was not found			
@@ -203,7 +203,7 @@ func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix s
 			base = fallbackKey + ":"
 			key = base + destPrefix
 			recursionDepth++
-			return cd.getActivationPeriodsOrFallback(key, base, destPrefix, recursionDepth)
+			return cd.getRatingProfile(key, base, destPrefix, recursionDepth)
 		}
 
 		i--
@@ -213,7 +213,7 @@ func (cd *CallDescriptor) getActivationPeriodsOrFallback(key, base, destPrefix s
 		} else {
 			break
 		}
-		values, fallbackKey, err = storageGetter.GetActivationPeriodsOrFallback(key)
+		values, fallbackKey, err = storageGetter.GetRatingProfile(key)
 	}
 	return
 }
@@ -223,7 +223,7 @@ Constructs the key for the storage lookup.
 The prefixLen is limiting the length of the destination prefix.
 */
 func (cd *CallDescriptor) GetKey() string {
-	return fmt.Sprintf("%s:%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, cd.Subject, cd.Destination)
+	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, cd.Subject)
 }
 
 /*
