@@ -22,6 +22,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/bmizerany/pq"
 )
 
 type PostgresStorage struct {
