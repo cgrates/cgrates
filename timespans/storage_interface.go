@@ -26,9 +26,14 @@ import (
 )
 
 const (
-	ACTION_TIMING_PREFIX = "acttmg:"
-	CALL_COST_LOG_PREFIX = "cc:"
-	LOG_PREFIX           = "log:"
+	ACTION_TIMING_PREFIX  = "acttmg_"
+	CALL_COST_LOG_PREFIX  = "cc_"
+	LOG_PREFIX            = "log_"
+	RATING_PROFILE_PREFIX = "ratingprofile_"
+	ACTION_PREFIX         = "action_"
+	USER_BALANCE_PREFIX   = "userbalance_"
+	DESTINATION_PREFIX    = "dest_"
+	ACTION_TIMING         = "actiontiming_"
 )
 
 /*

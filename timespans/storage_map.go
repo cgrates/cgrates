@@ -42,7 +42,7 @@ func (ms *MapStorage) Flush() error {
 }
 
 func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[RATING_PROFILE_PREFIX+key]; ok {
 		rp = new(RatingProfile)
 		err = ms.ms.Unmarshal(values, rp)
 	} else {
@@ -53,12 +53,12 @@ func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error
 
 func (ms *MapStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := ms.ms.Marshal(rp)
-	ms.dict[rp.Id] = result
+	ms.dict[RATING_PROFILE_PREFIX+rp.Id] = result
 	return
 }
 
 func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[DESTINATION_PREFIX+key]; ok {
 		dest = &Destination{Id: key}
 		err = ms.ms.Unmarshal(values, dest)
 	} else {
@@ -68,12 +68,12 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 }
 func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
-	ms.dict[dest.Id] = result
+	ms.dict[DESTINATION_PREFIX+dest.Id] = result
 	return
 }
 
 func (ms *MapStorage) GetActions(key string) (as []*Action, err error) {
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
 	} else {
 		return nil, errors.New("not found")
@@ -83,12 +83,12 @@ func (ms *MapStorage) GetActions(key string) (as []*Action, err error) {
 
 func (ms *MapStorage) SetActions(key string, as []*Action) (err error) {
 	result, err := ms.ms.Marshal(as)
-	ms.dict[key] = result
+	ms.dict[ACTION_PREFIX+key] = result
 	return
 }
 
 func (ms *MapStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[USER_BALANCE_PREFIX+key]; ok {
 		ub = &UserBalance{Id: key}
 		err = ms.ms.Unmarshal(values, ub)
 	} else {
@@ -99,12 +99,12 @@ func (ms *MapStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
 
 func (ms *MapStorage) SetUserBalance(ub *UserBalance) (err error) {
 	result, err := ms.ms.Marshal(ub)
-	ms.dict[ub.Id] = result
+	ms.dict[USER_BALANCE_PREFIX+ub.Id] = result
 	return
 }
 
 func (ms *MapStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
 		return nil, errors.New("not found")
@@ -115,11 +115,11 @@ func (ms *MapStorage) GetActionTimings(key string) (ats []*ActionTiming, err err
 func (ms *MapStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
 	if len(ats) == 0 {
 		// delete the key
-		delete(ms.dict, key)
+		delete(ms.dict, ACTION_TIMING_PREFIX+key)
 		return
 	}
 	result, err := ms.ms.Marshal(ats)
-	ms.dict[key] = result
+	ms.dict[ACTION_TIMING_PREFIX+key] = result
 	return
 }
 

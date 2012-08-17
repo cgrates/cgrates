@@ -111,7 +111,7 @@ func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose boo
 		log.Print("Action timings")
 	}
 	for k, ats := range csvr.actionsTimings {
-		err = storage.SetActionTimings(ACTION_TIMING_PREFIX+k, ats)
+		err = storage.SetActionTimings(k, ats)
 		if err != nil {
 			return err
 		}

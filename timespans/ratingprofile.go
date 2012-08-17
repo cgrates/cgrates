@@ -29,7 +29,7 @@ const (
 )
 
 type RatingProfile struct {
-	Id             string `bson:"_id,omitempty"`
+	Id             string
 	FallbackKey    string
 	DestinationMap map[string][]*ActivationPeriod
 }

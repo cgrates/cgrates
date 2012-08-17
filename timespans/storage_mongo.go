@@ -49,6 +49,7 @@ func NewMongoStorage(host, port, db, user, pass string) (StorageGetter, error) {
 	err = ndb.C("actions").EnsureIndex(index)
 	err = ndb.C("actiontimings").EnsureIndex(index)
 	index = mgo.Index{Key: []string{"id"}, Background: true}
+	err = ndb.C("ratingprofiles").EnsureIndex(index)
 	err = ndb.C("destinations").EnsureIndex(index)
 	err = ndb.C("userbalances").EnsureIndex(index)
 
@@ -166,7 +167,7 @@ func (ms *MongoStorage) SetActionTimings(key string, ats []*ActionTiming) error 
 
 func (ms *MongoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
 	result := AtKeyValue{}
-	iter := ms.db.C("actiontimings").Find(bson.M{"key": fmt.Sprintf("/^%s/", ACTION_TIMING_PREFIX)}).Iter()
+	iter := ms.db.C("actiontimings").Find(nil).Iter()
 	ats = make(map[string][]*ActionTiming)
 	for iter.Next(&result) {
 		ats[result.Key] = result.Value
