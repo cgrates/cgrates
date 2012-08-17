@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rif/cache2go"
-	"log"
 	"log/syslog"
 	"math"
 	"time"
@@ -92,7 +91,7 @@ func (cd *CallDescriptor) GetUserBalanceKey() string {
 	if cd.Account != "" {
 		subj = cd.Account
 	}
-	return ACCOUNT_PREFIX + fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
+	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 }
 
 /*
@@ -151,7 +150,6 @@ func (cd *CallDescriptor) LoadActivationPeriods() (destPrefix string, err error)
 }
 
 func (cd *CallDescriptor) getActivationPeriodsForPrefix(key string, recursionDepth int) (foundPrefix string, aps []*ActivationPeriod, err error) {
-	log.Print("Search: ", key)
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
