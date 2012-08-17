@@ -39,7 +39,7 @@ type CSVReader struct {
 	rates             map[string][]*Rate
 	timings           map[string][]*Timing
 	activationPeriods map[string]*ActivationPeriod
-	ratingProfiles    map[string]CallDescriptors
+	ratingProfiles    map[string]*RatingProfile
 }
 
 func NewFileCSVReader() *CSVReader {
@@ -50,7 +50,7 @@ func NewFileCSVReader() *CSVReader {
 	c.rates = make(map[string][]*Rate)
 	c.timings = make(map[string][]*Timing)
 	c.activationPeriods = make(map[string]*ActivationPeriod)
-	c.ratingProfiles = make(map[string]CallDescriptors)
+	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.readerFunc = openFileCSVReader
 	return c
 }
@@ -98,22 +98,20 @@ func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose boo
 	if verbose {
 		log.Print("Rating profiles")
 	}
-	for _, cds := range csvr.ratingProfiles {
-		for _, cd := range cds {
-			err = storage.SetActivationPeriodsOrFallback(cd.GetKey(), cd.ActivationPeriods, cd.FallbackKey)
-			if err != nil {
-				return err
-			}
-			if verbose {
-				log.Print(cd.GetKey())
-			}
+	for _, rp := range csvr.ratingProfiles {
+		err = storage.SetRatingProfile(rp)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print(rp.Id)
 		}
 	}
 	if verbose {
 		log.Print("Action timings")
 	}
 	for k, ats := range csvr.actionsTimings {
-		err = storage.SetActionTimings(ACTION_TIMING_PREFIX+":"+k, ats)
+		err = storage.SetActionTimings(ACTION_TIMING_PREFIX+k, ats)
 		if err != nil {
 			return err
 		}
@@ -283,46 +281,24 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[6]))
 		}
+		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
+		rp, ok := csvr.ratingProfiles[key]
+		if !ok {
+			rp = &RatingProfile{Id: key}
+			csvr.ratingProfiles[key] = rp
+		}
 		for _, d := range csvr.destinations {
-			for _, p := range d.Prefixes { //destinations
-				// Search for a CallDescriptor with the same key
-				var cd *CallDescriptor
-				key := fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, p)
-				for _, c := range csvr.ratingProfiles[p] {
-					if c.GetKey() == key {
-						cd = c
-					}
-				}
-				if cd == nil {
-					cd = &CallDescriptor{
-						Direction:   direction,
-						Tenant:      tenant,
-						TOR:         tor,
-						Subject:     subject,
-						Destination: p,
-					}
-					csvr.ratingProfiles[p] = append(csvr.ratingProfiles[p], cd)
-				}
+			for _, p := range d.Prefixes { //destinations								
 				ap, exists := csvr.activationPeriods[record[5]]
 				if !exists {
 					return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: ", record[5]))
 				}
-				newAP := &ActivationPeriod{}
+				newAP := &ActivationPeriod{ActivationTime: at}
 				//copy(newAP.Intervals, ap.Intervals)
 				newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-				newAP.ActivationTime = at
-				cd.AddActivationPeriodIfNotPresent(newAP)
-				if fallbacksubject != "" &&
-					csvr.ratingProfiles[p].getKey(fmt.Sprintf("%s:%s:%s:%s:%s", direction, tenant, tor, subject, FallbackDestination)) == nil {
-					cd = &CallDescriptor{
-						Direction:   direction,
-						Tenant:      tenant,
-						TOR:         tor,
-						Subject:     subject,
-						Destination: FallbackDestination,
-						FallbackKey: fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject),
-					}
-					csvr.ratingProfiles[p] = append(csvr.ratingProfiles[p], cd)
+				rp.AddActivationPeriodIfNotPresent(p, newAP)
+				if fallbacksubject != "" {
+					rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject)
 				}
 			}
 		}

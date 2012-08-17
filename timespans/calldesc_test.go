@@ -57,7 +57,7 @@ func TestSplitSpans(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 
-	cd.SearchStorageForPrefix()
+	cd.LoadActivationPeriods()
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Log(cd.ActivationPeriods)
@@ -70,7 +70,7 @@ func TestRedisSplitSpans(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257", TimeStart: t1, TimeEnd: t2}
 
-	cd.SearchStorageForPrefix()
+	cd.LoadActivationPeriods()
 	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Log(cd.ActivationPeriods)
@@ -215,22 +215,6 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 	}
 }
 
-func TestApAddAPIfNotPresent(t *testing.T) {
-	ap1 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
-	ap2 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
-	ap3 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 1, time.UTC)}
-	cd := &CallDescriptor{}
-	cd.AddActivationPeriodIfNotPresent(ap1)
-	cd.AddActivationPeriodIfNotPresent(ap2)
-	if len(cd.ActivationPeriods) != 1 {
-		t.Error("Wronfully appended activation period ;)", len(cd.ActivationPeriods))
-	}
-	cd.AddActivationPeriodIfNotPresent(ap3)
-	if len(cd.ActivationPeriods) != 2 {
-		t.Error("Wronfully not appended activation period ;)", len(cd.ActivationPeriods))
-	}
-}
-
 /*********************************** BENCHMARKS ***************************************/
 func BenchmarkStorageGetting(b *testing.B) {
 	b.StopTimer()
@@ -239,7 +223,7 @@ func BenchmarkStorageGetting(b *testing.B) {
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		storageGetter.GetActivationPeriodsOrFallback(cd.GetKey())
+		storageGetter.GetRatingProfile(cd.GetKey())
 	}
 }
 
@@ -250,7 +234,7 @@ func BenchmarkStorageRestoring(b *testing.B) {
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.SearchStorageForPrefix()
+		cd.LoadActivationPeriods()
 	}
 }
 
@@ -270,7 +254,7 @@ func BenchmarkSplitting(b *testing.B) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	cd.SearchStorageForPrefix()
+	cd.LoadActivationPeriods()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.splitInTimeSpans()

@@ -43,11 +43,11 @@ func (psl *PostgresStorage) Flush() (err error) {
 	return
 }
 
-func (psl *PostgresStorage) GetActivationPeriodsOrFallback(string) (aps []*ActivationPeriod, fallback string, err error) {
+func (psl *PostgresStorage) GetRatingProfile(string) (rp *RatingProfile, err error) {
 	return
 }
 
-func (psl *PostgresStorage) SetActivationPeriodsOrFallback(key string, aps []*ActivationPeriod, fallback string) (err error) {
+func (psl *PostgresStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	return
 }
 

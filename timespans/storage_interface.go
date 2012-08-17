@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
-	"errors"
 	"strings"
 )
 
@@ -38,8 +37,8 @@ Interface for storage providers.
 type StorageGetter interface {
 	Close()
 	Flush() error
-	GetActivationPeriodsOrFallback(string) ([]*ActivationPeriod, string, error)
-	SetActivationPeriodsOrFallback(string, []*ActivationPeriod, string) error
+	GetRatingProfile(string) (*RatingProfile, error)
+	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 	GetActions(string) ([]*Action, error)
@@ -117,22 +116,16 @@ type MyMarshaler struct {
 
 func (mm *MyMarshaler) Marshal(v interface{}) (data []byte, err error) {
 	switch v.(type) {
-	case []*ActivationPeriod:
-		result := ""
-		for _, ap := range v.([]*ActivationPeriod) {
-			result += ap.store() + "\n"
-		}
-		return []byte(result), nil
 	case []*Action:
 		result := ""
 		for _, a := range v.([]*Action) {
-			result += a.store() + "\n"
+			result += a.store() + "+"
 		}
 		return []byte(result), nil
 	case []*ActionTiming:
 		result := ""
 		for _, at := range v.([]*ActionTiming) {
-			result += at.store() + "\n"
+			result += at.store() + "+"
 		}
 		return []byte(result), nil
 	case storer:
@@ -148,23 +141,9 @@ func (mm *MyMarshaler) Marshal(v interface{}) (data []byte, err error) {
 
 func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) (err error) {
 	switch v.(type) {
-	case *[]*ActivationPeriod:
-		aps := v.(*[]*ActivationPeriod)
-		splits := strings.Split(string(data), "\n")
-		if len(splits) == 0 {
-			return errors.New("")
-		}
-		for _, ap_string := range splits {
-			if len(ap_string) > 0 {
-				ap := &ActivationPeriod{}
-				ap.restore(ap_string)
-				*aps = append(*aps, ap)
-			}
-		}
-		return nil
 	case *[]*Action:
 		as := v.(*[]*Action)
-		for _, a_string := range strings.Split(string(data), "\n") {
+		for _, a_string := range strings.Split(string(data), "+") {
 			if len(a_string) > 0 {
 				a := &Action{}
 				a.restore(a_string)
@@ -174,7 +153,7 @@ func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) (err error) {
 		return nil
 	case *[]*ActionTiming:
 		ats := v.(*[]*ActionTiming)
-		for _, at_string := range strings.Split(string(data), "\n") {
+		for _, at_string := range strings.Split(string(data), "+") {
 			if len(at_string) > 0 {
 				at := &ActionTiming{}
 				at.restore(at_string)
