@@ -23,6 +23,7 @@ import (
 	"github.com/cgrates/cgrates/timespans"
 	"html/template"
 	"net/http"
+	"path"
 	"runtime"
 )
 
@@ -30,10 +31,10 @@ import (
 Handler for the statistics web client
 */
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	if t, err := template.ParseFiles("templates/base.html", "templates/status.html"); err == nil {
+	if t, err := template.ParseFiles(path.Join(stats_media_path, "templates/base.html"), path.Join(stats_media_path, "templates/status.html")); err == nil {
 		t.Execute(w, bal.GetClientAddresses())
 	} else {
-		timespans.Logger.Err(fmt.Sprintf("Error rendering status: ", err))
+		timespans.Logger.Err(fmt.Sprintf("Error rendering status: %v", err))
 	}
 }
 

@@ -69,6 +69,7 @@ rpc_encoding = test # use JSON for RPC encoding
 [stats_server]
 enabled = true
 listen = test # Web server address (for stat reports)
+media_path = test
 
 [freeswitch]
 server = test # freeswitch address host:port
@@ -119,6 +120,7 @@ func TestConfig(t *testing.T) {
 
 		stats_enabled != true ||
 		stats_listen != "test" ||
+		stats_media_path != "test" ||
 		freeswitch_server != "test" ||
 		freeswitch_pass != "test" {
 		t.Log(redis_server)
@@ -149,6 +151,7 @@ func TestConfig(t *testing.T) {
 		t.Log(mediator_rater)
 		t.Log(stats_enabled)
 		t.Log(stats_listen)
+		t.Log(stats_media_path)
 		t.Log(freeswitch_server)
 		t.Log(freeswitch_pass)
 		t.Error("Config file read failed!")

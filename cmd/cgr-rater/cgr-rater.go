@@ -82,8 +82,9 @@ var (
 	mediator_rpc_encoding = GOB          // use JSON for RPC encoding
 	mediator_skipdb       = false
 
-	stats_enabled = false
-	stats_listen  = "127.0.0.1:8000" // Web server address (for stat reports)
+	stats_enabled    = false
+	stats_listen     = "127.0.0.1:8000" // Web server address (for stat reports)
+	stats_media_path = ""
 
 	freeswitch_server = "localhost:8021" // freeswitch address host:port
 	freeswitch_pass   = "ClueCon"        // reeswitch address host:port	
@@ -130,6 +131,7 @@ func readConfig(c *conf.ConfigFile) {
 
 	stats_enabled, _ = c.GetBool("stats_server", "enabled")
 	stats_listen, _ = c.GetString("stats_server", "listen")
+	stats_media_path, _ = c.GetString("stats_server", "media_path")
 
 	freeswitch_server, _ = c.GetString("freeswitch", "server")
 	freeswitch_pass, _ = c.GetString("freeswitch", "pass")
