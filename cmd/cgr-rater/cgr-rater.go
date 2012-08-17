@@ -174,7 +174,7 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 }
 
 func listenToHttpRequests() {
-	http.Handle("/static/", http.FileServer(http.Dir("")))
+	http.Handle("/static/", http.FileServer(http.Dir(stats_media_path)))
 	http.HandleFunc("/", statusHandler)
 	http.HandleFunc("/getmem", memoryHandler)
 	http.HandleFunc("/raters", ratersHandler)
