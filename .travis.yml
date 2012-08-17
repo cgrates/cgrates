@@ -16,5 +16,4 @@ notifications:
     on_failure: always
 
 after_script:
-    ./build.sh
-    ./test.sh
+    ./build.sh && ./test.sh
