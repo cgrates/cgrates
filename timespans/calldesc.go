@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rif/cache2go"
+	"log"
 	"log/syslog"
 	"math"
 	"time"
@@ -134,13 +135,11 @@ func (cd *CallDescriptor) LoadActivationPeriods() (destPrefix string, err error)
 		cd.ActivationPeriods = xaps.aps
 		return xaps.destPrefix, nil
 	}
-	destPrefix, values, err := cd.getActivationPeriodsForPrefix(cd.GetKey(), cd.Destination, 1)
+	destPrefix, values, err := cd.getActivationPeriodsForPrefix(cd.GetKey(), 1)
 	if err != nil {
-		if err != nil {
-			fallbackKey := fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
-			// use the default subject
-			destPrefix, values, err = cd.getActivationPeriodsForPrefix(fallbackKey, cd.Destination, 1)
-		}
+		fallbackKey := fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
+		// use the default subject
+		destPrefix, values, err = cd.getActivationPeriodsForPrefix(fallbackKey, 1)
 	}
 	//load the activation preriods
 	if err == nil && len(values) > 0 {
@@ -151,7 +150,8 @@ func (cd *CallDescriptor) LoadActivationPeriods() (destPrefix string, err error)
 	return
 }
 
-func (cd *CallDescriptor) getActivationPeriodsForPrefix(key, prefix string, recursionDepth int) (foundPrefix string, aps []*ActivationPeriod, err error) {
+func (cd *CallDescriptor) getActivationPeriodsForPrefix(key string, recursionDepth int) (foundPrefix string, aps []*ActivationPeriod, err error) {
+	log.Print("Search: ", key)
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
@@ -160,11 +160,11 @@ func (cd *CallDescriptor) getActivationPeriodsForPrefix(key, prefix string, recu
 	if err != nil {
 		return "", nil, err
 	}
-	foundPrefix, aps, err = rp.GetActivationPeriodsForPrefix(prefix)
+	foundPrefix, aps, err = rp.GetActivationPeriodsForPrefix(cd.Destination)
 	if err != nil {
 		if rp.FallbackKey != "" {
 			recursionDepth++
-			return cd.getActivationPeriodsForPrefix(rp.FallbackKey, prefix, recursionDepth)
+			return cd.getActivationPeriodsForPrefix(rp.FallbackKey, recursionDepth)
 		}
 	}
 
