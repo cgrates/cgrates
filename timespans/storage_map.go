@@ -52,7 +52,7 @@ func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error
 }
 
 func (ms *MapStorage) SetRatingProfile(rp *RatingProfile) (err error) {
-	result, err := ms.ms.Marshal(rp.Id)
+	result, err := ms.ms.Marshal(rp)
 	ms.dict[rp.Id] = result
 	return
 }

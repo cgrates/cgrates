@@ -71,6 +71,7 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 	}
 	return
 }
+
 func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	result, err := rs.ms.Marshal(dest)
 	return rs.db.Set(dest.Id, result)

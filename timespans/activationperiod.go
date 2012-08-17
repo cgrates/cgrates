@@ -97,34 +97,3 @@ func (ap *ActivationPeriod) restore(input string) {
 		ap.Intervals = append(ap.Intervals, i)
 	}
 }
-
-type RatingProfile struct {
-	Id                string `bson:"_id,omitempty"`
-	DestinationInfo   string
-	FallbackKey       string
-	ActivationPeriods []*ActivationPeriod
-}
-
-func (rp *RatingProfile) store() (result string) {
-	result += rp.Id + ">"
-	result += rp.DestinationInfo + ">"
-	result += rp.FallbackKey + ">"
-	for _, ap := range rp.ActivationPeriods {
-		result += ap.store() + "<"
-	}
-	result = strings.TrimRight(result, "<")
-	return
-}
-
-func (rp *RatingProfile) restore(input string) {
-	elements := strings.Split(input, ">")
-	rp.Id = elements[0]
-	rp.DestinationInfo = elements[1]
-	rp.FallbackKey = elements[2]
-	apsList := strings.Split(elements[3], "<")
-	for _, aps := range apsList {
-		ap := new(ActivationPeriod)
-		ap.restore(aps)
-		rp.ActivationPeriods = append(rp.ActivationPeriods, ap)
-	}
-}

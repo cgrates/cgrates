@@ -36,11 +36,8 @@ func init() {
 }
 
 const (
-	// the minimum length for a destination prefix to be matched.
-	MinPrefixLength     = 2
-	RecursionMaxDepth   = 4
-	FallbackDestination = "fallback" // the string to be used to mark the fallback destination
-	FallbackSubject     = "*all"
+	RECURSION_MAX_DEPTH = 4
+	FALLBACK_SUBJECT    = "*all"
 )
 
 var (
@@ -80,29 +77,12 @@ type CallDescriptor struct {
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	ActivationPeriods                     []*ActivationPeriod
-	FallbackKey                           string
 	userBalance                           *UserBalance
 }
 
 // Adds an activation period that applyes to current call descriptor.
 func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {
 	cd.ActivationPeriods = append(cd.ActivationPeriods, aps...)
-}
-
-// Adds an activation period that applyes to current call descriptor if not already present.
-func (cd *CallDescriptor) AddActivationPeriodIfNotPresent(aps ...*ActivationPeriod) {
-	for _, ap := range aps {
-		found := false
-		for _, eap := range cd.ActivationPeriods {
-			if ap.Equal(eap) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			cd.ActivationPeriods = append(cd.ActivationPeriods, ap)
-		}
-	}
 }
 
 // Returns the key used to retrive the user balance involved in this call
@@ -148,31 +128,18 @@ func SetDebitPeriod(d time.Duration) {
 /*
 Restores the activation periods for the specified prefix from storage.
 */
-func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error) {
+func (cd *CallDescriptor) LoadActivationPeriods() (destPrefix string, err error) {
 	if val, err := cache.GetXCached(cd.GetKey()); err == nil {
 		xaps := val.(xCachedActivationPeriods)
 		cd.ActivationPeriods = xaps.aps
 		return xaps.destPrefix, nil
 	}
-	cd.ActivationPeriods = make([]*ActivationPeriod, 0)
-	base := fmt.Sprintf("%s:%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR, cd.Subject)
-	destPrefix = cd.Destination
-	key := base + destPrefix
-	values, err := cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
+	destPrefix, values, err := cd.getActivationPeriodsForPrefix(cd.GetKey(), cd.Destination, 1)
 	if err != nil {
-		// use the default destination
-		key := base + FallbackDestination
-		values, err = cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
-	}
-	if err != nil {
-		// use the default subject
-		base = fmt.Sprintf("%s:%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR, FallbackSubject)
-		key = base + destPrefix
-		values, err = cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
 		if err != nil {
-			// use the default destination
-			key := base + FallbackDestination
-			values, err = cd.getActivationPeriodsOrFallback(key, base, destPrefix, 1)
+			fallbackKey := fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
+			// use the default subject
+			destPrefix, values, err = cd.getActivationPeriodsForPrefix(fallbackKey, cd.Destination, 1)
 		}
 	}
 	//load the activation preriods
@@ -184,37 +151,23 @@ func (cd *CallDescriptor) SearchStorageForPrefix() (destPrefix string, err error
 	return
 }
 
-func (cd *CallDescriptor) getRatinPprofile(key, base, destPrefix string, recursionDepth int) (values []*ActivationPeriod, err error) {
-	if recursionDepth > RecursionMaxDepth {
+func (cd *CallDescriptor) getActivationPeriodsForPrefix(key, prefix string, recursionDepth int) (foundPrefix string, aps []*ActivationPeriod, err error) {
+	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
 	rp, err := storageGetter.GetRatingProfile(key)
-	if rp.FallbackKey != "" {
-		base = rp.FallbackKey + ":"
-		key = base + destPrefix
-		recursionDepth++
-		return cd.getRatingProfile(key, base, destPrefix, recursionDepth)
+	if err != nil {
+		return "", nil, err
 	}
-
-	//get for a smaller prefix if the orignal one was not found			
-	for i := len(cd.Destination); err != nil || fallbackKey != ""; {
-		if fallbackKey != "" {
-			base = fallbackKey + ":"
-			key = base + destPrefix
+	foundPrefix, aps, err = rp.GetActivationPeriodsForPrefix(prefix)
+	if err != nil {
+		if rp.FallbackKey != "" {
 			recursionDepth++
-			return cd.getRatingProfile(key, base, destPrefix, recursionDepth)
+			return cd.getActivationPeriodsForPrefix(rp.FallbackKey, prefix, recursionDepth)
 		}
-
-		i--
-		if i >= MinPrefixLength {
-			destPrefix = cd.Destination[:i]
-			key = base + destPrefix
-		} else {
-			break
-		}
-		values, fallbackKey, err = storageGetter.GetRatingProfile(key)
 	}
+
 	return
 }
 
@@ -306,7 +259,7 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	destPrefix, err := cd.SearchStorageForPrefix()
+	destPrefix, err := cd.LoadActivationPeriods()
 	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 	connectionFee := 0.0
@@ -336,7 +289,7 @@ and will decrease it by 10% for nine times. So if the user has little credit it 
 If the user has no credit then it will return 0.
 */
 func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
-	_, err = cd.SearchStorageForPrefix()
+	_, err = cd.LoadActivationPeriods()
 	now := time.Now()
 	availableCredit, availableSeconds := 0.0, 0.0
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {

@@ -52,7 +52,7 @@ func (d *Destination) containsPrefix(prefix string) (bool, int) {
 	if d == nil {
 		return false, 0
 	}
-	for i := len(prefix); i >= MinPrefixLength; {
+	for i := len(prefix); i >= MIN_PREFIX_LENGTH; {
 		for _, p := range d.Prefixes {
 			if p == prefix[:i] {
 				return true, i

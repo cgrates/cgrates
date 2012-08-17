@@ -129,7 +129,7 @@ func TestLoadRateTimings(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 7 {
+	if len(csvr.ratingProfiles) != 6 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 }
