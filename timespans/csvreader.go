@@ -288,18 +288,16 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) (err error) {
 			csvr.ratingProfiles[key] = rp
 		}
 		for _, d := range csvr.destinations {
-			for _, p := range d.Prefixes { //destinations								
-				ap, exists := csvr.activationPeriods[record[5]]
-				if !exists {
-					return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: ", record[5]))
-				}
-				newAP := &ActivationPeriod{ActivationTime: at}
-				//copy(newAP.Intervals, ap.Intervals)
-				newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-				rp.AddActivationPeriodIfNotPresent(p, newAP)
-				if fallbacksubject != "" {
-					rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject)
-				}
+			ap, exists := csvr.activationPeriods[record[5]]
+			if !exists {
+				return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: ", record[5]))
+			}
+			newAP := &ActivationPeriod{ActivationTime: at}
+			//copy(newAP.Intervals, ap.Intervals)
+			newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
+			rp.AddActivationPeriodIfNotPresent(d.Id, newAP)
+			if fallbacksubject != "" {
+				rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject)
 			}
 		}
 	}

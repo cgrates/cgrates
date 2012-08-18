@@ -48,8 +48,17 @@ func TestDestinationStorageStore(t *testing.T) {
 
 func TestDestinationContainsPrefix(t *testing.T) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	contains, precision := nationale.containsPrefix("0256")
-	if !contains || precision != len("0256") {
+	precision, ok := nationale.containsPrefix("0256")
+	if !ok || precision != len("0256") {
+		t.Error("Should contain prefix: ", nationale)
+	}
+
+}
+
+func TestDestinationContainsPrefixLong(t *testing.T) {
+	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	precision, ok := nationale.containsPrefix("0256723045")
+	if !ok || precision != len("0256") {
 		t.Error("Should contain prefix: ", nationale)
 	}
 

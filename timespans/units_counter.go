@@ -57,7 +57,7 @@ func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
 			Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: ", mb.DestinationId))
 			continue
 		}
-		if ok, _ := d.containsPrefix(prefix); ok {
+		if _, ok := d.containsPrefix(prefix); ok {
 			mb.Seconds += amount
 			break
 		}

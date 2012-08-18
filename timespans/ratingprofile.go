@@ -20,6 +20,7 @@ package timespans
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -87,19 +88,22 @@ func (rp *RatingProfile) AddActivationPeriodIfNotPresent(destInfo string, aps ..
 }
 
 func (rp *RatingProfile) GetActivationPeriodsForPrefix(destPrefix string) (foundPrefix string, aps []*ActivationPeriod, err error) {
-	var found = false
-	foundPrefix = destPrefix
-	for i := len(foundPrefix); !found; {
-		if i >= MIN_PREFIX_LENGTH {
-			foundPrefix = foundPrefix[:i]
-		} else {
-			break
+	bestPrecision := 0
+	for k, v := range rp.DestinationMap {
+		d, err := GetDestination(k)
+		if err != nil {
+			Logger.Err(fmt.Sprintf("Cannot find destination with id: ", k))
+			continue
 		}
-		aps, found = rp.DestinationMap[foundPrefix]
-		i--
+		if precision, ok := d.containsPrefix(destPrefix); ok && precision > bestPrecision {
+			bestPrecision = precision
+			aps = v
+		}
 	}
-	if !found {
-		return "", nil, errors.New("not found")
+
+	if bestPrecision > 0 {
+		return destPrefix[:bestPrecision], aps, nil
 	}
-	return
+
+	return "", nil, errors.New("not found")
 }

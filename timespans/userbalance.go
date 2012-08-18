@@ -76,8 +76,7 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 		if err != nil {
 			continue
 		}
-		contains, precision := d.containsPrefix(prefix)
-		if contains {
+		if precision, ok := d.containsPrefix(prefix); ok {
 			mb.precision = precision
 			if mb.Seconds > 0 {
 				bucketList = append(bucketList, mb)

@@ -48,20 +48,17 @@ func GetDestination(dId string) (d *Destination, err error) {
 /*
 De-serializes the destination for the storage. Used for key-value storages.
 */
-func (d *Destination) containsPrefix(prefix string) (bool, int) {
+func (d *Destination) containsPrefix(prefix string) (precision int, ok bool) {
 	if d == nil {
-		return false, 0
+		return
 	}
-	for i := len(prefix); i >= MIN_PREFIX_LENGTH; {
-		for _, p := range d.Prefixes {
-			if p == prefix[:i] {
-				return true, i
-			}
+	for _, p := range d.Prefixes {
+		if strings.Index(prefix, p) == 0 && len(p) > precision {
+			precision = len(p)
+			ok = true
 		}
-		i--
 	}
-
-	return false, 0
+	return
 }
 
 func (d *Destination) String() (result string) {
