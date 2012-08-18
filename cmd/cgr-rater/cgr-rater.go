@@ -31,6 +31,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -42,15 +43,19 @@ const (
 	GOB      = "gob"
 	POSTGRES = "postgres"
 	MONGO    = "mongo"
+	REDIS    = "redis"
 	SAME     = "same"
 	FS       = "freeswitch"
 )
 
 var (
 	config              = flag.String("config", "rater_standalone.config", "Configuration file location.")
-	redis_server        = "127.0.0.1:6379" // redis address host:port
-	redis_db            = 10               // redis database number
-	redis_pass          = ""
+	data_db_type        = REDIS
+	data_db_host        = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
+	data_db_port        = ""          // The port to bind to.
+	data_db_name        = "10"        // The name of the database to connect to.
+	data_db_user        = ""          // The user to sign in as.
+	data_db_password    = ""          // The user's password.
 	logging_db_type     = MONGO
 	logging_db_host     = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
 	logging_db_port     = ""          // The port to bind to.
@@ -95,9 +100,12 @@ var (
 
 // this function will reset to zero values the variables that are not present
 func readConfig(c *conf.ConfigFile) {
-	redis_server, _ = c.GetString("global", "redis_server")
-	redis_db, _ = c.GetInt("global", "redis_db")
-	redis_pass, _ = c.GetString("global", "redis_pass")
+	data_db_type, _ = c.GetString("global", "datadb_type")
+	data_db_host, _ = c.GetString("global", "datadb_host")
+	data_db_port, _ = c.GetString("global", "datadb_port")
+	data_db_name, _ = c.GetString("global", "datadb_name")
+	data_db_user, _ = c.GetString("global", "datadb_user")
+	data_db_password, _ = c.GetString("global", "datadb_passwd")
 	logging_db_type, _ = c.GetString("global", "logdb_type")
 	logging_db_host, _ = c.GetString("global", "logdb_host")
 	logging_db_port, _ = c.GetString("global", "logdb_port")
@@ -289,10 +297,26 @@ func main() {
 	// some consitency checks
 	go checkConfigSanity()
 
-	getter, err := timespans.NewRedisStorage(redis_server, redis_db, redis_pass)
-	//getter, err := timespans.NewMongoStorage("localhost", "cgrates")
+	var getter timespans.StorageGetter
+	switch data_db_type {
+	case REDIS:
+		db_nb, err := strconv.Atoi(data_db_name)
+		if err != nil {
+			timespans.Logger.Crit("Redis db name must be an integer!")
+			exitChan <- true
+		}
+		getter, err = timespans.NewRedisStorage(data_db_host, db_nb, data_db_password)
+	case MONGO:
+		getter, err = timespans.NewMongoStorage(data_db_host, data_db_port, data_db_name, data_db_user, data_db_password)
+	case POSTGRES:
+		getter, err = timespans.NewPostgresStorage(data_db_host, data_db_port, data_db_name, data_db_user, data_db_password)
+	default:
+		timespans.Logger.Crit("Unknown data db type, exiting!")
+		exitChan <- true
+	}
+
 	if err != nil {
-		timespans.Logger.Crit("Could not connect to redis, exiting!")
+		timespans.Logger.Crit("Could not connect to data db, exiting!")
 		exitChan <- true
 	}
 	defer getter.Close()
@@ -308,20 +332,17 @@ func main() {
 	switch logging_db_type {
 	case POSTGRES:
 		loggerDb, err = timespans.NewPostgresStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
-		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
-			exitChan <- true
-		}
 	case MONGO:
 		loggerDb, err = timespans.NewMongoStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
-		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
-			exitChan <- true
-		}
 	case SAME:
 		loggerDb = getter
 	default:
-		timespans.Logger.Crit("Could not open logging database")
+		timespans.Logger.Crit("Unknown logger db type, exiting!")
+		exitChan <- true
+	}
+
+	if err != nil {
+		timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
 		exitChan <- true
 	}
 

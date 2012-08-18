@@ -27,9 +27,12 @@ import (
 const (
 	configText = `
 [global]
-redis_server = test #redis address host:port
-redis_db = 1 # redis database number
-redis_pass = test
+datadb_type = test # 
+datadb_host = test # The host to connect to. Values that start with / are for UNIX domain sockets.
+datadb_port = test # The port to bind to.
+datadb_name = test # The name of the database to connect to.
+datadb_user =  test # The user to sign in as.
+datadb_passwd =  test # The user's password.root
 logdb_type = test # 
 logdb_host = test # The host to connect to. Values that start with / are for UNIX domain sockets.
 logdb_port = test # The port to bind to.
@@ -84,9 +87,12 @@ func TestConfig(t *testing.T) {
 		t.FailNow()
 	}
 	readConfig(c)
-	if redis_server != "test" ||
-		redis_db != 1 ||
-		redis_pass != "test" ||
+	if data_db_type != "test" ||
+		data_db_host != "test" ||
+		data_db_port != "test" ||
+		data_db_name != "test" ||
+		data_db_user != "test" ||
+		data_db_password != "test" ||
 		logging_db_type != "test" ||
 		logging_db_host != "test" ||
 		logging_db_port != "test" ||
@@ -123,9 +129,12 @@ func TestConfig(t *testing.T) {
 		stats_media_path != "test" ||
 		freeswitch_server != "test" ||
 		freeswitch_pass != "test" {
-		t.Log(redis_server)
-		t.Log(redis_db)
-		t.Log(redis_pass)
+		t.Log(data_db_type)
+		t.Log(data_db_host)
+		t.Log(data_db_port)
+		t.Log(data_db_name)
+		t.Log(data_db_user)
+		t.Log(data_db_password)
 		t.Log(logging_db_type)
 		t.Log(logging_db_host)
 		t.Log(logging_db_port)
