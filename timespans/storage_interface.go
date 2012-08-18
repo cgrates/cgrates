@@ -26,14 +26,13 @@ import (
 )
 
 const (
-	ACTION_TIMING_PREFIX  = "acttmg_"
-	CALL_COST_LOG_PREFIX  = "cc_"
+	ACTION_TIMING_PREFIX  = "atm_"
+	CALL_COST_LOG_PREFIX  = "cco_"
 	LOG_PREFIX            = "log_"
-	RATING_PROFILE_PREFIX = "ratingprofile_"
-	ACTION_PREFIX         = "action_"
-	USER_BALANCE_PREFIX   = "userbalance_"
-	DESTINATION_PREFIX    = "dest_"
-	ACTION_TIMING         = "actiontiming_"
+	RATING_PROFILE_PREFIX = "rpf_"
+	ACTION_PREFIX         = "act_"
+	USER_BALANCE_PREFIX   = "ubl_"
+	DESTINATION_PREFIX    = "dst_"
 )
 
 /*
