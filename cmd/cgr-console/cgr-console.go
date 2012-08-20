@@ -117,9 +117,9 @@ func main() {
 		if err = client.Call("Responder.DebitSeconds", cd, &result); err == nil {
 			fmt.Println(result)
 		}
-	case "resetuserbudget":
+	case "addrecievedcallseconds":
 		var result float64
-		if err = client.Call("Responder.ResetUserBudget", cd, &result); err == nil {
+		if err = client.Call("Responder.AddRecievedCallSeconds", cd, &result); err == nil {
 			fmt.Println(result)
 		}
 	case "status":
@@ -141,7 +141,8 @@ func main() {
 		fmt.Println("\tdebitbalance")
 		fmt.Println("\tdebitsms")
 		fmt.Println("\tdebitseconds")
-		fmt.Println("\tresetuserbudget")
+		fmt.Println("\taddrecievedcallseconds")
+		fmt.Println("\tflushcache")
 		fmt.Println("\tstatus")
 		fmt.Println("\tshutdown")
 		flag.PrintDefaults()

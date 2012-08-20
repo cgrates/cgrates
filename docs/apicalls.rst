@@ -1,5 +1,5 @@
 API Calls
-========
+=========
 The general API usage of the CGRateS involves creating a CallDescriptor structure sending it to the balancer via JSON/GOB RPC and getting a response from the balancer in form of a CallCost structure or a numeric value for requested information.
 
 CallDescriptor structure
@@ -7,6 +7,7 @@ CallDescriptor structure
 	- Direction, TOR, Tenant, Subject, Account, DestinationPrefix string
 	- TimeStart, TimeEnd                 Time
 	- Amount                             float64
+
 Direction
 	The direction of the call (inbound or outbound)
 TOR
@@ -33,6 +34,7 @@ CallCost structure
 	- CstmId, Subject, DestinationPrefix string
 	- Cost, ConnectFee                   float64
 	- Timespans                          []*TimeSpan
+
 TOR
 	Type Of Record, used to differentiate between various type of records (for query identification and confirmation)
 CstmId
@@ -80,6 +82,15 @@ JSON RPC
 GetCost
 	Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 
+Debit
+    Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method) from user's money balance.
+
+
+MaxDebit
+    Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method) from user's money balance.
+    This methods combines the Debit and GetMaxSessionTime and will debit the max available time as returned by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
+
+
 DebitBalance
 	Interface method used to add/substract an amount of cents from user's money budget.
 	The amount filed has to be filled in call descriptor.
@@ -97,38 +108,9 @@ GetMaxSessionTime
 	and will decrease it by 10% for nine times. So if the user has little credit it will still allow 10% of the initial amount.
 	If the user has no credit then it will return 0.
 
-AddVolumeDiscountSeconds
-	Interface method used to add an amount to the accumulated placed call seconds to be used for volume discount.
-	The amount filed has to be filled in call descriptor.
-
-ResetVolumeDiscountSeconds
-	Resets the accumulated volume discount seconds (to zero).
-
 AddRecievedCallSeconds
 	Adds the specified amount of seconds to the received call seconds. When the threshold specified in the user's tariff plan is reached then the received call budget is reseted and the bonus specified in the tariff plan is applied.
 	The amount filed has to be filled in call descriptor.
 
-ResetUserBudget
-	Resets user budgets value to the amounts specified in the tariff plan.
-
-HTTP
-----
-
-getcost
-	:Example: curl "http://127.0.0.1:8000/getcost?cstmid=vdf&subj=rif&dest=0257"
-debitbalance
-	:Example: curl "http://127.0.0.1:8000/debitbalance?cstmid=vdf&subj=rif&dest=0257@amount=100"
-debitsms
-	:Example: curl "http://127.0.0.1:8000/debitsms?cstmid=vdf&subj=rif&dest=0257@amount=100"
-debitseconds
-	:Example: curl "http://127.0.0.1:8000/debitseconds?cstmid=vdf&subj=rif&dest=0257@amount=100"
-getmaxsessiontime
-	:Example: curl "http://127.0.0.1:8000/getmaxsessiontime?cstmid=vdf&subj=rif&dest=0257@amount=100"
-addvolumediscountseconds
-	:Example: curl "http://127.0.0.1:8000/addvolumediscountseconds?cstmid=vdf&subj=rif&dest=0257@amount=100"
-resetvolumediscountseconds
-	:Example: curl "http://127.0.0.1:8000/resetvolumediscountseconds?cstmid=vdf&subj=rif&dest=0257"
-addrecievedcallseconds
-	:Example: curl "http://127.0.0.1:8000/addrecievedcallseconds?cstmid=vdf&subj=rif&dest=0257@amount=100"
-resetuserbudget
-	:Example: curl "http://127.0.0.1:8000/resetuserbudget?cstmid=vdf&subj=rif&dest=0257"
+FlushCache
+    Cleans all internal cached (Destinations, RatingProfiles)

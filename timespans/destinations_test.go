@@ -73,7 +73,7 @@ func TestDestinationGetExists(t *testing.T) {
 
 func TestDestinationGetExistsCache(t *testing.T) {
 	GetDestination("NAT")
-	if _, err := cache.GetCached("NAT"); err != nil {
+	if _, err := cache2go.GetCached("NAT"); err != nil {
 		t.Error("Destination not cached!")
 	}
 }
@@ -87,7 +87,7 @@ func TestDestinationGetNotExists(t *testing.T) {
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
 	GetDestination("not existing")
-	if _, err := cache.GetCached("not existing"); err == nil {
+	if _, err := cache2go.GetCached("not existing"); err == nil {
 		t.Error("Bad destination cached")
 	}
 }

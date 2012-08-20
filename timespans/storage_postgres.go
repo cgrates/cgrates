@@ -44,6 +44,11 @@ func (psl *PostgresStorage) Flush() (err error) {
 }
 
 func (psl *PostgresStorage) GetRatingProfile(string) (rp *RatingProfile, err error) {
+	row := psl.Db.QueryRow(fmt.Sprintf("SELECT * FROM cdr WHERE uuid='%s'", uuid))
+	var uuid_found string
+	var timespansJson string
+	err = row.Scan(&uuid_found, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
+	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)
 	return
 }
 

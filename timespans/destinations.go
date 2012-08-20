@@ -33,11 +33,11 @@ type Destination struct {
 
 // Gets the specified destination from the storage and caches it.
 func GetDestination(dId string) (d *Destination, err error) {
-	x, err := cache.GetCached(dId)
+	x, err := cache2go.GetCached(dId)
 	if err != nil {
 		d, err = storageGetter.GetDestination(dId)
 		if err == nil && d != nil {
-			cache.Cache(dId, d)
+			cache2go.Cache(dId, d)
 		}
 	} else {
 		d = x.(*Destination)

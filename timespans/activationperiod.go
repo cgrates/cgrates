@@ -36,7 +36,7 @@ type ActivationPeriod struct {
 type xCachedActivationPeriods struct {
 	destPrefix string
 	aps        []*ActivationPeriod
-	*cache.XEntry
+	*cache2go.XEntry
 }
 
 /*

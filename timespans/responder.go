@@ -137,6 +137,18 @@ func (rs *Responder) AddRecievedCallSeconds(arg CallDescriptor, reply *float64) 
 	return
 }
 
+func (rs *Responder) FlushCache(arg CallDescriptor, reply *float64) (err error) {
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(&arg, "Responder.FlushCache")
+	} else {
+		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+			return 0, arg.FlushCache()
+		})
+		*reply, err = r, e
+	}
+	return
+}
+
 func (rs *Responder) Status(arg string, reply *string) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)

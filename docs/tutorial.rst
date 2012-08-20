@@ -49,6 +49,7 @@ The cgr-rater can be provided with the balancer server address and can be config
 Bellow there is a full configuration file:
 
 ::
+
    [global]
    datadb_type = redis # The main database: redis|mongo|postgres.
    datadb_host = 127.0.0.1:6379 # The host to connect to. Values that start with / are for UNIX domain sockets.
@@ -154,25 +155,32 @@ cgr-console
 The cgr-console is a command line tool used to access the balancer (or the rater directly) to call all the API methods offered by CGRateS. It is
 ::
 
-	rif@grace:~$ cgr-console 
-	List of commands:
-	        getcost
-	        getmaxsessiontime
-	        debitbalance
-	        debitsms
-	        debitseconds
-	        resetuserbudget
-	        status
-	  -direction="OUT": Call direction
-	  -tenant="vdf": Tenant identificator
-	  -tor="0": Type of record
-	  -amount=100: Amount for different operations
-	  -dest="041": Call destination	  
-	  -server="127.0.0.1:2001": server address host:port
-	  -subject="rif": The client who made the call
-	  -account="rif": The the user balance to be used
-	  -start="2012-02-09T00:00:00Z": Time start
-	  -end="2012-02-09T00:10:00Z": Time end	  
+   cgrrif@grace:~$ cgr-console -help
+   Usage of cgr-console:
+      -account="": The the user balance to be used
+      -amount=0: Amount for different operations
+      -cmd="": server address host:port
+      -dest="": Call destination
+      -direction="OUT": Call direction
+      -end="": Time end (format: 2012-02-09T00:00:00Z)
+      -json=false: Use JSON for RPC encoding.
+      -server="127.0.0.1:2001": server address host:port
+      -start="": Time start (format: 2012-02-09T00:00:00Z)
+      -subject="": The client who made the call
+      -tenant="": Tenant identificator
+      -tor="0": Type of record
 
 :Example: cgr-console -cmd=getcost -subject=rif -tenant=vdf -dest=419 -start=2012-02-09T00:00:00Z -end=2012-02-09T00:01:00Z
 
+List of commands:
+ - getcost
+ - debit
+ - maxdebit
+ - getmaxsessiontime
+ - debitbalance
+ - debitsms
+ - debitseconds
+ - addrecievedcallseconds
+ - flushcache
+ - status
+ - shutdown
