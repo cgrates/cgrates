@@ -367,24 +367,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		rs, _ := time.ParseDuration(fmt.Sprintf("%vs", remainingSeconds))
 		cd.TimeEnd = cd.TimeStart.Add(rs)
 	}
-	cc, err = cd.GetCost()
-	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
-		return
-	}
-	Logger.Debug(fmt.Sprintf("Debiting from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer storageGetter.SetUserBalance(userBalance)
-		if cc.Cost != 0 || cc.ConnectFee != 0 {
-			userBalance.debitBalance(CREDIT, cc.Cost+cc.ConnectFee, true)
-		}
-		for _, ts := range cc.Timespans {
-			if ts.MinuteInfo != nil {
-				userBalance.debitMinutesBalance(ts.MinuteInfo.Quantity, cd.Destination, true)
-			}
-		}
-	}
-	return
+	return cd.Debit()
 }
 
 /*
