@@ -31,43 +31,119 @@ This will install the sources and compile all available tools
 Running
 -------
 
-The CGRateS suite is formed by seven tools described bellow.
+The CGRateS suite is formed by three tools described bellow. We'll start with the most important one, cgr-rater which is configured with an ini style configuration file.
 
-cgr-balancer
-~~~~~~~~~~~~
-The cgr-balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open a rater server on witch the raters will register themselves when they start.
-::
-
-	rif@grace:~$ cgr-balancer --help
-	Usage of cgr-balancer:
-	  -freeswitch=false: connect to freeswitch server
-	  -freeswitchpass="ClueCon": freeswitch address host:port
-	  -freeswitchsrv="localhost:8021": freeswitch address host:port
-	  -httpapiaddr="127.0.0.1:8000": Http API server address (localhost:2002)
-	  -json=false: use JSON for RPC encoding
-	  -jsonrpcaddr="127.0.0.1:2001": Json RPC server address (localhost:2001)
-	  -rateraddr="127.0.0.1:2000": Rater server address (localhost:2000)
-
-:Example: cgr-balancer -freeswitch=true -httpapiaddr=127.0.0.1:6060 -json=true
 
 cgr-rater
 ~~~~~~~~~
 The cgr-rater can be provided with the balancer server address and can be configured to listen to a specific interface and port. It is an auxiliary tool only and is meant to be used for housekeeping duties (better alternative to curl inspection).
 ::
 
-	rif@grace:~$ cgr-rater --help
-	Usage of cgr-rater:
-	  -balancer="127.0.0.1:2000": balancer address host:port
-	  -freeswitch=false: connect to freeswitch server
-	  -freeswitchpass="ClueCon": freeswitch address host:port
-	  -freeswitchsrv="localhost:8021": freeswitch address host:port
-	  -json=false: use JSON for RPC encoding
-	  -listen="127.0.0.1:1234": listening address host:port
-	  -redisdb=10: redis database number
-	  -redissrv="127.0.0.1:6379": redis address host:port
-	  -standalone=false: start standalone server (no balancer)
+   rif@grace:~$ cgr-rater -help
+   Usage of cgr-rater:
+      -config="rater_standalone.config": Configuration file location.
 
-:Example: cgr-rater -balancer=127.0.0.1:2000
+
+:Example: cgr-rater -config=full.config
+
+Bellow there is a full configuration file 
+
+::
+
+   [global]
+   [global]
+   datadb_type = redis # 
+   datadb_host = 127.0.0.1:6379 # The host to connect to. Values that start with / are for UNIX domain sockets.
+   datadb_name = 10 # The name of the database to connect to.
+   logdb_type = postgres # 
+   logdb_host = localhost # The host to connect to. Values that start with / are for UNIX domain sockets.
+   logdb_port = 5432 # The port to bind to.
+   logdb_name = gosqltest # The name of the database to connect to.
+   logdb_user =  rif # The user to sign in as.
+   logdb_passwd =  test # The user's password.root
+
+   [balancer]
+   enabled = false # Start balancer server
+   listen = 127.0.0.1:2001 # Balancer listen interface
+   rpc_encoding = gob # use JSON for RPC encoding
+
+   [rater]
+   enabled = true
+   listen = 127.0.0.1:2001 # listening address host:port, internal for internal communication only
+   balancer = disabled # if defined it will register to balancer as worker
+   rpc_encoding = gob # use JSON for RPC encoding
+
+   [mediator]
+   enabled = true
+   cdr_file = Master.csv # Freeswitch Master CSV CDR file.
+   result_file = out.csv # Generated file containing CDR and price info.
+   rater = internal #address where to access rater. Can be internal, direct rater address or the address of a balancer
+   rpc_encoding = gob # use JSON for RPC encoding
+   skipdb = true
+
+   [scheduler]
+   enabled = true
+
+   [session_manager]
+   enabled = true
+   rater = 127.0.0.1:2000 #address where to access rater. Can be internal, direct rater address or the address of a balancer
+   freeswitch_server = localhost:8021 # freeswitch address host:port
+   freeswitch_pass = ClueCon # freesw/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/confitch address host:port
+   rpc_encoding = gob # use JSON for RPC encoding
+
+   [stats_server]
+   enabled = true
+   listen = 127.0.0.1:8000 # Web server address (for stat reports)
+   media_path = /home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/data
+
+
+The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open a rater server on witch the raters will register themselves when they start.
+
+Session manager connects and monitors the freeswitch server issuing API request to other CGRateS components. It can run in standalone mode for minimal system configuration. It logs the calls information to a postgres database in order to be used by the mediator tool.
+
+The scheduler is loading the timed actions form database and executes them as appropriate, It will execute all run once actions as they are loaded. It will reload all the action timings from the database when it received system HUP signal (pkill -1 cgr-rater).
+
+The mediator parses the call logs written in a postgres database by the session manager and writes the call costs to a freeswitch CDR file.
+
+The structure of the table (as an SQL command) is the following::
+::
+
+	CREATE TABLE callcosts (
+	uuid varchar(80) primary key,
+    direction varchar(32),
+	tenant varchar(32),
+    tor varchar(32),
+	subject varchar(32),
+	account varchar(32),
+	destination varchar(32),
+	cost real,
+	conect_fee real,
+	timespans text
+	);
+
+
+
+cgr-loader
+~~~~~~~~~~
+
+This tool is used for importing the data from CSV files into the CGRateS database system. The structure of the CSV files is described in the :ref:`data-importing` chapter.
+
+::
+
+   rif@grace:~$ cgr-loader -help
+   Usage of cgr-loader:
+      -dbhost="localhost": The database host to connect to.
+      -dbname="10": he name/number of the database to connect to.
+      -dbpass="": The database user's password.
+      -dbport="6379": The database port to bind to.
+      -dbtype="redis": The type of the database (redis|mongo|postgres)
+      -dbuser="": The database user to sign in as.
+      -flush=false: Flush the database before importing
+      -path=".": The path containing the data files
+   
+
+:Example: cgr-loader -flush
+
 
 cgr-console
 ~~~~~~~~~~~
@@ -94,60 +170,5 @@ The cgr-console is a command line tool used to access the balancer (or the rater
 	  -start="2012-02-09T00:00:00Z": Time start
 	  -end="2012-02-09T00:10:00Z": Time end	  
 
-:Example: cgr-console getcost -subject=rif -dest=0723045326 -start=2012-07-13T15:38:00Z -end=2012-07-13T15:39:00Z
-
-cgr-loader
-~~~~~~~~~~
-
-This tool is used for importing the data from CSV files into the CGRateS database system. The structure of the CSV files is described in the :ref:`data-importing` chapter.
-
-::
-
-	rif@grace:~$ cgr-loader --help
-	Usage of cgr-loader:
-	  -accountactions="": Account actions file
-	  -actions="": Actions file
-	  -actiontimings="": Actions timings file
-	  -actiontriggers="": Actions triggers file
-	  -destinations="": Destinations file
-	  -flush=false: Flush the database before importing
-	  -month="": Months file
-	  -monthdays="": Month days file
-	  -pass="": redis database password
-	  -rates="": Rates file
-	  -ratetimings="": Rates timings file
-	  -ratingprofiles="": Rating profiles file
-	  -redisdb=10: redis database number (10)
-	  -redissrv="127.0.0.1:6379": redis server address (tcp:127.0.0.1:6379)
-	  -separator=",": Default field separator
-	  -timings="": Timings file
-	  -weekdays="": Week days file
-
-:Example: cgr-loader -destinations=Destinations.csv
-
-
-Session manager connects and monitors the freeswitch server issuing API request to other CGRateS components. It can run in standalone mode for minimal system configuration. It logs the calls information to a postgres database in order to be used by the mediator tool.
-
-The scheduler is loading the timed actions form database and executes them as appropriate, It will execute all run once actions as they are loaded. It will reload all the action timings from the database when it received system HUP signal (pkill -1 cgr-schedule).
-
-The mediator parses the call logs written in a postgres database by the session manager and writes the call costs to a freeswitch CDR file.
-
-The structure of the table (as an SQL command) is the following::
-
-	CREATE TABLE callcosts (
-	uuid varchar(80) primary key,
-    direction varchar(32),
-	tenant varchar(32),
-    tor varchar(32),
-	subject varchar(32),
-	account varchar(32),
-	destination varchar(32),
-	cost real,
-	conect_fee real,
-	timespans text
-	);
-
-::
-
-
+:Example: cgr-console -cmd=getcost -subject=rif -tenant=vdf -dest=419 -start=2012-02-09T00:00:00Z -end=2012-02-09T00:01:00Z
 

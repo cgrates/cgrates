@@ -129,7 +129,7 @@ func SetDebitPeriod(d time.Duration) {
 Restores the activation periods for the specified prefix from storage.
 */
 func (cd *CallDescriptor) LoadActivationPeriods() (destPrefix string, err error) {
-	if val, err := cache.GetXCached(cd.GetKey()); err == nil {
+	if val, err := cache.GetXCached(cd.GetKey() + cd.Destination); err == nil {
 		xaps := val.(xCachedActivationPeriods)
 		cd.ActivationPeriods = xaps.aps
 		return xaps.destPrefix, nil
@@ -143,7 +143,7 @@ func (cd *CallDescriptor) LoadActivationPeriods() (destPrefix string, err error)
 	//load the activation preriods
 	if err == nil && len(values) > 0 {
 		xaps := xCachedActivationPeriods{destPrefix, values, new(cache.XEntry)}
-		xaps.XCache(cd.GetKey(), debitPeriod+5*time.Second, xaps)
+		xaps.XCache(cd.GetKey()+cd.Destination, debitPeriod+5*time.Second, xaps)
 		cd.ActivationPeriods = values
 	}
 	return

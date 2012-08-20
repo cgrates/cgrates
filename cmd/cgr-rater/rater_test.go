@@ -92,13 +92,13 @@ func TestConfig(t *testing.T) {
 		data_db_port != "test" ||
 		data_db_name != "test" ||
 		data_db_user != "test" ||
-		data_db_password != "test" ||
-		logging_db_type != "test" ||
-		logging_db_host != "test" ||
-		logging_db_port != "test" ||
-		logging_db_name != "test" ||
-		logging_db_user != "test" ||
-		logging_db_password != "test" ||
+		data_db_pass != "test" ||
+		log_db_type != "test" ||
+		log_db_host != "test" ||
+		log_db_port != "test" ||
+		log_db_name != "test" ||
+		log_db_user != "test" ||
+		log_db_pass != "test" ||
 
 		rater_enabled != true ||
 		rater_balancer != "test" ||
@@ -134,13 +134,13 @@ func TestConfig(t *testing.T) {
 		t.Log(data_db_port)
 		t.Log(data_db_name)
 		t.Log(data_db_user)
-		t.Log(data_db_password)
-		t.Log(logging_db_type)
-		t.Log(logging_db_host)
-		t.Log(logging_db_port)
-		t.Log(logging_db_name)
-		t.Log(logging_db_user)
-		t.Log(logging_db_password)
+		t.Log(data_db_pass)
+		t.Log(log_db_type)
+		t.Log(log_db_host)
+		t.Log(log_db_port)
+		t.Log(log_db_name)
+		t.Log(log_db_user)
+		t.Log(log_db_pass)
 		t.Log(rater_enabled)
 		t.Log(rater_balancer)
 		t.Log(rater_listen)

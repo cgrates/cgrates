@@ -22,23 +22,24 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
+	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"os"
 	"time"
 )
 
 var (
+	cmd       = flag.String("cmd", "", "server address host:port")
 	server    = flag.String("server", "127.0.0.1:2001", "server address host:port")
 	tor       = flag.String("tor", "0", "Type of record")
 	direction = flag.String("direction", "OUT", "Call direction")
-	tenant    = flag.String("tenant", "vdf", "Tenant identificator")
-	subject   = flag.String("subject", "rif", "The client who made the call")
-	account   = flag.String("account", "rif", "The the user balance to be used")
-	dest      = flag.String("dest", "041", "Call destination")
-	start     = flag.String("start", "2012-02-09T00:00:00Z", "Time start")
-	end       = flag.String("end", "2012-02-09T00:10:00Z", "Time end")
-	amount    = flag.Float64("amount", 100, "Amount for different operations")
+	tenant    = flag.String("tenant", "", "Tenant identificator")
+	subject   = flag.String("subject", "", "The client who made the call")
+	account   = flag.String("account", "", "The the user balance to be used")
+	dest      = flag.String("dest", "", "Call destination")
+	start     = flag.String("start", "", "Time start (format: 2012-02-09T00:00:00Z)")
+	end       = flag.String("end", "", "Time end (format: 2012-02-09T00:00:00Z)")
+	amount    = flag.Float64("amount", 0, "Amount for different operations")
 	json      = flag.Bool("json", false, "Use JSON for RPC encoding.")
 )
 
@@ -52,20 +53,20 @@ func main() {
 		client, err = rpc.Dial("tcp", *server)
 	}
 	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Could not connect to server " + *server))
-		os.Exit(1)
+		flag.PrintDefaults()
+		log.Fatal("Could not connect to server " + *server)
 	}
 	defer client.Close()
 
 	timestart, err := time.Parse(time.RFC3339, *start)
 	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Time start format is invalid: ", err))
-		os.Exit(2)
+		flag.PrintDefaults()
+		log.Fatal("Time start format is invalid: ", err)
 	}
 	timeend, err := time.Parse(time.RFC3339, *end)
 	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Time end format is invalid: ", err))
-		os.Exit(3)
+		flag.PrintDefaults()
+		log.Fatal("Time end format is invalid: ", err)
 	}
 
 	cd := &timespans.CallDescriptor{
@@ -80,7 +81,7 @@ func main() {
 		Amount:      *amount,
 	}
 
-	switch flag.Arg(0) {
+	switch *cmd {
 	case "getcost":
 		result := timespans.CallCost{}
 		if err = client.Call("Responder.GetCost", cd, &result); err == nil {
@@ -134,6 +135,8 @@ func main() {
 	default:
 		fmt.Println("List of commands:")
 		fmt.Println("\tgetcost")
+		fmt.Println("\tdebit")
+		fmt.Println("\tmaxdebit")
 		fmt.Println("\tgetmaxsessiontime")
 		fmt.Println("\tdebitbalance")
 		fmt.Println("\tdebitsms")
@@ -144,7 +147,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 	if err != nil {
-		timespans.Logger.Crit(err.Error())
-		os.Exit(1)
+		log.Print(cd.GetKey())
+		log.Fatal(err)
 	}
 }

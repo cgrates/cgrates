@@ -20,6 +20,7 @@ package main
 
 import (
 	"code.google.com/p/goconf/conf"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/balancer"
@@ -49,19 +50,19 @@ const (
 )
 
 var (
-	config              = flag.String("config", "rater_standalone.config", "Configuration file location.")
-	data_db_type        = REDIS
-	data_db_host        = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
-	data_db_port        = ""          // The port to bind to.
-	data_db_name        = "10"        // The name of the database to connect to.
-	data_db_user        = ""          // The user to sign in as.
-	data_db_password    = ""          // The user's password.
-	logging_db_type     = MONGO
-	logging_db_host     = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
-	logging_db_port     = ""          // The port to bind to.
-	logging_db_name     = "cgrates"   // The name of the database to connect to.
-	logging_db_user     = ""          // The user to sign in as.
-	logging_db_password = ""          // The user's password.
+	config       = flag.String("config", "rater_standalone.config", "Configuration file location.")
+	data_db_type = REDIS
+	data_db_host = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
+	data_db_port = ""          // The port to bind to.
+	data_db_name = "10"        // The name of the database to connect to.
+	data_db_user = ""          // The user to sign in as.
+	data_db_pass = ""          // The user's password.
+	log_db_type  = MONGO
+	log_db_host  = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
+	log_db_port  = ""          // The port to bind to.
+	log_db_name  = "cgrates"   // The name of the database to connect to.
+	log_db_user  = ""          // The user to sign in as.
+	log_db_pass  = ""          // The user's password.
 
 	rater_enabled      = false            // start standalone server (no balancer)
 	rater_balancer     = DISABLED         // balancer address host:port
@@ -105,13 +106,13 @@ func readConfig(c *conf.ConfigFile) {
 	data_db_port, _ = c.GetString("global", "datadb_port")
 	data_db_name, _ = c.GetString("global", "datadb_name")
 	data_db_user, _ = c.GetString("global", "datadb_user")
-	data_db_password, _ = c.GetString("global", "datadb_passwd")
-	logging_db_type, _ = c.GetString("global", "logdb_type")
-	logging_db_host, _ = c.GetString("global", "logdb_host")
-	logging_db_port, _ = c.GetString("global", "logdb_port")
-	logging_db_name, _ = c.GetString("global", "logdb_name")
-	logging_db_user, _ = c.GetString("global", "logdb_user")
-	logging_db_password, _ = c.GetString("global", "logdb_passwd")
+	data_db_pass, _ = c.GetString("global", "datadb_passwd")
+	log_db_type, _ = c.GetString("global", "logdb_type")
+	log_db_host, _ = c.GetString("global", "logdb_host")
+	log_db_port, _ = c.GetString("global", "logdb_port")
+	log_db_name, _ = c.GetString("global", "logdb_name")
+	log_db_user, _ = c.GetString("global", "logdb_user")
+	log_db_pass, _ = c.GetString("global", "logdb_passwd")
 
 	rater_enabled, _ = c.GetBool("rater", "enabled")
 	rater_balancer, _ = c.GetString("rater", "balancer")
@@ -285,6 +286,36 @@ func checkConfigSanity() {
 	}
 }
 
+func configureDatabase(db_type, host, port, name, user, pass string) (getter timespans.StorageGetter, err error) {
+
+	switch db_type {
+	case REDIS:
+		db_nb, err := strconv.Atoi(name)
+		if err != nil {
+			timespans.Logger.Crit("Redis db name must be an integer!")
+			exitChan <- true
+		}
+		if port != "" {
+			host += ":" + port
+		}
+		getter, err = timespans.NewRedisStorage(host, db_nb, pass)
+	case MONGO:
+		getter, err = timespans.NewMongoStorage(host, port, name, user, pass)
+	case POSTGRES:
+		getter, err = timespans.NewPostgresStorage(host, port, name, user, pass)
+	default:
+		err = errors.New("unknown db")
+		timespans.Logger.Crit("Unknown db type, exiting!")
+		exitChan <- true
+	}
+
+	if err != nil {
+		timespans.Logger.Crit(fmt.Sprintf("Could not connect to db: %v, exiting!", err))
+		exitChan <- true
+	}
+	return
+}
+
 func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -297,59 +328,31 @@ func main() {
 	// some consitency checks
 	go checkConfigSanity()
 
-	var getter timespans.StorageGetter
-	switch data_db_type {
-	case REDIS:
-		db_nb, err := strconv.Atoi(data_db_name)
-		if err != nil {
-			timespans.Logger.Crit("Redis db name must be an integer!")
-			exitChan <- true
-		}
-		if data_db_port != "" {
-			data_db_host += ":" + data_db_port
-		}
-		getter, err = timespans.NewRedisStorage(data_db_host, db_nb, data_db_password)
-	case MONGO:
-		getter, err = timespans.NewMongoStorage(data_db_host, data_db_port, data_db_name, data_db_user, data_db_password)
-	case POSTGRES:
-		getter, err = timespans.NewPostgresStorage(data_db_host, data_db_port, data_db_name, data_db_user, data_db_password)
-	default:
-		timespans.Logger.Crit("Unknown data db type, exiting!")
-		exitChan <- true
-	}
+	var getter, loggerDb timespans.StorageGetter
+	go func() {
+		getter, err = configureDatabase(data_db_type, data_db_host, data_db_port, data_db_name, data_db_user, data_db_pass)
 
-	if err != nil {
-		timespans.Logger.Crit("Could not connect to data db, exiting!")
-		exitChan <- true
-	}
-	defer getter.Close()
-	timespans.SetStorageGetter(getter)
+		if err == nil {
+			defer getter.Close()
+			timespans.SetStorageGetter(getter)
+		}
+
+		if log_db_type == SAME {
+			loggerDb = getter
+		} else {
+			loggerDb, err = configureDatabase(log_db_type, log_db_host, log_db_port, log_db_name, log_db_user, log_db_pass)
+		}
+		if err == nil {
+			defer loggerDb.Close()
+			timespans.SetStorageLogger(loggerDb)
+		}
+	}()
 
 	if sm_debit_period > 0 {
 		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period)); err == nil {
 			timespans.SetDebitPeriod(dp)
 		}
 	}
-
-	var loggerDb timespans.StorageGetter
-	switch logging_db_type {
-	case POSTGRES:
-		loggerDb, err = timespans.NewPostgresStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
-	case MONGO:
-		loggerDb, err = timespans.NewMongoStorage(logging_db_host, logging_db_port, logging_db_name, logging_db_user, logging_db_password)
-	case SAME:
-		loggerDb = getter
-	default:
-		timespans.Logger.Crit("Unknown logger db type, exiting!")
-		exitChan <- true
-	}
-
-	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
-		exitChan <- true
-	}
-
-	timespans.SetStorageLogger(loggerDb)
 
 	if rater_enabled && rater_balancer != DISABLED && !balancer_enabled {
 		go registerToBalancer()
