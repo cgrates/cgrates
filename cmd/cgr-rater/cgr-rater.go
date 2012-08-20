@@ -305,6 +305,9 @@ func main() {
 			timespans.Logger.Crit("Redis db name must be an integer!")
 			exitChan <- true
 		}
+		if data_db_port != "" {
+			data_db_host += ":" + data_db_port
+		}
 		getter, err = timespans.NewRedisStorage(data_db_host, db_nb, data_db_password)
 	case MONGO:
 		getter, err = timespans.NewMongoStorage(data_db_host, data_db_port, data_db_name, data_db_user, data_db_password)

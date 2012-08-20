@@ -91,6 +91,11 @@ func main() {
 		if err = client.Call("Responder.Debit", cd, &result); err == nil {
 			fmt.Println(result)
 		}
+	case "maxdebit":
+		result := timespans.CallCost{}
+		if err = client.Call("Responder.MaxDebit", cd, &result); err == nil {
+			fmt.Println(result)
+		}
 	case "getmaxsessiontime":
 		var result float64
 		if err = client.Call("Responder.GetMaxSessionTime", cd, &result); err == nil {

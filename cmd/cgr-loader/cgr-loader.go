@@ -24,15 +24,27 @@ import (
 	"log"
 	"path"
 	"regexp"
+	"strconv"
+)
+
+const (
+	POSTGRES = "postgres"
+	MONGO    = "mongo"
+	REDIS    = "redis"
 )
 
 var (
-	separator        = flag.String("separator", ",", "Default field separator")
-	redissrv         = flag.String("redissrv", "127.0.0.1:6379", "redis server address (tcp:127.0.0.1:6379)")
-	redisdb          = flag.Int("redisdb", 10, "redis database number (10)")
-	redispass        = flag.String("pass", "", "redis database password")
-	flush            = flag.Bool("flush", false, "Flush the database before importing")
-	dataPath         = flag.String("path", ".", "The path containing the data files")
+	//separator = flag.String("separator", ",", "Default field separator")
+	db_type = flag.String("dbtype", REDIS, "The type of the database (redis|mongo|postgres)")
+	db_host = flag.String("dbhost", "localhost", "The database host to connect to.")
+	db_port = flag.String("dbport", "6379", "The database port to bind to.")
+	db_name = flag.String("dbname", "10", "he name/number of the database to connect to.")
+	db_user = flag.String("dbuser", "", "The database user to sign in as.")
+	db_pass = flag.String("dbpass", "", "The database user's password.")
+
+	flush    = flag.Bool("flush", false, "Flush the database before importing")
+	dataPath = flag.String("path", ".", "The path containing the data files")
+
 	destinationsFn   = "Destinations.csv"
 	ratesFn          = "Rates.csv"
 	timingsFn        = "Timings.csv"
@@ -89,7 +101,8 @@ func main() {
 		}
 	}
 
-	sep = []rune(*separator)[0]
+	//sep = []rune(*separator)[0]
+	sep = ','
 	csvr := timespans.NewFileCSVReader()
 	err := csvr.LoadDestinations(path.Join(*dataPath, destinationsFn), sep)
 	if err != nil {
@@ -127,12 +140,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	storage, err := timespans.NewRedisStorage(*redissrv, *redisdb, *redispass)
-	//storage, err := timespans.NewMongoStorage("localhost", "cgrates")
+	var getter timespans.StorageGetter
+	switch *db_type {
+	case REDIS:
+		db_nb, err := strconv.Atoi(*db_name)
+		if err != nil {
+			log.Fatal("Redis db name must be an integer!")
+		}
+		if *db_port != "" {
+			*db_host += ":" + *db_port
+		}
+		getter, err = timespans.NewRedisStorage(*db_host, db_nb, *db_pass)
+	case MONGO:
+		getter, err = timespans.NewMongoStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
+	case POSTGRES:
+		getter, err = timespans.NewPostgresStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
+	default:
+		log.Fatal("Unknown data db type, exiting!")
+	}
+
 	if err != nil {
 		log.Fatal("Could not open database connection: %v", err)
 	}
 
 	// writing to database
-	csvr.WriteToDatabase(storage, *flush, true)
+	csvr.WriteToDatabase(getter, *flush, true)
 }

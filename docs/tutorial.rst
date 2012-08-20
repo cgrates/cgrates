@@ -125,35 +125,20 @@ This tool is used for importing the data from CSV files into the CGRateS databas
 
 :Example: cgr-loader -destinations=Destinations.csv
 
-cgr-sessionmanager
-~~~~~~~~~~~~~~~~~~
 
 Session manager connects and monitors the freeswitch server issuing API request to other CGRateS components. It can run in standalone mode for minimal system configuration. It logs the calls information to a postgres database in order to be used by the mediator tool.
 
-::
-
-	rif@grace:~$ cgr-sessionmanager --help
-	Usage of cgr-sessionmanager:
-	  -balancer="127.0.0.1:2000": balancer address host:port
-	  -freeswitchpass="ClueCon": freeswitch address host:port
-	  -freeswitchsrv="localhost:8021": freeswitch address host:port
-	  -json=false: use JSON for RPC encoding
-	  -redisdb=10: redis database number
-	  -redissrv="127.0.0.1:6379": redis address host:port
-	  -standalone=false: run standalone (run as a rater)
-
-:Example: cgr-sessionmanager -standalone=true
-
-cgr-mediator
-~~~~~~~~~~~~
+The scheduler is loading the timed actions form database and executes them as appropriate, It will execute all run once actions as they are loaded. It will reload all the action timings from the database when it received system HUP signal (pkill -1 cgr-schedule).
 
 The mediator parses the call logs written in a postgres database by the session manager and writes the call costs to a freeswitch CDR file.
 
 The structure of the table (as an SQL command) is the following::
 
 	CREATE TABLE callcosts (
-	uuid varchar(80) primary key,direction varchar(32),
-	tenant varchar(32),tor varchar(32),
+	uuid varchar(80) primary key,
+    direction varchar(32),
+	tenant varchar(32),
+    tor varchar(32),
 	subject varchar(32),
 	account varchar(32),
 	destination varchar(32),
@@ -164,29 +149,5 @@ The structure of the table (as an SQL command) is the following::
 
 ::
 
-	rif@grace:~$ cgr-mediator --help
-	Usage of cgr-mediator:
-	  -dbname="cgrates": The name of the database to connect to.
-	  -freeswitchcdr="Master.csv": Freeswitch Master CSV CDR file.
-	  -host="localhost": The host to connect to. Values that start with / are for UNIX domain sockets.
-	  -password="": The user's password.
-	  -port="5432": The port to bind to.
-	  -resultfile="out.csv": Generated file containing CDR and price info.
-	  -user="": The user to sign in as.
 
-:Example: cgr-mediator -freeswitchcdr="logs.csv"
 
-cgr-scheduler
-~~~~~~~~~~~~~
-
-The scheduler is loading the timed actions form database and executes them as appropriate, It will execute all run once actions as they are loaded. It will reload all the action timings from the database when it received system HUP signal (pkill -1 cgr-schedule).
-
-::
-
-	rif@grace:~$ cgr-scheduler --help
-	Usage of cgr-scheduler:
-	  -pass="": redis database password
-	  -rdb=10: redis database number (10)
-	  -redisserver="127.0.0.1:6379": redis server address (tcp:127.0.0.1:6379)	  
-
-:Example: cgr-scheduler -rdb=2 -pass="secret"
