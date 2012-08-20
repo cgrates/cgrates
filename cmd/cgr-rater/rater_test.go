@@ -69,7 +69,7 @@ rater = test #address where to access rater. Can be internal, direct rater addre
 debit_period = 11
 rpc_encoding = test # use JSON for RPC encoding
 
-[stats_server]
+[stats]
 enabled = true
 listen = test # Web server address (for stat reports)
 media_path = test

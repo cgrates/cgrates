@@ -138,9 +138,9 @@ func readConfig(c *conf.ConfigFile) {
 	mediator_rpc_encoding, _ = c.GetString("mediator", "rpc_encoding")
 	mediator_skipdb, _ = c.GetBool("mediator", "skipdb")
 
-	stats_enabled, _ = c.GetBool("stats_server", "enabled")
-	stats_listen, _ = c.GetString("stats_server", "listen")
-	stats_media_path, _ = c.GetString("stats_server", "media_path")
+	stats_enabled, _ = c.GetBool("stats", "enabled")
+	stats_listen, _ = c.GetString("stats", "listen")
+	stats_media_path, _ = c.GetString("stats", "media_path")
 
 	freeswitch_server, _ = c.GetString("freeswitch", "server")
 	freeswitch_pass, _ = c.GetString("freeswitch", "pass")

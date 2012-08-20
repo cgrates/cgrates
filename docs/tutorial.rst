@@ -46,56 +46,60 @@ The cgr-rater can be provided with the balancer server address and can be config
 
 :Example: cgr-rater -config=full.config
 
-Bellow there is a full configuration file 
+Bellow there is a full configuration file:
 
 ::
-
    [global]
-   [global]
-   datadb_type = redis # 
+   datadb_type = redis # The main database: redis|mongo|postgres.
    datadb_host = 127.0.0.1:6379 # The host to connect to. Values that start with / are for UNIX domain sockets.
    datadb_name = 10 # The name of the database to connect to.
-   logdb_type = postgres # 
+   logdb_type = mongo # The logging database: redis|mongo|postgres|same.
    logdb_host = localhost # The host to connect to. Values that start with / are for UNIX domain sockets.
-   logdb_port = 5432 # The port to bind to.
-   logdb_name = gosqltest # The name of the database to connect to.
-   logdb_user =  rif # The user to sign in as.
-   logdb_passwd =  test # The user's password.root
+   logdb_name = cgrates # The name of the database to connect to.
+
 
    [balancer]
    enabled = false # Start balancer server
    listen = 127.0.0.1:2001 # Balancer listen interface
-   rpc_encoding = gob # use JSON for RPC encoding
+   rpc_encoding = gob # Use json or gob for RPC encoding
 
    [rater]
-   enabled = true
-   listen = 127.0.0.1:2001 # listening address host:port, internal for internal communication only
-   balancer = disabled # if defined it will register to balancer as worker
-   rpc_encoding = gob # use JSON for RPC encoding
+   enabled = true # Start the rating service
+   listen = 127.0.0.1:2001 # Listening address host:port, internal for internal communication only
+   balancer = disabled # If defined it will register to balancer as worker
+   rpc_encoding = gob # Use json or gob for RPC encoding
 
    [mediator]
-   enabled = true
-   cdr_file = Master.csv # Freeswitch Master CSV CDR file.
-   result_file = out.csv # Generated file containing CDR and price info.
-   rater = internal #address where to access rater. Can be internal, direct rater address or the address of a balancer
-   rpc_encoding = gob # use JSON for RPC encoding
-   skipdb = true
+   enabled = true # Start the mediator service
+   cdr_file = Master.csv # Freeswitch Master CSV CDR file
+   result_file = out.csv # Generated file containing CDR and price info
+   rater = internal # Address where to access rater. Can be internal, direct rater address or the address of a balancer
+   rpc_encoding = gob # Use json or gob for RPC encoding
+   skipdb = true # Do not look in the database for logged cdrs, ask rater directly
 
    [scheduler]
-   enabled = true
+   enabled = true # Start the schedule service
 
    [session_manager]
-   enabled = true
-   rater = 127.0.0.1:2000 #address where to access rater. Can be internal, direct rater address or the address of a balancer
-   freeswitch_server = localhost:8021 # freeswitch address host:port
-   freeswitch_pass = ClueCon # freesw/home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/confitch address host:port
-   rpc_encoding = gob # use JSON for RPC encoding
+   enabled = true # Start the session manager service
+   switch_type = freeswitch # The switch type to be used
+   debit_period = 10 # The number of seconds to be debited in advance during a call
+   rater = 127.0.0.1:2000 # Address where to access rater. Can be internal, direct rater address or the address of a balancer
+   rpc_encoding = gob # Use json or gob for RPC encoding
 
-   [stats_server]
-   enabled = true
+   [freeswitch]
+   server = localhost:8021 # Freeswitch address host:port
+   pass = ClueCon # Freeswtch address host:port
+
+   [stats]
+   enabled = true # Start the stats web server
    listen = 127.0.0.1:8000 # Web server address (for stat reports)
-   media_path = /home/rif/Documents/prog/go/src/github.com/cgrates/cgrates/data
+   media_path =  /home/rif/cgrates/data # The path containig the css, js and templates for the web server
 
+
+There are various sections in the configuration file that define various services that the cgr-rater process can provide. If you are not interested in a certain service you can either leave it in the configuration with the enabled option set to false or remove the section entirely to reduce clutter.
+
+The global sections define the databases to be used with used by CGRateS. The second database is used for logging the debit operations and various acctions operated on the accounts. The two databases can be the same type or different types. Currently we sopport redis, mongo and postgres.
 
 The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open a rater server on witch the raters will register themselves when they start.
 
