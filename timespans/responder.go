@@ -21,7 +21,7 @@ package timespans
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/balancer"
+	"github.com/rif/balancer2go"
 	"net/rpc"
 	"reflect"
 	"runtime"
@@ -30,7 +30,7 @@ import (
 )
 
 type Responder struct {
-	Bal      *balancer.Balancer
+	Bal      *balancer2go.Balancer
 	ExitChan chan bool
 }
 
@@ -167,7 +167,7 @@ func (rs *Responder) Status(arg string, reply *string) (err error) {
 
 func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	if rs.Bal != nil {
-		rs.Bal.Shutdown()
+		rs.Bal.Shutdown("Responder.Shutdown")
 	}
 	storageGetter.Close()
 	defer func() { rs.ExitChan <- true }()

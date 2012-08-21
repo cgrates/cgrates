@@ -23,9 +23,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/cgrates/cgrates/balancer"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
+	"github.com/rif/balancer2go"
 	"io"
 	"net"
 	"net/http"
@@ -95,7 +95,7 @@ var (
 	freeswitch_server = "localhost:8021" // freeswitch address host:port
 	freeswitch_pass   = "ClueCon"        // reeswitch address host:port	
 
-	bal      = balancer.NewBalancer()
+	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
 )
 

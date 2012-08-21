@@ -37,7 +37,7 @@ func stopBalancerSingnalHandler() {
 
 	sig := <-c
 	timespans.Logger.Info(fmt.Sprintf("Caught signal %v, sending shutdownto raters\n", sig))
-	bal.Shutdown()
+	bal.Shutdown("Responder.Shutdown")
 	exitChan <- true
 }
 
