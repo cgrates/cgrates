@@ -4,8 +4,6 @@ go test github.com/cgrates/cgrates/timespans
 ts=$?
 go test github.com/cgrates/cgrates/sessionmanager
 sm=$?
-go test github.com/cgrates/cgrates/balancer
-bl=$?
 go test github.com/cgrates/cgrates/cmd/cgr-rater
 cr=$?
 
