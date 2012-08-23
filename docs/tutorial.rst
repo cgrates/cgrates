@@ -100,7 +100,7 @@ Bellow there is a full configuration file:
 
 There are various sections in the configuration file that define various services that the cgr-rater process can provide. If you are not interested in a certain service you can either leave it in the configuration with the enabled option set to false or remove the section entirely to reduce clutter.
 
-The global sections define the databases to be used with used by CGRateS. The second database is used for logging the debit operations and various acctions operated on the accounts. The two databases can be the same type or different types. Currently we sopport redis, mongo and postgres(work in progress).
+The global sections define the databases to be used with used by CGRateS. The second database is used for logging the debit operations and various acctions operated on the accounts. The two databases can be the same type or different types. Currently we sopport redis, mongo and postgres (work in progress).
 
 The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open a rater server on witch the raters will register themselves when they start.
 
