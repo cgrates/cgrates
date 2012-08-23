@@ -100,7 +100,7 @@ Bellow there is a full configuration file:
 
 There are various sections in the configuration file that define various services that the cgr-rater process can provide. If you are not interested in a certain service you can either leave it in the configuration with the enabled option set to false or remove the section entirely to reduce clutter.
 
-The global sections define the databases to be used with used by CGRateS. The second database is used for logging the debit operations and various acctions operated on the accounts. The two databases can be the same type or different types. Currently we sopport redis, mongo and postgres.
+The global sections define the databases to be used with used by CGRateS. The second database is used for logging the debit operations and various acctions operated on the accounts. The two databases can be the same type or different types. Currently we sopport redis, mongo and postgres(work in progress).
 
 The balancer will open a JSON RPC server and an HTTP server ready for taking external requests. It will also open a rater server on witch the raters will register themselves when they start.
 
@@ -108,7 +108,7 @@ Session manager connects and monitors the freeswitch server issuing API request 
 
 The scheduler is loading the timed actions form database and executes them as appropriate, It will execute all run once actions as they are loaded. It will reload all the action timings from the database when it received system HUP signal (pkill -1 cgr-rater).
 
-The mediator parses the call logs written in a postgres database by the session manager and writes the call costs to a freeswitch CDR file.
+The mediator parses the call logs written in the logging database by the session manager and writes the call costs to a freeswitch CDR file.
 
 The structure of the table (as an SQL command) is the following::
 ::
