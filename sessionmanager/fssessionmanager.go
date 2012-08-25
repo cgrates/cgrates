@@ -34,12 +34,12 @@ type FSSessionManager struct {
 	buf             *bufio.Reader
 	sessions        []*Session
 	sessionDelegate *SessionDelegate
-	loggerDB        timespans.StorageGetter
+	loggerDB        timespans.DataStorage
 	address, pass   string
 	delayFunc       func() int
 }
 
-func NewFSSessionManager(storage timespans.StorageGetter) *FSSessionManager {
+func NewFSSessionManager(storage timespans.DataStorage) *FSSessionManager {
 	return &FSSessionManager{loggerDB: storage}
 }
 
@@ -176,7 +176,7 @@ func (sm *FSSessionManager) GetSessionDelegate() *SessionDelegate {
 	return sm.sessionDelegate
 }
 
-func (sm *FSSessionManager) GetDbLogger() timespans.StorageGetter {
+func (sm *FSSessionManager) GetDbLogger() timespans.DataStorage {
 	return sm.loggerDB
 }
 

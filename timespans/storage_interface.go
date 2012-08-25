@@ -38,7 +38,7 @@ const (
 /*
 Interface for storage providers.
 */
-type StorageGetter interface {
+type DataStorage interface {
 	Close()
 	Flush() error
 	GetRatingProfile(string) (*RatingProfile, error)

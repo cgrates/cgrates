@@ -140,7 +140,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var getter timespans.StorageGetter
+	var getter timespans.DataStorage
 	switch *db_type {
 	case REDIS:
 		db_nb, err := strconv.Atoi(*db_name)

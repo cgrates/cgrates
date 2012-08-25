@@ -31,7 +31,7 @@ import (
 
 type Mediator struct {
 	Connector sessionmanager.Connector
-	loggerDb  timespans.StorageGetter
+	loggerDb  timespans.DataStorage
 	SkipDb    bool
 }
 

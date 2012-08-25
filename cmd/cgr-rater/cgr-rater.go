@@ -191,7 +191,7 @@ func listenToHttpRequests() {
 	http.ListenAndServe(stats_listen, nil)
 }
 
-func startMediator(responder *timespans.Responder, loggerDb timespans.StorageGetter) {
+func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorage) {
 	var connector sessionmanager.Connector
 	if mediator_rater == INTERNAL {
 		connector = responder
@@ -213,7 +213,7 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.StorageGet
 	m.parseCSV()
 }
 
-func startSessionManager(responder *timespans.Responder, loggerDb timespans.StorageGetter) {
+func startSessionManager(responder *timespans.Responder, loggerDb timespans.DataStorage) {
 	var connector sessionmanager.Connector
 	if sm_rater == INTERNAL {
 		connector = responder
@@ -286,7 +286,7 @@ func checkConfigSanity() {
 	}
 }
 
-func configureDatabase(db_type, host, port, name, user, pass string) (getter timespans.StorageGetter, err error) {
+func configureDatabase(db_type, host, port, name, user, pass string) (getter timespans.DataStorage, err error) {
 
 	switch db_type {
 	case REDIS:
@@ -328,13 +328,13 @@ func main() {
 	// some consitency checks
 	go checkConfigSanity()
 
-	var getter, loggerDb timespans.StorageGetter
+	var getter, loggerDb timespans.DataStorage
 	go func() {
 		getter, err = configureDatabase(data_db_type, data_db_host, data_db_port, data_db_name, data_db_user, data_db_pass)
 
 		if err == nil {
 			defer getter.Close()
-			timespans.SetStorageGetter(getter)
+			timespans.SetDataStorage(getter)
 		}
 
 		if log_db_type == SAME {

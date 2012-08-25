@@ -25,5 +25,5 @@ import (
 type SessionManager interface {
 	DisconnectSession(*Session)
 	GetSessionDelegate() *SessionDelegate
-	GetDbLogger() timespans.StorageGetter
+	GetDbLogger() timespans.DataStorage
 }

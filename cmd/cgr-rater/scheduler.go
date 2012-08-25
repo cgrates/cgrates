@@ -64,7 +64,7 @@ func (s scheduler) loop() {
 	}
 }
 
-func loadActionTimings(storage timespans.StorageGetter) {
+func loadActionTimings(storage timespans.DataStorage) {
 	actionTimings, err := storage.GetAllActionTimings()
 	if err != nil {
 		timespans.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))

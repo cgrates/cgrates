@@ -79,7 +79,7 @@ func openStringCSVReader(data string, comma rune) (csvReader *csv.Reader, fp *os
 	return
 }
 
-func (csvr *CSVReader) WriteToDatabase(storage StorageGetter, flush, verbose bool) (err error) {
+func (csvr *CSVReader) WriteToDatabase(storage DataStorage, flush, verbose bool) (err error) {
 	if flush {
 		storage.Flush()
 	}

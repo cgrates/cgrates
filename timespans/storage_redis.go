@@ -30,7 +30,7 @@ type RedisStorage struct {
 	ms   Marshaler
 }
 
-func NewRedisStorage(address string, db int, pass string) (StorageGetter, error) {
+func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
 	if address != "" {
 		address = "tcp:" + address
 	}

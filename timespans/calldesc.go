@@ -107,14 +107,14 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 /*
 Exported method to set the storage getter.
 */
-func SetStorageGetter(sg StorageGetter) {
+func SetDataStorage(sg DataStorage) {
 	storageGetter = sg
 }
 
 /*
 Sets the database for logging (can be de same  as storage getter or different db)
 */
-func SetStorageLogger(sg StorageGetter) {
+func SetStorageLogger(sg DataStorage) {
 	storageLogger = sg
 }
 

@@ -63,7 +63,7 @@ func main() {
 	//getter, err := timespans.NewMongoStorage("localhost", "cgrates")
 	defer getter.Close()
 
-	timespans.SetStorageGetter(getter)
+	timespans.SetDataStorage(getter)
 
 	log.Printf("Runnning %d cycles...", *runs)
 	var result *timespans.CallCost
