@@ -29,6 +29,36 @@ type PostgresStorage struct {
 	Db *sql.DB
 }
 
+var (
+	schema_sql = `
+CREATE TABLE destination IF NOT EXISTS (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(512),
+    prefixes TEXT
+);
+CREATE TABLE activationprofile  IF NOT EXISTS(
+    id SERIAL PRIMARY KEY,
+    destination INTEGER REFERENCES destination(id) ON DELETE CASCADE,
+    activationtime TIMESTAMP
+);
+CREATE TABLE interval IF NOT EXISTS(
+    id SERIAL PRIMARY KEY,
+    activationprofile INTEGER REFERENCES activationprofile(id) ON DELETE CASCADE,
+    years TEXT,
+    months TEXT,
+    monthdays TEXT,
+    weekdays TEXT,
+    starttime TIMESTAMP,
+    endtime TIMESTAMP,
+    weight FLOAT8,
+    connectfee FLOAT8,
+    price FLOAT8,
+    pricedunits FLOAT8,
+    rateincrements FLOAT8
+);
+`
+)
+
 func NewPostgresStorage(host, port, name, user, password string) (DataStorage, error) {
 	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password))
 	if err != nil {
