@@ -42,6 +42,7 @@ The cgr-rater can be provided with the balancer server address and can be config
    rif@grace:~$ cgr-rater -help
    Usage of cgr-rater:
       -config="rater_standalone.config": Configuration file location.
+      -version=false: Prints the application version.
 
 
 :Example: cgr-rater -config=full.config
@@ -145,6 +146,7 @@ This tool is used for importing the data from CSV files into the CGRateS databas
       -dbuser="": The database user to sign in as.
       -flush=false: Flush the database before importing
       -path=".": The path containing the data files
+      -version=false: Prints the application version.
    
 
 :Example: cgr-loader -flush
@@ -169,6 +171,7 @@ The cgr-console is a command line tool used to access the balancer (or the rater
       -subject="": The client who made the call
       -tenant="": Tenant identificator
       -tor="0": Type of record
+      -version=false: Prints the application version.
 
 :Example: cgr-console -cmd=getcost -subject=rif -tenant=vdf -dest=419 -start=2012-02-09T00:00:00Z -end=2012-02-09T00:01:00Z
 
