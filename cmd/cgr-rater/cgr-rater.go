@@ -51,6 +51,7 @@ const (
 
 var (
 	config       = flag.String("config", "rater_standalone.config", "Configuration file location.")
+	version      = flag.Bool("version", false, "Prints the application version.")
 	data_db_type = REDIS
 	data_db_host = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
 	data_db_port = ""          // The port to bind to.
@@ -316,6 +317,10 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter tim
 
 func main() {
 	flag.Parse()
+	if *version {
+		fmt.Println("CGRateS " + timespans.VERSION)
+		return
+	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	c, err := conf.ReadConfigFile(*config)
 	if err != nil {

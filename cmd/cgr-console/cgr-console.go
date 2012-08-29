@@ -30,6 +30,7 @@ import (
 
 var (
 	cmd       = flag.String("cmd", "", "server address host:port")
+	version   = flag.Bool("version", false, "Prints the application version.")
 	server    = flag.String("server", "127.0.0.1:2001", "server address host:port")
 	tor       = flag.String("tor", "0", "Type of record")
 	direction = flag.String("direction", "OUT", "Call direction")
@@ -45,6 +46,10 @@ var (
 
 func main() {
 	flag.Parse()
+	if *version {
+		fmt.Println("CGRateS " + timespans.VERSION)
+		return
+	}
 	var client *rpc.Client
 	var err error
 	if *json {

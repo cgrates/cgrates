@@ -20,6 +20,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"path"
@@ -44,6 +45,7 @@ var (
 
 	flush    = flag.Bool("flush", false, "Flush the database before importing")
 	dataPath = flag.String("path", ".", "The path containing the data files")
+	version  = flag.Bool("version", false, "Prints the application version.")
 
 	destinationsFn   = "Destinations.csv"
 	ratesFn          = "Rates.csv"
@@ -65,6 +67,10 @@ type validator struct {
 
 func main() {
 	flag.Parse()
+	if *version {
+		fmt.Println("CGRateS " + timespans.VERSION)
+		return
+	}
 	dataFilesValidators := []*validator{
 		&validator{destinationsFn,
 			regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
