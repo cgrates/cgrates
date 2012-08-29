@@ -150,17 +150,11 @@ func readConfig(c *conf.ConfigFile) {
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("could not connect to %v: %v", rpcAddress, err))
+		timespans.Logger.Crit(fmt.Sprintf("Could not listen to %v: %v", rpcAddress, err))
 		exitChan <- true
 		return
 	}
 	defer l.Close()
-
-	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("could start the rpc server: %v", err))
-		exitChan <- true
-		return
-	}
 
 	timespans.Logger.Info(fmt.Sprintf("Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
@@ -188,7 +182,11 @@ func listenToHttpRequests() {
 	http.HandleFunc("/getmem", memoryHandler)
 	http.HandleFunc("/raters", ratersHandler)
 	timespans.Logger.Info(fmt.Sprintf("The server is listening on %s", stats_listen))
-	http.ListenAndServe(stats_listen, nil)
+	err := http.ListenAndServe(stats_listen, nil)
+	if err != nil {
+		timespans.Logger.Crit(fmt.Sprintf("Could not start the http server: ", err))
+		exitChan <- true
+	}
 }
 
 func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorage) {
