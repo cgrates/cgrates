@@ -24,15 +24,33 @@ Of course more session managers can serve multiple call switches and all of them
 
 Features
 --------
-+ Prepaid, Pseudo-Prepaid and Postpaid Rating.
-+ The budget expressed in money and/or minutes (seconds)
-+ High accuracy rating: configurable to milliseconds
-+ Handles volume discount
-+ Received calls bonus
-+ Fully/Easy configurable 
-+ Very fast (5000+ req/sec)
-+ Good documentation ( that's me :)
-+ Commercial support available
+- Reliable and Fast ( very fast ;) ). To get an idea about speed, we have benchmarked 11000+ req/sec on a rather modest machine without requiring special tweaks in the kernel
+    - Using most modern programing concepts like multiprocessor support, asynchronous code execution within microthreads
+    - Built-in data caching system per call duration
+    - In-Memory database with persistence
+    - Use of Balancer assures High-Availability of Raters as well as increase of processing performance where that is required
+    - Use of Linux enterprise ready tools to assure High-Availability of the Balancer where that is required (*Supervise* for Application level availability and *LinuxHA* for Host level availability)
+- Prepaid and Pseudo-Prepaid Controller
+    - Mutiple Primary Balances per Account (eg: MONETARY, SMS, INTERNET_MINUTES, INTERNET_TRAFFIC)
+    - Multiple Auxiliary Balances per Account (eg: Free Minutes per Destination,  Volume Rates, Volume Discounts).
+    - Built-in Task-Scheduler supporting both one-time as well as recurrent actions (eg: TOPUP_MINUTES_PER_DESTINATION, DEBIT_MONETARY, RESET_BALANCE)
+    - ActionTriggers ( useful for commercial offerings like receive amounts of monetary units if a specified number of minutes was charged in a month)
+- Highly configurable Rating
+    - Connect Fees
+    - Priced Units definition
+    - Rate increments
+    - Millisecond timestaps
+    - Four decimal currencies
+    - Multiple TypeOfRecord rating (eg: standard vs. premium calls, SMSes, Internet Traffic)
+    - Rating subject concatenations for combined records (eg: location based rating for same user)
+    - Recurrent rates definition (per year, month, day, dayOfWeek, time)
+    - Rating Profiles activation times (eg: rates which activate at specific time in future)
+- Multi-Tenant for both Prepaid as well as Rating
+- Flexible Mediator able to run multiple mediation processes on the same CDR.
+- Verbose action logging in persistent databases (eg: Postgres) to cope with country specific law requirements.
+- Good documentation ( that's me :)
+- Commercial support available
+
 
 How does CGRateS work?
 ----------------------
