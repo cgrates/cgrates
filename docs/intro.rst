@@ -13,7 +13,7 @@ After testing various databases like Kyoto_ cabinet, Redis_ or Mongodb_, the pro
 Here are some of the configurations in which CGRateS can operate:
 
 .. image::  images/Simple.png
-If the network does not require more than one rater to handle the calls. The balancer can be left out and the rater can be queried directly. In this case the rater must be started with -standalone=true and -freeswitch=true options.
+If the network does not require more than one rater to handle the calls. The balancer can be left out and the rater can be queried directly.
 
 .. image::  images/Normal.png
 While the network grows more raters can be thrown into the stack to offer more requests per seconds workload. This implies the usage of the balancer to distribute the requests to the raters running on the different machines.
@@ -24,7 +24,7 @@ Of course more session managers can serve multiple call switches and all of them
 
 Features
 --------
-+ Rates for prepaid and for postpaid
++ Prepaid, Pseudo-Prepaid and Postpaid Rating.
 + The budget expressed in money and/or minutes (seconds)
 + High accuracy rating: configurable to milliseconds
 + Handles volume discount
