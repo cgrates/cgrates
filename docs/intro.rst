@@ -49,7 +49,7 @@ Features
 - Flexible Mediator able to run multiple mediation processes on the same CDR.
 - Verbose action logging in persistent databases (eg: Postgres) to cope with country specific law requirements.
 - Good documentation ( that's me :)
-- Commercial support available
+- "Free as in Beer" with commercial support available on-demand.
 
 
 How does CGRateS work?
