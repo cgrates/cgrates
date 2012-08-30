@@ -1,6 +1,6 @@
 Introduction
 ============
-CGRateS is a very fast and easy scalable rating engine targeted especially for ISPs and telecom operators.
+CGRateS is a very fast and easy scalable rating engine targeted especially for ISPs and Telecom Operators.
 
 It is written in go (http://golang.org) and accessible from any language via JSON RPC. The code is well documented (go doc compliant API docs) and heavily tested.
 
