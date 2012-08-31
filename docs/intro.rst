@@ -49,6 +49,9 @@ Features
 - Multi-Tenant for both Prepaid as well as Rating
 - Flexible Mediator able to run multiple mediation processes on the same CDR.
 - Verbose action logging in persistent databases (eg: Postgres) to cope with country specific law requirements
+- Modular architecture
+    - Easy to enhance functionality by rewriting custom session managers or mediators
+    - Flexible API accessible via both Gob (Golang specific, increased performance) or JSON (platform independent, universally accesible)
 - Good documentation ( that's me :)
 - "Free as in Beer" with commercial support available on-demand.
 
