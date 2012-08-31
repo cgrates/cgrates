@@ -30,6 +30,9 @@ Features
     - In-Memory database with persistence
     - Use of Balancer assures High-Availability of Raters as well as increase of processing performance where that is required
     - Use of Linux enterprise ready tools to assure High-Availability of the Balancer where that is required (*Supervise* for Application level availability and *LinuxHA* for Host level availability)
+- Modular architecture
+    - Easy to enhance functionality by rewriting custom session managers or mediators
+    - Flexible API accessible via both Gob (Golang specific, increased performance) or JSON (platform independent, universally accesible)
 - Prepaid and Pseudo-Prepaid Controller
     - Mutiple Primary Balances per Account (eg: MONETARY, SMS, INTERNET_MINUTES, INTERNET_TRAFFIC)
     - Multiple Auxiliary Balances per Account (eg: Free Minutes per Destination,  Volume Rates, Volume Discounts)
@@ -49,9 +52,6 @@ Features
 - Multi-Tenant for both Prepaid as well as Rating
 - Flexible Mediator able to run multiple mediation processes on the same CDR.
 - Verbose action logging in persistent databases (eg: Postgres) to cope with country specific law requirements
-- Modular architecture
-    - Easy to enhance functionality by rewriting custom session managers or mediators
-    - Flexible API accessible via both Gob (Golang specific, increased performance) or JSON (platform independent, universally accesible)
 - Good documentation ( that's me :)
 - "Free as in Beer" with commercial support available on-demand.
 
