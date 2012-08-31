@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package main
+package scheduler
 
 import (
 	"fmt"
@@ -25,38 +25,38 @@ import (
 	"time"
 )
 
-var (
-	sched       = new(scheduler)
+type Scheduler struct {
+	queue       timespans.ActionTimingPriotityList
 	timer       *time.Timer
-	restartLoop = make(chan byte)
-)
-
-type scheduler struct {
-	queue timespans.ActionTimingPriotityList
+	restartLoop chan bool
 }
 
-func (s scheduler) loop() {
+func NewScheduler() *Scheduler {
+	return &Scheduler{restartLoop: make(chan bool)}
+}
+
+func (s *Scheduler) Loop() {
 	for {
 		if len(s.queue) == 0 {
-			<-restartLoop
+			<-s.restartLoop
 		}
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
 			timespans.Logger.Debug(fmt.Sprintf("%v - %v", a0.Tag, a0.Timing))
 			go a0.Execute()
-			sched.queue = append(s.queue, a0)
-			sched.queue = s.queue[1:]
-			sort.Sort(sched.queue)
+			s.queue = append(s.queue, a0)
+			s.queue = s.queue[1:]
+			sort.Sort(s.queue)
 		} else {
 			d := a0.GetNextStartTime().Sub(now)
 			timespans.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
-			timer = time.NewTimer(d)
+			s.timer = time.NewTimer(d)
 			select {
-			case <-timer.C:
+			case <-s.timer.C:
 				// timer has expired
 				timespans.Logger.Info(fmt.Sprintf("Time for action on %v", s.queue[0]))
-			case <-restartLoop:
+			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
 
@@ -64,13 +64,13 @@ func (s scheduler) loop() {
 	}
 }
 
-func loadActionTimings(storage timespans.DataStorage) {
+func (s *Scheduler) LoadActionTimings(storage timespans.DataStorage) {
 	actionTimings, err := storage.GetAllActionTimings()
 	if err != nil {
 		timespans.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
 	}
 	// recreate the queue
-	sched.queue = timespans.ActionTimingPriotityList{}
+	s.queue = timespans.ActionTimingPriotityList{}
 	for key, ats := range actionTimings {
 		toBeSaved := false
 		isAsap := false
@@ -83,7 +83,7 @@ func loadActionTimings(storage timespans.DataStorage) {
 				go at.Execute()
 				// do not append it to the newAts list to be saved
 			} else {
-				sched.queue = append(sched.queue, at)
+				s.queue = append(s.queue, at)
 				newAts = append(newAts, at)
 			}
 		}
@@ -91,5 +91,10 @@ func loadActionTimings(storage timespans.DataStorage) {
 			storage.SetActionTimings(key, newAts)
 		}
 	}
-	sort.Sort(sched.queue)
+	sort.Sort(s.queue)
+}
+
+func (s *Scheduler) Restart() {
+	s.restartLoop <- true
+	s.timer.Stop()
 }

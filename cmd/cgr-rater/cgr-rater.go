@@ -23,6 +23,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/cgrates/cgrates/mediator"
+	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
 	"github.com/rif/balancer2go"
@@ -98,6 +100,7 @@ var (
 
 	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
+	sched    = new(scheduler.Scheduler)
 )
 
 // this function will reset to zero values the variables that are not present
@@ -208,8 +211,8 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 		}
 		connector = &sessionmanager.RPCClientConnector{client}
 	}
-	m := &Mediator{connector, loggerDb, mediator_skipdb}
-	m.parseCSV()
+	m := &mediator.Mediator{connector, loggerDb, mediator_skipdb}
+	m.ParseCSV(mediator_cdr_file)
 }
 
 func startSessionManager(responder *timespans.Responder, loggerDb timespans.DataStorage) {
@@ -385,9 +388,9 @@ func main() {
 	if scheduler_enabled {
 		timespans.Logger.Info("Starting CGRateS scheduler.")
 		go func() {
-			loadActionTimings(getter)
+			sched.LoadActionTimings(getter)
 			go reloadSchedulerSingnalHandler(getter)
-			sched.loop()
+			sched.Loop()
 		}()
 	}
 

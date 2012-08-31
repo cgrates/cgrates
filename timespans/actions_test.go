@@ -56,7 +56,6 @@ func TestActionTimingStoreRestore(t *testing.T) {
 		t.Errorf("Expected %v was  %v", at, o)
 	}
 }
-
 func TestActionTriggerStoreRestore(t *testing.T) {
 	at := &ActionTrigger{
 		Id:             "some_uuid",
@@ -314,6 +313,7 @@ func TestActionTimingHourMonthdaysMonthYear(t *testing.T) {
 			month = nextMonth.Month()
 		}
 	}
+	nextDay = time.Date(y, month, day, 10, 1, 0, 0, time.Local)
 	year := now.Year()
 	if nextDay.Before(now) {
 		if now.After(testTime) {

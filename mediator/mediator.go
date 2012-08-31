@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package main
+package mediator
 
 import (
 	"bufio"
@@ -31,17 +31,13 @@ import (
 
 type Mediator struct {
 	Connector sessionmanager.Connector
-	loggerDb  timespans.DataStorage
+	LoggerDb  timespans.DataStorage
 	SkipDb    bool
 }
 
-/*func readDbRecord(db *sql.DB, searchedUUID string) (cc *timespans.CallCost, timespansText string, err error) {
-
-}*/
-
-func (m *Mediator) parseCSV() {
+func (m *Mediator) ParseCSV(cdrfn string) {
 	flag.Parse()
-	file, err := os.Open(mediator_cdr_file)
+	file, err := os.Open(cdrfn)
 	defer file.Close()
 	if err != nil {
 		timespans.Logger.Crit(err.Error())
@@ -67,7 +63,7 @@ func (m *Mediator) parseCSV() {
 
 func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err error) {
 	searchedUUID := record[10]
-	cc, err = m.loggerDb.GetCallCostLog(searchedUUID)
+	cc, err = m.LoggerDb.GetCallCostLog(searchedUUID)
 	if err != nil {
 		cc, err = m.GetCostsFromRater(record)
 	}
@@ -82,6 +78,7 @@ func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, e
 	t2, _ := time.Parse("2012-05-21 17:48:20", record[6])
 	cd := timespans.CallDescriptor{
 		Direction:   "OUT",
+		Account:     subject,
 		Tenant:      tenant,
 		TOR:         "0",
 		Subject:     subject,

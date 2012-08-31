@@ -6,7 +6,7 @@ go test github.com/cgrates/cgrates/sessionmanager
 sm=$?
 go test github.com/cgrates/cgrates/cmd/cgr-rater
 cr=$?
+go test github.com/cgrates/cgrates/inotify
+in=$?
 
-exit $ts || $sm || $bl || $cr
-
-
+exit $ts || $sm || $bl || $cr || $in
