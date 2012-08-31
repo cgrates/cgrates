@@ -23,8 +23,10 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"github.com/cgrates/cgrates/inotify"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
+	"log"
 	"os"
 	"time"
 )
@@ -33,6 +35,28 @@ type Mediator struct {
 	Connector sessionmanager.Connector
 	LoggerDb  timespans.DataStorage
 	SkipDb    bool
+}
+
+func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
+	watcher, err := inotify.NewWatcher()
+	if err != nil {
+		return
+	}
+	err = watcher.Watch(cdrPath)
+	if err != nil {
+		return
+	}
+	for {
+		select {
+		case ev := <-watcher.Event:
+			if ev.Mask&inotify.IN_MOVE != 0 {
+				log.Print(ev)
+			}
+		case err := <-watcher.Error:
+			timespans.Logger.Err(fmt.Sprintf("Inotify error: ", err))
+		}
+	}
+	return
 }
 
 func (m *Mediator) ParseCSV(cdrfn string) {
