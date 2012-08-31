@@ -32,7 +32,8 @@ Features
     - Use of Linux enterprise ready tools to assure High-Availability of the Balancer where that is required (*Supervise* for Application level availability and *LinuxHA* for Host level availability)
 - Prepaid and Pseudo-Prepaid Controller
     - Mutiple Primary Balances per Account (eg: MONETARY, SMS, INTERNET_MINUTES, INTERNET_TRAFFIC)
-    - Multiple Auxiliary Balances per Account (eg: Free Minutes per Destination,  Volume Rates, Volume Discounts).
+    - Multiple Auxiliary Balances per Account (eg: Free Minutes per Destination,  Volume Rates, Volume Discounts)
+    - Concurrent sessions per account sharing the same balance with configurable debit interval (starting with 1 second)
     - Built-in Task-Scheduler supporting both one-time as well as recurrent actions (eg: TOPUP_MINUTES_PER_DESTINATION, DEBIT_MONETARY, RESET_BALANCE)
     - ActionTriggers ( useful for commercial offerings like receive amounts of monetary units if a specified number of minutes was charged in a month)
 - Highly configurable Rating
@@ -44,10 +45,10 @@ Features
     - Multiple TypeOfRecord rating (eg: standard vs. premium calls, SMSes, Internet Traffic)
     - Rating subject concatenations for combined records (eg: location based rating for same user)
     - Recurrent rates definition (per year, month, day, dayOfWeek, time)
-    - Rating Profiles activation times (eg: rates which activate at specific time in future)
+    - Rating Profiles activation times (eg: rates becoming active at specific time in future)
 - Multi-Tenant for both Prepaid as well as Rating
 - Flexible Mediator able to run multiple mediation processes on the same CDR.
-- Verbose action logging in persistent databases (eg: Postgres) to cope with country specific law requirements.
+- Verbose action logging in persistent databases (eg: Postgres) to cope with country specific law requirements
 - Good documentation ( that's me :)
 - "Free as in Beer" with commercial support available on-demand.
 
