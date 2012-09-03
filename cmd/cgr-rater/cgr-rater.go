@@ -85,18 +85,26 @@ var (
 	sm_rpc_encoding = GOB      // use JSON for RPC encoding
 
 	mediator_enabled      = false
-	mediator_cdr_file     = "Master.csv" // Freeswitch Master CSV CDR file.
-	mediator_result_file  = "out.csv"    // Generated file containing CDR and price info.
-	mediator_rater        = INTERNAL     // address where to access rater. Can be internal, direct rater address or the address of a balancer	
-	mediator_rpc_encoding = GOB          // use JSON for RPC encoding
+	mediator_cdr_path     = ""        // Freeswitch Master CSV CDR file.
+	mediator_result_file  = "out.csv" // Generated file containing CDR and price info.
+	mediator_rater        = INTERNAL  // address where to access rater. Can be internal, direct rater address or the address of a balancer	
+	mediator_rpc_encoding = GOB       // use JSON for RPC encoding
 	mediator_skipdb       = false
 
 	stats_enabled    = false
 	stats_listen     = "127.0.0.1:8000" // Web server address (for stat reports)
 	stats_media_path = ""
 
-	freeswitch_server = "localhost:8021" // freeswitch address host:port
-	freeswitch_pass   = "ClueCon"        // reeswitch address host:port	
+	freeswitch_server      = "localhost:8021" // freeswitch address host:port
+	freeswitch_pass        = "ClueCon"        // reeswitch address host:port	
+	freeswitch_direction   = ""
+	freeswitch_tor         = ""
+	freeswitch_tenant      = ""
+	freeswitch_subject     = ""
+	freeswitch_account     = ""
+	freeswitch_destination = ""
+	freeswitch_time_start  = ""
+	freeswitch_time_end    = ""
 
 	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
@@ -136,8 +144,7 @@ func readConfig(c *conf.ConfigFile) {
 	sm_rpc_encoding, _ = c.GetString("session_manager", "rpc_encoding")
 
 	mediator_enabled, _ = c.GetBool("mediator", "enabled")
-	mediator_cdr_file, _ = c.GetString("mediator", "cdr_file")
-	mediator_result_file, _ = c.GetString("mediator", "result_file")
+	mediator_cdr_path, _ = c.GetString("mediator", "cdr_file")
 	mediator_rater, _ = c.GetString("mediator", "rater")
 	mediator_rpc_encoding, _ = c.GetString("mediator", "rpc_encoding")
 	mediator_skipdb, _ = c.GetBool("mediator", "skipdb")
@@ -148,7 +155,14 @@ func readConfig(c *conf.ConfigFile) {
 
 	freeswitch_server, _ = c.GetString("freeswitch", "server")
 	freeswitch_pass, _ = c.GetString("freeswitch", "pass")
-
+	freeswitch_tor, _ = c.GetString("freeswitch", "tor_index")
+	freeswitch_tenant, _ = c.GetString("freeswitch", "tenant_index")
+	freeswitch_direction, _ = c.GetString("freeswitch", "direction_index")
+	freeswitch_subject, _ = c.GetString("freeswitch", "subject_index")
+	freeswitch_account, _ = c.GetString("freeswitch", "account_index")
+	freeswitch_destination, _ = c.GetString("freeswitch", "destination_index")
+	freeswitch_time_start, _ = c.GetString("freeswitch", "time_start_index")
+	freeswitch_time_end, _ = c.GetString("freeswitch", "time_end_index")
 }
 
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
@@ -211,8 +225,12 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 		}
 		connector = &timespans.RPCClientConnector{client}
 	}
-	m := &mediator.Mediator{connector, loggerDb, mediator_skipdb}
-	m.ParseCSV(mediator_cdr_file)
+	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_time_end)
+	if err != nil {
+		timespans.Logger.Crit(fmt.Sprintf("Failed to start mediator: %v", err))
+		exitChan <- true
+	}
+	m.TrackCDRFiles(mediator_cdr_path)
 }
 
 func startSessionManager(responder *timespans.Responder, loggerDb timespans.DataStorage) {

@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/timespans"
 	"os"
 	"path"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -37,10 +36,69 @@ const (
 	OUTPUT_DIR = "med_output"
 )
 
+type csvindex int
+
 type Mediator struct {
-	Connector timespans.Connector
-	LoggerDb  timespans.DataStorage
-	SkipDb    bool
+	connector timespans.Connector
+	loggerDb  timespans.DataStorage
+	skipDb    bool
+	directionIndex,
+	torIndex,
+	tenantIndex,
+	subjectIndex,
+	accountIndex,
+	destinationIndex,
+	timeStartIndex,
+	timeEndIndex csvindex
+}
+
+func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, skipDb bool, directionIndex, torIndex, tenantIndex, subjectIndex, accountIndex, destinationIndex, timeStartIndex, timeEndIndex string) (*Mediator, error) {
+	m := &Mediator{
+		connector: connector,
+		loggerDb:  loggerDb,
+		skipDb:    skipDb,
+	}
+	i, err := strconv.Atoi(directionIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.directionIndex = csvindex(i)
+	i, err = strconv.Atoi(torIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.torIndex = csvindex(i)
+	i, err = strconv.Atoi(tenantIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.tenantIndex = csvindex(i)
+	i, err = strconv.Atoi(subjectIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.subjectIndex = csvindex(i)
+	i, err = strconv.Atoi(accountIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.accountIndex = csvindex(i)
+	i, err = strconv.Atoi(destinationIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.destinationIndex = csvindex(i)
+	i, err = strconv.Atoi(timeStartIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.timeStartIndex = csvindex(i)
+	i, err = strconv.Atoi(timeEndIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.timeEndIndex = csvindex(i)
+	return m, nil
 }
 
 func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
@@ -91,7 +149,7 @@ func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
 		//t, _ := time.Parse("2012-05-21 17:48:20", record[5])		
 		var cc *timespans.CallCost
-		if !m.SkipDb {
+		if !m.skipDb {
 			cc, err = m.GetCostsFromDB(record)
 		} else {
 			cc, err = m.GetCostsFromRater(record)
@@ -108,7 +166,7 @@ func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
 
 func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err error) {
 	searchedUUID := record[10]
-	cc, err = m.LoggerDb.GetCallCostLog(searchedUUID)
+	cc, err = m.loggerDb.GetCallCostLog(searchedUUID)
 	if err != nil {
 		cc, err = m.GetCostsFromRater(record)
 	}
@@ -116,20 +174,17 @@ func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err 
 }
 
 func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, err error) {
-	tenant := record[0]
-	subject := record[1]
-	dest := record[2]
-	t1, _ := time.Parse("2012-05-21 17:48:20", record[5])
-	t2, _ := time.Parse("2012-05-21 17:48:20", record[6])
+	t1, _ := time.Parse("2012-05-21 17:48:20", record[m.timeStartIndex])
+	t2, _ := time.Parse("2012-05-21 17:48:20", record[m.timeEndIndex])
 	cd := timespans.CallDescriptor{
-		Direction:   "OUT",
-		Account:     subject,
-		Tenant:      tenant,
-		TOR:         "0",
-		Subject:     subject,
-		Destination: dest,
+		Direction:   record[m.directionIndex],
+		Tenant:      record[m.tenantIndex],
+		TOR:         record[m.torIndex],
+		Subject:     record[m.subjectIndex],
+		Account:     record[m.accountIndex],
+		Destination: record[m.destinationIndex],
 		TimeStart:   t1,
 		TimeEnd:     t2}
-	err = m.Connector.GetCost(cd, cc)
+	err = m.connector.GetCost(cd, cc)
 	return
 }
