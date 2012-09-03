@@ -194,7 +194,7 @@ func listenToHttpRequests() {
 }
 
 func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorage) {
-	var connector sessionmanager.Connector
+	var connector timespans.Connector
 	if mediator_rater == INTERNAL {
 		connector = responder
 	} else {
@@ -209,14 +209,14 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 			timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
 			exitChan <- true
 		}
-		connector = &sessionmanager.RPCClientConnector{client}
+		connector = &timespans.RPCClientConnector{client}
 	}
 	m := &mediator.Mediator{connector, loggerDb, mediator_skipdb}
 	m.ParseCSV(mediator_cdr_file)
 }
 
 func startSessionManager(responder *timespans.Responder, loggerDb timespans.DataStorage) {
-	var connector sessionmanager.Connector
+	var connector timespans.Connector
 	if sm_rater == INTERNAL {
 		connector = responder
 	} else {
@@ -231,7 +231,7 @@ func startSessionManager(responder *timespans.Responder, loggerDb timespans.Data
 			timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
 			exitChan <- true
 		}
-		connector = &sessionmanager.RPCClientConnector{client}
+		connector = &timespans.RPCClientConnector{client}
 	}
 	switch sm_switch_type {
 	case FS:

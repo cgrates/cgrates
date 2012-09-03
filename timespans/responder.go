@@ -288,3 +288,37 @@ func (rw *ResponderWorker) Call(serviceMethod string, args interface{}, reply in
 func (rw *ResponderWorker) Close() error {
 	return nil
 }
+
+type Connector interface {
+	GetCost(CallDescriptor, *CallCost) error
+	Debit(CallDescriptor, *CallCost) error
+	MaxDebit(CallDescriptor, *CallCost) error
+	DebitCents(CallDescriptor, *float64) error
+	DebitSeconds(CallDescriptor, *float64) error
+	GetMaxSessionTime(CallDescriptor, *float64) error
+}
+
+type RPCClientConnector struct {
+	Client *rpc.Client
+}
+
+func (rcc *RPCClientConnector) GetCost(cd CallDescriptor, cc *CallCost) error {
+	return rcc.Client.Call("Responder.GetCost", cd, cc)
+}
+
+func (rcc *RPCClientConnector) Debit(cd CallDescriptor, cc *CallCost) error {
+	return rcc.Client.Call("Responder.Debit", cd, cc)
+}
+
+func (rcc *RPCClientConnector) MaxDebit(cd CallDescriptor, cc *CallCost) error {
+	return rcc.Client.Call("Responder.MaxDebit", cd, cc)
+}
+func (rcc *RPCClientConnector) DebitCents(cd CallDescriptor, resp *float64) error {
+	return rcc.Client.Call("Responder.DebitCents", cd, resp)
+}
+func (rcc *RPCClientConnector) DebitSeconds(cd CallDescriptor, resp *float64) error {
+	return rcc.Client.Call("Responder.DebitSeconds", cd, resp)
+}
+func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float64) error {
+	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
+}

@@ -24,15 +24,21 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/inotify"
-	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/timespans"
-	"log"
 	"os"
+	"path"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 )
 
+const (
+	OUTPUT_DIR = "med_output"
+)
+
 type Mediator struct {
-	Connector sessionmanager.Connector
+	Connector timespans.Connector
 	LoggerDb  timespans.DataStorage
 	SkipDb    bool
 }
@@ -50,7 +56,10 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 		select {
 		case ev := <-watcher.Event:
 			if ev.Mask&inotify.IN_MOVE != 0 {
-				log.Print(ev)
+				err = m.parseCSV(cdrPath, ev.Name)
+				if err != nil {
+					return err
+				}
 			}
 		case err := <-watcher.Error:
 			timespans.Logger.Err(fmt.Sprintf("Inotify error: ", err))
@@ -59,15 +68,25 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	return
 }
 
-func (m *Mediator) ParseCSV(cdrfn string) {
+func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
 	flag.Parse()
-	file, err := os.Open(cdrfn)
+	file, err := os.Open(path.Join(dir, cdrfn))
 	defer file.Close()
 	if err != nil {
 		timespans.Logger.Crit(err.Error())
 		os.Exit(1)
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
+
+	dir = path.Join(dir, OUTPUT_DIR)
+	os.Mkdir(dir, os.ModeDir)
+	fout, err := os.Create(path.Join(dir, cdrfn))
+	if err != nil {
+		return err
+	}
+	defer fout.Close()
+
+	w := bufio.NewWriter(fout)
 
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
 		//t, _ := time.Parse("2012-05-21 17:48:20", record[5])		
@@ -81,8 +100,10 @@ func (m *Mediator) ParseCSV(cdrfn string) {
 		if err != nil {
 			timespans.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record (%v): %v", record, err))
 		}
-		fmt.Println(cc)
+		record = append(record, strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64))
+		w.WriteString(strings.Join(record, ","))
 	}
+	return
 }
 
 func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err error) {
