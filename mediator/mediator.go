@@ -157,6 +157,7 @@ func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
 		}
 		if err != nil {
 			timespans.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record (%v): %v", record, err))
+			continue
 		}
 		record = append(record, strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64))
 		w.WriteString(strings.Join(record, ","))

@@ -85,10 +85,9 @@ var (
 	sm_rpc_encoding = GOB      // use JSON for RPC encoding
 
 	mediator_enabled      = false
-	mediator_cdr_path     = ""        // Freeswitch Master CSV CDR file.
-	mediator_result_file  = "out.csv" // Generated file containing CDR and price info.
-	mediator_rater        = INTERNAL  // address where to access rater. Can be internal, direct rater address or the address of a balancer	
-	mediator_rpc_encoding = GOB       // use JSON for RPC encoding
+	mediator_cdr_path     = ""       // Freeswitch Master CSV CDR file.
+	mediator_rater        = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer	
+	mediator_rpc_encoding = GOB      // use JSON for RPC encoding
 	mediator_skipdb       = false
 
 	stats_enabled    = false
@@ -144,7 +143,7 @@ func readConfig(c *conf.ConfigFile) {
 	sm_rpc_encoding, _ = c.GetString("session_manager", "rpc_encoding")
 
 	mediator_enabled, _ = c.GetBool("mediator", "enabled")
-	mediator_cdr_path, _ = c.GetString("mediator", "cdr_file")
+	mediator_cdr_path, _ = c.GetString("mediator", "cdr_path")
 	mediator_rater, _ = c.GetString("mediator", "rater")
 	mediator_rpc_encoding, _ = c.GetString("mediator", "rpc_encoding")
 	mediator_skipdb, _ = c.GetBool("mediator", "skipdb")

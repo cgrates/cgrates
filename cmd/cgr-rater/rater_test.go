@@ -53,8 +53,7 @@ rpc_encoding = test # use JSON for RPC encoding
 
 [mediator]
 enabled = true
-cdr_file = test # Freeswitch Master CSV CDR file.
-result_file = test # Generated file containing CDR and price info.
+cdr_path = test # Freeswitch Master CSV CDR file.
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
 rpc_encoding = test # use JSON for RPC encoding
 skipdb = true
@@ -77,6 +76,14 @@ media_path = test
 [freeswitch]
 server = test # freeswitch address host:port
 pass = test # freeswitch address host:port
+direction_index = test
+tor_index         = test
+tenant_index      = test
+subject_index     = test
+account_index     = test
+destination_index = test
+time_start_index  = test
+time_end_index    = test
 `
 )
 
@@ -118,8 +125,7 @@ func TestConfig(t *testing.T) {
 		sm_rpc_encoding != "test" ||
 
 		mediator_enabled != true ||
-		mediator_cdr_file != "test" ||
-		mediator_result_file != "test" ||
+		mediator_cdr_path != "test" ||
 		mediator_rater != "test" ||
 		mediator_rpc_encoding != "test" ||
 		mediator_skipdb != true ||
@@ -128,7 +134,15 @@ func TestConfig(t *testing.T) {
 		stats_listen != "test" ||
 		stats_media_path != "test" ||
 		freeswitch_server != "test" ||
-		freeswitch_pass != "test" {
+		freeswitch_pass != "test" ||
+		freeswitch_direction != "test" ||
+		freeswitch_tor != "test" ||
+		freeswitch_tenant != "test" ||
+		freeswitch_subject != "test" ||
+		freeswitch_account != "test" ||
+		freeswitch_destination != "test" ||
+		freeswitch_time_start != "test" ||
+		freeswitch_time_end != "test" {
 		t.Log(data_db_type)
 		t.Log(data_db_host)
 		t.Log(data_db_port)
@@ -155,14 +169,21 @@ func TestConfig(t *testing.T) {
 		t.Log(sm_debit_period)
 		t.Log(sm_rpc_encoding)
 		t.Log(mediator_enabled)
-		t.Log(mediator_cdr_file)
-		t.Log(mediator_result_file)
+		t.Log(mediator_cdr_path)
 		t.Log(mediator_rater)
 		t.Log(stats_enabled)
 		t.Log(stats_listen)
 		t.Log(stats_media_path)
 		t.Log(freeswitch_server)
 		t.Log(freeswitch_pass)
+		t.Log(freeswitch_direction)
+		t.Log(freeswitch_tor)
+		t.Log(freeswitch_tenant)
+		t.Log(freeswitch_subject)
+		t.Log(freeswitch_account)
+		t.Log(freeswitch_destination)
+		t.Log(freeswitch_time_start)
+		t.Log(freeswitch_time_end)
 		t.Error("Config file read failed!")
 	}
 }
