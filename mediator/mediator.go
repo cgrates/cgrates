@@ -110,10 +110,12 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	if err != nil {
 		return
 	}
+	timespans.Logger.Info(fmt.Sprintf("Monitoring %v for file moves.", cdrPath))
 	for {
 		select {
 		case ev := <-watcher.Event:
 			if ev.Mask&inotify.IN_MOVE != 0 {
+				timespans.Logger.Info(fmt.Sprintf("Started to parse %v", ev.Name))
 				err = m.parseCSV(cdrPath, ev.Name)
 				if err != nil {
 					return err
@@ -128,7 +130,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 
 func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
 	flag.Parse()
-	file, err := os.Open(path.Join(dir, cdrfn))
+	file, err := os.Open(cdrfn)
 	defer file.Close()
 	if err != nil {
 		timespans.Logger.Crit(err.Error())
@@ -138,7 +140,7 @@ func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
 
 	dir = path.Join(dir, OUTPUT_DIR)
 	os.Mkdir(dir, os.ModeDir)
-	fout, err := os.Create(path.Join(dir, cdrfn))
+	fout, err := os.Create(path.Join(dir, "test.out"))
 	if err != nil {
 		return err
 	}
