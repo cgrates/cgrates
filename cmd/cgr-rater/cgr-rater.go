@@ -33,6 +33,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -85,7 +86,8 @@ var (
 	sm_rpc_encoding = GOB      // use JSON for RPC encoding
 
 	mediator_enabled      = false
-	mediator_cdr_path     = ""       // Freeswitch Master CSV CDR file.
+	mediator_cdr_path     = ""       // Freeswitch Master CSV CDR path.
+	mediator_cdr_out_path = ""       // Freeswitch Master CSV CDR output path.
 	mediator_rater        = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer	
 	mediator_rpc_encoding = GOB      // use JSON for RPC encoding
 	mediator_skipdb       = false
@@ -144,6 +146,7 @@ func readConfig(c *conf.ConfigFile) {
 
 	mediator_enabled, _ = c.GetBool("mediator", "enabled")
 	mediator_cdr_path, _ = c.GetString("mediator", "cdr_path")
+	mediator_cdr_out_path, _ = c.GetString("mediator", "cdr_out_path")
 	mediator_rater, _ = c.GetString("mediator", "rater")
 	mediator_rpc_encoding, _ = c.GetString("mediator", "rpc_encoding")
 	mediator_skipdb, _ = c.GetBool("mediator", "skipdb")
@@ -224,7 +227,15 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 		}
 		connector = &timespans.RPCClientConnector{client}
 	}
-	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_time_end)
+	if _, err := os.Stat(mediator_cdr_path); err != nil {
+		timespans.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", mediator_cdr_path))
+		exitChan <- true
+	}
+	if _, err := os.Stat(mediator_cdr_out_path); err != nil {
+		timespans.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", mediator_cdr_out_path))
+		exitChan <- true
+	}
+	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_time_end)
 	if err != nil {
 		timespans.Logger.Crit(fmt.Sprintf("Failed to start mediator: %v", err))
 		exitChan <- true

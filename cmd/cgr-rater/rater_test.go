@@ -53,7 +53,8 @@ rpc_encoding = test # use JSON for RPC encoding
 
 [mediator]
 enabled = true
-cdr_path = test # Freeswitch Master CSV CDR file.
+cdr_path = test # Freeswitch Master CSV CDR path.
+cdr_out_path = test
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
 rpc_encoding = test # use JSON for RPC encoding
 skipdb = true
@@ -126,6 +127,7 @@ func TestConfig(t *testing.T) {
 
 		mediator_enabled != true ||
 		mediator_cdr_path != "test" ||
+		mediator_cdr_out_path != "test" ||
 		mediator_rater != "test" ||
 		mediator_rpc_encoding != "test" ||
 		mediator_skipdb != true ||
@@ -170,6 +172,7 @@ func TestConfig(t *testing.T) {
 		t.Log(sm_rpc_encoding)
 		t.Log(mediator_enabled)
 		t.Log(mediator_cdr_path)
+		t.Log(mediator_cdr_out_path)
 		t.Log(mediator_rater)
 		t.Log(stats_enabled)
 		t.Log(stats_listen)
