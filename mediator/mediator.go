@@ -114,7 +114,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	for {
 		select {
 		case ev := <-watcher.Event:
-			if ev.Mask&inotify.IN_MOVE != 0 {
+			if ev.Mask&inotify.IN_MOVED_TO != 0 {
 				timespans.Logger.Info(fmt.Sprintf("Started to parse %v", ev.Name))
 				err = m.parseCSV(cdrPath, ev.Name)
 				if err != nil {
@@ -139,7 +139,7 @@ func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
 	csvReader := csv.NewReader(bufio.NewReader(file))
 
 	dir = path.Join(dir, OUTPUT_DIR)
-	os.Mkdir(dir, os.ModeDir)
+	os.Mkdir(dir, 0777)
 	fout, err := os.Create(path.Join(dir, "test.out"))
 	if err != nil {
 		return err
