@@ -131,7 +131,7 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err
 		}
 		var tempAts []*ActionTiming
 		err = ms.ms.Unmarshal(value, &tempAts)
-		ats[key] = tempAts
+		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}
 
 	return

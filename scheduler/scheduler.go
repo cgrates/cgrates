@@ -59,7 +59,6 @@ func (s *Scheduler) Loop() {
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
-
 		}
 	}
 }
