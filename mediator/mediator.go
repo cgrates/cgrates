@@ -32,16 +32,13 @@ import (
 	"time"
 )
 
-const (
-	OUTPUT_DIR = "med_output"
-)
-
 type csvindex int
 
 type Mediator struct {
 	connector timespans.Connector
 	loggerDb  timespans.DataStorage
 	skipDb    bool
+	outputDir string
 	directionIndex,
 	torIndex,
 	tenantIndex,
@@ -52,11 +49,12 @@ type Mediator struct {
 	timeEndIndex csvindex
 }
 
-func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, skipDb bool, directionIndex, torIndex, tenantIndex, subjectIndex, accountIndex, destinationIndex, timeStartIndex, timeEndIndex string) (*Mediator, error) {
+func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, skipDb bool, outputDir, directionIndex, torIndex, tenantIndex, subjectIndex, accountIndex, destinationIndex, timeStartIndex, timeEndIndex string) (*Mediator, error) {
 	m := &Mediator{
 		connector: connector,
 		loggerDb:  loggerDb,
 		skipDb:    skipDb,
+		outputDir: outputDir,
 	}
 	i, err := strconv.Atoi(directionIndex)
 	if err != nil {
@@ -116,7 +114,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 		case ev := <-watcher.Event:
 			if ev.Mask&inotify.IN_MOVED_TO != 0 {
 				timespans.Logger.Info(fmt.Sprintf("Started to parse %v", ev.Name))
-				err = m.parseCSV(cdrPath, ev.Name)
+				err = m.parseCSV(ev.Name)
 				if err != nil {
 					return err
 				}
@@ -128,7 +126,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	return
 }
 
-func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
+func (m *Mediator) parseCSV(cdrfn string) (err error) {
 	flag.Parse()
 	file, err := os.Open(cdrfn)
 	defer file.Close()
@@ -138,9 +136,8 @@ func (m *Mediator) parseCSV(dir, cdrfn string) (err error) {
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
 
-	dir = path.Join(dir, OUTPUT_DIR)
-	os.Mkdir(dir, 0777)
-	fout, err := os.Create(path.Join(dir, "test.out"))
+	_, fn := path.Split(cdrfn)
+	fout, err := os.Create(path.Join(m.outputDir, fn))
 	if err != nil {
 		return err
 	}
@@ -177,8 +174,14 @@ func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err 
 }
 
 func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, err error) {
-	t1, _ := time.Parse("2012-05-21 17:48:20", record[m.timeStartIndex])
-	t2, _ := time.Parse("2012-05-21 17:48:20", record[m.timeEndIndex])
+	t1, err := time.Parse("2012-05-21 17:48:20", record[m.timeStartIndex])
+	if err != nil {
+		return
+	}
+	t2, err := time.Parse("2012-05-21 17:48:20", record[m.timeEndIndex])
+	if err != nil {
+		return
+	}
 	cd := timespans.CallDescriptor{
 		Direction:   record[m.directionIndex],
 		Tenant:      record[m.tenantIndex],

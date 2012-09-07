@@ -59,7 +59,6 @@ Bellow there is a full configuration file:
    logdb_host = localhost # The host to connect to. Values that start with / are for UNIX domain sockets.
    logdb_name = cgrates # The name of the database to connect to.
 
-
    [balancer]
    enabled = false # Start balancer server
    listen = 127.0.0.1:2001 # Balancer listen interface
@@ -73,8 +72,8 @@ Bellow there is a full configuration file:
 
    [mediator]
    enabled = true # Start the mediator service
-   cdr_file = Master.csv # Freeswitch Master CSV CDR file
-   result_file = out.csv # Generated file containing CDR and price info
+   cdr_path = /var/log/freeswitch # Freeswitch Master CSV CDR path
+   cdr_out_path = /var/log/freeswitch/out # Freeswitch Master CSV CDR path
    rater = internal # Address where to access rater. Can be internal, direct rater address or the address of a balancer
    rpc_encoding = gob # Use json or gob for RPC encoding
    skipdb = true # Do not look in the database for logged cdrs, ask rater directly
@@ -92,11 +91,19 @@ Bellow there is a full configuration file:
    [freeswitch]
    server = localhost:8021 # Freeswitch address host:port
    pass = ClueCon # Freeswtch address host:port
-
+   direction_index = 0
+   tor_index = 1
+   tenant_index = 2
+   subject_index = 3
+   account_index = 4
+   destination_index = 5
+   time_start_index = 6
+   time_end_index = 7
+   
    [stats]
    enabled = true # Start the stats web server
    listen = 127.0.0.1:8000 # Web server address (for stat reports)
-   media_path =  /home/rif/cgrates/data # The path containig the css, js and templates for the web server
+   media_path =  /etc/cgrates/data # The path containig the css, js and templates for the web server
 
 
 There are various sections in the configuration file that define various services that the cgr-rater process can provide. If you are not interested in a certain service you can either leave it in the configuration with the enabled option set to false or remove the section entirely to reduce clutter.
