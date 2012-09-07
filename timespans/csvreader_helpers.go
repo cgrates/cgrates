@@ -118,9 +118,12 @@ func (rt *RateTiming) GetInterval(r *Rate) (i *Interval) {
 	return
 }
 
-func ValidateCSVData(fn string, re *regexp.Regexp) (err error) {
+func ValidateCSVData(fn string, re *regexp.Regexp, skipIfNotAvailable bool) (err error) {
 	fin, err := os.Open(fn)
 	if err != nil {
+		if skipIfNotAvailable {
+			return nil
+		}
 		return
 	}
 	defer fin.Close()
