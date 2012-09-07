@@ -74,7 +74,7 @@ func main() {
 	dataFilesValidators := []*validator{
 		&validator{destinationsFn,
 			regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
-			"Tag[0-9A-Za-z_),Prefix[0-9]"},
+			"Tag[0-9A-Za-z_],Prefix[0-9]"},
 		&validator{ratesFn,
 			regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*){4}$`),
 			"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
@@ -101,7 +101,7 @@ func main() {
 			"Tenant[0-9A-Za-z_],Account[0-9A-Za-z_:.],Direction OUT|IN,ActionTimingsTag[0-9A-Za-z_],ActionTriggersTag[0-9A-Za-z_]"},
 	}
 	for _, v := range dataFilesValidators {
-		err := timespans.ValidateCSVData(v.fn, v.re)
+		err := timespans.ValidateCSVData(path.Join(*dataPath, v.fn), v.re)
 		if err != nil {
 			log.Fatal(err, "\n\t", v.message)
 		}

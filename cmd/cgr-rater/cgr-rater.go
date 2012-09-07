@@ -107,7 +107,6 @@ var (
 
 	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
-	sched    = new(scheduler.Scheduler)
 )
 
 // this function will reset to zero values the variables that are not present
@@ -352,24 +351,22 @@ func main() {
 	go checkConfigSanity()
 
 	var getter, loggerDb timespans.DataStorage
-	go func() {
-		getter, err = configureDatabase(data_db_type, data_db_host, data_db_port, data_db_name, data_db_user, data_db_pass)
+	getter, err = configureDatabase(data_db_type, data_db_host, data_db_port, data_db_name, data_db_user, data_db_pass)
 
-		if err == nil {
-			defer getter.Close()
-			timespans.SetDataStorage(getter)
-		}
+	if err == nil {
+		defer getter.Close()
+		timespans.SetDataStorage(getter)
+	}
 
-		if log_db_type == SAME {
-			loggerDb = getter
-		} else {
-			loggerDb, err = configureDatabase(log_db_type, log_db_host, log_db_port, log_db_name, log_db_user, log_db_pass)
-		}
-		if err == nil {
-			defer loggerDb.Close()
-			timespans.SetStorageLogger(loggerDb)
-		}
-	}()
+	if log_db_type == SAME {
+		loggerDb = getter
+	} else {
+		loggerDb, err = configureDatabase(log_db_type, log_db_host, log_db_port, log_db_name, log_db_user, log_db_pass)
+	}
+	if err == nil {
+		defer loggerDb.Close()
+		timespans.SetStorageLogger(loggerDb)
+	}
 
 	if sm_debit_period > 0 {
 		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period)); err == nil {
@@ -405,8 +402,9 @@ func main() {
 	if scheduler_enabled {
 		timespans.Logger.Info("Starting CGRateS scheduler.")
 		go func() {
+			sched := scheduler.NewScheduler()
 			sched.LoadActionTimings(getter)
-			go reloadSchedulerSingnalHandler(getter)
+			go reloadSchedulerSingnalHandler(sched, getter)
 			sched.Loop()
 		}()
 	}

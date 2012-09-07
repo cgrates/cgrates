@@ -20,6 +20,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/timespans"
 	"net/rpc"
 	"os"
@@ -95,9 +96,10 @@ func registerToBalancer() {
 }
 
 // Listens for the HUP system signal and gracefuly reloads the timers from database.
-func reloadSchedulerSingnalHandler(getter timespans.DataStorage) {
+func reloadSchedulerSingnalHandler(sched *scheduler.Scheduler, getter timespans.DataStorage) {
 	timespans.Logger.Info("Handling HUP signal...")
 	for {
+		timespans.Logger.Debug("here again")
 		c := make(chan os.Signal)
 		signal.Notify(c, syscall.SIGHUP)
 		sig := <-c

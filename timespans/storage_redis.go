@@ -92,7 +92,7 @@ func (rs *RedisStorage) SetActions(key string, as []*Action) (err error) {
 }
 
 func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
-	if values, err := rs.db.Get(USER_BALANCE_PREFIX+key); err == nil {
+	if values, err := rs.db.Get(USER_BALANCE_PREFIX + key); err == nil {
 		ub = &UserBalance{Id: key}
 		err = rs.ms.Unmarshal(values, ub)
 	} else {
@@ -138,7 +138,7 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, e
 		}
 		var tempAts []*ActionTiming
 		err = rs.ms.Unmarshal(values, &tempAts)
-		ats[key] = tempAts
+		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}
 
 	return
