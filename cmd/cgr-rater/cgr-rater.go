@@ -414,8 +414,8 @@ func main() {
 		timespans.Logger.Info("Starting CGRateS scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
-			sched.LoadActionTimings(getter)
 			go reloadSchedulerSingnalHandler(sched, getter)
+			sched.LoadActionTimings(getter)
 			sched.Loop()
 		}()
 	}

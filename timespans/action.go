@@ -128,8 +128,10 @@ func resetCountersAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func genericMakeNegative(a *Action) {
-	a.Units = -a.Units
-	if a.MinuteBucket != nil {
+	if a.Units > 0 { // only apply if not allready negative
+		a.Units = -a.Units
+	}
+	if a.MinuteBucket != nil && a.MinuteBucket.Seconds > 0 {
 		a.MinuteBucket.Seconds = -a.MinuteBucket.Seconds
 	}
 }

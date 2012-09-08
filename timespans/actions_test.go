@@ -816,6 +816,18 @@ func TestActionTimingLogging(t *testing.T) {
 	}
 }
 
+func TestActionMakeNegative(t *testing.T) {
+	a := &Action{Units: 10}
+	genericMakeNegative(a)
+	if a.Units > 0 {
+		t.Error("Failed to make negative: ", a)
+	}
+	genericMakeNegative(a)
+	if a.Units > 0 {
+		t.Error("Failed to preserve negative: ", a)
+	}
+}
+
 /********************************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {

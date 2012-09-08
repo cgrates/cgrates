@@ -56,7 +56,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	now := time.Now()
 	y, m, d := now.Date()
 	z, _ := now.Zone()
-	if i.StartTime != "" {
+	if i.StartTime != "" && i.StartTime != ASAP {
 		l := fmt.Sprintf("%d-%d-%d %s %s", y, m, d, i.StartTime, z)
 		var err error
 		t, err = time.Parse(FORMAT, l)
@@ -219,7 +219,7 @@ func (at *ActionTiming) Execute() (err error) {
 		}
 		for _, ub := range at.getUserBalances() {
 			AccLock.Guard(ub.Id, func() (float64, error) {
-				go Logger.Info(fmt.Sprintf("Executing %v: %v", ub.Id, a))
+				Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
 				err = actionFunction(ub, a)
 				storageGetter.SetUserBalance(ub)
 				return 0, nil

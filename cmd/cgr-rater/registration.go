@@ -99,7 +99,6 @@ func registerToBalancer() {
 func reloadSchedulerSingnalHandler(sched *scheduler.Scheduler, getter timespans.DataStorage) {
 	timespans.Logger.Info("Handling HUP signal...")
 	for {
-		timespans.Logger.Debug("here again")
 		c := make(chan os.Signal)
 		signal.Notify(c, syscall.SIGHUP)
 		sig := <-c

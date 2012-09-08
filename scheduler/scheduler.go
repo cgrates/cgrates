@@ -78,7 +78,7 @@ func (s *Scheduler) LoadActionTimings(storage timespans.DataStorage) {
 			isAsap = at.CheckForASAP()
 			toBeSaved = toBeSaved || isAsap
 			if at.IsOneTimeRun() {
-				timespans.Logger.Info(fmt.Sprintf("Time for one time action on %v", at))
+				timespans.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
 				go at.Execute()
 				// do not append it to the newAts list to be saved
 			} else {
