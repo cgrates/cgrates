@@ -37,7 +37,7 @@ func NewScheduler() *Scheduler {
 
 func (s *Scheduler) Loop() {
 	for {
-		if len(s.queue) == 0 {
+		for len(s.queue) == 0 { //hang here if empty
 			<-s.restartLoop
 		}
 		a0 := s.queue[0]
@@ -95,5 +95,7 @@ func (s *Scheduler) LoadActionTimings(storage timespans.DataStorage) {
 
 func (s *Scheduler) Restart() {
 	s.restartLoop <- true
-	s.timer.Stop()
+	if s.timer != nil {
+		s.timer.Stop()
+	}
 }
