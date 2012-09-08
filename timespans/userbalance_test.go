@@ -375,7 +375,6 @@ func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
-	t.Log(ub, ub.MinuteBuckets[0])
 	if ub.BalanceMap[CREDIT+OUTBOUND] != 110 || ub.MinuteBuckets[0].Seconds != 20 {
 		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND], ub.MinuteBuckets[0].Seconds)
 	}

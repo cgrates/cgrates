@@ -407,7 +407,6 @@ func TestActionTimingPriotityList(t *testing.T) {
 	}}
 	var atpl ActionTimingPriotityList
 	atpl = append(atpl, at2, at1)
-	t.Log(atpl)
 	atpl.Sort()
 	if atpl[0] != at1 || atpl[1] != at2 {
 		t.Error("Timing list not sorted correctly: ", atpl)

@@ -37,7 +37,6 @@ func TestDestinationStoreRestore(t *testing.T) {
 }
 
 func TestDestinationStorageStore(t *testing.T) {
-	t.Log(storageGetter)
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	storageGetter.SetDestination(nationale)
 	result, _ := storageGetter.GetDestination(nationale.Id)
