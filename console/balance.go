@@ -12,7 +12,7 @@ import (
 
 // ConsoleCommand interface
 type Command interface {
-	FromOsArgs( args []string ) error	// Load data from os arguments
+	FromOsArgs( args []string ) error	// Load data from os arguments or flag.Args()
 	usage( string ) string			// usage message
 	defaults() error			// set default field values
 }
@@ -41,7 +41,7 @@ func ( self *CmdGetBalance ) defaults() error {
 // Parses command line args and builds CmdBalance value
 func ( self *CmdGetBalance ) FromOsArgs( args []string ) error {
 	// Map arg indexes to "self.Value"s
-	idxArgsToFields := map[int]string{2:"User",3:"BalanceType",4:"Direction"}
+	idxArgsToFields := map[int]string{ 2:"User", 3:"BalanceType", 4:"Direction" }
 	if len(os.Args) < 3 {
 		return fmt.Errorf(self.usage(filepath.Base(args[0])))
 	}
@@ -57,7 +57,7 @@ func ( self *CmdGetBalance ) FromOsArgs( args []string ) error {
 		if fld := reflect.ValueOf(self).Elem().FieldByName(fldName); fld.Kind() == reflect.String {
 			fld.SetString(args[idx])
 		} else if fld.Kind() == reflect.Int {
-			fld.SetInt(1) // Placeholder for future usage
+			fld.SetInt(1) // Placeholder for future usage of other data types than strings
 		}
 	}
 	return nil
