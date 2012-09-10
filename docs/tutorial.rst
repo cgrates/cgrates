@@ -100,11 +100,6 @@ Bellow there is a full configuration file:
    time_start_index = 6
    time_end_index = 7
    
-   [stats]
-   enabled = true # Start the stats web server
-   listen = 127.0.0.1:8000 # Web server address (for stat reports)
-   media_path =  /etc/cgrates/data # The path containig the css, js and templates for the web server
-
 
 There are various sections in the configuration file that define various services that the cgr-rater process can provide. If you are not interested in a certain service you can either leave it in the configuration with the enabled option set to false or remove the section entirely to reduce clutter.
 
