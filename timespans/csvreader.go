@@ -149,7 +149,9 @@ func (csvr *CSVReader) WriteToDatabase(storage DataStorage, flush, verbose bool)
 func (csvr *CSVReader) LoadDestinations(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load destinations file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
@@ -180,7 +182,9 @@ func (csvr *CSVReader) LoadDestinations(fn string, comma rune) (err error) {
 func (csvr *CSVReader) LoadRates(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load rates file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
@@ -204,7 +208,9 @@ func (csvr *CSVReader) LoadRates(fn string, comma rune) (err error) {
 func (csvr *CSVReader) LoadTimings(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load timings file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
@@ -225,7 +231,9 @@ func (csvr *CSVReader) LoadTimings(fn string, comma rune) (err error) {
 func (csvr *CSVReader) LoadRateTimings(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load rate timings file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
@@ -262,7 +270,9 @@ func (csvr *CSVReader) LoadRateTimings(fn string, comma rune) (err error) {
 func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) (err error) {
 	csvReader, fp, err := csvr.readerFunc(fn, comma)
 	if err != nil {
-		return
+		log.Print("Could not load rating profiles file: ", err)
+		// allow writing of the other values
+		return nil
 	}
 	if fp != nil {
 		defer fp.Close()
