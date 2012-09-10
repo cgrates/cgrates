@@ -30,7 +30,6 @@ import (
 	"github.com/rif/balancer2go"
 	"io"
 	"net"
-	"net/http"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
@@ -92,10 +91,6 @@ var (
 	mediator_rpc_encoding = GOB      // use JSON for RPC encoding
 	mediator_skipdb       = false
 
-	stats_enabled    = false
-	stats_listen     = "127.0.0.1:8000" // Web server address (for stat reports)
-	stats_media_path = ""
-
 	freeswitch_server      = "localhost:8021" // freeswitch address host:port
 	freeswitch_pass        = "ClueCon"        // reeswitch address host:port	
 	freeswitch_direction   = ""
@@ -150,10 +145,6 @@ func readConfig(c *conf.ConfigFile) {
 	mediator_rpc_encoding, _ = c.GetString("mediator", "rpc_encoding")
 	mediator_skipdb, _ = c.GetBool("mediator", "skipdb")
 
-	stats_enabled, _ = c.GetBool("stats", "enabled")
-	stats_listen, _ = c.GetString("stats", "listen")
-	stats_media_path, _ = c.GetString("stats", "media_path")
-
 	freeswitch_server, _ = c.GetString("freeswitch", "server")
 	freeswitch_pass, _ = c.GetString("freeswitch", "pass")
 	freeswitch_tor, _ = c.GetString("freeswitch", "tor_index")
@@ -192,19 +183,6 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 
 		timespans.Logger.Info(fmt.Sprintf("connection started: %v", conn.RemoteAddr()))
 		go serveFunc(conn)
-	}
-}
-
-func listenToHttpRequests() {
-	http.Handle("/static/", http.FileServer(http.Dir(stats_media_path)))
-	http.HandleFunc("/", statusHandler)
-	http.HandleFunc("/getmem", memoryHandler)
-	http.HandleFunc("/raters", ratersHandler)
-	timespans.Logger.Info(fmt.Sprintf("The server is listening on %s", stats_listen))
-	err := http.ListenAndServe(stats_listen, nil)
-	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Could not start the http server: ", err))
-		exitChan <- true
 	}
 }
 
@@ -403,11 +381,6 @@ func main() {
 			timespans.Logger.Info("Starting internal rater.")
 			bal.AddClient("local", new(timespans.ResponderWorker))
 		}
-	}
-
-	if stats_enabled {
-		timespans.Logger.Info(fmt.Sprintf("Starting CGRateS stats server on %v.", stats_listen))
-		go listenToHttpRequests()
 	}
 
 	if scheduler_enabled {

@@ -69,11 +69,6 @@ rater = test #address where to access rater. Can be internal, direct rater addre
 debit_period = 11
 rpc_encoding = test # use JSON for RPC encoding
 
-[stats]
-enabled = true
-listen = test # Web server address (for stat reports)
-media_path = test
-
 [freeswitch]
 server = test # freeswitch address host:port
 pass = test # freeswitch address host:port
@@ -132,9 +127,6 @@ func TestConfig(t *testing.T) {
 		mediator_rpc_encoding != "test" ||
 		mediator_skipdb != true ||
 
-		stats_enabled != true ||
-		stats_listen != "test" ||
-		stats_media_path != "test" ||
 		freeswitch_server != "test" ||
 		freeswitch_pass != "test" ||
 		freeswitch_direction != "test" ||
@@ -174,9 +166,6 @@ func TestConfig(t *testing.T) {
 		t.Log(mediator_cdr_path)
 		t.Log(mediator_cdr_out_path)
 		t.Log(mediator_rater)
-		t.Log(stats_enabled)
-		t.Log(stats_listen)
-		t.Log(stats_media_path)
 		t.Log(freeswitch_server)
 		t.Log(freeswitch_pass)
 		t.Log(freeswitch_direction)
