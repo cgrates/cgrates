@@ -1,4 +1,4 @@
-/* Implementing balance related console commands
+/* Implementing balance related console commands.
 */
 package console
 
