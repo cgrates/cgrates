@@ -21,27 +21,19 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"time"
+	"os"
+	//"reflect"
+	"timespans"
+	"console"
 )
 
 var (
-	cmd       = flag.String("cmd", "", "server address host:port")
 	version   = flag.Bool("version", false, "Prints the application version.")
 	server    = flag.String("server", "127.0.0.1:2001", "server address host:port")
-	tor       = flag.String("tor", "0", "Type of record")
-	direction = flag.String("direction", "OUT", "Call direction")
-	tenant    = flag.String("tenant", "", "Tenant identificator")
-	subject   = flag.String("subject", "", "The client who made the call")
-	account   = flag.String("account", "", "The the user balance to be used")
-	dest      = flag.String("dest", "", "Call destination")
-	start     = flag.String("start", "", "Time start (format: 2012-02-09T00:00:00Z)")
-	end       = flag.String("end", "", "Time end (format: 2012-02-09T00:00:00Z)")
-	amount    = flag.Float64("amount", 0, "Amount for different operations")
-	json      = flag.Bool("json", false, "Use JSON for RPC encoding.")
+	json      = flag.Bool("json", true, "Use JSON for RPC encoding.")
 )
 
 func main() {
@@ -62,98 +54,18 @@ func main() {
 		log.Fatal("Could not connect to server " + *server)
 	}
 	defer client.Close()
-
-	timestart, err := time.Parse(time.RFC3339, *start)
-	if err != nil {
-		flag.PrintDefaults()
-		log.Fatal("Time start format is invalid: ", err)
+	// Strict command parsing starts here
+	args := append( []string{os.Args[0]}, flag.Args()... ) // Emulate os.Args by prepending the cmd to list of args coming from flag
+	cmd, cmdErr := console.GetCommandValue( args )
+	if cmdErr != nil {
+		log.Fatal( cmdErr )
 	}
-	timeend, err := time.Parse(time.RFC3339, *end)
-	if err != nil {
-		flag.PrintDefaults()
-		log.Fatal("Time end format is invalid: ", err)
-	}
-
-	cd := &timespans.CallDescriptor{
-		Direction:   *direction,
-		TOR:         *tor,
-		Tenant:      *tenant,
-		Subject:     *subject,
-		Account:     *account,
-		Destination: *dest,
-		TimeStart:   timestart,
-		TimeEnd:     timeend,
-		Amount:      *amount,
+	//res := reflect.ValueOf(cmd.RpcResult()).Elem()
+	var res string
+	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), &res); rpcErr != nil {
+		log.Fatal( err )
 	}
 
-	switch *cmd {
-	case "getcost":
-		result := timespans.CallCost{}
-		if err = client.Call("Responder.GetCost", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "debit":
-		result := timespans.CallCost{}
-		if err = client.Call("Responder.Debit", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "maxdebit":
-		result := timespans.CallCost{}
-		if err = client.Call("Responder.MaxDebit", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "getmaxsessiontime":
-		var result float64
-		if err = client.Call("Responder.GetMaxSessionTime", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "debitbalance":
-		var result float64
-		if err = client.Call("Responder.DebitBalance", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "debitsms":
-		var result float64
-		if err = client.Call("Responder.DebitSMS", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "debitseconds":
-		var result float64
-		if err = client.Call("Responder.DebitSeconds", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "addrecievedcallseconds":
-		var result float64
-		if err = client.Call("Responder.AddRecievedCallSeconds", cd, &result); err == nil {
-			fmt.Println(result)
-		}
-	case "status":
-		var result string
-		if err = client.Call("Responder.Status", "", &result); err == nil {
-			fmt.Println(result)
-		}
-	case "shutdown":
-		var result string
-		if err = client.Call("Responder.Shutdown", "", &result); err == nil {
-			fmt.Println(result)
-		}
-	default:
-		fmt.Println("List of commands:")
-		fmt.Println("\tgetcost")
-		fmt.Println("\tdebit")
-		fmt.Println("\tmaxdebit")
-		fmt.Println("\tgetmaxsessiontime")
-		fmt.Println("\tdebitbalance")
-		fmt.Println("\tdebitsms")
-		fmt.Println("\tdebitseconds")
-		fmt.Println("\taddrecievedcallseconds")
-		fmt.Println("\tflushcache")
-		fmt.Println("\tstatus")
-		fmt.Println("\tshutdown")
-		flag.PrintDefaults()
-	}
-	if err != nil {
-		log.Print(cd.GetKey())
-		log.Fatal(err)
-	}
+	fmt.Println( res )
+
 }
