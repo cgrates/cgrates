@@ -25,7 +25,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
-	//"reflect"
+	"reflect"
 	"timespans"
 	"console"
 )
@@ -60,12 +60,11 @@ func main() {
 	if cmdErr != nil {
 		log.Fatal( cmdErr )
 	}
-	//res := reflect.ValueOf(cmd.RpcResult()).Elem()
-	var res string
-	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), &res); rpcErr != nil {
+	res := cmd.RpcResult()
+	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), res); rpcErr != nil {
 		log.Fatal( err )
 	}
 
-	fmt.Println( res )
+	fmt.Println( reflect.ValueOf(res).Elem().String() )
 
 }

@@ -8,7 +8,6 @@ import (
 )
 
 
-
 // Console Command interface
 type Commander interface {
 	FromArgs(args []string)	error 		// Load data from os arguments or flag.Args()
@@ -57,4 +56,5 @@ func GetCommandValue( args []string ) ( Commander, error ) {
         }
 	return cmdVal, nil
 }
-	
+
+
