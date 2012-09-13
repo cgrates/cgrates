@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"console"
 	"flag"
 	"fmt"
 	"log"
@@ -27,7 +26,8 @@ import (
 	"net/rpc/jsonrpc"
 	"os"
 	"reflect"
-	"timespans"
+	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/console"
 )
 
 var (
@@ -64,7 +64,6 @@ func main() {
 	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), res); rpcErr != nil {
 		log.Fatal(rpcErr)
 	}
-
-	fmt.Println(reflect.ValueOf(res).Elem().String())
+	fmt.Println(reflect.ValueOf(res).Elem().Interface())
 
 }

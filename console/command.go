@@ -35,7 +35,7 @@ func CmdRpcPrmsFromArgs(rpcPrms interface{}, args []string, idxArgsToRpcPrms map
 // Process args and return right command Value or error
 func GetCommandValue(args []string) (Commander, error) {
 	if len(args) < 2 {
-		return nil, fmt.Errorf("\n\tUsage: %s <command>\n", filepath.Base(args[0]))
+		return nil, fmt.Errorf("\n\tUsage: %s [cfg_opts...{-h}] <command>\n", filepath.Base(args[0]))
 	}
 	cmd := args[1]
 	var cmdVal Commander
@@ -45,7 +45,7 @@ func GetCommandValue(args []string) (Commander, error) {
 	case "get_balance":
 		cmdVal = &CmdGetBalance{}
 	default:
-		return nil, fmt.Errorf("\n\tUsage: %s <status|get_balance>\n", filepath.Base(args[0]))
+		return nil, fmt.Errorf("\n\tUsage: %s [cfg_opts...{-h}] <status|get_balance>\n", filepath.Base(args[0]))
 	}
 	if err := cmdVal.FromArgs(args); err != nil {
 		return nil, err

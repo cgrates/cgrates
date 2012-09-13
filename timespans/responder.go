@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/rif/balancer2go"
+	"github.com/cgrates/cgrates/console"
 	"net/rpc"
 	"reflect"
 	"runtime"
@@ -175,6 +176,29 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	return
 }
 
+// Get balance
+func (rs *Responder) GetBalance(arg console.ArgsGetBalance, reply *console.ReplyGetBalance) (err error) {
+	if rs.Bal != nil {
+		return fmt.Errorf("No balancer supported for this command right now")
+	}
+	ubKey := arg.Direction+":"+arg.Tenant+":"+arg.User
+	userBalance, err := storageGetter.GetUserBalance(ubKey)
+	if err != nil {
+		return err
+	}
+	if balance,balExists := userBalance.BalanceMap[arg.BalanceId]; !balExists {
+		// No match, balanceId not found
+		return fmt.Errorf("-BALANCE_NOT_FOUND")
+	} else {
+		reply.Tenant = arg.Tenant
+		reply.User = arg.User
+		reply.Direction = arg.Direction
+		reply.BalanceId = arg.BalanceId
+		reply.Balance = balance
+	}
+	return nil 
+}
+
 /*
 The function that gets the information from the raters using balancer.
 */
@@ -322,3 +346,4 @@ func (rcc *RPCClientConnector) DebitSeconds(cd CallDescriptor, resp *float64) er
 func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
 }
+

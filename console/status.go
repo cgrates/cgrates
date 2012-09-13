@@ -11,7 +11,7 @@ type CmdStatus struct {
 }
 
 func (self *CmdStatus) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: %s status", name)
+	return fmt.Sprintf("\n\tUsage: %s [cfg_opts...{-h}] status", name)
 }
 
 func (self *CmdStatus) defaults() error {

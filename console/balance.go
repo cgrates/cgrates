@@ -7,30 +7,42 @@ import (
 	"path/filepath"
 )
 
-type PrmsGetBalance struct {
+// Data being sent to the rpc responder
+type ArgsGetBalance struct {
 	Tenant		string
 	User		string
 	Direction	string
-	BalanceTag	string
+	BalanceId	string
 }
 
+
+// Received back from query
+type ReplyGetBalance struct {
+	Tenant		string
+	User		string
+	Direction	string
+	BalanceId	string
+	Balance		float64
+}
+
+// Commander implementation
 type CmdGetBalance struct {
 	rpcMethod        string
-	rpcParams        PrmsGetBalance
-	rpcResult        string
+	rpcParams        ArgsGetBalance
+	rpcResult        ReplyGetBalance
 	idxArgsToRpcPrms map[int]string
 }
 
 // name should be exec's name
 func (self *CmdGetBalance) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: %s get_balance <tenant> <user> [<balance_tag> [<direction>]]", name)
+	return fmt.Sprintf("\n\tUsage: %s [cfg_opts...{-h}] get_balance <tenant> <user> [<balanceid> [<direction>]]", name)
 }
 
 // set param defaults
 func (self *CmdGetBalance) defaults() error {
-	self.idxArgsToRpcPrms = map[int]string{2: "Tenant", 3: "User", 4: "BalanceTag", 5:"Direction" }
+	self.idxArgsToRpcPrms = map[int]string{2: "Tenant", 3: "User", 4: "BalanceId", 5:"Direction" }
 	self.rpcMethod = "Responder.GetBalance"
-	self.rpcParams.BalanceTag = "MONETARY"
+	self.rpcParams.BalanceId = "MONETARY"
 	self.rpcParams.Direction = "OUT"
 	return nil
 }
