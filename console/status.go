@@ -11,7 +11,7 @@ type CmdStatus struct {
 }
 
 func (self *CmdStatus) Usage(name string) string {
-	return fmt.Sprintf("usage: %s status", name)
+	return fmt.Sprintf("\n\tUsage: %s status", name)
 }
 
 func (self *CmdStatus) defaults() error {
@@ -29,7 +29,7 @@ func (self *CmdStatus) RpcMethod() string {
 }
 
 func (self *CmdStatus) RpcParams() interface{} {
-	return self.rpcParams
+	return &self.rpcParams
 }
 
 func (self *CmdStatus) RpcResult() interface{} {

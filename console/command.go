@@ -13,7 +13,7 @@ type Commander interface {
 	RpcMethod() string            // Method which should be called remotely
 	RpcParams() interface{}       // Parameters to send out on rpc
 	RpcResult() interface{}       // Only requirement is to have a String method to print on console
-	defaults() error              // set default field values
+	defaults() error              // set defaults wherever necessary
 }
 
 // Set command fields based on indexes defined in default()
@@ -35,7 +35,7 @@ func CmdRpcPrmsFromArgs(rpcPrms interface{}, args []string, idxArgsToRpcPrms map
 // Process args and return right command Value or error
 func GetCommandValue(args []string) (Commander, error) {
 	if len(args) < 2 {
-		return nil, fmt.Errorf("usage: %s <command>\n", filepath.Base(args[0]))
+		return nil, fmt.Errorf("\n\tUsage: %s <command>\n", filepath.Base(args[0]))
 	}
 	cmd := args[1]
 	var cmdVal Commander
@@ -45,7 +45,7 @@ func GetCommandValue(args []string) (Commander, error) {
 	case "get_balance":
 		cmdVal = &CmdGetBalance{}
 	default:
-		return nil, fmt.Errorf("usage: %s <command>\n", filepath.Base(args[0]))
+		return nil, fmt.Errorf("\n\tUsage: %s <status|get_balance>\n", filepath.Base(args[0]))
 	}
 	if err := cmdVal.FromArgs(args); err != nil {
 		return nil, err
