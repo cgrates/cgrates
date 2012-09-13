@@ -32,8 +32,8 @@ import (
 
 var (
 	version = flag.Bool("version", false, "Prints the application version.")
-	server  = flag.String("server", "127.0.0.1:2001", "server address host:port")
-	rpc_encoding = flag.String("rpc_encoding", "gob", "RPC encoding used <gob|jsonrpc>")
+	server  = flag.String("server", "127.0.0.1:2000", "server address host:port")
+	rpc_encoding = flag.String("rpc_encoding", "gob", "RPC encoding used <gob|json>")
 )
 
 func main() {
@@ -44,7 +44,7 @@ func main() {
 	}
 	var client *rpc.Client
 	var err error
-	if *rpc_encoding == "jsonrpc" {
+	if *rpc_encoding == "json" {
 		client, err = jsonrpc.Dial("tcp", *server)
 	} else {
 		client, err = rpc.Dial("tcp", *server)
