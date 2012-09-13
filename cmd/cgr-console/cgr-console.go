@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"console"
 	"flag"
 	"fmt"
 	"log"
@@ -27,13 +28,12 @@ import (
 	"os"
 	"reflect"
 	"timespans"
-	"console"
 )
 
 var (
-	version   = flag.Bool("version", false, "Prints the application version.")
-	server    = flag.String("server", "127.0.0.1:2001", "server address host:port")
-	json      = flag.Bool("json", true, "Use JSON for RPC encoding.")
+	version = flag.Bool("version", false, "Prints the application version.")
+	server  = flag.String("server", "127.0.0.1:2001", "server address host:port")
+	json    = flag.Bool("json", true, "Use JSON for RPC encoding.")
 )
 
 func main() {
@@ -55,16 +55,16 @@ func main() {
 	}
 	defer client.Close()
 	// Strict command parsing starts here
-	args := append( []string{os.Args[0]}, flag.Args()... ) // Emulate os.Args by prepending the cmd to list of args coming from flag
-	cmd, cmdErr := console.GetCommandValue( args )
+	args := append([]string{os.Args[0]}, flag.Args()...) // Emulate os.Args by prepending the cmd to list of args coming from flag
+	cmd, cmdErr := console.GetCommandValue(args)
 	if cmdErr != nil {
-		log.Fatal( cmdErr )
+		log.Fatal(cmdErr)
 	}
 	res := cmd.RpcResult()
 	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), res); rpcErr != nil {
-		log.Fatal( err )
+		log.Fatal(err)
 	}
 
-	fmt.Println( reflect.ValueOf(res).Elem().String() )
+	fmt.Println(reflect.ValueOf(res).Elem().String())
 
 }

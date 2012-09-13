@@ -5,9 +5,9 @@ import (
 )
 
 type CmdStatus struct {
-	rpcMethod	string
-	rpcParams	string
-	rpcResult	string
+	rpcMethod string
+	rpcParams string
+	rpcResult string
 }
 
 func (self *CmdStatus) Usage(name string) string {
@@ -24,7 +24,7 @@ func (self *CmdStatus) FromArgs(args []string) error {
 	return nil
 }
 
-func (self *CmdStatus) RpcMethod () string {
+func (self *CmdStatus) RpcMethod() string {
 	return self.rpcMethod
 }
 

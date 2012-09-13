@@ -8,18 +8,17 @@ import (
 	"path/filepath"
 )
 
-
-type PrmsGetBalance	struct {
-	User		string
-	BalanceType	string
-	Direction	string
+type PrmsGetBalance struct {
+	User        string
+	BalanceType string
+	Direction   string
 }
 
 type CmdGetBalance struct {
-	rpcMethod		string
-	rpcParams		PrmsGetBalance
-	rpcResult		string
-	idxArgsToRpcPrms	map[int]string
+	rpcMethod        string
+	rpcParams        PrmsGetBalance
+	rpcResult        string
+	idxArgsToRpcPrms map[int]string
 }
 
 // name should be exec's name
@@ -44,11 +43,11 @@ func (self *CmdGetBalance) FromArgs(args []string) error {
 	// Args look OK, set defaults before going further
 	self.defaults()
 	// Dynamically set rpc params
-	CmdRpcPrmsFromArgs( self.rpcParams, args, self.idxArgsToRpcPrms )
+	CmdRpcPrmsFromArgs(self.rpcParams, args, self.idxArgsToRpcPrms)
 	return nil
 }
 
-func (self *CmdGetBalance) RpcMethod () string {
+func (self *CmdGetBalance) RpcMethod() string {
 	return self.rpcMethod
 }
 
