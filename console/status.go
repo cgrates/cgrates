@@ -10,16 +10,12 @@ type CmdStatus struct {
 	rpcResult	string
 }
 
-func (self *CmdStatus) usage(name string) string {
+func (self *CmdStatus) Usage(name string) string {
 	return fmt.Sprintf("usage: %s status", name)
 }
 
 func (self *CmdStatus) defaults() error {
 	self.rpcMethod = "Responder.Status"
-	return nil
-}
-
-func( self *CmdStatus) idxArgsToFields() map[int]string {
 	return nil
 }
 

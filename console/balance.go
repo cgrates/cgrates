@@ -8,42 +8,43 @@ import (
 	"path/filepath"
 )
 
-type CmdGetBalance struct {
+
+type PrmsGetBalance	struct {
 	User		string
 	BalanceType	string
 	Direction	string
-	rpcMethod	string
-	rpcParams	interface{}
-	rpcResult	string
+}
+
+type CmdGetBalance struct {
+	rpcMethod		string
+	rpcParams		PrmsGetBalance
+	rpcResult		string
+	idxArgsToRpcPrms	map[int]string
 }
 
 // name should be exec's name
-func (self *CmdGetBalance) usage(name string) string {
+func (self *CmdGetBalance) Usage(name string) string {
 	return fmt.Sprintf("usage: %s get_balance <user> <baltype> [<direction>]", name)
 }
 
 // set param defaults
 func (self *CmdGetBalance) defaults() error {
+	self.idxArgsToRpcPrms = map[int]string{2: "User", 3: "BalanceType", 4: "Direction"}
 	self.rpcMethod = "Responder.GetBalance"
-	self.rpcParams = self
-	self.BalanceType = "MONETARY"
-	self.Direction = "OUT"
+	self.rpcParams.BalanceType = "MONETARY"
+	self.rpcParams.Direction = "OUT"
 	return nil
-}
-
-func( self *CmdGetBalance) idxArgsToFields() map[int]string {
-	return map[int]string{2: "User", 3: "BalanceType", 4: "Direction"}
 }
 
 // Parses command line args and builds CmdBalance value
 func (self *CmdGetBalance) FromArgs(args []string) error {
 	if len(os.Args) < 3 {
-		return fmt.Errorf(self.usage(filepath.Base(args[0])))
+		return fmt.Errorf(self.Usage(filepath.Base(args[0])))
 	}
 	// Args look OK, set defaults before going further
 	self.defaults()
-	// Dynamically set field values
-	CmdFieldsFromArgs( self, args )
+	// Dynamically set rpc params
+	CmdRpcPrmsFromArgs( self.rpcParams, args, self.idxArgsToRpcPrms )
 	return nil
 }
 

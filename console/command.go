@@ -11,24 +11,23 @@ import (
 // Console Command interface
 type Commander interface {
 	FromArgs(args []string)	error 		// Load data from os arguments or flag.Args()
-	usage(string)		string		// usage message
-	defaults()		error		// set default field values
-	idxArgsToFields()	map[int]string	// field's index position in command arguments
+	Usage(string)		string		// usage message
 	RpcMethod()		string		// Method which should be called remotely
 	RpcParams()		interface{}	// Parameters to send out on rpc
 	RpcResult()		interface{}	// Only requirement is to have a String method to print on console
+	defaults()		error		// set default field values
 }
 
 
 // Set command fields based on indexes defined in default()
-func CmdFieldsFromArgs( cmd Commander, args []string ) {
+func CmdRpcPrmsFromArgs( rpcPrms interface{}, args []string, idxArgsToRpcPrms map[int]string ) {
 	for idx := range args {
-		fldName, hasIdx := cmd.idxArgsToFields()[idx]
+		fldName, hasIdx := idxArgsToRpcPrms[idx]
 		if !hasIdx {
 			continue
 		}
 		// field defined to be set by os.Args index
-		if fld := reflect.ValueOf(cmd).Elem().FieldByName(fldName); fld.Kind() == reflect.String {
+		if fld := reflect.ValueOf(rpcPrms).Elem().FieldByName(fldName); fld.Kind() == reflect.String {
 			fld.SetString(args[idx])
 		} else if fld.Kind() == reflect.Int {
 			fld.SetInt(1) // Placeholder for future usage of data types other than strings
@@ -56,5 +55,3 @@ func GetCommandValue( args []string ) ( Commander, error ) {
         }
 	return cmdVal, nil
 }
-
-
