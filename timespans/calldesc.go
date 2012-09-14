@@ -286,6 +286,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 Returns the approximate max allowed session for user balance. It will try the max amount received in the call descriptor 
 and will decrease it by 10% for nine times. So if the user has little credit it will still allow 10% of the initial amount.
 If the user has no credit then it will return 0.
+If the user has postpayied plan it returns -1. 
 */
 func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	_, err = cd.LoadActivationPeriods()

@@ -21,6 +21,7 @@ package sessionmanager
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
+	"strings"
 	"time"
 )
 
@@ -32,6 +33,35 @@ type SessionDelegate struct {
 
 func (rsd *SessionDelegate) OnHeartBeat(ev Event) {
 	timespans.Logger.Info("freeswitch ♥")
+}
+
+func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
+	startTime, err := ev.GetStartTime()
+	if err != nil {
+		timespans.Logger.Err("Error parsing answer event start time, using time.Now!")
+		startTime = time.Now()
+	}
+	// if there is no account configured leave the call alone
+	if strings.TrimSpace(ev.GetAccount()) == "" {
+		sm.UnparkCall(ev.GetUUID(), ev.GetDestination())
+	}
+	cd := timespans.CallDescriptor{
+		Direction:   ev.GetDirection(),
+		Tenant:      ev.GetTenant(),
+		TOR:         ev.GetTOR(),
+		Subject:     ev.GetSubject(),
+		Account:     ev.GetAccount(),
+		Destination: ev.GetDestination(),
+		TimeStart:   startTime}
+	var remainingTime float64
+	err = rsd.Connector.GetMaxSessionTime(cd, &remainingTime)
+	if err != nil {
+		timespans.Logger.Err(fmt.Sprintf("Could not get max session time for %v: %v", ev.GetUUID(), err))
+	}
+	if remainingTime == 0 {
+		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %v.", ev.GetUUID()))
+	}
+	sm.UnparkCall(ev.GetUUID(), ev.GetDestination())
 }
 
 func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {

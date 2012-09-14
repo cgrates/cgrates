@@ -103,6 +103,8 @@ func (sm *FSSessionManager) readNextEvent(exitChan chan bool) (ev Event) {
 	switch ev.GetName() {
 	case HEARTBEAT:
 		sm.OnHeartBeat(ev)
+	case PARK:
+		sm.OnChannelPark(ev)
 	case ANSWER:
 		sm.OnChannelAnswer(ev)
 	case HANGUP:
@@ -129,12 +131,26 @@ func (sm *FSSessionManager) DisconnectSession(s *Session) {
 	s.Close()
 }
 
+// Sends the transfer command to unpark the call to freeswitch
+func (sm *FSSessionManager) UnparkCall(uuid, dest string) {
+	fmt.Fprint(sm.conn, fmt.Sprintf("uuid_transfer %s %s XML rou_cgrates\n\n", uuid, dest))
+}
+
 // Called on freeswitch's hearbeat event
 func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnHeartBeat(ev)
 	} else {
 		timespans.Logger.Info("♥")
+	}
+}
+
+// Called on freeswitch's answer event
+func (sm *FSSessionManager) OnChannelPark(ev Event) {
+	if sm.sessionDelegate != nil {
+		sm.sessionDelegate.OnChannelPark(ev, sm)
+	} else {
+		timespans.Logger.Info("park")
 	}
 }
 

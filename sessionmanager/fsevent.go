@@ -49,6 +49,7 @@ const (
 	HEARTBEAT   = "HEARTBEAT"
 	ANSWER      = "CHANNEL_ANSWER"
 	HANGUP      = "CHANNEL_HANGUP_COMPLETE"
+	PARK        = "CHANNEL_PARK"
 )
 
 // Nice printing for the event object.
