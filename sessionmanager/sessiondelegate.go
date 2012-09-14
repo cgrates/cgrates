@@ -42,7 +42,7 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
-	if strings.TrimSpace(ev.GetReqType()) == "" {
+	if strings.TrimSpace(ev.GetReqType()) != REQTYPE_PREPAID {
 		return
 	}
 	if ev.MissingParameter() {
@@ -60,7 +60,7 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 	err = rsd.Connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("Could not get max session time for %v: %v", ev.GetUUID(), err))
-		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
+		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), SYSTEM_ERROR)
 	}
 	if remainingSeconds == 0 {
 		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %v.", ev.GetUUID()))
@@ -99,7 +99,9 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 		err = rsd.Connector.Debit(cd, cc)
 		if err != nil {
 			timespans.Logger.Err(fmt.Sprintf("Error making the general debit for postpaid call: %v", ev.GetUUID()))
+			return
 		}
+		s.CallCosts = append(s.CallCosts, cc)
 		return
 	}
 
