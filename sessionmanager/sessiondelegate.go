@@ -42,8 +42,11 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
-	if strings.TrimSpace(ev.GetAccount()) == "" {
-		sm.UnparkCall(ev.GetUUID(), ev.GetDestination())
+	if strings.TrimSpace(ev.GetReqType()) == "" {
+		return
+	}
+	if ev.MissingParameter() {
+		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), MISSING_PARAMETER)
 	}
 	cd := timespans.CallDescriptor{
 		Direction:   ev.GetDirection(),
@@ -53,15 +56,17 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 		Account:     ev.GetAccount(),
 		Destination: ev.GetDestination(),
 		TimeStart:   startTime}
-	var remainingTime float64
-	err = rsd.Connector.GetMaxSessionTime(cd, &remainingTime)
+	var remainingSeconds float64
+	err = rsd.Connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("Could not get max session time for %v: %v", ev.GetUUID(), err))
+		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
 	}
-	if remainingTime == 0 {
+	if remainingSeconds == 0 {
 		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %v.", ev.GetUUID()))
+		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
 	}
-	sm.UnparkCall(ev.GetUUID(), ev.GetDestination())
+	sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), AUTH_OK)
 }
 
 func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {
@@ -69,6 +74,35 @@ func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {
 }
 
 func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
+	if ev.GetReqType() == REQTYPE_POSTPAID {
+		startTime, err := ev.GetStartTime()
+		if err != nil {
+			timespans.Logger.Crit("Error parsing postpaid call start time from event")
+			return
+		}
+		endTime, err := ev.GetEndTime()
+		if err != nil {
+			timespans.Logger.Crit("Error parsing postpaid call start time from event")
+			return
+		}
+		cd := timespans.CallDescriptor{
+			Direction:   ev.GetDirection(),
+			Tenant:      ev.GetTenant(),
+			TOR:         ev.GetTOR(),
+			Subject:     ev.GetSubject(),
+			Account:     ev.GetAccount(),
+			Destination: ev.GetDestination(),
+			TimeStart:   startTime,
+			TimeEnd:     endTime,
+		}
+		cc := &timespans.CallCost{}
+		err = rsd.Connector.Debit(cd, cc)
+		if err != nil {
+			timespans.Logger.Err(fmt.Sprintf("Error making the general debit for postpaid call: %v", ev.GetUUID()))
+		}
+		return
+	}
+
 	if s == nil || len(s.CallCosts) == 0 {
 		return // why would we have 0 callcosts
 	}

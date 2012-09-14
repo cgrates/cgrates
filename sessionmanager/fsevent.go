@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/timespans"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -36,20 +38,29 @@ var (
 
 const (
 	// Freswitch event proprities names
-	DIRECTION   = "Call-Direction"
-	ORIG_ID     = "variable_sip_call_id" //- originator_id - match cdrs
-	SUBJECT     = "variable_cgr_subject"
-	ACCOUNT     = "variable_cgr_account"
-	DESTINATION = "variable_cgr_destination"
-	TOR         = "variable_cgr_tor"
-	UUID        = "Unique-ID" // -Unique ID for this call leg
-	CSTMID      = "variable_cgr_cstmid"
-	START_TIME  = "Event-Date-GMT"
-	NAME        = "Event-Name"
-	HEARTBEAT   = "HEARTBEAT"
-	ANSWER      = "CHANNEL_ANSWER"
-	HANGUP      = "CHANNEL_HANGUP_COMPLETE"
-	PARK        = "CHANNEL_PARK"
+	DIRECTION          = "Call-Direction"
+	ORIG_ID            = "variable_sip_call_id" //- originator_id - match cdrs
+	SUBJECT            = "variable_cgr_subject"
+	ACCOUNT            = "variable_cgr_account"
+	DESTINATION        = "variable_cgr_destination"
+	REQTYPE            = "variable_cgr_reqtype" //prepaid or postpaid
+	TOR                = "variable_cgr_tor"
+	UUID               = "Unique-ID" // -Unique ID for this call leg
+	CSTMID             = "variable_cgr_cstmid"
+	CALL_DEST_NB       = "Caller-Destination-Number"
+	START_TIME         = "variable_answer_epoch"
+	END_TIME           = "variable_end_epoch"
+	NAME               = "Event-Name"
+	HEARTBEAT          = "HEARTBEAT"
+	ANSWER             = "CHANNEL_ANSWER"
+	HANGUP             = "CHANNEL_HANGUP_COMPLETE"
+	PARK               = "CHANNEL_PARK"
+	REQTYPE_PREPAID    = "prepaid"
+	REQTYPE_POSTPAID   = "postpaid"
+	AUTH_OK            = "+AUTH_OK"
+	INSUFFICIENT_FUNDS = "-INSUFFICIENT_FUNDS"
+	MISSING_PARAMETER  = "-MISSING_PARAMETER"
+	SYSTEM_ERROR       = "-SYSTEM_ERROR"
 )
 
 // Nice printing for the event object.
@@ -104,7 +115,31 @@ func (fsev *FSEvent) GetUUID() string {
 func (fsev *FSEvent) GetTenant() string {
 	return fsev.Fields[CSTMID]
 }
+func (fsev *FSEvent) GetCallDestNb() string {
+	return fsev.Fields[CALL_DEST_NB]
+}
+func (fsev *FSEvent) GetReqType() string {
+	return fsev.Fields[REQTYPE]
+}
+func (fsev *FSEvent) MissingParameter() bool {
+	return strings.TrimSpace(fsev.GetDirection()) == "" ||
+		strings.TrimSpace(fsev.GetOrigId()) == "" ||
+		strings.TrimSpace(fsev.GetSubject()) == "" ||
+		strings.TrimSpace(fsev.GetAccount()) == "" ||
+		strings.TrimSpace(fsev.GetDestination()) == "" ||
+		strings.TrimSpace(fsev.GetTOR()) == "" ||
+		strings.TrimSpace(fsev.GetUUID()) == "" ||
+		strings.TrimSpace(fsev.GetTenant()) == "" ||
+		strings.TrimSpace(fsev.GetCallDestNb()) == ""
+}
 func (fsev *FSEvent) GetStartTime() (t time.Time, err error) {
-	t, err = time.Parse(time.RFC1123, fsev.Fields[START_TIME])
+	st, err := strconv.ParseInt(fsev.Fields[END_TIME], 0, 64)
+	t = time.Unix(st, 0)
+	return
+}
+
+func (fsev *FSEvent) GetEndTime() (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsev.Fields[END_TIME], 0, 64)
+	t = time.Unix(st, 0)
 	return
 }

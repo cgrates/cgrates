@@ -132,8 +132,9 @@ func (sm *FSSessionManager) DisconnectSession(s *Session) {
 }
 
 // Sends the transfer command to unpark the call to freeswitch
-func (sm *FSSessionManager) UnparkCall(uuid, dest string) {
-	fmt.Fprint(sm.conn, fmt.Sprintf("uuid_transfer %s %s XML rou_cgrates\n\n", uuid, dest))
+func (sm *FSSessionManager) UnparkCall(uuid, call_dest_nb, reply string) {
+	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_setvar %s cgr_notify %s", uuid, reply))
+	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_transfer %s %s\n\n", uuid, call_dest_nb))
 }
 
 // Called on freeswitch's hearbeat event

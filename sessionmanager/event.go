@@ -33,5 +33,9 @@ type Event interface {
 	GetTOR() string
 	GetUUID() string
 	GetTenant() string
+	GetReqType() string
+	GetCallDestNb() string
 	GetStartTime() (time.Time, error)
+	GetEndTime() (time.Time, error)
+	MissingParameter() bool
 }

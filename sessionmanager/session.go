@@ -37,15 +37,16 @@ type Session struct {
 
 // Creates a new session and starts the debit loop
 func NewSession(ev Event, sm SessionManager) (s *Session) {
+	// if there is no account configured leave the call alone
+	if strings.TrimSpace(ev.GetReqType()) == "" {
+		return
+	}
 	startTime, err := ev.GetStartTime()
 	if err != nil {
 		timespans.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
-	// if there is no account configured leave the call alone
-	if strings.TrimSpace(ev.GetAccount()) == "" {
-		return nil
-	}
+
 	cd := &timespans.CallDescriptor{
 		Direction:   ev.GetDirection(),
 		Tenant:      ev.GetTenant(),
@@ -58,7 +59,16 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 		callDescriptor: cd,
 		stopDebit:      make(chan bool, 2)} //buffer it for multiple close signals
 	s.sessionManager = sm
-	go s.startDebitLoop()
+	if ev.MissingParameter() {
+		sm.DisconnectSession(s)
+	} else {
+		switch ev.GetReqType() {
+		case REQTYPE_PREPAID:
+			go s.startDebitLoop()
+		case REQTYPE_POSTPAID:
+			// do not loop, make only one debit at hangup
+		}
+	}
 	return
 }
 
