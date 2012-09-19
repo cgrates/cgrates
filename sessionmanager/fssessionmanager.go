@@ -65,7 +65,7 @@ func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) e
 	sm.conn = conn
 	sm.buf = bufio.NewReaderSize(conn, 8192)
 	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
-	fmt.Fprint(conn, "event json  HEARTBEAT CHANNEL_ANSWER CHANNEL_HANGUP_COMPLETE\n\n")
+	fmt.Fprint(conn, "event json  HEARTBEAT CHANNEL_ANSWER CHANNEL_HANGUP_COMPLETE CHANNEL_PARK\n\n")
 	fmt.Fprint(conn, "filter Call-Direction inbound\n\n")
 	fmt.Fprint(conn, "filter Event-Name HEARTBEAT\n\n")
 	go func() {
