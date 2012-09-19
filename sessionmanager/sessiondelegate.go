@@ -64,7 +64,7 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 		return
 	}
 	if remainingSeconds == 0 {
-		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetUserBalanceKey()))
+		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
 		return
 	}
