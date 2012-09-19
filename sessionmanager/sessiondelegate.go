@@ -59,12 +59,12 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 	var remainingSeconds float64
 	err = rsd.Connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Could not get max session time for %v: %v", ev.GetUUID(), err))
+		timespans.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), SYSTEM_ERROR)
 		return
 	}
 	if remainingSeconds == 0 {
-		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %v.", ev.GetUUID()))
+		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetUserBalanceKey()))
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
 		return
 	}
