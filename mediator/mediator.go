@@ -174,11 +174,11 @@ func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err 
 }
 
 func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, err error) {
-	t1, err := time.Parse("2012-05-21 17:48:20", record[m.timeStartIndex])
+	t1, err := time.Parse("2006-01-02 15:04:05", record[m.timeStartIndex])
 	if err != nil {
 		return
 	}
-	t2, err := time.Parse("2012-05-21 17:48:20", record[m.timeEndIndex])
+	t2, err := time.Parse("2006-01-02 15:04:05", record[m.timeEndIndex])
 	if err != nil {
 		return
 	}
