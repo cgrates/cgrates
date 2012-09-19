@@ -36,7 +36,7 @@ func (rsd *SessionDelegate) OnHeartBeat(ev Event) {
 }
 
 func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
-	startTime, err := ev.GetStartTime()
+	startTime, err := ev.GetStartTime(PARK_TIME)
 	if err != nil {
 		timespans.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
@@ -75,7 +75,7 @@ func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {
 
 func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	if ev.GetReqType() == REQTYPE_POSTPAID {
-		startTime, err := ev.GetStartTime()
+		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
 			timespans.Logger.Crit("Error parsing postpaid call start time from event")
 			return

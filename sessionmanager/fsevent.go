@@ -48,6 +48,7 @@ const (
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_cgr_cstmid"
 	CALL_DEST_NB       = "Caller-Destination-Number"
+	PARK_TIME          = "Event-Date-Timestamp"
 	START_TIME         = "variable_answer_epoch"
 	END_TIME           = "variable_end_epoch"
 	NAME               = "Event-Name"
@@ -132,8 +133,8 @@ func (fsev *FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetTenant()) == "" ||
 		strings.TrimSpace(fsev.GetCallDestNb()) == ""
 }
-func (fsev *FSEvent) GetStartTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev.Fields[END_TIME], 0, 64)
+func (fsev *FSEvent) GetStartTime(field string) (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsev.Fields[field], 0, 64)
 	t = time.Unix(st, 0)
 	return
 }

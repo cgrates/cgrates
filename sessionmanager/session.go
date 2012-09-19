@@ -41,7 +41,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	if strings.TrimSpace(ev.GetReqType()) == "" {
 		return
 	}
-	startTime, err := ev.GetStartTime()
+	startTime, err := ev.GetStartTime(START_TIME)
 	if err != nil {
 		timespans.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
