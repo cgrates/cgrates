@@ -135,12 +135,12 @@ func (fsev *FSEvent) MissingParameter() bool {
 }
 func (fsev *FSEvent) GetStartTime(field string) (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev.Fields[field], 0, 64)
-	t = time.Unix(st, 0)
+	t = time.Unix(0, st*1000).Local()
 	return
 }
 
 func (fsev *FSEvent) GetEndTime() (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev.Fields[END_TIME], 0, 64)
-	t = time.Unix(st, 0)
+	t = time.Unix(0, st*1000).Local()
 	return
 }
