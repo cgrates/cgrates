@@ -48,9 +48,9 @@ const (
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_cgr_cstmid"
 	CALL_DEST_NB       = "Caller-Destination-Number"
-	PARK_TIME          = "Event-Date-Timestamp"
-	START_TIME         = "variable_answer_epoch"
-	END_TIME           = "variable_end_epoch"
+	PARK_TIME          = "Caller-Profile-Created-Time"
+	START_TIME         = "Caller-Channel-Answered-Time"
+	END_TIME           = "Caller-Channel-Hangup-Time"
 	NAME               = "Event-Name"
 	HEARTBEAT          = "HEARTBEAT"
 	ANSWER             = "CHANNEL_ANSWER"
