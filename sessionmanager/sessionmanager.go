@@ -23,7 +23,7 @@ import (
 )
 
 type SessionManager interface {
-	DisconnectSession(*Session)
+	DisconnectSession(*Session, string)
 	UnparkCall(string, string, string)
 	GetSessionDelegate() *SessionDelegate
 	GetDbLogger() timespans.DataStorage

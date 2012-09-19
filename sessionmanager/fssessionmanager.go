@@ -125,14 +125,15 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 }
 
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) DisconnectSession(s *Session) {
+func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
+	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
 	fmt.Fprint(sm.conn, fmt.Sprintf("SendMsg %s\ncall-command: hangup\nhangup-cause: MANAGER_REQUEST\n\n", s.uuid))
 	s.Close()
 }
 
 // Sends the transfer command to unpark the call to freeswitch
-func (sm *FSSessionManager) UnparkCall(uuid, call_dest_nb, reply string) {
-	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_setvar %s cgr_notify %s\n\n", uuid, reply))
+func (sm *FSSessionManager) UnparkCall(uuid, call_dest_nb, notify string) {
+	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
 	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_transfer %s %s\n\n", uuid, call_dest_nb))
 }
 

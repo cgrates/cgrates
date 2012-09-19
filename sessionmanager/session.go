@@ -60,7 +60,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 		stopDebit:      make(chan bool, 2)} //buffer it for multiple close signals
 	s.sessionManager = sm
 	if ev.MissingParameter() {
-		sm.DisconnectSession(s)
+		sm.DisconnectSession(s, MISSING_PARAMETER)
 	} else {
 		switch ev.GetReqType() {
 		case REQTYPE_PREPAID:
@@ -117,7 +117,7 @@ func (s *Session) Close() {
 
 // Disconects a session using session manager
 func (s *Session) Disconnect() {
-	s.sessionManager.DisconnectSession(s)
+	s.sessionManager.DisconnectSession(s, DISCCONECT)
 }
 
 // Nice print for session

@@ -47,6 +47,8 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 	}
 	if ev.MissingParameter() {
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), MISSING_PARAMETER)
+		timespans.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
+		return
 	}
 	cd := timespans.CallDescriptor{
 		Direction:   ev.GetDirection(),
@@ -189,7 +191,7 @@ func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor)
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 		// disconnect session
-		s.sessionManager.DisconnectSession(s)
+		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
 	}
 	nbts := len(cc.Timespans)
 	remainingSeconds := 0.0
