@@ -79,7 +79,7 @@ subject_index     = test
 account_index     = test
 destination_index = test
 time_start_index  = test
-time_end_index    = test
+duration_index    = test
 `
 )
 
@@ -136,7 +136,7 @@ func TestConfig(t *testing.T) {
 		freeswitch_account != "test" ||
 		freeswitch_destination != "test" ||
 		freeswitch_time_start != "test" ||
-		freeswitch_time_end != "test" {
+		freeswitch_duration != "test" {
 		t.Log(data_db_type)
 		t.Log(data_db_host)
 		t.Log(data_db_port)
@@ -175,7 +175,7 @@ func TestConfig(t *testing.T) {
 		t.Log(freeswitch_account)
 		t.Log(freeswitch_destination)
 		t.Log(freeswitch_time_start)
-		t.Log(freeswitch_time_end)
+		t.Log(freeswitch_duration)
 		t.Error("Config file read failed!")
 	}
 }

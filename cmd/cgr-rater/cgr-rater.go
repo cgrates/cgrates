@@ -100,7 +100,7 @@ var (
 	freeswitch_account     = ""
 	freeswitch_destination = ""
 	freeswitch_time_start  = ""
-	freeswitch_time_end    = ""
+	freeswitch_duration    = ""
 
 	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
@@ -154,7 +154,7 @@ func readConfig(c *conf.ConfigFile) {
 	freeswitch_account, _ = c.GetString("freeswitch", "account_index")
 	freeswitch_destination, _ = c.GetString("freeswitch", "destination_index")
 	freeswitch_time_start, _ = c.GetString("freeswitch", "time_start_index")
-	freeswitch_time_end, _ = c.GetString("freeswitch", "time_end_index")
+	freeswitch_duration, _ = c.GetString("freeswitch", "duration_index")
 }
 
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
@@ -212,7 +212,7 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 		timespans.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", mediator_cdr_out_path))
 		exitChan <- true
 	}
-	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_time_end)
+	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_duration)
 	if err != nil {
 		timespans.Logger.Crit(fmt.Sprintf("Failed to start mediator: %v", err))
 		exitChan <- true

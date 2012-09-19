@@ -46,10 +46,10 @@ type Mediator struct {
 	accountIndex,
 	destinationIndex,
 	timeStartIndex,
-	timeEndIndex csvindex
+	durationIndex csvindex
 }
 
-func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, skipDb bool, outputDir, directionIndex, torIndex, tenantIndex, subjectIndex, accountIndex, destinationIndex, timeStartIndex, timeEndIndex string) (*Mediator, error) {
+func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, skipDb bool, outputDir, directionIndex, torIndex, tenantIndex, subjectIndex, accountIndex, destinationIndex, timeStartIndex, durationIndex string) (*Mediator, error) {
 	m := &Mediator{
 		connector: connector,
 		loggerDb:  loggerDb,
@@ -91,11 +91,11 @@ func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, 
 		return nil, err
 	}
 	m.timeStartIndex = csvindex(i)
-	i, err = strconv.Atoi(timeEndIndex)
+	i, err = strconv.Atoi(durationIndex)
 	if err != nil {
 		return nil, err
 	}
-	m.timeEndIndex = csvindex(i)
+	m.durationIndex = csvindex(i)
 	return m, nil
 }
 
@@ -174,11 +174,16 @@ func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err 
 }
 
 func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, err error) {
-	t1, err := time.Parse("2006-01-02 15:04:05", record[m.timeStartIndex])
+	d, err := time.ParseDuration(record[m.durationIndex] + "s")
 	if err != nil {
 		return
 	}
-	t2, err := time.Parse("2006-01-02 15:04:05", record[m.timeEndIndex])
+
+	if d.Seconds() == 0 { // failed call
+		return
+	}
+
+	t1, err := time.Parse("2006-01-02 15:04:05", record[m.timeStartIndex])
 	if err != nil {
 		return
 	}
@@ -190,7 +195,7 @@ func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, e
 		Account:     record[m.accountIndex],
 		Destination: record[m.destinationIndex],
 		TimeStart:   t1,
-		TimeEnd:     t2}
+		TimeEnd:     t1.Add(d)}
 	err = m.connector.GetCost(cd, cc)
 	return
 }

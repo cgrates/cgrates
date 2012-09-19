@@ -21,8 +21,8 @@ package timespans
 import (
 	"errors"
 	"fmt"
-	"github.com/rif/balancer2go"
 	"github.com/cgrates/cgrates/console"
+	"github.com/rif/balancer2go"
 	"net/rpc"
 	"reflect"
 	"runtime"
@@ -181,12 +181,12 @@ func (rs *Responder) GetBalance(arg console.ArgsGetBalance, reply *console.Reply
 	if rs.Bal != nil {
 		return fmt.Errorf("No balancer supported for this command right now")
 	}
-	ubKey := arg.Direction+":"+arg.Tenant+":"+arg.User
+	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.User
 	userBalance, err := storageGetter.GetUserBalance(ubKey)
 	if err != nil {
 		return err
 	}
-	if balance,balExists := userBalance.BalanceMap[arg.BalanceId]; !balExists {
+	if balance, balExists := userBalance.BalanceMap[arg.BalanceId]; !balExists {
 		// No match, balanceId not found
 		return fmt.Errorf("-BALANCE_NOT_FOUND")
 	} else {
@@ -196,7 +196,7 @@ func (rs *Responder) GetBalance(arg console.ArgsGetBalance, reply *console.Reply
 		reply.BalanceId = arg.BalanceId
 		reply.Balance = balance
 	}
-	return nil 
+	return nil
 }
 
 /*
@@ -346,4 +346,3 @@ func (rcc *RPCClientConnector) DebitSeconds(cd CallDescriptor, resp *float64) er
 func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
 }
-
