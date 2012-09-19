@@ -180,7 +180,7 @@ func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, e
 	}
 
 	if d.Seconds() == 0 { // failed call
-		return
+		return &timespans.CallCost{}, nil
 	}
 
 	t1, err := time.Parse("2006-01-02 15:04:05", record[m.timeStartIndex])
