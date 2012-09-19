@@ -183,7 +183,7 @@ func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, e
 		return
 	}
 	cd := timespans.CallDescriptor{
-		Direction:   record[m.directionIndex],
+		Direction:   "OUT", //record[m.directionIndex] TODO: fix me
 		Tenant:      record[m.tenantIndex],
 		TOR:         record[m.torIndex],
 		Subject:     record[m.subjectIndex],

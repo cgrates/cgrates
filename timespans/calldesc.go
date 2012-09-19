@@ -291,6 +291,7 @@ If the user has postpayied plan it returns -1.
 func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	_, err = cd.LoadActivationPeriods()
 	if err != nil {
+		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return 0, err
 	}
 	now := time.Now()
