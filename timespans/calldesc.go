@@ -290,6 +290,9 @@ If the user has postpayied plan it returns -1.
 */
 func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	_, err = cd.LoadActivationPeriods()
+	if err != nil {
+		return 0, err
+	}
 	now := time.Now()
 	availableCredit, availableSeconds := 0.0, 0.0
 	Logger.Debug(fmt.Sprintf("cd: %+v", cd))
