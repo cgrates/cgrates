@@ -56,10 +56,10 @@ func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, 
 		skipDb:    skipDb,
 		outputDir: outputDir,
 	}
-	i, err := strconv.Atoi(directionIndex)
+	/*i, err := strconv.Atoi(directionIndex)
 	if err != nil {
 		return nil, err
-	}
+	}*/
 	m.directionIndex = csvindex(i)
 	i, err = strconv.Atoi(torIndex)
 	if err != nil {
