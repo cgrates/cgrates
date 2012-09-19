@@ -36,6 +36,7 @@ func (rsd *SessionDelegate) OnHeartBeat(ev Event) {
 }
 
 func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
+	timespans.Logger.Info("freeswitch park")
 	startTime, err := ev.GetStartTime(PARK_TIME)
 	if err != nil {
 		timespans.Logger.Err("Error parsing answer event start time, using time.Now!")
@@ -66,6 +67,7 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), SYSTEM_ERROR)
 		return
 	}
+	timespans.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
 	if remainingSeconds == 0 {
 		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
