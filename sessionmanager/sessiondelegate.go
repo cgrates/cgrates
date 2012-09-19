@@ -46,7 +46,7 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 		return
 	}
 	if ev.MissingParameter() {
-		sm.UnparkCall(ev.GetUUID(), MISSING_PARAMETER)
+		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), MISSING_PARAMETER)
 	}
 	cd := timespans.CallDescriptor{
 		Direction:   ev.GetDirection(),
@@ -60,15 +60,15 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 	err = rsd.Connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
 		timespans.Logger.Err(fmt.Sprintf("Could not get max session time for %v: %v", ev.GetUUID(), err))
-		sm.UnparkCall(ev.GetUUID(), SYSTEM_ERROR)
+		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), SYSTEM_ERROR)
 		return
 	}
 	if remainingSeconds == 0 {
 		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %v.", ev.GetUUID()))
-		sm.UnparkCall(ev.GetUUID(), INSUFFICIENT_FUNDS)
+		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
 		return
 	}
-	sm.UnparkCall(ev.GetUUID(), AUTH_OK)
+	sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), AUTH_OK)
 }
 
 func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {

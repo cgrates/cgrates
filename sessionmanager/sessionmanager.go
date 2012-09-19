@@ -24,7 +24,7 @@ import (
 
 type SessionManager interface {
 	DisconnectSession(*Session)
-	UnparkCall(string, string)
+	UnparkCall(string, string, string)
 	GetSessionDelegate() *SessionDelegate
 	GetDbLogger() timespans.DataStorage
 }
