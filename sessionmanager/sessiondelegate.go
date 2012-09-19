@@ -55,6 +55,7 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 		Subject:     ev.GetSubject(),
 		Account:     ev.GetAccount(),
 		Destination: ev.GetDestination(),
+		Amount:      rsd.DebitPeriod.Seconds(),
 		TimeStart:   startTime}
 	var remainingSeconds float64
 	err = rsd.Connector.GetMaxSessionTime(cd, &remainingSeconds)
