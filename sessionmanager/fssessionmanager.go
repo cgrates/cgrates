@@ -67,7 +67,6 @@ func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) e
 	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
 	fmt.Fprint(conn, "event json  HEARTBEAT CHANNEL_ANSWER CHANNEL_HANGUP_COMPLETE CHANNEL_PARK\n\n")
 	fmt.Fprint(conn, "filter Call-Direction inbound\n\n")
-	fmt.Fprint(conn, "filter Event-Name HEARTBEAT\n\n")
 	go func() {
 		sm.delayFunc = fib()
 		exitChan := make(chan bool)
@@ -133,7 +132,7 @@ func (sm *FSSessionManager) DisconnectSession(s *Session) {
 
 // Sends the transfer command to unpark the call to freeswitch
 func (sm *FSSessionManager) UnparkCall(uuid, call_dest_nb, reply string) {
-	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_setvar %s cgr_notify %s", uuid, reply))
+	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_setvar %s cgr_notify %s\n\n", uuid, reply))
 	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_transfer %s %s\n\n", uuid, call_dest_nb))
 }
 
