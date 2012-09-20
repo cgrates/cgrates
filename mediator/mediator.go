@@ -159,7 +159,7 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 		} else {
 			record = append(record, strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64))
 		}
-		w.WriteString(strings.Join(record, ","))
+		w.WriteString(strings.Join(record, ",") + "\n")
 	}
 	return
 }

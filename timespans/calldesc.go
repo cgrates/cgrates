@@ -21,7 +21,7 @@ package timespans
 import (
 	"errors"
 	"fmt"
-	"github.com/rif/cache2go"
+	"github.com/cgrates/cgrates/cache2go"
 	"log/syslog"
 	"math"
 	"time"

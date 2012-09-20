@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package timespans
 
 import (
-	"github.com/rif/cache2go"
+	"github.com/cgrates/cgrates/cache2go"
 	"strings"
 )
 

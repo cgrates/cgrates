@@ -21,8 +21,8 @@ package timespans
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/console"
-	"github.com/rif/balancer2go"
 	"net/rpc"
 	"reflect"
 	"runtime"
