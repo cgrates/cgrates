@@ -18,3 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package cgrates
 
+import (
+	_ "github.com/cgrates/cgrates/timespans"	
+)
