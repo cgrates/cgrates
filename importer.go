@@ -19,5 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cgrates
 
 import (
-	_ "github.com/cgrates/cgrates/timespans"	
+	_ "github.com/cgrates/cgrates/cmd/cgr-console"
+	_ "github.com/cgrates/cgrates/cmd/cgr-loader"
+	_ "github.com/cgrates/cgrates/cmd/cgr-rater"
 )
