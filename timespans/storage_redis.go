@@ -20,13 +20,13 @@ package timespans
 
 import (
 	"fmt"
-	"github.com/simonz05/godis"
+	"github.com/simonz05/godis/redis"
 	"time"
 )
 
 type RedisStorage struct {
 	dbNb int
-	db   *godis.Client
+	db   *redis.Client
 	ms   Marshaler
 }
 
@@ -34,7 +34,7 @@ func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
 	if address != "" {
 		address = "tcp:" + address
 	}
-	ndb := godis.New(address, db, pass)
+	ndb := redis.New(address, db, pass)
 	ms := new(MyMarshaler)
 	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
 }
