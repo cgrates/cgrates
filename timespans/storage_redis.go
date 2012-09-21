@@ -92,6 +92,7 @@ func (rs *RedisStorage) SetActions(key string, as []*Action) (err error) {
 }
 
 func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
+	Logger.Debug(fmt.Sprintf("Getting ub for: %v", key))
 	if values, err := rs.db.Get(USER_BALANCE_PREFIX + key); err == nil {
 		ub = &UserBalance{Id: key}
 		err = rs.ms.Unmarshal(values, ub)

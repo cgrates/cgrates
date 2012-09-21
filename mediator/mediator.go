@@ -158,17 +158,12 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 			cc, err = m.GetCostsFromDB(record)
 		} else {
 			cc, err = m.GetCostsFromRater(record)
-
 		}
 		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record (%v): %v", record, err))
+			timespans.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record (%s): %v", record[m.uuidIndex], err))
 		} else {
-			if cc != nil {
-				timespans.Logger.Debug(fmt.Sprintf("Calculated cost: %v (%v)", cc.ConnectFee+cc.Cost, strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)))
-				record = append(record, strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64))
-			} else {
-				timespans.Logger.Err(fmt.Sprintf("Got nil call cost for record (%v)", record))
-			}
+			timespans.Logger.Debug(fmt.Sprintf("Calculated cost: %v (%v)", cc.ConnectFee+cc.Cost, strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)))
+			record = append(record, strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64))
 		}
 		w.WriteString(strings.Join(record, ",") + "\n")
 	}
