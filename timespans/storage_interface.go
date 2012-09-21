@@ -171,7 +171,7 @@ func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) (err error) {
 		return nil
 
 	}
-	Logger.Info("Using default gob marshalling!")
+	// Logger.Info("Using default gob marshalling!")
 	mm.buf.Reset()
 	mm.buf.Write(data)
 	return gob.NewDecoder(&mm.buf).Decode(v)

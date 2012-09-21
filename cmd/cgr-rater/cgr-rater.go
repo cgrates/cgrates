@@ -202,6 +202,7 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 			timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
 			exitChan <- true
 		}
+		timespans.Logger.Debug(fmt.Sprintf("Using remote connector: %s.", mediator_rater))
 		connector = &timespans.RPCClientConnector{client}
 	}
 	if _, err := os.Stat(mediator_cdr_path); err != nil {
