@@ -46,7 +46,6 @@ func (rs *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
 			return arg.GetCost()
 		})
-		Logger.Debug(fmt.Sprintf("Responder: %v, %v", r, *r))
 		*reply, err = *r, e
 	}
 	return
@@ -328,7 +327,6 @@ type RPCClientConnector struct {
 }
 
 func (rcc *RPCClientConnector) GetCost(cd CallDescriptor, cc *CallCost) error {
-	Logger.Debug(fmt.Sprintf("Getting cost for %v", cd.GetKey()))
 	return rcc.Client.Call("Responder.GetCost", cd, cc)
 }
 

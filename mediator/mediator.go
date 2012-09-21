@@ -46,10 +46,11 @@ type Mediator struct {
 	accountIndex,
 	destinationIndex,
 	timeStartIndex,
-	durationIndex csvindex
+	durationIndex,
+	uuidIndex csvindex
 }
 
-func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, skipDb bool, outputDir, directionIndex, torIndex, tenantIndex, subjectIndex, accountIndex, destinationIndex, timeStartIndex, durationIndex string) (*Mediator, error) {
+func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, skipDb bool, outputDir, directionIndex, torIndex, tenantIndex, subjectIndex, accountIndex, destinationIndex, timeStartIndex, durationIndex, uuidIndex string) (*Mediator, error) {
 	m := &Mediator{
 		connector: connector,
 		loggerDb:  loggerDb,
@@ -96,6 +97,11 @@ func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, 
 		return nil, err
 	}
 	m.durationIndex = csvindex(i)
+	i, err = strconv.Atoi(uuidIndex)
+	if err != nil {
+		return nil, err
+	}
+	m.uuidIndex = csvindex(i)
 	return m, nil
 }
 
@@ -170,8 +176,9 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 }
 
 func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err error) {
-	searchedUUID := record[10]
+	searchedUUID := record[m.uuidIndex]
 	cc, err = m.loggerDb.GetCallCostLog(searchedUUID)
+	timespans.Logger.Debug(fmt.Sprintf("Got from db: %v error: %v", cc, err))
 	if err != nil {
 		cc, err = m.GetCostsFromRater(record)
 	}
