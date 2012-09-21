@@ -154,7 +154,7 @@ func (rs *RedisStorage) LogCallCost(uuid string, cc *CallCost) (err error) {
 
 func (rs *RedisStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
 	if values, err := rs.db.Get(uuid); err == nil {
-		err = rs.ms.Unmarshal(values, &cc)
+		err = rs.ms.Unmarshal(values, cc)
 	} else {
 		return nil, err
 	}

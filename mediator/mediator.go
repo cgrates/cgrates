@@ -178,8 +178,7 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 func (m *Mediator) GetCostsFromDB(record []string) (cc *timespans.CallCost, err error) {
 	searchedUUID := record[m.uuidIndex]
 	cc, err = m.loggerDb.GetCallCostLog(searchedUUID)
-	timespans.Logger.Debug(fmt.Sprintf("Got from db: %v error: %v", cc, err))
-	if err != nil {
+	if err != nil || cc == nil {
 		cc, err = m.GetCostsFromRater(record)
 	}
 	return
@@ -190,9 +189,8 @@ func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, e
 	if err != nil {
 		return
 	}
-	cc = &timespans.CallCost{}
 	if d.Seconds() == 0 { // failed call
-		return cc, nil
+		return &timespans.CallCost{}, nil
 	}
 
 	t1, err := time.Parse("2006-01-02 15:04:05", record[m.timeStartIndex])
