@@ -43,11 +43,11 @@ const (
 
 var (
 	storageGetter, _ = NewMapStorage()
-	storageLogger    = storageGetter
-	debitPeriod      = 10 * time.Second
 	//storageGetter, _ = NewMongoStorage("localhost", "cgrates")
-	//storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 10, "")
-	Logger LoggerInterface
+	//storageGetter, _ = NewRedixStorage("127.0.0.1:6379", 10, "")
+	storageLogger = storageGetter
+	debitPeriod   = 10 * time.Second
+	Logger        LoggerInterface
 )
 
 /*
