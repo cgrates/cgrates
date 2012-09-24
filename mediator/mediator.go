@@ -168,7 +168,9 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 		}
 		record = append(record, cost)
 		w.WriteString(strings.Join(record, ",") + "\n")
+
 	}
+	w.Flush()
 	return
 }
 
