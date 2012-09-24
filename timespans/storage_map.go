@@ -137,14 +137,14 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err
 	return
 }
 
-func (ms *MapStorage) LogCallCost(uuid string, cc *CallCost) error {
+func (ms *MapStorage) LogCallCost(uuid, source string, cc *CallCost) error {
 	result, err := ms.ms.Marshal(cc)
-	ms.dict[LOG_CALL_COST_PREFIX+uuid] = result
+	ms.dict[LOG_CALL_COST_PREFIX+source+"_"+uuid] = result
 	return err
 }
 
-func (ms *MapStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
-	if values, ok := ms.dict[uuid]; ok {
+func (ms *MapStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
+	if values, ok := ms.dict[LOG_CALL_COST_PREFIX+source+"_"+uuid]; ok {
 		err = ms.ms.Unmarshal(values, &cc)
 	} else {
 		return nil, errors.New("not found")
@@ -152,7 +152,7 @@ func (ms *MapStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
 	return
 }
 
-func (ms *MapStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
+func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
 	mat, err := ms.ms.Marshal(at)
 	if err != nil {
 		return
@@ -161,11 +161,11 @@ func (ms *MapStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Act
 	if err != nil {
 		return
 	}
-	ms.dict[LOG_ACTION_TRIGGER_PREFIX+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
+	ms.dict[LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
 	return
 }
 
-func (ms *MapStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
+func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
 	mat, err := ms.ms.Marshal(at)
 	if err != nil {
 		return
@@ -174,11 +174,11 @@ func (ms *MapStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error
 	if err != nil {
 		return
 	}
-	ms.dict[LOG_ACTION_TIMMING_PREFIX+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s", string(mat), string(mas)))
+	ms.dict[LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano)] = []byte(fmt.Sprintf("%s*%s", string(mat), string(mas)))
 	return
 }
 
-func (ms *MapStorage) LogError(uuid, errstr string) (err error) {
-	ms.dict[LOG_ERR+uuid] = []byte(errstr)
+func (ms *MapStorage) LogError(uuid, source, errstr string) (err error) {
+	ms.dict[LOG_ERR+source+"_"+uuid] = []byte(errstr)
 	return nil
 }

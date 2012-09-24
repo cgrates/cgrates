@@ -177,7 +177,7 @@ func (psl *PostgresStorage) SetActionTimings(key string, ats []*ActionTiming) (e
 
 func (psl *PostgresStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) { return }
 
-func (psl *PostgresStorage) LogCallCost(uuid string, cc *CallCost) (err error) {
+func (psl *PostgresStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	if psl.Db == nil {
 		//timespans.Logger.Warning("Cannot write log to database.")
 		return
@@ -186,8 +186,9 @@ func (psl *PostgresStorage) LogCallCost(uuid string, cc *CallCost) (err error) {
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdr VALUES ('%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdr VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
+		source,
 		cc.Direction,
 		cc.Tenant,
 		cc.TOR,
@@ -203,8 +204,8 @@ func (psl *PostgresStorage) LogCallCost(uuid string, cc *CallCost) (err error) {
 	return
 }
 
-func (psl *PostgresStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
-	row := psl.Db.QueryRow(fmt.Sprintf("SELECT * FROM cdr WHERE uuid='%s'", uuid))
+func (psl *PostgresStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
+	row := psl.Db.QueryRow(fmt.Sprintf("SELECT * FROM cdr WHERE uuid='%s' AND source='%s'", uuid, source))
 	var uuid_found string
 	var timespansJson string
 	err = row.Scan(&uuid_found, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
@@ -212,8 +213,10 @@ func (psl *PostgresStorage) GetCallCostLog(uuid string) (cc *CallCost, err error
 	return
 }
 
-func (psl *PostgresStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
+func (psl *PostgresStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
 	return
 }
-func (psl *PostgresStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) { return }
-func (psl *PostgresStorage) LogError(uuid, errstr string) (err error)                   { return }
+func (psl *PostgresStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+	return
+}
+func (psl *PostgresStorage) LogError(uuid, source, errstr string) (err error) { return }

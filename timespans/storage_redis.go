@@ -146,16 +146,16 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, e
 	return
 }
 
-func (rs *RedisStorage) LogCallCost(uuid string, cc *CallCost) (err error) {
+func (rs *RedisStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	result, err := rs.ms.Marshal(cc)
 	if err != nil {
 		return
 	}
-	return rs.db.Set(LOG_CALL_COST_PREFIX+uuid, result).Err
+	return rs.db.Set(LOG_CALL_COST_PREFIX+source+"_"+uuid, result).Err
 }
 
-func (rs *RedisStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
-	if values, err := rs.db.Get(uuid).Bytes(); err == nil {
+func (rs *RedisStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
+	if values, err := rs.db.Get(LOG_CALL_COST_PREFIX + source + "_" + uuid).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, cc)
 	} else {
 		return nil, err
@@ -163,7 +163,7 @@ func (rs *RedisStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
 	return
 }
 
-func (rs *RedisStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
+func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
@@ -172,11 +172,11 @@ func (rs *RedisStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*A
 	if err != nil {
 		return
 	}
-	rs.db.Set(LOG_ACTION_TRIGGER_PREFIX+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
+	rs.db.Set(LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
 	return
 }
 
-func (rs *RedisStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
+func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
@@ -185,10 +185,10 @@ func (rs *RedisStorage) LogActionTiming(at *ActionTiming, as []*Action) (err err
 	if err != nil {
 		return
 	}
-	rs.db.Set(LOG_ACTION_TIMMING_PREFIX+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s", string(mat), string(mas))))
+	rs.db.Set(LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s", string(mat), string(mas))))
 	return
 }
 
-func (rs *RedisStorage) LogError(uuid, errstr string) (err error) {
-	return rs.db.Set(LOG_ERR+uuid, errstr).Err
+func (rs *RedisStorage) LogError(uuid, source, errstr string) (err error) {
+	return rs.db.Set(LOG_ERR+source+"_"+uuid, errstr).Err
 }

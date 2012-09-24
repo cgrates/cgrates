@@ -54,7 +54,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		go Logger.Info(fmt.Sprintf("Executing %v: %v", ub.Id, a))
 		err = actionFunction(ub, a)
 	}
-	go storageLogger.LogActionTrigger(ub.Id, at, aac)
+	go storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)
 	at.Executed = true
 	storageGetter.SetUserBalance(ub)
 	return

@@ -97,12 +97,14 @@ type AtKeyValue struct {
 type LogCostEntry struct {
 	Id       string `bson:"_id,omitempty"`
 	CallCost *CallCost
+	Source   string
 }
 
 type LogTimingEntry struct {
 	ActionTiming *ActionTiming
 	Actions      []*Action
 	LogTime      time.Time
+	Source       string
 }
 
 type LogTriggerEntry struct {
@@ -110,11 +112,13 @@ type LogTriggerEntry struct {
 	ActionTrigger *ActionTrigger
 	Actions       []*Action
 	LogTime       time.Time
+	Source        string
 }
 
 type LogErrEntry struct {
 	Id     string `bson:"_id,omitempty"`
 	ErrStr string
+	Source string
 }
 
 func (ms *MongoStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
@@ -180,25 +184,25 @@ func (ms *MongoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, e
 	return
 }
 
-func (ms *MongoStorage) LogCallCost(uuid string, cc *CallCost) error {
-	return ms.db.C("cclog").Insert(&LogCostEntry{uuid, cc})
+func (ms *MongoStorage) LogCallCost(uuid, source string, cc *CallCost) error {
+	return ms.db.C("cclog").Insert(&LogCostEntry{uuid, cc, source})
 }
 
-func (ms *MongoStorage) GetCallCostLog(uuid string) (cc *CallCost, err error) {
+func (ms *MongoStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
 	result := new(LogCostEntry)
-	err = ms.db.C("cclog").Find(bson.M{"_id": uuid}).One(result)
+	err = ms.db.C("cclog").Find(bson.M{"_id": uuid, "source": source}).One(result)
 	cc = result.CallCost
 	return
 }
 
-func (ms *MongoStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) (err error) {
-	return ms.db.C("actlog").Insert(&LogTriggerEntry{ubId, at, as, time.Now()})
+func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
+	return ms.db.C("actlog").Insert(&LogTriggerEntry{ubId, at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
-	return ms.db.C("actlog").Insert(&LogTimingEntry{at, as, time.Now()})
+func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+	return ms.db.C("actlog").Insert(&LogTimingEntry{at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogError(uuid, errstr string) (err error) {
-	return ms.db.C("errlog").Insert(&LogErrEntry{uuid, errstr})
+func (ms *MongoStorage) LogError(uuid, source, errstr string) (err error) {
+	return ms.db.C("errlog").Insert(&LogErrEntry{uuid, errstr, source})
 }

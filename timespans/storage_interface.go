@@ -36,7 +36,10 @@ const (
 	LOG_ACTION_TRIGGER_PREFIX = "ltr_"
 	LOG_ERR                   = "ler_"
 	// sources
-
+	SESSION_MANAGER_SOURCE = "SMR"
+	MEDIATOR_SOURCE        = "MED"
+	SCHED_SOURCE           = "MED"
+	RATER_SOURCE           = "RAT"
 )
 
 /*
@@ -56,11 +59,11 @@ type DataStorage interface {
 	GetActionTimings(string) ([]*ActionTiming, error)
 	SetActionTimings(string, []*ActionTiming) error
 	GetAllActionTimings() (map[string][]*ActionTiming, error)
-	LogCallCost(uuid string, cc *CallCost) error
-	LogError(uuid, errstr string) error
-	LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) error
-	LogActionTiming(at *ActionTiming, as []*Action) error
-	GetCallCostLog(uuid string) (*CallCost, error)
+	LogCallCost(uuid, source string, cc *CallCost) error
+	LogError(uuid, source, errstr string) error
+	LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) error
+	LogActionTiming(source string, at *ActionTiming, as []*Action) error
+	GetCallCostLog(uuid, source string) (*CallCost, error)
 }
 
 type Marshaler interface {

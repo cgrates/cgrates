@@ -118,9 +118,10 @@ The structure of the table (as an SQL command) is the following::
 
 	CREATE TABLE callcosts (
 	uuid varchar(80) primary key,
-    direction varchar(32),
+   source varchar(32),
+   direction varchar(32),
 	tenant varchar(32),
-    tor varchar(32),
+   tor varchar(32),
 	subject varchar(32),
 	account varchar(32),
 	destination varchar(32),

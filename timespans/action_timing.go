@@ -226,7 +226,7 @@ func (at *ActionTiming) Execute() (err error) {
 			})
 		}
 	}
-	go storageLogger.LogActionTiming(at, aac)
+	go storageLogger.LogActionTiming(SCHED_SOURCE, at, aac)
 	return
 }
 
