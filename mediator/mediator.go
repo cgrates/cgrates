@@ -50,7 +50,19 @@ type Mediator struct {
 	uuidIndex csvindex
 }
 
-func NewMediator(connector timespans.Connector, loggerDb timespans.DataStorage, skipDb bool, outputDir, directionIndex, torIndex, tenantIndex, subjectIndex, accountIndex, destinationIndex, timeStartIndex, durationIndex, uuidIndex string) (*Mediator, error) {
+func NewMediator(connector timespans.Connector,
+	loggerDb timespans.DataStorage,
+	skipDb bool,
+	outputDir,
+	directionIndex,
+	torIndex,
+	tenantIndex,
+	subjectIndex,
+	accountIndex,
+	destinationIndex,
+	timeStartIndex,
+	durationIndex,
+	uuidIndex string) (*Mediator, error) {
 	m := &Mediator{
 		connector: connector,
 		loggerDb:  loggerDb,
@@ -209,5 +221,10 @@ func (m *Mediator) GetCostsFromRater(record []string) (cc *timespans.CallCost, e
 		TimeStart:   t1,
 		TimeEnd:     t1.Add(d)}
 	err = m.connector.GetCost(cd, cc)
+	if err != nil {
+		m.loggerDb.LogError(record[m.uuidIndex], err.Error())
+	} else {
+		m.loggerDb.LogCallCost(record[m.uuidIndex], cc)
+	}
 	return
 }

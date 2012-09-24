@@ -26,13 +26,17 @@ import (
 )
 
 const (
-	ACTION_TIMING_PREFIX  = "atm_"
-	CALL_COST_LOG_PREFIX  = "cco_"
-	LOG_PREFIX            = "log_"
-	RATING_PROFILE_PREFIX = "rpf_"
-	ACTION_PREFIX         = "act_"
-	USER_BALANCE_PREFIX   = "ubl_"
-	DESTINATION_PREFIX    = "dst_"
+	ACTION_TIMING_PREFIX      = "atm_"
+	RATING_PROFILE_PREFIX     = "rpf_"
+	ACTION_PREFIX             = "act_"
+	USER_BALANCE_PREFIX       = "ubl_"
+	DESTINATION_PREFIX        = "dst_"
+	LOG_CALL_COST_PREFIX      = "cco_"
+	LOG_ACTION_TIMMING_PREFIX = "ltm_"
+	LOG_ACTION_TRIGGER_PREFIX = "ltr_"
+	LOG_ERR                   = "ler_"
+	// sources
+
 )
 
 /*
@@ -53,9 +57,10 @@ type DataStorage interface {
 	SetActionTimings(string, []*ActionTiming) error
 	GetAllActionTimings() (map[string][]*ActionTiming, error)
 	LogCallCost(uuid string, cc *CallCost) error
-	GetCallCostLog(uuid string) (*CallCost, error)
+	LogError(uuid, errstr string) error
 	LogActionTrigger(ubId string, at *ActionTrigger, as []*Action) error
 	LogActionTiming(at *ActionTiming, as []*Action) error
+	GetCallCostLog(uuid string) (*CallCost, error)
 }
 
 type Marshaler interface {
@@ -137,7 +142,7 @@ func (mm *MyMarshaler) Marshal(v interface{}) (data []byte, err error) {
 		return []byte(s.store()), nil
 	}
 	mm.buf.Reset()
-	if err = gob.NewEncoder(&mm.buf).Encode(v); err == nil {
+	if err = json.NewEncoder(&mm.buf).Encode(v); err == nil {
 		data = mm.buf.Bytes()
 	}
 	return
@@ -171,8 +176,7 @@ func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) (err error) {
 		return nil
 
 	}
-	// Logger.Info("Using default gob marshalling!")
 	mm.buf.Reset()
 	mm.buf.Write(data)
-	return gob.NewDecoder(&mm.buf).Decode(v)
+	return json.NewDecoder(&mm.buf).Decode(v)
 }

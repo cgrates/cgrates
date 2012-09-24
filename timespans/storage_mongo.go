@@ -112,6 +112,11 @@ type LogTriggerEntry struct {
 	LogTime       time.Time
 }
 
+type LogErrEntry struct {
+	Id     string `bson:"_id,omitempty"`
+	ErrStr string
+}
+
 func (ms *MongoStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	rp = new(RatingProfile)
 	err = ms.db.C("ratingprofiles").Find(bson.M{"_id": key}).One(&rp)
@@ -192,4 +197,8 @@ func (ms *MongoStorage) LogActionTrigger(ubId string, at *ActionTrigger, as []*A
 
 func (ms *MongoStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) {
 	return ms.db.C("actlog").Insert(&LogTimingEntry{at, as, time.Now()})
+}
+
+func (ms *MongoStorage) LogError(uuid, errstr string) (err error) {
+	return ms.db.C("errlog").Insert(&LogErrEntry{uuid, errstr})
 }

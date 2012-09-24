@@ -216,3 +216,4 @@ func (psl *PostgresStorage) LogActionTrigger(ubId string, at *ActionTrigger, as 
 	return
 }
 func (psl *PostgresStorage) LogActionTiming(at *ActionTiming, as []*Action) (err error) { return }
+func (psl *PostgresStorage) LogError(uuid, errstr string) (err error)                   { return }
