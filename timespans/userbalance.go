@@ -20,7 +20,6 @@ package timespans
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -304,7 +303,6 @@ func (ub *UserBalance) store() (result string) {
 De-serializes the user balance for the storage. Used for key-value storages.
 */
 func (ub *UserBalance) restore(input string) {
-	Logger.Debug(fmt.Sprintf("User balance string: %s.", input))
 	elements := strings.Split(input, "|")
 	ub.Id = elements[0]
 	ub.Type = elements[1]
