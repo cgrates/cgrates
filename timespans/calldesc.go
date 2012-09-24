@@ -259,6 +259,10 @@ Creates a CallCost structure with the cost information calculated for the receiv
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	destPrefix, err := cd.LoadActivationPeriods()
+	if err != nil {
+		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
+		return &CallCost{}, err
+	}
 	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 	connectionFee := 0.0
