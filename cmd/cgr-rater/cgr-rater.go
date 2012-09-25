@@ -225,7 +225,7 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 	refLen := len(freeswitch_subject)
 	for _,fldIdxs := range []mediator.MediatorFieldIdxs{freeswitch_tor, freeswitch_tenant, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_duration, freeswitch_uuid} {
 		if len(fldIdxs) != refLen {
-			timespans.Logger.Crit(fmt.Sprintf("All mediator index elements must be of the same size: %d(freeswitch_subject)", freeswitch_subject))
+			timespans.Logger.Crit(fmt.Sprintf("All mediator index elements must be of the same size: %d(freeswitch_subject)", len(freeswitch_subject)))
 			exitChan <- true
 		}
 	}
