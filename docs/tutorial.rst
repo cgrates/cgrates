@@ -77,6 +77,7 @@ Bellow there is a full configuration file:
    rater = internal # Address where to access rater. Can be internal, direct rater address or the address of a balancer
    rpc_encoding = gob # Use json or gob for RPC encoding
    skipdb = true # Do not look in the database for logged cdrs, ask rater directly
+   pseudo_prepaid = false # debit the call cost from user balance when getting the cost
 
    [scheduler]
    enabled = true # Start the schedule service

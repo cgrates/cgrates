@@ -84,12 +84,13 @@ var (
 	sm_debit_period = 10       // the period to be debited in advanced during a call (in seconds)
 	sm_rpc_encoding = GOB      // use JSON for RPC encoding
 
-	mediator_enabled      = false
-	mediator_cdr_path     = ""       // Freeswitch Master CSV CDR path.
-	mediator_cdr_out_path = ""       // Freeswitch Master CSV CDR output path.
-	mediator_rater        = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer	
-	mediator_rpc_encoding = GOB      // use JSON for RPC encoding
-	mediator_skipdb       = false
+	mediator_enabled        = false
+	mediator_cdr_path       = ""       // Freeswitch Master CSV CDR path.
+	mediator_cdr_out_path   = ""       // Freeswitch Master CSV CDR output path.
+	mediator_rater          = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer	
+	mediator_rpc_encoding   = GOB      // use JSON for RPC encoding
+	mediator_skipdb         = false
+	mediator_pseudo_prepaid = false
 
 	freeswitch_server      = "localhost:8021" // freeswitch address host:port
 	freeswitch_pass        = "ClueCon"        // reeswitch address host:port	
@@ -147,6 +148,7 @@ func readConfig(c *conf.ConfigFile) {
 	mediator_rater, _ = c.GetString("mediator", "rater")
 	mediator_rpc_encoding, _ = c.GetString("mediator", "rpc_encoding")
 	mediator_skipdb, _ = c.GetBool("mediator", "skipdb")
+	mediator_pseudo_prepaid, _ = c.GetBool("mediator", "pseudo_prepaid")
 
 	freeswitch_server, _ = c.GetString("freeswitch", "server")
 	freeswitch_pass, _ = c.GetString("freeswitch", "pass")
@@ -222,7 +224,9 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 		exitChan <- true
 	}
 
-	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_duration, freeswitch_uuid)
+	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, mediator_pseudo_prepaid, freeswitch_direction,
+		freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination,
+		freeswitch_time_start, freeswitch_duration, freeswitch_uuid)
 	if err != nil {
 		timespans.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true

@@ -58,6 +58,7 @@ cdr_out_path = test
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
 rpc_encoding = test # use JSON for RPC encoding
 skipdb = true
+pseudo_prepaid = true
 
 [scheduler]
 enabled = true
@@ -127,6 +128,7 @@ func TestConfig(t *testing.T) {
 		mediator_rater != "test" ||
 		mediator_rpc_encoding != "test" ||
 		mediator_skipdb != true ||
+		mediator_pseudo_prepaid != true ||
 
 		freeswitch_server != "test" ||
 		freeswitch_pass != "test" ||
@@ -168,6 +170,8 @@ func TestConfig(t *testing.T) {
 		t.Log(mediator_cdr_path)
 		t.Log(mediator_cdr_out_path)
 		t.Log(mediator_rater)
+		t.Log(mediator_skipdb)
+		t.Log(mediator_pseudo_prepaid)
 		t.Log(freeswitch_server)
 		t.Log(freeswitch_pass)
 		t.Log(freeswitch_direction)

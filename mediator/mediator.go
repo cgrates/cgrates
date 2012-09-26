@@ -51,10 +51,11 @@ func (mfi *mediatorFieldIdxs) Load(idxs string) error {
 }
 
 type Mediator struct {
-	connector timespans.Connector
-	loggerDb  timespans.DataStorage
-	skipDb    bool
-	outputDir string
+	connector     timespans.Connector
+	loggerDb      timespans.DataStorage
+	skipDb        bool
+	outputDir     string
+	pseudoPrepaid bool
 	directionIndexs,
 	torIndexs,
 	tenantIndexs,
@@ -71,13 +72,15 @@ func NewMediator(connector timespans.Connector,
 	loggerDb timespans.DataStorage,
 	skipDb bool,
 	outputDir string,
+	pseudoPrepaid bool,
 	directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs, destinationIndexs,
 	timeStartIndexs, durationIndexs, uuidIndexs string) (m *Mediator, err error) {
 	m = &Mediator{
-		connector: connector,
-		loggerDb:  loggerDb,
-		skipDb:    skipDb,
-		outputDir: outputDir,
+		connector:     connector,
+		loggerDb:      loggerDb,
+		skipDb:        skipDb,
+		outputDir:     outputDir,
+		pseudoPrepaid: pseudoPrepaid,
 	}
 	idxs := []string{directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs,
 		destinationIndexs, timeStartIndexs, durationIndexs, uuidIndexs}
@@ -177,7 +180,6 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 			record = append(record, cost)
 		}
 		w.WriteString(strings.Join(record, ",") + "\n")
-
 	}
 	w.Flush()
 	return
@@ -214,7 +216,11 @@ func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *timespans
 		Destination: record[m.destinationIndexs[runIdx]],
 		TimeStart:   t1,
 		TimeEnd:     t1.Add(d)}
-	err = m.connector.GetCost(cd, cc)
+	if m.pseudoPrepaid {
+		err = m.connector.Debit(cd, cc)
+	} else {
+		err = m.connector.GetCost(cd, cc)
+	}
 	if err != nil {
 		m.loggerDb.LogError(record[m.uuidIndexs[runIdx]], timespans.MEDIATOR_SOURCE, err.Error())
 	} else {
