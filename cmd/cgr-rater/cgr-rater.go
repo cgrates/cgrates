@@ -93,15 +93,15 @@ var (
 
 	freeswitch_server      = "localhost:8021" // freeswitch address host:port
 	freeswitch_pass        = "ClueCon"        // reeswitch address host:port	
-	freeswitch_direction   = mediator.MediatorFieldIdxs{}
-	freeswitch_tor         = mediator.MediatorFieldIdxs{}
-	freeswitch_tenant      = mediator.MediatorFieldIdxs{}
-	freeswitch_subject     = mediator.MediatorFieldIdxs{}
-	freeswitch_account     = mediator.MediatorFieldIdxs{}
-	freeswitch_destination = mediator.MediatorFieldIdxs{}
-	freeswitch_time_start  = mediator.MediatorFieldIdxs{}
-	freeswitch_duration    = mediator.MediatorFieldIdxs{}
-	freeswitch_uuid        = mediator.MediatorFieldIdxs{}
+	freeswitch_direction   = ""
+	freeswitch_tor         = ""
+	freeswitch_tenant      = ""
+	freeswitch_subject     = ""
+	freeswitch_account     = ""
+	freeswitch_destination = ""
+	freeswitch_time_start  = ""
+	freeswitch_duration    = ""
+	freeswitch_uuid        = ""
 
 	cfgParseErr error
 
@@ -150,15 +150,15 @@ func readConfig(c *conf.ConfigFile) {
 
 	freeswitch_server, _ = c.GetString("freeswitch", "server")
 	freeswitch_pass, _ = c.GetString("freeswitch", "pass")
-	freeswitch_tor, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "tor_index")
-	freeswitch_tenant, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "tenant_index")
-	freeswitch_direction, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "direction_index")
-	freeswitch_subject, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "subject_index")
-	freeswitch_account, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "account_index")
-	freeswitch_destination, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "destination_index")
-	freeswitch_time_start, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "time_start_index")
-	freeswitch_duration, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "duration_index")
-	freeswitch_uuid, cfgParseErr = mediator.GetFieldIdxs(c, "freeswitch", "uuid_index")
+	freeswitch_tor, _ = c.GetString("freeswitch", "tor_index")
+	freeswitch_tenant, _ = c.GetString("freeswitch", "tenant_index")
+	freeswitch_direction, _ = c.GetString("freeswitch", "direction_index")
+	freeswitch_subject, _ = c.GetString("freeswitch", "subject_index")
+	freeswitch_account, _ = c.GetString("freeswitch", "account_index")
+	freeswitch_destination, _ = c.GetString("freeswitch", "destination_index")
+	freeswitch_time_start, _ = c.GetString("freeswitch", "time_start_index")
+	freeswitch_duration, _ = c.GetString("freeswitch", "duration_index")
+	freeswitch_uuid, _ = c.GetString("freeswitch", "uuid_index")
 }
 
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
@@ -221,16 +221,13 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 		timespans.Logger.Crit(fmt.Sprintf("Errors on config parsing: <%v>", cfgParseErr))
 		exitChan <- true
 	}
-	// Make sure all indexes are having same lenght
-	refLen := len(freeswitch_subject)
-	for _,fldIdxs := range []mediator.MediatorFieldIdxs{freeswitch_tor, freeswitch_tenant, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_duration, freeswitch_uuid} {
-		if len(fldIdxs) != refLen {
-			timespans.Logger.Crit(fmt.Sprintf("All mediator index elements must be of the same size: %d(freeswitch_subject)", len(freeswitch_subject)))
-			exitChan <- true
-		}
+
+	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_duration, freeswitch_uuid)
+	if err != nil || m.ValidateIndexses() {
+		timespans.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
+		exitChan <- true
 	}
-		
-	m := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_duration, freeswitch_uuid)
+
 	m.TrackCDRFiles(mediator_cdr_path)
 }
 

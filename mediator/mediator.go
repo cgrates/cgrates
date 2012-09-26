@@ -30,10 +30,25 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"code.google.com/p/goconf/conf"
 )
 
-type MediatorFieldIdxs []int
+type mediatorFieldIdxs []int
+
+// Extends goconf to provide us the slice with indexes we need for multiple mediation
+func (mfi *mediatorFieldIdxs) Load(idxs string) error {
+	cfgStrIdxs := strings.Split(idxs, ",")
+	if len(cfgStrIdxs) == 0 {
+		return fmt.Errorf("Undefined %s", idxs)
+	}
+	for _, cfgStrIdx := range cfgStrIdxs {
+		if cfgIntIdx, errConv := strconv.Atoi(cfgStrIdx); errConv != nil || cfgStrIdx == "" {
+			return fmt.Errorf("All %s members must be ints", idxs)
+		} else {
+			*mfi = append(*mfi, cfgIntIdx)
+		}
+	}
+	return nil
+}
 
 type Mediator struct {
 	connector timespans.Connector
@@ -48,60 +63,67 @@ type Mediator struct {
 	destinationIndexs,
 	timeStartIndexs,
 	durationIndexs,
-	uuidIndexs  MediatorFieldIdxs
+	uuidIndexs mediatorFieldIdxs
 }
 
 func NewMediator(connector timespans.Connector,
 	loggerDb timespans.DataStorage,
 	skipDb bool,
 	outputDir string,
-	directionIndexs,
-	torIndexs,
-	tenantIndexs,
-	subjectIndexs,
-	accountIndexs,
-	destinationIndexs,
-	timeStartIndexs,
-	durationIndexs,
-	uuidIndexs MediatorFieldIdxs) *Mediator {
-	return &Mediator{
+	directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs, destinationIndexs, timeStartIndexs, durationIndexs, uuidIndexs string) (m *Mediator, err error) {
+	m = &Mediator{
 		connector: connector,
 		loggerDb:  loggerDb,
 		skipDb:    skipDb,
 		outputDir: outputDir,
-		directionIndexs: directionIndexs,
-		torIndexs: torIndexs,
-		tenantIndexs: tenantIndexs,
-		subjectIndexs: subjectIndexs,
-		accountIndexs: accountIndexs,
-		destinationIndexs: destinationIndexs,
-		timeStartIndexs: timeStartIndexs,
-		durationIndexs: durationIndexs,
-		uuidIndexs: uuidIndexs,
 	}
+	err = m.directionIndexs.Load(directionIndexs)
+	if err != nil {
+		return
+	}
+	err = m.torIndexs.Load(torIndexs)
+	if err != nil {
+		return
+	}
+	err = m.tenantIndexs.Load(tenantIndexs)
+	if err != nil {
+		return
+	}
+	err = m.subjectIndexs.Load(subjectIndexs)
+	if err != nil {
+		return
+	}
+	err = m.accountIndexs.Load(accountIndexs)
+	if err != nil {
+		return
+	}
+	err = m.destinationIndexs.Load(destinationIndexs)
+	if err != nil {
+		return
+	}
+	err = m.timeStartIndexs.Load(timeStartIndexs)
+	if err != nil {
+		return
+	}
+	err = m.durationIndexs.Load(durationIndexs)
+	if err != nil {
+		return
+	}
+	err = m.uuidIndexs.Load(uuidIndexs)
+	return
 }
 
-// Extends goconf to provide us the slice with indexes we need for multiple mediation
-func GetFieldIdxs(cfg *conf.ConfigFile, section, option string) (MediatorFieldIdxs, error) {
-        strConf, err := cfg.GetString(section, option)
-        if err != nil {
-		return nil, err
-	}
-	cfgStrIdxs := strings.Split(strConf,",")
-	if len(cfgStrIdxs) == 0 {
-		return nil, fmt.Errorf("Undefined %s in section %s",option, section)
-	}
-	retIdxs := make( MediatorFieldIdxs, len(cfgStrIdxs) )
-	for i,cfgStrIdx := range cfgStrIdxs {
-		if cfgIntIdx,errConv := strconv.Atoi(cfgStrIdx); errConv!= nil || cfgStrIdx == ""{
-			return nil, fmt.Errorf("All [%s]-%s members must be ints",section, option)
-		} else {
-			retIdxs[i] = cfgIntIdx
+// Make sure all indexes are having same lenght
+func (m *Mediator) ValidateIndexses() bool {
+	refLen := len(m.subjectIndexs)
+	for _, fldIdxs := range []mediatorFieldIdxs{m.directionIndexs, m.torIndexs, m.tenantIndexs,
+		m.accountIndexs, m.destinationIndexs, m.timeStartIndexs, m.durationIndexs, m.uuidIndexs} {
+		if len(fldIdxs) != refLen {
+			return false
 		}
 	}
-        return retIdxs, nil
+	return true
 }
-
 
 func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	watcher, err := inotify.NewWatcher()
@@ -152,7 +174,7 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
 		//t, _ := time.Parse("2012-05-21 17:48:20", record[5])		
 		var cc *timespans.CallCost
-		for runIdx := range(m.subjectIndexs) { // Query costs for every run index given by subject
+		for runIdx := range m.subjectIndexs { // Query costs for every run index given by subject
 			if runIdx == 0 && !m.skipDb { // The first index is matching the session manager one
 				cc, err = m.GetCostsFromDB(record, runIdx)
 				if err != nil || cc == nil { // Fallback on rater if no db record found
@@ -191,8 +213,8 @@ func (m *Mediator) GetCostsFromRater(record []string, runIdx int) (cc *timespans
 
 	cc = &timespans.CallCost{}
 	if d.Seconds() == 0 { // failed call,  returning empty callcost, no error
-                return cc, nil
-        }
+		return cc, nil
+	}
 	t1, err := time.Parse("2006-01-02 15:04:05", record[m.timeStartIndexs[runIdx]])
 	if err != nil {
 		return
