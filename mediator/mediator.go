@@ -42,7 +42,7 @@ func (mfi *mediatorFieldIdxs) Load(idxs string) error {
 	}
 	for _, cfgStrIdx := range cfgStrIdxs {
 		if cfgIntIdx, errConv := strconv.Atoi(cfgStrIdx); errConv != nil || cfgStrIdx == "" {
-			return fmt.Errorf("All %s members must be ints", idxs)
+			return fmt.Errorf("All mediator index members (%s) must be ints", idxs)
 		} else {
 			*mfi = append(*mfi, cfgIntIdx)
 		}
@@ -66,55 +66,37 @@ type Mediator struct {
 	uuidIndexs mediatorFieldIdxs
 }
 
+// Creates a new mediator object parsing the indexses
 func NewMediator(connector timespans.Connector,
 	loggerDb timespans.DataStorage,
 	skipDb bool,
 	outputDir string,
-	directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs, destinationIndexs, timeStartIndexs, durationIndexs, uuidIndexs string) (m *Mediator, err error) {
+	directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs, destinationIndexs,
+	timeStartIndexs, durationIndexs, uuidIndexs string) (m *Mediator, err error) {
 	m = &Mediator{
 		connector: connector,
 		loggerDb:  loggerDb,
 		skipDb:    skipDb,
 		outputDir: outputDir,
 	}
-	err = m.directionIndexs.Load(directionIndexs)
-	if err != nil {
-		return
+	idxs := []string{directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs,
+		destinationIndexs, timeStartIndexs, durationIndexs, uuidIndexs}
+	objs := []mediatorFieldIdxs{m.directionIndexs, m.torIndexs, m.tenantIndexs, m.subjectIndexs,
+		m.accountIndexs, m.destinationIndexs, m.timeStartIndexs, m.durationIndexs, m.uuidIndexs}
+	for i, o := range objs {
+		err = o.Load(idxs[i])
+		if err != nil {
+			return
+		}
 	}
-	err = m.torIndexs.Load(torIndexs)
-	if err != nil {
-		return
+	if !m.validateIndexses() {
+		err = fmt.Errorf("All members must have the same length")
 	}
-	err = m.tenantIndexs.Load(tenantIndexs)
-	if err != nil {
-		return
-	}
-	err = m.subjectIndexs.Load(subjectIndexs)
-	if err != nil {
-		return
-	}
-	err = m.accountIndexs.Load(accountIndexs)
-	if err != nil {
-		return
-	}
-	err = m.destinationIndexs.Load(destinationIndexs)
-	if err != nil {
-		return
-	}
-	err = m.timeStartIndexs.Load(timeStartIndexs)
-	if err != nil {
-		return
-	}
-	err = m.durationIndexs.Load(durationIndexs)
-	if err != nil {
-		return
-	}
-	err = m.uuidIndexs.Load(uuidIndexs)
 	return
 }
 
 // Make sure all indexes are having same lenght
-func (m *Mediator) ValidateIndexses() bool {
+func (m *Mediator) validateIndexses() bool {
 	refLen := len(m.subjectIndexs)
 	for _, fldIdxs := range []mediatorFieldIdxs{m.directionIndexs, m.torIndexs, m.tenantIndexs,
 		m.accountIndexs, m.destinationIndexs, m.timeStartIndexs, m.durationIndexs, m.uuidIndexs} {
@@ -125,6 +107,7 @@ func (m *Mediator) ValidateIndexses() bool {
 	return true
 }
 
+// Watch the specified folder for file moves and parse the files on events
 func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	watcher, err := inotify.NewWatcher()
 	if err != nil {
@@ -152,6 +135,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	return
 }
 
+// Parse the files and get cost for every record
 func (m *Mediator) parseCSV(cdrfn string) (err error) {
 	flag.Parse()
 	file, err := os.Open(cdrfn)
@@ -176,12 +160,12 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 		var cc *timespans.CallCost
 		for runIdx := range m.subjectIndexs { // Query costs for every run index given by subject
 			if runIdx == 0 && !m.skipDb { // The first index is matching the session manager one
-				cc, err = m.GetCostsFromDB(record, runIdx)
+				cc, err = m.getCostsFromDB(record, runIdx)
 				if err != nil || cc == nil { // Fallback on rater if no db record found
-					cc, err = m.GetCostsFromRater(record, runIdx)
+					cc, err = m.getCostsFromRater(record, runIdx)
 				}
 			} else {
-				cc, err = m.GetCostsFromRater(record, runIdx)
+				cc, err = m.getCostsFromRater(record, runIdx)
 			}
 			cost := "-1"
 			if err != nil {
@@ -199,13 +183,15 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 	return
 }
 
-func (m *Mediator) GetCostsFromDB(record []string, runIdx int) (cc *timespans.CallCost, err error) {
+// Retrive the cost from logging database
+func (m *Mediator) getCostsFromDB(record []string, runIdx int) (cc *timespans.CallCost, err error) {
 	searchedUUID := record[m.uuidIndexs[runIdx]]
 	cc, err = m.loggerDb.GetCallCostLog(searchedUUID, timespans.SESSION_MANAGER_SOURCE)
 	return
 }
 
-func (m *Mediator) GetCostsFromRater(record []string, runIdx int) (cc *timespans.CallCost, err error) {
+// Retrive the cost from rater
+func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *timespans.CallCost, err error) {
 	d, err := time.ParseDuration(record[m.durationIndexs[runIdx]] + "s")
 	if err != nil {
 		return

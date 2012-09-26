@@ -223,7 +223,7 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 	}
 
 	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, freeswitch_direction, freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination, freeswitch_time_start, freeswitch_duration, freeswitch_uuid)
-	if err != nil || m.ValidateIndexses() {
+	if err != nil {
 		timespans.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
 	}
