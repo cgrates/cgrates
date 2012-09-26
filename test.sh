@@ -9,4 +9,4 @@ cr=$?
 go test github.com/cgrates/cgrates/inotify
 in=$?
 
-exit $ts || $sm || $bl || $cr || $in
+exit $ts && $sm && $bl && $cr && $in
