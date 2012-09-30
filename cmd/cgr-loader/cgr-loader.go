@@ -166,7 +166,7 @@ func main() {
 	}
 
 	if err != nil {
-		log.Fatal("Could not open database connection: %v", err)
+		log.Fatalf("Could not open database connection: %v", err)
 	}
 
 	// writing to database

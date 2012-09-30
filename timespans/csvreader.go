@@ -300,7 +300,7 @@ func (csvr *CSVReader) LoadRatingProfiles(fn string, comma rune) (err error) {
 		for _, d := range csvr.destinations {
 			ap, exists := csvr.activationPeriods[record[5]]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: ", record[5]))
+				return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: %v", record[5]))
 			}
 			newAP := &ActivationPeriod{ActivationTime: at}
 			//copy(newAP.Intervals, ap.Intervals)

@@ -42,7 +42,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	aac, err = storageGetter.GetActions(at.ActionsId)
 	aac.Sort()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Failed to get actions: ", err))
+		Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
 		return
 	}
 	for _, a := range aac {

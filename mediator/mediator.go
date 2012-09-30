@@ -132,7 +132,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 				}
 			}
 		case err := <-watcher.Error:
-			timespans.Logger.Err(fmt.Sprintf("Inotify error: ", err))
+			timespans.Logger.Err(fmt.Sprintf("Inotify error: %v", err))
 		}
 	}
 	return

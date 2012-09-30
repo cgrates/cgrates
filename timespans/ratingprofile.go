@@ -92,7 +92,7 @@ func (rp *RatingProfile) GetActivationPeriodsForPrefix(destPrefix string) (found
 	for k, v := range rp.DestinationMap {
 		d, err := GetDestination(k)
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Cannot find destination with id: ", k))
+			Logger.Err(fmt.Sprintf("Cannot find destination with id: %s", k))
 			continue
 		}
 		if precision, ok := d.containsPrefix(destPrefix); ok && precision > bestPrecision {

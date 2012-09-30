@@ -67,7 +67,7 @@ func unregisterFromBalancer() {
 		return
 	}
 	var reply int
-	timespans.Logger.Info(fmt.Sprintf("Unregistering from balancer ", rater_balancer))
+	timespans.Logger.Info(fmt.Sprintf("Unregistering from balancer %s", rater_balancer))
 	client.Call("Responder.UnRegisterRater", rater_listen, &reply)
 	if err := client.Close(); err != nil {
 		timespans.Logger.Crit("Could not close balancer unregistration!")
@@ -81,12 +81,12 @@ Connects to the balancer and rehisters the rater to the server.
 func registerToBalancer() {
 	client, err := rpc.Dial("tcp", rater_balancer)
 	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Cannot contact the balancer!", err))
+		timespans.Logger.Crit(fmt.Sprintf("Cannot contact the balancer: %v", err))
 		exitChan <- true
 		return
 	}
 	var reply int
-	timespans.Logger.Info(fmt.Sprintf("Registering to balancer ", rater_balancer))
+	timespans.Logger.Info(fmt.Sprintf("Registering to balancer %s", rater_balancer))
 	client.Call("Responder.RegisterRater", rater_listen, &reply)
 	if err := client.Close(); err != nil {
 		timespans.Logger.Crit("Could not close balancer registration!")

@@ -208,7 +208,7 @@ func (at *ActionTiming) Execute() (err error) {
 	at.resetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Failed to get actions: ", err))
+		Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
 		return
 	}
 	for _, a := range aac {

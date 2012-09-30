@@ -67,7 +67,7 @@ func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func setPostpaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_POSTPAID
+	ub.Type = UB_TYPE_POSTPAID        
 	return
 }
 

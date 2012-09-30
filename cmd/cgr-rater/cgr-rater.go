@@ -208,7 +208,7 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 			timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
 			exitChan <- true
 		}
-		connector = &timespans.RPCClientConnector{client}
+		connector = &timespans.RPCClientConnector{Client: client}
 	}
 	if _, err := os.Stat(mediator_cdr_path); err != nil {
 		timespans.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", mediator_cdr_path))
@@ -251,13 +251,13 @@ func startSessionManager(responder *timespans.Responder, loggerDb timespans.Data
 			timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
 			exitChan <- true
 		}
-		connector = &timespans.RPCClientConnector{client}
+		connector = &timespans.RPCClientConnector{Client: client}
 	}
 	switch sm_switch_type {
 	case FS:
 		sm := sessionmanager.NewFSSessionManager(loggerDb)
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period))
-		sm.Connect(&sessionmanager.SessionDelegate{connector, dp}, freeswitch_server, freeswitch_pass)
+		sm.Connect(&sessionmanager.SessionDelegate{Connector: connector, DebitPeriod: dp}, freeswitch_server, freeswitch_pass)
 	default:
 		timespans.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
 		exitChan <- true
