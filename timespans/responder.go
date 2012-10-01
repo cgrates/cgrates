@@ -184,15 +184,12 @@ func (rs *Responder) GetBalance(arg console.ArgsGetBalance, reply *console.Reply
 	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.User
 	userBalance, err := storageGetter.GetUserBalance(ubKey)
 	if err != nil {
-		fmt.Println("here")
 		return err
 	}
 	if balance, balExists := userBalance.BalanceMap[arg.BalanceId]; !balExists {
 		// No match, balanceId not found
-		fmt.Printf("%+v : %s\n", userBalance, arg.BalanceId)
 		return fmt.Errorf("-BALANCE_NOT_FOUND")
 	} else {
-		fmt.Println("bal: ", balance)
 		reply.Tenant = arg.Tenant
 		reply.User = arg.User
 		reply.Direction = arg.Direction
