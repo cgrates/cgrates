@@ -6,6 +6,10 @@ import (
 	"fmt"
 )
 
+func init() {
+	commands["get_balance"] = &CmdGetBalance{}
+}
+
 // Data being sent to the rpc responder
 type ArgsGetBalance struct {
 	Tenant    string
@@ -25,10 +29,9 @@ type ReplyGetBalance struct {
 
 // Commander implementation
 type CmdGetBalance struct {
-	rpcMethod        string
-	rpcParams        *ArgsGetBalance
-	rpcResult        *ReplyGetBalance
-	idxArgsToRpcPrms map[int]string
+	rpcMethod string
+	rpcParams *ArgsGetBalance
+	rpcResult *ReplyGetBalance
 }
 
 // name should be exec's name
@@ -38,9 +41,8 @@ func (self *CmdGetBalance) Usage(name string) string {
 
 // set param defaults
 func (self *CmdGetBalance) defaults() error {
-	self.idxArgsToRpcPrms = map[int]string{2: "Tenant", 3: "User", 4: "BalanceId", 5: "Direction"}
 	self.rpcMethod = "Responder.GetBalance"
-	self.rpcParams = &ArgsGetBalance{BalanceId: "MONETARY", Direction: "OUT"}
+	self.rpcParams = &ArgsGetBalance{BalanceId: "MONETARYOUT", Direction: "OUT"}
 	return nil
 }
 
@@ -51,11 +53,13 @@ func (self *CmdGetBalance) FromArgs(args []string) error {
 	}
 	// Args look OK, set defaults before going further	
 	self.defaults()
-	self.rpcParams = &ArgsGetBalance{
-		Tenant:    args[2],
-		User:      args[3],
-		BalanceId: args[4],
-		Direction: args[5],
+	self.rpcParams.Tenant = args[2]
+	self.rpcParams.User = args[3]
+	if len(args) > 4 {
+		self.rpcParams.BalanceId = args[4]
+	}
+	if len(args) > 5 {
+		self.rpcParams.Direction = args[5]
 	}
 	return nil
 }

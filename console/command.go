@@ -5,6 +5,10 @@ import (
 	"path/filepath"
 )
 
+var (
+	commands = make(map[string]Commander)
+)
+
 // Console Command interface
 type Commander interface {
 	FromArgs(args []string) error // Load data from os arguments or flag.Args()
@@ -20,14 +24,8 @@ func GetCommandValue(args []string) (Commander, error) {
 	if len(args) < 2 {
 		return nil, fmt.Errorf("\n\tUsage: %s [cfg_opts...{-h}] <command>\n", filepath.Base(args[0]))
 	}
-	cmd := args[1]
-	var cmdVal Commander
-	switch cmd {
-	case "status":
-		cmdVal = &CmdStatus{}
-	case "get_balance":
-		cmdVal = &CmdGetBalance{}
-	default:
+	cmdVal, exists := commands[args[1]]
+	if !exists {
 		return nil, fmt.Errorf("\n\tUsage: %s [cfg_opts...{-h}] <status|get_balance>\n", filepath.Base(args[0]))
 	}
 	if err := cmdVal.FromArgs(args); err != nil {

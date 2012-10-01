@@ -4,6 +4,10 @@ import (
 	"fmt"
 )
 
+func init() {
+	commands["status"] = &CmdStatus{}
+}
+
 type CmdStatus struct {
 	rpcMethod string
 	rpcParams string
