@@ -106,7 +106,6 @@ func main() {
 			log.Fatal(err, "\n\t", v.message)
 		}
 	}
-
 	//sep = []rune(*separator)[0]
 	sep = ','
 	csvr := timespans.NewFileCSVReader()
@@ -169,6 +168,8 @@ func main() {
 		log.Fatalf("Could not open database connection: %v", err)
 	}
 
-	// writing to database
-	csvr.WriteToDatabase(getter, *flush, true)
+	// write maps to database
+	if err := csvr.WriteToDatabase(getter, *flush, true); err != nil {
+		log.Fatal("Could not write to database: ", err)
+	}
 }

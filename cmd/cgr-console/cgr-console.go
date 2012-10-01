@@ -21,18 +21,17 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/cgrates/cgrates/console"
+	"github.com/cgrates/cgrates/timespans"
 	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os"
-	"reflect"
-	"github.com/cgrates/cgrates/timespans"
-	"github.com/cgrates/cgrates/console"
 )
 
 var (
-	version = flag.Bool("version", false, "Prints the application version.")
-	server  = flag.String("server", "127.0.0.1:2000", "server address host:port")
+	version      = flag.Bool("version", false, "Prints the application version.")
+	server       = flag.String("server", "127.0.0.1:2000", "server address host:port")
 	rpc_encoding = flag.String("rpc_encoding", "gob", "RPC encoding used <gob|json>")
 )
 
@@ -62,8 +61,7 @@ func main() {
 	}
 	res := cmd.RpcResult()
 	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), res); rpcErr != nil {
-		log.Fatal(rpcErr)
 	}
-	fmt.Println(reflect.ValueOf(res).Elem().Interface())
+	fmt.Println("Result:", res)
 
 }
