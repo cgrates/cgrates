@@ -1,8 +1,7 @@
 package console
 
 import (
-	"fmt"
-	"path/filepath"
+	"errors"
 )
 
 var (
@@ -22,11 +21,11 @@ type Commander interface {
 // Process args and return right command Value or error
 func GetCommandValue(args []string) (Commander, error) {
 	if len(args) < 2 {
-		return nil, fmt.Errorf("\n\tUsage: %s [cfg_opts...{-h}] <command>\n", filepath.Base(args[0]))
+		return nil, errors.New("\n\tUsage: cgr-console [cfg_opts...{-h}] <command>\n")
 	}
 	cmdVal, exists := commands[args[1]]
 	if !exists {
-		return nil, fmt.Errorf("\n\tUsage: %s [cfg_opts...{-h}] <status|get_balance>\n", filepath.Base(args[0]))
+		return nil, errors.New("\n\tUsage: cgr-console [cfg_opts...{-h}] <status|get_balance>\n")
 	}
 	if err := cmdVal.FromArgs(args); err != nil {
 		return nil, err

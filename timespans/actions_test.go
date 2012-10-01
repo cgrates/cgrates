@@ -392,14 +392,16 @@ func TestActionTimingLogFunction(t *testing.T) {
 	}
 }
 
-func TestActionTimingPriotityList(t *testing.T) {
+func TestActionTimingPriotityListSortByWeight(t *testing.T) {
 	at1 := &ActionTiming{Timing: &Interval{
+		Years:     Years{2100},
 		Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
 		MonthDays: MonthDays{1},
 		StartTime: "00:00:00",
 		Weight:    20,
 	}}
 	at2 := &ActionTiming{Timing: &Interval{
+		Years:     Years{2100},
 		Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
 		MonthDays: MonthDays{2},
 		StartTime: "00:00:00",
@@ -409,7 +411,7 @@ func TestActionTimingPriotityList(t *testing.T) {
 	atpl = append(atpl, at2, at1)
 	atpl.Sort()
 	if atpl[0] != at1 || atpl[1] != at2 {
-		t.Error("Timing list not sorted correctly: ", atpl)
+		t.Error("Timing list not sorted correctly: ", at1, at2, atpl)
 	}
 }
 

@@ -36,7 +36,7 @@ type CmdGetBalance struct {
 
 // name should be exec's name
 func (self *CmdGetBalance) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: %s [cfg_opts...{-h}] get_balance <tenant> <user> [<balanceid> [<direction>]]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_balance <tenant> <user> [<balanceid> [<direction>]]")
 }
 
 // set param defaults

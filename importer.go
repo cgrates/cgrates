@@ -22,10 +22,4 @@ import (
 	_ "github.com/cgrates/cgrates/cmd/cgr-console"
 	_ "github.com/cgrates/cgrates/cmd/cgr-loader"
 	_ "github.com/cgrates/cgrates/cmd/cgr-rater"
-	"github.com/cgrates/cgrates/timespans"
 )
-
-func main(){
-	                                      cd := timespans.CallDesc{}
-
-}
