@@ -20,7 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/rater"
 	"regexp"
 	"strconv"
 	"strings"
@@ -82,7 +82,7 @@ func (fsev *FSEvent) New(body string) Event {
 		if len(fields) == 3 {
 			fsev.Fields[fields[1]] = fields[2]
 		} else {
-			timespans.Logger.Err(fmt.Sprintf("malformed event field: %v", fields))
+			rater.Logger.Err(fmt.Sprintf("malformed event field: %v", fields))
 		}
 	}
 	return fsev

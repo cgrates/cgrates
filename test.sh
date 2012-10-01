@@ -1,6 +1,6 @@
 #! /usr/bin/env sh
 
-go test github.com/cgrates/cgrates/timespans
+go test github.com/cgrates/cgrates/rater
 ts=$?
 go test github.com/cgrates/cgrates/sessionmanager
 sm=$?

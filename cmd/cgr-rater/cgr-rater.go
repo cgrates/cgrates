@@ -25,9 +25,9 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/mediator"
+	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
-	"github.com/cgrates/cgrates/timespans"
 	"io"
 	"net"
 	"net/rpc"
@@ -166,13 +166,13 @@ func readConfig(c *conf.ConfigFile) {
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Could not listen to %v: %v", rpcAddress, err))
+		rater.Logger.Crit(fmt.Sprintf("Could not listen to %v: %v", rpcAddress, err))
 		exitChan <- true
 		return
 	}
 	defer l.Close()
 
-	timespans.Logger.Info(fmt.Sprintf("Listening for incomming RPC requests on %v", l.Addr()))
+	rater.Logger.Info(fmt.Sprintf("Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
 	var serveFunc func(io.ReadWriteCloser)
 	if rpc_encoding == JSON {
@@ -183,17 +183,17 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("accept error: %v", conn))
+			rater.Logger.Err(fmt.Sprintf("accept error: %v", conn))
 			continue
 		}
 
-		timespans.Logger.Info(fmt.Sprintf("connection started: %v", conn.RemoteAddr()))
+		rater.Logger.Info(fmt.Sprintf("connection started: %v", conn.RemoteAddr()))
 		go serveFunc(conn)
 	}
 }
 
-func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorage) {
-	var connector timespans.Connector
+func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
+	var connector rater.Connector
 	if mediator_rater == INTERNAL {
 		connector = responder
 	} else {
@@ -205,22 +205,22 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 			client, err = rpc.Dial("tcp", mediator_rater)
 		}
 		if err != nil {
-			timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
+			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
 			exitChan <- true
 		}
-		connector = &timespans.RPCClientConnector{Client: client}
+		connector = &rater.RPCClientConnector{Client: client}
 	}
 	if _, err := os.Stat(mediator_cdr_path); err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", mediator_cdr_path))
+		rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", mediator_cdr_path))
 		exitChan <- true
 	}
 	if _, err := os.Stat(mediator_cdr_out_path); err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", mediator_cdr_out_path))
+		rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", mediator_cdr_out_path))
 		exitChan <- true
 	}
 	// Check parsing errors
 	if cfgParseErr != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Errors on config parsing: <%v>", cfgParseErr))
+		rater.Logger.Crit(fmt.Sprintf("Errors on config parsing: <%v>", cfgParseErr))
 		exitChan <- true
 	}
 
@@ -228,15 +228,15 @@ func startMediator(responder *timespans.Responder, loggerDb timespans.DataStorag
 		freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination,
 		freeswitch_time_start, freeswitch_duration, freeswitch_uuid)
 	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
+		rater.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
 	}
 
 	m.TrackCDRFiles(mediator_cdr_path)
 }
 
-func startSessionManager(responder *timespans.Responder, loggerDb timespans.DataStorage) {
-	var connector timespans.Connector
+func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage) {
+	var connector rater.Connector
 	if sm_rater == INTERNAL {
 		connector = responder
 	} else {
@@ -248,10 +248,10 @@ func startSessionManager(responder *timespans.Responder, loggerDb timespans.Data
 			client, err = rpc.Dial("tcp", sm_rater)
 		}
 		if err != nil {
-			timespans.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
+			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
 			exitChan <- true
 		}
-		connector = &timespans.RPCClientConnector{Client: client}
+		connector = &rater.RPCClientConnector{Client: client}
 	}
 	switch sm_switch_type {
 	case FS:
@@ -259,18 +259,18 @@ func startSessionManager(responder *timespans.Responder, loggerDb timespans.Data
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period))
 		sm.Connect(&sessionmanager.SessionDelegate{Connector: connector, DebitPeriod: dp}, freeswitch_server, freeswitch_pass)
 	default:
-		timespans.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
+		rater.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
 		exitChan <- true
 	}
 }
 
 func checkConfigSanity() {
 	if sm_enabled && rater_enabled && rater_balancer != DISABLED {
-		timespans.Logger.Crit("The session manager must not be enabled on a worker rater (change [rater]/balancer to disabled)!")
+		rater.Logger.Crit("The session manager must not be enabled on a worker rater (change [rater]/balancer to disabled)!")
 		exitChan <- true
 	}
 	if balancer_enabled && rater_enabled && rater_balancer != DISABLED {
-		timespans.Logger.Crit("The balancer is enabled so it cannot connect to anatoher balancer (change [rater]/balancer to disabled)!")
+		rater.Logger.Crit("The balancer is enabled so it cannot connect to anatoher balancer (change [rater]/balancer to disabled)!")
 		exitChan <- true
 	}
 
@@ -281,13 +281,13 @@ func checkConfigSanity() {
 	if strings.Contains(sm_rater, "localhost") || strings.Contains(sm_rater, "127.0.0.1") {
 		if balancer_enabled {
 			if balancer_rpc_encoding != sm_rpc_encoding {
-				timespans.Logger.Crit("If you are connecting the session manager via the loopback to the balancer use the same type of rpc encoding!")
+				rater.Logger.Crit("If you are connecting the session manager via the loopback to the balancer use the same type of rpc encoding!")
 				exitChan <- true
 			}
 		}
 		if rater_enabled {
 			if rater_rpc_encoding != sm_rpc_encoding {
-				timespans.Logger.Crit("If you are connecting the session manager via the loopback to the arter use the same type of rpc encoding!")
+				rater.Logger.Crit("If you are connecting the session manager via the loopback to the arter use the same type of rpc encoding!")
 				exitChan <- true
 			}
 		}
@@ -295,44 +295,44 @@ func checkConfigSanity() {
 	if strings.Contains(mediator_rater, "localhost") || strings.Contains(mediator_rater, "127.0.0.1") {
 		if balancer_enabled {
 			if balancer_rpc_encoding != mediator_rpc_encoding {
-				timespans.Logger.Crit("If you are connecting the mediator via the loopback to the balancer use the same type of rpc encoding!")
+				rater.Logger.Crit("If you are connecting the mediator via the loopback to the balancer use the same type of rpc encoding!")
 				exitChan <- true
 			}
 		}
 		if rater_enabled {
 			if rater_rpc_encoding != mediator_rpc_encoding {
-				timespans.Logger.Crit("If you are connecting the mediator via the loopback to the arter use the same type of rpc encoding!")
+				rater.Logger.Crit("If you are connecting the mediator via the loopback to the arter use the same type of rpc encoding!")
 				exitChan <- true
 			}
 		}
 	}
 }
 
-func configureDatabase(db_type, host, port, name, user, pass string) (getter timespans.DataStorage, err error) {
+func configureDatabase(db_type, host, port, name, user, pass string) (getter rater.DataStorage, err error) {
 
 	switch db_type {
 	case REDIS:
 		db_nb, err := strconv.Atoi(name)
 		if err != nil {
-			timespans.Logger.Crit("Redis db name must be an integer!")
+			rater.Logger.Crit("Redis db name must be an integer!")
 			exitChan <- true
 		}
 		if port != "" {
 			host += ":" + port
 		}
-		getter, err = timespans.NewRedisStorage(host, db_nb, pass)
+		getter, err = rater.NewRedisStorage(host, db_nb, pass)
 	case MONGO:
-		getter, err = timespans.NewMongoStorage(host, port, name, user, pass)
+		getter, err = rater.NewMongoStorage(host, port, name, user, pass)
 	case POSTGRES:
-		getter, err = timespans.NewPostgresStorage(host, port, name, user, pass)
+		getter, err = rater.NewPostgresStorage(host, port, name, user, pass)
 	default:
 		err = errors.New("unknown db")
-		timespans.Logger.Crit("Unknown db type, exiting!")
+		rater.Logger.Crit("Unknown db type, exiting!")
 		exitChan <- true
 	}
 
 	if err != nil {
-		timespans.Logger.Crit(fmt.Sprintf("Could not connect to db: %v, exiting!", err))
+		rater.Logger.Crit(fmt.Sprintf("Could not connect to db: %v, exiting!", err))
 		exitChan <- true
 	}
 	return
@@ -341,25 +341,25 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter tim
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("CGRateS " + timespans.VERSION)
+		fmt.Println("CGRateS " + rater.VERSION)
 		return
 	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	c, err := conf.ReadConfigFile(*config)
 	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Could not open the configuration file: %v", err))
+		rater.Logger.Err(fmt.Sprintf("Could not open the configuration file: %v", err))
 		return
 	}
 	readConfig(c)
 	// some consitency checks
 	go checkConfigSanity()
 
-	var getter, loggerDb timespans.DataStorage
+	var getter, loggerDb rater.DataStorage
 	getter, err = configureDatabase(data_db_type, data_db_host, data_db_port, data_db_name, data_db_user, data_db_pass)
 
 	if err == nil {
 		defer getter.Close()
-		timespans.SetDataStorage(getter)
+		rater.SetDataStorage(getter)
 	}
 
 	if log_db_type == SAME {
@@ -369,12 +369,12 @@ func main() {
 	}
 	if err == nil {
 		defer loggerDb.Close()
-		timespans.SetStorageLogger(loggerDb)
+		rater.SetStorageLogger(loggerDb)
 	}
 
 	if sm_debit_period > 0 {
 		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period)); err == nil {
-			timespans.SetDebitPeriod(dp)
+			rater.SetDebitPeriod(dp)
 		}
 	}
 
@@ -382,24 +382,24 @@ func main() {
 		go registerToBalancer()
 		go stopRaterSingnalHandler()
 	}
-	responder := &timespans.Responder{ExitChan: exitChan}
+	responder := &rater.Responder{ExitChan: exitChan}
 	if rater_enabled && !balancer_enabled && rater_listen != INTERNAL {
-		timespans.Logger.Info(fmt.Sprintf("Starting CGRateS rater on %s.", rater_listen))
+		rater.Logger.Info(fmt.Sprintf("Starting CGRateS rater on %s.", rater_listen))
 		go listenToRPCRequests(responder, rater_listen, rater_rpc_encoding)
 	}
 	if balancer_enabled {
-		timespans.Logger.Info(fmt.Sprintf("Starting CGRateS balancer on %s.", balancer_listen))
+		rater.Logger.Info(fmt.Sprintf("Starting CGRateS balancer on %s.", balancer_listen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
 		go listenToRPCRequests(responder, balancer_listen, balancer_rpc_encoding)
 		if rater_enabled {
-			timespans.Logger.Info("Starting internal rater.")
-			bal.AddClient("local", new(timespans.ResponderWorker))
+			rater.Logger.Info("Starting internal rater.")
+			bal.AddClient("local", new(rater.ResponderWorker))
 		}
 	}
 
 	if scheduler_enabled {
-		timespans.Logger.Info("Starting CGRateS scheduler.")
+		rater.Logger.Info("Starting CGRateS scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
 			go reloadSchedulerSingnalHandler(sched, getter)
@@ -409,12 +409,12 @@ func main() {
 	}
 
 	if sm_enabled {
-		timespans.Logger.Info("Starting CGRateS session manager.")
+		rater.Logger.Info("Starting CGRateS session manager.")
 		go startSessionManager(responder, loggerDb)
 	}
 
 	if mediator_enabled {
-		timespans.Logger.Info("Starting CGRateS mediator.")
+		rater.Logger.Info("Starting CGRateS mediator.")
 		go startMediator(responder, loggerDb)
 	}
 

@@ -20,26 +20,26 @@ package sessionmanager
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/rater"
 	"strings"
 	"time"
 )
 
 // Sample SessionDelegate calling the timespans methods through the RPC interface
 type SessionDelegate struct {
-	Connector   timespans.Connector
+	Connector   rater.Connector
 	DebitPeriod time.Duration
 }
 
 func (rsd *SessionDelegate) OnHeartBeat(ev Event) {
-	timespans.Logger.Info("freeswitch ♥")
+	rater.Logger.Info("freeswitch ♥")
 }
 
 func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
-	timespans.Logger.Info("freeswitch park")
+	rater.Logger.Info("freeswitch park")
 	startTime, err := ev.GetStartTime(PARK_TIME)
 	if err != nil {
-		timespans.Logger.Err("Error parsing answer event start time, using time.Now!")
+		rater.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
@@ -48,10 +48,10 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 	}
 	if ev.MissingParameter() {
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), MISSING_PARAMETER)
-		timespans.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
+		rater.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
 		return
 	}
-	cd := timespans.CallDescriptor{
+	cd := rater.CallDescriptor{
 		Direction:   ev.GetDirection(),
 		Tenant:      ev.GetTenant(),
 		TOR:         ev.GetTOR(),
@@ -63,13 +63,13 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 	var remainingSeconds float64
 	err = rsd.Connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
+		rater.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), SYSTEM_ERROR)
 		return
 	}
-	timespans.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
+	rater.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
 	if remainingSeconds == 0 {
-		timespans.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
+		rater.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
 		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
 		return
 	}
@@ -77,22 +77,22 @@ func (rsd *SessionDelegate) OnChannelPark(ev Event, sm SessionManager) {
 }
 
 func (rsd *SessionDelegate) OnChannelAnswer(ev Event, s *Session) {
-	timespans.Logger.Info("freeswitch answer")
+	rater.Logger.Info("freeswitch answer")
 }
 
 func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	if ev.GetReqType() == REQTYPE_POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
-			timespans.Logger.Crit("Error parsing postpaid call start time from event")
+			rater.Logger.Crit("Error parsing postpaid call start time from event")
 			return
 		}
 		endTime, err := ev.GetEndTime()
 		if err != nil {
-			timespans.Logger.Crit("Error parsing postpaid call start time from event")
+			rater.Logger.Crit("Error parsing postpaid call start time from event")
 			return
 		}
-		cd := timespans.CallDescriptor{
+		cd := rater.CallDescriptor{
 			Direction:   ev.GetDirection(),
 			Tenant:      ev.GetTenant(),
 			TOR:         ev.GetTOR(),
@@ -102,10 +102,10 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 			TimeStart:   startTime,
 			TimeEnd:     endTime,
 		}
-		cc := &timespans.CallCost{}
+		cc := &rater.CallCost{}
 		err = rsd.Connector.Debit(cd, cc)
 		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("Error making the general debit for postpaid call: %v", ev.GetUUID()))
+			rater.Logger.Err(fmt.Sprintf("Error making the general debit for postpaid call: %v", ev.GetUUID()))
 			return
 		}
 		s.CallCosts = append(s.CallCosts, cc)
@@ -122,7 +122,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 	refoundDuration := end.Sub(start).Seconds()
 	cost := 0.0
 	seconds := 0.0
-	timespans.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
+	rater.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
 		tsDuration := ts.GetDuration().Seconds()
@@ -151,7 +151,7 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 		}
 	}
 	if cost > 0 {
-		cd := &timespans.CallDescriptor{
+		cd := &rater.CallDescriptor{
 			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
 			TOR:         lastCC.TOR,
@@ -163,11 +163,11 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 		var response float64
 		err := rsd.Connector.DebitCents(*cd, &response)
 		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
+			rater.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 		}
 	}
 	if seconds > 0 {
-		cd := &timespans.CallDescriptor{
+		cd := &rater.CallDescriptor{
 			Direction:   lastCC.Direction,
 			TOR:         lastCC.TOR,
 			Tenant:      lastCC.Tenant,
@@ -179,30 +179,30 @@ func (rsd *SessionDelegate) OnChannelHangupComplete(ev Event, s *Session) {
 		var response float64
 		err := rsd.Connector.DebitSeconds(*cd, &response)
 		if err != nil {
-			timespans.Logger.Err(fmt.Sprintf("Debit seconds failed: %v", err))
+			rater.Logger.Err(fmt.Sprintf("Debit seconds failed: %v", err))
 		}
 	}
 	lastCC.Cost -= cost
-	timespans.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
+	rater.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
 }
 
-func (rsd *SessionDelegate) LoopAction(s *Session, cd *timespans.CallDescriptor) {
-	cc := &timespans.CallCost{}
+func (rsd *SessionDelegate) LoopAction(s *Session, cd *rater.CallDescriptor) {
+	cc := &rater.CallCost{}
 	cd.Amount = rsd.DebitPeriod.Seconds()
 	err := rsd.Connector.MaxDebit(*cd, cc)
 	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
+		rater.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 		// disconnect session
 		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
 	}
 	nbts := len(cc.Timespans)
 	remainingSeconds := 0.0
-	timespans.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
+	rater.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
 	if nbts > 0 {
 		remainingSeconds = cc.Timespans[nbts-1].TimeEnd.Sub(cc.Timespans[0].TimeStart).Seconds()
 	}
 	if remainingSeconds == 0 || err != nil {
-		timespans.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
+		rater.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		s.Disconnect()
 		return
 	}

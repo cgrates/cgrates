@@ -20,7 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/rater"
 	"strings"
 	"time"
 )
@@ -29,10 +29,10 @@ import (
 // actions and a channel to signal end of the debit loop.
 type Session struct {
 	uuid           string
-	callDescriptor *timespans.CallDescriptor
+	callDescriptor *rater.CallDescriptor
 	sessionManager SessionManager
 	stopDebit      chan bool
-	CallCosts      []*timespans.CallCost
+	CallCosts      []*rater.CallCost
 }
 
 // Creates a new session and starts the debit loop
@@ -43,11 +43,11 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	}
 	startTime, err := ev.GetStartTime(START_TIME)
 	if err != nil {
-		timespans.Logger.Err("Error parsing answer event start time, using time.Now!")
+		rater.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
 
-	cd := &timespans.CallDescriptor{
+	cd := &rater.CallDescriptor{
 		Direction:   ev.GetDirection(),
 		Tenant:      ev.GetTenant(),
 		TOR:         ev.GetTOR(),
@@ -96,7 +96,7 @@ func (s *Session) getSessionDurationFrom(now time.Time) (d time.Duration) {
 	seconds := now.Sub(s.callDescriptor.TimeStart).Seconds()
 	d, err := time.ParseDuration(fmt.Sprintf("%ds", int(seconds)))
 	if err != nil {
-		timespans.Logger.Err(fmt.Sprintf("Cannot parse session duration %v", seconds))
+		rater.Logger.Err(fmt.Sprintf("Cannot parse session duration %v", seconds))
 	}
 	return
 }
@@ -136,8 +136,8 @@ func (s *Session) SaveOperations() {
 			firstCC.Merge(cc)
 		}
 		if s.sessionManager.GetDbLogger() != nil {
-			s.sessionManager.GetDbLogger().LogCallCost(s.uuid, timespans.SESSION_MANAGER_SOURCE, firstCC)
+			s.sessionManager.GetDbLogger().LogCallCost(s.uuid, rater.SESSION_MANAGER_SOURCE, firstCC)
 		}
-		timespans.Logger.Debug(firstCC.String())
+		rater.Logger.Debug(firstCC.String())
 	}()
 }

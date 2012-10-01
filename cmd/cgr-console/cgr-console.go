@@ -22,7 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/console"
-	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/rater"
 	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -38,7 +38,7 @@ var (
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("CGRateS " + timespans.VERSION)
+		fmt.Println("CGRateS " + rater.VERSION)
 		return
 	}
 	var client *rpc.Client

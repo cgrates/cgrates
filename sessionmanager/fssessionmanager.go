@@ -22,7 +22,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/rater"
 	"net"
 	"time"
 )
@@ -34,12 +34,12 @@ type FSSessionManager struct {
 	buf             *bufio.Reader
 	sessions        []*Session
 	sessionDelegate *SessionDelegate
-	loggerDB        timespans.DataStorage
+	loggerDB        rater.DataStorage
 	address, pass   string
 	delayFunc       func() int
 }
 
-func NewFSSessionManager(storage timespans.DataStorage) *FSSessionManager {
+func NewFSSessionManager(storage rater.DataStorage) *FSSessionManager {
 	return &FSSessionManager{loggerDB: storage}
 }
 
@@ -47,7 +47,7 @@ func NewFSSessionManager(storage timespans.DataStorage) *FSSessionManager {
 // listening for events in json format.
 func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) error {
 	if ed == nil {
-		timespans.Logger.Crit("Please provide a non nil SessionDelegate")
+		rater.Logger.Crit("Please provide a non nil SessionDelegate")
 		return errors.New("nil session delegate")
 	}
 	sm.sessionDelegate = ed
@@ -59,7 +59,7 @@ func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) e
 	}
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		timespans.Logger.Warning("Could not connect to freeswitch server!")
+		rater.Logger.Warning("Could not connect to freeswitch server!")
 		return err
 	}
 	sm.conn = conn
@@ -88,13 +88,13 @@ func (sm *FSSessionManager) Connect(ed *SessionDelegate, address, pass string) e
 func (sm *FSSessionManager) readNextEvent(exitChan chan bool) (ev Event) {
 	body, err := sm.buf.ReadString('}')
 	if err != nil {
-		timespans.Logger.Warning("Could not read from freeswitch connection!")
+		rater.Logger.Warning("Could not read from freeswitch connection!")
 		// wait until a sec
 		time.Sleep(time.Duration(sm.delayFunc()) * time.Second)
 		// try to reconnect
 		err = sm.Connect(sm.sessionDelegate, sm.address, sm.pass)
 		if err == nil {
-			timespans.Logger.Info("Successfuly reconnected to freeswitch! ")
+			rater.Logger.Info("Successfuly reconnected to freeswitch! ")
 			exitChan <- true
 		}
 	}
@@ -142,7 +142,7 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnHeartBeat(ev)
 	} else {
-		timespans.Logger.Info("♥")
+		rater.Logger.Info("♥")
 	}
 }
 
@@ -151,7 +151,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	if sm.sessionDelegate != nil {
 		sm.sessionDelegate.OnChannelPark(ev, sm)
 	} else {
-		timespans.Logger.Info("park")
+		rater.Logger.Info("park")
 	}
 }
 
@@ -164,7 +164,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 			sm.sessionDelegate.OnChannelAnswer(ev, s)
 		}
 	} else {
-		timespans.Logger.Info("answer")
+		rater.Logger.Info("answer")
 	}
 }
 
@@ -175,7 +175,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		sm.sessionDelegate.OnChannelHangupComplete(ev, s)
 		s.SaveOperations()
 	} else {
-		timespans.Logger.Info("HangupComplete")
+		rater.Logger.Info("HangupComplete")
 	}
 	if s != nil {
 
@@ -193,7 +193,7 @@ func (sm *FSSessionManager) GetSessionDelegate() *SessionDelegate {
 	return sm.sessionDelegate
 }
 
-func (sm *FSSessionManager) GetDbLogger() timespans.DataStorage {
+func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 	return sm.loggerDB
 }
 

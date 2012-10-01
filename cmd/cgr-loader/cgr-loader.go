@@ -21,7 +21,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/rater"
 	"log"
 	"path"
 	"regexp"
@@ -68,7 +68,7 @@ type validator struct {
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("CGRateS " + timespans.VERSION)
+		fmt.Println("CGRateS " + rater.VERSION)
 		return
 	}
 	dataFilesValidators := []*validator{
@@ -101,14 +101,14 @@ func main() {
 			"Tenant[0-9A-Za-z_],Account[0-9A-Za-z_:.],Direction OUT|IN,ActionTimingsTag[0-9A-Za-z_],ActionTriggersTag[0-9A-Za-z_]"},
 	}
 	for _, v := range dataFilesValidators {
-		err := timespans.ValidateCSVData(path.Join(*dataPath, v.fn), v.re)
+		err := rater.ValidateCSVData(path.Join(*dataPath, v.fn), v.re)
 		if err != nil {
 			log.Fatal(err, "\n\t", v.message)
 		}
 	}
 	//sep = []rune(*separator)[0]
 	sep = ','
-	csvr := timespans.NewFileCSVReader()
+	csvr := rater.NewFileCSVReader()
 	err := csvr.LoadDestinations(path.Join(*dataPath, destinationsFn), sep)
 	if err != nil {
 		log.Fatal(err)
@@ -145,7 +145,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var getter timespans.DataStorage
+	var getter rater.DataStorage
 	switch *db_type {
 	case REDIS:
 		db_nb, err := strconv.Atoi(*db_name)
@@ -155,11 +155,11 @@ func main() {
 		if *db_port != "" {
 			*db_host += ":" + *db_port
 		}
-		getter, err = timespans.NewRedisStorage(*db_host, db_nb, *db_pass)
+		getter, err = rater.NewRedisStorage(*db_host, db_nb, *db_pass)
 	case MONGO:
-		getter, err = timespans.NewMongoStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
+		getter, err = rater.NewMongoStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
 	case POSTGRES:
-		getter, err = timespans.NewPostgresStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
+		getter, err = rater.NewPostgresStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
 	default:
 		log.Fatal("Unknown data db type, exiting!")
 	}

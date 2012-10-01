@@ -24,7 +24,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/inotify"
-	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/rater"
 	"os"
 	"path"
 	"strconv"
@@ -51,8 +51,8 @@ func (mfi *mediatorFieldIdxs) Load(idxs string) error {
 }
 
 type Mediator struct {
-	connector     timespans.Connector
-	loggerDb      timespans.DataStorage
+	connector     rater.Connector
+	loggerDb      rater.DataStorage
 	skipDb        bool
 	outputDir     string
 	pseudoPrepaid bool
@@ -68,8 +68,8 @@ type Mediator struct {
 }
 
 // Creates a new mediator object parsing the indexses
-func NewMediator(connector timespans.Connector,
-	loggerDb timespans.DataStorage,
+func NewMediator(connector rater.Connector,
+	loggerDb rater.DataStorage,
 	skipDb bool,
 	outputDir string,
 	pseudoPrepaid bool,
@@ -120,19 +120,19 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	if err != nil {
 		return
 	}
-	timespans.Logger.Info(fmt.Sprintf("Monitoring %v for file moves.", cdrPath))
+	rater.Logger.Info(fmt.Sprintf("Monitoring %v for file moves.", cdrPath))
 	for {
 		select {
 		case ev := <-watcher.Event:
 			if ev.Mask&inotify.IN_MOVED_TO != 0 {
-				timespans.Logger.Info(fmt.Sprintf("Started to parse %v", ev.Name))
+				rater.Logger.Info(fmt.Sprintf("Started to parse %v", ev.Name))
 				err = m.parseCSV(ev.Name)
 				if err != nil {
 					return err
 				}
 			}
 		case err := <-watcher.Error:
-			timespans.Logger.Err(fmt.Sprintf("Inotify error: %v", err))
+			rater.Logger.Err(fmt.Sprintf("Inotify error: %v", err))
 		}
 	}
 	return
@@ -144,7 +144,7 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 	file, err := os.Open(cdrfn)
 	defer file.Close()
 	if err != nil {
-		timespans.Logger.Crit(err.Error())
+		rater.Logger.Crit(err.Error())
 		os.Exit(1)
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
@@ -160,7 +160,7 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
 		//t, _ := time.Parse("2012-05-21 17:48:20", record[5])		
-		var cc *timespans.CallCost
+		var cc *rater.CallCost
 		for runIdx := range m.subjectIndexs { // Query costs for every run index given by subject
 			if runIdx == 0 && !m.skipDb { // The first index is matching the session manager one
 				cc, err = m.getCostsFromDB(record, runIdx)
@@ -172,10 +172,10 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 			}
 			cost := "-1"
 			if err != nil {
-				timespans.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record with uuid:%s and subject:%s - %s", record[m.uuidIndexs[runIdx]], record[m.subjectIndexs[runIdx]], err.Error()))
+				rater.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record with uuid:%s and subject:%s - %s", record[m.uuidIndexs[runIdx]], record[m.subjectIndexs[runIdx]], err.Error()))
 			} else {
 				cost = strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)
-				timespans.Logger.Debug(fmt.Sprintf("Calculated for uuid:%s, subject:%s cost: %v", record[m.uuidIndexs[runIdx]], record[m.subjectIndexs[runIdx]], cost))
+				rater.Logger.Debug(fmt.Sprintf("Calculated for uuid:%s, subject:%s cost: %v", record[m.uuidIndexs[runIdx]], record[m.subjectIndexs[runIdx]], cost))
 			}
 			record = append(record, cost)
 		}
@@ -186,20 +186,20 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 }
 
 // Retrive the cost from logging database
-func (m *Mediator) getCostsFromDB(record []string, runIdx int) (cc *timespans.CallCost, err error) {
+func (m *Mediator) getCostsFromDB(record []string, runIdx int) (cc *rater.CallCost, err error) {
 	searchedUUID := record[m.uuidIndexs[runIdx]]
-	cc, err = m.loggerDb.GetCallCostLog(searchedUUID, timespans.SESSION_MANAGER_SOURCE)
+	cc, err = m.loggerDb.GetCallCostLog(searchedUUID, rater.SESSION_MANAGER_SOURCE)
 	return
 }
 
 // Retrive the cost from rater
-func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *timespans.CallCost, err error) {
+func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *rater.CallCost, err error) {
 	d, err := time.ParseDuration(record[m.durationIndexs[runIdx]] + "s")
 	if err != nil {
 		return
 	}
 
-	cc = &timespans.CallCost{}
+	cc = &rater.CallCost{}
 	if d.Seconds() == 0 { // failed call,  returning empty callcost, no error
 		return cc, nil
 	}
@@ -207,7 +207,7 @@ func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *timespans
 	if err != nil {
 		return
 	}
-	cd := timespans.CallDescriptor{
+	cd := rater.CallDescriptor{
 		Direction:   "OUT", //record[m.directionIndexs[runIdx]] TODO: fix me
 		Tenant:      record[m.tenantIndexs[runIdx]],
 		TOR:         record[m.torIndexs[runIdx]],
@@ -222,9 +222,9 @@ func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *timespans
 		err = m.connector.GetCost(cd, cc)
 	}
 	if err != nil {
-		m.loggerDb.LogError(record[m.uuidIndexs[runIdx]], timespans.MEDIATOR_SOURCE, err.Error())
+		m.loggerDb.LogError(record[m.uuidIndexs[runIdx]], rater.MEDIATOR_SOURCE, err.Error())
 	} else {
-		m.loggerDb.LogCallCost(record[m.uuidIndexs[runIdx]], timespans.MEDIATOR_SOURCE, cc)
+		m.loggerDb.LogCallCost(record[m.uuidIndexs[runIdx]], rater.MEDIATOR_SOURCE, cc)
 	}
 	return
 }

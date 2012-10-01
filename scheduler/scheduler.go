@@ -20,13 +20,13 @@ package scheduler
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/timespans"
+	"github.com/cgrates/cgrates/rater"
 	"sort"
 	"time"
 )
 
 type Scheduler struct {
-	queue       timespans.ActionTimingPriotityList
+	queue       rater.ActionTimingPriotityList
 	timer       *time.Timer
 	restartLoop chan bool
 }
@@ -43,19 +43,19 @@ func (s *Scheduler) Loop() {
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
-			timespans.Logger.Debug(fmt.Sprintf("%v - %v", a0.Tag, a0.Timing))
+			rater.Logger.Debug(fmt.Sprintf("%v - %v", a0.Tag, a0.Timing))
 			go a0.Execute()
 			s.queue = append(s.queue, a0)
 			s.queue = s.queue[1:]
 			sort.Sort(s.queue)
 		} else {
 			d := a0.GetNextStartTime().Sub(now)
-			timespans.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
+			rater.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				timespans.Logger.Info(fmt.Sprintf("Time for action on %v", s.queue[0]))
+				rater.Logger.Info(fmt.Sprintf("Time for action on %v", s.queue[0]))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
@@ -63,22 +63,22 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) LoadActionTimings(storage timespans.DataStorage) {
+func (s *Scheduler) LoadActionTimings(storage rater.DataStorage) {
 	actionTimings, err := storage.GetAllActionTimings()
 	if err != nil {
-		timespans.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
+		rater.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
 	}
 	// recreate the queue
-	s.queue = timespans.ActionTimingPriotityList{}
+	s.queue = rater.ActionTimingPriotityList{}
 	for key, ats := range actionTimings {
 		toBeSaved := false
 		isAsap := false
-		newAts := make([]*timespans.ActionTiming, 0)
+		newAts := make([]*rater.ActionTiming, 0)
 		for _, at := range ats {
 			isAsap = at.CheckForASAP()
 			toBeSaved = toBeSaved || isAsap
 			if at.IsOneTimeRun() {
-				timespans.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
+				rater.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
 				go at.Execute()
 				// do not append it to the newAts list to be saved
 			} else {
