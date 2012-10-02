@@ -4,34 +4,18 @@ package console
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/rater"
 )
 
 func init() {
 	commands["get_balance"] = &CmdGetBalance{}
 }
 
-// Data being sent to the rpc responder
-type ArgsGetBalance struct {
-	Tenant    string
-	User      string
-	Direction string
-	BalanceId string
-}
-
-// Received back from query
-type ReplyGetBalance struct {
-	Tenant    string
-	User      string
-	Direction string
-	BalanceId string
-	Balance   float64
-}
-
 // Commander implementation
 type CmdGetBalance struct {
 	rpcMethod string
-	rpcParams *ArgsGetBalance
-	rpcResult *ReplyGetBalance
+	rpcParams *rater.CallDescriptor
+	rpcResult *rater.CallCost
 }
 
 // name should be exec's name
@@ -41,8 +25,8 @@ func (self *CmdGetBalance) Usage(name string) string {
 
 // set param defaults
 func (self *CmdGetBalance) defaults() error {
-	self.rpcMethod = "Responder.GetBalance"
-	self.rpcParams = &ArgsGetBalance{BalanceId: "MONETARYOUT", Direction: "OUT"}
+	self.rpcMethod = "Responder.GetMonetary"
+	self.rpcParams = &rater.CallDescriptor{Direction: "OUT"}
 	return nil
 }
 
@@ -54,9 +38,20 @@ func (self *CmdGetBalance) FromArgs(args []string) error {
 	// Args look OK, set defaults before going further	
 	self.defaults()
 	self.rpcParams.Tenant = args[2]
-	self.rpcParams.User = args[3]
+	self.rpcParams.Account = args[3]
 	if len(args) > 4 {
-		self.rpcParams.BalanceId = args[4]
+		switch args[4] {
+		case "MONETARY":
+			self.rpcMethod = "Responder.GetMonetary"
+		case "SMS":
+			self.rpcMethod = "Responder.GetSMS"
+		case "INETRNET":
+			self.rpcMethod = "Responder.GetInternet"
+		case "INTERNET_TIME":
+			self.rpcMethod = "Responder.GetInternetTime"
+		case "MINUTES":
+			self.rpcMethod = "Responder.GetMonetary"
+		}
 	}
 	if len(args) > 5 {
 		self.rpcParams.Direction = args[5]
@@ -73,6 +68,6 @@ func (self *CmdGetBalance) RpcParams() interface{} {
 }
 
 func (self *CmdGetBalance) RpcResult() interface{} {
-	self.rpcResult = &ReplyGetBalance{}
+	self.rpcResult = &rater.CallCost{}
 	return self.rpcResult
 }

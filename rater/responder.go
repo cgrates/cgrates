@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/balancer2go"
-	"github.com/cgrates/cgrates/console"
 	"net/rpc"
 	"reflect"
 	"runtime"
@@ -176,25 +175,49 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	return
 }
 
+func (rs *Responder) GetMonetary(arg CallDescriptor, reply *CallCost) (err error) {
+	err = rs.getBalance(&arg, CREDIT, reply)
+	return err
+}
+
+func (rs *Responder) GetSMS(arg CallDescriptor, reply *CallCost) (err error) {
+	err = rs.getBalance(&arg, SMS, reply)
+	return err
+}
+
+func (rs *Responder) GetInternet(arg CallDescriptor, reply *CallCost) (err error) {
+	err = rs.getBalance(&arg, TRAFFIC, reply)
+	return err
+}
+
+func (rs *Responder) GetInternetTime(arg CallDescriptor, reply *CallCost) (err error) {
+	err = rs.getBalance(&arg, TRAFFIC_TIME, reply)
+	return err
+}
+
+func (rs *Responder) GetMinutes(arg CallDescriptor, reply *CallCost) (err error) {
+	err = rs.getBalance(&arg, MINUTES, reply)
+	return err
+}
+
 // Get balance
-func (rs *Responder) GetBalance(arg console.ArgsGetBalance, reply *console.ReplyGetBalance) (err error) {
+func (rs *Responder) getBalance(arg *CallDescriptor, balanceId string, reply *CallCost) (err error) {
 	if rs.Bal != nil {
-		return fmt.Errorf("No balancer supported for this command right now")
+		return errors.New("No balancer supported for this command right now")
 	}
-	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.User
+	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.Account
 	userBalance, err := storageGetter.GetUserBalance(ubKey)
 	if err != nil {
 		return err
 	}
-	if balance, balExists := userBalance.BalanceMap[arg.BalanceId]; !balExists {
+	if balance, balExists := userBalance.BalanceMap[balanceId+arg.Direction]; !balExists {
 		// No match, balanceId not found
-		return fmt.Errorf("-BALANCE_NOT_FOUND")
+		return errors.New("-BALANCE_NOT_FOUND")
 	} else {
 		reply.Tenant = arg.Tenant
-		reply.User = arg.User
+		reply.Account = arg.Account
 		reply.Direction = arg.Direction
-		reply.BalanceId = arg.BalanceId
-		reply.Balance = balance
+		reply.Cost = balance
 	}
 	return nil
 }
