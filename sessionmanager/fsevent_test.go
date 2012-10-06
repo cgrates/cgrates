@@ -45,9 +45,9 @@ func TestEventCreation(t *testing.T) {
 	"Idle-CPU":	"100.000000"`
 	ev := new(FSEvent).New(body)
 	if ev.GetName() != "HEARTBEAT" {
-		t.Error("Event not parsed correctly!")
+		t.Error("Event not parsed correctly: ", ev)
 	}
-	if len(ev.(*FSEvent).Fields) != 20 {
+	if len(ev.(*FSEvent).fields) != 20 {
 		t.Error("Incorrect number of event fields!")
 	}
 }

@@ -14,7 +14,34 @@ import (
 	"time"
 )
 
-var fs *fSock // Used to share FS connection via package globals
+var fs *fSock // Used to share FS connection via package globals (singleton)
+
+// Connection to FreeSWITCH Socket
+type fSock struct {
+	conn   net.Conn
+	buffer *bufio.Reader
+	fsaddress,
+	fspaswd string
+	eventHandlers map[string]func(string)
+	eventFilters  map[string]string
+	apiChan       chan string
+	reconnects    int
+	delayFunc     func() int
+}
+
+// Connects to FS and starts buffering input
+func New(fsaddr, fspaswd string, reconnects int, eventHandlers map[string]func(string)) error {
+	eventFilters := make(map[string]string)
+	fs = &fSock{fsaddress: fsaddr, fspaswd: fspaswd, eventHandlers: eventHandlers, eventFilters: eventFilters}
+	fs.apiChan = make(chan string) // Init apichan so we can use it to pass api replies
+	fs.reconnects = reconnects
+	fs.delayFunc = fib()
+	errConn := Connect(reconnects)
+	if errConn != nil {
+		return errConn
+	}
+	return nil
+}
 
 // Extracts value of a header from anywhere in content string
 func headerVal(hdrs, hdr string) string {
@@ -49,7 +76,7 @@ func isSliceMember(ss []string, s string) bool {
 }
 
 // Convert fseventStr into fseventMap
-func fsEventStrToMap(fsevstr string, headers []string) map[string]string {
+func FSEventStrToMap(fsevstr string, headers []string) map[string]string {
 	fsevent := make(map[string]string)
 	filtered := false
 	if len(headers) != 0 {
@@ -64,29 +91,6 @@ func fsEventStrToMap(fsevstr string, headers []string) map[string]string {
 		}
 	}
 	return fsevent
-}
-
-// Connects to FS and starts buffering input
-func NewFSock(fsaddr, fspaswd string, reconnects int, eventHandlers map[string]func(string)) error {
-	eventFilters := make(map[string]string)
-	fs = &fSock{fsaddress: fsaddr, fspaswd: fspaswd, eventHandlers: eventHandlers, eventFilters: eventFilters}
-	fs.apiChan = make(chan string) // Init apichan so we can use it to pass api replies
-	errConn := Connect(reconnects)
-	if errConn != nil {
-		return errConn
-	}
-	return nil
-}
-
-// Connection to FreeSWITCH Socket
-type fSock struct {
-	conn   net.Conn
-	buffer *bufio.Reader
-	fsaddress,
-	fspaswd string
-	eventHandlers map[string]func(string)
-	eventFilters  map[string]string
-	apiChan       chan string
 }
 
 // Reads headers until delimiter reached
@@ -237,7 +241,7 @@ func Connect(reconnects int) error {
 			}
 			return nil
 		}
-		time.Sleep(time.Duration(i) * time.Second)
+		time.Sleep(time.Duration(fs.delayFunc()) * time.Second)
 	}
 	return conErr
 }
@@ -263,7 +267,7 @@ func ReadEvents() {
 		hdr, body, err := readEvent()
 		if err != nil {
 			fmt.Println("WARNING: got error while reading events: ", err.Error())
-			connErr := Connect(3)
+			connErr := Connect(fs.reconnects)
 			if connErr != nil {
 				fmt.Println("FSock reader - cannot connect to FS")
 				return
@@ -274,7 +278,7 @@ func ReadEvents() {
 			fs.apiChan <- hdr + body
 		}
 		if body != "" { // We got a body, could be event, try dispatching it
-			DispatchEvent(body)
+			dispatchEvent(body)
 		}
 	}
 	fmt.Println("Exiting ReadEvents")
@@ -282,9 +286,18 @@ func ReadEvents() {
 }
 
 // Dispatch events to handlers in async mode
-func DispatchEvent(event string) {
+func dispatchEvent(event string) {
 	eventName := headerVal(event, "Event-Name")
 	if handlerFunc, hasHandler := fs.eventHandlers[eventName]; hasHandler {
 		go handlerFunc(event)
+	}
+}
+
+// successive Fibonacci numbers.
+func fib() func() int {
+	a, b := 0, 1
+	return func() int {
+		a, b = b, a+b
+		return a
 	}
 }

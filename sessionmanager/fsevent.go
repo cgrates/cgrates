@@ -20,8 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
-	"regexp"
+	"github.com/cgrates/cgrates/fsock"
 	"strconv"
 	"strings"
 	"time"
@@ -29,12 +28,8 @@ import (
 
 // Event type holding a mapping of all event's proprieties
 type FSEvent struct {
-	Fields map[string]string
+	fields map[string]string
 }
-
-var (
-	eventBodyRE = regexp.MustCompile(`"(.*?)":\s+"(.*?)"`) // for parsing the proprieties
-)
 
 const (
 	// Freswitch event proprities names
@@ -67,7 +62,7 @@ const (
 
 // Nice printing for the event object.
 func (fsev *FSEvent) String() (result string) {
-	for k, v := range fsev.Fields {
+	for k, v := range fsev.fields {
 		result += fmt.Sprintf("%s = %s\n", k, v)
 	}
 	result += "=============================================================="
@@ -77,51 +72,44 @@ func (fsev *FSEvent) String() (result string) {
 // Loads the new event data from a body of text containing the key value proprieties.
 // It stores the parsed proprieties in the internal map.
 func (fsev *FSEvent) New(body string) Event {
-	fsev.Fields = make(map[string]string)
-	for _, fields := range eventBodyRE.FindAllStringSubmatch(body, -1) {
-		if len(fields) == 3 {
-			fsev.Fields[fields[1]] = fields[2]
-		} else {
-			rater.Logger.Err(fmt.Sprintf("malformed event field: %v", fields))
-		}
-	}
+	fsev.fields = fsock.FSEventStrToMap(body, nil)
 	return fsev
 }
 
 func (fsev *FSEvent) GetName() string {
-	return fsev.Fields[NAME]
+	return fsev.fields[NAME]
 }
 func (fsev *FSEvent) GetDirection() string {
 	//TODO: temporary hack
 	return "OUT"
-	//return fsev.Fields[DIRECTION]
+	//return fsev.fields[DIRECTION]
 }
 func (fsev *FSEvent) GetOrigId() string {
-	return fsev.Fields[ORIG_ID]
+	return fsev.fields[ORIG_ID]
 }
 func (fsev *FSEvent) GetSubject() string {
-	return fsev.Fields[SUBJECT]
+	return fsev.fields[SUBJECT]
 }
 func (fsev *FSEvent) GetAccount() string {
-	return fsev.Fields[ACCOUNT]
+	return fsev.fields[ACCOUNT]
 }
 func (fsev *FSEvent) GetDestination() string {
-	return fsev.Fields[DESTINATION]
+	return fsev.fields[DESTINATION]
 }
 func (fsev *FSEvent) GetTOR() string {
-	return fsev.Fields[TOR]
+	return fsev.fields[TOR]
 }
 func (fsev *FSEvent) GetUUID() string {
-	return fsev.Fields[UUID]
+	return fsev.fields[UUID]
 }
 func (fsev *FSEvent) GetTenant() string {
-	return fsev.Fields[CSTMID]
+	return fsev.fields[CSTMID]
 }
 func (fsev *FSEvent) GetCallDestNb() string {
-	return fsev.Fields[CALL_DEST_NB]
+	return fsev.fields[CALL_DEST_NB]
 }
 func (fsev *FSEvent) GetReqType() string {
-	return fsev.Fields[REQTYPE]
+	return fsev.fields[REQTYPE]
 }
 func (fsev *FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection()) == "" ||
@@ -135,13 +123,13 @@ func (fsev *FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetCallDestNb()) == ""
 }
 func (fsev *FSEvent) GetStartTime(field string) (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev.Fields[field], 0, 64)
+	st, err := strconv.ParseInt(fsev.fields[field], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
 
 func (fsev *FSEvent) GetEndTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev.Fields[END_TIME], 0, 64)
+	st, err := strconv.ParseInt(fsev.fields[END_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }

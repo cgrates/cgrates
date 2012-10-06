@@ -37,86 +37,47 @@ type FSSessionManager struct {
 	connector   rater.Connector
 	debitPeriod time.Duration
 	loggerDB    rater.DataStorage
-	delayFunc   func() int
 }
 
 func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, debitPeriod time.Duration) *FSSessionManager {
-	return &FSSessionManager{loggerDB: storage}
+	return &FSSessionManager{loggerDB: storage, connector: connector, debitPeriod: debitPeriod}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events in json format.
-func (sm *FSSessionManager) Connect(address, pass string) error {
-	sm.address = address
-	sm.pass = pass
-	if sm.conn != nil {
-		// in case it is a reconnect
-		sm.conn.Close()
-	}
-	conn, err := net.Dial("tcp", address)
-	if err != nil {
-		rater.Logger.Warning("Could not connect to freeswitch server!")
-		return err
-	}
-	sm.conn = conn
-	sm.buf = bufio.NewReaderSize(conn, 8192)
-	fmt.Fprint(conn, fmt.Sprintf("auth %s\n\n", pass))
-	fmt.Fprint(conn, "event json  HEARTBEAT CHANNEL_ANSWER CHANNEL_HANGUP_COMPLETE CHANNEL_PARK\n\n")
-	fmt.Fprint(conn, "filter Call-Direction inbound\n\n")
-
-	handlers := make(map[string]func(string))
-	handlers["HEARTBEAT"] = func(s string) { fmt.Println(s) } // Example handler
-	if officer.FS, err = officer.NewFSock(config.FS_SOCK, config.FS_PASWD, 3, handlers); err != nil {
-		fmt.Println("FreeSWITCH error:", err)
-		exitChan <- true
+func (sm *FSSessionManager) Connect(address, pass string) (err error) {
+	if err = fsock.New(address, pass, 3, sm.createHandlers()); err != nil {
+		rater.Logger.Crit(fmt.Sprintf("FreeSWITCH error:", err))
 		return
-	} else if officer.FS.Connected() {
-		fmt.Println("Successfully connected to FreeSWITCH")
+	} else if fsock.Connected() {
+		rater.Logger.Info("Successfully connected to FreeSWITCH")
 	}
-	officer.FS.ReadEvents()
-	exitChan <- true // If we have reached here something went wrong
-
-	go func() {
-		sm.delayFunc = fib()
-		exitChan := make(chan bool)
-		for {
-			select {
-			case <-exitChan:
-				break
-			default:
-				sm.readNextEvent(exitChan)
-			}
-		}
-	}()
+	fsock.ReadEvents()
 	return nil
 }
 
-// Reads from freeswitch server buffer until it encounters a '}',
-// than it creates an event object and calls the appropriate method
-func (sm *FSSessionManager) readNextEvent(exitChan chan bool) (ev Event) {
-	body, err := sm.buf.ReadString('}')
-	if err != nil {
-		rater.Logger.Warning("Could not read from freeswitch connection!")
-		// wait until a sec
-		time.Sleep(time.Duration(sm.delayFunc()) * time.Second)
-		// try to reconnect
-		err = sm.Connect(sm.address, sm.pass)
-		if err == nil {
-			rater.Logger.Info("Successfuly reconnected to freeswitch! ")
-			exitChan <- true
-		}
-	}
-	ev = new(FSEvent).New(body)
-	switch ev.GetName() {
-	case HEARTBEAT:
+func (sm *FSSessionManager) createHandlers() (handlers map[string]func(string)) {
+	handlers = make(map[string]func(string))
+	hb := func(body string) {
+		ev := new(FSEvent).New(body)
 		sm.OnHeartBeat(ev)
-	case PARK:
+	}
+	cp := func(body string) {
+		ev := new(FSEvent).New(body)
 		sm.OnChannelPark(ev)
-	case ANSWER:
+	}
+	ca := func(body string) {
+		ev := new(FSEvent).New(body)
 		sm.OnChannelAnswer(ev)
-	case HANGUP:
+	}
+	ch := func(body string) {
+		ev := new(FSEvent).New(body)
 		sm.OnChannelHangupComplete(ev)
 	}
+	handlers["HEARTBEAT"] = hb
+	handlers["CHANNEL_PARK"] = cp
+	handlers["CHANNEL_ANSWER"] = ca
+	handlers["CHANNEL_HANGUP_COMPLETE "] = ch
 	return
 }
 
@@ -132,15 +93,14 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 
 // Disconnects a session by sending hangup command to freeswitch
 func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
-	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
-	fmt.Fprint(sm.conn, fmt.Sprintf("SendMsg %s\ncall-command: hangup\nhangup-cause: MANAGER_REQUEST\n\n", s.uuid))
+	fsock.Disconnect()
 	s.Close()
 }
 
 // Sends the transfer command to unpark the call to freeswitch
-func (sm *FSSessionManager) UnparkCall(uuid, call_dest_nb, notify string) {
-	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
-	fmt.Fprint(sm.conn, fmt.Sprintf("api uuid_transfer %s %s\n\n", uuid, call_dest_nb))
+func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
+	fsock.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
+	fsock.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
 }
 
 func (sm *FSSessionManager) OnHeartBeat(ev Event) {
@@ -159,7 +119,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		return
 	}
 	if ev.MissingParameter() {
-		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), MISSING_PARAMETER)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNb(), MISSING_PARAMETER)
 		rater.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
 		return
 	}
@@ -176,20 +136,24 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	err = sm.connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
 		rater.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
-		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), SYSTEM_ERROR)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNb(), SYSTEM_ERROR)
 		return
 	}
 	rater.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
 	if remainingSeconds == 0 {
 		rater.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
-		sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
 		return
 	}
-	sm.UnparkCall(ev.GetUUID(), ev.GetCallDestNb(), AUTH_OK)
+	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNb(), AUTH_OK)
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	rater.Logger.Info("freeswitch answer")
+	s := NewSession(ev, sm)
+	if s != nil {
+		sm.sessions = append(sm.sessions, s)
+	}
 }
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
@@ -326,13 +290,4 @@ func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
 }
 func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 	return sm.loggerDB
-}
-
-// successive Fibonacci numbers.
-func fib() func() int {
-	a, b := 0, 1
-	return func() int {
-		a, b = b, a+b
-		return a
-	}
 }

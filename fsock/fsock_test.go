@@ -61,6 +61,33 @@ func TestEvent(t *testing.T) {
 	}
 }
 
+func TestHeaderVal(t *testing.T) {
+	h := headerVal(BODY, "Event-Date-GMT")
+	if h != "Fri,%2005%20Oct%202012%2011%3A41%3A38%20GMT" {
+		t.Error("Header val error: ", h)
+	}
+}
+
+func TestEventToMapUnfiltered(t *testing.T) {
+	fields := FSEventStrToMap(BODY, nil)
+	if fields["Event-Name"] != "RE_SCHEDULE" {
+		t.Error("Event not parsed correctly: ", fields)
+	}
+	if len(fields) != 17 {
+		t.Error("Incorrect number of event fields: ", len(fields))
+	}
+}
+
+func TestEventToMapFiltered(t *testing.T) {
+	fields := FSEventStrToMap(BODY, []string{"Event-Name", "Task-Group", "Event-Date-GMT"})
+	if fields["Event-Date-Local"] != "2012-10-05 13:41:38" {
+		t.Error("Event not parsed correctly: ", fields)
+	}
+	if len(fields) != 14 {
+		t.Error("Incorrect number of event fields: ", len(fields))
+	}
+}
+
 func BenchmarkHeaderVal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		headerVal(HEADER, "Content-Length")
