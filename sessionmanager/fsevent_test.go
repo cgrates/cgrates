@@ -23,31 +23,29 @@ import (
 )
 
 func TestEventCreation(t *testing.T) {
-	body := `"Event-Name":	"HEARTBEAT",
-	"Core-UUID":	"d5abc5b0-95c6-11e1-be05-43c90197c914",
-	"FreeSWITCH-Hostname":	"grace",
-	"FreeSWITCH-Switchname":	"grace",
-	"FreeSWITCH-IPv4":	"172.17.77.126",
-	"FreeSWITCH-IPv6":	"::1",
-	"Event-Date-Local":	"2012-05-04 14:38:23",
-	"Event-Date-GMT":	"Fri, 04 May 2012 11:38:23 GMT",
-	"Event-Date-Timestamp":	"1336131503218867",
-	"Event-Calling-File":	"switch_core.c",
-	"Event-Calling-Function":	"send_heartbeat",
-	"Event-Calling-Line-Number":	"68",
-	"Event-Sequence":	"4171",
-	"Event-Info":	"System Ready",
-	"Up-Time":	"0 years, 0 days, 2 hours, 43 minutes, 21 seconds, 349 milliseconds, 683 microseconds",
-	"Session-Count":	"0",
-	"Max-Sessions":	"1000",
-	"Session-Per-Sec":	"30",
-	"Session-Since-Startup":	"122",
-	"Idle-CPU":	"100.000000"`
+	body := `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+FreeSWITCH-IPv6: %3A%3A1
+Event-Date-Local: 2012-10-05%2013%3A41%3A38
+Event-Date-GMT: Fri,%2005%20Oct%202012%2011%3A41%3A38%20GMT
+Event-Date-Timestamp: 1349437298012866
+Event-Calling-File: switch_scheduler.c
+Event-Calling-Function: switch_scheduler_execute
+Event-Calling-Line-Number: 65
+Event-Sequence: 34263
+Task-ID: 2
+Task-Desc: heartbeat
+Task-Group: core
+Task-Runtime: 1349437318`
 	ev := new(FSEvent).New(body)
-	if ev.GetName() != "HEARTBEAT" {
+	if ev.GetName() != "RE_SCHEDULE" {
 		t.Error("Event not parsed correctly: ", ev)
 	}
-	if len(ev.(*FSEvent).fields) != 20 {
-		t.Error("Incorrect number of event fields!")
+	l := len(ev.(*FSEvent).fields)
+	if l != 17 {
+		t.Error("Incorrect number of event fields: ", l)
 	}
 }

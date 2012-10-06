@@ -80,7 +80,7 @@ func (fsev *FSEvent) GetName() string {
 	return fsev.fields[NAME]
 }
 func (fsev *FSEvent) GetDirection() string {
-	//TODO: temporary hack
+	//TODO: implement direction
 	return "OUT"
 	//return fsev.fields[DIRECTION]
 }
