@@ -38,10 +38,10 @@ func TestHeaders(t *testing.T) {
 	if err != nil {
 		t.Error("Error creating pype!")
 	}
-	fs := FSock{}
+	fs = &fSock{}
 	fs.buffer = bufio.NewReader(r)
 	w.Write([]byte(HEADER))
-	h, err := fs.readHeaders()
+	h, err := readHeaders()
 	if err != nil || h != "Content-Length: 564\nContent-Type: text/event-plain\n" {
 		t.Error("Error parsing headers: ", h, err)
 	}
@@ -52,10 +52,10 @@ func TestEvent(t *testing.T) {
 	if err != nil {
 		t.Error("Error creating pype!")
 	}
-	fs := FSock{}
+	fs = &fSock{}
 	fs.buffer = bufio.NewReader(r)
 	w.Write([]byte(HEADER + BODY))
-	h, b, err := fs.readEvent()
+	h, b, err := readEvent()
 	if err != nil || h != HEADER[:len(HEADER)-1] || len(b) != 564 {
 		t.Error("Error parsing event: ", h, b, err)
 	}
@@ -63,8 +63,7 @@ func TestEvent(t *testing.T) {
 
 func BenchmarkHeaderVal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		HeaderVal(HEADER, "Content-Length")
-		HeaderVal(BODY, "Event-Date-Loca")
+		headerVal(HEADER, "Content-Length")
+		headerVal(BODY, "Event-Date-Loca")
 	}
 }
-

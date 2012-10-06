@@ -14,10 +14,10 @@ import (
 	"time"
 )
 
-var FS *FSock // Used to share FS connection via package globals
+var fs *fSock // Used to share FS connection via package globals
 
 // Extracts value of a header from anywhere in content string
-func HeaderVal(hdrs, hdr string) string {
+func headerVal(hdrs, hdr string) string {
 	var hdrSIdx, hdrEIdx int
 	if hdrSIdx = strings.Index(hdrs, hdr); hdrSIdx == -1 {
 		return ""
@@ -32,7 +32,7 @@ func HeaderVal(hdrs, hdr string) string {
 }
 
 // FS event header values are urlencoded. Use this to decode them. On error, use original value
-func UrlDecode(hdrVal string) string {
+func urlDecode(hdrVal string) string {
 	if valUnescaped, errUnescaping := url.QueryUnescape(hdrVal); errUnescaping == nil {
 		hdrVal = valUnescaped
 	}
@@ -40,7 +40,7 @@ func UrlDecode(hdrVal string) string {
 }
 
 // Binary string search in slice
-func IsSliceMember(ss []string, s string) bool {
+func isSliceMember(ss []string, s string) bool {
 	sort.Strings(ss)
 	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
 		return true
@@ -49,7 +49,7 @@ func IsSliceMember(ss []string, s string) bool {
 }
 
 // Convert fseventStr into fseventMap
-func FSEventStrToMap(fsevstr string, headers []string) map[string]string {
+func fsEventStrToMap(fsevstr string, headers []string) map[string]string {
 	fsevent := make(map[string]string)
 	filtered := false
 	if len(headers) != 0 {
@@ -57,29 +57,29 @@ func FSEventStrToMap(fsevstr string, headers []string) map[string]string {
 	}
 	for _, strLn := range strings.Split(fsevstr, "\n") {
 		if hdrVal := strings.SplitN(strLn, ": ", 2); len(hdrVal) == 2 {
-			if filtered && IsSliceMember(headers, hdrVal[0]) {
+			if filtered && isSliceMember(headers, hdrVal[0]) {
 				continue // Loop again since we only work on filtered fields
 			}
-			fsevent[hdrVal[0]] = UrlDecode(strings.TrimSpace(strings.TrimRight(hdrVal[1], "\n")))
+			fsevent[hdrVal[0]] = urlDecode(strings.TrimSpace(strings.TrimRight(hdrVal[1], "\n")))
 		}
 	}
 	return fsevent
 }
 
 // Connects to FS and starts buffering input
-func NewFSock(fsaddr, fspaswd string, reconnects int, eventHandlers map[string]func(string)) (*FSock, error) {
+func NewFSock(fsaddr, fspaswd string, reconnects int, eventHandlers map[string]func(string)) error {
 	eventFilters := make(map[string]string)
-	fsock := FSock{fsaddress: fsaddr, fspaswd: fspaswd, eventHandlers: eventHandlers, eventFilters: eventFilters}
-	fsock.apiChan = make(chan string) // Init apichan so we can use it to pass api replies
-	errConn := fsock.Connect(reconnects)
+	fs = &fSock{fsaddress: fsaddr, fspaswd: fspaswd, eventHandlers: eventHandlers, eventFilters: eventFilters}
+	fs.apiChan = make(chan string) // Init apichan so we can use it to pass api replies
+	errConn := Connect(reconnects)
 	if errConn != nil {
-		return nil, errConn
+		return errConn
 	}
-	return &fsock, nil
+	return nil
 }
 
 // Connection to FreeSWITCH Socket
-type FSock struct {
+type fSock struct {
 	conn   net.Conn
 	buffer *bufio.Reader
 	fsaddress,
@@ -90,11 +90,11 @@ type FSock struct {
 }
 
 // Reads headers until delimiter reached
-func (self *FSock) readHeaders() (s string, err error) {
+func readHeaders() (s string, err error) {
 	bytesRead := make([]byte, 0)
 	var readLine []byte
 	for {
-		readLine, err = self.buffer.ReadBytes('\n')
+		readLine, err = fs.buffer.ReadBytes('\n')
 		if err != nil {
 			return
 		}
@@ -108,9 +108,9 @@ func (self *FSock) readHeaders() (s string, err error) {
 }
 
 // Reads the body from buffer, ln is given by content-length of headers
-func (self *FSock) readBody(ln int) (s string, err error) {
+func readBody(ln int) (s string, err error) {
 	bytesRead := make([]byte, ln)
-	n, err := self.buffer.Read(bytesRead)
+	n, err := fs.buffer.Read(bytesRead)
 	if err != nil {
 		return
 	}
@@ -122,46 +122,46 @@ func (self *FSock) readBody(ln int) (s string, err error) {
 }
 
 // Event is made out of headers and body (if present)
-func (self *FSock) readEvent() (string, string, error) {
+func readEvent() (string, string, error) {
 	var hdrs, body string
 	var cl int
 	var err error
-	if hdrs, err = self.readHeaders(); err != nil {
+	if hdrs, err = readHeaders(); err != nil {
 		return "", "", err
 	}
 	if !strings.Contains(hdrs, "Content-Length") { //No body
 		return hdrs, "", nil
 	}
-	clStr := HeaderVal(hdrs, "Content-Length")
+	clStr := headerVal(hdrs, "Content-Length")
 	if cl, err = strconv.Atoi(clStr); err != nil {
 		return "", "", errors.New("Cannot extract content length")
 	}
-	if body, err = self.readBody(cl); err != nil {
+	if body, err = readBody(cl); err != nil {
 		return "", "", errors.New("Cannot extract body")
 	}
 	return hdrs, body, nil
 }
 
 // Checks if socket connected. Can be extended with pings
-func (self *FSock) Connected() bool {
-	if self.conn == nil {
+func Connected() bool {
+	if fs.conn == nil {
 		return false
 	}
 	return true
 }
 
 // Disconnects from socket
-func (self *FSock) Disconnect() {
-	if self.conn != nil {
-		self.conn.Close()
+func Disconnect() {
+	if fs.conn != nil {
+		fs.conn.Close()
 	}
 }
 
 // Auth to FS
-func (self *FSock) Auth() error {
-	authCmd := fmt.Sprintf("auth %s\n\n", self.fspaswd)
-	fmt.Fprint(self.conn, authCmd)
-	if rply, err := self.readHeaders(); err != nil || !strings.Contains(rply, "Reply-Text: +OK accepted") {
+func Auth() error {
+	authCmd := fmt.Sprintf("auth %s\n\n", fs.fspaswd)
+	fmt.Fprint(fs.conn, authCmd)
+	if rply, err := readHeaders(); err != nil || !strings.Contains(rply, "Reply-Text: +OK accepted") {
 		fmt.Println("Got reply to auth:", rply)
 		return errors.New("auth error")
 	}
@@ -169,7 +169,7 @@ func (self *FSock) Auth() error {
 }
 
 // Subscribe to events
-func (self *FSock) EventsPlain(events []string) error {
+func EventsPlain(events []string) error {
 	if len(events) == 0 {
 		return nil
 	}
@@ -182,15 +182,15 @@ func (self *FSock) EventsPlain(events []string) error {
 		eventsCmd += " " + ev
 	}
 	eventsCmd += "\n\n"
-	fmt.Fprint(self.conn, eventsCmd) // Send command here
-	if rply, err := self.readHeaders(); err != nil || !strings.Contains(rply, "Reply-Text: +OK") {
+	fmt.Fprint(fs.conn, eventsCmd) // Send command here
+	if rply, err := readHeaders(); err != nil || !strings.Contains(rply, "Reply-Text: +OK") {
 		return errors.New("event error")
 	}
 	return nil
 }
 
 // Enable filters
-func (self *FSock) FilterEvents(filters map[string]string) error {
+func FilterEvents(filters map[string]string) error {
 	if len(filters) == 0 { //Nothing to filter
 		return nil
 	}
@@ -199,40 +199,40 @@ func (self *FSock) FilterEvents(filters map[string]string) error {
 		cmd += " " + hdr + " " + val
 	}
 	cmd += "\n\n"
-	fmt.Fprint(self.conn, cmd)
-	if rply, err := self.readHeaders(); err != nil || !strings.Contains(rply, "Reply-Text: +OK") {
+	fmt.Fprint(fs.conn, cmd)
+	if rply, err := readHeaders(); err != nil || !strings.Contains(rply, "Reply-Text: +OK") {
 		return errors.New("filter error")
 	}
 	return nil
 }
 
 // Connect or reconnect
-func (self *FSock) Connect(reconnects int) error {
-	if self.Connected() {
-		self.Disconnect()
+func Connect(reconnects int) error {
+	if Connected() {
+		Disconnect()
 	}
 	var conErr error
 	for i := 0; i < reconnects; i++ {
 		fmt.Println("Attempting FS connect")
-		self.conn, conErr = net.Dial("tcp", self.fsaddress)
+		fs.conn, conErr = net.Dial("tcp", fs.fsaddress)
 		if conErr == nil {
 			// Connected, init buffer, auth and subscribe to desired events and filters
-			self.buffer = bufio.NewReaderSize(self.conn, 8192) // reinit buffer
-			if authChg, err := self.readHeaders(); err != nil || !strings.Contains(authChg, "auth/request") {
+			fs.buffer = bufio.NewReaderSize(fs.conn, 8192) // reinit buffer
+			if authChg, err := readHeaders(); err != nil || !strings.Contains(authChg, "auth/request") {
 				return errors.New("No auth challenge received")
-			} else if errAuth := self.Auth(); errAuth != nil { // Auth did not succeed
+			} else if errAuth := Auth(); errAuth != nil { // Auth did not succeed
 				return errAuth
 			}
 			// Subscribe to events handled by event handlers
-			handledEvs := make([]string, len(self.eventHandlers))
+			handledEvs := make([]string, len(fs.eventHandlers))
 			j := 0
-			for k := range self.eventHandlers {
+			for k := range fs.eventHandlers {
 				handledEvs[j] = k
 				j++
 			}
-			if subscribeErr := self.EventsPlain(handledEvs); subscribeErr != nil {
+			if subscribeErr := EventsPlain(handledEvs); subscribeErr != nil {
 				return subscribeErr
-			} else if filterErr := self.FilterEvents(self.eventFilters); filterErr != nil {
+			} else if filterErr := FilterEvents(fs.eventFilters); filterErr != nil {
 				return filterErr
 			}
 			return nil
@@ -243,13 +243,13 @@ func (self *FSock) Connect(reconnects int) error {
 }
 
 // Send API command
-func (self *FSock) SendApiCmd(cmdStr string) error {
-	if !self.Connected() {
+func SendApiCmd(cmdStr string) error {
+	if !Connected() {
 		return errors.New("Not connected to FS")
 	}
 	cmd := fmt.Sprintf("api %s\n\n", cmdStr)
-	fmt.Fprint(self.conn, cmd)
-	resEvent := <-self.apiChan
+	fmt.Fprint(fs.conn, cmd)
+	resEvent := <-fs.apiChan
 	if strings.Contains(resEvent, "-ERR") {
 		return errors.New("Command failed")
 	}
@@ -257,13 +257,13 @@ func (self *FSock) SendApiCmd(cmdStr string) error {
 }
 
 // Reads events from socket
-func (self *FSock) ReadEvents() {
+func ReadEvents() {
 	// Read events from buffer, firing them up further
 	for {
-		hdr, body, err := self.readEvent()
+		hdr, body, err := readEvent()
 		if err != nil {
 			fmt.Println("WARNING: got error while reading events: ", err.Error())
-			connErr := self.Connect(3)
+			connErr := Connect(3)
 			if connErr != nil {
 				fmt.Println("FSock reader - cannot connect to FS")
 				return
@@ -271,10 +271,10 @@ func (self *FSock) ReadEvents() {
 			continue // Connection reset
 		}
 		if strings.Contains(hdr, "api/response") {
-			self.apiChan <- hdr + body
+			fs.apiChan <- hdr + body
 		}
 		if body != "" { // We got a body, could be event, try dispatching it
-			self.DispatchEvent(body)
+			DispatchEvent(body)
 		}
 	}
 	fmt.Println("Exiting ReadEvents")
@@ -282,9 +282,9 @@ func (self *FSock) ReadEvents() {
 }
 
 // Dispatch events to handlers in async mode
-func (self *FSock) DispatchEvent(event string) {
-	eventName := HeaderVal(event, "Event-Name")
-	if handlerFunc, hasHandler := self.eventHandlers[eventName]; hasHandler {
+func DispatchEvent(event string) {
+	eventName := headerVal(event, "Event-Name")
+	if handlerFunc, hasHandler := fs.eventHandlers[eventName]; hasHandler {
 		go handlerFunc(event)
 	}
 }

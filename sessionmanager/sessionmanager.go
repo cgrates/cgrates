@@ -20,11 +20,12 @@ package sessionmanager
 
 import (
 	"github.com/cgrates/cgrates/rater"
+	"time"
 )
 
 type SessionManager interface {
 	DisconnectSession(*Session, string)
-	UnparkCall(string, string, string)
-	GetSessionDelegate() *SessionDelegate
+	LoopAction(*Session, *rater.CallDescriptor)
+	GetDebitPeriod() time.Duration
 	GetDbLogger() rater.DataStorage
 }

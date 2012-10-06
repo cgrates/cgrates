@@ -84,10 +84,9 @@ func (s *Session) startDebitLoop() {
 		if nextCd.TimeEnd != s.callDescriptor.TimeEnd { // first time use the session start time
 			nextCd.TimeStart = time.Now()
 		}
-		sd := s.sessionManager.GetSessionDelegate()
-		nextCd.TimeEnd = time.Now().Add(sd.GetDebitPeriod())
-		sd.LoopAction(s, &nextCd)
-		time.Sleep(sd.GetDebitPeriod())
+		nextCd.TimeEnd = time.Now().Add(s.sessionManager.GetDebitPeriod())
+		s.sessionManager.LoopAction(s, &nextCd)
+		time.Sleep(s.sessionManager.GetDebitPeriod())
 	}
 }
 
