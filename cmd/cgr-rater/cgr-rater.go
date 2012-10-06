@@ -256,7 +256,7 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	switch sm_switch_type {
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period))
-		sm := sessionmanager.NewFSSessionManager(loggerDb, connectorm, dp)
+		sm := sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
 		sm.Connect(freeswitch_server, freeswitch_pass)
 	default:
 		rater.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
