@@ -4,6 +4,7 @@ package fsock
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"net"
@@ -18,15 +19,14 @@ var fs *fSock // Used to share FS connection via package globals (singleton)
 
 // Connection to FreeSWITCH Socket
 type fSock struct {
-	conn   net.Conn
-	buffer *bufio.Reader
-	fsaddress,
-	fspaswd string
-	eventHandlers map[string]func(string)
-	eventFilters  map[string]string
-	apiChan       chan string
-	reconnects    int
-	delayFunc     func() int
+	conn               net.Conn
+	buffer             *bufio.Reader
+	fsaddress, fspaswd string
+	eventHandlers      map[string]func(string)
+	eventFilters       map[string]string
+	apiChan            chan string
+	reconnects         int
+	delayFunc          func() int
 }
 
 // Connects to FS and starts buffering input
@@ -103,7 +103,7 @@ func readHeaders() (s string, err error) {
 			return
 		}
 		// No Error, add received to localread buffer
-		if readLine[0] == '\n' {
+		if len(bytes.TrimSpace(readLine)) == 0 {
 			break
 		}
 		bytesRead = append(bytesRead, readLine...)
@@ -112,15 +112,14 @@ func readHeaders() (s string, err error) {
 }
 
 // Reads the body from buffer, ln is given by content-length of headers
-func readBody(ln int) (s string, err error) {
+func readBody(ln int) (string, error) {
 	bytesRead := make([]byte, ln)
-	n, err := fs.buffer.Read(bytesRead)
-	if err != nil {
-		return
-	}
-	if n != ln {
-		err = errors.New("Could not read whole body")
-		return
+	for i := 0; i < ln; i++ {
+		if readByte, err := fs.buffer.ReadByte(); err != nil {
+			return "", err
+		} else { // No Error, add received to localread buffer
+			bytesRead[i] = readByte // Add received line to the local read buffer
+		}
 	}
 	return string(bytesRead), nil
 }
@@ -130,6 +129,7 @@ func readEvent() (string, string, error) {
 	var hdrs, body string
 	var cl int
 	var err error
+
 	if hdrs, err = readHeaders(); err != nil {
 		return "", "", err
 	}
@@ -141,7 +141,7 @@ func readEvent() (string, string, error) {
 		return "", "", errors.New("Cannot extract content length")
 	}
 	if body, err = readBody(cl); err != nil {
-		return "", "", errors.New("Cannot extract body")
+		return "", "", err
 	}
 	return hdrs, body, nil
 }
@@ -217,7 +217,6 @@ func Connect(reconnects int) error {
 	}
 	var conErr error
 	for i := 0; i < reconnects; i++ {
-		fmt.Println("Attempting FS connect")
 		fs.conn, conErr = net.Dial("tcp", fs.fsaddress)
 		if conErr == nil {
 			// Connected, init buffer, auth and subscribe to desired events and filters

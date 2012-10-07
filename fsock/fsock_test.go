@@ -2,8 +2,10 @@ package fsock
 
 import (
 	"bufio"
+	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 )
 
 const (
@@ -57,13 +59,27 @@ func TestEvent(t *testing.T) {
 	w.Write([]byte(HEADER + BODY))
 	h, b, err := readEvent()
 	if err != nil || h != HEADER[:len(HEADER)-1] || len(b) != 564 {
-		t.Error("Error parsing event: ", h, b, err)
+		t.Error("Error parsing event: ", h, b, len(b))
 	}
 }
 
-func TestHeaderVal(t *testing.T) {
+func TestHeaderValMiddle(t *testing.T) {
 	h := headerVal(BODY, "Event-Date-GMT")
 	if h != "Fri,%2005%20Oct%202012%2011%3A41%3A38%20GMT" {
+		t.Error("Header val error: ", h)
+	}
+}
+
+func TestHeaderValStart(t *testing.T) {
+	h := headerVal(BODY, "Event-Name")
+	if h != "RE_SCHEDULE" {
+		t.Error("Header val error: ", h)
+	}
+}
+
+func TestHeaderValEnd(t *testing.T) {
+	h := headerVal(BODY, "Task-Runtime")
+	if h != "1349437318" {
 		t.Error("Header val error: ", h)
 	}
 }
@@ -87,6 +103,44 @@ func TestEventToMapFiltered(t *testing.T) {
 		t.Error("Incorrect number of event fields: ", len(fields))
 	}
 }
+
+func TestReadEvents(t *testing.T) {
+	data, err := ioutil.ReadFile("test_data.txt")
+	if err != nil {
+		t.Error("Error reading test data file!")
+	}
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Error("Error creating pype!")
+	}
+	fs = &fSock{}
+	fs.buffer = bufio.NewReader(r)
+	var events int32
+	fs.eventHandlers = map[string]func(string){
+		"HEARTBEAT":                func(string) { events++ },
+		"RE_SCHEDULE":              func(string) { events++ },
+		"CHANNEL_STATE":            func(string) { events++ },
+		"CODEC":                    func(string) { events++ },
+		"CHANNEL_CREATE":           func(string) { events++ },
+		"CHANNEL_CALLSTATE":        func(string) { events++ },
+		"API":                      func(string) { events++ },
+		"CHANNEL_EXECUTE":          func(string) { events++ },
+		"CHANNEL_EXECUTE_COMPLETE": func(string) { events++ },
+		"CHANNEL_PARK":             func(string) { events++ },
+		"CHANNEL_HANGUP":           func(string) { events++ },
+		"CHANNEL_HANGUP_COMPLETE":  func(string) { events++ },
+		"CHANNEL_UNPARK":           func(string) { events++ },
+		"CHANNEL_DESTROY":          func(string) { events++ },
+	}
+	go ReadEvents()
+	w.Write(data)
+	time.Sleep(50 * time.Millisecond)
+	if events != 45 {
+		t.Error("Error reading events: ", events)
+	}
+}
+
+/*********************** Benchmarks ************************/
 
 func BenchmarkHeaderVal(b *testing.B) {
 	for i := 0; i < b.N; i++ {
