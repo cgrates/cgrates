@@ -108,6 +108,7 @@ var (
 
 	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
+	sm       sessionmanager.SessionManager
 )
 
 // this function will reset to zero values the variables that are not present
@@ -256,7 +257,7 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	switch sm_switch_type {
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period))
-		sm := sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
+		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
 		sm.Connect(freeswitch_server, freeswitch_pass)
 	default:
 		rater.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
@@ -411,6 +412,8 @@ func main() {
 	if sm_enabled {
 		rater.Logger.Info("Starting CGRateS session manager.")
 		go startSessionManager(responder, loggerDb)
+		// close all sessions on shutdown
+		go shutdownSessionmanagerSingnalHandler()
 	}
 
 	if mediator_enabled {

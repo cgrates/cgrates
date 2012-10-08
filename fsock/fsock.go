@@ -155,10 +155,11 @@ func Connected() bool {
 }
 
 // Disconnects from socket
-func Disconnect() {
+func Disconnect() (err error) {
 	if fs.conn != nil {
-		fs.conn.Close()
+		err = fs.conn.Close()
 	}
+	return
 }
 
 // Auth to FS

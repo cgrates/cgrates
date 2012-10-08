@@ -94,9 +94,10 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 }
 
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
-	fsock.Disconnect()
+func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) error {
+	err := fsock.Disconnect()
 	s.Close()
+	return err
 }
 
 // Sends the transfer command to unpark the call to freeswitch
@@ -293,4 +294,15 @@ func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
 }
 func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 	return sm.loggerDB
+}
+
+func (sm *FSSessionManager) Shutdown() (err error) {
+	rater.Logger.Info("Shutting down all sessions...")
+	for _, s := range sm.sessions {
+		err = sm.DisconnectSession(s, MANAGER_REQUEST)
+		if err != nil {
+			return
+		}
+	}
+	return
 }
