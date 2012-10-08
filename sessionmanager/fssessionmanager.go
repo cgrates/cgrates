@@ -50,6 +50,7 @@ func (sm *FSSessionManager) Connect(address, pass string) (err error) {
 		rater.Logger.Crit(fmt.Sprintf("FreeSWITCH error:", err))
 		return
 	} else if fsock.Connected() {
+		fsock.FilterEvents(map[string]string{"Call-Direction": "inbound"})
 		rater.Logger.Info("Successfully connected to FreeSWITCH")
 	}
 	fsock.ReadEvents()
@@ -57,7 +58,6 @@ func (sm *FSSessionManager) Connect(address, pass string) (err error) {
 }
 
 func (sm *FSSessionManager) createHandlers() (handlers map[string]func(string)) {
-	handlers = make(map[string]func(string))
 	hb := func(body string) {
 		ev := new(FSEvent).New(body)
 		sm.OnHeartBeat(ev)
@@ -71,14 +71,16 @@ func (sm *FSSessionManager) createHandlers() (handlers map[string]func(string)) 
 		sm.OnChannelAnswer(ev)
 	}
 	ch := func(body string) {
+		rater.Logger.Info("hangup!")
 		ev := new(FSEvent).New(body)
 		sm.OnChannelHangupComplete(ev)
 	}
-	handlers["HEARTBEAT"] = hb
-	handlers["CHANNEL_PARK"] = cp
-	handlers["CHANNEL_ANSWER"] = ca
-	handlers["CHANNEL_HANGUP_COMPLETE "] = ch
-	return
+	return map[string]func(string){
+		"HEARTBEAT":               hb,
+		"CHANNEL_PARK":            cp,
+		"CHANNEL_ANSWER":          ca,
+		"CHANNEL_HANGUP_COMPLETE": ch,
+	}
 }
 
 // Searches and return the session with the specifed uuid
@@ -157,6 +159,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
+	rater.Logger.Info("freeswitch hangup")
 	s := sm.GetSession(ev.GetUUID())
 	if ev.GetReqType() == REQTYPE_POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
