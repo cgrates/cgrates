@@ -25,6 +25,7 @@ type fSock struct {
 	eventHandlers      map[string]func(string)
 	eventFilters       map[string]string
 	apiChan            chan string
+	cmdChan            chan string
 	reconnects         int
 	delayFunc          func() int
 }
@@ -260,28 +261,48 @@ func SendApiCmd(cmdStr string) error {
 	return nil
 }
 
+// SendMessage command
+func SendMsgCmd(uuid string, cmdargs map[string]string) error {
+	if len(cmdargs) == 0 {
+		return errors.New("Need command arguments")
+	}
+	if !Connected() {
+		return errors.New("Not connected to FS")
+	}
+	argStr := ""
+	for k, v := range cmdargs {
+		argStr += fmt.Sprintf("%s:%s\n", k, v)
+	}
+	fmt.Fprint(fs.conn, fmt.Sprintf("sendmsg %s\n%s\n", uuid, argStr))
+	replyTxt := <-fs.cmdChan
+	if strings.HasPrefix(replyTxt, "-ERR") {
+		return fmt.Errorf("SendMessage: %s", replyTxt)
+	}
+	return nil
+}
+
 // Reads events from socket
 func ReadEvents() {
 	// Read events from buffer, firing them up further
 	for {
 		hdr, body, err := readEvent()
 		if err != nil {
-			fmt.Println("WARNING: got error while reading events: ", err.Error())
 			connErr := Connect(fs.reconnects)
 			if connErr != nil {
-				fmt.Println("FSock reader - cannot connect to FS")
 				return
 			}
 			continue // Connection reset
 		}
 		if strings.Contains(hdr, "api/response") {
 			fs.apiChan <- hdr + body
+		} else if strings.Contains(hdr, "command/reply") {
+			fs.cmdChan <- headerVal(hdr, "Reply-Text")
 		}
 		if body != "" { // We got a body, could be event, try dispatching it
 			dispatchEvent(body)
 		}
 	}
-	fmt.Println("Exiting ReadEvents")
+
 	return
 }
 

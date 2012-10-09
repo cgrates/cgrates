@@ -94,16 +94,29 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 }
 
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) error {
-	err := fsock.Disconnect()
+func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
+	err := fsock.SendApiCmd(fmt.Sprintf("api uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
+	if err != nil {
+		rater.Logger.Err("could not send disconect api notification to freeswitch")
+	}
+	err = fsock.SendMsgCmd(s.uuid, map[string]string{"call-command": "hangup", "hangup-cause": notify})
+	if err != nil {
+		rater.Logger.Err("could not send disconect msg to freeswitch")
+	}
 	s.Close()
-	return err
+	return
 }
 
 // Sends the transfer command to unpark the call to freeswitch
 func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
-	fsock.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
-	fsock.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
+	err := fsock.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
+	if err != nil {
+		rater.Logger.Err("could not send unpark api notification to freeswitch")
+	}
+	err = fsock.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
+	if err != nil {
+		rater.Logger.Err("could not send unpark api call to freeswitch")
+	}
 }
 
 func (sm *FSSessionManager) OnHeartBeat(ev Event) {
@@ -299,10 +312,7 @@ func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 func (sm *FSSessionManager) Shutdown() (err error) {
 	rater.Logger.Info("Shutting down all sessions...")
 	for _, s := range sm.sessions {
-		err = sm.DisconnectSession(s, MANAGER_REQUEST)
-		if err != nil {
-			return
-		}
+		sm.DisconnectSession(s, MANAGER_REQUEST)
 	}
 	return
 }

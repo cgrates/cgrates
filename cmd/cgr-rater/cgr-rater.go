@@ -420,6 +420,5 @@ func main() {
 		rater.Logger.Info("Starting CGRateS mediator.")
 		go startMediator(responder, loggerDb)
 	}
-
 	<-exitChan
 }
