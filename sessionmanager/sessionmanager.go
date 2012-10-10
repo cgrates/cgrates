@@ -26,6 +26,7 @@ import (
 type SessionManager interface {
 	Connect(address, pass string) error
 	DisconnectSession(*Session, string)
+	RemoveSession(*Session)
 	LoopAction(*Session, *rater.CallDescriptor)
 	GetDebitPeriod() time.Duration
 	GetDbLogger() rater.DataStorage

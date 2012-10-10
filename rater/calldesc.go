@@ -309,6 +309,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 			Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 		}
 	} else {
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s.", cd.GetUserBalanceKey()))
 		return cd.Amount, err
 	}
 	// check for zero balance	

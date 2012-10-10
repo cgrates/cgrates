@@ -116,9 +116,9 @@ Listens for the SIGTERM, SIGINT, SIGQUIT system signals and shuts down the sessi
 func shutdownSessionmanagerSingnalHandler() {
 	rater.Logger.Info("Handling stop signals...")
 	c := make(chan os.Signal)
-	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-c
 
-	sm.Shutdown()
+	sm.Shutdown()	
 	exitChan <- true
 }

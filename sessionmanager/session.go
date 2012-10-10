@@ -113,11 +113,7 @@ func (s *Session) Close() {
 	}
 	s.stopDebit <- true
 	s.callDescriptor.TimeEnd = time.Now()
-}
-
-// Disconects a session using session manager
-func (s *Session) Disconnect() {
-	s.sessionManager.DisconnectSession(s, DISCCONECT)
+	s.sessionManager.RemoveSession(s)
 }
 
 // Nice print for session

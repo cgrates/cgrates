@@ -71,7 +71,6 @@ func (sm *FSSessionManager) createHandlers() (handlers map[string]func(string)) 
 		sm.OnChannelAnswer(ev)
 	}
 	ch := func(body string) {
-		rater.Logger.Info("hangup!")
 		ev := new(FSEvent).New(body)
 		sm.OnChannelHangupComplete(ev)
 	}
@@ -100,12 +99,22 @@ func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
 	if err != nil {
 		rater.Logger.Err("could not send disconect api notification to freeswitch")
 	}
-	err = fsock.SendMsgCmd(s.uuid, map[string]string{"call-command": "hangup", "hangup-cause": notify})
+	err = fsock.SendMsgCmd(s.uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}) // without + sign
 	if err != nil {
 		rater.Logger.Err("could not send disconect msg to freeswitch")
 	}
 	s.Close()
 	return
+}
+
+// Remove session from sessin list
+func (sm *FSSessionManager) RemoveSession(s *Session) {
+	for i, ss := range sm.sessions {
+		if ss == s {
+			sm.sessions = append(sm.sessions[:i], sm.sessions[i+1:]...)
+			return
+		}
+	}
 }
 
 // Sends the transfer command to unpark the call to freeswitch
@@ -280,6 +289,8 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	lastCC.Cost -= cost
 	rater.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
 	s.SaveOperations()
+	s.Close()
+
 }
 
 func (sm *FSSessionManager) LoopAction(s *Session, cd *rater.CallDescriptor) {
@@ -299,7 +310,7 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *rater.CallDescriptor) {
 	}
 	if remainingSeconds == 0 || err != nil {
 		rater.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
-		s.Disconnect()
+		sm.DisconnectSession(s, DISCONNECT)
 		return
 	}
 	s.CallCosts = append(s.CallCosts, cc)
@@ -312,9 +323,12 @@ func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 }
 
 func (sm *FSSessionManager) Shutdown() (err error) {
-	rater.Logger.Info("Shutting down all sessions...")
-	for _, s := range sm.sessions {
-		sm.DisconnectSession(s, MANAGER_REQUEST)
-	}
+	rater.Logger.Info("Shutting down all sessions...")	
+	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid")
+	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype postpaid")
+	for len(sm.sessions)>0 {		
+		time.Sleep(500*time.Millisecond)
+		rater.Logger.Info(fmt.Sprintf("sessions: %s", sm.sessions))		 
+	}	
 	return
 }

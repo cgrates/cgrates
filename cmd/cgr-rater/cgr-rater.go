@@ -310,7 +310,6 @@ func checkConfigSanity() {
 }
 
 func configureDatabase(db_type, host, port, name, user, pass string) (getter rater.DataStorage, err error) {
-
 	switch db_type {
 	case REDIS:
 		db_nb, err := strconv.Atoi(name)
