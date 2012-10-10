@@ -107,6 +107,7 @@ func (s *Session) GetSessionDuration() time.Duration {
 
 // Stops the debit loop
 func (s *Session) Close() {
+	rater.Logger.Debug(fmt.Sprintf("Stopping debit for %s", s.uuid))
 	if s == nil {
 		return
 	}

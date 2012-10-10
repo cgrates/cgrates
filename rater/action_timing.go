@@ -197,7 +197,7 @@ func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
 	for _, ubId := range at.UserBalanceIds {
 		ub, err := storageGetter.GetUserBalance(ubId)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("Could not get user balances for therse id: %v. Skipping!", ubId))
+			Logger.Warning(fmt.Sprintf("Could not get user balances for therse id: %s. Skipping!", ubId))
 		}
 		ubs = append(ubs, ub)
 	}
