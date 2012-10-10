@@ -197,7 +197,7 @@ func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
 	for _, ubId := range at.UserBalanceIds {
 		ub, err := storageGetter.GetUserBalance(ubId)
 		if err != nil {
-			Logger.Warning(fmt.Sprintf("Could not get user balances for therse id: %s. Skipping!", ubId))
+			Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
 		}
 		ubs = append(ubs, ub)
 	}
@@ -305,7 +305,9 @@ func (at *ActionTiming) restore(input string) {
 	at.Id = elements[0]
 	at.Tag = elements[1]
 	for _, ubi := range strings.Split(elements[2], ",") {
-		at.UserBalanceIds = append(at.UserBalanceIds, ubi)
+		if strings.TrimSpace(ubi) != ""{
+			at.UserBalanceIds = append(at.UserBalanceIds, ubi)
+		}
 	}
 
 	at.Timing = &Interval{}
