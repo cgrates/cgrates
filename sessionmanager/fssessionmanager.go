@@ -327,7 +327,7 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid")
 	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype postpaid")
 	for len(sm.sessions)>0 {		
-		time.Sleep(500*time.Millisecond)
+		time.Sleep(100*time.Millisecond) // wait for the hungup event to be fired
 		rater.Logger.Info(fmt.Sprintf("sessions: %s", sm.sessions))		 
 	}	
 	return
