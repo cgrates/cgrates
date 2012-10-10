@@ -95,6 +95,7 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 
 // Disconnects a session by sending hangup command to freeswitch
 func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
+	rater.Logger.Debug(fmt.Sprintf("Session: %+v", s))
 	err := fsock.SendApiCmd(fmt.Sprintf("api uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
 	if err != nil {
 		rater.Logger.Err("could not send disconect api notification to freeswitch")
@@ -170,6 +171,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	if s != nil {
 		sm.sessions = append(sm.sessions, s)
 	}
+	rater.Logger.Debug(fmt.Sprintf("sessions: %v", sm.sessions))
 }
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
@@ -311,6 +313,7 @@ func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 
 func (sm *FSSessionManager) Shutdown() (err error) {
 	rater.Logger.Info("Shutting down all sessions...")
+	rater.Logger.Debug(fmt.Sprintf("sessions: %v", sm.sessions))
 	for _, s := range sm.sessions {
 		sm.DisconnectSession(s, MANAGER_REQUEST)
 	}
