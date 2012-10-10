@@ -31,8 +31,7 @@ type fSock struct {
 }
 
 // Connects to FS and starts buffering input
-func New(fsaddr, fspaswd string, reconnects int, eventHandlers map[string]func(string)) error {
-	eventFilters := make(map[string]string)
+func New(fsaddr, fspaswd string, reconnects int, eventHandlers map[string]func(string), eventFilters map[string]string) error {
 	fs = &fSock{fsaddress: fsaddr, fspaswd: fspaswd, eventHandlers: eventHandlers, eventFilters: eventFilters}
 	fs.apiChan = make(chan string) // Init apichan so we can use it to pass api replies
 	fs.reconnects = reconnects
@@ -196,7 +195,7 @@ func EventsPlain(events []string) error {
 }
 
 // Enable filters
-func FilterEvents(filters map[string]string) error {
+func filterEvents(filters map[string]string) error {
 	if len(filters) == 0 { //Nothing to filter
 		return nil
 	}
@@ -237,7 +236,7 @@ func Connect(reconnects int) error {
 			}
 			if subscribeErr := EventsPlain(handledEvs); subscribeErr != nil {
 				return subscribeErr
-			} else if filterErr := FilterEvents(fs.eventFilters); filterErr != nil {
+			} else if filterErr := filterEvents(fs.eventFilters); filterErr != nil {
 				return filterErr
 			}
 			return nil

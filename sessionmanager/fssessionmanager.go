@@ -46,11 +46,11 @@ func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, d
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events in json format.
 func (sm *FSSessionManager) Connect(address, pass string) (err error) {
-	if err = fsock.New(address, pass, 3, sm.createHandlers()); err != nil {
+	eventFilters := map[string]string{"Call-Direction": "inbound"}
+	if err = fsock.New(address, pass, 10, sm.createHandlers(), eventFilters); err != nil {
 		rater.Logger.Crit(fmt.Sprintf("FreeSWITCH error:", err))
 		return
-	} else if fsock.Connected() {
-		fsock.FilterEvents(map[string]string{"Call-Direction": "inbound"})
+	} else if fsock.Connected() {		
 		rater.Logger.Info("Successfully connected to FreeSWITCH")
 	}
 	fsock.ReadEvents()
