@@ -398,14 +398,17 @@ func (csvr *CSVReader) LoadActionTimings(fn string, comma rune) (err error) {
 			// skip header line
 			continue
 		}
-
+		_, exists := csvr.actions[record[1]]
+		if !exists {
+			return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", record[1]))
+		}
 		ts, exists := csvr.timings[record[2]]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not load the timing for tag: %v", record[2]))
+			return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", record[2]))
 		}
 		weight, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action timing weight: %v", err))
+			return errors.New(fmt.Sprintf("ActionTiming: Could not parse action timing weight: %v", err))
 		}
 		for _, t := range ts {
 			at := &ActionTiming{
