@@ -245,7 +245,7 @@ func Connect(reconnects int) error {
 			return nil
 		}
 		time.Sleep(time.Duration(fs.delayFunc()) * time.Second)
-		logger.Warning("FreeSWITCH reconnect!")
+		fs.logger.Warning("FreeSWITCH reconnect!")
 	}
 	return conErr
 }
