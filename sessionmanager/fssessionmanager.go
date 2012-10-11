@@ -50,7 +50,7 @@ func (sm *FSSessionManager) Connect(address, pass string) (err error) {
 	if err = fsock.New(address, pass, 10, sm.createHandlers(), eventFilters); err != nil {
 		rater.Logger.Crit(fmt.Sprintf("FreeSWITCH error:", err))
 		return
-	} else if fsock.Connected() {		
+	} else if fsock.Connected() {
 		rater.Logger.Info("Successfully connected to FreeSWITCH")
 	}
 	fsock.ReadEvents()
@@ -323,12 +323,12 @@ func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 }
 
 func (sm *FSSessionManager) Shutdown() (err error) {
-	rater.Logger.Info("Shutting down all sessions...")	
+	rater.Logger.Info("Shutting down all sessions...")
 	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid")
 	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype postpaid")
-	for len(sm.sessions)>0 {		
-		time.Sleep(100*time.Millisecond) // wait for the hungup event to be fired
-		rater.Logger.Info(fmt.Sprintf("sessions: %s", sm.sessions))		 
-	}	
+	for gurad := 0; len(sm.sessions) > 0 && guard < 20; guard++ {
+		time.Sleep(100 * time.Millisecond) // wait for the hungup event to be fired
+		rater.Logger.Info(fmt.Sprintf("sessions: %s", sm.sessions))
+	}
 	return
 }
