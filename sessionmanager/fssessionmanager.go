@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/fsock"
 	"github.com/cgrates/cgrates/rater"
+	"log/syslog"
 	"net"
 	"strings"
 	"time"
@@ -47,7 +48,7 @@ func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, d
 // listening for events in json format.
 func (sm *FSSessionManager) Connect(address, pass string) (err error) {
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
-	if err = fsock.New(address, pass, 10, sm.createHandlers(), eventFilters); err != nil {
+	if err = fsock.New(address, pass, 10, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
 		rater.Logger.Crit(fmt.Sprintf("FreeSWITCH error:", err))
 		return
 	} else if fsock.Connected() {
@@ -326,7 +327,7 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	rater.Logger.Info("Shutting down all sessions...")
 	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid")
 	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype postpaid")
-	for gurad := 0; len(sm.sessions) > 0 && guard < 20; guard++ {
+	for guard := 0; len(sm.sessions) > 0 && guard < 20; guard++ {
 		time.Sleep(100 * time.Millisecond) // wait for the hungup event to be fired
 		rater.Logger.Info(fmt.Sprintf("sessions: %s", sm.sessions))
 	}

@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log/syslog"
 	"net"
 	"net/url"
 	"sort"
@@ -28,11 +29,12 @@ type fSock struct {
 	cmdChan            chan string
 	reconnects         int
 	delayFunc          func() int
+	logger             *syslog.Writer
 }
 
 // Connects to FS and starts buffering input
-func New(fsaddr, fspaswd string, reconnects int, eventHandlers map[string]func(string), eventFilters map[string]string) error {
-	fs = &fSock{fsaddress: fsaddr, fspaswd: fspaswd, eventHandlers: eventHandlers, eventFilters: eventFilters}
+func New(fsaddr, fspaswd string, reconnects int, eventHandlers map[string]func(string), eventFilters map[string]string, l *syslog.Writer) error {
+	fs = &fSock{fsaddress: fsaddr, fspaswd: fspaswd, eventHandlers: eventHandlers, eventFilters: eventFilters, logger: l}
 	fs.apiChan = make(chan string) // Init apichan so we can use it to pass api replies
 	fs.reconnects = reconnects
 	fs.delayFunc = fib()
@@ -236,7 +238,8 @@ func Connect(reconnects int) error {
 			}
 			if subscribeErr := EventsPlain(handledEvs); subscribeErr != nil {
 				return subscribeErr
-			} else if filterErr := filterEvents(fs.eventFilters); filterErr != nil {
+			}
+			if filterErr := filterEvents(fs.eventFilters); filterErr != nil {
 				return filterErr
 			}
 			return nil
@@ -286,6 +289,7 @@ func ReadEvents() {
 	for {
 		hdr, body, err := readEvent()
 		if err != nil {
+			fs.logger.Warning("FreeSWITCH connection broken: attemting reconnect")
 			connErr := Connect(fs.reconnects)
 			if connErr != nil {
 				return
