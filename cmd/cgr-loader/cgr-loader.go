@@ -148,7 +148,7 @@ func main() {
 	var getter rater.DataStorage
 	switch *db_type {
 	case REDIS:
-		db_nb, err := strconv.Atoi(*db_name)
+		db_nb, err := strconv.Atoi(*db_name)		
 		if err != nil {
 			log.Fatal("Redis db name must be an integer!")
 		}
