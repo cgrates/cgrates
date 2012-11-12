@@ -52,7 +52,7 @@ const (
 )
 
 var (
-	config       = flag.String("config", "rater_standalone.config", "Configuration file location.")
+	config       = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
 	version      = flag.Bool("version", false, "Prints the application version.")
 	data_db_type = REDIS
 	data_db_host = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
