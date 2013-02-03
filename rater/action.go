@@ -40,21 +40,33 @@ type Action struct {
 
 type actionTypeFunc func(*UserBalance, *Action) error
 
-var (
-	actionTypeFuncMap = map[string]actionTypeFunc{
-		"LOG":            logAction,
-		"RESET_TRIGGERS": resetTriggersAction,
-		"SET_POSTPAID":   setPostpaidAction,
-		"RESET_POSTPAID": resetPostpaidAction,
-		"SET_PREPAID":    setPrepaidAction,
-		"RESET_PREPAID":  resetPrepaidAction,
-		"TOPUP_RESET":    topupResetAction,
-		"TOPUP":          topupAction,
-		"DEBIT":          debitAction,
-		"RESET_COUNTER":  resetCounterAction,
-		"RESET_COUNTERS": resetCountersAction,
+func getActionFunc(typ string)(actionTypeFunc, bool) {
+	switch typ {
+		case "LOG":
+			return logAction, true
+		case "RESET_TRIGGERS":
+			return resetTriggersAction, true
+		case "SET_POSTPAID":
+			return setPostpaidAction, true
+		case "RESET_POSTPAID":
+			return resetPostpaidAction, true
+		case "SET_PREPAID":
+			return setPrepaidAction, true
+		case "RESET_PREPAID":
+			return  resetPrepaidAction, true
+		case "TOPUP_RESET":
+			return topupResetAction, true
+		case "TOPUP":
+			return topupAction, true
+		case "DEBIT":
+			return debitAction, true
+		case "RESET_COUNTER":
+			return resetCounterAction, true
+		case "RESET_COUNTERS":
+			return resetCountersAction, true
 	}
-)
+	return nil, false
+}
 
 func logAction(ub *UserBalance, a *Action) (err error) {
 	Logger.Info(fmt.Sprintf("%v %v %v", a.BalanceId, a.Units, a.MinuteBucket))

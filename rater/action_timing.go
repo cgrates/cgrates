@@ -212,7 +212,7 @@ func (at *ActionTiming) Execute() (err error) {
 		return
 	}
 	for _, a := range aac {
-		actionFunction, exists := actionTypeFuncMap[a.ActionType]
+		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return

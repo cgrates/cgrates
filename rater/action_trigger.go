@@ -46,7 +46,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		return
 	}
 	for _, a := range aac {
-		actionFunction, exists := actionTypeFuncMap[a.ActionType]
+		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return

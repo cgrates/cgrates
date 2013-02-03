@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"github.com/vmihailenco/msgpack"
 	"strings"
 )
 
@@ -97,6 +98,16 @@ func (jbm *JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
 	jbm.buf.Reset()
 	jbm.buf.Write(data)
 	return json.NewDecoder(&jbm.buf).Decode(v)
+}
+
+type MsgpackMarshaler struct{}
+
+func (jm *MsgpackMarshaler) Marshal(v interface{}) ([]byte, error) {
+	return msgpack.Marshal(v)
+}
+
+func (jm *MsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
+	return msgpack.Unmarshal(data, v)
 }
 
 type GOBMarshaler struct {
