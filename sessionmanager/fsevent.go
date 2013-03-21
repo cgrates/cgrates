@@ -59,6 +59,9 @@ const (
 	MISSING_PARAMETER  = "-MISSING_PARAMETER"
 	SYSTEM_ERROR       = "-SYSTEM_ERROR"
 	MANAGER_REQUEST    = "+MANAGER_REQUEST"
+	USERNAME	= "username"
+	REQ_USER		= "sip_req_user"
+	TOR_DEFAULT	= "0"
 )
 
 // Nice printing for the event object.
@@ -89,16 +92,28 @@ func (fsev *FSEvent) GetOrigId() string {
 	return fsev.fields[ORIG_ID]
 }
 func (fsev *FSEvent) GetSubject() string {
-	return fsev.fields[SUBJECT]
+	if _, hasKey := fsev.fields[SUBJECT]; hasKey {
+		return fsev.fields[SUBJECT]
+	}
+	return fsev.fields[USERNAME]
 }
 func (fsev *FSEvent) GetAccount() string {
-	return fsev.fields[ACCOUNT]
+	if _, hasKey := fsev.fields[ACCOUNT]; hasKey {
+		return fsev.fields[ACCOUNT]
+	}
+	return fsev.fields[USERNAME]
 }
 func (fsev *FSEvent) GetDestination() string {
-	return fsev.fields[DESTINATION]
+	if _, hasKey := fsev.fields[DESTINATION]; hasKey {
+		return fsev.fields[DESTINATION]
+	}
+	return fsev.fields[REQ_USER]
 }
 func (fsev *FSEvent) GetTOR() string {
-	return fsev.fields[TOR]
+	if _, hasKey := fsev.fields[TOR]; hasKey {
+		return fsev.fields[TOR]
+	}
+	return fsev.fields[TOR_DEFAULT]
 }
 func (fsev *FSEvent) GetUUID() string {
 	return fsev.fields[UUID]
