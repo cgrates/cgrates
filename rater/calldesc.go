@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012  Radu Ioan Fericean
+Copyright (C) 2013 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -190,7 +190,7 @@ Splits the received timespan into sub time spans according to the activation per
 */
 func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeSpan) {
 	timespans = append(timespans, firstSpan)
-	// split on (free) minute buckets	
+	// split on (free) minute buckets
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		_, _, bucketList := userBalance.getSecondsForPrefix(cd.Destination)
 		for _, mb := range bucketList {
@@ -287,10 +287,10 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 }
 
 /*
-Returns the approximate max allowed session for user balance. It will try the max amount received in the call descriptor 
+Returns the approximate max allowed session for user balance. It will try the max amount received in the call descriptor
 and will decrease it by 10% for nine times. So if the user has little credit it will still allow 10% of the initial amount.
 If the user has no credit then it will return 0.
-If the user has postpayied plan it returns -1. 
+If the user has postpayied plan it returns -1.
 */
 func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	_, err = cd.LoadActivationPeriods()
@@ -312,7 +312,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s.", cd.GetUserBalanceKey()))
 		return cd.Amount, err
 	}
-	// check for zero balance	
+	// check for zero balance
 	if availableCredit == 0 {
 		return availableSeconds, nil
 	}

@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012  Radu Ioan Fericean
+Copyright (C) 2013 ITsysCOM
 
 Thresult program result free software: you can redresulttribute it and/or modify
 it under the terms of the GNU General Public License as publresulthed by

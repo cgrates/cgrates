@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012  Radu Ioan Fericean
+Copyright (C) 2013 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ var (
 	rater_rpc_encoding = GOB              // use JSON for RPC encoding
 
 	balancer_enabled      = false
-	balancer_listen       = "127.0.0.1:2001" // Json RPC server address	
+	balancer_listen       = "127.0.0.1:2001" // Json RPC server address
 	balancer_rpc_encoding = GOB              // use JSON for RPC encoding
 
 	scheduler_enabled = false
@@ -87,13 +87,13 @@ var (
 	mediator_enabled        = false
 	mediator_cdr_path       = ""       // Freeswitch Master CSV CDR path.
 	mediator_cdr_out_path   = ""       // Freeswitch Master CSV CDR output path.
-	mediator_rater          = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer	
+	mediator_rater          = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer
 	mediator_rpc_encoding   = GOB      // use JSON for RPC encoding
 	mediator_skipdb         = false
 	mediator_pseudo_prepaid = false
 
 	freeswitch_server      = "localhost:8021" // freeswitch address host:port
-	freeswitch_pass        = "ClueCon"        // reeswitch address host:port	
+	freeswitch_pass        = "ClueCon"        // reeswitch address host:port
 	freeswitch_direction   = ""
 	freeswitch_tor         = ""
 	freeswitch_tenant      = ""
@@ -275,7 +275,7 @@ func checkConfigSanity() {
 		exitChan <- true
 	}
 
-	// check if the session manager or mediator is connectting via loopback 
+	// check if the session manager or mediator is connectting via loopback
 	// if they are using the same encoding as the rater/balancer
 	// this scenariou should be used for debug puropses only (it is racy anyway)
 	// and it might be forbidden in the future
