@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2012  Radu Ioan Fericean
+Copyright (C) 2013 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -222,7 +222,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		return // why would we have 0 callcosts
 	}
 	lastCC := s.CallCosts[len(s.CallCosts)-1]
-	// put credit back	
+	// put credit back
 	start := time.Now()
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refoundDuration := end.Sub(start).Seconds()
