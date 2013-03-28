@@ -420,4 +420,5 @@ func main() {
 		go startMediator(responder, loggerDb)
 	}
 	<-exitChan
+	rater.Logger.Info("Stopped all components. CGRateS shutdown!")
 }
