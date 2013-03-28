@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Copyright (C) 2012  Radu Ioan Fericean
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/fsock"
+	"github.com/cgrates/fsock"
 	"strconv"
 	"strings"
 	"time"
@@ -59,9 +59,9 @@ const (
 	MISSING_PARAMETER  = "-MISSING_PARAMETER"
 	SYSTEM_ERROR       = "-SYSTEM_ERROR"
 	MANAGER_REQUEST    = "+MANAGER_REQUEST"
-	USERNAME	= "username"
-	REQ_USER		= "sip_req_user"
-	TOR_DEFAULT	= "0"
+	USERNAME           = "username"
+	REQ_USER           = "sip_req_user"
+	TOR_DEFAULT        = "0"
 )
 
 // Nice printing for the event object.

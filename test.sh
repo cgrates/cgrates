@@ -10,7 +10,7 @@ go test github.com/cgrates/cgrates/inotify
 it=$?
 go test github.com/cgrates/cgrates/mediator
 md=$?
-go test github.com/cgrates/cgrates/fsock
+go test github.com/cgrates/fsock
 fs=$?
 
 exit $ts && $sm && $bl && $cr && $it && $md && $fs

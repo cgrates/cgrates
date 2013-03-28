@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Copyright (C) 2012  Radu Ioan Fericean
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,9 +20,10 @@ package sessionmanager
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/fsock"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/fsock"
 	"log/syslog"
 	"net"
 	"strings"
@@ -45,20 +46,20 @@ func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, d
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
-// listening for events in json format.
+// listening for events.
 func (sm *FSSessionManager) Connect(address, pass string) (err error) {
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
-	if err = fsock.New(address, pass, 10, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
+	if fsock.FS, err = fsock.NewFSock(address, pass, 10, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
 		rater.Logger.Crit(fmt.Sprintf("FreeSWITCH error:", err))
 		return
-	} else if fsock.Connected() {
-		rater.Logger.Info("Successfully connected to FreeSWITCH")
+	} else if !fsock.FS.Connected() {
+		return errors.New("Cannot connect to FreeSWITCH")
 	}
-	fsock.ReadEvents()
+	fsock.FS.ReadEvents()
 	return nil
 }
 
-func (sm *FSSessionManager) createHandlers() (handlers map[string]func(string)) {
+func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string)) {
 	hb := func(body string) {
 		ev := new(FSEvent).New(body)
 		sm.OnHeartBeat(ev)
@@ -75,11 +76,11 @@ func (sm *FSSessionManager) createHandlers() (handlers map[string]func(string)) 
 		ev := new(FSEvent).New(body)
 		sm.OnChannelHangupComplete(ev)
 	}
-	return map[string]func(string){
-		"HEARTBEAT":               hb,
-		"CHANNEL_PARK":            cp,
-		"CHANNEL_ANSWER":          ca,
-		"CHANNEL_HANGUP_COMPLETE": ch,
+	return map[string][]func(string){
+		"HEARTBEAT":               []func(string){hb},
+		"CHANNEL_PARK":            []func(string){cp},
+		"CHANNEL_ANSWER":          []func(string){ca},
+		"CHANNEL_HANGUP_COMPLETE": []func(string){ch},
 	}
 }
 
@@ -96,11 +97,11 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 // Disconnects a session by sending hangup command to freeswitch
 func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
 	rater.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
-	err := fsock.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
+	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
 	if err != nil {
 		rater.Logger.Err("could not send disconect api notification to freeswitch")
 	}
-	err = fsock.SendMsgCmd(s.uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}) // without + sign
+	err = fsock.FS.SendMsgCmd(s.uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}) // without + sign
 	if err != nil {
 		rater.Logger.Err("could not send disconect msg to freeswitch")
 	}
@@ -120,11 +121,11 @@ func (sm *FSSessionManager) RemoveSession(s *Session) {
 
 // Sends the transfer command to unpark the call to freeswitch
 func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
-	err := fsock.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
+	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
 	if err != nil {
 		rater.Logger.Err("could not send unpark api notification to freeswitch")
 	}
-	err = fsock.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
+	err = fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
 	if err != nil {
 		rater.Logger.Err("could not send unpark api call to freeswitch")
 	}
@@ -325,8 +326,8 @@ func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 
 func (sm *FSSessionManager) Shutdown() (err error) {
 	rater.Logger.Info("Shutting down all sessions...")
-	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid")
-	fsock.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype postpaid")
+	fsock.FS.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid")
+	fsock.FS.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype postpaid")
 	for guard := 0; len(sm.sessions) > 0 && guard < 20; guard++ {
 		time.Sleep(100 * time.Millisecond) // wait for the hungup event to be fired
 		rater.Logger.Info(fmt.Sprintf("sessions: %s", sm.sessions))
