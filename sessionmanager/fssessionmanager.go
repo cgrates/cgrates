@@ -49,14 +49,13 @@ func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, d
 // listening for events.
 func (sm *FSSessionManager) Connect(address, pass string) (err error) {
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
-	if fsock.FS, err = fsock.NewFSock(address, pass, 10, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
-		rater.Logger.Crit(fmt.Sprintf("FreeSWITCH error:", err))
-		return
+	if fsock.FS, err = fsock.NewFSock(address, pass, 5, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
+		return err
 	} else if !fsock.FS.Connected() {
 		return errors.New("Cannot connect to FreeSWITCH")
 	}
 	fsock.FS.ReadEvents()
-	return nil
+	return errors.New("Stopped reading events")
 }
 
 func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string)) {
@@ -147,7 +146,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		return
 	}
 	if ev.MissingParameter() {
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNb(), MISSING_PARAMETER)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), MISSING_PARAMETER)
 		rater.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
 		return
 	}
@@ -164,16 +163,16 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	err = sm.connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
 		rater.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNb(), SYSTEM_ERROR)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), SYSTEM_ERROR)
 		return
 	}
 	rater.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
 	if remainingSeconds == 0 {
 		rater.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNb(), INSUFFICIENT_FUNDS)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), INSUFFICIENT_FUNDS)
 		return
 	}
-	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNb(), AUTH_OK)
+	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), AUTH_OK)
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
@@ -222,7 +221,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		return // why would we have 0 callcosts
 	}
 	lastCC := s.CallCosts[len(s.CallCosts)-1]
-	// put credit back
+	// put credit back	
 	start := time.Now()
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refoundDuration := end.Sub(start).Seconds()
@@ -325,6 +324,9 @@ func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 }
 
 func (sm *FSSessionManager) Shutdown() (err error) {
+	if fsock.FS==nil || !fsock.FS.Connected() {
+		return errors.New("Cannot shutdown sessions, fsock not connected")
+	}
 	rater.Logger.Info("Shutting down all sessions...")
 	fsock.FS.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid")
 	fsock.FS.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype postpaid")

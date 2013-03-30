@@ -32,7 +32,6 @@ import (
 Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered raters.
 */
 func stopBalancerSingnalHandler() {
-	rater.Logger.Info("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
@@ -46,7 +45,6 @@ func stopBalancerSingnalHandler() {
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from balancer and closes the storage before exiting.
 */
 func stopRaterSingnalHandler() {
-	rater.Logger.Info("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	sig := <-c
@@ -97,7 +95,6 @@ func registerToBalancer() {
 
 // Listens for the HUP system signal and gracefuly reloads the timers from database.
 func reloadSchedulerSingnalHandler(sched *scheduler.Scheduler, getter rater.DataStorage) {
-	rater.Logger.Info("Handling HUP signal...")
 	for {
 		c := make(chan os.Signal)
 		signal.Notify(c, syscall.SIGHUP)
@@ -114,11 +111,12 @@ func reloadSchedulerSingnalHandler(sched *scheduler.Scheduler, getter rater.Data
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and shuts down the session manager.
 */
 func shutdownSessionmanagerSingnalHandler() {
-	rater.Logger.Info("Handling stop signals...")
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-c
 
-	sm.Shutdown()	
+	if err := sm.Shutdown(); err!=nil {
+		rater.Logger.Warning(fmt.Sprintf("<SessionManager> %s", err))
+	}
 	exitChan <- true
 }

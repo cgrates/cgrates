@@ -167,13 +167,13 @@ func readConfig(c *conf.ConfigFile) {
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
-		rater.Logger.Crit(fmt.Sprintf("Could not listen to %v: %v", rpcAddress, err))
+		rater.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
 		exitChan <- true
 		return
 	}
 	defer l.Close()
 
-	rater.Logger.Info(fmt.Sprintf("Listening for incomming RPC requests on %v", l.Addr()))
+	rater.Logger.Info(fmt.Sprintf("<Rater> Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
 	var serveFunc func(io.ReadWriteCloser)
 	if rpc_encoding == JSON {
@@ -184,11 +184,11 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			rater.Logger.Err(fmt.Sprintf("accept error: %v", conn))
+			rater.Logger.Err(fmt.Sprintf("<Rater> Accept error: %v", conn))
 			continue
 		}
 
-		rater.Logger.Info(fmt.Sprintf("connection started: %v", conn.RemoteAddr()))
+		rater.Logger.Info(fmt.Sprintf("<Rater> New incoming connection: %v", conn.RemoteAddr()))
 		go serveFunc(conn)
 	}
 }
@@ -258,11 +258,15 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period))
 		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
-		sm.Connect(freeswitch_server, freeswitch_pass)
+		errConn := sm.Connect(freeswitch_server, freeswitch_pass)
+		if errConn != nil {
+			rater.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", errConn))
+		}
 	default:
-		rater.Logger.Err(fmt.Sprintf("Cannot start session manger of type: %s!", sm_switch_type))
+		rater.Logger.Err(fmt.Sprintf("<SessionManager> Unknown session manger type: %s!", sm_switch_type))
 		exitChan <- true
 	}
+	exitChan <-true
 }
 
 func checkConfigSanity() {
@@ -384,11 +388,11 @@ func main() {
 	}
 	responder := &rater.Responder{ExitChan: exitChan}
 	if rater_enabled && !balancer_enabled && rater_listen != INTERNAL {
-		rater.Logger.Info(fmt.Sprintf("Starting CGRateS rater on %s.", rater_listen))
+		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", rater_listen))
 		go listenToRPCRequests(responder, rater_listen, rater_rpc_encoding)
 	}
 	if balancer_enabled {
-		rater.Logger.Info(fmt.Sprintf("Starting CGRateS balancer on %s.", balancer_listen))
+		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", balancer_listen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
 		go listenToRPCRequests(responder, balancer_listen, balancer_rpc_encoding)
@@ -399,7 +403,7 @@ func main() {
 	}
 
 	if scheduler_enabled {
-		rater.Logger.Info("Starting CGRateS scheduler.")
+		rater.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
 			go reloadSchedulerSingnalHandler(sched, getter)
@@ -409,14 +413,14 @@ func main() {
 	}
 
 	if sm_enabled {
-		rater.Logger.Info("Starting CGRateS session manager.")
+		rater.Logger.Info("Starting CGRateS SessionManager.")
 		go startSessionManager(responder, loggerDb)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler()
 	}
 
 	if mediator_enabled {
-		rater.Logger.Info("Starting CGRateS mediator.")
+		rater.Logger.Info("Starting CGRateS Mediator.")
 		go startMediator(responder, loggerDb)
 	}
 	<-exitChan

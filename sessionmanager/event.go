@@ -34,8 +34,19 @@ type Event interface {
 	GetUUID() string
 	GetTenant() string
 	GetReqType() string
-	GetCallDestNb() string
+	GetCallDestNr() string
 	GetStartTime(string) (time.Time, error)
 	GetEndTime() (time.Time, error)
 	MissingParameter() bool
+}
+
+
+// Returns first non empty string out of vals. Useful to extract defaults
+func firstNonEmpty( vals []string ) string {
+    for _,val := range vals {
+        if len(val) != 0 {
+            return val
+        }
+    }
+    return ""
 }

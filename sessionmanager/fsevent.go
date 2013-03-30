@@ -42,7 +42,7 @@ const (
 	TOR                = "variable_cgr_tor"
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_cgr_cstmid"
-	CALL_DEST_NB       = "Caller-Destination-Number"
+	CALL_DEST_NR       = "Caller-Destination-Number"
 	PARK_TIME          = "Caller-Profile-Created-Time"
 	START_TIME         = "Caller-Channel-Answered-Time"
 	END_TIME           = "Caller-Channel-Hangup-Time"
@@ -62,6 +62,7 @@ const (
 	USERNAME           = "username"
 	REQ_USER           = "sip_req_user"
 	TOR_DEFAULT        = "0"
+	CSTMID_DEFAULT	   = "0"
 )
 
 // Nice printing for the event object.
@@ -92,37 +93,25 @@ func (fsev *FSEvent) GetOrigId() string {
 	return fsev.fields[ORIG_ID]
 }
 func (fsev *FSEvent) GetSubject() string {
-	if _, hasKey := fsev.fields[SUBJECT]; hasKey {
-		return fsev.fields[SUBJECT]
-	}
-	return fsev.fields[USERNAME]
+	return firstNonEmpty( []string{fsev.fields[SUBJECT], fsev.fields[USERNAME]} )
 }
 func (fsev *FSEvent) GetAccount() string {
-	if _, hasKey := fsev.fields[ACCOUNT]; hasKey {
-		return fsev.fields[ACCOUNT]
-	}
-	return fsev.fields[USERNAME]
+	return firstNonEmpty( []string{fsev.fields[ACCOUNT], fsev.fields[USERNAME]} )
 }
 func (fsev *FSEvent) GetDestination() string {
-	if _, hasKey := fsev.fields[DESTINATION]; hasKey {
-		return fsev.fields[DESTINATION]
-	}
-	return fsev.fields[REQ_USER]
+	return firstNonEmpty( []string{fsev.fields[DESTINATION], fsev.fields[CALL_DEST_NR]} )
 }
 func (fsev *FSEvent) GetTOR() string {
-	if _, hasKey := fsev.fields[TOR]; hasKey {
-		return fsev.fields[TOR]
-	}
-	return fsev.fields[TOR_DEFAULT]
+	return firstNonEmpty( []string{fsev.fields[TOR], fsev.fields[TOR_DEFAULT]} )
 }
 func (fsev *FSEvent) GetUUID() string {
 	return fsev.fields[UUID]
 }
 func (fsev *FSEvent) GetTenant() string {
-	return fsev.fields[CSTMID]
+	return firstNonEmpty( []string{fsev.fields[CSTMID], fsev.fields[CSTMID_DEFAULT]} )
 }
-func (fsev *FSEvent) GetCallDestNb() string {
-	return fsev.fields[CALL_DEST_NB]
+func (fsev *FSEvent) GetCallDestNr() string {
+	return fsev.fields[CALL_DEST_NR]
 }
 func (fsev *FSEvent) GetReqType() string {
 	return fsev.fields[REQTYPE]
@@ -136,7 +125,7 @@ func (fsev *FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetTOR()) == "" ||
 		strings.TrimSpace(fsev.GetUUID()) == "" ||
 		strings.TrimSpace(fsev.GetTenant()) == "" ||
-		strings.TrimSpace(fsev.GetCallDestNb()) == ""
+		strings.TrimSpace(fsev.GetCallDestNr()) == ""
 }
 func (fsev *FSEvent) GetStartTime(field string) (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev.fields[field], 0, 64)
