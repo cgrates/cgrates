@@ -59,8 +59,7 @@ const (
 	MISSING_PARAMETER  = "-MISSING_PARAMETER"
 	SYSTEM_ERROR       = "-SYSTEM_ERROR"
 	MANAGER_REQUEST    = "+MANAGER_REQUEST"
-	USERNAME           = "username"
-	REQ_USER           = "sip_req_user"
+	USERNAME           = "Caller-Username"
 	TOR_DEFAULT        = "0"
 	CSTMID_DEFAULT	   = "0"
 )
@@ -102,13 +101,13 @@ func (fsev *FSEvent) GetDestination() string {
 	return firstNonEmpty( []string{fsev.fields[DESTINATION], fsev.fields[CALL_DEST_NR]} )
 }
 func (fsev *FSEvent) GetTOR() string {
-	return firstNonEmpty( []string{fsev.fields[TOR], fsev.fields[TOR_DEFAULT]} )
+	return firstNonEmpty( []string{fsev.fields[TOR], TOR_DEFAULT} )
 }
 func (fsev *FSEvent) GetUUID() string {
 	return fsev.fields[UUID]
 }
 func (fsev *FSEvent) GetTenant() string {
-	return firstNonEmpty( []string{fsev.fields[CSTMID], fsev.fields[CSTMID_DEFAULT]} )
+	return firstNonEmpty( []string{fsev.fields[CSTMID], CSTMID_DEFAULT} )
 }
 func (fsev *FSEvent) GetCallDestNr() string {
 	return fsev.fields[CALL_DEST_NR]

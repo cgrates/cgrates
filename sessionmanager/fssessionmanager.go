@@ -311,7 +311,7 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *rater.CallDescriptor) {
 	}
 	if remainingSeconds == 0 || err != nil {
 		rater.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
-		sm.DisconnectSession(s, DISCONNECT)
+		sm.DisconnectSession(s, INSUFFICIENT_FUNDS)
 		return
 	}
 	s.CallCosts = append(s.CallCosts, cc)
