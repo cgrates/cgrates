@@ -23,6 +23,7 @@ Ignore include and context defined here for the sake of avoiding errors if direc
       <condition field="${cgr_notify}" expression="^-INSUFFICIENT_FUNDS$">
         <action application="playback" data="tone_stream://path=$${sounds_dir}/insufficient_funds.wav"/>
         <action application="set" data="proto_specific_hangup_cause=sip:403"/>
+        <action application="hangup"/>
       </condition>
     </extension>
 
@@ -31,6 +32,7 @@ Ignore include and context defined here for the sake of avoiding errors if direc
       <condition field="${cgr_reqtype}" expression="^prepaid$" />
       <condition field="${cgr_notify}" expression="^-SYSTEM_ERROR$">
         <action application="set" data="proto_specific_hangup_cause=sip:503"/>
+        <action application="hangup"/>
       </condition>
     </extension>
 
