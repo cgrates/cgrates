@@ -103,6 +103,7 @@ var (
 	freeswitch_time_start  = ""
 	freeswitch_duration    = ""
 	freeswitch_uuid        = ""
+	freeswitch_reconnects = 5
 
 	cfgParseErr error
 
@@ -111,58 +112,7 @@ var (
 	sm       sessionmanager.SessionManager
 )
 
-// this function will reset to zero values the variables that are not present
-func readConfig(c *conf.ConfigFile) {
-	data_db_type, _ = c.GetString("global", "datadb_type")
-	data_db_host, _ = c.GetString("global", "datadb_host")
-	data_db_port, _ = c.GetString("global", "datadb_port")
-	data_db_name, _ = c.GetString("global", "datadb_name")
-	data_db_user, _ = c.GetString("global", "datadb_user")
-	data_db_pass, _ = c.GetString("global", "datadb_passwd")
-	log_db_type, _ = c.GetString("global", "logdb_type")
-	log_db_host, _ = c.GetString("global", "logdb_host")
-	log_db_port, _ = c.GetString("global", "logdb_port")
-	log_db_name, _ = c.GetString("global", "logdb_name")
-	log_db_user, _ = c.GetString("global", "logdb_user")
-	log_db_pass, _ = c.GetString("global", "logdb_passwd")
 
-	rater_enabled, _ = c.GetBool("rater", "enabled")
-	rater_balancer, _ = c.GetString("rater", "balancer")
-	rater_listen, _ = c.GetString("rater", "listen")
-	rater_rpc_encoding, _ = c.GetString("rater", "rpc_encoding")
-
-	balancer_enabled, _ = c.GetBool("balancer", "enabled")
-	balancer_listen, _ = c.GetString("balancer", "listen")
-	balancer_rpc_encoding, _ = c.GetString("balancer", "rpc_encoding")
-
-	scheduler_enabled, _ = c.GetBool("scheduler", "enabled")
-
-	sm_enabled, _ = c.GetBool("session_manager", "enabled")
-	sm_switch_type, _ = c.GetString("session_manager", "switch_type")
-	sm_rater, _ = c.GetString("session_manager", "rater")
-	sm_debit_period, _ = c.GetInt("session_manager", "debit_period")
-	sm_rpc_encoding, _ = c.GetString("session_manager", "rpc_encoding")
-
-	mediator_enabled, _ = c.GetBool("mediator", "enabled")
-	mediator_cdr_path, _ = c.GetString("mediator", "cdr_path")
-	mediator_cdr_out_path, _ = c.GetString("mediator", "cdr_out_path")
-	mediator_rater, _ = c.GetString("mediator", "rater")
-	mediator_rpc_encoding, _ = c.GetString("mediator", "rpc_encoding")
-	mediator_skipdb, _ = c.GetBool("mediator", "skipdb")
-	mediator_pseudo_prepaid, _ = c.GetBool("mediator", "pseudo_prepaid")
-
-	freeswitch_server, _ = c.GetString("freeswitch", "server")
-	freeswitch_pass, _ = c.GetString("freeswitch", "pass")
-	freeswitch_tor, _ = c.GetString("freeswitch", "tor_index")
-	freeswitch_tenant, _ = c.GetString("freeswitch", "tenant_index")
-	freeswitch_direction, _ = c.GetString("freeswitch", "direction_index")
-	freeswitch_subject, _ = c.GetString("freeswitch", "subject_index")
-	freeswitch_account, _ = c.GetString("freeswitch", "account_index")
-	freeswitch_destination, _ = c.GetString("freeswitch", "destination_index")
-	freeswitch_time_start, _ = c.GetString("freeswitch", "time_start_index")
-	freeswitch_duration, _ = c.GetString("freeswitch", "duration_index")
-	freeswitch_uuid, _ = c.GetString("freeswitch", "uuid_index")
-}
 
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
 	l, err := net.Listen("tcp", rpcAddress)
@@ -258,12 +208,12 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period))
 		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
-		errConn := sm.Connect(freeswitch_server, freeswitch_pass)
+		errConn := sm.Connect(freeswitch_server, freeswitch_pass, freeswitch_reconnects)
 		if errConn != nil {
 			rater.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", errConn))
 		}
 	default:
-		rater.Logger.Err(fmt.Sprintf("<SessionManager> Unknown session manger type: %s!", sm_switch_type))
+		rater.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", sm_switch_type))
 		exitChan <- true
 	}
 	exitChan <-true

@@ -47,15 +47,15 @@ func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, d
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
-func (sm *FSSessionManager) Connect(address, pass string) (err error) {
+func (sm *FSSessionManager) Connect(address, pass string, reconnects int) (err error) {
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
-	if fsock.FS, err = fsock.NewFSock(address, pass, 5, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
+	if fsock.FS, err = fsock.NewFSock(address, pass, reconnects, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
 		return err
 	} else if !fsock.FS.Connected() {
 		return errors.New("Cannot connect to FreeSWITCH")
 	}
 	fsock.FS.ReadEvents()
-	return errors.New("Stopped reading events")
+	return errors.New("stopped reading events")
 }
 
 func (sm *FSSessionManager) createHandlers() (handlers map[string][]func(string)) {
