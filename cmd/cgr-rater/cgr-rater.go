@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"code.google.com/p/goconf/conf"
 	"errors"
 	"flag"
 	"fmt"
@@ -52,67 +51,14 @@ const (
 )
 
 var (
-	config       = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
-	version      = flag.Bool("version", false, "Prints the application version.")
-	data_db_type = REDIS
-	data_db_host = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
-	data_db_port = ""          // The port to bind to.
-	data_db_name = "10"        // The name of the database to connect to.
-	data_db_user = ""          // The user to sign in as.
-	data_db_pass = ""          // The user's password.
-	log_db_type  = MONGO
-	log_db_host  = "localhost" // The host to connect to. Values that start with / are for UNIX domain sockets.
-	log_db_port  = ""          // The port to bind to.
-	log_db_name  = "cgrates"   // The name of the database to connect to.
-	log_db_user  = ""          // The user to sign in as.
-	log_db_pass  = ""          // The user's password.
-
-	rater_enabled      = false            // start standalone server (no balancer)
-	rater_balancer     = DISABLED         // balancer address host:port
-	rater_listen       = "127.0.0.1:1234" // listening address host:port
-	rater_rpc_encoding = GOB              // use JSON for RPC encoding
-
-	balancer_enabled      = false
-	balancer_listen       = "127.0.0.1:2001" // Json RPC server address
-	balancer_rpc_encoding = GOB              // use JSON for RPC encoding
-
-	scheduler_enabled = false
-
-	sm_enabled      = false
-	sm_switch_type  = FS
-	sm_rater        = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	sm_debit_period = 10       // the period to be debited in advanced during a call (in seconds)
-	sm_rpc_encoding = GOB      // use JSON for RPC encoding
-
-	mediator_enabled        = false
-	mediator_cdr_path       = ""       // Freeswitch Master CSV CDR path.
-	mediator_cdr_out_path   = ""       // Freeswitch Master CSV CDR output path.
-	mediator_rater          = INTERNAL // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	mediator_rpc_encoding   = GOB      // use JSON for RPC encoding
-	mediator_skipdb         = false
-	mediator_pseudo_prepaid = false
-
-	freeswitch_server      = "localhost:8021" // freeswitch address host:port
-	freeswitch_pass        = "ClueCon"        // reeswitch address host:port
-	freeswitch_direction   = ""
-	freeswitch_tor         = ""
-	freeswitch_tenant      = ""
-	freeswitch_subject     = ""
-	freeswitch_account     = ""
-	freeswitch_destination = ""
-	freeswitch_time_start  = ""
-	freeswitch_duration    = ""
-	freeswitch_uuid        = ""
-	freeswitch_reconnects = 5
-
-	cfgParseErr error
-
+	cfgPath  = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
+	version  = flag.Bool("version", false, "Prints the application version.")
 	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
 	sm       sessionmanager.SessionManager
+	cfg      *CGRConfig
+	err	error
 )
-
-
 
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
 	l, err := net.Listen("tcp", rpcAddress)
@@ -145,15 +91,15 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 
 func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 	var connector rater.Connector
-	if mediator_rater == INTERNAL {
+	if cfg.mediator_rater == INTERNAL {
 		connector = responder
 	} else {
 		var client *rpc.Client
 		var err error
-		if mediator_rpc_encoding == JSON {
-			client, err = jsonrpc.Dial("tcp", mediator_rater)
+		if cfg.mediator_rpc_encoding == JSON {
+			client, err = jsonrpc.Dial("tcp", cfg.mediator_rater)
 		} else {
-			client, err = rpc.Dial("tcp", mediator_rater)
+			client, err = rpc.Dial("tcp", cfg.mediator_rater)
 		}
 		if err != nil {
 			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
@@ -161,42 +107,43 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		}
 		connector = &rater.RPCClientConnector{Client: client}
 	}
-	if _, err := os.Stat(mediator_cdr_path); err != nil {
-		rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", mediator_cdr_path))
+	if _, err := os.Stat(cfg.mediator_cdr_path); err != nil {
+		rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", cfg.mediator_cdr_path))
 		exitChan <- true
 	}
-	if _, err := os.Stat(mediator_cdr_out_path); err != nil {
-		rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", mediator_cdr_out_path))
+	if _, err := os.Stat(cfg.mediator_cdr_out_path); err != nil {
+		rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", cfg.mediator_cdr_out_path))
 		exitChan <- true
 	}
+	// ToDo: Why is here 
 	// Check parsing errors
-	if cfgParseErr != nil {
-		rater.Logger.Crit(fmt.Sprintf("Errors on config parsing: <%v>", cfgParseErr))
-		exitChan <- true
-	}
+	//if cfgParseErr != nil {
+	//	rater.Logger.Crit(fmt.Sprintf("Errors on config parsing: <%v>", cfgParseErr))
+	//	exitChan <- true
+	//}
 
-	m, err := mediator.NewMediator(connector, loggerDb, mediator_skipdb, mediator_cdr_out_path, mediator_pseudo_prepaid, freeswitch_direction,
-		freeswitch_tor, freeswitch_tenant, freeswitch_subject, freeswitch_account, freeswitch_destination,
-		freeswitch_time_start, freeswitch_duration, freeswitch_uuid)
+	m, err := mediator.NewMediator(connector, loggerDb, cfg.mediator_skipdb, cfg.mediator_cdr_out_path, cfg.mediator_pseudo_prepaid, 
+		cfg.freeswitch_direction, cfg.freeswitch_tor, cfg.freeswitch_tenant, cfg.freeswitch_subject, cfg.freeswitch_account,
+		 cfg.freeswitch_destination, cfg.freeswitch_time_start, cfg.freeswitch_duration, cfg.freeswitch_uuid)
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
 	}
 
-	m.TrackCDRFiles(mediator_cdr_path)
+	m.TrackCDRFiles(cfg.mediator_cdr_path)
 }
 
 func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage) {
 	var connector rater.Connector
-	if sm_rater == INTERNAL {
+	if cfg.sm_rater == INTERNAL {
 		connector = responder
 	} else {
 		var client *rpc.Client
 		var err error
-		if sm_rpc_encoding == JSON {
-			client, err = jsonrpc.Dial("tcp", sm_rater)
+		if cfg.sm_rpc_encoding == JSON {
+			client, err = jsonrpc.Dial("tcp", cfg.sm_rater)
 		} else {
-			client, err = rpc.Dial("tcp", sm_rater)
+			client, err = rpc.Dial("tcp", cfg.sm_rater)
 		}
 		if err != nil {
 			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
@@ -204,27 +151,27 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 		}
 		connector = &rater.RPCClientConnector{Client: client}
 	}
-	switch sm_switch_type {
+	switch cfg.sm_switch_type {
 	case FS:
-		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period))
+		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.sm_debit_period))
 		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
-		errConn := sm.Connect(freeswitch_server, freeswitch_pass, freeswitch_reconnects)
+		errConn := sm.Connect(cfg.freeswitch_server, cfg.freeswitch_pass, cfg.freeswitch_reconnects)
 		if errConn != nil {
 			rater.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", errConn))
 		}
 	default:
-		rater.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", sm_switch_type))
+		rater.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.sm_switch_type))
 		exitChan <- true
 	}
-	exitChan <-true
+	exitChan <- true
 }
 
 func checkConfigSanity() {
-	if sm_enabled && rater_enabled && rater_balancer != DISABLED {
+	if cfg.sm_enabled && cfg.rater_enabled && cfg.rater_balancer != DISABLED {
 		rater.Logger.Crit("The session manager must not be enabled on a worker rater (change [rater]/balancer to disabled)!")
 		exitChan <- true
 	}
-	if balancer_enabled && rater_enabled && rater_balancer != DISABLED {
+	if cfg.balancer_enabled && cfg.rater_enabled && cfg.rater_balancer != DISABLED {
 		rater.Logger.Crit("The balancer is enabled so it cannot connect to anatoher balancer (change [rater]/balancer to disabled)!")
 		exitChan <- true
 	}
@@ -233,29 +180,29 @@ func checkConfigSanity() {
 	// if they are using the same encoding as the rater/balancer
 	// this scenariou should be used for debug puropses only (it is racy anyway)
 	// and it might be forbidden in the future
-	if strings.Contains(sm_rater, "localhost") || strings.Contains(sm_rater, "127.0.0.1") {
-		if balancer_enabled {
-			if balancer_rpc_encoding != sm_rpc_encoding {
+	if strings.Contains(cfg.sm_rater, "localhost") || strings.Contains(cfg.sm_rater, "127.0.0.1") {
+		if cfg.balancer_enabled {
+			if cfg.balancer_rpc_encoding != cfg.sm_rpc_encoding {
 				rater.Logger.Crit("If you are connecting the session manager via the loopback to the balancer use the same type of rpc encoding!")
 				exitChan <- true
 			}
 		}
-		if rater_enabled {
-			if rater_rpc_encoding != sm_rpc_encoding {
+		if cfg.rater_enabled {
+			if cfg.rater_rpc_encoding != cfg.sm_rpc_encoding {
 				rater.Logger.Crit("If you are connecting the session manager via the loopback to the arter use the same type of rpc encoding!")
 				exitChan <- true
 			}
 		}
 	}
-	if strings.Contains(mediator_rater, "localhost") || strings.Contains(mediator_rater, "127.0.0.1") {
-		if balancer_enabled {
-			if balancer_rpc_encoding != mediator_rpc_encoding {
+	if strings.Contains(cfg.mediator_rater, "localhost") || strings.Contains(cfg.mediator_rater, "127.0.0.1") {
+		if cfg.balancer_enabled {
+			if cfg.balancer_rpc_encoding != cfg.mediator_rpc_encoding {
 				rater.Logger.Crit("If you are connecting the mediator via the loopback to the balancer use the same type of rpc encoding!")
 				exitChan <- true
 			}
 		}
-		if rater_enabled {
-			if rater_rpc_encoding != mediator_rpc_encoding {
+		if cfg.rater_enabled {
+			if cfg.rater_rpc_encoding != cfg.mediator_rpc_encoding {
 				rater.Logger.Crit("If you are connecting the mediator via the loopback to the arter use the same type of rpc encoding!")
 				exitChan <- true
 			}
@@ -299,60 +246,60 @@ func main() {
 		return
 	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	c, err := conf.ReadConfigFile(*config)
+
+	cfg, err = NewCGRConfig( cfgPath )
 	if err != nil {
-		rater.Logger.Err(fmt.Sprintf("Could not open the configuration file: %v", err))
+		rater.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
 		return
 	}
-	readConfig(c)
 	// some consitency checks
 	go checkConfigSanity()
 
 	var getter, loggerDb rater.DataStorage
-	getter, err = configureDatabase(data_db_type, data_db_host, data_db_port, data_db_name, data_db_user, data_db_pass)
+	getter, err = configureDatabase(cfg.data_db_type, cfg.data_db_host, cfg.data_db_port, cfg.data_db_name, cfg.data_db_user, cfg.data_db_pass)
 
 	if err == nil {
 		defer getter.Close()
 		rater.SetDataStorage(getter)
 	}
 
-	if log_db_type == SAME {
+	if cfg.log_db_type == SAME {
 		loggerDb = getter
 	} else {
-		loggerDb, err = configureDatabase(log_db_type, log_db_host, log_db_port, log_db_name, log_db_user, log_db_pass)
+		loggerDb, err = configureDatabase(cfg.log_db_type, cfg.log_db_host, cfg.log_db_port, cfg.log_db_name, cfg.log_db_user, cfg.log_db_pass)
 	}
 	if err == nil {
 		defer loggerDb.Close()
 		rater.SetStorageLogger(loggerDb)
 	}
 
-	if sm_debit_period > 0 {
-		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", sm_debit_period)); err == nil {
+	if cfg.sm_debit_period > 0 {
+		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", cfg.sm_debit_period)); err == nil {
 			rater.SetDebitPeriod(dp)
 		}
 	}
 
-	if rater_enabled && rater_balancer != DISABLED && !balancer_enabled {
+	if cfg.rater_enabled && cfg.rater_balancer != DISABLED && !cfg.balancer_enabled {
 		go registerToBalancer()
 		go stopRaterSingnalHandler()
 	}
 	responder := &rater.Responder{ExitChan: exitChan}
-	if rater_enabled && !balancer_enabled && rater_listen != INTERNAL {
-		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", rater_listen))
-		go listenToRPCRequests(responder, rater_listen, rater_rpc_encoding)
+	if cfg.rater_enabled && !cfg.balancer_enabled && cfg.rater_listen != INTERNAL {
+		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.rater_listen))
+		go listenToRPCRequests(responder, cfg.rater_listen, cfg.rater_rpc_encoding)
 	}
-	if balancer_enabled {
-		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", balancer_listen))
+	if cfg.balancer_enabled {
+		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.balancer_listen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
-		go listenToRPCRequests(responder, balancer_listen, balancer_rpc_encoding)
-		if rater_enabled {
+		go listenToRPCRequests(responder, cfg.balancer_listen, cfg.balancer_rpc_encoding)
+		if cfg.rater_enabled {
 			rater.Logger.Info("Starting internal rater.")
 			bal.AddClient("local", new(rater.ResponderWorker))
 		}
 	}
 
-	if scheduler_enabled {
+	if cfg.scheduler_enabled {
 		rater.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
@@ -362,14 +309,14 @@ func main() {
 		}()
 	}
 
-	if sm_enabled {
+	if cfg.sm_enabled {
 		rater.Logger.Info("Starting CGRateS SessionManager.")
 		go startSessionManager(responder, loggerDb)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler()
 	}
 
-	if mediator_enabled {
+	if cfg.mediator_enabled {
 		rater.Logger.Info("Starting CGRateS Mediator.")
 		go startMediator(responder, loggerDb)
 	}

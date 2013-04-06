@@ -58,15 +58,15 @@ func stopRaterSingnalHandler() {
 Connects to the balancer and calls unregister RPC method.
 */
 func unregisterFromBalancer() {
-	client, err := rpc.Dial("tcp", rater_balancer)
+	client, err := rpc.Dial("tcp", cfg.rater_balancer)
 	if err != nil {
 		rater.Logger.Crit("Cannot contact the balancer!")
 		exitChan <- true
 		return
 	}
 	var reply int
-	rater.Logger.Info(fmt.Sprintf("Unregistering from balancer %s", rater_balancer))
-	client.Call("Responder.UnRegisterRater", rater_listen, &reply)
+	rater.Logger.Info(fmt.Sprintf("Unregistering from balancer %s", cfg.rater_balancer))
+	client.Call("Responder.UnRegisterRater", cfg.rater_listen, &reply)
 	if err := client.Close(); err != nil {
 		rater.Logger.Crit("Could not close balancer unregistration!")
 		exitChan <- true
@@ -77,15 +77,15 @@ func unregisterFromBalancer() {
 Connects to the balancer and rehisters the rater to the server.
 */
 func registerToBalancer() {
-	client, err := rpc.Dial("tcp", rater_balancer)
+	client, err := rpc.Dial("tcp", cfg.rater_balancer)
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("Cannot contact the balancer: %v", err))
 		exitChan <- true
 		return
 	}
 	var reply int
-	rater.Logger.Info(fmt.Sprintf("Registering to balancer %s", rater_balancer))
-	client.Call("Responder.RegisterRater", rater_listen, &reply)
+	rater.Logger.Info(fmt.Sprintf("Registering to balancer %s", cfg.rater_balancer))
+	client.Call("Responder.RegisterRater", cfg.rater_listen, &reply)
 	if err := client.Close(); err != nil {
 		rater.Logger.Crit("Could not close balancer registration!")
 		exitChan <- true
@@ -115,7 +115,7 @@ func shutdownSessionmanagerSingnalHandler() {
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	<-c
 
-	if err := sm.Shutdown(); err!=nil {
+	if err := sm.Shutdown(); err != nil {
 		rater.Logger.Warning(fmt.Sprintf("<SessionManager> %s", err))
 	}
 	exitChan <- true
