@@ -63,9 +63,9 @@ type CGRConfig struct {
 	SMRater                string // address where to access rater. Can be internal, direct rater address or the address of a balancer
 	SMDebitPeriod          int    // the period to be debited in advanced during a call (in seconds)
 	SMRPCEncoding          string // use JSON for RPC encoding
-	SMDefaultTOR           string // set default type of record label to 0
-	SMDefaultTenant        string // set default tenant to 0
-	SMDefaultSubject       string // set default rating subject to 0
+	SMDefaultTOR           string // set default type of record
+	SMDefaultTenant        string // set default tenant
+	SMDefaultSubject       string // set default rating subject
 	MediatorEnabled        bool
 	MediatorCDRPath        string // Freeswitch Master CSV CDR path.
 	MediatorCDROutPath     string // Freeswitch Master CSV CDR output path.

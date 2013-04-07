@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/rater"
 	"time"
 )
 

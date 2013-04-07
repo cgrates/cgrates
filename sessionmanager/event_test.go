@@ -27,7 +27,7 @@ func TestFirstNonEmpty(t *testing.T) {
 	sampleMap := make(map[string]string)
 	sampleMap["Third"] = "third"
 	fourthElmnt := "fourth"
-	winnerElmnt := firstNonEmpty( []string{firstElmnt, sampleMap["second"], sampleMap["Third"], fourthElmnt} )
+	winnerElmnt := firstNonEmpty([]string{firstElmnt, sampleMap["second"], sampleMap["Third"], fourthElmnt})
 	if winnerElmnt != sampleMap["Third"] {
 		t.Error("Wrong elemnt returned: ", winnerElmnt)
 	}

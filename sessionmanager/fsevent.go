@@ -60,8 +60,6 @@ const (
 	SYSTEM_ERROR       = "-SYSTEM_ERROR"
 	MANAGER_REQUEST    = "+MANAGER_REQUEST"
 	USERNAME           = "Caller-Username"
-	TOR_DEFAULT        = "0"
-	CSTMID_DEFAULT	   = "0"
 )
 
 // Nice printing for the event object.
@@ -92,25 +90,29 @@ func (fsev *FSEvent) GetOrigId() string {
 	return fsev.fields[ORIG_ID]
 }
 func (fsev *FSEvent) GetSubject() string {
-	return firstNonEmpty( []string{fsev.fields[SUBJECT], fsev.fields[USERNAME]} )
+	return firstNonEmpty([]string{fsev.fields[SUBJECT], fsev.fields[USERNAME]})
 }
 func (fsev *FSEvent) GetAccount() string {
-	return firstNonEmpty( []string{fsev.fields[ACCOUNT], fsev.fields[USERNAME]} )
+	return firstNonEmpty([]string{fsev.fields[ACCOUNT], fsev.fields[USERNAME]})
 }
+
+// Charging destination number
 func (fsev *FSEvent) GetDestination() string {
-	return firstNonEmpty( []string{fsev.fields[DESTINATION], fsev.fields[CALL_DEST_NR]} )
+	return firstNonEmpty([]string{fsev.fields[DESTINATION], fsev.fields[CALL_DEST_NR]})
+}
+
+// Original dialed destination number, useful in case of unpark
+func (fsev *FSEvent) GetCallDestNr() string {
+	return fsev.fields[CALL_DEST_NR]
 }
 func (fsev *FSEvent) GetTOR() string {
-	return firstNonEmpty( []string{fsev.fields[TOR], TOR_DEFAULT} )
+	return firstNonEmpty([]string{fsev.fields[TOR], cfg.SMDefaultTOR})
 }
 func (fsev *FSEvent) GetUUID() string {
 	return fsev.fields[UUID]
 }
 func (fsev *FSEvent) GetTenant() string {
-	return firstNonEmpty( []string{fsev.fields[CSTMID], CSTMID_DEFAULT} )
-}
-func (fsev *FSEvent) GetCallDestNr() string {
-	return fsev.fields[CALL_DEST_NR]
+	return firstNonEmpty([]string{fsev.fields[CSTMID], cfg.SMDefaultTenant})
 }
 func (fsev *FSEvent) GetReqType() string {
 	return fsev.fields[REQTYPE]
@@ -125,6 +127,9 @@ func (fsev *FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetUUID()) == "" ||
 		strings.TrimSpace(fsev.GetTenant()) == "" ||
 		strings.TrimSpace(fsev.GetCallDestNr()) == ""
+}
+func (fsev *FSEvent) GetFallbackSubj() string {
+	return cfg.SMDefaultSubject
 }
 func (fsev *FSEvent) GetStartTime(field string) (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev.fields[field], 0, 64)

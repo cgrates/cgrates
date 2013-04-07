@@ -22,14 +22,16 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/fsock"
 	"log/syslog"
 	"net"
 	"strings"
 	"time"
 )
+
+var cfg *config.CGRConfig
 
 // The freeswitch session manager type holding a buffer for the network connection
 // and the active sessions
@@ -48,7 +50,8 @@ func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, d
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
-func (sm *FSSessionManager) Connect(cfg *config.CGRConfig) (err error) {
+func (sm *FSSessionManager) Connect(cgrCfg *config.CGRConfig) (err error) {
+	cfg = cgrCfg // make config global
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
 	if fsock.FS, err = fsock.NewFSock(cfg.FreeswitchServer, cfg.FreeswitchPass, cfg.FreeswitchReconnects, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
 		return err
@@ -152,14 +155,15 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		return
 	}
 	cd := rater.CallDescriptor{
-		Direction:   ev.GetDirection(),
-		Tenant:      ev.GetTenant(),
-		TOR:         ev.GetTOR(),
-		Subject:     ev.GetSubject(),
-		Account:     ev.GetAccount(),
-		Destination: ev.GetDestination(),
-		Amount:      sm.debitPeriod.Seconds(),
-		TimeStart:   startTime}
+		Direction:       ev.GetDirection(),
+		Tenant:          ev.GetTenant(),
+		TOR:             ev.GetTOR(),
+		Subject:         ev.GetSubject(),
+		Account:         ev.GetAccount(),
+		Destination:     ev.GetDestination(),
+		Amount:          sm.debitPeriod.Seconds(),
+		TimeStart:       startTime,
+		FallbackSubject: ev.GetFallbackSubj()}
 	var remainingSeconds float64
 	err = sm.connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
@@ -325,7 +329,7 @@ func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
 }
 
 func (sm *FSSessionManager) Shutdown() (err error) {
-	if fsock.FS==nil || !fsock.FS.Connected() {
+	if fsock.FS == nil || !fsock.FS.Connected() {
 		return errors.New("Cannot shutdown sessions, fsock not connected")
 	}
 	rater.Logger.Info("Shutting down all sessions...")

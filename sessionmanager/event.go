@@ -30,23 +30,23 @@ type Event interface {
 	GetSubject() string
 	GetAccount() string
 	GetDestination() string
+	GetCallDestNr() string
 	GetTOR() string
 	GetUUID() string
 	GetTenant() string
 	GetReqType() string
-	GetCallDestNr() string
 	GetStartTime(string) (time.Time, error)
 	GetEndTime() (time.Time, error)
+	GetFallbackSubj() string
 	MissingParameter() bool
 }
 
-
 // Returns first non empty string out of vals. Useful to extract defaults
-func firstNonEmpty( vals []string ) string {
-    for _,val := range vals {
-        if len(val) != 0 {
-            return val
-        }
-    }
-    return ""
+func firstNonEmpty(vals []string) string {
+	for _, val := range vals {
+		if len(val) != 0 {
+			return val
+		}
+	}
+	return ""
 }
