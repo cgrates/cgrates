@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/fsock"
 	"log/syslog"
 	"net"
@@ -47,9 +48,9 @@ func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, d
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
-func (sm *FSSessionManager) Connect(address, pass string, reconnects int) (err error) {
+func (sm *FSSessionManager) Connect(cfg *config.CGRConfig) (err error) {
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
-	if fsock.FS, err = fsock.NewFSock(address, pass, reconnects, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
+	if fsock.FS, err = fsock.NewFSock(cfg.FreeswitchServer, cfg.FreeswitchPass, cfg.FreeswitchReconnects, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
 		return err
 	} else if !fsock.FS.Connected() {
 		return errors.New("Cannot connect to FreeSWITCH")

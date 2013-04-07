@@ -20,11 +20,12 @@ package sessionmanager
 
 import (
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/config"
 	"time"
 )
 
 type SessionManager interface {
-	Connect(address, pass string, reconnects int) error
+	Connect(*config.CGRConfig) error
 	DisconnectSession(*Session, string)
 	RemoveSession(*Session)
 	LoopAction(*Session, *rater.CallDescriptor)
