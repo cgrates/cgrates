@@ -38,53 +38,53 @@ const (
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	DataDBType            string
-	DataDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDBPort            string // The port to bind to.
-	DataDBName            string // The name of the database to connect to.
-	DataDBUser            string // The user to sign in as.
-	DataDBPass            string // The user's password.
-	LogDBType             string // Should reflect the database type used to store logs
-	LogDBHost             string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	LogDBPort             string // The port to bind to.
-	LogDBName             string // The name of the database to connect to.
-	LogDBUser             string // The user to sign in as.
-	LogDBPass             string // The user's password.
+	DataDBType             string
+	DataDBHost             string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDBPort             string // The port to bind to.
+	DataDBName             string // The name of the database to connect to.
+	DataDBUser             string // The user to sign in as.
+	DataDBPass             string // The user's password.
+	LogDBType              string // Should reflect the database type used to store logs
+	LogDBHost              string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	LogDBPort              string // The port to bind to.
+	LogDBName              string // The name of the database to connect to.
+	LogDBUser              string // The user to sign in as.
+	LogDBPass              string // The user's password.
 	RaterEnabled           bool   // start standalone server (no balancer)
 	RaterBalancer          string // balancer address host:port
 	RaterListen            string // listening address host:port
-	RaterRPCEncoding      string // use JSON for RPC encoding
+	RaterRPCEncoding       string // use JSON for RPC encoding
 	BalancerEnabled        bool
 	BalancerListen         string // Json RPC server address
-	BalancerRPCEncoding   string // use JSON for RPC encoding
+	BalancerRPCEncoding    string // use JSON for RPC encoding
 	SchedulerEnabled       bool
 	SMEnabled              bool
-	SMSwitchType          string
+	SMSwitchType           string
 	SMRater                string // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMDebitPeriod         int    // the period to be debited in advanced during a call (in seconds)
-	SMRPCEncoding         string // use JSON for RPC encoding
-	SMDefaultTOR          string // set default type of record label to 0
-	SMDefaultTenant       string // set default tenant to 0
-	SMDefaultSubject      string // set default rating subject to 0
+	SMDebitPeriod          int    // the period to be debited in advanced during a call (in seconds)
+	SMRPCEncoding          string // use JSON for RPC encoding
+	SMDefaultTOR           string // set default type of record label to 0
+	SMDefaultTenant        string // set default tenant to 0
+	SMDefaultSubject       string // set default rating subject to 0
 	MediatorEnabled        bool
-	MediatorCDRPath       string // Freeswitch Master CSV CDR path.
-	MediatorCDROutPath   string // Freeswitch Master CSV CDR output path.
+	MediatorCDRPath        string // Freeswitch Master CSV CDR path.
+	MediatorCDROutPath     string // Freeswitch Master CSV CDR output path.
 	MediatorRater          string // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	MediatorRPCEncoding   string // use JSON for RPC encoding
+	MediatorRPCEncoding    string // use JSON for RPC encoding
 	MediatorSkipDB         bool
-	MediatorPseudoprepaid bool
+	MediatorPseudoprepaid  bool
 	FreeswitchServer       string // freeswitch address host:port
 	FreeswitchPass         string // FS socket password
-	FreeswitchDirectionIdx    string
-	FreeswitchTORIdx          string
-	FreeswitchTenantIdx       string
-	FreeswitchSubjectIdx      string
-	FreeswitchAccountIdx      string
-	FreeswitchDestIdx  string
-	FreeswitchTimeStartIdx   string
-	FreeswitchDurationIdx     string
-	FreeswitchUUIDIdx         string
-	FreeswitchReconnects   int
+	FreeswitchDirectionIdx string
+	FreeswitchTORIdx       string
+	FreeswitchTenantIdx    string
+	FreeswitchSubjectIdx   string
+	FreeswitchAccountIdx   string
+	FreeswitchDestIdx      string
+	FreeswitchTimeStartIdx string
+	FreeswitchDurationIdx  string
+	FreeswitchUUIDIdx      string
+	FreeswitchReconnects   int // number of times to attempt reconnect after connect fails
 }
 
 // Instantiate a new CGRConfig setting defaults or reading from file

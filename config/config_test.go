@@ -25,7 +25,7 @@ import (
 
 func TestConfig(t *testing.T) {
 	cfgPth := "test_data.txt"
-	cfg, err := NewCGRConfig( &cfgPth )
+	cfg, err := NewCGRConfig(&cfgPth)
 	if err != nil {
 		t.Log(fmt.Sprintf("Could not parse config: %s!", err))
 		t.FailNow()
@@ -79,15 +79,14 @@ func TestConfig(t *testing.T) {
 
 func TestParamOverwrite(t *testing.T) {
 	cfgPth := "test_data.txt"
-	cfg, err := NewCGRConfig( &cfgPth )
+	cfg, err := NewCGRConfig(&cfgPth)
 	if err != nil {
 		t.Log(fmt.Sprintf("Could not parse config: %s!", err))
 		t.FailNow()
 	}
-	if cfg.FreeswitchReconnects !=  5 { // one default which is not overwritten in test data
-		t.Errorf("FreeswitchReconnects set == %d, expect 5",cfg.FreeswitchReconnects)
+	if cfg.FreeswitchReconnects != 5 { // one default which is not overwritten in test data
+		t.Errorf("FreeswitchReconnects set == %d, expect 5", cfg.FreeswitchReconnects)
 	} else if cfg.SchedulerEnabled != true { // one parameter which should be overwritten in test data
-		t.Errorf("scheduler_enabled set == %d, expect true",cfg.SchedulerEnabled)
+		t.Errorf("scheduler_enabled set == %d, expect true", cfg.SchedulerEnabled)
 	}
 }
-

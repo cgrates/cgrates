@@ -23,11 +23,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/balancer2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
-	"github.com/cgrates/cgrates/config"
 	"io"
 	"net"
 	"net/rpc"
@@ -58,7 +58,7 @@ var (
 	exitChan = make(chan bool)
 	sm       sessionmanager.SessionManager
 	cfg      *config.CGRConfig
-	err	error
+	err      error
 )
 
 func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
@@ -123,9 +123,9 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 	//	exitChan <- true
 	//}
 
-	m, err := mediator.NewMediator(connector, loggerDb, cfg.MediatorSkipDB, cfg.MediatorCDROutPath, cfg.MediatorPseudoprepaid, 
+	m, err := mediator.NewMediator(connector, loggerDb, cfg.MediatorSkipDB, cfg.MediatorCDROutPath, cfg.MediatorPseudoprepaid,
 		cfg.FreeswitchDirectionIdx, cfg.FreeswitchTORIdx, cfg.FreeswitchTenantIdx, cfg.FreeswitchSubjectIdx, cfg.FreeswitchAccountIdx,
-		 cfg.FreeswitchDestIdx, cfg.FreeswitchTimeStartIdx, cfg.FreeswitchDurationIdx, cfg.FreeswitchUUIDIdx)
+		cfg.FreeswitchDestIdx, cfg.FreeswitchTimeStartIdx, cfg.FreeswitchDurationIdx, cfg.FreeswitchUUIDIdx)
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
@@ -156,7 +156,7 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitPeriod))
 		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
-		errConn := sm.Connect(cfg )
+		errConn := sm.Connect(cfg)
 		if errConn != nil {
 			rater.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", errConn))
 		}
@@ -248,7 +248,7 @@ func main() {
 	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	cfg, err = config.NewCGRConfig( cfgPath )
+	cfg, err = config.NewCGRConfig(cfgPath)
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
 		return
