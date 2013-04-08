@@ -63,9 +63,10 @@ type CGRConfig struct {
 	SMRater                string // address where to access rater. Can be internal, direct rater address or the address of a balancer
 	SMDebitPeriod          int    // the period to be debited in advanced during a call (in seconds)
 	SMRPCEncoding          string // use JSON for RPC encoding
+	SMDefaultReqType       string // Use this request type if not defined on top
 	SMDefaultTOR           string // set default type of record
 	SMDefaultTenant        string // set default tenant
-	SMDefaultSubject       string // set default rating subject
+	SMDefaultSubject       string // set default rating subject, useful in case of fallback
 	MediatorEnabled        bool
 	MediatorCDRPath        string // Freeswitch Master CSV CDR path.
 	MediatorCDROutPath     string // Freeswitch Master CSV CDR output path.
@@ -226,6 +227,10 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	cfg.SMDefaultTOR = "0"
 	if hasOpt = c.HasOption("session_manager", "default_tor"); hasOpt {
 		cfg.SMDefaultTOR, _ = c.GetString("session_manager", "default_tor")
+	}
+	cfg.SMDefaultReqType = "" // By default CGRateS is inactive, customer should activate when he feels he is ready
+	if hasOpt = c.HasOption("session_manager", "default_reqtype"); hasOpt {
+		cfg.SMDefaultReqType, _ = c.GetString("session_manager", "default_reqtype")
 	}
 	cfg.SMDefaultTenant = "0"
 	if hasOpt = c.HasOption("session_manager", "default_tenant"); hasOpt {
