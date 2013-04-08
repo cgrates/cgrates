@@ -31,7 +31,7 @@ import (
 	"time"
 )
 
-var cfg *config.CGRConfig
+var cfg *config.CGRConfig // Share the configuration with the rest of the package
 
 // The freeswitch session manager type holding a buffer for the network connection
 // and the active sessions
