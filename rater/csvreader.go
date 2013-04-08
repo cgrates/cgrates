@@ -253,7 +253,7 @@ func (csvr *CSVReader) LoadRateTimings(fn string, comma rune) (err error) {
 			rt := NewRateTiming(record[1], t, record[3])
 			rs, exists := csvr.rates[record[1]]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not rate for tag %v", record[2]))
+				return errors.New(fmt.Sprintf("Could not find rate for tag %v", record[1]))
 			}
 			for _, r := range rs {
 				_, exists := csvr.activationPeriods[tag]

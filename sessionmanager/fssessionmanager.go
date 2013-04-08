@@ -211,6 +211,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Destination: ev.GetDestination(),
 			TimeStart:   startTime,
 			TimeEnd:     endTime,
+			FallbackSubject: ev.GetFallbackSubj()
 		}
 		cc := &rater.CallCost{}
 		err = sm.connector.Debit(cd, cc)
@@ -269,6 +270,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
 			Amount:      -cost,
+			FallbackSubject: lastCC.FallbackSubject
 		}
 		var response float64
 		err := sm.connector.DebitCents(*cd, &response)
@@ -285,6 +287,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
 			Amount:      -seconds,
+			FallbackSubject: lastCC.FallbackSubject
 		}
 		var response float64
 		err := sm.connector.DebitSeconds(*cd, &response)

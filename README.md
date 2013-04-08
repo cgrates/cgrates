@@ -1,4 +1,4 @@
-# Rating system designed to be used in VoIP Carriers World #
+# Rating system for Telecom & ISP environments #
 
 ## Features ##
 + Rates for prepaid and for postpaid
@@ -18,6 +18,6 @@ PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
 API reference http://gopkgdoc.appspot.com/pkg/github.com/cgrates/cgrates
 
-Also check irc.freenode.net#cgrates and [Google group](https://groups.google.com/forum/#!forum/cgrates) for live info.
+Also check irc.freenode.net#cgrates and [Google group](https://groups.google.com/forum/#!forum/cgrates) for a more real-time support.
 
 Continous integration: [![Build Status](https://goci.herokuapp.com/project/image/github.com/cgrates/cgrates "Continous integration")](http://goci.me/project/github.com/cgrates/cgrates) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
