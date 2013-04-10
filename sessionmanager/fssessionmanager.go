@@ -181,16 +181,25 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
-	rater.Logger.Info("freeswitch answer")
+	rater.Logger.Info("<SessionManager> FreeSWITCH answer.")
 	s := NewSession(ev, sm)
 	if s != nil {
 		sm.sessions = append(sm.sessions, s)
 	}
+	// Make sure cgr_type is enforced even if not set by FreeSWITCH
+	cgrType := ev.GetReqType()
+	if cgrType != "" {
+		err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_type %s\n\n", s.uuid, cgrType))
+		if err != nil {
+			rater.Logger.Err("<SessionManager> Could not enforce cgr_type variable on FreeSWITCH uuid")
+		}
+	}
 }
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
-	rater.Logger.Info("freeswitch hangup")
+	rater.Logger.Info("<SessionManager> FreeSWITCH hangup.")
 	s := sm.GetSession(ev.GetUUID())
+	sm.RemoveSession(s)
 	if ev.GetReqType() == REQTYPE_POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
@@ -337,10 +346,9 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	}
 	rater.Logger.Info("Shutting down all sessions...")
 	fsock.FS.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype prepaid")
-	fsock.FS.SendApiCmd("hupall MANAGER_REQUEST cgr_reqtype postpaid")
 	for guard := 0; len(sm.sessions) > 0 && guard < 20; guard++ {
 		time.Sleep(100 * time.Millisecond) // wait for the hungup event to be fired
-		rater.Logger.Info(fmt.Sprintf("sessions: %s", sm.sessions))
+		rater.Logger.Info(fmt.Sprintf("<SessionManager> Shutdown waiting on sessions: %s", sm.sessions))
 	}
 	return
 }
