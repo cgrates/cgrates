@@ -199,7 +199,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	rater.Logger.Info("<SessionManager> FreeSWITCH hangup.")
 	s := sm.GetSession(ev.GetUUID())
-	sm.RemoveSession(s)
+	sm.RemoveSession(s) // Session cleanup from memory
 	if ev.GetReqType() == REQTYPE_POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
