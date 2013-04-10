@@ -21,6 +21,7 @@ package sessionmanager
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/fsock"
 	"strings"
 	"time"
 )
@@ -37,9 +38,13 @@ type Session struct {
 
 // Creates a new session and starts the debit loop
 func NewSession(ev Event, sm SessionManager) (s *Session) {
-	// if there is no account configured leave the call alone
+	// Ignore calls which have nothing to do with CGRateS 
 	if strings.TrimSpace(ev.GetReqType()) == "" {
 		return
+	}
+	// Make sure cgr_type is enforced even if not set by FreeSWITCH
+	if err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err!=nil {
+		rater.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
 	startTime, err := ev.GetStartTime(START_TIME)
 	if err != nil {
