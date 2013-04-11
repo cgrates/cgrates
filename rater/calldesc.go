@@ -350,10 +350,10 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetUserBalanceKey(), err))
 		return
 	}
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+	if userBalance, err := cd.getUserBalance(); err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error retrieving user balance: %v", err))
 	} else if userBalance == nil {
-		Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v",cd.GetUserBalanceKey()))
+		Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetUserBalanceKey()))
 	} else {
 		Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 		defer storageGetter.SetUserBalance(userBalance)

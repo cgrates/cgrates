@@ -1,0 +1,2 @@
+Tenant,TOR,Direction,Subject,RatesFallbackSubject,RatesTimingTag,ActivationTime
+0,0,OUT,*all,,1CENTPERSEC,2013-01-01T00:00:00Z

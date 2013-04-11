@@ -1,0 +1,2 @@
+Tag,Action,BalanceTag,Direction,Units,DestinationTag,PriceType,PriceValue,MinutesWeight,Weight
+TOPUP_10,TOPUP_RESET,MONETARY,OUT,10,*all,,,,10

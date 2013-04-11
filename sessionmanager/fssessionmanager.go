@@ -207,14 +207,14 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			return
 		}
 		cd := rater.CallDescriptor{
-			Direction:   ev.GetDirection(),
-			Tenant:      ev.GetTenant(),
-			TOR:         ev.GetTOR(),
-			Subject:     ev.GetSubject(),
-			Account:     ev.GetAccount(),
-			Destination: ev.GetDestination(),
-			TimeStart:   startTime,
-			TimeEnd:     endTime,
+			Direction:       ev.GetDirection(),
+			Tenant:          ev.GetTenant(),
+			TOR:             ev.GetTOR(),
+			Subject:         ev.GetSubject(),
+			Account:         ev.GetAccount(),
+			Destination:     ev.GetDestination(),
+			TimeStart:       startTime,
+			TimeEnd:         endTime,
 			FallbackSubject: ev.GetFallbackSubj(),
 		}
 		cc := &rater.CallCost{}
@@ -342,8 +342,8 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	rater.Logger.Info("Shutting down all sessions...")
 	cmdKillPrepaid := "hupall MANAGER_REQUEST cgr_reqtype prepaid"
 	cmdKillPostpaid := "hupall MANAGER_REQUEST cgr_reqtype postpaid"
-	for _,cmd := range[]string{cmdKillPrepaid, cmdKillPostpaid} {
-		if err = fsock.FS.SendApiCmd(cmd); err!= nil {
+	for _, cmd := range []string{cmdKillPrepaid, cmdKillPostpaid} {
+		if err = fsock.FS.SendApiCmd(cmd); err != nil {
 			rater.Logger.Err(fmt.Sprintf("Error on calls shutdown: %s", err))
 			return
 		}

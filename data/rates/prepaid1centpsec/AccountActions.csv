@@ -1,0 +1,6 @@
+Tenant,Account,Direction,ActionTimingsTag,ActionTriggersTag
+0,1000,OUT,TOPUP_10,
+0,1001,OUT,TOPUP_10,
+0,1002,OUT,TOPUP_10,
+0,1003,OUT,TOPUP_10,
+0,1004,OUT,TOPUP_10,

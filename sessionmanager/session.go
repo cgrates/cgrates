@@ -43,7 +43,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 		return
 	}
 	// Make sure cgr_type is enforced even if not set by FreeSWITCH
-	if err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err!=nil {
+	if err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err != nil {
 		rater.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
 	startTime, err := ev.GetStartTime(START_TIME)

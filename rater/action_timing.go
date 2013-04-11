@@ -305,7 +305,7 @@ func (at *ActionTiming) restore(input string) {
 	at.Id = elements[0]
 	at.Tag = elements[1]
 	for _, ubi := range strings.Split(elements[2], ",") {
-		if strings.TrimSpace(ubi) != ""{
+		if strings.TrimSpace(ubi) != "" {
 			at.UserBalanceIds = append(at.UserBalanceIds, ubi)
 		}
 	}

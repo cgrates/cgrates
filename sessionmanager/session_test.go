@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"testing"
 	"github.com/cgrates/cgrates/config"
+	"testing"
 	// "time"
 )
 
@@ -67,9 +67,9 @@ var (
 func TestSessionNilSession(t *testing.T) {
 	cfgTestPath := "../config/test_data.txt"
 	var errCfg error
-	cfg,errCfg = config.NewCGRConfig(&cfgTestPath) // Needed here to avoid nil on cfg variable
-	if errCfg!= nil {
-		t.Errorf("Cannot get configuration %v",errCfg)
+	cfg, errCfg = config.NewCGRConfig(&cfgTestPath) // Needed here to avoid nil on cfg variable
+	if errCfg != nil {
+		t.Errorf("Cannot get configuration %v", errCfg)
 	}
 	newEvent := new(FSEvent).New("")
 	sm := &FSSessionManager{}

@@ -40,30 +40,30 @@ type Action struct {
 
 type actionTypeFunc func(*UserBalance, *Action) error
 
-func getActionFunc(typ string)(actionTypeFunc, bool) {
+func getActionFunc(typ string) (actionTypeFunc, bool) {
 	switch typ {
-		case "LOG":
-			return logAction, true
-		case "RESET_TRIGGERS":
-			return resetTriggersAction, true
-		case "SET_POSTPAID":
-			return setPostpaidAction, true
-		case "RESET_POSTPAID":
-			return resetPostpaidAction, true
-		case "SET_PREPAID":
-			return setPrepaidAction, true
-		case "RESET_PREPAID":
-			return  resetPrepaidAction, true
-		case "TOPUP_RESET":
-			return topupResetAction, true
-		case "TOPUP":
-			return topupAction, true
-		case "DEBIT":
-			return debitAction, true
-		case "RESET_COUNTER":
-			return resetCounterAction, true
-		case "RESET_COUNTERS":
-			return resetCountersAction, true
+	case "LOG":
+		return logAction, true
+	case "RESET_TRIGGERS":
+		return resetTriggersAction, true
+	case "SET_POSTPAID":
+		return setPostpaidAction, true
+	case "RESET_POSTPAID":
+		return resetPostpaidAction, true
+	case "SET_PREPAID":
+		return setPrepaidAction, true
+	case "RESET_PREPAID":
+		return resetPrepaidAction, true
+	case "TOPUP_RESET":
+		return topupResetAction, true
+	case "TOPUP":
+		return topupAction, true
+	case "DEBIT":
+		return debitAction, true
+	case "RESET_COUNTER":
+		return resetCounterAction, true
+	case "RESET_COUNTERS":
+		return resetCountersAction, true
 	}
 	return nil, false
 }
@@ -79,7 +79,7 @@ func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func setPostpaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_POSTPAID        
+	ub.Type = UB_TYPE_POSTPAID
 	return
 }
 
