@@ -53,11 +53,11 @@ func TestConfig(t *testing.T) {
 		cfg.SMEnabled != true ||
 		cfg.SMSwitchType != "test" ||
 		cfg.SMRater != "test" ||
-		cfg.SMDebitPeriod != 11 ||
+		cfg.SMDebitInterval != 11 ||
 		cfg.SMRPCEncoding != "test" ||
 		cfg.MediatorEnabled != true ||
-		cfg.MediatorCDRPath != "test" ||
-		cfg.MediatorCDROutPath != "test" ||
+		cfg.MediatorCDRInDir != "test" ||
+		cfg.MediatorCDROutDir != "test" ||
 		cfg.MediatorRater != "test" ||
 		cfg.MediatorRPCEncoding != "test" ||
 		cfg.MediatorSkipDB != true ||
@@ -73,8 +73,51 @@ func TestConfig(t *testing.T) {
 		cfg.FreeswitchTimeStartIdx != "test" ||
 		cfg.FreeswitchDurationIdx != "test" ||
 		cfg.FreeswitchUUIDIdx != "test" {
-		t.Error("Config file read failed!")
-	}
+			t.Log(cfg.DataDBType)
+			t.Log(cfg.DataDBHost)
+			t.Log(cfg.DataDBPort)
+			t.Log(cfg.DataDBName)
+			t.Log(cfg.DataDBUser)
+			t.Log(cfg.DataDBPass)
+			t.Log(cfg.LogDBType)
+			t.Log(cfg.LogDBHost)
+			t.Log(cfg.LogDBPort)
+			t.Log(cfg.LogDBName)
+			t.Log(cfg.LogDBUser)
+			t.Log(cfg.LogDBPass)
+			t.Log(cfg.RaterEnabled)
+			t.Log(cfg.RaterBalancer)
+			t.Log(cfg.RaterListen) 
+			t.Log(cfg.RaterRPCEncoding)
+			t.Log(cfg.BalancerEnabled)
+			t.Log(cfg.BalancerListen) 
+			t.Log(cfg.BalancerRPCEncoding)
+			t.Log(cfg.SchedulerEnabled)
+			t.Log(cfg.SMEnabled)
+			t.Log(cfg.SMSwitchType) 
+			t.Log(cfg.SMRater)
+			t.Log(cfg.SMDebitInterval)
+			t.Log(cfg.SMRPCEncoding)
+			t.Log(cfg.MediatorEnabled)
+			t.Log(cfg.MediatorCDRInDir)
+			t.Log(cfg.MediatorCDROutDir) 
+			t.Log(cfg.MediatorRater)
+			t.Log(cfg.MediatorRPCEncoding)
+			t.Log(cfg.MediatorSkipDB) 
+			t.Log(cfg.MediatorPseudoprepaid) 
+			t.Log(cfg.FreeswitchServer) 
+			t.Log(cfg.FreeswitchPass)
+			t.Log(cfg.FreeswitchDirectionIdx)
+			t.Log(cfg.FreeswitchTORIdx) 
+			t.Log(cfg.FreeswitchTenantIdx) 
+			t.Log(cfg.FreeswitchSubjectIdx) 
+			t.Log(cfg.FreeswitchAccountIdx)
+			t.Log(cfg.FreeswitchDestIdx) 
+			t.Log(cfg.FreeswitchTimeStartIdx)
+			t.Log(cfg.FreeswitchDurationIdx)
+			t.Log(cfg.FreeswitchUUIDIdx)
+			t.Error("Config file read failed!")
+		}
 }
 
 func TestParamOverwrite(t *testing.T) {

@@ -28,12 +28,12 @@ rpc_encoding = test # use JSON for RPC encoding
 
 [mediator]
 enabled = true
-cdr_path = test # Freeswitch Master CSV CDR path.
-cdr_out_path = test
+cdr_in_dir = test # Freeswitch Master CSV CDR path.
+cdr_out_dir = test
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
 rpc_encoding = test # use JSON for RPC encoding
 skipdb = true
-pseudo_prepaid = true
+pseudoprepaid = true
 
 [scheduler]
 enabled = true
@@ -42,12 +42,12 @@ enabled = true
 enabled = true
 switch_type = test
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
-debit_period = 11
+debit_interval = 11
 rpc_encoding = test # use JSON for RPC encoding
 
 [freeswitch]
 server = test # freeswitch address host:port
-pass = test # freeswitch address host:port
+passwd = test # freeswitch address host:port
 direction_index = test
 tor_index         = test
 tenant_index      = test

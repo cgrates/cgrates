@@ -61,15 +61,16 @@ type CGRConfig struct {
 	SMEnabled              bool
 	SMSwitchType           string
 	SMRater                string // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMDebitPeriod          int    // the period to be debited in advanced during a call (in seconds)
+	SMDebitInterval          int    // the period to be debited in advanced during a call (in seconds)
 	SMRPCEncoding          string // use JSON for RPC encoding
 	SMDefaultReqType       string // Use this request type if not defined on top
 	SMDefaultTOR           string // set default type of record
 	SMDefaultTenant        string // set default tenant
 	SMDefaultSubject       string // set default rating subject, useful in case of fallback
 	MediatorEnabled        bool
-	MediatorCDRPath        string // Freeswitch Master CSV CDR path.
-	MediatorCDROutPath     string // Freeswitch Master CSV CDR output path.
+	MediatorCDRType		string // sets the type of cdrs we are processing.
+	MediatorCDRInDir        string // Freeswitch Master CSV CDR path.
+	MediatorCDROutDir     string // Freeswitch Master CSV CDR output path.
 	MediatorRater          string // address where to access rater. Can be internal, direct rater address or the address of a balancer
 	MediatorRPCEncoding    string // use JSON for RPC encoding
 	MediatorSkipDB         bool
@@ -100,11 +101,11 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "datadb_type"); hasOpt {
 		cfg.DataDBType, _ = c.GetString("global", "datadb_type")
 	}
-	cfg.DataDBHost = "localhost"
+	cfg.DataDBHost = "127.0.0.1"
 	if hasOpt = c.HasOption("global", "datadb_host"); hasOpt {
 		cfg.DataDBHost, _ = c.GetString("global", "datadb_host")
 	}
-	cfg.DataDBPort = ""
+	cfg.DataDBPort = "6379"
 	if hasOpt = c.HasOption("global", "datadb_port"); hasOpt {
 		cfg.DataDBPort, _ = c.GetString("global", "datadb_port")
 	}
@@ -128,7 +129,7 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "logdb_host"); hasOpt {
 		cfg.LogDBHost, _ = c.GetString("global", "logdb_host")
 	}
-	cfg.LogDBPort = ""
+	cfg.LogDBPort = "27017"
 	if hasOpt = c.HasOption("global", "logdb_port"); hasOpt {
 		cfg.LogDBPort, _ = c.GetString("global", "logdb_port")
 	}
@@ -136,11 +137,11 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "logdb_name"); hasOpt {
 		cfg.LogDBName, _ = c.GetString("global", "logdb_name")
 	}
-	cfg.LogDBUser = ""
+	cfg.LogDBUser = "cgrates"
 	if hasOpt = c.HasOption("global", "logdb_user"); hasOpt {
 		cfg.LogDBUser, _ = c.GetString("global", "logdb_user")
 	}
-	cfg.LogDBPass = ""
+	cfg.LogDBPass = "CGRateS.org"
 	if hasOpt = c.HasOption("global", "logdb_passwd"); hasOpt {
 		cfg.LogDBPass, _ = c.GetString("global", "logdb_passwd")
 	}
@@ -152,11 +153,11 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("rater", "balancer"); hasOpt {
 		cfg.RaterBalancer, _ = c.GetString("rater", "balancer")
 	}
-	cfg.RaterListen = "127.0.0.1:1234"
+	cfg.RaterListen = "127.0.0.1:2012"
 	if hasOpt = c.HasOption("rater", "listen"); hasOpt {
 		cfg.RaterListen, _ = c.GetString("rater", "listen")
 	}
-	cfg.RaterRPCEncoding = "gob"
+	cfg.RaterRPCEncoding = GOB
 	if hasOpt = c.HasOption("rater", "rpc_encoding"); hasOpt {
 		cfg.RaterRPCEncoding, _ = c.GetString("rater", "rpc_encoding")
 	}
@@ -164,7 +165,7 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("balancer", "enabled"); hasOpt {
 		cfg.BalancerEnabled, _ = c.GetBool("balancer", "enabled")
 	}
-	cfg.BalancerListen = "127.0.0.1:2001"
+	cfg.BalancerListen = "127.0.0.1:2013"
 	if hasOpt = c.HasOption("balancer", "listen"); hasOpt {
 		cfg.BalancerListen, _ = c.GetString("balancer", "listen")
 	}
@@ -180,15 +181,15 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
 		cfg.MediatorEnabled, _ = c.GetBool("mediator", "enabled")
 	}
-	cfg.MediatorCDRPath = ""
-	if hasOpt = c.HasOption("mediator", "cdr_path"); hasOpt {
-		cfg.MediatorCDRPath, _ = c.GetString("mediator", "cdr_path")
+	cfg.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv/"
+	if hasOpt = c.HasOption("mediator", "cdr_in_dir"); hasOpt {
+		cfg.MediatorCDRInDir, _ = c.GetString("mediator", "cdr_in_dir")
 	}
-	cfg.MediatorCDROutPath = ""
-	if hasOpt = c.HasOption("mediator", "cdr_out_path"); hasOpt {
-		cfg.MediatorCDROutPath, _ = c.GetString("mediator", "cdr_out_path")
+	cfg.MediatorCDROutDir = "/var/log/cgrates/cdr_out/"
+	if hasOpt = c.HasOption("mediator", "cdr_out_dir"); hasOpt {
+		cfg.MediatorCDROutDir, _ = c.GetString("mediator", "cdr_out_dir")
 	}
-	cfg.MediatorRater = INTERNAL
+	cfg.MediatorRater = "127.0.0.1:2012"
 	if hasOpt = c.HasOption("mediator", "rater"); hasOpt {
 		cfg.MediatorRater, _ = c.GetString("mediator", "rater")
 	}
@@ -201,8 +202,12 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 		cfg.MediatorSkipDB, _ = c.GetBool("mediator", "skipdb")
 	}
 	cfg.MediatorPseudoprepaid = false
-	if hasOpt = c.HasOption("mediator", "pseudo_prepaid"); hasOpt {
-		cfg.MediatorPseudoprepaid, _ = c.GetBool("mediator", "pseudo_prepaid")
+	if hasOpt = c.HasOption("mediator", "pseudoprepaid"); hasOpt {
+		cfg.MediatorPseudoprepaid, _ = c.GetBool("mediator", "pseudoprepaid")
+	}
+	cfg.MediatorCDRType = "freeswitch_csv"
+	if hasOpt = c.HasOption("mediator", "cdr_type"); hasOpt {
+		cfg.MediatorCDRType, _ = c.GetString("mediator", "cdr_type")
 	}
 	cfg.SMEnabled = false
 	if hasOpt = c.HasOption("session_manager", "enabled"); hasOpt {
@@ -212,25 +217,25 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("session_manager", "switch_type"); hasOpt {
 		cfg.SMSwitchType, _ = c.GetString("session_manager", "switch_type")
 	}
-	cfg.SMRater = INTERNAL
+	cfg.SMRater = "127.0.0.1:2012"
 	if hasOpt = c.HasOption("session_manager", "rater"); hasOpt {
 		cfg.SMRater, _ = c.GetString("session_manager", "rater")
 	}
-	cfg.SMDebitPeriod = 10
-	if hasOpt = c.HasOption("session_manager", "debit_period"); hasOpt {
-		cfg.SMDebitPeriod, _ = c.GetInt("session_manager", "debit_period")
+	cfg.SMDebitInterval = 10
+	if hasOpt = c.HasOption("session_manager", "debit_interval"); hasOpt {
+		cfg.SMDebitInterval, _ = c.GetInt("session_manager", "debit_interval")
 	}
 	cfg.SMRPCEncoding = GOB
 	if hasOpt = c.HasOption("session_manager", "rpc_encoding"); hasOpt {
 		cfg.SMRPCEncoding, _ = c.GetString("session_manager", "rpc_encoding")
 	}
-	cfg.SMDefaultTOR = "0"
-	if hasOpt = c.HasOption("session_manager", "default_tor"); hasOpt {
-		cfg.SMDefaultTOR, _ = c.GetString("session_manager", "default_tor")
-	}
 	cfg.SMDefaultReqType = "" // By default CGRateS is inactive, customer should activate when he feels he is ready
 	if hasOpt = c.HasOption("session_manager", "default_reqtype"); hasOpt {
 		cfg.SMDefaultReqType, _ = c.GetString("session_manager", "default_reqtype")
+	}
+	cfg.SMDefaultTOR = "0"
+	if hasOpt = c.HasOption("session_manager", "default_tor"); hasOpt {
+		cfg.SMDefaultTOR, _ = c.GetString("session_manager", "default_tor")
 	}
 	cfg.SMDefaultTenant = "0"
 	if hasOpt = c.HasOption("session_manager", "default_tenant"); hasOpt {
@@ -240,13 +245,13 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("session_manager", "default_subject"); hasOpt {
 		cfg.SMDefaultSubject, _ = c.GetString("session_manager", "default_subject")
 	}
-	cfg.FreeswitchServer = "localhost:8021"
+	cfg.FreeswitchServer = "127.0.0.1:8021"
 	if hasOpt = c.HasOption("freeswitch", "server"); hasOpt {
 		cfg.FreeswitchServer, _ = c.GetString("freeswitch", "server")
 	}
 	cfg.FreeswitchPass = "ClueCon"
-	if hasOpt = c.HasOption("freeswitch", "pass"); hasOpt {
-		cfg.FreeswitchPass, _ = c.GetString("freeswitch", "pass")
+	if hasOpt = c.HasOption("freeswitch", "passwd"); hasOpt {
+		cfg.FreeswitchPass, _ = c.GetString("freeswitch", "passwd")
 	}
 	cfg.FreeswitchReconnects = 5
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {

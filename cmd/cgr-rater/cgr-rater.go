@@ -108,12 +108,12 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		}
 		connector = &rater.RPCClientConnector{Client: client}
 	}
-	if _, err := os.Stat(cfg.MediatorCDRPath); err != nil {
-		rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", cfg.MediatorCDRPath))
+	if _, err := os.Stat(cfg.MediatorCDRInDir); err != nil {
+		rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", cfg.MediatorCDRInDir))
 		exitChan <- true
 	}
-	if _, err := os.Stat(cfg.MediatorCDROutPath); err != nil {
-		rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", cfg.MediatorCDROutPath))
+	if _, err := os.Stat(cfg.MediatorCDROutDir); err != nil {
+		rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", cfg.MediatorCDROutDir))
 		exitChan <- true
 	}
 	// ToDo: Why is here 
@@ -123,7 +123,7 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 	//	exitChan <- true
 	//}
 
-	m, err := mediator.NewMediator(connector, loggerDb, cfg.MediatorSkipDB, cfg.MediatorCDROutPath, cfg.MediatorPseudoprepaid,
+	m, err := mediator.NewMediator(connector, loggerDb, cfg.MediatorSkipDB, cfg.MediatorCDROutDir, cfg.MediatorPseudoprepaid,
 		cfg.FreeswitchDirectionIdx, cfg.FreeswitchTORIdx, cfg.FreeswitchTenantIdx, cfg.FreeswitchSubjectIdx, cfg.FreeswitchAccountIdx,
 		cfg.FreeswitchDestIdx, cfg.FreeswitchTimeStartIdx, cfg.FreeswitchDurationIdx, cfg.FreeswitchUUIDIdx)
 	if err != nil {
@@ -131,7 +131,7 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		exitChan <- true
 	}
 
-	m.TrackCDRFiles(cfg.MediatorCDRPath)
+	m.TrackCDRFiles(cfg.MediatorCDRInDir)
 }
 
 func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage) {
@@ -154,7 +154,7 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	}
 	switch cfg.SMSwitchType {
 	case FS:
-		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitPeriod))
+		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval))
 		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
 		errConn := sm.Connect(cfg)
 		if errConn != nil {
@@ -274,8 +274,8 @@ func main() {
 		rater.SetStorageLogger(loggerDb)
 	}
 
-	if cfg.SMDebitPeriod > 0 {
-		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitPeriod)); err == nil {
+	if cfg.SMDebitInterval > 0 {
+		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval)); err == nil {
 			rater.SetDebitPeriod(dp)
 		}
 	}
