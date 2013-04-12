@@ -121,7 +121,7 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "datadb_passwd"); hasOpt {
 		cfg.DataDBPass, _ = c.GetString("global", "datadb_passwd")
 	}
-	cfg.LogDBType = MONGO
+	cfg.LogDBType = MONGO 
 	if hasOpt = c.HasOption("global", "logdb_type"); hasOpt {
 		cfg.LogDBType, _ = c.GetString("global", "logdb_type")
 	}
@@ -137,11 +137,11 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "logdb_name"); hasOpt {
 		cfg.LogDBName, _ = c.GetString("global", "logdb_name")
 	}
-	cfg.LogDBUser = "cgrates"
+	cfg.LogDBUser = ""
 	if hasOpt = c.HasOption("global", "logdb_user"); hasOpt {
 		cfg.LogDBUser, _ = c.GetString("global", "logdb_user")
 	}
-	cfg.LogDBPass = "CGRateS.org"
+	cfg.LogDBPass = ""
 	if hasOpt = c.HasOption("global", "logdb_passwd"); hasOpt {
 		cfg.LogDBPass, _ = c.GetString("global", "logdb_passwd")
 	}
@@ -181,11 +181,11 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
 		cfg.MediatorEnabled, _ = c.GetBool("mediator", "enabled")
 	}
-	cfg.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv/"
+	cfg.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv"
 	if hasOpt = c.HasOption("mediator", "cdr_in_dir"); hasOpt {
 		cfg.MediatorCDRInDir, _ = c.GetString("mediator", "cdr_in_dir")
 	}
-	cfg.MediatorCDROutDir = "/var/log/cgrates/cdr_out/"
+	cfg.MediatorCDROutDir = "/var/log/cgrates/cdr_out"
 	if hasOpt = c.HasOption("mediator", "cdr_out_dir"); hasOpt {
 		cfg.MediatorCDROutDir, _ = c.GetString("mediator", "cdr_out_dir")
 	}
@@ -257,41 +257,41 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
 		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
 	}
-	cfg.FreeswitchTORIdx = ""
+	cfg.FreeswitchUUIDIdx = "10"
+	if hasOpt = c.HasOption("freeswitch", "uuid_index"); hasOpt {
+		cfg.FreeswitchUUIDIdx, _ = c.GetString("freeswitch", "uuid_index")
+	}
+	cfg.FreeswitchTORIdx = "-1"
 	if hasOpt = c.HasOption("freeswitch", "tor_index"); hasOpt {
 		cfg.FreeswitchTORIdx, _ = c.GetString("freeswitch", "tor_index")
 	}
-	cfg.FreeswitchTenantIdx = ""
+	cfg.FreeswitchTenantIdx = "-1"
 	if hasOpt = c.HasOption("freeswitch", "tenant_index"); hasOpt {
 		cfg.FreeswitchTenantIdx, _ = c.GetString("freeswitch", "tenant_index")
 	}
-	cfg.FreeswitchDirectionIdx = ""
+	cfg.FreeswitchDirectionIdx = "-1"
 	if hasOpt = c.HasOption("freeswitch", "direction_index"); hasOpt {
 		cfg.FreeswitchDirectionIdx, _ = c.GetString("freeswitch", "direction_index")
 	}
-	cfg.FreeswitchSubjectIdx = ""
+	cfg.FreeswitchSubjectIdx = "-1"
 	if hasOpt = c.HasOption("freeswitch", "subject_index"); hasOpt {
 		cfg.FreeswitchSubjectIdx, _ = c.GetString("freeswitch", "subject_index")
 	}
-	cfg.FreeswitchAccountIdx = ""
+	cfg.FreeswitchAccountIdx = "-1"
 	if hasOpt = c.HasOption("freeswitch", "account_index"); hasOpt {
 		cfg.FreeswitchAccountIdx, _ = c.GetString("freeswitch", "account_index")
 	}
-	cfg.FreeswitchDestIdx = ""
+	cfg.FreeswitchDestIdx = "-1"
 	if hasOpt = c.HasOption("freeswitch", "destination_index"); hasOpt {
 		cfg.FreeswitchDestIdx, _ = c.GetString("freeswitch", "destination_index")
 	}
-	cfg.FreeswitchTimeStartIdx = ""
+	cfg.FreeswitchTimeStartIdx = "-1"
 	if hasOpt = c.HasOption("freeswitch", "time_start_index"); hasOpt {
 		cfg.FreeswitchTimeStartIdx, _ = c.GetString("freeswitch", "time_start_index")
 	}
-	cfg.FreeswitchDurationIdx = ""
+	cfg.FreeswitchDurationIdx = "-1"
 	if hasOpt = c.HasOption("freeswitch", "duration_index"); hasOpt {
 		cfg.FreeswitchDurationIdx, _ = c.GetString("freeswitch", "duration_index")
-	}
-	cfg.FreeswitchUUIDIdx = ""
-	if hasOpt = c.HasOption("freeswitch", "uuid_index"); hasOpt {
-		cfg.FreeswitchUUIDIdx, _ = c.GetString("freeswitch", "uuid_index")
 	}
 
 	return cfg, nil

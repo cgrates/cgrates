@@ -118,6 +118,7 @@ func (s *Session) Close() {
 	}
 	s.stopDebit <- true
 	s.callDescriptor.TimeEnd = time.Now()
+	s.SaveOperations()
 	s.sessionManager.RemoveSession(s)
 }
 
@@ -136,9 +137,10 @@ func (s *Session) SaveOperations() {
 		for _, cc := range s.CallCosts[1:] {
 			firstCC.Merge(cc)
 		}
-		if s.sessionManager.GetDbLogger() != nil {
-			s.sessionManager.GetDbLogger().LogCallCost(s.uuid, rater.SESSION_MANAGER_SOURCE, firstCC)
+		if s.sessionManager.GetDbLogger() == nil {
+			rater.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
 		}
-		rater.Logger.Debug(firstCC.String())
+		s.sessionManager.GetDbLogger().LogCallCost(s.uuid, rater.SESSION_MANAGER_SOURCE, firstCC)
+		rater.Logger.Debug(fmt.Sprintf("<SessionManager> End of call, having costs: %v", firstCC.String()))
 	}()
 }

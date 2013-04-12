@@ -258,21 +258,23 @@ func main() {
 
 	var getter, loggerDb rater.DataStorage
 	getter, err = configureDatabase(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
-
-	if err == nil {
-		defer getter.Close()
-		rater.SetDataStorage(getter)
+	if err != nil { // Cannot configure getter database, show stopper
+		rater.Logger.Crit(fmt.Sprintf("Could not configure database: %s exiting!", err))
+		return
 	}
-
+	defer getter.Close()
+	rater.SetDataStorage(getter)
 	if cfg.LogDBType == SAME {
 		loggerDb = getter
 	} else {
 		loggerDb, err = configureDatabase(cfg.LogDBType, cfg.LogDBHost, cfg.LogDBPort, cfg.LogDBName, cfg.LogDBUser, cfg.LogDBPass)
 	}
-	if err == nil {
-		defer loggerDb.Close()
-		rater.SetStorageLogger(loggerDb)
+	if err != nil { // Cannot configure logger database, show stopper
+		rater.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+		return
 	}
+	defer loggerDb.Close()
+	rater.SetStorageLogger(loggerDb)
 
 	if cfg.SMDebitInterval > 0 {
 		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval)); err == nil {

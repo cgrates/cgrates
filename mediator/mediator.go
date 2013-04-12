@@ -84,8 +84,8 @@ func NewMediator(connector rater.Connector,
 	}
 	idxs := []string{directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs,
 		destinationIndexs, timeStartIndexs, durationIndexs, uuidIndexs}
-	objs := []mediatorFieldIdxs{m.directionIndexs, m.torIndexs, m.tenantIndexs, m.subjectIndexs,
-		m.accountIndexs, m.destinationIndexs, m.timeStartIndexs, m.durationIndexs, m.uuidIndexs}
+	objs := []*mediatorFieldIdxs{&m.directionIndexs, &m.torIndexs, &m.tenantIndexs, &m.subjectIndexs,
+		&m.accountIndexs, &m.destinationIndexs, &m.timeStartIndexs, &m.durationIndexs, &m.uuidIndexs}
 	for i, o := range objs {
 		err = o.Load(idxs[i])
 		if err != nil {
@@ -125,7 +125,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 		select {
 		case ev := <-watcher.Event:
 			if ev.Mask&inotify.IN_MOVED_TO != 0 {
-				rater.Logger.Info(fmt.Sprintf("Started to parse %v", ev.Name))
+				rater.Logger.Info(fmt.Sprintf("Parsing: %v", ev.Name))
 				err = m.parseCSV(ev.Name)
 				if err != nil {
 					return err
@@ -157,25 +157,27 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 	defer fout.Close()
 
 	w := bufio.NewWriter(fout)
-
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
 		//t, _ := time.Parse("2012-05-21 17:48:20", record[5])		
 		var cc *rater.CallCost
-		for runIdx := range m.subjectIndexs { // Query costs for every run index given by subject
-			if runIdx == 0 && !m.skipDb { // The first index is matching the session manager one
+		for runIdx,idxVal := range m.subjectIndexs { // Query costs for every run index given by subject
+			if idxVal == -1 { // -1 as subject means use database to get previous set price
 				cc, err = m.getCostsFromDB(record, runIdx)
 				if err != nil || cc == nil { // Fallback on rater if no db record found
-					cc, err = m.getCostsFromRater(record, runIdx)
+					rater.Logger.Err(fmt.Sprintf("<Mediator> Error extracting price from database for uuid: <%s>, err: <%s>, cost: %v",record[m.uuidIndexs[runIdx]], err.Error(), cc))
+					//cc, err = m.getCostsFromRater(record, runIdx)
+					continue
 				}
 			} else {
 				cc, err = m.getCostsFromRater(record, runIdx)
+				
 			}
 			cost := "-1"
 			if err != nil {
 				rater.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record with uuid:%s and subject:%s - %s", record[m.uuidIndexs[runIdx]], record[m.subjectIndexs[runIdx]], err.Error()))
 			} else {
 				cost = strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)
-				rater.Logger.Debug(fmt.Sprintf("Calculated for uuid:%s, subject:%s cost: %v", record[m.uuidIndexs[runIdx]], record[m.subjectIndexs[runIdx]], cost))
+				rater.Logger.Debug(fmt.Sprintf("Calculated for uuid:%s, cost: %v", record[m.uuidIndexs[runIdx]], cost))
 			}
 			record = append(record, cost)
 		}

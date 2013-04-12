@@ -108,7 +108,6 @@ func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
 	if err != nil {
 		rater.Logger.Err("could not send disconect msg to freeswitch")
 	}
-	s.Close()
 	return
 }
 
@@ -194,7 +193,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	if s == nil { // Not handled by us
 		return
 	}
-	sm.RemoveSession(s) // Session cleanup from memory
+	defer s.Close() // Stop loop and save the costs deducted so far to database
 	if ev.GetReqType() == REQTYPE_POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
@@ -301,8 +300,6 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	}
 	lastCC.Cost -= cost
 	rater.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
-	s.SaveOperations()
-	s.Close()
 
 }
 
