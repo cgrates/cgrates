@@ -160,17 +160,17 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
 		//t, _ := time.Parse("2012-05-21 17:48:20", record[5])		
 		var cc *rater.CallCost
-		for runIdx,idxVal := range m.subjectIndexs { // Query costs for every run index given by subject
+		for runIdx, idxVal := range m.subjectIndexs { // Query costs for every run index given by subject
 			if idxVal == -1 { // -1 as subject means use database to get previous set price
 				cc, err = m.getCostsFromDB(record, runIdx)
 				if err != nil || cc == nil { // Fallback on rater if no db record found
-					rater.Logger.Err(fmt.Sprintf("<Mediator> Error extracting price from database for uuid: <%s>, err: <%s>, cost: %v",record[m.uuidIndexs[runIdx]], err.Error(), cc))
+					rater.Logger.Err(fmt.Sprintf("<Mediator> Error extracting price from database for uuid: <%s>, err: <%s>, cost: %v", record[m.uuidIndexs[runIdx]], err.Error(), cc))
 					//cc, err = m.getCostsFromRater(record, runIdx)
 					continue
 				}
 			} else {
 				cc, err = m.getCostsFromRater(record, runIdx)
-				
+
 			}
 			cost := "-1"
 			if err != nil {
