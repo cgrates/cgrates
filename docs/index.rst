@@ -1,9 +1,9 @@
-.. CGRates documentation master file, created by
+.. CGRateS documentation master file, created by
    sphinx-quickstart on Mon Mar  5 10:59:27 2012.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to CGRates's documentation!
+Welcome to CGRateS's documentation!
 ===================================
 
 Contents:
@@ -11,10 +11,13 @@ Contents:
 .. toctree::
    :maxdepth: 2
    
-   intro
-   importing
+   introduction
+   architecture
+   installation
+   configuration   
+   administration
+   advanced
    tutorial
-   apicalls   
-   arhitecture
+   miscellaneous
 
 

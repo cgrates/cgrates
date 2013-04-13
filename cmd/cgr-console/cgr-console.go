@@ -31,7 +31,7 @@ import (
 
 var (
 	version      = flag.Bool("version", false, "Prints the application version.")
-	server       = flag.String("server", "127.0.0.1:2000", "server address host:port")
+	server       = flag.String("server", "127.0.0.1:2012", "server address host:port")
 	rpc_encoding = flag.String("rpc_encoding", "gob", "RPC encoding used <gob|json>")
 )
 
