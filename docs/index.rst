@@ -17,7 +17,7 @@ Contents:
    configuration   
    administration
    advanced
-   tutorial
+   tutorials
    miscellaneous
 
 
