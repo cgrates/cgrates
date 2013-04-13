@@ -21,8 +21,8 @@ This command will install the trunk version of CGRateS together with all the nec
 .. _installed: http://golang.org/doc/install
 .. _configured: http://golang.org/doc/code.html
 
-Post-install
---------------
+3.3. Post-install
+-----------------
 CGRateS needs at minimum one external database where to keep it's main data as well as logs of it's operation.
 
 At present we support the following databases:

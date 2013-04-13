@@ -59,8 +59,8 @@ Of course more SessionManagers can serve multiple Telecom Switches and all of th
 - "Free as in Beer" with commercial support available on-demand.
 
 
-How does CGRateS work?
-----------------------
+1.2. How does CGRateS work?
+---------------------------
 Let's start with the most important function: finding the cost of a certain call. 
 
 The call information comes to CGRateS having the following information: subject, destination, start time and end time. The engine will lookup the database for the activation periods applicable to the received subject and destination. 
