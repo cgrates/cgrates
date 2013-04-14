@@ -1,9 +1,9 @@
-API Calls
-=========
+6.1. API Calls
+==============
 The general API usage of the CGRateS involves creating a CallDescriptor structure sending it to the balancer via JSON/GOB RPC and getting a response from the balancer in form of a CallCost structure or a numeric value for requested information.
 
-CallDescriptor structure
-------------------------	
+6.1.1. CallDescriptor structure
+-------------------------------
 	- Direction, TOR, Tenant, Subject, Account, DestinationPrefix string
 	- TimeStart, TimeEnd                 Time
 	- Amount                             float64
@@ -28,8 +28,8 @@ Amount
 The **Subject** field is used usually used to identify both the client in the detailed cost list and the user in the balances database. When there is some additional info added to the subject for the call price list then the **Account** attribute is used to specify the balance for the client. For example: the subject can be rif:from:ha or rif:form:mu and for both we would use the rif account.
 
 
-CallCost structure
-------------------
+6.1.2. CallCost structure
+-------------------------
 	- TOR                                int
 	- CstmId, Subject, DestinationPrefix string
 	- Cost, ConnectFee                   float64
@@ -77,8 +77,8 @@ In the stress folder you can find a better example of python client using a clas
 	result = rpc.call("Responder.Get", cd)
 	print result
 	
-JSON RPC
---------
+6.1.3. JSON RPC
+---------------
 GetCost
 	Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 
@@ -114,3 +114,4 @@ AddRecievedCallSeconds
 
 FlushCache
     Cleans all internal cached (Destinations, RatingProfiles)
+

@@ -5,4 +5,6 @@
    :maxdepth: 2
 
    apicalls
+   ratinglogic
+
 
