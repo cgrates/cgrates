@@ -10,13 +10,14 @@ What are the activation periods?
     The activation period is a structure describing different prices for a call on different intervals of time. This structure has an activation time, which enables the complete on the activation period at some point in time and one ore more (usually more than one) intervals with prices. 
 
 ::
-	Interval {
-		Months 
-		MonthDays
-		WeekDays
-		StartTime, EndTime
-		Weight, ConnectFee, Price, BillingUnit
-	}
+
+ Interval {
+  Months 
+  MonthDays
+  WeekDays
+  StartTime, EndTime
+  Weight, ConnectFee, Price, BillingUnit
+ }
 
 An **Interval** specifies the Month, the MonthDay, the WeekDays and the StartTime and the EndTime when the Interval's price profile is in effect. 
 
