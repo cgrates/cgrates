@@ -158,7 +158,7 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 
 	w := bufio.NewWriter(fout)
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
-		//t, _ := time.Parse("2012-05-21 17:48:20", record[5])		
+		//t, _ := time.Parse("2006-01-02 15:04:05", record[5])
 		var cc *rater.CallCost
 		for runIdx, idxVal := range m.subjectIndexs { // Query costs for every run index given by subject
 			if idxVal == -1 { // -1 as subject means use database to get previous set price
