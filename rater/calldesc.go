@@ -268,14 +268,15 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 	connectionFee := 0.0
-	if cd.LoopIndex == 0 { // only add connect fee if this is the first/only call cost request
-		for i, ts := range timespans {
-			if i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
-				connectionFee = ts.Interval.ConnectFee
-			}
-			cost += ts.getCost(cd)
+
+	for i, ts := range timespans {
+		// only add connect fee if this is the first/only call cost request
+		if cd.LoopIndex == 0 && i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
+			connectionFee = ts.Interval.ConnectFee
 		}
+		cost += ts.getCost(cd)
 	}
+
 	cc := &CallCost{
 		Direction:   cd.Direction,
 		TOR:         cd.TOR,
