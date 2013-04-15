@@ -211,6 +211,8 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			TOR:             ev.GetTOR(),
 			Subject:         ev.GetSubject(),
 			Account:         ev.GetAccount(),
+			LoopIndex:       0,
+			CallDuration:    endTime.Sub(startTime).Seconds(),
 			Destination:     ev.GetDestination(),
 			TimeStart:       startTime,
 			TimeEnd:         endTime,
@@ -230,7 +232,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		return // why would we have 0 callcosts
 	}
 	lastCC := s.CallCosts[len(s.CallCosts)-1]
-	// put credit back	
+	// put credit back
 	start := time.Now()
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refoundDuration := end.Sub(start).Seconds()
@@ -303,9 +305,11 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 
 }
 
-func (sm *FSSessionManager) LoopAction(s *Session, cd *rater.CallDescriptor) {
+func (sm *FSSessionManager) LoopAction(s *Session, cd *rater.CallDescriptor, index float64) {
 	cc := &rater.CallCost{}
+	cd.LoopIndex = index
 	cd.Amount = sm.debitPeriod.Seconds()
+	cd.CallDuration += cd.Amount
 	err := sm.connector.MaxDebit(*cd, cc)
 	if err != nil {
 		rater.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))

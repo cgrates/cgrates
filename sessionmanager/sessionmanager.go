@@ -28,7 +28,7 @@ type SessionManager interface {
 	Connect(*config.CGRConfig) error
 	DisconnectSession(*Session, string)
 	RemoveSession(*Session)
-	LoopAction(*Session, *rater.CallDescriptor)
+	LoopAction(*Session, *rater.CallDescriptor, float64)
 	GetDebitPeriod() time.Duration
 	GetDbLogger() rater.DataStorage
 	Shutdown() error

@@ -75,6 +75,8 @@ type CallDescriptor struct {
 	TOR                                   string
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
+	LoopIndex                             float64 // indicates the postion of this segment in a cost request loop
+	CallDuration                          float64 // the call duration so far (partial or final)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	ActivationPeriods                     []*ActivationPeriod
@@ -266,11 +268,13 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 	connectionFee := 0.0
-	for i, ts := range timespans {
-		if i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
-			connectionFee = ts.Interval.ConnectFee
+	if cd.LoopIndex == 0 { // only add connect fee if this is the first/only call cost request
+		for i, ts := range timespans {
+			if i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
+				connectionFee = ts.Interval.ConnectFee
+			}
+			cost += ts.getCost(cd)
 		}
-		cost += ts.getCost(cd)
 	}
 	cc := &CallCost{
 		Direction:   cd.Direction,

@@ -38,7 +38,7 @@ type Session struct {
 
 // Creates a new session and starts the debit loop
 func NewSession(ev Event, sm SessionManager) (s *Session) {
-	// Ignore calls which have nothing to do with CGRateS 
+	// Ignore calls which have nothing to do with CGRateS
 	if strings.TrimSpace(ev.GetReqType()) == "" {
 		return
 	}
@@ -80,6 +80,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 // the debit loop method (to be stoped by sending somenting on stopDebit channel)
 func (s *Session) startDebitLoop() {
 	nextCd := *s.callDescriptor
+	index := 0.0
 	for {
 		select {
 		case <-s.stopDebit:
@@ -90,8 +91,9 @@ func (s *Session) startDebitLoop() {
 			nextCd.TimeStart = time.Now()
 		}
 		nextCd.TimeEnd = time.Now().Add(s.sessionManager.GetDebitPeriod())
-		s.sessionManager.LoopAction(s, &nextCd)
+		s.sessionManager.LoopAction(s, &nextCd, index)
 		time.Sleep(s.sessionManager.GetDebitPeriod())
+		index++
 	}
 }
 
@@ -127,7 +129,7 @@ func (s *Session) String() string {
 	return fmt.Sprintf("%v: %s(%s) -> %s", s.callDescriptor.TimeStart, s.callDescriptor.Subject, s.callDescriptor.Account, s.callDescriptor.Destination)
 }
 
-// 
+//
 func (s *Session) SaveOperations() {
 	go func() {
 		if s == nil || len(s.CallCosts) == 0 {
