@@ -163,18 +163,12 @@ func (m *Mediator) parseCSV(cdrfn string) (err error) {
 		for runIdx, idxVal := range m.subjectIndexs { // Query costs for every run index given by subject
 			if idxVal == -1 { // -1 as subject means use database to get previous set price
 				cc, err = m.getCostsFromDB(record, runIdx)
-				if err != nil || cc == nil { // Fallback on rater if no db record found
-					rater.Logger.Err(fmt.Sprintf("<Mediator> Error extracting price from database for uuid: <%s>, err: <%s>, cost: %v", record[m.uuidIndexs[runIdx]], err.Error(), cc))
-					//cc, err = m.getCostsFromRater(record, runIdx)
-					continue
-				}
 			} else {
 				cc, err = m.getCostsFromRater(record, runIdx)
-
 			}
 			cost := "-1"
-			if err != nil {
-				rater.Logger.Err(fmt.Sprintf("Could not get the cost for mediator record with uuid:%s and subject:%s - %s", record[m.uuidIndexs[runIdx]], record[m.subjectIndexs[runIdx]], err.Error()))
+			if err != nil || cc == nil {
+				rater.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for uuid: <%s>, err: <%s>, cost: <%v>", record[m.uuidIndexs[runIdx]], err.Error(), cc))
 			} else {
 				cost = strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)
 				rater.Logger.Debug(fmt.Sprintf("Calculated for uuid:%s, cost: %v", record[m.uuidIndexs[runIdx]], cost))
