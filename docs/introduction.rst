@@ -2,10 +2,11 @@
 ==============
 CGRateS is a very fast and easy scalable rating engine targeted especially for ISPs and Telecom Operators.
 
-It is written in Go (http://golang.org) and accessible from any language via JSON RPC. The code is well documented (go doc compliant API docs) and heavily tested.
+It is written in Go_  and accessible from any language via JSON RPC. The code is well documented (go doc compliant API docs) and heavily tested.
 
 After testing various databases like Kyoto_ cabinet, Redis_ or Mongodb_, the project focused on Redis as it delivers the best trade-off between speed, configuration and scalability. Despite that a connection to any database can be easily integrated by writing a simple adapter.
 
+.. _Go: http://golang.org
 .. _kyoto: http://fallabs.com/kyotocabinet
 .. _Redis: http://redis.io
 .. _Mongodb: http://www.mongodb.org

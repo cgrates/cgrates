@@ -77,7 +77,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	return
 }
 
-// the debit loop method (to be stoped by sending somenting on stopDebit channel)
+// the debit loop method (to be stoped by sending somenthing on stopDebit channel)
 func (s *Session) startDebitLoop() {
 	nextCd := *s.callDescriptor
 	index := 0.0
