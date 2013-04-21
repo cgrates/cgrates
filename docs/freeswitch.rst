@@ -21,7 +21,9 @@ The process of rating is decoupled into two different components:
          - INSUFFICIENT_FUNDS: if MaximSessionTime is 0.
          - AUTH_OK: Call is authorized to proceed. 
       - Un-Park the call via *uuid_transfer* to original dialed number. The FreeSWITCH_ administrator is expected to make use of *cgr_notify* variable value to either allow the call going further or reject it (eg: towards an IVR or returning authorization fail message to call originator).
+
    - On *CHANNEL_ANSWER* event received:
+      - Index the call into CGRateS's cache.
       - Starts debit loop by calling at configured interval *MaxDebit* on the Rater.
       - If any of the debits fail:
           - Set *cgr_notify* channel variable to either SYSTEM_ERROR in case of errors or INSUFFICIENT_FUNDS of there would be not enough balance for the next debit to proceed.
@@ -32,8 +34,10 @@ The process of rating is decoupled into two different components:
        - Save call costs into CGRateS LogDB.
 
 - In Postpaid mode:
+
    - On *CHANNEL_ANSWER* event received:
-       - Index the call into CGRateS's cache
+       - Index the call into CGRateS's cache.
+
    - On *CHANNEL_HANGUP_COMPLETE* event received:
        - Call *Debit* RPC method on the Rater.
        - Save call costs into CGRateS LogDB.

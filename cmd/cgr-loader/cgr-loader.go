@@ -76,7 +76,7 @@ func main() {
 			regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
 			"Tag[0-9A-Za-z_],Prefix[0-9]"},
 		&validator{ratesFn,
-			regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*){4}$`),
+			regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
 			"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
 		&validator{timingsFn,
 			regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*all\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
