@@ -6,7 +6,27 @@ We recommend using source installs for advanced users familiar with Go programmi
 
 3.1. Using packages
 -------------------
-Details will come here.
+
+3.1.2. Debian Squeeze
+~~~~~~~~~~~~~~~~~~~
+This is for the moment the only packaged and the most recommended to use method to install CGRateS.
+
+On the server you want to install CGRateS, simply execute the following commands:
+::
+
+   cd /etc/apt/sources.list.d/
+   wget http://apt.itsyscom.com/repos/apt/conf/cgrates.apt.list
+   wget -O - http://apt.itsyscom.com/repos/apt/conf/cgrates.gpg.key|apt-key add -
+   apt-get update
+   apt-get install cgrates
+
+These commands should set you up with a running version of CGRateS on your machine. 
+Details regarding running and errors should be checked in the syslog.
+Since on Debian we use Damontools_ to control the CGRateS another way to check the daemon status is to issue following command over your console:
+::
+   svstat /etc/service/cgrates/
+
+.. _Daemontools: http://cr.yp.to/daemontools.html
 
 3.2. Using source
 -----------------
@@ -28,10 +48,11 @@ CGRateS needs at minimum one external database where to keep it's main data as w
 At present we support the following databases:
     As DataDB:
      - Redis_
+     - mongoDB_
     As LogDB:
-     - PostgreSQL_
      - mongoDB_
      - Redis_
+     - PostgreSQL_ (partially supported)
 
 When using PostgreSQL_ as your LogDB, the following data table needs to be created and accessible to CGRateS LogDB user::
 
