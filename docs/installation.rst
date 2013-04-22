@@ -22,7 +22,7 @@ On the server you want to install CGRateS, simply execute the following commands
 
 These commands should set you up with a running version of CGRateS on your machine. 
 Details regarding running and errors should be checked in the syslog.
-Since on Debian we use Damontools_ to control the CGRateS another way to check the daemon status is to issue following command over your console:
+Since on Debian we use Daemontools_ to control the CGRateS another way to check the daemon status is to issue following command over your console:
 ::
    svstat /etc/service/cgrates/
 
