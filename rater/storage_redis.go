@@ -36,13 +36,17 @@ func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
 	if err != nil {
 		return nil, err
 	}
-	r := ndb.Cmd("auth", pass)
-	if r.Err != nil {
-		return nil, errors.New(r.Err.Error())
+	if pass != "" {
+		r := ndb.Cmd("auth", pass)
+		if r.Err != nil {
+			return nil, errors.New(r.Err.Error())
+		}
 	}
-	r = ndb.Cmd("select", db)
-	if r.Err != nil {
-		return nil, errors.New(r.Err.Error())
+	if db > 0 {
+		r := ndb.Cmd("select", db)
+		if r.Err != nil {
+			return nil, errors.New(r.Err.Error())
+		}
 	}
 	ms := new(MyMarshaler)
 	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
