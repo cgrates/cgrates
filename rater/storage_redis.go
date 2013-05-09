@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
-	"errors"
 	"fmt"
 	"github.com/fzzy/radix/redis"
 	"time"
@@ -39,13 +38,13 @@ func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
 	if pass != "" {
 		r := ndb.Cmd("auth", pass)
 		if r.Err != nil {
-			return nil, errors.New(r.Err.Error())
+			return nil, r.Err
 		}
 	}
 	if db > 0 {
 		r := ndb.Cmd("select", db)
 		if r.Err != nil {
-			return nil, errors.New(r.Err.Error())
+			return nil, r.Err
 		}
 	}
 	ms := new(MyMarshaler)
@@ -59,7 +58,7 @@ func (rs *RedisStorage) Close() {
 func (rs *RedisStorage) Flush() (err error) {
 	r := rs.db.Cmd("flushdb")
 	if r.Err != nil {
-		return errors.New(r.Err.Error())
+		return r.Err
 	}
 	return
 }
@@ -78,7 +77,7 @@ func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := rs.ms.Marshal(rp)
 	r := rs.db.Cmd("set", RATING_PROFILE_PREFIX+rp.Id, result)
 	if r.Err != nil {
-		return errors.New(r.Err.Error())
+		return r.Err
 	}
 	return
 }
@@ -100,7 +99,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	}
 	r := rs.db.Cmd("set", DESTINATION_PREFIX+dest.Id, result)
 	if r.Err != nil {
-		return errors.New(r.Err.Error())
+		return r.Err
 	}
 	return
 }
@@ -118,7 +117,7 @@ func (rs *RedisStorage) SetActions(key string, as []*Action) (err error) {
 	result, err := rs.ms.Marshal(as)
 	r := rs.db.Cmd("set", ACTION_PREFIX+key, result)
 	if r.Err != nil {
-		return errors.New(r.Err.Error())
+		return r.Err
 	}
 	return
 }
@@ -137,7 +136,7 @@ func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 	result, err := rs.ms.Marshal(ub)
 	r := rs.db.Cmd("set", USER_BALANCE_PREFIX+ub.Id, result)
 	if r.Err != nil {
-		return errors.New(r.Err.Error())
+		return r.Err
 	}
 	return
 }
@@ -156,14 +155,14 @@ func (rs *RedisStorage) SetActionTimings(key string, ats []*ActionTiming) (err e
 		// delete the key
 		r := rs.db.Cmd("del", ACTION_TIMING_PREFIX+key)
 		if r.Err != nil {
-			return errors.New(r.Err.Error())
+			return r.Err
 		}
 		return
 	}
 	result, err := rs.ms.Marshal(ats)
 	r := rs.db.Cmd("set", ACTION_TIMING_PREFIX+key, result)
 	if r.Err != nil {
-		return errors.New(r.Err.Error())
+		return r.Err
 	}
 	return
 }
@@ -194,7 +193,7 @@ func (rs *RedisStorage) LogCallCost(uuid, source string, cc *CallCost) (err erro
 	}
 	r := rs.db.Cmd("set", LOG_CALL_COST_PREFIX+source+"_"+uuid, result)
 	if r.Err != nil {
-		return errors.New(r.Err.Error())
+		return r.Err
 	}
 	return
 }
@@ -237,7 +236,7 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as []*A
 func (rs *RedisStorage) LogError(uuid, source, errstr string) (err error) {
 	r := rs.db.Cmd("set", LOG_ERR+source+"_"+uuid, errstr)
 	if r.Err != nil {
-		return errors.New(r.Err.Error())
+		return r.Err
 	}
 	return
 }
