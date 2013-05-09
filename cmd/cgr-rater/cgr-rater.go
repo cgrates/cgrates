@@ -116,7 +116,7 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", cfg.MediatorCDROutDir))
 		exitChan <- true
 	}
-	// ToDo: Why is here 
+	// ToDo: Why is here
 	// Check parsing errors
 	//if cfgParseErr != nil {
 	//	rater.Logger.Crit(fmt.Sprintf("Errors on config parsing: <%v>", cfgParseErr))
@@ -214,7 +214,8 @@ func checkConfigSanity() {
 func configureDatabase(db_type, host, port, name, user, pass string) (getter rater.DataStorage, err error) {
 	switch db_type {
 	case REDIS:
-		db_nb, err := strconv.Atoi(name)
+		var db_nb int
+		db_nb, err = strconv.Atoi(name)
 		if err != nil {
 			rater.Logger.Crit("Redis db name must be an integer!")
 			exitChan <- true
