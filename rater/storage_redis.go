@@ -32,9 +32,17 @@ type RedisStorage struct {
 }
 
 func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
-	ndb, err := redis.DialTimeout("tcp", fmt.Sprintf("%q%q%q", address, db, pass), time.Duration(10)*time.Second)
+	ndb, err := redis.DialTimeout("tcp", address, time.Duration(10)*time.Second)
 	if err != nil {
 		return nil, err
+	}
+	r := ndb.Cmd("auth", pass)
+	if r.Err != nil {
+		return nil, errors.New(r.Err.Error())
+	}
+	r = ndb.Cmd("select", db)
+	if r.Err != nil {
+		return nil, errors.New(r.Err.Error())
 	}
 	ms := new(MyMarshaler)
 	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
