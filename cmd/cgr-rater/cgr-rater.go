@@ -98,9 +98,21 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		var client *rpc.Client
 		var err error
 		if cfg.MediatorRPCEncoding == JSON {
-			client, err = jsonrpc.Dial("tcp", cfg.MediatorRater)
+			for i := 0; i < cfg.MediatorRaterReconnects; i++ {
+				client, err = jsonrpc.Dial("tcp", cfg.MediatorRater)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
 		} else {
-			client, err = rpc.Dial("tcp", cfg.MediatorRater)
+			for i := 0; i < cfg.MediatorRaterReconnects; i++ {
+				client, err = rpc.Dial("tcp", cfg.MediatorRater)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
 		}
 		if err != nil {
 			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
@@ -142,9 +154,23 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 		var client *rpc.Client
 		var err error
 		if cfg.SMRPCEncoding == JSON {
-			client, err = jsonrpc.Dial("tcp", cfg.SMRater)
+			// We attempt to reconnect more times
+			for i := 0; i < cfg.SMRaterReconnects; i++ {
+				client, err = jsonrpc.Dial("tcp", cfg.SMRater)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
 		} else {
-			client, err = rpc.Dial("tcp", cfg.SMRater)
+			for i := 0; i < cfg.SMRaterReconnects; i++ {
+				client, err = rpc.Dial("tcp", cfg.SMRater)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
+			
 		}
 		if err != nil {
 			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
@@ -231,12 +257,10 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter rat
 		getter, err = rater.NewPostgresStorage(host, port, name, user, pass)
 	default:
 		err = errors.New("unknown db")
-		rater.Logger.Crit("Unknown db type, exiting!")
 		return nil, err
 	}
 
 	if err != nil {
-		rater.Logger.Crit(fmt.Sprintf("Could not connect to db: %v, exiting!", err))
 		return nil, err 
 	}
 	return getter, nil
