@@ -98,9 +98,21 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		var client *rpc.Client
 		var err error
 		if cfg.MediatorRPCEncoding == JSON {
-			client, err = jsonrpc.Dial("tcp", cfg.MediatorRater)
+			for i := 0; i < cfg.MediatorRaterReconnects; i++ {
+				client, err = jsonrpc.Dial("tcp", cfg.MediatorRater)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
 		} else {
-			client, err = rpc.Dial("tcp", cfg.MediatorRater)
+			for i := 0; i < cfg.MediatorRaterReconnects; i++ {
+				client, err = rpc.Dial("tcp", cfg.MediatorRater)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
 		}
 		if err != nil {
 			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
@@ -142,9 +154,23 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 		var client *rpc.Client
 		var err error
 		if cfg.SMRPCEncoding == JSON {
-			client, err = jsonrpc.Dial("tcp", cfg.SMRater)
+			// We attempt to reconnect more times
+			for i := 0; i < cfg.SMRaterReconnects; i++ {
+				client, err = jsonrpc.Dial("tcp", cfg.SMRater)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
 		} else {
-			client, err = rpc.Dial("tcp", cfg.SMRater)
+			for i := 0; i < cfg.SMRaterReconnects; i++ {
+				client, err = rpc.Dial("tcp", cfg.SMRater)
+				if err == nil { //Connected so no need to reiterate
+					break
+				}
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
+			
 		}
 		if err != nil {
 			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
@@ -167,14 +193,14 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	exitChan <- true
 }
 
-func checkConfigSanity() {
+func checkConfigSanity() error {
 	if cfg.SMEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
 		rater.Logger.Crit("The session manager must not be enabled on a worker rater (change [rater]/balancer to disabled)!")
-		exitChan <- true
+		return errors.New("SessionManager on Worker")
 	}
 	if cfg.BalancerEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
 		rater.Logger.Crit("The balancer is enabled so it cannot connect to anatoher balancer (change [rater]/balancer to disabled)!")
-		exitChan <- true
+		return errors.New("Improperly configured balancer")
 	}
 
 	// check if the session manager or mediator is connectting via loopback
@@ -185,13 +211,13 @@ func checkConfigSanity() {
 		if cfg.BalancerEnabled {
 			if cfg.BalancerRPCEncoding != cfg.SMRPCEncoding {
 				rater.Logger.Crit("If you are connecting the session manager via the loopback to the balancer use the same type of rpc encoding!")
-				exitChan <- true
+				return errors.New("Balancer and SessionManager using different encoding")
 			}
 		}
 		if cfg.RaterEnabled {
 			if cfg.RaterRPCEncoding != cfg.SMRPCEncoding {
 				rater.Logger.Crit("If you are connecting the session manager via the loopback to the arter use the same type of rpc encoding!")
-				exitChan <- true
+				return errors.New("Rater and SessionManager using different encoding")
 			}
 		}
 	}
@@ -199,16 +225,17 @@ func checkConfigSanity() {
 		if cfg.BalancerEnabled {
 			if cfg.BalancerRPCEncoding != cfg.MediatorRPCEncoding {
 				rater.Logger.Crit("If you are connecting the mediator via the loopback to the balancer use the same type of rpc encoding!")
-				exitChan <- true
+				return  errors.New("Balancer and Mediator using different encoding")
 			}
 		}
 		if cfg.RaterEnabled {
 			if cfg.RaterRPCEncoding != cfg.MediatorRPCEncoding {
 				rater.Logger.Crit("If you are connecting the mediator via the loopback to the arter use the same type of rpc encoding!")
-				exitChan <- true
+				return errors.New("Rater and Mediator using different encoding")
 			}
 		}
 	}
+	return nil
 }
 
 func configureDatabase(db_type, host, port, name, user, pass string) (getter rater.DataStorage, err error) {
@@ -218,7 +245,7 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter rat
 		db_nb, err = strconv.Atoi(name)
 		if err != nil {
 			rater.Logger.Crit("Redis db name must be an integer!")
-			exitChan <- true
+			return nil, err
 		}
 		if port != "" {
 			host += ":" + port
@@ -230,15 +257,13 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter rat
 		getter, err = rater.NewPostgresStorage(host, port, name, user, pass)
 	default:
 		err = errors.New("unknown db")
-		rater.Logger.Crit("Unknown db type, exiting!")
-		exitChan <- true
+		return nil, err
 	}
 
 	if err != nil {
-		rater.Logger.Crit(fmt.Sprintf("Could not connect to db: %v, exiting!", err))
-		exitChan <- true
+		return nil, err 
 	}
-	return
+	return getter, nil
 }
 
 func main() {
@@ -255,7 +280,11 @@ func main() {
 		return
 	}
 	// some consitency checks
-	go checkConfigSanity()
+	errCfg := checkConfigSanity()
+	if errCfg != nil {
+		rater.Logger.Crit( errCfg.Error() )
+		return
+	}
 
 	var getter, loggerDb rater.DataStorage
 	getter, err = configureDatabase(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
@@ -269,10 +298,10 @@ func main() {
 		loggerDb = getter
 	} else {
 		loggerDb, err = configureDatabase(cfg.LogDBType, cfg.LogDBHost, cfg.LogDBPort, cfg.LogDBName, cfg.LogDBUser, cfg.LogDBPass)
-	}
-	if err != nil { // Cannot configure logger database, show stopper
-		rater.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
-		return
+		if err != nil { // Cannot configure logger database, show stopper
+			rater.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+			return
+		}
 	}
 	defer loggerDb.Close()
 	rater.SetStorageLogger(loggerDb)
@@ -283,6 +312,7 @@ func main() {
 		}
 	}
 
+	// Async starts here
 	if cfg.RaterEnabled && cfg.RaterBalancer != DISABLED && !cfg.BalancerEnabled {
 		go registerToBalancer()
 		go stopRaterSingnalHandler()

@@ -61,6 +61,7 @@ type CGRConfig struct {
 	SMEnabled              bool
 	SMSwitchType           string
 	SMRater                string // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMRaterReconnects	int // Number of reconnect attempts to rater
 	SMDebitInterval          int    // the period to be debited in advanced during a call (in seconds)
 	SMRPCEncoding          string // use JSON for RPC encoding
 	SMDefaultReqType       string // Use this request type if not defined on top
@@ -72,6 +73,7 @@ type CGRConfig struct {
 	MediatorCDRInDir        string // Freeswitch Master CSV CDR path.
 	MediatorCDROutDir     string // Freeswitch Master CSV CDR output path.
 	MediatorRater          string // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	MediatorRaterReconnects	int // Number of reconnect attempts to rater
 	MediatorRPCEncoding    string // use JSON for RPC encoding
 	MediatorSkipDB         bool
 	MediatorPseudoprepaid  bool
@@ -193,6 +195,10 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("mediator", "rater"); hasOpt {
 		cfg.MediatorRater, _ = c.GetString("mediator", "rater")
 	}
+	cfg.MediatorRaterReconnects = 3
+	if hasOpt = c.HasOption("mediator", "rater_reconnects"); hasOpt {
+		cfg.MediatorRaterReconnects, _ = c.GetInt("mediator", "rater_reconnects")
+	}
 	cfg.MediatorRPCEncoding = GOB
 	if hasOpt = c.HasOption("mediator", "rpc_encoding"); hasOpt {
 		cfg.MediatorRPCEncoding, _ = c.GetString("mediator", "rpc_encoding")
@@ -220,6 +226,10 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	cfg.SMRater = "127.0.0.1:2012"
 	if hasOpt = c.HasOption("session_manager", "rater"); hasOpt {
 		cfg.SMRater, _ = c.GetString("session_manager", "rater")
+	}
+	cfg.SMRaterReconnects = 3
+	if hasOpt = c.HasOption("session_manager", "rater_reconnects"); hasOpt {
+		cfg.SMRaterReconnects, _ = c.GetInt("session_manager", "rater_reconnects")
 	}
 	cfg.SMDebitInterval = 10
 	if hasOpt = c.HasOption("session_manager", "debit_interval"); hasOpt {
