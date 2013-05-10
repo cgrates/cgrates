@@ -21,6 +21,7 @@ package rater
 import (
 	"fmt"
 	"github.com/fzzy/radix/redis"
+	//"log"
 	"time"
 )
 
@@ -31,7 +32,7 @@ type RedisStorage struct {
 }
 
 func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
-	ndb, err := redis.DialTimeout("tcp", address, time.Duration(10)*time.Second)
+	ndb, err := redis.DialTimeout("tcp", address, 5*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -47,6 +48,7 @@ func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
 			return nil, r.Err
 		}
 	}
+	// test: to be removed
 	ms := new(MyMarshaler)
 	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
 }
@@ -75,7 +77,7 @@ func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err err
 
 func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := rs.ms.Marshal(rp)
-	r := rs.db.Cmd("set", RATING_PROFILE_PREFIX+rp.Id, result)
+	r := rs.db.Cmd("set", RATING_PROFILE_PREFIX+rp.Id, string(result))
 	if r.Err != nil {
 		return r.Err
 	}
@@ -97,7 +99,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	if err != nil {
 		return err
 	}
-	r := rs.db.Cmd("set", DESTINATION_PREFIX+dest.Id, result)
+	r := rs.db.Cmd("set", DESTINATION_PREFIX+dest.Id, string(result))
 	if r.Err != nil {
 		return r.Err
 	}
@@ -115,7 +117,7 @@ func (rs *RedisStorage) GetActions(key string) (as []*Action, err error) {
 
 func (rs *RedisStorage) SetActions(key string, as []*Action) (err error) {
 	result, err := rs.ms.Marshal(as)
-	r := rs.db.Cmd("set", ACTION_PREFIX+key, result)
+	r := rs.db.Cmd("set", ACTION_PREFIX+key, string(result))
 	if r.Err != nil {
 		return r.Err
 	}
@@ -134,7 +136,7 @@ func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) 
 
 func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 	result, err := rs.ms.Marshal(ub)
-	r := rs.db.Cmd("set", USER_BALANCE_PREFIX+ub.Id, result)
+	r := rs.db.Cmd("set", USER_BALANCE_PREFIX+ub.Id, string(result))
 	if r.Err != nil {
 		return r.Err
 	}
@@ -160,7 +162,7 @@ func (rs *RedisStorage) SetActionTimings(key string, ats []*ActionTiming) (err e
 		return
 	}
 	result, err := rs.ms.Marshal(ats)
-	r := rs.db.Cmd("set", ACTION_TIMING_PREFIX+key, result)
+	r := rs.db.Cmd("set", ACTION_TIMING_PREFIX+key, string(result))
 	if r.Err != nil {
 		return r.Err
 	}
@@ -191,7 +193,7 @@ func (rs *RedisStorage) LogCallCost(uuid, source string, cc *CallCost) (err erro
 	if err != nil {
 		return
 	}
-	r := rs.db.Cmd("set", LOG_CALL_COST_PREFIX+source+"_"+uuid, result)
+	r := rs.db.Cmd("set", LOG_CALL_COST_PREFIX+source+"_"+uuid, string(result))
 	if r.Err != nil {
 		return r.Err
 	}
@@ -216,7 +218,7 @@ func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	if err != nil {
 		return
 	}
-	rs.db.Cmd("set", LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
+	rs.db.Cmd("set", LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
 	return
 }
 
@@ -229,7 +231,7 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as []*A
 	if err != nil {
 		return
 	}
-	rs.db.Cmd("set", LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s", string(mat), string(mas))))
+	rs.db.Cmd("set", LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), fmt.Sprintf("%s*%s", string(mat), string(mas)))
 	return
 }
 

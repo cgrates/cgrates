@@ -217,6 +217,9 @@ De-serializes the action for the storage. Used for key-value storages.
 */
 func (a *Action) restore(input string) {
 	elements := strings.Split(input, "|")
+	if len(elements) < 6 {
+		return
+	}
 	a.Id = elements[0]
 	a.ActionType = elements[1]
 	a.BalanceId = elements[2]

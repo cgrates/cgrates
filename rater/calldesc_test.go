@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
+	//"log"
 	"testing"
 	"time"
-	//"log"
 )
 
 func init() {
@@ -187,7 +187,6 @@ func TestMinutesCost(t *testing.T) {
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Cost: 55, ConnectFee: 0}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
-		t.Log(result.Timespans[0])
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }

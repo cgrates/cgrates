@@ -20,6 +20,7 @@ package rater
 
 import (
 	"errors"
+	//"log"
 	"strconv"
 	"strings"
 )
@@ -106,7 +107,7 @@ func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
 		}
 	}
 	// if it is not found and the Seconds are negative (topup)
-	// then we add it to the list	
+	// then we add it to the list
 	if !found && newMb.Seconds <= 0 {
 		newMb.Seconds = -newMb.Seconds
 		ub.MinuteBuckets = append(ub.MinuteBuckets, newMb)
@@ -195,7 +196,7 @@ func (ub *UserBalance) executeActionTriggers() {
 					}
 				} else {
 					if uc.Units >= at.ThresholdValue {
-						// run the actions					
+						// run the actions
 						at.Execute(ub)
 					}
 				}
@@ -304,6 +305,9 @@ De-serializes the user balance for the storage. Used for key-value storages.
 */
 func (ub *UserBalance) restore(input string) {
 	elements := strings.Split(input, "|")
+	if len(elements) < 2 {
+		return
+	}
 	ub.Id = elements[0]
 	ub.Type = elements[1]
 	if ub.BalanceMap == nil {

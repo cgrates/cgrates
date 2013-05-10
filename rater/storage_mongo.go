@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
+	"log"
 	"time"
 )
 
@@ -40,7 +41,7 @@ func NewMongoStorage(host, port, db, user, pass string) (DataStorage, error) {
 	}
 	session, err := mgo.Dial(dial)
 	if err != nil {
-		Logger.Err(fmt.Sprintf("Could not connect to logger database: %v", err))
+		log.Printf(fmt.Sprintf("Could not connect to logger database: %v", err))
 		return nil, err
 	}
 	ndb := session.DB(db)

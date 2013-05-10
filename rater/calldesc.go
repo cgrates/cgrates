@@ -42,12 +42,13 @@ const (
 )
 
 var (
+	Logger           LoggerInterface
 	storageGetter, _ = NewMapStorage()
-	//storageGetter, _ = NewMongoStorage("localhost", "cgrates")
-	//storageGetter, _ = NewRedixStorage("127.0.0.1:6379", 10, "")
+	//storageGetter, _ = NewMongoStorage("192.168.0.17", "27017", "cgrates", "", "")
+	//storageGetter, _ = NewRedisStorage("192.168.0.17:6379", 10, "")
+	//storageGetter, _ = NewRedigoStorage("192.168.0.17:6379", 10, "")
 	storageLogger = storageGetter
 	debitPeriod   = 10 * time.Second
-	Logger        LoggerInterface
 )
 
 /*

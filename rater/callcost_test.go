@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
-	// "log"	
+	// "log"
 	"testing"
 	"time"
 )
@@ -41,7 +41,7 @@ func TestSingleResultMerge(t *testing.T) {
 	}
 	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 1 || cc1.Timespans[0].GetDuration().Seconds() != 120 {
-		t.Error("wrong resulted timespan: ", len(cc1.Timespans), cc1.Timespans[0].GetDuration().Seconds())
+		t.Error("wrong resulted timespan: ", len(cc1.Timespans))
 	}
 	if cc1.Cost != 120 {
 		t.Errorf("Exdpected 120 was %v", cc1.Cost)
@@ -71,7 +71,7 @@ func TestMultipleResultMerge(t *testing.T) {
 	}
 	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 2 || cc1.Timespans[0].GetDuration().Seconds() != 60 {
-		t.Error("wrong resulted timespan: ", len(cc1.Timespans), cc1.Timespans[0].GetDuration().Seconds())
+		t.Error("wrong resulted timespan: ", len(cc1.Timespans))
 	}
 	if cc1.Cost != 90 {
 		t.Errorf("Exdpected 90 was %v", cc1.Cost)
@@ -95,7 +95,7 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 	}
 	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 2 || cc1.Timespans[1].GetDuration().Seconds() != 120 {
-		t.Error("wrong resulted timespan: ", len(cc1.Timespans), cc1.Timespans[0].GetDuration().Seconds())
+		t.Error("wrong resulted timespan: ", len(cc1.Timespans))
 	}
 	if cc1.Cost != 120 {
 		t.Errorf("Exdpected 120 was %v", cc1.Cost)
@@ -119,8 +119,7 @@ func TestMultipleInputRightMerge(t *testing.T) {
 	}
 	cc1.Merge(cc2)
 	if len(cc1.Timespans) != 2 || cc1.Timespans[0].GetDuration().Seconds() != 120 {
-		t.Error("wrong resulted timespan: ", len(cc1.Timespans), cc1.Timespans[0].GetDuration().Seconds())
-		t.Log(cc1.Timespans[0].GetDuration())
+		t.Error("wrong resulted timespan: ", len(cc1.Timespans))
 	}
 	if cc1.Cost != 150 {
 		t.Errorf("Exdpected 150 was %v", cc1.Cost)

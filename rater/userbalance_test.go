@@ -88,7 +88,7 @@ func TestUserBalanceStorageStoreRestore(t *testing.T) {
 	storageGetter.SetUserBalance(rifsBalance)
 	ub1, err := storageGetter.GetUserBalance("other")
 	if err != nil || ub1.BalanceMap[CREDIT+OUTBOUND] != rifsBalance.BalanceMap[CREDIT+OUTBOUND] {
-		t.Errorf("Expected %v was %v", rifsBalance.BalanceMap[CREDIT+OUTBOUND], ub1.BalanceMap[CREDIT+OUTBOUND])
+		t.Errorf("Expected %v was something else", rifsBalance.BalanceMap[CREDIT+OUTBOUND]) //, ub1.BalanceMap[CREDIT+OUTBOUND])
 	}
 }
 
@@ -110,7 +110,7 @@ func TestGetPricedSeconds(t *testing.T) {
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT + OUTBOUND: 21}}
 	seconds, credit, bucketList := ub1.getSecondsForPrefix("0723")
 	expected := 21.0
-	if credit != 0 || seconds != expected || bucketList[0].Weight < bucketList[1].Weight {
+	if credit != 0 || seconds != expected || len(bucketList) < 2 || bucketList[0].Weight < bucketList[1].Weight {
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }
@@ -120,8 +120,9 @@ func TestUserBalanceRedisStore(t *testing.T) {
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT + OUTBOUND: 21}}
 	storageGetter.SetUserBalance(rifsBalance)
-	result, _ := storageGetter.GetUserBalance(rifsBalance.Id)
-	if (rifsBalance.Id != result.Id) ||
+	result, err := storageGetter.GetUserBalance(rifsBalance.Id)
+	if err != nil || rifsBalance.Id != result.Id ||
+		len(rifsBalance.MinuteBuckets) < 2 || len(result.MinuteBuckets) < 2 ||
 		!(rifsBalance.MinuteBuckets[0].Equal(result.MinuteBuckets[0])) ||
 		!(rifsBalance.MinuteBuckets[1].Equal(result.MinuteBuckets[1])) ||
 		(rifsBalance.BalanceMap[CREDIT+OUTBOUND] != result.BalanceMap[CREDIT+OUTBOUND]) {

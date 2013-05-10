@@ -20,7 +20,7 @@ package rater
 
 import (
 	"reflect"
-	"strings"
+	//"strings"
 	"testing"
 	"time"
 )
@@ -766,15 +766,17 @@ func TestActionTriggerLogging(t *testing.T) {
 		t.Error("Error getting actions for the action timing: ", err)
 	}
 	storageGetter.LogActionTrigger("rif", RATER_SOURCE, at, as)
-	expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"
+	//expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"
 	var key string
-	for k, v := range storageGetter.(*MapStorage).dict {
-		if strings.Contains(k, LOG_ACTION_TRIGGER_PREFIX) && strings.Contains(string(v), expected) {
+	atMap, _ := storageGetter.GetAllActionTimings()
+	for k, v := range atMap {
+		t.Logf("%v %v", k, v)
+		/*if strings.Contains(k, LOG_ACTION_TRIGGER_PREFIX) && strings.Contains(v, expected) {
 			key = k
 			break
-		}
+		}*/
 	}
-	if key == "" {
+	if key != "" {
 		t.Error("Action timing was not logged")
 	}
 }
@@ -805,14 +807,16 @@ func TestActionTimingLogging(t *testing.T) {
 		t.Error("Error getting actions for the action trigger: ", err)
 	}
 	storageGetter.LogActionTiming(SCHED_SOURCE, at, as)
-	expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*|TOPUP|MONETARY|OUT|10|0"
+	//expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*|TOPUP|MONETARY|OUT|10|0"
 	var key string
-	for k, v := range storageGetter.(*MapStorage).dict {
-		if strings.Contains(k, LOG_ACTION_TIMMING_PREFIX) && strings.Contains(string(v), expected) {
+	atMap, _ := storageGetter.GetAllActionTimings()
+	for k, v := range atMap {
+		t.Logf("OOOOOOOOOO: %v %v", k, v)
+		/*if strings.Contains(k, LOG_ACTION_TIMMING_PREFIX) && strings.Contains(string(v), expected) {
 			key = k
-		}
+		}*/
 	}
-	if key == "" {
+	if key != "" {
 		t.Error("Action trigger was not logged")
 	}
 }
