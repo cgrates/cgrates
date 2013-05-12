@@ -65,7 +65,7 @@ func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
 }
 
 func (uc *UnitsCounter) String() string {
-	return uc.BalanceId + " " + uc.Direction
+	return fmt.Sprintf("%s %s %v", uc.BalanceId, uc.Direction, uc.Units)
 }
 
 /*

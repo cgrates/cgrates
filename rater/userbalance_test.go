@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
+	//"log"
 	"reflect"
 	"testing"
 )
@@ -384,7 +385,6 @@ func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 	if ub.BalanceMap[CREDIT+OUTBOUND] != 110 || ub.MinuteBuckets[0].Seconds != 20 {
 		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND], ub.MinuteBuckets[0].Seconds)
 	}
-
 	// we can reset them
 	ub.resetActionTriggers()
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1})

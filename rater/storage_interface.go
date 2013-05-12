@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	gmsgpack "github.com/ugorji/go-msgpack"
 	"github.com/vmihailenco/msgpack"
 	"strings"
 )
@@ -111,6 +112,16 @@ func (jm *MsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return msgpack.Unmarshal(data, v)
 }
 
+type GoMsgpackMarshaler struct{}
+
+func (jm *GoMsgpackMarshaler) Marshal(v interface{}) ([]byte, error) {
+	return gmsgpack.Marshal(v)
+}
+
+func (jm *GoMsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
+	return gmsgpack.Unmarshal(data, v, nil)
+}
+
 type GOBMarshaler struct {
 	buf bytes.Buffer
 }
@@ -143,14 +154,16 @@ func (mm *MyMarshaler) Marshal(v interface{}) (data []byte, err error) {
 	case []*Action:
 		result := ""
 		for _, a := range v.([]*Action) {
-			result += a.store() + "+"
+			result += a.store() + "~"
 		}
+		result = strings.TrimRight(result, "~")
 		return []byte(result), nil
 	case []*ActionTiming:
 		result := ""
 		for _, at := range v.([]*ActionTiming) {
-			result += at.store() + "+"
+			result += at.store() + "~"
 		}
+		result = strings.TrimRight(result, "~")
 		return []byte(result), nil
 	case storer:
 		s := v.(storer)
@@ -167,7 +180,7 @@ func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) (err error) {
 	switch v.(type) {
 	case *[]*Action:
 		as := v.(*[]*Action)
-		for _, a_string := range strings.Split(string(data), "+") {
+		for _, a_string := range strings.Split(string(data), "~") {
 			if len(a_string) > 0 {
 				a := &Action{}
 				a.restore(a_string)
@@ -177,7 +190,7 @@ func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) (err error) {
 		return nil
 	case *[]*ActionTiming:
 		ats := v.(*[]*ActionTiming)
-		for _, at_string := range strings.Split(string(data), "+") {
+		for _, at_string := range strings.Split(string(data), "~") {
 			if len(at_string) > 0 {
 				at := &ActionTiming{}
 				at.restore(at_string)

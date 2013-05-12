@@ -48,6 +48,7 @@ func populateDB() {
 			&MinuteBucket{Seconds: 100, DestinationId: "RET", Weight: 20},
 		},
 	}
+	storageGetter.Flush()
 	storageGetter.SetUserBalance(broker)
 	storageGetter.SetUserBalance(minu)
 }

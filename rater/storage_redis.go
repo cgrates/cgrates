@@ -107,10 +107,9 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 }
 
 func (rs *RedisStorage) GetActions(key string) (as []*Action, err error) {
-	if values, err := rs.db.Cmd("get", ACTION_PREFIX+key).Bytes(); err == nil {
+	var values []byte
+	if values, err = rs.db.Cmd("get", ACTION_PREFIX+key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &as)
-	} else {
-		return nil, err
 	}
 	return
 }
