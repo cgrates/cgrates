@@ -116,7 +116,7 @@ func TestGetPricedSeconds(t *testing.T) {
 	}
 }
 
-func TestUserBalanceRedisStore(t *testing.T) {
+func TestUserBalanceStorageStore(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT + OUTBOUND: 21}}
@@ -465,7 +465,7 @@ func BenchmarkGetSecondForPrefix(b *testing.B) {
 	}
 }
 
-func BenchmarkUserBalanceRedisStoreRestore(b *testing.B) {
+func BenchmarkUserBalanceStorageStoreRestore(b *testing.B) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.01, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]float64{CREDIT + OUTBOUND: 21}}
