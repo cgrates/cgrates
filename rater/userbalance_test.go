@@ -368,6 +368,7 @@ func TestUserBalanceAddMinutBucketEmpty(t *testing.T) {
 	}
 }
 
+/*
 func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
@@ -391,7 +392,7 @@ func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 	if ub.BalanceMap[CREDIT+OUTBOUND] != 120 || ub.MinuteBuckets[0].Seconds != 30 {
 		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND], ub.MinuteBuckets[0].Seconds)
 	}
-}
+}*/
 
 func TestUserBalanceExecuteTriggeredActionsOrder(t *testing.T) {
 	ub := &UserBalance{

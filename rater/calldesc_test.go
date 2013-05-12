@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
-	//"log"
+	"log"
 	"testing"
 	"time"
 )
@@ -48,9 +48,13 @@ func populateDB() {
 			&MinuteBucket{Seconds: 100, DestinationId: "RET", Weight: 20},
 		},
 	}
-	storageGetter.Flush()
-	storageGetter.SetUserBalance(broker)
-	storageGetter.SetUserBalance(minu)
+	if storageGetter != nil {
+		storageGetter.Flush()
+		storageGetter.SetUserBalance(broker)
+		storageGetter.SetUserBalance(minu)
+	} else {
+		log.Fatal("Could not connect to db!")
+	}
 }
 
 func TestSplitSpans(t *testing.T) {

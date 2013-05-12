@@ -42,9 +42,9 @@ const (
 )
 
 var (
-	Logger LoggerInterface
-	//db_server = "127.0.0.1"
-	db_server = "192.168.0.17"
+	Logger    LoggerInterface
+	db_server = "127.0.0.1"
+	//db_server = "192.168.0.17"
 	//storageGetter, _ = NewMapStorage()
 	//storageGetter, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
 	//storageGetter, _ = NewRedisStorage(db_server+":6379", 11, "")
