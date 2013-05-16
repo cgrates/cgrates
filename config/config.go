@@ -38,57 +38,57 @@ const (
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	DataDBType             string
-	DataDBHost             string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDBPort             string // The port to bind to.
-	DataDBName             string // The name of the database to connect to.
-	DataDBUser             string // The user to sign in as.
-	DataDBPass             string // The user's password.
-	LogDBType              string // Should reflect the database type used to store logs
-	LogDBHost              string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	LogDBPort              string // The port to bind to.
-	LogDBName              string // The name of the database to connect to.
-	LogDBUser              string // The user to sign in as.
-	LogDBPass              string // The user's password.
-	RaterEnabled           bool   // start standalone server (no balancer)
-	RaterBalancer          string // balancer address host:port
-	RaterListen            string // listening address host:port
-	RaterRPCEncoding       string // use JSON for RPC encoding
-	BalancerEnabled        bool
-	BalancerListen         string // Json RPC server address
-	BalancerRPCEncoding    string // use JSON for RPC encoding
-	SchedulerEnabled       bool
-	SMEnabled              bool
-	SMSwitchType           string
-	SMRater                string // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMRaterReconnects	int // Number of reconnect attempts to rater
-	SMDebitInterval          int    // the period to be debited in advanced during a call (in seconds)
-	SMRPCEncoding          string // use JSON for RPC encoding
-	SMDefaultReqType       string // Use this request type if not defined on top
-	SMDefaultTOR           string // set default type of record
-	SMDefaultTenant        string // set default tenant
-	SMDefaultSubject       string // set default rating subject, useful in case of fallback
-	MediatorEnabled        bool
-	MediatorCDRType		string // sets the type of cdrs we are processing.
+	DataDBType              string
+	DataDBHost              string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDBPort              string // The port to bind to.
+	DataDBName              string // The name of the database to connect to.
+	DataDBUser              string // The user to sign in as.
+	DataDBPass              string // The user's password.
+	LogDBType               string // Should reflect the database type used to store logs
+	LogDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	LogDBPort               string // The port to bind to.
+	LogDBName               string // The name of the database to connect to.
+	LogDBUser               string // The user to sign in as.
+	LogDBPass               string // The user's password.
+	RaterEnabled            bool   // start standalone server (no balancer)
+	RaterBalancer           string // balancer address host:port
+	RaterListen             string // listening address host:port
+	RaterRPCEncoding        string // use JSON for RPC encoding
+	BalancerEnabled         bool
+	BalancerListen          string // Json RPC server address
+	BalancerRPCEncoding     string // use JSON for RPC encoding
+	SchedulerEnabled        bool
+	SMEnabled               bool
+	SMSwitchType            string
+	SMRater                 string // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMRaterReconnects       int    // Number of reconnect attempts to rater
+	SMDebitInterval         int    // the period to be debited in advanced during a call (in seconds)
+	SMRPCEncoding           string // use JSON for RPC encoding
+	SMDefaultReqType        string // Use this request type if not defined on top
+	SMDefaultTOR            string // set default type of record
+	SMDefaultTenant         string // set default tenant
+	SMDefaultSubject        string // set default rating subject, useful in case of fallback
+	MediatorEnabled         bool
+	MediatorCDRType         string // sets the type of cdrs we are processing.
 	MediatorCDRInDir        string // Freeswitch Master CSV CDR path.
-	MediatorCDROutDir     string // Freeswitch Master CSV CDR output path.
-	MediatorRater          string // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	MediatorRaterReconnects	int // Number of reconnect attempts to rater
-	MediatorRPCEncoding    string // use JSON for RPC encoding
-	MediatorSkipDB         bool
-	MediatorPseudoprepaid  bool
-	FreeswitchServer       string // freeswitch address host:port
-	FreeswitchPass         string // FS socket password
-	FreeswitchDirectionIdx string
-	FreeswitchTORIdx       string
-	FreeswitchTenantIdx    string
-	FreeswitchSubjectIdx   string
-	FreeswitchAccountIdx   string
-	FreeswitchDestIdx      string
-	FreeswitchTimeStartIdx string
-	FreeswitchDurationIdx  string
-	FreeswitchUUIDIdx      string
-	FreeswitchReconnects   int // number of times to attempt reconnect after connect fails
+	MediatorCDROutDir       string // Freeswitch Master CSV CDR output path.
+	MediatorRater           string // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	MediatorRaterReconnects int    // Number of reconnect attempts to rater
+	MediatorRPCEncoding     string // use JSON for RPC encoding
+	MediatorSkipDB          bool
+	MediatorPseudoprepaid   bool
+	FreeswitchServer        string // freeswitch address host:port
+	FreeswitchPass          string // FS socket password
+	FreeswitchDirectionIdx  string
+	FreeswitchTORIdx        string
+	FreeswitchTenantIdx     string
+	FreeswitchSubjectIdx    string
+	FreeswitchAccountIdx    string
+	FreeswitchDestIdx       string
+	FreeswitchTimeStartIdx  string
+	FreeswitchDurationIdx   string
+	FreeswitchUUIDIdx       string
+	FreeswitchReconnects    int // number of times to attempt reconnect after connect fails
 }
 
 // Instantiate a new CGRConfig setting defaults or reading from file
@@ -97,6 +97,18 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
 	}
+	return loadConfig(c)
+}
+
+func NewCGRConfigBytes(data []byte) (*CGRConfig, error) {
+	c, err := conf.ReadConfigBytes(data)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
+	}
+	return loadConfig(c)
+}
+
+func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	cfg := &CGRConfig{}
 	var hasOpt bool
 	cfg.DataDBType = REDIS
@@ -123,7 +135,7 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "datadb_passwd"); hasOpt {
 		cfg.DataDBPass, _ = c.GetString("global", "datadb_passwd")
 	}
-	cfg.LogDBType = MONGO 
+	cfg.LogDBType = MONGO
 	if hasOpt = c.HasOption("global", "logdb_type"); hasOpt {
 		cfg.LogDBType, _ = c.GetString("global", "logdb_type")
 	}
@@ -305,5 +317,4 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	}
 
 	return cfg, nil
-
 }

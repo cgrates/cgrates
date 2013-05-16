@@ -51,6 +51,66 @@ var (
 "Session-Since-Startup":	"122",
 "Idle-CPU":	"100.000000"
 `
+	conf_data = []byte(`
+### Test data, not for production usage
+
+[global]
+datadb_type = test # 
+datadb_host = test # The host to connect to. Values that start with / are for UNIX domain sockets.
+datadb_port = test # The port to bind to.
+datadb_name = test # The name of the database to connect to.
+datadb_user =  test # The user to sign in as.
+datadb_passwd =  test # The user's password.root
+logdb_type = test # 
+logdb_host = test # The host to connect to. Values that start with / are for UNIX domain sockets.
+logdb_port = test # The port to bind to.
+logdb_name = test # The name of the database to connect to.
+logdb_user =  test # The user to sign in as.
+logdb_passwd =  test # The user's password.root
+
+[balancer]
+enabled = true # Start balancer server
+listen = test # Balancer listen interface
+rpc_encoding = test # use JSON for RPC encoding	
+
+[rater]
+enabled = true
+listen = test # listening address host:port, internal for internal communication only
+balancer = test # if defined it will register to balancer as worker
+rpc_encoding = test # use JSON for RPC encoding
+
+[mediator]
+enabled = true
+cdr_in_dir = test # Freeswitch Master CSV CDR path.
+cdr_out_dir = test
+rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
+rpc_encoding = test # use JSON for RPC encoding
+skipdb = true
+pseudoprepaid = true
+
+[scheduler]
+enabled = true
+
+[session_manager]
+enabled = true
+switch_type = test
+rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
+debit_interval = 11
+rpc_encoding = test # use JSON for RPC encoding
+
+[freeswitch]
+server = test # freeswitch address host:port
+passwd = test # freeswitch address host:port
+direction_index = test
+tor_index         = test
+tenant_index      = test
+subject_index     = test
+account_index     = test
+destination_index = test
+time_start_index  = test
+duration_index    = test
+uuid_index        = test
+`)
 )
 
 /*func TestSessionDurationSingle(t *testing.T) {
@@ -65,9 +125,8 @@ var (
 }*/
 
 func TestSessionNilSession(t *testing.T) {
-	cfgTestPath := "../config/test_data.txt"
 	var errCfg error
-	cfg, errCfg = config.NewCGRConfig(&cfgTestPath) // Needed here to avoid nil on cfg variable
+	cfg, errCfg = config.NewCGRConfigBytes(conf_data) // Needed here to avoid nil on cfg variable
 	if errCfg != nil {
 		t.Errorf("Cannot get configuration %v", errCfg)
 	}

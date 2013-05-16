@@ -90,15 +90,15 @@ func (fsev *FSEvent) GetOrigId() string {
 	return fsev.fields[ORIG_ID]
 }
 func (fsev *FSEvent) GetSubject() string {
-	return firstNonEmpty([]string{fsev.fields[SUBJECT], fsev.fields[USERNAME]})
+	return firstNonEmpty(fsev.fields[SUBJECT], fsev.fields[USERNAME])
 }
 func (fsev *FSEvent) GetAccount() string {
-	return firstNonEmpty([]string{fsev.fields[ACCOUNT], fsev.fields[USERNAME]})
+	return firstNonEmpty(fsev.fields[ACCOUNT], fsev.fields[USERNAME])
 }
 
 // Charging destination number
 func (fsev *FSEvent) GetDestination() string {
-	return firstNonEmpty([]string{fsev.fields[DESTINATION], fsev.fields[CALL_DEST_NR]})
+	return firstNonEmpty(fsev.fields[DESTINATION], fsev.fields[CALL_DEST_NR])
 }
 
 // Original dialed destination number, useful in case of unpark
@@ -106,16 +106,16 @@ func (fsev *FSEvent) GetCallDestNr() string {
 	return fsev.fields[CALL_DEST_NR]
 }
 func (fsev *FSEvent) GetTOR() string {
-	return firstNonEmpty([]string{fsev.fields[TOR], cfg.SMDefaultTOR})
+	return firstNonEmpty(fsev.fields[TOR], cfg.SMDefaultTOR)
 }
 func (fsev *FSEvent) GetUUID() string {
 	return fsev.fields[UUID]
 }
 func (fsev *FSEvent) GetTenant() string {
-	return firstNonEmpty([]string{fsev.fields[CSTMID], cfg.SMDefaultTenant})
+	return firstNonEmpty(fsev.fields[CSTMID], cfg.SMDefaultTenant)
 }
 func (fsev *FSEvent) GetReqType() string {
-	return firstNonEmpty([]string{fsev.fields[REQTYPE], cfg.SMDefaultReqType})
+	return firstNonEmpty(fsev.fields[REQTYPE], cfg.SMDefaultReqType)
 }
 func (fsev *FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection()) == "" ||

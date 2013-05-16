@@ -42,7 +42,7 @@ type Event interface {
 }
 
 // Returns first non empty string out of vals. Useful to extract defaults
-func firstNonEmpty(vals []string) string {
+func firstNonEmpty(vals ...string) string {
 	for _, val := range vals {
 		if len(val) != 0 {
 			return val
