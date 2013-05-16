@@ -30,7 +30,7 @@ type PostgresStorage struct {
 }
 
 var (
-	schema_sql = `
+	postgres_schema = `
 CREATE TABLE ratingprofile IF NOT EXISTS (
 	id SERIAL PRIMARY KEY,
 	fallbackkey VARCHAR(512),
