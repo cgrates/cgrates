@@ -12,6 +12,8 @@
 + Commercial support available
 
 ## Documentation ##
+Install & run screencast: http://youtu.be/qTQZZpb-m7Q
+
 Browsable HTML http://readthedocs.org/docs/cgrates/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
