@@ -170,7 +170,7 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 				}
 				time.Sleep(time.Duration(i/2) * time.Second)
 			}
-			
+
 		}
 		if err != nil {
 			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
@@ -225,7 +225,7 @@ func checkConfigSanity() error {
 		if cfg.BalancerEnabled {
 			if cfg.BalancerRPCEncoding != cfg.MediatorRPCEncoding {
 				rater.Logger.Crit("If you are connecting the mediator via the loopback to the balancer use the same type of rpc encoding!")
-				return  errors.New("Balancer and Mediator using different encoding")
+				return errors.New("Balancer and Mediator using different encoding")
 			}
 		}
 		if cfg.RaterEnabled {
@@ -250,7 +250,7 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter rat
 		if port != "" {
 			host += ":" + port
 		}
-		getter, err = rater.NewRedisStorage(host, db_nb, pass)
+		getter, err = rater.NewGosexyStorage(host, db_nb, pass)
 	case MONGO:
 		getter, err = rater.NewMongoStorage(host, port, name, user, pass)
 	case POSTGRES:
@@ -261,7 +261,7 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter rat
 	}
 
 	if err != nil {
-		return nil, err 
+		return nil, err
 	}
 	return getter, nil
 }
@@ -282,7 +282,7 @@ func main() {
 	// some consitency checks
 	errCfg := checkConfigSanity()
 	if errCfg != nil {
-		rater.Logger.Crit( errCfg.Error() )
+		rater.Logger.Crit(errCfg.Error())
 		return
 	}
 

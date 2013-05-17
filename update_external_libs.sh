@@ -1,7 +1,9 @@
+#!/usr/bin/env sh
 go get -v -u github.com/fzzy/radix/redis
 go get -v -u code.google.com/p/goconf/conf
 go get -v -u github.com/bmizerany/pq
 go get -v -u github.com/vmihailenco/msgpack
+go get -v -u github.com/ugorji/go-msgpack
 go get -v -u labix.org/v2/mgo
 go get -v -u github.com/cgrates/fsock
 go get -u -v github.com/go-sql-driver/mysql

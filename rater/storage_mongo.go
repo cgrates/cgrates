@@ -124,7 +124,7 @@ type LogErrEntry struct {
 
 func (ms *MongoStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	rp = new(RatingProfile)
-	err = ms.db.C("ratingprofiles").Find(bson.M{"_id": key}).One(&rp)
+	err = ms.db.C("ratingprofiles").Find(bson.M{"id": key}).One(&rp)
 	return
 }
 

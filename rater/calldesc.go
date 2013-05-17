@@ -50,8 +50,8 @@ var (
 	//storageGetter, _ = NewRedisStorage(db_server+":6379", 11, "")
 	//storageGetter, _ = NewRedigoStorage(db_server+":6379", 11, "")
 	//storageGetter, _ = NewGosexyStorage(db_server+":6379", 11, "")
-	storageLogger    = storageGetter
-	debitPeriod      = 10 * time.Second
+	storageLogger = storageGetter
+	debitPeriod   = 10 * time.Second
 )
 
 /*
