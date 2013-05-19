@@ -20,6 +20,7 @@ package rater
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/cdrs"
 	"menteslibres.net/gosexy/redis"
 	//"log"
 	"strconv"
@@ -216,4 +217,11 @@ func (rs *GosexyStorage) LogActionTiming(source string, at *ActionTiming, as []*
 func (rs *GosexyStorage) LogError(uuid, source, errstr string) (err error) {
 	_, err = rs.db.Set(LOG_ERR+source+"_"+uuid, errstr)
 	return
+}
+
+func (rs *GosexyStorage) GetCdr(string) (cdrs.CDR, error) {
+	return nil, nil
+}
+func (rs *GosexyStorage) SetCdr(string, cdrs.CDR) error {
+	return nil
 }

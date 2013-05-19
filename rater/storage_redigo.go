@@ -20,6 +20,7 @@ package rater
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/garyburd/redigo/redis"
 	//"log"
 	"time"
@@ -213,4 +214,11 @@ func (rs *RedigoStorage) LogActionTiming(source string, at *ActionTiming, as []*
 func (rs *RedigoStorage) LogError(uuid, source, errstr string) (err error) {
 	_, err = rs.db.Do("set", LOG_ERR+source+"_"+uuid, errstr)
 	return
+}
+
+func (rs *RedigoStorage) GetCdr(string) (cdrs.CDR, error) {
+	return nil, nil
+}
+func (rs *RedigoStorage) SetCdr(string, cdrs.CDR) error {
+	return nil
 }

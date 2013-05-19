@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"github.com/cgrates/cgrates/cdrs"
 	gmsgpack "github.com/ugorji/go-msgpack"
 	"github.com/vmihailenco/msgpack"
 	"strings"
@@ -61,6 +62,8 @@ type DataStorage interface {
 	GetActionTimings(string) ([]*ActionTiming, error)
 	SetActionTimings(string, []*ActionTiming) error
 	GetAllActionTimings() (map[string][]*ActionTiming, error)
+	GetCdr(string) (cdrs.CDR, error)
+	SetCdr(string, cdrs.CDR) error
 	//GetAllActionTimingsLogs() (map[string][]*ActionTiming, error)
 	LogCallCost(uuid, source string, cc *CallCost) error
 	LogError(uuid, source, errstr string) error

@@ -22,6 +22,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/cgrates/cgrates/cdrs"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -136,49 +137,49 @@ func NewMySQLStorage(host, port, name, user, password string) (DataStorage, erro
 	return &MySQLStorage{db}, nil
 }
 
-func (psl *MySQLStorage) Close() {}
+func (mys *MySQLStorage) Close() {}
 
-func (psl *MySQLStorage) Flush() (err error) {
+func (mys *MySQLStorage) Flush() (err error) {
 	return
 }
 
-func (psl *MySQLStorage) GetRatingProfile(string) (rp *RatingProfile, err error) {
-	/*row := psl.Db.QueryRow(fmt.Sprintf("SELECT * FROM ratingprofiles WHERE id='%s'", id))
+func (mys *MySQLStorage) GetRatingProfile(string) (rp *RatingProfile, err error) {
+	/*row := mys.Db.QueryRow(fmt.Sprintf("SELECT * FROM ratingprofiles WHERE id='%s'", id))
 	err = row.Scan(&rp, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
 	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)*/
 	return
 }
 
-func (psl *MySQLStorage) SetRatingProfile(rp *RatingProfile) (err error) {
+func (mys *MySQLStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	return
 }
 
-func (psl *MySQLStorage) GetDestination(string) (d *Destination, err error) {
+func (mys *MySQLStorage) GetDestination(string) (d *Destination, err error) {
 	return
 }
 
-func (psl *MySQLStorage) SetDestination(d *Destination) (err error) {
+func (mys *MySQLStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
-func (psl *MySQLStorage) GetActions(string) (as []*Action, err error) {
+func (mys *MySQLStorage) GetActions(string) (as []*Action, err error) {
 	return
 }
 
-func (psl *MySQLStorage) SetActions(key string, as []*Action) (err error) { return }
+func (mys *MySQLStorage) SetActions(key string, as []*Action) (err error) { return }
 
-func (psl *MySQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
+func (mys *MySQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
 
-func (psl *MySQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
+func (mys *MySQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
 
-func (psl *MySQLStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) { return }
+func (mys *MySQLStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) { return }
 
-func (psl *MySQLStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) { return }
+func (mys *MySQLStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) { return }
 
-func (psl *MySQLStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) { return }
+func (mys *MySQLStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) { return }
 
-func (psl *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
-	if psl.Db == nil {
+func (mys *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
+	if mys.Db == nil {
 		//timespans.Logger.Warning("Cannot write log to database.")
 		return
 	}
@@ -186,7 +187,7 @@ func (psl *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err err
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdr VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdr VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
 		source,
 		cc.Direction,
@@ -204,8 +205,8 @@ func (psl *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err err
 	return
 }
 
-func (psl *MySQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	row := psl.Db.QueryRow(fmt.Sprintf("SELECT * FROM cdr WHERE uuid='%s' AND source='%s'", uuid, source))
+func (mys *MySQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
+	row := mys.Db.QueryRow(fmt.Sprintf("SELECT * FROM cdr WHERE uuid='%s' AND source='%s'", uuid, source))
 	var uuid_found string
 	var timespansJson string
 	err = row.Scan(&uuid_found, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
@@ -213,10 +214,17 @@ func (psl *MySQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err 
 	return
 }
 
-func (psl *MySQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
+func (mys *MySQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
 	return
 }
-func (psl *MySQLStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+func (mys *MySQLStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
 	return
 }
-func (psl *MySQLStorage) LogError(uuid, source, errstr string) (err error) { return }
+func (mys *MySQLStorage) LogError(uuid, source, errstr string) (err error) { return }
+
+func (mys *MySQLStorage) GetCdr(string) (cdrs.CDR, error) {
+	return nil, nil
+}
+func (mys *MySQLStorage) SetCdr(string, cdrs.CDR) error {
+	return nil
+}

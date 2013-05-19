@@ -20,6 +20,7 @@ package rater
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/fzzy/radix/redis"
 	//"log"
 	"time"
@@ -240,4 +241,10 @@ func (rs *RedisStorage) LogError(uuid, source, errstr string) (err error) {
 		return r.Err
 	}
 	return
+}
+func (rs *RedisStorage) GetCdr(string) (cdrs.CDR, error) {
+	return nil, nil
+}
+func (rs *RedisStorage) SetCdr(string, cdrs.CDR) error {
+	return nil
 }

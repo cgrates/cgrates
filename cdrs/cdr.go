@@ -19,41 +19,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrs
 
 import (
-	"encoding/json"
-	"fmt"
-	utils "github.com/cgrates/cgrates/cgrcoreutils"
-	"io/ioutil"
-	"log/syslog"
-	"net/http"
+	"time"
 )
 
-var (
-	Logger utils.LoggerInterface
-)
-
-func init() {
-	var err error
-	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
-	if err != nil {
-		Logger = new(utils.StdLogger)
-	}
-}
-
-type CDRVars struct {
-	FSCdr map[string]string
-}
-
-func cdrHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
-	cdr := CDRVars{}
-	if err := json.Unmarshal(body, &cdr); err == nil {
-		new(FSCdr).New(body)
-	} else {
-		Logger.Err(fmt.Sprintf("CDRCAPTOR: Could not unmarshal cdr: %v", err))
-	}
-}
-
-func startCaptiuringCDRs() {
-	http.HandleFunc("/cdr", cdrHandler)
-	http.ListenAndServe(":8080", nil)
+type CDR interface {
+	New([]byte) CDR
+	GetName() string
+	GetDirection() string
+	GetOrigId() string
+	GetSubject() string
+	GetAccount() string
+	GetDestination() string
+	GetCallDestNr() string
+	GetTOR() string
+	GetUUID() string
+	GetTenant() string
+	GetReqType() string
+	GetStartTime(string) (time.Time, error)
+	GetEndTime() (time.Time, error)
+	GetFallbackSubj() string
+	GetExtraParameters() string
 }

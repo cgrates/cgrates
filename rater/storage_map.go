@@ -21,6 +21,7 @@ package rater
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/cdrs"
 	"strings"
 	"time"
 )
@@ -180,5 +181,12 @@ func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as []*Act
 
 func (ms *MapStorage) LogError(uuid, source, errstr string) (err error) {
 	ms.dict[LOG_ERR+source+"_"+uuid] = []byte(errstr)
+	return nil
+}
+
+func (ms *MapStorage) GetCdr(string) (cdrs.CDR, error) {
+	return nil, nil
+}
+func (ms *MapStorage) SetCdr(string, cdrs.CDR) error {
 	return nil
 }

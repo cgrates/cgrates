@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/cache2go"
+	utils "github.com/cgrates/cgrates/cgrcoreutils"
 	"log/syslog"
 	"math"
 	"time"
@@ -31,7 +32,7 @@ func init() {
 	var err error
 	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
 	if err != nil {
-		Logger = new(StdLogger)
+		Logger = new(utils.StdLogger)
 	}
 }
 
@@ -42,7 +43,7 @@ const (
 )
 
 var (
-	Logger    LoggerInterface
+	Logger    utils.LoggerInterface
 	db_server = "127.0.0.1"
 	//db_server = "192.168.0.17"
 	storageGetter, _ = NewMapStorage()
