@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	utils "github.com/cgrates/cgrates/cgrcoreutils"
 	"testing"
 )
 
@@ -27,7 +28,7 @@ func TestFirstNonEmpty(t *testing.T) {
 	sampleMap := make(map[string]string)
 	sampleMap["Third"] = "third"
 	fourthElmnt := "fourth"
-	winnerElmnt := firstNonEmpty(firstElmnt, sampleMap["second"], sampleMap["Third"], fourthElmnt)
+	winnerElmnt := utils.FirstNonEmpty(firstElmnt, sampleMap["second"], sampleMap["Third"], fourthElmnt)
 	if winnerElmnt != sampleMap["Third"] {
 		t.Error("Wrong elemnt returned: ", winnerElmnt)
 	}

@@ -44,7 +44,7 @@ Task-Runtime: 1349437318`
 	if ev.GetName() != "RE_SCHEDULE" {
 		t.Error("Event not parsed correctly: ", ev)
 	}
-	l := len(ev.(*FSEvent).fields)
+	l := len(ev.(FSEvent))
 	if l != 17 {
 		t.Error("Incorrect number of event fields: ", l)
 	}
