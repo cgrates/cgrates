@@ -748,7 +748,6 @@ func TestUUID(t *testing.T) {
 	if len(uuid) == 0 {
 		t.Fatalf("GenUUID error %s", uuid)
 	}
-	t.Logf("uuid[%s]\n", uuid)
 }
 
 func TestActionTriggerLogging(t *testing.T) {
@@ -770,7 +769,8 @@ func TestActionTriggerLogging(t *testing.T) {
 	var key string
 	atMap, _ := storageGetter.GetAllActionTimings()
 	for k, v := range atMap {
-		t.Logf("%v %v", k, v)
+		_ = k
+		_ = v
 		/*if strings.Contains(k, LOG_ACTION_TRIGGER_PREFIX) && strings.Contains(v, expected) {
 			key = k
 			break
@@ -811,7 +811,6 @@ func TestActionTimingLogging(t *testing.T) {
 	var key string
 	atMap, _ := storageGetter.GetAllActionTimings()
 	for k, v := range atMap {
-		t.Logf("OOOOOOOOOO: %v %v", k, v)
 		/*if strings.Contains(k, LOG_ACTION_TIMMING_PREFIX) && strings.Contains(string(v), expected) {
 			key = k
 		}*/

@@ -20,7 +20,6 @@ package rater
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/cdrs"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"log"
@@ -209,9 +208,9 @@ func (ms *MongoStorage) LogError(uuid, source, errstr string) (err error) {
 	return ms.db.C("errlog").Insert(&LogErrEntry{uuid, errstr, source})
 }
 
-func (ms *MongoStorage) GetCdr(string) (cdrs.CDR, error) {
+func (ms *MongoStorage) GetCdr(string) (CDR, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) SetCdr(string, cdrs.CDR) error {
+func (ms *MongoStorage) SetCdr(CDR) error {
 	return nil
 }

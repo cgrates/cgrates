@@ -22,7 +22,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/cgrates/cgrates/cdrs"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -222,9 +221,9 @@ func (mys *MySQLStorage) LogActionTiming(source string, at *ActionTiming, as []*
 }
 func (mys *MySQLStorage) LogError(uuid, source, errstr string) (err error) { return }
 
-func (mys *MySQLStorage) GetCdr(string) (cdrs.CDR, error) {
+func (mys *MySQLStorage) GetCdr(string) (CDR, error) {
 	return nil, nil
 }
-func (mys *MySQLStorage) SetCdr(string, cdrs.CDR) error {
+func (mys *MySQLStorage) SetCdr(CDR) error {
 	return nil
 }

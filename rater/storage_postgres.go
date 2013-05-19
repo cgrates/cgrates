@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/bmizerany/pq"
-	"github.com/cgrates/cgrates/cdrs"
 )
 
 type PostgresStorage struct {
@@ -222,9 +221,9 @@ func (psl *PostgresStorage) LogActionTiming(source string, at *ActionTiming, as 
 }
 func (psl *PostgresStorage) LogError(uuid, source, errstr string) (err error) { return }
 
-func (psl *PostgresStorage) GetCdr(string) (cdrs.CDR, error) {
+func (psl *PostgresStorage) GetCdr(string) (CDR, error) {
 	return nil, nil
 }
-func (psl *PostgresStorage) SetCdr(string, cdrs.CDR) error {
+func (psl *PostgresStorage) SetCdr(CDR) error {
 	return nil
 }

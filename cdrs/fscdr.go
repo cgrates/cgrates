@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrs
 
 import (
-	utils "github.com/cgrates/cgrates/cgrcoreutils"
+	"encoding/json"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/utils"
 	"strconv"
 	"time"
 )
@@ -29,6 +31,7 @@ var cfg *config.CGRConfig // Share the configuration with the rest of the packag
 
 const (
 	// Freswitch event proprities names
+	CDR_MAP      = "variables"
 	DIRECTION    = "Call-Direction"
 	ORIG_ID      = "variable_sip_call_id" //- originator_id - match cdrs
 	SUBJECT      = "variable_cgr_subject"
@@ -48,64 +51,76 @@ const (
 
 type FSCdr map[string]string
 
-func (fsev FSCdr) New(body []byte) CDR {
-	//fsev = fsock.FSCdrStrToMap(body, nil)
-	return fsev
+func (fsCdr FSCdr) New(body []byte) (rater.CDR, error) {
+	fsCdr = make(map[string]string)
+	var tmp map[string]interface{}
+	var err error
+	if err = json.Unmarshal(body, &tmp); err == nil {
+		if variables, ok := tmp[CDR_MAP]; ok {
+			if variables, ok := variables.(map[string]interface{}); ok {
+				for k, v := range variables {
+					fsCdr[k] = v.(string)
+				}
+			}
+			return fsCdr, nil
+		}
+	}
+	return nil, err
 }
 
-func (fsev FSCdr) GetName() string {
-	return fsev[NAME]
+func (fsCdr FSCdr) GetName() string {
+	return fsCdr[NAME]
 }
-func (fsev FSCdr) GetDirection() string {
+func (fsCdr FSCdr) GetDirection() string {
 	//TODO: implement direction
 	return "OUT"
-	//return fsev[DIRECTION]
+	//return fsCdr[DIRECTION]
 }
-func (fsev FSCdr) GetOrigId() string {
-	return fsev[ORIG_ID]
+func (fsCdr FSCdr) GetOrigId() string {
+	return fsCdr[ORIG_ID]
 }
-func (fsev FSCdr) GetSubject() string {
-	return utils.FirstNonEmpty(fsev[SUBJECT], fsev[USERNAME])
+func (fsCdr FSCdr) GetSubject() string {
+	return utils.FirstNonEmpty(fsCdr[SUBJECT], fsCdr[USERNAME])
 }
-func (fsev FSCdr) GetAccount() string {
-	return utils.FirstNonEmpty(fsev[ACCOUNT], fsev[USERNAME])
+func (fsCdr FSCdr) GetAccount() string {
+	return utils.FirstNonEmpty(fsCdr[ACCOUNT], fsCdr[USERNAME])
 }
 
 // Charging destination number
-func (fsev FSCdr) GetDestination() string {
-	return utils.FirstNonEmpty(fsev[DESTINATION], fsev[CALL_DEST_NR])
+func (fsCdr FSCdr) GetDestination() string {
+	return utils.FirstNonEmpty(fsCdr[DESTINATION], fsCdr[CALL_DEST_NR])
 }
 
 // Original dialed destination number, useful in case of unpark
-func (fsev FSCdr) GetCallDestNr() string {
-	return fsev[CALL_DEST_NR]
+func (fsCdr FSCdr) GetCallDestNr() string {
+	return fsCdr[CALL_DEST_NR]
 }
-func (fsev FSCdr) GetTOR() string {
-	return utils.FirstNonEmpty(fsev[TOR], cfg.SMDefaultTOR)
+func (fsCdr FSCdr) GetTOR() string {
+	return utils.FirstNonEmpty(fsCdr[TOR], cfg.SMDefaultTOR)
 }
-func (fsev FSCdr) GetUUID() string {
-	return fsev[UUID]
+func (fsCdr FSCdr) GetUUID() string {
+	return fsCdr[UUID]
 }
-func (fsev FSCdr) GetTenant() string {
-	return utils.FirstNonEmpty(fsev[CSTMID], cfg.SMDefaultTenant)
+func (fsCdr FSCdr) GetTenant() string {
+	return utils.FirstNonEmpty(fsCdr[CSTMID], cfg.SMDefaultTenant)
 }
-func (fsev FSCdr) GetReqType() string {
-	return utils.FirstNonEmpty(fsev[REQTYPE], cfg.SMDefaultReqType)
+func (fsCdr FSCdr) GetReqType() string {
+	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.SMDefaultReqType)
 }
-func (fsev FSCdr) GetExtraParameters() string {
+func (fsCdr FSCdr) GetExtraParameters() string {
 	return ""
 }
-func (fsev FSCdr) GetFallbackSubj() string {
+func (fsCdr FSCdr) GetFallbackSubj() string {
 	return cfg.SMDefaultSubject
 }
-func (fsev FSCdr) GetStartTime(field string) (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev[field], 0, 64)
+func (fsCdr FSCdr) GetStartTime(field string) (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsCdr[field], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
 
-func (fsev FSCdr) GetEndTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev[END_TIME], 0, 64)
+func (fsCdr FSCdr) GetEndTime() (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsCdr[END_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }

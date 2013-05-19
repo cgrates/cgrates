@@ -19,41 +19,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrs
 
 import (
-	"encoding/json"
 	"fmt"
-	utils "github.com/cgrates/cgrates/cgrcoreutils"
+	"github.com/cgrates/cgrates/mediator"
+	"github.com/cgrates/cgrates/rater"
 	"io/ioutil"
-	"log/syslog"
 	"net/http"
 )
 
 var (
-	Logger utils.LoggerInterface
+	Logger = rater.Logger
 )
 
-func init() {
-	var err error
-	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
-	if err != nil {
-		Logger = new(utils.StdLogger)
-	}
+type CDRS struct {
+	loggerDb rater.DataStorage
+	medi     *mediator.Mediator
 }
 
-type CDRVars struct {
-	FSCdr map[string]string
-}
-
-func cdrHandler(w http.ResponseWriter, r *http.Request) {
+func (cdrs *CDRS) cdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
-	cdr := CDRVars{}
-	if err := json.Unmarshal(body, &cdr); err == nil {
-		new(FSCdr).New(body)
+	if fsCdr, err := new(FSCdr).New(body); err == nil {
+		cdrs.loggerDb.SetCdr(fsCdr)
+		cdrs.medi.MediateCdrFromDB(fsCdr.GetAccount(), cdrs.loggerDb)
 	} else {
-		Logger.Err(fmt.Sprintf("CDRCAPTOR: Could not unmarshal cdr: %v", err))
+		Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
 	}
 }
 
-func startCaptiuringCDRs() {
-	http.HandleFunc("/cdr", cdrHandler)
+func New(storage rater.DataStorage, mediator *mediator.Mediator) *CDRS {
+	return &CDRS{storage, mediator}
+}
+
+func (cdrs *CDRS) StartCaptiuringCDRs() {
+	http.HandleFunc("/cdr", cdrs.cdrHandler)
 	http.ListenAndServe(":8080", nil)
 }

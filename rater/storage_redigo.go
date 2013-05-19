@@ -20,7 +20,6 @@ package rater
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/cdrs"
 	"github.com/garyburd/redigo/redis"
 	//"log"
 	"time"
@@ -216,9 +215,9 @@ func (rs *RedigoStorage) LogError(uuid, source, errstr string) (err error) {
 	return
 }
 
-func (rs *RedigoStorage) GetCdr(string) (cdrs.CDR, error) {
+func (rs *RedigoStorage) GetCdr(string) (CDR, error) {
 	return nil, nil
 }
-func (rs *RedigoStorage) SetCdr(string, cdrs.CDR) error {
+func (rs *RedigoStorage) SetCdr(CDR) error {
 	return nil
 }

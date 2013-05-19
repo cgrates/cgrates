@@ -20,7 +20,6 @@ package rater
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/cdrs"
 	"menteslibres.net/gosexy/redis"
 	//"log"
 	"strconv"
@@ -219,9 +218,9 @@ func (rs *GosexyStorage) LogError(uuid, source, errstr string) (err error) {
 	return
 }
 
-func (rs *GosexyStorage) GetCdr(string) (cdrs.CDR, error) {
+func (rs *GosexyStorage) GetCdr(string) (CDR, error) {
 	return nil, nil
 }
-func (rs *GosexyStorage) SetCdr(string, cdrs.CDR) error {
+func (rs *GosexyStorage) SetCdr(CDR) error {
 	return nil
 }

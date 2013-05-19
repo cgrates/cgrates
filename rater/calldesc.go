@@ -22,7 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/cache2go"
-	utils "github.com/cgrates/cgrates/cgrcoreutils"
+	"github.com/cgrates/cgrates/utils"
 	"log/syslog"
 	"math"
 	"time"

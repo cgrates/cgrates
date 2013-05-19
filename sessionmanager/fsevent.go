@@ -20,7 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
-	utils "github.com/cgrates/cgrates/cgrcoreutils"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 	"strconv"
 	"strings"
