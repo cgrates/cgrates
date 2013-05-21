@@ -217,3 +217,10 @@ func (rs *GosexyStorage) LogError(uuid, source, errstr string) (err error) {
 	_, err = rs.db.Set(LOG_ERR+source+"_"+uuid, errstr)
 	return
 }
+
+func (rs *GosexyStorage) GetCdr(string) (CDR, error) {
+	return nil, nil
+}
+func (rs *GosexyStorage) SetCdr(CDR) error {
+	return nil
+}

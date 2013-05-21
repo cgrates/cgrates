@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/balancer2go"
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/rater"
@@ -57,6 +58,7 @@ var (
 	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
 	sm       sessionmanager.SessionManager
+	medi     *mediator.Mediator
 	cfg      *config.CGRConfig
 	err      error
 )
@@ -134,8 +136,8 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 	//	rater.Logger.Crit(fmt.Sprintf("Errors on config parsing: <%v>", cfgParseErr))
 	//	exitChan <- true
 	//}
-
-	m, err := mediator.NewMediator(connector, loggerDb, cfg.MediatorSkipDB, cfg.MediatorCDROutDir, cfg.MediatorPseudoprepaid,
+	var err error
+	medi, err = mediator.NewMediator(connector, loggerDb, cfg.MediatorSkipDB, cfg.MediatorCDROutDir, cfg.MediatorPseudoprepaid,
 		cfg.FreeswitchDirectionIdx, cfg.FreeswitchTORIdx, cfg.FreeswitchTenantIdx, cfg.FreeswitchSubjectIdx, cfg.FreeswitchAccountIdx,
 		cfg.FreeswitchDestIdx, cfg.FreeswitchTimeStartIdx, cfg.FreeswitchDurationIdx, cfg.FreeswitchUUIDIdx)
 	if err != nil {
@@ -143,7 +145,7 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		exitChan <- true
 	}
 
-	m.TrackCDRFiles(cfg.MediatorCDRInDir)
+	medi.TrackCDRFiles(cfg.MediatorCDRInDir)
 }
 
 func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage) {
@@ -353,6 +355,11 @@ func main() {
 	if cfg.MediatorEnabled {
 		rater.Logger.Info("Starting CGRateS Mediator.")
 		go startMediator(responder, loggerDb)
+	}
+	if cfg.CDRServerEnabled {
+		rater.Logger.Info("Starting CGRateS CDR Server.")
+		cs := cdrs.New(loggerDb, medi)
+		go cs.StartCaptiuringCDRs()
 	}
 	<-exitChan
 	rater.Logger.Info("Stopped all components. CGRateS shutdown!")

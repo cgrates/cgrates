@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 	"strconv"
 	"strings"
@@ -27,9 +28,7 @@ import (
 )
 
 // Event type holding a mapping of all event's proprieties
-type FSEvent struct {
-	fields map[string]string
-}
+type FSEvent map[string]string
 
 const (
 	// Freswitch event proprities names
@@ -63,8 +62,8 @@ const (
 )
 
 // Nice printing for the event object.
-func (fsev *FSEvent) String() (result string) {
-	for k, v := range fsev.fields {
+func (fsev FSEvent) String() (result string) {
+	for k, v := range fsev {
 		result += fmt.Sprintf("%s = %s\n", k, v)
 	}
 	result += "=============================================================="
@@ -73,51 +72,51 @@ func (fsev *FSEvent) String() (result string) {
 
 // Loads the new event data from a body of text containing the key value proprieties.
 // It stores the parsed proprieties in the internal map.
-func (fsev *FSEvent) New(body string) Event {
-	fsev.fields = fsock.FSEventStrToMap(body, nil)
+func (fsev FSEvent) New(body string) Event {
+	fsev = fsock.FSEventStrToMap(body, nil)
 	return fsev
 }
 
-func (fsev *FSEvent) GetName() string {
-	return fsev.fields[NAME]
+func (fsev FSEvent) GetName() string {
+	return fsev[NAME]
 }
-func (fsev *FSEvent) GetDirection() string {
+func (fsev FSEvent) GetDirection() string {
 	//TODO: implement direction
 	return "OUT"
-	//return fsev.fields[DIRECTION]
+	//return fsev[DIRECTION]
 }
-func (fsev *FSEvent) GetOrigId() string {
-	return fsev.fields[ORIG_ID]
+func (fsev FSEvent) GetOrigId() string {
+	return fsev[ORIG_ID]
 }
-func (fsev *FSEvent) GetSubject() string {
-	return firstNonEmpty(fsev.fields[SUBJECT], fsev.fields[USERNAME])
+func (fsev FSEvent) GetSubject() string {
+	return utils.FirstNonEmpty(fsev[SUBJECT], fsev[USERNAME])
 }
-func (fsev *FSEvent) GetAccount() string {
-	return firstNonEmpty(fsev.fields[ACCOUNT], fsev.fields[USERNAME])
+func (fsev FSEvent) GetAccount() string {
+	return utils.FirstNonEmpty(fsev[ACCOUNT], fsev[USERNAME])
 }
 
 // Charging destination number
-func (fsev *FSEvent) GetDestination() string {
-	return firstNonEmpty(fsev.fields[DESTINATION], fsev.fields[CALL_DEST_NR])
+func (fsev FSEvent) GetDestination() string {
+	return utils.FirstNonEmpty(fsev[DESTINATION], fsev[CALL_DEST_NR])
 }
 
 // Original dialed destination number, useful in case of unpark
-func (fsev *FSEvent) GetCallDestNr() string {
-	return fsev.fields[CALL_DEST_NR]
+func (fsev FSEvent) GetCallDestNr() string {
+	return fsev[CALL_DEST_NR]
 }
-func (fsev *FSEvent) GetTOR() string {
-	return firstNonEmpty(fsev.fields[TOR], cfg.SMDefaultTOR)
+func (fsev FSEvent) GetTOR() string {
+	return utils.FirstNonEmpty(fsev[TOR], cfg.SMDefaultTOR)
 }
-func (fsev *FSEvent) GetUUID() string {
-	return fsev.fields[UUID]
+func (fsev FSEvent) GetUUID() string {
+	return fsev[UUID]
 }
-func (fsev *FSEvent) GetTenant() string {
-	return firstNonEmpty(fsev.fields[CSTMID], cfg.SMDefaultTenant)
+func (fsev FSEvent) GetTenant() string {
+	return utils.FirstNonEmpty(fsev[CSTMID], cfg.SMDefaultTenant)
 }
-func (fsev *FSEvent) GetReqType() string {
-	return firstNonEmpty(fsev.fields[REQTYPE], cfg.SMDefaultReqType)
+func (fsev FSEvent) GetReqType() string {
+	return utils.FirstNonEmpty(fsev[REQTYPE], cfg.SMDefaultReqType)
 }
-func (fsev *FSEvent) MissingParameter() bool {
+func (fsev FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection()) == "" ||
 		strings.TrimSpace(fsev.GetOrigId()) == "" ||
 		strings.TrimSpace(fsev.GetSubject()) == "" ||
@@ -128,17 +127,17 @@ func (fsev *FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetTenant()) == "" ||
 		strings.TrimSpace(fsev.GetCallDestNr()) == ""
 }
-func (fsev *FSEvent) GetFallbackSubj() string {
+func (fsev FSEvent) GetFallbackSubj() string {
 	return cfg.SMDefaultSubject
 }
-func (fsev *FSEvent) GetStartTime(field string) (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev.fields[field], 0, 64)
+func (fsev FSEvent) GetStartTime(field string) (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsev[field], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
 
-func (fsev *FSEvent) GetEndTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev.fields[END_TIME], 0, 64)
+func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsev[END_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }

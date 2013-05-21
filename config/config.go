@@ -89,6 +89,7 @@ type CGRConfig struct {
 	FreeswitchDurationIdx   string
 	FreeswitchUUIDIdx       string
 	FreeswitchReconnects    int // number of times to attempt reconnect after connect fails
+	CDRServerEnabled        bool
 }
 
 // Instantiate a new CGRConfig setting defaults or reading from file

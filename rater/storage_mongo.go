@@ -207,3 +207,10 @@ func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as []*A
 func (ms *MongoStorage) LogError(uuid, source, errstr string) (err error) {
 	return ms.db.C("errlog").Insert(&LogErrEntry{uuid, errstr, source})
 }
+
+func (ms *MongoStorage) GetCdr(string) (CDR, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) SetCdr(CDR) error {
+	return nil
+}

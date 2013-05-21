@@ -224,3 +224,7 @@ func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *rater.Cal
 	}
 	return
 }
+
+func (m *Mediator) MediateCdrFromDB(cdrID string, db rater.DataStorage) error {
+	return nil
+}

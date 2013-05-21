@@ -182,3 +182,10 @@ func (ms *MapStorage) LogError(uuid, source, errstr string) (err error) {
 	ms.dict[LOG_ERR+source+"_"+uuid] = []byte(errstr)
 	return nil
 }
+
+func (ms *MapStorage) GetCdr(string) (CDR, error) {
+	return nil, nil
+}
+func (ms *MapStorage) SetCdr(CDR) error {
+	return nil
+}

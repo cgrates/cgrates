@@ -214,3 +214,10 @@ func (rs *RedigoStorage) LogError(uuid, source, errstr string) (err error) {
 	_, err = rs.db.Do("set", LOG_ERR+source+"_"+uuid, errstr)
 	return
 }
+
+func (rs *RedigoStorage) GetCdr(string) (CDR, error) {
+	return nil, nil
+}
+func (rs *RedigoStorage) SetCdr(CDR) error {
+	return nil
+}
