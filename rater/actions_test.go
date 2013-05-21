@@ -811,6 +811,8 @@ func TestActionTimingLogging(t *testing.T) {
 	var key string
 	atMap, _ := storageGetter.GetAllActionTimings()
 	for k, v := range atMap {
+		_ = k
+		_ = v
 		/*if strings.Contains(k, LOG_ACTION_TIMMING_PREFIX) && strings.Contains(string(v), expected) {
 			key = k
 		}*/
