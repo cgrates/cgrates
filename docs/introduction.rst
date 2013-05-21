@@ -30,7 +30,7 @@ Of course more SessionManagers can serve multiple Telecom Switches and all of th
 1.1. CGRateS Features
 ---------------------
 
-- Reliable and Fast ( very fast ;) ). To get an idea about speed, we have benchmarked 11000+ req/sec on a rather modest machine without requiring special tweaks in the kernel.
+- Reliable and Fast ( very fast ;) ). To get an idea about speed, we have benchmarked 13000+ req/sec on a rather modest machine without requiring special tweaks in the kernel.
    - Using most modern programming concepts like multiprocessor support, asynchronous code execution within microthreads.
    - Built-in data caching system per call duration.
    - In-Memory database with persistence over restarts.

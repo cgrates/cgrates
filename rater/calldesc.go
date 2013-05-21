@@ -38,7 +38,7 @@ func init() {
 const (
 	RECURSION_MAX_DEPTH = 4
 	FALLBACK_SUBJECT    = "*all"
-	VERSION             = "1.0a5"
+	VERSION             = "0.9.1rc2"
 )
 
 var (

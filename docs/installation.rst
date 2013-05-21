@@ -7,16 +7,17 @@ We recommend using source installs for advanced users familiar with Go programmi
 3.1. Using packages
 -------------------
 
-3.1.2. Debian Squeeze
-~~~~~~~~~~~~~~~~~~~
+3.1.2. Debian Wheezy (Squeeze is also backwards compatible)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 This is for the moment the only packaged and the most recommended to use method to install CGRateS.
 
 On the server you want to install CGRateS, simply execute the following commands:
 ::
 
    cd /etc/apt/sources.list.d/
-   wget http://apt.itsyscom.com/repos/apt/conf/cgrates.apt.list
    wget -O - http://apt.itsyscom.com/repos/apt/conf/cgrates.gpg.key|apt-key add -
+   wget http://apt.itsyscom.com/repos/apt/conf/cgrates.apt.list
    apt-get update
    apt-get install cgrates
 
