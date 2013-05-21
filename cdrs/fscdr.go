@@ -30,23 +30,24 @@ import (
 var cfg *config.CGRConfig // Share the configuration with the rest of the package
 
 const (
-	// Freswitch event proprities names
+	// Freswitch event property names
 	CDR_MAP      = "variables"
-	DIRECTION    = "Call-Direction"
-	ORIG_ID      = "variable_sip_call_id" //- originator_id - match cdrs
-	SUBJECT      = "variable_cgr_subject"
-	ACCOUNT      = "variable_cgr_account"
-	DESTINATION  = "variable_cgr_destination"
-	REQTYPE      = "variable_cgr_reqtype" //prepaid or postpaid
-	TOR          = "variable_cgr_tor"
-	UUID         = "Unique-ID" // -Unique ID for this call leg
-	CSTMID       = "variable_cgr_cstmid"
-	CALL_DEST_NR = "Caller-Destination-Number"
-	PARK_TIME    = "Caller-Profile-Created-Time"
-	START_TIME   = "Caller-Channel-Answered-Time"
-	END_TIME     = "Caller-Channel-Hangup-Time"
-	NAME         = "Event-Name"
-	USERNAME     = "Caller-Username"
+	DIRECTION    = "direction"
+	ORIG_ID      = "sip_call_id" //- originator_id - match cdrs
+	SUBJECT      = "cgr_subject"
+	ACCOUNT      = "cgr_account"
+	DESTINATION  = "cgr_destination"
+	REQTYPE      = "cgr_reqtype" //prepaid or postpaid
+	TOR          = "cgr_tor"
+	UUID         = "uuid" // -Unique ID for this call leg
+	CSTMID       = "cgr_cstmid"
+	CALL_DEST_NR = "dialed_extension"
+	PARK_TIME    = "start_stamp"
+	START_TIME   = "answer_stamp"
+	END_TIME     = "end_stamp"
+	NAME         = "unused"
+	USERNAME     = "user_name"
+	FS_IP	= "sip_local_network_addr"
 )
 
 type FSCdr map[string]string
