@@ -20,14 +20,12 @@ package cdrs
 
 import (
 	"encoding/json"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
 	"time"
 )
 
-var cfg *config.CGRConfig // Share the configuration with the rest of the package
 
 const (
 	// Freswitch event property names
@@ -97,13 +95,13 @@ func (fsCdr FSCdr) GetCallDestNr() string {
 	return fsCdr[CALL_DEST_NR]
 }
 func (fsCdr FSCdr) GetTOR() string {
-	return utils.FirstNonEmpty(fsCdr[TOR], cfg.SMDefaultTOR)
+	return utils.FirstNonEmpty(fsCdr[TOR], cfg.DefaultTOR)
 }
 func (fsCdr FSCdr) GetUUID() string {
 	return fsCdr[UUID]
 }
 func (fsCdr FSCdr) GetTenant() string {
-	return utils.FirstNonEmpty(fsCdr[CSTMID], cfg.SMDefaultTenant)
+	return utils.FirstNonEmpty(fsCdr[CSTMID], cfg.DefaultTenant)
 }
 func (fsCdr FSCdr) GetReqType() string {
 	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.SMDefaultReqType)
@@ -112,7 +110,7 @@ func (fsCdr FSCdr) GetExtraParameters() string {
 	return ""
 }
 func (fsCdr FSCdr) GetFallbackSubj() string {
-	return cfg.SMDefaultSubject
+	return cfg.DefaultSubject
 }
 func (fsCdr FSCdr) GetStartTime(field string) (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsCdr[field], 0, 64)

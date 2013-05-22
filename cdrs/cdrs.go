@@ -22,12 +22,14 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/config"
 	"io/ioutil"
 	"net/http"
 )
 
 var (
 	Logger = rater.Logger
+	cfg *config.CGRConfig // Share the configuration with the rest of the package
 )
 
 type CDRS struct {
@@ -49,7 +51,9 @@ func New(storage rater.DataStorage, mediator *mediator.Mediator) *CDRS {
 	return &CDRS{storage, mediator}
 }
 
-func (cdrs *CDRS) StartCaptiuringCDRs() {
-	http.HandleFunc("/cdr", cdrs.cdrHandler)
-	http.ListenAndServe(":8080", nil)
+func (cdrs *CDRS) StartCapturingCDRs() {
+	if cfg.CDRSfsJSONEnabled {
+		http.HandleFunc("/freeswitch_json", cdrs.cdrHandler)
+	}
+	http.ListenAndServe(cfg.CDRSListen, nil)
 }

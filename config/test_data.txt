@@ -14,24 +14,22 @@ logdb_port = test # The port to bind to.
 logdb_name = test # The name of the database to connect to.
 logdb_user =  test # The user to sign in as.
 logdb_passwd =  test # The user's password.root
+rpc_encoding = test # The RPC encoding used in APIs
 
 [balancer]
 enabled = true # Start balancer server
 listen = test # Balancer listen interface
-rpc_encoding = test # use JSON for RPC encoding	
 
 [rater]
 enabled = true
 listen = test # listening address host:port, internal for internal communication only
 balancer = test # if defined it will register to balancer as worker
-rpc_encoding = test # use JSON for RPC encoding
 
 [mediator]
 enabled = true
 cdr_in_dir = test # Freeswitch Master CSV CDR path.
 cdr_out_dir = test
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
-rpc_encoding = test # use JSON for RPC encoding
 skipdb = true
 pseudoprepaid = true
 
@@ -43,7 +41,6 @@ enabled = true
 switch_type = test
 rater = test #address where to access rater. Can be internal, direct rater address or the address of a balancer
 debit_interval = 11
-rpc_encoding = test # use JSON for RPC encoding
 
 [freeswitch]
 server = test # freeswitch address host:port

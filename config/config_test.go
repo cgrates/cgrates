@@ -42,24 +42,21 @@ func TestConfig(t *testing.T) {
 		cfg.LogDBName != "test" ||
 		cfg.LogDBUser != "test" ||
 		cfg.LogDBPass != "test" ||
+		cfg.RPCEncoding != "test" ||
 		cfg.RaterEnabled != true ||
 		cfg.RaterBalancer != "test" ||
 		cfg.RaterListen != "test" ||
-		cfg.RaterRPCEncoding != "test" ||
 		cfg.BalancerEnabled != true ||
 		cfg.BalancerListen != "test" ||
-		cfg.BalancerRPCEncoding != "test" ||
 		cfg.SchedulerEnabled != true ||
 		cfg.SMEnabled != true ||
 		cfg.SMSwitchType != "test" ||
 		cfg.SMRater != "test" ||
 		cfg.SMDebitInterval != 11 ||
-		cfg.SMRPCEncoding != "test" ||
 		cfg.MediatorEnabled != true ||
 		cfg.MediatorCDRInDir != "test" ||
 		cfg.MediatorCDROutDir != "test" ||
 		cfg.MediatorRater != "test" ||
-		cfg.MediatorRPCEncoding != "test" ||
 		cfg.MediatorSkipDB != true ||
 		cfg.MediatorPseudoprepaid != true ||
 		cfg.FreeswitchServer != "test" ||
@@ -85,24 +82,21 @@ func TestConfig(t *testing.T) {
 			t.Log(cfg.LogDBName)
 			t.Log(cfg.LogDBUser)
 			t.Log(cfg.LogDBPass)
+			t.Log(cfg.RPCEncoding)
 			t.Log(cfg.RaterEnabled)
 			t.Log(cfg.RaterBalancer)
 			t.Log(cfg.RaterListen) 
-			t.Log(cfg.RaterRPCEncoding)
 			t.Log(cfg.BalancerEnabled)
 			t.Log(cfg.BalancerListen) 
-			t.Log(cfg.BalancerRPCEncoding)
 			t.Log(cfg.SchedulerEnabled)
 			t.Log(cfg.SMEnabled)
 			t.Log(cfg.SMSwitchType) 
 			t.Log(cfg.SMRater)
 			t.Log(cfg.SMDebitInterval)
-			t.Log(cfg.SMRPCEncoding)
 			t.Log(cfg.MediatorEnabled)
 			t.Log(cfg.MediatorCDRInDir)
 			t.Log(cfg.MediatorCDROutDir) 
 			t.Log(cfg.MediatorRater)
-			t.Log(cfg.MediatorRPCEncoding)
 			t.Log(cfg.MediatorSkipDB) 
 			t.Log(cfg.MediatorPseudoprepaid) 
 			t.Log(cfg.FreeswitchServer) 
@@ -133,3 +127,90 @@ func TestParamOverwrite(t *testing.T) {
 		t.Errorf("scheduler_enabled set == %d, expect true", cfg.SchedulerEnabled)
 	}
 }
+
+// Make sure defaults did not change by mistake
+func TestDefaults(t *testing.T) {
+	cfg := &CGRConfig{}
+	errSet := cfg.setDefaults()
+	if errSet != nil  {
+		t.Log(fmt.Sprintf("Coud not set defaults: %s!", errSet.Error()))
+		t.FailNow()
+	}
+	if  cfg.DataDBType != REDIS ||
+		cfg.DataDBHost != "127.0.0.1" ||
+		cfg.DataDBPort != "6379" ||
+		cfg.DataDBName != "10" ||
+		cfg.DataDBUser != "" ||
+		cfg.DataDBPass != "" ||
+		cfg.LogDBType != MONGO ||
+		cfg.LogDBHost != "localhost" ||
+		cfg.LogDBPort != "27017" ||
+		cfg.LogDBName != "cgrates" ||
+		cfg.LogDBUser != "" ||
+		cfg.LogDBPass != "" ||
+		cfg.RPCEncoding != GOB ||
+		cfg.DefaultTOR != "0" ||
+		cfg.DefaultTenant != "0" ||
+		cfg.DefaultSubject != "0" ||
+		cfg.RaterEnabled != false ||
+		cfg.RaterBalancer != DISABLED ||
+		cfg.RaterListen != "127.0.0.1:2012" ||
+		cfg.BalancerEnabled != false ||
+		cfg.BalancerListen != "127.0.0.1:2013" ||
+		cfg.SchedulerEnabled != false ||
+		cfg.CDRSListen != "127.0.0.1:2022" ||
+		cfg.CDRSfsJSONEnabled != false ||
+		cfg.MediatorEnabled != false ||
+		cfg.MediatorListen != "127.0.0.1:2032" ||
+		cfg.MediatorCDRInDir != "/var/log/freeswitch/cdr-csv" ||
+		cfg.MediatorCDROutDir != "/var/log/cgrates/cdr_out" ||
+		cfg.MediatorRater != "127.0.0.1:2012" ||
+		cfg.MediatorRaterReconnects != 3 ||
+		cfg.MediatorSkipDB != false ||
+		cfg.MediatorPseudoprepaid != false ||
+		cfg.MediatorCDRType != "freeswitch_csv" ||
+		cfg.SMEnabled != false ||
+		cfg.SMSwitchType != FS ||
+		cfg.SMRater != "127.0.0.1:2012" ||
+		cfg.SMRaterReconnects != 3 ||
+		cfg.SMDebitInterval != 10 ||
+		cfg.SMDefaultReqType != "" ||
+		cfg.FreeswitchServer != "127.0.0.1:8021" ||
+		cfg.FreeswitchPass != "ClueCon" ||
+		cfg.FreeswitchReconnects != 5 ||
+		cfg.FreeswitchUUIDIdx != "10" ||
+		cfg.FreeswitchTORIdx != "-1" ||
+		cfg.FreeswitchTenantIdx != "-1" ||
+		cfg.FreeswitchDirectionIdx != "-1" ||
+		cfg.FreeswitchSubjectIdx != "-1" ||
+		cfg.FreeswitchAccountIdx != "-1" ||
+		cfg.FreeswitchDestIdx != "-1" ||
+		cfg.FreeswitchTimeStartIdx != "-1" ||
+		cfg.FreeswitchDurationIdx != "-1" {
+			t.Error("Defaults different than expected!")
+	}
+
+}
+
+// Make sure defaults did not change by mistake
+func TestDefaultsSanity(t *testing.T) {
+	cfg := &CGRConfig{}
+	errSet := cfg.setDefaults()
+	if errSet != nil  {
+		t.Log(fmt.Sprintf("Coud not set defaults: %s!", errSet.Error()))
+		t.FailNow()
+	}
+	if cfg.RaterListen == cfg.BalancerListen || 
+		cfg.RaterListen == cfg.CDRSListen ||
+		cfg.RaterListen == cfg.MediatorListen ||
+		cfg.BalancerListen == cfg.CDRSListen ||
+		cfg.BalancerListen == cfg.MediatorListen ||
+		cfg.CDRSListen == cfg.MediatorListen {
+			t.Error("Listen defaults on the same port!")
+	}
+}
+
+		
+	
+	
+	

@@ -36,7 +36,6 @@ import (
 	"os"
 	"runtime"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -99,7 +98,7 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 	} else {
 		var client *rpc.Client
 		var err error
-		if cfg.MediatorRPCEncoding == JSON {
+		if cfg.RPCEncoding == JSON {
 			for i := 0; i < cfg.MediatorRaterReconnects; i++ {
 				client, err = jsonrpc.Dial("tcp", cfg.MediatorRater)
 				if err == nil { //Connected so no need to reiterate
@@ -130,12 +129,6 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", cfg.MediatorCDROutDir))
 		exitChan <- true
 	}
-	// ToDo: Why is here
-	// Check parsing errors
-	//if cfgParseErr != nil {
-	//	rater.Logger.Crit(fmt.Sprintf("Errors on config parsing: <%v>", cfgParseErr))
-	//	exitChan <- true
-	//}
 	var err error
 	medi, err = mediator.NewMediator(connector, loggerDb, cfg.MediatorSkipDB, cfg.MediatorCDROutDir, cfg.MediatorPseudoprepaid,
 		cfg.FreeswitchDirectionIdx, cfg.FreeswitchTORIdx, cfg.FreeswitchTenantIdx, cfg.FreeswitchSubjectIdx, cfg.FreeswitchAccountIdx,
@@ -155,7 +148,7 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	} else {
 		var client *rpc.Client
 		var err error
-		if cfg.SMRPCEncoding == JSON {
+		if cfg.RPCEncoding == JSON {
 			// We attempt to reconnect more times
 			for i := 0; i < cfg.SMRaterReconnects; i++ {
 				client, err = jsonrpc.Dial("tcp", cfg.SMRater)
@@ -205,38 +198,6 @@ func checkConfigSanity() error {
 		return errors.New("Improperly configured balancer")
 	}
 
-	// check if the session manager or mediator is connectting via loopback
-	// if they are using the same encoding as the rater/balancer
-	// this scenariou should be used for debug puropses only (it is racy anyway)
-	// and it might be forbidden in the future
-	if strings.Contains(cfg.SMRater, "localhost") || strings.Contains(cfg.SMRater, "127.0.0.1") {
-		if cfg.BalancerEnabled {
-			if cfg.BalancerRPCEncoding != cfg.SMRPCEncoding {
-				rater.Logger.Crit("If you are connecting the session manager via the loopback to the balancer use the same type of rpc encoding!")
-				return errors.New("Balancer and SessionManager using different encoding")
-			}
-		}
-		if cfg.RaterEnabled {
-			if cfg.RaterRPCEncoding != cfg.SMRPCEncoding {
-				rater.Logger.Crit("If you are connecting the session manager via the loopback to the arter use the same type of rpc encoding!")
-				return errors.New("Rater and SessionManager using different encoding")
-			}
-		}
-	}
-	if strings.Contains(cfg.MediatorRater, "localhost") || strings.Contains(cfg.MediatorRater, "127.0.0.1") {
-		if cfg.BalancerEnabled {
-			if cfg.BalancerRPCEncoding != cfg.MediatorRPCEncoding {
-				rater.Logger.Crit("If you are connecting the mediator via the loopback to the balancer use the same type of rpc encoding!")
-				return errors.New("Balancer and Mediator using different encoding")
-			}
-		}
-		if cfg.RaterEnabled {
-			if cfg.RaterRPCEncoding != cfg.MediatorRPCEncoding {
-				rater.Logger.Crit("If you are connecting the mediator via the loopback to the arter use the same type of rpc encoding!")
-				return errors.New("Rater and Mediator using different encoding")
-			}
-		}
-	}
 	return nil
 }
 
@@ -322,13 +283,13 @@ func main() {
 	responder := &rater.Responder{ExitChan: exitChan}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
-		go listenToRPCRequests(responder, cfg.RaterListen, cfg.RaterRPCEncoding)
+		go listenToRPCRequests(responder, cfg.RaterListen, cfg.RPCEncoding)
 	}
 	if cfg.BalancerEnabled {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
-		go listenToRPCRequests(responder, cfg.BalancerListen, cfg.BalancerRPCEncoding)
+		go listenToRPCRequests(responder, cfg.BalancerListen, cfg.RPCEncoding)
 		if cfg.RaterEnabled {
 			rater.Logger.Info("Starting internal rater.")
 			bal.AddClient("local", new(rater.ResponderWorker))
@@ -356,10 +317,11 @@ func main() {
 		rater.Logger.Info("Starting CGRateS Mediator.")
 		go startMediator(responder, loggerDb)
 	}
+
 	if cfg.CDRServerEnabled {
 		rater.Logger.Info("Starting CGRateS CDR Server.")
 		cs := cdrs.New(loggerDb, medi)
-		go cs.StartCaptiuringCDRs()
+		go cs.StartCapturingCDRs()
 	}
 	<-exitChan
 	rater.Logger.Info("Stopped all components. CGRateS shutdown!")

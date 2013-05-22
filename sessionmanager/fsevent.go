@@ -105,13 +105,13 @@ func (fsev FSEvent) GetCallDestNr() string {
 	return fsev[CALL_DEST_NR]
 }
 func (fsev FSEvent) GetTOR() string {
-	return utils.FirstNonEmpty(fsev[TOR], cfg.SMDefaultTOR)
+	return utils.FirstNonEmpty(fsev[TOR], cfg.DefaultTOR)
 }
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
 }
 func (fsev FSEvent) GetTenant() string {
-	return utils.FirstNonEmpty(fsev[CSTMID], cfg.SMDefaultTenant)
+	return utils.FirstNonEmpty(fsev[CSTMID], cfg.DefaultTenant)
 }
 func (fsev FSEvent) GetReqType() string {
 	return utils.FirstNonEmpty(fsev[REQTYPE], cfg.SMDefaultReqType)
@@ -128,7 +128,7 @@ func (fsev FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetCallDestNr()) == ""
 }
 func (fsev FSEvent) GetFallbackSubj() string {
-	return cfg.SMDefaultSubject
+	return cfg.DefaultSubject
 }
 func (fsev FSEvent) GetStartTime(field string) (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev[field], 0, 64)
