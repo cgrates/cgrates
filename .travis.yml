@@ -1,6 +1,6 @@
 language: go
 
-script: test.sh
+script: $TRAVIS_BUILD_DIR/test.sh
 
 branches:
   only: master
