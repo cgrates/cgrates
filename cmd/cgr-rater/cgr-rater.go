@@ -320,7 +320,7 @@ func main() {
 
 	if cfg.CDRSListen!="" {
 		rater.Logger.Info("Starting CGRateS CDR Server.")
-		cs := cdrs.New(loggerDb, medi)
+		cs := cdrs.New(loggerDb, medi, cfg)
 		go cs.StartCapturingCDRs()
 	}
 	<-exitChan

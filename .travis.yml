@@ -1,6 +1,6 @@
 language: go
 
-before_install: sudo apt-get -q install bzr
+script: $TRAVIS_BUILD_DIR/test.sh
 
 branches:
   only: master
@@ -15,5 +15,3 @@ notifications:
     on_success: change
     on_failure: always
 
-after_script:
-    ./build.sh && ./test.sh

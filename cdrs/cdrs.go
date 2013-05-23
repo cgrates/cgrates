@@ -20,40 +20,42 @@ package cdrs
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/rater"
-	"github.com/cgrates/cgrates/config"
 	"io/ioutil"
 	"net/http"
 )
 
 var (
-	Logger = rater.Logger
-	cfg *config.CGRConfig // Share the configuration with the rest of the package
+	Logger  = rater.Logger
+	cfg     *config.CGRConfig // Share the configuration with the rest of the package
+	storage rater.DataStorage
+	medi    *mediator.Mediator
 )
 
-type CDRS struct {
-	loggerDb rater.DataStorage
-	medi     *mediator.Mediator
-}
-
-func (cdrs *CDRS) cdrHandler(w http.ResponseWriter, r *http.Request) {
+func cdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	if fsCdr, err := new(FSCdr).New(body); err == nil {
-		cdrs.loggerDb.SetCdr(fsCdr)
-		cdrs.medi.MediateCdrFromDB(fsCdr.GetAccount(), cdrs.loggerDb)
+		storage.SetCdr(fsCdr)
+		medi.MediateCdrFromDB(fsCdr.GetAccount(), storage)
 	} else {
 		Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
 	}
 }
 
-func New(storage rater.DataStorage, mediator *mediator.Mediator) *CDRS {
-	return &CDRS{storage, mediator}
+type CDRS struct{}
+
+func New(s rater.DataStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
+	storage = s
+	medi = m
+	cfg = c
+	return &CDRS{}
 }
 
 func (cdrs *CDRS) StartCapturingCDRs() {
 	if cfg.CDRSfsJSONEnabled {
-		http.HandleFunc("/freeswitch_json", cdrs.cdrHandler)
+		http.HandleFunc("/freeswitch_json", cdrHandler)
 	}
 	http.ListenAndServe(cfg.CDRSListen, nil)
 }
