@@ -26,7 +26,6 @@ import (
 	"time"
 )
 
-
 const (
 	// Freswitch event property names
 	CDR_MAP      = "variables"
@@ -43,9 +42,8 @@ const (
 	PARK_TIME    = "start_stamp"
 	START_TIME   = "answer_stamp"
 	END_TIME     = "end_stamp"
-	NAME         = "unused"
 	USERNAME     = "user_name"
-	FS_IP	= "sip_local_network_addr"
+	FS_IP        = "sip_local_network_addr"
 )
 
 type FSCdr map[string]string
@@ -67,9 +65,6 @@ func (fsCdr FSCdr) New(body []byte) (rater.CDR, error) {
 	return nil, err
 }
 
-func (fsCdr FSCdr) GetName() string {
-	return fsCdr[NAME]
-}
 func (fsCdr FSCdr) GetDirection() string {
 	//TODO: implement direction
 	return "OUT"

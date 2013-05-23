@@ -24,7 +24,6 @@ import (
 
 type CDR interface {
 	New([]byte) (CDR, error)
-	GetName() string
 	GetDirection() string
 	GetOrigId() string
 	GetSubject() string
