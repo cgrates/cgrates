@@ -31,7 +31,7 @@ type MapStorage struct {
 }
 
 func NewMapStorage() (DataStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: new(JSONMarshaler)}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: new(MyMarshaler)}, nil
 }
 
 func (ms *MapStorage) Close() {}

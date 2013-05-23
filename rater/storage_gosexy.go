@@ -55,7 +55,7 @@ func NewGosexyStorage(address string, db int, pass string) (DataStorage, error) 
 			return nil, err
 		}
 	}
-	ms := new(JSONMarshaler)
+	ms := new(MyMarshaler)
 	return &GosexyStorage{db: ndb, dbNb: db, ms: ms}, nil
 }
 
