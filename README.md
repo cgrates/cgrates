@@ -22,4 +22,4 @@ API reference http://gopkgdoc.appspot.com/pkg/github.com/cgrates/cgrates
 
 Also check irc.freenode.net#cgrates and [Google group](https://groups.google.com/forum/#!forum/cgrates) for a more real-time support.
 
-[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest)
+[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates) 
