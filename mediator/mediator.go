@@ -53,7 +53,6 @@ func (mfi *mediatorFieldIdxs) Load(idxs string) error {
 type Mediator struct {
 	connector     rater.Connector
 	loggerDb      rater.DataStorage
-	skipDb        bool
 	outputDir     string
 	pseudoPrepaid bool
 	directionIndexs,
@@ -70,7 +69,6 @@ type Mediator struct {
 // Creates a new mediator object parsing the indexses
 func NewMediator(connector rater.Connector,
 	loggerDb rater.DataStorage,
-	skipDb bool,
 	outputDir string,
 	pseudoPrepaid bool,
 	directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs, destinationIndexs,
@@ -78,7 +76,6 @@ func NewMediator(connector rater.Connector,
 	m = &Mediator{
 		connector:     connector,
 		loggerDb:      loggerDb,
-		skipDb:        skipDb,
 		outputDir:     outputDir,
 		pseudoPrepaid: pseudoPrepaid,
 	}

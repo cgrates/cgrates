@@ -21,112 +21,8 @@ package config
 import (
 	"fmt"
 	"testing"
+	"reflect"
 )
-
-func TestConfig(t *testing.T) {
-	cfgPth := "test_data.txt"
-	cfg, err := NewCGRConfig(&cfgPth)
-	if err != nil {
-		t.Log(fmt.Sprintf("Could not parse config: %s!", err))
-		t.FailNow()
-	}
-	if cfg.DataDBType != "test" ||
-		cfg.DataDBHost != "test" ||
-		cfg.DataDBPort != "test" ||
-		cfg.DataDBName != "test" ||
-		cfg.DataDBUser != "test" ||
-		cfg.DataDBPass != "test" ||
-		cfg.LogDBType != "test" ||
-		cfg.LogDBHost != "test" ||
-		cfg.LogDBPort != "test" ||
-		cfg.LogDBName != "test" ||
-		cfg.LogDBUser != "test" ||
-		cfg.LogDBPass != "test" ||
-		cfg.RPCEncoding != "test" ||
-		cfg.RaterEnabled != true ||
-		cfg.RaterBalancer != "test" ||
-		cfg.RaterListen != "test" ||
-		cfg.BalancerEnabled != true ||
-		cfg.BalancerListen != "test" ||
-		cfg.SchedulerEnabled != true ||
-		cfg.SMEnabled != true ||
-		cfg.SMSwitchType != "test" ||
-		cfg.SMRater != "test" ||
-		cfg.SMDebitInterval != 11 ||
-		cfg.MediatorEnabled != true ||
-		cfg.MediatorCDRInDir != "test" ||
-		cfg.MediatorCDROutDir != "test" ||
-		cfg.MediatorRater != "test" ||
-		cfg.MediatorSkipDB != true ||
-		cfg.MediatorPseudoprepaid != true ||
-		cfg.FreeswitchServer != "test" ||
-		cfg.FreeswitchPass != "test" ||
-		cfg.FreeswitchDirectionIdx != "test" ||
-		cfg.FreeswitchTORIdx != "test" ||
-		cfg.FreeswitchTenantIdx != "test" ||
-		cfg.FreeswitchSubjectIdx != "test" ||
-		cfg.FreeswitchAccountIdx != "test" ||
-		cfg.FreeswitchDestIdx != "test" ||
-		cfg.FreeswitchTimeStartIdx != "test" ||
-		cfg.FreeswitchDurationIdx != "test" ||
-		cfg.FreeswitchUUIDIdx != "test" {
-			t.Log(cfg.DataDBType)
-			t.Log(cfg.DataDBHost)
-			t.Log(cfg.DataDBPort)
-			t.Log(cfg.DataDBName)
-			t.Log(cfg.DataDBUser)
-			t.Log(cfg.DataDBPass)
-			t.Log(cfg.LogDBType)
-			t.Log(cfg.LogDBHost)
-			t.Log(cfg.LogDBPort)
-			t.Log(cfg.LogDBName)
-			t.Log(cfg.LogDBUser)
-			t.Log(cfg.LogDBPass)
-			t.Log(cfg.RPCEncoding)
-			t.Log(cfg.RaterEnabled)
-			t.Log(cfg.RaterBalancer)
-			t.Log(cfg.RaterListen) 
-			t.Log(cfg.BalancerEnabled)
-			t.Log(cfg.BalancerListen) 
-			t.Log(cfg.SchedulerEnabled)
-			t.Log(cfg.SMEnabled)
-			t.Log(cfg.SMSwitchType) 
-			t.Log(cfg.SMRater)
-			t.Log(cfg.SMDebitInterval)
-			t.Log(cfg.MediatorEnabled)
-			t.Log(cfg.MediatorCDRInDir)
-			t.Log(cfg.MediatorCDROutDir) 
-			t.Log(cfg.MediatorRater)
-			t.Log(cfg.MediatorSkipDB) 
-			t.Log(cfg.MediatorPseudoprepaid) 
-			t.Log(cfg.FreeswitchServer) 
-			t.Log(cfg.FreeswitchPass)
-			t.Log(cfg.FreeswitchDirectionIdx)
-			t.Log(cfg.FreeswitchTORIdx) 
-			t.Log(cfg.FreeswitchTenantIdx) 
-			t.Log(cfg.FreeswitchSubjectIdx) 
-			t.Log(cfg.FreeswitchAccountIdx)
-			t.Log(cfg.FreeswitchDestIdx) 
-			t.Log(cfg.FreeswitchTimeStartIdx)
-			t.Log(cfg.FreeswitchDurationIdx)
-			t.Log(cfg.FreeswitchUUIDIdx)
-			t.Error("Config file read failed!")
-		}
-}
-
-func TestParamOverwrite(t *testing.T) {
-	cfgPth := "test_data.txt"
-	cfg, err := NewCGRConfig(&cfgPth)
-	if err != nil {
-		t.Log(fmt.Sprintf("Could not parse config: %s!", err))
-		t.FailNow()
-	}
-	if cfg.FreeswitchReconnects != 5 { // one default which is not overwritten in test data
-		t.Errorf("FreeswitchReconnects set == %d, expect 5", cfg.FreeswitchReconnects)
-	} else if cfg.SchedulerEnabled != true { // one parameter which should be overwritten in test data
-		t.Errorf("scheduler_enabled set == %d, expect true", cfg.SchedulerEnabled)
-	}
-}
 
 // Make sure defaults did not change by mistake
 func TestDefaults(t *testing.T) {
@@ -136,63 +32,66 @@ func TestDefaults(t *testing.T) {
 		t.Log(fmt.Sprintf("Coud not set defaults: %s!", errSet.Error()))
 		t.FailNow()
 	}
-	if  cfg.DataDBType != REDIS ||
-		cfg.DataDBHost != "127.0.0.1" ||
-		cfg.DataDBPort != "6379" ||
-		cfg.DataDBName != "10" ||
-		cfg.DataDBUser != "" ||
-		cfg.DataDBPass != "" ||
-		cfg.LogDBType != MONGO ||
-		cfg.LogDBHost != "localhost" ||
-		cfg.LogDBPort != "27017" ||
-		cfg.LogDBName != "cgrates" ||
-		cfg.LogDBUser != "" ||
-		cfg.LogDBPass != "" ||
-		cfg.RPCEncoding != GOB ||
-		cfg.DefaultTOR != "0" ||
-		cfg.DefaultTenant != "0" ||
-		cfg.DefaultSubject != "0" ||
-		cfg.RaterEnabled != false ||
-		cfg.RaterBalancer != DISABLED ||
-		cfg.RaterListen != "127.0.0.1:2012" ||
-		cfg.BalancerEnabled != false ||
-		cfg.BalancerListen != "127.0.0.1:2013" ||
-		cfg.SchedulerEnabled != false ||
-		cfg.CDRSListen != "127.0.0.1:2022" ||
-		cfg.CDRSfsJSONEnabled != false ||
-		cfg.MediatorEnabled != false ||
-		cfg.MediatorListen != "127.0.0.1:2032" ||
-		cfg.MediatorCDRInDir != "/var/log/freeswitch/cdr-csv" ||
-		cfg.MediatorCDROutDir != "/var/log/cgrates/cdr_out" ||
-		cfg.MediatorRater != "127.0.0.1:2012" ||
-		cfg.MediatorRaterReconnects != 3 ||
-		cfg.MediatorSkipDB != false ||
-		cfg.MediatorPseudoprepaid != false ||
-		cfg.MediatorCDRType != "freeswitch_csv" ||
-		cfg.SMEnabled != false ||
-		cfg.SMSwitchType != FS ||
-		cfg.SMRater != "127.0.0.1:2012" ||
-		cfg.SMRaterReconnects != 3 ||
-		cfg.SMDebitInterval != 10 ||
-		cfg.SMDefaultReqType != "" ||
-		cfg.FreeswitchServer != "127.0.0.1:8021" ||
-		cfg.FreeswitchPass != "ClueCon" ||
-		cfg.FreeswitchReconnects != 5 ||
-		cfg.FreeswitchUUIDIdx != "10" ||
-		cfg.FreeswitchTORIdx != "-1" ||
-		cfg.FreeswitchTenantIdx != "-1" ||
-		cfg.FreeswitchDirectionIdx != "-1" ||
-		cfg.FreeswitchSubjectIdx != "-1" ||
-		cfg.FreeswitchAccountIdx != "-1" ||
-		cfg.FreeswitchDestIdx != "-1" ||
-		cfg.FreeswitchTimeStartIdx != "-1" ||
-		cfg.FreeswitchDurationIdx != "-1" {
-			t.Error("Defaults different than expected!")
+	eCfg := &CGRConfig{}
+	eCfg.DataDBType = REDIS 
+	eCfg.DataDBHost = "127.0.0.1" 
+	eCfg.DataDBPort = "6379" 
+	eCfg.DataDBName = "10" 
+	eCfg.DataDBUser = "" 
+	eCfg.DataDBPass = "" 
+	eCfg.LogDBType = MONGO 
+	eCfg.LogDBHost = "localhost" 
+	eCfg.LogDBPort = "27017" 
+	eCfg.LogDBName = "cgrates" 
+	eCfg.LogDBUser = "" 
+	eCfg.LogDBPass = "" 
+	eCfg.RPCEncoding = GOB 
+	eCfg.DefaultReqType = "" 
+	eCfg.DefaultTOR = "0" 
+	eCfg.DefaultTenant = "0" 
+	eCfg.DefaultSubject = "0" 
+	eCfg.RaterEnabled = false 
+	eCfg.RaterBalancer = DISABLED 
+	eCfg.RaterListen = "127.0.0.1:2012" 
+	eCfg.BalancerEnabled = false 
+	eCfg.BalancerListen = "127.0.0.1:2013" 
+	eCfg.SchedulerEnabled = false 
+	eCfg.CDRSListen = "127.0.0.1:2022" 
+	eCfg.CDRSfsJSONEnabled = false 
+	eCfg.CDRSMediator = INTERNAL 
+	eCfg.MediatorEnabled = false 
+	eCfg.MediatorListen = "127.0.0.1:2032" 
+	eCfg.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv" 
+	eCfg.MediatorCDROutDir = "/var/log/cgrates/cdr_out" 
+	eCfg.MediatorRater = "127.0.0.1:2012" 
+	eCfg.MediatorRaterReconnects = 3 
+	eCfg.MediatorPseudoprepaid = false 
+	eCfg.MediatorCDRType = "freeswitch_csv" 
+	eCfg.SMEnabled = false 
+	eCfg.SMSwitchType = FS 
+	eCfg.SMRater = "127.0.0.1:2012" 
+	eCfg.SMRaterReconnects = 3 
+	eCfg.SMDebitInterval = 10 
+	eCfg.FreeswitchServer = "127.0.0.1:8021" 
+	eCfg.FreeswitchPass = "ClueCon" 
+	eCfg.FreeswitchReconnects = 5 
+	eCfg.FreeswitchUUIDIdx = "10" 
+	eCfg.FreeswitchTORIdx = "-1" 
+	eCfg.FreeswitchTenantIdx = "-1" 
+	eCfg.FreeswitchDirectionIdx = "-1" 
+	eCfg.FreeswitchSubjectIdx = "-1" 
+	eCfg.FreeswitchAccountIdx = "-1" 
+	eCfg.FreeswitchDestIdx = "-1" 
+	eCfg.FreeswitchTimeStartIdx = "-1" 
+	eCfg.FreeswitchDurationIdx = "-1"
+	if !reflect.DeepEqual(cfg ,eCfg ){ 
+		t.Log(eCfg)
+		t.Log(cfg)
+		t.Error("Defaults different than expected!")
 	}
-
 }
 
-// Make sure defaults did not change by mistake
+// Make sure defaults did not change
 func TestDefaultsSanity(t *testing.T) {
 	cfg := &CGRConfig{}
 	errSet := cfg.setDefaults()
@@ -200,17 +99,81 @@ func TestDefaultsSanity(t *testing.T) {
 		t.Log(fmt.Sprintf("Coud not set defaults: %s!", errSet.Error()))
 		t.FailNow()
 	}
-	if cfg.RaterListen == cfg.BalancerListen || 
-		cfg.RaterListen == cfg.CDRSListen ||
-		cfg.RaterListen == cfg.MediatorListen ||
-		cfg.BalancerListen == cfg.CDRSListen ||
-		cfg.BalancerListen == cfg.MediatorListen ||
-		cfg.CDRSListen == cfg.MediatorListen {
+	if (cfg.RaterListen != INTERNAL && 
+		(cfg.RaterListen == cfg.BalancerListen || 
+			cfg.RaterListen == cfg.CDRSListen ||
+			cfg.RaterListen == cfg.MediatorListen )) ||
+		(cfg.BalancerListen != INTERNAL && (cfg.BalancerListen == cfg.CDRSListen ||
+			cfg.BalancerListen == cfg.MediatorListen ))||
+		(cfg.CDRSListen != INTERNAL && cfg.CDRSListen == cfg.MediatorListen) {
 			t.Error("Listen defaults on the same port!")
 	}
 }
 
-		
-	
-	
-	
+// Load config from file and make sure we have all set 
+func TestConfigFromFile(t *testing.T) {
+	cfgPth := "test_data.txt"
+	cfg, err := NewCGRConfig(&cfgPth)
+	if err != nil {
+		t.Log(fmt.Sprintf("Could not parse config: %s!", err))
+		t.FailNow()
+	}
+	eCfg := &CGRConfig{} // Instance we expect to get out after reading config file
+	eCfg.setDefaults()
+	eCfg.DataDBType = "test"
+	eCfg.DataDBHost = "test"
+	eCfg.DataDBPort = "test"
+	eCfg.DataDBName = "test"
+	eCfg.DataDBUser = "test"
+	eCfg.DataDBPass = "test"
+	eCfg.LogDBType = "test"
+	eCfg.LogDBHost = "test"
+	eCfg.LogDBPort = "test"
+	eCfg.LogDBName = "test"
+	eCfg.LogDBUser = "test"
+	eCfg.LogDBPass = "test"
+	eCfg.RPCEncoding = "test"
+	eCfg.DefaultReqType = "test"
+	eCfg.DefaultTOR = "test"
+	eCfg.DefaultTenant = "test"
+	eCfg.DefaultSubject = "test"
+	eCfg.RaterEnabled = true
+	eCfg.RaterBalancer = "test"
+	eCfg.RaterListen = "test"
+	eCfg.BalancerEnabled = true
+	eCfg.BalancerListen = "test"
+	eCfg.SchedulerEnabled = true
+	eCfg.CDRSListen = "test"
+	eCfg.CDRSfsJSONEnabled = true
+	eCfg.CDRSMediator = "test"
+	eCfg.MediatorEnabled = true
+	eCfg.MediatorListen = "test"
+	eCfg.MediatorCDRInDir = "test"
+	eCfg.MediatorCDROutDir = "test"
+	eCfg.MediatorRater = "test"
+	eCfg.MediatorRaterReconnects = 99
+	eCfg.MediatorPseudoprepaid = true
+	eCfg.MediatorCDRType = "test"
+	eCfg.SMEnabled = true
+	eCfg.SMSwitchType = "test"
+	eCfg.SMRater = "test"
+	eCfg.SMRaterReconnects = 99
+	eCfg.SMDebitInterval = 99
+	eCfg.FreeswitchServer = "test"
+	eCfg.FreeswitchPass = "test"
+	eCfg.FreeswitchReconnects = 99
+	eCfg.FreeswitchUUIDIdx = "test"
+	eCfg.FreeswitchTORIdx = "test"
+	eCfg.FreeswitchTenantIdx = "test"
+	eCfg.FreeswitchDirectionIdx = "test"
+	eCfg.FreeswitchSubjectIdx = "test"
+	eCfg.FreeswitchAccountIdx = "test"
+	eCfg.FreeswitchDestIdx = "test"
+	eCfg.FreeswitchTimeStartIdx = "test"
+	eCfg.FreeswitchDurationIdx = "test"
+	if !reflect.DeepEqual(cfg ,eCfg ){ 
+		t.Log(eCfg)
+		t.Log(cfg)
+		t.Error("Loading of configuration from file failed!")
+	}
+}		

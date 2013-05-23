@@ -130,7 +130,7 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		exitChan <- true
 	}
 	var err error
-	medi, err = mediator.NewMediator(connector, loggerDb, cfg.MediatorSkipDB, cfg.MediatorCDROutDir, cfg.MediatorPseudoprepaid,
+	medi, err = mediator.NewMediator(connector, loggerDb, cfg.MediatorCDROutDir, cfg.MediatorPseudoprepaid,
 		cfg.FreeswitchDirectionIdx, cfg.FreeswitchTORIdx, cfg.FreeswitchTenantIdx, cfg.FreeswitchSubjectIdx, cfg.FreeswitchAccountIdx,
 		cfg.FreeswitchDestIdx, cfg.FreeswitchTimeStartIdx, cfg.FreeswitchDurationIdx, cfg.FreeswitchUUIDIdx)
 	if err != nil {
@@ -318,7 +318,7 @@ func main() {
 		go startMediator(responder, loggerDb)
 	}
 
-	if cfg.CDRServerEnabled {
+	if cfg.CDRSListen!="" {
 		rater.Logger.Info("Starting CGRateS CDR Server.")
 		cs := cdrs.New(loggerDb, medi)
 		go cs.StartCapturingCDRs()

@@ -114,7 +114,7 @@ func (fsev FSEvent) GetTenant() string {
 	return utils.FirstNonEmpty(fsev[CSTMID], cfg.DefaultTenant)
 }
 func (fsev FSEvent) GetReqType() string {
-	return utils.FirstNonEmpty(fsev[REQTYPE], cfg.SMDefaultReqType)
+	return utils.FirstNonEmpty(fsev[REQTYPE], cfg.DefaultReqType)
 }
 func (fsev FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection()) == "" ||

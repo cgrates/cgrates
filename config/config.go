@@ -51,6 +51,7 @@ type CGRConfig struct {
 	LogDBUser               string // The user to sign in as.
 	LogDBPass               string // The user's password.
 	RPCEncoding        	string // RPC encoding used on APIs: <gob|json>.
+	DefaultReqType        string // Use this request type if not defined on top
 	DefaultTOR            string // set default type of record
 	DefaultTenant         string // set default tenant
 	DefaultSubject        string // set default rating subject, useful in case of fallback
@@ -62,20 +63,19 @@ type CGRConfig struct {
 	SchedulerEnabled        bool
 	CDRSListen		string // CDRS's listening interface: <x.y.z.y:1234>.
 	CDRSfsJSONEnabled	bool	// Enable the handler for FreeSWITCH JSON CDRs: <enabled|disabled>.
+	CDRSMediator           string // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string // address where to access rater. Can be internal, direct rater address or the address of a balancer
 	SMRaterReconnects       int    // Number of reconnect attempts to rater
 	SMDebitInterval         int    // the period to be debited in advanced during a call (in seconds)
-	SMDefaultReqType        string // Use this request type if not defined on top
 	MediatorEnabled         bool
-	MediatorListen          string // listening address host:port
+	MediatorListen          string // Mediator's listening interface: <internal>.
 	MediatorCDRType         string // sets the type of cdrs we are processing.
 	MediatorCDRInDir        string // Freeswitch Master CSV CDR path.
 	MediatorCDROutDir       string // Freeswitch Master CSV CDR output path.
 	MediatorRater           string // address where to access rater. Can be internal, direct rater address or the address of a balancer
 	MediatorRaterReconnects int    // Number of reconnect attempts to rater
-	MediatorSkipDB          bool
 	MediatorPseudoprepaid   bool
 	FreeswitchServer        string // freeswitch address host:port
 	FreeswitchPass          string // FS socket password
@@ -89,7 +89,6 @@ type CGRConfig struct {
 	FreeswitchDurationIdx   string
 	FreeswitchUUIDIdx       string
 	FreeswitchReconnects    int // number of times to attempt reconnect after connect fails
-	CDRServerEnabled        bool
 }
 
 func ( self *CGRConfig ) setDefaults() error {
@@ -117,13 +116,13 @@ func ( self *CGRConfig ) setDefaults() error {
 	self.SchedulerEnabled = false
 	self.CDRSListen = "127.0.0.1:2022"
 	self.CDRSfsJSONEnabled = false
+	self.CDRSMediator = INTERNAL
 	self.MediatorEnabled = false
 	self.MediatorListen = "127.0.0.1:2032"
 	self.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv"
 	self.MediatorCDROutDir = "/var/log/cgrates/cdr_out"
 	self.MediatorRater = "127.0.0.1:2012"
 	self.MediatorRaterReconnects = 3
-	self.MediatorSkipDB = false
 	self.MediatorPseudoprepaid = false
 	self.MediatorCDRType = "freeswitch_csv"
 	self.SMEnabled = false
@@ -131,7 +130,7 @@ func ( self *CGRConfig ) setDefaults() error {
 	self.SMRater = "127.0.0.1:2012"
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
-	self.SMDefaultReqType = ""
+	self.DefaultReqType = ""
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
@@ -209,6 +208,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "rpc_encoding"); hasOpt {
 		cfg.RPCEncoding, _ = c.GetString("global", "rpc_encoding")
 	}
+	if hasOpt = c.HasOption("global", "default_reqtype"); hasOpt {
+		cfg.DefaultReqType, _ = c.GetString("global", "default_reqtype")
+	}
 	if hasOpt = c.HasOption("global", "default_tor"); hasOpt {
 		cfg.DefaultTOR, _ = c.GetString("global", "default_tor")
 	}
@@ -239,8 +241,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrs", "listen"); hasOpt {
 		cfg.CDRSListen, _ = c.GetString("cdrs", "listen")
 	}
-	if hasOpt = c.HasOption("cdrs", "enabled"); hasOpt {
-		cfg.CDRSfsJSONEnabled, _ = c.GetBool("cdrs", "enabled")
+	if hasOpt = c.HasOption("cdrs", "freeswitch_json_enabled"); hasOpt {
+		cfg.CDRSfsJSONEnabled, _ = c.GetBool("cdrs", "freeswitch_json_enabled")
+	}
+	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
+		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
 	}
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
 		cfg.MediatorEnabled, _ = c.GetBool("mediator", "enabled")
@@ -259,9 +264,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("mediator", "rater_reconnects"); hasOpt {
 		cfg.MediatorRaterReconnects, _ = c.GetInt("mediator", "rater_reconnects")
-	}
-	if hasOpt = c.HasOption("mediator", "skipdb"); hasOpt {
-		cfg.MediatorSkipDB, _ = c.GetBool("mediator", "skipdb")
 	}
 	if hasOpt = c.HasOption("mediator", "pseudoprepaid"); hasOpt {
 		cfg.MediatorPseudoprepaid, _ = c.GetBool("mediator", "pseudoprepaid")
@@ -283,9 +285,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("session_manager", "debit_interval"); hasOpt {
 		cfg.SMDebitInterval, _ = c.GetInt("session_manager", "debit_interval")
-	}
-	if hasOpt = c.HasOption("session_manager", "default_reqtype"); hasOpt {
-		cfg.SMDefaultReqType, _ = c.GetString("session_manager", "default_reqtype")
 	}
 	if hasOpt = c.HasOption("freeswitch", "server"); hasOpt {
 		cfg.FreeswitchServer, _ = c.GetString("freeswitch", "server")

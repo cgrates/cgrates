@@ -104,7 +104,7 @@ func (fsCdr FSCdr) GetTenant() string {
 	return utils.FirstNonEmpty(fsCdr[CSTMID], cfg.DefaultTenant)
 }
 func (fsCdr FSCdr) GetReqType() string {
-	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.SMDefaultReqType)
+	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.DefaultReqType)
 }
 func (fsCdr FSCdr) GetExtraParameters() string {
 	return ""
