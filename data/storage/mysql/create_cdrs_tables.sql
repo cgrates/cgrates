@@ -1,11 +1,12 @@
 --
 -- Table structure for table `cdrs_primary`
 --
-DROP TABLE IF EXISTS `cdrs_primary`;
 CREATE TABLE `cdrs_primary` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cgrid` char(40) NOT NULL,
   `accid` varchar(64) NOT NULL,
+  `cdrhost` varchar(64) NOT NULL,
+  `reqtype` varchar(24) NOT NULL,
   `direction` enum('0','1','2') NOT NULL DEFAULT '1',
   `tenant` varchar(64) NOT NULL,
   `tor` varchar(8) NOT NULL,
@@ -21,7 +22,6 @@ CREATE TABLE `cdrs_primary` (
 --
 -- Table structure for table cdrs_extra
 --
-DROP TABLE IF EXISTS `cdrs_extra`;
 CREATE TABLE `cdrs_extra` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cgrid` char(40) NOT NULL,
