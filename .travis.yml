@@ -1,5 +1,7 @@
 language: go
 
+script: ./test.sh
+
 branches:
   only: master
 
@@ -12,5 +14,4 @@ notifications:
   email:
     on_success: change
     on_failure: always
-
 
