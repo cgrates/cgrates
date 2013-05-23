@@ -31,7 +31,6 @@ import (
 func init() {
 	var err error
 	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
-	Logger = new(utils.StdLogger)
 	if err != nil {
 		Logger = new(utils.StdLogger)
 	}
