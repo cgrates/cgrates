@@ -122,7 +122,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	for {
 		select {
 		case ev := <-watcher.Event:
-			if ev.IsRename() {
+			if ev.IsCreate() && path.Ext(ev.Name) != ".csv" {
 				rater.Logger.Info(fmt.Sprintf("Parsing: %v", ev.Name))
 				err = m.parseCSV(ev.Name)
 				if err != nil {

@@ -94,7 +94,7 @@ func TestDestinationGetNotExistsCache(t *testing.T) {
 
 /********************************* Benchmarks **********************************/
 
-func BenchmarkDestinationRedisStoreRestore(b *testing.B) {
+func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
 		storageGetter.SetDestination(nationale)
