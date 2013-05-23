@@ -1,6 +1,6 @@
 language: go
 
-script: $TRAVIS_BUILD_DIR/test.sh
+script: $GOPATH/src/github.com/cgrates/cgrates/test.sh
 
 branches:
   only: master
