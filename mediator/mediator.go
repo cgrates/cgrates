@@ -23,8 +23,8 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"github.com/cgrates/cgrates/inotify"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/howeyc/fsnotify"
 	"os"
 	"path"
 	"strconv"
@@ -109,10 +109,11 @@ func (m *Mediator) validateIndexses() bool {
 
 // Watch the specified folder for file moves and parse the files on events
 func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
-	watcher, err := inotify.NewWatcher()
+	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return
 	}
+	defer watcher.Close()
 	err = watcher.Watch(cdrPath)
 	if err != nil {
 		return
@@ -121,7 +122,7 @@ func (m *Mediator) TrackCDRFiles(cdrPath string) (err error) {
 	for {
 		select {
 		case ev := <-watcher.Event:
-			if ev.Mask&inotify.IN_MOVED_TO != 0 {
+			if ev.IsRename() {
 				rater.Logger.Info(fmt.Sprintf("Parsing: %v", ev.Name))
 				err = m.parseCSV(ev.Name)
 				if err != nil {

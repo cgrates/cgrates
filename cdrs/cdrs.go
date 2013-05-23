@@ -24,11 +24,11 @@ import (
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/rater"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 var (
-	Logger  = rater.Logger
 	cfg     *config.CGRConfig // Share the configuration with the rest of the package
 	storage rater.DataStorage
 	medi    *mediator.Mediator
@@ -37,10 +37,11 @@ var (
 func cdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	if fsCdr, err := new(FSCdr).New(body); err == nil {
-		storage.SetCdr(fsCdr)
-		medi.MediateCdrFromDB(fsCdr.GetAccount(), storage)
+		log.Printf("CDR: %v", fsCdr)
+		//storage.SetCdr(fsCdr)
+		//medi.MediateCdrFromDB(fsCdr.GetAccount(), storage)
 	} else {
-		Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
+		rater.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
 	}
 }
 
