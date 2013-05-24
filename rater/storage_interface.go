@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	gmsgpack "github.com/ugorji/go-msgpack"
 	"github.com/vmihailenco/msgpack"
+	"labix.org/v2/mgo/bson"
 	"strings"
 )
 
@@ -86,22 +87,27 @@ func (jm *JSONMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }
 
-type JSONBufMarshaler struct {
-	buf bytes.Buffer
+type BSONMarshaler struct{}
+
+func (jm *BSONMarshaler) Marshal(v interface{}) ([]byte, error) {
+	return bson.Marshal(v)
 }
 
+func (jm *BSONMarshaler) Unmarshal(data []byte, v interface{}) error {
+	return bson.Unmarshal(data, v)
+}
+
+type JSONBufMarshaler struct{}
+
 func (jbm *JSONBufMarshaler) Marshal(v interface{}) (data []byte, err error) {
-	jbm.buf.Reset()
-	if err = json.NewEncoder(&jbm.buf).Encode(v); err == nil {
-		data = jbm.buf.Bytes()
-	}
+	buf := new(bytes.Buffer)
+	err = json.NewEncoder(buf).Encode(v)
+	data = buf.Bytes()
 	return
 }
 
 func (jbm *JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
-	jbm.buf.Reset()
-	jbm.buf.Write(data)
-	return json.NewDecoder(&jbm.buf).Decode(v)
+	return json.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 
 type MsgpackMarshaler struct{}
@@ -124,22 +130,17 @@ func (jm *GoMsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return gmsgpack.Unmarshal(data, v, nil)
 }
 
-type GOBMarshaler struct {
-	buf bytes.Buffer
-}
+type GOBMarshaler struct{}
 
 func (gm *GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
-	gm.buf.Reset()
-	if err = gob.NewEncoder(&gm.buf).Encode(v); err == nil {
-		data = gm.buf.Bytes()
-	}
+	buf := new(bytes.Buffer)
+	err = gob.NewEncoder(buf).Encode(v)
+	data = buf.Bytes()
 	return
 }
 
 func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
-	gm.buf.Reset()
-	gm.buf.Write(data)
-	return gob.NewDecoder(&gm.buf).Decode(v)
+	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 
 type storer interface {

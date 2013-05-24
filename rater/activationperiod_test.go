@@ -20,42 +20,11 @@ package rater
 
 import (
 	"encoding/json"
+	//"log"
 	"reflect"
 	"testing"
 	"time"
-	//"log"
 )
-
-func TestApStoreRestore(t *testing.T) {
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{
-		Months:    Months{time.February},
-		MonthDays: MonthDays{1},
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
-	result := ap.store()
-	expected := "1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0"
-	if result != expected {
-		t.Errorf("Expected %q was %q", expected, result)
-	}
-	ap1 := ActivationPeriod{}
-	ap1.restore(result)
-	if reflect.DeepEqual(ap, ap1) {
-		t.Errorf("Expected %v was %v", ap, ap1)
-	}
-}
-
-func TestApRestoreFromString(t *testing.T) {
-	s := "1325376000000000000|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0.2;60;1\n"
-	ap := ActivationPeriod{}
-	ap.restore(s)
-	if len(ap.Intervals) != 1 {
-		t.Error("Error restoring activation period from string", ap)
-	}
-}
 
 func TestApRestoreFromStorage(t *testing.T) {
 	cd := &CallDescriptor{
@@ -84,9 +53,9 @@ func TestApStoreRestoreJson(t *testing.T) {
 	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
-	ap1 := ActivationPeriod{}
-	json.Unmarshal(result, &ap1)
-	if reflect.DeepEqual(ap, ap1) {
+	ap1 := &ActivationPeriod{}
+	json.Unmarshal(result, ap1)
+	if !reflect.DeepEqual(ap, ap1) {
 		t.Errorf("Expected %v was %v", ap, ap1)
 	}
 }
@@ -190,9 +159,9 @@ func BenchmarkActivationPeriodStoreRestoreJson(b *testing.B) {
 }
 
 func BenchmarkActivationPeriodRestore(b *testing.B) {
-	ap := ActivationPeriod{}
+	ap := &ActivationPeriod{}
 	for i := 0; i < b.N; i++ {
-		ap.restore("1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0")
+		activationPeriodRestore("1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0", ap)
 	}
 }
 
@@ -210,7 +179,147 @@ func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
 	ap1 := ActivationPeriod{}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		result := ap.store()
-		ap1.restore(result)
+		result, _ := Marshal(ap)
+		Unmarshal(result, ap1)
+	}
+}
+
+func BenchmarkActivationPeriodMarshallerMyStoreRestore(b *testing.B) {
+	b.StopTimer()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	ap1 := ActivationPeriod{}
+	b.StartTimer()
+	ms := new(MyMarshaler)
+	for i := 0; i < b.N; i++ {
+		result, _ := ms.Marshal(ap)
+		ms.Unmarshal(result, ap1)
+	}
+}
+
+func BenchmarkActivationPeriodMarshallerJSONStoreRestore(b *testing.B) {
+	b.StopTimer()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	ap1 := ActivationPeriod{}
+	b.StartTimer()
+	ms := new(JSONMarshaler)
+	for i := 0; i < b.N; i++ {
+		result, _ := ms.Marshal(ap)
+		ms.Unmarshal(result, ap1)
+	}
+}
+
+func BenchmarkActivationPeriodMarshallerBSONStoreRestore(b *testing.B) {
+	b.StopTimer()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	ap1 := ActivationPeriod{}
+	b.StartTimer()
+	ms := new(BSONMarshaler)
+	for i := 0; i < b.N; i++ {
+		result, _ := ms.Marshal(ap)
+		ms.Unmarshal(result, ap1)
+	}
+}
+
+func BenchmarkActivationPeriodMarshallerJSONBufStoreRestore(b *testing.B) {
+	b.StopTimer()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	ap1 := ActivationPeriod{}
+	b.StartTimer()
+	ms := new(JSONBufMarshaler)
+	for i := 0; i < b.N; i++ {
+		result, _ := ms.Marshal(ap)
+		ms.Unmarshal(result, ap1)
+	}
+}
+
+func BenchmarkActivationPeriodMarshallerGOBStoreRestore(b *testing.B) {
+	b.StopTimer()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	ap1 := ActivationPeriod{}
+	b.StartTimer()
+	ms := new(GOBMarshaler)
+	for i := 0; i < b.N; i++ {
+		result, _ := ms.Marshal(ap)
+		ms.Unmarshal(result, ap1)
+	}
+}
+
+func BenchmarkActivationPeriodMarshallerMsgpackStoreRestore(b *testing.B) {
+	b.StopTimer()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	ap1 := ActivationPeriod{}
+	b.StartTimer()
+	ms := new(MsgpackMarshaler)
+	for i := 0; i < b.N; i++ {
+		result, _ := ms.Marshal(ap)
+		ms.Unmarshal(result, ap1)
+	}
+}
+
+func BenchmarkActivationPeriodMarshallerGoMsgpStoreRestore(b *testing.B) {
+	b.StopTimer()
+	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
+	i := &Interval{Months: []time.Month{time.February},
+		MonthDays: []int{1},
+		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+		StartTime: "14:30:00",
+		EndTime:   "15:00:00"}
+	ap := &ActivationPeriod{ActivationTime: d}
+	ap.AddInterval(i)
+
+	ap1 := ActivationPeriod{}
+	b.StartTimer()
+	ms := new(GoMsgpackMarshaler)
+	for i := 0; i < b.N; i++ {
+		result, _ := ms.Marshal(ap)
+		ms.Unmarshal(result, ap1)
 	}
 }

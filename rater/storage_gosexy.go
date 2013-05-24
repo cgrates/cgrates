@@ -55,8 +55,7 @@ func NewGosexyStorage(address string, db int, pass string) (DataStorage, error) 
 			return nil, err
 		}
 	}
-	ms := new(MyMarshaler)
-	return &GosexyStorage{db: ndb, dbNb: db, ms: ms}, nil
+	return &GosexyStorage{db: ndb, dbNb: db, ms: new(MsgpackMarshaler)}, nil
 }
 
 func (rs *GosexyStorage) Close() {

@@ -20,8 +20,6 @@ package rater
 
 import (
 	"github.com/cgrates/cgrates/cache2go"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -66,34 +64,4 @@ func (ap *ActivationPeriod) AddIntervalIfNotPresent(is ...*Interval) {
 
 func (ap *ActivationPeriod) Equal(o *ActivationPeriod) bool {
 	return ap.ActivationTime == o.ActivationTime
-}
-
-/*
-Serializes the activation periods for the storage. Used for key-value storages.
-*/
-func (ap *ActivationPeriod) store() (result string) {
-	result += strconv.FormatInt(ap.ActivationTime.UnixNano(), 10) + "|"
-	for _, i := range ap.Intervals {
-		result += i.store() + "|"
-	}
-	result = strings.TrimRight(result, "|")
-	return
-}
-
-/*
-De-serializes the activation periods for the storage. Used for key-value storages.
-*/
-func (ap *ActivationPeriod) restore(input string) {
-	elements := strings.Split(input, "|")
-	unixNano, _ := strconv.ParseInt(elements[0], 10, 64)
-	ap.ActivationTime = time.Unix(0, unixNano).In(time.UTC)
-	els := elements[1:]
-	if len(els) > 1 {
-		els = elements[1 : len(elements)-1]
-	}
-	for _, is := range els {
-		i := &Interval{}
-		i.restore(is)
-		ap.Intervals = append(ap.Intervals, i)
-	}
 }

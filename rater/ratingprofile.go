@@ -21,7 +21,6 @@ package rater
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 const (
@@ -33,39 +32,6 @@ type RatingProfile struct {
 	Id             string
 	FallbackKey    string
 	DestinationMap map[string][]*ActivationPeriod
-}
-
-func (rp *RatingProfile) store() (result string) {
-	result += rp.FallbackKey + ">"
-	for k, aps := range rp.DestinationMap {
-		result += k + "="
-		for _, ap := range aps {
-			result += ap.store() + "<"
-		}
-		result = strings.TrimRight(result, "<")
-		result += ">"
-	}
-	result = strings.TrimRight(result, ">")
-	return
-}
-
-func (rp *RatingProfile) restore(input string) {
-	if rp.DestinationMap == nil {
-		rp.DestinationMap = make(map[string][]*ActivationPeriod, 1)
-	}
-	elements := strings.Split(input, ">")
-	rp.FallbackKey = elements[0]
-	for _, kv := range elements[1:] {
-		pair := strings.SplitN(kv, "=", 2)
-		apList := strings.Split(pair[1], "<")
-		var newAps []*ActivationPeriod
-		for _, aps := range apList {
-			ap := new(ActivationPeriod)
-			ap.restore(aps)
-			newAps = append(newAps, ap)
-		}
-		rp.DestinationMap[pair[0]] = newAps
-	}
 }
 
 // Adds an activation period that applyes to current rating profile if not already present.
