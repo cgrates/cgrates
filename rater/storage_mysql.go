@@ -227,3 +227,11 @@ func (mys *MySQLStorage) GetCdr(string) (CDR, error) {
 func (mys *MySQLStorage) SetCdr(CDR) error {
 	return nil
 }
+
+func (mys *MySQLStorage) SetMediatedCdr(CDR, *CallCost) error {
+	return nil
+}
+
+func (mys *MySQLStorage) GetMediatedCdr(string) (CDR, error) {
+	return nil, nil
+}

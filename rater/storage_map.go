@@ -189,3 +189,11 @@ func (ms *MapStorage) GetCdr(string) (CDR, error) {
 func (ms *MapStorage) SetCdr(CDR) error {
 	return nil
 }
+
+func (ms *MapStorage) SetMediatedCdr(CDR, *CallCost) error {
+	return nil
+}
+
+func (ms *MapStorage) GetMediatedCdr(string) (CDR, error) {
+	return nil, nil
+}

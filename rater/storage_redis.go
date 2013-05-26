@@ -247,3 +247,11 @@ func (rs *RedisStorage) GetCdr(string) (CDR, error) {
 func (rs *RedisStorage) SetCdr(CDR) error {
 	return nil
 }
+
+func (rs *RedisStorage) SetMediatedCdr(CDR, *CallCost) error {
+	return nil
+}
+
+func (rs *RedisStorage) GetMediatedCdr(string) (CDR, error) {
+	return nil, nil
+}

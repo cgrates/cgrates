@@ -63,6 +63,8 @@ type DataStorage interface {
 	GetAllActionTimings() (map[string][]*ActionTiming, error)
 	GetCdr(string) (CDR, error)
 	SetCdr(CDR) error
+	SetMediatedCdr(CDR, *CallCost) error
+	GetMediatedCdr(string) (CDR, error)
 	//GetAllActionTimingsLogs() (map[string][]*ActionTiming, error)
 	LogCallCost(uuid, source string, cc *CallCost) error
 	LogError(uuid, source, errstr string) error

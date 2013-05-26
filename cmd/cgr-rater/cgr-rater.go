@@ -317,8 +317,7 @@ func main() {
 		rater.Logger.Info("Starting CGRateS Mediator.")
 		go startMediator(responder, loggerDb)
 	}
-
-	if cfg.CDRSListen!="" {
+	if cfg.CDRSListen != "" {
 		rater.Logger.Info("Starting CGRateS CDR Server.")
 		cs := cdrs.New(loggerDb, medi, cfg)
 		go cs.StartCapturingCDRs()

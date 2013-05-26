@@ -227,3 +227,11 @@ func (psl *PostgresStorage) GetCdr(string) (CDR, error) {
 func (psl *PostgresStorage) SetCdr(CDR) error {
 	return nil
 }
+
+func (psl *PostgresStorage) SetMediatedCdr(CDR, *CallCost) error {
+	return nil
+}
+
+func (psl *PostgresStorage) GetMediatedCdr(string) (CDR, error) {
+	return nil, nil
+}

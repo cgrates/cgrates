@@ -224,3 +224,11 @@ func (rs *GosexyStorage) GetCdr(string) (CDR, error) {
 func (rs *GosexyStorage) SetCdr(CDR) error {
 	return nil
 }
+
+func (rs *GosexyStorage) SetMediatedCdr(CDR, *CallCost) error {
+	return nil
+}
+
+func (rs *GosexyStorage) GetMediatedCdr(string) (CDR, error) {
+	return nil, nil
+}

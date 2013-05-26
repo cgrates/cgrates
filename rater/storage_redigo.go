@@ -221,3 +221,11 @@ func (rs *RedigoStorage) GetCdr(string) (CDR, error) {
 func (rs *RedigoStorage) SetCdr(CDR) error {
 	return nil
 }
+
+func (rs *RedigoStorage) SetMediatedCdr(CDR, *CallCost) error {
+	return nil
+}
+
+func (rs *RedigoStorage) GetMediatedCdr(string) (CDR, error) {
+	return nil, nil
+}

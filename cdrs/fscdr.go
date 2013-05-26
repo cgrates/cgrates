@@ -107,8 +107,8 @@ func (fsCdr FSCdr) GetExtraParameters() string {
 func (fsCdr FSCdr) GetFallbackSubj() string {
 	return cfg.DefaultSubject
 }
-func (fsCdr FSCdr) GetStartTime(field string) (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsCdr[field], 0, 64)
+func (fsCdr FSCdr) GetStartTime() (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsCdr[START_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }

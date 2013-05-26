@@ -214,3 +214,11 @@ func (ms *MongoStorage) GetCdr(string) (CDR, error) {
 func (ms *MongoStorage) SetCdr(CDR) error {
 	return nil
 }
+
+func (ms *MongoStorage) SetMediatedCdr(CDR, *CallCost) error {
+	return nil
+}
+
+func (ms *MongoStorage) GetMediatedCdr(string) (CDR, error) {
+	return nil, nil
+}

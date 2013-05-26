@@ -34,7 +34,7 @@ type CDR interface {
 	GetUUID() string
 	GetTenant() string
 	GetReqType() string
-	GetStartTime(string) (time.Time, error)
+	GetStartTime() (time.Time, error)
 	GetEndTime() (time.Time, error)
 	GetFallbackSubj() string
 	GetExtraParameters() string
