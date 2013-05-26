@@ -20,6 +20,7 @@ package cdrs
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
@@ -44,6 +45,7 @@ const (
 	END_TIME     = "end_stamp"
 	USERNAME     = "user_name"
 	FS_IP        = "sip_local_network_addr"
+	RATE         = "rate"
 )
 
 type FSCdr map[string]string
@@ -65,6 +67,15 @@ func (fsCdr FSCdr) New(body []byte) (rater.CDR, error) {
 	return nil, err
 }
 
+func (fsCdr FSCdr) GetCgrId() string {
+	return ""
+}
+func (fsCdr FSCdr) GetAccId() string {
+	return ""
+}
+func (fsCdr FSCdr) GetCdrHost() string {
+	return ""
+}
 func (fsCdr FSCdr) GetDirection() string {
 	//TODO: implement direction
 	return "OUT"
@@ -117,4 +128,16 @@ func (fsCdr FSCdr) GetEndTime() (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsCdr[END_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
+}
+
+func (fsCdr FSCdr) GetRate() (float64, error) {
+	rate, ok := fsCdr[RATE]
+	if !ok {
+		return -1, errors.New("Not found")
+	}
+	return strconv.ParseFloat(rate, 64)
+}
+
+func (fsCdr FSCdr) SetRate(rate float64) {
+	fsCdr[RATE] = strconv.FormatFloat(rate, 'f', -1, 64)
 }

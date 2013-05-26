@@ -29,105 +29,6 @@ type MySQLStorage struct {
 	Db *sql.DB
 }
 
-var (
-	mysql_schema = `
-CREATE TABLE ratingprofile IF NOT EXISTS (
-	id SERIAL PRIMARY KEY,
-	fallbackkey VARCHAR(512),
-);
-CREATE TABLE ratingdestinations IF NOT EXISTS (
-	id SERIAL PRIMARY KEY,
-	ratingprofile INTEGER REFERENCES ratingprofile(id) ON DELETE CASCADE,
-	destination INTEGER REFERENCES destination(id) ON DELETE CASCADE
-);
-CREATE TABLE destination IF NOT EXISTS (
-	id SERIAL PRIMARY KEY,
-	ratingprofile INTEGER REFERENCES ratingprofile(id) ON DELETE CASCADE,
-	name VARCHAR(512),
-	prefixes TEXT
-);
-CREATE TABLE activationprofile  IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	destination INTEGER REFERENCES destination(id) ON DELETE CASCADE,
-	activationtime TIMESTAMP
-);
-CREATE TABLE interval IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	activationprofile INTEGER REFERENCES activationprofile(id) ON DELETE CASCADE,
-	years TEXT,
-	months TEXT,
-	monthdays TEXT,
-	weekdays TEXT,
-	starttime TIMESTAMP,
-	endtime TIMESTAMP,
-	weight FLOAT8,
-	connectfee FLOAT8,
-	price FLOAT8,
-	pricedunits FLOAT8,
-	rateincrements FLOAT8
-);
-CREATE TABLE minutebucket IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	destination INTEGER REFERENCES destination(id) ON DELETE CASCADE,
-	seconds FLOAT8,
-	weight FLOAT8,
-	price FLOAT8,
-	percent FLOAT8
-);
-CREATE TABLE unitcounter IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	direction TEXT,
-	balance TEXT,
-	units FLOAT8
-);
-CREATE TABLE unitcounterbucket IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	unitcounter INTEGER REFERENCES unitcounter(id) ON DELETE CASCADE,
-	minutebucket INTEGER REFERENCES minutebucket(id) ON DELETE CASCADE
-);
-CREATE TABLE actiontrigger IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	destination INTEGER REFERENCES destination(id) ON DELETE CASCADE,
-	actions INTEGER REFERENCES action(id) ON DELETE CASCADE,
-	balance TEXT,
-	direction TEXT,
-	thresholdvalue FLOAT8,
-	weight FLOAT8,
-	executed BOOL
-);
-CREATE TABLE balance IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	name TEXT;
-	value FLOAT8
-);
-CREATE TABLE userbalance IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	unitcounter INTEGER REFERENCES unitcounter(id) ON DELETE CASCADE,
-	minutebucket INTEGER REFERENCES minutebucket(id) ON DELETE CASCADE
-	actiontriggers INTEGER REFERENCES actiontrigger(id) ON DELETE CASCADE,
-	balances INTEGER REFERENCES balance(id) ON DELETE CASCADE,
-	type TEXT
-);
-CREATE TABLE actiontiming IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	tag TEXT,
-	userbalances INTEGER REFERENCES userbalance(id) ON DELETE CASCADE,
-	timing INTEGER REFERENCES interval(id) ON DELETE CASCADE,
-	actions INTEGER REFERENCES action(id) ON DELETE CASCADE,
-	weight FLOAT8
-);
-CREATE TABLE action IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	minutebucket INTEGER REFERENCES minutebucket(id) ON DELETE CASCADE,
-	actiontype TEXT,
-	balance TEXT,
-	direction TEXT,
-	units FLOAT8,
-	weight FLOAT8
-);
-`
-)
-
 func NewMySQLStorage(host, port, name, user, password string) (DataStorage, error) {
 	db, err := sql.Open("mysql", "cgrates:testus@tcp(192.168.0.17:3306)/cgrates?charset=utf8")
 	if err != nil {
@@ -186,7 +87,7 @@ func (mys *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err err
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdr VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO call_costs VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
 		source,
 		cc.Direction,
@@ -205,7 +106,7 @@ func (mys *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err err
 }
 
 func (mys *MySQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	row := mys.Db.QueryRow(fmt.Sprintf("SELECT * FROM cdr WHERE uuid='%s' AND source='%s'", uuid, source))
+	row := mys.Db.QueryRow(fmt.Sprintf("SELECT * FROM call_costs WHERE uuid='%s' AND source='%s'", uuid, source))
 	var uuid_found string
 	var timespansJson string
 	err = row.Scan(&uuid_found, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
@@ -221,17 +122,57 @@ func (mys *MySQLStorage) LogActionTiming(source string, at *ActionTiming, as []*
 }
 func (mys *MySQLStorage) LogError(uuid, source, errstr string) (err error) { return }
 
-func (mys *MySQLStorage) GetCdr(string) (CDR, error) {
-	return nil, nil
-}
-func (mys *MySQLStorage) SetCdr(CDR) error {
-	return nil
+func (mys *MySQLStorage) SetCdr(cdr CDR) (err error) {
+	startTime, err := cdr.GetStartTime()
+	if err != nil {
+		return err
+	}
+	endTime, err := cdr.GetEndTime()
+	if err != nil {
+		return err
+	}
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+		cdr.GetCgrId(),
+		cdr.GetAccId(),
+		cdr.GetCdrHost(),
+		cdr.GetReqType(),
+		cdr.GetDirection(),
+		cdr.GetTenant(),
+		cdr.GetTOR(),
+		cdr.GetAccount(),
+		cdr.GetSubject(),
+		cdr.GetDestination(),
+		startTime,
+		endTime, //duration
+	))
+	if err != nil {
+		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
+	}
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s')",
+		cdr.GetCgrId(),
+		cdr.GetExtraParameters(),
+	))
+	if err != nil {
+		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
+	}
+
+	return
 }
 
-func (mys *MySQLStorage) SetMediatedCdr(CDR, *CallCost) error {
-	return nil
-}
+func (mys *MySQLStorage) SetRatedCdr(cdr CDR, callcost *CallCost) (err error) {
+	rate, err := cdr.GetRate()
+	if err != nil {
+		return err
+	}
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s', '%s', '%s')",
+		cdr.GetCgrId(),
+		rate,
+		"cgrcostid",
+		"cdrsrc",
+	))
+	if err != nil {
+		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
+	}
 
-func (mys *MySQLStorage) GetMediatedCdr(string) (CDR, error) {
-	return nil, nil
+	return
 }

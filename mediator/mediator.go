@@ -225,7 +225,7 @@ func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *rater.Cal
 
 /* Calculates  price for the specified cdr and writes the new cdr with price to
 the storage. If the cdr is nil then it will fetch it from the storage. */
-func (m *Mediator) MediateCdrFromDB(cdrID string, cdr rater.CDR, db rater.DataStorage) error {
+func (m *Mediator) MediateCdrFromDB(cdr rater.CDR, db rater.DataStorage) error {
 	cc := &rater.CallCost{}
 	startTime, err := cdr.GetStartTime()
 	if err != nil {
@@ -247,5 +247,5 @@ func (m *Mediator) MediateCdrFromDB(cdrID string, cdr rater.CDR, db rater.DataSt
 	if err := m.connector.GetCost(cd, cc); err != nil {
 		return err
 	}
-	return db.SetMediatedCdr(cdr, cc)
+	return db.SetRatedCdr(cdr, cc)
 }
