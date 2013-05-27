@@ -25,6 +25,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
 	"time"
+	"fmt"
+	"crypto/sha1"
 )
 
 const (
@@ -68,18 +70,20 @@ func (fsCdr FSCdr) New(body []byte) (rater.CDR, error) {
 }
 
 func (fsCdr FSCdr) GetCgrId() string {
-	return ""
+	hasher := sha1.New()
+	hasher.Write([]byte( fsCdr[FS_IP] ))
+	hasher.Write([]byte( fsCdr[UUID] ))
+	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
 func (fsCdr FSCdr) GetAccId() string {
-	return ""
+	return fsCdr[UUID]
 }
 func (fsCdr FSCdr) GetCdrHost() string {
-	return ""
+	return fsCdr[FS_IP]
 }
 func (fsCdr FSCdr) GetDirection() string {
-	//TODO: implement direction
+	//TODO: implement direction, not related to FS_DIRECTION but traffic towards or from subject/account
 	return "OUT"
-	//return fsCdr[DIRECTION]
 }
 func (fsCdr FSCdr) GetOrigId() string {
 	return fsCdr[ORIG_ID]
@@ -113,7 +117,7 @@ func (fsCdr FSCdr) GetReqType() string {
 	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.DefaultReqType)
 }
 func (fsCdr FSCdr) GetExtraParameters() string {
-	return ""
+	return "" // ToDo: Add and extract from config
 }
 func (fsCdr FSCdr) GetFallbackSubj() string {
 	return cfg.DefaultSubject
