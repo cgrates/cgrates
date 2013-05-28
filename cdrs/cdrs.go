@@ -38,7 +38,10 @@ func cdrHandler(w http.ResponseWriter, r *http.Request) {
 	if fsCdr, err := new(FSCdr).New(body); err == nil {
 		storage.SetCdr(fsCdr)
 		if cfg.CDRSMediator == "internal" {
-			medi.MediateCdrFromDB(fsCdr, storage)
+			errMedi := medi.MediateCdrFromDB(fsCdr, storage)
+			if errMedi != nil {
+				rater.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
+			}
 		} else {
 			//TODO: use the connection to mediator
 		}

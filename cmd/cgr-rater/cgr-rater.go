@@ -121,14 +121,6 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		}
 		connector = &rater.RPCClientConnector{Client: client}
 	}
-	if _, err := os.Stat(cfg.MediatorCDRInDir); err != nil {
-		rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", cfg.MediatorCDRInDir))
-		exitChan <- true
-	}
-	if _, err := os.Stat(cfg.MediatorCDROutDir); err != nil {
-		rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", cfg.MediatorCDROutDir))
-		exitChan <- true
-	}
 	var err error
 	medi, err = mediator.NewMediator(connector, loggerDb, cfg.MediatorCDROutDir, cfg.MediatorPseudoprepaid,
 		cfg.FreeswitchDirectionIdx, cfg.FreeswitchTORIdx, cfg.FreeswitchTenantIdx, cfg.FreeswitchSubjectIdx, cfg.FreeswitchAccountIdx,
@@ -138,7 +130,19 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		exitChan <- true
 	}
 
-	medi.TrackCDRFiles(cfg.MediatorCDRInDir)
+	if cfg.MediatorEnabled { //Mediator as standalone service
+		if _, err := os.Stat(cfg.MediatorCDRInDir); err != nil {
+			rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", cfg.MediatorCDRInDir))
+			exitChan <- true
+		}
+		if _, err := os.Stat(cfg.MediatorCDROutDir); err != nil {
+			rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", cfg.MediatorCDROutDir))
+			exitChan <- true
+		}
+		medi.TrackCDRFiles(cfg.MediatorCDRInDir)
+	}
+
+	
 }
 
 func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage) {
@@ -319,6 +323,19 @@ func main() {
 	}
 	if cfg.CDRSListen != "" {
 		rater.Logger.Info("Starting CGRateS CDR Server.")
+		if !cfg.MediatorEnabled {
+			go startMediator(responder, loggerDb) // Will start it internally, important to connect the responder
+		}
+		for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
+			time.Sleep(time.Duration(i/2) * time.Second)
+			if medi!=nil { // Got our mediator, no need to wait any longer
+				break
+			}
+		}
+		if medi == nil  {
+			rater.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
+			exitChan <- true
+		}
 		cs := cdrs.New(loggerDb, medi, cfg)
 		go cs.StartCapturingCDRs()
 	}

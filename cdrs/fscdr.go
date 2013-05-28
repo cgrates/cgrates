@@ -42,9 +42,9 @@ const (
 	UUID         = "uuid" // -Unique ID for this call leg
 	CSTMID       = "cgr_cstmid"
 	CALL_DEST_NR = "dialed_extension"
-	PARK_TIME    = "start_stamp"
-	START_TIME   = "answer_stamp"
-	END_TIME     = "end_stamp"
+	PARK_TIME    = "start_epoch"
+	START_TIME   = "answer_epoch"
+	END_TIME     = "end_epoch"
 	USERNAME     = "user_name"
 	FS_IP        = "sip_local_network_addr"
 	RATE         = "rate"
