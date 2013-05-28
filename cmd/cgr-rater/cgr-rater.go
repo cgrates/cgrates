@@ -45,6 +45,7 @@ const (
 	JSON     = "json"
 	GOB      = "gob"
 	POSTGRES = "postgres"
+	MYSQL    = "mysql"
 	MONGO    = "mongo"
 	REDIS    = "redis"
 	SAME     = "same"
@@ -241,6 +242,8 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter rat
 		getter, err = rater.NewMongoStorage(host, port, name, user, pass)
 	case POSTGRES:
 		getter, err = rater.NewPostgresStorage(host, port, name, user, pass)
+	case MYSQL:
+		getter, err = rater.NewMySQLStorage(host, port, name, user, pass)
 	default:
 		err = errors.New("unknown db")
 		return nil, err

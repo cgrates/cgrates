@@ -39,6 +39,7 @@ type CDR interface {
 	GetReqType() string
 	GetStartTime() (time.Time, error)
 	GetEndTime() (time.Time, error)
+	GetDuration() int64
 	GetFallbackSubj() string
 	GetExtraParameters() string
 	GetRate() (float64, error)

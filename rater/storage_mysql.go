@@ -30,7 +30,7 @@ type MySQLStorage struct {
 }
 
 func NewMySQLStorage(host, port, name, user, password string) (DataStorage, error) {
-	db, err := sql.Open("mysql", "cgrates:testus@tcp(192.168.0.17:3306)/cgrates?charset=utf8")
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", user, password, host, port, name))
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (mys *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err err
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO call_costs VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('NULL','%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
 		source,
 		cc.Direction,
@@ -106,7 +106,7 @@ func (mys *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err err
 }
 
 func (mys *MySQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	row := mys.Db.QueryRow(fmt.Sprintf("SELECT * FROM call_costs WHERE uuid='%s' AND source='%s'", uuid, source))
+	row := mys.Db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s' AND source='%s'", uuid, source))
 	var uuid_found string
 	var timespansJson string
 	err = row.Scan(&uuid_found, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
@@ -127,11 +127,7 @@ func (mys *MySQLStorage) SetCdr(cdr CDR) (err error) {
 	if err != nil {
 		return err
 	}
-	endTime, err := cdr.GetEndTime()
-	if err != nil {
-		return err
-	}
-	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)",
 		cdr.GetCgrId(),
 		cdr.GetAccId(),
 		cdr.GetCdrHost(),
@@ -143,12 +139,12 @@ func (mys *MySQLStorage) SetCdr(cdr CDR) (err error) {
 		cdr.GetSubject(),
 		cdr.GetDestination(),
 		startTime,
-		endTime, //duration
+		cdr.GetDuration(), //duration
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
 	}
-	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s')",
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('NULL','%s', '%s')",
 		cdr.GetCgrId(),
 		cdr.GetExtraParameters(),
 	))
@@ -162,9 +158,10 @@ func (mys *MySQLStorage) SetCdr(cdr CDR) (err error) {
 func (mys *MySQLStorage) SetRatedCdr(cdr CDR, callcost *CallCost) (err error) {
 	rate, err := cdr.GetRate()
 	if err != nil {
+		fmt.Println("Could not find rate in cdr")
 		return err
 	}
-	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s', '%s', '%s')",
+	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO rated_cdrs VALUES ('%s', '%s', '%s', '%s')",
 		cdr.GetCgrId(),
 		rate,
 		"cgrcostid",

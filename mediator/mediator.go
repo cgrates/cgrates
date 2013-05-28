@@ -245,6 +245,7 @@ func (m *Mediator) MediateCdrFromDB(cdr rater.CDR, db rater.DataStorage) error {
 		TimeStart:   startTime,
 		TimeEnd:     endTime}
 	if err := m.connector.GetCost(cd, cc); err != nil {
+		fmt.Println("Got error in the mediator getCost", err.Error())
 		return err
 	}
 	return db.SetRatedCdr(cdr, cc)

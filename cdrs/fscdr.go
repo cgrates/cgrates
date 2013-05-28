@@ -45,6 +45,7 @@ const (
 	PARK_TIME    = "start_epoch"
 	START_TIME   = "answer_epoch"
 	END_TIME     = "end_epoch"
+	DURATION     = "billsec"
 	USERNAME     = "user_name"
 	FS_IP        = "sip_local_network_addr"
 	RATE         = "rate"
@@ -133,6 +134,12 @@ func (fsCdr FSCdr) GetEndTime() (t time.Time, err error) {
 	t = time.Unix(0, st*1000)
 	return
 }
+// Extracts duration as considered by the telecom switch
+func (fsCdr FSCdr) GetDuration() int64 {
+	dur, _ := strconv.ParseInt(fsCdr[DURATION], 0, 64)
+	return dur
+}
+
 
 func (fsCdr FSCdr) GetRate() (float64, error) {
 	rate, ok := fsCdr[RATE]
