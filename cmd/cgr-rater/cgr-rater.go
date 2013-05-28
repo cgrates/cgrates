@@ -192,6 +192,25 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 	exitChan <- true
 }
 
+func startCDRS(responder *rater.Responder, loggerDb rater.DataStorage) {
+	if !cfg.MediatorEnabled {
+		go startMediator(responder, loggerDb) // Will start it internally, important to connect the responder
+	}
+	for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
+		time.Sleep(time.Duration(i/2) * time.Second)
+		if medi!=nil { // Got our mediator, no need to wait any longer
+			break
+		}
+	}
+	if medi == nil  {
+		rater.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
+		exitChan <- true
+	}
+	cs := cdrs.New(loggerDb, medi, cfg)
+	cs.StartCapturingCDRs()
+	exitChan <- true
+}
+
 func checkConfigSanity() error {
 	if cfg.SMEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
 		rater.Logger.Crit("The session manager must not be enabled on a worker rater (change [rater]/balancer to disabled)!")
@@ -323,21 +342,7 @@ func main() {
 	}
 	if cfg.CDRSListen != "" {
 		rater.Logger.Info("Starting CGRateS CDR Server.")
-		if !cfg.MediatorEnabled {
-			go startMediator(responder, loggerDb) // Will start it internally, important to connect the responder
-		}
-		for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
-			time.Sleep(time.Duration(i/2) * time.Second)
-			if medi!=nil { // Got our mediator, no need to wait any longer
-				break
-			}
-		}
-		if medi == nil  {
-			rater.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
-			exitChan <- true
-		}
-		cs := cdrs.New(loggerDb, medi, cfg)
-		go cs.StartCapturingCDRs()
+		go startCDRS(responder, loggerDb)
 	}
 	<-exitChan
 	rater.Logger.Info("Stopped all components. CGRateS shutdown!")
