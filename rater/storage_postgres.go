@@ -159,14 +159,10 @@ func (psl *PostgresStorage) SetCdr(cdr CDR) (err error) {
 	return
 }
 
-func (psl *PostgresStorage) SetRatedCdr(cdr CDR, callcost *CallCost) (err error) {
-	rate, err := cdr.GetRate()
-	if err != nil {
-		return err
-	}
+func (psl *PostgresStorage) SetRatedCdr(cdr CDR, cc *CallCost) (err error) {
 	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s', '%s', '%s')",
 		cdr.GetCgrId(),
-		rate,
+		cc.Cost,
 		"cgrcostid",
 		"cdrsrc",
 	))
