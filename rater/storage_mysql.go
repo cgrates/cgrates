@@ -139,7 +139,7 @@ func (mys *MySQLStorage) SetCdr(cdr CDR) (err error) {
 		cdr.GetSubject(),
 		cdr.GetDestination(),
 		startTime,
-		cdr.GetDuration(), //duration
+		cdr.GetDuration(),
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))

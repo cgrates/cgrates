@@ -19,14 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrs
 
 import (
+	"crypto/sha1"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
 	"time"
-	"fmt"
-	"crypto/sha1"
 )
 
 const (
@@ -48,7 +47,6 @@ const (
 	DURATION     = "billsec"
 	USERNAME     = "user_name"
 	FS_IP        = "sip_local_network_addr"
-	RATE         = "rate"
 )
 
 type FSCdr map[string]string
@@ -72,8 +70,8 @@ func (fsCdr FSCdr) New(body []byte) (rater.CDR, error) {
 
 func (fsCdr FSCdr) GetCgrId() string {
 	hasher := sha1.New()
-	hasher.Write([]byte( fsCdr[FS_IP] ))
-	hasher.Write([]byte( fsCdr[UUID] ))
+	hasher.Write([]byte(fsCdr[FS_IP]))
+	hasher.Write([]byte(fsCdr[UUID]))
 	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
 func (fsCdr FSCdr) GetAccId() string {
@@ -128,27 +126,14 @@ func (fsCdr FSCdr) GetStartTime() (t time.Time, err error) {
 	t = time.Unix(0, st*1000)
 	return
 }
-
 func (fsCdr FSCdr) GetEndTime() (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsCdr[END_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
+
 // Extracts duration as considered by the telecom switch
 func (fsCdr FSCdr) GetDuration() int64 {
 	dur, _ := strconv.ParseInt(fsCdr[DURATION], 0, 64)
 	return dur
-}
-
-
-func (fsCdr FSCdr) GetRate() (float64, error) {
-	rate, ok := fsCdr[RATE]
-	if !ok {
-		return -1, errors.New("Not found")
-	}
-	return strconv.ParseFloat(rate, 64)
-}
-
-func (fsCdr FSCdr) SetRate(rate float64) {
-	fsCdr[RATE] = strconv.FormatFloat(rate, 'f', -1, 64)
 }

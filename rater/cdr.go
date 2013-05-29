@@ -42,6 +42,4 @@ type CDR interface {
 	GetDuration() int64
 	GetFallbackSubj() string
 	GetExtraParameters() string
-	GetRate() (float64, error)
-	SetRate(float64)
 }

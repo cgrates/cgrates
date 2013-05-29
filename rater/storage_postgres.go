@@ -127,10 +127,6 @@ func (psl *PostgresStorage) SetCdr(cdr CDR) (err error) {
 	if err != nil {
 		return err
 	}
-	endTime, err := cdr.GetEndTime()
-	if err != nil {
-		return err
-	}
 	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		cdr.GetCgrId(),
 		cdr.GetAccId(),
@@ -143,7 +139,7 @@ func (psl *PostgresStorage) SetCdr(cdr CDR) (err error) {
 		cdr.GetSubject(),
 		cdr.GetDestination(),
 		startTime,
-		endTime, //duration
+		cdr.GetDuration(),
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
