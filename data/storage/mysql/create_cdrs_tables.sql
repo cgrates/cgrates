@@ -9,7 +9,7 @@ CREATE TABLE `cdrs_primary` (
   `reqtype` varchar(24) NOT NULL,
   `direction` enum('0','1','2') NOT NULL DEFAULT '1',
   `tenant` varchar(64) NOT NULL,
-  `tor` varchar(8) NOT NULL,
+  `tor` varchar(16) NOT NULL,
   `account` varchar(64) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `destination` varchar(64) NOT NULL,
