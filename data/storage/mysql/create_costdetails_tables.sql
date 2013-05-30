@@ -1,8 +1,8 @@
 
 --
--- Table structure for table `transactions`
+-- Table structure for table `cost_details`
 --
-CREATE TABLE `transactions` (
+CREATE TABLE `cost_details` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cgrid` char(40) NOT NULL,
   `accid` varchar(64) NOT NULL,
@@ -18,6 +18,6 @@ CREATE TABLE `transactions` (
   `timespans` text,
   `source` varchar(64) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `cgrid` (`uuid`)
+  UNIQUE KEY `costid` (`cgrid`,`subject`)
 );
 
