@@ -19,7 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrs
 
 import (
+	"crypto/sha1"
 	"encoding/json"
+	"fmt"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
@@ -39,9 +41,10 @@ const (
 	UUID         = "uuid" // -Unique ID for this call leg
 	CSTMID       = "cgr_cstmid"
 	CALL_DEST_NR = "dialed_extension"
-	PARK_TIME    = "start_stamp"
-	START_TIME   = "answer_stamp"
-	END_TIME     = "end_stamp"
+	PARK_TIME    = "start_epoch"
+	START_TIME   = "answer_epoch"
+	END_TIME     = "end_epoch"
+	DURATION     = "billsec"
 	USERNAME     = "user_name"
 	FS_IP        = "sip_local_network_addr"
 )
@@ -65,10 +68,21 @@ func (fsCdr FSCdr) New(body []byte) (rater.CDR, error) {
 	return nil, err
 }
 
+func (fsCdr FSCdr) GetCgrId() string {
+	hasher := sha1.New()
+	hasher.Write([]byte(fsCdr[FS_IP]))
+	hasher.Write([]byte(fsCdr[UUID]))
+	return fmt.Sprintf("%x", hasher.Sum(nil))
+}
+func (fsCdr FSCdr) GetAccId() string {
+	return fsCdr[UUID]
+}
+func (fsCdr FSCdr) GetCdrHost() string {
+	return fsCdr[FS_IP]
+}
 func (fsCdr FSCdr) GetDirection() string {
-	//TODO: implement direction
+	//TODO: implement direction, not related to FS_DIRECTION but traffic towards or from subject/account
 	return "OUT"
-	//return fsCdr[DIRECTION]
 }
 func (fsCdr FSCdr) GetOrigId() string {
 	return fsCdr[ORIG_ID]
@@ -102,19 +116,24 @@ func (fsCdr FSCdr) GetReqType() string {
 	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.DefaultReqType)
 }
 func (fsCdr FSCdr) GetExtraParameters() string {
-	return ""
+	return "" // ToDo: Add and extract from config
 }
 func (fsCdr FSCdr) GetFallbackSubj() string {
 	return cfg.DefaultSubject
 }
-func (fsCdr FSCdr) GetStartTime(field string) (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsCdr[field], 0, 64)
+func (fsCdr FSCdr) GetStartTime() (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsCdr[START_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
-
 func (fsCdr FSCdr) GetEndTime() (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsCdr[END_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
+}
+
+// Extracts duration as considered by the telecom switch
+func (fsCdr FSCdr) GetDuration() int64 {
+	dur, _ := strconv.ParseInt(fsCdr[DURATION], 0, 64)
+	return dur
 }

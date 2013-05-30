@@ -29,105 +29,6 @@ type PostgresStorage struct {
 	Db *sql.DB
 }
 
-var (
-	postgres_schema = `
-CREATE TABLE ratingprofile IF NOT EXISTS (
-	id SERIAL PRIMARY KEY,
-	fallbackkey VARCHAR(512),
-);
-CREATE TABLE ratingdestinations IF NOT EXISTS (
-	id SERIAL PRIMARY KEY,
-	ratingprofile INTEGER REFERENCES ratingprofile(id) ON DELETE CASCADE,
-	destination INTEGER REFERENCES destination(id) ON DELETE CASCADE
-);
-CREATE TABLE destination IF NOT EXISTS (
-	id SERIAL PRIMARY KEY,
-	ratingprofile INTEGER REFERENCES ratingprofile(id) ON DELETE CASCADE,
-	name VARCHAR(512),
-	prefixes TEXT
-);
-CREATE TABLE activationprofile  IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	destination INTEGER REFERENCES destination(id) ON DELETE CASCADE,
-	activationtime TIMESTAMP
-);
-CREATE TABLE interval IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	activationprofile INTEGER REFERENCES activationprofile(id) ON DELETE CASCADE,
-	years TEXT,
-	months TEXT,
-	monthdays TEXT,
-	weekdays TEXT,
-	starttime TIMESTAMP,
-	endtime TIMESTAMP,
-	weight FLOAT8,
-	connectfee FLOAT8,
-	price FLOAT8,
-	pricedunits FLOAT8,
-	rateincrements FLOAT8
-);
-CREATE TABLE minutebucket IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	destination INTEGER REFERENCES destination(id) ON DELETE CASCADE,
-	seconds FLOAT8,
-	weight FLOAT8,
-	price FLOAT8,
-	percent FLOAT8
-);
-CREATE TABLE unitcounter IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	direction TEXT,
-	balance TEXT,
-	units FLOAT8
-);
-CREATE TABLE unitcounterbucket IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	unitcounter INTEGER REFERENCES unitcounter(id) ON DELETE CASCADE,
-	minutebucket INTEGER REFERENCES minutebucket(id) ON DELETE CASCADE
-);
-CREATE TABLE actiontrigger IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	destination INTEGER REFERENCES destination(id) ON DELETE CASCADE,
-	actions INTEGER REFERENCES action(id) ON DELETE CASCADE,
-	balance TEXT,
-	direction TEXT,
-	thresholdvalue FLOAT8,
-	weight FLOAT8,
-	executed BOOL
-);
-CREATE TABLE balance IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	name TEXT;
-	value FLOAT8
-);
-CREATE TABLE userbalance IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	unitcounter INTEGER REFERENCES unitcounter(id) ON DELETE CASCADE,
-	minutebucket INTEGER REFERENCES minutebucket(id) ON DELETE CASCADE
-	actiontriggers INTEGER REFERENCES actiontrigger(id) ON DELETE CASCADE,
-	balances INTEGER REFERENCES balance(id) ON DELETE CASCADE,
-	type TEXT
-);
-CREATE TABLE actiontiming IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	tag TEXT,
-	userbalances INTEGER REFERENCES userbalance(id) ON DELETE CASCADE,
-	timing INTEGER REFERENCES interval(id) ON DELETE CASCADE,
-	actions INTEGER REFERENCES action(id) ON DELETE CASCADE,
-	weight FLOAT8
-);
-CREATE TABLE action IF NOT EXISTS(
-	id SERIAL PRIMARY KEY,
-	minutebucket INTEGER REFERENCES minutebucket(id) ON DELETE CASCADE,
-	actiontype TEXT,
-	balance TEXT,
-	direction TEXT,
-	units FLOAT8,
-	weight FLOAT8
-);
-`
-)
-
 func NewPostgresStorage(host, port, name, user, password string) (DataStorage, error) {
 	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password))
 	if err != nil {
@@ -221,9 +122,52 @@ func (psl *PostgresStorage) LogActionTiming(source string, at *ActionTiming, as 
 }
 func (psl *PostgresStorage) LogError(uuid, source, errstr string) (err error) { return }
 
-func (psl *PostgresStorage) GetCdr(string) (CDR, error) {
-	return nil, nil
+func (psl *PostgresStorage) SetCdr(cdr CDR) (err error) {
+	startTime, err := cdr.GetStartTime()
+	if err != nil {
+		return err
+	}
+	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+		cdr.GetCgrId(),
+		cdr.GetAccId(),
+		cdr.GetCdrHost(),
+		cdr.GetReqType(),
+		cdr.GetDirection(),
+		cdr.GetTenant(),
+		cdr.GetTOR(),
+		cdr.GetAccount(),
+		cdr.GetSubject(),
+		cdr.GetDestination(),
+		startTime,
+		cdr.GetDuration(),
+	))
+	if err != nil {
+		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
+	}
+	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s')",
+		cdr.GetCgrId(),
+		cdr.GetExtraParameters(),
+	))
+	if err != nil {
+		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
+	}
+
+	return
 }
-func (psl *PostgresStorage) SetCdr(CDR) error {
-	return nil
+
+func (psl *PostgresStorage) SetRatedCdr(cdr CDR, cc *CallCost) (err error) {
+	if err != nil {
+		return err
+	}
+	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s', '%s', '%s')",
+		cdr.GetCgrId(),
+		cc.Cost,
+		"cgrcostid",
+		"cdrsrc",
+	))
+	if err != nil {
+		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
+	}
+
+	return
 }

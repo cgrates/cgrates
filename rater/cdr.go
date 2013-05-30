@@ -24,6 +24,9 @@ import (
 
 type CDR interface {
 	New([]byte) (CDR, error)
+	GetCgrId() string
+	GetAccId() string
+	GetCdrHost() string
 	GetDirection() string
 	GetOrigId() string
 	GetSubject() string
@@ -34,8 +37,9 @@ type CDR interface {
 	GetUUID() string
 	GetTenant() string
 	GetReqType() string
-	GetStartTime(string) (time.Time, error)
+	GetStartTime() (time.Time, error)
 	GetEndTime() (time.Time, error)
+	GetDuration() int64
 	GetFallbackSubj() string
 	GetExtraParameters() string
 }

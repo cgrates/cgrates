@@ -183,9 +183,10 @@ func (ms *MapStorage) LogError(uuid, source, errstr string) (err error) {
 	return nil
 }
 
-func (ms *MapStorage) GetCdr(string) (CDR, error) {
-	return nil, nil
-}
 func (ms *MapStorage) SetCdr(CDR) error {
+	return nil
+}
+
+func (ms *MapStorage) SetRatedCdr(CDR, *CallCost) error {
 	return nil
 }

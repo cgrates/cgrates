@@ -24,7 +24,6 @@ import (
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/rater"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -37,9 +36,15 @@ var (
 func cdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	if fsCdr, err := new(FSCdr).New(body); err == nil {
-		log.Printf("CDR: %v", fsCdr)
-		//storage.SetCdr(fsCdr)
-		//medi.MediateCdrFromDB(fsCdr.GetAccount(), storage)
+		storage.SetCdr(fsCdr)
+		if cfg.CDRSMediator == "internal" {
+			errMedi := medi.MediateCdrFromDB(fsCdr, storage)
+			if errMedi != nil {
+				rater.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
+			}
+		} else {
+			//TODO: use the connection to mediator
+		}
 	} else {
 		rater.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
 	}

@@ -241,9 +241,11 @@ func (rs *RedisStorage) LogError(uuid, source, errstr string) (err error) {
 	}
 	return
 }
-func (rs *RedisStorage) GetCdr(string) (CDR, error) {
-	return nil, nil
-}
+
 func (rs *RedisStorage) SetCdr(CDR) error {
+	return nil
+}
+
+func (rs *RedisStorage) SetRatedCdr(CDR, *CallCost) error {
 	return nil
 }
