@@ -19,10 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrs
 
 import (
-	"crypto/sha1"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
@@ -70,10 +68,7 @@ func (fsCdr FSCdr) New(body []byte) (rater.CDR, error) {
 }
 
 func (fsCdr FSCdr) GetCgrId() string {
-	hasher := sha1.New()
-	hasher.Write([]byte(fsCdr[FS_IP]))
-	hasher.Write([]byte(fsCdr[UUID]))
-	return fmt.Sprintf("%x", hasher.Sum(nil))
+	return utils.FSCgrId(fsCdr[UUID])
 }
 func (fsCdr FSCdr) GetAccId() string {
 	return fsCdr[UUID]

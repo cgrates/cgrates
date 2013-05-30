@@ -218,6 +218,7 @@ func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *rater.Cal
 	if err != nil {
 		m.loggerDb.LogError(record[m.uuidIndexs[runIdx]], rater.MEDIATOR_SOURCE, err.Error())
 	} else {
+		// If the mediator calculated a price it will write it to logdb
 		m.loggerDb.LogCallCost(record[m.uuidIndexs[runIdx]], rater.MEDIATOR_SOURCE, cc)
 	}
 	return

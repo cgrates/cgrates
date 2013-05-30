@@ -18,6 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import (
+	"crypto/sha1"
+	"fmt"
+)
+
 // Returns first non empty string out of vals. Useful to extract defaults
 func FirstNonEmpty(vals ...string) string {
 	for _, val := range vals {
@@ -26,4 +31,10 @@ func FirstNonEmpty(vals ...string) string {
 		}
 	}
 	return ""
+}
+
+func FSCgrId(uuid string) string {
+	hasher := sha1.New()
+	hasher.Write([]byte(uuid))
+	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
