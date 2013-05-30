@@ -73,23 +73,6 @@ func (ys *Years) Parse(input, sep string) {
 	}
 }
 
-func (yss Years) store() (result string) {
-	for _, ys := range yss {
-		result += strconv.Itoa(int(ys)) + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-func (yss *Years) restore(input string) {
-	for _, ys := range strings.Split(input, ",") {
-		if ys != "" {
-			mm, _ := strconv.Atoi(ys)
-			*yss = append(*yss, mm)
-		}
-	}
-}
-
 // Defines months series
 type Months []time.Month
 
@@ -134,23 +117,6 @@ func (m *Months) Parse(input, sep string) {
 			if month, err := strconv.Atoi(ms); err == nil {
 				*m = append(*m, time.Month(month))
 			}
-		}
-	}
-}
-
-func (ms Months) store() (result string) {
-	for _, m := range ms {
-		result += strconv.Itoa(int(m)) + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-func (ms *Months) restore(input string) {
-	for _, m := range strings.Split(input, ",") {
-		if m != "" {
-			mm, _ := strconv.Atoi(m)
-			*ms = append(*ms, time.Month(mm))
 		}
 	}
 }
@@ -203,23 +169,6 @@ func (md *MonthDays) Parse(input, sep string) {
 	}
 }
 
-func (mds MonthDays) store() (result string) {
-	for _, md := range mds {
-		result += strconv.Itoa(int(md)) + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-func (mds *MonthDays) restore(input string) {
-	for _, md := range strings.Split(input, ",") {
-		if md != "" {
-			mm, _ := strconv.Atoi(md)
-			*mds = append(*mds, mm)
-		}
-	}
-}
-
 // Defines week days series
 type WeekDays []time.Weekday
 
@@ -263,23 +212,6 @@ func (wd *WeekDays) Parse(input, sep string) {
 			if day, err := strconv.Atoi(wds); err == nil {
 				*wd = append(*wd, time.Weekday(day%7)) // %7 for sunday = 7 normalization
 			}
-		}
-	}
-}
-
-func (wds WeekDays) store() (result string) {
-	for _, wd := range wds {
-		result += strconv.Itoa(int(wd)) + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-func (wds *WeekDays) restore(input string) {
-	for _, wd := range strings.Split(input, ",") {
-		if wd != "" {
-			mm, _ := strconv.Atoi(wd)
-			*wds = append(*wds, time.Weekday(mm))
 		}
 	}
 }

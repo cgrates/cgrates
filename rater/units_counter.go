@@ -20,8 +20,6 @@ package rater
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 // Amount of a trafic of a certain type
@@ -66,36 +64,4 @@ func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
 
 func (uc *UnitsCounter) String() string {
 	return fmt.Sprintf("%s %s %v", uc.BalanceId, uc.Direction, uc.Units)
-}
-
-/*
-Serializes the unit counter for the storage. Used for key-value storages.
-*/
-func (uc *UnitsCounter) store() (result string) {
-	result += uc.Direction + "/"
-	result += uc.BalanceId + "/"
-	result += strconv.FormatFloat(uc.Units, 'f', -1, 64) + "/"
-	for _, mb := range uc.MinuteBuckets {
-		result += mb.store() + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-/*
-De-serializes the unit counter for the storage. Used for key-value storages.
-*/
-func (uc *UnitsCounter) restore(input string) {
-	elements := strings.Split(input, "/")
-	if len(elements) != 4 {
-		return
-	}
-	uc.Direction = elements[0]
-	uc.BalanceId = elements[1]
-	uc.Units, _ = strconv.ParseFloat(elements[2], 64)
-	for _, mbs := range strings.Split(elements[3], ",") {
-		mb := &MinuteBucket{}
-		mb.restore(mbs)
-		uc.MinuteBuckets = append(uc.MinuteBuckets, mb)
-	}
 }

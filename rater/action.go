@@ -21,8 +21,6 @@ package rater
 import (
 	"fmt"
 	"sort"
-	"strconv"
-	"strings"
 )
 
 /*
@@ -37,6 +35,8 @@ type Action struct {
 	Weight       float64
 	MinuteBucket *MinuteBucket
 }
+
+type Actions []*Action
 
 type actionTypeFunc func(*UserBalance, *Action) error
 
@@ -193,41 +193,4 @@ func (apl ActionPriotityList) Less(i, j int) bool {
 
 func (apl ActionPriotityList) Sort() {
 	sort.Sort(apl)
-}
-
-/*
-Serializes the action for the storage. Used for key-value storages.
-*/
-func (a *Action) store() (result string) {
-	result += a.Id + "|"
-	result += a.ActionType + "|"
-	result += a.BalanceId + "|"
-	result += a.Direction + "|"
-	result += strconv.FormatFloat(a.Units, 'f', -1, 64) + "|"
-	result += strconv.FormatFloat(a.Weight, 'f', -1, 64)
-	if a.MinuteBucket != nil {
-		result += "|"
-		result += a.MinuteBucket.store()
-	}
-	return
-}
-
-/*
-De-serializes the action for the storage. Used for key-value storages.
-*/
-func (a *Action) restore(input string) {
-	elements := strings.Split(input, "|")
-	if len(elements) < 6 {
-		return
-	}
-	a.Id = elements[0]
-	a.ActionType = elements[1]
-	a.BalanceId = elements[2]
-	a.Direction = elements[3]
-	a.Units, _ = strconv.ParseFloat(elements[4], 64)
-	a.Weight, _ = strconv.ParseFloat(elements[5], 64)
-	if len(elements) == 7 {
-		a.MinuteBucket = &MinuteBucket{}
-		a.MinuteBucket.restore(elements[6])
-	}
 }

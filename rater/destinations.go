@@ -69,15 +69,3 @@ func (d *Destination) String() (result string) {
 	result = strings.TrimRight(result, ", ")
 	return result
 }
-
-func (d *Destination) store() (result string) {
-	for _, p := range d.Prefixes {
-		result += p + ","
-	}
-	result = strings.TrimRight(result, ",")
-	return
-}
-
-func (d *Destination) restore(input string) {
-	d.Prefixes = strings.Split(input, ",")
-}

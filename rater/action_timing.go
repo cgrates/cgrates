@@ -45,6 +45,8 @@ type ActionTiming struct {
 	stCache        time.Time
 }
 
+type ActionTimings []*ActionTiming
+
 func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
@@ -275,45 +277,6 @@ func (atpl ActionTimingPriotityList) Sort() {
 
 func (at *ActionTiming) String() string {
 	return at.Tag + " " + at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
-}
-
-/*
-Serializes the action timing for the storage. Used for key-value storages.
-*/
-func (at *ActionTiming) store() (result string) {
-	result += at.Id + "|"
-	result += at.Tag + "|"
-	for _, ubi := range at.UserBalanceIds {
-		result += ubi + ","
-	}
-	result = strings.TrimRight(result, ",") + "|"
-	if at.Timing != nil {
-		result += at.Timing.store() + "|"
-	} else {
-		result += " |"
-	}
-	result += strconv.FormatFloat(at.Weight, 'f', -1, 64) + "|"
-	result += at.ActionsId
-	return
-}
-
-/*
-De-serializes the action timing for the storage. Used for key-value storages.
-*/
-func (at *ActionTiming) restore(input string) {
-	elements := strings.Split(input, "|")
-	at.Id = elements[0]
-	at.Tag = elements[1]
-	for _, ubi := range strings.Split(elements[2], ",") {
-		if strings.TrimSpace(ubi) != "" {
-			at.UserBalanceIds = append(at.UserBalanceIds, ubi)
-		}
-	}
-
-	at.Timing = &Interval{}
-	at.Timing.restore(elements[3])
-	at.Weight, _ = strconv.ParseFloat(elements[4], 64)
-	at.ActionsId = elements[5]
 }
 
 // helper function for uuid generation

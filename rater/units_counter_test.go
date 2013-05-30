@@ -30,13 +30,13 @@ func TestUnitsCounterStoreRestore(t *testing.T) {
 		Units:         100,
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 	}
-	r := uc.store()
-	if string(r) != "OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET" {
+	r, err := uc.Store()
+	if err != nil || r != "OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET" {
 		t.Errorf("Error serializing units counter: %v", string(r))
 	}
 	o := &UnitsCounter{}
-	o.restore(r)
-	if !reflect.DeepEqual(o, uc) {
+	err = o.Restore(r)
+	if err != nil || !reflect.DeepEqual(o, uc) {
 		t.Errorf("Expected %v was  %v", uc, o)
 	}
 }

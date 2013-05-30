@@ -161,7 +161,7 @@ func BenchmarkActivationPeriodStoreRestoreJson(b *testing.B) {
 func BenchmarkActivationPeriodRestore(b *testing.B) {
 	ap := &ActivationPeriod{}
 	for i := 0; i < b.N; i++ {
-		activationPeriodRestore("1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0", ap)
+		ap.Restore("1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0")
 	}
 }
 
@@ -176,11 +176,11 @@ func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 
-	ap1 := ActivationPeriod{}
+	ap1 := &ActivationPeriod{}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		result, _ := Marshal(ap)
-		Unmarshal(result, ap1)
+		result, _ := ap.Store()
+		ap1.Restore(result)
 	}
 }
 
@@ -195,7 +195,7 @@ func BenchmarkActivationPeriodMarshallerMyStoreRestore(b *testing.B) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 
-	ap1 := ActivationPeriod{}
+	ap1 := &ActivationPeriod{}
 	b.StartTimer()
 	ms := new(MyMarshaler)
 	for i := 0; i < b.N; i++ {

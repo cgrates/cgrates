@@ -22,8 +22,6 @@ import (
 	"fmt"
 	//"log"
 	"sort"
-	"strconv"
-	"strings"
 )
 
 type ActionTrigger struct {
@@ -78,37 +76,4 @@ func (atpl ActionTriggerPriotityList) Less(i, j int) bool {
 
 func (atpl ActionTriggerPriotityList) Sort() {
 	sort.Sort(atpl)
-}
-
-/*
-Serializes the action trigger for the storage. Used for key-value storages.
-*/
-func (at *ActionTrigger) store() (result string) {
-	result += at.Id + ";"
-	result += at.BalanceId + ";"
-	result += at.Direction + ";"
-	result += at.DestinationId + ";"
-	result += at.ActionsId + ";"
-	result += strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(at.Weight, 'f', -1, 64) + ";"
-	result += strconv.FormatBool(at.Executed)
-	return
-}
-
-/*
-De-serializes the action timing for the storage. Used for key-value storages.
-*/
-func (at *ActionTrigger) restore(input string) {
-	elements := strings.Split(input, ";")
-	if len(elements) != 8 {
-		return
-	}
-	at.Id = elements[0]
-	at.BalanceId = elements[1]
-	at.Direction = elements[2]
-	at.DestinationId = elements[3]
-	at.ActionsId = elements[4]
-	at.ThresholdValue, _ = strconv.ParseFloat(elements[5], 64)
-	at.Weight, _ = strconv.ParseFloat(elements[6], 64)
-	at.Executed, _ = strconv.ParseBool(elements[7])
 }

@@ -70,14 +70,14 @@ func TestUserBalanceStoreRestore(t *testing.T) {
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}
-	r := ub.store()
-	if string(r) != "rif|postpaid|SMSOUT:14#INTERNETOUT:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false" &&
-		string(r) != "rif|postpaid|INTERNETOUT:1024#SMSOUT:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false" {
+	r, err := ub.Store()
+	if err != nil || r != "rif|postpaid|SMSOUT:14#INTERNETOUT:1024|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false" &&
+		r != "rif|postpaid|INTERNETOUT:1024#SMSOUT:14|0;20;1;0;NAT#0;10;10;0;RET|OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET#OUT/SMS/100/0;20;1;0;NAT,0;10;10;0;RET|some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false#some_uuid;MONETARY;OUT;NAT;Commando;100;10;false" {
 		t.Errorf("Error serializing action timing: %v", string(r))
 	}
 	o := &UserBalance{}
-	o.restore(r)
-	if !reflect.DeepEqual(o, ub) {
+	err = o.Restore(r)
+	if err != nil || !reflect.DeepEqual(o, ub) {
 		t.Errorf("Expected %v was  %v", ub, o)
 	}
 }
