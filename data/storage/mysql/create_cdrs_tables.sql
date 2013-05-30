@@ -7,7 +7,7 @@ CREATE TABLE `cdrs_primary` (
   `accid` varchar(64) NOT NULL,
   `cdrhost` varchar(64) NOT NULL,
   `reqtype` varchar(24) NOT NULL,
-  `direction` enum('0','1','2') NOT NULL DEFAULT '1',
+  `direction` varchar(8) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `tor` varchar(16) NOT NULL,
   `account` varchar(64) NOT NULL,
