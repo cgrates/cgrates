@@ -21,6 +21,7 @@ package cdrs
 import (
 	"crypto/sha1"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
@@ -136,4 +137,38 @@ func (fsCdr FSCdr) GetEndTime() (t time.Time, err error) {
 func (fsCdr FSCdr) GetDuration() int64 {
 	dur, _ := strconv.ParseInt(fsCdr[DURATION], 0, 64)
 	return dur
+}
+
+func (fsCdr FSCdr) Store() (result string, err error) {
+	result += fsCdr.GetCgrId() + "|"
+	result += fsCdr.GetAccId() + "|"
+	result += fsCdr.GetCdrHost() + "|"
+	result += fsCdr.GetDirection() + "|"
+	result += fsCdr.GetOrigId() + "|"
+	result += fsCdr.GetSubject() + "|"
+	result += fsCdr.GetAccount() + "|"
+	result += fsCdr.GetDestination() + "|"
+	result += fsCdr.GetCallDestNr() + "|"
+	result += fsCdr.GetTOR() + "|"
+	result += fsCdr.GetUUID() + "|"
+	result += fsCdr.GetTenant() + "|"
+	result += fsCdr.GetReqType() + "|"
+	st, err := fsCdr.GetStartTime()
+	if err != nil {
+		return "", err
+	}
+	result += strconv.FormatInt(st.UnixNano(), 10) + "|"
+	et, err := fsCdr.GetEndTime()
+	if err != nil {
+		return "", err
+	}
+	result += strconv.FormatInt(et.UnixNano(), 10) + "|"
+	result += strconv.FormatInt(fsCdr.GetDuration(), 10) + "|"
+	result += fsCdr.GetFallbackSubj() + "|"
+	result += fsCdr.GetExtraParameters() + "|"
+	return
+}
+
+func (fsCdr FSCdr) Restore(input string) error {
+	return errors.New("Not implemented")
 }
