@@ -36,8 +36,6 @@ type Action struct {
 	MinuteBucket *MinuteBucket
 }
 
-type Actions []*Action
-
 type actionTypeFunc func(*UserBalance, *Action) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
@@ -177,20 +175,20 @@ func genericReset(ub *UserBalance) {
 }
 
 // Structure to store actions according to weight
-type ActionPriotityList []*Action
+type Actions []*Action
 
-func (apl ActionPriotityList) Len() int {
+func (apl Actions) Len() int {
 	return len(apl)
 }
 
-func (apl ActionPriotityList) Swap(i, j int) {
+func (apl Actions) Swap(i, j int) {
 	apl[i], apl[j] = apl[j], apl[i]
 }
 
-func (apl ActionPriotityList) Less(i, j int) bool {
+func (apl Actions) Less(i, j int) bool {
 	return apl[i].Weight < apl[j].Weight
 }
 
-func (apl ActionPriotityList) Sort() {
+func (apl Actions) Sort() {
 	sort.Sort(apl)
 }

@@ -37,7 +37,7 @@ type ActionTrigger struct {
 
 func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
-	var aac ActionPriotityList
+	var aac Actions
 	aac, err = storageGetter.GetActions(at.ActionsId)
 	aac.Sort()
 	if err != nil {

@@ -62,21 +62,21 @@ func (mys *MySQLStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
-func (mys *MySQLStorage) GetActions(string) (as []*Action, err error) {
+func (mys *MySQLStorage) GetActions(string) (as Actions, err error) {
 	return
 }
 
-func (mys *MySQLStorage) SetActions(key string, as []*Action) (err error) { return }
+func (mys *MySQLStorage) SetActions(key string, as Actions) (err error) { return }
 
 func (mys *MySQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
 
 func (mys *MySQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
 
-func (mys *MySQLStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) { return }
+func (mys *MySQLStorage) GetActionTimings(key string) (ats ActionTimings, err error) { return }
 
-func (mys *MySQLStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) { return }
+func (mys *MySQLStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
 
-func (mys *MySQLStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) { return }
+func (mys *MySQLStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) { return }
 
 func (mys *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	if mys.Db == nil {
@@ -114,10 +114,10 @@ func (mys *MySQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err 
 	return
 }
 
-func (mys *MySQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
+func (mys *MySQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	return
 }
-func (mys *MySQLStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+func (mys *MySQLStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	return
 }
 func (mys *MySQLStorage) LogError(uuid, source, errstr string) (err error) { return }

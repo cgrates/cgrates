@@ -41,7 +41,7 @@ type ActionTiming struct {
 	Timing         *Interval
 	Weight         float64
 	ActionsId      string
-	actions        ActionPriotityList
+	actions        Actions
 	stCache        time.Time
 }
 

@@ -22,7 +22,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
-	gmsgpack "github.com/ugorji/go-msgpack"
+	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack"
 	"labix.org/v2/mgo/bson"
 )
@@ -56,20 +56,20 @@ type DataStorage interface {
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
-	GetActions(string) ([]*Action, error)
-	SetActions(string, []*Action) error
+	GetActions(string) (Actions, error)
+	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)
 	SetUserBalance(*UserBalance) error
-	GetActionTimings(string) ([]*ActionTiming, error)
-	SetActionTimings(string, []*ActionTiming) error
-	GetAllActionTimings() (map[string][]*ActionTiming, error)
+	GetActionTimings(string) (ActionTimings, error)
+	SetActionTimings(string, ActionTimings) error
+	GetAllActionTimings() (map[string]ActionTimings, error)
 	SetCdr(CDR) error
 	SetRatedCdr(CDR, *CallCost) error
-	//GetAllActionTimingsLogs() (map[string][]*ActionTiming, error)
+	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
 	LogCallCost(uuid, source string, cc *CallCost) error
 	LogError(uuid, source, errstr string) error
-	LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) error
-	LogActionTiming(source string, at *ActionTiming, as []*Action) error
+	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
+	LogActionTiming(source string, at *ActionTiming, as Actions) error
 	GetCallCostLog(uuid, source string) (*CallCost, error)
 }
 
@@ -121,14 +121,27 @@ func (jm *MsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return msgpack.Unmarshal(data, v)
 }
 
-type GoMsgpackMarshaler struct{}
-
-func (jm *GoMsgpackMarshaler) Marshal(v interface{}) ([]byte, error) {
-	return gmsgpack.Marshal(v)
+type GoMsgpackMarshaler struct {
+	mh *codec.MsgpackHandle
 }
 
-func (jm *GoMsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
-	return gmsgpack.Unmarshal(data, v, nil)
+type BincMarshaler struct {
+	bh *codec.BincHandle
+}
+
+func NewBincMarshaler() *BincMarshaler {
+	return &BincMarshaler{&codec.BincHandle{}}
+}
+
+func (bm *BincMarshaler) Marshal(v interface{}) (b []byte, err error) {
+	enc := codec.NewEncoderBytes(&b, bm.bh)
+	err = enc.Encode(v)
+	return
+}
+
+func (bm *BincMarshaler) Unmarshal(data []byte, v interface{}) error {
+	dec := codec.NewDecoderBytes(data, bm.bh)
+	return dec.Decode(&v)
 }
 
 type GOBMarshaler struct{}

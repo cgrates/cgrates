@@ -304,7 +304,7 @@ func BenchmarkActivationPeriodMarshallerMsgpackStoreRestore(b *testing.B) {
 	}
 }
 
-func BenchmarkActivationPeriodMarshallerGoMsgpStoreRestore(b *testing.B) {
+func BenchmarkActivationPeriodMarshallerBincStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Months: []time.Month{time.February},
@@ -317,7 +317,7 @@ func BenchmarkActivationPeriodMarshallerGoMsgpStoreRestore(b *testing.B) {
 
 	ap1 := ActivationPeriod{}
 	b.StartTimer()
-	ms := new(GoMsgpackMarshaler)
+	ms := NewBincMarshaler()
 	for i := 0; i < b.N; i++ {
 		result, _ := ms.Marshal(ap)
 		ms.Unmarshal(result, ap1)

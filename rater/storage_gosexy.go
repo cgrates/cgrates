@@ -55,7 +55,7 @@ func NewGosexyStorage(address string, db int, pass string) (DataStorage, error) 
 			return nil, err
 		}
 	}
-	return &GosexyStorage{db: ndb, dbNb: db, ms: new(MsgpackMarshaler)}, nil
+	return &GosexyStorage{db: ndb, dbNb: db, ms: NewBincMarshaler()}, nil
 }
 
 func (rs *GosexyStorage) Close() {
@@ -100,7 +100,7 @@ func (rs *GosexyStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
-func (rs *GosexyStorage) GetActions(key string) (as []*Action, err error) {
+func (rs *GosexyStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {
 		err = rs.ms.Unmarshal([]byte(values), &as)
@@ -108,8 +108,8 @@ func (rs *GosexyStorage) GetActions(key string) (as []*Action, err error) {
 	return
 }
 
-func (rs *GosexyStorage) SetActions(key string, as []*Action) (err error) {
-	result, err := rs.ms.Marshal(as)
+func (rs *GosexyStorage) SetActions(key string, as Actions) (err error) {
+	result, err := rs.ms.Marshal(&as)
 	_, err = rs.db.Set(ACTION_PREFIX+key, result)
 	return
 }
@@ -130,7 +130,7 @@ func (rs *GosexyStorage) SetUserBalance(ub *UserBalance) (err error) {
 	return
 }
 
-func (rs *GosexyStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
+func (rs *GosexyStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_TIMING_PREFIX + key); err == nil {
 		err = rs.ms.Unmarshal([]byte(values), &ats)
@@ -138,7 +138,7 @@ func (rs *GosexyStorage) GetActionTimings(key string) (ats []*ActionTiming, err 
 	return
 }
 
-func (rs *GosexyStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
+func (rs *GosexyStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		_, err = rs.db.Del(ACTION_TIMING_PREFIX + key)
@@ -149,18 +149,18 @@ func (rs *GosexyStorage) SetActionTimings(key string, ats []*ActionTiming) (err 
 	return
 }
 
-func (rs *GosexyStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
+func (rs *GosexyStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
 	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
 	if err != nil {
 		return nil, err
 	}
-	ats = make(map[string][]*ActionTiming, len(keys))
+	ats = make(map[string]ActionTimings, len(keys))
 	for _, key := range keys {
 		values, err := rs.db.Get(key)
 		if err != nil {
 			continue
 		}
-		var tempAts []*ActionTiming
+		var tempAts ActionTimings
 		err = rs.ms.Unmarshal([]byte(values), &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}
@@ -186,12 +186,12 @@ func (rs *GosexyStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err 
 	return
 }
 
-func (rs *GosexyStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
+func (rs *GosexyStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(as)
+	mas, err := rs.ms.Marshal(&as)
 	if err != nil {
 		return
 	}
@@ -199,12 +199,12 @@ func (rs *GosexyStorage) LogActionTrigger(ubId, source string, at *ActionTrigger
 	return
 }
 
-func (rs *GosexyStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+func (rs *GosexyStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(as)
+	mas, err := rs.ms.Marshal(&as)
 	if err != nil {
 		return
 	}

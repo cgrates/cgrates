@@ -31,7 +31,7 @@ type MapStorage struct {
 }
 
 func NewMapStorage() (DataStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: new(JSONMarshaler)}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: NewBincMarshaler()}, nil
 }
 
 func (ms *MapStorage) Close() {}
@@ -72,7 +72,7 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetActions(key string) (as []*Action, err error) {
+func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
 	} else {
@@ -81,8 +81,8 @@ func (ms *MapStorage) GetActions(key string) (as []*Action, err error) {
 	return
 }
 
-func (ms *MapStorage) SetActions(key string, as []*Action) (err error) {
-	result, err := ms.ms.Marshal(as)
+func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
+	result, err := ms.ms.Marshal(&as)
 	ms.dict[ACTION_PREFIX+key] = result
 	return
 }
@@ -103,7 +103,7 @@ func (ms *MapStorage) SetUserBalance(ub *UserBalance) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
+func (ms *MapStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
 	if values, ok := ms.dict[ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
@@ -112,24 +112,24 @@ func (ms *MapStorage) GetActionTimings(key string) (ats []*ActionTiming, err err
 	return
 }
 
-func (ms *MapStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
+func (ms *MapStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		delete(ms.dict, ACTION_TIMING_PREFIX+key)
 		return
 	}
-	result, err := ms.ms.Marshal(ats)
+	result, err := ms.ms.Marshal(&ats)
 	ms.dict[ACTION_TIMING_PREFIX+key] = result
 	return
 }
 
-func (ms *MapStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
-	ats = make(map[string][]*ActionTiming)
+func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
+	ats = make(map[string]ActionTimings)
 	for key, value := range ms.dict {
 		if !strings.Contains(key, ACTION_TIMING_PREFIX) {
 			continue
 		}
-		var tempAts []*ActionTiming
+		var tempAts ActionTimings
 		err = ms.ms.Unmarshal(value, &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}
@@ -152,12 +152,12 @@ func (ms *MapStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err err
 	return
 }
 
-func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
+func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	mat, err := ms.ms.Marshal(at)
 	if err != nil {
 		return
 	}
-	mas, err := ms.ms.Marshal(as)
+	mas, err := ms.ms.Marshal(&as)
 	if err != nil {
 		return
 	}
@@ -165,12 +165,12 @@ func (ms *MapStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, a
 	return
 }
 
-func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	mat, err := ms.ms.Marshal(at)
 	if err != nil {
 		return
 	}
-	mas, err := ms.ms.Marshal(as)
+	mas, err := ms.ms.Marshal(&as)
 	if err != nil {
 		return
 	}

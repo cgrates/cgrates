@@ -92,7 +92,7 @@ func (rs *RedigoStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
-func (rs *RedigoStorage) GetActions(key string) (as []*Action, err error) {
+func (rs *RedigoStorage) GetActions(key string) (as Actions, err error) {
 	var values []byte
 	if values, err = redis.Bytes(rs.db.Do("get", ACTION_PREFIX+key)); err == nil {
 		err = rs.ms.Unmarshal(values, &as)
@@ -100,7 +100,7 @@ func (rs *RedigoStorage) GetActions(key string) (as []*Action, err error) {
 	return
 }
 
-func (rs *RedigoStorage) SetActions(key string, as []*Action) (err error) {
+func (rs *RedigoStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(as)
 	_, err = rs.db.Do("set", ACTION_PREFIX+key, result)
 	return
@@ -122,7 +122,7 @@ func (rs *RedigoStorage) SetUserBalance(ub *UserBalance) (err error) {
 	return
 }
 
-func (rs *RedigoStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
+func (rs *RedigoStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
 	var values []byte
 	if values, err = redis.Bytes(rs.db.Do("get", ACTION_TIMING_PREFIX+key)); err == nil {
 		err = rs.ms.Unmarshal(values, &ats)
@@ -130,18 +130,18 @@ func (rs *RedigoStorage) GetActionTimings(key string) (ats []*ActionTiming, err 
 	return
 }
 
-func (rs *RedigoStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) {
+func (rs *RedigoStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		_, err = rs.db.Do("del", ACTION_TIMING_PREFIX+key)
 		return err
 	}
-	result, err := rs.ms.Marshal(ats)
+	result, err := rs.ms.Marshal(&ats)
 	_, err = rs.db.Do("set", ACTION_TIMING_PREFIX+key, result)
 	return
 }
 
-func (rs *RedigoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
+func (rs *RedigoStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
 	reply, err := redis.Values(rs.db.Do("keys", ACTION_TIMING_PREFIX+"*"))
 	if err != nil {
 		return nil, err
@@ -152,13 +152,13 @@ func (rs *RedigoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, 
 			keys = append(keys, string(v))
 		}
 	}
-	ats = make(map[string][]*ActionTiming, len(keys))
+	ats = make(map[string]ActionTimings, len(keys))
 	for _, key := range keys {
 		values, err := redis.Bytes(rs.db.Do("get", key))
 		if err != nil {
 			continue
 		}
-		var tempAts []*ActionTiming
+		var tempAts ActionTimings
 		err = rs.ms.Unmarshal(values, &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}
@@ -184,12 +184,12 @@ func (rs *RedigoStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err 
 	return
 }
 
-func (rs *RedigoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
+func (rs *RedigoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(as)
+	mas, err := rs.ms.Marshal(&as)
 	if err != nil {
 		return
 	}
@@ -197,12 +197,12 @@ func (rs *RedigoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger
 	return
 }
 
-func (rs *RedigoStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+func (rs *RedigoStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(as)
+	mas, err := rs.ms.Marshal(&as)
 	if err != nil {
 		return
 	}

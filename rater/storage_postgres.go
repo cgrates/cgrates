@@ -62,21 +62,21 @@ func (psl *PostgresStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
-func (psl *PostgresStorage) GetActions(string) (as []*Action, err error) {
+func (psl *PostgresStorage) GetActions(string) (as Actions, err error) {
 	return
 }
 
-func (psl *PostgresStorage) SetActions(key string, as []*Action) (err error) { return }
+func (psl *PostgresStorage) SetActions(key string, as Actions) (err error) { return }
 
 func (psl *PostgresStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
 
 func (psl *PostgresStorage) SetUserBalance(ub *UserBalance) (err error) { return }
 
-func (psl *PostgresStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) { return }
+func (psl *PostgresStorage) GetActionTimings(key string) (ats ActionTimings, err error) { return }
 
-func (psl *PostgresStorage) SetActionTimings(key string, ats []*ActionTiming) (err error) { return }
+func (psl *PostgresStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
 
-func (psl *PostgresStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) { return }
+func (psl *PostgresStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) { return }
 
 func (psl *PostgresStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	if psl.Db == nil {
@@ -114,10 +114,10 @@ func (psl *PostgresStorage) GetCallCostLog(uuid, source string) (cc *CallCost, e
 	return
 }
 
-func (psl *PostgresStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
+func (psl *PostgresStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	return
 }
-func (psl *PostgresStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+func (psl *PostgresStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	return
 }
 func (psl *PostgresStorage) LogError(uuid, source, errstr string) (err error) { return }

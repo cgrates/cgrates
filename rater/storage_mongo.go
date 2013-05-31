@@ -87,12 +87,12 @@ func (ms *MongoStorage) Flush() (err error) {
 
 type AcKeyValue struct {
 	Key   string
-	Value []*Action
+	Value Actions
 }
 
 type AtKeyValue struct {
 	Key   string
-	Value []*ActionTiming
+	Value ActionTimings
 }
 
 type LogCostEntry struct {
@@ -103,7 +103,7 @@ type LogCostEntry struct {
 
 type LogTimingEntry struct {
 	ActionTiming *ActionTiming
-	Actions      []*Action
+	Actions      Actions
 	LogTime      time.Time
 	Source       string
 }
@@ -111,7 +111,7 @@ type LogTimingEntry struct {
 type LogTriggerEntry struct {
 	ubId          string
 	ActionTrigger *ActionTrigger
-	Actions       []*Action
+	Actions       Actions
 	LogTime       time.Time
 	Source        string
 }
@@ -145,13 +145,13 @@ func (ms *MongoStorage) SetDestination(dest *Destination) error {
 	return ms.db.C("destinations").Insert(dest)
 }
 
-func (ms *MongoStorage) GetActions(key string) (as []*Action, err error) {
+func (ms *MongoStorage) GetActions(key string) (as Actions, err error) {
 	result := AcKeyValue{}
 	err = ms.db.C("actions").Find(bson.M{"key": key}).One(&result)
 	return result.Value, err
 }
 
-func (ms *MongoStorage) SetActions(key string, as []*Action) error {
+func (ms *MongoStorage) SetActions(key string, as Actions) error {
 	return ms.db.C("actions").Insert(&AcKeyValue{Key: key, Value: as})
 }
 
@@ -165,20 +165,20 @@ func (ms *MongoStorage) SetUserBalance(ub *UserBalance) error {
 	return ms.db.C("userbalances").Insert(ub)
 }
 
-func (ms *MongoStorage) GetActionTimings(key string) (ats []*ActionTiming, err error) {
+func (ms *MongoStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
 	result := AtKeyValue{}
 	err = ms.db.C("actiontimings").Find(bson.M{"key": key}).One(&result)
 	return result.Value, err
 }
 
-func (ms *MongoStorage) SetActionTimings(key string, ats []*ActionTiming) error {
+func (ms *MongoStorage) SetActionTimings(key string, ats ActionTimings) error {
 	return ms.db.C("actiontimings").Insert(&AtKeyValue{key, ats})
 }
 
-func (ms *MongoStorage) GetAllActionTimings() (ats map[string][]*ActionTiming, err error) {
+func (ms *MongoStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
 	result := AtKeyValue{}
 	iter := ms.db.C("actiontimings").Find(nil).Iter()
-	ats = make(map[string][]*ActionTiming)
+	ats = make(map[string]ActionTimings)
 	for iter.Next(&result) {
 		ats[result.Key] = result.Value
 	}
@@ -196,11 +196,11 @@ func (ms *MongoStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err e
 	return
 }
 
-func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as []*Action) (err error) {
+func (ms *MongoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	return ms.db.C("actlog").Insert(&LogTriggerEntry{ubId, at, as, time.Now(), source})
 }
 
-func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as []*Action) (err error) {
+func (ms *MongoStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	return ms.db.C("actlog").Insert(&LogTimingEntry{at, as, time.Now(), source})
 }
 
