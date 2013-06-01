@@ -101,7 +101,7 @@ func (rs *RedigoStorage) GetActions(key string) (as Actions, err error) {
 }
 
 func (rs *RedigoStorage) SetActions(key string, as Actions) (err error) {
-	result, err := rs.ms.Marshal(as)
+	result, err := rs.ms.Marshal(&as)
 	_, err = rs.db.Do("set", ACTION_PREFIX+key, result)
 	return
 }

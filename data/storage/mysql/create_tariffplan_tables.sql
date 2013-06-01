@@ -1,6 +1,7 @@
 --
 -- Table structure for table `tp_timings`
 --
+??? all float instead int
 
 CREATE TABLE `tp_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -39,6 +40,7 @@ CREATE TABLE `tp_rates` (
   `destinations_tag` varchar(24) NOT NULL,
   `connect_fee` DECIMAL(5,4) NOT NULL,
   `rate` DECIMAL(5,4) NOT NULL,
+??? priced_units
   `rate_increments` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)

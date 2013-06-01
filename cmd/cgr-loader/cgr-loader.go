@@ -30,6 +30,7 @@ import (
 
 const (
 	POSTGRES = "postgres"
+	MYSQL    = "mysql"
 	MONGO    = "mongo"
 	REDIS    = "redis"
 )
@@ -44,6 +45,7 @@ var (
 	db_pass = flag.String("dbpass", "", "The database user's password.")
 
 	flush    = flag.Bool("flush", false, "Flush the database before importing")
+	dataDbId = flag.String("tpid", "", "The tariff plan id from the database")
 	dataPath = flag.String("path", ".", "The path containing the data files")
 	version  = flag.Bool("version", false, "Prints the application version.")
 
@@ -71,6 +73,91 @@ func main() {
 		fmt.Println("CGRateS " + rater.VERSION)
 		return
 	}
+	var err error
+	var getter rater.DataStorage
+	switch *db_type {
+	case REDIS:
+		db_nb, err := strconv.Atoi(*db_name)
+		if err != nil {
+			log.Fatal("Redis db name must be an integer!")
+		}
+		if *db_port != "" {
+			*db_host += ":" + *db_port
+		}
+		getter, err = rater.NewGosexyStorage(*db_host, db_nb, *db_pass)
+	case MONGO:
+		getter, err = rater.NewMongoStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
+	case MYSQL:
+		getter, err = rater.NewMySQLStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
+	case POSTGRES:
+		getter, err = rater.NewPostgresStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
+	default:
+		log.Fatal("Unknown data db type, exiting!")
+	}
+
+	if err != nil {
+		log.Fatalf("Could not open database connection: %v", err)
+	}
+
+	if *dataDbId != "" && *dataPath != "" {
+		log.Fatal("You can read either from db or from files, not both.")
+	}
+	if *dataPath != "" {
+		loadFromCSVFile(getter)
+	}
+	if *dataDbId != "" {
+		loadFromDb(getter)
+	}
+}
+
+func loadFromDb(getter rater.DataStorage) {
+	// TODO: how do we read from db
+	//dbr := rater.NewDbReader(getter, *dataDbId)
+	var dbr *rater.DbReader
+	err := dbr.LoadDestinations()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbr.LoadRates()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbr.LoadTimings()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbr.LoadRateTimings()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbr.LoadRatingProfiles()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbr.LoadActions()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbr.LoadActionTimings()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbr.LoadActionTriggers()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = dbr.LoadAccountActions()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// write maps to database
+	if err := dbr.WriteToDatabase(getter, *flush, true); err != nil {
+		log.Fatal("Could not write to database: ", err)
+	}
+}
+
+func loadFromCSVFile(getter rater.DataStorage) {
 	dataFilesValidators := []*validator{
 		&validator{destinationsFn,
 			regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
@@ -144,28 +231,6 @@ func main() {
 	err = csvr.LoadAccountActions(path.Join(*dataPath, accountactionsFn), sep)
 	if err != nil {
 		log.Fatal(err)
-	}
-	var getter rater.DataStorage
-	switch *db_type {
-	case REDIS:
-		db_nb, err := strconv.Atoi(*db_name)
-		if err != nil {
-			log.Fatal("Redis db name must be an integer!")
-		}
-		if *db_port != "" {
-			*db_host += ":" + *db_port
-		}
-		getter, err = rater.NewGosexyStorage(*db_host, db_nb, *db_pass)
-	case MONGO:
-		getter, err = rater.NewMongoStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
-	case POSTGRES:
-		getter, err = rater.NewPostgresStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
-	default:
-		log.Fatal("Unknown data db type, exiting!")
-	}
-
-	if err != nil {
-		log.Fatalf("Could not open database connection: %v", err)
 	}
 
 	// write maps to database
