@@ -54,7 +54,6 @@ type Mediator struct {
 	connector     rater.Connector
 	loggerDb      rater.DataStorage
 	outputDir     string
-	pseudoPrepaid bool
 	directionIndexs,
 	torIndexs,
 	tenantIndexs,
@@ -69,15 +68,11 @@ type Mediator struct {
 // Creates a new mediator object parsing the indexses
 func NewMediator(connector rater.Connector,
 	loggerDb rater.DataStorage,
-	outputDir string,
-	pseudoPrepaid bool,
-	directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs, destinationIndexs,
-	timeStartIndexs, durationIndexs, uuidIndexs string) (m *Mediator, err error) {
+	cfg *config.CGRConfig) (m *Mediator, err error) {
 	m = &Mediator{
 		connector:     connector,
 		loggerDb:      loggerDb,
 		outputDir:     outputDir,
-		pseudoPrepaid: pseudoPrepaid,
 	}
 	idxs := []string{directionIndexs, torIndexs, tenantIndexs, subjectIndexs, accountIndexs,
 		destinationIndexs, timeStartIndexs, durationIndexs, uuidIndexs}
@@ -210,7 +205,7 @@ func (m *Mediator) getCostsFromRater(record []string, runIdx int) (cc *rater.Cal
 		Destination: record[m.destinationIndexs[runIdx]],
 		TimeStart:   t1,
 		TimeEnd:     t1.Add(d)}
-	if m.pseudoPrepaid {
+	if cfg.DefaultReqType == PSEUDOPREPAID { //ToDo: Implement here dynamically getting the tor out of record instance
 		err = m.connector.Debit(cd, cc)
 	} else {
 		err = m.connector.GetCost(cd, cc)

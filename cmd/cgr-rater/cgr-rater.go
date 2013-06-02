@@ -50,6 +50,7 @@ const (
 	REDIS    = "redis"
 	SAME     = "same"
 	FS       = "freeswitch"
+	FSCDR_FILE_CSV = "freeswitch_file_csv"
 )
 
 var (
@@ -123,15 +124,13 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		connector = &rater.RPCClientConnector{Client: client}
 	}
 	var err error
-	medi, err = mediator.NewMediator(connector, loggerDb, cfg.MediatorCDROutDir, cfg.MediatorPseudoprepaid,
-		cfg.FreeswitchDirectionIdx, cfg.FreeswitchTORIdx, cfg.FreeswitchTenantIdx, cfg.FreeswitchSubjectIdx, cfg.FreeswitchAccountIdx,
-		cfg.FreeswitchDestIdx, cfg.FreeswitchTimeStartIdx, cfg.FreeswitchDurationIdx, cfg.FreeswitchUUIDIdx)
+	medi, err = mediator.NewMediator(connector, loggerDb, cfg )
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
 	}
 
-	if cfg.MediatorEnabled { //Mediator as standalone service
+	if cfg.MediatorCDRType == FSCDR_FILE_CSV { //Mediator as standalone service for file CDRs
 		if _, err := os.Stat(cfg.MediatorCDRInDir); err != nil {
 			rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", cfg.MediatorCDRInDir))
 			exitChan <- true
@@ -194,18 +193,17 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 }
 
 func startCDRS(responder *rater.Responder, loggerDb rater.DataStorage) {
-	if !cfg.MediatorEnabled {
-		go startMediator(responder, loggerDb) // Will start it internally, important to connect the responder
-	}
-	for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
-		time.Sleep(time.Duration(i/2) * time.Second)
-		if medi!=nil { // Got our mediator, no need to wait any longer
-			break
+	if cfg.CDRSMediator == INTERNAL {
+		for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
+			time.Sleep(time.Duration(i/2) * time.Second)
+			if medi!=nil { // Got our mediator, no need to wait any longer
+				break
+			}
 		}
-	}
-	if medi == nil  {
-		rater.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
-		exitChan <- true
+		if medi == nil  {
+			rater.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
+			exitChan <- true
+		}
 	}
 	cs := cdrs.New(loggerDb, medi, cfg)
 	cs.StartCapturingCDRs()
@@ -343,6 +341,7 @@ func main() {
 		rater.Logger.Info("Starting CGRateS Mediator.")
 		go startMediator(responder, loggerDb)
 	}
+
 	if cfg.CDRSListen != "" {
 		rater.Logger.Info("Starting CGRateS CDR Server.")
 		go startCDRS(responder, loggerDb)
