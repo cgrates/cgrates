@@ -1,4 +1,5 @@
-### Test data, not for production usage
+# Test Data.
+# NOT A REAL CONFIGURATION FILE
 
 [global]
 datadb_type = test 				# The main database: <redis>.
@@ -6,23 +7,23 @@ datadb_host = test	 			# Database host address.
 datadb_port = test 				# Port to reach the database.
 datadb_name = test 				# The name of the database to connect to.
 datadb_user = test				# Username to use when connecting to database.
-datadb_passwd =	test				# Password to use when connecting to database.
-logdb_type = test				# Log/stored database type to use: <same|postgres|mongo|redis>
+datadb_passwd =	test	 			# Password to use when connecting to database.
+logdb_type = test 				# Log/stored database type to use: <same|postgres|mongo|redis>
 logdb_host = test	 			# The host to connect to. Values that start with / are for UNIX domain sockets.
 logdb_port = test				# The port to reach the logdb.
 logdb_name = test 				# The name of the log database to connect to.
-logdb_user = test  	 			# Username to use when connecting to logdb.
-logdb_passwd = test	 			# Password to use when connecting to logdb.
+logdb_user = test 	 			# Username to use when connecting to logdb.
+logdb_passwd = test 	 			# Password to use when connecting to logdb.
 rpc_encoding = test 				# RPC encoding used on APIs: <gob|json>.
-default_reqtype = test				# Default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid>.
+default_reqtype = test				# Default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>.
 default_tor = test				# Default Type of Record to consider when missing from requests.
 default_tenant = test				# Default Tenant to consider when missing from requests.
 default_subject = test				# Default rating Subject to consider when missing from requests.
 
 
 [balancer]
-enabled = true 					# Start Balancer service: <true|false>.
-listen = test 					# Balancer listen interface: <disabled|x.y.z.y:1234>.
+enabled = true	 				# Start Balancer service: <true|false>.
+listen = test		 			# Balancer listen interface: <disabled|x.y.z.y:1234>.
 
 [rater]
 enabled = true					# Enable Rater service: <true|false>.
@@ -40,12 +41,21 @@ mediator = test					# Address where to reach the Mediator. Empty for disabling m
 [mediator]
 enabled = true					# Starts Mediator service: <true|false>.
 listen = test					# Mediator's listening interface: <internal>.
-rater = test					# Address where to reach the Rater.
+rater = test	 				# Address where to reach the Rater: <internal|x.y.z.y:1234>
 rater_reconnects = 99				# Number of reconnects to rater before giving up.
-pseudoprepaid = true				# Execute debits together with pricing: <true|false>.
-cdr_type = test					# CDR type <freeswitch_cdr>.
-cdr_in_dir = test			 	# Absolute path towards the directory where the CDRs are kept.
-cdr_out_dir = test				# Absolute path towards the directory where processed CDRs will be exported.
+cdr_type = test					# CDR type <freeswitch_http_json|freeswitch_file_csv>.
+accid_field = test				# Name of field identifying accounting id used during mediation. Use index number in case of .csv cdrs.
+subject_fields = test				# Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
+reqtype_fields = test				# Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
+direction_fields = test				# Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
+tenant_fields = test				# Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
+tor_fields = test				# Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
+account_fields = test				# Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
+destination_fields = test			# Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
+time_start_fields = test			# Name of time_start fields to be used during mediation. Use index numbers in case of .csv cdrs.
+duration_fields = test				# Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
+cdr_in_dir = test			 	# Absolute path towards the directory where the CDRs are kept (file stored CDRs).
+cdr_out_dir = test				# Absolute path towards the directory where processed CDRs will be exported (file stored CDRs).
 
 [session_manager]
 enabled = true					# Starts SessionManager service: <true|false>.
@@ -58,14 +68,4 @@ debit_interval = 99				# Interval to perform debits on.
 server = test					# Adress where to connect to FreeSWITCH socket.
 passwd = test					# FreeSWITCH socket password.
 reconnects = 99					# Number of attempts on connect failure.
-uuid_index = test				# Index of the UUID info in the CDR file.
-direction_index = test				# Index of the CallDirection info in the CDR file.
-tor_index = test				# Index of the TypeOfRecord info in the CDR file.
-tenant_index = test				# Index of the Tenant info in the CDR file. 
-subject_index = test				# Index of the Subject info in the CDR file. -1 to query database instead of rater
-account_index = test				# Index of the Account info in the CDR file.
-destination_index = test			# Index of the Destination info in the CDR file.
-time_start_index = test				# Index of the TimeStart info in the CDR file.
-duration_index = test				# Index of the CallDuration info in the CDR file.
-
 

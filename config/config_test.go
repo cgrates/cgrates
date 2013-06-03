@@ -46,7 +46,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.LogDBUser = "" 
 	eCfg.LogDBPass = "" 
 	eCfg.RPCEncoding = GOB 
-	eCfg.DefaultReqType = "" 
+	eCfg.DefaultReqType = RATED
 	eCfg.DefaultTOR = "0" 
 	eCfg.DefaultTenant = "0" 
 	eCfg.DefaultSubject = "0" 
@@ -61,12 +61,21 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSMediator = INTERNAL 
 	eCfg.MediatorEnabled = false 
 	eCfg.MediatorListen = "127.0.0.1:2032" 
-	eCfg.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv" 
-	eCfg.MediatorCDROutDir = "/var/log/cgrates/cdr_out" 
 	eCfg.MediatorRater = "127.0.0.1:2012" 
 	eCfg.MediatorRaterReconnects = 3 
-	eCfg.MediatorPseudoprepaid = false 
-	eCfg.MediatorCDRType = "freeswitch_csv" 
+	eCfg.MediatorCDRType = "freeswitch_http_json"
+	eCfg.MediatorAccIdField = "accid"
+	eCfg.MediatorSubjectFields = "subject"
+	eCfg.MediatorReqTypeFields = "reqtype"
+	eCfg.MediatorDirectionFields = "direction"
+	eCfg.MediatorTenantFields = "tenant"
+	eCfg.MediatorTORFields = "tor"
+	eCfg.MediatorAccountFields = "account"
+	eCfg.MediatorDestFields = "destination"
+	eCfg.MediatorTimeStartFields = "time_start"
+	eCfg.MediatorDurationFields = "duration"
+	eCfg.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv" 
+	eCfg.MediatorCDROutDir = "/var/log/cgrates/cdr/out/freeswitch/csv"
 	eCfg.SMEnabled = false 
 	eCfg.SMSwitchType = FS 
 	eCfg.SMRater = "127.0.0.1:2012" 
@@ -75,15 +84,6 @@ func TestDefaults(t *testing.T) {
 	eCfg.FreeswitchServer = "127.0.0.1:8021" 
 	eCfg.FreeswitchPass = "ClueCon" 
 	eCfg.FreeswitchReconnects = 5 
-	eCfg.FreeswitchUUIDIdx = "10" 
-	eCfg.FreeswitchTORIdx = "-1" 
-	eCfg.FreeswitchTenantIdx = "-1" 
-	eCfg.FreeswitchDirectionIdx = "-1" 
-	eCfg.FreeswitchSubjectIdx = "-1" 
-	eCfg.FreeswitchAccountIdx = "-1" 
-	eCfg.FreeswitchDestIdx = "-1" 
-	eCfg.FreeswitchTimeStartIdx = "-1" 
-	eCfg.FreeswitchDurationIdx = "-1"
 	if !reflect.DeepEqual(cfg ,eCfg ){ 
 		t.Log(eCfg)
 		t.Log(cfg)
@@ -148,12 +148,21 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSMediator = "test"
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorListen = "test"
-	eCfg.MediatorCDRInDir = "test"
-	eCfg.MediatorCDROutDir = "test"
 	eCfg.MediatorRater = "test"
 	eCfg.MediatorRaterReconnects = 99
-	eCfg.MediatorPseudoprepaid = true
 	eCfg.MediatorCDRType = "test"
+	eCfg.MediatorAccIdField = "test"
+	eCfg.MediatorSubjectFields = "test"
+	eCfg.MediatorReqTypeFields = "test"
+	eCfg.MediatorDirectionFields = "test"
+	eCfg.MediatorTenantFields = "test"
+	eCfg.MediatorTORFields = "test"
+	eCfg.MediatorAccountFields = "test"
+	eCfg.MediatorDestFields = "test"
+	eCfg.MediatorTimeStartFields = "test"
+	eCfg.MediatorDurationFields = "test"
+	eCfg.MediatorCDRInDir = "test"
+	eCfg.MediatorCDROutDir = "test"
 	eCfg.SMEnabled = true
 	eCfg.SMSwitchType = "test"
 	eCfg.SMRater = "test"
@@ -162,15 +171,6 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
-	eCfg.FreeswitchUUIDIdx = "test"
-	eCfg.FreeswitchTORIdx = "test"
-	eCfg.FreeswitchTenantIdx = "test"
-	eCfg.FreeswitchDirectionIdx = "test"
-	eCfg.FreeswitchSubjectIdx = "test"
-	eCfg.FreeswitchAccountIdx = "test"
-	eCfg.FreeswitchDestIdx = "test"
-	eCfg.FreeswitchTimeStartIdx = "test"
-	eCfg.FreeswitchDurationIdx = "test"
 	if !reflect.DeepEqual(cfg ,eCfg ){ 
 		t.Log(eCfg)
 		t.Log(cfg)
