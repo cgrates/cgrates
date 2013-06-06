@@ -21,9 +21,9 @@ package rater
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"strings"
 	"time"
-	"github.com/cgrates/cgrates/utils"
 )
 
 type MapStorage struct {
@@ -32,7 +32,7 @@ type MapStorage struct {
 }
 
 func NewMapStorage() (DataStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: NewBincMarshaler()}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: new(MyMarshaler)}, nil
 }
 
 func (ms *MapStorage) Close() {}

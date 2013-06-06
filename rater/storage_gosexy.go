@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"menteslibres.net/gosexy/redis"
 	//"log"
+	"github.com/cgrates/cgrates/utils"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/cgrates/cgrates/utils"
 )
 
 type GosexyStorage struct {
@@ -56,7 +56,7 @@ func NewGosexyStorage(address string, db int, pass string) (DataStorage, error) 
 			return nil, err
 		}
 	}
-	return &GosexyStorage{db: ndb, dbNb: db, ms: NewBincMarshaler()}, nil
+	return &GosexyStorage{db: ndb, dbNb: db, ms: new(MyMarshaler)}, nil
 }
 
 func (rs *GosexyStorage) Close() {
