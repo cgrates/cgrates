@@ -80,6 +80,9 @@ func openStringCSVReader(data string, comma rune) (csvReader *csv.Reader, fp *os
 }
 
 func (csvr *CSVReader) WriteToDatabase(storage DataStorage, flush, verbose bool) (err error) {
+	if storage == nil {
+		return errors.New("No database connection!")
+	}
 	if flush {
 		storage.Flush()
 	}

@@ -145,7 +145,7 @@ func (rs *GosexyStorage) SetActionTimings(key string, ats ActionTimings) (err er
 		_, err = rs.db.Del(ACTION_TIMING_PREFIX + key)
 		return err
 	}
-	result, err := rs.ms.Marshal(ats)
+	result, err := rs.ms.Marshal(&ats)
 	_, err = rs.db.Set(ACTION_TIMING_PREFIX+key, result)
 	return
 }
