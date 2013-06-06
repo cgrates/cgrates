@@ -23,6 +23,7 @@ import (
 	"github.com/fzzy/radix/redis"
 	//"log"
 	"time"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type RedisStorage struct {
@@ -242,10 +243,10 @@ func (rs *RedisStorage) LogError(uuid, source, errstr string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) SetCdr(CDR) error {
+func (rs *RedisStorage) SetCdr(utils.CDR) error {
 	return nil
 }
 
-func (rs *RedisStorage) SetRatedCdr(CDR, *CallCost) error {
+func (rs *RedisStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }

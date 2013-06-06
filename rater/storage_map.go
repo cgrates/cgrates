@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type MapStorage struct {
@@ -183,10 +184,10 @@ func (ms *MapStorage) LogError(uuid, source, errstr string) (err error) {
 	return nil
 }
 
-func (ms *MapStorage) SetCdr(CDR) error {
+func (ms *MapStorage) SetCdr(utils.CDR) error {
 	return nil
 }
 
-func (ms *MapStorage) SetRatedCdr(CDR, *CallCost) error {
+func (ms *MapStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }

@@ -25,6 +25,7 @@ import (
 	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack"
 	"labix.org/v2/mgo/bson"
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -63,8 +64,8 @@ type DataStorage interface {
 	GetActionTimings(string) (ActionTimings, error)
 	SetActionTimings(string, ActionTimings) error
 	GetAllActionTimings() (map[string]ActionTimings, error)
-	SetCdr(CDR) error
-	SetRatedCdr(CDR, *CallCost) error
+	SetCdr(utils.CDR) error
+	SetRatedCdr(utils.CDR, *CallCost) error
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
 	LogCallCost(uuid, source string, cc *CallCost) error
 	LogError(uuid, source, errstr string) error

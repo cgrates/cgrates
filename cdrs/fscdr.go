@@ -21,7 +21,6 @@ package cdrs
 import (
 	"encoding/json"
 	"errors"
-	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
 	"time"
@@ -41,8 +40,8 @@ const (
 	CSTMID       = "cgr_cstmid"
 	CALL_DEST_NR = "dialed_extension"
 	PARK_TIME    = "start_epoch"
-	START_TIME   = "answer_epoch"
-	END_TIME     = "end_epoch"
+	ANSWER_TIME   = "answer_epoch"
+	HANGUP_TIME     = "end_epoch"
 	DURATION     = "billsec"
 	USERNAME     = "user_name"
 	FS_IP        = "sip_local_network_addr"
@@ -50,7 +49,7 @@ const (
 
 type FSCdr map[string]string
 
-func (fsCdr FSCdr) New(body []byte) (rater.CDR, error) {
+func (fsCdr FSCdr) New(body []byte) (utils.CDR, error) {
 	fsCdr = make(map[string]string)
 	var tmp map[string]interface{}
 	var err error
@@ -95,35 +94,29 @@ func (fsCdr FSCdr) GetDestination() string {
 	return utils.FirstNonEmpty(fsCdr[DESTINATION], fsCdr[CALL_DEST_NR])
 }
 
-// Original dialed destination number, useful in case of unpark
-func (fsCdr FSCdr) GetCallDestNr() string {
-	return fsCdr[CALL_DEST_NR]
-}
 func (fsCdr FSCdr) GetTOR() string {
 	return utils.FirstNonEmpty(fsCdr[TOR], cfg.DefaultTOR)
 }
-func (fsCdr FSCdr) GetUUID() string {
-	return fsCdr[UUID]
-}
+
 func (fsCdr FSCdr) GetTenant() string {
 	return utils.FirstNonEmpty(fsCdr[CSTMID], cfg.DefaultTenant)
 }
 func (fsCdr FSCdr) GetReqType() string {
 	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.DefaultReqType)
 }
-func (fsCdr FSCdr) GetExtraParameters() string {
-	return "" // ToDo: Add and extract from config
+func (fsCdr FSCdr) GetExtraFields() map[string]string {
+	return nil // ToDo: Add and extract from config
 }
 func (fsCdr FSCdr) GetFallbackSubj() string {
 	return cfg.DefaultSubject
 }
-func (fsCdr FSCdr) GetStartTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsCdr[START_TIME], 0, 64)
+func (fsCdr FSCdr) GetAnswerTime() (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsCdr[ANSWER_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
-func (fsCdr FSCdr) GetEndTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsCdr[END_TIME], 0, 64)
+func (fsCdr FSCdr) GetHangupTime() (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsCdr[HANGUP_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
@@ -143,24 +136,22 @@ func (fsCdr FSCdr) Store() (result string, err error) {
 	result += fsCdr.GetSubject() + "|"
 	result += fsCdr.GetAccount() + "|"
 	result += fsCdr.GetDestination() + "|"
-	result += fsCdr.GetCallDestNr() + "|"
 	result += fsCdr.GetTOR() + "|"
-	result += fsCdr.GetUUID() + "|"
+	result += fsCdr.GetAccId() + "|"
 	result += fsCdr.GetTenant() + "|"
 	result += fsCdr.GetReqType() + "|"
-	st, err := fsCdr.GetStartTime()
+	st, err := fsCdr.GetAnswerTime()
 	if err != nil {
 		return "", err
 	}
 	result += strconv.FormatInt(st.UnixNano(), 10) + "|"
-	et, err := fsCdr.GetEndTime()
+	et, err := fsCdr.GetHangupTime()
 	if err != nil {
 		return "", err
 	}
 	result += strconv.FormatInt(et.UnixNano(), 10) + "|"
 	result += strconv.FormatInt(fsCdr.GetDuration(), 10) + "|"
 	result += fsCdr.GetFallbackSubj() + "|"
-	result += fsCdr.GetExtraParameters() + "|"
 	return
 }
 

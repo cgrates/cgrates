@@ -16,14 +16,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package rater
+package utils
 
 import (
 	"time"
 )
 
 type CDR interface {
-	New([]byte) (CDR, error)
 	GetCgrId() string
 	GetAccId() string
 	GetCdrHost() string
@@ -32,14 +31,11 @@ type CDR interface {
 	GetSubject() string
 	GetAccount() string
 	GetDestination() string
-	GetCallDestNr() string
 	GetTOR() string
-	GetUUID() string
 	GetTenant() string
 	GetReqType() string
-	GetStartTime() (time.Time, error)
-	GetEndTime() (time.Time, error)
+	GetAnswerTime() (time.Time, error)
 	GetDuration() int64
 	GetFallbackSubj() string
-	GetExtraParameters() string
+	GetExtraFields() map[string]string //Stores extra CDR Fields
 }

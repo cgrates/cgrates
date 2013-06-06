@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type GosexyStorage struct {
@@ -217,10 +218,10 @@ func (rs *GosexyStorage) LogError(uuid, source, errstr string) (err error) {
 	return
 }
 
-func (rs *GosexyStorage) SetCdr(CDR) error {
+func (rs *GosexyStorage) SetCdr(utils.CDR) error {
 	return nil
 }
 
-func (rs *GosexyStorage) SetRatedCdr(CDR, *CallCost) error {
+func (rs *GosexyStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }

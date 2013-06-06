@@ -24,6 +24,7 @@ import (
 	"labix.org/v2/mgo/bson"
 	"log"
 	"time"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type MongoStorage struct {
@@ -208,10 +209,10 @@ func (ms *MongoStorage) LogError(uuid, source, errstr string) (err error) {
 	return ms.db.C("errlog").Insert(&LogErrEntry{uuid, errstr, source})
 }
 
-func (ms *MongoStorage) SetCdr(CDR) error {
+func (ms *MongoStorage) SetCdr(utils.CDR) error {
 	return nil
 }
 
-func (ms *MongoStorage) SetRatedCdr(CDR, *CallCost) error {
+func (ms *MongoStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }

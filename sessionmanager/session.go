@@ -21,8 +21,8 @@ package sessionmanager
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
-	"strings"
 	"time"
 )
 
@@ -38,8 +38,8 @@ type Session struct {
 
 // Creates a new session and starts the debit loop
 func NewSession(ev Event, sm SessionManager) (s *Session) {
-	// Ignore calls which have nothing to do with CGRateS
-	if strings.TrimSpace(ev.GetReqType()) == "" {
+	// SesionManager only handles prepaid and postpaid calls
+	if ev.GetReqType() != utils.PREPAID && ev.GetReqType() != utils.POSTPAID {
 		return
 	}
 	// Make sure cgr_type is enforced even if not set by FreeSWITCH
@@ -68,9 +68,9 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 		sm.DisconnectSession(s, MISSING_PARAMETER)
 	} else {
 		switch ev.GetReqType() {
-		case REQTYPE_PREPAID:
+		case utils.PREPAID:
 			go s.startDebitLoop()
-		case REQTYPE_POSTPAID:
+		case utils.POSTPAID:
 			// do not loop, make only one debit at hangup
 		}
 	}

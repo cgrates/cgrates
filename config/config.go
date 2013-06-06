@@ -22,6 +22,7 @@ import (
 	"code.google.com/p/goconf/conf"
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -67,7 +68,8 @@ type CGRConfig struct {
 	SchedulerEnabled        bool
 	CDRSListen		string // CDRS's listening interface: <x.y.z.y:1234>.
 	CDRSfsJSONEnabled	bool	// Enable the handler for FreeSWITCH JSON CDRs: <enabled|disabled>.
-	CDRSMediator           string // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CDRSMediator            string // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CDRSExtraFields		[]string //Extra fields to store in CDRs
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -79,15 +81,15 @@ type CGRConfig struct {
 	MediatorRaterReconnects int    // Number of reconnects to rater before giving up.
 	MediatorCDRType         string // CDR type <freeswitch_http_json|freeswitch_file_csv>.
 	MediatorAccIdField      string // Name of field identifying accounting id used during mediation. Use index number in case of .csv cdrs.
-	MediatorSubjectFields   string // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorReqTypeFields	string // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
-	MediatorDirectionFields	string // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTenantFields	string // Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTORFields	string // Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAccountFields	string // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDestFields	string // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTimeStartFields	string // Name of time_start fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDurationFields	string // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorSubjectFields   []string // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorReqTypeFields	[]string // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
+	MediatorDirectionFields	[]string // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorTenantFields	[]string // Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorTORFields	[]string // Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorAccountFields	[]string // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorDestFields	[]string // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorTimeAnswerFields	[]string // Name of time_start fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorDurationFields	[]string // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorCDRInDir        string // Absolute path towards the directory where the CDRs are kept (file stored CDRs).
 	MediatorCDROutDir       string // Absolute path towards the directory where processed CDRs will be exported (file stored CDRs).
 	FreeswitchServer        string // freeswitch address host:port
@@ -122,21 +124,22 @@ func ( self *CGRConfig ) setDefaults() error {
 	self.CDRSListen = "127.0.0.1:2022"
 	self.CDRSfsJSONEnabled = false
 	self.CDRSMediator = INTERNAL
+	self.CDRSExtraFields = []string{}
 	self.MediatorEnabled = false
 	self.MediatorListen = "127.0.0.1:2032"
 	self.MediatorRater = "127.0.0.1:2012"
 	self.MediatorRaterReconnects = 3
-	self.MediatorCDRType = "freeswitch_http_json"
+	self.MediatorCDRType = utils.FSCDR_HTTP_JSON
 	self.MediatorAccIdField = "accid"
-	self.MediatorSubjectFields = "subject"
-	self.MediatorReqTypeFields = "reqtype"
-	self.MediatorDirectionFields = "direction"
-	self.MediatorTenantFields = "tenant"
-	self.MediatorTORFields = "tor"
-	self.MediatorAccountFields = "account"
-	self.MediatorDestFields = "destination"
-	self.MediatorTimeStartFields = "time_start"
-	self.MediatorDurationFields = "duration"
+	self.MediatorSubjectFields = []string{"subject"}
+	self.MediatorReqTypeFields = []string{"reqtype"}
+	self.MediatorDirectionFields = []string{"direction"}
+	self.MediatorTenantFields = []string{"tenant"}
+	self.MediatorTORFields = []string{"tor"}
+	self.MediatorAccountFields = []string{"account"}
+	self.MediatorDestFields = []string{"destination"}
+	self.MediatorTimeAnswerFields = []string{"time_answer"}
+	self.MediatorDurationFields = []string{"duration"}
 	self.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv"
 	self.MediatorCDROutDir = "/var/log/cgrates/cdr/out/freeswitch/csv"
 	self.SMEnabled = false
@@ -173,6 +176,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	cfg := &CGRConfig{}
 	cfg.setDefaults()
 	var hasOpt bool
+	var errParse error
 	if hasOpt = c.HasOption("global", "datadb_type"); hasOpt {
 		cfg.DataDBType, _ = c.GetString("global", "datadb_type")
 	}
@@ -251,6 +255,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
 		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
 	}
+	if hasOpt = c.HasOption("cdrs", "extra_fields"); hasOpt {
+		if cfg.CDRSExtraFields, errParse = ConfigSlice( c, "cdrs", "extra_fields"); errParse!=nil {
+			return nil, errParse
+		}
+	}
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
 		cfg.MediatorEnabled, _ = c.GetBool("mediator", "enabled")
 	}
@@ -270,31 +279,49 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.MediatorAccIdField, _ = c.GetString("mediator", "accid_field")
 	}
 	if hasOpt = c.HasOption("mediator", "subject_fields"); hasOpt {
-		cfg.MediatorSubjectFields, _ = c.GetString("mediator", "subject_fields")
+		if cfg.MediatorSubjectFields, errParse = ConfigSlice( c, "mediator", "subject_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "reqtype_fields"); hasOpt {
-		cfg.MediatorReqTypeFields, _ = c.GetString("mediator", "reqtype_fields")
+		if cfg.MediatorReqTypeFields, errParse = ConfigSlice( c, "mediator", "reqtype_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "direction_fields"); hasOpt {
-		cfg.MediatorDirectionFields, _ = c.GetString("mediator", "direction_fields")
+		if cfg.MediatorDirectionFields, errParse = ConfigSlice( c, "mediator", "direction_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "tenant_fields"); hasOpt {
-		cfg.MediatorTenantFields, _ = c.GetString("mediator", "tenant_fields")
+		if cfg.MediatorTenantFields, errParse = ConfigSlice( c, "mediator", "tenant_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "tor_fields"); hasOpt {
-		cfg.MediatorTORFields, _ = c.GetString("mediator", "tor_fields")
+		if cfg.MediatorTORFields, errParse = ConfigSlice( c, "mediator", "tor_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "account_fields"); hasOpt {
-		cfg.MediatorAccountFields, _ = c.GetString("mediator", "account_fields")
+		if cfg.MediatorAccountFields, errParse = ConfigSlice( c, "mediator", "account_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "destination_fields"); hasOpt {
-		cfg.MediatorDestFields, _ = c.GetString("mediator", "destination_fields")
+		if cfg.MediatorDestFields, errParse = ConfigSlice( c, "mediator", "destination_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
-	if hasOpt = c.HasOption("mediator", "time_start_fields"); hasOpt {
-		cfg.MediatorTimeStartFields, _ = c.GetString("mediator", "time_start_fields")
+	if hasOpt = c.HasOption("mediator", "time_answer_fields"); hasOpt {
+		if cfg.MediatorTimeAnswerFields, errParse = ConfigSlice( c, "mediator", "time_answer_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "duration_fields"); hasOpt {
-		cfg.MediatorDurationFields, _ = c.GetString("mediator", "duration_fields")
+		if cfg.MediatorDurationFields, errParse = ConfigSlice( c, "mediator", "duration_fields"); errParse!=nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "cdr_in_dir"); hasOpt {
 		cfg.MediatorCDRInDir, _ = c.GetString("mediator", "cdr_in_dir")

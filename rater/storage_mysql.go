@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type MySQLStorage struct {
@@ -122,8 +123,8 @@ func (mys *MySQLStorage) LogActionTiming(source string, at *ActionTiming, as Act
 }
 func (mys *MySQLStorage) LogError(uuid, source, errstr string) (err error) { return }
 
-func (mys *MySQLStorage) SetCdr(cdr CDR) (err error) {
-	startTime, err := cdr.GetStartTime()
+func (mys *MySQLStorage) SetCdr(cdr utils.CDR) (err error) {
+	startTime, err := cdr.GetAnswerTime()
 	if err != nil {
 		return err
 	}
@@ -146,7 +147,7 @@ func (mys *MySQLStorage) SetCdr(cdr CDR) (err error) {
 	}
 	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('NULL','%s', '%s')",
 		cdr.GetCgrId(),
-		cdr.GetExtraParameters(),
+		cdr.GetExtraFields(),
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
@@ -155,7 +156,7 @@ func (mys *MySQLStorage) SetCdr(cdr CDR) (err error) {
 	return
 }
 
-func (mys *MySQLStorage) SetRatedCdr(cdr CDR, cc *CallCost) (err error) {
+func (mys *MySQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error) {
 	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO rated_cdrs VALUES ('%s', '%s', '%s', '%s')",
 		cdr.GetCgrId(),
 		cc.Cost,

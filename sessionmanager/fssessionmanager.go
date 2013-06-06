@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 	"log/syslog"
 	"net"
@@ -145,7 +146,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
-	if strings.TrimSpace(ev.GetReqType()) != REQTYPE_PREPAID {
+	if strings.TrimSpace(ev.GetReqType()) != utils.PREPAID {
 		return
 	}
 	if ev.MissingParameter() {
@@ -194,7 +195,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		return
 	}
 	defer s.Close() // Stop loop and save the costs deducted so far to database
-	if ev.GetReqType() == REQTYPE_POSTPAID {
+	if ev.GetReqType() == utils.POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
 			rater.Logger.Crit("Error parsing postpaid call start time from event")

@@ -29,11 +29,11 @@ import (
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
+	"github.com/cgrates/cgrates/utils"
 	"io"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
-	"os"
 	"runtime"
 	"strconv"
 	"time"
@@ -50,7 +50,6 @@ const (
 	REDIS    = "redis"
 	SAME     = "same"
 	FS       = "freeswitch"
-	FSCDR_FILE_CSV = "freeswitch_file_csv"
 )
 
 var (
@@ -130,19 +129,9 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		exitChan <- true
 	}
 
-	if cfg.MediatorCDRType == FSCDR_FILE_CSV { //Mediator as standalone service for file CDRs
-		if _, err := os.Stat(cfg.MediatorCDRInDir); err != nil {
-			rater.Logger.Crit(fmt.Sprintf("The input path for mediator does not exist: %v", cfg.MediatorCDRInDir))
-			exitChan <- true
-		}
-		if _, err := os.Stat(cfg.MediatorCDROutDir); err != nil {
-			rater.Logger.Crit(fmt.Sprintf("The output path for mediator does not exist: %v", cfg.MediatorCDROutDir))
-			exitChan <- true
-		}
-		medi.TrackCDRFiles(cfg.MediatorCDRInDir)
+	if cfg.MediatorCDRType == utils.FSCDR_FILE_CSV { //Mediator as standalone service for file CDRs
+		medi.TrackCDRFiles()
 	}
-
-	
 }
 
 func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage) {

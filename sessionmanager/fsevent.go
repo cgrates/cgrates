@@ -50,8 +50,6 @@ const (
 	ANSWER             = "CHANNEL_ANSWER"
 	HANGUP             = "CHANNEL_HANGUP_COMPLETE"
 	PARK               = "CHANNEL_PARK"
-	REQTYPE_PREPAID    = "prepaid"
-	REQTYPE_POSTPAID   = "postpaid"
 	AUTH_OK            = "+AUTH_OK"
 	DISCONNECT         = "+SWITCH DISCONNECT"
 	INSUFFICIENT_FUNDS = "-INSUFFICIENT_FUNDS"

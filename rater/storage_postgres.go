@@ -22,6 +22,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	_ "github.com/bmizerany/pq"
 )
 
@@ -122,8 +123,8 @@ func (psl *PostgresStorage) LogActionTiming(source string, at *ActionTiming, as 
 }
 func (psl *PostgresStorage) LogError(uuid, source, errstr string) (err error) { return }
 
-func (psl *PostgresStorage) SetCdr(cdr CDR) (err error) {
-	startTime, err := cdr.GetStartTime()
+func (psl *PostgresStorage) SetCdr(cdr utils.CDR) (err error) {
+	startTime, err := cdr.GetAnswerTime()
 	if err != nil {
 		return err
 	}
@@ -146,7 +147,7 @@ func (psl *PostgresStorage) SetCdr(cdr CDR) (err error) {
 	}
 	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s')",
 		cdr.GetCgrId(),
-		cdr.GetExtraParameters(),
+		cdr.GetExtraFields(),
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
@@ -155,7 +156,7 @@ func (psl *PostgresStorage) SetCdr(cdr CDR) (err error) {
 	return
 }
 
-func (psl *PostgresStorage) SetRatedCdr(cdr CDR, cc *CallCost) (err error) {
+func (psl *PostgresStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error) {
 	if err != nil {
 		return err
 	}

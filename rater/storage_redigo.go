@@ -23,6 +23,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	//"log"
 	"time"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type RedigoStorage struct {
@@ -215,10 +216,10 @@ func (rs *RedigoStorage) LogError(uuid, source, errstr string) (err error) {
 	return
 }
 
-func (rs *RedigoStorage) SetCdr(CDR) error {
+func (rs *RedigoStorage) SetCdr(utils.CDR) error {
 	return nil
 }
 
-func (rs *RedigoStorage) SetRatedCdr(CDR, *CallCost) error {
+func (rs *RedigoStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
