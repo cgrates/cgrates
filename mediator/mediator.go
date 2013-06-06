@@ -61,7 +61,20 @@ type Mediator struct {
 	fieldIdxs	map[string][]int // Populated only for csv files where we have no names but indexes for the fields
 }
 
-// Load configuration out of config fields and does the necessary checks
+/*
+Responsible for loading configuration fields out of CGRConfig instance, doing the necessary pre-checks.
+@param fieldKeys: stores the keys which will be referenced inside fieldNames/fieldIdxs
+@param cfgVals: keep ordered references to configuration fields from CGRConfig instance.
+fieldKeys and cfgVals are directly related through index.
+Method logic:
+ * Make sure the field used as reference in mediation process loop is not empty.
+ * All other fields should match the length of reference field.
+ * Accounting id field should not be empty.
+ * If we run mediation on csv file:
+  * Make sure cdrInDir and cdrOutDir are valid paths.
+  * Populate accIdIdx by converting accIdField into integer.
+  * Populate fieldIdxs by converting fieldNames into integers
+*/
 func (self *Mediator) loadConfig() error {
 	fieldKeys := []string{"subject", "reqtype", "direction", "tenant", "tor", "account", "destination", "time_start", "duration"}
 	cfgVals := [][]string{self.cgrCfg.MediatorSubjectFields, self.cgrCfg.MediatorReqTypeFields, self.cgrCfg.MediatorDirectionFields, 
@@ -256,7 +269,6 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 	return
 }
 
-	
 func (self *Mediator) MediateDBCDR(cdr utils.CDR, db rater.DataStorage) error {
 	var cc *rater.CallCost
 	var errCost error	
