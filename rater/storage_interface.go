@@ -22,10 +22,10 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack"
 	"labix.org/v2/mgo/bson"
-	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -63,7 +63,7 @@ type DataStorage interface {
 	SetUserBalance(*UserBalance) error
 	GetActionTimings(string) (ActionTimings, error)
 	SetActionTimings(string, ActionTimings) error
-	GetAllActionTimings() (map[string]ActionTimings, error)
+	GetAllActionTimings(string) (map[string]ActionTimings, error)
 	SetCdr(utils.CDR) error
 	SetRatedCdr(utils.CDR, *CallCost) error
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
@@ -72,6 +72,14 @@ type DataStorage interface {
 	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
 	LogActionTiming(source string, at *ActionTiming, as Actions) error
 	GetCallCostLog(uuid, source string) (*CallCost, error)
+	// loader functions
+	GetAllDestinations(string) ([]*Destination, error)
+	GetAllRates(string) (map[string][]*Rate, error)
+	GetAllTimings(string) (map[string][]*Timing, error)
+	GetAllRateTimings(string) ([]*RateTiming, error)
+	GetAllRatingProfiles(string) (map[string]*RatingProfile, error)
+	GetAllAllActions(string) (map[string][]*Action, error)
+	GetAllActionTriggers(string) (map[string][]*ActionTrigger, error)
 }
 
 type Marshaler interface {

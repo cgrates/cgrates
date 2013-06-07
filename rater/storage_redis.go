@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"github.com/fzzy/radix/redis"
 	//"log"
-	"time"
 	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 type RedisStorage struct {
@@ -249,4 +249,8 @@ func (rs *RedisStorage) SetCdr(utils.CDR) error {
 
 func (rs *RedisStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
+}
+
+func (rs *RedisStorage) GetDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
 }

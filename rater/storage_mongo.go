@@ -20,11 +20,11 @@ package rater
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 	"log"
 	"time"
-	"github.com/cgrates/cgrates/utils"
 )
 
 type MongoStorage struct {
@@ -215,4 +215,8 @@ func (ms *MongoStorage) SetCdr(utils.CDR) error {
 
 func (ms *MongoStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
+}
+
+func (ms *MongoStorage) GetDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
 }

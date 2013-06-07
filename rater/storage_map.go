@@ -191,3 +191,7 @@ func (ms *MapStorage) SetCdr(utils.CDR) error {
 func (ms *MapStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
+
+func (ms *MapStorage) GetDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
+}

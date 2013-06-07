@@ -28,6 +28,19 @@ import (
 	"strconv"
 )
 
+type Loader interface {
+	LoadDestinations() error
+	LoadRates() error
+	LoadTimings() error
+	LoadRateTimings() error
+	LoadRatingProfiles() error
+	LoadActions() error
+	LoadActionTimings() error
+	LoadActionTriggers() error
+	LoadAccountActions() error
+	WriteToDatabase(DataStorage, bool, bool) error
+}
+
 type Rate struct {
 	DestinationsTag                                string
 	ConnectFee, Price, PricedUnits, RateIncrements float64
@@ -83,9 +96,11 @@ func NewTiming(timeingInfo ...string) (rt *Timing) {
 }
 
 type RateTiming struct {
-	RatesTag string
-	Weight   float64
-	timing   *Timing
+	Tag        string
+	RatesTag   string
+	Weight     float64
+	TimingsTag string
+	timing     *Timing
 }
 
 func NewRateTiming(ratesTag string, timing *Timing, weight string) (rt *RateTiming) {

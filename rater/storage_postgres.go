@@ -22,8 +22,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	_ "github.com/bmizerany/pq"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type PostgresStorage struct {
@@ -171,4 +171,8 @@ func (psl *PostgresStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error)
 	}
 
 	return
+}
+
+func (psl *PostgresStorage) GetDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
 }

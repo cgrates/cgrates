@@ -91,16 +91,16 @@ vdf,minitsboy,OUT,MORE_MINUTES,STANDARD_TRIGGER
 var csvr *CSVReader
 
 func init() {
-	csvr = NewStringCSVReader()
-	csvr.LoadDestinations(destinations, ',')
-	csvr.LoadRates(rates, ',')
-	csvr.LoadTimings(timings, ',')
-	csvr.LoadRateTimings(rateTimings, ',')
-	csvr.LoadRatingProfiles(ratingProfiles, ',')
-	csvr.LoadActions(actions, ',')
-	csvr.LoadActionTimings(actionTimings, ',')
-	csvr.LoadActionTriggers(actionTriggers, ',')
-	csvr.LoadAccountActions(accountActions, ',')
+	csvr = NewStringCSVReader(',', destinations, rates, timings, rateTimings, ratingProfiles, actions, actionTimings, actionTriggers, accountActions)
+	csvr.LoadDestinations()
+	csvr.LoadRates()
+	csvr.LoadTimings()
+	csvr.LoadRateTimings()
+	csvr.LoadRatingProfiles()
+	csvr.LoadActions()
+	csvr.LoadActionTimings()
+	csvr.LoadActionTriggers()
+	csvr.LoadAccountActions()
 	csvr.WriteToDatabase(storageGetter, false, false)
 }
 

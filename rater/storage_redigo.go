@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	//"log"
-	"time"
 	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 type RedigoStorage struct {
@@ -222,4 +222,8 @@ func (rs *RedigoStorage) SetCdr(utils.CDR) error {
 
 func (rs *RedigoStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
+}
+
+func (rs *RedigoStorage) GetDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
 }

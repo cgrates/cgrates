@@ -150,8 +150,8 @@ func (rs *GosexyStorage) SetActionTimings(key string, ats ActionTimings) (err er
 	return
 }
 
-func (rs *GosexyStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
-	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
+func (rs *GosexyStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) {
+	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + tpid + "*")
 	if err != nil {
 		return nil, err
 	}
@@ -224,4 +224,27 @@ func (rs *GosexyStorage) SetCdr(utils.CDR) error {
 
 func (rs *GosexyStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
+}
+
+func (rs *GosexyStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
+}
+
+func (rs *GosexyStorage) GetAllRates(string) (map[string][]*Rate, error) {
+	return nil, nil
+}
+func (rs *GosexyStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+	return nil, nil
+}
+func (rs *GosexyStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+	return nil, nil
+}
+func (rs *GosexyStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+	return nil, nil
+}
+func (rs *GosexyStorage) GetAllActions(string) (map[string][]*Action, error) {
+	return nil, nil
+}
+func (rs *GosexyStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
 }

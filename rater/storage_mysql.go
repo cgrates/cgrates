@@ -22,8 +22,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/cgrates/cgrates/utils"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type MySQLStorage struct {
@@ -168,4 +168,135 @@ func (mys *MySQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error) {
 	}
 
 	return
+}
+
+func (mys *MySQLStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+	var dests []*Destination
+	rows, err := mys.Db.Query("SELECT * FROM tp_destinations WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tag, prefix string
+		if err := rows.Scan(id, tpid, &tag, &prefix); err != nil {
+			return nil, err
+		}
+		var dest *Destination
+		for _, d := range dests {
+			if d.Id == tag {
+				dest = d
+				break
+			}
+		}
+		if dest == nil {
+			dest = &Destination{Id: tag}
+			dests = append(dests, dest)
+		}
+		dest.Prefixes = append(dest.Prefixes, prefix)
+	}
+	return dests, rows.Err()
+}
+
+func (mys *MySQLStorage) GetAllRates(tpid string) (map[string][]*Rate, error) {
+	rts := make(map[string][]*Rate)
+	rows, err := mys.Db.Query("SELECT * FROM tp_rates WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tag, destinations_tag string
+		var connect_fee, rate, priced_units, rate_increments float64
+		if err := rows.Scan(&id, &tpid, &tag, &destinations_tag, &connect_fee, &rate, &priced_units, &rate_increments); err != nil {
+			return nil, err
+		}
+
+		r := &Rate{
+			DestinationsTag: destinations_tag,
+			ConnectFee:      connect_fee,
+			Price:           rate,
+			PricedUnits:     priced_units,
+			RateIncrements:  rate_increments,
+		}
+
+		rts[tag] = append(rts[tag], r)
+	}
+	return rts, rows.Err()
+}
+
+func (mys *MySQLStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+	tms := make(map[string][]*Timing)
+	rows, err := dbr.db.Query("SELECT * FROM tp_timings WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tag, years, months, month_days, week_days, start_time string
+		if err := rows.Scan(&id, &tpid, &tag, &years, &months, &month_days, &week_days, &start_time); err != nil {
+			return nil, err
+		}
+		t := NewTiming(years, months, month_days, week_days, start_time)
+		tms[tag] = append(tms[tag], t)
+	}
+	return tms, rows.Err()
+}
+
+func (mys *MySQLStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+	var rts []*RateTiming
+	rows, err := mys.Db.Query("SELECT * FROM tp_rate_timings WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var weight float64
+		var tpid, tag, rates_tag, timings_tag string
+		if err := rows.Scan(&id, &tpid, &tag, &rates_tag, &timings_tag, &weight); err != nil {
+			return err
+		}
+		rt := &RateTiming{
+			Tag:        tag,
+			RatesTag:   rates_tag,
+			Weight:     weight,
+			TimingsTag: timings_tag,
+		}
+		rts = append(rts, rt)
+	}
+	return rts, rows.Err()
+}
+
+func (mys *MySQLStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+	rpfs := make(map[string]*RatingProfile)
+	rows, err := mys.Db.Query("SELECT * FROM tp_rate_profiles WHERE tpid=?", tpid)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tenant, tor, direction, subject, fallbacksubject, rates_timing_tag, activation_time string
+
+		if err := rows.Scan(&id, &tpid, &tenant, &tor, &direction, &subject, &fallbacksubject, &rates_timing_tag, &activation_time); err != nil {
+			return err
+		}
+		at, err := time.Parse(time.RFC3339, activation_time)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", activation_time))
+		}
+		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
+		rp, ok := rpfs[key]
+		if !ok {
+			rp = &RatingProfile{Id: key}
+			rpfs[key] = rp
+		}
+
+	}
+	return rpfs, rows.Err()
+}
+func (mys *MySQLStorage) GetAllActions(string) (map[string][]*Action, error) {
+	return nil, nil
+}
+func (mys *MySQLStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
 }

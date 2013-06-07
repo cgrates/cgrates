@@ -19,16 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
-	"database/sql"
-	"errors"
-	"fmt"
 	"log"
-	"time"
 )
 
 type DbReader struct {
 	tpid              string
-	db                *sql.DB
+	storDB            DataStorage
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
@@ -40,17 +36,16 @@ type DbReader struct {
 	ratingProfiles    map[string]*RatingProfile
 }
 
-func NewDbReader(db *sql.DB, tpid string) *DbReader {
+func NewDbReader(storDB DataStorage) *DbReader {
 	c := new(DbReader)
-	c.db = db
-	c.tpid = tpid
-	c.actions = make(map[string][]*Action)
+	c.storDB = storDB
+	/*c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
 	c.rates = make(map[string][]*Rate)
-	c.timings = make(map[string][]*Timing)
+	c.timings = make(map[string][]*Timing)*/
 	c.activationPeriods = make(map[string]*ActivationPeriod)
-	c.ratingProfiles = make(map[string]*RatingProfile)
+	//c.ratingProfiles = make(map[string]*RatingProfile)
 	return c
 }
 
@@ -121,94 +116,33 @@ func (dbr *DbReader) WriteToDatabase(storage DataStorage, flush, verbose bool) (
 	return
 }
 
-func (dbr *DbReader) LoadDestinations() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_destinations WHERE tpid=?", dbr.tpid)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var id int
-		var tpid, tag, prefix string
-		if err := rows.Scan(id, tpid, &tag, &prefix); err != nil {
-			return err
-		}
-		var dest *Destination
-		for _, d := range dbr.destinations {
-			if d.Id == tag {
-				dest = d
-				break
-			}
-		}
-		if dest == nil {
-			dest = &Destination{Id: tag}
-			dbr.destinations = append(dbr.destinations, dest)
-		}
-		dest.Prefixes = append(dest.Prefixes, prefix)
-	}
-	return rows.Err()
+func (dbr *DbReader) LoadDestinations(tpid string) (err error) {
+	dbr.destinations, err = dbr.storDB.GetAllDestinations(tpid)
+	return
 }
 
-func (dbr *DbReader) LoadRates() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_rates WHERE tpid=?", dbr.tpid)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var id int
-		var tpid, tag, destinations_tag string
-		var connect_fee, rate, priced_units, rate_increments float64
-		if err := rows.Scan(&id, &tpid, &tag, &destinations_tag, &connect_fee, &rate, &priced_units, &rate_increments); err != nil {
-			return err
-		}
-
-		r := &Rate{
-			DestinationsTag: destinations_tag,
-			ConnectFee:      connect_fee,
-			Price:           rate,
-			PricedUnits:     priced_units,
-			RateIncrements:  rate_increments,
-		}
-
-		dbr.rates[tag] = append(dbr.rates[tag], r)
-	}
-	return rows.Err()
+func (dbr *DbReader) LoadRates(tpid string) error {
+	dbr.rates, err := dbr.storDB.GetAllRates(tpid)
+	return err 
 }
 
-func (dbr *DbReader) LoadTimings() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_timings WHERE tpid=?", dbr.tpid)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var id int
-		var tpid, tag, years, months, month_days, week_days, start_time string
-		if err := rows.Scan(&id, &tpid, &tag, &years, &months, &month_days, &week_days, &start_time); err != nil {
-			return err
-		}
-		t := NewTiming(years, months, month_days, week_days, start_time)
-		dbr.timings[tag] = append(dbr.timings[tag], t)
-	}
-	return rows.Err()
+func (dbr *DbReader) LoadTimings(tpid string) error {
+	dbr.timings, err := dbr.storDB.GetAllTimings(tpid)
+	return err
 }
 
-func (dbr *DbReader) LoadRateTimings() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_rate_timings WHERE tpid=?", dbr.tpid)
+func (dbr *DbReader) LoadRateTimings(tpid string) error {
+	rts, err := dbr.storDB.GetAllRateTimings(tpid)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	for rows.Next() {
-		var id int
-		var weight float64
-		var tpid, tag, rates_tag, timings_tag string
-		if err := rows.Scan(&id, &tpid, &tag, &rates_tag, &timings_tag, &weight); err != nil {
-			return err
-		}
-		ts, exists := dbr.timings[timings_tag]
+	for _, rt := range rts {
+		ts, exists := dbr.timings[rt.TimingsTag]
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get timing for tag %v", timings_tag))
 		}
 		for _, t := range ts {
-			rt := &RateTiming{
+			rateTiming := &RateTiming{
 				RatesTag: rates_tag,
 				Weight:   weight,
 				timing:   t,
@@ -218,39 +152,20 @@ func (dbr *DbReader) LoadRateTimings() error {
 				return errors.New(fmt.Sprintf("Could not find rate for tag %v", rates_tag))
 			}
 			for _, r := range rs {
-				_, exists := dbr.activationPeriods[tag]
+				_, exists := dbr.activationPeriods[rt.Tag]
 				if !exists {
-					dbr.activationPeriods[tag] = &ActivationPeriod{}
+					dbr.activationPeriods[rt.Tag] = &ActivationPeriod{}
 				}
-				dbr.activationPeriods[tag].AddIntervalIfNotPresent(rt.GetInterval(r))
+				dbr.activationPeriods[rt.Tag].AddIntervalIfNotPresent(rateTiming.GetInterval(r))
 			}
-		}
-	}
-	return rows.Err()
+		}		
+	}			
+	return nil
 }
 
-func (dbr *DbReader) LoadRatingProfiles() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_rate_profiles WHERE tpid=?", dbr.tpid)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var id int
-		var tpid, tenant, tor, direction, subject, fallbacksubject, rates_timing_tag, activation_time string
-
-		if err := rows.Scan(&id, &tpid, &tenant, &tor, &direction, &subject, &fallbacksubject, &rates_timing_tag, &activation_time); err != nil {
-			return err
-		}
-		at, err := time.Parse(time.RFC3339, activation_time)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", activation_time))
-		}
-		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
-		rp, ok := dbr.ratingProfiles[key]
-		if !ok {
-			rp = &RatingProfile{Id: key}
-			dbr.ratingProfiles[key] = rp
-		}
+func (dbr *DbReader) LoadRatingProfiles(tpid string) error {
+	rpfs, err := dbr.storDB.GetAllRatingProfiles(tpid)
+	for _, rp := range rpfs {
 		for _, d := range dbr.destinations {
 			ap, exists := dbr.activationPeriods[rates_timing_tag]
 			if !exists {
@@ -265,11 +180,11 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 			}
 		}
 	}
-	return rows.Err()
+	return nil
 }
 
-func (dbr *DbReader) LoadActions() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_actions WHERE tpid=?", dbr.tpid)
+func (dbr *DbReader) LoadActions(tpid string) error {
+	/*rows, err := dbr.db.Query("SELECT * FROM tp_actions WHERE tpid=?", tpid)
 	if err != nil {
 		return err
 	}
@@ -313,11 +228,12 @@ func (dbr *DbReader) LoadActions() error {
 		}
 		dbr.actions[tag] = append(dbr.actions[tag], a)
 	}
-	return rows.Err()
+	return rows.Err()*/
+	return nil
 }
 
-func (dbr *DbReader) LoadActionTimings() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_action_timings WHERE tpid=?", dbr.tpid)
+func (dbr *DbReader) LoadActionTimings(tpid string) error {
+	/*rows, err := dbr.db.Query("SELECT * FROM tp_action_timings WHERE tpid=?", tpid)
 	if err != nil {
 		return err
 	}
@@ -352,11 +268,12 @@ func (dbr *DbReader) LoadActionTimings() error {
 			dbr.actionsTimings[tag] = append(dbr.actionsTimings[tag], at)
 		}
 	}
-	return rows.Err()
+	return rows.Err()*/
+	return nil
 }
 
-func (dbr *DbReader) LoadActionTriggers() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_action_triggers WHERE tpid=?", dbr.tpid)
+func (dbr *DbReader) LoadActionTriggers(tpid string) error {
+	/*rows, err := dbr.db.Query("SELECT * FROM tp_action_triggers WHERE tpid=?", tpid)
 	if err != nil {
 		return err
 	}
@@ -379,11 +296,12 @@ func (dbr *DbReader) LoadActionTriggers() error {
 		}
 		dbr.actionsTriggers[tag] = append(dbr.actionsTriggers[tag], at)
 	}
-	return rows.Err()
+	return rows.Err()*/
+	return nil
 }
 
 func (dbr *DbReader) LoadAccountActions() error {
-	rows, err := dbr.db.Query("SELECT * FROM tp_account_actions WHERE tpid=?", dbr.tpid)
+	/*rows, err := dbr.db.Query("SELECT * FROM tp_account_actions WHERE tpid=?", tpid)
 	if err != nil {
 		return err
 	}
@@ -416,5 +334,6 @@ func (dbr *DbReader) LoadAccountActions() error {
 			at.UserBalanceIds = append(at.UserBalanceIds, tag)
 		}
 	}
-	return rows.Err()
+	return rows.Err()*/
+	return nil
 }
