@@ -39,9 +39,10 @@ type DbReader struct {
 	ratingProfiles    map[string]*RatingProfile
 }
 
-func NewDbReader(storDB DataStorage) *DbReader {
+func NewDbReader(storDB DataStorage, tpid string) *DbReader {
 	c := new(DbReader)
 	c.storDB = storDB
+	c.tpid = tpid
 	/*c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
@@ -119,23 +120,23 @@ func (dbr *DbReader) WriteToDatabase(storage DataStorage, flush, verbose bool) (
 	return
 }
 
-func (dbr *DbReader) LoadDestinations(tpid string) (err error) {
-	dbr.destinations, err = dbr.storDB.GetAllDestinations(tpid)
+func (dbr *DbReader) LoadDestinations() (err error) {
+	dbr.destinations, err = dbr.storDB.GetAllDestinations(dbr.tpid)
 	return
 }
 
-func (dbr *DbReader) LoadRates(tpid string) (err error) {
-	dbr.rates, err = dbr.storDB.GetAllRates(tpid)
+func (dbr *DbReader) LoadRates() (err error) {
+	dbr.rates, err = dbr.storDB.GetAllRates(dbr.tpid)
 	return err
 }
 
-func (dbr *DbReader) LoadTimings(tpid string) (err error) {
-	dbr.timings, err = dbr.storDB.GetAllTimings(tpid)
+func (dbr *DbReader) LoadTimings() (err error) {
+	dbr.timings, err = dbr.storDB.GetAllTimings(dbr.tpid)
 	return err
 }
 
-func (dbr *DbReader) LoadRateTimings(tpid string) error {
-	rts, err := dbr.storDB.GetAllRateTimings(tpid)
+func (dbr *DbReader) LoadRateTimings() error {
+	rts, err := dbr.storDB.GetAllRateTimings(dbr.tpid)
 	if err != nil {
 		return err
 	}
@@ -166,8 +167,8 @@ func (dbr *DbReader) LoadRateTimings(tpid string) error {
 	return nil
 }
 
-func (dbr *DbReader) LoadRatingProfiles(tpid string) error {
-	rpfs, err := dbr.storDB.GetAllRatingProfiles(tpid)
+func (dbr *DbReader) LoadRatingProfiles() error {
+	rpfs, err := dbr.storDB.GetAllRatingProfiles(dbr.tpid)
 	if err != nil {
 		return err
 	}
@@ -193,13 +194,13 @@ func (dbr *DbReader) LoadRatingProfiles(tpid string) error {
 	return nil
 }
 
-func (dbr *DbReader) LoadActions(tpid string) (err error) {
-	dbr.actions, err = dbr.storDB.GetAllActions(tpid)
+func (dbr *DbReader) LoadActions() (err error) {
+	dbr.actions, err = dbr.storDB.GetAllActions(dbr.tpid)
 	return err
 }
 
-func (dbr *DbReader) LoadActionTimings(tpid string) (err error) {
-	atsMap, err := dbr.storDB.GetAllActionTimings(tpid)
+func (dbr *DbReader) LoadActionTimings() (err error) {
+	atsMap, err := dbr.storDB.GetAllActionTimings(dbr.tpid)
 	if err != nil {
 		return err
 	}
@@ -233,13 +234,13 @@ func (dbr *DbReader) LoadActionTimings(tpid string) (err error) {
 	return err
 }
 
-func (dbr *DbReader) LoadActionTriggers(tpid string) (err error) {
-	dbr.actionsTriggers, err = dbr.storDB.GetAllActionTriggers(tpid)
+func (dbr *DbReader) LoadActionTriggers() (err error) {
+	dbr.actionsTriggers, err = dbr.storDB.GetAllActionTriggers(dbr.tpid)
 	return err
 }
 
-func (dbr *DbReader) LoadAccountActions(tpid string) (err error) {
-	dbr.accountActions, err = dbr.storDB.GetAllUserBalances(tpid)
+func (dbr *DbReader) LoadAccountActions() (err error) {
+	dbr.accountActions, err = dbr.storDB.GetAllUserBalances(dbr.tpid)
 	for _, ub := range dbr.accountActions {
 		aTimings, exists := dbr.actionsTimings[ub.actionTimingsTag]
 		if !exists {

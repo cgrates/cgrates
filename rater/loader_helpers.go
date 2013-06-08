@@ -28,7 +28,7 @@ import (
 	"strconv"
 )
 
-type Loader interface {
+type TPLoader interface {
 	LoadDestinations() error
 	LoadRates() error
 	LoadTimings() error

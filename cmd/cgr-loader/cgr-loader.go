@@ -102,7 +102,7 @@ func main() {
 	if *dataDbId != "" && *dataPath != "" {
 		log.Fatal("You can read either from db or from files, not both.")
 	}
-	var loader *rater.Loader
+	var loader rater.TPLoader
 	if *dataPath != "" {
 		dataFilesValidators := []*validator{
 			&validator{destinationsFn,
@@ -140,13 +140,14 @@ func main() {
 			}
 		}
 		//sep = []rune(*separator)[0]
-		csvr := rater.NewFileCSVReader(',', destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
-	}
-	if *dataDbId != "" {
-		loader := rater.NewDbReader(getter, *dataDbId)
+		loader = rater.NewFileCSVReader(',', destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	}
 
-	err := loader.LoadDestinations()
+	if *dataDbId != "" {
+		loader = rater.NewDbReader(getter, *dataDbId)
+	}
+
+	err = loader.LoadDestinations()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -184,7 +185,7 @@ func main() {
 	}
 
 	// write maps to database
-	if err := dbr.WriteToDatabase(getter, *flush, true); err != nil {
+	if err := loader.WriteToDatabase(getter, *flush, true); err != nil {
 		log.Fatal("Could not write to database: ", err)
 	}
 }
