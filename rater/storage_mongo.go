@@ -176,10 +176,10 @@ func (ms *MongoStorage) SetActionTimings(key string, ats ActionTimings) error {
 	return ms.db.C("actiontimings").Insert(&AtKeyValue{key, ats})
 }
 
-func (ms *MongoStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
+func (ms *MongoStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
 	result := AtKeyValue{}
 	iter := ms.db.C("actiontimings").Find(nil).Iter()
-	ats = make(map[string]ActionTimings)
+	ats = make(map[string][]*ActionTiming)
 	for iter.Next(&result) {
 		ats[result.Key] = result.Value
 	}
@@ -218,5 +218,31 @@ func (ms *MongoStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 }
 
 func (ms *MongoStorage) GetDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
+}
+
+func (ms *MongoStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
+}
+
+func (ms *MongoStorage) GetAllRates(string) (map[string][]*Rate, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) GetAllActions(string) (map[string][]*Action, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
 	return nil, nil
 }

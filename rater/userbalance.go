@@ -44,12 +44,13 @@ const (
 Structure containing information about user's credit (minutes, cents, sms...).'
 */
 type UserBalance struct {
-	Id             string
-	Type           string // prepaid-postpaid
-	BalanceMap     map[string]float64
-	MinuteBuckets  []*MinuteBucket
-	UnitCounters   []*UnitsCounter
-	ActionTriggers ActionTriggerPriotityList
+	Id                                  string
+	Type                                string // prepaid-postpaid
+	BalanceMap                          map[string]float64
+	MinuteBuckets                       []*MinuteBucket
+	UnitCounters                        []*UnitsCounter
+	ActionTriggers                      ActionTriggerPriotityList
+	actionTriggersTag, actionTimingsTag string // used only for loading
 }
 
 /*

@@ -133,6 +133,10 @@ func (rt *RateTiming) GetInterval(r *Rate) (i *Interval) {
 	return
 }
 
+type AccountAction struct {
+	Tenant, Account, Direction, ActionTimingsTag, ActionTriggersTag string
+}
+
 func ValidateCSVData(fn string, re *regexp.Regexp) (err error) {
 	fin, err := os.Open(fn)
 	if err != nil {

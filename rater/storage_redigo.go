@@ -142,8 +142,8 @@ func (rs *RedigoStorage) SetActionTimings(key string, ats ActionTimings) (err er
 	return
 }
 
-func (rs *RedigoStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
-	reply, err := redis.Values(rs.db.Do("keys", ACTION_TIMING_PREFIX+"*"))
+func (rs *RedigoStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
+	reply, err := redis.Values(rs.db.Do("keys", ACTION_TIMING_PREFIX+tpid+"*"))
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (rs *RedigoStorage) GetAllActionTimings() (ats map[string]ActionTimings, er
 			keys = append(keys, string(v))
 		}
 	}
-	ats = make(map[string]ActionTimings, len(keys))
+	ats = make(map[string][]*ActionTiming, len(keys))
 	for _, key := range keys {
 		values, err := redis.Bytes(rs.db.Do("get", key))
 		if err != nil {
@@ -161,7 +161,7 @@ func (rs *RedigoStorage) GetAllActionTimings() (ats map[string]ActionTimings, er
 		}
 		var tempAts ActionTimings
 		err = rs.ms.Unmarshal(values, &tempAts)
-		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
+		ats[key[len(ACTION_TIMING_PREFIX+tpid):]] = tempAts
 	}
 
 	return
@@ -224,6 +224,28 @@ func (rs *RedigoStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
 
-func (rs *RedigoStorage) GetDestinations(tpid string) ([]*Destination, error) {
+func (ms *RedigoStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
+}
+
+func (ms *RedigoStorage) GetAllRates(string) (map[string][]*Rate, error) {
+	return nil, nil
+}
+func (ms *RedigoStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+	return nil, nil
+}
+func (ms *RedigoStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+	return nil, nil
+}
+func (ms *RedigoStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+	return nil, nil
+}
+func (ms *RedigoStorage) GetAllActions(string) (map[string][]*Action, error) {
+	return nil, nil
+}
+func (ms *RedigoStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
+}
+func (ms *RedigoStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
 	return nil, nil
 }

@@ -35,14 +35,15 @@ const (
 )
 
 type ActionTiming struct {
-	Id             string // uniquely identify the timing
-	Tag            string // informative purpos only
-	UserBalanceIds []string
-	Timing         *Interval
-	Weight         float64
-	ActionsId      string
-	actions        Actions
-	stCache        time.Time
+	Id                     string // uniquely identify the timing
+	Tag                    string // informative purpos only
+	UserBalanceIds         []string
+	Timing                 *Interval
+	Weight                 float64
+	ActionsId              string
+	actions                Actions
+	stCache                time.Time
+	actionsTag, timingsTag string // used only for loading
 }
 
 type ActionTimings []*ActionTiming

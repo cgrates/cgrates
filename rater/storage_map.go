@@ -124,15 +124,15 @@ func (ms *MapStorage) SetActionTimings(key string, ats ActionTimings) (err error
 	return
 }
 
-func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
-	ats = make(map[string]ActionTimings)
+func (ms *MapStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
+	ats = make(map[string][]*ActionTiming)
 	for key, value := range ms.dict {
-		if !strings.Contains(key, ACTION_TIMING_PREFIX) {
+		if !strings.Contains(key, ACTION_TIMING_PREFIX+tpid) {
 			continue
 		}
 		var tempAts ActionTimings
 		err = ms.ms.Unmarshal(value, &tempAts)
-		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
+		ats[key[len(ACTION_TIMING_PREFIX+tpid):]] = tempAts
 	}
 
 	return
@@ -192,6 +192,28 @@ func (ms *MapStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
 
-func (ms *MapStorage) GetDestinations(tpid string) ([]*Destination, error) {
+func (ms *MapStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
+}
+
+func (ms *MapStorage) GetAllRates(string) (map[string][]*Rate, error) {
+	return nil, nil
+}
+func (ms *MapStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+	return nil, nil
+}
+func (ms *MapStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+	return nil, nil
+}
+func (ms *MapStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+	return nil, nil
+}
+func (ms *MapStorage) GetAllActions(string) (map[string][]*Action, error) {
+	return nil, nil
+}
+func (ms *MapStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
+}
+func (ms *MapStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
 	return nil, nil
 }

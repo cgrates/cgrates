@@ -150,12 +150,12 @@ func (rs *GosexyStorage) SetActionTimings(key string, ats ActionTimings) (err er
 	return
 }
 
-func (rs *GosexyStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) {
+func (rs *GosexyStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
 	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + tpid + "*")
 	if err != nil {
 		return nil, err
 	}
-	ats = make(map[string]ActionTimings, len(keys))
+	ats = make(map[string][]*ActionTiming, len(keys))
 	for _, key := range keys {
 		values, err := rs.db.Get(key)
 		if err != nil {
@@ -163,7 +163,7 @@ func (rs *GosexyStorage) GetAllActionTimings(tpid string) (ats map[string]Action
 		}
 		var tempAts ActionTimings
 		err = rs.ms.Unmarshal([]byte(values), &tempAts)
-		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
+		ats[key[len(ACTION_TIMING_PREFIX+tpid):]] = tempAts
 	}
 
 	return
@@ -246,5 +246,8 @@ func (rs *GosexyStorage) GetAllActions(string) (map[string][]*Action, error) {
 	return nil, nil
 }
 func (rs *GosexyStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
+}
+func (rs *GosexyStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
 	return nil, nil
 }

@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"time"
 )
 
 type DbReader struct {
@@ -121,35 +124,35 @@ func (dbr *DbReader) LoadDestinations(tpid string) (err error) {
 	return
 }
 
-func (dbr *DbReader) LoadRates(tpid string) error {
-	dbr.rates, err := dbr.storDB.GetAllRates(tpid)
-	return err 
+func (dbr *DbReader) LoadRates(tpid string) (err error) {
+	dbr.rates, err = dbr.storDB.GetAllRates(tpid)
+	return err
 }
 
-func (dbr *DbReader) LoadTimings(tpid string) error {
-	dbr.timings, err := dbr.storDB.GetAllTimings(tpid)
+func (dbr *DbReader) LoadTimings(tpid string) (err error) {
+	dbr.timings, err = dbr.storDB.GetAllTimings(tpid)
 	return err
 }
 
 func (dbr *DbReader) LoadRateTimings(tpid string) error {
 	rts, err := dbr.storDB.GetAllRateTimings(tpid)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	for _, rt := range rts {
 		ts, exists := dbr.timings[rt.TimingsTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get timing for tag %v", timings_tag))
+			return errors.New(fmt.Sprintf("Could not get timing for tag %v", rt.TimingsTag))
 		}
 		for _, t := range ts {
 			rateTiming := &RateTiming{
-				RatesTag: rates_tag,
-				Weight:   weight,
+				RatesTag: rt.RatesTag,
+				Weight:   rt.Weight,
 				timing:   t,
 			}
-			rs, exists := dbr.rates[rates_tag]
+			rs, exists := dbr.rates[rt.RatesTag]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not find rate for tag %v", rates_tag))
+				return errors.New(fmt.Sprintf("Could not find rate for tag %v", rt.RatesTag))
 			}
 			for _, r := range rs {
 				_, exists := dbr.activationPeriods[rt.Tag]
@@ -158,182 +161,100 @@ func (dbr *DbReader) LoadRateTimings(tpid string) error {
 				}
 				dbr.activationPeriods[rt.Tag].AddIntervalIfNotPresent(rateTiming.GetInterval(r))
 			}
-		}		
-	}			
+		}
+	}
 	return nil
 }
 
 func (dbr *DbReader) LoadRatingProfiles(tpid string) error {
 	rpfs, err := dbr.storDB.GetAllRatingProfiles(tpid)
+	if err != nil {
+		return err
+	}
 	for _, rp := range rpfs {
+		at, err := time.Parse(time.RFC3339, rp.activationTime)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", rp.activationTime))
+		}
 		for _, d := range dbr.destinations {
-			ap, exists := dbr.activationPeriods[rates_timing_tag]
+			ap, exists := dbr.activationPeriods[rp.ratesTimingTag]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rates_timing_tag))
+				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rp.ratesTimingTag))
 			}
 			newAP := &ActivationPeriod{ActivationTime: at}
 			//copy(newAP.Intervals, ap.Intervals)
 			newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
 			rp.AddActivationPeriodIfNotPresent(d.Id, newAP)
-			if fallbacksubject != "" {
-				rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject)
+			if rp.fallbackSubject != "" {
+				rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", rp.direction, rp.tenant, rp.tor, rp.fallbackSubject)
 			}
 		}
 	}
 	return nil
 }
 
-func (dbr *DbReader) LoadActions(tpid string) error {
-	/*rows, err := dbr.db.Query("SELECT * FROM tp_actions WHERE tpid=?", tpid)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var id int
-		var units, rate, minutes_weight, weight float64
-		var tpid, tag, action, balances_tag, direction, destinations_tag, rate_type string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balances_tag, &direction, &units, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
-			return err
-		}
-		var a *Action
-		if balances_tag != MINUTES {
-			a = &Action{
-				ActionType: action,
-				BalanceId:  balances_tag,
-				Direction:  direction,
-				Units:      units,
-			}
-		} else {
-			var percent, price float64
-			if rate_type == PERCENT {
-				percent = rate
-			}
-			if rate_type == ABSOLUTE {
-				price = rate
-			}
-			a = &Action{
-				Id:         GenUUID(),
-				ActionType: action,
-				BalanceId:  balances_tag,
-				Direction:  direction,
-				Weight:     weight,
-				MinuteBucket: &MinuteBucket{
-					Seconds:       units,
-					Weight:        minutes_weight,
-					Price:         price,
-					Percent:       percent,
-					DestinationId: destinations_tag,
-				},
-			}
-		}
-		dbr.actions[tag] = append(dbr.actions[tag], a)
-	}
-	return rows.Err()*/
-	return nil
+func (dbr *DbReader) LoadActions(tpid string) (err error) {
+	dbr.actions, err = dbr.storDB.GetAllActions(tpid)
+	return err
 }
 
-func (dbr *DbReader) LoadActionTimings(tpid string) error {
-	/*rows, err := dbr.db.Query("SELECT * FROM tp_action_timings WHERE tpid=?", tpid)
+func (dbr *DbReader) LoadActionTimings(tpid string) (err error) {
+	atsMap, err := dbr.storDB.GetAllActionTimings(tpid)
 	if err != nil {
 		return err
 	}
-	for rows.Next() {
-		var id int
-		var weight float64
-		var tpid, tag, actions_tag, timings_tag string
-		if err := rows.Scan(&id, &tpid, &tag, &actions_tag, &timings_tag, &weight); err != nil {
-			return err
+	for tag, ats := range atsMap {
+		for _, at := range ats {
+			_, exists := dbr.actions[at.ActionsId]
+			if !exists {
+				return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", at.ActionsId))
+			}
+			ts, exists := dbr.timings[at.Tag]
+			if !exists {
+				return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", at.Tag))
+			}
+			for _, t := range ts {
+				actTmg := &ActionTiming{
+					Id:     GenUUID(),
+					Tag:    at.Tag,
+					Weight: at.Weight,
+					Timing: &Interval{
+						Months:    t.Months,
+						MonthDays: t.MonthDays,
+						WeekDays:  t.WeekDays,
+						StartTime: t.StartTime,
+					},
+					ActionsId: at.ActionsId,
+				}
+				dbr.actionsTimings[tag] = append(dbr.actionsTimings[tag], actTmg)
+			}
 		}
-		_, exists := dbr.actions[actions_tag]
+	}
+	return err
+}
+
+func (dbr *DbReader) LoadActionTriggers(tpid string) (err error) {
+	dbr.actionsTriggers, err = dbr.storDB.GetAllActionTriggers(tpid)
+	return err
+}
+
+func (dbr *DbReader) LoadAccountActions(tpid string) (err error) {
+	dbr.accountActions, err = dbr.storDB.GetAllUserBalances(tpid)
+	for _, ub := range dbr.accountActions {
+		aTimings, exists := dbr.actionsTimings[ub.actionTimingsTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", actions_tag))
-		}
-		ts, exists := dbr.timings[timings_tag]
-		if !exists {
-			return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", timings_tag))
-		}
-		for _, t := range ts {
-			at := &ActionTiming{
-				Id:     GenUUID(),
-				Tag:    timings_tag,
-				Weight: weight,
-				Timing: &Interval{
-					Months:    t.Months,
-					MonthDays: t.MonthDays,
-					WeekDays:  t.WeekDays,
-					StartTime: t.StartTime,
-				},
-				ActionsId: actions_tag,
-			}
-			dbr.actionsTimings[tag] = append(dbr.actionsTimings[tag], at)
-		}
-	}
-	return rows.Err()*/
-	return nil
-}
-
-func (dbr *DbReader) LoadActionTriggers(tpid string) error {
-	/*rows, err := dbr.db.Query("SELECT * FROM tp_action_triggers WHERE tpid=?", tpid)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var id int
-		var threshold, weight float64
-		var tpid, tag, balances_tag, direction, destinations_tag, actions_tag string
-		if err := rows.Scan(&id, &tpid, &tag, &balances_tag, &direction, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
-			return err
-		}
-
-		at := &ActionTrigger{
-			Id:             GenUUID(),
-			BalanceId:      balances_tag,
-			Direction:      direction,
-			ThresholdValue: threshold,
-			DestinationId:  destinations_tag,
-			ActionsId:      actions_tag,
-			Weight:         weight,
-		}
-		dbr.actionsTriggers[tag] = append(dbr.actionsTriggers[tag], at)
-	}
-	return rows.Err()*/
-	return nil
-}
-
-func (dbr *DbReader) LoadAccountActions() error {
-	/*rows, err := dbr.db.Query("SELECT * FROM tp_account_actions WHERE tpid=?", tpid)
-	if err != nil {
-		return err
-	}
-	for rows.Next() {
-		var id int
-		var tpid, tenant, account, direction, action_timings_tag, action_triggers_tag string
-		if err := rows.Scan(&id, &tpid, &tenant, &account, &direction, &action_timings_tag, &action_triggers_tag); err != nil {
-			return err
-		}
-
-		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
-		aTriggers, exists := dbr.actionsTriggers[action_triggers_tag]
-		if action_triggers_tag != "" && !exists {
-			// only return error if there was something ther for the tag
-			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", action_triggers_tag))
-		}
-		ub := &UserBalance{
-			Type:           UB_TYPE_PREPAID,
-			Id:             tag,
-			ActionTriggers: aTriggers,
-		}
-		dbr.accountActions = append(dbr.accountActions, ub)
-
-		aTimings, exists := dbr.actionsTimings[action_timings_tag]
-		if !exists {
-			log.Printf("Could not get action timing for tag %v", action_timings_tag)
+			log.Printf("Could not get action timing for tag %v", ub.actionTimingsTag)
 			// must not continue here
 		}
 		for _, at := range aTimings {
-			at.UserBalanceIds = append(at.UserBalanceIds, tag)
+			aTriggers, exists := dbr.actionsTriggers[ub.actionTriggersTag]
+			if ub.actionTriggersTag != "" && !exists {
+				// only return error if there was something ther for the tag
+				return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", ub.actionTriggersTag))
+			}
+			ub.ActionTriggers = aTriggers
+			at.UserBalanceIds = append(at.UserBalanceIds, ub.Id)
 		}
 	}
-	return rows.Err()*/
 	return nil
 }

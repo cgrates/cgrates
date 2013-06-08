@@ -169,12 +169,12 @@ func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err err
 	return
 }
 
-func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
-	keys, err := rs.db.Cmd("keys", ACTION_TIMING_PREFIX+"*").List()
+func (rs *RedisStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
+	keys, err := rs.db.Cmd("keys", ACTION_TIMING_PREFIX+tpid+"*").List()
 	if err != nil {
 		return
 	}
-	ats = make(map[string]ActionTimings, len(keys))
+	ats = make(map[string][]*ActionTiming, len(keys))
 	for _, key := range keys {
 		values, err := rs.db.Cmd("get", key).Bytes()
 		if err != nil {
@@ -182,7 +182,7 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err
 		}
 		var tempAts ActionTimings
 		err = rs.ms.Unmarshal(values, &tempAts)
-		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
+		ats[key[len(ACTION_TIMING_PREFIX+tpid):]] = tempAts
 	}
 
 	return
@@ -251,6 +251,28 @@ func (rs *RedisStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
 
-func (rs *RedisStorage) GetDestinations(tpid string) ([]*Destination, error) {
+func (ms *RedisStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+	return nil, nil
+}
+
+func (ms *RedisStorage) GetAllRates(string) (map[string][]*Rate, error) {
+	return nil, nil
+}
+func (ms *RedisStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+	return nil, nil
+}
+func (ms *RedisStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+	return nil, nil
+}
+func (ms *RedisStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+	return nil, nil
+}
+func (ms *RedisStorage) GetAllActions(string) (map[string][]*Action, error) {
+	return nil, nil
+}
+func (ms *RedisStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
+}
+func (ms *RedisStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
 	return nil, nil
 }

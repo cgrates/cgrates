@@ -77,7 +77,30 @@ func (mys *MySQLStorage) GetActionTimings(key string) (ats ActionTimings, err er
 
 func (mys *MySQLStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
 
-func (mys *MySQLStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) { return }
+func (mys *MySQLStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
+	ats = make(map[string][]*ActionTiming)
+	rows, err := mys.Db.Query("SELECT * FROM tp_action_timings WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var weight float64
+		var tpid, tag, actions_tag, timings_tag string
+		if err := rows.Scan(&id, &tpid, &tag, &actions_tag, &timings_tag, &weight); err != nil {
+			return nil, err
+		}
+
+		at := &ActionTiming{
+			Id:        GenUUID(),
+			Tag:       timings_tag,
+			Weight:    weight,
+			ActionsId: actions_tag,
+		}
+		ats[tag] = append(ats[tag], at)
+	}
+	return ats, rows.Err()
+}
 
 func (mys *MySQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	if mys.Db == nil {
@@ -225,9 +248,9 @@ func (mys *MySQLStorage) GetAllRates(tpid string) (map[string][]*Rate, error) {
 	return rts, rows.Err()
 }
 
-func (mys *MySQLStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+func (mys *MySQLStorage) GetAllTimings(tpid string) (map[string][]*Timing, error) {
 	tms := make(map[string][]*Timing)
-	rows, err := dbr.db.Query("SELECT * FROM tp_timings WHERE tpid=?", tpid)
+	rows, err := mys.Db.Query("SELECT * FROM tp_timings WHERE tpid=?", tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -243,7 +266,7 @@ func (mys *MySQLStorage) GetAllTimings(string) (map[string][]*Timing, error) {
 	return tms, rows.Err()
 }
 
-func (mys *MySQLStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+func (mys *MySQLStorage) GetAllRateTimings(tpid string) ([]*RateTiming, error) {
 	var rts []*RateTiming
 	rows, err := mys.Db.Query("SELECT * FROM tp_rate_timings WHERE tpid=?", tpid)
 	if err != nil {
@@ -254,7 +277,7 @@ func (mys *MySQLStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
 		var weight float64
 		var tpid, tag, rates_tag, timings_tag string
 		if err := rows.Scan(&id, &tpid, &tag, &rates_tag, &timings_tag, &weight); err != nil {
-			return err
+			return nil, err
 		}
 		rt := &RateTiming{
 			Tag:        tag,
@@ -267,22 +290,18 @@ func (mys *MySQLStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
 	return rts, rows.Err()
 }
 
-func (mys *MySQLStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+func (mys *MySQLStorage) GetAllRatingProfiles(tpid string) (map[string]*RatingProfile, error) {
 	rpfs := make(map[string]*RatingProfile)
 	rows, err := mys.Db.Query("SELECT * FROM tp_rate_profiles WHERE tpid=?", tpid)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for rows.Next() {
 		var id int
 		var tpid, tenant, tor, direction, subject, fallbacksubject, rates_timing_tag, activation_time string
 
 		if err := rows.Scan(&id, &tpid, &tenant, &tor, &direction, &subject, &fallbacksubject, &rates_timing_tag, &activation_time); err != nil {
-			return err
-		}
-		at, err := time.Parse(time.RFC3339, activation_time)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", activation_time))
+			return nil, err
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
 		rp, ok := rpfs[key]
@@ -290,13 +309,112 @@ func (mys *MySQLStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile
 			rp = &RatingProfile{Id: key}
 			rpfs[key] = rp
 		}
-
+		rp.tor = tor
+		rp.direction = direction
+		rp.subject = subject
+		rp.fallbackSubject = fallbacksubject
+		rp.ratesTimingTag = rates_timing_tag
+		rp.activationTime = activation_time
 	}
 	return rpfs, rows.Err()
 }
-func (mys *MySQLStorage) GetAllActions(string) (map[string][]*Action, error) {
-	return nil, nil
+func (mys *MySQLStorage) GetAllActions(tpid string) (map[string][]*Action, error) {
+	as := make(map[string][]*Action)
+	rows, err := mys.Db.Query("SELECT * FROM tp_actions WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var units, rate, minutes_weight, weight float64
+		var tpid, tag, action, balances_tag, direction, destinations_tag, rate_type string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balances_tag, &direction, &units, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
+			return nil, err
+		}
+		var a *Action
+		if balances_tag != MINUTES {
+			a = &Action{
+				ActionType: action,
+				BalanceId:  balances_tag,
+				Direction:  direction,
+				Units:      units,
+			}
+		} else {
+			var percent, price float64
+			if rate_type == PERCENT {
+				percent = rate
+			}
+			if rate_type == ABSOLUTE {
+				price = rate
+			}
+			a = &Action{
+				Id:         GenUUID(),
+				ActionType: action,
+				BalanceId:  balances_tag,
+				Direction:  direction,
+				Weight:     weight,
+				MinuteBucket: &MinuteBucket{
+					Seconds:       units,
+					Weight:        minutes_weight,
+					Price:         price,
+					Percent:       percent,
+					DestinationId: destinations_tag,
+				},
+			}
+		}
+		as[tag] = append(as[tag], a)
+	}
+	return as, rows.Err()
 }
-func (mys *MySQLStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
-	return nil, nil
+func (mys *MySQLStorage) GetAllActionTriggers(tpid string) (map[string][]*ActionTrigger, error) {
+	ats := make(map[string][]*ActionTrigger)
+	rows, err := mys.Db.Query("SELECT * FROM tp_action_triggers WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var threshold, weight float64
+		var tpid, tag, balances_tag, direction, destinations_tag, actions_tag string
+		if err := rows.Scan(&id, &tpid, &tag, &balances_tag, &direction, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
+			return nil, err
+		}
+
+		at := &ActionTrigger{
+			Id:             GenUUID(),
+			BalanceId:      balances_tag,
+			Direction:      direction,
+			ThresholdValue: threshold,
+			DestinationId:  destinations_tag,
+			ActionsId:      actions_tag,
+			Weight:         weight,
+		}
+		ats[tag] = append(ats[tag], at)
+	}
+	return ats, rows.Err()
+}
+
+func (mys *MySQLStorage) GetAllUserBalances(tpid string) ([]*UserBalance, error) {
+	var ubs []*UserBalance
+	rows, err := mys.Db.Query("SELECT * FROM tp_account_actions WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tenant, account, direction, action_timings_tag, action_triggers_tag string
+		if err := rows.Scan(&id, &tpid, &tenant, &account, &direction, &action_timings_tag, &action_triggers_tag); err != nil {
+			return nil, err
+		}
+
+		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
+		ub := &UserBalance{
+			Type:              UB_TYPE_PREPAID,
+			Id:                tag,
+			actionTriggersTag: action_triggers_tag,
+			actionTimingsTag:  action_timings_tag,
+		}
+		ubs = append(ubs, ub)
+	}
+	return ubs, rows.Err()
 }

@@ -63,7 +63,7 @@ type DataStorage interface {
 	SetUserBalance(*UserBalance) error
 	GetActionTimings(string) (ActionTimings, error)
 	SetActionTimings(string, ActionTimings) error
-	GetAllActionTimings(string) (map[string]ActionTimings, error)
+	GetAllActionTimings(string) (map[string][]*ActionTiming, error)
 	SetCdr(utils.CDR) error
 	SetRatedCdr(utils.CDR, *CallCost) error
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
@@ -78,8 +78,9 @@ type DataStorage interface {
 	GetAllTimings(string) (map[string][]*Timing, error)
 	GetAllRateTimings(string) ([]*RateTiming, error)
 	GetAllRatingProfiles(string) (map[string]*RatingProfile, error)
-	GetAllAllActions(string) (map[string][]*Action, error)
+	GetAllActions(string) (map[string][]*Action, error)
 	GetAllActionTriggers(string) (map[string][]*ActionTrigger, error)
+	GetAllUserBalances(string) ([]*UserBalance, error)
 }
 
 type Marshaler interface {

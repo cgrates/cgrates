@@ -77,7 +77,9 @@ func (psl *PostgresStorage) GetActionTimings(key string) (ats ActionTimings, err
 
 func (psl *PostgresStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
 
-func (psl *PostgresStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) { return }
+func (psl *PostgresStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
+	return
+}
 
 func (psl *PostgresStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	if psl.Db == nil {
@@ -173,6 +175,228 @@ func (psl *PostgresStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error)
 	return
 }
 
-func (psl *PostgresStorage) GetDestinations(tpid string) ([]*Destination, error) {
-	return nil, nil
+func (psl *PostgresStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+	var dests []*Destination
+	rows, err := psl.Db.Query("SELECT * FROM tp_destinations WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tag, prefix string
+		if err := rows.Scan(id, tpid, &tag, &prefix); err != nil {
+			return nil, err
+		}
+		var dest *Destination
+		for _, d := range dests {
+			if d.Id == tag {
+				dest = d
+				break
+			}
+		}
+		if dest == nil {
+			dest = &Destination{Id: tag}
+			dests = append(dests, dest)
+		}
+		dest.Prefixes = append(dest.Prefixes, prefix)
+	}
+	return dests, rows.Err()
+}
+
+func (psl *PostgresStorage) GetAllRates(tpid string) (map[string][]*Rate, error) {
+	rts := make(map[string][]*Rate)
+	rows, err := psl.Db.Query("SELECT * FROM tp_rates WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tag, destinations_tag string
+		var connect_fee, rate, priced_units, rate_increments float64
+		if err := rows.Scan(&id, &tpid, &tag, &destinations_tag, &connect_fee, &rate, &priced_units, &rate_increments); err != nil {
+			return nil, err
+		}
+
+		r := &Rate{
+			DestinationsTag: destinations_tag,
+			ConnectFee:      connect_fee,
+			Price:           rate,
+			PricedUnits:     priced_units,
+			RateIncrements:  rate_increments,
+		}
+
+		rts[tag] = append(rts[tag], r)
+	}
+	return rts, rows.Err()
+}
+
+func (psl *PostgresStorage) GetAllTimings(tpid string) (map[string][]*Timing, error) {
+	tms := make(map[string][]*Timing)
+	rows, err := psl.Db.Query("SELECT * FROM tp_timings WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tag, years, months, month_days, week_days, start_time string
+		if err := rows.Scan(&id, &tpid, &tag, &years, &months, &month_days, &week_days, &start_time); err != nil {
+			return nil, err
+		}
+		t := NewTiming(years, months, month_days, week_days, start_time)
+		tms[tag] = append(tms[tag], t)
+	}
+	return tms, rows.Err()
+}
+
+func (psl *PostgresStorage) GetAllRateTimings(tpid string) ([]*RateTiming, error) {
+	var rts []*RateTiming
+	rows, err := psl.Db.Query("SELECT * FROM tp_rate_timings WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var weight float64
+		var tpid, tag, rates_tag, timings_tag string
+		if err := rows.Scan(&id, &tpid, &tag, &rates_tag, &timings_tag, &weight); err != nil {
+			return nil, err
+		}
+		rt := &RateTiming{
+			Tag:        tag,
+			RatesTag:   rates_tag,
+			Weight:     weight,
+			TimingsTag: timings_tag,
+		}
+		rts = append(rts, rt)
+	}
+	return rts, rows.Err()
+}
+
+func (psl *PostgresStorage) GetAllRatingProfiles(tpid string) (map[string]*RatingProfile, error) {
+	rpfs := make(map[string]*RatingProfile)
+	rows, err := psl.Db.Query("SELECT * FROM tp_rate_profiles WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tenant, tor, direction, subject, fallbacksubject, rates_timing_tag, activation_time string
+
+		if err := rows.Scan(&id, &tpid, &tenant, &tor, &direction, &subject, &fallbacksubject, &rates_timing_tag, &activation_time); err != nil {
+			return nil, err
+		}
+		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
+		rp, ok := rpfs[key]
+		if !ok {
+			rp = &RatingProfile{Id: key}
+			rpfs[key] = rp
+		}
+		rp.tor = tor
+		rp.direction = direction
+		rp.subject = subject
+		rp.fallbackSubject = fallbacksubject
+		rp.ratesTimingTag = rates_timing_tag
+		rp.activationTime = activation_time
+	}
+	return rpfs, rows.Err()
+}
+func (psl *PostgresStorage) GetAllActions(tpid string) (map[string][]*Action, error) {
+	as := make(map[string][]*Action)
+	rows, err := psl.Db.Query("SELECT * FROM tp_actions WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var units, rate, minutes_weight, weight float64
+		var tpid, tag, action, balances_tag, direction, destinations_tag, rate_type string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balances_tag, &direction, &units, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
+			return nil, err
+		}
+		var a *Action
+		if balances_tag != MINUTES {
+			a = &Action{
+				ActionType: action,
+				BalanceId:  balances_tag,
+				Direction:  direction,
+				Units:      units,
+			}
+		} else {
+			var percent, price float64
+			if rate_type == PERCENT {
+				percent = rate
+			}
+			if rate_type == ABSOLUTE {
+				price = rate
+			}
+			a = &Action{
+				Id:         GenUUID(),
+				ActionType: action,
+				BalanceId:  balances_tag,
+				Direction:  direction,
+				Weight:     weight,
+				MinuteBucket: &MinuteBucket{
+					Seconds:       units,
+					Weight:        minutes_weight,
+					Price:         price,
+					Percent:       percent,
+					DestinationId: destinations_tag,
+				},
+			}
+		}
+		as[tag] = append(as[tag], a)
+	}
+	return as, rows.Err()
+}
+func (psl *PostgresStorage) GetAllActionTriggers(tpid string) (map[string][]*ActionTrigger, error) {
+	ats := make(map[string][]*ActionTrigger)
+	rows, err := psl.Db.Query("SELECT * FROM tp_action_triggers WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var threshold, weight float64
+		var tpid, tag, balances_tag, direction, destinations_tag, actions_tag string
+		if err := rows.Scan(&id, &tpid, &tag, &balances_tag, &direction, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
+			return nil, err
+		}
+
+		at := &ActionTrigger{
+			Id:             GenUUID(),
+			BalanceId:      balances_tag,
+			Direction:      direction,
+			ThresholdValue: threshold,
+			DestinationId:  destinations_tag,
+			ActionsId:      actions_tag,
+			Weight:         weight,
+		}
+		ats[tag] = append(ats[tag], at)
+	}
+	return ats, rows.Err()
+}
+
+func (psl *PostgresStorage) GetAllUserBalances(tpid string) ([]*UserBalance, error) {
+	var ubs []*UserBalance
+	rows, err := psl.Db.Query("SELECT * FROM tp_account_actions WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tenant, account, direction, action_timings_tag, action_triggers_tag string
+		if err := rows.Scan(&id, &tpid, &tenant, &account, &direction, &action_timings_tag, &action_triggers_tag); err != nil {
+			return nil, err
+		}
+
+		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
+		ub := &UserBalance{
+			Type:              UB_TYPE_PREPAID,
+			Id:                tag,
+			actionTriggersTag: action_triggers_tag,
+			actionTimingsTag:  action_timings_tag,
+		}
+		ubs = append(ubs, ub)
+	}
+	return ubs, rows.Err()
 }
