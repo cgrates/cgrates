@@ -77,7 +77,7 @@ In the stress folder you can find a better example of python client using a clas
 	result = rpc.call("Responder.Get", cd)
 	print result
 	
-6.1.3. JSON RPC
+6.1.3. Call API
 ---------------
 GetCost
 	Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
@@ -115,3 +115,157 @@ AddRecievedCallSeconds
 FlushCache
     Cleans all internal cached (Destinations, RatingProfiles)
 
+
+6.1.4. Importing API
+--------------------
+
+These operate on a tpid
+
+Destinations
+++++++++++++
+
+
+::
+
+   type Destination struct {
+       Tag      string
+       Prefixes []string
+   }
+
+SetDestination
+    Will set the prefixes for a specific destination. It will delete the existing prefixes if the destination is already in the database.
+
+Parametrs:
+
+TPid
+    A string containing traiff plan id
+
+Dest
+    A JSON string containing destination data.
+
+Example
+    SetDestination("1dec2012", '{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}')
+
+Reply
+    'ok'
+
+GetDestination
+
+DeleteDestination
+
+GetAllDestinations
+
+
+Timings
++++++++
+
+::
+
+   type Timing struct {
+      Tag
+      Years
+      Months
+      MonthDays
+      WeekDays
+      Time
+   }
+
+SetTiming
+
+Parametrs:
+
+TPid
+    A string containing traiff plan id
+
+Timing
+    A JSON string containing timing data.
+
+Example
+    SetTiming("1dec2012", '{"Tag": "MIDNIGHT", Year: "\*all", Months: "\*all", MonthDays: "\*all", WeekDays: "\*all", "Time": "00:00:00"}')
+
+GetTiming
+
+DeleteTiming
+
+GetAllTimings
+
+
+SetRate
+
+GetRate
+
+DeleteRate
+
+GetAllRates
+
+
+GetRateTiming
+
+SetRateTiming
+
+DeleteRateTiming
+
+GetAllRateTinings
+
+
+GetRatingProfile
+
+SetRatingProfile
+
+DeleteProfile
+
+GetAllRatingProfiles
+
+
+GetAction
+
+SetAction
+
+DeleteAction
+
+GetAllActions
+
+
+GetActionTiming
+
+SetActionTiming
+
+DeleteActionTiming
+
+GetAllActionTimings
+
+
+GetActionTrigger
+
+SetActionTrigger
+
+DeleteActionTrigger
+
+GetAllActionTriggers
+
+
+GetAccountAction
+
+SetAccountAction
+
+DeleteAccountAction
+
+GetAllAccountActions
+
+
+ImportWithOverride
+
+ImportWithFlush
+
+GetAllTariffPlanIds
+
+6.1.5. Management API
+---------------------
+These operates on live data
+
+ALL of the above APIs will be reused with tpid = "LIVE"
+
+Most management activitities will be done through account actions: define/document account more actions types.
+
+Questions:
+How do we keep track of changes? (Clone tpids?)
