@@ -132,7 +132,7 @@ Destinations
        Prefixes []string
    }
 
-SetDestination
+**SetDestination**
     Will set the prefixes for a specific destination. It will delete the existing prefixes if the destination is already in the database.
 
 Parametrs:
@@ -141,20 +141,56 @@ TPid
     A string containing traiff plan id
 
 Dest
-    A JSON string containing destination data.
+    A JSON string containing destination data
 
 Example
     SetDestination("1dec2012", '{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}')
 
-Reply
-    'ok'
+    Reply: '{"Reply": "ok"}'
 
-GetDestination
 
-DeleteDestination
+**GetDestination**
+   Gets a JSON destination structure.
 
-GetAllDestinations
+Parametrs:
 
+TPid
+   A string containing traiff plan id
+
+Tag
+   A destination tag string
+
+Example
+   GetDestination("1dec2012", "DAN_NET")
+   
+   Reply: '{"Replay": {"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}}'
+
+**DeleteDestination**
+   Delets a destination
+
+Parametrs:
+
+TPid
+   A string containing traiff plan id
+
+Tag
+   A destination tag string
+
+Example
+   DeleteDestination("1dec2012", "DAN_NET")
+   Replay: '{"Reply": "ok"}'
+
+**GetAllDestinations**
+   Get all destinations
+
+Parametrs:
+
+TPid
+   A string containing traiff plan id
+
+Example
+   GetAllDestinations("1dec2012")
+   Reply: '{"Reply": [{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}, {"Tag": "RIF_NET", "Prefixes": ["40723"]}]}'
 
 Timings
 +++++++
@@ -170,7 +206,7 @@ Timings
       Time
    }
 
-SetTiming
+**SetTiming**
 
 Parametrs:
 
@@ -269,3 +305,4 @@ Most management activitities will be done through account actions: define/docume
 
 Questions:
 How do we keep track of changes? (Clone tpids?)
+Should it be GetAll... or GetAll..Tags?
