@@ -30,6 +30,7 @@ import (
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/apier"
 	"io"
 	"net"
 	"net/rpc"
@@ -74,6 +75,7 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 
 	rater.Logger.Info(fmt.Sprintf("<Rater> Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
+	rpc.Register(&apier.Apier{})
 	var serveFunc func(io.ReadWriteCloser)
 	if rpc_encoding == JSON {
 		serveFunc = jsonrpc.ServeConn

@@ -16,45 +16,29 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
+
 package utils
 
 import (
-	"crypto/sha1"
-	"fmt"
-	"encoding/hex"
-	"crypto/rand"
+	"sort"
+	"strings"
 )
 
-// Returns first non empty string out of vals. Useful to extract defaults
-func FirstNonEmpty(vals ...string) string {
-	for _, val := range vals {
-		if len(val) != 0 {
-			return val
+// Binary string search in slice
+func IsSliceMember(ss []string, s string) bool {
+	sort.Strings(ss)
+	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
+		return true
+	}
+	return false
+}
+
+//Iterates over slice members and returns true of one starts with prefix
+func SliceMemberHasPrefix(ss []string, prfx string) bool {
+	for _, mbr := range ss {
+		if strings.HasPrefix(mbr, prfx) {
+			return true
 		}
 	}
-	return ""
-}
-
-func FSCgrId(uuid string) string {
-	hasher := sha1.New()
-	hasher.Write([]byte(uuid))
-	return fmt.Sprintf("%x", hasher.Sum(nil))
-}
-
-func NewTPid() string {
-	hasher := sha1.New()
-	uuid,_ := GenUUID()
-	hasher.Write([]byte(uuid))
-	return fmt.Sprintf("%x", hasher.Sum(nil))
-}
-
-func GenUUID() (string, error) {
-	uuid := make([]byte, 16)
-	n, err := rand.Read(uuid)
-	if n != len(uuid) || err != nil {
-		return "", err
-	}
-	uuid[8] = 0x80
-	uuid[4] = 0x40
-	return hex.EncodeToString(uuid), nil
+	return false
 }
