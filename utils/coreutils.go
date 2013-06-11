@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"encoding/hex"
 	"crypto/rand"
+	"strconv"
+	"time"
 )
 
 // Returns first non empty string out of vals. Useful to extract defaults
@@ -43,18 +45,21 @@ func FSCgrId(uuid string) string {
 
 func NewTPid() string {
 	hasher := sha1.New()
-	uuid,_ := GenUUID()
+	uuid := GenUUID()
 	hasher.Write([]byte(uuid))
 	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
 
-func GenUUID() (string, error) {
+// helper function for uuid generation
+func GenUUID() string {
 	uuid := make([]byte, 16)
 	n, err := rand.Read(uuid)
 	if n != len(uuid) || err != nil {
-		return "", err
+		return strconv.FormatInt(time.Now().UnixNano(), 10)
 	}
-	uuid[8] = 0x80
-	uuid[4] = 0x40
-	return hex.EncodeToString(uuid), nil
+	// TODO: verify the two lines implement RFC 4122 correctly
+	uuid[8] = 0x80 // variant bits see page 5
+	uuid[4] = 0x40 // version 4 Pseudo Random, see page 7
+
+	return hex.EncodeToString(uuid)
 }

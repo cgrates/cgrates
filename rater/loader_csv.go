@@ -27,6 +27,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type CSVReader struct {
@@ -375,7 +376,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
 			}
 			a = &Action{
-				Id:         GenUUID(),
+				Id:         utils.GenUUID(),
 				ActionType: record[1],
 				BalanceId:  record[2],
 				Direction:  record[3],
@@ -424,7 +425,7 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 		}
 		for _, t := range ts {
 			at := &ActionTiming{
-				Id:     GenUUID(),
+				Id:     utils.GenUUID(),
 				Tag:    record[2],
 				Weight: weight,
 				Timing: &Interval{
@@ -466,7 +467,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			return errors.New(fmt.Sprintf("Could not parse action trigger weight: %v", err))
 		}
 		at := &ActionTrigger{
-			Id:             GenUUID(),
+			Id:             utils.GenUUID(),
 			BalanceId:      record[1],
 			Direction:      record[2],
 			ThresholdValue: value,

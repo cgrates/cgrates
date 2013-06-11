@@ -92,7 +92,7 @@ func (mys *MySQLStorage) GetAllActionTimings(tpid string) (ats map[string][]*Act
 		}
 
 		at := &ActionTiming{
-			Id:        GenUUID(),
+			Id:        utils.GenUUID(),
 			Tag:       timings_tag,
 			Weight:    weight,
 			ActionsId: actions_tag,
@@ -348,7 +348,7 @@ func (mys *MySQLStorage) GetAllActions(tpid string) (map[string][]*Action, error
 				price = rate
 			}
 			a = &Action{
-				Id:         GenUUID(),
+				Id:         utils.GenUUID(),
 				ActionType: action,
 				BalanceId:  balances_tag,
 				Direction:  direction,
@@ -381,7 +381,7 @@ func (mys *MySQLStorage) GetAllActionTriggers(tpid string) (map[string][]*Action
 		}
 
 		at := &ActionTrigger{
-			Id:             GenUUID(),
+			Id:             utils.GenUUID(),
 			BalanceId:      balances_tag,
 			Direction:      direction,
 			ThresholdValue: threshold,

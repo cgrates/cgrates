@@ -330,7 +330,7 @@ func (psl *PostgresStorage) GetAllActions(tpid string) (map[string][]*Action, er
 				price = rate
 			}
 			a = &Action{
-				Id:         GenUUID(),
+				Id:         utils.GenUUID(),
 				ActionType: action,
 				BalanceId:  balances_tag,
 				Direction:  direction,
@@ -363,7 +363,7 @@ func (psl *PostgresStorage) GetAllActionTriggers(tpid string) (map[string][]*Act
 		}
 
 		at := &ActionTrigger{
-			Id:             GenUUID(),
+			Id:             utils.GenUUID(),
 			BalanceId:      balances_tag,
 			Direction:      direction,
 			ThresholdValue: threshold,

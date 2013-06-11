@@ -689,12 +689,6 @@ func TestActionResetCounterCREDIT(t *testing.T) {
 	}
 }
 
-func TestUUID(t *testing.T) {
-	uuid := GenUUID()
-	if len(uuid) == 0 {
-		t.Fatalf("GenUUID error %s", uuid)
-	}
-}
 
 func TestActionTriggerLogging(t *testing.T) {
 	at := &ActionTrigger{

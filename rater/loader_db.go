@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type DbReader struct {
@@ -216,7 +217,7 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 			}
 			for _, t := range ts {
 				actTmg := &ActionTiming{
-					Id:     GenUUID(),
+					Id:     utils.GenUUID(),
 					Tag:    at.Tag,
 					Weight: at.Weight,
 					Timing: &Interval{

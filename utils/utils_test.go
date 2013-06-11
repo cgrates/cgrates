@@ -32,3 +32,10 @@ func TestFirstNonEmpty(t *testing.T) {
 		t.Error("Wrong elemnt returned: ", winnerElmnt)
 	}
 }
+
+func TestUUID(t *testing.T) {
+        uuid := GenUUID()
+        if len(uuid) == 0 {
+                t.Fatalf("GenUUID error %s", uuid)
+        }
+}
