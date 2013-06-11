@@ -1,8 +1,6 @@
 --
 -- Table structure for table `tp_timings`
 --
-??? all float instead int
-
 CREATE TABLE `tp_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
@@ -40,7 +38,6 @@ CREATE TABLE `tp_rates` (
   `destinations_tag` varchar(24) NOT NULL,
   `connect_fee` DECIMAL(5,4) NOT NULL,
   `rate` DECIMAL(5,4) NOT NULL,
-??? priced_units
   `rate_increments` INT(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
@@ -56,7 +53,7 @@ CREATE TABLE `tp_rate_timings` (
   `tag` varchar(24) NOT NULL,
   `rates_tag` varchar(24) NOT NULL,
   `timings_tag` varchar(24) NOT NULL,
-  `weight` smallint(5) NOT NULL,
+  `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );
@@ -90,12 +87,12 @@ CREATE TABLE `tp_actions` (
   `action` varchar(24) NOT NULL,
   `balances_tag` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
-  `units` int(11) NOT NULL,
+  `units` DECIMAL(5,2) NOT NULL,
   `destinations_tag` varchar(24) NOT NULL,
   `rate_type` varchar(8) NOT NULL,
   `rate` DECIMAL(5,4) NOT NULL,
-  `minutes_weight` smallint(5) NOT NULL,
-  `weight` smallint(5) NOT NULL,
+  `minutes_weight` DECIMAL(5,2) NOT NULL,
+  `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );
@@ -110,7 +107,7 @@ CREATE TABLE `tp_action_timings` (
   `tag` varchar(24) NOT NULL,
   `actions_tag` varchar(24) NOT NULL,
   `timings_tag` varchar(24) NOT NULL,
-  `weight` smallint(5) NOT NULL,
+  `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );
@@ -125,10 +122,10 @@ CREATE TABLE `tp_action_triggers` (
   `tag` varchar(24) NOT NULL,
   `balances_tag` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
-  `threshold` int(11) NOT NULL,
+  `threshold` DECIMAL(5,4) NOT NULL,
   `destinations_tag` varchar(24) NOT NULL,
   `actions_tag` varchar(24) NOT NULL,
-  `weight` smallint(5) NOT NULL,
+  `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );
