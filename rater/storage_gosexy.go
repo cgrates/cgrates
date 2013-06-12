@@ -20,6 +20,7 @@ package rater
 
 import (
 	"fmt"
+	"errors"
 	"menteslibres.net/gosexy/redis"
 	//"log"
 	"github.com/cgrates/cgrates/utils"
@@ -103,7 +104,7 @@ func (rs *GosexyStorage) SetDestination(dest *Destination) (err error) {
 
 // Extracts destinations from StorDB on specific tariffplan id
 func (rs *GosexyStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
-	return nil, nil
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *GosexyStorage) GetActions(key string) (as Actions, err error) {

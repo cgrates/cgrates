@@ -20,6 +20,7 @@ package rater
 
 import (
 	"fmt"
+	"errors"
 	"github.com/garyburd/redigo/redis"
 	//"log"
 	"github.com/cgrates/cgrates/utils"
@@ -95,7 +96,7 @@ func (rs *RedigoStorage) SetDestination(dest *Destination) (err error) {
 
 // Extracts destinations from StorDB on specific tariffplan id
 func (rs *RedigoStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
-	return nil, nil
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedigoStorage) GetActions(key string) (as Actions, err error) {

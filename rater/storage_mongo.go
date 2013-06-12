@@ -20,6 +20,7 @@ package rater
 
 import (
 	"fmt"
+	"errors"
 	"github.com/cgrates/cgrates/utils"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
@@ -148,7 +149,7 @@ func (ms *MongoStorage) SetDestination(dest *Destination) error {
 
 // Extracts destinations from StorDB on specific tariffplan id
 func (ms *MongoStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
-	return nil, nil
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (ms *MongoStorage) GetActions(key string) (as Actions, err error) {
