@@ -107,6 +107,11 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+// Extracts destinations from StorDB on specific tariffplan id
+func (rs *RedisStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+	return nil, nil
+}
+
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	var values []byte
 	if values, err = rs.db.Cmd("get", ACTION_PREFIX+key).Bytes(); err == nil {

@@ -101,6 +101,11 @@ func (rs *GosexyStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+// Extracts destinations from StorDB on specific tariffplan id
+func (rs *GosexyStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+	return nil, nil
+}
+
 func (rs *GosexyStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {

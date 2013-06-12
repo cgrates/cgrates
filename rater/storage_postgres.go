@@ -63,6 +63,11 @@ func (psl *PostgresStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
+// Extracts destinations from StorDB on specific tariffplan id
+func (psl *PostgresStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+	return nil, nil
+}
+
 func (psl *PostgresStorage) GetActions(string) (as Actions, err error) {
 	return
 }

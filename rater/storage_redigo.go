@@ -93,6 +93,11 @@ func (rs *RedigoStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+// Extracts destinations from StorDB on specific tariffplan id
+func (rs *RedigoStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+	return nil, nil
+}
+
 func (rs *RedigoStorage) GetActions(key string) (as Actions, err error) {
 	var values []byte
 	if values, err = redis.Bytes(rs.db.Do("get", ACTION_PREFIX+key)); err == nil {

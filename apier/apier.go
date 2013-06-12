@@ -18,6 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package apier
 
+import (
+	"github.com/cgrates/cgrates/rater"
+)
+
 
 type Apier struct {
+	StorDb	rater.DataStorage
 }

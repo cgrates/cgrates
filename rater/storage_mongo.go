@@ -146,6 +146,11 @@ func (ms *MongoStorage) SetDestination(dest *Destination) error {
 	return ms.db.C("destinations").Insert(dest)
 }
 
+// Extracts destinations from StorDB on specific tariffplan id
+func (ms *MongoStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+	return nil, nil
+}
+
 func (ms *MongoStorage) GetActions(key string) (as Actions, err error) {
 	result := AcKeyValue{}
 	err = ms.db.C("actions").Find(bson.M{"key": key}).One(&result)

@@ -73,6 +73,12 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+// Extracts destinations from StorDB on specific tariffplan id
+func (ms *MapStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+        return nil, nil
+}
+
+
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)

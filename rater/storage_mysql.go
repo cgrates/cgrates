@@ -63,6 +63,31 @@ func (mys *MySQLStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
+// Extracts destinations from StorDB on specific tariffplan id
+func (mys *MySQLStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+	rows,err := mys.Db.Query(fmt.Sprintf("SELECT prefix FROM tp_destinatins WHERE id='%s' AND tag='%s'", tpid, destTag))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	d := &Destination{Id:destTag}
+	i := 0
+ 	for rows.Next() {
+  		i++ //Keep here a reference so we know we got at least one prefix
+		var pref string
+		err = rows.Scan( &pref )
+		if err != nil {
+			return nil, err
+		}
+		d.Prefixes = append( d.Prefixes, pref )
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return d, nil
+}
+
+
 func (mys *MySQLStorage) GetActions(string) (as Actions, err error) {
 	return
 }

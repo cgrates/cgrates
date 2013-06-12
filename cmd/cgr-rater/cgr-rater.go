@@ -64,7 +64,7 @@ var (
 	err      error
 )
 
-func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string) {
+func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string, loggerDb rater.DataStorage) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
@@ -75,7 +75,7 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 
 	rater.Logger.Info(fmt.Sprintf("<Rater> Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
-	rpc.Register(&apier.Apier{})
+	rpc.Register(&apier.Apier{StorDb:loggerDb})
 	var serveFunc func(io.ReadWriteCloser)
 	if rpc_encoding == JSON {
 		serveFunc = jsonrpc.ServeConn
@@ -298,13 +298,13 @@ func main() {
 	responder := &rater.Responder{ExitChan: exitChan}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
-		go listenToRPCRequests(responder, cfg.RaterListen, cfg.RPCEncoding)
+		go listenToRPCRequests(responder, cfg.RaterListen, cfg.RPCEncoding, loggerDb)
 	}
 	if cfg.BalancerEnabled {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
-		go listenToRPCRequests(responder, cfg.BalancerListen, cfg.RPCEncoding)
+		go listenToRPCRequests(responder, cfg.BalancerListen, cfg.RPCEncoding, loggerDb)
 		if cfg.RaterEnabled {
 			rater.Logger.Info("Starting internal rater.")
 			bal.AddClient("local", new(rater.ResponderWorker))
