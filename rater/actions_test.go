@@ -708,7 +708,7 @@ func TestActionTriggerLogging(t *testing.T) {
 	storageGetter.LogActionTrigger("rif", RATER_SOURCE, at, as)
 	//expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"
 	var key string
-	atMap, _ := storageGetter.GetAllActionTimings("")
+	atMap, _ := storageGetter.GetAllActionTimings()
 	for k, v := range atMap {
 		_ = k
 		_ = v
@@ -750,7 +750,7 @@ func TestActionTimingLogging(t *testing.T) {
 	storageGetter.LogActionTiming(SCHED_SOURCE, at, as)
 	//expected := "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|TEST_ACTIONS*|TOPUP|MONETARY|OUT|10|0"
 	var key string
-	atMap, _ := storageGetter.GetAllActionTimings("")
+	atMap, _ := storageGetter.GetAllActionTimings()
 	for k, v := range atMap {
 		_ = k
 		_ = v

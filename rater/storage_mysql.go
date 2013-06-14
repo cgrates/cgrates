@@ -101,7 +101,7 @@ func (mys *MySQLStorage) GetActionTimings(key string) (ats ActionTimings, err er
 
 func (mys *MySQLStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
 
-func (mys *MySQLStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) {
+func (mys *MySQLStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
 	return
 }
 

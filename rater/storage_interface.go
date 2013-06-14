@@ -64,7 +64,7 @@ type DataStorage interface {
 	SetUserBalance(*UserBalance) error
 	GetActionTimings(string) (ActionTimings, error)
 	SetActionTimings(string, ActionTimings) error
-	GetAllActionTimings(string) (map[string]ActionTimings, error)
+	GetAllActionTimings() (map[string]ActionTimings, error)
 	SetCdr(utils.CDR) error
 	SetRatedCdr(utils.CDR, *CallCost) error
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)

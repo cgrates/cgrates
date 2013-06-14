@@ -64,7 +64,7 @@ func (s *Scheduler) Loop() {
 }
 
 func (s *Scheduler) LoadActionTimings(storage rater.DataStorage) {
-	actionTimings, err := storage.GetAllActionTimings("")
+	actionTimings, err := storage.GetAllActionTimings()
 	if err != nil {
 		rater.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
 	}

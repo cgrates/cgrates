@@ -156,8 +156,8 @@ func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err err
 	return
 }
 
-func (rs *RedisStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) {
-	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + tpid + "*")
+func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
+	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (rs *RedisStorage) GetAllActionTimings(tpid string) (ats map[string]ActionT
 		}
 		var tempAts ActionTimings
 		err = rs.ms.Unmarshal([]byte(values), &tempAts)
-		ats[key[len(ACTION_TIMING_PREFIX+tpid):]] = tempAts
+		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}
 
 	return

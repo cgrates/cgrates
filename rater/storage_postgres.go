@@ -82,7 +82,7 @@ func (psl *PostgresStorage) GetActionTimings(key string) (ats ActionTimings, err
 
 func (psl *PostgresStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
 
-func (psl *PostgresStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) { return }
+func (psl *PostgresStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) { return }
 
 func (psl *PostgresStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	if psl.Db == nil {

@@ -182,7 +182,7 @@ func (ms *MongoStorage) SetActionTimings(key string, ats ActionTimings) error {
 	return ms.db.C("actiontimings").Insert(&AtKeyValue{key, ats})
 }
 
-func (ms *MongoStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) {
+func (ms *MongoStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
 	result := AtKeyValue{}
 	iter := ms.db.C("actiontimings").Find(nil).Iter()
 	ats = make(map[string]ActionTimings)
