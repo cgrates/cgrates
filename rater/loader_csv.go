@@ -22,12 +22,12 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/cgrates/cgrates/utils"
 )
 
 type CSVReader struct {
@@ -39,7 +39,7 @@ type CSVReader struct {
 	accountActions    []*UserBalance
 	destinations      []*Destination
 	rates             map[string][]*Rate
-	timings           map[string][]*Timing
+	timings           map[string]*Timing
 	activationPeriods map[string]*ActivationPeriod
 	ratingProfiles    map[string]*RatingProfile
 	// file names
@@ -54,7 +54,7 @@ func NewFileCSVReader(sep rune, destinationsFn, ratesFn, timingsFn, ratetimingsF
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
 	c.rates = make(map[string][]*Rate)
-	c.timings = make(map[string][]*Timing)
+	c.timings = make(map[string]*Timing)
 	c.activationPeriods = make(map[string]*ActivationPeriod)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.readerFunc = openFileCSVReader
@@ -235,8 +235,7 @@ func (csvr *CSVReader) LoadTimings() (err error) {
 			continue
 		}
 
-		t := NewTiming(record[1:]...)
-		csvr.timings[tag] = append(csvr.timings[tag], t)
+		csvr.timings[tag] = NewTiming(record[1:]...)
 	}
 	return
 }
@@ -258,23 +257,21 @@ func (csvr *CSVReader) LoadRateTimings() (err error) {
 			continue
 		}
 
-		ts, exists := csvr.timings[record[2]]
+		t, exists := csvr.timings[record[2]]
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get timing for tag %v", record[2]))
 		}
-		for _, t := range ts {
-			rt := NewRateTiming(record[1], t, record[3])
-			rs, exists := csvr.rates[record[1]]
-			if !exists {
-				return errors.New(fmt.Sprintf("Could not find rate for tag %v", record[1]))
+
+		rt := NewRateTiming(record[1], t, record[3])
+		rs, exists := csvr.rates[record[1]]
+		if !exists {
+			return errors.New(fmt.Sprintf("Could not find rate for tag %v", record[1]))
+		}
+		for _, r := range rs {
+			if _, exists := csvr.activationPeriods[tag]; !exists {
+				csvr.activationPeriods[tag] = &ActivationPeriod{}
 			}
-			for _, r := range rs {
-				_, exists := csvr.activationPeriods[tag]
-				if !exists {
-					csvr.activationPeriods[tag] = &ActivationPeriod{}
-				}
-				csvr.activationPeriods[tag].AddIntervalIfNotPresent(rt.GetInterval(r))
-			}
+			csvr.activationPeriods[tag].AddIntervalIfNotPresent(rt.GetInterval(r))
 		}
 	}
 	return
@@ -415,7 +412,7 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 		if !exists {
 			return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", record[1]))
 		}
-		ts, exists := csvr.timings[record[2]]
+		t, exists := csvr.timings[record[2]]
 		if !exists {
 			return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", record[2]))
 		}
@@ -423,21 +420,19 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("ActionTiming: Could not parse action timing weight: %v", err))
 		}
-		for _, t := range ts {
-			at := &ActionTiming{
-				Id:     utils.GenUUID(),
-				Tag:    record[2],
-				Weight: weight,
-				Timing: &Interval{
-					Months:    t.Months,
-					MonthDays: t.MonthDays,
-					WeekDays:  t.WeekDays,
-					StartTime: t.StartTime,
-				},
-				ActionsId: record[1],
-			}
-			csvr.actionsTimings[tag] = append(csvr.actionsTimings[tag], at)
+		at := &ActionTiming{
+			Id:     utils.GenUUID(),
+			Tag:    record[2],
+			Weight: weight,
+			Timing: &Interval{
+				Months:    t.Months,
+				MonthDays: t.MonthDays,
+				WeekDays:  t.WeekDays,
+				StartTime: t.StartTime,
+			},
+			ActionsId: record[1],
 		}
+		csvr.actionsTimings[tag] = append(csvr.actionsTimings[tag], at)
 	}
 	return
 }
@@ -516,5 +511,5 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 			at.UserBalanceIds = append(at.UserBalanceIds, tag)
 		}
 	}
-	return
+	return nil
 }

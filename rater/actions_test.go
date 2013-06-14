@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
+	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
 )
@@ -779,7 +780,7 @@ func TestActionMakeNegative(t *testing.T) {
 func BenchmarkUUID(b *testing.B) {
 	m := make(map[string]int, 1000)
 	for i := 0; i < b.N; i++ {
-		uuid := GenUUID()
+		uuid := utils.GenUUID()
 		if len(uuid) == 0 {
 			b.Fatalf("GenUUID error %s", uuid)
 		}

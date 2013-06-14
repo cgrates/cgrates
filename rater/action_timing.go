@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"sort"
 	"strconv"
@@ -36,7 +34,7 @@ const (
 
 type ActionTiming struct {
 	Id                     string // uniquely identify the timing
-	Tag                    string // informative purpos only
+	Tag                    string // informative purpose only
 	UserBalanceIds         []string
 	Timing                 *Interval
 	Weight                 float64
@@ -278,18 +276,4 @@ func (atpl ActionTimingPriotityList) Sort() {
 
 func (at *ActionTiming) String() string {
 	return at.Tag + " " + at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
-}
-
-// helper function for uuid generation
-func GenUUID() string {
-	uuid := make([]byte, 16)
-	n, err := rand.Read(uuid)
-	if n != len(uuid) || err != nil {
-		return strconv.FormatInt(time.Now().UnixNano(), 10)
-	}
-	// TODO: verify the two lines implement RFC 4122 correctly
-	uuid[8] = 0x80 // variant bits see page 5
-	uuid[4] = 0x40 // version 4 Pseudo Random, see page 7
-
-	return hex.EncodeToString(uuid)
 }

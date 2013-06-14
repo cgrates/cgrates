@@ -226,7 +226,7 @@ func configureDatabase(db_type, host, port, name, user, pass string) (getter rat
 		if port != "" {
 			host += ":" + port
 		}
-		getter, err = rater.NewGosexyStorage(host, db_nb, pass)
+		getter, err = rater.NewRedisStorage(host, db_nb, pass)
 	case MONGO:
 		getter, err = rater.NewMongoStorage(host, port, name, user, pass)
 	case POSTGRES:

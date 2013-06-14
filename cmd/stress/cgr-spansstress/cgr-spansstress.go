@@ -59,7 +59,7 @@ func main() {
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
 	cd := rater.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 
-	getter, err := rater.NewGosexyStorage("localhost:6379", 10, "")
+	getter, err := rater.NewRedisStorage("localhost:6379", 10, "")
 	//getter, err := rater.NewMongoStorage("localhost", "cgrates")
 	defer getter.Close()
 

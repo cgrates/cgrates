@@ -50,7 +50,6 @@ type UserBalance struct {
 	MinuteBuckets                       []*MinuteBucket
 	UnitCounters                        []*UnitsCounter
 	ActionTriggers                      ActionTriggerPriotityList
-	actionTriggersTag, actionTimingsTag string // used only for loading
 }
 
 /*

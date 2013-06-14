@@ -130,8 +130,8 @@ func (ms *MapStorage) SetActionTimings(key string, ats ActionTimings) (err error
 	return
 }
 
-func (ms *MapStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
-	ats = make(map[string][]*ActionTiming)
+func (ms *MapStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) {
+	ats = make(map[string]ActionTimings)
 	for key, value := range ms.dict {
 		if !strings.Contains(key, ACTION_TIMING_PREFIX+tpid) {
 			continue
@@ -198,28 +198,31 @@ func (ms *MapStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
 
-func (ms *MapStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+func (ms *MapStorage) GetTpDestinations(tpid string) ([]*Destination, error) {
 	return nil, nil
 }
 
-func (ms *MapStorage) GetAllRates(string) (map[string][]*Rate, error) {
+func (ms *MapStorage) GetTpRates(string) (map[string][]*Rate, error) {
 	return nil, nil
 }
-func (ms *MapStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+func (ms *MapStorage) GetTpTimings(string) (map[string]*Timing, error) {
 	return nil, nil
 }
-func (ms *MapStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+func (ms *MapStorage) GetTpRateTimings(string) ([]*RateTiming, error) {
 	return nil, nil
 }
-func (ms *MapStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+func (ms *MapStorage) GetTpRatingProfiles(string) (map[string]*RatingProfile, error) {
 	return nil, nil
 }
-func (ms *MapStorage) GetAllActions(string) (map[string][]*Action, error) {
+func (ms *MapStorage) GetTpActions(string) (map[string][]*Action, error) {
 	return nil, nil
 }
-func (ms *MapStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+func (ms *MapStorage) GetTpActionTimings(string) (map[string][]*ActionTiming, error) {
 	return nil, nil
 }
-func (ms *MapStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
+func (ms *MapStorage) GetTpActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
+}
+func (ms *MapStorage) GetTpAccountActions(string) ([]*AccountAction, error) {
 	return nil, nil
 }

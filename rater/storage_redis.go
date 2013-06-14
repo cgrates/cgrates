@@ -156,12 +156,12 @@ func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err err
 	return
 }
 
-func (rs *RedisStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
+func (rs *RedisStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) {
 	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + tpid + "*")
 	if err != nil {
 		return nil, err
 	}
-	ats = make(map[string][]*ActionTiming, len(keys))
+	ats = make(map[string]ActionTimings, len(keys))
 	for _, key := range keys {
 		values, err := rs.db.Get(key)
 		if err != nil {
@@ -232,28 +232,31 @@ func (rs *RedisStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
 
-func (rs *RedisStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+func (rs *RedisStorage) GetTpDestinations(tpid string) ([]*Destination, error) {
 	return nil, nil
 }
 
-func (rs *RedisStorage) GetAllRates(string) (map[string][]*Rate, error) {
+func (rs *RedisStorage) GetTpRates(string) (map[string][]*Rate, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+func (rs *RedisStorage) GetTpTimings(string) (map[string]*Timing, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+func (rs *RedisStorage) GetTpRateTimings(string) ([]*RateTiming, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+func (rs *RedisStorage) GetTpRatingProfiles(string) (map[string]*RatingProfile, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetAllActions(string) (map[string][]*Action, error) {
+func (rs *RedisStorage) GetTpActions(string) (map[string][]*Action, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+func (rs *RedisStorage) GetTpActionTimings(string) (map[string][]*ActionTiming, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
+func (rs *RedisStorage) GetTpActionTriggers(string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
+}
+func (rs *RedisStorage) GetTpAccountActions(string) ([]*AccountAction, error) {
 	return nil, nil
 }

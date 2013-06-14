@@ -99,7 +99,7 @@ type RateTiming struct {
 	Tag        string
 	RatesTag   string
 	Weight     float64
-	TimingsTag string
+	TimingsTag string // intermediary used when loading from db
 	timing     *Timing
 }
 

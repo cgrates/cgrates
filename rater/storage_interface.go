@@ -64,7 +64,7 @@ type DataStorage interface {
 	SetUserBalance(*UserBalance) error
 	GetActionTimings(string) (ActionTimings, error)
 	SetActionTimings(string, ActionTimings) error
-	GetAllActionTimings(string) (map[string][]*ActionTiming, error)
+	GetAllActionTimings(string) (map[string]ActionTimings, error)
 	SetCdr(utils.CDR) error
 	SetRatedCdr(utils.CDR, *CallCost) error
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
@@ -74,14 +74,15 @@ type DataStorage interface {
 	LogActionTiming(source string, at *ActionTiming, as Actions) error
 	GetCallCostLog(uuid, source string) (*CallCost, error)
 	// loader functions
-	GetAllDestinations(string) ([]*Destination, error)
-	GetAllRates(string) (map[string][]*Rate, error)
-	GetAllTimings(string) (map[string][]*Timing, error)
-	GetAllRateTimings(string) ([]*RateTiming, error)
-	GetAllRatingProfiles(string) (map[string]*RatingProfile, error)
-	GetAllActions(string) (map[string][]*Action, error)
-	GetAllActionTriggers(string) (map[string][]*ActionTrigger, error)
-	GetAllUserBalances(string) ([]*UserBalance, error)
+	GetTpDestinations(string) ([]*Destination, error)
+	GetTpRates(string) (map[string][]*Rate, error)
+	GetTpTimings(string) (map[string]*Timing, error)
+	GetTpRateTimings(string) ([]*RateTiming, error)
+	GetTpRatingProfiles(string) (map[string]*RatingProfile, error)
+	GetTpActions(string) (map[string][]*Action, error)
+	GetTpActionTimings(string) (map[string][]*ActionTiming, error)
+	GetTpActionTriggers(string) (map[string][]*ActionTrigger, error)
+	GetTpAccountActions(string) ([]*AccountAction, error)
 }
 
 type Marshaler interface {

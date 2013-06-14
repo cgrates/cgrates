@@ -84,7 +84,7 @@ func main() {
 		if *db_port != "" {
 			*db_host += ":" + *db_port
 		}
-		getter, err = rater.NewGosexyStorage(*db_host, db_nb, *db_pass)
+		getter, err = rater.NewRedisStorage(*db_host, db_nb, *db_pass)
 	case MONGO:
 		getter, err = rater.NewMongoStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
 	case MYSQL:
@@ -94,7 +94,7 @@ func main() {
 	default:
 		log.Fatal("Unknown data db type, exiting!")
 	}
-
+	defer getter.Close()
 	if err != nil {
 		log.Fatalf("Could not open database connection: %v", err)
 	}

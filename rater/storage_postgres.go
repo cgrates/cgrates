@@ -82,9 +82,7 @@ func (psl *PostgresStorage) GetActionTimings(key string) (ats ActionTimings, err
 
 func (psl *PostgresStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
 
-func (psl *PostgresStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
-	return
-}
+func (psl *PostgresStorage) GetAllActionTimings(tpid string) (ats map[string]ActionTimings, err error) { return }
 
 func (psl *PostgresStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	if psl.Db == nil {
@@ -180,7 +178,7 @@ func (psl *PostgresStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error)
 	return
 }
 
-func (psl *PostgresStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+func (psl *PostgresStorage) GetTpDestinations(tpid string) ([]*Destination, error) {
 	var dests []*Destination
 	rows, err := psl.Db.Query("SELECT * FROM tp_destinations WHERE tpid=?", tpid)
 	if err != nil {
@@ -208,7 +206,7 @@ func (psl *PostgresStorage) GetAllDestinations(tpid string) ([]*Destination, err
 	return dests, rows.Err()
 }
 
-func (psl *PostgresStorage) GetAllRates(tpid string) (map[string][]*Rate, error) {
+func (psl *PostgresStorage) GetTpRates(tpid string) (map[string][]*Rate, error) {
 	rts := make(map[string][]*Rate)
 	rows, err := psl.Db.Query("SELECT * FROM tp_rates WHERE tpid=?", tpid)
 	if err != nil {
@@ -235,8 +233,8 @@ func (psl *PostgresStorage) GetAllRates(tpid string) (map[string][]*Rate, error)
 	return rts, rows.Err()
 }
 
-func (psl *PostgresStorage) GetAllTimings(tpid string) (map[string][]*Timing, error) {
-	tms := make(map[string][]*Timing)
+func (psl *PostgresStorage) GetTpTimings(tpid string) (map[string]*Timing, error) {
+	tms := make(map[string]*Timing)
 	rows, err := psl.Db.Query("SELECT * FROM tp_timings WHERE tpid=?", tpid)
 	if err != nil {
 		return nil, err
@@ -247,13 +245,12 @@ func (psl *PostgresStorage) GetAllTimings(tpid string) (map[string][]*Timing, er
 		if err := rows.Scan(&id, &tpid, &tag, &years, &months, &month_days, &week_days, &start_time); err != nil {
 			return nil, err
 		}
-		t := NewTiming(years, months, month_days, week_days, start_time)
-		tms[tag] = append(tms[tag], t)
+		tms[tag] = NewTiming(years, months, month_days, week_days, start_time)
 	}
 	return tms, rows.Err()
 }
 
-func (psl *PostgresStorage) GetAllRateTimings(tpid string) ([]*RateTiming, error) {
+func (psl *PostgresStorage) GetTpRateTimings(tpid string) ([]*RateTiming, error) {
 	var rts []*RateTiming
 	rows, err := psl.Db.Query("SELECT * FROM tp_rate_timings WHERE tpid=?", tpid)
 	if err != nil {
@@ -277,7 +274,7 @@ func (psl *PostgresStorage) GetAllRateTimings(tpid string) ([]*RateTiming, error
 	return rts, rows.Err()
 }
 
-func (psl *PostgresStorage) GetAllRatingProfiles(tpid string) (map[string]*RatingProfile, error) {
+func (psl *PostgresStorage) GetTpRatingProfiles(tpid string) (map[string]*RatingProfile, error) {
 	rpfs := make(map[string]*RatingProfile)
 	rows, err := psl.Db.Query("SELECT * FROM tp_rate_profiles WHERE tpid=?", tpid)
 	if err != nil {
@@ -305,7 +302,7 @@ func (psl *PostgresStorage) GetAllRatingProfiles(tpid string) (map[string]*Ratin
 	}
 	return rpfs, rows.Err()
 }
-func (psl *PostgresStorage) GetAllActions(tpid string) (map[string][]*Action, error) {
+func (psl *PostgresStorage) GetTpActions(tpid string) (map[string][]*Action, error) {
 	as := make(map[string][]*Action)
 	rows, err := psl.Db.Query("SELECT * FROM tp_actions WHERE tpid=?", tpid)
 	if err != nil {
@@ -353,7 +350,33 @@ func (psl *PostgresStorage) GetAllActions(tpid string) (map[string][]*Action, er
 	}
 	return as, rows.Err()
 }
-func (psl *PostgresStorage) GetAllActionTriggers(tpid string) (map[string][]*ActionTrigger, error) {
+
+func (psl *PostgresStorage) GetTpActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
+	ats = make(map[string][]*ActionTiming)
+	rows, err := psl.Db.Query("SELECT * FROM tp_action_timings WHERE tpid=?", tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var weight float64
+		var tpid, tag, actions_tag, timings_tag string
+		if err := rows.Scan(&id, &tpid, &tag, &actions_tag, &timings_tag, &weight); err != nil {
+			return nil, err
+		}
+
+		at := &ActionTiming{
+			Id:        utils.GenUUID(),
+			Tag:       timings_tag,
+			Weight:    weight,
+			ActionsId: actions_tag,
+		}
+		ats[tag] = append(ats[tag], at)
+	}
+	return ats, rows.Err()
+}
+
+func (psl *PostgresStorage) GetTpActionTriggers(tpid string) (map[string][]*ActionTrigger, error) {
 	ats := make(map[string][]*ActionTrigger)
 	rows, err := psl.Db.Query("SELECT * FROM tp_action_triggers WHERE tpid=?", tpid)
 	if err != nil {
@@ -381,8 +404,8 @@ func (psl *PostgresStorage) GetAllActionTriggers(tpid string) (map[string][]*Act
 	return ats, rows.Err()
 }
 
-func (psl *PostgresStorage) GetAllUserBalances(tpid string) ([]*UserBalance, error) {
-	var ubs []*UserBalance
+func (psl *PostgresStorage) GetTpAccountActions(tpid string) ([]*AccountAction, error) {
+	var acs []*AccountAction
 	rows, err := psl.Db.Query("SELECT * FROM tp_account_actions WHERE tpid=?", tpid)
 	if err != nil {
 		return nil, err
@@ -394,14 +417,14 @@ func (psl *PostgresStorage) GetAllUserBalances(tpid string) ([]*UserBalance, err
 			return nil, err
 		}
 
-		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
-		ub := &UserBalance{
-			Type:              UB_TYPE_PREPAID,
-			Id:                tag,
-			actionTriggersTag: action_triggers_tag,
-			actionTimingsTag:  action_timings_tag,
+		aa := &AccountAction{
+			Tenant:            tenant,
+			Account:           account,
+			Direction:         direction,
+			ActionTimingsTag:  action_timings_tag,
+			ActionTriggersTag: action_triggers_tag,
 		}
-		ubs = append(ubs, ub)
+		acs = append(acs, aa)
 	}
-	return ubs, rows.Err()
+	return acs, rows.Err()
 }
