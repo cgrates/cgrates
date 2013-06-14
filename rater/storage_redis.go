@@ -20,9 +20,12 @@ package rater
 
 import (
 	"fmt"
-	"github.com/fzzy/radix/redis"
+	"errors"
+	"menteslibres.net/gosexy/redis"
 	//"log"
 	"github.com/cgrates/cgrates/utils"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -33,126 +36,111 @@ type RedisStorage struct {
 }
 
 func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
-	ndb, err := redis.DialTimeout("tcp", address, 5*time.Second)
+	addrSplit := strings.Split(address, ":")
+	host := addrSplit[0]
+	port := 6379
+	if len(addrSplit) == 2 {
+		port, _ = strconv.Atoi(addrSplit[1])
+	}
+	ndb := redis.New()
+	err := ndb.Connect(host, uint(port))
 	if err != nil {
 		return nil, err
 	}
 	if pass != "" {
-		r := ndb.Cmd("auth", pass)
-		if r.Err != nil {
-			return nil, r.Err
+		if _, err = ndb.Auth(pass); err != nil {
+			return nil, err
 		}
 	}
 	if db > 0 {
-		r := ndb.Cmd("select", db)
-		if r.Err != nil {
-			return nil, r.Err
+		if _, err = ndb.Select(int64(db)); err != nil {
+			return nil, err
 		}
 	}
-	// test: to be removed
-	ms := new(MyMarshaler)
-	return &RedisStorage{db: ndb, dbNb: db, ms: ms}, nil
+	return &RedisStorage{db: ndb, dbNb: db, ms: new(MyMarshaler)}, nil
 }
 
 func (rs *RedisStorage) Close() {
-	rs.db.Close()
+	rs.db.Quit()
 }
 
 func (rs *RedisStorage) Flush() (err error) {
-	r := rs.db.Cmd("flushdb")
-	if r.Err != nil {
-		return r.Err
-	}
+	_, err = rs.db.FlushDB()
 	return
 }
 
 func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
-	if values, err := rs.db.Cmd("get", RATING_PROFILE_PREFIX+key).Bytes(); err == nil {
+	var values string
+	if values, err = rs.db.Get(RATING_PROFILE_PREFIX + key); err == nil {
 		rp = new(RatingProfile)
-		err = rs.ms.Unmarshal(values, rp)
-	} else {
-		return nil, err
+		err = rs.ms.Unmarshal([]byte(values), rp)
 	}
 	return
 }
 
 func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := rs.ms.Marshal(rp)
-	r := rs.db.Cmd("set", RATING_PROFILE_PREFIX+rp.Id, string(result))
-	if r.Err != nil {
-		return r.Err
-	}
+	_, err = rs.db.Set(RATING_PROFILE_PREFIX+rp.Id, result)
 	return
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
-	if values, err := rs.db.Cmd("get", DESTINATION_PREFIX+key).Bytes(); err == nil {
+	var values string
+	if values, err = rs.db.Get(DESTINATION_PREFIX + key); err == nil {
 		dest = &Destination{Id: key}
-		err = rs.ms.Unmarshal(values, dest)
-	} else {
-		return nil, err
+		err = rs.ms.Unmarshal([]byte(values), dest)
 	}
 	return
 }
 
 func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
-	result, err := rs.ms.Marshal(dest)
-	if err != nil {
-		return err
+	var result []byte
+	if result, err = rs.ms.Marshal(dest); err != nil {
+		return
 	}
-	r := rs.db.Cmd("set", DESTINATION_PREFIX+dest.Id, string(result))
-	if r.Err != nil {
-		return r.Err
-	}
+	_, err = rs.db.Set(DESTINATION_PREFIX+dest.Id, result)
 	return
 }
 
 // Extracts destinations from StorDB on specific tariffplan id
 func (rs *RedisStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
-	return nil, nil
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
-	var values []byte
-	if values, err = rs.db.Cmd("get", ACTION_PREFIX+key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &as)
+	var values string
+	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {
+		err = rs.ms.Unmarshal([]byte(values), &as)
 	}
 	return
 }
 
 func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
-	r := rs.db.Cmd("set", ACTION_PREFIX+key, string(result))
-	if r.Err != nil {
-		return r.Err
-	}
+	_, err = rs.db.Set(ACTION_PREFIX+key, result)
 	return
 }
 
 func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
-	if values, err := rs.db.Cmd("get", USER_BALANCE_PREFIX+key).Bytes(); err == nil {
+	var values string
+	if values, err = rs.db.Get(USER_BALANCE_PREFIX + key); err == nil {
 		ub = &UserBalance{Id: key}
-		err = rs.ms.Unmarshal(values, ub)
-	} else {
-		return nil, err
+		err = rs.ms.Unmarshal([]byte(values), ub)
 	}
+
 	return
 }
 
 func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 	result, err := rs.ms.Marshal(ub)
-	r := rs.db.Cmd("set", USER_BALANCE_PREFIX+ub.Id, string(result))
-	if r.Err != nil {
-		return r.Err
-	}
+	_, err = rs.db.Set(USER_BALANCE_PREFIX+ub.Id, result)
 	return
 }
 
 func (rs *RedisStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
-	if values, err := rs.db.Cmd("get", ACTION_TIMING_PREFIX+key).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, &ats)
-	} else {
-		return nil, err
+	var values string
+	if values, err = rs.db.Get(ACTION_TIMING_PREFIX + key); err == nil {
+		err = rs.ms.Unmarshal([]byte(values), &ats)
 	}
 	return
 }
@@ -160,33 +148,27 @@ func (rs *RedisStorage) GetActionTimings(key string) (ats ActionTimings, err err
 func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
 	if len(ats) == 0 {
 		// delete the key
-		r := rs.db.Cmd("del", ACTION_TIMING_PREFIX+key)
-		if r.Err != nil {
-			return r.Err
-		}
-		return
+		_, err = rs.db.Del(ACTION_TIMING_PREFIX + key)
+		return err
 	}
 	result, err := rs.ms.Marshal(&ats)
-	r := rs.db.Cmd("set", ACTION_TIMING_PREFIX+key, string(result))
-	if r.Err != nil {
-		return r.Err
-	}
+	_, err = rs.db.Set(ACTION_TIMING_PREFIX+key, result)
 	return
 }
 
 func (rs *RedisStorage) GetAllActionTimings(tpid string) (ats map[string][]*ActionTiming, err error) {
-	keys, err := rs.db.Cmd("keys", ACTION_TIMING_PREFIX+tpid+"*").List()
+	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + tpid + "*")
 	if err != nil {
-		return
+		return nil, err
 	}
 	ats = make(map[string][]*ActionTiming, len(keys))
 	for _, key := range keys {
-		values, err := rs.db.Cmd("get", key).Bytes()
+		values, err := rs.db.Get(key)
 		if err != nil {
 			continue
 		}
 		var tempAts ActionTimings
-		err = rs.ms.Unmarshal(values, &tempAts)
+		err = rs.ms.Unmarshal([]byte(values), &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX+tpid):]] = tempAts
 	}
 
@@ -194,22 +176,19 @@ func (rs *RedisStorage) GetAllActionTimings(tpid string) (ats map[string][]*Acti
 }
 
 func (rs *RedisStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
-	result, err := rs.ms.Marshal(cc)
+	var result []byte
+	result, err = rs.ms.Marshal(cc)
 	if err != nil {
 		return
 	}
-	r := rs.db.Cmd("set", LOG_CALL_COST_PREFIX+source+"_"+uuid, string(result))
-	if r.Err != nil {
-		return r.Err
-	}
+	_, err = rs.db.Set(LOG_CALL_COST_PREFIX+source+"_"+uuid, result)
 	return
 }
 
 func (rs *RedisStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	if values, err := rs.db.Cmd("get", LOG_CALL_COST_PREFIX+source+"_"+uuid).Bytes(); err == nil {
-		err = rs.ms.Unmarshal(values, cc)
-	} else {
-		return nil, err
+	var values string
+	if values, err = rs.db.Get(LOG_CALL_COST_PREFIX + source + "_" + uuid); err == nil {
+		err = rs.ms.Unmarshal([]byte(values), cc)
 	}
 	return
 }
@@ -223,7 +202,7 @@ func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	if err != nil {
 		return
 	}
-	rs.db.Cmd("set", LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
+	rs.db.Set(LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
 	return
 }
 
@@ -236,15 +215,12 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	if err != nil {
 		return
 	}
-	rs.db.Cmd("set", LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), fmt.Sprintf("%s*%s", string(mat), string(mas)))
+	_, err = rs.db.Set(LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s", string(mat), string(mas))))
 	return
 }
 
 func (rs *RedisStorage) LogError(uuid, source, errstr string) (err error) {
-	r := rs.db.Cmd("set", LOG_ERR+source+"_"+uuid, errstr)
-	if r.Err != nil {
-		return r.Err
-	}
+	_, err = rs.db.Set(LOG_ERR+source+"_"+uuid, errstr)
 	return
 }
 
@@ -256,28 +232,28 @@ func (rs *RedisStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
 
-func (ms *RedisStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
+func (rs *RedisStorage) GetAllDestinations(tpid string) ([]*Destination, error) {
 	return nil, nil
 }
 
-func (ms *RedisStorage) GetAllRates(string) (map[string][]*Rate, error) {
+func (rs *RedisStorage) GetAllRates(string) (map[string][]*Rate, error) {
 	return nil, nil
 }
-func (ms *RedisStorage) GetAllTimings(string) (map[string][]*Timing, error) {
+func (rs *RedisStorage) GetAllTimings(string) (map[string][]*Timing, error) {
 	return nil, nil
 }
-func (ms *RedisStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
+func (rs *RedisStorage) GetAllRateTimings(string) ([]*RateTiming, error) {
 	return nil, nil
 }
-func (ms *RedisStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
+func (rs *RedisStorage) GetAllRatingProfiles(string) (map[string]*RatingProfile, error) {
 	return nil, nil
 }
-func (ms *RedisStorage) GetAllActions(string) (map[string][]*Action, error) {
+func (rs *RedisStorage) GetAllActions(string) (map[string][]*Action, error) {
 	return nil, nil
 }
-func (ms *RedisStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
+func (rs *RedisStorage) GetAllActionTriggers(string) (map[string][]*ActionTrigger, error) {
 	return nil, nil
 }
-func (ms *RedisStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
+func (rs *RedisStorage) GetAllUserBalances(string) ([]*UserBalance, error) {
 	return nil, nil
 }
