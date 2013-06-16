@@ -61,43 +61,19 @@ func (self *Apier) SetDestination(dest *rater.Destination, reply *rater.Destinat
 	return nil
 }
 
-type AttrBalance struct {
+type AttrGetBalance struct {
 	Account   string
+	BalanceId string
 	Direction string
 }
 
-func (self *Apier) GetMoneyBalance(attr *AttrBalance, reply *float64) (err error) {
-	err = self.getBalance(attr, rater.CREDIT, reply)
-	return err
-}
-
-func (self *Apier) GetSMSBalance(attr *AttrBalance, reply *float64) (err error) {
-	err = self.getBalance(attr, rater.SMS, reply)
-	return err
-}
-
-func (self *Apier) GetInternetBalance(attr *AttrBalance, reply *float64) (err error) {
-	err = self.getBalance(attr, rater.TRAFFIC, reply)
-	return err
-}
-
-func (self *Apier) GetInternetTimeBalance(attr *AttrBalance, reply *float64) (err error) {
-	err = self.getBalance(attr, rater.TRAFFIC_TIME, reply)
-	return err
-}
-
-func (self *Apier) GetMinutesBalance(attr *AttrBalance, reply *float64) (err error) {
-	err = self.getBalance(attr, rater.MINUTES, reply)
-	return err
-}
-
 // Get balance
-func (self *Apier) getBalance(attr *AttrBalance, balanceId string, reply *float64) (err error) {
+func (self *Apier) GetBalance(attr *AttrGetBalance, reply *float64) error {
 	userBalance, err := self.StorDb.GetUserBalance(attr.Account)
 	if err != nil {
 		return err
 	}
-	if balance, balExists := userBalance.BalanceMap[balanceId+attr.Direction]; !balExists {
+	if balance, balExists := userBalance.BalanceMap[attr.BalanceId+attr.Direction]; !balExists {
 		// No match, balanceId not found
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
@@ -106,7 +82,63 @@ func (self *Apier) getBalance(attr *AttrBalance, balanceId string, reply *float6
 	return nil
 }
 
-func (self *Apier) AddTimedAction(attr *AttrBalance, reply *float64) (err error) {
-	err = self.getBalance(attr, rater.MINUTES, reply)
+type AttrAddBalance struct {
+	Account   string
+	BalanceId string
+	Direction string
+	Value     float64
+}
+
+func (self *Apier) AddBalance(attr *AttrAddBalance, reply *float64) error {
+	// what storage instance do we use?
+
+	at := &rater.ActionTiming{
+		UserBalanceIds: []string{attr.Account},
+	}
+
+	at.SetActions(rater.Actions{&rater.Action{BalanceId: attr.BalanceId, Direction: attr.Direction, Units: attr.Value}})
+
+	if err := at.Execute(); err != nil {
+		return err
+	}
+	// what to put in replay?
+	return nil
+}
+
+type AttrExecuteAction struct {
+	Account   string
+	BalanceId string
+	ActionsId string
+}
+
+func (self *Apier) ExecuteAction(attr *AttrExecuteAction, reply *float64) error {
+	at := &rater.ActionTiming{
+		UserBalanceIds: []string{attr.Account},
+		ActionsId:      attr.ActionsId,
+	}
+
+	if err := at.Execute(); err != nil {
+		return err
+	}
+	// what to put in replay
+	return nil
+}
+
+type AttrSetRatingProfile struct {
+	Subject         string
+	RatingProfileId string
+}
+
+func (self *Apier) SetRatingProfile(attr *AttrSetRatingProfile, reply *float64) error {
+	subject, err := self.StorDb.GetRatingProfile(attr.Subject)
+	if err != nil {
+		return err
+	}
+	rp, err := self.StorDb.GetRatingProfile(attr.RatingProfileId)
+	if err != nil {
+		return err
+	}
+	subject.DestinationMap = rp.DestinationMap
+	err = self.StorDb.SetRatingProfile(subject)
 	return err
 }

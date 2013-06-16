@@ -186,23 +186,16 @@ func (at *ActionTiming) resetStartTimeCache() {
 	at.stCache = time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
 }
 
+func (at *ActionTiming) SetActions(as Actions) {
+	at.actions = as
+}
+
 func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
 		at.actions, err = storageGetter.GetActions(at.ActionsId)
 	}
 	at.actions.Sort()
 	return at.actions, err
-}
-
-func (at *ActionTiming) getUserBalances() (ubs []*UserBalance) {
-	for _, ubId := range at.UserBalanceIds {
-		ub, err := storageGetter.GetUserBalance(ubId)
-		if err != nil {
-			Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
-		}
-		ubs = append(ubs, ub)
-	}
-	return
 }
 
 func (at *ActionTiming) Execute() (err error) {
@@ -218,8 +211,13 @@ func (at *ActionTiming) Execute() (err error) {
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
-		for _, ub := range at.getUserBalances() {
-			AccLock.Guard(ub.Id, func() (float64, error) {
+		for _, ubId := range at.UserBalanceIds {
+			AccLock.Guard(ubId, func() (float64, error) {
+				ub, err := storageGetter.GetUserBalance(ubId)
+				if err != nil {
+					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
+				}
+
 				Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
 				err = actionFunction(ub, a)
 				storageGetter.SetUserBalance(ub)
