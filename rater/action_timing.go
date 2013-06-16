@@ -40,8 +40,8 @@ type ActionTiming struct {
 	Weight                 float64
 	ActionsId              string
 	actions                Actions
-	stCache                time.Time
-	actionsTag, timingsTag string // used only for loading
+	stCache                time.Time // cached time of the next start
+	actionsTag, timingsTag string    // used only for loading
 }
 
 type ActionTimings []*ActionTiming
@@ -235,8 +235,8 @@ func (at *ActionTiming) Execute() (err error) {
 // returns true if the *asap string was found
 func (at *ActionTiming) CheckForASAP() bool {
 	if at.Timing.StartTime == ASAP {
-		oneMinute, _ := time.ParseDuration(ASAP_DELAY)
-		timeTokens := strings.Split(time.Now().Add(oneMinute).Format(time.Stamp), " ")
+		delay, _ := time.ParseDuration(ASAP_DELAY)
+		timeTokens := strings.Split(time.Now().Add(delay).Format(time.Stamp), " ")
 		at.Timing.StartTime = timeTokens[len(timeTokens)-1]
 		return true
 	}

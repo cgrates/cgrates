@@ -57,55 +57,56 @@ func (self *Apier) GetDestination(tag string, reply *rater.Destination) error {
 func (self *Apier) SetDestination(dest *rater.Destination, reply *rater.Destination) error {
 	if err := self.StorDb.SetDestination(dest); err != nil {
 		return err
-	} 
+	}
 	return nil
 }
 
-/*
-func (self *Apier) GetMoneyBalance(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, CREDIT, reply)
+type AttrBalance struct {
+	Account   string
+	Direction string
+}
+
+func (self *Apier) GetMoneyBalance(attr *AttrBalance, reply *float64) (err error) {
+	err = self.getBalance(attr, rater.CREDIT, reply)
 	return err
 }
 
-func (self *Apier) GetSMSBalance(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, SMS, reply)
+func (self *Apier) GetSMSBalance(attr *AttrBalance, reply *float64) (err error) {
+	err = self.getBalance(attr, rater.SMS, reply)
 	return err
 }
 
-func (self *Apier) GetInternetBalance(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, TRAFFIC, reply)
+func (self *Apier) GetInternetBalance(attr *AttrBalance, reply *float64) (err error) {
+	err = self.getBalance(attr, rater.TRAFFIC, reply)
 	return err
 }
 
-func (self *Apier) GetInternetTimeBalance(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, TRAFFIC_TIME, reply)
+func (self *Apier) GetInternetTimeBalance(attr *AttrBalance, reply *float64) (err error) {
+	err = self.getBalance(attr, rater.TRAFFIC_TIME, reply)
 	return err
 }
 
-func (self *Apier) GetMinutesBalance(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, MINUTES, reply)
+func (self *Apier) GetMinutesBalance(attr *AttrBalance, reply *float64) (err error) {
+	err = self.getBalance(attr, rater.MINUTES, reply)
 	return err
 }
 
 // Get balance
-func (rs *Responder) getBalance(arg *CallDescriptor, balanceId string, reply *CallCost) (err error) {
-	if rs.Bal != nil {
-		return errors.New("No balancer supported for this command right now")
-	}
-	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.Account
-	userBalance, err := storageGetter.GetUserBalance(ubKey)
+func (self *Apier) getBalance(attr *AttrBalance, balanceId string, reply *float64) (err error) {
+	userBalance, err := self.StorDb.GetUserBalance(attr.Account)
 	if err != nil {
 		return err
 	}
-	if balance, balExists := userBalance.BalanceMap[balanceId+arg.Direction]; !balExists {
+	if balance, balExists := userBalance.BalanceMap[balanceId+attr.Direction]; !balExists {
 		// No match, balanceId not found
-		return errors.New("-BALANCE_NOT_FOUND")
+		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		reply.Tenant = arg.Tenant
-		reply.Account = arg.Account
-		reply.Direction = arg.Direction
-		reply.Cost = balance
+		*reply = balance
 	}
 	return nil
 }
-*/
+
+func (self *Apier) AddTimedAction(attr *AttrBalance, reply *float64) (err error) {
+	err = self.getBalance(attr, rater.MINUTES, reply)
+	return err
+}

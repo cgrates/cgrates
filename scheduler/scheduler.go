@@ -73,7 +73,7 @@ func (s *Scheduler) LoadActionTimings(storage rater.DataStorage) {
 	for key, ats := range actionTimings {
 		toBeSaved := false
 		isAsap := false
-		newAts := make([]*rater.ActionTiming, 0)
+		newAts := make([]*rater.ActionTiming, 0) // will remove the one time runs from the database
 		for _, at := range ats {
 			isAsap = at.CheckForASAP()
 			toBeSaved = toBeSaved || isAsap
