@@ -73,6 +73,11 @@ func (self *Apier) GetBalance(attr *AttrGetBalance, reply *float64) error {
 	if err != nil {
 		return err
 	}
+
+	if attr.Direction == "" {
+		attr.Direction = rater.OUTBOUND
+	}
+
 	if balance, balExists := userBalance.BalanceMap[attr.BalanceId+attr.Direction]; !balExists {
 		// No match, balanceId not found
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -94,6 +99,10 @@ func (self *Apier) AddBalance(attr *AttrAddBalance, reply *float64) error {
 
 	at := &rater.ActionTiming{
 		UserBalanceIds: []string{attr.Account},
+	}
+
+	if attr.Direction == "" {
+		attr.Direction = rater.OUTBOUND
 	}
 
 	at.SetActions(rater.Actions{&rater.Action{BalanceId: attr.BalanceId, Direction: attr.Direction, Units: attr.Value}})

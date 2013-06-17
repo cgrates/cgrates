@@ -178,6 +178,7 @@ Tag
 
 Example
    DeleteDestination("1dec2012", "DAN_NET")
+
    Replay: '{"Reply": "ok"}'
 
 **GetAllDestinations**
@@ -190,6 +191,7 @@ TPid
 
 Example
    GetAllDestinations("1dec2012")
+
    Reply: '{"Reply": [{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}, {"Tag": "RIF_NET", "Prefixes": ["40723"]}]}'
 
 Timings
@@ -217,6 +219,7 @@ Timing
     A JSON string containing timing data.
 
 Example
+
     SetTiming("1dec2012", '{"Tag": "MIDNIGHT", Year: "\*all", Months: "\*all", MonthDays: "\*all", WeekDays: "\*all", "Time": "00:00:00"}')
 
 GetTiming
@@ -299,10 +302,92 @@ GetAllTariffPlanIds
 ---------------------
 These operates on live data
 
-ALL of the above APIs will be reused with tpid = "LIVE"
+GetBalance
+++++++++++
 
-Most management activitities will be done through account actions: define/document account more actions types.
+Gets a specific balance of a user acoount.
 
-Questions:
-How do we keep track of changes? (Clone tpids?)
-Should it be GetAll... or GetAll..Tags?
+::
+
+   type AttrGetBalance struct {
+      Account   string
+      BalanceId string
+      Direction string
+   }
+
+The Account is the id of the account for which the balance is desired.
+
+The BalanceId can have one of the following string values: MONETARY, SMS, INTERNET, INTERNET_TIME, MINUTES.
+
+Direction can be the strings IN or OUT (default OUT).
+
+Return value is the balance value as float64.
+
+Example
+    GetBalance(attr \*AttrGetBalance, reply \*float64)
+
+AddBalance
+++++++++++
+
+Adds an amount to a specific balance of a user account.
+
+::
+
+    type AttrAddBalance struct {
+    	Account   string
+	    BalanceId string
+	    Direction string
+	    Value     float64
+    }
+
+
+The Account is the id of the account for which the balance is set.
+
+The BalanceId can have one of the following string values: MONETARY, SMS, INTERNET, INTERNET_TIME, MINUTES.
+
+Direction can be the strings IN or OUT (default OUT).
+
+Value is the amount to be added to the specified balance.
+
+Example
+     AddBalance(attr \*AttrAddBalance, reply \*float64)
+
+
+ExecuteAction
++++++++++++++
+
+Executes specified action on a user account.
+
+::
+
+    type AttrExecuteAction struct {
+	    Account   string
+     	BalanceId string
+        ActionsId string
+    }
+
+Example
+    ExecuteAction(attr \*AttrExecuteAction, reply \*float64)
+
+AddTimedAction
+++++++++++++++
+
+AddTriggeredAction
+++++++++++++++++++
+
+SetRatingProfile
+++++++++++++++++
+
+Sets the rating profile for the specified subject.
+
+::
+
+    type AttrSetRatingProfile struct {
+	    Subject         string
+    	RatingProfileId string
+    }
+
+Example
+    SetRatingProfile(attr \*AttrSetRatingProfile, reply \*float64)
+
+
