@@ -45,25 +45,25 @@ func (self *Apier) GetTPDestinations(attrs AttrGetTPDestinations, reply *rater.D
 	return nil
 }
 
-type AttrDestination {
+type AttrDestination struct {
 	Id       string
 	Prefixes []string
 }
 
 func (self *Apier) GetDestination(tag string, reply *AttrDestination) error {
 	if dst, err := self.StorDb.GetDestination(tag); err != nil {
-		return errors.New(utils.ERR_NOT_FOUND)		
+		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		reply.Id = dst.Id
-		reply.Prefixes = dst.Prefixes		
+		reply.Prefixes = dst.Prefixes
 	}
 	return nil
 }
 
 func (self *Apier) SetDestination(attr *AttrDestination, reply *rater.Destination) error {
-	d := &Destination{
-		Id: attr.Id
-		Prefixes: attr.Prefixes
+	d := &rater.Destination{
+		Id:       attr.Id,
+		Prefixes: attr.Prefixes,
 	}
 	if err := self.StorDb.SetDestination(d); err != nil {
 		return err
