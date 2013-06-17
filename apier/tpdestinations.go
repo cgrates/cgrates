@@ -72,6 +72,7 @@ func (self *Apier) SetDestination(attr *AttrDestination, reply *rater.Destinatio
 }
 
 type AttrGetBalance struct {
+	Tenant    string
 	Account   string
 	BalanceId string
 	Direction string
@@ -79,7 +80,8 @@ type AttrGetBalance struct {
 
 // Get balance
 func (self *Apier) GetBalance(attr *AttrGetBalance, reply *float64) error {
-	userBalance, err := self.StorDb.GetUserBalance(attr.Account)
+	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
+	userBalance, err := self.StorDb.GetUserBalance(tag)
 	if err != nil {
 		return err
 	}
@@ -98,6 +100,7 @@ func (self *Apier) GetBalance(attr *AttrGetBalance, reply *float64) error {
 }
 
 type AttrAddBalance struct {
+	Tenant    string
 	Account   string
 	BalanceId string
 	Direction string
@@ -106,9 +109,10 @@ type AttrAddBalance struct {
 
 func (self *Apier) AddBalance(attr *AttrAddBalance, reply *float64) error {
 	// what storage instance do we use?
+	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 
 	at := &rater.ActionTiming{
-		UserBalanceIds: []string{attr.Account},
+		UserBalanceIds: []string{tag},
 	}
 
 	if attr.Direction == "" {
@@ -125,14 +129,17 @@ func (self *Apier) AddBalance(attr *AttrAddBalance, reply *float64) error {
 }
 
 type AttrExecuteAction struct {
+	Direction string
+	Tenant    string
 	Account   string
 	BalanceId string
 	ActionsId string
 }
 
 func (self *Apier) ExecuteAction(attr *AttrExecuteAction, reply *float64) error {
+	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	at := &rater.ActionTiming{
-		UserBalanceIds: []string{attr.Account},
+		UserBalanceIds: []string{tag},
 		ActionsId:      attr.ActionsId,
 	}
 
@@ -144,12 +151,21 @@ func (self *Apier) ExecuteAction(attr *AttrExecuteAction, reply *float64) error 
 }
 
 type AttrSetRatingProfile struct {
+	Direction       string
+	Tenant          string
+	TOR             string
 	Subject         string
 	RatingProfileId string
 }
 
 func (self *Apier) SetRatingProfile(attr *AttrSetRatingProfile, reply *float64) error {
-	subject, err := self.StorDb.GetRatingProfile(attr.Subject)
+	cd := &rater.CallDescriptor{
+		Direction: attr.Direction,
+		Tenant:    attr.Tenant,
+		TOR:       attr.TOR,
+		Subject:   attr.Subject,
+	}
+	subject, err := self.StorDb.GetRatingProfile(cd.GetKey())
 	if err != nil {
 		return err
 	}

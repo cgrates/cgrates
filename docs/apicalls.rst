@@ -342,10 +342,13 @@ Gets a specific balance of a user acoount.
 ::
 
    type AttrGetBalance struct {
-      Account   string
-      BalanceId string
-      Direction string
-   }
+		Tenant    string
+		Account   string
+		BalanceId string
+		Direction string
+	}
+
+The Tenant is the network tenant of the account.
 
 The Account is the id of the account for which the balance is desired.
 
@@ -366,12 +369,14 @@ Adds an amount to a specific balance of a user account.
 ::
 
     type AttrAddBalance struct {
-    	Account   string
-	    BalanceId string
-	    Direction string
-	    Value     float64
-    }
+		Tenant    string
+		Account   string
+		BalanceId string
+		Direction string
+		Value     float64
+	}
 
+The Tenant is the network tenant of the account.
 
 The Account is the id of the account for which the balance is set.
 
@@ -393,10 +398,12 @@ Executes specified action on a user account.
 ::
 
     type AttrExecuteAction struct {
-	    Account   string
-     	BalanceId string
-        ActionsId string
-    }
+		Direction string
+		Tenant    string
+		Account   string
+		BalanceId string
+		ActionsId string
+	}
 
 Example
     ExecuteAction(attr \*AttrExecuteAction, reply \*float64)
@@ -415,9 +422,12 @@ Sets the rating profile for the specified subject.
 ::
 
     type AttrSetRatingProfile struct {
-	    Subject         string
-    	RatingProfileId string
-    }
+		Direction       string
+		Tenant          string
+		TOR             string
+		Subject         string
+		RatingProfileId string
+	}
 
 Example
     SetRatingProfile(attr \*AttrSetRatingProfile, reply \*float64)
