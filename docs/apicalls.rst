@@ -308,7 +308,8 @@ GetDestination
 Gets the destinations for the specified tag.
 
 ::
-	type AttrDestination {
+
+	type AttrDestination struct {
 		Id       string
 		Prefixes []string
 	}
@@ -323,7 +324,8 @@ SetDestination
 Sets the destinations for the specified tag.
 
 ::
-	type AttrDestination {
+
+	type AttrDestination struct{
 		Id       string
 		Prefixes []string
 	}
