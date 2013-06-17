@@ -300,7 +300,37 @@ GetAllTariffPlanIds
 
 6.1.5. Management API
 ---------------------
-These operates on live data
+These operate on live data.
+
+GetDestination
+++++++++++++++
+
+Gets the destinations for the specified tag.
+
+::
+	type AttrDestination {
+		Id       string
+		Prefixes []string
+	}
+
+
+Example
+	GetDestination(tag string, reply \*AttrDestination)
+
+SetDestination
+++++++++++++++
+
+Sets the destinations for the specified tag.
+
+::
+	type AttrDestination {
+		Id       string
+		Prefixes []string
+	}
+
+
+Example
+	SetDestination(attr *AttrDestination, reply \*rater.Destination)
 
 GetBalance
 ++++++++++
