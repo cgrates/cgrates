@@ -41,12 +41,12 @@ class JSONClient(object):
         self._socket.close()
 
 
-rpc =JSONClient(("127.0.0.1", 2001))
+rpc =JSONClient(("127.0.0.1", 2012))
 
 cd = {"Direction":"OUT", "TOR":"0", "Tenant": "vdf", "Subject": "rif", "DestinationPrefix": "0256", "TimeStart": "2012-02-02T17:30:00Z", "TimeEnd": "2012-02-02T18:30:00Z"}
 
 # alternative to the above
-s = socket.create_connection(("127.0.0.1", 2001))
+s = socket.create_connection(("127.0.0.1", 2012))
 s.sendall(json.dumps(({"id": 1, "method": "Responder.GetCost", "params": [cd]})))
 print s.recv(4096)
 

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/cgrates/cgrates/apier"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
@@ -30,7 +31,6 @@ import (
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/apier"
 	"io"
 	"net"
 	"net/rpc"
@@ -64,7 +64,7 @@ var (
 	err      error
 )
 
-func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string, loggerDb rater.DataStorage) {
+func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string, getter rater.DataStorage, loggerDb rater.DataStorage) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
@@ -75,7 +75,7 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 
 	rater.Logger.Info(fmt.Sprintf("<Rater> Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
-	rpc.Register(&apier.Apier{StorDb:loggerDb})
+	rpc.Register(&apier.Apier{StorDb: loggerDb, Getter: getter})
 	var serveFunc func(io.ReadWriteCloser)
 	if rpc_encoding == JSON {
 		serveFunc = jsonrpc.ServeConn
@@ -125,7 +125,7 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 		connector = &rater.RPCClientConnector{Client: client}
 	}
 	var err error
-	medi, err = mediator.NewMediator(connector, loggerDb, cfg )
+	medi, err = mediator.NewMediator(connector, loggerDb, cfg)
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
@@ -187,11 +187,11 @@ func startCDRS(responder *rater.Responder, loggerDb rater.DataStorage) {
 	if cfg.CDRSMediator == INTERNAL {
 		for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
 			time.Sleep(time.Duration(i/2) * time.Second)
-			if medi!=nil { // Got our mediator, no need to wait any longer
+			if medi != nil { // Got our mediator, no need to wait any longer
 				break
 			}
 		}
-		if medi == nil  {
+		if medi == nil {
 			rater.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
 			exitChan <- true
 		}
@@ -298,13 +298,13 @@ func main() {
 	responder := &rater.Responder{ExitChan: exitChan}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
-		go listenToRPCRequests(responder, cfg.RaterListen, cfg.RPCEncoding, loggerDb)
+		go listenToRPCRequests(responder, cfg.RaterListen, cfg.RPCEncoding, getter, loggerDb)
 	}
 	if cfg.BalancerEnabled {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
-		go listenToRPCRequests(responder, cfg.BalancerListen, cfg.RPCEncoding, loggerDb)
+		go listenToRPCRequests(responder, cfg.BalancerListen, cfg.RPCEncoding, getter, loggerDb)
 		if cfg.RaterEnabled {
 			rater.Logger.Info("Starting internal rater.")
 			bal.AddClient("local", new(rater.ResponderWorker))

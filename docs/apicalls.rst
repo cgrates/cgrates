@@ -132,7 +132,7 @@ Destinations
        Prefixes []string
    }
 
-**SetDestination**
+**SetTPDestination**
     Will set the prefixes for a specific destination. It will delete the existing prefixes if the destination is already in the database.
 
 Parametrs:
@@ -144,12 +144,12 @@ Dest
     A JSON string containing destination data
 
 Example
-    SetDestination("1dec2012", '{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}')
+    SetTPDestination("1dec2012", '{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}')
 
     Reply: '{"Reply": "ok"}'
 
 
-**GetDestination**
+**GetTPDestination**
    Gets a JSON destination structure.
 
 Parametrs:
@@ -161,11 +161,11 @@ Tag
    A destination tag string
 
 Example
-   GetDestination("1dec2012", "DAN_NET")
+   GetTPDestination("1dec2012", "DAN_NET")
    
    Reply: '{"Replay": {"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}}'
 
-**DeleteDestination**
+**DeleteTPDestination**
    Delets a destination
 
 Parametrs:
@@ -177,11 +177,11 @@ Tag
    A destination tag string
 
 Example
-   DeleteDestination("1dec2012", "DAN_NET")
+   DeleteTPDestination("1dec2012", "DAN_NET")
 
    Replay: '{"Reply": "ok"}'
 
-**GetAllDestinations**
+**GetAllTPDestinations**
    Get all destinations
 
 Parametrs:
@@ -190,7 +190,7 @@ TPid
    A string containing traiff plan id
 
 Example
-   GetAllDestinations("1dec2012")
+   GetAllTPDestinations("1dec2012")
 
    Reply: '{"Reply": [{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}, {"Tag": "RIF_NET", "Prefixes": ["40723"]}]}'
 
@@ -208,7 +208,7 @@ Timings
       Time
    }
 
-**SetTiming**
+**SetTPTiming**
 
 Parametrs:
 
@@ -220,83 +220,83 @@ Timing
 
 Example
 
-    SetTiming("1dec2012", '{"Tag": "MIDNIGHT", Year: "\*all", Months: "\*all", MonthDays: "\*all", WeekDays: "\*all", "Time": "00:00:00"}')
+    SetTPTiming("1dec2012", '{"Tag": "MIDNIGHT", Year: "\*all", Months: "\*all", MonthDays: "\*all", WeekDays: "\*all", "Time": "00:00:00"}')
 
-GetTiming
+GetTPTiming
 
-DeleteTiming
+DeleteTPTiming
 
-GetAllTimings
-
-
-SetRate
-
-GetRate
-
-DeleteRate
-
-GetAllRates
+GetAllTPTimings
 
 
-GetRateTiming
+SetTPRate
 
-SetRateTiming
+GetTPRate
 
-DeleteRateTiming
+DeleteTPRate
 
-GetAllRateTinings
-
-
-GetRatingProfile
-
-SetRatingProfile
-
-DeleteProfile
-
-GetAllRatingProfiles
+GetAllTPRates
 
 
-GetAction
+GetTPRateTiming
 
-SetAction
+SetTPRateTiming
 
-DeleteAction
+DeleteTPRateTiming
 
-GetAllActions
-
-
-GetActionTiming
-
-SetActionTiming
-
-DeleteActionTiming
-
-GetAllActionTimings
+GetAllTPRateTinings
 
 
-GetActionTrigger
+GetTPRatingProfile
 
-SetActionTrigger
+SetTPRatingProfile
 
-DeleteActionTrigger
+DeleteTPProfile
 
-GetAllActionTriggers
+GetAllTPRatingProfiles
 
 
-GetAccountAction
+GetTPAction
 
-SetAccountAction
+SetTPAction
 
-DeleteAccountAction
+DeleteTPAction
 
-GetAllAccountActions
+GetAllTPActions
+
+
+GetTPActionTiming
+
+SetTPActionTiming
+
+DeleteTPActionTiming
+
+GetAllTPActionTimings
+
+
+GetTPActionTrigger
+
+SetTPActionTrigger
+
+DeleteTPActionTrigger
+
+GetAllTPActionTriggers
+
+
+GetTPAccountAction
+
+SetTPAccountAction
+
+DeleteTPAccountAction
+
+GetAllTPAccountActions
 
 
 ImportWithOverride
 
 ImportWithFlush
 
-GetAllTariffPlanIds
+GetAllTPTariffPlanIds
 
 6.1.5. Management API
 ---------------------

@@ -22,7 +22,7 @@ import (
 	"github.com/cgrates/cgrates/rater"
 )
 
-
 type Apier struct {
-	StorDb	rater.DataStorage
+	StorDb rater.DataStorage
+	Getter rater.DataStorage
 }

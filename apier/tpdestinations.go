@@ -51,7 +51,7 @@ type AttrDestination struct {
 }
 
 func (self *Apier) GetDestination(tag string, reply *AttrDestination) error {
-	if dst, err := self.StorDb.GetDestination(tag); err != nil {
+	if dst, err := self.Getter.GetDestination(tag); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		reply.Id = dst.Id
@@ -60,12 +60,12 @@ func (self *Apier) GetDestination(tag string, reply *AttrDestination) error {
 	return nil
 }
 
-func (self *Apier) SetDestination(attr *AttrDestination, reply *rater.Destination) error {
+func (self *Apier) SetDestination(attr *AttrDestination, reply *float64) error {
 	d := &rater.Destination{
 		Id:       attr.Id,
 		Prefixes: attr.Prefixes,
 	}
-	if err := self.StorDb.SetDestination(d); err != nil {
+	if err := self.Getter.SetDestination(d); err != nil {
 		return err
 	}
 	return nil
@@ -81,7 +81,7 @@ type AttrGetBalance struct {
 // Get balance
 func (self *Apier) GetBalance(attr *AttrGetBalance, reply *float64) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	userBalance, err := self.StorDb.GetUserBalance(tag)
+	userBalance, err := self.Getter.GetUserBalance(tag)
 	if err != nil {
 		return err
 	}
@@ -165,16 +165,16 @@ func (self *Apier) SetRatingProfile(attr *AttrSetRatingProfile, reply *float64) 
 		TOR:       attr.TOR,
 		Subject:   attr.Subject,
 	}
-	subject, err := self.StorDb.GetRatingProfile(cd.GetKey())
+	subject, err := self.Getter.GetRatingProfile(cd.GetKey())
 	if err != nil {
 		return err
 	}
-	rp, err := self.StorDb.GetRatingProfile(attr.RatingProfileId)
+	rp, err := self.Getter.GetRatingProfile(attr.RatingProfileId)
 	if err != nil {
 		return err
 	}
 	subject.DestinationMap = rp.DestinationMap
-	err = self.StorDb.SetRatingProfile(subject)
+	err = self.Getter.SetRatingProfile(subject)
 	return err
 }
 
@@ -208,7 +208,7 @@ func (self *Apier) AddTriggeredAction(attr *AttrActionTrigger, reply *float64) e
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	var dbErr error
 	rater.AccLock.Guard(tag, func() (float64, error) {
-		userBalance, err := self.StorDb.GetUserBalance(tag)
+		userBalance, err := self.Getter.GetUserBalance(tag)
 		if err != nil {
 			dbErr = err
 			return 0, err
@@ -216,7 +216,7 @@ func (self *Apier) AddTriggeredAction(attr *AttrActionTrigger, reply *float64) e
 
 		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
 
-		if err = self.StorDb.SetUserBalance(userBalance); err != nil {
+		if err = self.Getter.SetUserBalance(userBalance); err != nil {
 			dbErr = err
 			return 0, err
 		}
