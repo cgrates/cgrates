@@ -50,8 +50,8 @@ type AttrDestination struct {
 	Prefixes []string
 }
 
-func (self *Apier) GetDestination(tag string, reply *AttrDestination) error {
-	if dst, err := self.Getter.GetDestination(tag); err != nil {
+func (self *Apier) GetDestination(attr *AttrDestination, reply *AttrDestination) error {
+	if dst, err := self.Getter.GetDestination(attr.Id); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		reply.Id = dst.Id
