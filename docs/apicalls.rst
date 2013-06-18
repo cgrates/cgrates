@@ -314,7 +314,7 @@ Gets the destinations for the specified tag.
 		Prefixes []string
 	}
 
-Only the Id filed must be filled for get operation.
+Only the Id field must be set for get operation.
 
 Example
 	GetDestination(attr \*AttrDestination, reply \*AttrDestination)
