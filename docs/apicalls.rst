@@ -408,11 +408,24 @@ Executes specified action on a user account.
 Example
     ExecuteAction(attr \*AttrExecuteAction, reply \*float64)
 
-AddTimedAction
-++++++++++++++
-
 AddTriggeredAction
 ++++++++++++++++++
+
+::
+
+	type AttrActionTrigger struct {
+		Tenant         string
+		Account        string
+		Direction      string
+		BalanceId      string
+		ThresholdValue float64
+		DestinationId  string
+		Weight         float64
+		ActionsId      string
+	}
+
+Example
+	AddTriggeredAction(attr \*AttrActionTrigger, reply \*float64)
 
 SetRatingProfile
 ++++++++++++++++

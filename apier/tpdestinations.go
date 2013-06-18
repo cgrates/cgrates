@@ -177,3 +177,51 @@ func (self *Apier) SetRatingProfile(attr *AttrSetRatingProfile, reply *float64) 
 	err = self.StorDb.SetRatingProfile(subject)
 	return err
 }
+
+type AttrActionTrigger struct {
+	Tenant         string
+	Account        string
+	Direction      string
+	BalanceId      string
+	ThresholdValue float64
+	DestinationId  string
+	Weight         float64
+	ActionsId      string
+}
+
+func (self *Apier) AddTriggeredAction(attr *AttrActionTrigger, reply *float64) error {
+	if attr.Direction == "" {
+		attr.Direction = rater.OUTBOUND
+	}
+
+	at := &rater.ActionTrigger{
+		Id:             utils.GenUUID(),
+		BalanceId:      attr.BalanceId,
+		Direction:      attr.Direction,
+		ThresholdValue: attr.ThresholdValue,
+		DestinationId:  attr.DestinationId,
+		Weight:         attr.Weight,
+		ActionsId:      attr.ActionsId,
+		Executed:       false,
+	}
+
+	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
+	var dbErr error
+	rater.AccLock.Guard(tag, func() (float64, error) {
+		userBalance, err := self.StorDb.GetUserBalance(tag)
+		if err != nil {
+			dbErr = err
+			return 0, err
+		}
+
+		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
+
+		if err = self.StorDb.SetUserBalance(userBalance); err != nil {
+			dbErr = err
+			return 0, err
+		}
+		return 0, nil
+	})
+
+	return dbErr
+}
