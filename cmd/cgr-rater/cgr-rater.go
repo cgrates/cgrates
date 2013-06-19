@@ -64,7 +64,7 @@ var (
 	err      error
 )
 
-func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encoding string, getter rater.DataStorage, loggerDb rater.DataStorage) {
+func listenToRPCRequests(rpcResponder interface{}, apier *apier.Apier, rpcAddress string, rpc_encoding string, getter rater.DataStorage, loggerDb rater.DataStorage) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
 		rater.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
@@ -75,7 +75,7 @@ func listenToRPCRequests(rpcResponder interface{}, rpcAddress string, rpc_encodi
 
 	rater.Logger.Info(fmt.Sprintf("<Rater> Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
-	rpc.Register(&apier.Apier{StorDb: loggerDb, Getter: getter})
+	rpc.Register(apier)
 	var serveFunc func(io.ReadWriteCloser)
 	if rpc_encoding == JSON {
 		serveFunc = jsonrpc.ServeConn
@@ -296,15 +296,16 @@ func main() {
 		go stopRaterSingnalHandler()
 	}
 	responder := &rater.Responder{ExitChan: exitChan}
+	apier := &apier.Apier{StorDb: loggerDb, Getter: getter}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
-		go listenToRPCRequests(responder, cfg.RaterListen, cfg.RPCEncoding, getter, loggerDb)
+		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding, getter, loggerDb)
 	}
 	if cfg.BalancerEnabled {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
-		go listenToRPCRequests(responder, cfg.BalancerListen, cfg.RPCEncoding, getter, loggerDb)
+		go listenToRPCRequests(responder, apier, cfg.BalancerListen, cfg.RPCEncoding, getter, loggerDb)
 		if cfg.RaterEnabled {
 			rater.Logger.Info("Starting internal rater.")
 			bal.AddClient("local", new(rater.ResponderWorker))
@@ -316,6 +317,7 @@ func main() {
 		go func() {
 			sched := scheduler.NewScheduler()
 			go reloadSchedulerSingnalHandler(sched, getter)
+			apier.Sched = sched
 			sched.LoadActionTimings(getter)
 			sched.Loop()
 		}()

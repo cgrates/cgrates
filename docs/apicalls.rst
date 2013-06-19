@@ -428,6 +428,22 @@ AddTriggeredAction
 Example
 	AddTriggeredAction(attr \*AttrActionTrigger, reply \*float64)
 
+AddAcount
++++++++++
+
+::
+
+	type AttrAccount struct {
+		Tenant          string
+		Direction       string
+		Account         string
+		Type            string // prepaid-postpaid
+		ActionTimingsId string
+	}
+	
+Example
+	AddAccount(attr \*AttrAccount, reply \*float64)
+
 SetRatingProfile
 ++++++++++++++++
 
@@ -440,7 +456,7 @@ Sets the rating profile for the specified subject.
 		Tenant          string
 		TOR             string
 		Subject         string
-		RatingProfileId string
+		SourceSubject string
 	}
 
 Example

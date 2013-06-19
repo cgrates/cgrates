@@ -36,31 +36,45 @@ type Action struct {
 	MinuteBucket *MinuteBucket
 }
 
+const (
+	LOG            = "LOG"
+	RESET_TRIGGERS = "RESET_TRIGGERS"
+	SET_POSTPAID   = "SET_POSTPAID"
+	RESET_POSTPAID = "RESET_POSTPAID"
+	SET_PREPAID    = "SET_PREPAID"
+	RESET_PREPAID  = "RESET_PREPAID"
+	TOPUP_RESET    = "TOPUP_RESET"
+	TOPUP          = "TOPUP"
+	DEBIT          = "DEBIT"
+	RESET_COUNTER  = "RESET_COUNTER"
+	RESET_COUNTERS = "RESET_COUNTERS"
+)
+
 type actionTypeFunc func(*UserBalance, *Action) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	switch typ {
-	case "LOG":
+	case LOG:
 		return logAction, true
-	case "RESET_TRIGGERS":
+	case RESET_TRIGGERS:
 		return resetTriggersAction, true
-	case "SET_POSTPAID":
+	case SET_POSTPAID:
 		return setPostpaidAction, true
-	case "RESET_POSTPAID":
+	case RESET_POSTPAID:
 		return resetPostpaidAction, true
-	case "SET_PREPAID":
+	case SET_PREPAID:
 		return setPrepaidAction, true
-	case "RESET_PREPAID":
+	case RESET_PREPAID:
 		return resetPrepaidAction, true
-	case "TOPUP_RESET":
+	case TOPUP_RESET:
 		return topupResetAction, true
-	case "TOPUP":
+	case TOPUP:
 		return topupAction, true
-	case "DEBIT":
+	case DEBIT:
 		return debitAction, true
-	case "RESET_COUNTER":
+	case RESET_COUNTER:
 		return resetCounterAction, true
-	case "RESET_COUNTERS":
+	case RESET_COUNTERS:
 		return resetCountersAction, true
 	}
 	return nil, false
