@@ -105,7 +105,11 @@ func (fsCdr FSCdr) GetReqType() string {
 	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.DefaultReqType)
 }
 func (fsCdr FSCdr) GetExtraFields() map[string]string {
-	return nil // ToDo: Add and extract from config
+	extraFields := make(map[string]string, len(cfg.CDRSExtraFields))
+	for _, field := range cfg.CDRSExtraFields {
+		extraFields[field] := fsCdr[field]
+	}
+	return extraFields
 }
 func (fsCdr FSCdr) GetFallbackSubj() string {
 	return cfg.DefaultSubject

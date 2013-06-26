@@ -64,7 +64,7 @@ func (psl *PostgresStorage) SetDestination(d *Destination) (err error) {
 }
 
 // Extracts destinations from StorDB on specific tariffplan id
-func (psl *PostgresStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+func (psl *PostgresStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
 	return nil, nil
 }
 
@@ -150,9 +150,13 @@ func (psl *PostgresStorage) SetCdr(cdr utils.CDR) (err error) {
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
 	}
+	extraFields, err := json.Marshal(cdr.GetExtraFields())
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Error marshalling cdr extra fields to json: %v", err))
+	}
 	_, err = psl.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('%s', '%s')",
 		cdr.GetCgrId(),
-		cdr.GetExtraFields(),
+		extraFields,
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))

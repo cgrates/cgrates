@@ -171,9 +171,13 @@ func (mys *MySQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
 	}
+	extraFields, err := json.Marshal(cdr.GetExtraFields())
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Error marshalling cdr extra fields to json: %v", err))
+	}
 	_, err = mys.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('NULL','%s', '%s')",
 		cdr.GetCgrId(),
-		cdr.GetExtraFields(),
+		extraFields,
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
