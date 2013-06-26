@@ -170,7 +170,7 @@ func (cd *CallDescriptor) getActivationPeriodsForPrefix(key string, recursionDep
 	if err != nil {
 		if rp.FallbackKey != "" {
 			recursionDepth++
-			for _, fbk := range strings.Split(rp.FallbackKey, "|") {
+			for _, fbk := range strings.Split(rp.FallbackKey, ";") {
 				if destPrefix, values, err := cd.getActivationPeriodsForPrefix(fbk, recursionDepth); err == nil {
 					return destPrefix, values, err
 				}
