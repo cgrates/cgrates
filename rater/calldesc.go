@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"log/syslog"
 	"math"
+	"strings"
 	"time"
 )
 
@@ -38,7 +39,7 @@ func init() {
 }
 
 const (
-	RECURSION_MAX_DEPTH = 4
+	RECURSION_MAX_DEPTH = 10
 	FALLBACK_SUBJECT    = "*all"
 	VERSION             = "0.9.1rc2"
 )
@@ -169,7 +170,11 @@ func (cd *CallDescriptor) getActivationPeriodsForPrefix(key string, recursionDep
 	if err != nil {
 		if rp.FallbackKey != "" {
 			recursionDepth++
-			return cd.getActivationPeriodsForPrefix(rp.FallbackKey, recursionDepth)
+			for _, fbk := range strings.Split(rp.FallbackKey, "|") {
+				if destPrefix, values, err := cd.getActivationPeriodsForPrefix(fbk, recursionDepth); err == nil {
+					return destPrefix, values, err
+				}
+			}
 		}
 	}
 

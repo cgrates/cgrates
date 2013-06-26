@@ -40,8 +40,8 @@ const (
 	CSTMID       = "cgr_cstmid"
 	CALL_DEST_NR = "dialed_extension"
 	PARK_TIME    = "start_epoch"
-	ANSWER_TIME   = "answer_epoch"
-	HANGUP_TIME     = "end_epoch"
+	ANSWER_TIME  = "answer_epoch"
+	HANGUP_TIME  = "end_epoch"
 	DURATION     = "billsec"
 	USERNAME     = "user_name"
 	FS_IP        = "sip_local_network_addr"
@@ -107,7 +107,7 @@ func (fsCdr FSCdr) GetReqType() string {
 func (fsCdr FSCdr) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string, len(cfg.CDRSExtraFields))
 	for _, field := range cfg.CDRSExtraFields {
-		extraFields[field] := fsCdr[field]
+		extraFields[field] = fsCdr[field]
 	}
 	return extraFields
 }

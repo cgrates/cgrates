@@ -72,6 +72,9 @@ vdf,0,OUT,rif,,EVENING,2012-01-01T00:00:00Z
 vdf,0,OUT,rif,,EVENING,2012-02-28T00:00:00Z
 vdf,0,OUT,minu,,EVENING,2012-01-01T00:00:00Z
 vdf,0,OUT,*all,,EVENING,2012-02-28T00:00:00Z
+vdf,0,OUT,one,,STANDARD,2012-02-28T00:00:00Z
+vdf,0,OUT,inf,inf,STANDARD,2012-02-28T00:00:00Z
+vdf,0,OUT,fall,one|rif,PREMIUM,2012-02-28T00:00:00Z
 `
 	actions = `
 MINI,TOPUP,MINUTES,OUT,100,NAT,ABSOLUTE,0,10,10
@@ -129,7 +132,7 @@ func TestLoadRateTimings(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 6 {
+	if len(csvr.ratingProfiles) != 9 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 }
