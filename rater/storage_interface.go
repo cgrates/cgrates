@@ -57,7 +57,7 @@ type DataStorage interface {
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
-	GetTPDestination(string,string) (*Destination, error)
+	GetTPDestination(string, string) (*Destination, error)
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)
@@ -67,6 +67,7 @@ type DataStorage interface {
 	GetAllActionTimings() (map[string]ActionTimings, error)
 	SetCdr(utils.CDR) error
 	SetRatedCdr(utils.CDR, *CallCost) error
+	GetAllRatedCdr() ([]utils.CDR, error)
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
 	LogCallCost(uuid, source string, cc *CallCost) error
 	LogError(uuid, source, errstr string) error
@@ -74,15 +75,15 @@ type DataStorage interface {
 	LogActionTiming(source string, at *ActionTiming, as Actions) error
 	GetCallCostLog(uuid, source string) (*CallCost, error)
 	// loader functions
-	GetTpDestinations(string) ([]*Destination, error)
-	GetTpRates(string) (map[string][]*Rate, error)
-	GetTpTimings(string) (map[string]*Timing, error)
-	GetTpRateTimings(string) ([]*RateTiming, error)
-	GetTpRatingProfiles(string) (map[string]*RatingProfile, error)
-	GetTpActions(string) (map[string][]*Action, error)
-	GetTpActionTimings(string) (map[string][]*ActionTiming, error)
-	GetTpActionTriggers(string) (map[string][]*ActionTrigger, error)
-	GetTpAccountActions(string) ([]*AccountAction, error)
+	GetTpDestinations(string, string) ([]*Destination, error)
+	GetTpRates(string, string) (map[string][]*Rate, error)
+	GetTpTimings(string, string) (map[string]*Timing, error)
+	GetTpRateTimings(string, string) ([]*RateTiming, error)
+	GetTpRatingProfiles(string, string) (map[string]*RatingProfile, error)
+	GetTpActions(string, string) (map[string][]*Action, error)
+	GetTpActionTimings(string, string) (map[string][]*ActionTiming, error)
+	GetTpActionTriggers(string, string) (map[string][]*ActionTrigger, error)
+	GetTpAccountActions(string, string) ([]*AccountAction, error)
 }
 
 type Marshaler interface {

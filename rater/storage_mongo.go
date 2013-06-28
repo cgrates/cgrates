@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
@@ -148,7 +148,7 @@ func (ms *MongoStorage) SetDestination(dest *Destination) error {
 }
 
 // Extracts destinations from StorDB on specific tariffplan id
-func (ms *MongoStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+func (ms *MongoStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -223,35 +223,39 @@ func (ms *MongoStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
 
+func (ms *MongoStorage) GetAllRatedCdr() ([]utils.CDR, error) {
+	return nil, nil
+}
+
 func (ms *MongoStorage) GetDestinations(tpid string) ([]*Destination, error) {
 	return nil, nil
 }
 
-func (ms *MongoStorage) GetTpDestinations(tpid string) ([]*Destination, error) {
+func (ms *MongoStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
 	return nil, nil
 }
 
-func (ms *MongoStorage) GetTpRates(string) (map[string][]*Rate, error) {
+func (ms *MongoStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpTimings(string) (map[string]*Timing, error) {
+func (ms *MongoStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpRateTimings(string) ([]*RateTiming, error) {
+func (ms *MongoStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpRatingProfiles(string) (map[string]*RatingProfile, error) {
+func (ms *MongoStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpActions(string) (map[string][]*Action, error) {
+func (ms *MongoStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpActionTimings(string) (map[string][]*ActionTiming, error) {
+func (ms *MongoStorage) GetTpActionTimings(tpid, tag string) (map[string][]*ActionTiming, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpActionTriggers(string) (map[string][]*ActionTrigger, error) {
+func (ms *MongoStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpAccountActions(string) ([]*AccountAction, error) {
+func (ms *MongoStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
 	return nil, nil
 }

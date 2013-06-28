@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"menteslibres.net/gosexy/redis"
 	//"log"
 	"github.com/cgrates/cgrates/utils"
@@ -103,7 +103,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 }
 
 // Extracts destinations from StorDB on specific tariffplan id
-func (rs *RedisStorage) GetTPDestination( tpid, destTag string ) (*Destination, error) {
+func (rs *RedisStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -232,31 +232,35 @@ func (rs *RedisStorage) SetRatedCdr(utils.CDR, *CallCost) error {
 	return nil
 }
 
-func (rs *RedisStorage) GetTpDestinations(tpid string) ([]*Destination, error) {
+func (rs *RedisStorage) GetAllRatedCdr() ([]utils.CDR, error) {
 	return nil, nil
 }
 
-func (rs *RedisStorage) GetTpRates(string) (map[string][]*Rate, error) {
+func (rs *RedisStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpTimings(string) (map[string]*Timing, error) {
+
+func (rs *RedisStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpRateTimings(string) ([]*RateTiming, error) {
+func (rs *RedisStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpRatingProfiles(string) (map[string]*RatingProfile, error) {
+func (rs *RedisStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpActions(string) (map[string][]*Action, error) {
+func (rs *RedisStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpActionTimings(string) (map[string][]*ActionTiming, error) {
+func (rs *RedisStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpActionTriggers(string) (map[string][]*ActionTrigger, error) {
+func (rs *RedisStorage) GetTpActionTimings(tpid, tag string) (map[string][]*ActionTiming, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpAccountActions(string) ([]*AccountAction, error) {
+func (rs *RedisStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
+	return nil, nil
+}
+func (rs *RedisStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
 	return nil, nil
 }

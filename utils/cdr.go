@@ -39,3 +39,51 @@ type CDR interface {
 	GetFallbackSubj() string
 	GetExtraFields() map[string]string //Stores extra CDR Fields
 }
+
+type GenericCdr map[string]string
+
+func (gcdr GenericCdr) GetCgrId() string {
+	return ""
+}
+func (gcdr GenericCdr) GetAccId() string {
+	return ""
+}
+func (gcdr GenericCdr) GetCdrHost() string {
+	return ""
+}
+func (gcdr GenericCdr) GetDirection() string {
+	return ""
+}
+func (gcdr GenericCdr) GetOrigId() string {
+	return ""
+}
+func (gcdr GenericCdr) GetSubject() string {
+	return ""
+}
+func (gcdr GenericCdr) GetAccount() string {
+	return ""
+}
+func (gcdr GenericCdr) GetDestination() string {
+	return ""
+}
+func (gcdr GenericCdr) GetTOR() string {
+	return ""
+}
+func (gcdr GenericCdr) GetTenant() string {
+	return ""
+}
+func (gcdr GenericCdr) GetReqType() string {
+	return ""
+}
+func (gcdr GenericCdr) GetAnswerTime() (time.Time, error) {
+	return time.Now(), nil
+}
+func (gcdr GenericCdr) GetDuration() int64 {
+	return 0.0
+}
+func (gcdr GenericCdr) GetFallbackSubj() string {
+	return ""
+}
+func (gcdr GenericCdr) GetExtraFields() map[string]string {
+	return nil
+}
