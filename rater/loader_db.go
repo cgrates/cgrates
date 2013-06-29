@@ -29,6 +29,7 @@ import (
 type DbReader struct {
 	tpid              string
 	storDB            DataStorage
+	storage           DataStorage
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
@@ -40,16 +41,18 @@ type DbReader struct {
 	ratingProfiles    map[string]*RatingProfile
 }
 
-func NewDbReader(storDB DataStorage, tpid string) *DbReader {
+func NewDbReader(storDB DataStorage, storage DataStorage, tpid string) *DbReader {
 	c := new(DbReader)
 	c.storDB = storDB
+	c.storage = storage
 	c.tpid = tpid
 	c.activationPeriods = make(map[string]*ActivationPeriod)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	return c
 }
 
-func (dbr *DbReader) WriteToDatabase(storage DataStorage, flush, verbose bool) (err error) {
+func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
+	storage := dbr.storage
 	if flush {
 		storage.Flush()
 	}
@@ -223,9 +226,11 @@ func (dbr *DbReader) LoadRatingProfile(tag string) error {
 					newAP := &ActivationPeriod{ActivationTime: at}
 					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
 					ratingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)
+					dbr.storage.SetDestination(destination)
 				}
 			}
 		}
+		dbr.storage.SetRatingProfile(ratingProfile)
 	}
 
 	return nil

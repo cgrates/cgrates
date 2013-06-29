@@ -32,6 +32,7 @@ import (
 
 type CSVReader struct {
 	sep               rune
+	storage           DataStorage
 	readerFunc        func(string, rune) (*csv.Reader, *os.File, error)
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
@@ -47,9 +48,10 @@ type CSVReader struct {
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
 }
 
-func NewFileCSVReader(sep rune, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+func NewFileCSVReader(storage DataStorage, sep rune, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
 	c := new(CSVReader)
 	c.sep = sep
+	c.storage = storage
 	c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
@@ -66,7 +68,7 @@ func NewFileCSVReader(sep rune, destinationsFn, ratesFn, timingsFn, ratetimingsF
 }
 
 func NewStringCSVReader(sep rune, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
-	c := NewFileCSVReader(sep, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+	c := NewFileCSVReader(nil, sep, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	c.readerFunc = openStringCSVReader
 	return c
 }
@@ -89,7 +91,8 @@ func openStringCSVReader(data string, comma rune) (csvReader *csv.Reader, fp *os
 	return
 }
 
-func (csvr *CSVReader) WriteToDatabase(storage DataStorage, flush, verbose bool) (err error) {
+func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
+	storage := csvr.storage
 	if storage == nil {
 		return errors.New("No database connection!")
 	}

@@ -38,7 +38,7 @@ type TPLoader interface {
 	LoadActionTimings() error
 	LoadActionTriggers() error
 	LoadAccountActions() error
-	WriteToDatabase(DataStorage, bool, bool) error
+	WriteToDatabase(bool, bool) error
 }
 
 type Rate struct {

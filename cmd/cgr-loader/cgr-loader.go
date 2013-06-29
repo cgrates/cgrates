@@ -140,11 +140,11 @@ func main() {
 			}
 		}
 		//sep = []rune(*separator)[0]
-		loader = rater.NewFileCSVReader(',', destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+		loader = rater.NewFileCSVReader(getter, ',', destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	}
 
 	if *dataDbId != "" {
-		loader = rater.NewDbReader(getter, *dataDbId)
+		loader = rater.NewDbReader(getter, getter, *dataDbId)
 	}
 
 	err = loader.LoadDestinations()
@@ -185,7 +185,7 @@ func main() {
 	}
 
 	// write maps to database
-	if err := loader.WriteToDatabase(getter, *flush, true); err != nil {
+	if err := loader.WriteToDatabase(*flush, true); err != nil {
 		log.Fatal("Could not write to database: ", err)
 	}
 }
