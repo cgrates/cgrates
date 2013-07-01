@@ -163,7 +163,7 @@ Tag
 Example
    GetTPDestination("1dec2012", "DAN_NET")
    
-   Reply: '{"Replay": {"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}}'
+   Reply: '{"Reply": {"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}}'
 
 **DeleteTPDestination**
    Delets a destination
