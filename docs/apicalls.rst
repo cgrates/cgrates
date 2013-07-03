@@ -450,13 +450,13 @@ SetRatingProfile
 Sets the rating profile for the specified subject.
 
 ::
-
-    type AttrSetRatingProfile struct {
-		Direction       string
-		Tenant          string
-		TOR             string
-		Subject         string
-		SourceSubject string
+    
+	type AttrSetRatingProfile struct {
+		Direction string
+		Tenant    string
+		TOR       string
+		Subject   string
+		TPID      string
 	}
 
 Example

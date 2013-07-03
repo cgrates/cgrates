@@ -24,12 +24,11 @@ import (
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
-	"log"
 )
 
 type Apier struct {
 	StorDb rater.DataStorage
-	Getter rater.DataStorage
+	DataDb rater.DataStorage
 	Sched  *scheduler.Scheduler
 }
 
@@ -39,7 +38,7 @@ type AttrDestination struct {
 }
 
 func (self *Apier) GetDestination(attr *AttrDestination, reply *AttrDestination) error {
-	if dst, err := self.Getter.GetDestination(attr.Id); err != nil {
+	if dst, err := self.DataDb.GetDestination(attr.Id); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		reply.Id = dst.Id
@@ -53,7 +52,7 @@ func (self *Apier) SetDestination(attr *AttrDestination, reply *float64) error {
 		Id:       attr.Id,
 		Prefixes: attr.Prefixes,
 	}
-	if err := self.Getter.SetDestination(d); err != nil {
+	if err := self.DataDb.SetDestination(d); err != nil {
 		return err
 	}
 	return nil
@@ -69,7 +68,7 @@ type AttrGetBalance struct {
 // Get balance
 func (self *Apier) GetBalance(attr *AttrGetBalance, reply *float64) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	userBalance, err := self.Getter.GetUserBalance(tag)
+	userBalance, err := self.DataDb.GetUserBalance(tag)
 	if err != nil {
 		return err
 	}
@@ -98,12 +97,12 @@ func (self *Apier) AddBalance(attr *AttrAddBalance, reply *float64) error {
 	// what storage instance do we use?
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 
-	if _, err := self.Getter.GetUserBalance(tag); err != nil {
+	if _, err := self.DataDb.GetUserBalance(tag); err != nil {
 		// create user balance if not exists
 		ub := &rater.UserBalance{
 			Id: tag,
 		}
-		if err := self.Getter.SetUserBalance(ub); err != nil {
+		if err := self.DataDb.SetUserBalance(ub); err != nil {
 			return err
 		}
 	}
@@ -148,35 +147,23 @@ func (self *Apier) ExecuteAction(attr *AttrExecuteAction, reply *float64) error 
 }
 
 type AttrSetRatingProfile struct {
-	Direction     string
-	Tenant        string
-	TOR           string
-	Subject       string
-	SourceSubject string
+	Direction string
+	Tenant    string
+	TOR       string
+	Subject   string
+	TPID      string
 }
 
 func (self *Apier) SetRatingProfile(attr *AttrSetRatingProfile, reply *float64) error {
-	cd := &rater.CallDescriptor{
-		Direction: attr.Direction,
-		Tenant:    attr.Tenant,
-		TOR:       attr.TOR,
-		Subject:   attr.Subject,
-	}
-	destination, err := self.Getter.GetRatingProfile(cd.GetKey())
-	log.Print("1: " + cd.GetKey())
+	tag := fmt.Sprintf("%s:%s:%s:%s", attr.Direction, attr.Tenant, attr.TOR, attr.Subject)
+	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attr.TPID)
+
+	newRP, err := dbReader.LoadRatingProfileByTag(tag)
 	if err != nil {
-		destination = &rater.RatingProfile{Id: cd.GetKey()}
-	}
-	cd.Subject = attr.SourceSubject
-	source, err := self.Getter.GetRatingProfile(cd.GetKey())
-	log.Print("2: " + cd.GetKey())
-	if err != nil {
-		log.Print("here: " + err.Error())
 		return err
 	}
-	destination.DestinationMap = source.DestinationMap
-	destination.FallbackKey = source.FallbackKey
-	err = self.Getter.SetRatingProfile(destination)
+
+	err = self.DataDb.SetRatingProfile(newRP)
 	return err
 }
 
@@ -210,7 +197,7 @@ func (self *Apier) AddTriggeredAction(attr *AttrActionTrigger, reply *float64) e
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	var dbErr error
 	rater.AccLock.Guard(tag, func() (float64, error) {
-		userBalance, err := self.Getter.GetUserBalance(tag)
+		userBalance, err := self.DataDb.GetUserBalance(tag)
 		if err != nil {
 			dbErr = err
 			return 0, err
@@ -218,7 +205,7 @@ func (self *Apier) AddTriggeredAction(attr *AttrActionTrigger, reply *float64) e
 
 		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
 
-		if err = self.Getter.SetUserBalance(userBalance); err != nil {
+		if err = self.DataDb.SetUserBalance(userBalance); err != nil {
 			dbErr = err
 			return 0, err
 		}
@@ -242,17 +229,17 @@ func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
 		Id:   tag,
 		Type: attr.Type,
 	}
-	if err := self.Getter.SetUserBalance(ub); err != nil {
+	if err := self.DataDb.SetUserBalance(ub); err != nil {
 		return err
 	}
 	if attr.ActionTimingsId != "" {
-		if ats, err := self.Getter.GetActionTimings(attr.ActionTimingsId); err == nil {
+		if ats, err := self.DataDb.GetActionTimings(attr.ActionTimingsId); err == nil {
 			for _, at := range ats {
 				at.UserBalanceIds = append(at.UserBalanceIds, tag)
 			}
-			self.Getter.SetActionTimings(attr.ActionTimingsId, ats)
+			self.DataDb.SetActionTimings(attr.ActionTimingsId, ats)
 			if self.Sched != nil {
-				self.Sched.LoadActionTimings(self.Getter)
+				self.Sched.LoadActionTimings(self.DataDb)
 				self.Sched.Restart()
 			}
 		} else {

@@ -67,8 +67,8 @@ func NewFileCSVReader(storage DataStorage, sep rune, destinationsFn, ratesFn, ti
 	return c
 }
 
-func NewStringCSVReader(sep rune, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
-	c := NewFileCSVReader(nil, sep, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+func NewStringCSVReader(storage DataStorage, sep rune, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+	c := NewFileCSVReader(storage, sep, destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	c.readerFunc = openStringCSVReader
 	return c
 }

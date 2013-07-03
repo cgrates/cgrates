@@ -185,31 +185,32 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 	return nil
 }
 
-func (dbr *DbReader) LoadRatingProfile(tag string) error {
+func (dbr *DbReader) LoadRatingProfileByTag(tag string) (*RatingProfile, error) {
 	activationPeriods := make(map[string]*ActivationPeriod)
-
+	resultRatingProfile := &RatingProfile{Id: tag}
 	rpm, err := dbr.storDB.GetTpRatingProfiles(dbr.tpid, tag)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, ratingProfile := range rpm {
+		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
 		at, err := time.Parse(time.RFC3339, ratingProfile.activationTime)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", ratingProfile.activationTime))
+			return nil, errors.New(fmt.Sprintf("Cannot parse activation time from %v", ratingProfile.activationTime))
 		}
 		rtm, err := dbr.storDB.GetTpRateTimings(dbr.tpid, ratingProfile.ratesTimingTag)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		for _, rateTiming := range rtm {
 			tm, err := dbr.storDB.GetTpTimings(dbr.tpid, rateTiming.TimingsTag)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			rateTiming.timing = tm[rateTiming.TimingsTag]
 			rm, err := dbr.storDB.GetTpRates(dbr.tpid, rateTiming.RatesTag)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			for _, rate := range rm[rateTiming.RatesTag] {
 				_, exists := activationPeriods[rateTiming.Tag]
@@ -219,21 +220,20 @@ func (dbr *DbReader) LoadRatingProfile(tag string) error {
 				activationPeriods[rateTiming.Tag].AddIntervalIfNotPresent(rateTiming.GetInterval(rate))
 				dm, err := dbr.storDB.GetTpDestinations(dbr.tpid, rate.DestinationsTag)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				for _, destination := range dm {
 					ap := activationPeriods[ratingProfile.ratesTimingTag]
 					newAP := &ActivationPeriod{ActivationTime: at}
 					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-					ratingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)
+					resultRatingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)
 					dbr.storage.SetDestination(destination)
 				}
 			}
 		}
-		dbr.storage.SetRatingProfile(ratingProfile)
 	}
 
-	return nil
+	return resultRatingProfile, nil
 }
 
 func (dbr *DbReader) LoadActions() (err error) {

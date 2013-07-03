@@ -296,7 +296,7 @@ func main() {
 		go stopRaterSingnalHandler()
 	}
 	responder := &rater.Responder{ExitChan: exitChan}
-	apier := &apier.Apier{StorDb: loggerDb, Getter: getter}
+	apier := &apier.Apier{StorDb: loggerDb, DataDb: getter}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
 		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
 		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding, getter, loggerDb)

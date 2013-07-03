@@ -41,6 +41,7 @@ func init() {
 const (
 	RECURSION_MAX_DEPTH = 10
 	FALLBACK_SUBJECT    = "*all"
+	FALLBACK_SEP        = ";"
 	VERSION             = "0.9.1rc2"
 )
 
@@ -170,7 +171,7 @@ func (cd *CallDescriptor) getActivationPeriodsForPrefix(key string, recursionDep
 	if err != nil {
 		if rp.FallbackKey != "" {
 			recursionDepth++
-			for _, fbk := range strings.Split(rp.FallbackKey, ";") {
+			for _, fbk := range strings.Split(rp.FallbackKey, FALLBACK_SEP) {
 				if destPrefix, values, err := cd.getActivationPeriodsForPrefix(fbk, recursionDepth); err == nil {
 					return destPrefix, values, err
 				}
