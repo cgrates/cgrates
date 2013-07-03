@@ -71,7 +71,7 @@ CREATE TABLE `tp_rate_profiles` (
   `subject` varchar(64) NOT NULL,
   `rates_fallback_subject` varchar(64),
   `rates_timing_tag` varchar(24) NOT NULL,
-  `activation_time` char(3) NOT NULL,                   ???? char(3)
+  `activation_time` char(20) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );

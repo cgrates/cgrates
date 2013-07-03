@@ -107,6 +107,11 @@ func (rs *RedisStorage) GetTPDestination(tpid, destTag string) (*Destination, er
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (rs *RedisStorage) SetTPDestination(tpid string, dest *Destination) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {

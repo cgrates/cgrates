@@ -58,6 +58,7 @@ type DataStorage interface {
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 	GetTPDestination(string, string) (*Destination, error)
+	SetTPDestination(string, *Destination) error
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)

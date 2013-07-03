@@ -152,6 +152,11 @@ func (ms *MongoStorage) GetTPDestination(tpid, destTag string) (*Destination, er
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (ms *MongoStorage) SetTPDestination(tpid string, dest *Destination) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+
 func (ms *MongoStorage) GetActions(key string) (as Actions, err error) {
 	result := AcKeyValue{}
 	err = ms.db.C("actions").Find(bson.M{"key": key}).One(&result)

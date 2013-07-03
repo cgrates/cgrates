@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"errors"
 )
 
 type SQLStorage struct {
@@ -76,6 +77,15 @@ func (sql *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, err
 		return nil, nil
 	}
 	return d, nil
+}
+
+func (sql *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
+	for _,prefix := range dest.Prefixes {
+		if _,err := sql.Db.Exec(fmt.Sprintf("INSERT INTO tp_destinations (tpid, tag, prefix) VALUES( '%s','%s','%s')",tpid, dest.Id, prefix));err!=nil {
+			return err
+		}
+	}
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (sql *SQLStorage) GetActions(string) (as Actions, err error) {

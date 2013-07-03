@@ -78,6 +78,10 @@ func (ms *MapStorage) GetTPDestination(tpid, destTag string) (*Destination, erro
 	return nil, nil
 }
 
+func (ms *MapStorage) SetTPDestination(tpid string, dest *Destination) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)

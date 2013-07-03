@@ -25,22 +25,39 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AttrGetTPDestinations struct {
+type AttrGetTPDestination struct {
 	TPid            string
-	DestinationsTag string	
+	DestinationId string
 }
 
 // Return destinations profile for a destination tag received as parameter
-func (self *Apier) GetTPDestinations(attrs AttrGetTPDestinations, reply *rater.Destination) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationsTag"}); len(missing) != 0 { //Params missing
+func (self *Apier) GetTPDestination(attrs AttrGetTPDestination, reply *rater.Destination) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if dst, err := self.StorDb.GetTPDestination(attrs.TPid, attrs.DestinationsTag); err != nil {
+	if dst, err := self.StorDb.GetTPDestination(attrs.TPid, attrs.DestinationId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if dst == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = *dst
 	}
+	return nil
+}
+
+type AttrSetTPDestination struct {
+	TPid            string
+	DestinationId string
+	Prefixes []string
+}
+
+func (self *Apier) SetTPDestination(attrs AttrSetTPDestination, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.SetTPDestination(attrs.TPid, &rater.Destination{attrs.DestinationId, attrs.Prefixes}); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = "OK"
 	return nil
 }
