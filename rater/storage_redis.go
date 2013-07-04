@@ -102,6 +102,10 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+func (rs *RedisStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 // Extracts destinations from StorDB on specific tariffplan id
 func (rs *RedisStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)

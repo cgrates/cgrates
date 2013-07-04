@@ -18,12 +18,13 @@ CREATE TABLE `tp_timings` (
 -- Table structure for table `tp_destinations`
 --
 
-CREATE TABLE `tp_destinatins` (
+CREATE TABLE `tp_destinations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
   `prefix` varchar(24) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `tpid_dest_prefix` (`tpid`,`tag`,`prefix`),
   KEY `tpid` (`tpid`)
 );
 

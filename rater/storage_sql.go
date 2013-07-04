@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
-	"errors"
 )
 
 type SQLStorage struct {
@@ -55,9 +54,18 @@ func (sql *SQLStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
+func (sql *SQLStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
+	var exists bool
+	err := sql.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_DESTINATIONS, tpid, destTag)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
 // Extracts destinations from StorDB on specific tariffplan id
 func (sql *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
-	rows, err := sql.Db.Query(fmt.Sprintf("SELECT prefix FROM tp_destinatins WHERE id='%s' AND tag='%s'", tpid, destTag))
+	rows, err := sql.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
 	if err != nil {
 		return nil, err
 	}
@@ -81,11 +89,11 @@ func (sql *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, err
 
 func (sql *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	for _,prefix := range dest.Prefixes {
-		if _,err := sql.Db.Exec(fmt.Sprintf("INSERT INTO tp_destinations (tpid, tag, prefix) VALUES( '%s','%s','%s')",tpid, dest.Id, prefix));err!=nil {
+		if _,err := sql.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES( '%s','%s','%s')",utils.TBL_TP_DESTINATIONS, tpid, dest.Id, prefix));err!=nil {
 			return err
 		}
 	}
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return nil
 }
 
 func (sql *SQLStorage) GetActions(string) (as Actions, err error) {
@@ -207,7 +215,7 @@ func (sql *SQLStorage) GetAllRatedCdr() ([]utils.CDR, error) {
 
 func (sql *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
 	var dests []*Destination
-	q := fmt.Sprintf("SELECT * FROM tp_destinations WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATIONS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -239,7 +247,7 @@ func (sql *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, erro
 
 func (sql *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) {
 	rts := make(map[string][]*Rate)
-	q := fmt.Sprintf("SELECT * FROM tp_rates WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -270,7 +278,7 @@ func (sql *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) 
 
 func (sql *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
 	tms := make(map[string]*Timing)
-	q := fmt.Sprintf("SELECT * FROM tp_timings WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_TIMINGS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -291,7 +299,7 @@ func (sql *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error
 
 func (sql *SQLStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error) {
 	var rts []*RateTiming
-	q := fmt.Sprintf("SELECT * FROM tp_rate_timings WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATE_TIMINGS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -319,7 +327,7 @@ func (sql *SQLStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error)
 
 func (sql *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
 	rpfs := make(map[string]*RatingProfile)
-	q := fmt.Sprintf("SELECT * FROM tp_rate_profiles WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATE_PROFILES, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -350,7 +358,7 @@ func (sql *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Rating
 }
 func (sql *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
 	as := make(map[string][]*Action)
-	q := fmt.Sprintf("SELECT * FROM tp_actions WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTIONS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -403,7 +411,7 @@ func (sql *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, err
 
 func (sql *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*ActionTiming, err error) {
 	ats = make(map[string][]*ActionTiming)
-	q := fmt.Sprintf("SELECT * FROM tp_action_timings WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTION_TIMINGS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -432,7 +440,7 @@ func (sql *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*A
 
 func (sql *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	ats := make(map[string][]*ActionTrigger)
-	q := fmt.Sprintf("SELECT * FROM tp_action_triggers WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -464,7 +472,7 @@ func (sql *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*Acti
 
 func (sql *SQLStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
 	var acs []*AccountAction
-	q := fmt.Sprintf("SELECT * FROM tp_account_actions WHERE tpid=%s", tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACCOUNT_ACTIONS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}

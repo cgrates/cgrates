@@ -73,6 +73,10 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+func (ms *MapStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 // Extracts destinations from StorDB on specific tariffplan id
 func (ms *MapStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
 	return nil, nil
