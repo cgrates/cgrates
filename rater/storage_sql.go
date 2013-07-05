@@ -54,6 +54,30 @@ func (sql *SQLStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
+// Extracts destinations from StorDB on specific tariffplan id
+func (sql *SQLStorage) GetTPDestinationIds(tpid string) ([]string, error) {
+	rows, err := sql.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids:= []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one prefix
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
+}
+
 func (sql *SQLStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
 	var exists bool
 	err := sql.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_DESTINATIONS, tpid, destTag)).Scan(&exists)

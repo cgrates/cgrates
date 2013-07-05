@@ -147,6 +147,10 @@ func (ms *MongoStorage) SetDestination(dest *Destination) error {
 	return ms.db.C("destinations").Insert(dest)
 }
 
+func (ms *MongoStorage) GetTPDestinationIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MongoStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }

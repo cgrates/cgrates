@@ -165,22 +165,6 @@ Example
    
    Reply: '{"Reply": {"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}}'
 
-**DeleteTPDestination**
-   Delets a destination
-
-Parametrs:
-
-TPid
-   A string containing traiff plan id
-
-Tag
-   A destination tag string
-
-Example
-   DeleteTPDestination("1dec2012", "DAN_NET")
-
-   Replay: '{"Reply": "ok"}'
-
 **GetAllTPDestinations**
    Get all destinations
 

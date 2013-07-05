@@ -57,6 +57,7 @@ type DataStorage interface {
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
+	GetTPDestinationIds(string) ([]string,error)
 	ExistsTPDestination(string, string) (bool, error)
 	GetTPDestination(string, string) (*Destination, error)
 	SetTPDestination(string, *Destination) error
