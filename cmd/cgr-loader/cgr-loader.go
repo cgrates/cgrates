@@ -49,16 +49,17 @@ var (
 	dataPath = flag.String("path", ".", "The path containing the data files")
 	version  = flag.Bool("version", false, "Prints the application version.")
 
-	destinationsFn   = "Destinations.csv"
-	ratesFn          = "Rates.csv"
-	timingsFn        = "Timings.csv"
-	ratetimingsFn    = "RateTimings.csv"
-	ratingprofilesFn = "RatingProfiles.csv"
-	actionsFn        = "Actions.csv"
-	actiontimingsFn  = "ActionTimings.csv"
-	actiontriggersFn = "ActionTriggers.csv"
-	accountactionsFn = "AccountActions.csv"
-	sep              rune
+	destinationsFn     = "Destinations.csv"
+	ratesFn            = "Rates.csv"
+	destinationRatesFn = "DestinationRates.csv"
+	timingsFn          = "Timings.csv"
+	ratetimingsFn      = "DestinationRateTimings.csv"
+	ratingprofilesFn   = "RatingProfiles.csv"
+	actionsFn          = "Actions.csv"
+	actiontimingsFn    = "ActionTimings.csv"
+	actiontriggersFn   = "ActionTriggers.csv"
+	accountactionsFn   = "AccountActions.csv"
+	sep                rune
 )
 
 type validator struct {
@@ -140,7 +141,7 @@ func main() {
 			}
 		}
 		//sep = []rune(*separator)[0]
-		loader = rater.NewFileCSVReader(getter, ',', destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+		loader = rater.NewFileCSVReader(getter, ',', destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	}
 
 	if *dataDbId != "" {

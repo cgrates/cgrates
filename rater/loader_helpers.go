@@ -31,8 +31,9 @@ import (
 type TPLoader interface {
 	LoadDestinations() error
 	LoadRates() error
+	LoadDestinationRates() error
 	LoadTimings() error
-	LoadRateTimings() error
+	LoadDestinationRateTimings() error
 	LoadRatingProfiles() error
 	LoadActions() error
 	LoadActionTimings() error
@@ -42,11 +43,11 @@ type TPLoader interface {
 }
 
 type Rate struct {
-	DestinationsTag                                string
+	Tag                                            string
 	ConnectFee, Price, PricedUnits, RateIncrements float64
 }
 
-func NewRate(destinationsTag, connectFee, price, pricedUnits, rateIncrements string) (r *Rate, err error) {
+func NewRate(tag, connectFee, price, pricedUnits, rateIncrements string) (r *Rate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -68,13 +69,19 @@ func NewRate(destinationsTag, connectFee, price, pricedUnits, rateIncrements str
 		return
 	}
 	r = &Rate{
-		DestinationsTag: destinationsTag,
-		ConnectFee:      cf,
-		Price:           p,
-		PricedUnits:     pu,
-		RateIncrements:  ri,
+		Tag:            tag,
+		ConnectFee:     cf,
+		Price:          p,
+		PricedUnits:    pu,
+		RateIncrements: ri,
 	}
 	return
+}
+
+type DestinationRate struct {
+	Tag             string
+	DestinationsTag string
+	Rate            *Rate
 }
 
 type Timing struct {
@@ -95,7 +102,7 @@ func NewTiming(timeingInfo ...string) (rt *Timing) {
 	return
 }
 
-type RateTiming struct {
+type DestinationRateTiming struct {
 	Tag        string
 	RatesTag   string
 	Weight     float64
@@ -103,13 +110,13 @@ type RateTiming struct {
 	timing     *Timing
 }
 
-func NewRateTiming(ratesTag string, timing *Timing, weight string) (rt *RateTiming) {
+func NewDestinationRateTiming(ratesTag string, timing *Timing, weight string) (rt *DestinationRateTiming) {
 	w, err := strconv.ParseFloat(weight, 64)
 	if err != nil {
 		log.Printf("Error parsing weight unit from: %v", weight)
 		return
 	}
-	rt = &RateTiming{
+	rt = &DestinationRateTiming{
 		RatesTag: ratesTag,
 		Weight:   w,
 		timing:   timing,
@@ -117,7 +124,7 @@ func NewRateTiming(ratesTag string, timing *Timing, weight string) (rt *RateTimi
 	return
 }
 
-func (rt *RateTiming) GetInterval(r *Rate) (i *Interval) {
+func (rt *DestinationRateTiming) GetInterval(dr *DestinationRate) (i *Interval) {
 	i = &Interval{
 		Years:          rt.timing.Years,
 		Months:         rt.timing.Months,
@@ -125,10 +132,10 @@ func (rt *RateTiming) GetInterval(r *Rate) (i *Interval) {
 		WeekDays:       rt.timing.WeekDays,
 		StartTime:      rt.timing.StartTime,
 		Weight:         rt.Weight,
-		ConnectFee:     r.ConnectFee,
-		Price:          r.Price,
-		PricedUnits:    r.PricedUnits,
-		RateIncrements: r.RateIncrements,
+		ConnectFee:     dr.Rate.ConnectFee,
+		Price:          dr.Rate.Price,
+		PricedUnits:    dr.Rate.PricedUnits,
+		RateIncrements: dr.Rate.RateIncrements,
 	}
 	return
 }
