@@ -164,7 +164,6 @@ func (ms *MongoStorage) SetTPDestination(tpid string, dest *Destination) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-
 func (ms *MongoStorage) GetActions(key string) (as Actions, err error) {
 	result := AcKeyValue{}
 	err = ms.db.C("actions").Find(bson.M{"key": key}).One(&result)
@@ -248,13 +247,16 @@ func (ms *MongoStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 	return nil, nil
 }
 
-func (ms *MongoStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) {
+func (ms *MongoStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
+	return nil, nil
+}
+func (ms *MongoStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*DestinationRate, error) {
 	return nil, nil
 }
 func (ms *MongoStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error) {
+func (ms *MongoStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
 	return nil, nil
 }
 func (ms *MongoStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {

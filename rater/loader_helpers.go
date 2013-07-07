@@ -81,6 +81,7 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements string) (r *Rat
 type DestinationRate struct {
 	Tag             string
 	DestinationsTag string
+	RateTag         string
 	Rate            *Rate
 }
 
@@ -103,23 +104,23 @@ func NewTiming(timeingInfo ...string) (rt *Timing) {
 }
 
 type DestinationRateTiming struct {
-	Tag        string
-	RatesTag   string
-	Weight     float64
-	TimingsTag string // intermediary used when loading from db
-	timing     *Timing
+	Tag                 string
+	DestinationRatesTag string
+	Weight              float64
+	TimingsTag          string // intermediary used when loading from db
+	timing              *Timing
 }
 
-func NewDestinationRateTiming(ratesTag string, timing *Timing, weight string) (rt *DestinationRateTiming) {
+func NewDestinationRateTiming(destinationRatesTag string, timing *Timing, weight string) (rt *DestinationRateTiming) {
 	w, err := strconv.ParseFloat(weight, 64)
 	if err != nil {
 		log.Printf("Error parsing weight unit from: %v", weight)
 		return
 	}
 	rt = &DestinationRateTiming{
-		RatesTag: ratesTag,
-		Weight:   w,
-		timing:   timing,
+		DestinationRatesTag: destinationRatesTag,
+		Weight:              w,
+		timing:              timing,
 	}
 	return
 }

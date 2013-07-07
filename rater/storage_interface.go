@@ -57,7 +57,7 @@ type DataStorage interface {
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
-	GetTPDestinationIds(string) ([]string,error)
+	GetTPDestinationIds(string) ([]string, error)
 	ExistsTPDestination(string, string) (bool, error)
 	GetTPDestination(string, string) (*Destination, error)
 	SetTPDestination(string, *Destination) error
@@ -79,9 +79,10 @@ type DataStorage interface {
 	GetCallCostLog(uuid, source string) (*CallCost, error)
 	// loader functions
 	GetTpDestinations(string, string) ([]*Destination, error)
-	GetTpRates(string, string) (map[string][]*Rate, error)
 	GetTpTimings(string, string) (map[string]*Timing, error)
-	GetTpRateTimings(string, string) ([]*RateTiming, error)
+	GetTpRates(string, string) (map[string]*Rate, error)
+	GetTpDestinationRates(string, string) (map[string][]*DestinationRate, error)
+	GetTpDestinationRateTimings(string, string) ([]*DestinationRateTiming, error)
 	GetTpRatingProfiles(string, string) (map[string]*RatingProfile, error)
 	GetTpActions(string, string) (map[string][]*Action, error)
 	GetTpActionTimings(string, string) (map[string][]*ActionTiming, error)
