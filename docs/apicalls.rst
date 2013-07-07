@@ -71,7 +71,7 @@ This also gives you a pretty good idea of how JSON-RPC works. You can find detai
 
 .. _specification:  http://json-rpc.org/wiki/specification
 
-In the stress folder you can find a better example of python client using a class that reduces tha ctual call code to::
+In the stress folder you can find a better example of python client using a class that reduces the actual call code to::
 
 	rpc =JSONClient(("127.0.0.1", 2001))
 	result = rpc.call("Responder.Get", cd)
@@ -132,22 +132,47 @@ Destinations
        Prefixes []string
    }
 
-**SetTPDestination**
-    Will set the prefixes for a specific destination. It will delete the existing prefixes if the destination is already in the database.
+**Apier.SetTPDestination**
 
-Parametrs:
+ Creates a new destination within a tariff plan id.
 
-TPid
-    A string containing traiff plan id
+Request:
 
-Dest
-    A JSON string containing destination data
+ Data:
+ ::
 
-Example
-    SetTPDestination("1dec2012", '{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}')
+  type AttrSetTPDestination struct {
+    TPid            string   // Tariff plan id
+    DestinationId   string   // Unique identity within the tariff plan id
+    Prefixes       []string  // Set of prefixes grouped by this destination
+  }
 
-    Reply: '{"Reply": "ok"}'
+ JSON output example:
+ ::
 
+  {"params": [{"Prefixes": ["123", "345"], "DestinationId": "FIST_DST2", "TPid": "FIST_TP"}], "method": "Apier.SetTPDestination", "id": 2}
+
+
+Reply:
+
+ Data:
+ ::
+
+  string
+
+ Possible answers:
+  OK - Success.
+
+ JSON output example:
+ ::
+
+ {"id":2,"result":"OK","error":null}
+
+Errors:
+
+ MANDATORY_IE_MISSING - Mandatory parameter missing from request.
+ SERVER_ERROR - Server error occurred.
+ DUPLICATE - The specified combination of TPid/DestinationId already exists in StorDb.
 
 **GetTPDestination**
    Gets a JSON destination structure.
