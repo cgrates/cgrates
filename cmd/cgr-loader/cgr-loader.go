@@ -49,16 +49,17 @@ var (
 	dataPath = flag.String("path", ".", "The path containing the data files")
 	version  = flag.Bool("version", false, "Prints the application version.")
 
-	destinationsFn   = "Destinations.csv"
-	ratesFn          = "Rates.csv"
-	timingsFn        = "Timings.csv"
-	ratetimingsFn    = "RateTimings.csv"
-	ratingprofilesFn = "RatingProfiles.csv"
-	actionsFn        = "Actions.csv"
-	actiontimingsFn  = "ActionTimings.csv"
-	actiontriggersFn = "ActionTriggers.csv"
-	accountactionsFn = "AccountActions.csv"
-	sep              rune
+	destinationsFn           = "Destinations.csv"
+	ratesFn                  = "Rates.csv"
+	destinationratesFn       = "DestinationRates.csv"
+	timingsFn                = "Timings.csv"
+	destinationratetimingsFn = "DestinationRateTimings.csv"
+	ratingprofilesFn         = "RatingProfiles.csv"
+	actionsFn                = "Actions.csv"
+	actiontimingsFn          = "ActionTimings.csv"
+	actiontriggersFn         = "ActionTriggers.csv"
+	accountactionsFn         = "AccountActions.csv"
+	sep                      rune
 )
 
 type validator struct {
@@ -108,15 +109,18 @@ func main() {
 			&validator{destinationsFn,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
 				"Tag[0-9A-Za-z_],Prefix[0-9]"},
-			&validator{ratesFn,
-				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
-				"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
 			&validator{timingsFn,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*all\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
 				"Tag[0-9A-Za-z_],Years[0-9;]|*all|<empty>,Months[0-9;]|*all|<empty>,MonthDays[0-9;]|*all|<empty>,WeekDays[0-9;]|*all|<empty>,Time[0-9:]|*asap(00:00:00)"},
-			&validator{ratetimingsFn,
+			&validator{ratesFn,
+				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
+				"Tag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
+			&validator{destinationratesFn,
+				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
+				"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],RateTag[0-9A-Za-z_]"},
+			&validator{destinationratetimingsFn,
 				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
-				"Tag[0-9A-Za-z_],RatesTag[0-9A-Za-z_],TimingProfile[0-9A-Za-z_],Weight[0-9.]"},
+				"Tag[0-9A-Za-z_],DestinationRatesTag[0-9A-Za-z_],TimingProfile[0-9A-Za-z_],Weight[0-9.]"},
 			&validator{ratingprofilesFn,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\*all\s*,\s*|[\w:\.]+\s*,\s*){1}(?:\w*\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}$`),
 				"Tenant[0-9A-Za-z_],TOR[0-9],Direction OUT|IN,Subject[0-9A-Za-z_:.]|*all,RatesFallbackSubject[0-9A-Za-z_]|<empty>,RatesTimingTag[0-9A-Za-z_],ActivationTime[[0-9T:X]] (2012-01-01T00:00:00Z)"},
@@ -140,7 +144,7 @@ func main() {
 			}
 		}
 		//sep = []rune(*separator)[0]
-		loader = rater.NewFileCSVReader(getter, ',', destinationsFn, ratesFn, timingsFn, ratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+		loader = rater.NewFileCSVReader(getter, ',', destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	}
 
 	if *dataDbId != "" {
@@ -151,15 +155,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = loader.LoadRates()
-	if err != nil {
-		log.Fatal(err)
-	}
 	err = loader.LoadTimings()
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = loader.LoadRateTimings()
+	err = loader.LoadRates()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = loader.LoadDestinationRates()
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = loader.LoadDestinationRateTimings()
 	if err != nil {
 		log.Fatal(err)
 	}

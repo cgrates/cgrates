@@ -37,23 +37,30 @@ NAT,0723
 RET,0723
 RET,0724
 `
-	rates = `
-RT_STANDARD,GERMANY,0,0.2,60,1
-RT_STANDARD,GERMANY_O2,0,0.1,60,1
-RT_STANDARD,GERMANY_PREMIUM,0,0.1,60,1
-RT_DEFAULT,ALL,0,0.1,60,1
-RT_STD_WEEKEND,GERMANY,0,0.1,60,1
-RT_STD_WEEKEND,GERMANY_O2,0,0.05,60,1
-P1,NAT,1,1,1,1
-P2,NAT,0,0.5,1,1
-`
 	timings = `
 WORKDAYS_00,*all,*all,*all,1;2;3;4;5,00:00:00
 WORKDAYS_18,*all,*all,*all,1;2;3;4;5,18:00:00
 WEEKENDS,*all,*all,*all,6;7,00:00:00
 ONE_TIME_RUN,2012,,,,*asap
 `
-	rateTimings = `
+	rates = `
+R1,0,0.2,60,1
+R2,0,0.1,60,1
+R3,0,0.05,60,1
+R4,1,1,1,1
+R5,0,0.5,1,1
+`
+	destinationRates = `
+RT_STANDARD,GERMANY,R1
+RT_STANDARD,GERMANY_O2,R2
+RT_STANDARD,GERMANY_PREMIUM,R2
+RT_DEFAULT,ALL,R2
+RT_STD_WEEKEND,GERMANY,R2
+RT_STD_WEEKEND,GERMANY_O2,R3
+P1,NAT,R4
+P2,NAT,R5
+`
+	destinationRateTimings = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
 STANDARD,RT_STD_WEEKEND,WORKDAYS_18,10
 STANDARD,RT_STD_WEEKEND,WEEKENDS,10
@@ -94,11 +101,12 @@ vdf,minitsboy,OUT,MORE_MINUTES,STANDARD_TRIGGER
 var csvr *CSVReader
 
 func init() {
-	csvr = NewStringCSVReader(storageGetter, ',', destinations, rates, timings, rateTimings, ratingProfiles, actions, actionTimings, actionTriggers, accountActions)
+	csvr = NewStringCSVReader(storageGetter, ',', destinations, timings, rates, destinationRates, destinationRateTimings, ratingProfiles, actions, actionTimings, actionTriggers, accountActions)
 	csvr.LoadDestinations()
-	csvr.LoadRates()
 	csvr.LoadTimings()
-	csvr.LoadRateTimings()
+	csvr.LoadRates()
+	csvr.LoadDestinationRates()
+	csvr.LoadDestinationRateTimings()
 	csvr.LoadRatingProfiles()
 	csvr.LoadActions()
 	csvr.LoadActionTimings()
@@ -113,19 +121,25 @@ func TestLoadDestinations(t *testing.T) {
 	}
 }
 
-func TestLoadRates(t *testing.T) {
-	if len(csvr.rates) != 5 {
-		t.Error("Failed to load rates: ", csvr.rates)
-	}
-}
-
 func TestLoadTimimgs(t *testing.T) {
 	if len(csvr.timings) != 4 {
 		t.Error("Failed to load timings: ", csvr.timings)
 	}
 }
 
-func TestLoadRateTimings(t *testing.T) {
+func TestLoadRates(t *testing.T) {
+	if len(csvr.rates) != 5 {
+		t.Error("Failed to load rates: ", csvr.rates)
+	}
+}
+
+func TestLoadDestinationRates(t *testing.T) {
+	if len(csvr.destinationRates) != 5 {
+		t.Error("Failed to load rates: ", csvr.rates)
+	}
+}
+
+func TestLoadDestinationRateTimings(t *testing.T) {
 	if len(csvr.activationPeriods) != 4 {
 		t.Error("Failed to load rate timings: ", csvr.activationPeriods)
 	}

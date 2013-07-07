@@ -77,7 +77,6 @@ func (ms *MapStorage) GetTPDestinationIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-
 func (ms *MapStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
@@ -218,15 +217,19 @@ func (ms *MapStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error
 	return nil, nil
 }
 
-func (ms *MapStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) {
+func (ms *MapStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
+	return nil, nil
+}
+func (ms *MapStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*DestinationRate, error) {
 	return nil, nil
 }
 func (ms *MapStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
 	return nil, nil
 }
-func (ms *MapStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error) {
+func (ms *MapStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
 	return nil, nil
 }
+
 func (ms *MapStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
 	return nil, nil
 }

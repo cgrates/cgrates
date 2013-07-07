@@ -119,7 +119,6 @@ func (rs *RedisStorage) SetTPDestination(tpid string, dest *Destination) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {
@@ -253,13 +252,17 @@ func (rs *RedisStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 	return nil, nil
 }
 
-func (rs *RedisStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) {
+func (rs *RedisStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
+	return nil, nil
+}
+
+func (ms *RedisStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*DestinationRate, error) {
 	return nil, nil
 }
 func (rs *RedisStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error) {
+func (rs *RedisStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
 	return nil, nil
 }
 func (rs *RedisStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {

@@ -61,7 +61,7 @@ func (sql *SQLStorage) GetTPDestinationIds(tpid string) ([]string, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	ids:= []string{}
+	ids := []string{}
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix
@@ -112,8 +112,8 @@ func (sql *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, err
 }
 
 func (sql *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
-	for _,prefix := range dest.Prefixes {
-		if _,err := sql.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES( '%s','%s','%s')",utils.TBL_TP_DESTINATIONS, tpid, dest.Id, prefix));err!=nil {
+	for _, prefix := range dest.Prefixes {
+		if _, err := sql.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES( '%s','%s','%s')", utils.TBL_TP_DESTINATIONS, tpid, dest.Id, prefix)); err != nil {
 			return err
 		}
 	}
@@ -269,8 +269,8 @@ func (sql *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, erro
 	return dests, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) {
-	rts := make(map[string][]*Rate)
+func (sql *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
+	rts := make(map[string]*Rate)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
@@ -281,21 +281,49 @@ func (sql *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*Rate, error) 
 	}
 	for rows.Next() {
 		var id int
-		var tpid, tag, destinations_tag string
+		var tpid, tag string
 		var connect_fee, rate, priced_units, rate_increments float64
-		if err := rows.Scan(&id, &tpid, &tag, &destinations_tag, &connect_fee, &rate, &priced_units, &rate_increments); err != nil {
+		if err := rows.Scan(&id, &tpid, &tag, &connect_fee, &rate, &priced_units, &rate_increments); err != nil {
 			return nil, err
 		}
 
 		r := &Rate{
-			DestinationsTag: destinations_tag,
-			ConnectFee:      connect_fee,
-			Price:           rate,
-			PricedUnits:     priced_units,
-			RateIncrements:  rate_increments,
+			Tag:            tag,
+			ConnectFee:     connect_fee,
+			Price:          rate,
+			PricedUnits:    priced_units,
+			RateIncrements: rate_increments,
 		}
 
-		rts[tag] = append(rts[tag], r)
+		rts[tag] = r
+	}
+	return rts, rows.Err()
+}
+
+func (sql *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*DestinationRate, error) {
+	rts := make(map[string][]*DestinationRate)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATION_RATES, tpid)
+	if tag != "" {
+		q += "AND tag=" + tag
+	}
+	rows, err := sql.Db.Query(q, tpid)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var id int
+		var tpid, tag, destinations_tag, rate_tag string
+		if err := rows.Scan(&id, &tpid, &tag, destinations_tag, rate_tag); err != nil {
+			return nil, err
+		}
+
+		dr := &DestinationRate{
+			Tag:             tag,
+			DestinationsTag: destinations_tag,
+			RateTag:         rate_tag,
+		}
+
+		rts[tag] = append(rts[tag], dr)
 	}
 	return rts, rows.Err()
 }
@@ -321,9 +349,9 @@ func (sql *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error
 	return tms, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error) {
-	var rts []*RateTiming
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATE_TIMINGS, tpid)
+func (sql *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
+	var rts []*DestinationRateTiming
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATION_RATE_TIMINGS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
@@ -334,15 +362,15 @@ func (sql *SQLStorage) GetTpRateTimings(tpid, tag string) ([]*RateTiming, error)
 	for rows.Next() {
 		var id int
 		var weight float64
-		var tpid, tag, rates_tag, timings_tag string
-		if err := rows.Scan(&id, &tpid, &tag, &rates_tag, &timings_tag, &weight); err != nil {
+		var tpid, tag, destination_rates_tag, timings_tag string
+		if err := rows.Scan(&id, &tpid, &tag, &destination_rates_tag, &timings_tag, &weight); err != nil {
 			return nil, err
 		}
-		rt := &RateTiming{
-			Tag:        tag,
-			RatesTag:   rates_tag,
-			Weight:     weight,
-			TimingsTag: timings_tag,
+		rt := &DestinationRateTiming{
+			Tag:                 tag,
+			DestinationRatesTag: destination_rates_tag,
+			Weight:              weight,
+			TimingsTag:          timings_tag,
 		}
 		rts = append(rts, rt)
 	}
