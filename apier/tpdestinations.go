@@ -21,28 +21,14 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"	
+	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Return destinations profile for a destination tag received as parameter
-func (self *Apier) GetTPDestinationIds(TPid string, reply *[]string) error {
-	if TPid == "" {
-		return fmt.Errorf("%s:TPid", utils.ERR_MANDATORY_IE_MISSING)
-	}
-	if ids, err := self.StorDb.GetTPDestinationIds(TPid); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if ids == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
-	} else {
-		*reply = ids
-	}
-	return nil
-}
 
 type AttrGetTPDestination struct {
-	TPid            string
-	DestinationId string
+	TPid          string // Tariff plan id
+	DestinationId string // Destination id
 }
 
 // Return destinations profile for a destination tag received as parameter
@@ -61,9 +47,9 @@ func (self *Apier) GetTPDestination(attrs AttrGetTPDestination, reply *rater.Des
 }
 
 type AttrSetTPDestination struct {
-	TPid            string
-	DestinationId string
-	Prefixes []string
+	TPid          string   // Tariff plan id
+	DestinationId string   // Destination id
+	Prefixes      []string // Set of prefixes attached to this destination
 }
 
 func (self *Apier) SetTPDestination(attrs AttrSetTPDestination, reply *string) error {

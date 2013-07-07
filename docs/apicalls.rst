@@ -174,34 +174,82 @@ Errors:
  SERVER_ERROR - Server error occurred.
  DUPLICATE - The specified combination of TPid/DestinationId already exists in StorDb.
 
-**GetTPDestination**
-   Gets a JSON destination structure.
+**Apier.GetTPDestination**
 
-Parametrs:
+ Queries a specific destination.
 
-TPid
-   A string containing traiff plan id
+Request:
 
-Tag
-   A destination tag string
+ Data:
+ ::
 
-Example
-   GetTPDestination("1dec2012", "DAN_NET")
-   
-   Reply: '{"Reply": {"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}}'
+  type AttrGetTPDestination struct {
+	TPid          string // Tariff plan id
+	DestinationId string // Destination id
+  }
 
-**GetAllTPDestinations**
-   Get all destinations
+ JSON output example:
+ ::
 
-Parametrs:
+  {"params": [{"DestinationId": "FIRST_DST2", "TPid": "FIRST_TP"}], "method": "Apier.GetTPDestination", "id": 0}
 
-TPid
-   A string containing traiff plan id
 
-Example
-   GetAllTPDestinations("1dec2012")
+Reply:
 
-   Reply: '{"Reply": [{"Tag": "DAN_NET", "Prefixes": ["4917", "4918"]}, {"Tag": "RIF_NET", "Prefixes": ["40723"]}]}'
+ Data:
+ ::
+
+  type Destination struct {
+    Id       string
+    Prefixes []string
+  }
+
+ JSON output example:
+ ::
+
+ {"id":0,"result":{"Id":"FIST_DST2","Prefixes":["123","345"]},"error":null}
+
+Errors:
+  MANDATORY_IE_MISSING - Mandatory parameter missing from request. 
+  SERVER_ERROR - Server error occurred. 
+  NOT_FOUND - Requested destination not found.
+
+
+**Apier.GetTPDestinationIds**
+
+ Queries destination identities on specific tariff plan.
+
+Request:
+
+ Data:
+ ::
+
+  type AttrGetTPDestinationIds struct {
+	TPid string // Tariff plan id
+  }
+
+ JSON output example:
+ ::
+
+  {"params": [{"TPid": "FIST_TP"}], "method": "Apier.GetTPDestinationIds", "id": 1}
+
+
+Reply:
+
+ Data:
+ ::
+
+  []string
+
+ JSON output example:
+ ::
+
+ {"id":1,"result":["FIST_DST","FIST_DST1","FIST_DST2","FIST_DST3","FIST_DST4"],"error":null}
+
+Errors:
+  MANDATORY_IE_MISSING - Mandatory parameter missing from request. 
+  SERVER_ERROR - Server error occurred. 
+  NOT_FOUND - Requested tariff plan not found.
 
 Timings
 +++++++
