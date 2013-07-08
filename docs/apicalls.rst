@@ -122,7 +122,7 @@ FlushCache
 These operate on a tpid
 
 Destinations
-++++++++++++
+~~~~~~~~~~~~
 
 
 ::
@@ -132,124 +132,191 @@ Destinations
        Prefixes []string
    }
 
-**Apier.SetTPDestination**
+Apier.SetTPDestination
+++++++++++++++++++++++
 
- Creates a new destination within a tariff plan id.
+Creates a new destination within a tariff plan id.
 
-Request:
-
- Data:
- ::
-
-  type AttrSetTPDestination struct {
-    TPid            string   // Tariff plan id
-    DestinationId   string   // Unique identity within the tariff plan id
-    Prefixes       []string  // Set of prefixes grouped by this destination
-  }
-
- JSON output example:
- ::
-
-  {"params": [{"Prefixes": ["123", "345"], "DestinationId": "FIST_DST2", "TPid": "FIST_TP"}], "method": "Apier.SetTPDestination", "id": 2}
-
-
-Reply:
+**Request**:
 
  Data:
- ::
+  ::
 
-  string
+   type AttrSetTPDestination struct {
+     TPid            string   // Tariff plan id
+     DestinationId   string   // Unique identity within the tariff plan id
+     Prefixes       []string  // Set of prefixes grouped by this destination
+   }
+
+ *JSON sample*:
+  ::
+
+   {
+     "id": 2, 
+     "method": "Apier.SetTPDestination", 
+     "params": [
+        {
+            "DestinationId": "FIST_DST2", 
+            "Prefixes": [
+                "123", 
+                "345"
+            ], 
+            "TPid": "FIST_TP"
+        }
+    ]
+   }
+
+**Reply**:
+
+ Data:
+  ::
+
+   string
 
  Possible answers:
-  OK - Success.
+  ``OK`` - Success.
 
- JSON output example:
- ::
+ *JSON sample*:
+  ::
 
- {"id":2,"result":"OK","error":null}
+   {
+    "error": null, 
+    "id": 2, 
+    "result": "OK"
+   }
 
-Errors:
+**Errors**:
 
- MANDATORY_IE_MISSING - Mandatory parameter missing from request.
- SERVER_ERROR - Server error occurred.
- DUPLICATE - The specified combination of TPid/DestinationId already exists in StorDb.
+ ``MANDATORY_IE_MISSING`` - Mandatory parameter missing from request.
 
-**Apier.GetTPDestination**
+ ``SERVER_ERROR`` - Server error occurred.
 
- Queries a specific destination.
+ ``DUPLICATE`` - The specified combination of TPid/DestinationId already exists in StorDb.
 
-Request:
+
+Apier.GetTPDestination
+++++++++++++++++++++++
+
+Queries a specific destination.
+
+**Request**:
 
  Data:
- ::
+  ::
 
-  type AttrGetTPDestination struct {
+   type AttrGetTPDestination struct {
 	TPid          string // Tariff plan id
 	DestinationId string // Destination id
-  }
+   }
 
- JSON output example:
- ::
+ *JSON sample*:
+  ::
 
-  {"params": [{"DestinationId": "FIRST_DST2", "TPid": "FIRST_TP"}], "method": "Apier.GetTPDestination", "id": 0}
+   {
+    "id": 0, 
+    "method": "Apier.GetTPDestination", 
+    "params": [
+        {
+            "DestinationId": "FIRST_DST2", 
+            "TPid": "FIRST_TP"
+        }
+    ]
+   }
 
-
-Reply:
-
- Data:
- ::
-
-  type Destination struct {
-    Id       string
-    Prefixes []string
-  }
-
- JSON output example:
- ::
-
- {"id":0,"result":{"Id":"FIST_DST2","Prefixes":["123","345"]},"error":null}
-
-Errors:
-  MANDATORY_IE_MISSING - Mandatory parameter missing from request. 
-  SERVER_ERROR - Server error occurred. 
-  NOT_FOUND - Requested destination not found.
-
-
-**Apier.GetTPDestinationIds**
-
- Queries destination identities on specific tariff plan.
-
-Request:
+**Reply**:
 
  Data:
- ::
+  ::
 
-  type AttrGetTPDestinationIds struct {
+   type Destination struct {
+     Id       string     // Destination id
+     Prefixes []string   // List of prefixes attached to destination
+   }
+
+ *JSON sample*:
+  ::
+
+   {
+    "error": null, 
+    "id": 0, 
+    "result": {
+        "Id": "FIST_DST2", 
+        "Prefixes": [
+            "123", 
+            "345"
+        ]
+    }
+   }
+
+
+**Errors**:
+
+ ``MANDATORY_IE_MISSING`` - Mandatory parameter missing from request.
+
+ ``SERVER_ERROR`` - Server error occurred.
+
+ ``NOT_FOUND`` - Requested destination id not found.
+
+
+Apier.GetTPDestinationIds
++++++++++++++++++++++++++
+
+Queries destination identities on specific tariff plan.
+
+**Request**:
+
+ Data:
+  ::
+
+   type AttrGetTPDestinationIds struct {
 	TPid string // Tariff plan id
-  }
+   }
 
- JSON output example:
- ::
+ *JSON sample*:
+  ::
 
-  {"params": [{"TPid": "FIST_TP"}], "method": "Apier.GetTPDestinationIds", "id": 1}
+   {
+    "id": 1, 
+    "method": "Apier.GetTPDestinationIds", 
+    "params": [
+        {
+            "TPid": "FIST_TP"
+        }
+    ]
+   }
 
-
-Reply:
+**Reply**:
 
  Data:
- ::
+  ::
 
-  []string
+   []string
 
- JSON output example:
- ::
+ *JSON sample*:
+  ::
 
- {"id":1,"result":["FIST_DST","FIST_DST1","FIST_DST2","FIST_DST3","FIST_DST4"],"error":null}
+   {
+    "error": null, 
+    "id": 1, 
+    "result": [
+        "FIST_DST", 
+        "FIST_DST1", 
+        "FIST_DST2", 
+        "FIST_DST3", 
+        "FIST_DST4"
+    ]
+   }
 
-Errors:
-  MANDATORY_IE_MISSING - Mandatory parameter missing from request. 
-  SERVER_ERROR - Server error occurred. 
-  NOT_FOUND - Requested tariff plan not found.
+
+
+**Errors**:
+
+ ``MANDATORY_IE_MISSING`` - Mandatory parameter missing from request.
+
+ ``SERVER_ERROR`` - Server error occurred.
+
+ ``NOT_FOUND`` - Requested tariff plan not found.
+
 
 Timings
 +++++++
