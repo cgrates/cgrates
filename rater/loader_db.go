@@ -137,7 +137,19 @@ func (dbr *DbReader) LoadRates() (err error) {
 
 func (dbr *DbReader) LoadDestinationRates() (err error) {
 	dbr.destinationRates, err = dbr.storDB.GetTpDestinationRates(dbr.tpid, "")
-	return err
+	if err != nil {
+		return err
+	}
+	for _, drs := range dbr.destinationRates {
+		for _, dr := range drs {
+			rate, exists := dbr.rates[dr.RateTag]
+			if !exists {
+				return errors.New(fmt.Sprintf("Could not find rate for tag %v", dr.RateTag))
+			}
+			dr.Rate = rate
+		}
+	}
+	return nil
 }
 
 func (dbr *DbReader) LoadDestinationRateTimings() error {
@@ -214,17 +226,17 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) (*RatingProfile, error) 
 				return nil, err
 			}
 			rateTiming.timing = tm[rateTiming.TimingsTag]
-			rm, err := dbr.storDB.GetTpDestinationRates(dbr.tpid, rateTiming.DestinationRatesTag)
+			drm, err := dbr.storDB.GetTpDestinationRates(dbr.tpid, rateTiming.DestinationRatesTag)
 			if err != nil {
 				return nil, err
 			}
-			for _, rate := range rm[rateTiming.DestinationRatesTag] {
+			for _, drate := range drm[rateTiming.DestinationRatesTag] {
 				_, exists := activationPeriods[rateTiming.Tag]
 				if !exists {
 					activationPeriods[rateTiming.Tag] = &ActivationPeriod{}
 				}
-				activationPeriods[rateTiming.Tag].AddIntervalIfNotPresent(rateTiming.GetInterval(rate))
-				dm, err := dbr.storDB.GetTpDestinations(dbr.tpid, rate.DestinationsTag)
+				activationPeriods[rateTiming.Tag].AddIntervalIfNotPresent(rateTiming.GetInterval(drate))
+				dm, err := dbr.storDB.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 				if err != nil {
 					return nil, err
 				}
