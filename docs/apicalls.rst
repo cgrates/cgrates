@@ -132,7 +132,7 @@ Destinations
 
 
 Timings
-+++++++
+~~~~~~~
 
 .. toctree::
    :maxdepth: 2
