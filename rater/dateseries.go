@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
-	// "log"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	// "log"
+	"fmt"
+	"reflect"
 )
 
 // Defines years days series
@@ -58,7 +58,7 @@ func (ys Years) Contains(year int) (result bool) {
 	return
 }
 
-// Parse MonthDay elements from string separated by sep.
+// Parse Years elements from string separated by sep.
 func (ys *Years) Parse(input, sep string) {
 	switch input {
 	case "*all", "":
@@ -72,6 +72,24 @@ func (ys *Years) Parse(input, sep string) {
 		}
 	}
 }
+
+func (ys Years) Serialize( sep string ) string {
+	if len(ys) == 0 {
+		return "*all"
+	}
+	var yStr string
+	for idx, yr := range ys {
+		if idx != 0 {
+			yStr = fmt.Sprintf("%s%s%d", yStr, sep, yr)
+		} else {
+			yStr = strconv.Itoa(yr)
+		}
+	}
+	return yStr
+}
+
+var allMonths []time.Month = []time.Month{time.January, time.February, time.March, time.April, time.May, time.June,
+			time.July, time.August, time.September, time.October, time.November, time.December}
 
 // Defines months series
 type Months []time.Month
@@ -107,8 +125,9 @@ func (m Months) Contains(month time.Month) (result bool) {
 func (m *Months) Parse(input, sep string) {
 	switch input {
 	case "*all":
-		*m = []time.Month{time.January, time.February, time.March, time.April, time.May, time.June,
-			time.July, time.August, time.September, time.October, time.November, time.December}
+		*m = allMonths
+	case "*none": // Apier cannot receive empty string, hence using meta-tag
+		*m = []time.Month{}
 	case "":
 		*m = []time.Month{}
 	default:
@@ -120,6 +139,28 @@ func (m *Months) Parse(input, sep string) {
 		}
 	}
 }
+
+// Dumps the months in a serialized string, similar to the one parsed
+func (m Months) Serialize( sep string ) string {
+	if len(m) == 0 {
+		return "*none"
+	}
+	if reflect.DeepEqual( m, Months(allMonths) ) {
+		return "*all"
+	}
+	var mStr string
+	for idx, mt := range m {
+		if idx != 0 {
+			mStr = fmt.Sprintf("%s%s%d", mStr, sep, mt)
+		} else {
+			mStr = strconv.Itoa(int(mt))
+		}
+	}
+	return mStr
+}
+
+
+var allMonthDays []int = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
 
 // Defines month days series
 type MonthDays []int
@@ -156,7 +197,7 @@ func (md MonthDays) Contains(monthDay int) (result bool) {
 func (md *MonthDays) Parse(input, sep string) {
 	switch input {
 	case "*all":
-		*md = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
+		*md = allMonthDays
 	case "":
 		*md = []int{}
 	default:
@@ -169,6 +210,26 @@ func (md *MonthDays) Parse(input, sep string) {
 	}
 }
 
+// Dumps the month days in a serialized string, similar to the one parsed
+func (md MonthDays) Serialize( sep string ) string {
+	if len(md) == 0 {
+		return "*none"
+	}
+	if reflect.DeepEqual(md, MonthDays(allMonthDays)) {
+		return "*all"
+	}
+	var mdsStr string
+	for idx, mDay := range md {
+		if idx != 0 {
+			mdsStr = fmt.Sprintf("%s%s%d", mdsStr, sep, mDay)
+		} else {
+			mdsStr = strconv.Itoa(mDay)
+		}
+	}
+	return mdsStr
+}
+
+var allWeekDays []time.Weekday = []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday}
 // Defines week days series
 type WeekDays []time.Weekday
 
@@ -203,7 +264,7 @@ func (wd WeekDays) Contains(weekDay time.Weekday) (result bool) {
 func (wd *WeekDays) Parse(input, sep string) {
 	switch input {
 	case "*all":
-		*wd = []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday}
+		*wd = allWeekDays
 	case "":
 		*wd = []time.Weekday{}
 	default:
@@ -214,4 +275,23 @@ func (wd *WeekDays) Parse(input, sep string) {
 			}
 		}
 	}
+}
+
+// Dumps the week days in a serialized string, similar to the one parsed
+func (wd WeekDays) Serialize( sep string ) string {
+	if len(wd) == 0 {
+		return "*none"
+	}
+	if reflect.DeepEqual( wd, WeekDays(allWeekDays) ) {
+		return "*all"
+	}
+	var wdStr string
+	for idx, d := range wd {
+		if idx != 0 {
+			wdStr = fmt.Sprintf("%s%s%d", wdStr, sep, d)
+		} else {
+			wdStr = strconv.Itoa(int(d))
+		}
+	}
+	return wdStr
 }

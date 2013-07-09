@@ -86,6 +86,7 @@ type DestinationRate struct {
 }
 
 type Timing struct {
+	Id	 string
 	Years     Years
 	Months    Months
 	MonthDays MonthDays
@@ -93,13 +94,14 @@ type Timing struct {
 	StartTime string
 }
 
-func NewTiming(timeingInfo ...string) (rt *Timing) {
+func NewTiming(timingInfo ...string) (rt *Timing) {
 	rt = &Timing{}
-	rt.Years.Parse(timeingInfo[0], ";")
-	rt.Months.Parse(timeingInfo[1], ";")
-	rt.MonthDays.Parse(timeingInfo[2], ";")
-	rt.WeekDays.Parse(timeingInfo[3], ";")
-	rt.StartTime = timeingInfo[4]
+	rt.Id = timingInfo[0]
+	rt.Years.Parse(timingInfo[1], ";")
+	rt.Months.Parse(timingInfo[2], ";")
+	rt.MonthDays.Parse(timingInfo[3], ";")
+	rt.WeekDays.Parse(timingInfo[4], ";")
+	rt.StartTime = timingInfo[5]
 	return
 }
 

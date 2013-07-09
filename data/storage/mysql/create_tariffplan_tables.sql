@@ -11,7 +11,8 @@ CREATE TABLE `tp_timings` (
   `week_days` varchar(255) NOT NULL,
   `time` varchar(16) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `tpid_tmid` (`tpid`,`tag`)
 );
 
 --
@@ -24,8 +25,8 @@ CREATE TABLE `tp_destinations` (
   `tag` varchar(24) NOT NULL,
   `prefix` varchar(24) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `tpid_dest_prefix` (`tpid`,`tag`,`prefix`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `tpid_dest_prefix` (`tpid`,`tag`,`prefix`)
 );
 
 --

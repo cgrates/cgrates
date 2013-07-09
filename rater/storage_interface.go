@@ -57,10 +57,16 @@ type DataStorage interface {
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
-	GetTPDestinationIds(string) ([]string, error)
+	// Apier functions
+	SetTPTiming(string, *Timing) error
+	ExistsTPTiming(string, string) (bool, error)
+	GetTPTiming(string, string) (*Timing, error)
+	GetTPTimingIds(string) ([]string, error)
+	SetTPDestination(string, *Destination) error
 	ExistsTPDestination(string, string) (bool, error)
 	GetTPDestination(string, string) (*Destination, error)
-	SetTPDestination(string, *Destination) error
+	GetTPDestinationIds(string) ([]string, error)
+	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)

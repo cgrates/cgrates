@@ -125,13 +125,6 @@ Destinations
 ~~~~~~~~~~~~
 
 
-::
-
-   type Destination struct {
-       Tag      string
-       Prefixes []string
-   }
-
 Apier.SetTPDestination
 ++++++++++++++++++++++
 
@@ -142,11 +135,13 @@ Creates a new destination within a tariff plan id.
  Data:
   ::
 
-   type AttrSetTPDestination struct {
-     TPid            string   // Tariff plan id
-     DestinationId   string   // Unique identity within the tariff plan id
-     Prefixes       []string  // Set of prefixes grouped by this destination
+   type ApierTPDestination struct {
+	TPid          string   // Tariff plan id
+	DestinationId string   // Destination id
+	Prefixes      []string // Prefixes attached to this destination
    }
+
+ Required parameters: ``[]string{"TPid", "DestinationId", "Prefixes"}``
 
  *JSON sample*:
   ::
@@ -209,6 +204,8 @@ Queries a specific destination.
 	DestinationId string // Destination id
    }
 
+ Required parameters: ``[]string{"TPid", "DestinationId"}``
+
  *JSON sample*:
   ::
 
@@ -228,9 +225,10 @@ Queries a specific destination.
  Data:
   ::
 
-   type Destination struct {
-     Id       string     // Destination id
-     Prefixes []string   // List of prefixes attached to destination
+   type ApierTPDestination struct {
+	TPid          string   // Tariff plan id
+	DestinationId string   // Destination id
+	Prefixes      []string // Prefixes attached to this destination
    }
 
  *JSON sample*:
@@ -240,7 +238,8 @@ Queries a specific destination.
     "error": null, 
     "id": 0, 
     "result": {
-        "Id": "FIST_DST2", 
+        "TPid":"FIST_TP",
+        "DestinationId": "FIST_DST2", 
         "Prefixes": [
             "123", 
             "345"
@@ -271,6 +270,8 @@ Queries destination identities on specific tariff plan.
    type AttrGetTPDestinationIds struct {
 	TPid string // Tariff plan id
    }
+
+ Required parameters: ``[]string{"TPid"}``
 
  *JSON sample*:
   ::
@@ -321,36 +322,10 @@ Queries destination identities on specific tariff plan.
 Timings
 +++++++
 
-::
+.. toctree::
+   :maxdepth: 2
 
-   type Timing struct {
-      Tag
-      Years
-      Months
-      MonthDays
-      WeekDays
-      Time
-   }
-
-**SetTPTiming**
-
-Parametrs:
-
-TPid
-    A string containing traiff plan id
-
-Timing
-    A JSON string containing timing data.
-
-Example
-
-    SetTPTiming("1dec2012", '{"Tag": "MIDNIGHT", Year: "\*all", Months: "\*all", MonthDays: "\*all", WeekDays: "\*all", "Time": "00:00:00"}')
-
-GetTPTiming
-
-DeleteTPTiming
-
-GetAllTPTimings
+   api_tptimings
 
 
 SetTPRate

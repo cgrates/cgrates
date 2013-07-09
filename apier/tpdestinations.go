@@ -21,56 +21,18 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"	
+	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 )
 
-type AttrGetTPDestinationIds struct {
-     TPid string // Tariff plan id
+type ApierTPDestination struct {
+	TPid          string   // Tariff plan id
+	DestinationId string   // Destination id
+	Prefixes      []string // Prefixes attached to this destination
 }
 
-// Return destinations profile for a destination tag received as parameter
-func (self *Apier) GetTPDestinationIds(attrs AttrGetTPDestinationIds, reply *[]string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if ids, err := self.StorDb.GetTPDestinationIds(attrs.TPid); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if ids == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
-	} else {
-		*reply = ids
-	}
-	return nil
-}
-
-type AttrGetTPDestination struct {
-	TPid            string
-	DestinationId string
-}
-
-// Return destinations profile for a destination tag received as parameter
-func (self *Apier) GetTPDestination(attrs AttrGetTPDestination, reply *rater.Destination) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if dst, err := self.StorDb.GetTPDestination(attrs.TPid, attrs.DestinationId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if dst == nil {
-		return errors.New(utils.ERR_NOT_FOUND)
-	} else {
-		*reply = *dst
-	}
-	return nil
-}
-
-type AttrSetTPDestination struct {
-	TPid            string
-	DestinationId string
-	Prefixes []string
-}
-
-func (self *Apier) SetTPDestination(attrs AttrSetTPDestination, reply *string) error {
+// Creates a new destination within a tariff plan
+func (self *Apier) SetTPDestination(attrs ApierTPDestination, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -83,5 +45,44 @@ func (self *Apier) SetTPDestination(attrs AttrSetTPDestination, reply *string) e
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
+	return nil
+}
+
+type AttrGetTPDestination struct {
+	TPid          string // Tariff plan id
+	DestinationId string // Destination id
+}
+
+// Queries a specific destination
+func (self *Apier) GetTPDestination(attrs AttrGetTPDestination, reply *ApierTPDestination) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if dst, err := self.StorDb.GetTPDestination(attrs.TPid, attrs.DestinationId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if dst == nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		*reply = ApierTPDestination{attrs.TPid, dst.Id, dst.Prefixes}
+	}
+	return nil
+}
+
+type AttrGetTPDestinationIds struct {
+	TPid string // Tariff plan id
+}
+
+// Queries destination identities on specific tariff plan.
+func (self *Apier) GetTPDestinationIds(attrs AttrGetTPDestinationIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if ids, err := self.StorDb.GetTPDestinationIds(attrs.TPid); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if ids == nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		*reply = ids
+	}
 	return nil
 }

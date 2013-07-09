@@ -147,6 +147,22 @@ func (ms *MongoStorage) SetDestination(dest *Destination) error {
 	return ms.db.C("destinations").Insert(dest)
 }
 
+func (ms *MongoStorage) SetTPTiming(tpid string, tm *Timing) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MongoStorage) ExistsTPTiming(tpid, tmId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MongoStorage) GetTPTiming(tpid, tmId string) (*Timing, error) {
+	return nil, nil
+}
+
+func (ms *MongoStorage) GetTPTimingIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MongoStorage) GetTPDestinationIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }

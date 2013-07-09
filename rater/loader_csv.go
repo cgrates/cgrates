@@ -213,7 +213,7 @@ func (csvr *CSVReader) LoadTimings() (err error) {
 			continue
 		}
 
-		csvr.timings[tag] = NewTiming(record[1:]...)
+		csvr.timings[tag] = NewTiming(record...)
 	}
 	return
 }

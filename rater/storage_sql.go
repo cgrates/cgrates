@@ -29,34 +29,64 @@ type SQLStorage struct {
 	Db *sql.DB
 }
 
-func (sql *SQLStorage) Close() {}
+func (self *SQLStorage) Close() {}
 
-func (sql *SQLStorage) Flush() (err error) {
+func (self *SQLStorage) Flush() (err error) {
 	return
 }
 
-func (sql *SQLStorage) GetRatingProfile(string) (rp *RatingProfile, err error) {
-	/*row := sql.Db.QueryRow(fmt.Sprintf("SELECT * FROM ratingprofiles WHERE id='%s'", id))
+func (self *SQLStorage) GetRatingProfile(string) (rp *RatingProfile, err error) {
+	/*row := self.Db.QueryRow(fmt.Sprintf("SELECT * FROM ratingprofiles WHERE id='%s'", id))
 	err = row.Scan(&rp, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
 	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)*/
 	return
 }
 
-func (sql *SQLStorage) SetRatingProfile(rp *RatingProfile) (err error) {
+func (self *SQLStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	return
 }
 
-func (sql *SQLStorage) GetDestination(string) (d *Destination, err error) {
+func (self *SQLStorage) GetDestination(string) (d *Destination, err error) {
 	return
 }
 
-func (sql *SQLStorage) SetDestination(d *Destination) (err error) {
+func (self *SQLStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
-// Extracts destinations from StorDB on specific tariffplan id
-func (sql *SQLStorage) GetTPDestinationIds(tpid string) ([]string, error) {
-	rows, err := sql.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid))
+func (self *SQLStorage) SetTPTiming(tpid string, tm *Timing) error {
+	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s')",
+		utils.TBL_TP_TIMINGS, tpid, tm.Id, tm.Years.Serialize(";"), tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"),
+		tm.WeekDays.Serialize(";"), tm.StartTime )); err != nil {
+			return err
+	}
+	return nil
+}
+
+func (self *SQLStorage) ExistsTPTiming(tpid, tmId string) (bool, error) {
+	var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_TIMINGS, tpid, tmId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (self *SQLStorage) GetTPTiming(tpid, tmId string) (*Timing, error) {
+	var years, months, monthDays, weekDays, time string
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT years, months, month_days, week_days, time FROM %s WHERE tpid='%s' AND tag='%s' LIMIT 1", 
+		utils.TBL_TP_TIMINGS, tpid, tmId)).Scan(&years,&months,&monthDays,&weekDays,&time)
+	switch {
+	case err == sql.ErrNoRows:
+		return nil,nil
+	case err!=nil:
+		return nil, err
+	}
+	return NewTiming( tmId, years, months, monthDays, weekDays, time ), nil
+}
+
+func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_TIMINGS, tpid))
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +94,7 @@ func (sql *SQLStorage) GetTPDestinationIds(tpid string) ([]string, error) {
 	ids := []string{}
 	i := 0
 	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one prefix
+		i++ //Keep here a reference so we know we got at least one
 		var id string
 		err = rows.Scan(&id)
 		if err != nil {
@@ -78,9 +108,33 @@ func (sql *SQLStorage) GetTPDestinationIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
-func (sql *SQLStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
+// Extracts destinations from StorDB on specific tariffplan id
+func (self *SQLStorage) GetTPDestinationIds(tpid string) ([]string, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
+}
+
+func (self *SQLStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
 	var exists bool
-	err := sql.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_DESTINATIONS, tpid, destTag)).Scan(&exists)
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_DESTINATIONS, tpid, destTag)).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
@@ -88,8 +142,8 @@ func (sql *SQLStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
 }
 
 // Extracts destinations from StorDB on specific tariffplan id
-func (sql *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
-	rows, err := sql.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
+func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
 	if err != nil {
 		return nil, err
 	}
@@ -111,35 +165,35 @@ func (sql *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, err
 	return d, nil
 }
 
-func (sql *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
+func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	for _, prefix := range dest.Prefixes {
-		if _, err := sql.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES( '%s','%s','%s')", utils.TBL_TP_DESTINATIONS, tpid, dest.Id, prefix)); err != nil {
+		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES( '%s','%s','%s')", utils.TBL_TP_DESTINATIONS, tpid, dest.Id, prefix)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (sql *SQLStorage) GetActions(string) (as Actions, err error) {
+func (self *SQLStorage) GetActions(string) (as Actions, err error) {
 	return
 }
 
-func (sql *SQLStorage) SetActions(key string, as Actions) (err error) { return }
+func (self *SQLStorage) SetActions(key string, as Actions) (err error) { return }
 
-func (sql *SQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
+func (self *SQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
 
-func (sql *SQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
+func (self *SQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
 
-func (sql *SQLStorage) GetActionTimings(key string) (ats ActionTimings, err error) { return }
+func (self *SQLStorage) GetActionTimings(key string) (ats ActionTimings, err error) { return }
 
-func (sql *SQLStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
+func (self *SQLStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
 
-func (sql *SQLStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
+func (self *SQLStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
 	return
 }
 
-func (sql *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
-	if sql.Db == nil {
+func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
+	if self.Db == nil {
 		//timespans.Logger.Warning("Cannot write log to database.")
 		return
 	}
@@ -147,7 +201,7 @@ func (sql *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = sql.Db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('NULL','%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('NULL','%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
 		uuid,
 		source,
 		cc.Direction,
@@ -165,8 +219,8 @@ func (sql *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error
 	return
 }
 
-func (sql *SQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	row := sql.Db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s' AND source='%s'", uuid, source))
+func (self *SQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
+	row := self.Db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s' AND source='%s'", uuid, source))
 	var uuid_found string
 	var timespansJson string
 	err = row.Scan(&uuid_found, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
@@ -174,20 +228,20 @@ func (sql *SQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err er
 	return
 }
 
-func (sql *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
+func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	return
 }
-func (sql *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
+func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	return
 }
-func (sql *SQLStorage) LogError(uuid, source, errstr string) (err error) { return }
+func (self *SQLStorage) LogError(uuid, source, errstr string) (err error) { return }
 
-func (sql *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
+func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	startTime, err := cdr.GetAnswerTime()
 	if err != nil {
 		return err
 	}
-	_, err = sql.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)",
 		cdr.GetCgrId(),
 		cdr.GetAccId(),
 		cdr.GetCdrHost(),
@@ -208,7 +262,7 @@ func (sql *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling cdr extra fields to json: %v", err))
 	}
-	_, err = sql.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('NULL','%s', '%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('NULL','%s', '%s')",
 		cdr.GetCgrId(),
 		extraFields,
 	))
@@ -219,8 +273,8 @@ func (sql *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	return
 }
 
-func (sql *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error) {
-	_, err = sql.Db.Exec(fmt.Sprintf("INSERT INTO rated_cdrs VALUES ('%s', '%s', '%s', '%s')",
+func (self *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error) {
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO rated_cdrs VALUES ('%s', '%s', '%s', '%s')",
 		cdr.GetCgrId(),
 		cc.Cost,
 		"cgrcostid",
@@ -233,17 +287,17 @@ func (sql *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error) {
 	return
 }
 
-func (sql *SQLStorage) GetAllRatedCdr() ([]utils.CDR, error) {
+func (self *SQLStorage) GetAllRatedCdr() ([]utils.CDR, error) {
 	return nil, nil
 }
 
-func (sql *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
+func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
 	var dests []*Destination
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATIONS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -269,13 +323,13 @@ func (sql *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, erro
 	return dests, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
+func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 	rts := make(map[string]*Rate)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -300,13 +354,13 @@ func (sql *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 	return rts, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*DestinationRate, error) {
+func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*DestinationRate, error) {
 	rts := make(map[string][]*DestinationRate)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATION_RATES, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -328,13 +382,13 @@ func (sql *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*De
 	return rts, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
+func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
 	tms := make(map[string]*Timing)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_TIMINGS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -344,18 +398,18 @@ func (sql *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error
 		if err := rows.Scan(&id, &tpid, &tag, &years, &months, &month_days, &week_days, &start_time); err != nil {
 			return nil, err
 		}
-		tms[tag] = NewTiming(years, months, month_days, week_days, start_time)
+		tms[tag] = NewTiming(tag, years, months, month_days, week_days, start_time)
 	}
 	return tms, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
+func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
 	var rts []*DestinationRateTiming
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATION_RATE_TIMINGS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -377,13 +431,13 @@ func (sql *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*Destina
 	return rts, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
+func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
 	rpfs := make(map[string]*RatingProfile)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATE_PROFILES, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -408,13 +462,13 @@ func (sql *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Rating
 	}
 	return rpfs, rows.Err()
 }
-func (sql *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
+func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
 	as := make(map[string][]*Action)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTIONS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -461,13 +515,13 @@ func (sql *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, err
 	return as, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*ActionTiming, err error) {
+func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*ActionTiming, err error) {
 	ats = make(map[string][]*ActionTiming)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTION_TIMINGS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -490,13 +544,13 @@ func (sql *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*A
 	return ats, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
+func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	ats := make(map[string][]*ActionTrigger)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}
@@ -522,13 +576,13 @@ func (sql *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*Acti
 	return ats, rows.Err()
 }
 
-func (sql *SQLStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
+func (self *SQLStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
 	var acs []*AccountAction
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACCOUNT_ACTIONS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}
-	rows, err := sql.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q, tpid)
 	if err != nil {
 		return nil, err
 	}

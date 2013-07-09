@@ -73,8 +73,24 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetTPDestinationIds(tpid string) ([]string, error) {
+func (ms *MapStorage) SetTPTiming(tpid string, tm *Timing) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) ExistsTPTiming(tpid, tmId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) GetTPTiming(tpid, tmId string) (*Timing, error) {
+	return nil, nil
+}
+
+func (ms *MapStorage) GetTPTimingIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) SetTPDestination(tpid string, dest *Destination) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (ms *MapStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
@@ -86,8 +102,8 @@ func (ms *MapStorage) GetTPDestination(tpid, destTag string) (*Destination, erro
 	return nil, nil
 }
 
-func (ms *MapStorage) SetTPDestination(tpid string, dest *Destination) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+func (ms *MapStorage) GetTPDestinationIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
