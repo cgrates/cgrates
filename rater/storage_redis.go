@@ -102,6 +102,10 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+func (rs *RedisStorage) GetTPIds() ([]string, error) {
+        return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (rs *RedisStorage) SetTPTiming(tpid string, tm *Timing) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }

@@ -58,6 +58,7 @@ type DataStorage interface {
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 	// Apier functions
+	GetTPIds() ([]string, error)
 	SetTPTiming(string, *Timing) error
 	ExistsTPTiming(string, string) (bool, error)
 	GetTPTiming(string, string) (*Timing, error)

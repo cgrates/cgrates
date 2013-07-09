@@ -37,10 +37,25 @@ CREATE TABLE `tp_rates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
-  `destinations_tag` varchar(24) NOT NULL,
   `connect_fee` DECIMAL(5,4) NOT NULL,
   `rate` DECIMAL(5,4) NOT NULL,
+  `rated_units` INT(11) NOT NULL,
   `rate_increments` INT(11) NOT NULL,
+  `weight` DECIMAL(5,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`)
+);
+
+--
+-- Table structure for table `destination_rates`
+--
+
+CREATE TABLE `tp_destination_rates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` char(40) NOT NULL,
+  `tag` varchar(24) NOT NULL,
+  `destinations_tag` varchar(24) NOT NULL,
+  `rates_tag` varchar(24) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );
@@ -49,11 +64,11 @@ CREATE TABLE `tp_rates` (
 -- Table structure for table `tp_rate_timings`
 --
 
-CREATE TABLE `tp_rate_timings` (
+CREATE TABLE `tp_destination_rate_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
-  `rates_tag` varchar(24) NOT NULL,
+  `destination_rates_tag` varchar(24) NOT NULL,
   `timings_tag` varchar(24) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),

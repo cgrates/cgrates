@@ -73,6 +73,10 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+func (ms *MapStorage) GetTPIds() ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MapStorage) SetTPTiming(tpid string, tm *Timing) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }

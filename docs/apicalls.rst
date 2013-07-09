@@ -121,6 +121,15 @@ FlushCache
 
 These operate on a tpid
 
+TariffPlan
+~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   api_tp
+
+
 Destinations
 ~~~~~~~~~~~~
 
