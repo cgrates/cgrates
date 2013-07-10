@@ -44,10 +44,10 @@ type TPLoader interface {
 
 type Rate struct {
 	Tag                                            string
-	ConnectFee, Price, PricedUnits, RateIncrements float64
+	ConnectFee, Price, PricedUnits, RateIncrements, Weight float64
 }
 
-func NewRate(tag, connectFee, price, pricedUnits, rateIncrements string) (r *Rate, err error) {
+func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, weight string) (r *Rate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -68,12 +68,18 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements string) (r *Rat
 		log.Printf("Error parsing rates increments from: %v", rateIncrements)
 		return
 	}
+	wght, err := strconv.ParseFloat(weight, 64)
+	if err != nil {
+		log.Printf("Error parsing rates increments from: %s", weight)
+		return
+	}
 	r = &Rate{
 		Tag:            tag,
 		ConnectFee:     cf,
 		Price:          p,
 		PricedUnits:    pu,
 		RateIncrements: ri,
+		Weight:		wght,
 	}
 	return
 }

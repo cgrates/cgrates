@@ -37,7 +37,7 @@ type ApierTPTiming struct {
 
 // Creates a new timing within a tariff plan
 func (self *Apier) SetTPTiming(attrs ApierTPTiming, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId", "Years","Months","MonthDays", "WeekDays","Time"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId", "Years", "Months", "MonthDays", "WeekDays", "Time"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	if exists, err := self.StorDb.ExistsTPTiming(attrs.TPid, attrs.TimingId); err != nil {
@@ -45,7 +45,7 @@ func (self *Apier) SetTPTiming(attrs ApierTPTiming, reply *string) error {
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	tm := rater.NewTiming( attrs.TimingId, attrs.Years, attrs.Months, attrs.MonthDays, attrs.WeekDays, attrs.Time )
+	tm := rater.NewTiming(attrs.TimingId, attrs.Years, attrs.Months, attrs.MonthDays, attrs.WeekDays, attrs.Time)
 	if err := self.StorDb.SetTPTiming(attrs.TPid, tm); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -68,7 +68,7 @@ func (self *Apier) GetTPTiming(attrs AttrGetTPTiming, reply *ApierTPTiming) erro
 	} else if tm == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = ApierTPTiming{attrs.TPid, tm.Id, tm.Years.Serialize(";"), 
+		*reply = ApierTPTiming{attrs.TPid, tm.Id, tm.Years.Serialize(";"),
 			tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"), tm.WeekDays.Serialize(";"), tm.StartTime}
 	}
 	return nil

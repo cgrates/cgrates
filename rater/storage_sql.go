@@ -22,6 +22,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	//"errors"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -195,6 +196,13 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES( '%s','%s','%s')", utils.TBL_TP_DESTINATIONS, tpid, dest.Id, prefix)); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (self *SQLStorage) SetTPRate(tpid string, rt *Rate) error {
+	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, weight) VALUES ('%s', '%s', %f, %f, %d, %d, %f)", utils.TBL_TP_RATES, tpid, rt.Tag, rt.ConnectFee, rt.Price, int(rt.PricedUnits), int(rt.RateIncrements), rt.Weight)); err != nil {
+		return err
 	}
 	return nil
 }

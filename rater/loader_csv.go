@@ -235,7 +235,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 			continue
 		}
 		var r *Rate
-		r, err = NewRate(record[0], record[1], record[2], record[3], record[4])
+		r, err = NewRate(record[0], record[1], record[2], record[3], record[4], record[5])
 		if err != nil {
 			return err
 		}

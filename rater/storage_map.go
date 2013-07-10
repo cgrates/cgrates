@@ -101,13 +101,16 @@ func (ms *MapStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-// Extracts destinations from StorDB on specific tariffplan id
 func (ms *MapStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
 	return nil, nil
 }
 
 func (ms *MapStorage) GetTPDestinationIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) SetTPRate(tpid string, rt *Rate) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {

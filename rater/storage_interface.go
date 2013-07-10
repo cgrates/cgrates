@@ -67,6 +67,7 @@ type DataStorage interface {
 	ExistsTPDestination(string, string) (bool, error)
 	GetTPDestination(string, string) (*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)
+	SetTPRate(string, *Rate) error
 	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error

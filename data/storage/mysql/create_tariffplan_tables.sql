@@ -43,7 +43,8 @@ CREATE TABLE `tp_rates` (
   `rate_increments` INT(11) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `tpid_rate_weight` (`tpid`,`rate`,`weight`)
 );
 
 --
