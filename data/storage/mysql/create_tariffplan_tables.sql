@@ -59,7 +59,7 @@ CREATE TABLE `tp_destination_rates` (
   `rates_tag` varchar(24) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `tpid_tag_dst_rates` (`tpid`,`tag`,`destinations_tag`, `rates_tag`)
+  UNIQUE KEY `tpid_tag_dst_rates` (`tpid`,`tag`,`destinations_tag`)
 );
 
 --

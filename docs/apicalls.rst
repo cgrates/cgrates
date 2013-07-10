@@ -130,16 +130,6 @@ TariffPlan
    api_tp
 
 
-Destinations
-~~~~~~~~~~~~
-
-.. toctree::
-   :maxdepth: 2
-
-   api_tpdestinations
-
-
-
 Timings
 ~~~~~~~
 
@@ -149,6 +139,15 @@ Timings
    api_tptimings
 
 
+Destinations
+~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   api_tpdestinations
+
+
 Rates
 ~~~~~~~
 
@@ -156,6 +155,15 @@ Rates
    :maxdepth: 2
 
    api_tprates
+
+
+DestinationRates
+~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   api_tpdestinationrates
 
 
 GetTPRateTiming
