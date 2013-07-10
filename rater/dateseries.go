@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
+	"fmt"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
-	"reflect"
 )
 
 // Defines years days series
@@ -73,7 +73,7 @@ func (ys *Years) Parse(input, sep string) {
 	}
 }
 
-func (ys Years) Serialize( sep string ) string {
+func (ys Years) Serialize(sep string) string {
 	if len(ys) == 0 {
 		return "*all"
 	}
@@ -89,7 +89,7 @@ func (ys Years) Serialize( sep string ) string {
 }
 
 var allMonths []time.Month = []time.Month{time.January, time.February, time.March, time.April, time.May, time.June,
-			time.July, time.August, time.September, time.October, time.November, time.December}
+	time.July, time.August, time.September, time.October, time.November, time.December}
 
 // Defines months series
 type Months []time.Month
@@ -141,11 +141,11 @@ func (m *Months) Parse(input, sep string) {
 }
 
 // Dumps the months in a serialized string, similar to the one parsed
-func (m Months) Serialize( sep string ) string {
+func (m Months) Serialize(sep string) string {
 	if len(m) == 0 {
 		return "*none"
 	}
-	if reflect.DeepEqual( m, Months(allMonths) ) {
+	if reflect.DeepEqual(m, Months(allMonths)) {
 		return "*all"
 	}
 	var mStr string
@@ -158,7 +158,6 @@ func (m Months) Serialize( sep string ) string {
 	}
 	return mStr
 }
-
 
 var allMonthDays []int = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
 
@@ -211,7 +210,7 @@ func (md *MonthDays) Parse(input, sep string) {
 }
 
 // Dumps the month days in a serialized string, similar to the one parsed
-func (md MonthDays) Serialize( sep string ) string {
+func (md MonthDays) Serialize(sep string) string {
 	if len(md) == 0 {
 		return "*none"
 	}
@@ -230,6 +229,7 @@ func (md MonthDays) Serialize( sep string ) string {
 }
 
 var allWeekDays []time.Weekday = []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday}
+
 // Defines week days series
 type WeekDays []time.Weekday
 
@@ -278,11 +278,11 @@ func (wd *WeekDays) Parse(input, sep string) {
 }
 
 // Dumps the week days in a serialized string, similar to the one parsed
-func (wd WeekDays) Serialize( sep string ) string {
+func (wd WeekDays) Serialize(sep string) string {
 	if len(wd) == 0 {
 		return "*none"
 	}
-	if reflect.DeepEqual( wd, WeekDays(allWeekDays) ) {
+	if reflect.DeepEqual(wd, WeekDays(allWeekDays)) {
 		return "*all"
 	}
 	var wdStr string

@@ -19,32 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package mediator
 
 import (
-	"time"
-	"strconv"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"strconv"
+	"time"
 )
 
 type FScsvCDR struct {
-	rowData			[]string 	// The original row extracted form csv file
+	rowData []string // The original row extracted form csv file
 	accIdIdx,
-	subjectIdx, 
-	reqtypeIdx, 
-	directionIdx, 
-	tenantIdx, 
-	torIdx, 
-	accountIdx, 
-	destinationIdx, 
-	answerTimeIdx, 
-	durationIdx 		int // Field indexes	
-	cgrCfg			*config.CGRConfig // CGR Config instance
+	subjectIdx,
+	reqtypeIdx,
+	directionIdx,
+	tenantIdx,
+	torIdx,
+	accountIdx,
+	destinationIdx,
+	answerTimeIdx,
+	durationIdx int // Field indexes
+	cgrCfg *config.CGRConfig // CGR Config instance
 }
 
-
-func NewFScsvCDR(cdrRow []string, accIdIdx, subjectIdx, reqtypeIdx, directionIdx, tenantIdx, torIdx, 
-	accountIdx, destinationIdx, answerTimeIdx, durationIdx int, cfg *config.CGRConfig ) (*FScsvCDR, error) {
-	fscdr := FScsvCDR{ cdrRow, accIdIdx, subjectIdx, reqtypeIdx, directionIdx, tenantIdx, 
-		torIdx, accountIdx, destinationIdx, answerTimeIdx, durationIdx, cfg }
+func NewFScsvCDR(cdrRow []string, accIdIdx, subjectIdx, reqtypeIdx, directionIdx, tenantIdx, torIdx,
+	accountIdx, destinationIdx, answerTimeIdx, durationIdx int, cfg *config.CGRConfig) (*FScsvCDR, error) {
+	fscdr := FScsvCDR{cdrRow, accIdIdx, subjectIdx, reqtypeIdx, directionIdx, tenantIdx,
+		torIdx, accountIdx, destinationIdx, answerTimeIdx, durationIdx, cfg}
 	return &fscdr, nil
 }
 
@@ -111,11 +110,3 @@ func (self *FScsvCDR) GetFallbackSubj() string {
 func (self *FScsvCDR) GetExtraFields() map[string]string {
 	return nil
 }
-
-
-
-
-
-
-
-	

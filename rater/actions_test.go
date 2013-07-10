@@ -690,7 +690,6 @@ func TestActionResetCounterCREDIT(t *testing.T) {
 	}
 }
 
-
 func TestActionTriggerLogging(t *testing.T) {
 	at := &ActionTrigger{
 		Id:             "some_uuid",

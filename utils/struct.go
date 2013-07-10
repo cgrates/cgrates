@@ -105,4 +105,3 @@ func UpdateStructWithStrMap(s interface{}, m map[string]string) []string {
 	}
 	return notMatched
 }
-

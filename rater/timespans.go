@@ -108,7 +108,7 @@ The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 	//Logger.Debug("here: ", ts, " +++ ", i)
-	// if the span is not in interval return nil	
+	// if the span is not in interval return nil
 	if !(i.Contains(ts.TimeStart) || i.Contains(ts.TimeEnd)) {
 		//Logger.Debug("Not in interval")
 		return

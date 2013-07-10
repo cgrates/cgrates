@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"crypto/sha1"
-	"fmt"
-	"encoding/hex"
 	"crypto/rand"
+	"crypto/sha1"
+	"encoding/hex"
+	"fmt"
 	"strconv"
 	"time"
 )

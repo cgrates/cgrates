@@ -20,17 +20,16 @@ package utils
 
 // This file deals with tp_rates data definition
 
-
 type TPRate struct {
-	TPid           string // Tariff plan id
-	RateId         string // Rate id
-	RateSlots      []RateSlot // One or more RateSlots
+	TPid      string     // Tariff plan id
+	RateId    string     // Rate id
+	RateSlots []RateSlot // One or more RateSlots
 }
 
 type RateSlot struct {
 	ConnectFee     float64 // ConnectFee applied once the call is answered
-	Rate		float64 // Rate applied
-	RatedUnits	int //  Number of billing units this rate applies to
-	RateIncrements	int // This rate will apply in increments of duration
-	Weight		float64 // Rate's priority when dealing with grouped rates
+	Rate           float64 // Rate applied
+	RatedUnits     int     //  Number of billing units this rate applies to
+	RateIncrements int     // This rate will apply in increments of duration
+	Weight         float64 // Rate's priority when dealing with grouped rates
 }

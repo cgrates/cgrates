@@ -26,8 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-
-
 // Creates a new rate within a tariff plan
 func (self *Apier) SetTPRate(attrs utils.TPRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId", "ConnectFee", "RateSlots"}); len(missing) != 0 {
@@ -38,7 +36,7 @@ func (self *Apier) SetTPRate(attrs utils.TPRate, reply *string) error {
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	if err := self.StorDb.SetTPRate(&attrs); err!=nil {
+	if err := self.StorDb.SetTPRate(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -46,7 +44,7 @@ func (self *Apier) SetTPRate(attrs utils.TPRate, reply *string) error {
 }
 
 type AttrGetTPRate struct {
-	TPid     string // Tariff plan id
+	TPid   string // Tariff plan id
 	RateId string // Rate id
 }
 

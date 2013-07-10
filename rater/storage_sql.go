@@ -83,8 +83,8 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 func (self *SQLStorage) SetTPTiming(tpid string, tm *Timing) error {
 	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s')",
 		utils.TBL_TP_TIMINGS, tpid, tm.Id, tm.Years.Serialize(";"), tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"),
-		tm.WeekDays.Serialize(";"), tm.StartTime )); err != nil {
-			return err
+		tm.WeekDays.Serialize(";"), tm.StartTime)); err != nil {
+		return err
 	}
 	return nil
 }
@@ -100,15 +100,15 @@ func (self *SQLStorage) ExistsTPTiming(tpid, tmId string) (bool, error) {
 
 func (self *SQLStorage) GetTPTiming(tpid, tmId string) (*Timing, error) {
 	var years, months, monthDays, weekDays, time string
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT years, months, month_days, week_days, time FROM %s WHERE tpid='%s' AND tag='%s' LIMIT 1", 
-		utils.TBL_TP_TIMINGS, tpid, tmId)).Scan(&years,&months,&monthDays,&weekDays,&time)
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT years, months, month_days, week_days, time FROM %s WHERE tpid='%s' AND tag='%s' LIMIT 1",
+		utils.TBL_TP_TIMINGS, tpid, tmId)).Scan(&years, &months, &monthDays, &weekDays, &time)
 	switch {
 	case err == sql.ErrNoRows:
-		return nil,nil
-	case err!=nil:
+		return nil, nil
+	case err != nil:
 		return nil, err
 	}
-	return NewTiming( tmId, years, months, monthDays, weekDays, time ), nil
+	return NewTiming(tmId, years, months, monthDays, weekDays, time), nil
 }
 
 func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
@@ -211,8 +211,8 @@ func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 
 func (self *SQLStorage) SetTPRate(rt *utils.TPRate) error {
 	for _, rtSlot := range rt.RateSlots {
-		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, weight) VALUES ('%s', '%s', %f, %f, %d, %d, %f)", 
-			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements, 
+		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, weight) VALUES ('%s', '%s', %f, %f, %d, %d, %f)",
+			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements,
 			rtSlot.Weight)); err != nil {
 			return err
 		}
@@ -226,7 +226,7 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	rt := &utils.TPRate{TPid: tpid, RateId:rtId}
+	rt := &utils.TPRate{TPid: tpid, RateId: rtId}
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix

@@ -64,7 +64,7 @@ Creates a new timing within a tariff plan.
 
  ``SERVER_ERROR`` - Server error occurred.
 
- ``DUPLICATE`` - The specified combination of TPid/DestinationId already exists in StorDb.
+ ``DUPLICATE`` - The specified combination of TPid/TimingId already exists in StorDb.
 
 
 Apier.GetTPTiming
@@ -136,10 +136,10 @@ Queries specific Timing on tariff plan.
 
  ``SERVER_ERROR`` - Server error occurred.
 
- ``NOT_FOUND`` - Requested destination id not found.
+ ``NOT_FOUND`` - Requested timing id not found.
 
 
-Apier.GetTPDestinationIds
+Apier.GetTPTimingIds
 +++++++++++++++++++++++++
 
 Queries timing identities on tariff plan.
@@ -149,11 +149,11 @@ Queries timing identities on tariff plan.
  Data:
   ::
 
-   type AttrGetTPDestinationIds struct {
+   type AttrGetTPTimingIds struct {
 	TPid string // Tariff plan id
    }
 
- Required parameters: ``[]string{"TPid"}``
+ Mandatory parameters: ``[]string{"TPid"}``
 
  *JSON sample*:
   ::

@@ -43,7 +43,7 @@ type TPLoader interface {
 }
 
 type Rate struct {
-	Tag                                            string
+	Tag                                                    string
 	ConnectFee, Price, PricedUnits, RateIncrements, Weight float64
 }
 
@@ -79,7 +79,7 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, weight string)
 		Price:          p,
 		PricedUnits:    pu,
 		RateIncrements: ri,
-		Weight:		wght,
+		Weight:         wght,
 	}
 	return
 }
@@ -92,7 +92,7 @@ type DestinationRate struct {
 }
 
 type Timing struct {
-	Id	 string
+	Id        string
 	Years     Years
 	Months    Months
 	MonthDays MonthDays

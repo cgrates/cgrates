@@ -149,13 +149,13 @@ Timings
    api_tptimings
 
 
-SetTPRate
+Rates
+~~~~~~~
 
-GetTPRate
+.. toctree::
+   :maxdepth: 2
 
-DeleteTPRate
-
-GetAllTPRates
+   api_tprates
 
 
 GetTPRateTiming

@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package mediator
 
 import (
-	"errors"
 	"bufio"
 	"encoding/csv"
+	"errors"
 	"flag"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/howeyc/fsnotify"
 	"os"
@@ -35,14 +35,14 @@ import (
 	"time"
 )
 
-func NewMediator( connector rater.Connector, storDb rater.DataStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
+func NewMediator(connector rater.Connector, storDb rater.DataStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
 	m = &Mediator{
 		connector: connector,
-		storDb: storDb,
-		cgrCfg: cfg,
+		storDb:    storDb,
+		cgrCfg:    cfg,
 	}
-	m.fieldNames = make( map[string][]string )
-	m.fieldIdxs = make( map[string][]int )
+	m.fieldNames = make(map[string][]string)
+	m.fieldIdxs = make(map[string][]int)
 	// Load config fields
 	if errLoad := m.loadConfig(); errLoad != nil {
 		return nil, errLoad
@@ -51,14 +51,14 @@ func NewMediator( connector rater.Connector, storDb rater.DataStorage, cfg *conf
 }
 
 type Mediator struct {
-	connector     rater.Connector
-	storDb      rater.DataStorage
-	cgrCfg 		*config.CGRConfig
-	cdrInDir, cdrOutDir     string
-	accIdField 	string
-	accIdIdx	int	// Populated only for csv files where we have no names but indexes for the fields
-	fieldNames	map[string][]string 
-	fieldIdxs	map[string][]int // Populated only for csv files where we have no names but indexes for the fields
+	connector           rater.Connector
+	storDb              rater.DataStorage
+	cgrCfg              *config.CGRConfig
+	cdrInDir, cdrOutDir string
+	accIdField          string
+	accIdIdx            int // Populated only for csv files where we have no names but indexes for the fields
+	fieldNames          map[string][]string
+	fieldIdxs           map[string][]int // Populated only for csv files where we have no names but indexes for the fields
 }
 
 /*
@@ -77,8 +77,8 @@ Method logic:
 */
 func (self *Mediator) loadConfig() error {
 	fieldKeys := []string{"subject", "reqtype", "direction", "tenant", "tor", "account", "destination", "time_start", "duration"}
-	cfgVals := [][]string{self.cgrCfg.MediatorSubjectFields, self.cgrCfg.MediatorReqTypeFields, self.cgrCfg.MediatorDirectionFields, 
-		self.cgrCfg.MediatorTenantFields, self.cgrCfg.MediatorTORFields, self.cgrCfg.MediatorAccountFields, self.cgrCfg.MediatorDestFields, 
+	cfgVals := [][]string{self.cgrCfg.MediatorSubjectFields, self.cgrCfg.MediatorReqTypeFields, self.cgrCfg.MediatorDirectionFields,
+		self.cgrCfg.MediatorTenantFields, self.cgrCfg.MediatorTORFields, self.cgrCfg.MediatorAccountFields, self.cgrCfg.MediatorDestFields,
 		self.cgrCfg.MediatorTimeAnswerFields, self.cgrCfg.MediatorDurationFields}
 
 	refIdx := 0 // Subject becomes reference for our checks
@@ -87,7 +87,7 @@ func (self *Mediator) loadConfig() error {
 	}
 	// All other configured fields must match the length of reference fields
 	for iCfgVal := range cfgVals {
-		if ( len(cfgVals[refIdx])!=len(cfgVals[iCfgVal]) ) {
+		if len(cfgVals[refIdx]) != len(cfgVals[iCfgVal]) {
 			// Make sure we have everywhere the length of reference key (subject)
 			return errors.New("Inconsistent lenght of mediator fields.")
 		}
@@ -122,7 +122,7 @@ func (self *Mediator) loadConfig() error {
 	for idx, key := range fieldKeys {
 		self.fieldNames[key] = cfgVals[idx]
 		if self.cgrCfg.MediatorCDRType == utils.FSCDR_FILE_CSV { // Special case when field names represent indexes of their location in file
-			self.fieldIdxs[key] = make( []int, len(cfgVals[idx]) )
+			self.fieldIdxs[key] = make([]int, len(cfgVals[idx]))
 			for iStr, cfgStr := range cfgVals[idx] {
 				if self.fieldIdxs[key][iStr], errConv = strconv.Atoi(cfgStr); errConv != nil {
 					return fmt.Errorf("All mediator index members (%s) must be ints", key)
@@ -133,8 +133,6 @@ func (self *Mediator) loadConfig() error {
 
 	return nil
 }
-
-
 
 // Watch the specified folder for file moves and parse the files on events
 func (self *Mediator) TrackCDRFiles() (err error) {
@@ -173,7 +171,7 @@ func (self *Mediator) getCostsFromDB(cdr utils.CDR) (cc *rater.CallCost, err err
 // Retrive the cost from rater
 func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*rater.CallCost, error) {
 	cc := &rater.CallCost{}
-	d, err := time.ParseDuration(strconv.FormatInt(cdr.GetDuration(),10) + "s")
+	d, err := time.ParseDuration(strconv.FormatInt(cdr.GetDuration(), 10) + "s")
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +191,7 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*rater.CallCost, error) 
 		Destination: cdr.GetDestination(),
 		TimeStart:   t1,
 		TimeEnd:     t1.Add(d)}
-	if  cdr.GetReqType()== utils.PSEUDOPREPAID {
+	if cdr.GetReqType() == utils.PSEUDOPREPAID {
 		err = self.connector.Debit(cd, cc)
 	} else {
 		err = self.connector.GetCost(cd, cc)
@@ -206,7 +204,6 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*rater.CallCost, error) 
 	}
 	return cc, nil
 }
-
 
 // Parse the files and get cost for every record
 func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
@@ -230,29 +227,29 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
 		//t, _ := time.Parse("2006-01-02 15:04:05", record[5])
 		var cc *rater.CallCost
-		
+
 		for runIdx := range self.fieldIdxs["subject"] { // Query costs for every run index given by subject
-			csvCDR, errCDR := NewFScsvCDR( record, self.accIdIdx, 
-						self.fieldIdxs["subject"][runIdx], 
-						self.fieldIdxs["reqtype"][runIdx],
-						self.fieldIdxs["direction"][runIdx],
-						self.fieldIdxs["tenant"][runIdx],
-						self.fieldIdxs["tor"][runIdx],
-						self.fieldIdxs["account"][runIdx],
-						self.fieldIdxs["destination"][runIdx],
-						self.fieldIdxs["answer_time"][runIdx],
-						self.fieldIdxs["duration"][runIdx],
-						self.cgrCfg)
+			csvCDR, errCDR := NewFScsvCDR(record, self.accIdIdx,
+				self.fieldIdxs["subject"][runIdx],
+				self.fieldIdxs["reqtype"][runIdx],
+				self.fieldIdxs["direction"][runIdx],
+				self.fieldIdxs["tenant"][runIdx],
+				self.fieldIdxs["tor"][runIdx],
+				self.fieldIdxs["account"][runIdx],
+				self.fieldIdxs["destination"][runIdx],
+				self.fieldIdxs["answer_time"][runIdx],
+				self.fieldIdxs["duration"][runIdx],
+				self.cgrCfg)
 			if errCDR != nil {
-				rater.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for accid: <%s>, err: <%s>", 
+				rater.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for accid: <%s>, err: <%s>",
 					record[self.accIdIdx], errCDR.Error()))
 			}
-			var errCost error	
-			if (csvCDR.GetReqType()==utils.PREPAID || csvCDR.GetReqType()==utils.POSTPAID){ 
+			var errCost error
+			if csvCDR.GetReqType() == utils.PREPAID || csvCDR.GetReqType() == utils.POSTPAID {
 				// Should be previously calculated and stored in DB
-				cc, errCost = self.getCostsFromDB( csvCDR )
+				cc, errCost = self.getCostsFromDB(csvCDR)
 			} else {
-				cc, errCost = self.getCostsFromRater( csvCDR )
+				cc, errCost = self.getCostsFromRater(csvCDR)
 			}
 			cost := "-1"
 			if errCost != nil || cc == nil {
@@ -271,12 +268,12 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 
 func (self *Mediator) MediateDBCDR(cdr utils.CDR, db rater.DataStorage) error {
 	var cc *rater.CallCost
-	var errCost error	
-	if (cdr.GetReqType()==utils.PREPAID || cdr.GetReqType()==utils.POSTPAID){
+	var errCost error
+	if cdr.GetReqType() == utils.PREPAID || cdr.GetReqType() == utils.POSTPAID {
 		// Should be previously calculated and stored in DB
-		cc, errCost = self.getCostsFromDB( cdr )
+		cc, errCost = self.getCostsFromDB(cdr)
 	} else {
-		cc, errCost = self.getCostsFromRater( cdr )
+		cc, errCost = self.getCostsFromRater(cdr)
 	}
 	cost := "-1"
 	if errCost != nil || cc == nil {
@@ -287,4 +284,3 @@ func (self *Mediator) MediateDBCDR(cdr utils.CDR, db rater.DataStorage) error {
 	}
 	return self.storDb.SetRatedCdr(cdr, cc)
 }
-

@@ -148,8 +148,8 @@ func (ms *MongoStorage) SetDestination(dest *Destination) error {
 }
 
 func (ms *MongoStorage) GetTPIds() ([]string, error) {
-        return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-} 
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
 
 func (ms *MongoStorage) SetTPTiming(tpid string, tm *Timing) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
