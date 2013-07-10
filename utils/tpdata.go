@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-// This file deals with tp_rates data definition
+// This file deals with tp_* data definition
 
 type TPRate struct {
 	TPid      string     // Tariff plan id
@@ -33,3 +33,17 @@ type RateSlot struct {
 	RateIncrements int     // This rate will apply in increments of duration
 	Weight         float64 // Rate's priority when dealing with grouped rates
 }
+
+
+type TPDestinationRate struct {
+	TPid              string // Tariff plan id
+	DestinationRateId string // DestinationRate profile id
+	DestinationRates     []DestinationRate // Set of destinationid-rateid bindings
+}
+
+type DestinationRate struct {
+	DestinationId string // The destination identity
+	RateId		string // The rate identity
+}
+
+

@@ -22,7 +22,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	//"errors"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -246,6 +245,79 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 
 func (self *SQLStorage) GetTPRateIds(tpid string) ([]string, error) {
 	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_RATES, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
+}
+
+func (self *SQLStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error) {
+	var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_DESTINATION_RATES, tpid, drId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (self *SQLStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error {
+	if len(dr.DestinationRates) == 0 {
+		return nil //Nothing to set
+	}
+	// Using multiple values in query to spare some network processing time
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destinations_tag, rates_tag) VALUES", utils.TBL_TP_DESTINATION_RATES)
+	for idx, drPair := range dr.DestinationRates {
+		if idx!=0 { //Consecutive values after the first will be prefixed with "," as separator
+			qry += ","
+		}
+		qry += fmt.Sprintf("('%s','%s','%s','%s')", dr.TPid, dr.DestinationRateId, drPair.DestinationId, drPair.RateId)
+	}
+	if _, err := self.Db.Exec(qry); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (self *SQLStorage) GetTPDestinationRate(tpid, drId string) (*utils.TPDestinationRate, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT destinations_tag, rates_tag FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_DESTINATION_RATES, tpid, drId))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	dr := &utils.TPDestinationRate{TPid: tpid, DestinationRateId: drId}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one prefix
+		var dstTag, ratesTag string
+		err = rows.Scan(&dstTag, &ratesTag)
+		if err != nil {
+			return nil, err
+		}
+		dr.DestinationRates = append(dr.DestinationRates, utils.DestinationRate{dstTag, ratesTag})
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return dr, nil
+}
+
+func (self *SQLStorage) GetTPDestinationRateIds(tpid string) ([]string, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_DESTINATION_RATES, tpid))
 	if err != nil {
 		return nil, err
 	}

@@ -200,6 +200,22 @@ func (ms *MongoStorage) GetTPRateIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (ms *MongoStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MongoStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MongoStorage) GetTPDestinationRate(tpid, drId string) (*utils.TPDestinationRate, error) {
+	return nil, nil
+}
+
+func (ms *MongoStorage) GetTPDestinationRateIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MongoStorage) GetActions(key string) (as Actions, err error) {
 	result := AcKeyValue{}
 	err = ms.db.C("actions").Find(bson.M{"key": key}).One(&result)
