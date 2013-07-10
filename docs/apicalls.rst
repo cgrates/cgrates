@@ -149,7 +149,7 @@ Destinations
 
 
 Rates
-~~~~~~~
+~~~~~
 
 .. toctree::
    :maxdepth: 2
@@ -158,7 +158,7 @@ Rates
 
 
 DestinationRates
-~~~~~~~
+~~~~~~~~~~~~~~~~
 
 .. toctree::
    :maxdepth: 2
