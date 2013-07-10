@@ -147,6 +147,14 @@ func (rs *RedisStorage) SetTPRate(rt *utils.TPRate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (rs *RedisStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
+	return nil, nil
+}
+
+func (rs *RedisStorage) GetTPRateIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {

@@ -45,25 +45,41 @@ func (self *Apier) SetTPRate(attrs utils.TPRate, reply *string) error {
 	return nil
 }
 
-/*
 type AttrGetTPRate struct {
 	TPid     string // Tariff plan id
 	RateId string // Rate id
 }
 
 // Queries specific Rate on tariff plan
-func (self *Apier) GetTPRate(attrs AttrGetTPRate, reply *ApierTPRate) error {
+func (self *Apier) GetTPRate(attrs AttrGetTPRate, reply *utils.TPRate) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if tm, err := self.StorDb.GetTPTiming(attrs.TPid, attrs.TimingId); err != nil {
+	if rt, err := self.StorDb.GetTPRate(attrs.TPid, attrs.RateId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if tm == nil {
+	} else if rt == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = ApierTPTiming{attrs.TPid, tm.Id, tm.Years.Serialize(";"),
-			tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"), tm.WeekDays.Serialize(";"), tm.StartTime}
+		*reply = *rt
 	}
 	return nil
 }
-*/
+
+type AttrGetTPRateIds struct {
+	TPid string // Tariff plan id
+}
+
+// Queries rate identities on specific tariff plan.
+func (self *Apier) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if ids, err := self.StorDb.GetTPRateIds(attrs.TPid); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if ids == nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		*reply = ids
+	}
+	return nil
+}

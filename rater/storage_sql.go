@@ -220,21 +220,51 @@ func (self *SQLStorage) SetTPRate(rt *utils.TPRate) error {
 	return nil
 }
 
-func (self *SQLStorage) GetTPRate(tpid, rtId, weight string) (*utils.TPRate, error) {
-/*
-	var tpid, tag string
-	var connect_fee, rate, rated_units, rate_increments, weight float64
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT years, months, month_days, week_days, time FROM %s WHERE tpid='%s' AND tag='%s' LIMIT 1", 
-		utils.TBL_TP_TIMINGS, tpid, tmId)).Scan(&years,&months,&monthDays,&weekDays,&time)
-	switch {
-	case err == sql.ErrNoRows:
-		return nil,nil
-	case err!=nil:
+func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rated_units, rate_increments, weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
+	if err != nil {
 		return nil, err
 	}
-	return NewTiming( tmId, years, months, monthDays, weekDays, time ), nil
-*/
-	return nil, nil
+	defer rows.Close()
+	rt := &utils.TPRate{TPid: tpid, RateId:rtId}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one prefix
+		var connectFee, rate, weight float64
+		var ratedUnits, rateIncrements int
+		err = rows.Scan(&connectFee, &rate, &ratedUnits, &rateIncrements, &weight)
+		if err != nil {
+			return nil, err
+		}
+		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, ratedUnits, rateIncrements, weight})
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return rt, nil
+}
+
+func (self *SQLStorage) GetTPRateIds(tpid string) ([]string, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_RATES, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
 }
 
 func (self *SQLStorage) GetActions(string) (as Actions, err error) {
