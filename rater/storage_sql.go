@@ -200,11 +200,41 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	return nil
 }
 
-func (self *SQLStorage) SetTPRate(tpid string, rt *Rate) error {
-	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, weight) VALUES ('%s', '%s', %f, %f, %d, %d, %f)", utils.TBL_TP_RATES, tpid, rt.Tag, rt.ConnectFee, rt.Price, int(rt.PricedUnits), int(rt.RateIncrements), rt.Weight)); err != nil {
-		return err
+func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
+	var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_RATES, tpid, rtId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (self *SQLStorage) SetTPRate(rt *utils.TPRate) error {
+	for _, rtSlot := range rt.RateSlots {
+		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, weight) VALUES ('%s', '%s', %f, %f, %d, %d, %f)", 
+			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements, 
+			rtSlot.Weight)); err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func (self *SQLStorage) GetTPRate(tpid, rtId, weight string) (*utils.TPRate, error) {
+/*
+	var tpid, tag string
+	var connect_fee, rate, rated_units, rate_increments, weight float64
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT years, months, month_days, week_days, time FROM %s WHERE tpid='%s' AND tag='%s' LIMIT 1", 
+		utils.TBL_TP_TIMINGS, tpid, tmId)).Scan(&years,&months,&monthDays,&weekDays,&time)
+	switch {
+	case err == sql.ErrNoRows:
+		return nil,nil
+	case err!=nil:
+		return nil, err
+	}
+	return NewTiming( tmId, years, months, monthDays, weekDays, time ), nil
+*/
+	return nil, nil
 }
 
 func (self *SQLStorage) GetActions(string) (as Actions, err error) {

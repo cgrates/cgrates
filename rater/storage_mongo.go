@@ -184,7 +184,11 @@ func (ms *MongoStorage) SetTPDestination(tpid string, dest *Destination) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPRate(tpid string, rt *Rate) error {
+func (ms *MongoStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MongoStorage) SetTPRate(rt *utils.TPRate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

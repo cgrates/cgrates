@@ -23,37 +23,47 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/utils"
-	"strings"
 )
 
-type ApierTPRate struct {
-	TPid           string // Tariff plan id
-	RateId         string // Rates id
-	ConnectFee     string // ConnectFee applied once the call is answered
-	Rate           string // Rate applied
-	RatedUnits     string //  Number of billing units this rate applies to
-	RateIncrements string // This rate will apply in increments of
-	Weight         string // Rate's priority when dealing with grouped rates
-}
+
 
 // Creates a new rate within a tariff plan
-func (self *Apier) SetTPRate(attrs ApierTPRate, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId", "ConnectFee", "Rate", "RatedUnits", "RateIncrements", "Weight"}); len(missing) != 0 {
+func (self *Apier) SetTPRate(attrs utils.TPRate, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId", "ConnectFee", "RateSlots"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	rt, errRt := rater.NewRate(attrs.RateId, attrs.ConnectFee, attrs.Rate, attrs.RatedUnits, attrs.RateIncrements, attrs.Weight)
-	if errRt != nil {
-		return fmt.Errorf("%s:%v", utils.ERR_SERVER_ERROR, errRt.Error())
-	}
-	err := self.StorDb.SetTPRate(attrs.TPid, rt)
-	switch {
-	case strings.HasPrefix(err.Error(), "Error 1062"): //MySQL way of saying duplicate
+	if exists, err := self.StorDb.ExistsTPRate(attrs.TPid, attrs.RateId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
-	case err != nil:
+	}
+	if err := self.StorDb.SetTPRate(&attrs); err!=nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
 	return nil
 }
+
+/*
+type AttrGetTPRate struct {
+	TPid     string // Tariff plan id
+	RateId string // Rate id
+}
+
+// Queries specific Rate on tariff plan
+func (self *Apier) GetTPRate(attrs AttrGetTPRate, reply *ApierTPRate) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if tm, err := self.StorDb.GetTPTiming(attrs.TPid, attrs.TimingId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if tm == nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		*reply = ApierTPTiming{attrs.TPid, tm.Id, tm.Years.Serialize(";"),
+			tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"), tm.WeekDays.Serialize(";"), tm.StartTime}
+	}
+	return nil
+}
+*/

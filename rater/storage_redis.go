@@ -139,7 +139,11 @@ func (rs *RedisStorage) SetTPDestination(tpid string, dest *Destination) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (rs *RedisStorage) SetTPRate(tpid string, rt *Rate) error {
+func (rs *RedisStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) SetTPRate(rt *utils.TPRate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

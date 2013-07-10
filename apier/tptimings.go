@@ -41,7 +41,7 @@ func (self *Apier) SetTPTiming(attrs ApierTPTiming, reply *string) error {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	if exists, err := self.StorDb.ExistsTPTiming(attrs.TPid, attrs.TimingId); err != nil {
-		return fmt.Errorf("%s:%v", utils.ERR_SERVER_ERROR, err.Error())
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}

@@ -44,7 +44,7 @@ CREATE TABLE `tp_rates` (
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `tpid_rate_weight` (`tpid`,`rate`,`weight`)
+  UNIQUE KEY `tpid_tag_rate_weight` (`tpid`,`tag`,`weight`)
 );
 
 --
