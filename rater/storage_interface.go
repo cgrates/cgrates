@@ -75,6 +75,10 @@ type DataStorage interface {
 	SetTPDestinationRate(*utils.TPDestinationRate) error
 	GetTPDestinationRate(string, string) (*utils.TPDestinationRate, error)
 	GetTPDestinationRateIds(string) ([]string, error)
+	ExistsTPDestRateTiming(string, string) (bool, error)
+	SetTPDestRateTiming(*utils.TPDestRateTiming) error
+	GetTPDestRateTiming(string, string) (*utils.TPDestRateTiming, error)
+	GetTPDestRateTimingIds(string) ([]string, error)
 	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error

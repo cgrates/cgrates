@@ -57,7 +57,7 @@ func (self *SQLStorage) SetDestination(d *Destination) (err error) {
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
 func (self *SQLStorage) GetTPIds() ([]string, error) {
 	rows, err := self.Db.Query(
-		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)", utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_DESTINATION_RATE_TIMINGS, utils.TBL_TP_RATE_PROFILES))
+		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)", utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_DESTRATE_TIMINGS, utils.TBL_TP_RATE_PROFILES))
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +280,7 @@ func (self *SQLStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error 
 		return nil //Nothing to set
 	}
 	// Using multiple values in query to spare some network processing time
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destinations_tag, rates_tag) VALUES", utils.TBL_TP_DESTINATION_RATES)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destinations_tag, rates_tag) VALUES ", utils.TBL_TP_DESTINATION_RATES)
 	for idx, drPair := range dr.DestinationRates {
 		if idx!=0 { //Consecutive values after the first will be prefixed with "," as separator
 			qry += ","
@@ -318,6 +318,80 @@ func (self *SQLStorage) GetTPDestinationRate(tpid, drId string) (*utils.TPDestin
 
 func (self *SQLStorage) GetTPDestinationRateIds(tpid string) ([]string, error) {
 	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_DESTINATION_RATES, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
+}
+
+func (self *SQLStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error) {
+	var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_DESTRATE_TIMINGS, tpid, drtId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (self *SQLStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
+	if len(drt.DestRateTimings) == 0 {
+		return nil //Nothing to set
+	}
+	// Using multiple values in query to spare some network processing time
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES ", utils.TBL_TP_DESTRATE_TIMINGS)
+	for idx, drtPair := range drt.DestRateTimings {
+		if idx!=0 { //Consecutive values after the first will be prefixed with "," as separator
+			qry += ","
+		}
+		qry += fmt.Sprintf("('%s','%s','%s','%s',%f)", drt.TPid, drt.DestRateTimingId, drtPair.DestRatesId, drtPair.TimingId, drtPair.Weight)
+	}
+	if _, err := self.Db.Exec(qry); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (self *SQLStorage) GetTPDestRateTiming(tpid, drtId string) (*utils.TPDestRateTiming, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT destrates_tag, timing_tag, weight from %s where tpid='%s' and tag='%s'", utils.TBL_TP_DESTRATE_TIMINGS, tpid, drtId))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	drt := &utils.TPDestRateTiming{TPid: tpid, DestRateTimingId: drtId}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one result
+		var drTag, timingTag string
+		var weight float64
+		err = rows.Scan(&drTag, &timingTag, &weight)
+		if err != nil {
+			return nil, err
+		}
+		drt.DestRateTimings = append(drt.DestRateTimings, utils.DestRateTiming{drTag, timingTag,weight})
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return drt, nil
+}
+
+func (self *SQLStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_DESTRATE_TIMINGS, tpid))
 	if err != nil {
 		return nil, err
 	}
@@ -570,7 +644,7 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, erro
 
 func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
 	var rts []*DestinationRateTiming
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATION_RATE_TIMINGS, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTRATE_TIMINGS, tpid)
 	if tag != "" {
 		q += "AND tag=" + tag
 	}

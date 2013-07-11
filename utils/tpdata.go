@@ -34,16 +34,25 @@ type RateSlot struct {
 	Weight         float64 // Rate's priority when dealing with grouped rates
 }
 
-
 type TPDestinationRate struct {
-	TPid              string // Tariff plan id
-	DestinationRateId string // DestinationRate profile id
-	DestinationRates     []DestinationRate // Set of destinationid-rateid bindings
+	TPid              string            // Tariff plan id
+	DestinationRateId string            // DestinationRate profile id
+	DestinationRates  []DestinationRate // Set of destinationid-rateid bindings
 }
 
 type DestinationRate struct {
 	DestinationId string // The destination identity
-	RateId		string // The rate identity
+	RateId        string // The rate identity
 }
 
+type TPDestRateTiming struct {
+	TPid             string           // Tariff plan id
+	DestRateTimingId string           // DestinationRate profile id
+	DestRateTimings  []DestRateTiming // Set of destinationid-rateid bindings
+}
 
+type DestRateTiming struct {
+	DestRatesId string  // The DestinationRate identity
+	TimingId    string  // The timing identity
+	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot
+}

@@ -1,5 +1,5 @@
 Apier.SetTPRate
-+++++++++++++++++
++++++++++++++++
 
 Creates a new rate within a tariff plan.
 
@@ -52,7 +52,7 @@ Creates a new rate within a tariff plan.
             "TPid": "SAMPLE_TP"
         }
     ]
-  }
+   }
 
 **Reply**:
 
@@ -159,6 +159,7 @@ Queries specific rate on tariff plan.
         "TPid": "SAMPLE_TP"
     }
    }
+
 **Errors**:
 
  ``MANDATORY_IE_MISSING`` - Mandatory parameter missing from request.
@@ -169,7 +170,7 @@ Queries specific rate on tariff plan.
 
 
 Apier.GetTPRateIds
-+++++++++++++++++++++++++
+++++++++++++++++++
 
 Queries rate identities on tariff plan.
 
@@ -216,7 +217,7 @@ Queries rate identities on tariff plan.
         "SAMPLE_RATE_3", 
         "SAMPLE_RATE_4"
     ]
-  }
+   }
 
 **Errors**:
 
@@ -225,6 +226,5 @@ Queries rate identities on tariff plan.
  ``SERVER_ERROR`` - Server error occurred.
 
  ``NOT_FOUND`` - Requested tariff plan not found.
-
 
 

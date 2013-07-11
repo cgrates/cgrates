@@ -166,13 +166,13 @@ DestinationRates
    api_tpdestinationrates
 
 
-GetTPRateTiming
+DestinationRateTiming
+~~~~~~~~~~~~~~~~~~~~~
 
-SetTPRateTiming
+.. toctree::
+   :maxdepth: 2
 
-DeleteTPRateTiming
-
-GetAllTPRateTinings
+   api_tpdestratetimings
 
 
 GetTPRatingProfile
@@ -184,47 +184,10 @@ DeleteTPProfile
 GetAllTPRatingProfiles
 
 
-GetTPAction
-
-SetTPAction
-
-DeleteTPAction
-
-GetAllTPActions
-
-
-GetTPActionTiming
-
-SetTPActionTiming
-
-DeleteTPActionTiming
-
-GetAllTPActionTimings
-
-
-GetTPActionTrigger
-
-SetTPActionTrigger
-
-DeleteTPActionTrigger
-
-GetAllTPActionTriggers
-
-
-GetTPAccountAction
-
-SetTPAccountAction
-
-DeleteTPAccountAction
-
-GetAllTPAccountActions
-
-
 ImportWithOverride
 
 ImportWithFlush
 
-GetAllTPTariffPlanIds
 
 6.1.5. Management API
 ---------------------

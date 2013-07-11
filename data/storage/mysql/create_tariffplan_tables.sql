@@ -66,15 +66,16 @@ CREATE TABLE `tp_destination_rates` (
 -- Table structure for table `tp_rate_timings`
 --
 
-CREATE TABLE `tp_destination_rate_timings` (
+CREATE TABLE `tp_destrate_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
-  `destination_rates_tag` varchar(24) NOT NULL,
-  `timings_tag` varchar(24) NOT NULL,
+  `destrates_tag` varchar(24) NOT NULL,
+  `timing_tag` varchar(24) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `tpid_tag_destrates_timings_weight` (`tpid`,`tag`,`destrates_tag`,`timing_tag`,`weight`)
 );
 
 --

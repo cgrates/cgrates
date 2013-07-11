@@ -171,6 +171,22 @@ func (rs *RedisStorage) GetTPDestinationRateIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (rs *RedisStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) GetTPDestRateTiming(tpid, drtId string) (*utils.TPDestRateTiming, error) {
+	return nil, nil
+}
+
+func (rs *RedisStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {
