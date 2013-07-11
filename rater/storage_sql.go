@@ -413,6 +413,44 @@ func (self *SQLStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
+func (self *SQLStorage) ExistsTPRateProfile(tpid, rpId string) (bool, error) {
+	var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_RATE_PROFILES, tpid, rpId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (self *SQLStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
+	var qry string
+	if len(rp.RatingActivations) == 0 { // Possibility to only set fallback rate subject
+		qry = fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', 0,'','%s')", 
+			utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.RateProfileId, rp.Tenant, rp.TOR, rp.Direction, rp.Subject, rp.RatesFallbackSubject)
+	} else {
+		qry = fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ", utils.TBL_TP_RATE_PROFILES)
+		// Using multiple values in query to spare some network processing time
+		for idx, rpa := range rp.RatingActivations {
+			if idx!=0 { //Consecutive values after the first will be prefixed with "," as separator
+				qry += ","
+			}
+			qry += fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', %d,'%s','%s')", rp.TPid, rp.RateProfileId, rp.Tenant, rp.TOR, rp.Direction, rp.Subject, rpa.ActivationTime, rpa.DestRateTimingId, rp.RatesFallbackSubject)
+		}
+	}
+	if _, err := self.Db.Exec(qry); err != nil {
+		return err
+	}
+	return nil 
+}
+
+func (self *SQLStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfile, error) {
+	return nil, nil 
+}
+
+func (self *SQLStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) ([]string, error) {
+	return nil, nil
+}
+
 func (self *SQLStorage) GetActions(string) (as Actions, err error) {
 	return
 }

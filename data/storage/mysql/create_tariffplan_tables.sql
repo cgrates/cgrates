@@ -12,6 +12,7 @@ CREATE TABLE `tp_timings` (
   `time` varchar(16) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
+  KEY `tpid_tag` (`tpid`,`tag`),
   UNIQUE KEY `tpid_tmid` (`tpid`,`tag`)
 );
 
@@ -26,6 +27,7 @@ CREATE TABLE `tp_destinations` (
   `prefix` varchar(24) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
+  KEY `tpid_tag` (`tpid`,`tag`),
   UNIQUE KEY `tpid_dest_prefix` (`tpid`,`tag`,`prefix`)
 );
 
@@ -44,6 +46,7 @@ CREATE TABLE `tp_rates` (
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
+  KEY `tpid_tag` (`tpid`,`tag`),
   UNIQUE KEY `tpid_tag_rate_weight` (`tpid`,`tag`,`weight`)
 );
 
@@ -59,6 +62,7 @@ CREATE TABLE `tp_destination_rates` (
   `rates_tag` varchar(24) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
+  KEY `tpid_tag` (`tpid`,`tag`),
   UNIQUE KEY `tpid_tag_dst_rates` (`tpid`,`tag`,`destinations_tag`)
 );
 
@@ -75,6 +79,7 @@ CREATE TABLE `tp_destrate_timings` (
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
+  KEY `tpid_tag` (`tpid`,`tag`),
   UNIQUE KEY `tpid_tag_destrates_timings_weight` (`tpid`,`tag`,`destrates_tag`,`timing_tag`,`weight`)
 );
 
@@ -85,15 +90,17 @@ CREATE TABLE `tp_destrate_timings` (
 CREATE TABLE `tp_rate_profiles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
+  `tag` varchar(24) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `tor` varchar(16) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `subject` varchar(64) NOT NULL,
+  `activation_time` int(11) NOT NULL,
+  `destrates_timing_tag` varchar(24) NOT NULL,
   `rates_fallback_subject` varchar(64),
-  `rates_timing_tag` varchar(24) NOT NULL,
-  `activation_time` char(20) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid_tag` (`tpid`, `tag`),
+  UNIQUE KEY `tpid_tag_tenant_tor_dir_subj_atime` (`tpid`,`tag`, `tenant`,`tor`,`direction`,`subject`,`activation_time`)
 );
 
 --

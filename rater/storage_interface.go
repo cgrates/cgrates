@@ -79,6 +79,10 @@ type DataStorage interface {
 	SetTPDestRateTiming(*utils.TPDestRateTiming) error
 	GetTPDestRateTiming(string, string) (*utils.TPDestRateTiming, error)
 	GetTPDestRateTimingIds(string) ([]string, error)
+	ExistsTPRateProfile(string, string) (bool, error)
+	SetTPRateProfile(*utils.TPRateProfile) error
+	GetTPRateProfile(string, string) (*utils.TPRateProfile, error)
+	GetTPRateProfileIds(*utils.AttrTPRateProfileIds) ([]string, error)
 	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error

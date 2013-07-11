@@ -56,3 +56,27 @@ type DestRateTiming struct {
 	TimingId    string  // The timing identity
 	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot
 }
+
+type TPRateProfile struct {
+	TPid                   string                  // Tariff plan id
+	RateProfileId          string                  // RateProfile id
+	Tenant                 string                  // Tenant's Id
+	TOR                    string                  // TypeOfRecord
+	Direction              string                  // Traffic direction, OUT is the only one supported for now
+	Subject                string                  // Rating subject, usually the same as account
+	RatesFallbackSubject   string                  // Fallback on this subject if rates not found for destination
+	RatingActivations []RatingActivation // Activate rate profiles at specific time
+}
+
+type RatingActivation struct {
+	ActivationTime   int64 // Time when this profile will become active
+	DestRateTimingId string // Id of DestRateTiming profile
+}
+
+type AttrTPRateProfileIds struct {
+	TPid string // Tariff plan id
+	Tenant string // Tenant's Id
+	TOR   string  // TypeOfRecord
+	Direction string // Traffic direction
+	Subject   string // Rating subject, usually the same as account
+}

@@ -115,7 +115,7 @@ func (rs *RedisStorage) ExistsTPTiming(tpid, tmId string) (bool, error) {
 }
 
 func (rs *RedisStorage) GetTPTiming(tpid, tmId string) (*Timing, error) {
-	return nil, nil
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedisStorage) GetTPTimingIds(tpid string) ([]string, error) {
@@ -148,7 +148,7 @@ func (rs *RedisStorage) SetTPRate(rt *utils.TPRate) error {
 }
 
 func (rs *RedisStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
-	return nil, nil
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedisStorage) GetTPRateIds(tpid string) ([]string, error) {
@@ -180,10 +180,26 @@ func (rs *RedisStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
 }
 
 func (rs *RedisStorage) GetTPDestRateTiming(tpid, drtId string) (*utils.TPDestRateTiming, error) {
-	return nil, nil
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedisStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) ExistsTPRateProfile(tpid, rpId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfile, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
