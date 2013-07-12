@@ -19,6 +19,8 @@ Creates a new rate within a tariff plan.
 	Rate           float64 // Rate applied
 	RatedUnits     int     //  Number of billing units this rate applies to
 	RateIncrements int     // This rate will apply in increments of duration
+	RoundingMethod string     // Use this method to round the cost
+	RoundingDecimals int	// Round the cost number of decimals
 	Weight         float64 // Rate's priority when dealing with grouped rates
    }
 
@@ -28,25 +30,29 @@ Creates a new rate within a tariff plan.
   ::
 
    {
-    "id": 0, 
+    "id": 1, 
     "method": "Apier.SetTPRate", 
     "params": [
         {
-            "RateId": "SAMPLE_RATE_4", 
+            "RateId": "SAMPLE_RATE_2", 
             "RateSlots": [
                 {
-                    "ConnectFee": 0, 
-                    "Rate": 1.2, 
+                    "ConnectFee": 0.2, 
+                    "Rate": 2, 
                     "RateIncrements": 1, 
-                    "RatedUnits": 60, 
-                    "Weight": 10
+                    "RatedUnits": 1, 
+                    "RoundingDecimals": 2, 
+                    "RoundingMethod": "*up", 
+                    "Weight": 10.0
                 }, 
                 {
-                    "ConnectFee": 0, 
-                    "Rate": 2.2, 
+                    "ConnectFee": 0.2, 
+                    "Rate": 2.1, 
                     "RateIncrements": 1, 
-                    "RatedUnits": 60, 
-                    "Weight": 20
+                    "RatedUnits": 1, 
+                    "RoundingDecimals": 2, 
+                    "RoundingMethod": "*up", 
+                    "Weight": 20.0
                 }
             ], 
             "TPid": "SAMPLE_TP"
@@ -129,6 +135,8 @@ Queries specific rate on tariff plan.
 	Rate           float64 // Rate applied
 	RatedUnits     int     //  Number of billing units this rate applies to
 	RateIncrements int     // This rate will apply in increments of duration
+	RoundingMethod string     // Use this method to round the cost
+	RoundingDecimals int	// Round the cost number of decimals
 	Weight         float64 // Rate's priority when dealing with grouped rates
    }
 
@@ -137,22 +145,26 @@ Queries specific rate on tariff plan.
 
    {
     "error": null, 
-    "id": 1, 
+    "id": 2, 
     "result": {
-        "RateId": "SAMPLE_RATE_4", 
+        "RateId": "SAMPLE_RATE_2", 
         "RateSlots": [
             {
-                "ConnectFee": 0, 
-                "Rate": 1.2, 
+                "ConnectFee": 0.2, 
+                "Rate": 2, 
                 "RateIncrements": 1, 
-                "RatedUnits": 60, 
+                "RatedUnits": 1, 
+                "RoundingDecimals": 2, 
+                "RoundingMethod": "*up", 
                 "Weight": 10
             }, 
             {
-                "ConnectFee": 0, 
-                "Rate": 2.2, 
+                "ConnectFee": 0.2, 
+                "Rate": 2.1, 
                 "RateIncrements": 1, 
-                "RatedUnits": 60, 
+                "RatedUnits": 1, 
+                "RoundingDecimals": 2, 
+                "RoundingMethod": "*up", 
                 "Weight": 20
             }
         ], 

@@ -210,9 +210,9 @@ func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 
 func (self *SQLStorage) SetTPRate(rt *utils.TPRate) error {
 	for _, rtSlot := range rt.RateSlots {
-		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, weight) VALUES ('%s', '%s', %f, %f, %d, %d, %f)",
-			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements,
-			rtSlot.Weight)); err != nil {
+		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, rounding_method, rounding_decimals, weight) VALUES ('%s', '%s', %f, %f, %d, %d,'%s', %d, %f)",
+			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements,  
+			rtSlot.RoundingMethod, rtSlot.RoundingDecimals,  rtSlot.Weight)); err != nil {
 			return err
 		}
 	}
@@ -220,7 +220,7 @@ func (self *SQLStorage) SetTPRate(rt *utils.TPRate) error {
 }
 
 func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rated_units, rate_increments, weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rated_units, rate_increments, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
 	if err != nil {
 		return nil, err
 	}
@@ -230,12 +230,13 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix
 		var connectFee, rate, weight float64
-		var ratedUnits, rateIncrements int
-		err = rows.Scan(&connectFee, &rate, &ratedUnits, &rateIncrements, &weight)
+		var ratedUnits, rateIncrements, roundingDecimals int
+		var roundingMethod string
+		err = rows.Scan(&connectFee, &rate, &ratedUnits, &rateIncrements, &roundingMethod, &roundingDecimals, &weight)
 		if err != nil {
 			return nil, err
 		}
-		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, ratedUnits, rateIncrements, weight})
+		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, ratedUnits, rateIncrements, roundingMethod, roundingDecimals, weight})
 	}
 	if i == 0 {
 		return nil, nil
