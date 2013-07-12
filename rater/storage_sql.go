@@ -282,7 +282,7 @@ func (self *SQLStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error 
 	// Using multiple values in query to spare some network processing time
 	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destinations_tag, rates_tag) VALUES ", utils.TBL_TP_DESTINATION_RATES)
 	for idx, drPair := range dr.DestinationRates {
-		if idx!=0 { //Consecutive values after the first will be prefixed with "," as separator
+		if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
 			qry += ","
 		}
 		qry += fmt.Sprintf("('%s','%s','%s','%s')", dr.TPid, dr.DestinationRateId, drPair.DestinationId, drPair.RateId)
@@ -355,7 +355,7 @@ func (self *SQLStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
 	// Using multiple values in query to spare some network processing time
 	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES ", utils.TBL_TP_DESTRATE_TIMINGS)
 	for idx, drtPair := range drt.DestRateTimings {
-		if idx!=0 { //Consecutive values after the first will be prefixed with "," as separator
+		if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
 			qry += ","
 		}
 		qry += fmt.Sprintf("('%s','%s','%s','%s',%f)", drt.TPid, drt.DestRateTimingId, drtPair.DestRatesId, drtPair.TimingId, drtPair.Weight)
@@ -382,7 +382,7 @@ func (self *SQLStorage) GetTPDestRateTiming(tpid, drtId string) (*utils.TPDestRa
 		if err != nil {
 			return nil, err
 		}
-		drt.DestRateTimings = append(drt.DestRateTimings, utils.DestRateTiming{drTag, timingTag,weight})
+		drt.DestRateTimings = append(drt.DestRateTimings, utils.DestRateTiming{drTag, timingTag, weight})
 	}
 	if i == 0 {
 		return nil, nil
@@ -682,15 +682,15 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 	}
 	for rows.Next() {
 		var id int
-		var tpid, tenant, tor, direction, subject, fallback_subject, rates_timing_tag, activation_time string
+		var tpid, tag, tenant, tor, direction, subject, fallback_subject, rates_timing_tag, activation_time string
 
-		if err := rows.Scan(&id, &tpid, &tenant, &tor, &direction, &subject, &fallback_subject, &rates_timing_tag, &activation_time); err != nil {
+		if err := rows.Scan(&id, &tag, &tpid, &tenant, &tor, &direction, &subject, &fallback_subject, &rates_timing_tag, &activation_time); err != nil {
 			return nil, err
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
 		rp, ok := rpfs[key]
-		if !ok {
-			rp = &RatingProfile{Id: key}
+		if !ok || rp.tag != tag {
+			rp = &RatingProfile{Id: key, tag: tag}
 			rpfs[key] = rp
 		}
 		rp.ratesTimingTag = rates_timing_tag

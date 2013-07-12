@@ -29,10 +29,10 @@ const (
 )
 
 type RatingProfile struct {
-	Id                             string
-	FallbackKey                    string
-	DestinationMap                 map[string][]*ActivationPeriod
-	ratesTimingTag, activationTime string // used only for loading
+	Id                                  string
+	FallbackKey                         string
+	DestinationMap                      map[string][]*ActivationPeriod
+	tag, ratesTimingTag, activationTime string // used only for loading
 }
 
 // Adds an activation period that applyes to current rating profile if not already present.
