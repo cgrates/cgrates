@@ -157,7 +157,21 @@ func (ms *MapStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (ms *MapStorage) ExistsTPRateProfile(tpid, rpId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
 
+func (ms *MapStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfile, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
 
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
