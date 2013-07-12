@@ -1,4 +1,4 @@
-Apier.GetTPDestinationIds
+Apier.GetTPIds
 +++++++++++++++++++++++++
 
 // Queries tarrif plan identities gathered from all tables.
