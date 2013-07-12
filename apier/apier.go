@@ -147,18 +147,14 @@ func (self *Apier) ExecuteAction(attr *AttrExecuteAction, reply *float64) error 
 }
 
 type AttrSetRatingProfile struct {
-	Direction string
-	Tenant    string
-	TOR       string
-	Subject   string
-	TPID      string
+	TPID          string
+	RateProfileId string
 }
 
 func (self *Apier) SetRatingProfile(attr *AttrSetRatingProfile, reply *float64) error {
-	tag := fmt.Sprintf("%s:%s:%s:%s", attr.Direction, attr.Tenant, attr.TOR, attr.Subject)
 	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attr.TPID)
 
-	newRP, err := dbReader.LoadRatingProfileByTag(tag)
+	newRP, err := dbReader.LoadRatingProfileByTag(attr.RateProfileId)
 	if err != nil {
 		return err
 	}

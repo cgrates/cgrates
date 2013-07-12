@@ -338,11 +338,8 @@ Sets the rating profile for the specified subject.
 ::
     
 	type AttrSetRatingProfile struct {
-		Direction string
-		Tenant    string
-		TOR       string
-		Subject   string
-		TPID      string
+		TPID            string
+        RatingProfileId string
 	}
 
 Example
