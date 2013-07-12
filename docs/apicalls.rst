@@ -166,8 +166,8 @@ DestinationRates
    api_tpdestinationrates
 
 
-DestinationRateTiming
-~~~~~~~~~~~~~~~~~~~~~
+DestinationRateTimings
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
    :maxdepth: 2
@@ -175,18 +175,13 @@ DestinationRateTiming
    api_tpdestratetimings
 
 
-GetTPRatingProfile
+RateProfiles
+~~~~~~~~~~~~
 
-SetTPRatingProfile
+.. toctree::
+   :maxdepth: 2
 
-DeleteTPProfile
-
-GetAllTPRatingProfiles
-
-
-ImportWithOverride
-
-ImportWithFlush
+   api_tprateprofiles
 
 
 6.1.5. Management API
