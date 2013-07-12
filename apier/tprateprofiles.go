@@ -64,7 +64,7 @@ func (self *Apier) GetTPRateProfile(attrs AttrGetTPRateProfile, reply *utils.TPR
 }
 
 // Queries RateProfile identities on specific tariff plan.
-func (self *Apier) GetTPRateProfiles(attrs utils.AttrTPRateProfileIds, reply *[]string) error {
+func (self *Apier) GetTPRateProfileIds(attrs utils.AttrTPRateProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
