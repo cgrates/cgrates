@@ -31,6 +31,8 @@ type RateSlot struct {
 	Rate           float64 // Rate applied
 	RatedUnits     int     //  Number of billing units this rate applies to
 	RateIncrements int     // This rate will apply in increments of duration
+	RoundingMethod string     // Use this method to round the cost
+	RoundingDecimals int	// Round the cost number of decimals
 	Weight         float64 // Rate's priority when dealing with grouped rates
 }
 
@@ -58,25 +60,25 @@ type DestRateTiming struct {
 }
 
 type TPRateProfile struct {
-	TPid                   string                  // Tariff plan id
-	RateProfileId          string                  // RateProfile id
-	Tenant                 string                  // Tenant's Id
-	TOR                    string                  // TypeOfRecord
-	Direction              string                  // Traffic direction, OUT is the only one supported for now
-	Subject                string                  // Rating subject, usually the same as account
-	RatesFallbackSubject   string                  // Fallback on this subject if rates not found for destination
-	RatingActivations []RatingActivation // Activate rate profiles at specific time
+	TPid                 string             // Tariff plan id
+	RateProfileId        string             // RateProfile id
+	Tenant               string             // Tenant's Id
+	TOR                  string             // TypeOfRecord
+	Direction            string             // Traffic direction, OUT is the only one supported for now
+	Subject              string             // Rating subject, usually the same as account
+	RatesFallbackSubject string             // Fallback on this subject if rates not found for destination
+	RatingActivations    []RatingActivation // Activate rate profiles at specific time
 }
 
 type RatingActivation struct {
-	ActivationTime   int64 // Time when this profile will become active, defined as unix epoch time
+	ActivationTime   int64  // Time when this profile will become active, defined as unix epoch time
 	DestRateTimingId string // Id of DestRateTiming profile
 }
 
 type AttrTPRateProfileIds struct {
-	TPid string // Tariff plan id
-	Tenant string // Tenant's Id
-	TOR   string  // TypeOfRecord
+	TPid      string // Tariff plan id
+	Tenant    string // Tenant's Id
+	TOR       string // TypeOfRecord
 	Direction string // Traffic direction
 	Subject   string // Rating subject, usually the same as account
 }

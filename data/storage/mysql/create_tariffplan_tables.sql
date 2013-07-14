@@ -39,15 +39,17 @@ CREATE TABLE `tp_rates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
-  `connect_fee` DECIMAL(5,4) NOT NULL,
-  `rate` DECIMAL(5,4) NOT NULL,
-  `rated_units` INT(11) NOT NULL,
-  `rate_increments` INT(11) NOT NULL,
-  `weight` DECIMAL(5,2) NOT NULL,
+  `connect_fee` decimal(5,4) NOT NULL,
+  `rate` decimal(5,4) NOT NULL,
+  `rated_units` int(11) NOT NULL,
+  `rate_increments` int(11) NOT NULL,
+  `rounding_method` varchar(255) NOT NULL,
+  `rounding_decimals` tinyint(4) NOT NULL,
+  `weight` decimal(5,2) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `tpid_tag_rate_weight` (`tpid`,`tag`,`weight`),
   KEY `tpid` (`tpid`),
-  KEY `tpid_tag` (`tpid`,`tag`),
-  UNIQUE KEY `tpid_tag_rate_weight` (`tpid`,`tag`,`weight`)
+  KEY `tpid_tag` (`tpid`,`tag`)
 );
 
 --
