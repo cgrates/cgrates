@@ -424,13 +424,15 @@ func (i *Interval) Store() (result string, err error) {
 	result += strconv.FormatFloat(i.ConnectFee, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(i.Price, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(i.PricedUnits, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(i.RateIncrements, 'f', -1, 64)
+	result += strconv.FormatFloat(i.RateIncrements, 'f', -1, 64) + ";"
+	result += i.RoundingMethod + ";"
+	result += strconv.Itoa(i.RoundingDecimals)
 	return
 }
 
 func (i *Interval) Restore(input string) error {
 	is := strings.Split(input, ";")
-	if len(is) != 11 {
+	if len(is) != 13 {
 		return notEnoughElements
 	}
 	if err := i.Years.Restore(is[0]); err != nil {
@@ -452,6 +454,8 @@ func (i *Interval) Restore(input string) error {
 	i.Price, _ = strconv.ParseFloat(is[8], 64)
 	i.PricedUnits, _ = strconv.ParseFloat(is[9], 64)
 	i.RateIncrements, _ = strconv.ParseFloat(is[10], 64)
+	i.RoundingMethod = is[11]
+	i.RoundingDecimals, _ = strconv.Atoi(is[12])
 	return nil
 }
 

@@ -20,7 +20,6 @@ package rater
 
 import (
 	"fmt"
-	"math"
 	"time"
 )
 
@@ -64,11 +63,7 @@ func (ts *TimeSpan) getCost(cd *CallDescriptor) (cost float64) {
 	if i.RateIncrements == 0 {
 		i.RateIncrements = 1
 	}
-	if i.PricedUnits != 0 {
-		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * (i.Price / i.PricedUnits)
-	} else {
-		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * i.Price
-	}
+	cost = i.GetCost(duration)
 	// if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 	// 	userBalance.mux.RLock()
 	// 	if percentageDiscount, err := userBalance.getVolumeDiscount(cd.Destination, INBOUND); err == nil && percentageDiscount > 0 {

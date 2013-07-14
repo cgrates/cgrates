@@ -49,7 +49,7 @@ func TestApStoreRestoreJson(t *testing.T) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result, _ := json.Marshal(ap)
-	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Years\":null,\"Months\":[2],\"MonthDays\":[1],\"WeekDays\":[3,4],\"StartTime\":\"14:30:00\",\"EndTime\":\"15:00:00\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"PricedUnits\":0,\"RateIncrements\":0}]}"
+	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Years\":null,\"Months\":[2],\"MonthDays\":[1],\"WeekDays\":[3,4],\"StartTime\":\"14:30:00\",\"EndTime\":\"15:00:00\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"PricedUnits\":0,\"RateIncrements\":0,\"RoundingMethod\":\"\",\"RoundingDecimals\":0}]}"
 	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
@@ -66,7 +66,7 @@ func TestApStoreRestoreBlank(t *testing.T) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result, _ := json.Marshal(ap)
-	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Years\":null,\"Months\":null,\"MonthDays\":null,\"WeekDays\":null,\"StartTime\":\"\",\"EndTime\":\"\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"PricedUnits\":0,\"RateIncrements\":0}]}"
+	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Years\":null,\"Months\":null,\"MonthDays\":null,\"WeekDays\":null,\"StartTime\":\"\",\"EndTime\":\"\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"PricedUnits\":0,\"RateIncrements\":0,\"RoundingMethod\":\"\",\"RoundingDecimals\":0}]}"
 	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
