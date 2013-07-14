@@ -36,16 +36,16 @@ func populateDB() {
 			CREDIT: 0,
 		},
 		MinuteBuckets: []*MinuteBucket{
-			&MinuteBucket{Seconds: 200, DestinationId: "NAT", Weight: 10},
-			&MinuteBucket{Seconds: 100, DestinationId: "RET", Weight: 20},
+			&MinuteBucket{Seconds: 200, DestinationIds: []string{"NAT"}, Weight: 10},
+			&MinuteBucket{Seconds: 100, DestinationIds: []string{"RET"}, Weight: 20},
 		},
 	}
 	broker := &UserBalance{
 		Id:   "OUT:vdf:broker",
 		Type: UB_TYPE_PREPAID,
 		MinuteBuckets: []*MinuteBucket{
-			&MinuteBucket{Seconds: 20, DestinationId: "NAT", Weight: 10, Price: 1},
-			&MinuteBucket{Seconds: 100, DestinationId: "RET", Weight: 20},
+			&MinuteBucket{Seconds: 20, DestinationIds: []string{"NAT"}, Weight: 10, Price: 1},
+			&MinuteBucket{Seconds: 100, DestinationIds: []string{"RET"}, Weight: 20},
 		},
 	}
 	if storageGetter != nil {

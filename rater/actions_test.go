@@ -415,7 +415,7 @@ func TestActionResetTriggres(t *testing.T) {
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetTriggersAction(ub, nil)
@@ -430,7 +430,7 @@ func TestActionSetPostpaid(t *testing.T) {
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	setPostpaidAction(ub, nil)
@@ -445,7 +445,7 @@ func TestActionSetPrepaid(t *testing.T) {
 		Type:           UB_TYPE_POSTPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	setPrepaidAction(ub, nil)
@@ -460,7 +460,7 @@ func TestActionResetPrepaid(t *testing.T) {
 		Type:           UB_TYPE_POSTPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetPrepaidAction(ub, nil)
@@ -479,7 +479,7 @@ func TestActionResetPostpaid(t *testing.T) {
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetPostpaidAction(ub, nil)
@@ -498,7 +498,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]float64{CREDIT + OUTBOUND: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 10}
@@ -518,10 +518,10 @@ func TestActionTopupResetMinutes(t *testing.T) {
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]float64{CREDIT + OUTBOUND: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationId: "NAT"}}
+	a := &Action{BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}}
 	topupResetAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.MinuteBuckets[0].Seconds != 5 ||
@@ -539,7 +539,7 @@ func TestActionTopupCredit(t *testing.T) {
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]float64{CREDIT + OUTBOUND: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceId: CREDIT, Units: 10}
@@ -559,10 +559,10 @@ func TestActionTopupMinutes(t *testing.T) {
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationId: "NAT"}}
+	a := &Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}}
 	topupAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.MinuteBuckets[0].Seconds != 15 ||
@@ -580,7 +580,7 @@ func TestActionDebitCredit(t *testing.T) {
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]float64{CREDIT + OUTBOUND: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceId: CREDIT, Units: 10}
@@ -600,10 +600,10 @@ func TestActionDebitMinutes(t *testing.T) {
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationId: "NAT"}}
+	a := &Action{BalanceId: MINUTES, MinuteBucket: &MinuteBucket{Seconds: 5, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}}
 	debitAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.MinuteBuckets[0].Seconds != 5 ||
@@ -621,7 +621,7 @@ func TestActionResetAllCounters(t *testing.T) {
 		Type:           UB_TYPE_POSTPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	resetCountersAction(ub, nil)
@@ -637,7 +637,7 @@ func TestActionResetAllCounters(t *testing.T) {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[0].MinuteBuckets[0]
-	if mb.Weight != 20 || mb.Price != 1 || mb.Seconds != 10 || mb.DestinationId != "NAT" {
+	if mb.Weight != 20 || mb.Price != 1 || mb.Seconds != 10 || mb.DestinationIds[0] != "NAT" {
 		t.Errorf("Minute bucked cloned incorrectly: %v!", mb)
 	}
 }
@@ -648,7 +648,7 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		Type:           UB_TYPE_POSTPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceId: MINUTES}
@@ -665,7 +665,7 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[1].MinuteBuckets[0]
-	if mb.Weight != 20 || mb.Price != 1 || mb.Seconds != 10 || mb.DestinationId != "NAT" {
+	if mb.Weight != 20 || mb.Price != 1 || mb.Seconds != 10 || mb.DestinationIds[0] != "NAT" {
 		t.Errorf("Minute bucked cloned incorrectly: %v!", mb)
 	}
 }
@@ -676,7 +676,7 @@ func TestActionResetCounterCREDIT(t *testing.T) {
 		Type:           UB_TYPE_POSTPAID,
 		BalanceMap:     map[string]float64{CREDIT: 100},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}, &UnitsCounter{BalanceId: SMS, Direction: OUTBOUND, Units: 1}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationIds: []string{"NAT"}}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationIds: []string{"RET"}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceId: CREDIT, Direction: OUTBOUND}

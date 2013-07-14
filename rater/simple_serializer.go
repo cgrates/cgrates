@@ -464,7 +464,7 @@ func (mb *MinuteBucket) Store() (result string, err error) {
 	result += strconv.FormatFloat(mb.Weight, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(mb.Price, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(mb.Percent, 'f', -1, 64) + ";"
-	result += mb.DestinationId
+	result += strings.Join(mb.DestinationIds, "^")
 	return
 }
 
@@ -475,7 +475,7 @@ func (mb *MinuteBucket) Restore(input string) error {
 		mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
 		mb.Price, _ = strconv.ParseFloat(elements[2], 64)
 		mb.Percent, _ = strconv.ParseFloat(elements[3], 64)
-		mb.DestinationId = elements[4]
+		mb.DestinationIds = strings.Split(elements[4], "^")
 		return nil
 	}
 	return notEnoughElements

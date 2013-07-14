@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"strings"
 )
 
 type SQLStorage struct {
@@ -211,8 +212,8 @@ func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 func (self *SQLStorage) SetTPRate(rt *utils.TPRate) error {
 	for _, rtSlot := range rt.RateSlots {
 		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, rounding_method, rounding_decimals, weight) VALUES ('%s', '%s', %f, %f, %d, %d,'%s', %d, %f)",
-			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements,  
-			rtSlot.RoundingMethod, rtSlot.RoundingDecimals,  rtSlot.Weight)); err != nil {
+			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements,
+			rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight)); err != nil {
 			return err
 		}
 	}
@@ -426,13 +427,13 @@ func (self *SQLStorage) ExistsTPRateProfile(tpid, rpId string) (bool, error) {
 func (self *SQLStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
 	var qry string
 	if len(rp.RatingActivations) == 0 { // Possibility to only set fallback rate subject
-		qry = fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', 0,'','%s')", 
+		qry = fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', 0,'','%s')",
 			utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.RateProfileId, rp.Tenant, rp.TOR, rp.Direction, rp.Subject, rp.RatesFallbackSubject)
 	} else {
 		qry = fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ", utils.TBL_TP_RATE_PROFILES)
 		// Using multiple values in query to spare some network processing time
 		for idx, rpa := range rp.RatingActivations {
-			if idx!=0 { //Consecutive values after the first will be prefixed with "," as separator
+			if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', %d,'%s','%s')", rp.TPid, rp.RateProfileId, rp.Tenant, rp.TOR, rp.Direction, rp.Subject, rpa.ActivationTime, rpa.DestRateTimingId, rp.RatesFallbackSubject)
@@ -441,7 +442,7 @@ func (self *SQLStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
-	return nil 
+	return nil
 }
 
 func (self *SQLStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfile, error) {
@@ -472,7 +473,7 @@ func (self *SQLStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfil
 	if i == 0 {
 		return nil, nil
 	}
-	return rp, nil 
+	return rp, nil
 }
 
 func (self *SQLStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) ([]string, error) {
@@ -812,8 +813,8 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 	for rows.Next() {
 		var id int
 		var units, rate, minutes_weight, weight float64
-		var tpid, tag, action, balance_tag, direction, destinations_tag, rate_type string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_tag, &direction, &units, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
+		var tpid, tag, action, balance_tag, direction, destinations_tags, rate_type string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_tag, &direction, &units, &destinations_tags, &rate_type, &rate, &minutes_weight, &weight); err != nil {
 			return nil, err
 		}
 		var a *Action
@@ -839,11 +840,11 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 				Direction:  direction,
 				Weight:     weight,
 				MinuteBucket: &MinuteBucket{
-					Seconds:       units,
-					Weight:        minutes_weight,
-					Price:         price,
-					Percent:       percent,
-					DestinationId: destinations_tag,
+					Seconds:        units,
+					Weight:         minutes_weight,
+					Price:          price,
+					Percent:        percent,
+					DestinationIds: strings.Split(destinations_tags, ";"),
 				},
 			}
 		}

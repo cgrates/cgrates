@@ -414,11 +414,11 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				Direction:  record[3],
 				Weight:     weight,
 				MinuteBucket: &MinuteBucket{
-					Seconds:       units,
-					Weight:        minutesWeight,
-					Price:         price,
-					Percent:       percent,
-					DestinationId: record[5],
+					Seconds:        units,
+					Weight:         minutesWeight,
+					Price:          price,
+					Percent:        percent,
+					DestinationIds: strings.Split(record[5], ";"),
 				},
 			}
 		}

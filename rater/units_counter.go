@@ -50,14 +50,16 @@ func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
 // is the same or ads the minutye bucket to the list if none matches.
 func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
 	for _, mb := range uc.MinuteBuckets {
-		d, err := GetDestination(mb.DestinationId)
-		if err != nil {
-			Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: %s", mb.DestinationId))
-			continue
-		}
-		if _, ok := d.containsPrefix(prefix); ok {
-			mb.Seconds += amount
-			break
+		for _, dest := range mb.DestinationIds {
+			d, err := GetDestination(dest)
+			if err != nil {
+				Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: %s", dest))
+				continue
+			}
+			if _, ok := d.containsPrefix(prefix); ok {
+				mb.Seconds += amount
+				break
+			}
 		}
 	}
 }

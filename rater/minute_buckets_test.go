@@ -57,16 +57,16 @@ func TestMinutBucketSortPrice(t *testing.T) {
 }
 
 func TestMinutBucketEqual(t *testing.T) {
-	mb1 := &MinuteBucket{Weight: 1, precision: 1, Price: 1, Percent: 1, DestinationId: ""}
-	mb2 := &MinuteBucket{Weight: 1, precision: 1, Price: 1, Percent: 1, DestinationId: ""}
-	mb3 := &MinuteBucket{Weight: 1, precision: 1, Price: 2, Percent: 1, DestinationId: ""}
+	mb1 := &MinuteBucket{Weight: 1, precision: 1, Price: 1, Percent: 1, DestinationIds: []string{}}
+	mb2 := &MinuteBucket{Weight: 1, precision: 1, Price: 1, Percent: 1, DestinationIds: []string{}}
+	mb3 := &MinuteBucket{Weight: 1, precision: 1, Price: 2, Percent: 1, DestinationIds: []string{}}
 	if !mb1.Equal(mb2) || mb2.Equal(mb3) {
 		t.Error("Equal failure!", mb1, mb2, mb3)
 	}
 }
 
 func TestMinutBucketClone(t *testing.T) {
-	mb1 := &MinuteBucket{Seconds: 1, Weight: 2, Price: 3, Percent: 4, DestinationId: "5"}
+	mb1 := &MinuteBucket{Seconds: 1, Weight: 2, Price: 3, Percent: 4, DestinationIds: []string{"5"}}
 	mb2 := mb1.Clone()
 	if mb1 == mb2 || !reflect.DeepEqual(mb1, mb2) {
 		t.Error("Cloning failure: ", mb1, mb2)

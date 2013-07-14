@@ -447,7 +447,7 @@ func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		a := &Action{
 			Direction:    INBOUND,
-			MinuteBucket: &MinuteBucket{Seconds: cd.Amount, DestinationId: cd.Destination},
+			MinuteBucket: &MinuteBucket{Seconds: cd.Amount, DestinationIds: []string{cd.Destination}},
 		}
 		userBalance.countUnits(a)
 		return nil
