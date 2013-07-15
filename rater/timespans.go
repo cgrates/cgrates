@@ -36,9 +36,9 @@ type TimeSpan struct {
 
 // Holds the bonus minute information related to a specified timespan
 type MinuteInfo struct {
-	DestinationIds []string
-	Quantity       float64
-	Price          float64
+	DestinationId string
+	Quantity      float64
+	Price         float64
 }
 
 /*
@@ -164,7 +164,7 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 		return nil
 	}
 	s := ts.GetDuration().Seconds()
-	ts.MinuteInfo = &MinuteInfo{mb.DestinationIds, s, mb.Price}
+	ts.MinuteInfo = &MinuteInfo{mb.DestinationId, s, mb.Price}
 	if s <= mb.Seconds {
 		mb.Seconds -= s
 		return nil

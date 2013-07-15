@@ -20,9 +20,7 @@ package rater
 
 import (
 	"math"
-	"reflect"
 	"sort"
-	"time"
 )
 
 type MinuteBucket struct {
@@ -30,7 +28,7 @@ type MinuteBucket struct {
 	Weight         float64
 	Price          float64
 	Percent        float64 // percentage from standard price
-	DestinationIds []string
+	DestinationId  string
 	ExpirationDate time.Time
 	precision      int
 }
@@ -47,22 +45,20 @@ func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {
 // Creates a similar minute
 func (mb *MinuteBucket) Clone() *MinuteBucket {
 	return &MinuteBucket{
-		Seconds:        mb.Seconds,
-		Weight:         mb.Weight,
-		Price:          mb.Price,
-		Percent:        mb.Percent,
-		DestinationIds: mb.DestinationIds,
-		ExpirationTime: mb.ExpirationTime,
+		Seconds:       mb.Seconds,
+		Weight:        mb.Weight,
+		Price:         mb.Price,
+		Percent:       mb.Percent,
+		DestinationId: mb.DestinationId,
 	}
 }
 
 // Equal method
 func (mb *MinuteBucket) Equal(o *MinuteBucket) bool {
-	return reflect.DeepEqual(mb.DestinationIds, o.DestinationIds) &&
+	return mb.DestinationId == o.DestinationId &&
 		mb.Weight == o.Weight &&
 		mb.Price == o.Price &&
-		mb.Percent == o.Percent &&
-		mb.ExpirationTime == o.ExpirationTime
+		mb.Percent == o.Percent
 }
 
 /*

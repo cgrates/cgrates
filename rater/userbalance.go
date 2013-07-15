@@ -71,16 +71,14 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 		return
 	}
 	for _, mb := range ub.MinuteBuckets {
-		for _, dest := range mb.DestinationIds {
-			d, err := GetDestination(dest)
-			if err != nil {
-				continue
-			}
-			if precision, ok := d.containsPrefix(prefix); ok {
-				mb.precision = precision
-				if mb.Seconds > 0 {
-					bucketList = append(bucketList, mb)
-				}
+		d, err := GetDestination(mb.DestinationId)
+		if err != nil {
+			continue
+		}
+		if precision, ok := d.containsPrefix(prefix); ok {
+			mb.precision = precision
+			if mb.Seconds > 0 {
+				bucketList = append(bucketList, mb)
 			}
 		}
 	}
@@ -123,7 +121,7 @@ debited and an error will be returned.
 */
 func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count bool) error {
 	if count {
-		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Seconds: amount, DestinationIds: []string{prefix}}})
+		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Seconds: amount, DestinationId: prefix}})
 	}
 	avaliableNbSeconds, _, bucketList := ub.getSecondsForPrefix(prefix)
 	if avaliableNbSeconds < amount {
@@ -189,11 +187,9 @@ func (ub *UserBalance) executeActionTriggers() {
 			if uc.BalanceId == at.BalanceId {
 				if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safty
 					for _, mb := range uc.MinuteBuckets {
-						for _, dest := range mb.DestinationIds {
-							if dest == at.DestinationId && mb.Seconds >= at.ThresholdValue {
-								// run the actions
-								at.Execute(ub)
-							}
+						if mb.DestinationId == at.DestinationId && mb.Seconds >= at.ThresholdValue {
+							// run the actions
+							at.Execute(ub)
 						}
 					}
 				} else {
@@ -242,9 +238,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
 	}
 	if a.BalanceId == MINUTES && a.MinuteBucket != nil {
-		for _, dest := range a.MinuteBucket.DestinationIds {
-			unitsCounter.addMinutes(a.MinuteBucket.Seconds, dest)
-		}
+		unitsCounter.addMinutes(a.MinuteBucket.Seconds, a.MinuteBucket.DestinationId)
 	} else {
 		unitsCounter.Units += a.Units
 	}
