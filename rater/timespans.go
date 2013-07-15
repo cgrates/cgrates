@@ -160,14 +160,22 @@ Splits the given timespan on minute bucket's duration.
 */
 func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 	// if mb expired skip it
-	if !mb.ExpirationTime.IsZero() && (ts.TimeStart.Equal(mb.ExpirationTime) || ts.TimeStart.After(mb.ExpirationTime)) {
+	if !mb.ExpirationDate.IsZero() && (ts.TimeStart.Equal(mb.ExpirationDate) || ts.TimeStart.After(mb.ExpirationDate)) {
 		return nil
 	}
+
+	// expiring before time spans end
+
+	if !mb.ExpirationDate.IsZero() && ts.TimeEnd.After(mb.ExpirationDate) {
+		newTs = &TimeSpan{TimeStart: mb.ExpirationDate, TimeEnd: ts.TimeEnd}
+		ts.TimeEnd = mb.ExpirationDate
+	}
+
 	s := ts.GetDuration().Seconds()
 	ts.MinuteInfo = &MinuteInfo{mb.DestinationId, s, mb.Price}
 	if s <= mb.Seconds {
 		mb.Seconds -= s
-		return nil
+		return newTs
 	}
 	secDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", mb.Seconds))
 

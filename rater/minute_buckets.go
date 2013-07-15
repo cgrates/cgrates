@@ -21,6 +21,7 @@ package rater
 import (
 	"math"
 	"sort"
+	"time"
 )
 
 type MinuteBucket struct {
