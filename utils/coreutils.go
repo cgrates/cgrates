@@ -23,6 +23,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 )
@@ -62,4 +63,34 @@ func GenUUID() string {
 	uuid[4] = 0x40 // version 4 Pseudo Random, see page 7
 
 	return hex.EncodeToString(uuid)
+}
+
+// Round return rounded version of x with prec precision.
+//
+// Special cases are:
+//	Round(±0) = ±0
+//	Round(±Inf) = ±Inf
+//	Round(NaN) = NaN
+func Round(x float64, prec int, method string) float64 {
+	var rounder float64
+	pow := math.Pow(10, float64(prec))
+	intermed := x * pow
+	_, frac := math.Modf(intermed)
+
+	switch method {
+	case "*up":
+		rounder = math.Ceil(intermed)
+	case "*down":
+		rounder = math.Floor(intermed)
+	case "*middle":
+		if frac >= 0.5 {
+			rounder = math.Ceil(intermed)
+		} else {
+			rounder = math.Floor(intermed)
+		}
+	default:
+		rounder = intermed
+	}
+
+	return rounder / pow
 }

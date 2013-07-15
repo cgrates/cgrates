@@ -35,7 +35,7 @@ func TestSimpleMarshallerApStoreRestore(t *testing.T) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result, err := ap.Store()
-	expected := "1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0"
+	expected := "1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0;;0"
 	if err != nil || !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
@@ -47,7 +47,7 @@ func TestSimpleMarshallerApStoreRestore(t *testing.T) {
 }
 
 func TestSimpleMarshallerApRestoreFromString(t *testing.T) {
-	s := "1325376000000000000|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0.2;60;1\n"
+	s := "1325376000000000000|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0.2;60;1;;0\n"
 	ap := &ActivationPeriod{}
 	err := ap.Restore(s)
 	if err != nil || len(ap.Intervals) != 1 {
@@ -68,7 +68,7 @@ func TestRpStoreRestore(t *testing.T) {
 	rp := &RatingProfile{FallbackKey: "test"}
 	rp.AddActivationPeriodIfNotPresent("0723", ap)
 	result, err := rp.Store()
-	expected := "test>0723=1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0"
+	expected := "test>0723=1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0;;0"
 	if err != nil || !reflect.DeepEqual(result, expected) {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
@@ -101,7 +101,7 @@ func TestActionTimingStoreRestore(t *testing.T) {
 		ActionsId:      "Commando",
 	}
 	r, err := at.Store()
-	if err != nil || r != "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1|10|Commando" {
+	if err != nil || r != "some uuid|test|one,two,three|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1;;0|10|Commando" {
 		t.Errorf("Error serializing action timing: %v", string(r))
 	}
 	o := &ActionTiming{}
@@ -146,7 +146,7 @@ func TestIntervalStoreRestore(t *testing.T) {
 		RateIncrements: 1,
 	}
 	r, err := i.Store()
-	if err != nil || r != ";1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1" {
+	if err != nil || r != ";1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5;18:00:00;00:00:00;10;0;1;60;1;;0" {
 		t.Errorf("Error serializing interval: %v", string(r))
 	}
 	o := &Interval{}
@@ -157,7 +157,7 @@ func TestIntervalStoreRestore(t *testing.T) {
 }
 
 func TestIntervalRestoreFromString(t *testing.T) {
-	s := ";1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0.2;60;1"
+	s := ";1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0.2;60;0;;1"
 	i := Interval{}
 	err := i.Restore(s)
 	if err != nil || i.Price != 0.2 {

@@ -20,6 +20,8 @@ package rater
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -37,6 +39,8 @@ type Interval struct {
 	WeekDays                                               WeekDays
 	StartTime, EndTime                                     string // ##:##:## format
 	Weight, ConnectFee, Price, PricedUnits, RateIncrements float64
+	RoundingMethod                                         string
+	RoundingDecimals                                       int
 }
 
 /*
@@ -131,4 +135,14 @@ func (i *Interval) Equal(o *Interval) bool {
 		reflect.DeepEqual(i.WeekDays, o.WeekDays) &&
 		i.StartTime == o.StartTime &&
 		i.EndTime == o.EndTime
+}
+
+func (i *Interval) GetCost(duration float64) (cost float64) {
+
+	if i.PricedUnits != 0 {
+		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * (i.Price / i.PricedUnits)
+	} else {
+		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * i.Price
+	}
+	return utils.Round(cost, i.RoundingDecimals, i.RoundingMethod)
 }

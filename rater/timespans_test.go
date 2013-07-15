@@ -217,3 +217,115 @@ func TestSetInterval(t *testing.T) {
 		t.Error("Bigger ponder interval should win")
 	}
 }
+
+func TestTimespanSplitByMinuteBucketPlenty(t *testing.T) {
+	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
+	mb := &MinuteBucket{Seconds: 180}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	newTs := ts.SplitByMinuteBucket(mb)
+	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 120 {
+		t.Error("Not enough minutes on minute bucket split")
+	}
+	if newTs != nil {
+		t.Error("Bad extra timespan on minute bucket split")
+	}
+}
+
+func TestTimespanSplitByMinuteBucketScarce(t *testing.T) {
+	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
+	mb := &MinuteBucket{Seconds: 60}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	newTs := ts.SplitByMinuteBucket(mb)
+	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
+		t.Error("Not enough minutes on minute bucket split")
+	}
+	if newTs == nil || newTs.MinuteInfo != nil {
+		t.Error("Missing extra timespan on minute bucket split")
+	}
+}
+
+func TestTimespanSplitByMinuteBucketPlantyExpired(t *testing.T) {
+	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
+	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 39, 0, 0, time.UTC)}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	newTs := ts.SplitByMinuteBucket(mb)
+	if ts.MinuteInfo != nil {
+		t.Error("Not enough minutes on minute bucket split")
+	}
+	if newTs != nil {
+		t.Error("Bad extra timespan on minute bucket split")
+	}
+}
+
+func TestTimespanSplitByMinuteBucketPlantyExpiring(t *testing.T) {
+	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
+	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	newTs := ts.SplitByMinuteBucket(mb)
+	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
+		t.Error("Not enough minutes on minute bucket split")
+	}
+	if newTs == nil || newTs.MinuteInfo != nil {
+		t.Error("Missing extra timespan on minute bucket split")
+	}
+}
+
+func TestTimespanSplitByMinuteBucketPlantyExpiringEnd(t *testing.T) {
+	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
+	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	newTs := ts.SplitByMinuteBucket(mb)
+	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 120 {
+		t.Error("Not enough minutes on minute bucket split")
+	}
+	if newTs != nil {
+		t.Error("Missing extra timespan on minute bucket split")
+	}
+}
+
+func TestTimespanSplitByMinuteBucketScarceExpiringSame(t *testing.T) {
+	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
+	mb := &MinuteBucket{Seconds: 120, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	newTs := ts.SplitByMinuteBucket(mb)
+	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
+		t.Error("Not enough minutes on minute bucket split")
+	}
+	if newTs == nil || newTs.MinuteInfo != nil {
+		t.Error("Missing extra timespan on minute bucket split")
+	}
+}
+
+func TestTimespanSplitByMinuteBucketScarceExpiringDifferentExpFirst(t *testing.T) {
+	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
+	mb := &MinuteBucket{Seconds: 140, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 1, 0, time.UTC)}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	newTs := ts.SplitByMinuteBucket(mb)
+	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 61 {
+		t.Error("Not enough minutes on minute bucket split: ", ts.MinuteInfo.Quantity)
+	}
+	if newTs == nil || newTs.MinuteInfo != nil {
+		t.Error("Missing extra timespan on minute bucket split")
+	}
+}
+
+func TestTimespanSplitByMinuteBucketScarceExpiringDifferentScarceFirst(t *testing.T) {
+	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
+	mb := &MinuteBucket{Seconds: 61, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 30, 0, time.UTC)}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	newTs := ts.SplitByMinuteBucket(mb)
+	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 61 {
+		t.Error("Not enough minutes on minute bucket split")
+	}
+	if newTs == nil || newTs.MinuteInfo != nil {
+		t.Error("Missing extra timespan on minute bucket split")
+	}
+}

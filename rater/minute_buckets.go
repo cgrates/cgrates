@@ -21,15 +21,17 @@ package rater
 import (
 	"math"
 	"sort"
+	"time"
 )
 
 type MinuteBucket struct {
-	Seconds       float64
-	Weight        float64
-	Price         float64
-	Percent       float64 // percentage from standard price
-	DestinationId string
-	precision     int
+	Seconds        float64
+	Weight         float64
+	Price          float64
+	Percent        float64 // percentage from standard price
+	DestinationId  string
+	ExpirationDate time.Time
+	precision      int
 }
 
 // Returns the available number of seconds for a specified credit

@@ -39,3 +39,83 @@ func TestUUID(t *testing.T) {
 		t.Fatalf("GenUUID error %s", uuid)
 	}
 }
+
+func TestRoundUp(t *testing.T) {
+	result := Round(12.52, 0, "*middle")
+	expected := 13.0
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundUpMiddle(t *testing.T) {
+	result := Round(12.5, 0, "*middle")
+	expected := 13.0
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundDown(t *testing.T) {
+	result := Round(12.49, 0, "*middle")
+	expected := 12.0
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundPrec(t *testing.T) {
+	result := Round(12.49, 1, "*middle")
+	expected := 12.5
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundPrecNothing(t *testing.T) {
+	result := Round(12.49, 2, "*middle")
+	expected := 12.49
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundPrecNoTouch(t *testing.T) {
+	result := Round(12.49, 2, "")
+	expected := 12.49
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundByMethodUp1(t *testing.T) {
+	result := Round(12.49, 1, "*up")
+	expected := 12.5
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundByMethodUp2(t *testing.T) {
+	result := Round(12.21, 1, "*up")
+	expected := 12.3
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundByMethodDown1(t *testing.T) {
+	result := Round(12.49, 1, "*down")
+	expected := 12.4
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestRoundByMethodDown2(t *testing.T) {
+	result := Round(12.21, 1, "*down")
+	expected := 12.2
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
