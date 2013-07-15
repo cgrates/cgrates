@@ -31,7 +31,7 @@ type MinuteBucket struct {
 	Price          float64
 	Percent        float64 // percentage from standard price
 	DestinationIds []string
-	ExpirationTime time.Time
+	ExpirationDate time.Time
 	precision      int
 }
 
