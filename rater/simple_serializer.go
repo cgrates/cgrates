@@ -33,7 +33,7 @@ type Serializer interface {
 var notEnoughElements = errors.New("Too few elements to restore")
 
 func (ap *ActivationPeriod) Store() (result string, err error) {
-	result += strconv.FormatInt(ap.ActivationTime.UnixNano(), 10) + "|"
+	result += ap.ActivationTime.Format(time.RFC3339) + "|"
 	for _, i := range ap.Intervals {
 		str, err := i.Store()
 		if err != nil {
@@ -47,8 +47,11 @@ func (ap *ActivationPeriod) Store() (result string, err error) {
 
 func (ap *ActivationPeriod) Restore(input string) error {
 	elements := strings.Split(input, "|")
-	unixNano, _ := strconv.ParseInt(elements[0], 10, 64)
-	ap.ActivationTime = time.Unix(0, unixNano).In(time.UTC)
+	var err error
+	ap.ActivationTime, err = time.Parse(time.RFC3339, elements[0])
+	if err != nil {
+		return err
+	}
 	els := elements[1:]
 	if len(els) > 1 {
 		els = elements[1 : len(elements)-1]
@@ -260,11 +263,57 @@ func (at *ActionTrigger) Restore(input string) error {
 	return nil
 }
 
+func (b *Balance) Store() (result string, err error) {
+	result += b.Id + ")"
+	result += strconv.FormatFloat(b.Value, 'f', -1, 64) + ")"
+	result += strconv.FormatFloat(b.Weight, 'f', -1, 64) + ")"
+	result += b.ExpirationDate.Format(time.RFC3339)
+	return result, nil
+}
+
+func (b *Balance) Restore(input string) (err error) {
+	elements := strings.Split(input, ")")
+	b.Id = elements[0]
+	b.Value, _ = strconv.ParseFloat(elements[1], 64)
+	b.Weight, _ = strconv.ParseFloat(elements[2], 64)
+	b.ExpirationDate, err = time.Parse(time.RFC3339, elements[3])
+	return nil
+}
+
+func (bc BalanceChain) Store() (result string, err error) {
+	for _, b := range bc {
+		str, err := b.Store()
+		if err != nil {
+			return "", err
+		}
+		result += str + "^"
+	}
+	result = strings.TrimRight(result, "^")
+	return result, nil
+}
+
+func (bc *BalanceChain) Restore(input string) error {
+	elements := strings.Split(input, "^")
+	for _, element := range elements {
+		b := &Balance{}
+		err := b.Restore(element)
+		if err != nil {
+			return err
+		}
+		*bc = append(*bc, b)
+	}
+	return nil
+}
+
 func (ub *UserBalance) Store() (result string, err error) {
 	result += ub.Id + "|"
 	result += ub.Type + "|"
 	for k, v := range ub.BalanceMap {
-		result += k + ":" + strconv.FormatFloat(v, 'f', -1, 64) + "#"
+		bc, err := v.Store()
+		if err != nil {
+			return "", err
+		}
+		result += k + "=" + bc + "#"
 	}
 	result = strings.TrimRight(result, "#") + "|"
 	for _, mb := range ub.MinuteBuckets {
@@ -302,15 +351,18 @@ func (ub *UserBalance) Restore(input string) error {
 	ub.Id = elements[0]
 	ub.Type = elements[1]
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]float64, 0)
+		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
 	for _, maps := range strings.Split(elements[2], "#") {
-		kv := strings.Split(maps, ":")
+		kv := strings.Split(maps, "=")
 		if len(kv) != 2 {
 			continue
 		}
-		value, _ := strconv.ParseFloat(kv[1], 64)
-		ub.BalanceMap[kv[0]] = value
+		bc := BalanceChain{}
+		if err := (&bc).Restore(kv[1]); err != nil {
+			return err
+		}
+		ub.BalanceMap[kv[0]] = bc
 	}
 	for _, mbs := range strings.Split(elements[3], "#") {
 		if mbs == "" {

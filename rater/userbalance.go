@@ -20,7 +20,8 @@ package rater
 
 import (
 	"errors"
-	//"log"
+	"sort"
+	"time"
 )
 
 const (
@@ -46,10 +47,87 @@ Structure containing information about user's credit (minutes, cents, sms...).'
 type UserBalance struct {
 	Id             string
 	Type           string // prepaid-postpaid
-	BalanceMap     map[string]float64
+	BalanceMap     map[string]BalanceChain
 	MinuteBuckets  []*MinuteBucket
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
+}
+
+type Balance struct {
+	Id             string
+	Value          float64
+	ExpirationDate time.Time
+	Weight         float64
+}
+
+func (b *Balance) Equal(o *Balance) bool {
+	return b.Value == o.Value ||
+		b.ExpirationDate.Equal(o.ExpirationDate) ||
+		b.Weight == o.Weight
+}
+
+func (b *Balance) IsExpired() bool {
+	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
+}
+
+/*
+Structure to store minute buckets according to weight, precision or price.
+*/
+type BalanceChain []*Balance
+
+func (bc BalanceChain) Len() int {
+	return len(bc)
+}
+
+func (bc BalanceChain) Swap(i, j int) {
+	bc[i], bc[j] = bc[j], bc[i]
+}
+
+func (bc BalanceChain) Less(j, i int) bool {
+	return bc[i].Weight < bc[j].Weight
+}
+
+func (bc BalanceChain) Sort() {
+	sort.Sort(bc)
+}
+
+func (bc BalanceChain) GetTotalValue() (total float64) {
+	for _, b := range bc {
+		if !b.IsExpired() {
+			total += b.Value
+		}
+	}
+	return
+}
+
+func (bc BalanceChain) Debit(amount float64) float64 {
+	bc.Sort()
+	for i, b := range bc {
+		if b.IsExpired() {
+			continue
+		}
+		if b.Value >= amount || i == len(bc)-1 { // if last one go negative
+			b.Value -= amount
+			break
+		}
+		b.Value = 0
+		amount -= b.Value
+	}
+	return bc.GetTotalValue()
+}
+
+func (bc BalanceChain) Equal(o BalanceChain) bool {
+	if len(bc) != len(o) {
+		return false
+	}
+	bc.Sort()
+	o.Sort()
+	for i := 0; i < len(bc); i++ {
+		if !bc[i].Equal(o[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 /*
@@ -65,7 +143,7 @@ func (a AmountTooBig) Error() string {
 Returns user's available minutes for the specified destination
 */
 func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float64, bucketList bucketsorter) {
-	credit = ub.BalanceMap[CREDIT+OUTBOUND]
+	credit = ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
 	if len(ub.MinuteBuckets) == 0 {
 		// Logger.Debug("There are no minute buckets to check for user: ", ub.Id)
 		return
@@ -134,19 +212,19 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 	for _, mb := range bucketList {
 		if mb.Seconds < amount {
 			if mb.Price > 0 { // debit the money if the bucket has price
-				credit -= mb.Seconds * mb.Price
+				credit.Debit(mb.Seconds * mb.Price)
 			}
 		} else {
 			if mb.Price > 0 { // debit the money if the bucket has price
-				credit -= amount * mb.Price
+				credit.Debit(amount * mb.Price)
 			}
 			break
 		}
-		if credit < 0 {
+		if credit.GetTotalValue() < 0 {
 			break
 		}
 	}
-	if credit < 0 {
+	if credit.GetTotalValue() < 0 {
 		return new(AmountTooBig)
 	}
 	ub.BalanceMap[CREDIT+OUTBOUND] = credit // credit is > 0
@@ -170,8 +248,8 @@ func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool
 	if count {
 		ub.countUnits(&Action{BalanceId: balanceId, Direction: OUTBOUND, Units: amount})
 	}
-	ub.BalanceMap[balanceId+OUTBOUND] -= amount
-	return ub.BalanceMap[balanceId+OUTBOUND]
+	ub.BalanceMap[balanceId+OUTBOUND].Debit(amount)
+	return ub.BalanceMap[balanceId+OUTBOUND].GetTotalValue()
 }
 
 // Scans the action trigers and execute the actions for which trigger is met
