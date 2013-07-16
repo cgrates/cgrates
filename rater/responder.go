@@ -217,7 +217,7 @@ func (rs *Responder) getBalance(arg *CallDescriptor, balanceId string, reply *Ca
 		reply.Tenant = arg.Tenant
 		reply.Account = arg.Account
 		reply.Direction = arg.Direction
-		reply.Cost = balance
+		reply.Cost = balance.GetTotalValue()
 	}
 	return nil
 }

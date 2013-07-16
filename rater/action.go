@@ -114,7 +114,7 @@ func topupResetAction(ub *UserBalance, a *Action) (err error) {
 	if a.BalanceId == MINUTES {
 		ub.MinuteBuckets = make([]*MinuteBucket, 0)
 	} else {
-		ub.BalanceMap[a.BalanceId+a.Direction] = 0
+		ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{&Balance{Value: 0}}
 	}
 	genericMakeNegative(a)
 	genericDebit(ub, a)
@@ -162,7 +162,7 @@ func genericMakeNegative(a *Action) {
 
 func genericDebit(ub *UserBalance, a *Action) (err error) {
 	if ub.BalanceMap == nil {
-		ub.BalanceMap = make(map[string]float64)
+		ub.BalanceMap = make(map[string]BalanceChain)
 	}
 	switch a.BalanceId {
 	case CREDIT:
@@ -181,7 +181,7 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 
 func genericReset(ub *UserBalance) {
 	for k, _ := range ub.BalanceMap {
-		ub.BalanceMap[k] = 0
+		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
 	ub.MinuteBuckets = make([]*MinuteBucket, 0)
 	ub.UnitCounters = make([]*UnitsCounter, 0)

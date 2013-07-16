@@ -53,7 +53,7 @@ func (self *Apier) GetBalance(attr *AttrGetBalance, reply *float64) error {
 	if balance, balExists := userBalance.BalanceMap[attr.BalanceId+attr.Direction]; !balExists {
 		*reply = 0.0
 	} else {
-		*reply = balance
+		*reply = balance.GetTotalValue()
 	}
 	return nil
 }

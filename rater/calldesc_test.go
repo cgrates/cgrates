@@ -30,11 +30,9 @@ func init() {
 
 func populateDB() {
 	minu := &UserBalance{
-		Id:   "OUT:vdf:minu",
-		Type: UB_TYPE_PREPAID,
-		BalanceMap: map[string]float64{
-			CREDIT: 0,
-		},
+		Id:         "OUT:vdf:minu",
+		Type:       UB_TYPE_PREPAID,
+		BalanceMap: map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 0}}},
 		MinuteBuckets: []*MinuteBucket{
 			&MinuteBucket{Seconds: 200, DestinationId: "NAT", Weight: 10},
 			&MinuteBucket{Seconds: 100, DestinationId: "RET", Weight: 20},
