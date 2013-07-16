@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
-	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/scheduler"
@@ -30,32 +29,6 @@ type Apier struct {
 	StorDb rater.DataStorage
 	DataDb rater.DataStorage
 	Sched  *scheduler.Scheduler
-}
-
-type AttrDestination struct {
-	Id       string
-	Prefixes []string
-}
-
-func (self *Apier) GetDestination(attr *AttrDestination, reply *AttrDestination) error {
-	if dst, err := self.DataDb.GetDestination(attr.Id); err != nil {
-		return errors.New(utils.ERR_NOT_FOUND)
-	} else {
-		reply.Id = dst.Id
-		reply.Prefixes = dst.Prefixes
-	}
-	return nil
-}
-
-func (self *Apier) SetDestination(attr *AttrDestination, reply *float64) error {
-	d := &rater.Destination{
-		Id:       attr.Id,
-		Prefixes: attr.Prefixes,
-	}
-	if err := self.DataDb.SetDestination(d); err != nil {
-		return err
-	}
-	return nil
 }
 
 type AttrGetBalance struct {
@@ -147,20 +120,26 @@ func (self *Apier) ExecuteAction(attr *AttrExecuteAction, reply *float64) error 
 }
 
 type AttrSetRatingProfile struct {
-	TPID          string
+	TPid          string
 	RateProfileId string
 }
 
-func (self *Apier) SetRatingProfile(attr *AttrSetRatingProfile, reply *float64) error {
-	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attr.TPID)
-
-	newRP, err := dbReader.LoadRatingProfileByTag(attr.RateProfileId)
-	if err != nil {
-		return err
+func (self *Apier) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateProfileId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
+	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
+	newRP, err := dbReader.LoadRatingProfileByTag(attrs.RateProfileId)
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
 	err = self.DataDb.SetRatingProfile(newRP)
-	return err
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = "OK"
+	return nil
 }
 
 type AttrActionTrigger struct {
@@ -174,7 +153,7 @@ type AttrActionTrigger struct {
 	ActionsId      string
 }
 
-func (self *Apier) AddTriggeredAction(attr *AttrActionTrigger, reply *float64) error {
+func (self *Apier) AddTriggeredAction(attr AttrActionTrigger, reply *float64) error {
 	if attr.Direction == "" {
 		attr.Direction = rater.OUTBOUND
 	}

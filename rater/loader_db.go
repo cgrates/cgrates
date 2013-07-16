@@ -184,14 +184,11 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		return err
 	}
 	for _, rp := range rpfs {
-		at, err := time.Parse(time.RFC3339, rp.activationTime)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", rp.activationTime))
-		}
+		at := time.Unix(rp.activationTime, 0)
 		for _, d := range dbr.destinations {
-			ap, exists := dbr.activationPeriods[rp.ratesTimingTag]
+			ap, exists := dbr.activationPeriods[rp.destRatesTimingTag]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rp.ratesTimingTag))
+				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rp.destRatesTimingTag))
 			}
 			newAP := &ActivationPeriod{ActivationTime: at}
 			//copy(newAP.Intervals, ap.Intervals)
@@ -209,39 +206,50 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) (*RatingProfile, error) 
 	rpm, err := dbr.storDB.GetTpRatingProfiles(dbr.tpid, tag)
 	if err != nil {
 		return nil, err
+	} else if len(rpm)==0 {
+		return nil, fmt.Errorf("No RateProfile with id: %s", tag)
 	}
 	for _, ratingProfile := range rpm {
 		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
-		at, err := time.Parse(time.RFC3339, ratingProfile.activationTime)
-		if err != nil {
-			return nil, errors.New(fmt.Sprintf("Cannot parse activation time from %v", ratingProfile.activationTime))
-		}
-		rtm, err := dbr.storDB.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.ratesTimingTag)
+		at := time.Unix(ratingProfile.activationTime, 0)
+		drtm, err := dbr.storDB.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.destRatesTimingTag)
 		if err != nil {
 			return nil, err
+		} else if len(drtm)==0 {
+			return nil, fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.destRatesTimingTag)
 		}
-		for _, rateTiming := range rtm {
-			tm, err := dbr.storDB.GetTpTimings(dbr.tpid, rateTiming.TimingsTag)
+		for _, destrateTiming := range drtm {
+			tm, err := dbr.storDB.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
 			if err != nil {
 				return nil, err
+			} else if len(tm)==0 {
+				return nil, fmt.Errorf("No Timings profile with id: %s", destrateTiming.TimingsTag)
 			}
-			rateTiming.timing = tm[rateTiming.TimingsTag]
-			drm, err := dbr.storDB.GetTpDestinationRates(dbr.tpid, rateTiming.DestinationRatesTag)
+			destrateTiming.timing = tm[destrateTiming.TimingsTag]
+			drm, err := dbr.storDB.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
 			if err != nil {
 				return nil, err
+			} else if len(drm)==0 {
+				return nil, fmt.Errorf("No Timings profile with id: %s", destrateTiming.DestinationRatesTag)
 			}
-			for _, drate := range drm[rateTiming.DestinationRatesTag] {
-				_, exists := activationPeriods[rateTiming.Tag]
-				if !exists {
-					activationPeriods[rateTiming.Tag] = &ActivationPeriod{}
+			for _, drate := range drm[destrateTiming.DestinationRatesTag] {
+				rt, err := dbr.storDB.GetTpRates(dbr.tpid, drate.RateTag)
+				if err != nil {
+					return nil, err
+				} else if len(rt)==0 {
+					return nil, fmt.Errorf("No Rates profile with id: %s", drate.RateTag)
 				}
-				activationPeriods[rateTiming.Tag].AddIntervalIfNotPresent(rateTiming.GetInterval(drate))
+				drate.Rate = rt[drate.RateTag]
+				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
+					activationPeriods[destrateTiming.Tag] = &ActivationPeriod{}
+				}
+				activationPeriods[destrateTiming.Tag].AddIntervalIfNotPresent(destrateTiming.GetInterval(drate))
 				dm, err := dbr.storDB.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 				if err != nil {
 					return nil, err
 				}
 				for _, destination := range dm {
-					ap := activationPeriods[ratingProfile.ratesTimingTag]
+					ap := activationPeriods[ratingProfile.destRatesTimingTag]
 					newAP := &ActivationPeriod{ActivationTime: at}
 					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
 					resultRatingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)

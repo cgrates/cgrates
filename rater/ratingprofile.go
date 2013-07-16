@@ -32,7 +32,8 @@ type RatingProfile struct {
 	Id                                  string
 	FallbackKey                         string
 	DestinationMap                      map[string][]*ActivationPeriod
-	tag, ratesTimingTag, activationTime string // used only for loading
+	tag, destRatesTimingTag string // used only for loading
+	activationTime		int64
 }
 
 // Adds an activation period that applyes to current rating profile if not already present.

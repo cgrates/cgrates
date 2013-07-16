@@ -630,18 +630,19 @@ func (self *SQLStorage) GetAllRatedCdr() ([]utils.CDR, error) {
 
 func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
 	var dests []*Destination
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATIONS, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var id int
 		var tpid, tag, prefix string
-		if err := rows.Scan(id, tpid, &tag, &prefix); err != nil {
+		if err := rows.Scan(&id, &tpid, &tag, &prefix); err != nil {
 			return nil, err
 		}
 		var dest *Destination
@@ -657,78 +658,80 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 		}
 		dest.Prefixes = append(dest.Prefixes, prefix)
 	}
-	return dests, rows.Err()
+	return dests, nil
 }
 
 func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 	rts := make(map[string]*Rate)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATES, tpid)
+	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rated_units, rate_increments, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
-		var id int
-		var tpid, tag string
-		var connect_fee, rate, priced_units, rate_increments float64
-		if err := rows.Scan(&id, &tpid, &tag, &connect_fee, &rate, &priced_units, &rate_increments); err != nil {
+		var tag, roundingMethod string
+		var connect_fee, rate, priced_units, rate_increments, weight float64
+		var roundingDecimals int
+		if err := rows.Scan(&tag, &connect_fee, &rate, &priced_units, &rate_increments, &roundingMethod, &roundingDecimals, &weight); err != nil {
 			return nil, err
 		}
-
 		r := &Rate{
 			Tag:            tag,
 			ConnectFee:     connect_fee,
 			Price:          rate,
 			PricedUnits:    priced_units,
 			RateIncrements: rate_increments,
+			RoundingMethod: roundingMethod,
+			RoundingDecimals: roundingDecimals,
+			Weight:		weight,
 		}
-
 		rts[tag] = r
 	}
-	return rts, rows.Err()
+	return rts, nil
 }
 
 func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*DestinationRate, error) {
 	rts := make(map[string][]*DestinationRate)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTINATION_RATES, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATION_RATES, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var id int
 		var tpid, tag, destinations_tag, rate_tag string
-		if err := rows.Scan(&id, &tpid, &tag, destinations_tag, rate_tag); err != nil {
+		if err := rows.Scan(&id, &tpid, &tag, &destinations_tag, &rate_tag); err != nil {
 			return nil, err
 		}
-
 		dr := &DestinationRate{
 			Tag:             tag,
 			DestinationsTag: destinations_tag,
 			RateTag:         rate_tag,
 		}
-
 		rts[tag] = append(rts[tag], dr)
 	}
-	return rts, rows.Err()
+	return rts, nil
 }
 
 func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
 	tms := make(map[string]*Timing)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_TIMINGS, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_TIMINGS, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var id int
 		var tpid, tag, years, months, month_days, week_days, start_time string
@@ -737,19 +740,20 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, erro
 		}
 		tms[tag] = NewTiming(tag, years, months, month_days, week_days, start_time)
 	}
-	return tms, rows.Err()
+	return tms, nil
 }
 
 func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
 	var rts []*DestinationRateTiming
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_DESTRATE_TIMINGS, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTRATE_TIMINGS, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var id int
 		var weight float64
@@ -765,24 +769,25 @@ func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*Destin
 		}
 		rts = append(rts, rt)
 	}
-	return rts, rows.Err()
+	return rts, nil
 }
 
 func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
 	rpfs := make(map[string]*RatingProfile)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_RATE_PROFILES, tpid)
+	q := fmt.Sprintf("SELECT tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject FROM %s WHERE tpid='%s'", 
+		utils.TBL_TP_RATE_PROFILES, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
-		var id int
-		var tpid, tag, tenant, tor, direction, subject, fallback_subject, rates_timing_tag, activation_time string
-
-		if err := rows.Scan(&id, &tag, &tpid, &tenant, &tor, &direction, &subject, &fallback_subject, &rates_timing_tag, &activation_time); err != nil {
+		var tag, tenant, tor, direction, subject, fallback_subject, destrates_timing_tag string
+		var activation_time int64
+		if err := rows.Scan(&tag, &tenant, &tor, &direction, &subject, &activation_time, &destrates_timing_tag, &fallback_subject); err != nil {
 			return nil, err
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
@@ -791,24 +796,25 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 			rp = &RatingProfile{Id: key, tag: tag}
 			rpfs[key] = rp
 		}
-		rp.ratesTimingTag = rates_timing_tag
+		rp.destRatesTimingTag = destrates_timing_tag
 		rp.activationTime = activation_time
 		if fallback_subject != "" {
 			rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallback_subject)
 		}
 	}
-	return rpfs, rows.Err()
+	return rpfs, nil
 }
 func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
 	as := make(map[string][]*Action)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTIONS, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTIONS, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var id int
 		var units, rate, minutes_weight, weight float64
@@ -849,19 +855,20 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 		}
 		as[tag] = append(as[tag], a)
 	}
-	return as, rows.Err()
+	return as, nil
 }
 
 func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*ActionTiming, err error) {
 	ats = make(map[string][]*ActionTiming)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTION_TIMINGS, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var id int
 		var weight float64
@@ -878,19 +885,20 @@ func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*
 		}
 		ats[tag] = append(ats[tag], at)
 	}
-	return ats, rows.Err()
+	return ats, nil
 }
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	ats := make(map[string][]*ActionTrigger)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACTION_TRIGGERS, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var id int
 		var threshold, weight float64
@@ -910,19 +918,20 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*Act
 		}
 		ats[tag] = append(ats[tag], at)
 	}
-	return ats, rows.Err()
+	return ats, nil
 }
 
 func (self *SQLStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
 	var acs []*AccountAction
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid=%s", utils.TBL_TP_ACCOUNT_ACTIONS, tpid)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, tpid)
 	if tag != "" {
-		q += "AND tag=" + tag
+		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
-	rows, err := self.Db.Query(q, tpid)
+	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var id int
 		var tpid, tenant, account, direction, action_timings_tag, action_triggers_tag string
@@ -939,5 +948,5 @@ func (self *SQLStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction,
 		}
 		acs = append(acs, aa)
 	}
-	return acs, rows.Err()
+	return acs, nil
 }

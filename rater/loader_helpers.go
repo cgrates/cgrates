@@ -44,7 +44,10 @@ type TPLoader interface {
 
 type Rate struct {
 	Tag                                                    string
-	ConnectFee, Price, PricedUnits, RateIncrements, Weight float64
+	ConnectFee, Price, PricedUnits, RateIncrements float64
+	RoundingMethod string
+	RoundingDecimals int
+	Weight float64
 }
 
 func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, weight string) (r *Rate, err error) {
