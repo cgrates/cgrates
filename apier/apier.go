@@ -31,6 +31,21 @@ type Apier struct {
 	Sched  *scheduler.Scheduler
 }
 
+type AttrDestination struct {
+	Id       string
+	Prefixes []string
+}
+
+func (self *Apier) GetDestination(attr *AttrDestination, reply *AttrDestination) error {
+	if dst, err := self.DataDb.GetDestination(attr.Id); err != nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		reply.Id = dst.Id
+		reply.Prefixes = dst.Prefixes
+	}
+	return nil
+}
+
 type AttrGetBalance struct {
 	Tenant    string
 	Account   string
