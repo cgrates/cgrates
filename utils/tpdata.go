@@ -27,13 +27,13 @@ type TPRate struct {
 }
 
 type RateSlot struct {
-	ConnectFee     float64 // ConnectFee applied once the call is answered
-	Rate           float64 // Rate applied
-	RatedUnits     int     //  Number of billing units this rate applies to
-	RateIncrements int     // This rate will apply in increments of duration
-	RoundingMethod string     // Use this method to round the cost
-	RoundingDecimals int	// Round the cost number of decimals
-	Weight         float64 // Rate's priority when dealing with grouped rates
+	ConnectFee       float64 // ConnectFee applied once the call is answered
+	Rate             float64 // Rate applied
+	RatedUnits       int     //  Number of billing units this rate applies to
+	RateIncrements   int     // This rate will apply in increments of duration
+	RoundingMethod   string  // Use this method to round the cost
+	RoundingDecimals int     // Round the cost number of decimals
+	Weight           float64 // Rate's priority when dealing with grouped rates
 }
 
 type TPDestinationRate struct {
@@ -81,4 +81,23 @@ type AttrTPRateProfileIds struct {
 	TOR       string // TypeOfRecord
 	Direction string // Traffic direction
 	Subject   string // Rating subject, usually the same as account
+}
+
+type TPActions struct {
+	TPid      string   // Tariff plan id
+	ActionsId string   // Actions id
+	Actions   []Action // Set of actions this Actions profile will perform
+}
+
+type Action struct {
+	Identifier     string  // Identifier mapped in the code
+	BalanceId      string  // Type of balance the action will operate on
+	Direction      string  // Balance direction
+	Units          float64 // Number of units to add/deduct
+	ExpirationTime int64   // Time when the units will expire
+	DestinationId  string  // Destination profile id
+	RateType       string  // Type of price <ABSOLUTE|PERCENT>
+	Rate           float64 // Price value
+	MinutesWeight  float64 // Minutes weight
+	Weight         float64 // Action's weight
 }

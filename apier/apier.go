@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
+	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/rater"
 	"github.com/cgrates/cgrates/scheduler"

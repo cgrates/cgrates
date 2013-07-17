@@ -83,6 +83,10 @@ type DataStorage interface {
 	SetTPRateProfile(*utils.TPRateProfile) error
 	GetTPRateProfile(string, string) (*utils.TPRateProfile, error)
 	GetTPRateProfileIds(*utils.AttrTPRateProfileIds) ([]string, error)
+	ExistsTPActions(string, string) (bool, error)
+	SetTPActions(*utils.TPActions) error
+	GetTPActions(string, string) (*utils.TPActions, error)
+	GetTPActionIds(string) ([]string, error)
 	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error

@@ -211,8 +211,8 @@ func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 func (self *SQLStorage) SetTPRate(rt *utils.TPRate) error {
 	for _, rtSlot := range rt.RateSlots {
 		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, rounding_method, rounding_decimals, weight) VALUES ('%s', '%s', %f, %f, %d, %d,'%s', %d, %f)",
-			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements,  
-			rtSlot.RoundingMethod, rtSlot.RoundingDecimals,  rtSlot.Weight)); err != nil {
+			utils.TBL_TP_RATES, rt.TPid, rt.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits, rtSlot.RateIncrements,
+			rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight)); err != nil {
 			return err
 		}
 	}
@@ -426,13 +426,13 @@ func (self *SQLStorage) ExistsTPRateProfile(tpid, rpId string) (bool, error) {
 func (self *SQLStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
 	var qry string
 	if len(rp.RatingActivations) == 0 { // Possibility to only set fallback rate subject
-		qry = fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', 0,'','%s')", 
+		qry = fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', 0,'','%s')",
 			utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.RateProfileId, rp.Tenant, rp.TOR, rp.Direction, rp.Subject, rp.RatesFallbackSubject)
 	} else {
 		qry = fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ", utils.TBL_TP_RATE_PROFILES)
 		// Using multiple values in query to spare some network processing time
 		for idx, rpa := range rp.RatingActivations {
-			if idx!=0 { //Consecutive values after the first will be prefixed with "," as separator
+			if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', %d,'%s','%s')", rp.TPid, rp.RateProfileId, rp.Tenant, rp.TOR, rp.Direction, rp.Subject, rpa.ActivationTime, rpa.DestRateTimingId, rp.RatesFallbackSubject)
@@ -441,7 +441,7 @@ func (self *SQLStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
-	return nil 
+	return nil
 }
 
 func (self *SQLStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfile, error) {
@@ -472,7 +472,7 @@ func (self *SQLStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfil
 	if i == 0 {
 		return nil, nil
 	}
-	return rp, nil 
+	return rp, nil
 }
 
 func (self *SQLStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) ([]string, error) {
@@ -509,6 +509,43 @@ func (self *SQLStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds)
 		return nil, nil
 	}
 	return ids, nil
+}
+
+func (self *SQLStorage) ExistsTPActions(tpid, actsId string) (bool, error) {
+	var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACTIONS, tpid, actsId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (self *SQLStorage) SetTPActions(acts *utils.TPActions) error {
+	if len(acts.Actions) == 0 {
+		return nil //Nothing to set
+	}
+	// Using multiple values in query to spare some network processing time
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_tag,direction,units,expiration_time,destination_tag,rate_type,rate, minutes_weight,weight) VALUES ", utils.TBL_TP_ACTIONS)
+	for idx, act := range acts.Actions {
+		if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
+			qry += ","
+		}
+		qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,%d,'%s','%s',%f,%f,%f)",
+			acts.TPid, acts.ActionsId, act.Identifier, act.BalanceId, act.Direction, act.Units, act.ExpirationTime,
+			act.DestinationId, act.RateType, act.Rate, act.MinutesWeight, act.Weight)
+	}
+	if _, err := self.Db.Exec(qry); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (self *SQLStorage) GetTPActions(tpid, aId string) (*utils.TPActions, error) {
+	return nil, nil
+}
+
+func (self *SQLStorage) GetTPActionIds(tpid string) ([]string, error) {
+	return nil, nil
 }
 
 func (self *SQLStorage) GetActions(string) (as Actions, err error) {
@@ -680,14 +717,14 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 			return nil, err
 		}
 		r := &Rate{
-			Tag:            tag,
-			ConnectFee:     connect_fee,
-			Price:          rate,
-			PricedUnits:    priced_units,
-			RateIncrements: rate_increments,
-			RoundingMethod: roundingMethod,
+			Tag:              tag,
+			ConnectFee:       connect_fee,
+			Price:            rate,
+			PricedUnits:      priced_units,
+			RateIncrements:   rate_increments,
+			RoundingMethod:   roundingMethod,
 			RoundingDecimals: roundingDecimals,
-			Weight:		weight,
+			Weight:           weight,
 		}
 		rts[tag] = r
 	}
@@ -774,7 +811,7 @@ func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*Destin
 
 func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
 	rpfs := make(map[string]*RatingProfile)
-	q := fmt.Sprintf("SELECT tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject FROM %s WHERE tpid='%s'", 
+	q := fmt.Sprintf("SELECT tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_RATE_PROFILES, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)

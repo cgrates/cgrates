@@ -44,8 +44,8 @@ func (self *Apier) SetTPRateProfile(attrs utils.TPRateProfile, reply *string) er
 }
 
 type AttrGetTPRateProfile struct {
-	TPid             string // Tariff plan id
-	RateProfileId    string // RateProfile id
+	TPid          string // Tariff plan id
+	RateProfileId string // RateProfile id
 }
 
 // Queries specific RateProfile on tariff plan

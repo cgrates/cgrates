@@ -173,6 +173,22 @@ func (ms *MapStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) (
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (ms *MapStorage) ExistsTPActions(tpid, aId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) SetTPActions(ap *utils.TPActions) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) GetTPActions(tpid, aId string) (*utils.TPActions, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) GetTPActionIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)

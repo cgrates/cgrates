@@ -203,6 +203,22 @@ func (rs *RedisStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds)
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (rs *RedisStorage) ExistsTPActions(tpid, aId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) SetTPActions(ap *utils.TPActions) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) GetTPActions(tpid, aId string) (*utils.TPActions, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) GetTPActionIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {

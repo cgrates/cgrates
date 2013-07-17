@@ -206,7 +206,7 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) (*RatingProfile, error) 
 	rpm, err := dbr.storDB.GetTpRatingProfiles(dbr.tpid, tag)
 	if err != nil {
 		return nil, err
-	} else if len(rpm)==0 {
+	} else if len(rpm) == 0 {
 		return nil, fmt.Errorf("No RateProfile with id: %s", tag)
 	}
 	for _, ratingProfile := range rpm {
@@ -215,28 +215,28 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) (*RatingProfile, error) 
 		drtm, err := dbr.storDB.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.destRatesTimingTag)
 		if err != nil {
 			return nil, err
-		} else if len(drtm)==0 {
+		} else if len(drtm) == 0 {
 			return nil, fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.destRatesTimingTag)
 		}
 		for _, destrateTiming := range drtm {
 			tm, err := dbr.storDB.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
 			if err != nil {
 				return nil, err
-			} else if len(tm)==0 {
+			} else if len(tm) == 0 {
 				return nil, fmt.Errorf("No Timings profile with id: %s", destrateTiming.TimingsTag)
 			}
 			destrateTiming.timing = tm[destrateTiming.TimingsTag]
 			drm, err := dbr.storDB.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
 			if err != nil {
 				return nil, err
-			} else if len(drm)==0 {
+			} else if len(drm) == 0 {
 				return nil, fmt.Errorf("No Timings profile with id: %s", destrateTiming.DestinationRatesTag)
 			}
 			for _, drate := range drm[destrateTiming.DestinationRatesTag] {
 				rt, err := dbr.storDB.GetTpRates(dbr.tpid, drate.RateTag)
 				if err != nil {
 					return nil, err
-				} else if len(rt)==0 {
+				} else if len(rt) == 0 {
 					return nil, fmt.Errorf("No Rates profile with id: %s", drate.RateTag)
 				}
 				drate.Rate = rt[drate.RateTag]
