@@ -205,21 +205,6 @@ Only the Id field must be set for get operation.
 Example
 	GetDestination(attr \*AttrDestination, reply \*AttrDestination)
 
-SetDestination
-++++++++++++++
-
-Sets the destinations for the specified tag.
-
-::
-
-	type AttrDestination struct{
-		Id       string
-		Prefixes []string
-	}
-
-
-Example
-	SetDestination(attr *AttrDestination, reply \*rater.Destination)
 
 GetBalance
 ++++++++++
@@ -330,19 +315,14 @@ AddAcount
 Example
 	AddAccount(attr \*AttrAccount, reply \*float64)
 
-SetRatingProfile
-++++++++++++++++
+RatingProfiles
+~~~~~~~~~~~~~~
 
-Sets the rating profile for the specified subject.
 
-::
-    
-	type AttrSetRatingProfile struct {
-		TPID            string
-        RatingProfileId string
-	}
+.. toctree::
+   :maxdepth: 2
 
-Example
-    SetRatingProfile(attr \*AttrSetRatingProfile, reply \*float64)
+   api_ratingprofiles
+
 
 
