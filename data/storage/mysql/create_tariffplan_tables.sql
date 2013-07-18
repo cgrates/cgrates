@@ -124,7 +124,8 @@ CREATE TABLE `tp_actions` (
   `minutes_weight` DECIMAL(5,2) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`direction`,`expiration_time`,`destination_tag`,`rate_type`,`minutes_weight`,`weight`)
 );
 
 --
