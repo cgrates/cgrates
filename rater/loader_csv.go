@@ -488,7 +488,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			// skip header line
 			continue
 		}
-		value, err := strconv.ParseFloat(record[3], 64)
+		value, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action trigger value: %v", err))
 		}
@@ -500,8 +500,8 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			Id:             utils.GenUUID(),
 			BalanceId:      record[1],
 			Direction:      record[2],
+			ThresholdType:  record[3],
 			ThresholdValue: value,
-			ThresholdType:  record[4],
 			DestinationId:  record[5],
 			ActionsId:      record[6],
 			Weight:         weight,
