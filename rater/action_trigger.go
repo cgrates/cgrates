@@ -29,6 +29,7 @@ type ActionTrigger struct {
 	BalanceId      string
 	Direction      string
 	ThresholdValue float64
+	ThresholdType  string
 	DestinationId  string
 	Weight         float64
 	ActionsId      string

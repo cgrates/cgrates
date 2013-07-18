@@ -242,6 +242,7 @@ func (at *ActionTrigger) Store() (result string, err error) {
 	result += at.DestinationId + ";"
 	result += at.ActionsId + ";"
 	result += strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64) + ";"
+	result += at.ThresholdType + ";"
 	result += strconv.FormatFloat(at.Weight, 'f', -1, 64) + ";"
 	result += strconv.FormatBool(at.Executed)
 	return
@@ -249,7 +250,7 @@ func (at *ActionTrigger) Store() (result string, err error) {
 
 func (at *ActionTrigger) Restore(input string) error {
 	elements := strings.Split(input, ";")
-	if len(elements) != 8 {
+	if len(elements) != 9 {
 		return notEnoughElements
 	}
 	at.Id = elements[0]
@@ -258,8 +259,9 @@ func (at *ActionTrigger) Restore(input string) error {
 	at.DestinationId = elements[3]
 	at.ActionsId = elements[4]
 	at.ThresholdValue, _ = strconv.ParseFloat(elements[5], 64)
-	at.Weight, _ = strconv.ParseFloat(elements[6], 64)
-	at.Executed, _ = strconv.ParseBool(elements[7])
+	at.ThresholdType = elements[6]
+	at.Weight, _ = strconv.ParseFloat(elements[7], 64)
+	at.Executed, _ = strconv.ParseBool(elements[8])
 	return nil
 }
 

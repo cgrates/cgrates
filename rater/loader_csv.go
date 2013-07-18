@@ -235,7 +235,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 			continue
 		}
 		var r *Rate
-		r, err = NewRate(record[0], record[1], record[2], record[3], record[4], record[5])
+		r, err = NewRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
 		if err != nil {
 			return err
 		}
@@ -492,7 +492,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action trigger value: %v", err))
 		}
-		weight, err := strconv.ParseFloat(record[6], 64)
+		weight, err := strconv.ParseFloat(record[7], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action trigger weight: %v", err))
 		}
@@ -501,8 +501,9 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			BalanceId:      record[1],
 			Direction:      record[2],
 			ThresholdValue: value,
-			DestinationId:  record[4],
-			ActionsId:      record[5],
+			ThresholdType:  record[4],
+			DestinationId:  record[5],
+			ActionsId:      record[6],
 			Weight:         weight,
 		}
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)

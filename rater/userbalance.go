@@ -21,6 +21,7 @@ package rater
 import (
 	"errors"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -261,19 +262,65 @@ func (ub *UserBalance) executeActionTriggers() {
 			// the next reset (see RESET_TRIGGERS action type)
 			continue
 		}
-		for _, uc := range ub.UnitCounters {
-			if uc.BalanceId == at.BalanceId {
-				if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safty
-					for _, mb := range uc.MinuteBuckets {
-						if mb.DestinationId == at.DestinationId && mb.Seconds >= at.ThresholdValue {
-							// run the actions
-							at.Execute(ub)
+		if strings.Contains(at.ThresholdType, "COUNTER") {
+			for _, uc := range ub.UnitCounters {
+				if uc.BalanceId == at.BalanceId {
+					if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safety
+						for _, mb := range uc.MinuteBuckets {
+							if strings.Contains(at.ThresholdType, "MAX") {
+								if mb.DestinationId == at.DestinationId && mb.Seconds >= at.ThresholdValue {
+									// run the actions
+									at.Execute(ub)
+								}
+							} else { //MIN
+								if mb.DestinationId == at.DestinationId && mb.Seconds <= at.ThresholdValue {
+									// run the actions
+									at.Execute(ub)
+								}
+							}
+						}
+					} else {
+						if strings.Contains(at.ThresholdType, "MAX") {
+							if uc.Units >= at.ThresholdValue {
+								// run the actions
+								at.Execute(ub)
+							}
+						} else { //MIN
+							if uc.Units <= at.ThresholdValue {
+								// run the actions
+								at.Execute(ub)
+							}
+						}
+					}
+				}
+			}
+		} else { // BALANCE
+			for _, b := range ub.BalanceMap[at.BalanceId] {
+				if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safety
+					for _, mb := range ub.MinuteBuckets {
+						if strings.Contains(at.ThresholdType, "MAX") {
+							if mb.DestinationId == at.DestinationId && mb.Seconds >= at.ThresholdValue {
+								// run the actions
+								at.Execute(ub)
+							}
+						} else { //MIN
+							if mb.DestinationId == at.DestinationId && mb.Seconds <= at.ThresholdValue {
+								// run the actions
+								at.Execute(ub)
+							}
 						}
 					}
 				} else {
-					if uc.Units >= at.ThresholdValue {
-						// run the actions
-						at.Execute(ub)
+					if strings.Contains(at.ThresholdType, "MAX") {
+						if b.Value >= at.ThresholdValue {
+							// run the actions
+							at.Execute(ub)
+						}
+					} else { //MIN
+						if b.Value <= at.ThresholdValue {
+							// run the actions
+							at.Execute(ub)
+						}
 					}
 				}
 			}
