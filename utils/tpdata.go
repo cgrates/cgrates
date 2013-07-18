@@ -101,3 +101,37 @@ type Action struct {
 	MinutesWeight  float64 // Minutes weight
 	Weight         float64 // Action's weight
 }
+
+type TPActionTimings struct {
+	TPid            string         // Tariff plan id
+	ActionTimingsId string         // ActionTimings id
+	ActionTimings   []ActionTiming // Set of ActionTiming bindings this profile will group
+}
+
+type ActionTiming struct {
+	ActionsId string  // Actions id
+	TimingId  string  // Timing profile id
+	Weight    float64 // Binding's weight
+}
+
+type TPActionTriggers struct {
+	TPid            string  // Tariff plan id
+	ActionTriggerId string  // ActionTrigger id
+	BalanceId       string  // Id of the balance this trigger monitors
+	Direction       string  // Traffic direction
+	ThresholdType   string  // This threshold type
+	ThresholdValue  float64 // Threshold
+	DestinationId   string  // Id of the destination profile
+	ActionsId       string  // Actions which will execute on threshold reached
+	Weight          float64 // weight
+}
+
+type TPAccountActions struct {
+	TPid             string // Tariff plan id
+	AccountActionsId string // AccountActions id
+	Tenant           string // Tenant's Id
+	Account          string // Account name
+	Direction        string // Traffic direction
+	ActionTimingsId  string // Id of ActionTimings profile to use
+	ActionTriggersId string // Id of ActionTriggers profile to use
+}
