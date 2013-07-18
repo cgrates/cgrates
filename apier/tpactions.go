@@ -55,7 +55,7 @@ type AttrGetTPActions struct {
 	ActionsId string // Actions id
 }
 
-// Queries specific Actions on tariff plan
+// Queries specific Actions profile on tariff plan
 func (self *Apier) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)

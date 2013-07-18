@@ -183,6 +183,14 @@ RateProfiles
 
    api_tprateprofiles
 
+Actions
+~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   api_actions
+
 
 6.1.5. Management API
 ---------------------

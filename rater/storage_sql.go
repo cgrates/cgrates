@@ -540,12 +540,50 @@ func (self *SQLStorage) SetTPActions(acts *utils.TPActions) error {
 	return nil
 }
 
-func (self *SQLStorage) GetTPActions(tpid, aId string) (*utils.TPActions, error) {
-	return nil, nil
+func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_tag,direction,units,expiration_time,destination_tag,rate_type,rate, minutes_weight,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	acts := &utils.TPActions{TPid: tpid, ActionsId: actsId}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one result
+		var action, balanceId, dir, destId, rateType  string
+		var expTime int64
+		var units, rate, minutesWeight, weight float64
+		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateType, &rate, &minutesWeight, &weight); err!= nil {
+			return nil, err
+		}
+		acts.Actions = append(acts.Actions, utils.Action{action, balanceId, dir, units, expTime, destId, rateType, rate, minutesWeight, weight})
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return acts, nil
 }
 
 func (self *SQLStorage) GetTPActionIds(tpid string) ([]string, error) {
-	return nil, nil
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTIONS, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
 }
 
 func (self *SQLStorage) GetActions(string) (as Actions, err error) {
