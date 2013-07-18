@@ -140,7 +140,8 @@ CREATE TABLE `tp_action_timings` (
   `timing_tag` varchar(24) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_action_schedule` (`tpid`,`tag`,`actions_tag`)
 );
 
 --
@@ -153,13 +154,14 @@ CREATE TABLE `tp_action_triggers` (
   `tag` varchar(24) NOT NULL,
   `balance_tag` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
+  `threshold_type` char(11) NOT NULL,
   `threshold_value` DECIMAL(5,4) NOT NULL,
-  `tpid` char(7) NOT NULL,
   `destination_tag` varchar(24) NOT NULL,
   `actions_tag` varchar(24) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`direction`,`threshold_type`,`threshold_value`,`destination_tag`,`actions_tag`)
 );
 
 --
@@ -176,5 +178,6 @@ CREATE TABLE `tp_account_actions` (
   `action_timings_tag` varchar(24),
   `action_triggers_tag` varchar(24),
   PRIMARY KEY (`id`),
-  KEY `tpid` (`tpid`)
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_tp_account` (`tpid`,`tag`,`tenant`,`account`,`direction`)
 );
