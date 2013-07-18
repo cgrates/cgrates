@@ -417,38 +417,51 @@ func TestUserBalanceAddMinutBucketEmpty(t *testing.T) {
 	}
 }
 
-/*
 func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
-		BalanceMap:     map[string]float64{CREDIT + OUTBOUND: 100},
+		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: "MAX_COUNTER", ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
-	if ub.BalanceMap[CREDIT+OUTBOUND] != 110 || ub.MinuteBuckets[0].Seconds != 20 {
-		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND], ub.MinuteBuckets[0].Seconds)
+	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 110 || ub.MinuteBuckets[0].Seconds != 20 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND][0].Value, ub.MinuteBuckets[0].Seconds)
 	}
 	// are set to executed
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1})
-	if ub.BalanceMap[CREDIT+OUTBOUND] != 110 || ub.MinuteBuckets[0].Seconds != 20 {
-		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND], ub.MinuteBuckets[0].Seconds)
+	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 110 || ub.MinuteBuckets[0].Seconds != 20 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND][0].Value, ub.MinuteBuckets[0].Seconds)
 	}
 	// we can reset them
 	ub.resetActionTriggers()
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1})
-	if ub.BalanceMap[CREDIT+OUTBOUND] != 120 || ub.MinuteBuckets[0].Seconds != 30 {
-		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND], ub.MinuteBuckets[0].Seconds)
+	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 120 || ub.MinuteBuckets[0].Seconds != 30 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND][0].Value, ub.MinuteBuckets[0].Seconds)
 	}
-}*/
+}
+
+func TestUserBalanceExecuteTriggeredActionsBalance(t *testing.T) {
+	ub := &UserBalance{
+		Id:             "TEST_UB",
+		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 100, ThresholdType: "MIN_COUNTER", ActionsId: "TEST_ACTIONS"}},
+	}
+	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
+	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 110 || ub.MinuteBuckets[0].Seconds != 20 {
+		t.Error("Error executing triggered actions", ub.BalanceMap[CREDIT+OUTBOUND][0].Value, ub.MinuteBuckets[0].Seconds)
+	}
+}
 
 func TestUserBalanceExecuteTriggeredActionsOrder(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS_ORDER"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ThresholdType: "MAX_COUNTER", ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1})
 	if len(ub.BalanceMap[CREDIT+OUTBOUND]) != 1 || ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 10 {

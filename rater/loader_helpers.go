@@ -50,7 +50,7 @@ type Rate struct {
 	Weight                                         float64
 }
 
-func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, weight string) (r *Rate, err error) {
+func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, roundingMethod, roundingDecimals, weight string) (r *Rate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -76,13 +76,21 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, weight string)
 		log.Printf("Error parsing rates increments from: %s", weight)
 		return
 	}
+	rd, err := strconv.Atoi(roundingDecimals)
+	if err != nil {
+		log.Printf("Error parsing rounding decimals: %s", roundingDecimals)
+		return
+	}
+
 	r = &Rate{
-		Tag:            tag,
-		ConnectFee:     cf,
-		Price:          p,
-		PricedUnits:    pu,
-		RateIncrements: ri,
-		Weight:         wght,
+		Tag:              tag,
+		ConnectFee:       cf,
+		Price:            p,
+		PricedUnits:      pu,
+		RateIncrements:   ri,
+		Weight:           wght,
+		RoundingMethod:   roundingMethod,
+		RoundingDecimals: rd,
 	}
 	return
 }
