@@ -662,6 +662,59 @@ func (self *SQLStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
+func (self *SQLStorage) ExistsTPActionTriggers(tpid, atId string) (bool, error) {
+        var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACTION_TRIGGERS, tpid, atId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil 
+}
+
+func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*ActionTrigger) error {
+        if len(ats) == 0 {
+		return nil //Nothing to set
+	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,balance_tag,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight) VALUES ", 
+			utils.TBL_TP_ACTION_TRIGGERS)
+	for atId, atRows := range ats {
+		for idx, atsRow := range atRows {
+			if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
+				qry += ","
+			}
+			qry += fmt.Sprintf("('%s','%s','%s','%s','%s', %f, '%s','%s',%f)",
+				tpid, atId, atsRow.BalanceId, atsRow.Direction, atsRow.ThresholdType,
+				atsRow.ThresholdValue, atsRow.DestinationId, atsRow.ActionsId, atsRow.Weight)
+		}
+	}
+	if _, err := self.Db.Exec(qry); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (self *SQLStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
+        rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTION_TRIGGERS, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
+}
+
 func (self *SQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
 
 func (self *SQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
@@ -1041,7 +1094,8 @@ func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	ats := make(map[string][]*ActionTrigger)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TRIGGERS, tpid)
+	q := fmt.Sprintf("SELECT tpid,tag,balance_tag,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight FROM %s WHERE tpid='%s'", 
+		utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
@@ -1051,10 +1105,9 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*Act
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var id int
 		var threshold, weight float64
 		var tpid, tag, balances_tag, direction, destinations_tag, actions_tag, thresholdType string
-		if err := rows.Scan(&id, &tpid, &tag, &balances_tag, &direction, &thresholdType, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
+		if err := rows.Scan(&tpid, &tag, &balances_tag, &direction, &thresholdType, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
 			return nil, err
 		}
 

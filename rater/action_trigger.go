@@ -25,11 +25,11 @@ import (
 )
 
 type ActionTrigger struct {
-	Id             string // uniquely identify the timing
+	Id             string // uniquely identify the trigger
 	BalanceId      string
 	Direction      string
-	ThresholdValue float64
 	ThresholdType  string
+	ThresholdValue float64
 	DestinationId  string
 	Weight         float64
 	ActionsId      string

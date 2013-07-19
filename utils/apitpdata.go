@@ -114,9 +114,14 @@ type ApiActionTiming struct {
 	Weight    float64 // Binding's weight
 }
 
-type TPActionTriggers struct {
+type ApiTPActionTriggers struct {
 	TPid            string  // Tariff plan id
-	ActionTriggerId string  // ActionTrigger id
+	ActionTriggersId string  // Profile id
+	ActionTriggers  []ApiActionTrigger // Set of triggers grouped in this profile
+	
+}
+
+type ApiActionTrigger struct {
 	BalanceId       string  // Id of the balance this trigger monitors
 	Direction       string  // Traffic direction
 	ThresholdType   string  // This threshold type

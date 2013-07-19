@@ -91,6 +91,9 @@ type DataStorage interface {
 	SetTPActionTimings(string, map[string][]*utils.TPActionTimingsRow) error
 	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTimingsRow, error)
 	GetTPActionTimingIds(string) ([]string, error)
+	ExistsTPActionTriggers(string, string) (bool, error)
+	SetTPActionTriggers(string, map[string][]*ActionTrigger) error
+	GetTPActionTriggerIds(string) ([]string, error)
 	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
