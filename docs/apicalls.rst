@@ -331,10 +331,12 @@ AddAcount
 Example
 	AddAccount(attr \*AttrAccount, reply \*float64)
 
+
 Apier.SetAccountAction
 ++++++++++++++++++++++
 
-Process dependencies and load a specific rating profile from storDb into dataDb.
+
+Process dependencies and load a specific account action from storDb into dataDb.
 
 **Request**:
 
