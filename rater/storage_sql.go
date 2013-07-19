@@ -990,13 +990,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 				ExpirationDate: expDate,
 			}
 		} else {
-			var percent, price float64
-			if rate_type == PERCENT {
-				percent = rate
-			}
-			if rate_type == ABSOLUTE {
-				price = rate
-			}
+			var price float64
 			a = &Action{
 				Id:             utils.GenUUID(),
 				ActionType:     action,
@@ -1008,7 +1002,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 					Seconds:        units,
 					Weight:         minutes_weight,
 					Price:          price,
-					Percent:        percent,
+					PriceType:      rate_type,
 					DestinationId:  destinations_tag,
 					ExpirationDate: expDate,
 				},

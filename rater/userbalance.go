@@ -38,9 +38,6 @@ const (
 	TRAFFIC      = "INTERNET"
 	TRAFFIC_TIME = "INTERNET_TIME"
 	MINUTES      = "MINUTES"
-	// Price types
-	PERCENT  = "PERCENT"
-	ABSOLUTE = "ABSOLUTE"
 )
 
 /*
@@ -283,12 +280,19 @@ func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool
 }
 
 // Scans the action trigers and execute the actions for which trigger is met
-func (ub *UserBalance) executeActionTriggers() {
+func (ub *UserBalance) executeActionTriggers(a *Action) {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
 		if at.Executed {
 			// trigger is marked as executed, so skipp it until
 			// the next reset (see RESET_TRIGGERS action type)
+			continue
+		}
+		if a != nil && (at.BalanceId != a.BalanceId ||
+			at.Direction != a.Direction ||
+			(a.MinuteBucket != nil &&
+				(at.ThresholdType != a.MinuteBucket.PriceType ||
+					at.ThresholdValue != a.MinuteBucket.Price))) {
 			continue
 		}
 		if strings.Contains(at.ThresholdType, "COUNTER") {
@@ -358,10 +362,19 @@ func (ub *UserBalance) executeActionTriggers() {
 }
 
 // Mark all action trigers as ready for execution
-func (ub *UserBalance) resetActionTriggers() {
+// If the action is not nil it acts like a filter
+func (ub *UserBalance) resetActionTriggers(a *Action) {
 	for _, at := range ub.ActionTriggers {
+		if a != nil && (at.BalanceId != a.BalanceId ||
+			at.Direction != a.Direction ||
+			(a.MinuteBucket != nil &&
+				(at.ThresholdType != a.MinuteBucket.PriceType ||
+					at.ThresholdValue != a.MinuteBucket.Price))) {
+			continue
+		}
 		at.Executed = false
 	}
+	ub.executeActionTriggers(a)
 }
 
 // Returns the unit counter that matches the specified action type
@@ -396,7 +409,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 	} else {
 		unitsCounter.Units += a.Units
 	}
-	ub.executeActionTriggers()
+	ub.executeActionTriggers(nil)
 }
 
 // Create minute counters for all triggered actions that have actions operating on minute buckets

@@ -27,12 +27,17 @@ import (
 type MinuteBucket struct {
 	Seconds        float64
 	Weight         float64
-	Price          float64
-	Percent        float64 // percentage from standard price
+	Price          float64 // percentage from standard price or absolute value depending on Type
+	PriceType      string
 	DestinationId  string
 	ExpirationDate time.Time
 	precision      int
 }
+
+const (
+	PERCENT  = "PERCENT"
+	ABSOLUTE = "ABSOLUTE"
+)
 
 // Returns the available number of seconds for a specified credit
 func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {
@@ -49,7 +54,7 @@ func (mb *MinuteBucket) Clone() *MinuteBucket {
 		Seconds:       mb.Seconds,
 		Weight:        mb.Weight,
 		Price:         mb.Price,
-		Percent:       mb.Percent,
+		PriceType:     mb.PriceType,
 		DestinationId: mb.DestinationId,
 	}
 }
@@ -59,7 +64,7 @@ func (mb *MinuteBucket) Equal(o *MinuteBucket) bool {
 	return mb.DestinationId == o.DestinationId &&
 		mb.Weight == o.Weight &&
 		mb.Price == o.Price &&
-		mb.Percent == o.Percent
+		mb.PriceType == o.PriceType
 }
 
 func (mb *MinuteBucket) IsExpired() bool {

@@ -331,9 +331,64 @@ AddAcount
 Example
 	AddAccount(attr \*AttrAccount, reply \*float64)
 
+Apier.SetAccountAction
+++++++++++++++++++++++
+
+Process dependencies and load a specific rating profile from storDb into dataDb.
+
+**Request**:
+
+ Data:
+  ::
+
+   type AttrSetAccountAction struct {
+	 TPid            string
+	 AccountActionId string
+   }
+
+ Mandatory parameters: ``[]string{"TPid", "AccountActionId"}``
+
+ *JSON sample*:
+  ::
+
+   {
+    "id": 0, 
+    "method": "Apier.SetAccountAction", 
+    "params": [
+        {
+            "AccountActionId": "ACC_SAMPLE_1", 
+            "TPid": "TPID_SAMPLE_1"
+        }
+    ]
+   }
+
+**Reply**:
+
+ Data:
+  ::
+
+   string
+
+ Possible answers:
+  ``OK`` - Success.
+
+ *JSON sample*:
+  ::
+
+   {
+    "error": null, 
+    "id": 0, 
+    "result": "OK"
+   }
+
+**Errors**:
+
+ ``MANDATORY_IE_MISSING`` - Mandatory parameter missing from request.
+
+ ``SERVER_ERROR`` - Server error occurred.
+
 RatingProfiles
 ~~~~~~~~~~~~~~
-
 
 .. toctree::
    :maxdepth: 2

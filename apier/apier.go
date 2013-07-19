@@ -238,8 +238,8 @@ func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
 }
 
 type AttrSetAccountAction struct {
-	TPid          string
-	RateProfileId string
+	TPid            string
+	AccountActionId string
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
@@ -249,8 +249,15 @@ func (self *Apier) SetAccountAction(attrs AttrSetAccountAction, reply *string) e
 	}
 	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
-	if err := dbReader.LoadAccountActionByTag(attrs.RateProfileId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	rater.AccLock.Guard(attrs.AccountActionId, func() (float64, error) {
+		if err := dbReader.LoadAccountActionsByTag(attrs.AccountActionId); err != nil {
+			return 0, fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		}
+		return 0, nil
+	})
+	if self.Sched != nil {
+		self.Sched.LoadActionTimings(self.DataDb)
+		self.Sched.Restart()
 	}
 	*reply = "OK"
 	return nil

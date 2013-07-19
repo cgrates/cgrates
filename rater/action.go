@@ -88,7 +88,7 @@ func logAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
-	ub.resetActionTriggers()
+	ub.resetActionTriggers(a)
 	return
 }
 
@@ -180,7 +180,7 @@ func genericReset(ub *UserBalance) {
 	}
 	ub.MinuteBuckets = make([]*MinuteBucket, 0)
 	ub.UnitCounters = make([]*UnitsCounter, 0)
-	ub.resetActionTriggers()
+	ub.resetActionTriggers(nil)
 }
 
 // Structure to store actions according to weight

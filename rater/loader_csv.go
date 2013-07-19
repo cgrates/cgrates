@@ -394,16 +394,9 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				ExpirationDate: expDate,
 			}
 		} else {
-			price, percent := 0.0, 0.0
 			value, err := strconv.ParseFloat(record[8], 64)
 			if err != nil {
 				return errors.New(fmt.Sprintf("Could not parse action price: %v", err))
-			}
-			if record[7] == PERCENT {
-				percent = value
-			}
-			if record[7] == ABSOLUTE {
-				price = value
 			}
 			minutesWeight, err := strconv.ParseFloat(record[9], 64)
 			if err != nil {
@@ -423,8 +416,8 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				MinuteBucket: &MinuteBucket{
 					Seconds:        units,
 					Weight:         minutesWeight,
-					Price:          price,
-					Percent:        percent,
+					Price:          value,
+					PriceType:      record[7],
 					DestinationId:  record[6],
 					ExpirationDate: expDate,
 				},

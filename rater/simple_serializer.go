@@ -522,7 +522,7 @@ func (mb *MinuteBucket) Store() (result string, err error) {
 	result += strconv.FormatFloat(mb.Seconds, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(mb.Weight, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(mb.Price, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(mb.Percent, 'f', -1, 64) + ";"
+	result += mb.PriceType + ";"
 	result += mb.DestinationId
 	return
 }
@@ -533,7 +533,7 @@ func (mb *MinuteBucket) Restore(input string) error {
 		mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
 		mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
 		mb.Price, _ = strconv.ParseFloat(elements[2], 64)
-		mb.Percent, _ = strconv.ParseFloat(elements[3], 64)
+		mb.PriceType = elements[3]
 		mb.DestinationId = elements[4]
 		return nil
 	}

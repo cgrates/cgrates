@@ -313,7 +313,7 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		tag := fmt.Sprintf("%s:%s:%s", aa.Direction, aa.Tenant, aa.Account)
 		aTriggers, exists := dbr.actionsTriggers[aa.ActionTriggersTag]
 		if aa.ActionTriggersTag != "" && !exists {
-			// only return error if there was something ther for the tag
+			// only return error if there was something there for the tag
 			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", aa.ActionTriggersTag))
 		}
 		ub := &UserBalance{
@@ -341,27 +341,84 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 		return err
 	}
 	accountAction := accountActions[0]
-	actionTimingsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, accountAction.ActionTimingsTag)
-	if err != nil {
-		return err
-	}
-	actionTriggersMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, accountAction.ActionTriggersTag)
-	if err != nil {
-		return err
-	}
+	id := fmt.Sprintf("%s:%s:%s", accountAction.Direction, accountAction.Tenant, accountAction.Account)
 
-	// collecting action ids
-	var actionsIds []string
-	for _, atms := range actionTimingsMap {
-		for _, atm := range atms {
-			actionsIds = append(actionsIds, atm.ActionsId)
+	var actionsIds []string // collects action ids
+
+	// action timings
+	if accountAction.ActionTimingsTag != "" {
+		// get old userBalanceIds
+		var exitingUserBalanceIds []string
+		exitingActionTimings, err := dbr.dataDb.GetActionTimings(accountAction.ActionTimingsTag)
+		if err == nil && len(exitingActionTimings) > 0 {
+			// all action timings from a specific tag shuld have the same list of user balances from the first one
+			exitingUserBalanceIds = exitingActionTimings[0].UserBalanceIds
+		}
+
+		actionTimingsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, accountAction.ActionTimingsTag)
+		if err != nil {
+			return err
+		}
+		var actionTimings []*ActionTiming
+		for _, at := range actionTimingsMap[accountAction.ActionTimingsTag] {
+			_, exists := dbr.actions[at.ActionsId]
+			if !exists {
+				return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", at.ActionsId))
+			}
+			t, exists := dbr.timings[at.Tag]
+			if !exists {
+				return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", at.Tag))
+			}
+			actTmg := &ActionTiming{
+				Id:     utils.GenUUID(),
+				Tag:    at.Tag,
+				Weight: at.Weight,
+				Timing: &Interval{
+					Months:    t.Months,
+					MonthDays: t.MonthDays,
+					WeekDays:  t.WeekDays,
+					StartTime: t.StartTime,
+				},
+				ActionsId: at.ActionsId,
+			}
+			// collect action ids from timings
+			actionsIds = append(actionsIds, actTmg.ActionsId)
+			//add user balance id if no already in
+			found := false
+			for _, ubId := range exitingUserBalanceIds {
+				if ubId == id {
+					found = true
+					break
+				}
+			}
+			if !found {
+				at.UserBalanceIds = append(exitingUserBalanceIds, id)
+			}
+			actionTimings = append(actionTimings, actTmg)
+		}
+
+		// write action timings
+		err = dbr.dataDb.SetActionTimings(accountAction.ActionTimingsTag, actionTimings)
+		if err != nil {
+			return err
 		}
 	}
-	for _, atrs := range actionTriggersMap {
-		for _, atr := range atrs {
+
+	// action triggers
+	var actionTriggers ActionTriggerPriotityList
+	if accountAction.ActionTriggersTag != "" {
+		actionTriggersMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, accountAction.ActionTriggersTag)
+		if err != nil {
+			return err
+		}
+		actionTriggers = actionTriggersMap[accountAction.ActionTriggersTag]
+		// collect action ids from triggers
+		for _, atr := range actionTriggers {
 			actionsIds = append(actionsIds, atr.ActionsId)
 		}
 	}
+
+	// actions
 	var acts map[string][]*Action
 	for _, actId := range actionsIds {
 		actions, err := dbr.storDb.GetTpActions(dbr.tpid, actId)
@@ -372,79 +429,19 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 			acts[id] = act
 		}
 	}
-
-	// write action timings
-	for k, atms := range actionTimingsMap {
-		err = dbr.storDb.SetActionTimings(k, atms)
-		if err != nil {
-			return err
-		}
-	}
 	// write actions
 	for k, as := range acts {
-		err = dbr.storDb.SetActions(k, as)
+		err = dbr.dataDb.SetActions(k, as)
 		if err != nil {
 			return err
 		}
 	}
 
-	activationPeriods := make(map[string]*ActivationPeriod)
-	resultRatingProfile := &RatingProfile{Id: tag}
-	rpm, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
+	ub, err := dbr.dataDb.GetUserBalance(id)
 	if err != nil {
 		return err
-	} else if len(rpm) == 0 {
-		return fmt.Errorf("No RateProfile with id: %s", tag)
 	}
-	for _, ratingProfile := range rpm {
-		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
-		at := time.Unix(ratingProfile.activationTime, 0)
-		drtm, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.destRatesTimingTag)
-		if err != nil {
-			return err
-		} else if len(drtm) == 0 {
-			return fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.destRatesTimingTag)
-		}
-		for _, destrateTiming := range drtm {
-			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
-			if err != nil {
-				return err
-			} else if len(tm) == 0 {
-				return fmt.Errorf("No Timings profile with id: %s", destrateTiming.TimingsTag)
-			}
-			destrateTiming.timing = tm[destrateTiming.TimingsTag]
-			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
-			if err != nil {
-				return err
-			} else if len(drm) == 0 {
-				return fmt.Errorf("No Timings profile with id: %s", destrateTiming.DestinationRatesTag)
-			}
-			for _, drate := range drm[destrateTiming.DestinationRatesTag] {
-				rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateTag)
-				if err != nil {
-					return err
-				} else if len(rt) == 0 {
-					return fmt.Errorf("No Rates profile with id: %s", drate.RateTag)
-				}
-				drate.Rate = rt[drate.RateTag]
-				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
-					activationPeriods[destrateTiming.Tag] = &ActivationPeriod{}
-				}
-				activationPeriods[destrateTiming.Tag].AddIntervalIfNotPresent(destrateTiming.GetInterval(drate))
-				dm, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
-				if err != nil {
-					return err
-				}
-				for _, destination := range dm {
-					ap := activationPeriods[ratingProfile.destRatesTimingTag]
-					newAP := &ActivationPeriod{ActivationTime: at}
-					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-					resultRatingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)
-					dbr.dataDb.SetDestination(destination)
-				}
-			}
-		}
-	}
+	ub.ActionTriggers = actionTriggers
 
-	return dbr.dataDb.SetRatingProfile(resultRatingProfile)
+	return dbr.dataDb.SetUserBalance(ub)
 }
