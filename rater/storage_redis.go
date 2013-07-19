@@ -236,15 +236,15 @@ func (rs *RedisStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
 }
 
 func (rs *RedisStorage) ExistsTPActionTriggers(tpid, atId string) (bool, error) {
-        return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedisStorage) SetTPActionTriggers(tpid string, ats map[string][]*ActionTrigger) error {
-        return errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedisStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
-        return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {

@@ -21,15 +21,14 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/utils"
 )
-
 
 // Creates a new ActionTriggers profile within a tariff plan
 func (self *Apier) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, 
-		[]string{"TPid","ActionTriggersId",}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs,
+		[]string{"TPid", "ActionTriggersId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	if exists, err := self.StorDb.ExistsTPActionTriggers(attrs.TPid, attrs.ActionTriggersId); err != nil {
@@ -39,26 +38,25 @@ func (self *Apier) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *s
 	}
 	aTriggers := make([]*rater.ActionTrigger, len(attrs.ActionTriggers))
 	for idx, at := range attrs.ActionTriggers {
-		requiredFields := []string{"BalanceId","Direction","ThresholdType","ThresholdValue","ActionsId","Weight"}
+		requiredFields := []string{"BalanceId", "Direction", "ThresholdType", "ThresholdValue", "ActionsId", "Weight"}
 		if missing := utils.MissingStructFields(&at, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Balance:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.BalanceId, missing)
 		}
 		at := &rater.ActionTrigger{
-				BalanceId: at.BalanceId,
-				Direction: at.Direction,
-				ThresholdType: at.ThresholdType,
-				ThresholdValue: at.ThresholdValue,
-				DestinationId: at.DestinationId,
-				Weight: at.Weight,
-				ActionsId: at.ActionsId,
-				}
-		aTriggers[idx] =  at
+			BalanceId:      at.BalanceId,
+			Direction:      at.Direction,
+			ThresholdType:  at.ThresholdType,
+			ThresholdValue: at.ThresholdValue,
+			DestinationId:  at.DestinationId,
+			Weight:         at.Weight,
+			ActionsId:      at.ActionsId,
+		}
+		aTriggers[idx] = at
 	}
-	
-	
+
 	ats := map[string][]*rater.ActionTrigger{
 		attrs.ActionTriggersId: aTriggers}
-				
+
 	if err := self.StorDb.SetTPActionTriggers(attrs.TPid, ats); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -67,7 +65,7 @@ func (self *Apier) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *s
 }
 
 type AttrGetTPActionTriggers struct {
-	TPid      string // Tariff plan id
+	TPid             string // Tariff plan id
 	ActionTriggersId string // ActionTrigger id
 }
 
@@ -82,20 +80,20 @@ func (self *Apier) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *uti
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		aTriggers := make([]utils.ApiActionTrigger, len(ats[attrs.ActionTriggersId]))
-		for idx,row := range ats[attrs.ActionTriggersId] {
+		for idx, row := range ats[attrs.ActionTriggersId] {
 			aTriggers[idx] = utils.ApiActionTrigger{
-						BalanceId: row.BalanceId,
-						Direction: row.Direction,
-						ThresholdType: row.ThresholdType,
-						ThresholdValue: row.ThresholdValue,
-						DestinationId: row.DestinationId,
-						ActionsId: row.ActionsId,
-						Weight: row.Weight,
-						}
+				BalanceId:      row.BalanceId,
+				Direction:      row.Direction,
+				ThresholdType:  row.ThresholdType,
+				ThresholdValue: row.ThresholdValue,
+				DestinationId:  row.DestinationId,
+				ActionsId:      row.ActionsId,
+				Weight:         row.Weight,
+			}
 		}
-		atRply := &utils.ApiTPActionTriggers{ attrs.TPid, attrs.ActionTriggersId, aTriggers }
-		
-	*reply = *atRply
+		atRply := &utils.ApiTPActionTriggers{attrs.TPid, attrs.ActionTriggersId, aTriggers}
+
+		*reply = *atRply
 	}
 	return nil
 }
@@ -118,4 +116,3 @@ func (self *Apier) GetTPActionTriggerIds(attrs AttrGetTPActionTriggerIds, reply 
 	}
 	return nil
 }
-

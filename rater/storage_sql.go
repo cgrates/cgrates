@@ -665,20 +665,20 @@ func (self *SQLStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
 }
 
 func (self *SQLStorage) ExistsTPActionTriggers(tpid, atId string) (bool, error) {
-        var exists bool
+	var exists bool
 	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACTION_TRIGGERS, tpid, atId)).Scan(&exists)
 	if err != nil {
 		return false, err
 	}
-	return exists, nil 
+	return exists, nil
 }
 
 func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*ActionTrigger) error {
-        if len(ats) == 0 {
+	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,balance_tag,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight) VALUES ", 
-			utils.TBL_TP_ACTION_TRIGGERS)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,balance_tag,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight) VALUES ",
+		utils.TBL_TP_ACTION_TRIGGERS)
 	for atId, atRows := range ats {
 		for idx, atsRow := range atRows {
 			if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
@@ -696,7 +696,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*Actio
 }
 
 func (self *SQLStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
-        rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTION_TRIGGERS, tpid))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTION_TRIGGERS, tpid))
 	if err != nil {
 		return nil, err
 	}
@@ -1098,7 +1098,7 @@ func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	ats := make(map[string][]*ActionTrigger)
-	q := fmt.Sprintf("SELECT tpid,tag,balance_tag,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight FROM %s WHERE tpid='%s'", 
+	q := fmt.Sprintf("SELECT tpid,tag,balance_tag,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)

@@ -18,11 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-
 // Represents a single row in .csv or storDb, id will be used as key in the map holding all rows
 type TPActionTimingsRow struct {
 	ActionsId string  // Actions id
 	TimingId  string  // Timing profile id
 	Weight    float64 // Binding's weight
 }
-

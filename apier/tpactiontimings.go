@@ -41,8 +41,8 @@ func (self *Apier) SetTPActionTimings(attrs utils.ApiTPActionTimings, reply *str
 		return errors.New(utils.ERR_DUPLICATE)
 	}
 	ats := make(map[string][]*utils.TPActionTimingsRow, 1) // Only one id will be stored in the map
-	for _,at := range attrs.ActionTimings {
-		ats[attrs.ActionTimingsId] = append( ats[attrs.ActionTimingsId], &utils.TPActionTimingsRow{at.ActionsId, at.TimingId, at.Weight} )
+	for _, at := range attrs.ActionTimings {
+		ats[attrs.ActionTimingsId] = append(ats[attrs.ActionTimingsId], &utils.TPActionTimingsRow{at.ActionsId, at.TimingId, at.Weight})
 	}
 	if err := self.StorDb.SetTPActionTimings(attrs.TPid, ats); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -52,7 +52,7 @@ func (self *Apier) SetTPActionTimings(attrs utils.ApiTPActionTimings, reply *str
 }
 
 type AttrGetTPActionTimings struct {
-	TPid      string // Tariff plan id
+	TPid            string // Tariff plan id
 	ActionTimingsId string // ActionTimings id
 }
 
@@ -66,11 +66,11 @@ func (self *Apier) GetTPActionTimings(attrs AttrGetTPActionTimings, reply *utils
 	} else if len(ats) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else { // Got the data we need, convert it from []TPActionTimingsRow into ApiTPActionTimings
-		atRply := &utils.ApiTPActionTimings{ attrs.TPid, attrs.ActionTimingsId, make([]utils.ApiActionTiming, len(ats[attrs.ActionTimingsId])) }
-		for idx,row := range ats[attrs.ActionTimingsId] {
-			atRply.ActionTimings[idx] = utils.ApiActionTiming{ row.ActionsId, row.TimingId, row.Weight }
+		atRply := &utils.ApiTPActionTimings{attrs.TPid, attrs.ActionTimingsId, make([]utils.ApiActionTiming, len(ats[attrs.ActionTimingsId]))}
+		for idx, row := range ats[attrs.ActionTimingsId] {
+			atRply.ActionTimings[idx] = utils.ApiActionTiming{row.ActionsId, row.TimingId, row.Weight}
 		}
-	*reply = *atRply
+		*reply = *atRply
 	}
 	return nil
 }
@@ -93,5 +93,3 @@ func (self *Apier) GetTPActionTimingIds(attrs AttrGetTPActionTimingIds, reply *[
 	}
 	return nil
 }
-
-

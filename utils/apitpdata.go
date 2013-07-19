@@ -103,8 +103,8 @@ type Action struct {
 }
 
 type ApiTPActionTimings struct {
-	TPid            string         // Tariff plan id
-	ActionTimingsId string         // ActionTimings id
+	TPid            string            // Tariff plan id
+	ActionTimingsId string            // ActionTimings id
 	ActionTimings   []ApiActionTiming // Set of ActionTiming bindings this profile will group
 }
 
@@ -115,20 +115,20 @@ type ApiActionTiming struct {
 }
 
 type ApiTPActionTriggers struct {
-	TPid            string  // Tariff plan id
-	ActionTriggersId string  // Profile id
-	ActionTriggers  []ApiActionTrigger // Set of triggers grouped in this profile
-	
+	TPid             string             // Tariff plan id
+	ActionTriggersId string             // Profile id
+	ActionTriggers   []ApiActionTrigger // Set of triggers grouped in this profile
+
 }
 
 type ApiActionTrigger struct {
-	BalanceId       string  // Id of the balance this trigger monitors
-	Direction       string  // Traffic direction
-	ThresholdType   string  // This threshold type
-	ThresholdValue  float64 // Threshold
-	DestinationId   string  // Id of the destination profile
-	ActionsId       string  // Actions which will execute on threshold reached
-	Weight          float64 // weight
+	BalanceId      string  // Id of the balance this trigger monitors
+	Direction      string  // Traffic direction
+	ThresholdType  string  // This threshold type
+	ThresholdValue float64 // Threshold
+	DestinationId  string  // Id of the destination profile
+	ActionsId      string  // Actions which will execute on threshold reached
+	Weight         float64 // weight
 }
 
 type TPAccountActions struct {

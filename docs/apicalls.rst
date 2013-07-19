@@ -199,6 +199,14 @@ ActionTimings
 
    api_tpactiontimings
 
+ActionTriggers
+~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   api_tpactiontriggers
+
 
 6.1.5. Management API
 ---------------------
