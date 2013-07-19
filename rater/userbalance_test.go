@@ -469,6 +469,27 @@ func TestUserBalanceExecuteTriggeredActionsOrder(t *testing.T) {
 	}
 }
 
+func TestCleanExpired(t *testing.T) {
+	ub := &UserBalance{
+		Id: "TEST_UB_OREDER",
+		BalanceMap: map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{
+			&Balance{ExpirationDate: time.Now().Add(10 * time.Second)},
+			&Balance{ExpirationDate: time.Date(2013, 7, 18, 14, 33, 0, 0, time.UTC)},
+			&Balance{ExpirationDate: time.Now().Add(10 * time.Second)}}},
+		MinuteBuckets: []*MinuteBucket{
+			&MinuteBucket{ExpirationDate: time.Date(2013, 7, 18, 14, 33, 0, 0, time.UTC)},
+			&MinuteBucket{ExpirationDate: time.Now().Add(10 * time.Second)},
+		},
+	}
+	ub.CleanExpiredBalancesAndBuckets()
+	if len(ub.BalanceMap[CREDIT+OUTBOUND]) != 2 {
+		t.Error("Error cleaning expired balances!")
+	}
+	if len(ub.MinuteBuckets) != 1 {
+		t.Error("Error cleaning expired minute buckets!")
+	}
+}
+
 func TestUserBalanceUnitCounting(t *testing.T) {
 	ub := &UserBalance{}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 10})

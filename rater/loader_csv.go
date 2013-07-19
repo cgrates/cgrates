@@ -379,27 +379,33 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
+		unix, err := strconv.ParseInt(record[5], 10, 64)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Could not parse expiration date: %v", err))
+		}
+		expDate := time.Unix(unix, 0)
 		var a *Action
 		if record[2] != MINUTES {
 			a = &Action{
-				ActionType: record[1],
-				BalanceId:  record[2],
-				Direction:  record[3],
-				Units:      units,
+				ActionType:     record[1],
+				BalanceId:      record[2],
+				Direction:      record[3],
+				Units:          units,
+				ExpirationDate: expDate,
 			}
 		} else {
 			price, percent := 0.0, 0.0
-			value, err := strconv.ParseFloat(record[7], 64)
+			value, err := strconv.ParseFloat(record[8], 64)
 			if err != nil {
 				return errors.New(fmt.Sprintf("Could not parse action price: %v", err))
 			}
-			if record[6] == PERCENT {
+			if record[7] == PERCENT {
 				percent = value
 			}
-			if record[6] == ABSOLUTE {
+			if record[7] == ABSOLUTE {
 				price = value
 			}
-			minutesWeight, err := strconv.ParseFloat(record[8], 64)
+			minutesWeight, err := strconv.ParseFloat(record[9], 64)
 			if err != nil {
 				return errors.New(fmt.Sprintf("Could not parse action minutes weight: %v", err))
 			}
@@ -408,17 +414,19 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
 			}
 			a = &Action{
-				Id:         utils.GenUUID(),
-				ActionType: record[1],
-				BalanceId:  record[2],
-				Direction:  record[3],
-				Weight:     weight,
+				Id:             utils.GenUUID(),
+				ActionType:     record[1],
+				BalanceId:      record[2],
+				Direction:      record[3],
+				Weight:         weight,
+				ExpirationDate: expDate,
 				MinuteBucket: &MinuteBucket{
-					Seconds:       units,
-					Weight:        minutesWeight,
-					Price:         price,
-					Percent:       percent,
-					DestinationId: record[5],
+					Seconds:        units,
+					Weight:         minutesWeight,
+					Price:          price,
+					Percent:        percent,
+					DestinationId:  record[6],
+					ExpirationDate: expDate,
 				},
 			}
 		}

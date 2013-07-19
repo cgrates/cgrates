@@ -147,14 +147,10 @@ func (self *Apier) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) e
 	}
 	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
-	newRP, err := dbReader.LoadRatingProfileByTag(attrs.RateProfileId)
-	if err != nil {
+	if err := dbReader.LoadRatingProfileByTag(attrs.RateProfileId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	err = self.DataDb.SetRatingProfile(newRP)
-	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	}
+
 	*reply = "OK"
 	return nil
 }
@@ -238,5 +234,24 @@ func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
 			return err
 		}
 	}
+	return nil
+}
+
+type AttrSetAccountAction struct {
+	TPid          string
+	RateProfileId string
+}
+
+// Process dependencies and load a specific rating profile from storDb into dataDb.
+func (self *Apier) SetAccountAction(attrs AttrSetAccountAction, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateProfileId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
+
+	if err := dbReader.LoadAccountActionByTag(attrs.RateProfileId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = "OK"
 	return nil
 }

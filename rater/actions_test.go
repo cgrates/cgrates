@@ -508,7 +508,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 		len(ub.UnitCounters) != 1 ||
 		len(ub.MinuteBuckets) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Errorf("Topup reset action failed: %#v", ub)
+		t.Errorf("Topup reset action failed: %#v", ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
 	}
 }
 
@@ -542,14 +542,14 @@ func TestActionTopupCredit(t *testing.T) {
 		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceId: CREDIT, Units: 10}
+	a := &Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 10}
 	topupAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != 110 ||
 		len(ub.UnitCounters) != 1 ||
 		len(ub.MinuteBuckets) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Error("Topup action failed!", ub)
+		t.Error("Topup action failed!", ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
 	}
 }
 
@@ -583,14 +583,14 @@ func TestActionDebitCredit(t *testing.T) {
 		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, Percent: 0, DestinationId: "RET"}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceId: CREDIT, Units: 10}
+	a := &Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 10}
 	debitAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != 90 ||
 		len(ub.UnitCounters) != 1 ||
 		len(ub.MinuteBuckets) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Error("Debit action failed!", ub)
+		t.Error("Debit action failed!", ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
 	}
 }
 

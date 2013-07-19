@@ -28,8 +28,8 @@ import (
 
 type DbReader struct {
 	tpid              string
-	storDB            DataStorage
-	storage           DataStorage
+	storDb            DataStorage
+	dataDb            DataStorage
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
@@ -44,8 +44,8 @@ type DbReader struct {
 
 func NewDbReader(storDB DataStorage, storage DataStorage, tpid string) *DbReader {
 	c := new(DbReader)
-	c.storDB = storDB
-	c.storage = storage
+	c.storDb = storDB
+	c.dataDb = storage
 	c.tpid = tpid
 	c.activationPeriods = make(map[string]*ActivationPeriod)
 	c.actionsTimings = make(map[string][]*ActionTiming)
@@ -53,7 +53,7 @@ func NewDbReader(storDB DataStorage, storage DataStorage, tpid string) *DbReader
 }
 
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
-	storage := dbr.storage
+	storage := dbr.dataDb
 	if flush {
 		storage.Flush()
 	}
@@ -121,22 +121,22 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 }
 
 func (dbr *DbReader) LoadDestinations() (err error) {
-	dbr.destinations, err = dbr.storDB.GetTpDestinations(dbr.tpid, "")
+	dbr.destinations, err = dbr.storDb.GetTpDestinations(dbr.tpid, "")
 	return
 }
 
 func (dbr *DbReader) LoadTimings() (err error) {
-	dbr.timings, err = dbr.storDB.GetTpTimings(dbr.tpid, "")
+	dbr.timings, err = dbr.storDb.GetTpTimings(dbr.tpid, "")
 	return err
 }
 
 func (dbr *DbReader) LoadRates() (err error) {
-	dbr.rates, err = dbr.storDB.GetTpRates(dbr.tpid, "")
+	dbr.rates, err = dbr.storDb.GetTpRates(dbr.tpid, "")
 	return err
 }
 
 func (dbr *DbReader) LoadDestinationRates() (err error) {
-	dbr.destinationRates, err = dbr.storDB.GetTpDestinationRates(dbr.tpid, "")
+	dbr.destinationRates, err = dbr.storDb.GetTpDestinationRates(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 }
 
 func (dbr *DbReader) LoadDestinationRateTimings() error {
-	rts, err := dbr.storDB.GetTpDestinationRateTimings(dbr.tpid, "")
+	rts, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func (dbr *DbReader) LoadDestinationRateTimings() error {
 }
 
 func (dbr *DbReader) LoadRatingProfiles() error {
-	rpfs, err := dbr.storDB.GetTpRatingProfiles(dbr.tpid, "")
+	rpfs, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
@@ -200,75 +200,74 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 	return nil
 }
 
-func (dbr *DbReader) LoadRatingProfileByTag(tag string) (*RatingProfile, error) {
+func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 	activationPeriods := make(map[string]*ActivationPeriod)
 	resultRatingProfile := &RatingProfile{Id: tag}
-	rpm, err := dbr.storDB.GetTpRatingProfiles(dbr.tpid, tag)
+	rpm, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
 	if err != nil {
-		return nil, err
+		return err
 	} else if len(rpm) == 0 {
-		return nil, fmt.Errorf("No RateProfile with id: %s", tag)
+		return fmt.Errorf("No RateProfile with id: %s", tag)
 	}
 	for _, ratingProfile := range rpm {
 		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
 		at := time.Unix(ratingProfile.activationTime, 0)
-		drtm, err := dbr.storDB.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.destRatesTimingTag)
+		drtm, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.destRatesTimingTag)
 		if err != nil {
-			return nil, err
+			return err
 		} else if len(drtm) == 0 {
-			return nil, fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.destRatesTimingTag)
+			return fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.destRatesTimingTag)
 		}
 		for _, destrateTiming := range drtm {
-			tm, err := dbr.storDB.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
+			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
 			if err != nil {
-				return nil, err
+				return err
 			} else if len(tm) == 0 {
-				return nil, fmt.Errorf("No Timings profile with id: %s", destrateTiming.TimingsTag)
+				return fmt.Errorf("No Timings profile with id: %s", destrateTiming.TimingsTag)
 			}
 			destrateTiming.timing = tm[destrateTiming.TimingsTag]
-			drm, err := dbr.storDB.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
+			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
 			if err != nil {
-				return nil, err
+				return err
 			} else if len(drm) == 0 {
-				return nil, fmt.Errorf("No Timings profile with id: %s", destrateTiming.DestinationRatesTag)
+				return fmt.Errorf("No Timings profile with id: %s", destrateTiming.DestinationRatesTag)
 			}
 			for _, drate := range drm[destrateTiming.DestinationRatesTag] {
-				rt, err := dbr.storDB.GetTpRates(dbr.tpid, drate.RateTag)
+				rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateTag)
 				if err != nil {
-					return nil, err
+					return err
 				} else if len(rt) == 0 {
-					return nil, fmt.Errorf("No Rates profile with id: %s", drate.RateTag)
+					return fmt.Errorf("No Rates profile with id: %s", drate.RateTag)
 				}
 				drate.Rate = rt[drate.RateTag]
 				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
 					activationPeriods[destrateTiming.Tag] = &ActivationPeriod{}
 				}
 				activationPeriods[destrateTiming.Tag].AddIntervalIfNotPresent(destrateTiming.GetInterval(drate))
-				dm, err := dbr.storDB.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
+				dm, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 				if err != nil {
-					return nil, err
+					return err
 				}
 				for _, destination := range dm {
 					ap := activationPeriods[ratingProfile.destRatesTimingTag]
 					newAP := &ActivationPeriod{ActivationTime: at}
 					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
 					resultRatingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)
-					dbr.storage.SetDestination(destination)
+					dbr.dataDb.SetDestination(destination)
 				}
 			}
 		}
 	}
-
-	return resultRatingProfile, nil
+	return dbr.dataDb.SetRatingProfile(resultRatingProfile)
 }
 
 func (dbr *DbReader) LoadActions() (err error) {
-	dbr.actions, err = dbr.storDB.GetTpActions(dbr.tpid, "")
+	dbr.actions, err = dbr.storDb.GetTpActions(dbr.tpid, "")
 	return err
 }
 
 func (dbr *DbReader) LoadActionTimings() (err error) {
-	atsMap, err := dbr.storDB.GetTpActionTimings(dbr.tpid, "")
+	atsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
@@ -301,12 +300,12 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 }
 
 func (dbr *DbReader) LoadActionTriggers() (err error) {
-	dbr.actionsTriggers, err = dbr.storDB.GetTpActionTriggers(dbr.tpid, "")
+	dbr.actionsTriggers, err = dbr.storDb.GetTpActionTriggers(dbr.tpid, "")
 	return err
 }
 
 func (dbr *DbReader) LoadAccountActions() (err error) {
-	acs, err := dbr.storDB.GetTpAccountActions(dbr.tpid, "")
+	acs, err := dbr.storDb.GetTpAccountActions(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
@@ -334,4 +333,118 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		}
 	}
 	return nil
+}
+
+func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
+	accountActions, err := dbr.storDb.GetTpAccountActions(dbr.tpid, tag)
+	if err != nil || len(accountActions) != 1 {
+		return err
+	}
+	accountAction := accountActions[0]
+	actionTimingsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, accountAction.ActionTimingsTag)
+	if err != nil {
+		return err
+	}
+	actionTriggersMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, accountAction.ActionTriggersTag)
+	if err != nil {
+		return err
+	}
+
+	// collecting action ids
+	var actionsIds []string
+	for _, atms := range actionTimingsMap {
+		for _, atm := range atms {
+			actionsIds = append(actionsIds, atm.ActionsId)
+		}
+	}
+	for _, atrs := range actionTriggersMap {
+		for _, atr := range atrs {
+			actionsIds = append(actionsIds, atr.ActionsId)
+		}
+	}
+	var acts map[string][]*Action
+	for _, actId := range actionsIds {
+		actions, err := dbr.storDb.GetTpActions(dbr.tpid, actId)
+		if err != nil {
+			return err
+		}
+		for id, act := range actions {
+			acts[id] = act
+		}
+	}
+
+	// write action timings
+	for k, atms := range actionTimingsMap {
+		err = dbr.storDb.SetActionTimings(k, atms)
+		if err != nil {
+			return err
+		}
+	}
+	// write actions
+	for k, as := range acts {
+		err = dbr.storDb.SetActions(k, as)
+		if err != nil {
+			return err
+		}
+	}
+
+	activationPeriods := make(map[string]*ActivationPeriod)
+	resultRatingProfile := &RatingProfile{Id: tag}
+	rpm, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
+	if err != nil {
+		return err
+	} else if len(rpm) == 0 {
+		return fmt.Errorf("No RateProfile with id: %s", tag)
+	}
+	for _, ratingProfile := range rpm {
+		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
+		at := time.Unix(ratingProfile.activationTime, 0)
+		drtm, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.destRatesTimingTag)
+		if err != nil {
+			return err
+		} else if len(drtm) == 0 {
+			return fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.destRatesTimingTag)
+		}
+		for _, destrateTiming := range drtm {
+			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
+			if err != nil {
+				return err
+			} else if len(tm) == 0 {
+				return fmt.Errorf("No Timings profile with id: %s", destrateTiming.TimingsTag)
+			}
+			destrateTiming.timing = tm[destrateTiming.TimingsTag]
+			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
+			if err != nil {
+				return err
+			} else if len(drm) == 0 {
+				return fmt.Errorf("No Timings profile with id: %s", destrateTiming.DestinationRatesTag)
+			}
+			for _, drate := range drm[destrateTiming.DestinationRatesTag] {
+				rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateTag)
+				if err != nil {
+					return err
+				} else if len(rt) == 0 {
+					return fmt.Errorf("No Rates profile with id: %s", drate.RateTag)
+				}
+				drate.Rate = rt[drate.RateTag]
+				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
+					activationPeriods[destrateTiming.Tag] = &ActivationPeriod{}
+				}
+				activationPeriods[destrateTiming.Tag].AddIntervalIfNotPresent(destrateTiming.GetInterval(drate))
+				dm, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
+				if err != nil {
+					return err
+				}
+				for _, destination := range dm {
+					ap := activationPeriods[ratingProfile.destRatesTimingTag]
+					newAP := &ActivationPeriod{ActivationTime: at}
+					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
+					resultRatingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)
+					dbr.dataDb.SetDestination(destination)
+				}
+			}
+		}
+	}
+
+	return dbr.dataDb.SetRatingProfile(resultRatingProfile)
 }

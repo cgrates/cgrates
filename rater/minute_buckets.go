@@ -62,6 +62,10 @@ func (mb *MinuteBucket) Equal(o *MinuteBucket) bool {
 		mb.Percent == o.Percent
 }
 
+func (mb *MinuteBucket) IsExpired() bool {
+	return !mb.ExpirationDate.IsZero() && mb.ExpirationDate.Before(time.Now())
+}
+
 /*
 Structure to store minute buckets according to weight, precision or price.
 */

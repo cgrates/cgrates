@@ -21,19 +21,21 @@ package rater
 import (
 	"fmt"
 	"sort"
+	"time"
 )
 
 /*
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id           string
-	ActionType   string
-	BalanceId    string
-	Direction    string
-	Units        float64
-	Weight       float64
-	MinuteBucket *MinuteBucket
+	Id             string
+	ActionType     string
+	BalanceId      string
+	Direction      string
+	ExpirationDate time.Time
+	Units          float64
+	Weight         float64
+	MinuteBucket   *MinuteBucket
 }
 
 const (
@@ -164,17 +166,10 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	switch a.BalanceId {
-	case CREDIT:
-		ub.debitBalance(CREDIT, a.Units, false)
-	case SMS:
-		ub.debitBalance(SMS, a.Units, false)
-	case MINUTES:
+	if a.BalanceId == MINUTES {
 		ub.debitMinuteBucket(a.MinuteBucket)
-	case TRAFFIC:
-		ub.debitBalance(TRAFFIC, a.Units, false)
-	case TRAFFIC_TIME:
-		ub.debitBalance(TRAFFIC_TIME, a.Units, false)
+	} else {
+		ub.debitBalanceAction(a)
 	}
 	return
 }
