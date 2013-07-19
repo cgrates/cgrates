@@ -191,6 +191,14 @@ Actions
 
    api_tpactions
 
+ActionTimings
+~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   api_tpactiontimings
+
 
 6.1.5. Management API
 ---------------------
