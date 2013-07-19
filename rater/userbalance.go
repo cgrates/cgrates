@@ -20,6 +20,7 @@ package rater
 
 import (
 	"errors"
+	"github.com/cgrates/cgrates/utils"
 	"sort"
 	"strings"
 	"time"
@@ -37,9 +38,6 @@ const (
 	TRAFFIC      = "INTERNET"
 	TRAFFIC_TIME = "INTERNET_TIME"
 	MINUTES      = "MINUTES"
-	// Price types
-	PERCENT  = "PERCENT"
-	ABSOLUTE = "ABSOLUTE"
 )
 
 /*
@@ -62,8 +60,7 @@ type Balance struct {
 }
 
 func (b *Balance) Equal(o *Balance) bool {
-	return b.Value == o.Value ||
-		b.ExpirationDate.Equal(o.ExpirationDate) ||
+	return b.ExpirationDate.Equal(o.ExpirationDate) ||
 		b.Weight == o.Weight
 }
 
@@ -150,6 +147,9 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 		return
 	}
 	for _, mb := range ub.MinuteBuckets {
+		if mb.IsExpired() {
+			continue
+		}
 		d, err := GetDestination(mb.DestinationId)
 		if err != nil {
 			continue
@@ -177,6 +177,9 @@ func (ub *UserBalance) debitMinuteBucket(newMb *MinuteBucket) error {
 	}
 	found := false
 	for _, mb := range ub.MinuteBuckets {
+		if mb.IsExpired() {
+			continue
+		}
 		if mb.Equal(newMb) {
 			mb.Seconds -= newMb.Seconds
 			found = true
@@ -242,6 +245,29 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 	return nil
 }
 
+// Debits some amount of user's specified balance adding the balance if it does not exists.
+// Returns the remaining credit in user's balance.
+func (ub *UserBalance) debitBalanceAction(a *Action) float64 {
+	newBalance := &Balance{
+		Id:             utils.GenUUID(),
+		ExpirationDate: a.ExpirationDate,
+		Weight:         a.Weight,
+	}
+	found := false
+	id := a.BalanceId + a.Direction
+	for _, b := range ub.BalanceMap[id] {
+		if b.Equal(newBalance) {
+			b.Value -= a.Units
+			found = true
+		}
+	}
+	if !found {
+		newBalance.Value -= a.Units
+		ub.BalanceMap[id] = append(ub.BalanceMap[id], newBalance)
+	}
+	return ub.BalanceMap[a.BalanceId+OUTBOUND].GetTotalValue()
+}
+
 /*
 Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
 */
@@ -254,12 +280,19 @@ func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool
 }
 
 // Scans the action trigers and execute the actions for which trigger is met
-func (ub *UserBalance) executeActionTriggers() {
+func (ub *UserBalance) executeActionTriggers(a *Action) {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
 		if at.Executed {
 			// trigger is marked as executed, so skipp it until
 			// the next reset (see RESET_TRIGGERS action type)
+			continue
+		}
+		if a != nil && (at.BalanceId != a.BalanceId ||
+			at.Direction != a.Direction ||
+			(a.MinuteBucket != nil &&
+				(at.ThresholdType != a.MinuteBucket.PriceType ||
+					at.ThresholdValue != a.MinuteBucket.Price))) {
 			continue
 		}
 		if strings.Contains(at.ThresholdType, "COUNTER") {
@@ -329,10 +362,19 @@ func (ub *UserBalance) executeActionTriggers() {
 }
 
 // Mark all action trigers as ready for execution
-func (ub *UserBalance) resetActionTriggers() {
+// If the action is not nil it acts like a filter
+func (ub *UserBalance) resetActionTriggers(a *Action) {
 	for _, at := range ub.ActionTriggers {
+		if a != nil && (at.BalanceId != a.BalanceId ||
+			at.Direction != a.Direction ||
+			(a.MinuteBucket != nil &&
+				(at.ThresholdType != a.MinuteBucket.PriceType ||
+					at.ThresholdValue != a.MinuteBucket.Price))) {
+			continue
+		}
 		at.Executed = false
 	}
+	ub.executeActionTriggers(a)
 }
 
 // Returns the unit counter that matches the specified action type
@@ -367,7 +409,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 	} else {
 		unitsCounter.Units += a.Units
 	}
-	ub.executeActionTriggers()
+	ub.executeActionTriggers(nil)
 }
 
 // Create minute counters for all triggered actions that have actions operating on minute buckets
@@ -394,6 +436,24 @@ func (ub *UserBalance) initMinuteCounters() {
 				uc.MinuteBuckets = append(uc.MinuteBuckets, a.MinuteBucket.Clone())
 				uc.MinuteBuckets.Sort()
 			}
+		}
+	}
+}
+
+func (ub *UserBalance) CleanExpiredBalancesAndBuckets() {
+	for key, _ := range ub.BalanceMap {
+		bm := ub.BalanceMap[key]
+		for i := 0; i < len(bm); i++ {
+			if bm[i].IsExpired() {
+				// delete it
+				bm = append(bm[:i], bm[i+1:]...)
+			}
+		}
+		ub.BalanceMap[key] = bm
+	}
+	for i := 0; i < len(ub.MinuteBuckets); i++ {
+		if ub.MinuteBuckets[i].IsExpired() {
+			ub.MinuteBuckets = append(ub.MinuteBuckets[:i], ub.MinuteBuckets[i+1:]...)
 		}
 	}
 }

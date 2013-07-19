@@ -23,6 +23,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"strconv"
+	"time"
 )
 
 type SQLStorage struct {
@@ -550,10 +552,10 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateType  string
+		var action, balanceId, dir, destId, rateType string
 		var expTime int64
 		var units, rate, minutesWeight, weight float64
-		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateType, &rate, &minutesWeight, &weight); err!= nil {
+		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateType, &rate, &minutesWeight, &weight); err != nil {
 			return nil, err
 		}
 		acts.Actions = append(acts.Actions, utils.Action{action, balanceId, dir, units, expTime, destId, rateType, rate, minutesWeight, weight})
@@ -632,7 +634,7 @@ func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*uti
 		i++ //Keep here a reference so we know we got at least one result
 		var tag, actionsId, timingId string
 		var weight float64
-		if err = rows.Scan(&tag, &actionsId, &timingId, &weight); err!= nil {
+		if err = rows.Scan(&tag, &actionsId, &timingId, &weight); err != nil {
 			return nil, err
 		}
 		ats[tag] = append(ats[tag], &utils.TPActionTimingsRow{actionsId, timingId, weight})
@@ -1022,38 +1024,40 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 	for rows.Next() {
 		var id int
 		var units, rate, minutes_weight, weight float64
-		var tpid, tag, action, balance_tag, direction, destinations_tag, rate_type string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_tag, &direction, &units, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
+		var tpid, tag, action, balance_tag, direction, destinations_tag, rate_type, expirationDate string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_tag, &direction, &units, &expirationDate, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
 			return nil, err
 		}
+		unix, err := strconv.ParseInt(expirationDate, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		expDate := time.Unix(unix, 0)
 		var a *Action
 		if balance_tag != MINUTES {
 			a = &Action{
-				ActionType: action,
-				BalanceId:  balance_tag,
-				Direction:  direction,
-				Units:      units,
+				ActionType:     action,
+				BalanceId:      balance_tag,
+				Direction:      direction,
+				Units:          units,
+				ExpirationDate: expDate,
 			}
 		} else {
-			var percent, price float64
-			if rate_type == PERCENT {
-				percent = rate
-			}
-			if rate_type == ABSOLUTE {
-				price = rate
-			}
+			var price float64
 			a = &Action{
-				Id:         utils.GenUUID(),
-				ActionType: action,
-				BalanceId:  balance_tag,
-				Direction:  direction,
-				Weight:     weight,
+				Id:             utils.GenUUID(),
+				ActionType:     action,
+				BalanceId:      balance_tag,
+				Direction:      direction,
+				Weight:         weight,
+				ExpirationDate: expDate,
 				MinuteBucket: &MinuteBucket{
-					Seconds:       units,
-					Weight:        minutes_weight,
-					Price:         price,
-					Percent:       percent,
-					DestinationId: destinations_tag,
+					Seconds:        units,
+					Weight:         minutes_weight,
+					Price:          price,
+					PriceType:      rate_type,
+					DestinationId:  destinations_tag,
+					ExpirationDate: expDate,
 				},
 			}
 		}

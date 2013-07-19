@@ -112,6 +112,7 @@ func (a *Action) Store() (result string, err error) {
 	result += a.ActionType + "|"
 	result += a.BalanceId + "|"
 	result += a.Direction + "|"
+	result += a.ExpirationDate.Format(time.RFC3339) + "|"
 	result += strconv.FormatFloat(a.Units, 'f', -1, 64) + "|"
 	result += strconv.FormatFloat(a.Weight, 'f', -1, 64)
 	if a.MinuteBucket != nil {
@@ -125,20 +126,24 @@ func (a *Action) Store() (result string, err error) {
 	return
 }
 
-func (a *Action) Restore(input string) error {
+func (a *Action) Restore(input string) (err error) {
 	elements := strings.Split(input, "|")
-	if len(elements) < 6 {
+	if len(elements) < 7 {
 		return notEnoughElements
 	}
 	a.Id = elements[0]
 	a.ActionType = elements[1]
 	a.BalanceId = elements[2]
 	a.Direction = elements[3]
-	a.Units, _ = strconv.ParseFloat(elements[4], 64)
-	a.Weight, _ = strconv.ParseFloat(elements[5], 64)
-	if len(elements) == 7 {
+	a.ExpirationDate, err = time.Parse(time.RFC3339, elements[4])
+	if err != nil {
+		return err
+	}
+	a.Units, _ = strconv.ParseFloat(elements[5], 64)
+	a.Weight, _ = strconv.ParseFloat(elements[6], 64)
+	if len(elements) == 8 {
 		a.MinuteBucket = &MinuteBucket{}
-		if err := a.MinuteBucket.Restore(elements[6]); err != nil {
+		if err := a.MinuteBucket.Restore(elements[7]); err != nil {
 			return err
 		}
 	}
@@ -517,7 +522,7 @@ func (mb *MinuteBucket) Store() (result string, err error) {
 	result += strconv.FormatFloat(mb.Seconds, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(mb.Weight, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(mb.Price, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(mb.Percent, 'f', -1, 64) + ";"
+	result += mb.PriceType + ";"
 	result += mb.DestinationId
 	return
 }
@@ -528,7 +533,7 @@ func (mb *MinuteBucket) Restore(input string) error {
 		mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
 		mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
 		mb.Price, _ = strconv.ParseFloat(elements[2], 64)
-		mb.Percent, _ = strconv.ParseFloat(elements[3], 64)
+		mb.PriceType = elements[3]
 		mb.DestinationId = elements[4]
 		return nil
 	}
