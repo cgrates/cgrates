@@ -189,6 +189,22 @@ func (ms *MapStorage) GetTPActionIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (ms *MapStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTimingsRow) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) GetTPActionTimings(tpid, atId string) (map[string][]*utils.TPActionTimingsRow, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)

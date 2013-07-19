@@ -87,6 +87,10 @@ type DataStorage interface {
 	SetTPActions(*utils.TPActions) error
 	GetTPActions(string, string) (*utils.TPActions, error)
 	GetTPActionIds(string) ([]string, error)
+	ExistsTPActionTimings(string, string) (bool, error)
+	SetTPActionTimings(string, map[string][]*utils.TPActionTimingsRow) error
+	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTimingsRow, error)
+	GetTPActionTimingIds(string) ([]string, error)
 	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error

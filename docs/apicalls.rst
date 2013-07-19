@@ -189,7 +189,7 @@ Actions
 .. toctree::
    :maxdepth: 2
 
-   api_actions
+   api_tpactions
 
 
 6.1.5. Management API

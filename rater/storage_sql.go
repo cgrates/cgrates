@@ -586,15 +586,91 @@ func (self *SQLStorage) GetTPActionIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
+func (self *SQLStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
+	var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACTION_TIMINGS, tpid, atId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+// Sets actionTimings in sqlDB. Imput is expected in form map[actionTimingId][]rows, eg a full .csv file content
+func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTimingsRow) error {
+	if len(ats) == 0 {
+		return nil //Nothing to set
+	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES ", utils.TBL_TP_ACTION_TIMINGS)
+	for atId, atRows := range ats {
+		for idx, atsRow := range atRows {
+			if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
+				qry += ","
+			}
+			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
+				tpid, atId, atsRow.ActionsId, atsRow.TimingId, atsRow.Weight)
+		}
+	}
+	if _, err := self.Db.Exec(qry); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*utils.TPActionTimingsRow, error) {
+	ats := make(map[string][]*utils.TPActionTimingsRow)
+	q := fmt.Sprintf("SELECT tag,actions_tag,timing_tag,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid)
+	if atId != "" {
+		q += fmt.Sprintf(" AND tag='%s'", atId)
+	}
+	rows, err := self.Db.Query(q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one result
+		var tag, actionsId, timingId string
+		var weight float64
+		if err = rows.Scan(&tag, &actionsId, &timingId, &weight); err!= nil {
+			return nil, err
+		}
+		ats[tag] = append(ats[tag], &utils.TPActionTimingsRow{actionsId, timingId, weight})
+	}
+	return ats, nil
+}
+
+func (self *SQLStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
+}
+
+func (self *SQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
+
+func (self *SQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
+
 func (self *SQLStorage) GetActions(string) (as Actions, err error) {
 	return
 }
 
 func (self *SQLStorage) SetActions(key string, as Actions) (err error) { return }
-
-func (self *SQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
-
-func (self *SQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
 
 func (self *SQLStorage) GetActionTimings(key string) (ats ActionTimings, err error) { return }
 
@@ -978,7 +1054,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*Act
 		var id int
 		var threshold, weight float64
 		var tpid, tag, balances_tag, direction, destinations_tag, actions_tag, thresholdType string
-		if err := rows.Scan(&id, &tpid, &tag, &balances_tag, &direction, &threshold, &thresholdType, &destinations_tag, &actions_tag, &weight); err != nil {
+		if err := rows.Scan(&id, &tpid, &tag, &balances_tag, &direction, &thresholdType, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
 			return nil, err
 		}
 
@@ -986,8 +1062,8 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*Act
 			Id:             utils.GenUUID(),
 			BalanceId:      balances_tag,
 			Direction:      direction,
-			ThresholdValue: threshold,
 			ThresholdType:  thresholdType,
+			ThresholdValue: threshold,
 			DestinationId:  destinations_tag,
 			ActionsId:      actions_tag,
 			Weight:         weight,
