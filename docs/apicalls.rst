@@ -116,10 +116,10 @@ FlushCache
     Cleans all internal cached (Destinations, RatingProfiles)
 
 
-6.1.4. Importing API
---------------------
+6.1.4. Tariff plan importer APIs
+--------------------------------
 
-These operate on a tpid
+These operate on a tpid and are used to import the tariff plan content into storDb.
 
 TariffPlan
 ~~~~~~~~~~
@@ -129,7 +129,6 @@ TariffPlan
 
    api_tp
 
-
 Timings
 ~~~~~~~
 
@@ -137,7 +136,6 @@ Timings
    :maxdepth: 2
 
    api_tptimings
-
 
 Destinations
 ~~~~~~~~~~~~
@@ -147,7 +145,6 @@ Destinations
 
    api_tpdestinations
 
-
 Rates
 ~~~~~
 
@@ -155,7 +152,6 @@ Rates
    :maxdepth: 2
 
    api_tprates
-
 
 DestinationRates
 ~~~~~~~~~~~~~~~~
@@ -165,7 +161,6 @@ DestinationRates
 
    api_tpdestinationrates
 
-
 DestinationRateTimings
 ~~~~~~~~~~~~~~~~~~~~~~
 
@@ -173,7 +168,6 @@ DestinationRateTimings
    :maxdepth: 2
 
    api_tpdestratetimings
-
 
 RateProfiles
 ~~~~~~~~~~~~
@@ -184,7 +178,7 @@ RateProfiles
    api_tprateprofiles
 
 Actions
-~~~~~~~~~~~~
+~~~~~~~
 
 .. toctree::
    :maxdepth: 2
@@ -192,7 +186,8 @@ Actions
    api_tpactions
 
 ActionTimings
-~~~~~~~~~~~~
+~~~~~~~~~~~~~
+
 
 .. toctree::
    :maxdepth: 2
@@ -200,12 +195,21 @@ ActionTimings
    api_tpactiontimings
 
 ActionTriggers
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+
 
 .. toctree::
    :maxdepth: 2
 
    api_tpactiontriggers
+
+AccountActions
+~~~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   api_tpaccountactions
 
 
 6.1.5. Management API
