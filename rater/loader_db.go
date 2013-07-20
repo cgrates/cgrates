@@ -337,8 +337,12 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 
 func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 	accountActions, err := dbr.storDb.GetTpAccountActions(dbr.tpid, tag)
-	if err != nil || len(accountActions) != 1 {
+	if err != nil {
 		return err
+	} else if len(accountActions) == 0 {
+		return fmt.Errorf("No AccountActions with id <%s>", tag)
+	} else if len(accountActions) > 1 {
+		return fmt.Errorf("StorDb configuration error for AccountActions <%s>", tag)
 	}
 	accountAction := accountActions[tag]
 	id := fmt.Sprintf("%s:%s:%s", accountAction.Direction, accountAction.Tenant, accountAction.Account)
@@ -349,26 +353,33 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 	if accountAction.ActionTimingsTag != "" {
 		// get old userBalanceIds
 		var exitingUserBalanceIds []string
-		exitingActionTimings, err := dbr.dataDb.GetActionTimings(accountAction.ActionTimingsTag)
-		if err == nil && len(exitingActionTimings) > 0 {
+		existingActionTimings, err := dbr.dataDb.GetActionTimings(accountAction.ActionTimingsTag)
+		if err == nil && len(existingActionTimings) > 0 {
 			// all action timings from a specific tag shuld have the same list of user balances from the first one
-			exitingUserBalanceIds = exitingActionTimings[0].UserBalanceIds
+			exitingUserBalanceIds = existingActionTimings[0].UserBalanceIds
 		}
 
 		actionTimingsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, accountAction.ActionTimingsTag)
 		if err != nil {
 			return err
+		} else if len(actionTimingsMap) == 0 {
+			return fmt.Errorf("No ActionTimings with id <%s>", accountAction.ActionTimingsTag)
 		}
 		var actionTimings []*ActionTiming
 		for _, at := range actionTimingsMap[accountAction.ActionTimingsTag] {
-			_, exists := dbr.actions[at.ActionsId]
-			if !exists {
-				return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", at.ActionsId))
+			existsAction, err := dbr.storDb.ExistsTPActions(dbr.tpid, at.ActionsId)
+			if err != nil {
+				return err
+			} else if !existsAction {
+				return fmt.Errorf("No Action with id <%s>", at.ActionsId)
 			}
-			t, exists := dbr.timings[at.Tag]
-			if !exists {
-				return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", at.Tag))
+			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, at.Tag)
+			if err != nil {
+				return err
+			} else if len(timingsMap) == 0 {
+				return fmt.Errorf("No Timing with id <%s>", at.Tag)
 			}
+			t := timingsMap[at.Tag]
 			actTmg := &ActionTiming{
 				Id:     utils.GenUUID(),
 				Tag:    at.Tag,
@@ -419,14 +430,14 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 	}
 
 	// actions
-	var acts map[string][]*Action
+	acts := make( map[string][]*Action )
 	for _, actId := range actionsIds {
 		actions, err := dbr.storDb.GetTpActions(dbr.tpid, actId)
 		if err != nil {
 			return err
 		}
 		for id, act := range actions {
-			acts[id] = act
+			acts[id] =  act
 		}
 	}
 	// write actions
@@ -439,7 +450,7 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 
 	ub, err := dbr.dataDb.GetUserBalance(id)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error when retrieving user balance <%s>: %s", id, err.Error())
 	}
 	ub.ActionTriggers = actionTriggers
 

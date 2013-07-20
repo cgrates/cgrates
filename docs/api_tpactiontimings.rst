@@ -20,7 +20,7 @@ Creates a new ActionTimings profile within a tariff plan.
 	Weight    float64 // Binding's weight
    }
 
- Mandatory parameters: ``[]string{"TPid", "ActionsId", "ActionTimings", "ActionsId", "TimingId", "Weight"}``
+ Mandatory parameters: ``[]string{"TPid", "ActionTimingsId", "ActionTimings", "ActionsId", "TimingId", "Weight"}``
 
  *JSON sample*:
   ::
