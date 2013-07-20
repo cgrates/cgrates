@@ -217,6 +217,18 @@ func (ms *MapStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (ms *MapStorage) ExistsTPAccountActions(tpid, aaId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) SetTPAccountActions(tpid string, aa map[string]*AccountAction) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MapStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
@@ -369,6 +381,6 @@ func (ms *MapStorage) GetTpActionTimings(tpid, tag string) (map[string][]*Action
 func (ms *MapStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	return nil, nil
 }
-func (ms *MapStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
+func (ms *MapStorage) GetTpAccountActions(tpid, tag string) (map[string]*AccountAction, error) {
 	return nil, nil
 }

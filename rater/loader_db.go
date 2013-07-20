@@ -340,7 +340,7 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 	if err != nil || len(accountActions) != 1 {
 		return err
 	}
-	accountAction := accountActions[0]
+	accountAction := accountActions[tag]
 	id := fmt.Sprintf("%s:%s:%s", accountAction.Direction, accountAction.Tenant, accountAction.Account)
 
 	var actionsIds []string // collects action ids

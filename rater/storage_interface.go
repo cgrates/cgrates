@@ -94,6 +94,9 @@ type DataStorage interface {
 	ExistsTPActionTriggers(string, string) (bool, error)
 	SetTPActionTriggers(string, map[string][]*ActionTrigger) error
 	GetTPActionTriggerIds(string) ([]string, error)
+	ExistsTPAccountActions(string, string) (bool, error)
+	SetTPAccountActions(string, map[string]*AccountAction) error
+	GetTPAccountActionIds(string) ([]string, error)
 	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
@@ -121,7 +124,7 @@ type DataStorage interface {
 	GetTpActions(string, string) (map[string][]*Action, error)
 	GetTpActionTimings(string, string) (map[string][]*ActionTiming, error)
 	GetTpActionTriggers(string, string) (map[string][]*ActionTrigger, error)
-	GetTpAccountActions(string, string) ([]*AccountAction, error)
+	GetTpAccountActions(string, string) (map[string]*AccountAction, error)
 }
 
 type Marshaler interface {

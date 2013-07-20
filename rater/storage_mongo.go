@@ -292,6 +292,18 @@ func (ms *MongoStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (ms *MongoStorage) ExistsTPAccountActions(tpid, aaId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MongoStorage) SetTPAccountActions(tpid string, aa map[string]*AccountAction) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (ms *MongoStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (ms *MongoStorage) GetActions(key string) (as Actions, err error) {
 	result := AcKeyValue{}
 	err = ms.db.C("actions").Find(bson.M{"key": key}).One(&result)
@@ -399,6 +411,6 @@ func (ms *MongoStorage) GetTpActionTimings(tpid, tag string) (map[string][]*Acti
 func (ms *MongoStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	return nil, nil
 }
-func (ms *MongoStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
+func (ms *MongoStorage) GetTpAccountActions(tpid, tag string) (map[string]*AccountAction, error) {
 	return nil, nil
 }

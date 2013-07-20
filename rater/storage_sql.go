@@ -717,6 +717,58 @@ func (self *SQLStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
+func (self *SQLStorage) ExistsTPAccountActions(tpid, aaId string) (bool, error) {
+	var exists bool
+	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACCOUNT_ACTIONS, tpid, aaId)).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*AccountAction) error {
+	if len(aa) == 0 {
+		return nil //Nothing to set
+	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, tenant, account, direction, action_timings_tag, action_triggers_tag) VALUES ",
+		utils.TBL_TP_ACCOUNT_ACTIONS)
+	i := 0
+	for aaId, aActs := range aa {
+		i++
+		if i != 1 { //Consecutive values after the first will be prefixed with "," as separator
+			qry += ","
+		}
+		qry += fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
+			tpid, aaId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionTimingsTag, aActs.ActionTriggersTag)
+	}
+	if _, err := self.Db.Exec(qry); err != nil {
+		return err
+	}
+	return nil 
+}
+
+func (self *SQLStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
+}
+
 func (self *SQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
 
 func (self *SQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
@@ -1130,9 +1182,8 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*Act
 	return ats, nil
 }
 
-func (self *SQLStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
-	var acs []*AccountAction
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, tpid)
+func (self *SQLStorage) GetTpAccountActions(tpid, tag string) (map[string]*AccountAction, error) {
+	q := fmt.Sprintf("SELECT tag, tenant, account, direction, action_timings_tag, action_triggers_tag FROM %s WHERE tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
@@ -1141,21 +1192,19 @@ func (self *SQLStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction,
 		return nil, err
 	}
 	defer rows.Close()
+	aa := make(map[string]*AccountAction)
 	for rows.Next() {
-		var id int
-		var tpid, tenant, account, direction, action_timings_tag, action_triggers_tag string
-		if err := rows.Scan(&id, &tpid, &tenant, &account, &direction, &action_timings_tag, &action_triggers_tag); err != nil {
+		var aaId, tenant, account, direction, action_timings_tag, action_triggers_tag string
+		if err := rows.Scan(&aaId, &tenant, &account, &direction, &action_timings_tag, &action_triggers_tag); err != nil {
 			return nil, err
 		}
-
-		aa := &AccountAction{
+		aa[aaId] = &AccountAction{
 			Tenant:            tenant,
 			Account:           account,
 			Direction:         direction,
 			ActionTimingsTag:  action_timings_tag,
 			ActionTriggersTag: action_triggers_tag,
 		}
-		acs = append(acs, aa)
 	}
-	return acs, nil
+	return aa, nil
 }

@@ -247,6 +247,18 @@ func (rs *RedisStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
+func (rs *RedisStorage) ExistsTPAccountActions(tpid, aaId string) (bool, error) {
+	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) SetTPAccountActions(tpid string, aa map[string]*AccountAction) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
+func (rs *RedisStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
+	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+}
+
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {
@@ -405,6 +417,6 @@ func (rs *RedisStorage) GetTpActionTimings(tpid, tag string) (map[string][]*Acti
 func (rs *RedisStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
 	return nil, nil
 }
-func (rs *RedisStorage) GetTpAccountActions(tpid, tag string) ([]*AccountAction, error) {
+func (rs *RedisStorage) GetTpAccountActions(tpid, tag string) (map[string]*AccountAction, error) {
 	return nil, nil
 }
