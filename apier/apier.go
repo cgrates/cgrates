@@ -211,14 +211,18 @@ type AttrAccount struct {
 	ActionTimingsId string
 }
 
+// Ads a new account into dataDb. If already defined, returns success.
 func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Direction","Account","Type","ActionTimingsId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	ub := &rater.UserBalance{
 		Id:   tag,
 		Type: attr.Type,
 	}
 	if err := self.DataDb.SetUserBalance(ub); err != nil {
-		return err
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	if attr.ActionTimingsId != "" {
 		if ats, err := self.DataDb.GetActionTimings(attr.ActionTimingsId); err == nil {
@@ -231,7 +235,7 @@ func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
 				self.Sched.Restart()
 			}
 		} else {
-			return err
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		}
 	}
 	return nil
