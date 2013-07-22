@@ -117,13 +117,13 @@ func TestActionTriggerStoreRestore(t *testing.T) {
 		BalanceId:      CREDIT,
 		Direction:      OUTBOUND,
 		ThresholdValue: 100.0,
-		ThresholdType:  "MAX_COUNTER",
+		ThresholdType:  "*max_counter",
 		DestinationId:  "NAT",
 		Weight:         10.0,
 		ActionsId:      "Commando",
 	}
 	r, err := at.Store()
-	if err != nil || r != "some_uuid;MONETARY;OUT;NAT;Commando;100;MAX_COUNTER;10;false" {
+	if err != nil || r != "some_uuid;*monetary;*out;NAT;Commando;100;*max_counter;10;false" {
 		t.Errorf("Error serializing action trigger: %v", string(r))
 	}
 	o := &ActionTrigger{}

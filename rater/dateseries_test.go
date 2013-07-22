@@ -67,7 +67,7 @@ func TestWeekDayStoreRestoreJson(t *testing.T) {
 func TestYearsSerialize(t *testing.T) {
 	ys := &Years{}
 	yString := ys.Serialize(";")
-	expectString := "*all"
+	expectString := "*any"
 	if expectString != yString {
 		t.Errorf("Expected: %s, got: %s", expectString, yString)
 	}
@@ -94,7 +94,7 @@ func TestMonthsSerialize(t *testing.T) {
 	}
 	mths1 := Months(allMonths)
 	mString1 := mths1.Serialize(";")
-	expectString1 := "*all"
+	expectString1 := "*any"
 	if expectString1 != mString1 {
 		t.Errorf("Expected: %s, got: %s", expectString1, mString1)
 	}
@@ -121,7 +121,7 @@ func TestMonthDaysSerialize(t *testing.T) {
 	}
 	mds1 := MonthDays(allMonthDays)
 	mdsString1 := mds1.Serialize(";")
-	expectString1 := "*all"
+	expectString1 := "*any"
 	if expectString1 != mdsString1 {
 		t.Errorf("Expected: %s, got: %s", expectString1, mdsString1)
 	}
@@ -148,7 +148,7 @@ func TestWeekDaysSerialize(t *testing.T) {
 	}
 	wds1 := WeekDays(allWeekDays)
 	wdsString1 := wds1.Serialize(";")
-	expectString1 := "*all"
+	expectString1 := "*any"
 	if expectString1 != wdsString1 {
 		t.Errorf("Expected: %s, got: %s", expectString1, wdsString1)
 	}

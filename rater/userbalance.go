@@ -27,17 +27,17 @@ import (
 )
 
 const (
-	UB_TYPE_POSTPAID = "postpaid"
-	UB_TYPE_PREPAID  = "prepaid"
+	UB_TYPE_POSTPAID = "*postpaid"
+	UB_TYPE_PREPAID  = "*prepaid"
 	// Direction type
-	INBOUND  = "IN"
-	OUTBOUND = "OUT"
+	INBOUND  = "*in"
+	OUTBOUND = "*out"
 	// Balance types
-	CREDIT       = "MONETARY"
-	SMS          = "SMS"
-	TRAFFIC      = "INTERNET"
-	TRAFFIC_TIME = "INTERNET_TIME"
-	MINUTES      = "MINUTES"
+	CREDIT       = "*monetary"
+	SMS          = "*sms"
+	TRAFFIC      = "*internet"
+	TRAFFIC_TIME = "*internet_time"
+	MINUTES      = "*minutes"
 )
 
 /*
@@ -295,12 +295,12 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 					at.ThresholdValue != a.MinuteBucket.Price))) {
 			continue
 		}
-		if strings.Contains(at.ThresholdType, "COUNTER") {
+		if strings.Contains(at.ThresholdType, "counter") {
 			for _, uc := range ub.UnitCounters {
 				if uc.BalanceId == at.BalanceId {
 					if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safety
 						for _, mb := range uc.MinuteBuckets {
-							if strings.Contains(at.ThresholdType, "MAX") {
+							if strings.Contains(at.ThresholdType, "*max") {
 								if mb.DestinationId == at.DestinationId && mb.Seconds >= at.ThresholdValue {
 									// run the actions
 									at.Execute(ub)
@@ -313,7 +313,7 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 							}
 						}
 					} else {
-						if strings.Contains(at.ThresholdType, "MAX") {
+						if strings.Contains(at.ThresholdType, "*max") {
 							if uc.Units >= at.ThresholdValue {
 								// run the actions
 								at.Execute(ub)
@@ -331,7 +331,7 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 			for _, b := range ub.BalanceMap[at.BalanceId] {
 				if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safety
 					for _, mb := range ub.MinuteBuckets {
-						if strings.Contains(at.ThresholdType, "MAX") {
+						if strings.Contains(at.ThresholdType, "*max") {
 							if mb.DestinationId == at.DestinationId && mb.Seconds >= at.ThresholdValue {
 								// run the actions
 								at.Execute(ub)
@@ -344,7 +344,7 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 						}
 					}
 				} else {
-					if strings.Contains(at.ThresholdType, "MAX") {
+					if strings.Contains(at.ThresholdType, "*max") {
 						if b.Value >= at.ThresholdValue {
 							// run the actions
 							at.Execute(ub)

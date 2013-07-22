@@ -23,6 +23,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"math"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -39,6 +40,7 @@ type Interval struct {
 	WeekDays                                               WeekDays
 	StartTime, EndTime                                     string // ##:##:## format
 	Weight, ConnectFee, Price, PricedUnits, RateIncrements float64
+	GroupInterval                                          float64
 	RoundingMethod                                         string
 	RoundingDecimals                                       int
 }
@@ -145,4 +147,23 @@ func (i *Interval) GetCost(duration float64) (cost float64) {
 		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * i.Price
 	}
 	return utils.Round(cost, i.RoundingDecimals, i.RoundingMethod)
+}
+
+// Structure to store actions according to weight
+type IntervalList []*Interval
+
+func (il IntervalList) Len() int {
+	return len(il)
+}
+
+func (il IntervalList) Swap(i, j int) {
+	il[i], il[j] = il[j], il[i]
+}
+
+func (il IntervalList) Less(i, j int) bool {
+	return il[i].Weight < il[j].Weight
+}
+
+func (il IntervalList) Sort() {
+	sort.Sort(il)
 }

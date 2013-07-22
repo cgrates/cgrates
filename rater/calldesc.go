@@ -40,7 +40,7 @@ func init() {
 
 const (
 	RECURSION_MAX_DEPTH = 10
-	FALLBACK_SUBJECT    = "*all"
+	FALLBACK_SUBJECT    = "*any"
 	FALLBACK_SEP        = ";"
 )
 
@@ -190,16 +190,12 @@ func (cd *CallDescriptor) GetKey() string {
 }
 
 /*
-Splits the call descriptor timespan into sub time spans according to the activation periods intervals.
-*/
-func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
-	return cd.splitTimeSpan(&TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd})
-}
-
-/*
 Splits the received timespan into sub time spans according to the activation periods intervals.
 */
-func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeSpan) {
+func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*TimeSpan) {
+	if firstSpan == nil {
+		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
+	}
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
@@ -250,11 +246,15 @@ func (cd *CallDescriptor) splitTimeSpan(firstSpan *TimeSpan) (timespans []*TimeS
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
 		if timespans[i].MinuteInfo != nil {
-			continue
+			continue // cont try to split timespans payed with minutes
 		}
 		ap := timespans[i].ActivationPeriod
 		//timespans[i].ActivationPeriod = nil
+		ap.Intervals.Sort()
 		for _, interval := range ap.Intervals {
+			if timespans[i].Interval != nil && timespans[i].Interval.Weight < interval.Weight {
+				continue // if the timespan has an interval than it already has a heigher weight
+			}
 			newTs := timespans[i].SplitByInterval(interval)
 			if newTs != nil {
 				newTs.ActivationPeriod = ap
@@ -274,7 +274,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return &CallCost{}, err
 	}
-	timespans := cd.splitInTimeSpans()
+	timespans := cd.splitInTimeSpans(nil)
 	cost := 0.0
 	connectionFee := 0.0
 
@@ -336,7 +336,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	for i := 0; i < 10; i++ {
 		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds-availableSeconds))
 		ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
-		timespans := cd.splitTimeSpan(ts)
+		timespans := cd.splitInTimeSpans(ts)
 
 		cost := 0.0
 		for i, ts := range timespans {

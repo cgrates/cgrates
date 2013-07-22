@@ -32,6 +32,7 @@ type TimeSpan struct {
 	ActivationPeriod   *ActivationPeriod
 	Interval           *Interval
 	MinuteInfo         *MinuteInfo
+	CallDuration       float64 // the call duration so far till TimeEnd
 }
 
 // Holds the bonus minute information related to a specified timespan
@@ -186,4 +187,12 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 	mb.Seconds = 0
 
 	return
+}
+
+func (ts *TimeSpan) GetGroupStart() float64 {
+	return ts.CallDuration - ts.GetDuration().Seconds()
+}
+
+func (ts *TimeSpan) GetGroupEnd() float64 {
+	return ts.CallDuration
 }

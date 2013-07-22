@@ -28,7 +28,7 @@ The struture that is saved to storage.
 */
 type ActivationPeriod struct {
 	ActivationTime time.Time
-	Intervals      []*Interval
+	Intervals      IntervalList
 }
 
 type xCachedActivationPeriods struct {
@@ -64,4 +64,8 @@ func (ap *ActivationPeriod) AddIntervalIfNotPresent(is ...*Interval) {
 
 func (ap *ActivationPeriod) Equal(o *ActivationPeriod) bool {
 	return ap.ActivationTime == o.ActivationTime
+}
+
+func (ap *ActivationPeriod) GetGroupTimeLimits() []float64 {
+	return nil
 }
