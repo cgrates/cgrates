@@ -117,7 +117,6 @@ type AttrExecuteAction struct {
 	Direction string
 	Tenant    string
 	Account   string
-	BalanceId string
 	ActionsId string
 }
 
@@ -213,7 +212,7 @@ type AttrAccount struct {
 
 // Ads a new account into dataDb. If already defined, returns success.
 func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction","Account","Type","ActionTimingsId"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
@@ -221,18 +220,21 @@ func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
 		Id:   tag,
 		Type: attr.Type,
 	}
-	if err := self.DataDb.SetUserBalance(ub); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	}
+
 	if attr.ActionTimingsId != "" {
 		if ats, err := self.DataDb.GetActionTimings(attr.ActionTimingsId); err == nil {
 			for _, at := range ats {
 				at.UserBalanceIds = append(at.UserBalanceIds, tag)
 			}
-			self.DataDb.SetActionTimings(attr.ActionTimingsId, ats)
-			if self.Sched != nil {
-				self.Sched.LoadActionTimings(self.DataDb)
-				self.Sched.Restart()
+			err = self.DataDb.SetActionTimings(attr.ActionTimingsId, ats)
+			if err != nil {
+				if self.Sched != nil {
+					self.Sched.LoadActionTimings(self.DataDb)
+					self.Sched.Restart()
+				}
+			}
+			if err := self.DataDb.SetUserBalance(ub); err != nil {
+				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 			}
 		} else {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -242,7 +244,7 @@ func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
 }
 
 type AttrSetAccountActions struct {
-	TPid            string
+	TPid             string
 	AccountActionsId string
 }
 
@@ -253,7 +255,7 @@ func (self *Apier) SetAccountActions(attrs AttrSetAccountActions, reply *string)
 	}
 	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
-	if _,err := rater.AccLock.Guard(attrs.AccountActionsId, func() (float64, error) {
+	if _, err := rater.AccLock.Guard(attrs.AccountActionsId, func() (float64, error) {
 		if err := dbReader.LoadAccountActionsByTag(attrs.AccountActionsId); err != nil {
 			return 0, err
 		}
