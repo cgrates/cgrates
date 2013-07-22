@@ -430,17 +430,17 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 	}
 
 	// actions
-	acts := make( map[string][]*Action )
+	acts := make(map[string][]*Action)
 	for _, actId := range actionsIds {
 		actions, err := dbr.storDb.GetTpActions(dbr.tpid, actId)
 		if err != nil {
 			return err
 		}
 		for id, act := range actions {
-			acts[id] =  act
+			acts[id] = act
 		}
 	}
-	// write actions
+	// writee actions
 	for k, as := range acts {
 		err = dbr.dataDb.SetActions(k, as)
 		if err != nil {
@@ -450,7 +450,10 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 
 	ub, err := dbr.dataDb.GetUserBalance(id)
 	if err != nil {
-		return fmt.Errorf("Error when retrieving user balance <%s>: %s", id, err.Error())
+		ub = &UserBalance{
+			Type: UB_TYPE_PREPAID,
+			Id:   id,
+		}
 	}
 	ub.ActionTriggers = actionTriggers
 
