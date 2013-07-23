@@ -301,7 +301,6 @@ Executes specified action on a user account.
 		Direction string
 		Tenant    string
 		Account   string
-		BalanceId string
 		ActionsId string
 	}
 
