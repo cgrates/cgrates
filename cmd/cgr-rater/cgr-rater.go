@@ -36,7 +36,6 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"runtime"
-	"strconv"
 	"time"
 )
 
@@ -214,40 +213,10 @@ func checkConfigSanity() error {
 	return nil
 }
 
-func configureDatabase(db_type, host, port, name, user, pass string) (getter rater.DataStorage, err error) {
-	switch db_type {
-	case REDIS:
-		var db_nb int
-		db_nb, err = strconv.Atoi(name)
-		if err != nil {
-			rater.Logger.Crit("Redis db name must be an integer!")
-			return nil, err
-		}
-		if port != "" {
-			host += ":" + port
-		}
-		getter, err = rater.NewRedisStorage(host, db_nb, pass)
-	case MONGO:
-		getter, err = rater.NewMongoStorage(host, port, name, user, pass)
-	case POSTGRES:
-		getter, err = rater.NewPostgresStorage(host, port, name, user, pass)
-	case MYSQL:
-		getter, err = rater.NewMySQLStorage(host, port, name, user, pass)
-	default:
-		err = errors.New("unknown db")
-		return nil, err
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	return getter, nil
-}
-
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("CGRateS " + rater.VERSION)
+		fmt.Println("CGRateS " + utils.VERSION)
 		return
 	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -265,17 +234,17 @@ func main() {
 	}
 
 	var getter, loggerDb rater.DataStorage
-	getter, err = configureDatabase(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
+	getter, err = rater.ConfigureDatabase(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
 	if err != nil { // Cannot configure getter database, show stopper
-		rater.Logger.Crit(fmt.Sprintf("Could not configure database: %s exiting!", err))
+		rater.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
 	defer getter.Close()
 	rater.SetDataStorage(getter)
-	if cfg.LogDBType == SAME {
+	if cfg.StorDBType == SAME {
 		loggerDb = getter
 	} else {
-		loggerDb, err = configureDatabase(cfg.LogDBType, cfg.LogDBHost, cfg.LogDBPort, cfg.LogDBName, cfg.LogDBUser, cfg.LogDBPass)
+		loggerDb, err = rater.ConfigureDatabase(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass)
 		if err != nil { // Cannot configure logger database, show stopper
 			rater.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return

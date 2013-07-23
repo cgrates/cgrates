@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"testing"
 	"reflect"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Make sure defaults did not change by mistake
@@ -39,12 +40,12 @@ func TestDefaults(t *testing.T) {
 	eCfg.DataDBName = "10" 
 	eCfg.DataDBUser = "" 
 	eCfg.DataDBPass = "" 
-	eCfg.LogDBType = MONGO 
-	eCfg.LogDBHost = "localhost" 
-	eCfg.LogDBPort = "27017" 
-	eCfg.LogDBName = "cgrates" 
-	eCfg.LogDBUser = "" 
-	eCfg.LogDBPass = "" 
+	eCfg.StorDBType = MONGO 
+	eCfg.StorDBHost = "localhost" 
+	eCfg.StorDBPort = "27017" 
+	eCfg.StorDBName = "cgrates" 
+	eCfg.StorDBUser = "" 
+	eCfg.StorDBPass = "" 
 	eCfg.RPCEncoding = GOB 
 	eCfg.DefaultReqType = RATED
 	eCfg.DefaultTOR = "0" 
@@ -53,6 +54,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.RaterEnabled = false 
 	eCfg.RaterBalancer = DISABLED 
 	eCfg.RaterListen = "127.0.0.1:2012" 
+	eCfg.RaterRoundingMethod = utils.ROUNDING_MIDDLE
+	eCfg.RaterRoundingDecimals = 4
 	eCfg.BalancerEnabled = false 
 	eCfg.BalancerListen = "127.0.0.1:2013" 
 	eCfg.SchedulerEnabled = false 
@@ -127,12 +130,12 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.DataDBName = "test"
 	eCfg.DataDBUser = "test"
 	eCfg.DataDBPass = "test"
-	eCfg.LogDBType = "test"
-	eCfg.LogDBHost = "test"
-	eCfg.LogDBPort = "test"
-	eCfg.LogDBName = "test"
-	eCfg.LogDBUser = "test"
-	eCfg.LogDBPass = "test"
+	eCfg.StorDBType = "test"
+	eCfg.StorDBHost = "test"
+	eCfg.StorDBPort = "test"
+	eCfg.StorDBName = "test"
+	eCfg.StorDBUser = "test"
+	eCfg.StorDBPass = "test"
 	eCfg.RPCEncoding = "test"
 	eCfg.DefaultReqType = "test"
 	eCfg.DefaultTOR = "test"
@@ -141,6 +144,8 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.RaterEnabled = true
 	eCfg.RaterBalancer = "test"
 	eCfg.RaterListen = "test"
+	eCfg.RaterRoundingMethod = "test"
+	eCfg.RaterRoundingDecimals = 99
 	eCfg.BalancerEnabled = true
 	eCfg.BalancerListen = "test"
 	eCfg.SchedulerEnabled = true

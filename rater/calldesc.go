@@ -42,7 +42,6 @@ const (
 	RECURSION_MAX_DEPTH = 10
 	FALLBACK_SUBJECT    = "*all"
 	FALLBACK_SEP        = ";"
-	VERSION             = "0.9.1rc2"
 )
 
 var (

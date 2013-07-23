@@ -49,12 +49,12 @@ type CGRConfig struct {
 	DataDBName              string // The name of the database to connect to.
 	DataDBUser              string // The user to sign in as.
 	DataDBPass              string // The user's password.
-	LogDBType               string // Should reflect the database type used to store logs
-	LogDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	LogDBPort               string // The port to bind to.
-	LogDBName               string // The name of the database to connect to.
-	LogDBUser               string // The user to sign in as.
-	LogDBPass               string // The user's password.
+	StorDBType               string // Should reflect the database type used to store logs
+	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort               string // The port to bind to.
+	StorDBName               string // The name of the database to connect to.
+	StorDBUser               string // The user to sign in as.
+	StorDBPass               string // The user's password.
 	RPCEncoding        	string // RPC encoding used on APIs: <gob|json>.
 	DefaultReqType        string // Use this request type if not defined on top
 	DefaultTOR            string // set default type of record
@@ -63,6 +63,8 @@ type CGRConfig struct {
 	RaterEnabled            bool   // start standalone server (no balancer)
 	RaterBalancer           string // balancer address host:port
 	RaterListen             string // listening address host:port
+	RaterRoundingMethod     string // Rounding method for the end price: <up|middle|down>
+	RaterRoundingDecimals   int    // Number of decimals to round end prices at
 	BalancerEnabled         bool
 	BalancerListen          string // Json RPC server address
 	SchedulerEnabled        bool
@@ -104,12 +106,12 @@ func ( self *CGRConfig ) setDefaults() error {
 	self.DataDBName = "10"
 	self.DataDBUser = ""
 	self.DataDBPass = ""
-	self.LogDBType = MONGO
-	self.LogDBHost = "localhost"
-	self.LogDBPort = "27017"
-	self.LogDBName = "cgrates"
-	self.LogDBUser = ""
-	self.LogDBPass = ""
+	self.StorDBType = MONGO
+	self.StorDBHost = "localhost"
+	self.StorDBPort = "27017"
+	self.StorDBName = "cgrates"
+	self.StorDBUser = ""
+	self.StorDBPass = ""
 	self.RPCEncoding = GOB
 	self.DefaultReqType = "rated"
 	self.DefaultTOR = "0"
@@ -118,6 +120,8 @@ func ( self *CGRConfig ) setDefaults() error {
 	self.RaterEnabled = false
 	self.RaterBalancer = DISABLED
 	self.RaterListen = "127.0.0.1:2012"
+	self.RaterRoundingMethod = utils.ROUNDING_MIDDLE
+	self.RaterRoundingDecimals = 4
 	self.BalancerEnabled = false
 	self.BalancerListen = "127.0.0.1:2013"
 	self.SchedulerEnabled = false
@@ -154,6 +158,11 @@ func ( self *CGRConfig ) setDefaults() error {
 	return nil
 }
 
+func NewDefaultCGRConfig() (*CGRConfig, error) {
+	cfg := &CGRConfig{}
+	cfg.setDefaults()
+	return cfg, nil
+}
 
 // Instantiate a new CGRConfig setting defaults or reading from file
 func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
@@ -195,23 +204,23 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "datadb_passwd"); hasOpt {
 		cfg.DataDBPass, _ = c.GetString("global", "datadb_passwd")
 	}
-	if hasOpt = c.HasOption("global", "logdb_type"); hasOpt {
-		cfg.LogDBType, _ = c.GetString("global", "logdb_type")
+	if hasOpt = c.HasOption("global", "stordb_type"); hasOpt {
+		cfg.StorDBType, _ = c.GetString("global", "stordb_type")
 	}
-	if hasOpt = c.HasOption("global", "logdb_host"); hasOpt {
-		cfg.LogDBHost, _ = c.GetString("global", "logdb_host")
+	if hasOpt = c.HasOption("global", "stordb_host"); hasOpt {
+		cfg.StorDBHost, _ = c.GetString("global", "stordb_host")
 	}
-	if hasOpt = c.HasOption("global", "logdb_port"); hasOpt {
-		cfg.LogDBPort, _ = c.GetString("global", "logdb_port")
+	if hasOpt = c.HasOption("global", "stordb_port"); hasOpt {
+		cfg.StorDBPort, _ = c.GetString("global", "stordb_port")
 	}
-	if hasOpt = c.HasOption("global", "logdb_name"); hasOpt {
-		cfg.LogDBName, _ = c.GetString("global", "logdb_name")
+	if hasOpt = c.HasOption("global", "stordb_name"); hasOpt {
+		cfg.StorDBName, _ = c.GetString("global", "stordb_name")
 	}
-	if hasOpt = c.HasOption("global", "logdb_user"); hasOpt {
-		cfg.LogDBUser, _ = c.GetString("global", "logdb_user")
+	if hasOpt = c.HasOption("global", "stordb_user"); hasOpt {
+		cfg.StorDBUser, _ = c.GetString("global", "stordb_user")
 	}
-	if hasOpt = c.HasOption("global", "logdb_passwd"); hasOpt {
-		cfg.LogDBPass, _ = c.GetString("global", "logdb_passwd")
+	if hasOpt = c.HasOption("global", "stordb_passwd"); hasOpt {
+		cfg.StorDBPass, _ = c.GetString("global", "stordb_passwd")
 	}
 	if hasOpt = c.HasOption("global", "rpc_encoding"); hasOpt {
 		cfg.RPCEncoding, _ = c.GetString("global", "rpc_encoding")
@@ -236,6 +245,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("rater", "listen"); hasOpt {
 		cfg.RaterListen, _ = c.GetString("rater", "listen")
+	}
+	if hasOpt = c.HasOption("rater", "rounding_method"); hasOpt {
+		cfg.RaterRoundingMethod, _ = c.GetString("rater", "rounding_method")
+	}
+	if hasOpt = c.HasOption("rater", "rounding_decimals"); hasOpt {
+		cfg.RaterRoundingDecimals, _ = c.GetInt("rater", "rounding_decimals")
 	}
 	if hasOpt = c.HasOption("balancer", "enabled"); hasOpt {
 		cfg.BalancerEnabled, _ = c.GetBool("balancer", "enabled")

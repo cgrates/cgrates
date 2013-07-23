@@ -3,19 +3,19 @@
 
 [global]
 datadb_type = test 				# The main database: <redis>.
-datadb_host = test 			# Database host address.
+datadb_host = test 				# Database host address.
 datadb_port = test 				# Port to reach the database.
 datadb_name = test 				# The name of the database to connect to.
 datadb_user = test				# Username to use when connecting to database.
 datadb_passwd = test				# Password to use when connecting to database.
-logdb_type = test				# Log/stored database type to use: <same|postgres|mongo|redis>
-logdb_host = test 			# The host to connect to. Values that start with / are for UNIX domain sockets.
-logdb_port = test				# The port to reach the logdb.
-logdb_name = test 				# The name of the log database to connect to.
-logdb_user = test  	 			# Username to use when connecting to logdb.
-logdb_passwd = test 	 			# Password to use when connecting to logdb.
+stordb_type = test				# Log/stored database type to use: <same|postgres|mongo|redis>
+stordb_host = test 				# The host to connect to. Values that start with / are for UNIX domain sockets.
+stordb_port = test				# The port to reach the logdb.
+stordb_name = test 				# The name of the log database to connect to.
+stordb_user = test  	 			# Username to use when connecting to logdb.
+stordb_passwd = test 	 			# Password to use when connecting to logdb.
 rpc_encoding = test 				# RPC encoding used on APIs: <gob|json>.
-default_reqtype = test			# Default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>.
+default_reqtype = test				# Default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>.
 default_tor = test				# Default Type of Record to consider when missing from requests.
 default_tenant = test				# Default Tenant to consider when missing from requests.
 default_subject = test				# Default rating Subject to consider when missing from requests.
@@ -29,6 +29,8 @@ listen = test 			# Balancer listen interface: <disabled|x.y.z.y:1234>.
 enabled = true				# Enable Rater service: <true|false>.
 balancer = test 				# Register to Balancer as worker: <enabled|disabled>.
 listen = test 			# Rater's listening interface: <internal|x.y.z.y:1234>.
+rounding_method = test			# Rounding method for the end price: <up|middle|down>
+rounding_decimals = 99			# Number of decimals to round prices at
 
 [scheduler]
  enabled = true				# Starts Scheduler service: <true|false>.

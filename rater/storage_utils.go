@@ -21,13 +21,14 @@ package rater
 import (
 	"strconv"
 	"errors"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Various helpers to deal with database
 
 func ConfigureDatabase(db_type, host, port, name, user, pass string) (db DataStorage, err error) {
 	switch db_type {
-	case REDIS:
+	case utils.REDIS:
 		var db_nb int
 		db_nb, err = strconv.Atoi(name)
 		if err != nil {
@@ -38,11 +39,11 @@ func ConfigureDatabase(db_type, host, port, name, user, pass string) (db DataSto
 			host += ":" + port
 		}
 		db, err = NewRedisStorage(host, db_nb, pass)
-	case MONGO:
+	case utils.MONGO:
 		db, err = NewMongoStorage(host, port, name, user, pass)
-	case POSTGRES:
+	case utils.POSTGRES:
 		db, err = NewPostgresStorage(host, port, name, user, pass)
-	case MYSQL:
+	case utils.MYSQL:
 		db, err = NewMySQLStorage(host, port, name, user, pass)
 	default:
 		err = errors.New("unknown db")

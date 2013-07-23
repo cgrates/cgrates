@@ -22,43 +22,36 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/config"
 	"log"
 	"path"
 	"regexp"
-	"strconv"
-)
-
-const (
-	POSTGRES = "postgres"
-	MYSQL    = "mysql"
-	MONGO    = "mongo"
-	REDIS    = "redis"
 )
 
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
-	db_type = flag.String("dbtype", REDIS, "The type of the database (redis|mongo|postgres)")
-	db_host = flag.String("dbhost", "localhost", "The database host to connect to.")
-	db_port = flag.String("dbport", "6379", "The database port to bind to.")
-	db_name = flag.String("dbname", "10", "he name/number of the database to connect to.")
-	db_user = flag.String("dbuser", "", "The database user to sign in as.")
-	db_pass = flag.String("dbpass", "", "The database user's password.")
+	cgrConfig,_ = config.NewDefaultCGRConfig()
+	data_db_type = flag.String("datadb_type", cgrConfig.DataDBType, "The type of the dataDb database (redis|mongo|postgres|mysql)")
+	data_db_host = flag.String("datadb_host", cgrConfig.DataDBHost, "The dataDb host to connect to.")
+	data_db_port = flag.String("datadb_port", cgrConfig.DataDBPort, "The dataDb port to bind to.")
+	data_db_name = flag.String("datadb_name", cgrConfig.DataDBName, "The name/number of the dataDb to connect to.")
+	data_db_user = flag.String("datadb_user", cgrConfig.DataDBUser, "The dataDb user to sign in as.")
+	data_db_pass = flag.String("datadb_passwd", cgrConfig.DataDBPass,  "The dataDb user's password.")
+
+	stor_db_type = flag.String("logdb_type", cgrConfig.StorDBType, "The type of the storDb database (redis|mongo|postgres|mysql)")
+	stor_db_host = flag.String("logdb_host", cgrConfig.StorDBHost, "The storDb host to connect to.")
+	stor_db_port = flag.String("logdb_port", cgrConfig.StorDBPort, "The storDb port to bind to.")
+	stor_db_name = flag.String("logdb_name", cgrConfig.StorDBName, "The name/number of the storDb to connect to.")
+	stor_db_user = flag.String("logdb_user", cgrConfig.StorDBUser, "The storDb user to sign in as.")
+	stor_db_pass = flag.String("logdb_passwd", cgrConfig.StorDBPass, "The storDb user's password.")
 
 	flush    = flag.Bool("flush", false, "Flush the database before importing")
-	dataDbId = flag.String("tpid", "", "The tariff plan id from the database")
+	tpid = flag.String("tpid", "", "The tariff plan id from the database")
 	dataPath = flag.String("path", ".", "The path containing the data files")
 	version  = flag.Bool("version", false, "Prints the application version.")
+	importer = flag.Bool("import", false, "Import to storDb instead of directly loading to dataDb")
 
-	destinationsFn           = "Destinations.csv"
-	ratesFn                  = "Rates.csv"
-	destinationratesFn       = "DestinationRates.csv"
-	timingsFn                = "Timings.csv"
-	destinationratetimingsFn = "DestinationRateTimings.csv"
-	ratingprofilesFn         = "RatingProfiles.csv"
-	actionsFn                = "Actions.csv"
-	actiontimingsFn          = "ActionTimings.csv"
-	actiontriggersFn         = "ActionTriggers.csv"
-	accountactionsFn         = "AccountActions.csv"
 	sep                      rune
 )
 
@@ -71,69 +64,55 @@ type validator struct {
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Println("CGRateS " + rater.VERSION)
+		fmt.Println("CGRateS " + utils.VERSION)
 		return
 	}
 	var err error
-	var getter rater.DataStorage
-	switch *db_type {
-	case REDIS:
-		db_nb, err := strconv.Atoi(*db_name)
-		if err != nil {
-			log.Fatal("Redis db name must be an integer!")
-		}
-		if *db_port != "" {
-			*db_host += ":" + *db_port
-		}
-		getter, err = rater.NewRedisStorage(*db_host, db_nb, *db_pass)
-	case MONGO:
-		getter, err = rater.NewMongoStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
-	case MYSQL:
-		getter, err = rater.NewMySQLStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
-	case POSTGRES:
-		getter, err = rater.NewPostgresStorage(*db_host, *db_port, *db_name, *db_user, *db_pass)
-	default:
-		log.Fatal("Unknown data db type, exiting!")
+	var db rater.DataStorage
+	if *importer { // Loader has importer function, we need connection to storDb
+		db, err = rater.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
+	} else { // Loader function, need connection directly to dataDb
+		db, err = rater.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
 	}
-	defer getter.Close()
+	defer db.Close()
 	if err != nil {
 		log.Fatalf("Could not open database connection: %v", err)
 	}
 
-	if *dataDbId != "" && *dataPath != "" {
+	if *tpid != "" && *dataPath != "" {
 		log.Fatal("You can read either from db or from files, not both.")
 	}
 	var loader rater.TPLoader
 	if *dataPath != "" {
 		dataFilesValidators := []*validator{
-			&validator{destinationsFn,
+			&validator{utils.DESTINATIONS_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
 				"Tag[0-9A-Za-z_],Prefix[0-9]"},
-			&validator{timingsFn,
+			&validator{utils.TIMINGS_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*all\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
 				"Tag[0-9A-Za-z_],Years[0-9;]|*all|<empty>,Months[0-9;]|*all|<empty>,MonthDays[0-9;]|*all|<empty>,WeekDays[0-9;]|*all|<empty>,Time[0-9:]|*asap(00:00:00)"},
-			&validator{ratesFn,
+			&validator{utils.RATES_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
 				"Tag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
-			&validator{destinationratesFn,
+			&validator{utils.DESTINATION_RATES_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
 				"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],RateTag[0-9A-Za-z_]"},
-			&validator{destinationratetimingsFn,
+			&validator{utils.DESTRATE_TIMINGS_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
 				"Tag[0-9A-Za-z_],DestinationRatesTag[0-9A-Za-z_],TimingProfile[0-9A-Za-z_],Weight[0-9.]"},
-			&validator{ratingprofilesFn,
+			&validator{utils.RATE_PROFILES_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\*all\s*,\s*|[\w:\.]+\s*,\s*){1}(?:\w*\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}$`),
 				"Tenant[0-9A-Za-z_],TOR[0-9],Direction OUT|IN,Subject[0-9A-Za-z_:.]|*all,RatesFallbackSubject[0-9A-Za-z_]|<empty>,RatesTimingTag[0-9A-Za-z_],ActivationTime[[0-9T:X]] (2012-01-01T00:00:00Z)"},
-			&validator{actionsFn,
+			&validator{utils.ACTIONS_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:ABSOLUTE\s*,\s*|PERCENT\s*,\s*|\s*,\s*){1}(?:\d*\.?\d*\s*,?\s*){3}$`),
 				"Tag[0-9A-Za-z_],Action[0-9A-Za-z_],BalanceTag[0-9A-Za-z_],Direction OUT|IN,Units[0-9],DestinationTag[0-9A-Za-z_]|*all,PriceType ABSOLUT|PERCENT,PriceValue[0-9.],MinutesWeight[0-9.],Weight[0-9.]"},
-			&validator{actiontimingsFn,
+			&validator{utils.ACTION_TIMINGS_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
 				"Tag[0-9A-Za-z_],ActionsTag[0-9A-Za-z_],TimingTag[0-9A-Za-z_],Weight[0-9.]"},
-			&validator{actiontriggersFn,
+			&validator{utils.ACTION_TRIGGERS_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:MONETARY\s*,\s*|SMS\s*,\s*|MINUTES\s*,\s*|INTERNET\s*,\s*|INTERNET_TIME\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\.?\d*\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d+\.?\d*){1}$`),
 				"Tag[0-9A-Za-z_],BalanceTag MONETARY|SMS|MINUTES|INTERNET|INTERNET_TIME,Direction OUT|IN,ThresholdValue[0-9.],DestinationTag[0-9A-Za-z_]|*all,ActionsTag[0-9A-Za-z_],Weight[0-9.]"},
-			&validator{accountactionsFn,
+			&validator{utils.ACCOUNT_ACTIONS_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:[\w:.]+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\w+\s*,?\s*){2}$`),
 				"Tenant[0-9A-Za-z_],Account[0-9A-Za-z_:.],Direction OUT|IN,ActionTimingsTag[0-9A-Za-z_],ActionTriggersTag[0-9A-Za-z_]"},
 		}
@@ -144,11 +123,11 @@ func main() {
 			}
 		}
 		//sep = []rune(*separator)[0]
-		loader = rater.NewFileCSVReader(getter, ',', destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+		loader = rater.NewFileCSVReader(db, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.DESTRATE_TIMINGS_CSV, utils.RATE_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
 	}
 
-	if *dataDbId != "" {
-		loader = rater.NewDbReader(getter, getter, *dataDbId)
+	if *tpid != "" {
+		loader = rater.NewDbReader(db, db, *tpid)
 	}
 
 	err = loader.LoadDestinations()
