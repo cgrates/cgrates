@@ -757,7 +757,7 @@ func TestActionTimingLogging(t *testing.T) {
 		EndTime:        "00:00:00",
 		Weight:         10.0,
 		ConnectFee:     0.0,
-		Price:          1.0,
+		Prices:         PriceGroups{&Price{0, 1.0}},
 		PricedUnits:    60,
 		RateIncrements: 1,
 	}

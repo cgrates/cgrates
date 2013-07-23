@@ -64,7 +64,7 @@ func (ts *TimeSpan) getCost(cd *CallDescriptor) (cost float64) {
 	if i.RateIncrements == 0 {
 		i.RateIncrements = 1
 	}
-	cost = i.GetCost(duration)
+	cost = i.GetCost(duration, ts.GetGroupStart())
 	// if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 	// 	userBalance.mux.RLock()
 	// 	if percentageDiscount, err := userBalance.getVolumeDiscount(cd.Destination, INBOUND); err == nil && percentageDiscount > 0 {
@@ -91,7 +91,7 @@ func (ts *TimeSpan) SetInterval(i *Interval) {
 	if ts.Interval == nil || ts.Interval.Weight < i.Weight {
 		ts.Interval = i
 	}
-	if ts.Interval.Weight == i.Weight && i.Price < ts.Interval.Price {
+	if ts.Interval.Weight == i.Weight && i.GetPrice(ts.GetGroupStart()) < ts.Interval.GetPrice(ts.GetGroupStart()) {
 		ts.Interval = i
 	}
 }
@@ -103,12 +103,25 @@ a new timespan starting from the end of the received one.
 The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
+
 	//Logger.Debug("here: ", ts, " +++ ", i)
 	// if the span is not in interval return nil
 	if !(i.Contains(ts.TimeStart) || i.Contains(ts.TimeEnd)) {
 		//Logger.Debug("Not in interval")
 		return
 	}
+	// split by GroupStart
+	i.Prices.Sort()
+	for _, price := range i.Prices {
+		if ts.GetGroupStart() < price.StartSecond && ts.GetGroupEnd() >= price.StartSecond {
+			ts.SetInterval(i)
+			splitTime := ts.TimeStart.Add(time.Duration(price.StartSecond-ts.GetGroupStart()) * time.Second)
+			ts.TimeEnd = splitTime
+			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
+			return
+		}
+	}
+
 	// if the span is enclosed in the interval try to set as new interval and return nil
 	if i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd) {
 		//Logger.Debug("All in interval")
@@ -190,6 +203,9 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 }
 
 func (ts *TimeSpan) GetGroupStart() float64 {
+	if ts.CallDuration == 0 {
+		return 0
+	}
 	return ts.CallDuration - ts.GetDuration().Seconds()
 }
 

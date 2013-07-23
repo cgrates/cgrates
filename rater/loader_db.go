@@ -172,7 +172,7 @@ func (dbr *DbReader) LoadDestinationRateTimings() error {
 			if !exists {
 				dbr.activationPeriods[rt.Tag] = &ActivationPeriod{}
 			}
-			dbr.activationPeriods[rt.Tag].AddIntervalIfNotPresent(rt.GetInterval(dr))
+			dbr.activationPeriods[rt.Tag].AddInterval(rt.GetInterval(dr))
 		}
 	}
 	return nil
@@ -243,7 +243,7 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
 					activationPeriods[destrateTiming.Tag] = &ActivationPeriod{}
 				}
-				activationPeriods[destrateTiming.Tag].AddIntervalIfNotPresent(destrateTiming.GetInterval(drate))
+				activationPeriods[destrateTiming.Tag].AddInterval(destrateTiming.GetInterval(drate))
 				dm, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 				if err != nil {
 					return err

@@ -456,6 +456,38 @@ func (d *Destination) Restore(input string) error {
 	return nil
 }
 
+func (pg PriceGroups) Store() (result string, err error) {
+	for _, p := range pg {
+		result += strconv.FormatFloat(p.StartSecond, 'f', -1, 64) + ":" + strconv.FormatFloat(p.Value, 'f', -1, 64) + ","
+	}
+	result = strings.TrimRight(result, ",")
+	return
+}
+
+func (pg *PriceGroups) Restore(input string) error {
+	elements := strings.Split(input, ",")
+	for _, element := range elements {
+		priceElements := strings.Split(element, ":")
+		if len(priceElements) != 2 {
+			continue
+		}
+		ss, err := strconv.ParseFloat(priceElements[0], 64)
+		if err != nil {
+			return err
+		}
+		v, err := strconv.ParseFloat(priceElements[1], 64)
+		if err != nil {
+			return err
+		}
+		price := &Price{
+			StartSecond: ss,
+			Value:       v,
+		}
+		*pg = append(*pg, price)
+	}
+	return nil
+}
+
 func (i *Interval) Store() (result string, err error) {
 	str, err := i.Years.Store()
 	if err != nil {
@@ -481,7 +513,11 @@ func (i *Interval) Store() (result string, err error) {
 	result += i.EndTime + ";"
 	result += strconv.FormatFloat(i.Weight, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(i.ConnectFee, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(i.Price, 'f', -1, 64) + ";"
+	ps, err := i.Prices.Store()
+	if err != nil {
+		return "", err
+	}
+	result += ps + ";"
 	result += strconv.FormatFloat(i.PricedUnits, 'f', -1, 64) + ";"
 	result += strconv.FormatFloat(i.RateIncrements, 'f', -1, 64) + ";"
 	result += i.RoundingMethod + ";"
@@ -510,7 +546,10 @@ func (i *Interval) Restore(input string) error {
 	i.EndTime = is[5]
 	i.Weight, _ = strconv.ParseFloat(is[6], 64)
 	i.ConnectFee, _ = strconv.ParseFloat(is[7], 64)
-	i.Price, _ = strconv.ParseFloat(is[8], 64)
+	err := (&i.Prices).Restore(is[8])
+	if err != nil {
+		return err
+	}
 	i.PricedUnits, _ = strconv.ParseFloat(is[9], 64)
 	i.RateIncrements, _ = strconv.ParseFloat(is[10], 64)
 	i.RoundingMethod = is[11]

@@ -38,20 +38,14 @@ type xCachedActivationPeriods struct {
 }
 
 /*
-Adds one ore more intervals to the internal interval list.
-*/
-func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
-	ap.Intervals = append(ap.Intervals, is...)
-}
-
-/*
 Adds one ore more intervals to the internal interval list only if it is not allready in the list.
 */
-func (ap *ActivationPeriod) AddIntervalIfNotPresent(is ...*Interval) {
+func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 	for _, i := range is {
 		found := false
 		for _, ei := range ap.Intervals {
 			if i.Equal(ei) {
+				(&ei.Prices).AddPrice(i.Prices...)
 				found = true
 				break
 			}
@@ -64,8 +58,4 @@ func (ap *ActivationPeriod) AddIntervalIfNotPresent(is ...*Interval) {
 
 func (ap *ActivationPeriod) Equal(o *ActivationPeriod) bool {
 	return ap.ActivationTime == o.ActivationTime
-}
-
-func (ap *ActivationPeriod) GetGroupTimeLimits() []float64 {
-	return nil
 }

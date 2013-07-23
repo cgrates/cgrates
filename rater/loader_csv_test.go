@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
+	//"log"
 	"testing"
 )
 
@@ -44,11 +45,11 @@ WEEKENDS,*any,*any,*any,6;7,00:00:00
 ONE_TIME_RUN,2012,,,,*asap
 `
 	rates = `
-R1,0,0.2,60,1,*middle,2,10
-R2,0,0.1,60,1,*middle,2,10
-R3,0,0.05,60,1,*middle,2,10
-R4,1,1,1,1,*up,2,10
-R5,0,0.5,1,1,*down,2,10
+R1,0,0.2,60,1,0,*middle,2,10
+R2,0,0.1,60,1,0,*middle,2,10
+R3,0,0.05,60,1,0,*middle,2,10
+R4,1,1,1,1,0,*up,2,10
+R5,0,0.5,1,1,0,*down,2,10
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1
@@ -143,6 +144,9 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 	if len(csvr.activationPeriods) != 4 {
 		t.Error("Failed to load rate timings: ", csvr.activationPeriods)
 	}
+	//for _, ap := range csvr.activationPeriods {
+	//log.Print(ap.Intervals[0].Prices[1])
+	//}
 }
 
 func TestLoadRatingProfiles(t *testing.T) {

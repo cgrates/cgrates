@@ -27,22 +27,75 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	// "log"
 )
 
 /*
 Defines a time interval for which a certain set of prices will apply
 */
 type Interval struct {
-	Years                                                  Years
-	Months                                                 Months
-	MonthDays                                              MonthDays
-	WeekDays                                               WeekDays
-	StartTime, EndTime                                     string // ##:##:## format
-	Weight, ConnectFee, Price, PricedUnits, RateIncrements float64
-	GroupInterval                                          float64
-	RoundingMethod                                         string
-	RoundingDecimals                                       int
+	Years                                           Years
+	Months                                          Months
+	MonthDays                                       MonthDays
+	WeekDays                                        WeekDays
+	StartTime, EndTime                              string // ##:##:## format
+	Weight, ConnectFee, PricedUnits, RateIncrements float64
+	Prices                                          PriceGroups // GroupInterval (start time): Price
+	RoundingMethod                                  string
+	RoundingDecimals                                int
+}
+
+type Price struct {
+	StartSecond float64
+	Value       float64
+}
+
+func (p *Price) Equal(o *Price) bool {
+	return p.StartSecond == o.StartSecond && p.Value == o.Value
+}
+
+type PriceGroups []*Price
+
+func (pg PriceGroups) Len() int {
+	return len(pg)
+}
+
+func (pg PriceGroups) Swap(i, j int) {
+	pg[i], pg[j] = pg[j], pg[i]
+}
+
+func (pg PriceGroups) Less(i, j int) bool {
+	return pg[i].StartSecond < pg[j].StartSecond
+}
+
+func (pg PriceGroups) Sort() {
+	sort.Sort(pg)
+}
+
+func (pg PriceGroups) Equal(og PriceGroups) bool {
+	if len(pg) != len(og) {
+		return false
+	}
+	for i := 0; i < len(pg); i++ {
+		if !pg[i].Equal(og[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func (pg *PriceGroups) AddPrice(ps ...*Price) {
+	for _, p := range ps {
+		found := false
+		for _, op := range *pg {
+			if op.Equal(p) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			*pg = append(*pg, p)
+		}
+	}
 }
 
 /*
@@ -139,17 +192,28 @@ func (i *Interval) Equal(o *Interval) bool {
 		i.EndTime == o.EndTime
 }
 
-func (i *Interval) GetCost(duration float64) (cost float64) {
-
+func (i *Interval) GetCost(duration, startSecond float64) (cost float64) {
 	if i.PricedUnits != 0 {
-		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * (i.Price / i.PricedUnits)
+		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * (i.GetPrice(startSecond) / i.PricedUnits)
 	} else {
-		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * i.Price
+		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * i.GetPrice(startSecond)
 	}
 	return utils.Round(cost, i.RoundingDecimals, i.RoundingMethod)
 }
 
-// Structure to store actions according to weight
+// gets the price for a the provided start second
+func (i *Interval) GetPrice(startSecond float64) float64 {
+	i.Prices.Sort()
+	for index, price := range i.Prices {
+		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||
+			i.Prices[index+1].StartSecond > startSecond) {
+			return price.Value
+		}
+	}
+	return -1
+}
+
+// Structure to store intervals according to weight
 type IntervalList []*Interval
 
 func (il IntervalList) Len() int {

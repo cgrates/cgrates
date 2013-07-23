@@ -744,7 +744,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*AccountA
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
-	return nil 
+	return nil
 }
 
 func (self *SQLStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
@@ -932,9 +932,9 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var tag, roundingMethod string
-		var connect_fee, rate, priced_units, rate_increments, weight float64
+		var connect_fee, rate, priced_units, rate_increments, group_interval, weight float64
 		var roundingDecimals int
-		if err := rows.Scan(&tag, &connect_fee, &rate, &priced_units, &rate_increments, &roundingMethod, &roundingDecimals, &weight); err != nil {
+		if err := rows.Scan(&tag, &connect_fee, &rate, &priced_units, &rate_increments, &group_interval, &roundingMethod, &roundingDecimals, &weight); err != nil {
 			return nil, err
 		}
 		r := &Rate{
@@ -943,6 +943,7 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 			Price:            rate,
 			PricedUnits:      priced_units,
 			RateIncrements:   rate_increments,
+			GroupInterval:    group_interval,
 			RoundingMethod:   roundingMethod,
 			RoundingDecimals: roundingDecimals,
 			Weight:           weight,

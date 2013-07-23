@@ -43,14 +43,14 @@ type TPLoader interface {
 }
 
 type Rate struct {
-	Tag                                            string
-	ConnectFee, Price, PricedUnits, RateIncrements float64
-	RoundingMethod                                 string
-	RoundingDecimals                               int
-	Weight                                         float64
+	Tag                                                           string
+	ConnectFee, Price, PricedUnits, RateIncrements, GroupInterval float64
+	RoundingMethod                                                string
+	RoundingDecimals                                              int
+	Weight                                                        float64
 }
 
-func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, roundingMethod, roundingDecimals, weight string) (r *Rate, err error) {
+func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *Rate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -59,6 +59,11 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, roundingMethod
 	p, err := strconv.ParseFloat(price, 64)
 	if err != nil {
 		log.Printf("Error parsing price from: %v", price)
+		return
+	}
+	gi, err := strconv.ParseFloat(groupInterval, 64)
+	if err != nil {
+		log.Printf("Error parsing group interval from: %v", price)
 		return
 	}
 	pu, err := strconv.ParseFloat(pricedUnits, 64)
@@ -86,6 +91,7 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, roundingMethod
 		Tag:              tag,
 		ConnectFee:       cf,
 		Price:            p,
+		GroupInterval:    gi,
 		PricedUnits:      pu,
 		RateIncrements:   ri,
 		Weight:           wght,
@@ -153,7 +159,7 @@ func (rt *DestinationRateTiming) GetInterval(dr *DestinationRate) (i *Interval) 
 		StartTime:      rt.timing.StartTime,
 		Weight:         rt.Weight,
 		ConnectFee:     dr.Rate.ConnectFee,
-		Price:          dr.Rate.Price,
+		Prices:         PriceGroups{&Price{dr.Rate.GroupInterval, dr.Rate.Price}},
 		PricedUnits:    dr.Rate.PricedUnits,
 		RateIncrements: dr.Rate.RateIncrements,
 	}
