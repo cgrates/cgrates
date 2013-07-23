@@ -116,8 +116,11 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 		if ts.GetGroupStart() < price.StartSecond && ts.GetGroupEnd() >= price.StartSecond {
 			ts.SetInterval(i)
 			splitTime := ts.TimeStart.Add(time.Duration(price.StartSecond-ts.GetGroupStart()) * time.Second)
-			ts.TimeEnd = splitTime
 			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
+			nts.SetInterval(i)
+			nts.CallDuration = ts.CallDuration
+			ts.CallDuration = ts.CallDuration - nts.GetDuration().Seconds()
+			ts.TimeEnd = splitTime
 			return
 		}
 	}
