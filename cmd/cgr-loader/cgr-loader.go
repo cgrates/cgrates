@@ -39,12 +39,12 @@ var (
 	data_db_user = flag.String("datadb_user", cgrConfig.DataDBUser, "The dataDb user to sign in as.")
 	data_db_pass = flag.String("datadb_passwd", cgrConfig.DataDBPass,  "The dataDb user's password.")
 
-	stor_db_type = flag.String("logdb_type", cgrConfig.StorDBType, "The type of the storDb database (redis|mongo|postgres|mysql)")
-	stor_db_host = flag.String("logdb_host", cgrConfig.StorDBHost, "The storDb host to connect to.")
-	stor_db_port = flag.String("logdb_port", cgrConfig.StorDBPort, "The storDb port to bind to.")
-	stor_db_name = flag.String("logdb_name", cgrConfig.StorDBName, "The name/number of the storDb to connect to.")
-	stor_db_user = flag.String("logdb_user", cgrConfig.StorDBUser, "The storDb user to sign in as.")
-	stor_db_pass = flag.String("logdb_passwd", cgrConfig.StorDBPass, "The storDb user's password.")
+	stor_db_type = flag.String("stordb_type", cgrConfig.StorDBType, "The type of the storDb database (redis|mongo|postgres|mysql)")
+	stor_db_host = flag.String("stordb_host", cgrConfig.StorDBHost, "The storDb host to connect to.")
+	stor_db_port = flag.String("stordb_port", cgrConfig.StorDBPort, "The storDb port to bind to.")
+	stor_db_name = flag.String("stordb_name", cgrConfig.StorDBName, "The name/number of the storDb to connect to.")
+	stor_db_user = flag.String("stordb_user", cgrConfig.StorDBUser, "The storDb user to sign in as.")
+	stor_db_pass = flag.String("stordb_passwd", cgrConfig.StorDBPass, "The storDb user's password.")
 
 	flush    = flag.Bool("flush", false, "Flush the database before importing")
 	tpid = flag.String("tpid", "", "The tariff plan id from the database")
