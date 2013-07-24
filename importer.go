@@ -20,6 +20,6 @@ package cgrates
 
 import (
 	_ "github.com/cgrates/cgrates/cmd/cgr-console"
+	_ "github.com/cgrates/cgrates/cmd/cgr-engine"
 	_ "github.com/cgrates/cgrates/cmd/cgr-loader"
-	_ "github.com/cgrates/cgrates/cmd/cgr-rater"
 )
