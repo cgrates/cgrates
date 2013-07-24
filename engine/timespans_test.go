@@ -473,3 +473,47 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 		t.Error("Wrong durations.for Intervals", nts.GetDuration().Seconds(), nnts.GetDuration().Seconds())
 	}
 }
+
+func TestTimespanSplitMultipleGroup(t *testing.T) {
+	i := &Interval{
+		EndTime: "17:05:00",
+		Prices:  PriceGroups{&Price{0, 2, 1}, &Price{60, 1, 1}, &Price{180, 1, 1}},
+	}
+	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240}
+	oldDuration := ts.GetDuration()
+	nts := ts.SplitByInterval(i)
+	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
+	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
+		t.Error("Incorrect first half", nts)
+	}
+	if nts.TimeStart != splitTime || nts.TimeEnd != t2 {
+		t.Error("Incorrect second half", nts)
+	}
+	if ts.Interval != i {
+		t.Error("Interval not attached correctly")
+	}
+
+	if ts.GetDuration().Seconds() != 60 || nts.GetDuration().Seconds() != 180 {
+		t.Error("Wrong durations.for Intervals", ts.GetDuration().Seconds(), nts.GetDuration().Seconds())
+	}
+	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
+		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
+	}
+	nnts := nts.SplitByInterval(i)
+	nsplitTime := time.Date(2012, time.February, 3, 17, 03, 00, 0, time.UTC)
+	if nts.TimeStart != splitTime || nts.TimeEnd != nsplitTime {
+		t.Error("Incorrect first half", nts)
+	}
+	if nnts.TimeStart != nsplitTime || nnts.TimeEnd != t2 {
+		t.Error("Incorrect second half", nnts)
+	}
+	if nts.Interval != i {
+		t.Error("Interval not attached correctly")
+	}
+
+	if nts.GetDuration().Seconds() != 120 || nnts.GetDuration().Seconds() != 60 {
+		t.Error("Wrong durations.for Intervals", nts.GetDuration().Seconds(), nnts.GetDuration().Seconds())
+	}
+}
