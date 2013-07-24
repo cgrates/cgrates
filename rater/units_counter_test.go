@@ -31,7 +31,7 @@ func TestUnitsCounterStoreRestore(t *testing.T) {
 		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
 	}
 	r, err := uc.Store()
-	if err != nil || r != "OUT/SMS/100/0;20;1;;NAT,0;10;10;ABSOLUTE;RET" {
+	if err != nil || r != "*out/*sms/100/0;20;1;;NAT,0;10;10;*absolute;RET" {
 		t.Errorf("Error serializing units counter: %v", string(r))
 	}
 	o := &UnitsCounter{}

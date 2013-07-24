@@ -39,17 +39,17 @@ type Action struct {
 }
 
 const (
-	LOG            = "LOG"
-	RESET_TRIGGERS = "RESET_TRIGGERS"
-	SET_POSTPAID   = "SET_POSTPAID"
-	RESET_POSTPAID = "RESET_POSTPAID"
-	SET_PREPAID    = "SET_PREPAID"
-	RESET_PREPAID  = "RESET_PREPAID"
-	TOPUP_RESET    = "TOPUP_RESET"
-	TOPUP          = "TOPUP"
-	DEBIT          = "DEBIT"
-	RESET_COUNTER  = "RESET_COUNTER"
-	RESET_COUNTERS = "RESET_COUNTERS"
+	LOG            = "*log"
+	RESET_TRIGGERS = "*reset_triggers"
+	SET_POSTPAID   = "*set_postpaid"
+	RESET_POSTPAID = "*reset_postpaid"
+	SET_PREPAID    = "*set_prepaid"
+	RESET_PREPAID  = "*reset_prepaid"
+	TOPUP_RESET    = "*topup_reset"
+	TOPUP          = "*topup"
+	DEBIT          = "*debit"
+	RESET_COUNTER  = "*reset_counter"
+	RESET_COUNTERS = "*reset_counters"
 )
 
 type actionTypeFunc func(*UserBalance, *Action) error

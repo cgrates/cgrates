@@ -35,8 +35,8 @@ type MinuteBucket struct {
 }
 
 const (
-	PERCENT  = "PERCENT"
-	ABSOLUTE = "ABSOLUTE"
+	PERCENT  = "*percent"
+	ABSOLUTE = "*absolute"
 )
 
 // Returns the available number of seconds for a specified credit

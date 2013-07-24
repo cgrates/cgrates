@@ -192,7 +192,7 @@ func TestTimespanGetCost(t *testing.T) {
 	if ts1.getCost(cd) != 0 {
 		t.Error("No interval and still kicking")
 	}
-	ts1.Interval = &Interval{Price: 1}
+	ts1.Interval = &Interval{Prices: PriceGroups{&Price{0, 1.0}}}
 	if ts1.getCost(cd) != 600 {
 		t.Error("Expected 10 got ", ts1.getCost(cd))
 	}
@@ -204,9 +204,9 @@ func TestTimespanGetCost(t *testing.T) {
 }
 
 func TestSetInterval(t *testing.T) {
-	i1 := &Interval{Price: 1}
+	i1 := &Interval{Prices: PriceGroups{&Price{0, 1.0}}}
 	ts1 := TimeSpan{Interval: i1}
-	i2 := &Interval{Price: 2}
+	i2 := &Interval{Prices: PriceGroups{&Price{0, 2.0}}}
 	ts1.SetInterval(i2)
 	if ts1.Interval != i1 {
 		t.Error("Smaller price interval should win")
@@ -327,5 +327,39 @@ func TestTimespanSplitByMinuteBucketScarceExpiringDifferentScarceFirst(t *testin
 	}
 	if newTs == nil || newTs.MinuteInfo != nil {
 		t.Error("Missing extra timespan on minute bucket split")
+	}
+}
+
+func TestTimespanSplitGroupedRates(t *testing.T) {
+	i := &Interval{
+		EndTime:        "17:59:00",
+		Prices:         PriceGroups{&Price{0, 1}, &Price{900, 2}},
+		RateIncrements: 1,
+	}
+	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 1800}
+	oldDuration := ts.GetDuration()
+	nts := ts.SplitByInterval(i)
+	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 17, 45, 00, 0, time.UTC) {
+		t.Error("Incorrect first half", ts)
+	}
+	if nts.TimeStart != time.Date(2012, time.February, 3, 17, 45, 00, 0, time.UTC) || nts.TimeEnd != t2 {
+		t.Error("Incorrect second half", nts)
+	}
+	if ts.Interval != i {
+		t.Error("Interval not attached correctly")
+	}
+	c1 := ts.Interval.GetCost(ts.GetDuration().Seconds(), ts.GetGroupStart())
+	c2 := nts.Interval.GetCost(nts.GetDuration().Seconds(), nts.GetGroupStart())
+	if c1 != 900 || c2 != 1800 {
+		t.Error("Wrong costs: ", c1, c2)
+	}
+
+	if ts.GetDuration().Seconds() != 15*60 || nts.GetDuration().Seconds() != 15*60 {
+		t.Error("Wrong durations.for Intervals", ts.GetDuration().Seconds(), nts.GetDuration().Seconds())
+	}
+	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
+		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
 }

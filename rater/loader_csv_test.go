@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package rater
 
 import (
+	//"log"
 	"testing"
 )
 
@@ -38,17 +39,17 @@ RET,0723
 RET,0724
 `
 	timings = `
-WORKDAYS_00,*all,*all,*all,1;2;3;4;5,00:00:00
-WORKDAYS_18,*all,*all,*all,1;2;3;4;5,18:00:00
-WEEKENDS,*all,*all,*all,6;7,00:00:00
+WORKDAYS_00,*any,*any,*any,1;2;3;4;5,00:00:00
+WORKDAYS_18,*any,*any,*any,1;2;3;4;5,18:00:00
+WEEKENDS,*any,*any,*any,6;7,00:00:00
 ONE_TIME_RUN,2012,,,,*asap
 `
 	rates = `
-R1,0,0.2,60,1,*middle,2,10
-R2,0,0.1,60,1,*middle,2,10
-R3,0,0.05,60,1,*middle,2,10
-R4,1,1,1,1,*up,2,10
-R5,0,0.5,1,1,*down,2,10
+R1,0,0.2,60,1,0,*middle,2,10
+R2,0,0.1,60,1,0,*middle,2,10
+R3,0,0.05,60,1,0,*middle,2,10
+R4,1,1,1,1,0,*up,2,10
+R5,0,0.5,1,1,0,*down,2,10
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1
@@ -71,30 +72,30 @@ EVENING,P2,WORKDAYS_18,10
 EVENING,P2,WEEKENDS,10
 `
 	ratingProfiles = `
-CUSTOMER_1,0,OUT,rif:from:tm,danb,PREMIUM,2012-01-01T00:00:00Z
-CUSTOMER_1,0,OUT,rif:from:tm,danb,STANDARD,2012-02-28T00:00:00Z
-CUSTOMER_2,0,OUT,danb:87.139.12.167,danb,STANDARD,2012-01-01T00:00:00Z
-CUSTOMER_1,0,OUT,danb,,PREMIUM,2012-01-01T00:00:00Z
-vdf,0,OUT,rif,,EVENING,2012-01-01T00:00:00Z
-vdf,0,OUT,rif,,EVENING,2012-02-28T00:00:00Z
-vdf,0,OUT,minu,,EVENING,2012-01-01T00:00:00Z
-vdf,0,OUT,*all,,EVENING,2012-02-28T00:00:00Z
-vdf,0,OUT,one,,STANDARD,2012-02-28T00:00:00Z
-vdf,0,OUT,inf,inf,STANDARD,2012-02-28T00:00:00Z
-vdf,0,OUT,fall,one|rif,PREMIUM,2012-02-28T00:00:00Z
+CUSTOMER_1,0,*out,rif:from:tm,danb,PREMIUM,2012-01-01T00:00:00Z
+CUSTOMER_1,0,*out,rif:from:tm,danb,STANDARD,2012-02-28T00:00:00Z
+CUSTOMER_2,0,*out,danb:87.139.12.167,danb,STANDARD,2012-01-01T00:00:00Z
+CUSTOMER_1,0,*out,danb,,PREMIUM,2012-01-01T00:00:00Z
+vdf,0,*out,rif,,EVENING,2012-01-01T00:00:00Z
+vdf,0,*out,rif,,EVENING,2012-02-28T00:00:00Z
+vdf,0,*out,minu,,EVENING,2012-01-01T00:00:00Z
+vdf,0,*out,*any,,EVENING,2012-02-28T00:00:00Z
+vdf,0,*out,one,,STANDARD,2012-02-28T00:00:00Z
+vdf,0,*out,inf,inf,STANDARD,2012-02-28T00:00:00Z
+vdf,0,*out,fall,one|rif,PREMIUM,2012-02-28T00:00:00Z
 `
 	actions = `
-MINI,TOPUP,MINUTES,OUT,100,1374239002,NAT,ABSOLUTE,0,10,10
+MINI,TOPUP,MINUTES,*out,100,1374239002,NAT,*absolute,0,10,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 `
 	actionTriggers = `
-STANDARD_TRIGGER,MINUTES,OUT,COUNTER,10,GERMANY_O2,SOME_1,10
-STANDARD_TRIGGER,MINUTES,OUT,BALANCE,200,GERMANY,SOME_2,10
+STANDARD_TRIGGER,MINUTES,*out,COUNTER,10,GERMANY_O2,SOME_1,10
+STANDARD_TRIGGER,MINUTES,*out,BALANCE,200,GERMANY,SOME_2,10
 `
 	accountActions = `
-vdf,minitsboy,OUT,MORE_MINUTES,STANDARD_TRIGGER
+vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
 `
 )
 
@@ -143,6 +144,9 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 	if len(csvr.activationPeriods) != 4 {
 		t.Error("Failed to load rate timings: ", csvr.activationPeriods)
 	}
+	//for _, ap := range csvr.activationPeriods {
+	//log.Print(ap.Intervals[0].Prices[1])
+	//}
 }
 
 func TestLoadRatingProfiles(t *testing.T) {

@@ -28,7 +28,7 @@ The struture that is saved to storage.
 */
 type ActivationPeriod struct {
 	ActivationTime time.Time
-	Intervals      []*Interval
+	Intervals      IntervalList
 }
 
 type xCachedActivationPeriods struct {
@@ -38,20 +38,14 @@ type xCachedActivationPeriods struct {
 }
 
 /*
-Adds one ore more intervals to the internal interval list.
-*/
-func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
-	ap.Intervals = append(ap.Intervals, is...)
-}
-
-/*
 Adds one ore more intervals to the internal interval list only if it is not allready in the list.
 */
-func (ap *ActivationPeriod) AddIntervalIfNotPresent(is ...*Interval) {
+func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
 	for _, i := range is {
 		found := false
 		for _, ei := range ap.Intervals {
 			if i.Equal(ei) {
+				(&ei.Prices).AddPrice(i.Prices...)
 				found = true
 				break
 			}

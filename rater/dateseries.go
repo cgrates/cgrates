@@ -61,7 +61,7 @@ func (ys Years) Contains(year int) (result bool) {
 // Parse Years elements from string separated by sep.
 func (ys *Years) Parse(input, sep string) {
 	switch input {
-	case "*all", "":
+	case "*any", "":
 		*ys = []int{}
 	default:
 		elements := strings.Split(input, sep)
@@ -75,7 +75,7 @@ func (ys *Years) Parse(input, sep string) {
 
 func (ys Years) Serialize(sep string) string {
 	if len(ys) == 0 {
-		return "*all"
+		return "*any"
 	}
 	var yStr string
 	for idx, yr := range ys {
@@ -124,7 +124,7 @@ func (m Months) Contains(month time.Month) (result bool) {
 // Loades Month elemnents from a string separated by sep.
 func (m *Months) Parse(input, sep string) {
 	switch input {
-	case "*all":
+	case "*any":
 		*m = allMonths
 	case "*none": // Apier cannot receive empty string, hence using meta-tag
 		*m = []time.Month{}
@@ -146,7 +146,7 @@ func (m Months) Serialize(sep string) string {
 		return "*none"
 	}
 	if reflect.DeepEqual(m, Months(allMonths)) {
-		return "*all"
+		return "*any"
 	}
 	var mStr string
 	for idx, mt := range m {
@@ -195,7 +195,7 @@ func (md MonthDays) Contains(monthDay int) (result bool) {
 // Parse MonthDay elements from string separated by sep.
 func (md *MonthDays) Parse(input, sep string) {
 	switch input {
-	case "*all":
+	case "*any":
 		*md = allMonthDays
 	case "":
 		*md = []int{}
@@ -215,7 +215,7 @@ func (md MonthDays) Serialize(sep string) string {
 		return "*none"
 	}
 	if reflect.DeepEqual(md, MonthDays(allMonthDays)) {
-		return "*all"
+		return "*any"
 	}
 	var mdsStr string
 	for idx, mDay := range md {
@@ -263,7 +263,7 @@ func (wd WeekDays) Contains(weekDay time.Weekday) (result bool) {
 
 func (wd *WeekDays) Parse(input, sep string) {
 	switch input {
-	case "*all":
+	case "*any":
 		*wd = allWeekDays
 	case "":
 		*wd = []time.Weekday{}
@@ -283,7 +283,7 @@ func (wd WeekDays) Serialize(sep string) string {
 		return "*none"
 	}
 	if reflect.DeepEqual(wd, WeekDays(allWeekDays)) {
-		return "*all"
+		return "*any"
 	}
 	var wdStr string
 	for idx, d := range wd {

@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITH*out ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -20,7 +20,6 @@ package rater
 
 import (
 	"encoding/json"
-	//"log"
 	"reflect"
 	"testing"
 	"time"
@@ -28,7 +27,7 @@ import (
 
 func TestApRestoreFromStorage(t *testing.T) {
 	cd := &CallDescriptor{
-		Direction:   "OUT",
+		Direction:   OUTBOUND,
 		TOR:         "0",
 		Tenant:      "CUSTOMER_1",
 		Subject:     "rif:from:tm",
@@ -49,7 +48,7 @@ func TestApStoreRestoreJson(t *testing.T) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result, _ := json.Marshal(ap)
-	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Years\":null,\"Months\":[2],\"MonthDays\":[1],\"WeekDays\":[3,4],\"StartTime\":\"14:30:00\",\"EndTime\":\"15:00:00\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"PricedUnits\":0,\"RateIncrements\":0,\"RoundingMethod\":\"\",\"RoundingDecimals\":0}]}"
+	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Years\":null,\"Months\":[2],\"MonthDays\":[1],\"WeekDays\":[3,4],\"StartTime\":\"14:30:00\",\"EndTime\":\"15:00:00\",\"Weight\":0,\"ConnectFee\":0,\"PricedUnits\":0,\"RateIncrements\":0,\"Prices\":null,\"RoundingMethod\":\"\",\"RoundingDecimals\":0}]}"
 	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
@@ -66,7 +65,7 @@ func TestApStoreRestoreBlank(t *testing.T) {
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
 	result, _ := json.Marshal(ap)
-	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Years\":null,\"Months\":null,\"MonthDays\":null,\"WeekDays\":null,\"StartTime\":\"\",\"EndTime\":\"\",\"Weight\":0,\"ConnectFee\":0,\"Price\":0,\"PricedUnits\":0,\"RateIncrements\":0,\"RoundingMethod\":\"\",\"RoundingDecimals\":0}]}"
+	expected := "{\"ActivationTime\":\"2012-02-01T14:30:01Z\",\"Intervals\":[{\"Years\":null,\"Months\":null,\"MonthDays\":null,\"WeekDays\":null,\"StartTime\":\"\",\"EndTime\":\"\",\"Weight\":0,\"ConnectFee\":0,\"PricedUnits\":0,\"RateIncrements\":0,\"Prices\":null,\"RoundingMethod\":\"\",\"RoundingDecimals\":0}]}"
 	if string(result) != expected {
 		t.Errorf("Expected %q was %q", expected, result)
 	}
@@ -78,7 +77,7 @@ func TestApStoreRestoreBlank(t *testing.T) {
 }
 
 func TestFallbackDirect(t *testing.T) {
-	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "CUSTOMER_2", Subject: "danb:87.139.12.167", Destination: "41"}
+	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "CUSTOMER_2", Subject: "danb:87.139.12.167", Destination: "41"}
 	cd.LoadActivationPeriods()
 	if len(cd.ActivationPeriods) != 1 {
 		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
@@ -86,7 +85,7 @@ func TestFallbackDirect(t *testing.T) {
 }
 
 func TestFallbackMultiple(t *testing.T) {
-	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "vdf", Subject: "fall", Destination: "0723045"}
+	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "fall", Destination: "0723045"}
 	cd.LoadActivationPeriods()
 	if len(cd.ActivationPeriods) != 1 {
 		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
@@ -94,7 +93,7 @@ func TestFallbackMultiple(t *testing.T) {
 }
 
 func TestFallbackWithBackTrace(t *testing.T) {
-	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "CUSTOMER_2", Subject: "danb:87.139.12.167", Destination: "4123"}
+	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "CUSTOMER_2", Subject: "danb:87.139.12.167", Destination: "4123"}
 	cd.LoadActivationPeriods()
 	if len(cd.ActivationPeriods) != 1 {
 		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
@@ -102,7 +101,7 @@ func TestFallbackWithBackTrace(t *testing.T) {
 }
 
 func TestFallbackDefault(t *testing.T) {
-	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "vdf", Subject: "one", Destination: "0723"}
+	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "one", Destination: "0723"}
 	cd.LoadActivationPeriods()
 	if len(cd.ActivationPeriods) != 1 {
 		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
@@ -110,7 +109,7 @@ func TestFallbackDefault(t *testing.T) {
 }
 
 func TestFallbackNoInfiniteLoop(t *testing.T) {
-	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "vdf", Subject: "rif", Destination: "0721"}
+	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "rif", Destination: "0721"}
 	cd.LoadActivationPeriods()
 	if len(cd.ActivationPeriods) != 0 {
 		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
@@ -118,7 +117,7 @@ func TestFallbackNoInfiniteLoop(t *testing.T) {
 }
 
 func TestFallbackNoInfiniteLoopSelf(t *testing.T) {
-	cd := &CallDescriptor{TOR: "0", Direction: "OUT", Tenant: "vdf", Subject: "inf", Destination: "0721"}
+	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "inf", Destination: "0721"}
 	cd.LoadActivationPeriods()
 	if len(cd.ActivationPeriods) != 0 {
 		t.Error("Error restoring activation periods: ", len(cd.ActivationPeriods))
@@ -142,14 +141,36 @@ func TestApAddIntervalIfNotPresent(t *testing.T) {
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{}
-	ap.AddIntervalIfNotPresent(i1)
-	ap.AddIntervalIfNotPresent(i2)
+	ap.AddInterval(i1)
+	ap.AddInterval(i2)
 	if len(ap.Intervals) != 1 {
 		t.Error("Wronfully appended interval ;)")
 	}
-	ap.AddIntervalIfNotPresent(i3)
+	ap.AddInterval(i3)
 	if len(ap.Intervals) != 2 {
 		t.Error("Wronfully not appended interval ;)")
+	}
+}
+
+func TestApAddIntervalGroups(t *testing.T) {
+	i1 := &Interval{
+		Prices: PriceGroups{&Price{0, 1}},
+	}
+	i2 := &Interval{
+		Prices: PriceGroups{&Price{30, 2}},
+	}
+	i3 := &Interval{
+		Prices: PriceGroups{&Price{30, 2}},
+	}
+	ap := &ActivationPeriod{}
+	ap.AddInterval(i1)
+	ap.AddInterval(i2)
+	ap.AddInterval(i3)
+	if len(ap.Intervals) != 1 {
+		t.Error("Wronfully appended interval ;)")
+	}
+	if len(ap.Intervals[0].Prices) != 2 {
+		t.Error("Group prices not formed: ", ap.Intervals[0].Prices)
 	}
 }
 

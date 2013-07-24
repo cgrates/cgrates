@@ -8,7 +8,7 @@ the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITH*out ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -27,14 +27,14 @@ import (
 func TestSingleResultMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 01, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.GetCost()
 	if cc1.Cost != 60 {
 		t.Errorf("expected 60 was %v", cc1.Cost)
 	}
 	t1 = time.Date(2012, time.February, 2, 17, 01, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 17, 02, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 60 {
 		t.Errorf("expected 60 was %v", cc2.Cost)
@@ -51,7 +51,7 @@ func TestSingleResultMerge(t *testing.T) {
 func TestMultipleResultMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 00, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.GetCost()
 	if cc1.Cost != 60 {
 		t.Errorf("expected 60 was %v", cc1.Cost)
@@ -61,7 +61,7 @@ func TestMultipleResultMerge(t *testing.T) {
 	}
 	t1 = time.Date(2012, time.February, 2, 18, 00, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 30 {
 		t.Errorf("expected 30 was %v", cc2.Cost)
@@ -81,14 +81,14 @@ func TestMultipleResultMerge(t *testing.T) {
 func TestMultipleInputLeftMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.GetCost()
 	if cc1.Cost != 90 {
 		t.Errorf("expected 90 was %v", cc1.Cost)
 	}
 	t1 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 02, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 30 {
 		t.Errorf("expected 30 was %v", cc2.Cost)
@@ -105,14 +105,14 @@ func TestMultipleInputLeftMerge(t *testing.T) {
 func TestMultipleInputRightMerge(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 58, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc1, _ := cd.GetCost()
 	if cc1.Cost != 60 {
 		t.Errorf("expected 60 was %v", cc1.Cost)
 	}
 	t1 = time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
 	t2 = time.Date(2012, time.February, 2, 18, 01, 0, 0, time.UTC)
-	cd = &CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd = &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cc2, _ := cd.GetCost()
 	if cc2.Cost != 90 {
 		t.Errorf("expected 90 was %v", cc2.Cost)

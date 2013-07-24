@@ -235,7 +235,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 			continue
 		}
 		var r *Rate
-		r, err = NewRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
+		r, err = NewRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
 		if err != nil {
 			return err
 		}
@@ -306,7 +306,7 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 			if _, exists := csvr.activationPeriods[tag]; !exists {
 				csvr.activationPeriods[tag] = &ActivationPeriod{}
 			}
-			csvr.activationPeriods[tag].AddIntervalIfNotPresent(rt.GetInterval(dr))
+			csvr.activationPeriods[tag].AddInterval(rt.GetInterval(dr))
 		}
 	}
 	return

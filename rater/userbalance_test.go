@@ -36,13 +36,13 @@ func init() {
 
 func populateTestActionsForTriggers() {
 	ats := []*Action{
-		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Direction: OUTBOUND, Units: 10},
-		&Action{ActionType: "TOPUP", BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Weight: 20, Price: 1, Seconds: 10, DestinationId: "NAT"}},
+		&Action{ActionType: "*topup", BalanceId: CREDIT, Direction: OUTBOUND, Units: 10},
+		&Action{ActionType: "*topup", BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Weight: 20, Price: 1, Seconds: 10, DestinationId: "NAT"}},
 	}
 	storageGetter.SetActions("TEST_ACTIONS", ats)
 	ats1 := []*Action{
-		&Action{ActionType: "TOPUP", BalanceId: CREDIT, Direction: OUTBOUND, Units: 10, Weight: 20},
-		&Action{ActionType: "RESET_PREPAID", Weight: 10},
+		&Action{ActionType: "*topup", BalanceId: CREDIT, Direction: OUTBOUND, Units: 10, Weight: 20},
+		&Action{ActionType: "*reset_prepaid", Weight: 10},
 	}
 	storageGetter.SetActions("TEST_ACTIONS_ORDER", ats1)
 }
@@ -423,7 +423,7 @@ func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: "MAX_COUNTER", ActionsId: "TEST_ACTIONS"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: "*max_counter", ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
 	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 110 || ub.MinuteBuckets[0].Seconds != 20 {
@@ -448,7 +448,7 @@ func TestUserBalanceExecuteTriggeredActionsBalance(t *testing.T) {
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 100, ThresholdType: "MIN_COUNTER", ActionsId: "TEST_ACTIONS"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 100, ThresholdType: "*min_counter", ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
 	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 110 || ub.MinuteBuckets[0].Seconds != 20 {
@@ -461,7 +461,7 @@ func TestUserBalanceExecuteTriggeredActionsOrder(t *testing.T) {
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ThresholdType: "MAX_COUNTER", ActionsId: "TEST_ACTIONS_ORDER"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ThresholdType: "*max_counter", ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1})
 	if len(ub.BalanceMap[CREDIT+OUTBOUND]) != 1 || ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 10 {
