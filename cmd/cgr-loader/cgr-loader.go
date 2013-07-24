@@ -50,7 +50,8 @@ var (
 	tpid = flag.String("tpid", "", "The tariff plan id from the database")
 	dataPath = flag.String("path", ".", "The path containing the data files")
 	version  = flag.Bool("version", false, "Prints the application version.")
-	importer = flag.Bool("import", false, "Import to storDb instead of directly loading to dataDb")
+	fromStorDb = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
+	toStorDb = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 
 	sep                      rune
 )
@@ -67,23 +68,29 @@ func main() {
 		fmt.Println("CGRateS " + utils.VERSION)
 		return
 	}
-	var err error
-	var db rater.DataStorage
-	if *importer { // Loader has importer function, we need connection to storDb
-		db, err = rater.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
-	} else { // Loader function, need connection directly to dataDb
-		db, err = rater.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+	var errDataDb, errStorDb, err error
+	var dataDb, storDb rater.DataStorage
+	// Init necessary db connections
+	if *fromStorDb {
+		dataDb, errDataDb = rater.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
+		storDb, errStorDb = rater.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+	} else if *toStorDb { // Import from csv files to storDb
+		storDb, errStorDb = rater.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+	} else { // Default load from csv files to dataDb
+		dataDb, errDataDb = rater.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
 	}
-	defer db.Close()
-	if err != nil {
-		log.Fatalf("Could not open database connection: %v", err)
+	defer dataDb.Close()
+	defer storDb.Close()
+	for _,err = range []error{errDataDb, errStorDb} {
+		if err != nil {
+			log.Fatalf("Could not open database connection: %v", err)
+		}
 	}
 
-	if *tpid != "" && *dataPath != "" {
-		log.Fatal("You can read either from db or from files, not both.")
-	}
 	var loader rater.TPLoader
-	if *dataPath != "" {
+	if *fromStorDb {
+		loader = rater.NewDbReader(storDb, dataDb, *tpid)
+	} else { // Default load from csv files to dataDb
 		dataFilesValidators := []*validator{
 			&validator{utils.DESTINATIONS_CSV,
 				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
@@ -123,11 +130,7 @@ func main() {
 			}
 		}
 		//sep = []rune(*separator)[0]
-		loader = rater.NewFileCSVReader(db, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.DESTRATE_TIMINGS_CSV, utils.RATE_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
-	}
-
-	if *tpid != "" {
-		loader = rater.NewDbReader(db, db, *tpid)
+		loader = rater.NewFileCSVReader(dataDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.DESTRATE_TIMINGS_CSV, utils.RATE_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
 	}
 
 	err = loader.LoadDestinations()
