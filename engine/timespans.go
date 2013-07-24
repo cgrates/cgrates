@@ -61,9 +61,6 @@ func (ts *TimeSpan) getCost(cd *CallDescriptor) (cost float64) {
 	}
 	duration := ts.GetDuration().Seconds()
 	i := ts.Interval
-	if i.RateIncrements == 0 {
-		i.RateIncrements = 1
-	}
 	cost = i.GetCost(duration, ts.GetGroupStart())
 	// if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 	// 	userBalance.mux.RLock()

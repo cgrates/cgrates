@@ -33,24 +33,25 @@ import (
 Defines a time interval for which a certain set of prices will apply
 */
 type Interval struct {
-	Years                                           Years
-	Months                                          Months
-	MonthDays                                       MonthDays
-	WeekDays                                        WeekDays
-	StartTime, EndTime                              string // ##:##:## format
-	Weight, ConnectFee, PricedUnits, RateIncrements float64
-	Prices                                          PriceGroups // GroupInterval (start time): Price
-	RoundingMethod                                  string
-	RoundingDecimals                                int
+	Years                           Years
+	Months                          Months
+	MonthDays                       MonthDays
+	WeekDays                        WeekDays
+	StartTime, EndTime              string // ##:##:## format
+	Weight, ConnectFee, PricedUnits float64
+	Prices                          PriceGroups // GroupInterval (start time): Price
+	RoundingMethod                  string
+	RoundingDecimals                int
 }
 
 type Price struct {
-	StartSecond float64
-	Value       float64
+	StartSecond    float64
+	Value          float64
+	RateIncrements float64
 }
 
 func (p *Price) Equal(o *Price) bool {
-	return p.StartSecond == o.StartSecond && p.Value == o.Value
+	return p.StartSecond == o.StartSecond && p.Value == o.Value && p.RateIncrements == o.RateIncrements
 }
 
 type PriceGroups []*Price
@@ -193,15 +194,17 @@ func (i *Interval) Equal(o *Interval) bool {
 }
 
 func (i *Interval) GetCost(duration, startSecond float64) (cost float64) {
+	price := i.GetPrice(startSecond)
+	rateIncrements := i.GetRateIncrements(startSecond)
 	if i.PricedUnits != 0 {
-		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * (i.GetPrice(startSecond) / i.PricedUnits)
+		cost = math.Ceil(duration/rateIncrements) * rateIncrements * (price / i.PricedUnits)
 	} else {
-		cost = math.Ceil(duration/i.RateIncrements) * i.RateIncrements * i.GetPrice(startSecond)
+		cost = math.Ceil(duration/rateIncrements) * rateIncrements * price
 	}
 	return utils.Round(cost, i.RoundingDecimals, i.RoundingMethod)
 }
 
-// gets the price for a the provided start second
+// Gets the price for a the provided start second
 func (i *Interval) GetPrice(startSecond float64) float64 {
 	i.Prices.Sort()
 	for index, price := range i.Prices {
@@ -211,6 +214,20 @@ func (i *Interval) GetPrice(startSecond float64) float64 {
 		}
 	}
 	return -1
+}
+
+func (i *Interval) GetRateIncrements(startSecond float64) float64 {
+	i.Prices.Sort()
+	for index, price := range i.Prices {
+		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||
+			i.Prices[index+1].StartSecond > startSecond) {
+			if price.RateIncrements == 0 {
+				price.RateIncrements = 1
+			}
+			return price.RateIncrements
+		}
+	}
+	return 1
 }
 
 // Structure to store intervals according to weight

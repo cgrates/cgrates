@@ -22,11 +22,11 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"log"
 	"os"
 	"regexp"
 	"strconv"
-	"github.com/cgrates/cgrates/utils"
 )
 
 type TPLoader interface {
@@ -153,16 +153,19 @@ func NewDestinationRateTiming(destinationRatesTag string, timing *Timing, weight
 
 func (rt *DestinationRateTiming) GetInterval(dr *DestinationRate) (i *Interval) {
 	i = &Interval{
-		Years:          rt.timing.Years,
-		Months:         rt.timing.Months,
-		MonthDays:      rt.timing.MonthDays,
-		WeekDays:       rt.timing.WeekDays,
-		StartTime:      rt.timing.StartTime,
-		Weight:         rt.Weight,
-		ConnectFee:     dr.Rate.ConnectFee,
-		Prices:         PriceGroups{&Price{dr.Rate.GroupInterval, dr.Rate.Price}},
-		PricedUnits:    dr.Rate.PricedUnits,
-		RateIncrements: dr.Rate.RateIncrements,
+		Years:      rt.timing.Years,
+		Months:     rt.timing.Months,
+		MonthDays:  rt.timing.MonthDays,
+		WeekDays:   rt.timing.WeekDays,
+		StartTime:  rt.timing.StartTime,
+		Weight:     rt.Weight,
+		ConnectFee: dr.Rate.ConnectFee,
+		Prices: PriceGroups{&Price{
+			StartSecond:    dr.Rate.GroupInterval,
+			Value:          dr.Rate.Price,
+			RateIncrements: dr.Rate.RateIncrements,
+		}},
+		PricedUnits: dr.Rate.PricedUnits,
 	}
 	return
 }
@@ -200,40 +203,40 @@ func ValidateCSVData(fn string, re *regexp.Regexp) (err error) {
 }
 
 type TPCSVRowValidator struct {
-	FileName      string // File name
-	Rule      *regexp.Regexp // Regexp rule
-	ErrMessage string // Error message
+	FileName   string         // File name
+	Rule       *regexp.Regexp // Regexp rule
+	ErrMessage string         // Error message
 }
 
 var TPCSVRowValidators = []*TPCSVRowValidator{
-			&TPCSVRowValidator{utils.DESTINATIONS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
-				"Tag[0-9A-Za-z_],Prefix[0-9]"},
-			&TPCSVRowValidator{utils.TIMINGS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*all\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
-				"Tag[0-9A-Za-z_],Years[0-9;]|*all|<empty>,Months[0-9;]|*all|<empty>,MonthDays[0-9;]|*all|<empty>,WeekDays[0-9;]|*all|<empty>,Time[0-9:]|*asap(00:00:00)"},
-			&TPCSVRowValidator{utils.RATES_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
-				"Tag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
-			&TPCSVRowValidator{utils.DESTINATION_RATES_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
-				"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],RateTag[0-9A-Za-z_]"},
-			&TPCSVRowValidator{utils.DESTRATE_TIMINGS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
-				"Tag[0-9A-Za-z_],DestinationRatesTag[0-9A-Za-z_],TimingProfile[0-9A-Za-z_],Weight[0-9.]"},
-			&TPCSVRowValidator{utils.RATE_PROFILES_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\*all\s*,\s*|[\w:\.]+\s*,\s*){1}(?:\w*\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}$`),
-				"Tenant[0-9A-Za-z_],TOR[0-9],Direction OUT|IN,Subject[0-9A-Za-z_:.]|*all,RatesFallbackSubject[0-9A-Za-z_]|<empty>,RatesTimingTag[0-9A-Za-z_],ActivationTime[[0-9T:X]] (2012-01-01T00:00:00Z)"},
-			&TPCSVRowValidator{utils.ACTIONS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:ABSOLUTE\s*,\s*|PERCENT\s*,\s*|\s*,\s*){1}(?:\d*\.?\d*\s*,?\s*){3}$`),
-				"Tag[0-9A-Za-z_],Action[0-9A-Za-z_],BalanceTag[0-9A-Za-z_],Direction OUT|IN,Units[0-9],DestinationTag[0-9A-Za-z_]|*all,PriceType ABSOLUT|PERCENT,PriceValue[0-9.],MinutesWeight[0-9.],Weight[0-9.]"},
-			&TPCSVRowValidator{utils.ACTION_TIMINGS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
-				"Tag[0-9A-Za-z_],ActionsTag[0-9A-Za-z_],TimingTag[0-9A-Za-z_],Weight[0-9.]"},
-			&TPCSVRowValidator{utils.ACTION_TRIGGERS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:MONETARY\s*,\s*|SMS\s*,\s*|MINUTES\s*,\s*|INTERNET\s*,\s*|INTERNET_TIME\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\.?\d*\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d+\.?\d*){1}$`),
-				"Tag[0-9A-Za-z_],BalanceTag MONETARY|SMS|MINUTES|INTERNET|INTERNET_TIME,Direction OUT|IN,ThresholdValue[0-9.],DestinationTag[0-9A-Za-z_]|*all,ActionsTag[0-9A-Za-z_],Weight[0-9.]"},
-			&TPCSVRowValidator{utils.ACCOUNT_ACTIONS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:[\w:.]+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\w+\s*,?\s*){2}$`),
-				"Tenant[0-9A-Za-z_],Account[0-9A-Za-z_:.],Direction OUT|IN,ActionTimingsTag[0-9A-Za-z_],ActionTriggersTag[0-9A-Za-z_]"},
-		}
+	&TPCSVRowValidator{utils.DESTINATIONS_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
+		"Tag[0-9A-Za-z_],Prefix[0-9]"},
+	&TPCSVRowValidator{utils.TIMINGS_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*all\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
+		"Tag[0-9A-Za-z_],Years[0-9;]|*all|<empty>,Months[0-9;]|*all|<empty>,MonthDays[0-9;]|*all|<empty>,WeekDays[0-9;]|*all|<empty>,Time[0-9:]|*asap(00:00:00)"},
+	&TPCSVRowValidator{utils.RATES_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
+		"Tag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
+	&TPCSVRowValidator{utils.DESTINATION_RATES_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
+		"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],RateTag[0-9A-Za-z_]"},
+	&TPCSVRowValidator{utils.DESTRATE_TIMINGS_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
+		"Tag[0-9A-Za-z_],DestinationRatesTag[0-9A-Za-z_],TimingProfile[0-9A-Za-z_],Weight[0-9.]"},
+	&TPCSVRowValidator{utils.RATE_PROFILES_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\*all\s*,\s*|[\w:\.]+\s*,\s*){1}(?:\w*\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}$`),
+		"Tenant[0-9A-Za-z_],TOR[0-9],Direction OUT|IN,Subject[0-9A-Za-z_:.]|*all,RatesFallbackSubject[0-9A-Za-z_]|<empty>,RatesTimingTag[0-9A-Za-z_],ActivationTime[[0-9T:X]] (2012-01-01T00:00:00Z)"},
+	&TPCSVRowValidator{utils.ACTIONS_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:ABSOLUTE\s*,\s*|PERCENT\s*,\s*|\s*,\s*){1}(?:\d*\.?\d*\s*,?\s*){3}$`),
+		"Tag[0-9A-Za-z_],Action[0-9A-Za-z_],BalanceTag[0-9A-Za-z_],Direction OUT|IN,Units[0-9],DestinationTag[0-9A-Za-z_]|*all,PriceType ABSOLUT|PERCENT,PriceValue[0-9.],MinutesWeight[0-9.],Weight[0-9.]"},
+	&TPCSVRowValidator{utils.ACTION_TIMINGS_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
+		"Tag[0-9A-Za-z_],ActionsTag[0-9A-Za-z_],TimingTag[0-9A-Za-z_],Weight[0-9.]"},
+	&TPCSVRowValidator{utils.ACTION_TRIGGERS_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:MONETARY\s*,\s*|SMS\s*,\s*|MINUTES\s*,\s*|INTERNET\s*,\s*|INTERNET_TIME\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\.?\d*\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d+\.?\d*){1}$`),
+		"Tag[0-9A-Za-z_],BalanceTag MONETARY|SMS|MINUTES|INTERNET|INTERNET_TIME,Direction OUT|IN,ThresholdValue[0-9.],DestinationTag[0-9A-Za-z_]|*all,ActionsTag[0-9A-Za-z_],Weight[0-9.]"},
+	&TPCSVRowValidator{utils.ACCOUNT_ACTIONS_CSV,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:[\w:.]+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\w+\s*,?\s*){2}$`),
+		"Tenant[0-9A-Za-z_],Account[0-9A-Za-z_:.],Direction OUT|IN,ActionTimingsTag[0-9A-Za-z_],ActionTriggersTag[0-9A-Za-z_]"},
+}

@@ -458,7 +458,10 @@ func (d *Destination) Restore(input string) error {
 
 func (pg PriceGroups) Store() (result string, err error) {
 	for _, p := range pg {
-		result += strconv.FormatFloat(p.StartSecond, 'f', -1, 64) + ":" + strconv.FormatFloat(p.Value, 'f', -1, 64) + ","
+		result += strconv.FormatFloat(p.StartSecond, 'f', -1, 64) +
+			":" + strconv.FormatFloat(p.Value, 'f', -1, 64) +
+			":" + strconv.FormatFloat(p.RateIncrements, 'f', -1, 64) +
+			","
 	}
 	result = strings.TrimRight(result, ",")
 	return
@@ -468,7 +471,7 @@ func (pg *PriceGroups) Restore(input string) error {
 	elements := strings.Split(input, ",")
 	for _, element := range elements {
 		priceElements := strings.Split(element, ":")
-		if len(priceElements) != 2 {
+		if len(priceElements) != 3 {
 			continue
 		}
 		ss, err := strconv.ParseFloat(priceElements[0], 64)
@@ -479,9 +482,14 @@ func (pg *PriceGroups) Restore(input string) error {
 		if err != nil {
 			return err
 		}
+		ri, err := strconv.ParseFloat(priceElements[2], 64)
+		if err != nil {
+			return err
+		}
 		price := &Price{
-			StartSecond: ss,
-			Value:       v,
+			StartSecond:    ss,
+			Value:          v,
+			RateIncrements: ri,
 		}
 		*pg = append(*pg, price)
 	}
@@ -519,7 +527,6 @@ func (i *Interval) Store() (result string, err error) {
 	}
 	result += ps + ";"
 	result += strconv.FormatFloat(i.PricedUnits, 'f', -1, 64) + ";"
-	result += strconv.FormatFloat(i.RateIncrements, 'f', -1, 64) + ";"
 	result += i.RoundingMethod + ";"
 	result += strconv.Itoa(i.RoundingDecimals)
 	return
@@ -527,7 +534,7 @@ func (i *Interval) Store() (result string, err error) {
 
 func (i *Interval) Restore(input string) error {
 	is := strings.Split(input, ";")
-	if len(is) != 13 {
+	if len(is) != 12 {
 		return notEnoughElements
 	}
 	if err := i.Years.Restore(is[0]); err != nil {
@@ -551,9 +558,8 @@ func (i *Interval) Restore(input string) error {
 		return err
 	}
 	i.PricedUnits, _ = strconv.ParseFloat(is[9], 64)
-	i.RateIncrements, _ = strconv.ParseFloat(is[10], 64)
-	i.RoundingMethod = is[11]
-	i.RoundingDecimals, _ = strconv.Atoi(is[12])
+	i.RoundingMethod = is[10]
+	i.RoundingDecimals, _ = strconv.Atoi(is[11])
 	return nil
 }
 
