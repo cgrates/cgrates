@@ -20,7 +20,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"net/rpc"
 	"os"

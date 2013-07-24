@@ -1,6 +1,6 @@
 #! /usr/bin/env sh
 
-go install github.com/cgrates/cgrates/cmd/cgr-rater
+go install github.com/cgrates/cgrates/cmd/cgr-engine
 cr=$?
 go install github.com/cgrates/cgrates/cmd/cgr-loader
 cl=$?
