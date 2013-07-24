@@ -25,7 +25,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/howeyc/fsnotify"
 	"os"
@@ -35,7 +35,7 @@ import (
 	"time"
 )
 
-func NewMediator(connector rater.Connector, storDb rater.DataStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
+func NewMediator(connector engine.Connector, storDb engine.DataStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
 	m = &Mediator{
 		connector: connector,
 		storDb:    storDb,
@@ -51,8 +51,8 @@ func NewMediator(connector rater.Connector, storDb rater.DataStorage, cfg *confi
 }
 
 type Mediator struct {
-	connector           rater.Connector
-	storDb              rater.DataStorage
+	connector           engine.Connector
+	storDb              engine.DataStorage
 	cgrCfg              *config.CGRConfig
 	cdrInDir, cdrOutDir string
 	accIdField          string
@@ -145,32 +145,32 @@ func (self *Mediator) TrackCDRFiles() (err error) {
 	if err != nil {
 		return
 	}
-	rater.Logger.Info(fmt.Sprintf("Monitoring %s for file moves.", self.cdrInDir))
+	engine.Logger.Info(fmt.Sprintf("Monitoring %s for file moves.", self.cdrInDir))
 	for {
 		select {
 		case ev := <-watcher.Event:
 			if ev.IsCreate() && path.Ext(ev.Name) != ".csv" {
-				rater.Logger.Info(fmt.Sprintf("Parsing: %s", ev.Name))
+				engine.Logger.Info(fmt.Sprintf("Parsing: %s", ev.Name))
 				err = self.MediateCSVCDR(ev.Name)
 				if err != nil {
 					return err
 				}
 			}
 		case err := <-watcher.Error:
-			rater.Logger.Err(fmt.Sprintf("Inotify error: %s", err.Error()))
+			engine.Logger.Err(fmt.Sprintf("Inotify error: %s", err.Error()))
 		}
 	}
 	return
 }
 
 // Retrive the cost from logging database
-func (self *Mediator) getCostsFromDB(cdr utils.CDR) (cc *rater.CallCost, err error) {
-	return self.storDb.GetCallCostLog(cdr.GetCgrId(), rater.SESSION_MANAGER_SOURCE)
+func (self *Mediator) getCostsFromDB(cdr utils.CDR) (cc *engine.CallCost, err error) {
+	return self.storDb.GetCallCostLog(cdr.GetCgrId(), engine.SESSION_MANAGER_SOURCE)
 }
 
-// Retrive the cost from rater
-func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*rater.CallCost, error) {
-	cc := &rater.CallCost{}
+// Retrive the cost from engine
+func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*engine.CallCost, error) {
+	cc := &engine.CallCost{}
 	d, err := time.ParseDuration(strconv.FormatInt(cdr.GetDuration(), 10) + "s")
 	if err != nil {
 		return nil, err
@@ -182,7 +182,7 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*rater.CallCost, error) 
 	if err != nil {
 		return nil, err
 	}
-	cd := rater.CallDescriptor{
+	cd := engine.CallDescriptor{
 		Direction:   "OUT", //record[m.directionFields[runIdx]] TODO: fix me
 		Tenant:      cdr.GetTenant(),
 		TOR:         cdr.GetTOR(),
@@ -197,10 +197,10 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*rater.CallCost, error) 
 		err = self.connector.GetCost(cd, cc)
 	}
 	if err != nil {
-		self.storDb.LogError(cdr.GetCgrId(), rater.MEDIATOR_SOURCE, err.Error())
+		self.storDb.LogError(cdr.GetCgrId(), engine.MEDIATOR_SOURCE, err.Error())
 	} else {
 		// If the mediator calculated a price it will write it to logdb
-		self.storDb.LogCallCost(cdr.GetCgrId(), rater.MEDIATOR_SOURCE, cc)
+		self.storDb.LogCallCost(cdr.GetCgrId(), engine.MEDIATOR_SOURCE, cc)
 	}
 	return cc, nil
 }
@@ -211,7 +211,7 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 	file, err := os.Open(cdrfn)
 	defer file.Close()
 	if err != nil {
-		rater.Logger.Crit(err.Error())
+		engine.Logger.Crit(err.Error())
 		os.Exit(1)
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
@@ -226,7 +226,7 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 	w := bufio.NewWriter(fout)
 	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
 		//t, _ := time.Parse("2006-01-02 15:04:05", record[5])
-		var cc *rater.CallCost
+		var cc *engine.CallCost
 
 		for runIdx := range self.fieldIdxs["subject"] { // Query costs for every run index given by subject
 			csvCDR, errCDR := NewFScsvCDR(record, self.accIdIdx,
@@ -241,7 +241,7 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 				self.fieldIdxs["duration"][runIdx],
 				self.cgrCfg)
 			if errCDR != nil {
-				rater.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for accid: <%s>, err: <%s>",
+				engine.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for accid: <%s>, err: <%s>",
 					record[self.accIdIdx], errCDR.Error()))
 			}
 			var errCost error
@@ -253,10 +253,10 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 			}
 			cost := "-1"
 			if errCost != nil || cc == nil {
-				rater.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for accid: <%s>, err: <%s>, cost: <%v>", csvCDR.GetAccId(), err.Error(), cc))
+				engine.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for accid: <%s>, err: <%s>, cost: <%v>", csvCDR.GetAccId(), err.Error(), cc))
 			} else {
 				cost = strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)
-				rater.Logger.Debug(fmt.Sprintf("Calculated for accid:%s, cost: %v", csvCDR.GetAccId(), cost))
+				engine.Logger.Debug(fmt.Sprintf("Calculated for accid:%s, cost: %v", csvCDR.GetAccId(), cost))
 			}
 			record = append(record, cost)
 		}
@@ -266,8 +266,8 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 	return
 }
 
-func (self *Mediator) MediateDBCDR(cdr utils.CDR, db rater.DataStorage) error {
-	var cc *rater.CallCost
+func (self *Mediator) MediateDBCDR(cdr utils.CDR, db engine.DataStorage) error {
+	var cc *engine.CallCost
 	var errCost error
 	if cdr.GetReqType() == utils.PREPAID || cdr.GetReqType() == utils.POSTPAID {
 		// Should be previously calculated and stored in DB
@@ -277,10 +277,10 @@ func (self *Mediator) MediateDBCDR(cdr utils.CDR, db rater.DataStorage) error {
 	}
 	cost := "-1"
 	if errCost != nil || cc == nil {
-		rater.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for cgrid: <%s>, err: <%s>, cost: <%v>", cdr.GetCgrId(), errCost.Error(), cc))
+		engine.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for cgrid: <%s>, err: <%s>, cost: <%v>", cdr.GetCgrId(), errCost.Error(), cc))
 	} else {
 		cost = strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)
-		rater.Logger.Debug(fmt.Sprintf("<Mediator> Calculated for cgrid:%s, cost: %v", cdr.GetCgrId(), cost))
+		engine.Logger.Debug(fmt.Sprintf("<Mediator> Calculated for cgrid:%s, cost: %v", cdr.GetCgrId(), cost))
 	}
 	return self.storDb.SetRatedCdr(cdr, cc)
 }

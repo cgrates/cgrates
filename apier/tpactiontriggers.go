@@ -21,7 +21,7 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,13 +36,13 @@ func (self *Apier) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *s
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	aTriggers := make([]*rater.ActionTrigger, len(attrs.ActionTriggers))
+	aTriggers := make([]*engine.ActionTrigger, len(attrs.ActionTriggers))
 	for idx, at := range attrs.ActionTriggers {
 		requiredFields := []string{"BalanceId", "Direction", "ThresholdType", "ThresholdValue", "ActionsId", "Weight"}
 		if missing := utils.MissingStructFields(&at, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Balance:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.BalanceId, missing)
 		}
-		at := &rater.ActionTrigger{
+		at := &engine.ActionTrigger{
 			BalanceId:      at.BalanceId,
 			Direction:      at.Direction,
 			ThresholdType:  at.ThresholdType,
@@ -54,7 +54,7 @@ func (self *Apier) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *s
 		aTriggers[idx] = at
 	}
 
-	ats := map[string][]*rater.ActionTrigger{
+	ats := map[string][]*engine.ActionTrigger{
 		attrs.ActionTriggersId: aTriggers}
 
 	if err := self.StorDb.SetTPActionTriggers(attrs.TPid, ats); err != nil {

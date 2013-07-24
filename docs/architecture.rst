@@ -3,7 +3,7 @@
 
 The CGRateS suite consits of  three software applications, described bellow. 
 
-2.1. cgr-rater
+2.1. cgr-engine
 --------------
 The most important and complex as functionality.
 
@@ -11,12 +11,12 @@ Customisable through the use of a configuration file, it will start on demand on
 
 ::
 
- rif@grace:~$ cgr-rater -help
- Usage of cgr-rater:
+ rif@grace:~$ cgr-engine -help
+ Usage of cgr-engine:
     -config="/etc/cgrates/cgrates.cfg": Configuration file location.
     -version=false: Prints the application version.
 
-:Example: cgr-rater -config=cgr-customconfig.cfg
+:Example: cgr-engine -config=cgr-customconfig.cfg
 
 2.1.1. Rater service
 ~~~~~~~~~~~~~~~~~~~~
@@ -26,7 +26,7 @@ Responsible with the following tasks:
 - Computes prices for rating subjects.
 - Monitors and executes triggers.
 
-Accessed by components using it's functionality via RPC or directly within same running cgr-rater process.
+Accessed by components using it's functionality via RPC or directly within same running cgr-engine process.
 
 2.1.2. Balancer service
 ~~~~~~~~~~~~~~~~~~~~~~~

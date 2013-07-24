@@ -20,7 +20,7 @@ package main
 
 import (
 	"flag"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"log"
 	"net/rpc"
 	//"net/rpc/jsonrpc"
@@ -42,8 +42,8 @@ func main() {
 
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := rater.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	result := rater.CallCost{}
+	cd := engine.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	result := engine.CallCost{}
 	var client *rpc.Client
 	var err error
 	if *json {
@@ -52,7 +52,7 @@ func main() {
 		client, err = rpc.Dial("tcp", *balancer)
 	}
 	if err != nil {
-		log.Fatal("Could not connect to rater: ", err)
+		log.Fatal("Could not connect to engine: ", err)
 	}
 	start := time.Now()
 	if *parallel > 0 {

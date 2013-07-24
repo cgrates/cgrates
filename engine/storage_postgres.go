@@ -16,20 +16,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessionmanager
+package engine
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"time"
+	"database/sql"
+	"fmt"
+	_ "github.com/bmizerany/pq"
 )
 
-type SessionManager interface {
-	Connect(*config.CGRConfig) error
-	DisconnectSession(*Session, string)
-	RemoveSession(*Session)
-	LoopAction(*Session, *engine.CallDescriptor, float64)
-	GetDebitPeriod() time.Duration
-	GetDbLogger() engine.DataStorage
-	Shutdown() error
+type PostgresStorage struct {
+	*SQLStorage
+}
+
+func NewPostgresStorage(host, port, name, user, password string) (DataStorage, error) {
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password))
+	if err != nil {
+		return nil, err
+	}
+	return &PostgresStorage{&SQLStorage{db}}, nil
 }

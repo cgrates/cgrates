@@ -21,14 +21,14 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type Apier struct {
-	StorDb rater.DataStorage
-	DataDb rater.DataStorage
+	StorDb engine.DataStorage
+	DataDb engine.DataStorage
 	Sched  *scheduler.Scheduler
 }
 
@@ -63,7 +63,7 @@ func (self *Apier) GetBalance(attr *AttrGetBalance, reply *float64) error {
 	}
 
 	if attr.Direction == "" {
-		attr.Direction = rater.OUTBOUND
+		attr.Direction = engine.OUTBOUND
 	}
 
 	if balance, balExists := userBalance.BalanceMap[attr.BalanceId+attr.Direction]; !balExists {
@@ -88,7 +88,7 @@ func (self *Apier) AddBalance(attr *AttrAddBalance, reply *float64) error {
 
 	if _, err := self.DataDb.GetUserBalance(tag); err != nil {
 		// create user balance if not exists
-		ub := &rater.UserBalance{
+		ub := &engine.UserBalance{
 			Id: tag,
 		}
 		if err := self.DataDb.SetUserBalance(ub); err != nil {
@@ -96,15 +96,15 @@ func (self *Apier) AddBalance(attr *AttrAddBalance, reply *float64) error {
 		}
 	}
 
-	at := &rater.ActionTiming{
+	at := &engine.ActionTiming{
 		UserBalanceIds: []string{tag},
 	}
 
 	if attr.Direction == "" {
-		attr.Direction = rater.OUTBOUND
+		attr.Direction = engine.OUTBOUND
 	}
 
-	at.SetActions(rater.Actions{&rater.Action{ActionType: rater.TOPUP, BalanceId: attr.BalanceId, Direction: attr.Direction, Units: attr.Value}})
+	at.SetActions(engine.Actions{&engine.Action{ActionType: engine.TOPUP, BalanceId: attr.BalanceId, Direction: attr.Direction, Units: attr.Value}})
 
 	if err := at.Execute(); err != nil {
 		return err
@@ -122,7 +122,7 @@ type AttrExecuteAction struct {
 
 func (self *Apier) ExecuteAction(attr *AttrExecuteAction, reply *float64) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	at := &rater.ActionTiming{
+	at := &engine.ActionTiming{
 		UserBalanceIds: []string{tag},
 		ActionsId:      attr.ActionsId,
 	}
@@ -144,7 +144,7 @@ func (self *Apier) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) e
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateProfileId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
+	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
 	if err := dbReader.LoadRatingProfileByTag(attrs.RateProfileId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -167,10 +167,10 @@ type AttrActionTrigger struct {
 
 func (self *Apier) AddTriggeredAction(attr AttrActionTrigger, reply *float64) error {
 	if attr.Direction == "" {
-		attr.Direction = rater.OUTBOUND
+		attr.Direction = engine.OUTBOUND
 	}
 
-	at := &rater.ActionTrigger{
+	at := &engine.ActionTrigger{
 		Id:             utils.GenUUID(),
 		BalanceId:      attr.BalanceId,
 		Direction:      attr.Direction,
@@ -183,7 +183,7 @@ func (self *Apier) AddTriggeredAction(attr AttrActionTrigger, reply *float64) er
 
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	var dbErr error
-	rater.AccLock.Guard(tag, func() (float64, error) {
+	engine.AccLock.Guard(tag, func() (float64, error) {
 		userBalance, err := self.DataDb.GetUserBalance(tag)
 		if err != nil {
 			dbErr = err
@@ -216,7 +216,7 @@ func (self *Apier) AddAccount(attr *AttrAccount, reply *float64) error {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	ub := &rater.UserBalance{
+	ub := &engine.UserBalance{
 		Id:   tag,
 		Type: attr.Type,
 	}
@@ -253,9 +253,9 @@ func (self *Apier) SetAccountActions(attrs AttrSetAccountActions, reply *string)
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	dbReader := rater.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
+	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
-	if _, err := rater.AccLock.Guard(attrs.AccountActionsId, func() (float64, error) {
+	if _, err := engine.AccLock.Guard(attrs.AccountActionsId, func() (float64, error) {
 		if err := dbReader.LoadAccountActionsByTag(attrs.AccountActionsId); err != nil {
 			return 0, err
 		}

@@ -16,20 +16,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessionmanager
+package engine
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"time"
+	"database/sql"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-type SessionManager interface {
-	Connect(*config.CGRConfig) error
-	DisconnectSession(*Session, string)
-	RemoveSession(*Session)
-	LoopAction(*Session, *engine.CallDescriptor, float64)
-	GetDebitPeriod() time.Duration
-	GetDbLogger() engine.DataStorage
-	Shutdown() error
+type MySQLStorage struct {
+	*SQLStorage
+}
+
+func NewMySQLStorage(host, port, name, user, password string) (DataStorage, error) {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", user, password, host, port, name))
+	if err != nil {
+		return nil, err
+	}
+	return &MySQLStorage{&SQLStorage{db}}, nil
 }

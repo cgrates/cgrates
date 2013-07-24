@@ -21,7 +21,7 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -41,7 +41,7 @@ func (self *Apier) SetTPDestination(attrs ApierTPDestination, reply *string) err
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	if err := self.StorDb.SetTPDestination(attrs.TPid, &rater.Destination{attrs.DestinationId, attrs.Prefixes}); err != nil {
+	if err := self.StorDb.SetTPDestination(attrs.TPid, &engine.Destination{attrs.DestinationId, attrs.Prefixes}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

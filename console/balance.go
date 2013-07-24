@@ -4,7 +4,7 @@ package console
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 )
 
 func init() {
@@ -14,8 +14,8 @@ func init() {
 // Commander implementation
 type CmdGetBalance struct {
 	rpcMethod string
-	rpcParams *rater.CallDescriptor
-	rpcResult *rater.CallCost
+	rpcParams *engine.CallDescriptor
+	rpcResult *engine.CallCost
 }
 
 // name should be exec's name
@@ -26,7 +26,7 @@ func (self *CmdGetBalance) Usage(name string) string {
 // set param defaults
 func (self *CmdGetBalance) defaults() error {
 	self.rpcMethod = "Responder.GetMonetary"
-	self.rpcParams = &rater.CallDescriptor{Direction: "OUT"}	
+	self.rpcParams = &engine.CallDescriptor{Direction: "OUT"}	
 	return nil
 }
 
@@ -68,6 +68,6 @@ func (self *CmdGetBalance) RpcParams() interface{} {
 }
 
 func (self *CmdGetBalance) RpcResult() interface{} {
-	self.rpcResult = &rater.CallCost{}
+	self.rpcResult = &engine.CallCost{}
 	return self.rpcResult
 }

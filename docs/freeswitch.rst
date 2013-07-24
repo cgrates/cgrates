@@ -72,7 +72,7 @@ A typical usage into our implementations is a combination between the two modes 
 8.1.2.2. Implementation logic
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- The Mediator process is configured and started in the *cgrates.cfg* file and is alive as long as the *cgr-rater* application is on.
+- The Mediator process is configured and started in the *cgrates.cfg* file and is alive as long as the *cgr-engine* application is on.
 - To avoid concurrency issues, the Mediator does not process active maintained CDR csv files by FreeSWITCH_ but picks them up as soon as FreeSWITCH_ has done with them by rotating. The information about rotation comes in real-time on the Linux OS through the use of inotify.
 - Based on configured indexes in the configuration file, the Mediator will start multiple processes for the same CDR.
 - For each mediation process configured the Mediator will apped the original CDR with costs calculated. In case of errors of some kind, the value *-1* will be prepended.

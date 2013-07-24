@@ -22,14 +22,14 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/mediator"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"io/ioutil"
 	"net/http"
 )
 
 var (
 	cfg     *config.CGRConfig // Share the configuration with the rest of the package
-	storage rater.DataStorage
+	storage engine.DataStorage
 	medi    *mediator.Mediator
 )
 
@@ -40,19 +40,19 @@ func cdrHandler(w http.ResponseWriter, r *http.Request) {
 		if cfg.CDRSMediator == "internal" {
 			errMedi := medi.MediateDBCDR(fsCdr, storage)
 			if errMedi != nil {
-				rater.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
+				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
 			}
 		} else {
 			//TODO: use the connection to mediator
 		}
 	} else {
-		rater.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
+		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
 	}
 }
 
 type CDRS struct{}
 
-func New(s rater.DataStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
+func New(s engine.DataStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
 	storage = s
 	medi = m
 	cfg = c

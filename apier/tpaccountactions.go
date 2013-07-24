@@ -21,7 +21,7 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,8 +37,8 @@ func (self *Apier) SetTPAccountActions(attrs utils.ApiTPAccountActions, reply *s
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	aa := map[string]*rater.AccountAction{
-		attrs.AccountActionsId: &rater.AccountAction{Tenant: attrs.Tenant, Account: attrs.Account, Direction: attrs.Direction, 
+	aa := map[string]*engine.AccountAction{
+		attrs.AccountActionsId: &engine.AccountAction{Tenant: attrs.Tenant, Account: attrs.Account, Direction: attrs.Direction, 
 				ActionTimingsTag: attrs.ActionTimingsId, ActionTriggersTag: attrs.ActionTriggersId},
 		}
 

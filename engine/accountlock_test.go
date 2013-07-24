@@ -16,20 +16,32 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package sessionmanager
+package engine
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
+	"log"
+	"testing"
 	"time"
 )
 
-type SessionManager interface {
-	Connect(*config.CGRConfig) error
-	DisconnectSession(*Session, string)
-	RemoveSession(*Session)
-	LoopAction(*Session, *engine.CallDescriptor, float64)
-	GetDebitPeriod() time.Duration
-	GetDbLogger() engine.DataStorage
-	Shutdown() error
+func ATestAccountLock(t *testing.T) {
+	go AccLock.Guard("1", func() (float64, error) {
+		log.Print("first 1")
+		time.Sleep(1 * time.Second)
+		log.Print("end first 1")
+		return 0, nil
+	})
+	go AccLock.Guard("2", func() (float64, error) {
+		log.Print("first 2")
+		time.Sleep(1 * time.Second)
+		log.Print("end first 2")
+		return 0, nil
+	})
+	go AccLock.Guard("1", func() (float64, error) {
+		log.Print("second 1")
+		time.Sleep(1 * time.Second)
+		log.Print("end second 1")
+		return 0, nil
+	})
+	time.Sleep(3 * time.Second)
 }

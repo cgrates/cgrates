@@ -21,7 +21,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/config"
 	"log"
@@ -69,15 +69,15 @@ func main() {
 		return
 	}
 	var errDataDb, errStorDb, err error
-	var dataDb, storDb rater.DataStorage
+	var dataDb, storDb engine.DataStorage
 	// Init necessary db connections
 	if *fromStorDb {
-		dataDb, errDataDb = rater.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
-		storDb, errStorDb = rater.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+		dataDb, errDataDb = engine.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
+		storDb, errStorDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
 	} else if *toStorDb { // Import from csv files to storDb
-		storDb, errStorDb = rater.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+		storDb, errStorDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
 	} else { // Default load from csv files to dataDb
-		dataDb, errDataDb = rater.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
+		dataDb, errDataDb = engine.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
 	}
 	defer dataDb.Close()
 	defer storDb.Close()
@@ -87,9 +87,9 @@ func main() {
 		}
 	}
 
-	var loader rater.TPLoader
+	var loader engine.TPLoader
 	if *fromStorDb {
-		loader = rater.NewDbReader(storDb, dataDb, *tpid)
+		loader = engine.NewDbReader(storDb, dataDb, *tpid)
 	} else { // Default load from csv files to dataDb
 		dataFilesValidators := []*validator{
 			&validator{utils.DESTINATIONS_CSV,
@@ -124,13 +124,13 @@ func main() {
 				"Tenant[0-9A-Za-z_],Account[0-9A-Za-z_:.],Direction OUT|IN,ActionTimingsTag[0-9A-Za-z_],ActionTriggersTag[0-9A-Za-z_]"},
 		}
 		for _, v := range dataFilesValidators {
-			err := rater.ValidateCSVData(path.Join(*dataPath, v.fn), v.re)
+			err := engine.ValidateCSVData(path.Join(*dataPath, v.fn), v.re)
 			if err != nil {
 				log.Fatal(err, "\n\t", v.message)
 			}
 		}
 		//sep = []rune(*separator)[0]
-		loader = rater.NewFileCSVReader(dataDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.DESTRATE_TIMINGS_CSV, utils.RATE_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
+		loader = engine.NewFileCSVReader(dataDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.DESTRATE_TIMINGS_CSV, utils.RATE_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
 	}
 
 	err = loader.LoadDestinations()

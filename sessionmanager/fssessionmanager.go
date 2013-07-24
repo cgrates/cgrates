@@ -23,7 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 	"log/syslog"
@@ -40,12 +40,12 @@ type FSSessionManager struct {
 	conn        net.Conn
 	buf         *bufio.Reader
 	sessions    []*Session
-	connector   rater.Connector
+	connector   engine.Connector
 	debitPeriod time.Duration
-	loggerDB    rater.DataStorage
+	loggerDB    engine.DataStorage
 }
 
-func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, debitPeriod time.Duration) *FSSessionManager {
+func NewFSSessionManager(storage engine.DataStorage, connector engine.Connector, debitPeriod time.Duration) *FSSessionManager {
 	return &FSSessionManager{loggerDB: storage, connector: connector, debitPeriod: debitPeriod}
 }
 
@@ -54,7 +54,7 @@ func NewFSSessionManager(storage rater.DataStorage, connector rater.Connector, d
 func (sm *FSSessionManager) Connect(cgrCfg *config.CGRConfig) (err error) {
 	cfg = cgrCfg // make config global
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
-	if fsock.FS, err = fsock.NewFSock(cfg.FreeswitchServer, cfg.FreeswitchPass, cfg.FreeswitchReconnects, sm.createHandlers(), eventFilters, rater.Logger.(*syslog.Writer)); err != nil {
+	if fsock.FS, err = fsock.NewFSock(cfg.FreeswitchServer, cfg.FreeswitchPass, cfg.FreeswitchReconnects, sm.createHandlers(), eventFilters, engine.Logger.(*syslog.Writer)); err != nil {
 		return err
 	} else if !fsock.FS.Connected() {
 		return errors.New("Cannot connect to FreeSWITCH")
@@ -100,14 +100,14 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 
 // Disconnects a session by sending hangup command to freeswitch
 func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
-	rater.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
+	engine.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
 	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
 	if err != nil {
-		rater.Logger.Err("could not send disconect api notification to freeswitch")
+		engine.Logger.Err("could not send disconect api notification to freeswitch")
 	}
 	err = fsock.FS.SendMsgCmd(s.uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}) // without + sign
 	if err != nil {
-		rater.Logger.Err("could not send disconect msg to freeswitch")
+		engine.Logger.Err("could not send disconect msg to freeswitch")
 	}
 	return
 }
@@ -126,23 +126,23 @@ func (sm *FSSessionManager) RemoveSession(s *Session) {
 func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
 	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
 	if err != nil {
-		rater.Logger.Err("could not send unpark api notification to freeswitch")
+		engine.Logger.Err("could not send unpark api notification to freeswitch")
 	}
 	err = fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
 	if err != nil {
-		rater.Logger.Err("could not send unpark api call to freeswitch")
+		engine.Logger.Err("could not send unpark api call to freeswitch")
 	}
 }
 
 func (sm *FSSessionManager) OnHeartBeat(ev Event) {
-	rater.Logger.Info("freeswitch ♥")
+	engine.Logger.Info("freeswitch ♥")
 }
 
 func (sm *FSSessionManager) OnChannelPark(ev Event) {
-	rater.Logger.Info("freeswitch park")
+	engine.Logger.Info("freeswitch park")
 	startTime, err := ev.GetStartTime(PARK_TIME)
 	if err != nil {
-		rater.Logger.Err("Error parsing answer event start time, using time.Now!")
+		engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
@@ -151,10 +151,10 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	}
 	if ev.MissingParameter() {
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), MISSING_PARAMETER)
-		rater.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
+		engine.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
 		return
 	}
-	cd := rater.CallDescriptor{
+	cd := engine.CallDescriptor{
 		Direction:       ev.GetDirection(),
 		Tenant:          ev.GetTenant(),
 		TOR:             ev.GetTOR(),
@@ -167,13 +167,13 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	var remainingSeconds float64
 	err = sm.connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
-		rater.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
+		engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), SYSTEM_ERROR)
 		return
 	}
-	rater.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
+	engine.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
 	if remainingSeconds == 0 {
-		rater.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
+		engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), INSUFFICIENT_FUNDS)
 		return
 	}
@@ -181,7 +181,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
-	rater.Logger.Info("<SessionManager> FreeSWITCH answer.")
+	engine.Logger.Info("<SessionManager> FreeSWITCH answer.")
 	s := NewSession(ev, sm)
 	if s != nil {
 		sm.sessions = append(sm.sessions, s)
@@ -189,7 +189,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
-	rater.Logger.Info("<SessionManager> FreeSWITCH hangup.")
+	engine.Logger.Info("<SessionManager> FreeSWITCH hangup.")
 	s := sm.GetSession(ev.GetUUID())
 	if s == nil { // Not handled by us
 		return
@@ -198,15 +198,15 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	if ev.GetReqType() == utils.POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
-			rater.Logger.Crit("Error parsing postpaid call start time from event")
+			engine.Logger.Crit("Error parsing postpaid call start time from event")
 			return
 		}
 		endTime, err := ev.GetEndTime()
 		if err != nil {
-			rater.Logger.Crit("Error parsing postpaid call start time from event")
+			engine.Logger.Crit("Error parsing postpaid call start time from event")
 			return
 		}
-		cd := rater.CallDescriptor{
+		cd := engine.CallDescriptor{
 			Direction:       ev.GetDirection(),
 			Tenant:          ev.GetTenant(),
 			TOR:             ev.GetTOR(),
@@ -219,10 +219,10 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			TimeEnd:         endTime,
 			FallbackSubject: ev.GetFallbackSubj(),
 		}
-		cc := &rater.CallCost{}
+		cc := &engine.CallCost{}
 		err = sm.connector.Debit(cd, cc)
 		if err != nil {
-			rater.Logger.Err(fmt.Sprintf("Error making the general debit for postpaid call: %v", ev.GetUUID()))
+			engine.Logger.Err(fmt.Sprintf("Error making the general debit for postpaid call: %v", ev.GetUUID()))
 			return
 		}
 		s.CallCosts = append(s.CallCosts, cc)
@@ -239,7 +239,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	refoundDuration := end.Sub(start).Seconds()
 	cost := 0.0
 	seconds := 0.0
-	rater.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
+	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
 		tsDuration := ts.GetDuration().Seconds()
@@ -268,7 +268,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		}
 	}
 	if cost > 0 {
-		cd := &rater.CallDescriptor{
+		cd := &engine.CallDescriptor{
 			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
 			TOR:         lastCC.TOR,
@@ -281,11 +281,11 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		var response float64
 		err := sm.connector.DebitCents(*cd, &response)
 		if err != nil {
-			rater.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
+			engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 		}
 	}
 	if seconds > 0 {
-		cd := &rater.CallDescriptor{
+		cd := &engine.CallDescriptor{
 			Direction:   lastCC.Direction,
 			TOR:         lastCC.TOR,
 			Tenant:      lastCC.Tenant,
@@ -298,33 +298,33 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		var response float64
 		err := sm.connector.DebitSeconds(*cd, &response)
 		if err != nil {
-			rater.Logger.Err(fmt.Sprintf("Debit seconds failed: %v", err))
+			engine.Logger.Err(fmt.Sprintf("Debit seconds failed: %v", err))
 		}
 	}
 	lastCC.Cost -= cost
-	rater.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
+	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
 
 }
 
-func (sm *FSSessionManager) LoopAction(s *Session, cd *rater.CallDescriptor, index float64) {
-	cc := &rater.CallCost{}
+func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, index float64) {
+	cc := &engine.CallCost{}
 	cd.LoopIndex = index
 	cd.Amount = sm.debitPeriod.Seconds()
 	cd.CallDuration += cd.Amount
 	err := sm.connector.MaxDebit(*cd, cc)
 	if err != nil {
-		rater.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
+		engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 		// disconnect session
 		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
 	}
 	nbts := len(cc.Timespans)
 	remainingSeconds := 0.0
-	rater.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
+	engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
 	if nbts > 0 {
 		remainingSeconds = cc.Timespans[nbts-1].TimeEnd.Sub(cc.Timespans[0].TimeStart).Seconds()
 	}
 	if remainingSeconds == 0 || err != nil {
-		rater.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
+		engine.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		sm.DisconnectSession(s, INSUFFICIENT_FUNDS)
 		return
 	}
@@ -333,7 +333,7 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *rater.CallDescriptor, ind
 func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
 	return sm.debitPeriod
 }
-func (sm *FSSessionManager) GetDbLogger() rater.DataStorage {
+func (sm *FSSessionManager) GetDbLogger() engine.DataStorage {
 	return sm.loggerDB
 }
 
@@ -341,18 +341,18 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	if fsock.FS == nil || !fsock.FS.Connected() {
 		return errors.New("Cannot shutdown sessions, fsock not connected")
 	}
-	rater.Logger.Info("Shutting down all sessions...")
+	engine.Logger.Info("Shutting down all sessions...")
 	cmdKillPrepaid := "hupall MANAGER_REQUEST cgr_reqtype prepaid"
 	cmdKillPostpaid := "hupall MANAGER_REQUEST cgr_reqtype postpaid"
 	for _, cmd := range []string{cmdKillPrepaid, cmdKillPostpaid} {
 		if err = fsock.FS.SendApiCmd(cmd); err != nil {
-			rater.Logger.Err(fmt.Sprintf("Error on calls shutdown: %s", err))
+			engine.Logger.Err(fmt.Sprintf("Error on calls shutdown: %s", err))
 			return
 		}
 	}
 	for guard := 0; len(sm.sessions) > 0 && guard < 20; guard++ {
 		time.Sleep(100 * time.Millisecond) // wait for the hungup event to be fired
-		rater.Logger.Info(fmt.Sprintf("<SessionManager> Shutdown waiting on sessions: %v", sm.sessions))
+		engine.Logger.Info(fmt.Sprintf("<SessionManager> Shutdown waiting on sessions: %v", sm.sessions))
 	}
 	return
 }

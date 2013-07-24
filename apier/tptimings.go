@@ -21,7 +21,7 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -45,7 +45,7 @@ func (self *Apier) SetTPTiming(attrs ApierTPTiming, reply *string) error {
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	tm := rater.NewTiming(attrs.TimingId, attrs.Years, attrs.Months, attrs.MonthDays, attrs.WeekDays, attrs.Time)
+	tm := engine.NewTiming(attrs.TimingId, attrs.Years, attrs.Months, attrs.MonthDays, attrs.WeekDays, attrs.Time)
 	if err := self.StorDb.SetTPTiming(attrs.TPid, tm); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}

@@ -26,8 +26,8 @@ import (
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/mediator"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -63,16 +63,16 @@ var (
 	err      error
 )
 
-func listenToRPCRequests(rpcResponder interface{}, apier *apier.Apier, rpcAddress string, rpc_encoding string, getter rater.DataStorage, loggerDb rater.DataStorage) {
+func listenToRPCRequests(rpcResponder interface{}, apier *apier.Apier, rpcAddress string, rpc_encoding string, getter engine.DataStorage, loggerDb engine.DataStorage) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
-		rater.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
+		engine.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
 		exitChan <- true
 		return
 	}
 	defer l.Close()
 
-	rater.Logger.Info(fmt.Sprintf("<Rater> Listening for incomming RPC requests on %v", l.Addr()))
+	engine.Logger.Info(fmt.Sprintf("<Rater> Listening for incomming RPC requests on %v", l.Addr()))
 	rpc.Register(rpcResponder)
 	rpc.Register(apier)
 	var serveFunc func(io.ReadWriteCloser)
@@ -84,17 +84,17 @@ func listenToRPCRequests(rpcResponder interface{}, apier *apier.Apier, rpcAddres
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			rater.Logger.Err(fmt.Sprintf("<Rater> Accept error: %v", conn))
+			engine.Logger.Err(fmt.Sprintf("<Rater> Accept error: %v", conn))
 			continue
 		}
 
-		rater.Logger.Info(fmt.Sprintf("<Rater> New incoming connection: %v", conn.RemoteAddr()))
+		engine.Logger.Info(fmt.Sprintf("<Rater> New incoming connection: %v", conn.RemoteAddr()))
 		go serveFunc(conn)
 	}
 }
 
-func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
-	var connector rater.Connector
+func startMediator(responder *engine.Responder, loggerDb engine.DataStorage) {
+	var connector engine.Connector
 	if cfg.MediatorRater == INTERNAL {
 		connector = responder
 	} else {
@@ -118,15 +118,15 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 			}
 		}
 		if err != nil {
-			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("Could not connect to engine: %v", err))
 			exitChan <- true
 		}
-		connector = &rater.RPCClientConnector{Client: client}
+		connector = &engine.RPCClientConnector{Client: client}
 	}
 	var err error
 	medi, err = mediator.NewMediator(connector, loggerDb, cfg)
 	if err != nil {
-		rater.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
+		engine.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
 	}
 
@@ -135,8 +135,8 @@ func startMediator(responder *rater.Responder, loggerDb rater.DataStorage) {
 	}
 }
 
-func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage) {
-	var connector rater.Connector
+func startSessionManager(responder *engine.Responder, loggerDb engine.DataStorage) {
+	var connector engine.Connector
 	if cfg.SMRater == INTERNAL {
 		connector = responder
 	} else {
@@ -162,10 +162,10 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 
 		}
 		if err != nil {
-			rater.Logger.Crit(fmt.Sprintf("Could not connect to rater: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("Could not connect to engine: %v", err))
 			exitChan <- true
 		}
-		connector = &rater.RPCClientConnector{Client: client}
+		connector = &engine.RPCClientConnector{Client: client}
 	}
 	switch cfg.SMSwitchType {
 	case FS:
@@ -173,16 +173,16 @@ func startSessionManager(responder *rater.Responder, loggerDb rater.DataStorage)
 		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
 		errConn := sm.Connect(cfg)
 		if errConn != nil {
-			rater.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", errConn))
+			engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", errConn))
 		}
 	default:
-		rater.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.SMSwitchType))
+		engine.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.SMSwitchType))
 		exitChan <- true
 	}
 	exitChan <- true
 }
 
-func startCDRS(responder *rater.Responder, loggerDb rater.DataStorage) {
+func startCDRS(responder *engine.Responder, loggerDb engine.DataStorage) {
 	if cfg.CDRSMediator == INTERNAL {
 		for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
 			time.Sleep(time.Duration(i/2) * time.Second)
@@ -191,7 +191,7 @@ func startCDRS(responder *rater.Responder, loggerDb rater.DataStorage) {
 			}
 		}
 		if medi == nil {
-			rater.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
+			engine.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
 			exitChan <- true
 		}
 	}
@@ -202,11 +202,11 @@ func startCDRS(responder *rater.Responder, loggerDb rater.DataStorage) {
 
 func checkConfigSanity() error {
 	if cfg.SMEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
-		rater.Logger.Crit("The session manager must not be enabled on a worker rater (change [rater]/balancer to disabled)!")
+		engine.Logger.Crit("The session manager must not be enabled on a worker engine (change [engine]/balancer to disabled)!")
 		return errors.New("SessionManager on Worker")
 	}
 	if cfg.BalancerEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
-		rater.Logger.Crit("The balancer is enabled so it cannot connect to anatoher balancer (change [rater]/balancer to disabled)!")
+		engine.Logger.Crit("The balancer is enabled so it cannot connect to anatoher balancer (change [engine]/balancer to disabled)!")
 		return errors.New("Improperly configured balancer")
 	}
 
@@ -223,39 +223,39 @@ func main() {
 
 	cfg, err = config.NewCGRConfig(cfgPath)
 	if err != nil {
-		rater.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
+		engine.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
 		return
 	}
 	// some consitency checks
 	errCfg := checkConfigSanity()
 	if errCfg != nil {
-		rater.Logger.Crit(errCfg.Error())
+		engine.Logger.Crit(errCfg.Error())
 		return
 	}
 
-	var getter, loggerDb rater.DataStorage
-	getter, err = rater.ConfigureDatabase(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
+	var getter, loggerDb engine.DataStorage
+	getter, err = engine.ConfigureDatabase(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
 	if err != nil { // Cannot configure getter database, show stopper
-		rater.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
 	defer getter.Close()
-	rater.SetDataStorage(getter)
+	engine.SetDataStorage(getter)
 	if cfg.StorDBType == SAME {
 		loggerDb = getter
 	} else {
-		loggerDb, err = rater.ConfigureDatabase(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass)
+		loggerDb, err = engine.ConfigureDatabase(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass)
 		if err != nil { // Cannot configure logger database, show stopper
-			rater.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
+			engine.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return
 		}
 	}
 	defer loggerDb.Close()
-	rater.SetStorageLogger(loggerDb)
+	engine.SetStorageLogger(loggerDb)
 
 	if cfg.SMDebitInterval > 0 {
 		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval)); err == nil {
-			rater.SetDebitPeriod(dp)
+			engine.SetDebitPeriod(dp)
 		}
 	}
 
@@ -264,25 +264,25 @@ func main() {
 		go registerToBalancer()
 		go stopRaterSingnalHandler()
 	}
-	responder := &rater.Responder{ExitChan: exitChan}
+	responder := &engine.Responder{ExitChan: exitChan}
 	apier := &apier.Apier{StorDb: loggerDb, DataDb: getter}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
-		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
+		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
 		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding, getter, loggerDb)
 	}
 	if cfg.BalancerEnabled {
-		rater.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
+		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
 		go listenToRPCRequests(responder, apier, cfg.BalancerListen, cfg.RPCEncoding, getter, loggerDb)
 		if cfg.RaterEnabled {
-			rater.Logger.Info("Starting internal rater.")
-			bal.AddClient("local", new(rater.ResponderWorker))
+			engine.Logger.Info("Starting internal engine.")
+			bal.AddClient("local", new(engine.ResponderWorker))
 		}
 	}
 
 	if cfg.SchedulerEnabled {
-		rater.Logger.Info("Starting CGRateS Scheduler.")
+		engine.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
 			go reloadSchedulerSingnalHandler(sched, getter)
@@ -293,21 +293,21 @@ func main() {
 	}
 
 	if cfg.SMEnabled {
-		rater.Logger.Info("Starting CGRateS SessionManager.")
+		engine.Logger.Info("Starting CGRateS SessionManager.")
 		go startSessionManager(responder, loggerDb)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler()
 	}
 
 	if cfg.MediatorEnabled {
-		rater.Logger.Info("Starting CGRateS Mediator.")
+		engine.Logger.Info("Starting CGRateS Mediator.")
 		go startMediator(responder, loggerDb)
 	}
 
 	if cfg.CDRSListen != "" {
-		rater.Logger.Info("Starting CGRateS CDR Server.")
+		engine.Logger.Info("Starting CGRateS CDR Server.")
 		go startCDRS(responder, loggerDb)
 	}
 	<-exitChan
-	rater.Logger.Info("Stopped all components. CGRateS shutdown!")
+	engine.Logger.Info("Stopped all components. CGRateS shutdown!")
 }

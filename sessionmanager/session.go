@@ -20,7 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 	"time"
@@ -30,10 +30,10 @@ import (
 // actions and a channel to signal end of the debit loop.
 type Session struct {
 	uuid           string
-	callDescriptor *rater.CallDescriptor
+	callDescriptor *engine.CallDescriptor
 	sessionManager SessionManager
 	stopDebit      chan bool
-	CallCosts      []*rater.CallCost
+	CallCosts      []*engine.CallCost
 }
 
 // Creates a new session and starts the debit loop
@@ -44,15 +44,15 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	}
 	// Make sure cgr_type is enforced even if not set by FreeSWITCH
 	if err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err != nil {
-		rater.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
+		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
 	startTime, err := ev.GetStartTime(START_TIME)
 	if err != nil {
-		rater.Logger.Err("Error parsing answer event start time, using time.Now!")
+		engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
 
-	cd := &rater.CallDescriptor{
+	cd := &engine.CallDescriptor{
 		Direction:   ev.GetDirection(),
 		Tenant:      ev.GetTenant(),
 		TOR:         ev.GetTOR(),
@@ -102,7 +102,7 @@ func (s *Session) getSessionDurationFrom(now time.Time) (d time.Duration) {
 	seconds := now.Sub(s.callDescriptor.TimeStart).Seconds()
 	d, err := time.ParseDuration(fmt.Sprintf("%ds", int(seconds)))
 	if err != nil {
-		rater.Logger.Err(fmt.Sprintf("Cannot parse session duration %v", seconds))
+		engine.Logger.Err(fmt.Sprintf("Cannot parse session duration %v", seconds))
 	}
 	return
 }
@@ -114,7 +114,7 @@ func (s *Session) GetSessionDuration() time.Duration {
 
 // Stops the debit loop
 func (s *Session) Close() {
-	rater.Logger.Debug(fmt.Sprintf("Stopping debit for %s", s.uuid))
+	engine.Logger.Debug(fmt.Sprintf("Stopping debit for %s", s.uuid))
 	if s == nil {
 		return
 	}
@@ -140,9 +140,9 @@ func (s *Session) SaveOperations() {
 			firstCC.Merge(cc)
 		}
 		if s.sessionManager.GetDbLogger() == nil {
-			rater.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
+			engine.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
 		}
-		s.sessionManager.GetDbLogger().LogCallCost(s.uuid, rater.SESSION_MANAGER_SOURCE, firstCC)
-		rater.Logger.Debug(fmt.Sprintf("<SessionManager> End of call, having costs: %v", firstCC.String()))
+		s.sessionManager.GetDbLogger().LogCallCost(s.uuid, engine.SESSION_MANAGER_SOURCE, firstCC)
+		engine.Logger.Debug(fmt.Sprintf("<SessionManager> End of call, having costs: %v", firstCC.String()))
 	}()
 }

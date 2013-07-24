@@ -20,7 +20,7 @@ package main
 
 import (
 	"flag"
-	"github.com/cgrates/cgrates/rater"
+	"github.com/cgrates/cgrates/engine"
 	"log"
 	"os"
 	"runtime"
@@ -57,16 +57,16 @@ func main() {
 	}
 	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := rater.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := engine.CallDescriptor{Direction: "OUT", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 
-	getter, err := rater.NewRedisStorage("localhost:6379", 10, "")
-	//getter, err := rater.NewMongoStorage("localhost", "cgrates")
+	getter, err := engine.NewRedisStorage("localhost:6379", 10, "")
+	//getter, err := engine.NewMongoStorage("localhost", "cgrates")
 	defer getter.Close()
 
-	rater.SetDataStorage(getter)
+	engine.SetDataStorage(getter)
 
 	log.Printf("Runnning %d cycles...", *runs)
-	var result *rater.CallCost
+	var result *engine.CallCost
 	j := 0
 	start := time.Now()
 	for i := 0; i < *runs; i++ {
