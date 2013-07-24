@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -114,10 +115,11 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 			ts.SetInterval(i)
 			splitTime := ts.TimeStart.Add(time.Duration(price.StartSecond-ts.GetGroupStart()) * time.Second)
 			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
+			ts.TimeEnd = splitTime
 			nts.SetInterval(i)
 			nts.CallDuration = ts.CallDuration
-			ts.CallDuration = ts.CallDuration - nts.GetDuration().Seconds()
-			ts.TimeEnd = splitTime
+			ts.CallDuration = math.Max(0, ts.CallDuration-nts.GetDuration().Seconds())
+
 			return
 		}
 	}
@@ -128,7 +130,7 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 		ts.SetInterval(i)
 		return
 	}
-	// if only the start time is in the interval split the interval
+	// if only the start time is in the interval split the interval to the right
 	if i.Contains(ts.TimeStart) {
 		//Logger.Debug("Start in interval")
 		splitTime := i.getRightMargin(ts.TimeStart)
@@ -138,10 +140,12 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 		}
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 		ts.TimeEnd = splitTime
+		nts.CallDuration = ts.CallDuration
+		ts.CallDuration = math.Max(0, ts.CallDuration-nts.GetDuration().Seconds())
 
 		return
 	}
-	// if only the end time is in the interval split the interval
+	// if only the end time is in the interval split the interval to the left
 	if i.Contains(ts.TimeEnd) {
 		//Logger.Debug("End in interval")
 		splitTime := i.getLeftMargin(ts.TimeEnd)
@@ -152,6 +156,9 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 		ts.TimeEnd = splitTime
 
 		nts.SetInterval(i)
+		nts.CallDuration = ts.CallDuration
+		ts.CallDuration = math.Max(0, ts.CallDuration-nts.GetDuration().Seconds())
+
 		return
 	}
 	return
@@ -203,10 +210,7 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 }
 
 func (ts *TimeSpan) GetGroupStart() float64 {
-	if ts.CallDuration == 0 {
-		return 0
-	}
-	return ts.CallDuration - ts.GetDuration().Seconds()
+	return math.Max(0, ts.CallDuration-ts.GetDuration().Seconds())
 }
 
 func (ts *TimeSpan) GetGroupEnd() float64 {
