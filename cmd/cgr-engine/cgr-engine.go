@@ -26,8 +26,8 @@ import (
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -252,6 +252,7 @@ func main() {
 	}
 	defer loggerDb.Close()
 	engine.SetStorageLogger(loggerDb)
+	engine.SetRoundingMethodAndDecimals(cfg.RaterRoundingMethod, cfg.RaterRoundingDecimals)
 
 	if cfg.SMDebitInterval > 0 {
 		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval)); err == nil {
