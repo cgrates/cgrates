@@ -18,13 +18,110 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-// Import tariff plan from csv into storDb
+import (
+	"io"
+	"io/ioutil"
+	"log"
+	"github.com/cgrates/cgrates/utils"
+)
 
-type TPImporterCSV struct {
-	sep               rune
-	storDb DataStorage
+
+// Import tariff plan from csv into storDb
+type TPCSVImporter struct {
+	TPid     string // Load data on this tpid
+	StorDb DataStorage // StorDb connection handle
+	DirPath   string // Directory path to import from
+	Sep 		rune // Separator in the csv file
+	Verbose		bool // If true will print a detailed information instead of silently discarding it
 }
 
-func (self *TPImporterCSV) ProcessFolder (fPath string) (err error) {
+func (self *TPCSVImporter) Run() error {
+
+	// Maps csv file to handler which should process it
+	fileHandlers := map[string]func(string)error{
+		utils.TIMINGS_CSV: self.importTimings,
+		utils.DESTINATIONS_CSV: self.importDestinations,
+		utils.RATES_CSV: self.importRates,
+		utils.DESTINATION_RATES_CSV: self.importDestinationRates,
+		utils.DESTRATE_TIMINGS_CSV: self.importDestRateTimings,
+		utils.RATE_PROFILES_CSV: self.importRatingProfiles,
+		utils.ACTIONS_CSV: self.importActions,
+		utils.ACTION_TIMINGS_CSV: self.importActionTimings,
+		utils.ACTION_TRIGGERS_CSV: self.importActionTriggers,
+		utils.ACCOUNT_ACTIONS_CSV: self.importAccountActions,
+		}
+
+	files, _ := ioutil.ReadDir(self.DirPath)
+	for _, f := range files {
+		fHandler,hasName := fileHandlers[f.Name()]
+		if !hasName {
+			continue
+		}
+		fHandler( f.Name() )
+	}
 	return nil
 }
+
+// Handler importing timings from file, saved row by row to storDb
+func (self *TPCSVImporter) importTimings(fn string) error {
+	fParser, err := NewTPCSVFileParser( self.DirPath, fn )
+	if err!=nil {
+		return err
+	}
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		tm := NewTiming( record... )
+		if err := self.StorDb.SetTPTiming(self.TPid, tm); err != nil {
+			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+		}
+	}
+	return nil
+}
+
+func (self *TPCSVImporter) importDestinations(fPath string) error {
+	return nil
+}
+
+func (self *TPCSVImporter) importRates(fPath string) error {
+	return nil
+}
+
+func (self *TPCSVImporter) importDestinationRates(fPath string) error {
+	return nil
+}
+
+func (self *TPCSVImporter) importDestRateTimings(fPath string) error {
+	return nil
+}
+
+func (self *TPCSVImporter) importRatingProfiles(fPath string) error {
+	return nil
+}
+
+func (self *TPCSVImporter) importActions(fPath string) error {
+	return nil
+}
+
+func (self *TPCSVImporter) importActionTimings(fPath string) error {
+	return nil
+}
+
+func (self *TPCSVImporter) importActionTriggers(fPath string) error {
+	return nil
+}
+
+func (self *TPCSVImporter) importAccountActions(fPath string) error {
+	return nil
+}
+
+

@@ -33,7 +33,7 @@ import (
 type CSVReader struct {
 	sep               rune
 	storage           DataStorage
-	readerFunc        func(string, rune) (*csv.Reader, *os.File, error)
+	readerFunc        func(string, rune, int) (*csv.Reader, *os.File, error)
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
@@ -74,20 +74,24 @@ func NewStringCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn
 	return c
 }
 
-func openFileCSVReader(fn string, comma rune) (csvReader *csv.Reader, fp *os.File, err error) {
+func openFileCSVReader(fn string, comma rune, nrFields int) (csvReader *csv.Reader, fp *os.File, err error) {
 	fp, err = os.Open(fn)
 	if err != nil {
 		return
 	}
 	csvReader = csv.NewReader(fp)
 	csvReader.Comma = comma
+	csvReader.Comment = utils.COMMENT_CHAR
+	csvReader.FieldsPerRecord = nrFields
 	csvReader.TrailingComma = true
 	return
 }
 
-func openStringCSVReader(data string, comma rune) (csvReader *csv.Reader, fp *os.File, err error) {
+func openStringCSVReader(data string, comma rune, nrFields int) (csvReader *csv.Reader, fp *os.File, err error) {
 	csvReader = csv.NewReader(strings.NewReader(data))
 	csvReader.Comma = comma
+	csvReader.Comment = utils.COMMENT_CHAR
+	csvReader.FieldsPerRecord = nrFields
 	csvReader.TrailingComma = true
 	return
 }
@@ -164,7 +168,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 }
 
 func (csvr *CSVReader) LoadDestinations() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.destinationsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.destinationsFn, csvr.sep, utils.DESTINATION_RATES_NRCOLS)
 	if err != nil {
 		log.Print("Could not load destinations file: ", err)
 		// allow writing of the other values
@@ -197,7 +201,7 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 }
 
 func (csvr *CSVReader) LoadTimings() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.timingsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.timingsFn, csvr.sep, utils.TIMINGS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load timings file: ", err)
 		// allow writing of the other values
@@ -219,7 +223,7 @@ func (csvr *CSVReader) LoadTimings() (err error) {
 }
 
 func (csvr *CSVReader) LoadRates() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.ratesFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.ratesFn, csvr.sep, utils.RATES_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rates file: ", err)
 		// allow writing of the other values
@@ -245,7 +249,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 }
 
 func (csvr *CSVReader) LoadDestinationRates() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.destinationratesFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.destinationratesFn, csvr.sep, utils.DESTINATION_RATES_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rates file: ", err)
 		// allow writing of the other values
@@ -276,7 +280,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 }
 
 func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.destinationratetimingsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.destinationratetimingsFn, csvr.sep, utils.DESTRATE_TIMINGS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rate timings file: ", err)
 		// allow writing of the other values
@@ -313,7 +317,7 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 }
 
 func (csvr *CSVReader) LoadRatingProfiles() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.ratingprofilesFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.ratingprofilesFn, csvr.sep, utils.RATE_PROFILES_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rating profiles file: ", err)
 		// allow writing of the other values
@@ -360,7 +364,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 }
 
 func (csvr *CSVReader) LoadActions() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.actionsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.actionsFn, csvr.sep, utils.ACTIONS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load action triggers file: ", err)
 		// allow writing of the other values
@@ -429,7 +433,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 }
 
 func (csvr *CSVReader) LoadActionTimings() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep, utils.ACTION_TIMINGS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load action triggers file: ", err)
 		// allow writing of the other values
@@ -474,7 +478,7 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 }
 
 func (csvr *CSVReader) LoadActionTriggers() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.actiontriggersFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.actiontriggersFn, csvr.sep, utils.ACTION_TRIGGERS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load action triggers file: ", err)
 		// allow writing of the other values
@@ -513,7 +517,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 }
 
 func (csvr *CSVReader) LoadAccountActions() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.accountactionsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.accountactionsFn, csvr.sep, utils.ACCOUNT_ACTIONS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load account actions file: ", err)
 		// allow writing of the other values

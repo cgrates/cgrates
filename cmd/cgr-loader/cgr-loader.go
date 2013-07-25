@@ -26,7 +26,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"log"
 	"path"
-	"regexp"
 )
 
 var (
@@ -50,17 +49,11 @@ var (
 	tpid = flag.String("tpid", "", "The tariff plan id from the database")
 	dataPath = flag.String("path", ".", "The path containing the data files")
 	version  = flag.Bool("version", false, "Prints the application version.")
+	verbose  = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	fromStorDb = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 
-	sep                      rune
 )
-
-type validator struct {
-	fn      string
-	re      *regexp.Regexp
-	message string
-}
 
 func main() {
 	flag.Parse()
@@ -72,64 +65,42 @@ func main() {
 	var dataDb, storDb engine.DataStorage
 	// Init necessary db connections
 	if *fromStorDb {
-		dataDb, errDataDb = engine.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
-		storDb, errStorDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+		dataDb, errDataDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+		storDb, errStorDb = engine.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
 	} else if *toStorDb { // Import from csv files to storDb
-		storDb, errStorDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+		storDb, errStorDb = engine.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
 	} else { // Default load from csv files to dataDb
-		dataDb, errDataDb = engine.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
+		dataDb, errDataDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
 	}
-	defer dataDb.Close()
-	defer storDb.Close()
+	// Defer databases opened to be closed when we are done
+	for _,db := range []engine.DataStorage{ dataDb, storDb } {
+		if db != nil { defer db.Close() }
+	}
+	// Stop on db errors
 	for _,err = range []error{errDataDb, errStorDb} {
 		if err != nil {
 			log.Fatalf("Could not open database connection: %v", err)
 		}
 	}
-
 	var loader engine.TPLoader
-	if *fromStorDb {
+	if *fromStorDb { // Load Tariff Plan from storDb into dataDb
 		loader = engine.NewDbReader(storDb, dataDb, *tpid)
-	} else { // Default load from csv files to dataDb
-		dataFilesValidators := []*validator{
-			&validator{utils.DESTINATIONS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
-				"Tag[0-9A-Za-z_],Prefix[0-9]"},
-			&validator{utils.TIMINGS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*all\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
-				"Tag[0-9A-Za-z_],Years[0-9;]|*all|<empty>,Months[0-9;]|*all|<empty>,MonthDays[0-9;]|*all|<empty>,WeekDays[0-9;]|*all|<empty>,Time[0-9:]|*asap(00:00:00)"},
-			&validator{utils.RATES_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
-				"Tag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
-			&validator{utils.DESTINATION_RATES_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
-				"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],RateTag[0-9A-Za-z_]"},
-			&validator{utils.DESTRATE_TIMINGS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
-				"Tag[0-9A-Za-z_],DestinationRatesTag[0-9A-Za-z_],TimingProfile[0-9A-Za-z_],Weight[0-9.]"},
-			&validator{utils.RATE_PROFILES_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\*all\s*,\s*|[\w:\.]+\s*,\s*){1}(?:\w*\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}$`),
-				"Tenant[0-9A-Za-z_],TOR[0-9],Direction OUT|IN,Subject[0-9A-Za-z_:.]|*all,RatesFallbackSubject[0-9A-Za-z_]|<empty>,RatesTimingTag[0-9A-Za-z_],ActivationTime[[0-9T:X]] (2012-01-01T00:00:00Z)"},
-			&validator{utils.ACTIONS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:ABSOLUTE\s*,\s*|PERCENT\s*,\s*|\s*,\s*){1}(?:\d*\.?\d*\s*,?\s*){3}$`),
-				"Tag[0-9A-Za-z_],Action[0-9A-Za-z_],BalanceTag[0-9A-Za-z_],Direction OUT|IN,Units[0-9],DestinationTag[0-9A-Za-z_]|*all,PriceType ABSOLUT|PERCENT,PriceValue[0-9.],MinutesWeight[0-9.],Weight[0-9.]"},
-			&validator{utils.ACTION_TIMINGS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
-				"Tag[0-9A-Za-z_],ActionsTag[0-9A-Za-z_],TimingTag[0-9A-Za-z_],Weight[0-9.]"},
-			&validator{utils.ACTION_TRIGGERS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:MONETARY\s*,\s*|SMS\s*,\s*|MINUTES\s*,\s*|INTERNET\s*,\s*|INTERNET_TIME\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\.?\d*\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d+\.?\d*){1}$`),
-				"Tag[0-9A-Za-z_],BalanceTag MONETARY|SMS|MINUTES|INTERNET|INTERNET_TIME,Direction OUT|IN,ThresholdValue[0-9.],DestinationTag[0-9A-Za-z_]|*all,ActionsTag[0-9A-Za-z_],Weight[0-9.]"},
-			&validator{utils.ACCOUNT_ACTIONS_CSV,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:[\w:.]+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\w+\s*,?\s*){2}$`),
-				"Tenant[0-9A-Za-z_],Account[0-9A-Za-z_:.],Direction OUT|IN,ActionTimingsTag[0-9A-Za-z_],ActionTriggersTag[0-9A-Za-z_]"},
+	} else if *toStorDb { // Import files from a directory into storDb
+		if *tpid == "" {
+			log.Fatal("TPid required, please define it via -tpid command argument.")
 		}
-		for _, v := range dataFilesValidators {
-			err := engine.ValidateCSVData(path.Join(*dataPath, v.fn), v.re)
+		csvImporter := engine.TPCSVImporter{ *tpid, storDb, *dataPath, ',', *verbose }
+		if errImport := csvImporter.Run(); errImport != nil {
+			log.Fatal(errImport)
+		}
+		return
+	} else { // Default load from csv files to dataDb
+		for fn, v := range engine.FileValidators {
+			err := engine.ValidateCSVData(path.Join(*dataPath, fn), v.Rule)
 			if err != nil {
-				log.Fatal(err, "\n\t", v.message)
+				log.Fatal(err, "\n\t", v.Message)
 			}
 		}
-		//sep = []rune(*separator)[0]
 		loader = engine.NewFileCSVReader(dataDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.DESTRATE_TIMINGS_CSV, utils.RATE_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
 	}
 
