@@ -168,7 +168,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 }
 
 func (csvr *CSVReader) LoadDestinations() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.destinationsFn, csvr.sep, utils.DESTINATION_RATES_NRCOLS)
+	csvReader, fp, err := csvr.readerFunc(csvr.destinationsFn, csvr.sep, utils.DESTINATIONS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load destinations file: ", err)
 		// allow writing of the other values
@@ -177,13 +177,10 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 	if fp != nil {
 		defer fp.Close()
 	}
+	fmt.Println("Should start loading destinations")
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-
+		fmt.Println("Reading destination line", record)
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		var dest *Destination
 		for _, d := range csvr.destinations {
 			if d.Id == tag {
@@ -212,11 +209,6 @@ func (csvr *CSVReader) LoadTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-
 		csvr.timings[tag] = NewTiming(record...)
 	}
 	return
@@ -234,10 +226,6 @@ func (csvr *CSVReader) LoadRates() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		var r *Rate
 		r, err = NewRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
 		if err != nil {
@@ -260,14 +248,11 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		r, exists := csvr.rates[record[2]]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get rating for tag %v", record[2]))
+			return errors.New(fmt.Sprintf("Could not get rates for tag %v", record[2]))
 		}
+		//ToDo: Not checking presence of destinations?
 		dr := &DestinationRate{
 			Tag:             tag,
 			DestinationsTag: record[1],
@@ -291,11 +276,6 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-
 		t, exists := csvr.timings[record[2]]
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get timing for tag %v", record[2]))
@@ -327,18 +307,10 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tenant" {
-			// skip header line
-			continue
-		}
-		if len(record) != 7 {
-			return errors.New(fmt.Sprintf("Malformed rating profile: %v", record))
-		}
-		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[4]
-		at, err := time.Parse(time.RFC3339, record[6])
+		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
+		at, err := time.Parse(time.RFC3339, record[4])
 		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[6]))
+			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[4]))
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
 		rp, ok := csvr.ratingProfiles[key]
@@ -375,19 +347,17 @@ func (csvr *CSVReader) LoadActions() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
-		unix, err := strconv.ParseInt(record[5], 10, 64)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse expiration date: %v", err))
+		var expiryTime time.Time // Empty initialized time represents never expire
+		if record[5] != "*unlimited" { // ToDo: Expand here for other meta tags or go way of adding time for expiry
+			expiryTime, err = time.Parse(time.RFC3339, record[5])
+			if err != nil {
+				return errors.New(fmt.Sprintf("Could not parse expiry time: %v", err))
+			}
 		}
-		expDate := time.Unix(unix, 0)
 		var a *Action
 		if record[2] != MINUTES {
 			a = &Action{
@@ -395,7 +365,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				BalanceId:      record[2],
 				Direction:      record[3],
 				Units:          units,
-				ExpirationDate: expDate,
+				ExpirationDate: expiryTime, //ToDo: Fix ExpirationDate as string to have ability of storing + reported on run time
 			}
 		} else {
 			value, err := strconv.ParseFloat(record[8], 64)
@@ -416,14 +386,14 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				BalanceId:      record[2],
 				Direction:      record[3],
 				Weight:         weight,
-				ExpirationDate: expDate,
+				ExpirationDate: expiryTime,
 				MinuteBucket: &MinuteBucket{
 					Seconds:        units,
 					Weight:         minutesWeight,
 					Price:          value,
 					PriceType:      record[7],
 					DestinationId:  record[6],
-					ExpirationDate: expDate,
+					ExpirationDate: expiryTime,
 				},
 			}
 		}
@@ -444,10 +414,6 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		_, exists := csvr.actions[record[1]]
 		if !exists {
 			return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", record[1]))
@@ -489,10 +455,6 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		value, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action trigger value: %v", err))
@@ -527,10 +489,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		if record[0] == "Tenant" {
-			continue
-		}
-		tag := fmt.Sprintf("%s:%s:%s", record[2], record[0], record[1])
+		tag := fmt.Sprintf("%s:%s:%s", record[2][1:], record[0], record[1]) // Ignore * in front of direction
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
 		if record[4] != "" && !exists {
 			// only return error if there was something ther for the tag

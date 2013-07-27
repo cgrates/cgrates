@@ -146,7 +146,7 @@ func main() {
 	}
 
 	// write maps to database
-	if err := loader.WriteToDatabase(*flush, true); err != nil {
+	if err := loader.WriteToDatabase(*flush, *verbose); err != nil {
 		log.Fatal("Could not write to database: ", err)
 	}
 }
