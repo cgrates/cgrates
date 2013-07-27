@@ -24,7 +24,6 @@ import (
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 	"log/syslog"
-	"math"
 	"strings"
 	"time"
 )
@@ -51,26 +50,11 @@ var (
 	storageGetter, _ = NewMapStorage()
 	//storageGetter, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
 	//storageGetter, _ = NewRedisStorage(db_server+":6379", 11, "")
-	storageLogger = storageGetter
-	debitPeriod   = 10 * time.Second
+	storageLogger    = storageGetter
+	debitPeriod      = 10 * time.Second
+	roundingMethod   = "*middle"
+	roundingDecimals = 4
 )
-
-/*
-Utility function for rounding a float to a certain number of decimals (not present in math).
-*/
-func round(val float64, prec int) float64 {
-
-	var rounder float64
-	intermed := val * math.Pow(10, float64(prec))
-
-	if val >= 0.5 {
-		rounder = math.Ceil(intermed)
-	} else {
-		rounder = math.Floor(intermed)
-	}
-
-	return rounder / math.Pow(10, float64(prec))
-}
 
 /*
 The input stucture that contains call information.
@@ -102,9 +86,7 @@ func (cd *CallDescriptor) GetUserBalanceKey() string {
 	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 }
 
-/*
-Gets and caches the user balance information.
-*/
+// Gets and caches the user balance information.
 func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 	if cd.userBalance == nil {
 		cd.userBalance, err = storageGetter.GetUserBalance(cd.GetUserBalanceKey())
@@ -112,11 +94,15 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 	return cd.userBalance, err
 }
 
-/*
-Exported method to set the storage getter.
-*/
+// Exported method to set the storage getter.
 func SetDataStorage(sg DataStorage) {
 	storageGetter = sg
+}
+
+// Sets the global rounding method and decimal precision for GetCost method
+func SetRoundingMethodAndDecimals(rm string, rd int) {
+	roundingMethod = rm
+	roundingDecimals = rd
 }
 
 /*
@@ -285,7 +271,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 		cost += ts.getCost(cd)
 	}
-
+	cost = utils.Round(cost, roundingDecimals, roundingMethod)
 	cc := &CallCost{
 		Direction:   cd.Direction,
 		TOR:         cd.TOR,
