@@ -50,8 +50,8 @@ var (
 	dataPath = flag.String("path", ".", "The path containing the data files")
 	version  = flag.Bool("version", false, "Prints the application version.")
 	verbose  = flag.Bool("verbose", false, "Enable detailed verbose logging output")
-	fromStorDb = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
-	toStorDb = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
+	fromStorDb = flag.Bool("from-stordb", false, "Load the tariff plan from storDb to dataDb")
+	toStorDb = flag.Bool("to-stordb", false, "Import the tariff plan from files to storDb")
 
 )
 

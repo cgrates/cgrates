@@ -177,9 +177,7 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	fmt.Println("Should start loading destinations")
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		fmt.Println("Reading destination line", record)
 		tag := record[0]
 		var dest *Destination
 		for _, d := range csvr.destinations {
@@ -489,7 +487,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := fmt.Sprintf("%s:%s:%s", record[2][1:], record[0], record[1]) // Ignore * in front of direction
+		tag := fmt.Sprintf("%s:%s:%s", record[2], record[0], record[1])
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
 		if record[4] != "" && !exists {
 			// only return error if there was something ther for the tag
