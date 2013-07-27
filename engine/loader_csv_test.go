@@ -25,7 +25,7 @@ import (
 
 var (
 	destinations = `
-Tag,Prefix
+#Tag,Prefix
 GERMANY,49
 GERMANY_O2,41
 GERMANY_PREMIUM,43
@@ -82,17 +82,17 @@ vdf,0,*out,minu,2012-01-01T00:00:00Z,EVENING,
 vdf,0,*out,*any,2012-02-28T00:00:00Z,EVENING,
 vdf,0,*out,one,2012-02-28T00:00:00Z,STANDARD,
 vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
-vdf,0,*out,fall,one,2012-02-28T00:00:00Z,PREMIUM|rif
+vdf,0,*out,fall,2012-02-28T00:00:00Z,PREMIUM,rif
 `
 	actions = `
-MINI,TOPUP,MINUTES,*out,100,1374239002,NAT,*absolute,0,10,10
+MINI,TOPUP,MINUTES,*out,100,2013-07-19T13:03:22Z,NAT,*absolute,0,10,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 `
 	actionTriggers = `
-STANDARD_TRIGGER,MINUTES,*out,COUNTER,10,GERMANY_O2,SOME_1,10
-STANDARD_TRIGGER,MINUTES,*out,BALANCE,200,GERMANY,SOME_2,10
+STANDARD_TRIGGER,MINUTES,*out,*min_counter,10,GERMANY_O2,SOME_1,10
+STANDARD_TRIGGER,MINUTES,*out,*max_balance,200,GERMANY,SOME_2,10
 `
 	accountActions = `
 vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
@@ -144,9 +144,6 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 	if len(csvr.activationPeriods) != 4 {
 		t.Error("Failed to load rate timings: ", csvr.activationPeriods)
 	}
-	//for _, ap := range csvr.activationPeriods {
-	//log.Print(ap.Intervals[0].Prices[1])
-	//}
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
