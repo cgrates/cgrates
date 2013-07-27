@@ -87,7 +87,7 @@ func main() {
 		loader = engine.NewDbReader(storDb, dataDb, *tpid)
 	} else if *toStorDb { // Import files from a directory into storDb
 		if *tpid == "" {
-			log.Fatal("TPid required, please define it via -tpid command argument.")
+			log.Fatal("TPid required, please define it via *-tpid* command argument.")
 		}
 		csvImporter := engine.TPCSVImporter{ *tpid, storDb, *dataPath, ',', *verbose }
 		if errImport := csvImporter.Run(); errImport != nil {

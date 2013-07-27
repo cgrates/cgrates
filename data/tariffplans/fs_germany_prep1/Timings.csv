@@ -1,0 +1,7 @@
+#Tag,Years,Months,MonthDays,WeekDays,Time
+ALWAYS,*any,*any,*any,*any,00:00:00
+ASAP,*any,*any,*any,*any,*asap
+OFFPEAK_MORNING,*any,*any,*any,1;2;3;4;5,00:00:00
+PEAK,*any,*any,*any,1;2;3;4;5,08:00:00
+OFFPEAK_EVENING,*any,*any,*any,1;2;3;4;5,20:00:00
+WEEKENDS,*any,*any,*any,6;7,00:00:00
