@@ -35,21 +35,23 @@ type TPCSVImporter struct {
 	Verbose		bool // If true will print a detailed information instead of silently discarding it
 }
 
+var fileHandlers = map[string]func(*TPCSVImporter,string) error{
+		utils.TIMINGS_CSV: (*TPCSVImporter).importTimings,
+		utils.DESTINATIONS_CSV: (*TPCSVImporter).importDestinations,
+		utils.RATES_CSV: (*TPCSVImporter).importRates,
+		utils.DESTINATION_RATES_CSV: (*TPCSVImporter).importDestinationRates,
+		utils.DESTRATE_TIMINGS_CSV: (*TPCSVImporter).importDestRateTimings,
+		utils.RATE_PROFILES_CSV: (*TPCSVImporter).importRatingProfiles,
+		utils.ACTIONS_CSV: (*TPCSVImporter).importActions,
+		utils.ACTION_TIMINGS_CSV: (*TPCSVImporter).importActionTimings,
+		utils.ACTION_TRIGGERS_CSV: (*TPCSVImporter).importActionTriggers,
+		utils.ACCOUNT_ACTIONS_CSV: (*TPCSVImporter).importAccountActions,
+		}
+
 func (self *TPCSVImporter) Run() error {
 
 	// Maps csv file to handler which should process it
-	fileHandlers := map[string]func(string)error{
-		utils.TIMINGS_CSV: self.importTimings,
-		utils.DESTINATIONS_CSV: self.importDestinations,
-		utils.RATES_CSV: self.importRates,
-		utils.DESTINATION_RATES_CSV: self.importDestinationRates,
-		utils.DESTRATE_TIMINGS_CSV: self.importDestRateTimings,
-		utils.RATE_PROFILES_CSV: self.importRatingProfiles,
-		utils.ACTIONS_CSV: self.importActions,
-		utils.ACTION_TIMINGS_CSV: self.importActionTimings,
-		utils.ACTION_TRIGGERS_CSV: self.importActionTriggers,
-		utils.ACCOUNT_ACTIONS_CSV: self.importAccountActions,
-		}
+	
 
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
@@ -57,7 +59,7 @@ func (self *TPCSVImporter) Run() error {
 		if !hasName {
 			continue
 		}
-		fHandler( f.Name() )
+		fHandler( self, f.Name() )
 	}
 	return nil
 }
