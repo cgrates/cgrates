@@ -175,7 +175,7 @@ func (rs *RedisStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error)
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (rs *RedisStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
+func (rs *RedisStorage) SetTPDestRateTimings(tpid string, drts map[string][]*DestinationRateTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

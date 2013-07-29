@@ -364,17 +364,19 @@ func (self *SQLStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error)
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
-	if len(drt.DestRateTimings) == 0 {
+func (self *SQLStorage) SetTPDestRateTimings(tpid string, drts map[string][]*DestinationRateTiming) error {
+	if len(drts) == 0 {
 		return nil //Nothing to set
 	}
-	// Using multiple values in query to spare some network processing time
 	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES ", utils.TBL_TP_DESTRATE_TIMINGS)
-	for idx, drtPair := range drt.DestRateTimings {
-		if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
-			qry += ","
+	for drtId, drtRows := range drts {
+		for idx, drt := range drtRows {
+			if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
+				qry += ","
+			}
+			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
+				tpid, drtId, drt.DestinationRatesTag, drt.TimingsTag, drt.Weight)
 		}
-		qry += fmt.Sprintf("('%s','%s','%s','%s',%f)", drt.TPid, drt.DestRateTimingId, drtPair.DestRatesId, drtPair.TimingId, drtPair.Weight)
 	}
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err

@@ -145,7 +145,7 @@ func (ms *MapStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
+func (ms *MapStorage) SetTPDestRateTimings(tpid string, drts map[string][]*DestinationRateTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

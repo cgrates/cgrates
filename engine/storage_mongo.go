@@ -220,7 +220,7 @@ func (ms *MongoStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error)
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
+func (ms *MongoStorage) SetTPDestRateTimings(tpid string, drts map[string][]*DestinationRateTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

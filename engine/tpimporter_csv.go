@@ -22,6 +22,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"strconv"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -171,9 +172,6 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 			continue
 		}
 		dr := &DestinationRate{record[0], record[1], record[2], nil} 
-		if err != nil {
-			return err
-		}
 		if err := self.StorDb.SetTPDestinationRates( self.TPid, 
 			map[string][]*DestinationRate{ dr.Tag: []*DestinationRate{dr} } ); err != nil {
 			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
@@ -182,27 +180,60 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 	return nil
 }
 
-func (self *TPCSVImporter) importDestRateTimings(fPath string) error {
+func (self *TPCSVImporter) importDestRateTimings(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	fParser, err := NewTPCSVFileParser( self.DirPath, fn )
+	if err!=nil {
+		return err
+	}
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		weight, err := strconv.ParseFloat(record[3], 64)
+		if err != nil {
+			log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			continue
+		}
+		drt := &DestinationRateTiming{Tag: record[0], 
+					DestinationRatesTag: record[1], 
+					Weight: weight, 
+					TimingsTag: record[2],
+					}
+		if err := self.StorDb.SetTPDestRateTimings( self.TPid, map[string][]*DestinationRateTiming{drt.Tag:[]*DestinationRateTiming{drt}}); err != nil {
+			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+		}
+	}
 	return nil
 }
 
-func (self *TPCSVImporter) importRatingProfiles(fPath string) error {
+func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 	return nil
 }
 
-func (self *TPCSVImporter) importActions(fPath string) error {
+func (self *TPCSVImporter) importActions(fn string) error {
 	return nil
 }
 
-func (self *TPCSVImporter) importActionTimings(fPath string) error {
+func (self *TPCSVImporter) importActionTimings(fn string) error {
 	return nil
 }
 
-func (self *TPCSVImporter) importActionTriggers(fPath string) error {
+func (self *TPCSVImporter) importActionTriggers(fn string) error {
 	return nil
 }
 
-func (self *TPCSVImporter) importAccountActions(fPath string) error {
+func (self *TPCSVImporter) importAccountActions(fn string) error {
 	return nil
 }
 
