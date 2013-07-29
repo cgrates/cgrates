@@ -21,7 +21,9 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"time"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/engine"
 )
 
 // Creates a new Actions profile within a tariff plan
@@ -31,8 +33,8 @@ func (self *Apier) SetTPActions(attrs utils.TPActions, reply *string) error {
 	}
 	for _, action := range attrs.Actions {
 		requiredFields := []string{"Identifier", "Weight"}
-		if action.BalanceId != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
-			requiredFields = append(requiredFields, "Direction", "Units", "ExpirationTime")
+		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
+			requiredFields = append(requiredFields, "Direction", "Units", "ExpiryTime")
 		}
 		if missing := utils.MissingStructFields(&action, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
@@ -43,7 +45,22 @@ func (self *Apier) SetTPActions(attrs utils.TPActions, reply *string) error {
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	if err := self.StorDb.SetTPActions(&attrs); err != nil {
+	acts := make([]*engine.Action, len(attrs.Actions))
+	for idx, act := range attrs.Actions {
+		acts[idx] = &engine.Action{
+			ActionType:		act.Identifier,
+			BalanceId: 	act.BalanceType,
+			Direction:       act.Direction,
+			Units:          act.Units,
+			ExpirationDate: time.Unix(act.ExpiryTime,0),
+			DestinationTag: act.DestinationId,
+			RateType:      act.RateType,
+			RateValue:     act.Rate,
+			MinutesWeight: act.MinutesWeight,
+			Weight:        act.Weight,
+		}
+	}
+	if err := self.StorDb.SetTPActions(attrs.TPid, map[string][]*engine.Action{attrs.ActionsId: acts}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

@@ -36,6 +36,8 @@ type Action struct {
 	Units          float64
 	Weight         float64
 	MinuteBucket   *MinuteBucket
+	DestinationTag, RateType  string // From here for import/load purposes only
+	RateValue, MinutesWeight       float64
 }
 
 const (

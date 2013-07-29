@@ -177,7 +177,7 @@ func (ms *MapStorage) ExistsTPActions(tpid, aId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPActions(ap *utils.TPActions) error {
+func (ms *MapStorage) SetTPActions(tpid string, acts map[string][]*Action) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

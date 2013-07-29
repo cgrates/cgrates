@@ -207,7 +207,7 @@ func (rs *RedisStorage) ExistsTPActions(tpid, aId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (rs *RedisStorage) SetTPActions(ap *utils.TPActions) error {
+func (rs *RedisStorage) SetTPActions(tpid string, acts map[string][]*Action) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

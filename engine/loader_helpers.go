@@ -20,15 +20,15 @@ package engine
 
 import (
 	"bufio"
-	"path"
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"log"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
-	"github.com/cgrates/cgrates/utils"
 )
 
 type TPLoader interface {
@@ -202,45 +202,43 @@ func ValidateCSVData(fn string, re *regexp.Regexp) (err error) {
 }
 
 type FileLineRegexValidator struct {
-	FieldsPerRecord  int // Number of fields in one record, useful for crosschecks
-	Rule      *regexp.Regexp // Regexp rule
-	Message 	string // Pass this message as helper
+	FieldsPerRecord int            // Number of fields in one record, useful for crosschecks
+	Rule            *regexp.Regexp // Regexp rule
+	Message         string         // Pass this message as helper
 }
 
-var FileValidators = map[string]*FileLineRegexValidator{ 
-			utils.DESTINATIONS_CSV: &FileLineRegexValidator{ utils.DESTINATIONS_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\+?\d+.?\d*){1}$`),
-				"Tag([0-9A-Za-z_]),Prefix([0-9])"},
-			utils.TIMINGS_CSV: &FileLineRegexValidator{ utils.TIMINGS_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
-				"Tag([0-9A-Za-z_]),Years([0-9;]|*all|<empty>),Months([0-9;]|*all|<empty>),MonthDays([0-9;]|*all|<empty>),WeekDays([0-9;]|*all|<empty>),Time([0-9:]|*asap)"},
-			utils.RATES_CSV: &FileLineRegexValidator{ utils.RATES_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){5}(?:\*\w+,){1}(?:\d+\.?\d*,?){2}$`),
-				"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RatedUnits([0-9.]),RateIncrement([0-9.])"},
-			utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{ utils.DESTINATION_RATES_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*,?\s*){3}$`),
-				"Tag([0-9A-Za-z_]),DestinationsTag([0-9A-Za-z_]),RateTag([0-9A-Za-z_])"},
-			utils.DESTRATE_TIMINGS_CSV: &FileLineRegexValidator{ utils.DESTRATE_TIMINGS_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
-				"Tag([0-9A-Za-z_]),DestinationRatesTag([0-9A-Za-z_]),TimingProfile([0-9A-Za-z_]),Weight([0-9.])"},
-			utils.RATE_PROFILES_CSV: &FileLineRegexValidator{ utils.RATE_PROFILES_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\*out\s*,\s*){1}(?:\*any\s*,\s*|\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}(?:\w*\s*,?\s*){2}$`),
-				"Tenant([0-9A-Za-z_]),TOR([0-9A-Za-z_]),Direction(*out),Subject([0-9A-Za-z_]|*all),RatesFallbackSubject([0-9A-Za-z_]|<empty>),RatesTimingTag([0-9A-Za-z_]),ActivationTime([0-9T:X])"},
-			utils.ACTIONS_CSV: &FileLineRegexValidator{ utils.ACTIONS_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*),(?:\*\w+\s*),(?:\*\w+\s*),(?:\*out\s*),(?:\d+\s*),(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*),(?:\*any|\w+\s*),(?:\*\w+\s*)?,(?:\d+\.?\d*\s*)?,(?:\d+\.?\d*\s*)?,(?:\d+\.?\d*\s*)$`),
-				"Tag([0-9A-Za-z_]),Action([0-9A-Za-z_]),BalanceType([*a-z_]),Direction(*out),Units([0-9]),ExpiryTime(*[a-z_]|+[0-9][smh]|[0-9])DestinationTag([0-9A-Za-z_]|*all),RateType(*[a-z_]),RateValue([0-9.]),MinutesWeight([0-9.]),Weight([0-9.])"},
-			utils.ACTION_TIMINGS_CSV: &FileLineRegexValidator{ utils.ACTION_TIMINGS_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
-				"Tag([0-9A-Za-z_]),ActionsTag([0-9A-Za-z_]),TimingTag([0-9A-Za-z_]),Weight([0-9.])"},
-			utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{ utils.ACTION_TRIGGERS_NRCOLS,
-				regexp.MustCompile(`(?:\w+),(?:\*\w+),(?:\*out),(?:\*\w+),(?:\d+\.?\d*),(?:\w+|\*any)?,(?:\w+),(?:\d+\.?\d*)$`),
-				"Tag([0-9A-Za-z_]),BalanceType(*[a-z_]),Direction(*out),ThresholdType(*[a-z_]),ThresholdValue([0-9]+),DestinationTag([0-9A-Za-z_]|*all),ActionsTag([0-9A-Za-z_]),Weight([0-9]+)"},
-			utils.ACCOUNT_ACTIONS_CSV: &FileLineRegexValidator{ utils.ACCOUNT_ACTIONS_NRCOLS,
-				regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\*out\s*,\s*){1}(?:\w+\s*,?\s*){2}$`),
-				"Tenant([0-9A-Za-z_]),Account([0-9A-Za-z_.]),Direction(*out),ActionTimingsTag([0-9A-Za-z_]),ActionTriggersTag([0-9A-Za-z_])"},
-		}
-
-
+var FileValidators = map[string]*FileLineRegexValidator{
+	utils.DESTINATIONS_CSV: &FileLineRegexValidator{utils.DESTINATIONS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\+?\d+.?\d*){1}$`),
+		"Tag([0-9A-Za-z_]),Prefix([0-9])"},
+	utils.TIMINGS_CSV: &FileLineRegexValidator{utils.TIMINGS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
+		"Tag([0-9A-Za-z_]),Years([0-9;]|*all|<empty>),Months([0-9;]|*all|<empty>),MonthDays([0-9;]|*all|<empty>),WeekDays([0-9;]|*all|<empty>),Time([0-9:]|*asap)"},
+	utils.RATES_CSV: &FileLineRegexValidator{utils.RATES_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){5}(?:\*\w+,){1}(?:\d+\.?\d*,?){2}$`),
+		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RatedUnits([0-9.]),RateIncrement([0-9.])"},
+	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,?\s*){3}$`),
+		"Tag([0-9A-Za-z_]),DestinationsTag([0-9A-Za-z_]),RateTag([0-9A-Za-z_])"},
+	utils.DESTRATE_TIMINGS_CSV: &FileLineRegexValidator{utils.DESTRATE_TIMINGS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
+		"Tag([0-9A-Za-z_]),DestinationRatesTag([0-9A-Za-z_]),TimingProfile([0-9A-Za-z_]),Weight([0-9.])"},
+	utils.RATE_PROFILES_CSV: &FileLineRegexValidator{utils.RATE_PROFILES_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\*out\s*,\s*){1}(?:\*any\s*,\s*|\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}(?:\w*\s*,?\s*){2}$`),
+		"Tenant([0-9A-Za-z_]),TOR([0-9A-Za-z_]),Direction(*out),Subject([0-9A-Za-z_]|*all),RatesFallbackSubject([0-9A-Za-z_]|<empty>),RatesTimingTag([0-9A-Za-z_]),ActivationTime([0-9T:X])"},
+	utils.ACTIONS_CSV: &FileLineRegexValidator{utils.ACTIONS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*),(?:\*\w+\s*),(?:\*\w+\s*),(?:\*out\s*),(?:\d+\s*),(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*),(?:\*any|\w+\s*),(?:\*\w+\s*)?,(?:\d+\.?\d*\s*)?,(?:\d+\.?\d*\s*)?,(?:\d+\.?\d*\s*)$`),
+		"Tag([0-9A-Za-z_]),Action([0-9A-Za-z_]),BalanceType([*a-z_]),Direction(*out),Units([0-9]),ExpiryTime(*[a-z_]|+[0-9][smh]|[0-9])DestinationTag([0-9A-Za-z_]|*all),RateType(*[a-z_]),RateValue([0-9.]),MinutesWeight([0-9.]),Weight([0-9.])"},
+	utils.ACTION_TIMINGS_CSV: &FileLineRegexValidator{utils.ACTION_TIMINGS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
+		"Tag([0-9A-Za-z_]),ActionsTag([0-9A-Za-z_]),TimingTag([0-9A-Za-z_]),Weight([0-9.])"},
+	utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{utils.ACTION_TRIGGERS_NRCOLS,
+		regexp.MustCompile(`(?:\w+),(?:\*\w+),(?:\*out),(?:\*\w+),(?:\d+\.?\d*),(?:\w+|\*any)?,(?:\w+),(?:\d+\.?\d*)$`),
+		"Tag([0-9A-Za-z_]),BalanceType(*[a-z_]),Direction(*out),ThresholdType(*[a-z_]),ThresholdValue([0-9]+),DestinationTag([0-9A-Za-z_]|*all),ActionsTag([0-9A-Za-z_]),Weight([0-9]+)"},
+	utils.ACCOUNT_ACTIONS_CSV: &FileLineRegexValidator{utils.ACCOUNT_ACTIONS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\*out\s*,\s*){1}(?:\w+\s*,?\s*){2}$`),
+		"Tenant([0-9A-Za-z_]),Account([0-9A-Za-z_.]),Direction(*out),ActionTimingsTag([0-9A-Za-z_]),ActionTriggersTag([0-9A-Za-z_])"},
+}
 
 func NewTPCSVFileParser(dirPath, fileName string) (*TPCSVFileParser, error) {
 	validator, hasValidator := FileValidators[fileName]
@@ -248,7 +246,7 @@ func NewTPCSVFileParser(dirPath, fileName string) (*TPCSVFileParser, error) {
 		return nil, fmt.Errorf("No validator found for file <%s>", fileName)
 	}
 	// Open the file here
-	fin, err := os.Open( path.Join(dirPath, fileName) )
+	fin, err := os.Open(path.Join(dirPath, fileName))
 	if err != nil {
 		return nil, err
 	}
@@ -259,11 +257,11 @@ func NewTPCSVFileParser(dirPath, fileName string) (*TPCSVFileParser, error) {
 
 // Opens the connection to a file and returns the parsed lines one by one when ParseNextLine() is called
 type TPCSVFileParser struct {
-	validator      *FileLineRegexValidator // Row validator
-	reader         *bufio.Reader // Reader to the file we are interested in
+	validator *FileLineRegexValidator // Row validator
+	reader    *bufio.Reader           // Reader to the file we are interested in
 }
 
-func (self *TPCSVFileParser) ParseNextLine() ( []string, error ) {
+func (self *TPCSVFileParser) ParseNextLine() ([]string, error) {
 	line, truncated, err := self.reader.ReadLine()
 	if err != nil {
 		return nil, err
@@ -279,7 +277,7 @@ func (self *TPCSVFileParser) ParseNextLine() ( []string, error ) {
 		return nil, fmt.Errorf("Invalid line, <%s>", self.validator.Message)
 	}
 	// Open csv reader directly on string line
-	csvReader, _, err := openStringCSVReader( string(line), ',', self.validator.FieldsPerRecord )
+	csvReader, _, err := openStringCSVReader(string(line), ',', self.validator.FieldsPerRecord)
 	if err != nil {
 		return nil, err
 	}

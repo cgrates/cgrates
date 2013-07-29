@@ -23,8 +23,8 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Creates a new DestinationRateTiming profile within a tariff plan
@@ -38,14 +38,14 @@ func (self *Apier) SetTPDestRateTiming(attrs utils.TPDestRateTiming, reply *stri
 		return errors.New(utils.ERR_DUPLICATE)
 	}
 	drts := make([]*engine.DestinationRateTiming, len(attrs.DestRateTimings))
-	for idx,drt := range attrs.DestRateTimings {
-		drts[idx] = &engine.DestinationRateTiming{Tag: attrs.DestRateTimingId, 
-							DestinationRatesTag: drt.DestRatesId, 
-							Weight: drt.Weight, 
-							TimingsTag: drt.TimingId,
-							}
+	for idx, drt := range attrs.DestRateTimings {
+		drts[idx] = &engine.DestinationRateTiming{Tag: attrs.DestRateTimingId,
+			DestinationRatesTag: drt.DestRatesId,
+			Weight:              drt.Weight,
+			TimingsTag:          drt.TimingId,
+		}
 	}
-	if err := self.StorDb.SetTPDestRateTimings( attrs.TPid, map[string][]*engine.DestinationRateTiming{ attrs.DestRateTimingId: drts } ); err != nil {
+	if err := self.StorDb.SetTPDestRateTimings(attrs.TPid, map[string][]*engine.DestinationRateTiming{attrs.DestRateTimingId: drts}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

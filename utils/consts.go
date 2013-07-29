@@ -1,11 +1,11 @@
 package utils
 
 const (
-	VERSION             =     "0.9.1rc3"
-	POSTGRES 		= "postgres"
-	MYSQL    		= "mysql"
-	MONGO    		= "mongo"
-	REDIS    		= "redis"
+	VERSION                  = "0.9.1rc3"
+	POSTGRES                 = "postgres"
+	MYSQL                    = "mysql"
+	MONGO                    = "mongo"
+	REDIS                    = "redis"
 	LOCALHOST                = "127.0.0.1"
 	FSCDR_FILE_CSV           = "freeswitch_file_csv"
 	FSCDR_HTTP_JSON          = "freeswitch_http_json"
@@ -29,28 +29,28 @@ const (
 	TBL_TP_ACTION_TIMINGS    = "tp_action_timings"
 	TBL_TP_ACTION_TRIGGERS   = "tp_action_triggers"
 	TBL_TP_ACCOUNT_ACTIONS   = "tp_account_actions"
-	TIMINGS_CSV           = "Timings.csv"
-	DESTINATIONS_CSV      = "Destinations.csv"
-	RATES_CSV             = "Rates.csv"
-	DESTINATION_RATES_CSV = "DestinationRates.csv"
-	DESTRATE_TIMINGS_CSV  = "DestinationRateTimings.csv"
-	RATE_PROFILES_CSV     = "RatingProfiles.csv"
-	ACTIONS_CSV           = "Actions.csv"
-	ACTION_TIMINGS_CSV    = "ActionTimings.csv"
-	ACTION_TRIGGERS_CSV   = "ActionTriggers.csv"
-	ACCOUNT_ACTIONS_CSV   = "AccountActions.csv"
-	TIMINGS_NRCOLS      = 6
-	DESTINATIONS_NRCOLS = 2
-	RATES_NRCOLS        = 9
+	TIMINGS_CSV              = "Timings.csv"
+	DESTINATIONS_CSV         = "Destinations.csv"
+	RATES_CSV                = "Rates.csv"
+	DESTINATION_RATES_CSV    = "DestinationRates.csv"
+	DESTRATE_TIMINGS_CSV     = "DestinationRateTimings.csv"
+	RATE_PROFILES_CSV        = "RatingProfiles.csv"
+	ACTIONS_CSV              = "Actions.csv"
+	ACTION_TIMINGS_CSV       = "ActionTimings.csv"
+	ACTION_TRIGGERS_CSV      = "ActionTriggers.csv"
+	ACCOUNT_ACTIONS_CSV      = "AccountActions.csv"
+	TIMINGS_NRCOLS           = 6
+	DESTINATIONS_NRCOLS      = 2
+	RATES_NRCOLS             = 9
 	DESTINATION_RATES_NRCOLS = 3
 	DESTRATE_TIMINGS_NRCOLS  = 4
 	RATE_PROFILES_NRCOLS     = 7
 	ACTIONS_NRCOLS           = 11
-	ACTION_TIMINGS_NRCOLS = 4
+	ACTION_TIMINGS_NRCOLS    = 4
 	ACTION_TRIGGERS_NRCOLS   = 8
 	ACCOUNT_ACTIONS_NRCOLS   = 5
-	ROUNDING_UP = "up"
-	ROUNDING_MIDDLE = "middle"
-        ROUNDING_DOWN = "down"
-	COMMENT_CHAR = '#'
+	ROUNDING_UP              = "up"
+	ROUNDING_MIDDLE          = "middle"
+	ROUNDING_DOWN            = "down"
+	COMMENT_CHAR             = '#'
 )

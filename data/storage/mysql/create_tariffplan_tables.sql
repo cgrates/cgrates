@@ -115,10 +115,10 @@ CREATE TABLE `tp_actions` (
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
   `action` varchar(24) NOT NULL,
-  `balance_tag` varchar(24) NOT NULL,
+  `balance_type` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `units` DECIMAL(5,2) NOT NULL,
-  `expiration_time` int(11) NOT NULL,
+  `expiry_time` int(16) NOT NULL,
   `destination_tag` varchar(24) NOT NULL,
   `rate_type` varchar(8) NOT NULL,
   `rate` DECIMAL(5,4) NOT NULL,
@@ -126,7 +126,7 @@ CREATE TABLE `tp_actions` (
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`direction`,`expiration_time`,`destination_tag`,`rate_type`,`minutes_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`rate_type`,`minutes_weight`,`weight`)
 );
 
 --
@@ -153,7 +153,7 @@ CREATE TABLE `tp_action_triggers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
-  `balance_tag` varchar(24) NOT NULL,
+  `balance_type` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `threshold_type` char(11) NOT NULL,
   `threshold_value` DECIMAL(5,4) NOT NULL,
@@ -162,7 +162,7 @@ CREATE TABLE `tp_action_triggers` (
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`direction`,`threshold_type`,`threshold_value`,`destination_tag`,`actions_tag`)
+  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_type`,`direction`,`threshold_type`,`threshold_value`,`destination_tag`,`actions_tag`)
 );
 
 --

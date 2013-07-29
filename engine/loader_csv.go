@@ -349,7 +349,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
-		var expiryTime time.Time // Empty initialized time represents never expire
+		var expiryTime time.Time       // Empty initialized time represents never expire
 		if record[5] != "*unlimited" { // ToDo: Expand here for other meta tags or go way of adding time for expiry
 			expiryTime, err = time.Parse(time.RFC3339, record[5])
 			if err != nil {

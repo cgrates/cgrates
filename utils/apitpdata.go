@@ -62,7 +62,7 @@ type DestRateTiming struct {
 
 type TPRatingProfile struct {
 	TPid                 string             // Tariff plan id
-	RatingProfileId        string             // RatingProfile id
+	RatingProfileId      string             // RatingProfile id
 	Tenant               string             // Tenant's Id
 	TOR                  string             // TypeOfRecord
 	Direction            string             // Traffic direction, OUT is the only one supported for now
@@ -92,12 +92,12 @@ type TPActions struct {
 
 type Action struct {
 	Identifier     string  // Identifier mapped in the code
-	BalanceId      string  // Type of balance the action will operate on
+	BalanceType    string  // Type of balance the action will operate on
 	Direction      string  // Balance direction
 	Units          float64 // Number of units to add/deduct
-	ExpirationTime int64   // Time when the units will expire
+	ExpiryTime int64   // Time when the units will expire
 	DestinationId  string  // Destination profile id
-	RateType       string  // Type of price <ABSOLUTE|PERCENT>
+	RateType       string  // Type of rate <*absolute|*percent>
 	Rate           float64 // Price value
 	MinutesWeight  float64 // Minutes weight
 	Weight         float64 // Action's weight

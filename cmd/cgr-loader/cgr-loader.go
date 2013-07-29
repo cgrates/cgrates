@@ -21,22 +21,22 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/config"
 	"log"
 	"path"
 )
 
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
-	cgrConfig,_ = config.NewDefaultCGRConfig()
+	cgrConfig, _ = config.NewDefaultCGRConfig()
 	data_db_type = flag.String("datadb_type", cgrConfig.DataDBType, "The type of the dataDb database (redis|mongo|postgres|mysql)")
 	data_db_host = flag.String("datadb_host", cgrConfig.DataDBHost, "The dataDb host to connect to.")
 	data_db_port = flag.String("datadb_port", cgrConfig.DataDBPort, "The dataDb port to bind to.")
 	data_db_name = flag.String("datadb_name", cgrConfig.DataDBName, "The name/number of the dataDb to connect to.")
 	data_db_user = flag.String("datadb_user", cgrConfig.DataDBUser, "The dataDb user to sign in as.")
-	data_db_pass = flag.String("datadb_passwd", cgrConfig.DataDBPass,  "The dataDb user's password.")
+	data_db_pass = flag.String("datadb_passwd", cgrConfig.DataDBPass, "The dataDb user's password.")
 
 	stor_db_type = flag.String("stordb_type", cgrConfig.StorDBType, "The type of the storDb database (redis|mongo|postgres|mysql)")
 	stor_db_host = flag.String("stordb_host", cgrConfig.StorDBHost, "The storDb host to connect to.")
@@ -45,14 +45,14 @@ var (
 	stor_db_user = flag.String("stordb_user", cgrConfig.StorDBUser, "The storDb user to sign in as.")
 	stor_db_pass = flag.String("stordb_passwd", cgrConfig.StorDBPass, "The storDb user's password.")
 
-	flush    = flag.Bool("flush", false, "Flush the database before importing")
-	tpid = flag.String("tpid", "", "The tariff plan id from the database")
-	dataPath = flag.String("path", ".", "The path containing the data files")
-	version  = flag.Bool("version", false, "Prints the application version.")
-	verbose  = flag.Bool("verbose", false, "Enable detailed verbose logging output")
+	flush      = flag.Bool("flush", false, "Flush the database before importing")
+	tpid       = flag.String("tpid", "", "The tariff plan id from the database")
+	dataPath   = flag.String("path", ".", "The path containing the data files")
+	version    = flag.Bool("version", false, "Prints the application version.")
+	verbose    = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	fromStorDb = flag.Bool("from-stordb", false, "Load the tariff plan from storDb to dataDb")
-	toStorDb = flag.Bool("to-stordb", false, "Import the tariff plan from files to storDb")
-	runId  = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
+	toStorDb   = flag.Bool("to-stordb", false, "Import the tariff plan from files to storDb")
+	runId      = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )
 
 func main() {
@@ -73,11 +73,13 @@ func main() {
 		dataDb, errDataDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
 	}
 	// Defer databases opened to be closed when we are done
-	for _,db := range []engine.DataStorage{ dataDb, storDb } {
-		if db != nil { defer db.Close() }
+	for _, db := range []engine.DataStorage{dataDb, storDb} {
+		if db != nil {
+			defer db.Close()
+		}
 	}
 	// Stop on db errors
-	for _,err = range []error{errDataDb, errStorDb} {
+	for _, err = range []error{errDataDb, errStorDb} {
 		if err != nil {
 			log.Fatalf("Could not open database connection: %v", err)
 		}
@@ -89,7 +91,7 @@ func main() {
 		if *tpid == "" {
 			log.Fatal("TPid required, please define it via *-tpid* command argument.")
 		}
-		csvImporter := engine.TPCSVImporter{ *tpid, storDb, *dataPath, ',', *verbose, *runId }
+		csvImporter := engine.TPCSVImporter{*tpid, storDb, *dataPath, ',', *verbose, *runId}
 		if errImport := csvImporter.Run(); errImport != nil {
 			log.Fatal(errImport)
 		}
