@@ -113,7 +113,7 @@ func (ms *MapStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPRate(rt *utils.TPRate) error {
+func (ms *MapStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

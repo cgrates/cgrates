@@ -35,6 +35,8 @@ type TPCSVImporter struct {
 	Verbose		bool // If true will print a detailed information instead of silently discarding it
 }
 
+// Maps csv file to handler which should process it. Defined like this since tests on 1.0.3 were failing on Travis. 
+// Change it to func(string) error as soon as Travis updates.
 var fileHandlers = map[string]func(*TPCSVImporter,string) error{
 		utils.TIMINGS_CSV: (*TPCSVImporter).importTimings,
 		utils.DESTINATIONS_CSV: (*TPCSVImporter).importDestinations,
@@ -49,10 +51,6 @@ var fileHandlers = map[string]func(*TPCSVImporter,string) error{
 		}
 
 func (self *TPCSVImporter) Run() error {
-
-	// Maps csv file to handler which should process it
-	
-
 	files, _ := ioutil.ReadDir(self.DirPath)
 	for _, f := range files {
 		fHandler,hasName := fileHandlers[f.Name()]
@@ -66,6 +64,9 @@ func (self *TPCSVImporter) Run() error {
 
 // Handler importing timings from file, saved row by row to storDb
 func (self *TPCSVImporter) importTimings(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser( self.DirPath, fn )
 	if err!=nil {
 		return err
@@ -90,11 +91,62 @@ func (self *TPCSVImporter) importTimings(fn string) error {
 	return nil
 }
 
-func (self *TPCSVImporter) importDestinations(fPath string) error {
+func (self *TPCSVImporter) importDestinations(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	fParser, err := NewTPCSVFileParser( self.DirPath, fn )
+	if err!=nil {
+		return err
+	}
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		dst := &Destination{record[0], []string{record[1]}}
+		if err := self.StorDb.SetTPDestination(self.TPid, dst); err != nil {
+			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+		}
+	}
 	return nil
 }
 
-func (self *TPCSVImporter) importRates(fPath string) error {
+func (self *TPCSVImporter) importRates(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	fParser, err := NewTPCSVFileParser( self.DirPath, fn )
+	if err!=nil {
+		return err
+	}
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		rt, err := NewRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
+		if err != nil {
+			return err
+		}
+		if err := self.StorDb.SetTPRates( self.TPid, map[string][]*Rate{ record[0]: []*Rate{rt} } ); err != nil {
+			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+		}
+	}
 	return nil
 }
 

@@ -31,6 +31,7 @@ type RateSlot struct {
 	Rate             float64 // Rate applied
 	RatedUnits       int     //  Number of billing units this rate applies to
 	RateIncrements   int     // This rate will apply in increments of duration
+	GroupInterval    int     // Group position
 	RoundingMethod   string  // Use this method to round the cost
 	RoundingDecimals int     // Round the cost number of decimals
 	Weight           float64 // Rate's priority when dealing with grouped rates

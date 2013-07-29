@@ -43,11 +43,12 @@ CREATE TABLE `tp_rates` (
   `rate` decimal(5,4) NOT NULL,
   `rated_units` int(11) NOT NULL,
   `rate_increments` int(11) NOT NULL,
+  `group_interval` int(11) NOT NULL,
   `rounding_method` varchar(255) NOT NULL,
   `rounding_decimals` tinyint(4) NOT NULL,
   `weight` decimal(5,2) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `tpid_tag_rate_weight` (`tpid`,`tag`,`weight`),
+  UNIQUE KEY `unique_tprate` (`tpid`,`tag`,`group_interval`),
   KEY `tpid` (`tpid`),
   KEY `tpid_tag` (`tpid`,`tag`)
 );

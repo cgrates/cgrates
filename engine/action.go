@@ -116,7 +116,7 @@ func topupResetAction(ub *UserBalance, a *Action) (err error) {
 	if a.BalanceId == MINUTES {
 		ub.MinuteBuckets = make([]*MinuteBucket, 0)
 	} else {
-		ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{&Balance{Value: 0}}
+		ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{&Balance{Value: 0}} // ToDo: can ub be empty here?
 	}
 	genericMakeNegative(a)
 	genericDebit(ub, a)

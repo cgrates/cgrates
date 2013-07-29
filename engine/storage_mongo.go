@@ -188,7 +188,7 @@ func (ms *MongoStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPRate(rt *utils.TPRate) error {
+func (ms *MongoStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
