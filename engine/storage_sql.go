@@ -289,17 +289,19 @@ func (self *SQLStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error)
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error {
-	if len(dr.DestinationRates) == 0 {
+func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*DestinationRate) error {
+	if len(drs) == 0 {
 		return nil //Nothing to set
 	}
-	// Using multiple values in query to spare some network processing time
 	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destinations_tag, rates_tag) VALUES ", utils.TBL_TP_DESTINATION_RATES)
-	for idx, drPair := range dr.DestinationRates {
-		if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
-			qry += ","
+	for drId, drRows := range drs {
+		for idx, dr := range drRows {
+			if idx != 0 { //Consecutive values after the first will be prefixed with "," as separator
+				qry += ","
+			}
+			qry += fmt.Sprintf("('%s','%s','%s','%s')",
+				tpid, drId, dr.DestinationsTag, dr.RateTag)
 		}
-		qry += fmt.Sprintf("('%s','%s','%s','%s')", dr.TPid, dr.DestinationRateId, drPair.DestinationId, drPair.RateId)
 	}
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err

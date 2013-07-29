@@ -72,7 +72,7 @@ type DataStorage interface {
 	GetTPRate(string, string) (*utils.TPRate, error)
 	GetTPRateIds(string) ([]string, error)
 	ExistsTPDestinationRate(string, string) (bool, error)
-	SetTPDestinationRate(*utils.TPDestinationRate) error
+	SetTPDestinationRates(string, map[string][]*DestinationRate) error
 	GetTPDestinationRate(string, string) (*utils.TPDestinationRate, error)
 	GetTPDestinationRateIds(string) ([]string, error)
 	ExistsTPDestRateTiming(string, string) (bool, error)

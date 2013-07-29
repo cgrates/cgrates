@@ -129,7 +129,7 @@ func (ms *MapStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error {
+func (ms *MapStorage) SetTPDestinationRates(tpid string, drs map[string][]*DestinationRate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

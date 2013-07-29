@@ -150,7 +150,35 @@ func (self *TPCSVImporter) importRates(fn string) error {
 	return nil
 }
 
-func (self *TPCSVImporter) importDestinationRates(fPath string) error {
+func (self *TPCSVImporter) importDestinationRates(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	fParser, err := NewTPCSVFileParser( self.DirPath, fn )
+	if err!=nil {
+		return err
+	}
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		dr := &DestinationRate{record[0], record[1], record[2], nil} 
+		if err != nil {
+			return err
+		}
+		if err := self.StorDb.SetTPDestinationRates( self.TPid, 
+			map[string][]*DestinationRate{ dr.Tag: []*DestinationRate{dr} } ); err != nil {
+			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+		}
+	}
 	return nil
 }
 

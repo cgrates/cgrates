@@ -159,7 +159,7 @@ func (rs *RedisStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error)
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (rs *RedisStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error {
+func (rs *RedisStorage) SetTPDestinationRates(tpid string, drs map[string][]*DestinationRate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

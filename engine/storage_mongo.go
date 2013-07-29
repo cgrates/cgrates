@@ -204,7 +204,7 @@ func (ms *MongoStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error)
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error {
+func (ms *MongoStorage) SetTPDestinationRates(tpid string, drs map[string][]*DestinationRate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
