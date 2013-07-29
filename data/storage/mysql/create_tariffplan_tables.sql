@@ -90,7 +90,7 @@ CREATE TABLE `tp_destrate_timings` (
 -- Table structure for table `tp_rate_profiles`
 --
 
-CREATE TABLE `tp_rate_profiles` (
+CREATE TABLE `tp_rating_profiles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,

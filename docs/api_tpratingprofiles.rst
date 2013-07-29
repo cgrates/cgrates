@@ -1,16 +1,16 @@
-Apier.SetTPRateProfile
-++++++++++++++++++++++
+Apier.SetTPRatingProfile
+++++++++++++++++++++++++
 
-Creates a new RateProfile within a tariff plan.
+Creates a new RatingProfile within a tariff plan.
 
 **Request**:
 
  Data:
   ::
 
-   type TPRateProfile struct {
+   type TPRatingProfile struct {
 	TPid                 string             // Tariff plan id
-	RateProfileId        string             // RateProfile id
+	RatingProfileId        string             // RatingProfile id
 	Tenant               string             // Tenant's Id
 	TOR                  string             // TypeOfRecord
 	Direction            string             // Traffic direction, OUT is the only one supported for now
@@ -24,18 +24,18 @@ Creates a new RateProfile within a tariff plan.
 	DestRateTimingId string // Id of DestRateTiming profile
    }
 
- Mandatory parameters: ``[]string{"TPid", "RateProfileId", "Tenant", "TOR", "Direction", "Subject", "RatingActivations"}``
+ Mandatory parameters: ``[]string{"TPid", "RatingProfileId", "Tenant", "TOR", "Direction", "Subject", "RatingActivations"}``
 
  *JSON sample*:
   ::
 
    {
     "id": 3, 
-    "method": "Apier.SetTPRateProfile", 
+    "method": "Apier.SetTPRatingProfile", 
     "params": [
         {
             "Direction": "OUT", 
-            "RateProfileId": "SAMPLE_RP_2", 
+            "RatingProfileId": "SAMPLE_RP_2", 
             "RatingActivations": [
                 {
                     "ActivationTime": 1373609003, 
@@ -79,35 +79,35 @@ Creates a new RateProfile within a tariff plan.
 
  ``SERVER_ERROR`` - Server error occurred.
 
- ``DUPLICATE`` - The specified combination of TPid/RateProfileId already exists in StorDb.
+ ``DUPLICATE`` - The specified combination of TPid/RatingProfileId already exists in StorDb.
 
 
-Apier.GetTPRateProfile
-++++++++++++++++++++++
+Apier.GetTPRatingProfile
+++++++++++++++++++++++++
 
-Queries specific RateProfile on tariff plan.
+Queries specific RatingProfile on tariff plan.
 
 **Request**:
 
  Data:
   ::
 
-   type AttrGetTPRateProfile struct {
+   type AttrGetTPRatingProfile struct {
 	TPid             string // Tariff plan id
-	RateProfileId    string // RateProfile id
+	RatingProfileId    string // RatingProfile id
    }
 
- Mandatory parameters: ``[]string{"TPid", "RateProfileId"}``
+ Mandatory parameters: ``[]string{"TPid", "RatingProfileId"}``
 
  *JSON sample*:
   ::
 
    {
     "id": 0, 
-    "method": "Apier.GetTPRateProfile", 
+    "method": "Apier.GetTPRatingProfile", 
     "params": [
         {
-            "RateProfileId": "SAMPLE_RP_2", 
+            "RatingProfileId": "SAMPLE_RP_2", 
             "TPid": "SAMPLE_TP"
         }
     ]
@@ -118,9 +118,9 @@ Queries specific RateProfile on tariff plan.
  Data:
   ::
 
-   type TPRateProfile struct {
+   type TPRatingProfile struct {
 	TPid                 string             // Tariff plan id
-	RateProfileId        string             // RateProfile id
+	RatingProfileId        string             // RatingProfile id
 	Tenant               string             // Tenant's Id
 	TOR                  string             // TypeOfRecord
 	Direction            string             // Traffic direction, OUT is the only one supported for now
@@ -142,7 +142,7 @@ Queries specific RateProfile on tariff plan.
     "id": 0, 
     "result": {
         "Direction": "OUT", 
-        "RateProfileId": "SAMPLE_RP_2", 
+        "RatingProfileId": "SAMPLE_RP_2", 
         "RatesFallbackSubject": "", 
         "RatingActivations": [
             {
@@ -167,20 +167,20 @@ Queries specific RateProfile on tariff plan.
 
  ``SERVER_ERROR`` - Server error occurred.
 
- ``NOT_FOUND`` - Requested RateProfile profile not found.
+ ``NOT_FOUND`` - Requested RatingProfile profile not found.
 
 
-Apier.GetTPRateProfileIds
-+++++++++++++++++++++++++
+Apier.GetTPRatingProfileIds
++++++++++++++++++++++++++++
 
-Queries specific RateProfile on tariff plan. Attribute parameters used as extra filters.
+Queries specific RatingProfile on tariff plan. Attribute parameters used as extra filters.
 
 **Request**:
 
  Data:
   ::
 
-   type AttrTPRateProfileIds struct {
+   type AttrTPRatingProfileIds struct {
 	TPid      string // Tariff plan id
 	Tenant    string // Tenant's Id
 	TOR       string // TypeOfRecord
@@ -195,7 +195,7 @@ Queries specific RateProfile on tariff plan. Attribute parameters used as extra 
 
    {
     "id": 0, 
-    "method": "Apier.GetTPRateProfileIds", 
+    "method": "Apier.GetTPRatingProfileIds", 
     "params": [
         {
             "Subject": "dan", 

@@ -30,10 +30,10 @@ const (
 
 type RatingProfile struct {
 	Id                      string
-	FallbackKey             string
+	FallbackKey             string // FallbackKey is used as complete combination of Tenant:TOR:Direction:Subject
 	DestinationMap          map[string][]*ActivationPeriod
-	tag, destRatesTimingTag string // used only for loading
-	activationTime          int64
+	Tag, Tenant, TOR, Direction, Subject, DestRatesTimingTag, RatesFallbackSubject string // used only for loading
+	ActivationTime          int64
 }
 
 // Adds an activation period that applyes to current rating profile if not already present.

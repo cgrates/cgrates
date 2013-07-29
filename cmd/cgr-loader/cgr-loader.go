@@ -52,7 +52,7 @@ var (
 	verbose  = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	fromStorDb = flag.Bool("from-stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb = flag.Bool("to-stordb", false, "Import the tariff plan from files to storDb")
-
+	runId  = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )
 
 func main() {
@@ -89,7 +89,7 @@ func main() {
 		if *tpid == "" {
 			log.Fatal("TPid required, please define it via *-tpid* command argument.")
 		}
-		csvImporter := engine.TPCSVImporter{ *tpid, storDb, *dataPath, ',', *verbose }
+		csvImporter := engine.TPCSVImporter{ *tpid, storDb, *dataPath, ',', *verbose, *runId }
 		if errImport := csvImporter.Run(); errImport != nil {
 			log.Fatal(errImport)
 		}

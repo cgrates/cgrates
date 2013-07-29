@@ -60,9 +60,9 @@ type DestRateTiming struct {
 	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot
 }
 
-type TPRateProfile struct {
+type TPRatingProfile struct {
 	TPid                 string             // Tariff plan id
-	RateProfileId        string             // RateProfile id
+	RatingProfileId        string             // RatingProfile id
 	Tenant               string             // Tenant's Id
 	TOR                  string             // TypeOfRecord
 	Direction            string             // Traffic direction, OUT is the only one supported for now
@@ -76,7 +76,7 @@ type RatingActivation struct {
 	DestRateTimingId string // Id of DestRateTiming profile
 }
 
-type AttrTPRateProfileIds struct {
+type AttrTPRatingProfileIds struct {
 	TPid      string // Tariff plan id
 	Tenant    string // Tenant's Id
 	TOR       string // TypeOfRecord

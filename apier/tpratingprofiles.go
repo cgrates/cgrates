@@ -24,36 +24,49 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/engine"
 )
 
-// Creates a new RateProfile within a tariff plan
-func (self *Apier) SetTPRateProfile(attrs utils.TPRateProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateProfileId", "Tenant", "TOR", "Direction", "Subject", "RatingActivations"}); len(missing) != 0 {
+// Creates a new RatingProfile within a tariff plan
+func (self *Apier) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId", "Tenant", "TOR", "Direction", "Subject", "RatingActivations"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPRateProfile(attrs.TPid, attrs.RateProfileId); err != nil {
+	if exists, err := self.StorDb.ExistsTPRatingProfile(attrs.TPid, attrs.RatingProfileId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	if err := self.StorDb.SetTPRateProfile(&attrs); err != nil {
+	rps := make([]*engine.RatingProfile, len(attrs.RatingActivations))
+	for idx,ra := range attrs.RatingActivations {
+		rps[idx] = &engine.RatingProfile{Tag: attrs.RatingProfileId, 
+				Tenant: attrs.Tenant, 
+				TOR: attrs.TOR, 
+				Direction: attrs.Direction,
+				Subject: attrs.Subject,
+				ActivationTime: ra.ActivationTime,
+				DestRatesTimingTag: ra.DestRateTimingId,
+				RatesFallbackSubject: attrs.RatesFallbackSubject,
+				}
+	}
+	if err := self.StorDb.SetTPRatingProfiles( attrs.TPid, map[string][]*engine.RatingProfile{ attrs.RatingProfileId: rps } ); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
 	return nil
 }
 
-type AttrGetTPRateProfile struct {
+type AttrGetTPRatingProfile struct {
 	TPid          string // Tariff plan id
-	RateProfileId string // RateProfile id
+	RatingProfileId string // RatingProfile id
 }
 
-// Queries specific RateProfile on tariff plan
-func (self *Apier) GetTPRateProfile(attrs AttrGetTPRateProfile, reply *utils.TPRateProfile) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateProfileId"}); len(missing) != 0 { //Params missing
+// Queries specific RatingProfile on tariff plan
+func (self *Apier) GetTPRatingProfile(attrs AttrGetTPRatingProfile, reply *utils.TPRatingProfile) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if dr, err := self.StorDb.GetTPRateProfile(attrs.TPid, attrs.RateProfileId); err != nil {
+	if dr, err := self.StorDb.GetTPRatingProfile(attrs.TPid, attrs.RatingProfileId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if dr == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -63,12 +76,12 @@ func (self *Apier) GetTPRateProfile(attrs AttrGetTPRateProfile, reply *utils.TPR
 	return nil
 }
 
-// Queries RateProfile identities on specific tariff plan.
-func (self *Apier) GetTPRateProfileIds(attrs utils.AttrTPRateProfileIds, reply *[]string) error {
+// Queries RatingProfile identities on specific tariff plan.
+func (self *Apier) GetTPRatingProfileIds(attrs utils.AttrTPRatingProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPRateProfileIds(&attrs); err != nil {
+	if ids, err := self.StorDb.GetTPRatingProfileIds(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)

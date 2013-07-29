@@ -169,13 +169,13 @@ DestinationRateTimings
 
    api_tpdestratetimings
 
-RateProfiles
-~~~~~~~~~~~~
+RatingProfiles
+~~~~~~~~~~~~~~
 
 .. toctree::
    :maxdepth: 2
 
-   api_tprateprofiles
+   api_tpratingprofiles
 
 Actions
 ~~~~~~~

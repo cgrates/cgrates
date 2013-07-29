@@ -232,19 +232,19 @@ func (ms *MongoStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) ExistsTPRateProfile(tpid, rpId string) (bool, error) {
+func (ms *MongoStorage) ExistsTPRatingProfile(tpid, rpId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
+func (ms *MongoStorage) SetTPRatingProfiles(tpid string, rps map[string][]*RatingProfile) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfile, error) {
+func (ms *MongoStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingProfile, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) ([]string, error) {
+func (ms *MongoStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfileIds) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

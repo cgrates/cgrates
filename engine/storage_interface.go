@@ -79,10 +79,10 @@ type DataStorage interface {
 	SetTPDestRateTimings(string, map[string][]*DestinationRateTiming) error
 	GetTPDestRateTiming(string, string) (*utils.TPDestRateTiming, error)
 	GetTPDestRateTimingIds(string) ([]string, error)
-	ExistsTPRateProfile(string, string) (bool, error)
-	SetTPRateProfile(*utils.TPRateProfile) error
-	GetTPRateProfile(string, string) (*utils.TPRateProfile, error)
-	GetTPRateProfileIds(*utils.AttrTPRateProfileIds) ([]string, error)
+	ExistsTPRatingProfile(string, string) (bool, error)
+	SetTPRatingProfiles(string, map[string][]*RatingProfile) error
+	GetTPRatingProfile(string, string) (*utils.TPRatingProfile, error)
+	GetTPRatingProfileIds(*utils.AttrTPRatingProfileIds) ([]string, error)
 	ExistsTPActions(string, string) (bool, error)
 	SetTPActions(*utils.TPActions) error
 	GetTPActions(string, string) (*utils.TPActions, error)
