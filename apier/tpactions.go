@@ -21,9 +21,8 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"time"
-	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Creates a new Actions profile within a tariff plan
@@ -48,16 +47,16 @@ func (self *Apier) SetTPActions(attrs utils.TPActions, reply *string) error {
 	acts := make([]*engine.Action, len(attrs.Actions))
 	for idx, act := range attrs.Actions {
 		acts[idx] = &engine.Action{
-			ActionType:		act.Identifier,
-			BalanceId: 	act.BalanceType,
-			Direction:       act.Direction,
-			Units:          act.Units,
-			ExpirationDate: time.Unix(act.ExpiryTime,0),
-			DestinationTag: act.DestinationId,
-			RateType:      act.RateType,
-			RateValue:     act.Rate,
-			MinutesWeight: act.MinutesWeight,
-			Weight:        act.Weight,
+			ActionType:       act.Identifier,
+			BalanceId:        act.BalanceType,
+			Direction:        act.Direction,
+			Units:            act.Units,
+			ExpirationString: act.ExpiryTime,
+			DestinationTag:   act.DestinationId,
+			RateType:         act.RateType,
+			RateValue:        act.Rate,
+			MinutesWeight:    act.MinutesWeight,
+			Weight:           act.Weight,
 		}
 	}
 	if err := self.StorDb.SetTPActions(attrs.TPid, map[string][]*engine.Action{attrs.ActionsId: acts}); err != nil {

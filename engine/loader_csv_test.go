@@ -85,7 +85,7 @@ vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
 vdf,0,*out,fall,2012-02-28T00:00:00Z,PREMIUM,rif
 `
 	actions = `
-MINI,TOPUP,MINUTES,*out,100,2013-07-19T13:03:22Z,NAT,*absolute,0,10,10
+MINI,TOPUP,MINUTES,*out,100,*unlimited,NAT,*absolute,0,10,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
