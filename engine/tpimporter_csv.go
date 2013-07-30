@@ -426,5 +426,37 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 }
 
 func (self *TPCSVImporter) importAccountActions(fn string) error {
+	log.Printf("Processing file: <%s> ", fn)
+	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
+	if err != nil {
+		return err
+	}
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		tenant, account, direction, actionTimingsTag, actionTriggersTag := record[0], record[1], record[2], record[3], record[4]
+		tag := "TPCSV" //Autogenerate account actions profile id
+		if self.ImportId != "" {
+			tag += "_" + self.ImportId
+		}
+		aa := map[string]*AccountAction{
+			tag: &AccountAction{Tenant: tenant, Account: account, Direction: direction,
+				ActionTimingsTag: actionTimingsTag, ActionTriggersTag: actionTriggersTag},
+		}
+		if err := self.StorDb.SetTPAccountActions(self.TPid, aa); err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
+		}
+	}
 	return nil
 }

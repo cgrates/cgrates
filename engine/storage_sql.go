@@ -769,7 +769,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*AccountA
 		utils.TBL_TP_ACCOUNT_ACTIONS)
 	i := 0
 	for aaId, aActs := range aa {
-		if i != 1 { //Consecutive values after the first will be prefixed with "," as separator
+		if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 			qry += ","
 		}
 		qry += fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
