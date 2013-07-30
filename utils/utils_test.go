@@ -20,6 +20,7 @@ package utils
 
 import (
 	"testing"
+	"time"
 )
 
 func TestFirstNonEmpty(t *testing.T) {
@@ -117,5 +118,35 @@ func TestRoundByMethodDown2(t *testing.T) {
 	expected := 12.2
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
+func TestParseDateUnix(t *testing.T) {
+	date, err := ParseDate("1375212790")
+	expected := time.Date(2013, 7, 30, 19, 33, 10, 0, time.UTC)
+	if err != nil || !date.Equal(expected) {
+		t.Error("error parsing date: ", expected.Sub(date))
+	}
+}
+
+func TestParseDateUnlimited(t *testing.T) {
+	date, err := ParseDate("*unlimited")
+	if err != nil || !date.IsZero() {
+		t.Error("error parsing unlimited date!: ")
+	}
+}
+
+func TestParseDateEmpty(t *testing.T) {
+	date, err := ParseDate("")
+	if err != nil || !date.IsZero() {
+		t.Error("error parsing unlimited date!: ")
+	}
+}
+
+func TestParseDateMonthly(t *testing.T) {
+	date, err := ParseDate("*monthly")
+	expected := time.Now().AddDate(0, 1, 0)
+	if err != nil || expected.Sub(date).Seconds() > 1 {
+		t.Error("error parsing date: ", expected.Sub(date).Seconds())
 	}
 }

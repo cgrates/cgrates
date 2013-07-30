@@ -20,7 +20,7 @@ package engine
 
 import (
 	"fmt"
-	//"log"
+	"github.com/cgrates/cgrates/utils"
 	"sort"
 )
 
@@ -46,6 +46,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		return
 	}
 	for _, a := range aac {
+		a.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))

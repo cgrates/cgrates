@@ -96,12 +96,9 @@ func Round(x float64, prec int, method string) float64 {
 }
 
 func ParseDate(date string) (expDate time.Time, err error) {
-	if date == "" {
-		return // zero values are fine
-	}
 	expirationTime := []byte(date)
 	switch {
-	case string(expirationTime) == "*unlimited":
+	case string(expirationTime) == "*unlimited" || string(expirationTime) == "":
 		// leave it at zero
 	case string(expirationTime[0]) == "+":
 		d, err := time.ParseDuration(string(expirationTime[1:]))
@@ -109,6 +106,8 @@ func ParseDate(date string) (expDate time.Time, err error) {
 			return expDate, err
 		}
 		expDate = time.Now().Add(d)
+	case string(expirationTime) == "*monthly":
+		expDate = time.Now().AddDate(0, 1, 0) // add one month
 	default:
 		unix, err := strconv.ParseInt(string(expirationTime), 10, 64)
 		if err != nil {
