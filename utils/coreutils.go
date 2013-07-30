@@ -94,3 +94,27 @@ func Round(x float64, prec int, method string) float64 {
 
 	return rounder / pow
 }
+
+func ParseDate(date string) (expDate time.Time, err error) {
+	if date == "" {
+		return // zero values are fine
+	}
+	expirationTime := []byte(date)
+	switch {
+	case string(expirationTime) == "*unlimited":
+		// leave it at zero
+	case string(expirationTime[0]) == "+":
+		d, err := time.ParseDuration(string(expirationTime[1:]))
+		if err != nil {
+			return expDate, err
+		}
+		expDate = time.Now().Add(d)
+	default:
+		unix, err := strconv.ParseInt(string(expirationTime), 10, 64)
+		if err != nil {
+			return expDate, err
+		}
+		expDate = time.Unix(unix, 0)
+	}
+	return expDate, err
+}

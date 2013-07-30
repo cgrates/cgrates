@@ -117,7 +117,7 @@ CREATE TABLE `tp_actions` (
   `balance_tag` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `units` DECIMAL(5,2) NOT NULL,
-  `expiration_time` int(11) NOT NULL,
+  `expiration_time` varchar(24) NOT NULL,
   `destination_tag` varchar(24) NOT NULL,
   `rate_type` varchar(8) NOT NULL,
   `rate` DECIMAL(5,4) NOT NULL,

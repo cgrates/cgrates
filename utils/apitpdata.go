@@ -94,7 +94,7 @@ type Action struct {
 	BalanceId      string  // Type of balance the action will operate on
 	Direction      string  // Balance direction
 	Units          float64 // Number of units to add/deduct
-	ExpirationTime int64   // Time when the units will expire
+	ExpirationTime string  // Time when the units will expire
 	DestinationId  string  // Destination profile id
 	RateType       string  // Type of price <ABSOLUTE|PERCENT>
 	Rate           float64 // Price value

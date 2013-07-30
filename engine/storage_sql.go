@@ -23,8 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
-	"strconv"
-	"time"
 )
 
 type SQLStorage struct {
@@ -552,8 +550,7 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateType string
-		var expTime int64
+		var action, balanceId, dir, destId, rateType, expTime string
 		var units, rate, minutesWeight, weight float64
 		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateType, &rate, &minutesWeight, &weight); err != nil {
 			return nil, err
@@ -1081,36 +1078,31 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_tag, &direction, &units, &expirationDate, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
 			return nil, err
 		}
-		unix, err := strconv.ParseInt(expirationDate, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		expDate := time.Unix(unix, 0)
 		var a *Action
 		if balance_tag != MINUTES {
 			a = &Action{
-				ActionType:     action,
-				BalanceId:      balance_tag,
-				Direction:      direction,
-				Units:          units,
-				ExpirationDate: expDate,
+				ActionType:       action,
+				BalanceId:        balance_tag,
+				Direction:        direction,
+				Units:            units,
+				ExpirationString: expirationDate,
 			}
 		} else {
 			var price float64
 			a = &Action{
-				Id:             utils.GenUUID(),
-				ActionType:     action,
-				BalanceId:      balance_tag,
-				Direction:      direction,
-				Weight:         weight,
-				ExpirationDate: expDate,
+				Id:               utils.GenUUID(),
+				ActionType:       action,
+				BalanceId:        balance_tag,
+				Direction:        direction,
+				Weight:           weight,
+				ExpirationString: expirationDate,
 				MinuteBucket: &MinuteBucket{
-					Seconds:        units,
-					Weight:         minutes_weight,
-					Price:          price,
-					PriceType:      rate_type,
-					DestinationId:  destinations_tag,
-					ExpirationDate: expDate,
+					Seconds:          units,
+					Weight:           minutes_weight,
+					Price:            price,
+					PriceType:        rate_type,
+					DestinationId:    destinations_tag,
+					ExpirationString: expirationDate,
 				},
 			}
 		}

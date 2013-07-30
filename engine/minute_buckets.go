@@ -25,13 +25,14 @@ import (
 )
 
 type MinuteBucket struct {
-	Seconds        float64
-	Weight         float64
-	Price          float64 // percentage from standard price or absolute value depending on Type
-	PriceType      string
-	DestinationId  string
-	ExpirationDate time.Time
-	precision      int
+	Seconds          float64
+	Weight           float64
+	Price            float64 // percentage from standard price or absolute value depending on Type
+	PriceType        string
+	DestinationId    string
+	ExpirationString string
+	ExpirationDate   time.Time
+	precision        int
 }
 
 const (
