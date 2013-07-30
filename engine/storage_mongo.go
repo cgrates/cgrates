@@ -188,7 +188,7 @@ func (ms *MongoStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPRate(rt *utils.TPRate) error {
+func (ms *MongoStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -204,7 +204,7 @@ func (ms *MongoStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error)
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error {
+func (ms *MongoStorage) SetTPDestinationRates(tpid string, drs map[string][]*DestinationRate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -220,7 +220,7 @@ func (ms *MongoStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error)
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
+func (ms *MongoStorage) SetTPDestRateTimings(tpid string, drts map[string][]*DestinationRateTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -232,19 +232,19 @@ func (ms *MongoStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) ExistsTPRateProfile(tpid, rpId string) (bool, error) {
+func (ms *MongoStorage) ExistsTPRatingProfile(tpid, rpId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
+func (ms *MongoStorage) SetTPRatingProfiles(tpid string, rps map[string][]*RatingProfile) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfile, error) {
+func (ms *MongoStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingProfile, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) ([]string, error) {
+func (ms *MongoStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfileIds) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -252,7 +252,7 @@ func (ms *MongoStorage) ExistsTPActions(tpid, aId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPActions(ap *utils.TPActions) error {
+func (ms *MongoStorage) SetTPActions(tpid string, acts map[string][]*Action) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -268,7 +268,7 @@ func (ms *MongoStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MongoStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTimingsRow) error {
+func (ms *MongoStorage) SetTPActionTimings(tpid string, ats map[string][]*ActionTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

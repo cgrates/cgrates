@@ -113,7 +113,7 @@ func (ms *MapStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPRate(rt *utils.TPRate) error {
+func (ms *MapStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -129,7 +129,7 @@ func (ms *MapStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPDestinationRate(dr *utils.TPDestinationRate) error {
+func (ms *MapStorage) SetTPDestinationRates(tpid string, drs map[string][]*DestinationRate) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -145,7 +145,7 @@ func (ms *MapStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPDestRateTiming(drt *utils.TPDestRateTiming) error {
+func (ms *MapStorage) SetTPDestRateTimings(tpid string, drts map[string][]*DestinationRateTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -157,19 +157,19 @@ func (ms *MapStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) ExistsTPRateProfile(tpid, rpId string) (bool, error) {
+func (ms *MapStorage) ExistsTPRatingProfile(tpid, rpId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPRateProfile(rp *utils.TPRateProfile) error {
+func (ms *MapStorage) SetTPRatingProfiles(tpid string, rps map[string][]*RatingProfile) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) GetTPRateProfile(tpid, rpId string) (*utils.TPRateProfile, error) {
+func (ms *MapStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingProfile, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) GetTPRateProfileIds(filters *utils.AttrTPRateProfileIds) ([]string, error) {
+func (ms *MapStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfileIds) ([]string, error) {
 	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -177,7 +177,7 @@ func (ms *MapStorage) ExistsTPActions(tpid, aId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPActions(ap *utils.TPActions) error {
+func (ms *MapStorage) SetTPActions(tpid string, acts map[string][]*Action) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
@@ -193,7 +193,7 @@ func (ms *MapStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTimingsRow) error {
+func (ms *MapStorage) SetTPActionTimings(tpid string, ats map[string][]*ActionTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

@@ -15,13 +15,14 @@ Creates a new rate within a tariff plan.
    }
 
    type RateSlot struct {
-	ConnectFee     float64 // ConnectFee applied once the call is answered
-	Rate           float64 // Rate applied
-	RatedUnits     int     //  Number of billing units this rate applies to
-	RateIncrements int     // This rate will apply in increments of duration
-	RoundingMethod string     // Use this method to round the cost
-	RoundingDecimals int	// Round the cost number of decimals
-	Weight         float64 // Rate's priority when dealing with grouped rates
+	ConnectFee       float64 // ConnectFee applied once the call is answered
+	Rate             float64 // Rate applied
+	RatedUnits       int     //  Number of billing units this rate applies to
+	RateIncrements   int     // This rate will apply in increments of duration
+	GroupInterval    int     // Group position
+	RoundingMethod   string  // Use this method to round the cost
+	RoundingDecimals int     // Round the cost number of decimals
+	Weight           float64 // Rate's priority when dealing with grouped rates
    }
 
  Mandatory parameters: ``[]string{"TPid", "RateId", "ConnectFee", "RateSlots"}``
@@ -39,9 +40,10 @@ Creates a new rate within a tariff plan.
                 {
                     "ConnectFee": 0.2, 
                     "Rate": 2, 
-                    "RateIncrements": 1, 
+                    "RateIncrements": 60, 
                     "RatedUnits": 1, 
-                    "RoundingDecimals": 2, 
+                    "RoundingDecimals": 2,
+                    "GroupInterval": 0, 
                     "RoundingMethod": "*up", 
                     "Weight": 10.0
                 }, 
@@ -50,7 +52,8 @@ Creates a new rate within a tariff plan.
                     "Rate": 2.1, 
                     "RateIncrements": 1, 
                     "RatedUnits": 1, 
-                    "RoundingDecimals": 2, 
+                    "RoundingDecimals": 2,
+                    "GroupInterval": 60, 
                     "RoundingMethod": "*up", 
                     "Weight": 20.0
                 }
@@ -131,13 +134,14 @@ Queries specific rate on tariff plan.
    }
 
    type RateSlot struct {
-	ConnectFee     float64 // ConnectFee applied once the call is answered
-	Rate           float64 // Rate applied
-	RatedUnits     int     //  Number of billing units this rate applies to
-	RateIncrements int     // This rate will apply in increments of duration
-	RoundingMethod string     // Use this method to round the cost
-	RoundingDecimals int	// Round the cost number of decimals
-	Weight         float64 // Rate's priority when dealing with grouped rates
+	ConnectFee       float64 // ConnectFee applied once the call is answered
+	Rate             float64 // Rate applied
+	RatedUnits       int     //  Number of billing units this rate applies to
+	RateIncrements   int     // This rate will apply in increments of duration
+	GroupInterval    int     // Group position
+	RoundingMethod   string  // Use this method to round the cost
+	RoundingDecimals int     // Round the cost number of decimals
+	Weight           float64 // Rate's priority when dealing with grouped rates
    }
 
  *JSON sample*:
@@ -152,9 +156,10 @@ Queries specific rate on tariff plan.
             {
                 "ConnectFee": 0.2, 
                 "Rate": 2, 
-                "RateIncrements": 1, 
+                "RateIncrements": 60, 
                 "RatedUnits": 1, 
-                "RoundingDecimals": 2, 
+                "RoundingDecimals": 2,
+                "GroupInterval": 0, 
                 "RoundingMethod": "*up", 
                 "Weight": 10
             }, 
@@ -163,7 +168,8 @@ Queries specific rate on tariff plan.
                 "Rate": 2.1, 
                 "RateIncrements": 1, 
                 "RatedUnits": 1, 
-                "RoundingDecimals": 2, 
+                "RoundingDecimals": 2,
+                "GroupInterval": 60,
                 "RoundingMethod": "*up", 
                 "Weight": 20
             }

@@ -25,8 +25,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"log"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 type TPLoader interface {
@@ -202,41 +204,89 @@ func ValidateCSVData(fn string, re *regexp.Regexp) (err error) {
 	return
 }
 
-type TPCSVRowValidator struct {
-	FileName   string         // File name
-	Rule       *regexp.Regexp // Regexp rule
-	ErrMessage string         // Error message
+type FileLineRegexValidator struct {
+	FieldsPerRecord int            // Number of fields in one record, useful for crosschecks
+	Rule            *regexp.Regexp // Regexp rule
+	Message         string         // Pass this message as helper
 }
 
-var TPCSVRowValidators = []*TPCSVRowValidator{
-	&TPCSVRowValidator{utils.DESTINATIONS_CSV,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+.?\d*){1}$`),
-		"Tag[0-9A-Za-z_],Prefix[0-9]"},
-	&TPCSVRowValidator{utils.TIMINGS_CSV,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*all\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
-		"Tag[0-9A-Za-z_],Years[0-9;]|*all|<empty>,Months[0-9;]|*all|<empty>,MonthDays[0-9;]|*all|<empty>,WeekDays[0-9;]|*all|<empty>,Time[0-9:]|*asap(00:00:00)"},
-	&TPCSVRowValidator{utils.RATES_CSV,
-		regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
-		"Tag[0-9A-Za-z_],ConnectFee[0-9.],Price[0-9.],PricedUnits[0-9.],RateIncrement[0-9.]"},
-	&TPCSVRowValidator{utils.DESTINATION_RATES_CSV,
-		regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\d+.?\d*,?){4}$`),
-		"Tag[0-9A-Za-z_],DestinationsTag[0-9A-Za-z_],RateTag[0-9A-Za-z_]"},
-	&TPCSVRowValidator{utils.DESTRATE_TIMINGS_CSV,
+var FileValidators = map[string]*FileLineRegexValidator{
+	utils.DESTINATIONS_CSV: &FileLineRegexValidator{utils.DESTINATIONS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\+?\d+.?\d*){1}$`),
+		"Tag([0-9A-Za-z_]),Prefix([0-9])"},
+	utils.TIMINGS_CSV: &FileLineRegexValidator{utils.TIMINGS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
+		"Tag([0-9A-Za-z_]),Years([0-9;]|*all|<empty>),Months([0-9;]|*all|<empty>),MonthDays([0-9;]|*all|<empty>),WeekDays([0-9;]|*all|<empty>),Time([0-9:]|*asap)"},
+	utils.RATES_CSV: &FileLineRegexValidator{utils.RATES_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){5}(?:\*\w+,){1}(?:\d+\.?\d*,?){2}$`),
+		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RatedUnits([0-9.]),RateIncrement([0-9.])"},
+	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,?\s*){3}$`),
+		"Tag([0-9A-Za-z_]),DestinationsTag([0-9A-Za-z_]),RateTag([0-9A-Za-z_])"},
+	utils.DESTRATE_TIMINGS_CSV: &FileLineRegexValidator{utils.DESTRATE_TIMINGS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
-		"Tag[0-9A-Za-z_],DestinationRatesTag[0-9A-Za-z_],TimingProfile[0-9A-Za-z_],Weight[0-9.]"},
-	&TPCSVRowValidator{utils.RATE_PROFILES_CSV,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\*all\s*,\s*|[\w:\.]+\s*,\s*){1}(?:\w*\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}$`),
-		"Tenant[0-9A-Za-z_],TOR[0-9],Direction OUT|IN,Subject[0-9A-Za-z_:.]|*all,RatesFallbackSubject[0-9A-Za-z_]|<empty>,RatesTimingTag[0-9A-Za-z_],ActivationTime[[0-9T:X]] (2012-01-01T00:00:00Z)"},
-	&TPCSVRowValidator{utils.ACTIONS_CSV,
-		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:ABSOLUTE\s*,\s*|PERCENT\s*,\s*|\s*,\s*){1}(?:\d*\.?\d*\s*,?\s*){3}$`),
-		"Tag[0-9A-Za-z_],Action[0-9A-Za-z_],BalanceTag[0-9A-Za-z_],Direction OUT|IN,Units[0-9],DestinationTag[0-9A-Za-z_]|*all,PriceType ABSOLUT|PERCENT,PriceValue[0-9.],MinutesWeight[0-9.],Weight[0-9.]"},
-	&TPCSVRowValidator{utils.ACTION_TIMINGS_CSV,
+		"Tag([0-9A-Za-z_]),DestinationRatesTag([0-9A-Za-z_]),TimingProfile([0-9A-Za-z_]),Weight([0-9.])"},
+	utils.RATE_PROFILES_CSV: &FileLineRegexValidator{utils.RATE_PROFILES_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\*out\s*,\s*){1}(?:\*any\s*,\s*|\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}(?:\w*\s*,?\s*){2}$`),
+		"Tenant([0-9A-Za-z_]),TOR([0-9A-Za-z_]),Direction(*out),Subject([0-9A-Za-z_]|*all),RatesFallbackSubject([0-9A-Za-z_]|<empty>),RatesTimingTag([0-9A-Za-z_]),ActivationTime([0-9T:X])"},
+	utils.ACTIONS_CSV: &FileLineRegexValidator{utils.ACTIONS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*),(?:\*\w+\s*),(?:\*\w+\s*),(?:\*out\s*),(?:\d+\s*),(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*),(?:\*any|\w+\s*),(?:\*\w+\s*)?,(?:\d+\.?\d*\s*)?,(?:\d+\.?\d*\s*)?,(?:\d+\.?\d*\s*)$`),
+		"Tag([0-9A-Za-z_]),Action([0-9A-Za-z_]),BalanceType([*a-z_]),Direction(*out),Units([0-9]),ExpiryTime(*[a-z_]|+[0-9][smh]|[0-9])DestinationTag([0-9A-Za-z_]|*all),RateType(*[a-z_]),RateValue([0-9.]),MinutesWeight([0-9.]),Weight([0-9.])"},
+	utils.ACTION_TIMINGS_CSV: &FileLineRegexValidator{utils.ACTION_TIMINGS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
-		"Tag[0-9A-Za-z_],ActionsTag[0-9A-Za-z_],TimingTag[0-9A-Za-z_],Weight[0-9.]"},
-	&TPCSVRowValidator{utils.ACTION_TRIGGERS_CSV,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:MONETARY\s*,\s*|SMS\s*,\s*|MINUTES\s*,\s*|INTERNET\s*,\s*|INTERNET_TIME\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\d+\.?\d*\s*,\s*){1}(?:\w+\s*,\s*|\*all\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\d+\.?\d*){1}$`),
-		"Tag[0-9A-Za-z_],BalanceTag MONETARY|SMS|MINUTES|INTERNET|INTERNET_TIME,Direction OUT|IN,ThresholdValue[0-9.],DestinationTag[0-9A-Za-z_]|*all,ActionsTag[0-9A-Za-z_],Weight[0-9.]"},
-	&TPCSVRowValidator{utils.ACCOUNT_ACTIONS_CSV,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:[\w:.]+\s*,\s*){1}(?:OUT\s*,\s*|IN\s*,\s*){1}(?:\w+\s*,?\s*){2}$`),
-		"Tenant[0-9A-Za-z_],Account[0-9A-Za-z_:.],Direction OUT|IN,ActionTimingsTag[0-9A-Za-z_],ActionTriggersTag[0-9A-Za-z_]"},
+		"Tag([0-9A-Za-z_]),ActionsTag([0-9A-Za-z_]),TimingTag([0-9A-Za-z_]),Weight([0-9.])"},
+	utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{utils.ACTION_TRIGGERS_NRCOLS,
+		regexp.MustCompile(`(?:\w+),(?:\*\w+),(?:\*out),(?:\*\w+),(?:\d+\.?\d*),(?:\w+|\*any)?,(?:\w+),(?:\d+\.?\d*)$`),
+		"Tag([0-9A-Za-z_]),BalanceType(*[a-z_]),Direction(*out),ThresholdType(*[a-z_]),ThresholdValue([0-9]+),DestinationTag([0-9A-Za-z_]|*all),ActionsTag([0-9A-Za-z_]),Weight([0-9]+)"},
+	utils.ACCOUNT_ACTIONS_CSV: &FileLineRegexValidator{utils.ACCOUNT_ACTIONS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\w+\s*,\s*){1}(?:\*out\s*,\s*){1}(?:\w+\s*,?\s*){2}$`),
+		"Tenant([0-9A-Za-z_]),Account([0-9A-Za-z_.]),Direction(*out),ActionTimingsTag([0-9A-Za-z_]),ActionTriggersTag([0-9A-Za-z_])"},
+}
+
+func NewTPCSVFileParser(dirPath, fileName string) (*TPCSVFileParser, error) {
+	validator, hasValidator := FileValidators[fileName]
+	if !hasValidator {
+		return nil, fmt.Errorf("No validator found for file <%s>", fileName)
+	}
+	// Open the file here
+	fin, err := os.Open(path.Join(dirPath, fileName))
+	if err != nil {
+		return nil, err
+	}
+	//defer fin.Close()
+	reader := bufio.NewReader(fin)
+	return &TPCSVFileParser{validator, reader}, nil
+}
+
+// Opens the connection to a file and returns the parsed lines one by one when ParseNextLine() is called
+type TPCSVFileParser struct {
+	validator *FileLineRegexValidator // Row validator
+	reader    *bufio.Reader           // Reader to the file we are interested in
+}
+
+func (self *TPCSVFileParser) ParseNextLine() ([]string, error) {
+	line, truncated, err := self.reader.ReadLine()
+	if err != nil {
+		return nil, err
+	} else if truncated {
+		return nil, errors.New("Line too long.")
+	}
+	// skip commented lines
+	if strings.HasPrefix(string(line), string(utils.COMMENT_CHAR)) {
+		return nil, errors.New("Line starts with comment character.")
+	}
+	// Validate here string line
+	if !self.validator.Rule.Match(line) {
+		return nil, fmt.Errorf("Invalid line, <%s>", self.validator.Message)
+	}
+	// Open csv reader directly on string line
+	csvReader, _, err := openStringCSVReader(string(line), ',', self.validator.FieldsPerRecord)
+	if err != nil {
+		return nil, err
+	}
+	record, err := csvReader.Read() // if no errors, record should be good to go having right format and length
+	if err != nil {
+		return nil, err
+	}
+	return record, nil
 }

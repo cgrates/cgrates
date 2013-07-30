@@ -68,27 +68,27 @@ type DataStorage interface {
 	GetTPDestination(string, string) (*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)
 	ExistsTPRate(string, string) (bool, error)
-	SetTPRate(*utils.TPRate) error
+	SetTPRates(string, map[string][]*Rate) error
 	GetTPRate(string, string) (*utils.TPRate, error)
 	GetTPRateIds(string) ([]string, error)
 	ExistsTPDestinationRate(string, string) (bool, error)
-	SetTPDestinationRate(*utils.TPDestinationRate) error
+	SetTPDestinationRates(string, map[string][]*DestinationRate) error
 	GetTPDestinationRate(string, string) (*utils.TPDestinationRate, error)
 	GetTPDestinationRateIds(string) ([]string, error)
 	ExistsTPDestRateTiming(string, string) (bool, error)
-	SetTPDestRateTiming(*utils.TPDestRateTiming) error
+	SetTPDestRateTimings(string, map[string][]*DestinationRateTiming) error
 	GetTPDestRateTiming(string, string) (*utils.TPDestRateTiming, error)
 	GetTPDestRateTimingIds(string) ([]string, error)
-	ExistsTPRateProfile(string, string) (bool, error)
-	SetTPRateProfile(*utils.TPRateProfile) error
-	GetTPRateProfile(string, string) (*utils.TPRateProfile, error)
-	GetTPRateProfileIds(*utils.AttrTPRateProfileIds) ([]string, error)
+	ExistsTPRatingProfile(string, string) (bool, error)
+	SetTPRatingProfiles(string, map[string][]*RatingProfile) error
+	GetTPRatingProfile(string, string) (*utils.TPRatingProfile, error)
+	GetTPRatingProfileIds(*utils.AttrTPRatingProfileIds) ([]string, error)
 	ExistsTPActions(string, string) (bool, error)
-	SetTPActions(*utils.TPActions) error
+	SetTPActions(string, map[string][]*Action) error
 	GetTPActions(string, string) (*utils.TPActions, error)
 	GetTPActionIds(string) ([]string, error)
 	ExistsTPActionTimings(string, string) (bool, error)
-	SetTPActionTimings(string, map[string][]*utils.TPActionTimingsRow) error
+	SetTPActionTimings(string, map[string][]*ActionTiming) error
 	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTimingsRow, error)
 	GetTPActionTimingIds(string) ([]string, error)
 	ExistsTPActionTriggers(string, string) (bool, error)

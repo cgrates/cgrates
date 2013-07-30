@@ -38,12 +38,12 @@ func (self *Apier) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *s
 	}
 	aTriggers := make([]*engine.ActionTrigger, len(attrs.ActionTriggers))
 	for idx, at := range attrs.ActionTriggers {
-		requiredFields := []string{"BalanceId", "Direction", "ThresholdType", "ThresholdValue", "ActionsId", "Weight"}
+		requiredFields := []string{"BalanceType", "Direction", "ThresholdType", "ThresholdValue", "ActionsId", "Weight"}
 		if missing := utils.MissingStructFields(&at, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:Balance:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.BalanceId, missing)
+			return fmt.Errorf("%s:Balance:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.BalanceType, missing)
 		}
 		at := &engine.ActionTrigger{
-			BalanceId:      at.BalanceId,
+			BalanceId:      at.BalanceType,
 			Direction:      at.Direction,
 			ThresholdType:  at.ThresholdType,
 			ThresholdValue: at.ThresholdValue,
@@ -82,7 +82,7 @@ func (self *Apier) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *uti
 		aTriggers := make([]utils.ApiActionTrigger, len(ats[attrs.ActionTriggersId]))
 		for idx, row := range ats[attrs.ActionTriggersId] {
 			aTriggers[idx] = utils.ApiActionTrigger{
-				BalanceId:      row.BalanceId,
+				BalanceType:      row.BalanceId,
 				Direction:      row.Direction,
 				ThresholdType:  row.ThresholdType,
 				ThresholdValue: row.ThresholdValue,

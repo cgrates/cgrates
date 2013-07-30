@@ -31,6 +31,7 @@ type RateSlot struct {
 	Rate             float64 // Rate applied
 	RatedUnits       int     //  Number of billing units this rate applies to
 	RateIncrements   int     // This rate will apply in increments of duration
+	GroupInterval    int     // Group position
 	RoundingMethod   string  // Use this method to round the cost
 	RoundingDecimals int     // Round the cost number of decimals
 	Weight           float64 // Rate's priority when dealing with grouped rates
@@ -59,9 +60,9 @@ type DestRateTiming struct {
 	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot
 }
 
-type TPRateProfile struct {
+type TPRatingProfile struct {
 	TPid                 string             // Tariff plan id
-	RateProfileId        string             // RateProfile id
+	RatingProfileId      string             // RatingProfile id
 	Tenant               string             // Tenant's Id
 	TOR                  string             // TypeOfRecord
 	Direction            string             // Traffic direction, OUT is the only one supported for now
@@ -75,7 +76,7 @@ type RatingActivation struct {
 	DestRateTimingId string // Id of DestRateTiming profile
 }
 
-type AttrTPRateProfileIds struct {
+type AttrTPRatingProfileIds struct {
 	TPid      string // Tariff plan id
 	Tenant    string // Tenant's Id
 	TOR       string // TypeOfRecord
@@ -90,16 +91,16 @@ type TPActions struct {
 }
 
 type Action struct {
-	Identifier     string  // Identifier mapped in the code
-	BalanceId      string  // Type of balance the action will operate on
-	Direction      string  // Balance direction
-	Units          float64 // Number of units to add/deduct
-	ExpirationTime string  // Time when the units will expire
-	DestinationId  string  // Destination profile id
-	RateType       string  // Type of price <ABSOLUTE|PERCENT>
-	Rate           float64 // Price value
-	MinutesWeight  float64 // Minutes weight
-	Weight         float64 // Action's weight
+	Identifier    string  // Identifier mapped in the code
+	BalanceType   string  // Type of balance the action will operate on
+	Direction     string  // Balance direction
+	Units         float64 // Number of units to add/deduct
+	ExpiryTime    string  // Time when the units will expire
+	DestinationId string  // Destination profile id
+	RateType      string  // Type of rate <*absolute|*percent>
+	Rate          float64 // Price value
+	MinutesWeight float64 // Minutes weight
+	Weight        float64 // Action's weight
 }
 
 type ApiTPActionTimings struct {
@@ -122,7 +123,7 @@ type ApiTPActionTriggers struct {
 }
 
 type ApiActionTrigger struct {
-	BalanceId      string  // Id of the balance this trigger monitors
+	BalanceType    string  // Type of balance this trigger monitors
 	Direction      string  // Traffic direction
 	ThresholdType  string  // This threshold type
 	ThresholdValue float64 // Threshold

@@ -43,11 +43,12 @@ CREATE TABLE `tp_rates` (
   `rate` decimal(5,4) NOT NULL,
   `rated_units` int(11) NOT NULL,
   `rate_increments` int(11) NOT NULL,
+  `group_interval` int(11) NOT NULL,
   `rounding_method` varchar(255) NOT NULL,
   `rounding_decimals` tinyint(4) NOT NULL,
   `weight` decimal(5,2) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `tpid_tag_rate_weight` (`tpid`,`tag`,`weight`),
+  UNIQUE KEY `unique_tprate` (`tpid`,`tag`,`group_interval`),
   KEY `tpid` (`tpid`),
   KEY `tpid_tag` (`tpid`,`tag`)
 );
@@ -89,7 +90,7 @@ CREATE TABLE `tp_destrate_timings` (
 -- Table structure for table `tp_rate_profiles`
 --
 
-CREATE TABLE `tp_rate_profiles` (
+CREATE TABLE `tp_rating_profiles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
@@ -114,18 +115,23 @@ CREATE TABLE `tp_actions` (
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
   `action` varchar(24) NOT NULL,
-  `balance_tag` varchar(24) NOT NULL,
+  `balance_type` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
+<<<<<<< HEAD
   `units` DECIMAL(5,2) NOT NULL,
   `expiration_time` varchar(24) NOT NULL,
+=======
+  `units` DECIMAL(8,4) NOT NULL,
+  `expiry_time` int(16) NOT NULL,
+>>>>>>> 2f733525b215e608478e1cddf2b001fb92fb8cbd
   `destination_tag` varchar(24) NOT NULL,
   `rate_type` varchar(8) NOT NULL,
-  `rate` DECIMAL(5,4) NOT NULL,
+  `rate` DECIMAL(8,4) NOT NULL,
   `minutes_weight` DECIMAL(5,2) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_tag`,`direction`,`expiration_time`,`destination_tag`,`rate_type`,`minutes_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`rate_type`,`minutes_weight`,`weight`)
 );
 
 --
@@ -152,16 +158,16 @@ CREATE TABLE `tp_action_triggers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` char(40) NOT NULL,
   `tag` varchar(24) NOT NULL,
-  `balance_tag` varchar(24) NOT NULL,
+  `balance_type` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
-  `threshold_type` char(11) NOT NULL,
-  `threshold_value` DECIMAL(5,4) NOT NULL,
+  `threshold_type` char(12) NOT NULL,
+  `threshold_value` DECIMAL(8,4) NOT NULL,
   `destination_tag` varchar(24) NOT NULL,
   `actions_tag` varchar(24) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_tag`,`direction`,`threshold_type`,`threshold_value`,`destination_tag`,`actions_tag`)
+  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_type`,`direction`,`threshold_type`,`threshold_value`,`destination_tag`,`actions_tag`)
 );
 
 --

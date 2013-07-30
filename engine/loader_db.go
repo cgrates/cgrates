@@ -184,11 +184,11 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		return err
 	}
 	for _, rp := range rpfs {
-		at := time.Unix(rp.activationTime, 0)
+		at := time.Unix(rp.ActivationTime, 0)
 		for _, d := range dbr.destinations {
-			ap, exists := dbr.activationPeriods[rp.destRatesTimingTag]
+			ap, exists := dbr.activationPeriods[rp.DestRatesTimingTag]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rp.destRatesTimingTag))
+				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rp.DestRatesTimingTag))
 			}
 			newAP := &ActivationPeriod{ActivationTime: at}
 			//copy(newAP.Intervals, ap.Intervals)
@@ -211,12 +211,12 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 	}
 	for _, ratingProfile := range rpm {
 		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
-		at := time.Unix(ratingProfile.activationTime, 0)
-		drtm, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.destRatesTimingTag)
+		at := time.Unix(ratingProfile.ActivationTime, 0)
+		drtm, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.DestRatesTimingTag)
 		if err != nil {
 			return err
 		} else if len(drtm) == 0 {
-			return fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.destRatesTimingTag)
+			return fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.DestRatesTimingTag)
 		}
 		for _, destrateTiming := range drtm {
 			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
@@ -249,7 +249,7 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 					return err
 				}
 				for _, destination := range dm {
-					ap := activationPeriods[ratingProfile.destRatesTimingTag]
+					ap := activationPeriods[ratingProfile.DestRatesTimingTag]
 					newAP := &ActivationPeriod{ActivationTime: at}
 					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
 					resultRatingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)

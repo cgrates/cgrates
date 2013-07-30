@@ -1,4 +1,4 @@
 #!/bin/sh
-echo Running CGRateS service
-exec /usr/bin/cgr-rater -config /etc/cgrates/cgrates.cfg
+echo Running CGRateS engine
+exec /usr/bin/cgr-engine -config /etc/cgrates/cgrates.cfg
 

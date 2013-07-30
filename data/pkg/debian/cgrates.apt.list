@@ -1,6 +1,7 @@
 ## CGRateS official APT repository. 
 # Place this source file into your /etc/apt/sources.list.d/ folder and execute commands from bellow
 # wget -O - http://apt.itsyscom.com/repos/apt/conf/cgrates.gpg.key|apt-key add -
-# apt-get update && apt-get install
+# apt-get update && apt-get install cgrates
+deb http://apt.itsyscom.com/repos/apt/debian wheezy main
 deb http://apt.itsyscom.com/repos/apt/debian squeeze main
 

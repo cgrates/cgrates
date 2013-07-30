@@ -21,8 +21,8 @@ package cdrs
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/mediator"
 	"io/ioutil"
 	"net/http"
 )
@@ -33,12 +33,29 @@ var (
 	medi    *mediator.Mediator
 )
 
-func cdrHandler(w http.ResponseWriter, r *http.Request) {
+func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	if fsCdr, err := new(FSCdr).New(body); err == nil {
 		storage.SetCdr(fsCdr)
 		if cfg.CDRSMediator == "internal" {
 			errMedi := medi.MediateDBCDR(fsCdr, storage)
+			if errMedi != nil {
+				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
+			}
+		} else {
+			//TODO: use the connection to mediator
+		}
+	} else {
+		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
+	}
+}
+
+func genCdrHandler(w http.ResponseWriter, r *http.Request) {
+	body, _ := ioutil.ReadAll(r.Body)
+	if genCdr, err := new(GenCdr).New(body); err == nil {
+		storage.SetCdr(genCdr)
+		if cfg.CDRSMediator == "internal" {
+			errMedi := medi.MediateDBCDR(genCdr, storage)
 			if errMedi != nil {
 				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
 			}
@@ -61,7 +78,10 @@ func New(s engine.DataStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS 
 
 func (cdrs *CDRS) StartCapturingCDRs() {
 	if cfg.CDRSfsJSONEnabled {
-		http.HandleFunc("/freeswitch_json", cdrHandler)
+		http.HandleFunc("/freeswitch_json", fsCdrHandler)
+	}
+	if cfg.CDRSgenJSONEnabled {
+		http.HandleFunc("/generic_json", genCdrHandler)
 	}
 	http.ListenAndServe(cfg.CDRSListen, nil)
 }

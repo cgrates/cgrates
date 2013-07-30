@@ -23,6 +23,7 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +37,11 @@ func (self *Apier) SetTPDestinationRate(attrs utils.TPDestinationRate, reply *st
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	if err := self.StorDb.SetTPDestinationRate(&attrs); err != nil {
+	drs := make([]*engine.DestinationRate, len(attrs.DestinationRates))
+	for idx, dr := range attrs.DestinationRates {
+		drs[idx] = &engine.DestinationRate{attrs.DestinationRateId, dr.DestinationId, dr.RateId, nil}
+	}
+	if err := self.StorDb.SetTPDestinationRates(attrs.TPid, map[string][]*engine.DestinationRate{attrs.DestinationRateId: drs}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

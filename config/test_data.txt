@@ -19,6 +19,8 @@ default_reqtype = test				# Default request type to consider when missing from r
 default_tor = test				# Default Type of Record to consider when missing from requests.
 default_tenant = test				# Default Tenant to consider when missing from requests.
 default_subject = test				# Default rating Subject to consider when missing from requests.
+rounding_method = test				# Rounding method for floats/costs: <up|middle|down>
+rounding_decimals = 99				# Number of decimals to round floats/costs at
 
 
 [balancer]
@@ -29,8 +31,6 @@ listen = test 			# Balancer listen interface: <disabled|x.y.z.y:1234>.
 enabled = true				# Enable Rater service: <true|false>.
 balancer = test 				# Register to Balancer as worker: <enabled|disabled>.
 listen = test 			# Rater's listening interface: <internal|x.y.z.y:1234>.
-rounding_method = test			# Rounding method for the end price: <up|middle|down>
-rounding_decimals = 99			# Number of decimals to round prices at
 
 [scheduler]
  enabled = true				# Starts Scheduler service: <true|false>.
@@ -38,6 +38,7 @@ rounding_decimals = 99			# Number of decimals to round prices at
 [cdrs]
 listen=test				# CDRS's listening interface: <x.y.z.y:1234>.
 freeswitch_json_enabled=true			# Enable the handler for FreeSWITCH JSON CDRs: <true|false>.
+generic_json_enabled=true			# Enable the handler for generic JSON CDRs: <true|false>.
 mediator = test				# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 extra_fields = test				# Extra fields to store in CDRs
 

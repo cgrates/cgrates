@@ -28,23 +28,23 @@ import (
 
 const (
 	// Freswitch event property names
-	CDR_MAP      = "variables"
-	DIRECTION    = "direction"
-	ORIG_ID      = "sip_call_id" //- originator_id - match cdrs
-	SUBJECT      = "cgr_subject"
-	ACCOUNT      = "cgr_account"
-	DESTINATION  = "cgr_destination"
-	REQTYPE      = "cgr_reqtype" //prepaid or postpaid
-	TOR          = "cgr_tor"
-	UUID         = "uuid" // -Unique ID for this call leg
-	CSTMID       = "cgr_cstmid"
-	CALL_DEST_NR = "dialed_extension"
-	PARK_TIME    = "start_epoch"
-	ANSWER_TIME  = "answer_epoch"
-	HANGUP_TIME  = "end_epoch"
-	DURATION     = "billsec"
-	USERNAME     = "user_name"
-	FS_IP        = "sip_local_network_addr"
+	FS_CDR_MAP      = "variables"
+	FS_DIRECTION    = "direction"
+	FS_ORIG_ID      = "sip_call_id" //- originator_id - match cdrs
+	FS_SUBJECT      = "cgr_subject"
+	FS_ACCOUNT      = "cgr_account"
+	FS_DESTINATION  = "cgr_destination"
+	FS_REQTYPE      = "cgr_reqtype" //prepaid or postpaid
+	FS_TOR          = "cgr_tor"
+	FS_UUID         = "uuid" // -Unique ID for this call leg
+	FS_CSTMID       = "cgr_cstmid"
+	FS_CALL_DEST_NR = "dialed_extension"
+	FS_PARK_TIME    = "start_epoch"
+	FS_ANSWER_TIME  = "answer_epoch"
+	FS_HANGUP_TIME  = "end_epoch"
+	FS_DURATION     = "billsec"
+	FS_USERNAME     = "user_name"
+	FS_IP           = "sip_local_network_addr"
 )
 
 type FSCdr map[string]string
@@ -54,7 +54,7 @@ func (fsCdr FSCdr) New(body []byte) (utils.CDR, error) {
 	var tmp map[string]interface{}
 	var err error
 	if err = json.Unmarshal(body, &tmp); err == nil {
-		if variables, ok := tmp[CDR_MAP]; ok {
+		if variables, ok := tmp[FS_CDR_MAP]; ok {
 			if variables, ok := variables.(map[string]interface{}); ok {
 				for k, v := range variables {
 					fsCdr[k] = v.(string)
@@ -67,10 +67,10 @@ func (fsCdr FSCdr) New(body []byte) (utils.CDR, error) {
 }
 
 func (fsCdr FSCdr) GetCgrId() string {
-	return utils.FSCgrId(fsCdr[UUID])
+	return utils.FSCgrId(fsCdr[FS_UUID])
 }
 func (fsCdr FSCdr) GetAccId() string {
-	return fsCdr[UUID]
+	return fsCdr[FS_UUID]
 }
 func (fsCdr FSCdr) GetCdrHost() string {
 	return fsCdr[FS_IP]
@@ -80,29 +80,29 @@ func (fsCdr FSCdr) GetDirection() string {
 	return "OUT"
 }
 func (fsCdr FSCdr) GetOrigId() string {
-	return fsCdr[ORIG_ID]
+	return fsCdr[FS_ORIG_ID]
 }
 func (fsCdr FSCdr) GetSubject() string {
-	return utils.FirstNonEmpty(fsCdr[SUBJECT], fsCdr[USERNAME])
+	return utils.FirstNonEmpty(fsCdr[FS_SUBJECT], fsCdr[FS_USERNAME])
 }
 func (fsCdr FSCdr) GetAccount() string {
-	return utils.FirstNonEmpty(fsCdr[ACCOUNT], fsCdr[USERNAME])
+	return utils.FirstNonEmpty(fsCdr[FS_ACCOUNT], fsCdr[FS_USERNAME])
 }
 
 // Charging destination number
 func (fsCdr FSCdr) GetDestination() string {
-	return utils.FirstNonEmpty(fsCdr[DESTINATION], fsCdr[CALL_DEST_NR])
+	return utils.FirstNonEmpty(fsCdr[FS_DESTINATION], fsCdr[FS_CALL_DEST_NR])
 }
 
 func (fsCdr FSCdr) GetTOR() string {
-	return utils.FirstNonEmpty(fsCdr[TOR], cfg.DefaultTOR)
+	return utils.FirstNonEmpty(fsCdr[FS_TOR], cfg.DefaultTOR)
 }
 
 func (fsCdr FSCdr) GetTenant() string {
-	return utils.FirstNonEmpty(fsCdr[CSTMID], cfg.DefaultTenant)
+	return utils.FirstNonEmpty(fsCdr[FS_CSTMID], cfg.DefaultTenant)
 }
 func (fsCdr FSCdr) GetReqType() string {
-	return utils.FirstNonEmpty(fsCdr[REQTYPE], cfg.DefaultReqType)
+	return utils.FirstNonEmpty(fsCdr[FS_REQTYPE], cfg.DefaultReqType)
 }
 func (fsCdr FSCdr) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string, len(cfg.CDRSExtraFields))
@@ -115,19 +115,19 @@ func (fsCdr FSCdr) GetFallbackSubj() string {
 	return cfg.DefaultSubject
 }
 func (fsCdr FSCdr) GetAnswerTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsCdr[ANSWER_TIME], 0, 64)
+	st, err := strconv.ParseInt(fsCdr[FS_ANSWER_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
 func (fsCdr FSCdr) GetHangupTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsCdr[HANGUP_TIME], 0, 64)
+	st, err := strconv.ParseInt(fsCdr[FS_HANGUP_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
 }
 
 // Extracts duration as considered by the telecom switch
 func (fsCdr FSCdr) GetDuration() int64 {
-	dur, _ := strconv.ParseInt(fsCdr[DURATION], 0, 64)
+	dur, _ := strconv.ParseInt(fsCdr[FS_DURATION], 0, 64)
 	return dur
 }
 

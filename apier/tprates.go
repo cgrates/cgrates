@@ -23,6 +23,7 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -36,7 +37,12 @@ func (self *Apier) SetTPRate(attrs utils.TPRate, reply *string) error {
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	if err := self.StorDb.SetTPRate(&attrs); err != nil {
+	rts := make([]*engine.Rate, len(attrs.RateSlots))
+	for idx, rtSlot := range attrs.RateSlots {
+		rts[idx] = &engine.Rate{attrs.RateId, rtSlot.ConnectFee, rtSlot.Rate, float64(rtSlot.RatedUnits),
+			float64(rtSlot.RateIncrements), float64(rtSlot.GroupInterval), rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight}
+	}
+	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*engine.Rate{attrs.RateId: rts}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

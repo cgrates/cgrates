@@ -78,11 +78,11 @@ func Round(x float64, prec int, method string) float64 {
 	_, frac := math.Modf(intermed)
 
 	switch method {
-	case "*up":
+	case ROUNDING_UP:
 		rounder = math.Ceil(intermed)
-	case "*down":
+	case ROUNDING_DOWN:
 		rounder = math.Floor(intermed)
-	case "*middle":
+	case ROUNDING_MIDDLE:
 		if frac >= 0.5 {
 			rounder = math.Ceil(intermed)
 		} else {

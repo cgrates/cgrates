@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"strconv"
 	"errors"
 	"github.com/cgrates/cgrates/utils"
+	"strconv"
 )
 
 // Various helpers to deal with database
@@ -53,4 +53,3 @@ func ConfigureDatabase(db_type, host, port, name, user, pass string) (db DataSto
 	}
 	return db, nil
 }
-

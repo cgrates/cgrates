@@ -26,80 +26,78 @@ import (
 )
 
 const (
-	DISABLED = "disabled"
-	INTERNAL = "internal"
-	JSON     = "json"
-	GOB      = "gob"
-	POSTGRES = "postgres"
-	MONGO    = "mongo"
-	REDIS    = "redis"
-	SAME     = "same"
-	FS       = "freeswitch"
-	PREPAID  = "prepaid"
-	POSTPAID = "postpaid"
-	PSEUDOPREPAID = "pseudoprepaid"
-	RATED	 = "rated"
+	DISABLED      = "disabled"
+	INTERNAL      = "internal"
+	JSON          = "json"
+	GOB           = "gob"
+	POSTGRES      = "postgres"
+	MONGO         = "mongo"
+	REDIS         = "redis"
+	SAME          = "same"
+	FS            = "freeswitch"
+	
 )
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	DataDBType              string
-	DataDBHost              string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDBPort              string // The port to bind to.
-	DataDBName              string // The name of the database to connect to.
-	DataDBUser              string // The user to sign in as.
-	DataDBPass              string // The user's password.
+	DataDBType               string
+	DataDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	DataDBPort               string // The port to bind to.
+	DataDBName               string // The name of the database to connect to.
+	DataDBUser               string // The user to sign in as.
+	DataDBPass               string // The user's password.
 	StorDBType               string // Should reflect the database type used to store logs
 	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	StorDBPort               string // The port to bind to.
 	StorDBName               string // The name of the database to connect to.
 	StorDBUser               string // The user to sign in as.
 	StorDBPass               string // The user's password.
-	RPCEncoding        	string // RPC encoding used on APIs: <gob|json>.
-	DefaultReqType        string // Use this request type if not defined on top
-	DefaultTOR            string // set default type of record
-	DefaultTenant         string // set default tenant
-	DefaultSubject        string // set default rating subject, useful in case of fallback
-	RaterEnabled            bool   // start standalone server (no balancer)
-	RaterBalancer           string // balancer address host:port
-	RaterListen             string // listening address host:port
-	RaterRoundingMethod     string // Rounding method for the end price: <up|middle|down>
-	RaterRoundingDecimals   int    // Number of decimals to round end prices at
-	BalancerEnabled         bool
-	BalancerListen          string // Json RPC server address
-	SchedulerEnabled        bool
-	CDRSListen		string // CDRS's listening interface: <x.y.z.y:1234>.
-	CDRSfsJSONEnabled	bool	// Enable the handler for FreeSWITCH JSON CDRs: <enabled|disabled>.
-	CDRSMediator            string // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CDRSExtraFields		[]string //Extra fields to store in CDRs
-	SMEnabled               bool
-	SMSwitchType            string
-	SMRater                 string // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMRaterReconnects       int    // Number of reconnect attempts to rater
-	SMDebitInterval         int    // the period to be debited in advanced during a call (in seconds)
-	MediatorEnabled         bool   // Starts Mediator service: <true|false>.
-	MediatorListen          string // Mediator's listening interface: <internal>.
-	MediatorRater           string // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorRaterReconnects int    // Number of reconnects to rater before giving up.
-	MediatorCDRType         string // CDR type <freeswitch_http_json|freeswitch_file_csv>.
-	MediatorAccIdField      string // Name of field identifying accounting id used during mediation. Use index number in case of .csv cdrs.
-	MediatorSubjectFields   []string // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorReqTypeFields	[]string // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
-	MediatorDirectionFields	[]string // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTenantFields	[]string // Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTORFields	[]string // Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAccountFields	[]string // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDestFields	[]string // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTimeAnswerFields	[]string // Name of time_start fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDurationFields	[]string // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorCDRInDir        string // Absolute path towards the directory where the CDRs are kept (file stored CDRs).
-	MediatorCDROutDir       string // Absolute path towards the directory where processed CDRs will be exported (file stored CDRs).
-	FreeswitchServer        string // freeswitch address host:port
-	FreeswitchPass          string // FS socket password
-	FreeswitchReconnects    int    // number of times to attempt reconnect after connect fails
+	RPCEncoding              string // RPC encoding used on APIs: <gob|json>.
+	DefaultReqType           string // Use this request type if not defined on top
+	DefaultTOR               string // set default type of record
+	DefaultTenant            string // set default tenant
+	DefaultSubject           string // set default rating subject, useful in case of fallback
+	RoundingMethod      string // Rounding method for the end price: <*up|*middle|*down>
+	RoundingDecimals    int    // Number of decimals to round end prices at
+	RaterEnabled             bool   // start standalone server (no balancer)
+	RaterBalancer            string // balancer address host:port
+	RaterListen              string // listening address host:port
+	BalancerEnabled          bool
+	BalancerListen           string // Json RPC server address
+	SchedulerEnabled         bool
+	CDRSListen               string   // CDRS's listening interface: <x.y.z.y:1234>.
+	CDRSfsJSONEnabled        bool     // Enable the handler for FreeSWITCH JSON CDRs: <enabled|disabled>.
+	CDRSgenJSONEnabled       bool     // Enable the handler for Generic JSON CDRs: <enabled|disabled>.
+	CDRSMediator             string   // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CDRSExtraFields          []string //Extra fields to store in CDRs
+	SMEnabled                bool
+	SMSwitchType             string
+	SMRater                  string   // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMRaterReconnects        int      // Number of reconnect attempts to rater
+	SMDebitInterval          int      // the period to be debited in advanced during a call (in seconds)
+	MediatorEnabled          bool     // Starts Mediator service: <true|false>.
+	MediatorListen           string   // Mediator's listening interface: <internal>.
+	MediatorRater            string   // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	MediatorRaterReconnects  int      // Number of reconnects to rater before giving up.
+	MediatorCDRType          string   // CDR type <freeswitch_http_json|freeswitch_file_csv>.
+	MediatorAccIdField       string   // Name of field identifying accounting id used during mediation. Use index number in case of .csv cdrs.
+	MediatorSubjectFields    []string // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorReqTypeFields    []string // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
+	MediatorDirectionFields  []string // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorTenantFields     []string // Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorTORFields        []string // Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorAccountFields    []string // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorDestFields       []string // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorTimeAnswerFields []string // Name of time_start fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorDurationFields   []string // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorCDRInDir         string   // Absolute path towards the directory where the CDRs are kept (file stored CDRs).
+	MediatorCDROutDir        string   // Absolute path towards the directory where processed CDRs will be exported (file stored CDRs).
+	FreeswitchServer         string   // freeswitch address host:port
+	FreeswitchPass           string   // FS socket password
+	FreeswitchReconnects     int      // number of times to attempt reconnect after connect fails
 }
 
-func ( self *CGRConfig ) setDefaults() error {
+func (self *CGRConfig) setDefaults() error {
 	self.DataDBType = REDIS
 	self.DataDBHost = "127.0.0.1"
 	self.DataDBPort = "6379"
@@ -113,20 +111,21 @@ func ( self *CGRConfig ) setDefaults() error {
 	self.StorDBUser = "cgrates"
 	self.StorDBPass = "CGRateS.org"
 	self.RPCEncoding = JSON
-	self.DefaultReqType = "rated"
+	self.DefaultReqType = utils.RATED 
 	self.DefaultTOR = "0"
 	self.DefaultTenant = "0"
 	self.DefaultSubject = "0"
+	self.RoundingMethod = utils.ROUNDING_MIDDLE
+	self.RoundingDecimals = 4
 	self.RaterEnabled = false
 	self.RaterBalancer = DISABLED
 	self.RaterListen = "127.0.0.1:2012"
-	self.RaterRoundingMethod = utils.ROUNDING_MIDDLE
-	self.RaterRoundingDecimals = 4
 	self.BalancerEnabled = false
 	self.BalancerListen = "127.0.0.1:2013"
 	self.SchedulerEnabled = false
 	self.CDRSListen = "127.0.0.1:2022"
 	self.CDRSfsJSONEnabled = false
+	self.CDRSgenJSONEnabled = false
 	self.CDRSMediator = INTERNAL
 	self.CDRSExtraFields = []string{}
 	self.MediatorEnabled = false
@@ -237,6 +236,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "default_subject"); hasOpt {
 		cfg.DefaultSubject, _ = c.GetString("global", "default_subject")
 	}
+	if hasOpt = c.HasOption("global", "rounding_method"); hasOpt {
+		cfg.RoundingMethod, _ = c.GetString("global", "rounding_method")
+	}
+	if hasOpt = c.HasOption("global", "rounding_decimals"); hasOpt {
+		cfg.RoundingDecimals, _ = c.GetInt("global", "rounding_decimals")
+	}
 	if hasOpt = c.HasOption("rater", "enabled"); hasOpt {
 		cfg.RaterEnabled, _ = c.GetBool("rater", "enabled")
 	}
@@ -245,12 +250,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("rater", "listen"); hasOpt {
 		cfg.RaterListen, _ = c.GetString("rater", "listen")
-	}
-	if hasOpt = c.HasOption("rater", "rounding_method"); hasOpt {
-		cfg.RaterRoundingMethod, _ = c.GetString("rater", "rounding_method")
-	}
-	if hasOpt = c.HasOption("rater", "rounding_decimals"); hasOpt {
-		cfg.RaterRoundingDecimals, _ = c.GetInt("rater", "rounding_decimals")
 	}
 	if hasOpt = c.HasOption("balancer", "enabled"); hasOpt {
 		cfg.BalancerEnabled, _ = c.GetBool("balancer", "enabled")
@@ -267,11 +266,14 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrs", "freeswitch_json_enabled"); hasOpt {
 		cfg.CDRSfsJSONEnabled, _ = c.GetBool("cdrs", "freeswitch_json_enabled")
 	}
+	if hasOpt = c.HasOption("cdrs", "generic_json_enabled"); hasOpt {
+		cfg.CDRSgenJSONEnabled, _ = c.GetBool("cdrs", "generic_json_enabled")
+	}
 	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
 		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
 	}
 	if hasOpt = c.HasOption("cdrs", "extra_fields"); hasOpt {
-		if cfg.CDRSExtraFields, errParse = ConfigSlice( c, "cdrs", "extra_fields"); errParse!=nil {
+		if cfg.CDRSExtraFields, errParse = ConfigSlice(c, "cdrs", "extra_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
@@ -294,47 +296,47 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.MediatorAccIdField, _ = c.GetString("mediator", "accid_field")
 	}
 	if hasOpt = c.HasOption("mediator", "subject_fields"); hasOpt {
-		if cfg.MediatorSubjectFields, errParse = ConfigSlice( c, "mediator", "subject_fields"); errParse!=nil {
+		if cfg.MediatorSubjectFields, errParse = ConfigSlice(c, "mediator", "subject_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "reqtype_fields"); hasOpt {
-		if cfg.MediatorReqTypeFields, errParse = ConfigSlice( c, "mediator", "reqtype_fields"); errParse!=nil {
+		if cfg.MediatorReqTypeFields, errParse = ConfigSlice(c, "mediator", "reqtype_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "direction_fields"); hasOpt {
-		if cfg.MediatorDirectionFields, errParse = ConfigSlice( c, "mediator", "direction_fields"); errParse!=nil {
+		if cfg.MediatorDirectionFields, errParse = ConfigSlice(c, "mediator", "direction_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "tenant_fields"); hasOpt {
-		if cfg.MediatorTenantFields, errParse = ConfigSlice( c, "mediator", "tenant_fields"); errParse!=nil {
+		if cfg.MediatorTenantFields, errParse = ConfigSlice(c, "mediator", "tenant_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "tor_fields"); hasOpt {
-		if cfg.MediatorTORFields, errParse = ConfigSlice( c, "mediator", "tor_fields"); errParse!=nil {
+		if cfg.MediatorTORFields, errParse = ConfigSlice(c, "mediator", "tor_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "account_fields"); hasOpt {
-		if cfg.MediatorAccountFields, errParse = ConfigSlice( c, "mediator", "account_fields"); errParse!=nil {
+		if cfg.MediatorAccountFields, errParse = ConfigSlice(c, "mediator", "account_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "destination_fields"); hasOpt {
-		if cfg.MediatorDestFields, errParse = ConfigSlice( c, "mediator", "destination_fields"); errParse!=nil {
+		if cfg.MediatorDestFields, errParse = ConfigSlice(c, "mediator", "destination_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "time_answer_fields"); hasOpt {
-		if cfg.MediatorTimeAnswerFields, errParse = ConfigSlice( c, "mediator", "time_answer_fields"); errParse!=nil {
+		if cfg.MediatorTimeAnswerFields, errParse = ConfigSlice(c, "mediator", "time_answer_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "duration_fields"); hasOpt {
-		if cfg.MediatorDurationFields, errParse = ConfigSlice( c, "mediator", "duration_fields"); errParse!=nil {
+		if cfg.MediatorDurationFields, errParse = ConfigSlice(c, "mediator", "duration_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}

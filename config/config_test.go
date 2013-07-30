@@ -20,53 +20,54 @@ package config
 
 import (
 	"fmt"
-	"testing"
-	"reflect"
 	"github.com/cgrates/cgrates/utils"
+	"reflect"
+	"testing"
 )
 
 // Make sure defaults did not change by mistake
 func TestDefaults(t *testing.T) {
 	cfg := &CGRConfig{}
 	errSet := cfg.setDefaults()
-	if errSet != nil  {
+	if errSet != nil {
 		t.Log(fmt.Sprintf("Coud not set defaults: %s!", errSet.Error()))
 		t.FailNow()
 	}
 	eCfg := &CGRConfig{}
-	eCfg.DataDBType = REDIS 
-	eCfg.DataDBHost = "127.0.0.1" 
-	eCfg.DataDBPort = "6379" 
-	eCfg.DataDBName = "10" 
-	eCfg.DataDBUser = "" 
-	eCfg.DataDBPass = "" 
+	eCfg.DataDBType = REDIS
+	eCfg.DataDBHost = "127.0.0.1"
+	eCfg.DataDBPort = "6379"
+	eCfg.DataDBName = "10"
+	eCfg.DataDBUser = ""
+	eCfg.DataDBPass = ""
 	eCfg.StorDBType = utils.MYSQL
-	eCfg.StorDBHost = "localhost" 
-	eCfg.StorDBPort = "3306" 
-	eCfg.StorDBName = "cgrates" 
-	eCfg.StorDBUser = "cgrates" 
-	eCfg.StorDBPass = "CGRateS.org" 
+	eCfg.StorDBHost = "localhost"
+	eCfg.StorDBPort = "3306"
+	eCfg.StorDBName = "cgrates"
+	eCfg.StorDBUser = "cgrates"
+	eCfg.StorDBPass = "CGRateS.org"
 	eCfg.RPCEncoding = JSON
-	eCfg.DefaultReqType = RATED
-	eCfg.DefaultTOR = "0" 
-	eCfg.DefaultTenant = "0" 
-	eCfg.DefaultSubject = "0" 
-	eCfg.RaterEnabled = false 
-	eCfg.RaterBalancer = DISABLED 
-	eCfg.RaterListen = "127.0.0.1:2012" 
-	eCfg.RaterRoundingMethod = utils.ROUNDING_MIDDLE
-	eCfg.RaterRoundingDecimals = 4
-	eCfg.BalancerEnabled = false 
-	eCfg.BalancerListen = "127.0.0.1:2013" 
-	eCfg.SchedulerEnabled = false 
-	eCfg.CDRSListen = "127.0.0.1:2022" 
-	eCfg.CDRSfsJSONEnabled = false 
+	eCfg.DefaultReqType = utils.RATED
+	eCfg.DefaultTOR = "0"
+	eCfg.DefaultTenant = "0"
+	eCfg.DefaultSubject = "0"
+	eCfg.RoundingMethod = utils.ROUNDING_MIDDLE
+	eCfg.RoundingDecimals = 4
+	eCfg.RaterEnabled = false
+	eCfg.RaterBalancer = DISABLED
+	eCfg.RaterListen = "127.0.0.1:2012"
+	eCfg.BalancerEnabled = false
+	eCfg.BalancerListen = "127.0.0.1:2013"
+	eCfg.SchedulerEnabled = false
+	eCfg.CDRSListen = "127.0.0.1:2022"
+	eCfg.CDRSfsJSONEnabled = false
+	eCfg.CDRSgenJSONEnabled = false
 	eCfg.CDRSMediator = INTERNAL
 	eCfg.CDRSExtraFields = []string{}
-	eCfg.MediatorEnabled = false 
-	eCfg.MediatorListen = "127.0.0.1:2032" 
-	eCfg.MediatorRater = "127.0.0.1:2012" 
-	eCfg.MediatorRaterReconnects = 3 
+	eCfg.MediatorEnabled = false
+	eCfg.MediatorListen = "127.0.0.1:2032"
+	eCfg.MediatorRater = "127.0.0.1:2012"
+	eCfg.MediatorRaterReconnects = 3
 	eCfg.MediatorCDRType = "freeswitch_http_json"
 	eCfg.MediatorAccIdField = "accid"
 	eCfg.MediatorSubjectFields = []string{"subject"}
@@ -78,17 +79,17 @@ func TestDefaults(t *testing.T) {
 	eCfg.MediatorDestFields = []string{"destination"}
 	eCfg.MediatorTimeAnswerFields = []string{"time_answer"}
 	eCfg.MediatorDurationFields = []string{"duration"}
-	eCfg.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv" 
+	eCfg.MediatorCDRInDir = "/var/log/freeswitch/cdr-csv"
 	eCfg.MediatorCDROutDir = "/var/log/cgrates/cdr/out/freeswitch/csv"
-	eCfg.SMEnabled = false 
-	eCfg.SMSwitchType = FS 
-	eCfg.SMRater = "127.0.0.1:2012" 
-	eCfg.SMRaterReconnects = 3 
-	eCfg.SMDebitInterval = 10 
-	eCfg.FreeswitchServer = "127.0.0.1:8021" 
-	eCfg.FreeswitchPass = "ClueCon" 
-	eCfg.FreeswitchReconnects = 5 
-	if !reflect.DeepEqual(cfg ,eCfg ){ 
+	eCfg.SMEnabled = false
+	eCfg.SMSwitchType = FS
+	eCfg.SMRater = "127.0.0.1:2012"
+	eCfg.SMRaterReconnects = 3
+	eCfg.SMDebitInterval = 10
+	eCfg.FreeswitchServer = "127.0.0.1:8021"
+	eCfg.FreeswitchPass = "ClueCon"
+	eCfg.FreeswitchReconnects = 5
+	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
 		t.Error("Defaults different than expected!")
@@ -99,22 +100,22 @@ func TestDefaults(t *testing.T) {
 func TestDefaultsSanity(t *testing.T) {
 	cfg := &CGRConfig{}
 	errSet := cfg.setDefaults()
-	if errSet != nil  {
+	if errSet != nil {
 		t.Log(fmt.Sprintf("Coud not set defaults: %s!", errSet.Error()))
 		t.FailNow()
 	}
-	if (cfg.RaterListen != INTERNAL && 
-		(cfg.RaterListen == cfg.BalancerListen || 
+	if (cfg.RaterListen != INTERNAL &&
+		(cfg.RaterListen == cfg.BalancerListen ||
 			cfg.RaterListen == cfg.CDRSListen ||
-			cfg.RaterListen == cfg.MediatorListen )) ||
+			cfg.RaterListen == cfg.MediatorListen)) ||
 		(cfg.BalancerListen != INTERNAL && (cfg.BalancerListen == cfg.CDRSListen ||
-			cfg.BalancerListen == cfg.MediatorListen ))||
+			cfg.BalancerListen == cfg.MediatorListen)) ||
 		(cfg.CDRSListen != INTERNAL && cfg.CDRSListen == cfg.MediatorListen) {
-			t.Error("Listen defaults on the same port!")
+		t.Error("Listen defaults on the same port!")
 	}
 }
 
-// Load config from file and make sure we have all set 
+// Load config from file and make sure we have all set
 func TestConfigFromFile(t *testing.T) {
 	cfgPth := "test_data.txt"
 	cfg, err := NewCGRConfig(&cfgPth)
@@ -141,16 +142,17 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.DefaultTOR = "test"
 	eCfg.DefaultTenant = "test"
 	eCfg.DefaultSubject = "test"
+	eCfg.RoundingMethod = "test"
+	eCfg.RoundingDecimals = 99
 	eCfg.RaterEnabled = true
 	eCfg.RaterBalancer = "test"
 	eCfg.RaterListen = "test"
-	eCfg.RaterRoundingMethod = "test"
-	eCfg.RaterRoundingDecimals = 99
 	eCfg.BalancerEnabled = true
 	eCfg.BalancerListen = "test"
 	eCfg.SchedulerEnabled = true
 	eCfg.CDRSListen = "test"
 	eCfg.CDRSfsJSONEnabled = true
+	eCfg.CDRSgenJSONEnabled = true
 	eCfg.CDRSMediator = "test"
 	eCfg.CDRSExtraFields = []string{"test"}
 	eCfg.MediatorEnabled = true
@@ -178,9 +180,9 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
-	if !reflect.DeepEqual(cfg ,eCfg ){ 
+	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
 		t.Error("Loading of configuration from file failed!")
 	}
-}		
+}

@@ -33,7 +33,7 @@ import (
 type CSVReader struct {
 	sep               rune
 	storage           DataStorage
-	readerFunc        func(string, rune) (*csv.Reader, *os.File, error)
+	readerFunc        func(string, rune, int) (*csv.Reader, *os.File, error)
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
@@ -74,20 +74,24 @@ func NewStringCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn
 	return c
 }
 
-func openFileCSVReader(fn string, comma rune) (csvReader *csv.Reader, fp *os.File, err error) {
+func openFileCSVReader(fn string, comma rune, nrFields int) (csvReader *csv.Reader, fp *os.File, err error) {
 	fp, err = os.Open(fn)
 	if err != nil {
 		return
 	}
 	csvReader = csv.NewReader(fp)
 	csvReader.Comma = comma
+	csvReader.Comment = utils.COMMENT_CHAR
+	csvReader.FieldsPerRecord = nrFields
 	csvReader.TrailingComma = true
 	return
 }
 
-func openStringCSVReader(data string, comma rune) (csvReader *csv.Reader, fp *os.File, err error) {
+func openStringCSVReader(data string, comma rune, nrFields int) (csvReader *csv.Reader, fp *os.File, err error) {
 	csvReader = csv.NewReader(strings.NewReader(data))
 	csvReader.Comma = comma
+	csvReader.Comment = utils.COMMENT_CHAR
+	csvReader.FieldsPerRecord = nrFields
 	csvReader.TrailingComma = true
 	return
 }
@@ -164,7 +168,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 }
 
 func (csvr *CSVReader) LoadDestinations() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.destinationsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.destinationsFn, csvr.sep, utils.DESTINATIONS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load destinations file: ", err)
 		// allow writing of the other values
@@ -174,12 +178,7 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		var dest *Destination
 		for _, d := range csvr.destinations {
 			if d.Id == tag {
@@ -197,7 +196,7 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 }
 
 func (csvr *CSVReader) LoadTimings() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.timingsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.timingsFn, csvr.sep, utils.TIMINGS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load timings file: ", err)
 		// allow writing of the other values
@@ -208,18 +207,13 @@ func (csvr *CSVReader) LoadTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-
 		csvr.timings[tag] = NewTiming(record...)
 	}
 	return
 }
 
 func (csvr *CSVReader) LoadRates() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.ratesFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.ratesFn, csvr.sep, utils.RATES_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rates file: ", err)
 		// allow writing of the other values
@@ -230,10 +224,6 @@ func (csvr *CSVReader) LoadRates() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		var r *Rate
 		r, err = NewRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
 		if err != nil {
@@ -245,7 +235,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 }
 
 func (csvr *CSVReader) LoadDestinationRates() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.destinationratesFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.destinationratesFn, csvr.sep, utils.DESTINATION_RATES_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rates file: ", err)
 		// allow writing of the other values
@@ -256,14 +246,11 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		r, exists := csvr.rates[record[2]]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get rating for tag %v", record[2]))
+			return errors.New(fmt.Sprintf("Could not get rates for tag %v", record[2]))
 		}
+		//ToDo: Not checking presence of destinations?
 		dr := &DestinationRate{
 			Tag:             tag,
 			DestinationsTag: record[1],
@@ -276,7 +263,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 }
 
 func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.destinationratetimingsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.destinationratetimingsFn, csvr.sep, utils.DESTRATE_TIMINGS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rate timings file: ", err)
 		// allow writing of the other values
@@ -287,11 +274,6 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
-
 		t, exists := csvr.timings[record[2]]
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get timing for tag %v", record[2]))
@@ -313,7 +295,7 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 }
 
 func (csvr *CSVReader) LoadRatingProfiles() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.ratingprofilesFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.ratingprofilesFn, csvr.sep, utils.RATE_PROFILES_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rating profiles file: ", err)
 		// allow writing of the other values
@@ -323,18 +305,10 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		if tag == "Tenant" {
-			// skip header line
-			continue
-		}
-		if len(record) != 7 {
-			return errors.New(fmt.Sprintf("Malformed rating profile: %v", record))
-		}
-		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[4]
-		at, err := time.Parse(time.RFC3339, record[6])
+		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
+		at, err := time.Parse(time.RFC3339, record[4])
 		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[6]))
+			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[4]))
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
 		rp, ok := csvr.ratingProfiles[key]
@@ -360,7 +334,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 }
 
 func (csvr *CSVReader) LoadActions() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.actionsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.actionsFn, csvr.sep, utils.ACTIONS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load action triggers file: ", err)
 		// allow writing of the other values
@@ -371,10 +345,6 @@ func (csvr *CSVReader) LoadActions() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
@@ -431,7 +401,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 }
 
 func (csvr *CSVReader) LoadActionTimings() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep, utils.ACTION_TIMINGS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load action triggers file: ", err)
 		// allow writing of the other values
@@ -442,10 +412,6 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		_, exists := csvr.actions[record[1]]
 		if !exists {
 			return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", record[1]))
@@ -476,7 +442,7 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 }
 
 func (csvr *CSVReader) LoadActionTriggers() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.actiontriggersFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.actiontriggersFn, csvr.sep, utils.ACTION_TRIGGERS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load action triggers file: ", err)
 		// allow writing of the other values
@@ -487,10 +453,6 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if tag == "Tag" {
-			// skip header line
-			continue
-		}
 		value, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action trigger value: %v", err))
@@ -515,7 +477,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 }
 
 func (csvr *CSVReader) LoadAccountActions() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.accountactionsFn, csvr.sep)
+	csvReader, fp, err := csvr.readerFunc(csvr.accountactionsFn, csvr.sep, utils.ACCOUNT_ACTIONS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load account actions file: ", err)
 		// allow writing of the other values
@@ -525,9 +487,6 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		if record[0] == "Tenant" {
-			continue
-		}
 		tag := fmt.Sprintf("%s:%s:%s", record[2], record[0], record[1])
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
 		if record[4] != "" && !exists {
