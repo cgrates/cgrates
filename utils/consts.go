@@ -49,8 +49,8 @@ const (
 	ACTION_TIMINGS_NRCOLS    = 4
 	ACTION_TRIGGERS_NRCOLS   = 8
 	ACCOUNT_ACTIONS_NRCOLS   = 5
-	ROUNDING_UP              = "up"
-	ROUNDING_MIDDLE          = "middle"
-	ROUNDING_DOWN            = "down"
+	ROUNDING_UP              = "*up"
+	ROUNDING_MIDDLE          = "*middle"
+	ROUNDING_DOWN            = "*down"
 	COMMENT_CHAR             = '#'
 )

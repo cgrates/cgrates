@@ -35,10 +35,7 @@ const (
 	REDIS         = "redis"
 	SAME          = "same"
 	FS            = "freeswitch"
-	PREPAID       = "prepaid"
-	POSTPAID      = "postpaid"
-	PSEUDOPREPAID = "pseudoprepaid"
-	RATED         = "rated"
+	
 )
 
 // Holds system configuration, defaults are overwritten with values from config file if found
@@ -60,11 +57,11 @@ type CGRConfig struct {
 	DefaultTOR               string // set default type of record
 	DefaultTenant            string // set default tenant
 	DefaultSubject           string // set default rating subject, useful in case of fallback
+	RoundingMethod      string // Rounding method for the end price: <*up|*middle|*down>
+	RoundingDecimals    int    // Number of decimals to round end prices at
 	RaterEnabled             bool   // start standalone server (no balancer)
 	RaterBalancer            string // balancer address host:port
 	RaterListen              string // listening address host:port
-	RaterRoundingMethod      string // Rounding method for the end price: <up|middle|down>
-	RaterRoundingDecimals    int    // Number of decimals to round end prices at
 	BalancerEnabled          bool
 	BalancerListen           string // Json RPC server address
 	SchedulerEnabled         bool
@@ -114,15 +111,15 @@ func (self *CGRConfig) setDefaults() error {
 	self.StorDBUser = "cgrates"
 	self.StorDBPass = "CGRateS.org"
 	self.RPCEncoding = JSON
-	self.DefaultReqType = "rated"
+	self.DefaultReqType = utils.RATED 
 	self.DefaultTOR = "0"
 	self.DefaultTenant = "0"
 	self.DefaultSubject = "0"
+	self.RoundingMethod = utils.ROUNDING_MIDDLE
+	self.RoundingDecimals = 4
 	self.RaterEnabled = false
 	self.RaterBalancer = DISABLED
 	self.RaterListen = "127.0.0.1:2012"
-	self.RaterRoundingMethod = utils.ROUNDING_MIDDLE
-	self.RaterRoundingDecimals = 4
 	self.BalancerEnabled = false
 	self.BalancerListen = "127.0.0.1:2013"
 	self.SchedulerEnabled = false
@@ -239,6 +236,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "default_subject"); hasOpt {
 		cfg.DefaultSubject, _ = c.GetString("global", "default_subject")
 	}
+	if hasOpt = c.HasOption("global", "rounding_method"); hasOpt {
+		cfg.RoundingMethod, _ = c.GetString("global", "rounding_method")
+	}
+	if hasOpt = c.HasOption("global", "rounding_decimals"); hasOpt {
+		cfg.RoundingDecimals, _ = c.GetInt("global", "rounding_decimals")
+	}
 	if hasOpt = c.HasOption("rater", "enabled"); hasOpt {
 		cfg.RaterEnabled, _ = c.GetBool("rater", "enabled")
 	}
@@ -247,12 +250,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("rater", "listen"); hasOpt {
 		cfg.RaterListen, _ = c.GetString("rater", "listen")
-	}
-	if hasOpt = c.HasOption("rater", "rounding_method"); hasOpt {
-		cfg.RaterRoundingMethod, _ = c.GetString("rater", "rounding_method")
-	}
-	if hasOpt = c.HasOption("rater", "rounding_decimals"); hasOpt {
-		cfg.RaterRoundingDecimals, _ = c.GetInt("rater", "rounding_decimals")
 	}
 	if hasOpt = c.HasOption("balancer", "enabled"); hasOpt {
 		cfg.BalancerEnabled, _ = c.GetBool("balancer", "enabled")

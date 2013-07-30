@@ -16,7 +16,7 @@ Creates a new ActionTriggers profile within a tariff plan.
    }
 
    type ApiActionTrigger struct {
-	BalanceId      string  // Id of the balance this trigger monitors
+	BalanceType      string  // Id of the balance this trigger monitors
 	Direction      string  // Traffic direction
 	ThresholdType  string  // This threshold type
 	ThresholdValue float64 // Threshold
@@ -25,7 +25,7 @@ Creates a new ActionTriggers profile within a tariff plan.
 	Weight         float64 // weight
    }
 
- Mandatory parameters: ``[]string{"TPid", "ActionTriggersId","BalanceId", "Direction", "ThresholdType", "ThresholdValue", "ActionsId", "Weight"}``
+ Mandatory parameters: ``[]string{"TPid", "ActionTriggersId","BalanceType", "Direction", "ThresholdType", "ThresholdValue", "ActionsId", "Weight"}``
 
  *JSON sample*:
   ::
@@ -38,7 +38,7 @@ Creates a new ActionTriggers profile within a tariff plan.
             "ActionTriggers": [
                 {
                     "ActionsId": "ACTION_1", 
-                    "BalanceId": "MONETARY", 
+                    "BalanceType": "MONETARY", 
                     "DestinationId": "", 
                     "Direction": "OUT", 
                     "ThresholdType": "MIN_BALANCE", 
@@ -124,7 +124,7 @@ Queries specific ActionTriggers profile on tariff plan.
    }
 
    type ApiActionTrigger struct {
-	BalanceId      string  // Id of the balance this trigger monitors
+	BalanceType      string  // Id of the balance this trigger monitors
 	Direction      string  // Traffic direction
 	ThresholdType  string  // This threshold type
 	ThresholdValue float64 // Threshold
@@ -143,9 +143,9 @@ Queries specific ActionTriggers profile on tariff plan.
         "ActionTriggers": [
             {
                 "ActionsId": "ACTION_1", 
-                "BalanceId": "MONETARY", 
+                "BalanceType": "*monetary", 
                 "DestinationId": "", 
-                "Direction": "OUT", 
+                "Direction": "*out", 
                 "ThresholdType": "MIN_BALANCE", 
                 "ThresholdValue": 5, 
                 "Weight": 10

@@ -252,7 +252,7 @@ func main() {
 	}
 	defer loggerDb.Close()
 	engine.SetStorageLogger(loggerDb)
-	engine.SetRoundingMethodAndDecimals(cfg.RaterRoundingMethod, cfg.RaterRoundingDecimals)
+	engine.SetRoundingMethodAndDecimals(cfg.RoundingMethod, cfg.RoundingDecimals)
 
 	if cfg.SMDebitInterval > 0 {
 		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval)); err == nil {

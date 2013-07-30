@@ -134,7 +134,7 @@ Queries specific Actions profile on tariff plan.
 	Units          float64 // Number of units to add/deduct
 	ExpiryTime int64   // Time when the units will expire
 	DestinationId  string  // Destination profile id
-	RateType       string  // Type of price <ABSOLUTE|PERCENT>
+	RateType       string  // Type of price <*absolute|*percent>
 	Rate           float64 // Price value
 	MinutesWeight  float64 // Minutes weight
 	Weight         float64 // Action's weight

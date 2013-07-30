@@ -123,7 +123,7 @@ type ApiTPActionTriggers struct {
 }
 
 type ApiActionTrigger struct {
-	BalanceId      string  // Id of the balance this trigger monitors
+	BalanceType      string  // Type of balance this trigger monitors
 	Direction      string  // Traffic direction
 	ThresholdType  string  // This threshold type
 	ThresholdValue float64 // Threshold

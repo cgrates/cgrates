@@ -375,6 +375,53 @@ func (self *TPCSVImporter) importActionTimings(fn string) error {
 }
 
 func (self *TPCSVImporter) importActionTriggers(fn string) error {
+	log.Printf("Processing file: <%s> ", fn)
+	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
+	if err != nil {
+		return err
+	}
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		tag, balanceType, direction, thresholdType, destinationTag, actionsTag := record[0], record[1], record[2], record[3], record[5], record[6]
+		threshold, err := strconv.ParseFloat(record[4], 64)
+		if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		weight, err := strconv.ParseFloat(record[7], 64)
+		if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		at :=  &ActionTrigger{
+			BalanceId: balanceType,
+			Direction: direction,
+			ThresholdType: thresholdType,
+			ThresholdValue: threshold,
+			DestinationId: destinationTag,
+			Weight: weight,
+			ActionsId: actionsTag,
+		}
+		if err := self.StorDb.SetTPActionTriggers(self.TPid, map[string][]*ActionTrigger{tag: []*ActionTrigger{at}}); err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
+		}
+	}
 	return nil
 }
 

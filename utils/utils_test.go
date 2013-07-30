@@ -41,7 +41,7 @@ func TestUUID(t *testing.T) {
 }
 
 func TestRoundUp(t *testing.T) {
-	result := Round(12.52, 0, "*middle")
+	result := Round(12.52, 0, ROUNDING_UP)
 	expected := 13.0
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
@@ -49,7 +49,7 @@ func TestRoundUp(t *testing.T) {
 }
 
 func TestRoundUpMiddle(t *testing.T) {
-	result := Round(12.5, 0, "*middle")
+	result := Round(12.5, 0, ROUNDING_UP)
 	expected := 13.0
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
@@ -57,7 +57,7 @@ func TestRoundUpMiddle(t *testing.T) {
 }
 
 func TestRoundDown(t *testing.T) {
-	result := Round(12.49, 0, "*middle")
+	result := Round(12.49, 0, ROUNDING_MIDDLE)
 	expected := 12.0
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
@@ -65,7 +65,7 @@ func TestRoundDown(t *testing.T) {
 }
 
 func TestRoundPrec(t *testing.T) {
-	result := Round(12.49, 1, "*middle")
+	result := Round(12.49, 1, ROUNDING_UP)
 	expected := 12.5
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
@@ -73,7 +73,7 @@ func TestRoundPrec(t *testing.T) {
 }
 
 func TestRoundPrecNothing(t *testing.T) {
-	result := Round(12.49, 2, "*middle")
+	result := Round(12.49, 2, ROUNDING_MIDDLE)
 	expected := 12.49
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
@@ -89,7 +89,7 @@ func TestRoundPrecNoTouch(t *testing.T) {
 }
 
 func TestRoundByMethodUp1(t *testing.T) {
-	result := Round(12.49, 1, "*up")
+	result := Round(12.49, 1, ROUNDING_UP)
 	expected := 12.5
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
@@ -97,7 +97,7 @@ func TestRoundByMethodUp1(t *testing.T) {
 }
 
 func TestRoundByMethodUp2(t *testing.T) {
-	result := Round(12.21, 1, "*up")
+	result := Round(12.21, 1, ROUNDING_UP)
 	expected := 12.3
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
@@ -105,15 +105,15 @@ func TestRoundByMethodUp2(t *testing.T) {
 }
 
 func TestRoundByMethodDown1(t *testing.T) {
-	result := Round(12.49, 1, "*down")
+	result := Round(12.49, 1, ROUNDING_DOWN)
 	expected := 12.4
 	if result != expected {
-		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+		t.Errorf("Error rounding down: sould be %v was %v", expected, result)
 	}
 }
 
 func TestRoundByMethodDown2(t *testing.T) {
-	result := Round(12.21, 1, "*down")
+	result := Round(12.21, 1, ROUNDING_DOWN)
 	expected := 12.2
 	if result != expected {
 		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
