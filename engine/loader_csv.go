@@ -27,7 +27,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type CSVReader struct {
@@ -306,7 +305,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
-		at, err := time.Parse(time.RFC3339, record[4])
+		at, err := utils.ParseDate(record[4])
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[4]))
 		}

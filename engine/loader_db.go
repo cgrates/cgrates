@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"log"
-	"time"
 )
 
 type DbReader struct {
@@ -184,7 +183,10 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		return err
 	}
 	for _, rp := range rpfs {
-		at := time.Unix(rp.ActivationTime, 0)
+		at, err := utils.ParseDate(rp.ActivationTime)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", rp.ActivationTime))
+		}
 		for _, d := range dbr.destinations {
 			ap, exists := dbr.activationPeriods[rp.DestRatesTimingTag]
 			if !exists {
@@ -211,7 +213,10 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 	}
 	for _, ratingProfile := range rpm {
 		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
-		at := time.Unix(ratingProfile.ActivationTime, 0)
+		at, err := utils.ParseDate(ratingProfile.ActivationTime)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", ratingProfile.ActivationTime))
+		}
 		drtm, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.DestRatesTimingTag)
 		if err != nil {
 			return err

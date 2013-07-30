@@ -478,8 +478,7 @@ func (self *SQLStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingPr
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var tenant, tor, direction, subject, drtId, fallbackSubj string
-		var aTime int64
+		var tenant, tor, direction, subject, drtId, fallbackSubj, aTime string
 		err = rows.Scan(&tenant, &tor, &direction, &subject, &aTime, &drtId, &fallbackSubj)
 		if err != nil {
 			return nil, err
@@ -1076,8 +1075,7 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var tag, tenant, tor, direction, subject, fallback_subject, destrates_timing_tag string
-		var activation_time int64
+		var tag, tenant, tor, direction, subject, fallback_subject, destrates_timing_tag, activation_time string
 		if err := rows.Scan(&tag, &tenant, &tor, &direction, &subject, &activation_time, &destrates_timing_tag, &fallback_subject); err != nil {
 			return nil, err
 		}

@@ -98,7 +98,7 @@ CREATE TABLE `tp_rating_profiles` (
   `tor` varchar(16) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `subject` varchar(64) NOT NULL,
-  `activation_time` int(11) NOT NULL,
+  `activation_time` varchar(24) NOT NULL,
   `destrates_timing_tag` varchar(24) NOT NULL,
   `rates_fallback_subject` varchar(64),
   PRIMARY KEY (`id`),
@@ -117,13 +117,8 @@ CREATE TABLE `tp_actions` (
   `action` varchar(24) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
-<<<<<<< HEAD
-  `units` DECIMAL(5,2) NOT NULL,
-  `expiration_time` varchar(24) NOT NULL,
-=======
   `units` DECIMAL(8,4) NOT NULL,
-  `expiry_time` int(16) NOT NULL,
->>>>>>> 2f733525b215e608478e1cddf2b001fb92fb8cbd
+  `expiry_time` varchar(24) NOT NULL,
   `destination_tag` varchar(24) NOT NULL,
   `rate_type` varchar(8) NOT NULL,
   `rate` DECIMAL(8,4) NOT NULL,

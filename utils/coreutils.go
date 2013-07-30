@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/hex"
@@ -108,6 +109,8 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().Add(d)
 	case string(expirationTime) == "*monthly":
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
+	case bytes.Contains(expirationTime, []byte("Z")):
+		expDate, err = time.Parse(time.RFC3339, date)
 	default:
 		unix, err := strconv.ParseInt(string(expirationTime), 10, 64)
 		if err != nil {

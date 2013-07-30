@@ -150,3 +150,11 @@ func TestParseDateMonthly(t *testing.T) {
 		t.Error("error parsing date: ", expected.Sub(date).Seconds())
 	}
 }
+
+func TestParseDateRFC3339(t *testing.T) {
+	date, err := ParseDate("2013-07-30T19:33:10Z")
+	expected := time.Date(2013, 7, 30, 19, 33, 10, 0, time.UTC)
+	if err != nil || !date.Equal(expected) {
+		t.Error("error parsing date: ", expected.Sub(date))
+	}
+}
