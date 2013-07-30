@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/engine"
 )
 
 // Creates a new ActionTimings profile within a tariff plan
@@ -40,11 +41,16 @@ func (self *Apier) SetTPActionTimings(attrs utils.ApiTPActionTimings, reply *str
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	ats := make(map[string][]*utils.TPActionTimingsRow, 1) // Only one id will be stored in the map
-	for _, at := range attrs.ActionTimings {
-		ats[attrs.ActionTimingsId] = append(ats[attrs.ActionTimingsId], &utils.TPActionTimingsRow{at.ActionsId, at.TimingId, at.Weight})
+	ats := make([]*engine.ActionTiming, len(attrs.ActionTimings))
+	for idx, at := range attrs.ActionTimings {
+		ats[idx] = &engine.ActionTiming{
+			Tag:		attrs.ActionTimingsId,
+			ActionsTag: 	at.ActionsId,
+			TimingsTag:       at.TimingId,
+			Weight:        at.Weight,
+		}
 	}
-	if err := self.StorDb.SetTPActionTimings(attrs.TPid, ats); err != nil {
+	if err := self.StorDb.SetTPActionTimings(attrs.TPid, map[string][]*engine.ActionTiming{attrs.ActionTimingsId: ats}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

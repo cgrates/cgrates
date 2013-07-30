@@ -41,7 +41,7 @@ type ActionTiming struct {
 	ActionsId              string
 	actions                Actions
 	stCache                time.Time // cached time of the next start
-	actionsTag, timingsTag string    // used only for loading
+	ActionsTag, TimingsTag string    // used only for loading
 }
 
 type ActionTimings []*ActionTiming

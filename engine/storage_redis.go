@@ -223,7 +223,7 @@ func (rs *RedisStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (rs *RedisStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTimingsRow) error {
+func (rs *RedisStorage) SetTPActionTimings(tpid string, ats map[string][]*ActionTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

@@ -88,7 +88,7 @@ type DataStorage interface {
 	GetTPActions(string, string) (*utils.TPActions, error)
 	GetTPActionIds(string) ([]string, error)
 	ExistsTPActionTimings(string, string) (bool, error)
-	SetTPActionTimings(string, map[string][]*utils.TPActionTimingsRow) error
+	SetTPActionTimings(string, map[string][]*ActionTiming) error
 	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTimingsRow, error)
 	GetTPActionTimingIds(string) ([]string, error)
 	ExistsTPActionTriggers(string, string) (bool, error)

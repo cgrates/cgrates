@@ -629,19 +629,19 @@ func (self *SQLStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
 }
 
 // Sets actionTimings in sqlDB. Imput is expected in form map[actionTimingId][]rows, eg a full .csv file content
-func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTimingsRow) error {
+func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*ActionTiming) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
 	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES ", utils.TBL_TP_ACTION_TIMINGS)
 	i := 0
 	for atId, atRows := range ats {
-		for _, atsRow := range atRows {
+		for _, at := range atRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
-				tpid, atId, atsRow.ActionsId, atsRow.TimingId, atsRow.Weight)
+				tpid, atId, at.ActionsTag, at.TimingsTag, at.Weight)
 			i++
 		}
 	}

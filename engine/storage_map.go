@@ -193,7 +193,7 @@ func (ms *MapStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
 	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (ms *MapStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTimingsRow) error {
+func (ms *MapStorage) SetTPActionTimings(tpid string, ats map[string][]*ActionTiming) error {
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 

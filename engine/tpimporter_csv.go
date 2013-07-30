@@ -66,9 +66,7 @@ func (self *TPCSVImporter) Run() error {
 
 // Handler importing timings from file, saved row by row to storDb
 func (self *TPCSVImporter) importTimings(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
+	log.Printf("Processing file: <%s> ", fn)
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -87,16 +85,16 @@ func (self *TPCSVImporter) importTimings(fn string) error {
 		}
 		tm := NewTiming(record...)
 		if err := self.StorDb.SetTPTiming(self.TPid, tm); err != nil {
-			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
 		}
 	}
 	return nil
 }
 
 func (self *TPCSVImporter) importDestinations(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
+	log.Printf("Processing file: <%s> ", fn)
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -115,16 +113,16 @@ func (self *TPCSVImporter) importDestinations(fn string) error {
 		}
 		dst := &Destination{record[0], []string{record[1]}}
 		if err := self.StorDb.SetTPDestination(self.TPid, dst); err != nil {
-			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
 		}
 	}
 	return nil
 }
 
 func (self *TPCSVImporter) importRates(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
+	log.Printf("Processing file: <%s> ", fn)
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -146,16 +144,16 @@ func (self *TPCSVImporter) importRates(fn string) error {
 			return err
 		}
 		if err := self.StorDb.SetTPRates(self.TPid, map[string][]*Rate{record[0]: []*Rate{rt}}); err != nil {
-			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
 		}
 	}
 	return nil
 }
 
 func (self *TPCSVImporter) importDestinationRates(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
+	log.Printf("Processing file: <%s> ", fn)
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -175,16 +173,16 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 		dr := &DestinationRate{record[0], record[1], record[2], nil}
 		if err := self.StorDb.SetTPDestinationRates(self.TPid,
 			map[string][]*DestinationRate{dr.Tag: []*DestinationRate{dr}}); err != nil {
-			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
 		}
 	}
 	return nil
 }
 
 func (self *TPCSVImporter) importDestRateTimings(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
+	log.Printf("Processing file: <%s> ", fn)
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -203,7 +201,9 @@ func (self *TPCSVImporter) importDestRateTimings(fn string) error {
 		}
 		weight, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
 			continue
 		}
 		drt := &DestinationRateTiming{Tag: record[0],
@@ -212,16 +212,16 @@ func (self *TPCSVImporter) importDestRateTimings(fn string) error {
 			TimingsTag:          record[2],
 		}
 		if err := self.StorDb.SetTPDestRateTimings(self.TPid, map[string][]*DestinationRateTiming{drt.Tag: []*DestinationRateTiming{drt}}); err != nil {
-			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
 		}
 	}
 	return nil
 }
 
 func (self *TPCSVImporter) importRatingProfiles(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
+	log.Printf("Processing file: <%s> ", fn)
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -241,7 +241,9 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 		tenant, tor, direction, subject, destRatesTimingTag, fallbacksubject := record[0], record[1], record[2], record[3], record[5], record[6]
 		at, err := time.Parse(time.RFC3339, record[4])
 		if err != nil {
-			log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
 		}
 		rpTag := "TPCSV" //Autogenerate rating profile id
 		if self.ImportId != "" {
@@ -257,16 +259,16 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			RatesFallbackSubject: fallbacksubject,
 		}
 		if err := self.StorDb.SetTPRatingProfiles(self.TPid, map[string][]*RatingProfile{rpTag: []*RatingProfile{rp}}); err != nil {
-			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
 		}
 	}
 	return nil
 }
 
 func (self *TPCSVImporter) importActions(fn string) error {
-	if self.Verbose {
-		log.Printf("Processing file: <%s> ", fn)
-	}
+	log.Printf("Processing file: <%s> ", fn)
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -286,14 +288,18 @@ func (self *TPCSVImporter) importActions(fn string) error {
 		actId, actionType, balanceType, direction, destTag, rateType := record[0], record[1], record[2], record[3], record[6], record[7]
 		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
-			log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
 			continue
 		}
 		var expiryTime time.Time       // Empty initialized time represents never expire
 		if record[5] != "*unlimited" { // ToDo: Expand here for other meta tags or go way of adding time for expiry
 			expiryTime, err = time.Parse(time.RFC3339, record[5])
 			if err != nil {
-				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+				if self.Verbose {
+					log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+				}
 				continue
 			}
 		}
@@ -301,7 +307,9 @@ func (self *TPCSVImporter) importActions(fn string) error {
 		minutesWeight, _ := strconv.ParseFloat(record[9], 64)
 		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {
-			log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
 			continue
 		}
 		act := &Action{
@@ -317,13 +325,52 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			Weight:        weight,
 		}
 		if err := self.StorDb.SetTPActions(self.TPid, map[string][]*Action{actId: []*Action{act}}); err != nil {
-			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
 		}
 	}
 	return nil
 }
 
 func (self *TPCSVImporter) importActionTimings(fn string) error {
+	log.Printf("Processing file: <%s> ", fn)
+	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
+	if err != nil {
+		return err
+	}
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		tag, actionsTag, timingTag := record[0], record[1], record[2]
+		weight, err := strconv.ParseFloat(record[3], 64)
+		if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		at :=  &ActionTiming{
+			Tag:		tag,
+			ActionsTag: actionsTag,
+			TimingsTag:   timingTag,
+			Weight:        weight,
+		}
+		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string][]*ActionTiming{tag: []*ActionTiming{at}}); err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+			}
+		}
+	}
 	return nil
 }
 
