@@ -47,6 +47,9 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	}
 	for _, a := range aac {
 		a.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
+		if a.MinuteBucket != nil {
+			a.MinuteBucket.ExpirationDate = a.ExpirationDate
+		}
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))

@@ -1130,12 +1130,11 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 				Weight:           weight,
 				ExpirationString: expirationDate,
 				MinuteBucket: &MinuteBucket{
-					Seconds:          units,
-					Weight:           minutes_weight,
-					Price:            price,
-					PriceType:        rate_type,
-					DestinationId:    destinations_tag,
-					ExpirationString: expirationDate,
+					Seconds:       units,
+					Weight:        minutes_weight,
+					Price:         price,
+					PriceType:     rate_type,
+					DestinationId: destinations_tag,
 				},
 			}
 		}

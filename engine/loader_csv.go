@@ -381,12 +381,11 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				Weight:           weight,
 				ExpirationString: record[5],
 				MinuteBucket: &MinuteBucket{
-					Seconds:          units,
-					Weight:           minutesWeight,
-					Price:            value,
-					PriceType:        record[7],
-					DestinationId:    record[6],
-					ExpirationString: record[5],
+					Seconds:       units,
+					Weight:        minutesWeight,
+					Price:         value,
+					PriceType:     record[7],
+					DestinationId: record[6],
 				},
 			}
 			if _, err := utils.ParseDate(a.ExpirationString); err != nil {

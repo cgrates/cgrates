@@ -112,6 +112,7 @@ func (a *Action) Store() (result string, err error) {
 	result += a.ActionType + "|"
 	result += a.BalanceId + "|"
 	result += a.Direction + "|"
+	result += a.ExpirationString + "|"
 	result += a.ExpirationDate.Format(time.RFC3339) + "|"
 	result += strconv.FormatFloat(a.Units, 'f', -1, 64) + "|"
 	result += strconv.FormatFloat(a.Weight, 'f', -1, 64)
@@ -128,22 +129,23 @@ func (a *Action) Store() (result string, err error) {
 
 func (a *Action) Restore(input string) (err error) {
 	elements := strings.Split(input, "|")
-	if len(elements) < 7 {
+	if len(elements) < 8 {
 		return notEnoughElements
 	}
 	a.Id = elements[0]
 	a.ActionType = elements[1]
 	a.BalanceId = elements[2]
 	a.Direction = elements[3]
-	a.ExpirationDate, err = time.Parse(time.RFC3339, elements[4])
+	a.ExpirationString = elements[4]
+	a.ExpirationDate, err = time.Parse(time.RFC3339, elements[5])
 	if err != nil {
 		return err
 	}
-	a.Units, _ = strconv.ParseFloat(elements[5], 64)
-	a.Weight, _ = strconv.ParseFloat(elements[6], 64)
-	if len(elements) == 8 {
+	a.Units, _ = strconv.ParseFloat(elements[6], 64)
+	a.Weight, _ = strconv.ParseFloat(elements[7], 64)
+	if len(elements) == 9 {
 		a.MinuteBucket = &MinuteBucket{}
-		if err := a.MinuteBucket.Restore(elements[7]); err != nil {
+		if err := a.MinuteBucket.Restore(elements[8]); err != nil {
 			return err
 		}
 	}
