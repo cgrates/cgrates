@@ -19,13 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -97,22 +97,21 @@ func Round(x float64, prec int, method string) float64 {
 }
 
 func ParseDate(date string) (expDate time.Time, err error) {
-	expirationTime := []byte(date)
 	switch {
-	case string(expirationTime) == "*unlimited" || string(expirationTime) == "":
+	case date == "*unlimited" || date == "":
 		// leave it at zero
-	case string(expirationTime[0]) == "+":
-		d, err := time.ParseDuration(string(expirationTime[1:]))
+	case string(date[0]) == "+":
+		d, err := time.ParseDuration(date[1:])
 		if err != nil {
 			return expDate, err
 		}
 		expDate = time.Now().Add(d)
-	case string(expirationTime) == "*monthly":
+	case date == "*monthly":
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
-	case bytes.Contains(expirationTime, []byte("Z")):
+	case strings.Contains(date, "Z"):
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
-		unix, err := strconv.ParseInt(string(expirationTime), 10, 64)
+		unix, err := strconv.ParseInt(date, 10, 64)
 		if err != nil {
 			return expDate, err
 		}

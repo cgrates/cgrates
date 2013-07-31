@@ -143,6 +143,14 @@ func TestParseDateEmpty(t *testing.T) {
 	}
 }
 
+func TestParseDatePlus(t *testing.T) {
+	date, err := ParseDate("+20s")
+	expected := time.Now()
+	if err != nil || date.Sub(expected).Seconds() > 20 || date.Sub(expected).Seconds() < 19 {
+		t.Error("error parsing date: ", date.Sub(expected).Seconds())
+	}
+}
+
 func TestParseDateMonthly(t *testing.T) {
 	date, err := ParseDate("*monthly")
 	expected := time.Now().AddDate(0, 1, 0)
