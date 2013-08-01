@@ -10,10 +10,10 @@ fi
 
 PKG_DIR=/tmp/cgrates_$1
 rm -rf $PKG_DIR
-git checkout-index -f --prefix=$PKG_DIR/ skel
+cp -r skel $PKG_DIR
 chmod -R a-s $PKG_DIR/DEBIAN/
-cp cp ../conf/cgrates.cfg $PKG_DIR/etc/cgrates/
-cp -r ../../data/ $PKG_DIR/usr/share/cgrates/data
+cp ../conf/cgrates.cfg $PKG_DIR/etc/cgrates/
+cp -r ../../data/ $PKG_DIR/usr/share/cgrates/
 cp /usr/local/goapps/bin/cgr-* $PKG_DIR/usr/bin/
 dpkg-deb --build $PKG_DIR
 

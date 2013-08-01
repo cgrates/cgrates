@@ -1,5 +1,5 @@
 Package: cgrates
-Version: 0.9.1-rc1
+Version: 0.9.1-rc3
 Section: base
 Priority: optional
 Architecture: amd64
