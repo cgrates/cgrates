@@ -72,7 +72,7 @@ type TPRatingProfile struct {
 }
 
 type RatingActivation struct {
-	ActivationTime   int64  // Time when this profile will become active, defined as unix epoch time
+	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	DestRateTimingId string // Id of DestRateTiming profile
 }
 
@@ -91,16 +91,16 @@ type TPActions struct {
 }
 
 type Action struct {
-	Identifier     string  // Identifier mapped in the code
-	BalanceType    string  // Type of balance the action will operate on
-	Direction      string  // Balance direction
-	Units          float64 // Number of units to add/deduct
-	ExpiryTime int64   // Time when the units will expire
-	DestinationId  string  // Destination profile id
-	RateType       string  // Type of rate <*absolute|*percent>
-	Rate           float64 // Price value
-	MinutesWeight  float64 // Minutes weight
-	Weight         float64 // Action's weight
+	Identifier    string  // Identifier mapped in the code
+	BalanceType   string  // Type of balance the action will operate on
+	Direction     string  // Balance direction
+	Units         float64 // Number of units to add/deduct
+	ExpiryTime    string  // Time when the units will expire
+	DestinationId string  // Destination profile id
+	RateType      string  // Type of rate <*absolute|*percent>
+	Rate          float64 // Price value
+	MinutesWeight float64 // Minutes weight
+	Weight        float64 // Action's weight
 }
 
 type ApiTPActionTimings struct {
@@ -123,7 +123,7 @@ type ApiTPActionTriggers struct {
 }
 
 type ApiActionTrigger struct {
-	BalanceType      string  // Type of balance this trigger monitors
+	BalanceType    string  // Type of balance this trigger monitors
 	Direction      string  // Traffic direction
 	ThresholdType  string  // This threshold type
 	ThresholdValue float64 // Threshold

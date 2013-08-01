@@ -750,16 +750,15 @@ func TestActionTriggerLogging(t *testing.T) {
 
 func TestActionTimingLogging(t *testing.T) {
 	i := &Interval{
-		Months:         Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
-		MonthDays:      MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
-		WeekDays:       WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
-		StartTime:      "18:00:00",
-		EndTime:        "00:00:00",
-		Weight:         10.0,
-		ConnectFee:     0.0,
-		Prices:         PriceGroups{&Price{0, 1.0}},
-		PricedUnits:    60,
-		RateIncrements: 1,
+		Months:      Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays:   MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
+		WeekDays:    WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+		StartTime:   "18:00:00",
+		EndTime:     "00:00:00",
+		Weight:      10.0,
+		ConnectFee:  0.0,
+		Prices:      PriceGroups{&Price{0, 1.0, 1}},
+		PricedUnits: 60,
 	}
 	at := &ActionTiming{
 		Id:             "some uuid",

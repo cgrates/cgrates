@@ -20,6 +20,7 @@ package engine
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"sort"
 	"strconv"
 	"strings"
@@ -206,6 +207,10 @@ func (at *ActionTiming) Execute() (err error) {
 		return
 	}
 	for _, a := range aac {
+		a.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
+		if a.MinuteBucket != nil {
+			a.MinuteBucket.ExpirationDate = a.ExpirationDate
+		}
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))

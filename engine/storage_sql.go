@@ -23,8 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
-	"strconv"
-	"time"
 )
 
 type SQLStorage struct {
@@ -480,8 +478,7 @@ func (self *SQLStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingPr
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var tenant, tor, direction, subject, drtId, fallbackSubj string
-		var aTime int64
+		var tenant, tor, direction, subject, drtId, fallbackSubj, aTime string
 		err = rows.Scan(&tenant, &tor, &direction, &subject, &aTime, &drtId, &fallbackSubj)
 		if err != nil {
 			return nil, err
@@ -562,7 +559,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 				expTime = act.ExpirationDate.Unix()
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,%d,'%s','%s',%f,%f,%f)",
-				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Units, expTime, 
+				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Units, expTime,
 				act.DestinationTag, act.RateType, act.RateValue, act.MinutesWeight, act.Weight)
 			i++
 		}
@@ -583,8 +580,7 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateType string
-		var expTime int64
+		var action, balanceId, dir, destId, rateType, expTime string
 		var units, rate, minutesWeight, weight float64
 		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateType, &rate, &minutesWeight, &weight); err != nil {
 			return nil, err
@@ -1079,8 +1075,7 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var tag, tenant, tor, direction, subject, fallback_subject, destrates_timing_tag string
-		var activation_time int64
+		var tag, tenant, tor, direction, subject, fallback_subject, destrates_timing_tag, activation_time string
 		if err := rows.Scan(&tag, &tenant, &tor, &direction, &subject, &activation_time, &destrates_timing_tag, &fallback_subject); err != nil {
 			return nil, err
 		}
@@ -1116,36 +1111,30 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
 			return nil, err
 		}
-		unix, err := strconv.ParseInt(expirationDate, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		expDate := time.Unix(unix, 0)
 		var a *Action
 		if balance_type != MINUTES {
 			a = &Action{
-				ActionType:     action,
-				BalanceId:      balance_type,
-				Direction:      direction,
-				Units:          units,
-				ExpirationDate: expDate,
+				ActionType:       action,
+				BalanceId:        balance_type,
+				Direction:        direction,
+				Units:            units,
+				ExpirationString: expirationDate,
 			}
 		} else {
 			var price float64
 			a = &Action{
-				Id:             utils.GenUUID(),
-				ActionType:     action,
-				BalanceId:      balance_type,
-				Direction:      direction,
-				Weight:         weight,
-				ExpirationDate: expDate,
+				Id:               utils.GenUUID(),
+				ActionType:       action,
+				BalanceId:        balance_type,
+				Direction:        direction,
+				Weight:           weight,
+				ExpirationString: expirationDate,
 				MinuteBucket: &MinuteBucket{
-					Seconds:        units,
-					Weight:         minutes_weight,
-					Price:          price,
-					PriceType:      rate_type,
-					DestinationId:  destinations_tag,
-					ExpirationDate: expDate,
+					Seconds:       units,
+					Weight:        minutes_weight,
+					Price:         price,
+					PriceType:     rate_type,
+					DestinationId: destinations_tag,
 				},
 			}
 		}

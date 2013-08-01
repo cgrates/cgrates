@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -93,4 +94,28 @@ func Round(x float64, prec int, method string) float64 {
 	}
 
 	return rounder / pow
+}
+
+func ParseDate(date string) (expDate time.Time, err error) {
+	switch {
+	case date == "*unlimited" || date == "":
+		// leave it at zero
+	case string(date[0]) == "+":
+		d, err := time.ParseDuration(date[1:])
+		if err != nil {
+			return expDate, err
+		}
+		expDate = time.Now().Add(d)
+	case date == "*monthly":
+		expDate = time.Now().AddDate(0, 1, 0) // add one month
+	case strings.Contains(date, "Z"):
+		expDate, err = time.Parse(time.RFC3339, date)
+	default:
+		unix, err := strconv.ParseInt(date, 10, 64)
+		if err != nil {
+			return expDate, err
+		}
+		expDate = time.Unix(unix, 0)
+	}
+	return expDate, err
 }

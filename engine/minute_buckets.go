@@ -64,7 +64,8 @@ func (mb *MinuteBucket) Equal(o *MinuteBucket) bool {
 	return mb.DestinationId == o.DestinationId &&
 		mb.Weight == o.Weight &&
 		mb.Price == o.Price &&
-		mb.PriceType == o.PriceType
+		mb.PriceType == o.PriceType &&
+		mb.ExpirationDate.Equal(o.ExpirationDate)
 }
 
 func (mb *MinuteBucket) IsExpired() bool {

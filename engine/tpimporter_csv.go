@@ -239,11 +239,12 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			continue
 		}
 		tenant, tor, direction, subject, destRatesTimingTag, fallbacksubject := record[0], record[1], record[2], record[3], record[5], record[6]
-		at, err := time.Parse(time.RFC3339, record[4])
+		_, err = utils.ParseDate(record[4])
 		if err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
 			}
+			continue
 		}
 		rpTag := "TPCSV" //Autogenerate rating profile id
 		if self.ImportId != "" {
@@ -254,7 +255,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			TOR:                  tor,
 			Direction:            direction,
 			Subject:              subject,
-			ActivationTime:       at.Unix(),
+			ActivationTime:       record[4],
 			DestRatesTimingTag:   destRatesTimingTag,
 			RatesFallbackSubject: fallbacksubject,
 		}
@@ -303,7 +304,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 				continue
 			}
 		}
-		rateValue, _ := strconv.ParseFloat(record[8], 64) // Ignore errors since empty string is error, we can find out based on rateType if defined 
+		rateValue, _ := strconv.ParseFloat(record[8], 64) // Ignore errors since empty string is error, we can find out based on rateType if defined
 		minutesWeight, _ := strconv.ParseFloat(record[9], 64)
 		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {
@@ -313,16 +314,16 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			continue
 		}
 		act := &Action{
-			ActionType:	actionType,
-			BalanceId: 	balanceType,
-			Direction:       direction,
+			ActionType:     actionType,
+			BalanceId:      balanceType,
+			Direction:      direction,
 			Units:          units,
 			ExpirationDate: expiryTime,
 			DestinationTag: destTag,
-			RateType:      rateType,
-			RateValue:     rateValue,
-			MinutesWeight: minutesWeight,
-			Weight:        weight,
+			RateType:       rateType,
+			RateValue:      rateValue,
+			MinutesWeight:  minutesWeight,
+			Weight:         weight,
 		}
 		if err := self.StorDb.SetTPActions(self.TPid, map[string][]*Action{actId: []*Action{act}}); err != nil {
 			if self.Verbose {
@@ -359,11 +360,11 @@ func (self *TPCSVImporter) importActionTimings(fn string) error {
 			}
 			continue
 		}
-		at :=  &ActionTiming{
-			Tag:		tag,
+		at := &ActionTiming{
+			Tag:        tag,
 			ActionsTag: actionsTag,
-			TimingsTag:   timingTag,
-			Weight:        weight,
+			TimingsTag: timingTag,
+			Weight:     weight,
 		}
 		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string][]*ActionTiming{tag: []*ActionTiming{at}}); err != nil {
 			if self.Verbose {
@@ -407,14 +408,14 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		at :=  &ActionTrigger{
-			BalanceId: balanceType,
-			Direction: direction,
-			ThresholdType: thresholdType,
+		at := &ActionTrigger{
+			BalanceId:      balanceType,
+			Direction:      direction,
+			ThresholdType:  thresholdType,
 			ThresholdValue: threshold,
-			DestinationId: destinationTag,
-			Weight: weight,
-			ActionsId: actionsTag,
+			DestinationId:  destinationTag,
+			Weight:         weight,
+			ActionsId:      actionsTag,
 		}
 		if err := self.StorDb.SetTPActionTriggers(self.TPid, map[string][]*ActionTrigger{tag: []*ActionTrigger{at}}); err != nil {
 			if self.Verbose {

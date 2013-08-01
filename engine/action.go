@@ -28,16 +28,17 @@ import (
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id             string
-	ActionType     string
-	BalanceId      string
-	Direction      string
-	ExpirationDate time.Time
-	Units          float64
-	Weight         float64
-	MinuteBucket   *MinuteBucket
-	DestinationTag, RateType  string // From here for import/load purposes only
-	RateValue, MinutesWeight       float64
+	Id                       string
+	ActionType               string
+	BalanceId                string
+	Direction                string
+	ExpirationString         string
+	ExpirationDate           time.Time
+	Units                    float64
+	Weight                   float64
+	MinuteBucket             *MinuteBucket
+	DestinationTag, RateType string // From here for import/load purposes only
+	RateValue, MinutesWeight float64
 }
 
 const (

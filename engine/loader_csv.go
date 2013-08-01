@@ -27,7 +27,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type CSVReader struct {
@@ -306,7 +305,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
-		at, err := time.Parse(time.RFC3339, record[4])
+		at, err := utils.ParseDate(record[4])
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[4]))
 		}
@@ -349,21 +348,17 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
-		var expiryTime time.Time       // Empty initialized time represents never expire
-		if record[5] != "*unlimited" { // ToDo: Expand here for other meta tags or go way of adding time for expiry
-			expiryTime, err = time.Parse(time.RFC3339, record[5])
-			if err != nil {
-				return errors.New(fmt.Sprintf("Could not parse expiry time: %v", err))
-			}
-		}
 		var a *Action
 		if record[2] != MINUTES {
 			a = &Action{
-				ActionType:     record[1],
-				BalanceId:      record[2],
-				Direction:      record[3],
-				Units:          units,
-				ExpirationDate: expiryTime, //ToDo: Fix ExpirationDate as string to have ability of storing + reported on run time
+				ActionType:       record[1],
+				BalanceId:        record[2],
+				Direction:        record[3],
+				Units:            units,
+				ExpirationString: record[5],
+			}
+			if _, err := utils.ParseDate(a.ExpirationString); err != nil {
+				return errors.New(fmt.Sprintf("Could not parse expiration time: %v", err))
 			}
 		} else {
 			value, err := strconv.ParseFloat(record[8], 64)
@@ -379,21 +374,24 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
 			}
 			a = &Action{
-				Id:             utils.GenUUID(),
-				ActionType:     record[1],
-				BalanceId:      record[2],
-				Direction:      record[3],
-				Weight:         weight,
-				ExpirationDate: expiryTime,
+				Id:               utils.GenUUID(),
+				ActionType:       record[1],
+				BalanceId:        record[2],
+				Direction:        record[3],
+				Weight:           weight,
+				ExpirationString: record[5],
 				MinuteBucket: &MinuteBucket{
-					Seconds:        units,
-					Weight:         minutesWeight,
-					Price:          value,
-					PriceType:      record[7],
-					DestinationId:  record[6],
-					ExpirationDate: expiryTime,
+					Seconds:       units,
+					Weight:        minutesWeight,
+					Price:         value,
+					PriceType:     record[7],
+					DestinationId: record[6],
 				},
 			}
+			if _, err := utils.ParseDate(a.ExpirationString); err != nil {
+				return errors.New(fmt.Sprintf("Could not parse expiration time: %v", err))
+			}
+
 		}
 		csvr.actions[tag] = append(csvr.actions[tag], a)
 	}
@@ -403,7 +401,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 func (csvr *CSVReader) LoadActionTimings() (err error) {
 	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep, utils.ACTION_TIMINGS_NRCOLS)
 	if err != nil {
-		log.Print("Could not load action triggers file: ", err)
+		log.Print("Could not load action timings file: ", err)
 		// allow writing of the other values
 		return nil
 	}
