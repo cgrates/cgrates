@@ -22,7 +22,7 @@ func start() {
 	if *masterAddr != "" {
 		store, err := NewProxyStore(*masterAddr)
 	} else {
-		store, err := NewHistoryStore(*dataFile)
+		store, err := NewFileStore(*dataFile)
 	}
 	rpc.RegisterName("Store", store)
 	rpc.HandleHTTP()
