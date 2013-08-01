@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"log/syslog"
 	"strings"
@@ -54,7 +55,38 @@ var (
 	debitPeriod      = 10 * time.Second
 	roundingMethod   = "*middle"
 	roundingDecimals = 4
+	historyScribe, _ = history.NewMockScribe()
 )
+
+// Exported method to set the storage getter.
+func SetDataStorage(sg DataStorage) {
+	storageGetter = sg
+}
+
+// Sets the global rounding method and decimal precision for GetCost method
+func SetRoundingMethodAndDecimals(rm string, rd int) {
+	roundingMethod = rm
+	roundingDecimals = rd
+}
+
+/*
+Sets the database for logging (can be de same  as storage getter or different db)
+*/
+func SetStorageLogger(sg DataStorage) {
+	storageLogger = sg
+}
+
+/*
+Exported method to set the debit period for caching purposes.
+*/
+func SetDebitPeriod(d time.Duration) {
+	debitPeriod = d
+}
+
+// Exported method to set the history scribe.
+func SetHistoryScribe(scribe history.Scribe) {
+	historyScribe = scribe
+}
 
 /*
 The input stucture that contains call information.
@@ -92,31 +124,6 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 		cd.userBalance, err = storageGetter.GetUserBalance(cd.GetUserBalanceKey())
 	}
 	return cd.userBalance, err
-}
-
-// Exported method to set the storage getter.
-func SetDataStorage(sg DataStorage) {
-	storageGetter = sg
-}
-
-// Sets the global rounding method and decimal precision for GetCost method
-func SetRoundingMethodAndDecimals(rm string, rd int) {
-	roundingMethod = rm
-	roundingDecimals = rd
-}
-
-/*
-Sets the database for logging (can be de same  as storage getter or different db)
-*/
-func SetStorageLogger(sg DataStorage) {
-	storageLogger = sg
-}
-
-/*
-Exported method to set the debit period for caching purposes.
-*/
-func SetDebitPeriod(d time.Duration) {
-	debitPeriod = d
 }
 
 /*

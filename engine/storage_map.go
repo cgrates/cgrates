@@ -70,6 +70,7 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result
+	historyScribe.Record(dest.Id, dest)
 	return
 }
 

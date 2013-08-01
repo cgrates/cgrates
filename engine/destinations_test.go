@@ -21,7 +21,6 @@ package engine
 import (
 	"encoding/json"
 	"github.com/cgrates/cgrates/cache2go"
-	//"log"
 	"reflect"
 	"testing"
 )

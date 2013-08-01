@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
@@ -210,6 +211,24 @@ func checkConfigSanity() error {
 		return errors.New("Improperly configured balancer")
 	}
 
+	return nil
+}
+
+func startHistoryScribe() (err error) {
+	var scribe history.Scribe
+	flag.Parse()
+	if "*masterAddr" != "" {
+		scribe, err = history.NewProxyScribe("*masterAddr")
+	} else {
+		scribe, err = history.NewFileScribe("*dataFile")
+	}
+	rpc.RegisterName("Scribe", scribe)
+	rpc.HandleHTTP()
+	_, e := net.Listen("tcp", ":1234")
+	if e != nil {
+		return err
+	}
+	//http.Serve(l, nil)
 	return nil
 }
 
