@@ -44,6 +44,7 @@ func (s *MockScribe) Record(key string, obj interface{}) error {
 }
 
 func (s *MockScribe) save() error {
+	s.Buf.Reset()
 	b := bufio.NewWriter(&s.Buf)
 	e := json.NewEncoder(b)
 	defer b.Flush()
