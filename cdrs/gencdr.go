@@ -36,7 +36,7 @@ const (
 	REQTYPE      = "reqtype" //prepaid or postpaid
 	TOR          = "tor"
 	UUID         = "uuid" // -Unique ID for this call leg
-	CSTMID       = "cstmid"
+	CSTMID       = "tenant"
 	CALL_DEST_NR = "dialed_extension"
 	PARK_TIME    = "start_epoch"
 	ANSWER_TIME  = "time_answer"

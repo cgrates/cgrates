@@ -38,7 +38,7 @@ const (
 	FS_REQTYPE      = "cgr_reqtype" //prepaid or postpaid
 	FS_TOR          = "cgr_tor"
 	FS_UUID         = "uuid" // -Unique ID for this call leg
-	FS_CSTMID       = "cgr_cstmid"
+	FS_CSTMID       = "cgr_tenant"
 	FS_CALL_DEST_NR = "dialed_extension"
 	FS_PARK_TIME    = "start_epoch"
 	FS_ANSWER_TIME  = "answer_epoch"

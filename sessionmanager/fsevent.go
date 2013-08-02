@@ -40,7 +40,7 @@ const (
 	REQTYPE            = "variable_cgr_reqtype" //prepaid or postpaid
 	TOR                = "variable_cgr_tor"
 	UUID               = "Unique-ID" // -Unique ID for this call leg
-	CSTMID             = "variable_cgr_cstmid"
+	CSTMID             = "variable_cgr_tenant"
 	CALL_DEST_NR       = "Caller-Destination-Number"
 	PARK_TIME          = "Caller-Profile-Created-Time"
 	START_TIME         = "Caller-Channel-Answered-Time"
