@@ -867,7 +867,7 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	if err != nil {
 		return err
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', FROM_UNIXTIME(%d), %d)",
 		cdr.GetCgrId(),
 		cdr.GetAccId(),
 		cdr.GetCdrHost(),
@@ -878,7 +878,7 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 		cdr.GetAccount(),
 		cdr.GetSubject(),
 		cdr.GetDestination(),
-		startTime,
+		startTime.Unix(),
 		cdr.GetDuration(),
 	))
 	if err != nil {
