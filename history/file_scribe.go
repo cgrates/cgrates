@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"os/exec"
 	"sync"
@@ -79,13 +80,28 @@ func (s *FileScribe) save() error {
 	if err != nil {
 		return err
 	}
+
 	b := bufio.NewWriter(f)
-	e := json.NewEncoder(b)
-	defer f.Close()
 	defer b.Flush()
-	s.records.Sort()
-	if err := e.Encode(s.records); err != nil {
+	if err := s.format(b); err != nil {
 		return err
 	}
 	return s.commit()
+}
+
+func (s *FileScribe) format(b io.Writer) error {
+	s.records.Sort()
+	b.Write([]byte("["))
+	for i, r := range s.records {
+		src, err := json.Marshal(r)
+		if err != nil {
+			return err
+		}
+		b.Write(src)
+		if i < len(s.records)-1 {
+			b.Write([]byte("\n"))
+		}
+	}
+	b.Write([]byte("]"))
+	return nil
 }

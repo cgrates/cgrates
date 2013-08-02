@@ -22,6 +22,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"io"
 	"sync"
 )
 
@@ -46,8 +47,26 @@ func (s *MockScribe) Record(key string, obj interface{}) error {
 func (s *MockScribe) save() error {
 	s.Buf.Reset()
 	b := bufio.NewWriter(&s.Buf)
-	e := json.NewEncoder(b)
 	defer b.Flush()
+	if err := s.format(b); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *MockScribe) format(b io.Writer) error {
 	s.records.Sort()
-	return e.Encode(s.records)
+	b.Write([]byte("["))
+	for i, r := range s.records {
+		src, err := json.Marshal(r)
+		if err != nil {
+			return err
+		}
+		b.Write(src)
+		if i < len(s.records)-1 {
+			b.Write([]byte("\n"))
+		}
+	}
+	b.Write([]byte("]"))
+	return nil
 }

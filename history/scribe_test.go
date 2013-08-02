@@ -24,7 +24,7 @@ import (
 
 func TestHistorySet(t *testing.T) {
 	rs := records{&record{"first", "test"}}
-	rs = rs.SetOrAdd("first", "new value")
+	rs.SetOrAdd("first", "new value")
 	if len(rs) != 1 || rs[0].Object != "new value" {
 		t.Error("error setting new value: ", rs[0])
 	}

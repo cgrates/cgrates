@@ -68,19 +68,6 @@ func TestSplitSpans(t *testing.T) {
 	}
 }
 
-func TestRedisSplitSpans(t *testing.T) {
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257", TimeStart: t1, TimeEnd: t2}
-
-	cd.LoadActivationPeriods()
-	timespans := cd.splitInTimeSpans(nil)
-	if len(timespans) != 2 {
-		t.Log(cd.ActivationPeriods)
-		t.Error("Wrong number of timespans: ", len(timespans))
-	}
-}
-
 func TestGetCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)

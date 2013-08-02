@@ -26,7 +26,7 @@ go test github.com/cgrates/cgrates/utils
 ut=$?
 go test github.com/cgrates/fsock
 fs=$?
-go test github.com/cgrates/history
+go test github.com/cgrates/cgrates/history
 hs=$?
 
-exit $en && $sm && $cfg && $bl && $cr && $md && $cdr && $fs && $ut && &hs
+exit $en && $sm && $cfg && $bl && $cr && $md && $cdr && $fs && $ut && $hs
