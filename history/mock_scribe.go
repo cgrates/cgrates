@@ -54,15 +54,15 @@ func (s *MockScribe) Record(key string, obj interface{}) error {
 }
 
 func (s *MockScribe) save(filename string) error {
-	switch {
-	case filename == DESTINATIONS_FILE:
+	switch filename {
+	case DESTINATIONS_FILE:
 		s.DestBuf.Reset()
 		b := bufio.NewWriter(&s.DestBuf)
 		defer b.Flush()
 		if err := s.format(b, s.destinations); err != nil {
 			return err
 		}
-	case filename == RATING_PROFILES_FILE:
+	case RATING_PROFILES_FILE:
 		s.RpBuf.Reset()
 		b := bufio.NewWriter(&s.RpBuf)
 		defer b.Flush()

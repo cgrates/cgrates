@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -88,9 +87,6 @@ func (ys Years) Serialize(sep string) string {
 	return yStr
 }
 
-var allMonths []time.Month = []time.Month{time.January, time.February, time.March, time.April, time.May, time.June,
-	time.July, time.August, time.September, time.October, time.November, time.December}
-
 // Defines months series
 type Months []time.Month
 
@@ -124,11 +120,7 @@ func (m Months) Contains(month time.Month) (result bool) {
 // Loades Month elemnents from a string separated by sep.
 func (m *Months) Parse(input, sep string) {
 	switch input {
-	case "*any":
-		*m = allMonths
-	case "*none": // Apier cannot receive empty string, hence using meta-tag
-		*m = []time.Month{}
-	case "":
+	case "*any", "": // Apier cannot receive empty string, hence using meta-tag
 		*m = []time.Month{}
 	default:
 		elements := strings.Split(input, sep)
@@ -143,9 +135,6 @@ func (m *Months) Parse(input, sep string) {
 // Dumps the months in a serialized string, similar to the one parsed
 func (m Months) Serialize(sep string) string {
 	if len(m) == 0 {
-		return "*none"
-	}
-	if reflect.DeepEqual(m, Months(allMonths)) {
 		return "*any"
 	}
 	var mStr string
@@ -158,8 +147,6 @@ func (m Months) Serialize(sep string) string {
 	}
 	return mStr
 }
-
-var allMonthDays []int = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31}
 
 // Defines month days series
 type MonthDays []int
@@ -195,9 +182,7 @@ func (md MonthDays) Contains(monthDay int) (result bool) {
 // Parse MonthDay elements from string separated by sep.
 func (md *MonthDays) Parse(input, sep string) {
 	switch input {
-	case "*any":
-		*md = allMonthDays
-	case "":
+	case "*any", "":
 		*md = []int{}
 	default:
 		elements := strings.Split(input, sep)
@@ -212,9 +197,6 @@ func (md *MonthDays) Parse(input, sep string) {
 // Dumps the month days in a serialized string, similar to the one parsed
 func (md MonthDays) Serialize(sep string) string {
 	if len(md) == 0 {
-		return "*none"
-	}
-	if reflect.DeepEqual(md, MonthDays(allMonthDays)) {
 		return "*any"
 	}
 	var mdsStr string
@@ -227,8 +209,6 @@ func (md MonthDays) Serialize(sep string) string {
 	}
 	return mdsStr
 }
-
-var allWeekDays []time.Weekday = []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday}
 
 // Defines week days series
 type WeekDays []time.Weekday
@@ -263,9 +243,7 @@ func (wd WeekDays) Contains(weekDay time.Weekday) (result bool) {
 
 func (wd *WeekDays) Parse(input, sep string) {
 	switch input {
-	case "*any":
-		*wd = allWeekDays
-	case "":
+	case "*any", "":
 		*wd = []time.Weekday{}
 	default:
 		elements := strings.Split(input, sep)
@@ -280,9 +258,6 @@ func (wd *WeekDays) Parse(input, sep string) {
 // Dumps the week days in a serialized string, similar to the one parsed
 func (wd WeekDays) Serialize(sep string) string {
 	if len(wd) == 0 {
-		return "*none"
-	}
-	if reflect.DeepEqual(wd, WeekDays(allWeekDays)) {
 		return "*any"
 	}
 	var wdStr string

@@ -117,13 +117,13 @@ func (s *FileScribe) load(filename string) error {
 	defer f.Close()
 	d := json.NewDecoder(f)
 
-	switch {
-	case filename == DESTINATIONS_FILE:
+	switch filename {
+	case DESTINATIONS_FILE:
 		if err := d.Decode(&s.destinations); err != nil {
 			return err
 		}
 		s.destinations.Sort()
-	case filename == RATING_PROFILES_FILE:
+	case RATING_PROFILES_FILE:
 		if err := d.Decode(&s.ratingProfiles); err != nil {
 			return err
 		}
@@ -140,12 +140,12 @@ func (s *FileScribe) save(filename string) error {
 
 	b := bufio.NewWriter(f)
 	defer b.Flush()
-	switch {
-	case filename == DESTINATIONS_FILE:
+	switch filename {
+	case DESTINATIONS_FILE:
 		if err := s.format(b, s.destinations); err != nil {
 			return err
 		}
-	case filename == RATING_PROFILES_FILE:
+	case RATING_PROFILES_FILE:
 		if err := s.format(b, s.ratingProfiles); err != nil {
 			return err
 		}

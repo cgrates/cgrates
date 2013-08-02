@@ -88,15 +88,9 @@ func TestYearsSerialize(t *testing.T) {
 func TestMonthsSerialize(t *testing.T) {
 	mths := &Months{}
 	mString := mths.Serialize(";")
-	expectString := "*none"
+	expectString := "*any"
 	if expectString != mString {
 		t.Errorf("Expected: %s, got: %s", expectString, mString)
-	}
-	mths1 := Months(allMonths)
-	mString1 := mths1.Serialize(";")
-	expectString1 := "*any"
-	if expectString1 != mString1 {
-		t.Errorf("Expected: %s, got: %s", expectString1, mString1)
 	}
 	mths2 := &Months{time.January}
 	mString2 := mths2.Serialize(";")
@@ -115,15 +109,9 @@ func TestMonthsSerialize(t *testing.T) {
 func TestMonthDaysSerialize(t *testing.T) {
 	mds := &MonthDays{}
 	mdsString := mds.Serialize(";")
-	expectString := "*none"
+	expectString := "*any"
 	if expectString != mdsString {
 		t.Errorf("Expected: %s, got: %s", expectString, mdsString)
-	}
-	mds1 := MonthDays(allMonthDays)
-	mdsString1 := mds1.Serialize(";")
-	expectString1 := "*any"
-	if expectString1 != mdsString1 {
-		t.Errorf("Expected: %s, got: %s", expectString1, mdsString1)
 	}
 	mds2 := &MonthDays{1}
 	mdsString2 := mds2.Serialize(";")
@@ -142,15 +130,9 @@ func TestMonthDaysSerialize(t *testing.T) {
 func TestWeekDaysSerialize(t *testing.T) {
 	wds := &WeekDays{}
 	wdsString := wds.Serialize(";")
-	expectString := "*none"
+	expectString := "*any"
 	if expectString != wdsString {
 		t.Errorf("Expected: %s, got: %s", expectString, wdsString)
-	}
-	wds1 := WeekDays(allWeekDays)
-	wdsString1 := wds1.Serialize(";")
-	expectString1 := "*any"
-	if expectString1 != wdsString1 {
-		t.Errorf("Expected: %s, got: %s", expectString1, wdsString1)
 	}
 	wds2 := &WeekDays{time.Monday}
 	wdsString2 := wds2.Serialize(";")
