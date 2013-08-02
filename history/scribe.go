@@ -22,6 +22,11 @@ import (
 	"sort"
 )
 
+const (
+	RATING_PROFILE_PREFIX = "rpf_"
+	DESTINATION_PREFIX    = "dst_"
+)
+
 type Scribe interface {
 	Record(key string, obj interface{}) error
 }

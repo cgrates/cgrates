@@ -97,10 +97,11 @@ func Round(x float64, prec int, method string) float64 {
 }
 
 func ParseDate(date string) (expDate time.Time, err error) {
+	date = strings.TrimSpace(date)
 	switch {
 	case date == "*unlimited" || date == "":
 		// leave it at zero
-	case string(date[0]) == "+":
+	case strings.HasPrefix(date, "+"):
 		d, err := time.ParseDuration(date[1:])
 		if err != nil {
 			return expDate, err
@@ -108,7 +109,7 @@ func ParseDate(date string) (expDate time.Time, err error) {
 		expDate = time.Now().Add(d)
 	case date == "*monthly":
 		expDate = time.Now().AddDate(0, 1, 0) // add one month
-	case strings.Contains(date, "Z"):
+	case strings.HasSuffix(date, "Z"):
 		expDate, err = time.Parse(time.RFC3339, date)
 	default:
 		unix, err := strconv.ParseInt(date, 10, 64)

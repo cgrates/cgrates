@@ -55,6 +55,7 @@ func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error
 func (ms *MapStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := ms.ms.Marshal(rp)
 	ms.dict[RATING_PROFILE_PREFIX+rp.Id] = result
+	go historyScribe.Record(RATING_PROFILE_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -70,7 +71,7 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result
-	historyScribe.Record(dest.Id, dest)
+	go historyScribe.Record(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 

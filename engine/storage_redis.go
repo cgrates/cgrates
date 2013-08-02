@@ -21,9 +21,8 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"menteslibres.net/gosexy/redis"
-	//"log"
 	"github.com/cgrates/cgrates/utils"
+	"menteslibres.net/gosexy/redis"
 	"strconv"
 	"strings"
 	"time"

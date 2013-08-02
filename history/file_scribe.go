@@ -25,80 +25,145 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"sync"
+)
+
+const (
+	DESTINATIONS_FILE    = "destinations.json"
+	RATING_PROFILES_FILE = "rating_profiles.json"
 )
 
 type FileScribe struct {
 	sync.RWMutex
-	filename string
-	records  records
+	fileRoot       string
+	gitCommand     string
+	destinations   records
+	ratingProfiles records
 }
 
-func NewFileScribe(filename string) (Scribe, error) {
+func NewFileScribe(fileRoot string) (Scribe, error) {
 	// looking for git
-	_, err := exec.LookPath("git")
+	gitCommand, err := exec.LookPath("git")
 	if err != nil {
 		return nil, errors.New("Please install git: " + err.Error())
 	}
-	s := &FileScribe{filename: filename}
-	return s, s.load()
+	s := &FileScribe{fileRoot: fileRoot, gitCommand: gitCommand}
+	s.gitInit()
+	if err := s.load(DESTINATIONS_FILE); err != nil {
+		return nil, err
+	}
+	if err := s.load(RATING_PROFILES_FILE); err != nil {
+		return nil, err
+	}
+	return s, nil
 }
 
 func (s *FileScribe) Record(key string, obj interface{}) error {
 	s.Lock()
 	defer s.Unlock()
-	s.records = s.records.SetOrAdd(key, obj)
-	s.save()
+	switch {
+	case strings.HasPrefix(key, DESTINATION_PREFIX):
+		s.destinations = s.destinations.SetOrAdd(key, obj)
+		s.save(DESTINATIONS_FILE)
+	case strings.HasPrefix(key, RATING_PROFILE_PREFIX):
+		s.ratingProfiles = s.ratingProfiles.SetOrAdd(key, obj)
+		s.save(RATING_PROFILES_FILE)
+	}
 	return nil
 }
 
-func (s *FileScribe) commit() error {
-	out, err := exec.Command("git", "commit", "-a", "-m", "'historic commit'").Output()
-	if err != nil {
+func (s *FileScribe) gitInit() error {
+	if _, err := os.Stat(filepath.Join(s.fileRoot, ".git")); os.IsNotExist(err) {
+		cmd := exec.Command(s.gitCommand, "init")
+		cmd.Dir = s.fileRoot
+		if out, err := cmd.Output(); err != nil {
+			return errors.New(string(out) + " " + err.Error())
+		}
+		if f, err := os.Create(filepath.Join(s.fileRoot, DESTINATIONS_FILE)); err != nil {
+			return err
+		} else {
+			f.Close()
+		}
+		if f, err := os.Create(filepath.Join(s.fileRoot, RATING_PROFILES_FILE)); err != nil {
+			return err
+		} else {
+			f.Close()
+		}
+		cmd = exec.Command(s.gitCommand, "add")
+		cmd.Dir = s.fileRoot
+		if out, err := cmd.Output(); err != nil {
+			return errors.New(string(out) + " " + err.Error())
+		}
+	}
+	return nil
+}
+
+func (s *FileScribe) gitCommit() error {
+	cmd := exec.Command(s.gitCommand, "commit", "-a", "-m", "'historic commit'")
+	cmd.Dir = s.fileRoot
+	if out, err := cmd.Output(); err != nil {
 		return errors.New(string(out) + " " + err.Error())
 	}
 	return nil
 }
 
-func (s *FileScribe) load() error {
-	f, err := os.Open(s.filename)
+func (s *FileScribe) load(filename string) error {
+	f, err := os.Open(filepath.Join(s.fileRoot, filename))
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 	d := json.NewDecoder(f)
 
-	if err := d.Decode(&s.records); err != nil {
-		return err
+	switch {
+	case filename == DESTINATIONS_FILE:
+		if err := d.Decode(&s.destinations); err != nil {
+			return err
+		}
+		s.destinations.Sort()
+	case filename == RATING_PROFILES_FILE:
+		if err := d.Decode(&s.ratingProfiles); err != nil {
+			return err
+		}
+		s.ratingProfiles.Sort()
 	}
-	s.records.Sort()
 	return nil
 }
 
-func (s *FileScribe) save() error {
-	f, err := os.Create(s.filename)
+func (s *FileScribe) save(filename string) error {
+	f, err := os.Create(filepath.Join(s.fileRoot, filename))
 	if err != nil {
 		return err
 	}
 
 	b := bufio.NewWriter(f)
 	defer b.Flush()
-	if err := s.format(b); err != nil {
-		return err
+	switch {
+	case filename == DESTINATIONS_FILE:
+		if err := s.format(b, s.destinations); err != nil {
+			return err
+		}
+	case filename == RATING_PROFILES_FILE:
+		if err := s.format(b, s.ratingProfiles); err != nil {
+			return err
+		}
 	}
-	return s.commit()
+
+	return s.gitCommit()
 }
 
-func (s *FileScribe) format(b io.Writer) error {
-	s.records.Sort()
+func (s *FileScribe) format(b io.Writer, recs records) error {
+	recs.Sort()
 	b.Write([]byte("["))
-	for i, r := range s.records {
+	for i, r := range recs {
 		src, err := json.Marshal(r)
 		if err != nil {
 			return err
 		}
 		b.Write(src)
-		if i < len(s.records)-1 {
+		if i < len(recs)-1 {
 			b.Write([]byte("\n"))
 		}
 	}

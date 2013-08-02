@@ -23,13 +23,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"strings"
 	"sync"
 )
 
 type MockScribe struct {
 	sync.RWMutex
-	records records
-	Buf     bytes.Buffer
+	destinations   records
+	ratingProfiles records
+	DestBuf        bytes.Buffer
+	RpBuf          bytes.Buffer
 }
 
 func NewMockScribe() (Scribe, error) {
@@ -39,31 +42,48 @@ func NewMockScribe() (Scribe, error) {
 func (s *MockScribe) Record(key string, obj interface{}) error {
 	s.Lock()
 	defer s.Unlock()
-	s.records = s.records.SetOrAdd(key, obj)
-	s.save()
-	return nil
-}
-
-func (s *MockScribe) save() error {
-	s.Buf.Reset()
-	b := bufio.NewWriter(&s.Buf)
-	defer b.Flush()
-	if err := s.format(b); err != nil {
-		return err
+	switch {
+	case strings.HasPrefix(key, DESTINATION_PREFIX):
+		s.destinations = s.destinations.SetOrAdd(key[len(DESTINATION_PREFIX):], obj)
+		s.save(DESTINATIONS_FILE)
+	case strings.HasPrefix(key, RATING_PROFILE_PREFIX):
+		s.ratingProfiles = s.ratingProfiles.SetOrAdd(key[len(DESTINATION_PREFIX):], obj)
+		s.save(RATING_PROFILES_FILE)
 	}
 	return nil
 }
 
-func (s *MockScribe) format(b io.Writer) error {
-	s.records.Sort()
+func (s *MockScribe) save(filename string) error {
+	switch {
+	case filename == DESTINATIONS_FILE:
+		s.DestBuf.Reset()
+		b := bufio.NewWriter(&s.DestBuf)
+		defer b.Flush()
+		if err := s.format(b, s.destinations); err != nil {
+			return err
+		}
+	case filename == RATING_PROFILES_FILE:
+		s.RpBuf.Reset()
+		b := bufio.NewWriter(&s.RpBuf)
+		defer b.Flush()
+		if err := s.format(b, s.ratingProfiles); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *MockScribe) format(b io.Writer, recs records) error {
+	recs.Sort()
 	b.Write([]byte("["))
-	for i, r := range s.records {
+	for i, r := range recs {
 		src, err := json.Marshal(r)
 		if err != nil {
 			return err
 		}
 		b.Write(src)
-		if i < len(s.records)-1 {
+		if i < len(recs)-1 {
 			b.Write([]byte("\n"))
 		}
 	}
