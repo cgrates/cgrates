@@ -1,4 +1,6 @@
 #!/bin/sh
-echo Running CGRateS service
+
+echo Firing up CGRateS engine
+
 exec /usr/bin/cgr-engine -config /etc/cgrates/cgrates.cfg
 
