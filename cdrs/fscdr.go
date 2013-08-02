@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/cgrates/cgrates/utils"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -107,7 +108,9 @@ func (fsCdr FSCdr) GetReqType() string {
 func (fsCdr FSCdr) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string, len(cfg.CDRSExtraFields))
 	for _, field := range cfg.CDRSExtraFields {
-		extraFields[field] = fsCdr[field]
+		if unescaped, err := url.QueryUnescape(fsCdr[field]); err != nil {
+			extraFields[field] = unescaped
+		}
 	}
 	return extraFields
 }
