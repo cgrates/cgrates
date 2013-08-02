@@ -80,7 +80,7 @@ func (fsev FSEvent) GetName() string {
 }
 func (fsev FSEvent) GetDirection() string {
 	//TODO: implement direction
-	return "OUT"
+	return "*out"
 	//return fsev[DIRECTION]
 }
 func (fsev FSEvent) GetOrigId() string {
