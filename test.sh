@@ -8,6 +8,7 @@ go test -i github.com/cgrates/cgrates/mediator
 go test -i github.com/cgrates/fsock
 go test -i github.com/cgrates/cgrates/cdrs
 go test -i github.com/cgrates/cgrates/utils
+go test -i github.com/cgrates/cgrates/history
 
 go test github.com/cgrates/cgrates/engine
 en=$?
@@ -23,7 +24,9 @@ go test github.com/cgrates/cgrates/cdrs
 cdr=$?
 go test github.com/cgrates/cgrates/utils
 ut=$?
-go test github.com/cgrates//fsock
+go test github.com/cgrates/fsock
 fs=$?
+go test github.com/cgrates/history
+hs=$?
 
-exit $en && $sm && $cfg && $bl && $cr && $md && $cdr && $fs && $ut
+exit $en && $sm && $cfg && $bl && $cr && $md && $cdr && $fs && $ut && &hs
