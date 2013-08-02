@@ -76,7 +76,7 @@ func (genCdr GenCdr) GetCdrHost() string {
 }
 func (genCdr GenCdr) GetDirection() string {
 	//TODO: implement direction
-	return "OUT"
+	return "*out"
 }
 func (genCdr GenCdr) GetOrigId() string {
 	return genCdr[ORIG_ID]

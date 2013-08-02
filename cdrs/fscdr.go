@@ -77,7 +77,7 @@ func (fsCdr FSCdr) GetCdrHost() string {
 }
 func (fsCdr FSCdr) GetDirection() string {
 	//TODO: implement direction, not related to FS_DIRECTION but traffic towards or from subject/account
-	return "OUT"
+	return "*out"
 }
 func (fsCdr FSCdr) GetOrigId() string {
 	return fsCdr[FS_ORIG_ID]
