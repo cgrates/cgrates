@@ -217,10 +217,10 @@ func checkConfigSanity() error {
 func startHistoryScribe() (err error) {
 	var scribe history.Scribe
 	flag.Parse()
-	if "*masterAddr" != "" {
-		scribe, err = history.NewProxyScribe("*masterAddr")
+	if cfg.HistoryMaster != "" {
+		scribe, err = history.NewProxyScribe(cfg.HistoryMaster)
 	} else {
-		scribe, err = history.NewFileScribe("*dataFile")
+		scribe, err = history.NewFileScribe(cfg.HistoryRoot)
 	}
 	rpc.RegisterName("Scribe", scribe)
 	rpc.HandleHTTP()
@@ -327,6 +327,10 @@ func main() {
 	if cfg.CDRSListen != "" {
 		engine.Logger.Info("Starting CGRateS CDR Server.")
 		go startCDRS(responder, loggerDb)
+	}
+	if cfg.HistoryEnabled {
+		engine.Logger.Info("Starting History Service.")
+		go startHistoryScribe()
 	}
 	<-exitChan
 	engine.Logger.Info("Stopped all components. CGRateS shutdown!")

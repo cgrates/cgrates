@@ -73,3 +73,7 @@ server = test			# Adress where to connect to FreeSWITCH socket.
 passwd = test				# FreeSWITCH socket password.
 reconnects = 99				# Number of attempts on connect failure.
 
+[history]
+enabled = true			# Starts History service: <true|false>.
+master = test			# Address where to reach the master history server: <internal|x.y.z.y:1234>
+root = test			# Location on disk where to store hostory files.
