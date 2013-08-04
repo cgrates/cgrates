@@ -88,6 +88,14 @@ func TestCDRFields(t *testing.T) {
 	if fsCdr.GetDuration() != 4 {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
+	cfg.CDRSExtraFields = []string{"sip_user_agent","read_codec","write_codec"}
+	extraFields := fsCdr.GetExtraFields()
+	if len(extraFields)!=3 {
+		t.Error("Error parsing extra fields: ", extraFields)
+	}
+	if extraFields["sip_user_agent"] != "Jitsi2.2.4603.9615Linux" {
+		t.Error("Error parsing extra fields: ", extraFields)
+	}
 
 	
 }
