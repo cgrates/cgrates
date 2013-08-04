@@ -64,6 +64,7 @@ type CGRConfig struct {
 	BalancerEnabled          bool
 	BalancerListen           string // Json RPC server address
 	SchedulerEnabled         bool
+	CDRSEnabled		 bool  	// Enable CDR Server service
 	CDRSListen               string   // CDRS's listening interface: <x.y.z.y:1234>.
 	CDRSfsJSONEnabled        bool     // Enable the handler for FreeSWITCH JSON CDRs: <enabled|disabled>.
 	CDRSgenJSONEnabled       bool     // Enable the handler for Generic JSON CDRs: <enabled|disabled>.
@@ -127,6 +128,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.BalancerEnabled = false
 	self.BalancerListen = "127.0.0.1:2013"
 	self.SchedulerEnabled = false
+	self.CDRSEnabled = false
 	self.CDRSListen = "127.0.0.1:2022"
 	self.CDRSfsJSONEnabled = false
 	self.CDRSgenJSONEnabled = false
@@ -268,6 +270,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("scheduler", "enabled"); hasOpt {
 		cfg.SchedulerEnabled, _ = c.GetBool("scheduler", "enabled")
+	}
+	if hasOpt = c.HasOption("cdrs", "enabled"); hasOpt {
+		cfg.CDRSEnabled, _ = c.GetBool("cdrs", "enabled")
 	}
 	if hasOpt = c.HasOption("cdrs", "listen"); hasOpt {
 		cfg.CDRSListen, _ = c.GetString("cdrs", "listen")

@@ -36,6 +36,7 @@ listen = test 			# Rater's listening interface: <internal|x.y.z.y:1234>.
 enabled = true				# Starts Scheduler service: <true|false>.
 
 [cdrs]
+enabled = true				# Start the CDR Server service:  <true|false>.
 listen=test				# CDRS's listening interface: <x.y.z.y:1234>.
 freeswitch_json_enabled=true			# Enable the handler for FreeSWITCH JSON CDRs: <true|false>.
 generic_json_enabled=true			# Enable the handler for generic JSON CDRs: <true|false>.

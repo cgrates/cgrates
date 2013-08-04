@@ -828,7 +828,7 @@ func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err erro
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source )VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s')", 
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source )VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s')",
 		utils.TBL_COST_DETAILS,
 		utils.FSCgrId(uuid),
 		uuid,

@@ -59,6 +59,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.BalancerEnabled = false
 	eCfg.BalancerListen = "127.0.0.1:2013"
 	eCfg.SchedulerEnabled = false
+	eCfg.CDRSEnabled = false
 	eCfg.CDRSListen = "127.0.0.1:2022"
 	eCfg.CDRSfsJSONEnabled = false
 	eCfg.CDRSgenJSONEnabled = false
@@ -155,6 +156,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.BalancerEnabled = true
 	eCfg.BalancerListen = "test"
 	eCfg.SchedulerEnabled = true
+	eCfg.CDRSEnabled = true
 	eCfg.CDRSListen = "test"
 	eCfg.CDRSfsJSONEnabled = true
 	eCfg.CDRSgenJSONEnabled = true
