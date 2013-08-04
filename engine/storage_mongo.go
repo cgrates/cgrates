@@ -134,7 +134,7 @@ func (ms *MongoStorage) GetRatingProfile(key string) (rp *RatingProfile, err err
 func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
 	if historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
+		historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
 	}
 	return ms.db.C("ratingprofiles").Insert(rp)
 }
@@ -151,7 +151,7 @@ func (ms *MongoStorage) GetDestination(key string) (result *Destination, err err
 func (ms *MongoStorage) SetDestination(dest *Destination) error {
 	if historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
+		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
 	return ms.db.C("destinations").Insert(dest)
 }
