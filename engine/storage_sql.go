@@ -819,6 +819,7 @@ func (self *SQLStorage) GetAllActionTimings() (ats map[string]ActionTimings, err
 }
 
 func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
+	//ToDo: Add cgrid to logCallCost
 	if self.Db == nil {
 		//timespans.Logger.Warning("Cannot write log to database.")
 		return
@@ -827,18 +828,20 @@ func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err erro
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO callcosts VALUES ('NULL','%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %v, %v, '%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source )VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s')", 
+		utils.TBL_COST_DETAILS,
+		utils.FSCgrId(uuid),
 		uuid,
-		source,
 		cc.Direction,
 		cc.Tenant,
 		cc.TOR,
-		cc.Subject,
 		cc.Account,
+		cc.Subject,
 		cc.Destination,
 		cc.Cost,
 		cc.ConnectFee,
-		tss))
+		tss,
+		source))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
 	}
@@ -846,10 +849,11 @@ func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err erro
 }
 
 func (self *SQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	row := self.Db.QueryRow(fmt.Sprintf("SELECT * FROM callcosts WHERE uuid='%s' AND source='%s'", uuid, source))
-	var uuid_found string
+	//ToDo: cgrid instead of uuid
+	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s'", utils.TBL_COST_DETAILS, utils.FSCgrId(uuid), source))
+	var cgrid, accid, src string
 	var timespansJson string
-	err = row.Scan(&uuid_found, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
+	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson, &src)
 	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)
 	return
 }
@@ -900,12 +904,13 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 }
 
 func (self *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO rated_cdrs VALUES ('%s', '%s', '%s', '%s')",
+	// ToDo: Add here source and subject
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, subject, cost, source) VALUES ('%s', '%s', %f, '%s')",
+		utils.TBL_RATED_CDRS,
 		cdr.GetCgrId(),
-		cc.Cost,
-		"cgrcostid",
-		"cdrsrc",
-	))
+		"subject",
+		cc.Cost+cc.ConnectFee,
+		"cdrsrc"))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
 	}

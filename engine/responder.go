@@ -230,7 +230,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 	for err != nil {
 		client := rs.Bal.Balance()
 		if client == nil {
-			Logger.Info("Waiting for raters to register...")
+			Logger.Info("<Balancer> Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			reply = &CallCost{}
@@ -239,7 +239,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 				return reply, err
 			})
 			if err != nil {
-				Logger.Err(fmt.Sprintf("Got en error from rater: %v", err))
+				Logger.Err(fmt.Sprintf("<Balancer> Got en error from rater: %v", err))
 			}
 		}
 	}

@@ -12,7 +12,6 @@ CREATE TABLE `cost_details` (
   `account` varchar(64) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `destination` varchar(64) NOT NULL,
-  `time_start` datetime NOT NULL,
   `cost` DECIMAL(5,4) NOT NULL,
   `connect_fee` DECIMAL(5,4) NOT NULL,
   `timespans` text,
