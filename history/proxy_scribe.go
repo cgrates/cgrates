@@ -30,10 +30,10 @@ const (
 )
 
 type ProxyScribe struct {
-	client *rpc.Client
+	Client *rpc.Client
 }
 
-func NewProxyScribe(addr, encoding string) (Scribe, error) {
+func NewProxyScribe(addr, encoding string) (*ProxyScribe, error) {
 	var client *rpc.Client
 	var err error
 	switch encoding {
@@ -48,9 +48,9 @@ func NewProxyScribe(addr, encoding string) (Scribe, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &ProxyScribe{client: client}, nil
+	return &ProxyScribe{Client: client}, nil
 }
 
 func (ps *ProxyScribe) Record(rec *Record, out *int) error {
-	return ps.client.Call("Scribe.Record", rec, out)
+	return ps.Client.Call("Scribe.Record", rec, out)
 }

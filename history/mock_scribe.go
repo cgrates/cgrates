@@ -35,7 +35,7 @@ type MockScribe struct {
 	RpBuf          bytes.Buffer
 }
 
-func NewMockScribe() (Scribe, error) {
+func NewMockScribe() (*MockScribe, error) {
 	return &MockScribe{}, nil
 }
 

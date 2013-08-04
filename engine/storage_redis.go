@@ -83,7 +83,7 @@ func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	_, err = rs.db.Set(RATING_PROFILE_PREFIX+rp.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
+		historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
 	}
 	return
 }
@@ -105,7 +105,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	_, err = rs.db.Set(DESTINATION_PREFIX+dest.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
+		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
 	return
 }

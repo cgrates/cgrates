@@ -224,7 +224,11 @@ func startHistoryScribe() {
 			scribeAgent = scribeServer
 		}
 	}
-	engine.SetHistoryScribe(scribeAgent)
+	if scribeAgent != nil {
+		engine.SetHistoryScribe(scribeAgent)
+	} else {
+		engine.SetHistoryScribe(scribeServer) // if it is nil so be it
+	}
 
 	if cfg.HistoryServerEnabled {
 		if cfg.HistoryListen != INTERNAL {

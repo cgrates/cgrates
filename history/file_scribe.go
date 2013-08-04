@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
 const (
@@ -41,15 +42,18 @@ type FileScribe struct {
 	gitCommand     string
 	destinations   records
 	ratingProfiles records
+	loopChecker    chan int
+	waitingFile    string
 }
 
-func NewFileScribe(fileRoot string) (Scribe, error) {
+func NewFileScribe(fileRoot string) (*FileScribe, error) {
 	// looking for git
 	gitCommand, err := exec.LookPath("git")
 	if err != nil {
 		return nil, errors.New("Please install git: " + err.Error())
 	}
 	s := &FileScribe{fileRoot: fileRoot, gitCommand: gitCommand}
+	s.loopChecker = make(chan int)
 	s.gitInit()
 	if err := s.load(DESTINATIONS_FILE); err != nil {
 		return nil, err
@@ -63,14 +67,38 @@ func NewFileScribe(fileRoot string) (Scribe, error) {
 func (s *FileScribe) Record(rec *Record, out *int) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	var fileToSave string
 	switch {
 	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
 		s.destinations = s.destinations.SetOrAdd(&Record{rec.Key[len(DESTINATION_PREFIX):], rec.Object})
-		s.save(DESTINATIONS_FILE)
+		fileToSave = DESTINATIONS_FILE
 	case strings.HasPrefix(rec.Key, RATING_PROFILE_PREFIX):
 		s.ratingProfiles = s.ratingProfiles.SetOrAdd(&Record{rec.Key[len(RATING_PROFILE_PREFIX):], rec.Object})
-		s.save(RATING_PROFILES_FILE)
+		fileToSave = RATING_PROFILES_FILE
 	}
+
+	// flood protection for save method (do not save on every loop iteration)
+	if s.waitingFile == fileToSave {
+		s.loopChecker <- 1
+	}
+	s.waitingFile = fileToSave
+	go func() {
+		t := time.NewTicker(1 * time.Second)
+		select {
+		case <-s.loopChecker:
+			// cancel saving
+		case <-t.C:
+			if fileToSave != "" {
+				s.save(fileToSave)
+			}
+			t.Stop()
+			s.waitingFile = ""
+		}
+	}()
+	// no protection variant
+	/*if fileToSave != "" {
+		s.save(fileToSave)
+	}*/
 	*out = 0
 	return nil
 }

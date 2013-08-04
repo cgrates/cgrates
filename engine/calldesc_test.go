@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"github.com/cgrates/cgrates/history"
 	"log"
 	"testing"
 	"time"
@@ -26,6 +27,7 @@ import (
 
 func init() {
 	populateDB()
+	historyScribe, _ = history.NewMockScribe()
 }
 
 func populateDB() {

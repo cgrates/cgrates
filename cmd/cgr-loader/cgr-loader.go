@@ -115,9 +115,9 @@ func main() {
 			log.Fatal("Could not connect to history server:" + err.Error())
 			return
 		} else {
-			log.Print("HS: ", historyServer)
 			engine.SetHistoryScribe(scribeAgent)
 			gob.Register(&engine.Destination{})
+			defer scribeAgent.Client.Close()
 		}
 	}
 

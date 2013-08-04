@@ -55,7 +55,8 @@ var (
 	debitPeriod      = 10 * time.Second
 	roundingMethod   = "*middle"
 	roundingDecimals = 4
-	historyScribe, _ = history.NewMockScribe()
+	historyScribe    history.Scribe
+	//historyScribe, _ = history.NewMockScribe()
 )
 
 // Exported method to set the storage getter.
