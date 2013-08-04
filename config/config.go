@@ -129,7 +129,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSEnabled = false
 	self.CDRSListen = "127.0.0.1:2022"
 	self.CDRSExtraFields = []string{}
-	self.CDRSMediator = INTERNAL
+	self.CDRSMediator = ""
 	self.MediatorEnabled = false
 	self.MediatorListen = "127.0.0.1:2032"
 	self.MediatorRater = "127.0.0.1:2012"

@@ -62,7 +62,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSEnabled = false
 	eCfg.CDRSListen = "127.0.0.1:2022"
 	eCfg.CDRSExtraFields = []string{}
-	eCfg.CDRSMediator = INTERNAL
+	eCfg.CDRSMediator = ""
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorListen = "127.0.0.1:2032"
 	eCfg.MediatorRater = "127.0.0.1:2012"
