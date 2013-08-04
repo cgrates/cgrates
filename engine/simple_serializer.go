@@ -30,7 +30,9 @@ type Serializer interface {
 	Restore(string) error
 }
 
-var notEnoughElements = errors.New("Too few elements to restore")
+func notEnoughElements(line string) error {
+	return errors.New("Too few elements to restore: " + line)
+}
 
 func (ap *ActivationPeriod) Store() (result string, err error) {
 	result += ap.ActivationTime.Format(time.RFC3339) + "|"
@@ -130,7 +132,7 @@ func (a *Action) Store() (result string, err error) {
 func (a *Action) Restore(input string) (err error) {
 	elements := strings.Split(input, "|")
 	if len(elements) < 8 {
-		return notEnoughElements
+		return notEnoughElements(input)
 	}
 	a.Id = elements[0]
 	a.ActionType = elements[1]
@@ -258,7 +260,7 @@ func (at *ActionTrigger) Store() (result string, err error) {
 func (at *ActionTrigger) Restore(input string) error {
 	elements := strings.Split(input, ";")
 	if len(elements) != 9 {
-		return notEnoughElements
+		return notEnoughElements(input)
 	}
 	at.Id = elements[0]
 	at.BalanceId = elements[1]
@@ -355,7 +357,7 @@ func (ub *UserBalance) Store() (result string, err error) {
 func (ub *UserBalance) Restore(input string) error {
 	elements := strings.Split(input, "|")
 	if len(elements) < 2 {
-		return notEnoughElements
+		return notEnoughElements(input)
 	}
 	ub.Id = elements[0]
 	ub.Type = elements[1]
@@ -430,7 +432,7 @@ De-serializes the unit counter for the storage. Used for key-value storages.
 func (uc *UnitsCounter) Restore(input string) error {
 	elements := strings.Split(input, "/")
 	if len(elements) != 4 {
-		return notEnoughElements
+		return notEnoughElements(input)
 	}
 	uc.Direction = elements[0]
 	uc.BalanceId = elements[1]
@@ -537,7 +539,7 @@ func (i *Interval) Store() (result string, err error) {
 func (i *Interval) Restore(input string) error {
 	is := strings.Split(input, ";")
 	if len(is) != 12 {
-		return notEnoughElements
+		return notEnoughElements(input)
 	}
 	if err := i.Years.Restore(is[0]); err != nil {
 		return err
@@ -584,7 +586,7 @@ func (mb *MinuteBucket) Restore(input string) error {
 		mb.DestinationId = elements[4]
 		return nil
 	}
-	return notEnoughElements
+	return notEnoughElements(input)
 }
 
 func (wds WeekDays) Store() (result string, err error) {
