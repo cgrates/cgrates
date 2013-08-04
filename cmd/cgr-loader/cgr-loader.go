@@ -19,10 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"encoding/gob"
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"log"
 	"path"
@@ -45,14 +47,16 @@ var (
 	stor_db_user = flag.String("stordb_user", cgrConfig.StorDBUser, "The storDb user to sign in as.")
 	stor_db_pass = flag.String("stordb_passwd", cgrConfig.StorDBPass, "The storDb user's password.")
 
-	flush      = flag.Bool("flush", false, "Flush the database before importing")
-	tpid       = flag.String("tpid", "", "The tariff plan id from the database")
-	dataPath   = flag.String("path", ".", "The path containing the data files")
-	version    = flag.Bool("version", false, "Prints the application version.")
-	verbose    = flag.Bool("verbose", false, "Enable detailed verbose logging output")
-	fromStorDb = flag.Bool("from-stordb", false, "Load the tariff plan from storDb to dataDb")
-	toStorDb   = flag.Bool("to-stordb", false, "Import the tariff plan from files to storDb")
-	runId      = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
+	flush         = flag.Bool("flush", false, "Flush the database before importing")
+	tpid          = flag.String("tpid", "", "The tariff plan id from the database")
+	dataPath      = flag.String("path", ".", "The path containing the data files")
+	version       = flag.Bool("version", false, "Prints the application version.")
+	verbose       = flag.Bool("verbose", false, "Enable detailed verbose logging output")
+	fromStorDb    = flag.Bool("from-stordb", false, "Load the tariff plan from storDb to dataDb")
+	toStorDb      = flag.Bool("to-stordb", false, "Import the tariff plan from files to storDb")
+	historyServer = flag.String("history-server", "", "The history server address:port")
+	rpcEncoding   = flag.String("rpc-encoding", "json", "The history server rpc encoding json|gob")
+	runId         = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )
 
 func main() {
@@ -104,6 +108,17 @@ func main() {
 			}
 		}
 		loader = engine.NewFileCSVReader(dataDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.DESTRATE_TIMINGS_CSV, utils.RATE_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
+	}
+
+	if *historyServer != "" {
+		if scribeAgent, err := history.NewProxyScribe(*historyServer, *rpcEncoding); err != nil {
+			log.Fatal("Could not connect to history server:" + err.Error())
+			return
+		} else {
+			log.Print("HS: ", historyServer)
+			engine.SetHistoryScribe(scribeAgent)
+			gob.Register(&engine.Destination{})
+		}
 	}
 
 	err = loader.LoadDestinations()

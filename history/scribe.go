@@ -28,15 +28,15 @@ const (
 )
 
 type Scribe interface {
-	Record(key string, obj interface{}) error
+	Record(record *Record, out *int) error
 }
 
-type record struct {
+type Record struct {
 	Key    string
 	Object interface{}
 }
 
-type records []*record
+type records []*Record
 
 func (rs records) Len() int {
 	return len(rs)
@@ -54,17 +54,17 @@ func (rs records) Sort() {
 	sort.Sort(rs)
 }
 
-func (rs records) SetOrAdd(key string, obj interface{}) records {
+func (rs records) SetOrAdd(rec *Record) records {
 	found := false
 	for _, r := range rs {
-		if r.Key == key {
+		if r.Key == rec.Key {
 			found = true
-			r.Object = obj
+			r.Object = rec.Object
 			return rs
 		}
 	}
 	if !found {
-		rs = append(rs, &record{key, obj})
+		rs = append(rs, rec)
 	}
 	return rs
 }

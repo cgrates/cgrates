@@ -23,16 +23,16 @@ import (
 )
 
 func TestHistorySet(t *testing.T) {
-	rs := records{&record{"first", "test"}}
-	rs.SetOrAdd("first", "new value")
+	rs := records{&Record{"first", "test"}}
+	rs.SetOrAdd(&Record{"first", "new value"})
 	if len(rs) != 1 || rs[0].Object != "new value" {
 		t.Error("error setting new value: ", rs[0])
 	}
 }
 
 func TestHistoryAdd(t *testing.T) {
-	rs := records{&record{"first", "test"}}
-	rs = rs.SetOrAdd("second", "new value")
+	rs := records{&Record{"first", "test"}}
+	rs = rs.SetOrAdd(&Record{"second", "new value"})
 	if len(rs) != 2 || rs[1].Object != "new value" {
 		t.Error("error setting new value: ", rs)
 	}

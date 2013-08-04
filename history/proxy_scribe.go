@@ -19,24 +19,38 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package history
 
 import (
+	"errors"
 	"net/rpc"
+	"net/rpc/jsonrpc"
+)
+
+const (
+	JSON = "json"
+	GOB  = "gob"
 )
 
 type ProxyScribe struct {
 	client *rpc.Client
 }
 
-func NewProxyScribe(addr string) (Scribe, error) {
-	client, err := rpc.DialHTTP("tcp", addr)
+func NewProxyScribe(addr, encoding string) (Scribe, error) {
+	var client *rpc.Client
+	var err error
+	switch encoding {
+	case GOB:
+		client, err = rpc.Dial("tcp", addr)
+	case JSON:
+		client, err = jsonrpc.Dial("tcp", addr)
+	default:
+		err = errors.New("Hystory proxy scribe: Unknown encoding " + encoding)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 	return &ProxyScribe{client: client}, nil
 }
 
-func (ps *ProxyScribe) Record(key string, obj interface{}) error {
-	if err := ps.client.Call("Scribe.Record", key, obj); err != nil {
-		return err
-	}
-	return nil
+func (ps *ProxyScribe) Record(rec *Record, out *int) error {
+	return ps.client.Call("Scribe.Record", rec, out)
 }

@@ -203,7 +203,6 @@ func startCDRS(responder *engine.Responder, loggerDb engine.DataStorage) {
 
 func startHistoryScribe() {
 	var scribeServer history.Scribe
-	flag.Parse()
 
 	if cfg.HistoryServerEnabled {
 		if scribeServer, err = history.NewFileScribe(cfg.HistoryPath); err != nil {
@@ -211,6 +210,23 @@ func startHistoryScribe() {
 			exitChan <- true
 			return
 		}
+	}
+	var scribeAgent history.Scribe
+
+	if cfg.HistoryAgentEnabled {
+		if cfg.HistoryServer != INTERNAL {
+			if scribeAgent, err = history.NewProxyScribe(cfg.HistoryServer, cfg.RPCEncoding); err != nil {
+				engine.Logger.Crit(err.Error())
+				exitChan <- true
+				return
+			}
+		} else {
+			scribeAgent = scribeServer
+		}
+	}
+	engine.SetHistoryScribe(scribeAgent)
+
+	if cfg.HistoryServerEnabled {
 		if cfg.HistoryListen != INTERNAL {
 			rpc.RegisterName("Scribe", scribeServer)
 			var serveFunc func(io.ReadWriteCloser)
@@ -238,20 +254,7 @@ func startHistoryScribe() {
 			}
 		}
 	}
-	var scribeAgent history.Scribe
 
-	if cfg.HistoryAgentEnabled {
-		if cfg.HistoryServer != INTERNAL {
-			if scribeAgent, err = history.NewProxyScribe(cfg.HistoryServer); err != nil {
-				engine.Logger.Crit(err.Error())
-				exitChan <- true
-				return
-			}
-		} else {
-			scribeAgent = scribeServer
-		}
-	}
-	engine.SetHistoryScribe(scribeAgent)
 	return
 }
 

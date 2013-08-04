@@ -36,7 +36,7 @@ const (
 )
 
 type FileScribe struct {
-	sync.RWMutex
+	mu             sync.RWMutex
 	fileRoot       string
 	gitCommand     string
 	destinations   records
@@ -60,17 +60,18 @@ func NewFileScribe(fileRoot string) (Scribe, error) {
 	return s, nil
 }
 
-func (s *FileScribe) Record(key string, obj interface{}) error {
-	s.Lock()
-	defer s.Unlock()
+func (s *FileScribe) Record(rec *Record, out *int) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	switch {
-	case strings.HasPrefix(key, DESTINATION_PREFIX):
-		s.destinations = s.destinations.SetOrAdd(key, obj)
+	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
+		s.destinations = s.destinations.SetOrAdd(&Record{rec.Key[len(DESTINATION_PREFIX):], rec.Object})
 		s.save(DESTINATIONS_FILE)
-	case strings.HasPrefix(key, RATING_PROFILE_PREFIX):
-		s.ratingProfiles = s.ratingProfiles.SetOrAdd(key, obj)
+	case strings.HasPrefix(rec.Key, RATING_PROFILE_PREFIX):
+		s.ratingProfiles = s.ratingProfiles.SetOrAdd(&Record{rec.Key[len(RATING_PROFILE_PREFIX):], rec.Object})
 		s.save(RATING_PROFILES_FILE)
 	}
+	*out = 0
 	return nil
 }
 
@@ -144,7 +145,6 @@ func (s *FileScribe) save(filename string) error {
 	}
 
 	b := bufio.NewWriter(f)
-	defer b.Flush()
 	switch filename {
 	case DESTINATIONS_FILE:
 		if err := s.format(b, s.destinations); err != nil {
@@ -155,7 +155,8 @@ func (s *FileScribe) save(filename string) error {
 			return err
 		}
 	}
-
+	b.Flush()
+	f.Close()
 	return s.gitCommit()
 }
 
@@ -169,7 +170,7 @@ func (s *FileScribe) format(b io.Writer, recs records) error {
 		}
 		b.Write(src)
 		if i < len(recs)-1 {
-			b.Write([]byte("\n"))
+			b.Write([]byte(",\n"))
 		}
 	}
 	b.Write([]byte("]"))

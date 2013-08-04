@@ -39,17 +39,18 @@ func NewMockScribe() (Scribe, error) {
 	return &MockScribe{}, nil
 }
 
-func (s *MockScribe) Record(key string, obj interface{}) error {
+func (s *MockScribe) Record(rec *Record, out *int) error {
 	s.Lock()
 	defer s.Unlock()
 	switch {
-	case strings.HasPrefix(key, DESTINATION_PREFIX):
-		s.destinations = s.destinations.SetOrAdd(key[len(DESTINATION_PREFIX):], obj)
+	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
+		s.destinations = s.destinations.SetOrAdd(&Record{rec.Key[len(DESTINATION_PREFIX):], rec.Object})
 		s.save(DESTINATIONS_FILE)
-	case strings.HasPrefix(key, RATING_PROFILE_PREFIX):
-		s.ratingProfiles = s.ratingProfiles.SetOrAdd(key[len(DESTINATION_PREFIX):], obj)
+	case strings.HasPrefix(rec.Key, RATING_PROFILE_PREFIX):
+		s.ratingProfiles = s.ratingProfiles.SetOrAdd(&Record{rec.Key[len(RATING_PROFILE_PREFIX):], rec.Object})
 		s.save(RATING_PROFILES_FILE)
 	}
+	*out = 0
 	return nil
 }
 
