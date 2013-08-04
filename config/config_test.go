@@ -89,6 +89,9 @@ func TestDefaults(t *testing.T) {
 	eCfg.FreeswitchServer = "127.0.0.1:8021"
 	eCfg.FreeswitchPass = "ClueCon"
 	eCfg.FreeswitchReconnects = 5
+	eCfg.HistoryEnabled = false
+	eCfg.HistoryMaster = "127.0.0.1:2013"
+	eCfg.HistoryRoot = "/var/log/cgrates/history"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
@@ -180,6 +183,9 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
+	eCfg.HistoryEnabled = true
+	eCfg.HistoryMaster = "test"
+	eCfg.HistoryRoot = "test"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)

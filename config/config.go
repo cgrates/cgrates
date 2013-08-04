@@ -26,16 +26,15 @@ import (
 )
 
 const (
-	DISABLED      = "disabled"
-	INTERNAL      = "internal"
-	JSON          = "json"
-	GOB           = "gob"
-	POSTGRES      = "postgres"
-	MONGO         = "mongo"
-	REDIS         = "redis"
-	SAME          = "same"
-	FS            = "freeswitch"
-	
+	DISABLED = "disabled"
+	INTERNAL = "internal"
+	JSON     = "json"
+	GOB      = "gob"
+	POSTGRES = "postgres"
+	MONGO    = "mongo"
+	REDIS    = "redis"
+	SAME     = "same"
+	FS       = "freeswitch"
 )
 
 // Holds system configuration, defaults are overwritten with values from config file if found
@@ -57,8 +56,8 @@ type CGRConfig struct {
 	DefaultTOR               string // set default type of record
 	DefaultTenant            string // set default tenant
 	DefaultSubject           string // set default rating subject, useful in case of fallback
-	RoundingMethod      string // Rounding method for the end price: <*up|*middle|*down>
-	RoundingDecimals    int    // Number of decimals to round end prices at
+	RoundingMethod           string // Rounding method for the end price: <*up|*middle|*down>
+	RoundingDecimals         int    // Number of decimals to round end prices at
 	RaterEnabled             bool   // start standalone server (no balancer)
 	RaterBalancer            string // balancer address host:port
 	RaterListen              string // listening address host:port
@@ -95,6 +94,9 @@ type CGRConfig struct {
 	FreeswitchServer         string   // freeswitch address host:port
 	FreeswitchPass           string   // FS socket password
 	FreeswitchReconnects     int      // number of times to attempt reconnect after connect fails
+	HistoryEnabled           bool     // Starts History service: <true|false>.
+	HistoryMaster            string   // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryRoot              string   // Location on disk where to store hostory files.
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -111,7 +113,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.StorDBUser = "cgrates"
 	self.StorDBPass = "CGRateS.org"
 	self.RPCEncoding = JSON
-	self.DefaultReqType = utils.RATED 
+	self.DefaultReqType = utils.RATED
 	self.DefaultTOR = "0"
 	self.DefaultTenant = "0"
 	self.DefaultSubject = "0"
@@ -153,6 +155,9 @@ func (self *CGRConfig) setDefaults() error {
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
+	self.HistoryEnabled = false
+	self.HistoryMaster = "127.0.0.1:2013"
+	self.HistoryRoot = "/var/log/cgrates/history"
 
 	return nil
 }
@@ -370,6 +375,14 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
 		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
 	}
-
+	if hasOpt = c.HasOption("history", "enabled"); hasOpt {
+		cfg.HistoryEnabled, _ = c.GetBool("history", "enabled")
+	}
+	if hasOpt = c.HasOption("history", "master"); hasOpt {
+		cfg.HistoryMaster, _ = c.GetString("history", "master")
+	}
+	if hasOpt = c.HasOption("history", "root"); hasOpt {
+		cfg.HistoryRoot, _ = c.GetString("history", "root")
+	}
 	return cfg, nil
 }
