@@ -82,7 +82,7 @@ func (self *Apier) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *uti
 		aTriggers := make([]utils.ApiActionTrigger, len(ats[attrs.ActionTriggersId]))
 		for idx, row := range ats[attrs.ActionTriggersId] {
 			aTriggers[idx] = utils.ApiActionTrigger{
-				BalanceType:      row.BalanceId,
+				BalanceType:    row.BalanceId,
 				Direction:      row.Direction,
 				ThresholdType:  row.ThresholdType,
 				ThresholdValue: row.ThresholdValue,

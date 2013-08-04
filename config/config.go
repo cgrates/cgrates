@@ -64,7 +64,7 @@ type CGRConfig struct {
 	BalancerEnabled          bool
 	BalancerListen           string // Json RPC server address
 	SchedulerEnabled         bool
-	CDRSEnabled		 bool  	// Enable CDR Server service
+	CDRSEnabled              bool     // Enable CDR Server service
 	CDRSListen               string   // CDRS's listening interface: <x.y.z.y:1234>.
 	CDRSfsJSONEnabled        bool     // Enable the handler for FreeSWITCH JSON CDRs: <enabled|disabled>.
 	CDRSgenJSONEnabled       bool     // Enable the handler for Generic JSON CDRs: <enabled|disabled>.
