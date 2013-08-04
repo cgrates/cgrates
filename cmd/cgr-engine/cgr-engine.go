@@ -268,8 +268,12 @@ func checkConfigSanity() error {
 		return errors.New("SessionManager on Worker")
 	}
 	if cfg.BalancerEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
-		engine.Logger.Crit("The balancer is enabled so it cannot connect to another balancer (change [engine]/balancer to disabled)!")
+		engine.Logger.Crit("The balancer is enabled so it cannot connect to another balancer (change rater/balancer to disabled)!")
 		return errors.New("Improperly configured balancer")
+	}
+	if cfg.CDRSEnabled && (cfg.CDRSMediator == INTERNAL && !cfg.BalancerEnabled) {
+		engine.Logger.Crit("CDRS cannot connect to mediator. Enable it first!")
+		return errors.New("Internal Mediator required by CDRS")
 	}
 	if cfg.HistoryServerEnabled && cfg.HistoryServer == INTERNAL && !cfg.HistoryServerEnabled {
 		engine.Logger.Crit("The history agent is enabled and internal and history server is disabled!")
