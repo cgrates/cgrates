@@ -60,7 +60,7 @@ func (self *FScsvCDR) GetCdrHost() string {
 }
 
 func (self *FScsvCDR) GetDirection() string {
-	return "OUT"
+	return "*out"
 }
 
 func (self *FScsvCDR) GetOrigId() string {

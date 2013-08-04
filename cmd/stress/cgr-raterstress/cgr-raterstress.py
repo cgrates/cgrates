@@ -43,7 +43,7 @@ class JSONClient(object):
 
 rpc =JSONClient(("127.0.0.1", 2012))
 
-cd = {"Direction":"OUT", "TOR":"0", "Tenant": "vdf", "Subject": "rif", "DestinationPrefix": "0256", "TimeStart": "2012-02-02T17:30:00Z", "TimeEnd": "2012-02-02T18:30:00Z"}
+cd = {"Direction":"*out", "TOR":"0", "Tenant": "vdf", "Subject": "rif", "DestinationPrefix": "0256", "TimeStart": "2012-02-02T17:30:00Z", "TimeEnd": "2012-02-02T18:30:00Z"}
 
 # alternative to the above
 s = socket.create_connection(("127.0.0.1", 2012))

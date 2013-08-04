@@ -38,9 +38,9 @@ Creates a new ActionTriggers profile within a tariff plan.
             "ActionTriggers": [
                 {
                     "ActionsId": "ACTION_1", 
-                    "BalanceType": "MONETARY", 
+                    "BalanceType": "*monetary", 
                     "DestinationId": "", 
-                    "Direction": "OUT", 
+                    "Direction": "*out", 
                     "ThresholdType": "MIN_BALANCE", 
                     "ThresholdValue": 5, 
                     "Weight": 10

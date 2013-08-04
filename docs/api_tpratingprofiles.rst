@@ -13,7 +13,7 @@ Creates a new RatingProfile within a tariff plan.
 	RatingProfileId        string             // RatingProfile id
 	Tenant               string             // Tenant's Id
 	TOR                  string             // TypeOfRecord
-	Direction            string             // Traffic direction, OUT is the only one supported for now
+	Direction            string             // Traffic direction, *out is the only one supported for now
 	Subject              string             // Rating subject, usually the same as account
 	RatesFallbackSubject string             // Fallback on this subject if rates not found for destination
 	RatingActivations    []RatingActivation // Activate rate profiles at specific time
@@ -34,7 +34,7 @@ Creates a new RatingProfile within a tariff plan.
     "method": "Apier.SetTPRatingProfile", 
     "params": [
         {
-            "Direction": "OUT", 
+            "Direction": "*out", 
             "RatingProfileId": "SAMPLE_RP_2", 
             "RatingActivations": [
                 {
@@ -123,7 +123,7 @@ Queries specific RatingProfile on tariff plan.
 	RatingProfileId        string             // RatingProfile id
 	Tenant               string             // Tenant's Id
 	TOR                  string             // TypeOfRecord
-	Direction            string             // Traffic direction, OUT is the only one supported for now
+	Direction            string             // Traffic direction, *out is the only one supported for now
 	Subject              string             // Rating subject, usually the same as account
 	RatesFallbackSubject string             // Fallback on this subject if rates not found for destination
 	RatingActivations    []RatingActivation // Activate rate profiles at specific time
@@ -141,7 +141,7 @@ Queries specific RatingProfile on tariff plan.
     "error": null, 
     "id": 0, 
     "result": {
-        "Direction": "OUT", 
+        "Direction": "*out", 
         "RatingProfileId": "SAMPLE_RP_2", 
         "RatesFallbackSubject": "", 
         "RatingActivations": [

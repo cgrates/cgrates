@@ -26,7 +26,7 @@ func (self *CmdGetBalance) Usage(name string) string {
 // set param defaults
 func (self *CmdGetBalance) defaults() error {
 	self.rpcMethod = "Responder.GetMonetary"
-	self.rpcParams = &engine.CallDescriptor{Direction: "OUT"}	
+	self.rpcParams = &engine.CallDescriptor{Direction: "*out"}	
 	return nil
 }
 

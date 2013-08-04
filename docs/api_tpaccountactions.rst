@@ -32,7 +32,7 @@ Creates a new AccountActions profile within a tariff plan.
             "AccountActionsId": "AA_SAMPLE_2", 
             "ActionTimingsId": "SAMPLE_AT_1", 
             "ActionTriggersId": "SAMPLE_ATRS_1", 
-            "Direction": "OUT", 
+            "Direction": "*out", 
             "TPid": "SAMPLE_TP_1", 
             "Tenant": "TENANT1"
         }
@@ -124,7 +124,7 @@ Queries specific AccountActions profile on tariff plan.
         "AccountActionsId": "AA_SAMPLE_2", 
         "ActionTimingsId": "SAMPLE_AT_1", 
         "ActionTriggersId": "SAMPLE_ATRS_1", 
-        "Direction": "OUT", 
+        "Direction": "*out", 
         "TPid": "SAMPLE_TP_1", 
         "Tenant": "TENANT1"
     }

@@ -183,7 +183,7 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*engine.CallCost, error)
 		return nil, err
 	}
 	cd := engine.CallDescriptor{
-		Direction:   "OUT", //record[m.directionFields[runIdx]] TODO: fix me
+		Direction:   "*out", //record[m.directionFields[runIdx]] TODO: fix me
 		Tenant:      cdr.GetTenant(),
 		TOR:         cdr.GetTOR(),
 		Subject:     cdr.GetSubject(),

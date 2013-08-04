@@ -115,13 +115,14 @@ func (fsCdr FSCdr) GetFallbackSubj() string {
 	return cfg.DefaultSubject
 }
 func (fsCdr FSCdr) GetAnswerTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsCdr[FS_ANSWER_TIME], 0, 64)
-	t = time.Unix(0, st*1000)
+	//ToDo: Make sure we work with UTC instead of local time
+	at, err := strconv.ParseInt(fsCdr[FS_ANSWER_TIME], 0, 64)
+	t = time.Unix(at, 0)
 	return
 }
 func (fsCdr FSCdr) GetHangupTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsCdr[FS_HANGUP_TIME], 0, 64)
-	t = time.Unix(0, st*1000)
+	hupt, err := strconv.ParseInt(fsCdr[FS_HANGUP_TIME], 0, 64)
+	t = time.Unix(hupt, 0)
 	return
 }
 
