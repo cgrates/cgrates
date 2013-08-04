@@ -266,7 +266,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	destPrefix, err := cd.LoadActivationPeriods()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
-		return &CallCost{}, err
+		return &CallCost{Cost: -1}, err
 	}
 	timespans := cd.splitInTimeSpans(nil)
 	cost := 0.0
