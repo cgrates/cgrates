@@ -50,7 +50,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func genCdrHandler(w http.ResponseWriter, r *http.Request) {
+func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	if genCdr, err := new(GenCdr).New(body); err == nil {
 		storage.SetCdr(genCdr)
@@ -77,11 +77,7 @@ func New(s engine.DataStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS 
 }
 
 func (cdrs *CDRS) StartCapturingCDRs() {
-	if cfg.CDRSfsJSONEnabled {
-		http.HandleFunc("/freeswitch_json", fsCdrHandler)
-	}
-	if cfg.CDRSgenJSONEnabled {
-		http.HandleFunc("/generic_json", genCdrHandler)
-	}
+	http.HandleFunc("/cgr_json", cgrCdrHandler) // Attach CGR CDR Handler
+	http.HandleFunc("/freeswitch_json", fsCdrHandler)  // Attach FreeSWITCH JSON CDR Handler
 	http.ListenAndServe(cfg.CDRSListen, nil)
 }

@@ -38,10 +38,8 @@ enabled = true				# Starts Scheduler service: <true|false>.
 [cdrs]
 enabled = true				# Start the CDR Server service:  <true|false>.
 listen=test				# CDRS's listening interface: <x.y.z.y:1234>.
-freeswitch_json_enabled=true			# Enable the handler for FreeSWITCH JSON CDRs: <true|false>.
-generic_json_enabled=true			# Enable the handler for generic JSON CDRs: <true|false>.
+extra_fields = test			# Extra fields to store in CDRs
 mediator = test				# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-extra_fields = test				# Extra fields to store in CDRs
 
 [mediator]
 enabled = true				# Starts Mediator service: <true|false>.

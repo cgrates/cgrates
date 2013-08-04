@@ -370,10 +370,11 @@ func main() {
 		go startMediator(responder, loggerDb)
 	}
 
-	if cfg.CDRSListen != "" {
+	if cfg.CDRSEnabled {
 		engine.Logger.Info("Starting CGRateS CDR Server.")
 		go startCDRS(responder, loggerDb)
 	}
+
 	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {
 		engine.Logger.Info("Starting History Service.")
 		go startHistoryScribe()

@@ -61,10 +61,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.SchedulerEnabled = false
 	eCfg.CDRSEnabled = false
 	eCfg.CDRSListen = "127.0.0.1:2022"
-	eCfg.CDRSfsJSONEnabled = false
-	eCfg.CDRSgenJSONEnabled = false
-	eCfg.CDRSMediator = INTERNAL
 	eCfg.CDRSExtraFields = []string{}
+	eCfg.CDRSMediator = INTERNAL
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorListen = "127.0.0.1:2032"
 	eCfg.MediatorRater = "127.0.0.1:2012"
@@ -158,10 +156,8 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.SchedulerEnabled = true
 	eCfg.CDRSEnabled = true
 	eCfg.CDRSListen = "test"
-	eCfg.CDRSfsJSONEnabled = true
-	eCfg.CDRSgenJSONEnabled = true
-	eCfg.CDRSMediator = "test"
 	eCfg.CDRSExtraFields = []string{"test"}
+	eCfg.CDRSMediator = "test"
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorListen = "test"
 	eCfg.MediatorRater = "test"

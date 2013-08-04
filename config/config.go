@@ -66,10 +66,8 @@ type CGRConfig struct {
 	SchedulerEnabled         bool
 	CDRSEnabled              bool     // Enable CDR Server service
 	CDRSListen               string   // CDRS's listening interface: <x.y.z.y:1234>.
-	CDRSfsJSONEnabled        bool     // Enable the handler for FreeSWITCH JSON CDRs: <enabled|disabled>.
-	CDRSgenJSONEnabled       bool     // Enable the handler for Generic JSON CDRs: <enabled|disabled>.
-	CDRSMediator             string   // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	CDRSExtraFields          []string //Extra fields to store in CDRs
+	CDRSMediator             string   // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	SMEnabled                bool
 	SMSwitchType             string
 	SMRater                  string   // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -130,10 +128,8 @@ func (self *CGRConfig) setDefaults() error {
 	self.SchedulerEnabled = false
 	self.CDRSEnabled = false
 	self.CDRSListen = "127.0.0.1:2022"
-	self.CDRSfsJSONEnabled = false
-	self.CDRSgenJSONEnabled = false
-	self.CDRSMediator = INTERNAL
 	self.CDRSExtraFields = []string{}
+	self.CDRSMediator = INTERNAL
 	self.MediatorEnabled = false
 	self.MediatorListen = "127.0.0.1:2032"
 	self.MediatorRater = "127.0.0.1:2012"
@@ -277,19 +273,13 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrs", "listen"); hasOpt {
 		cfg.CDRSListen, _ = c.GetString("cdrs", "listen")
 	}
-	if hasOpt = c.HasOption("cdrs", "freeswitch_json_enabled"); hasOpt {
-		cfg.CDRSfsJSONEnabled, _ = c.GetBool("cdrs", "freeswitch_json_enabled")
-	}
-	if hasOpt = c.HasOption("cdrs", "generic_json_enabled"); hasOpt {
-		cfg.CDRSgenJSONEnabled, _ = c.GetBool("cdrs", "generic_json_enabled")
-	}
-	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
-		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
-	}
 	if hasOpt = c.HasOption("cdrs", "extra_fields"); hasOpt {
 		if cfg.CDRSExtraFields, errParse = ConfigSlice(c, "cdrs", "extra_fields"); errParse != nil {
 			return nil, errParse
 		}
+	}
+	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
+		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
 	}
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
 		cfg.MediatorEnabled, _ = c.GetBool("mediator", "enabled")
