@@ -94,9 +94,11 @@ type CGRConfig struct {
 	FreeswitchServer         string   // freeswitch address host:port
 	FreeswitchPass           string   // FS socket password
 	FreeswitchReconnects     int      // number of times to attempt reconnect after connect fails
-	HistoryEnabled           bool     // Starts History service: <true|false>.
-	HistoryMaster            string   // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryRoot              string   // Location on disk where to store hostory files.
+	HistoryAgentEnabled      bool     // Starts History as an agent: <true|false>.
+	HistoryServerEnabled     bool     // Starts History as server: <true|false>.
+	HistoryServer            string   // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryListen            string   // History server listening interface: <internal|x.y.z.y:1234>
+	HistoryPath              string   // Location on disk where to store history files.
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -155,9 +157,11 @@ func (self *CGRConfig) setDefaults() error {
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
-	self.HistoryEnabled = false
-	self.HistoryMaster = "127.0.0.1:2013"
-	self.HistoryRoot = "/var/log/cgrates/history"
+	self.HistoryAgentEnabled = false
+	self.HistoryServerEnabled = false
+	self.HistoryServer = "127.0.0.1:2013"
+	self.HistoryListen = "127.0.0.1:2013"
+	self.HistoryPath = "/var/log/cgrates/history"
 
 	return nil
 }
@@ -375,14 +379,20 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
 		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
 	}
-	if hasOpt = c.HasOption("history", "enabled"); hasOpt {
-		cfg.HistoryEnabled, _ = c.GetBool("history", "enabled")
+	if hasOpt = c.HasOption("history_agent", "enabled"); hasOpt {
+		cfg.HistoryAgentEnabled, _ = c.GetBool("history_agent", "enabled")
 	}
-	if hasOpt = c.HasOption("history", "master"); hasOpt {
-		cfg.HistoryMaster, _ = c.GetString("history", "master")
+	if hasOpt = c.HasOption("history_agent", "server"); hasOpt {
+		cfg.HistoryServer, _ = c.GetString("history_agent", "server")
 	}
-	if hasOpt = c.HasOption("history", "root"); hasOpt {
-		cfg.HistoryRoot, _ = c.GetString("history", "root")
+	if hasOpt = c.HasOption("history_server", "enabled"); hasOpt {
+		cfg.HistoryServerEnabled, _ = c.GetBool("history_server", "enabled")
+	}
+	if hasOpt = c.HasOption("history_server", "listen"); hasOpt {
+		cfg.HistoryListen, _ = c.GetString("history_server", "listen")
+	}
+	if hasOpt = c.HasOption("history_server", "path"); hasOpt {
+		cfg.HistoryPath, _ = c.GetString("history_server", "path")
 	}
 	return cfg, nil
 }

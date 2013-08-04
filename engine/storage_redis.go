@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"log"
 	"menteslibres.net/gosexy/redis"
 	"strconv"
 	"strings"
@@ -80,6 +81,9 @@ func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err err
 func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := rs.ms.Marshal(rp)
 	_, err = rs.db.Set(RATING_PROFILE_PREFIX+rp.Id, result)
+	if err != nil && historyScribe != nil {
+		go historyScribe.Record(RATING_PROFILE_PREFIX+rp.Id, rp)
+	}
 	return
 }
 
@@ -98,6 +102,11 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 		return
 	}
 	_, err = rs.db.Set(DESTINATION_PREFIX+dest.Id, result)
+	log.Print("before")
+	if err != nil && historyScribe != nil {
+		log.Print("scribe: ", historyScribe)
+		go historyScribe.Record(DESTINATION_PREFIX+dest.Id, dest)
+	}
 	return
 }
 

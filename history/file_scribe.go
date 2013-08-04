@@ -75,6 +75,11 @@ func (s *FileScribe) Record(key string, obj interface{}) error {
 }
 
 func (s *FileScribe) gitInit() error {
+	if _, err := os.Stat(s.fileRoot); os.IsNotExist(err) {
+		if err := os.MkdirAll(s.fileRoot, os.ModeDir|0755); err != nil {
+			return errors.New("<History> Error creating history folder: " + err.Error())
+		}
+	}
 	if _, err := os.Stat(filepath.Join(s.fileRoot, ".git")); os.IsNotExist(err) {
 		cmd := exec.Command(s.gitCommand, "init")
 		cmd.Dir = s.fileRoot
@@ -82,16 +87,16 @@ func (s *FileScribe) gitInit() error {
 			return errors.New(string(out) + " " + err.Error())
 		}
 		if f, err := os.Create(filepath.Join(s.fileRoot, DESTINATIONS_FILE)); err != nil {
-			return err
+			return errors.New("<History> Error writing destinations file: " + err.Error())
 		} else {
 			f.Close()
 		}
 		if f, err := os.Create(filepath.Join(s.fileRoot, RATING_PROFILES_FILE)); err != nil {
-			return err
+			return errors.New("<History> Error writing rating profiles file: " + err.Error())
 		} else {
 			f.Close()
 		}
-		cmd = exec.Command(s.gitCommand, "add")
+		cmd = exec.Command(s.gitCommand, "add", ".")
 		cmd.Dir = s.fileRoot
 		if out, err := cmd.Output(); err != nil {
 			return errors.New(string(out) + " " + err.Error())
@@ -119,13 +124,13 @@ func (s *FileScribe) load(filename string) error {
 
 	switch filename {
 	case DESTINATIONS_FILE:
-		if err := d.Decode(&s.destinations); err != nil {
-			return err
+		if err := d.Decode(&s.destinations); err != nil && err != io.EOF {
+			return errors.New("<History> Error loading destinations: " + err.Error())
 		}
 		s.destinations.Sort()
 	case RATING_PROFILES_FILE:
-		if err := d.Decode(&s.ratingProfiles); err != nil {
-			return err
+		if err := d.Decode(&s.ratingProfiles); err != nil && err != io.EOF {
+			return errors.New("<History> Error loading rating profiles: " + err.Error())
 		}
 		s.ratingProfiles.Sort()
 	}

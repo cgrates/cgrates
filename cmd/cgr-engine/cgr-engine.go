@@ -201,34 +201,73 @@ func startCDRS(responder *engine.Responder, loggerDb engine.DataStorage) {
 	exitChan <- true
 }
 
+func startHistoryScribe() {
+	var scribeServer history.Scribe
+	flag.Parse()
+
+	if cfg.HistoryServerEnabled {
+		if scribeServer, err = history.NewFileScribe(cfg.HistoryPath); err != nil {
+			engine.Logger.Crit(err.Error())
+			exitChan <- true
+			return
+		}
+		if cfg.HistoryListen != INTERNAL {
+			rpc.RegisterName("Scribe", scribeServer)
+			var serveFunc func(io.ReadWriteCloser)
+			if cfg.RPCEncoding == JSON {
+				serveFunc = jsonrpc.ServeConn
+			} else {
+				serveFunc = rpc.ServeConn
+			}
+			l, err := net.Listen("tcp", cfg.HistoryListen)
+			if err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<History> Could not listen to %v: %v", cfg.HistoryListen, err))
+				exitChan <- true
+				return
+			}
+			defer l.Close()
+			for {
+				conn, err := l.Accept()
+				if err != nil {
+					engine.Logger.Err(fmt.Sprintf("<History> Accept error: %v", conn))
+					continue
+				}
+
+				engine.Logger.Info(fmt.Sprintf("<History> New incoming connection: %v", conn.RemoteAddr()))
+				go serveFunc(conn)
+			}
+		}
+	}
+	var scribeAgent history.Scribe
+
+	if cfg.HistoryAgentEnabled {
+		if cfg.HistoryServer != INTERNAL {
+			if scribeAgent, err = history.NewProxyScribe(cfg.HistoryServer); err != nil {
+				engine.Logger.Crit(err.Error())
+				exitChan <- true
+				return
+			}
+		} else {
+			scribeAgent = scribeServer
+		}
+	}
+	engine.SetHistoryScribe(scribeAgent)
+	return
+}
+
 func checkConfigSanity() error {
 	if cfg.SMEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
 		engine.Logger.Crit("The session manager must not be enabled on a worker engine (change [engine]/balancer to disabled)!")
 		return errors.New("SessionManager on Worker")
 	}
 	if cfg.BalancerEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
-		engine.Logger.Crit("The balancer is enabled so it cannot connect to anatoher balancer (change [engine]/balancer to disabled)!")
+		engine.Logger.Crit("The balancer is enabled so it cannot connect to another balancer (change [engine]/balancer to disabled)!")
 		return errors.New("Improperly configured balancer")
 	}
-
-	return nil
-}
-
-func startHistoryScribe() (err error) {
-	var scribe history.Scribe
-	flag.Parse()
-	if cfg.HistoryMaster != "" {
-		scribe, err = history.NewProxyScribe(cfg.HistoryMaster)
-	} else {
-		scribe, err = history.NewFileScribe(cfg.HistoryRoot)
+	if cfg.HistoryServerEnabled && cfg.HistoryServer == INTERNAL && !cfg.HistoryServerEnabled {
+		engine.Logger.Crit("The history agent is enabled and internal and history server is disabled!")
+		return errors.New("Improperly configured history service")
 	}
-	rpc.RegisterName("Scribe", scribe)
-	rpc.HandleHTTP()
-	_, e := net.Listen("tcp", ":1234")
-	if e != nil {
-		return err
-	}
-	//http.Serve(l, nil)
 	return nil
 }
 
@@ -328,7 +367,7 @@ func main() {
 		engine.Logger.Info("Starting CGRateS CDR Server.")
 		go startCDRS(responder, loggerDb)
 	}
-	if cfg.HistoryEnabled {
+	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {
 		engine.Logger.Info("Starting History Service.")
 		go startHistoryScribe()
 	}
