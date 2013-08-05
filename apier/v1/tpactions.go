@@ -26,7 +26,7 @@ import (
 )
 
 // Creates a new Actions profile within a tariff plan
-func (self *Apier) SetTPActions(attrs utils.TPActions, reply *string) error {
+func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId", "Actions"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -72,7 +72,7 @@ type AttrGetTPActions struct {
 }
 
 // Queries specific Actions profile on tariff plan
-func (self *Apier) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions) error {
+func (self *ApierV1) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -91,7 +91,7 @@ type AttrGetTPActionIds struct {
 }
 
 // Queries Actions identities on specific tariff plan.
-func (self *Apier) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) error {
+func (self *ApierV1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}

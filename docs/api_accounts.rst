@@ -1,4 +1,4 @@
-Apier.SetAccountActions
+ApierV1.SetAccountActions
 +++++++++++++++++++++++
 
 
@@ -21,7 +21,7 @@ Process dependencies and load a specific AccountActions profile from storDb into
 
    {
     "id": 0, 
-    "method": "Apier.SetAccountActions", 
+    "method": "ApierV1.SetAccountActions", 
     "params": [
         {
             "AccountActionsId": "SAMPLE_AA_1", 

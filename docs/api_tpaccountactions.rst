@@ -1,4 +1,4 @@
-Apier.SetTPAccountActions
+ApierV1.SetTPAccountActions
 +++++++++++++++++++++++++
 
 Creates a new AccountActions profile within a tariff plan.
@@ -25,7 +25,7 @@ Creates a new AccountActions profile within a tariff plan.
 
    {
     "id": 2, 
-    "method": "Apier.SetTPAccountActions", 
+    "method": "ApierV1.SetTPAccountActions", 
     "params": [
         {
             "Account": "ACNT1", 
@@ -67,7 +67,7 @@ Creates a new AccountActions profile within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/AccountActionsId already present in StorDb.
 
 
-Apier.GetTPAccountActions
+ApierV1.GetTPAccountActions
 +++++++++++++++++++++++++
 
 Queries specific AccountActions profile on tariff plan.
@@ -89,7 +89,7 @@ Queries specific AccountActions profile on tariff plan.
 
    {
     "id": 3, 
-    "method": "Apier.GetTPAccountActions", 
+    "method": "ApierV1.GetTPAccountActions", 
     "params": [
         {
             "AccountActionsId": "AA_SAMPLE_2", 
@@ -139,7 +139,7 @@ Queries specific AccountActions profile on tariff plan.
  ``NOT_FOUND`` - Requested AccountActions profile not found.
 
 
-Apier.GetTPAccountActionIds
+ApierV1.GetTPAccountActionIds
 +++++++++++++++++++++++++++
 
 Queries AccountActions identities on specific tariff plan.
@@ -160,7 +160,7 @@ Queries AccountActions identities on specific tariff plan.
 
    {
     "id": 4, 
-    "method": "Apier.GetTPAccountActionIds", 
+    "method": "ApierV1.GetTPAccountActionIds", 
     "params": [
         {
             "TPid": "SAMPLE_TP_1"

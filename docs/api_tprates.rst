@@ -1,4 +1,4 @@
-Apier.SetTPRate
+ApierV1.SetTPRate
 +++++++++++++++
 
 Creates a new rate within a tariff plan.
@@ -32,7 +32,7 @@ Creates a new rate within a tariff plan.
 
    {
     "id": 1, 
-    "method": "Apier.SetTPRate", 
+    "method": "ApierV1.SetTPRate", 
     "params": [
         {
             "RateId": "SAMPLE_RATE_2", 
@@ -91,7 +91,7 @@ Creates a new rate within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/RateId already exists in StorDb.
 
 
-Apier.GetTPRate
+ApierV1.GetTPRate
 +++++++++++++++
 
 Queries specific rate on tariff plan.
@@ -113,7 +113,7 @@ Queries specific rate on tariff plan.
 
    {
     "id": 1, 
-    "method": "Apier.GetTPRate", 
+    "method": "ApierV1.GetTPRate", 
     "params": [
         {
             "RateId": "SAMPLE_RATE_4", 
@@ -187,7 +187,7 @@ Queries specific rate on tariff plan.
  ``NOT_FOUND`` - Requested rate id not found.
 
 
-Apier.GetTPRateIds
+ApierV1.GetTPRateIds
 ++++++++++++++++++
 
 Queries rate identities on tariff plan.
@@ -208,7 +208,7 @@ Queries rate identities on tariff plan.
 
    {
     "id": 1, 
-    "method": "Apier.GetTPRateIds", 
+    "method": "ApierV1.GetTPRateIds", 
     "params": [
         {
             "TPid": "SAMPLE_TP"

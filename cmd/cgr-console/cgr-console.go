@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/console"
@@ -32,7 +33,7 @@ import (
 var (
 	version      = flag.Bool("version", false, "Prints the application version.")
 	server       = flag.String("server", "127.0.0.1:2012", "server address host:port")
-	rpc_encoding = flag.String("rpc_encoding", "gob", "RPC encoding used <gob|json>")
+	rpc_encoding = flag.String("rpc_encoding", "json", "RPC encoding used <gob|json>")
 )
 
 func main() {
@@ -61,7 +62,9 @@ func main() {
 	}
 	res := cmd.RpcResult()
 	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), res); rpcErr != nil {
+		fmt.Println("Error executing command: " + rpcErr.Error())
 	}
-	fmt.Println("Result:", res)
+	result, _ := json.Marshal(res)
+	fmt.Println(string(result))
 
 }

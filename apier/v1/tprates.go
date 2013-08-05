@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package apier
 
+// This file deals with tp_rates management over APIs
+
 import (
 	"errors"
 	"fmt"
@@ -25,59 +27,58 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ApierTPDestination struct {
-	TPid          string   // Tariff plan id
-	DestinationId string   // Destination id
-	Prefixes      []string // Prefixes attached to this destination
-}
-
-// Creates a new destination within a tariff plan
-func (self *Apier) SetTPDestination(attrs ApierTPDestination, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
+// Creates a new rate within a tariff plan
+func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId", "RateSlots"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPDestination(attrs.TPid, attrs.DestinationId); err != nil {
-		return fmt.Errorf("%s:%v", utils.ERR_SERVER_ERROR, err.Error())
+	if exists, err := self.StorDb.ExistsTPRate(attrs.TPid, attrs.RateId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	if err := self.StorDb.SetTPDestination(attrs.TPid, &engine.Destination{attrs.DestinationId, attrs.Prefixes}); err != nil {
+	rts := make([]*engine.Rate, len(attrs.RateSlots))
+	for idx, rtSlot := range attrs.RateSlots {
+		rts[idx] = &engine.Rate{attrs.RateId, rtSlot.ConnectFee, rtSlot.Rate, float64(rtSlot.RatedUnits),
+			float64(rtSlot.RateIncrements), float64(rtSlot.GroupInterval), rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight}
+	}
+	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*engine.Rate{attrs.RateId: rts}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
 	return nil
 }
 
-type AttrGetTPDestination struct {
-	TPid          string // Tariff plan id
-	DestinationId string // Destination id
+type AttrGetTPRate struct {
+	TPid   string // Tariff plan id
+	RateId string // Rate id
 }
 
-// Queries a specific destination
-func (self *Apier) GetTPDestination(attrs AttrGetTPDestination, reply *ApierTPDestination) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
+// Queries specific Rate on tariff plan
+func (self *ApierV1) GetTPRate(attrs AttrGetTPRate, reply *utils.TPRate) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if dst, err := self.StorDb.GetTPDestination(attrs.TPid, attrs.DestinationId); err != nil {
+	if rt, err := self.StorDb.GetTPRate(attrs.TPid, attrs.RateId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if dst == nil {
+	} else if rt == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = ApierTPDestination{attrs.TPid, dst.Id, dst.Prefixes}
+		*reply = *rt
 	}
 	return nil
 }
 
-type AttrGetTPDestinationIds struct {
+type AttrGetTPRateIds struct {
 	TPid string // Tariff plan id
 }
 
-// Queries destination identities on specific tariff plan.
-func (self *Apier) GetTPDestinationIds(attrs AttrGetTPDestinationIds, reply *[]string) error {
+// Queries rate identities on specific tariff plan.
+func (self *ApierV1) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPDestinationIds(attrs.TPid); err != nil {
+	if ids, err := self.StorDb.GetTPRateIds(attrs.TPid); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)

@@ -1,4 +1,4 @@
-Apier.SetTPDestinationRate
+ApierV1.SetTPDestinationRate
 ++++++++++++++++++++++++++
 
 
@@ -27,7 +27,7 @@ Creates a new DestinationRate profile within a tariff plan.
 
    {
     "id": 2, 
-    "method": "Apier.SetTPDestinationRate", 
+    "method": "ApierV1.SetTPDestinationRate", 
     "params": [
         {
             "DestinationRateId": "DST_RATE_1", 
@@ -78,7 +78,7 @@ Creates a new DestinationRate profile within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/DestinationRateId already exists in StorDb.
 
 
-Apier.GetTPDestinationRate
+ApierV1.GetTPDestinationRate
 +++++++++++++++
 
 Queries specific DestinationRate profile on tariff plan.
@@ -100,7 +100,7 @@ Queries specific DestinationRate profile on tariff plan.
 
    {
     "id": 2, 
-    "method": "Apier.GetTPDestinationRate", 
+    "method": "ApierV1.GetTPDestinationRate", 
     "params": [
         {
             "DestinationRateId": "DST_RATE_1", 
@@ -161,7 +161,7 @@ Queries specific DestinationRate profile on tariff plan.
  ``NOT_FOUND`` - Requested DestinationRate id not found.
 
 
-Apier.GetTPDestinationRateIds
+ApierV1.GetTPDestinationRateIds
 +++++++++++++++++++++++++++++
 
 Queries DestinationRate identities on specific tariff plan.
@@ -182,7 +182,7 @@ Queries DestinationRate identities on specific tariff plan.
 
    {
     "id": 3, 
-    "method": "Apier.GetTPDestinationRateIds", 
+    "method": "ApierV1.GetTPDestinationRateIds", 
     "params": [
         {
             "TPid": "FIST_TP"

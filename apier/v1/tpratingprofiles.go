@@ -28,7 +28,7 @@ import (
 )
 
 // Creates a new RatingProfile within a tariff plan
-func (self *Apier) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
+func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId", "Tenant", "TOR", "Direction", "Subject", "RatingActivations"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -62,7 +62,7 @@ type AttrGetTPRatingProfile struct {
 }
 
 // Queries specific RatingProfile on tariff plan
-func (self *Apier) GetTPRatingProfile(attrs AttrGetTPRatingProfile, reply *utils.TPRatingProfile) error {
+func (self *ApierV1) GetTPRatingProfile(attrs AttrGetTPRatingProfile, reply *utils.TPRatingProfile) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -77,7 +77,7 @@ func (self *Apier) GetTPRatingProfile(attrs AttrGetTPRatingProfile, reply *utils
 }
 
 // Queries RatingProfile identities on specific tariff plan.
-func (self *Apier) GetTPRatingProfileIds(attrs utils.AttrTPRatingProfileIds, reply *[]string) error {
+func (self *ApierV1) GetTPRatingProfileIds(attrs utils.AttrTPRatingProfileIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
