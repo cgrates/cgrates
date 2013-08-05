@@ -26,6 +26,10 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+const (
+	OK = "OK"
+)
+
 type ApierV1 struct {
 	StorDb engine.DataStorage
 	DataDb engine.DataStorage
@@ -82,7 +86,7 @@ type AttrAddBalance struct {
 	Value     float64
 }
 
-func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *float64) error {
+func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	// what storage instance do we use?
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 
@@ -92,7 +96,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *float64) error {
 			Id: tag,
 		}
 		if err := self.DataDb.SetUserBalance(ub); err != nil {
-			*reply = -1
+			*reply = err.Error()
 			return err
 		}
 	}
@@ -108,10 +112,10 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *float64) error {
 	at.SetActions(engine.Actions{&engine.Action{ActionType: engine.TOPUP, BalanceId: attr.BalanceId, Direction: attr.Direction, Units: attr.Value}})
 
 	if err := at.Execute(); err != nil {
-		*reply = -1
+		*reply = err.Error()
 		return err
 	}
-	*reply = attr.Value
+	*reply = OK
 	return nil
 }
 
@@ -122,7 +126,7 @@ type AttrExecuteAction struct {
 	ActionsId string
 }
 
-func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *float64) error {
+func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	at := &engine.ActionTiming{
 		UserBalanceIds: []string{tag},
@@ -130,10 +134,10 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *float64) erro
 	}
 
 	if err := at.Execute(); err != nil {
-		*reply = -1
+		*reply = err.Error()
 		return err
 	}
-	*reply = 0
+	*reply = OK
 	return nil
 }
 
@@ -153,11 +157,11 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 
-	*reply = "OK"
+	*reply = OK
 	return nil
 }
 
-type AttrActionTrigger struct {
+type AttrAddActionTrigger struct {
 	Tenant         string
 	Account        string
 	Direction      string
@@ -168,7 +172,7 @@ type AttrActionTrigger struct {
 	ActionsId      string
 }
 
-func (self *ApierV1) AddTriggeredAction(attr AttrActionTrigger, reply *float64) error {
+func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
 	if attr.Direction == "" {
 		attr.Direction = engine.OUTBOUND
 	}
@@ -185,27 +189,28 @@ func (self *ApierV1) AddTriggeredAction(attr AttrActionTrigger, reply *float64) 
 	}
 
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	var dbErr error
-	engine.AccLock.Guard(tag, func() (float64, error) {
+	_, err := engine.AccLock.Guard(tag, func() (float64, error) {
 		userBalance, err := self.DataDb.GetUserBalance(tag)
 		if err != nil {
-			dbErr = err
 			return 0, err
 		}
 
 		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
 
 		if err = self.DataDb.SetUserBalance(userBalance); err != nil {
-			dbErr = err
 			return 0, err
 		}
 		return 0, nil
 	})
-
-	return dbErr
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
+	return nil
 }
 
-type AttrAccount struct {
+type AttrAddAccount struct {
 	Tenant          string
 	Direction       string
 	Account         string
@@ -214,8 +219,9 @@ type AttrAccount struct {
 }
 
 // Ads a new account into dataDb. If already defined, returns success.
-func (self *ApierV1) AddAccount(attr *AttrAccount, reply *float64) error {
+func (self *ApierV1) AddAccount(attr *AttrAddAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
+		*reply = fmt.Sprintf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
@@ -237,12 +243,15 @@ func (self *ApierV1) AddAccount(attr *AttrAccount, reply *float64) error {
 				}
 			}
 			if err := self.DataDb.SetUserBalance(ub); err != nil {
+				*reply = fmt.Sprintf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 			}
 		} else {
+			*reply = fmt.Sprintf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		}
 	}
+	*reply = OK
 	return nil
 }
 
@@ -270,6 +279,6 @@ func (self *ApierV1) SetAccountActions(attrs AttrSetAccountActions, reply *strin
 		self.Sched.LoadActionTimings(self.DataDb)
 		self.Sched.Restart()
 	}
-	*reply = "OK"
+	*reply = OK
 	return nil
 }

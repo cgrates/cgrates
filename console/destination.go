@@ -18,7 +18,7 @@ type CmdGetDestination struct {
 
 // name should be exec's name
 func (self *CmdGetDestination) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_balance <id>")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_destination <id>")
 }
 
 // set param defaults

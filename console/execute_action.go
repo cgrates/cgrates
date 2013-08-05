@@ -6,19 +6,19 @@ import (
 )
 
 func init() {
-	commands["add_balance"] = &CmdExecuteAction{}
+	commands["execute_action"] = &CmdExecuteAction{}
 }
 
 // Commander implementation
 type CmdExecuteAction struct {
 	rpcMethod string
 	rpcParams *apier.AttrExecuteAction
-	rpcResult float64
+	rpcResult string
 }
 
 // name should be exec's name
 func (self *CmdExecuteAction) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_balance <tenant> <account> <value> <actionsid> [<direction>]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] execute_action <tenant> <account> <actionsid> [<direction>]")
 }
 
 // set param defaults
