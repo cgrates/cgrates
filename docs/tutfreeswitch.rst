@@ -62,7 +62,7 @@ To get CGRateS installed and configured, we have executed the following commands
  wget http://apt.itsyscom.com/repos/apt/conf/cgrates.apt.list
  apt-get update
  apt-get install cgrates
- cd /usr/share/cgrates/data/rates/prepaid1centpsec/
+ cd /usr/share/cgrates/data/tariffplans/prepaid1centpsec/
  cgr-loader
  cd /etc/cgrates/
  cp /usr/share/cgrates/data/conf/cgr_fs_prep_csv.cfg cgrates.cfg
