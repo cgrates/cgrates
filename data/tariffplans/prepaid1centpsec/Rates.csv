@@ -1,0 +1,2 @@
+#Tag,ConnectFee,Rate,RatedUnits,RateIncrements,GroupInterval,RoundingMethod,RoundingDecimals,Weight
+1CENTPERSEC,0,0.01,1,1,0,*middle,4,10

@@ -1,0 +1,2 @@
+#ActionsTag,Action,BalanceType,Direction,Units,ExpirationDate,DestinationTag,RateType,RateValue,MinutesWeight,Weight
+TOPUP_10,*topup_reset,*monetary,*out,10,*unlimited,*any,,,,10
