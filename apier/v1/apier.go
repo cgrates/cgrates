@@ -130,9 +130,10 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *float64) erro
 	}
 
 	if err := at.Execute(); err != nil {
+		*reply = -1
 		return err
 	}
-	// what to put in replay
+	*reply = 0
 	return nil
 }
 
