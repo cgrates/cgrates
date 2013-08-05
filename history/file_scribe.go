@@ -37,7 +37,7 @@ const (
 )
 
 type FileScribe struct {
-	mu             sync.RWMutex
+	mu             sync.Mutex
 	fileRoot       string
 	gitCommand     string
 	destinations   records
@@ -65,8 +65,6 @@ func NewFileScribe(fileRoot string) (*FileScribe, error) {
 }
 
 func (s *FileScribe) Record(rec *Record, out *int) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	var fileToSave string
 	switch {
 	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
@@ -104,6 +102,8 @@ func (s *FileScribe) Record(rec *Record, out *int) error {
 }
 
 func (s *FileScribe) gitInit() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if _, err := os.Stat(s.fileRoot); os.IsNotExist(err) {
 		if err := os.MkdirAll(s.fileRoot, os.ModeDir|0755); err != nil {
 			return errors.New("<History> Error creating history folder: " + err.Error())
@@ -144,6 +144,8 @@ func (s *FileScribe) gitCommit() error {
 }
 
 func (s *FileScribe) load(filename string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	f, err := os.Open(filepath.Join(s.fileRoot, filename))
 	if err != nil {
 		return err
@@ -167,6 +169,8 @@ func (s *FileScribe) load(filename string) error {
 }
 
 func (s *FileScribe) save(filename string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	f, err := os.Create(filepath.Join(s.fileRoot, filename))
 	if err != nil {
 		return err

@@ -28,7 +28,7 @@ import (
 )
 
 type MockScribe struct {
-	sync.RWMutex
+	sync.Mutex
 	destinations   records
 	ratingProfiles records
 	DestBuf        bytes.Buffer
@@ -40,8 +40,6 @@ func NewMockScribe() (*MockScribe, error) {
 }
 
 func (s *MockScribe) Record(rec *Record, out *int) error {
-	s.Lock()
-	defer s.Unlock()
 	switch {
 	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
 		s.destinations = s.destinations.SetOrAdd(&Record{rec.Key[len(DESTINATION_PREFIX):], rec.Object})
@@ -55,6 +53,8 @@ func (s *MockScribe) Record(rec *Record, out *int) error {
 }
 
 func (s *MockScribe) save(filename string) error {
+	s.Lock()
+	defer s.Unlock()
 	switch filename {
 	case DESTINATIONS_FILE:
 		s.DestBuf.Reset()
