@@ -1,4 +1,4 @@
-Apier.SetTPDestRateTiming
+ApierV1.SetTPDestRateTiming
 +++++++++++++++++++++++++
 
 Creates a new DestinationRateTiming profile within a tariff plan.
@@ -27,7 +27,7 @@ Creates a new DestinationRateTiming profile within a tariff plan.
 
    {
     "id": 0, 
-    "method": "Apier.SetTPDestRateTiming", 
+    "method": "ApierV1.SetTPDestRateTiming", 
     "params": [
         {
             "DestRateTimingId": "SAMPLE_DRTIMING_1", 
@@ -71,7 +71,7 @@ Creates a new DestinationRateTiming profile within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/DestRateTimingId already exists in StorDb.
 
 
-Apier.GetTPDestRateTiming
+ApierV1.GetTPDestRateTiming
 +++++++++++++++++++++++++
 
 Queries specific DestRateTiming profile on tariff plan.
@@ -93,7 +93,7 @@ Queries specific DestRateTiming profile on tariff plan.
 
    {
     "id": 4, 
-    "method": "Apier.GetTPDestRateTiming", 
+    "method": "ApierV1.GetTPDestRateTiming", 
     "params": [
         {
             "DestRateTimingId": "SAMPLE_DRTIMING_1", 
@@ -147,7 +147,7 @@ Queries specific DestRateTiming profile on tariff plan.
  ``NOT_FOUND`` - Requested DestRateTiming profile not found.
 
 
-Apier.GetTPDestRateTimingIds
+ApierV1.GetTPDestRateTimingIds
 ++++++++++++++++++++++++++++
 
 Queries DestRateTiming identities on specific tariff plan.
@@ -168,7 +168,7 @@ Queries DestRateTiming identities on specific tariff plan.
 
    {
     "id": 5, 
-    "method": "Apier.GetTPDestRateTimingIds", 
+    "method": "ApierV1.GetTPDestRateTimingIds", 
     "params": [
         {
             "TPid": "SAMPLE_TP"

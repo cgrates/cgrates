@@ -312,7 +312,7 @@ AddTriggeredAction
 
 ::
 
-	type AttrActionTrigger struct {
+	type AttrAddActionTrigger struct {
 		Tenant         string
 		Account        string
 		Direction      string
@@ -324,14 +324,14 @@ AddTriggeredAction
 	}
 
 Example
-	AddTriggeredAction(attr \*AttrActionTrigger, reply \*float64)
+	AddTriggeredAction(attr \*AttrAddActionTrigger, reply \*float64)
 
 AddAcount
 +++++++++
 
 ::
 
-	type AttrAccount struct {
+	type AttrAddAccount struct {
 		Tenant          string
 		Direction       string
 		Account         string
@@ -340,7 +340,7 @@ AddAcount
 	}
 	
 Example
-	AddAccount(attr \*AttrAccount, reply \*float64)
+	AddAccount(attr \*AttrAddAccount, reply \*float64)
 
 
 

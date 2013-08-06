@@ -1,4 +1,4 @@
-Apier.SetTPActionTimings
+ApierV1.SetTPActionTimings
 ++++++++++++++++++++++++
 
 Creates a new ActionTimings profile within a tariff plan.
@@ -27,7 +27,7 @@ Creates a new ActionTimings profile within a tariff plan.
 
    {
     "id": 7, 
-    "method": "Apier.SetTPActionTimings", 
+    "method": "ApierV1.SetTPActionTimings", 
     "params": [
         {
             "ActionTimings": [
@@ -76,7 +76,7 @@ Creates a new ActionTimings profile within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/ActionTimingsId already present in StorDb.
 
 
-Apier.GetTPActionTimings
+ApierV1.GetTPActionTimings
 ++++++++++++++++++++++++
 
 Queries specific ActionTimings profile on tariff plan.
@@ -98,7 +98,7 @@ Queries specific ActionTimings profile on tariff plan.
 
    {
     "id": 8, 
-    "method": "Apier.GetTPActionTimings", 
+    "method": "ApierV1.GetTPActionTimings", 
     "params": [
         {
             "ActionTimingsId": "SAMPLE_AT3", 
@@ -157,7 +157,7 @@ Queries specific ActionTimings profile on tariff plan.
  ``NOT_FOUND`` - Requested ActionTimings profile not found.
 
 
-Apier.GetTPActionTimingIds
+ApierV1.GetTPActionTimingIds
 ++++++++++++++++++++++++++
 
 Queries ActionTimings identities on specific tariff plan.
@@ -178,7 +178,7 @@ Queries ActionTimings identities on specific tariff plan.
 
    {
     "id": 9, 
-    "method": "Apier.GetTPActionTimingIds", 
+    "method": "ApierV1.GetTPActionTimingIds", 
     "params": [
         {
             "TPid": "SAMPLE_TP_1"

@@ -26,7 +26,7 @@ import (
 )
 
 // Creates a new ActionTriggers profile within a tariff plan
-func (self *Apier) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *string) error {
+func (self *ApierV1) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs,
 		[]string{"TPid", "ActionTriggersId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
@@ -70,7 +70,7 @@ type AttrGetTPActionTriggers struct {
 }
 
 // Queries specific ActionTriggers profile on tariff plan
-func (self *Apier) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *utils.ApiTPActionTriggers) error {
+func (self *ApierV1) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *utils.ApiTPActionTriggers) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTriggersId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -103,7 +103,7 @@ type AttrGetTPActionTriggerIds struct {
 }
 
 // Queries ActionTriggers identities on specific tariff plan.
-func (self *Apier) GetTPActionTriggerIds(attrs AttrGetTPActionTriggerIds, reply *[]string) error {
+func (self *ApierV1) GetTPActionTriggerIds(attrs AttrGetTPActionTriggerIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}

@@ -22,7 +22,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/cgrates/cgrates/apier"
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
@@ -64,7 +64,7 @@ var (
 	err      error
 )
 
-func listenToRPCRequests(rpcResponder interface{}, apier *apier.Apier, rpcAddress string, rpc_encoding string, getter engine.DataStorage, loggerDb engine.DataStorage) {
+func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddress string, rpc_encoding string, getter engine.DataStorage, loggerDb engine.DataStorage) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
@@ -335,7 +335,7 @@ func main() {
 		go stopRaterSingnalHandler()
 	}
 	responder := &engine.Responder{ExitChan: exitChan}
-	apier := &apier.Apier{StorDb: loggerDb, DataDb: getter}
+	apier := &apier.ApierV1{StorDb: loggerDb, DataDb: getter}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
 		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
 		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding, getter, loggerDb)

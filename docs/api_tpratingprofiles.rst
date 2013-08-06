@@ -1,4 +1,4 @@
-Apier.SetTPRatingProfile
+ApierV1.SetTPRatingProfile
 ++++++++++++++++++++++++
 
 Creates a new RatingProfile within a tariff plan.
@@ -31,7 +31,7 @@ Creates a new RatingProfile within a tariff plan.
 
    {
     "id": 3, 
-    "method": "Apier.SetTPRatingProfile", 
+    "method": "ApierV1.SetTPRatingProfile", 
     "params": [
         {
             "Direction": "*out", 
@@ -82,7 +82,7 @@ Creates a new RatingProfile within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/RatingProfileId already exists in StorDb.
 
 
-Apier.GetTPRatingProfile
+ApierV1.GetTPRatingProfile
 ++++++++++++++++++++++++
 
 Queries specific RatingProfile on tariff plan.
@@ -104,7 +104,7 @@ Queries specific RatingProfile on tariff plan.
 
    {
     "id": 0, 
-    "method": "Apier.GetTPRatingProfile", 
+    "method": "ApierV1.GetTPRatingProfile", 
     "params": [
         {
             "RatingProfileId": "SAMPLE_RP_2", 
@@ -170,7 +170,7 @@ Queries specific RatingProfile on tariff plan.
  ``NOT_FOUND`` - Requested RatingProfile profile not found.
 
 
-Apier.GetTPRatingProfileIds
+ApierV1.GetTPRatingProfileIds
 +++++++++++++++++++++++++++
 
 Queries specific RatingProfile on tariff plan. Attribute parameters used as extra filters.
@@ -195,7 +195,7 @@ Queries specific RatingProfile on tariff plan. Attribute parameters used as extr
 
    {
     "id": 0, 
-    "method": "Apier.GetTPRatingProfileIds", 
+    "method": "ApierV1.GetTPRatingProfileIds", 
     "params": [
         {
             "Subject": "dan", 

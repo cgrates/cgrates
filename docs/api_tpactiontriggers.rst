@@ -1,4 +1,4 @@
-Apier.SetTPActionTriggers
+ApierV1.SetTPActionTriggers
 +++++++++++++++++++++++++
 
 Creates a new ActionTriggers profile within a tariff plan.
@@ -32,7 +32,7 @@ Creates a new ActionTriggers profile within a tariff plan.
 
    {
     "id": 2, 
-    "method": "Apier.SetTPActionTriggers", 
+    "method": "ApierV1.SetTPActionTriggers", 
     "params": [
         {
             "ActionTriggers": [
@@ -80,7 +80,7 @@ Creates a new ActionTriggers profile within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/ActionTriggersId already present in StorDb.
 
 
-Apier.GetTPActionTriggers
+ApierV1.GetTPActionTriggers
 +++++++++++++++++++++++++
 
 Queries specific ActionTriggers profile on tariff plan.
@@ -102,7 +102,7 @@ Queries specific ActionTriggers profile on tariff plan.
 
    {
     "id": 0, 
-    "method": "Apier.GetTPActionTriggers", 
+    "method": "ApierV1.GetTPActionTriggers", 
     "params": [
         {
             "ActionTriggersId": "SAMPLE_ATS_1", 
@@ -165,7 +165,7 @@ Queries specific ActionTriggers profile on tariff plan.
  ``NOT_FOUND`` - Requested ActionTriggersId profile not found.
 
 
-Apier.GetTPActionTriggerIds
+ApierV1.GetTPActionTriggerIds
 +++++++++++++++++++++++++++
 
 Queries ActionTriggers identities on specific tariff plan.
@@ -186,7 +186,7 @@ Queries ActionTriggers identities on specific tariff plan.
 
    {
     "id": 5, 
-    "method": "Apier.GetTPActionTriggerIds", 
+    "method": "ApierV1.GetTPActionTriggerIds", 
     "params": [
         {
             "TPid": "SAMPLE_TP_2"

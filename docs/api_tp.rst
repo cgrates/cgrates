@@ -1,4 +1,4 @@
-Apier.GetTPIds
+ApierV1.GetTPIds
 +++++++++++++++++++++++++
 
 // Queries tarrif plan identities gathered from all tables.
@@ -16,7 +16,7 @@ Apier.GetTPIds
 
    {
     "id": 9, 
-    "method": "Apier.GetTPIds", 
+    "method": "ApierV1.GetTPIds", 
     "params": []
    }
    

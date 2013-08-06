@@ -2,6 +2,8 @@ package console
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 )
 
 var (
@@ -25,7 +27,11 @@ func GetCommandValue(args []string) (Commander, error) {
 	}
 	cmdVal, exists := commands[args[1]]
 	if !exists {
-		return nil, errors.New("\n\tUsage: cgr-console [cfg_opts...{-h}] <status|get_balance>\n")
+		var keys []string
+		for key, _ := range commands {
+			keys = append(keys, key)
+		}
+		return nil, fmt.Errorf("\n\tUsage: cgr-console [cfg_opts...{-h}] <%s>\n", strings.Join(keys, "|"))
 	}
 	if err := cmdVal.FromArgs(args); err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-Apier.SetRatingProfile
+ApierV1.SetRatingProfile
 ++++++++++++++++++++++
 
 Process dependencies and load a specific rating profile from storDb into dataDb.
@@ -20,7 +20,7 @@ Process dependencies and load a specific rating profile from storDb into dataDb.
 
    {
     "id": 0, 
-    "method": "Apier.SetRatingProfile", 
+    "method": "ApierV1.SetRatingProfile", 
     "params": [
         {
             "RateProfileId": "RPF_SAMPLE_1", 

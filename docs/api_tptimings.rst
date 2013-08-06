@@ -1,4 +1,4 @@
-Apier.SetTPTiming
+ApierV1.SetTPTiming
 +++++++++++++++++
 
 Creates a new timing within a tariff plan.
@@ -25,7 +25,7 @@ Creates a new timing within a tariff plan.
 
    {
     "id": 3, 
-    "method": "Apier.SetTPTiming", 
+    "method": "ApierV1.SetTPTiming", 
     "params": [
         {
             "MonthDays": "1;2;3;31", 
@@ -67,7 +67,7 @@ Creates a new timing within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/TimingId already exists in StorDb.
 
 
-Apier.GetTPTiming
+ApierV1.GetTPTiming
 +++++++++++++++++
 
 Queries specific Timing on tariff plan.
@@ -89,7 +89,7 @@ Queries specific Timing on tariff plan.
 
    {
     "id": 4, 
-    "method": "Apier.GetTPTiming", 
+    "method": "ApierV1.GetTPTiming", 
     "params": [
         {
             "TPid": "SAMPLE_TP", 
@@ -139,7 +139,7 @@ Queries specific Timing on tariff plan.
  ``NOT_FOUND`` - Requested timing id not found.
 
 
-Apier.GetTPTimingIds
+ApierV1.GetTPTimingIds
 +++++++++++++++++++++++++
 
 Queries timing identities on tariff plan.
@@ -160,7 +160,7 @@ Queries timing identities on tariff plan.
 
    {
     "id": 5, 
-    "method": "Apier.GetTPTimingIds", 
+    "method": "ApierV1.GetTPTimingIds", 
     "params": [
         {
             "TPid": "SAMPLE_TP"

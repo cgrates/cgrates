@@ -36,7 +36,7 @@ type ApierTPTiming struct {
 }
 
 // Creates a new timing within a tariff plan
-func (self *Apier) SetTPTiming(attrs ApierTPTiming, reply *string) error {
+func (self *ApierV1) SetTPTiming(attrs ApierTPTiming, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId", "Years", "Months", "MonthDays", "WeekDays", "Time"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -59,7 +59,7 @@ type AttrGetTPTiming struct {
 }
 
 // Queries specific Timing on Tariff plan
-func (self *Apier) GetTPTiming(attrs AttrGetTPTiming, reply *ApierTPTiming) error {
+func (self *ApierV1) GetTPTiming(attrs AttrGetTPTiming, reply *ApierTPTiming) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -79,7 +79,7 @@ type AttrGetTPTimingIds struct {
 }
 
 // Queries timing identities on specific tariff plan.
-func (self *Apier) GetTPTimingIds(attrs AttrGetTPTimingIds, reply *[]string) error {
+func (self *ApierV1) GetTPTimingIds(attrs AttrGetTPTimingIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}

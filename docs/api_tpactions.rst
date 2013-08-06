@@ -1,4 +1,4 @@
-Apier.SetTPActions
+ApierV1.SetTPActions
 ++++++++++++++++++
 
 Creates a new Actions profile within a tariff plan.
@@ -34,7 +34,7 @@ Creates a new Actions profile within a tariff plan.
 
    {
     "id": 3, 
-    "method": "Apier.SetTPActions", 
+    "method": "ApierV1.SetTPActions", 
     "params": [
         {
             "Actions": [
@@ -85,7 +85,7 @@ Creates a new Actions profile within a tariff plan.
  ``DUPLICATE`` - The specified combination of TPid/ActionsId already present in StorDb.
 
 
-Apier.GetTPActions
+ApierV1.GetTPActions
 ++++++++++++++++++
 
 Queries specific Actions profile on tariff plan.
@@ -107,7 +107,7 @@ Queries specific Actions profile on tariff plan.
 
    {
     "id": 5, 
-    "method": "Apier.GetTPActions", 
+    "method": "ApierV1.GetTPActions", 
     "params": [
         {
             "ActionsId": "SAMPLE_ACTS_1", 
@@ -175,7 +175,7 @@ Queries specific Actions profile on tariff plan.
  ``NOT_FOUND`` - Requested Actions profile not found.
 
 
-Apier.GetTPActionIds
+ApierV1.GetTPActionIds
 ++++++++++++++++++++
 
 Queries Actions identities on specific tariff plan.
@@ -196,7 +196,7 @@ Queries Actions identities on specific tariff plan.
 
    {
     "id": 6, 
-    "method": "Apier.GetTPActionIds", 
+    "method": "ApierV1.GetTPActionIds", 
     "params": [
         {
             "TPid": "SAMPLE_TP_1"

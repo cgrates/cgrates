@@ -26,7 +26,7 @@ import (
 )
 
 // Creates a new ActionTimings profile within a tariff plan
-func (self *Apier) SetTPActionTimings(attrs utils.ApiTPActionTimings, reply *string) error {
+func (self *ApierV1) SetTPActionTimings(attrs utils.ApiTPActionTimings, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTimingsId", "ActionTimings"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -63,7 +63,7 @@ type AttrGetTPActionTimings struct {
 }
 
 // Queries specific ActionTimings profile on tariff plan
-func (self *Apier) GetTPActionTimings(attrs AttrGetTPActionTimings, reply *utils.ApiTPActionTimings) error {
+func (self *ApierV1) GetTPActionTimings(attrs AttrGetTPActionTimings, reply *utils.ApiTPActionTimings) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTimingsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -86,7 +86,7 @@ type AttrGetTPActionTimingIds struct {
 }
 
 // Queries ActionTimings identities on specific tariff plan.
-func (self *Apier) GetTPActionTimingIds(attrs AttrGetTPActionTimingIds, reply *[]string) error {
+func (self *ApierV1) GetTPActionTimingIds(attrs AttrGetTPActionTimingIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}

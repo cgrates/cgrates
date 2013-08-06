@@ -1,4 +1,4 @@
-Apier.SetTPDestination
+ApierV1.SetTPDestination
 ++++++++++++++++++++++
 
 Creates a new destination within a tariff plan id.
@@ -21,7 +21,7 @@ Creates a new destination within a tariff plan id.
 
    {
      "id": 2, 
-     "method": "Apier.SetTPDestination", 
+     "method": "ApierV1.SetTPDestination", 
      "params": [
         {
             "DestinationId": "FIST_DST2", 
@@ -62,7 +62,7 @@ Creates a new destination within a tariff plan id.
  ``DUPLICATE`` - The specified combination of TPid/DestinationId already exists in StorDb.
 
 
-Apier.GetTPDestination
+ApierV1.GetTPDestination
 ++++++++++++++++++++++
 
 Queries a specific destination.
@@ -84,7 +84,7 @@ Queries a specific destination.
 
    {
     "id": 0, 
-    "method": "Apier.GetTPDestination", 
+    "method": "ApierV1.GetTPDestination", 
     "params": [
         {
             "DestinationId": "FIRST_DST2", 
@@ -130,7 +130,7 @@ Queries a specific destination.
  ``NOT_FOUND`` - Requested destination id not found.
 
 
-Apier.GetTPDestinationIds
+ApierV1.GetTPDestinationIds
 +++++++++++++++++++++++++
 
 Queries destination identities on specific tariff plan.
@@ -151,7 +151,7 @@ Queries destination identities on specific tariff plan.
 
    {
     "id": 1, 
-    "method": "Apier.GetTPDestinationIds", 
+    "method": "ApierV1.GetTPDestinationIds", 
     "params": [
         {
             "TPid": "FIST_TP"

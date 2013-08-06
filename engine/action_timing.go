@@ -221,6 +221,7 @@ func (at *ActionTiming) Execute() (err error) {
 				ub, err := storageGetter.GetUserBalance(ubId)
 				if err != nil {
 					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
+					return 0, err
 				}
 
 				Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
