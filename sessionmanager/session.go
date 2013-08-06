@@ -81,18 +81,18 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 func (s *Session) startDebitLoop() {
 	nextCd := *s.callDescriptor
 	index := 0.0
+	ticker := time.NewTicker(s.sessionManager.GetDebitPeriod())
 	for {
 		select {
 		case <-s.stopDebit:
 			return
-		default:
+		case <-ticker.C:
 		}
-		if nextCd.TimeEnd != s.callDescriptor.TimeEnd { // first time use the session start time
-			nextCd.TimeStart = time.Now()
+		if index > 0 { // first time use the session start time
+			nextCd.TimeStart = nextCd.TimeEnd
 		}
-		nextCd.TimeEnd = time.Now().Add(s.sessionManager.GetDebitPeriod())
+		nextCd.TimeEnd = nextCd.TimeStart.Add(s.sessionManager.GetDebitPeriod())
 		s.sessionManager.LoopAction(s, &nextCd, index)
-		time.Sleep(s.sessionManager.GetDebitPeriod())
 		index++
 	}
 }
@@ -107,19 +107,20 @@ func (s *Session) getSessionDurationFrom(now time.Time) (d time.Duration) {
 	return
 }
 
-// Returns the session duration till now
-func (s *Session) GetSessionDuration() time.Duration {
-	return s.getSessionDurationFrom(time.Now())
-}
-
 // Stops the debit loop
-func (s *Session) Close() {
+func (s *Session) Close(ev Event) {
 	engine.Logger.Debug(fmt.Sprintf("Stopping debit for %s", s.uuid))
 	if s == nil {
 		return
 	}
 	s.stopDebit <- true
-	s.callDescriptor.TimeEnd = time.Now()
+	//s.callDescriptor.TimeEnd = time.Now()
+	endTime, err := ev.GetEndTime()
+	if err != nil {
+		engine.Logger.Err("Error parsing answer event stop time.")
+		endTime = s.callDescriptor.TimeStart.Add(s.callDescriptor.CallDuration)
+	}
+	s.callDescriptor.TimeEnd = endTime
 	s.SaveOperations()
 	s.sessionManager.RemoveSession(s)
 }

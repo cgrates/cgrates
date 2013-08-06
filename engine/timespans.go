@@ -118,7 +118,7 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 			ts.TimeEnd = splitTime
 			nts.SetInterval(i)
 			nts.CallDuration = ts.CallDuration
-			ts.CallDuration = math.Max(0, ts.CallDuration-nts.GetDuration().Seconds())
+			ts.SetNewCallDuration(nts)
 
 			return
 		}
@@ -141,7 +141,7 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 		ts.TimeEnd = splitTime
 		nts.CallDuration = ts.CallDuration
-		ts.CallDuration = math.Max(0, ts.CallDuration-nts.GetDuration().Seconds())
+		ts.SetNewCallDuration(nts)
 
 		return
 	}
@@ -157,7 +157,7 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 
 		nts.SetInterval(i)
 		nts.CallDuration = ts.CallDuration
-		ts.CallDuration = math.Max(0, ts.CallDuration-nts.GetDuration().Seconds())
+		ts.SetNewCallDuration(nts)
 
 		return
 	}
@@ -172,7 +172,9 @@ func (ts *TimeSpan) SplitByActivationPeriod(ap *ActivationPeriod) (newTs *TimeSp
 		return nil
 	}
 	newTs = &TimeSpan{TimeStart: ap.ActivationTime, TimeEnd: ts.TimeEnd, ActivationPeriod: ap}
+	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = ap.ActivationTime
+	ts.SetNewCallDuration(newTs)
 	return
 }
 
@@ -189,7 +191,9 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 
 	if !mb.ExpirationDate.IsZero() && ts.TimeEnd.After(mb.ExpirationDate) {
 		newTs = &TimeSpan{TimeStart: mb.ExpirationDate, TimeEnd: ts.TimeEnd}
+		newTs.CallDuration = ts.CallDuration
 		ts.TimeEnd = mb.ExpirationDate
+		ts.SetNewCallDuration(newTs)
 	}
 
 	s := ts.GetDuration().Seconds()
@@ -203,7 +207,9 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 	newTimeEnd := ts.TimeStart.Add(secDuration)
 	newTs = &TimeSpan{TimeStart: newTimeEnd, TimeEnd: ts.TimeEnd}
 	ts.TimeEnd = newTimeEnd
+	newTs.CallDuration = ts.CallDuration
 	ts.MinuteInfo.Quantity = mb.Seconds
+	ts.SetNewCallDuration(newTs)
 	mb.Seconds = 0
 
 	return
@@ -215,4 +221,8 @@ func (ts *TimeSpan) GetGroupStart() float64 {
 
 func (ts *TimeSpan) GetGroupEnd() float64 {
 	return ts.CallDuration
+}
+
+func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
+	ts.CallDuration = math.Max(0, ts.CallDuration-nts.GetDuration().Seconds())
 }

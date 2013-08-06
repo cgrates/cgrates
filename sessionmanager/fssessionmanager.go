@@ -194,7 +194,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	if s == nil { // Not handled by us
 		return
 	}
-	defer s.Close() // Stop loop and save the costs deducted so far to database
+	defer s.Close(ev) // Stop loop and save the costs deducted so far to database
 	if ev.GetReqType() == utils.POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
@@ -213,7 +213,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Subject:         ev.GetSubject(),
 			Account:         ev.GetAccount(),
 			LoopIndex:       0,
-			CallDuration:    endTime.Sub(startTime).Seconds(),
+			CallDuration:    endTime.Sub(startTime),
 			Destination:     ev.GetDestination(),
 			TimeStart:       startTime,
 			TimeEnd:         endTime,
@@ -310,7 +310,7 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, in
 	cc := &engine.CallCost{}
 	cd.LoopIndex = index
 	cd.Amount = sm.debitPeriod.Seconds()
-	cd.CallDuration += cd.Amount
+	cd.CallDuration += time.Duration(cd.Amount) * time.Second
 	err := sm.connector.MaxDebit(*cd, cc)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
@@ -330,9 +330,11 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, in
 	}
 	s.CallCosts = append(s.CallCosts, cc)
 }
+
 func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
 	return sm.debitPeriod
 }
+
 func (sm *FSSessionManager) GetDbLogger() engine.DataStorage {
 	return sm.loggerDB
 }

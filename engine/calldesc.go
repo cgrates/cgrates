@@ -97,8 +97,8 @@ type CallDescriptor struct {
 	TOR                                   string
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
-	LoopIndex                             float64 // indicates the postion of this segment in a cost request loop
-	CallDuration                          float64 // the call duration so far (partial or final)
+	LoopIndex                             float64       // indicates the postion of this segment in a cost request loop
+	CallDuration                          time.Duration // the call duration so far (partial or final)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	ActivationPeriods                     []*ActivationPeriod
@@ -188,7 +188,7 @@ Splits the received timespan into sub time spans according to the activation per
 */
 func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*TimeSpan) {
 	if firstSpan == nil {
-		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd}
+		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration.Seconds()}
 	}
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets
@@ -317,7 +317,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 			Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 		}
 	} else {
-		Logger.Err(fmt.Sprintf("Could not get user balance for %s.", cd.GetUserBalanceKey()))
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetUserBalanceKey(), err.Error()))
 		return cd.Amount, err
 	}
 	// check for zero balance
