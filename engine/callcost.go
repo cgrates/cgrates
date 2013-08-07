@@ -20,6 +20,7 @@ package engine
 import (
 	"fmt"
 	"reflect"
+	"time"
 )
 
 /*
@@ -59,4 +60,11 @@ func (cc *CallCost) Merge(other *CallCost) {
 		cc.Timespans = append(cc.Timespans, other.Timespans...)
 	}
 	cc.Cost += other.Cost
+}
+
+func (cc *CallCost) GetStartTime() time.Time {
+	if len(cc.Timespans) == 0 {
+		return time.Now()
+	}
+	return cc.Timespans[0].TimeStart
 }

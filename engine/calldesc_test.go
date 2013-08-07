@@ -185,7 +185,7 @@ func TestMinutesCost(t *testing.T) {
 
 func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723", Amount: 1000}
-	result, err := cd.GetMaxSessionTime()
+	result, err := cd.GetMaxSessionTime(time.Now())
 	if result != 1000 || err == nil {
 		t.Errorf("Expected %v was %v (%v)", 1000, result, err)
 	}
@@ -193,7 +193,7 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 
 func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minu", Destination: "0723", Amount: 1000}
-	result, err := cd.GetMaxSessionTime()
+	result, err := cd.GetMaxSessionTime(time.Now())
 	expected := 300.0
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -202,7 +202,7 @@ func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 
 func TestMaxSessionTimeWithUserBalanceAccount(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minu_from_tm", Account: "minu", Destination: "0723", Amount: 1000}
-	result, err := cd.GetMaxSessionTime()
+	result, err := cd.GetMaxSessionTime(time.Now())
 	expected := 300.0
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
@@ -211,7 +211,7 @@ func TestMaxSessionTimeWithUserBalanceAccount(t *testing.T) {
 
 func TestMaxSessionTimeNoCredit(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "broker", Destination: "0723", Amount: 5400}
-	result, err := cd.GetMaxSessionTime()
+	result, err := cd.GetMaxSessionTime(time.Now())
 	if result != 100 || err != nil {
 		t.Errorf("Expected %v was %v", 100, result)
 	}
@@ -268,7 +268,7 @@ func BenchmarkStorageSingleGetSessionTime(b *testing.B) {
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 100}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime()
+		cd.GetMaxSessionTime(time.Now())
 	}
 }
 
@@ -277,6 +277,6 @@ func BenchmarkStorageMultipleGetSessionTime(b *testing.B) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime()
+		cd.GetMaxSessionTime(time.Now())
 	}
 }

@@ -69,7 +69,7 @@ func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
 		*reply, err = *r, e
 	} else {
 		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
-			return arg.MaxDebit()
+			return arg.MaxDebit(arg.TimeStart)
 		})
 		*reply, err = *r, e
 	}
@@ -117,7 +117,7 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 		*reply, err = rs.callMethod(&arg, "Responder.GetMaxSessionTime")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
-			return arg.GetMaxSessionTime()
+			return arg.GetMaxSessionTime(arg.TimeStart)
 		})
 		*reply, err = r, e
 	}

@@ -234,9 +234,14 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	}
 	lastCC := s.CallCosts[len(s.CallCosts)-1]
 	// put credit back
-	start := time.Now()
+	var hangupTime time.Time
+	var err error
+	if hangupTime, err = ev.GetEndTime(); err != nil {
+		engine.Logger.Err("Error parsing answer event hangup time, using time.Now!")
+		hangupTime = time.Now()
+	}
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
-	refoundDuration := end.Sub(start).Seconds()
+	refoundDuration := end.Sub(hangupTime).Seconds()
 	cost := 0.0
 	seconds := 0.0
 	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
@@ -254,7 +259,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				seconds += (procentage * ts.MinuteInfo.Quantity) / 100
 			}
 			// set the end time to now
-			ts.TimeEnd = start
+			ts.TimeEnd = hangupTime
 			break // do not go to other timespans
 		} else {
 			cost += ts.Cost

@@ -300,13 +300,12 @@ and will decrease it by 10% for nine times. So if the user has little credit it 
 If the user has no credit then it will return 0.
 If the user has postpayied plan it returns -1.
 */
-func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
+func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float64, err error) {
 	_, err = cd.LoadActivationPeriods()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return 0, err
 	}
-	now := time.Now()
 	availableCredit, availableSeconds := 0.0, 0.0
 	Logger.Debug(fmt.Sprintf("cd: %+v", cd))
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
@@ -329,7 +328,7 @@ func (cd *CallDescriptor) GetMaxSessionTime() (seconds float64, err error) {
 	maxSessionSeconds := cd.Amount
 	for i := 0; i < 10; i++ {
 		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds-availableSeconds))
-		ts := &TimeSpan{TimeStart: now, TimeEnd: now.Add(maxDuration)}
+		ts := &TimeSpan{TimeStart: startTime, TimeEnd: startTime.Add(maxDuration)}
 		timespans := cd.splitInTimeSpans(ts)
 
 		cost := 0.0
@@ -381,8 +380,8 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // from user's money balance.
 // This methods combines the Debit and GetMaxSessionTime and will debit the max available time as returned
 // by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
-func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
-	remainingSeconds, err := cd.GetMaxSessionTime()
+func (cd *CallDescriptor) MaxDebit(startTime time.Time) (cc *CallCost, err error) {
+	remainingSeconds, err := cd.GetMaxSessionTime(startTime)
 	Logger.Debug(fmt.Sprintf("In MaxDebitd remaining seconds: %v", remainingSeconds))
 	if err != nil || remainingSeconds == 0 {
 		return new(CallCost), errors.New("no more credit")
