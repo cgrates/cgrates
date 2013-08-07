@@ -40,7 +40,7 @@ func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
 	rts := make([]*engine.Rate, len(attrs.RateSlots))
 	for idx, rtSlot := range attrs.RateSlots {
 		rts[idx] = &engine.Rate{attrs.RateId, rtSlot.ConnectFee, rtSlot.Rate, float64(rtSlot.RatedUnits),
-			float64(rtSlot.RateIncrements), float64(rtSlot.GroupInterval), rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight}
+			rtSlot.RateIncrements, rtSlot.GroupInterval, rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight}
 	}
 	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*engine.Rate{attrs.RateId: rts}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())

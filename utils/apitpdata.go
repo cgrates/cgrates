@@ -18,6 +18,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import (
+	"time"
+)
+
 // This file deals with tp_* data definition
 
 type TPRate struct {
@@ -27,14 +31,14 @@ type TPRate struct {
 }
 
 type RateSlot struct {
-	ConnectFee       float64 // ConnectFee applied once the call is answered
-	Rate             float64 // Rate applied
-	RatedUnits       int     //  Number of billing units this rate applies to
-	RateIncrements   int     // This rate will apply in increments of duration
-	GroupInterval    int     // Group position
-	RoundingMethod   string  // Use this method to round the cost
-	RoundingDecimals int     // Round the cost number of decimals
-	Weight           float64 // Rate's priority when dealing with grouped rates
+	ConnectFee       float64       // ConnectFee applied once the call is answered
+	Rate             float64       // Rate applied
+	RatedUnits       int           //  Number of billing units this rate applies to
+	RateIncrements   time.Duration // This rate will apply in increments of duration
+	GroupInterval    time.Duration // Group position
+	RoundingMethod   string        // Use this method to round the cost
+	RoundingDecimals int           // Round the cost number of decimals
+	Weight           float64       // Rate's priority when dealing with grouped rates
 }
 
 type TPDestinationRate struct {

@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 type SQLStorage struct {
@@ -242,13 +243,14 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix
 		var connectFee, rate, weight float64
-		var ratedUnits, rateIncrements, roundingDecimals, groupInterval int
+		var ratedUnits, roundingDecimals int
+		var rateIncrements, groupInterval time.Duration
 		var roundingMethod string
 		err = rows.Scan(&connectFee, &rate, &ratedUnits, &rateIncrements, &groupInterval, &roundingMethod, &roundingDecimals, &weight)
 		if err != nil {
 			return nil, err
 		}
-		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, ratedUnits, rateIncrements, groupInterval,
+		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, ratedUnits, rateIncrements * time.Second, groupInterval * time.Second,
 			roundingMethod, roundingDecimals, weight})
 	}
 	if i == 0 {
@@ -974,7 +976,8 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var tag, roundingMethod string
-		var connect_fee, rate, priced_units, rate_increments, group_interval, weight float64
+		var connect_fee, rate, priced_units, weight float64
+		var rate_increments, group_interval time.Duration
 		var roundingDecimals int
 		if err := rows.Scan(&tag, &connect_fee, &rate, &priced_units, &rate_increments, &group_interval, &roundingMethod, &roundingDecimals, &weight); err != nil {
 			return nil, err

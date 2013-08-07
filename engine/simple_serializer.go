@@ -462,9 +462,9 @@ func (d *Destination) Restore(input string) error {
 
 func (pg PriceGroups) Store() (result string, err error) {
 	for _, p := range pg {
-		result += strconv.FormatFloat(p.StartSecond, 'f', -1, 64) +
+		result += p.StartSecond.String() +
 			":" + strconv.FormatFloat(p.Value, 'f', -1, 64) +
-			":" + strconv.FormatFloat(p.RateIncrements, 'f', -1, 64) +
+			":" + p.RateIncrements.String() +
 			","
 	}
 	result = strings.TrimRight(result, ",")
@@ -478,7 +478,7 @@ func (pg *PriceGroups) Restore(input string) error {
 		if len(priceElements) != 3 {
 			continue
 		}
-		ss, err := strconv.ParseFloat(priceElements[0], 64)
+		ss, err := time.ParseDuration(priceElements[0])
 		if err != nil {
 			return err
 		}
@@ -486,7 +486,7 @@ func (pg *PriceGroups) Restore(input string) error {
 		if err != nil {
 			return err
 		}
-		ri, err := strconv.ParseFloat(priceElements[2], 64)
+		ri, err := time.ParseDuration(priceElements[2])
 		if err != nil {
 			return err
 		}

@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"math"
 	"time"
 )
 
@@ -33,7 +32,7 @@ type TimeSpan struct {
 	ActivationPeriod   *ActivationPeriod
 	Interval           *Interval
 	MinuteInfo         *MinuteInfo
-	CallDuration       float64 // the call duration so far till TimeEnd
+	CallDuration       time.Duration // the call duration so far till TimeEnd
 }
 
 // Holds the bonus minute information related to a specified timespan
@@ -60,9 +59,8 @@ func (ts *TimeSpan) getCost(cd *CallDescriptor) (cost float64) {
 	if ts.Interval == nil {
 		return 0
 	}
-	duration := ts.GetDuration().Seconds()
 	i := ts.Interval
-	cost = i.GetCost(duration, ts.GetGroupStart())
+	cost = i.GetCost(ts.GetDuration(), ts.GetGroupStart())
 	// if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 	// 	userBalance.mux.RLock()
 	// 	if percentageDiscount, err := userBalance.getVolumeDiscount(cd.Destination, INBOUND); err == nil && percentageDiscount > 0 {
@@ -113,7 +111,7 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 	for _, price := range i.Prices {
 		if ts.GetGroupStart() < price.StartSecond && ts.GetGroupEnd() >= price.StartSecond {
 			ts.SetInterval(i)
-			splitTime := ts.TimeStart.Add(time.Duration(price.StartSecond-ts.GetGroupStart()) * time.Second)
+			splitTime := ts.TimeStart.Add(price.StartSecond - ts.GetGroupStart())
 			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 			ts.TimeEnd = splitTime
 			nts.SetInterval(i)
@@ -215,14 +213,22 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 	return
 }
 
-func (ts *TimeSpan) GetGroupStart() float64 {
-	return math.Max(0, ts.CallDuration-ts.GetDuration().Seconds())
+func (ts *TimeSpan) GetGroupStart() time.Duration {
+	s := ts.CallDuration - ts.GetDuration()
+	if s < 0 {
+		s = 0
+	}
+	return s
 }
 
-func (ts *TimeSpan) GetGroupEnd() float64 {
+func (ts *TimeSpan) GetGroupEnd() time.Duration {
 	return ts.CallDuration
 }
 
 func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
-	ts.CallDuration = math.Max(0, ts.CallDuration-nts.GetDuration().Seconds())
+	d := ts.CallDuration - nts.GetDuration()
+	if d < 0 {
+		d = 0
+	}
+	ts.CallDuration = d
 }

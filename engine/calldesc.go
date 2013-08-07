@@ -188,7 +188,7 @@ Splits the received timespan into sub time spans according to the activation per
 */
 func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*TimeSpan) {
 	if firstSpan == nil {
-		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration.Seconds()}
+		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration}
 	}
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets

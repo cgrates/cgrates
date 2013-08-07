@@ -29,6 +29,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type TPLoader interface {
@@ -46,11 +47,12 @@ type TPLoader interface {
 }
 
 type Rate struct {
-	Tag                                                           string
-	ConnectFee, Price, PricedUnits, RateIncrements, GroupInterval float64
-	RoundingMethod                                                string
-	RoundingDecimals                                              int
-	Weight                                                        float64
+	Tag                            string
+	ConnectFee, Price, PricedUnits float64
+	RateIncrements, GroupInterval  time.Duration
+	RoundingMethod                 string
+	RoundingDecimals               int
+	Weight                         float64
 }
 
 func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *Rate, err error) {
@@ -64,7 +66,7 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, groupInterval,
 		log.Printf("Error parsing price from: %v", price)
 		return
 	}
-	gi, err := strconv.ParseFloat(groupInterval, 64)
+	gi, err := time.ParseDuration(groupInterval)
 	if err != nil {
 		log.Printf("Error parsing group interval from: %v", price)
 		return
@@ -74,7 +76,7 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, groupInterval,
 		log.Printf("Error parsing priced units from: %v", pricedUnits)
 		return
 	}
-	ri, err := strconv.ParseFloat(rateIncrements, 64)
+	ri, err := time.ParseDuration(rateIncrements)
 	if err != nil {
 		log.Printf("Error parsing rates increments from: %v", rateIncrements)
 		return

@@ -45,9 +45,9 @@ type Interval struct {
 }
 
 type Price struct {
-	StartSecond    float64
+	StartSecond    time.Duration
 	Value          float64
-	RateIncrements float64
+	RateIncrements time.Duration
 }
 
 func (p *Price) Equal(o *Price) bool {
@@ -193,19 +193,20 @@ func (i *Interval) Equal(o *Interval) bool {
 		i.EndTime == o.EndTime
 }
 
-func (i *Interval) GetCost(duration, startSecond float64) (cost float64) {
+func (i *Interval) GetCost(duration, startSecond time.Duration) (cost float64) {
 	price := i.GetPrice(startSecond)
-	rateIncrements := i.GetRateIncrements(startSecond)
+	rateIncrements := i.GetRateIncrements(startSecond).Seconds()
+	d := float64(duration.Seconds())
 	if i.PricedUnits != 0 {
-		cost = math.Ceil(duration/rateIncrements) * rateIncrements * (price / i.PricedUnits)
+		cost = math.Ceil(d/rateIncrements) * rateIncrements * (price / i.PricedUnits)
 	} else {
-		cost = math.Ceil(duration/rateIncrements) * rateIncrements * price
+		cost = math.Ceil(d/rateIncrements) * rateIncrements * price
 	}
 	return utils.Round(cost, i.RoundingDecimals, i.RoundingMethod)
 }
 
 // Gets the price for a the provided start second
-func (i *Interval) GetPrice(startSecond float64) float64 {
+func (i *Interval) GetPrice(startSecond time.Duration) float64 {
 	i.Prices.Sort()
 	for index, price := range i.Prices {
 		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||
@@ -216,7 +217,7 @@ func (i *Interval) GetPrice(startSecond float64) float64 {
 	return -1
 }
 
-func (i *Interval) GetRateIncrements(startSecond float64) float64 {
+func (i *Interval) GetRateIncrements(startSecond time.Duration) time.Duration {
 	i.Prices.Sort()
 	for index, price := range i.Prices {
 		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||

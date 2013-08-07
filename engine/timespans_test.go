@@ -192,7 +192,7 @@ func TestTimespanGetCost(t *testing.T) {
 	if ts1.getCost(cd) != 0 {
 		t.Error("No interval and still kicking")
 	}
-	ts1.Interval = &Interval{Prices: PriceGroups{&Price{0, 1.0, 1}}}
+	ts1.Interval = &Interval{Prices: PriceGroups{&Price{0, 1.0, 1 * time.Second}}}
 	if ts1.getCost(cd) != 600 {
 		t.Error("Expected 10 got ", ts1.getCost(cd))
 	}
@@ -203,9 +203,9 @@ func TestTimespanGetCost(t *testing.T) {
 }
 
 func TestSetInterval(t *testing.T) {
-	i1 := &Interval{Prices: PriceGroups{&Price{0, 1.0, 1}}}
+	i1 := &Interval{Prices: PriceGroups{&Price{0, 1.0, 1 * time.Second}}}
 	ts1 := TimeSpan{Interval: i1}
-	i2 := &Interval{Prices: PriceGroups{&Price{0, 2.0, 1}}}
+	i2 := &Interval{Prices: PriceGroups{&Price{0, 2.0, 1 * time.Second}}}
 	ts1.SetInterval(i2)
 	if ts1.Interval != i1 {
 		t.Error("Smaller price interval should win")
@@ -332,16 +332,16 @@ func TestTimespanSplitByMinuteBucketScarceExpiringDifferentScarceFirst(t *testin
 func TestTimespanSplitGroupedRates(t *testing.T) {
 	i := &Interval{
 		EndTime: "17:59:00",
-		Prices:  PriceGroups{&Price{0, 2, 1}, &Price{900, 1, 1}},
+		Prices:  PriceGroups{&Price{0, 2, 1 * time.Second}, &Price{900 * time.Second, 1, 1 * time.Second}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 1800}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 1800 * time.Second}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 45, 00, 0, time.UTC)
 	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
-		t.Error("Incorrect first half", ts)
+		t.Error("Incorrect first half", ts.TimeStart, ts.TimeEnd)
 	}
 	if nts.TimeStart != splitTime || nts.TimeEnd != t2 {
 		t.Error("Incorrect second half", nts)
@@ -349,8 +349,8 @@ func TestTimespanSplitGroupedRates(t *testing.T) {
 	if ts.Interval != i {
 		t.Error("Interval not attached correctly")
 	}
-	c1 := ts.Interval.GetCost(ts.GetDuration().Seconds(), ts.GetGroupStart())
-	c2 := nts.Interval.GetCost(nts.GetDuration().Seconds(), nts.GetGroupStart())
+	c1 := ts.Interval.GetCost(ts.GetDuration(), ts.GetGroupStart())
+	c2 := nts.Interval.GetCost(nts.GetDuration(), nts.GetGroupStart())
 	if c1 != 1800 || c2 != 900 {
 		t.Error("Wrong costs: ", c1, c2)
 	}
@@ -366,11 +366,11 @@ func TestTimespanSplitGroupedRates(t *testing.T) {
 func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	i := &Interval{
 		EndTime: "17:59:00",
-		Prices:  PriceGroups{&Price{0, 2, 1}, &Price{30, 1, 60}},
+		Prices:  PriceGroups{&Price{0, 2, 1 * time.Second}, &Price{30 * time.Second, 1, 60 * time.Second}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 31, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 60}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 60 * time.Second}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 30, 30, 0, time.UTC)
@@ -383,8 +383,8 @@ func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	if ts.Interval != i {
 		t.Error("Interval not attached correctly")
 	}
-	c1 := ts.Interval.GetCost(ts.GetDuration().Seconds(), ts.GetGroupStart())
-	c2 := nts.Interval.GetCost(nts.GetDuration().Seconds(), nts.GetGroupStart())
+	c1 := ts.Interval.GetCost(ts.GetDuration(), ts.GetGroupStart())
+	c2 := nts.Interval.GetCost(nts.GetDuration(), nts.GetGroupStart())
 	if c1 != 60 || c2 != 60 {
 		t.Error("Wrong costs: ", c1, c2)
 	}
@@ -400,7 +400,7 @@ func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 	i := &Interval{
 		EndTime: "17:00:30",
-		Prices:  PriceGroups{&Price{0, 2, 1}, &Price{60, 1, 60}},
+		Prices:  PriceGroups{&Price{0, 2, 1 * time.Second}, &Price{60 * time.Second, 1, 60 * time.Second}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 01, 0, 0, time.UTC)
@@ -433,11 +433,11 @@ func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 	i := &Interval{
 		EndTime: "17:03:30",
-		Prices:  PriceGroups{&Price{0, 2, 1}, &Price{60, 1, 1}},
+		Prices:  PriceGroups{&Price{0, 2, 1 * time.Second}, &Price{60 * time.Second, 1, 1 * time.Second}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240 * time.Second}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
@@ -477,11 +477,11 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 func TestTimespanSplitMultipleGroup(t *testing.T) {
 	i := &Interval{
 		EndTime: "17:05:00",
-		Prices:  PriceGroups{&Price{0, 2, 1}, &Price{60, 1, 1}, &Price{180, 1, 1}},
+		Prices:  PriceGroups{&Price{0, 2, 1 * time.Second}, &Price{60 * time.Second, 1, 1 * time.Second}, &Price{180 * time.Second, 1, 1 * time.Second}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240 * time.Second}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
