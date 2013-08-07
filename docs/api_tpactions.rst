@@ -129,10 +129,10 @@ Queries specific Actions profile on tariff plan.
 
    type Action struct {
 	Identifier     string  // Identifier mapped in the code
-	BalanceType      string  // Type of balance the action will operate on
+	BalanceType    string  // Type of balance the action will operate on
 	Direction      string  // Balance direction
 	Units          float64 // Number of units to add/deduct
-	ExpiryTime int64   // Time when the units will expire
+	ExpiryTime     string   // Time when the units will expire
 	DestinationId  string  // Destination profile id
 	RateType       string  // Type of price <*absolute|*percent>
 	Rate           float64 // Price value
@@ -152,7 +152,7 @@ Queries specific Actions profile on tariff plan.
                 "BalanceType": "*monetary", 
                 "DestinationId": "CGRATES_NET", 
                 "Direction": "*out", 
-                "ExpiryTime": 1374082259, 
+                "ExpiryTime": "+24h", 
                 "Identifier": "TOPUP_RESET", 
                 "MinutesWeight": 10, 
                 "Rate": 0.12, 

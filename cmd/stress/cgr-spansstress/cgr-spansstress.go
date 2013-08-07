@@ -58,7 +58,7 @@ func main() {
 	t1 := time.Date(2013, time.August, 07, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.August, 07, 18, 30, 0, 0, time.UTC)
 	//cd := engine.CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	cd := engine.CallDescriptor{Direction: "*out", TOR: "call", Tenant: "cgrates.org", Subject: "rif", Destination: "+49", TimeStart: t1, TimeEnd: t2}
+	cd := engine.CallDescriptor{Direction: "*out", TOR: "call", Tenant: "cgrates.org", Subject: "1001", Destination: "+49", TimeStart: t1, TimeEnd: t2}
 
 	getter, err := engine.NewRedisStorage("localhost:6379", 10, "")
 	//getter, err := engine.NewMongoStorage("localhost", "cgrates")

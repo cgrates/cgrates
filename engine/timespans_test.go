@@ -245,7 +245,7 @@ func TestTimespanSplitByMinuteBucketScarce(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketPlantyExpired(t *testing.T) {
+func TestTimespanSplitByMinuteBucketPlentyExpired(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
 	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 39, 0, 0, time.UTC)}
@@ -259,7 +259,7 @@ func TestTimespanSplitByMinuteBucketPlantyExpired(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketPlantyExpiring(t *testing.T) {
+func TestTimespanSplitByMinuteBucketPlentyExpiring(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
 	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
@@ -273,7 +273,7 @@ func TestTimespanSplitByMinuteBucketPlantyExpiring(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketPlantyExpiringEnd(t *testing.T) {
+func TestTimespanSplitByMinuteBucketPlentyExpiringEnd(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
 	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)}

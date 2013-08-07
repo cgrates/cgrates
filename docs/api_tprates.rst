@@ -134,14 +134,14 @@ Queries specific rate on tariff plan.
    }
 
    type RateSlot struct {
-	ConnectFee       float64 // ConnectFee applied once the call is answered
-	Rate             float64 // Rate applied
-	RatedUnits       int     //  Number of billing units this rate applies to
-	RateIncrements   int     // This rate will apply in increments of duration
-	GroupInterval    int     // Group position
-	RoundingMethod   string  // Use this method to round the cost
-	RoundingDecimals int     // Round the cost number of decimals
-	Weight           float64 // Rate's priority when dealing with grouped rates
+	ConnectFee         float64 // ConnectFee applied once the call is answered
+	Rate               float64 // Rate applied
+	RateUnit           string     //  Number of billing units this rate applies to
+	RateIncrement      string     // This rate will apply in increments of duration
+	GroupIntervalStart string     // Group start time during a call
+	RoundingMethod     string  // Use this method to round the cost
+	RoundingDecimals   int     // Round the cost number of decimals
+	Weight             float64 // Rate's priority when dealing with grouped rates
    }
 
  *JSON sample*:
@@ -156,20 +156,20 @@ Queries specific rate on tariff plan.
             {
                 "ConnectFee": 0.2, 
                 "Rate": 2, 
-                "RateIncrements": 60, 
-                "RatedUnits": 1, 
+                "RateIncrement": "60s", 
+                "RateUnit": "1s", 
                 "RoundingDecimals": 2,
-                "GroupInterval": 0, 
+                "GroupIntervalStart": "0s", 
                 "RoundingMethod": "*up", 
                 "Weight": 10
             }, 
             {
                 "ConnectFee": 0.2, 
                 "Rate": 2.1, 
-                "RateIncrements": 1, 
-                "RatedUnits": 1, 
+                "RateIncrement": "1s", 
+                "RateUnit": "1s", 
                 "RoundingDecimals": 2,
-                "GroupInterval": 60,
+                "GroupIntervalStart": "60s",
                 "RoundingMethod": "*up", 
                 "Weight": 20
             }
