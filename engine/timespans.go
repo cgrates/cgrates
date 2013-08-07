@@ -87,7 +87,9 @@ func (ts *TimeSpan) SetInterval(i *Interval) {
 	if ts.Interval == nil || ts.Interval.Weight < i.Weight {
 		ts.Interval = i
 	}
-	if ts.Interval.Weight == i.Weight && i.GetPrice(ts.GetGroupStart()) < ts.Interval.GetPrice(ts.GetGroupStart()) {
+	iPrice, _, _ := i.GetPriceParameters(ts.GetGroupStart())
+	tsPrice, _, _ := ts.Interval.GetPriceParameters(ts.GetGroupStart())
+	if ts.Interval.Weight == i.Weight && iPrice < tsPrice {
 		ts.Interval = i
 	}
 }
@@ -109,9 +111,9 @@ func (ts *TimeSpan) SplitByInterval(i *Interval) (nts *TimeSpan) {
 	// split by GroupStart
 	i.Prices.Sort()
 	for _, price := range i.Prices {
-		if ts.GetGroupStart() < price.StartSecond && ts.GetGroupEnd() >= price.StartSecond {
+		if ts.GetGroupStart() < price.GroupIntervalStart && ts.GetGroupEnd() >= price.GroupIntervalStart {
 			ts.SetInterval(i)
-			splitTime := ts.TimeStart.Add(price.StartSecond - ts.GetGroupStart())
+			splitTime := ts.TimeStart.Add(price.GroupIntervalStart - ts.GetGroupStart())
 			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 			ts.TimeEnd = splitTime
 			nts.SetInterval(i)

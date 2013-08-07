@@ -213,7 +213,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rated_units, rate_increments, group_interval, rounding_method, rounding_decimals, weight) VALUES ", utils.TBL_TP_RATES)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight) VALUES ", utils.TBL_TP_RATES)
 	i := 0
 	for rtId, rtRows := range rts {
 		for _, rt := range rtRows {
@@ -221,7 +221,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d, %f)",
-				tpid, rtId, rt.ConnectFee, rt.Price, rt.RatedUnits, rt.RateIncrements, rt.GroupInterval,
+				tpid, rtId, rt.ConnectFee, rt.Price, rt.RateUnit, rt.RateIncrement, rt.GroupIntervalStart,
 				rt.RoundingMethod, rt.RoundingDecimals, rt.Weight)
 			i++
 		}
@@ -244,13 +244,13 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 		i++ //Keep here a reference so we know we got at least one prefix
 		var connectFee, rate, weight float64
 		var roundingDecimals int
-		var ratedUnits, rateIncrements, groupInterval time.Duration
+		var rateUnit, rateIncrement, groupIntervalStart time.Duration
 		var roundingMethod string
-		err = rows.Scan(&connectFee, &rate, &ratedUnits, &rateIncrements, &groupInterval, &roundingMethod, &roundingDecimals, &weight)
+		err = rows.Scan(&connectFee, &rate, &rateUnit, &rateIncrement, &groupIntervalStart, &roundingMethod, &roundingDecimals, &weight)
 		if err != nil {
 			return nil, err
 		}
-		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, ratedUnits, rateIncrements, groupInterval,
+		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, rateUnit, rateIncrement, groupIntervalStart,
 			roundingMethod, roundingDecimals, weight})
 	}
 	if i == 0 {
@@ -977,21 +977,21 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 	for rows.Next() {
 		var tag, roundingMethod string
 		var connect_fee, rate, weight float64
-		var rated_units, rate_increments, group_interval time.Duration
+		var rate_unit, rate_increment, group_interval_start time.Duration
 		var roundingDecimals int
-		if err := rows.Scan(&tag, &connect_fee, &rate, &rated_units, &rate_increments, &group_interval, &roundingMethod, &roundingDecimals, &weight); err != nil {
+		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start, &roundingMethod, &roundingDecimals, &weight); err != nil {
 			return nil, err
 		}
 		r := &Rate{
-			Tag:              tag,
-			ConnectFee:       connect_fee,
-			Price:            rate,
-			RatedUnits:       rated_units,
-			RateIncrements:   rate_increments,
-			GroupInterval:    group_interval,
-			RoundingMethod:   roundingMethod,
-			RoundingDecimals: roundingDecimals,
-			Weight:           weight,
+			Tag:                tag,
+			ConnectFee:         connect_fee,
+			Price:              rate,
+			RateUnit:           rate_unit,
+			RateIncrement:      rate_increment,
+			GroupIntervalStart: group_interval_start,
+			RoundingMethod:     roundingMethod,
+			RoundingDecimals:   roundingDecimals,
+			Weight:             weight,
 		}
 		rts[tag] = r
 	}

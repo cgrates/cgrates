@@ -45,14 +45,14 @@ type Interval struct {
 }
 
 type Price struct {
-	StartSecond    time.Duration
-	Value          float64
-	RateIncrements time.Duration
-	RatedUnits     time.Duration
+	GroupIntervalStart time.Duration
+	Value              float64
+	RateIncrement      time.Duration
+	RateUnit           time.Duration
 }
 
 func (p *Price) Equal(o *Price) bool {
-	return p.StartSecond == o.StartSecond && p.Value == o.Value && p.RateIncrements == o.RateIncrements
+	return p.GroupIntervalStart == o.GroupIntervalStart && p.Value == o.Value && p.RateIncrement == o.RateIncrement && p.RateUnit == o.RateUnit
 }
 
 type PriceGroups []*Price
@@ -66,7 +66,7 @@ func (pg PriceGroups) Swap(i, j int) {
 }
 
 func (pg PriceGroups) Less(i, j int) bool {
-	return pg[i].StartSecond < pg[j].StartSecond
+	return pg[i].GroupIntervalStart < pg[j].GroupIntervalStart
 }
 
 func (pg PriceGroups) Sort() {
@@ -195,53 +195,30 @@ func (i *Interval) Equal(o *Interval) bool {
 }
 
 func (i *Interval) GetCost(duration, startSecond time.Duration) (cost float64) {
-	price := i.GetPrice(startSecond)
-	rateIncrements := i.GetRateIncrements(startSecond).Seconds()
+	price, rateIncrement, rateUnit := i.GetPriceParameters(startSecond)
 	d := float64(duration.Seconds())
-	ratedUnits := i.GetRatedUnits(startSecond)
-	price /= ratedUnits.Seconds()
-	cost = math.Ceil(d/rateIncrements) * rateIncrements * price
+	price /= rateUnit.Seconds()
+	ri := rateIncrement.Seconds()
+	cost = math.Ceil(d/ri) * ri * price
 	return utils.Round(cost, i.RoundingDecimals, i.RoundingMethod)
 }
 
 // Gets the price for a the provided start second
-func (i *Interval) GetPrice(startSecond time.Duration) float64 {
+func (i *Interval) GetPriceParameters(startSecond time.Duration) (price float64, rateIncrement, rateUnit time.Duration) {
 	i.Prices.Sort()
 	for index, price := range i.Prices {
-		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||
-			i.Prices[index+1].StartSecond > startSecond) {
-			return price.Value
-		}
-	}
-	return -1
-}
-
-func (i *Interval) GetRateIncrements(startSecond time.Duration) time.Duration {
-	i.Prices.Sort()
-	for index, price := range i.Prices {
-		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||
-			i.Prices[index+1].StartSecond > startSecond) {
-			if price.RateIncrements == 0 {
-				price.RateIncrements = 1 * time.Second
+		if price.GroupIntervalStart <= startSecond && (index == len(i.Prices)-1 ||
+			i.Prices[index+1].GroupIntervalStart > startSecond) {
+			if price.RateIncrement == 0 {
+				price.RateIncrement = 1 * time.Second
 			}
-			return price.RateIncrements
-		}
-	}
-	return 1
-}
-
-func (i *Interval) GetRatedUnits(startSecond time.Duration) time.Duration {
-	i.Prices.Sort()
-	for index, price := range i.Prices {
-		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||
-			i.Prices[index+1].StartSecond > startSecond) {
-			if price.RatedUnits == 0 {
-				price.RatedUnits = 1 * time.Second
+			if price.RateUnit == 0 {
+				price.RateUnit = 1 * time.Second
 			}
-			return price.RatedUnits
+			return price.Value, price.RateIncrement, price.RateUnit
 		}
 	}
-	return -1
+	return -1, -1, -1
 }
 
 // Structure to store intervals according to weight

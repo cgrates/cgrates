@@ -462,10 +462,10 @@ func (d *Destination) Restore(input string) error {
 
 func (pg PriceGroups) Store() (result string, err error) {
 	for _, p := range pg {
-		result += p.StartSecond.String() +
+		result += p.GroupIntervalStart.String() +
 			":" + strconv.FormatFloat(p.Value, 'f', -1, 64) +
-			":" + p.RateIncrements.String() +
-			":" + p.RatedUnits.String() +
+			":" + p.RateIncrement.String() +
+			":" + p.RateUnit.String() +
 			","
 	}
 	result = strings.TrimRight(result, ",")
@@ -496,10 +496,10 @@ func (pg *PriceGroups) Restore(input string) error {
 			return err
 		}
 		price := &Price{
-			StartSecond:    ss,
-			Value:          v,
-			RateIncrements: ri,
-			RatedUnits:     ru,
+			GroupIntervalStart: ss,
+			Value:              v,
+			RateIncrement:      ri,
+			RateUnit:           ru,
 		}
 		*pg = append(*pg, price)
 	}

@@ -47,12 +47,12 @@ type TPLoader interface {
 }
 
 type Rate struct {
-	Tag                                       string
-	ConnectFee, Price                         float64
-	RatedUnits, RateIncrements, GroupInterval time.Duration
-	RoundingMethod                            string
-	RoundingDecimals                          int
-	Weight                                    float64
+	Tag                                         string
+	ConnectFee, Price                           float64
+	RateUnit, RateIncrement, GroupIntervalStart time.Duration
+	RoundingMethod                              string
+	RoundingDecimals                            int
+	Weight                                      float64
 }
 
 func NewRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *Rate, err error) {
@@ -93,15 +93,15 @@ func NewRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, 
 	}
 
 	r = &Rate{
-		Tag:              tag,
-		ConnectFee:       cf,
-		Price:            p,
-		GroupInterval:    gi,
-		RatedUnits:       ru,
-		RateIncrements:   ri,
-		Weight:           wght,
-		RoundingMethod:   roundingMethod,
-		RoundingDecimals: rd,
+		Tag:                tag,
+		ConnectFee:         cf,
+		Price:              p,
+		GroupIntervalStart: gi,
+		RateUnit:           ru,
+		RateIncrement:      ri,
+		Weight:             wght,
+		RoundingMethod:     roundingMethod,
+		RoundingDecimals:   rd,
 	}
 	return
 }
@@ -165,10 +165,10 @@ func (rt *DestinationRateTiming) GetInterval(dr *DestinationRate) (i *Interval) 
 		Weight:     rt.Weight,
 		ConnectFee: dr.Rate.ConnectFee,
 		Prices: PriceGroups{&Price{
-			StartSecond:    dr.Rate.GroupInterval,
-			Value:          dr.Rate.Price,
-			RateIncrements: dr.Rate.RateIncrements,
-			RatedUnits:     dr.Rate.RatedUnits,
+			GroupIntervalStart: dr.Rate.GroupIntervalStart,
+			Value:              dr.Rate.Price,
+			RateIncrement:      dr.Rate.RateIncrement,
+			RateUnit:           dr.Rate.RateUnit,
 		}},
 	}
 	return
