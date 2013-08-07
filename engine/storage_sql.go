@@ -848,13 +848,19 @@ func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err erro
 	return
 }
 
-func (self *SQLStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	//ToDo: cgrid instead of uuid
-	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s'", utils.TBL_COST_DETAILS, utils.FSCgrId(uuid), source))
-	var cgrid, accid, src string
+func (self *SQLStorage) GetCallCostLog(cgrid, source string) (cc *CallCost, err error) {
+	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s'", utils.TBL_COST_DETAILS, cgrid, source))
+	var accid, src string
 	var timespansJson string
-	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson, &src)
-	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)
+	cc = &CallCost{Cost:-1}
+	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject, 
+		&cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson, &src)
+	fmt.Println(cgrid, accid, cc, timespansJson, src)
+	err = json.Unmarshal([]byte(timespansJson), &cc.Timespans)
+	fmt.Println("err", err)
+	if err != nil {
+		return nil, err
+	}
 	return
 }
 
@@ -903,14 +909,14 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	return
 }
 
-func (self *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost) (err error) {
+func (self *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost, extraInfo string) (err error) {
 	// ToDo: Add here source and subject
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, subject, cost, source) VALUES ('%s', '%s', %f, '%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, subject, cost, extra_info) VALUES ('%s', '%s', %f, '%s')",
 		utils.TBL_RATED_CDRS,
 		cdr.GetCgrId(),
-		"subject",
+		cdr.GetSubject(),
 		cc.Cost+cc.ConnectFee,
-		"cdrsrc"))
+		extraInfo))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
 	}

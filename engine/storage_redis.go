@@ -388,8 +388,8 @@ func (rs *RedisStorage) SetCdr(utils.CDR) error {
 	return nil
 }
 
-func (rs *RedisStorage) SetRatedCdr(utils.CDR, *CallCost) error {
-	return nil
+func (rs *RedisStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost, extraInfo string) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (rs *RedisStorage) GetAllRatedCdr() ([]utils.CDR, error) {

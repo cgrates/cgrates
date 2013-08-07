@@ -106,7 +106,7 @@ type DataStorage interface {
 	SetActionTimings(string, ActionTimings) error
 	GetAllActionTimings() (map[string]ActionTimings, error)
 	SetCdr(utils.CDR) error
-	SetRatedCdr(utils.CDR, *CallCost) error
+	SetRatedCdr(utils.CDR, *CallCost, string) error
 	GetAllRatedCdr() ([]utils.CDR, error)
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
 	LogCallCost(uuid, source string, cc *CallCost) error

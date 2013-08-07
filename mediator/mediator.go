@@ -165,7 +165,14 @@ func (self *Mediator) TrackCDRFiles() (err error) {
 
 // Retrive the cost from logging database
 func (self *Mediator) getCostsFromDB(cdr utils.CDR) (cc *engine.CallCost, err error) {
-	return self.storDb.GetCallCostLog(cdr.GetCgrId(), engine.SESSION_MANAGER_SOURCE)
+	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
+		cc, err = self.storDb.GetCallCostLog(cdr.GetCgrId(), engine.SESSION_MANAGER_SOURCE) //ToDo: What are we getting when there is no log?
+		if cc != nil { // There were no errors, chances are that we got what we are looking for
+			break
+		}
+		time.Sleep(time.Duration(i) * time.Second)
+	}
+	return
 }
 
 // Retrive the cost from engine
@@ -267,20 +274,24 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 }
 
 func (self *Mediator) MediateDBCDR(cdr utils.CDR, db engine.DataStorage) error {
-	var cc *engine.CallCost
+	var qryCC *engine.CallCost
+	cc := &engine.CallCost{Cost:-1}
 	var errCost error
 	if cdr.GetReqType() == utils.PREPAID || cdr.GetReqType() == utils.POSTPAID {
 		// Should be previously calculated and stored in DB
-		cc, errCost = self.getCostsFromDB(cdr)
+		qryCC, errCost = self.getCostsFromDB(cdr)
 	} else {
-		cc, errCost = self.getCostsFromRater(cdr)
+		qryCC, errCost = self.getCostsFromRater(cdr)
 	}
-	cost := "-1"
-	if errCost != nil || cc == nil {
-		engine.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for cgrid: <%s>, err: <%s>, cost: <%v>", cdr.GetCgrId(), errCost.Error(), cc))
+	if errCost != nil || qryCC == nil {
+		engine.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for cgrid: <%s>, err: <%s>, cost: <%v>", cdr.GetCgrId(), errCost.Error(), qryCC))
 	} else {
-		cost = strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)
-		engine.Logger.Debug(fmt.Sprintf("<Mediator> Calculated for cgrid:%s, cost: %v", cdr.GetCgrId(), cost))
+		cc = qryCC
+		engine.Logger.Debug(fmt.Sprintf("<Mediator> Calculated for cgrid:%s, cost: %f", cdr.GetCgrId(), cc.ConnectFee+cc.Cost))
 	}
-	return self.storDb.SetRatedCdr(cdr, cc)
+	extraInfo := ""
+	if errCost != nil {
+		extraInfo = errCost.Error()
+	}
+	return self.storDb.SetRatedCdr(cdr, cc, extraInfo)
 }

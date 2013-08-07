@@ -37,14 +37,13 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	if fsCdr, err := new(FSCdr).New(body); err == nil {
 		storage.SetCdr(fsCdr)
-		if cfg.CDRSMediator == "internal" {
-			errMedi := medi.MediateDBCDR(fsCdr, storage)
-			if errMedi != nil {
-				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
+		go func() { //FS will not send us hangup_complete until we have send back the answer to CDR, so we need to handle mediation async
+			if cfg.CDRSMediator == "internal" {
+				medi.MediateDBCDR(fsCdr, storage)
+			} else {
+				//TODO: use the connection to mediator
 			}
-		} else {
-			//TODO: use the connection to mediator
-		}
+		} ()
 	} else {
 		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
 	}

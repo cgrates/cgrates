@@ -380,8 +380,8 @@ func (ms *MongoStorage) SetCdr(utils.CDR) error {
 	return nil
 }
 
-func (ms *MongoStorage) SetRatedCdr(utils.CDR, *CallCost) error {
-	return nil
+func (ms *MongoStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost, extraInfo string) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (ms *MongoStorage) GetAllRatedCdr() ([]utils.CDR, error) {

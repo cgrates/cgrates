@@ -80,7 +80,6 @@ func (fsev FSEvent) GetName() string {
 }
 func (fsev FSEvent) GetDirection() string {
 	//TODO: implement direction
-	fmt.Println("Returning direction *out")
 	return "*out"
 	//return fsev[DIRECTION]
 }

@@ -349,8 +349,8 @@ func (ms *MapStorage) SetCdr(utils.CDR) error {
 	return nil
 }
 
-func (ms *MapStorage) SetRatedCdr(utils.CDR, *CallCost) error {
-	return nil
+func (ms *MapStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost, extraInfo string) error {
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (ms *MapStorage) GetAllRatedCdr() ([]utils.CDR, error) {
