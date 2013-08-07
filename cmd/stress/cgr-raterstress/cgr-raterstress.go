@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	balancer = flag.String("balancer", "localhost:2001", "balancer server address")
+	balancer = flag.String("balancer", "localhost:2012", "balancer server address")
 	runs     = flag.Int("runs", 10000, "stress cycle number")
 	parallel = flag.Int("parallel", 0, "run n requests in parallel")
 	json     = flag.Bool("json", false, "use JSON for RPC encoding")
@@ -40,9 +40,9 @@ func main() {
 	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	t1 := time.Date(2012, time.February, 02, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 02, 18, 30, 0, 0, time.UTC)
-	cd := engine.CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	t1 := time.Date(2013, time.August, 07, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.August, 07, 18, 30, 0, 0, time.UTC)
+	cd := engine.CallDescriptor{Direction: "*out", TOR: "call", Tenant: "cgrates.org", Subject: "1001", Destination: "+49", TimeStart: t1, TimeEnd: t2}
 	result := engine.CallCost{}
 	var client *rpc.Client
 	var err error
@@ -65,7 +65,7 @@ func main() {
 				client.Call("Responder.GetCost", cd, &result)
 				<-sem
 				finish <- 1
-				// divCall = client.Go("Responder.GetCost", cd, &result, nil)	
+				// divCall = client.Go("Responder.GetCost", cd, &result, nil)
 			}()
 		}
 		for i := 0; i < *runs; i++ {

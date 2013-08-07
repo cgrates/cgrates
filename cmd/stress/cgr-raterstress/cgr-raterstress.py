@@ -43,15 +43,15 @@ class JSONClient(object):
 
 rpc =JSONClient(("127.0.0.1", 2012))
 
-cd = {"Direction":"*out", "TOR":"0", "Tenant": "vdf", "Subject": "rif", "DestinationPrefix": "0256", "TimeStart": "2012-02-02T17:30:00Z", "TimeEnd": "2012-02-02T18:30:00Z"}
+cd = {"Direction":"*out", "TOR":"call", "Tenant": "cgrates.org", "Subject": "1001", "Destination": "+49", "TimeStart": "2013-08-07T17:30:00Z", "TimeEnd": "2013-08-07T18:30:00Z"}
 
 # alternative to the above
-s = socket.create_connection(("127.0.0.1", 2012))
-s.sendall(json.dumps(({"id": 1, "method": "Responder.GetCost", "params": [cd]})))
-print s.recv(4096)
+#s = socket.create_connection(("127.0.0.1", 2012))
+#s.sendall(json.dumps({"id": 1, "method": "Responder.GetCost", "params": [cd]}))
+#print(s.recv(4096))
 
 i = 0
 result = ""
-for i in xrange(int(1e5) + 1):
+for i in range(int(1e5) + 1):
     result = rpc.call("Responder.GetCost", cd)
-print i, result
+print(i, result)

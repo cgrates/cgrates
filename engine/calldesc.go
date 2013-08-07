@@ -290,7 +290,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Cost:        cost,
 		ConnectFee:  connectionFee,
 		Timespans:   timespans}
-	Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
+	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	return cc, err
 }
 

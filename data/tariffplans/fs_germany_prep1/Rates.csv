@@ -1,7 +1,7 @@
 #Tag,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart,RoundingMethod,RoundingDecimals,Weight
-LANDLINE_PEAK,0.02,0.02,60s,60s,0,*up,4,10
+LANDLINE_PEAK,0.02,0.02,60s,60s,0s,*up,4,10
 LANDLINE_PEAK,0.02,0.01,1s,1s,60s,*up,4,10
-MOBILE_PEAK,0.02,0.14,60s,60s,0,*up,4,10
-LANDLINE_OFFPEAK,1,0,60s,60s,0,*up,4,10
+MOBILE_PEAK,0.02,0.14,60s,60s,0s,*up,4,10
+LANDLINE_OFFPEAK,1,0,60s,60s,0s,*up,4,10
 MOBILE_OFFPEAK,0.02,0.1,60s,60s,0,*up,4,10
-RT_FS_USERS,0,0,60s,60s,0,*up,0,10
+RT_FS_USERS,0,0,60s,60s,0s,*up,0,10
