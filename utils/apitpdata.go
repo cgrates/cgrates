@@ -33,7 +33,7 @@ type TPRate struct {
 type RateSlot struct {
 	ConnectFee       float64       // ConnectFee applied once the call is answered
 	Rate             float64       // Rate applied
-	RatedUnits       int           //  Number of billing units this rate applies to
+	RatedUnits       time.Duration //  Number of billing units this rate applies to
 	RateIncrements   time.Duration // This rate will apply in increments of duration
 	GroupInterval    time.Duration // Group position
 	RoundingMethod   string        // Use this method to round the cost

@@ -33,21 +33,22 @@ import (
 Defines a time interval for which a certain set of prices will apply
 */
 type Interval struct {
-	Years                           Years
-	Months                          Months
-	MonthDays                       MonthDays
-	WeekDays                        WeekDays
-	StartTime, EndTime              string // ##:##:## format
-	Weight, ConnectFee, PricedUnits float64
-	Prices                          PriceGroups // GroupInterval (start time): Price
-	RoundingMethod                  string
-	RoundingDecimals                int
+	Years              Years
+	Months             Months
+	MonthDays          MonthDays
+	WeekDays           WeekDays
+	StartTime, EndTime string // ##:##:## format
+	Weight, ConnectFee float64
+	Prices             PriceGroups // GroupInterval (start time): Price
+	RoundingMethod     string
+	RoundingDecimals   int
 }
 
 type Price struct {
 	StartSecond    time.Duration
 	Value          float64
 	RateIncrements time.Duration
+	RatedUnits     time.Duration
 }
 
 func (p *Price) Equal(o *Price) bool {
@@ -197,11 +198,9 @@ func (i *Interval) GetCost(duration, startSecond time.Duration) (cost float64) {
 	price := i.GetPrice(startSecond)
 	rateIncrements := i.GetRateIncrements(startSecond).Seconds()
 	d := float64(duration.Seconds())
-	if i.PricedUnits != 0 {
-		cost = math.Ceil(d/rateIncrements) * rateIncrements * (price / i.PricedUnits)
-	} else {
-		cost = math.Ceil(d/rateIncrements) * rateIncrements * price
-	}
+	ratedUnits := i.GetRatedUnits(startSecond)
+	price /= ratedUnits.Seconds()
+	cost = math.Ceil(d/rateIncrements) * rateIncrements * price
 	return utils.Round(cost, i.RoundingDecimals, i.RoundingMethod)
 }
 
@@ -223,12 +222,26 @@ func (i *Interval) GetRateIncrements(startSecond time.Duration) time.Duration {
 		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||
 			i.Prices[index+1].StartSecond > startSecond) {
 			if price.RateIncrements == 0 {
-				price.RateIncrements = 1
+				price.RateIncrements = 1 * time.Second
 			}
 			return price.RateIncrements
 		}
 	}
 	return 1
+}
+
+func (i *Interval) GetRatedUnits(startSecond time.Duration) time.Duration {
+	i.Prices.Sort()
+	for index, price := range i.Prices {
+		if price.StartSecond <= startSecond && (index == len(i.Prices)-1 ||
+			i.Prices[index+1].StartSecond > startSecond) {
+			if price.RatedUnits == 0 {
+				price.RatedUnits = 1 * time.Second
+			}
+			return price.RatedUnits
+		}
+	}
+	return -1
 }
 
 // Structure to store intervals according to weight

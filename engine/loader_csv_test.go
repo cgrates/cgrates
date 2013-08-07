@@ -45,11 +45,11 @@ WEEKENDS,*any,*any,*any,6;7,00:00:00
 ONE_TIME_RUN,2012,,,,*asap
 `
 	rates = `
-R1,0,0.2,60,1s,0,*middle,2,10
-R2,0,0.1,60,1s,0,*middle,2,10
-R3,0,0.05,60,1s,0,*middle,2,10
-R4,1,1,1,1s,0,*up,2,10
-R5,0,0.5,1,1s,0,*down,2,10
+R1,0,0.2,60s,1s,0,*middle,2,10
+R2,0,0.1,60s,1s,0,*middle,2,10
+R3,0,0.05,60s,1s,0,*middle,2,10
+R4,1,1,1s,1s,0,*up,2,10
+R5,0,0.5,1s,1s,0,*down,2,10
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1

@@ -43,7 +43,7 @@ func TestSimpleMarshallerApStoreRestore(t *testing.T) {
 }
 
 func TestSimpleMarshallerApRestoreFromString(t *testing.T) {
-	s := "2012-02-01T14:30:01Z|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0:0.2:1s;60;1;\n"
+	s := "2012-02-01T14:30:01Z|;1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0:0.2:1s:60s;1;\n"
 	ap := &ActivationPeriod{}
 	err := ap.Restore(s)
 	if err != nil || len(ap.Intervals) != 1 {
@@ -73,15 +73,14 @@ func TestRpStoreRestore(t *testing.T) {
 
 func TestActionTimingStoreRestore(t *testing.T) {
 	i := &Interval{
-		Months:      Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
-		MonthDays:   MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
-		WeekDays:    WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
-		StartTime:   "18:00:00",
-		EndTime:     "00:00:00",
-		Weight:      10.0,
-		ConnectFee:  0.0,
-		Prices:      PriceGroups{&Price{0, 1.0, 1}},
-		PricedUnits: 60,
+		Months:     Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays:  MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
+		WeekDays:   WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+		StartTime:  "18:00:00",
+		EndTime:    "00:00:00",
+		Weight:     10.0,
+		ConnectFee: 0.0,
+		Prices:     PriceGroups{&Price{0, 1.0, 1 * time.Second, 60 * time.Second}},
 	}
 	at := &ActionTiming{
 		Id:             "some uuid",
@@ -123,15 +122,14 @@ func TestActionTriggerStoreRestore(t *testing.T) {
 
 func TestIntervalStoreRestore(t *testing.T) {
 	i := &Interval{
-		Months:      Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
-		MonthDays:   MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
-		WeekDays:    WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
-		StartTime:   "18:00:00",
-		EndTime:     "00:00:00",
-		Weight:      10.0,
-		ConnectFee:  0.0,
-		Prices:      PriceGroups{&Price{0, 1777.0, 1}},
-		PricedUnits: 60,
+		Months:     Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
+		MonthDays:  MonthDays{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31},
+		WeekDays:   WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+		StartTime:  "18:00:00",
+		EndTime:    "00:00:00",
+		Weight:     10.0,
+		ConnectFee: 0.0,
+		Prices:     PriceGroups{&Price{0, 1777.0, 1 * time.Second, 60 * time.Second}},
 	}
 	r, err := i.Store()
 	o := &Interval{}
@@ -142,10 +140,10 @@ func TestIntervalStoreRestore(t *testing.T) {
 }
 
 func TestIntervalRestoreFromString(t *testing.T) {
-	s := ";1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0:0.2:1s;60;0;"
+	s := ";1,2,3,4,5,6,7,8,9,10,11,12;1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31;1,2,3,4,5,6,0;00:00:00;;10;0;0:0.2:1s:60s;0;"
 	i := Interval{}
 	err := i.Restore(s)
-	if err != nil || !i.Prices.Equal(PriceGroups{&Price{0, 0.2, 1 * time.Second}}) {
+	if err != nil || !i.Prices.Equal(PriceGroups{&Price{0, 0.2, 1 * time.Second, 1 * time.Second}}) {
 		t.Errorf("Error restoring inteval period from string %+v", i)
 	}
 }

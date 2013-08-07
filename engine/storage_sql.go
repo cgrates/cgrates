@@ -221,7 +221,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d, %f)",
-				tpid, rtId, rt.ConnectFee, rt.Price, int(rt.PricedUnits), int(rt.RateIncrements), int(rt.GroupInterval),
+				tpid, rtId, rt.ConnectFee, rt.Price, rt.RatedUnits, rt.RateIncrements, rt.GroupInterval,
 				rt.RoundingMethod, rt.RoundingDecimals, rt.Weight)
 			i++
 		}
@@ -243,14 +243,14 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix
 		var connectFee, rate, weight float64
-		var ratedUnits, roundingDecimals int
-		var rateIncrements, groupInterval time.Duration
+		var roundingDecimals int
+		var ratedUnits, rateIncrements, groupInterval time.Duration
 		var roundingMethod string
 		err = rows.Scan(&connectFee, &rate, &ratedUnits, &rateIncrements, &groupInterval, &roundingMethod, &roundingDecimals, &weight)
 		if err != nil {
 			return nil, err
 		}
-		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, ratedUnits, rateIncrements * time.Second, groupInterval * time.Second,
+		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, ratedUnits, rateIncrements, groupInterval,
 			roundingMethod, roundingDecimals, weight})
 	}
 	if i == 0 {
@@ -854,8 +854,8 @@ func (self *SQLStorage) GetCallCostLog(cgrid, source string) (cc *CallCost, err 
 	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s'", utils.TBL_COST_DETAILS, cgrid, source))
 	var accid, src string
 	var timespansJson string
-	cc = &CallCost{Cost:-1}
-	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject, 
+	cc = &CallCost{Cost: -1}
+	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
 		&cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson, &src)
 	fmt.Println(cgrid, accid, cc, timespansJson, src)
 	err = json.Unmarshal([]byte(timespansJson), &cc.Timespans)
@@ -976,17 +976,17 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var tag, roundingMethod string
-		var connect_fee, rate, priced_units, weight float64
-		var rate_increments, group_interval time.Duration
+		var connect_fee, rate, weight float64
+		var rated_units, rate_increments, group_interval time.Duration
 		var roundingDecimals int
-		if err := rows.Scan(&tag, &connect_fee, &rate, &priced_units, &rate_increments, &group_interval, &roundingMethod, &roundingDecimals, &weight); err != nil {
+		if err := rows.Scan(&tag, &connect_fee, &rate, &rated_units, &rate_increments, &group_interval, &roundingMethod, &roundingDecimals, &weight); err != nil {
 			return nil, err
 		}
 		r := &Rate{
 			Tag:              tag,
 			ConnectFee:       connect_fee,
 			Price:            rate,
-			PricedUnits:      priced_units,
+			RatedUnits:       rated_units,
 			RateIncrements:   rate_increments,
 			GroupInterval:    group_interval,
 			RoundingMethod:   roundingMethod,

@@ -146,13 +146,13 @@ func TestApAddIntervalIfNotPresent(t *testing.T) {
 
 func TestApAddIntervalGroups(t *testing.T) {
 	i1 := &Interval{
-		Prices: PriceGroups{&Price{0, 1, 1}},
+		Prices: PriceGroups{&Price{0, 1, 1 * time.Second, 1 * time.Second}},
 	}
 	i2 := &Interval{
-		Prices: PriceGroups{&Price{30, 2, 1}},
+		Prices: PriceGroups{&Price{30 * time.Second, 2, 1 * time.Second, 1 * time.Second}},
 	}
 	i3 := &Interval{
-		Prices: PriceGroups{&Price{30, 2, 1}},
+		Prices: PriceGroups{&Price{30 * time.Second, 2, 1 * time.Second, 1 * time.Second}},
 	}
 	ap := &ActivationPeriod{}
 	ap.AddInterval(i1)

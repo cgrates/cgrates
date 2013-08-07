@@ -465,6 +465,7 @@ func (pg PriceGroups) Store() (result string, err error) {
 		result += p.StartSecond.String() +
 			":" + strconv.FormatFloat(p.Value, 'f', -1, 64) +
 			":" + p.RateIncrements.String() +
+			":" + p.RatedUnits.String() +
 			","
 	}
 	result = strings.TrimRight(result, ",")
@@ -475,7 +476,7 @@ func (pg *PriceGroups) Restore(input string) error {
 	elements := strings.Split(input, ",")
 	for _, element := range elements {
 		priceElements := strings.Split(element, ":")
-		if len(priceElements) != 3 {
+		if len(priceElements) != 4 {
 			continue
 		}
 		ss, err := time.ParseDuration(priceElements[0])
@@ -490,10 +491,15 @@ func (pg *PriceGroups) Restore(input string) error {
 		if err != nil {
 			return err
 		}
+		ru, err := time.ParseDuration(priceElements[3])
+		if err != nil {
+			return err
+		}
 		price := &Price{
 			StartSecond:    ss,
 			Value:          v,
 			RateIncrements: ri,
+			RatedUnits:     ru,
 		}
 		*pg = append(*pg, price)
 	}
@@ -530,7 +536,6 @@ func (i *Interval) Store() (result string, err error) {
 		return "", err
 	}
 	result += ps + ";"
-	result += strconv.FormatFloat(i.PricedUnits, 'f', -1, 64) + ";"
 	result += i.RoundingMethod + ";"
 	result += strconv.Itoa(i.RoundingDecimals)
 	return
@@ -538,7 +543,7 @@ func (i *Interval) Store() (result string, err error) {
 
 func (i *Interval) Restore(input string) error {
 	is := strings.Split(input, ";")
-	if len(is) != 12 {
+	if len(is) != 11 {
 		return notEnoughElements(input)
 	}
 	if err := i.Years.Restore(is[0]); err != nil {
@@ -561,9 +566,8 @@ func (i *Interval) Restore(input string) error {
 	if err != nil {
 		return err
 	}
-	i.PricedUnits, _ = strconv.ParseFloat(is[9], 64)
-	i.RoundingMethod = is[10]
-	i.RoundingDecimals, _ = strconv.Atoi(is[11])
+	i.RoundingMethod = is[9]
+	i.RoundingDecimals, _ = strconv.Atoi(is[10])
 	return nil
 }
 

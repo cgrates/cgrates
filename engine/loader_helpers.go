@@ -47,15 +47,15 @@ type TPLoader interface {
 }
 
 type Rate struct {
-	Tag                            string
-	ConnectFee, Price, PricedUnits float64
-	RateIncrements, GroupInterval  time.Duration
-	RoundingMethod                 string
-	RoundingDecimals               int
-	Weight                         float64
+	Tag                                       string
+	ConnectFee, Price                         float64
+	RatedUnits, RateIncrements, GroupInterval time.Duration
+	RoundingMethod                            string
+	RoundingDecimals                          int
+	Weight                                    float64
 }
 
-func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *Rate, err error) {
+func NewRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *Rate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -71,9 +71,9 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, groupInterval,
 		log.Printf("Error parsing group interval from: %v", price)
 		return
 	}
-	pu, err := strconv.ParseFloat(pricedUnits, 64)
+	ru, err := time.ParseDuration(ratedUnits)
 	if err != nil {
-		log.Printf("Error parsing priced units from: %v", pricedUnits)
+		log.Printf("Error parsing rated units from: %v", ratedUnits)
 		return
 	}
 	ri, err := time.ParseDuration(rateIncrements)
@@ -83,7 +83,7 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, groupInterval,
 	}
 	wght, err := strconv.ParseFloat(weight, 64)
 	if err != nil {
-		log.Printf("Error parsing rates increments from: %s", weight)
+		log.Printf("Error parsing weight from: %s", weight)
 		return
 	}
 	rd, err := strconv.Atoi(roundingDecimals)
@@ -97,7 +97,7 @@ func NewRate(tag, connectFee, price, pricedUnits, rateIncrements, groupInterval,
 		ConnectFee:       cf,
 		Price:            p,
 		GroupInterval:    gi,
-		PricedUnits:      pu,
+		RatedUnits:       ru,
 		RateIncrements:   ri,
 		Weight:           wght,
 		RoundingMethod:   roundingMethod,
@@ -168,8 +168,8 @@ func (rt *DestinationRateTiming) GetInterval(dr *DestinationRate) (i *Interval) 
 			StartSecond:    dr.Rate.GroupInterval,
 			Value:          dr.Rate.Price,
 			RateIncrements: dr.Rate.RateIncrements,
+			RatedUnits:     dr.Rate.RatedUnits,
 		}},
-		PricedUnits: dr.Rate.PricedUnits,
 	}
 	return
 }
