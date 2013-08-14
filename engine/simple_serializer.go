@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -30,8 +30,8 @@ type Serializer interface {
 	Restore(string) error
 }
 
-func notEnoughElements(line string) error {
-	return errors.New("Too few elements to restore: " + line)
+func notEnoughElements(element, line string) error {
+	return fmt.Errorf("Too few elements to restore (%v): %v", element, line)
 }
 
 func (ap *ActivationPeriod) Store() (result string, err error) {
@@ -132,7 +132,7 @@ func (a *Action) Store() (result string, err error) {
 func (a *Action) Restore(input string) (err error) {
 	elements := strings.Split(input, "|")
 	if len(elements) < 8 {
-		return notEnoughElements(input)
+		return notEnoughElements("Action", input)
 	}
 	a.Id = elements[0]
 	a.ActionType = elements[1]
@@ -260,7 +260,7 @@ func (at *ActionTrigger) Store() (result string, err error) {
 func (at *ActionTrigger) Restore(input string) error {
 	elements := strings.Split(input, ";")
 	if len(elements) != 9 {
-		return notEnoughElements(input)
+		return notEnoughElements("ActionTrigger", input)
 	}
 	at.Id = elements[0]
 	at.BalanceId = elements[1]
@@ -357,7 +357,7 @@ func (ub *UserBalance) Store() (result string, err error) {
 func (ub *UserBalance) Restore(input string) error {
 	elements := strings.Split(input, "|")
 	if len(elements) < 2 {
-		return notEnoughElements(input)
+		return notEnoughElements("UserBalance", input)
 	}
 	ub.Id = elements[0]
 	ub.Type = elements[1]
@@ -432,7 +432,7 @@ De-serializes the unit counter for the storage. Used for key-value storages.
 func (uc *UnitsCounter) Restore(input string) error {
 	elements := strings.Split(input, "/")
 	if len(elements) != 4 {
-		return notEnoughElements(input)
+		return notEnoughElements("UnitsCounter", input)
 	}
 	uc.Direction = elements[0]
 	uc.BalanceId = elements[1]
@@ -544,7 +544,7 @@ func (i *Interval) Store() (result string, err error) {
 func (i *Interval) Restore(input string) error {
 	is := strings.Split(input, ";")
 	if len(is) != 11 {
-		return notEnoughElements(input)
+		return notEnoughElements("Interval", input)
 	}
 	if err := i.Years.Restore(is[0]); err != nil {
 		return err
@@ -590,7 +590,7 @@ func (mb *MinuteBucket) Restore(input string) error {
 		mb.DestinationId = elements[4]
 		return nil
 	}
-	return notEnoughElements(input)
+	return notEnoughElements("MinuteBucket", input)
 }
 
 func (wds WeekDays) Store() (result string, err error) {

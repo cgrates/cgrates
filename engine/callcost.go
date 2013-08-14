@@ -23,9 +23,7 @@ import (
 	"time"
 )
 
-/*
-The output structure that will be returned with the call cost information.
-*/
+// The output structure that will be returned with the call cost information.
 type CallCost struct {
 	Direction, TOR, Tenant, Subject, Account, Destination string
 	Cost, ConnectFee                                      float64

@@ -213,33 +213,33 @@ func startHistoryScribe() {
 	}
 
 	if cfg.HistoryServerEnabled {
-                if cfg.HistoryListen != INTERNAL {
-                        rpc.RegisterName("Scribe", scribeServer)
-                        var serveFunc func(io.ReadWriteCloser)
-                        if cfg.RPCEncoding == JSON {
-                                serveFunc = jsonrpc.ServeConn
-                        } else {
-                                serveFunc = rpc.ServeConn
-                        }
-                        l, err := net.Listen("tcp", cfg.HistoryListen)
-                        if err != nil {
-                                engine.Logger.Crit(fmt.Sprintf("<History> Could not listen to %v: %v", cfg.HistoryListen, err))
-                                exitChan <- true
-                                return
-                        }
-                        defer l.Close()
-                        for {
-                                conn, err := l.Accept()
-                                if err != nil {
-                                        engine.Logger.Err(fmt.Sprintf("<History> Accept error: %v", conn))
-                                        continue
-                                }
+		if cfg.HistoryListen != INTERNAL {
+			rpc.RegisterName("Scribe", scribeServer)
+			var serveFunc func(io.ReadWriteCloser)
+			if cfg.RPCEncoding == JSON {
+				serveFunc = jsonrpc.ServeConn
+			} else {
+				serveFunc = rpc.ServeConn
+			}
+			l, err := net.Listen("tcp", cfg.HistoryListen)
+			if err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<History> Could not listen to %v: %v", cfg.HistoryListen, err))
+				exitChan <- true
+				return
+			}
+			defer l.Close()
+			for {
+				conn, err := l.Accept()
+				if err != nil {
+					engine.Logger.Err(fmt.Sprintf("<History> Accept error: %v", conn))
+					continue
+				}
 
-                                engine.Logger.Info(fmt.Sprintf("<History> New incoming connection: %v", conn.RemoteAddr()))
-                                go serveFunc(conn)
-                        }
-                }
-        }
+				engine.Logger.Info(fmt.Sprintf("<History> New incoming connection: %v", conn.RemoteAddr()))
+				go serveFunc(conn)
+			}
+		}
+	}
 
 	var scribeAgent history.Scribe
 
@@ -247,14 +247,14 @@ func startHistoryScribe() {
 		if cfg.HistoryServer != INTERNAL { // Connect in iteration since there are chances of concurrency here
 			for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
 				if scribeAgent, err = history.NewProxyScribe(cfg.HistoryServer, cfg.RPCEncoding); err == nil {
-                                        break //Connected so no need to reiterate
-                                } else if (i==2 && err!= nil) {
+					break //Connected so no need to reiterate
+				} else if i == 2 && err != nil {
 					engine.Logger.Crit(err.Error())
 					exitChan <- true
 					return
 				}
-                                time.Sleep(time.Duration(i/2) * time.Second)
-                        }
+				time.Sleep(time.Duration(i/2) * time.Second)
+			}
 		} else {
 			scribeAgent = scribeServer
 		}

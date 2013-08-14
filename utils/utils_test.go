@@ -166,3 +166,31 @@ func TestParseDateRFC3339(t *testing.T) {
 		t.Error("error parsing date: ", expected.Sub(date))
 	}
 }
+
+func TestMissingStructFieldsCorrect(t *testing.T) {
+	var attr = struct {
+		Tenant          string
+		Direction       string
+		Account         string
+		Type            string
+		ActionTimingsId string
+	}{"bevoip.eu", "OUT", "danconns0001", "prepaid", "mama"}
+	if missing := MissingStructFields(&attr,
+		[]string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
+		t.Error("Found missing field on correct struct", missing)
+	}
+}
+
+func TestMissingStructFieldsIncorrect(t *testing.T) {
+	var attr = struct {
+		Tenant          string
+		Direction       string
+		Account         string
+		Type            string
+		ActionTimingsId string
+	}{Tenant: "bevoip.eu", Direction: "OUT", Account: "danconns0001", Type: "prepaid"}
+	if missing := MissingStructFields(&attr,
+		[]string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 1 || missing[0] != "ActionTimingsId" {
+		t.Error("Found missing field on correct struct", missing)
+	}
+}

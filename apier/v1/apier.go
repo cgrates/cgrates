@@ -219,7 +219,7 @@ type AttrAddAccount struct {
 }
 
 // Ads a new account into dataDb. If already defined, returns success.
-func (self *ApierV1) AddAccount(attr *AttrAddAccount, reply *string) error {
+func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
 		*reply = fmt.Sprintf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
