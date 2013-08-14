@@ -1,5 +1,8 @@
 language: go
 
+go:
+  - 1.1
+
 script: $TRAVIS_BUILD_DIR/test.sh
 
 branches:
