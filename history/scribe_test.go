@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package history
 
 import (
+	"strconv"
 	"testing"
 )
 
@@ -35,5 +36,25 @@ func TestHistoryAdd(t *testing.T) {
 	rs = rs.SetOrAdd(&Record{"second", "new value"})
 	if len(rs) != 2 || rs[1].Object != "new value" {
 		t.Error("error setting new value: ", rs)
+	}
+}
+
+func BenchmarkSetOrAdd(b *testing.B) {
+	var rs records
+	for i := 0; i < 1000; i++ {
+		rs = rs.SetOrAdd(&Record{strconv.Itoa(i), strconv.Itoa(i)})
+	}
+	for i := 0; i < b.N; i++ {
+		rs.SetOrAdd(&Record{"400", "test"})
+	}
+}
+
+func BenchmarkSetOrAddOld(b *testing.B) {
+	var rs records
+	for i := 0; i < 1000; i++ {
+		rs = rs.SetOrAddOld(&Record{strconv.Itoa(i), strconv.Itoa(i)})
+	}
+	for i := 0; i < b.N; i++ {
+		rs.SetOrAddOld(&Record{"400", "test"})
 	}
 }
