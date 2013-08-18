@@ -1,7 +1,7 @@
 ApierV1.GetTPIds
 +++++++++++++++++++++++++
 
-// Queries tarrif plan identities gathered from all tables.
+Queries tarrif plan identities gathered from all tables.
 
 **Request**:
 

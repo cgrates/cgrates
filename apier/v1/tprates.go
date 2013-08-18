@@ -23,6 +23,7 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"time"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -39,8 +40,16 @@ func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
 	}
 	rts := make([]*engine.Rate, len(attrs.RateSlots))
 	for idx, rtSlot := range attrs.RateSlots {
-		rts[idx] = &engine.Rate{attrs.RateId, rtSlot.ConnectFee, rtSlot.Rate, rtSlot.RatedUnits,
-			rtSlot.RateIncrements, rtSlot.GroupInterval, rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight}
+		var errParse error
+		itrvlStrs := []string{rtSlot.RatedUnits, rtSlot.RateIncrements, rtSlot.GroupIntervalStart}
+		itrvls := make([]time.Duration, len(itrvlStrs))
+		for idxItrvl, itrvlStr := range itrvlStrs {
+			if itrvls[idxItrvl], errParse = time.ParseDuration(itrvlStr); errParse != nil {
+				return fmt.Errorf("%s:Parsing interval failed:%s", utils.ERR_SERVER_ERROR, errParse.Error())
+			}
+		}
+		rts[idx] = &engine.Rate{attrs.RateId, rtSlot.ConnectFee, rtSlot.Rate, itrvls[0], itrvls[1], itrvls[2],
+			rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight}
 	}
 	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*engine.Rate{attrs.RateId: rts}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())

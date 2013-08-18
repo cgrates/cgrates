@@ -233,7 +233,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
 }
 
 func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rated_units, rate_increments, group_interval, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
 	if err != nil {
 		return nil, err
 	}
@@ -250,8 +250,8 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 		if err != nil {
 			return nil, err
 		}
-		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, rateUnit, rateIncrement, groupIntervalStart,
-			roundingMethod, roundingDecimals, weight})
+		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, rateUnit.String(), rateIncrement.String(), 
+			groupIntervalStart.String(), roundingMethod, roundingDecimals, weight})
 	}
 	if i == 0 {
 		return nil, nil

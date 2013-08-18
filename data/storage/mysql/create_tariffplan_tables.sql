@@ -3,8 +3,8 @@
 --
 CREATE TABLE `tp_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
   `years` varchar(255) NOT NULL,
   `months` varchar(255) NOT NULL,
   `month_days` varchar(255) NOT NULL,
@@ -22,8 +22,8 @@ CREATE TABLE `tp_timings` (
 
 CREATE TABLE `tp_destinations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
   `prefix` varchar(24) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
@@ -37,8 +37,8 @@ CREATE TABLE `tp_destinations` (
 
 CREATE TABLE `tp_rates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
   `connect_fee` decimal(5,4) NOT NULL,
   `rate` decimal(5,4) NOT NULL,
   `rate_unit` int(11) NOT NULL,
@@ -59,10 +59,10 @@ CREATE TABLE `tp_rates` (
 
 CREATE TABLE `tp_destination_rates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
-  `destinations_tag` varchar(24) NOT NULL,
-  `rates_tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
+  `destinations_tag` varchar(64) NOT NULL,
+  `rates_tag` varchar(64) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_tag` (`tpid`,`tag`),
@@ -75,10 +75,10 @@ CREATE TABLE `tp_destination_rates` (
 
 CREATE TABLE `tp_destrate_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
-  `destrates_tag` varchar(24) NOT NULL,
-  `timing_tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
+  `destrates_tag` varchar(64) NOT NULL,
+  `timing_tag` varchar(64) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
@@ -92,14 +92,14 @@ CREATE TABLE `tp_destrate_timings` (
 
 CREATE TABLE `tp_rating_profiles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `tor` varchar(16) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `activation_time` varchar(24) NOT NULL,
-  `destrates_timing_tag` varchar(24) NOT NULL,
+  `destrates_timing_tag` varchar(64) NOT NULL,
   `rates_fallback_subject` varchar(64),
   PRIMARY KEY (`id`),
   KEY `tpid_tag` (`tpid`, `tag`),
@@ -112,14 +112,14 @@ CREATE TABLE `tp_rating_profiles` (
 
 CREATE TABLE `tp_actions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
   `action` varchar(24) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `units` DECIMAL(8,4) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
-  `destination_tag` varchar(24) NOT NULL,
+  `destination_tag` varchar(64) NOT NULL,
   `rate_type` varchar(8) NOT NULL,
   `rate` DECIMAL(8,4) NOT NULL,
   `minutes_weight` DECIMAL(5,2) NOT NULL,
@@ -135,10 +135,10 @@ CREATE TABLE `tp_actions` (
 
 CREATE TABLE `tp_action_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
-  `actions_tag` varchar(24) NOT NULL,
-  `timing_tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
+  `actions_tag` varchar(64) NOT NULL,
+  `timing_tag` varchar(64) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
@@ -151,14 +151,14 @@ CREATE TABLE `tp_action_timings` (
 
 CREATE TABLE `tp_action_triggers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
   `balance_type` varchar(24) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `threshold_type` char(12) NOT NULL,
   `threshold_value` DECIMAL(8,4) NOT NULL,
-  `destination_tag` varchar(24) NOT NULL,
-  `actions_tag` varchar(24) NOT NULL,
+  `destination_tag` varchar(64) NOT NULL,
+  `actions_tag` varchar(64) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
@@ -171,13 +171,13 @@ CREATE TABLE `tp_action_triggers` (
 
 CREATE TABLE `tp_account_actions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `tpid` char(40) NOT NULL,
-  `tag` varchar(24) NOT NULL,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `account` varchar(64) NOT NULL,
   `direction` varchar(8) NOT NULL,
-  `action_timings_tag` varchar(24),
-  `action_triggers_tag` varchar(24),
+  `action_timings_tag` varchar(64),
+  `action_triggers_tag` varchar(64),
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_account` (`tpid`,`tag`,`tenant`,`account`,`direction`)
