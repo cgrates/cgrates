@@ -36,7 +36,7 @@ func (self *CmdSetrRatingProfile) FromArgs(args []string) error {
 	// Args look OK, set defaults before going further
 	self.defaults()
 	self.rpcParams.TPid = args[2]
-	self.rpcParams.RateProfileId = args[3]
+	self.rpcParams.RatingProfileId = args[3]
 	return nil
 }
 

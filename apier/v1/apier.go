@@ -143,17 +143,17 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error
 
 type AttrSetRatingProfile struct {
 	TPid          string
-	RateProfileId string
+	RatingProfileId string
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
 func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateProfileId"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
-	if err := dbReader.LoadRatingProfileByTag(attrs.RateProfileId); err != nil {
+	if err := dbReader.LoadRatingProfileByTag(attrs.RatingProfileId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 

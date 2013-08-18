@@ -965,7 +965,7 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 
 func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 	rts := make(map[string]*Rate)
-	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rated_units, rate_increments, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
+	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rate_unit, rate_increment, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}

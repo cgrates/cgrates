@@ -10,10 +10,10 @@ Process dependencies and load a specific rating profile from storDb into dataDb.
 
    type AttrSetRatingProfile struct {
 	TPid          string
-	RateProfileId string
+	RatingProfileId string
    }
 
- Mandatory parameters: ``[]string{"TPid", "RateProfileId"}``
+ Mandatory parameters: ``[]string{"TPid", "RatingProfileId"}``
 
  *JSON sample*:
   ::
@@ -23,7 +23,7 @@ Process dependencies and load a specific rating profile from storDb into dataDb.
     "method": "ApierV1.SetRatingProfile", 
     "params": [
         {
-            "RateProfileId": "RPF_SAMPLE_1", 
+            "RatingProfileId": "RPF_SAMPLE_1", 
             "TPid": "TPID_SAMPLE_1"
         }
     ]
