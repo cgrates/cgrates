@@ -55,6 +55,21 @@ func (rs records) Sort() {
 }
 
 func (rs records) SetOrAdd(rec *Record) records {
+	//rs.Sort()
+	n := len(rs)
+	i := sort.Search(n, func(i int) bool { return rs[i].Key >= rec.Key })
+	if i < n && rs[i].Key == rec.Key {
+		rs[i].Object = rec.Object
+	} else {
+		// i is the index where it would be inserted.
+		rs = append(rs, nil)
+		copy(rs[i+1:], rs[i:])
+		rs[i] = rec
+	}
+	return rs
+}
+
+func (rs records) SetOrAddOld(rec *Record) records {
 	found := false
 	for _, r := range rs {
 		if r.Key == rec.Key {
