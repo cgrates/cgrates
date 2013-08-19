@@ -556,12 +556,8 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
-			var expTime int64
-			if !act.ExpirationDate.IsZero() {
-				expTime = act.ExpirationDate.Unix()
-			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,%d,'%s','%s',%f,%f,%f)",
-				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Units, expTime,
+			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,%f,%f)",
+				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Units, act.ExpirationString,
 				act.DestinationTag, act.RateType, act.RateValue, act.MinutesWeight, act.Weight)
 			i++
 		}
