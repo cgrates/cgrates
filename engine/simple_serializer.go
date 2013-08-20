@@ -139,8 +139,7 @@ func (a *Action) Restore(input string) (err error) {
 	a.BalanceId = elements[2]
 	a.Direction = elements[3]
 	a.ExpirationString = elements[4]
-	a.ExpirationDate, err = time.Parse(time.RFC3339, elements[5])
-	if err != nil {
+	if a.ExpirationDate, err = time.Parse(time.RFC3339, elements[5]); err != nil {
 		return err
 	}
 	a.Units, _ = strconv.ParseFloat(elements[6], 64)
@@ -582,15 +581,15 @@ func (mb *MinuteBucket) Store() (result string, err error) {
 
 func (mb *MinuteBucket) Restore(input string) error {
 	elements := strings.Split(input, ";")
-	if len(elements) == 5 {
-		mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
-		mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
-		mb.Price, _ = strconv.ParseFloat(elements[2], 64)
-		mb.PriceType = elements[3]
-		mb.DestinationId = elements[4]
-		return nil
+	if len(elemnets) > 0 && len(elements) != 5 {
+		return notEnoughElements("MinuteBucket", input)
 	}
-	return notEnoughElements("MinuteBucket", input)
+	mb.Seconds, _ = strconv.ParseFloat(elements[0], 64)
+	mb.Weight, _ = strconv.ParseFloat(elements[1], 64)
+	mb.Price, _ = strconv.ParseFloat(elements[2], 64)
+	mb.PriceType = elements[3]
+	mb.DestinationId = elements[4]
+	return nil
 }
 
 func (wds WeekDays) Store() (result string, err error) {
