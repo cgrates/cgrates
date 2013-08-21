@@ -175,7 +175,6 @@ func TestActionTimingFirstOfTheMonth(t *testing.T) {
 	at := &ActionTiming{Timing: &Interval{
 		Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
 		MonthDays: MonthDays{1},
-		StartTime: "00:00:00",
 	}}
 	st := at.GetNextStartTime()
 	expected := nextMonth
@@ -289,6 +288,20 @@ func TestActionTimingFirstOfTheYear(t *testing.T) {
 		Months:    Months{time.January},
 		MonthDays: MonthDays{1},
 		StartTime: "00:00:00",
+	}}
+	st := at.GetNextStartTime()
+	expected := nextYear
+	if !st.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, st)
+	}
+}
+
+func TestActionTimingFirstMonthOfTheYear(t *testing.T) {
+	now := time.Now()
+	y, _, _ := now.Date()
+	nextYear := time.Date(y+1, 1, 1, 0, 0, 0, 0, time.Local)
+	at := &ActionTiming{Timing: &Interval{
+		Months: Months{time.January},
 	}}
 	st := at.GetNextStartTime()
 	expected := nextYear

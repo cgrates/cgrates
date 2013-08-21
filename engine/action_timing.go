@@ -89,6 +89,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	if i.MonthDays != nil && len(i.MonthDays) > 0 {
 		i.MonthDays.Sort()
 		now := time.Now()
+		month := now.Month()
 		x := sort.SearchInts(i.MonthDays, now.Day())
 		d = i.MonthDays[0]
 		if x < len(i.MonthDays) {
@@ -104,14 +105,19 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 			} else { // today was not found in the list, x is the first greater day
 				d = i.MonthDays[x]
 			}
+		} else {
+			if len(i.Months) == 0 {
+				month += 1
+			}
 		}
 		h, m, s := t.Clock()
-		t = time.Date(now.Year(), now.Month(), d, h, m, s, 0, time.Local)
+		t = time.Date(now.Year(), month, d, h, m, s, 0, time.Local)
 	}
 MONTHS:
 	if i.Months != nil && len(i.Months) > 0 {
 		i.Months.Sort()
 		now := time.Now()
+		year := now.Year()
 		x := sort.Search(len(i.Months), func(x int) bool { return i.Months[x] >= now.Month() })
 		m = i.Months[0]
 		if x < len(i.Months) {
@@ -135,9 +141,13 @@ MONTHS:
 					t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 				}
 			}
+		} else {
+			if len(i.Years) == 0 {
+				year += 1
+			}
 		}
 		h, min, s := t.Clock()
-		t = time.Date(now.Year(), m, t.Day(), h, min, s, 0, time.Local)
+		t = time.Date(year, m, t.Day(), h, min, s, 0, time.Local)
 	}
 YEARS:
 	if i.Years != nil && len(i.Years) > 0 {
