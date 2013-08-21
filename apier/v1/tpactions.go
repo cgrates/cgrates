@@ -33,7 +33,7 @@ func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 	for _, action := range attrs.Actions {
 		requiredFields := []string{"Identifier", "Weight"}
 		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
-			requiredFields = append(requiredFields, "Direction", "Units", "ExpiryTime")
+			requiredFields = append(requiredFields, "Direction", "Units")
 		}
 		if missing := utils.MissingStructFields(&action, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
