@@ -580,8 +580,7 @@ func (mb *MinuteBucket) Store() (result string, err error) {
 }
 
 func (mb *MinuteBucket) Restore(input string) error {
-	input = strings.TrimSpace(input)
-	elements := strings.Split(input, ";")
+	elements := strings.Split(strings.TrimSpace(input), ";")
 	if len(elements) > 0 && len(elements) != 5 {
 		return notEnoughElements("MinuteBucket", input)
 	}
