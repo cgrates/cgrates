@@ -1,4 +1,4 @@
-mings.csv
+Timings.csv
 +++++++++++
 
 Holds time related definitions.
