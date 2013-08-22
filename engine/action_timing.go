@@ -76,7 +76,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		}
 		d := t.Day()
 		for _, j := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
-			t = time.Date(t.Year(), t.Month(), d+j, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location())
+			t = time.Date(t.Year(), t.Month(), d, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location()).AddDate(0, 0, j)
 			for _, wd := range i.WeekDays {
 				if t.Weekday() == wd && (t.Equal(now) || t.After(now)) {
 					at.stCache = t
@@ -107,7 +107,8 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 			}
 		} else {
 			if len(i.Months) == 0 {
-				month += 1
+				t = time.Date(now.Year(), month, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
+				month = t.Month()
 			}
 		}
 		h, m, s := t.Clock()
@@ -143,7 +144,8 @@ MONTHS:
 			}
 		} else {
 			if len(i.Years) == 0 {
-				year += 1
+				t = time.Date(year, m, t.Day(), 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
+				year = t.Year()
 			}
 		}
 		h, min, s := t.Clock()

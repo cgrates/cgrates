@@ -53,7 +53,7 @@ func TestActionTimingOnlyWeekdays(t *testing.T) {
 	e := time.Date(y, m, d, h, min, s, 0, time.Local)
 	day := e.Day()
 	for _, i := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
-		e = time.Date(e.Year(), e.Month(), day+i, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
+		e = time.Date(e.Year(), e.Month(), day, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location()).AddDate(0, 0, i)
 		if e.Weekday() == time.Monday && (e.Equal(now) || e.After(now)) {
 			break
 		}
@@ -71,7 +71,7 @@ func TestActionTimingHourWeekdays(t *testing.T) {
 	e := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
 	day := e.Day()
 	for _, i := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
-		e = time.Date(e.Year(), e.Month(), day+i, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
+		e = time.Date(e.Year(), e.Month(), day, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location()).AddDate(0, 0, i)
 		if e.Weekday() == time.Monday && (e.Equal(now) || e.After(now)) {
 			break
 		}
@@ -84,7 +84,7 @@ func TestActionTimingHourWeekdays(t *testing.T) {
 func TestActionTimingOnlyMonthdays(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
-	tomorrow := time.Date(y, m, d+1, 0, 0, 0, 0, time.Local)
+	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	at := &ActionTiming{Timing: &Interval{MonthDays: MonthDays{1, 25, 2, tomorrow.Day()}}}
 	st := at.GetNextStartTime()
 	expected := time.Date(y, m, tomorrow.Day(), 0, 0, 0, 0, time.Local)
@@ -97,7 +97,7 @@ func TestActionTimingHourMonthdays(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	tomorrow := time.Date(y, m, d+1, 0, 0, 0, 0, time.Local)
+	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	day := now.Day()
 	if now.After(testTime) {
 		day = tomorrow.Day()
@@ -113,7 +113,7 @@ func TestActionTimingHourMonthdays(t *testing.T) {
 func TestActionTimingOnlyMonths(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
-	nextMonth := time.Date(y, m+1, d, 0, 0, 0, 0, time.Local)
+	nextMonth := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	at := &ActionTiming{Timing: &Interval{Months: Months{time.February, time.May, nextMonth.Month()}}}
 	st := at.GetNextStartTime()
 	expected := time.Date(y, nextMonth.Month(), 1, 0, 0, 0, 0, time.Local)
@@ -126,7 +126,7 @@ func TestActionTimingHourMonths(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	nextMonth := time.Date(y, m+1, d, 0, 0, 0, 0, time.Local)
+	nextMonth := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	month := now.Month()
 	if now.After(testTime) {
 		month = nextMonth.Month()
@@ -143,8 +143,8 @@ func TestActionTimingHourMonthdaysMonths(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	nextMonth := time.Date(y, m+1, d, 0, 0, 0, 0, time.Local)
-	tomorrow := time.Date(y, m, d+1, 0, 0, 0, 0, time.Local)
+	nextMonth := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
+	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	day := now.Day()
 	if now.After(testTime) {
 		day = tomorrow.Day()
@@ -171,7 +171,7 @@ func TestActionTimingHourMonthdaysMonths(t *testing.T) {
 func TestActionTimingFirstOfTheMonth(t *testing.T) {
 	now := time.Now()
 	y, m, _ := now.Date()
-	nextMonth := time.Date(y, m+1, 1, 0, 0, 0, 0, time.Local)
+	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	at := &ActionTiming{Timing: &Interval{
 		Months:    Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
 		MonthDays: MonthDays{1},
@@ -186,7 +186,7 @@ func TestActionTimingFirstOfTheMonth(t *testing.T) {
 func TestActionTimingOnlyYears(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
-	nextYear := time.Date(y+1, m, d, 0, 0, 0, 0, time.Local)
+	nextYear := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
 	at := &ActionTiming{Timing: &Interval{Years: Years{now.Year(), nextYear.Year()}}}
 	st := at.GetNextStartTime()
 	expected := time.Date(nextYear.Year(), 1, 1, 0, 0, 0, 0, time.Local)
@@ -199,7 +199,7 @@ func TestActionTimingHourYears(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	nextYear := time.Date(y+1, m, d, 0, 0, 0, 0, time.Local)
+	nextYear := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
 	year := now.Year()
 	if now.After(testTime) {
 		year = nextYear.Year()
@@ -216,8 +216,8 @@ func TestActionTimingHourMonthdaysYear(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	nextYear := time.Date(y+1, m, d, 0, 0, 0, 0, time.Local)
-	tomorrow := time.Date(y, m, d+1, 0, 0, 0, 0, time.Local)
+	nextYear := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
+	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	day := now.Day()
 	if now.After(testTime) {
 		day = tomorrow.Day()
@@ -245,9 +245,9 @@ func TestActionTimingHourMonthdaysMonthYear(t *testing.T) {
 	now := time.Now()
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	nextYear := time.Date(y+1, m, d, 0, 0, 0, 0, time.Local)
-	nextMonth := time.Date(y, m+1, d, 0, 0, 0, 0, time.Local)
-	tomorrow := time.Date(y, m, d+1, 0, 0, 0, 0, time.Local)
+	nextYear := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
+	nextMonth := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
+	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	day := now.Day()
 	if now.After(testTime) {
 		day = tomorrow.Day()
@@ -282,7 +282,7 @@ func TestActionTimingHourMonthdaysMonthYear(t *testing.T) {
 func TestActionTimingFirstOfTheYear(t *testing.T) {
 	now := time.Now()
 	y, _, _ := now.Date()
-	nextYear := time.Date(y+1, 1, 1, 0, 0, 0, 0, time.Local)
+	nextYear := time.Date(y, 1, 1, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
 	at := &ActionTiming{Timing: &Interval{
 		Years:     Years{nextYear.Year()},
 		Months:    Months{time.January},
@@ -299,7 +299,7 @@ func TestActionTimingFirstOfTheYear(t *testing.T) {
 func TestActionTimingFirstMonthOfTheYear(t *testing.T) {
 	now := time.Now()
 	y, _, _ := now.Date()
-	nextYear := time.Date(y+1, 1, 1, 0, 0, 0, 0, time.Local)
+	nextYear := time.Date(y, 1, 1, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
 	at := &ActionTiming{Timing: &Interval{
 		Months: Months{time.January},
 	}}
