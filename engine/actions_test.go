@@ -338,7 +338,7 @@ func TestActionTimingOneTimeRun(t *testing.T) {
 
 func TestActionTimingLogFunction(t *testing.T) {
 	a := &Action{
-		ActionType:   "LOG",
+		ActionType:   "*log",
 		BalanceId:    "test",
 		Units:        1.1,
 		MinuteBucket: &MinuteBucket{},
