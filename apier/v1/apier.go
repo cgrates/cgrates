@@ -142,7 +142,7 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error
 }
 
 type AttrSetRatingProfile struct {
-	TPid          string
+	TPid            string
 	RatingProfileId string
 }
 
@@ -281,4 +281,15 @@ func (self *ApierV1) SetAccountActions(attrs AttrSetAccountActions, reply *strin
 	}
 	*reply = OK
 	return nil
+}
+
+func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
+	if self.Sched != nil {
+		self.Sched.LoadActionTimings(self.DataDb)
+		self.Sched.Restart()
+		*reply = OK
+		return nil
+	}
+	*reply = utils.ERR_NOT_FOUND
+	return errors.New(utils.ERR_NOT_FOUND)
 }
