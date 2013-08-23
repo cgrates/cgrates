@@ -182,6 +182,10 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	engine.Logger.Info("<SessionManager> FreeSWITCH answer.")
+	// Make sure cgr_type is enforced even if not set by FreeSWITCH
+	if err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err != nil {
+		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
+	}
 	s := NewSession(ev, sm)
 	if s != nil {
 		sm.sessions = append(sm.sessions, s)

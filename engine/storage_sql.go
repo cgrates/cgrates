@@ -250,7 +250,7 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 		if err != nil {
 			return nil, err
 		}
-		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, rateUnit.String(), rateIncrement.String(), 
+		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, rateUnit.String(), rateIncrement.String(),
 			groupIntervalStart.String(), roundingMethod, roundingDecimals, weight})
 	}
 	if i == 0 {
@@ -853,10 +853,7 @@ func (self *SQLStorage) GetCallCostLog(cgrid, source string) (cc *CallCost, err 
 	cc = &CallCost{Cost: -1}
 	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
 		&cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson, &src)
-	fmt.Println(cgrid, accid, cc, timespansJson, src)
-	err = json.Unmarshal([]byte(timespansJson), &cc.Timespans)
-	fmt.Println("err", err)
-	if err != nil {
+	if err = json.Unmarshal([]byte(timespansJson), &cc.Timespans); err != nil {
 		return nil, err
 	}
 	return

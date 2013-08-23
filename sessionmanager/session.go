@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/fsock"
 	"time"
 )
 
@@ -41,10 +40,6 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	// SesionManager only handles prepaid and postpaid calls
 	if ev.GetReqType() != utils.PREPAID && ev.GetReqType() != utils.POSTPAID {
 		return
-	}
-	// Make sure cgr_type is enforced even if not set by FreeSWITCH
-	if err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err != nil {
-		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
 	startTime, err := ev.GetStartTime(START_TIME)
 	if err != nil {
@@ -81,18 +76,18 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 func (s *Session) startDebitLoop() {
 	nextCd := *s.callDescriptor
 	index := 0.0
-	ticker := time.NewTicker(s.sessionManager.GetDebitPeriod())
 	for {
 		select {
 		case <-s.stopDebit:
 			return
-		case <-ticker.C:
+		default:
 		}
 		if index > 0 { // first time use the session start time
 			nextCd.TimeStart = nextCd.TimeEnd
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(s.sessionManager.GetDebitPeriod())
 		s.sessionManager.LoopAction(s, &nextCd, index)
+		time.Sleep(s.sessionManager.GetDebitPeriod())
 		index++
 	}
 }
@@ -115,12 +110,11 @@ func (s *Session) Close(ev Event) {
 	}
 	s.stopDebit <- true
 	//s.callDescriptor.TimeEnd = time.Now()
-	endTime, err := ev.GetEndTime()
-	if err != nil {
+	if endTime, err := ev.GetEndTime(); err != nil {
 		engine.Logger.Err("Error parsing answer event stop time.")
 		endTime = s.callDescriptor.TimeStart.Add(s.callDescriptor.CallDuration)
+		s.callDescriptor.TimeEnd = endTime
 	}
-	s.callDescriptor.TimeEnd = endTime
 	s.SaveOperations()
 	s.sessionManager.RemoveSession(s)
 }
