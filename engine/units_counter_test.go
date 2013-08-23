@@ -19,27 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"reflect"
 	"testing"
 )
-
-func TestUnitsCounterStoreRestore(t *testing.T) {
-	uc := &UnitsCounter{
-		Direction:     OUTBOUND,
-		BalanceId:     SMS,
-		Units:         100,
-		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
-	}
-	r, err := uc.Store()
-	if err != nil || r != "*out/*sms/100/0;20;1;;NAT,0;10;10;*absolute;RET" {
-		t.Errorf("Error serializing units counter: %v", string(r))
-	}
-	o := &UnitsCounter{}
-	err = o.Restore(r)
-	if err != nil || !reflect.DeepEqual(o, uc) {
-		t.Errorf("Expected %v was  %v", uc, o)
-	}
-}
 
 func TestUnitsCounterAddMinuteBucket(t *testing.T) {
 	uc := &UnitsCounter{

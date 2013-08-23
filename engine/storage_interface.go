@@ -210,16 +210,3 @@ func (gm *GOBMarshaler) Marshal(v interface{}) (data []byte, err error) {
 func (gm *GOBMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return gob.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
-
-type MyMarshaler struct{}
-
-func (mm *MyMarshaler) Marshal(v interface{}) ([]byte, error) {
-	ser := v.(Serializer)
-	res, err := ser.Store()
-	return []byte(res), err
-}
-
-func (mm *MyMarshaler) Unmarshal(data []byte, v interface{}) error {
-	ser := v.(Serializer)
-	return ser.Restore(string(data))
-}
