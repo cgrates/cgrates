@@ -187,13 +187,6 @@ func BenchmarkActivationPeriodStoreRestoreJson(b *testing.B) {
 	}
 }
 
-func BenchmarkActivationPeriodRestore(b *testing.B) {
-	ap := &ActivationPeriod{}
-	for i := 0; i < b.N; i++ {
-		ap.Restore("1328106601000000000|;2;1;3,4;14:30:00;15:00:00;0;0;0;0;0")
-	}
-}
-
 func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
@@ -208,12 +201,41 @@ func BenchmarkActivationPeriodStoreRestore(b *testing.B) {
 	ap1 := &ActivationPeriod{}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		result, _ := ap.Store()
-		ap1.Restore(result)
+		result, _ := marsh.Marshal(ap)
+		marsh.Unmarshal(result, ap1)
 	}
 }
 
-func BenchmarkActivationPeriodMarshallerMyStoreRestore(b *testing.B) {
+func GetUB() *UserBalance {
+	uc := &UnitsCounter{
+		Direction:     OUTBOUND,
+		BalanceId:     SMS,
+		Units:         100,
+		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
+	}
+	at := &ActionTrigger{
+		Id:             "some_uuid",
+		BalanceId:      CREDIT,
+		Direction:      OUTBOUND,
+		ThresholdValue: 100.0,
+		DestinationId:  "NAT",
+		Weight:         10.0,
+		ActionsId:      "Commando",
+	}
+	var zeroTime time.Time
+	zeroTime = zeroTime.UTC() // for deep equal to find location
+	ub := &UserBalance{
+		Id:             "rif",
+		Type:           UB_TYPE_POSTPAID,
+		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}},
+		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
+		UnitCounters:   []*UnitsCounter{uc, uc},
+		ActionTriggers: ActionTriggerPriotityList{at, at, at},
+	}
+	return ub
+}
+
+func BenchmarkMarshallerJSONStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Months: []time.Month{time.February},
@@ -223,37 +245,21 @@ func BenchmarkActivationPeriodMarshallerMyStoreRestore(b *testing.B) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
-
-	ap1 := &ActivationPeriod{}
-	b.StartTimer()
-	ms := new(MyMarshaler)
-	for i := 0; i < b.N; i++ {
-		result, _ := ms.Marshal(ap)
-		ms.Unmarshal(result, ap1)
-	}
-}
-
-func BenchmarkActivationPeriodMarshallerJSONStoreRestore(b *testing.B) {
-	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Months: []time.Month{time.February},
-		MonthDays: []int{1},
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
+	ub := GetUB()
 
 	ap1 := ActivationPeriod{}
+	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(JSONMarshaler)
 	for i := 0; i < b.N; i++ {
 		result, _ := ms.Marshal(ap)
 		ms.Unmarshal(result, ap1)
+		result, _ = ms.Marshal(ub)
+		ms.Unmarshal(result, ub1)
 	}
 }
 
-func BenchmarkActivationPeriodMarshallerBSONStoreRestore(b *testing.B) {
+func BenchmarkMarshallerBSONStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Months: []time.Month{time.February},
@@ -263,17 +269,21 @@ func BenchmarkActivationPeriodMarshallerBSONStoreRestore(b *testing.B) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
+	ub := GetUB()
 
 	ap1 := ActivationPeriod{}
+	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(BSONMarshaler)
 	for i := 0; i < b.N; i++ {
 		result, _ := ms.Marshal(ap)
 		ms.Unmarshal(result, ap1)
+		result, _ = ms.Marshal(ub)
+		ms.Unmarshal(result, ub1)
 	}
 }
 
-func BenchmarkActivationPeriodMarshallerJSONBufStoreRestore(b *testing.B) {
+func BenchmarkMarshallerJSONBufStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Months: []time.Month{time.February},
@@ -283,17 +293,21 @@ func BenchmarkActivationPeriodMarshallerJSONBufStoreRestore(b *testing.B) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
+	ub := GetUB()
 
 	ap1 := ActivationPeriod{}
+	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(JSONBufMarshaler)
 	for i := 0; i < b.N; i++ {
 		result, _ := ms.Marshal(ap)
 		ms.Unmarshal(result, ap1)
+		result, _ = ms.Marshal(ub)
+		ms.Unmarshal(result, ub1)
 	}
 }
 
-func BenchmarkActivationPeriodMarshallerGOBStoreRestore(b *testing.B) {
+func BenchmarkMarshallerGOBStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Months: []time.Month{time.February},
@@ -303,17 +317,21 @@ func BenchmarkActivationPeriodMarshallerGOBStoreRestore(b *testing.B) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
+	ub := GetUB()
 
 	ap1 := ActivationPeriod{}
+	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(GOBMarshaler)
 	for i := 0; i < b.N; i++ {
 		result, _ := ms.Marshal(ap)
 		ms.Unmarshal(result, ap1)
+		result, _ = ms.Marshal(ub)
+		ms.Unmarshal(result, ub1)
 	}
 }
 
-func BenchmarkActivationPeriodMarshallerMsgpackStoreRestore(b *testing.B) {
+func BenchmarkMarshallerMsgpackStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Months: []time.Month{time.February},
@@ -323,17 +341,22 @@ func BenchmarkActivationPeriodMarshallerMsgpackStoreRestore(b *testing.B) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
+	ub := GetUB()
 
 	ap1 := ActivationPeriod{}
+	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(MsgpackMarshaler)
 	for i := 0; i < b.N; i++ {
 		result, _ := ms.Marshal(ap)
 		ms.Unmarshal(result, ap1)
+
+		result, _ = ms.Marshal(ub)
+		ms.Unmarshal(result, ub1)
 	}
 }
 
-func BenchmarkActivationPeriodMarshallerBincStoreRestore(b *testing.B) {
+func BenchmarkMarshallerBincStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &Interval{Months: []time.Month{time.February},
@@ -343,12 +366,16 @@ func BenchmarkActivationPeriodMarshallerBincStoreRestore(b *testing.B) {
 		EndTime:   "15:00:00"}
 	ap := &ActivationPeriod{ActivationTime: d}
 	ap.AddInterval(i)
+	ub := GetUB()
 
 	ap1 := ActivationPeriod{}
+	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := NewBincMarshaler()
 	for i := 0; i < b.N; i++ {
 		result, _ := ms.Marshal(ap)
 		ms.Unmarshal(result, ap1)
+		result, _ = ms.Marshal(ub)
+		ms.Unmarshal(result, ub1)
 	}
 }

@@ -103,11 +103,11 @@ func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
 	engine.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
 	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
 	if err != nil {
-		engine.Logger.Err("could not send disconect api notification to freeswitch")
+		engine.Logger.Err(fmt.Sprintf("could not send disconect api notification to freeswitch: %v", err))
 	}
 	err = fsock.FS.SendMsgCmd(s.uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}) // without + sign
 	if err != nil {
-		engine.Logger.Err("could not send disconect msg to freeswitch")
+		engine.Logger.Err(fmt.Sprintf("could not send disconect msg to freeswitch: %v", err))
 	}
 	return
 }

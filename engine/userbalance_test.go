@@ -20,7 +20,6 @@ package engine
 
 import (
 	//"log"
-	"reflect"
 	"testing"
 	"time"
 )
@@ -49,12 +48,13 @@ func populateTestActionsForTriggers() {
 
 func TestBalanceStoreRestore(t *testing.T) {
 	b := &Balance{Value: 14, Weight: 1, Id: "test", ExpirationDate: time.Date(2013, time.July, 15, 17, 48, 0, 0, time.UTC)}
-	output, err := b.Store()
+	marsh := new(MsgpackMarshaler)
+	output, err := marsh.Marshal(b)
 	if err != nil {
 		t.Error("Error storing balance: ", err)
 	}
 	b1 := &Balance{}
-	err = b1.Restore(output)
+	err = marsh.Unmarshal(output, b1)
 	if err != nil {
 		t.Error("Error restoring balance: ", err)
 	}
@@ -65,12 +65,13 @@ func TestBalanceStoreRestore(t *testing.T) {
 
 func TestBalanceStoreRestoreZero(t *testing.T) {
 	b := &Balance{}
-	output, err := b.Store()
+
+	output, err := marsh.Marshal(b)
 	if err != nil {
 		t.Error("Error storing balance: ", err)
 	}
 	b1 := &Balance{}
-	err = b1.Restore(output)
+	err = marsh.Unmarshal(output, b1)
 	if err != nil {
 		t.Error("Error restoring balance: ", err)
 	}
@@ -81,53 +82,17 @@ func TestBalanceStoreRestoreZero(t *testing.T) {
 
 func TestBalanceChainStoreRestore(t *testing.T) {
 	bc := BalanceChain{&Balance{Value: 14, ExpirationDate: time.Date(2013, time.July, 15, 17, 48, 0, 0, time.UTC)}, &Balance{Value: 1024}}
-	output, err := bc.Store()
+	output, err := marsh.Marshal(bc)
 	if err != nil {
 		t.Error("Error storing balance chain: ", err)
 	}
 	bc1 := BalanceChain{}
-	err = (&bc1).Restore(output)
+	err = marsh.Unmarshal(output, &bc1)
 	if err != nil {
 		t.Error("Error restoring balance chain: ", err)
 	}
 	if !bc.Equal(bc1) {
 		t.Errorf("Balance chain store/restore failed: expected %v was %v", bc, bc1)
-	}
-}
-
-func TestUserBalanceStoreRestore(t *testing.T) {
-	uc := &UnitsCounter{
-		Direction:     OUTBOUND,
-		BalanceId:     SMS,
-		Units:         100,
-		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
-	}
-	at := &ActionTrigger{
-		Id:             "some_uuid",
-		BalanceId:      CREDIT,
-		Direction:      OUTBOUND,
-		ThresholdValue: 100.0,
-		DestinationId:  "NAT",
-		Weight:         10.0,
-		ActionsId:      "Commando",
-	}
-	var zeroTime time.Time
-	zeroTime = zeroTime.UTC() // for deep equal to find location
-	ub := &UserBalance{
-		Id:             "rif",
-		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
-		UnitCounters:   []*UnitsCounter{uc, uc},
-		ActionTriggers: ActionTriggerPriotityList{at, at, at},
-	}
-
-	var err error
-	r, err := ub.Store()
-	o := &UserBalance{}
-	err = o.Restore(r)
-	if err != nil || !reflect.DeepEqual(ub, o) {
-		t.Errorf("Expected [%v] was [%v] , err: %v", ub, o, err)
 	}
 }
 

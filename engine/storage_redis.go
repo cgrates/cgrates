@@ -57,7 +57,7 @@ func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
 			return nil, err
 		}
 	}
-	return &RedisStorage{db: ndb, dbNb: db, ms: new(MyMarshaler)}, nil
+	return &RedisStorage{db: ndb, dbNb: db, ms: new(MsgpackMarshaler)}, nil
 }
 
 func (rs *RedisStorage) Close() {

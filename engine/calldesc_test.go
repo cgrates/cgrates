@@ -25,6 +25,10 @@ import (
 	"time"
 )
 
+var (
+	marsh = new(MsgpackMarshaler)
+)
+
 func init() {
 	populateDB()
 	historyScribe, _ = history.NewMockScribe()
