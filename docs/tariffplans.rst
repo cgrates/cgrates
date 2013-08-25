@@ -16,8 +16,8 @@ Each individual CSV file can have any number of rows starting with comment chara
 
 Depending on CGRateS subsystem, following files are required:
 
-RatingProfiles
-~~~~~~~~~~~~~~
+Rating
+~~~~~~
 
 .. toctree::
    :maxdepth: 2
@@ -49,8 +49,8 @@ RatingProfiles
 
    csv_tpratingprofiles
 
-Accounts
-~~~~~~~~
+Accounting
+~~~~~~~~~~
 
 .. toctree::
    :maxdepth: 2
