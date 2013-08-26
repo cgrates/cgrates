@@ -1,7 +1,7 @@
 DestinationRates.csv
 ++++++++++++++++++++
 
-Bind destination group from Destinations.csv_ with rates defined in Rates.csv_ files.
+Attach rates to destinations.
 
 CSV fields as tabular representation:
 
@@ -13,47 +13,20 @@ CSV fields as tabular representation:
 | DR_RETAIL_OFFPEAK  | GERMANY          | LANDLINE_OFFPEAK    |
 +--------------------+------------------+---------------------+
 
+**Fields**
+
 Index 0 - *Tag*
-    Free-text field used to reference the entry from other files.
+  Free-text field used to reference the entry from other files.
 
-Index 1 - *Years*
-    Years this timing is valid on.
+Index 1 - *DestinationsTag*
+  References profile in Destinations.csv_.
 
-    Possibile values:
-     * Semicolon (;) separated list of years as descriptive filter.
-     * "\*any" metatag used as match-any filter.
-
-Index 2 - *Months*
-    Months this timing is valid on.
-
-    Possibile values:
-     * Semicolon (;) separated list of months as descriptive filter.
-     * "\*any" metatag used as match-any filter.
-
-Index 3 - *MonthDays*
-    Days of a month this timing is valid on.
-
-    Possibile values:
-     * Semicolon (;) separated list of month days as descriptive filter.
-     * "\*any" metatag used as match-any filter.
-
-Index 4 - *WeekDays*
-    Days of a week this timing is valid on. Week days represented as integers where 1=Monday and 7=Sunday
-
-    Possibile values:
-     * Semicolon (;) separated list of week days as descriptive filter.
-     * "\*any" metatag used as match-any filter.
-
-Index 5 - *Time*
-    The start time for this time period.
-
-    Possibile values:
-     * String representation of time (hh:mm:ss).
-     * "\*asap" metatag used to represent time converted at runtime.
+Index 2 - *RatesTag*
+  References profile defined in Rates.csv_.
 
 
-.. _Destinations.csv: csv_tpdestinations
-.. _Rates.csv: csv_tprates
+.. _Destinations.csv: csv_tpdestinations.html
+.. _Rates.csv: csv_tprates.html
 
 
 
