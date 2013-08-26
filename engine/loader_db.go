@@ -212,10 +212,11 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 		return fmt.Errorf("No RateProfile with id: %s", tag)
 	}
 	for _, ratingProfile := range rpm {
+		Logger.Debug(fmt.Sprintf("Rating profile: %v", rpm))
 		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
 		at, err := utils.ParseDate(ratingProfile.ActivationTime)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", ratingProfile.ActivationTime))
+			return fmt.Errorf("Cannot parse activation time from %v", ratingProfile.ActivationTime)
 		}
 		drtm, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.DestRatesTimingTag)
 		if err != nil {
@@ -224,7 +225,9 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 			return fmt.Errorf("No DestRateTimings profile with id: %s", ratingProfile.DestRatesTimingTag)
 		}
 		for _, destrateTiming := range drtm {
+			Logger.Debug(fmt.Sprintf("Destination rate timing: %v", rpm))
 			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
+			Logger.Debug(fmt.Sprintf("Timing: %v", rpm))
 			if err != nil {
 				return err
 			} else if len(tm) == 0 {
@@ -238,22 +241,26 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				return fmt.Errorf("No Timings profile with id: %s", destrateTiming.DestinationRatesTag)
 			}
 			for _, drate := range drm[destrateTiming.DestinationRatesTag] {
+				Logger.Debug(fmt.Sprintf("Destination rate: %v", rpm))
 				rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateTag)
 				if err != nil {
 					return err
 				} else if len(rt) == 0 {
 					return fmt.Errorf("No Rates profile with id: %s", drate.RateTag)
 				}
+				Logger.Debug(fmt.Sprintf("Rate: %v", rpm))
 				drate.Rate = rt[drate.RateTag]
 				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
 					activationPeriods[destrateTiming.Tag] = &ActivationPeriod{}
 				}
 				activationPeriods[destrateTiming.Tag].AddInterval(destrateTiming.GetInterval(drate))
 				dm, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
-				if err != nil {
-					return err
+				if err != nil || len(dm) == 0 {
+					return fmt.Errorf("Could not find destination id %s: %v", drate.DestinationsTag, err)
 				}
+				Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationsTag, dm))
 				for _, destination := range dm {
+					Logger.Debug(fmt.Sprintf("Destination: %v", rpm))
 					ap := activationPeriods[ratingProfile.DestRatesTimingTag]
 					newAP := &ActivationPeriod{ActivationTime: at}
 					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
