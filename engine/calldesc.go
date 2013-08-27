@@ -101,7 +101,7 @@ type CallDescriptor struct {
 	TOR                                   string
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
-	LoopIndex                             float64       // indicates the postion of this segment in a cost request loop
+	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
 	CallDuration                          time.Duration // the call duration so far (partial or final)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
