@@ -29,7 +29,7 @@ import (
 
 var (
 	cfg     *config.CGRConfig // Share the configuration with the rest of the package
-	storage engine.DataStorage
+	storage engine.CdrStorage
 	medi    *mediator.Mediator
 )
 
@@ -43,7 +43,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 			} else {
 				//TODO: use the connection to mediator
 			}
-		} ()
+		}()
 	} else {
 		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
 	}
@@ -68,7 +68,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 
 type CDRS struct{}
 
-func New(s engine.DataStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
+func New(s engine.CdrStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
 	storage = s
 	medi = m
 	cfg = c
@@ -76,7 +76,7 @@ func New(s engine.DataStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS 
 }
 
 func (cdrs *CDRS) StartCapturingCDRs() {
-	http.HandleFunc("/cgr_json", cgrCdrHandler) // Attach CGR CDR Handler
-	http.HandleFunc("/freeswitch_json", fsCdrHandler)  // Attach FreeSWITCH JSON CDR Handler
+	http.HandleFunc("/cgr_json", cgrCdrHandler)       // Attach CGR CDR Handler
+	http.HandleFunc("/freeswitch_json", fsCdrHandler) // Attach FreeSWITCH JSON CDR Handler
 	http.ListenAndServe(cfg.CDRSListen, nil)
 }

@@ -30,7 +30,7 @@ import (
 // Import tariff plan from csv into storDb
 type TPCSVImporter struct {
 	TPid     string      // Load data on this tpid
-	StorDb   DataStorage // StorDb connection handle
+	StorDb   LoadStorage // StorDb connection handle
 	DirPath  string      // Directory path to import from
 	Sep      rune        // Separator in the csv file
 	Verbose  bool        // If true will print a detailed information instead of silently discarding it

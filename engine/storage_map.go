@@ -32,7 +32,7 @@ type MapStorage struct {
 	ms   Marshaler
 }
 
-func NewMapStorage() (DataStorage, error) {
+func NewMapStorage() (Storage, error) {
 	return &MapStorage{dict: make(map[string][]byte), ms: new(MsgpackMarshaler)}, nil
 }
 

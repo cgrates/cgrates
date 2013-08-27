@@ -35,7 +35,7 @@ type RedisStorage struct {
 	ms   Marshaler
 }
 
-func NewRedisStorage(address string, db int, pass string) (DataStorage, error) {
+func NewRedisStorage(address string, db int, pass string) (Storage, error) {
 	addrSplit := strings.Split(address, ":")
 	host := addrSplit[0]
 	port := 6379

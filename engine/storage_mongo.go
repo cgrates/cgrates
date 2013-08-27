@@ -34,7 +34,7 @@ type MongoStorage struct {
 	db      *mgo.Database
 }
 
-func NewMongoStorage(host, port, db, user, pass string) (DataStorage, error) {
+func NewMongoStorage(host, port, db, user, pass string) (Storage, error) {
 	dial := fmt.Sprintf(host)
 	if user != "" && pass != "" {
 		dial = fmt.Sprintf("%s:%s@%s", user, pass, dial)

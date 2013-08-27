@@ -27,7 +27,7 @@ import (
 
 type DbReader struct {
 	tpid              string
-	storDb            DataStorage
+	storDb            LoadStorage
 	dataDb            DataStorage
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
@@ -41,7 +41,7 @@ type DbReader struct {
 	ratingProfiles    map[string]*RatingProfile
 }
 
-func NewDbReader(storDB DataStorage, storage DataStorage, tpid string) *DbReader {
+func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader {
 	c := new(DbReader)
 	c.storDb = storDB
 	c.dataDb = storage
@@ -54,7 +54,7 @@ func NewDbReader(storDB DataStorage, storage DataStorage, tpid string) *DbReader
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	storage := dbr.dataDb
 	if flush {
-		storage.Flush()
+		storage.(Storage).Flush()
 	}
 	if verbose {
 		log.Print("Destinations")

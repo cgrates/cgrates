@@ -42,10 +42,10 @@ type FSSessionManager struct {
 	sessions    []*Session
 	connector   engine.Connector
 	debitPeriod time.Duration
-	loggerDB    engine.DataStorage
+	loggerDB    engine.LogStorage
 }
 
-func NewFSSessionManager(storage engine.DataStorage, connector engine.Connector, debitPeriod time.Duration) *FSSessionManager {
+func NewFSSessionManager(storage engine.LogStorage, connector engine.Connector, debitPeriod time.Duration) *FSSessionManager {
 	return &FSSessionManager{loggerDB: storage, connector: connector, debitPeriod: debitPeriod}
 }
 
@@ -344,7 +344,7 @@ func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
 	return sm.debitPeriod
 }
 
-func (sm *FSSessionManager) GetDbLogger() engine.DataStorage {
+func (sm *FSSessionManager) GetDbLogger() engine.LogStorage {
 	return sm.loggerDB
 }
 
