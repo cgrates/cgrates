@@ -330,6 +330,9 @@ func main() {
 	}
 	defer logDb.Close()
 	engine.SetStorageLogger(logDb)
+	// loadDb,cdrDb and logDb are all mapped on the same stordb storage
+	loadDb = logDb.(engine.LoadStorage)
+	cdrDb = logDb.(engine.CdrStorage)
 	engine.SetRoundingMethodAndDecimals(cfg.RoundingMethod, cfg.RoundingDecimals)
 
 	if cfg.SMDebitInterval > 0 {
