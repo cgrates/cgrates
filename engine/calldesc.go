@@ -39,9 +39,9 @@ func init() {
 	//db_server := "127.0.0.1"
 	//db_server := "192.168.0.17"
 	m, _ := NewMapStorage()
+	//m, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
+	//m, _ = NewRedisStorage(db_server+":6379", 11, "")
 	storageGetter, _ = m.(DataStorage)
-	//storageGetter, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-	//storageGetter, _ = NewRedisStorage(db_server+":6379", 11, "")
 
 	storageLogger = storageGetter.(LogStorage)
 }
