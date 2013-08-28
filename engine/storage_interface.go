@@ -26,6 +26,8 @@ import (
 	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack"
 	"labix.org/v2/mgo/bson"
+	"reflect"
+	"time"
 )
 
 const (
@@ -45,6 +47,13 @@ const (
 	MEDIATOR_SOURCE        = "MED"
 	SCHED_SOURCE           = "SCH"
 	RATER_SOURCE           = "RAT"
+)
+
+var (
+	// for codec msgpack
+	mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
+	sliceByteTyp  = reflect.TypeOf([]byte(nil))
+	timeTyp       = reflect.TypeOf(time.Time{})
 )
 
 /*
@@ -175,8 +184,30 @@ func (jm *MsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return msgpack.Unmarshal(data, v)
 }
 
-type GoMsgpackMarshaler struct {
+type CodecMsgpackMarshaler struct {
 	mh *codec.MsgpackHandle
+}
+
+func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
+	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
+	mh := cmm.mh
+	mh.MapType = mapStrIntfTyp
+
+	// configure extensions for msgpack, to enable Binary and Time support for tags 0 and 1
+	mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
+	mh.AddExt(timeTyp, 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
+	return cmm
+}
+
+func (cmm *CodecMsgpackMarshaler) Marshal(v interface{}) (b []byte, err error) {
+	enc := codec.NewEncoderBytes(&b, cmm.mh)
+	err = enc.Encode(v)
+	return
+}
+
+func (cmm *CodecMsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
+	dec := codec.NewDecoderBytes(data, cmm.mh)
+	return dec.Decode(&v)
 }
 
 type BincMarshaler struct {
@@ -184,7 +215,7 @@ type BincMarshaler struct {
 }
 
 func NewBincMarshaler() *BincMarshaler {
-	return &BincMarshaler{&codec.BincHandle{}}
+	return &BincMarshaler{new(codec.BincHandle)}
 }
 
 func (bm *BincMarshaler) Marshal(v interface{}) (b []byte, err error) {

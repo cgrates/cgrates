@@ -197,6 +197,7 @@ If the amount is bigger than the sum of all seconds in the minute buckets than n
 debited and an error will be returned.
 */
 func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count bool) error {
+	// amount should be rounded at whole minutes??
 	if count {
 		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Seconds: amount, DestinationId: prefix}})
 	}

@@ -33,7 +33,7 @@ type MapStorage struct {
 }
 
 func NewMapStorage() (DataStorage, error) {
-	return &MapStorage{dict: make(map[string][]byte), ms: new(MsgpackMarshaler)}, nil
+	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler()}, nil
 }
 
 func (ms *MapStorage) Close() {}

@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	marsh = new(MsgpackMarshaler)
+	marsh = NewCodecMsgpackMarshaler()
 )
 
 func init() {

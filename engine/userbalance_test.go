@@ -48,7 +48,7 @@ func populateTestActionsForTriggers() {
 
 func TestBalanceStoreRestore(t *testing.T) {
 	b := &Balance{Value: 14, Weight: 1, Id: "test", ExpirationDate: time.Date(2013, time.July, 15, 17, 48, 0, 0, time.UTC)}
-	marsh := new(MsgpackMarshaler)
+	marsh := NewCodecMsgpackMarshaler()
 	output, err := marsh.Marshal(b)
 	if err != nil {
 		t.Error("Error storing balance: ", err)
