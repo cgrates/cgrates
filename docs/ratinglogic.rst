@@ -94,7 +94,7 @@ The result of this splitting will be a list of *TimeSpan* structures each having
 6.2.1 User balances
 -------------------
 
-The other functions relay on a user budget structure to manage the different quotas for postpaid and prepaid clients. The UserBudget keeps track of user monetary balance, free SMS and minutes for every destination, Internet traffic and offers the volume discount and received call bonus. 
+The user account contains a map of various balances like money, sms, internet traffic, internet time, etc. Each of these lists contains one or more Balance structure that have a wheight and a possible expiration date.  
 
 ::
 
@@ -112,14 +112,17 @@ The other functions relay on a user budget structure to manage the different quo
 	Weight 
  }
 
+CGRateS treats special priced or free minutes different from the rest of balances. They will be called free minutes further on but they can have a special price.
 
-Let's take them one by one.
+The free minutes must be handled a little differently because usually they are grouped by specific destinations (e.g. national minutes, ore minutes in the same network). So they are grouped in buckets and when a call is made the engine checks all applicable buckets to consume minutes according to that call.
+
+When a call cost needs to be debited these minute buckets will be queried for call destination first. If the user has special minutes for the specific destination those minutes will be consumed according to call duration.
+
+A standard debit operation consist of selecting a certaing balance type and taking all balances from that list in the weight order to be debited till the total amount is consumed.
 
 CGRateS provide api for adding/substracting user's money credit. The prepaid and postpaid are uniformly treated except that the prepaid is checked to be always greater than zero and the postpaid can go bellow zero.
 
-Both prepaid and postpaid can have a limited number of free SMS and Internet traffic per month and this budget is replenished at regular intervals based on the user tariff plan or as the user buys more free SMS (for example).
-
-The free (or special price) minutes must be handled a little differently because usually they are grouped by specific destinations (e.g. national minutes, ore minutes in the same network). So they are grouped in buckets and when a call is made the engine checks all applicable buckets to consume minutes according to that call.
+Both prepaid and postpaid can have a limited number of free SMS and Internet traffic per month and this budget is replenished at regular intervals based on the user tariff plan or as the user buys more free SMSs (for example).
 
 Another special feature allows user to get a better price as the call volume increases each month. This can be added on one ore more thresholds so the more he/she talks the cheaper the calls.
 

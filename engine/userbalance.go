@@ -40,6 +40,10 @@ const (
 	MINUTES      = "*minutes"
 )
 
+var (
+	AMOUNT_TOO_BIG = errors.New("Amount excedes balance!")
+)
+
 /*
 Structure containing information about user's credit (minutes, cents, sms...).'
 */
@@ -129,15 +133,6 @@ func (bc BalanceChain) Equal(o BalanceChain) bool {
 }
 
 /*
-Error type for overflowed debit methods.
-*/
-type AmountTooBig struct{}
-
-func (a AmountTooBig) Error() string {
-	return "Amount excedes balance!"
-}
-
-/*
 Returns user's available minutes for the specified destination
 */
 func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float64, bucketList bucketsorter) {
@@ -207,12 +202,9 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 	}
 	avaliableNbSeconds, _, bucketList := ub.getSecondsForPrefix(prefix)
 	if avaliableNbSeconds < amount {
-		return new(AmountTooBig)
+		return AMOUNT_TOO_BIG
 	}
 	credit := ub.BalanceMap[CREDIT+OUTBOUND]
-	// calculating money debit
-	// this is needed because if the credit is less then the amount needed to be debited
-	// we need to keep everything in place and return an error
 	for _, mb := range bucketList {
 		if mb.Seconds < amount {
 			if mb.Price > 0 { // debit the money if the bucket has price
@@ -224,12 +216,6 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 			}
 			break
 		}
-		if credit.GetTotalValue() < 0 {
-			break
-		}
-	}
-	if credit.GetTotalValue() < 0 {
-		return new(AmountTooBig)
 	}
 	ub.BalanceMap[CREDIT+OUTBOUND] = credit // credit is > 0
 

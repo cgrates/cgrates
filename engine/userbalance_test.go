@@ -254,7 +254,10 @@ func TestDebitPriceMoreMinuteBalance(t *testing.T) {
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 1.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
 	err := rifsBalance.debitMinutesBalance(25, "0723", false)
-	if b2.Seconds != 100 || b1.Seconds != 10 || err == nil || rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != -4 {
+	if b2.Seconds != 75 || b1.Seconds != 10 || err != nil || rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != -4 {
+		t.Log(b2.Seconds)
+		t.Log(b1.Seconds)
+		t.Log(err)
 		t.Errorf("Expected %v was %v", -4, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
 }
