@@ -72,6 +72,15 @@ func (b *Balance) IsExpired() bool {
 	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
 }
 
+func (b *Balance) Clone() *Balance {
+	return &Balance{
+		Id:             b.Id,
+		Value:          b.Value,
+		ExpirationDate: b.ExpirationDate,
+		Weight:         b.Weight,
+	}
+}
+
 /*
 Structure to store minute buckets according to weight, precision or price.
 */
@@ -130,6 +139,14 @@ func (bc BalanceChain) Equal(o BalanceChain) bool {
 		}
 	}
 	return true
+}
+
+func (bc BalanceChain) Clone() BalanceChain {
+	var newChain BalanceChain
+	for _, b := range bc {
+		newChain = append(newChain, b.Clone())
+	}
+	return newChain
 }
 
 /*
@@ -197,7 +214,6 @@ If the amount is bigger than the sum of all seconds in the minute buckets than n
 debited and an error will be returned.
 */
 func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count bool) error {
-	// amount should be rounded at whole minutes??
 	if count {
 		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, MinuteBucket: &MinuteBucket{Seconds: amount, DestinationId: prefix}})
 	}
@@ -205,7 +221,10 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 	if avaliableNbSeconds < amount {
 		return AMOUNT_TOO_BIG
 	}
-	credit := ub.BalanceMap[CREDIT+OUTBOUND]
+	var credit BalanceChain
+	if bc, exists := ub.BalanceMap[CREDIT+OUTBOUND]; exists {
+		credit = bc.Clone()
+	}
 	for _, mb := range bucketList {
 		if mb.Seconds < amount {
 			if mb.Price > 0 { // debit the money if the bucket has price
@@ -217,6 +236,13 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 			}
 			break
 		}
+		if ub.Type == UB_TYPE_PREPAID && credit.GetTotalValue() < 0 {
+			break
+		}
+	}
+	// need to check again because there are two break above
+	if ub.Type == UB_TYPE_PREPAID && credit.GetTotalValue() < 0 {
+		return AMOUNT_TOO_BIG
 	}
 	ub.BalanceMap[CREDIT+OUTBOUND] = credit // credit is > 0
 

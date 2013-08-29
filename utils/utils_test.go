@@ -194,3 +194,36 @@ func TestMissingStructFieldsIncorrect(t *testing.T) {
 		t.Error("Found missing field on correct struct", missing)
 	}
 }
+
+func TestRoundToMinute(t *testing.T) {
+	result := RoundToMinute(0)
+	expected := 0.0
+	if result != expected {
+		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
+	}
+	result = RoundToMinute(1)
+	expected = 60.0
+	if result != expected {
+		t.Errorf("Error rounding to minute2: expected %v was %v", expected, result)
+	}
+	result = RoundToMinute(59)
+	expected = 60.0
+	if result != expected {
+		t.Errorf("Error rounding to minute3: expected %v was %v", expected, result)
+	}
+	result = RoundToMinute(60)
+	expected = 60.0
+	if result != expected {
+		t.Errorf("Error rounding to minute4: expected %v was %v", expected, result)
+	}
+	result = RoundToMinute(90)
+	expected = 120.0
+	if result != expected {
+		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
+	}
+	result = RoundToMinute(120)
+	expected = 120.0
+	if result != expected {
+		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
+	}
+}

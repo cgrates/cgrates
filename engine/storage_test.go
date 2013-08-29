@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-func TestMsgpackStructs(t *testing.T) {
+func TestMsgpackStructsAdded(t *testing.T) {
 	var a = struct{ First string }{"test"}
 	var b = struct {
 		First  string
@@ -36,6 +36,23 @@ func TestMsgpackStructs(t *testing.T) {
 	}
 	err = m.Unmarshal(buf, &b)
 	if err != nil || b.First != "test" || b.Second != "" {
+		t.Error("error unmarshalling structure: ", b, err)
+	}
+}
+
+func TestMsgpackStructsMissing(t *testing.T) {
+	var a = struct {
+		First  string
+		Second string
+	}{"test1", "test2"}
+	var b = struct{ First string }{}
+	m := NewCodecMsgpackMarshaler()
+	buf, err := m.Marshal(&a)
+	if err != nil {
+		t.Error("error marshaling structure: ", err)
+	}
+	err = m.Unmarshal(buf, &b)
+	if err != nil || b.First != "test1" {
 		t.Error("error unmarshalling structure: ", b, err)
 	}
 }

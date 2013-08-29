@@ -120,3 +120,10 @@ func ParseDate(date string) (expDate time.Time, err error) {
 	}
 	return expDate, err
 }
+
+func RoundToMinute(seconds float64) float64 {
+	if math.Mod(seconds, 60) == 0 {
+		return seconds
+	}
+	return (60 - math.Mod(seconds, 60)) + seconds
+}

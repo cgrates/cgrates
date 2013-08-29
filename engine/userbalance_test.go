@@ -262,6 +262,20 @@ func TestDebitPriceMoreMinuteBalance(t *testing.T) {
 	}
 }
 
+func TestDebitPriceMoreMinuteBalancePrepay(t *testing.T) {
+	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
+	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 1.0, DestinationId: "RET"}
+	rifsBalance := &UserBalance{Id: "other", Type: UB_TYPE_PREPAID, MinuteBuckets: []*MinuteBucket{b1, b2}, BalanceMap: map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
+	err := rifsBalance.debitMinutesBalance(25, "0723", false)
+	expected := 21.0
+	if b2.Seconds != 100 || b1.Seconds != 10 || err != AMOUNT_TOO_BIG || rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != expected {
+		t.Log(b2.Seconds)
+		t.Log(b1.Seconds)
+		t.Log(err)
+		t.Errorf("Expected %v was %v", expected, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
+	}
+}
+
 func TestDebitPriceNegativeMinuteBalance(t *testing.T) {
 	b1 := &MinuteBucket{Seconds: 10, Weight: 10, Price: 0.0, DestinationId: "NAT"}
 	b2 := &MinuteBucket{Seconds: 100, Weight: 20, Price: 1.0, DestinationId: "RET"}
