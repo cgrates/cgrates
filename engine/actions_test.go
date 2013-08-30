@@ -400,6 +400,110 @@ func TestActionTimingPriotityListWeight(t *testing.T) {
 	}
 }
 
+func TestActionTriggerMatchNil(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:      OUTBOUND,
+		BalanceId:      CREDIT,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
+	}
+	var a *Action
+	if !at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
+func TestActionTriggerMatchAllBlank(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:      OUTBOUND,
+		BalanceId:      CREDIT,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
+	}
+	a := &Action{}
+	if !at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
+func TestActionTriggerMatchMinuteBucketBlank(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:      OUTBOUND,
+		BalanceId:      CREDIT,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
+	}
+	a := &Action{Direction: OUTBOUND, BalanceId: CREDIT}
+	if !at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
+func TestActionTriggerMatchMinuteBucketFull(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:      OUTBOUND,
+		BalanceId:      CREDIT,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
+	}
+	a := &Action{MinuteBucket: &MinuteBucket{PriceType: TRIGGER_MAX_BALANCE, Price: 2}}
+	if !at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
+func TestActionTriggerMatchAllFull(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:      OUTBOUND,
+		BalanceId:      CREDIT,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
+	}
+	a := &Action{Direction: OUTBOUND, BalanceId: CREDIT, MinuteBucket: &MinuteBucket{PriceType: TRIGGER_MAX_BALANCE, Price: 2}}
+	if !at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
+func TestActionTriggerMatchSomeFalse(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:      OUTBOUND,
+		BalanceId:      CREDIT,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
+	}
+	a := &Action{Direction: INBOUND, BalanceId: CREDIT, MinuteBucket: &MinuteBucket{PriceType: TRIGGER_MAX_BALANCE, Price: 2}}
+	if at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
+func TestActionTriggerMatcMinuteBucketFalse(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:      OUTBOUND,
+		BalanceId:      CREDIT,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
+	}
+	a := &Action{Direction: OUTBOUND, BalanceId: CREDIT, MinuteBucket: &MinuteBucket{PriceType: TRIGGER_MAX_BALANCE, Price: 3}}
+	if at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
+func TestActionTriggerMatcAllFalse(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:      OUTBOUND,
+		BalanceId:      CREDIT,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 2,
+	}
+	a := &Action{Direction: INBOUND, BalanceId: MINUTES, MinuteBucket: &MinuteBucket{PriceType: TRIGGER_MAX_COUNTER, Price: 3}}
+	if at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
 func TestActionTriggerPriotityList(t *testing.T) {
 	at1 := &ActionTrigger{Weight: 10}
 	at2 := &ActionTrigger{Weight: 20}

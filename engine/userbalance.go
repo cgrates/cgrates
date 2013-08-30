@@ -21,9 +21,7 @@ package engine
 import (
 	"errors"
 	"github.com/cgrates/cgrates/utils"
-	"sort"
 	"strings"
-	"time"
 )
 
 const (
@@ -41,6 +39,11 @@ const (
 	// action price type
 	PRICE_PERCENT  = "*percent"
 	PRICE_ABSOLUTE = "*absolute"
+	// action trigger threshold types
+	TRIGGER_MIN_COUNTER = "*min_counter"
+	TRIGGER_MAX_COUNTER = "*max_counter"
+	TRIGGER_MIN_BALANCE = "*min_balance"
+	TRIGGER_MAX_BALANCE = "*max_balance"
 )
 
 var (
@@ -49,6 +52,7 @@ var (
 
 /*
 Structure containing information about user's credit (minutes, cents, sms...).'
+This can represent a user or a shared group.
 */
 type UserBalance struct {
 	Id             string
@@ -57,104 +61,10 @@ type UserBalance struct {
 	MinuteBuckets  []*MinuteBucket
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
+
+	Groups GroupLinks // user info about groups
 	// group information
-	GroupIds []string
-	UserIds  []string
-}
-
-type Balance struct {
-	Id             string
-	Value          float64
-	ExpirationDate time.Time
-	Weight         float64
-	GroupIds       []string
-	Percent        float64
-}
-
-func (b *Balance) Equal(o *Balance) bool {
-	return b.ExpirationDate.Equal(o.ExpirationDate) ||
-		b.Weight == o.Weight
-}
-
-func (b *Balance) IsExpired() bool {
-	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
-}
-
-func (b *Balance) Clone() *Balance {
-	return &Balance{
-		Id:             b.Id,
-		Value:          b.Value,
-		ExpirationDate: b.ExpirationDate,
-		Weight:         b.Weight,
-	}
-}
-
-/*
-Structure to store minute buckets according to weight, precision or price.
-*/
-type BalanceChain []*Balance
-
-func (bc BalanceChain) Len() int {
-	return len(bc)
-}
-
-func (bc BalanceChain) Swap(i, j int) {
-	bc[i], bc[j] = bc[j], bc[i]
-}
-
-func (bc BalanceChain) Less(j, i int) bool {
-	return bc[i].Weight < bc[j].Weight
-}
-
-func (bc BalanceChain) Sort() {
-	sort.Sort(bc)
-}
-
-func (bc BalanceChain) GetTotalValue() (total float64) {
-	for _, b := range bc {
-		if !b.IsExpired() {
-			total += b.Value
-		}
-	}
-	return
-}
-
-func (bc BalanceChain) Debit(amount float64) float64 {
-	bc.Sort()
-	for i, b := range bc {
-		if b.IsExpired() {
-			continue
-		}
-		if b.Value >= amount || i == len(bc)-1 { // if last one go negative
-			b.Value -= amount
-			break
-		}
-		b.Value = 0
-		amount -= b.Value
-	}
-	return bc.GetTotalValue()
-}
-
-func (bc BalanceChain) Equal(o BalanceChain) bool {
-	if len(bc) != len(o) {
-		return false
-	}
-	bc.Sort()
-	o.Sort()
-	for i := 0; i < len(bc); i++ {
-		if !bc[i].Equal(o[i]) {
-			return false
-		}
-	}
-	return true
-}
-
-func (bc BalanceChain) Clone() BalanceChain {
-	var newChain BalanceChain
-	for _, b := range bc {
-		newChain = append(newChain, b.Clone())
-	}
-	return newChain
+	UserIds []string // group info about users
 }
 
 /*
@@ -309,11 +219,7 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 			// the next reset (see RESET_TRIGGERS action type)
 			continue
 		}
-		if a != nil && (at.BalanceId != a.BalanceId ||
-			at.Direction != a.Direction ||
-			(a.MinuteBucket != nil &&
-				(at.ThresholdType != a.MinuteBucket.PriceType ||
-					at.ThresholdValue != a.MinuteBucket.Price))) {
+		if !at.Match(a) {
 			continue
 		}
 		if strings.Contains(at.ThresholdType, "counter") {
@@ -386,11 +292,7 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 // If the action is not nil it acts like a filter
 func (ub *UserBalance) resetActionTriggers(a *Action) {
 	for _, at := range ub.ActionTriggers {
-		if a != nil && (at.BalanceId != a.BalanceId ||
-			at.Direction != a.Direction ||
-			(a.MinuteBucket != nil &&
-				(at.ThresholdType != a.MinuteBucket.PriceType ||
-					at.ThresholdValue != a.MinuteBucket.Price))) {
+		if !at.Match(a) {
 			continue
 		}
 		at.Executed = false

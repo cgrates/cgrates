@@ -369,7 +369,9 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		}
 		for _, ts := range cc.Timespans {
 			if ts.MinuteInfo != nil {
-				userBalance.debitMinutesBalance(ts.MinuteInfo.Quantity, cd.Destination, true)
+				if err = userBalance.debitMinutesBalance(ts.MinuteInfo.Quantity, cd.Destination, true); err != nil {
+					return cc, err
+				}
 			}
 		}
 	}
@@ -387,8 +389,7 @@ func (cd *CallDescriptor) MaxDebit(startTime time.Time) (cc *CallCost, err error
 		return new(CallCost), errors.New("no more credit")
 	}
 	if remainingSeconds > 0 { // for postpaying client returns -1
-		rs, _ := time.ParseDuration(fmt.Sprintf("%vs", remainingSeconds))
-		cd.TimeEnd = cd.TimeStart.Add(rs)
+		cd.TimeEnd = cd.TimeStart.Add(time.Duration(remainingSeconds) * time.Second)
 	}
 	return cd.Debit()
 }

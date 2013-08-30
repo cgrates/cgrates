@@ -64,6 +64,22 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	return
 }
 
+// returns true if the field of the action timing are equeal to the non empty
+// fields of the action
+func (at *ActionTrigger) Match(a *Action) bool {
+	if a == nil {
+		return true
+	}
+	id := a.BalanceId == "" || at.BalanceId == a.BalanceId
+	direction := a.Direction == "" || at.Direction == a.Direction
+	thresholdType, thresholdValue := true, true
+	if a.MinuteBucket != nil {
+		thresholdType = a.MinuteBucket.PriceType == "" || at.ThresholdType == a.MinuteBucket.PriceType
+		thresholdValue = a.MinuteBucket.Price == 0 || at.ThresholdValue == a.MinuteBucket.Price
+	}
+	return id && direction && thresholdType && thresholdValue
+}
+
 // Structure to store actions according to weight
 type ActionTriggerPriotityList []*ActionTrigger
 
