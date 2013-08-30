@@ -198,31 +198,6 @@ func BenchmarkMarshallerGOBStoreRestore(b *testing.B) {
 	}
 }
 
-func BenchmarkMarshallerMsgpackStoreRestore(b *testing.B) {
-	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Months: []time.Month{time.February},
-		MonthDays: []int{1},
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
-	ub := GetUB()
-
-	ap1 := ActivationPeriod{}
-	ub1 := &UserBalance{}
-	b.StartTimer()
-	ms := new(MsgpackMarshaler)
-	for i := 0; i < b.N; i++ {
-		result, _ := ms.Marshal(ap)
-		ms.Unmarshal(result, ap1)
-
-		result, _ = ms.Marshal(ub)
-		ms.Unmarshal(result, ub1)
-	}
-}
-
 func BenchmarkMarshallerCodecMsgpackStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)

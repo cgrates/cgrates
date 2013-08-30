@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
-	"github.com/vmihailenco/msgpack"
 	"labix.org/v2/mgo/bson"
 	"reflect"
 	"time"
@@ -172,16 +171,6 @@ func (jbm *JSONBufMarshaler) Marshal(v interface{}) (data []byte, err error) {
 
 func (jbm *JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return json.NewDecoder(bytes.NewBuffer(data)).Decode(v)
-}
-
-type MsgpackMarshaler struct{}
-
-func (jm *MsgpackMarshaler) Marshal(v interface{}) ([]byte, error) {
-	return msgpack.Marshal(v)
-}
-
-func (jm *MsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
-	return msgpack.Unmarshal(data, v)
 }
 
 type CodecMsgpackMarshaler struct {
