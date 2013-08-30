@@ -34,11 +34,6 @@ type MinuteBucket struct {
 	precision      int
 }
 
-const (
-	PERCENT  = "*percent"
-	ABSOLUTE = "*absolute"
-)
-
 // Returns the available number of seconds for a specified credit
 func (mb *MinuteBucket) GetSecondsForCredit(credit float64) (seconds float64) {
 	seconds = mb.Seconds
@@ -64,7 +59,6 @@ func (mb *MinuteBucket) Equal(o *MinuteBucket) bool {
 	return mb.DestinationId == o.DestinationId &&
 		mb.Weight == o.Weight &&
 		mb.Price == o.Price &&
-		mb.PriceType == o.PriceType &&
 		mb.ExpirationDate.Equal(o.ExpirationDate)
 }
 

@@ -27,7 +27,7 @@ func TestUnitsCounterAddMinuteBucket(t *testing.T) {
 		Direction:     OUTBOUND,
 		BalanceId:     SMS,
 		Units:         100,
-		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
+		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
 	}
 	uc.addMinutes(20, "test")
 	if len(uc.MinuteBuckets) != 2 {
@@ -40,7 +40,7 @@ func TestUnitsCounterAddMinuteBucketExists(t *testing.T) {
 		Direction:     OUTBOUND,
 		BalanceId:     SMS,
 		Units:         100,
-		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
+		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
 	}
 	uc.addMinutes(5, "0723")
 	if len(uc.MinuteBuckets) != 2 || uc.MinuteBuckets[0].Seconds != 15 {

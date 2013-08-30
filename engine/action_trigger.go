@@ -28,7 +28,7 @@ type ActionTrigger struct {
 	Id             string // uniquely identify the trigger
 	BalanceId      string
 	Direction      string
-	ThresholdType  string
+	ThresholdType  string //*min_counter, *max_counter, *min_balance, *max_balance
 	ThresholdValue float64
 	DestinationId  string
 	Weight         float64

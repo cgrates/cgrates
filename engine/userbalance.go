@@ -38,6 +38,9 @@ const (
 	TRAFFIC      = "*internet"
 	TRAFFIC_TIME = "*internet_time"
 	MINUTES      = "*minutes"
+	// action price type
+	PRICE_PERCENT  = "*percent"
+	PRICE_ABSOLUTE = "*absolute"
 )
 
 var (
@@ -54,6 +57,9 @@ type UserBalance struct {
 	MinuteBuckets  []*MinuteBucket
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
+	// group information
+	GroupIds []string
+	UserIds  []string
 }
 
 type Balance struct {
@@ -61,6 +67,8 @@ type Balance struct {
 	Value          float64
 	ExpirationDate time.Time
 	Weight         float64
+	GroupIds       []string
+	Percent        float64
 }
 
 func (b *Balance) Equal(o *Balance) bool {
