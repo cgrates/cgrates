@@ -30,6 +30,6 @@ type SessionManager interface {
 	RemoveSession(*Session)
 	LoopAction(*Session, *engine.CallDescriptor, float64)
 	GetDebitPeriod() time.Duration
-	GetDbLogger() engine.DataStorage
+	GetDbLogger() engine.LogStorage
 	Shutdown() error
 }

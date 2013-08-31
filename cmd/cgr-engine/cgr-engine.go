@@ -64,7 +64,7 @@ var (
 	err      error
 )
 
-func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddress string, rpc_encoding string, getter engine.DataStorage, loggerDb engine.DataStorage) {
+func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddress string, rpc_encoding string, getter engine.DataStorage, loggerDb engine.LogStorage) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
@@ -94,7 +94,7 @@ func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddr
 	}
 }
 
-func startMediator(responder *engine.Responder, loggerDb engine.DataStorage) {
+func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrDb engine.CdrStorage) {
 	var connector engine.Connector
 	if cfg.MediatorRater == INTERNAL {
 		connector = responder
@@ -125,7 +125,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.DataStorage) {
 		connector = &engine.RPCClientConnector{Client: client}
 	}
 	var err error
-	medi, err = mediator.NewMediator(connector, loggerDb, cfg)
+	medi, err = mediator.NewMediator(connector, loggerDb, cdrDb, cfg)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
@@ -136,7 +136,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.DataStorage) {
 	}
 }
 
-func startSessionManager(responder *engine.Responder, loggerDb engine.DataStorage) {
+func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage) {
 	var connector engine.Connector
 	if cfg.SMRater == INTERNAL {
 		connector = responder
@@ -183,7 +183,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.DataStorag
 	exitChan <- true
 }
 
-func startCDRS(responder *engine.Responder, loggerDb engine.DataStorage) {
+func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage) {
 	if cfg.CDRSMediator == INTERNAL {
 		for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
 			time.Sleep(time.Duration(i/2) * time.Second)
@@ -196,7 +196,7 @@ func startCDRS(responder *engine.Responder, loggerDb engine.DataStorage) {
 			exitChan <- true
 		}
 	}
-	cs := cdrs.New(loggerDb, medi, cfg)
+	cs := cdrs.New(cdrDb, medi, cfg)
 	cs.StartCapturingCDRs()
 	exitChan <- true
 }
@@ -308,25 +308,31 @@ func main() {
 		return
 	}
 
-	var getter, loggerDb engine.DataStorage
-	getter, err = engine.ConfigureDatabase(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
+	var dataDb engine.DataStorage
+	var logDb engine.LogStorage
+	var loadDb engine.LoadStorage
+	var cdrDb engine.CdrStorage
+	dataDb, err = engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
 	if err != nil { // Cannot configure getter database, show stopper
 		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
-	defer getter.Close()
-	engine.SetDataStorage(getter)
+	defer dataDb.Close()
+	engine.SetDataStorage(dataDb)
 	if cfg.StorDBType == SAME {
-		loggerDb = getter
+		logDb = dataDb.(engine.LogStorage)
 	} else {
-		loggerDb, err = engine.ConfigureDatabase(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass)
+		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass)
 		if err != nil { // Cannot configure logger database, show stopper
 			engine.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return
 		}
 	}
-	defer loggerDb.Close()
-	engine.SetStorageLogger(loggerDb)
+	defer logDb.Close()
+	engine.SetStorageLogger(logDb)
+	// loadDb,cdrDb and logDb are all mapped on the same stordb storage
+	loadDb = logDb.(engine.LoadStorage)
+	cdrDb = logDb.(engine.CdrStorage)
 	engine.SetRoundingMethodAndDecimals(cfg.RoundingMethod, cfg.RoundingDecimals)
 
 	if cfg.SMDebitInterval > 0 {
@@ -341,16 +347,16 @@ func main() {
 		go stopRaterSingnalHandler()
 	}
 	responder := &engine.Responder{ExitChan: exitChan}
-	apier := &apier.ApierV1{StorDb: loggerDb, DataDb: getter}
+	apier := &apier.ApierV1{StorDb: loadDb, DataDb: dataDb}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
 		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
-		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding, getter, loggerDb)
+		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding, dataDb, logDb)
 	}
 	if cfg.BalancerEnabled {
 		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
-		go listenToRPCRequests(responder, apier, cfg.BalancerListen, cfg.RPCEncoding, getter, loggerDb)
+		go listenToRPCRequests(responder, apier, cfg.BalancerListen, cfg.RPCEncoding, dataDb, logDb)
 		if cfg.RaterEnabled {
 			engine.Logger.Info("Starting internal engine.")
 			bal.AddClient("local", new(engine.ResponderWorker))
@@ -361,28 +367,28 @@ func main() {
 		engine.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
-			go reloadSchedulerSingnalHandler(sched, getter)
+			go reloadSchedulerSingnalHandler(sched, dataDb)
 			apier.Sched = sched
-			sched.LoadActionTimings(getter)
+			sched.LoadActionTimings(dataDb)
 			sched.Loop()
 		}()
 	}
 
 	if cfg.SMEnabled {
 		engine.Logger.Info("Starting CGRateS SessionManager.")
-		go startSessionManager(responder, loggerDb)
+		go startSessionManager(responder, logDb)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler()
 	}
 
 	if cfg.MediatorEnabled {
 		engine.Logger.Info("Starting CGRateS Mediator.")
-		go startMediator(responder, loggerDb)
+		go startMediator(responder, logDb, cdrDb)
 	}
 
 	if cfg.CDRSEnabled {
 		engine.Logger.Info("Starting CGRateS CDR Server.")
-		go startCDRS(responder, loggerDb)
+		go startCDRS(responder, cdrDb)
 	}
 
 	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {

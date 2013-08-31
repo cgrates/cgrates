@@ -53,7 +53,7 @@ func populateDB() {
 		},
 	}
 	if storageGetter != nil {
-		storageGetter.Flush()
+		storageGetter.(Storage).Flush()
 		storageGetter.SetUserBalance(broker)
 		storageGetter.SetUserBalance(minu)
 	} else {

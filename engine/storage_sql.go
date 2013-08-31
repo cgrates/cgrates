@@ -30,28 +30,11 @@ type SQLStorage struct {
 	Db *sql.DB
 }
 
-func (self *SQLStorage) Close() {}
+func (self *SQLStorage) Close() {
+	self.Close()
+}
 
 func (self *SQLStorage) Flush() (err error) {
-	return
-}
-
-func (self *SQLStorage) GetRatingProfile(string) (rp *RatingProfile, err error) {
-	/*row := self.Db.QueryRow(fmt.Sprintf("SELECT * FROM ratingprofiles WHERE id='%s'", id))
-	err = row.Scan(&rp, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
-	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)*/
-	return
-}
-
-func (self *SQLStorage) SetRatingProfile(rp *RatingProfile) (err error) {
-	return
-}
-
-func (self *SQLStorage) GetDestination(string) (d *Destination, err error) {
-	return
-}
-
-func (self *SQLStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
@@ -796,24 +779,6 @@ func (self *SQLStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
 		return nil, nil
 	}
 	return ids, nil
-}
-
-func (self *SQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
-
-func (self *SQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
-
-func (self *SQLStorage) GetActions(string) (as Actions, err error) {
-	return
-}
-
-func (self *SQLStorage) SetActions(key string, as Actions) (err error) { return }
-
-func (self *SQLStorage) GetActionTimings(key string) (ats ActionTimings, err error) { return }
-
-func (self *SQLStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
-
-func (self *SQLStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
-	return
 }
 
 func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {

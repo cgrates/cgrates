@@ -35,10 +35,10 @@ import (
 	"time"
 )
 
-func NewMediator(connector engine.Connector, storDb engine.DataStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
+func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engine.CdrStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
 	m = &Mediator{
 		connector: connector,
-		storDb:    storDb,
+		logDb:     logDb,
 		cgrCfg:    cfg,
 	}
 	m.fieldNames = make(map[string][]string)
@@ -52,7 +52,8 @@ func NewMediator(connector engine.Connector, storDb engine.DataStorage, cfg *con
 
 type Mediator struct {
 	connector           engine.Connector
-	storDb              engine.DataStorage
+	logDb               engine.LogStorage
+	cdrDb               engine.CdrStorage
 	cgrCfg              *config.CGRConfig
 	cdrInDir, cdrOutDir string
 	accIdField          string
@@ -166,8 +167,8 @@ func (self *Mediator) TrackCDRFiles() (err error) {
 // Retrive the cost from logging database
 func (self *Mediator) getCostsFromDB(cdr utils.CDR) (cc *engine.CallCost, err error) {
 	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
-		cc, err = self.storDb.GetCallCostLog(cdr.GetCgrId(), engine.SESSION_MANAGER_SOURCE) //ToDo: What are we getting when there is no log?
-		if cc != nil { // There were no errors, chances are that we got what we are looking for
+		cc, err = self.logDb.GetCallCostLog(cdr.GetCgrId(), engine.SESSION_MANAGER_SOURCE) //ToDo: What are we getting when there is no log?
+		if cc != nil {                                                                     // There were no errors, chances are that we got what we are looking for
 			break
 		}
 		time.Sleep(time.Duration(i) * time.Second)
@@ -204,10 +205,10 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*engine.CallCost, error)
 		err = self.connector.GetCost(cd, cc)
 	}
 	if err != nil {
-		self.storDb.LogError(cdr.GetCgrId(), engine.MEDIATOR_SOURCE, err.Error())
+		self.logDb.LogError(cdr.GetCgrId(), engine.MEDIATOR_SOURCE, err.Error())
 	} else {
 		// If the mediator calculated a price it will write it to logdb
-		self.storDb.LogCallCost(cdr.GetCgrId(), engine.MEDIATOR_SOURCE, cc)
+		self.logDb.LogCallCost(cdr.GetCgrId(), engine.MEDIATOR_SOURCE, cc)
 	}
 	return cc, err
 }
@@ -273,9 +274,9 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 	return
 }
 
-func (self *Mediator) MediateDBCDR(cdr utils.CDR, db engine.DataStorage) error {
+func (self *Mediator) MediateDBCDR(cdr utils.CDR, db engine.CdrStorage) error {
 	var qryCC *engine.CallCost
-	cc := &engine.CallCost{Cost:-1}
+	cc := &engine.CallCost{Cost: -1}
 	var errCost error
 	if cdr.GetReqType() == utils.PREPAID || cdr.GetReqType() == utils.POSTPAID {
 		// Should be previously calculated and stored in DB
@@ -293,5 +294,5 @@ func (self *Mediator) MediateDBCDR(cdr utils.CDR, db engine.DataStorage) error {
 	if errCost != nil {
 		extraInfo = errCost.Error()
 	}
-	return self.storDb.SetRatedCdr(cdr, cc, extraInfo)
+	return self.cdrDb.SetRatedCdr(cdr, cc, extraInfo)
 }

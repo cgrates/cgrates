@@ -66,18 +66,19 @@ func main() {
 		return
 	}
 	var errDataDb, errStorDb, err error
-	var dataDb, storDb engine.DataStorage
+	var dataDb engine.DataStorage
+	var storDb engine.LoadStorage
 	// Init necessary db connections
 	if *fromStorDb {
-		dataDb, errDataDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
-		storDb, errStorDb = engine.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
+		dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+		storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
 	} else if *toStorDb { // Import from csv files to storDb
-		storDb, errStorDb = engine.ConfigureDatabase(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
+		storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass)
 	} else { // Default load from csv files to dataDb
-		dataDb, errDataDb = engine.ConfigureDatabase(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
+		dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass)
 	}
 	// Defer databases opened to be closed when we are done
-	for _, db := range []engine.DataStorage{dataDb, storDb} {
+	for _, db := range []engine.Storage{dataDb, storDb} {
 		if db != nil {
 			defer db.Close()
 		}

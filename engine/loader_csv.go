@@ -101,7 +101,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		return errors.New("No database connection!")
 	}
 	if flush {
-		storage.Flush()
+		storage.(Storage).Flush()
 	}
 	if verbose {
 		log.Print("Destinations")

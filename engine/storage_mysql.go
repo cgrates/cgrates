@@ -28,7 +28,7 @@ type MySQLStorage struct {
 	*SQLStorage
 }
 
-func NewMySQLStorage(host, port, name, user, password string) (DataStorage, error) {
+func NewMySQLStorage(host, port, name, user, password string) (Storage, error) {
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", user, password, host, port, name))
 	if err != nil {
 		return nil, err

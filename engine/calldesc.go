@@ -36,6 +36,14 @@ func init() {
 		Logger = new(utils.StdLogger)
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 	}
+	//db_server := "127.0.0.1"
+	//db_server := "192.168.0.17"
+	m, _ := NewMapStorage()
+	//m, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
+	//m, _ = NewRedisStorage(db_server+":6379", 11, "")
+	storageGetter, _ = m.(DataStorage)
+
+	storageLogger = storageGetter.(LogStorage)
 }
 
 const (
@@ -45,13 +53,9 @@ const (
 )
 
 var (
-	Logger    utils.LoggerInterface
-	db_server = "127.0.0.1"
-	//db_server = "192.168.0.17"
-	storageGetter, _ = NewMapStorage()
-	//storageGetter, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-	//storageGetter, _ = NewRedisStorage(db_server+":6379", 11, "")
-	storageLogger    = storageGetter
+	Logger           utils.LoggerInterface
+	storageGetter    DataStorage
+	storageLogger    LogStorage
 	debitPeriod      = 10 * time.Second
 	roundingMethod   = "*middle"
 	roundingDecimals = 4
@@ -73,7 +77,7 @@ func SetRoundingMethodAndDecimals(rm string, rd int) {
 /*
 Sets the database for logging (can be de same  as storage getter or different db)
 */
-func SetStorageLogger(sg DataStorage) {
+func SetStorageLogger(sg LogStorage) {
 	storageLogger = sg
 }
 
@@ -97,7 +101,7 @@ type CallDescriptor struct {
 	TOR                                   string
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
-	LoopIndex                             float64       // indicates the postion of this segment in a cost request loop
+	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
 	CallDuration                          time.Duration // the call duration so far (partial or final)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject

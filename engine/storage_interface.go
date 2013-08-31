@@ -56,16 +56,49 @@ var (
 	timeTyp       = reflect.TypeOf(time.Time{})
 )
 
+type Storage interface {
+	Close()
+	Flush() error
+}
+
 /*
 Interface for storage providers.
 */
 type DataStorage interface {
-	Close()
-	Flush() error
+	Storage
 	GetRatingProfile(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
+	// End Apier functions
+	GetActions(string) (Actions, error)
+	SetActions(string, Actions) error
+	GetUserBalance(string) (*UserBalance, error)
+	SetUserBalance(*UserBalance) error
+	GetActionTimings(string) (ActionTimings, error)
+	SetActionTimings(string, ActionTimings) error
+	GetAllActionTimings() (map[string]ActionTimings, error)
+}
+
+type CdrStorage interface {
+	Storage
+	SetCdr(utils.CDR) error
+	SetRatedCdr(utils.CDR, *CallCost, string) error
+	GetAllRatedCdr() ([]utils.CDR, error)
+}
+
+type LogStorage interface {
+	Storage
+	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
+	LogCallCost(uuid, source string, cc *CallCost) error
+	LogError(uuid, source, errstr string) error
+	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
+	LogActionTiming(source string, at *ActionTiming, as Actions) error
+	GetCallCostLog(uuid, source string) (*CallCost, error)
+}
+
+type LoadStorage interface {
+	Storage
 	// Apier functions
 	GetTPIds() ([]string, error)
 	SetTPTiming(string, *Timing) error
@@ -106,23 +139,6 @@ type DataStorage interface {
 	ExistsTPAccountActions(string, string) (bool, error)
 	SetTPAccountActions(string, map[string]*AccountAction) error
 	GetTPAccountActionIds(string) ([]string, error)
-	// End Apier functions
-	GetActions(string) (Actions, error)
-	SetActions(string, Actions) error
-	GetUserBalance(string) (*UserBalance, error)
-	SetUserBalance(*UserBalance) error
-	GetActionTimings(string) (ActionTimings, error)
-	SetActionTimings(string, ActionTimings) error
-	GetAllActionTimings() (map[string]ActionTimings, error)
-	SetCdr(utils.CDR) error
-	SetRatedCdr(utils.CDR, *CallCost, string) error
-	GetAllRatedCdr() ([]utils.CDR, error)
-	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogCallCost(uuid, source string, cc *CallCost) error
-	LogError(uuid, source, errstr string) error
-	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
-	LogActionTiming(source string, at *ActionTiming, as Actions) error
-	GetCallCostLog(uuid, source string) (*CallCost, error)
 	// loader functions
 	GetTpDestinations(string, string) ([]*Destination, error)
 	GetTpTimings(string, string) (map[string]*Timing, error)

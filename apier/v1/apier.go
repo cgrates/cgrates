@@ -31,7 +31,7 @@ const (
 )
 
 type ApierV1 struct {
-	StorDb engine.DataStorage
+	StorDb engine.LoadStorage
 	DataDb engine.DataStorage
 	Sched  *scheduler.Scheduler
 }
