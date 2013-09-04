@@ -19,21 +19,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"math"
 	"sort"
 	"time"
 )
 
+// Can hold different units as seconds or monetary
 type Balance struct {
 	Id             string
 	Value          float64
 	ExpirationDate time.Time
 	Weight         float64
 	GroupIds       []string
-	SpecialPercent float64
+	SpecialPrice   float64 // absolute for minutes and percent for monetary (can be positive or negative)
+	DestinationId  string
+	precision      int
 }
 
+/*func (b *Balance) Equal(o *Balance) bool {
+	return b.ExpirationDate.Equal(o.ExpirationDate) &&
+		b.Weight == o.Weight &&
+		b.Value == o.Value &&
+		b.SpecialPrice == b.SpecialPrice &&
+		b.DestinationId == o.DestinationId
+}*/
+// TODO: why
 func (b *Balance) Equal(o *Balance) bool {
-	return b.ExpirationDate.Equal(o.ExpirationDate) ||
+	return b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight
 }
 
@@ -45,9 +57,20 @@ func (b *Balance) Clone() *Balance {
 	return &Balance{
 		Id:             b.Id,
 		Value:          b.Value,
+		SpecialPrice:   b.SpecialPrice,
+		DestinationId:  b.DestinationId,
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
 	}
+}
+
+// Returns the available number of seconds for a specified credit
+func (b *Balance) GetSecondsForCredit(credit float64) (seconds float64) {
+	seconds = b.Value
+	if b.SpecialPrice > 0 {
+		seconds = math.Min(credit/b.SpecialPrice, b.Value)
+	}
+	return
 }
 
 /*
@@ -64,7 +87,9 @@ func (bc BalanceChain) Swap(i, j int) {
 }
 
 func (bc BalanceChain) Less(j, i int) bool {
-	return bc[i].Weight < bc[j].Weight
+	return bc[i].Weight < bc[j].Weight ||
+		bc[i].precision < bc[j].precision ||
+		bc[i].SpecialPrice > bc[j].SpecialPrice
 }
 
 func (bc BalanceChain) Sort() {

@@ -87,7 +87,7 @@ func TestActionTimingOnlyMonthdays(t *testing.T) {
 	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
 	at := &ActionTiming{Timing: &Interval{MonthDays: MonthDays{1, 25, 2, tomorrow.Day()}}}
 	st := at.GetNextStartTime()
-	expected := time.Date(y, m, tomorrow.Day(), 0, 0, 0, 0, time.Local)
+	expected := tomorrow
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
