@@ -71,7 +71,7 @@ Let's get back to the engine. When a GetCost or Debit call comes to the engine i
 
 At this point in rating process the engine will start splitting the call into various time spans using the following criterias:
 
-1. Minute Buckets: first it will handle the call information to the originator user acount to be split by available minute buckets. If the user has free or special price minutes for the call destination they will be consumed by the call.
+1. Minute Balances: first it will handle the call information to the originator user acount to be split by available minute balances. If the user has free or special price minutes for the call destination they will be consumed by the call.
 
 2. Activation periods: if there were not enough special price minutes available than the engine will check if the call spans over multiple activation periods (the call starts in initial rates period and continues in another).
 
@@ -100,8 +100,7 @@ The user account contains a map of various balances like money, sms, internet tr
 
  type UserBalance struct {
 	Type           // prepaid-postpaid
-	BalanceMap     
-	MinuteBuckets  
+	BalanceMap
 	UnitCounters   
 	ActionTriggers 
  }
@@ -114,9 +113,9 @@ The user account contains a map of various balances like money, sms, internet tr
 
 CGRateS treats special priced or free minutes different from the rest of balances. They will be called free minutes further on but they can have a special price.
 
-The free minutes must be handled a little differently because usually they are grouped by specific destinations (e.g. national minutes, ore minutes in the same network). So they are grouped in buckets and when a call is made the engine checks all applicable buckets to consume minutes according to that call.
+The free minutes must be handled a little differently because usually they are grouped by specific destinations (e.g. national minutes, ore minutes in the same network). So they are grouped in balances and when a call is made the engine checks all applicable balances to consume minutes according to that call.
 
-When a call cost needs to be debited these minute buckets will be queried for call destination first. If the user has special minutes for the specific destination those minutes will be consumed according to call duration.
+When a call cost needs to be debited these minute balances will be queried for call destination first. If the user has special minutes for the specific destination those minutes will be consumed according to call duration.
 
 A standard debit operation consist of selecting a certaing balance type and taking all balances from that list in the weight order to be debited till the total amount is consumed.
 
