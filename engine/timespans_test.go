@@ -220,9 +220,9 @@ func TestSetInterval(t *testing.T) {
 func TestTimespanSplitByMinuteBucketPlenty(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &MinuteBucket{Seconds: 180}
+	mb := &Balance{Value: 180}
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBucket(mb)
+	newTs := ts.SplitByMinuteBalance(mb)
 	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 120 {
 		t.Error("Not enough minutes on minute bucket split")
 	}
@@ -231,12 +231,12 @@ func TestTimespanSplitByMinuteBucketPlenty(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketScarce(t *testing.T) {
+func TestTimespanSplitByMinuteBalanceScarce(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &MinuteBucket{Seconds: 60}
+	mb := &Balance{Value: 60}
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBucket(mb)
+	newTs := ts.SplitByMinuteBalance(mb)
 	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
 		t.Error("Not enough minutes on minute bucket split")
 	}
@@ -245,12 +245,12 @@ func TestTimespanSplitByMinuteBucketScarce(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketPlentyExpired(t *testing.T) {
+func TestTimespanSplitByMinuteBalancePlentyExpired(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 39, 0, 0, time.UTC)}
+	mb := &Balance{Value: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 39, 0, 0, time.UTC)}
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBucket(mb)
+	newTs := ts.SplitByMinuteBalance(mb)
 	if ts.MinuteInfo != nil {
 		t.Error("Not enough minutes on minute bucket split")
 	}
@@ -259,12 +259,12 @@ func TestTimespanSplitByMinuteBucketPlentyExpired(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketPlentyExpiring(t *testing.T) {
+func TestTimespanSplitByMinuteBalancePlentyExpiring(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
+	mb := &Balance{Value: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBucket(mb)
+	newTs := ts.SplitByMinuteBalance(mb)
 	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
 		t.Error("Not enough minutes on minute bucket split")
 	}
@@ -273,12 +273,12 @@ func TestTimespanSplitByMinuteBucketPlentyExpiring(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketPlentyExpiringEnd(t *testing.T) {
+func TestTimespanSplitByMinuteBalancePlentyExpiringEnd(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &MinuteBucket{Seconds: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)}
+	mb := &Balance{Value: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)}
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBucket(mb)
+	newTs := ts.SplitByMinuteBalance(mb)
 	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 120 {
 		t.Error("Not enough minutes on minute bucket split")
 	}
@@ -287,12 +287,12 @@ func TestTimespanSplitByMinuteBucketPlentyExpiringEnd(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketScarceExpiringSame(t *testing.T) {
+func TestTimespanSplitByMinuteBalanceScarceExpiringSame(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &MinuteBucket{Seconds: 120, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
+	mb := &Balance{Value: 120, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBucket(mb)
+	newTs := ts.SplitByMinuteBalance(mb)
 	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
 		t.Error("Not enough minutes on minute bucket split")
 	}
@@ -301,12 +301,12 @@ func TestTimespanSplitByMinuteBucketScarceExpiringSame(t *testing.T) {
 	}
 }
 
-func TestTimespanSplitByMinuteBucketScarceExpiringDifferentExpFirst(t *testing.T) {
+func TestTimespanSplitByMinuteBalanceScarceExpiringDifferentExpFirst(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &MinuteBucket{Seconds: 140, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 1, 0, time.UTC)}
+	mb := &Balance{Value: 140, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 1, 0, time.UTC)}
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBucket(mb)
+	newTs := ts.SplitByMinuteBalance(mb)
 	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 61 {
 		t.Error("Not enough minutes on minute bucket split: ", ts.MinuteInfo.Quantity)
 	}
@@ -315,12 +315,12 @@ func TestTimespanSplitByMinuteBucketScarceExpiringDifferentExpFirst(t *testing.T
 	}
 }
 
-func TestTimespanSplitByMinuteBucketScarceExpiringDifferentScarceFirst(t *testing.T) {
+func TestTimespanSplitByMinuteBalanceScarceExpiringDifferentScarceFirst(t *testing.T) {
 	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &MinuteBucket{Seconds: 61, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 30, 0, time.UTC)}
+	mb := &Balance{Value: 61, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 30, 0, time.UTC)}
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBucket(mb)
+	newTs := ts.SplitByMinuteBalance(mb)
 	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 61 {
 		t.Error("Not enough minutes on minute bucket split")
 	}

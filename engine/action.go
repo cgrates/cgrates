@@ -28,17 +28,16 @@ import (
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id                       string
-	ActionType               string
-	BalanceId                string
-	Direction                string
-	ExpirationString         string
-	ExpirationDate           time.Time
-	Units                    float64
-	Weight                   float64
-	MinuteBucket             *MinuteBucket
-	DestinationTag, RateType string // From here for import/load purposes only
-	RateValue, MinutesWeight float64
+	Id                              string
+	ActionType                      string
+	BalanceId                       string
+	Direction                       string
+	ExpirationString                string
+	Weight                          float64
+	Balance                         *Balance
+	DestinationTag, RateType        string // From here for import/load purposes only
+	ExpirationDate                  time.Time
+	Units, RateValue, MinutesWeight float64
 }
 
 const (
@@ -86,7 +85,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 }
 
 func logAction(ub *UserBalance, a *Action) (err error) {
-	Logger.Info(fmt.Sprintf("%v %v %v", a.BalanceId, a.Units, a.MinuteBucket))
+	Logger.Info(fmt.Sprintf("%v %v %v", a.BalanceId, a.Balance))
 	return
 }
 
@@ -116,11 +115,7 @@ func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func topupResetAction(ub *UserBalance, a *Action) (err error) {
-	if a.BalanceId == MINUTES {
-		ub.MinuteBuckets = make([]*MinuteBucket, 0)
-	} else {
-		ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{&Balance{Value: 0}} // ToDo: can ub be empty here?
-	}
+	ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{&Balance{Value: 0}} // ToDo: can ub be empty here?
 	genericMakeNegative(a)
 	genericDebit(ub, a)
 	return
@@ -157,11 +152,8 @@ func resetCountersAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Units > 0 { // only apply if not allready negative
-		a.Units = -a.Units
-	}
-	if a.MinuteBucket != nil && a.MinuteBucket.Seconds > 0 {
-		a.MinuteBucket.Seconds = -a.MinuteBucket.Seconds
+	if a.Balance != nil && a.Balance.Value > 0 { // only apply if not allready negative
+		a.Balance.Value = -a.Balance.Value
 	}
 }
 
@@ -170,7 +162,7 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
 	if a.BalanceId == MINUTES {
-		ub.debitMinuteBucket(a.MinuteBucket)
+		ub.debitMinuteBalance(a.Balance)
 	} else {
 		ub.debitBalanceAction(a)
 	}
@@ -181,7 +173,6 @@ func genericReset(ub *UserBalance) {
 	for k, _ := range ub.BalanceMap {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
-	ub.MinuteBuckets = make([]*MinuteBucket, 0)
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	ub.resetActionTriggers(nil)
 }

@@ -181,7 +181,7 @@ func (ts *TimeSpan) SplitByActivationPeriod(ap *ActivationPeriod) (newTs *TimeSp
 /*
 Splits the given timespan on minute bucket's duration.
 */
-func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
+func (ts *TimeSpan) SplitByMinuteBalance(mb *Balance) (newTs *TimeSpan) {
 	// if mb expired skip it
 	if !mb.ExpirationDate.IsZero() && (ts.TimeStart.Equal(mb.ExpirationDate) || ts.TimeStart.After(mb.ExpirationDate)) {
 		return nil
@@ -197,20 +197,20 @@ func (ts *TimeSpan) SplitByMinuteBucket(mb *MinuteBucket) (newTs *TimeSpan) {
 	}
 
 	s := ts.GetDuration().Seconds()
-	ts.MinuteInfo = &MinuteInfo{mb.DestinationId, s, mb.Price}
-	if s <= mb.Seconds {
-		mb.Seconds -= s
+	ts.MinuteInfo = &MinuteInfo{mb.DestinationId, s, mb.SpecialPrice}
+	if s <= mb.Value {
+		mb.Value -= s
 		return newTs
 	}
-	secDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", mb.Seconds))
+	secDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", mb.Value))
 
 	newTimeEnd := ts.TimeStart.Add(secDuration)
 	newTs = &TimeSpan{TimeStart: newTimeEnd, TimeEnd: ts.TimeEnd}
 	ts.TimeEnd = newTimeEnd
 	newTs.CallDuration = ts.CallDuration
-	ts.MinuteInfo.Quantity = mb.Seconds
+	ts.MinuteInfo.Quantity = mb.Value
 	ts.SetNewCallDuration(newTs)
-	mb.Seconds = 0
+	mb.Value = 0
 
 	return
 }

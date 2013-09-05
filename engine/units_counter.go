@@ -24,39 +24,39 @@ import (
 
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
-	Direction     string
-	BalanceId     string
-	Units         float64
-	MinuteBuckets bucketsorter
+	Direction      string
+	BalanceId      string
+	Units          float64
+	MinuteBalances BalanceChain
 }
 
 func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
-	uc.MinuteBuckets = make(bucketsorter, 0)
+	uc.MinuteBalances = make(BalanceChain, 0)
 	for _, at := range ats {
 		acs, err := storageGetter.GetActions(at.ActionsId)
 		if err != nil {
 			continue
 		}
 		for _, a := range acs {
-			if a.MinuteBucket != nil {
-				uc.MinuteBuckets = append(uc.MinuteBuckets, a.MinuteBucket.Clone())
+			if a.Balance != nil {
+				uc.MinuteBalances = append(uc.MinuteBalances, a.Balance.Clone())
 			}
 		}
 	}
-	uc.MinuteBuckets.Sort()
+	uc.MinuteBalances.Sort()
 }
 
-// Adds the minutes from the received minute bucket to an existing bucket if the destination
-// is the same or ads the minutye bucket to the list if none matches.
+// Adds the minutes from the received minute balance to an existing bucket if the destination
+// is the same or ads the minute balance to the list if none matches.
 func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
-	for _, mb := range uc.MinuteBuckets {
+	for _, mb := range uc.MinuteBalances {
 		d, err := GetDestination(mb.DestinationId)
 		if err != nil {
 			Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: %s", mb.DestinationId))
 			continue
 		}
 		if _, ok := d.containsPrefix(prefix); ok {
-			mb.Seconds += amount
+			mb.Value += amount
 			break
 		}
 	}

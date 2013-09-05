@@ -540,7 +540,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,%f,%f)",
-				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Units, act.ExpirationString,
+				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Balance.Value, act.ExpirationString,
 				act.DestinationTag, act.RateType, act.RateValue, act.MinutesWeight, act.Weight)
 			i++
 		}
@@ -1083,32 +1083,21 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
 			return nil, err
 		}
-		var a *Action
-		if balance_type != MINUTES {
-			a = &Action{
-				ActionType:       action,
-				BalanceId:        balance_type,
-				Direction:        direction,
-				Units:            units,
-				ExpirationString: expirationDate,
-			}
-		} else {
-			var price float64
-			a = &Action{
-				Id:               utils.GenUUID(),
-				ActionType:       action,
-				BalanceId:        balance_type,
-				Direction:        direction,
-				Weight:           weight,
-				ExpirationString: expirationDate,
-				MinuteBucket: &MinuteBucket{
-					Seconds:       units,
-					Weight:        minutes_weight,
-					Price:         price,
-					PriceType:     rate_type,
-					DestinationId: destinations_tag,
-				},
-			}
+		var price float64
+		a := &Action{
+			Id:               utils.GenUUID(),
+			ActionType:       action,
+			BalanceId:        balance_type,
+			Direction:        direction,
+			Weight:           weight,
+			ExpirationString: expirationDate,
+			Balance: &Balance{
+				Value:            units,
+				Weight:           minutes_weight,
+				SpecialPrice:     price,
+				SpecialPriceType: rate_type,
+				DestinationId:    destinations_tag,
+			},
 		}
 		as[tag] = append(as[tag], a)
 	}

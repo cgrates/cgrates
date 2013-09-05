@@ -75,10 +75,10 @@ func TestMsgpackTime(t *testing.T) {
 
 func GetUB() *UserBalance {
 	uc := &UnitsCounter{
-		Direction:     OUTBOUND,
-		BalanceId:     SMS,
-		Units:         100,
-		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
+		Direction:      OUTBOUND,
+		BalanceId:      SMS,
+		Units:          100,
+		MinuteBalances: BalanceChain{&Balance{Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
 		Id:             "some_uuid",
@@ -94,8 +94,7 @@ func GetUB() *UserBalance {
 	ub := &UserBalance{
 		Id:             "rif",
 		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
+		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}

@@ -197,13 +197,13 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	timespans = append(timespans, firstSpan)
 	// split on (free) minute buckets
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		_, _, bucketList := userBalance.getSecondsForPrefix(cd.Destination)
-		for _, mb := range bucketList {
+		_, _, minuteBalances := userBalance.getSecondsForPrefix(cd.Destination)
+		for _, b := range minuteBalances {
 			for i := 0; i < len(timespans); i++ {
 				if timespans[i].MinuteInfo != nil {
 					continue
 				}
-				newTs := timespans[i].SplitByMinuteBucket(mb)
+				newTs := timespans[i].SplitByMinuteBalance(b)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
 					firstSpan = newTs // we move the firstspan to the newly created one for further spliting
@@ -443,8 +443,8 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		a := &Action{
-			Direction:    INBOUND,
-			MinuteBucket: &MinuteBucket{Seconds: cd.Amount, DestinationId: cd.Destination},
+			Direction: INBOUND,
+			Balance:   &Balance{Value: cd.Amount, DestinationId: cd.Destination},
 		}
 		userBalance.countUnits(a)
 		return nil

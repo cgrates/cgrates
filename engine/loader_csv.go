@@ -348,50 +348,35 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
-		var a *Action
-		if record[2] != MINUTES {
-			a = &Action{
-				ActionType:       record[1],
-				BalanceId:        record[2],
-				Direction:        record[3],
-				Units:            units,
-				ExpirationString: record[5],
-			}
-			if _, err := utils.ParseDate(a.ExpirationString); err != nil {
-				return errors.New(fmt.Sprintf("Could not parse expiration time: %v", err))
-			}
-		} else {
-			value, err := strconv.ParseFloat(record[8], 64)
-			if err != nil {
-				return errors.New(fmt.Sprintf("Could not parse action price: %v", err))
-			}
-			minutesWeight, err := strconv.ParseFloat(record[9], 64)
-			if err != nil {
-				return errors.New(fmt.Sprintf("Could not parse action minutes weight: %v", err))
-			}
-			weight, err := strconv.ParseFloat(record[9], 64)
-			if err != nil {
-				return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
-			}
-			a = &Action{
-				Id:               utils.GenUUID(),
-				ActionType:       record[1],
-				BalanceId:        record[2],
-				Direction:        record[3],
-				Weight:           weight,
-				ExpirationString: record[5],
-				MinuteBucket: &MinuteBucket{
-					Seconds:       units,
-					Weight:        minutesWeight,
-					Price:         value,
-					PriceType:     record[7],
-					DestinationId: record[6],
-				},
-			}
-			if _, err := utils.ParseDate(a.ExpirationString); err != nil {
-				return errors.New(fmt.Sprintf("Could not parse expiration time: %v", err))
-			}
-
+		value, err := strconv.ParseFloat(record[8], 64)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Could not parse action price: %v", err))
+		}
+		minutesWeight, err := strconv.ParseFloat(record[9], 64)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Could not parse action minutes weight: %v", err))
+		}
+		weight, err := strconv.ParseFloat(record[9], 64)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
+		}
+		a := &Action{
+			Id:               utils.GenUUID(),
+			ActionType:       record[1],
+			BalanceId:        record[2],
+			Direction:        record[3],
+			Weight:           weight,
+			ExpirationString: record[5],
+			Balance: &Balance{
+				Value:            units,
+				Weight:           minutesWeight,
+				SpecialPrice:     value,
+				SpecialPriceType: record[7],
+				DestinationId:    record[6],
+			},
+		}
+		if _, err := utils.ParseDate(a.ExpirationString); err != nil {
+			return errors.New(fmt.Sprintf("Could not parse expiration time: %v", err))
 		}
 		csvr.actions[tag] = append(csvr.actions[tag], a)
 	}

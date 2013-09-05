@@ -46,10 +46,10 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		return
 	}
 	for _, a := range aac {
-		a.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
-		if a.MinuteBucket != nil {
-			a.MinuteBucket.ExpirationDate = a.ExpirationDate
+		if a.Balance == nil {
+			a.Balance = &Balance{}
 		}
+		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
@@ -73,9 +73,9 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	id := a.BalanceId == "" || at.BalanceId == a.BalanceId
 	direction := a.Direction == "" || at.Direction == a.Direction
 	thresholdType, thresholdValue := true, true
-	if a.MinuteBucket != nil {
-		thresholdType = a.MinuteBucket.PriceType == "" || at.ThresholdType == a.MinuteBucket.PriceType
-		thresholdValue = a.MinuteBucket.Price == 0 || at.ThresholdValue == a.MinuteBucket.Price
+	if a.Balance != nil {
+		thresholdType = a.Balance.SpecialPriceType == "" || at.ThresholdType == a.Balance.SpecialPriceType
+		thresholdValue = a.Balance.SpecialPrice == 0 || at.ThresholdValue == a.Balance.SpecialPrice
 	}
 	return id && direction && thresholdType && thresholdValue
 }

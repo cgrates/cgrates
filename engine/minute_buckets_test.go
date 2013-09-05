@@ -24,9 +24,9 @@ import (
 )
 
 func TestMinutBucketSortWeight(t *testing.T) {
-	mb1 := &MinuteBucket{Weight: 1, precision: 2, Price: 2}
-	mb2 := &MinuteBucket{Weight: 2, precision: 1, Price: 1}
-	var bs bucketsorter
+	mb1 := &Balance{Weight: 1, precision: 2, SpecialPrice: 2}
+	mb2 := &Balance{Weight: 2, precision: 1, SpecialPrice: 1}
+	var bs BalanceChain
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb1 || bs[1] != mb2 {
@@ -35,9 +35,9 @@ func TestMinutBucketSortWeight(t *testing.T) {
 }
 
 func TestMinutBucketSortPrecision(t *testing.T) {
-	mb1 := &MinuteBucket{Weight: 1, precision: 2, Price: 2}
-	mb2 := &MinuteBucket{Weight: 1, precision: 1, Price: 1}
-	var bs bucketsorter
+	mb1 := &Balance{Weight: 1, precision: 2, SpecialPrice: 2}
+	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1}
+	var bs BalanceChain
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb1 || bs[1] != mb2 {
@@ -45,10 +45,10 @@ func TestMinutBucketSortPrecision(t *testing.T) {
 	}
 }
 
-func TestMinutBucketSortPrice(t *testing.T) {
-	mb1 := &MinuteBucket{Weight: 1, precision: 1, Price: 1}
-	mb2 := &MinuteBucket{Weight: 1, precision: 1, Price: 2}
-	var bs bucketsorter
+func TestMinutBucketSortSpecialPrice(t *testing.T) {
+	mb1 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1}
+	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 2}
+	var bs BalanceChain
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb1 || bs[1] != mb2 {
@@ -57,16 +57,16 @@ func TestMinutBucketSortPrice(t *testing.T) {
 }
 
 func TestMinutBucketEqual(t *testing.T) {
-	mb1 := &MinuteBucket{Weight: 1, precision: 1, Price: 1, PriceType: PRICE_ABSOLUTE, DestinationId: ""}
-	mb2 := &MinuteBucket{Weight: 1, precision: 1, Price: 1, PriceType: PRICE_ABSOLUTE, DestinationId: ""}
-	mb3 := &MinuteBucket{Weight: 1, precision: 1, Price: 2, PriceType: PRICE_ABSOLUTE, DestinationId: ""}
+	mb1 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
+	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
+	mb3 := &Balance{Weight: 1, precision: 1, SpecialPrice: 2, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
 	if !mb1.Equal(mb2) || mb2.Equal(mb3) {
 		t.Error("Equal failure!", mb1, mb2, mb3)
 	}
 }
 
 func TestMinutBucketClone(t *testing.T) {
-	mb1 := &MinuteBucket{Seconds: 1, Weight: 2, Price: 3, PriceType: PRICE_ABSOLUTE, DestinationId: "5"}
+	mb1 := &Balance{Value: 1, Weight: 2, SpecialPrice: 3, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "5"}
 	mb2 := mb1.Clone()
 	if mb1 == mb2 || !reflect.DeepEqual(mb1, mb2) {
 		t.Error("Cloning failure: ", mb1, mb2)
