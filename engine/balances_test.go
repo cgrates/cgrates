@@ -23,7 +23,7 @@ import (
 	"testing"
 )
 
-func TestMinutBucketSortWeight(t *testing.T) {
+func TestBalanceSortWeight(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 2, SpecialPrice: 2}
 	mb2 := &Balance{Weight: 2, precision: 1, SpecialPrice: 1}
 	var bs BalanceChain
@@ -34,7 +34,7 @@ func TestMinutBucketSortWeight(t *testing.T) {
 	}
 }
 
-func TestMinutBucketSortPrecision(t *testing.T) {
+func TestBalanceSortPrecision(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 2, SpecialPrice: 2}
 	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1}
 	var bs BalanceChain
@@ -45,7 +45,7 @@ func TestMinutBucketSortPrecision(t *testing.T) {
 	}
 }
 
-func TestMinutBucketSortSpecialPrice(t *testing.T) {
+func TestBalanceSortSpecialPrice(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1}
 	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 2}
 	var bs BalanceChain
@@ -56,19 +56,19 @@ func TestMinutBucketSortSpecialPrice(t *testing.T) {
 	}
 }
 
-func TestMinutBucketEqual(t *testing.T) {
+func TestBalanceEqual(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
 	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
 	mb3 := &Balance{Weight: 1, precision: 1, SpecialPrice: 2, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
 	if !mb1.Equal(mb2) || mb2.Equal(mb3) {
-		t.Error("Equal failure!", mb1, mb2, mb3)
+		t.Error("Equal failure!", mb1 == mb2, mb3)
 	}
 }
 
-func TestMinutBucketClone(t *testing.T) {
+func TestBalanceClone(t *testing.T) {
 	mb1 := &Balance{Value: 1, Weight: 2, SpecialPrice: 3, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "5"}
 	mb2 := mb1.Clone()
 	if mb1 == mb2 || !reflect.DeepEqual(mb1, mb2) {
-		t.Error("Cloning failure: ", mb1, mb2)
+		t.Errorf("Cloning failure: \n%v\n%v", mb1, mb2)
 	}
 }

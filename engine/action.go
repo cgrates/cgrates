@@ -35,9 +35,9 @@ type Action struct {
 	ExpirationString                string
 	Weight                          float64
 	Balance                         *Balance
-	DestinationTag, RateType        string // From here for import/load purposes only
-	ExpirationDate                  time.Time
-	Units, RateValue, MinutesWeight float64
+	destinationTag, rateType        string // From here for import/load purposes only
+	expirationDate                  time.Time
+	units, rateValue, minutesWeight float64
 }
 
 const (

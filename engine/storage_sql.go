@@ -541,7 +541,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,%f,%f)",
 				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Balance.Value, act.ExpirationString,
-				act.DestinationTag, act.RateType, act.RateValue, act.MinutesWeight, act.Weight)
+				act.destinationTag, act.rateType, act.rateValue, act.minutesWeight, act.Weight)
 			i++
 		}
 	}

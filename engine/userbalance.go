@@ -182,23 +182,21 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
 func (ub *UserBalance) debitBalanceAction(a *Action) float64 {
-	newBalance := &Balance{
-		Id:             utils.GenUUID(),
-		ExpirationDate: a.ExpirationDate,
-	}
+	newBalance := &Balance{Id: utils.GenUUID()}
 	if a.Balance != nil {
+		newBalance.ExpirationDate = a.Balance.ExpirationDate
 		newBalance.Weight = a.Balance.Weight
 	}
 	found := false
 	id := a.BalanceId + a.Direction
 	for _, b := range ub.BalanceMap[id] {
 		if b.Equal(newBalance) {
-			b.Value -= a.Units
+			b.Value -= a.Balance.Value
 			found = true
 		}
 	}
 	if !found {
-		newBalance.Value -= a.Units
+		newBalance.Value -= a.Balance.Value
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], newBalance)
 	}
 	return ub.BalanceMap[a.BalanceId+OUTBOUND].GetTotalValue()
@@ -209,7 +207,7 @@ Debits some amount of user's specified balance. Returns the remaining credit in 
 */
 func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool) float64 {
 	if count {
-		ub.countUnits(&Action{BalanceId: balanceId, Direction: OUTBOUND, Units: amount})
+		ub.countUnits(&Action{BalanceId: balanceId, Direction: OUTBOUND, Balance: &Balance{Value: amount}})
 	}
 	ub.BalanceMap[balanceId+OUTBOUND].Debit(amount)
 	return ub.BalanceMap[balanceId+OUTBOUND].GetTotalValue()
@@ -335,7 +333,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 	if a.BalanceId == MINUTES && a.Balance != nil {
 		unitsCounter.addMinutes(a.Balance.Value, a.Balance.DestinationId)
 	} else {
-		unitsCounter.Units += a.Units
+		unitsCounter.Units += a.Balance.Value
 	}
 	ub.executeActionTriggers(nil)
 }
