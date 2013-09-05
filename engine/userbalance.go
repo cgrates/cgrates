@@ -182,7 +182,9 @@ func (ub *UserBalance) debitBalanceAction(a *Action) float64 {
 	newBalance := &Balance{
 		Id:             utils.GenUUID(),
 		ExpirationDate: a.ExpirationDate,
-		Weight:         a.Weight,
+	}
+	if a.MinuteBucket != nil {
+		newBalance.Weight = a.MinuteBucket.Weight
 	}
 	found := false
 	id := a.BalanceId + a.Direction
@@ -225,7 +227,7 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 		if strings.Contains(at.ThresholdType, "counter") {
 			for _, uc := range ub.UnitCounters {
 				if uc.BalanceId == at.BalanceId {
-					if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safety
+					if at.BalanceId == MINUTES {
 						for _, mb := range uc.MinuteBuckets {
 							if strings.Contains(at.ThresholdType, "*max") {
 								if mb.DestinationId == at.DestinationId && mb.Seconds >= at.ThresholdValue {

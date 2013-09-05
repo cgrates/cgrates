@@ -36,17 +36,11 @@ type Balance struct {
 	precision      int
 }
 
-/*func (b *Balance) Equal(o *Balance) bool {
-	return b.ExpirationDate.Equal(o.ExpirationDate) &&
-		b.Weight == o.Weight &&
-		b.Value == o.Value &&
-		b.SpecialPrice == b.SpecialPrice &&
-		b.DestinationId == o.DestinationId
-}*/
-// TODO: why
 func (b *Balance) Equal(o *Balance) bool {
 	return b.ExpirationDate.Equal(o.ExpirationDate) &&
-		b.Weight == o.Weight
+		b.Weight == o.Weight &&
+		b.SpecialPrice == b.SpecialPrice &&
+		b.DestinationId == o.DestinationId
 }
 
 func (b *Balance) IsExpired() bool {

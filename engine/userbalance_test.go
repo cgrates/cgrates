@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	//"log"
 	"testing"
 	"time"
 )
@@ -430,7 +429,7 @@ func TestUserBalanceExecuteTriggeredActionsBalance(t *testing.T) {
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 100, ThresholdType: "*min_counter", ActionsId: "TEST_ACTIONS"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 100, ThresholdType: TRIGGER_MIN_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Units: 1})
 	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 110 || ub.MinuteBuckets[0].Seconds != 20 {
@@ -443,10 +442,12 @@ func TestUserBalanceExecuteTriggeredActionsOrder(t *testing.T) {
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ThresholdType: "*max_counter", ActionsId: "TEST_ACTIONS_ORDER"}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1})
 	if len(ub.BalanceMap[CREDIT+OUTBOUND]) != 1 || ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 10 {
+		t.Log(ub.BalanceMap[CREDIT+OUTBOUND][0])
+		t.Log(ub.BalanceMap[CREDIT+OUTBOUND][1])
 		t.Error("Error executing triggered actions in order", ub.BalanceMap[CREDIT+OUTBOUND])
 	}
 }
