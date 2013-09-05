@@ -38,18 +38,21 @@ func populateDB() {
 	minu := &UserBalance{
 		Id:   "*out:vdf:minu",
 		Type: UB_TYPE_PREPAID,
-		BalanceMap: map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 0}}, MINUTES: BalanceChain{
-			&Balance{Value: 200, DestinationId: "NAT", Weight: 10},
-			&Balance{Value: 100, DestinationId: "RET", Weight: 20},
-		}},
+		BalanceMap: map[string]BalanceChain{
+			CREDIT: BalanceChain{&Balance{Value: 0}},
+			MINUTES + OUTBOUND: BalanceChain{
+				&Balance{Value: 200, DestinationId: "NAT", Weight: 10},
+				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
+			}},
 	}
 	broker := &UserBalance{
 		Id:   "*out:vdf:broker",
 		Type: UB_TYPE_PREPAID,
-		BalanceMap: map[string]BalanceChain{MINUTES: BalanceChain{
-			&Balance{Value: 20, DestinationId: "NAT", Weight: 10, SpecialPrice: 1},
-			&Balance{Value: 100, DestinationId: "RET", Weight: 20},
-		}},
+		BalanceMap: map[string]BalanceChain{
+			MINUTES + OUTBOUND: BalanceChain{
+				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, SpecialPrice: 1},
+				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
+			}},
 	}
 	if storageGetter != nil {
 		storageGetter.(Storage).Flush()

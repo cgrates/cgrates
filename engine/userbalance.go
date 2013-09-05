@@ -72,11 +72,11 @@ Returns user's available minutes for the specified destination
 */
 func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float64, balances BalanceChain) {
 	credit = ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
-	if len(ub.BalanceMap[MINUTES]) == 0 {
+	if len(ub.BalanceMap[MINUTES+OUTBOUND]) == 0 {
 		// Logger.Debug("There are no minute buckets to check for user: ", ub.Id)
 		return
 	}
-	for _, b := range ub.BalanceMap[MINUTES] {
+	for _, b := range ub.BalanceMap[MINUTES+OUTBOUND] {
 		if b.IsExpired() {
 			continue
 		}
@@ -109,7 +109,7 @@ func (ub *UserBalance) debitMinuteBalance(newMb *Balance) error {
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
 	found := false
-	for _, mb := range ub.BalanceMap[MINUTES] {
+	for _, mb := range ub.BalanceMap[MINUTES+OUTBOUND] {
 		if mb.IsExpired() {
 			continue
 		}
@@ -123,7 +123,7 @@ func (ub *UserBalance) debitMinuteBalance(newMb *Balance) error {
 	// then we add it to the list
 	if !found && newMb.Value <= 0 {
 		newMb.Value = -newMb.Value
-		ub.BalanceMap[MINUTES] = append(ub.BalanceMap[MINUTES], newMb)
+		ub.BalanceMap[MINUTES+OUTBOUND] = append(ub.BalanceMap[MINUTES+OUTBOUND], newMb)
 	}
 	return nil
 }
@@ -259,8 +259,8 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 			}
 		} else { // BALANCE
 			for _, b := range ub.BalanceMap[at.BalanceId] {
-				if at.BalanceId == MINUTES && at.DestinationId != "" { // last check adds safety
-					for _, mb := range ub.BalanceMap[MINUTES] {
+				if at.BalanceId == MINUTES {
+					for _, mb := range ub.BalanceMap[MINUTES+OUTBOUND] {
 						if strings.Contains(at.ThresholdType, "*max") {
 							if mb.DestinationId == at.DestinationId && mb.Value >= at.ThresholdValue {
 								// run the actions
@@ -347,7 +347,7 @@ func (ub *UserBalance) initMinuteCounters() {
 			continue
 		}
 		for _, a := range acs {
-			if a.Balance != nil {
+			if a.BalanceId == MINUTES && a.Balance != nil {
 				direction := at.Direction
 				if direction == "" {
 					direction = OUTBOUND
@@ -359,7 +359,9 @@ func (ub *UserBalance) initMinuteCounters() {
 					uc.MinuteBalances = BalanceChain{}
 					ub.UnitCounters = append(ub.UnitCounters, uc)
 				}
-				uc.MinuteBalances = append(uc.MinuteBalances, a.Balance.Clone())
+				b := a.Balance.Clone()
+				b.Value = 0
+				uc.MinuteBalances = append(uc.MinuteBalances, b)
 				uc.MinuteBalances.Sort()
 			}
 		}
@@ -377,9 +379,9 @@ func (ub *UserBalance) CleanExpiredBalancesAndBuckets() {
 		}
 		ub.BalanceMap[key] = bm
 	}
-	for i := 0; i < len(ub.BalanceMap[MINUTES]); i++ {
-		if ub.BalanceMap[MINUTES][i].IsExpired() {
-			ub.BalanceMap[MINUTES] = append(ub.BalanceMap[MINUTES][:i], ub.BalanceMap[MINUTES][i+1:]...)
+	for i := 0; i < len(ub.BalanceMap[MINUTES+OUTBOUND]); i++ {
+		if ub.BalanceMap[MINUTES+OUTBOUND][i].IsExpired() {
+			ub.BalanceMap[MINUTES+OUTBOUND] = append(ub.BalanceMap[MINUTES+OUTBOUND][:i], ub.BalanceMap[MINUTES+OUTBOUND][i+1:]...)
 		}
 	}
 }

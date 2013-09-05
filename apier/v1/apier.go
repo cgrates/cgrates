@@ -109,7 +109,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 		attr.Direction = engine.OUTBOUND
 	}
 
-	at.SetActions(engine.Actions{&engine.Action{ActionType: engine.TOPUP, BalanceId: attr.BalanceId, Direction: attr.Direction, Units: attr.Value}})
+	at.SetActions(engine.Actions{&engine.Action{ActionType: engine.TOPUP, BalanceId: attr.BalanceId, Direction: attr.Direction, Balance: &engine.Balance{Value: attr.Value}}})
 
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()

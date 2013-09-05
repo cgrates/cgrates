@@ -317,12 +317,12 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			ActionType:     actionType,
 			BalanceId:      balanceType,
 			Direction:      direction,
-			units:          units,
-			expirationDate: expiryTime,
-			destinationTag: destTag,
-			rateType:       rateType,
-			rateValue:      rateValue,
-			minutesWeight:  minutesWeight,
+			Units:          units,
+			ExpirationDate: expiryTime,
+			DestinationTag: destTag,
+			RateType:       rateType,
+			RateValue:      rateValue,
+			MinutesWeight:  minutesWeight,
 			Weight:         weight,
 		}
 		if err := self.StorDb.SetTPActions(self.TPid, map[string][]*Action{actId: []*Action{act}}); err != nil {

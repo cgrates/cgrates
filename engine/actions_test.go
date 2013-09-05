@@ -529,7 +529,7 @@ func TestActionTriggerPriotityList(t *testing.T) {
 func TestActionResetTriggres(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 10}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 10}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -555,7 +555,7 @@ func TestActionResetTriggresExecutesThem(t *testing.T) {
 func TestActionResetTriggresActionFilter(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 10}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 10}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -569,7 +569,7 @@ func TestActionSetPostpaid(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -583,7 +583,7 @@ func TestActionSetPrepaid(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -597,7 +597,7 @@ func TestActionResetPrepaid(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: SMS, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: SMS, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -605,7 +605,7 @@ func TestActionResetPrepaid(t *testing.T) {
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.BalanceMap[CREDIT].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
-		ub.BalanceMap[MINUTES][0].Value != 0 ||
+		ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
 		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
 		t.Log(ub.BalanceMap)
 		t.Error("Reset prepaid action failed!")
@@ -616,7 +616,7 @@ func TestActionResetPostpaid(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: SMS, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: SMS, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -624,7 +624,7 @@ func TestActionResetPostpaid(t *testing.T) {
 	if ub.Type != UB_TYPE_POSTPAID ||
 		ub.BalanceMap[CREDIT].GetTotalValue() != 0 ||
 		len(ub.UnitCounters) != 0 ||
-		ub.BalanceMap[MINUTES][0].Value != 0 ||
+		ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
 		ub.ActionTriggers[0].Executed == true || ub.ActionTriggers[1].Executed == true {
 		t.Error("Reset postpaid action failed!")
 	}
@@ -634,7 +634,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -643,7 +643,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != 10 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.BalanceMap[MINUTES]) != 2 ||
+		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Errorf("Topup reset action failed: %#v", ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
 	}
@@ -654,20 +654,20 @@ func TestActionTopupResetMinutes(t *testing.T) {
 		Id:   "TEST_UB",
 		Type: UB_TYPE_PREPAID,
 		BalanceMap: map[string]BalanceChain{
-			CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}},
-			MINUTES:           BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+			CREDIT + OUTBOUND:  BalanceChain{&Balance{Value: 100}},
+			MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: 5, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}}
 	topupResetAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
-		ub.BalanceMap[MINUTES][0].Value != 5 ||
+		ub.BalanceMap[MINUTES+OUTBOUND].GetTotalValue() != 5 ||
 		ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.BalanceMap[MINUTES]) != 1 ||
+		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Errorf("Topup reset minutes action failed: %v", ub.BalanceMap)
+		t.Errorf("Topup reset minutes action failed: %v", ub.BalanceMap[MINUTES+OUTBOUND].GetTotalValue())
 	}
 }
 
@@ -675,7 +675,7 @@ func TestActionTopupCredit(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -684,7 +684,7 @@ func TestActionTopupCredit(t *testing.T) {
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != 110 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.BalanceMap[MINUTES]) != 2 ||
+		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Error("Topup action failed!", ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
 	}
@@ -694,19 +694,19 @@ func TestActionTopupMinutes(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceId: MINUTES, Balance: &Balance{Value: 5, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}}
 	topupAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
-		ub.BalanceMap[MINUTES][0].Value != 15 ||
+		ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 15 ||
 		ub.BalanceMap[CREDIT].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.BalanceMap[MINUTES]) != 2 ||
+		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Error("Topup minutes action failed!", ub.BalanceMap[MINUTES][0])
+		t.Error("Topup minutes action failed!", ub.BalanceMap[MINUTES+OUTBOUND][0])
 	}
 }
 
@@ -714,7 +714,7 @@ func TestActionDebitCredit(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -723,7 +723,7 @@ func TestActionDebitCredit(t *testing.T) {
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != 90 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.BalanceMap[MINUTES]) != 2 ||
+		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
 		t.Error("Debit action failed!", ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
 	}
@@ -733,27 +733,31 @@ func TestActionDebitMinutes(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceId: MINUTES, Balance: &Balance{Value: 5, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}}
 	debitAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
-		ub.BalanceMap[MINUTES][0].Value != 5 ||
+		ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 5 ||
 		ub.BalanceMap[CREDIT].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
-		len(ub.BalanceMap[MINUTES]) != 2 ||
+		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Error("Debit minutes action failed!", ub.BalanceMap[MINUTES][0])
+		t.Error("Debit minutes action failed!", ub.BalanceMap[MINUTES+OUTBOUND][0])
 	}
 }
 
 func TestActionResetAllCounters(t *testing.T) {
 	ub := &UserBalance{
-		Id:             "TEST_UB",
-		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		Id:   "TEST_UB",
+		Type: UB_TYPE_POSTPAID,
+		BalanceMap: map[string]BalanceChain{
+			CREDIT: BalanceChain{&Balance{Value: 100}},
+			MINUTES: BalanceChain{
+				&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"},
+				&Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -764,22 +768,24 @@ func TestActionResetAllCounters(t *testing.T) {
 		len(ub.UnitCounters[0].MinuteBalances) != 1 ||
 		len(ub.BalanceMap[MINUTES]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
-		t.Error("Reset counters action failed!")
+		t.Error("Reset counters action failed: ", ub.BalanceMap[MINUTES])
 	}
 	if len(ub.UnitCounters) < 1 {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[0].MinuteBalances[0]
-	if mb.Weight != 20 || mb.SpecialPrice != 1 || mb.Value != 10 || mb.DestinationId != "NAT" {
-		t.Errorf("Minute bucked cloned incorrectly: %v!", mb)
+	if mb.Weight != 20 || mb.SpecialPrice != 1 || mb.Value != 0 || mb.DestinationId != "NAT" {
+		t.Errorf("Balanxce cloned incorrectly: %v!", mb)
 	}
 }
 
 func TestActionResetCounterMinutes(t *testing.T) {
 	ub := &UserBalance{
-		Id:             "TEST_UB",
-		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		Id:   "TEST_UB",
+		Type: UB_TYPE_POSTPAID,
+		BalanceMap: map[string]BalanceChain{
+			CREDIT:  BalanceChain{&Balance{Value: 100}},
+			MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -791,13 +797,15 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		len(ub.UnitCounters[1].MinuteBalances) != 1 ||
 		len(ub.BalanceMap[MINUTES]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
+		t.Logf("%#v", ub.UnitCounters[1].MinuteBalances[0])
+		t.Logf("%#v", ub.UnitCounters[1].MinuteBalances[1])
 		t.Error("Reset counters action failed!", ub.UnitCounters[1].MinuteBalances)
 	}
 	if len(ub.UnitCounters) < 2 || len(ub.UnitCounters[1].MinuteBalances) < 1 {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[1].MinuteBalances[0]
-	if mb.Weight != 20 || mb.SpecialPrice != 1 || mb.Value != 10 || mb.DestinationId != "NAT" {
+	if mb.Weight != 20 || mb.SpecialPrice != 1 || mb.Value != 0 || mb.DestinationId != "NAT" {
 		t.Errorf("Minute bucked cloned incorrectly: %v!", mb)
 	}
 }
@@ -806,7 +814,7 @@ func TestActionResetCounterCREDIT(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}, &UnitsCounter{BalanceId: SMS, Direction: OUTBOUND, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
@@ -815,7 +823,7 @@ func TestActionResetCounterCREDIT(t *testing.T) {
 	if ub.Type != UB_TYPE_POSTPAID ||
 		ub.BalanceMap[CREDIT].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 2 ||
-		len(ub.BalanceMap[MINUTES]) != 2 ||
+		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
 		t.Error("Reset counters action failed!", ub.UnitCounters)
 	}

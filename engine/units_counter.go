@@ -30,7 +30,7 @@ type UnitsCounter struct {
 	MinuteBalances BalanceChain
 }
 
-func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
+func (uc *UnitsCounter) initMinuteBalances(ats []*ActionTrigger) {
 	uc.MinuteBalances = make(BalanceChain, 0)
 	for _, at := range ats {
 		acs, err := storageGetter.GetActions(at.ActionsId)
@@ -38,8 +38,10 @@ func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
 			continue
 		}
 		for _, a := range acs {
-			if a.Balance != nil {
-				uc.MinuteBalances = append(uc.MinuteBalances, a.Balance.Clone())
+			if a.BalanceId == MINUTES && a.Balance != nil {
+				b := a.Balance.Clone()
+				b.Value = 0
+				uc.MinuteBalances = append(uc.MinuteBalances, b)
 			}
 		}
 	}

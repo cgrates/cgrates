@@ -35,9 +35,9 @@ type Action struct {
 	ExpirationString                string
 	Weight                          float64
 	Balance                         *Balance
-	destinationTag, rateType        string // From here for import/load purposes only
-	expirationDate                  time.Time
-	units, rateValue, minutesWeight float64
+	DestinationTag, RateType        string // From here for import/load purposes only
+	ExpirationDate                  time.Time
+	Units, RateValue, MinutesWeight float64
 }
 
 const (
@@ -138,7 +138,7 @@ func resetCounterAction(ub *UserBalance, a *Action) (err error) {
 		ub.UnitCounters = append(ub.UnitCounters, uc)
 	}
 	if a.BalanceId == MINUTES {
-		uc.initMinuteBuckets(ub.ActionTriggers)
+		uc.initMinuteBalances(ub.ActionTriggers)
 	} else {
 		uc.Units = 0
 	}
