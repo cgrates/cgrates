@@ -315,8 +315,8 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 
 }
 
-func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, index float64) {
-	cc := &engine.CallCost{}
+func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, index float64) (cc *engine.CallCost) {
+	cc = &engine.CallCost{}
 	cd.LoopIndex = index
 	cd.Amount = sm.debitPeriod.Seconds()
 	cd.CallDuration += time.Duration(cd.Amount) * time.Second
@@ -326,18 +326,14 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, in
 		// disconnect session
 		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
 	}
-	nbts := len(cc.Timespans)
-	remainingSeconds := 0.0
 	engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
-	if nbts > 0 {
-		remainingSeconds = cc.Timespans[nbts-1].TimeEnd.Sub(cc.Timespans[0].TimeStart).Seconds()
-	}
-	if remainingSeconds == 0 || err != nil {
+	if cc.GetTotalDuration() == 0 || err != nil {
 		engine.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		sm.DisconnectSession(s, INSUFFICIENT_FUNDS)
 		return
 	}
 	s.CallCosts = append(s.CallCosts, cc)
+	return
 }
 
 func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
