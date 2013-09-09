@@ -23,11 +23,6 @@ import (
 	"fmt"
 )
 
-const (
-	// the minimum length for a destination prefix to be matched.
-	MIN_PREFIX_LENGTH = 2
-)
-
 type RatingProfile struct {
 	Id                                                                                             string
 	FallbackKey                                                                                    string // FallbackKey is used as complete combination of Tenant:TOR:Direction:Subject

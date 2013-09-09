@@ -161,11 +161,7 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	if a.BalanceId == MINUTES {
-		ub.debitMinuteBalance(a.Balance)
-	} else {
-		ub.debitBalanceAction(a)
-	}
+	ub.debitBalanceAction(a)
 	return
 }
 

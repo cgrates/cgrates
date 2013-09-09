@@ -69,8 +69,8 @@ type DataStorage interface {
 	GetRatingProfile(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
+	DestinationContainsPrefix(string, string) (int, error)
 	SetDestination(*Destination) error
-	// End Apier functions
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)

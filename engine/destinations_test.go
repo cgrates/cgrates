@@ -38,8 +38,11 @@ func TestDestinationStoreRestore(t *testing.T) {
 
 func TestDestinationStorageStore(t *testing.T) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
-	storageGetter.SetDestination(nationale)
-	result, _ := storageGetter.GetDestination(nationale.Id)
+	err := storageGetter.SetDestination(nationale)
+	if err != nil {
+		t.Error("Error storing destination: ", err)
+	}
+	result, err := storageGetter.GetDestination(nationale.Id)
 	if !reflect.DeepEqual(nationale, result) {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
@@ -86,8 +89,8 @@ func TestDestinationGetNotExists(t *testing.T) {
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
 	GetDestination("not existing")
-	if _, err := cache2go.GetCached("not existing"); err == nil {
-		t.Error("Bad destination cached")
+	if d, err := cache2go.GetCached("not existing"); err == nil {
+		t.Error("Bad destination cached: ", d)
 	}
 }
 

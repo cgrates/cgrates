@@ -100,32 +100,37 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 	return
 }
 
-// Debit seconds from specified minute bucket
-func (ub *UserBalance) debitMinuteBalance(newMb *Balance) error {
-	if newMb == nil {
-		return errors.New("Nil minute bucket!")
+// Debits some amount of user's specified balance adding the balance if it does not exists.
+// Returns the remaining credit in user's balance.
+func (ub *UserBalance) debitBalanceAction(a *Action) error {
+	if a == nil {
+		return errors.New("nil minute action!")
+	}
+	if a.Balance.Id == "" {
+		a.Balance.Id = utils.GenUUID()
 	}
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
 	found := false
-	for _, mb := range ub.BalanceMap[MINUTES+OUTBOUND] {
-		if mb.IsExpired() {
-			continue
+	id := a.BalanceId + a.Direction
+	for _, b := range ub.BalanceMap[id] {
+		if b.IsExpired() {
+			continue // we can clean expired balances balances here
 		}
-		if mb.Equal(newMb) {
-			mb.Value -= newMb.Value
+		if b.Equal(a.Balance) {
+			b.Value -= a.Balance.Value
 			found = true
 			break
 		}
 	}
 	// if it is not found and the Seconds are negative (topup)
 	// then we add it to the list
-	if !found && newMb.Value <= 0 {
-		newMb.Value = -newMb.Value
-		ub.BalanceMap[MINUTES+OUTBOUND] = append(ub.BalanceMap[MINUTES+OUTBOUND], newMb)
+	if !found && a.Balance.Value <= 0 {
+		a.Balance.Value = -a.Balance.Value
+		ub.BalanceMap[id] = append(ub.BalanceMap[id], a.Balance)
 	}
-	return nil
+	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 
 /*
@@ -177,29 +182,6 @@ func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count 
 		}
 	}
 	return nil
-}
-
-// Debits some amount of user's specified balance adding the balance if it does not exists.
-// Returns the remaining credit in user's balance.
-func (ub *UserBalance) debitBalanceAction(a *Action) float64 {
-	newBalance := &Balance{Id: utils.GenUUID()}
-	if a.Balance != nil {
-		newBalance.ExpirationDate = a.Balance.ExpirationDate
-		newBalance.Weight = a.Balance.Weight
-	}
-	found := false
-	id := a.BalanceId + a.Direction
-	for _, b := range ub.BalanceMap[id] {
-		if b.Equal(newBalance) {
-			b.Value -= a.Balance.Value
-			found = true
-		}
-	}
-	if !found {
-		newBalance.Value -= a.Balance.Value
-		ub.BalanceMap[id] = append(ub.BalanceMap[id], newBalance)
-	}
-	return ub.BalanceMap[a.BalanceId+OUTBOUND].GetTotalValue()
 }
 
 /*

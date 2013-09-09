@@ -121,9 +121,29 @@ func ParseDate(date string) (expDate time.Time, err error) {
 	return expDate, err
 }
 
+// returns a number equeal or larger than the peram that exactly
+// is divisible to 60
 func RoundToMinute(seconds float64) float64 {
 	if math.Mod(seconds, 60) == 0 {
 		return seconds
 	}
 	return (60 - math.Mod(seconds, 60)) + seconds
+}
+
+func SplitPrefix(prefix string) []string {
+	var subs []string
+	max := len(prefix)
+	for i := 0; i < len(prefix)-1; i++ {
+		subs = append(subs, prefix[:max-i])
+	}
+	return subs
+}
+
+func SplitPrefixInterface(prefix string) []interface{} {
+	var subs []interface{}
+	max := len(prefix)
+	for i := 0; i < len(prefix)-1; i++ {
+		subs = append(subs, prefix[:max-i])
+	}
+	return subs
 }

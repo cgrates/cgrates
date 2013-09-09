@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/history"
+	"github.com/cgrates/cgrates/utils"
 	"menteslibres.net/gosexy/redis"
 	"strconv"
 	"strings"
@@ -87,20 +88,31 @@ func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
-	var values string
-	if values, err = rs.db.Get(DESTINATION_PREFIX + key); err == nil {
-		dest = &Destination{Id: key}
-		err = rs.ms.Unmarshal([]byte(values), dest)
+	var values []string
+	if values, err = rs.db.HKeys(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
+		dest = &Destination{Id: key, Prefixes: values}
+	}
+	return
+}
+
+func (rs *RedisStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
+	var values []string
+	if values, err = rs.db.HMGet(DESTINATION_PREFIX+key, utils.SplitPrefix(prefix)...); err == nil {
+		for i, p := range values {
+			if p != "" {
+				return len(prefix) - i, nil
+			}
+		}
 	}
 	return
 }
 
 func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(dest); err != nil {
-		return
+	var newPrefixes []interface{}
+	for _, p := range dest.Prefixes {
+		newPrefixes = append(newPrefixes, p, "*")
 	}
-	_, err = rs.db.Set(DESTINATION_PREFIX+dest.Id, result)
+	_, err = rs.db.HMSet(DESTINATION_PREFIX+dest.Id, newPrefixes...)
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)

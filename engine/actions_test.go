@@ -515,17 +515,6 @@ func TestActionTriggerPriotityList(t *testing.T) {
 	}
 }
 
-/*func TestActionLog(t *testing.T) {
-	a := &Action{
-		ActionType:   "TEST",
-		BalanceId:    "BALANCE",
-		Units:        10,
-		Weight:       11,
-		Balance: &Balance{},
-	}
-	logAction(nil, a)
-}*/
-
 func TestActionResetTriggres(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
@@ -667,7 +656,7 @@ func TestActionTopupResetMinutes(t *testing.T) {
 		len(ub.UnitCounters) != 1 ||
 		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Errorf("Topup reset minutes action failed: %v", ub.BalanceMap[MINUTES+OUTBOUND].GetTotalValue())
+		t.Errorf("Topup reset minutes action failed: %v", ub.BalanceMap[MINUTES+OUTBOUND][0])
 	}
 }
 
@@ -698,15 +687,15 @@ func TestActionTopupMinutes(t *testing.T) {
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceId: MINUTES, Balance: &Balance{Value: 5, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}}
+	a := &Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: 5, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}}
 	topupAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
-		ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 15 ||
+		ub.BalanceMap[MINUTES+OUTBOUND].GetTotalValue() != 15 ||
 		ub.BalanceMap[CREDIT].GetTotalValue() != 100 ||
 		len(ub.UnitCounters) != 1 ||
 		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Error("Topup minutes action failed!", ub.BalanceMap[MINUTES+OUTBOUND][0])
+		t.Error("Topup minutes action failed!", ub.BalanceMap[MINUTES+OUTBOUND])
 	}
 }
 
@@ -737,7 +726,7 @@ func TestActionDebitMinutes(t *testing.T) {
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}, &ActionTrigger{BalanceId: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
-	a := &Action{BalanceId: MINUTES, Balance: &Balance{Value: 5, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}}
+	a := &Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: 5, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}}
 	debitAction(ub, a)
 	if ub.Type != UB_TYPE_PREPAID ||
 		ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 5 ||
@@ -797,8 +786,6 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		len(ub.UnitCounters[1].MinuteBalances) != 1 ||
 		len(ub.BalanceMap[MINUTES]) != 2 ||
 		ub.ActionTriggers[0].Executed != true {
-		t.Logf("%#v", ub.UnitCounters[1].MinuteBalances[0])
-		t.Logf("%#v", ub.UnitCounters[1].MinuteBalances[1])
 		t.Error("Reset counters action failed!", ub.UnitCounters[1].MinuteBalances)
 	}
 	if len(ub.UnitCounters) < 2 || len(ub.UnitCounters[1].MinuteBalances) < 1 {
@@ -841,7 +828,7 @@ func TestActionTriggerLogging(t *testing.T) {
 	}
 	as, err := storageGetter.GetActions(at.ActionsId)
 	if err != nil {
-		t.Error("Error getting actions for the action timing: ", err)
+		t.Error("Error getting actions for the action timing: ", as, err)
 	}
 	storageLogger.LogActionTrigger("rif", RATER_SOURCE, at, as)
 	//expected := "rif*some_uuid;MONETARY;OUT;NAT;TEST_ACTIONS;100;10;false*|TOPUP|MONETARY|OUT|10|0"

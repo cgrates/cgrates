@@ -227,3 +227,17 @@ func TestRoundToMinute(t *testing.T) {
 		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
 	}
 }
+
+func TestSplitPrefix(t *testing.T) {
+	a := SplitPrefix("0123456789")
+	if len(a) != 9 {
+		t.Error("Error splitting prefix: ", a)
+	}
+}
+
+func TestSplitPrefixEmpty(t *testing.T) {
+	a := SplitPrefix("")
+	if len(a) != 0 {
+		t.Error("Error splitting prefix: ", a)
+	}
+}
