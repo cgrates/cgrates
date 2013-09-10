@@ -182,6 +182,11 @@ func TestIntervalNotEqual(t *testing.T) {
 	}
 }
 
+func TestIntervalGetCost(t *testing.T) {
+}
+
+/*********************************Benchmarks**************************************/
+
 func BenchmarkIntervalContainsDate(b *testing.B) {
 	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}
 	d := time.Date(2012, time.February, 1, 14, 30, 0, 0, time.UTC)

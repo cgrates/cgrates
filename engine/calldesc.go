@@ -262,7 +262,39 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			}
 		}
 	}
+	timespans = cd.expandTimeSpans(timespans)
 	return
+}
+
+// if the rate interval for any timespan has a RatingInterval larger than the timespan duration
+// the timespan must expand potentially overlaping folowing timespans and may exceed call
+// descriptor's initial duration
+func (cd *CallDescriptor) expandTimeSpans(timespans []*TimeSpan) []*TimeSpan {
+	for i, ts := range timespans {
+		if ts.Interval != nil {
+			_, rateIncrement, _ := ts.Interval.GetPriceParameters(ts.GetGroupStart())
+			if rateIncrement > ts.GetDuration() {
+				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
+				// overlap the rest of the timespans
+				for ; i < len(timespans); i++ {
+					if timespans[i].TimeEnd.Before(ts.TimeEnd) {
+						timespans[i].overlapped = true
+					} else if timespans[i].TimeStart.Before(ts.TimeEnd) {
+						timespans[i].TimeStart = ts.TimeEnd
+					}
+				}
+				break
+			}
+		}
+	}
+	// remove overlapped
+	for i, ts := range timespans {
+		if ts.overlapped {
+			timespans = timespans[:i]
+			break
+		}
+	}
+	return timespans
 }
 
 /*

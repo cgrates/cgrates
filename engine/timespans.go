@@ -33,6 +33,7 @@ type TimeSpan struct {
 	Interval           *Interval
 	MinuteInfo         *MinuteInfo
 	CallDuration       time.Duration // the call duration so far till TimeEnd
+	overlapped         bool          // mark a timespan as overlapped by an expanded one
 }
 
 // Holds the bonus minute information related to a specified timespan
@@ -80,12 +81,13 @@ func (ts *TimeSpan) Contains(t time.Time) bool {
 }
 
 /*
-Will set the interval as spans's interval if new Weight is greater then span's interval Weight
+Will set the interval as spans's interval if new Weight is lower then span's interval Weight
 or if the Weights are equal and new price is lower then spans's interval price
 */
 func (ts *TimeSpan) SetInterval(i *Interval) {
 	if ts.Interval == nil || ts.Interval.Weight < i.Weight {
 		ts.Interval = i
+		return
 	}
 	iPrice, _, _ := i.GetPriceParameters(ts.GetGroupStart())
 	tsPrice, _, _ := ts.Interval.GetPriceParameters(ts.GetGroupStart())

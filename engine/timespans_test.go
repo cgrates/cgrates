@@ -517,3 +517,139 @@ func TestTimespanSplitMultipleGroup(t *testing.T) {
 		t.Error("Wrong durations.for Intervals", nts.GetDuration().Seconds(), nnts.GetDuration().Seconds())
 	}
 }
+
+func TestTimespanExpandingPastEnd(t *testing.T) {
+	timespans := []*TimeSpan{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			Interval: &Interval{Prices: PriceGroups{
+				&Price{RateIncrement: 60 * time.Second},
+			}},
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC),
+		},
+	}
+	cd := &CallDescriptor{}
+	timespans = cd.expandTimeSpans(timespans)
+	if len(timespans) != 1 {
+		t.Error("Error removing overlaped intervals: ", timespans)
+	}
+	if !timespans[0].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 31, 0, 0, time.UTC)) {
+		t.Error("Error expanding timespan: ", timespans[0])
+	}
+}
+
+func TestTimespanExpandingPastEndMultiple(t *testing.T) {
+	timespans := []*TimeSpan{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			Interval: &Interval{Prices: PriceGroups{
+				&Price{RateIncrement: 60 * time.Second},
+			}},
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 50, 0, time.UTC),
+		},
+	}
+	cd := &CallDescriptor{}
+	timespans = cd.expandTimeSpans(timespans)
+	if len(timespans) != 1 {
+		t.Error("Error removing overlaped intervals: ", timespans)
+	}
+	if !timespans[0].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 31, 0, 0, time.UTC)) {
+		t.Error("Error expanding timespan: ", timespans[0])
+	}
+}
+
+func TestTimespanExpandingPastEndMultipleEqual(t *testing.T) {
+	timespans := []*TimeSpan{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			Interval: &Interval{Prices: PriceGroups{
+				&Price{RateIncrement: 60 * time.Second},
+			}},
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 40, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 31, 00, 0, time.UTC),
+		},
+	}
+	cd := &CallDescriptor{}
+	timespans = cd.expandTimeSpans(timespans)
+	if len(timespans) != 1 {
+		t.Error("Error removing overlaped intervals: ", timespans)
+	}
+	if !timespans[0].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 31, 0, 0, time.UTC)) {
+		t.Error("Error expanding timespan: ", timespans[0])
+	}
+}
+
+func TestTimespanExpandingBeforeEnd(t *testing.T) {
+	timespans := []*TimeSpan{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			Interval: &Interval{Prices: PriceGroups{
+				&Price{RateIncrement: 45 * time.Second},
+			}},
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 31, 0, 0, time.UTC),
+		},
+	}
+	cd := &CallDescriptor{}
+	timespans = cd.expandTimeSpans(timespans)
+	if len(timespans) != 2 {
+		t.Error("Error removing overlaped intervals: ", timespans)
+	}
+	if !timespans[0].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC)) ||
+		!timespans[1].TimeStart.Equal(time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC)) ||
+		!timespans[1].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 31, 0, 0, time.UTC)) {
+		t.Error("Error expanding timespan: ", timespans[0])
+	}
+}
+
+func TestTimespanExpandingBeforeEndMultiple(t *testing.T) {
+	timespans := []*TimeSpan{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			Interval: &Interval{Prices: PriceGroups{
+				&Price{RateIncrement: 45 * time.Second},
+			}},
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 50, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 50, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 31, 00, 0, time.UTC),
+		},
+	}
+	cd := &CallDescriptor{}
+	timespans = cd.expandTimeSpans(timespans)
+	if len(timespans) != 3 {
+		t.Error("Error removing overlaped intervals: ", timespans)
+	}
+	if !timespans[0].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC)) ||
+		!timespans[1].TimeStart.Equal(time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC)) ||
+		!timespans[1].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 30, 50, 0, time.UTC)) {
+		t.Error("Error expanding timespan: ", timespans[0])
+	}
+}
