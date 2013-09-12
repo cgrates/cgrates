@@ -15,7 +15,7 @@ The call information comes to CGRateS having the following vital information lik
 	LoopIndex       // indicates the position of this segment in a cost request loop
 	CallDuration    // the call duration so far (partial or final)
 	FallbackSubject // the subject to check for destination if not found on primary subject
-	ActivationPeriods
+	RatingPlans
  }
 
 When the session manager receives a call start event it will first check if the call is prepaid or postpaid. If the call is postpaid than the cost will be determined only once at the end of the call but if the call is prepaid there will be a debit operation every X seconds (X is configurable).
@@ -31,7 +31,7 @@ What are the activation periods?
 
 ::
 
- type Interval struct {
+ type RateInterval struct {
 	Years            
 	Months           
 	MonthDays        
@@ -51,9 +51,9 @@ What are the activation periods?
  }
 
 
-An **Interval** specifies the Month, the MonthDay, the WeekDays, the StartTime and the EndTime when the Interval's price profile is in effect. 
+An **RateInterval** specifies the Month, the MonthDay, the WeekDays, the StartTime and the EndTime when the RateInterval's price profile is in effect. 
 
-:Example: The Interval {"Month": [1], "WeekDays":[1,2,3,4,5], "StartTime":"18:00:00"} specifies the *Price* for the first month of each year from Monday to Friday starting 18:00. Most structure elements are optional and they can be combined in any way it makes sense. If an element is omitted it means it is zero or any.
+:Example: The RateInterval {"Month": [1], "WeekDays":[1,2,3,4,5], "StartTime":"18:00:00"} specifies the *Price* for the first month of each year from Monday to Friday starting 18:00. Most structure elements are optional and they can be combined in any way it makes sense. If an element is omitted it means it is zero or any.
 
 The *ConnectFee* specifies the connection price for the call if this interval is the first one of the call.
 
@@ -65,7 +65,7 @@ The *RoundingMethod* and the *RoundingDecimals* will adjust the price using the 
 
 The **Price** structure defines the start (*GroupIntervalStart*) of a section of a call with a specified rate *Value* per *RateUnit* diving and rounding the section in *RateIncrement* subsections.
 
-So when there is a need to define new sets of prices just define new ActivationPeriods with the activation time set to the moment when it becomes active.
+So when there is a need to define new sets of prices just define new RatingPlans with the activation time set to the moment when it becomes active.
 
 Let's get back to the engine. When a GetCost or Debit call comes to the engine it will try to match the best rating profile for the given *Direction*, *Tenant*, *TOR* and *Subject* using the longest *Subject* prefix method or using the *FallbackSubject* if not found. The rating profile contains the activation periods that might apply to the call in question.
 
@@ -75,21 +75,21 @@ At this point in rating process the engine will start splitting the call into va
 
 2. Activation periods: if there were not enough special price minutes available than the engine will check if the call spans over multiple activation periods (the call starts in initial rates period and continues in another).
 
-3. Intervals: for each activation period that apply to the call the engine will select the best rate intervals that apply. 
+3. RateIntervals: for each activation period that apply to the call the engine will select the best rate intervals that apply. 
 
 ::
 
  type TimeSpan struct {
 	TimeStart, TimeEnd
 	Cost              
-	ActivationPeriod  
-	Interval          
+	RatingPlan  
+	RateInterval          
 	MinuteInfo        
 	CallDuration  // the call duration so far till TimeEnd
  }
 
 
-The result of this splitting will be a list of *TimeSpan* structures each having attached the MinuteInfo or the Interval that gave the price for it. The *CallDuration* attribute will select the right *Price* from the *Interval* *Prices* list. The final cost for the call will be the sum of the prices of these times spans plus the *ConnectionFee* from the first time span of the call.
+The result of this splitting will be a list of *TimeSpan* structures each having attached the MinuteInfo or the RateInterval that gave the price for it. The *CallDuration* attribute will select the right *Price* from the *RateInterval* *Prices* list. The final cost for the call will be the sum of the prices of these times spans plus the *ConnectionFee* from the first time span of the call.
 
 6.2.1 User balances
 -------------------

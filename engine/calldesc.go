@@ -107,13 +107,13 @@ type CallDescriptor struct {
 	CallDuration                          time.Duration // the call duration so far (partial or final)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
-	ActivationPeriods                     []*ActivationPeriod
+	RatingPlans                           []*RatingPlan
 	userBalance                           *UserBalance
 }
 
 // Adds an activation period that applyes to current call descriptor.
-func (cd *CallDescriptor) AddActivationPeriod(aps ...*ActivationPeriod) {
-	cd.ActivationPeriods = append(cd.ActivationPeriods, aps...)
+func (cd *CallDescriptor) AddRatingPlan(aps ...*RatingPlan) {
+	cd.RatingPlans = append(cd.RatingPlans, aps...)
 }
 
 // Returns the key used to retrive the user balance involved in this call
@@ -136,28 +136,28 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 /*
 Restores the activation periods for the specified prefix from storage.
 */
-func (cd *CallDescriptor) LoadActivationPeriods() (destPrefix string, err error) {
+func (cd *CallDescriptor) LoadRatingPlans() (destPrefix string, err error) {
 	if val, err := cache2go.GetXCached(cd.GetKey() + cd.Destination); err == nil {
-		xaps := val.(xCachedActivationPeriods)
-		cd.ActivationPeriods = xaps.aps
+		xaps := val.(xCachedRatingPlans)
+		cd.RatingPlans = xaps.aps
 		return xaps.destPrefix, nil
 	}
-	destPrefix, values, err := cd.getActivationPeriodsForPrefix(cd.GetKey(), 1)
+	destPrefix, values, err := cd.getRatingPlansForPrefix(cd.GetKey(), 1)
 	if err != nil {
 		fallbackKey := fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
 		// use the default subject
-		destPrefix, values, err = cd.getActivationPeriodsForPrefix(fallbackKey, 1)
+		destPrefix, values, err = cd.getRatingPlansForPrefix(fallbackKey, 1)
 	}
 	//load the activation preriods
 	if err == nil && len(values) > 0 {
-		xaps := xCachedActivationPeriods{destPrefix, values, new(cache2go.XEntry)}
+		xaps := xCachedRatingPlans{destPrefix, values, new(cache2go.XEntry)}
 		xaps.XCache(cd.GetKey()+cd.Destination, debitPeriod+5*time.Second, xaps)
-		cd.ActivationPeriods = values
+		cd.RatingPlans = values
 	}
 	return
 }
 
-func (cd *CallDescriptor) getActivationPeriodsForPrefix(key string, recursionDepth int) (foundPrefix string, aps []*ActivationPeriod, err error) {
+func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (foundPrefix string, aps []*RatingPlan, err error) {
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
@@ -166,12 +166,12 @@ func (cd *CallDescriptor) getActivationPeriodsForPrefix(key string, recursionDep
 	if err != nil {
 		return "", nil, err
 	}
-	foundPrefix, aps, err = rp.GetActivationPeriodsForPrefix(cd.Destination)
+	foundPrefix, aps, err = rp.GetRatingPlansForPrefix(cd.Destination)
 	if err != nil {
 		if rp.FallbackKey != "" {
 			recursionDepth++
 			for _, fbk := range strings.Split(rp.FallbackKey, FALLBACK_SEP) {
-				if destPrefix, values, err := cd.getActivationPeriodsForPrefix(fbk, recursionDepth); err == nil {
+				if destPrefix, values, err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
 					return destPrefix, values, err
 				}
 			}
@@ -217,23 +217,23 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	if firstSpan.MinuteInfo != nil {
 		return // all the timespans are on minutes
 	}
-	if len(cd.ActivationPeriods) == 0 {
+	if len(cd.RatingPlans) == 0 {
 		return
 	}
-	firstSpan.ActivationPeriod = cd.ActivationPeriods[0]
+	firstSpan.RatingPlan = cd.RatingPlans[0]
 
 	// split on activation periods
 	afterStart, afterEnd := false, false //optimization for multiple activation periods
-	for _, ap := range cd.ActivationPeriods {
+	for _, ap := range cd.RatingPlans {
 		if !afterStart && !afterEnd && ap.ActivationTime.Before(cd.TimeStart) {
-			firstSpan.ActivationPeriod = ap
+			firstSpan.RatingPlan = ap
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
 				if timespans[i].MinuteInfo != nil {
 					continue
 				}
-				newTs := timespans[i].SplitByActivationPeriod(ap)
+				newTs := timespans[i].SplitByRatingPlan(ap)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
 				} else {
@@ -248,16 +248,16 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 		if timespans[i].MinuteInfo != nil {
 			continue // cont try to split timespans payed with minutes
 		}
-		ap := timespans[i].ActivationPeriod
-		//timespans[i].ActivationPeriod = nil
-		ap.Intervals.Sort()
-		for _, interval := range ap.Intervals {
-			if timespans[i].Interval != nil && timespans[i].Interval.Weight < interval.Weight {
+		ap := timespans[i].RatingPlan
+		//timespans[i].RatingPlan = nil
+		ap.RateIntervals.Sort()
+		for _, interval := range ap.RateIntervals {
+			if timespans[i].RateInterval != nil && timespans[i].RateInterval.Weight < interval.Weight {
 				continue // if the timespan has an interval than it already has a heigher weight
 			}
-			newTs := timespans[i].SplitByInterval(interval)
+			newTs := timespans[i].SplitByRateInterval(interval)
 			if newTs != nil {
-				newTs.ActivationPeriod = ap
+				newTs.RatingPlan = ap
 				timespans = append(timespans, newTs)
 			}
 		}
@@ -266,15 +266,20 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	return
 }
 
-// if the rate interval for any timespan has a RatingInterval larger than the timespan duration
+// if the rate interval for any timespan has a RatingIncrement larger than the timespan duration
 // the timespan must expand potentially overlaping folowing timespans and may exceed call
 // descriptor's initial duration
 func (cd *CallDescriptor) expandTimeSpans(timespans []*TimeSpan) []*TimeSpan {
 	for i, ts := range timespans {
-		if ts.Interval != nil {
-			_, rateIncrement, _ := ts.Interval.GetPriceParameters(ts.GetGroupStart())
+		if ts.RateInterval != nil {
+			_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+			// if the timespan duration is larger than the rate increment make sure it is a multiple of it
+			if rateIncrement < ts.GetDuration() {
+				rateIncrement = utils.RoundTo(rateIncrement, ts.GetDuration())
+			}
 			if rateIncrement > ts.GetDuration() {
 				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
+				ts.SetNewCallDuration(ts) // set new call duration for this timespan
 				// overlap the rest of the timespans
 				for ; i < len(timespans); i++ {
 					if timespans[i].TimeEnd.Before(ts.TimeEnd) {
@@ -301,7 +306,7 @@ func (cd *CallDescriptor) expandTimeSpans(timespans []*TimeSpan) []*TimeSpan {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	destPrefix, err := cd.LoadActivationPeriods()
+	destPrefix, err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return &CallCost{Cost: -1}, err
@@ -312,8 +317,8 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 
 	for i, ts := range timespans {
 		// only add connect fee if this is the first/only call cost request
-		if cd.LoopIndex == 0 && i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
-			connectionFee = ts.Interval.ConnectFee
+		if cd.LoopIndex == 0 && i == 0 && ts.MinuteInfo == nil && ts.RateInterval != nil {
+			connectionFee = ts.RateInterval.ConnectFee
 		}
 		cost += ts.getCost(cd)
 	}
@@ -339,7 +344,7 @@ If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
 func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float64, err error) {
-	_, err = cd.LoadActivationPeriods()
+	_, err = cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return 0, err
@@ -371,8 +376,8 @@ func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float6
 
 		cost := 0.0
 		for i, ts := range timespans {
-			if i == 0 && ts.MinuteInfo == nil && ts.Interval != nil {
-				cost += ts.Interval.ConnectFee
+			if i == 0 && ts.MinuteInfo == nil && ts.RateInterval != nil {
+				cost += ts.RateInterval.ConnectFee
 			}
 			cost += ts.getCost(cd)
 		}

@@ -285,7 +285,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
 			Amount:      -cost,
-			// FallbackSubject: lastCC.FallbackSubject, // ToDo: check how to best add it
+			// FallbackSubject: lastCC.FallbackSubject, // TODO: check how to best add it
 		}
 		var response float64
 		err := sm.connector.DebitCents(*cd, &response)

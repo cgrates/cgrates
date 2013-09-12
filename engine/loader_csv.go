@@ -39,9 +39,9 @@ type CSVReader struct {
 	accountActions    []*UserBalance
 	destinations      []*Destination
 	timings           map[string]*Timing
-	rates             map[string]*Rate
+	rates             map[string]*LoadRate
 	destinationRates  map[string][]*DestinationRate
-	activationPeriods map[string]*ActivationPeriod
+	activationPeriods map[string]*RatingPlan
 	ratingProfiles    map[string]*RatingProfile
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
@@ -55,10 +55,10 @@ func NewFileCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn, 
 	c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
-	c.rates = make(map[string]*Rate)
+	c.rates = make(map[string]*LoadRate)
 	c.destinationRates = make(map[string][]*DestinationRate)
 	c.timings = make(map[string]*Timing)
-	c.activationPeriods = make(map[string]*ActivationPeriod)
+	c.activationPeriods = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.readerFunc = openFileCSVReader
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
@@ -223,8 +223,8 @@ func (csvr *CSVReader) LoadRates() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		var r *Rate
-		r, err = NewRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
+		var r *LoadRate
+		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
 		if err != nil {
 			return err
 		}
@@ -285,9 +285,9 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 		}
 		for _, dr := range drs {
 			if _, exists := csvr.activationPeriods[tag]; !exists {
-				csvr.activationPeriods[tag] = &ActivationPeriod{}
+				csvr.activationPeriods[tag] = &RatingPlan{}
 			}
-			csvr.activationPeriods[tag].AddInterval(rt.GetInterval(dr))
+			csvr.activationPeriods[tag].AddRateInterval(rt.GetRateInterval(dr))
 		}
 	}
 	return
@@ -320,10 +320,10 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			if !exists {
 				return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: %v", record[5]))
 			}
-			newAP := &ActivationPeriod{ActivationTime: at}
+			newAP := &RatingPlan{ActivationTime: at}
 			//copy(newAP.Intervals, ap.Intervals)
-			newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-			rp.AddActivationPeriodIfNotPresent(d.Id, newAP)
+			newAP.RateIntervals = append(newAP.RateIntervals, ap.RateIntervals...)
+			rp.AddRatingPlanIfNotPresent(d.Id, newAP)
 			if fallbacksubject != "" {
 				rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject)
 			}
@@ -411,7 +411,7 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 			Id:     utils.GenUUID(),
 			Tag:    record[2],
 			Weight: weight,
-			Timing: &Interval{
+			Timing: &RateInterval{
 				Months:    t.Months,
 				MonthDays: t.MonthDays,
 				WeekDays:  t.WeekDays,

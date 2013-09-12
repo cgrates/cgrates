@@ -23,8 +23,8 @@ import (
 	"time"
 )
 
-func TestIntervalMonth(t *testing.T) {
-	i := &Interval{Months: Months{time.February}}
+func TestRateIntervalMonth(t *testing.T) {
+	i := &RateInterval{Months: Months{time.February}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d) {
@@ -35,8 +35,8 @@ func TestIntervalMonth(t *testing.T) {
 	}
 }
 
-func TestIntervalMonthDay(t *testing.T) {
-	i := &Interval{MonthDays: MonthDays{10}}
+func TestRateIntervalMonthDay(t *testing.T) {
+	i := &RateInterval{MonthDays: MonthDays{10}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d) {
@@ -47,8 +47,8 @@ func TestIntervalMonthDay(t *testing.T) {
 	}
 }
 
-func TestIntervalMonthAndMonthDay(t *testing.T) {
-	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{10}}
+func TestRateIntervalMonthAndMonthDay(t *testing.T) {
+	i := &RateInterval{Months: Months{time.February}, MonthDays: MonthDays{10}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
 	d2 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
@@ -63,9 +63,9 @@ func TestIntervalMonthAndMonthDay(t *testing.T) {
 	}
 }
 
-func TestIntervalWeekDays(t *testing.T) {
-	i := &Interval{WeekDays: []time.Weekday{time.Wednesday}}
-	i2 := &Interval{WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
+func TestRateIntervalWeekDays(t *testing.T) {
+	i := &RateInterval{WeekDays: []time.Weekday{time.Wednesday}}
+	i2 := &RateInterval{WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
 	d := time.Date(2012, time.February, 1, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 2, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d) {
@@ -82,9 +82,9 @@ func TestIntervalWeekDays(t *testing.T) {
 	}
 }
 
-func TestIntervalMonthAndMonthDayAndWeekDays(t *testing.T) {
-	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday}}
-	i2 := &Interval{Months: Months{time.February}, MonthDays: MonthDays{2}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
+func TestRateIntervalMonthAndMonthDayAndWeekDays(t *testing.T) {
+	i := &RateInterval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday}}
+	i2 := &RateInterval{Months: Months{time.February}, MonthDays: MonthDays{2}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
 	d := time.Date(2012, time.February, 1, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 2, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d) {
@@ -101,8 +101,8 @@ func TestIntervalMonthAndMonthDayAndWeekDays(t *testing.T) {
 	}
 }
 
-func TestIntervalHours(t *testing.T) {
-	i := &Interval{StartTime: "14:30:00", EndTime: "15:00:00"}
+func TestRateIntervalHours(t *testing.T) {
+	i := &RateInterval{StartTime: "14:30:00", EndTime: "15:00:00"}
 	d := time.Date(2012, time.February, 10, 14, 30, 1, 0, time.UTC)
 	d1 := time.Date(2012, time.January, 10, 14, 29, 0, 0, time.UTC)
 	d2 := time.Date(2012, time.January, 10, 14, 59, 0, 0, time.UTC)
@@ -121,8 +121,8 @@ func TestIntervalHours(t *testing.T) {
 	}
 }
 
-func TestIntervalEverything(t *testing.T) {
-	i := &Interval{Months: Months{time.February},
+func TestRateIntervalEverything(t *testing.T) {
+	i := &RateInterval{Months: Months{time.February},
 		Years:     Years{2012},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
@@ -150,13 +150,13 @@ func TestIntervalEverything(t *testing.T) {
 	}
 }
 
-func TestIntervalEqual(t *testing.T) {
-	i1 := &Interval{Months: Months{time.February},
+func TestRateIntervalEqual(t *testing.T) {
+	i1 := &RateInterval{Months: Months{time.February},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	i2 := &Interval{Months: Months{time.February},
+	i2 := &RateInterval{Months: Months{time.February},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
@@ -166,13 +166,13 @@ func TestIntervalEqual(t *testing.T) {
 	}
 }
 
-func TestIntervalNotEqual(t *testing.T) {
-	i1 := &Interval{Months: Months{time.February},
+func TestRateIntervalNotEqual(t *testing.T) {
+	i1 := &RateInterval{Months: Months{time.February},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	i2 := &Interval{Months: Months{time.February},
+	i2 := &RateInterval{Months: Months{time.February},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
@@ -182,13 +182,13 @@ func TestIntervalNotEqual(t *testing.T) {
 	}
 }
 
-func TestIntervalGetCost(t *testing.T) {
+func TestRateIntervalGetCost(t *testing.T) {
 }
 
 /*********************************Benchmarks**************************************/
 
-func BenchmarkIntervalContainsDate(b *testing.B) {
-	i := &Interval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}
+func BenchmarkRateIntervalContainsDate(b *testing.B) {
+	i := &RateInterval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}
 	d := time.Date(2012, time.February, 1, 14, 30, 0, 0, time.UTC)
 	for x := 0; x < b.N; x++ {
 		i.Contains(d)

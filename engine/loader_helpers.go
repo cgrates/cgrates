@@ -46,7 +46,7 @@ type TPLoader interface {
 	WriteToDatabase(bool, bool) error
 }
 
-type Rate struct {
+type LoadRate struct {
 	Tag                                         string
 	ConnectFee, Price                           float64
 	RateUnit, RateIncrement, GroupIntervalStart time.Duration
@@ -55,7 +55,7 @@ type Rate struct {
 	Weight                                      float64
 }
 
-func NewRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *Rate, err error) {
+func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *LoadRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -92,7 +92,7 @@ func NewRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, 
 		return
 	}
 
-	r = &Rate{
+	r = &LoadRate{
 		Tag:                tag,
 		ConnectFee:         cf,
 		Price:              p,
@@ -110,7 +110,7 @@ type DestinationRate struct {
 	Tag             string
 	DestinationsTag string
 	RateTag         string
-	Rate            *Rate
+	Rate            *LoadRate
 }
 
 type Timing struct {
@@ -155,8 +155,8 @@ func NewDestinationRateTiming(destinationRatesTag string, timing *Timing, weight
 	return
 }
 
-func (rt *DestinationRateTiming) GetInterval(dr *DestinationRate) (i *Interval) {
-	i = &Interval{
+func (rt *DestinationRateTiming) GetRateInterval(dr *DestinationRate) (i *RateInterval) {
+	i = &RateInterval{
 		Years:      rt.timing.Years,
 		Months:     rt.timing.Months,
 		MonthDays:  rt.timing.MonthDays,
@@ -164,7 +164,7 @@ func (rt *DestinationRateTiming) GetInterval(dr *DestinationRate) (i *Interval) 
 		StartTime:  rt.timing.StartTime,
 		Weight:     rt.Weight,
 		ConnectFee: dr.Rate.ConnectFee,
-		Prices: PriceGroups{&Price{
+		Rates: RateGroups{&Rate{
 			GroupIntervalStart: dr.Rate.GroupIntervalStart,
 			Value:              dr.Rate.Price,
 			RateIncrement:      dr.Rate.RateIncrement,

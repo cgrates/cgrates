@@ -56,7 +56,7 @@ func TestMultipleResultMerge(t *testing.T) {
 	if cc1.Cost != 60 {
 		t.Errorf("expected 60 was %v", cc1.Cost)
 		for _, ts := range cc1.Timespans {
-			t.Log(ts.Interval)
+			t.Log(ts.RateInterval)
 		}
 	}
 	t1 = time.Date(2012, time.February, 2, 18, 00, 0, 0, time.UTC)
@@ -66,7 +66,7 @@ func TestMultipleResultMerge(t *testing.T) {
 	if cc2.Cost != 30 {
 		t.Errorf("expected 30 was %v", cc2.Cost)
 		for _, ts := range cc1.Timespans {
-			t.Log(ts.Interval)
+			t.Log(ts.RateInterval)
 		}
 	}
 	cc1.Merge(cc2)

@@ -110,7 +110,7 @@ type LoadStorage interface {
 	GetTPDestination(string, string) (*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)
 	ExistsTPRate(string, string) (bool, error)
-	SetTPRates(string, map[string][]*Rate) error
+	SetTPRates(string, map[string][]*LoadRate) error
 	GetTPRate(string, string) (*utils.TPRate, error)
 	GetTPRateIds(string) ([]string, error)
 	ExistsTPDestinationRate(string, string) (bool, error)
@@ -142,7 +142,7 @@ type LoadStorage interface {
 	// loader functions
 	GetTpDestinations(string, string) ([]*Destination, error)
 	GetTpTimings(string, string) (map[string]*Timing, error)
-	GetTpRates(string, string) (map[string]*Rate, error)
+	GetTpRates(string, string) (map[string]*LoadRate, error)
 	GetTpDestinationRates(string, string) (map[string][]*DestinationRate, error)
 	GetTpDestinationRateTimings(string, string) ([]*DestinationRateTiming, error)
 	GetTpRatingProfiles(string, string) (map[string]*RatingProfile, error)

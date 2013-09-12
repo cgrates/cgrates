@@ -192,7 +192,7 @@ func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
+func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*LoadRate) error {
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
@@ -541,7 +541,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,%f,%f)",
 				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Balance.Value, act.ExpirationString,
-				act.DestinationTag, act.RateType, act.RateValue, act.MinutesWeight, act.Weight)
+				act.Balance.DestinationId, act.Balance.SpecialPriceType, act.Balance.SpecialPrice, act.Balance.Weight, act.Weight)
 			i++
 		}
 	}
@@ -921,8 +921,8 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 	return dests, nil
 }
 
-func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
-	rts := make(map[string]*Rate)
+func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*LoadRate, error) {
+	rts := make(map[string]*LoadRate)
 	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
@@ -940,7 +940,7 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start, &roundingMethod, &roundingDecimals, &weight); err != nil {
 			return nil, err
 		}
-		r := &Rate{
+		r := &LoadRate{
 			Tag:                tag,
 			ConnectFee:         connect_fee,
 			Price:              rate,

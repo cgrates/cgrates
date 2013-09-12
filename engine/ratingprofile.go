@@ -26,14 +26,14 @@ import (
 type RatingProfile struct {
 	Id                                                                                             string
 	FallbackKey                                                                                    string // FallbackKey is used as complete combination of Tenant:TOR:Direction:Subject
-	DestinationMap                                                                                 map[string][]*ActivationPeriod
+	DestinationMap                                                                                 map[string][]*RatingPlan
 	Tag, Tenant, TOR, Direction, Subject, DestRatesTimingTag, RatesFallbackSubject, ActivationTime string // used only for loading
 }
 
 // Adds an activation period that applyes to current rating profile if not already present.
-func (rp *RatingProfile) AddActivationPeriodIfNotPresent(destInfo string, aps ...*ActivationPeriod) {
+func (rp *RatingProfile) AddRatingPlanIfNotPresent(destInfo string, aps ...*RatingPlan) {
 	if rp.DestinationMap == nil {
-		rp.DestinationMap = make(map[string][]*ActivationPeriod, 1)
+		rp.DestinationMap = make(map[string][]*RatingPlan, 1)
 	}
 	for _, ap := range aps {
 		found := false
@@ -49,7 +49,7 @@ func (rp *RatingProfile) AddActivationPeriodIfNotPresent(destInfo string, aps ..
 	}
 }
 
-func (rp *RatingProfile) GetActivationPeriodsForPrefix(destPrefix string) (foundPrefix string, aps []*ActivationPeriod, err error) {
+func (rp *RatingProfile) GetRatingPlansForPrefix(destPrefix string) (foundPrefix string, aps []*RatingPlan, err error) {
 	bestPrecision := 0
 	for k, v := range rp.DestinationMap {
 		d, err := GetDestination(k)

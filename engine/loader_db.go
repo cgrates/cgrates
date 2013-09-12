@@ -35,9 +35,9 @@ type DbReader struct {
 	accountActions    []*UserBalance
 	destinations      []*Destination
 	timings           map[string]*Timing
-	rates             map[string]*Rate
+	rates             map[string]*LoadRate
 	destinationRates  map[string][]*DestinationRate
-	activationPeriods map[string]*ActivationPeriod
+	activationPeriods map[string]*RatingPlan
 	ratingProfiles    map[string]*RatingProfile
 }
 
@@ -46,7 +46,7 @@ func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader
 	c.storDb = storDB
 	c.dataDb = storage
 	c.tpid = tpid
-	c.activationPeriods = make(map[string]*ActivationPeriod)
+	c.activationPeriods = make(map[string]*RatingPlan)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	return c
 }
@@ -169,9 +169,9 @@ func (dbr *DbReader) LoadDestinationRateTimings() error {
 		for _, dr := range drs {
 			_, exists := dbr.activationPeriods[rt.Tag]
 			if !exists {
-				dbr.activationPeriods[rt.Tag] = &ActivationPeriod{}
+				dbr.activationPeriods[rt.Tag] = &RatingPlan{}
 			}
-			dbr.activationPeriods[rt.Tag].AddInterval(rt.GetInterval(dr))
+			dbr.activationPeriods[rt.Tag].AddRateInterval(rt.GetRateInterval(dr))
 		}
 	}
 	return nil
@@ -192,10 +192,10 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 			if !exists {
 				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rp.DestRatesTimingTag))
 			}
-			newAP := &ActivationPeriod{ActivationTime: at}
+			newAP := &RatingPlan{ActivationTime: at}
 			//copy(newAP.Intervals, ap.Intervals)
-			newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-			rp.AddActivationPeriodIfNotPresent(d.Id, newAP)
+			newAP.RateIntervals = append(newAP.RateIntervals, ap.RateIntervals...)
+			rp.AddRatingPlanIfNotPresent(d.Id, newAP)
 
 		}
 	}
@@ -203,7 +203,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 }
 
 func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
-	activationPeriods := make(map[string]*ActivationPeriod)
+	activationPeriods := make(map[string]*RatingPlan)
 	resultRatingProfile := &RatingProfile{}
 	rpm, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
 	if err != nil || len(rpm) == 0 {
@@ -242,9 +242,9 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				Logger.Debug(fmt.Sprintf("Rate: %v", rpm))
 				drate.Rate = rt[drate.RateTag]
 				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
-					activationPeriods[destrateTiming.Tag] = &ActivationPeriod{}
+					activationPeriods[destrateTiming.Tag] = &RatingPlan{}
 				}
-				activationPeriods[destrateTiming.Tag].AddInterval(destrateTiming.GetInterval(drate))
+				activationPeriods[destrateTiming.Tag].AddRateInterval(destrateTiming.GetRateInterval(drate))
 				dm, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 				if err != nil || len(dm) == 0 {
 					return fmt.Errorf("Could not get destination id %s: %v", drate.DestinationsTag, err)
@@ -253,9 +253,9 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				for _, destination := range dm {
 					Logger.Debug(fmt.Sprintf("Destination: %v", rpm))
 					ap := activationPeriods[ratingProfile.DestRatesTimingTag]
-					newAP := &ActivationPeriod{ActivationTime: at}
-					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-					resultRatingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)
+					newAP := &RatingPlan{ActivationTime: at}
+					newAP.RateIntervals = append(newAP.RateIntervals, ap.RateIntervals...)
+					resultRatingProfile.AddRatingPlanIfNotPresent(destination.Id, newAP)
 					dbr.dataDb.SetDestination(destination)
 				}
 			}
@@ -288,7 +288,7 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 				Id:     utils.GenUUID(),
 				Tag:    at.Tag,
 				Weight: at.Weight,
-				Timing: &Interval{
+				Timing: &RateInterval{
 					Months:    t.Months,
 					MonthDays: t.MonthDays,
 					WeekDays:  t.WeekDays,
@@ -387,7 +387,7 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 				Id:     utils.GenUUID(),
 				Tag:    at.Tag,
 				Weight: at.Weight,
-				Timing: &Interval{
+				Timing: &RateInterval{
 					Months:    t.Months,
 					MonthDays: t.MonthDays,
 					WeekDays:  t.WeekDays,

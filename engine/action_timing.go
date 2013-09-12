@@ -37,7 +37,7 @@ type ActionTiming struct {
 	Id                     string // uniquely identify the timing
 	Tag                    string // informative purpose only
 	UserBalanceIds         []string
-	Timing                 *Interval
+	Timing                 *RateInterval
 	Weight                 float64
 	ActionsId              string
 	actions                Actions

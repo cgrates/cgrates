@@ -68,10 +68,10 @@ func TestSplitSpans(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 
-	cd.LoadActivationPeriods()
+	cd.LoadRatingPlans()
 	timespans := cd.splitInTimeSpans(nil)
 	if len(timespans) != 2 {
-		t.Log(cd.ActivationPeriods)
+		t.Log(cd.RatingPlans)
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 }
@@ -116,7 +116,7 @@ func TestFullDestNotFound(t *testing.T) {
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700, ConnectFee: 1}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
-		t.Log(cd.ActivationPeriods)
+		t.Log(cd.RatingPlans)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -128,12 +128,12 @@ func TestSubjectNotFound(t *testing.T) {
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2700, ConnectFee: 1}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
-		t.Log(cd.ActivationPeriods)
+		t.Log(cd.RatingPlans)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
 
-func TestMultipleActivationPeriods(t *testing.T) {
+func TestMultipleRatingPlans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 8, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
@@ -145,7 +145,7 @@ func TestMultipleActivationPeriods(t *testing.T) {
 	}
 }
 
-func TestSpansMultipleActivationPeriods(t *testing.T) {
+func TestSpansMultipleRatingPlans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 7, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 0, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
@@ -242,7 +242,7 @@ func BenchmarkStorageRestoring(b *testing.B) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.LoadActivationPeriods()
+		cd.LoadRatingPlans()
 	}
 }
 
@@ -262,7 +262,7 @@ func BenchmarkSplitting(b *testing.B) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
-	cd.LoadActivationPeriods()
+	cd.LoadRatingPlans()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.splitInTimeSpans(nil)

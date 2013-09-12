@@ -21,23 +21,19 @@ package engine
 import (
 	"fmt"
 	"sort"
-	"time"
 )
 
 /*
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id                              string
-	ActionType                      string
-	BalanceId                       string
-	Direction                       string
-	ExpirationString                string
-	Weight                          float64
-	Balance                         *Balance
-	DestinationTag, RateType        string // From here for import/load purposes only
-	ExpirationDate                  time.Time
-	Units, RateValue, MinutesWeight float64
+	Id               string
+	ActionType       string
+	BalanceId        string
+	Direction        string
+	ExpirationString string
+	Weight           float64
+	Balance          *Balance
 }
 
 const (
