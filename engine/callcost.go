@@ -48,7 +48,7 @@ func (cc *CallCost) Merge(other *CallCost) {
 	ts := cc.Timespans[len(cc.Timespans)-1]
 	otherTs := other.Timespans[0]
 	if reflect.DeepEqual(ts.RatingPlan, otherTs.RatingPlan) &&
-		reflect.DeepEqual(ts.MinuteInfo, otherTs.MinuteInfo) && reflect.DeepEqual(ts.RateInterval, otherTs.RateInterval) {
+		reflect.DeepEqual(ts.RateInterval, otherTs.RateInterval) {
 		// extend the last timespan with
 		ts.TimeEnd = ts.TimeEnd.Add(otherTs.GetDuration())
 		// add the rest of the timspans

@@ -21,7 +21,6 @@ package engine
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
-	"math"
 	"reflect"
 	"sort"
 	"strconv"
@@ -40,7 +39,7 @@ type RateInterval struct {
 	StartTime, EndTime string // ##:##:## format
 	Weight, ConnectFee float64
 	Rates              RateGroups // GroupRateInterval (start time): Rate
-	RoundingMethod     string
+	RoundingMethod     string     //ROUNDING_UP, ROUNDING_DOWN, ROUNDING_MIDDLE
 	RoundingDecimals   int
 }
 
@@ -194,13 +193,12 @@ func (i *RateInterval) Equal(o *RateInterval) bool {
 		i.EndTime == o.EndTime
 }
 
-func (i *RateInterval) GetCost(duration, startSecond time.Duration) (cost float64) {
-	price, rateIncrement, rateUnit := i.GetRateParameters(startSecond)
-	d := float64(duration.Seconds())
+func (i *RateInterval) GetCost(duration, startSecond time.Duration) float64 {
+	price, _, rateUnit := i.GetRateParameters(startSecond)
+	d := duration.Seconds()
 	price /= rateUnit.Seconds()
-	ri := rateIncrement.Seconds()
-	cost = math.Ceil(d/ri) * ri * price
-	return utils.Round(cost, i.RoundingDecimals, i.RoundingMethod)
+
+	return utils.Round(d*price, i.RoundingDecimals, i.RoundingMethod)
 }
 
 // Gets the price for a the provided start second

@@ -197,26 +197,6 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration}
 	}
 	timespans = append(timespans, firstSpan)
-	// split on (free) minute buckets
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		_, _, minuteBalances := userBalance.getSecondsForPrefix(cd.Destination)
-		for _, b := range minuteBalances {
-			for i := 0; i < len(timespans); i++ {
-				if timespans[i].MinuteInfo != nil {
-					continue
-				}
-				newTs := timespans[i].SplitByMinuteBalance(b)
-				if newTs != nil {
-					timespans = append(timespans, newTs)
-					firstSpan = newTs // we move the firstspan to the newly created one for further spliting
-					break
-				}
-			}
-		}
-	}
-	if firstSpan.MinuteInfo != nil {
-		return // all the timespans are on minutes
-	}
 	if len(cd.RatingPlans) == 0 {
 		return
 	}
@@ -230,9 +210,6 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
-				if timespans[i].MinuteInfo != nil {
-					continue
-				}
 				newTs := timespans[i].SplitByRatingPlan(ap)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
@@ -245,9 +222,6 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	}
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
-		if timespans[i].MinuteInfo != nil {
-			continue // cont try to split timespans payed with minutes
-		}
 		ap := timespans[i].RatingPlan
 		//timespans[i].RatingPlan = nil
 		ap.RateIntervals.Sort()
@@ -262,27 +236,29 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			}
 		}
 	}
-	timespans = cd.expandTimeSpans(timespans)
+	timespans = cd.roundTimeSpansToIncrement(timespans)
 	return
 }
 
 // if the rate interval for any timespan has a RatingIncrement larger than the timespan duration
 // the timespan must expand potentially overlaping folowing timespans and may exceed call
 // descriptor's initial duration
-func (cd *CallDescriptor) expandTimeSpans(timespans []*TimeSpan) []*TimeSpan {
+func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*TimeSpan {
 	for i, ts := range timespans {
 		if ts.RateInterval != nil {
 			_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			// if the timespan duration is larger than the rate increment make sure it is a multiple of it
-			if rateIncrement < ts.GetDuration() {
+			if rateIncrement != time.Second && rateIncrement < ts.GetDuration() {
 				rateIncrement = utils.RoundTo(rateIncrement, ts.GetDuration())
 			}
 			if rateIncrement > ts.GetDuration() {
 				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
-				ts.SetNewCallDuration(ts) // set new call duration for this timespan
+				ts.CallDuration = ts.CallDuration + rateIncrement
+
 				// overlap the rest of the timespans
+				i += 1
 				for ; i < len(timespans); i++ {
-					if timespans[i].TimeEnd.Before(ts.TimeEnd) {
+					if timespans[i].TimeEnd.Before(ts.TimeEnd) || timespans[i].TimeEnd.Equal(ts.TimeEnd) {
 						timespans[i].overlapped = true
 					} else if timespans[i].TimeStart.Before(ts.TimeEnd) {
 						timespans[i].TimeStart = ts.TimeEnd
@@ -292,14 +268,15 @@ func (cd *CallDescriptor) expandTimeSpans(timespans []*TimeSpan) []*TimeSpan {
 			}
 		}
 	}
+	var newTimespans []*TimeSpan
 	// remove overlapped
-	for i, ts := range timespans {
-		if ts.overlapped {
-			timespans = timespans[:i]
-			break
+	for _, ts := range timespans {
+		if !ts.overlapped {
+			ts.createRatedSecondSlice()
+			newTimespans = append(newTimespans, ts)
 		}
 	}
-	return timespans
+	return newTimespans
 }
 
 /*
@@ -317,10 +294,10 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 
 	for i, ts := range timespans {
 		// only add connect fee if this is the first/only call cost request
-		if cd.LoopIndex == 0 && i == 0 && ts.MinuteInfo == nil && ts.RateInterval != nil {
+		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
 			connectionFee = ts.RateInterval.ConnectFee
 		}
-		cost += ts.getCost(cd)
+		cost += ts.getCost()
 	}
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
 	cc := &CallCost{
@@ -376,10 +353,10 @@ func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float6
 
 		cost := 0.0
 		for i, ts := range timespans {
-			if i == 0 && ts.MinuteInfo == nil && ts.RateInterval != nil {
+			if i == 0 && ts.RateInterval != nil {
 				cost += ts.RateInterval.ConnectFee
 			}
-			cost += ts.getCost(cd)
+			cost += ts.Cost
 		}
 		//logger.Print(availableCredit, availableSeconds, cost)
 		if cost < availableCredit {
@@ -408,14 +385,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 		defer storageGetter.SetUserBalance(userBalance)
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
-			userBalance.debitBalance(CREDIT, cc.Cost+cc.ConnectFee, true)
-		}
-		for _, ts := range cc.Timespans {
-			if ts.MinuteInfo != nil {
-				if err = userBalance.debitMinutesBalance(ts.MinuteInfo.Quantity, cd.Destination, true); err != nil {
-					return cc, err
-				}
-			}
+			userBalance.debitBalance(CREDIT+OUTBOUND, cc.Cost+cc.ConnectFee, true)
 		}
 	}
 	return

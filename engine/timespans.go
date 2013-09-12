@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"time"
 )
 
@@ -31,16 +31,14 @@ type TimeSpan struct {
 	Cost               float64
 	RatingPlan         *RatingPlan
 	RateInterval       *RateInterval
-	MinuteInfo         *MinuteInfo
 	CallDuration       time.Duration // the call duration so far till TimeEnd
 	overlapped         bool          // mark a timespan as overlapped by an expanded one
+	ratedSeconds       []*rated_second
 }
 
-// Holds the bonus minute information related to a specified timespan
-type MinuteInfo struct {
-	DestinationId string
-	Quantity      float64
-	Price         float64
+type rated_second struct {
+	index int
+	rate  float64
 }
 
 // Returns the duration of the timespan
@@ -48,27 +46,20 @@ func (ts *TimeSpan) GetDuration() time.Duration {
 	return ts.TimeEnd.Sub(ts.TimeStart)
 }
 
+// Returns true if the given time is inside timespan range.
+func (ts *TimeSpan) Contains(t time.Time) bool {
+	return t.After(ts.TimeStart) && t.Before(ts.TimeEnd)
+}
+
 // Returns the cost of the timespan according to the relevant cost interval.
 // It also sets the Cost field of this timespan (used for refound on session
 // manager debit loop where the cost cannot be recalculated)
-func (ts *TimeSpan) getCost(cd *CallDescriptor) (cost float64) {
-	if ts.MinuteInfo != nil {
-		return ts.GetDuration().Seconds() * ts.MinuteInfo.Price
-	}
+func (ts *TimeSpan) getCost() float64 {
 	if ts.RateInterval == nil {
 		return 0
 	}
-	i := ts.RateInterval
-	cost = i.GetCost(ts.GetDuration(), ts.GetGroupStart())
-	ts.Cost = cost
-	return
-}
-
-/*
-Returns true if the given time is inside timespan range.
-*/
-func (ts *TimeSpan) Contains(t time.Time) bool {
-	return t.After(ts.TimeStart) && t.Before(ts.TimeEnd)
+	ts.Cost = ts.RateInterval.GetCost(ts.GetDuration(), ts.GetGroupStart())
+	return ts.Cost
 }
 
 /*
@@ -84,6 +75,26 @@ func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
 	tsPrice, _, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 	if ts.RateInterval.Weight == i.Weight && iPrice < tsPrice {
 		ts.RateInterval = i
+	}
+}
+
+func (ts *TimeSpan) createRatedSecondSlice() {
+	if ts.RateInterval == nil {
+		return
+	}
+	// create rated seconds series
+	rate, _, rate_unit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+	secondCost := rate / rate_unit.Seconds()
+	totalCost := 0.0
+	for s := 0; s < int(ts.GetDuration().Seconds()); s++ {
+		ts.ratedSeconds = append(ts.ratedSeconds, &rated_second{s, secondCost})
+		totalCost += secondCost
+	}
+	cCost := ts.getCost()
+	// here there might be some subsecond duration left
+	if totalCost < cCost {
+		// add one extra second with the fractional cost
+		ts.ratedSeconds = append(ts.ratedSeconds, &rated_second{len(ts.ratedSeconds), utils.Round(cCost-totalCost, ts.RateInterval.RoundingDecimals, ts.RateInterval.RoundingMethod)})
 	}
 }
 
@@ -168,43 +179,6 @@ func (ts *TimeSpan) SplitByRatingPlan(ap *RatingPlan) (newTs *TimeSpan) {
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = ap.ActivationTime
 	ts.SetNewCallDuration(newTs)
-	return
-}
-
-/*
-Splits the given timespan on minute bucket's duration.
-*/
-func (ts *TimeSpan) SplitByMinuteBalance(mb *Balance) (newTs *TimeSpan) {
-	// if mb expired skip it
-	if !mb.ExpirationDate.IsZero() && (ts.TimeStart.Equal(mb.ExpirationDate) || ts.TimeStart.After(mb.ExpirationDate)) {
-		return nil
-	}
-
-	// expiring before time spans end
-
-	if !mb.ExpirationDate.IsZero() && ts.TimeEnd.After(mb.ExpirationDate) {
-		newTs = &TimeSpan{TimeStart: mb.ExpirationDate, TimeEnd: ts.TimeEnd}
-		newTs.CallDuration = ts.CallDuration
-		ts.TimeEnd = mb.ExpirationDate
-		ts.SetNewCallDuration(newTs)
-	}
-
-	s := ts.GetDuration().Seconds()
-	ts.MinuteInfo = &MinuteInfo{mb.DestinationId, s, mb.SpecialPrice}
-	if s <= mb.Value {
-		mb.Value -= s
-		return newTs
-	}
-	secDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", mb.Value))
-
-	newTimeEnd := ts.TimeStart.Add(secDuration)
-	newTs = &TimeSpan{TimeStart: newTimeEnd, TimeEnd: ts.TimeEnd}
-	ts.TimeEnd = newTimeEnd
-	newTs.CallDuration = ts.CallDuration
-	ts.MinuteInfo.Quantity = mb.Value
-	ts.SetNewCallDuration(newTs)
-	mb.Value = 0
-
 	return
 }
 

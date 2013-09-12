@@ -247,7 +247,6 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refoundDuration := end.Sub(hangupTime).Seconds()
 	cost := 0.0
-	seconds := 0.0
 	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
@@ -258,18 +257,11 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			tmpCost := (procentage * ts.Cost) / 100
 			ts.Cost -= tmpCost
 			cost += tmpCost
-			if ts.MinuteInfo != nil {
-				// DestinationPrefix and Price take from lastCC and above caclulus
-				seconds += (procentage * ts.MinuteInfo.Quantity) / 100
-			}
 			// set the end time to now
 			ts.TimeEnd = hangupTime
 			break // do not go to other timespans
 		} else {
 			cost += ts.Cost
-			if ts.MinuteInfo != nil {
-				seconds += ts.MinuteInfo.Quantity
-			}
 			// remove the timestamp entirely
 			lastCC.Timespans = lastCC.Timespans[:i]
 			// continue to the next timespan with what is left to refound
@@ -293,25 +285,8 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 		}
 	}
-	if seconds > 0 {
-		cd := &engine.CallDescriptor{
-			Direction:   lastCC.Direction,
-			TOR:         lastCC.TOR,
-			Tenant:      lastCC.Tenant,
-			Subject:     lastCC.Subject,
-			Account:     lastCC.Account,
-			Destination: lastCC.Destination,
-			Amount:      -seconds,
-			// FallbackSubject: lastCC.FallbackSubject, // ToDo: check how to best add it
-		}
-		var response float64
-		err := sm.connector.DebitSeconds(*cd, &response)
-		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("Debit seconds failed: %v", err))
-		}
-	}
 	lastCC.Cost -= cost
-	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
+	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 
 }
 

@@ -34,6 +34,7 @@ type Balance struct {
 	SpecialPriceType string
 	SpecialPrice     float64 // absolute for minutes and percent for monetary (can be positive or negative)
 	DestinationId    string
+	RateSubject      string
 	precision        int
 }
 

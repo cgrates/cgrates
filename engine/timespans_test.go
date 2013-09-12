@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
 )
@@ -188,17 +189,17 @@ func TestTimespanGetCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	ts1 := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	cd := &CallDescriptor{Subject: "other"}
-	if ts1.getCost(cd) != 0 {
+	if ts1.getCost() != 0 {
 		t.Error("No interval and still kicking")
 	}
-	ts1.RateInterval = &RateInterval{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}}
-	if ts1.getCost(cd) != 600 {
-		t.Error("Expected 10 got ", ts1.getCost(cd))
+	ts1.SetRateInterval(&RateInterval{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}})
+	if ts1.getCost() != 600 {
+		t.Error("Expected 10 got ", ts1.Cost)
 	}
-	ts1.RateInterval.Rates[0].RateUnit = 60 * time.Second
-	if ts1.getCost(cd) != 10 {
-		t.Error("Expected 6000 got ", ts1.getCost(cd))
+	ts1.RateInterval = nil
+	ts1.SetRateInterval(&RateInterval{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 60 * time.Second}}})
+	if ts1.getCost() != 10 {
+		t.Error("Expected 6000 got ", ts1.Cost)
 	}
 }
 
@@ -214,118 +215,6 @@ func TestSetRateInterval(t *testing.T) {
 	ts1.SetRateInterval(i2)
 	if ts1.RateInterval != i2 {
 		t.Error("Bigger ponder interval should win")
-	}
-}
-
-func TestTimespanSplitByMinuteBucketPlenty(t *testing.T) {
-	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &Balance{Value: 180}
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBalance(mb)
-	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 120 {
-		t.Error("Not enough minutes on minute bucket split")
-	}
-	if newTs != nil {
-		t.Error("Bad extra timespan on minute bucket split")
-	}
-}
-
-func TestTimespanSplitByMinuteBalanceScarce(t *testing.T) {
-	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &Balance{Value: 60}
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBalance(mb)
-	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
-		t.Error("Not enough minutes on minute bucket split")
-	}
-	if newTs == nil || newTs.MinuteInfo != nil {
-		t.Error("Missing extra timespan on minute bucket split")
-	}
-}
-
-func TestTimespanSplitByMinuteBalancePlentyExpired(t *testing.T) {
-	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &Balance{Value: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 39, 0, 0, time.UTC)}
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBalance(mb)
-	if ts.MinuteInfo != nil {
-		t.Error("Not enough minutes on minute bucket split")
-	}
-	if newTs != nil {
-		t.Error("Bad extra timespan on minute bucket split")
-	}
-}
-
-func TestTimespanSplitByMinuteBalancePlentyExpiring(t *testing.T) {
-	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &Balance{Value: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBalance(mb)
-	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
-		t.Error("Not enough minutes on minute bucket split")
-	}
-	if newTs == nil || newTs.MinuteInfo != nil {
-		t.Error("Missing extra timespan on minute bucket split")
-	}
-}
-
-func TestTimespanSplitByMinuteBalancePlentyExpiringEnd(t *testing.T) {
-	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &Balance{Value: 180, ExpirationDate: time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)}
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBalance(mb)
-	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 120 {
-		t.Error("Not enough minutes on minute bucket split")
-	}
-	if newTs != nil {
-		t.Error("Missing extra timespan on minute bucket split")
-	}
-}
-
-func TestTimespanSplitByMinuteBalanceScarceExpiringSame(t *testing.T) {
-	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &Balance{Value: 120, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 0, 0, time.UTC)}
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBalance(mb)
-	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 60 {
-		t.Error("Not enough minutes on minute bucket split")
-	}
-	if newTs == nil || newTs.MinuteInfo != nil {
-		t.Error("Missing extra timespan on minute bucket split")
-	}
-}
-
-func TestTimespanSplitByMinuteBalanceScarceExpiringDifferentExpFirst(t *testing.T) {
-	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &Balance{Value: 140, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 1, 0, time.UTC)}
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBalance(mb)
-	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 61 {
-		t.Error("Not enough minutes on minute bucket split: ", ts.MinuteInfo.Quantity)
-	}
-	if newTs == nil || newTs.MinuteInfo != nil {
-		t.Error("Missing extra timespan on minute bucket split")
-	}
-}
-
-func TestTimespanSplitByMinuteBalanceScarceExpiringDifferentScarceFirst(t *testing.T) {
-	t1 := time.Date(2013, time.July, 15, 10, 40, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.July, 15, 10, 42, 0, 0, time.UTC)
-	mb := &Balance{Value: 61, ExpirationDate: time.Date(2013, time.July, 15, 10, 41, 30, 0, time.UTC)}
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	newTs := ts.SplitByMinuteBalance(mb)
-	if ts.MinuteInfo == nil || ts.MinuteInfo.Quantity != 61 {
-		t.Error("Not enough minutes on minute bucket split")
-	}
-	if newTs == nil || newTs.MinuteInfo != nil {
-		t.Error("Missing extra timespan on minute bucket split")
 	}
 }
 
@@ -366,19 +255,38 @@ func TestTimespanSplitGroupedRates(t *testing.T) {
 func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	i := &RateInterval{
 		EndTime: "17:59:00",
-		Rates:   RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{30 * time.Second, 1, 60 * time.Second, 1 * time.Second}},
+		Rates: RateGroups{
+			&Rate{
+				GroupIntervalStart: 0,
+				Value:              2,
+				RateIncrement:      time.Second,
+				RateUnit:           time.Second},
+			&Rate{
+				GroupIntervalStart: 30 * time.Second,
+				Value:              1,
+				RateIncrement:      time.Minute,
+				RateUnit:           time.Second,
+			}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 31, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 60 * time.Second}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
+	cd := &CallDescriptor{}
+	timespans := cd.roundTimeSpansToIncrement([]*TimeSpan{ts, nts})
+	if len(timespans) != 2 {
+		t.Error("Error rounding timespans: ", timespans)
+	}
+	ts = timespans[0]
+	nts = timespans[1]
 	splitTime := time.Date(2012, time.February, 3, 17, 30, 30, 0, time.UTC)
 	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
 		t.Error("Incorrect first half", ts)
 	}
-	if nts.TimeStart != splitTime || nts.TimeEnd != t2 {
-		t.Error("Incorrect second half", nts)
+	t3 := time.Date(2012, time.February, 3, 17, 31, 30, 0, time.UTC)
+	if nts.TimeStart != splitTime || nts.TimeEnd != t3 {
+		t.Error("Incorrect second half", nts.TimeStart, nts.TimeEnd)
 	}
 	if ts.RateInterval != i {
 		t.Error("RateInterval not attached correctly")
@@ -389,10 +297,10 @@ func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 		t.Error("Wrong costs: ", c1, c2)
 	}
 
-	if ts.GetDuration().Seconds() != 0.5*60 || nts.GetDuration().Seconds() != 0.5*60 {
+	if ts.GetDuration().Seconds() != 0.5*60 || nts.GetDuration().Seconds() != 1*60 {
 		t.Error("Wrong durations.for RateIntervals", ts.GetDuration().Seconds(), nts.GetDuration().Seconds())
 	}
-	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
+	if ts.GetDuration()+nts.GetDuration() != oldDuration+30*time.Second {
 		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
 }
@@ -533,12 +441,34 @@ func TestTimespanExpandingPastEnd(t *testing.T) {
 		},
 	}
 	cd := &CallDescriptor{}
-	timespans = cd.expandTimeSpans(timespans)
+	timespans = cd.roundTimeSpansToIncrement(timespans)
 	if len(timespans) != 1 {
 		t.Error("Error removing overlaped intervals: ", timespans)
 	}
 	if !timespans[0].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 31, 0, 0, time.UTC)) {
 		t.Error("Error expanding timespan: ", timespans[0])
+	}
+}
+
+func TestTimespanExpandingCallDuration(t *testing.T) {
+	timespans := []*TimeSpan{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			RateInterval: &RateInterval{Rates: RateGroups{
+				&Rate{RateIncrement: 60 * time.Second},
+			}},
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC),
+		},
+	}
+	cd := &CallDescriptor{}
+	timespans = cd.roundTimeSpansToIncrement(timespans)
+
+	if timespans[0].CallDuration != time.Minute {
+		t.Error("Error setting call duration: ", timespans[0])
 	}
 }
 
@@ -557,7 +487,7 @@ func TestTimespanExpandingRoundingPastEnd(t *testing.T) {
 		},
 	}
 	cd := &CallDescriptor{}
-	timespans = cd.expandTimeSpans(timespans)
+	timespans = cd.roundTimeSpansToIncrement(timespans)
 	if len(timespans) != 2 {
 		t.Error("Error removing overlaped intervals: ", timespans)
 	}
@@ -585,7 +515,7 @@ func TestTimespanExpandingPastEndMultiple(t *testing.T) {
 		},
 	}
 	cd := &CallDescriptor{}
-	timespans = cd.expandTimeSpans(timespans)
+	timespans = cd.roundTimeSpansToIncrement(timespans)
 	if len(timespans) != 1 {
 		t.Error("Error removing overlaped intervals: ", timespans)
 	}
@@ -613,7 +543,7 @@ func TestTimespanExpandingPastEndMultipleEqual(t *testing.T) {
 		},
 	}
 	cd := &CallDescriptor{}
-	timespans = cd.expandTimeSpans(timespans)
+	timespans = cd.roundTimeSpansToIncrement(timespans)
 	if len(timespans) != 1 {
 		t.Error("Error removing overlaped intervals: ", timespans)
 	}
@@ -637,7 +567,7 @@ func TestTimespanExpandingBeforeEnd(t *testing.T) {
 		},
 	}
 	cd := &CallDescriptor{}
-	timespans = cd.expandTimeSpans(timespans)
+	timespans = cd.roundTimeSpansToIncrement(timespans)
 	if len(timespans) != 2 {
 		t.Error("Error removing overlaped intervals: ", timespans)
 	}
@@ -667,7 +597,7 @@ func TestTimespanExpandingBeforeEndMultiple(t *testing.T) {
 		},
 	}
 	cd := &CallDescriptor{}
-	timespans = cd.expandTimeSpans(timespans)
+	timespans = cd.roundTimeSpansToIncrement(timespans)
 	if len(timespans) != 3 {
 		t.Error("Error removing overlaped intervals: ", timespans)
 	}
@@ -675,5 +605,44 @@ func TestTimespanExpandingBeforeEndMultiple(t *testing.T) {
 		!timespans[1].TimeStart.Equal(time.Date(2013, 9, 10, 14, 30, 45, 0, time.UTC)) ||
 		!timespans[1].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 30, 50, 0, time.UTC)) {
 		t.Error("Error expanding timespan: ", timespans[0])
+	}
+}
+
+func TestTimespanCreateSecondsSlice(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
+		RateInterval: &RateInterval{Rates: RateGroups{
+			&Rate{Value: 2.0},
+		}},
+	}
+	ts.createRatedSecondSlice()
+	if len(ts.ratedSeconds) != 30 {
+		t.Error("Error creating second slice: ", ts.ratedSeconds)
+	}
+	if ts.ratedSeconds[0].rate != 2.0 {
+		t.Error("Wrong second slice: ", ts.ratedSeconds[0])
+	}
+}
+
+func TestTimespanCreateSecondsFract(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 100000000, time.UTC),
+		RateInterval: &RateInterval{
+			RoundingMethod:   utils.ROUNDING_MIDDLE,
+			RoundingDecimals: 2,
+			Rates: RateGroups{
+				&Rate{Value: 2.0},
+			},
+		},
+	}
+	ts.createRatedSecondSlice()
+	if len(ts.ratedSeconds) != 31 {
+		t.Error("Error creating second slice: ", ts.ratedSeconds)
+	}
+	t.Log(ts.getCost())
+	if ts.ratedSeconds[30].rate != 0.2 {
+		t.Error("Wrong second slice: ", ts.ratedSeconds[30])
 	}
 }
