@@ -55,10 +55,9 @@ Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
 */
 type UserBalance struct {
-	Id         string
-	Type       string // prepaid-postpaid
-	BalanceMap map[string]BalanceChain
-	//MinuteBuckets  []*MinuteBucket
+	Id             string
+	Type           string // prepaid-postpaid
+	BalanceMap     map[string]BalanceChain
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
 

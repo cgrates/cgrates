@@ -368,6 +368,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			Weight:           weight,
 			ExpirationString: record[5],
 			Balance: &Balance{
+				Id:               utils.GenUUID(),
 				Value:            units,
 				Weight:           minutesWeight,
 				SpecialPrice:     value,
@@ -412,6 +413,7 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 			Tag:    record[2],
 			Weight: weight,
 			Timing: &RateInterval{
+				Years:     t.Years,
 				Months:    t.Months,
 				MonthDays: t.MonthDays,
 				WeekDays:  t.WeekDays,

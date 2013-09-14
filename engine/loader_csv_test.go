@@ -87,14 +87,14 @@ vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
 vdf,0,*out,fall,2012-02-28T00:00:00Z,PREMIUM,rif
 `
 	actions = `
-MINI,TOPUP,MINUTES,*out,100,*unlimited,NAT,*absolute,0,10,10
+MINI,*topup,*minutes,*out,100,*unlimited,NAT,*absolute,0,10,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 `
 	actionTriggers = `
-STANDARD_TRIGGER,MINUTES,*out,*min_counter,10,GERMANY_O2,SOME_1,10
-STANDARD_TRIGGER,MINUTES,*out,*max_balance,200,GERMANY,SOME_2,10
+STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
+STANDARD_TRIGGER,*minutes,*out,*max_balance,200,GERMANY,SOME_2,10
 `
 	accountActions = `
 vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
@@ -607,11 +607,49 @@ func TestLoadActions(t *testing.T) {
 	if len(csvr.actions) != 1 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
+	a := csvr.actions["MINI"][0]
+	expected := &Action{
+		Id:               a.Id,
+		ActionType:       TOPUP,
+		BalanceId:        MINUTES,
+		Direction:        OUTBOUND,
+		ExpirationString: UNLIMITED,
+		Weight:           10,
+		Balance: &Balance{
+			Id:               a.Balance.Id,
+			Value:            100,
+			Weight:           10,
+			SpecialPriceType: PRICE_ABSOLUTE,
+			SpecialPrice:     0,
+			DestinationId:    "NAT",
+		},
+	}
+	if !reflect.DeepEqual(a, expected) {
+		t.Error("Error loading action: ", a)
+	}
 }
 
 func TestLoadActionTimings(t *testing.T) {
 	if len(csvr.actionsTimings) != 1 {
 		t.Error("Failed to load action timings: ", csvr.actionsTimings)
+	}
+	atm := csvr.actionsTimings["MORE_MINUTES"][0]
+	expected := &ActionTiming{
+		Id:             atm.Id,
+		Tag:            "ONE_TIME_RUN",
+		UserBalanceIds: []string{"*out:vdf:minitsboy"},
+		Timing: &RateInterval{
+			Years:     Years{2012},
+			Months:    Months{},
+			MonthDays: MonthDays{},
+			WeekDays:  WeekDays{},
+			StartTime: ASAP,
+		},
+		Weight:    10,
+		ActionsId: "MINI",
+	}
+	if !reflect.DeepEqual(atm, expected) {
+		t.Error("Error loading action timing: ", atm)
 	}
 }
 
@@ -619,10 +657,53 @@ func TestLoadActionTriggers(t *testing.T) {
 	if len(csvr.actionsTriggers) != 1 {
 		t.Error("Failed to load action triggers: ", csvr.actionsTriggers)
 	}
+	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
+	expected := &ActionTrigger{
+		Id:             atr.Id,
+		BalanceId:      MINUTES,
+		Direction:      OUTBOUND,
+		ThresholdType:  TRIGGER_MIN_COUNTER,
+		ThresholdValue: 10,
+		DestinationId:  "GERMANY_O2",
+		Weight:         10,
+		ActionsId:      "SOME_1",
+		Executed:       false,
+	}
+	if !reflect.DeepEqual(atr, expected) {
+		t.Error("Error loading action trigger: ", atr)
+	}
+	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
+	expected = &ActionTrigger{
+		Id:             atr.Id,
+		BalanceId:      MINUTES,
+		Direction:      OUTBOUND,
+		ThresholdType:  TRIGGER_MAX_BALANCE,
+		ThresholdValue: 200,
+		DestinationId:  "GERMANY",
+		Weight:         10,
+		ActionsId:      "SOME_2",
+		Executed:       false,
+	}
+	if !reflect.DeepEqual(atr, expected) {
+		t.Error("Error loading action trigger: ", atr)
+	}
 }
 
 func TestLoadAccountActions(t *testing.T) {
 	if len(csvr.accountActions) != 1 {
 		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
+	aa := csvr.accountActions[0]
+	expected := &UserBalance{
+		Id:             "*out:vdf:minitsboy",
+		Type:           UB_TYPE_PREPAID,
+		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
+	}
+	if !reflect.DeepEqual(aa, expected) {
+		t.Error("Error loading account action: ", aa)
+	}
 }
+
+/*
+vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
+*/

@@ -48,6 +48,7 @@ const (
 	DEBIT          = "*debit"
 	RESET_COUNTER  = "*reset_counter"
 	RESET_COUNTERS = "*reset_counters"
+	UNLIMITED      = "*unlimited"
 )
 
 type actionTypeFunc func(*UserBalance, *Action) error

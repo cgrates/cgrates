@@ -287,6 +287,6 @@ func (atpl ActionTimingPriotityList) Sort() {
 	sort.Sort(atpl)
 }
 
-func (at *ActionTiming) String() string {
+func (at *ActionTiming) String_DISABLED() string {
 	return at.Tag + " " + at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
 }

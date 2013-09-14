@@ -183,7 +183,7 @@ func (i *RateInterval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	return time.Date(year, month, day, hour, min, sec, nsec, loc)
 }
 
-func (i *RateInterval) String() string {
+func (i *RateInterval) String_DISABLED() string {
 	return fmt.Sprintf("%v %v %v %v %v %v", i.Years, i.Months, i.MonthDays, i.WeekDays, i.StartTime, i.EndTime)
 }
 
