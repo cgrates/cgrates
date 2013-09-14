@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	//"log"
+	"github.com/cgrates/cgrates/utils"
+	"reflect"
 	"testing"
+	"time"
 )
 
 var (
@@ -120,11 +122,85 @@ func TestLoadDestinations(t *testing.T) {
 	if len(csvr.destinations) != 6 {
 		t.Error("Failed to load destinations: ", csvr.destinations)
 	}
+	for _, d := range csvr.destinations {
+		switch d.Id {
+		case "NAT":
+			if !reflect.DeepEqual(d.Prefixes, []string{`0256`, `0257`, `0723`}) {
+				t.Error("Faild to load destinations", d)
+			}
+		case "ALL":
+			if !reflect.DeepEqual(d.Prefixes, []string{`49`, `41`, `43`}) {
+				t.Error("Faild to load destinations", d)
+			}
+		case "RET":
+			if !reflect.DeepEqual(d.Prefixes, []string{`0723`, `0724`}) {
+				t.Error("Faild to load destinations", d)
+			}
+		case "GERMANY":
+			if !reflect.DeepEqual(d.Prefixes, []string{`49`}) {
+				t.Error("Faild to load destinations", d)
+			}
+		case "GERMANY_O2":
+			if !reflect.DeepEqual(d.Prefixes, []string{`41`}) {
+				t.Error("Faild to load destinations", d)
+			}
+		case "GERMANY_PREMIUM":
+			if !reflect.DeepEqual(d.Prefixes, []string{`43`}) {
+				t.Error("Faild to load destinations", d)
+			}
+		default:
+			t.Error("Unknown destination tag!")
+		}
+	}
 }
 
 func TestLoadTimimgs(t *testing.T) {
 	if len(csvr.timings) != 4 {
 		t.Error("Failed to load timings: ", csvr.timings)
+	}
+	timing := csvr.timings["WORKDAYS_00"]
+	if !reflect.DeepEqual(timing, &Timing{
+		Id:        "WORKDAYS_00",
+		Years:     Years{},
+		Months:    Months{},
+		MonthDays: MonthDays{},
+		WeekDays:  WeekDays{1, 2, 3, 4, 5},
+		StartTime: "00:00:00",
+	}) {
+		t.Error("Error loading timing: ", timing)
+	}
+	timing = csvr.timings["WORKDAYS_18"]
+	if !reflect.DeepEqual(timing, &Timing{
+		Id:        "WORKDAYS_18",
+		Years:     Years{},
+		Months:    Months{},
+		MonthDays: MonthDays{},
+		WeekDays:  WeekDays{1, 2, 3, 4, 5},
+		StartTime: "18:00:00",
+	}) {
+		t.Error("Error loading timing: ", timing)
+	}
+	timing = csvr.timings["WEEKENDS"]
+	if !reflect.DeepEqual(timing, &Timing{
+		Id:        "WEEKENDS",
+		Years:     Years{},
+		Months:    Months{},
+		MonthDays: MonthDays{},
+		WeekDays:  WeekDays{time.Saturday, time.Sunday},
+		StartTime: "00:00:00",
+	}) {
+		t.Error("Error loading timing: ", timing)
+	}
+	timing = csvr.timings["ONE_TIME_RUN"]
+	if !reflect.DeepEqual(timing, &Timing{
+		Id:        "ONE_TIME_RUN",
+		Years:     Years{2012},
+		Months:    Months{},
+		MonthDays: MonthDays{},
+		WeekDays:  WeekDays{},
+		StartTime: "*asap",
+	}) {
+		t.Error("Error loading timing: ", timing)
 	}
 }
 
@@ -132,11 +208,147 @@ func TestLoadRates(t *testing.T) {
 	if len(csvr.rates) != 5 {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
+	rate := csvr.rates["R1"]
+	if !reflect.DeepEqual(rate, &LoadRate{
+		Tag:                "R1",
+		ConnectFee:         0,
+		Price:              0.2,
+		RateUnit:           time.Minute,
+		RateIncrement:      time.Second,
+		GroupIntervalStart: 0,
+		RoundingMethod:     utils.ROUNDING_MIDDLE,
+		RoundingDecimals:   2,
+		Weight:             10,
+	}) {
+		t.Error("Error loading rate: ", csvr.rates)
+	}
+	rate = csvr.rates["R2"]
+	if !reflect.DeepEqual(rate, &LoadRate{
+		Tag:                "R2",
+		ConnectFee:         0,
+		Price:              0.1,
+		RateUnit:           time.Minute,
+		RateIncrement:      time.Second,
+		GroupIntervalStart: 0,
+		RoundingMethod:     utils.ROUNDING_MIDDLE,
+		RoundingDecimals:   2,
+		Weight:             10,
+	}) {
+		t.Error("Error loading rate: ", csvr.rates)
+	}
+	rate = csvr.rates["R3"]
+	if !reflect.DeepEqual(rate, &LoadRate{
+		Tag:                "R3",
+		ConnectFee:         0,
+		Price:              0.05,
+		RateUnit:           time.Minute,
+		RateIncrement:      time.Second,
+		GroupIntervalStart: 0,
+		RoundingMethod:     utils.ROUNDING_MIDDLE,
+		RoundingDecimals:   2,
+		Weight:             10,
+	}) {
+		t.Error("Error loading rate: ", csvr.rates)
+	}
+	rate = csvr.rates["R4"]
+	if !reflect.DeepEqual(rate, &LoadRate{
+		Tag:                "R4",
+		ConnectFee:         1,
+		Price:              1.0,
+		RateUnit:           time.Second,
+		RateIncrement:      time.Second,
+		GroupIntervalStart: 0,
+		RoundingMethod:     utils.ROUNDING_UP,
+		RoundingDecimals:   2,
+		Weight:             10,
+	}) {
+		t.Error("Error loading rate: ", csvr.rates)
+	}
+	rate = csvr.rates["R5"]
+	if !reflect.DeepEqual(rate, &LoadRate{
+		Tag:                "R5",
+		ConnectFee:         0,
+		Price:              0.5,
+		RateUnit:           time.Second,
+		RateIncrement:      time.Second,
+		GroupIntervalStart: 0,
+		RoundingMethod:     utils.ROUNDING_DOWN,
+		RoundingDecimals:   2,
+		Weight:             10,
+	}) {
+		t.Error("Error loading rate: ", csvr.rates)
+	}
+
 }
 
 func TestLoadDestinationRates(t *testing.T) {
 	if len(csvr.destinationRates) != 5 {
 		t.Error("Failed to load rates: ", csvr.rates)
+	}
+	drs := csvr.destinationRates["RT_STANDARD"]
+	if !reflect.DeepEqual(drs, []*DestinationRate{
+		&DestinationRate{
+			Tag:             "RT_STANDARD",
+			DestinationsTag: "GERMANY",
+			Rate:            csvr.rates["R1"],
+		},
+		&DestinationRate{
+			Tag:             "RT_STANDARD",
+			DestinationsTag: "GERMANY_O2",
+			Rate:            csvr.rates["R2"],
+		},
+		&DestinationRate{
+			Tag:             "RT_STANDARD",
+			DestinationsTag: "GERMANY_PREMIUM",
+			Rate:            csvr.rates["R2"],
+		},
+	}) {
+		t.Error("Error loading destination rate: ", drs)
+	}
+	drs = csvr.destinationRates["RT_DEFAULT"]
+	if !reflect.DeepEqual(drs, []*DestinationRate{
+		&DestinationRate{
+			Tag:             "RT_DEFAULT",
+			DestinationsTag: "ALL",
+			Rate:            csvr.rates["R2"],
+		},
+	}) {
+		t.Error("Error loading destination rate: ", drs)
+	}
+	drs = csvr.destinationRates["RT_STD_WEEKEND"]
+	if !reflect.DeepEqual(drs, []*DestinationRate{
+		&DestinationRate{
+			Tag:             "RT_STD_WEEKEND",
+			DestinationsTag: "GERMANY",
+			Rate:            csvr.rates["R2"],
+		},
+		&DestinationRate{
+			Tag:             "RT_STD_WEEKEND",
+			DestinationsTag: "GERMANY_O2",
+			Rate:            csvr.rates["R3"],
+		},
+	}) {
+		t.Error("Error loading destination rate: ", drs)
+	}
+	drs = csvr.destinationRates["P1"]
+	if !reflect.DeepEqual(drs, []*DestinationRate{
+		&DestinationRate{
+			Tag:             "P1",
+			DestinationsTag: "NAT",
+			Rate:            csvr.rates["R4"],
+		},
+	}) {
+		t.Error("Error loading destination rate: ", drs)
+	}
+	drs = csvr.destinationRates["P2"]
+	if !reflect.DeepEqual(drs, []*DestinationRate{
+		&DestinationRate{
+			Tag:             "P2",
+			DestinationsTag: "NAT",
+			Rate:            csvr.rates["R5"],
+		},
+	}) {
+		t.Error("Error loading destination rate: ", drs)
 	}
 }
 
@@ -144,13 +356,252 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 	if len(csvr.activationPeriods) != 4 {
 		t.Error("Failed to load rate timings: ", csvr.activationPeriods)
 	}
+	rplan := csvr.activationPeriods["STANDARD"]
+	expected := &RatingPlan{
+		ActivationTime: time.Time{},
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Years:      Years{},
+				Months:     Months{},
+				MonthDays:  MonthDays{},
+				WeekDays:   WeekDays{1, 2, 3, 4, 5},
+				StartTime:  "00:00:00",
+				EndTime:    "",
+				Weight:     10,
+				ConnectFee: 0,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.2,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.1,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+			},
+			&RateInterval{
+				Years:      Years{},
+				Months:     Months{},
+				MonthDays:  MonthDays{},
+				WeekDays:   WeekDays{1, 2, 3, 4, 5},
+				StartTime:  "18:00:00",
+				EndTime:    "",
+				Weight:     10,
+				ConnectFee: 0,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.1,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.05,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+			},
+			&RateInterval{
+				Years:      Years{},
+				Months:     Months{},
+				MonthDays:  MonthDays{},
+				WeekDays:   WeekDays{6, 0},
+				StartTime:  "00:00:00",
+				EndTime:    "",
+				Weight:     10,
+				ConnectFee: 0,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.1,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.05,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+			},
+		},
+	}
+	if !reflect.DeepEqual(rplan, expected) {
+		t.Errorf("Error loading rating plan: %#v", csvr.activationPeriods["STANDARD"])
+	}
+	rplan = csvr.activationPeriods["PREMIUM"]
+	expected = &RatingPlan{
+		ActivationTime: time.Time{},
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Years:      Years{},
+				Months:     Months{},
+				MonthDays:  MonthDays{},
+				WeekDays:   WeekDays{6, 0},
+				StartTime:  "00:00:00",
+				EndTime:    "",
+				Weight:     10,
+				ConnectFee: 0,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.1,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.05,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+			},
+		},
+	}
+	if !reflect.DeepEqual(rplan, expected) {
+		t.Errorf("Error loading rating plan: %#v", csvr.activationPeriods["PREMIUM"])
+	}
+	rplan = csvr.activationPeriods["DEFAULT"]
+	expected = &RatingPlan{
+		ActivationTime: time.Time{},
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Years:      Years{},
+				Months:     Months{},
+				MonthDays:  MonthDays{},
+				WeekDays:   WeekDays{1, 2, 3, 4, 5},
+				StartTime:  "00:00:00",
+				EndTime:    "",
+				Weight:     10,
+				ConnectFee: 0,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.1,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Minute,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+			},
+		},
+	}
+	if !reflect.DeepEqual(rplan, expected) {
+		t.Errorf("Error loading rating plan: %#v", csvr.activationPeriods["DEFAULT"])
+	}
+	rplan = csvr.activationPeriods["EVENING"]
+	expected = &RatingPlan{
+		ActivationTime: time.Time{},
+		RateIntervals: RateIntervalList{
+			&RateInterval{
+				Years:      Years{},
+				Months:     Months{},
+				MonthDays:  MonthDays{},
+				WeekDays:   WeekDays{1, 2, 3, 4, 5},
+				StartTime:  "00:00:00",
+				EndTime:    "",
+				Weight:     10,
+				ConnectFee: 1,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              1,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_UP,
+				RoundingDecimals: 2,
+			},
+			&RateInterval{
+				Years:      Years{},
+				Months:     Months{},
+				MonthDays:  MonthDays{},
+				WeekDays:   WeekDays{1, 2, 3, 4, 5},
+				StartTime:  "18:00:00",
+				EndTime:    "",
+				Weight:     10,
+				ConnectFee: 0,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.5,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_DOWN,
+				RoundingDecimals: 2,
+			},
+			&RateInterval{
+				Years:      Years{},
+				Months:     Months{},
+				MonthDays:  MonthDays{},
+				WeekDays:   WeekDays{6, 0},
+				StartTime:  "00:00:00",
+				EndTime:    "",
+				Weight:     10,
+				ConnectFee: 0,
+				Rates: RateGroups{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0.5,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_DOWN,
+				RoundingDecimals: 2,
+			},
+		},
+	}
+	if !reflect.DeepEqual(rplan, expected) {
+		t.Errorf("Error loading rating plan: %#v", csvr.activationPeriods["EVENING"])
+	}
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
 	if len(csvr.ratingProfiles) != 9 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
+	rp := csvr.ratingProfiles["*out:CUSTOMER_1:0:rif:from:tm"]
+	expected := &RatingProfile{}
+	if reflect.DeepEqual(rp, expected) {
+		t.Error("Error loading rating profile: ", csvr.ratingProfiles["*out:CUSTOMER_1:0:rif:from:tm"])
+	}
 }
+
+/*
+CUSTOMER_1,0,*out,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb
+CUSTOMER_1,0,*out,rif:from:tm,2012-02-28T00:00:00Z,STANDARD,danb
+CUSTOMER_2,0,*out,danb:87.139.12.167,2012-01-01T00:00:00Z,STANDARD,danb
+CUSTOMER_1,0,*out,danb,2012-01-01T00:00:00Z,PREMIUM,
+vdf,0,*out,rif,2012-01-01T00:00:00Z,EVENING,
+vdf,0,*out,rif,2012-02-28T00:00:00Z,EVENING,
+vdf,0,*out,minu,2012-01-01T00:00:00Z,EVENING,
+vdf,0,*out,*any,2012-02-28T00:00:00Z,EVENING,
+vdf,0,*out,one,2012-02-28T00:00:00Z,STANDARD,
+vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
+vdf,0,*out,fall,2012-02-28T00:00:00Z,PREMIUM,rif
+*/
 
 func TestLoadActions(t *testing.T) {
 	if len(csvr.actions) != 1 {

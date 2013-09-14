@@ -51,7 +51,10 @@ type Rate struct {
 }
 
 func (p *Rate) Equal(o *Rate) bool {
-	return p.GroupIntervalStart == o.GroupIntervalStart && p.Value == o.Value && p.RateIncrement == o.RateIncrement && p.RateUnit == o.RateUnit
+	return p.GroupIntervalStart == o.GroupIntervalStart &&
+		p.Value == o.Value &&
+		p.RateIncrement == o.RateIncrement &&
+		p.RateUnit == o.RateUnit
 }
 
 type RateGroups []*Rate

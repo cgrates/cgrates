@@ -157,13 +157,15 @@ func NewDestinationRateTiming(destinationRatesTag string, timing *Timing, weight
 
 func (rt *DestinationRateTiming) GetRateInterval(dr *DestinationRate) (i *RateInterval) {
 	i = &RateInterval{
-		Years:      rt.timing.Years,
-		Months:     rt.timing.Months,
-		MonthDays:  rt.timing.MonthDays,
-		WeekDays:   rt.timing.WeekDays,
-		StartTime:  rt.timing.StartTime,
-		Weight:     rt.Weight,
-		ConnectFee: dr.Rate.ConnectFee,
+		Years:            rt.timing.Years,
+		Months:           rt.timing.Months,
+		MonthDays:        rt.timing.MonthDays,
+		WeekDays:         rt.timing.WeekDays,
+		StartTime:        rt.timing.StartTime,
+		Weight:           rt.Weight,
+		ConnectFee:       dr.Rate.ConnectFee,
+		RoundingMethod:   dr.Rate.RoundingMethod,
+		RoundingDecimals: dr.Rate.RoundingDecimals,
 		Rates: RateGroups{&Rate{
 			GroupIntervalStart: dr.Rate.GroupIntervalStart,
 			Value:              dr.Rate.Price,
