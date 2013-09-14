@@ -354,10 +354,10 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadDestinationRateTimings(t *testing.T) {
-	if len(csvr.activationPeriods) != 4 {
-		t.Error("Failed to load rate timings: ", csvr.activationPeriods)
+	if len(csvr.ratingPlans) != 4 {
+		t.Error("Failed to load rate timings: ", csvr.ratingPlans)
 	}
-	rplan := csvr.activationPeriods["STANDARD"]
+	rplan := csvr.ratingPlans["STANDARD"]
 	expected := &RatingPlan{
 		ActivationTime: time.Time{},
 		RateIntervals: RateIntervalList{
@@ -442,9 +442,9 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading rating plan: %#v", csvr.activationPeriods["STANDARD"])
+		t.Errorf("Error loading rating plan: %#v", csvr.ratingPlans["STANDARD"])
 	}
-	rplan = csvr.activationPeriods["PREMIUM"]
+	rplan = csvr.ratingPlans["PREMIUM"]
 	expected = &RatingPlan{
 		ActivationTime: time.Time{},
 		RateIntervals: RateIntervalList{
@@ -477,9 +477,9 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading rating plan: %#v", csvr.activationPeriods["PREMIUM"])
+		t.Errorf("Error loading rating plan: %#v", csvr.ratingPlans["PREMIUM"])
 	}
-	rplan = csvr.activationPeriods["DEFAULT"]
+	rplan = csvr.ratingPlans["DEFAULT"]
 	expected = &RatingPlan{
 		ActivationTime: time.Time{},
 		RateIntervals: RateIntervalList{
@@ -506,9 +506,9 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading rating plan: %#v", csvr.activationPeriods["DEFAULT"])
+		t.Errorf("Error loading rating plan: %#v", csvr.ratingPlans["DEFAULT"])
 	}
-	rplan = csvr.activationPeriods["EVENING"]
+	rplan = csvr.ratingPlans["EVENING"]
 	expected = &RatingPlan{
 		ActivationTime: time.Time{},
 		RateIntervals: RateIntervalList{
@@ -575,7 +575,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading rating plan: %#v", csvr.activationPeriods["EVENING"])
+		t.Errorf("Error loading rating plan: %#v", csvr.ratingPlans["EVENING"])
 	}
 }
 

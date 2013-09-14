@@ -30,19 +30,19 @@ import (
 )
 
 type CSVReader struct {
-	sep               rune
-	storage           DataStorage
-	readerFunc        func(string, rune, int) (*csv.Reader, *os.File, error)
-	actions           map[string][]*Action
-	actionsTimings    map[string][]*ActionTiming
-	actionsTriggers   map[string][]*ActionTrigger
-	accountActions    []*UserBalance
-	destinations      []*Destination
-	timings           map[string]*Timing
-	rates             map[string]*LoadRate
-	destinationRates  map[string][]*DestinationRate
-	activationPeriods map[string]*RatingPlan
-	ratingProfiles    map[string]*RatingProfile
+	sep              rune
+	storage          DataStorage
+	readerFunc       func(string, rune, int) (*csv.Reader, *os.File, error)
+	actions          map[string][]*Action
+	actionsTimings   map[string][]*ActionTiming
+	actionsTriggers  map[string][]*ActionTrigger
+	accountActions   []*UserBalance
+	destinations     []*Destination
+	timings          map[string]*Timing
+	rates            map[string]*LoadRate
+	destinationRates map[string][]*DestinationRate
+	ratingPlans      map[string]*RatingPlan
+	ratingProfiles   map[string]*RatingProfile
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
@@ -58,7 +58,7 @@ func NewFileCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn, 
 	c.rates = make(map[string]*LoadRate)
 	c.destinationRates = make(map[string][]*DestinationRate)
 	c.timings = make(map[string]*Timing)
-	c.activationPeriods = make(map[string]*RatingPlan)
+	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.readerFunc = openFileCSVReader
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
@@ -284,10 +284,10 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", record[1]))
 		}
 		for _, dr := range drs {
-			if _, exists := csvr.activationPeriods[tag]; !exists {
-				csvr.activationPeriods[tag] = &RatingPlan{}
+			if _, exists := csvr.ratingPlans[tag]; !exists {
+				csvr.ratingPlans[tag] = &RatingPlan{}
 			}
-			csvr.activationPeriods[tag].AddRateInterval(rt.GetRateInterval(dr))
+			csvr.ratingPlans[tag].AddRateInterval(rt.GetRateInterval(dr))
 		}
 	}
 	return
@@ -316,7 +316,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			csvr.ratingProfiles[key] = rp
 		}
 		for _, d := range csvr.destinations {
-			ap, exists := csvr.activationPeriods[record[5]]
+			ap, exists := csvr.ratingPlans[record[5]]
 			if !exists {
 				return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: %v", record[5]))
 			}
