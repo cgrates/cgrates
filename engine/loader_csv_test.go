@@ -87,6 +87,7 @@ vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
 vdf,0,*out,fall,2012-02-28T00:00:00Z,PREMIUM,rif
 `
 	actions = `
+MINI,*topup_reset,*monetary,*out,10,*unlimited,,,0,10,10
 MINI,*topup,*minutes,*out,100,*unlimited,NAT,*absolute,0,10,10
 `
 	actionTimings = `
@@ -607,25 +608,40 @@ func TestLoadActions(t *testing.T) {
 	if len(csvr.actions) != 1 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
-	a := csvr.actions["MINI"][0]
-	expected := &Action{
-		Id:               a.Id,
-		ActionType:       TOPUP,
-		BalanceId:        MINUTES,
-		Direction:        OUTBOUND,
-		ExpirationString: UNLIMITED,
-		Weight:           10,
-		Balance: &Balance{
-			Id:               a.Balance.Id,
-			Value:            100,
+	as := csvr.actions["MINI"]
+	expected := []*Action{
+		&Action{
+			Id:               as[0].Id,
+			ActionType:       TOPUP_RESET,
+			BalanceId:        CREDIT,
+			Direction:        OUTBOUND,
+			ExpirationString: UNLIMITED,
 			Weight:           10,
-			SpecialPriceType: PRICE_ABSOLUTE,
-			SpecialPrice:     0,
-			DestinationId:    "NAT",
+			Balance: &Balance{
+				Id:     as[0].Balance.Id,
+				Value:  10,
+				Weight: 10,
+			},
+		},
+		&Action{
+			Id:               as[1].Id,
+			ActionType:       TOPUP,
+			BalanceId:        MINUTES,
+			Direction:        OUTBOUND,
+			ExpirationString: UNLIMITED,
+			Weight:           10,
+			Balance: &Balance{
+				Id:               as[1].Balance.Id,
+				Value:            100,
+				Weight:           10,
+				SpecialPriceType: PRICE_ABSOLUTE,
+				SpecialPrice:     0,
+				DestinationId:    "NAT",
+			},
 		},
 	}
-	if !reflect.DeepEqual(a, expected) {
-		t.Error("Error loading action: ", a)
+	if !reflect.DeepEqual(as, expected) {
+		t.Error("Error loading action: ", as)
 	}
 }
 
