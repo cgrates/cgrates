@@ -36,6 +36,7 @@ const (
 	ACTION_PREFIX             = "act_"
 	USER_BALANCE_PREFIX       = "ubl_"
 	DESTINATION_PREFIX        = "dst_"
+	TEMP_DESTINATION_PREFIX   = "tmp_"
 	LOG_CALL_COST_PREFIX      = "cco_"
 	LOG_ACTION_TIMMING_PREFIX = "ltm_"
 	LOG_ACTION_TRIGGER_PREFIX = "ltr_"

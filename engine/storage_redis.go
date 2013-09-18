@@ -89,30 +89,36 @@ func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
 	var values []string
-	if values, err = rs.db.HKeys(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
+	if values, err = rs.db.SMembers(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
 		dest = &Destination{Id: key, Prefixes: values}
 	}
 	return
 }
 
 func (rs *RedisStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
+	if _, err := rs.db.SAdd(TEMP_DESTINATION_PREFIX+prefix, utils.SplitPrefixInterface(prefix)...); err != nil {
+		return 0, err
+	}
 	var values []string
-	if values, err = rs.db.HMGet(DESTINATION_PREFIX+key, utils.SplitPrefix(prefix)...); err == nil {
-		for i, p := range values {
-			if p != "" {
-				return len(prefix) - i, nil
+	if values, err = rs.db.SInter(DESTINATION_PREFIX+key, TEMP_DESTINATION_PREFIX+prefix); err == nil {
+		for _, p := range values {
+			if len(p) > precision {
+				precision = len(p)
 			}
 		}
+	}
+	if _, err := rs.db.Del(TEMP_DESTINATION_PREFIX + prefix); err != nil {
+		Logger.Err("Error removing temp ")
 	}
 	return
 }
 
 func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
-	var newPrefixes []interface{}
+	var prefixes []interface{}
 	for _, p := range dest.Prefixes {
-		newPrefixes = append(newPrefixes, p, "*")
+		prefixes = append(prefixes, p)
 	}
-	_, err = rs.db.HMSet(DESTINATION_PREFIX+dest.Id, newPrefixes...)
+	_, err = rs.db.SAdd(DESTINATION_PREFIX+dest.Id, prefixes...)
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)

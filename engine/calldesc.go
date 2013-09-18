@@ -36,11 +36,11 @@ func init() {
 		Logger = new(utils.StdLogger)
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 	}
-	//db_server := "127.0.0.1"
+	db_server := "127.0.0.1"
 	//db_server := "192.168.0.17"
-	m, _ := NewMapStorage()
+	//m, _ := NewMapStorage()
 	//m, _ := NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-	//m, _ := NewRedisStorage(db_server+":6379", 11, "")
+	m, _ := NewRedisStorage(db_server+":6379", 11, "")
 	//m, _ := NewRedigoStorage(db_server+":6379", 11, "")
 	//m, _ := NewRadixStorage(db_server+":6379", 11, "")
 	storageGetter, _ = m.(DataStorage)
