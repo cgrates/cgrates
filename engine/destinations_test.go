@@ -21,7 +21,7 @@ package engine
 import (
 	"encoding/json"
 	"github.com/cgrates/cgrates/cache2go"
-	"reflect"
+	"github.com/cgrates/cgrates/utils"
 	"testing"
 )
 
@@ -43,7 +43,8 @@ func TestDestinationStorageStore(t *testing.T) {
 		t.Error("Error storing destination: ", err)
 	}
 	result, err := storageGetter.GetDestination(nationale.Id)
-	if !reflect.DeepEqual(nationale, result) {
+	var ss utils.StringSlice = result.Prefixes
+	if !ss.Contains("0257") || !ss.Contains("0256") || !ss.Contains("0723") {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
 }
@@ -54,7 +55,6 @@ func TestDestinationContainsPrefix(t *testing.T) {
 	if !ok || precision != len("0256") {
 		t.Error("Should contain prefix: ", nationale)
 	}
-
 }
 
 func TestDestinationContainsPrefixLong(t *testing.T) {
@@ -63,7 +63,14 @@ func TestDestinationContainsPrefixLong(t *testing.T) {
 	if !ok || precision != len("0256") {
 		t.Error("Should contain prefix: ", nationale)
 	}
+}
 
+func TestDestinationContainsPrefixWrong(t *testing.T) {
+	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
+	precision, ok := nationale.containsPrefix("01234567")
+	if ok || precision != 0 {
+		t.Error("Should not contain prefix: ", nationale)
+	}
 }
 
 func TestDestinationGetExists(t *testing.T) {

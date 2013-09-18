@@ -131,6 +131,17 @@ func RoundTo(whole, amount time.Duration) time.Duration {
 	return time.Duration((w - math.Mod(a, w)) + a)
 }
 
+type StringSlice []string
+
+func (ss StringSlice) Contains(needle string) bool {
+	for _, hay := range ss {
+		if hay == needle {
+			return true
+		}
+	}
+	return false
+}
+
 func SplitPrefix(prefix string) []string {
 	var subs []string
 	max := len(prefix)
