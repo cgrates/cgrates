@@ -73,3 +73,15 @@ func (cc *CallCost) GetTotalDuration() (td time.Duration) {
 	}
 	return
 }
+
+// Creates a CallDescriptor structure copying related data from CallCost
+func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
+	return &CallDescriptor{
+		Direction:   cc.Direction,
+		TOR:         cc.TOR,
+		Tenant:      cc.Tenant,
+		Subject:     cc.Subject,
+		Account:     cc.Account,
+		Destination: cc.Destination,
+	}
+}

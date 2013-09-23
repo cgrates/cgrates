@@ -202,6 +202,11 @@ func TestRound(t *testing.T) {
 	if result != expected {
 		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
 	}
+	result = RoundTo(time.Second, 1*time.Second+500*time.Millisecond)
+	expected = 2 * time.Second
+	if result != expected {
+		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
+	}
 	result = RoundTo(minute, 1*time.Second)
 	expected = minute
 	if result != expected {

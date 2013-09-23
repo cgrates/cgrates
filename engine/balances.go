@@ -41,8 +41,8 @@ type Balance struct {
 func (b *Balance) Equal(o *Balance) bool {
 	return b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
-		b.SpecialPrice == o.SpecialPrice &&
-		b.DestinationId == o.DestinationId
+		b.DestinationId == o.DestinationId &&
+		b.RateSubject == o.RateSubject
 }
 
 func (b *Balance) IsExpired() bool {
@@ -51,13 +51,12 @@ func (b *Balance) IsExpired() bool {
 
 func (b *Balance) Clone() *Balance {
 	return &Balance{
-		Id:               b.Id,
-		Value:            b.Value,
-		SpecialPrice:     b.SpecialPrice,
-		SpecialPriceType: b.SpecialPriceType,
-		DestinationId:    b.DestinationId,
-		ExpirationDate:   b.ExpirationDate,
-		Weight:           b.Weight,
+		Id:             b.Id,
+		Value:          b.Value,
+		DestinationId:  b.DestinationId,
+		ExpirationDate: b.ExpirationDate,
+		Weight:         b.Weight,
+		RateSubject:    b.RateSubject,
 	}
 }
 

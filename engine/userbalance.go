@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"strings"
 )
@@ -44,6 +45,9 @@ const (
 	TRIGGER_MAX_COUNTER = "*max_counter"
 	TRIGGER_MIN_BALANCE = "*min_balance"
 	TRIGGER_MAX_BALANCE = "*max_balance"
+	// minute subjects
+	ZEROSECOND = "*zerosecond"
+	ZEROMINUTE = "*zerominute"
 )
 
 var (
@@ -66,9 +70,7 @@ type UserBalance struct {
 	UserIds []string // group info about users
 }
 
-/*
-Returns user's available minutes for the specified destination
-*/
+// Returns user's available minutes for the specified destination
 func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float64, balances BalanceChain) {
 	credit = ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) == 0 {
@@ -132,53 +134,94 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 
-/*
-Debits the received amount of seconds from user's minute buckets.
-All the appropriate buckets will be debited until all amount of minutes is consumed.
-If the amount is bigger than the sum of all seconds in the minute buckets than nothing will be
-debited and an error will be returned.
-*/
-func (ub *UserBalance) debitMinutesBalance(amount float64, prefix string, count bool) error {
-	if count {
-		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: amount, DestinationId: prefix}})
-	}
-	avaliableNbSeconds, _, bucketList := ub.getSecondsForPrefix(prefix)
-	if avaliableNbSeconds < amount {
-		return AMOUNT_TOO_BIG
-	}
-	var credit BalanceChain
-	if bc, exists := ub.BalanceMap[CREDIT+OUTBOUND]; exists {
-		credit = bc.Clone()
-	}
-	for _, mb := range bucketList {
-		if mb.Value < amount {
-			if mb.SpecialPrice > 0 { // debit the money if the bucket has price
-				credit.Debit(mb.Value * mb.SpecialPrice)
-			}
-		} else {
-			if mb.SpecialPrice > 0 { // debit the money if the bucket has price
-				credit.Debit(amount * mb.SpecialPrice)
-			}
-			break
+func (ub *UserBalance) getBalanceForPrefix(prefix string, balances BalanceChain) BalanceChain {
+	var usefulBalances BalanceChain
+	for _, b := range balances {
+		if b.IsExpired() {
+			continue
 		}
-		if ub.Type == UB_TYPE_PREPAID && credit.GetTotalValue() < 0 {
-			break
+		if b.DestinationId != "" {
+			precision, err := storageGetter.DestinationContainsPrefix(b.DestinationId, prefix)
+			if err != nil {
+				continue
+			}
+			if precision > 0 {
+				b.precision = precision
+				if b.Value > 0 {
+					balances = append(balances, b)
+				}
+			}
 		}
 	}
-	// need to check again because there are two break above
-	if ub.Type == UB_TYPE_PREPAID && credit.GetTotalValue() < 0 {
-		return AMOUNT_TOO_BIG
-	}
-	ub.BalanceMap[CREDIT+OUTBOUND] = credit // credit is > 0
+	// resort by precision
+	usefulBalances.Sort()
+	return usefulBalances
+}
 
-	for _, mb := range bucketList {
-		if mb.Value < amount {
-			amount -= mb.Value
-			mb.Value = 0
-		} else {
-			mb.Value -= amount
-			break
+/*
+This method is the core of userbalance debiting: don't panic just follow the branches
+*/
+func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
+	// debit minutes first
+	minuteBalances := ub.BalanceMap[MINUTES+cc.Direction]
+
+	usefulBalances := ub.getBalanceForPrefix(cc.Destination, minuteBalances)
+
+	for _, ts := range cc.Timespans {
+		ts.createIncrementsSlice()
+		for incrementIndex, increment := range ts.Increments {
+			for _, b := range usefulBalances {
+				if b.Value == 0 {
+					continue
+				}
+
+				// check standard subject tags
+				if b.RateSubject == ZEROSECOND || b.RateSubject == "" {
+					if b.Value >= increment.Duration.Seconds() {
+						b.Value -= increment.Duration.Seconds()
+						increment.BalanceId = b.Id
+						break
+					}
+				}
+				if b.RateSubject == ZEROMINUTE {
+					if b.Value >= 60 {
+						// TODO: round to minute (consume the rest of the timespans)
+						nts := ts.SplitByIncrement(incrementIndex, increment)
+						nts.RoundToDuration(increment.Duration)
+
+						b.Value -= 60
+						increment.BalanceId = b.Id
+						break
+					}
+				}
+				// nts.SplitByIncrement()
+				// get the new rate
+				cd := cc.CreateCallDescriptor()
+				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex, increment)
+				cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
+				cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
+				newCC, err := cd.GetCost()
+				if err != nil {
+					Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+					continue
+				}
+				//debit new callcost
+				for _, nts := range newCC.Timespans {
+					for _, nIncrement := range nts.Increments {
+						// debit minutes and money
+						_ = nIncrement
+					}
+				}
+			}
+			if increment.BalanceId == "" {
+				// no balance was attached to this increment: cut the rest of increments/timespans
+
+			}
 		}
+	}
+
+	if count {
+		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: cc.Cost + cc.ConnectFee, DestinationId: cc.Destination}})
 	}
 	return nil
 }

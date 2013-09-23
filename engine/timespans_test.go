@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
+	//"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
 )
@@ -450,6 +450,7 @@ func TestTimespanExpandingPastEnd(t *testing.T) {
 	}
 }
 
+/*
 func TestTimespanExpandingCallDuration(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
@@ -471,7 +472,7 @@ func TestTimespanExpandingCallDuration(t *testing.T) {
 		t.Error("Error setting call duration: ", timespans[0])
 	}
 }
-
+*/
 func TestTimespanExpandingRoundingPastEnd(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
@@ -616,15 +617,16 @@ func TestTimespanCreateSecondsSlice(t *testing.T) {
 			&Rate{Value: 2.0},
 		}},
 	}
-	ts.createRatedSecondSlice()
-	if len(ts.ratedSeconds) != 30 {
-		t.Error("Error creating second slice: ", ts.ratedSeconds)
+	ts.createIncrementsSlice()
+	if len(ts.Increments) != 30 {
+		t.Error("Error creating second slice: ", ts.Increments)
 	}
-	if ts.ratedSeconds[0].rate != 2.0 {
-		t.Error("Wrong second slice: ", ts.ratedSeconds[0])
+	if ts.Increments[0].Cost != 2.0 {
+		t.Error("Wrong second slice: ", ts.Increments[0])
 	}
 }
 
+/*
 func TestTimespanCreateSecondsFract(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -637,12 +639,28 @@ func TestTimespanCreateSecondsFract(t *testing.T) {
 			},
 		},
 	}
-	ts.createRatedSecondSlice()
-	if len(ts.ratedSeconds) != 31 {
-		t.Error("Error creating second slice: ", ts.ratedSeconds)
+	ts.createIncrementsSlice()
+	if len(ts.Increments) != 31 {
+		t.Error("Error creating second slice: ", ts.Increments)
 	}
-	t.Log(ts.getCost())
-	if ts.ratedSeconds[30].rate != 0.2 {
-		t.Error("Wrong second slice: ", ts.ratedSeconds[30])
+	if len(ts.Increments) < 31 || ts.Increments[30].Cost != 0.2 {
+		t.Error("Wrong second slice: ", ts.Increments)
 	}
 }
+
+func TestTimespanSplitByIncrement(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 19, 18, 30, 30, 0, time.UTC),
+		CallDuration: 50 * time.Second,
+	}
+	i := &Increment{Duration: time.Second}
+	newTs := ts.SplitByIncrement(5, i)
+	if ts.GetDuration() != 5*time.Second || newTs.GetDuration() != 25*time.Second {
+		t.Error("Error spliting by second: ", ts.GetDuration(), newTs.GetDuration())
+	}
+	if ts.CallDuration != 25*time.Second || newTs.CallDuration != 50*time.Second {
+		t.Error("Error spliting by second at setting call duration: ", ts.GetDuration(), newTs.GetDuration())
+	}
+}
+*/

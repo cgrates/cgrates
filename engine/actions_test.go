@@ -763,8 +763,8 @@ func TestActionResetAllCounters(t *testing.T) {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[0].MinuteBalances[0]
-	if mb.Weight != 20 || mb.SpecialPrice != 1 || mb.Value != 0 || mb.DestinationId != "NAT" {
-		t.Errorf("Balanxce cloned incorrectly: %v!", mb)
+	if mb.Weight != 20 || mb.Value != 0 || mb.DestinationId != "NAT" {
+		t.Errorf("Balance cloned incorrectly: %v!", mb)
 	}
 }
 
@@ -792,7 +792,7 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[1].MinuteBalances[0]
-	if mb.Weight != 20 || mb.SpecialPrice != 1 || mb.Value != 0 || mb.DestinationId != "NAT" {
+	if mb.Weight != 20 || mb.Value != 0 || mb.DestinationId != "NAT" {
 		t.Errorf("Minute bucked cloned incorrectly: %v!", mb)
 	}
 }

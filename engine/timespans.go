@@ -33,12 +33,14 @@ type TimeSpan struct {
 	RateInterval       *RateInterval
 	CallDuration       time.Duration // the call duration so far till TimeEnd
 	overlapped         bool          // mark a timespan as overlapped by an expanded one
-	ratedSeconds       []*rated_second
+	Increments         []*Increment
 }
 
-type rated_second struct {
-	index int
-	rate  float64
+type Increment struct {
+	Duration    time.Duration
+	Cost        float64
+	BalanceId   string
+	BalanceType string
 }
 
 // Returns the duration of the timespan
@@ -78,23 +80,17 @@ func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
 	}
 }
 
-func (ts *TimeSpan) createRatedSecondSlice() {
+func (ts *TimeSpan) createIncrementsSlice() {
 	if ts.RateInterval == nil {
 		return
 	}
-	// create rated seconds series
-	rate, _, rate_unit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	secondCost := rate / rate_unit.Seconds()
+	// create rated units series
+	rate, rateIncrement, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+	incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	totalCost := 0.0
-	for s := 0; s < int(ts.GetDuration().Seconds()); s++ {
-		ts.ratedSeconds = append(ts.ratedSeconds, &rated_second{s, secondCost})
-		totalCost += secondCost
-	}
-	cCost := ts.getCost()
-	// here there might be some subsecond duration left
-	if totalCost < cCost {
-		// add one extra second with the fractional cost
-		ts.ratedSeconds = append(ts.ratedSeconds, &rated_second{len(ts.ratedSeconds), utils.Round(cCost-totalCost, ts.RateInterval.RoundingDecimals, ts.RateInterval.RoundingMethod)})
+	for s := 0; s < int(ts.GetDuration()/rateIncrement); s++ {
+		ts.Increments = append(ts.Increments, &Increment{Duration: rateIncrement, Cost: incrementCost})
+		totalCost += incrementCost
 	}
 }
 
@@ -168,9 +164,17 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	return
 }
 
-/*
-Splits the given timespan on activation period's activation time.
-*/
+// Split the interval at the given increment start
+func (ts *TimeSpan) SplitByIncrement(index int, increment *Increment) *TimeSpan {
+	timeStart := ts.GetTimeStartForIncrement(index, increment)
+	newTs := &TimeSpan{TimeStart: timeStart, TimeEnd: ts.TimeEnd}
+	newTs.CallDuration = ts.CallDuration
+	ts.TimeEnd = timeStart
+	ts.SetNewCallDuration(newTs)
+	return newTs
+}
+
+// Splits the given timespan on activation period's activation time.
 func (ts *TimeSpan) SplitByRatingPlan(ap *RatingPlan) (newTs *TimeSpan) {
 	if !ts.Contains(ap.ActivationTime) {
 		return nil
@@ -202,4 +206,20 @@ func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
 		d = 0
 	}
 	ts.CallDuration = d
+}
+
+// returns a time for the specified second in the time span
+func (ts *TimeSpan) GetTimeStartForIncrement(index int, increment *Increment) time.Time {
+	return ts.TimeStart.Add(time.Duration(int64(index) * increment.Duration.Nanoseconds()))
+}
+
+func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
+	if duration < ts.GetDuration() {
+		duration = utils.RoundTo(duration, ts.GetDuration())
+	}
+	if duration > ts.GetDuration() {
+		initialDuration := ts.GetDuration()
+		ts.TimeEnd = ts.TimeStart.Add(duration)
+		ts.CallDuration = ts.CallDuration + (duration - initialDuration)
+	}
 }

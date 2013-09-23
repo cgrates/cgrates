@@ -104,7 +104,7 @@ type CallDescriptor struct {
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
 	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
-	CallDuration                          time.Duration // the call duration so far (partial or final)
+	CallDuration                          time.Duration // the call duration so far (till TimeEnd)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	RatingPlans                           []*RatingPlan
@@ -248,12 +248,13 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*Ti
 		if ts.RateInterval != nil {
 			_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			// if the timespan duration is larger than the rate increment make sure it is a multiple of it
-			if rateIncrement != time.Second && rateIncrement < ts.GetDuration() {
+			if rateIncrement < ts.GetDuration() {
 				rateIncrement = utils.RoundTo(rateIncrement, ts.GetDuration())
 			}
 			if rateIncrement > ts.GetDuration() {
+				initialDuration := ts.GetDuration()
 				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
-				ts.CallDuration = ts.CallDuration + rateIncrement
+				ts.CallDuration = ts.CallDuration + (rateIncrement - initialDuration)
 
 				// overlap the rest of the timespans
 				i += 1
@@ -272,7 +273,6 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*Ti
 	// remove overlapped
 	for _, ts := range timespans {
 		if !ts.overlapped {
-			ts.createRatedSecondSlice()
 			newTimespans = append(newTimespans, ts)
 		}
 	}
@@ -299,6 +299,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 		cost += ts.getCost()
 	}
+	// global rounding
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
 	cc := &CallCost{
 		Direction:   cd.Direction,
@@ -438,7 +439,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) DebitSeconds() (err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitMinutesBalance(cd.Amount, cd.Destination, true)
+		return userBalance.debitCreditBalance(cd.CreateCallCost(), true)
 	}
 	return err
 }
@@ -467,4 +468,16 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.Flush()
 	return nil
 
+}
+
+// Creates a CallCost structure copying related data from CallDescriptor
+func (cd *CallDescriptor) CreateCallCost() *CallCost {
+	return &CallCost{
+		Direction:   cd.Direction,
+		TOR:         cd.TOR,
+		Tenant:      cd.Tenant,
+		Subject:     cd.Subject,
+		Account:     cd.Account,
+		Destination: cd.Destination,
+	}
 }
