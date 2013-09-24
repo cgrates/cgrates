@@ -84,6 +84,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	if ts.RateInterval == nil {
 		return
 	}
+	ts.Increments = make([]*Increment, 0)
 	// create rated units series
 	rate, rateIncrement, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 	incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
@@ -170,6 +171,7 @@ func (ts *TimeSpan) SplitByIncrement(index int, increment *Increment) *TimeSpan 
 	newTs := &TimeSpan{TimeStart: timeStart, TimeEnd: ts.TimeEnd}
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = timeStart
+	ts.Increments = ts.Increments[0:index]
 	ts.SetNewCallDuration(newTs)
 	return newTs
 }

@@ -186,6 +186,334 @@ func TestDebitNegativeMoneyBalance(t *testing.T) {
 	}
 }
 
+func TestDebitCreditZeroSecond(t *testing.T) {
+	b1 := &Balance{Id: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceId != "testb" {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 21 {
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[MINUTES+OUTBOUND][0])
+	}
+}
+
+func TestDebitCreditZeroMinute(t *testing.T) {
+	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1},
+		CREDIT + OUTBOUND:  BalanceChain{&Balance{Value: 21}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+		cc.Timespans[0].Increments[0].Duration != time.Minute {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 21 {
+		t.Error("Error extracting minutes from balance: ",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0])
+	}
+}
+func TestDebitCreditZeroMixedMinute(t *testing.T) {
+	b1 := &Balance{Id: "testm", Value: 70, Weight: 5, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b2 := &Balance{Id: "tests", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1, b2},
+		CREDIT + OUTBOUND:  BalanceChain{&Balance{Value: 21}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceId != "tests" ||
+		cc.Timespans[1].Increments[0].BalanceId != "testm" {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0], cc.Timespans[1].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][1].Value != 0 ||
+		rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 21 {
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[MINUTES+OUTBOUND])
+	}
+}
+
+func TestDebitCreditNoCredit(t *testing.T) {
+	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				CallDuration: 10 * time.Second,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+		cc.Timespans[0].Increments[0].Duration != time.Minute {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 {
+		t.Error("Error extracting minutes from balance: ",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0])
+	}
+	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != time.Minute {
+		t.Error("Error truncating extra timespans: ", cc.Timespans)
+	}
+}
+
+func TestDebitCreditHasCredit(t *testing.T) {
+	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				CallDuration: 10 * time.Second,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1},
+		CREDIT + OUTBOUND:  BalanceChain{&Balance{Id: "moneya", Value: 50}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+		cc.Timespans[0].Increments[0].Duration != time.Minute {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 30 {
+		t.Error("Error extracting minutes from balance: ",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0], rifsBalance.BalanceMap[CREDIT+OUTBOUND][0])
+	}
+	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != time.Minute || cc.Timespans[1].GetDuration() != 20*time.Second {
+		t.Error("Error truncating extra timespans: ", cc.Timespans)
+	}
+}
+
+func TestDebitCreditMoreTimespans(t *testing.T) {
+	b1 := &Balance{Id: "testb", Value: 150, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				CallDuration: 10 * time.Second,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+		cc.Timespans[0].Increments[0].Duration != time.Minute {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 30 {
+		t.Error("Error extracting minutes from balance: ",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0])
+	}
+}
+
+func TestDebitCreditMoreTimespansMixed(t *testing.T) {
+	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b2 := &Balance{Id: "testa", Value: 150, Weight: 5, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				CallDuration: 10 * time.Second,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1, b2},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+		cc.Timespans[0].Increments[0].Duration != time.Minute {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 ||
+		rifsBalance.BalanceMap[MINUTES+OUTBOUND][1].Value != 130 {
+		t.Error("Error extracting minutes from balance: ",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][1], cc.Timespans[1])
+	}
+}
+
+func TestDebitCreditNoConectFeeCredit(t *testing.T) {
+	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		ConnectFee:  10.0,
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				CallDuration: 10 * time.Second,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+
+	if len(cc.Timespans) != 0 || cc.GetTotalDuration() != 0 {
+		t.Error("Error cutting at no connect fee: ", cc.Timespans)
+	}
+}
+
+func TestDebitCreditMoneyOnly(t *testing.T) {
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				CallDuration: 10 * time.Second,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Id: "money", Value: 50}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+
+	if cc.Timespans[0].Increments[0].BalanceId != "money" ||
+		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 {
+		t.Error("Error extracting minutes from balance: ",
+			rifsBalance.BalanceMap[CREDIT+OUTBOUND][0])
+	}
+	if len(cc.Timespans) != 2 ||
+		cc.Timespans[0].GetDuration() != 10*time.Second ||
+		cc.Timespans[1].GetDuration() != 40*time.Second {
+		t.Error("Error truncating extra timespans: ", cc.Timespans[1].Increments[0])
+	}
+}
+
 /*
 func TestDebitMinuteBalance(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.0, DestinationId: "NAT"}

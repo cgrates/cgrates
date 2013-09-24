@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"strings"
+	"time"
 )
 
 const (
@@ -137,7 +138,7 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 func (ub *UserBalance) getBalanceForPrefix(prefix string, balances BalanceChain) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
-		if b.IsExpired() {
+		if b.IsExpired() || (ub.Type == UB_TYPE_PREPAID && b.Value <= 0) {
 			continue
 		}
 		if b.DestinationId != "" {
@@ -147,10 +148,10 @@ func (ub *UserBalance) getBalanceForPrefix(prefix string, balances BalanceChain)
 			}
 			if precision > 0 {
 				b.precision = precision
-				if b.Value > 0 {
-					balances = append(balances, b)
-				}
+				usefulBalances = append(usefulBalances, b)
 			}
+		} else {
+			usefulBalances = append(usefulBalances, b)
 		}
 	}
 	// resort by precision
@@ -162,39 +163,109 @@ func (ub *UserBalance) getBalanceForPrefix(prefix string, balances BalanceChain)
 This method is the core of userbalance debiting: don't panic just follow the branches
 */
 func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
-	// debit minutes first
 	minuteBalances := ub.BalanceMap[MINUTES+cc.Direction]
+	moneyBalances := ub.BalanceMap[CREDIT+cc.Direction]
+	usefulMinuteBalances := ub.getBalanceForPrefix(cc.Destination, minuteBalances)
+	usefulMoneyBalances := ub.getBalanceForPrefix(cc.Destination, moneyBalances)
+	// debit connect fee
+	if cc.ConnectFee > 0 {
+		amount := cc.ConnectFee
+		paid := false
+		for _, b := range usefulMoneyBalances {
+			if b.Value >= amount {
+				b.Value -= amount
+				// the conect fee is not refoundable!
+				if count {
+					ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+				}
+				paid = true
+				break
+			}
+		}
+		if !paid {
+			// there are no money for the connect fee; abort mission
+			cc.Timespans = make([]*TimeSpan, 0)
+			return nil
+		}
+	}
+	// debit minutes
+	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
+		ts := cc.Timespans[tsIndex]
 
-	usefulBalances := ub.getBalanceForPrefix(cc.Destination, minuteBalances)
-
-	for _, ts := range cc.Timespans {
 		ts.createIncrementsSlice()
 		for incrementIndex, increment := range ts.Increments {
-			for _, b := range usefulBalances {
+			paid := false
+			for _, b := range usefulMinuteBalances {
 				if b.Value == 0 {
 					continue
 				}
-
 				// check standard subject tags
 				if b.RateSubject == ZEROSECOND || b.RateSubject == "" {
-					if b.Value >= increment.Duration.Seconds() {
-						b.Value -= increment.Duration.Seconds()
+					amount := increment.Duration.Seconds()
+					if b.Value >= amount {
+						b.Value -= amount
 						increment.BalanceId = b.Id
+						paid = true
+						if count {
+							ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+						}
 						break
 					}
 				}
 				if b.RateSubject == ZEROMINUTE {
-					if b.Value >= 60 {
-						// TODO: round to minute (consume the rest of the timespans)
-						nts := ts.SplitByIncrement(incrementIndex, increment)
-						nts.RoundToDuration(increment.Duration)
+					amount := time.Minute.Seconds()
+					if b.Value >= amount { // balance has at least 60 seconds
+						newTs := ts
+						if incrementIndex != 0 {
+							// if increment it's not at the begining we must split the timespan
+							newTs = ts.SplitByIncrement(incrementIndex, increment)
+						}
+						newTs.RoundToDuration(time.Minute)
+						newTs.RateInterval = &RateInterval{
+							Rates: RateGroups{
+								&Rate{
+									GroupIntervalStart: 0,
+									Value:              0,
+									RateIncrement:      time.Minute,
+									RateUnit:           time.Minute,
+								},
+							},
+						}
+						newTs.createIncrementsSlice()
+						// overlap the rest of the timespans
+						for i := tsIndex + 1; i < len(cc.Timespans); i++ {
+							if cc.Timespans[i].TimeEnd.Before(newTs.TimeEnd) || cc.Timespans[i].TimeEnd.Equal(newTs.TimeEnd) {
+								cc.Timespans[i].overlapped = true
+							} else if cc.Timespans[i].TimeStart.Before(newTs.TimeEnd) {
+								cc.Timespans[i].TimeStart = ts.TimeEnd
+							}
+						}
+						// insert the new timespan
+						if newTs != ts {
+							tsIndex++
+							cc.Timespans = append(cc.Timespans, nil)
+							copy(cc.Timespans[tsIndex+1:], cc.Timespans[tsIndex:])
+							cc.Timespans[tsIndex] = newTs
+						}
 
-						b.Value -= 60
-						increment.BalanceId = b.Id
+						var newTimespans []*TimeSpan
+						// remove overlapped
+						for _, ots := range cc.Timespans {
+							if !ots.overlapped {
+								newTimespans = append(newTimespans, ots)
+							}
+						}
+						cc.Timespans = newTimespans
+						b.Value -= amount
+						newTs.Increments[0].BalanceId = b.Id
+						paid = true
+						if count {
+							ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+						}
 						break
 					}
 				}
-				// nts.SplitByIncrement()
+				// newTs.SplitByIncrement()
 				// get the new rate
 				cd := cc.CreateCallDescriptor()
 				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex, increment)
@@ -213,16 +284,44 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					}
 				}
 			}
-			if increment.BalanceId == "" {
+			if paid {
+				continue
+			}
+			// debit monetary
+			for _, b := range usefulMoneyBalances {
+				if b.Value == 0 {
+					continue
+				}
+				// check standard subject tags
+				if b.RateSubject == "" {
+					amount := increment.Cost
+					if b.Value >= amount {
+						b.Value -= amount
+						increment.BalanceId = b.Id
+						paid = true
+						if count {
+							ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+						}
+						break
+					}
+				} else {
+					// get the new rate
+				}
+			}
+			if !paid {
 				// no balance was attached to this increment: cut the rest of increments/timespans
-
+				ts.SplitByIncrement(incrementIndex, increment)
+				if len(ts.Increments) == 0 {
+					// if there are no increments left in the ts leav it out
+					cc.Timespans = cc.Timespans[:tsIndex]
+				} else {
+					cc.Timespans = cc.Timespans[:tsIndex+1]
+				}
+				return nil
 			}
 		}
 	}
 
-	if count {
-		ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: cc.Cost + cc.ConnectFee, DestinationId: cc.Destination}})
-	}
 	return nil
 }
 
