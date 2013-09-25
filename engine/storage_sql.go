@@ -363,7 +363,7 @@ func (self *SQLStorage) SetTPDestRateTimings(tpid string, drts map[string][]*Des
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
-				tpid, drtId, drt.DestinationRatesTag, drt.TimingsTag, drt.Weight)
+				tpid, drtId, drt.DestinationRatesTag, drt.TimingTag, drt.Weight)
 			i++
 		}
 	}
@@ -921,8 +921,8 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 	return dests, nil
 }
 
-func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*LoadRate, error) {
-	rts := make(map[string]*LoadRate)
+func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*LoadRate, error) {
+	rts := make(map[string][]*LoadRate)
 	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
@@ -951,7 +951,14 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*LoadRate, erro
 			RoundingDecimals:   roundingDecimals,
 			Weight:             weight,
 		}
-		rts[tag] = r
+		// same tag only to create rate groups
+		existingRates, exists := rts[tag]
+		if exists {
+			if err := existingRates[len(existingRates)-1].ValidNextGroup(r); err != nil {
+				return nil, err
+			}
+		}
+		rts[tag] = append(rts[tag], r)
 	}
 	return rts, nil
 }
@@ -1027,7 +1034,7 @@ func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*Destin
 			Tag:                 tag,
 			DestinationRatesTag: destination_rates_tag,
 			Weight:              weight,
-			TimingsTag:          timings_tag,
+			TimingTag:           timings_tag,
 		}
 		rts = append(rts, rt)
 	}

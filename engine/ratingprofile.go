@@ -31,20 +31,21 @@ type RatingProfile struct {
 }
 
 // Adds an activation period that applyes to current rating profile if not already present.
-func (rp *RatingProfile) AddRatingPlanIfNotPresent(destInfo string, aps ...*RatingPlan) {
+func (rp *RatingProfile) AddRatingPlanIfNotPresent(destInfo string, plans ...*RatingPlan) {
 	if rp.DestinationMap == nil {
 		rp.DestinationMap = make(map[string][]*RatingPlan, 1)
 	}
-	for _, ap := range aps {
+	for _, plan := range plans {
 		found := false
-		for _, eap := range rp.DestinationMap[destInfo] {
-			if ap.Equal(eap) {
+		for _, existingPlan := range rp.DestinationMap[destInfo] {
+			if plan.Equal(existingPlan) {
+				existingPlan.AddRateInterval(plan.RateIntervals...)
 				found = true
 				break
 			}
 		}
 		if !found {
-			rp.DestinationMap[destInfo] = append(rp.DestinationMap[destInfo], ap)
+			rp.DestinationMap[destInfo] = append(rp.DestinationMap[destInfo], plan)
 		}
 	}
 }

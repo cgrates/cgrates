@@ -79,8 +79,8 @@ func TestFallbackDirect(t *testing.T) {
 func TestFallbackMultiple(t *testing.T) {
 	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "fall", Destination: "0723045"}
 	cd.LoadRatingPlans()
-	if len(cd.RatingPlans) != 1 {
-		t.Error("Error restoring activation periods: ", len(cd.RatingPlans))
+	if len(cd.RatingPlans) != 2 {
+		t.Errorf("Error restoring rating plans: %#v", cd.RatingPlans)
 	}
 }
 
@@ -161,8 +161,8 @@ func TestApAddRateIntervalGroups(t *testing.T) {
 	if len(ap.RateIntervals) != 1 {
 		t.Error("Wronfully appended interval ;)")
 	}
-	if len(ap.RateIntervals[0].Rates) != 2 {
-		t.Error("Group prices not formed: ", ap.RateIntervals[0].Rates)
+	if len(ap.RateIntervals[0].Rates) != 1 {
+		t.Errorf("Group prices not formed: %#v", ap.RateIntervals[0].Rates[0])
 	}
 }
 

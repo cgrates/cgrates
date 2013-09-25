@@ -143,7 +143,7 @@ type LoadStorage interface {
 	// loader functions
 	GetTpDestinations(string, string) ([]*Destination, error)
 	GetTpTimings(string, string) (map[string]*Timing, error)
-	GetTpRates(string, string) (map[string]*LoadRate, error)
+	GetTpRates(string, string) (map[string][]*LoadRate, error)
 	GetTpDestinationRates(string, string) (map[string][]*DestinationRate, error)
 	GetTpDestinationRateTimings(string, string) ([]*DestinationRateTiming, error)
 	GetTpRatingProfiles(string, string) (map[string]*RatingProfile, error)

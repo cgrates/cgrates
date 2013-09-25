@@ -35,7 +35,7 @@ type DbReader struct {
 	accountActions    []*UserBalance
 	destinations      []*Destination
 	timings           map[string]*Timing
-	rates             map[string]*LoadRate
+	rates             map[string][]*LoadRate
 	destinationRates  map[string][]*DestinationRate
 	activationPeriods map[string]*RatingPlan
 	ratingProfiles    map[string]*RatingProfile
@@ -141,11 +141,11 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 	}
 	for _, drs := range dbr.destinationRates {
 		for _, dr := range drs {
-			rate, exists := dbr.rates[dr.RateTag]
+			rates, exists := dbr.rates[dr.RateTag]
 			if !exists {
 				return errors.New(fmt.Sprintf("Could not find rate for tag %v", dr.RateTag))
 			}
-			dr.Rate = rate
+			dr.rates = rates
 		}
 	}
 	return nil
@@ -157,9 +157,9 @@ func (dbr *DbReader) LoadDestinationRateTimings() error {
 		return err
 	}
 	for _, rt := range rts {
-		t, exists := dbr.timings[rt.TimingsTag]
+		t, exists := dbr.timings[rt.TimingTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get timing for tag %v", rt.TimingsTag))
+			return errors.New(fmt.Sprintf("Could not get timing for tag %v", rt.TimingTag))
 		}
 		rt.timing = t
 		drs, exists := dbr.destinationRates[rt.DestinationRatesTag]
@@ -223,12 +223,12 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 		}
 		for _, destrateTiming := range drtm {
 			Logger.Debug(fmt.Sprintf("Destination rate timing: %v", rpm))
-			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
+			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingTag)
 			Logger.Debug(fmt.Sprintf("Timing: %v", rpm))
 			if err != nil || len(tm) == 0 {
-				return fmt.Errorf("No Timings profile with id %s: %v", destrateTiming.TimingsTag, err)
+				return fmt.Errorf("No Timings profile with id %s: %v", destrateTiming.TimingTag, err)
 			}
-			destrateTiming.timing = tm[destrateTiming.TimingsTag]
+			destrateTiming.timing = tm[destrateTiming.TimingTag]
 			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
 			if err != nil || len(drm) == 0 {
 				return fmt.Errorf("No Timings profile with id %s: %v", destrateTiming.DestinationRatesTag, err)
@@ -240,7 +240,7 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 					return fmt.Errorf("No Rates profile with id %s: %v", drate.RateTag, err)
 				}
 				Logger.Debug(fmt.Sprintf("Rate: %v", rpm))
-				drate.Rate = rt[drate.RateTag]
+				drate.rates = rt[drate.RateTag]
 				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
 					activationPeriods[destrateTiming.Tag] = &RatingPlan{}
 				}

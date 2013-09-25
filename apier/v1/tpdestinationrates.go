@@ -39,7 +39,10 @@ func (self *ApierV1) SetTPDestinationRate(attrs utils.TPDestinationRate, reply *
 	}
 	drs := make([]*engine.DestinationRate, len(attrs.DestinationRates))
 	for idx, dr := range attrs.DestinationRates {
-		drs[idx] = &engine.DestinationRate{attrs.DestinationRateId, dr.DestinationId, dr.RateId, nil}
+		drs[idx] = &engine.DestinationRate{
+			Tag:             attrs.DestinationRateId,
+			DestinationsTag: dr.DestinationId,
+			RateTag:         dr.RateId}
 	}
 	if err := self.StorDb.SetTPDestinationRates(attrs.TPid, map[string][]*engine.DestinationRate{attrs.DestinationRateId: drs}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())

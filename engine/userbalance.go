@@ -287,6 +287,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			if paid {
 				continue
 			}
+			// TODO: Split if some increments were processed by minutes
 			// debit monetary
 			for _, b := range usefulMoneyBalances {
 				if b.Value == 0 {

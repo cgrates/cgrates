@@ -208,7 +208,7 @@ func (self *TPCSVImporter) importDestRateTimings(fn string) error {
 		drt := &DestinationRateTiming{Tag: record[0],
 			DestinationRatesTag: record[1],
 			Weight:              weight,
-			TimingsTag:          record[2],
+			TimingTag:           record[2],
 		}
 		if err := self.StorDb.SetTPDestRateTimings(self.TPid, map[string][]*DestinationRateTiming{drt.Tag: []*DestinationRateTiming{drt}}); err != nil {
 			if self.Verbose {
