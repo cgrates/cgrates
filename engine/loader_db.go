@@ -26,19 +26,19 @@ import (
 )
 
 type DbReader struct {
-	tpid              string
-	storDb            LoadStorage
-	dataDb            DataStorage
-	actions           map[string][]*Action
-	actionsTimings    map[string][]*ActionTiming
-	actionsTriggers   map[string][]*ActionTrigger
-	accountActions    []*UserBalance
-	destinations      []*Destination
-	timings           map[string]*Timing
-	rates             map[string][]*LoadRate
-	destinationRates  map[string][]*DestinationRate
-	activationPeriods map[string]*RatingPlan
-	ratingProfiles    map[string]*RatingProfile
+	tpid                   string
+	storDb                 LoadStorage
+	dataDb                 DataStorage
+	actions                map[string][]*Action
+	actionsTimings         map[string][]*ActionTiming
+	actionsTriggers        map[string][]*ActionTrigger
+	accountActions         []*UserBalance
+	destinations           []*Destination
+	timings                map[string]*Timing
+	rates                  map[string][]*LoadRate
+	destinationRates       map[string][]*DestinationRate
+	destinationRateTimings map[string][]*DestinationRateTiming
+	ratingProfiles         map[string]*RatingProfile
 }
 
 func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader {
@@ -46,7 +46,7 @@ func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader
 	c.storDb = storDB
 	c.dataDb = storage
 	c.tpid = tpid
-	c.activationPeriods = make(map[string]*RatingPlan)
+	c.destinationRateTimings = make(map[string][]*DestinationRateTiming)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	return c
 }
@@ -146,33 +146,38 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 				return errors.New(fmt.Sprintf("Could not find rate for tag %v", dr.RateTag))
 			}
 			dr.rates = rates
+			destinationExists := false
+			for _, d := range dbr.destinations {
+				if d.Id == dr.DestinationsTag {
+					destinationExists = true
+					break
+				}
+			}
+			if !destinationExists {
+				return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationsTag))
+			}
 		}
 	}
 	return nil
 }
 
 func (dbr *DbReader) LoadDestinationRateTimings() error {
-	rts, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, "")
+	drts, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
-	for _, rt := range rts {
-		t, exists := dbr.timings[rt.TimingTag]
+	for _, drt := range drts {
+		t, exists := dbr.timings[drt.TimingTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get timing for tag %v", rt.TimingTag))
+			return errors.New(fmt.Sprintf("Could not get timing for tag %v", drt.TimingTag))
 		}
-		rt.timing = t
-		drs, exists := dbr.destinationRates[rt.DestinationRatesTag]
+		drt.timing = t
+		drs, exists := dbr.destinationRates[drt.DestinationRatesTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", rt.DestinationRatesTag))
+			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", drt.DestinationRatesTag))
 		}
-		for _, dr := range drs {
-			_, exists := dbr.activationPeriods[rt.Tag]
-			if !exists {
-				dbr.activationPeriods[rt.Tag] = &RatingPlan{}
-			}
-			dbr.activationPeriods[rt.Tag].AddRateInterval(rt.GetRateInterval(dr))
-		}
+		drt.destinationRates = drs
+		dbr.destinationRateTimings[drt.Tag] = append(dbr.destinationRateTimings[drt.Tag], drt)
 	}
 	return nil
 }
@@ -187,17 +192,18 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", rp.ActivationTime))
 		}
-		for _, d := range dbr.destinations {
-			ap, exists := dbr.activationPeriods[rp.DestRatesTimingTag]
-			if !exists {
-				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rp.DestRatesTimingTag))
-			}
-			newAP := &RatingPlan{ActivationTime: at}
-			//copy(newAP.Intervals, ap.Intervals)
-			newAP.RateIntervals = append(newAP.RateIntervals, ap.RateIntervals...)
-			rp.AddRatingPlanIfNotPresent(d.Id, newAP)
-
+		drts, exists := dbr.destinationRateTimings[rp.DestRatesTimingTag]
+		if !exists {
+			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", rp.DestinationMap))
 		}
+		for _, drt := range drts {
+			plan := &RatingPlan{ActivationTime: at}
+			for _, dr := range drt.destinationRates {
+				plan.AddRateInterval(drt.GetRateInterval(dr))
+				rp.AddRatingPlanIfNotPresent(dr.DestinationsTag, plan)
+			}
+		}
+		dbr.ratingProfiles[rp.Id] = rp
 	}
 	return nil
 }
