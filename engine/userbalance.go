@@ -82,11 +82,11 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 		if b.IsExpired() {
 			continue
 		}
-		d, err := GetDestination(b.DestinationId)
+		precision, err := storageGetter.DestinationContainsPrefix(b.DestinationId, prefix)
 		if err != nil {
 			continue
 		}
-		if precision, ok := d.containsPrefix(prefix); ok {
+		if precision > 0 {
 			b.precision = precision
 			if b.Value > 0 {
 				balances = append(balances, b)
@@ -329,7 +329,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 /*
 Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
 */
-func (ub *UserBalance) debitBalance(balanceId string, amount float64, count bool) float64 {
+func (ub *UserBalance) debitGenericBalance(balanceId string, amount float64, count bool) float64 {
 	if count {
 		ub.countUnits(&Action{BalanceId: balanceId, Direction: OUTBOUND, Balance: &Balance{Value: amount}})
 	}

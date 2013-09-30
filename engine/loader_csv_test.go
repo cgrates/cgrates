@@ -529,7 +529,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 	rp := csvr.ratingProfiles["*out:CUSTOMER_1:0:rif:from:tm"]
 	expected := &RatingProfile{}
 	if reflect.DeepEqual(rp, expected) {
-		t.Errorf("Error loading rating profile: %#v", rp.DestinationMap["GERMANY"][1].RateIntervals[2].Rates[0])
+		t.Errorf("Error loading rating profile: %+v", rp.DestinationMap["GERMANY"][1].RateIntervals[2].Rates[0])
 	}
 }
 

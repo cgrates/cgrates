@@ -145,7 +145,7 @@ func TestUserBalanceStorageStore(t *testing.T) {
 	}
 }
 
-func TestDebitMoneyBalance(t *testing.T) {
+/*func TestDebitMoneyBalance(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.01, DestinationId: "NAT"}
 	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
@@ -185,6 +185,7 @@ func TestDebitNegativeMoneyBalance(t *testing.T) {
 		t.Errorf("Expected %v was %v", 36, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
 }
+*/
 
 func TestDebitCreditZeroSecond(t *testing.T) {
 	b1 := &Balance{Id: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
@@ -626,6 +627,8 @@ func TestDebitNegativeMinuteBalance(t *testing.T) {
 	}
 }
 */
+
+/*
 func TestDebitSMSBalance(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.0, DestinationId: "NAT"}
 	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
@@ -665,6 +668,7 @@ func TestDebitNegativeSMSBalance(t *testing.T) {
 		t.Errorf("Expected %v was %v", 115, rifsBalance.BalanceMap[SMS+OUTBOUND])
 	}
 }
+*/
 
 func TestUserBalancedebitBalance(t *testing.T) {
 	ub := &UserBalance{

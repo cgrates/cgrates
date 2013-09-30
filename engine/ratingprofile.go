@@ -52,13 +52,13 @@ func (rp *RatingProfile) AddRatingPlanIfNotPresent(destInfo string, plans ...*Ra
 
 func (rp *RatingProfile) GetRatingPlansForPrefix(destPrefix string) (foundPrefix string, aps []*RatingPlan, err error) {
 	bestPrecision := 0
-	for k, v := range rp.DestinationMap {
-		d, err := GetDestination(k)
+	for dId, v := range rp.DestinationMap {
+		precision, err := storageGetter.DestinationContainsPrefix(dId, destPrefix)
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Cannot find destination with id: %s", k))
+			Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 			continue
 		}
-		if precision, ok := d.containsPrefix(destPrefix); ok && precision > bestPrecision {
+		if precision > bestPrecision {
 			bestPrecision = precision
 			aps = v
 		}

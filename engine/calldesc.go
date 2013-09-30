@@ -386,7 +386,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 		defer storageGetter.SetUserBalance(userBalance)
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
-			userBalance.debitBalance(CREDIT+OUTBOUND, cc.Cost+cc.ConnectFee, true)
+			userBalance.debitCreditBalance(cc, true)
 		}
 	}
 	return
@@ -415,7 +415,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) DebitCents() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitBalance(CREDIT, cd.Amount, true), nil
+		return userBalance.debitGenericBalance(CREDIT+OUTBOUND, cd.Amount, true), nil
 	}
 	return 0.0, err
 }
@@ -427,7 +427,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitBalance(SMS, cd.Amount, true), nil
+		return userBalance.debitGenericBalance(SMS+OUTBOUND, cd.Amount, true), nil
 	}
 	return 0, err
 }
