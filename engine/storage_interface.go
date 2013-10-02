@@ -50,13 +50,6 @@ const (
 	RATER_SOURCE           = "RAT"
 )
 
-var (
-	// for codec msgpack
-	mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
-	sliceByteTyp  = reflect.TypeOf([]byte(nil))
-	timeTyp       = reflect.TypeOf(time.Time{})
-)
-
 type Storage interface {
 	Close()
 	Flush() error
@@ -208,11 +201,14 @@ type CodecMsgpackMarshaler struct {
 func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
+	var mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
+	//sliceByteTyp  = reflect.TypeOf([]byte(nil))
+	//timeTyp       = reflect.TypeOf(time.Time{})
 	mh.MapType = mapStrIntfTyp
 
 	// configure extensions for msgpack, to enable Binary and Time support for tags 0 and 1
-	mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
-	mh.AddExt(timeTyp, 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
+	//mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
+	//mh.AddExt(timeTyp, 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
 	return cmm
 }
 

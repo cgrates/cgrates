@@ -361,13 +361,9 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
-		value, err := strconv.ParseFloat(record[8], 64)
+		balanceWeight, err := strconv.ParseFloat(record[9], 64)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action price: %v", err))
-		}
-		minutesWeight, err := strconv.ParseFloat(record[9], 64)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action minutes weight: %v", err))
+			return errors.New(fmt.Sprintf("Could not parse action balance weight: %v", err))
 		}
 		weight, err := strconv.ParseFloat(record[9], 64)
 		if err != nil {
@@ -380,13 +376,13 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			Direction:        record[3],
 			Weight:           weight,
 			ExpirationString: record[5],
+			ExtraParameters:  record[8],
 			Balance: &Balance{
-				Uuid:             utils.GenUUID(),
-				Value:            units,
-				Weight:           minutesWeight,
-				SpecialPrice:     value,
-				SpecialPriceType: record[7],
-				DestinationId:    record[6],
+				Uuid:          utils.GenUUID(),
+				Value:         units,
+				Weight:        balanceWeight,
+				DestinationId: record[6],
+				RateSubject:   record[7],
 			},
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {

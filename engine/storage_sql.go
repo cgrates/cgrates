@@ -539,9 +539,9 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,%f,%f)",
+			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s',%f,'%s',%f)",
 				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Balance.Value, act.ExpirationString,
-				act.Balance.DestinationId, act.Balance.SpecialPriceType, act.Balance.SpecialPrice, act.Balance.Weight, act.Weight)
+				act.Balance.DestinationId, act.Balance.RateSubject, act.Balance.Weight, act.ExtraParameters, act.Weight)
 			i++
 		}
 	}
@@ -1085,9 +1085,9 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 	defer rows.Close()
 	for rows.Next() {
 		var id int
-		var units, rate, minutes_weight, weight float64
-		var tpid, tag, action, balance_type, direction, destinations_tag, rate_type, expirationDate string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
+		var units, balance_weight, weight float64
+		var tpid, tag, action, balance_type, direction, destinations_tag, rate_subject, extra_parameters, expirationDate string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_subject, &balance_weight, &extra_parameters, &weight); err != nil {
 			return nil, err
 		}
 		var price float64
@@ -1097,13 +1097,13 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 			BalanceId:        balance_type,
 			Direction:        direction,
 			Weight:           weight,
+			ExtraParameters:  extra_parameters,
 			ExpirationString: expirationDate,
 			Balance: &Balance{
-				Value:            units,
-				Weight:           minutes_weight,
-				SpecialPrice:     price,
-				SpecialPriceType: rate_type,
-				DestinationId:    destinations_tag,
+				Value:         units,
+				Weight:        balance_weight,
+				RateSubject:   rate_subject,
+				DestinationId: destinations_tag,
 			},
 		}
 		as[tag] = append(as[tag], a)
