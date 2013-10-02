@@ -138,7 +138,7 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 func (ub *UserBalance) getBalanceForPrefix(prefix string, balances BalanceChain) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
-		if b.IsExpired() || (ub.Type == UB_TYPE_PREPAID && b.Value <= 0) {
+		if b.IsExpired() || (ub.Type != UB_TYPE_POSTPAID && b.Value <= 0) {
 			continue
 		}
 		if b.DestinationId != "" {
@@ -191,20 +191,21 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 	// debit minutes
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
-
 		ts.createIncrementsSlice()
+		tsWasSplited := false
 		for incrementIndex, increment := range ts.Increments {
+			if tsWasSplited {
+				break
+			}
 			paid := false
 			for _, b := range usefulMinuteBalances {
-				if b.Value == 0 {
-					continue
-				}
 				// check standard subject tags
 				if b.RateSubject == ZEROSECOND || b.RateSubject == "" {
 					amount := increment.Duration.Seconds()
 					if b.Value >= amount {
 						b.Value -= amount
 						increment.BalanceId = b.Id
+						increment.MinuteInfo = &MinuteInfo{b.DestinationId, amount, 0}
 						paid = true
 						if count {
 							ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -246,6 +247,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 							cc.Timespans = append(cc.Timespans, nil)
 							copy(cc.Timespans[tsIndex+1:], cc.Timespans[tsIndex:])
 							cc.Timespans[tsIndex] = newTs
+							tsWasSplited = true
 						}
 
 						var newTimespans []*TimeSpan
@@ -258,6 +260,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						cc.Timespans = newTimespans
 						b.Value -= amount
 						newTs.Increments[0].BalanceId = b.Id
+						newTs.Increments[0].MinuteInfo = &MinuteInfo{b.DestinationId, amount, 0}
 						paid = true
 						if count {
 							ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -286,13 +289,21 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			}
 			if paid {
 				continue
+			} else {
+				// Split if some increments were processed by minutes
+				if incrementIndex > 0 && ts.Increments[incrementIndex-1].MinuteInfo != nil {
+					newTs := ts.SplitByIncrement(incrementIndex, increment)
+					idx := tsIndex + 1
+					cc.Timespans = append(cc.Timespans, nil)
+					copy(cc.Timespans[idx+1:], cc.Timespans[idx:])
+					cc.Timespans[idx] = newTs
+					newTs.createIncrementsSlice()
+					tsWasSplited = true
+					break
+				}
 			}
-			// TODO: Split if some increments were processed by minutes
 			// debit monetary
 			for _, b := range usefulMoneyBalances {
-				if b.Value == 0 {
-					continue
-				}
 				// check standard subject tags
 				if b.RateSubject == "" {
 					amount := increment.Cost

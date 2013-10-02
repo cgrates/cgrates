@@ -37,10 +37,19 @@ type TimeSpan struct {
 }
 
 type Increment struct {
-	Duration    time.Duration
-	Cost        float64
-	BalanceId   string
-	BalanceType string
+	Duration            time.Duration
+	Cost                float64
+	BalanceId           string
+	BalanceType         string
+	BalanceRateInterval *RateInterval
+	MinuteInfo          *MinuteInfo
+}
+
+// Holds the minute information related to a specified timespan
+type MinuteInfo struct {
+	DestinationId string
+	Quantity      float64
+	Price         float64
 }
 
 // Returns the duration of the timespan
@@ -168,7 +177,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 // Split the interval at the given increment start
 func (ts *TimeSpan) SplitByIncrement(index int, increment *Increment) *TimeSpan {
 	timeStart := ts.GetTimeStartForIncrement(index, increment)
-	newTs := &TimeSpan{TimeStart: timeStart, TimeEnd: ts.TimeEnd}
+	newTs := &TimeSpan{RateInterval: ts.RateInterval, TimeStart: timeStart, TimeEnd: ts.TimeEnd}
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = timeStart
 	ts.Increments = ts.Increments[0:index]

@@ -355,10 +355,46 @@ func TestDebitCreditHasCredit(t *testing.T) {
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 ||
 		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 30 {
-		t.Error("Error extracting minutes from balance: ",
-			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0], rifsBalance.BalanceMap[CREDIT+OUTBOUND][0])
+		t.Errorf("Error extracting minutes from balance: %+v, %+v",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
 	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != time.Minute || cc.Timespans[1].GetDuration() != 20*time.Second {
+		t.Error("Error truncating extra timespans: ", cc.Timespans)
+	}
+}
+
+func TestDebitCreditSplitMinutesMoney(t *testing.T) {
+	b1 := &Balance{Id: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1},
+		CREDIT + OUTBOUND:  BalanceChain{&Balance{Id: "moneya", Value: 50}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 40 {
+		t.Errorf("Error extracting minutes from balance: %+v, %+v",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
+	}
+	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != 10*time.Second || cc.Timespans[1].GetDuration() != 10*time.Second {
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
 	}
 }
