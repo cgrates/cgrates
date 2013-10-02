@@ -87,8 +87,8 @@ vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
 vdf,0,*out,fall,2012-02-28T00:00:00Z,PREMIUM,rif
 `
 	actions = `
-MINI,*topup_reset,*monetary,*out,10,*unlimited,,,0,10,10
-MINI,*topup,*minutes,*out,100,*unlimited,NAT,*absolute,0,10,10
+MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,10
+MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -550,6 +550,7 @@ func TestLoadActions(t *testing.T) {
 			BalanceId:        CREDIT,
 			Direction:        OUTBOUND,
 			ExpirationString: UNLIMITED,
+			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &Balance{
 				Uuid:   as[0].Balance.Uuid,
@@ -563,14 +564,14 @@ func TestLoadActions(t *testing.T) {
 			BalanceId:        MINUTES,
 			Direction:        OUTBOUND,
 			ExpirationString: UNLIMITED,
+			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &Balance{
-				Uuid:             as[1].Balance.Uuid,
-				Value:            100,
-				Weight:           10,
-				SpecialPriceType: PRICE_ABSOLUTE,
-				SpecialPrice:     0,
-				DestinationId:    "NAT",
+				Uuid:          as[1].Balance.Uuid,
+				Value:         100,
+				Weight:        10,
+				RateSubject:   "test",
+				DestinationId: "NAT",
 			},
 		},
 	}

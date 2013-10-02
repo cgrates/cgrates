@@ -293,7 +293,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		balanceWeight, _ := strconv.ParseFloat(record[9], 64)
+		balanceWeight, _ := strconv.ParseFloat(record[8], 64)
 		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {
 			if self.Verbose {
@@ -306,7 +306,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			BalanceId:        balanceType,
 			Direction:        direction,
 			ExpirationString: record[5],
-			ExtraParameters:  record[8],
+			ExtraParameters:  record[9],
 			Balance: &Balance{
 				Value:         units,
 				DestinationId: destTag,

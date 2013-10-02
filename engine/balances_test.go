@@ -45,17 +45,6 @@ func TestBalanceSortPrecision(t *testing.T) {
 	}
 }
 
-func TestBalanceSortSpecialPrice(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1}
-	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 2}
-	var bs BalanceChain
-	bs = append(bs, mb2, mb1)
-	bs.Sort()
-	if bs[0] != mb1 || bs[1] != mb2 {
-		t.Error("Buckets not sorted by price!")
-	}
-}
-
 func TestBalanceEqual(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 1, RateSubject: "1", DestinationId: ""}
 	mb2 := &Balance{Weight: 1, precision: 1, RateSubject: "1", DestinationId: ""}

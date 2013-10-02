@@ -26,16 +26,16 @@ import (
 
 // Can hold different units as seconds or monetary
 type Balance struct {
-	Uuid           string
-	Value          float64
-	ExpirationDate time.Time
-	Weight         float64
-	GroupIds       []string
-	//SpecialPriceType string
-	//SpecialPrice     float64 // absolute for minutes and percent for monetary (can be positive or negative)
-	DestinationId string
-	RateSubject   string
-	precision     int
+	Uuid             string
+	Value            float64
+	ExpirationDate   time.Time
+	Weight           float64
+	GroupIds         []string
+	SpecialPriceType string
+	SpecialPrice     float64 // absolute for minutes and percent for monetary (can be positive or negative)
+	DestinationId    string
+	RateSubject      string
+	precision        int
 }
 
 func (b *Balance) Equal(o *Balance) bool {

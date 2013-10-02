@@ -1090,7 +1090,6 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_subject, &balance_weight, &extra_parameters, &weight); err != nil {
 			return nil, err
 		}
-		var price float64
 		a := &Action{
 			Id:               utils.GenUUID(),
 			ActionType:       action,

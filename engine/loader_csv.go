@@ -361,11 +361,11 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
-		balanceWeight, err := strconv.ParseFloat(record[9], 64)
+		balanceWeight, err := strconv.ParseFloat(record[8], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action balance weight: %v", err))
 		}
-		weight, err := strconv.ParseFloat(record[9], 64)
+		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
 		}
@@ -376,7 +376,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			Direction:        record[3],
 			Weight:           weight,
 			ExpirationString: record[5],
-			ExtraParameters:  record[8],
+			ExtraParameters:  record[9],
 			Balance: &Balance{
 				Uuid:          utils.GenUUID(),
 				Value:         units,

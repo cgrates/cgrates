@@ -246,7 +246,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	}
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refoundDuration := end.Sub(hangupTime)
-	var refoundIncrements []*engine.Increment
+	var refoundIncrements engine.Increments
 	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
@@ -289,6 +289,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 		}
 	}
+	cost := refoundIncrements.GetTotalCost()
 	lastCC.Cost -= cost
 	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 

@@ -352,7 +352,7 @@ type Connector interface {
 	GetCost(CallDescriptor, *CallCost) error
 	Debit(CallDescriptor, *CallCost) error
 	MaxDebit(CallDescriptor, *CallCost) error
-	RefoundIncrements(Increments, *float64) error
+	RefoundIncrements(CallDescriptor, *float64) error
 	DebitCents(CallDescriptor, *float64) error
 	DebitSeconds(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
