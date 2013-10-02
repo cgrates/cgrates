@@ -245,30 +245,34 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		hangupTime = time.Now()
 	}
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
-	refoundDuration := end.Sub(hangupTime).Seconds()
-	cost := 0.0
+	refoundDuration := end.Sub(hangupTime)
+	var refoundIncrements []*engine.Increment
 	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
-		tsDuration := ts.GetDuration().Seconds()
+		tsDuration := ts.GetDuration()
 		if refoundDuration <= tsDuration {
-			// find procentage
-			procentage := (refoundDuration * 100) / tsDuration
-			tmpCost := (procentage * ts.Cost) / 100
-			ts.Cost -= tmpCost
-			cost += tmpCost
-			// set the end time to now
-			ts.TimeEnd = hangupTime
+			lastRefoundedIncrementIndex := 0
+			var lastRefoundedIncrement *engine.Increment
+			for incrementIndex, increment := range ts.Increments {
+				if increment.Duration <= refoundDuration {
+					refoundIncrements = append(refoundIncrements, increment)
+					refoundDuration -= increment.Duration
+					lastRefoundedIncrementIndex = incrementIndex
+					lastRefoundedIncrement = increment
+				}
+			}
+			ts.SplitByIncrement(lastRefoundedIncrementIndex, lastRefoundedIncrement)
 			break // do not go to other timespans
 		} else {
-			cost += ts.Cost
-			// remove the timestamp entirely
+			refoundIncrements = append(refoundIncrements, ts.Increments...)
+			// remove the timespan entirely
 			lastCC.Timespans = lastCC.Timespans[:i]
 			// continue to the next timespan with what is left to refound
 			refoundDuration -= tsDuration
 		}
 	}
-	if cost > 0 {
+	if len(refoundIncrements) > 0 {
 		cd := &engine.CallDescriptor{
 			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
@@ -276,7 +280,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Subject:     lastCC.Subject,
 			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
-			Amount:      -cost,
+			Increments:  refoundIncrements,
 			// FallbackSubject: lastCC.FallbackSubject, // TODO: check how to best add it
 		}
 		var response float64

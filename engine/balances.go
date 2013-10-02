@@ -26,7 +26,7 @@ import (
 
 // Can hold different units as seconds or monetary
 type Balance struct {
-	Id               string
+	Uuid             string
 	Value            float64
 	ExpirationDate   time.Time
 	Weight           float64
@@ -51,7 +51,7 @@ func (b *Balance) IsExpired() bool {
 
 func (b *Balance) Clone() *Balance {
 	return &Balance{
-		Id:             b.Id,
+		Uuid:           b.Uuid,
 		Value:          b.Value,
 		DestinationId:  b.DestinationId,
 		ExpirationDate: b.ExpirationDate,
@@ -137,4 +137,13 @@ func (bc BalanceChain) Clone() BalanceChain {
 		newChain = append(newChain, b.Clone())
 	}
 	return newChain
+}
+
+func (bc BalanceChain) GetBalance(uuid string) *Balance {
+	for _, balance := range bc {
+		if balance.Uuid == uuid {
+			return balance
+		}
+	}
+	return nil
 }

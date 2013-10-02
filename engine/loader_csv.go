@@ -381,7 +381,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			Weight:           weight,
 			ExpirationString: record[5],
 			Balance: &Balance{
-				Id:               utils.GenUUID(),
+				Uuid:             utils.GenUUID(),
 				Value:            units,
 				Weight:           minutesWeight,
 				SpecialPrice:     value,

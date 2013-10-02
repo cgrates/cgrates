@@ -552,7 +552,7 @@ func TestLoadActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &Balance{
-				Id:     as[0].Balance.Id,
+				Uuid:   as[0].Balance.Uuid,
 				Value:  10,
 				Weight: 10,
 			},
@@ -565,7 +565,7 @@ func TestLoadActions(t *testing.T) {
 			ExpirationString: UNLIMITED,
 			Weight:           10,
 			Balance: &Balance{
-				Id:               as[1].Balance.Id,
+				Uuid:             as[1].Balance.Uuid,
 				Value:            100,
 				Weight:           10,
 				SpecialPriceType: PRICE_ABSOLUTE,

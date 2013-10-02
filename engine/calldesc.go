@@ -108,6 +108,7 @@ type CallDescriptor struct {
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	RatingPlans                           []*RatingPlan
+	Increments                            Increments
 	userBalance                           *UserBalance
 }
 
@@ -406,6 +407,14 @@ func (cd *CallDescriptor) MaxDebit(startTime time.Time) (cc *CallCost, err error
 		cd.TimeEnd = cd.TimeStart.Add(time.Duration(remainingSeconds) * time.Second)
 	}
 	return cd.Debit()
+}
+
+func (cd *CallDescriptor) RefoundIncrements() (left float64, err error) {
+	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+		defer storageGetter.SetUserBalance(userBalance)
+		userBalance.refoundIncrements(cd.Increments, true)
+	}
+	return 0.0, err
 }
 
 /*

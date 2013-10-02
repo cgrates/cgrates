@@ -33,13 +33,13 @@ type TimeSpan struct {
 	RateInterval       *RateInterval
 	CallDuration       time.Duration // the call duration so far till TimeEnd
 	overlapped         bool          // mark a timespan as overlapped by an expanded one
-	Increments         []*Increment
+	Increments         Increments
 }
 
 type Increment struct {
 	Duration            time.Duration
 	Cost                float64
-	BalanceId           string
+	BalanceUuid         string
 	BalanceType         string
 	BalanceRateInterval *RateInterval
 	MinuteInfo          *MinuteInfo
@@ -50,6 +50,16 @@ type MinuteInfo struct {
 	DestinationId string
 	Quantity      float64
 	Price         float64
+}
+
+type Increments []*Increment
+
+func (incs Increments) GetTotalCost() float64 {
+	cost := 0.0
+	for _, increment := range incs {
+		cost += increment.Cost
+	}
+	return cost
 }
 
 // Returns the duration of the timespan

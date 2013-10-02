@@ -46,7 +46,7 @@ func populateTestActionsForTriggers() {
 }
 
 func TestBalanceStoreRestore(t *testing.T) {
-	b := &Balance{Value: 14, Weight: 1, Id: "test", ExpirationDate: time.Date(2013, time.July, 15, 17, 48, 0, 0, time.UTC)}
+	b := &Balance{Value: 14, Weight: 1, Uuid: "test", ExpirationDate: time.Date(2013, time.July, 15, 17, 48, 0, 0, time.UTC)}
 	marsh := NewCodecMsgpackMarshaler()
 	output, err := marsh.Marshal(b)
 	if err != nil {
@@ -188,7 +188,7 @@ func TestDebitNegativeMoneyBalance(t *testing.T) {
 */
 
 func TestDebitCreditZeroSecond(t *testing.T) {
-	b1 := &Balance{Id: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	b1 := &Balance{Uuid: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -206,7 +206,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceId != "testb" {
+	if cc.Timespans[0].Increments[0].BalanceUuid != "testb" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
@@ -216,7 +216,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 }
 
 func TestDebitCreditZeroMinute(t *testing.T) {
-	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -237,7 +237,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -248,8 +248,8 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	}
 }
 func TestDebitCreditZeroMixedMinute(t *testing.T) {
-	b1 := &Balance{Id: "testm", Value: 70, Weight: 5, DestinationId: "NAT", RateSubject: ZEROMINUTE}
-	b2 := &Balance{Id: "tests", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	b1 := &Balance{Uuid: "testm", Value: 70, Weight: 5, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b2 := &Balance{Uuid: "tests", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -270,8 +270,8 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceId != "tests" ||
-		cc.Timespans[1].Increments[0].BalanceId != "testm" {
+	if cc.Timespans[0].Increments[0].BalanceUuid != "tests" ||
+		cc.Timespans[1].Increments[0].BalanceUuid != "testm" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0], cc.Timespans[1].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][1].Value != 0 ||
@@ -282,7 +282,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 }
 
 func TestDebitCreditNoCredit(t *testing.T) {
-	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -308,7 +308,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -322,7 +322,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 }
 
 func TestDebitCreditHasCredit(t *testing.T) {
-	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -343,13 +343,13 @@ func TestDebitCreditHasCredit(t *testing.T) {
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
-		CREDIT + OUTBOUND:  BalanceChain{&Balance{Id: "moneya", Value: 50}},
+		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 50}},
 	}}
 	err := rifsBalance.debitCreditBalance(cc, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -364,7 +364,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 }
 
 func TestDebitCreditSplitMinutesMoney(t *testing.T) {
-	b1 := &Balance{Id: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	b1 := &Balance{Uuid: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -379,13 +379,13 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
-		CREDIT + OUTBOUND:  BalanceChain{&Balance{Id: "moneya", Value: 50}},
+		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 50}},
 	}}
 	err := rifsBalance.debitCreditBalance(cc, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -400,7 +400,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 }
 
 func TestDebitCreditMoreTimespans(t *testing.T) {
-	b1 := &Balance{Id: "testb", Value: 150, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 150, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -426,7 +426,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -437,8 +437,8 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 }
 
 func TestDebitCreditMoreTimespansMixed(t *testing.T) {
-	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
-	b2 := &Balance{Id: "testa", Value: 150, Weight: 5, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b2 := &Balance{Uuid: "testa", Value: 150, Weight: 5, DestinationId: "NAT", RateSubject: ZEROSECOND}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -464,7 +464,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].BalanceId != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -476,7 +476,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 }
 
 func TestDebitCreditNoConectFeeCredit(t *testing.T) {
-	b1 := &Balance{Id: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -529,14 +529,14 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 		},
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
-		CREDIT + OUTBOUND: BalanceChain{&Balance{Id: "money", Value: 50}},
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "money", Value: 50}},
 	}}
 	err := rifsBalance.debitCreditBalance(cc, false)
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
 
-	if cc.Timespans[0].Increments[0].BalanceId != "money" ||
+	if cc.Timespans[0].Increments[0].BalanceUuid != "money" ||
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}

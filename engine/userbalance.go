@@ -108,8 +108,8 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil minute action!")
 	}
-	if a.Balance.Id == "" {
-		a.Balance.Id = utils.GenUUID()
+	if a.Balance.Uuid == "" {
+		a.Balance.Uuid = utils.GenUUID()
 	}
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
@@ -204,7 +204,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					amount := increment.Duration.Seconds()
 					if b.Value >= amount {
 						b.Value -= amount
-						increment.BalanceId = b.Id
+						increment.BalanceUuid = b.Uuid
 						increment.MinuteInfo = &MinuteInfo{b.DestinationId, amount, 0}
 						paid = true
 						if count {
@@ -259,7 +259,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						}
 						cc.Timespans = newTimespans
 						b.Value -= amount
-						newTs.Increments[0].BalanceId = b.Id
+						newTs.Increments[0].BalanceUuid = b.Uuid
 						newTs.Increments[0].MinuteInfo = &MinuteInfo{b.DestinationId, amount, 0}
 						paid = true
 						if count {
@@ -309,7 +309,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					amount := increment.Cost
 					if b.Value >= amount {
 						b.Value -= amount
-						increment.BalanceId = b.Id
+						increment.BalanceUuid = b.Uuid
 						paid = true
 						if count {
 							ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -335,6 +335,25 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 	}
 
 	return nil
+}
+
+func (ub *UserBalance) refoundIncrements(increments Increments, count bool) {
+	for _, increment := range increments {
+		var balance *Balance
+		for _, balanceChain := range ub.BalanceMap {
+			if balance = balanceChain.GetBalance(increment.BalanceUuid); balance != nil {
+				break
+			}
+		}
+		if balance != nil {
+			balance.Value += increment.Cost
+			if count {
+				ub.countUnits(&Action{BalanceId: increment.BalanceType, Direction: OUTBOUND, Balance: &Balance{Value: increment.Cost}})
+			}
+		} else {
+			// TODO: where should put the money?
+		}
+	}
 }
 
 /*
