@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"time"
@@ -26,16 +27,16 @@ import (
 
 // Can hold different units as seconds or monetary
 type Balance struct {
-	Uuid             string
-	Value            float64
-	ExpirationDate   time.Time
-	Weight           float64
-	GroupIds         []string
-	SpecialPriceType string
-	SpecialPrice     float64 // absolute for minutes and percent for monetary (can be positive or negative)
-	DestinationId    string
-	RateSubject      string
-	precision        int
+	Uuid           string
+	Value          float64
+	ExpirationDate time.Time
+	Weight         float64
+	GroupIds       []string
+	//SpecialPriceType string
+	//SpecialPrice     float64 // absolute for minutes and percent for monetary (can be positive or negative)
+	DestinationId string
+	RateSubject   string
+	precision     int
 }
 
 func (b *Balance) Equal(o *Balance) bool {
@@ -61,12 +62,24 @@ func (b *Balance) Clone() *Balance {
 }
 
 // Returns the available number of seconds for a specified credit
-func (b *Balance) GetSecondsForCredit(credit float64) (seconds float64) {
+func (b *Balance) GetSecondsForCredit(cd *CallDescriptor, credit float64) (seconds float64) {
 	seconds = b.Value
-	if b.SpecialPrice > 0 {
-		seconds = math.Min(credit/b.SpecialPrice, b.Value)
+	// TODO: fix this
+	cc, err := b.GetCost(cd)
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+		return 0
+	}
+	if cc.Cost > 0 {
+		seconds = math.Min(credit/cc.Cost, b.Value)
 	}
 	return
+}
+
+func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
+	cd.Subject = b.RateSubject
+	cd.Account = cd.Subject
+	return cd.GetCost()
 }
 
 /*

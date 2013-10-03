@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"sort"
@@ -73,9 +74,14 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	id := a.BalanceId == "" || at.BalanceId == a.BalanceId
 	direction := a.Direction == "" || at.Direction == a.Direction
 	thresholdType, thresholdValue := true, true
-	if a.Balance != nil {
-		thresholdType = a.Balance.SpecialPriceType == "" || at.ThresholdType == a.Balance.SpecialPriceType
-		thresholdValue = a.Balance.SpecialPrice == 0 || at.ThresholdValue == a.Balance.SpecialPrice
+	if a.ExtraParameters != "" {
+		t := struct {
+			ThresholdType  string
+			ThresholdValue float64
+		}{}
+		json.Unmarshal([]byte(a.ExtraParameters), &t)
+		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
+		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
 	}
 	return id && direction && thresholdType && thresholdValue
 }

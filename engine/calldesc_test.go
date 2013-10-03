@@ -50,7 +50,7 @@ func populateDB() {
 		Type: UB_TYPE_PREPAID,
 		BalanceMap: map[string]BalanceChain{
 			MINUTES + OUTBOUND: BalanceChain{
-				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, SpecialPrice: 1},
+				&Balance{Value: 20, DestinationId: "NAT", Weight: 10},
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
 	}

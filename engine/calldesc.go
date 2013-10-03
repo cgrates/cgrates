@@ -334,7 +334,7 @@ func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float6
 		if userBalance.Type == UB_TYPE_POSTPAID {
 			return -1, nil
 		} else {
-			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd.Destination)
+			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd)
 			Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 		}
 	} else {

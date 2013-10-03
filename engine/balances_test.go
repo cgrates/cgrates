@@ -24,8 +24,8 @@ import (
 )
 
 func TestBalanceSortWeight(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 2, SpecialPrice: 2}
-	mb2 := &Balance{Weight: 2, precision: 1, SpecialPrice: 1}
+	mb1 := &Balance{Weight: 1, precision: 2}
+	mb2 := &Balance{Weight: 2, precision: 1}
 	var bs BalanceChain
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
@@ -35,8 +35,8 @@ func TestBalanceSortWeight(t *testing.T) {
 }
 
 func TestBalanceSortPrecision(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 2, SpecialPrice: 2}
-	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1}
+	mb1 := &Balance{Weight: 1, precision: 2}
+	mb2 := &Balance{Weight: 1, precision: 1}
 	var bs BalanceChain
 	bs = append(bs, mb2, mb1)
 	bs.Sort()

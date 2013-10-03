@@ -35,7 +35,7 @@ func init() {
 func populateTestActionsForTriggers() {
 	ats := []*Action{
 		&Action{ActionType: "*topup", BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}},
-		&Action{ActionType: "*topup", BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Weight: 20, SpecialPrice: 1, Value: 10, DestinationId: "NAT"}},
+		&Action{ActionType: "*topup", BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationId: "NAT"}},
 	}
 	storageGetter.SetActions("TEST_ACTIONS", ats)
 	ats1 := []*Action{
@@ -96,8 +96,8 @@ func TestBalanceChainStoreRestore(t *testing.T) {
 }
 
 func TestUserBalanceStorageStoreRestore(t *testing.T) {
-	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.01, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
 	storageGetter.SetUserBalance(rifsBalance)
 	ub1, err := storageGetter.GetUserBalance("other")
@@ -111,7 +111,10 @@ func TestGetSecondsForPrefix(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 200}}}}
-	seconds, credit, bucketList := ub1.getSecondsForPrefix("0723")
+	cd := &CallDescriptor{
+		Destination: "0723",
+	}
+	seconds, credit, bucketList := ub1.getSecondsForPrefix(cd)
 	expected := 110.0
 	if credit != 200 || seconds != expected || bucketList[0].Weight < bucketList[1].Weight {
 		t.Errorf("Expected %v was %v", expected, seconds)
@@ -119,11 +122,14 @@ func TestGetSecondsForPrefix(t *testing.T) {
 }
 
 func TestGetSpecialPricedSeconds(t *testing.T) {
-	b1 := &Balance{Value: 10, SpecialPrice: 10, Weight: 10, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, SpecialPrice: 1, Weight: 20, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
-	seconds, credit, bucketList := ub1.getSecondsForPrefix("0723")
+	cd := &CallDescriptor{
+		Destination: "0723",
+	}
+	seconds, credit, bucketList := ub1.getSecondsForPrefix(cd)
 	expected := 21.0
 	if credit != 0 || seconds != expected || len(bucketList) < 2 || bucketList[0].Weight < bucketList[1].Weight {
 		t.Errorf("Expected %v was %v", expected, seconds)
@@ -131,8 +137,8 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 }
 
 func TestUserBalanceStorageStore(t *testing.T) {
-	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.01, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
 	storageGetter.SetUserBalance(rifsBalance)
 	result, err := storageGetter.GetUserBalance(rifsBalance.Id)
@@ -710,9 +716,9 @@ func TestUserBalancedebitBalance(t *testing.T) {
 	ub := &UserBalance{
 		Id:         "rif",
 		Type:       UB_TYPE_POSTPAID,
-		BalanceMap: map[string]BalanceChain{SMS: BalanceChain{&Balance{Value: 14}}, TRAFFIC: BalanceChain{&Balance{Value: 1204}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap: map[string]BalanceChain{SMS: BalanceChain{&Balance{Value: 14}}, TRAFFIC: BalanceChain{&Balance{Value: 1204}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 	}
-	newMb := &Balance{Weight: 20, SpecialPrice: 1, DestinationId: "NEW"}
+	newMb := &Balance{Weight: 20, DestinationId: "NEW"}
 	a := &Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: newMb}
 	ub.debitBalanceAction(a)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 3 || ub.BalanceMap[MINUTES+OUTBOUND][2] != newMb {
@@ -725,9 +731,9 @@ func TestUserBalancedebitBalanceExists(t *testing.T) {
 	ub := &UserBalance{
 		Id:         "rif",
 		Type:       UB_TYPE_POSTPAID,
-		BalanceMap: map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 15, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap: map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 15, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 	}
-	newMb := &Balance{Value: -10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}
+	newMb := &Balance{Value: -10, Weight: 20, DestinationId: "NAT"}
 	a := &Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: newMb}
 	ub.debitBalanceAction(a)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 || ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 25 {
@@ -739,7 +745,7 @@ func TestUserBalanceAddMinuteNil(t *testing.T) {
 	ub := &UserBalance{
 		Id:         "rif",
 		Type:       UB_TYPE_POSTPAID,
-		BalanceMap: map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap: map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 	}
 	ub.debitBalanceAction(nil)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 {
@@ -772,7 +778,7 @@ func TestUserBalanceAddMinutBucketEmpty(t *testing.T) {
 func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
-		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
@@ -796,7 +802,7 @@ func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 func TestUserBalanceExecuteTriggeredActionsBalance(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
-		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 100, ThresholdType: TRIGGER_MIN_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
@@ -887,19 +893,22 @@ func TestUserBalanceUnitCountingOutboundInbound(t *testing.T) {
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
 	b.StopTimer()
-	b1 := &Balance{Value: 10, SpecialPrice: 10, Weight: 10, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, SpecialPrice: 1, Weight: 20, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 
 	ub1 := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
+	cd := &CallDescriptor{
+		Destination: "0723",
+	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		ub1.getSecondsForPrefix("0723")
+		ub1.getSecondsForPrefix(cd)
 	}
 }
 
 func BenchmarkUserBalanceStorageStoreRestore(b *testing.B) {
-	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.01, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
 	for i := 0; i < b.N; i++ {
 		storageGetter.SetUserBalance(rifsBalance)
@@ -911,7 +920,10 @@ func BenchmarkGetSecondsForPrefix(b *testing.B) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
+	cd := &CallDescriptor{
+		Destination: "0723",
+	}
 	for i := 0; i < b.N; i++ {
-		ub1.getSecondsForPrefix("0723")
+		ub1.getSecondsForPrefix(cd)
 	}
 }

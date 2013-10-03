@@ -72,17 +72,17 @@ type UserBalance struct {
 }
 
 // Returns user's available minutes for the specified destination
-func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float64, balances BalanceChain) {
-	credit = ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
-	if len(ub.BalanceMap[MINUTES+OUTBOUND]) == 0 {
+func (ub *UserBalance) getSecondsForPrefix(cd *CallDescriptor) (seconds, credit float64, balances BalanceChain) {
+	credit = ub.getBalanceForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction]).GetTotalValue()
+	if len(ub.BalanceMap[MINUTES+cd.Direction]) == 0 {
 		// Logger.Debug("There are no minute buckets to check for user: ", ub.Id)
 		return
 	}
-	for _, b := range ub.BalanceMap[MINUTES+OUTBOUND] {
+	for _, b := range ub.BalanceMap[MINUTES+cd.Direction] {
 		if b.IsExpired() {
 			continue
 		}
-		precision, err := storageGetter.DestinationContainsPrefix(b.DestinationId, prefix)
+		precision, err := storageGetter.DestinationContainsPrefix(b.DestinationId, cd.Destination)
 		if err != nil {
 			continue
 		}
@@ -95,8 +95,13 @@ func (ub *UserBalance) getSecondsForPrefix(prefix string) (seconds, credit float
 	}
 	balances.Sort() // sorts the buckets according to priority, precision or price
 	for _, b := range balances {
-		s := b.GetSecondsForCredit(credit)
-		credit -= s * b.SpecialPrice
+		s := b.GetSecondsForCredit(cd, credit)
+		cc, err := b.GetCost(cd)
+		if err != nil {
+			Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+			continue
+		}
+		credit -= s * cc.Cost
 		seconds += s
 	}
 	return
@@ -274,7 +279,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex, increment)
 				cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
 				cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
-				newCC, err := cd.GetCost()
+				newCC, err := b.GetCost(cd)
 				if err != nil {
 					Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 					continue
@@ -318,6 +323,21 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					}
 				} else {
 					// get the new rate
+					cd := cc.CreateCallDescriptor()
+					cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex, increment)
+					cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
+					cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
+					newCC, err := b.GetCost(cd)
+					if err != nil {
+						Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+						continue
+					}
+					//debit new callcost
+					for _, nts := range newCC.Timespans {
+						for _, nIncrement := range nts.Increments {
+							_ = nIncrement
+						}
+					}
 				}
 			}
 			if !paid {

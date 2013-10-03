@@ -27,7 +27,7 @@ func TestUnitsCounterAddBalance(t *testing.T) {
 		Direction:      OUTBOUND,
 		BalanceId:      SMS,
 		Units:          100,
-		MinuteBalances: []*Balance{&Balance{Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
+		MinuteBalances: []*Balance{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	uc.addMinutes(20, "test")
 	if len(uc.MinuteBalances) != 2 {
@@ -40,7 +40,7 @@ func TestUnitsCounterAddBalanceExists(t *testing.T) {
 		Direction:      OUTBOUND,
 		BalanceId:      SMS,
 		Units:          100,
-		MinuteBalances: []*Balance{&Balance{Value: 10, Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
+		MinuteBalances: []*Balance{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	uc.addMinutes(5, "0723")
 	if len(uc.MinuteBalances) != 2 || uc.MinuteBalances[0].Value != 15 {
