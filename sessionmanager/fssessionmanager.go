@@ -253,16 +253,14 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		tsDuration := ts.GetDuration()
 		if refoundDuration <= tsDuration {
 			lastRefoundedIncrementIndex := 0
-			var lastRefoundedIncrement *engine.Increment
 			for incrementIndex, increment := range ts.Increments {
 				if increment.Duration <= refoundDuration {
 					refoundIncrements = append(refoundIncrements, increment)
 					refoundDuration -= increment.Duration
 					lastRefoundedIncrementIndex = incrementIndex
-					lastRefoundedIncrement = increment
 				}
 			}
-			ts.SplitByIncrement(lastRefoundedIncrementIndex, lastRefoundedIncrement)
+			ts.SplitByIncrement(lastRefoundedIncrementIndex)
 			break // do not go to other timespans
 		} else {
 			refoundIncrements = append(refoundIncrements, ts.Increments...)
