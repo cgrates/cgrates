@@ -82,7 +82,7 @@ func (ub *UserBalance) getSecondsForPrefix(cd *CallDescriptor) (seconds, credit 
 			continue
 		}
 		if cc.Cost > 0 && cc.GetDuration() > 0 {
-			// TODO: fix this
+			// TODO: improve this
 			secondCost := cc.Cost / cc.GetDuration().Seconds()
 			credit -= s * secondCost
 		}
@@ -181,9 +181,9 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
 		ts.createIncrementsSlice()
-		tsWasSplited := false
+		tsWasSplit := false
 		for incrementIndex, increment := range ts.Increments {
-			if tsWasSplited {
+			if tsWasSplit {
 				break
 			}
 			paid := false
@@ -208,7 +208,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						newTs := ts
 						if incrementIndex != 0 {
 							// if increment it's not at the begining we must split the timespan
-							newTs = ts.SplitByIncrement(incrementIndex, increment)
+							newTs = ts.SplitByIncrement(incrementIndex)
 						}
 						newTs.RoundToDuration(time.Minute)
 						newTs.RateInterval = &RateInterval{
@@ -236,7 +236,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 							cc.Timespans = append(cc.Timespans, nil)
 							copy(cc.Timespans[tsIndex+1:], cc.Timespans[tsIndex:])
 							cc.Timespans[tsIndex] = newTs
-							tsWasSplited = true
+							tsWasSplit = true
 						}
 
 						var newTimespans []*TimeSpan
@@ -260,7 +260,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				// newTs.SplitByIncrement()
 				// get the new rate
 				cd := cc.CreateCallDescriptor()
-				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex, increment)
+				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 				cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
 				cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
 				newCC, err := b.GetCost(cd)
@@ -269,11 +269,60 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					continue
 				}
 				//debit new callcost
+				var paidTs []*TimeSpan
 				for _, nts := range newCC.Timespans {
-					for _, nIncrement := range nts.Increments {
+					paidTs = append(paidTs, nts)
+					for nIdx, nInc := range nts.Increments {
 						// debit minutes and money
-						_ = nIncrement
+						amount := nInc.Cost
+						if b.Value >= amount {
+							b.Value -= amount
+							nInc.BalanceUuid = b.Uuid
+							if count {
+								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
+							}
+						} else {
+							nts.SplitByIncrement(nIdx)
+						}
 					}
+				}
+				// calculate overlaped timespans
+				var paidDuration time.Duration
+				for _, pts := range paidTs {
+					paidDuration += pts.GetDuration()
+				}
+				if paidDuration > 0 {
+					// split from current increment
+					newTs := ts.SplitByIncrement(incrementIndex)
+					remainingTs := []*TimeSpan{newTs}
+
+					for tsi := tsIndex + 1; tsi < len(cc.Timespans); tsi++ {
+						remainingTs = append(remainingTs, cc.Timespans[tsi])
+					}
+					for remainingIndex, rts := range remainingTs {
+						if paidDuration >= rts.GetDuration() {
+							paidDuration -= rts.GetDuration()
+						} else {
+							if paidDuration > 0 {
+								// this ts was not fully paid
+								fragment := rts.SplitByDuration(paidDuration)
+								paidTs = append(paidTs, fragment)
+							}
+							// delete from tsIndex to current
+							cc.Timespans = append(cc.Timespans[:tsIndex], cc.Timespans[remainingIndex:]...)
+							break
+						}
+					}
+
+					// append the timpespans to outer timespans
+					for _, pts := range paidTs {
+						tsIndex++
+						cc.Timespans = append(cc.Timespans, nil)
+						copy(cc.Timespans[tsIndex+1:], cc.Timespans[tsIndex:])
+						cc.Timespans[tsIndex] = pts
+					}
+					paid = true
+					tsWasSplit = true
 				}
 			}
 			if paid {
@@ -281,13 +330,15 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			} else {
 				// Split if some increments were processed by minutes
 				if incrementIndex > 0 && ts.Increments[incrementIndex-1].MinuteInfo != nil {
-					newTs := ts.SplitByIncrement(incrementIndex, increment)
-					idx := tsIndex + 1
-					cc.Timespans = append(cc.Timespans, nil)
-					copy(cc.Timespans[idx+1:], cc.Timespans[idx:])
-					cc.Timespans[idx] = newTs
-					newTs.createIncrementsSlice()
-					tsWasSplited = true
+					newTs := ts.SplitByIncrement(incrementIndex)
+					if newTs != nil {
+						idx := tsIndex + 1
+						cc.Timespans = append(cc.Timespans, nil)
+						copy(cc.Timespans[idx+1:], cc.Timespans[idx:])
+						cc.Timespans[idx] = newTs
+						newTs.createIncrementsSlice()
+						tsWasSplit = true
+					}
 					break
 				}
 			}
@@ -308,7 +359,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				} else {
 					// get the new rate
 					cd := cc.CreateCallDescriptor()
-					cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex, increment)
+					cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 					cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
 					cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
 					newCC, err := b.GetCost(cd)
@@ -326,11 +377,11 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			}
 			if !paid {
 				// no balance was attached to this increment: cut the rest of increments/timespans
-				ts.SplitByIncrement(incrementIndex, increment)
-				if len(ts.Increments) == 0 {
-					// if there are no increments left in the ts leav it out
+				if incrementIndex == 0 {
+					// if we are right at the begining in the ts leave it out
 					cc.Timespans = cc.Timespans[:tsIndex]
 				} else {
+					ts.SplitByIncrement(incrementIndex)
 					cc.Timespans = cc.Timespans[:tsIndex+1]
 				}
 				return nil

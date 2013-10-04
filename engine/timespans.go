@@ -52,6 +52,17 @@ type MinuteInfo struct {
 	Price         float64
 }
 
+func (incr *Increment) Clone() *Increment {
+	return &Increment{
+		Duration:            incr.Duration,
+		Cost:                incr.Cost,
+		BalanceUuid:         incr.BalanceUuid,
+		BalanceType:         incr.BalanceType,
+		BalanceRateInterval: incr.BalanceRateInterval,
+		MinuteInfo:          incr.MinuteInfo,
+	}
+}
+
 type Increments []*Increment
 
 func (incs Increments) GetTotalCost() float64 {
@@ -184,13 +195,47 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	return
 }
 
-// Split the interval at the given increment start
-func (ts *TimeSpan) SplitByIncrement(index int, increment *Increment) *TimeSpan {
-	timeStart := ts.GetTimeStartForIncrement(index, increment)
+// Split the timespan at the given increment start
+func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
+	if index <= 0 || index >= len(ts.Increments) {
+		return nil
+	}
+	timeStart := ts.GetTimeStartForIncrement(index)
 	newTs := &TimeSpan{RateInterval: ts.RateInterval, TimeStart: timeStart, TimeEnd: ts.TimeEnd}
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = timeStart
-	ts.Increments = ts.Increments[0:index]
+	newTs.Increments = ts.Increments[index:]
+	ts.Increments = ts.Increments[:index]
+	ts.SetNewCallDuration(newTs)
+	return newTs
+}
+
+// Split the timespan at the given second
+func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
+	if duration <= 0 || duration >= ts.GetDuration() {
+		return nil
+	}
+	timeStart := ts.TimeStart.Add(duration)
+	newTs := &TimeSpan{RateInterval: ts.RateInterval, TimeStart: timeStart, TimeEnd: ts.TimeEnd}
+	newTs.CallDuration = ts.CallDuration
+	ts.TimeEnd = timeStart
+	// split the increment
+	for incrIndex, incr := range ts.Increments {
+		if duration-incr.Duration >= 0 {
+			duration -= incr.Duration
+		} else {
+
+			splitIncrement := ts.Increments[incrIndex].Clone()
+			splitIncrement.Duration -= duration
+			ts.Increments[incrIndex].Duration = duration
+			newTs.Increments = Increments{splitIncrement}
+			if incrIndex < len(ts.Increments)-1 {
+				newTs.Increments = append(newTs.Increments, ts.Increments[incrIndex+1:]...)
+			}
+			ts.Increments = ts.Increments[:incrIndex+1]
+			break
+		}
+	}
 	ts.SetNewCallDuration(newTs)
 	return newTs
 }
@@ -230,8 +275,8 @@ func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
 }
 
 // returns a time for the specified second in the time span
-func (ts *TimeSpan) GetTimeStartForIncrement(index int, increment *Increment) time.Time {
-	return ts.TimeStart.Add(time.Duration(int64(index) * increment.Duration.Nanoseconds()))
+func (ts *TimeSpan) GetTimeStartForIncrement(index int) time.Time {
+	return ts.TimeStart.Add(time.Duration(int64(index) * ts.Increments[0].Duration.Nanoseconds()))
 }
 
 func (ts *TimeSpan) RoundToDuration(duration time.Duration) {

@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	//"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
 )
@@ -450,7 +450,6 @@ func TestTimespanExpandingPastEnd(t *testing.T) {
 	}
 }
 
-/*
 func TestTimespanExpandingCallDuration(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
@@ -468,11 +467,11 @@ func TestTimespanExpandingCallDuration(t *testing.T) {
 	cd := &CallDescriptor{}
 	timespans = cd.roundTimeSpansToIncrement(timespans)
 
-	if timespans[0].CallDuration != time.Minute {
+	if len(timespans) != 1 || timespans[0].GetDuration() != time.Minute {
 		t.Error("Error setting call duration: ", timespans[0])
 	}
 }
-*/
+
 func TestTimespanExpandingRoundingPastEnd(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
@@ -626,8 +625,7 @@ func TestTimespanCreateSecondsSlice(t *testing.T) {
 	}
 }
 
-/*
-func TestTimespanCreateSecondsFract(t *testing.T) {
+func TestTimespanCreateIncrements(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 100000000, time.UTC),
@@ -635,15 +633,18 @@ func TestTimespanCreateSecondsFract(t *testing.T) {
 			RoundingMethod:   utils.ROUNDING_MIDDLE,
 			RoundingDecimals: 2,
 			Rates: RateGroups{
-				&Rate{Value: 2.0},
+				&Rate{
+					Value:         2.0,
+					RateIncrement: 10 * time.Second,
+				},
 			},
 		},
 	}
 	ts.createIncrementsSlice()
-	if len(ts.Increments) != 31 {
-		t.Error("Error creating second slice: ", ts.Increments)
+	if len(ts.Increments) != 3 {
+		t.Error("Error creating increment slice: ", len(ts.Increments))
 	}
-	if len(ts.Increments) < 31 || ts.Increments[30].Cost != 0.2 {
+	if len(ts.Increments) < 3 || ts.Increments[2].Cost != 20 {
 		t.Error("Wrong second slice: ", ts.Increments)
 	}
 }
@@ -651,16 +652,130 @@ func TestTimespanCreateSecondsFract(t *testing.T) {
 func TestTimespanSplitByIncrement(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2013, 9, 19, 18, 30, 30, 0, time.UTC),
-		CallDuration: 50 * time.Second,
+		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
+		CallDuration: 60 * time.Second,
+		RateInterval: &RateInterval{
+			RoundingMethod:   utils.ROUNDING_MIDDLE,
+			RoundingDecimals: 2,
+			Rates: RateGroups{
+				&Rate{
+					Value:         2.0,
+					RateIncrement: 10 * time.Second,
+				},
+			},
+		},
 	}
-	i := &Increment{Duration: time.Second}
-	newTs := ts.SplitByIncrement(5, i)
-	if ts.GetDuration() != 5*time.Second || newTs.GetDuration() != 25*time.Second {
-		t.Error("Error spliting by second: ", ts.GetDuration(), newTs.GetDuration())
+	ts.createIncrementsSlice()
+	if len(ts.Increments) != 6 {
+		t.Error("Error creating increment slice: ", len(ts.Increments))
 	}
-	if ts.CallDuration != 25*time.Second || newTs.CallDuration != 50*time.Second {
-		t.Error("Error spliting by second at setting call duration: ", ts.GetDuration(), newTs.GetDuration())
+	newTs := ts.SplitByIncrement(5)
+	if ts.GetDuration() != 50*time.Second || newTs.GetDuration() != 10*time.Second {
+		t.Error("Error spliting by increment: ", ts.GetDuration(), newTs.GetDuration())
+	}
+	if ts.CallDuration != 50*time.Second || newTs.CallDuration != 60*time.Second {
+		t.Error("Error spliting by increment at setting call duration: ", ts.CallDuration, newTs.CallDuration)
+	}
+	if len(ts.Increments) != 5 || len(newTs.Increments) != 1 {
+		t.Error("Error spliting increments: ", ts.Increments, newTs.Increments)
 	}
 }
-*/
+
+func TestTimespanSplitByIncrementStart(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
+		CallDuration: 60 * time.Second,
+		RateInterval: &RateInterval{
+			RoundingMethod:   utils.ROUNDING_MIDDLE,
+			RoundingDecimals: 2,
+			Rates: RateGroups{
+				&Rate{
+					Value:         2.0,
+					RateIncrement: 10 * time.Second,
+				},
+			},
+		},
+	}
+	ts.createIncrementsSlice()
+	if len(ts.Increments) != 6 {
+		t.Error("Error creating increment slice: ", len(ts.Increments))
+	}
+	newTs := ts.SplitByIncrement(0)
+	if ts.GetDuration() != 60*time.Second || newTs != nil {
+		t.Error("Error spliting by increment: ", ts.GetDuration())
+	}
+	if ts.CallDuration != 60*time.Second {
+		t.Error("Error spliting by incrementat setting call duration: ", ts.CallDuration)
+	}
+	if len(ts.Increments) != 6 {
+		t.Error("Error spliting increments: ", ts.Increments)
+	}
+}
+
+func TestTimespanSplitByIncrementEnd(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
+		CallDuration: 60 * time.Second,
+		RateInterval: &RateInterval{
+			RoundingMethod:   utils.ROUNDING_MIDDLE,
+			RoundingDecimals: 2,
+			Rates: RateGroups{
+				&Rate{
+					Value:         2.0,
+					RateIncrement: 10 * time.Second,
+				},
+			},
+		},
+	}
+	ts.createIncrementsSlice()
+	if len(ts.Increments) != 6 {
+		t.Error("Error creating increment slice: ", len(ts.Increments))
+	}
+	newTs := ts.SplitByIncrement(6)
+	if ts.GetDuration() != 60*time.Second || newTs != nil {
+		t.Error("Error spliting by increment: ", ts.GetDuration())
+	}
+	if ts.CallDuration != 60*time.Second {
+		t.Error("Error spliting by increment at setting call duration: ", ts.CallDuration)
+	}
+	if len(ts.Increments) != 6 {
+		t.Error("Error spliting increments: ", ts.Increments)
+	}
+}
+
+func TestTimespanSplitByDuration(t *testing.T) {
+	ts := &TimeSpan{
+		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
+		CallDuration: 60 * time.Second,
+		RateInterval: &RateInterval{
+			RoundingMethod:   utils.ROUNDING_MIDDLE,
+			RoundingDecimals: 2,
+			Rates: RateGroups{
+				&Rate{
+					Value:         2.0,
+					RateIncrement: 10 * time.Second,
+				},
+			},
+		},
+	}
+	ts.createIncrementsSlice()
+	if len(ts.Increments) != 6 {
+		t.Error("Error creating increment slice: ", len(ts.Increments))
+	}
+	newTs := ts.SplitByDuration(46 * time.Second)
+	if ts.GetDuration() != 46*time.Second || newTs.GetDuration() != 14*time.Second {
+		t.Error("Error spliting by duration: ", ts.GetDuration(), newTs.GetDuration())
+	}
+	if ts.CallDuration != 46*time.Second || newTs.CallDuration != 60*time.Second {
+		t.Error("Error spliting by duration at setting call duration: ", ts.CallDuration, newTs.CallDuration)
+	}
+	if len(ts.Increments) != 5 || len(newTs.Increments) != 2 {
+		t.Error("Error spliting increments: ", ts.Increments, newTs.Increments)
+	}
+	if ts.Increments[4].Duration != 6*time.Second || newTs.Increments[0].Duration != 4*time.Second {
+		t.Error("Error spliting increment: ", ts.Increments[4], newTs.Increments[0])
+	}
+}
