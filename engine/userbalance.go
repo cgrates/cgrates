@@ -65,35 +65,15 @@ type UserBalance struct {
 	BalanceMap     map[string]BalanceChain
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
-
-	Groups GroupLinks // user info about groups
+	Groups         GroupLinks // user info about groups
 	// group information
 	UserIds []string // group info about users
 }
 
 // Returns user's available minutes for the specified destination
 func (ub *UserBalance) getSecondsForPrefix(cd *CallDescriptor) (seconds, credit float64, balances BalanceChain) {
-	credit = ub.getBalanceForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction]).GetTotalValue()
-	if len(ub.BalanceMap[MINUTES+cd.Direction]) == 0 {
-		// Logger.Debug("There are no minute buckets to check for user: ", ub.Id)
-		return
-	}
-	for _, b := range ub.BalanceMap[MINUTES+cd.Direction] {
-		if b.IsExpired() {
-			continue
-		}
-		precision, err := storageGetter.DestinationContainsPrefix(b.DestinationId, cd.Destination)
-		if err != nil {
-			continue
-		}
-		if precision > 0 {
-			b.precision = precision
-			if b.Value > 0 {
-				balances = append(balances, b)
-			}
-		}
-	}
-	balances.Sort() // sorts the buckets according to priority, precision or price
+	credit = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction]).GetTotalValue()
+	balances = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[MINUTES+cd.Direction])
 	for _, b := range balances {
 		s := b.GetSecondsForCredit(cd, credit)
 		cc, err := b.GetCost(cd)
@@ -101,7 +81,11 @@ func (ub *UserBalance) getSecondsForPrefix(cd *CallDescriptor) (seconds, credit 
 			Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 			continue
 		}
-		credit -= s * cc.Cost
+		if cc.Cost > 0 && cc.GetDuration() > 0 {
+			// TODO: fix this
+			secondCost := cc.Cost / cc.GetDuration().Seconds()
+			credit -= s * secondCost
+		}
 		seconds += s
 	}
 	return
@@ -140,7 +124,7 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 
-func (ub *UserBalance) getBalanceForPrefix(prefix string, balances BalanceChain) BalanceChain {
+func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
 		if b.IsExpired() || (ub.Type != UB_TYPE_POSTPAID && b.Value <= 0) {
@@ -170,8 +154,8 @@ This method is the core of userbalance debiting: don't panic just follow the bra
 func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 	minuteBalances := ub.BalanceMap[MINUTES+cc.Direction]
 	moneyBalances := ub.BalanceMap[CREDIT+cc.Direction]
-	usefulMinuteBalances := ub.getBalanceForPrefix(cc.Destination, minuteBalances)
-	usefulMoneyBalances := ub.getBalanceForPrefix(cc.Destination, moneyBalances)
+	usefulMinuteBalances := ub.getBalancesForPrefix(cc.Destination, minuteBalances)
+	usefulMoneyBalances := ub.getBalancesForPrefix(cc.Destination, moneyBalances)
 	// debit connect fee
 	if cc.ConnectFee > 0 {
 		amount := cc.ConnectFee

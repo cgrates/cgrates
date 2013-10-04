@@ -128,8 +128,8 @@ func TestMultipleInputRightMerge(t *testing.T) {
 
 func TestCallCostGetDurationZero(t *testing.T) {
 	cc := &CallCost{}
-	if cc.GetTotalDuration().Seconds() != 0 {
-		t.Error("Wrong call cost duration for zero timespans: ", cc.GetTotalDuration())
+	if cc.GetDuration().Seconds() != 0 {
+		t.Error("Wrong call cost duration for zero timespans: ", cc.GetDuration())
 	}
 }
 
@@ -146,7 +146,7 @@ func TestCallCostGetDuration(t *testing.T) {
 			},
 		},
 	}
-	if cc.GetTotalDuration().Seconds() != 90 {
-		t.Error("Wrong call cost duration: ", cc.GetTotalDuration())
+	if cc.GetDuration().Seconds() != 90 {
+		t.Error("Wrong call cost duration: ", cc.GetDuration())
 	}
 }

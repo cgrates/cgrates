@@ -307,7 +307,7 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, in
 		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
 	}
 	engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
-	if cc.GetTotalDuration() == 0 || err != nil {
+	if cc.GetDuration() == 0 || err != nil {
 		engine.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		sm.DisconnectSession(s, INSUFFICIENT_FUNDS)
 		return

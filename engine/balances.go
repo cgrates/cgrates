@@ -64,22 +64,30 @@ func (b *Balance) Clone() *Balance {
 // Returns the available number of seconds for a specified credit
 func (b *Balance) GetSecondsForCredit(cd *CallDescriptor, credit float64) (seconds float64) {
 	seconds = b.Value
-	// TODO: fix this
 	cc, err := b.GetCost(cd)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 		return 0
 	}
 	if cc.Cost > 0 {
-		seconds = math.Min(credit/cc.Cost, b.Value)
+		secondCost := cc.Cost / cc.GetDuration().Seconds()
+		// TODO: this is not very accurate
+		// we should iterate timespans and increment to get exact number of minutes for
+		// available credit
+		seconds = math.Min(credit/secondCost, b.Value)
 	}
 	return
 }
 
 func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
-	cd.Subject = b.RateSubject
-	cd.Account = cd.Subject
-	return cd.GetCost()
+	if b.RateSubject != "" {
+		cd.Subject = b.RateSubject
+		cd.Account = cd.Subject
+		return cd.GetCost()
+	}
+	cc := cd.CreateCallCost()
+	cc.Cost = 0
+	return cc, nil
 }
 
 /*

@@ -67,7 +67,7 @@ func (cc *CallCost) GetStartTime() time.Time {
 	return cc.Timespans[0].TimeStart
 }
 
-func (cc *CallCost) GetTotalDuration() (td time.Duration) {
+func (cc *CallCost) GetDuration() (td time.Duration) {
 	for _, ts := range cc.Timespans {
 		td += ts.GetDuration()
 	}

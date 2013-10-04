@@ -51,12 +51,12 @@ func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 			BalanceId:        act.BalanceType,
 			Direction:        act.Direction,
 			ExpirationString: act.ExpiryTime,
+			ExtraParameters:  act.ExtraParameters,
 			Balance: &engine.Balance{
-				Value:            act.Units,
-				DestinationId:    act.DestinationId,
-				SpecialPriceType: act.RateType,
-				SpecialPrice:     act.Rate,
-				Weight:           act.MinutesWeight,
+				Value:         act.Units,
+				DestinationId: act.DestinationId,
+				RateSubject:   act.RateSubject,
+				Weight:        act.BalanceWeight,
 			},
 			Weight: act.Weight,
 		}

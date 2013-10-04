@@ -561,12 +561,12 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateType, expTime string
-		var units, rate, minutesWeight, weight float64
-		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateType, &rate, &minutesWeight, &weight); err != nil {
+		var action, balanceId, dir, destId, rateSubject, expTime, extraParameters string
+		var units, balanceWeight, weight float64
+		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &balanceWeight, &extraParameters, &weight); err != nil {
 			return nil, err
 		}
-		acts.Actions = append(acts.Actions, utils.Action{action, balanceId, dir, units, expTime, destId, rateType, rate, minutesWeight, weight})
+		acts.Actions = append(acts.Actions, utils.Action{action, balanceId, dir, units, expTime, destId, rateSubject, balanceWeight, extraParameters, weight})
 	}
 	if i == 0 {
 		return nil, nil

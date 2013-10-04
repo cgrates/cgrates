@@ -112,26 +112,42 @@ func TestGetSecondsForPrefix(t *testing.T) {
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 200}}}}
 	cd := &CallDescriptor{
-		Destination: "0723",
+		TOR:          "0",
+		Tenant:       "vdf",
+		TimeStart:    time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 10, 4, 15, 46, 10, 0, time.UTC),
+		LoopIndex:    0,
+		CallDuration: 10 * time.Second,
+		Direction:    OUTBOUND,
+		Destination:  "0723",
 	}
 	seconds, credit, bucketList := ub1.getSecondsForPrefix(cd)
 	expected := 110.0
 	if credit != 200 || seconds != expected || bucketList[0].Weight < bucketList[1].Weight {
+		t.Log(seconds, credit, bucketList)
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }
 
 func TestGetSpecialPricedSeconds(t *testing.T) {
-	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: "minu"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET", RateSubject: "minu"}
 
 	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
 	cd := &CallDescriptor{
-		Destination: "0723",
+		TOR:          "0",
+		Tenant:       "vdf",
+		TimeStart:    time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, 10, 4, 15, 46, 10, 0, time.UTC),
+		LoopIndex:    0,
+		CallDuration: 10 * time.Second,
+		Direction:    OUTBOUND,
+		Destination:  "0723",
 	}
 	seconds, credit, bucketList := ub1.getSecondsForPrefix(cd)
 	expected := 21.0
 	if credit != 0 || seconds != expected || len(bucketList) < 2 || bucketList[0].Weight < bucketList[1].Weight {
+		t.Log(seconds, credit, bucketList)
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
 }
@@ -510,7 +526,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 		t.Error("Error debiting balance: ", err)
 	}
 
-	if len(cc.Timespans) != 0 || cc.GetTotalDuration() != 0 {
+	if len(cc.Timespans) != 0 || cc.GetDuration() != 0 {
 		t.Error("Error cutting at no connect fee: ", cc.Timespans)
 	}
 }
