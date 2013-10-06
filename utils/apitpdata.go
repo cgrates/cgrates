@@ -97,7 +97,7 @@ type Action struct {
 	Units           float64 // Number of units to add/deduct
 	ExpiryTime      string  // Time when the units will expire
 	DestinationId   string  // Destination profile id
-	RateSubject     string  // Type of rate <*absolute|*percent>
+	RateSubject     string  // Reference a rate subject defined in RatingProfiles
 	BalanceWeight   float64 // Balance weight
 	ExtraParameters string
 	Weight          float64 // Action's weight

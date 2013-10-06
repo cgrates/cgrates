@@ -532,14 +532,14 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 	if len(acts) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rate_type,rate, minutes_weight,weight) VALUES ", utils.TBL_TP_ACTIONS)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rate_subject,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS)
 	i := 0
 	for actId, actRows := range acts {
 		for _, act := range actRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s',%f,'%s',%f)",
+			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,'%s',%f)",
 				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Balance.Value, act.ExpirationString,
 				act.Balance.DestinationId, act.Balance.RateSubject, act.Balance.Weight, act.ExtraParameters, act.Weight)
 			i++
@@ -552,7 +552,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rate_type,rate, minutes_weight,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rate_subject,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
 	if err != nil {
 		return nil, err
 	}

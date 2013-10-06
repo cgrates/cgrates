@@ -1,2 +1,2 @@
-#ActionsTag,Action,BalanceType,Direction,Units,ExpirationDate,DestinationTag,RateType,RateValue,MinutesWeight,Weight
-PREPAID_10,*topup_reset,*monetary,*out,10,*unlimited,*any,,,,10
+#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RateSubject,BalanceWeight,ExtraParameters,Weight
+PREPAID_10,*topup_reset,*monetary,*out,10,*unlimited,*any,,10,,10

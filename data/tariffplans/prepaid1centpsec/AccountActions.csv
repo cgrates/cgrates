@@ -1,6 +1,6 @@
 #Tenant,Account,Direction,ActionTimingsTag,ActionTriggersTag
-cgrates.org,1001,*out,AT_FS10,STANDARD_TRIGGERS
-cgrates.org,1002,*out,AT_FS10,STANDARD_TRIGGERS
-cgrates.org,1003,*out,AT_FS10,STANDARD_TRIGGERS
-cgrates.org,1004,*out,AT_FS10,STANDARD_TRIGGERS
-cgrates.org,1005,*out,AT_FS10,STANDARD_TRIGGERS
+cgrates.org,1001,*out,PREPAID_10,STANDARD_TRIGGERS
+cgrates.org,1002,*out,PREPAID_10,STANDARD_TRIGGERS
+cgrates.org,1003,*out,PREPAID_10,STANDARD_TRIGGERS
+cgrates.org,1004,*out,PREPAID_10,STANDARD_TRIGGERS
+cgrates.org,1005,*out,PREPAID_10,STANDARD_TRIGGERS

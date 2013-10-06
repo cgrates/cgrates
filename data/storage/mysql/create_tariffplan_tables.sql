@@ -121,12 +121,12 @@ CREATE TABLE `tp_actions` (
   `expiry_time` varchar(24) NOT NULL,
   `destination_tag` varchar(64) NOT NULL,
   `rate_subject` varchar(64) NOT NULL,
-  `minutes_weight` DECIMAL(5,2) NOT NULL,
+  `balance_weight` DECIMAL(5,2) NOT NULL,
   `extra_parameters` varchar(256) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`rate_type`,`minutes_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`balance_weight`,`weight`)
 );
 
 --
