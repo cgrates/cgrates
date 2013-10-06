@@ -76,6 +76,18 @@ func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
 	return
 }
 
+func (rs *Responder) RefoundIncrements(arg CallDescriptor, reply *float64) (err error) {
+	if rs.Bal != nil {
+		*reply, err = rs.callMethod(&arg, "Responder.RefoundIncrements")
+	} else {
+		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+			return arg.RefoundIncrements()
+		})
+		*reply, err = r, e
+	}
+	return
+}
+
 func (rs *Responder) DebitCents(arg CallDescriptor, reply *float64) (err error) {
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.DebitCents")
@@ -169,7 +181,7 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	if rs.Bal != nil {
 		rs.Bal.Shutdown("Responder.Shutdown")
 	}
-	storageGetter.Close()
+	storageGetter.(Storage).Close()
 	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"
 	return
@@ -340,6 +352,7 @@ type Connector interface {
 	GetCost(CallDescriptor, *CallCost) error
 	Debit(CallDescriptor, *CallCost) error
 	MaxDebit(CallDescriptor, *CallCost) error
+	RefoundIncrements(CallDescriptor, *float64) error
 	DebitCents(CallDescriptor, *float64) error
 	DebitSeconds(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
@@ -359,6 +372,9 @@ func (rcc *RPCClientConnector) Debit(cd CallDescriptor, cc *CallCost) error {
 
 func (rcc *RPCClientConnector) MaxDebit(cd CallDescriptor, cc *CallCost) error {
 	return rcc.Client.Call("Responder.MaxDebit", cd, cc)
+}
+func (rcc *RPCClientConnector) RefoundIncrements(cd CallDescriptor, resp *float64) error {
+	return rcc.Client.Call("Responder.RefoundIncrements", cd, resp)
 }
 func (rcc *RPCClientConnector) DebitCents(cd CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.DebitCents", cd, resp)

@@ -42,10 +42,10 @@ type FSSessionManager struct {
 	sessions    []*Session
 	connector   engine.Connector
 	debitPeriod time.Duration
-	loggerDB    engine.DataStorage
+	loggerDB    engine.LogStorage
 }
 
-func NewFSSessionManager(storage engine.DataStorage, connector engine.Connector, debitPeriod time.Duration) *FSSessionManager {
+func NewFSSessionManager(storage engine.LogStorage, connector engine.Connector, debitPeriod time.Duration) *FSSessionManager {
 	return &FSSessionManager{loggerDB: storage, connector: connector, debitPeriod: debitPeriod}
 }
 
@@ -245,38 +245,32 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		hangupTime = time.Now()
 	}
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
-	refoundDuration := end.Sub(hangupTime).Seconds()
-	cost := 0.0
-	seconds := 0.0
+	refoundDuration := end.Sub(hangupTime)
+	var refoundIncrements engine.Increments
 	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
-		tsDuration := ts.GetDuration().Seconds()
+		tsDuration := ts.GetDuration()
 		if refoundDuration <= tsDuration {
-			// find procentage
-			procentage := (refoundDuration * 100) / tsDuration
-			tmpCost := (procentage * ts.Cost) / 100
-			ts.Cost -= tmpCost
-			cost += tmpCost
-			if ts.MinuteInfo != nil {
-				// DestinationPrefix and Price take from lastCC and above caclulus
-				seconds += (procentage * ts.MinuteInfo.Quantity) / 100
+			lastRefoundedIncrementIndex := 0
+			for incrementIndex, increment := range ts.Increments {
+				if increment.Duration <= refoundDuration {
+					refoundIncrements = append(refoundIncrements, increment)
+					refoundDuration -= increment.Duration
+					lastRefoundedIncrementIndex = incrementIndex
+				}
 			}
-			// set the end time to now
-			ts.TimeEnd = hangupTime
+			ts.SplitByIncrement(lastRefoundedIncrementIndex)
 			break // do not go to other timespans
 		} else {
-			cost += ts.Cost
-			if ts.MinuteInfo != nil {
-				seconds += ts.MinuteInfo.Quantity
-			}
-			// remove the timestamp entirely
+			refoundIncrements = append(refoundIncrements, ts.Increments...)
+			// remove the timespan entirely
 			lastCC.Timespans = lastCC.Timespans[:i]
 			// continue to the next timespan with what is left to refound
 			refoundDuration -= tsDuration
 		}
 	}
-	if cost > 0 {
+	if len(refoundIncrements) > 0 {
 		cd := &engine.CallDescriptor{
 			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
@@ -284,8 +278,8 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Subject:     lastCC.Subject,
 			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
-			Amount:      -cost,
-			// FallbackSubject: lastCC.FallbackSubject, // ToDo: check how to best add it
+			Increments:  refoundIncrements,
+			// FallbackSubject: lastCC.FallbackSubject, // TODO: check how to best add it
 		}
 		var response float64
 		err := sm.connector.DebitCents(*cd, &response)
@@ -293,30 +287,14 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 		}
 	}
-	if seconds > 0 {
-		cd := &engine.CallDescriptor{
-			Direction:   lastCC.Direction,
-			TOR:         lastCC.TOR,
-			Tenant:      lastCC.Tenant,
-			Subject:     lastCC.Subject,
-			Account:     lastCC.Account,
-			Destination: lastCC.Destination,
-			Amount:      -seconds,
-			// FallbackSubject: lastCC.FallbackSubject, // ToDo: check how to best add it
-		}
-		var response float64
-		err := sm.connector.DebitSeconds(*cd, &response)
-		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("Debit seconds failed: %v", err))
-		}
-	}
+	cost := refoundIncrements.GetTotalCost()
 	lastCC.Cost -= cost
-	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents, %v seconds", cost, seconds))
+	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 
 }
 
-func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, index float64) {
-	cc := &engine.CallCost{}
+func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, index float64) (cc *engine.CallCost) {
+	cc = &engine.CallCost{}
 	cd.LoopIndex = index
 	cd.Amount = sm.debitPeriod.Seconds()
 	cd.CallDuration += time.Duration(cd.Amount) * time.Second
@@ -326,25 +304,21 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, in
 		// disconnect session
 		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
 	}
-	nbts := len(cc.Timespans)
-	remainingSeconds := 0.0
 	engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
-	if nbts > 0 {
-		remainingSeconds = cc.Timespans[nbts-1].TimeEnd.Sub(cc.Timespans[0].TimeStart).Seconds()
-	}
-	if remainingSeconds == 0 || err != nil {
+	if cc.GetDuration() == 0 || err != nil {
 		engine.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		sm.DisconnectSession(s, INSUFFICIENT_FUNDS)
 		return
 	}
 	s.CallCosts = append(s.CallCosts, cc)
+	return
 }
 
 func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
 	return sm.debitPeriod
 }
 
-func (sm *FSSessionManager) GetDbLogger() engine.DataStorage {
+func (sm *FSSessionManager) GetDbLogger() engine.LogStorage {
 	return sm.loggerDB
 }
 

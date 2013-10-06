@@ -19,19 +19,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"database/sql"
-	"fmt"
-	_ "github.com/bmizerany/pq"
+	"sort"
 )
 
-type PostgresStorage struct {
-	*SQLStorage
+type GroupLink struct {
+	Id     string
+	Weight float64
 }
 
-func NewPostgresStorage(host, port, name, user, password string) (Storage, error) {
-	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password))
-	if err != nil {
-		return nil, err
-	}
-	return &PostgresStorage{&SQLStorage{db}}, nil
+type GroupLinks []*GroupLink
+
+func (gls GroupLinks) Len() int {
+	return len(gls)
+}
+
+func (gls GroupLinks) Swap(i, j int) {
+	gls[i], gls[j] = gls[j], gls[i]
+}
+
+func (gls GroupLinks) Less(j, i int) bool {
+	return gls[i].Weight < gls[j].Weight
+}
+
+func (gls GroupLinks) Sort() {
+	sort.Sort(gls)
 }

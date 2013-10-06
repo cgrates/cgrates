@@ -37,7 +37,7 @@ type ActionTiming struct {
 	Id                     string // uniquely identify the timing
 	Tag                    string // informative purpose only
 	UserBalanceIds         []string
-	Timing                 *Interval
+	Timing                 *RateInterval
 	Weight                 float64
 	ActionsId              string
 	actions                Actions
@@ -219,10 +219,7 @@ func (at *ActionTiming) Execute() (err error) {
 		return
 	}
 	for _, a := range aac {
-		a.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
-		if a.MinuteBucket != nil {
-			a.MinuteBucket.ExpirationDate = a.ExpirationDate
-		}
+		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
@@ -290,6 +287,6 @@ func (atpl ActionTimingPriotityList) Sort() {
 	sort.Sort(atpl)
 }
 
-func (at *ActionTiming) String() string {
+func (at *ActionTiming) String_DISABLED() string {
 	return at.Tag + " " + at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
 }

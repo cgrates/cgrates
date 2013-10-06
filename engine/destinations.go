@@ -45,9 +45,6 @@ func GetDestination(dId string) (d *Destination, err error) {
 	return
 }
 
-/*
-De-serializes the destination for the storage. Used for key-value storages.
-*/
 func (d *Destination) containsPrefix(prefix string) (precision int, ok bool) {
 	if d == nil {
 		return

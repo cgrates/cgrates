@@ -22,28 +22,28 @@ import (
 	"testing"
 )
 
-func TestUnitsCounterAddMinuteBucket(t *testing.T) {
+func TestUnitsCounterAddBalance(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction:     OUTBOUND,
-		BalanceId:     SMS,
-		Units:         100,
-		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
+		Direction:      OUTBOUND,
+		BalanceId:      SMS,
+		Units:          100,
+		MinuteBalances: []*Balance{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	uc.addMinutes(20, "test")
-	if len(uc.MinuteBuckets) != 2 {
+	if len(uc.MinuteBalances) != 2 {
 		t.Error("Error adding minute bucket!")
 	}
 }
 
-func TestUnitsCounterAddMinuteBucketExists(t *testing.T) {
+func TestUnitsCounterAddBalanceExists(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction:     OUTBOUND,
-		BalanceId:     SMS,
-		Units:         100,
-		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Seconds: 10, Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
+		Direction:      OUTBOUND,
+		BalanceId:      SMS,
+		Units:          100,
+		MinuteBalances: []*Balance{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	uc.addMinutes(5, "0723")
-	if len(uc.MinuteBuckets) != 2 || uc.MinuteBuckets[0].Seconds != 15 {
+	if len(uc.MinuteBalances) != 2 || uc.MinuteBalances[0].Value != 15 {
 		t.Error("Error adding minute bucket!")
 	}
 }

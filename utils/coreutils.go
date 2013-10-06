@@ -121,9 +121,41 @@ func ParseDate(date string) (expDate time.Time, err error) {
 	return expDate, err
 }
 
-func RoundToMinute(seconds float64) float64 {
-	if math.Mod(seconds, 60) == 0 {
-		return seconds
+// returns a number equeal or larger than the amount that exactly
+// is divisible to whole
+func RoundTo(whole, amount time.Duration) time.Duration {
+	a, w := float64(amount), float64(whole)
+	if math.Mod(a, w) == 0 {
+		return amount
 	}
-	return (60 - math.Mod(seconds, 60)) + seconds
+	return time.Duration((w - math.Mod(a, w)) + a)
+}
+
+type StringSlice []string
+
+func (ss StringSlice) Contains(needle string) bool {
+	for _, hay := range ss {
+		if hay == needle {
+			return true
+		}
+	}
+	return false
+}
+
+func SplitPrefix(prefix string) []string {
+	var subs []string
+	max := len(prefix)
+	for i := 0; i < len(prefix)-1; i++ {
+		subs = append(subs, prefix[:max-i])
+	}
+	return subs
+}
+
+func SplitPrefixInterface(prefix string) []interface{} {
+	var subs []interface{}
+	max := len(prefix)
+	for i := 0; i < len(prefix)-1; i++ {
+		subs = append(subs, prefix[:max-i])
+	}
+	return subs
 }

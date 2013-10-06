@@ -195,35 +195,55 @@ func TestMissingStructFieldsIncorrect(t *testing.T) {
 	}
 }
 
-func TestRoundToMinute(t *testing.T) {
-	result := RoundToMinute(0)
-	expected := 0.0
+func TestRound(t *testing.T) {
+	minute := time.Minute
+	result := RoundTo(minute, 0*time.Second)
+	expected := 0 * time.Second
 	if result != expected {
 		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
 	}
-	result = RoundToMinute(1)
-	expected = 60.0
+	result = RoundTo(time.Second, 1*time.Second+500*time.Millisecond)
+	expected = 2 * time.Second
+	if result != expected {
+		t.Errorf("Error rounding to minute1: expected %v was %v", expected, result)
+	}
+	result = RoundTo(minute, 1*time.Second)
+	expected = minute
 	if result != expected {
 		t.Errorf("Error rounding to minute2: expected %v was %v", expected, result)
 	}
-	result = RoundToMinute(59)
-	expected = 60.0
+	result = RoundTo(minute, 5*time.Second)
+	expected = minute
 	if result != expected {
 		t.Errorf("Error rounding to minute3: expected %v was %v", expected, result)
 	}
-	result = RoundToMinute(60)
-	expected = 60.0
+	result = RoundTo(minute, minute)
+	expected = minute
 	if result != expected {
 		t.Errorf("Error rounding to minute4: expected %v was %v", expected, result)
 	}
-	result = RoundToMinute(90)
+	result = RoundTo(minute, 90*time.Second)
+	expected = 120 * time.Second
+	if result != expected {
+		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
+	}
+	result = RoundTo(60, 120)
 	expected = 120.0
 	if result != expected {
 		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
 	}
-	result = RoundToMinute(120)
-	expected = 120.0
-	if result != expected {
-		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
+}
+
+func TestSplitPrefix(t *testing.T) {
+	a := SplitPrefix("0123456789")
+	if len(a) != 9 {
+		t.Error("Error splitting prefix: ", a)
+	}
+}
+
+func TestSplitPrefixEmpty(t *testing.T) {
+	a := SplitPrefix("")
+	if len(a) != 0 {
+		t.Error("Error splitting prefix: ", a)
 	}
 }

@@ -26,7 +26,8 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureDatabase(db_type, host, port, name, user, pass string) (db DataStorage, err error) {
+func ConfigureDataStorage(db_type, host, port, name, user, pass string) (db DataStorage, err error) {
+	var d Storage
 	switch db_type {
 	case utils.REDIS:
 		var db_nb int
@@ -38,13 +39,80 @@ func ConfigureDatabase(db_type, host, port, name, user, pass string) (db DataSto
 		if port != "" {
 			host += ":" + port
 		}
-		db, err = NewRedisStorage(host, db_nb, pass)
+		d, err = NewRedisStorage(host, db_nb, pass)
+		db = d.(DataStorage)
 	case utils.MONGO:
-		db, err = NewMongoStorage(host, port, name, user, pass)
+		d, err = NewMongoStorage(host, port, name, user, pass)
+		db = d.(DataStorage)
+	default:
+		err = errors.New("unknown db")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func ConfigureLogStorage(db_type, host, port, name, user, pass string) (db LogStorage, err error) {
+	var d Storage
+	switch db_type {
+	case utils.REDIS:
+		var db_nb int
+		db_nb, err = strconv.Atoi(name)
+		if err != nil {
+			Logger.Crit("Redis db name must be an integer!")
+			return nil, err
+		}
+		if port != "" {
+			host += ":" + port
+		}
+		d, err = NewRedisStorage(host, db_nb, pass)
+		db = d.(LogStorage)
+	case utils.MONGO:
+		d, err = NewMongoStorage(host, port, name, user, pass)
+		db = d.(LogStorage)
 	case utils.POSTGRES:
-		db, err = NewPostgresStorage(host, port, name, user, pass)
+		d, err = NewPostgresStorage(host, port, name, user, pass)
+		db = d.(LogStorage)
 	case utils.MYSQL:
-		db, err = NewMySQLStorage(host, port, name, user, pass)
+		d, err = NewMySQLStorage(host, port, name, user, pass)
+		db = d.(LogStorage)
+	default:
+		err = errors.New("unknown db")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func ConfigureLoadStorage(db_type, host, port, name, user, pass string) (db LoadStorage, err error) {
+	var d Storage
+	switch db_type {
+	case utils.POSTGRES:
+		d, err = NewPostgresStorage(host, port, name, user, pass)
+		db = d.(LoadStorage)
+	case utils.MYSQL:
+		d, err = NewMySQLStorage(host, port, name, user, pass)
+		db = d.(LoadStorage)
+	default:
+		err = errors.New("unknown db")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func ConfigureCdrStorage(db_type, host, port, name, user, pass string) (db CdrStorage, err error) {
+	var d Storage
+	switch db_type {
+	case utils.POSTGRES:
+		d, err = NewPostgresStorage(host, port, name, user, pass)
+		db = d.(CdrStorage)
+	case utils.MYSQL:
+		d, err = NewMySQLStorage(host, port, name, user, pass)
+		db = d.(CdrStorage)
 	default:
 		err = errors.New("unknown db")
 	}

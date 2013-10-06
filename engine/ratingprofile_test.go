@@ -24,16 +24,16 @@ import (
 )
 
 func TestRpAddAPIfNotPresent(t *testing.T) {
-	ap1 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
-	ap2 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
-	ap3 := &ActivationPeriod{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 1, time.UTC)}
+	ap1 := &RatingPlan{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
+	ap2 := &RatingPlan{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 0, time.UTC)}
+	ap3 := &RatingPlan{ActivationTime: time.Date(2012, time.July, 2, 14, 24, 30, 1, time.UTC)}
 	rp := &RatingProfile{}
-	rp.AddActivationPeriodIfNotPresent("test", ap1)
-	rp.AddActivationPeriodIfNotPresent("test", ap2)
+	rp.AddRatingPlanIfNotPresent("test", ap1)
+	rp.AddRatingPlanIfNotPresent("test", ap2)
 	if len(rp.DestinationMap["test"]) != 1 {
 		t.Error("Wronfully appended activation period ;)", len(rp.DestinationMap["test"]))
 	}
-	rp.AddActivationPeriodIfNotPresent("test", ap3)
+	rp.AddRatingPlanIfNotPresent("test", ap3)
 	if len(rp.DestinationMap["test"]) != 2 {
 		t.Error("Wronfully not appended activation period ;)", len(rp.DestinationMap["test"]))
 	}

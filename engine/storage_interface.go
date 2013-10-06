@@ -35,6 +35,7 @@ const (
 	ACTION_PREFIX             = "act_"
 	USER_BALANCE_PREFIX       = "ubl_"
 	DESTINATION_PREFIX        = "dst_"
+	TEMP_DESTINATION_PREFIX   = "tmp_"
 	LOG_CALL_COST_PREFIX      = "cco_"
 	LOG_ACTION_TIMMING_PREFIX = "ltm_"
 	LOG_ACTION_TRIGGER_PREFIX = "ltr_"
@@ -48,23 +49,49 @@ const (
 	RATER_SOURCE           = "RAT"
 )
 
-var (
-	// for codec msgpack
-	mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
-	sliceByteTyp  = reflect.TypeOf([]byte(nil))
-	timeTyp       = reflect.TypeOf(time.Time{})
-)
+type Storage interface {
+	Close()
+	Flush() error
+}
 
 /*
 Interface for storage providers.
 */
 type DataStorage interface {
-	Close()
-	Flush() error
+	Storage
 	GetRatingProfile(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
+	DestinationContainsPrefix(string, string) (int, error)
 	SetDestination(*Destination) error
+	GetActions(string) (Actions, error)
+	SetActions(string, Actions) error
+	GetUserBalance(string) (*UserBalance, error)
+	SetUserBalance(*UserBalance) error
+	GetActionTimings(string) (ActionTimings, error)
+	SetActionTimings(string, ActionTimings) error
+	GetAllActionTimings() (map[string]ActionTimings, error)
+}
+
+type CdrStorage interface {
+	Storage
+	SetCdr(utils.CDR) error
+	SetRatedCdr(utils.CDR, *CallCost, string) error
+	GetAllRatedCdr() ([]utils.CDR, error)
+}
+
+type LogStorage interface {
+	Storage
+	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
+	LogCallCost(uuid, source string, cc *CallCost) error
+	LogError(uuid, source, errstr string) error
+	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
+	LogActionTiming(source string, at *ActionTiming, as Actions) error
+	GetCallCostLog(uuid, source string) (*CallCost, error)
+}
+
+type LoadStorage interface {
+	Storage
 	// Apier functions
 	GetTPIds() ([]string, error)
 	SetTPTiming(string, *Timing) error
@@ -76,7 +103,7 @@ type DataStorage interface {
 	GetTPDestination(string, string) (*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)
 	ExistsTPRate(string, string) (bool, error)
-	SetTPRates(string, map[string][]*Rate) error
+	SetTPRates(string, map[string][]*LoadRate) error
 	GetTPRate(string, string) (*utils.TPRate, error)
 	GetTPRateIds(string) ([]string, error)
 	ExistsTPDestinationRate(string, string) (bool, error)
@@ -105,27 +132,10 @@ type DataStorage interface {
 	ExistsTPAccountActions(string, string) (bool, error)
 	SetTPAccountActions(string, map[string]*AccountAction) error
 	GetTPAccountActionIds(string) ([]string, error)
-	// End Apier functions
-	GetActions(string) (Actions, error)
-	SetActions(string, Actions) error
-	GetUserBalance(string) (*UserBalance, error)
-	SetUserBalance(*UserBalance) error
-	GetActionTimings(string) (ActionTimings, error)
-	SetActionTimings(string, ActionTimings) error
-	GetAllActionTimings() (map[string]ActionTimings, error)
-	SetCdr(utils.CDR) error
-	SetRatedCdr(utils.CDR, *CallCost, string) error
-	GetAllRatedCdr() ([]utils.CDR, error)
-	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogCallCost(uuid, source string, cc *CallCost) error
-	LogError(uuid, source, errstr string) error
-	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
-	LogActionTiming(source string, at *ActionTiming, as Actions) error
-	GetCallCostLog(uuid, source string) (*CallCost, error)
 	// loader functions
 	GetTpDestinations(string, string) ([]*Destination, error)
 	GetTpTimings(string, string) (map[string]*Timing, error)
-	GetTpRates(string, string) (map[string]*Rate, error)
+	GetTpRates(string, string) (map[string][]*LoadRate, error)
 	GetTpDestinationRates(string, string) (map[string][]*DestinationRate, error)
 	GetTpDestinationRateTimings(string, string) ([]*DestinationRateTiming, error)
 	GetTpRatingProfiles(string, string) (map[string]*RatingProfile, error)
@@ -180,10 +190,13 @@ type CodecMsgpackMarshaler struct {
 func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
+	var mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
+	//sliceByteTyp  = reflect.TypeOf([]byte(nil))
+	var timeTyp = reflect.TypeOf(time.Time{})
 	mh.MapType = mapStrIntfTyp
 
 	// configure extensions for msgpack, to enable Binary and Time support for tags 0 and 1
-	mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
+	//mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
 	mh.AddExt(timeTyp, 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
 	return cmm
 }

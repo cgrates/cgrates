@@ -91,16 +91,16 @@ type TPActions struct {
 }
 
 type Action struct {
-	Identifier    string  // Identifier mapped in the code
-	BalanceType   string  // Type of balance the action will operate on
-	Direction     string  // Balance direction
-	Units         float64 // Number of units to add/deduct
-	ExpiryTime    string  // Time when the units will expire
-	DestinationId string  // Destination profile id
-	RateType      string  // Type of rate <*absolute|*percent>
-	Rate          float64 // Price value
-	MinutesWeight float64 // Minutes weight
-	Weight        float64 // Action's weight
+	Identifier      string  // Identifier mapped in the code
+	BalanceType     string  // Type of balance the action will operate on
+	Direction       string  // Balance direction
+	Units           float64 // Number of units to add/deduct
+	ExpiryTime      string  // Time when the units will expire
+	DestinationId   string  // Destination profile id
+	RateSubject     string  // Type of rate <*absolute|*percent>
+	BalanceWeight   float64 // Balance weight
+	ExtraParameters string
+	Weight          float64 // Action's weight
 }
 
 type ApiTPActionTimings struct {

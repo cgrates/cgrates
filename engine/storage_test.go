@@ -71,14 +71,35 @@ func TestMsgpackTime(t *testing.T) {
 	}
 }
 
+func TestStorageDestinationContainsPrefixShort(t *testing.T) {
+	precision, err := storageGetter.DestinationContainsPrefix("NAT", "0723")
+	if err != nil || precision != 4 {
+		t.Error("Error finding prefix: ", err, precision)
+	}
+}
+
+func TestStorageDestinationContainsPrefixLong(t *testing.T) {
+	precision, err := storageGetter.DestinationContainsPrefix("NAT", "0723045326")
+	if err != nil || precision != 4 {
+		t.Error("Error finding prefix: ", err, precision)
+	}
+}
+
+func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
+	precision, err := storageGetter.DestinationContainsPrefix("NAT", "072")
+	if err != nil || precision != 0 {
+		t.Error("Error finding prefix: ", err, precision)
+	}
+}
+
 /************************** Benchmarks *****************************/
 
 func GetUB() *UserBalance {
 	uc := &UnitsCounter{
-		Direction:     OUTBOUND,
-		BalanceId:     SMS,
-		Units:         100,
-		MinuteBuckets: []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
+		Direction:      OUTBOUND,
+		BalanceId:      SMS,
+		Units:          100,
+		MinuteBalances: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
 		Id:             "some_uuid",
@@ -94,8 +115,7 @@ func GetUB() *UserBalance {
 	ub := &UserBalance{
 		Id:             "rif",
 		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}},
-		MinuteBuckets:  []*MinuteBucket{&MinuteBucket{Weight: 20, Price: 1, DestinationId: "NAT"}, &MinuteBucket{Weight: 10, Price: 10, PriceType: ABSOLUTE, DestinationId: "RET"}},
+		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}
@@ -105,16 +125,16 @@ func GetUB() *UserBalance {
 func BenchmarkMarshallerJSONStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Months: []time.Month{time.February},
+	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
+	ap := &RatingPlan{ActivationTime: d}
+	ap.AddRateInterval(i)
 	ub := GetUB()
 
-	ap1 := ActivationPeriod{}
+	ap1 := RatingPlan{}
 	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(JSONMarshaler)
@@ -129,16 +149,16 @@ func BenchmarkMarshallerJSONStoreRestore(b *testing.B) {
 func BenchmarkMarshallerBSONStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Months: []time.Month{time.February},
+	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
+	ap := &RatingPlan{ActivationTime: d}
+	ap.AddRateInterval(i)
 	ub := GetUB()
 
-	ap1 := ActivationPeriod{}
+	ap1 := RatingPlan{}
 	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(BSONMarshaler)
@@ -153,16 +173,16 @@ func BenchmarkMarshallerBSONStoreRestore(b *testing.B) {
 func BenchmarkMarshallerJSONBufStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Months: []time.Month{time.February},
+	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
+	ap := &RatingPlan{ActivationTime: d}
+	ap.AddRateInterval(i)
 	ub := GetUB()
 
-	ap1 := ActivationPeriod{}
+	ap1 := RatingPlan{}
 	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(JSONBufMarshaler)
@@ -177,16 +197,16 @@ func BenchmarkMarshallerJSONBufStoreRestore(b *testing.B) {
 func BenchmarkMarshallerGOBStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Months: []time.Month{time.February},
+	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
+	ap := &RatingPlan{ActivationTime: d}
+	ap.AddRateInterval(i)
 	ub := GetUB()
 
-	ap1 := ActivationPeriod{}
+	ap1 := RatingPlan{}
 	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := new(GOBMarshaler)
@@ -201,16 +221,16 @@ func BenchmarkMarshallerGOBStoreRestore(b *testing.B) {
 func BenchmarkMarshallerCodecMsgpackStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Months: []time.Month{time.February},
+	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
+	ap := &RatingPlan{ActivationTime: d}
+	ap.AddRateInterval(i)
 	ub := GetUB()
 
-	ap1 := ActivationPeriod{}
+	ap1 := RatingPlan{}
 	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := NewCodecMsgpackMarshaler()
@@ -225,16 +245,16 @@ func BenchmarkMarshallerCodecMsgpackStoreRestore(b *testing.B) {
 func BenchmarkMarshallerBincStoreRestore(b *testing.B) {
 	b.StopTimer()
 	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &Interval{Months: []time.Month{time.February},
+	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &ActivationPeriod{ActivationTime: d}
-	ap.AddInterval(i)
+	ap := &RatingPlan{ActivationTime: d}
+	ap.AddRateInterval(i)
 	ub := GetUB()
 
-	ap1 := ActivationPeriod{}
+	ap1 := RatingPlan{}
 	ub1 := &UserBalance{}
 	b.StartTimer()
 	ms := NewBincMarshaler()

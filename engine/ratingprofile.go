@@ -23,46 +23,42 @@ import (
 	"fmt"
 )
 
-const (
-	// the minimum length for a destination prefix to be matched.
-	MIN_PREFIX_LENGTH = 2
-)
-
 type RatingProfile struct {
 	Id                                                                                             string
 	FallbackKey                                                                                    string // FallbackKey is used as complete combination of Tenant:TOR:Direction:Subject
-	DestinationMap                                                                                 map[string][]*ActivationPeriod
+	DestinationMap                                                                                 map[string][]*RatingPlan
 	Tag, Tenant, TOR, Direction, Subject, DestRatesTimingTag, RatesFallbackSubject, ActivationTime string // used only for loading
 }
 
 // Adds an activation period that applyes to current rating profile if not already present.
-func (rp *RatingProfile) AddActivationPeriodIfNotPresent(destInfo string, aps ...*ActivationPeriod) {
+func (rp *RatingProfile) AddRatingPlanIfNotPresent(destInfo string, plans ...*RatingPlan) {
 	if rp.DestinationMap == nil {
-		rp.DestinationMap = make(map[string][]*ActivationPeriod, 1)
+		rp.DestinationMap = make(map[string][]*RatingPlan, 1)
 	}
-	for _, ap := range aps {
+	for _, plan := range plans {
 		found := false
-		for _, eap := range rp.DestinationMap[destInfo] {
-			if ap.Equal(eap) {
+		for _, existingPlan := range rp.DestinationMap[destInfo] {
+			if plan.Equal(existingPlan) {
+				existingPlan.AddRateInterval(plan.RateIntervals...)
 				found = true
 				break
 			}
 		}
 		if !found {
-			rp.DestinationMap[destInfo] = append(rp.DestinationMap[destInfo], ap)
+			rp.DestinationMap[destInfo] = append(rp.DestinationMap[destInfo], plan)
 		}
 	}
 }
 
-func (rp *RatingProfile) GetActivationPeriodsForPrefix(destPrefix string) (foundPrefix string, aps []*ActivationPeriod, err error) {
+func (rp *RatingProfile) GetRatingPlansForPrefix(destPrefix string) (foundPrefix string, aps []*RatingPlan, err error) {
 	bestPrecision := 0
-	for k, v := range rp.DestinationMap {
-		d, err := GetDestination(k)
+	for dId, v := range rp.DestinationMap {
+		precision, err := storageGetter.DestinationContainsPrefix(dId, destPrefix)
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Cannot find destination with id: %s", k))
+			Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 			continue
 		}
-		if precision, ok := d.containsPrefix(destPrefix); ok && precision > bestPrecision {
+		if precision > bestPrecision {
 			bestPrecision = precision
 			aps = v
 		}

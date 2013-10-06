@@ -28,8 +28,8 @@ type SessionManager interface {
 	Connect(*config.CGRConfig) error
 	DisconnectSession(*Session, string)
 	RemoveSession(*Session)
-	LoopAction(*Session, *engine.CallDescriptor, float64)
+	LoopAction(*Session, *engine.CallDescriptor, float64) *engine.CallCost
 	GetDebitPeriod() time.Duration
-	GetDbLogger() engine.DataStorage
+	GetDbLogger() engine.LogStorage
 	Shutdown() error
 }

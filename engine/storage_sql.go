@@ -30,28 +30,11 @@ type SQLStorage struct {
 	Db *sql.DB
 }
 
-func (self *SQLStorage) Close() {}
+func (self *SQLStorage) Close() {
+	self.Close()
+}
 
 func (self *SQLStorage) Flush() (err error) {
-	return
-}
-
-func (self *SQLStorage) GetRatingProfile(string) (rp *RatingProfile, err error) {
-	/*row := self.Db.QueryRow(fmt.Sprintf("SELECT * FROM ratingprofiles WHERE id='%s'", id))
-	err = row.Scan(&rp, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Subject, &cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson)
-	err = json.Unmarshal([]byte(timespansJson), cc.Timespans)*/
-	return
-}
-
-func (self *SQLStorage) SetRatingProfile(rp *RatingProfile) (err error) {
-	return
-}
-
-func (self *SQLStorage) GetDestination(string) (d *Destination, err error) {
-	return
-}
-
-func (self *SQLStorage) SetDestination(d *Destination) (err error) {
 	return
 }
 
@@ -209,7 +192,7 @@ func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
+func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*LoadRate) error {
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
@@ -380,7 +363,7 @@ func (self *SQLStorage) SetTPDestRateTimings(tpid string, drts map[string][]*Des
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
-				tpid, drtId, drt.DestinationRatesTag, drt.TimingsTag, drt.Weight)
+				tpid, drtId, drt.DestinationRatesTag, drt.TimingTag, drt.Weight)
 			i++
 		}
 	}
@@ -556,9 +539,9 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,%f,%f)",
-				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Units, act.ExpirationString,
-				act.DestinationTag, act.RateType, act.RateValue, act.MinutesWeight, act.Weight)
+			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s',%f,'%s',%f)",
+				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Balance.Value, act.ExpirationString,
+				act.Balance.DestinationId, act.Balance.RateSubject, act.Balance.Weight, act.ExtraParameters, act.Weight)
 			i++
 		}
 	}
@@ -578,12 +561,12 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateType, expTime string
-		var units, rate, minutesWeight, weight float64
-		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateType, &rate, &minutesWeight, &weight); err != nil {
+		var action, balanceId, dir, destId, rateSubject, expTime, extraParameters string
+		var units, balanceWeight, weight float64
+		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &balanceWeight, &extraParameters, &weight); err != nil {
 			return nil, err
 		}
-		acts.Actions = append(acts.Actions, utils.Action{action, balanceId, dir, units, expTime, destId, rateType, rate, minutesWeight, weight})
+		acts.Actions = append(acts.Actions, utils.Action{action, balanceId, dir, units, expTime, destId, rateSubject, balanceWeight, extraParameters, weight})
 	}
 	if i == 0 {
 		return nil, nil
@@ -798,24 +781,6 @@ func (self *SQLStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) GetUserBalance(string) (ub *UserBalance, err error) { return }
-
-func (self *SQLStorage) SetUserBalance(ub *UserBalance) (err error) { return }
-
-func (self *SQLStorage) GetActions(string) (as Actions, err error) {
-	return
-}
-
-func (self *SQLStorage) SetActions(key string, as Actions) (err error) { return }
-
-func (self *SQLStorage) GetActionTimings(key string) (ats ActionTimings, err error) { return }
-
-func (self *SQLStorage) SetActionTimings(key string, ats ActionTimings) (err error) { return }
-
-func (self *SQLStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
-	return
-}
-
 func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	//ToDo: Add cgrid to logCallCost
 	if self.Db == nil {
@@ -956,8 +921,8 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 	return dests, nil
 }
 
-func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
-	rts := make(map[string]*Rate)
+func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*LoadRate, error) {
+	rts := make(map[string][]*LoadRate)
 	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
@@ -975,7 +940,7 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start, &roundingMethod, &roundingDecimals, &weight); err != nil {
 			return nil, err
 		}
-		r := &Rate{
+		r := &LoadRate{
 			Tag:                tag,
 			ConnectFee:         connect_fee,
 			Price:              rate,
@@ -986,7 +951,14 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
 			RoundingDecimals:   roundingDecimals,
 			Weight:             weight,
 		}
-		rts[tag] = r
+		// same tag only to create rate groups
+		existingRates, exists := rts[tag]
+		if exists {
+			if err := existingRates[len(existingRates)-1].ValidNextGroup(r); err != nil {
+				return nil, err
+			}
+		}
+		rts[tag] = append(rts[tag], r)
 	}
 	return rts, nil
 }
@@ -1062,7 +1034,7 @@ func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*Destin
 			Tag:                 tag,
 			DestinationRatesTag: destination_rates_tag,
 			Weight:              weight,
-			TimingsTag:          timings_tag,
+			TimingTag:           timings_tag,
 		}
 		rts = append(rts, rt)
 	}
@@ -1113,37 +1085,25 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 	defer rows.Close()
 	for rows.Next() {
 		var id int
-		var units, rate, minutes_weight, weight float64
-		var tpid, tag, action, balance_type, direction, destinations_tag, rate_type, expirationDate string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
+		var units, balance_weight, weight float64
+		var tpid, tag, action, balance_type, direction, destinations_tag, rate_subject, extra_parameters, expirationDate string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_subject, &balance_weight, &extra_parameters, &weight); err != nil {
 			return nil, err
 		}
-		var a *Action
-		if balance_type != MINUTES {
-			a = &Action{
-				ActionType:       action,
-				BalanceId:        balance_type,
-				Direction:        direction,
-				Units:            units,
-				ExpirationString: expirationDate,
-			}
-		} else {
-			var price float64
-			a = &Action{
-				Id:               utils.GenUUID(),
-				ActionType:       action,
-				BalanceId:        balance_type,
-				Direction:        direction,
-				Weight:           weight,
-				ExpirationString: expirationDate,
-				MinuteBucket: &MinuteBucket{
-					Seconds:       units,
-					Weight:        minutes_weight,
-					Price:         price,
-					PriceType:     rate_type,
-					DestinationId: destinations_tag,
-				},
-			}
+		a := &Action{
+			Id:               utils.GenUUID(),
+			ActionType:       action,
+			BalanceId:        balance_type,
+			Direction:        direction,
+			Weight:           weight,
+			ExtraParameters:  extra_parameters,
+			ExpirationString: expirationDate,
+			Balance: &Balance{
+				Value:         units,
+				Weight:        balance_weight,
+				RateSubject:   rate_subject,
+				DestinationId: destinations_tag,
+			},
 		}
 		as[tag] = append(as[tag], a)
 	}

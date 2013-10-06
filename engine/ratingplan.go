@@ -26,36 +26,35 @@ import (
 /*
 The struture that is saved to storage.
 */
-type ActivationPeriod struct {
+type RatingPlan struct {
 	ActivationTime time.Time
-	Intervals      IntervalList
+	RateIntervals  RateIntervalList
 }
 
-type xCachedActivationPeriods struct {
+type xCachedRatingPlans struct {
 	destPrefix string
-	aps        []*ActivationPeriod
+	aps        []*RatingPlan
 	*cache2go.XEntry
 }
 
 /*
 Adds one ore more intervals to the internal interval list only if it is not allready in the list.
 */
-func (ap *ActivationPeriod) AddInterval(is ...*Interval) {
-	for _, i := range is {
+func (ap *RatingPlan) AddRateInterval(ris ...*RateInterval) {
+	for _, ri := range ris {
 		found := false
-		for _, ei := range ap.Intervals {
-			if i.Equal(ei) {
-				(&ei.Prices).AddPrice(i.Prices...)
+		for _, eri := range ap.RateIntervals {
+			if ri.Equal(eri) {
 				found = true
 				break
 			}
 		}
 		if !found {
-			ap.Intervals = append(ap.Intervals, i)
+			ap.RateIntervals = append(ap.RateIntervals, ri)
 		}
 	}
 }
 
-func (ap *ActivationPeriod) Equal(o *ActivationPeriod) bool {
+func (ap *RatingPlan) Equal(o *RatingPlan) bool {
 	return ap.ActivationTime == o.ActivationTime
 }

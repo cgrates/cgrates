@@ -19,26 +19,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"sort"
-	"time"
 )
 
 /*
 Structure to be filled for each tariff plan with the bonus value for received calls minutes.
 */
 type Action struct {
-	Id                       string
-	ActionType               string
-	BalanceId                string
-	Direction                string
-	ExpirationString         string
-	ExpirationDate           time.Time
-	Units                    float64
-	Weight                   float64
-	MinuteBucket             *MinuteBucket
-	DestinationTag, RateType string // From here for import/load purposes only
-	RateValue, MinutesWeight float64
+	Id               string
+	ActionType       string
+	BalanceId        string
+	Direction        string
+	ExtraParameters  string
+	ExpirationString string
+	Weight           float64
+	Balance          *Balance
 }
 
 const (
@@ -53,6 +52,8 @@ const (
 	DEBIT          = "*debit"
 	RESET_COUNTER  = "*reset_counter"
 	RESET_COUNTERS = "*reset_counters"
+	CALL_URL       = "*call_url"
+	UNLIMITED      = "*unlimited"
 )
 
 type actionTypeFunc func(*UserBalance, *Action) error
@@ -81,12 +82,14 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return resetCounterAction, true
 	case RESET_COUNTERS:
 		return resetCountersAction, true
+	case CALL_URL:
+		return callUrl, true
 	}
 	return nil, false
 }
 
 func logAction(ub *UserBalance, a *Action) (err error) {
-	Logger.Info(fmt.Sprintf("%v %v %v", a.BalanceId, a.Units, a.MinuteBucket))
+	Logger.Info(fmt.Sprintf("%v %v %v", a.BalanceId, a.Balance))
 	return
 }
 
@@ -116,11 +119,7 @@ func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func topupResetAction(ub *UserBalance, a *Action) (err error) {
-	if a.BalanceId == MINUTES {
-		ub.MinuteBuckets = make([]*MinuteBucket, 0)
-	} else {
-		ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{&Balance{Value: 0}} // ToDo: can ub be empty here?
-	}
+	ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{&Balance{Value: 0}} // ToDo: can ub be empty here?
 	genericMakeNegative(a)
 	genericDebit(ub, a)
 	return
@@ -143,7 +142,7 @@ func resetCounterAction(ub *UserBalance, a *Action) (err error) {
 		ub.UnitCounters = append(ub.UnitCounters, uc)
 	}
 	if a.BalanceId == MINUTES {
-		uc.initMinuteBuckets(ub.ActionTriggers)
+		uc.initMinuteBalances(ub.ActionTriggers)
 	} else {
 		uc.Units = 0
 	}
@@ -157,11 +156,8 @@ func resetCountersAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Units > 0 { // only apply if not allready negative
-		a.Units = -a.Units
-	}
-	if a.MinuteBucket != nil && a.MinuteBucket.Seconds > 0 {
-		a.MinuteBucket.Seconds = -a.MinuteBucket.Seconds
+	if a.Balance != nil && a.Balance.Value > 0 { // only apply if not allready negative
+		a.Balance.Value = -a.Balance.Value
 	}
 }
 
@@ -169,11 +165,7 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
-	if a.BalanceId == MINUTES {
-		ub.debitMinuteBucket(a.MinuteBucket)
-	} else {
-		ub.debitBalanceAction(a)
-	}
+	ub.debitBalanceAction(a)
 	return
 }
 
@@ -181,9 +173,17 @@ func genericReset(ub *UserBalance) {
 	for k, _ := range ub.BalanceMap {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
-	ub.MinuteBuckets = make([]*MinuteBucket, 0)
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	ub.resetActionTriggers(nil)
+}
+
+func callUrl(ub *UserBalance, a *Action) error {
+	body, err := json.Marshal(ub)
+	if err != nil {
+		return err
+	}
+	_, err = http.Post(a.ExtraParameters, "application/json", bytes.NewBuffer(body))
+	return err
 }
 
 // Structure to store actions according to weight

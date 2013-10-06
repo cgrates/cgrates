@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"sort"
@@ -28,7 +29,7 @@ type ActionTrigger struct {
 	Id             string // uniquely identify the trigger
 	BalanceId      string
 	Direction      string
-	ThresholdType  string
+	ThresholdType  string //*min_counter, *max_counter, *min_balance, *max_balance
 	ThresholdValue float64
 	DestinationId  string
 	Weight         float64
@@ -46,10 +47,10 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		return
 	}
 	for _, a := range aac {
-		a.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
-		if a.MinuteBucket != nil {
-			a.MinuteBucket.ExpirationDate = a.ExpirationDate
+		if a.Balance == nil {
+			a.Balance = &Balance{}
 		}
+		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
@@ -62,6 +63,27 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	at.Executed = true
 	storageGetter.SetUserBalance(ub)
 	return
+}
+
+// returns true if the field of the action timing are equeal to the non empty
+// fields of the action
+func (at *ActionTrigger) Match(a *Action) bool {
+	if a == nil {
+		return true
+	}
+	id := a.BalanceId == "" || at.BalanceId == a.BalanceId
+	direction := a.Direction == "" || at.Direction == a.Direction
+	thresholdType, thresholdValue := true, true
+	if a.ExtraParameters != "" {
+		t := struct {
+			ThresholdType  string
+			ThresholdValue float64
+		}{}
+		json.Unmarshal([]byte(a.ExtraParameters), &t)
+		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
+		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
+	}
+	return id && direction && thresholdType && thresholdValue
 }
 
 // Structure to store actions according to weight

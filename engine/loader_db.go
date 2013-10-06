@@ -26,27 +26,27 @@ import (
 )
 
 type DbReader struct {
-	tpid              string
-	storDb            DataStorage
-	dataDb            DataStorage
-	actions           map[string][]*Action
-	actionsTimings    map[string][]*ActionTiming
-	actionsTriggers   map[string][]*ActionTrigger
-	accountActions    []*UserBalance
-	destinations      []*Destination
-	timings           map[string]*Timing
-	rates             map[string]*Rate
-	destinationRates  map[string][]*DestinationRate
-	activationPeriods map[string]*ActivationPeriod
-	ratingProfiles    map[string]*RatingProfile
+	tpid                   string
+	storDb                 LoadStorage
+	dataDb                 DataStorage
+	actions                map[string][]*Action
+	actionsTimings         map[string][]*ActionTiming
+	actionsTriggers        map[string][]*ActionTrigger
+	accountActions         []*UserBalance
+	destinations           []*Destination
+	timings                map[string]*Timing
+	rates                  map[string][]*LoadRate
+	destinationRates       map[string][]*DestinationRate
+	destinationRateTimings map[string][]*DestinationRateTiming
+	ratingProfiles         map[string]*RatingProfile
 }
 
-func NewDbReader(storDB DataStorage, storage DataStorage, tpid string) *DbReader {
+func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader {
 	c := new(DbReader)
 	c.storDb = storDB
 	c.dataDb = storage
 	c.tpid = tpid
-	c.activationPeriods = make(map[string]*ActivationPeriod)
+	c.destinationRateTimings = make(map[string][]*DestinationRateTiming)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	return c
 }
@@ -54,7 +54,7 @@ func NewDbReader(storDB DataStorage, storage DataStorage, tpid string) *DbReader
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	storage := dbr.dataDb
 	if flush {
-		storage.Flush()
+		storage.(Storage).Flush()
 	}
 	if verbose {
 		log.Print("Destinations")
@@ -141,38 +141,43 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 	}
 	for _, drs := range dbr.destinationRates {
 		for _, dr := range drs {
-			rate, exists := dbr.rates[dr.RateTag]
+			rates, exists := dbr.rates[dr.RateTag]
 			if !exists {
 				return errors.New(fmt.Sprintf("Could not find rate for tag %v", dr.RateTag))
 			}
-			dr.Rate = rate
+			dr.rates = rates
+			destinationExists := false
+			for _, d := range dbr.destinations {
+				if d.Id == dr.DestinationsTag {
+					destinationExists = true
+					break
+				}
+			}
+			if !destinationExists {
+				return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationsTag))
+			}
 		}
 	}
 	return nil
 }
 
 func (dbr *DbReader) LoadDestinationRateTimings() error {
-	rts, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, "")
+	drts, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
-	for _, rt := range rts {
-		t, exists := dbr.timings[rt.TimingsTag]
+	for _, drt := range drts {
+		t, exists := dbr.timings[drt.TimingTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get timing for tag %v", rt.TimingsTag))
+			return errors.New(fmt.Sprintf("Could not get timing for tag %v", drt.TimingTag))
 		}
-		rt.timing = t
-		drs, exists := dbr.destinationRates[rt.DestinationRatesTag]
+		drt.timing = t
+		drs, exists := dbr.destinationRates[drt.DestinationRatesTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", rt.DestinationRatesTag))
+			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", drt.DestinationRatesTag))
 		}
-		for _, dr := range drs {
-			_, exists := dbr.activationPeriods[rt.Tag]
-			if !exists {
-				dbr.activationPeriods[rt.Tag] = &ActivationPeriod{}
-			}
-			dbr.activationPeriods[rt.Tag].AddInterval(rt.GetInterval(dr))
-		}
+		drt.destinationRates = drs
+		dbr.destinationRateTimings[drt.Tag] = append(dbr.destinationRateTimings[drt.Tag], drt)
 	}
 	return nil
 }
@@ -187,23 +192,24 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", rp.ActivationTime))
 		}
-		for _, d := range dbr.destinations {
-			ap, exists := dbr.activationPeriods[rp.DestRatesTimingTag]
-			if !exists {
-				return errors.New(fmt.Sprintf("Could not load rating timing for tag: %v", rp.DestRatesTimingTag))
-			}
-			newAP := &ActivationPeriod{ActivationTime: at}
-			//copy(newAP.Intervals, ap.Intervals)
-			newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-			rp.AddActivationPeriodIfNotPresent(d.Id, newAP)
-
+		drts, exists := dbr.destinationRateTimings[rp.DestRatesTimingTag]
+		if !exists {
+			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", rp.DestinationMap))
 		}
+		for _, drt := range drts {
+			plan := &RatingPlan{ActivationTime: at}
+			for _, dr := range drt.destinationRates {
+				plan.AddRateInterval(drt.GetRateInterval(dr))
+				rp.AddRatingPlanIfNotPresent(dr.DestinationsTag, plan)
+			}
+		}
+		dbr.ratingProfiles[rp.Id] = rp
 	}
 	return nil
 }
 
 func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
-	activationPeriods := make(map[string]*ActivationPeriod)
+	activationPeriods := make(map[string]*RatingPlan)
 	resultRatingProfile := &RatingProfile{}
 	rpm, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
 	if err != nil || len(rpm) == 0 {
@@ -223,12 +229,12 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 		}
 		for _, destrateTiming := range drtm {
 			Logger.Debug(fmt.Sprintf("Destination rate timing: %v", rpm))
-			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingsTag)
+			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destrateTiming.TimingTag)
 			Logger.Debug(fmt.Sprintf("Timing: %v", rpm))
 			if err != nil || len(tm) == 0 {
-				return fmt.Errorf("No Timings profile with id %s: %v", destrateTiming.TimingsTag, err)
+				return fmt.Errorf("No Timings profile with id %s: %v", destrateTiming.TimingTag, err)
 			}
-			destrateTiming.timing = tm[destrateTiming.TimingsTag]
+			destrateTiming.timing = tm[destrateTiming.TimingTag]
 			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
 			if err != nil || len(drm) == 0 {
 				return fmt.Errorf("No Timings profile with id %s: %v", destrateTiming.DestinationRatesTag, err)
@@ -240,11 +246,11 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 					return fmt.Errorf("No Rates profile with id %s: %v", drate.RateTag, err)
 				}
 				Logger.Debug(fmt.Sprintf("Rate: %v", rpm))
-				drate.Rate = rt[drate.RateTag]
+				drate.rates = rt[drate.RateTag]
 				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
-					activationPeriods[destrateTiming.Tag] = &ActivationPeriod{}
+					activationPeriods[destrateTiming.Tag] = &RatingPlan{}
 				}
-				activationPeriods[destrateTiming.Tag].AddInterval(destrateTiming.GetInterval(drate))
+				activationPeriods[destrateTiming.Tag].AddRateInterval(destrateTiming.GetRateInterval(drate))
 				dm, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 				if err != nil || len(dm) == 0 {
 					return fmt.Errorf("Could not get destination id %s: %v", drate.DestinationsTag, err)
@@ -253,9 +259,9 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				for _, destination := range dm {
 					Logger.Debug(fmt.Sprintf("Destination: %v", rpm))
 					ap := activationPeriods[ratingProfile.DestRatesTimingTag]
-					newAP := &ActivationPeriod{ActivationTime: at}
-					newAP.Intervals = append(newAP.Intervals, ap.Intervals...)
-					resultRatingProfile.AddActivationPeriodIfNotPresent(destination.Id, newAP)
+					newAP := &RatingPlan{ActivationTime: at}
+					newAP.RateIntervals = append(newAP.RateIntervals, ap.RateIntervals...)
+					resultRatingProfile.AddRatingPlanIfNotPresent(destination.Id, newAP)
 					dbr.dataDb.SetDestination(destination)
 				}
 			}
@@ -288,7 +294,7 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 				Id:     utils.GenUUID(),
 				Tag:    at.Tag,
 				Weight: at.Weight,
-				Timing: &Interval{
+				Timing: &RateInterval{
 					Months:    t.Months,
 					MonthDays: t.MonthDays,
 					WeekDays:  t.WeekDays,
@@ -387,7 +393,7 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 				Id:     utils.GenUUID(),
 				Tag:    at.Tag,
 				Weight: at.Weight,
-				Timing: &Interval{
+				Timing: &RateInterval{
 					Months:    t.Months,
 					MonthDays: t.MonthDays,
 					WeekDays:  t.WeekDays,

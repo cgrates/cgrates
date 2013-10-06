@@ -32,7 +32,7 @@ type MapStorage struct {
 	ms   Marshaler
 }
 
-func NewMapStorage() (DataStorage, error) {
+func NewMapStorage() (Storage, error) {
 	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler()}, nil
 }
 
@@ -70,6 +70,20 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 	}
 	return
 }
+
+func (ms *MapStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
+	if d, err := ms.GetDestination(key); err != nil {
+		return 0, err
+	} else {
+		for _, p := range utils.SplitPrefix(prefix) {
+			if precision, ok := d.containsPrefix(p); ok {
+				return precision, nil
+			}
+		}
+		return precision, nil
+	}
+}
+
 func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result

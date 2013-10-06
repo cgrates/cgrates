@@ -50,13 +50,15 @@ func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 			ActionType:       act.Identifier,
 			BalanceId:        act.BalanceType,
 			Direction:        act.Direction,
-			Units:            act.Units,
 			ExpirationString: act.ExpiryTime,
-			DestinationTag:   act.DestinationId,
-			RateType:         act.RateType,
-			RateValue:        act.Rate,
-			MinutesWeight:    act.MinutesWeight,
-			Weight:           act.Weight,
+			ExtraParameters:  act.ExtraParameters,
+			Balance: &engine.Balance{
+				Value:         act.Units,
+				DestinationId: act.DestinationId,
+				RateSubject:   act.RateSubject,
+				Weight:        act.BalanceWeight,
+			},
+			Weight: act.Weight,
 		}
 	}
 	if err := self.StorDb.SetTPActions(attrs.TPid, map[string][]*engine.Action{attrs.ActionsId: acts}); err != nil {

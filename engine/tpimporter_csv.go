@@ -24,13 +24,12 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
-	"time"
 )
 
 // Import tariff plan from csv into storDb
 type TPCSVImporter struct {
 	TPid     string      // Load data on this tpid
-	StorDb   DataStorage // StorDb connection handle
+	StorDb   LoadStorage // StorDb connection handle
 	DirPath  string      // Directory path to import from
 	Sep      rune        // Separator in the csv file
 	Verbose  bool        // If true will print a detailed information instead of silently discarding it
@@ -139,11 +138,11 @@ func (self *TPCSVImporter) importRates(fn string) error {
 			}
 			continue
 		}
-		rt, err := NewRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
+		rt, err := NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
 		if err != nil {
 			return err
 		}
-		if err := self.StorDb.SetTPRates(self.TPid, map[string][]*Rate{record[0]: []*Rate{rt}}); err != nil {
+		if err := self.StorDb.SetTPRates(self.TPid, map[string][]*LoadRate{record[0]: []*LoadRate{rt}}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -209,7 +208,7 @@ func (self *TPCSVImporter) importDestRateTimings(fn string) error {
 		drt := &DestinationRateTiming{Tag: record[0],
 			DestinationRatesTag: record[1],
 			Weight:              weight,
-			TimingsTag:          record[2],
+			TimingTag:           record[2],
 		}
 		if err := self.StorDb.SetTPDestRateTimings(self.TPid, map[string][]*DestinationRateTiming{drt.Tag: []*DestinationRateTiming{drt}}); err != nil {
 			if self.Verbose {
@@ -286,7 +285,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		actId, actionType, balanceType, direction, destTag, rateType := record[0], record[1], record[2], record[3], record[6], record[7]
+		actId, actionType, balanceType, direction, destTag, rateSubject := record[0], record[1], record[2], record[3], record[6], record[7]
 		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			if self.Verbose {
@@ -294,18 +293,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		var expiryTime time.Time       // Empty initialized time represents never expire
-		if record[5] != "*unlimited" { // ToDo: Expand here for other meta tags or go way of adding time for expiry
-			expiryTime, err = time.Parse(time.RFC3339, record[5])
-			if err != nil {
-				if self.Verbose {
-					log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
-				}
-				continue
-			}
-		}
-		rateValue, _ := strconv.ParseFloat(record[8], 64) // Ignore errors since empty string is error, we can find out based on rateType if defined
-		minutesWeight, _ := strconv.ParseFloat(record[9], 64)
+		balanceWeight, _ := strconv.ParseFloat(record[8], 64)
 		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {
 			if self.Verbose {
@@ -314,16 +302,18 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			continue
 		}
 		act := &Action{
-			ActionType:     actionType,
-			BalanceId:      balanceType,
-			Direction:      direction,
-			Units:          units,
-			ExpirationDate: expiryTime,
-			DestinationTag: destTag,
-			RateType:       rateType,
-			RateValue:      rateValue,
-			MinutesWeight:  minutesWeight,
-			Weight:         weight,
+			ActionType:       actionType,
+			BalanceId:        balanceType,
+			Direction:        direction,
+			ExpirationString: record[5],
+			ExtraParameters:  record[9],
+			Balance: &Balance{
+				Value:         units,
+				DestinationId: destTag,
+				RateSubject:   rateSubject,
+				Weight:        balanceWeight,
+			},
+			Weight: weight,
 		}
 		if err := self.StorDb.SetTPActions(self.TPid, map[string][]*Action{actId: []*Action{act}}); err != nil {
 			if self.Verbose {

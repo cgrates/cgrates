@@ -24,39 +24,41 @@ import (
 
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
-	Direction     string
-	BalanceId     string
-	Units         float64
-	MinuteBuckets bucketsorter
+	Direction      string
+	BalanceId      string
+	Units          float64
+	MinuteBalances BalanceChain
 }
 
-func (uc *UnitsCounter) initMinuteBuckets(ats []*ActionTrigger) {
-	uc.MinuteBuckets = make(bucketsorter, 0)
+func (uc *UnitsCounter) initMinuteBalances(ats []*ActionTrigger) {
+	uc.MinuteBalances = make(BalanceChain, 0)
 	for _, at := range ats {
 		acs, err := storageGetter.GetActions(at.ActionsId)
 		if err != nil {
 			continue
 		}
 		for _, a := range acs {
-			if a.MinuteBucket != nil {
-				uc.MinuteBuckets = append(uc.MinuteBuckets, a.MinuteBucket.Clone())
+			if a.BalanceId == MINUTES && a.Balance != nil {
+				b := a.Balance.Clone()
+				b.Value = 0
+				uc.MinuteBalances = append(uc.MinuteBalances, b)
 			}
 		}
 	}
-	uc.MinuteBuckets.Sort()
+	uc.MinuteBalances.Sort()
 }
 
-// Adds the minutes from the received minute bucket to an existing bucket if the destination
-// is the same or ads the minutye bucket to the list if none matches.
+// Adds the minutes from the received minute balance to an existing bucket if the destination
+// is the same or ads the minute balance to the list if none matches.
 func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
-	for _, mb := range uc.MinuteBuckets {
-		d, err := GetDestination(mb.DestinationId)
+	for _, mb := range uc.MinuteBalances {
+		precision, err := storageGetter.DestinationContainsPrefix(mb.DestinationId, prefix)
 		if err != nil {
-			Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: %s", mb.DestinationId))
+			Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: %v", mb.DestinationId))
 			continue
 		}
-		if _, ok := d.containsPrefix(prefix); ok {
-			mb.Seconds += amount
+		if precision > 0 {
+			mb.Value += amount
 			break
 		}
 	}
