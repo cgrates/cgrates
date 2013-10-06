@@ -39,6 +39,7 @@ func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engi
 	m = &Mediator{
 		connector: connector,
 		logDb:     logDb,
+		cdrDb:     cdrDb,
 		cgrCfg:    cfg,
 	}
 	m.fieldNames = make(map[string][]string)
