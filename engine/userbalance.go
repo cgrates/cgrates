@@ -257,7 +257,6 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						break
 					}
 				}
-				// newTs.SplitByIncrement()
 				// get the new rate
 				cd := cc.CreateCallDescriptor()
 				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
@@ -274,9 +273,10 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					paidTs = append(paidTs, nts)
 					for nIdx, nInc := range nts.Increments {
 						// debit minutes and money
+						seconds := nInc.Duration.Seconds()
 						amount := nInc.Cost
-						if b.Value >= amount {
-							b.Value -= amount
+						if b.Value >= seconds {
+							b.Value -= seconds
 							nInc.BalanceUuid = b.Uuid
 							if count {
 								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
@@ -368,10 +368,60 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						continue
 					}
 					//debit new callcost
+					var paidTs []*TimeSpan
 					for _, nts := range newCC.Timespans {
-						for _, nIncrement := range nts.Increments {
-							_ = nIncrement
+						paidTs = append(paidTs, nts)
+						for nIdx, nInc := range nts.Increments {
+							// debit money
+							amount := nInc.Cost
+							if b.Value >= amount {
+								b.Value -= amount
+								nInc.BalanceUuid = b.Uuid
+								if count {
+									ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
+								}
+							} else {
+								nts.SplitByIncrement(nIdx)
+							}
 						}
+					}
+					// calculate overlaped timespans
+					var paidDuration time.Duration
+					for _, pts := range paidTs {
+						paidDuration += pts.GetDuration()
+					}
+					if paidDuration > 0 {
+						// split from current increment
+						newTs := ts.SplitByIncrement(incrementIndex)
+						remainingTs := []*TimeSpan{newTs}
+
+						for tsi := tsIndex + 1; tsi < len(cc.Timespans); tsi++ {
+							remainingTs = append(remainingTs, cc.Timespans[tsi])
+						}
+						for remainingIndex, rts := range remainingTs {
+							if paidDuration >= rts.GetDuration() {
+								paidDuration -= rts.GetDuration()
+							} else {
+								if paidDuration > 0 {
+									// this ts was not fully paid
+									fragment := rts.SplitByDuration(paidDuration)
+									paidTs = append(paidTs, fragment)
+								}
+								// delete from tsIndex to current
+								cc.Timespans = append(cc.Timespans[:tsIndex], cc.Timespans[remainingIndex:]...)
+								break
+							}
+						}
+
+						// append the timpespans to outer timespans
+						for _, pts := range paidTs {
+							tsIndex++
+							cc.Timespans = append(cc.Timespans, nil)
+							copy(cc.Timespans[tsIndex+1:], cc.Timespans[tsIndex:])
+							cc.Timespans[tsIndex] = pts
+						}
+						paid = true
+						tsWasSplit = true
 					}
 				}
 			}
