@@ -532,7 +532,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 	if len(acts) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rate_subject,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS)
 	i := 0
 	for actId, actRows := range acts {
 		for _, act := range actRows {
@@ -552,7 +552,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rate_subject,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
 	if err != nil {
 		return nil, err
 	}
@@ -1086,8 +1086,8 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 	for rows.Next() {
 		var id int
 		var units, balance_weight, weight float64
-		var tpid, tag, action, balance_type, direction, destinations_tag, rate_subject, extra_parameters, expirationDate string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_subject, &balance_weight, &extra_parameters, &weight); err != nil {
+		var tpid, tag, action, balance_type, direction, destinations_tag, rating_subject, extra_parameters, expirationDate string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rating_subject, &balance_weight, &extra_parameters, &weight); err != nil {
 			return nil, err
 		}
 		a := &Action{
@@ -1101,7 +1101,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 			Balance: &Balance{
 				Value:         units,
 				Weight:        balance_weight,
-				RateSubject:   rate_subject,
+				RateSubject:   rating_subject,
 				DestinationId: destinations_tag,
 			},
 		}
