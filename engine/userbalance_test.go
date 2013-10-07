@@ -572,6 +572,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 	}
 }
 
+/*
 func TestDebitMinuteBalance(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
@@ -580,7 +581,7 @@ func TestDebitMinuteBalance(t *testing.T) {
 	if b2.Value != 94 || err != nil {
 		t.Errorf("Expected %v was %v", 94, b1.Value)
 	}
-}
+}*/
 
 /*func TestDebitMultipleBucketsMinuteBalance(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.0, DestinationId: "NAT"}
