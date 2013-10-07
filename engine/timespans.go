@@ -40,7 +40,6 @@ type Increment struct {
 	Duration            time.Duration
 	Cost                float64
 	BalanceUuids        []string // need more than one for minutes with cost
-	BalanceType         string
 	BalanceRateInterval *RateInterval
 	MinuteInfo          *MinuteInfo
 }
@@ -56,7 +55,6 @@ func (incr *Increment) Clone() *Increment {
 	nIncr := &Increment{
 		Duration:            incr.Duration,
 		Cost:                incr.Cost,
-		BalanceType:         incr.BalanceType,
 		BalanceRateInterval: incr.BalanceRateInterval,
 		MinuteInfo:          incr.MinuteInfo,
 	}

@@ -274,15 +274,26 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					for nIdx, nInc := range nts.Increments {
 						// debit minutes and money
 						seconds := nInc.Duration.Seconds()
-						//cost := nInc.Cost
-						if b.Value >= seconds {
+						cost := nInc.Cost
+						var moneyBal *Balance
+						for _, mb := range moneyBalances {
+							if mb.Value >= cost {
+								mb.Value -= cost
+								moneyBal = mb
+							}
+						}
+						if moneyBal != nil && b.Value >= seconds {
 							b.Value -= seconds
 							nInc.BalanceUuids = append(nInc.BalanceUuids, b.Uuid)
+							nInc.BalanceUuids = append(nInc.BalanceUuids, moneyBal.Uuid)
 							nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds, 0}
+							paid = true
 							if count {
-								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
+								ub.countUnits(&Action{BalanceId: MINUTES, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
+								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: cost, DestinationId: newCC.Destination}})
 							}
 						} else {
+							paid = false
 							nts.SplitByIncrement(nIdx)
 						}
 					}
@@ -447,18 +458,32 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 func (ub *UserBalance) refoundIncrements(increments Increments, count bool) {
 	for _, increment := range increments {
 		var balance *Balance
-		for _, balanceChain := range ub.BalanceMap {
-			if balance = balanceChain.GetBalance(increment.BalanceUuids[0]); balance != nil {
+		if increment.MinuteInfo != nil {
+			if balance = ub.BalanceMap[MINUTES+OUTBOUND].GetBalance(increment.BalanceUuids[0]); balance != nil {
 				break
 			}
-		}
-		if balance != nil {
-			balance.Value += increment.Cost
-			if count {
-				ub.countUnits(&Action{BalanceId: increment.BalanceType, Direction: OUTBOUND, Balance: &Balance{Value: increment.Cost}})
+			if balance != nil {
+				balance.Value += increment.Duration.Seconds()
+				if count {
+					ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: -increment.Duration.Seconds()}})
+				}
+			} else {
+				// TODO: where should put the minutes?
 			}
-		} else {
-			// TODO: where should put the money?
+		}
+		// check money too
+		if len(increment.BalanceUuids) == 2 && increment.BalanceUuids[1] != "" {
+			if balance = ub.BalanceMap[CREDIT+OUTBOUND].GetBalance(increment.BalanceUuids[1]); balance != nil {
+				break
+			}
+			if balance != nil {
+				balance.Value += increment.Cost
+				if count {
+					ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: -increment.Cost}})
+				}
+			} else {
+				// TODO: where should put the money?
+			}
 		}
 	}
 }
