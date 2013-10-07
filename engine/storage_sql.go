@@ -31,7 +31,7 @@ type SQLStorage struct {
 }
 
 func (self *SQLStorage) Close() {
-	self.Close()
+	self.Db.Close()
 }
 
 func (self *SQLStorage) Flush() (err error) {

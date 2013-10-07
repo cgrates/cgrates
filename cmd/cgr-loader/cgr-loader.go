@@ -121,7 +121,6 @@ func main() {
 			defer scribeAgent.Client.Close()
 		}
 	}
-
 	err = loader.LoadDestinations()
 	if err != nil {
 		log.Fatal(err)
