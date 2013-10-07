@@ -137,19 +137,20 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 /*
 Restores the activation periods for the specified prefix from storage.
 */
-func (cd *CallDescriptor) LoadRatingPlans() (destPrefix string, err error) {
+func (cd *CallDescriptor) LoadRatingPlans() (destPrefix, matchedSubject string, err error) {
+	matchedSubject = cd.GetKey()
 	if val, err := cache2go.GetXCached(cd.GetKey() + cd.Destination); err == nil {
 		xaps := val.(xCachedRatingPlans)
 		cd.RatingPlans = xaps.aps
-		return xaps.destPrefix, nil
+		return xaps.destPrefix, matchedSubject, nil
 	}
-	destPrefix, values, err := cd.getRatingPlansForPrefix(cd.GetKey(), 1)
+	destPrefix, matchedSubject, values, err := cd.getRatingPlansForPrefix(cd.GetKey(), 1)
 	if err != nil {
 		fallbackKey := fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
 		// use the default subject
-		destPrefix, values, err = cd.getRatingPlansForPrefix(fallbackKey, 1)
+		destPrefix, matchedSubject, values, err = cd.getRatingPlansForPrefix(fallbackKey, 1)
 	}
-	//load the activation preriods
+	//load the rating plans
 	if err == nil && len(values) > 0 {
 		xaps := xCachedRatingPlans{destPrefix, values, new(cache2go.XEntry)}
 		xaps.XCache(cd.GetKey()+cd.Destination, debitPeriod+5*time.Second, xaps)
@@ -158,22 +159,23 @@ func (cd *CallDescriptor) LoadRatingPlans() (destPrefix string, err error) {
 	return
 }
 
-func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (foundPrefix string, aps []*RatingPlan, err error) {
+func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (foundPrefix, matchedSubject string, aps []*RatingPlan, err error) {
+	matchedSubject = key
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
 	rp, err := storageGetter.GetRatingProfile(key)
 	if err != nil {
-		return "", nil, err
+		return "", "", nil, err
 	}
 	foundPrefix, aps, err = rp.GetRatingPlansForPrefix(cd.Destination)
 	if err != nil {
 		if rp.FallbackKey != "" {
 			recursionDepth++
 			for _, fbk := range strings.Split(rp.FallbackKey, FALLBACK_SEP) {
-				if destPrefix, values, err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
-					return destPrefix, values, err
+				if destPrefix, matchedSubject, values, err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
+					return destPrefix, matchedSubject, values, err
 				}
 			}
 		}
@@ -283,7 +285,7 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*Ti
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	destPrefix, err := cd.LoadRatingPlans()
+	destPrefix, matchedSubject, err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return &CallCost{Cost: -1}, err
@@ -305,7 +307,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Direction:   cd.Direction,
 		TOR:         cd.TOR,
 		Tenant:      cd.Tenant,
-		Subject:     cd.Subject,
+		Subject:     matchedSubject,
 		Account:     cd.Account,
 		Destination: destPrefix,
 		Cost:        cost,
@@ -322,7 +324,7 @@ If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
 func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float64, err error) {
-	_, err = cd.LoadRatingPlans()
+	_, _, err = cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return 0, err
