@@ -303,11 +303,12 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	}
 	// global rounding
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
+	subject := strings.Split(matchedSubject, ":")
 	cc := &CallCost{
 		Direction:   cd.Direction,
 		TOR:         cd.TOR,
 		Tenant:      cd.Tenant,
-		Subject:     matchedSubject,
+		Subject:     subject[len(subject)-1],
 		Account:     cd.Account,
 		Destination: destPrefix,
 		Cost:        cost,

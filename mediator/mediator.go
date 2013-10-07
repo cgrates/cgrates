@@ -199,7 +199,10 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*engine.CallCost, error)
 		Account:     cdr.GetAccount(),
 		Destination: cdr.GetDestination(),
 		TimeStart:   t1,
-		TimeEnd:     t1.Add(d)}
+		TimeEnd:     t1.Add(d),
+		LoopIndex:   0,
+	}
+	cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	if cdr.GetReqType() == utils.PSEUDOPREPAID {
 		err = self.connector.Debit(cd, cc)
 	} else {
