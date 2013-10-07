@@ -29,7 +29,7 @@ A unit in which a call will be split that has a specific price related interval 
 type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
 	Cost               float64
-	RatingPlan         *RatingPlan
+	ratingPlan         *RatingPlan
 	RateInterval       *RateInterval
 	CallDuration       time.Duration // the call duration so far till TimeEnd
 	overlapped         bool          // mark a timespan as overlapped by an expanded one
@@ -39,7 +39,7 @@ type TimeSpan struct {
 type Increment struct {
 	Duration            time.Duration
 	Cost                float64
-	BalanceUuid         string
+	BalanceUuids        []string // need more than one for minutes with cost
 	BalanceType         string
 	BalanceRateInterval *RateInterval
 	MinuteInfo          *MinuteInfo
@@ -53,14 +53,16 @@ type MinuteInfo struct {
 }
 
 func (incr *Increment) Clone() *Increment {
-	return &Increment{
+	nIncr := &Increment{
 		Duration:            incr.Duration,
 		Cost:                incr.Cost,
-		BalanceUuid:         incr.BalanceUuid,
 		BalanceType:         incr.BalanceType,
 		BalanceRateInterval: incr.BalanceRateInterval,
 		MinuteInfo:          incr.MinuteInfo,
 	}
+	nIncr.BalanceUuids = make([]string, len(incr.BalanceUuids))
+	copy(nIncr.BalanceUuids, incr.BalanceUuids)
+	return nIncr
 }
 
 type Increments []*Increment
@@ -132,7 +134,6 @@ a new timespan starting from the end of the received one.
 The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
-
 	//Logger.Debug("here: ", ts, " +++ ", i)
 	// if the span is not in interval return nil
 	if !(i.Contains(ts.TimeStart) || i.Contains(ts.TimeEnd)) {
@@ -141,10 +142,10 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	}
 	// split by GroupStart
 	i.Rates.Sort()
-	for _, price := range i.Rates {
-		if ts.GetGroupStart() < price.GroupIntervalStart && ts.GetGroupEnd() >= price.GroupIntervalStart {
+	for _, rate := range i.Rates {
+		if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() >= rate.GroupIntervalStart {
 			ts.SetRateInterval(i)
-			splitTime := ts.TimeStart.Add(price.GroupIntervalStart - ts.GetGroupStart())
+			splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
 			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 			ts.TimeEnd = splitTime
 			nts.SetRateInterval(i)
@@ -241,13 +242,13 @@ func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
 }
 
 // Splits the given timespan on activation period's activation time.
-func (ts *TimeSpan) SplitByRatingPlan(ap *RatingPlan) (newTs *TimeSpan) {
-	if !ts.Contains(ap.ActivationTime) {
+func (ts *TimeSpan) SplitByRatingPlan(rp *RatingPlan) (newTs *TimeSpan) {
+	if !ts.Contains(rp.ActivationTime) {
 		return nil
 	}
-	newTs = &TimeSpan{TimeStart: ap.ActivationTime, TimeEnd: ts.TimeEnd, RatingPlan: ap}
+	newTs = &TimeSpan{TimeStart: rp.ActivationTime, TimeEnd: ts.TimeEnd, ratingPlan: rp}
 	newTs.CallDuration = ts.CallDuration
-	ts.TimeEnd = ap.ActivationTime
+	ts.TimeEnd = rp.ActivationTime
 	ts.SetNewCallDuration(newTs)
 	return
 }

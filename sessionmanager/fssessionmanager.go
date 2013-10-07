@@ -297,7 +297,7 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, in
 	cc = &engine.CallCost{}
 	cd.LoopIndex = index
 	cd.Amount = sm.debitPeriod.Seconds()
-	cd.CallDuration += time.Duration(cd.Amount) * time.Second
+	cd.CallDuration += sm.debitPeriod
 	err := sm.connector.MaxDebit(*cd, cc)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))

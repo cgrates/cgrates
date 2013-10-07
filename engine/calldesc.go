@@ -201,17 +201,16 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	if len(cd.RatingPlans) == 0 {
 		return
 	}
-	firstSpan.RatingPlan = cd.RatingPlans[0]
-
+	firstSpan.ratingPlan = cd.RatingPlans[0]
 	// split on activation periods
 	afterStart, afterEnd := false, false //optimization for multiple activation periods
-	for _, ap := range cd.RatingPlans {
-		if !afterStart && !afterEnd && ap.ActivationTime.Before(cd.TimeStart) {
-			firstSpan.RatingPlan = ap
+	for _, rp := range cd.RatingPlans {
+		if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
+			firstSpan.ratingPlan = rp
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
-				newTs := timespans[i].SplitByRatingPlan(ap)
+				newTs := timespans[i].SplitByRatingPlan(rp)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
 				} else {
@@ -223,16 +222,16 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	}
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
-		ap := timespans[i].RatingPlan
+		rp := timespans[i].ratingPlan
 		//timespans[i].RatingPlan = nil
-		ap.RateIntervals.Sort()
-		for _, interval := range ap.RateIntervals {
+		rp.RateIntervals.Sort()
+		for _, interval := range rp.RateIntervals {
 			if timespans[i].RateInterval != nil && timespans[i].RateInterval.Weight < interval.Weight {
 				continue // if the timespan has an interval than it already has a heigher weight
 			}
 			newTs := timespans[i].SplitByRateInterval(interval)
 			if newTs != nil {
-				newTs.RatingPlan = ap
+				newTs.ratingPlan = rp
 				timespans = append(timespans, newTs)
 			}
 		}

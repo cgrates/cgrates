@@ -52,6 +52,8 @@ R2,0,0.1,60s,1s,0,*middle,2,10
 R3,0,0.05,60s,1s,0,*middle,2,10
 R4,1,1,1s,1s,0,*up,2,10
 R5,0,0.5,1s,1s,0,*down,2,10
+LANDLINE_OFFPEAK,0,1,1s,60s,0s,*up,4,10
+LANDLINE_OFFPEAK,0,1,1s,1s,60s,*up,4,10
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1
@@ -62,6 +64,7 @@ RT_STD_WEEKEND,GERMANY,R2
 RT_STD_WEEKEND,GERMANY_O2,R3
 P1,NAT,R4
 P2,NAT,R5
+T1,NAT,LANDLINE_OFFPEAK
 `
 	destinationRateTimings = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
@@ -72,6 +75,7 @@ DEFAULT,RT_DEFAULT,WORKDAYS_00,10
 EVENING,P1,WORKDAYS_00,10
 EVENING,P2,WORKDAYS_18,10
 EVENING,P2,WEEKENDS,10
+TDRT,T1,WORKDAYS_00,10
 `
 	ratingProfiles = `
 CUSTOMER_1,0,*out,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb
@@ -85,6 +89,7 @@ vdf,0,*out,*any,2012-02-28T00:00:00Z,EVENING,
 vdf,0,*out,one,2012-02-28T00:00:00Z,STANDARD,
 vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
 vdf,0,*out,fall,2012-02-28T00:00:00Z,PREMIUM,rif
+test,0,*out,trp,2013-10-01T00:00:00Z,TDRT,rif
 `
 	actions = `
 MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,10
@@ -206,7 +211,7 @@ func TestLoadTimimgs(t *testing.T) {
 }
 
 func TestLoadRates(t *testing.T) {
-	if len(csvr.rates) != 5 {
+	if len(csvr.rates) != 6 {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"][0]
@@ -280,10 +285,38 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", csvr.rates)
 	}
 
+	rate = csvr.rates["LANDLINE_OFFPEAK"][0]
+	if !reflect.DeepEqual(rate, &LoadRate{
+		Tag:                "LANDLINE_OFFPEAK",
+		ConnectFee:         0,
+		Price:              1,
+		RateUnit:           time.Second,
+		RateIncrement:      time.Minute,
+		GroupIntervalStart: 0,
+		RoundingMethod:     utils.ROUNDING_UP,
+		RoundingDecimals:   4,
+		Weight:             10,
+	}) {
+		t.Errorf("Error loading rate: %+v", rate)
+	}
+	rate = csvr.rates["LANDLINE_OFFPEAK"][1]
+	if !reflect.DeepEqual(rate, &LoadRate{
+		Tag:                "LANDLINE_OFFPEAK",
+		ConnectFee:         0,
+		Price:              1,
+		RateUnit:           time.Second,
+		RateIncrement:      time.Second,
+		GroupIntervalStart: 60 * time.Second,
+		RoundingMethod:     utils.ROUNDING_UP,
+		RoundingDecimals:   4,
+		Weight:             10,
+	}) {
+		t.Errorf("Error loading rate: %+v", rate)
+	}
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.destinationRates) != 5 {
+	if len(csvr.destinationRates) != 6 {
 		t.Error("Failed to load destinationrates: ", csvr.destinationRates)
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
@@ -351,10 +384,20 @@ func TestLoadDestinationRates(t *testing.T) {
 	}) {
 		t.Error("Error loading destination rate: ", drs)
 	}
+	drs = csvr.destinationRates["T1"]
+	if !reflect.DeepEqual(drs, []*DestinationRate{
+		&DestinationRate{
+			Tag:             "T1",
+			DestinationsTag: "NAT",
+			rates:           csvr.rates["LANDLINE_OFFPEAK"],
+		},
+	}) {
+		t.Error("Error loading destination rate: ", drs)
+	}
 }
 
 func TestLoadDestinationRateTimings(t *testing.T) {
-	if len(csvr.destinationRateTimings) != 4 {
+	if len(csvr.destinationRateTimings) != 5 {
 		t.Error("Failed to load rate timings: ", csvr.destinationRateTimings)
 	}
 	rplan := csvr.destinationRateTimings["STANDARD"]
@@ -518,18 +561,67 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %#v", rplan)
+		t.Errorf("Error loading destination rate timing: %+v", rplan)
+	}
+	rplan = csvr.destinationRateTimings["TDRT"]
+	expected = []*DestinationRateTiming{
+		&DestinationRateTiming{
+			destinationRates: csvr.destinationRates["T1"],
+			Weight:           10,
+			timing:           csvr.timings["WORKDAYS_00"],
+		},
+	}
+	if !reflect.DeepEqual(rplan, expected) {
+		t.Errorf("Error loading destination rate timing: %+v", rplan[0])
 	}
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 9 {
+	if len(csvr.ratingProfiles) != 10 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
-	rp := csvr.ratingProfiles["*out:CUSTOMER_1:0:rif:from:tm"]
-	expected := &RatingProfile{}
-	if reflect.DeepEqual(rp, expected) {
-		t.Errorf("Error loading rating profile: %+v", rp.DestinationMap["GERMANY"][1].RateIntervals[2].Rates[0])
+	rp := csvr.ratingProfiles["*out:test:0:trp"]
+	expected := &RatingProfile{
+		Id:          "*out:test:0:trp",
+		FallbackKey: "*out:test:0:rif",
+		DestinationMap: map[string][]*RatingPlan{
+			"NAT": []*RatingPlan{
+				&RatingPlan{
+					ActivationTime: time.Date(2013, time.October, 1, 0, 0, 0, 0, time.UTC),
+					RateIntervals: []*RateInterval{
+						&RateInterval{
+							Years:      Years{},
+							Months:     Months{},
+							MonthDays:  MonthDays{},
+							WeekDays:   WeekDays{1, 2, 3, 4, 5},
+							StartTime:  "00:00:00",
+							EndTime:    "",
+							Weight:     10,
+							ConnectFee: 0,
+							Rates: RateGroups{
+								&Rate{
+									GroupIntervalStart: 0,
+									Value:              1,
+									RateIncrement:      time.Minute,
+									RateUnit:           time.Second,
+								},
+								&Rate{
+									GroupIntervalStart: time.Minute,
+									Value:              1,
+									RateIncrement:      time.Second,
+									RateUnit:           time.Second,
+								},
+							},
+							RoundingMethod:   utils.ROUNDING_UP,
+							RoundingDecimals: 4,
+						},
+					},
+				},
+			},
+		},
+	}
+	if !reflect.DeepEqual(rp, expected) {
+		t.Errorf("Error loading rating profile: %+v")
 	}
 }
 

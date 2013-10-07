@@ -193,8 +193,8 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					amount := increment.Duration.Seconds()
 					if b.Value >= amount {
 						b.Value -= amount
-						increment.BalanceUuid = b.Uuid
-						increment.MinuteInfo = &MinuteInfo{b.DestinationId, amount, 0}
+						increment.BalanceUuids = append(increment.BalanceUuids, b.Uuid)
+						increment.MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
 						paid = true
 						if count {
 							ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -248,8 +248,8 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						}
 						cc.Timespans = newTimespans
 						b.Value -= amount
-						newTs.Increments[0].BalanceUuid = b.Uuid
-						newTs.Increments[0].MinuteInfo = &MinuteInfo{b.DestinationId, amount, 0}
+						newTs.Increments[0].BalanceUuids = append(newTs.Increments[0].BalanceUuids, b.Uuid)
+						newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
 						paid = true
 						if count {
 							ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -274,18 +274,20 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					for nIdx, nInc := range nts.Increments {
 						// debit minutes and money
 						seconds := nInc.Duration.Seconds()
-						amount := nInc.Cost
+						//cost := nInc.Cost
 						if b.Value >= seconds {
 							b.Value -= seconds
-							nInc.BalanceUuid = b.Uuid
+							nInc.BalanceUuids = append(nInc.BalanceUuids, b.Uuid)
+							nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds, 0}
 							if count {
-								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
+								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
 							}
 						} else {
 							nts.SplitByIncrement(nIdx)
 						}
 					}
 				}
+
 				// calculate overlaped timespans
 				var paidDuration time.Duration
 				for _, pts := range paidTs {
@@ -349,7 +351,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					amount := increment.Cost
 					if b.Value >= amount {
 						b.Value -= amount
-						increment.BalanceUuid = b.Uuid
+						increment.BalanceUuids = append(increment.BalanceUuids, b.Uuid)
 						paid = true
 						if count {
 							ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -376,7 +378,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 							amount := nInc.Cost
 							if b.Value >= amount {
 								b.Value -= amount
-								nInc.BalanceUuid = b.Uuid
+								nInc.BalanceUuids = append(nInc.BalanceUuids, b.Uuid)
 								if count {
 									ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
 								}
@@ -446,7 +448,7 @@ func (ub *UserBalance) refoundIncrements(increments Increments, count bool) {
 	for _, increment := range increments {
 		var balance *Balance
 		for _, balanceChain := range ub.BalanceMap {
-			if balance = balanceChain.GetBalance(increment.BalanceUuid); balance != nil {
+			if balance = balanceChain.GetBalance(increment.BalanceUuids[0]); balance != nil {
 				break
 			}
 		}
