@@ -188,6 +188,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			}
 			paid := false
 			for _, b := range usefulMinuteBalances {
+
 				// check standard subject tags
 				if b.RateSubject == ZEROSECOND || b.RateSubject == "" {
 					amount := increment.Duration.Seconds()
@@ -201,6 +202,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						}
 						break
 					}
+					continue
 				}
 				if b.RateSubject == ZEROMINUTE {
 					amount := time.Minute.Seconds()
@@ -256,6 +258,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						}
 						break
 					}
+					continue
 				}
 				// get the new rate
 				cd := cc.CreateCallDescriptor()

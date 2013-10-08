@@ -144,7 +144,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	i.Rates.Sort()
 	for _, rate := range i.Rates {
 		Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
-		if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() >= rate.GroupIntervalStart {
+		if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
 			Logger.Debug(fmt.Sprintf("Splitting"))
 			ts.SetRateInterval(i)
 			splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())

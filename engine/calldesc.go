@@ -236,6 +236,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			if newTs != nil {
 				newTs.ratingPlan = rp
 				timespans = append(timespans, newTs)
+				break
 			}
 		}
 	}
