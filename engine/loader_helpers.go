@@ -232,7 +232,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
 		"Tag([0-9A-Za-z_]),Years([0-9;]|*all|<empty>),Months([0-9;]|*all|<empty>),MonthDays([0-9;]|*all|<empty>),WeekDays([0-9;]|*all|<empty>),Time([0-9:]|*asap)"},
 	utils.RATES_CSV: &FileLineRegexValidator{utils.RATES_NRCOLS,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,){3}(?:\*\w+,){1}x(?:\d+\.?\d*,?){1}$`),
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,){3}(?:\*\w+,){1}(?:\d+\.?\d*,?){1}$`),
 		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RateUnit([0-9.]),RateIncrementStart([0-9.])"},
 	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,?\s*){3}$`),
