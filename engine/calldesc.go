@@ -222,6 +222,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			}
 		}
 	}
+	Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: ", timespans))
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
 		rp := timespans[i].ratingPlan
@@ -238,7 +239,9 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			}
 		}
 	}
+	Logger.Debug(fmt.Sprintf("After SplitByRateInterval: ", timespans))
 	timespans = cd.roundTimeSpansToIncrement(timespans)
+	Logger.Debug(fmt.Sprintf("After round: ", timespans))
 	return
 }
 

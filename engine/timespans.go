@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"time"
 )
@@ -149,7 +150,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 			nts.SetRateInterval(i)
 			nts.CallDuration = ts.CallDuration
 			ts.SetNewCallDuration(nts)
-
+			Logger.Debug(fmt.Sprintf("Group splitting: ", ts, nts))
 			return
 		}
 	}
@@ -158,6 +159,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	if i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd) {
 		//Logger.Debug("All in interval")
 		ts.SetRateInterval(i)
+		Logger.Debug(fmt.Sprintf("enclosed: ", ts))
 		return
 	}
 	// if only the start time is in the interval split the interval to the right
@@ -172,7 +174,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		ts.TimeEnd = splitTime
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
-
+		Logger.Debug(fmt.Sprintf("right: ", ts, nts))
 		return
 	}
 	// if only the end time is in the interval split the interval to the left
@@ -188,7 +190,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.SetRateInterval(i)
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
-
+		Logger.Debug(fmt.Sprintf("left: ", ts, nts))
 		return
 	}
 	return

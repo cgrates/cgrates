@@ -192,17 +192,17 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*engine.CallCost, error)
 		return nil, err
 	}
 	cd := engine.CallDescriptor{
-		Direction:   "*out", //record[m.directionFields[runIdx]] TODO: fix me
-		Tenant:      cdr.GetTenant(),
-		TOR:         cdr.GetTOR(),
-		Subject:     cdr.GetSubject(),
-		Account:     cdr.GetAccount(),
-		Destination: cdr.GetDestination(),
-		TimeStart:   t1,
-		TimeEnd:     t1.Add(d),
-		LoopIndex:   0,
+		Direction:    "*out", //record[m.directionFields[runIdx]] TODO: fix me
+		Tenant:       cdr.GetTenant(),
+		TOR:          cdr.GetTOR(),
+		Subject:      cdr.GetSubject(),
+		Account:      cdr.GetAccount(),
+		Destination:  cdr.GetDestination(),
+		TimeStart:    t1,
+		TimeEnd:      t1.Add(d),
+		LoopIndex:    0,
+		CallDuration: d,
 	}
-	cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	if cdr.GetReqType() == utils.PSEUDOPREPAID {
 		err = self.connector.Debit(cd, cc)
 	} else {
