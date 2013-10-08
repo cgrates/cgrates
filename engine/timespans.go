@@ -139,10 +139,13 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		//Logger.Debug("Not in interval")
 		return
 	}
+	Logger.Debug(fmt.Sprintf("TS: %+v", ts))
 	// split by GroupStart
 	i.Rates.Sort()
 	for _, rate := range i.Rates {
+		Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
 		if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() >= rate.GroupIntervalStart {
+			Logger.Debug(fmt.Sprintf("Splitting"))
 			ts.SetRateInterval(i)
 			splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
 			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
@@ -150,7 +153,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 			nts.SetRateInterval(i)
 			nts.CallDuration = ts.CallDuration
 			ts.SetNewCallDuration(nts)
-			Logger.Debug(fmt.Sprintf("Group splitting: ", ts, nts))
+			Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
 			return
 		}
 	}
@@ -159,7 +162,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	if i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd) {
 		//Logger.Debug("All in interval")
 		ts.SetRateInterval(i)
-		Logger.Debug(fmt.Sprintf("enclosed: ", ts))
 		return
 	}
 	// if only the start time is in the interval split the interval to the right
@@ -174,7 +176,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		ts.TimeEnd = splitTime
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
-		Logger.Debug(fmt.Sprintf("right: ", ts, nts))
+		Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
 		return
 	}
 	// if only the end time is in the interval split the interval to the left
@@ -190,7 +192,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.SetRateInterval(i)
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
-		Logger.Debug(fmt.Sprintf("left: ", ts, nts))
+		Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
 		return
 	}
 	return
