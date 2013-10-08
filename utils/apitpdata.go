@@ -34,7 +34,6 @@ type RateSlot struct {
 	GroupIntervalStart string  // Group position
 	RoundingMethod     string  // Use this method to round the cost
 	RoundingDecimals   int     // Round the cost number of decimals
-	Weight             float64 // Rate's priority when dealing with grouped rates
 }
 
 type TPDestinationRate struct {

@@ -205,7 +205,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*LoadRate) erro
 			}
 			qry += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d, %f)",
 				tpid, rtId, rt.ConnectFee, rt.Price, rt.RateUnit, rt.RateIncrement, rt.GroupIntervalStart,
-				rt.RoundingMethod, rt.RoundingDecimals, rt.Weight)
+				rt.RoundingMethod, rt.RoundingDecimals)
 			i++
 		}
 	}
@@ -234,7 +234,7 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 			return nil, err
 		}
 		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, rateUnit.String(), rateIncrement.String(),
-			groupIntervalStart.String(), roundingMethod, roundingDecimals, weight})
+			groupIntervalStart.String(), roundingMethod, roundingDecimals})
 	}
 	if i == 0 {
 		return nil, nil
@@ -934,10 +934,10 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*LoadRate, er
 	defer rows.Close()
 	for rows.Next() {
 		var tag, roundingMethod string
-		var connect_fee, rate, weight float64
+		var connect_fee, rate float64
 		var rate_unit, rate_increment, group_interval_start time.Duration
 		var roundingDecimals int
-		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start, &roundingMethod, &roundingDecimals, &weight); err != nil {
+		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start, &roundingMethod, &roundingDecimals); err != nil {
 			return nil, err
 		}
 		r := &LoadRate{
@@ -949,7 +949,6 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*LoadRate, er
 			GroupIntervalStart: group_interval_start,
 			RoundingMethod:     roundingMethod,
 			RoundingDecimals:   roundingDecimals,
-			Weight:             weight,
 		}
 		// same tag only to create rate groups
 		existingRates, exists := rts[tag]

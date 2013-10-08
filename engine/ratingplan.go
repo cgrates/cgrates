@@ -40,21 +40,21 @@ type xCachedRatingPlans struct {
 /*
 Adds one ore more intervals to the internal interval list only if it is not allready in the list.
 */
-func (ap *RatingPlan) AddRateInterval(ris ...*RateInterval) {
+func (rp *RatingPlan) AddRateInterval(ris ...*RateInterval) {
 	for _, ri := range ris {
 		found := false
-		for _, eri := range ap.RateIntervals {
+		for _, eri := range rp.RateIntervals {
 			if ri.Equal(eri) {
 				found = true
 				break
 			}
 		}
 		if !found {
-			ap.RateIntervals = append(ap.RateIntervals, ri)
+			rp.RateIntervals = append(rp.RateIntervals, ri)
 		}
 	}
 }
 
-func (ap *RatingPlan) Equal(o *RatingPlan) bool {
-	return ap.ActivationTime == o.ActivationTime
+func (rp *RatingPlan) Equal(o *RatingPlan) bool {
+	return rp.ActivationTime == o.ActivationTime
 }

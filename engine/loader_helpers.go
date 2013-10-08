@@ -53,10 +53,9 @@ type LoadRate struct {
 	RateUnit, RateIncrement, GroupIntervalStart time.Duration
 	RoundingMethod                              string
 	RoundingDecimals                            int
-	Weight                                      float64
 }
 
-func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *LoadRate, err error) {
+func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals string) (r *LoadRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -82,11 +81,6 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		log.Printf("Error parsing rates increments from: %v", rateIncrements)
 		return
 	}
-	wght, err := strconv.ParseFloat(weight, 64)
-	if err != nil {
-		log.Printf("Error parsing weight from: %s", weight)
-		return
-	}
 	rd, err := strconv.Atoi(roundingDecimals)
 	if err != nil {
 		log.Printf("Error parsing rounding decimals: %s", roundingDecimals)
@@ -100,7 +94,6 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		GroupIntervalStart: gi,
 		RateUnit:           ru,
 		RateIncrement:      ri,
-		Weight:             wght,
 		RoundingMethod:     roundingMethod,
 		RoundingDecimals:   rd,
 	}
@@ -239,7 +232,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
 		"Tag([0-9A-Za-z_]),Years([0-9;]|*all|<empty>),Months([0-9;]|*all|<empty>),MonthDays([0-9;]|*all|<empty>),WeekDays([0-9;]|*all|<empty>),Time([0-9:]|*asap)"},
 	utils.RATES_CSV: &FileLineRegexValidator{utils.RATES_NRCOLS,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,){3}(?:\*\w+,){1}(?:\d+\.?\d*,?){2}$`),
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,){3}(?:\*\w+,){1}x(?:\d+\.?\d*,?){1}$`),
 		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RateUnit([0-9.]),RateIncrementStart([0-9.])"},
 	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,?\s*){3}$`),

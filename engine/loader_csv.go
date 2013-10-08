@@ -221,10 +221,11 @@ func (csvr *CSVReader) LoadRates() (err error) {
 	if fp != nil {
 		defer fp.Close()
 	}
+
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		var r *LoadRate
-		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
+		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
 		if err != nil {
 			return err
 		}
@@ -331,15 +332,20 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		}
 
 		for _, drt := range drts {
-			plan := &RatingPlan{ActivationTime: at}
+			//log.Print("TAG: ", record[5])
 			for _, dr := range drt.destinationRates {
+				plan := &RatingPlan{ActivationTime: at}
+				//log.Printf("RI: %+v", drt.GetRateInterval(dr))
 				plan.AddRateInterval(drt.GetRateInterval(dr))
 				rp.AddRatingPlanIfNotPresent(dr.DestinationsTag, plan)
 			}
 		}
 
 		if fallbacksubject != "" {
-			rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject)
+			for _, fbs := range strings.Split(fallbacksubject, ";") {
+				rp.FallbackKey += fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs) + ";"
+			}
+			rp.FallbackKey = strings.TrimRight(rp.FallbackKey, ";")
 		}
 	}
 	return
