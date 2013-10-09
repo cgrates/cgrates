@@ -197,8 +197,8 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", rp.DestinationMap))
 		}
 		for _, drt := range drts {
-			plan := &RatingPlan{ActivationTime: at}
 			for _, dr := range drt.destinationRates {
+				plan := &RatingPlan{ActivationTime: at}
 				plan.AddRateInterval(drt.GetRateInterval(dr))
 				rp.AddRatingPlanIfNotPresent(dr.DestinationsTag, plan)
 			}

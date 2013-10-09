@@ -260,6 +260,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					}
 					continue
 				}
+
 				// get the new rate
 				cd := cc.CreateCallDescriptor()
 				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)

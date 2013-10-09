@@ -40,7 +40,7 @@ func init() {
 	//db_server := "192.168.0.17"
 	m, _ := NewMapStorage()
 	//m, _ := NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-	//m, _ := NewRedisStorage(db_server+":6379", 11, "")
+	//m, _ := NewRedisStorage(db_server+":6379", 11, "", utils.MSGPACK)
 	//m, _ := NewRedigoStorage(db_server+":6379", 11, "")
 	//m, _ := NewRadixStorage(db_server+":6379", 11, "")
 	storageGetter, _ = m.(DataStorage)
@@ -225,17 +225,24 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
+		//log.Printf("TS: %+v", timespans[i])
 		rp := timespans[i].ratingPlan
+		Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rp.RateIntervals.Sort()
 		for _, interval := range rp.RateIntervals {
+			//log.Printf("\tINTERVAL: %+v %v", interval, len(rp.RateIntervals))
 			if timespans[i].RateInterval != nil && timespans[i].RateInterval.Weight < interval.Weight {
 				continue // if the timespan has an interval than it already has a heigher weight
 			}
 			newTs := timespans[i].SplitByRateInterval(interval)
 			if newTs != nil {
 				newTs.ratingPlan = rp
-				timespans = append(timespans, newTs)
+				// insert the new timespan
+				i++
+				timespans = append(timespans, nil)
+				copy(timespans[i+1:], timespans[i:])
+				timespans[i] = newTs
 				break
 			}
 		}
@@ -307,12 +314,12 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	}
 	// global rounding
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
-	subject := strings.Split(matchedSubject, ":")
+	startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
 		Direction:   cd.Direction,
 		TOR:         cd.TOR,
 		Tenant:      cd.Tenant,
-		Subject:     subject[len(subject)-1],
+		Subject:     matchedSubject[startIndex:],
 		Account:     cd.Account,
 		Destination: destPrefix,
 		Cost:        cost,

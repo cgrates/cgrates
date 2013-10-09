@@ -142,15 +142,6 @@ func (ss StringSlice) Contains(needle string) bool {
 	return false
 }
 
-func SplitPrefix(prefix string) []string {
-	var subs []string
-	max := len(prefix)
-	for i := 0; i < len(prefix)-1; i++ {
-		subs = append(subs, prefix[:max-i])
-	}
-	return subs
-}
-
 func SplitPrefixInterface(prefix string) []interface{} {
 	var subs []interface{}
 	max := len(prefix)

@@ -34,7 +34,7 @@ func TestApRestoreFromStorage(t *testing.T) {
 		Destination: "49"}
 	cd.LoadRatingPlans()
 	if len(cd.RatingPlans) != 2 {
-		t.Error("Error restoring activation periods: ", len(cd.RatingPlans))
+		t.Error("Error restoring activation periods: ", cd.RatingPlans[0])
 	}
 }
 
@@ -79,8 +79,8 @@ func TestFallbackDirect(t *testing.T) {
 func TestFallbackMultiple(t *testing.T) {
 	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "fall", Destination: "0723045"}
 	cd.LoadRatingPlans()
-	if len(cd.RatingPlans) != 2 {
-		t.Errorf("Error restoring rating plans: %#v", cd.RatingPlans)
+	if len(cd.RatingPlans) != 1 {
+		t.Errorf("Error restoring rating plans: %+v", cd.RatingPlans)
 	}
 }
 

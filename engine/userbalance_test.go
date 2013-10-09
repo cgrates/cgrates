@@ -684,47 +684,45 @@ func TestDebitNegativeMinuteBalance(t *testing.T) {
 }
 */
 
-/*
 func TestDebitSMSBalance(t *testing.T) {
-	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.0, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}, SMS + OUTBOUND: BalanceChain{&Balance{Value: 100}}}}
-	result := rifsBalance.debitBalance(SMS, 12, false)
+	result := rifsBalance.debitGenericBalance(SMS, 12, false)
 	if rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value != 88 || result != rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value {
 		t.Errorf("Expected %v was %v", 88, rifsBalance.BalanceMap[SMS+OUTBOUND])
 	}
 }
 
 func TestDebitAllSMSBalance(t *testing.T) {
-	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.0, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}, SMS + OUTBOUND: BalanceChain{&Balance{Value: 100}}}}
-	result := rifsBalance.debitBalance(SMS, 100, false)
+	result := rifsBalance.debitGenericBalance(SMS, 100, false)
 	if rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value != 0 || result != rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value {
 		t.Errorf("Expected %v was %v", 0, rifsBalance.BalanceMap[SMS+OUTBOUND])
 	}
 }
 
 func TestDebitMoreSMSBalance(t *testing.T) {
-	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.0, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}, SMS + OUTBOUND: BalanceChain{&Balance{Value: 100}}}}
-	result := rifsBalance.debitBalance(SMS, 110, false)
+	result := rifsBalance.debitGenericBalance(SMS, 110, false)
 	if rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value != -10 || result != rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value {
 		t.Errorf("Expected %v was %v", -10, rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value)
 	}
 }
 
 func TestDebitNegativeSMSBalance(t *testing.T) {
-	b1 := &Balance{Value: 10, Weight: 10, SpecialPrice: 0.0, DestinationId: "NAT"}
-	b2 := &Balance{Value: 100, Weight: 20, SpecialPrice: 0.0, DestinationId: "RET"}
+	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
+	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}, SMS + OUTBOUND: BalanceChain{&Balance{Value: 100}}}}
-	result := rifsBalance.debitBalance(SMS, -15, false)
+	result := rifsBalance.debitGenericBalance(SMS, -15, false)
 	if rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value != 115 || result != rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value {
 		t.Errorf("Expected %v was %v", 115, rifsBalance.BalanceMap[SMS+OUTBOUND])
 	}
 }
-*/
 
 func TestUserBalancedebitBalance(t *testing.T) {
 	ub := &UserBalance{

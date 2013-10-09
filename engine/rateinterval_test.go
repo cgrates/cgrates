@@ -23,6 +23,18 @@ import (
 	"time"
 )
 
+func TestRateIntervalSimpleContains(t *testing.T) {
+	i := &RateInterval{
+		WeekDays:  WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+		StartTime: "18:00:00",
+		EndTime:   "",
+	}
+	d := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
+	if !i.Contains(d) {
+		t.Errorf("Date %+v shoud be in interval %+v", d, i)
+	}
+}
+
 func TestRateIntervalMonth(t *testing.T) {
 	i := &RateInterval{Months: Months{time.February}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)

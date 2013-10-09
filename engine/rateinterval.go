@@ -163,8 +163,9 @@ func (i *RateInterval) getRightMargin(t time.Time) (rigthtTime time.Time) {
 		hour, _ = strconv.Atoi(split[0])
 		min, _ = strconv.Atoi(split[1])
 		sec, _ = strconv.Atoi(split[2])
+		return time.Date(year, month, day, hour, min, sec, nsec, loc)
 	}
-	return time.Date(year, month, day, hour, min, sec, nsec, loc)
+	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
 }
 
 /*

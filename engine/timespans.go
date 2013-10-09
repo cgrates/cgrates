@@ -154,10 +154,11 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 			nts.CallDuration = ts.CallDuration
 			ts.SetNewCallDuration(nts)
 			Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
+			//log.Printf("Group splitting: %+v %+v", ts, nts)
 			return
 		}
 	}
-
+	//log.Printf("%+v %+v", i, ts.TimeEnd)
 	// if the span is enclosed in the interval try to set as new interval and return nil
 	if i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd) {
 		//Logger.Debug("All in interval")
@@ -168,6 +169,9 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	if i.Contains(ts.TimeStart) {
 		//Logger.Debug("Start in interval")
 		splitTime := i.getRightMargin(ts.TimeStart)
+		if ts.TimeEnd.Sub(splitTime) == time.Second {
+			//return
+		}
 		ts.SetRateInterval(i)
 		if splitTime == ts.TimeStart {
 			return
@@ -177,6 +181,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
 		Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
+		//log.Printf("right: %+v %+v", ts, nts)
 		return
 	}
 	// if only the end time is in the interval split the interval to the left
@@ -193,6 +198,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
 		Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
+		//log.Printf("left: %+v %+v", ts, nts)
 		return
 	}
 	return
