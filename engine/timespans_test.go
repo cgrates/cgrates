@@ -31,18 +31,18 @@ func TestRightMargin(t *testing.T) {
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
-	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 23, 59, 59, 0, time.UTC) {
+	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 24, 0, 0, 0, time.UTC) {
 		t.Error("Incorrect first half", ts)
 	}
-	if nts.TimeStart != time.Date(2012, time.February, 3, 23, 59, 59, 0, time.UTC) || nts.TimeEnd != t2 {
+	if nts.TimeStart != time.Date(2012, time.February, 4, 0, 0, 0, 0, time.UTC) || nts.TimeEnd != t2 {
 		t.Error("Incorrect second half", nts)
 	}
 	if ts.RateInterval != i {
 		t.Error("RateInterval not attached correctly")
 	}
 
-	if ts.GetDuration().Seconds() != 15*60-1 || nts.GetDuration().Seconds() != 10*60+1 {
-		t.Error("Wrong durations.for RateIntervals", ts.GetDuration().Seconds(), ts.GetDuration().Seconds())
+	if ts.GetDuration() != 15*time.Minute || nts.GetDuration() != 10*time.Minute {
+		t.Error("Wrong durations.for RateIntervals", ts.GetDuration(), ts.GetDuration())
 	}
 
 	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
@@ -57,18 +57,18 @@ func TestRightHourMargin(t *testing.T) {
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
-	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 17, 59, 00, 0, time.UTC) {
+	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 17, 59, 0, 0, time.UTC) {
 		t.Error("Incorrect first half", ts)
 	}
-	if nts.TimeStart != time.Date(2012, time.February, 3, 17, 59, 00, 0, time.UTC) || nts.TimeEnd != t2 {
+	if nts.TimeStart != time.Date(2012, time.February, 3, 17, 59, 0, 0, time.UTC) || nts.TimeEnd != t2 {
 		t.Error("Incorrect second half", nts)
 	}
 	if ts.RateInterval != i {
 		t.Error("RateInterval not attached correctly")
 	}
 
-	if ts.GetDuration().Seconds() != 29*60 || nts.GetDuration().Seconds() != 1*60 {
-		t.Error("Wrong durations.for RateIntervals", ts.GetDuration().Seconds(), nts.GetDuration().Seconds())
+	if ts.GetDuration() != 29*time.Minute || nts.GetDuration() != 1*time.Minute {
+		t.Error("Wrong durations.for RateIntervals", ts.GetDuration(), nts.GetDuration())
 	}
 	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
 		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())

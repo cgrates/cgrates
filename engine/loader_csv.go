@@ -343,7 +343,11 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 
 		if fallbacksubject != "" {
 			for _, fbs := range strings.Split(fallbacksubject, ";") {
-				rp.FallbackKey += fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs) + ";"
+				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
+				var sslice utils.StringSlice = strings.Split(rp.FallbackKey, ";")
+				if !sslice.Contains(newKey) {
+					rp.FallbackKey += newKey + ";"
+				}
 			}
 			rp.FallbackKey = strings.TrimRight(rp.FallbackKey, ";")
 		}

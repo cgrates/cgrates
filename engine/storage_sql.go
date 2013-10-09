@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"strings"
 	"time"
 )
 
@@ -1066,7 +1067,14 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 		rp.DestRatesTimingTag = destrates_timing_tag
 		rp.ActivationTime = activation_time
 		if fallback_subject != "" {
-			rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallback_subject)
+			for _, fbs := range strings.Split(fallback_subject, ";") {
+				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
+				var sslice utils.StringSlice = strings.Split(rp.FallbackKey, ";")
+				if !sslice.Contains(newKey) {
+					rp.FallbackKey += newKey + ";"
+				}
+			}
+			rp.FallbackKey = strings.TrimRight(rp.FallbackKey, ";")
 		}
 	}
 	return rpfs, nil

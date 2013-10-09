@@ -46,6 +46,7 @@ func (ms *MapStorage) Flush() error {
 func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	if values, ok := ms.dict[RATING_PROFILE_PREFIX+key]; ok {
 		rp = new(RatingProfile)
+
 		err = ms.ms.Unmarshal(values, rp)
 	} else {
 		return nil, errors.New("not found")
@@ -75,8 +76,8 @@ func (ms *MapStorage) DestinationContainsPrefix(key string, prefix string) (prec
 	if d, err := ms.GetDestination(key); err != nil {
 		return 0, err
 	} else {
-		for _, p := range utils.SplitPrefix(prefix) {
-			if precision, ok := d.containsPrefix(p); ok {
+		for _, p := range utils.SplitPrefixInterface(prefix) {
+			if precision, ok := d.containsPrefix(p.(string)); ok {
 				return precision, nil
 			}
 		}
