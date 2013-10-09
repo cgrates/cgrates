@@ -15,16 +15,16 @@ Creates a new Actions profile within a tariff plan.
    }
 
    type Action struct {
-	Identifier     string  // Identifier mapped in the code
-	BalanceType    string  // Type of balance the action will operate on
-	Direction      string  // Balance direction
-	Units          float64 // Number of units to add/deduct
-	ExpiryTime int64   // Time when the units will expire
-	DestinationId  string  // Destination profile id
-	RateType       string  // Type of rate <*absolute|*percent>
-	Rate           float64 // Price value
-	MinutesWeight  float64 // Minutes weight
-	Weight         float64 // Action's weight
+	Identifier      string  // Identifier mapped in the code
+	BalanceType     string  // Type of balance the action will operate on
+	Direction       string  // Balance direction
+	Units           float64 // Number of units to add/deduct
+	ExpiryTime      string  // Time when the units will expire
+	DestinationId   string  // Destination profile id
+	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
+	BalanceWeight   float64 // Balance weight
+	ExtraParameters string  // Pass here parameters to action when called. This can be an encoded string or something which Action will understand
+	Weight          float64 // Action's weight
     }
 
  Mandatory parameters: ``[]string{"TPid", "ActionsId", "Actions", "Identifier", "Weight"}``
@@ -128,17 +128,17 @@ Queries specific Actions profile on tariff plan.
    }
 
    type Action struct {
-	Identifier     string  // Identifier mapped in the code
-	BalanceType    string  // Type of balance the action will operate on
-	Direction      string  // Balance direction
-	Units          float64 // Number of units to add/deduct
-	ExpiryTime     string   // Time when the units will expire
-	DestinationId  string  // Destination profile id
-	RateType       string  // Type of price <*absolute|*percent>
-	Rate           float64 // Price value
-	MinutesWeight  float64 // Minutes weight
-	Weight         float64 // Action's weight
-   }
+	Identifier      string  // Identifier mapped in the code
+	BalanceType     string  // Type of balance the action will operate on
+	Direction       string  // Balance direction
+	Units           float64 // Number of units to add/deduct
+	ExpiryTime      string  // Time when the units will expire
+	DestinationId   string  // Destination profile id
+	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
+	BalanceWeight   float64 // Balance weight
+	ExtraParameters string  // Pass here parameters to action when called. This can be an encoded string or something which Action will understand
+	Weight          float64 // Action's weight
+    }
 
  *JSON sample*:
   ::
