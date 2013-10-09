@@ -14,6 +14,7 @@ stordb_port = test				# The port to reach the logdb.
 stordb_name = test 				# The name of the log database to connect to.
 stordb_user = test  	 			# Username to use when connecting to logdb.
 stordb_passwd = test 	 			# Password to use when connecting to logdb.
+dbdata_encoding = test				# The encoding used to store object data in strings: <msgpack|json>
 rpc_encoding = test 				# RPC encoding used on APIs: <gob|json>.
 default_reqtype = test				# Default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>.
 default_tor = test				# Default Type of Record to consider when missing from requests.

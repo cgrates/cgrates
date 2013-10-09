@@ -55,4 +55,6 @@ const (
 	ROUNDING_MIDDLE          = "*middle"
 	ROUNDING_DOWN            = "*down"
 	COMMENT_CHAR             = '#'
+	JSON			 = "json"
+	MSGPACK			 = "msgpack"
 )
