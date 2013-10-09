@@ -55,7 +55,7 @@ func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 			Balance: &engine.Balance{
 				Value:         act.Units,
 				DestinationId: act.DestinationId,
-				RateSubject:   act.RateSubject,
+				RateSubject:   act.RatingSubject,
 				Weight:        act.BalanceWeight,
 			},
 			Weight: act.Weight,

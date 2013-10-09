@@ -196,14 +196,14 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*LoadRate) erro
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight) VALUES ", utils.TBL_TP_RATES)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES ", utils.TBL_TP_RATES)
 	i := 0
 	for rtId, rtRows := range rts {
 		for _, rt := range rtRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
-			qry += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d, %f)",
+			qry += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d)",
 				tpid, rtId, rt.ConnectFee, rt.Price, rt.RateUnit, rt.RateIncrement, rt.GroupIntervalStart,
 				rt.RoundingMethod, rt.RoundingDecimals)
 			i++
@@ -216,7 +216,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*LoadRate) erro
 }
 
 func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
 	if err != nil {
 		return nil, err
 	}
@@ -225,11 +225,11 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix
-		var connectFee, rate, weight float64
+		var connectFee, rate float64
 		var roundingDecimals int
 		var rateUnit, rateIncrement, groupIntervalStart time.Duration
 		var roundingMethod string
-		err = rows.Scan(&connectFee, &rate, &rateUnit, &rateIncrement, &groupIntervalStart, &roundingMethod, &roundingDecimals, &weight)
+		err = rows.Scan(&connectFee, &rate, &rateUnit, &rateIncrement, &groupIntervalStart, &roundingMethod, &roundingDecimals)
 		if err != nil {
 			return nil, err
 		}

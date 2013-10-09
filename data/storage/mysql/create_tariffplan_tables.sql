@@ -46,7 +46,6 @@ CREATE TABLE `tp_rates` (
   `group_interval_start` int(11) NOT NULL,
   `rounding_method` varchar(255) NOT NULL,
   `rounding_decimals` tinyint(4) NOT NULL,
-  `weight` decimal(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_tprate` (`tpid`,`tag`,`group_interval_start`),
   KEY `tpid` (`tpid`),
