@@ -237,7 +237,7 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 			destrateTiming.timing = tm[destrateTiming.TimingTag]
 			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, destrateTiming.DestinationRatesTag)
 			if err != nil || len(drm) == 0 {
-				return fmt.Errorf("No Timings profile with id %s: %v", destrateTiming.DestinationRatesTag, err)
+				return fmt.Errorf("No DestinationRates profile with id %s: %v", destrateTiming.DestinationRatesTag, err)
 			}
 			for _, drate := range drm[destrateTiming.DestinationRatesTag] {
 				Logger.Debug(fmt.Sprintf("Destination rate: %v", rpm))

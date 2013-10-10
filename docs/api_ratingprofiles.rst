@@ -19,12 +19,12 @@ Process dependencies and load a specific rating profile from storDb into dataDb.
   ::
 
    {
-    "id": 0, 
-    "method": "ApierV1.SetRatingProfile", 
+    "id": 37,
+    "method": "ApierV1.SetRatingProfile",
     "params": [
         {
-            "RatingProfileId": "RPF_SAMPLE_1", 
-            "TPid": "TPID_SAMPLE_1"
+            "RatingProfileId": "RP_ANY",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -44,7 +44,7 @@ Process dependencies and load a specific rating profile from storDb into dataDb.
 
    {
     "error": null, 
-    "id": 0, 
+    "id": 37, 
     "result": "OK"
    }
 

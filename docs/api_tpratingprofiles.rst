@@ -30,26 +30,23 @@ Creates a new RatingProfile within a tariff plan.
   ::
 
    {
-    "id": 3, 
-    "method": "ApierV1.SetTPRatingProfile", 
+    "id": 14,
+    "method": "ApierV1.SetTPRatingProfile",
     "params": [
         {
-            "Direction": "*out", 
-            "RatingProfileId": "SAMPLE_RP_2", 
+            "Direction": "*out",
+            "RatesFallbackSubject": "",
             "RatingActivations": [
                 {
-                    "ActivationTime": 1373609003, 
-                    "DestRateTimingId": "DSTRTTIME_1"
-                }, 
-                {
-                    "ActivationTime": 1373609004, 
-                    "DestRateTimingId": "DSTRTTIME_2"
+                    "ActivationTime": "2012-01-01T00:00:00Z",
+                    "DestRateTimingId": "DRT_1CENTPERSEC"
                 }
-            ], 
-            "Subject": "dan", 
-            "TOR": "CALL", 
-            "TPid": "SAMPLE_TP", 
-            "Tenant": "Tenant1"
+            ],
+            "RatingProfileId": "RP_ANY",
+            "Subject": "*any",
+            "TOR": "call",
+            "TPid": "CGR_API_TESTS",
+            "Tenant": "cgrates.org"
         }
     ]
    }
@@ -69,7 +66,7 @@ Creates a new RatingProfile within a tariff plan.
 
    {
     "error": null, 
-    "id": 3, 
+    "id": 14, 
     "result": "OK"
    }
 
@@ -103,12 +100,12 @@ Queries specific RatingProfile on tariff plan.
   ::
 
    {
-    "id": 0, 
-    "method": "ApierV1.GetTPRatingProfile", 
+    "id": 15,
+    "method": "ApierV1.GetTPRatingProfile",
     "params": [
         {
-            "RatingProfileId": "SAMPLE_RP_2", 
-            "TPid": "SAMPLE_TP"
+            "RatingProfileId": "RP_ANY",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -120,7 +117,7 @@ Queries specific RatingProfile on tariff plan.
 
    type TPRatingProfile struct {
 	TPid                 string             // Tariff plan id
-	RatingProfileId        string             // RatingProfile id
+	RatingProfileId      string             // RatingProfile id
 	Tenant               string             // Tenant's Id
 	TOR                  string             // TypeOfRecord
 	Direction            string             // Traffic direction, *out is the only one supported for now
@@ -138,26 +135,22 @@ Queries specific RatingProfile on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 0, 
+    "error": null,
+    "id": 15,
     "result": {
-        "Direction": "*out", 
-        "RatingProfileId": "SAMPLE_RP_2", 
-        "RatesFallbackSubject": "", 
+        "Direction": "*out",
+        "RatesFallbackSubject": "",
         "RatingActivations": [
             {
-                "ActivationTime": 1373609003, 
-                "DestRateTimingId": "DSTRTTIME_1"
-            }, 
-            {
-                "ActivationTime": 1373609004, 
-                "DestRateTimingId": "DSTRTTIME_2"
+                "ActivationTime": "2012-01-01T00:00:00Z",
+                "DestRateTimingId": "DRT_1CENTPERSEC"
             }
-        ], 
-        "Subject": "dan", 
-        "TOR": "CALL", 
-        "TPid": "SAMPLE_TP", 
-        "Tenant": "Tenant1"
+        ],
+        "RatingProfileId": "RP_ANY",
+        "Subject": "*any",
+        "TOR": "call",
+        "TPid": "CGR_API_TESTS",
+        "Tenant": "cgrates.org"
     }
    }
 
@@ -194,13 +187,11 @@ Queries specific RatingProfile on tariff plan. Attribute parameters used as extr
   ::
 
    {
-    "id": 0, 
-    "method": "ApierV1.GetTPRatingProfileIds", 
+    "id": 16,
+    "method": "ApierV1.GetTPRatingProfileIds",
     "params": [
         {
-            "Subject": "dan", 
-            "TPid": "SAMPLE_TP", 
-            "Tenant": "Tenant1"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -216,11 +207,10 @@ Queries specific RatingProfile on tariff plan. Attribute parameters used as extr
   ::
 
    {
-    "error": null, 
-    "id": 0, 
+    "error": null,
+    "id": 16,
     "result": [
-        "SAMPLE_RP_1", 
-        "SAMPLE_RP_2"
+        "RP_ANY"
     ]
    }
 

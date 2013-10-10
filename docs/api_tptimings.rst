@@ -24,17 +24,17 @@ Creates a new timing within a tariff plan.
   ::
 
    {
-    "id": 3, 
-    "method": "ApierV1.SetTPTiming", 
+    "id": 0,
+    "method": "ApierV1.SetTPTiming",
     "params": [
         {
-            "MonthDays": "1;2;3;31", 
-            "Months": "1;3;6", 
-            "TPid": "SAMPLE_TP", 
-            "Time": "13:00:00", 
-            "TimingId": "SAMPLE_TIMING_5", 
-            "WeekDays": "0", 
-            "Years": "2013;2014"
+            "MonthDays": "*any",
+            "Months": "*any",
+            "TPid": "CGR_API_TESTS",
+            "Time": "*asap",
+            "TimingId": "ASAP",
+            "WeekDays": "*any",
+            "Years": "*any"
         }
     ]
    }
@@ -53,8 +53,8 @@ Creates a new timing within a tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 3, 
+    "error": null,
+    "id": 0,
     "result": "OK"
    }
 
@@ -87,16 +87,17 @@ Queries specific Timing on tariff plan.
  *JSON sample*:
   ::
 
-   {
-    "id": 4, 
-    "method": "ApierV1.GetTPTiming", 
+  { 
+    "id": 3,
+    "method": "ApierV1.GetTPTiming",
     "params": [
         {
-            "TPid": "SAMPLE_TP", 
-            "TimingId": "SAMPLE_TIMING_7"
+            "TPid": "CGR_API_TESTS",
+            "TimingId": "ASAP"
         }
     ]
    }
+   
 
 **Reply**:
 
@@ -117,18 +118,18 @@ Queries specific Timing on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 4, 
+    "error": null,
+    "id": 3,
     "result": {
-        "MonthDays": "1;2;3;31", 
-        "Months": "1;3;6", 
-        "TPid": "SAMPLE_TP", 
-        "Time": "13:00:00", 
-        "TimingId": "SAMPLE_TIMING_7", 
-        "WeekDays": "*all", 
-        "Years": "2013;2014"
+        "MonthDays": "*any",
+        "Months": "*any",
+        "TPid": "CGR_API_TESTS",
+        "Time": "*asap",
+        "TimingId": "ASAP",
+        "WeekDays": "*any",
+        "Years": "*any"
     }
-  }
+   }
 
 **Errors**:
 
@@ -159,11 +160,11 @@ Queries timing identities on tariff plan.
   ::
 
    {
-    "id": 5, 
-    "method": "ApierV1.GetTPTimingIds", 
+    "id": 4,
+    "method": "ApierV1.GetTPTimingIds",
     "params": [
         {
-            "TPid": "SAMPLE_TP"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -179,14 +180,10 @@ Queries timing identities on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 5, 
+    "error": null,
+    "id": 4,
     "result": [
-        "SAMPLE_TIMING_1", 
-        "SAMPLE_TIMING_2", 
-        "SAMPLE_TIMING_3", 
-        "SAMPLE_TIMING_4", 
-        "SAMPLE_TIMING_5"
+        "ASAP"
     ]
    }
 
