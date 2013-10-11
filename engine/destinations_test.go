@@ -20,10 +20,8 @@ package engine
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
-	"reflect"
 	"testing"
 )
 

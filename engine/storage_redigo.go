@@ -20,6 +20,8 @@ package engine
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/history"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/garyburd/redigo/redis"
 	"time"
 )
@@ -31,7 +33,7 @@ type RedigoStorage struct {
 }
 
 func NewRedigoStorage(address string, db int, pass string) (DataStorage, error) {
-	ndb, err := redis.Dial("tcp", address)
+	ndb, err := redis.DialTimeout("tcp", address, 5*time.Second, time.Second, time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -69,28 +71,45 @@ func (rs *RedigoStorage) GetRatingProfile(key string) (rp *RatingProfile, err er
 func (rs *RedigoStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := rs.ms.Marshal(rp)
 	_, err = rs.db.Do("set", RATING_PROFILE_PREFIX+rp.Id, result)
+	if err == nil && historyScribe != nil {
+		response := 0
+		historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
+	}
 	return
 }
 
 func (rs *RedigoStorage) GetDestination(key string) (dest *Destination, err error) {
-	var values []byte
-	if values, err = redis.Bytes(rs.db.Do("get", DESTINATION_PREFIX+key)); err == nil {
-		dest = &Destination{Id: key}
-		err = rs.ms.Unmarshal(values, dest)
+	var values []string
+	if values, err = redis.Strings(rs.db.Do("smembers", DESTINATION_PREFIX+key)); len(values) > 0 && err == nil {
+		dest = &Destination{Id: key, Prefixes: values}
 	}
 	return
 }
 
 func (rs *RedigoStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
+	if _, err := rs.db.Do("sadd", redis.Args{}.Add(TEMP_DESTINATION_PREFIX+prefix).AddFlat(utils.SplitPrefixInterface(prefix))...); err != nil {
+		return 0, err
+	}
+	var values []string
+	if values, err = redis.Strings(rs.db.Do("sinter", DESTINATION_PREFIX+key, TEMP_DESTINATION_PREFIX+prefix)); err == nil {
+		for _, p := range values {
+			if len(p) > precision {
+				precision = len(p)
+			}
+		}
+	}
+	if _, err := rs.db.Do("del", TEMP_DESTINATION_PREFIX+prefix); err != nil {
+		Logger.Err("Error removing temp ")
+	}
 	return
 }
 
 func (rs *RedigoStorage) SetDestination(dest *Destination) (err error) {
-	var result []byte
-	if result, err = rs.ms.Marshal(dest); err != nil {
-		return
+	_, err = rs.db.Do("sadd", redis.Args{}.Add(DESTINATION_PREFIX+dest.Id).AddFlat(dest.Prefixes)...)
+	if err == nil && historyScribe != nil {
+		response := 0
+		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
-	_, err = rs.db.Do("set", DESTINATION_PREFIX+dest.Id, result)
 	return
 }
 
@@ -191,11 +210,11 @@ func (rs *RedigoStorage) LogActionTrigger(ubId, source string, at *ActionTrigger
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(&as)
+	mas, err := rs.ms.Marshal(as)
 	if err != nil {
 		return
 	}
-	rs.db.Do("set", LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
+	_, err = rs.db.Do("set", LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
 	return
 }
 
@@ -204,7 +223,7 @@ func (rs *RedigoStorage) LogActionTiming(source string, at *ActionTiming, as Act
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(&as)
+	mas, err := rs.ms.Marshal(as)
 	if err != nil {
 		return
 	}

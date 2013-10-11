@@ -225,11 +225,11 @@ func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(&as)
+	mas, err := rs.ms.Marshal(as)
 	if err != nil {
 		return
 	}
-	rs.db.Set(LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas))))
+	rs.db.Set(LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v*%v", ubId, string(mat), string(mas))))
 	return
 }
 
@@ -238,11 +238,11 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(&as)
+	mas, err := rs.ms.Marshal(as)
 	if err != nil {
 		return
 	}
-	_, err = rs.db.Set(LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%s*%s", string(mat), string(mas))))
+	_, err = rs.db.Set(LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v", string(mat), string(mas))))
 	return
 }
 

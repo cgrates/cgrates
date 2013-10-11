@@ -33,7 +33,7 @@ type RadixStorage struct {
 }
 
 func NewRadixStorage(address string, db int, pass string) (DataStorage, error) {
-	ndb, err := redis.Dial("tcp", address)
+	ndb, err := redis.DialTimeout("tcp", address, 5*time.Second)
 	if err != nil {
 		return nil, err
 	}
@@ -55,10 +55,8 @@ func (rs *RadixStorage) Close() {
 }
 
 func (rs *RadixStorage) Flush() (err error) {
-	if r := rs.db.Cmd("flushdb"); r.Err != nil {
-		return r.Err
-	}
-	return
+	r := rs.db.Cmd("flushdb")
+	return r.Err
 }
 
 func (rs *RadixStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
@@ -85,45 +83,41 @@ func (rs *RadixStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 
 func (rs *RadixStorage) GetDestination(key string) (dest *Destination, err error) {
 	var values []string
-	if values, err = rs.db.Cmd("hkeys", DESTINATION_PREFIX+key).List(); len(values) > 0 && err == nil {
+	if values, err = rs.db.Cmd("smembers", DESTINATION_PREFIX+key).List(); len(values) > 0 && err == nil {
 		dest = &Destination{Id: key, Prefixes: values}
 	}
 	return
 }
 
 func (rs *RadixStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
+	if r := rs.db.Cmd("sadd", TEMP_DESTINATION_PREFIX+prefix, utils.SplitPrefixInterface(prefix)); r.Err != nil {
+		return 0, r.Err
+	}
 	var values []string
-	var pfs []interface{}
-	pfs = append(pfs, DESTINATION_PREFIX+key)
-	pfs = append(pfs, utils.SplitPrefixInterface(prefix)...)
-	if values, err = rs.db.Cmd("hmget", pfs...).List(); err == nil {
-		for i, p := range values {
-			if p != "" {
-				return len(prefix) - i, nil
+	if values, err = rs.db.Cmd("sinter", DESTINATION_PREFIX+key, TEMP_DESTINATION_PREFIX+prefix).List(); err == nil {
+		for _, p := range values {
+			if len(p) > precision {
+				precision = len(p)
 			}
 		}
+	}
+	if r := rs.db.Cmd("del", TEMP_DESTINATION_PREFIX+prefix); r.Err != nil {
+		Logger.Err(fmt.Sprintf("Error removing temp: %v", r.Err))
 	}
 	return
 }
 
 func (rs *RadixStorage) SetDestination(dest *Destination) (err error) {
-	newPrefixes := make(map[string]string, len(dest.Prefixes))
-	for _, p := range dest.Prefixes {
-		newPrefixes[p] = "*"
-	}
-	if r := rs.db.Cmd("hmset", DESTINATION_PREFIX+dest.Id, newPrefixes); r.Err != nil {
-		return r.Err
-	}
-	if err == nil && historyScribe != nil {
+	r := rs.db.Cmd("sadd", DESTINATION_PREFIX+dest.Id, dest.Prefixes)
+	if r.Err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
-	return
+	return r.Err
 }
 
 func (rs *RadixStorage) GetActions(key string) (as Actions, err error) {
-	var values []byte
-	if values, err = rs.db.Cmd("get", ACTION_PREFIX+key).Bytes(); err == nil {
+	if values, err := rs.db.Cmd("get", ACTION_PREFIX+key).Bytes(); err == nil {
 		err = rs.ms.Unmarshal(values, &as)
 	}
 	return
@@ -225,12 +219,12 @@ func (rs *RadixStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(&as)
+	mas, err := rs.ms.Marshal(as)
 	if err != nil {
 		return
 	}
-	rs.db.Cmd("set", LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), fmt.Sprintf("%s*%s*%s", ubId, string(mat), string(mas)))
-	return
+	r := rs.db.Cmd("set", LOG_ACTION_TRIGGER_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), fmt.Sprintf("%v*%v*%v", ubId, string(mat), string(mas)))
+	return r.Err
 }
 
 func (rs *RadixStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
@@ -238,12 +232,12 @@ func (rs *RadixStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	if err != nil {
 		return
 	}
-	mas, err := rs.ms.Marshal(&as)
+	mas, err := rs.ms.Marshal(as)
 	if err != nil {
 		return
 	}
-	rs.db.Cmd("set", LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), fmt.Sprintf("%s*%s", string(mat), string(mas)))
-	return
+	r := rs.db.Cmd("set", LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), fmt.Sprintf("%v*%v", string(mat), string(mas)))
+	return r.Err
 }
 
 func (rs *RadixStorage) LogError(uuid, source, errstr string) (err error) {
