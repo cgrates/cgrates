@@ -45,14 +45,14 @@ type CGRConfig struct {
 	DataDBName               string // The name of the database to connect to.
 	DataDBUser               string // The user to sign in as.
 	DataDBPass               string // The user's password.
-	DataDBEncoding		string // The encoding used to store objects in string keys
+	DataDBEncoding           string // The encoding used to store objects in string keys
 	StorDBType               string // Should reflect the database type used to store logs
 	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	StorDBPort               string // The port to bind to.
 	StorDBName               string // The name of the database to connect to.
 	StorDBUser               string // The user to sign in as.
 	StorDBPass               string // The user's password.
-	DBDataEncoding		 string // The encoding used to store object data in strings: <msgpack|json>
+	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
 	RPCEncoding              string // RPC encoding used on APIs: <gob|json>.
 	DefaultReqType           string // Use this request type if not defined on top
 	DefaultTOR               string // set default type of record

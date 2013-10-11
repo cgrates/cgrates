@@ -20,16 +20,15 @@ Creates a new destination within a tariff plan id.
   ::
 
    {
-     "id": 2, 
-     "method": "ApierV1.SetTPDestination", 
-     "params": [
+    "id": 6,
+    "method": "ApierV1.SetTPDestination",
+    "params": [
         {
-            "DestinationId": "FIST_DST2", 
+            "DestinationId": "FS_USERS",
             "Prefixes": [
-                "123", 
-                "345"
-            ], 
-            "TPid": "FIST_TP"
+                "10"
+            ],
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -48,8 +47,8 @@ Creates a new destination within a tariff plan id.
   ::
 
    {
-    "error": null, 
-    "id": 2, 
+    "error": null,
+    "id": 6,
     "result": "OK"
    }
 
@@ -83,12 +82,12 @@ Queries a specific destination.
   ::
 
    {
-    "id": 0, 
-    "method": "ApierV1.GetTPDestination", 
+    "id": 7,
+    "method": "ApierV1.GetTPDestination",
     "params": [
         {
-            "DestinationId": "FIRST_DST2", 
-            "TPid": "FIRST_TP"
+            "DestinationId": "FS_USERS",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -108,15 +107,14 @@ Queries a specific destination.
   ::
 
    {
-    "error": null, 
-    "id": 0, 
+    "error": null,
+    "id": 7,
     "result": {
-        "TPid":"FIST_TP",
-        "DestinationId": "FIST_DST2", 
+        "DestinationId": "FS_USERS",
         "Prefixes": [
-            "123", 
-            "345"
-        ]
+            "10"
+        ],
+        "TPid": "CGR_API_TESTS"
     }
    }
 
@@ -150,11 +148,11 @@ Queries destination identities on specific tariff plan.
   ::
 
    {
-    "id": 1, 
-    "method": "ApierV1.GetTPDestinationIds", 
+    "id": 8,
+    "method": "ApierV1.GetTPDestinationIds",
     "params": [
         {
-            "TPid": "FIST_TP"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -170,16 +168,12 @@ Queries destination identities on specific tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 1, 
+    "error": null,
+    "id": 8,
     "result": [
-        "FIST_DST", 
-        "FIST_DST1", 
-        "FIST_DST2", 
-        "FIST_DST3", 
-        "FIST_DST4"
+        "FS_USERS"
     ]
-   }
+  }
 
 
 

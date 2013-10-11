@@ -1,2 +1,2 @@
-#Tag,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart,RoundingMethod,RoundingDecimals,Weight
-RT_FS_USERS,0,0,60s,60s,0s,*up,0,10
+#Tag,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart,RoundingMethod,RoundingDecimals
+RT_FS_USERS,0,0,60s,60s,0s,*up,0

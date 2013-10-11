@@ -41,7 +41,7 @@ func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
 	rts := make([]*engine.LoadRate, len(attrs.RateSlots))
 	for idx, rtSlot := range attrs.RateSlots {
 		var errParse error
-		itrvlStrs := []string{rtSlot.RatedUnits, rtSlot.RateIncrements, rtSlot.GroupIntervalStart}
+		itrvlStrs := []string{rtSlot.RateUnit, rtSlot.RateIncrement, rtSlot.GroupIntervalStart}
 		itrvls := make([]time.Duration, len(itrvlStrs))
 		for idxItrvl, itrvlStr := range itrvlStrs {
 			if itrvls[idxItrvl], errParse = time.ParseDuration(itrvlStr); errParse != nil {
