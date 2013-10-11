@@ -30,7 +30,7 @@ func TestRateIntervalSimpleContains(t *testing.T) {
 		EndTime:   "",
 	}
 	d := time.Date(2012, time.February, 27, 23, 59, 59, 0, time.UTC)
-	if !i.Contains(d) {
+	if !i.Contains(d, false) {
 		t.Errorf("Date %+v shoud be in interval %+v", d, i)
 	}
 }
@@ -39,10 +39,10 @@ func TestRateIntervalMonth(t *testing.T) {
 	i := &RateInterval{Months: Months{time.February}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
-	if !i.Contains(d) {
+	if !i.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}
-	if i.Contains(d1) {
+	if i.Contains(d1, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d1, i)
 	}
 }
@@ -51,10 +51,10 @@ func TestRateIntervalMonthDay(t *testing.T) {
 	i := &RateInterval{MonthDays: MonthDays{10}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
-	if !i.Contains(d) {
+	if !i.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}
-	if i.Contains(d1) {
+	if i.Contains(d1, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d1, i)
 	}
 }
@@ -64,13 +64,13 @@ func TestRateIntervalMonthAndMonthDay(t *testing.T) {
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
 	d2 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
-	if !i.Contains(d) {
+	if !i.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}
-	if i.Contains(d1) {
+	if i.Contains(d1, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d1, i)
 	}
-	if i.Contains(d2) {
+	if i.Contains(d2, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d2, i)
 	}
 }
@@ -80,16 +80,16 @@ func TestRateIntervalWeekDays(t *testing.T) {
 	i2 := &RateInterval{WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
 	d := time.Date(2012, time.February, 1, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 2, 23, 0, 0, 0, time.UTC)
-	if !i.Contains(d) {
+	if !i.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}
-	if i.Contains(d1) {
+	if i.Contains(d1, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d1, i)
 	}
-	if !i2.Contains(d) {
+	if !i2.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i2)
 	}
-	if !i2.Contains(d1) {
+	if !i2.Contains(d1, false) {
 		t.Errorf("Date %v shoud be in interval %v", d1, i2)
 	}
 }
@@ -99,16 +99,16 @@ func TestRateIntervalMonthAndMonthDayAndWeekDays(t *testing.T) {
 	i2 := &RateInterval{Months: Months{time.February}, MonthDays: MonthDays{2}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}
 	d := time.Date(2012, time.February, 1, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 2, 23, 0, 0, 0, time.UTC)
-	if !i.Contains(d) {
+	if !i.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}
-	if i.Contains(d1) {
+	if i.Contains(d1, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d1, i)
 	}
-	if i2.Contains(d) {
+	if i2.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i2)
 	}
-	if !i2.Contains(d1) {
+	if !i2.Contains(d1, false) {
 		t.Errorf("Date %v shoud be in interval %v", d1, i2)
 	}
 }
@@ -119,16 +119,16 @@ func TestRateIntervalHours(t *testing.T) {
 	d1 := time.Date(2012, time.January, 10, 14, 29, 0, 0, time.UTC)
 	d2 := time.Date(2012, time.January, 10, 14, 59, 0, 0, time.UTC)
 	d3 := time.Date(2012, time.January, 10, 15, 01, 0, 0, time.UTC)
-	if !i.Contains(d) {
+	if !i.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}
-	if i.Contains(d1) {
+	if i.Contains(d1, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d1, i)
 	}
-	if !i.Contains(d2) {
+	if !i.Contains(d2, false) {
 		t.Errorf("Date %v shoud be in interval %v", d2, i)
 	}
-	if i.Contains(d3) {
+	if i.Contains(d3, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d3, i)
 	}
 }
@@ -145,19 +145,19 @@ func TestRateIntervalEverything(t *testing.T) {
 	d2 := time.Date(2012, time.February, 1, 15, 00, 00, 0, time.UTC)
 	d3 := time.Date(2012, time.February, 1, 15, 0, 1, 0, time.UTC)
 	d4 := time.Date(2011, time.February, 1, 15, 00, 00, 0, time.UTC)
-	if !i.Contains(d) {
+	if !i.Contains(d, false) {
 		t.Errorf("Date %v shoud be in interval %v", d, i)
 	}
-	if i.Contains(d1) {
+	if i.Contains(d1, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d1, i)
 	}
-	if !i.Contains(d2) {
+	if !i.Contains(d2, false) {
 		t.Errorf("Date %v shoud be in interval %v", d2, i)
 	}
-	if i.Contains(d3) {
+	if i.Contains(d3, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d3, i)
 	}
-	if i.Contains(d4) {
+	if i.Contains(d4, false) {
 		t.Errorf("Date %v shoud not be in interval %v", d3, i)
 	}
 }
@@ -203,6 +203,6 @@ func BenchmarkRateIntervalContainsDate(b *testing.B) {
 	i := &RateInterval{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}
 	d := time.Date(2012, time.February, 1, 14, 30, 0, 0, time.UTC)
 	for x := 0; x < b.N; x++ {
-		i.Contains(d)
+		i.Contains(d, false)
 	}
 }

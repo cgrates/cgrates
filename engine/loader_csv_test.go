@@ -79,8 +79,8 @@ T2,GERMANY_PREMIUM,GBP_71
 STANDARD,RT_STANDARD,WORKDAYS_00,10
 STANDARD,RT_STD_WEEKEND,WORKDAYS_18,10
 STANDARD,RT_STD_WEEKEND,WEEKENDS,10
-PREMIUM,P1,WORKDAYS_00,10
-PREMIUM,T2,WORKDAYS_18,10
+PREMIUM,RT_STANDARD,WORKDAYS_00,10
+PREMIUM,RT_STD_WEEKEND,WORKDAYS_18,10
 PREMIUM,RT_STD_WEEKEND,WEEKENDS,10
 DEFAULT,RT_DEFAULT,WORKDAYS_00,10
 EVENING,P1,WORKDAYS_00,10
@@ -814,8 +814,9 @@ func TestLoadRatingProfiles(t *testing.T) {
 	if !reflect.DeepEqual(rp.DestinationMap["GERMANY"], expected.DestinationMap["GERMANY"]) {
 		t.Errorf("Error loading rating profile: %+v", rp.DestinationMap["GERMANY"][0])
 	}
-	if _, ok := csvr.ratingProfiles["*out:CUSTOMER_1:0:rif:from:tm"]; !ok {
-		t.Error("Failed to load rating profile")
+	rp = csvr.ratingProfiles["*out:CUSTOMER_1:0:rif:from:tm"]
+	if len(rp.DestinationMap["GERMANY"]) != 2 {
+		t.Errorf("Failed to load rating profile %+v", rp.DestinationMap["GERMANY"][0].RateIntervals[0])
 	}
 
 }

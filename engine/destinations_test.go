@@ -101,6 +101,31 @@ func TestDestinationGetNotExistsCache(t *testing.T) {
 	}
 }
 
+/*func TestConcurrentDestReadWrite(t *testing.T) {
+	dst1 := &Destination{Id: "TST_1", Prefixes: []string{"1"}}
+	err := storageGetter.SetDestination(dst1)
+	if err != nil {
+		t.Error("Error setting  destination: ", err)
+	}
+	go func() {
+		for i := 0; i < 10; i++ {
+			if err := storageGetter.SetDestination(&Destination{Id: fmt.Sprintf("TST_%d", i), Prefixes: []string{"1"}}); err != nil {
+				t.Error("Error setting destinations: ", err)
+			}
+		}
+	}()
+
+	for i := 0; i < 10; i++ {
+		dst2, err := storageGetter.GetDestination(dst1.Id)
+		if err != nil {
+			t.Error("Error retrieving destination: ", err)
+		}
+		if !reflect.DeepEqual(dst1, dst2) {
+			t.Error("Cannot retrieve properly the destination 1", dst1, dst2)
+		}
+	}
+}*/
+
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {

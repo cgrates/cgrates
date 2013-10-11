@@ -50,6 +50,27 @@ func TestRightMargin(t *testing.T) {
 	}
 }
 
+func TestSplitMiddle(t *testing.T) {
+	i := &RateInterval{
+		WeekDays:  WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+		StartTime: "18:00:00",
+		EndTime:   "",
+	}
+	ts := &TimeSpan{
+		TimeStart: time.Date(2012, 2, 27, 0, 0, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2012, 2, 28, 0, 0, 0, 0, time.UTC),
+	}
+
+	if !i.Contains(ts.TimeEnd, true) {
+		t.Errorf("%+v should contain %+v", i, ts.TimeEnd)
+	}
+
+	newTs := ts.SplitByRateInterval(i)
+	if newTs == nil {
+		t.Errorf("Error spliting interval %+v", newTs)
+	}
+}
+
 func TestRightHourMargin(t *testing.T) {
 	i := &RateInterval{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, EndTime: "17:59:00"}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
@@ -164,7 +185,7 @@ func TestContains(t *testing.T) {
 	}
 }
 
-func TestSplitByActivationTime(t *testing.T) {
+func TestSplitByRatingPlan(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	t3 := time.Date(2012, time.February, 5, 17, 50, 0, 0, time.UTC)
@@ -379,6 +400,34 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 
 	if nts.GetDuration().Seconds() != 150 || nnts.GetDuration().Seconds() != 30 {
 		t.Error("Wrong durations.for RateIntervals", nts.GetDuration().Seconds(), nnts.GetDuration().Seconds())
+	}
+}
+
+func TestTimespanSplitLong(t *testing.T) {
+	i := &RateInterval{
+		StartTime: "18:00:00",
+	}
+	t1 := time.Date(2013, time.October, 9, 9, 0, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.October, 10, 20, 0, 0, 0, time.UTC)
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: t2.Sub(t1)}
+	oldDuration := ts.GetDuration()
+	nts := ts.SplitByRateInterval(i)
+	splitTime := time.Date(2013, time.October, 9, 18, 0, 0, 0, time.UTC)
+	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
+		t.Error("Incorrect first half", nts)
+	}
+	if nts.TimeStart != splitTime || nts.TimeEnd != t2 {
+		t.Error("Incorrect second half", nts)
+	}
+	if nts.RateInterval != i {
+		t.Error("RateInterval not attached correctly")
+	}
+
+	if ts.GetDuration() != 9*time.Hour || nts.GetDuration() != 26*time.Hour {
+		t.Error("Wrong durations.for RateIntervals", ts.GetDuration(), nts.GetDuration())
+	}
+	if ts.GetDuration()+nts.GetDuration() != oldDuration {
+		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration(), nts.GetDuration(), oldDuration)
 	}
 }
 

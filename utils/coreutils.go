@@ -150,3 +150,10 @@ func SplitPrefixInterface(prefix string) []interface{} {
 	}
 	return subs
 }
+
+func CopyHour(src, dest time.Time) time.Time {
+	if src.Hour() == 0 && src.Minute() == 0 && src.Second() == 0 {
+		return src
+	}
+	return time.Date(dest.Year(), dest.Month(), dest.Day(), src.Hour(), src.Minute(), src.Second(), src.Nanosecond(), src.Location())
+}

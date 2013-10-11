@@ -134,9 +134,11 @@ The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	//Logger.Debug("here: ", ts, " +++ ", i)
+	//log.Printf("TS: %+v", ts)
 	// if the span is not in interval return nil
-	if !(i.Contains(ts.TimeStart) || i.Contains(ts.TimeEnd)) {
+	if !(i.Contains(ts.TimeStart, false) || i.Contains(ts.TimeEnd, true)) {
 		//Logger.Debug("Not in interval")
+		//log.Printf("NOT in interval: %+v", i)
 		return
 	}
 	Logger.Debug(fmt.Sprintf("TS: %+v", ts))
@@ -148,6 +150,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 			Logger.Debug(fmt.Sprintf("Splitting"))
 			ts.SetRateInterval(i)
 			splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
+			//log.Print("SPLIT: ", splitTime)
 			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 			ts.TimeEnd = splitTime
 			nts.SetRateInterval(i)
@@ -158,22 +161,20 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 			return
 		}
 	}
-	//log.Printf("%+v %+v", i, ts.TimeEnd)
+	//log.Printf("*************TS: %+v", ts)
 	// if the span is enclosed in the interval try to set as new interval and return nil
-	if i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd) {
+	if i.Contains(ts.TimeStart, false) && i.Contains(ts.TimeEnd, true) {
 		//Logger.Debug("All in interval")
 		ts.SetRateInterval(i)
 		return
 	}
 	// if only the start time is in the interval split the interval to the right
-	if i.Contains(ts.TimeStart) {
+	if i.Contains(ts.TimeStart, false) {
 		//Logger.Debug("Start in interval")
 		splitTime := i.getRightMargin(ts.TimeStart)
-		if ts.TimeEnd.Sub(splitTime) == time.Second {
-			//return
-		}
+
 		ts.SetRateInterval(i)
-		if splitTime == ts.TimeStart {
+		if splitTime == ts.TimeStart || splitTime.Equal(ts.TimeEnd) {
 			return
 		}
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
@@ -185,10 +186,12 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		return
 	}
 	// if only the end time is in the interval split the interval to the left
-	if i.Contains(ts.TimeEnd) {
+	if i.Contains(ts.TimeEnd, true) {
 		//Logger.Debug("End in interval")
+		//tmpTime := time.Date(ts.TimeStart.)
 		splitTime := i.getLeftMargin(ts.TimeEnd)
-		if splitTime == ts.TimeEnd {
+		splitTime = utils.CopyHour(splitTime, ts.TimeStart)
+		if splitTime.Equal(ts.TimeEnd) {
 			return
 		}
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
@@ -258,6 +261,8 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingPlan) (newTs *TimeSpan) {
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = rp.ActivationTime
 	ts.SetNewCallDuration(newTs)
+	Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
+	//log.Printf("RP SPLITTING: %+v %+v", ts, newTs)
 	return
 }
 

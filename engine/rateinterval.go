@@ -105,7 +105,12 @@ func (pg *RateGroups) AddRate(ps ...*Rate) {
 /*
 Returns true if the received time result inside the interval
 */
-func (i *RateInterval) Contains(t time.Time) bool {
+func (i *RateInterval) Contains(t time.Time, endTime bool) bool {
+	// if the received time represents an endtime cosnidere it 24 instead of 0
+	hour := t.Hour()
+	if endTime && hour == 0 {
+		hour = 24
+	}
 	// check for years
 	if len(i.Years) > 0 && !i.Years.Contains(t.Year()) {
 		return false
@@ -129,9 +134,9 @@ func (i *RateInterval) Contains(t time.Time) bool {
 		sm, _ := strconv.Atoi(split[1])
 		ss, _ := strconv.Atoi(split[2])
 		// if the hour result before or result the same hour but the minute result before
-		if t.Hour() < sh ||
-			(t.Hour() == sh && t.Minute() < sm) ||
-			(t.Hour() == sh && t.Minute() == sm && t.Second() < ss) {
+		if hour < sh ||
+			(hour == sh && t.Minute() < sm) ||
+			(hour == sh && t.Minute() == sm && t.Second() < ss) {
 			return false
 		}
 	}
@@ -142,9 +147,9 @@ func (i *RateInterval) Contains(t time.Time) bool {
 		em, _ := strconv.Atoi(split[1])
 		es, _ := strconv.Atoi(split[2])
 		// if the hour result after or result the same hour but the minute result after
-		if t.Hour() > eh ||
-			(t.Hour() == eh && t.Minute() > em) ||
-			(t.Hour() == eh && t.Minute() == em && t.Second() > es) {
+		if hour > eh ||
+			(hour == eh && t.Minute() > em) ||
+			(hour == eh && t.Minute() == em && t.Second() > es) {
 			return false
 		}
 	}
@@ -163,8 +168,10 @@ func (i *RateInterval) getRightMargin(t time.Time) (rigthtTime time.Time) {
 		hour, _ = strconv.Atoi(split[0])
 		min, _ = strconv.Atoi(split[1])
 		sec, _ = strconv.Atoi(split[2])
+		//log.Print("RIGHT1: ", time.Date(year, month, day, hour, min, sec, nsec, loc))
 		return time.Date(year, month, day, hour, min, sec, nsec, loc)
 	}
+	//log.Print("RIGHT2: ", time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second))
 	return time.Date(year, month, day, hour, min, sec, nsec, loc).Add(time.Second)
 }
 
@@ -181,6 +188,7 @@ func (i *RateInterval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 		min, _ = strconv.Atoi(split[1])
 		sec, _ = strconv.Atoi(split[2])
 	}
+	//log.Print("LEFT: ", time.Date(year, month, day, hour, min, sec, nsec, loc))
 	return time.Date(year, month, day, hour, min, sec, nsec, loc)
 }
 

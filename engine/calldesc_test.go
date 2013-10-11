@@ -120,7 +120,6 @@ func TestGetCostTimespans(t *testing.T) {
 
 }
 
-/*
 func TestGetCostRatingPlansAndRatingIntervals(t *testing.T) {
 	t1 := time.Date(2012, time.February, 27, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 28, 18, 10, 0, 0, time.UTC)
@@ -133,6 +132,22 @@ func TestGetCostRatingPlansAndRatingIntervals(t *testing.T) {
 			t.Logf("TS %+v", ts)
 		}
 		t.Errorf("Expected %+v was %+v", 3, len(result.Timespans))
+	}
+}
+
+func TestGetCostRatingPlansAndRatingIntervalsMore(t *testing.T) {
+	t1 := time.Date(2012, time.February, 27, 9, 50, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 28, 18, 10, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, CallDuration: t2.Sub(t1)}
+	result, _ := cd.GetCost()
+	if len(result.Timespans) != 4 ||
+		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
+		!result.Timespans[1].TimeEnd.Equal(result.Timespans[2].TimeStart) ||
+		!result.Timespans[2].TimeEnd.Equal(result.Timespans[3].TimeStart) {
+		for _, ts := range result.Timespans {
+			t.Logf("TS %+v", ts)
+		}
+		t.Errorf("Expected %+v was %+v", 4, len(result.Timespans))
 	}
 }
 
@@ -149,7 +164,7 @@ func TestGetCostRateGroups(t *testing.T) {
 		t.Error("Error calculating cost: ", result.Timespans[0])
 	}
 }
-*/
+
 func TestGetCostNoConnectFee(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
@@ -213,8 +228,8 @@ func TestSpansMultipleRatingPlans(t *testing.T) {
 	t2 := time.Date(2012, time.February, 8, 0, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	if result.Cost != 300 || result.ConnectFee != 0 {
-		t.Errorf("Expected %v was %v", 300, result)
+	if result.Cost != 1200 || result.ConnectFee != 0 {
+		t.Errorf("Expected %v was %v", 1200, result)
 	}
 }
 

@@ -225,6 +225,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
+		//log.Printf("==============%v==================", i)
 		//log.Printf("TS: %+v", timespans[i])
 		rp := timespans[i].ratingPlan
 		Logger.Debug(fmt.Sprintf("rp: %+v", rp))
@@ -239,17 +240,19 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			if newTs != nil {
 				newTs.ratingPlan = rp
 				// insert the new timespan
-				i++
+				index := i + 1
 				timespans = append(timespans, nil)
-				copy(timespans[i+1:], timespans[i:])
-				timespans[i] = newTs
+				copy(timespans[index+1:], timespans[index:])
+				timespans[index] = newTs
 				break
 			}
 		}
 	}
 	Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
+	//log.Printf("After SplitByRateInterval: %+v", timespans)
 	timespans = cd.roundTimeSpansToIncrement(timespans)
 	Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
+	//log.Printf("After round: %+v", timespans)
 	return
 }
 
@@ -258,16 +261,21 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 // descriptor's initial duration
 func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*TimeSpan {
 	for i, ts := range timespans {
+		//log.Printf("TS: %+v", ts)
 		if ts.RateInterval != nil {
 			_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+			//log.Printf("Inc: %+v", rateIncrement)
 			// if the timespan duration is larger than the rate increment make sure it is a multiple of it
 			if rateIncrement < ts.GetDuration() {
 				rateIncrement = utils.RoundTo(rateIncrement, ts.GetDuration())
 			}
+			//log.Printf("Inc: %+v", rateIncrement)
 			if rateIncrement > ts.GetDuration() {
 				initialDuration := ts.GetDuration()
+				//log.Printf("Initial: %+v", initialDuration)
 				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
 				ts.CallDuration = ts.CallDuration + (rateIncrement - initialDuration)
+				//log.Printf("After: %+v", ts.CallDuration)
 
 				// overlap the rest of the timespans
 				i += 1
@@ -336,6 +344,9 @@ If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
 func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float64, err error) {
+	if cd.CallDuration == 0 {
+		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
+	}
 	_, _, err = cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
