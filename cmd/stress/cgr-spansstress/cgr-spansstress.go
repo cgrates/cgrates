@@ -21,6 +21,7 @@ package main
 import (
 	"flag"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"log"
 	"os"
 	"runtime"
@@ -60,8 +61,11 @@ func main() {
 	//cd := engine.CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cd := engine.CallDescriptor{Direction: "*out", TOR: "call", Tenant: "cgrates.org", Subject: "1001", Destination: "+49", TimeStart: t1, TimeEnd: t2}
 
-	getter, err := engine.NewRedisStorage("localhost:6379", 10, "")
+	getter, err := engine.ConfigureDataStorage(utils.REDIS, "localhost", "6379", "", "", "", utils.MSGPACK)
 	//getter, err := engine.NewMongoStorage("localhost", "cgrates")
+	if err != nil {
+		log.Fatal("Could not connect to data store: ", err)
+	}
 	defer getter.Close()
 
 	engine.SetDataStorage(getter)

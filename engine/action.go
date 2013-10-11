@@ -19,7 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"sort"
 )
 
@@ -31,6 +34,7 @@ type Action struct {
 	ActionType       string
 	BalanceId        string
 	Direction        string
+	ExtraParameters  string
 	ExpirationString string
 	Weight           float64
 	Balance          *Balance
@@ -48,6 +52,7 @@ const (
 	DEBIT          = "*debit"
 	RESET_COUNTER  = "*reset_counter"
 	RESET_COUNTERS = "*reset_counters"
+	CALL_URL       = "*call_url"
 	UNLIMITED      = "*unlimited"
 )
 
@@ -77,6 +82,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return resetCounterAction, true
 	case RESET_COUNTERS:
 		return resetCountersAction, true
+	case CALL_URL:
+		return callUrl, true
 	}
 	return nil, false
 }
@@ -112,6 +119,9 @@ func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
 }
 
 func topupResetAction(ub *UserBalance, a *Action) (err error) {
+	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
+		ub.BalanceMap = make(map[string]BalanceChain, 0)
+	}
 	ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{&Balance{Value: 0}} // ToDo: can ub be empty here?
 	genericMakeNegative(a)
 	genericDebit(ub, a)
@@ -168,6 +178,15 @@ func genericReset(ub *UserBalance) {
 	}
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	ub.resetActionTriggers(nil)
+}
+
+func callUrl(ub *UserBalance, a *Action) error {
+	body, err := json.Marshal(ub)
+	if err != nil {
+		return err
+	}
+	_, err = http.Post(a.ExtraParameters, "application/json", bytes.NewBuffer(body))
+	return err
 }
 
 // Structure to store actions according to weight

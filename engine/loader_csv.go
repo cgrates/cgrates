@@ -30,19 +30,19 @@ import (
 )
 
 type CSVReader struct {
-	sep              rune
-	storage          DataStorage
-	readerFunc       func(string, rune, int) (*csv.Reader, *os.File, error)
-	actions          map[string][]*Action
-	actionsTimings   map[string][]*ActionTiming
-	actionsTriggers  map[string][]*ActionTrigger
-	accountActions   []*UserBalance
-	destinations     []*Destination
-	timings          map[string]*Timing
-	rates            map[string]*LoadRate
-	destinationRates map[string][]*DestinationRate
-	ratingPlans      map[string]*RatingPlan
-	ratingProfiles   map[string]*RatingProfile
+	sep                    rune
+	storage                DataStorage
+	readerFunc             func(string, rune, int) (*csv.Reader, *os.File, error)
+	actions                map[string][]*Action
+	actionsTimings         map[string][]*ActionTiming
+	actionsTriggers        map[string][]*ActionTrigger
+	accountActions         []*UserBalance
+	destinations           []*Destination
+	timings                map[string]*Timing
+	rates                  map[string][]*LoadRate
+	destinationRates       map[string][]*DestinationRate
+	destinationRateTimings map[string][]*DestinationRateTiming
+	ratingProfiles         map[string]*RatingProfile
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
@@ -55,10 +55,10 @@ func NewFileCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn, 
 	c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
-	c.rates = make(map[string]*LoadRate)
+	c.rates = make(map[string][]*LoadRate)
 	c.destinationRates = make(map[string][]*DestinationRate)
 	c.timings = make(map[string]*Timing)
-	c.ratingPlans = make(map[string]*RatingPlan)
+	c.destinationRateTimings = make(map[string][]*DestinationRateTiming)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.readerFunc = openFileCSVReader
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
@@ -221,14 +221,22 @@ func (csvr *CSVReader) LoadRates() (err error) {
 	if fp != nil {
 		defer fp.Close()
 	}
+
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		var r *LoadRate
-		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
+		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
 		if err != nil {
 			return err
 		}
-		csvr.rates[tag] = r
+		// same tag only to create rate groups
+		existingRates, exists := csvr.rates[tag]
+		if exists {
+			if err := existingRates[len(existingRates)-1].ValidNextGroup(r); err != nil {
+				return err
+			}
+		}
+		csvr.rates[tag] = append(csvr.rates[tag], r)
 	}
 	return
 }
@@ -249,11 +257,20 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get rates for tag %v", record[2]))
 		}
-		//ToDo: Not checking presence of destinations?
+		destinationExists := false
+		for _, d := range csvr.destinations {
+			if d.Id == record[1] {
+				destinationExists = true
+				break
+			}
+		}
+		if !destinationExists {
+			return errors.New(fmt.Sprintf("Could not get destination for tag %v", record[1]))
+		}
 		dr := &DestinationRate{
 			Tag:             tag,
 			DestinationsTag: record[1],
-			Rate:            r,
+			rates:           r,
 		}
 
 		csvr.destinationRates[tag] = append(csvr.destinationRates[tag], dr)
@@ -277,18 +294,12 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get timing for tag %v", record[2]))
 		}
-
-		rt := NewDestinationRateTiming(record[1], t, record[3])
 		drs, exists := csvr.destinationRates[record[1]]
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", record[1]))
 		}
-		for _, dr := range drs {
-			if _, exists := csvr.ratingPlans[tag]; !exists {
-				csvr.ratingPlans[tag] = &RatingPlan{}
-			}
-			csvr.ratingPlans[tag].AddRateInterval(rt.GetRateInterval(dr))
-		}
+		drt := NewDestinationRateTiming(drs, t, record[3])
+		csvr.destinationRateTimings[tag] = append(csvr.destinationRateTimings[tag], drt)
 	}
 	return
 }
@@ -315,18 +326,30 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			rp = &RatingProfile{Id: key}
 			csvr.ratingProfiles[key] = rp
 		}
-		for _, d := range csvr.destinations {
-			ap, exists := csvr.ratingPlans[record[5]]
-			if !exists {
-				return errors.New(fmt.Sprintf("Could not load ratinTiming for tag: %v", record[5]))
+		drts, exists := csvr.destinationRateTimings[record[5]]
+		if !exists {
+			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", record[5]))
+		}
+
+		for _, drt := range drts {
+			//log.Print("TAG: ", record[5])
+			for _, dr := range drt.destinationRates {
+				plan := &RatingPlan{ActivationTime: at}
+				//log.Printf("RI: %+v", drt.GetRateInterval(dr))
+				plan.AddRateInterval(drt.GetRateInterval(dr))
+				rp.AddRatingPlanIfNotPresent(dr.DestinationsTag, plan)
 			}
-			newAP := &RatingPlan{ActivationTime: at}
-			//copy(newAP.Intervals, ap.Intervals)
-			newAP.RateIntervals = append(newAP.RateIntervals, ap.RateIntervals...)
-			rp.AddRatingPlanIfNotPresent(d.Id, newAP)
-			if fallbacksubject != "" {
-				rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallbacksubject)
+		}
+
+		if fallbacksubject != "" {
+			for _, fbs := range strings.Split(fallbacksubject, ";") {
+				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
+				var sslice utils.StringSlice = strings.Split(rp.FallbackKey, ";")
+				if !sslice.Contains(newKey) {
+					rp.FallbackKey += newKey + ";"
+				}
 			}
+			rp.FallbackKey = strings.TrimRight(rp.FallbackKey, ";")
 		}
 	}
 	return
@@ -348,15 +371,11 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
 		}
-		value, err := strconv.ParseFloat(record[8], 64)
+		balanceWeight, err := strconv.ParseFloat(record[8], 64)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action price: %v", err))
+			return errors.New(fmt.Sprintf("Could not parse action balance weight: %v", err))
 		}
-		minutesWeight, err := strconv.ParseFloat(record[9], 64)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action minutes weight: %v", err))
-		}
-		weight, err := strconv.ParseFloat(record[9], 64)
+		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
 		}
@@ -367,13 +386,13 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			Direction:        record[3],
 			Weight:           weight,
 			ExpirationString: record[5],
+			ExtraParameters:  record[9],
 			Balance: &Balance{
-				Id:               utils.GenUUID(),
-				Value:            units,
-				Weight:           minutesWeight,
-				SpecialPrice:     value,
-				SpecialPriceType: record[7],
-				DestinationId:    record[6],
+				Uuid:          utils.GenUUID(),
+				Value:         units,
+				Weight:        balanceWeight,
+				DestinationId: record[6],
+				RateSubject:   record[7],
 			},
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {

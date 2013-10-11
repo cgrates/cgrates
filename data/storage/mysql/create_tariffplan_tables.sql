@@ -46,7 +46,6 @@ CREATE TABLE `tp_rates` (
   `group_interval_start` int(11) NOT NULL,
   `rounding_method` varchar(255) NOT NULL,
   `rounding_decimals` tinyint(4) NOT NULL,
-  `weight` decimal(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_tprate` (`tpid`,`tag`,`group_interval_start`),
   KEY `tpid` (`tpid`),
@@ -120,13 +119,13 @@ CREATE TABLE `tp_actions` (
   `units` DECIMAL(8,4) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
   `destination_tag` varchar(64) NOT NULL,
-  `rate_type` varchar(8) NOT NULL,
-  `rate` DECIMAL(8,4) NOT NULL,
-  `minutes_weight` DECIMAL(5,2) NOT NULL,
+  `rating_subject` varchar(64) NOT NULL,
+  `balance_weight` DECIMAL(5,2) NOT NULL,
+  `extra_parameters` varchar(256) NOT NULL,
   `weight` DECIMAL(5,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`rate_type`,`minutes_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`balance_weight`,`weight`)
 );
 
 --

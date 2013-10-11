@@ -23,6 +23,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"strings"
 	"time"
 )
 
@@ -31,7 +32,7 @@ type SQLStorage struct {
 }
 
 func (self *SQLStorage) Close() {
-	self.Close()
+	self.Db.Close()
 }
 
 func (self *SQLStorage) Flush() (err error) {
@@ -196,16 +197,16 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*LoadRate) erro
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight) VALUES ", utils.TBL_TP_RATES)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES ", utils.TBL_TP_RATES)
 	i := 0
 	for rtId, rtRows := range rts {
 		for _, rt := range rtRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
-			qry += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d, %f)",
+			qry += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d)",
 				tpid, rtId, rt.ConnectFee, rt.Price, rt.RateUnit, rt.RateIncrement, rt.GroupIntervalStart,
-				rt.RoundingMethod, rt.RoundingDecimals, rt.Weight)
+				rt.RoundingMethod, rt.RoundingDecimals)
 			i++
 		}
 	}
@@ -216,7 +217,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*LoadRate) erro
 }
 
 func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
 	if err != nil {
 		return nil, err
 	}
@@ -225,16 +226,16 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix
-		var connectFee, rate, weight float64
+		var connectFee, rate float64
 		var roundingDecimals int
 		var rateUnit, rateIncrement, groupIntervalStart time.Duration
 		var roundingMethod string
-		err = rows.Scan(&connectFee, &rate, &rateUnit, &rateIncrement, &groupIntervalStart, &roundingMethod, &roundingDecimals, &weight)
+		err = rows.Scan(&connectFee, &rate, &rateUnit, &rateIncrement, &groupIntervalStart, &roundingMethod, &roundingDecimals)
 		if err != nil {
 			return nil, err
 		}
 		rt.RateSlots = append(rt.RateSlots, utils.RateSlot{connectFee, rate, rateUnit.String(), rateIncrement.String(),
-			groupIntervalStart.String(), roundingMethod, roundingDecimals, weight})
+			groupIntervalStart.String(), roundingMethod, roundingDecimals})
 	}
 	if i == 0 {
 		return nil, nil
@@ -363,7 +364,7 @@ func (self *SQLStorage) SetTPDestRateTimings(tpid string, drts map[string][]*Des
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
-				tpid, drtId, drt.DestinationRatesTag, drt.TimingsTag, drt.Weight)
+				tpid, drtId, drt.DestinationRatesTag, drt.TimingTag, drt.Weight)
 			i++
 		}
 	}
@@ -532,16 +533,16 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 	if len(acts) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rate_type,rate, minutes_weight,weight) VALUES ", utils.TBL_TP_ACTIONS)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS)
 	i := 0
 	for actId, actRows := range acts {
 		for _, act := range actRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,%f,%f)",
+			qry += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,'%s',%f)",
 				tpid, actId, act.ActionType, act.BalanceId, act.Direction, act.Balance.Value, act.ExpirationString,
-				act.Balance.DestinationId, act.Balance.SpecialPriceType, act.Balance.SpecialPrice, act.Balance.Weight, act.Weight)
+				act.Balance.DestinationId, act.Balance.RateSubject, act.Balance.Weight, act.ExtraParameters, act.Weight)
 			i++
 		}
 	}
@@ -552,7 +553,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*Action) err
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rate_type,rate, minutes_weight,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
 	if err != nil {
 		return nil, err
 	}
@@ -561,12 +562,12 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateType, expTime string
-		var units, rate, minutesWeight, weight float64
-		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateType, &rate, &minutesWeight, &weight); err != nil {
+		var action, balanceId, dir, destId, rateSubject, expTime, extraParameters string
+		var units, balanceWeight, weight float64
+		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &balanceWeight, &extraParameters, &weight); err != nil {
 			return nil, err
 		}
-		acts.Actions = append(acts.Actions, utils.Action{action, balanceId, dir, units, expTime, destId, rateType, rate, minutesWeight, weight})
+		acts.Actions = append(acts.Actions, utils.Action{action, balanceId, dir, units, expTime, destId, rateSubject, balanceWeight, extraParameters, weight})
 	}
 	if i == 0 {
 		return nil, nil
@@ -921,9 +922,9 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 	return dests, nil
 }
 
-func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*LoadRate, error) {
-	rts := make(map[string]*LoadRate)
-	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals, weight FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
+func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string][]*LoadRate, error) {
+	rts := make(map[string][]*LoadRate)
+	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
@@ -934,10 +935,10 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*LoadRate, erro
 	defer rows.Close()
 	for rows.Next() {
 		var tag, roundingMethod string
-		var connect_fee, rate, weight float64
+		var connect_fee, rate float64
 		var rate_unit, rate_increment, group_interval_start time.Duration
 		var roundingDecimals int
-		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start, &roundingMethod, &roundingDecimals, &weight); err != nil {
+		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start, &roundingMethod, &roundingDecimals); err != nil {
 			return nil, err
 		}
 		r := &LoadRate{
@@ -949,9 +950,15 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*LoadRate, erro
 			GroupIntervalStart: group_interval_start,
 			RoundingMethod:     roundingMethod,
 			RoundingDecimals:   roundingDecimals,
-			Weight:             weight,
 		}
-		rts[tag] = r
+		// same tag only to create rate groups
+		existingRates, exists := rts[tag]
+		if exists {
+			if err := existingRates[len(existingRates)-1].ValidNextGroup(r); err != nil {
+				return nil, err
+			}
+		}
+		rts[tag] = append(rts[tag], r)
 	}
 	return rts, nil
 }
@@ -1027,7 +1034,7 @@ func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*Destin
 			Tag:                 tag,
 			DestinationRatesTag: destination_rates_tag,
 			Weight:              weight,
-			TimingsTag:          timings_tag,
+			TimingTag:           timings_tag,
 		}
 		rts = append(rts, rt)
 	}
@@ -1060,7 +1067,14 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 		rp.DestRatesTimingTag = destrates_timing_tag
 		rp.ActivationTime = activation_time
 		if fallback_subject != "" {
-			rp.FallbackKey = fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fallback_subject)
+			for _, fbs := range strings.Split(fallback_subject, ";") {
+				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
+				var sslice utils.StringSlice = strings.Split(rp.FallbackKey, ";")
+				if !sslice.Contains(newKey) {
+					rp.FallbackKey += newKey + ";"
+				}
+			}
+			rp.FallbackKey = strings.TrimRight(rp.FallbackKey, ";")
 		}
 	}
 	return rpfs, nil
@@ -1078,25 +1092,24 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 	defer rows.Close()
 	for rows.Next() {
 		var id int
-		var units, rate, minutes_weight, weight float64
-		var tpid, tag, action, balance_type, direction, destinations_tag, rate_type, expirationDate string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rate_type, &rate, &minutes_weight, &weight); err != nil {
+		var units, balance_weight, weight float64
+		var tpid, tag, action, balance_type, direction, destinations_tag, rating_subject, extra_parameters, expirationDate string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rating_subject, &balance_weight, &extra_parameters, &weight); err != nil {
 			return nil, err
 		}
-		var price float64
 		a := &Action{
 			Id:               utils.GenUUID(),
 			ActionType:       action,
 			BalanceId:        balance_type,
 			Direction:        direction,
 			Weight:           weight,
+			ExtraParameters:  extra_parameters,
 			ExpirationString: expirationDate,
 			Balance: &Balance{
-				Value:            units,
-				Weight:           minutes_weight,
-				SpecialPrice:     price,
-				SpecialPriceType: rate_type,
-				DestinationId:    destinations_tag,
+				Value:         units,
+				Weight:        balance_weight,
+				RateSubject:   rating_subject,
+				DestinationId: destinations_tag,
 			},
 		}
 		as[tag] = append(as[tag], a)

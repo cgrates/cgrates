@@ -15,14 +15,13 @@ Creates a new rate within a tariff plan.
    }
 
    type RateSlot struct {
-	ConnectFee       float64 // ConnectFee applied once the call is answered
-	Rate             float64 // Rate applied
-	RatedUnits       int     //  Number of billing units this rate applies to
-	RateIncrements   int     // This rate will apply in increments of duration
-	GroupInterval    int     // Group position
-	RoundingMethod   string  // Use this method to round the cost
-	RoundingDecimals int     // Round the cost number of decimals
-	Weight           float64 // Rate's priority when dealing with grouped rates
+	ConnectFee         float64 // ConnectFee applied once the call is answered
+	Rate               float64 // Rate applied
+	RateUnit           string  //  Number of billing units this rate applies to
+	RateIncrement      string  // This rate will apply in increments of duration
+	GroupIntervalStart string  // Group position
+	RoundingMethod     string  // Use this method to round the cost
+	RoundingDecimals   int     // Round the cost number of decimals
    }
 
  Mandatory parameters: ``[]string{"TPid", "RateId", "ConnectFee", "RateSlots"}``
@@ -31,34 +30,24 @@ Creates a new rate within a tariff plan.
   ::
 
    {
-    "id": 1, 
-    "method": "ApierV1.SetTPRate", 
+    "id": 2,
+    "method": "ApierV1.SetTPRate",
     "params": [
         {
-            "RateId": "SAMPLE_RATE_2", 
+            "RateId": "1CENTPERSEC",
             "RateSlots": [
                 {
-                    "ConnectFee": 0.2, 
-                    "Rate": 2, 
-                    "RateIncrements": 60, 
-                    "RatedUnits": 1, 
-                    "RoundingDecimals": 2,
-                    "GroupInterval": 0, 
-                    "RoundingMethod": "*up", 
-                    "Weight": 10.0
-                }, 
-                {
-                    "ConnectFee": 0.2, 
-                    "Rate": 2.1, 
-                    "RateIncrements": 1, 
-                    "RatedUnits": 1, 
-                    "RoundingDecimals": 2,
-                    "GroupInterval": 60, 
-                    "RoundingMethod": "*up", 
-                    "Weight": 20.0
+                    "ConnectFee": 0,
+                    "GroupIntervalStart": "0",
+                    "Rate": 0.01,
+                    "RateIncrement": "1s",
+                    "RateUnit": "1s",
+                    "RoundingDecimals": 4,
+                    "RoundingMethod": "*middle",
+                    "Weight": 10
                 }
-            ], 
-            "TPid": "SAMPLE_TP"
+            ],
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -112,12 +101,12 @@ Queries specific rate on tariff plan.
   ::
 
    {
-    "id": 1, 
-    "method": "ApierV1.GetTPRate", 
+    "id": 3,
+    "method": "ApierV1.GetTPRate",
     "params": [
         {
-            "RateId": "SAMPLE_RATE_4", 
-            "TPid": "SAMPLE_TP"
+            "RateId": "1CENTPERSEC",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -136,45 +125,33 @@ Queries specific rate on tariff plan.
    type RateSlot struct {
 	ConnectFee         float64 // ConnectFee applied once the call is answered
 	Rate               float64 // Rate applied
-	RateUnit           string     //  Number of billing units this rate applies to
-	RateIncrement      string     // This rate will apply in increments of duration
-	GroupIntervalStart string     // Group start time during a call
+	RateUnit           string  //  Number of billing units this rate applies to
+	RateIncrement      string  // This rate will apply in increments of duration
+	GroupIntervalStart string  // Group position
 	RoundingMethod     string  // Use this method to round the cost
 	RoundingDecimals   int     // Round the cost number of decimals
-	Weight             float64 // Rate's priority when dealing with grouped rates
    }
 
  *JSON sample*:
   ::
 
    {
-    "error": null, 
-    "id": 2, 
+    "error": null,
+    "id": 3,
     "result": {
-        "RateId": "SAMPLE_RATE_2", 
+        "RateId": "1CENTPERSEC",
         "RateSlots": [
             {
-                "ConnectFee": 0.2, 
-                "Rate": 2, 
-                "RateIncrement": "60s", 
-                "RateUnit": "1s", 
-                "RoundingDecimals": 2,
-                "GroupIntervalStart": "0s", 
-                "RoundingMethod": "*up", 
-                "Weight": 10
-            }, 
-            {
-                "ConnectFee": 0.2, 
-                "Rate": 2.1, 
-                "RateIncrement": "1s", 
-                "RateUnit": "1s", 
-                "RoundingDecimals": 2,
-                "GroupIntervalStart": "60s",
-                "RoundingMethod": "*up", 
-                "Weight": 20
+                "ConnectFee": 0,
+                "GroupIntervalStart": "0",
+                "Rate": 0.01,
+                "RateIncrement": "1s",
+                "RateUnit": "1s",
+                "RoundingDecimals": 4,
+                "RoundingMethod": "*middle"
             }
-        ], 
-        "TPid": "SAMPLE_TP"
+        ],
+        "TPid": "CGR_API_TESTS"
     }
    }
 
@@ -207,11 +184,11 @@ Queries rate identities on tariff plan.
   ::
 
    {
-    "id": 1, 
-    "method": "ApierV1.GetTPRateIds", 
+    "id": 4,
+    "method": "ApierV1.GetTPRateIds",
     "params": [
         {
-            "TPid": "SAMPLE_TP"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -227,13 +204,10 @@ Queries rate identities on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 1, 
+    "error": null,
+    "id": 4,
     "result": [
-        "SAMPLE_RATE_1", 
-        "SAMPLE_RATE_2", 
-        "SAMPLE_RATE_3", 
-        "SAMPLE_RATE_4"
+        "1CENTPERSEC"
     ]
    }
 

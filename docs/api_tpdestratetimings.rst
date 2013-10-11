@@ -26,19 +26,19 @@ Creates a new DestinationRateTiming profile within a tariff plan.
   ::
 
    {
-    "id": 0, 
-    "method": "ApierV1.SetTPDestRateTiming", 
+    "id": 10,
+    "method": "ApierV1.SetTPDestRateTiming",
     "params": [
         {
-            "DestRateTimingId": "SAMPLE_DRTIMING_1", 
+            "DestRateTimingId": "DRT_1CENTPERSEC",
             "DestRateTimings": [
                 {
-                    "DestRatesId": "SAMPLE_DR_1", 
-                    "TimingId": "SAMPLE_TIMING_1", 
+                    "DestRatesId": "DR_1CENTPERSEC",
+                    "TimingId": "ALWAYS",
                     "Weight": 10
                 }
-            ], 
-            "TPid": "SAMPLE_TP"
+            ],
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -58,7 +58,7 @@ Creates a new DestinationRateTiming profile within a tariff plan.
 
    {
     "error": null, 
-    "id": 0, 
+    "id": 10, 
     "result": "OK"
    }
 
@@ -92,12 +92,12 @@ Queries specific DestRateTiming profile on tariff plan.
   ::
 
    {
-    "id": 4, 
-    "method": "ApierV1.GetTPDestRateTiming", 
+    "id": 11,
+    "method": "ApierV1.GetTPDestRateTiming",
     "params": [
         {
-            "DestRateTimingId": "SAMPLE_DRTIMING_1", 
-            "TPid": "SAMPLE_TP"
+            "DestRateTimingId": "DRT_1CENTPERSEC",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -123,18 +123,18 @@ Queries specific DestRateTiming profile on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 4, 
+    "error": null,
+    "id": 11,
     "result": {
-        "DestRateTimingId": "SAMPLE_DRTIMING_1", 
+        "DestRateTimingId": "DRT_1CENTPERSEC",
         "DestRateTimings": [
             {
-                "DestRatesId": "SAMPLE_DR_1", 
-                "TimingId": "SAMPLE_TIMING_1", 
+                "DestRatesId": "DR_1CENTPERSEC",
+                "TimingId": "ALWAYS",
                 "Weight": 10
             }
-        ], 
-        "TPid": "SAMPLE_TP"
+        ],
+        "TPid": "CGR_API_TESTS"
     }
    }
 
@@ -167,11 +167,11 @@ Queries DestRateTiming identities on specific tariff plan.
   ::
 
    {
-    "id": 5, 
-    "method": "ApierV1.GetTPDestRateTimingIds", 
+    "id": 12,
+    "method": "ApierV1.GetTPDestRateTimingIds",
     "params": [
         {
-            "TPid": "SAMPLE_TP"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -187,12 +187,10 @@ Queries DestRateTiming identities on specific tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 5, 
+    "error": null,
+    "id": 12,
     "result": [
-        "SAMPLE_DRTIMING_1", 
-        "SAMPLE_DRTIMING_2", 
-        "SAMPLE_DRTIMING_3"
+        "DRT_1CENTPERSEC"
     ]
    }
 

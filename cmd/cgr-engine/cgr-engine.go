@@ -312,7 +312,7 @@ func main() {
 	var logDb engine.LogStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
-	dataDb, err = engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass)
+	dataDb, err = engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding)
 	if err != nil { // Cannot configure getter database, show stopper
 		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
@@ -322,7 +322,7 @@ func main() {
 	if cfg.StorDBType == SAME {
 		logDb = dataDb.(engine.LogStorage)
 	} else {
-		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass)
+		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding)
 		if err != nil { // Cannot configure logger database, show stopper
 			engine.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return

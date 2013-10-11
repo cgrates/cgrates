@@ -29,12 +29,11 @@ type TPRate struct {
 type RateSlot struct {
 	ConnectFee         float64 // ConnectFee applied once the call is answered
 	Rate               float64 // Rate applied
-	RatedUnits         string  //  Number of billing units this rate applies to
-	RateIncrements     string  // This rate will apply in increments of duration
+	RateUnit           string  //  Number of billing units this rate applies to
+	RateIncrement      string  // This rate will apply in increments of duration
 	GroupIntervalStart string  // Group position
 	RoundingMethod     string  // Use this method to round the cost
 	RoundingDecimals   int     // Round the cost number of decimals
-	Weight             float64 // Rate's priority when dealing with grouped rates
 }
 
 type TPDestinationRate struct {
@@ -91,16 +90,16 @@ type TPActions struct {
 }
 
 type Action struct {
-	Identifier    string  // Identifier mapped in the code
-	BalanceType   string  // Type of balance the action will operate on
-	Direction     string  // Balance direction
-	Units         float64 // Number of units to add/deduct
-	ExpiryTime    string  // Time when the units will expire
-	DestinationId string  // Destination profile id
-	RateType      string  // Type of rate <*absolute|*percent>
-	Rate          float64 // Price value
-	MinutesWeight float64 // Minutes weight
-	Weight        float64 // Action's weight
+	Identifier      string  // Identifier mapped in the code
+	BalanceType     string  // Type of balance the action will operate on
+	Direction       string  // Balance direction
+	Units           float64 // Number of units to add/deduct
+	ExpiryTime      string  // Time when the units will expire
+	DestinationId   string  // Destination profile id
+	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
+	BalanceWeight   float64 // Balance weight
+	ExtraParameters string
+	Weight          float64 // Action's weight
 }
 
 type ApiTPActionTimings struct {

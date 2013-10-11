@@ -87,7 +87,7 @@ func (s *Session) startDebitLoop() {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(s.sessionManager.GetDebitPeriod())
 		cc := s.sessionManager.LoopAction(s, &nextCd, index)
-		time.Sleep(cc.GetTotalDuration())
+		time.Sleep(cc.GetDuration())
 		index++
 	}
 }

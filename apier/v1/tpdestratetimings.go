@@ -42,7 +42,7 @@ func (self *ApierV1) SetTPDestRateTiming(attrs utils.TPDestRateTiming, reply *st
 		drts[idx] = &engine.DestinationRateTiming{Tag: attrs.DestRateTimingId,
 			DestinationRatesTag: drt.DestRatesId,
 			Weight:              drt.Weight,
-			TimingsTag:          drt.TimingId,
+			TimingTag:           drt.TimingId,
 		}
 	}
 	if err := self.StorDb.SetTPDestRateTimings(attrs.TPid, map[string][]*engine.DestinationRateTiming{attrs.DestRateTimingId: drts}); err != nil {

@@ -142,15 +142,6 @@ func (ss StringSlice) Contains(needle string) bool {
 	return false
 }
 
-func SplitPrefix(prefix string) []string {
-	var subs []string
-	max := len(prefix)
-	for i := 0; i < len(prefix)-1; i++ {
-		subs = append(subs, prefix[:max-i])
-	}
-	return subs
-}
-
 func SplitPrefixInterface(prefix string) []interface{} {
 	var subs []interface{}
 	max := len(prefix)
@@ -158,4 +149,11 @@ func SplitPrefixInterface(prefix string) []interface{} {
 		subs = append(subs, prefix[:max-i])
 	}
 	return subs
+}
+
+func CopyHour(src, dest time.Time) time.Time {
+	if src.Hour() == 0 && src.Minute() == 0 && src.Second() == 0 {
+		return src
+	}
+	return time.Date(dest.Year(), dest.Month(), dest.Day(), src.Hour(), src.Minute(), src.Second(), src.Nanosecond(), src.Location())
 }

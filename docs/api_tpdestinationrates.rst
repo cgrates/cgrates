@@ -26,26 +26,18 @@ Creates a new DestinationRate profile within a tariff plan.
   ::
 
    {
-    "id": 2, 
-    "method": "ApierV1.SetTPDestinationRate", 
+    "id": 7,
+    "method": "ApierV1.SetTPDestinationRate",
     "params": [
         {
-            "DestinationRateId": "DST_RATE_1", 
+            "DestinationRateId": "DR_1CENTPERSEC",
             "DestinationRates": [
                 {
-                    "DestinationId": "FIST_DST2", 
-                    "RateId": "SAMPLE_RATE_4"
-                }, 
-                {
-                    "DestinationId": "DST_2", 
-                    "RateId": "SAMPLE_RATE_4"
-                }, 
-                {
-                    "DestinationId": "DST_3", 
-                    "RateId": "SAMPLE_RATE_5"
+                    "DestinationId": "FS_USERS",
+                    "RateId": "1CENTPERSEC"
                 }
-            ], 
-            "TPid": "FIST_TP"
+            ],
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -65,7 +57,7 @@ Creates a new DestinationRate profile within a tariff plan.
 
    {
     "error": null, 
-    "id": 2, 
+    "id": 7, 
     "result": "OK"
    }
 
@@ -99,12 +91,12 @@ Queries specific DestinationRate profile on tariff plan.
   ::
 
    {
-    "id": 2, 
-    "method": "ApierV1.GetTPDestinationRate", 
+    "id": 8,
+    "method": "ApierV1.GetTPDestinationRate",
     "params": [
         {
-            "DestinationRateId": "DST_RATE_1", 
-            "TPid": "FIST_TP"
+            "DestinationRateId": "DR_1CENTPERSEC",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -129,27 +121,19 @@ Queries specific DestinationRate profile on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 2, 
+    "error": null,
+    "id": 8,
     "result": {
-        "DestinationRateId": "DST_RATE_1", 
+        "DestinationRateId": "DR_1CENTPERSEC",
         "DestinationRates": [
             {
-                "DestinationId": "DST_2", 
-                "RateId": "SAMPLE_RATE_4"
-            }, 
-            {
-                "DestinationId": "DST_3", 
-                "RateId": "SAMPLE_RATE_5"
-            }, 
-            {
-                "DestinationId": "FIST_DST2", 
-                "RateId": "SAMPLE_RATE_4"
+                "DestinationId": "FS_USERS",
+                "RateId": "1CENTPERSEC"
             }
-        ], 
-        "TPid": "FIST_TP"
+        ],
+        "TPid": "CGR_API_TESTS"
     }
-   }
+  }
 
 
 **Errors**:
@@ -181,11 +165,11 @@ Queries DestinationRate identities on specific tariff plan.
   ::
 
    {
-    "id": 3, 
-    "method": "ApierV1.GetTPDestinationRateIds", 
+    "id": 9,
+    "method": "ApierV1.GetTPDestinationRateIds",
     "params": [
         {
-            "TPid": "FIST_TP"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -201,12 +185,10 @@ Queries DestinationRate identities on specific tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 3, 
+    "error": null,
+    "id": 9,
     "result": [
-        "DST_RATE_1", 
-        "DST_RATE_2", 
-        "DST_RATE_3"
+        "DR_1CENTPERSEC"
     ]
    }
 

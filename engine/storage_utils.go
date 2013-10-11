@@ -26,7 +26,7 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureDataStorage(db_type, host, port, name, user, pass string) (db DataStorage, err error) {
+func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string) (db DataStorage, err error) {
 	var d Storage
 	switch db_type {
 	case utils.REDIS:
@@ -39,7 +39,7 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass string) (db Data
 		if port != "" {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, db_nb, pass)
+		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 		db = d.(DataStorage)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass)
@@ -53,7 +53,7 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass string) (db Data
 	return db, nil
 }
 
-func ConfigureLogStorage(db_type, host, port, name, user, pass string) (db LogStorage, err error) {
+func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string) (db LogStorage, err error) {
 	var d Storage
 	switch db_type {
 	case utils.REDIS:
@@ -66,7 +66,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass string) (db LogSt
 		if port != "" {
 			host += ":" + port
 		}
-		d, err = NewRedisStorage(host, db_nb, pass)
+		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 		db = d.(LogStorage)
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass)
@@ -86,7 +86,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass string) (db LogSt
 	return db, nil
 }
 
-func ConfigureLoadStorage(db_type, host, port, name, user, pass string) (db LoadStorage, err error) {
+func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string) (db LoadStorage, err error) {
 	var d Storage
 	switch db_type {
 	case utils.POSTGRES:

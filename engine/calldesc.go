@@ -40,7 +40,7 @@ func init() {
 	//db_server := "192.168.0.17"
 	m, _ := NewMapStorage()
 	//m, _ := NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-	//m, _ := NewRedisStorage(db_server+":6379", 11, "")
+	//m, _ := NewRedisStorage(db_server+":6379", 11, "", utils.MSGPACK)
 	//m, _ := NewRedigoStorage(db_server+":6379", 11, "")
 	//m, _ := NewRadixStorage(db_server+":6379", 11, "")
 	storageGetter, _ = m.(DataStorage)
@@ -104,10 +104,11 @@ type CallDescriptor struct {
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
 	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
-	CallDuration                          time.Duration // the call duration so far (partial or final)
+	CallDuration                          time.Duration // the call duration so far (till TimeEnd)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	RatingPlans                           []*RatingPlan
+	Increments                            Increments
 	userBalance                           *UserBalance
 }
 
@@ -136,19 +137,20 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 /*
 Restores the activation periods for the specified prefix from storage.
 */
-func (cd *CallDescriptor) LoadRatingPlans() (destPrefix string, err error) {
+func (cd *CallDescriptor) LoadRatingPlans() (destPrefix, matchedSubject string, err error) {
+	matchedSubject = cd.GetKey()
 	if val, err := cache2go.GetXCached(cd.GetKey() + cd.Destination); err == nil {
 		xaps := val.(xCachedRatingPlans)
 		cd.RatingPlans = xaps.aps
-		return xaps.destPrefix, nil
+		return xaps.destPrefix, matchedSubject, nil
 	}
-	destPrefix, values, err := cd.getRatingPlansForPrefix(cd.GetKey(), 1)
+	destPrefix, matchedSubject, values, err := cd.getRatingPlansForPrefix(cd.GetKey(), 1)
 	if err != nil {
 		fallbackKey := fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
 		// use the default subject
-		destPrefix, values, err = cd.getRatingPlansForPrefix(fallbackKey, 1)
+		destPrefix, matchedSubject, values, err = cd.getRatingPlansForPrefix(fallbackKey, 1)
 	}
-	//load the activation preriods
+	//load the rating plans
 	if err == nil && len(values) > 0 {
 		xaps := xCachedRatingPlans{destPrefix, values, new(cache2go.XEntry)}
 		xaps.XCache(cd.GetKey()+cd.Destination, debitPeriod+5*time.Second, xaps)
@@ -157,22 +159,23 @@ func (cd *CallDescriptor) LoadRatingPlans() (destPrefix string, err error) {
 	return
 }
 
-func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (foundPrefix string, aps []*RatingPlan, err error) {
+func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (foundPrefix, matchedSubject string, aps []*RatingPlan, err error) {
+	matchedSubject = key
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
 	rp, err := storageGetter.GetRatingProfile(key)
 	if err != nil {
-		return "", nil, err
+		return "", "", nil, err
 	}
 	foundPrefix, aps, err = rp.GetRatingPlansForPrefix(cd.Destination)
 	if err != nil {
 		if rp.FallbackKey != "" {
 			recursionDepth++
 			for _, fbk := range strings.Split(rp.FallbackKey, FALLBACK_SEP) {
-				if destPrefix, values, err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
-					return destPrefix, values, err
+				if destPrefix, matchedSubject, values, err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
+					return destPrefix, matchedSubject, values, err
 				}
 			}
 		}
@@ -200,17 +203,16 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	if len(cd.RatingPlans) == 0 {
 		return
 	}
-	firstSpan.RatingPlan = cd.RatingPlans[0]
-
+	firstSpan.ratingPlan = cd.RatingPlans[0]
 	// split on activation periods
 	afterStart, afterEnd := false, false //optimization for multiple activation periods
-	for _, ap := range cd.RatingPlans {
-		if !afterStart && !afterEnd && ap.ActivationTime.Before(cd.TimeStart) {
-			firstSpan.RatingPlan = ap
+	for _, rp := range cd.RatingPlans {
+		if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
+			firstSpan.ratingPlan = rp
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
-				newTs := timespans[i].SplitByRatingPlan(ap)
+				newTs := timespans[i].SplitByRatingPlan(rp)
 				if newTs != nil {
 					timespans = append(timespans, newTs)
 				} else {
@@ -220,23 +222,37 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			}
 		}
 	}
+	Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
-		ap := timespans[i].RatingPlan
+		//log.Printf("==============%v==================", i)
+		//log.Printf("TS: %+v", timespans[i])
+		rp := timespans[i].ratingPlan
+		Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
-		ap.RateIntervals.Sort()
-		for _, interval := range ap.RateIntervals {
+		rp.RateIntervals.Sort()
+		for _, interval := range rp.RateIntervals {
+			//log.Printf("\tINTERVAL: %+v %v", interval, len(rp.RateIntervals))
 			if timespans[i].RateInterval != nil && timespans[i].RateInterval.Weight < interval.Weight {
 				continue // if the timespan has an interval than it already has a heigher weight
 			}
 			newTs := timespans[i].SplitByRateInterval(interval)
 			if newTs != nil {
-				newTs.RatingPlan = ap
-				timespans = append(timespans, newTs)
+				newTs.ratingPlan = rp
+				// insert the new timespan
+				index := i + 1
+				timespans = append(timespans, nil)
+				copy(timespans[index+1:], timespans[index:])
+				timespans[index] = newTs
+				break
 			}
 		}
 	}
+	Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
+	//log.Printf("After SplitByRateInterval: %+v", timespans)
 	timespans = cd.roundTimeSpansToIncrement(timespans)
+	Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
+	//log.Printf("After round: %+v", timespans)
 	return
 }
 
@@ -245,15 +261,21 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 // descriptor's initial duration
 func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*TimeSpan {
 	for i, ts := range timespans {
+		//log.Printf("TS: %+v", ts)
 		if ts.RateInterval != nil {
 			_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+			//log.Printf("Inc: %+v", rateIncrement)
 			// if the timespan duration is larger than the rate increment make sure it is a multiple of it
-			if rateIncrement != time.Second && rateIncrement < ts.GetDuration() {
+			if rateIncrement < ts.GetDuration() {
 				rateIncrement = utils.RoundTo(rateIncrement, ts.GetDuration())
 			}
+			//log.Printf("Inc: %+v", rateIncrement)
 			if rateIncrement > ts.GetDuration() {
+				initialDuration := ts.GetDuration()
+				//log.Printf("Initial: %+v", initialDuration)
 				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
-				ts.CallDuration = ts.CallDuration + rateIncrement
+				ts.CallDuration = ts.CallDuration + (rateIncrement - initialDuration)
+				//log.Printf("After: %+v", ts.CallDuration)
 
 				// overlap the rest of the timespans
 				i += 1
@@ -272,7 +294,6 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*Ti
 	// remove overlapped
 	for _, ts := range timespans {
 		if !ts.overlapped {
-			ts.createRatedSecondSlice()
 			newTimespans = append(newTimespans, ts)
 		}
 	}
@@ -283,7 +304,7 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*Ti
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	destPrefix, err := cd.LoadRatingPlans()
+	destPrefix, matchedSubject, err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return &CallCost{Cost: -1}, err
@@ -299,12 +320,14 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 		cost += ts.getCost()
 	}
+	// global rounding
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
+	startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
 		Direction:   cd.Direction,
 		TOR:         cd.TOR,
 		Tenant:      cd.Tenant,
-		Subject:     cd.Subject,
+		Subject:     matchedSubject[startIndex:],
 		Account:     cd.Account,
 		Destination: destPrefix,
 		Cost:        cost,
@@ -321,7 +344,10 @@ If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
 func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float64, err error) {
-	_, err = cd.LoadRatingPlans()
+	if cd.CallDuration == 0 {
+		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
+	}
+	_, _, err = cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return 0, err
@@ -332,7 +358,7 @@ func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float6
 		if userBalance.Type == UB_TYPE_POSTPAID {
 			return -1, nil
 		} else {
-			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd.Destination)
+			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd)
 			Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 		}
 	} else {
@@ -385,7 +411,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 		defer storageGetter.SetUserBalance(userBalance)
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
-			userBalance.debitBalance(CREDIT+OUTBOUND, cc.Cost+cc.ConnectFee, true)
+			userBalance.debitCreditBalance(cc, true)
 		}
 	}
 	return
@@ -407,6 +433,14 @@ func (cd *CallDescriptor) MaxDebit(startTime time.Time) (cc *CallCost, err error
 	return cd.Debit()
 }
 
+func (cd *CallDescriptor) RefoundIncrements() (left float64, err error) {
+	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+		defer storageGetter.SetUserBalance(userBalance)
+		userBalance.refoundIncrements(cd.Increments, true)
+	}
+	return 0.0, err
+}
+
 /*
 Interface method used to add/substract an amount of cents from user's money balance.
 The amount filed has to be filled in call descriptor.
@@ -414,7 +448,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) DebitCents() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitBalance(CREDIT, cd.Amount, true), nil
+		return userBalance.debitGenericBalance(CREDIT+OUTBOUND, cd.Amount, true), nil
 	}
 	return 0.0, err
 }
@@ -426,7 +460,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitBalance(SMS, cd.Amount, true), nil
+		return userBalance.debitGenericBalance(SMS+OUTBOUND, cd.Amount, true), nil
 	}
 	return 0, err
 }
@@ -438,7 +472,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) DebitSeconds() (err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitMinutesBalance(cd.Amount, cd.Destination, true)
+		return userBalance.debitCreditBalance(cd.CreateCallCost(), true)
 	}
 	return err
 }
@@ -467,4 +501,16 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.Flush()
 	return nil
 
+}
+
+// Creates a CallCost structure copying related data from CallDescriptor
+func (cd *CallDescriptor) CreateCallCost() *CallCost {
+	return &CallCost{
+		Direction:   cd.Direction,
+		TOR:         cd.TOR,
+		Tenant:      cd.Tenant,
+		Subject:     cd.Subject,
+		Account:     cd.Account,
+		Destination: cd.Destination,
+	}
 }

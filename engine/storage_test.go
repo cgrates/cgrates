@@ -99,7 +99,7 @@ func GetUB() *UserBalance {
 		Direction:      OUTBOUND,
 		BalanceId:      SMS,
 		Units:          100,
-		MinuteBalances: BalanceChain{&Balance{Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}},
+		MinuteBalances: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
 		Id:             "some_uuid",
@@ -115,7 +115,7 @@ func GetUB() *UserBalance {
 	ub := &UserBalance{
 		Id:             "rif",
 		Type:           UB_TYPE_POSTPAID,
-		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, SpecialPrice: 1, DestinationId: "NAT"}, &Balance{Weight: 10, SpecialPrice: 10, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}
@@ -213,31 +213,6 @@ func BenchmarkMarshallerGOBStoreRestore(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		result, _ := ms.Marshal(ap)
 		ms.Unmarshal(result, ap1)
-		result, _ = ms.Marshal(ub)
-		ms.Unmarshal(result, ub1)
-	}
-}
-
-func BenchmarkMarshallerMsgpackStoreRestore(b *testing.B) {
-	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
-	i := &RateInterval{Months: []time.Month{time.February},
-		MonthDays: []int{1},
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
-	ap := &RatingPlan{ActivationTime: d}
-	ap.AddRateInterval(i)
-	ub := GetUB()
-
-	ap1 := RatingPlan{}
-	ub1 := &UserBalance{}
-	b.StartTimer()
-	ms := new(MsgpackMarshaler)
-	for i := 0; i < b.N; i++ {
-		result, _ := ms.Marshal(ap)
-		ms.Unmarshal(result, ap1)
-
 		result, _ = ms.Marshal(ub)
 		ms.Unmarshal(result, ub1)
 	}

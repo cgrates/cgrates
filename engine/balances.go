@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"time"
@@ -26,23 +27,23 @@ import (
 
 // Can hold different units as seconds or monetary
 type Balance struct {
-	Id               string
-	Value            float64
-	ExpirationDate   time.Time
-	Weight           float64
-	GroupIds         []string
-	SpecialPriceType string
-	SpecialPrice     float64 // absolute for minutes and percent for monetary (can be positive or negative)
-	DestinationId    string
-	RateSubject      string
-	precision        int
+	Uuid           string
+	Value          float64
+	ExpirationDate time.Time
+	Weight         float64
+	GroupIds       []string
+	//SpecialPriceType string
+	//SpecialPrice     float64 // absolute for minutes and percent for monetary (can be positive or negative)
+	DestinationId string
+	RateSubject   string
+	precision     int
 }
 
 func (b *Balance) Equal(o *Balance) bool {
 	return b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
-		b.SpecialPrice == o.SpecialPrice &&
-		b.DestinationId == o.DestinationId
+		b.DestinationId == o.DestinationId &&
+		b.RateSubject == o.RateSubject
 }
 
 func (b *Balance) IsExpired() bool {
@@ -51,23 +52,42 @@ func (b *Balance) IsExpired() bool {
 
 func (b *Balance) Clone() *Balance {
 	return &Balance{
-		Id:               b.Id,
-		Value:            b.Value,
-		SpecialPrice:     b.SpecialPrice,
-		SpecialPriceType: b.SpecialPriceType,
-		DestinationId:    b.DestinationId,
-		ExpirationDate:   b.ExpirationDate,
-		Weight:           b.Weight,
+		Uuid:           b.Uuid,
+		Value:          b.Value,
+		DestinationId:  b.DestinationId,
+		ExpirationDate: b.ExpirationDate,
+		Weight:         b.Weight,
+		RateSubject:    b.RateSubject,
 	}
 }
 
 // Returns the available number of seconds for a specified credit
-func (b *Balance) GetSecondsForCredit(credit float64) (seconds float64) {
+func (b *Balance) GetSecondsForCredit(cd *CallDescriptor, credit float64) (seconds float64) {
 	seconds = b.Value
-	if b.SpecialPrice > 0 {
-		seconds = math.Min(credit/b.SpecialPrice, b.Value)
+	cc, err := b.GetCost(cd)
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
+		return 0
+	}
+	if cc.Cost > 0 {
+		secondCost := cc.Cost / cc.GetDuration().Seconds()
+		// TODO: this is not very accurate
+		// we should iterate timespans and increment to get exact number of minutes for
+		// available credit
+		seconds = math.Min(credit/secondCost, b.Value)
 	}
 	return
+}
+
+func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
+	if b.RateSubject != "" {
+		cd.Subject = b.RateSubject
+		cd.Account = cd.Subject
+		return cd.GetCost()
+	}
+	cc := cd.CreateCallCost()
+	cc.Cost = 0
+	return cc, nil
 }
 
 /*
@@ -85,8 +105,7 @@ func (bc BalanceChain) Swap(i, j int) {
 
 func (bc BalanceChain) Less(j, i int) bool {
 	return bc[i].Weight < bc[j].Weight ||
-		bc[i].precision < bc[j].precision ||
-		bc[i].SpecialPrice > bc[j].SpecialPrice
+		bc[i].precision < bc[j].precision
 }
 
 func (bc BalanceChain) Sort() {
@@ -138,4 +157,13 @@ func (bc BalanceChain) Clone() BalanceChain {
 		newChain = append(newChain, b.Clone())
 	}
 	return newChain
+}
+
+func (bc BalanceChain) GetBalance(uuid string) *Balance {
+	for _, balance := range bc {
+		if balance.Uuid == uuid {
+			return balance
+		}
+	}
+	return nil
 }

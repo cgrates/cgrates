@@ -24,8 +24,8 @@ import (
 )
 
 func TestBalanceSortWeight(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 2, SpecialPrice: 2}
-	mb2 := &Balance{Weight: 2, precision: 1, SpecialPrice: 1}
+	mb1 := &Balance{Weight: 1, precision: 2}
+	mb2 := &Balance{Weight: 2, precision: 1}
 	var bs BalanceChain
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
@@ -35,8 +35,8 @@ func TestBalanceSortWeight(t *testing.T) {
 }
 
 func TestBalanceSortPrecision(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 2, SpecialPrice: 2}
-	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1}
+	mb1 := &Balance{Weight: 1, precision: 2}
+	mb2 := &Balance{Weight: 1, precision: 1}
 	var bs BalanceChain
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
@@ -45,28 +45,17 @@ func TestBalanceSortPrecision(t *testing.T) {
 	}
 }
 
-func TestBalanceSortSpecialPrice(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1}
-	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 2}
-	var bs BalanceChain
-	bs = append(bs, mb2, mb1)
-	bs.Sort()
-	if bs[0] != mb1 || bs[1] != mb2 {
-		t.Error("Buckets not sorted by price!")
-	}
-}
-
 func TestBalanceEqual(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
-	mb2 := &Balance{Weight: 1, precision: 1, SpecialPrice: 1, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
-	mb3 := &Balance{Weight: 1, precision: 1, SpecialPrice: 2, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: ""}
+	mb1 := &Balance{Weight: 1, precision: 1, RateSubject: "1", DestinationId: ""}
+	mb2 := &Balance{Weight: 1, precision: 1, RateSubject: "1", DestinationId: ""}
+	mb3 := &Balance{Weight: 1, precision: 1, RateSubject: "2", DestinationId: ""}
 	if !mb1.Equal(mb2) || mb2.Equal(mb3) {
 		t.Error("Equal failure!", mb1 == mb2, mb3)
 	}
 }
 
 func TestBalanceClone(t *testing.T) {
-	mb1 := &Balance{Value: 1, Weight: 2, SpecialPrice: 3, SpecialPriceType: PRICE_ABSOLUTE, DestinationId: "5"}
+	mb1 := &Balance{Value: 1, Weight: 2, RateSubject: "test", DestinationId: "5"}
 	mb2 := mb1.Clone()
 	if mb1 == mb2 || !reflect.DeepEqual(mb1, mb2) {
 		t.Errorf("Cloning failure: \n%v\n%v", mb1, mb2)

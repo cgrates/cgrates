@@ -41,7 +41,7 @@ func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
 	rts := make([]*engine.LoadRate, len(attrs.RateSlots))
 	for idx, rtSlot := range attrs.RateSlots {
 		var errParse error
-		itrvlStrs := []string{rtSlot.RatedUnits, rtSlot.RateIncrements, rtSlot.GroupIntervalStart}
+		itrvlStrs := []string{rtSlot.RateUnit, rtSlot.RateIncrement, rtSlot.GroupIntervalStart}
 		itrvls := make([]time.Duration, len(itrvlStrs))
 		for idxItrvl, itrvlStr := range itrvlStrs {
 			if itrvls[idxItrvl], errParse = time.ParseDuration(itrvlStr); errParse != nil {
@@ -49,7 +49,7 @@ func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
 			}
 		}
 		rts[idx] = &engine.LoadRate{attrs.RateId, rtSlot.ConnectFee, rtSlot.Rate, itrvls[0], itrvls[1], itrvls[2],
-			rtSlot.RoundingMethod, rtSlot.RoundingDecimals, rtSlot.Weight}
+			rtSlot.RoundingMethod, rtSlot.RoundingDecimals}
 	}
 	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*engine.LoadRate{attrs.RateId: rts}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())

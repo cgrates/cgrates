@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
-	"github.com/vmihailenco/msgpack"
 	"labix.org/v2/mgo/bson"
 	"reflect"
 	"time"
@@ -48,13 +47,6 @@ const (
 	MEDIATOR_SOURCE        = "MED"
 	SCHED_SOURCE           = "SCH"
 	RATER_SOURCE           = "RAT"
-)
-
-var (
-	// for codec msgpack
-	mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
-	sliceByteTyp  = reflect.TypeOf([]byte(nil))
-	timeTyp       = reflect.TypeOf(time.Time{})
 )
 
 type Storage interface {
@@ -143,7 +135,7 @@ type LoadStorage interface {
 	// loader functions
 	GetTpDestinations(string, string) ([]*Destination, error)
 	GetTpTimings(string, string) (map[string]*Timing, error)
-	GetTpRates(string, string) (map[string]*LoadRate, error)
+	GetTpRates(string, string) (map[string][]*LoadRate, error)
 	GetTpDestinationRates(string, string) (map[string][]*DestinationRate, error)
 	GetTpDestinationRateTimings(string, string) ([]*DestinationRateTiming, error)
 	GetTpRatingProfiles(string, string) (map[string]*RatingProfile, error)
@@ -191,16 +183,6 @@ func (jbm *JSONBufMarshaler) Unmarshal(data []byte, v interface{}) error {
 	return json.NewDecoder(bytes.NewBuffer(data)).Decode(v)
 }
 
-type MsgpackMarshaler struct{}
-
-func (jm *MsgpackMarshaler) Marshal(v interface{}) ([]byte, error) {
-	return msgpack.Marshal(v)
-}
-
-func (jm *MsgpackMarshaler) Unmarshal(data []byte, v interface{}) error {
-	return msgpack.Unmarshal(data, v)
-}
-
 type CodecMsgpackMarshaler struct {
 	mh *codec.MsgpackHandle
 }
@@ -208,10 +190,13 @@ type CodecMsgpackMarshaler struct {
 func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
+	var mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
+	//sliceByteTyp  = reflect.TypeOf([]byte(nil))
+	var timeTyp = reflect.TypeOf(time.Time{})
 	mh.MapType = mapStrIntfTyp
 
 	// configure extensions for msgpack, to enable Binary and Time support for tags 0 and 1
-	mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
+	//mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
 	mh.AddExt(timeTyp, 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
 	return cmm
 }

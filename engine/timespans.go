@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"time"
 )
@@ -29,16 +30,48 @@ A unit in which a call will be split that has a specific price related interval 
 type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
 	Cost               float64
-	RatingPlan         *RatingPlan
+	ratingPlan         *RatingPlan
 	RateInterval       *RateInterval
 	CallDuration       time.Duration // the call duration so far till TimeEnd
 	overlapped         bool          // mark a timespan as overlapped by an expanded one
-	ratedSeconds       []*rated_second
+	Increments         Increments
 }
 
-type rated_second struct {
-	index int
-	rate  float64
+type Increment struct {
+	Duration            time.Duration
+	Cost                float64
+	BalanceUuids        []string // need more than one for minutes with cost
+	BalanceRateInterval *RateInterval
+	MinuteInfo          *MinuteInfo
+}
+
+// Holds the minute information related to a specified timespan
+type MinuteInfo struct {
+	DestinationId string
+	Quantity      float64
+	Price         float64
+}
+
+func (incr *Increment) Clone() *Increment {
+	nIncr := &Increment{
+		Duration:            incr.Duration,
+		Cost:                incr.Cost,
+		BalanceRateInterval: incr.BalanceRateInterval,
+		MinuteInfo:          incr.MinuteInfo,
+	}
+	nIncr.BalanceUuids = make([]string, len(incr.BalanceUuids))
+	copy(nIncr.BalanceUuids, incr.BalanceUuids)
+	return nIncr
+}
+
+type Increments []*Increment
+
+func (incs Increments) GetTotalCost() float64 {
+	cost := 0.0
+	for _, increment := range incs {
+		cost += increment.Cost
+	}
+	return cost
 }
 
 // Returns the duration of the timespan
@@ -78,23 +111,18 @@ func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
 	}
 }
 
-func (ts *TimeSpan) createRatedSecondSlice() {
+func (ts *TimeSpan) createIncrementsSlice() {
 	if ts.RateInterval == nil {
 		return
 	}
-	// create rated seconds series
-	rate, _, rate_unit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	secondCost := rate / rate_unit.Seconds()
+	ts.Increments = make([]*Increment, 0)
+	// create rated units series
+	rate, rateIncrement, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+	incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	totalCost := 0.0
-	for s := 0; s < int(ts.GetDuration().Seconds()); s++ {
-		ts.ratedSeconds = append(ts.ratedSeconds, &rated_second{s, secondCost})
-		totalCost += secondCost
-	}
-	cCost := ts.getCost()
-	// here there might be some subsecond duration left
-	if totalCost < cCost {
-		// add one extra second with the fractional cost
-		ts.ratedSeconds = append(ts.ratedSeconds, &rated_second{len(ts.ratedSeconds), utils.Round(cCost-totalCost, ts.RateInterval.RoundingDecimals, ts.RateInterval.RoundingMethod)})
+	for s := 0; s < int(ts.GetDuration()/rateIncrement); s++ {
+		ts.Increments = append(ts.Increments, &Increment{Duration: rateIncrement, Cost: incrementCost})
+		totalCost += incrementCost
 	}
 }
 
@@ -105,55 +133,65 @@ a new timespan starting from the end of the received one.
 The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
-
 	//Logger.Debug("here: ", ts, " +++ ", i)
+	//log.Printf("TS: %+v", ts)
 	// if the span is not in interval return nil
-	if !(i.Contains(ts.TimeStart) || i.Contains(ts.TimeEnd)) {
+	if !(i.Contains(ts.TimeStart, false) || i.Contains(ts.TimeEnd, true)) {
 		//Logger.Debug("Not in interval")
+		//log.Printf("NOT in interval: %+v", i)
 		return
 	}
+	Logger.Debug(fmt.Sprintf("TS: %+v", ts))
 	// split by GroupStart
 	i.Rates.Sort()
-	for _, price := range i.Rates {
-		if ts.GetGroupStart() < price.GroupIntervalStart && ts.GetGroupEnd() >= price.GroupIntervalStart {
+	for _, rate := range i.Rates {
+		Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
+		if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
+			Logger.Debug(fmt.Sprintf("Splitting"))
 			ts.SetRateInterval(i)
-			splitTime := ts.TimeStart.Add(price.GroupIntervalStart - ts.GetGroupStart())
+			splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
+			//log.Print("SPLIT: ", splitTime)
 			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 			ts.TimeEnd = splitTime
 			nts.SetRateInterval(i)
 			nts.CallDuration = ts.CallDuration
 			ts.SetNewCallDuration(nts)
-
+			Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
+			//log.Printf("Group splitting: %+v %+v", ts, nts)
 			return
 		}
 	}
-
+	//log.Printf("*************TS: %+v", ts)
 	// if the span is enclosed in the interval try to set as new interval and return nil
-	if i.Contains(ts.TimeStart) && i.Contains(ts.TimeEnd) {
+	if i.Contains(ts.TimeStart, false) && i.Contains(ts.TimeEnd, true) {
 		//Logger.Debug("All in interval")
 		ts.SetRateInterval(i)
 		return
 	}
 	// if only the start time is in the interval split the interval to the right
-	if i.Contains(ts.TimeStart) {
+	if i.Contains(ts.TimeStart, false) {
 		//Logger.Debug("Start in interval")
 		splitTime := i.getRightMargin(ts.TimeStart)
+
 		ts.SetRateInterval(i)
-		if splitTime == ts.TimeStart {
+		if splitTime == ts.TimeStart || splitTime.Equal(ts.TimeEnd) {
 			return
 		}
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
 		ts.TimeEnd = splitTime
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
-
+		Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
+		//log.Printf("right: %+v %+v", ts, nts)
 		return
 	}
 	// if only the end time is in the interval split the interval to the left
-	if i.Contains(ts.TimeEnd) {
+	if i.Contains(ts.TimeEnd, true) {
 		//Logger.Debug("End in interval")
+		//tmpTime := time.Date(ts.TimeStart.)
 		splitTime := i.getLeftMargin(ts.TimeEnd)
-		if splitTime == ts.TimeEnd {
+		splitTime = utils.CopyHour(splitTime, ts.TimeStart)
+		if splitTime.Equal(ts.TimeEnd) {
 			return
 		}
 		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
@@ -162,23 +200,69 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.SetRateInterval(i)
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
-
+		Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
+		//log.Printf("left: %+v %+v", ts, nts)
 		return
 	}
 	return
 }
 
-/*
-Splits the given timespan on activation period's activation time.
-*/
-func (ts *TimeSpan) SplitByRatingPlan(ap *RatingPlan) (newTs *TimeSpan) {
-	if !ts.Contains(ap.ActivationTime) {
+// Split the timespan at the given increment start
+func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
+	if index <= 0 || index >= len(ts.Increments) {
 		return nil
 	}
-	newTs = &TimeSpan{TimeStart: ap.ActivationTime, TimeEnd: ts.TimeEnd, RatingPlan: ap}
+	timeStart := ts.GetTimeStartForIncrement(index)
+	newTs := &TimeSpan{RateInterval: ts.RateInterval, TimeStart: timeStart, TimeEnd: ts.TimeEnd}
 	newTs.CallDuration = ts.CallDuration
-	ts.TimeEnd = ap.ActivationTime
+	ts.TimeEnd = timeStart
+	newTs.Increments = ts.Increments[index:]
+	ts.Increments = ts.Increments[:index]
 	ts.SetNewCallDuration(newTs)
+	return newTs
+}
+
+// Split the timespan at the given second
+func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
+	if duration <= 0 || duration >= ts.GetDuration() {
+		return nil
+	}
+	timeStart := ts.TimeStart.Add(duration)
+	newTs := &TimeSpan{RateInterval: ts.RateInterval, TimeStart: timeStart, TimeEnd: ts.TimeEnd}
+	newTs.CallDuration = ts.CallDuration
+	ts.TimeEnd = timeStart
+	// split the increment
+	for incrIndex, incr := range ts.Increments {
+		if duration-incr.Duration >= 0 {
+			duration -= incr.Duration
+		} else {
+
+			splitIncrement := ts.Increments[incrIndex].Clone()
+			splitIncrement.Duration -= duration
+			ts.Increments[incrIndex].Duration = duration
+			newTs.Increments = Increments{splitIncrement}
+			if incrIndex < len(ts.Increments)-1 {
+				newTs.Increments = append(newTs.Increments, ts.Increments[incrIndex+1:]...)
+			}
+			ts.Increments = ts.Increments[:incrIndex+1]
+			break
+		}
+	}
+	ts.SetNewCallDuration(newTs)
+	return newTs
+}
+
+// Splits the given timespan on activation period's activation time.
+func (ts *TimeSpan) SplitByRatingPlan(rp *RatingPlan) (newTs *TimeSpan) {
+	if !ts.Contains(rp.ActivationTime) {
+		return nil
+	}
+	newTs = &TimeSpan{TimeStart: rp.ActivationTime, TimeEnd: ts.TimeEnd, ratingPlan: rp}
+	newTs.CallDuration = ts.CallDuration
+	ts.TimeEnd = rp.ActivationTime
+	ts.SetNewCallDuration(newTs)
+	Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
+	//log.Printf("RP SPLITTING: %+v %+v", ts, newTs)
 	return
 }
 
@@ -202,4 +286,20 @@ func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
 		d = 0
 	}
 	ts.CallDuration = d
+}
+
+// returns a time for the specified second in the time span
+func (ts *TimeSpan) GetTimeStartForIncrement(index int) time.Time {
+	return ts.TimeStart.Add(time.Duration(int64(index) * ts.Increments[0].Duration.Nanoseconds()))
+}
+
+func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
+	if duration < ts.GetDuration() {
+		duration = utils.RoundTo(duration, ts.GetDuration())
+	}
+	if duration > ts.GetDuration() {
+		initialDuration := ts.GetDuration()
+		ts.TimeEnd = ts.TimeStart.Add(duration)
+		ts.CallDuration = ts.CallDuration + (duration - initialDuration)
+	}
 }

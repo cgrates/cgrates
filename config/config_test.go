@@ -46,6 +46,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.StorDBName = "cgrates"
 	eCfg.StorDBUser = "cgrates"
 	eCfg.StorDBPass = "CGRateS.org"
+	eCfg.DBDataEncoding = utils.MSGPACK
 	eCfg.RPCEncoding = JSON
 	eCfg.DefaultReqType = utils.RATED
 	eCfg.DefaultTOR = "0"
@@ -141,6 +142,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.StorDBName = "test"
 	eCfg.StorDBUser = "test"
 	eCfg.StorDBPass = "test"
+	eCfg.DBDataEncoding = "test"
 	eCfg.RPCEncoding = "test"
 	eCfg.DefaultReqType = "test"
 	eCfg.DefaultTOR = "test"

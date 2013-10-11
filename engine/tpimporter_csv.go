@@ -138,7 +138,7 @@ func (self *TPCSVImporter) importRates(fn string) error {
 			}
 			continue
 		}
-		rt, err := NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8])
+		rt, err := NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
 		if err != nil {
 			return err
 		}
@@ -208,7 +208,7 @@ func (self *TPCSVImporter) importDestRateTimings(fn string) error {
 		drt := &DestinationRateTiming{Tag: record[0],
 			DestinationRatesTag: record[1],
 			Weight:              weight,
-			TimingsTag:          record[2],
+			TimingTag:           record[2],
 		}
 		if err := self.StorDb.SetTPDestRateTimings(self.TPid, map[string][]*DestinationRateTiming{drt.Tag: []*DestinationRateTiming{drt}}); err != nil {
 			if self.Verbose {
@@ -285,7 +285,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		actId, actionType, balanceType, direction, destTag, rateType := record[0], record[1], record[2], record[3], record[6], record[7]
+		actId, actionType, balanceType, direction, destTag, rateSubject := record[0], record[1], record[2], record[3], record[6], record[7]
 		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			if self.Verbose {
@@ -293,8 +293,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		rateValue, _ := strconv.ParseFloat(record[8], 64) // Ignore errors since empty string is error, we can find out based on rateType if defined
-		minutesWeight, _ := strconv.ParseFloat(record[9], 64)
+		balanceWeight, _ := strconv.ParseFloat(record[8], 64)
 		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {
 			if self.Verbose {
@@ -307,12 +306,12 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			BalanceId:        balanceType,
 			Direction:        direction,
 			ExpirationString: record[5],
+			ExtraParameters:  record[9],
 			Balance: &Balance{
-				Value:            units,
-				DestinationId:    destTag,
-				SpecialPriceType: rateType,
-				SpecialPrice:     rateValue,
-				Weight:           minutesWeight,
+				Value:         units,
+				DestinationId: destTag,
+				RateSubject:   rateSubject,
+				Weight:        balanceWeight,
 			},
 			Weight: weight,
 		}

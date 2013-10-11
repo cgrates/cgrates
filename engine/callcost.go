@@ -47,7 +47,7 @@ func (cc *CallCost) Merge(other *CallCost) {
 	}
 	ts := cc.Timespans[len(cc.Timespans)-1]
 	otherTs := other.Timespans[0]
-	if reflect.DeepEqual(ts.RatingPlan, otherTs.RatingPlan) &&
+	if reflect.DeepEqual(ts.ratingPlan, otherTs.ratingPlan) &&
 		reflect.DeepEqual(ts.RateInterval, otherTs.RateInterval) {
 		// extend the last timespan with
 		ts.TimeEnd = ts.TimeEnd.Add(otherTs.GetDuration())
@@ -67,9 +67,21 @@ func (cc *CallCost) GetStartTime() time.Time {
 	return cc.Timespans[0].TimeStart
 }
 
-func (cc *CallCost) GetTotalDuration() (td time.Duration) {
+func (cc *CallCost) GetDuration() (td time.Duration) {
 	for _, ts := range cc.Timespans {
 		td += ts.GetDuration()
 	}
 	return
+}
+
+// Creates a CallDescriptor structure copying related data from CallCost
+func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
+	return &CallDescriptor{
+		Direction:   cc.Direction,
+		TOR:         cc.TOR,
+		Tenant:      cc.Tenant,
+		Subject:     cc.Subject,
+		Account:     cc.Account,
+		Destination: cc.Destination,
+	}
 }

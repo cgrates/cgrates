@@ -39,6 +39,7 @@ func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engi
 	m = &Mediator{
 		connector: connector,
 		logDb:     logDb,
+		cdrDb:     cdrDb,
 		cgrCfg:    cfg,
 	}
 	m.fieldNames = make(map[string][]string)
@@ -191,14 +192,17 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*engine.CallCost, error)
 		return nil, err
 	}
 	cd := engine.CallDescriptor{
-		Direction:   "*out", //record[m.directionFields[runIdx]] TODO: fix me
-		Tenant:      cdr.GetTenant(),
-		TOR:         cdr.GetTOR(),
-		Subject:     cdr.GetSubject(),
-		Account:     cdr.GetAccount(),
-		Destination: cdr.GetDestination(),
-		TimeStart:   t1,
-		TimeEnd:     t1.Add(d)}
+		Direction:    "*out", //record[m.directionFields[runIdx]] TODO: fix me
+		Tenant:       cdr.GetTenant(),
+		TOR:          cdr.GetTOR(),
+		Subject:      cdr.GetSubject(),
+		Account:      cdr.GetAccount(),
+		Destination:  cdr.GetDestination(),
+		TimeStart:    t1,
+		TimeEnd:      t1.Add(d),
+		LoopIndex:    0,
+		CallDuration: d,
+	}
 	if cdr.GetReqType() == utils.PSEUDOPREPAID {
 		err = self.connector.Debit(cd, cc)
 	} else {

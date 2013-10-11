@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"log"
+	"math"
 	"os"
 	"path"
 	"regexp"
@@ -52,10 +53,9 @@ type LoadRate struct {
 	RateUnit, RateIncrement, GroupIntervalStart time.Duration
 	RoundingMethod                              string
 	RoundingDecimals                            int
-	Weight                                      float64
 }
 
-func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals, weight string) (r *LoadRate, err error) {
+func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals string) (r *LoadRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -81,11 +81,6 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		log.Printf("Error parsing rates increments from: %v", rateIncrements)
 		return
 	}
-	wght, err := strconv.ParseFloat(weight, 64)
-	if err != nil {
-		log.Printf("Error parsing weight from: %s", weight)
-		return
-	}
 	rd, err := strconv.Atoi(roundingDecimals)
 	if err != nil {
 		log.Printf("Error parsing rounding decimals: %s", roundingDecimals)
@@ -99,18 +94,30 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		GroupIntervalStart: gi,
 		RateUnit:           ru,
 		RateIncrement:      ri,
-		Weight:             wght,
 		RoundingMethod:     roundingMethod,
 		RoundingDecimals:   rd,
 	}
 	return
 }
 
+func (present *LoadRate) ValidNextGroup(next *LoadRate) error {
+	if next.GroupIntervalStart <= present.GroupIntervalStart {
+		return errors.New(fmt.Sprintf("Next rate group interval start must be heigher than the last one: %#v", next))
+	}
+	if math.Mod(next.GroupIntervalStart.Seconds(), present.RateIncrement.Seconds()) != 0 {
+		return errors.New(fmt.Sprintf("GroupIntervalStart of %#v must be a multiple of RateIncrement of %#v", next, present))
+	}
+	if present.RoundingMethod != next.RoundingMethod || present.RoundingDecimals != next.RoundingDecimals {
+		return errors.New(fmt.Sprintf("Rounding stuff must be equal for sam rate tag: %#v, %#v", present, next))
+	}
+	return nil
+}
+
 type DestinationRate struct {
 	Tag             string
 	DestinationsTag string
-	RateTag         string
-	Rate            *LoadRate
+	RateTag         string // intermediary used when loading from db
+	rates           []*LoadRate
 }
 
 type Timing struct {
@@ -135,43 +142,46 @@ func NewTiming(timingInfo ...string) (rt *Timing) {
 
 type DestinationRateTiming struct {
 	Tag                 string
-	DestinationRatesTag string
+	DestinationRatesTag string // intermediary used when loading from db
+	destinationRates    []*DestinationRate
 	Weight              float64
-	TimingsTag          string // intermediary used when loading from db
+	TimingTag           string // intermediary used when loading from db
 	timing              *Timing
 }
 
-func NewDestinationRateTiming(destinationRatesTag string, timing *Timing, weight string) (rt *DestinationRateTiming) {
+func NewDestinationRateTiming(destinationRates []*DestinationRate, timing *Timing, weight string) (drt *DestinationRateTiming) {
 	w, err := strconv.ParseFloat(weight, 64)
 	if err != nil {
 		log.Printf("Error parsing weight unit from: %v", weight)
 		return
 	}
-	rt = &DestinationRateTiming{
-		DestinationRatesTag: destinationRatesTag,
-		Weight:              w,
-		timing:              timing,
+	drt = &DestinationRateTiming{
+		destinationRates: destinationRates,
+		timing:           timing,
+		Weight:           w,
 	}
 	return
 }
 
-func (rt *DestinationRateTiming) GetRateInterval(dr *DestinationRate) (i *RateInterval) {
+func (drt *DestinationRateTiming) GetRateInterval(dr *DestinationRate) (i *RateInterval) {
 	i = &RateInterval{
-		Years:            rt.timing.Years,
-		Months:           rt.timing.Months,
-		MonthDays:        rt.timing.MonthDays,
-		WeekDays:         rt.timing.WeekDays,
-		StartTime:        rt.timing.StartTime,
-		Weight:           rt.Weight,
-		ConnectFee:       dr.Rate.ConnectFee,
-		RoundingMethod:   dr.Rate.RoundingMethod,
-		RoundingDecimals: dr.Rate.RoundingDecimals,
-		Rates: RateGroups{&Rate{
-			GroupIntervalStart: dr.Rate.GroupIntervalStart,
-			Value:              dr.Rate.Price,
-			RateIncrement:      dr.Rate.RateIncrement,
-			RateUnit:           dr.Rate.RateUnit,
-		}},
+		Years:            drt.timing.Years,
+		Months:           drt.timing.Months,
+		MonthDays:        drt.timing.MonthDays,
+		WeekDays:         drt.timing.WeekDays,
+		StartTime:        drt.timing.StartTime,
+		Weight:           drt.Weight,
+		ConnectFee:       dr.rates[0].ConnectFee,
+		RoundingMethod:   dr.rates[0].RoundingMethod,
+		RoundingDecimals: dr.rates[0].RoundingDecimals,
+	}
+	for _, rl := range dr.rates {
+		i.Rates = append(i.Rates, &Rate{
+			GroupIntervalStart: rl.GroupIntervalStart,
+			Value:              rl.Price,
+			RateIncrement:      rl.RateIncrement,
+			RateUnit:           rl.RateUnit,
+		})
 	}
 	return
 }
@@ -220,9 +230,9 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		"Tag([0-9A-Za-z_]),Prefix([0-9])"},
 	utils.TIMINGS_CSV: &FileLineRegexValidator{utils.TIMINGS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
-		"Tag([0-9A-Za-z_]),Years([0-9;]|*all|<empty>),Months([0-9;]|*all|<empty>),MonthDays([0-9;]|*all|<empty>),WeekDays([0-9;]|*all|<empty>),Time([0-9:]|*asap)"},
+		"Tag([0-9A-Za-z_]),Years([0-9;]|*any|<empty>),Months([0-9;]|*any|<empty>),MonthDays([0-9;]|*any|<empty>),WeekDays([0-9;]|*any|<empty>),Time([0-9:]|*asap)"},
 	utils.RATES_CSV: &FileLineRegexValidator{utils.RATES_NRCOLS,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,){3}(?:\*\w+,){1}(?:\d+\.?\d*,?){2}$`),
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,){3}(?:\*\w+,){1}(?:\d+\.?\d*,?){1}$`),
 		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RateUnit([0-9.]),RateIncrementStart([0-9.])"},
 	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,?\s*){3}$`),

@@ -43,7 +43,7 @@ const (
 	ACCOUNT_ACTIONS_CSV      = "AccountActions.csv"
 	TIMINGS_NRCOLS           = 6
 	DESTINATIONS_NRCOLS      = 2
-	RATES_NRCOLS             = 9
+	RATES_NRCOLS             = 8
 	DESTINATION_RATES_NRCOLS = 3
 	DESTRATE_TIMINGS_NRCOLS  = 4
 	RATE_PROFILES_NRCOLS     = 7
@@ -55,4 +55,6 @@ const (
 	ROUNDING_MIDDLE          = "*middle"
 	ROUNDING_DOWN            = "*down"
 	COMMENT_CHAR             = '#'
+	JSON                     = "json"
+	MSGPACK                  = "msgpack"
 )

@@ -34,7 +34,7 @@ type RedisStorage struct {
 	ms   Marshaler
 }
 
-func NewRedisStorage(address string, db int, pass string) (Storage, error) {
+func NewRedisStorage(address string, db int, pass, mrshlerStr string) (Storage, error) {
 	addrSplit := strings.Split(address, ":")
 	host := addrSplit[0]
 	port := 6379
@@ -56,7 +56,15 @@ func NewRedisStorage(address string, db int, pass string) (Storage, error) {
 			return nil, err
 		}
 	}
-	return &RedisStorage{db: ndb, dbNb: db, ms: NewCodecMsgpackMarshaler()}, nil
+	var mrshler Marshaler
+	if mrshlerStr == utils.MSGPACK {
+		mrshler = NewCodecMsgpackMarshaler()
+	} else if mrshlerStr == utils.JSON {
+		mrshler = new(JSONMarshaler)
+	} else {
+		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
+	}
+	return &RedisStorage{db: ndb, dbNb: db, ms: mrshler}, nil
 }
 
 func (rs *RedisStorage) Close() {
