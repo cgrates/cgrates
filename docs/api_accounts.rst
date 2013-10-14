@@ -20,12 +20,12 @@ Process dependencies and load a specific AccountActions profile from storDb into
   ::
 
    {
-    "id": 0, 
-    "method": "ApierV1.SetAccountActions", 
+    "id": 0,
+    "method": "ApierV1.SetAccountActions",
     "params": [
         {
-            "AccountActionsId": "SAMPLE_AA_1", 
-            "TPid": "SAMPLE_TP_1"
+            "AccountActionsId": "AA_1005",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }

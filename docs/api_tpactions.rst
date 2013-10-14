@@ -23,9 +23,9 @@ Creates a new Actions profile within a tariff plan.
 	DestinationId   string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
 	BalanceWeight   float64 // Balance weight
-	ExtraParameters string  // Pass here parameters to action when called. This can be an encoded string or something which Action will understand
+	ExtraParameters string
 	Weight          float64 // Action's weight
-    }
+   }
 
  Mandatory parameters: ``[]string{"TPid", "ActionsId", "Actions", "Identifier", "Weight"}``
 
@@ -33,26 +33,25 @@ Creates a new Actions profile within a tariff plan.
   ::
 
    {
-    "id": 3, 
-    "method": "ApierV1.SetTPActions", 
+    "id": 39,
+    "method": "ApierV1.SetTPActions",
     "params": [
         {
             "Actions": [
                 {
-                    "BalanceType": "*monetary", 
-                    "DestinationId": "CGRATES_NET", 
-                    "Direction": "*out", 
-                    "ExpiryTime": 1374082259, 
-                    "Identifier": "TOPUP_RESET", 
-                    "MinutesWeight": 10, 
-                    "Rate": 0.12, 
-                    "RateType": "*absolute", 
-                    "Units": 10, 
+                    "BalanceType": "*monetary",
+                    "BalanceWeight": 0,
+                    "DestinationId": "*any",
+                    "Direction": "*out",
+                    "ExpiryTime": "0",
+                    "Identifier": "*topup_reset",
+                    "RatingSubject": "",
+                    "Units": 10,
                     "Weight": 10
                 }
-            ], 
-            "ActionsId": "SAMPLE_ACTS_1", 
-            "TPid": "SAMPLE_TP_1"
+            ],
+            "ActionsId": "TOPUP_10",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -72,7 +71,7 @@ Creates a new Actions profile within a tariff plan.
 
    {
     "error": null, 
-    "id": 3, 
+    "id": 39, 
     "result": "OK"
    }
 
@@ -106,12 +105,12 @@ Queries specific Actions profile on tariff plan.
   ::
 
    {
-    "id": 5, 
-    "method": "ApierV1.GetTPActions", 
+    "id": 40,
+    "method": "ApierV1.GetTPActions",
     "params": [
         {
-            "ActionsId": "SAMPLE_ACTS_1", 
-            "TPid": "SAMPLE_TP_1"
+            "ActionsId": "TOPUP_10",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -136,33 +135,33 @@ Queries specific Actions profile on tariff plan.
 	DestinationId   string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
 	BalanceWeight   float64 // Balance weight
-	ExtraParameters string  // Pass here parameters to action when called. This can be an encoded string or something which Action will understand
+	ExtraParameters string
 	Weight          float64 // Action's weight
-    }
+   }
 
  *JSON sample*:
   ::
 
    {
-    "error": null, 
-    "id": 5, 
+    "error": null,
+    "id": 40,
     "result": {
         "Actions": [
             {
-                "BalanceType": "*monetary", 
-                "DestinationId": "CGRATES_NET", 
-                "Direction": "*out", 
-                "ExpiryTime": "+24h", 
-                "Identifier": "TOPUP_RESET", 
-                "MinutesWeight": 10, 
-                "Rate": 0.12, 
-                "RateType": "*absolute", 
-                "Units": 10, 
+                "BalanceType": "*monetary",
+                "BalanceWeight": 0,
+                "DestinationId": "*any",
+                "Direction": "*out",
+                "ExpiryTime": "0",
+                "ExtraParameters": "",
+                "Identifier": "*topup_reset",
+                "RatingSubject": "",
+                "Units": 10,
                 "Weight": 10
             }
-        ], 
-        "ActionsId": "SAMPLE_ACTS_1", 
-        "TPid": "SAMPLE_TP_1"
+        ],
+        "ActionsId": "TOPUP_10",
+        "TPid": "CGR_API_TESTS"
     }
    }
 
@@ -195,11 +194,11 @@ Queries Actions identities on specific tariff plan.
   ::
 
    {
-    "id": 6, 
-    "method": "ApierV1.GetTPActionIds", 
+    "id": 41,
+    "method": "ApierV1.GetTPActionIds",
     "params": [
         {
-            "TPid": "SAMPLE_TP_1"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -215,11 +214,10 @@ Queries Actions identities on specific tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 6, 
+    "error": null,
+    "id": 41,
     "result": [
-        "SAMPLE_ACTS_1", 
-        "SAMPLE_ACTS_2"
+        "TOPUP_10"
     ]
    }
 

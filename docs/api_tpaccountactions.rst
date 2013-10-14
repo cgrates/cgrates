@@ -24,17 +24,17 @@ Creates a new AccountActions profile within a tariff plan.
   ::
 
    {
-    "id": 2, 
-    "method": "ApierV1.SetTPAccountActions", 
+    "id": 48,
+    "method": "ApierV1.SetTPAccountActions",
     "params": [
         {
-            "Account": "ACNT1", 
-            "AccountActionsId": "AA_SAMPLE_2", 
-            "ActionTimingsId": "SAMPLE_AT_1", 
-            "ActionTriggersId": "SAMPLE_ATRS_1", 
-            "Direction": "*out", 
-            "TPid": "SAMPLE_TP_1", 
-            "Tenant": "TENANT1"
+            "Account": "1005",
+            "AccountActionsId": "AA_1005",
+            "ActionTimingsId": "AT_FS10",
+            "ActionTriggersId": "STANDARD_TRIGGERS",
+            "Direction": "*out",
+            "TPid": "CGR_API_TESTS",
+            "Tenant": "cgrates.org"
         }
     ]
    }
@@ -54,7 +54,7 @@ Creates a new AccountActions profile within a tariff plan.
 
    {
     "error": null, 
-    "id": 2, 
+    "id": 48, 
     "result": "OK"
    }
 
@@ -88,12 +88,12 @@ Queries specific AccountActions profile on tariff plan.
   ::
 
    {
-    "id": 3, 
-    "method": "ApierV1.GetTPAccountActions", 
+    "id": 49,
+    "method": "ApierV1.GetTPAccountActions",
     "params": [
         {
-            "AccountActionsId": "AA_SAMPLE_2", 
-            "TPid": "SAMPLE_TP_1"
+            "AccountActionsId": "AA_1005",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -117,16 +117,16 @@ Queries specific AccountActions profile on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 3, 
+    "error": null,
+    "id": 49,
     "result": {
-        "Account": "ACNT1", 
-        "AccountActionsId": "AA_SAMPLE_2", 
-        "ActionTimingsId": "SAMPLE_AT_1", 
-        "ActionTriggersId": "SAMPLE_ATRS_1", 
-        "Direction": "*out", 
-        "TPid": "SAMPLE_TP_1", 
-        "Tenant": "TENANT1"
+        "Account": "1005",
+        "AccountActionsId": "AA_1005",
+        "ActionTimingsId": "AT_FS10",
+        "ActionTriggersId": "STANDARD_TRIGGERS",
+        "Direction": "*out",
+        "TPid": "CGR_API_TESTS",
+        "Tenant": "cgrates.org"
     }
    }
 
@@ -159,11 +159,11 @@ Queries AccountActions identities on specific tariff plan.
   ::
 
    {
-    "id": 4, 
-    "method": "ApierV1.GetTPAccountActionIds", 
+    "id": 50,
+    "method": "ApierV1.GetTPAccountActionIds",
     "params": [
         {
-            "TPid": "SAMPLE_TP_1"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -179,11 +179,10 @@ Queries AccountActions identities on specific tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 4, 
+    "error": null,
+    "id": 50,
     "result": [
-        "AA_SAMPLE_1", 
-        "AA_SAMPLE_2"
+        "AA_1005"
     ]
    }
 

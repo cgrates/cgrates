@@ -26,24 +26,19 @@ Creates a new ActionTimings profile within a tariff plan.
   ::
 
    {
-    "id": 7, 
-    "method": "ApierV1.SetTPActionTimings", 
+    "id": 42,
+    "method": "ApierV1.SetTPActionTimings",
     "params": [
         {
             "ActionTimings": [
                 {
-                    "ActionsId": "SAMPLE_ACTIONS", 
-                    "TimingId": "ALL_TIME", 
-                    "Weight": 10
-                }, 
-                {
-                    "ActionsId": "SAMPLE_ACTIONS2", 
-                    "TimingId": "ALL_TIME", 
+                    "ActionsId": "TOPUP_10",
+                    "TimingId": "ASAP",
                     "Weight": 10
                 }
-            ], 
-            "ActionTimingsId": "SAMPLE_AT3", 
-            "TPid": "SAMPLE_TP_1"
+            ],
+            "ActionTimingsId": "AT_FS10",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -63,7 +58,7 @@ Creates a new ActionTimings profile within a tariff plan.
 
    {
     "error": null, 
-    "id": 7, 
+    "id": 42, 
     "result": "OK"
    }
 
@@ -77,7 +72,7 @@ Creates a new ActionTimings profile within a tariff plan.
 
 
 ApierV1.GetTPActionTimings
-++++++++++++++++++++++++
+++++++++++++++++++++++++++
 
 Queries specific ActionTimings profile on tariff plan.
 
@@ -97,12 +92,12 @@ Queries specific ActionTimings profile on tariff plan.
   ::
 
    {
-    "id": 8, 
-    "method": "ApierV1.GetTPActionTimings", 
+    "id": 43,
+    "method": "ApierV1.GetTPActionTimings",
     "params": [
         {
-            "ActionTimingsId": "SAMPLE_AT3", 
-            "TPid": "SAMPLE_TP_1"
+            "ActionTimingsId": "AT_FS10",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -128,23 +123,18 @@ Queries specific ActionTimings profile on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 8, 
+    "error": null,
+    "id": 43,
     "result": {
         "ActionTimings": [
             {
-                "ActionsId": "SAMPLE_ACTIONS", 
-                "TimingId": "ALL_TIME", 
-                "Weight": 10
-            }, 
-            {
-                "ActionsId": "SAMPLE_ACTIONS2", 
-                "TimingId": "ALL_TIME", 
+                "ActionsId": "TOPUP_10",
+                "TimingId": "ASAP",
                 "Weight": 10
             }
-        ], 
-        "ActionTimingsId": "SAMPLE_AT3", 
-        "TPid": "SAMPLE_TP_1"
+        ],
+        "ActionTimingsId": "AT_FS10",
+        "TPid": "CGR_API_TESTS"
     }
    }
 
@@ -177,14 +167,15 @@ Queries ActionTimings identities on specific tariff plan.
   ::
 
    {
-    "id": 9, 
-    "method": "ApierV1.GetTPActionTimingIds", 
+    "id": 44,
+    "method": "ApierV1.GetTPActionTimingIds",
     "params": [
         {
-            "TPid": "SAMPLE_TP_1"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
+   
 
 **Reply**:
 
@@ -197,12 +188,10 @@ Queries ActionTimings identities on specific tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 9, 
+    "error": null,
+    "id": 44,
     "result": [
-        "SAMPLE_AT", 
-        "SAMPLE_AT2", 
-        "SAMPLE_AT3"
+        "AT_FS10"
     ]
    }
 

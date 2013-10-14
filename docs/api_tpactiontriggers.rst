@@ -1,5 +1,5 @@
 ApierV1.SetTPActionTriggers
-+++++++++++++++++++++++++
++++++++++++++++++++++++++++
 
 Creates a new ActionTriggers profile within a tariff plan.
 
@@ -31,23 +31,41 @@ Creates a new ActionTriggers profile within a tariff plan.
   ::
 
    {
-    "id": 2, 
-    "method": "ApierV1.SetTPActionTriggers", 
+    "id": 45,
+    "method": "ApierV1.SetTPActionTriggers",
     "params": [
         {
             "ActionTriggers": [
                 {
-                    "ActionsId": "ACTION_1", 
-                    "BalanceType": "*monetary", 
-                    "DestinationId": "", 
-                    "Direction": "*out", 
-                    "ThresholdType": "MIN_BALANCE", 
-                    "ThresholdValue": 5, 
+                    "ActionsId": "LOG_BALANCE",
+                    "BalanceType": "*monetary",
+                    "DestinationId": "",
+                    "Direction": "*out",
+                    "ThresholdType": "*min_balance",
+                    "ThresholdValue": 2,
+                    "Weight": 10
+                },
+                {
+                    "ActionsId": "LOG_BALANCE",
+                    "BalanceType": "*monetary",
+                    "DestinationId": "",
+                    "Direction": "*out",
+                    "ThresholdType": "*max_balance",
+                    "ThresholdValue": 20,
+                    "Weight": 10
+                },
+                {
+                    "ActionsId": "LOG_BALANCE",
+                    "BalanceType": "*monetary",
+                    "DestinationId": "FS_USERS",
+                    "Direction": "*out",
+                    "ThresholdType": "*max_counter",
+                    "ThresholdValue": 15,
                     "Weight": 10
                 }
-            ], 
-            "ActionTriggersId": "SAMPLE_ATS_1", 
-            "TPid": "SAMPLE_TP_2"
+            ],
+            "ActionTriggersId": "STANDARD_TRIGGERS",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -67,7 +85,7 @@ Creates a new ActionTriggers profile within a tariff plan.
 
    {
     "error": null, 
-    "id": 2, 
+    "id": 45, 
     "result": "OK"
    }
 
@@ -101,12 +119,12 @@ Queries specific ActionTriggers profile on tariff plan.
   ::
 
    {
-    "id": 0, 
-    "method": "ApierV1.GetTPActionTriggers", 
+    "id": 46,
+    "method": "ApierV1.GetTPActionTriggers",
     "params": [
         {
-            "ActionTriggersId": "SAMPLE_ATS_1", 
-            "TPid": "SAMPLE_TP_2"
+            "ActionTriggersId": "STANDARD_TRIGGERS",
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -137,22 +155,40 @@ Queries specific ActionTriggers profile on tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 0, 
+    "error": null,
+    "id": 46,
     "result": {
         "ActionTriggers": [
             {
-                "ActionsId": "ACTION_1", 
-                "BalanceType": "*monetary", 
-                "DestinationId": "", 
-                "Direction": "*out", 
-                "ThresholdType": "MIN_BALANCE", 
-                "ThresholdValue": 5, 
+                "ActionsId": "LOG_BALANCE",
+                "BalanceType": "*monetary",
+                "DestinationId": "",
+                "Direction": "*out",
+                "ThresholdType": "*min_balance",
+                "ThresholdValue": 2,
+                "Weight": 10
+            },
+            {
+                "ActionsId": "LOG_BALANCE",
+                "BalanceType": "*monetary",
+                "DestinationId": "",
+                "Direction": "*out",
+                "ThresholdType": "*max_balance",
+                "ThresholdValue": 20,
+                "Weight": 10
+            },
+            {
+                "ActionsId": "LOG_BALANCE",
+                "BalanceType": "*monetary",
+                "DestinationId": "FS_USERS",
+                "Direction": "*out",
+                "ThresholdType": "*max_counter",
+                "ThresholdValue": 15,
                 "Weight": 10
             }
-        ], 
-        "ActionTriggersId": "SAMPLE_ATS_1", 
-        "TPid": "SAMPLE_TP_2"
+        ],
+        "ActionTriggersId": "STANDARD_TRIGGERS",
+        "TPid": "CGR_API_TESTS"
     }
    }
 
@@ -185,11 +221,11 @@ Queries ActionTriggers identities on specific tariff plan.
   ::
 
    {
-    "id": 5, 
-    "method": "ApierV1.GetTPActionTriggerIds", 
+    "id": 47,
+    "method": "ApierV1.GetTPActionTriggerIds",
     "params": [
         {
-            "TPid": "SAMPLE_TP_2"
+            "TPid": "CGR_API_TESTS"
         }
     ]
    }
@@ -205,13 +241,12 @@ Queries ActionTriggers identities on specific tariff plan.
   ::
 
    {
-    "error": null, 
-    "id": 5, 
+    "error": null,
+    "id": 47,
     "result": [
-        "SAMPLE_ATS_1",
-        "SAMPLE_ATS_2"
+        "STANDARD_TRIGGERS"
     ]
-}
+   }
 
 **Errors**:
 
