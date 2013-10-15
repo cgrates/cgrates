@@ -41,7 +41,7 @@ func init() {
 	m, _ := NewMapStorage()
 	//m, _ := NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
 	//m, _ := NewRedisStorage(db_server+":6379", 11, "", utils.MSGPACK)
-	//m, _ := NewRedigoStorage(db_server+":6379", 11, "")
+	//fm, _ := NewRedigoStorage(db_server+":6379", 11, "")
 	//m, _ := NewRadixStorage(db_server+":6379", 11, "")
 	storageGetter, _ = m.(DataStorage)
 

@@ -188,7 +188,6 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			}
 			paid := false
 			for _, b := range usefulMinuteBalances {
-
 				// check standard subject tags
 				if b.RateSubject == ZEROSECOND || b.RateSubject == "" {
 					amount := increment.Duration.Seconds()
@@ -263,6 +262,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 
 				// get the new rate
 				cd := cc.CreateCallDescriptor()
+				cd.Subject = b.RateSubject
 				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 				cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
 				cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
@@ -274,6 +274,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				//debit new callcost
 				var paidTs []*TimeSpan
 				for _, nts := range newCC.Timespans {
+					nts.createIncrementsSlice()
 					paidTs = append(paidTs, nts)
 					for nIdx, nInc := range nts.Increments {
 						// debit minutes and money
@@ -311,8 +312,14 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				if paidDuration > 0 {
 					// split from current increment
 					newTs := ts.SplitByIncrement(incrementIndex)
-					remainingTs := []*TimeSpan{newTs}
-
+					var remainingTs []*TimeSpan
+					if newTs != nil {
+						remainingTs = append(remainingTs, newTs)
+					} else {
+						// nothing was paied form current ts so remove it
+						cc.Timespans = append(cc.Timespans[:tsIndex], cc.Timespans[tsIndex+1:]...)
+						tsIndex--
+					}
 					for tsi := tsIndex + 1; tsi < len(cc.Timespans); tsi++ {
 						remainingTs = append(remainingTs, cc.Timespans[tsi])
 					}
@@ -376,6 +383,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				} else {
 					// get the new rate
 					cd := cc.CreateCallDescriptor()
+					cd.Subject = b.RateSubject
 					cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 					cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
 					cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
@@ -387,6 +395,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					//debit new callcost
 					var paidTs []*TimeSpan
 					for _, nts := range newCC.Timespans {
+						nts.createIncrementsSlice()
 						paidTs = append(paidTs, nts)
 						for nIdx, nInc := range nts.Increments {
 							// debit money
@@ -410,7 +419,14 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					if paidDuration > 0 {
 						// split from current increment
 						newTs := ts.SplitByIncrement(incrementIndex)
-						remainingTs := []*TimeSpan{newTs}
+						var remainingTs []*TimeSpan
+						if newTs != nil {
+							remainingTs = append(remainingTs, newTs)
+						} else {
+							// nothing was paied form current ts so remove it
+							cc.Timespans = append(cc.Timespans[:tsIndex], cc.Timespans[tsIndex+1:]...)
+							tsIndex--
+						}
 
 						for tsi := tsIndex + 1; tsi < len(cc.Timespans); tsi++ {
 							remainingTs = append(remainingTs, cc.Timespans[tsi])
