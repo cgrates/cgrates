@@ -18,43 +18,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import (
-	"github.com/cgrates/cgrates/cache2go"
-	"time"
-)
-
 /*
 The struture that is saved to storage.
 */
 type RatingPlan struct {
-	ActivationTime time.Time
-	RateIntervals  RateIntervalList
+	Id               string
+	DestinationRates map[string]RateIntervalList
 }
 
-type xCachedRatingPlans struct {
-	destPrefix string
-	aps        []*RatingPlan
+/*
+type xCachedRatingPlan struct {
+	rp *RatingPlan
 	*cache2go.XEntry
 }
+*/
 
 /*
 Adds one ore more intervals to the internal interval list only if it is not allready in the list.
 */
-func (rp *RatingPlan) AddRateInterval(ris ...*RateInterval) {
+func (rp *RatingPlan) AddRateInterval(dId string, ris ...*RateInterval) {
+	if rp.DestinationRates == nil {
+		rp.DestinationRates = make(map[string]RateIntervalList, 1)
+	}
 	for _, ri := range ris {
 		found := false
-		for _, eri := range rp.RateIntervals {
+		for _, eri := range rp.DestinationRates[dId] {
 			if ri.Equal(eri) {
 				found = true
 				break
 			}
 		}
 		if !found {
-			rp.RateIntervals = append(rp.RateIntervals, ri)
+			rp.DestinationRates[dId] = append(rp.DestinationRates[dId], ri)
 		}
 	}
 }
 
 func (rp *RatingPlan) Equal(o *RatingPlan) bool {
-	return rp.ActivationTime == o.ActivationTime
+	return rp.Id == o.Id
 }

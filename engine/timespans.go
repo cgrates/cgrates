@@ -30,7 +30,7 @@ A unit in which a call will be split that has a specific price related interval 
 type TimeSpan struct {
 	TimeStart, TimeEnd time.Time
 	Cost               float64
-	ratingPlan         *RatingPlan
+	ratingInfo         *RatingInfo
 	RateInterval       *RateInterval
 	CallDuration       time.Duration // the call duration so far till TimeEnd
 	overlapped         bool          // mark a timespan as overlapped by an expanded one
@@ -253,11 +253,11 @@ func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
 }
 
 // Splits the given timespan on activation period's activation time.
-func (ts *TimeSpan) SplitByRatingPlan(rp *RatingPlan) (newTs *TimeSpan) {
+func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 	if !ts.Contains(rp.ActivationTime) {
 		return nil
 	}
-	newTs = &TimeSpan{TimeStart: rp.ActivationTime, TimeEnd: ts.TimeEnd, ratingPlan: rp}
+	newTs = &TimeSpan{TimeStart: rp.ActivationTime, TimeEnd: ts.TimeEnd, ratingInfo: rp}
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = rp.ActivationTime
 	ts.SetNewCallDuration(newTs)

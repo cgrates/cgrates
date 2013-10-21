@@ -71,7 +71,7 @@ func TestSplitSpans(t *testing.T) {
 	cd.LoadRatingPlans()
 	timespans := cd.splitInTimeSpans(nil)
 	if len(timespans) != 2 {
-		t.Log(cd.RatingPlans)
+		t.Log(cd.RatingInfos)
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 }
@@ -82,9 +82,10 @@ func TestSplitSpansRoundToIncrements(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, CallDuration: 132 * time.Second}
 
 	cd.LoadRatingPlans()
+	t.Logf("%+v", cd)
 	timespans := cd.splitInTimeSpans(nil)
 	if len(timespans) != 2 {
-		t.Log(cd.RatingPlans)
+		t.Log(cd.RatingInfos)
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 	var d time.Duration
@@ -161,7 +162,7 @@ func TestGetCostRateGroups(t *testing.T) {
 		t.Error("Error getting cost: ", err)
 	}
 	if result.Cost != 132 {
-		t.Error("Error calculating cost: ", result.Timespans[0])
+		t.Error("Error calculating cost: ", result.Timespans)
 	}
 }
 
@@ -194,19 +195,19 @@ func TestFullDestNotFound(t *testing.T) {
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700, ConnectFee: 1}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
-		t.Log(cd.RatingPlans)
+		t.Log(cd.RatingInfos)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
 
 func TestSubjectNotFound(t *testing.T) {
-	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
+	t1 := time.Date(2013, time.February, 1, 17, 30, 0, 0, time.UTC)
+	t2 := time.Date(2013, time.February, 1, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "not_exiting", Destination: "025740532", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2700, ConnectFee: 1}
 	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
-		t.Log(cd.RatingPlans)
+		t.Logf("%+v", result.Timespans[0].RateInterval)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -267,7 +268,14 @@ func TestMinutesCost(t *testing.T) {
 }
 
 func TestMaxSessionTimeNoUserBalance(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723", Amount: 1000}
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "rif",
+		Destination: "0723", Amount: 1000}
 	result, err := cd.GetMaxSessionTime(time.Now())
 	if result != 1000 || err == nil {
 		t.Errorf("Expected %v was %v (%v)", 1000, result, err)
@@ -275,7 +283,15 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithUserBalance(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minu", Destination: "0723", Amount: 1000}
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "minu",
+		Destination: "0723",
+		Amount:      1000}
 	result, err := cd.GetMaxSessionTime(time.Now())
 	expected := 300.0
 	if result != expected || err != nil {
@@ -284,7 +300,16 @@ func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 }
 
 func TestMaxSessionTimeWithUserBalanceAccount(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minu_from_tm", Account: "minu", Destination: "0723", Amount: 1000}
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "minu_from_tm",
+		Account:     "minu",
+		Destination: "0723",
+		Amount:      1000}
 	result, err := cd.GetMaxSessionTime(time.Now())
 	expected := 300.0
 	if result != expected || err != nil {
@@ -293,7 +318,15 @@ func TestMaxSessionTimeWithUserBalanceAccount(t *testing.T) {
 }
 
 func TestMaxSessionTimeNoCredit(t *testing.T) {
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "broker", Destination: "0723", Amount: 5400}
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "broker",
+		Destination: "0723",
+		Amount:      5400}
 	result, err := cd.GetMaxSessionTime(time.Now())
 	if result != 100 || err != nil {
 		t.Errorf("Expected %v was %v", 100, result)

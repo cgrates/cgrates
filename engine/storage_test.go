@@ -124,14 +124,13 @@ func GetUB() *UserBalance {
 
 func BenchmarkMarshallerJSONStoreRestore(b *testing.B) {
 	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &RatingPlan{ActivationTime: d}
-	ap.AddRateInterval(i)
+	ap := &RatingPlan{Id: "test"}
+	ap.AddRateInterval("NAT", i)
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
@@ -148,14 +147,13 @@ func BenchmarkMarshallerJSONStoreRestore(b *testing.B) {
 
 func BenchmarkMarshallerBSONStoreRestore(b *testing.B) {
 	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &RatingPlan{ActivationTime: d}
-	ap.AddRateInterval(i)
+	ap := &RatingPlan{Id: "test"}
+	ap.AddRateInterval("NAT", i)
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
@@ -172,14 +170,13 @@ func BenchmarkMarshallerBSONStoreRestore(b *testing.B) {
 
 func BenchmarkMarshallerJSONBufStoreRestore(b *testing.B) {
 	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &RatingPlan{ActivationTime: d}
-	ap.AddRateInterval(i)
+	ap := &RatingPlan{Id: "test"}
+	ap.AddRateInterval("NAT", i)
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
@@ -196,14 +193,13 @@ func BenchmarkMarshallerJSONBufStoreRestore(b *testing.B) {
 
 func BenchmarkMarshallerGOBStoreRestore(b *testing.B) {
 	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &RatingPlan{ActivationTime: d}
-	ap.AddRateInterval(i)
+	ap := &RatingPlan{Id: "test"}
+	ap.AddRateInterval("NAT", i)
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
@@ -220,14 +216,13 @@ func BenchmarkMarshallerGOBStoreRestore(b *testing.B) {
 
 func BenchmarkMarshallerCodecMsgpackStoreRestore(b *testing.B) {
 	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &RatingPlan{ActivationTime: d}
-	ap.AddRateInterval(i)
+	ap := &RatingPlan{Id: "test"}
+	ap.AddRateInterval("NAT", i)
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
@@ -244,14 +239,13 @@ func BenchmarkMarshallerCodecMsgpackStoreRestore(b *testing.B) {
 
 func BenchmarkMarshallerBincStoreRestore(b *testing.B) {
 	b.StopTimer()
-	d := time.Date(2012, time.February, 1, 14, 30, 1, 0, time.UTC)
 	i := &RateInterval{Months: []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}
-	ap := &RatingPlan{ActivationTime: d}
-	ap.AddRateInterval(i)
+	ap := &RatingPlan{Id: "test"}
+	ap.AddRateInterval("NAT", i)
 	ub := GetUB()
 
 	ap1 := RatingPlan{}

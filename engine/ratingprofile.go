@@ -21,52 +21,94 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/cache2go"
+	"sort"
+	"time"
 )
 
 type RatingProfile struct {
-	Id                                                                                             string
-	FallbackKey                                                                                    string // FallbackKey is used as complete combination of Tenant:TOR:Direction:Subject
-	DestinationMap                                                                                 map[string][]*RatingPlan
-	Tag, Tenant, TOR, Direction, Subject, DestRatesTimingTag, RatesFallbackSubject, ActivationTime string // used only for loading
+	Id                                                       string
+	FallbackKey                                              string // FallbackKey is used as complete combination of Tenant:TOR:Direction:Subject
+	RatingPlanActivations                                    RatingPlanActivations
+	Tag, Tenant, TOR, Direction, Subject                     string // used only for loading
+	DestRatesTimingTag, RatesFallbackSubject, ActivationTime string // used only for loading
 }
 
-// Adds an activation period that applyes to current rating profile if not already present.
-func (rp *RatingProfile) AddRatingPlanIfNotPresent(destInfo string, plans ...*RatingPlan) {
-	if rp.DestinationMap == nil {
-		rp.DestinationMap = make(map[string][]*RatingPlan, 1)
+type RatingPlanActivation struct {
+	ActivationTime time.Time
+	RatingPlanId   string
+}
+
+func (rpa *RatingPlanActivation) GetRatingPlan() (rp *RatingPlan, err error) {
+	if x, err := cache2go.GetCached(rpa.RatingPlanId); err != nil {
+		rp, err = storageGetter.GetRatingPlan(rpa.RatingPlanId)
+		if err == nil && rp != nil {
+			cache2go.Cache(rpa.RatingPlanId, rp)
+		}
+	} else {
+		rp = x.(*RatingPlan)
 	}
-	for _, plan := range plans {
-		found := false
-		for _, existingPlan := range rp.DestinationMap[destInfo] {
-			if plan.Equal(existingPlan) {
-				existingPlan.AddRateInterval(plan.RateIntervals...)
-				found = true
-				break
+	return
+}
+
+func (rpa *RatingPlanActivation) Equal(orpa *RatingPlanActivation) bool {
+	return rpa.ActivationTime == orpa.ActivationTime && rpa.RatingPlanId == orpa.RatingPlanId
+}
+
+type RatingPlanActivations []*RatingPlanActivation
+
+func (rpas RatingPlanActivations) Len() int {
+	return len(rpas)
+}
+
+func (rpas RatingPlanActivations) Swap(i, j int) {
+	rpas[i], rpas[j] = rpas[j], rpas[i]
+}
+
+func (rpas RatingPlanActivations) Less(i, j int) bool {
+	return rpas[i].ActivationTime.Before(rpas[j].ActivationTime)
+}
+
+func (rpas RatingPlanActivations) Sort() {
+	sort.Sort(rpas)
+}
+
+type RatingInfo struct {
+	ActivationTime time.Time
+	RateIntervals  RateIntervalList
+}
+
+func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (foundPrefixes []string, ris []*RatingInfo, err error) {
+	rp.RatingPlanActivations.Sort()
+	for _, rpa := range rp.RatingPlanActivations {
+		if rpa.ActivationTime.Before(cd.TimeEnd) {
+			rpl, err := rpa.GetRatingPlan()
+			if err != nil || rpl == nil {
+				Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
+				continue
+			}
+			bestPrecision := 0
+			var rps RateIntervalList
+			for dId, rpls := range rpl.DestinationRates {
+				precision, err := storageGetter.DestinationContainsPrefix(dId, cd.Destination)
+				if err != nil {
+					Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
+					continue
+				}
+				if precision > bestPrecision {
+					bestPrecision = precision
+					rps = rpls
+				}
+			}
+			if bestPrecision > 0 {
+				ris = append(ris, &RatingInfo{rpa.ActivationTime, rps})
+				foundPrefixes = append(foundPrefixes, cd.Destination[:bestPrecision])
 			}
 		}
-		if !found {
-			rp.DestinationMap[destInfo] = append(rp.DestinationMap[destInfo], plan)
-		}
 	}
-}
-
-func (rp *RatingProfile) GetRatingPlansForPrefix(destPrefix string) (foundPrefix string, aps []*RatingPlan, err error) {
-	bestPrecision := 0
-	for dId, v := range rp.DestinationMap {
-		precision, err := storageGetter.DestinationContainsPrefix(dId, destPrefix)
-		if err != nil {
-			Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
-			continue
-		}
-		if precision > bestPrecision {
-			bestPrecision = precision
-			aps = v
-		}
+	if len(ris) > 0 {
+		return foundPrefixes, ris, nil
 	}
 
-	if bestPrecision > 0 {
-		return destPrefix[:bestPrecision], aps, nil
-	}
-
-	return "", nil, errors.New("not found")
+	return nil, nil, errors.New("not found")
 }

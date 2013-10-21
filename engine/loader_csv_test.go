@@ -434,180 +434,163 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadDestinationRateTimings(t *testing.T) {
-	if len(csvr.destinationRateTimings) != 5 {
-		t.Error("Failed to load rate timings: ", csvr.destinationRateTimings)
+	if len(csvr.ratingPlans) != 5 {
+		t.Error("Failed to load rate timings: ", csvr.ratingPlans)
 	}
-	rplan := csvr.destinationRateTimings["STANDARD"]
-	expected := []*DestinationRateTiming{
-		&DestinationRateTiming{
-			destinationRates: []*DestinationRate{
-				&DestinationRate{
-					Tag:             "RT_STANDARD",
-					DestinationsTag: "GERMANY",
-					rates: []*LoadRate{
-						&LoadRate{
-							Tag:                "R1",
-							ConnectFee:         0,
-							Price:              0.2,
-							RateUnit:           time.Minute,
-							RateIncrement:      time.Second,
+	rplan := csvr.ratingPlans["STANDARD"]
+	expected := &RatingPlan{
+		Id: "STANDARD",
+		DestinationRates: map[string]RateIntervalList{
+			"GERMANY": RateIntervalList{
+				&RateInterval{
+					Years:      Years{},
+					Months:     Months{},
+					MonthDays:  MonthDays{},
+					WeekDays:   WeekDays{1, 2, 3, 4, 5},
+					StartTime:  "00:00:00",
+					EndTime:    "",
+					Weight:     10,
+					ConnectFee: 0,
+					Rates: RateGroups{
+						&Rate{
 							GroupIntervalStart: 0,
-							RoundingMethod:     "*middle",
-							RoundingDecimals:   2,
+							Value:              0.2,
+							RateIncrement:      time.Second,
+							RateUnit:           time.Minute,
 						},
 					},
+					RoundingMethod:   utils.ROUNDING_MIDDLE,
+					RoundingDecimals: 2,
 				},
-				&DestinationRate{
-					Tag:             "RT_STANDARD",
-					DestinationsTag: "GERMANY_O2",
-					rates: []*LoadRate{
-						&LoadRate{
-							Tag:                "R2",
-							ConnectFee:         0,
-							Price:              0.1,
-							RateUnit:           time.Minute,
-							RateIncrement:      time.Second,
+				&RateInterval{
+					Years:      Years{},
+					Months:     Months{},
+					MonthDays:  MonthDays{},
+					WeekDays:   WeekDays{1, 2, 3, 4, 5},
+					StartTime:  "18:00:00",
+					EndTime:    "",
+					Weight:     10,
+					ConnectFee: 0,
+					Rates: RateGroups{
+						&Rate{
 							GroupIntervalStart: 0,
-							RoundingMethod:     "*middle",
-							RoundingDecimals:   2,
+							Value:              0.1,
+							RateIncrement:      time.Second,
+							RateUnit:           time.Minute,
 						},
 					},
+					RoundingMethod:   utils.ROUNDING_MIDDLE,
+					RoundingDecimals: 2,
 				},
-				&DestinationRate{
-					Tag:             "RT_STANDARD",
-					DestinationsTag: "GERMANY_PREMIUM",
-					rates: []*LoadRate{
-						&LoadRate{
-							Tag:                "R2",
-							ConnectFee:         0,
-							Price:              0.1,
-							RateUnit:           time.Minute,
-							RateIncrement:      time.Second,
+				&RateInterval{
+					Years:      Years{},
+					Months:     Months{},
+					MonthDays:  MonthDays{},
+					WeekDays:   WeekDays{6, 0},
+					StartTime:  "00:00:00",
+					EndTime:    "",
+					Weight:     10,
+					ConnectFee: 0,
+					Rates: RateGroups{
+						&Rate{
 							GroupIntervalStart: 0,
-							RoundingMethod:     "*middle",
-							RoundingDecimals:   2,
+							Value:              0.1,
+							RateIncrement:      time.Second,
+							RateUnit:           time.Minute,
 						},
 					},
-				},
-			},
-			Weight: 10,
-			timing: &Timing{
-				Id:        "WORKDAYS_00",
-				Years:     Years{},
-				Months:    Months{},
-				MonthDays: MonthDays{},
-				WeekDays:  WeekDays{1, 2, 3, 4, 5},
-				StartTime: "00:00:00"},
-		},
-		&DestinationRateTiming{
-			destinationRates: []*DestinationRate{
-				&DestinationRate{
-					Tag:             "RT_STD_WEEKEND",
-					DestinationsTag: "GERMANY",
-					rates: []*LoadRate{
-						&LoadRate{
-							Tag:                "R2",
-							ConnectFee:         0,
-							Price:              0.1,
-							RateUnit:           time.Minute,
-							RateIncrement:      time.Second,
-							GroupIntervalStart: 0,
-							RoundingMethod:     "*middle",
-							RoundingDecimals:   2,
-						},
-					},
-				},
-				&DestinationRate{
-					Tag:             "RT_STD_WEEKEND",
-					DestinationsTag: "GERMANY_O2",
-					rates: []*LoadRate{
-						&LoadRate{
-							Tag:                "R3",
-							ConnectFee:         0,
-							Price:              0.05,
-							RateUnit:           time.Minute,
-							RateIncrement:      time.Second,
-							GroupIntervalStart: 0,
-							RoundingMethod:     "*middle",
-							RoundingDecimals:   2,
-						},
-					},
+					RoundingMethod:   utils.ROUNDING_MIDDLE,
+					RoundingDecimals: 2,
 				},
 			},
-			Weight: 10,
-			timing: &Timing{
-				Id:        "WORKDAYS_18",
-				Years:     Years{},
-				Months:    Months{},
-				MonthDays: MonthDays{},
-				WeekDays:  WeekDays{1, 2, 3, 4, 5},
-				StartTime: "18:00:00",
-			},
-		},
-		&DestinationRateTiming{
-			destinationRates: []*DestinationRate{
-				&DestinationRate{
-					Tag:             "RT_STD_WEEKEND",
-					DestinationsTag: "GERMANY",
-					rates: []*LoadRate{
-						&LoadRate{
-							Tag:                "R2",
-							ConnectFee:         0,
-							Price:              0.1,
-							RateUnit:           time.Minute,
-							RateIncrement:      time.Second,
+			"GERMANY_O2": RateIntervalList{
+				&RateInterval{
+					Years:      Years{},
+					Months:     Months{},
+					MonthDays:  MonthDays{},
+					WeekDays:   WeekDays{1, 2, 3, 4, 5},
+					StartTime:  "00:00:00",
+					EndTime:    "",
+					Weight:     10,
+					ConnectFee: 0,
+					Rates: RateGroups{
+						&Rate{
 							GroupIntervalStart: 0,
-							RoundingMethod:     "*middle",
-							RoundingDecimals:   2,
+							Value:              0.1,
+							RateIncrement:      time.Second,
+							RateUnit:           time.Minute,
 						},
 					},
+					RoundingMethod:   utils.ROUNDING_MIDDLE,
+					RoundingDecimals: 2,
 				},
-				&DestinationRate{
-					Tag:             "RT_STD_WEEKEND",
-					DestinationsTag: "GERMANY_O2",
-					rates: []*LoadRate{
-						&LoadRate{
-							Tag:                "R3",
-							ConnectFee:         0,
-							Price:              0.05,
-							RateUnit:           time.Minute,
-							RateIncrement:      time.Second,
+				&RateInterval{
+					Years:      Years{},
+					Months:     Months{},
+					MonthDays:  MonthDays{},
+					WeekDays:   WeekDays{1, 2, 3, 4, 5},
+					StartTime:  "18:00:00",
+					EndTime:    "",
+					Weight:     10,
+					ConnectFee: 0,
+					Rates: RateGroups{
+						&Rate{
 							GroupIntervalStart: 0,
-							RoundingMethod:     "*middle",
-							RoundingDecimals:   2,
+							Value:              0.05,
+							RateIncrement:      time.Second,
+							RateUnit:           time.Minute,
 						},
 					},
+					RoundingMethod:   utils.ROUNDING_MIDDLE,
+					RoundingDecimals: 2,
+				},
+				&RateInterval{
+					Years:      Years{},
+					Months:     Months{},
+					MonthDays:  MonthDays{},
+					WeekDays:   WeekDays{6, 0},
+					StartTime:  "00:00:00",
+					EndTime:    "",
+					Weight:     10,
+					ConnectFee: 0,
+					Rates: RateGroups{
+						&Rate{
+							GroupIntervalStart: 0,
+							Value:              0.05,
+							RateIncrement:      time.Second,
+							RateUnit:           time.Minute,
+						},
+					},
+					RoundingMethod:   utils.ROUNDING_MIDDLE,
+					RoundingDecimals: 2,
 				},
 			},
-			Weight: 10,
-			timing: &Timing{
-				Id:        "WEEKENDS",
-				Years:     Years{},
-				Months:    Months{},
-				MonthDays: MonthDays{},
-				WeekDays:  WeekDays{6, 0},
-				StartTime: "00:00:00",
+			"GERMANY_PREMIUM": RateIntervalList{
+				&RateInterval{
+					Years:      Years{},
+					Months:     Months{},
+					MonthDays:  MonthDays{},
+					WeekDays:   WeekDays{1, 2, 3, 4, 5},
+					StartTime:  "00:00:00",
+					EndTime:    "",
+					Weight:     10,
+					ConnectFee: 0,
+					Rates: RateGroups{
+						&Rate{
+							GroupIntervalStart: 0,
+							Value:              0.1,
+							RateIncrement:      time.Second,
+							RateUnit:           time.Minute,
+						},
+					},
+					RoundingMethod:   utils.ROUNDING_MIDDLE,
+					RoundingDecimals: 2,
+				},
 			},
-		},
-	}
-	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan)
-	}
-	rplan = csvr.destinationRateTimings["TDRT"]
-	expected = []*DestinationRateTiming{
-		&DestinationRateTiming{
-			destinationRates: csvr.destinationRates["T1"],
-			Weight:           10,
-			timing:           csvr.timings["WORKDAYS_00"],
-		},
-		&DestinationRateTiming{
-			destinationRates: csvr.destinationRates["T2"],
-			Weight:           10,
-			timing:           csvr.timings["WORKDAYS_00"],
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan[0])
+		t.Errorf("Error loading destination rate timing: %+v", rplan.DestinationRates["GERMANY_PREMIUM"][0].Rates[0])
 	}
 }
 
@@ -619,206 +602,14 @@ func TestLoadRatingProfiles(t *testing.T) {
 	expected := &RatingProfile{
 		Id:          "*out:test:0:trp",
 		FallbackKey: "*out:test:0:rif;*out:test:0:danb",
-		DestinationMap: map[string][]*RatingPlan{
-			"NAT": []*RatingPlan{
-				&RatingPlan{
-					ActivationTime: time.Date(2013, time.October, 1, 0, 0, 0, 0, time.UTC),
-					RateIntervals: []*RateInterval{
-						&RateInterval{
-							Years:      Years{},
-							Months:     Months{},
-							MonthDays:  MonthDays{},
-							WeekDays:   WeekDays{1, 2, 3, 4, 5},
-							StartTime:  "00:00:00",
-							EndTime:    "",
-							Weight:     10,
-							ConnectFee: 0,
-							Rates: RateGroups{
-								&Rate{
-									GroupIntervalStart: 0,
-									Value:              1,
-									RateIncrement:      time.Minute,
-									RateUnit:           time.Second,
-								},
-								&Rate{
-									GroupIntervalStart: time.Minute,
-									Value:              1,
-									RateIncrement:      time.Second,
-									RateUnit:           time.Second,
-								},
-							},
-							RoundingMethod:   utils.ROUNDING_UP,
-							RoundingDecimals: 4,
-						},
-					},
-				},
-			},
-			"GERMANY": []*RatingPlan{
-				&RatingPlan{
-					ActivationTime: time.Date(2013, time.October, 1, 0, 0, 0, 0, time.UTC),
-					RateIntervals: []*RateInterval{
-						&RateInterval{
-							Years:      Years{},
-							Months:     Months{},
-							MonthDays:  MonthDays{},
-							WeekDays:   WeekDays{1, 2, 3, 4, 5},
-							StartTime:  "00:00:00",
-							EndTime:    "",
-							Weight:     10,
-							ConnectFee: 0,
-							Rates: RateGroups{
-								&Rate{
-									GroupIntervalStart: 0,
-									Value:              7.77777,
-									RateIncrement:      time.Second,
-									RateUnit:           time.Second,
-								},
-							},
-							RoundingMethod:   utils.ROUNDING_UP,
-							RoundingDecimals: 4,
-						},
-					},
-				},
-			},
-			"GERMANY_O2": []*RatingPlan{
-				&RatingPlan{
-					ActivationTime: time.Date(2013, time.October, 1, 0, 0, 0, 0, time.UTC),
-					RateIntervals: []*RateInterval{
-						&RateInterval{
-							Years:      Years{},
-							Months:     Months{},
-							MonthDays:  MonthDays{},
-							WeekDays:   WeekDays{1, 2, 3, 4, 5},
-							StartTime:  "00:00:00",
-							EndTime:    "",
-							Weight:     10,
-							ConnectFee: 0,
-							Rates: RateGroups{
-								&Rate{
-									GroupIntervalStart: 0,
-									Value:              1,
-									RateIncrement:      time.Second,
-									RateUnit:           time.Second,
-								},
-							},
-							RoundingMethod:   utils.ROUNDING_UP,
-							RoundingDecimals: 4,
-						},
-					},
-				},
-			},
-			"GERMANY_PREMIUM": []*RatingPlan{
-				&RatingPlan{
-					ActivationTime: time.Date(2013, time.October, 1, 0, 0, 0, 0, time.UTC),
-					RateIntervals: []*RateInterval{
-						&RateInterval{
-							Years:      Years{},
-							Months:     Months{},
-							MonthDays:  MonthDays{},
-							WeekDays:   WeekDays{1, 2, 3, 4, 5},
-							StartTime:  "00:00:00",
-							EndTime:    "",
-							Weight:     10,
-							ConnectFee: 0,
-							Rates: RateGroups{
-								&Rate{
-									GroupIntervalStart: 0,
-									Value:              5.55555,
-									RateIncrement:      time.Second,
-									RateUnit:           time.Second,
-								},
-							},
-							RoundingMethod:   utils.ROUNDING_UP,
-							RoundingDecimals: 4,
-						},
-					},
-				},
-			},
-		},
+		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
+			ActivationTime: time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
+			RatingPlanId:   "TDRT",
+		}},
 	}
 	if !reflect.DeepEqual(rp, expected) {
-		t.Errorf("Error loading rating profile: %+v", rp.FallbackKey)
+		t.Errorf("Error loading rating profile: %+v", rp.RatingPlanActivations[0])
 	}
-	rp = csvr.ratingProfiles["*out:vdf:0:one"]
-	expected = &RatingProfile{
-		DestinationMap: map[string][]*RatingPlan{
-			"GERMANY": []*RatingPlan{
-				&RatingPlan{
-					ActivationTime: time.Date(2012, time.February, 28, 0, 0, 0, 0, time.UTC),
-					RateIntervals: []*RateInterval{
-						&RateInterval{
-							Years:      Years{},
-							Months:     Months{},
-							MonthDays:  MonthDays{},
-							WeekDays:   WeekDays{1, 2, 3, 4, 5},
-							StartTime:  "00:00:00",
-							EndTime:    "",
-							Weight:     10,
-							ConnectFee: 0,
-							Rates: RateGroups{
-								&Rate{
-									GroupIntervalStart: 0,
-									Value:              0.2,
-									RateIncrement:      time.Second,
-									RateUnit:           time.Minute,
-								},
-							},
-							RoundingMethod:   utils.ROUNDING_MIDDLE,
-							RoundingDecimals: 2,
-						},
-						&RateInterval{
-							Years:      Years{},
-							Months:     Months{},
-							MonthDays:  MonthDays{},
-							WeekDays:   WeekDays{1, 2, 3, 4, 5},
-							StartTime:  "18:00:00",
-							EndTime:    "",
-							Weight:     10,
-							ConnectFee: 0,
-							Rates: RateGroups{
-								&Rate{
-									GroupIntervalStart: 0,
-									Value:              0.1,
-									RateIncrement:      time.Second,
-									RateUnit:           time.Minute,
-								},
-							},
-							RoundingMethod:   utils.ROUNDING_MIDDLE,
-							RoundingDecimals: 2,
-						},
-						&RateInterval{
-							Years:      Years{},
-							Months:     Months{},
-							MonthDays:  MonthDays{},
-							WeekDays:   WeekDays{6, 0},
-							StartTime:  "00:00:00",
-							EndTime:    "",
-							Weight:     10,
-							ConnectFee: 0,
-							Rates: RateGroups{
-								&Rate{
-									GroupIntervalStart: 0,
-									Value:              0.1,
-									RateIncrement:      time.Second,
-									RateUnit:           time.Minute,
-								},
-							},
-							RoundingMethod:   utils.ROUNDING_MIDDLE,
-							RoundingDecimals: 2,
-						},
-					},
-				},
-			},
-		},
-	}
-	if !reflect.DeepEqual(rp.DestinationMap["GERMANY"], expected.DestinationMap["GERMANY"]) {
-		t.Errorf("Error loading rating profile: %+v", rp.DestinationMap["GERMANY"][0])
-	}
-	rp = csvr.ratingProfiles["*out:CUSTOMER_1:0:rif:from:tm"]
-	if len(rp.DestinationMap["GERMANY"]) != 2 {
-		t.Errorf("Failed to load rating profile %+v", rp.DestinationMap["GERMANY"][0].RateIntervals[0])
-	}
-
 }
 
 func TestLoadActions(t *testing.T) {

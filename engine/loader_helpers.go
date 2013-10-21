@@ -143,22 +143,20 @@ func NewTiming(timingInfo ...string) (rt *Timing) {
 type DestinationRateTiming struct {
 	Tag                 string
 	DestinationRatesTag string // intermediary used when loading from db
-	destinationRates    []*DestinationRate
 	Weight              float64
 	TimingTag           string // intermediary used when loading from db
 	timing              *Timing
 }
 
-func NewDestinationRateTiming(destinationRates []*DestinationRate, timing *Timing, weight string) (drt *DestinationRateTiming) {
+func NewDestinationRateTiming(timing *Timing, weight string) (drt *DestinationRateTiming) {
 	w, err := strconv.ParseFloat(weight, 64)
 	if err != nil {
 		log.Printf("Error parsing weight unit from: %v", weight)
 		return
 	}
 	drt = &DestinationRateTiming{
-		destinationRates: destinationRates,
-		timing:           timing,
-		Weight:           w,
+		timing: timing,
+		Weight: w,
 	}
 	return
 }

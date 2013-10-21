@@ -31,6 +31,7 @@ import (
 
 const (
 	ACTION_TIMING_PREFIX      = "atm_"
+	RATING_PLAN_PREFIX        = "rpl_"
 	RATING_PROFILE_PREFIX     = "rpf_"
 	ACTION_PREFIX             = "act_"
 	USER_BALANCE_PREFIX       = "ubl_"
@@ -59,6 +60,8 @@ Interface for storage providers.
 */
 type DataStorage interface {
 	Storage
+	GetRatingPlan(string) (*RatingPlan, error)
+	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)

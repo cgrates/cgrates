@@ -52,6 +52,7 @@ func NewMongoStorage(host, port, db, user, pass string) (Storage, error) {
 	err = ndb.C("actiontimings").EnsureIndex(index)
 	index = mgo.Index{Key: []string{"id"}, Background: true}
 	err = ndb.C("ratingprofiles").EnsureIndex(index)
+	err = ndb.C("ratingplans").EnsureIndex(index)
 	err = ndb.C("destinations").EnsureIndex(index)
 	err = ndb.C("userbalances").EnsureIndex(index)
 
@@ -64,6 +65,10 @@ func (ms *MongoStorage) Close() {
 
 func (ms *MongoStorage) Flush() (err error) {
 	err = ms.db.C("ratingprofiles").DropCollection()
+	if err != nil {
+		return
+	}
+	err = ms.db.C("ratingplans").DropCollection()
 	if err != nil {
 		return
 	}
@@ -121,6 +126,20 @@ type LogErrEntry struct {
 	Id     string `bson:"_id,omitempty"`
 	ErrStr string
 	Source string
+}
+
+func (ms *MongoStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+	rp = new(RatingPlan)
+	err = ms.db.C("ratingplans").Find(bson.M{"id": key}).One(&rp)
+	return
+}
+
+func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan) error {
+	if historyScribe != nil {
+		response := 0
+		historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
+	}
+	return ms.db.C("ratingplans").Insert(rp)
 }
 
 func (ms *MongoStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {

@@ -107,14 +107,14 @@ type CallDescriptor struct {
 	CallDuration                          time.Duration // the call duration so far (till TimeEnd)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
-	RatingPlans                           []*RatingPlan
+	RatingInfos                           []*RatingInfo
 	Increments                            Increments
 	userBalance                           *UserBalance
 }
 
-// Adds an activation period that applyes to current call descriptor.
-func (cd *CallDescriptor) AddRatingPlan(aps ...*RatingPlan) {
-	cd.RatingPlans = append(cd.RatingPlans, aps...)
+// Adds a rating plan that applyes to current call descriptor.
+func (cd *CallDescriptor) AddRatingInfo(ris ...*RatingInfo) {
+	cd.RatingInfos = append(cd.RatingInfos, ris...)
 }
 
 // Returns the key used to retrive the user balance involved in this call
@@ -137,39 +137,41 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 /*
 Restores the activation periods for the specified prefix from storage.
 */
-func (cd *CallDescriptor) LoadRatingPlans() (destPrefix, matchedSubject string, err error) {
+func (cd *CallDescriptor) LoadRatingPlans() (destPrefixes []string, matchedSubject string, err error) {
 	matchedSubject = cd.GetKey()
-	if val, err := cache2go.GetXCached(cd.GetKey() + cd.Destination); err == nil {
+	/*if val, err := cache2go.GetXCached(cd.GetKey() + cd.Destination); err == nil {
 		xaps := val.(xCachedRatingPlans)
 		cd.RatingPlans = xaps.aps
 		return xaps.destPrefix, matchedSubject, nil
-	}
-	destPrefix, matchedSubject, values, err := cd.getRatingPlansForPrefix(cd.GetKey(), 1)
+	}*/
+	destPrefixes, matchedSubject, values, err := cd.getRatingPlansForPrefix(cd.GetKey(), 1)
 	if err != nil {
 		fallbackKey := fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
 		// use the default subject
-		destPrefix, matchedSubject, values, err = cd.getRatingPlansForPrefix(fallbackKey, 1)
+		destPrefixes, matchedSubject, values, err = cd.getRatingPlansForPrefix(fallbackKey, 1)
 	}
 	//load the rating plans
 	if err == nil && len(values) > 0 {
-		xaps := xCachedRatingPlans{destPrefix, values, new(cache2go.XEntry)}
-		xaps.XCache(cd.GetKey()+cd.Destination, debitPeriod+5*time.Second, xaps)
-		cd.RatingPlans = values
+		/*
+			xaps := xCachedRatingPlans{destPrefix, values, new(cache2go.XEntry)}
+			xaps.XCache(cd.GetKey()+cd.Destination, debitPeriod+5*time.Second, xaps)
+		*/
+		cd.RatingInfos = values
 	}
 	return
 }
 
-func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (foundPrefix, matchedSubject string, aps []*RatingPlan, err error) {
+func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (foundPrefixes []string, matchedSubject string, ris []*RatingInfo, err error) {
 	matchedSubject = key
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
 	rp, err := storageGetter.GetRatingProfile(key)
-	if err != nil {
-		return "", "", nil, err
+	if err != nil || rp == nil {
+		return nil, "", nil, err
 	}
-	foundPrefix, aps, err = rp.GetRatingPlansForPrefix(cd.Destination)
+	foundPrefixes, ris, err = rp.GetRatingPlansForPrefix(cd)
 	if err != nil {
 		if rp.FallbackKey != "" {
 			recursionDepth++
@@ -200,15 +202,16 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration}
 	}
 	timespans = append(timespans, firstSpan)
-	if len(cd.RatingPlans) == 0 {
+	if len(cd.RatingInfos) == 0 {
 		return
 	}
-	firstSpan.ratingPlan = cd.RatingPlans[0]
-	// split on activation periods
+
+	firstSpan.ratingInfo = cd.RatingInfos[0]
+	// split on rating plans
 	afterStart, afterEnd := false, false //optimization for multiple activation periods
-	for _, rp := range cd.RatingPlans {
+	for _, rp := range cd.RatingInfos {
 		if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
-			firstSpan.ratingPlan = rp
+			firstSpan.ratingInfo = rp
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
@@ -227,7 +230,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	for i := 0; i < len(timespans); i++ {
 		//log.Printf("==============%v==================", i)
 		//log.Printf("TS: %+v", timespans[i])
-		rp := timespans[i].ratingPlan
+		rp := timespans[i].ratingInfo
 		Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rp.RateIntervals.Sort()
@@ -238,7 +241,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			}
 			newTs := timespans[i].SplitByRateInterval(interval)
 			if newTs != nil {
-				newTs.ratingPlan = rp
+				newTs.ratingInfo = rp
 				// insert the new timespan
 				index := i + 1
 				timespans = append(timespans, nil)
@@ -329,7 +332,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Tenant:      cd.Tenant,
 		Subject:     matchedSubject[startIndex:],
 		Account:     cd.Account,
-		Destination: destPrefix,
+		Destination: strings.Join(destPrefix, ";"),
 		Cost:        cost,
 		ConnectFee:  connectionFee,
 		Timespans:   timespans}

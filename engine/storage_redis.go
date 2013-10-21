@@ -76,6 +76,25 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
+func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+	var values string
+	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
+		rp = new(RatingPlan)
+		err = rs.ms.Unmarshal([]byte(values), rp)
+	}
+	return
+}
+
+func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
+	result, err := rs.ms.Marshal(rp)
+	_, err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, result)
+	if err == nil && historyScribe != nil {
+		response := 0
+		historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
+	}
+	return
+}
+
 func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	var values string
 	if values, err = rs.db.Get(RATING_PROFILE_PREFIX + key); err == nil {

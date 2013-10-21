@@ -190,9 +190,9 @@ func TestSplitByRatingPlan(t *testing.T) {
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	t3 := time.Date(2012, time.February, 5, 17, 50, 0, 0, time.UTC)
 	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
-	ap1 := &RatingPlan{ActivationTime: t1}
-	ap2 := &RatingPlan{ActivationTime: t2}
-	ap3 := &RatingPlan{ActivationTime: t3}
+	ap1 := &RatingInfo{ActivationTime: t1}
+	ap2 := &RatingInfo{ActivationTime: t2}
+	ap3 := &RatingInfo{ActivationTime: t3}
 
 	if ts.SplitByRatingPlan(ap1) != nil {
 		t.Error("Error spliting on left margin")

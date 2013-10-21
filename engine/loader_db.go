@@ -26,19 +26,19 @@ import (
 )
 
 type DbReader struct {
-	tpid                   string
-	storDb                 LoadStorage
-	dataDb                 DataStorage
-	actions                map[string][]*Action
-	actionsTimings         map[string][]*ActionTiming
-	actionsTriggers        map[string][]*ActionTrigger
-	accountActions         []*UserBalance
-	destinations           []*Destination
-	timings                map[string]*Timing
-	rates                  map[string][]*LoadRate
-	destinationRates       map[string][]*DestinationRate
-	destinationRateTimings map[string][]*DestinationRateTiming
-	ratingProfiles         map[string]*RatingProfile
+	tpid             string
+	storDb           LoadStorage
+	dataDb           DataStorage
+	actions          map[string][]*Action
+	actionsTimings   map[string][]*ActionTiming
+	actionsTriggers  map[string][]*ActionTrigger
+	accountActions   []*UserBalance
+	destinations     []*Destination
+	timings          map[string]*Timing
+	rates            map[string][]*LoadRate
+	destinationRates map[string][]*DestinationRate
+	ratingPlans      map[string]*RatingPlan
+	ratingProfiles   map[string]*RatingProfile
 }
 
 func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader {
@@ -46,8 +46,9 @@ func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader
 	c.storDb = storDB
 	c.dataDb = storage
 	c.tpid = tpid
-	c.destinationRateTimings = make(map[string][]*DestinationRateTiming)
 	c.actionsTimings = make(map[string][]*ActionTiming)
+	c.ratingPlans = make(map[string]*RatingPlan)
+	c.ratingProfiles = make(map[string]*RatingProfile)
 	return c
 }
 
@@ -66,6 +67,18 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 		if verbose {
 			log.Print(d.Id, " : ", d.Prefixes)
+		}
+	}
+	if verbose {
+		log.Print("Rating plans")
+	}
+	for _, rp := range dbr.ratingPlans {
+		err = storage.SetRatingPlan(rp)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print(rp.Id)
 		}
 	}
 	if verbose {
@@ -176,8 +189,15 @@ func (dbr *DbReader) LoadDestinationRateTimings() error {
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", drt.DestinationRatesTag))
 		}
-		drt.destinationRates = drs
-		dbr.destinationRateTimings[drt.Tag] = append(dbr.destinationRateTimings[drt.Tag], drt)
+
+		plan, exists := dbr.ratingPlans[drt.Tag]
+		if !exists {
+			plan = &RatingPlan{Id: drt.Tag}
+			dbr.ratingPlans[drt.Tag] = plan
+		}
+		for _, dr := range drs {
+			plan.AddRateInterval(dr.DestinationsTag, drt.GetRateInterval(dr))
+		}
 	}
 	return nil
 }
@@ -192,24 +212,18 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", rp.ActivationTime))
 		}
-		drts, exists := dbr.destinationRateTimings[rp.DestRatesTimingTag]
+		_, exists := dbr.ratingPlans[rp.DestRatesTimingTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", rp.DestinationMap))
+			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", rp.DestRatesTimingTag))
 		}
-		for _, drt := range drts {
-			for _, dr := range drt.destinationRates {
-				plan := &RatingPlan{ActivationTime: at}
-				plan.AddRateInterval(drt.GetRateInterval(dr))
-				rp.AddRatingPlanIfNotPresent(dr.DestinationsTag, plan)
-			}
-		}
+		rp.RatingPlanActivations = append(rp.RatingPlanActivations, &RatingPlanActivation{at, rp.DestRatesTimingTag})
 		dbr.ratingProfiles[rp.Id] = rp
 	}
 	return nil
 }
 
 func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
-	activationPeriods := make(map[string]*RatingPlan)
+	ratingPlans := make(map[string]*RatingPlan)
 	resultRatingProfile := &RatingProfile{}
 	rpm, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
 	if err != nil || len(rpm) == 0 {
@@ -219,7 +233,7 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 		Logger.Debug(fmt.Sprintf("Rating profile: %v", rpm))
 		resultRatingProfile.FallbackKey = ratingProfile.FallbackKey // it will be the last fallback key
 		resultRatingProfile.Id = ratingProfile.Id                   // idem
-		at, err := utils.ParseDate(ratingProfile.ActivationTime)
+		_, err := utils.ParseDate(ratingProfile.ActivationTime)
 		if err != nil {
 			return fmt.Errorf("Cannot parse activation time from %v", ratingProfile.ActivationTime)
 		}
@@ -247,10 +261,10 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				}
 				Logger.Debug(fmt.Sprintf("Rate: %v", rpm))
 				drate.rates = rt[drate.RateTag]
-				if _, exists := activationPeriods[destrateTiming.Tag]; !exists {
-					activationPeriods[destrateTiming.Tag] = &RatingPlan{}
+				if _, exists := ratingPlans[destrateTiming.Tag]; !exists {
+					ratingPlans[destrateTiming.Tag] = &RatingPlan{}
 				}
-				activationPeriods[destrateTiming.Tag].AddRateInterval(destrateTiming.GetRateInterval(drate))
+				ratingPlans[destrateTiming.Tag].AddRateInterval(drate.DestinationsTag, destrateTiming.GetRateInterval(drate))
 				dm, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 				if err != nil || len(dm) == 0 {
 					return fmt.Errorf("Could not get destination id %s: %v", drate.DestinationsTag, err)
@@ -258,10 +272,10 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationsTag, dm))
 				for _, destination := range dm {
 					Logger.Debug(fmt.Sprintf("Destination: %v", rpm))
-					ap := activationPeriods[ratingProfile.DestRatesTimingTag]
-					newAP := &RatingPlan{ActivationTime: at}
-					newAP.RateIntervals = append(newAP.RateIntervals, ap.RateIntervals...)
-					resultRatingProfile.AddRatingPlanIfNotPresent(destination.Id, newAP)
+					//ap := ratingPlans[ratingProfile.DestRatesTimingTag]
+					//newAP := &RatingPlan{ActivationTime: at}
+					//newAP.RateIntervals = append(newAP.RateIntervals, ap.RateIntervals...)
+					//resultRatingProfile.AddRatingPlanIfNotPresent(destination.Id, newAP)
 					dbr.dataDb.SetDestination(destination)
 				}
 			}

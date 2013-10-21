@@ -59,6 +59,28 @@ func (rs *RadixStorage) Flush() (err error) {
 	return r.Err
 }
 
+func (rs *RadixStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+	if values, err := rs.db.Cmd("get", RATING_PLAN_PREFIX+key).Bytes(); err == nil {
+		rp = new(RatingPlan)
+		err = rs.ms.Unmarshal(values, rp)
+	} else {
+		return nil, err
+	}
+	return
+}
+
+func (rs *RadixStorage) SetRatingPlan(rp *RatingPlan) (err error) {
+	result, err := rs.ms.Marshal(rp)
+	if r := rs.db.Cmd("set", RATING_PLAN_PREFIX+rp.Id, string(result)); r.Err != nil {
+		return r.Err
+	}
+	if err == nil && historyScribe != nil {
+		response := 0
+		historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
+	}
+	return
+}
+
 func (rs *RadixStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	if values, err := rs.db.Cmd("get", RATING_PROFILE_PREFIX+key).Bytes(); err == nil {
 		rp = new(RatingProfile)

@@ -43,6 +43,25 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
+func (ms *MapStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+	if values, ok := ms.dict[RATING_PLAN_PREFIX+key]; ok {
+		rp = new(RatingPlan)
+
+		err = ms.ms.Unmarshal(values, rp)
+	} else {
+		return nil, errors.New("not found")
+	}
+	return
+}
+
+func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
+	result, err := ms.ms.Marshal(rp)
+	ms.dict[RATING_PLAN_PREFIX+rp.Id] = result
+	response := 0
+	go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
+	return
+}
+
 func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	if values, ok := ms.dict[RATING_PROFILE_PREFIX+key]; ok {
 		rp = new(RatingProfile)

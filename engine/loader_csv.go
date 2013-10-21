@@ -30,19 +30,19 @@ import (
 )
 
 type CSVReader struct {
-	sep                    rune
-	storage                DataStorage
-	readerFunc             func(string, rune, int) (*csv.Reader, *os.File, error)
-	actions                map[string][]*Action
-	actionsTimings         map[string][]*ActionTiming
-	actionsTriggers        map[string][]*ActionTrigger
-	accountActions         []*UserBalance
-	destinations           []*Destination
-	timings                map[string]*Timing
-	rates                  map[string][]*LoadRate
-	destinationRates       map[string][]*DestinationRate
-	destinationRateTimings map[string][]*DestinationRateTiming
-	ratingProfiles         map[string]*RatingProfile
+	sep              rune
+	storage          DataStorage
+	readerFunc       func(string, rune, int) (*csv.Reader, *os.File, error)
+	actions          map[string][]*Action
+	actionsTimings   map[string][]*ActionTiming
+	actionsTriggers  map[string][]*ActionTrigger
+	accountActions   []*UserBalance
+	destinations     []*Destination
+	timings          map[string]*Timing
+	rates            map[string][]*LoadRate
+	destinationRates map[string][]*DestinationRate
+	ratingPlans      map[string]*RatingPlan
+	ratingProfiles   map[string]*RatingProfile
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
@@ -58,7 +58,7 @@ func NewFileCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn, 
 	c.rates = make(map[string][]*LoadRate)
 	c.destinationRates = make(map[string][]*DestinationRate)
 	c.timings = make(map[string]*Timing)
-	c.destinationRateTimings = make(map[string][]*DestinationRateTiming)
+	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.readerFunc = openFileCSVReader
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
@@ -113,6 +113,18 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 		if verbose {
 			log.Print(d.Id, " : ", d.Prefixes)
+		}
+	}
+	if verbose {
+		log.Print("Rating plans")
+	}
+	for _, rp := range csvr.ratingPlans {
+		err = storage.SetRatingPlan(rp)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print(rp.Id)
 		}
 	}
 	if verbose {
@@ -298,8 +310,15 @@ func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", record[1]))
 		}
-		drt := NewDestinationRateTiming(drs, t, record[3])
-		csvr.destinationRateTimings[tag] = append(csvr.destinationRateTimings[tag], drt)
+		drt := NewDestinationRateTiming(t, record[3])
+		plan, exists := csvr.ratingPlans[tag]
+		if !exists {
+			plan = &RatingPlan{Id: tag}
+			csvr.ratingPlans[tag] = plan
+		}
+		for _, dr := range drs {
+			plan.AddRateInterval(dr.DestinationsTag, drt.GetRateInterval(dr))
+		}
 	}
 	return
 }
@@ -326,21 +345,11 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			rp = &RatingProfile{Id: key}
 			csvr.ratingProfiles[key] = rp
 		}
-		drts, exists := csvr.destinationRateTimings[record[5]]
+		_, exists := csvr.ratingPlans[record[5]]
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", record[5]))
 		}
-
-		for _, drt := range drts {
-			//log.Print("TAG: ", record[5])
-			for _, dr := range drt.destinationRates {
-				plan := &RatingPlan{ActivationTime: at}
-				//log.Printf("RI: %+v", drt.GetRateInterval(dr))
-				plan.AddRateInterval(drt.GetRateInterval(dr))
-				rp.AddRatingPlanIfNotPresent(dr.DestinationsTag, plan)
-			}
-		}
-
+		rp.RatingPlanActivations = append(rp.RatingPlanActivations, &RatingPlanActivation{at, record[5]})
 		if fallbacksubject != "" {
 			for _, fbs := range strings.Split(fallbacksubject, ";") {
 				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
@@ -351,6 +360,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			}
 			rp.FallbackKey = strings.TrimRight(rp.FallbackKey, ";")
 		}
+		csvr.ratingProfiles[rp.Id] = rp
 	}
 	return
 }
