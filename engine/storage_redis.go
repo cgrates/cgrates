@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	//"code.google.com/p/snappy-go/snappy"
+	"code.google.com/p/snappy-go/snappy"
 	"fmt"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
@@ -81,14 +81,23 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	var values string
 	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
 		rp = new(RatingPlan)
-		err = rs.ms.Unmarshal([]byte(values), rp)
+		dst, err := snappy.Decode([]byte{}, []byte(values))
+		if err != nil {
+			return nil, err
+		}
+		err = rs.ms.Unmarshal(dst, rp)
 	}
 	return
 }
 
 func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := rs.ms.Marshal(rp)
-	_, err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, result)
+	dst := make([]byte, snappy.MaxEncodedLen(len(result)))
+	dst, err = snappy.Encode(dst, result)
+	if err != nil {
+		return err
+	}
+	_, err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, dst)
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
