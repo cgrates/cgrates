@@ -26,7 +26,7 @@ import (
 	"github.com/ugorji/go/codec"
 	"labix.org/v2/mgo/bson"
 	"reflect"
-	"time"
+	//"time"
 )
 
 const (
@@ -195,12 +195,12 @@ func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	mh := cmm.mh
 	var mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
 	//sliceByteTyp  = reflect.TypeOf([]byte(nil))
-	var timeTyp = reflect.TypeOf(time.Time{})
+	//var timeTyp = reflect.TypeOf(time.Time{})
 	mh.MapType = mapStrIntfTyp
 
 	// configure extensions for msgpack, to enable Binary and Time support for tags 0 and 1
 	//mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
-	mh.AddExt(timeTyp, 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
+	//	mh.AddExt(timeTyp, 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
 	return cmm
 }
 
