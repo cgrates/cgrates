@@ -7,7 +7,6 @@ from subprocess import call
 libs = ('github.com/fzzy/radix/redis',
         'code.google.com/p/goconf/conf',
         'github.com/bmizerany/pq',
-        'github.com/vmihailenco/msgpack',
         'github.com/ugorji/go/codec',
         'labix.org/v2/mgo',
         'github.com/cgrates/fsock',
@@ -15,6 +14,7 @@ libs = ('github.com/fzzy/radix/redis',
         'github.com/garyburd/redigo/redis',
         'menteslibres.net/gosexy/redis',
         'github.com/howeyc/fsnotify',
+        'code.google.com/p/snappy-go/snappy'
 )
 
 if __name__ == "__main__":
