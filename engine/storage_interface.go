@@ -20,13 +20,15 @@ package engine
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
 	"labix.org/v2/mgo/bson"
 	"reflect"
-	//"time"
+	"time"
 )
 
 const (
@@ -190,17 +192,180 @@ type CodecMsgpackMarshaler struct {
 	mh *codec.MsgpackHandle
 }
 
+/*** The following functions to be removed after go 1.2 ****/
+
+var (
+	bigen     = binary.BigEndian
+	bsAll0xff = []byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+)
+
+// TimeEncodeExt encodes a time.Time as a byte slice.
+// Configure this to support the Time Extension, e.g. using tag 1.
+func TimeEncodeExt(rv reflect.Value) (bs []byte, err error) {
+	rvi := rv.Interface()
+	switch iv := rvi.(type) {
+	case time.Time:
+		bs = encodeTime(iv)
+	default:
+		err = fmt.Errorf("codec/msgpack: TimeEncodeExt expects a time.Time. Received %T", rvi)
+	}
+	return
+}
+
+// TimeDecodeExt decodes a time.Time from the byte slice parameter, and sets it into the reflect value.
+// Configure this to support the Time Extension, e.g. using tag 1.
+func TimeDecodeExt(rv reflect.Value, bs []byte) (err error) {
+	tt, err := decodeTime(bs)
+	if err == nil {
+		rv.Set(reflect.ValueOf(tt))
+	}
+	return
+}
+func pruneSignExt(v []byte) (n int) {
+	l := len(v)
+	if l < 2 {
+		return
+	}
+	if v[0] == 0 {
+		n2 := n + 1
+		for v[n] == 0 && n2 < l && (v[n2]&(1<<7) == 0) {
+			n++
+			n2++
+		}
+		return
+	}
+	if v[0] == 0xff {
+		n2 := n + 1
+		for v[n] == 0xff && n2 < l && (v[n2]&(1<<7) != 0) {
+			n++
+			n2++
+		}
+		return
+	}
+	return
+}
+
+func encodeTime(t time.Time) []byte {
+	//t := rv.Interface().(time.Time)
+	tsecs, tnsecs := t.Unix(), t.Nanosecond()
+	var (
+		bd   byte
+		btmp [8]byte
+		bs   [16]byte
+		i    int = 1
+	)
+	l := t.Location()
+	if l == time.UTC {
+		l = nil
+	}
+	if tsecs != 0 {
+		bd = bd | 0x80
+		bigen.PutUint64(btmp[:], uint64(tsecs))
+		f := pruneSignExt(btmp[:])
+		bd = bd | (byte(7-f) << 2)
+		copy(bs[i:], btmp[f:])
+		i = i + (8 - f)
+	}
+	if tnsecs != 0 {
+		bd = bd | 0x40
+		bigen.PutUint32(btmp[:4], uint32(tnsecs))
+		f := pruneSignExt(btmp[:4])
+		bd = bd | byte(3-f)
+		copy(bs[i:], btmp[f:4])
+		i = i + (4 - f)
+	}
+	if l != nil {
+		bd = bd | 0x20
+		// Note that Go Libs do not give access to dst flag.
+		_, zoneOffset := t.Zone()
+		//zoneName, zoneOffset := t.Zone()
+		zoneOffset /= 60
+		z := uint16(zoneOffset)
+		bigen.PutUint16(btmp[:2], z)
+		// clear dst flags
+		bs[i] = btmp[0] & 0x3f
+		bs[i+1] = btmp[1]
+		i = i + 2
+	}
+	bs[0] = bd
+	return bs[0:i]
+}
+
+// DecodeTime decodes a []byte into a time.Time.
+func decodeTime(bs []byte) (tt time.Time, err error) {
+	bd := bs[0]
+	var (
+		tsec  int64
+		tnsec uint32
+		tz    uint16
+		i     byte = 1
+		i2    byte
+		n     byte
+	)
+	if bd&(1<<7) != 0 {
+		var btmp [8]byte
+		n = ((bd >> 2) & 0x7) + 1
+		i2 = i + n
+		copy(btmp[8-n:], bs[i:i2])
+		//if first bit of bs[i] is set, then fill btmp[0..8-n] with 0xff (ie sign extend it)
+		if bs[i]&(1<<7) != 0 {
+			copy(btmp[0:8-n], bsAll0xff)
+			//for j,k := byte(0), 8-n; j < k; j++ {	btmp[j] = 0xff }
+		}
+		i = i2
+		tsec = int64(bigen.Uint64(btmp[:]))
+	}
+	if bd&(1<<6) != 0 {
+		var btmp [4]byte
+		n = (bd & 0x3) + 1
+		i2 = i + n
+		copy(btmp[4-n:], bs[i:i2])
+		i = i2
+		tnsec = bigen.Uint32(btmp[:])
+	}
+	if bd&(1<<5) == 0 {
+		tt = time.Unix(tsec, int64(tnsec)).UTC()
+		return
+	}
+	// In stdlib time.Parse, when a date is parsed without a zone name, it uses "" as zone name.
+	// However, we need name here, so it can be shown when time is printed.
+	// Zone name is in form: UTC-08:00.
+	// Note that Go Libs do not give access to dst flag, so we ignore dst bits
+
+	i2 = i + 2
+	tz = bigen.Uint16(bs[i:i2])
+	i = i2
+	// sign extend sign bit into top 2 MSB (which were dst bits):
+	if tz&(1<<13) == 0 { // positive
+		tz = tz & 0x3fff //clear 2 MSBs: dst bits
+	} else { // negative
+		tz = tz | 0xc000 //set 2 MSBs: dst bits
+		//tzname[3] = '-' (TODO: verify. this works here)
+	}
+	tzint := int16(tz)
+	if tzint == 0 {
+		tt = time.Unix(tsec, int64(tnsec)).UTC()
+	} else {
+		// For Go Time, do not use a descriptive timezone.
+		// It's unnecessary, and makes it harder to do a reflect.DeepEqual.
+		// The Offset already tells what the offset should be, if not on UTC and unknown zone name.
+		// var zoneName = timeLocUTCName(tzint)
+		tt = time.Unix(tsec, int64(tnsec)).In(time.FixedZone("", int(tzint)*60))
+	}
+	return
+}
+
+/*** end remove here ***/
+
 func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	cmm := &CodecMsgpackMarshaler{new(codec.MsgpackHandle)}
 	mh := cmm.mh
-	var mapStrIntfTyp = reflect.TypeOf(map[string]interface{}(nil))
-	//sliceByteTyp  = reflect.TypeOf([]byte(nil))
-	//var timeTyp = reflect.TypeOf(time.Time{})
-	mh.MapType = mapStrIntfTyp
 
 	// configure extensions for msgpack, to enable Binary and Time support for tags 0 and 1
-	//mh.AddExt(sliceByteTyp, 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
-	//	mh.AddExt(timeTyp, 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
+	mh.MapType = reflect.TypeOf(map[string]interface{}(nil))
+	//mh.AddExt( reflect.TypeOf([]byte(nil)), 0, mh.BinaryEncodeExt, mh.BinaryDecodeExt)
+	//	mh.AddExt(reflect.TypeOf(time.Time{}), 1, mh.TimeEncodeExt, mh.TimeDecodeExt)
+	mh.AddExt(reflect.TypeOf(time.Time{}), 1, TimeEncodeExt, TimeDecodeExt)
 	return cmm
 }
 

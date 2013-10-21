@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	//"code.google.com/p/snappy-go/snappy"
 	"fmt"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
