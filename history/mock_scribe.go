@@ -30,8 +30,10 @@ import (
 type MockScribe struct {
 	sync.Mutex
 	destinations   records
+	ratingPlans    records
 	ratingProfiles records
 	DestBuf        bytes.Buffer
+	RplBuf         bytes.Buffer
 	RpBuf          bytes.Buffer
 }
 
@@ -44,6 +46,9 @@ func (s *MockScribe) Record(rec *Record, out *int) error {
 	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
 		s.destinations = s.destinations.SetOrAdd(&Record{rec.Key[len(DESTINATION_PREFIX):], rec.Object})
 		s.save(DESTINATIONS_FILE)
+	case strings.HasPrefix(rec.Key, RATING_PLAN_PREFIX):
+		s.ratingPlans = s.ratingPlans.SetOrAdd(&Record{rec.Key[len(RATING_PLAN_PREFIX):], rec.Object})
+		s.save(RATING_PLANS_FILE)
 	case strings.HasPrefix(rec.Key, RATING_PROFILE_PREFIX):
 		s.ratingProfiles = s.ratingProfiles.SetOrAdd(&Record{rec.Key[len(RATING_PROFILE_PREFIX):], rec.Object})
 		s.save(RATING_PROFILES_FILE)
@@ -61,6 +66,13 @@ func (s *MockScribe) save(filename string) error {
 		b := bufio.NewWriter(&s.DestBuf)
 		defer b.Flush()
 		if err := s.format(b, s.destinations); err != nil {
+			return err
+		}
+	case RATING_PLANS_FILE:
+		s.RplBuf.Reset()
+		b := bufio.NewWriter(&s.RplBuf)
+		defer b.Flush()
+		if err := s.format(b, s.ratingPlans); err != nil {
 			return err
 		}
 	case RATING_PROFILES_FILE:

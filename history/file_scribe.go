@@ -33,6 +33,7 @@ import (
 
 const (
 	DESTINATIONS_FILE    = "destinations.json"
+	RATING_PLANS_FILE    = "rating_plans.json"
 	RATING_PROFILES_FILE = "rating_profiles.json"
 )
 
@@ -41,6 +42,7 @@ type FileScribe struct {
 	fileRoot       string
 	gitCommand     string
 	destinations   records
+	ratingPlans    records
 	ratingProfiles records
 	loopChecker    chan int
 	waitingFile    string
@@ -70,6 +72,9 @@ func (s *FileScribe) Record(rec *Record, out *int) error {
 	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
 		s.destinations = s.destinations.SetOrAdd(&Record{rec.Key[len(DESTINATION_PREFIX):], rec.Object})
 		fileToSave = DESTINATIONS_FILE
+	case strings.HasPrefix(rec.Key, RATING_PLAN_PREFIX):
+		s.ratingPlans = s.ratingPlans.SetOrAdd(&Record{rec.Key[len(RATING_PLAN_PREFIX):], rec.Object})
+		fileToSave = RATING_PLANS_FILE
 	case strings.HasPrefix(rec.Key, RATING_PROFILE_PREFIX):
 		s.ratingProfiles = s.ratingProfiles.SetOrAdd(&Record{rec.Key[len(RATING_PROFILE_PREFIX):], rec.Object})
 		fileToSave = RATING_PROFILES_FILE
@@ -120,6 +125,11 @@ func (s *FileScribe) gitInit() error {
 		} else {
 			f.Close()
 		}
+		if f, err := os.Create(filepath.Join(s.fileRoot, RATING_PLANS_FILE)); err != nil {
+			return errors.New("<History> Error writing rating plans file: " + err.Error())
+		} else {
+			f.Close()
+		}
 		if f, err := os.Create(filepath.Join(s.fileRoot, RATING_PROFILES_FILE)); err != nil {
 			return errors.New("<History> Error writing rating profiles file: " + err.Error())
 		} else {
@@ -159,6 +169,11 @@ func (s *FileScribe) load(filename string) error {
 			return errors.New("<History> Error loading destinations: " + err.Error())
 		}
 		s.destinations.Sort()
+	case RATING_PLANS_FILE:
+		if err := d.Decode(&s.ratingPlans); err != nil && err != io.EOF {
+			return errors.New("<History> Error loading rating plans: " + err.Error())
+		}
+		s.ratingPlans.Sort()
 	case RATING_PROFILES_FILE:
 		if err := d.Decode(&s.ratingProfiles); err != nil && err != io.EOF {
 			return errors.New("<History> Error loading rating profiles: " + err.Error())
@@ -180,6 +195,10 @@ func (s *FileScribe) save(filename string) error {
 	switch filename {
 	case DESTINATIONS_FILE:
 		if err := s.format(b, s.destinations); err != nil {
+			return err
+		}
+	case RATING_PLANS_FILE:
+		if err := s.format(b, s.ratingPlans); err != nil {
 			return err
 		}
 	case RATING_PROFILES_FILE:

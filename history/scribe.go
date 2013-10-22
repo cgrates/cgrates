@@ -23,6 +23,7 @@ import (
 )
 
 const (
+	RATING_PLAN_PREFIX    = "rpl_"
 	RATING_PROFILE_PREFIX = "rpf_"
 	DESTINATION_PREFIX    = "dst_"
 )
