@@ -309,10 +309,12 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 				Tag:    at.Tag,
 				Weight: at.Weight,
 				Timing: &RateInterval{
-					Months:    t.Months,
-					MonthDays: t.MonthDays,
-					WeekDays:  t.WeekDays,
-					StartTime: t.StartTime,
+					Timing: &RITiming{
+						Months:    t.Months,
+						MonthDays: t.MonthDays,
+						WeekDays:  t.WeekDays,
+						StartTime: t.StartTime,
+					},
 				},
 				ActionsId: at.ActionsId,
 			}
@@ -408,10 +410,12 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 				Tag:    at.Tag,
 				Weight: at.Weight,
 				Timing: &RateInterval{
-					Months:    t.Months,
-					MonthDays: t.MonthDays,
-					WeekDays:  t.WeekDays,
-					StartTime: t.StartTime,
+					Timing: &RITiming{
+						Months:    t.Months,
+						MonthDays: t.MonthDays,
+						WeekDays:  t.WeekDays,
+						StartTime: t.StartTime,
+					},
 				},
 				ActionsId: at.ActionsId,
 			}

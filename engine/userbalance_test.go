@@ -218,7 +218,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -246,7 +246,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -279,7 +279,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -312,13 +312,13 @@ func TestDebitCreditNoCredit(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -352,13 +352,13 @@ func TestDebitCreditHasCredit(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -394,7 +394,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -430,13 +430,13 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -468,13 +468,13 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -507,13 +507,13 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -539,13 +539,13 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -584,7 +584,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -622,7 +622,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -658,7 +658,7 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}

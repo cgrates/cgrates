@@ -58,8 +58,8 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	now := time.Now()
 	y, m, d := now.Date()
 	z, _ := now.Zone()
-	if i.StartTime != "" && i.StartTime != ASAP {
-		l := fmt.Sprintf("%d-%d-%d %s %s", y, m, d, i.StartTime, z)
+	if i.Timing.StartTime != "" && i.Timing.StartTime != ASAP {
+		l := fmt.Sprintf("%d-%d-%d %s %s", y, m, d, i.Timing.StartTime, z)
 		var err error
 		t, err = time.Parse(FORMAT, l)
 		if err != nil {
@@ -69,15 +69,15 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		}
 	}
 	// weekdays
-	if i.WeekDays != nil && len(i.WeekDays) > 0 {
-		i.WeekDays.Sort()
+	if i.Timing.WeekDays != nil && len(i.Timing.WeekDays) > 0 {
+		i.Timing.WeekDays.Sort()
 		if t.IsZero() {
 			t = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
 		}
 		d := t.Day()
 		for _, j := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
 			t = time.Date(t.Year(), t.Month(), d, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location()).AddDate(0, 0, j)
-			for _, wd := range i.WeekDays {
+			for _, wd := range i.Timing.WeekDays {
 				if t.Weekday() == wd && (t.Equal(now) || t.After(now)) {
 					at.stCache = t
 					return
@@ -86,27 +86,27 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		}
 	}
 	// monthdays
-	if i.MonthDays != nil && len(i.MonthDays) > 0 {
-		i.MonthDays.Sort()
+	if i.Timing.MonthDays != nil && len(i.Timing.MonthDays) > 0 {
+		i.Timing.MonthDays.Sort()
 		now := time.Now()
 		month := now.Month()
-		x := sort.SearchInts(i.MonthDays, now.Day())
-		d = i.MonthDays[0]
-		if x < len(i.MonthDays) {
-			if i.MonthDays[x] == now.Day() {
+		x := sort.SearchInts(i.Timing.MonthDays, now.Day())
+		d = i.Timing.MonthDays[0]
+		if x < len(i.Timing.MonthDays) {
+			if i.Timing.MonthDays[x] == now.Day() {
 				if t.Equal(now) || t.After(now) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), now.Month(), now.Day(), h, m, s, 0, time.Local)
 					goto MONTHS
 				}
-				if x+1 < len(i.MonthDays) { // today was found in the list, jump to the next grater day
-					d = i.MonthDays[x+1]
+				if x+1 < len(i.Timing.MonthDays) { // today was found in the list, jump to the next grater day
+					d = i.Timing.MonthDays[x+1]
 				}
 			} else { // today was not found in the list, x is the first greater day
-				d = i.MonthDays[x]
+				d = i.Timing.MonthDays[x]
 			}
 		} else {
-			if len(i.Months) == 0 {
+			if len(i.Timing.Months) == 0 {
 				t = time.Date(now.Year(), month, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 				month = t.Month()
 			}
@@ -115,35 +115,35 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		t = time.Date(now.Year(), month, d, h, m, s, 0, time.Local)
 	}
 MONTHS:
-	if i.Months != nil && len(i.Months) > 0 {
-		i.Months.Sort()
+	if i.Timing.Months != nil && len(i.Timing.Months) > 0 {
+		i.Timing.Months.Sort()
 		now := time.Now()
 		year := now.Year()
-		x := sort.Search(len(i.Months), func(x int) bool { return i.Months[x] >= now.Month() })
-		m = i.Months[0]
-		if x < len(i.Months) {
-			if i.Months[x] == now.Month() {
+		x := sort.Search(len(i.Timing.Months), func(x int) bool { return i.Timing.Months[x] >= now.Month() })
+		m = i.Timing.Months[0]
+		if x < len(i.Timing.Months) {
+			if i.Timing.Months[x] == now.Month() {
 				if t.Equal(now) || t.After(now) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), now.Month(), t.Day(), h, m, s, 0, time.Local)
 					goto YEARS
 				}
-				if x+1 < len(i.Months) { // this month was found in the list so jump to next available month
-					m = i.Months[x+1]
+				if x+1 < len(i.Timing.Months) { // this month was found in the list so jump to next available month
+					m = i.Timing.Months[x+1]
 					// reset the monthday
-					if i.MonthDays != nil {
-						t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+					if i.Timing.MonthDays != nil {
+						t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 					}
 				}
 			} else { // this month was not found in the list, x is the first greater month
-				m = i.Months[x]
+				m = i.Timing.Months[x]
 				// reset the monthday
-				if i.MonthDays != nil {
-					t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+				if i.Timing.MonthDays != nil {
+					t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 				}
 			}
 		} else {
-			if len(i.Years) == 0 {
+			if len(i.Timing.Years) == 0 {
 				t = time.Date(year, m, t.Day(), 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
 				year = t.Year()
 			}
@@ -152,39 +152,39 @@ MONTHS:
 		t = time.Date(year, m, t.Day(), h, min, s, 0, time.Local)
 	}
 YEARS:
-	if i.Years != nil && len(i.Years) > 0 {
-		i.Years.Sort()
+	if i.Timing.Years != nil && len(i.Timing.Years) > 0 {
+		i.Timing.Years.Sort()
 		now := time.Now()
-		x := sort.Search(len(i.Years), func(x int) bool { return i.Years[x] >= now.Year() })
-		y = i.Years[0]
-		if x < len(i.Years) {
-			if i.Years[x] == now.Year() {
+		x := sort.Search(len(i.Timing.Years), func(x int) bool { return i.Timing.Years[x] >= now.Year() })
+		y = i.Timing.Years[0]
+		if x < len(i.Timing.Years) {
+			if i.Timing.Years[x] == now.Year() {
 				if t.Equal(now) || t.After(now) {
 					h, m, s := t.Clock()
 					t = time.Date(now.Year(), t.Month(), t.Day(), h, m, s, 0, time.Local)
 					at.stCache = t
 					return
 				}
-				if x+1 < len(i.Years) { // this year was found in the list so jump to next available year
-					y = i.Years[x+1]
+				if x+1 < len(i.Timing.Years) { // this year was found in the list so jump to next available year
+					y = i.Timing.Years[x+1]
 					// reset the month
-					if i.Months != nil {
-						t = time.Date(t.Year(), i.Months[0], t.Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+					if i.Timing.Months != nil {
+						t = time.Date(t.Year(), i.Timing.Months[0], t.Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 					}
 					// reset the monthday
-					if i.MonthDays != nil {
-						t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+					if i.Timing.MonthDays != nil {
+						t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 					}
 				}
 			} else { // this year was not found in the list, x is the first greater year
-				y = i.Years[x]
+				y = i.Timing.Years[x]
 				// reset the month
-				if i.Months != nil {
-					t = time.Date(t.Year(), i.Months[0], t.Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+				if i.Timing.Months != nil {
+					t = time.Date(t.Year(), i.Timing.Months[0], t.Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 				}
 				// reset the monthday
-				if i.MonthDays != nil {
-					t = time.Date(t.Year(), t.Month(), i.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
+				if i.Timing.MonthDays != nil {
+					t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 				}
 			}
 		}
@@ -247,10 +247,10 @@ func (at *ActionTiming) Execute() (err error) {
 // checks for *asap string as start time and replaces it wit an actual time in the newar future
 // returns true if the *asap string was found
 func (at *ActionTiming) CheckForASAP() bool {
-	if at.Timing.StartTime == ASAP {
+	if at.Timing.Timing.StartTime == ASAP {
 		delay, _ := time.ParseDuration(ASAP_DELAY)
 		timeTokens := strings.Split(time.Now().Add(delay).Format(time.Stamp), " ")
-		at.Timing.StartTime = timeTokens[len(timeTokens)-1]
+		at.Timing.Timing.StartTime = timeTokens[len(timeTokens)-1]
 		return true
 	}
 	return false
@@ -258,11 +258,11 @@ func (at *ActionTiming) CheckForASAP() bool {
 
 // returns true if only the starting time was is filled in the Timing field
 func (at *ActionTiming) IsOneTimeRun() bool {
-	return len(at.Timing.Years) == 0 &&
-		len(at.Timing.Months) == 0 &&
-		len(at.Timing.MonthDays) == 0 &&
-		len(at.Timing.WeekDays) == 0 &&
-		len(at.Timing.StartTime) != 0
+	return len(at.Timing.Timing.Years) == 0 &&
+		len(at.Timing.Timing.Months) == 0 &&
+		len(at.Timing.Timing.MonthDays) == 0 &&
+		len(at.Timing.Timing.WeekDays) == 0 &&
+		len(at.Timing.Timing.StartTime) != 0
 }
 
 // Structure to store actions according to weight

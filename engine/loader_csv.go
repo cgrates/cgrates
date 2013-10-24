@@ -442,11 +442,13 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 			Tag:    record[2],
 			Weight: weight,
 			Timing: &RateInterval{
-				Years:     t.Years,
-				Months:    t.Months,
-				MonthDays: t.MonthDays,
-				WeekDays:  t.WeekDays,
-				StartTime: t.StartTime,
+				Timing: &RITiming{
+					Years:     t.Years,
+					Months:    t.Months,
+					MonthDays: t.MonthDays,
+					WeekDays:  t.WeekDays,
+					StartTime: t.StartTime,
+				},
 			},
 			ActionsId: record[1],
 		}

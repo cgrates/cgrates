@@ -319,7 +319,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	for i, ts := range timespans {
 		// only add connect fee if this is the first/only call cost request
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
-			connectionFee = ts.RateInterval.ConnectFee
+			connectionFee = ts.RateInterval.Rating.ConnectFee
 		}
 		cost += ts.getCost()
 	}
@@ -383,7 +383,7 @@ func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float6
 		cost := 0.0
 		for i, ts := range timespans {
 			if i == 0 && ts.RateInterval != nil {
-				cost += ts.RateInterval.ConnectFee
+				cost += ts.RateInterval.Rating.ConnectFee
 			}
 			cost += ts.Cost
 		}

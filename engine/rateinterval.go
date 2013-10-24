@@ -32,15 +32,38 @@ import (
 Defines a time interval for which a certain set of prices will apply
 */
 type RateInterval struct {
+	Timing *RITiming
+	Rating *RIRate
+	Weight float64
+}
+
+// Separate structure used for rating plan size optimization
+type RITiming struct {
 	Years              Years
 	Months             Months
 	MonthDays          MonthDays
 	WeekDays           WeekDays
 	StartTime, EndTime string // ##:##:## format
-	Weight, ConnectFee float64
-	Rates              RateGroups // GroupRateInterval (start time): Rate
-	RoundingMethod     string     //ROUNDING_UP, ROUNDING_DOWN, ROUNDING_MIDDLE
-	RoundingDecimals   int
+}
+
+func (rit *RITiming) Stringify() string {
+	return utils.SHA1(fmt.Sprintf("%v", rit))[:8]
+}
+
+// Separate structure used for rating plan size optimization
+type RIRate struct {
+	ConnectFee       float64
+	Rates            RateGroups // GroupRateInterval (start time): Rate
+	RoundingMethod   string     //ROUNDING_UP, ROUNDING_DOWN, ROUNDING_MIDDLE
+	RoundingDecimals int
+}
+
+func (rir *RIRate) Stringify() string {
+	str := fmt.Sprintf("%v %v %v", rir.ConnectFee, rir.RoundingMethod, rir.RoundingDecimals)
+	for _, r := range rir.Rates {
+		str += r.Stringify()
+	}
+	return utils.SHA1(str)[:8]
 }
 
 type Rate struct {
@@ -48,6 +71,10 @@ type Rate struct {
 	Value              float64
 	RateIncrement      time.Duration
 	RateUnit           time.Duration
+}
+
+func (r *Rate) Stringify() string {
+	return utils.SHA1(fmt.Sprintf("%v", r))[:8]
 }
 
 func (p *Rate) Equal(o *Rate) bool {
@@ -112,24 +139,24 @@ func (i *RateInterval) Contains(t time.Time, endTime bool) bool {
 		hour = 24
 	}
 	// check for years
-	if len(i.Years) > 0 && !i.Years.Contains(t.Year()) {
+	if len(i.Timing.Years) > 0 && !i.Timing.Years.Contains(t.Year()) {
 		return false
 	}
 	// check for months
-	if len(i.Months) > 0 && !i.Months.Contains(t.Month()) {
+	if len(i.Timing.Months) > 0 && !i.Timing.Months.Contains(t.Month()) {
 		return false
 	}
 	// check for month days
-	if len(i.MonthDays) > 0 && !i.MonthDays.Contains(t.Day()) {
+	if len(i.Timing.MonthDays) > 0 && !i.Timing.MonthDays.Contains(t.Day()) {
 		return false
 	}
 	// check for weekdays
-	if len(i.WeekDays) > 0 && !i.WeekDays.Contains(t.Weekday()) {
+	if len(i.Timing.WeekDays) > 0 && !i.Timing.WeekDays.Contains(t.Weekday()) {
 		return false
 	}
 	// check for start hour
-	if i.StartTime != "" {
-		split := strings.Split(i.StartTime, ":")
+	if i.Timing.StartTime != "" {
+		split := strings.Split(i.Timing.StartTime, ":")
 		sh, _ := strconv.Atoi(split[0])
 		sm, _ := strconv.Atoi(split[1])
 		ss, _ := strconv.Atoi(split[2])
@@ -141,8 +168,8 @@ func (i *RateInterval) Contains(t time.Time, endTime bool) bool {
 		}
 	}
 	// check for end hour
-	if i.EndTime != "" {
-		split := strings.Split(i.EndTime, ":")
+	if i.Timing.EndTime != "" {
+		split := strings.Split(i.Timing.EndTime, ":")
 		eh, _ := strconv.Atoi(split[0])
 		em, _ := strconv.Atoi(split[1])
 		es, _ := strconv.Atoi(split[2])
@@ -163,8 +190,8 @@ func (i *RateInterval) getRightMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 23, 59, 59, 0
 	loc := t.Location()
-	if i.EndTime != "" {
-		split := strings.Split(i.EndTime, ":")
+	if i.Timing.EndTime != "" {
+		split := strings.Split(i.Timing.EndTime, ":")
 		hour, _ = strconv.Atoi(split[0])
 		min, _ = strconv.Atoi(split[1])
 		sec, _ = strconv.Atoi(split[2])
@@ -182,8 +209,8 @@ func (i *RateInterval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 	year, month, day := t.Year(), t.Month(), t.Day()
 	hour, min, sec, nsec := 0, 0, 0, 0
 	loc := t.Location()
-	if i.StartTime != "" {
-		split := strings.Split(i.StartTime, ":")
+	if i.Timing.StartTime != "" {
+		split := strings.Split(i.Timing.StartTime, ":")
 		hour, _ = strconv.Atoi(split[0])
 		min, _ = strconv.Atoi(split[1])
 		sec, _ = strconv.Atoi(split[2])
@@ -193,32 +220,36 @@ func (i *RateInterval) getLeftMargin(t time.Time) (rigthtTime time.Time) {
 }
 
 func (i *RateInterval) String_DISABLED() string {
-	return fmt.Sprintf("%v %v %v %v %v %v", i.Years, i.Months, i.MonthDays, i.WeekDays, i.StartTime, i.EndTime)
+	return fmt.Sprintf("%v %v %v %v %v %v", i.Timing.Years, i.Timing.Months, i.Timing.MonthDays, i.Timing.WeekDays, i.Timing.StartTime, i.Timing.EndTime)
 }
 
 func (i *RateInterval) Equal(o *RateInterval) bool {
-	return reflect.DeepEqual(i.Years, o.Years) &&
-		reflect.DeepEqual(i.Months, o.Months) &&
-		reflect.DeepEqual(i.MonthDays, o.MonthDays) &&
-		reflect.DeepEqual(i.WeekDays, o.WeekDays) &&
-		i.StartTime == o.StartTime &&
-		i.EndTime == o.EndTime
+	if i.Timing == nil && o.Timing == nil {
+		return true
+	}
+	return reflect.DeepEqual(i.Timing.Years, o.Timing.Years) &&
+		reflect.DeepEqual(i.Timing.Months, o.Timing.Months) &&
+		reflect.DeepEqual(i.Timing.MonthDays, o.Timing.MonthDays) &&
+		reflect.DeepEqual(i.Timing.WeekDays, o.Timing.WeekDays) &&
+		i.Timing.StartTime == o.Timing.StartTime &&
+		i.Timing.EndTime == o.Timing.EndTime
 }
 
 func (i *RateInterval) GetCost(duration, startSecond time.Duration) float64 {
-	price, _, rateUnit := i.GetRateParameters(startSecond)
+	price, _, rateUnit := i.
+		GetRateParameters(startSecond)
 	d := duration.Seconds()
 	price /= rateUnit.Seconds()
 
-	return utils.Round(d*price, i.RoundingDecimals, i.RoundingMethod)
+	return utils.Round(d*price, i.Rating.RoundingDecimals, i.Rating.RoundingMethod)
 }
 
 // Gets the price for a the provided start second
 func (i *RateInterval) GetRateParameters(startSecond time.Duration) (price float64, rateIncrement, rateUnit time.Duration) {
-	i.Rates.Sort()
-	for index, price := range i.Rates {
-		if price.GroupIntervalStart <= startSecond && (index == len(i.Rates)-1 ||
-			i.Rates[index+1].GroupIntervalStart > startSecond) {
+	i.Rating.Rates.Sort()
+	for index, price := range i.Rating.Rates {
+		if price.GroupIntervalStart <= startSecond && (index == len(i.Rating.Rates)-1 ||
+			i.Rating.Rates[index+1].GroupIntervalStart > startSecond) {
 			if price.RateIncrement == 0 {
 				price.RateIncrement = 1 * time.Second
 			}

@@ -163,18 +163,22 @@ func NewDestinationRateTiming(timing *Timing, weight string) (drt *DestinationRa
 
 func (drt *DestinationRateTiming) GetRateInterval(dr *DestinationRate) (i *RateInterval) {
 	i = &RateInterval{
-		Years:            drt.timing.Years,
-		Months:           drt.timing.Months,
-		MonthDays:        drt.timing.MonthDays,
-		WeekDays:         drt.timing.WeekDays,
-		StartTime:        drt.timing.StartTime,
-		Weight:           drt.Weight,
-		ConnectFee:       dr.rates[0].ConnectFee,
-		RoundingMethod:   dr.rates[0].RoundingMethod,
-		RoundingDecimals: dr.rates[0].RoundingDecimals,
+		Timing: &RITiming{
+			Years:     drt.timing.Years,
+			Months:    drt.timing.Months,
+			MonthDays: drt.timing.MonthDays,
+			WeekDays:  drt.timing.WeekDays,
+			StartTime: drt.timing.StartTime,
+		},
+		Weight: drt.Weight,
+		Rating: &RIRate{
+			ConnectFee:       dr.rates[0].ConnectFee,
+			RoundingMethod:   dr.rates[0].RoundingMethod,
+			RoundingDecimals: dr.rates[0].RoundingDecimals,
+		},
 	}
 	for _, rl := range dr.rates {
-		i.Rates = append(i.Rates, &Rate{
+		i.Rating.Rates = append(i.Rating.Rates, &Rate{
 			GroupIntervalStart: rl.GroupIntervalStart,
 			Value:              rl.Price,
 			RateIncrement:      rl.RateIncrement,

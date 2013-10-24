@@ -23,7 +23,32 @@ The struture that is saved to storage.
 */
 type RatingPlan struct {
 	Id               string
-	DestinationRates map[string]RateIntervalList
+	Timings          map[string]*RITiming
+	Ratings          map[string]*RIRate
+	DestinationRates map[string]RPRateList
+}
+
+type RPRate struct {
+	Timing string
+	Rating string
+	Weight float64
+}
+
+func (rpr *RPRate) Equal(orpr *RPRate) bool {
+	return rpr.Timing == orpr.Timing && rpr.Rating == orpr.Rating && rpr.Weight == orpr.Weight
+}
+
+type RPRateList []*RPRate
+
+func (rp *RatingPlan) RateIntervalList(dId string) (ril RateIntervalList) {
+	for _, rpr := range rp.DestinationRates[dId] {
+		ril = append(ril, &RateInterval{
+			Timing: rp.Timings[rpr.Timing],
+			Rating: rp.Ratings[rpr.Rating],
+			Weight: rpr.Weight,
+		})
+	}
+	return
 }
 
 /*
@@ -38,18 +63,32 @@ Adds one ore more intervals to the internal interval list only if it is not allr
 */
 func (rp *RatingPlan) AddRateInterval(dId string, ris ...*RateInterval) {
 	if rp.DestinationRates == nil {
-		rp.DestinationRates = make(map[string]RateIntervalList, 1)
+		rp.Timings = make(map[string]*RITiming)
+		rp.Ratings = make(map[string]*RIRate)
+		rp.DestinationRates = make(map[string]RPRateList, 1)
 	}
 	for _, ri := range ris {
+		rpr := &RPRate{Weight: ri.Weight}
+		if ri.Timing != nil {
+			timingTag := ri.Timing.Stringify()
+			rp.Timings[timingTag] = ri.Timing
+			rpr.Timing = timingTag
+		}
+		if ri.Rating != nil {
+			ratingTag := ri.Rating.Stringify()
+
+			rp.Ratings[ratingTag] = ri.Rating
+			rpr.Rating = ratingTag
+		}
 		found := false
-		for _, eri := range rp.DestinationRates[dId] {
-			if ri.Equal(eri) {
+		for _, erpr := range rp.DestinationRates[dId] {
+			if erpr.Equal(rpr) {
 				found = true
 				break
 			}
 		}
 		if !found {
-			rp.DestinationRates[dId] = append(rp.DestinationRates[dId], ri)
+			rp.DestinationRates[dId] = append(rp.DestinationRates[dId], rpr)
 		}
 	}
 }

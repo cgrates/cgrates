@@ -89,7 +89,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (foundPrefi
 			}
 			bestPrecision := 0
 			var rps RateIntervalList
-			for dId, rpls := range rpl.DestinationRates {
+			for dId, _ := range rpl.DestinationRates {
 				precision, err := storageGetter.DestinationContainsPrefix(dId, cd.Destination)
 				if err != nil {
 					Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
@@ -97,7 +97,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (foundPrefi
 				}
 				if precision > bestPrecision {
 					bestPrecision = precision
-					rps = rpls
+					rps = rpl.RateIntervalList(dId)
 				}
 			}
 			if bestPrecision > 0 {

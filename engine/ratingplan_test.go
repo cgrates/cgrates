@@ -41,11 +41,12 @@ func TestApRestoreFromStorage(t *testing.T) {
 }
 
 func TestApStoreRestoreJson(t *testing.T) {
-	i := &RateInterval{Months: []time.Month{time.February},
+	i := &RateInterval{Timing: &RITiming{
+		Months:    []time.Month{time.February},
 		MonthDays: []int{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
+		EndTime:   "15:00:00"}}
 	ap := &RatingPlan{Id: "test"}
 	ap.AddRateInterval("NAT", i)
 	result, _ := json.Marshal(ap)
@@ -145,27 +146,32 @@ func TestFallbackNoInfiniteLoopSelf(t *testing.T) {
 }
 
 func TestApAddIntervalIfNotPresent(t *testing.T) {
-	i1 := &RateInterval{Months: Months{time.February},
+	i1 := &RateInterval{
+		Timing: &RITiming{
+			Months:    Months{time.February},
+			MonthDays: MonthDays{1},
+			WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+			StartTime: "14:30:00",
+			EndTime:   "15:00:00"}}
+	i2 := &RateInterval{Timing: &RITiming{
+		Months:    Months{time.February},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
-	i2 := &RateInterval{Months: Months{time.February},
-		MonthDays: MonthDays{1},
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
-	i3 := &RateInterval{Months: Months{time.February},
+		EndTime:   "15:00:00"}}
+	i3 := &RateInterval{Timing: &RITiming{
+		Months:    Months{time.February},
 		MonthDays: MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday},
 		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
+		EndTime:   "15:00:00"}}
 	rp := &RatingPlan{}
 	rp.AddRateInterval("NAT", i1)
 	rp.AddRateInterval("NAT", i2)
-	if len(rp.DestinationRates) != 1 {
+	if len(rp.DestinationRates["NAT"]) != 1 {
 		t.Error("Wronfullyrppended interval ;)")
 	}
+	t.Log()
 	rp.AddRateInterval("NAT", i3)
 	if len(rp.DestinationRates["NAT"]) != 2 {
 		t.Error("Wronfully not appended interval ;)", rp.DestinationRates)
@@ -174,13 +180,13 @@ func TestApAddIntervalIfNotPresent(t *testing.T) {
 
 func TestApAddRateIntervalGroups(t *testing.T) {
 	i1 := &RateInterval{
-		Rates: RateGroups{&Rate{0, 1, 1 * time.Second, 1 * time.Second}},
+		Rating: &RIRate{Rates: RateGroups{&Rate{0, 1, 1 * time.Second, 1 * time.Second}}},
 	}
 	i2 := &RateInterval{
-		Rates: RateGroups{&Rate{30 * time.Second, 2, 1 * time.Second, 1 * time.Second}},
+		Rating: &RIRate{Rates: RateGroups{&Rate{30 * time.Second, 2, 1 * time.Second, 1 * time.Second}}},
 	}
 	i3 := &RateInterval{
-		Rates: RateGroups{&Rate{30 * time.Second, 2, 1 * time.Second, 1 * time.Second}},
+		Rating: &RIRate{Rates: RateGroups{&Rate{30 * time.Second, 2, 1 * time.Second, 1 * time.Second}}},
 	}
 	ap := &RatingPlan{}
 	ap.AddRateInterval("NAT", i1)
@@ -189,8 +195,8 @@ func TestApAddRateIntervalGroups(t *testing.T) {
 	if len(ap.DestinationRates) != 1 {
 		t.Error("Wronfully appended interval ;)")
 	}
-	if len(ap.DestinationRates["NAT"][0].Rates) != 1 {
-		t.Errorf("Group prices not formed: %#v", ap.DestinationRates["NAT"][0].Rates[0])
+	if len(ap.RateIntervalList("NAT")[0].Rating.Rates) != 1 {
+		t.Errorf("Group prices not formed: %#v", ap.RateIntervalList("NAT")[0].Rating.Rates[0])
 	}
 }
 
@@ -198,11 +204,13 @@ func TestApAddRateIntervalGroups(t *testing.T) {
 
 func BenchmarkRatingPlanStoreRestoreJson(b *testing.B) {
 	b.StopTimer()
-	i := &RateInterval{Months: []time.Month{time.February},
-		MonthDays: []int{1},
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
+	i := &RateInterval{
+		Timing: &RITiming{
+			Months:    []time.Month{time.February},
+			MonthDays: []int{1},
+			WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+			StartTime: "14:30:00",
+			EndTime:   "15:00:00"}}
 	ap := &RatingPlan{Id: "test"}
 	ap.AddRateInterval("NAT", i)
 
@@ -216,11 +224,12 @@ func BenchmarkRatingPlanStoreRestoreJson(b *testing.B) {
 
 func BenchmarkRatingPlanStoreRestore(b *testing.B) {
 	b.StopTimer()
-	i := &RateInterval{Months: []time.Month{time.February},
-		MonthDays: []int{1},
-		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
-		StartTime: "14:30:00",
-		EndTime:   "15:00:00"}
+	i := &RateInterval{
+		Timing: &RITiming{Months: []time.Month{time.February},
+			MonthDays: []int{1},
+			WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+			StartTime: "14:30:00",
+			EndTime:   "15:00:00"}}
 	ap := &RatingPlan{Id: "test"}
 	ap.AddRateInterval("NAT", i)
 

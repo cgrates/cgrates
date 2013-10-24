@@ -25,7 +25,8 @@ import (
 )
 
 func TestRightMargin(t *testing.T) {
-	i := &RateInterval{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}}
+	i := &RateInterval{
+		Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}}}
 	t1 := time.Date(2012, time.February, 3, 23, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 4, 0, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -52,10 +53,11 @@ func TestRightMargin(t *testing.T) {
 
 func TestSplitMiddle(t *testing.T) {
 	i := &RateInterval{
-		WeekDays:  WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
-		StartTime: "18:00:00",
-		EndTime:   "",
-	}
+		Timing: &RITiming{
+			WeekDays:  WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+			StartTime: "18:00:00",
+			EndTime:   "",
+		}}
 	ts := &TimeSpan{
 		TimeStart: time.Date(2012, 2, 27, 0, 0, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2012, 2, 28, 0, 0, 0, 0, time.UTC),
@@ -72,7 +74,7 @@ func TestSplitMiddle(t *testing.T) {
 }
 
 func TestRightHourMargin(t *testing.T) {
-	i := &RateInterval{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, EndTime: "17:59:00"}
+	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, EndTime: "17:59:00"}}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -97,7 +99,7 @@ func TestRightHourMargin(t *testing.T) {
 }
 
 func TestLeftMargin(t *testing.T) {
-	i := &RateInterval{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}}
+	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}}}
 	t1 := time.Date(2012, time.February, 5, 23, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 6, 0, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -121,7 +123,7 @@ func TestLeftMargin(t *testing.T) {
 }
 
 func TestLeftHourMargin(t *testing.T) {
-	i := &RateInterval{Months: Months{time.December}, MonthDays: MonthDays{1}, StartTime: "09:00:00"}
+	i := &RateInterval{Timing: &RITiming{Months: Months{time.December}, MonthDays: MonthDays{1}, StartTime: "09:00:00"}}
 	t1 := time.Date(2012, time.December, 1, 8, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.December, 1, 9, 20, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -145,7 +147,7 @@ func TestLeftHourMargin(t *testing.T) {
 }
 
 func TestEnclosingMargin(t *testing.T) {
-	i := &RateInterval{WeekDays: []time.Weekday{time.Sunday}}
+	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Sunday}}}
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -159,7 +161,7 @@ func TestEnclosingMargin(t *testing.T) {
 }
 
 func TestOutsideMargin(t *testing.T) {
-	i := &RateInterval{WeekDays: []time.Weekday{time.Monday}}
+	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday}}}
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
@@ -213,21 +215,21 @@ func TestTimespanGetCost(t *testing.T) {
 	if ts1.getCost() != 0 {
 		t.Error("No interval and still kicking")
 	}
-	ts1.SetRateInterval(&RateInterval{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}})
+	ts1.SetRateInterval(&RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}}})
 	if ts1.getCost() != 600 {
 		t.Error("Expected 10 got ", ts1.Cost)
 	}
 	ts1.RateInterval = nil
-	ts1.SetRateInterval(&RateInterval{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 60 * time.Second}}})
+	ts1.SetRateInterval(&RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 60 * time.Second}}}})
 	if ts1.getCost() != 10 {
 		t.Error("Expected 6000 got ", ts1.Cost)
 	}
 }
 
 func TestSetRateInterval(t *testing.T) {
-	i1 := &RateInterval{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}}
+	i1 := &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}}}
 	ts1 := TimeSpan{RateInterval: i1}
-	i2 := &RateInterval{Rates: RateGroups{&Rate{0, 2.0, 1 * time.Second, 1 * time.Second}}}
+	i2 := &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 2.0, 1 * time.Second, 1 * time.Second}}}}
 	ts1.SetRateInterval(i2)
 	if ts1.RateInterval != i1 {
 		t.Error("Smaller price interval should win")
@@ -241,8 +243,12 @@ func TestSetRateInterval(t *testing.T) {
 
 func TestTimespanSplitGroupedRates(t *testing.T) {
 	i := &RateInterval{
-		EndTime: "17:59:00",
-		Rates:   RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{900 * time.Second, 1, 1 * time.Second, 1 * time.Second}},
+		Timing: &RITiming{
+			EndTime: "17:59:00",
+		},
+		Rating: &RIRate{
+			Rates: RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{900 * time.Second, 1, 1 * time.Second, 1 * time.Second}},
+		},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
@@ -275,19 +281,22 @@ func TestTimespanSplitGroupedRates(t *testing.T) {
 
 func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	i := &RateInterval{
-		EndTime: "17:59:00",
-		Rates: RateGroups{
-			&Rate{
-				GroupIntervalStart: 0,
-				Value:              2,
-				RateIncrement:      time.Second,
-				RateUnit:           time.Second},
-			&Rate{
-				GroupIntervalStart: 30 * time.Second,
-				Value:              1,
-				RateIncrement:      time.Minute,
-				RateUnit:           time.Second,
-			}},
+		Timing: &RITiming{
+			EndTime: "17:59:00",
+		},
+		Rating: &RIRate{
+			Rates: RateGroups{
+				&Rate{
+					GroupIntervalStart: 0,
+					Value:              2,
+					RateIncrement:      time.Second,
+					RateUnit:           time.Second},
+				&Rate{
+					GroupIntervalStart: 30 * time.Second,
+					Value:              1,
+					RateIncrement:      time.Minute,
+					RateUnit:           time.Second,
+				}}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 31, 0, 0, time.UTC)
@@ -328,8 +337,12 @@ func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 
 func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 	i := &RateInterval{
-		EndTime: "17:00:30",
-		Rates:   RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{60 * time.Second, 1, 60 * time.Second, 1 * time.Second}},
+		Timing: &RITiming{
+			EndTime: "17:00:30",
+		},
+		Rating: &RIRate{
+			Rates: RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{60 * time.Second, 1, 60 * time.Second, 1 * time.Second}},
+		},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 01, 0, 0, time.UTC)
@@ -361,8 +374,11 @@ func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 
 func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 	i := &RateInterval{
-		EndTime: "17:03:30",
-		Rates:   RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{60 * time.Second, 1, 1 * time.Second, 1 * time.Second}},
+		Timing: &RITiming{
+			EndTime: "17:03:30",
+		},
+		Rating: &RIRate{
+			Rates: RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{60 * time.Second, 1, 1 * time.Second, 1 * time.Second}}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
@@ -405,7 +421,9 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 
 func TestTimespanSplitLong(t *testing.T) {
 	i := &RateInterval{
-		StartTime: "18:00:00",
+		Timing: &RITiming{
+			StartTime: "18:00:00",
+		},
 	}
 	t1 := time.Date(2013, time.October, 9, 9, 0, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 10, 20, 0, 0, 0, time.UTC)
@@ -433,8 +451,11 @@ func TestTimespanSplitLong(t *testing.T) {
 
 func TestTimespanSplitMultipleGroup(t *testing.T) {
 	i := &RateInterval{
-		EndTime: "17:05:00",
-		Rates:   RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{60 * time.Second, 1, 1 * time.Second, 1 * time.Second}, &Rate{180 * time.Second, 1, 1 * time.Second, 1 * time.Second}},
+		Timing: &RITiming{
+			EndTime: "17:05:00",
+		},
+		Rating: &RIRate{
+			Rates: RateGroups{&Rate{0, 2, 1 * time.Second, 1 * time.Second}, &Rate{60 * time.Second, 1, 1 * time.Second, 1 * time.Second}, &Rate{180 * time.Second, 1, 1 * time.Second, 1 * time.Second}}},
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
@@ -480,9 +501,9 @@ func TestTimespanExpandingPastEnd(t *testing.T) {
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
-			RateInterval: &RateInterval{Rates: RateGroups{
+			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&Rate{RateIncrement: 60 * time.Second},
-			}},
+			}}},
 		},
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
@@ -504,9 +525,9 @@ func TestTimespanExpandingCallDuration(t *testing.T) {
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
-			RateInterval: &RateInterval{Rates: RateGroups{
+			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&Rate{RateIncrement: 60 * time.Second},
-			}},
+			}}},
 		},
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
@@ -526,9 +547,9 @@ func TestTimespanExpandingRoundingPastEnd(t *testing.T) {
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 20, 0, time.UTC),
-			RateInterval: &RateInterval{Rates: RateGroups{
+			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&Rate{RateIncrement: 15 * time.Second},
-			}},
+			}}},
 		},
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 20, 0, time.UTC),
@@ -550,9 +571,9 @@ func TestTimespanExpandingPastEndMultiple(t *testing.T) {
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
-			RateInterval: &RateInterval{Rates: RateGroups{
+			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&Rate{RateIncrement: 60 * time.Second},
-			}},
+			}}},
 		},
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
@@ -578,9 +599,9 @@ func TestTimespanExpandingPastEndMultipleEqual(t *testing.T) {
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
-			RateInterval: &RateInterval{Rates: RateGroups{
+			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&Rate{RateIncrement: 60 * time.Second},
-			}},
+			}}},
 		},
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
@@ -606,9 +627,9 @@ func TestTimespanExpandingBeforeEnd(t *testing.T) {
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
-			RateInterval: &RateInterval{Rates: RateGroups{
+			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&Rate{RateIncrement: 45 * time.Second},
-			}},
+			}}},
 		},
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
@@ -632,9 +653,9 @@ func TestTimespanExpandingBeforeEndMultiple(t *testing.T) {
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 			TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
-			RateInterval: &RateInterval{Rates: RateGroups{
+			RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 				&Rate{RateIncrement: 45 * time.Second},
-			}},
+			}}},
 		},
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
@@ -661,9 +682,9 @@ func TestTimespanCreateSecondsSlice(t *testing.T) {
 	ts := &TimeSpan{
 		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC),
-		RateInterval: &RateInterval{Rates: RateGroups{
+		RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{
 			&Rate{Value: 2.0},
-		}},
+		}}},
 	}
 	ts.createIncrementsSlice()
 	if len(ts.Increments) != 30 {
@@ -679,12 +700,14 @@ func TestTimespanCreateIncrements(t *testing.T) {
 		TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
 		TimeEnd:   time.Date(2013, 9, 10, 14, 30, 30, 100000000, time.UTC),
 		RateInterval: &RateInterval{
-			RoundingMethod:   utils.ROUNDING_MIDDLE,
-			RoundingDecimals: 2,
-			Rates: RateGroups{
-				&Rate{
-					Value:         2.0,
-					RateIncrement: 10 * time.Second,
+			Rating: &RIRate{
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&Rate{
+						Value:         2.0,
+						RateIncrement: 10 * time.Second,
+					},
 				},
 			},
 		},
@@ -704,12 +727,14 @@ func TestTimespanSplitByIncrement(t *testing.T) {
 		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
 		CallDuration: 60 * time.Second,
 		RateInterval: &RateInterval{
-			RoundingMethod:   utils.ROUNDING_MIDDLE,
-			RoundingDecimals: 2,
-			Rates: RateGroups{
-				&Rate{
-					Value:         2.0,
-					RateIncrement: 10 * time.Second,
+			Rating: &RIRate{
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&Rate{
+						Value:         2.0,
+						RateIncrement: 10 * time.Second,
+					},
 				},
 			},
 		},
@@ -736,12 +761,14 @@ func TestTimespanSplitByIncrementStart(t *testing.T) {
 		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
 		CallDuration: 60 * time.Second,
 		RateInterval: &RateInterval{
-			RoundingMethod:   utils.ROUNDING_MIDDLE,
-			RoundingDecimals: 2,
-			Rates: RateGroups{
-				&Rate{
-					Value:         2.0,
-					RateIncrement: 10 * time.Second,
+			Rating: &RIRate{
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&Rate{
+						Value:         2.0,
+						RateIncrement: 10 * time.Second,
+					},
 				},
 			},
 		},
@@ -768,12 +795,14 @@ func TestTimespanSplitByIncrementEnd(t *testing.T) {
 		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
 		CallDuration: 60 * time.Second,
 		RateInterval: &RateInterval{
-			RoundingMethod:   utils.ROUNDING_MIDDLE,
-			RoundingDecimals: 2,
-			Rates: RateGroups{
-				&Rate{
-					Value:         2.0,
-					RateIncrement: 10 * time.Second,
+			Rating: &RIRate{
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&Rate{
+						Value:         2.0,
+						RateIncrement: 10 * time.Second,
+					},
 				},
 			},
 		},
@@ -800,12 +829,14 @@ func TestTimespanSplitByDuration(t *testing.T) {
 		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
 		CallDuration: 60 * time.Second,
 		RateInterval: &RateInterval{
-			RoundingMethod:   utils.ROUNDING_MIDDLE,
-			RoundingDecimals: 2,
-			Rates: RateGroups{
-				&Rate{
-					Value:         2.0,
-					RateIncrement: 10 * time.Second,
+			Rating: &RIRate{
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+				Rates: RateGroups{
+					&Rate{
+						Value:         2.0,
+						RateIncrement: 10 * time.Second,
+					},
 				},
 			},
 		},

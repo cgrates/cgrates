@@ -143,22 +143,24 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	}
 	Logger.Debug(fmt.Sprintf("TS: %+v", ts))
 	// split by GroupStart
-	i.Rates.Sort()
-	for _, rate := range i.Rates {
-		Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
-		if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
-			Logger.Debug(fmt.Sprintf("Splitting"))
-			ts.SetRateInterval(i)
-			splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
-			//log.Print("SPLIT: ", splitTime)
-			nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
-			ts.TimeEnd = splitTime
-			nts.SetRateInterval(i)
-			nts.CallDuration = ts.CallDuration
-			ts.SetNewCallDuration(nts)
-			Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
-			//log.Printf("Group splitting: %+v %+v", ts, nts)
-			return
+	if i.Rating != nil {
+		i.Rating.Rates.Sort()
+		for _, rate := range i.Rating.Rates {
+			Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
+			if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
+				Logger.Debug(fmt.Sprintf("Splitting"))
+				ts.SetRateInterval(i)
+				splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
+				//log.Print("SPLIT: ", splitTime)
+				nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
+				ts.TimeEnd = splitTime
+				nts.SetRateInterval(i)
+				nts.CallDuration = ts.CallDuration
+				ts.SetNewCallDuration(nts)
+				Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
+				//log.Printf("Group splitting: %+v %+v", ts, nts)
+				return
+			}
 		}
 	}
 	//log.Printf("*************TS: %+v", ts)

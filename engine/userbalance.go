@@ -213,12 +213,14 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						}
 						newTs.RoundToDuration(time.Minute)
 						newTs.RateInterval = &RateInterval{
-							Rates: RateGroups{
-								&Rate{
-									GroupIntervalStart: 0,
-									Value:              0,
-									RateIncrement:      time.Minute,
-									RateUnit:           time.Minute,
+							Rating: &RIRate{
+								Rates: RateGroups{
+									&Rate{
+										GroupIntervalStart: 0,
+										Value:              0,
+										RateIncrement:      time.Minute,
+										RateUnit:           time.Minute,
+									},
 								},
 							},
 						}
