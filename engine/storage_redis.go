@@ -19,13 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	//"bytes"
-	"code.google.com/p/snappy-go/snappy"
-	//"compress/gzip"
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
-	//"io"
+	"io"
 	"menteslibres.net/gosexy/redis"
 	"strconv"
 	"strings"
@@ -84,35 +83,26 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	var values string
 	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
 		rp = new(RatingPlan)
-		/*	b := bytes.NewBufferString(values)
-			var out bytes.Buffer
-			r, err := gzip.NewReader(b)
-			if err != nil {
-				return nil, err
-			}
-			io.Copy(&out, r)
-			r.Close()*/
-		dst, err := snappy.Decode([]byte{}, []byte(values))
+		b := bytes.NewBufferString(values)
+		var out bytes.Buffer
+		r, err := gzip.NewReader(b)
 		if err != nil {
 			return nil, err
 		}
-		err = rs.ms.Unmarshal(dst, rp)
+		io.Copy(&out, r)
+		r.Close()
+		err = rs.ms.Unmarshal(out.Bytes(), rp)
 	}
 	return
 }
 
 func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := rs.ms.Marshal(rp)
-	/*var b bytes.Buffer
+	var b bytes.Buffer
 	w := gzip.NewWriter(&b)
 	w.Write(result)
-	w.Close()*/
-	dst := make([]byte, snappy.MaxEncodedLen(len(result)))
-	dst, err = snappy.Encode(dst, result)
-	if err != nil {
-		return err
-	}
-	_, err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, dst)
+	w.Close()
+	_, err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
