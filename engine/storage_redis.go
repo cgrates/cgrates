@@ -20,11 +20,11 @@ package engine
 
 import (
 	"bytes"
-	"compress/gzip"
+	"compress/zlib"
 	"fmt"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
-	"io"
+	"io/ioutil"
 	"menteslibres.net/gosexy/redis"
 	"strconv"
 	"strings"
@@ -84,14 +84,16 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
 		rp = new(RatingPlan)
 		b := bytes.NewBufferString(values)
-		var out bytes.Buffer
-		r, err := gzip.NewReader(b)
+		r, err := zlib.NewReader(b)
 		if err != nil {
 			return nil, err
 		}
-		io.Copy(&out, r)
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
 		r.Close()
-		err = rs.ms.Unmarshal(out.Bytes(), rp)
+		err = rs.ms.Unmarshal(out, rp)
 	}
 	return
 }
@@ -99,7 +101,7 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := rs.ms.Marshal(rp)
 	var b bytes.Buffer
-	w := gzip.NewWriter(&b)
+	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
 	_, err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, b.Bytes())
