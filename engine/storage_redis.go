@@ -19,10 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	//"bytes"
 	"code.google.com/p/snappy-go/snappy"
+	//"compress/gzip"
 	"fmt"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
+	//"io"
 	"menteslibres.net/gosexy/redis"
 	"strconv"
 	"strings"
@@ -81,6 +84,14 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	var values string
 	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
 		rp = new(RatingPlan)
+		/*	b := bytes.NewBufferString(values)
+			var out bytes.Buffer
+			r, err := gzip.NewReader(b)
+			if err != nil {
+				return nil, err
+			}
+			io.Copy(&out, r)
+			r.Close()*/
 		dst, err := snappy.Decode([]byte{}, []byte(values))
 		if err != nil {
 			return nil, err
@@ -92,6 +103,10 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 
 func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := rs.ms.Marshal(rp)
+	/*var b bytes.Buffer
+	w := gzip.NewWriter(&b)
+	w.Write(result)
+	w.Close()*/
 	dst := make([]byte, snappy.MaxEncodedLen(len(result)))
 	dst, err = snappy.Encode(dst, result)
 	if err != nil {

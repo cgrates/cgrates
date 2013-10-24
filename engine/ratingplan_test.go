@@ -202,7 +202,7 @@ func TestApAddRateIntervalGroups(t *testing.T) {
 
 /**************************** Benchmarks *************************************/
 
-func BenchmarkRatingPlanStoreRestoreJson(b *testing.B) {
+func BenchmarkRatingPlanMarshalJson(b *testing.B) {
 	b.StopTimer()
 	i := &RateInterval{
 		Timing: &RITiming{
@@ -222,7 +222,7 @@ func BenchmarkRatingPlanStoreRestoreJson(b *testing.B) {
 	}
 }
 
-func BenchmarkRatingPlanStoreRestore(b *testing.B) {
+func BenchmarkRatingPlanMarshal(b *testing.B) {
 	b.StopTimer()
 	i := &RateInterval{
 		Timing: &RITiming{Months: []time.Month{time.February},
@@ -238,5 +238,21 @@ func BenchmarkRatingPlanStoreRestore(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		result, _ := marsh.Marshal(ap)
 		marsh.Unmarshal(result, ap1)
+	}
+}
+
+func BenchmarkRatingPlanRestore(b *testing.B) {
+	i := &RateInterval{
+		Timing: &RITiming{Months: []time.Month{time.February},
+			MonthDays: []int{1},
+			WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
+			StartTime: "14:30:00",
+			EndTime:   "15:00:00"}}
+	rp := &RatingPlan{Id: "test"}
+	rp.AddRateInterval("NAT", i)
+	storageGetter.SetRatingPlan(rp)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		storageGetter.GetRatingPlan(rp.Id)
 	}
 }

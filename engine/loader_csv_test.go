@@ -549,7 +549,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan.Ratings["e06c337f"].Rates[0])
+		t.Errorf("Error loading destination rate timing: %+v", rplan)
 	}
 }
 
