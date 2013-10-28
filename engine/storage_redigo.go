@@ -19,10 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"compress/zlib"
 	"fmt"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/garyburd/redigo/redis"
+	"io/ioutil"
 	"time"
 )
 
@@ -59,11 +63,49 @@ func (rs *RedigoStorage) Flush() (err error) {
 	return
 }
 
+func (rs *RedigoStorage) PreCache() error {
+	reply, err := redis.Values(rs.db.Do("keys", DESTINATION_PREFIX+"*"))
+	if err != nil {
+		return err
+	}
+	var keys []string
+	for _, x := range reply {
+		if v, ok := x.([]byte); ok {
+			keys = append(keys, string(v))
+		}
+	}
+	for _, key := range keys {
+		if _, err = rs.GetDestination(key); err != nil {
+			return err
+		}
+	}
+	reply, err = redis.Values(rs.db.Do("keys", RATING_PLAN_PREFIX+"*"))
+	if err != nil {
+		return err
+	}
+	keys = make([]string, len(reply))
+	for _, x := range reply {
+		if v, ok := x.([]byte); ok {
+			keys = append(keys, string(v))
+		}
+	}
+	for _, key := range keys {
+		if _, err = rs.GetRatingPlan(key); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (rs *RedigoStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*RatingPlan), nil
+	}
 	var values []byte
 	if values, err = redis.Bytes(rs.db.Do("get", RATING_PLAN_PREFIX+key)); err == nil {
 		rp = new(RatingPlan)
 		err = rs.ms.Unmarshal(values, rp)
+		cache2go.Cache(key, rp)
 	}
 	return
 }
@@ -82,14 +124,28 @@ func (rs *RedigoStorage) GetRatingProfile(key string) (rp *RatingProfile, err er
 	var values []byte
 	if values, err = redis.Bytes(rs.db.Do("get", RATING_PROFILE_PREFIX+key)); err == nil {
 		rp = new(RatingProfile)
-		err = rs.ms.Unmarshal(values, rp)
+		b := bytes.NewBuffer(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return nil, err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		r.Close()
+		err = rs.ms.Unmarshal(out, rp)
 	}
 	return
 }
 
 func (rs *RedigoStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := rs.ms.Marshal(rp)
-	_, err = rs.db.Do("set", RATING_PROFILE_PREFIX+rp.Id, result)
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	w.Write(result)
+	w.Close()
+	_, err = rs.db.Do("set", RATING_PROFILE_PREFIX+rp.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
@@ -98,9 +154,13 @@ func (rs *RedigoStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 }
 
 func (rs *RedigoStorage) GetDestination(key string) (dest *Destination, err error) {
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*Destination), nil
+	}
 	var values []string
 	if values, err = redis.Strings(rs.db.Do("smembers", DESTINATION_PREFIX+key)); len(values) > 0 && err == nil {
 		dest = &Destination{Id: key, Prefixes: values}
+		cache2go.Cache(key, dest)
 	}
 	return
 }

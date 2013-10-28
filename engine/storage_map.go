@@ -33,7 +33,7 @@ type MapStorage struct {
 	ms   Marshaler
 }
 
-func NewMapStorage() (Storage, error) {
+func NewMapStorage() (DataStorage, error) {
 	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler()}, nil
 }
 
@@ -41,6 +41,22 @@ func (ms *MapStorage) Close() {}
 
 func (ms *MapStorage) Flush() error {
 	ms.dict = make(map[string][]byte)
+	return nil
+}
+
+func (ms *MapStorage) PreCache() error {
+	for k, _ := range ms.dict {
+		if strings.HasPrefix(k, DESTINATION_PREFIX) {
+			if _, err := ms.GetDestination(k[len(DESTINATION_PREFIX):]); err != nil {
+				return err
+			}
+		}
+		if strings.HasPrefix(k, RATING_PLAN_PREFIX) {
+			if _, err := ms.GetRatingPlan(k[len(RATING_PLAN_PREFIX):]); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
@@ -119,162 +135,6 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	response := 0
 	go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	return
-}
-
-func (ms *MapStorage) GetTPIds() ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPTiming(tpid string, tm *Timing) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPTiming(tpid, tmId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPTiming(tpid, tmId string) (*Timing, error) {
-	return nil, nil
-}
-
-func (ms *MapStorage) GetTPTimingIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPDestination(tpid string, dest *Destination) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
-	return nil, nil
-}
-
-func (ms *MapStorage) GetTPDestinationIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPRates(tpid string, rts map[string][]*Rate) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
-	return nil, nil
-}
-
-func (ms *MapStorage) GetTPRateIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPDestinationRates(tpid string, drs map[string][]*DestinationRate) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPDestinationRate(tpid, drId string) (*utils.TPDestinationRate, error) {
-	return nil, nil
-}
-
-func (ms *MapStorage) GetTPDestinationRateIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPDestRateTiming(tpid, drtId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPDestRateTimings(tpid string, drts map[string][]*DestinationRateTiming) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPDestRateTiming(tpid, drtId string) (*utils.TPDestRateTiming, error) {
-	return nil, nil
-}
-
-func (ms *MapStorage) GetTPDestRateTimingIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPRatingProfile(tpid, rpId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPRatingProfiles(tpid string, rps map[string][]*RatingProfile) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingProfile, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfileIds) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPActions(tpid, aId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPActions(tpid string, acts map[string][]*Action) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPActions(tpid, aId string) (*utils.TPActions, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPActionIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPActionTimings(tpid string, ats map[string][]*ActionTiming) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPActionTimings(tpid, atId string) (map[string][]*utils.TPActionTimingsRow, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPActionTriggers(tpid, atId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPActionTriggers(tpid string, ats map[string][]*ActionTrigger) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) ExistsTPAccountActions(tpid, aaId string) (bool, error) {
-	return false, errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) SetTPAccountActions(tpid string, aa map[string]*AccountAction) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
@@ -386,49 +246,4 @@ func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Action
 func (ms *MapStorage) LogError(uuid, source, errstr string) (err error) {
 	ms.dict[LOG_ERR+source+"_"+uuid] = []byte(errstr)
 	return nil
-}
-
-func (ms *MapStorage) SetCdr(utils.CDR) error {
-	return nil
-}
-
-func (ms *MapStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost, extraInfo string) error {
-	return errors.New(utils.ERR_NOT_IMPLEMENTED)
-}
-
-func (ms *MapStorage) GetAllRatedCdr() ([]utils.CDR, error) {
-	return nil, nil
-}
-
-func (ms *MapStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
-	return nil, nil
-}
-
-func (ms *MapStorage) GetTpRates(tpid, tag string) (map[string]*Rate, error) {
-	return nil, nil
-}
-func (ms *MapStorage) GetTpDestinationRates(tpid, tag string) (map[string][]*DestinationRate, error) {
-	return nil, nil
-}
-func (ms *MapStorage) GetTpTimings(tpid, tag string) (map[string]*Timing, error) {
-	return nil, nil
-}
-func (ms *MapStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*DestinationRateTiming, error) {
-	return nil, nil
-}
-
-func (ms *MapStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
-	return nil, nil
-}
-func (ms *MapStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
-	return nil, nil
-}
-func (ms *MapStorage) GetTpActionTimings(tpid, tag string) (map[string][]*ActionTiming, error) {
-	return nil, nil
-}
-func (ms *MapStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
-	return nil, nil
-}
-func (ms *MapStorage) GetTpAccountActions(tpid, tag string) (map[string]*AccountAction, error) {
-	return nil, nil
 }

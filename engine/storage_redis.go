@@ -38,7 +38,7 @@ type RedisStorage struct {
 	ms   Marshaler
 }
 
-func NewRedisStorage(address string, db int, pass, mrshlerStr string) (Storage, error) {
+func NewRedisStorage(address string, db int, pass, mrshlerStr string) (DataStorage, error) {
 	addrSplit := strings.Split(address, ":")
 	host := addrSplit[0]
 	port := 6379
@@ -78,6 +78,28 @@ func (rs *RedisStorage) Close() {
 func (rs *RedisStorage) Flush() (err error) {
 	_, err = rs.db.FlushDB()
 	return
+}
+
+func (rs *RedisStorage) PreCache() error {
+	if keys, err := rs.db.Keys(DESTINATION_PREFIX + "*"); err == nil {
+		for _, key := range keys {
+			if _, err = rs.GetDestination(key); err != nil {
+				return err
+			}
+		}
+	} else {
+		return err
+	}
+	if keys, err := rs.db.Keys(RATING_PLAN_PREFIX + "*"); err == nil {
+		for _, key := range keys {
+			if _, err = rs.GetRatingPlan(key); err != nil {
+				return err
+			}
+		}
+	} else {
+		return err
+	}
+	return nil
 }
 
 func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {

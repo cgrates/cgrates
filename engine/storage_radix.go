@@ -19,10 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"compress/zlib"
 	"fmt"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/fzzy/radix/redis"
+	"io/ioutil"
 	"time"
 )
 
@@ -59,10 +63,46 @@ func (rs *RadixStorage) Flush() (err error) {
 	return r.Err
 }
 
+func (rs *RadixStorage) PreCache() error {
+	if keys, err := rs.db.Cmd("keys", DESTINATION_PREFIX+"*").List(); err == nil {
+		for _, key := range keys {
+			if _, err = rs.GetDestination(key); err != nil {
+				return err
+			}
+		}
+	} else {
+		return err
+	}
+	if keys, err := rs.db.Cmd("keys", RATING_PLAN_PREFIX+"*").List(); err == nil {
+		for _, key := range keys {
+			if _, err = rs.GetRatingPlan(key); err != nil {
+				return err
+			}
+		}
+	} else {
+		return err
+	}
+	return nil
+}
+
 func (rs *RadixStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*RatingPlan), nil
+	}
 	if values, err := rs.db.Cmd("get", RATING_PLAN_PREFIX+key).Bytes(); err == nil {
 		rp = new(RatingPlan)
-		err = rs.ms.Unmarshal(values, rp)
+		b := bytes.NewBuffer(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return nil, err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		r.Close()
+		err = rs.ms.Unmarshal(out, rp)
+		cache2go.Cache(key, rp)
 	} else {
 		return nil, err
 	}
@@ -71,7 +111,11 @@ func (rs *RadixStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 
 func (rs *RadixStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := rs.ms.Marshal(rp)
-	if r := rs.db.Cmd("set", RATING_PLAN_PREFIX+rp.Id, string(result)); r.Err != nil {
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	w.Write(result)
+	w.Close()
+	if r := rs.db.Cmd("set", RATING_PLAN_PREFIX+rp.Id, b.String()); r.Err != nil {
 		return r.Err
 	}
 	if err == nil && historyScribe != nil {
@@ -104,9 +148,13 @@ func (rs *RadixStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 }
 
 func (rs *RadixStorage) GetDestination(key string) (dest *Destination, err error) {
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*Destination), nil
+	}
 	var values []string
 	if values, err = rs.db.Cmd("smembers", DESTINATION_PREFIX+key).List(); len(values) > 0 && err == nil {
 		dest = &Destination{Id: key, Prefixes: values}
+		cache2go.Cache(key, dest)
 	}
 	return
 }

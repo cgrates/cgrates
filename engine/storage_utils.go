@@ -41,6 +41,7 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 		db = d.(DataStorage)
+		db.PreCache()
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass)
 		db = d.(DataStorage)
