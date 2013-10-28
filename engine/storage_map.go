@@ -105,7 +105,7 @@ func (ms *MapStorage) DestinationContainsPrefix(key string, prefix string) (prec
 		return 0, err
 	} else {
 		for _, p := range utils.SplitPrefixInterface(prefix) {
-			if precision, ok := d.containsPrefix(p.(string)); ok {
+			if precision := d.containsPrefix(p.(string)); precision > 0 {
 				return precision, nil
 			}
 		}

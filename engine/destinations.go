@@ -30,14 +30,13 @@ type Destination struct {
 	Prefixes []string
 }
 
-func (d *Destination) containsPrefix(prefix string) (precision int, ok bool) {
+func (d *Destination) containsPrefix(prefix string) (precision int) {
 	if d == nil {
 		return
 	}
 	for _, p := range d.Prefixes {
 		if strings.Index(prefix, p) == 0 && len(p) > precision {
 			precision = len(p)
-			ok = true
 		}
 	}
 	return

@@ -65,6 +65,7 @@ type RatingInfo struct {
 	RateIntervals  RateIntervalList
 }
 
+// TODO: what happens if there is no match for part of the call
 func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (foundPrefixes []string, ris []*RatingInfo, err error) {
 	rp.RatingPlanActivations.Sort()
 	for _, rpa := range rp.RatingPlanActivations {
@@ -77,11 +78,13 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (foundPrefi
 			bestPrecision := 0
 			var rps RateIntervalList
 			for dId, _ := range rpl.DestinationRates {
-				precision, err := storageGetter.DestinationContainsPrefix(dId, cd.Destination)
+				//precision, err := storageGetter.DestinationContainsPrefix(dId, cd.Destination)
+				d, err := storageGetter.GetDestination(dId)
 				if err != nil {
 					Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 					continue
 				}
+				precision := d.containsPrefix(cd.Destination)
 				if precision > bestPrecision {
 					bestPrecision = precision
 					rps = rpl.RateIntervalList(dId)
