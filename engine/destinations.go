@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/cache2go"
 	"strings"
 )
 
@@ -29,20 +28,6 @@ Structure that gathers multiple destination prefixes under a common id.
 type Destination struct {
 	Id       string
 	Prefixes []string
-}
-
-// Gets the specified destination from the storage and caches it.
-func GetDestination(dId string) (d *Destination, err error) {
-	x, err := cache2go.GetCached(dId)
-	if err != nil {
-		d, err = storageGetter.GetDestination(dId)
-		if err == nil && d != nil {
-			cache2go.Cache(dId, d)
-		}
-	} else {
-		d = x.(*Destination)
-	}
-	return
 }
 
 func (d *Destination) containsPrefix(prefix string) (precision int, ok bool) {

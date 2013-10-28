@@ -20,13 +20,19 @@ type XEntry struct {
 	key            string
 	keepAlive      bool
 	expireDuration time.Duration
+	timestamp      time.Time
 	t              *time.Timer
+}
+
+type timestampedValue struct {
+	timestamp time.Time
+	value     interface{}
 }
 
 var (
 	xcache = make(map[string]expiringCacheEntry)
 	xMux   sync.RWMutex
-	cache  = make(map[string]interface{})
+	cache  = make(map[string]timestampedValue)
 	mux    sync.RWMutex
 )
 
@@ -35,6 +41,7 @@ func (xe *XEntry) XCache(key string, expire time.Duration, value expiringCacheEn
 	xe.keepAlive = true
 	xe.key = key
 	xe.expireDuration = expire
+	xe.timestamp = time.Now()
 	xMux.Lock()
 	xcache[key] = value
 	xMux.Unlock()
@@ -84,7 +91,7 @@ func GetXCached(key string) (ece expiringCacheEntry, err error) {
 func Cache(key string, value interface{}) {
 	mux.Lock()
 	defer mux.Unlock()
-	cache[key] = value
+	cache[key] = timestampedValue{time.Now(), value}
 }
 
 // The function to extract a value for a key that never expire
@@ -92,7 +99,7 @@ func GetCached(key string) (v interface{}, err error) {
 	mux.RLock()
 	defer mux.RUnlock()
 	if r, ok := cache[key]; ok {
-		return r, nil
+		return r.value, nil
 	}
 	return nil, errors.New("not found")
 }
@@ -113,5 +120,5 @@ func XFlush() {
 func Flush() {
 	mux.Lock()
 	defer mux.Unlock()
-	cache = make(map[string]interface{})
+	cache = make(map[string]timestampedValue)
 }

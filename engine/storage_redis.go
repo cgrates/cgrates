@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"io/ioutil"
@@ -81,6 +82,9 @@ func (rs *RedisStorage) Flush() (err error) {
 
 func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	var values string
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*RatingPlan), nil
+	}
 	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
 		rp = new(RatingPlan)
 		b := bytes.NewBufferString(values)
@@ -94,6 +98,7 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 		}
 		r.Close()
 		err = rs.ms.Unmarshal(out, rp)
+		cache2go.Cache(key, rp)
 	}
 	return
 }
@@ -132,9 +137,13 @@ func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*Destination), nil
+	}
 	var values []string
 	if values, err = rs.db.SMembers(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
 		dest = &Destination{Id: key, Prefixes: values}
+		cache2go.Cache(key, dest)
 	}
 	return
 }

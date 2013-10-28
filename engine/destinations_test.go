@@ -74,28 +74,28 @@ func TestDestinationContainsPrefixWrong(t *testing.T) {
 }
 
 func TestDestinationGetExists(t *testing.T) {
-	d, err := GetDestination("NAT")
+	d, err := storageGetter.GetDestination("NAT")
 	if err != nil || d == nil {
 		t.Error("Could not get destination: ", d)
 	}
 }
 
 func TestDestinationGetExistsCache(t *testing.T) {
-	GetDestination("NAT")
+	storageGetter.GetDestination("NAT")
 	if _, err := cache2go.GetCached("NAT"); err != nil {
-		t.Error("Destination not cached!")
+		t.Error("Destination not cached:", err)
 	}
 }
 
 func TestDestinationGetNotExists(t *testing.T) {
-	d, err := GetDestination("not existing")
+	d, err := storageGetter.GetDestination("not existing")
 	if d != nil {
 		t.Error("Got false destination: ", d, err)
 	}
 }
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
-	GetDestination("not existing")
+	storageGetter.GetDestination("not existing")
 	if d, err := cache2go.GetCached("not existing"); err == nil {
 		t.Error("Bad destination cached: ", d)
 	}

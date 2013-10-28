@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"strings"
@@ -44,10 +45,14 @@ func (ms *MapStorage) Flush() error {
 }
 
 func (ms *MapStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*RatingPlan), nil
+	}
 	if values, ok := ms.dict[RATING_PLAN_PREFIX+key]; ok {
 		rp = new(RatingPlan)
 
 		err = ms.ms.Unmarshal(values, rp)
+		cache2go.Cache(key, rp)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -82,9 +87,13 @@ func (ms *MapStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 }
 
 func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*Destination), nil
+	}
 	if values, ok := ms.dict[DESTINATION_PREFIX+key]; ok {
 		dest = &Destination{Id: key}
 		err = ms.ms.Unmarshal(values, dest)
+		cache2go.Cache(key, dest)
 	} else {
 		return nil, errors.New("not found")
 	}

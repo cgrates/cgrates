@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/cache2go"
 	"sort"
 	"time"
 )
@@ -37,18 +36,6 @@ type RatingProfile struct {
 type RatingPlanActivation struct {
 	ActivationTime time.Time
 	RatingPlanId   string
-}
-
-func (rpa *RatingPlanActivation) GetRatingPlan() (rp *RatingPlan, err error) {
-	if x, err := cache2go.GetCached(rpa.RatingPlanId); err != nil {
-		rp, err = storageGetter.GetRatingPlan(rpa.RatingPlanId)
-		if err == nil && rp != nil {
-			cache2go.Cache(rpa.RatingPlanId, rp)
-		}
-	} else {
-		rp = x.(*RatingPlan)
-	}
-	return
 }
 
 func (rpa *RatingPlanActivation) Equal(orpa *RatingPlanActivation) bool {
@@ -82,7 +69,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (foundPrefi
 	rp.RatingPlanActivations.Sort()
 	for _, rpa := range rp.RatingPlanActivations {
 		if rpa.ActivationTime.Before(cd.TimeEnd) {
-			rpl, err := rpa.GetRatingPlan()
+			rpl, err := storageGetter.GetRatingPlan(rpa.RatingPlanId)
 			if err != nil || rpl == nil {
 				Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 				continue
