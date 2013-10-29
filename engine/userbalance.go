@@ -131,10 +131,11 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 			continue
 		}
 		if b.DestinationId != "" {
-			precision, err := storageGetter.DestinationContainsPrefix(b.DestinationId, prefix)
+			dest, err := storageGetter.GetDestination(b.DestinationId)
 			if err != nil {
 				continue
 			}
+			precision := dest.containsPrefix(prefix)
 			if precision > 0 {
 				b.precision = precision
 				usefulBalances = append(usefulBalances, b)

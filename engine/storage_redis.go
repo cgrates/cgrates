@@ -103,12 +103,11 @@ func (rs *RedisStorage) PreCache() error {
 }
 
 func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
-	var values string
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*RatingPlan), nil
 	}
+	var values string
 	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
-		rp = new(RatingPlan)
 		b := bytes.NewBufferString(values)
 		r, err := zlib.NewReader(b)
 		if err != nil {
@@ -119,6 +118,7 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 			return nil, err
 		}
 		r.Close()
+		rp = new(RatingPlan)
 		err = rs.ms.Unmarshal(out, rp)
 		cache2go.Cache(key, rp)
 	}
@@ -162,15 +162,26 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*Destination), nil
 	}
-	var values []string
-	if values, err = rs.db.SMembers(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
-		dest = &Destination{Id: key, Prefixes: values}
+	var values string
+	if values, err = rs.db.Get(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
+		b := bytes.NewBufferString(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return nil, err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		r.Close()
+		dest = new(Destination)
+		err = rs.ms.Unmarshal(out, dest)
 		cache2go.Cache(key, dest)
 	}
 	return
 }
 
-func (rs *RedisStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
+/*func (rs *RedisStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
 	if _, err := rs.db.SAdd(TEMP_DESTINATION_PREFIX+prefix, utils.SplitPrefixInterface(prefix)...); err != nil {
 		return 0, err
 	}
@@ -186,14 +197,15 @@ func (rs *RedisStorage) DestinationContainsPrefix(key string, prefix string) (pr
 		Logger.Err("Error removing temp ")
 	}
 	return
-}
+}*/
 
 func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
-	var prefixes []interface{}
-	for _, p := range dest.Prefixes {
-		prefixes = append(prefixes, p)
-	}
-	_, err = rs.db.SAdd(DESTINATION_PREFIX+dest.Id, prefixes...)
+	result, err := rs.ms.Marshal(dest)
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	w.Write(result)
+	w.Close()
+	_, err = rs.db.Set(DESTINATION_PREFIX+dest.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)

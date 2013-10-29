@@ -52,11 +52,12 @@ func (uc *UnitsCounter) initMinuteBalances(ats []*ActionTrigger) {
 // is the same or ads the minute balance to the list if none matches.
 func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
 	for _, mb := range uc.MinuteBalances {
-		precision, err := storageGetter.DestinationContainsPrefix(mb.DestinationId, prefix)
+		dest, err := storageGetter.GetDestination(mb.DestinationId)
 		if err != nil {
 			Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: %v", mb.DestinationId))
 			continue
 		}
+		precision := dest.containsPrefix(prefix)
 		if precision > 0 {
 			mb.Value += amount
 			break
