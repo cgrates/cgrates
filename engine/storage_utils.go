@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
 )
@@ -42,7 +43,9 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 		db = d.(DataStorage)
 		Logger.Info("Started redis pre-caching...")
-		db.PreCache()
+		if err := db.PreCache(); err != nil {
+			Logger.Err(fmt.Sprintf("Pre-caching error: %v", err))
+		}
 		Logger.Info("Pre-caching done!")
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass)
