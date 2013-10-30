@@ -83,7 +83,7 @@ func (rs *RedisStorage) Flush() (err error) {
 func (rs *RedisStorage) PreCache() error {
 	if keys, err := rs.db.Keys(DESTINATION_PREFIX + "*"); err == nil {
 		for _, key := range keys {
-			if _, err = rs.GetDestination(key); err != nil {
+			if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):]); err != nil {
 				return err
 			}
 		}
@@ -92,7 +92,7 @@ func (rs *RedisStorage) PreCache() error {
 	}
 	if keys, err := rs.db.Keys(RATING_PLAN_PREFIX + "*"); err == nil {
 		for _, key := range keys {
-			if _, err = rs.GetRatingPlan(key); err != nil {
+			if _, err = rs.GetRatingPlan(key[len(RATING_PLAN_PREFIX):]); err != nil {
 				return err
 			}
 		}
