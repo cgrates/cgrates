@@ -434,7 +434,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string][]*Ratin
 	if len(rps) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject) VALUES ",
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subject) VALUES ",
 		utils.TBL_TP_RATE_PROFILES)
 	i := 0
 	for rpId, rp := range rps {
@@ -455,7 +455,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string][]*Ratin
 }
 
 func (self *SQLStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingProfile, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATE_PROFILES, tpid, rpId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subject FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATE_PROFILES, tpid, rpId))
 	if err != nil {
 		return nil, err
 	}
@@ -1043,7 +1043,7 @@ func (self *SQLStorage) GetTpDestinationRateTimings(tpid, tag string) ([]*Destin
 
 func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*RatingProfile, error) {
 	rpfs := make(map[string]*RatingProfile)
-	q := fmt.Sprintf("SELECT tag,tenant,tor,direction,subject,activation_time,destrates_timing_tag,rates_fallback_subject FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT tag,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subject FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_RATE_PROFILES, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
@@ -1054,8 +1054,8 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var tag, tenant, tor, direction, subject, fallback_subject, destrates_timing_tag, activation_time string
-		if err := rows.Scan(&tag, &tenant, &tor, &direction, &subject, &activation_time, &destrates_timing_tag, &fallback_subject); err != nil {
+		var tag, tenant, tor, direction, subject, fallback_subject, rating_plan_tag, activation_time string
+		if err := rows.Scan(&tag, &tenant, &tor, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subject); err != nil {
 			return nil, err
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
@@ -1064,7 +1064,7 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 			rp = &RatingProfile{Id: key, Tag: tag}
 			rpfs[key] = rp
 		}
-		rp.DestRatesTimingTag = destrates_timing_tag
+		rp.DestRatesTimingTag = rating_plan_tag
 		rp.ActivationTime = activation_time
 		if fallback_subject != "" {
 			for _, fbs := range strings.Split(fallback_subject, ";") {

@@ -43,8 +43,8 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.DESTINATIONS_CSV:      (*TPCSVImporter).importDestinations,
 	utils.RATES_CSV:             (*TPCSVImporter).importRates,
 	utils.DESTINATION_RATES_CSV: (*TPCSVImporter).importDestinationRates,
-	utils.DESTRATE_TIMINGS_CSV:  (*TPCSVImporter).importDestRateTimings,
-	utils.RATE_PROFILES_CSV:     (*TPCSVImporter).importRatingProfiles,
+	utils.RATING_PLANS_CSV:  (*TPCSVImporter).importRatingPlans,
+	utils.RATING_PROFILES_CSV:     (*TPCSVImporter).importRatingProfiles,
 	utils.ACTIONS_CSV:           (*TPCSVImporter).importActions,
 	utils.ACTION_TIMINGS_CSV:    (*TPCSVImporter).importActionTimings,
 	utils.ACTION_TRIGGERS_CSV:   (*TPCSVImporter).importActionTriggers,
@@ -180,7 +180,7 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 	return nil
 }
 
-func (self *TPCSVImporter) importDestRateTimings(fn string) error {
+func (self *TPCSVImporter) importRatingPlans(fn string) error {
 	log.Printf("Processing file: <%s> ", fn)
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
