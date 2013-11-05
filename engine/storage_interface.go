@@ -62,7 +62,7 @@ Interface for storage providers.
 */
 type DataStorage interface {
 	Storage
-	PreCache() error
+	PreCache([]string, []string) error
 	GetRatingPlan(string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string) (*RatingProfile, error)

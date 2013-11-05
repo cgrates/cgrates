@@ -27,7 +27,7 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string) (db DataStorage, err error) {
+func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string, precache bool) (db DataStorage, err error) {
 	var d Storage
 	switch db_type {
 	case utils.REDIS:
@@ -42,11 +42,13 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 		db = d.(DataStorage)
-		Logger.Info("Started redis pre-caching...")
-		if err := db.PreCache(); err != nil {
-			Logger.Err(fmt.Sprintf("Pre-caching error: %v", err))
+		if precache {
+			Logger.Info("Started redis pre-caching...")
+			if err := db.PreCache(nil, nil); err != nil {
+				Logger.Err(fmt.Sprintf("Pre-caching error: %v", err))
+			}
+			Logger.Info("Pre-caching done!")
 		}
-		Logger.Info("Pre-caching done!")
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass)
 		db = d.(DataStorage)

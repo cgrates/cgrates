@@ -80,26 +80,28 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
-func (rs *RedisStorage) PreCache() error {
-	if keys, err := rs.db.Keys(DESTINATION_PREFIX + "*"); err == nil {
-		for _, key := range keys {
-			if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):]); err != nil {
-				return err
-			}
+func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
+	if dKeys == nil {
+		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
+			return
 		}
-	} else {
-		return err
 	}
-	if keys, err := rs.db.Keys(RATING_PLAN_PREFIX + "*"); err == nil {
-		for _, key := range keys {
-			if _, err = rs.GetRatingPlan(key[len(RATING_PLAN_PREFIX):]); err != nil {
-				return err
-			}
+	for _, key := range dKeys {
+		if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):]); err != nil {
+			return err
 		}
-	} else {
-		return err
 	}
-	return nil
+	if rpKeys == nil {
+		if rpKeys, err = rs.db.Keys(RATING_PLAN_PREFIX + "*"); err != nil {
+			return
+		}
+	}
+	for _, key := range rpKeys {
+		if _, err = rs.GetRatingPlan(key[len(RATING_PLAN_PREFIX):]); err != nil {
+			return err
+		}
+	}
+	return
 }
 
 func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {

@@ -312,7 +312,7 @@ func main() {
 	var logDb engine.LogStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
-	dataDb, err = engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding)
+	dataDb, err = engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding, true)
 	if err != nil { // Cannot configure getter database, show stopper
 		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return

@@ -44,7 +44,7 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
-func (ms *MapStorage) PreCache() error {
+func (ms *MapStorage) PreCache(dKeys, rppKeys []string) error {
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
 			if _, err := ms.GetDestination(k[len(DESTINATION_PREFIX):]); err != nil {
