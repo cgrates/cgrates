@@ -502,6 +502,7 @@ func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
+	storageGetter.PreCache(nil, nil)
 	return nil
 
 }
