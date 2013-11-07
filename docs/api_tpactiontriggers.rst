@@ -99,7 +99,7 @@ Creates a new ActionTriggers profile within a tariff plan.
 
 
 ApierV1.GetTPActionTriggers
-+++++++++++++++++++++++++
++++++++++++++++++++++++++++
 
 Queries specific ActionTriggers profile on tariff plan.
 
@@ -202,7 +202,7 @@ Queries specific ActionTriggers profile on tariff plan.
 
 
 ApierV1.GetTPActionTriggerIds
-+++++++++++++++++++++++++++
++++++++++++++++++++++++++++++
 
 Queries ActionTriggers identities on specific tariff plan.
 
