@@ -1,5 +1,5 @@
-6.2. Rating logic
-=================
+Rating logic
+============
 
 Let's start with the most important function: finding the cost of a certain call. 
 
@@ -91,8 +91,8 @@ At this point in rating process the engine will start splitting the call into va
 
 The result of this splitting will be a list of *TimeSpan* structures each having attached the MinuteInfo or the RateInterval that gave the price for it. The *CallDuration* attribute will select the right *Price* from the *RateInterval* *Prices* list. The final cost for the call will be the sum of the prices of these times spans plus the *ConnectionFee* from the first time span of the call.
 
-6.2.1 User balances
--------------------
+User balances
+-------------
 
 The user account contains a map of various balances like money, sms, internet traffic, internet time, etc. Each of these lists contains one or more Balance structure that have a wheight and a possible expiration date.  
 
