@@ -45,16 +45,15 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}()
 	} else {
-		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
+		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %s", err.Error()))
 	}
 }
 
 func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
-	if genCdr, err := new(GenCdr).New(body); err == nil {
-		storage.SetCdr(genCdr)
+	if cgrCdr, err := NewCgrCdrFromHttpReq(r); err == nil {
+		storage.SetCdr(cgrCdr)
 		if cfg.CDRSMediator == "internal" {
-			errMedi := medi.MediateDBCDR(genCdr, storage)
+			errMedi := medi.MediateDBCDR(cgrCdr, storage)
 			if errMedi != nil {
 				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
 			}
@@ -62,7 +61,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 			//TODO: use the connection to mediator
 		}
 	} else {
-		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %v", err))
+		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %s", err.Error()))
 	}
 }
 
@@ -76,7 +75,7 @@ func New(s engine.CdrStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
 }
 
 func (cdrs *CDRS) StartCapturingCDRs() {
-	http.HandleFunc("/cgr_json", cgrCdrHandler)       // Attach CGR CDR Handler
+	http.HandleFunc("/cgr", cgrCdrHandler)       // Attach CGR CDR Handler
 	http.HandleFunc("/freeswitch_json", fsCdrHandler) // Attach FreeSWITCH JSON CDR Handler
 	http.ListenAndServe(cfg.CDRSListen, nil)
 }
