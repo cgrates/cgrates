@@ -32,6 +32,11 @@ Primary fields: the fields which CGRateS needs for it's own operations and are s
 
 Extra fields: any field coming in via the http request and not a member of primary fields list. These fields are stored as json encoded into *cdrs_extra* table of storDb.
 
+Example of sample CDR generated simply using curl:
+::
+
+ curl --data "accid=asbfdsaf&cdrhost=192.168.1.1&reqtype=rated&direction=*out&tenant=cgrates.org&tor=call&account=1001&subject=1001&destination=1002&time_answer=1383813746&duration=10&sip_user=Jitsi" http://ipbxdev:2022/cgr
+
 
 CDR-FS_JSON 
 -----------
