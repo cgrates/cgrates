@@ -110,9 +110,7 @@ func (cgrCdr CgrCdr) GetFallbackSubj() string {
 	return cfg.DefaultSubject
 }
 func (cgrCdr CgrCdr) GetAnswerTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(cgrCdr[TIME_ANSWER], 0, 64)
-	t = time.Unix(st, 0)
-	return
+	return utils.ParseDate(cgrCdr[TIME_ANSWER])
 }
 // Extracts duration as considered by the telecom switch
 func (cgrCdr CgrCdr) GetDuration() int64 {
