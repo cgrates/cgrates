@@ -106,9 +106,6 @@ func (cgrCdr CgrCdr) GetExtraFields() map[string]string {
 	}
 	return extraFields
 }
-func (cgrCdr CgrCdr) GetFallbackSubj() string {
-	return cfg.DefaultSubject
-}
 func (cgrCdr CgrCdr) GetAnswerTime() (t time.Time, err error) {
 	return utils.ParseDate(cgrCdr[TIME_ANSWER])
 }

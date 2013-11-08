@@ -33,7 +33,6 @@ type FSEvent map[string]string
 const (
 	// Freswitch event proprities names
 	DIRECTION          = "Call-Direction"
-	ORIG_ID            = "variable_sip_call_id" //- originator_id - match cdrs
 	SUBJECT            = "variable_cgr_subject"
 	ACCOUNT            = "variable_cgr_account"
 	DESTINATION        = "variable_cgr_destination"
@@ -83,9 +82,6 @@ func (fsev FSEvent) GetDirection() string {
 	return "*out"
 	//return fsev[DIRECTION]
 }
-func (fsev FSEvent) GetOrigId() string {
-	return fsev[ORIG_ID]
-}
 func (fsev FSEvent) GetSubject() string {
 	return utils.FirstNonEmpty(fsev[SUBJECT], fsev[USERNAME])
 }
@@ -116,7 +112,6 @@ func (fsev FSEvent) GetReqType() string {
 }
 func (fsev FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection()) == "" ||
-		strings.TrimSpace(fsev.GetOrigId()) == "" ||
 		strings.TrimSpace(fsev.GetSubject()) == "" ||
 		strings.TrimSpace(fsev.GetAccount()) == "" ||
 		strings.TrimSpace(fsev.GetDestination()) == "" ||
@@ -124,9 +119,6 @@ func (fsev FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetUUID()) == "" ||
 		strings.TrimSpace(fsev.GetTenant()) == "" ||
 		strings.TrimSpace(fsev.GetCallDestNr()) == ""
-}
-func (fsev FSEvent) GetFallbackSubj() string {
-	return cfg.DefaultSubject
 }
 func (fsev FSEvent) GetStartTime(field string) (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev[field], 0, 64)

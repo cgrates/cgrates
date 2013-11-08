@@ -27,7 +27,6 @@ type CDR interface {
 	GetAccId() string
 	GetCdrHost() string
 	GetDirection() string
-	GetOrigId() string
 	GetSubject() string
 	GetAccount() string
 	GetDestination() string
@@ -36,6 +35,5 @@ type CDR interface {
 	GetReqType() string
 	GetAnswerTime() (time.Time, error)
 	GetDuration() int64
-	GetFallbackSubj() string
 	GetExtraFields() map[string]string //Stores extra CDR Fields
 }

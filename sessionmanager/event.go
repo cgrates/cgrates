@@ -26,7 +26,6 @@ type Event interface {
 	New(string) Event
 	GetName() string
 	GetDirection() string
-	GetOrigId() string
 	GetSubject() string
 	GetAccount() string
 	GetDestination() string
@@ -37,6 +36,5 @@ type Event interface {
 	GetReqType() string
 	GetStartTime(string) (time.Time, error)
 	GetEndTime() (time.Time, error)
-	GetFallbackSubj() string
 	MissingParameter() bool
 }

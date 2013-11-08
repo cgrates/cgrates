@@ -162,8 +162,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		Account:         ev.GetAccount(),
 		Destination:     ev.GetDestination(),
 		Amount:          sm.debitPeriod.Seconds(),
-		TimeStart:       startTime,
-		FallbackSubject: ev.GetFallbackSubj()}
+		TimeStart:       startTime}
 	var remainingSeconds float64
 	err = sm.connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
@@ -221,7 +220,6 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Destination:     ev.GetDestination(),
 			TimeStart:       startTime,
 			TimeEnd:         endTime,
-			FallbackSubject: ev.GetFallbackSubj(),
 		}
 		cc := &engine.CallCost{}
 		err = sm.connector.Debit(cd, cc)

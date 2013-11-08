@@ -63,9 +63,6 @@ func TestCgrCdrFields(t *testing.T) {
 	if cgrCdr.GetReqType() != utils.RATED {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
-	if cgrCdr.GetFallbackSubj() != "0" {
-		t.Error("Error parsing cdr: ", cgrCdr)
-	}
 	answerTime, _ := cgrCdr.GetAnswerTime()
 	expectedATime, _ := time.Parse(time.RFC3339, "2013-11-07T08:42:26Z")
 	if answerTime.UTC() != expectedATime {

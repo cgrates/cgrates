@@ -30,7 +30,6 @@ const (
 	// Freswitch event property names
 	FS_CDR_MAP      = "variables"
 	FS_DIRECTION    = "direction"
-	FS_ORIG_ID      = "sip_call_id" //- originator_id - match cdrs
 	FS_SUBJECT      = "cgr_subject"
 	FS_ACCOUNT      = "cgr_account"
 	FS_DESTINATION  = "cgr_destination"
@@ -79,9 +78,6 @@ func (fsCdr FSCdr) GetDirection() string {
 	//TODO: implement direction, not related to FS_DIRECTION but traffic towards or from subject/account
 	return "*out"
 }
-func (fsCdr FSCdr) GetOrigId() string {
-	return fsCdr[FS_ORIG_ID]
-}
 func (fsCdr FSCdr) GetSubject() string {
 	return utils.FirstNonEmpty(fsCdr[FS_SUBJECT], fsCdr[FS_USERNAME])
 }
@@ -111,9 +107,6 @@ func (fsCdr FSCdr) GetExtraFields() map[string]string {
 	}
 	return extraFields
 }
-func (fsCdr FSCdr) GetFallbackSubj() string {
-	return cfg.DefaultSubject
-}
 func (fsCdr FSCdr) GetAnswerTime() (t time.Time, err error) {
 	//ToDo: Make sure we work with UTC instead of local time
 	at, err := strconv.ParseInt(fsCdr[FS_ANSWER_TIME], 0, 64)
@@ -137,7 +130,6 @@ func (fsCdr FSCdr) Store() (result string, err error) {
 	result += fsCdr.GetAccId() + "|"
 	result += fsCdr.GetCdrHost() + "|"
 	result += fsCdr.GetDirection() + "|"
-	result += fsCdr.GetOrigId() + "|"
 	result += fsCdr.GetSubject() + "|"
 	result += fsCdr.GetAccount() + "|"
 	result += fsCdr.GetDestination() + "|"
@@ -156,7 +148,6 @@ func (fsCdr FSCdr) Store() (result string, err error) {
 	}
 	result += strconv.FormatInt(et.UnixNano(), 10) + "|"
 	result += strconv.FormatInt(fsCdr.GetDuration(), 10) + "|"
-	result += fsCdr.GetFallbackSubj() + "|"
 	return
 }
 

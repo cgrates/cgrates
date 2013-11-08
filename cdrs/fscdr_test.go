@@ -56,9 +56,6 @@ func TestCDRFields(t *testing.T) {
 	if fsCdr.GetDirection() != "*out" {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
-	if fsCdr.GetOrigId() != "ca9c5e20caeaa6596be8cf66261f13e5@0:0:0:0:0:0:0:0" {
-		t.Error("Error parsing cdr: ", fsCdr)
-	}
 	if fsCdr.GetSubject() != "dan" {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
@@ -75,9 +72,6 @@ func TestCDRFields(t *testing.T) {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
 	if fsCdr.GetReqType() != utils.RATED {
-		t.Error("Error parsing cdr: ", fsCdr)
-	}
-	if fsCdr.GetFallbackSubj() != "0" {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
 	answerTime, _ := fsCdr.GetAnswerTime()

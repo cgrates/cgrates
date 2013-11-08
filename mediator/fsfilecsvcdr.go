@@ -63,10 +63,6 @@ func (self *FScsvCDR) GetDirection() string {
 	return "*out"
 }
 
-func (self *FScsvCDR) GetOrigId() string {
-	return utils.NOT_IMPLEMENTED
-}
-
 func (self *FScsvCDR) GetSubject() string {
 	return self.rowData[self.subjectIdx]
 }
@@ -101,10 +97,6 @@ func (self *FScsvCDR) GetAnswerTime() (time.Time, error) {
 func (self *FScsvCDR) GetDuration() int64 {
 	dur, _ := strconv.ParseInt(self.rowData[self.durationIdx], 0, 64)
 	return dur
-}
-
-func (self *FScsvCDR) GetFallbackSubj() string {
-	return utils.NOT_IMPLEMENTED
 }
 
 func (self *FScsvCDR) GetExtraFields() map[string]string {
