@@ -838,7 +838,7 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	if err != nil {
 		return err
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', FROM_UNIXTIME(%d), %d)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d, %d)",
 		cdr.GetCgrId(),
 		cdr.GetAccId(),
 		cdr.GetCdrHost(),
@@ -886,9 +886,36 @@ func (self *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost, extraInfo strin
 }
 
 func (self *SQLStorage) GetAllRatedCdr() ([]utils.CDR, error) {
-	return nil, nil
+	var cdrs []utils.CDR
+	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,reqtype,direction,tenant,tor,account,%s.subject,destination,answer_timestamp,duration,extra_fields,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
+	rows, err := self.Db.Query(q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var cgrid, accid, cdrhost, reqtype, direction, tenant, tor, account, subject, destination string
+		var extraFields []byte
+		var answerTimestamp, duration int64
+		var cost float64
+		var extraFieldsMp map[string]string
+		if err := rows.Scan(&cgrid, &accid, &cdrhost, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &answerTimestamp, &duration, &extraFields,&cost); err!=nil {
+			return nil, err
+		}
+		answerTime := time.Unix(answerTimestamp, 0)
+		if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
+			return nil, err
+		}
+		storCdr := &utils.RatedCDR{
+				CgrId:cgrid, AccId:accid, CdrHost:cdrhost, ReqType:reqtype, Direction:direction, Tenant:tenant,  
+				TOR:tor, Account:account, Subject:subject, Destination:destination, AnswerTime:answerTime, Duration:duration, 
+				ExtraFields: extraFieldsMp, Cost:cost,
+				}
+		cdrs = append(cdrs, utils.CDR(storCdr))
+	}
+	return cdrs, nil
 }
-
+		
 func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
 	var dests []*Destination
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid)

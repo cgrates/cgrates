@@ -13,8 +13,8 @@ CREATE TABLE `cdrs_primary` (
   `account` varchar(128) NOT NULL,
   `subject` varchar(128) NOT NULL,
   `destination` varchar(128) NOT NULL,
-  `time_answer` datetime NOT NULL,
-  `duration` int(11) NOT NULL,
+  `answer_timestamp` int NOT NULL,
+  `duration` int NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cgrid` (`cgrid`)
 );

@@ -23,7 +23,7 @@ import (
 )
 
 // CDR as extracted from StorDb. Kinda standard of internal CDR
-type StorCDR struct {
+type RatedCDR struct {
 	CgrId         string
         AccId         string
         CdrHost       string
@@ -37,56 +37,57 @@ type StorCDR struct {
         AnswerTime    time.Time
         Duration      int64
         ExtraFields   map[string]string
+	Cost          float64
 }
 
-func(storCdr *StorCDR) GetCgrId() string {
-	return storCdr.CgrId
+func(ratedCdr *RatedCDR) GetCgrId() string {
+	return ratedCdr.CgrId
 }
 
-func(storCdr *StorCDR) GetAccId() string {
-	return storCdr.AccId
+func(ratedCdr *RatedCDR) GetAccId() string {
+	return ratedCdr.AccId
 }
 
-func(storCdr *StorCDR) GetCdrHost() string {
-	return storCdr.CdrHost
+func(ratedCdr *RatedCDR) GetCdrHost() string {
+	return ratedCdr.CdrHost
 }
 
-func(storCdr *StorCDR) GetDirection() string {
-	return storCdr.Direction
+func(ratedCdr *RatedCDR) GetDirection() string {
+	return ratedCdr.Direction
 }
 
-func(storCdr *StorCDR) GetSubject() string {
-	return storCdr.Subject
+func(ratedCdr *RatedCDR) GetSubject() string {
+	return ratedCdr.Subject
 }
 
-func(storCdr *StorCDR) GetAccount() string {
-	return storCdr.Account
+func(ratedCdr *RatedCDR) GetAccount() string {
+	return ratedCdr.Account
 }
 
-func(storCdr *StorCDR) GetDestination() string {
-	return storCdr.Destination
+func(ratedCdr *RatedCDR) GetDestination() string {
+	return ratedCdr.Destination
 }
 
-func(storCdr *StorCDR) GetTOR() string {
-	return storCdr.TOR
+func(ratedCdr *RatedCDR) GetTOR() string {
+	return ratedCdr.TOR
 }
 
-func(storCdr *StorCDR) GetTenant() string {
-	return storCdr.Tenant
+func(ratedCdr *RatedCDR) GetTenant() string {
+	return ratedCdr.Tenant
 }
 
-func(storCdr *StorCDR) GetReqType() string {
-	return storCdr.ReqType
+func(ratedCdr *RatedCDR) GetReqType() string {
+	return ratedCdr.ReqType
 }
 
-func(storCdr *StorCDR) GetAnswerTime() (time.Time, error) {
-	return storCdr.AnswerTime, nil
+func(ratedCdr *RatedCDR) GetAnswerTime() (time.Time, error) {
+	return ratedCdr.AnswerTime, nil
 }
 
-func(storCdr *StorCDR) GetDuration() int64 {
-	return storCdr.Duration
+func(ratedCdr *RatedCDR) GetDuration() int64 {
+	return ratedCdr.Duration
 }
 
-func(storCdr *StorCDR) GetExtraFields() map[string]string {
-	return storCdr.ExtraFields
+func(ratedCdr *RatedCDR) GetExtraFields() map[string]string {
+	return ratedCdr.ExtraFields
 }
