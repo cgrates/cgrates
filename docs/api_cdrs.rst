@@ -47,8 +47,6 @@ Data:
         NumberOfCdrs              int    // Number of CDRs in the export file
    }
 
- Possible answers:
-  ``/var/log/cgrates/cdr/out/cgr/csv/cdrs_1384103782.csv`` - Full path towards the generated .csv file.
 
  *JSON sample*:
   ::
