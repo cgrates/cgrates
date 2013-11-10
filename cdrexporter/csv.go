@@ -21,20 +21,35 @@ package cdrexporter
 import (
 	"encoding/csv"
 	"io"
+	"sort"
+	"strconv"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type CsvCdrWriter struct {
 	writer *csv.Writer
+	roundDecimals    int        // Round floats like Cost using this number of decimals
+	extraFields []string           // Extra fields to append after primary ones, order important
 }
 
-func NewCsvCdrWriter(writer io.Writer) *CsvCdrWriter {
-	return &CsvCdrWriter{csv.NewWriter(writer)}
+func NewCsvCdrWriter(writer io.Writer, roundDecimals int, extraFields []string) *CsvCdrWriter {
+	return &CsvCdrWriter{csv.NewWriter(writer), roundDecimals, extraFields}
 }
 
-func (dcw *CsvCdrWriter) Write(cdr map[string]string) error {
-	var row []string
-	for _, v := range cdr {
-		row = append(row, v)
+func (dcw *CsvCdrWriter) Write(cdr *utils.RatedCDR) error {
+	primaryFields := []string{cdr.CgrId, cdr.AccId, cdr.CdrHost, cdr.ReqType, cdr.Direction, cdr.Tenant, cdr.TOR, cdr.Account, cdr.Subject,
+				cdr.Destination, cdr.AnswerTime.String(), strconv.Itoa(int(cdr.Duration)), strconv.FormatFloat(cdr.Cost, 'f', dcw.roundDecimals, 64)}
+	if len(dcw.extraFields) == 0 {
+		dcw.extraFields = utils.MapKeys(cdr.ExtraFields)
+		sort.Strings(dcw.extraFields) // Controlled order in case of dynamic extra fields
+	}
+	lenPrimary := len(primaryFields)
+	row := make([]string, lenPrimary+len(dcw.extraFields))
+	for idx, fld := range primaryFields { // Add primary fields
+		row[idx] = fld
+	}
+	for idx, fldKey := range dcw.extraFields { // Add extra fields
+		row[lenPrimary+idx] = cdr.ExtraFields[fldKey]
 	}
 	return dcw.writer.Write(row)
 }

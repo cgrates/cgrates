@@ -24,6 +24,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/config"
 )
 
 const (
@@ -33,7 +34,9 @@ const (
 type ApierV1 struct {
 	StorDb engine.LoadStorage
 	DataDb engine.DataStorage
+	CdrDb  engine.CdrStorage
 	Sched  *scheduler.Scheduler
+	Config *config.CGRConfig
 }
 
 type AttrDestination struct {

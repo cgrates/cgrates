@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package cdrexporter
 
+import (
+	"github.com/cgrates/cgrates/utils"
+)
+
 type CdrWriter interface {
-	Write(cdr map[string]string) string
+	Write(cdr utils.RatedCDR) string
 	Close()
 }

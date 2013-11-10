@@ -64,6 +64,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSListen = "127.0.0.1:2022"
 	eCfg.CDRSExtraFields = []string{}
 	eCfg.CDRSMediator = ""
+	eCfg.CDRSExportPath = "/var/log/cgrates/cdr/out"
+	eCfg.CDRSExportExtraFields = []string{}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorListen = "127.0.0.1:2032"
 	eCfg.MediatorRater = "127.0.0.1:2012"
@@ -160,6 +162,8 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSListen = "test"
 	eCfg.CDRSExtraFields = []string{"test"}
 	eCfg.CDRSMediator = "test"
+	eCfg.CDRSExportPath = "test"
+	eCfg.CDRSExportExtraFields = []string{"test"}
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorListen = "test"
 	eCfg.MediatorRater = "test"

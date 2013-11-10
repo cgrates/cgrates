@@ -41,6 +41,8 @@ enabled = true				# Start the CDR Server service:  <true|false>.
 listen=test				# CDRS's listening interface: <x.y.z.y:1234>.
 extra_fields = test			# Extra fields to store in CDRs
 mediator = test				# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+export_path = test			# Path where exported cdrs will be written
+export_extra_fields = test		# Extra fields list to be exported
 
 [mediator]
 enabled = true				# Starts Mediator service: <true|false>.

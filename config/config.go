@@ -70,6 +70,8 @@ type CGRConfig struct {
 	CDRSListen               string   // CDRS's listening interface: <x.y.z.y:1234>.
 	CDRSExtraFields          []string //Extra fields to store in CDRs
 	CDRSMediator             string   // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CDRSExportPath           string   // Path towards exported cdrs
+	CDRSExportExtraFields    []string // Extra fields list to add in exported CDRs
 	SMEnabled                bool
 	SMSwitchType             string
 	SMRater                  string   // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -133,6 +135,8 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSListen = "127.0.0.1:2022"
 	self.CDRSExtraFields = []string{}
 	self.CDRSMediator = ""
+	self.CDRSExportPath = "/var/log/cgrates/cdr/out"
+	self.CDRSExportExtraFields = []string{}
 	self.MediatorEnabled = false
 	self.MediatorListen = "127.0.0.1:2032"
 	self.MediatorRater = "127.0.0.1:2012"
@@ -286,6 +290,14 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
 		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
+	}
+	if hasOpt = c.HasOption("cdrs", "export_path"); hasOpt {
+		cfg.CDRSExportPath, _ = c.GetString("cdrs", "export_path")
+	}
+	if hasOpt = c.HasOption("cdrs", "export_extra_fields"); hasOpt {
+		if cfg.CDRSExportExtraFields, errParse = ConfigSlice(c, "cdrs", "export_extra_fields"); errParse != nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
 		cfg.MediatorEnabled, _ = c.GetBool("mediator", "enabled")
