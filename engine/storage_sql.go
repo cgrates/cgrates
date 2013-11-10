@@ -885,9 +885,17 @@ func (self *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost, extraInfo strin
 	return
 }
 
-func (self *SQLStorage) GetAllRatedCdr() ([]utils.CDR, error) {
+// Return a slice of rated CDRs from storDb using optional timeStart and timeEnd as filters.
+func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]utils.CDR, error) {
 	var cdrs []utils.CDR
 	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,reqtype,direction,tenant,tor,account,%s.subject,destination,answer_timestamp,duration,extra_fields,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
+	if !timeStart.IsZero() && !timeEnd.IsZero() {
+		q += fmt.Sprintf(" WHERE answer_timestamp>=%d AND answer_timestamp<%d", timeStart.Unix(), timeEnd.Unix())
+	} else if !timeStart.IsZero() {
+		q += fmt.Sprintf(" WHERE answer_timestamp>=%d", timeStart.Unix())
+	} else if !timeEnd.IsZero() {
+		q += fmt.Sprintf(" WHERE answer_timestamp<%d", timeEnd.Unix())
+	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
