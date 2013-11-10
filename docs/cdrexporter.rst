@@ -48,3 +48,9 @@ Principles behind exports:
       - selected list of cdr_extra fields via *cgrates.cfg* configuration or
       - alphabetical order of the cdr extra fields stored in cdr_extra table
 
+
+Sample CDR export file content which was made available at path: */var/log/cgrates/cdr/out/cgr/csv/cdrs_1384104724.csv*
+::
+
+ 649ac3f5a7de07993448ed4354f484669c7df383,bsbfdsaf,192.168.1.1,rated,*out,itsyscom.com,call,dan,dan,+4986517174963,2013-11-07 09:42:26 +0100 CET,10,-1.0000,Jitsi
+ 7d5768f6b50c413ec938481d65c8d74fce38fb06,bvbfdsaf,192.168.1.1,rated,*out,itsyscom.com,call,dan,dan,+4986517174963,2013-11-07 12:29:06 +0100 CET,10,-1.0000,Jitsi

@@ -362,6 +362,13 @@ Accounts
    api_accounts
 
 
+Administration APIs
+-------------------
+
+.. toctree::
+   :maxdepth: 2
+
+   api_cdrs
 
 
 

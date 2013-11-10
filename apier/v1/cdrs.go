@@ -32,7 +32,12 @@ type AttrExpCsvCdrs struct {
 	TimeEnd      string // If provided, will represent the end of the CDRs interval (<)
 }
 
-func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *string) error {
+type ExportedCsvCdrs struct {
+	ExportedFilePath          string // Full path to the newly generated export file
+        NumberOfCdrs              int    // Number of CDRs in the export file
+}
+
+func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *ExportedCsvCdrs) error {
 	var tStart, tEnd time.Time
 	var err error
 	if len(attr.TimeStart) !=0 {
@@ -64,7 +69,7 @@ func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *string) error {
 		}
 	}
 	csvWriter.Close()
-	*reply = fileName
+	*reply = ExportedCsvCdrs{ fileName, len(cdrs) }
 	return nil
 }
 	
