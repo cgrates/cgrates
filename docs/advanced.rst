@@ -6,6 +6,7 @@
 
    apicalls
    cdrserver
+   cdrexporter
    ratinglogic
 
 
