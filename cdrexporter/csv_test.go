@@ -22,16 +22,22 @@ import (
 	"bytes"
 	"strings"
 	"testing"
+	"time"
+	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCsv(t *testing.T) {
+func TestCsvCdrWriter(t *testing.T) {
 	writer := &bytes.Buffer{}
-	csvCdrWriter := NewCsvCdrWriter(writer)
-	csvCdrWriter.Write(map[string]string{"First": "test", "Second": "the", "Third": "cdr"})
+	csvCdrWriter := NewCsvCdrWriter(writer, 4, []string{"extra3", "extra1"})
+	ratedCdr := &utils.RatedCDR{ CgrId: utils.FSCgrId("dsafdsaf"), AccId:"dsafdsaf", CdrHost:"192.168.1.1", ReqType:"rated", Direction:"*out", Tenant:"cgrates.org",  
+			TOR:"call", Account:"1001", Subject:"1001", Destination:"1002", AnswerTime:time.Unix(1383813746,0).UTC(), Duration:10, 
+			ExtraFields:map[string]string{"extra1":"val_extra1", "extra2":"val_extra2", "extra3":"val_extra3"}, Cost:1.01,
+			}
+	csvCdrWriter.Write(ratedCdr)
 	csvCdrWriter.Close()
-	expected := "test,the,cdr"
+	expected := "b18944ef4dc618569f24c27b9872827a242bad0c,dsafdsaf,192.168.1.1,rated,*out,cgrates.org,call,1001,1001,1002,2013-11-07 08:42:26 +0000 UTC,10,1.0100,val_extra3,val_extra1"
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
-		t.Errorf("Expected %s was %s.", expected, result)
+		t.Errorf("Expected %s received %s.", expected, result)
 	}
 }

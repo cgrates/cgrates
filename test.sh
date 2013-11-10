@@ -9,6 +9,7 @@ go test -i github.com/cgrates/fsock
 go test -i github.com/cgrates/cgrates/cdrs
 go test -i github.com/cgrates/cgrates/utils
 go test -i github.com/cgrates/cgrates/history
+go test -i github.com/cgrates/cgrates/cdrexporter
 
 go test github.com/cgrates/cgrates/engine
 en=$?
@@ -28,5 +29,8 @@ go test github.com/cgrates/fsock
 fs=$?
 go test github.com/cgrates/cgrates/history
 hs=$?
+go test github.com/cgrates/cgrates/cdrexporter
+cdre=$?
 
-exit $en && $sm && $cfg && $bl && $cr && $md && $cdr && $fs && $ut && $hs
+
+exit $en && $sm && $cfg && $bl && $cr && $md && $cdr && $fs && $ut && $hs && $cdre
