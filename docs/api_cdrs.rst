@@ -1,7 +1,7 @@
 CDR APIs
 ========
 
-Set of APIs CDR related.
+Set of CDR related APIs.
 
 
 ApierV1.ExportCsvCdrs
