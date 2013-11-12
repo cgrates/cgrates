@@ -27,15 +27,16 @@ import (
 
 type RatingProfile struct {
 	Id                                                       string
-	FallbackKey                                              string // FallbackKey is used as complete combination of Tenant:TOR:Direction:Subject
 	RatingPlanActivations                                    RatingPlanActivations
-	Tag, Tenant, TOR, Direction, Subject                     string // used only for loading
-	DestRatesTimingTag, RatesFallbackSubject, ActivationTime string // used only for loading
+	Tag, Tenant, TOR, Direction, Subject                     string   // used only for loading
+	DestRatesTimingTag, RatesFallbackSubject, ActivationTime string   // used only for loading
+	FallbackKeys                                             []string // used only for loading
 }
 
 type RatingPlanActivation struct {
 	ActivationTime time.Time
 	RatingPlanId   string
+	FallbackKeys   []string
 }
 
 func (rpa *RatingPlanActivation) Equal(orpa *RatingPlanActivation) bool {
@@ -60,45 +61,84 @@ func (rpas RatingPlanActivations) Sort() {
 	sort.Sort(rpas)
 }
 
+func (rpas RatingPlanActivations) GetActiveForCall(cd *CallDescriptor) RatingPlanActivations {
+	rpas.Sort()
+	lastBeforeCallStart := 0
+	firstAfterCallEnd := len(rpas)
+	for index, rpa := range rpas {
+		if rpa.ActivationTime.Before(cd.TimeStart) || rpa.ActivationTime.Equal(cd.TimeStart) {
+			lastBeforeCallStart = index
+		}
+		if rpa.ActivationTime.After(cd.TimeEnd) {
+			firstAfterCallEnd = index
+			break
+		}
+	}
+	return rpas[lastBeforeCallStart:firstAfterCallEnd]
+}
+
 type RatingInfo struct {
+	MatchedSubject string
+	MatchedPrefix  string
 	ActivationTime time.Time
 	RateIntervals  RateIntervalList
 }
 
+type RatingInfos []*RatingInfo
+
+func (ris RatingInfos) Len() int {
+	return len(ris)
+}
+
+func (ris RatingInfos) Swap(i, j int) {
+	ris[i], ris[j] = ris[j], ris[i]
+}
+
+func (ris RatingInfos) Less(i, j int) bool {
+	return ris[i].ActivationTime.Before(ris[j].ActivationTime)
+}
+
+func (ris RatingInfos) Sort() {
+	sort.Sort(ris)
+}
+
 // TODO: what happens if there is no match for part of the call
-func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (foundPrefixes []string, ris []*RatingInfo, err error) {
-	rp.RatingPlanActivations.Sort()
-	for _, rpa := range rp.RatingPlanActivations {
-		if rpa.ActivationTime.Before(cd.TimeEnd) {
-			rpl, err := storageGetter.GetRatingPlan(rpa.RatingPlanId)
-			if err != nil || rpl == nil {
+func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
+	var ris RatingInfos
+	for _, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {
+		rpl, err := storageGetter.GetRatingPlan(rpa.RatingPlanId)
+		if err != nil || rpl == nil {
+			Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
+			continue
+		}
+		bestPrecision := 0
+		var rps RateIntervalList
+		for dId, _ := range rpl.DestinationRates {
+			//precision, err := storageGetter.DestinationContainsPrefix(dId, cd.Destination)
+			d, err := storageGetter.GetDestination(dId)
+			if err != nil {
 				Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 				continue
 			}
-			bestPrecision := 0
-			var rps RateIntervalList
-			for dId, _ := range rpl.DestinationRates {
-				//precision, err := storageGetter.DestinationContainsPrefix(dId, cd.Destination)
-				d, err := storageGetter.GetDestination(dId)
-				if err != nil {
-					Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
-					continue
-				}
-				precision := d.containsPrefix(cd.Destination)
-				if precision > bestPrecision {
-					bestPrecision = precision
-					rps = rpl.RateIntervalList(dId)
-				}
+			precision := d.containsPrefix(cd.Destination)
+			if precision > bestPrecision {
+				bestPrecision = precision
+				rps = rpl.RateIntervalList(dId)
 			}
-			if bestPrecision > 0 {
-				ris = append(ris, &RatingInfo{rpa.ActivationTime, rps})
-				foundPrefixes = append(foundPrefixes, cd.Destination[:bestPrecision])
+		}
+		if bestPrecision > 0 {
+			ris = append(ris, &RatingInfo{rp.Id, cd.Destination[:bestPrecision], rpa.ActivationTime, rps})
+		} else {
+			// mark the end of previous!
+			if len(cd.RatingInfos) > 0 {
+				ris = append(ris, &RatingInfo{"", "", rpa.ActivationTime, nil})
 			}
 		}
 	}
 	if len(ris) > 0 {
-		return foundPrefixes, ris, nil
+		cd.addRatingInfos(ris)
+		return
 	}
 
-	return nil, nil, errors.New("not found")
+	return errors.New("not found")
 }

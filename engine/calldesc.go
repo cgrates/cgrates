@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"log/syslog"
-	"strings"
 	"time"
 )
 
@@ -107,7 +106,7 @@ type CallDescriptor struct {
 	CallDuration                          time.Duration // the call duration so far (till TimeEnd)
 	Amount                                float64
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
-	RatingInfos                           []*RatingInfo
+	RatingInfos                           RatingInfos
 	Increments                            Increments
 	userBalance                           *UserBalance
 }
@@ -137,53 +136,82 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 /*
 Restores the activation periods for the specified prefix from storage.
 */
-func (cd *CallDescriptor) LoadRatingPlans() (destPrefixes []string, matchedSubject string, err error) {
-	matchedSubject = cd.GetKey()
-	/*if val, err := cache2go.GetXCached(cd.GetKey() + cd.Destination); err == nil {
-		xaps := val.(xCachedRatingPlans)
-		cd.RatingPlans = xaps.aps
-		return xaps.destPrefix, matchedSubject, nil
-	}*/
-	destPrefixes, matchedSubject, values, err := cd.getRatingPlansForPrefix(cd.GetKey(), 1)
+func (cd *CallDescriptor) LoadRatingPlans() (err error) {
+	err = cd.getRatingPlansForPrefix(cd.GetKey(), 1)
 	if err != nil {
+		// try general fallback
 		fallbackKey := fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
 		// use the default subject
-		destPrefixes, matchedSubject, values, err = cd.getRatingPlansForPrefix(fallbackKey, 1)
+		err = cd.getRatingPlansForPrefix(fallbackKey, 1)
 	}
 	//load the rating plans
-	if err == nil && len(values) > 0 {
-		/*
-			xaps := xCachedRatingPlans{destPrefix, values, new(cache2go.XEntry)}
-			xaps.XCache(cd.GetKey()+cd.Destination, debitPeriod+5*time.Second, xaps)
-		*/
-		cd.RatingInfos = values
+	if err != nil || !cd.continousRatingInfos() {
+		err = errors.New("Could not determine rating plans for call")
+		return
 	}
 	return
 }
 
-func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (foundPrefixes []string, matchedSubject string, ris []*RatingInfo, err error) {
-	matchedSubject = key
+func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (err error) {
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
 	rp, err := storageGetter.GetRatingProfile(key)
 	if err != nil || rp == nil {
-		return nil, "", nil, err
+		return err
 	}
-	foundPrefixes, ris, err = rp.GetRatingPlansForPrefix(cd)
-	if err != nil {
-		if rp.FallbackKey != "" {
+	if err = rp.GetRatingPlansForPrefix(cd); err != nil {
+		// try rating profile fallback
+		if len(rp.FallbackKeys) > 0 {
 			recursionDepth++
-			for _, fbk := range strings.Split(rp.FallbackKey, FALLBACK_SEP) {
-				if destPrefix, matchedSubject, values, err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
-					return destPrefix, matchedSubject, values, err
+			for _, fbk := range rp.FallbackKeys {
+				if err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
+					return err
 				}
 			}
 		}
 	}
-
 	return
+}
+
+// checks if there is rating info for the entire call duration
+func (cd *CallDescriptor) continousRatingInfos() bool {
+	if len(cd.RatingInfos) == 0 || cd.RatingInfos[0].ActivationTime.After(cd.TimeStart) {
+		return false
+	}
+	for _, ri := range cd.RatingInfos {
+		if ri.RateIntervals == nil {
+			return false
+		}
+	}
+	return true
+}
+
+// adds a rating infos only if that call period is not already covered
+// returns true if added
+func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
+	if len(cd.RatingInfos) == 0 {
+		cd.RatingInfos = append(cd.RatingInfos, ris...)
+		return true
+	}
+	cd.RatingInfos.Sort()
+	// check if we dont have the start covered
+	if cd.RatingInfos[0].ActivationTime.After(cd.TimeStart) {
+		if ris[0].ActivationTime.Before(cd.RatingInfos[0].ActivationTime) {
+			cd.RatingInfos = append(cd.RatingInfos, ris[0])
+			cd.RatingInfos.Sort()
+		}
+	}
+	for _, ri := range cd.RatingInfos {
+		if ri.RateIntervals == nil {
+			for i, new_ri := range ris {
+				_ = i
+				_ = new_ri
+			}
+		}
+	}
+	return true
 }
 
 /*
@@ -307,7 +335,7 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*Ti
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	destPrefix, matchedSubject, err := cd.LoadRatingPlans()
+	err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return &CallCost{Cost: -1}, err
@@ -325,17 +353,19 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	}
 	// global rounding
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
-	startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
+	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
-		Direction:   cd.Direction,
-		TOR:         cd.TOR,
-		Tenant:      cd.Tenant,
-		Subject:     matchedSubject[startIndex:],
-		Account:     cd.Account,
-		Destination: strings.Join(destPrefix, ";"),
-		Cost:        cost,
-		ConnectFee:  connectionFee,
-		Timespans:   timespans}
+		Direction: cd.Direction,
+		TOR:       cd.TOR,
+		Tenant:    cd.Tenant,
+		// TODO, FIXME: find out where to put matched subject
+		//Subject:   matchedSubject[startIndex:],
+		Account: cd.Account,
+		// TODO, FIXME: find out where to put matched prfixes
+		//Destination: strings.Join(destPrefix, ";"),
+		Cost:       cost,
+		ConnectFee: connectionFee,
+		Timespans:  timespans}
 	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	return cc, err
 }
@@ -350,7 +380,7 @@ func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float6
 	if cd.CallDuration == 0 {
 		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	}
-	_, _, err = cd.LoadRatingPlans()
+	err = cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return 0, err
