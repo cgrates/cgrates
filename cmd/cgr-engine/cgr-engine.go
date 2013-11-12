@@ -307,18 +307,25 @@ func main() {
 		engine.Logger.Crit(errCfg.Error())
 		return
 	}
-
 	var dataDb engine.DataStorage
 	var logDb engine.LogStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
-	dataDb, err = engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding, true)
+	dataDb, err = engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding)
 	if err != nil { // Cannot configure getter database, show stopper
 		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
 	defer dataDb.Close()
 	engine.SetDataStorage(dataDb)
+	if cfg.RaterEnabled {
+		engine.Logger.Info("Starting redis pre-caching...")
+		if err := dataDb.PreCache(nil, nil); err != nil {
+			engine.Logger.Crit(fmt.Sprintf("Pre-caching error: %v", err))
+			return
+		}
+		engine.Logger.Info("Pre-caching done!")
+	}
 	if cfg.StorDBType == SAME {
 		logDb = dataDb.(engine.LogStorage)
 	} else {

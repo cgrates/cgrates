@@ -72,12 +72,12 @@ func main() {
 	var storDb engine.LoadStorage
 	// Init necessary db connections
 	if *fromStorDb {
-		dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass, *dbdata_encoding, false)
+		dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass, *dbdata_encoding)
 		storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding)
 	} else if *toStorDb { // Import from csv files to storDb
 		storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding)
 	} else { // Default load from csv files to dataDb
-		dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass, *dbdata_encoding, false)
+		dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass, *dbdata_encoding)
 	}
 	// Defer databases opened to be closed when we are done
 	for _, db := range []engine.Storage{dataDb, storDb} {
