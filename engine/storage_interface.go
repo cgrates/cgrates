@@ -65,13 +65,11 @@ type DataStorage interface {
 	PreCache([]string, []string) error
 	GetRatingPlan(string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
-	ExistsRatingPlan(string) (bool, error)
 	GetRatingProfile(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
 	//	DestinationContainsPrefix(string, string) (int, error)
 	SetDestination(*Destination) error
-	ExistsDestination(string) (bool, error)
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)

@@ -83,11 +83,6 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	return
 }
 
-func (ms *MapStorage) ExistsRatingPlan(rpId string) (bool, error) {
-	_, exists := ms.dict[RATING_PLAN_PREFIX+rpId]
-	return exists, nil
-}
-
 func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	if values, ok := ms.dict[RATING_PROFILE_PREFIX+key]; ok {
 		rp = new(RatingProfile)
@@ -140,11 +135,6 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	response := 0
 	go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	return
-}
-
-func (ms *MapStorage) ExistsDestination(destId string) (bool, error) {
-	_, exists := ms.dict[DESTINATION_PREFIX+destId]
-	return exists, nil
 }
 
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {

@@ -167,9 +167,9 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 				}
 			}
 			if !destinationExists {
-				if dbExists, err := dbr.dataDb.ExistsDestination(dr.DestinationsTag); err != nil {
+				if dest, err := dbr.dataDb.GetDestination(dr.DestinationsTag); err != nil {
 					return err
-				} else if !dbExists {
+				} else if dest == nil {
 					return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationsTag))
 				}
 			}
@@ -218,9 +218,9 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		}
 		_, exists := dbr.ratingPlans[rp.DestRatesTimingTag]
 		if !exists {
-			if dbExists, err := dbr.dataDb.ExistsRatingPlan(rp.DestRatesTimingTag); err != nil {
+			if rpl, err := dbr.dataDb.GetRatingPlan(rp.DestRatesTimingTag); err != nil {
 				return err
-			} else if !dbExists {
+			} else if rpl == nil {
 				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.DestRatesTimingTag))
 			}
 		}
@@ -237,7 +237,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 
 func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 	ratingPlan := &RatingPlan{}
-	rps, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, tag)
+	rps, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, tag)
 	if err != nil || len(rps) == 0 {
 		return fmt.Errorf("No DestRateTimings profile with id %s: %v", tag, err)
 	}
@@ -266,11 +266,11 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 
 			dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 			if err != nil || len(dms) == 0 {
-				if dbExists, err := dbr.dataDb.ExistsDestination(drate.DestinationsTag); err != nil {
-						return err
-					} else if !dbExists {
-						return fmt.Errorf("Could not get destination for tag %v", drate.DestinationsTag)
-					}
+				if dest, err := dbr.dataDb.GetDestination(drate.DestinationsTag); err != nil {
+					return err
+				} else if dest == nil {
+					return fmt.Errorf("Could not get destination for tag %v", drate.DestinationsTag)
+				}
 			}
 			Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationsTag, dms))
 			for _, destination := range dms {
@@ -283,7 +283,6 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 }
 
 func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
-	ratingPlans := make(map[string]*RatingPlan)
 	resultRatingProfile := &RatingProfile{}
 	rpm, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
 	if err != nil || len(rpm) == 0 {

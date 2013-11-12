@@ -249,7 +249,8 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 		if self.ImportId != "" {
 			rpTag += "_" + self.ImportId
 		}
-		rp := &RatingProfile{Tag: rpTag,
+		rp := &RatingProfile{
+			Tag:                  rpTag,
 			Tenant:               tenant,
 			TOR:                  tor,
 			Direction:            direction,

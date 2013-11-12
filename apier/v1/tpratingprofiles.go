@@ -39,7 +39,8 @@ func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *stri
 	}
 	rps := make([]*engine.RatingProfile, len(attrs.RatingActivations))
 	for idx, ra := range attrs.RatingActivations {
-		rps[idx] = &engine.RatingProfile{Tag: attrs.RatingProfileId,
+		rps[idx] = &engine.RatingProfile{
+			Tag:                  attrs.RatingProfileId,
 			Tenant:               attrs.Tenant,
 			TOR:                  attrs.TOR,
 			Direction:            attrs.Direction,
