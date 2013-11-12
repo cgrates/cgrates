@@ -144,6 +144,26 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error
 	return nil
 }
 
+type AttrSetRatingPlan struct {
+	TPid         string
+	RatingPlanId string
+}
+
+// Process dependencies and load a specific rating plan from storDb into dataDb.
+func (self *ApierV1) SetRatingPlan(attrs AttrSetRatingPlan, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
+
+	if err := dbReader.LoadRatingPlanByTag(attrs.RatingPlanId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+
+	*reply = OK
+	return nil
+}
+
 type AttrSetRatingProfile struct {
 	TPid            string
 	RatingProfileId string
