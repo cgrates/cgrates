@@ -53,7 +53,7 @@ func (self *ApierV1) SetTPRatingPlan(attrs utils.TPRatingPlan, reply *string) er
 }
 
 type AttrGetTPRatingPlan struct {
-	TPid             string // Tariff plan id
+	TPid         string // Tariff plan id
 	RatingPlanId string // Rate id
 }
 

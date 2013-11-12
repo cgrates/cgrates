@@ -21,10 +21,10 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/config"
 )
 
 const (

@@ -65,6 +65,7 @@ type DataStorage interface {
 	PreCache([]string, []string) error
 	GetRatingPlan(string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
+	ExistsRatingPlan(string) (bool, error)
 	GetRatingProfile(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)

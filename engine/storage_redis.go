@@ -141,6 +141,10 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	return
 }
 
+func (rs *RedisStorage) ExistsRatingPlan(rpId string) (bool, error) {
+	return rs.db.Exists(RATING_PLAN_PREFIX + rpId)
+}
+
 func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	var values string
 	if values, err = rs.db.Get(RATING_PROFILE_PREFIX + key); err == nil {

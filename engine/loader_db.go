@@ -214,7 +214,11 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		}
 		_, exists := dbr.ratingPlans[rp.DestRatesTimingTag]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", rp.DestRatesTimingTag))
+			if dbExists, err := dbr.dataDb.ExistsRatingPlan(rp.DestRatesTimingTag); err != nil {
+				return err
+			} else if !dbExists {
+				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.DestRatesTimingTag))
+			}
 		}
 		rp.RatingPlanActivations = append(rp.RatingPlanActivations, &RatingPlanActivation{at, rp.DestRatesTimingTag})
 		dbr.ratingProfiles[rp.Id] = rp
@@ -238,11 +242,14 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 			return fmt.Errorf("Cannot parse activation time from %v", ratingProfile.ActivationTime)
 		}
 		drtm, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, ratingProfile.DestRatesTimingTag)
-		if err != nil || len(drtm) == 0 {
-			return fmt.Errorf("No DestRateTimings profile with id %s: %v", ratingProfile.DestRatesTimingTag, err)
+		if err != nil || len(drtm) == 0 { // rating plan not found in storDb, check dataDb and if there will use that one
+			if dbExists, err := dbr.dataDb.ExistsRatingPlan(ratingProfile.DestRatesTimingTag); err != nil {
+				return err
+			} else if !dbExists {
+				return fmt.Errorf("No DestRateTimings profile with id %s: %v", ratingProfile.DestRatesTimingTag, err)
+			}
 		}
 		for _, destRateTiming := range drtm {
-
 			Logger.Debug(fmt.Sprintf("Destination rate timing: %v", rpm))
 			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, destRateTiming.TimingTag)
 			Logger.Debug(fmt.Sprintf("Timing: %v", rpm))

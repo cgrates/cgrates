@@ -83,6 +83,11 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	return
 }
 
+func (ms *MapStorage) ExistsRatingPlan(rpId string) (bool, error) {
+	_, exists := ms.dict[RATING_PLAN_PREFIX+rpId]
+	return exists, nil
+}
+
 func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	if values, ok := ms.dict[RATING_PROFILE_PREFIX+key]; ok {
 		rp = new(RatingProfile)

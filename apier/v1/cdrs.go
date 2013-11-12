@@ -20,33 +20,33 @@ package apier
 
 import (
 	"fmt"
-	"os"
-	"time"
-	"path"
-	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/cdrexporter"
+	"github.com/cgrates/cgrates/utils"
+	"os"
+	"path"
+	"time"
 )
 
 type AttrExpCsvCdrs struct {
-	TimeStart    string // If provided, will represent the starting of the CDRs interval (>=)
-	TimeEnd      string // If provided, will represent the end of the CDRs interval (<)
+	TimeStart string // If provided, will represent the starting of the CDRs interval (>=)
+	TimeEnd   string // If provided, will represent the end of the CDRs interval (<)
 }
 
 type ExportedCsvCdrs struct {
-	ExportedFilePath          string // Full path to the newly generated export file
-        NumberOfCdrs              int    // Number of CDRs in the export file
+	ExportedFilePath string // Full path to the newly generated export file
+	NumberOfCdrs     int    // Number of CDRs in the export file
 }
 
 func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *ExportedCsvCdrs) error {
 	var tStart, tEnd time.Time
 	var err error
-	if len(attr.TimeStart) !=0 {
-		if tStart, err = utils.ParseDate( attr.TimeStart ); err != nil {
+	if len(attr.TimeStart) != 0 {
+		if tStart, err = utils.ParseDate(attr.TimeStart); err != nil {
 			return err
 		}
 	}
-	if len(attr.TimeEnd) !=0 {
-		if tEnd, err = utils.ParseDate( attr.TimeEnd ); err != nil {
+	if len(attr.TimeEnd) != 0 {
+		if tEnd, err = utils.ParseDate(attr.TimeEnd); err != nil {
 			return err
 		}
 	}
@@ -54,7 +54,7 @@ func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *ExportedCsvCdrs)
 	if err != nil {
 		return err
 	}
-	fileName := path.Join(self.Config.CDRSExportPath, "cgr", "csv", fmt.Sprintf("cdrs_%d.csv",time.Now().Unix()))
+	fileName := path.Join(self.Config.CDRSExportPath, "cgr", "csv", fmt.Sprintf("cdrs_%d.csv", time.Now().Unix()))
 	fileOut, err := os.Create(fileName)
 	if err != nil {
 		return err
@@ -63,15 +63,12 @@ func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *ExportedCsvCdrs)
 	}
 	csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CDRSExportExtraFields)
 	for _, cdr := range cdrs {
-		if err := csvWriter.Write( cdr.(*utils.RatedCDR) ); err != nil {
+		if err := csvWriter.Write(cdr.(*utils.RatedCDR)); err != nil {
 			os.Remove(fileName)
 			return err
 		}
 	}
 	csvWriter.Close()
-	*reply = ExportedCsvCdrs{ fileName, len(cdrs) }
+	*reply = ExportedCsvCdrs{fileName, len(cdrs)}
 	return nil
 }
-	
-	
-
