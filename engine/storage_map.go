@@ -142,6 +142,11 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+func (ms *MapStorage) ExistsDestination(destId string) (bool, error) {
+	_, exists := ms.dict[DESTINATION_PREFIX+destId]
+	return exists, nil
+}
+
 func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)

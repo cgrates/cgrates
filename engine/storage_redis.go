@@ -219,6 +219,10 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
+func (rs *RedisStorage) ExistsDestination(destId string) (bool, error) {
+	return rs.db.Exists(DESTINATION_PREFIX+destId)
+}
+
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {

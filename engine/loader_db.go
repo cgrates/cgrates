@@ -167,7 +167,11 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 				}
 			}
 			if !destinationExists {
-				return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationsTag))
+				if dbExists, err := dbr.dataDb.ExistsDestination(dr.DestinationsTag); err != nil {
+					return err
+				} else if !dbExists {
+					return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationsTag))
+				}
 			}
 		}
 	}
@@ -280,13 +284,20 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				}
 				resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, &RatingPlanActivation{at, ratingProfile.DestRatesTimingTag})
 				dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
-				if err != nil || len(dms) == 0 {
+				if err != nil  {
 					return fmt.Errorf("Could not get destination id %s: %v", drate.DestinationsTag, err)
-				}
-				Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationsTag, dms))
-				for _, destination := range dms {
-					Logger.Debug(fmt.Sprintf("Destination: %v", rpm))
-					dbr.dataDb.SetDestination(destination)
+				} else if len(dms) == 0 {
+					if dbExists, err := dbr.dataDb.ExistsDestination(drate.DestinationsTag); err != nil {
+						return err
+					} else if !dbExists {
+						return fmt.Errorf("Could not get destination for tag %v", drate.DestinationsTag)
+					}
+				} else {
+					Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationsTag, dms))
+					for _, destination := range dms {
+						Logger.Debug(fmt.Sprintf("Destination: %v", rpm))
+						dbr.dataDb.SetDestination(destination)
+					}
 				}
 			}
 		}

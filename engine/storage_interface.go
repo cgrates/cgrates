@@ -71,6 +71,7 @@ type DataStorage interface {
 	GetDestination(string) (*Destination, error)
 	//	DestinationContainsPrefix(string, string) (int, error)
 	SetDestination(*Destination) error
+	ExistsDestination(string) (bool, error)
 	GetActions(string) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)
