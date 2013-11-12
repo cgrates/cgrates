@@ -139,7 +139,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = loader.LoadDestinationRateTimings()
+	err = loader.LoadRatingPlans()
 	if err != nil {
 		log.Fatal(err)
 	}

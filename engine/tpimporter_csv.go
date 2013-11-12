@@ -43,8 +43,8 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.DESTINATIONS_CSV:      (*TPCSVImporter).importDestinations,
 	utils.RATES_CSV:             (*TPCSVImporter).importRates,
 	utils.DESTINATION_RATES_CSV: (*TPCSVImporter).importDestinationRates,
-	utils.RATING_PLANS_CSV:  (*TPCSVImporter).importRatingPlans,
-	utils.RATING_PROFILES_CSV:     (*TPCSVImporter).importRatingProfiles,
+	utils.RATING_PLANS_CSV:      (*TPCSVImporter).importRatingPlans,
+	utils.RATING_PROFILES_CSV:   (*TPCSVImporter).importRatingProfiles,
 	utils.ACTIONS_CSV:           (*TPCSVImporter).importActions,
 	utils.ACTION_TIMINGS_CSV:    (*TPCSVImporter).importActionTimings,
 	utils.ACTION_TRIGGERS_CSV:   (*TPCSVImporter).importActionTriggers,
@@ -210,7 +210,7 @@ func (self *TPCSVImporter) importRatingPlans(fn string) error {
 			Weight:              weight,
 			TimingTag:           record[2],
 		}
-		if err := self.StorDb.SetTPDestRateTimings(self.TPid, map[string][]*DestinationRateTiming{drt.Tag: []*DestinationRateTiming{drt}}); err != nil {
+		if err := self.StorDb.SetTPRatingPlans(self.TPid, map[string][]*DestinationRateTiming{drt.Tag: []*DestinationRateTiming{drt}}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}

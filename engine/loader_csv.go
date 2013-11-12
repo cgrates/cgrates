@@ -290,7 +290,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 	return
 }
 
-func (csvr *CSVReader) LoadDestinationRateTimings() (err error) {
+func (csvr *CSVReader) LoadRatingPlans() (err error) {
 	csvReader, fp, err := csvr.readerFunc(csvr.destinationratetimingsFn, csvr.sep, utils.DESTRATE_TIMINGS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load rate timings file: ", err)

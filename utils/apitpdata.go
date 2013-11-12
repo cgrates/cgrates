@@ -47,13 +47,13 @@ type DestinationRate struct {
 	RateId        string // The rate identity
 }
 
-type TPDestRateTiming struct {
+type TPRatingPlan struct {
 	TPid             string           // Tariff plan id
-	DestRateTimingId string           // DestinationRate profile id
-	DestRateTimings  []DestRateTiming // Set of destinationid-rateid bindings
+	RatingPlanId     string           // RatingPlan profile id
+	RatingPlans  []RatingPlan // Set of destinationid-rateid bindings
 }
 
-type DestRateTiming struct {
+type RatingPlan struct {
 	DestRatesId string  // The DestinationRate identity
 	TimingId    string  // The timing identity
 	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot

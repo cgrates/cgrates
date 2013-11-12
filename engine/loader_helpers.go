@@ -38,7 +38,7 @@ type TPLoader interface {
 	LoadRates() error
 	LoadDestinationRates() error
 	LoadTimings() error
-	LoadDestinationRateTimings() error
+	LoadRatingPlans() error
 	LoadRatingProfiles() error
 	LoadActions() error
 	LoadActionTimings() error

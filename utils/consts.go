@@ -23,7 +23,7 @@ const (
 	TBL_TP_DESTINATIONS      = "tp_destinations"
 	TBL_TP_RATES             = "tp_rates"
 	TBL_TP_DESTINATION_RATES = "tp_destination_rates"
-	TBL_TP_DESTRATE_TIMINGS  = "tp_destrate_timings"
+	TBL_TP_RATING_PLANS      = "tp_rating_plans"
 	TBL_TP_RATE_PROFILES     = "tp_rating_profiles"
 	TBL_TP_ACTIONS           = "tp_actions"
 	TBL_TP_ACTION_TIMINGS    = "tp_action_timings"

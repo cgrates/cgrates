@@ -174,8 +174,8 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 	return nil
 }
 
-func (dbr *DbReader) LoadDestinationRateTimings() error {
-	drts, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, "")
+func (dbr *DbReader) LoadRatingPlans() error {
+	drts, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 		if err != nil {
 			return fmt.Errorf("Cannot parse activation time from %v", ratingProfile.ActivationTime)
 		}
-		drtm, err := dbr.storDb.GetTpDestinationRateTimings(dbr.tpid, ratingProfile.DestRatesTimingTag)
+		drtm, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, ratingProfile.DestRatesTimingTag)
 		if err != nil || len(drtm) == 0 {
 			return fmt.Errorf("No DestRateTimings profile with id %s: %v", ratingProfile.DestRatesTimingTag, err)
 		}

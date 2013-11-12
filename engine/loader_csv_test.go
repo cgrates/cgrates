@@ -127,7 +127,7 @@ func init() {
 	csvr.LoadTimings()
 	csvr.LoadRates()
 	csvr.LoadDestinationRates()
-	csvr.LoadDestinationRateTimings()
+	csvr.LoadRatingPlans()
 	csvr.LoadRatingProfiles()
 	csvr.LoadActions()
 	csvr.LoadActionTimings()
