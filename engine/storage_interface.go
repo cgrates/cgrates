@@ -50,6 +50,9 @@ const (
 	MEDIATOR_SOURCE        = "MED"
 	SCHED_SOURCE           = "SCH"
 	RATER_SOURCE           = "RAT"
+	DESTINATION           = "destination"
+	RATING_PLAN            = "rating_plan"
+	
 )
 
 type Storage interface {
@@ -63,6 +66,7 @@ Interface for storage providers.
 type DataStorage interface {
 	Storage
 	PreCache([]string, []string) error
+	ExistsData(string, string)(bool, error)
 	GetRatingPlan(string) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string) (*RatingProfile, error)

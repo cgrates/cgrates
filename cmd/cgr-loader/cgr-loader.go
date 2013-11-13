@@ -28,6 +28,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"log"
 	"path"
+	"net/rpc"
+	"net/rpc/jsonrpc"
 )
 
 var (
@@ -56,7 +58,8 @@ var (
 	verbose       = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	fromStorDb    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	historyServer = flag.String("history_server", "", "The history server address:port")
+	historyServer = flag.String("history_server", cgrConfig.HistoryServer, "The history server address:port, empty to disable automaticautomatic  history archiving")
+	raterAddress  = flag.String("rater_address", cgrConfig.RaterListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
 	rpcEncoding   = flag.String("rpc_encoding", "json", "The history server rpc encoding json|gob")
 	runId         = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )
@@ -91,10 +94,36 @@ func main() {
 			log.Fatalf("Could not open database connection: %v", err)
 		}
 	}
+	var rater *rpc.Client
+	if !*toStorDb { // Connections to history and rater
+		if *historyServer != "" { // Init scribeAgent
+			if scribeAgent, err := history.NewProxyScribe(*historyServer, *rpcEncoding); err != nil {
+				log.Fatalf("Could not connect to history server: %s. Make sure you have properly configured it via -history_server flag." + err.Error())
+				return
+			} else {
+				engine.SetHistoryScribe(scribeAgent)
+				gob.Register(&engine.Destination{})
+				defer scribeAgent.Client.Close()
+			}
+		} else {
+			log.Print("WARNING: Rates history archiving is disabled!")
+		}
+		if *raterAddress != "" {
+			if *rpcEncoding == "json" {
+				rater, err = jsonrpc.Dial("tcp", *raterAddress)
+			} else {
+				rater, err = rpc.Dial("tcp", *raterAddress)
+			}
+			if err != nil {
+				log.Fatalf("Could not connect to rater: %s", err.Error())
+				return
+			}
+		} else {
+			log.Print("WARNING: Rates automatic cache reloading is disabled!")
+		}
+	}
 	var loader engine.TPLoader
-	if *fromStorDb { // Load Tariff Plan from storDb into dataDb
-		loader = engine.NewDbReader(storDb, dataDb, *tpid)
-	} else if *toStorDb { // Import files from a directory into storDb
+	if *toStorDb { // Import files from a directory into storDb
 		if *tpid == "" {
 			log.Fatal("TPid required, please define it via *-tpid* command argument.")
 		}
@@ -103,6 +132,10 @@ func main() {
 			log.Fatal(errImport)
 		}
 		return
+	}
+
+	if *fromStorDb { // Load Tariff Plan from storDb into dataDb
+		loader = engine.NewDbReader(storDb, dataDb, *tpid)
 	} else { // Default load from csv files to dataDb
 		for fn, v := range engine.FileValidators {
 			err := engine.ValidateCSVData(path.Join(*dataPath, fn), v.Rule)
@@ -113,16 +146,6 @@ func main() {
 		loader = engine.NewFileCSVReader(dataDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
 	}
 
-	if *historyServer != "" {
-		if scribeAgent, err := history.NewProxyScribe(*historyServer, *rpcEncoding); err != nil {
-			log.Fatal("Could not connect to history server:" + err.Error())
-			return
-		} else {
-			engine.SetHistoryScribe(scribeAgent)
-			gob.Register(&engine.Destination{})
-			defer scribeAgent.Client.Close()
-		}
-	}
 	err = loader.LoadDestinations()
 	if err != nil {
 		log.Fatal(err)
@@ -167,5 +190,14 @@ func main() {
 	// write maps to database
 	if err := loader.WriteToDatabase(*flush, *verbose); err != nil {
 		log.Fatal("Could not write to database: ", err)
+	}
+	// Reload cache
+	if rater != nil {
+		//ToDo: only reload for destinations and rating plans we have loaded
+		// For this will need to export Destinations and RatingPlans loaded or a method providing their keys
+		reply := ""
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{}, &reply); err!=nil { 
+			log.Fatalf("Got error on cache reload: %s", err.Error())
+		}
 	}
 }

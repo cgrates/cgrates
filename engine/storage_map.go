@@ -60,6 +60,19 @@ func (ms *MapStorage) PreCache(dKeys, rppKeys []string) error {
 	return nil
 }
 
+// Used to check if specific subject is stored using prefix key attached to entity
+func (ms *MapStorage) ExistsData(categ, subject string) (bool, error) {
+	switch categ {
+	case DESTINATION:
+		_, exists := ms.dict[DESTINATION_PREFIX+subject]
+		return exists, nil
+	case RATING_PLAN:
+		_, exists := ms.dict[RATING_PLAN_PREFIX+subject]
+		return exists, nil
+	}
+	return false, errors.New("Unsupported category")
+}
+
 func (ms *MapStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*RatingPlan), nil

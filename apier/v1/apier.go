@@ -316,3 +316,12 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	*reply = utils.ERR_NOT_FOUND
 	return errors.New(utils.ERR_NOT_FOUND)
 }
+
+func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
+	if err := self.DataDb.PreCache(attrs.DestinationIds, attrs.RatingPlanIds); err!= nil {
+		return err
+	}
+	*reply = "OK"
+	return nil
+}
+

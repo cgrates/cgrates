@@ -140,3 +140,9 @@ type ApiTPAccountActions struct {
 	ActionTimingsId  string // Id of ActionTimings profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
 }
+
+type ApiReloadCache struct {
+	DestinationIds      []string
+	RatingPlanIds       []string
+}
+

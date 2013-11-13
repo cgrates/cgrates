@@ -167,9 +167,9 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 				}
 			}
 			if !destinationExists {
-				if dest, err := dbr.dataDb.GetDestination(dr.DestinationsTag); err != nil {
+				if dbExists, err := dbr.dataDb.ExistsData(DESTINATION, dr.DestinationsTag); err != nil {
 					return err
-				} else if dest == nil {
+				} else if !dbExists {
 					return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationsTag))
 				}
 			}
@@ -218,9 +218,9 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		}
 		_, exists := dbr.ratingPlans[rp.DestRatesTimingTag]
 		if !exists {
-			if rpl, err := dbr.dataDb.GetRatingPlan(rp.DestRatesTimingTag); err != nil {
+			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN, rp.DestRatesTimingTag); err != nil {
 				return err
-			} else if rpl == nil {
+			} else if !dbExists {
 				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.DestRatesTimingTag))
 			}
 		}
@@ -265,12 +265,15 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 			ratingPlan.AddRateInterval(drate.DestinationsTag, rp.GetRateInterval(drate))
 
 			dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
-			if err != nil || len(dms) == 0 {
-				if dest, err := dbr.dataDb.GetDestination(drate.DestinationsTag); err != nil {
+			if err != nil {
+				return err
+			} else if len(dms) == 0 {
+				if dbExists, err := dbr.dataDb.ExistsData(DESTINATION, drate.DestinationsTag); err != nil {
 					return err
-				} else if dest == nil {
+				} else if !dbExists {
 					return fmt.Errorf("Could not get destination for tag %v", drate.DestinationsTag)
 				}
+				continue
 			}
 			Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationsTag, dms))
 			for _, destination := range dms {
@@ -294,6 +297,15 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 		at, err := utils.ParseDate(ratingProfile.ActivationTime)
 		if err != nil {
 			return fmt.Errorf("Cannot parse activation time from %v", ratingProfile.ActivationTime)
+		}
+		// Check if referenced RatingPlan exists
+		_, exists := dbr.ratingPlans[ratingProfile.DestRatesTimingTag]
+		if !exists {
+			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN, ratingProfile.DestRatesTimingTag); err != nil {
+				return err
+			} else if !dbExists {
+				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", ratingProfile.DestRatesTimingTag))
+			}
 		}
 		resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, &RatingPlanActivation{at, ratingProfile.DestRatesTimingTag, ratingProfile.FallbackKeys})
 	}

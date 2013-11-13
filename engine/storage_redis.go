@@ -30,6 +30,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"errors"
 )
 
 type RedisStorage struct {
@@ -103,6 +104,18 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 	}
 	return
 }
+
+// Used to check if specific subject is stored using prefix key attached to entity
+func (rs *RedisStorage) ExistsData(entity, subject string) (bool, error) {
+	switch entity {
+	case DESTINATION: 
+		return rs.db.Exists(DESTINATION_PREFIX+subject)
+	case RATING_PLAN:
+		return rs.db.Exists(RATING_PLAN_PREFIX+subject)
+	}
+	return false, errors.New("Unsupported entity in ExistsData")
+}
+
 
 func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
