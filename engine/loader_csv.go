@@ -277,7 +277,11 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 			}
 		}
 		if !destinationExists {
-			return errors.New(fmt.Sprintf("Could not get destination for tag %v", record[1]))
+			if dbExists, err := csvr.storage.ExistsDestination(record[1]); err != nil {
+				return err
+			} else if !dbExists {
+				return fmt.Errorf("Could not get destination for tag %v", record[1])
+			}
 		}
 		dr := &DestinationRate{
 			Tag:             tag,
@@ -347,7 +351,11 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		}
 		_, exists := csvr.ratingPlans[record[5]]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not load destination rate timings for tag: %v", record[5]))
+			if dbExists, err := csvr.storage.ExistsRatingPlan(record[5]); err != nil {
+				return err
+			} else if !dbExists {
+				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", record[5]))
+			}
 		}
 		rp.RatingPlanActivations = append(rp.RatingPlanActivations, &RatingPlanActivation{at, record[5]})
 		if fallbacksubject != "" {
