@@ -560,11 +560,11 @@ func TestLoadRatingProfiles(t *testing.T) {
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
 	expected := &RatingProfile{
-		Id:          "*out:test:0:trp",
-		FallbackKey: "*out:test:0:rif;*out:test:0:danb",
+		Id: "*out:test:0:trp",
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime: time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 			RatingPlanId:   "TDRT",
+			FallbackKeys:   []string{"*out:test:0:rif", "*out:test:0:danb"},
 		}},
 	}
 	if !reflect.DeepEqual(rp, expected) {

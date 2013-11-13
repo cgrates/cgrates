@@ -35,8 +35,8 @@ func TestApRestoreFromStorage(t *testing.T) {
 		Subject:     "rif:from:tm",
 		Destination: "49"}
 	cd.LoadRatingPlans()
-	if len(cd.RatingInfos) != 2 {
-		t.Error("Error restoring activation periods: ", cd.RatingInfos)
+	if len(cd.RatingInfos) != 1 {
+		t.Errorf("Error restoring activation periods: %+v", cd.RatingInfos[0])
 	}
 }
 
@@ -94,7 +94,7 @@ func TestFallbackMultiple(t *testing.T) {
 		Subject:     "fall",
 		Destination: "0723045"}
 	cd.LoadRatingPlans()
-	if len(cd.RatingInfos) != 2 {
+	if len(cd.RatingInfos) != 1 {
 		t.Errorf("Error restoring rating plans: %+v", cd.RatingInfos)
 	}
 }
@@ -197,6 +197,22 @@ func TestApAddRateIntervalGroups(t *testing.T) {
 	}
 	if len(ap.RateIntervalList("NAT")[0].Rating.Rates) != 1 {
 		t.Errorf("Group prices not formed: %#v", ap.RateIntervalList("NAT")[0].Rating.Rates[0])
+	}
+}
+
+func TestGetActiveForCall(t *testing.T) {
+	rpas := RatingPlanActivations{
+		&RatingPlanActivation{ActivationTime: time.Date(2013, 1, 1, 0, 0, 0, 0, time.UTC)},
+		&RatingPlanActivation{ActivationTime: time.Date(2013, 11, 12, 11, 40, 0, 0, time.UTC)},
+		&RatingPlanActivation{ActivationTime: time.Date(2013, 11, 13, 0, 0, 0, 0, time.UTC)},
+	}
+	cd := &CallDescriptor{
+		TimeStart: time.Date(2013, 11, 12, 11, 39, 0, 0, time.UTC),
+		TimeEnd:   time.Date(2013, 11, 12, 11, 45, 0, 0, time.UTC),
+	}
+	active := rpas.GetActiveForCall(cd)
+	if len(active) != 2 {
+		t.Errorf("Error getting active rating plans: %+v", active)
 	}
 }
 

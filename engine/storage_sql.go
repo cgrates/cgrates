@@ -1104,12 +1104,11 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*Ratin
 		if fallback_subject != "" {
 			for _, fbs := range strings.Split(fallback_subject, ";") {
 				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
-				var sslice utils.StringSlice = strings.Split(rp.FallbackKey, ";")
+				var sslice utils.StringSlice = rp.FallbackKeys
 				if !sslice.Contains(newKey) {
-					rp.FallbackKey += newKey + ";"
+					rp.FallbackKeys = append(rp.FallbackKeys, newKey)
 				}
 			}
-			rp.FallbackKey = strings.TrimRight(rp.FallbackKey, ";")
 		}
 	}
 	return rpfs, nil

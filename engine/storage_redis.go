@@ -141,10 +141,6 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	return
 }
 
-func (rs *RedisStorage) ExistsRatingPlan(rpId string) (bool, error) {
-	return rs.db.Exists(RATING_PLAN_PREFIX + rpId)
-}
-
 func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
 	var values string
 	if values, err = rs.db.Get(RATING_PROFILE_PREFIX + key); err == nil {
@@ -217,10 +213,6 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
 	return
-}
-
-func (rs *RedisStorage) ExistsDestination(destId string) (bool, error) {
-	return rs.db.Exists(DESTINATION_PREFIX+destId)
 }
 
 func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {

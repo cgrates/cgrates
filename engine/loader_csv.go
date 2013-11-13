@@ -357,17 +357,20 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", record[5]))
 			}
 		}
-		rp.RatingPlanActivations = append(rp.RatingPlanActivations, &RatingPlanActivation{at, record[5]})
+		rpa := &RatingPlanActivation{
+			ActivationTime: at,
+			RatingPlanId:   record[5],
+		}
 		if fallbacksubject != "" {
+			var sslice utils.StringSlice = rpa.FallbackKeys
 			for _, fbs := range strings.Split(fallbacksubject, ";") {
 				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
-				var sslice utils.StringSlice = strings.Split(rp.FallbackKey, ";")
 				if !sslice.Contains(newKey) {
-					rp.FallbackKey += newKey + ";"
+					rpa.FallbackKeys = append(rpa.FallbackKeys, newKey)
 				}
 			}
-			rp.FallbackKey = strings.TrimRight(rp.FallbackKey, ";")
 		}
+		rp.RatingPlanActivations = append(rp.RatingPlanActivations, rpa)
 		csvr.ratingProfiles[rp.Id] = rp
 	}
 	return
