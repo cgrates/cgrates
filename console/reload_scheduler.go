@@ -23,7 +23,7 @@ import (
 )
 
 func init() {
-	commands["reload_balancer"] = &CmdReloadScheduler{}
+	commands["reload_scheduler"] = &CmdReloadScheduler{}
 }
 
 // Commander implementation
@@ -46,6 +46,7 @@ func (self *CmdReloadScheduler) defaults() error {
 
 // Parses command line args and builds CmdBalance value
 func (self *CmdReloadScheduler) FromArgs(args []string) error {
+	self.defaults()
 	return nil
 }
 

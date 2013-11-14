@@ -1168,9 +1168,8 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 	return as, nil
 }
 
-func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*ActionTiming, err error) {
-	ats = make(map[string][]*ActionTiming)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid)
+func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (map[string][]*utils.ApiActionTiming, error) {
+	q := fmt.Sprintf("SELECT tag,actions_tag,timing_tag,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
 	}
@@ -1179,19 +1178,17 @@ func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*
 		return nil, err
 	}
 	defer rows.Close()
+	ats := make(map[string][]*utils.ApiActionTiming)
 	for rows.Next() {
-		var id int
 		var weight float64
-		var tpid, tag, actions_tag, timings_tag string
-		if err := rows.Scan(&id, &tpid, &tag, &actions_tag, &timings_tag, &weight); err != nil {
+		var tag, actions_tag, timing_tag string
+		if err := rows.Scan(&tag, &actions_tag, &timing_tag, &weight); err != nil {
 			return nil, err
 		}
-
-		at := &ActionTiming{
-			Id:        utils.GenUUID(),
-			Tag:       timings_tag,
-			Weight:    weight,
-			ActionsId: actions_tag,
+		at := &utils.ApiActionTiming {
+			ActionsId: tag,
+			TimingId: timing_tag,
+			Weight: weight,
 		}
 		ats[tag] = append(ats[tag], at)
 	}

@@ -59,7 +59,7 @@ var (
 	fromStorDb    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 	historyServer = flag.String("history_server", cgrConfig.HistoryServer, "The history server address:port, empty to disable automaticautomatic  history archiving")
-	raterAddress  = flag.String("rater_address", cgrConfig.RaterListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
+	raterAddress  = flag.String("rater_address", cgrConfig.MediatorRater, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
 	rpcEncoding   = flag.String("rpc_encoding", "json", "The history server rpc encoding json|gob")
 	runId         = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )

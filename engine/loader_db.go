@@ -322,19 +322,19 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 	if err != nil {
 		return err
 	}
-	for tag, ats := range atsMap {
-		for _, at := range ats.ActionTimings {
+	for atId, ats := range atsMap {
+		for _, at := range ats {
 			_, exists := dbr.actions[at.ActionsId]
 			if !exists {
 				return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", at.ActionsId))
 			}
-			t, exists := dbr.timings[ats.ActionTimingsId]
+			t, exists := dbr.timings[atId]
 			if !exists {
-				return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", ats.ActionTimingsId))
+				return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", atId))
 			}
 			actTmg := &ActionTiming{
 				Id:     utils.GenUUID(),
-				Tag:    ats.ActionTimingsId,
+				Tag:    atId,
 				Weight: at.Weight,
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -346,7 +346,7 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 				},
 				ActionsId: at.ActionsId,
 			}
-			dbr.actionsTimings[tag] = append(dbr.actionsTimings[tag], actTmg)
+			dbr.actionsTimings[atId] = append(dbr.actionsTimings[atId], actTmg)
 		}
 	}
 	return err
@@ -438,23 +438,23 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 		}
 		var actionTimings []*ActionTiming
 		ats := actionTimingsMap[accountAction.ActionTimingsTag]
-		for _, at := range ats.ActionTimings {
+		for _, at := range ats {
 			existsAction, err := dbr.storDb.ExistsTPActions(dbr.tpid, at.ActionsId)
 			if err != nil {
 				return err
 			} else if !existsAction {
 				return fmt.Errorf("No Action with id <%s>", at.ActionsId)
 			}
-			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, ats.ActionTimingsId)
+			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, accountAction.ActionTimingsTag)
 			if err != nil {
 				return err
 			} else if len(timingsMap) == 0 {
-				return fmt.Errorf("No Timing with id <%s>", ats.ActionTimingsId)
+				return fmt.Errorf("No Timing with id <%s>", accountAction.ActionTimingsTag)
 			}
-			t := timingsMap[ats.ActionTimingsId]
+			t := timingsMap[accountAction.ActionTimingsTag]
 			actTmg := &ActionTiming{
 				Id:     utils.GenUUID(),
-				Tag:    ats.ActionTimingsId,
+				Tag:    accountAction.ActionTimingsTag,
 				Weight: at.Weight,
 				Timing: &RateInterval{
 					Timing: &RITiming{

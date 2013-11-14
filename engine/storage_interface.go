@@ -147,7 +147,7 @@ type LoadStorage interface {
 	GetTpRatingPlans(string, string) (*utils.TPRatingPlan, error)
 	GetTpRatingProfiles(string, string) (map[string]*utils.TPRatingProfile, error)
 	GetTpActions(string, string) (map[string][]*Action, error)
-	GetTpActionTimings(string, string) (map[string]utils.ApiTPActionTimings, error)
+	GetTpActionTimings(string, string) (map[string][]*utils.ApiActionTiming, error)
 	GetTpActionTriggers(string, string) (map[string][]*utils.ApiActionTrigger, error)
 	GetTpAccountActions(string, string) (map[string]*AccountAction, error)
 }
