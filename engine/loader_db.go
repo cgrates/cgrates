@@ -167,10 +167,10 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 				}
 			}
 			if !destinationExists {
-				if dbExists, err := dbr.dataDb.ExistsData(DESTINATION, dr.DestinationsTag); err != nil {
+				if dbExists, err := dbr.dataDb.ExistsData(DESTINATION, dr.DestinationId); err != nil {
 					return err
 				} else if !dbExists {
-					return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationsTag))
+					return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationId))
 				}
 			}
 		}
@@ -219,10 +219,10 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		}
 		_, exists := dbr.ratingPlans[rp.RatingPlanId]
 		if !exists {
-			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN, rp.DestRatesTimingTag); err != nil {
+			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN, rp.RatingPlanId); err != nil {
 				return err
 			} else if !dbExists {
-				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.DestRatesTimingTag))
+				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.RatingPlanId))
 			}
 		}
 		rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
@@ -264,14 +264,14 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 			drate.Rate = rt[drate.RateId]
 			ratingPlan.AddRateInterval(drate.DestinationId, GetRateInterval(rp, drate))
 
-			dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
+			dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationId)
 			if err != nil {
 				return err
 			} else if len(dms) == 0 {
-				if dbExists, err := dbr.dataDb.ExistsData(DESTINATION, drate.DestinationsTag); err != nil {
+				if dbExists, err := dbr.dataDb.ExistsData(DESTINATION, drate.DestinationId); err != nil {
 					return err
 				} else if !dbExists {
-					return fmt.Errorf("Could not get destination for tag %v", drate.DestinationsTag)
+					return fmt.Errorf("Could not get destination for tag %v", drate.DestinationId)
 				}
 				continue
 			}
@@ -299,12 +299,12 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 			return fmt.Errorf("Cannot parse activation time from %v", rp.ActivationTime)
 		}
 		// Check if referenced RatingPlan exists
-		_, exists := dbr.ratingPlans[ratingProfile.DestRatesTimingTag]
+		_, exists := dbr.ratingPlans[rp.RatingPlanId]
 		if !exists {
-			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN, ratingProfile.DestRatesTimingTag); err != nil {
+			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN, rp.RatingPlanId); err != nil {
 				return err
 			} else if !dbExists {
-				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", ratingProfile.DestRatesTimingTag))
+				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.RatingPlanId))
 			}
 		}
 		resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, &RatingPlanActivation{at, rp.RatingPlanId, rp.FallbackKeys})
