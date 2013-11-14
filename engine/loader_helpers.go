@@ -47,15 +47,15 @@ type TPLoader interface {
 	WriteToDatabase(bool, bool) error
 }
 
-type LoadRate struct {
+/*type LoadRate struct {
 	Tag                                         string
 	ConnectFee, Price                           float64
 	RateUnit, RateIncrement, GroupIntervalStart time.Duration
 	RoundingMethod                              string
 	RoundingDecimals                            int
-}
+}*/
 
-func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals string) (r *LoadRate, err error) {
+func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals string) (r *utils.TPRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -87,20 +87,24 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		return
 	}
 
-	r = &LoadRate{
-		Tag:                tag,
-		ConnectFee:         cf,
-		Price:              p,
-		GroupIntervalStart: gi,
-		RateUnit:           ru,
-		RateIncrement:      ri,
-		RoundingMethod:     roundingMethod,
-		RoundingDecimals:   rd,
+	r = &utils.TPRate{
+		RateId: tag,
+		RateSlots: []*utils.RateSlot{
+			&utils.RateSlot{
+				ConnectFee:         cf,
+				Rate:               p,
+				GroupIntervalStart: gi,
+				RateUnit:           ru,
+				RateIncrement:      ri,
+				RoundingMethod:     roundingMethod,
+				RoundingDecimals:   rd,
+			},
+		},
 	}
 	return
 }
 
-func (present *LoadRate) ValidNextGroup(next *LoadRate) error {
+func ValidNextGroup(present, next *utils.RateSlot) error {
 	if next.GroupIntervalStart <= present.GroupIntervalStart {
 		return errors.New(fmt.Sprintf("Next rate group interval start must be heigher than the last one: %#v", next))
 	}
@@ -113,24 +117,8 @@ func (present *LoadRate) ValidNextGroup(next *LoadRate) error {
 	return nil
 }
 
-type DestinationRate struct {
-	Tag             string
-	DestinationsTag string
-	RateTag         string // intermediary used when loading from db
-	rates           []*LoadRate
-}
-
-type Timing struct {
-	Id        string
-	Years     Years
-	Months    Months
-	MonthDays MonthDays
-	WeekDays  WeekDays
-	StartTime string
-}
-
-func NewTiming(timingInfo ...string) (rt *Timing) {
-	rt = &Timing{}
+func NewTiming(timingInfo ...string) (rt *utils.TPTiming) {
+	rt = &utils.TPTiming{}
 	rt.Id = timingInfo[0]
 	rt.Years.Parse(timingInfo[1], ";")
 	rt.Months.Parse(timingInfo[2], ";")
@@ -140,47 +128,39 @@ func NewTiming(timingInfo ...string) (rt *Timing) {
 	return
 }
 
-type DestinationRateTiming struct {
-	Tag                 string
-	DestinationRatesTag string // intermediary used when loading from db
-	Weight              float64
-	TimingTag           string // intermediary used when loading from db
-	timing              *Timing
-}
-
-func NewDestinationRateTiming(timing *Timing, weight string) (drt *DestinationRateTiming) {
+func NewRatingPlan(timing *utils.TPTiming, weight string) (drt *utils.RatingPlan) {
 	w, err := strconv.ParseFloat(weight, 64)
 	if err != nil {
 		log.Printf("Error parsing weight unit from: %v", weight)
 		return
 	}
-	drt = &DestinationRateTiming{
-		timing: timing,
+	drt = &utils.RatingPlan{
+		Timing: timing,
 		Weight: w,
 	}
 	return
 }
 
-func (drt *DestinationRateTiming) GetRateInterval(dr *DestinationRate) (i *RateInterval) {
+func GetRateInterval(rpl *utils.RatingPlan, dr *utils.DestinationRate) (i *RateInterval) {
 	i = &RateInterval{
 		Timing: &RITiming{
-			Years:     drt.timing.Years,
-			Months:    drt.timing.Months,
-			MonthDays: drt.timing.MonthDays,
-			WeekDays:  drt.timing.WeekDays,
-			StartTime: drt.timing.StartTime,
+			Years:     rpl.Timing.Years,
+			Months:    rpl.Timing.Months,
+			MonthDays: rpl.Timing.MonthDays,
+			WeekDays:  rpl.Timing.WeekDays,
+			StartTime: rpl.Timing.StartTime,
 		},
-		Weight: drt.Weight,
+		Weight: rpl.Weight,
 		Rating: &RIRate{
-			ConnectFee:       dr.rates[0].ConnectFee,
-			RoundingMethod:   dr.rates[0].RoundingMethod,
-			RoundingDecimals: dr.rates[0].RoundingDecimals,
+			ConnectFee:       dr.Rate.RateSlots[0].ConnectFee,
+			RoundingMethod:   dr.Rate.RateSlots[0].RoundingMethod,
+			RoundingDecimals: dr.Rate.RateSlots[0].RoundingDecimals,
 		},
 	}
-	for _, rl := range dr.rates {
+	for _, rl := range dr.Rate.RateSlots {
 		i.Rating.Rates = append(i.Rating.Rates, &Rate{
 			GroupIntervalStart: rl.GroupIntervalStart,
-			Value:              rl.Price,
+			Value:              rl.Rate,
 			RateIncrement:      rl.RateIncrement,
 			RateUnit:           rl.RateUnit,
 		})

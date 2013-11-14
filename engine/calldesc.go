@@ -161,13 +161,15 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 	if err != nil || rp == nil {
 		return err
 	}
-	if err = rp.GetRatingPlansForPrefix(cd); err != nil {
+	if err = rp.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
 		// try rating profile fallback
-		if len(rp.FallbackKeys) > 0 {
-			recursionDepth++
-			for _, fbk := range rp.FallbackKeys {
-				if err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
-					return err
+		for _, ri := range cd.RatingInfos {
+			if len(ri.FallbackKeys) > 0 {
+				recursionDepth++
+				for _, fbk := range ri.FallbackKeys {
+					if err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
+						return err
+					}
 				}
 			}
 		}

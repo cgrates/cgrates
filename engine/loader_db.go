@@ -34,9 +34,9 @@ type DbReader struct {
 	actionsTriggers  map[string][]*ActionTrigger
 	accountActions   []*UserBalance
 	destinations     []*Destination
-	timings          map[string]*Timing
-	rates            map[string][]*LoadRate
-	destinationRates map[string][]*DestinationRate
+	timings          map[string]*utils.TPTiming
+	rates            map[string]*utils.TPRate
+	destinationRates map[string]*utils.TPDestinationRate
 	ratingPlans      map[string]*RatingPlan
 	ratingProfiles   map[string]*RatingProfile
 }
@@ -153,15 +153,15 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 		return err
 	}
 	for _, drs := range dbr.destinationRates {
-		for _, dr := range drs {
-			rates, exists := dbr.rates[dr.RateTag]
+		for _, dr := range drs.DestinationRates {
+			rate, exists := dbr.rates[dr.RateId]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not find rate for tag %v", dr.RateTag))
+				return errors.New(fmt.Sprintf("Could not find rate for tag %v", dr.RateId))
 			}
-			dr.rates = rates
+			dr.Rate = rate
 			destinationExists := false
 			for _, d := range dbr.destinations {
-				if d.Id == dr.DestinationsTag {
+				if d.Id == dr.DestinationId {
 					destinationExists = true
 					break
 				}
@@ -183,24 +183,24 @@ func (dbr *DbReader) LoadRatingPlans() error {
 	if err != nil {
 		return err
 	}
-	for _, drt := range drts {
-		t, exists := dbr.timings[drt.TimingTag]
+	for _, drt := range drts.RatingPlans {
+		t, exists := dbr.timings[drt.TimingId]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get timing for tag %v", drt.TimingTag))
+			return errors.New(fmt.Sprintf("Could not get timing for tag %v", drt.TimingId))
 		}
-		drt.timing = t
-		drs, exists := dbr.destinationRates[drt.DestinationRatesTag]
+		drt.Timing = t
+		drs, exists := dbr.destinationRates[drt.DestRatesId]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", drt.DestinationRatesTag))
+			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", drt.DestRatesId))
 		}
 
-		plan, exists := dbr.ratingPlans[drt.Tag]
+		plan, exists := dbr.ratingPlans[drts.RatingPlanId]
 		if !exists {
-			plan = &RatingPlan{Id: drt.Tag}
-			dbr.ratingPlans[drt.Tag] = plan
+			plan = &RatingPlan{Id: drts.RatingPlanId}
+			dbr.ratingPlans[drts.RatingPlanId] = plan
 		}
-		for _, dr := range drs {
-			plan.AddRateInterval(dr.DestinationsTag, drt.GetRateInterval(dr))
+		for _, dr := range drs.DestinationRates {
+			plan.AddRateInterval(dr.DestinationId, GetRateInterval(drt, dr))
 		}
 	}
 	return nil
@@ -212,11 +212,12 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		return err
 	}
 	for _, rp := range rpfs {
+		rpf := &RatingProfile{Id: rp.RatingProfileId}
 		at, err := utils.ParseDate(rp.ActivationTime)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", rp.ActivationTime))
 		}
-		_, exists := dbr.ratingPlans[rp.DestRatesTimingTag]
+		_, exists := dbr.ratingPlans[rp.RatingPlanId]
 		if !exists {
 			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN, rp.DestRatesTimingTag); err != nil {
 				return err
@@ -224,13 +225,13 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.DestRatesTimingTag))
 			}
 		}
-		rp.RatingPlanActivations = append(rp.RatingPlanActivations,
+		rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
 			&RatingPlanActivation{
 				ActivationTime: at,
-				RatingPlanId:   rp.DestRatesTimingTag,
+				RatingPlanId:   rp.RatingPlanId,
 				FallbackKeys:   rp.FallbackKeys,
 			})
-		dbr.ratingProfiles[rp.Id] = rp
+		dbr.ratingProfiles[rpf.Id] = rpf
 	}
 	return nil
 }
@@ -238,31 +239,30 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 	ratingPlan := &RatingPlan{}
 	rps, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, tag)
-	if err != nil || len(rps) == 0 {
+	if err != nil || len(rps.RatingPlans) == 0 {
 		return fmt.Errorf("No DestRateTimings profile with id %s: %v", tag, err)
 	}
-	for _, rp := range rps {
-
+	for _, rp := range rps.RatingPlans {
 		Logger.Debug(fmt.Sprintf("Rating Plan: %v", rp))
-		tm, err := dbr.storDb.GetTpTimings(dbr.tpid, rp.TimingTag)
+		tm, err := dbr.storDb.GetTpTimings(dbr.tpid, rp.TimingId)
 		Logger.Debug(fmt.Sprintf("Timing: %v", tm))
 		if err != nil || len(tm) == 0 {
-			return fmt.Errorf("No Timings profile with id %s: %v", rp.TimingTag, err)
+			return fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
 		}
-		rp.timing = tm[rp.TimingTag]
-		drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestinationRatesTag)
+		rp.Timing = tm[rp.TimingId]
+		drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestRatesId)
 		if err != nil || len(drm) == 0 {
-			return fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesTag, err)
+			return fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestRatesId, err)
 		}
-		for _, drate := range drm[rp.DestinationRatesTag] {
+		for _, drate := range drm[rp.DestRatesId].DestinationRates {
 			Logger.Debug(fmt.Sprintf("Destination rate: %v", drate))
-			rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateTag)
+			rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateId)
 			if err != nil || len(rt) == 0 {
-				return fmt.Errorf("No Rates profile with id %s: %v", drate.RateTag, err)
+				return fmt.Errorf("No Rates profile with id %s: %v", drate.RateId, err)
 			}
 			Logger.Debug(fmt.Sprintf("Rate: %v", rt))
-			drate.rates = rt[drate.RateTag]
-			ratingPlan.AddRateInterval(drate.DestinationsTag, rp.GetRateInterval(drate))
+			drate.Rate = rt[drate.RateId]
+			ratingPlan.AddRateInterval(drate.DestinationId, GetRateInterval(rp, drate))
 
 			dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationsTag)
 			if err != nil {
@@ -275,7 +275,7 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 				}
 				continue
 			}
-			Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationsTag, dms))
+			Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationId, dms))
 			for _, destination := range dms {
 				Logger.Debug(fmt.Sprintf("Destination: %v", destination))
 				dbr.dataDb.SetDestination(destination)
@@ -287,16 +287,16 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 
 func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 	resultRatingProfile := &RatingProfile{}
-	rpm, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
-	if err != nil || len(rpm) == 0 {
+	rpfs, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
+	if err != nil || len(rpfs) == 0 {
 		return fmt.Errorf("No RateProfile with id %s: %v", tag, err)
 	}
-	for _, ratingProfile := range rpm {
-		Logger.Debug(fmt.Sprintf("Rating profile: %v", rpm))
-		resultRatingProfile.Id = ratingProfile.Id // idem
-		at, err := utils.ParseDate(ratingProfile.ActivationTime)
+	for _, rp := range rpfs {
+		Logger.Debug(fmt.Sprintf("Rating profile: %v", rpfs))
+		resultRatingProfile.Id = rp.RatingProfileId
+		at, err := utils.ParseDate(rp.ActivationTime)
 		if err != nil {
-			return fmt.Errorf("Cannot parse activation time from %v", ratingProfile.ActivationTime)
+			return fmt.Errorf("Cannot parse activation time from %v", rp.ActivationTime)
 		}
 		// Check if referenced RatingPlan exists
 		_, exists := dbr.ratingPlans[ratingProfile.DestRatesTimingTag]
@@ -307,7 +307,7 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", ratingProfile.DestRatesTimingTag))
 			}
 		}
-		resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, &RatingPlanActivation{at, ratingProfile.DestRatesTimingTag, ratingProfile.FallbackKeys})
+		resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, &RatingPlanActivation{at, rp.RatingPlanId, rp.FallbackKeys})
 	}
 	return dbr.dataDb.SetRatingProfile(resultRatingProfile)
 }
@@ -323,18 +323,18 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 		return err
 	}
 	for tag, ats := range atsMap {
-		for _, at := range ats {
+		for _, at := range ats.ActionTimings {
 			_, exists := dbr.actions[at.ActionsId]
 			if !exists {
 				return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", at.ActionsId))
 			}
-			t, exists := dbr.timings[at.Tag]
+			t, exists := dbr.timings[ats.ActionTimingsId]
 			if !exists {
-				return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", at.Tag))
+				return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", ats.ActionTimingsId))
 			}
 			actTmg := &ActionTiming{
 				Id:     utils.GenUUID(),
-				Tag:    at.Tag,
+				Tag:    ats.ActionTimingsId,
 				Weight: at.Weight,
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -419,23 +419,24 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 			return fmt.Errorf("No ActionTimings with id <%s>", accountAction.ActionTimingsTag)
 		}
 		var actionTimings []*ActionTiming
-		for _, at := range actionTimingsMap[accountAction.ActionTimingsTag] {
+		ats := actionTimingsMap[accountAction.ActionTimingsTag]
+		for _, at := range ats.ActionTimings {
 			existsAction, err := dbr.storDb.ExistsTPActions(dbr.tpid, at.ActionsId)
 			if err != nil {
 				return err
 			} else if !existsAction {
 				return fmt.Errorf("No Action with id <%s>", at.ActionsId)
 			}
-			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, at.Tag)
+			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, ats.ActionTimingsId)
 			if err != nil {
 				return err
 			} else if len(timingsMap) == 0 {
-				return fmt.Errorf("No Timing with id <%s>", at.Tag)
+				return fmt.Errorf("No Timing with id <%s>", ats.ActionTimingsId)
 			}
-			t := timingsMap[at.Tag]
+			t := timingsMap[ats.ActionTimingsId]
 			actTmg := &ActionTiming{
 				Id:     utils.GenUUID(),
-				Tag:    at.Tag,
+				Tag:    ats.ActionTimingsId,
 				Weight: at.Weight,
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -458,7 +459,7 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 				}
 			}
 			if !found {
-				at.UserBalanceIds = append(exitingUserBalanceIds, id)
+				actTmg.UserBalanceIds = append(exitingUserBalanceIds, id)
 			}
 			actionTimings = append(actionTimings, actTmg)
 		}

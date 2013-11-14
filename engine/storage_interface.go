@@ -104,28 +104,28 @@ type LoadStorage interface {
 	Storage
 	// Apier functions
 	GetTPIds() ([]string, error)
-	SetTPTiming(string, *Timing) error
+	SetTPTiming(string, *utils.TPTiming) error
 	ExistsTPTiming(string, string) (bool, error)
-	GetTPTiming(string, string) (*Timing, error)
+	GetTPTiming(string, string) (*utils.TPTiming, error)
 	GetTPTimingIds(string) ([]string, error)
 	SetTPDestination(string, *Destination) error
 	ExistsTPDestination(string, string) (bool, error)
 	GetTPDestination(string, string) (*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)
 	ExistsTPRate(string, string) (bool, error)
-	SetTPRates(string, map[string][]*LoadRate) error
+	SetTPRates(string, map[string]*utils.TPRate) error
 	GetTPRate(string, string) (*utils.TPRate, error)
 	GetTPRateIds(string) ([]string, error)
 	ExistsTPDestinationRate(string, string) (bool, error)
-	SetTPDestinationRates(string, map[string][]*DestinationRate) error
+	SetTPDestinationRates(string, map[string]*utils.TPDestinationRate) error
 	GetTPDestinationRate(string, string) (*utils.TPDestinationRate, error)
 	GetTPDestinationRateIds(string) ([]string, error)
 	ExistsTPRatingPlan(string, string) (bool, error)
-	SetTPRatingPlans(string, map[string][]*DestinationRateTiming) error
+	SetTPRatingPlans(string, map[string]*utils.TPRatingPlan) error
 	GetTPRatingPlan(string, string) (*utils.TPRatingPlan, error)
 	GetTPRatingPlanIds(string) ([]string, error)
 	ExistsTPRatingProfile(string, string) (bool, error)
-	SetTPRatingProfiles(string, map[string][]*RatingProfile) error
+	SetTPRatingProfiles(string, map[string][]*utils.TPRatingProfile) error
 	GetTPRatingProfile(string, string) (*utils.TPRatingProfile, error)
 	GetTPRatingProfileIds(*utils.AttrTPRatingProfileIds) ([]string, error)
 	ExistsTPActions(string, string) (bool, error)
@@ -133,8 +133,8 @@ type LoadStorage interface {
 	GetTPActions(string, string) (*utils.TPActions, error)
 	GetTPActionIds(string) ([]string, error)
 	ExistsTPActionTimings(string, string) (bool, error)
-	SetTPActionTimings(string, map[string][]*ActionTiming) error
-	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTimingsRow, error)
+	SetTPActionTimings(string, map[string]*utils.ApiTPActionTimings) error
+	GetTPActionTimings(string, string) (map[string]*utils.ApiTPActionTimings, error)
 	GetTPActionTimingIds(string) ([]string, error)
 	ExistsTPActionTriggers(string, string) (bool, error)
 	SetTPActionTriggers(string, map[string][]*ActionTrigger) error
@@ -144,13 +144,13 @@ type LoadStorage interface {
 	GetTPAccountActionIds(string) ([]string, error)
 	// loader functions
 	GetTpDestinations(string, string) ([]*Destination, error)
-	GetTpTimings(string, string) (map[string]*Timing, error)
-	GetTpRates(string, string) (map[string][]*LoadRate, error)
-	GetTpDestinationRates(string, string) (map[string][]*DestinationRate, error)
-	GetTpRatingPlans(string, string) ([]*DestinationRateTiming, error)
-	GetTpRatingProfiles(string, string) (map[string]*RatingProfile, error)
+	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
+	GetTpRates(string, string) (map[string]*utils.TPRate, error)
+	GetTpDestinationRates(string, string) (map[string]*utils.TPDestinationRate, error)
+	GetTpRatingPlans(string, string) (*utils.TPRatingPlan, error)
+	GetTpRatingProfiles(string, string) (map[string]*utils.TPRatingProfile, error)
 	GetTpActions(string, string) (map[string][]*Action, error)
-	GetTpActionTimings(string, string) (map[string][]*ActionTiming, error)
+	GetTpActionTimings(string, string) (map[string]utils.ApiTPActionTimings, error)
 	GetTpActionTriggers(string, string) (map[string][]*ActionTrigger, error)
 	GetTpAccountActions(string, string) (map[string]*AccountAction, error)
 }

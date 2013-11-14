@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
+	"strings"
 )
 
 // Import tariff plan from csv into storDb
@@ -142,7 +143,7 @@ func (self *TPCSVImporter) importRates(fn string) error {
 		if err != nil {
 			return err
 		}
-		if err := self.StorDb.SetTPRates(self.TPid, map[string][]*LoadRate{record[0]: []*LoadRate{rt}}); err != nil {
+		if err := self.StorDb.SetTPRates(self.TPid, map[string]*utils.TPRate{record[0]: rt}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -169,9 +170,17 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 			}
 			continue
 		}
-		dr := &DestinationRate{record[0], record[1], record[2], nil}
+		dr := &utils.TPDestinationRate{
+			DestinationRateId: record[0],
+			DestinationRates: []*utils.DestinationRate{
+				&utils.DestinationRate{
+					DestinationId: record[1],
+					RateId:        record[2],
+				},
+			},
+		}
 		if err := self.StorDb.SetTPDestinationRates(self.TPid,
-			map[string][]*DestinationRate{dr.Tag: []*DestinationRate{dr}}); err != nil {
+			map[string]*utils.TPDestinationRate{dr.DestinationRateId: dr}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -205,12 +214,17 @@ func (self *TPCSVImporter) importRatingPlans(fn string) error {
 			}
 			continue
 		}
-		drt := &DestinationRateTiming{Tag: record[0],
-			DestinationRatesTag: record[1],
-			Weight:              weight,
-			TimingTag:           record[2],
+		drt := &utils.TPRatingPlan{
+			RatingPlanId: record[0],
+			RatingPlans: []*utils.RatingPlan{
+				&utils.RatingPlan{
+					DestRatesId: record[1],
+					Weight:      weight,
+					TimingId:    record[2],
+				},
+			},
 		}
-		if err := self.StorDb.SetTPRatingPlans(self.TPid, map[string][]*DestinationRateTiming{drt.Tag: []*DestinationRateTiming{drt}}); err != nil {
+		if err := self.StorDb.SetTPRatingPlans(self.TPid, map[string]*utils.TPRatingPlan{drt.RatingPlanId: drt}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -249,17 +263,17 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 		if self.ImportId != "" {
 			rpTag += "_" + self.ImportId
 		}
-		rp := &RatingProfile{
-			Tag:                  rpTag,
-			Tenant:               tenant,
-			TOR:                  tor,
-			Direction:            direction,
-			Subject:              subject,
-			ActivationTime:       record[4],
-			DestRatesTimingTag:   destRatesTimingTag,
-			RatesFallbackSubject: fallbacksubject,
+		rp := &utils.TPRatingProfile{
+			Tag:            rpTag,
+			Tenant:         tenant,
+			TOR:            tor,
+			Direction:      direction,
+			Subject:        subject,
+			ActivationTime: record[4],
+			RatingPlanId:   destRatesTimingTag,
+			FallbackKeys:   strings.Split(fallbacksubject, FALLBACK_SEP),
 		}
-		if err := self.StorDb.SetTPRatingProfiles(self.TPid, map[string][]*RatingProfile{rpTag: []*RatingProfile{rp}}); err != nil {
+		if err := self.StorDb.SetTPRatingProfiles(self.TPid, map[string][]*utils.TPRatingProfile{rpTag: []*utils.TPRatingProfile{rp}}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -351,13 +365,17 @@ func (self *TPCSVImporter) importActionTimings(fn string) error {
 			}
 			continue
 		}
-		at := &ActionTiming{
-			Tag:        tag,
-			ActionsTag: actionsTag,
-			TimingsTag: timingTag,
-			Weight:     weight,
+		ats := &utils.ApiTPActionTimings{
+			ActionTimingsId: tag,
+			ActionTimings: []*utils.ApiActionTiming{
+				&utils.ApiActionTiming{
+					ActionsId: actionsTag,
+					TimingId:  timingTag,
+					Weight:    weight,
+				},
+			},
 		}
-		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string][]*ActionTiming{tag: []*ActionTiming{at}}); err != nil {
+		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string]*utils.ApiTPActionTimings{tag: ats}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}

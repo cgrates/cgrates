@@ -27,7 +27,7 @@ import (
 func TestRateIntervalSimpleContains(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
-			WeekDays:  WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+			WeekDays:  utils.WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
 			StartTime: "18:00:00",
 			EndTime:   "",
 		},
@@ -39,7 +39,7 @@ func TestRateIntervalSimpleContains(t *testing.T) {
 }
 
 func TestRateIntervalMonth(t *testing.T) {
-	i := &RateInterval{Timing: &RITiming{Months: Months{time.February}}}
+	i := &RateInterval{Timing: &RITiming{Months: utils.Months{time.February}}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d, false) {
@@ -51,7 +51,7 @@ func TestRateIntervalMonth(t *testing.T) {
 }
 
 func TestRateIntervalMonthDay(t *testing.T) {
-	i := &RateInterval{Timing: &RITiming{MonthDays: MonthDays{10}}}
+	i := &RateInterval{Timing: &RITiming{MonthDays: utils.MonthDays{10}}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d, false) {
@@ -63,7 +63,7 @@ func TestRateIntervalMonthDay(t *testing.T) {
 }
 
 func TestRateIntervalMonthAndMonthDay(t *testing.T) {
-	i := &RateInterval{Timing: &RITiming{Months: Months{time.February}, MonthDays: MonthDays{10}}}
+	i := &RateInterval{Timing: &RITiming{Months: utils.Months{time.February}, MonthDays: utils.MonthDays{10}}}
 	d := time.Date(2012, time.February, 10, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 11, 23, 0, 0, 0, time.UTC)
 	d2 := time.Date(2012, time.January, 10, 23, 0, 0, 0, time.UTC)
@@ -98,8 +98,8 @@ func TestRateIntervalWeekDays(t *testing.T) {
 }
 
 func TestRateIntervalMonthAndMonthDayAndWeekDays(t *testing.T) {
-	i := &RateInterval{Timing: &RITiming{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday}}}
-	i2 := &RateInterval{Timing: &RITiming{Months: Months{time.February}, MonthDays: MonthDays{2}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}}
+	i := &RateInterval{Timing: &RITiming{Months: utils.Months{time.February}, MonthDays: utils.MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday}}}
+	i2 := &RateInterval{Timing: &RITiming{Months: utils.Months{time.February}, MonthDays: utils.MonthDays{2}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}}}
 	d := time.Date(2012, time.February, 1, 23, 0, 0, 0, time.UTC)
 	d1 := time.Date(2012, time.February, 2, 23, 0, 0, 0, time.UTC)
 	if !i.Contains(d, false) {
@@ -139,9 +139,9 @@ func TestRateIntervalHours(t *testing.T) {
 func TestRateIntervalEverything(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
-			Months:    Months{time.February},
-			Years:     Years{2012},
-			MonthDays: MonthDays{1},
+			Months:    utils.Months{time.February},
+			Years:     utils.Years{2012},
+			MonthDays: utils.MonthDays{1},
 			WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 			StartTime: "14:30:00",
 			EndTime:   "15:00:00"}}
@@ -170,14 +170,14 @@ func TestRateIntervalEverything(t *testing.T) {
 func TestRateIntervalEqual(t *testing.T) {
 	i1 := &RateInterval{
 		Timing: &RITiming{
-			Months:    Months{time.February},
-			MonthDays: MonthDays{1},
+			Months:    utils.Months{time.February},
+			MonthDays: utils.MonthDays{1},
 			WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 			StartTime: "14:30:00",
 			EndTime:   "15:00:00"}}
 	i2 := &RateInterval{Timing: &RITiming{
-		Months:    Months{time.February},
-		MonthDays: MonthDays{1},
+		Months:    utils.Months{time.February},
+		MonthDays: utils.MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}}
@@ -189,14 +189,14 @@ func TestRateIntervalEqual(t *testing.T) {
 func TestRateIntervalNotEqual(t *testing.T) {
 	i1 := &RateInterval{
 		Timing: &RITiming{
-			Months:    Months{time.February},
-			MonthDays: MonthDays{1},
+			Months:    utils.Months{time.February},
+			MonthDays: utils.MonthDays{1},
 			WeekDays:  []time.Weekday{time.Wednesday},
 			StartTime: "14:30:00",
 			EndTime:   "15:00:00"}}
 	i2 := &RateInterval{Timing: &RITiming{
-		Months:    Months{time.February},
-		MonthDays: MonthDays{1},
+		Months:    utils.Months{time.February},
+		MonthDays: utils.MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}}
@@ -207,15 +207,15 @@ func TestRateIntervalNotEqual(t *testing.T) {
 
 func TestRitStrigyfy(t *testing.T) {
 	rit1 := &RITiming{
-		Years:     Years{},
-		Months:    Months{time.January, time.February},
-		MonthDays: MonthDays{},
+		Years:     utils.Years{},
+		Months:    utils.Months{time.January, time.February},
+		MonthDays: utils.MonthDays{},
 		StartTime: "00:00:00",
 	}
 	rit2 := &RITiming{
-		Years:     Years{},
-		Months:    Months{time.January, time.February},
-		MonthDays: MonthDays{},
+		Years:     utils.Years{},
+		Months:    utils.Months{time.January, time.February},
+		MonthDays: utils.MonthDays{},
 		StartTime: "00:00:00",
 	}
 	if rit1.Stringify() != rit2.Stringify() {
@@ -286,7 +286,7 @@ func TestRateStrigyfy(t *testing.T) {
 /*********************************Benchmarks**************************************/
 
 func BenchmarkRateIntervalContainsDate(b *testing.B) {
-	i := &RateInterval{Timing: &RITiming{Months: Months{time.February}, MonthDays: MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}}
+	i := &RateInterval{Timing: &RITiming{Months: utils.Months{time.February}, MonthDays: utils.MonthDays{1}, WeekDays: []time.Weekday{time.Wednesday, time.Thursday}, StartTime: "14:30:00", EndTime: "15:00:00"}}
 	d := time.Date(2012, time.February, 1, 14, 30, 0, 0, time.UTC)
 	for x := 0; x < b.N; x++ {
 		i.Contains(d, false)

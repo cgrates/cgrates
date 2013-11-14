@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/json"
+	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
 	"time"
@@ -148,20 +149,20 @@ func TestFallbackNoInfiniteLoopSelf(t *testing.T) {
 func TestApAddIntervalIfNotPresent(t *testing.T) {
 	i1 := &RateInterval{
 		Timing: &RITiming{
-			Months:    Months{time.February},
-			MonthDays: MonthDays{1},
+			Months:    utils.Months{time.February},
+			MonthDays: utils.MonthDays{1},
 			WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 			StartTime: "14:30:00",
 			EndTime:   "15:00:00"}}
 	i2 := &RateInterval{Timing: &RITiming{
-		Months:    Months{time.February},
-		MonthDays: MonthDays{1},
+		Months:    utils.Months{time.February},
+		MonthDays: utils.MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday, time.Thursday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}}
 	i3 := &RateInterval{Timing: &RITiming{
-		Months:    Months{time.February},
-		MonthDays: MonthDays{1},
+		Months:    utils.Months{time.February},
+		MonthDays: utils.MonthDays{1},
 		WeekDays:  []time.Weekday{time.Wednesday},
 		StartTime: "14:30:00",
 		EndTime:   "15:00:00"}}

@@ -54,7 +54,7 @@ func TestRightMargin(t *testing.T) {
 func TestSplitMiddle(t *testing.T) {
 	i := &RateInterval{
 		Timing: &RITiming{
-			WeekDays:  WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
+			WeekDays:  utils.WeekDays{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday},
 			StartTime: "18:00:00",
 			EndTime:   "",
 		}}
@@ -123,7 +123,7 @@ func TestLeftMargin(t *testing.T) {
 }
 
 func TestLeftHourMargin(t *testing.T) {
-	i := &RateInterval{Timing: &RITiming{Months: Months{time.December}, MonthDays: MonthDays{1}, StartTime: "09:00:00"}}
+	i := &RateInterval{Timing: &RITiming{Months: utils.Months{time.December}, MonthDays: utils.MonthDays{1}, StartTime: "09:00:00"}}
 	t1 := time.Date(2012, time.December, 1, 8, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.December, 1, 9, 20, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}

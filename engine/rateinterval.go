@@ -39,10 +39,10 @@ type RateInterval struct {
 
 // Separate structure used for rating plan size optimization
 type RITiming struct {
-	Years              Years
-	Months             Months
-	MonthDays          MonthDays
-	WeekDays           WeekDays
+	Years              utils.Years
+	Months             utils.Months
+	MonthDays          utils.MonthDays
+	WeekDays           utils.WeekDays
 	StartTime, EndTime string // ##:##:## format
 }
 

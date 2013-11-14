@@ -26,11 +26,8 @@ import (
 )
 
 type RatingProfile struct {
-	Id                                                       string
-	RatingPlanActivations                                    RatingPlanActivations
-	Tag, Tenant, TOR, Direction, Subject                     string   // used only for loading
-	DestRatesTimingTag, RatesFallbackSubject, ActivationTime string   // used only for loading
-	FallbackKeys                                             []string // used only for loading
+	Id                    string
+	RatingPlanActivations RatingPlanActivations
 }
 
 type RatingPlanActivation struct {
@@ -82,6 +79,7 @@ type RatingInfo struct {
 	MatchedPrefix  string
 	ActivationTime time.Time
 	RateIntervals  RateIntervalList
+	FallbackKeys   []string
 }
 
 type RatingInfos []*RatingInfo
@@ -127,11 +125,11 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 			}
 		}
 		if bestPrecision > 0 {
-			ris = append(ris, &RatingInfo{rp.Id, cd.Destination[:bestPrecision], rpa.ActivationTime, rps})
+			ris = append(ris, &RatingInfo{rp.Id, cd.Destination[:bestPrecision], rpa.ActivationTime, rps, rpa.FallbackKeys})
 		} else {
 			// mark the end of previous!
 			if len(cd.RatingInfos) > 0 {
-				ris = append(ris, &RatingInfo{"", "", rpa.ActivationTime, nil})
+				ris = append(ris, &RatingInfo{"", "", rpa.ActivationTime, nil, rpa.FallbackKeys})
 			}
 		}
 	}
