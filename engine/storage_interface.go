@@ -50,9 +50,6 @@ const (
 	MEDIATOR_SOURCE        = "MED"
 	SCHED_SOURCE           = "SCH"
 	RATER_SOURCE           = "RAT"
-	DESTINATION           = "destination"
-	RATING_PLAN            = "rating_plan"
-	
 )
 
 type Storage interface {

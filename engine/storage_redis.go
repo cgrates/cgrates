@@ -108,9 +108,9 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (rs *RedisStorage) ExistsData(entity, subject string) (bool, error) {
 	switch entity {
-	case DESTINATION: 
+	case DESTINATION_PREFIX: 
 		return rs.db.Exists(DESTINATION_PREFIX+subject)
-	case RATING_PLAN:
+	case RATING_PLAN_PREFIX:
 		return rs.db.Exists(RATING_PLAN_PREFIX+subject)
 	}
 	return false, errors.New("Unsupported entity in ExistsData")

@@ -63,10 +63,10 @@ func (ms *MapStorage) PreCache(dKeys, rppKeys []string) error {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (ms *MapStorage) ExistsData(categ, subject string) (bool, error) {
 	switch categ {
-	case DESTINATION:
+	case DESTINATION_PREFIX:
 		_, exists := ms.dict[DESTINATION_PREFIX+subject]
 		return exists, nil
-	case RATING_PLAN:
+	case RATING_PLAN_PREFIX:
 		_, exists := ms.dict[RATING_PLAN_PREFIX+subject]
 		return exists, nil
 	}
