@@ -98,7 +98,7 @@ func main() {
 	if !*toStorDb { // Connections to history and rater
 		if *historyServer != "" { // Init scribeAgent
 			if scribeAgent, err := history.NewProxyScribe(*historyServer, *rpcEncoding); err != nil {
-				log.Fatalf("Could not connect to history server: %s. Make sure you have properly configured it via -history_server flag." + err.Error())
+				log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
 				return
 			} else {
 				engine.SetHistoryScribe(scribeAgent)
@@ -193,9 +193,13 @@ func main() {
 	}
 	// Reload cache
 	if rater != nil {
-		//ToDo: only reload for destinations and rating plans we have loaded
-		// For this will need to export Destinations and RatingPlans loaded or a method providing their keys
 		reply := ""
+		actIds,_ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
+		if len(actIds) != 0 { // Reload scheduler first since that could take less time
+			if err = rater.Call("ApierV1.ReloadScheduler", "", &reply); err!=nil { 
+				log.Fatalf("Got error on scheduler reload: %s", err.Error())
+			}
+		}
 		dstIds,_ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
 		rplIds,_ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
 		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds}, &reply); err!=nil { 

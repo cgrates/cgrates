@@ -569,6 +569,14 @@ func (dbr *DbReader) GetLoadedIds( categ string ) ([]string, error) {
 			i++
 		}
 		return keys, nil
+	case ACTION_TIMING_PREFIX: // actionsTimings
+		keys := make([]string, len(dbr.actionsTimings))
+		i := 0
+		for k := range dbr.actionsTimings {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
 	}
 	return nil, errors.New("Unsupported category")
 }

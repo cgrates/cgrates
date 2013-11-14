@@ -88,6 +88,7 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 		}
 	}
 	for _, key := range dKeys {
+		// ToDo: cache2go.RemKey(key)
 		if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):]); err != nil {
 			return err
 		}
@@ -98,6 +99,7 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 		}
 	}
 	for _, key := range rpKeys {
+		// ToDo: cache2go.RemKey(key)
 		if _, err = rs.GetRatingPlan(key[len(RATING_PLAN_PREFIX):]); err != nil {
 			return err
 		}

@@ -568,6 +568,14 @@ func (csvr *CSVReader) GetLoadedIds( categ string ) ([]string, error) {
 			i++
 		}
 		return keys, nil
+	case ACTION_TIMING_PREFIX: // actionsTimings
+		keys := make([]string, len(csvr.actionsTimings))
+		i := 0
+		for k := range csvr.actionsTimings {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
 	}
 	return nil, errors.New("Unsupported category")
 }

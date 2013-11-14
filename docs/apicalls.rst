@@ -369,6 +369,8 @@ Administration APIs
    :maxdepth: 2
 
    api_cdrs
+   api_cache
+   api_scheduler
 
 
 
