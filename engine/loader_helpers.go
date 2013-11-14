@@ -44,7 +44,9 @@ type TPLoader interface {
 	LoadActionTimings() error
 	LoadActionTriggers() error
 	LoadAccountActions() error
+	GetLoadedIds( string ) ([]string, error)
 	WriteToDatabase(bool, bool) error
+
 }
 
 /*type LoadRate struct {

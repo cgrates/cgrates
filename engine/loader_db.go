@@ -550,3 +550,25 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 
 	return dbr.dataDb.SetUserBalance(ub)
 }
+
+
+// Returns the identities loaded for a specific entity category
+func (dbr *DbReader) GetLoadedIds( categ string ) ([]string, error) {
+	switch categ {
+	case DESTINATION_PREFIX:
+		ids := make([]string, len(dbr.destinations))
+		for idx, dst := range dbr.destinations {
+			ids[idx] = dst.Id
+		}
+		return ids, nil
+	case RATING_PLAN_PREFIX:
+		keys := make([]string, len(dbr.ratingPlans))
+		i := 0
+		for k := range dbr.ratingPlans {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	}
+	return nil, errors.New("Unsupported category")
+}

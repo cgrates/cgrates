@@ -196,7 +196,9 @@ func main() {
 		//ToDo: only reload for destinations and rating plans we have loaded
 		// For this will need to export Destinations and RatingPlans loaded or a method providing their keys
 		reply := ""
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{}, &reply); err!=nil { 
+		dstIds,_ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
+		rplIds,_ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds}, &reply); err!=nil { 
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
 	}
