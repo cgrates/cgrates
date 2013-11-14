@@ -353,7 +353,25 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 }
 
 func (dbr *DbReader) LoadActionTriggers() (err error) {
-	dbr.actionsTriggers, err = dbr.storDb.GetTpActionTriggers(dbr.tpid, "")
+	atrsMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, "")
+	if err != nil {
+		return err
+	}
+	for key, atrsLst := range atrsMap {
+		atrs := make([]*ActionTrigger, len(atrsLst))
+		for idx, apiAtr := range atrsLst {
+			atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
+						BalanceId: apiAtr.BalanceType,
+						Direction: apiAtr.Direction,
+						ThresholdType: apiAtr.ThresholdType,
+						ThresholdValue: apiAtr.ThresholdValue,
+						DestinationId: apiAtr.DestinationId,
+						Weight: apiAtr.Weight,
+						ActionsId: apiAtr.ActionsId,
+						}
+		}
+		dbr.actionsTriggers[key] = atrs
+	}
 	return err
 }
 
@@ -473,12 +491,29 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 
 	// action triggers
 	var actionTriggers ActionTriggerPriotityList
+	//ActionTriggerPriotityList []*ActionTrigger
 	if accountAction.ActionTriggersTag != "" {
-		actionTriggersMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, accountAction.ActionTriggersTag)
+		apiAtrsMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, accountAction.ActionTriggersTag)
 		if err != nil {
 			return err
 		}
-		actionTriggers = actionTriggersMap[accountAction.ActionTriggersTag]
+		atrsMap := make( map[string][]*ActionTrigger )
+		for key, atrsLst := range apiAtrsMap {
+			atrs := make([]*ActionTrigger, len(atrsLst))
+			for idx, apiAtr := range atrsLst {
+				atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
+						BalanceId: apiAtr.BalanceType,
+						Direction: apiAtr.Direction,
+						ThresholdType: apiAtr.ThresholdType,
+						ThresholdValue: apiAtr.ThresholdValue,
+						DestinationId: apiAtr.DestinationId,
+						Weight: apiAtr.Weight,
+						ActionsId: apiAtr.ActionsId,
+						}
+			}
+			atrsMap[key] = atrs
+		}
+		actionTriggers = atrsMap[accountAction.ActionTriggersTag]
 		// collect action ids from triggers
 		for _, atr := range actionTriggers {
 			actionsIds = append(actionsIds, atr.ActionsId)

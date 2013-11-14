@@ -23,7 +23,6 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,15 +36,7 @@ func (self *ApierV1) SetTPRatingPlan(attrs utils.TPRatingPlan, reply *string) er
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	drts := make([]*engine.DestinationRateTiming, len(attrs.RatingPlans))
-	for idx, drt := range attrs.RatingPlans {
-		drts[idx] = &engine.DestinationRateTiming{Tag: attrs.RatingPlanId,
-			DestinationRatesTag: drt.DestRatesId,
-			Weight:              drt.Weight,
-			TimingTag:           drt.TimingId,
-		}
-	}
-	if err := self.StorDb.SetTPRatingPlans(attrs.TPid, map[string][]*engine.DestinationRateTiming{attrs.RatingPlanId: drts}); err != nil {
+	if err := self.StorDb.SetTPRatingPlans(attrs.TPid, map[string][]*utils.RatingPlan{attrs.RatingPlanId: attrs.RatingPlans}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

@@ -160,6 +160,8 @@ type ApiTPAccountActions struct {
 	ActionTriggersId string // Id of ActionTriggers profile to use
 }
 
+
+// Data used to do remote cache reloads via api
 type ApiReloadCache struct {
 	DestinationIds      []string
 	RatingPlanIds       []string

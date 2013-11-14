@@ -143,7 +143,7 @@ func (self *TPCSVImporter) importRates(fn string) error {
 		if err != nil {
 			return err
 		}
-		if err := self.StorDb.SetTPRates(self.TPid, map[string]*utils.TPRate{record[0]: rt}); err != nil {
+		if err := self.StorDb.SetTPRates(self.TPid, map[string][]*utils.RateSlot{record[0]: rt.RateSlots}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -170,17 +170,14 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 			}
 			continue
 		}
-		dr := &utils.TPDestinationRate{
-			DestinationRateId: record[0],
-			DestinationRates: []*utils.DestinationRate{
+		drs := []*utils.DestinationRate{
 				&utils.DestinationRate{
 					DestinationId: record[1],
 					RateId:        record[2],
 				},
-			},
-		}
+			}
 		if err := self.StorDb.SetTPDestinationRates(self.TPid,
-			map[string]*utils.TPDestinationRate{dr.DestinationRateId: dr}); err != nil {
+			map[string][]*utils.DestinationRate{record[0]: drs}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -214,17 +211,14 @@ func (self *TPCSVImporter) importRatingPlans(fn string) error {
 			}
 			continue
 		}
-		drt := &utils.TPRatingPlan{
-			RatingPlanId: record[0],
-			RatingPlans: []*utils.RatingPlan{
+		drt := []*utils.RatingPlan{
 				&utils.RatingPlan{
 					DestRatesId: record[1],
 					Weight:      weight,
 					TimingId:    record[2],
 				},
-			},
-		}
-		if err := self.StorDb.SetTPRatingPlans(self.TPid, map[string]*utils.TPRatingPlan{drt.RatingPlanId: drt}); err != nil {
+			}
+		if err := self.StorDb.SetTPRatingPlans(self.TPid, map[string][]*utils.RatingPlan{record[0]: drt}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -365,17 +359,14 @@ func (self *TPCSVImporter) importActionTimings(fn string) error {
 			}
 			continue
 		}
-		ats := &utils.ApiTPActionTimings{
-			ActionTimingsId: tag,
-			ActionTimings: []*utils.ApiActionTiming{
+		at := []*utils.ApiActionTiming{
 				&utils.ApiActionTiming{
 					ActionsId: actionsTag,
 					TimingId:  timingTag,
 					Weight:    weight,
-				},
-			},
-		}
-		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string]*utils.ApiTPActionTimings{tag: ats}); err != nil {
+				}, 
+			}
+		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string][]*utils.ApiActionTiming{tag: at}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}

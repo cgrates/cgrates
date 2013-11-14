@@ -23,9 +23,7 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"time"
 )
 
 // Creates a new rate within a tariff plan
@@ -38,20 +36,7 @@ func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	rts := make([]*engine.LoadRate, len(attrs.RateSlots))
-	for idx, rtSlot := range attrs.RateSlots {
-		var errParse error
-		itrvlStrs := []string{rtSlot.RateUnit, rtSlot.RateIncrement, rtSlot.GroupIntervalStart}
-		itrvls := make([]time.Duration, len(itrvlStrs))
-		for idxItrvl, itrvlStr := range itrvlStrs {
-			if itrvls[idxItrvl], errParse = time.ParseDuration(itrvlStr); errParse != nil {
-				return fmt.Errorf("%s:Parsing interval failed:%s", utils.ERR_SERVER_ERROR, errParse.Error())
-			}
-		}
-		rts[idx] = &engine.LoadRate{attrs.RateId, rtSlot.ConnectFee, rtSlot.Rate, itrvls[0], itrvls[1], itrvls[2],
-			rtSlot.RoundingMethod, rtSlot.RoundingDecimals}
-	}
-	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*engine.LoadRate{attrs.RateId: rts}); err != nil {
+	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*utils.RateSlot{attrs.RateId: attrs.RateSlots}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

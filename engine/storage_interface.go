@@ -113,15 +113,15 @@ type LoadStorage interface {
 	GetTPDestination(string, string) (*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)
 	ExistsTPRate(string, string) (bool, error)
-	SetTPRates(string, map[string]*utils.TPRate) error
+	SetTPRates(string, map[string][]*utils.RateSlot) error
 	GetTPRate(string, string) (*utils.TPRate, error)
 	GetTPRateIds(string) ([]string, error)
 	ExistsTPDestinationRate(string, string) (bool, error)
-	SetTPDestinationRates(string, map[string]*utils.TPDestinationRate) error
+	SetTPDestinationRates(string, map[string][]*utils.DestinationRate) error
 	GetTPDestinationRate(string, string) (*utils.TPDestinationRate, error)
 	GetTPDestinationRateIds(string) ([]string, error)
 	ExistsTPRatingPlan(string, string) (bool, error)
-	SetTPRatingPlans(string, map[string]*utils.TPRatingPlan) error
+	SetTPRatingPlans(string, map[string][]*utils.RatingPlan) error
 	GetTPRatingPlan(string, string) (*utils.TPRatingPlan, error)
 	GetTPRatingPlanIds(string) ([]string, error)
 	ExistsTPRatingProfile(string, string) (bool, error)
@@ -133,8 +133,8 @@ type LoadStorage interface {
 	GetTPActions(string, string) (*utils.TPActions, error)
 	GetTPActionIds(string) ([]string, error)
 	ExistsTPActionTimings(string, string) (bool, error)
-	SetTPActionTimings(string, map[string]*utils.ApiTPActionTimings) error
-	GetTPActionTimings(string, string) (map[string]*utils.ApiTPActionTimings, error)
+	SetTPActionTimings(string, map[string][]*utils.ApiActionTiming) error
+	GetTPActionTimings(string, string) (map[string][]*utils.ApiActionTiming, error)
 	GetTPActionTimingIds(string) ([]string, error)
 	ExistsTPActionTriggers(string, string) (bool, error)
 	SetTPActionTriggers(string, map[string][]*ActionTrigger) error
@@ -151,7 +151,7 @@ type LoadStorage interface {
 	GetTpRatingProfiles(string, string) (map[string]*utils.TPRatingProfile, error)
 	GetTpActions(string, string) (map[string][]*Action, error)
 	GetTpActionTimings(string, string) (map[string]utils.ApiTPActionTimings, error)
-	GetTpActionTriggers(string, string) (map[string][]*ActionTrigger, error)
+	GetTpActionTriggers(string, string) (map[string][]*utils.ApiActionTrigger, error)
 	GetTpAccountActions(string, string) (map[string]*AccountAction, error)
 }
 

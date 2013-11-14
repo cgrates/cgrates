@@ -23,7 +23,6 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,20 +36,7 @@ func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *stri
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	rps := make([]*engine.RatingProfile, len(attrs.RatingActivations))
-	for idx, ra := range attrs.RatingActivations {
-		rps[idx] = &engine.RatingProfile{
-			Tag:                  attrs.RatingProfileId,
-			Tenant:               attrs.Tenant,
-			TOR:                  attrs.TOR,
-			Direction:            attrs.Direction,
-			Subject:              attrs.Subject,
-			ActivationTime:       ra.ActivationTime,
-			DestRatesTimingTag:   ra.DestRateTimingId,
-			RatesFallbackSubject: attrs.RatesFallbackSubject,
-		}
-	}
-	if err := self.StorDb.SetTPRatingProfiles(attrs.TPid, map[string][]*engine.RatingProfile{attrs.RatingProfileId: rps}); err != nil {
+	if err := self.StorDb.SetTPRatingProfiles(attrs.TPid, map[string][]*utils.TPRatingProfile{attrs.RatingProfileId: []*utils.TPRatingProfile{&attrs}}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

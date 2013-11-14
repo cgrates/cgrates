@@ -21,7 +21,6 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -41,16 +40,7 @@ func (self *ApierV1) SetTPActionTimings(attrs utils.ApiTPActionTimings, reply *s
 	} else if exists {
 		return errors.New(utils.ERR_DUPLICATE)
 	}
-	ats := make([]*engine.ActionTiming, len(attrs.ActionTimings))
-	for idx, at := range attrs.ActionTimings {
-		ats[idx] = &engine.ActionTiming{
-			Tag:        attrs.ActionTimingsId,
-			ActionsTag: at.ActionsId,
-			TimingsTag: at.TimingId,
-			Weight:     at.Weight,
-		}
-	}
-	if err := self.StorDb.SetTPActionTimings(attrs.TPid, map[string][]*engine.ActionTiming{attrs.ActionTimingsId: ats}); err != nil {
+	if err := self.StorDb.SetTPActionTimings(attrs.TPid, map[string][]*utils.ApiActionTiming{attrs.ActionTimingsId: attrs.ActionTimings}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -71,11 +61,8 @@ func (self *ApierV1) GetTPActionTimings(attrs AttrGetTPActionTimings, reply *uti
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(ats) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
-	} else { // Got the data we need, convert it from []TPActionTimingsRow into ApiTPActionTimings
-		atRply := &utils.ApiTPActionTimings{attrs.TPid, attrs.ActionTimingsId, make([]utils.ApiActionTiming, len(ats[attrs.ActionTimingsId]))}
-		for idx, row := range ats[attrs.ActionTimingsId] {
-			atRply.ActionTimings[idx] = utils.ApiActionTiming{row.ActionsId, row.TimingId, row.Weight}
-		}
+	} else { // Got the data we need, convert it
+		atRply := &utils.ApiTPActionTimings{attrs.TPid, attrs.ActionTimingsId, ats[attrs.ActionTimingsId]}
 		*reply = *atRply
 	}
 	return nil

@@ -74,25 +74,12 @@ func (self *ApierV1) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *u
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTriggersId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ats, err := self.StorDb.GetTpActionTriggers(attrs.TPid, attrs.ActionTriggersId); err != nil {
+	if atsMap, err := self.StorDb.GetTpActionTriggers(attrs.TPid, attrs.ActionTriggersId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if len(ats) == 0 {
+	} else if len(atsMap) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		aTriggers := make([]utils.ApiActionTrigger, len(ats[attrs.ActionTriggersId]))
-		for idx, row := range ats[attrs.ActionTriggersId] {
-			aTriggers[idx] = utils.ApiActionTrigger{
-				BalanceType:    row.BalanceId,
-				Direction:      row.Direction,
-				ThresholdType:  row.ThresholdType,
-				ThresholdValue: row.ThresholdValue,
-				DestinationId:  row.DestinationId,
-				ActionsId:      row.ActionsId,
-				Weight:         row.Weight,
-			}
-		}
-		atRply := &utils.ApiTPActionTriggers{attrs.TPid, attrs.ActionTriggersId, aTriggers}
-
+		atRply := &utils.ApiTPActionTriggers{attrs.TPid, attrs.ActionTriggersId, atsMap[attrs.ActionTriggersId]}
 		*reply = *atRply
 	}
 	return nil

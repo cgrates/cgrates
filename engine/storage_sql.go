@@ -193,14 +193,14 @@ func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPRates(tpid string, rts map[string]*utils.TPRate) error {
+func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot) error {
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
 	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES ", utils.TBL_TP_RATES)
 	i := 0
 	for rtId, rtRows := range rts {
-		for _, rt := range rtRows.RateSlots {
+		for _, rt := range rtRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
@@ -274,14 +274,14 @@ func (self *SQLStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error)
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string]*utils.TPDestinationRate) error {
+func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*utils.DestinationRate) error {
 	if len(drs) == 0 {
 		return nil //Nothing to set
 	}
 	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destinations_tag, rates_tag) VALUES ", utils.TBL_TP_DESTINATION_RATES)
 	i := 0
 	for drId, drRows := range drs {
-		for _, dr := range drRows.DestinationRates {
+		for _, dr := range drRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
@@ -351,14 +351,14 @@ func (self *SQLStorage) ExistsTPRatingPlan(tpid, drtId string) (bool, error) {
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string]*utils.TPRatingPlan) error {
+func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.RatingPlan) error {
 	if len(drts) == 0 {
 		return nil //Nothing to set
 	}
 	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES ", utils.TBL_TP_RATING_PLANS)
 	i := 0
 	for drtId, drtRows := range drts {
-		for _, drt := range drtRows.RatingPlans {
+		for _, drt := range drtRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
@@ -606,14 +606,14 @@ func (self *SQLStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
 }
 
 // Sets actionTimings in sqlDB. Imput is expected in form map[actionTimingId][]rows, eg a full .csv file content
-func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string]utils.ApiTPActionTimings) error {
+func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.ApiActionTiming) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
 	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES ", utils.TBL_TP_ACTION_TIMINGS)
 	i := 0
 	for atId, atRows := range ats {
-		for _, at := range atRows.ActionTimings {
+		for _, at := range atRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				qry += ","
 			}
@@ -1198,8 +1198,8 @@ func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (ats map[string][]*
 	return ats, nil
 }
 
-func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*ActionTrigger, error) {
-	ats := make(map[string][]*ActionTrigger)
+func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.ApiActionTrigger, error) {
+	ats := make(map[string][]*utils.ApiActionTrigger)
 	q := fmt.Sprintf("SELECT tpid,tag,balance_type,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
@@ -1212,14 +1212,13 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*Act
 	defer rows.Close()
 	for rows.Next() {
 		var threshold, weight float64
-		var tpid, tag, balances_tag, direction, destinations_tag, actions_tag, thresholdType string
-		if err := rows.Scan(&tpid, &tag, &balances_tag, &direction, &thresholdType, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
+		var tpid, tag, balances_type, direction, destinations_tag, actions_tag, thresholdType string
+		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &thresholdType, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
 			return nil, err
 		}
 
-		at := &ActionTrigger{
-			Id:             utils.GenUUID(),
-			BalanceId:      balances_tag,
+		at := &utils.ApiActionTrigger{
+			BalanceType:    balances_type,
 			Direction:      direction,
 			ThresholdType:  thresholdType,
 			ThresholdValue: threshold,
