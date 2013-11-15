@@ -104,6 +104,23 @@ func GetCached(key string) (v interface{}, err error) {
 	return nil, errors.New("not found")
 }
 
+func RemKey(key string) {
+	mux.Lock()
+	defer mux.Unlock()
+	delete(cache, key)
+}
+
+func XRemKey(key string) {
+	mux.Lock()
+	defer mux.Unlock()
+	if r, ok := xcache[key]; ok {
+		if r.timer() != nil {
+			r.timer().Stop()
+		}
+	}
+	delete(cache, key)
+}
+
 // Delete all keys from expiraton cache
 func XFlush() {
 	xMux.Lock()
