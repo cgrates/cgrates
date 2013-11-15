@@ -28,15 +28,10 @@ import (
 
 // Creates a new RatingProfile within a tariff plan
 func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId", "Tenant", "TOR", "Direction", "Subject", "RatingActivations"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId", "Tenant", "TOR", "Direction", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPRatingProfile(attrs.TPid, attrs.RatingProfileId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
-	if err := self.StorDb.SetTPRatingProfiles(attrs.TPid, map[string][]*utils.TPRatingProfile{attrs.RatingProfileId: []*utils.TPRatingProfile{&attrs}}); err != nil {
+	if err := self.StorDb.SetTPRatingProfiles(attrs.TPid, map[string]*utils.TPRatingProfile{attrs.RatingProfileId: &attrs}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -74,6 +69,20 @@ func (self *ApierV1) GetTPRatingProfileIds(attrs utils.AttrTPRatingProfileIds, r
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+
+// Removes specific RatingProfile on Tariff plan
+func (self *ApierV1) RemTPRatingProfile(attrs AttrGetTPRatingProfile, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, attrs.RatingProfileId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }

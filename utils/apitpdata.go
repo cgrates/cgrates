@@ -123,22 +123,18 @@ func(self *RatingPlan) Timing() *TPTiming {
 
 type TPRatingProfile struct {
 	TPid                  string // Tariff plan id
-	Tag                   string
 	RatingProfileId       string // RatingProfile id
-	RatingPlanId          string
 	Tenant                string   // Tenant's Id
 	TOR                   string   // TypeOfRecord
 	Direction             string   // Traffic direction, OUT is the only one supported for now
 	Subject               string   // Rating subject, usually the same as account
-	FallbackKeys          []string // Fallback on this subject if rates not found for destination
-	ActivationTime        string
-	RatingPlanActivations []*RatingActivation // Activate rate profiles at specific time
+	RatingPlanActivations []*TPRatingActivation // Activate rate profiles at specific time
 }
 
-type RatingActivation struct {
+type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
-	DestRateTimingId string // Id of DestRateTiming profile
-	//	FallbackKeys     []string
+	RatingPlanId string // Id of RatingPlan profile
+	FallbackSubjects     string // So we follow the api
 }
 
 type AttrTPRatingProfileIds struct {

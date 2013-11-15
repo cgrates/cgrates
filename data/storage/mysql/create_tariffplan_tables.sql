@@ -82,7 +82,7 @@ CREATE TABLE `tp_rating_plans` (
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_tag` (`tpid`,`tag`),
-  UNIQUE KEY `tpid_tag_destrates_timings_weight` (`tpid`,`tag`,`destrates_tag`,`timing_tag`,`weight`)
+  UNIQUE KEY `tpid_tag_destrates_timings_weight` (`tpid`,`tag`,`destrates_tag`,`timing_tag`)
 );
 
 --
@@ -99,7 +99,7 @@ CREATE TABLE `tp_rating_profiles` (
   `subject` varchar(64) NOT NULL,
   `activation_time` varchar(24) NOT NULL,
   `rating_plan_tag` varchar(64) NOT NULL,
-  `fallback_subject` varchar(64),
+  `fallback_subjects` varchar(64),
   PRIMARY KEY (`id`),
   KEY `tpid_tag` (`tpid`, `tag`),
   UNIQUE KEY `tpid_tag_tenant_tor_dir_subj_atime` (`tpid`,`tag`, `tenant`,`tor`,`direction`,`subject`,`activation_time`)

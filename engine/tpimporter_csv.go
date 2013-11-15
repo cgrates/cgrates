@@ -24,7 +24,6 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
-	"strings"
 )
 
 // Import tariff plan from csv into storDb
@@ -245,7 +244,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			}
 			continue
 		}
-		tenant, tor, direction, subject, destRatesTimingTag, fallbacksubject := record[0], record[1], record[2], record[3], record[5], record[6]
+		tenant, tor, direction, subject, ratingPlanTag, fallbacksubject := record[0], record[1], record[2], record[3], record[5], record[6]
 		_, err = utils.ParseDate(record[4])
 		if err != nil {
 			if self.Verbose {
@@ -258,16 +257,15 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			rpTag += "_" + self.ImportId
 		}
 		rp := &utils.TPRatingProfile{
-			Tag:            rpTag,
+			RatingProfileId:rpTag,
 			Tenant:         tenant,
 			TOR:            tor,
 			Direction:      direction,
 			Subject:        subject,
-			ActivationTime: record[4],
-			RatingPlanId:   destRatesTimingTag,
-			FallbackKeys:   strings.Split(fallbacksubject, FALLBACK_SEP),
+			RatingPlanActivations: []*utils.TPRatingActivation{ 
+				&utils.TPRatingActivation{ ActivationTime: record[4], RatingPlanId: ratingPlanTag, FallbackSubjects: fallbacksubject}},
 		}
-		if err := self.StorDb.SetTPRatingProfiles(self.TPid, map[string][]*utils.TPRatingProfile{rpTag: []*utils.TPRatingProfile{rp}}); err != nil {
+		if err := self.StorDb.SetTPRatingProfiles(self.TPid, map[string]*utils.TPRatingProfile{rpTag: rp}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}

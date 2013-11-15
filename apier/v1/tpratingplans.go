@@ -28,13 +28,8 @@ import (
 
 // Creates a new DestinationRateTiming profile within a tariff plan
 func (self *ApierV1) SetTPRatingPlan(attrs utils.TPRatingPlan, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestRateTimingId", "DestRateTimings"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId", "RatingPlans"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	if exists, err := self.StorDb.ExistsTPRatingPlan(attrs.TPid, attrs.RatingPlanId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
 	}
 	if err := self.StorDb.SetTPRatingPlans(attrs.TPid, map[string][]*utils.RatingPlan{attrs.RatingPlanId: attrs.RatingPlans}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -78,6 +73,19 @@ func (self *ApierV1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]s
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+// Removes specific RatingPlan on Tariff plan
+func (self *ApierV1) RemTPRatingPlan(attrs AttrGetTPRatingPlan, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_RATING_PLANS, attrs.TPid, attrs.RatingPlanId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }

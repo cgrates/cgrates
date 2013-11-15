@@ -31,11 +31,6 @@ func (self *ApierV1) SetTPDestinationRate(attrs utils.TPDestinationRate, reply *
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationRateId", "DestinationRates"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPDestinationRate(attrs.TPid, attrs.DestinationRateId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
 	if err := self.StorDb.SetTPDestinationRates(attrs.TPid, map[string][]*utils.DestinationRate{attrs.DestinationRateId: attrs.DestinationRates}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -78,6 +73,19 @@ func (self *ApierV1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]st
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+// Removes specific DestinationRate on Tariff plan
+func (self *ApierV1) RemTPDestinationRate(attrs AttrGetTPDestinationRate, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationRateId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_DESTINATION_RATES, attrs.TPid, attrs.DestinationRateId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }

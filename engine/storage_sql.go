@@ -23,7 +23,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
-	"strings"
 	"time"
 )
 
@@ -302,18 +301,19 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 	if len(drs) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destinations_tag, rates_tag) VALUES ", utils.TBL_TP_DESTINATION_RATES)
+	vals := ""
 	i := 0
 	for drId, drRows := range drs {
 		for _, dr := range drRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				qry += ","
+				vals += ","
 			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s')",
+			vals += fmt.Sprintf("('%s','%s','%s','%s')",
 				tpid, drId, dr.DestinationId, dr.RateId)
 			i++
 		}
 	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,destinations_tag,rates_tag) VALUES %s ON DUPLICATE KEY UPDATE destinations_tag=values(destinations_tag),rates_tag=values(rates_tag)", utils.TBL_TP_DESTINATION_RATES, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
@@ -379,18 +379,19 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.R
 	if len(drts) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES ", utils.TBL_TP_RATING_PLANS)
+	vals := ""
 	i := 0
 	for drtId, drtRows := range drts {
 		for _, drt := range drtRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				qry += ","
+				vals += ","
 			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
+			vals += fmt.Sprintf("('%s','%s','%s','%s',%f)",
 				tpid, drtId, drt.DestinationRatesId, drt.TimingId, drt.Weight)
 			i++
 		}
 	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES %s ON DUPLICATE KEY UPDATE weight=values(weight)", utils.TBL_TP_RATING_PLANS, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
@@ -453,24 +454,23 @@ func (self *SQLStorage) ExistsTPRatingProfile(tpid, rpId string) (bool, error) {
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string][]*utils.TPRatingProfile) error {
+func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.TPRatingProfile) error {
 	if len(rps) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subject) VALUES ",
-		utils.TBL_TP_RATE_PROFILES)
+	vals := ""
 	i := 0
-	for rpId, rp := range rps {
-		for _, rpa := range rp {
+	for _, rp := range rps {
+		for _, rpa := range rp.RatingPlanActivations {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				qry += ","
+				vals += ","
 			}
-			qry += fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rpId, rpa.Tenant, rpa.TOR, rpa.Direction,
-				rpa.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackKeys)
+			vals += fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.RatingProfileId, rp.Tenant, rp.TOR, rp.Direction,
+				rp.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackSubjects)
 			i++
 		}
-
 	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects) VALUES %s ON DUPLICATE KEY UPDATE fallback_subjects=values(fallback_subjects)", utils.TBL_TP_RATE_PROFILES, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
@@ -478,7 +478,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string][]*utils
 }
 
 func (self *SQLStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingProfile, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subject FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATE_PROFILES, tpid, rpId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATE_PROFILES, tpid, rpId))
 	if err != nil {
 		return nil, err
 	}
@@ -497,9 +497,8 @@ func (self *SQLStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingPr
 			rp.TOR = tor
 			rp.Direction = direction
 			rp.Subject = subject
-			rp.FallbackKeys = strings.Split(fallbackSubj, FALLBACK_SEP)
 		}
-		rp.RatingPlanActivations = append(rp.RatingPlanActivations, &utils.RatingActivation{aTime, drtId})
+		rp.RatingPlanActivations = append(rp.RatingPlanActivations, &utils.TPRatingActivation{aTime, drtId, fallbackSubj})
 	}
 	if i == 0 {
 		return nil, nil
@@ -1113,7 +1112,7 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (*utils.TPRatingPlan,
 
 func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*utils.TPRatingProfile, error) {
 	rpfs := make(map[string]*utils.TPRatingProfile)
-	q := fmt.Sprintf("SELECT tag,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subject FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT tag,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_RATE_PROFILES, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
@@ -1124,26 +1123,17 @@ func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*utils
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var tag, tenant, tor, direction, subject, fallback_subject, rating_plan_tag, activation_time string
-		if err := rows.Scan(&tag, &tenant, &tor, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subject); err != nil {
+		var rcvTag, tenant, tor, direction, subject, fallback_subjects, rating_plan_tag, activation_time string
+		if err := rows.Scan(&rcvTag, &tenant, &tor, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
 			return nil, err
 		}
-		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
-		rp, ok := rpfs[key]
-		if !ok || rp.RatingProfileId != tag {
-			rp = &utils.TPRatingProfile{RatingProfileId: key, Tag: tag}
-			rpfs[key] = rp
-		}
-		rp.RatingPlanId = rating_plan_tag
-		rp.ActivationTime = activation_time
-		if fallback_subject != "" {
-			for _, fbs := range strings.Split(fallback_subject, ";") {
-				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
-				var sslice utils.StringSlice = rp.FallbackKeys
-				if !sslice.Contains(newKey) {
-					rp.FallbackKeys = append(rp.FallbackKeys, newKey)
-				}
-			}
+		if _,ok := rpfs[rcvTag]; !ok {
+			rpfs[rcvTag] = &utils.TPRatingProfile{TPid: tpid, RatingProfileId: rcvTag, Tenant: tenant, TOR: tor, Direction:direction, Subject:subject,
+					RatingPlanActivations: []*utils.TPRatingActivation{
+						&utils.TPRatingActivation{ActivationTime:activation_time, RatingPlanId:rating_plan_tag, FallbackSubjects:fallback_subjects}}}
+		} else {
+			rpfs[rcvTag].RatingPlanActivations = append( rpfs[rcvTag].RatingPlanActivations, 
+					&utils.TPRatingActivation{ActivationTime:activation_time, RatingPlanId:rating_plan_tag, FallbackSubjects:fallback_subjects} )
 		}
 	}
 	return rpfs, nil

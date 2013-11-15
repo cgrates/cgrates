@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"log"
+	"strings"
 )
 
 type DbReader struct {
@@ -207,30 +208,32 @@ func (dbr *DbReader) LoadRatingPlans() error {
 }
 
 func (dbr *DbReader) LoadRatingProfiles() error {
-	rpfs, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, "")
+	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, "") //map[string]*utils.TPRatingProfile
 	if err != nil {
 		return err
 	}
-	for _, rp := range rpfs {
-		rpf := &RatingProfile{Id: rp.RatingProfileId}
-		at, err := utils.ParseDate(rp.ActivationTime)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", rp.ActivationTime))
-		}
-		_, exists := dbr.ratingPlans[rp.RatingPlanId]
-		if !exists {
-			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN_PREFIX, rp.RatingPlanId); err != nil {
-				return err
-			} else if !dbExists {
-				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.RatingPlanId))
+	for _, tpRpf := range mpTpRpfs {
+		rpf := &RatingProfile{Id: tpRpf.RatingProfileId}
+		for _, tpRa := range tpRpf.RatingPlanActivations {
+			at, err := utils.ParseDate(tpRa.ActivationTime)
+			if err != nil {
+				return errors.New(fmt.Sprintf("Cannot parse activation time from %v", tpRa.ActivationTime))
 			}
+			_, exists := dbr.ratingPlans[rpf.Id]
+			if !exists {
+				if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN_PREFIX, rpf.Id); err != nil {
+					return err
+				} else if !dbExists {
+					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rpf.Id))
+				}
+			}
+			rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
+				&RatingPlanActivation{
+					ActivationTime: at,
+					RatingPlanId:   tpRa.RatingPlanId,
+					FallbackKeys:   strings.Split(tpRa.FallbackSubjects,FALLBACK_SEP),
+				})
 		}
-		rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
-			&RatingPlanActivation{
-				ActivationTime: at,
-				RatingPlanId:   rp.RatingPlanId,
-				FallbackKeys:   rp.FallbackKeys,
-			})
 		dbr.ratingProfiles[rpf.Id] = rpf
 	}
 	return nil
@@ -287,27 +290,30 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 
 func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 	resultRatingProfile := &RatingProfile{}
-	rpfs, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag)
-	if err != nil || len(rpfs) == 0 {
+	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(dbr.tpid, tag) //map[string]*utils.TPRatingProfile
+	if err != nil || len(mpTpRpfs) == 0 {
 		return fmt.Errorf("No RateProfile with id %s: %v", tag, err)
 	}
-	for _, rp := range rpfs {
-		Logger.Debug(fmt.Sprintf("Rating profile: %v", rpfs))
-		resultRatingProfile.Id = rp.RatingProfileId
-		at, err := utils.ParseDate(rp.ActivationTime)
-		if err != nil {
-			return fmt.Errorf("Cannot parse activation time from %v", rp.ActivationTime)
-		}
-		// Check if referenced RatingPlan exists
-		_, exists := dbr.ratingPlans[rp.RatingPlanId]
-		if !exists {
-			if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN_PREFIX, rp.RatingPlanId); err != nil {
-				return err
-			} else if !dbExists {
-				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", rp.RatingPlanId))
+	for _, tpRpf := range mpTpRpfs {
+		Logger.Debug(fmt.Sprintf("Rating profile: %v", tpRpf))
+		resultRatingProfile.Id = tpRpf.RatingProfileId
+		///
+		for _, tpRa := range tpRpf.RatingPlanActivations {
+			at, err := utils.ParseDate(tpRa.ActivationTime)
+			if err != nil {
+				return errors.New(fmt.Sprintf("Cannot parse activation time from %v", tpRa.ActivationTime))
 			}
+			_, exists := dbr.ratingPlans[resultRatingProfile.Id]
+			if !exists {
+				if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN_PREFIX, resultRatingProfile.Id); err != nil {
+					return err
+				} else if !dbExists {
+					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", resultRatingProfile.Id))
+				}
+			}
+			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, 
+						&RatingPlanActivation{at, tpRa.RatingPlanId, strings.Split(tpRa.FallbackSubjects,FALLBACK_SEP)})
 		}
-		resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, &RatingPlanActivation{at, rp.RatingPlanId, rp.FallbackKeys})
 	}
 	return dbr.dataDb.SetRatingProfile(resultRatingProfile)
 }
