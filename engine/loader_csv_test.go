@@ -240,89 +240,68 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
-	if !reflect.DeepEqual(rate, &utils.RateSlot{
-		ConnectFee:         0,
-		Rate:               0.2,
-		RateUnit:           time.Minute,
-		RateIncrement:      time.Second,
-		GroupIntervalStart: 0,
-		RoundingMethod:     utils.ROUNDING_MIDDLE,
-		RoundingDecimals:   2,
-	}) {
-		t.Error("Error loading rate: ", csvr.rates["R1"].RateSlots[0])
+	expctRs,err := utils.NewRateSlot(0, 0.2, "60s", "1s", "0", utils.ROUNDING_MIDDLE, 2)
+	if err != nil {
+		t.Error("Error loading rate: ", rate, err.Error())
+	} else if !reflect.DeepEqual(rate, expctRs) ||
+		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
+		rate.RateIncrementDuration() != expctRs.RateIncrementDuration() ||
+		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
+			t.Error("Error loading rate: ", rate, expctRs)
 	}
 	rate = csvr.rates["R2"].RateSlots[0]
-	if !reflect.DeepEqual(rate, &utils.RateSlot{
-		ConnectFee:         0,
-		Rate:               0.1,
-		RateUnit:           time.Minute,
-		RateIncrement:      time.Second,
-		GroupIntervalStart: 0,
-		RoundingMethod:     utils.ROUNDING_MIDDLE,
-		RoundingDecimals:   2,
-	}) {
-		t.Error("Error loading rate: ", csvr.rates)
+	if expctRs,err = utils.NewRateSlot(0, 0.1, "60s", "1s", "0", utils.ROUNDING_MIDDLE, 2); err != nil {
+		t.Error("Error loading rate: ", rate, err.Error())
+	} else if !reflect.DeepEqual(rate, expctRs) ||
+		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
+		rate.RateIncrementDuration() != expctRs.RateIncrementDuration() ||
+		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
+			t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R3"].RateSlots[0]
-	if !reflect.DeepEqual(rate, &utils.RateSlot{
-		ConnectFee:         0,
-		Rate:               0.05,
-		RateUnit:           time.Minute,
-		RateIncrement:      time.Second,
-		GroupIntervalStart: 0,
-		RoundingMethod:     utils.ROUNDING_MIDDLE,
-		RoundingDecimals:   2,
-	}) {
-		t.Error("Error loading rate: ", csvr.rates)
+	if expctRs, err = utils.NewRateSlot( 0, 0.05, "60s", "1s", "0", utils.ROUNDING_MIDDLE, 2 ); err != nil {
+		t.Error("Error loading rate: ", rate, err.Error())
+	} else if !reflect.DeepEqual(rate, expctRs) ||
+		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
+		rate.RateIncrementDuration() != expctRs.RateIncrementDuration() ||
+		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
+			t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R4"].RateSlots[0]
-	if !reflect.DeepEqual(rate, &utils.RateSlot{
-		ConnectFee:         1,
-		Rate:               1.0,
-		RateUnit:           time.Second,
-		RateIncrement:      time.Second,
-		GroupIntervalStart: 0,
-		RoundingMethod:     utils.ROUNDING_UP,
-		RoundingDecimals:   2,
-	}) {
-		t.Error("Error loading rate: ", csvr.rates)
+	if expctRs, err = utils.NewRateSlot( 1, 1.0, "1s", "1s", "0", utils.ROUNDING_UP, 2 ); err != nil {
+		t.Error("Error loading rate: ", rate, err.Error())
+	} else if !reflect.DeepEqual(rate, expctRs) ||
+		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
+		rate.RateIncrementDuration() != expctRs.RateIncrementDuration() ||
+		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
+			t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R5"].RateSlots[0]
-	if !reflect.DeepEqual(rate, &utils.RateSlot{
-		ConnectFee:         0,
-		Rate:               0.5,
-		RateUnit:           time.Second,
-		RateIncrement:      time.Second,
-		GroupIntervalStart: 0,
-		RoundingMethod:     utils.ROUNDING_DOWN,
-		RoundingDecimals:   2,
-	}) {
-		t.Error("Error loading rate: ", csvr.rates)
+	if expctRs, err = utils.NewRateSlot( 0, 0.5, "1s", "1s", "0", utils.ROUNDING_DOWN, 2 ); err != nil {
+		t.Error("Error loading rate: ", rate, err.Error())
+	} else if !reflect.DeepEqual(rate, expctRs) ||
+		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
+		rate.RateIncrementDuration() != expctRs.RateIncrementDuration() ||
+		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
+			t.Error("Error loading rate: ", rate)
 	}
-
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[0]
-	if !reflect.DeepEqual(rate, &utils.RateSlot{
-		ConnectFee:         0,
-		Rate:               1,
-		RateUnit:           time.Second,
-		RateIncrement:      time.Minute,
-		GroupIntervalStart: 0,
-		RoundingMethod:     utils.ROUNDING_UP,
-		RoundingDecimals:   4,
-	}) {
-		t.Errorf("Error loading rate: %+v", rate)
+	if expctRs, err = utils.NewRateSlot( 0, 1, "1s", "60s", "0s", utils.ROUNDING_UP, 4 ); err != nil {
+		t.Error("Error loading rate: ", rate, err.Error())
+	} else if !reflect.DeepEqual(rate, expctRs) ||
+		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
+		rate.RateIncrementDuration() != expctRs.RateIncrementDuration() ||
+		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
+			t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[1]
-	if !reflect.DeepEqual(rate, &utils.RateSlot{
-		ConnectFee:         0,
-		Rate:               1,
-		RateUnit:           time.Second,
-		RateIncrement:      time.Second,
-		GroupIntervalStart: 60 * time.Second,
-		RoundingMethod:     utils.ROUNDING_UP,
-		RoundingDecimals:   4,
-	}) {
-		t.Errorf("Error loading rate: %+v", rate)
+	if expctRs, err = utils.NewRateSlot( 0, 1, "1s", "1s", "60s", utils.ROUNDING_UP, 4 ); err != nil {
+		t.Error("Error loading rate: ", rate, err.Error())
+	} else if !reflect.DeepEqual(rate, expctRs) ||
+		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
+		rate.RateIncrementDuration() != expctRs.RateIncrementDuration() ||
+		rate.GroupIntervalStartDuration() != expctRs.GroupIntervalStartDuration() {
+			t.Error("Error loading rate: ", rate)
 	}
 }
 

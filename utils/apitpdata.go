@@ -30,15 +30,54 @@ type TPRate struct {
 	RateSlots []*RateSlot // One or more RateSlots
 }
 
+// Needed so we make sure we always use SetDurations() on a newly created value
+func NewRateSlot( connectFee, rate float64, rateUnit, rateIncrement, grpInterval, rndMethod string, rndDecimals int ) (*RateSlot, error) {
+	rs := &RateSlot{ ConnectFee: connectFee, Rate: rate, RateUnit: rateUnit, RateIncrement: rateIncrement, 
+			GroupIntervalStart: grpInterval, RoundingMethod: rndMethod, RoundingDecimals: rndDecimals }
+	if err := rs.SetDurations(); err != nil {
+		return nil, err
+	}
+	return rs, nil
+}
+		
+
 type RateSlot struct {
 	ConnectFee         float64       // ConnectFee applied once the call is answered
 	Rate               float64       // Rate applied
-	RateUnit           time.Duration //  Number of billing units this rate applies to
-	RateIncrement      time.Duration // This rate will apply in increments of duration
-	GroupIntervalStart time.Duration // Group position
+	RateUnit           string //  Number of billing units this rate applies to
+	RateIncrement      string // This rate will apply in increments of duration
+	GroupIntervalStart string        // Group position
 	RoundingMethod     string        // Use this method to round the cost
 	RoundingDecimals   int           // Round the cost number of decimals
+	rateUnitDur        time.Duration
+	rateIncrementDur   time.Duration
+	groupIntervalStartDur   time.Duration
 }
+
+// Used to set the durations we need out of strings
+func(self *RateSlot) SetDurations() error {
+	var err error
+	if self.rateUnitDur, err = time.ParseDuration(self.RateUnit); err != nil {
+		return err
+	}
+	if self.rateIncrementDur, err = time.ParseDuration(self.RateIncrement); err != nil {
+		return err
+	}
+	if self.groupIntervalStartDur, err = time.ParseDuration(self.GroupIntervalStart); err != nil {
+		return err
+	}
+	return nil
+}
+func(self *RateSlot) RateUnitDuration() time.Duration {
+	return self.rateUnitDur
+}
+func(self *RateSlot) RateIncrementDuration() time.Duration {
+	return self.rateIncrementDur
+}
+func(self *RateSlot) GroupIntervalStartDuration() time.Duration {
+	return self.groupIntervalStartDur
+}
+			
 
 type TPDestinationRate struct {
 	TPid              string             // Tariff plan id

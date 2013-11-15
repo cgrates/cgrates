@@ -30,7 +30,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type TPLoader interface {
@@ -56,7 +55,6 @@ type TPLoader interface {
 	RoundingMethod                              string
 	RoundingDecimals                            int
 }*/
-
 func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals string) (r *utils.TPRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
@@ -68,49 +66,27 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		log.Printf("Error parsing price from: %v", price)
 		return
 	}
-	gi, err := time.ParseDuration(groupInterval)
-	if err != nil {
-		log.Printf("Error parsing group interval from: %v", price)
-		return
-	}
-	ru, err := time.ParseDuration(ratedUnits)
-	if err != nil {
-		log.Printf("Error parsing rated units from: %v", ratedUnits)
-		return
-	}
-	ri, err := time.ParseDuration(rateIncrements)
-	if err != nil {
-		log.Printf("Error parsing rates increments from: %v", rateIncrements)
-		return
-	}
 	rd, err := strconv.Atoi(roundingDecimals)
 	if err != nil {
 		log.Printf("Error parsing rounding decimals: %s", roundingDecimals)
 		return
 	}
-
+	rs, err := utils.NewRateSlot( cf, p, ratedUnits, rateIncrements, groupInterval, roundingMethod, rd )
+	if err != nil {
+		return nil, err
+	}
 	r = &utils.TPRate{
 		RateId: tag,
-		RateSlots: []*utils.RateSlot{
-			&utils.RateSlot{
-				ConnectFee:         cf,
-				Rate:               p,
-				GroupIntervalStart: gi,
-				RateUnit:           ru,
-				RateIncrement:      ri,
-				RoundingMethod:     roundingMethod,
-				RoundingDecimals:   rd,
-			},
-		},
-	}
+		RateSlots: []*utils.RateSlot{rs},
+		}
 	return
 }
 
 func ValidNextGroup(present, next *utils.RateSlot) error {
-	if next.GroupIntervalStart <= present.GroupIntervalStart {
+	if next.GroupIntervalStartDuration() <= present.GroupIntervalStartDuration() {
 		return errors.New(fmt.Sprintf("Next rate group interval start must be heigher than the last one: %#v", next))
 	}
-	if math.Mod(next.GroupIntervalStart.Seconds(), present.RateIncrement.Seconds()) != 0 {
+	if math.Mod(next.GroupIntervalStartDuration().Seconds(), present.RateIncrementDuration().Seconds()) != 0 {
 		return errors.New(fmt.Sprintf("GroupIntervalStart of %#v must be a multiple of RateIncrement of %#v", next, present))
 	}
 	if present.RoundingMethod != next.RoundingMethod || present.RoundingDecimals != next.RoundingDecimals {
@@ -161,10 +137,10 @@ func GetRateInterval(rpl *utils.RatingPlan, dr *utils.DestinationRate) (i *RateI
 	}
 	for _, rl := range dr.Rate.RateSlots {
 		i.Rating.Rates = append(i.Rating.Rates, &Rate{
-			GroupIntervalStart: rl.GroupIntervalStart,
+			GroupIntervalStart: rl.GroupIntervalStartDuration(),
 			Value:              rl.Rate,
-			RateIncrement:      rl.RateIncrement,
-			RateUnit:           rl.RateUnit,
+			RateIncrement:      rl.RateIncrementDuration(),
+			RateUnit:           rl.RateUnitDuration(),
 		})
 	}
 	return

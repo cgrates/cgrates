@@ -249,13 +249,16 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 		i++ //Keep here a reference so we know we got at least one prefix
 		var connectFee, rate float64
 		var roundingDecimals int
-		var rateUnit, rateIncrement, groupIntervalStart time.Duration
-		var roundingMethod string
+		var rateUnit, rateIncrement, groupIntervalStart, roundingMethod string
 		err = rows.Scan(&connectFee, &rate, &rateUnit, &rateIncrement, &groupIntervalStart, &roundingMethod, &roundingDecimals)
 		if err != nil {
 			return nil, err
 		}
-		rt.RateSlots = append(rt.RateSlots, &utils.RateSlot{connectFee, rate, rateUnit, rateIncrement, groupIntervalStart, roundingMethod, roundingDecimals})
+		if rs, err := utils.NewRateSlot(connectFee, rate, rateUnit, rateIncrement, groupIntervalStart, roundingMethod, roundingDecimals); err!=nil {
+			return nil, err
+		} else {
+			rt.RateSlots = append(rt.RateSlots, rs) 
+		}
 	}
 	if i == 0 {
 		return nil, nil
@@ -989,27 +992,21 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var tag, roundingMethod string
+		var tag, rate_unit, rate_increment, group_interval_start, roundingMethod string
 		var connect_fee, rate float64
-		var rate_unit, rate_increment, group_interval_start time.Duration
 		var roundingDecimals int
 		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start, &roundingMethod, &roundingDecimals); err != nil {
 			return nil, err
 		}
+		rs, err := utils.NewRateSlot(connect_fee, rate, rate_unit, rate_increment, group_interval_start, roundingMethod, roundingDecimals)
+		if err!=nil {
+			return nil, err
+		}
 		r := &utils.TPRate{
 			RateId: tag,
-			RateSlots: []*utils.RateSlot{
-				&utils.RateSlot{
-					ConnectFee:         connect_fee,
-					Rate:               rate,
-					RateUnit:           rate_unit,
-					RateIncrement:      rate_increment,
-					GroupIntervalStart: group_interval_start,
-					RoundingMethod:     roundingMethod,
-					RoundingDecimals:   roundingDecimals,
-				},
-			},
-		}
+			RateSlots: []*utils.RateSlot{rs},
+			}
+		
 		// same tag only to create rate groups
 		existingRates, exists := rts[tag]
 		if exists {
