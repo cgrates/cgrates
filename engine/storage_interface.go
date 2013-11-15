@@ -105,6 +105,7 @@ type LoadStorage interface {
 	ExistsTPTiming(string, string) (bool, error)
 	GetTPTiming(string, string) (*utils.TPTiming, error)
 	GetTPTimingIds(string) ([]string, error)
+	RemTPTiming(string, string) error
 	SetTPDestination(string, *Destination) error
 	ExistsTPDestination(string, string) (bool, error)
 	GetTPDestination(string, string) (*Destination, error)

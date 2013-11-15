@@ -213,7 +213,7 @@ func (self *TPCSVImporter) importRatingPlans(fn string) error {
 		}
 		drt := []*utils.RatingPlan{
 				&utils.RatingPlan{
-					DestRatesId: record[1],
+					DestinationRatesId: record[1],
 					Weight:      weight,
 					TimingId:    record[2],
 				},

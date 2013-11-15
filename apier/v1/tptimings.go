@@ -40,11 +40,6 @@ func (self *ApierV1) SetTPTiming(attrs ApierTPTiming, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId", "Years", "Months", "MonthDays", "WeekDays", "Time"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPTiming(attrs.TPid, attrs.TimingId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
 	tm := engine.NewTiming(attrs.TimingId, attrs.Years, attrs.Months, attrs.MonthDays, attrs.WeekDays, attrs.Time)
 	if err := self.StorDb.SetTPTiming(attrs.TPid, tm); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -92,3 +87,18 @@ func (self *ApierV1) GetTPTimingIds(attrs AttrGetTPTimingIds, reply *[]string) e
 	}
 	return nil
 }
+
+
+// Removes specific Timing on Tariff plan
+func (self *ApierV1) RemTPTiming(attrs AttrGetTPTiming, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPTiming(attrs.TPid, attrs.TimingId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
+	}
+	return nil
+}
+

@@ -65,7 +65,7 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 }
 
 func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
-	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s')",
+	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s') ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
 		utils.TBL_TP_TIMINGS, tpid, tm.Id, tm.Years.Serialize(";"), tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"),
 		tm.WeekDays.Serialize(";"), tm.StartTime)); err != nil {
 		return err
@@ -116,6 +116,16 @@ func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
 		return nil, nil
 	}
 	return ids, nil
+}
+
+
+
+func (self *SQLStorage) RemTPTiming(tpid, tag string) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_TIMINGS, tpid, tag)
+	if _, err := self.Db.Exec(q); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Extracts destinations from StorDB on specific tariffplan id
@@ -363,7 +373,7 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.R
 				qry += ","
 			}
 			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
-				tpid, drtId, drt.DestRatesId, drt.TimingId, drt.Weight)
+				tpid, drtId, drt.DestinationRatesId, drt.TimingId, drt.Weight)
 			i++
 		}
 	}
@@ -1084,7 +1094,7 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (*utils.TPRatingPlan,
 			return nil, err
 		}
 		rt := &utils.RatingPlan{
-			DestRatesId: destination_rates_tag,
+			DestinationRatesId: destination_rates_tag,
 			Weight:      weight,
 			TimingId:    timings_tag,
 		}

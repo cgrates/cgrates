@@ -68,10 +68,10 @@ type TPRatingPlan struct {
 }
 
 type RatingPlan struct {
-	DestRatesId string  // The DestinationRate identity
+	DestinationRatesId string  // The DestinationRate identity
 	TimingId    string  // The timing identity
 	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot
-	Timing      *TPTiming
+	Timing      *TPTiming //?
 }
 
 type TPRatingProfile struct {
@@ -91,7 +91,7 @@ type TPRatingProfile struct {
 type RatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	DestRateTimingId string // Id of DestRateTiming profile
-	//	FallbackKeys     []string
+	//	FallbackKeys     []string //??
 }
 
 type AttrTPRatingProfileIds struct {
@@ -152,7 +152,7 @@ type ApiActionTrigger struct {
 
 type ApiTPAccountActions struct {
 	TPid             string // Tariff plan id
-	AccountActionsId string // AccountActions id
+	AccountActionsId string // AccountActions id, used to group actions on a load
 	Tenant           string // Tenant's Id
 	Account          string // Account name
 	Direction        string // Traffic direction

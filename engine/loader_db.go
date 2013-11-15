@@ -189,9 +189,9 @@ func (dbr *DbReader) LoadRatingPlans() error {
 			return errors.New(fmt.Sprintf("Could not get timing for tag %v", drt.TimingId))
 		}
 		drt.Timing = t
-		drs, exists := dbr.destinationRates[drt.DestRatesId]
+		drs, exists := dbr.destinationRates[drt.DestinationRatesId]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", drt.DestRatesId))
+			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", drt.DestinationRatesId))
 		}
 
 		plan, exists := dbr.ratingPlans[drts.RatingPlanId]
@@ -250,11 +250,11 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 			return fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
 		}
 		rp.Timing = tm[rp.TimingId]
-		drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestRatesId)
+		drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestinationRatesId)
 		if err != nil || len(drm) == 0 {
-			return fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestRatesId, err)
+			return fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
 		}
-		for _, drate := range drm[rp.DestRatesId].DestinationRates {
+		for _, drate := range drm[rp.DestinationRatesId].DestinationRates {
 			Logger.Debug(fmt.Sprintf("Destination rate: %v", drate))
 			rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateId)
 			if err != nil || len(rt) == 0 {
