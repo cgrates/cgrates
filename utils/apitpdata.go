@@ -138,7 +138,7 @@ type TPRatingProfile struct {
 type RatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	DestRateTimingId string // Id of DestRateTiming profile
-	//	FallbackKeys     []string //??
+	//	FallbackKeys     []string
 }
 
 type AttrTPRatingProfileIds struct {

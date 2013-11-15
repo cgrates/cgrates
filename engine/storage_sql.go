@@ -224,13 +224,13 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				vals += ","
 			}
-			vals += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d)",
+			vals += fmt.Sprintf("('%s', '%s', %f, %f, '%s', '%s','%s','%s', %d)",
 				tpid, rtId, rt.ConnectFee, rt.Rate, rt.RateUnit, rt.RateIncrement, rt.GroupIntervalStart,
 				rt.RoundingMethod, rt.RoundingDecimals)
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES %s ON DUPLICATE KEY UPDATE connect_fee=values(connect_fee), rate=values(rate), rate_increment=values(rate_increment), group_iterval_start=values(group_interval_start), rouding_method=values(rounding_method), rounding_decimals=values(rounding_decimals)", utils.TBL_TP_RATES, vals)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES %s ON DUPLICATE KEY UPDATE connect_fee=values(connect_fee), rate=values(rate), rate_increment=values(rate_increment), group_interval_start=values(group_interval_start), rounding_method=values(rounding_method), rounding_decimals=values(rounding_decimals)", utils.TBL_TP_RATES, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
