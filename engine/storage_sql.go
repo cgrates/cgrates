@@ -120,8 +120,8 @@ func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
 
 
 
-func (self *SQLStorage) RemTPTiming(tpid, tag string) error {
-	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_TIMINGS, tpid, tag)
+func (self *SQLStorage) RemTPData(table, tpid, tag string) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND tag='%s'", table, tpid, tag)
 	if _, err := self.Db.Exec(q); err != nil {
 		return err
 	}
@@ -186,10 +186,20 @@ func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, er
 }
 
 func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
-	for _, prefix := range dest.Prefixes {
-		if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES( '%s','%s','%s')", utils.TBL_TP_DESTINATIONS, tpid, dest.Id, prefix)); err != nil {
-			return err
+	if len(dest.Prefixes) == 0 {
+		return nil
+	}
+	vals := ""
+	for idx, prefix := range dest.Prefixes {
+		if idx != 0 {
+			vals += ","
 		}
+		vals += fmt.Sprintf("('%s','%s','%s')", tpid, dest.Id, prefix)
+	}
+	q := fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES %s ON DUPLICATE KEY UPDATE prefix=values(prefix)", 
+			utils.TBL_TP_DESTINATIONS, vals)
+	if _, err := self.Db.Exec(q); err != nil {
+		return err
 	}
 	return nil
 }

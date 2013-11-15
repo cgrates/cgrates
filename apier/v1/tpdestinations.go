@@ -36,11 +36,6 @@ func (self *ApierV1) SetTPDestination(attrs ApierTPDestination, reply *string) e
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPDestination(attrs.TPid, attrs.DestinationId); err != nil {
-		return fmt.Errorf("%s:%v", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
 	if err := self.StorDb.SetTPDestination(attrs.TPid, &engine.Destination{attrs.DestinationId, attrs.Prefixes}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -83,6 +78,18 @@ func (self *ApierV1) GetTPDestinationIds(attrs AttrGetTPDestinationIds, reply *[
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+func (self *ApierV1) RemTPDestination(attrs AttrGetTPDestination, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_DESTINATIONS, attrs.TPid, attrs.DestinationId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }
