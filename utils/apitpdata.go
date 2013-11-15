@@ -71,7 +71,15 @@ type RatingPlan struct {
 	DestinationRatesId string  // The DestinationRate identity
 	TimingId    string  // The timing identity
 	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot
-	Timing      *TPTiming //?
+	timing      *TPTiming // Not exporting it via JSON
+}
+
+func(self *RatingPlan) SetTiming(tm *TPTiming) {
+	self.timing = tm
+}
+
+func(self *RatingPlan) Timing() *TPTiming {
+	return self.timing
 }
 
 type TPRatingProfile struct {

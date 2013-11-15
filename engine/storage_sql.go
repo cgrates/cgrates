@@ -217,19 +217,20 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES ", utils.TBL_TP_RATES)
+	vals := ""
 	i := 0
 	for rtId, rtRows := range rts {
 		for _, rt := range rtRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				qry += ","
+				vals += ","
 			}
-			qry += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d)",
+			vals += fmt.Sprintf("('%s', '%s', %f, %f, %d, %d,%d,'%s', %d)",
 				tpid, rtId, rt.ConnectFee, rt.Rate, rt.RateUnit, rt.RateIncrement, rt.GroupIntervalStart,
 				rt.RoundingMethod, rt.RoundingDecimals)
 			i++
 		}
 	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES %s ON DUPLICATE KEY UPDATE connect_fee=values(connect_fee), rate=values(rate), rate_increment=values(rate_increment), group_iterval_start=values(group_interval_start), rouding_method=values(rounding_method), rounding_decimals=values(rounding_decimals)", utils.TBL_TP_RATES, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
@@ -409,7 +410,7 @@ func (self *SQLStorage) GetTPRatingPlan(tpid, drtId string) (*utils.TPRatingPlan
 		if err != nil {
 			return nil, err
 		}
-		drt.RatingPlans = append(drt.RatingPlans, &utils.RatingPlan{drTag, timingTag, weight, nil})
+		drt.RatingPlans = append(drt.RatingPlans, &utils.RatingPlan{DestinationRatesId:drTag, TimingId:timingTag, Weight:weight})
 	}
 	if i == 0 {
 		return nil, nil

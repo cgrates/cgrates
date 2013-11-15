@@ -137,20 +137,20 @@ func NewRatingPlan(timing *utils.TPTiming, weight string) (drt *utils.RatingPlan
 		return
 	}
 	drt = &utils.RatingPlan{
-		Timing: timing,
 		Weight: w,
 	}
+	drt.SetTiming(timing)
 	return
 }
 
 func GetRateInterval(rpl *utils.RatingPlan, dr *utils.DestinationRate) (i *RateInterval) {
 	i = &RateInterval{
 		Timing: &RITiming{
-			Years:     rpl.Timing.Years,
-			Months:    rpl.Timing.Months,
-			MonthDays: rpl.Timing.MonthDays,
-			WeekDays:  rpl.Timing.WeekDays,
-			StartTime: rpl.Timing.StartTime,
+			Years:     rpl.Timing().Years,
+			Months:    rpl.Timing().Months,
+			MonthDays: rpl.Timing().MonthDays,
+			WeekDays:  rpl.Timing().WeekDays,
+			StartTime: rpl.Timing().StartTime,
 		},
 		Weight: rpl.Weight,
 		Rating: &RIRate{

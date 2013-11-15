@@ -188,7 +188,7 @@ func (dbr *DbReader) LoadRatingPlans() error {
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get timing for tag %v", drt.TimingId))
 		}
-		drt.Timing = t
+		drt.SetTiming(t)
 		drs, exists := dbr.destinationRates[drt.DestinationRatesId]
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", drt.DestinationRatesId))
@@ -249,7 +249,7 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 		if err != nil || len(tm) == 0 {
 			return fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
 		}
-		rp.Timing = tm[rp.TimingId]
+		rp.SetTiming(tm[rp.TimingId])
 		drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestinationRatesId)
 		if err != nil || len(drm) == 0 {
 			return fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)

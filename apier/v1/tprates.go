@@ -31,11 +31,6 @@ func (self *ApierV1) SetTPRate(attrs utils.TPRate, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId", "RateSlots"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPRate(attrs.TPid, attrs.RateId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
 	if err := self.StorDb.SetTPRates(attrs.TPid, map[string][]*utils.RateSlot{attrs.RateId: attrs.RateSlots}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -78,6 +73,19 @@ func (self *ApierV1) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+// Removes specific Rate on Tariff plan
+func (self *ApierV1) RemTPRate(attrs AttrGetTPRate, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_TIMINGS, attrs.TPid, attrs.RateId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }

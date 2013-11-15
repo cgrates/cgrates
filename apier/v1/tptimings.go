@@ -94,7 +94,7 @@ func (self *ApierV1) RemTPTiming(attrs AttrGetTPTiming, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_TIMINGS, attrs.TPid, attrs.TimingId); err != nil {
+	if err := self.StorDb.RemTPData(utils.TBL_TP_RATES, attrs.TPid, attrs.TimingId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"
