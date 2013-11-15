@@ -48,7 +48,7 @@ func init() {
 }
 
 const (
-	RECURSION_MAX_DEPTH = 10
+	RECURSION_MAX_DEPTH = 3
 	FALLBACK_SUBJECT    = "*any"
 	FALLBACK_SEP        = ";"
 )
@@ -152,6 +152,8 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 	return
 }
 
+// FIXME: this method is not exhaustive but will cover 99% of cases just good
+// it will not cover very long calls with very short activation periods fo rates
 func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (err error) {
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
@@ -163,12 +165,45 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 	}
 	if err = rp.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
 		// try rating profile fallback
-		for _, ri := range cd.RatingInfos {
+		for index := 0; index < len(cd.RatingInfos); index++ {
+			ri := cd.RatingInfos[index]
+			if len(ri.RateIntervals) > 0 {
+				// go to next rate info
+				continue
+			}
 			if len(ri.FallbackKeys) > 0 {
 				recursionDepth++
+				tempCD := &CallDescriptor{}
+				if index == 0 {
+					tempCD.TimeStart = cd.TimeStart
+				} else {
+					tempCD.TimeStart = ri.ActivationTime
+				}
+				if index == len(cd.RatingInfos)-1 {
+					tempCD.TimeEnd = cd.TimeEnd
+				} else {
+					tempCD.TimeEnd = cd.RatingInfos[index+1].ActivationTime
+				}
 				for _, fbk := range ri.FallbackKeys {
-					if err := cd.getRatingPlansForPrefix(fbk, recursionDepth); err == nil {
-						return err
+					if err := tempCD.getRatingPlansForPrefix(fbk, recursionDepth); err != nil {
+						continue
+					}
+					// extract the rate infos and break
+					for newIndex, newRI := range tempCD.RatingInfos {
+						if newIndex == 0 {
+							cd.RatingInfos[index] = newRI
+						} else {
+							// insert extra data
+							i := index + newIndex
+							cd.RatingInfos = append(cd.RatingInfos, nil)
+							copy(cd.RatingInfos[i+1:], cd.RatingInfos[i:])
+							cd.RatingInfos[i] = newRI
+						}
+					}
+					// if this fallbackey covered the interval than skip
+					// the other fallback keys
+					if tempCD.continousRatingInfos() {
+						break
 					}
 				}
 			}
