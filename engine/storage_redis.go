@@ -21,6 +21,7 @@ package engine
 import (
 	"bytes"
 	"compress/zlib"
+	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
@@ -30,7 +31,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"errors"
 )
 
 type RedisStorage struct {
@@ -88,7 +88,7 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 		}
 	}
 	for _, key := range dKeys {
-		// ToDo: cache2go.RemKey(key)
+		cache2go.RemKey(key)
 		if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):]); err != nil {
 			return err
 		}
@@ -99,7 +99,7 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 		}
 	}
 	for _, key := range rpKeys {
-		// ToDo: cache2go.RemKey(key)
+		cache2go.RemKey(key)
 		if _, err = rs.GetRatingPlan(key[len(RATING_PLAN_PREFIX):]); err != nil {
 			return err
 		}
@@ -110,14 +110,13 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (rs *RedisStorage) ExistsData(entity, subject string) (bool, error) {
 	switch entity {
-	case DESTINATION_PREFIX: 
-		return rs.db.Exists(DESTINATION_PREFIX+subject)
+	case DESTINATION_PREFIX:
+		return rs.db.Exists(DESTINATION_PREFIX + subject)
 	case RATING_PLAN_PREFIX:
-		return rs.db.Exists(RATING_PLAN_PREFIX+subject)
+		return rs.db.Exists(RATING_PLAN_PREFIX + subject)
 	}
 	return false, errors.New("Unsupported entity in ExistsData")
 }
-
 
 func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
