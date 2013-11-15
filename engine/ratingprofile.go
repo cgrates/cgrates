@@ -127,10 +127,8 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		if bestPrecision > 0 {
 			ris = append(ris, &RatingInfo{rp.Id, cd.Destination[:bestPrecision], rpa.ActivationTime, rps, rpa.FallbackKeys})
 		} else {
-			// mark the end of previous!
-			if len(cd.RatingInfos) > 0 {
-				ris = append(ris, &RatingInfo{"", "", rpa.ActivationTime, nil, rpa.FallbackKeys})
-			}
+			// add for fallback information
+			ris = append(ris, &RatingInfo{"", "", rpa.ActivationTime, nil, rpa.FallbackKeys})
 		}
 	}
 	if len(ris) > 0 {
