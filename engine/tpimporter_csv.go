@@ -404,8 +404,8 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		at := &ActionTrigger{
-			BalanceId:      balanceType,
+		at := &utils.TPActionTrigger{
+			BalanceType:      balanceType,
 			Direction:      direction,
 			ThresholdType:  thresholdType,
 			ThresholdValue: threshold,
@@ -413,7 +413,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			Weight:         weight,
 			ActionsId:      actionsTag,
 		}
-		if err := self.StorDb.SetTPActionTriggers(self.TPid, map[string][]*ActionTrigger{tag: []*ActionTrigger{at}}); err != nil {
+		if err := self.StorDb.SetTPActionTriggers(self.TPid, map[string][]*utils.TPActionTrigger{tag: []*utils.TPActionTrigger{at}}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}

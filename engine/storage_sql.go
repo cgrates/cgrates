@@ -708,24 +708,24 @@ func (self *SQLStorage) ExistsTPActionTriggers(tpid, atId string) (bool, error) 
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*ActionTrigger) error {
+func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils.TPActionTrigger) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,balance_type,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight) VALUES ",
-		utils.TBL_TP_ACTION_TRIGGERS)
+	vals := ""
 	i := 0
 	for atId, atRows := range ats {
 		for _, atsRow := range atRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				qry += ","
+				vals += ","
 			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s','%s', %f, '%s','%s',%f)",
-				tpid, atId, atsRow.BalanceId, atsRow.Direction, atsRow.ThresholdType,
+			vals += fmt.Sprintf("('%s','%s','%s','%s','%s', %f, '%s','%s',%f)",
+				tpid, atId, atsRow.BalanceType, atsRow.Direction, atsRow.ThresholdType,
 				atsRow.ThresholdValue, atsRow.DestinationId, atsRow.ActionsId, atsRow.Weight)
 			i++
 		}
 	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,balance_type,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight) VALUES %s ON DUPLICATE KEY UPDATE weight=values(weight)", utils.TBL_TP_ACTION_TRIGGERS, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
@@ -1205,8 +1205,8 @@ func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (map[string][]*util
 	return ats, nil
 }
 
-func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.ApiActionTrigger, error) {
-	ats := make(map[string][]*utils.ApiActionTrigger)
+func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {
+	ats := make(map[string][]*utils.TPActionTrigger)
 	q := fmt.Sprintf("SELECT tpid,tag,balance_type,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
@@ -1224,7 +1224,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 			return nil, err
 		}
 
-		at := &utils.ApiActionTrigger{
+		at := &utils.TPActionTrigger{
 			BalanceType:    balances_type,
 			Direction:      direction,
 			ThresholdType:  thresholdType,

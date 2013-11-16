@@ -21,41 +21,17 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Creates a new ActionTriggers profile within a tariff plan
-func (self *ApierV1) SetTPActionTriggers(attrs utils.ApiTPActionTriggers, reply *string) error {
+func (self *ApierV1) SetTPActionTriggers(attrs utils.TPActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs,
 		[]string{"TPid", "ActionTriggersId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPActionTriggers(attrs.TPid, attrs.ActionTriggersId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
-	aTriggers := make([]*engine.ActionTrigger, len(attrs.ActionTriggers))
-	for idx, at := range attrs.ActionTriggers {
-		requiredFields := []string{"BalanceType", "Direction", "ThresholdType", "ThresholdValue", "ActionsId", "Weight"}
-		if missing := utils.MissingStructFields(&at, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:Balance:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.BalanceType, missing)
-		}
-		at := &engine.ActionTrigger{
-			BalanceId:      at.BalanceType,
-			Direction:      at.Direction,
-			ThresholdType:  at.ThresholdType,
-			ThresholdValue: at.ThresholdValue,
-			DestinationId:  at.DestinationId,
-			Weight:         at.Weight,
-			ActionsId:      at.ActionsId,
-		}
-		aTriggers[idx] = at
-	}
-
-	ats := map[string][]*engine.ActionTrigger{
-		attrs.ActionTriggersId: aTriggers}
+	ats := map[string][]*utils.TPActionTrigger{
+		attrs.ActionTriggersId: attrs.ActionTriggers}
 
 	if err := self.StorDb.SetTPActionTriggers(attrs.TPid, ats); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -70,7 +46,7 @@ type AttrGetTPActionTriggers struct {
 }
 
 // Queries specific ActionTriggers profile on tariff plan
-func (self *ApierV1) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *utils.ApiTPActionTriggers) error {
+func (self *ApierV1) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *utils.TPActionTriggers) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTriggersId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -79,7 +55,7 @@ func (self *ApierV1) GetTPActionTriggers(attrs AttrGetTPActionTriggers, reply *u
 	} else if len(atsMap) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		atRply := &utils.ApiTPActionTriggers{attrs.TPid, attrs.ActionTriggersId, atsMap[attrs.ActionTriggersId]}
+		atRply := &utils.TPActionTriggers{attrs.TPid, attrs.ActionTriggersId, atsMap[attrs.ActionTriggersId]}
 		*reply = *atRply
 	}
 	return nil
@@ -100,6 +76,19 @@ func (self *ApierV1) GetTPActionTriggerIds(attrs AttrGetTPActionTriggerIds, repl
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+// Removes specific ActionTriggers on Tariff plan
+func (self *ApierV1) RemTPActionTriggers(attrs AttrGetTPActionTriggers, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTriggersId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTION_TRIGGERS, attrs.TPid, attrs.ActionTriggersId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }

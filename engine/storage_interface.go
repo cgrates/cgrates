@@ -135,7 +135,7 @@ type LoadStorage interface {
 	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
 	GetTPActionTimingIds(string) ([]string, error)
 	ExistsTPActionTriggers(string, string) (bool, error)
-	SetTPActionTriggers(string, map[string][]*ActionTrigger) error
+	SetTPActionTriggers(string, map[string][]*utils.TPActionTrigger) error
 	GetTPActionTriggerIds(string) ([]string, error)
 	ExistsTPAccountActions(string, string) (bool, error)
 	SetTPAccountActions(string, map[string]*AccountAction) error
@@ -149,7 +149,7 @@ type LoadStorage interface {
 	GetTpRatingProfiles(string, string) (map[string]*utils.TPRatingProfile, error)
 	GetTpActions(string, string) (map[string][]*Action, error)
 	GetTpActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
-	GetTpActionTriggers(string, string) (map[string][]*utils.ApiActionTrigger, error)
+	GetTpActionTriggers(string, string) (map[string][]*utils.TPActionTrigger, error)
 	GetTpAccountActions(string, string) (map[string]*AccountAction, error)
 }
 
