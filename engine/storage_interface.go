@@ -138,7 +138,7 @@ type LoadStorage interface {
 	SetTPActionTriggers(string, map[string][]*utils.TPActionTrigger) error
 	GetTPActionTriggerIds(string) ([]string, error)
 	ExistsTPAccountActions(string, string) (bool, error)
-	SetTPAccountActions(string, map[string]*AccountAction) error
+	SetTPAccountActions(string, map[string]*utils.TPAccountActions) error
 	GetTPAccountActionIds(string) ([]string, error)
 	// loader functions
 	GetTpDestinations(string, string) ([]*Destination, error)

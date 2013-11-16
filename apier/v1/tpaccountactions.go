@@ -21,27 +21,16 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // Creates a new AccountActions profile within a tariff plan
-func (self *ApierV1) SetTPAccountActions(attrs utils.ApiTPAccountActions, reply *string) error {
+func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs,
 		[]string{"TPid", "AccountActionsId", "Tenant", "Account", "Direction", "ActionTimingsId", "ActionTriggersId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if exists, err := self.StorDb.ExistsTPAccountActions(attrs.TPid, attrs.AccountActionsId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
-	aa := map[string]*engine.AccountAction{
-		attrs.AccountActionsId: &engine.AccountAction{Tenant: attrs.Tenant, Account: attrs.Account, Direction: attrs.Direction,
-			ActionTimingsTag: attrs.ActionTimingsId, ActionTriggersTag: attrs.ActionTriggersId},
-	}
-
-	if err := self.StorDb.SetTPAccountActions(attrs.TPid, aa); err != nil {
+	if err := self.StorDb.SetTPAccountActions(attrs.TPid, map[string]*utils.TPAccountActions{attrs.AccountActionsId: &attrs}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -54,7 +43,7 @@ type AttrGetTPAccountActions struct {
 }
 
 // Queries specific AccountActions profile on tariff plan
-func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *utils.ApiTPAccountActions) error {
+func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -63,7 +52,7 @@ func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *u
 	} else if len(aa) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = utils.ApiTPAccountActions{TPid: attrs.TPid,
+		*reply = utils.TPAccountActions{TPid: attrs.TPid,
 			AccountActionsId: attrs.AccountActionsId,
 			Tenant:           aa[attrs.AccountActionsId].Tenant,
 			Account:          aa[attrs.AccountActionsId].Account,
@@ -89,6 +78,19 @@ func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, repl
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+// Removes specific AccountActions on Tariff plan
+func (self *ApierV1) RemTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, attrs.TPid, attrs.AccountActionsId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }

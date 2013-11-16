@@ -445,9 +445,9 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 		if self.ImportId != "" {
 			tag += "_" + self.ImportId
 		}
-		aa := map[string]*AccountAction{
-			tag: &AccountAction{Tenant: tenant, Account: account, Direction: direction,
-				ActionTimingsTag: actionTimingsTag, ActionTriggersTag: actionTriggersTag},
+		aa := map[string]*utils.TPAccountActions{
+			tag: &utils.TPAccountActions{TPid: self.TPid, AccountActionsId: tag, Tenant: tenant, Account: account, Direction: direction,
+				ActionTimingsId: actionTimingsTag, ActionTriggersId: actionTriggersTag},
 		}
 		if err := self.StorDb.SetTPAccountActions(self.TPid, aa); err != nil {
 			if self.Verbose {

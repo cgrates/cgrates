@@ -763,21 +763,22 @@ func (self *SQLStorage) ExistsTPAccountActions(tpid, aaId string) (bool, error) 
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*AccountAction) error {
+// Sets a group of account actions. Map key has the role of grouping within a tpid
+func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TPAccountActions) error {
 	if len(aa) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, tenant, account, direction, action_timings_tag, action_triggers_tag) VALUES ",
-		utils.TBL_TP_ACCOUNT_ACTIONS)
+	vals := ""
 	i := 0
 	for aaId, aActs := range aa {
 		if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-			qry += ","
+			vals += ","
 		}
-		qry += fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
-			tpid, aaId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionTimingsTag, aActs.ActionTriggersTag)
+		vals += fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
+			tpid, aaId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionTimingsId, aActs.ActionTriggersId)
 		i++
 	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, tenant, account, direction, action_timings_tag, action_triggers_tag) VALUES %s ON DUPLICATE KEY UPDATE action_timings_tag=values(action_timings_tag), action_triggers_tag=values(action_triggers_tag)", utils.TBL_TP_ACCOUNT_ACTIONS, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}

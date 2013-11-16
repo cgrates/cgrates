@@ -193,7 +193,7 @@ type TPActionTrigger struct {
 	Weight         float64 // weight
 }
 
-type ApiTPAccountActions struct {
+type TPAccountActions struct {
 	TPid             string // Tariff plan id
 	AccountActionsId string // AccountActions id, used to group actions on a load
 	Tenant           string // Tenant's Id
