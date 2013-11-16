@@ -630,30 +630,31 @@ func (self *SQLStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
 }
 
 // Sets actionTimings in sqlDB. Imput is expected in form map[actionTimingId][]rows, eg a full .csv file content
-func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.ApiActionTiming) error {
+func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTiming) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES ", utils.TBL_TP_ACTION_TIMINGS)
+	vals := ""
 	i := 0
 	for atId, atRows := range ats {
 		for _, at := range atRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				qry += ","
+				vals += ","
 			}
-			qry += fmt.Sprintf("('%s','%s','%s','%s',%f)",
+			vals += fmt.Sprintf("('%s','%s','%s','%s',%f)",
 				tpid, atId, at.ActionsId, at.TimingId, at.Weight)
 			i++
 		}
 	}
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES %s ON DUPLICATE KEY UPDATE timing_tag=values(timing_tag),weight=values(weight)", utils.TBL_TP_ACTION_TIMINGS, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*utils.ApiActionTiming, error) {
-	ats := make(map[string][]*utils.ApiActionTiming)
+func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*utils.TPActionTiming, error) {
+	ats := make(map[string][]*utils.TPActionTiming)
 	q := fmt.Sprintf("SELECT tag,actions_tag,timing_tag,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid)
 	if atId != "" {
 		q += fmt.Sprintf(" AND tag='%s'", atId)
@@ -671,7 +672,7 @@ func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*uti
 		if err = rows.Scan(&tag, &actionsId, &timingId, &weight); err != nil {
 			return nil, err
 		}
-		ats[tag] = append(ats[tag], &utils.ApiActionTiming{actionsId, timingId, weight})
+		ats[tag] = append(ats[tag], &utils.TPActionTiming{actionsId, timingId, weight})
 	}
 	return ats, nil
 }
@@ -1177,7 +1178,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 	return as, nil
 }
 
-func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (map[string][]*utils.ApiActionTiming, error) {
+func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (map[string][]*utils.TPActionTiming, error) {
 	q := fmt.Sprintf("SELECT tag,actions_tag,timing_tag,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
@@ -1187,14 +1188,14 @@ func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (map[string][]*util
 		return nil, err
 	}
 	defer rows.Close()
-	ats := make(map[string][]*utils.ApiActionTiming)
+	ats := make(map[string][]*utils.TPActionTiming)
 	for rows.Next() {
 		var weight float64
 		var tag, actions_tag, timing_tag string
 		if err := rows.Scan(&tag, &actions_tag, &timing_tag, &weight); err != nil {
 			return nil, err
 		}
-		at := &utils.ApiActionTiming {
+		at := &utils.TPActionTiming {
 			ActionsId: tag,
 			TimingId: timing_tag,
 			Weight: weight,

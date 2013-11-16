@@ -164,13 +164,13 @@ type TPAction struct {
 	Weight          float64 // Action's weight
 }
 
-type ApiTPActionTimings struct {
+type TPActionTimings struct {
 	TPid            string             // Tariff plan id
 	ActionTimingsId string             // ActionTimings id
-	ActionTimings   []*ApiActionTiming // Set of ActionTiming bindings this profile will group
+	ActionTimings   []*TPActionTiming // Set of ActionTiming bindings this profile will group
 }
 
-type ApiActionTiming struct {
+type TPActionTiming struct {
 	ActionsId string  // Actions id
 	TimingId  string  // Timing profile id
 	Weight    float64 // Binding's weight

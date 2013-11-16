@@ -355,14 +355,14 @@ func (self *TPCSVImporter) importActionTimings(fn string) error {
 			}
 			continue
 		}
-		at := []*utils.ApiActionTiming{
-				&utils.ApiActionTiming{
+		at := []*utils.TPActionTiming{
+				&utils.TPActionTiming{
 					ActionsId: actionsTag,
 					TimingId:  timingTag,
 					Weight:    weight,
 				}, 
 			}
-		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string][]*utils.ApiActionTiming{tag: at}); err != nil {
+		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string][]*utils.TPActionTiming{tag: at}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}

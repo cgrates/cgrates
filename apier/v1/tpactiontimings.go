@@ -25,22 +25,17 @@ import (
 )
 
 // Creates a new ActionTimings profile within a tariff plan
-func (self *ApierV1) SetTPActionTimings(attrs utils.ApiTPActionTimings, reply *string) error {
+func (self *ApierV1) SetTPActionTimings(attrs utils.TPActionTimings, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTimingsId", "ActionTimings"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	for _, at := range attrs.ActionTimings {
 		requiredFields := []string{"ActionsId", "TimingId", "Weight"}
-		if missing := utils.MissingStructFields(&at, requiredFields); len(missing) != 0 {
+		if missing := utils.MissingStructFields(at, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.ActionsId, missing)
 		}
 	}
-	if exists, err := self.StorDb.ExistsTPActionTimings(attrs.TPid, attrs.ActionTimingsId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
-	if err := self.StorDb.SetTPActionTimings(attrs.TPid, map[string][]*utils.ApiActionTiming{attrs.ActionTimingsId: attrs.ActionTimings}); err != nil {
+	if err := self.StorDb.SetTPActionTimings(attrs.TPid, map[string][]*utils.TPActionTiming{attrs.ActionTimingsId: attrs.ActionTimings}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -53,7 +48,7 @@ type AttrGetTPActionTimings struct {
 }
 
 // Queries specific ActionTimings profile on tariff plan
-func (self *ApierV1) GetTPActionTimings(attrs AttrGetTPActionTimings, reply *utils.ApiTPActionTimings) error {
+func (self *ApierV1) GetTPActionTimings(attrs AttrGetTPActionTimings, reply *utils.TPActionTimings) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTimingsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -62,7 +57,7 @@ func (self *ApierV1) GetTPActionTimings(attrs AttrGetTPActionTimings, reply *uti
 	} else if len(ats) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else { // Got the data we need, convert it
-		atRply := &utils.ApiTPActionTimings{attrs.TPid, attrs.ActionTimingsId, ats[attrs.ActionTimingsId]}
+		atRply := &utils.TPActionTimings{attrs.TPid, attrs.ActionTimingsId, ats[attrs.ActionTimingsId]}
 		*reply = *atRply
 	}
 	return nil
@@ -83,6 +78,19 @@ func (self *ApierV1) GetTPActionTimingIds(attrs AttrGetTPActionTimingIds, reply 
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+// Removes specific ActionTimings on Tariff plan
+func (self *ApierV1) RemTPActionTimings(attrs AttrGetTPActionTimings, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTimingsId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTION_TIMINGS, attrs.TPid, attrs.ActionTimingsId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }
