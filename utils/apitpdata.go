@@ -148,10 +148,10 @@ type AttrTPRatingProfileIds struct {
 type TPActions struct {
 	TPid      string    // Tariff plan id
 	ActionsId string    // Actions id
-	Actions   []*Action // Set of actions this Actions profile will perform
+	Actions   []*TPAction // Set of actions this Actions profile will perform
 }
 
-type Action struct {
+type TPAction struct {
 	Identifier      string  // Identifier mapped in the code
 	BalanceType     string  // Type of balance the action will operate on
 	Direction       string  // Balance direction

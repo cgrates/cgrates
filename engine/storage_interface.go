@@ -127,7 +127,7 @@ type LoadStorage interface {
 	GetTPRatingProfile(string, string) (*utils.TPRatingProfile, error)
 	GetTPRatingProfileIds(*utils.AttrTPRatingProfileIds) ([]string, error)
 	ExistsTPActions(string, string) (bool, error)
-	SetTPActions(string, map[string][]*Action) error
+	SetTPActions(string, map[string][]*utils.TPAction) error
 	GetTPActions(string, string) (*utils.TPActions, error)
 	GetTPActionIds(string) ([]string, error)
 	ExistsTPActionTimings(string, string) (bool, error)

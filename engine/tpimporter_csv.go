@@ -308,21 +308,19 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		act := &Action{
-			ActionType:       actionType,
-			BalanceId:        balanceType,
+		act := &utils.TPAction{
+			Identifier:       actionType,
+			BalanceType:      balanceType,
 			Direction:        direction,
-			ExpirationString: record[5],
+			Units:            units,
+			ExpiryTime:       record[5],
+			DestinationId:    destTag,
+			RatingSubject:    rateSubject,
+			BalanceWeight:    balanceWeight,
 			ExtraParameters:  record[9],
-			Balance: &Balance{
-				Value:         units,
-				DestinationId: destTag,
-				RateSubject:   rateSubject,
-				Weight:        balanceWeight,
-			},
-			Weight: weight,
+			Weight:           weight,
 		}
-		if err := self.StorDb.SetTPActions(self.TPid, map[string][]*Action{actId: []*Action{act}}); err != nil {
+		if err := self.StorDb.SetTPActions(self.TPid, map[string][]*utils.TPAction{actId: []*utils.TPAction{act}}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}

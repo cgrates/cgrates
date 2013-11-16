@@ -21,7 +21,6 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,33 +34,11 @@ func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
 		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
 			requiredFields = append(requiredFields, "Direction", "Units")
 		}
-		if missing := utils.MissingStructFields(&action, requiredFields); len(missing) != 0 {
+		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
 		}
 	}
-	if exists, err := self.StorDb.ExistsTPActions(attrs.TPid, attrs.ActionsId); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if exists {
-		return errors.New(utils.ERR_DUPLICATE)
-	}
-	acts := make([]*engine.Action, len(attrs.Actions))
-	for idx, act := range attrs.Actions {
-		acts[idx] = &engine.Action{
-			ActionType:       act.Identifier,
-			BalanceId:        act.BalanceType,
-			Direction:        act.Direction,
-			ExpirationString: act.ExpiryTime,
-			ExtraParameters:  act.ExtraParameters,
-			Balance: &engine.Balance{
-				Value:         act.Units,
-				DestinationId: act.DestinationId,
-				RateSubject:   act.RatingSubject,
-				Weight:        act.BalanceWeight,
-			},
-			Weight: act.Weight,
-		}
-	}
-	if err := self.StorDb.SetTPActions(attrs.TPid, map[string][]*engine.Action{attrs.ActionsId: acts}); err != nil {
+	if err := self.StorDb.SetTPActions(attrs.TPid, map[string][]*utils.TPAction{attrs.ActionsId: attrs.Actions}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -103,6 +80,20 @@ func (self *ApierV1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) e
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = ids
+	}
+	return nil
+}
+
+
+// Removes specific Actions on Tariff plan
+func (self *ApierV1) RemTPActions(attrs AttrGetTPActions, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTIONS, attrs.TPid, attrs.ActionsId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = "OK"
 	}
 	return nil
 }
