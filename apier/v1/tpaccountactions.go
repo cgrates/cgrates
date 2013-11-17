@@ -27,10 +27,10 @@ import (
 // Creates a new AccountActions profile within a tariff plan
 func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs,
-		[]string{"TPid", "AccountActionsId", "Tenant", "Account", "Direction", "ActionTimingsId", "ActionTriggersId"}); len(missing) != 0 {
+		[]string{"TPid", "LoadId", "Tenant", "Account", "Direction", "ActionTimingsId", "ActionTriggersId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.SetTPAccountActions(attrs.TPid, map[string]*utils.TPAccountActions{attrs.AccountActionsId: &attrs}); err != nil {
+	if err := self.StorDb.SetTPAccountActions(attrs.TPid, map[string]*utils.TPAccountActions{attrs.KeyId(): &attrs}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -39,26 +39,33 @@ func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *st
 
 type AttrGetTPAccountActions struct {
 	TPid             string // Tariff plan id
-	AccountActionsId string // AccountActions id
+	LoadId string // AccountActions id
+	
 }
 
 // Queries specific AccountActions profile on tariff plan
-func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) GetTPAccountActions(attrs utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
+	mndtryFlds := []string{"TPid", "LoadId"}
+	if len(attrs.Account) != 0 { // If account provided as filter, make all related fields mandatory
+		mndtryFlds = append(mndtryFlds, "Tenant", "Account", "Direction")
+	}
+	if missing := utils.MissingStructFields(&attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if aa, err := self.StorDb.GetTpAccountActions(attrs.TPid, attrs.AccountActionsId); err != nil {
+	if aa, err := self.StorDb.GetTpAccountActions(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(aa) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = utils.TPAccountActions{TPid: attrs.TPid,
-			AccountActionsId: attrs.AccountActionsId,
-			Tenant:           aa[attrs.AccountActionsId].Tenant,
-			Account:          aa[attrs.AccountActionsId].Account,
-			Direction:        aa[attrs.AccountActionsId].Direction,
-			ActionTimingsId:  aa[attrs.AccountActionsId].ActionTimingsTag,
-			ActionTriggersId: aa[attrs.AccountActionsId].ActionTriggersTag}
+		var acts []*utils.TPAccountActions
+		if len(attrs.Account) != 0 {
+			acts = []*utils.TPAccountActions{aa[attrs.KeyId()]}
+		} else {
+			for _, actLst := range aa {
+				acts = append(acts, actLst)
+			}
+		}
+		*reply = acts
 	}
 	return nil
 }
@@ -68,7 +75,7 @@ type AttrGetTPAccountActionIds struct {
 }
 
 // Queries AccountActions identities on specific tariff plan.
-func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, reply *[]string) error {
+func (self *ApierV1) GetTPAccountActionLoadIds(attrs AttrGetTPAccountActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -83,11 +90,11 @@ func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, repl
 }
 
 // Removes specific AccountActions on Tariff plan
-func (self *ApierV1) RemTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 { //Params missing
+func (self *ApierV1) RemTPAccountActions(attrs utils.TPAccountActions, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, attrs.TPid, attrs.AccountActionsId); err != nil {
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, attrs.TPid, attrs.LoadId, attrs.Tenant, attrs.Account, attrs.Direction); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

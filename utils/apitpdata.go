@@ -20,6 +20,7 @@ package utils
 
 import (
 	"time"
+	"fmt"
 )
 
 // This file deals with tp_* data definition
@@ -103,32 +104,36 @@ type TPTiming struct {
 type TPRatingPlan struct {
 	TPid         string        // Tariff plan id
 	RatingPlanId string        // RatingPlan profile id
-	RatingPlans  []*RatingPlan // Set of destinationid-rateid bindings
+	RatingPlanBindings  []*TPRatingPlanBinding // Set of destinationid-rateid bindings
 }
 
-type RatingPlan struct {
+type TPRatingPlanBinding struct {
 	DestinationRatesId string  // The DestinationRate identity
 	TimingId    string  // The timing identity
 	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot
 	timing      *TPTiming // Not exporting it via JSON
 }
 
-func(self *RatingPlan) SetTiming(tm *TPTiming) {
+func(self *TPRatingPlanBinding) SetTiming(tm *TPTiming) {
 	self.timing = tm
 }
 
-func(self *RatingPlan) Timing() *TPTiming {
+func(self *TPRatingPlanBinding) Timing() *TPTiming {
 	return self.timing
 }
 
 type TPRatingProfile struct {
 	TPid                  string // Tariff plan id
-	RatingProfileId       string // RatingProfile id
+	LoadId                string // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
 	Tenant                string   // Tenant's Id
 	TOR                   string   // TypeOfRecord
 	Direction             string   // Traffic direction, OUT is the only one supported for now
 	Subject               string   // Rating subject, usually the same as account
 	RatingPlanActivations []*TPRatingActivation // Activate rate profiles at specific time
+}
+// Used as key in nosql db (eg: redis)
+func(self *TPRatingProfile) KeyId() string {
+	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.TOR, self.Subject)
 }
 
 type TPRatingActivation struct {
@@ -156,7 +161,7 @@ type TPAction struct {
 	BalanceType     string  // Type of balance the action will operate on
 	Direction       string  // Balance direction
 	Units           float64 // Number of units to add/deduct
-	ExpiryTime      string  // Time when the units will expire\
+	ExpiryTime      string  // Time when the units will expire
 	DestinationId   string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
 	BalanceWeight   float64 // Balance weight
@@ -195,12 +200,16 @@ type TPActionTrigger struct {
 
 type TPAccountActions struct {
 	TPid             string // Tariff plan id
-	AccountActionsId string // AccountActions id, used to group actions on a load
+	LoadId           string // LoadId, used to group actions on a load
 	Tenant           string // Tenant's Id
 	Account          string // Account name
 	Direction        string // Traffic direction
 	ActionTimingsId  string // Id of ActionTimings profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
+}
+// Returns the id used in some nosql dbs (eg: redis)
+func(self *TPAccountActions) KeyId() string {
+	return fmt.Sprintf("%s:%s:%s", self.Direction, self.Tenant, self.Account)
 }
 
 

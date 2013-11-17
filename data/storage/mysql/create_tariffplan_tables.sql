@@ -92,7 +92,7 @@ CREATE TABLE `tp_rating_plans` (
 CREATE TABLE `tp_rating_profiles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
-  `tag` varchar(64) NOT NULL,
+  `loadid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `tor` varchar(16) NOT NULL,
   `direction` varchar(8) NOT NULL,
@@ -101,8 +101,8 @@ CREATE TABLE `tp_rating_profiles` (
   `rating_plan_tag` varchar(64) NOT NULL,
   `fallback_subjects` varchar(64),
   PRIMARY KEY (`id`),
-  KEY `tpid_tag` (`tpid`, `tag`),
-  UNIQUE KEY `tpid_tag_tenant_tor_dir_subj_atime` (`tpid`,`tag`, `tenant`,`tor`,`direction`,`subject`,`activation_time`)
+  KEY `tpid_tag` (`tpid`, `loadid`),
+  UNIQUE KEY `tpid_tag_tenant_tor_dir_subj_atime` (`tpid`,`loadid`, `tenant`,`tor`,`direction`,`subject`,`activation_time`)
 );
 
 --
@@ -171,7 +171,7 @@ CREATE TABLE `tp_action_triggers` (
 CREATE TABLE `tp_account_actions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
-  `tag` varchar(64) NOT NULL,
+  `loadid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `account` varchar(64) NOT NULL,
   `direction` varchar(8) NOT NULL,
@@ -179,5 +179,5 @@ CREATE TABLE `tp_account_actions` (
   `action_triggers_tag` varchar(64),
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_tp_account` (`tpid`,`tag`,`tenant`,`account`,`direction`)
+  UNIQUE KEY `unique_tp_account` (`tpid`,`loadid`,`tenant`,`account`,`direction`)
 );

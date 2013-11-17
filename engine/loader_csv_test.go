@@ -604,7 +604,7 @@ func TestLoadActionTimings(t *testing.T) {
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
 	expected := &ActionTiming{
 		Id:             atm.Id,
-		Tag:            "ONE_TIME_RUN",
+		Tag:            "MORE_MINUTES",
 		UserBalanceIds: []string{"*out:vdf:minitsboy"},
 		Timing: &RateInterval{
 			Timing: &RITiming{
@@ -619,7 +619,7 @@ func TestLoadActionTimings(t *testing.T) {
 		ActionsId: "MINI",
 	}
 	if !reflect.DeepEqual(atm, expected) {
-		t.Error("Error loading action timing: ", atm)
+		t.Error("Error loading action timing: ", atm, expected)
 	}
 }
 

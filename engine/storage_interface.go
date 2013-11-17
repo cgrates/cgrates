@@ -105,7 +105,7 @@ type LoadStorage interface {
 	ExistsTPTiming(string, string) (bool, error)
 	GetTPTiming(string, string) (*utils.TPTiming, error)
 	GetTPTimingIds(string) ([]string, error)
-	RemTPData(string, string, string) error
+	RemTPData(string, string, ...string) error
 	SetTPDestination(string, *Destination) error
 	ExistsTPDestination(string, string) (bool, error)
 	GetTPDestination(string, string) (*Destination, error)
@@ -119,7 +119,7 @@ type LoadStorage interface {
 	GetTPDestinationRate(string, string) (*utils.TPDestinationRate, error)
 	GetTPDestinationRateIds(string) ([]string, error)
 	ExistsTPRatingPlan(string, string) (bool, error)
-	SetTPRatingPlans(string, map[string][]*utils.RatingPlan) error
+	SetTPRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
 	GetTPRatingPlan(string, string) (*utils.TPRatingPlan, error)
 	GetTPRatingPlanIds(string) ([]string, error)
 	ExistsTPRatingProfile(string, string) (bool, error)
@@ -145,12 +145,12 @@ type LoadStorage interface {
 	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
 	GetTpRates(string, string) (map[string]*utils.TPRate, error)
 	GetTpDestinationRates(string, string) (map[string]*utils.TPDestinationRate, error)
-	GetTpRatingPlans(string, string) (*utils.TPRatingPlan, error)
-	GetTpRatingProfiles(string, string) (map[string]*utils.TPRatingProfile, error)
+	GetTpRatingPlans(string, string) (map[string][]*utils.TPRatingPlanBinding, error)
+	GetTpRatingProfiles(*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error)
 	GetTpActions(string, string) (map[string][]*Action, error)
 	GetTpActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
 	GetTpActionTriggers(string, string) (map[string][]*utils.TPActionTrigger, error)
-	GetTpAccountActions(string, string) (map[string]*AccountAction, error)
+	GetTpAccountActions(*utils.TPAccountActions) (map[string]*utils.TPAccountActions, error)
 }
 
 type Marshaler interface {

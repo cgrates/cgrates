@@ -210,14 +210,14 @@ func (self *TPCSVImporter) importRatingPlans(fn string) error {
 			}
 			continue
 		}
-		drt := []*utils.RatingPlan{
-				&utils.RatingPlan{
+		drt := []*utils.TPRatingPlanBinding{
+				&utils.TPRatingPlanBinding{
 					DestinationRatesId: record[1],
 					Weight:      weight,
 					TimingId:    record[2],
 				},
 			}
-		if err := self.StorDb.SetTPRatingPlans(self.TPid, map[string][]*utils.RatingPlan{record[0]: drt}); err != nil {
+		if err := self.StorDb.SetTPRatingPlans(self.TPid, map[string][]*utils.TPRatingPlanBinding{record[0]: drt}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -252,12 +252,12 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			}
 			continue
 		}
-		rpTag := "TPCSV" //Autogenerate rating profile id
+		loadId := "TPCSV" //Autogenerate rating profile id
 		if self.ImportId != "" {
-			rpTag += "_" + self.ImportId
+			loadId += "_" + self.ImportId
 		}
 		rp := &utils.TPRatingProfile{
-			RatingProfileId:rpTag,
+			LoadId:         loadId,
 			Tenant:         tenant,
 			TOR:            tor,
 			Direction:      direction,
@@ -265,7 +265,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			RatingPlanActivations: []*utils.TPRatingActivation{ 
 				&utils.TPRatingActivation{ ActivationTime: record[4], RatingPlanId: ratingPlanTag, FallbackSubjects: fallbacksubject}},
 		}
-		if err := self.StorDb.SetTPRatingProfiles(self.TPid, map[string]*utils.TPRatingProfile{rpTag: rp}); err != nil {
+		if err := self.StorDb.SetTPRatingProfiles(self.TPid, map[string]*utils.TPRatingProfile{rp.KeyId(): rp}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
@@ -441,14 +441,13 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 			continue
 		}
 		tenant, account, direction, actionTimingsTag, actionTriggersTag := record[0], record[1], record[2], record[3], record[4]
-		tag := "TPCSV" //Autogenerate account actions profile id
+		loadId := "TPCSV" //Autogenerate account actions profile id
 		if self.ImportId != "" {
-			tag += "_" + self.ImportId
+			loadId += "_" + self.ImportId
 		}
-		aa := map[string]*utils.TPAccountActions{
-			tag: &utils.TPAccountActions{TPid: self.TPid, AccountActionsId: tag, Tenant: tenant, Account: account, Direction: direction,
-				ActionTimingsId: actionTimingsTag, ActionTriggersId: actionTriggersTag},
-		}
+		tpaa := &utils.TPAccountActions{TPid: self.TPid, LoadId: loadId, Tenant: tenant, Account: account, Direction: direction,
+				ActionTimingsId: actionTimingsTag, ActionTriggersId: actionTriggersTag}
+		aa := map[string]*utils.TPAccountActions{tpaa.KeyId(): tpaa}
 		if err := self.StorDb.SetTPAccountActions(self.TPid, aa); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())

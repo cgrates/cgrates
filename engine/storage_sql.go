@@ -119,8 +119,16 @@ func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
 
 
 
-func (self *SQLStorage) RemTPData(table, tpid, tag string) error {
-	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND tag='%s'", table, tpid, tag)
+func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND tag='%s'", table, tpid, args[0])
+	switch table {
+	case utils.TBL_TP_RATE_PROFILES:
+		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND tor='%s' AND direction='%s' AND subject='%s'", 
+				table, tpid, args[0], args[1], args[2], args[3], args[4])
+	case utils.TBL_TP_ACCOUNT_ACTIONS:
+		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND account='%s' AND direction='%s'", 
+				table, tpid, args[0], args[1], args[2], args[3])
+	}
 	if _, err := self.Db.Exec(q); err != nil {
 		return err
 	}
@@ -375,7 +383,7 @@ func (self *SQLStorage) ExistsTPRatingPlan(tpid, drtId string) (bool, error) {
 	return exists, nil
 }
 
-func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.RatingPlan) error {
+func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.TPRatingPlanBinding) error {
 	if len(drts) == 0 {
 		return nil //Nothing to set
 	}
@@ -414,7 +422,7 @@ func (self *SQLStorage) GetTPRatingPlan(tpid, drtId string) (*utils.TPRatingPlan
 		if err != nil {
 			return nil, err
 		}
-		drt.RatingPlans = append(drt.RatingPlans, &utils.RatingPlan{DestinationRatesId:drTag, TimingId:timingTag, Weight:weight})
+		drt.RatingPlanBindings = append(drt.RatingPlanBindings, &utils.TPRatingPlanBinding{DestinationRatesId:drTag, TimingId:timingTag, Weight:weight})
 	}
 	if i == 0 {
 		return nil, nil
@@ -465,25 +473,25 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				vals += ","
 			}
-			vals += fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.RatingProfileId, rp.Tenant, rp.TOR, rp.Direction,
+			vals += fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Tenant, rp.TOR, rp.Direction,
 				rp.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackSubjects)
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects) VALUES %s ON DUPLICATE KEY UPDATE fallback_subjects=values(fallback_subjects)", utils.TBL_TP_RATE_PROFILES, vals)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid,loadid,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects) VALUES %s ON DUPLICATE KEY UPDATE fallback_subjects=values(fallback_subjects)", utils.TBL_TP_RATE_PROFILES, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (self *SQLStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingProfile, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATE_PROFILES, tpid, rpId))
+func (self *SQLStorage) GetTPRatingProfile(tpid, loadId string) (*utils.TPRatingProfile, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects FROM %s WHERE tpid='%s' AND loadid='%s'", utils.TBL_TP_RATE_PROFILES, tpid, loadId))
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	rp := &utils.TPRatingProfile{TPid: tpid, RatingProfileId: rpId}
+	rp := &utils.TPRatingProfile{TPid: tpid, LoadId: loadId}
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
@@ -507,7 +515,7 @@ func (self *SQLStorage) GetTPRatingProfile(tpid, rpId string) (*utils.TPRatingPr
 }
 
 func (self *SQLStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfileIds) ([]string, error) {
-	qry := fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_RATE_PROFILES, filters.TPid)
+	qry := fmt.Sprintf("SELECT DISTINCT loadid FROM %s where tpid='%s'", utils.TBL_TP_RATE_PROFILES, filters.TPid)
 	if filters.Tenant != "" {
 		qry += fmt.Sprintf(" AND tenant='%s'", filters.Tenant)
 	}
@@ -770,15 +778,15 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 	}
 	vals := ""
 	i := 0
-	for aaId, aActs := range aa {
+	for _, aActs := range aa {
 		if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 			vals += ","
 		}
 		vals += fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
-			tpid, aaId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionTimingsId, aActs.ActionTriggersId)
+			tpid, aActs.LoadId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionTimingsId, aActs.ActionTriggersId)
 		i++
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, tenant, account, direction, action_timings_tag, action_triggers_tag) VALUES %s ON DUPLICATE KEY UPDATE action_timings_tag=values(action_timings_tag), action_triggers_tag=values(action_triggers_tag)", utils.TBL_TP_ACCOUNT_ACTIONS, vals)
+	qry := fmt.Sprintf("INSERT INTO %s (tpid, loadid, tenant, account, direction, action_timings_tag, action_triggers_tag) VALUES %s ON DUPLICATE KEY UPDATE action_timings_tag=values(action_timings_tag), action_triggers_tag=values(action_triggers_tag)", utils.TBL_TP_ACCOUNT_ACTIONS, vals)
 	if _, err := self.Db.Exec(qry); err != nil {
 		return err
 	}
@@ -786,7 +794,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 }
 
 func (self *SQLStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, tpid))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT loadid FROM %s where tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, tpid))
 	if err != nil {
 		return nil, err
 	}
@@ -1085,8 +1093,8 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.TPTimi
 	return tms, nil
 }
 
-func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (*utils.TPRatingPlan, error) {
-	rts := &utils.TPRatingPlan{RatingPlanId: tag}
+func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.TPRatingPlanBinding, error) {
+	rpbns := make(map[string][]*utils.TPRatingPlanBinding)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_RATING_PLANS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
@@ -1103,44 +1111,62 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (*utils.TPRatingPlan,
 		if err := rows.Scan(&id, &tpid, &tag, &destination_rates_tag, &timings_tag, &weight); err != nil {
 			return nil, err
 		}
-		rt := &utils.RatingPlan{
+		rpb := &utils.TPRatingPlanBinding{
 			DestinationRatesId: destination_rates_tag,
-			Weight:      weight,
 			TimingId:    timings_tag,
+			Weight:      weight,
 		}
-		rts.RatingPlans = append(rts.RatingPlans, rt)
+		if rpBnLst,exists := rpbns[tag]; exists {
+			rpBnLst = append(rpBnLst, rpb)
+		} else { // New
+			rpbns[tag] = []*utils.TPRatingPlanBinding{rpb}
+		}
 	}
-	return rts, nil
+	return rpbns, nil
 }
 
-func (self *SQLStorage) GetTpRatingProfiles(tpid, tag string) (map[string]*utils.TPRatingProfile, error) {
-	rpfs := make(map[string]*utils.TPRatingProfile)
-	q := fmt.Sprintf("SELECT tag,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects FROM %s WHERE tpid='%s'",
-		utils.TBL_TP_RATE_PROFILES, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
+	q := fmt.Sprintf("SELECT loadid,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects FROM %s WHERE tpid='%s'",
+		utils.TBL_TP_RATE_PROFILES, qryRpf.TPid)
+	if len(qryRpf.LoadId) != 0 {
+		q += fmt.Sprintf(" AND loadid='%s'", qryRpf.LoadId)
 	}
+	if len(qryRpf.Tenant) != 0 {
+		q += fmt.Sprintf(" AND tenant='%s'", qryRpf.Tenant)
+	}
+	if len(qryRpf.TOR) != 0 {
+		q += fmt.Sprintf(" AND tor='%s'", qryRpf.TOR)
+	}
+	if len(qryRpf.Direction) != 0 {
+		q += fmt.Sprintf(" AND direction='%s'", qryRpf.Direction)
+	}
+	if len(qryRpf.Subject) != 0 {
+		q += fmt.Sprintf(" AND subject='%s'", qryRpf.Subject)
+	}	
 	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+	rpfs := make(map[string]*utils.TPRatingProfile)
 	for rows.Next() {
-		var rcvTag, tenant, tor, direction, subject, fallback_subjects, rating_plan_tag, activation_time string
-		if err := rows.Scan(&rcvTag, &tenant, &tor, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
+		var rcvLoadId, tenant, tor, direction, subject, fallback_subjects, rating_plan_tag, activation_time string
+		if err := rows.Scan(&rcvLoadId, &tenant, &tor, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
 			return nil, err
 		}
-		if _,ok := rpfs[rcvTag]; !ok {
-			rpfs[rcvTag] = &utils.TPRatingProfile{TPid: tpid, RatingProfileId: rcvTag, Tenant: tenant, TOR: tor, Direction:direction, Subject:subject,
-					RatingPlanActivations: []*utils.TPRatingActivation{
-						&utils.TPRatingActivation{ActivationTime:activation_time, RatingPlanId:rating_plan_tag, FallbackSubjects:fallback_subjects}}}
-		} else {
-			rpfs[rcvTag].RatingPlanActivations = append( rpfs[rcvTag].RatingPlanActivations, 
+		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Tenant: tenant, TOR: tor, Direction:direction, Subject:subject}
+		if existingRp,has := rpfs[rp.KeyId()]; !has {
+			rp.RatingPlanActivations = []*utils.TPRatingActivation{
+						&utils.TPRatingActivation{ActivationTime:activation_time, RatingPlanId:rating_plan_tag, FallbackSubjects:fallback_subjects}}
+			rpfs[rp.KeyId()] = rp
+		} else { // Exists, update
+			existingRp.RatingPlanActivations = append( existingRp.RatingPlanActivations, 
 					&utils.TPRatingActivation{ActivationTime:activation_time, RatingPlanId:rating_plan_tag, FallbackSubjects:fallback_subjects} )
 		}
 	}
 	return rpfs, nil
 }
+
 func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
 	as := make(map[string][]*Action)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTIONS, tpid)
@@ -1168,6 +1194,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 			ExtraParameters:  extra_parameters,
 			ExpirationString: expirationDate,
 			Balance: &Balance{
+				Uuid:          utils.GenUUID(),
 				Value:         units,
 				Weight:        balance_weight,
 				RateSubject:   rating_subject,
@@ -1239,29 +1266,41 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 	return ats, nil
 }
 
-func (self *SQLStorage) GetTpAccountActions(tpid, tag string) (map[string]*AccountAction, error) {
-	q := fmt.Sprintf("SELECT tag, tenant, account, direction, action_timings_tag, action_triggers_tag FROM %s WHERE tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map[string]*utils.TPAccountActions, error) {
+	q := fmt.Sprintf("SELECT loadid, tenant, account, direction, action_timings_tag, action_triggers_tag FROM %s WHERE tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, aaFltr.TPid)
+	if len(aaFltr.LoadId) != 0 {
+		q += fmt.Sprintf(" AND loadid='%s'", aaFltr.LoadId)
+	}
+	if len(aaFltr.Tenant) != 0 {
+		q += fmt.Sprintf(" AND tenant='%s'", aaFltr.Tenant)
+	}
+	if len(aaFltr.Account) != 0 {
+		q += fmt.Sprintf(" AND account='%s'", aaFltr.Account)
+	}
+	if len(aaFltr.Direction) != 0 {
+		q += fmt.Sprintf(" AND direction='%s'", aaFltr.Direction)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	aa := make(map[string]*AccountAction)
+	aa := make(map[string]*utils.TPAccountActions)
 	for rows.Next() {
-		var aaId, tenant, account, direction, action_timings_tag, action_triggers_tag string
-		if err := rows.Scan(&aaId, &tenant, &account, &direction, &action_timings_tag, &action_triggers_tag); err != nil {
+		var aaLoadId, tenant, account, direction, action_timings_tag, action_triggers_tag string
+		if err := rows.Scan(&aaLoadId, &tenant, &account, &direction, &action_timings_tag, &action_triggers_tag); err != nil {
 			return nil, err
 		}
-		aa[aaId] = &AccountAction{
-			Tenant:            tenant,
-			Account:           account,
-			Direction:         direction,
-			ActionTimingsTag:  action_timings_tag,
-			ActionTriggersTag: action_triggers_tag,
+		aacts := &utils.TPAccountActions{
+			TPid:             aaFltr.TPid,
+			LoadId:           aaLoadId,
+			Tenant:           tenant,
+			Account:          account,
+			Direction:        direction,
+			ActionTimingsId:  action_timings_tag,
+			ActionTriggersId: action_triggers_tag,
 		}
+		aa[aacts.KeyId()] = aacts
 	}
 	return aa, nil
 }

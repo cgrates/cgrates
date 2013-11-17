@@ -375,7 +375,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		}
 		if fallbacksubject != "" {
 			var sslice utils.StringSlice = rpa.FallbackKeys
-			for _, fbs := range strings.Split(fallbacksubject, ";") {
+			for _, fbs := range strings.Split(fallbacksubject, FALLBACK_SEP) {
 				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
 				if !sslice.Contains(newKey) {
 					rpa.FallbackKeys = append(rpa.FallbackKeys, newKey)
@@ -462,7 +462,7 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 		}
 		at := &ActionTiming{
 			Id:     utils.GenUUID(),
-			Tag:    record[2],
+			Tag:    record[0],
 			Weight: weight,
 			Timing: &RateInterval{
 				Timing: &RITiming{

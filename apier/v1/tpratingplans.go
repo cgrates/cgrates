@@ -28,10 +28,10 @@ import (
 
 // Creates a new DestinationRateTiming profile within a tariff plan
 func (self *ApierV1) SetTPRatingPlan(attrs utils.TPRatingPlan, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId", "RatingPlans"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId", "RatingPlanBindings"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.SetTPRatingPlans(attrs.TPid, map[string][]*utils.RatingPlan{attrs.RatingPlanId: attrs.RatingPlans}); err != nil {
+	if err := self.StorDb.SetTPRatingPlans(attrs.TPid, map[string][]*utils.TPRatingPlanBinding{attrs.RatingPlanId: attrs.RatingPlanBindings}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

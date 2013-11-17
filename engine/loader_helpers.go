@@ -106,20 +106,20 @@ func NewTiming(timingInfo ...string) (rt *utils.TPTiming) {
 	return
 }
 
-func NewRatingPlan(timing *utils.TPTiming, weight string) (drt *utils.RatingPlan) {
+func NewRatingPlan(timing *utils.TPTiming, weight string) (drt *utils.TPRatingPlanBinding) {
 	w, err := strconv.ParseFloat(weight, 64)
 	if err != nil {
 		log.Printf("Error parsing weight unit from: %v", weight)
 		return
 	}
-	drt = &utils.RatingPlan{
+	drt = &utils.TPRatingPlanBinding{
 		Weight: w,
 	}
 	drt.SetTiming(timing)
 	return
 }
 
-func GetRateInterval(rpl *utils.RatingPlan, dr *utils.DestinationRate) (i *RateInterval) {
+func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) (i *RateInterval) {
 	i = &RateInterval{
 		Timing: &RITiming{
 			Years:     rpl.Timing().Years,
