@@ -2,6 +2,7 @@
 --
 -- Table structure for table `rater_cdrs`
 --
+DROP TABLE IF EXISTS `rated_cdrs`;
 CREATE TABLE `rated_cdrs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cgrid` char(40) NOT NULL,

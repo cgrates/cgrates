@@ -2,6 +2,8 @@
 --
 -- Table structure for table `cost_details`
 --
+
+DROP TABLE IF EXISTS `cost_details`;
 CREATE TABLE `cost_details` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cgrid` char(40) NOT NULL,

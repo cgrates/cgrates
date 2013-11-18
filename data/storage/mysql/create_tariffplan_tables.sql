@@ -1,6 +1,7 @@
 --
 -- Table structure for table `tp_timings`
 --
+DROP TABLE IF EXISTS `tp_timings`;
 CREATE TABLE `tp_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -20,6 +21,7 @@ CREATE TABLE `tp_timings` (
 -- Table structure for table `tp_destinations`
 --
 
+DROP TABLE IF EXISTS `tp_destinations`;
 CREATE TABLE `tp_destinations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -35,6 +37,7 @@ CREATE TABLE `tp_destinations` (
 -- Table structure for table `tp_rates`
 --
 
+DROP TABLE IF EXISTS `tp_rates`;
 CREATE TABLE `tp_rates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -56,6 +59,7 @@ CREATE TABLE `tp_rates` (
 -- Table structure for table `destination_rates`
 --
 
+DROP TABLE IF EXISTS `tp_destination_rates`;
 CREATE TABLE `tp_destination_rates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -72,6 +76,7 @@ CREATE TABLE `tp_destination_rates` (
 -- Table structure for table `tp_rating_plans`
 --
 
+DROP TABLE IF EXISTS `tp_rating_plans`;
 CREATE TABLE `tp_rating_plans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -89,6 +94,7 @@ CREATE TABLE `tp_rating_plans` (
 -- Table structure for table `tp_rate_profiles`
 --
 
+DROP TABLE IF EXISTS `tp_rating_profiles`;
 CREATE TABLE `tp_rating_profiles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -109,6 +115,7 @@ CREATE TABLE `tp_rating_profiles` (
 -- Table structure for table `tp_actions`
 --
 
+DROP TABLE IF EXISTS `tp_actions`;
 CREATE TABLE `tp_actions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -132,6 +139,7 @@ CREATE TABLE `tp_actions` (
 -- Table structure for table `tp_action_timings`
 --
 
+DROP TABLE IF EXISTS `tp_action_timings`;
 CREATE TABLE `tp_action_timings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -148,6 +156,7 @@ CREATE TABLE `tp_action_timings` (
 -- Table structure for table `tp_action_triggers`
 --
 
+DROP TABLE IF EXISTS `tp_action_triggers`;
 CREATE TABLE `tp_action_triggers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
@@ -168,6 +177,7 @@ CREATE TABLE `tp_action_triggers` (
 -- Table structure for table `tp_account_actions`
 --
 
+DROP TABLE IF EXISTS `tp_account_actions`;
 CREATE TABLE `tp_account_actions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,

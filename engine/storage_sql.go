@@ -24,6 +24,8 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"time"
+	"io/ioutil"
+	"strings"
 )
 
 type SQLStorage struct {
@@ -37,6 +39,25 @@ func (self *SQLStorage) Close() {
 func (self *SQLStorage) Flush() (err error) {
 	return
 }
+
+func (self *SQLStorage) CreateTablesFromScript( scriptPath string) error {
+	fileContent, err := ioutil.ReadFile(scriptPath)
+	if err != nil {
+		return err
+	}
+	qries := strings.Split(string(fileContent), ";") // Script has normally multiple queries separate by ';' go driver does not understand this so we handle it here
+	for _,qry := range qries {
+		qry = strings.TrimSpace(qry) // Avoid empty queries
+		if len(qry) == 0 {
+			continue
+		}
+		if _, err := self.Db.Exec(qry); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
 func (self *SQLStorage) GetTPIds() ([]string, error) {
