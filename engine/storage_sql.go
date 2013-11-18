@@ -452,35 +452,6 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 	return nil
 }
 
-func (self *SQLStorage) GetTPRatingProfile(tpid, loadId string) (*utils.TPRatingProfile, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects FROM %s WHERE tpid='%s' AND loadid='%s'", utils.TBL_TP_RATE_PROFILES, tpid, loadId))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	rp := &utils.TPRatingProfile{TPid: tpid, LoadId: loadId}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one result
-		var tenant, tor, direction, subject, drtId, fallbackSubj, aTime string
-		err = rows.Scan(&tenant, &tor, &direction, &subject, &aTime, &drtId, &fallbackSubj)
-		if err != nil {
-			return nil, err
-		}
-		if i == 1 { // Save some info on first iteration
-			rp.Tenant = tenant
-			rp.TOR = tor
-			rp.Direction = direction
-			rp.Subject = subject
-		}
-		rp.RatingPlanActivations = append(rp.RatingPlanActivations, &utils.TPRatingActivation{aTime, drtId, fallbackSubj})
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return rp, nil
-}
-
 func (self *SQLStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfileIds) ([]string, error) {
 	qry := fmt.Sprintf("SELECT DISTINCT loadid FROM %s where tpid='%s'", utils.TBL_TP_RATE_PROFILES, filters.TPid)
 	if filters.Tenant != "" {
