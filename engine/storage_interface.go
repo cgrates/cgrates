@@ -100,11 +100,11 @@ type LogStorage interface {
 type LoadStorage interface {
 	Storage
 	// Apier functions
+	RemTPData(string, string, ...string) error
 	GetTPIds() ([]string, error)
 	SetTPTiming(string, *utils.TPTiming) error
 	GetTPTiming(string, string) (*utils.TPTiming, error)
 	GetTPTimingIds(string) ([]string, error)
-	RemTPData(string, string, ...string) error
 	SetTPDestination(string, *Destination) error
 	GetTPDestination(string, string) (*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)

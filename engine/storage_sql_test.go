@@ -45,6 +45,7 @@ const (
 	CREATE_COSTDETAILS_TABLES_SQL = "create_costdetails_tables.sql"
 	CREATE_MEDIATOR_TABLES_SQL = "create_mediator_tables.sql"
 	CREATE_TARIFFPLAN_TABLES_SQL = "create_tariffplan_tables.sql"
+	TEST_SQL = "TEST_SQL"
 )
 
 var db *MySQLStorage
@@ -75,6 +76,73 @@ func TestCreateTables(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveData(t *testing.T) {
+	if !*testLocal { 
+		return
+	}
+	// Create Timings
+	tm :=  &utils.TPTiming{Id:"ALWAYS", StartTime:"00:00:00"}
+	if err := db.SetTPTiming(TEST_SQL,tm); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := db.GetTpTimings(TEST_SQL, tm.Id); err != nil {
+		t.Error(err.Error())
+	} else if len(tmgs) == 0 {
+		t.Error("Could not store TPTiming")
+	}
+	// Remove Timings
+	if err := db.RemTPData(utils.TBL_TP_TIMINGS, TEST_SQL, tm.Id); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := db.GetTpTimings(TEST_SQL, tm.Id); err != nil {
+		t.Error(err.Error())
+	} else if len(tmgs) != 0 {
+		t.Error("Did not remove TPTiming")
+	}
+	// Create RatingProfile
+	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId:"RETAIL1"}}
+	rp := &utils.TPRatingProfile{TPid:TEST_SQL, LoadId:TEST_SQL, Tenant:"cgrates.org", TOR:"call", Direction:"*out", Subject:"*any", RatingPlanActivations:ras} 
+	if err := db.SetTPRatingProfiles(TEST_SQL, map[string]*utils.TPRatingProfile{rp.KeyId():rp}); err != nil {
+		t.Error(err.Error())
+	}
+	if rps, err := db.GetTpRatingProfiles(rp); err != nil {
+		t.Error(err.Error())
+	} else if len(rps) == 0{
+		t.Error("Could not store TPRatingProfile")
+	}
+	// Remove RatingProfile
+	if err := db.RemTPData(utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.LoadId, rp.Tenant, rp.TOR, rp.Direction, rp.Subject); err != nil {
+		t.Error(err.Error())
+	}
+	if rps, err := db.GetTpRatingProfiles(rp); err != nil {
+		t.Error(err.Error())
+	} else if len(rps) != 0{
+		t.Error("Did not remove TPRatingProfile")
+	}
+
+	// Create AccountActions
+	aa := &utils.TPAccountActions{TPid:TEST_SQL, LoadId:TEST_SQL, Tenant:"cgrates.org", Account:"1001", 
+			Direction:"*out", ActionTimingsId:"PREPAID_10", ActionTriggersId:"STANDARD_TRIGGERS"}
+	if err := db.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+		t.Error(err.Error())
+	}
+	if aas, err := db.GetTpAccountActions(aa); err != nil {
+		t.Error(err.Error())
+	} else if len(aas) == 0 {
+		t.Error("Could not create TPAccountActions")
+	}
+	// Remove AccountActions
+	if err := db.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, aa.LoadId, aa.Tenant, aa.Account, aa.Direction); err != nil {
+		t.Error(err.Error())
+	}
+	if aas, err := db.GetTpAccountActions(aa); err != nil {
+		t.Error(err.Error())
+	} else if len(aas) != 0 {
+		t.Error("Did not remove TPAccountActions")
+	}
+}
+
 	
 
 
