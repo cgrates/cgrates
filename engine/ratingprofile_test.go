@@ -20,20 +20,44 @@ package engine
 
 import (
 	"testing"
+	"time"
 )
 
-func TestRpAddAPIfNotPresent(t *testing.T) {
-	/*	ap1 := &RatingPlan{Id: "test1"}
-		ap2 := &RatingPlan{Id: "test1"}
-		ap3 := &RatingPlan{Id: "test2"}
-		rp := &RatingProfile{}
-		rp.AddRatingPlanIfNotPresent("test", ap1)
-		rp.AddRatingPlanIfNotPresent("test", ap2)
-		if len(rp.DestinationMap["test"]) != 1 {
-			t.Error("Wronfully appended activation period ;)", len(rp.DestinationMap["test"]))
-		}
-		rp.AddRatingPlanIfNotPresent("test", ap3)
-		if len(rp.DestinationMap["test"]) != 2 {
-			t.Error("Wronfully not appended activation period ;)", len(rp.DestinationMap["test"]))
-		}*/
+func TestGetRatingProfileForPrefix(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 11, 18, 13, 45, 1, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 11, 18, 13, 47, 30, 0, time.UTC),
+		Tenant:      "vdf",
+		TOR:         "0",
+		Direction:   OUTBOUND,
+		Subject:     "fallback1",
+		Destination: "0256098",
+	}
+	cd.LoadRatingPlans()
+	if len(cd.RatingInfos) != 3 || !cd.continousRatingInfos() {
+		t.Logf("0: %+v", cd.RatingInfos[0])
+		t.Logf("1: %+v", cd.RatingInfos[1])
+		t.Logf("2: %+v", cd.RatingInfos[2])
+		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
+	}
+}
+
+func TestGetRatingProfileForPrefixFirstEmpty(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 11, 18, 13, 44, 1, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 11, 18, 13, 47, 30, 0, time.UTC),
+		Tenant:      "vdf",
+		TOR:         "0",
+		Direction:   OUTBOUND,
+		Subject:     "fallback1",
+		Destination: "0256098",
+	}
+	cd.LoadRatingPlans()
+	if len(cd.RatingInfos) != 4 || !cd.continousRatingInfos() {
+		t.Logf("0: %+v", cd.RatingInfos[0])
+		t.Logf("1: %+v", cd.RatingInfos[1])
+		t.Logf("2: %+v", cd.RatingInfos[2])
+		t.Logf("3: %+v", cd.RatingInfos[3])
+		t.Errorf("Error loading rating information: %+v %+v", cd.RatingInfos, cd.continousRatingInfos())
+	}
 }

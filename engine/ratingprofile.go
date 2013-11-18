@@ -100,10 +100,9 @@ func (ris RatingInfos) Sort() {
 	sort.Sort(ris)
 }
 
-// TODO: what happens if there is no match for part of the call
 func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
-	for _, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {
+	for index, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {
 		rpl, err := storageGetter.GetRatingPlan(rpa.RatingPlanId)
 		if err != nil || rpl == nil {
 			Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
@@ -123,6 +122,10 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 				bestPrecision = precision
 				rps = rpl.RateIntervalList(dId)
 			}
+		}
+		// check if it's the first ri and add a blank one for the initial part not covered
+		if index == 0 && cd.TimeStart.Before(rpa.ActivationTime) {
+			ris = append(ris, &RatingInfo{"", "", cd.TimeStart, nil, []string{cd.GetKey(FALLBACK_SUBJECT)}})
 		}
 		if bestPrecision > 0 {
 			ris = append(ris, &RatingInfo{rp.Id, cd.Destination[:bestPrecision], rpa.ActivationTime, rps, rpa.FallbackKeys})

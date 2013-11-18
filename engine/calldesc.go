@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
@@ -136,12 +137,10 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 Restores the activation periods for the specified prefix from storage.
 */
 func (cd *CallDescriptor) LoadRatingPlans() (err error) {
-	err = cd.getRatingPlansForPrefix(cd.GetKey(), 1)
-	if err != nil {
-		// try general fallback
-		fallbackKey := fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, FALLBACK_SUBJECT)
+	err = cd.getRatingPlansForPrefix(cd.GetKey(cd.Subject), 1)
+	if err != nil || !cd.continousRatingInfos() {
 		// use the default subject
-		err = cd.getRatingPlansForPrefix(fallbackKey, 1)
+		err = cd.getRatingPlansForPrefix(cd.GetKey(FALLBACK_SUBJECT), 1)
 	}
 	//load the rating plans
 	if err != nil || !cd.continousRatingInfos() {
@@ -164,6 +163,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 	}
 	if err = rp.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
 		// try rating profile fallback
+		recursionDepth++
 		for index := 0; index < len(cd.RatingInfos); index++ {
 			ri := cd.RatingInfos[index]
 			if len(ri.RateIntervals) > 0 {
@@ -171,8 +171,12 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 				continue
 			}
 			if len(ri.FallbackKeys) > 0 {
-				recursionDepth++
-				tempCD := &CallDescriptor{}
+				tempCD := &CallDescriptor{
+					TOR:         cd.TOR,
+					Direction:   cd.Direction,
+					Tenant:      cd.Tenant,
+					Destination: cd.Destination,
+				}
 				if index == 0 {
 					tempCD.TimeStart = cd.TimeStart
 				} else {
@@ -189,6 +193,10 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 					}
 					// extract the rate infos and break
 					for newIndex, newRI := range tempCD.RatingInfos {
+						// check if the new ri is filled
+						if len(newRI.RateIntervals) == 0 {
+							continue
+						}
 						if newIndex == 0 {
 							cd.RatingInfos[index] = newRI
 						} else {
@@ -254,8 +262,8 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 Constructs the key for the storage lookup.
 The prefixLen is limiting the length of the destination prefix.
 */
-func (cd *CallDescriptor) GetKey() string {
-	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, cd.Subject)
+func (cd *CallDescriptor) GetKey(subject string) string {
+	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, subject)
 }
 
 /*
