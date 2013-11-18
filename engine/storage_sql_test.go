@@ -41,8 +41,6 @@ README:
 */
 
 const (
-	SQL_SCRIPTS_PATH = "/usr/share/cgrates/data/storage"
-	MYSQL = "mysql"
 	CREATE_CDRS_TABLES_SQL = "create_cdrs_tables.sql"
 	CREATE_COSTDETAILS_TABLES_SQL = "create_costdetails_tables.sql"
 	CREATE_MEDIATOR_TABLES_SQL = "create_mediator_tables.sql"
@@ -51,6 +49,7 @@ const (
 
 var db *MySQLStorage
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
+var scriptsPath = flag.String("scripts_path", "/usr/share/cgrates/data/storage/mysql", "Overwrite default scripts path here")
 
  
 func TestCreateTables(t *testing.T) {
@@ -65,7 +64,7 @@ func TestCreateTables(t *testing.T) {
 		db = d.(*MySQLStorage)
 	}
 	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_COSTDETAILS_TABLES_SQL, CREATE_MEDIATOR_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
-		if err := db.CreateTablesFromScript(path.Join(SQL_SCRIPTS_PATH, MYSQL, scriptName)); err != nil {
+		if err := db.CreateTablesFromScript(path.Join(*scriptsPath, scriptName)); err != nil {
 			t.Error("Error on db creation: ", err.Error())
 			return // No point in going further
 		}
