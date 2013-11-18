@@ -21,6 +21,7 @@ package utils
 import (
 	"time"
 	"fmt"
+	"strings"
 )
 
 // This file deals with tp_* data definition
@@ -140,6 +141,21 @@ type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	RatingPlanId string // Id of RatingPlan profile
 	FallbackSubjects     string // So we follow the api
+}
+
+// Helper to return the subject fallback keys we need in dataDb
+func FallbackSubjKeys(direction, tenant, tor, fallbackSubjects string) []string {
+	var subjKeys []string
+	if len(fallbackSubjects) != 0 {
+		var sslice StringSlice
+		for _, fbs := range strings.Split(fallbackSubjects, string(FALLBACK_SEP)) {
+			newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
+			if !sslice.Contains(newKey) {
+				subjKeys = append(subjKeys, newKey)
+			}
+		}
+	}
+	return subjKeys
 }
 
 type AttrTPRatingProfileIds struct {

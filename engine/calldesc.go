@@ -50,7 +50,6 @@ func init() {
 const (
 	RECURSION_MAX_DEPTH = 3
 	FALLBACK_SUBJECT    = "*any"
-	FALLBACK_SEP        = ";"
 )
 
 var (

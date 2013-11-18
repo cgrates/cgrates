@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"log"
-	"strings"
 )
 
 type DbReader struct {
@@ -233,7 +232,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 				&RatingPlanActivation{
 					ActivationTime: at,
 					RatingPlanId:   tpRa.RatingPlanId,
-					FallbackKeys:   strings.Split(tpRa.FallbackSubjects,FALLBACK_SEP),
+					FallbackKeys:   utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, tpRa.FallbackSubjects),
 				})
 		}
 		dbr.ratingProfiles[tpRpf.KeyId()] = rpf
@@ -318,7 +317,8 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 				}
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, 
-						&RatingPlanActivation{at, tpRa.RatingPlanId, strings.Split(tpRa.FallbackSubjects,FALLBACK_SEP)})
+						&RatingPlanActivation{at, tpRa.RatingPlanId, 
+						utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, tpRa.FallbackSubjects)})
 		}
 	}
 	return dbr.dataDb.SetRatingProfile(resultRatingProfile)

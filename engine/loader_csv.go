@@ -372,15 +372,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		rpa := &RatingPlanActivation{
 			ActivationTime: at,
 			RatingPlanId:   record[5],
-		}
-		if fallbacksubject != "" {
-			var sslice utils.StringSlice = rpa.FallbackKeys
-			for _, fbs := range strings.Split(fallbacksubject, FALLBACK_SEP) {
-				newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
-				if !sslice.Contains(newKey) {
-					rpa.FallbackKeys = append(rpa.FallbackKeys, newKey)
-				}
-			}
+			FallbackKeys:  utils.FallbackSubjKeys(direction, tenant, tor, fallbacksubject),
 		}
 		rp.RatingPlanActivations = append(rp.RatingPlanActivations, rpa)
 		csvr.ratingProfiles[rp.Id] = rp
