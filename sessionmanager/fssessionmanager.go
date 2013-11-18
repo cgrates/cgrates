@@ -155,14 +155,14 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		return
 	}
 	cd := engine.CallDescriptor{
-		Direction:       ev.GetDirection(),
-		Tenant:          ev.GetTenant(),
-		TOR:             ev.GetTOR(),
-		Subject:         ev.GetSubject(),
-		Account:         ev.GetAccount(),
-		Destination:     ev.GetDestination(),
-		Amount:          sm.debitPeriod.Seconds(),
-		TimeStart:       startTime}
+		Direction:   ev.GetDirection(),
+		Tenant:      ev.GetTenant(),
+		TOR:         ev.GetTOR(),
+		Subject:     ev.GetSubject(),
+		Account:     ev.GetAccount(),
+		Destination: ev.GetDestination(),
+		Amount:      sm.debitPeriod.Seconds(),
+		TimeStart:   startTime}
 	var remainingSeconds float64
 	err = sm.connector.GetMaxSessionTime(cd, &remainingSeconds)
 	if err != nil {
@@ -172,7 +172,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	}
 	engine.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
 	if remainingSeconds == 0 {
-		engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey()))
+		engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), INSUFFICIENT_FUNDS)
 		return
 	}
@@ -210,16 +210,16 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			return
 		}
 		cd := engine.CallDescriptor{
-			Direction:       ev.GetDirection(),
-			Tenant:          ev.GetTenant(),
-			TOR:             ev.GetTOR(),
-			Subject:         ev.GetSubject(),
-			Account:         ev.GetAccount(),
-			LoopIndex:       0,
-			CallDuration:    endTime.Sub(startTime),
-			Destination:     ev.GetDestination(),
-			TimeStart:       startTime,
-			TimeEnd:         endTime,
+			Direction:    ev.GetDirection(),
+			Tenant:       ev.GetTenant(),
+			TOR:          ev.GetTOR(),
+			Subject:      ev.GetSubject(),
+			Account:      ev.GetAccount(),
+			LoopIndex:    0,
+			CallDuration: endTime.Sub(startTime),
+			Destination:  ev.GetDestination(),
+			TimeStart:    startTime,
+			TimeEnd:      endTime,
 		}
 		cc := &engine.CallCost{}
 		err = sm.connector.Debit(cd, cc)
