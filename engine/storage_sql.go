@@ -93,15 +93,6 @@ func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
 	return nil
 }
 
-func (self *SQLStorage) ExistsTPTiming(tpid, tmId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_TIMINGS, tpid, tmId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
-}
-
 func (self *SQLStorage) GetTPTiming(tpid, tmId string) (*utils.TPTiming, error) {
 	var years, months, monthDays, weekDays, time string
 	err := self.Db.QueryRow(fmt.Sprintf("SELECT years, months, month_days, week_days, time FROM %s WHERE tpid='%s' AND tag='%s' LIMIT 1",
@@ -180,15 +171,6 @@ func (self *SQLStorage) GetTPDestinationIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) ExistsTPDestination(tpid, destTag string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_DESTINATIONS, tpid, destTag)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
-}
-
 // Extracts destinations from StorDB on specific tariffplan id
 func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
 	rows, err := self.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
@@ -230,15 +212,6 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 		return err
 	}
 	return nil
-}
-
-func (self *SQLStorage) ExistsTPRate(tpid, rtId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_RATES, tpid, rtId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
 }
 
 func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot) error {
@@ -317,15 +290,6 @@ func (self *SQLStorage) GetTPRateIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) ExistsTPDestinationRate(tpid, drId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_DESTINATION_RATES, tpid, drId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
-}
-
 func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*utils.DestinationRate) error {
 	if len(drs) == 0 {
 		return nil //Nothing to set
@@ -393,15 +357,6 @@ func (self *SQLStorage) GetTPDestinationRateIds(tpid string) ([]string, error) {
 		return nil, nil
 	}
 	return ids, nil
-}
-
-func (self *SQLStorage) ExistsTPRatingPlan(tpid, drtId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_RATING_PLANS, tpid, drtId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
 }
 
 func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.TPRatingPlanBinding) error {
@@ -472,15 +427,6 @@ func (self *SQLStorage) GetTPRatingPlanIds(tpid string) ([]string, error) {
 		return nil, nil
 	}
 	return ids, nil
-}
-
-func (self *SQLStorage) ExistsTPRatingProfile(tpid, rpId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_RATE_PROFILES, tpid, rpId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
 }
 
 func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.TPRatingProfile) error {
@@ -571,15 +517,6 @@ func (self *SQLStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfile
 	return ids, nil
 }
 
-func (self *SQLStorage) ExistsTPActions(tpid, actsId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACTIONS, tpid, actsId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
-}
-
 func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAction) error {
 	if len(acts) == 0 {
 		return nil //Nothing to set
@@ -647,15 +584,6 @@ func (self *SQLStorage) GetTPActionIds(tpid string) ([]string, error) {
 		return nil, nil
 	}
 	return ids, nil
-}
-
-func (self *SQLStorage) ExistsTPActionTimings(tpid, atId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACTION_TIMINGS, tpid, atId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
 }
 
 // Sets actionTimings in sqlDB. Imput is expected in form map[actionTimingId][]rows, eg a full .csv file content
@@ -728,15 +656,6 @@ func (self *SQLStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) ExistsTPActionTriggers(tpid, atId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACTION_TRIGGERS, tpid, atId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
-}
-
 func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils.TPActionTrigger) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
@@ -781,15 +700,6 @@ func (self *SQLStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
 		return nil, nil
 	}
 	return ids, nil
-}
-
-func (self *SQLStorage) ExistsTPAccountActions(tpid, aaId string) (bool, error) {
-	var exists bool
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE tpid='%s' AND tag='%s')", utils.TBL_TP_ACCOUNT_ACTIONS, tpid, aaId)).Scan(&exists)
-	if err != nil {
-		return false, err
-	}
-	return exists, nil
 }
 
 // Sets a group of account actions. Map key has the role of grouping within a tpid

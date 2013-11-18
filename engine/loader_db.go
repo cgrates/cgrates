@@ -449,10 +449,11 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 		var actionTimings []*ActionTiming
 		ats := actionTimingsMap[accountAction.ActionTimingsId]
 		for _, at := range ats {
-			existsAction, err := dbr.storDb.ExistsTPActions(dbr.tpid, at.ActionsId)
-			if err != nil {
+			// Check action exists before saving it inside actionTiming key
+			// ToDo: try saving the key after the actions was retrieved in order to save one query here.
+			if actions, err := dbr.storDb.GetTpActions(dbr.tpid, at.ActionsId); err != nil {
 				return err
-			} else if !existsAction {
+			} else if len(actions) == 0 {
 				return fmt.Errorf("No Action with id <%s>", at.ActionsId)
 			}
 			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, accountAction.ActionTimingsId)

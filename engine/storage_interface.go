@@ -102,42 +102,32 @@ type LoadStorage interface {
 	// Apier functions
 	GetTPIds() ([]string, error)
 	SetTPTiming(string, *utils.TPTiming) error
-	ExistsTPTiming(string, string) (bool, error)
 	GetTPTiming(string, string) (*utils.TPTiming, error)
 	GetTPTimingIds(string) ([]string, error)
 	RemTPData(string, string, ...string) error
 	SetTPDestination(string, *Destination) error
-	ExistsTPDestination(string, string) (bool, error)
 	GetTPDestination(string, string) (*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)
-	ExistsTPRate(string, string) (bool, error)
 	SetTPRates(string, map[string][]*utils.RateSlot) error
 	GetTPRate(string, string) (*utils.TPRate, error)
 	GetTPRateIds(string) ([]string, error)
-	ExistsTPDestinationRate(string, string) (bool, error)
 	SetTPDestinationRates(string, map[string][]*utils.DestinationRate) error
 	GetTPDestinationRate(string, string) (*utils.TPDestinationRate, error)
 	GetTPDestinationRateIds(string) ([]string, error)
-	ExistsTPRatingPlan(string, string) (bool, error)
 	SetTPRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
 	GetTPRatingPlan(string, string) (*utils.TPRatingPlan, error)
 	GetTPRatingPlanIds(string) ([]string, error)
-	ExistsTPRatingProfile(string, string) (bool, error)
 	SetTPRatingProfiles(string, map[string]*utils.TPRatingProfile) error
 	GetTPRatingProfile(string, string) (*utils.TPRatingProfile, error)
 	GetTPRatingProfileIds(*utils.AttrTPRatingProfileIds) ([]string, error)
-	ExistsTPActions(string, string) (bool, error)
 	SetTPActions(string, map[string][]*utils.TPAction) error
 	GetTPActions(string, string) (*utils.TPActions, error)
 	GetTPActionIds(string) ([]string, error)
-	ExistsTPActionTimings(string, string) (bool, error)
 	SetTPActionTimings(string, map[string][]*utils.TPActionTiming) error
 	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
 	GetTPActionTimingIds(string) ([]string, error)
-	ExistsTPActionTriggers(string, string) (bool, error)
 	SetTPActionTriggers(string, map[string][]*utils.TPActionTrigger) error
 	GetTPActionTriggerIds(string) ([]string, error)
-	ExistsTPAccountActions(string, string) (bool, error)
 	SetTPAccountActions(string, map[string]*utils.TPAccountActions) error
 	GetTPAccountActionIds(string) ([]string, error)
 	// loader functions
