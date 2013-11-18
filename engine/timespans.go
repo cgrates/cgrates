@@ -28,13 +28,14 @@ import (
 A unit in which a call will be split that has a specific price related interval attached to it.
 */
 type TimeSpan struct {
-	TimeStart, TimeEnd time.Time
-	Cost               float64
-	ratingInfo         *RatingInfo
-	RateInterval       *RateInterval
-	CallDuration       time.Duration // the call duration so far till TimeEnd
-	overlapped         bool          // mark a timespan as overlapped by an expanded one
-	Increments         Increments
+	TimeStart, TimeEnd            time.Time
+	Cost                          float64
+	ratingInfo                    *RatingInfo
+	RateInterval                  *RateInterval
+	CallDuration                  time.Duration // the call duration so far till TimeEnd
+	overlapped                    bool          // mark a timespan as overlapped by an expanded one
+	Increments                    Increments
+	MatchedSubject, MatchedPrefix string
 }
 
 type Increment struct {
@@ -259,7 +260,13 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 	if !ts.Contains(rp.ActivationTime) {
 		return nil
 	}
-	newTs = &TimeSpan{TimeStart: rp.ActivationTime, TimeEnd: ts.TimeEnd, ratingInfo: rp}
+	newTs = &TimeSpan{
+		TimeStart:      rp.ActivationTime,
+		TimeEnd:        ts.TimeEnd,
+		ratingInfo:     rp,
+		MatchedSubject: rp.MatchedSubject,
+		MatchedPrefix:  rp.MatchedPrefix,
+	}
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = rp.ActivationTime
 	ts.SetNewCallDuration(newTs)

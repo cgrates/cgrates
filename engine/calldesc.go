@@ -284,6 +284,8 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	for _, rp := range cd.RatingInfos {
 		if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
 			firstSpan.ratingInfo = rp
+			firstSpan.MatchedSubject = rp.MatchedSubject
+			firstSpan.MatchedPrefix = rp.MatchedPrefix
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
@@ -399,14 +401,10 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
-		Direction: cd.Direction,
-		TOR:       cd.TOR,
-		Tenant:    cd.Tenant,
-		// TODO, FIXME: find out where to put matched subject
-		//Subject:   matchedSubject[startIndex:],
-		Account: cd.Account,
-		// TODO, FIXME: find out where to put matched prfixes
-		//Destination: strings.Join(destPrefix, ";"),
+		Direction:  cd.Direction,
+		TOR:        cd.TOR,
+		Tenant:     cd.Tenant,
+		Account:    cd.Account,
 		Cost:       cost,
 		ConnectFee: connectionFee,
 		Timespans:  timespans}
