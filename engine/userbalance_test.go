@@ -278,6 +278,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
+				ratingInfo:   &RatingInfo{},
 				CallDuration: 0,
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
@@ -394,6 +395,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
 				CallDuration: 0,
+				ratingInfo:   &RatingInfo{},
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
@@ -545,6 +547,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				CallDuration: 10 * time.Second,
+				ratingInfo:   &RatingInfo{},
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},

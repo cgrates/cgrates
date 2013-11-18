@@ -153,7 +153,11 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 				ts.SetRateInterval(i)
 				splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
 				//log.Print("SPLIT: ", splitTime)
-				nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
+				nts = &TimeSpan{
+					TimeStart: splitTime,
+					TimeEnd:   ts.TimeEnd,
+				}
+				nts.copyRatingInfo(ts)
 				ts.TimeEnd = splitTime
 				nts.SetRateInterval(i)
 				nts.CallDuration = ts.CallDuration
@@ -180,7 +184,11 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		if splitTime == ts.TimeStart || splitTime.Equal(ts.TimeEnd) {
 			return
 		}
-		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
+		nts = &TimeSpan{
+			TimeStart: splitTime,
+			TimeEnd:   ts.TimeEnd,
+		}
+		nts.copyRatingInfo(ts)
 		ts.TimeEnd = splitTime
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
@@ -197,7 +205,11 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		if splitTime.Equal(ts.TimeEnd) {
 			return
 		}
-		nts = &TimeSpan{TimeStart: splitTime, TimeEnd: ts.TimeEnd}
+		nts = &TimeSpan{
+			TimeStart: splitTime,
+			TimeEnd:   ts.TimeEnd,
+		}
+		nts.copyRatingInfo(ts)
 		ts.TimeEnd = splitTime
 
 		nts.SetRateInterval(i)
@@ -216,7 +228,12 @@ func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
 		return nil
 	}
 	timeStart := ts.GetTimeStartForIncrement(index)
-	newTs := &TimeSpan{RateInterval: ts.RateInterval, TimeStart: timeStart, TimeEnd: ts.TimeEnd}
+	newTs := &TimeSpan{
+		RateInterval: ts.RateInterval,
+		TimeStart:    timeStart,
+		TimeEnd:      ts.TimeEnd,
+	}
+	newTs.copyRatingInfo(ts)
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = timeStart
 	newTs.Increments = ts.Increments[index:]
@@ -231,7 +248,12 @@ func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
 		return nil
 	}
 	timeStart := ts.TimeStart.Add(duration)
-	newTs := &TimeSpan{RateInterval: ts.RateInterval, TimeStart: timeStart, TimeEnd: ts.TimeEnd}
+	newTs := &TimeSpan{
+		RateInterval: ts.RateInterval,
+		TimeStart:    timeStart,
+		TimeEnd:      ts.TimeEnd,
+	}
+	newTs.copyRatingInfo(ts)
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = timeStart
 	// split the increment
@@ -261,12 +283,10 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 		return nil
 	}
 	newTs = &TimeSpan{
-		TimeStart:      rp.ActivationTime,
-		TimeEnd:        ts.TimeEnd,
-		ratingInfo:     rp,
-		MatchedSubject: rp.MatchedSubject,
-		MatchedPrefix:  rp.MatchedPrefix,
+		TimeStart: rp.ActivationTime,
+		TimeEnd:   ts.TimeEnd,
 	}
+	newTs.copyRatingInfo(ts)
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = rp.ActivationTime
 	ts.SetNewCallDuration(newTs)
@@ -295,6 +315,12 @@ func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
 		d = 0
 	}
 	ts.CallDuration = d
+}
+
+func (nts *TimeSpan) copyRatingInfo(ts *TimeSpan) {
+	nts.ratingInfo = ts.ratingInfo
+	nts.MatchedSubject = ts.ratingInfo.MatchedSubject
+	nts.MatchedPrefix = ts.ratingInfo.MatchedPrefix
 }
 
 // returns a time for the specified second in the time span

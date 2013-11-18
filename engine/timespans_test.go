@@ -29,7 +29,7 @@ func TestRightMargin(t *testing.T) {
 		Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}}}
 	t1 := time.Date(2012, time.February, 3, 23, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 4, 0, 10, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 24, 0, 0, 0, time.UTC) {
@@ -59,8 +59,9 @@ func TestSplitMiddle(t *testing.T) {
 			EndTime:   "",
 		}}
 	ts := &TimeSpan{
-		TimeStart: time.Date(2012, 2, 27, 0, 0, 0, 0, time.UTC),
-		TimeEnd:   time.Date(2012, 2, 28, 0, 0, 0, 0, time.UTC),
+		TimeStart:  time.Date(2012, 2, 27, 0, 0, 0, 0, time.UTC),
+		TimeEnd:    time.Date(2012, 2, 28, 0, 0, 0, 0, time.UTC),
+		ratingInfo: &RatingInfo{},
 	}
 
 	if !i.Contains(ts.TimeEnd, true) {
@@ -77,7 +78,7 @@ func TestRightHourMargin(t *testing.T) {
 	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}, EndTime: "17:59:00"}}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 17, 59, 0, 0, time.UTC) {
@@ -102,7 +103,7 @@ func TestLeftMargin(t *testing.T) {
 	i := &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday}}}
 	t1 := time.Date(2012, time.February, 5, 23, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 6, 0, 10, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 6, 0, 0, 0, 0, time.UTC) {
@@ -126,7 +127,7 @@ func TestLeftHourMargin(t *testing.T) {
 	i := &RateInterval{Timing: &RITiming{Months: utils.Months{time.December}, MonthDays: utils.MonthDays{1}, StartTime: "09:00:00"}}
 	t1 := time.Date(2012, time.December, 1, 8, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.December, 1, 9, 20, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.December, 1, 9, 0, 0, 0, time.UTC) {
@@ -191,7 +192,7 @@ func TestSplitByRatingPlan(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 17, 55, 0, 0, time.UTC)
 	t3 := time.Date(2012, time.February, 5, 17, 50, 0, 0, time.UTC)
-	ts := TimeSpan{TimeStart: t1, TimeEnd: t2}
+	ts := TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	ap1 := &RatingInfo{ActivationTime: t1}
 	ap2 := &RatingInfo{ActivationTime: t2}
 	ap3 := &RatingInfo{ActivationTime: t3}
@@ -252,7 +253,7 @@ func TestTimespanSplitGroupedRates(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 1800 * time.Second}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 1800 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 45, 00, 0, time.UTC)
@@ -300,7 +301,7 @@ func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 31, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 60 * time.Second}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 60 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	cd := &CallDescriptor{}
@@ -346,7 +347,7 @@ func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 01, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 00, 30, 0, time.UTC)
@@ -382,7 +383,7 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240 * time.Second}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
@@ -427,7 +428,7 @@ func TestTimespanSplitLong(t *testing.T) {
 	}
 	t1 := time.Date(2013, time.October, 9, 9, 0, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 10, 20, 0, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: t2.Sub(t1)}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: t2.Sub(t1), ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2013, time.October, 9, 18, 0, 0, 0, time.UTC)
@@ -459,7 +460,7 @@ func TestTimespanSplitMultipleGroup(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240 * time.Second}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
@@ -726,6 +727,7 @@ func TestTimespanSplitByIncrement(t *testing.T) {
 		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
 		CallDuration: 60 * time.Second,
+		ratingInfo:   &RatingInfo{},
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
@@ -828,6 +830,7 @@ func TestTimespanSplitByDuration(t *testing.T) {
 		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
 		CallDuration: 60 * time.Second,
+		ratingInfo:   &RatingInfo{},
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
