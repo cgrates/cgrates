@@ -23,7 +23,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"testing"
 	"path"
-	//"fmt"
 	"flag"
 )
 
@@ -87,7 +86,7 @@ func TestCreateStorTpTables(t *testing.T) {
 	}
 }
 
-// Import data from csv files into dataDbCsv
+// Loads data from csv files in tp scenarion to dataDbCsv
 func TestLoadFromCSV(t *testing.T) {
 	if !*testLocal { 
 		return
@@ -146,7 +145,7 @@ func TestLoadFromCSV(t *testing.T) {
 	}
 }
 
-
+// Imports data from csv files in tpScenario to storDb
 func TestImportToStorDb(t *testing.T) {
 	if !*testLocal {
 		return
@@ -162,6 +161,7 @@ func TestImportToStorDb(t *testing.T) {
 	}
 }
 
+// Loads data from storDb into dataDb
 func TestLoadFromStorDb(t *testing.T) {
 	if !*testLocal {
 		return
@@ -201,3 +201,34 @@ func TestLoadFromStorDb(t *testing.T) {
 		t.Error("Could not write data into dataDb: ", err.Error())
 	}
 }
+
+// Compares previously loaded data from csv and stor to be identical, redis specific tests
+func TestMatchLoadCsvWithStor(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	rsCsv, redisDb := dataDbCsv.(*RedisStorage)
+	if !redisDb {
+		return // We only support these tests for redis
+	}
+	rsStor := dataDbCsv.(*RedisStorage)
+	keysCsv, err := rsCsv.db.Keys("*")
+	if err != nil {
+		t.Fatal("Failed querying redis keys for csv data")
+	}
+	for _,key := range keysCsv {
+		valCsv, err := rsCsv.db.Get(key)
+		if err != nil {
+			t.Errorf("Error when querying dataDbCsv for key: %s - %s ", key, err.Error())
+			continue
+		}
+		valStor, err := rsStor.db.Get(key)
+		if err != nil {
+			t.Errorf("Error when querying dataDbStor for key: %s - %s", key, err.Error())
+			continue
+		}
+		if valCsv != valStor {
+			t.Errorf("Missmatched data for key: %s\n\t, dataDbCsv: %s \n\t dataDbStor: %s\n", key, valCsv, valStor)
+		}
+	}
+} 
