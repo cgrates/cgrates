@@ -57,6 +57,7 @@ const (
 	ROUNDING_MIDDLE          = "*middle"
 	ROUNDING_DOWN            = "*down"
 	COMMENT_CHAR             = '#'
+	CSV_SEP                  = ','
 	FALLBACK_SEP             = ';'
 	JSON                     = "json"
 	MSGPACK                  = "msgpack"

@@ -145,7 +145,7 @@ func main() {
 		}
 		loader = engine.NewFileCSVReader(dataDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
 	}
-
+	// ToDo: put these methods in loader package so we can properly test loads
 	err = loader.LoadDestinations()
 	if err != nil {
 		log.Fatal(err)

@@ -65,7 +65,9 @@ func (self *TPCSVImporter) Run() error {
 
 // Handler importing timings from file, saved row by row to storDb
 func (self *TPCSVImporter) importTimings(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -93,7 +95,9 @@ func (self *TPCSVImporter) importTimings(fn string) error {
 }
 
 func (self *TPCSVImporter) importDestinations(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -121,7 +125,9 @@ func (self *TPCSVImporter) importDestinations(fn string) error {
 }
 
 func (self *TPCSVImporter) importRates(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -152,7 +158,9 @@ func (self *TPCSVImporter) importRates(fn string) error {
 }
 
 func (self *TPCSVImporter) importDestinationRates(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -186,7 +194,9 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 }
 
 func (self *TPCSVImporter) importRatingPlans(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -227,7 +237,9 @@ func (self *TPCSVImporter) importRatingPlans(fn string) error {
 }
 
 func (self *TPCSVImporter) importRatingProfiles(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -275,7 +287,9 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 }
 
 func (self *TPCSVImporter) importActions(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -330,7 +344,9 @@ func (self *TPCSVImporter) importActions(fn string) error {
 }
 
 func (self *TPCSVImporter) importActionTimings(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -372,7 +388,9 @@ func (self *TPCSVImporter) importActionTimings(fn string) error {
 }
 
 func (self *TPCSVImporter) importActionTriggers(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err
@@ -423,7 +441,9 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 }
 
 func (self *TPCSVImporter) importAccountActions(fn string) error {
-	log.Printf("Processing file: <%s> ", fn)
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
 	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
 	if err != nil {
 		return err

@@ -50,7 +50,8 @@ var testLocal = flag.Bool("local", false, "Perform the tests only on local test 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
 var tpCsvScenario = flag.String("tp_scenario", "prepaid1centpsec", "Use this scenario folder to import tp csv data from")
 
-// Create connection to dataDb and flush it's data
+
+// Create connection to dataDb
 // Will use 3 different datadbs in order to be able to see differences in data loaded
 func TestConnDataDbs(t *testing.T) {
 	if !*testLocal { 
@@ -97,7 +98,7 @@ func TestLoadFromCSV(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}
-	loader := NewFileCSVReader(dataDbCsv, ',', 
+	loader := NewFileCSVReader(dataDbCsv, utils.CSV_SEP, 
 			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
 			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
 			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
@@ -142,5 +143,21 @@ func TestLoadFromCSV(t *testing.T) {
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
 		t.Error("Could not write data into dataDb: ", err.Error())
+	}
+}
+
+
+func TestLoadToStorDb(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	csvImporter := TPCSVImporter{TEST_SQL, storDb, path.Join(*dataDir, "tariffplans", *tpCsvScenario), utils.CSV_SEP, false, TEST_SQL}
+	if err := csvImporter.Run(); err != nil {
+		t.Error("Error when importing tpdata to storDb: ", err)
+	}
+	if tpids, err := storDb.GetTPIds(); err != nil {
+		t.Error("Error when querying storDb for imported data: ", err)
+	} else if len(tpids) != 1 || tpids[0] != TEST_SQL {
+		t.Errorf("Data in storDb is different than expected %v", tpids)
 	}
 }
