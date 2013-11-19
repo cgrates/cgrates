@@ -56,6 +56,7 @@ var (
 	dataPath      = flag.String("path", ".", "The path containing the data files")
 	version       = flag.Bool("version", false, "Prints the application version.")
 	verbose       = flag.Bool("verbose", false, "Enable detailed verbose logging output")
+	dryRun        = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
 	fromStorDb    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 	historyServer = flag.String("history_server", cgrConfig.HistoryServer, "The history server address:port, empty to disable automaticautomatic  history archiving")
@@ -186,7 +187,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	if *dryRun { // We were just asked to parse the data, not saving it
+		return
+	}
 	// write maps to database
 	if err := loader.WriteToDatabase(*flush, *verbose); err != nil {
 		log.Fatal("Could not write to database: ", err)
