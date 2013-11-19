@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrs
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
 )
@@ -31,8 +31,8 @@ curl --data "accid=asbfdsaf&cdrhost=192.168.1.1&reqtype=rated&direction=*out&ten
 
 func TestCgrCdrFields(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
-	cgrCdr := CgrCdr{ "accid":"dsafdsaf", "cdrhost":"192.168.1.1", "reqtype":"rated", "direction":"*out", "tenant":"cgrates.org", "tor":"call", 
-		"account":"1001", "subject":"1001", "destination":"1002", "time_answer":"1383813746", "duration":"10", "field_extr1":"val_extr1", "fieldextr2":"valextr2"}
+	cgrCdr := CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
+		"account": "1001", "subject": "1001", "destination": "1002", "time_answer": "1383813746", "duration": "10", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	if cgrCdr.GetCgrId() != utils.FSCgrId("dsafdsaf") {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}

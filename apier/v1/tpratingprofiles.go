@@ -39,7 +39,7 @@ func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *stri
 }
 
 type AttrGetTPRatingProfile struct {
-	TPid            string // Tariff plan id
+	TPid   string // Tariff plan id
 	LoadId string // RatingProfile id
 }
 
@@ -47,7 +47,7 @@ type AttrGetTPRatingProfile struct {
 func (self *ApierV1) GetTPRatingProfiles(attrs utils.TPRatingProfile, reply *[]*utils.TPRatingProfile) error {
 	mndtryFlds := []string{"TPid", "LoadId"}
 	if len(attrs.Subject) != 0 { // If Subject provided as filter, make all related fields mandatory
-		mndtryFlds = append(mndtryFlds, "Tenant", "TOR", "Direction","Subject")
+		mndtryFlds = append(mndtryFlds, "Tenant", "TOR", "Direction", "Subject")
 	}
 	if missing := utils.MissingStructFields(&attrs, mndtryFlds); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
@@ -85,10 +85,9 @@ func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileId
 	return nil
 }
 
-
 // Removes specific RatingProfile on Tariff plan
 func (self *ApierV1) RemTPRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "TOR", "Direction","Subject"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "TOR", "Direction", "Subject"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	if err := self.StorDb.RemTPData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, attrs.LoadId, attrs.Tenant, attrs.TOR, attrs.Direction, attrs.Subject); err != nil {

@@ -19,11 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/config"
-	"testing"
-	"path"
 	"flag"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+	"path"
+	"testing"
 )
 
 /*
@@ -49,14 +49,13 @@ var testLocal = flag.Bool("local", false, "Perform the tests only on local test 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
 var tpCsvScenario = flag.String("tp_scenario", "prepaid1centpsec", "Use this scenario folder to import tp csv data from")
 
-
 // Create connection to dataDb
 // Will use 3 different datadbs in order to be able to see differences in data loaded
 func TestConnDataDbs(t *testing.T) {
-	if !*testLocal { 
+	if !*testLocal {
 		return
 	}
-	cfg,_ = config.NewDefaultCGRConfig()
+	cfg, _ = config.NewDefaultCGRConfig()
 	var err error
 	if dataDbCsv, err = ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, "13", cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
@@ -68,12 +67,12 @@ func TestConnDataDbs(t *testing.T) {
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
 func TestCreateStorTpTables(t *testing.T) {
-	if !*testLocal { 
+	if !*testLocal {
 		return
 	}
 	var db *MySQLStorage
 	if d, err := NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
-		t.Error("Error on opening database connection: ",err)
+		t.Error("Error on opening database connection: ", err)
 		return
 	} else {
 		db = d.(*MySQLStorage)
@@ -88,7 +87,7 @@ func TestCreateStorTpTables(t *testing.T) {
 
 // Loads data from csv files in tp scenarion to dataDbCsv
 func TestLoadFromCSV(t *testing.T) {
-	if !*testLocal { 
+	if !*testLocal {
 		return
 	}
 	var err error
@@ -97,18 +96,18 @@ func TestLoadFromCSV(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}
-	loader := NewFileCSVReader(dataDbCsv, utils.CSV_SEP, 
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATION_RATES_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TIMINGS_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
-			path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
-			)
+	loader := NewFileCSVReader(dataDbCsv, utils.CSV_SEP,
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATION_RATES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TIMINGS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
+	)
 
 	if err = loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
@@ -216,7 +215,7 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
-	for _,key := range keysCsv {
+	for _, key := range keysCsv {
 		valCsv, err := rsCsv.db.Get(key)
 		if err != nil {
 			t.Errorf("Error when querying dataDbCsv for key: %s - %s ", key, err.Error())
@@ -231,4 +230,4 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 			t.Errorf("Missmatched data for key: %s\n\t, dataDbCsv: %s \n\t dataDbStor: %s\n", key, valCsv, valStor)
 		}
 	}
-} 
+}

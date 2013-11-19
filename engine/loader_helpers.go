@@ -43,9 +43,8 @@ type TPLoader interface {
 	LoadActionTimings() error
 	LoadActionTriggers() error
 	LoadAccountActions() error
-	GetLoadedIds( string ) ([]string, error)
+	GetLoadedIds(string) ([]string, error)
 	WriteToDatabase(bool, bool) error
-
 }
 
 /*type LoadRate struct {
@@ -71,14 +70,14 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		log.Printf("Error parsing rounding decimals: %s", roundingDecimals)
 		return
 	}
-	rs, err := utils.NewRateSlot( cf, p, ratedUnits, rateIncrements, groupInterval, roundingMethod, rd )
+	rs, err := utils.NewRateSlot(cf, p, ratedUnits, rateIncrements, groupInterval, roundingMethod, rd)
 	if err != nil {
 		return nil, err
 	}
 	r = &utils.TPRate{
-		RateId: tag,
+		RateId:    tag,
 		RateSlots: []*utils.RateSlot{rs},
-		}
+	}
 	return
 }
 

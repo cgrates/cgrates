@@ -185,7 +185,7 @@ func (dbr *DbReader) LoadRatingPlans() error {
 		return err
 	}
 	for tag, rplBnds := range mpRpls {
-		for _,rplBnd  := range rplBnds {
+		for _, rplBnd := range rplBnds {
 			t, exists := dbr.timings[rplBnd.TimingId]
 			if !exists {
 				return errors.New(fmt.Sprintf("Could not get timing for tag %v", rplBnd.TimingId))
@@ -209,7 +209,7 @@ func (dbr *DbReader) LoadRatingPlans() error {
 }
 
 func (dbr *DbReader) LoadRatingProfiles() error {
-	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid:dbr.tpid}) //map[string]*utils.TPRatingProfile
+	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: dbr.tpid}) //map[string]*utils.TPRatingProfile
 	if err != nil {
 		return err
 	}
@@ -291,12 +291,12 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 			return err
 		}
 	}
-	return  nil
+	return nil
 }
 
 func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 	resultRatingProfile := &RatingProfile{}
-	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid:dbr.tpid, LoadId:tag}) //map[string]*utils.TPRatingProfile
+	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: dbr.tpid, LoadId: tag}) //map[string]*utils.TPRatingProfile
 	if err != nil || len(mpTpRpfs) == 0 {
 		return fmt.Errorf("No RateProfile with id %s: %v", tag, err)
 	}
@@ -316,9 +316,9 @@ func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
 					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))
 				}
 			}
-			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations, 
-						&RatingPlanActivation{at, tpRa.RatingPlanId, 
-						utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, tpRa.FallbackSubjects)})
+			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,
+				&RatingPlanActivation{at, tpRa.RatingPlanId,
+					utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, tpRa.FallbackSubjects)})
 		}
 	}
 	return dbr.dataDb.SetRatingProfile(resultRatingProfile)
@@ -374,14 +374,14 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, apiAtr := range atrsLst {
 			atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-						BalanceId: apiAtr.BalanceType,
-						Direction: apiAtr.Direction,
-						ThresholdType: apiAtr.ThresholdType,
-						ThresholdValue: apiAtr.ThresholdValue,
-						DestinationId: apiAtr.DestinationId,
-						Weight: apiAtr.Weight,
-						ActionsId: apiAtr.ActionsId,
-						}
+				BalanceId:      apiAtr.BalanceType,
+				Direction:      apiAtr.Direction,
+				ThresholdType:  apiAtr.ThresholdType,
+				ThresholdValue: apiAtr.ThresholdValue,
+				DestinationId:  apiAtr.DestinationId,
+				Weight:         apiAtr.Weight,
+				ActionsId:      apiAtr.ActionsId,
+			}
 		}
 		dbr.actionsTriggers[key] = atrs
 	}
@@ -389,7 +389,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 }
 
 func (dbr *DbReader) LoadAccountActions() (err error) {
-	acs, err := dbr.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid:dbr.tpid})
+	acs, err := dbr.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: dbr.tpid})
 	if err != nil {
 		return err
 	}
@@ -417,7 +417,7 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 }
 
 func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
-	accountActions, err := dbr.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid:dbr.tpid, LoadId:tag})
+	accountActions, err := dbr.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: dbr.tpid, LoadId: tag})
 	if err != nil {
 		return err
 	} else if len(accountActions) == 0 {
@@ -508,19 +508,19 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 		if err != nil {
 			return err
 		}
-		atrsMap := make( map[string][]*ActionTrigger )
+		atrsMap := make(map[string][]*ActionTrigger)
 		for key, atrsLst := range apiAtrsMap {
 			atrs := make([]*ActionTrigger, len(atrsLst))
 			for idx, apiAtr := range atrsLst {
 				atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-						BalanceId: apiAtr.BalanceType,
-						Direction: apiAtr.Direction,
-						ThresholdType: apiAtr.ThresholdType,
-						ThresholdValue: apiAtr.ThresholdValue,
-						DestinationId: apiAtr.DestinationId,
-						Weight: apiAtr.Weight,
-						ActionsId: apiAtr.ActionsId,
-						}
+					BalanceId:      apiAtr.BalanceType,
+					Direction:      apiAtr.Direction,
+					ThresholdType:  apiAtr.ThresholdType,
+					ThresholdValue: apiAtr.ThresholdValue,
+					DestinationId:  apiAtr.DestinationId,
+					Weight:         apiAtr.Weight,
+					ActionsId:      apiAtr.ActionsId,
+				}
 			}
 			atrsMap[key] = atrs
 		}
@@ -562,9 +562,8 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 	return dbr.dataDb.SetUserBalance(ub)
 }
 
-
 // Returns the identities loaded for a specific entity category
-func (dbr *DbReader) GetLoadedIds( categ string ) ([]string, error) {
+func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
 		ids := make([]string, len(dbr.destinations))

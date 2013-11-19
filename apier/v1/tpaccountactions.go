@@ -38,9 +38,9 @@ func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *st
 }
 
 type AttrGetTPAccountActions struct {
-	TPid             string // Tariff plan id
+	TPid   string // Tariff plan id
 	LoadId string // AccountActions id
-	
+
 }
 
 // Queries specific AccountActions profile on tariff plan

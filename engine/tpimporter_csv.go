@@ -178,11 +178,11 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 			continue
 		}
 		drs := []*utils.DestinationRate{
-				&utils.DestinationRate{
-					DestinationId: record[1],
-					RateId:        record[2],
-				},
-			}
+			&utils.DestinationRate{
+				DestinationId: record[1],
+				RateId:        record[2],
+			},
+		}
 		if err := self.StorDb.SetTPDestinationRates(self.TPid,
 			map[string][]*utils.DestinationRate{record[0]: drs}); err != nil {
 			if self.Verbose {
@@ -221,12 +221,12 @@ func (self *TPCSVImporter) importRatingPlans(fn string) error {
 			continue
 		}
 		drt := []*utils.TPRatingPlanBinding{
-				&utils.TPRatingPlanBinding{
-					DestinationRatesId: record[1],
-					Weight:      weight,
-					TimingId:    record[2],
-				},
-			}
+			&utils.TPRatingPlanBinding{
+				DestinationRatesId: record[1],
+				Weight:             weight,
+				TimingId:           record[2],
+			},
+		}
 		if err := self.StorDb.SetTPRatingPlans(self.TPid, map[string][]*utils.TPRatingPlanBinding{record[0]: drt}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
@@ -269,13 +269,13 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			loadId += "_" + self.ImportId
 		}
 		rp := &utils.TPRatingProfile{
-			LoadId:         loadId,
-			Tenant:         tenant,
-			TOR:            tor,
-			Direction:      direction,
-			Subject:        subject,
-			RatingPlanActivations: []*utils.TPRatingActivation{ 
-				&utils.TPRatingActivation{ ActivationTime: record[4], RatingPlanId: ratingPlanTag, FallbackSubjects: fallbacksubject}},
+			LoadId:    loadId,
+			Tenant:    tenant,
+			TOR:       tor,
+			Direction: direction,
+			Subject:   subject,
+			RatingPlanActivations: []*utils.TPRatingActivation{
+				&utils.TPRatingActivation{ActivationTime: record[4], RatingPlanId: ratingPlanTag, FallbackSubjects: fallbacksubject}},
 		}
 		if err := self.StorDb.SetTPRatingProfiles(self.TPid, map[string]*utils.TPRatingProfile{rp.KeyId(): rp}); err != nil {
 			if self.Verbose {
@@ -323,16 +323,16 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			continue
 		}
 		act := &utils.TPAction{
-			Identifier:       actionType,
-			BalanceType:      balanceType,
-			Direction:        direction,
-			Units:            units,
-			ExpiryTime:       record[5],
-			DestinationId:    destTag,
-			RatingSubject:    rateSubject,
-			BalanceWeight:    balanceWeight,
-			ExtraParameters:  record[9],
-			Weight:           weight,
+			Identifier:      actionType,
+			BalanceType:     balanceType,
+			Direction:       direction,
+			Units:           units,
+			ExpiryTime:      record[5],
+			DestinationId:   destTag,
+			RatingSubject:   rateSubject,
+			BalanceWeight:   balanceWeight,
+			ExtraParameters: record[9],
+			Weight:          weight,
 		}
 		if err := self.StorDb.SetTPActions(self.TPid, map[string][]*utils.TPAction{actId: []*utils.TPAction{act}}); err != nil {
 			if self.Verbose {
@@ -372,12 +372,12 @@ func (self *TPCSVImporter) importActionTimings(fn string) error {
 			continue
 		}
 		at := []*utils.TPActionTiming{
-				&utils.TPActionTiming{
-					ActionsId: actionsTag,
-					TimingId:  timingTag,
-					Weight:    weight,
-				}, 
-			}
+			&utils.TPActionTiming{
+				ActionsId: actionsTag,
+				TimingId:  timingTag,
+				Weight:    weight,
+			},
+		}
 		if err := self.StorDb.SetTPActionTimings(self.TPid, map[string][]*utils.TPActionTiming{tag: at}); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
@@ -423,7 +423,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			continue
 		}
 		at := &utils.TPActionTrigger{
-			BalanceType:      balanceType,
+			BalanceType:    balanceType,
 			Direction:      direction,
 			ThresholdType:  thresholdType,
 			ThresholdValue: threshold,
@@ -466,7 +466,7 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 			loadId += "_" + self.ImportId
 		}
 		tpaa := &utils.TPAccountActions{TPid: self.TPid, LoadId: loadId, Tenant: tenant, Account: account, Direction: direction,
-				ActionTimingsId: actionTimingsTag, ActionTriggersId: actionTriggersTag}
+			ActionTimingsId: actionTimingsTag, ActionTriggersId: actionTriggersTag}
 		aa := map[string]*utils.TPAccountActions{tpaa.KeyId(): tpaa}
 		if err := self.StorDb.SetTPAccountActions(self.TPid, aa); err != nil {
 			if self.Verbose {

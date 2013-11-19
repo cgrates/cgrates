@@ -20,23 +20,23 @@ package cdrs
 
 import (
 	"github.com/cgrates/cgrates/utils"
+	"net/http"
 	"strconv"
 	"time"
-	"net/http"
 )
 
 const (
-	ACCID = "accid"
-	CDRHOST = "cdrhost"
-	REQTYPE = "reqtype"
-	DIRECTION = "direction"
-	TENANT = "tenant"
-	TOR = "tor"
-	ACCOUNT = "account"
-	SUBJECT = "subject"
+	ACCID       = "accid"
+	CDRHOST     = "cdrhost"
+	REQTYPE     = "reqtype"
+	DIRECTION   = "direction"
+	TENANT      = "tenant"
+	TOR         = "tor"
+	ACCOUNT     = "account"
+	SUBJECT     = "subject"
 	DESTINATION = "destination"
 	TIME_ANSWER = "time_answer"
-	DURATION = "duration"
+	DURATION    = "duration"
 )
 
 var primaryFields []string = []string{ACCID, CDRHOST, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, TIME_ANSWER, DURATION}
@@ -53,7 +53,6 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 	}
 	return cgrCdr, nil
 }
-		
 
 type CgrCdr map[string]string
 
@@ -109,6 +108,7 @@ func (cgrCdr CgrCdr) GetExtraFields() map[string]string {
 func (cgrCdr CgrCdr) GetAnswerTime() (t time.Time, err error) {
 	return utils.ParseDate(cgrCdr[TIME_ANSWER])
 }
+
 // Extracts duration as considered by the telecom switch
 func (cgrCdr CgrCdr) GetDuration() int64 {
 	dur, _ := strconv.ParseInt(cgrCdr[DURATION], 0, 64)

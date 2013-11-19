@@ -30,7 +30,7 @@ const (
 	TBL_TP_ACTION_TRIGGERS   = "tp_action_triggers"
 	TBL_TP_ACCOUNT_ACTIONS   = "tp_account_actions"
 	TBL_CDRS_PRIMARY         = "cdrs_primary"
-        TBL_CDRS_EXTRA           = "cdrs_extra"
+	TBL_CDRS_EXTRA           = "cdrs_extra"
 	TBL_COST_DETAILS         = "cost_details"
 	TBL_RATED_CDRS           = "rated_cdrs"
 	TIMINGS_CSV              = "Timings.csv"
@@ -61,5 +61,4 @@ const (
 	FALLBACK_SEP             = ';'
 	JSON                     = "json"
 	MSGPACK                  = "msgpack"
-	
 )

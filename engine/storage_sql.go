@@ -23,9 +23,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
-	"time"
 	"io/ioutil"
 	"strings"
+	"time"
 )
 
 type SQLStorage struct {
@@ -40,13 +40,13 @@ func (self *SQLStorage) Flush() (err error) {
 	return
 }
 
-func (self *SQLStorage) CreateTablesFromScript( scriptPath string) error {
+func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 	fileContent, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
 		return err
 	}
 	qries := strings.Split(string(fileContent), ";") // Script has normally multiple queries separate by ';' go driver does not understand this so we handle it here
-	for _,qry := range qries {
+	for _, qry := range qries {
 		qry = strings.TrimSpace(qry) // Avoid empty queries
 		if len(qry) == 0 {
 			continue
@@ -57,7 +57,6 @@ func (self *SQLStorage) CreateTablesFromScript( scriptPath string) error {
 	}
 	return nil
 }
-
 
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
 func (self *SQLStorage) GetTPIds() ([]string, error) {
@@ -129,17 +128,15 @@ func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
-
-
 func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND tag='%s'", table, tpid, args[0])
 	switch table {
 	case utils.TBL_TP_RATE_PROFILES:
-		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND tor='%s' AND direction='%s' AND subject='%s'", 
-				table, tpid, args[0], args[1], args[2], args[3], args[4])
+		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND tor='%s' AND direction='%s' AND subject='%s'",
+			table, tpid, args[0], args[1], args[2], args[3], args[4])
 	case utils.TBL_TP_ACCOUNT_ACTIONS:
-		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND account='%s' AND direction='%s'", 
-				table, tpid, args[0], args[1], args[2], args[3])
+		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND account='%s' AND direction='%s'",
+			table, tpid, args[0], args[1], args[2], args[3])
 	}
 	if _, err := self.Db.Exec(q); err != nil {
 		return err
@@ -206,8 +203,8 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 		}
 		vals += fmt.Sprintf("('%s','%s','%s')", tpid, dest.Id, prefix)
 	}
-	q := fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES %s ON DUPLICATE KEY UPDATE prefix=values(prefix)", 
-			utils.TBL_TP_DESTINATIONS, vals)
+	q := fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES %s ON DUPLICATE KEY UPDATE prefix=values(prefix)",
+		utils.TBL_TP_DESTINATIONS, vals)
 	if _, err := self.Db.Exec(q); err != nil {
 		return err
 	}
@@ -255,10 +252,10 @@ func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
 		if err != nil {
 			return nil, err
 		}
-		if rs, err := utils.NewRateSlot(connectFee, rate, rateUnit, rateIncrement, groupIntervalStart, roundingMethod, roundingDecimals); err!=nil {
+		if rs, err := utils.NewRateSlot(connectFee, rate, rateUnit, rateIncrement, groupIntervalStart, roundingMethod, roundingDecimals); err != nil {
 			return nil, err
 		} else {
-			rt.RateSlots = append(rt.RateSlots, rs) 
+			rt.RateSlots = append(rt.RateSlots, rs)
 		}
 	}
 	if i == 0 {
@@ -398,7 +395,7 @@ func (self *SQLStorage) GetTPRatingPlan(tpid, drtId string) (*utils.TPRatingPlan
 		if err != nil {
 			return nil, err
 		}
-		drt.RatingPlanBindings = append(drt.RatingPlanBindings, &utils.TPRatingPlanBinding{DestinationRatesId:drTag, TimingId:timingTag, Weight:weight})
+		drt.RatingPlanBindings = append(drt.RatingPlanBindings, &utils.TPRatingPlanBinding{DestinationRatesId: drTag, TimingId: timingTag, Weight: weight})
 	}
 	if i == 0 {
 		return nil, nil
@@ -911,14 +908,14 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 			return nil, err
 		}
 		rs, err := utils.NewRateSlot(connect_fee, rate, rate_unit, rate_increment, group_interval_start, roundingMethod, roundingDecimals)
-		if err!=nil {
+		if err != nil {
 			return nil, err
 		}
 		r := &utils.TPRate{
-			RateId: tag,
+			RateId:    tag,
 			RateSlots: []*utils.RateSlot{rs},
-			}
-		
+		}
+
 		// same tag only to create rate groups
 		existingRates, exists := rts[tag]
 		if exists {
@@ -1015,10 +1012,10 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 		}
 		rpb := &utils.TPRatingPlanBinding{
 			DestinationRatesId: destination_rates_tag,
-			TimingId:    timings_tag,
-			Weight:      weight,
+			TimingId:           timings_tag,
+			Weight:             weight,
 		}
-		if rpBnLst,exists := rpbns[tag]; exists {
+		if rpBnLst, exists := rpbns[tag]; exists {
 			rpBnLst = append(rpBnLst, rpb)
 		} else { // New
 			rpbns[tag] = []*utils.TPRatingPlanBinding{rpb}
@@ -1044,7 +1041,7 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 	}
 	if len(qryRpf.Subject) != 0 {
 		q += fmt.Sprintf(" AND subject='%s'", qryRpf.Subject)
-	}	
+	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
 		return nil, err
@@ -1056,14 +1053,14 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 		if err := rows.Scan(&rcvLoadId, &tenant, &tor, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
 			return nil, err
 		}
-		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Tenant: tenant, TOR: tor, Direction:direction, Subject:subject}
-		if existingRp,has := rpfs[rp.KeyId()]; !has {
+		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Tenant: tenant, TOR: tor, Direction: direction, Subject: subject}
+		if existingRp, has := rpfs[rp.KeyId()]; !has {
 			rp.RatingPlanActivations = []*utils.TPRatingActivation{
-						&utils.TPRatingActivation{ActivationTime:activation_time, RatingPlanId:rating_plan_tag, FallbackSubjects:fallback_subjects}}
+				&utils.TPRatingActivation{ActivationTime: activation_time, RatingPlanId: rating_plan_tag, FallbackSubjects: fallback_subjects}}
 			rpfs[rp.KeyId()] = rp
 		} else { // Exists, update
-			existingRp.RatingPlanActivations = append( existingRp.RatingPlanActivations, 
-					&utils.TPRatingActivation{ActivationTime:activation_time, RatingPlanId:rating_plan_tag, FallbackSubjects:fallback_subjects} )
+			existingRp.RatingPlanActivations = append(existingRp.RatingPlanActivations,
+				&utils.TPRatingActivation{ActivationTime: activation_time, RatingPlanId: rating_plan_tag, FallbackSubjects: fallback_subjects})
 		}
 	}
 	return rpfs, nil
@@ -1125,10 +1122,10 @@ func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (map[string][]*util
 		if err := rows.Scan(&tag, &actions_tag, &timing_tag, &weight); err != nil {
 			return nil, err
 		}
-		at := &utils.TPActionTiming {
+		at := &utils.TPActionTiming{
 			ActionsId: tag,
-			TimingId: timing_tag,
-			Weight: weight,
+			TimingId:  timing_tag,
+			Weight:    weight,
 		}
 		ats[tag] = append(ats[tag], at)
 	}

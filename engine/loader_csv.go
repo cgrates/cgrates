@@ -372,7 +372,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		rpa := &RatingPlanActivation{
 			ActivationTime: at,
 			RatingPlanId:   record[5],
-			FallbackKeys:  utils.FallbackSubjKeys(direction, tenant, tor, fallbacksubject),
+			FallbackKeys:   utils.FallbackSubjKeys(direction, tenant, tor, fallbacksubject),
 		}
 		rp.RatingPlanActivations = append(rp.RatingPlanActivations, rpa)
 		csvr.ratingProfiles[rp.Id] = rp
@@ -544,7 +544,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 }
 
 // Returns the identities loaded for a specific category, useful for cache reloads
-func (csvr *CSVReader) GetLoadedIds( categ string ) ([]string, error) {
+func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
 		ids := make([]string, len(csvr.destinations))

@@ -19,11 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/config"
-	"testing"
-	"path"
 	"fmt"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+	"path"
+	"testing"
 )
 
 /*
@@ -40,14 +40,14 @@ README:
 */
 
 var mysql *MySQLStorage
- 
+
 func TestCreateTables(t *testing.T) {
-	if !*testLocal { 
+	if !*testLocal {
 		return
 	}
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	if d, err := NewMySQLStorage(cgrConfig.StorDBHost, cgrConfig.StorDBPort, cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass); err != nil {
-		t.Error("Error on opening database connection: ",err)
+		t.Error("Error on opening database connection: ", err)
 		return
 	} else {
 		mysql = d.(*MySQLStorage)
@@ -59,19 +59,19 @@ func TestCreateTables(t *testing.T) {
 		}
 	}
 	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
-		if  _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
+		if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
 			t.Error(err.Error())
 		}
 	}
 }
 
 func TestRemoveData(t *testing.T) {
-	if !*testLocal { 
+	if !*testLocal {
 		return
 	}
 	// Create Timings
-	tm :=  &utils.TPTiming{Id:"ALWAYS", StartTime:"00:00:00"}
-	if err := mysql.SetTPTiming(TEST_SQL,tm); err != nil {
+	tm := &utils.TPTiming{Id: "ALWAYS", StartTime: "00:00:00"}
+	if err := mysql.SetTPTiming(TEST_SQL, tm); err != nil {
 		t.Error(err.Error())
 	}
 	if tmgs, err := mysql.GetTpTimings(TEST_SQL, tm.Id); err != nil {
@@ -89,14 +89,14 @@ func TestRemoveData(t *testing.T) {
 		t.Error("Did not remove TPTiming")
 	}
 	// Create RatingProfile
-	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId:"RETAIL1"}}
-	rp := &utils.TPRatingProfile{TPid:TEST_SQL, LoadId:TEST_SQL, Tenant:"cgrates.org", TOR:"call", Direction:"*out", Subject:"*any", RatingPlanActivations:ras} 
-	if err := mysql.SetTPRatingProfiles(TEST_SQL, map[string]*utils.TPRatingProfile{rp.KeyId():rp}); err != nil {
+	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1"}}
+	rp := &utils.TPRatingProfile{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
+	if err := mysql.SetTPRatingProfiles(TEST_SQL, map[string]*utils.TPRatingProfile{rp.KeyId(): rp}); err != nil {
 		t.Error(err.Error())
 	}
 	if rps, err := mysql.GetTpRatingProfiles(rp); err != nil {
 		t.Error(err.Error())
-	} else if len(rps) == 0{
+	} else if len(rps) == 0 {
 		t.Error("Could not store TPRatingProfile")
 	}
 	// Remove RatingProfile
@@ -105,13 +105,13 @@ func TestRemoveData(t *testing.T) {
 	}
 	if rps, err := mysql.GetTpRatingProfiles(rp); err != nil {
 		t.Error(err.Error())
-	} else if len(rps) != 0{
+	} else if len(rps) != 0 {
 		t.Error("Did not remove TPRatingProfile")
 	}
 
 	// Create AccountActions
-	aa := &utils.TPAccountActions{TPid:TEST_SQL, LoadId:TEST_SQL, Tenant:"cgrates.org", Account:"1001", 
-			Direction:"*out", ActionTimingsId:"PREPAID_10", ActionTriggersId:"STANDARD_TRIGGERS"}
+	aa := &utils.TPAccountActions{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Account: "1001",
+		Direction: "*out", ActionTimingsId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	if err := mysql.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
 		t.Error(err.Error())
 	}
@@ -130,7 +130,3 @@ func TestRemoveData(t *testing.T) {
 		t.Error("Did not remove TPAccountActions")
 	}
 }
-
-	
-
-

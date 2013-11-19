@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"time"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // This file deals with tp_* data definition
@@ -33,31 +33,30 @@ type TPRate struct {
 }
 
 // Needed so we make sure we always use SetDurations() on a newly created value
-func NewRateSlot( connectFee, rate float64, rateUnit, rateIncrement, grpInterval, rndMethod string, rndDecimals int ) (*RateSlot, error) {
-	rs := &RateSlot{ ConnectFee: connectFee, Rate: rate, RateUnit: rateUnit, RateIncrement: rateIncrement, 
-			GroupIntervalStart: grpInterval, RoundingMethod: rndMethod, RoundingDecimals: rndDecimals }
+func NewRateSlot(connectFee, rate float64, rateUnit, rateIncrement, grpInterval, rndMethod string, rndDecimals int) (*RateSlot, error) {
+	rs := &RateSlot{ConnectFee: connectFee, Rate: rate, RateUnit: rateUnit, RateIncrement: rateIncrement,
+		GroupIntervalStart: grpInterval, RoundingMethod: rndMethod, RoundingDecimals: rndDecimals}
 	if err := rs.SetDurations(); err != nil {
 		return nil, err
 	}
 	return rs, nil
 }
-		
 
 type RateSlot struct {
-	ConnectFee         float64       // ConnectFee applied once the call is answered
-	Rate               float64       // Rate applied
-	RateUnit           string //  Number of billing units this rate applies to
-	RateIncrement      string // This rate will apply in increments of duration
-	GroupIntervalStart string        // Group position
-	RoundingMethod     string        // Use this method to round the cost
-	RoundingDecimals   int           // Round the cost number of decimals
-	rateUnitDur        time.Duration
-	rateIncrementDur   time.Duration
-	groupIntervalStartDur   time.Duration
+	ConnectFee            float64 // ConnectFee applied once the call is answered
+	Rate                  float64 // Rate applied
+	RateUnit              string  //  Number of billing units this rate applies to
+	RateIncrement         string  // This rate will apply in increments of duration
+	GroupIntervalStart    string  // Group position
+	RoundingMethod        string  // Use this method to round the cost
+	RoundingDecimals      int     // Round the cost number of decimals
+	rateUnitDur           time.Duration
+	rateIncrementDur      time.Duration
+	groupIntervalStartDur time.Duration
 }
 
 // Used to set the durations we need out of strings
-func(self *RateSlot) SetDurations() error {
+func (self *RateSlot) SetDurations() error {
 	var err error
 	if self.rateUnitDur, err = time.ParseDuration(self.RateUnit); err != nil {
 		return err
@@ -70,16 +69,15 @@ func(self *RateSlot) SetDurations() error {
 	}
 	return nil
 }
-func(self *RateSlot) RateUnitDuration() time.Duration {
+func (self *RateSlot) RateUnitDuration() time.Duration {
 	return self.rateUnitDur
 }
-func(self *RateSlot) RateIncrementDuration() time.Duration {
+func (self *RateSlot) RateIncrementDuration() time.Duration {
 	return self.rateIncrementDur
 }
-func(self *RateSlot) GroupIntervalStartDuration() time.Duration {
+func (self *RateSlot) GroupIntervalStartDuration() time.Duration {
 	return self.groupIntervalStartDur
 }
-			
 
 type TPDestinationRate struct {
 	TPid              string             // Tariff plan id
@@ -103,44 +101,45 @@ type TPTiming struct {
 }
 
 type TPRatingPlan struct {
-	TPid         string        // Tariff plan id
-	RatingPlanId string        // RatingPlan profile id
-	RatingPlanBindings  []*TPRatingPlanBinding // Set of destinationid-rateid bindings
+	TPid               string                 // Tariff plan id
+	RatingPlanId       string                 // RatingPlan profile id
+	RatingPlanBindings []*TPRatingPlanBinding // Set of destinationid-rateid bindings
 }
 
 type TPRatingPlanBinding struct {
-	DestinationRatesId string  // The DestinationRate identity
-	TimingId    string  // The timing identity
-	Weight      float64 // Binding priority taken into consideration when more DestinationRates are active on a time slot
-	timing      *TPTiming // Not exporting it via JSON
+	DestinationRatesId string    // The DestinationRate identity
+	TimingId           string    // The timing identity
+	Weight             float64   // Binding priority taken into consideration when more DestinationRates are active on a time slot
+	timing             *TPTiming // Not exporting it via JSON
 }
 
-func(self *TPRatingPlanBinding) SetTiming(tm *TPTiming) {
+func (self *TPRatingPlanBinding) SetTiming(tm *TPTiming) {
 	self.timing = tm
 }
 
-func(self *TPRatingPlanBinding) Timing() *TPTiming {
+func (self *TPRatingPlanBinding) Timing() *TPTiming {
 	return self.timing
 }
 
 type TPRatingProfile struct {
-	TPid                  string // Tariff plan id
-	LoadId                string // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
-	Tenant                string   // Tenant's Id
-	TOR                   string   // TypeOfRecord
-	Direction             string   // Traffic direction, OUT is the only one supported for now
-	Subject               string   // Rating subject, usually the same as account
+	TPid                  string                // Tariff plan id
+	LoadId                string                // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
+	Tenant                string                // Tenant's Id
+	TOR                   string                // TypeOfRecord
+	Direction             string                // Traffic direction, OUT is the only one supported for now
+	Subject               string                // Rating subject, usually the same as account
 	RatingPlanActivations []*TPRatingActivation // Activate rate profiles at specific time
 }
+
 // Used as key in nosql db (eg: redis)
-func(self *TPRatingProfile) KeyId() string {
+func (self *TPRatingProfile) KeyId() string {
 	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.TOR, self.Subject)
 }
 
 type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
-	RatingPlanId string // Id of RatingPlan profile
-	FallbackSubjects     string // So we follow the api
+	RatingPlanId     string // Id of RatingPlan profile
+	FallbackSubjects string // So we follow the api
 }
 
 // Helper to return the subject fallback keys we need in dataDb
@@ -167,8 +166,8 @@ type AttrTPRatingProfileIds struct {
 }
 
 type TPActions struct {
-	TPid      string    // Tariff plan id
-	ActionsId string    // Actions id
+	TPid      string      // Tariff plan id
+	ActionsId string      // Actions id
 	Actions   []*TPAction // Set of actions this Actions profile will perform
 }
 
@@ -186,8 +185,8 @@ type TPAction struct {
 }
 
 type TPActionTimings struct {
-	TPid            string             // Tariff plan id
-	ActionTimingsId string             // ActionTimings id
+	TPid            string            // Tariff plan id
+	ActionTimingsId string            // ActionTimings id
 	ActionTimings   []*TPActionTiming // Set of ActionTiming bindings this profile will group
 }
 
@@ -198,8 +197,8 @@ type TPActionTiming struct {
 }
 
 type TPActionTriggers struct {
-	TPid             string              // Tariff plan id
-	ActionTriggersId string              // Profile id
+	TPid             string             // Tariff plan id
+	ActionTriggersId string             // Profile id
 	ActionTriggers   []*TPActionTrigger // Set of triggers grouped in this profile
 
 }
@@ -223,15 +222,14 @@ type TPAccountActions struct {
 	ActionTimingsId  string // Id of ActionTimings profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
 }
+
 // Returns the id used in some nosql dbs (eg: redis)
-func(self *TPAccountActions) KeyId() string {
+func (self *TPAccountActions) KeyId() string {
 	return fmt.Sprintf("%s:%s:%s", self.Direction, self.Tenant, self.Account)
 }
 
-
 // Data used to do remote cache reloads via api
 type ApiReloadCache struct {
-	DestinationIds      []string
-	RatingPlanIds       []string
+	DestinationIds []string
+	RatingPlanIds  []string
 }
-

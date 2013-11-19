@@ -75,7 +75,7 @@ func New(s engine.CdrStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
 }
 
 func (cdrs *CDRS) StartCapturingCDRs() {
-	http.HandleFunc("/cgr", cgrCdrHandler)       // Attach CGR CDR Handler
+	http.HandleFunc("/cgr", cgrCdrHandler)            // Attach CGR CDR Handler
 	http.HandleFunc("/freeswitch_json", fsCdrHandler) // Attach FreeSWITCH JSON CDR Handler
 	http.ListenAndServe(cfg.CDRSListen, nil)
 }
