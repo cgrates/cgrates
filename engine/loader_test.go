@@ -147,7 +147,7 @@ func TestLoadFromCSV(t *testing.T) {
 }
 
 
-func TestLoadToStorDb(t *testing.T) {
+func TestImportToStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -159,5 +159,45 @@ func TestLoadToStorDb(t *testing.T) {
 		t.Error("Error when querying storDb for imported data: ", err)
 	} else if len(tpids) != 1 || tpids[0] != TEST_SQL {
 		t.Errorf("Data in storDb is different than expected %v", tpids)
+	}
+}
+
+func TestLoadFromStorDb(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	loader := NewDbReader(storDb, dataDbStor, TEST_SQL)
+	if err := loader.LoadDestinations(); err != nil {
+		t.Error("Failed loading destinations: ", err.Error())
+	}
+	if err := loader.LoadTimings(); err != nil {
+		t.Error("Failed loading timings: ", err.Error())
+	}
+	if err := loader.LoadRates(); err != nil {
+		t.Error("Failed loading rates: ", err.Error())
+	}
+	if err := loader.LoadDestinationRates(); err != nil {
+		t.Error("Failed loading destination rates: ", err.Error())
+	}
+	if err := loader.LoadRatingPlans(); err != nil {
+		t.Error("Failed loading rating plans: ", err.Error())
+	}
+	if err := loader.LoadRatingProfiles(); err != nil {
+		t.Error("Failed loading rating profiles: ", err.Error())
+	}
+	if err := loader.LoadActions(); err != nil {
+		t.Error("Failed loading actions: ", err.Error())
+	}
+	if err := loader.LoadActionTimings(); err != nil {
+		t.Error("Failed loading action timings: ", err.Error())
+	}
+	if err := loader.LoadActionTriggers(); err != nil {
+		t.Error("Failed loading action triggers: ", err.Error())
+	}
+	if err := loader.LoadAccountActions(); err != nil {
+		t.Error("Failed loading account actions: ", err.Error())
+	}
+	if err := loader.WriteToDatabase(true, false); err != nil {
+		t.Error("Could not write data into dataDb: ", err.Error())
 	}
 }
