@@ -398,3 +398,60 @@ func TestApierTPRatingPlan(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPRatingPlanIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
 	}
 }
+
+
+// Test here TPRatingPlan APIs
+func TestApierTPRatingProfile(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	rpf := &utils.TPRatingProfile{ TPid:engine.TEST_SQL, LoadId:engine.TEST_SQL, Tenant:"cgrates.org", TOR:"call", Direction:"*out", Subject:"*any",
+		RatingPlanActivations: []*utils.TPRatingActivation{
+			&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId:"RETAIL1", FallbackSubjects:""},
+		}}
+	rpfTst := new(utils.TPRatingProfile)
+	*rpfTst = *rpf
+	rpfTst.Subject = engine.TEST_SQL
+	for _, rp := range []*utils.TPRatingProfile{rpf, rpfTst} {
+		if err := rater.Call("ApierV1.SetTPRatingProfile", rp, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPRatingProfile: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPRatingProfile: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPRatingProfile", rpfTst, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPRatingProfile: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPRatingProfile got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPRatingProfile", new(utils.TPRatingProfile), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPRatingProfile, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid LoadId Tenant TOR Direction Subject RatingPlanActivations]" { 
+		t.Error("Calling ApierV1.SetTPRatingProfile got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyRpfs []*utils.TPRatingProfile
+	if err := rater.Call("ApierV1.GetTPRatingProfiles", rpfTst, &rplyRpfs); err!=nil { 
+		t.Error("Calling ApierV1.GetTPRatingProfiles, got error: ", err.Error())
+	} else if !reflect.DeepEqual(rpfTst, rplyRpfs[0])  {
+		t.Errorf("Calling ApierV1.GetTPRatingProfiles expected: %v, received: %v", rpfTst, rplyRpfs[0])
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPRatingProfile", rpfTst, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPRatingProfile, got error: ", err.Error())
+	} else if reply != "OK"  {
+		t.Error("Calling ApierV1.RemTPRatingProfile received: ", reply)
+	}
+	// Test getLoadIds
+	var rplyRpIds []string
+	expectedRpIds := []string{engine.TEST_SQL}
+	if err := rater.Call("ApierV1.GetTPRatingProfileLoadIds", utils.AttrTPRatingProfileIds{TPid:rpf.TPid}, &rplyRpIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPRatingProfileLoadIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds)  {
+		t.Errorf("Calling ApierV1.GetTPRatingProfileLoadIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
+	}
+}
+	
