@@ -25,14 +25,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ApierTPDestination struct {
-	TPid          string   // Tariff plan id
-	DestinationId string   // Destination id
-	Prefixes      []string // Prefixes attached to this destination
-}
-
 // Creates a new destination within a tariff plan
-func (self *ApierV1) SetTPDestination(attrs ApierTPDestination, reply *string) error {
+func (self *ApierV1) SetTPDestination(attrs utils.TPDestination, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -49,7 +43,7 @@ type AttrGetTPDestination struct {
 }
 
 // Queries a specific destination
-func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *ApierTPDestination) error {
+func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.TPDestination) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -58,7 +52,7 @@ func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *ApierTP
 	} else if dst == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = ApierTPDestination{attrs.TPid, dst.Id, dst.Prefixes}
+		*reply = utils.TPDestination{attrs.TPid, dst.Id, dst.Prefixes}
 	}
 	return nil
 }

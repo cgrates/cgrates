@@ -24,6 +24,13 @@ import (
 	"time"
 )
 
+type TPDestination struct {
+	TPid          string   // Tariff plan id
+	DestinationId string   // Destination id
+	Prefixes      []string // Prefixes attached to this destination
+}
+
+
 // This file deals with tp_* data definition
 
 type TPRate struct {

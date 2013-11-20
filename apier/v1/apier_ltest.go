@@ -33,6 +33,8 @@ import (
 	"testing"
 )
 
+// ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
+
 /*
 README:
 
@@ -54,6 +56,7 @@ var testLocal = flag.Bool("local", false, "Perform the tests only on local test 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
 var waitRater = flag.Int("wait_rater", 200, "Number of miliseconds to wait for rater to start and cache")
 
+// Empty tables before using them
 func TestCreateTables(t *testing.T) {
 	if !*testLocal {
 		return
@@ -178,3 +181,59 @@ func TestApierTPTiming(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIds, rplyTmIds)
 	}
 }
+
+// Test here TPTiming APIs
+func TestApierTPDestination(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	dstDe := &utils.TPDestination{TPid:engine.TEST_SQL,  DestinationId: "GERMANY", Prefixes: []string{"+49"}}
+	dstDeMobile := &utils.TPDestination{TPid:engine.TEST_SQL,  DestinationId: "GERMANY_MOBILE", Prefixes: []string{"+4915", "+4916", "+4917"}}
+	dstFs := &utils.TPDestination{TPid:engine.TEST_SQL,  DestinationId: "FS_USERS", Prefixes: []string{"10"}}
+	dstDe2 := new(utils.TPDestination)
+	*dstDe2 = *dstDe // Data which we use for remove, still keeping the sample data to check proper loading
+	dstDe2.DestinationId = "GERMANY2"
+	for _, dst := range []*utils.TPDestination{dstDe, dstDeMobile, dstFs, dstDe2} {
+		if err := rater.Call("ApierV1.SetTPDestination", dst, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPDestination: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPDestination: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPDestination", dstDe2, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPDestination: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPDestination got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPDestination", new(utils.TPDestination), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid DestinationId Prefixes]" { 
+		t.Error("Calling ApierV1.SetTPDestination got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyDstDe2 *utils.TPDestination
+	if err := rater.Call("ApierV1.GetTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.DestinationId}, &rplyDstDe2); err!=nil { 
+		t.Error("Calling ApierV1.GetTPDestination, got error: ", err.Error())
+	} else if !reflect.DeepEqual(dstDe2, rplyDstDe2)  {
+		t.Errorf("Calling ApierV1.GetTPDestination expected: %v, received: %v", dstDe2, rplyDstDe2)
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPDestination", AttrGetTPDestination{dstDe2.TPid, dstDe2.DestinationId}, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPTiming, got error: ", err.Error())
+	} else if reply != "OK"  {
+		t.Error("Calling ApierV1.RemTPTiming received: ", reply)
+	}
+	// Test getIds
+	var rplyDstIds []string
+	expectedDstIds := []string{"FS_USERS", "GERMANY", "GERMANY_MOBILE"}
+	if err := rater.Call("ApierV1.GetTPDestinationIds", AttrGetTPDestinationIds{dstDe.TPid}, &rplyDstIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPDestinationIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedDstIds, rplyDstIds)  {
+		t.Errorf("Calling ApierV1.GetTPDestinationIds expected: %v, received: %v", expectedDstIds, rplyDstIds)
+	}
+}
+	
+	
