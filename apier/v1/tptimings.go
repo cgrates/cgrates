@@ -25,18 +25,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type ApierTPTiming struct {
-	TPid      string // Tariff plan id
-	TimingId  string // Timing id
-	Years     string // semicolon separated list of years this timing is valid on, *all supported
-	Months    string // semicolon separated list of months this timing is valid on, *none and *all supported
-	MonthDays string // semicolon separated list of month's days this timing is valid on, *none and *all supported
-	WeekDays  string // semicolon separated list of week day names this timing is valid on *none and *all supported
-	Time      string // String representing the time this timing starts on
-}
-
 // Creates a new timing within a tariff plan
-func (self *ApierV1) SetTPTiming(attrs ApierTPTiming, reply *string) error {
+func (self *ApierV1) SetTPTiming(attrs utils.ApierTPTiming, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId", "Years", "Months", "MonthDays", "WeekDays", "Time"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -54,7 +44,7 @@ type AttrGetTPTiming struct {
 }
 
 // Queries specific Timing on Tariff plan
-func (self *ApierV1) GetTPTiming(attrs AttrGetTPTiming, reply *ApierTPTiming) error {
+func (self *ApierV1) GetTPTiming(attrs AttrGetTPTiming, reply *utils.ApierTPTiming) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -63,7 +53,7 @@ func (self *ApierV1) GetTPTiming(attrs AttrGetTPTiming, reply *ApierTPTiming) er
 	} else if tm == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = ApierTPTiming{attrs.TPid, tm.Id, tm.Years.Serialize(";"),
+		*reply = utils.ApierTPTiming{attrs.TPid, tm.Id, tm.Years.Serialize(";"),
 			tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"), tm.WeekDays.Serialize(";"), tm.StartTime}
 	}
 	return nil
