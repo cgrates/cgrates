@@ -235,5 +235,113 @@ func TestApierTPDestination(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPDestinationIds expected: %v, received: %v", expectedDstIds, rplyDstIds)
 	}
 }
-	
+
+// Test here TPRate APIs
+func TestApierTPRate(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	rt := &utils.TPRate{TPid: engine.TEST_SQL, RateId: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
+		&utils.RateSlot{ConnectFee:0, Rate:0, RateUnit:"60s", RateIncrement:"60s", GroupIntervalStart:"0s", RoundingMethod:"*up", RoundingDecimals: 0},
+		}}
+	rt2 := new(utils.TPRate)
+	*rt2 = *rt
+	rt2.RateId = "RT_FS_USERS2"
+	for _, r := range []*utils.TPRate{rt, rt2} {
+		if err := rater.Call("ApierV1.SetTPRate", r, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPRate: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPRate: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPRate", rt2, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPRate: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPRate got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPRate", new(utils.TPRate), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid RateId RateSlots]" { 
+		t.Error("Calling ApierV1.SetTPRate got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyRt2 *utils.TPRate
+	if err := rater.Call("ApierV1.GetTPRate", AttrGetTPRate{rt2.TPid, rt2.RateId}, &rplyRt2); err!=nil { 
+		t.Error("Calling ApierV1.GetTPRate, got error: ", err.Error())
+	} else if !reflect.DeepEqual(rt2, rplyRt2)  {
+		t.Errorf("Calling ApierV1.GetTPRate expected: %v, received: %v", rt2, rplyRt2)
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPRate", AttrGetTPRate{rt2.TPid, rt2.RateId}, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPRate, got error: ", err.Error())
+	} else if reply != "OK"  {
+		t.Error("Calling ApierV1.RemTPRate received: ", reply)
+	}
+	// Test getIds
+	var rplyRtIds []string
+	expectedRtIds := []string{"RT_FS_USERS"}
+	if err := rater.Call("ApierV1.GetTPRateIds", AttrGetTPRateIds{rt.TPid}, &rplyRtIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPRateIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedRtIds, rplyRtIds)  {
+		t.Errorf("Calling ApierV1.GetTPDestinationIds expected: %v, received: %v", expectedRtIds, rplyRtIds)
+	}
+}
+
+
+// Test here TPDestinationRate APIs
+func TestApierTPDestinationRate(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	dr := &utils.TPDestinationRate{TPid:engine.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
+			&utils.DestinationRate{DestinationId: "FS_USERS", RateId: "RT_FS_USERS"},
+			}}
+	dr2 := new(utils.TPDestinationRate)
+	*dr2 = *dr
+	dr2.DestinationRateId = engine.TEST_SQL
+	for _, d := range []*utils.TPDestinationRate{dr, dr2} {
+		if err := rater.Call("ApierV1.SetTPDestinationRate", d, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPDestinationRate: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPDestinationRate: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPDestinationRate", dr2, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPDestinationRate: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPDestinationRate got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPDestinationRate", new(utils.TPDestinationRate), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPDestination, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid DestinationRateId DestinationRates]" { 
+		t.Error("Calling ApierV1.SetTPDestinationRate got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyDr2 *utils.TPDestinationRate
+	if err := rater.Call("ApierV1.GetTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId}, &rplyDr2); err!=nil { 
+		t.Error("Calling ApierV1.GetTPDestinationRate, got error: ", err.Error())
+	} else if !reflect.DeepEqual(dr2, rplyDr2)  {
+		t.Errorf("Calling ApierV1.GetTPDestinationRate expected: %v, received: %v", dr2, rplyDr2)
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId}, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPRate, got error: ", err.Error())
+	} else if reply != "OK"  {
+		t.Error("Calling ApierV1.RemTPRate received: ", reply)
+	}
+	// Test getIds
+	var rplyDrIds []string
+	expectedDrIds := []string{"DR_FREESWITCH_USERS"}
+	if err := rater.Call("ApierV1.GetTPDestinationRateIds", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId}, &rplyDrIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPDestinationRateIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedDrIds, rplyDrIds)  {
+		t.Errorf("Calling ApierV1.GetTPDestinationRateIds expected: %v, received: %v", expectedDrIds, rplyDrIds)
+	}
+}
 	
