@@ -338,10 +338,63 @@ func TestApierTPDestinationRate(t *testing.T) {
 	// Test getIds
 	var rplyDrIds []string
 	expectedDrIds := []string{"DR_FREESWITCH_USERS"}
-	if err := rater.Call("ApierV1.GetTPDestinationRateIds", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId}, &rplyDrIds); err!=nil { 
+	if err := rater.Call("ApierV1.GetTPDestinationRateIds", AttrTPDestinationRateIds{dr.TPid}, &rplyDrIds); err!=nil { 
 		t.Error("Calling ApierV1.GetTPDestinationRateIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedDrIds, rplyDrIds)  {
 		t.Errorf("Calling ApierV1.GetTPDestinationRateIds expected: %v, received: %v", expectedDrIds, rplyDrIds)
 	}
 }
-	
+
+// Test here TPRatingPlan APIs
+func TestApierTPRatingPlan(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	rp := &utils.TPRatingPlan{ TPid:engine.TEST_SQL, RatingPlanId: "RETAIL1", RatingPlanBindings: []*utils.TPRatingPlanBinding{
+			&utils.TPRatingPlanBinding{ DestinationRatesId: "DR_FREESWITCH_USERS", TimingId: "ALWAYS", Weight: 10},
+			}}
+	rpTst := new(utils.TPRatingPlan)
+	*rpTst = *rp
+	rpTst.RatingPlanId = engine.TEST_SQL
+	for _, rpl := range []*utils.TPRatingPlan{rp, rpTst} {
+		if err := rater.Call("ApierV1.SetTPRatingPlan", rpl, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPRatingPlan: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPRatingPlan: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPRatingPlan", rpTst, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPRatingPlan: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPRatingPlan got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPRatingPlan", new(utils.TPRatingPlan), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPRatingPlan, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid RatingPlanId RatingPlanBindings]" { 
+		t.Error("Calling ApierV1.SetTPRatingPlan got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyRpTst *utils.TPRatingPlan
+	if err := rater.Call("ApierV1.GetTPRatingPlan", AttrGetTPRatingPlan{rpTst.TPid, rpTst.RatingPlanId}, &rplyRpTst); err!=nil { 
+		t.Error("Calling ApierV1.GetTPRatingPlan, got error: ", err.Error())
+	} else if !reflect.DeepEqual(rpTst, rplyRpTst)  {
+		t.Errorf("Calling ApierV1.GetTPRatingPlan expected: %v, received: %v", rpTst, rplyRpTst)
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPRatingPlan", AttrGetTPRatingPlan{rpTst.TPid, rpTst.RatingPlanId}, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPRatingPlan, got error: ", err.Error())
+	} else if reply != "OK"  {
+		t.Error("Calling ApierV1.RemTPRatingPlan received: ", reply)
+	}
+	// Test getIds
+	var rplyRpIds []string
+	expectedRpIds := []string{"RETAIL1"}
+	if err := rater.Call("ApierV1.GetTPRatingPlanIds", AttrGetTPRatingPlanIds{rp.TPid}, &rplyRpIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPRatingPlanIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds)  {
+		t.Errorf("Calling ApierV1.GetTPRatingPlanIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
+	}
+}
