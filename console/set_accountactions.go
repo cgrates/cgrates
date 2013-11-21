@@ -42,7 +42,6 @@ func (self *CmdSetAccountActions) Usage(name string) string {
 // set param defaults
 func (self *CmdSetAccountActions) defaults() error {
 	self.rpcMethod = "ApierV1.SetAccountActions"
-	self.rpcParams = new(utils.TPAccountActions)
 	return nil
 }
 

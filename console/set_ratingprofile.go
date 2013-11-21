@@ -42,7 +42,6 @@ func (self *CmdSetrRatingProfile) Usage(name string) string {
 // set param defaults
 func (self *CmdSetrRatingProfile) defaults() error {
 	self.rpcMethod = "ApierV1.SetRatingProfile"
-	self.rpcParams = &utils.TPRatingProfile{Direction:"*out"}
 	return nil
 }
 
@@ -53,11 +52,7 @@ func (self *CmdSetrRatingProfile) FromArgs(args []string) error {
 	}
 	// Args look OK, set defaults before going further
 	self.defaults()
-	self.rpcParams.TPid = args[2]
-	self.rpcParams.LoadId = args[3]
-	self.rpcParams.Tenant = args[4]
-	self.rpcParams.TOR = args[5]
-	self.rpcParams.Direction = args[6]
+	self.rpcParams = &utils.TPRatingProfile{TPid: args[2], LoadId: args[3], Tenant: args[4], TOR: args[5], Direction: "*out"}
 	return nil
 }
 
