@@ -243,7 +243,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 	mpRpls, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, tag)
 	if err != nil || len(mpRpls) == 0 {
-		return fmt.Errorf("No DestRateTimings profile with id %s: %v", tag, err)
+		return fmt.Errorf("No RatingPlan profile with id %s: %v", tag, err)
 	}
 	for tag, rplBnds := range mpRpls {
 		ratingPlan := &RatingPlan{Id: tag}
@@ -294,15 +294,17 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 	return nil
 }
 
-func (dbr *DbReader) LoadRatingProfileByTag(tag string) error {
-	resultRatingProfile := &RatingProfile{}
-	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: dbr.tpid, LoadId: tag}) //map[string]*utils.TPRatingProfile
+func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) error {
+	var resultRatingProfile *RatingProfile
+	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(qriedRpf) //map[string]*utils.TPRatingProfile
 	if err != nil || len(mpTpRpfs) == 0 {
-		return fmt.Errorf("No RateProfile with id %s: %v", tag, err)
+		return fmt.Errorf("No RateProfile for filter %v, error: %s", qriedRpf, err.Error())
+	} else if len(mpTpRpfs) > 1 {
+		return fmt.Errorf("More than one rating profile returned in LoadRatingProfileFiltered") // Should never reach here
 	}
 	for _, tpRpf := range mpTpRpfs {
 		Logger.Debug(fmt.Sprintf("Rating profile: %v", tpRpf))
-		resultRatingProfile.Id = tpRpf.KeyId()
+		resultRatingProfile = &RatingProfile{Id: tpRpf.KeyId()}
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseDate(tpRa.ActivationTime)
 			if err != nil {

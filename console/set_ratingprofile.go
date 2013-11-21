@@ -20,7 +20,7 @@ package console
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
@@ -30,19 +30,19 @@ func init() {
 // Commander implementation
 type CmdSetrRatingProfile struct {
 	rpcMethod string
-	rpcParams *apier.AttrSetRatingProfile
+	rpcParams *utils.TPRatingProfile
 	rpcResult string
 }
 
 // name should be exec's name
 func (self *CmdSetrRatingProfile) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] set_ratingprofile <tpid> <rateprofileid>")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] set_ratingprofile <tpid> <loadid> <tenant> <tor> <subject>")
 }
 
 // set param defaults
 func (self *CmdSetrRatingProfile) defaults() error {
 	self.rpcMethod = "ApierV1.SetRatingProfile"
-	self.rpcParams = &apier.AttrSetRatingProfile{}
+	self.rpcParams = &utils.TPRatingProfile{Direction:"*out"}
 	return nil
 }
 
@@ -54,7 +54,10 @@ func (self *CmdSetrRatingProfile) FromArgs(args []string) error {
 	// Args look OK, set defaults before going further
 	self.defaults()
 	self.rpcParams.TPid = args[2]
-	self.rpcParams.RatingProfileId = args[3]
+	self.rpcParams.LoadId = args[3]
+	self.rpcParams.Tenant = args[4]
+	self.rpcParams.TOR = args[5]
+	self.rpcParams.Direction = args[6]
 	return nil
 }
 

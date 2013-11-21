@@ -454,4 +454,32 @@ func TestApierTPRatingProfile(t *testing.T) {
 		t.Errorf("Calling ApierV1.GetTPRatingProfileLoadIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
 	}
 }
-	
+
+// Test here SetRatingPlan
+func TestApierSetRatingPlan(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	//SetRatingPlan(attrs AttrSetRatingPlan
+	if err := rater.Call("ApierV1.SetRatingPlan", AttrSetRatingPlan{TPid:engine.TEST_SQL,RatingPlanId:"RETAIL1"}, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetRatingPlan: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetRatingPlan got reply: ", reply)
+	}
+}
+
+// Test here SetRatingProfile
+func TestApierSetRatingProfile(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	rpf := &utils.TPRatingProfile{TPid:engine.TEST_SQL, LoadId:engine.TEST_SQL, Tenant:"cgrates.org", TOR:"call", Direction:"*out", Subject:"*any"}
+	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err!=nil {
+		t.Error("Got error on second ApierV1.SetRatingProfile: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
+	}
+}
+

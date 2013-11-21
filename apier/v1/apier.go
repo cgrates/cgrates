@@ -164,19 +164,14 @@ func (self *ApierV1) SetRatingPlan(attrs AttrSetRatingPlan, reply *string) error
 	return nil
 }
 
-type AttrSetRatingProfile struct {
-	TPid            string
-	RatingProfileId string
-}
-
 // Process dependencies and load a specific rating profile from storDb into dataDb.
-func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfileId"}); len(missing) != 0 {
+func (self *ApierV1) SetRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "TOR", "Direction", "Subject"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
-	if err := dbReader.LoadRatingProfileByTag(attrs.RatingProfileId); err != nil {
+	if err := dbReader.LoadRatingProfileFiltered(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 
