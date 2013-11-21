@@ -461,7 +461,8 @@ func TestApierTPActions(t *testing.T) {
 	}
 	reply := ""
 	act := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier:"*topup_reset", BalanceType:"*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited", DestinationId: "*any", BalanceWeight:10, Weight:10},
+		&utils.TPAction{Identifier:"*topup_reset", BalanceType:"*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited", 
+			DestinationId: "*any", BalanceWeight:10, Weight:10},
 		}}
 	actTst := new(utils.TPActions)
 	*actTst = *act
@@ -480,7 +481,7 @@ func TestApierTPActions(t *testing.T) {
 		t.Error("Calling ApierV1.SetTPActions got reply: ", reply)
 	}
 	// Check missing params
-	if err := rater.Call("ApierV1.SetTPActions", new(utils.TPAction), &reply); err==nil {
+	if err := rater.Call("ApierV1.SetTPActions", new(utils.TPActions), &reply); err==nil {
 		t.Error("Calling ApierV1.SetTPActions, expected error, received: ", reply)
 	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionsId Actions]" { 
 		t.Error("Calling ApierV1.SetTPActions got unexpected error: ", err.Error())
@@ -505,6 +506,59 @@ func TestApierTPActions(t *testing.T) {
 		t.Error("Calling ApierV1.GetTPActionIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedIds, rplyIds)  {
 		t.Errorf("Calling ApierV1.GetTPActionIds expected: %v, received: %v", expectedIds, rplyIds)
+	}
+}
+
+func TestApierTPActionTimings(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	at := &utils.TPActionTimings{TPid: engine.TEST_SQL, ActionTimingsId: "PREPAID_10", ActionTimings: []*utils.TPActionTiming{
+		&utils.TPActionTiming{ActionsId:"PREPAID_10",TimingId:"ASAP", Weight:10},
+		}}
+	atTst := new(utils.TPActionTimings)
+	*atTst = *at
+	atTst.ActionTimingsId = engine.TEST_SQL
+	for _, act := range []*utils.TPActionTimings{at, atTst} {
+		if err := rater.Call("ApierV1.SetTPActionTimings", act, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPActionTimings: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPActionTimings: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPActionTimings", atTst, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPActionTimings: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPActionTimings got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPActionTimings", new(utils.TPActionTimings), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPActionTimings, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionTimingsId ActionTimings]" { 
+		t.Error("Calling ApierV1.SetTPActionTimings got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyActs *utils.TPActionTimings
+	if err := rater.Call("ApierV1.GetTPActionTimings", AttrGetTPActionTimings{TPid:atTst.TPid, ActionTimingsId:atTst.ActionTimingsId}, &rplyActs); err!=nil { 
+		t.Error("Calling ApierV1.GetTPActionTimings, got error: ", err.Error())
+	} else if !reflect.DeepEqual(atTst, rplyActs)  {
+		t.Errorf("Calling ApierV1.GetTPActionTimings expected: %v, received: %v", atTst, rplyActs)
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPActionTimings", AttrGetTPActionTimings{TPid:atTst.TPid, ActionTimingsId:atTst.ActionTimingsId}, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPActionTimings, got error: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.RemTPActionTimings received: ", reply)
+	}
+	// Test getIds
+	var rplyIds []string
+	expectedIds := []string{"PREPAID_10"}
+	if err := rater.Call("ApierV1.GetTPActionTimingIds", AttrGetTPActionTimingIds{TPid: atTst.TPid}, &rplyIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPActionTimingIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedIds, rplyIds)  {
+		t.Errorf("Calling ApierV1.GetTPActionTimingIds expected: %v, received: %v", expectedIds, rplyIds)
 	}
 }
 
