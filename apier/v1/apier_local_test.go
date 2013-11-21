@@ -54,7 +54,7 @@ var rater *rpc.Client
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
-var waitRater = flag.Int("wait_rater", 200, "Number of miliseconds to wait for rater to start and cache")
+var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 
 // Empty tables before using them
 func TestCreateTables(t *testing.T) {
@@ -452,6 +452,59 @@ func TestApierTPRatingProfile(t *testing.T) {
 		t.Error("Calling ApierV1.GetTPRatingProfileLoadIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds)  {
 		t.Errorf("Calling ApierV1.GetTPRatingProfileLoadIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
+	}
+}
+
+func TestApierTPActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	act := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
+		&utils.TPAction{Identifier:"*topup_reset", BalanceType:"*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited", DestinationId: "*any", BalanceWeight:10, Weight:10},
+		}}
+	actTst := new(utils.TPActions)
+	*actTst = *act
+	actTst.ActionsId = engine.TEST_SQL
+	for _, ac := range []*utils.TPActions{act, actTst} {
+		if err := rater.Call("ApierV1.SetTPActions", ac, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPActions: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPActions: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPActions", actTst, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPActions: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPActions got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPActions", new(utils.TPAction), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPActions, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionsId Actions]" { 
+		t.Error("Calling ApierV1.SetTPActions got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyActs *utils.TPActions
+	if err := rater.Call("ApierV1.GetTPActions", AttrGetTPActions{TPid:actTst.TPid, ActionsId:actTst.ActionsId}, &rplyActs); err!=nil { 
+		t.Error("Calling ApierV1.GetTPActions, got error: ", err.Error())
+	} else if !reflect.DeepEqual(actTst, rplyActs)  {
+		t.Errorf("Calling ApierV1.GetTPActions expected: %v, received: %v", actTst, rplyActs)
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPActions", AttrGetTPActions{TPid:actTst.TPid, ActionsId:actTst.ActionsId}, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPActions, got error: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.RemTPActions received: ", reply)
+	}
+	// Test getIds
+	var rplyIds []string
+	expectedIds := []string{"PREPAID_10"}
+	if err := rater.Call("ApierV1.GetTPActionIds", AttrGetTPActionIds{TPid: actTst.TPid}, &rplyIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPActionIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedIds, rplyIds)  {
+		t.Errorf("Calling ApierV1.GetTPActionIds expected: %v, received: %v", expectedIds, rplyIds)
 	}
 }
 
