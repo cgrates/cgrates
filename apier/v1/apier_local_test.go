@@ -562,6 +562,59 @@ func TestApierTPActionTimings(t *testing.T) {
 	}
 }
 
+func TestApierTPActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	at := &utils.TPActionTriggers{TPid: engine.TEST_SQL, ActionTriggersId: "STANDARD_TRIGGERS", ActionTriggers: []*utils.TPActionTrigger{
+		&utils.TPActionTrigger{BalanceType:"*monetary",Direction:"*out", ThresholdType:"*min_balance", ThresholdValue:2, ActionsId:"LOG_BALANCE", Weight:10},
+		}}
+	atTst := new(utils.TPActionTriggers)
+	*atTst = *at
+	atTst.ActionTriggersId = engine.TEST_SQL
+	for _, act := range []*utils.TPActionTriggers{at, atTst} {
+		if err := rater.Call("ApierV1.SetTPActionTriggers", act, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPActionTriggers: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPActionTriggers: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPActionTriggers", atTst, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPActionTriggers: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPActionTriggers got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPActionTriggers", new(utils.TPActionTriggers), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPActionTriggers, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid ActionTriggersId]" { 
+		t.Error("Calling ApierV1.SetTPActionTriggers got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyActs *utils.TPActionTriggers
+	if err := rater.Call("ApierV1.GetTPActionTriggers", AttrGetTPActionTriggers{TPid:atTst.TPid, ActionTriggersId:atTst.ActionTriggersId}, &rplyActs); err!=nil { 
+		t.Error("Calling ApierV1.GetTPActionTriggers, got error: ", err.Error())
+	} else if !reflect.DeepEqual(atTst, rplyActs)  {
+		t.Errorf("Calling ApierV1.GetTPActionTriggers expected: %v, received: %v", atTst, rplyActs)
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPActionTriggers", AttrGetTPActionTriggers{TPid:atTst.TPid, ActionTriggersId:atTst.ActionTriggersId}, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPActionTriggers, got error: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.RemTPActionTriggers received: ", reply)
+	}
+	// Test getIds
+	var rplyIds []string
+	expectedIds := []string{"STANDARD_TRIGGERS"}
+	if err := rater.Call("ApierV1.GetTPActionTriggerIds", AttrGetTPActionTriggerIds{TPid: atTst.TPid}, &rplyIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPActionTriggerIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedIds, rplyIds)  {
+		t.Errorf("Calling ApierV1.GetTPActionTriggerIds expected: %v, received: %v", expectedIds, rplyIds)
+	}
+}
+
 // Test here SetRatingPlan
 func TestApierSetRatingPlan(t *testing.T) {
 	if !*testLocal {
