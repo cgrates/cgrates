@@ -273,20 +273,15 @@ func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 	return nil
 }
 
-type AttrSetAccountActions struct {
-	TPid             string
-	AccountActionsId string
-}
-
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (self *ApierV1) SetAccountActions(attrs AttrSetAccountActions, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 {
+func (self *ApierV1) SetAccountActions(attrs utils.TPAccountActions, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
 
-	if _, err := engine.AccLock.Guard(attrs.AccountActionsId, func() (float64, error) {
-		if err := dbReader.LoadAccountActionsByTag(attrs.AccountActionsId); err != nil {
+	if _, err := engine.AccLock.Guard(attrs.KeyId(), func() (float64, error) {
+		if err := dbReader.LoadAccountActionsFiltered(&attrs); err != nil {
 			return 0, err
 		}
 		return 0, nil

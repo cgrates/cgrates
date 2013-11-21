@@ -61,4 +61,6 @@ const (
 	FALLBACK_SEP             = ';'
 	JSON                     = "json"
 	MSGPACK                  = "msgpack"
+	CSV_LOAD                 = "CSVLOAD"
+
 )

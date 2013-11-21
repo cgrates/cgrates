@@ -264,7 +264,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			}
 			continue
 		}
-		loadId := "TPCSV" //Autogenerate rating profile id
+		loadId := utils.CSV_LOAD //Autogenerate rating profile id
 		if self.ImportId != "" {
 			loadId += "_" + self.ImportId
 		}
@@ -461,7 +461,7 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 			continue
 		}
 		tenant, account, direction, actionTimingsTag, actionTriggersTag := record[0], record[1], record[2], record[3], record[4]
-		loadId := "TPCSV" //Autogenerate account actions profile id
+		loadId := utils.CSV_LOAD //Autogenerate account actions profile id
 		if self.ImportId != "" {
 			loadId += "_" + self.ImportId
 		}

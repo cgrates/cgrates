@@ -297,8 +297,10 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) error {
 	var resultRatingProfile *RatingProfile
 	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(qriedRpf) //map[string]*utils.TPRatingProfile
-	if err != nil || len(mpTpRpfs) == 0 {
+	if err != nil {
 		return fmt.Errorf("No RateProfile for filter %v, error: %s", qriedRpf, err.Error())
+	} else if len(mpTpRpfs) == 0 {
+		return fmt.Errorf("No RateProfile for filter %v", qriedRpf)
 	} else if len(mpTpRpfs) > 1 {
 		return fmt.Errorf("More than one rating profile returned in LoadRatingProfileFiltered") // Should never reach here
 	}
@@ -418,16 +420,16 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 	return nil
 }
 
-func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
-	accountActions, err := dbr.storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: dbr.tpid, LoadId: tag})
+func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions) error {
+	accountActions, err := dbr.storDb.GetTpAccountActions(qriedAA)
 	if err != nil {
 		return err
 	} else if len(accountActions) == 0 {
-		return fmt.Errorf("No AccountActions with id <%s>", tag)
+		return fmt.Errorf("No AccountActions for queried %v", qriedAA)
 	} else if len(accountActions) > 1 {
-		return fmt.Errorf("StorDb configuration error for AccountActions <%s>", tag)
+		return fmt.Errorf("StorDb configuration error for AccountActions <%v>", qriedAA)
 	}
-	accountAction := accountActions[tag]
+	accountAction := accountActions[qriedAA.KeyId()]
 	id := fmt.Sprintf("%s:%s:%s", accountAction.Direction, accountAction.Tenant, accountAction.Account)
 
 	var actionsIds []string // collects action ids
@@ -458,13 +460,13 @@ func (dbr *DbReader) LoadAccountActionsByTag(tag string) error {
 			} else if len(actions) == 0 {
 				return fmt.Errorf("No Action with id <%s>", at.ActionsId)
 			}
-			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, accountAction.ActionTimingsId)
+			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, at.TimingId)
 			if err != nil {
 				return err
 			} else if len(timingsMap) == 0 {
-				return fmt.Errorf("No Timing with id <%s>", accountAction.ActionTimingsId)
+				return fmt.Errorf("No Timing with id <%s>", at.TimingId)
 			}
-			t := timingsMap[accountAction.ActionTimingsId]
+			t := timingsMap[at.TimingId]
 			actTmg := &ActionTiming{
 				Id:     utils.GenUUID(),
 				Tag:    accountAction.ActionTimingsId,

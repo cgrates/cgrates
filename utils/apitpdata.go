@@ -138,6 +138,18 @@ func (self *TPRatingPlanBinding) Timing() *TPTiming {
 	return self.timing
 }
 
+
+// Used to rebuild a TPRatingProfile (empty RatingPlanActivations) out of it's key in nosqldb
+func NewTPRatingProfileFromKeyId( tpid, loadId, keyId string ) (*TPRatingProfile, error) {
+	// *out:cgrates.org:call:*any
+	s := strings.Split(keyId, ":")
+	// [*out cgrates.org call *any]
+	if len(s) != 4 {
+		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
+	}
+	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant:s[1], TOR:s[2], Direction:s[0], Subject:s[3]}, nil
+}
+
 type TPRatingProfile struct {
 	TPid                  string                // Tariff plan id
 	LoadId                string                // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
@@ -228,6 +240,17 @@ type TPActionTrigger struct {
 	DestinationId  string  // Id of the destination profile
 	ActionsId      string  // Actions which will execute on threshold reached
 	Weight         float64 // weight
+}
+
+// Used to rebuild a TPAccountActions (empty ActionTimingsId and ActionTriggersId) out of it's key in nosqldb
+func NewTPAccountActionsFromKeyId( tpid, loadId, keyId string ) (*TPAccountActions, error) {
+	// *out:cgrates.org:1001
+	s := strings.Split(keyId, ":")
+	// [*out cgrates.org 1001]
+	if len(s) != 3 {
+		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
+	}
+	return &TPAccountActions{TPid: tpid, LoadId: loadId, Tenant:s[1], Account: s[2], Direction:s[0]}, nil
 }
 
 type TPAccountActions struct {

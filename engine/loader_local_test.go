@@ -40,7 +40,7 @@ README:
 */
 
 // Globals used
-var dataDbCsv, dataDbStor DataStorage // Test data coming from csv files getting inthere
+var dataDbCsv, dataDbStor, dataDbApier DataStorage // Each dataDb will have it's own sources to collect data
 var storDb LoadStorage
 var cfg *config.CGRConfig
 
@@ -62,6 +62,14 @@ func TestConnDataDbs(t *testing.T) {
 	}
 	if dataDbStor, err = ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, "14", cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
+	}
+	if dataDbApier, err = ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, "15", cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding); err != nil {
+		t.Fatal("Error on dataDb connection: ", err.Error())
+	}
+	for _,db := range []DataStorage{dataDbCsv, dataDbStor, dataDbApier} {
+		if err = db.Flush(); err != nil {
+			t.Fatal("Error when flushing datadb")
+		}
 	}
 }
 
@@ -201,6 +209,51 @@ func TestLoadFromStorDb(t *testing.T) {
 	}
 }
 
+func TestLoadIndividualProfiles(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	loader := NewDbReader(storDb, dataDbApier, TEST_SQL)
+	// Load ratingPlans. This will also set destination keys
+	if ratingPlans, err := storDb.GetTpRatingPlans(TEST_SQL, ""); err != nil {
+		t.Fatal("Could not retrieve rating plans")
+	} else {
+		for tag := range ratingPlans {
+			if err := loader.LoadRatingPlanByTag(tag); err != nil {
+				t.Fatalf("Could not load ratingPlan for tag: %s, error: %s", tag, err.Error())
+			}
+		}
+	}
+	// Load rating profiles
+	loadId := utils.CSV_LOAD+"_"+TEST_SQL
+	if ratingProfiles, err := storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid:TEST_SQL, LoadId: loadId}); err != nil {
+		t.Fatal("Could not retrieve rating profiles, error: ", err.Error())
+	} else if len(ratingProfiles) == 0 {
+		t.Fatal("Could not retrieve rating profiles")
+	} else {
+		for rpId := range ratingProfiles {
+			rp, _ := utils.NewTPRatingProfileFromKeyId(TEST_SQL, loadId, rpId)
+			if err := loader.LoadRatingProfileFiltered(rp); err != nil {
+				t.Fatalf("Could not load ratingProfile with id: %s, error: %s", rpId, err.Error())
+			}
+		}
+	}
+	// Load account actions
+	if aas, err := storDb.GetTpAccountActions(&utils.TPAccountActions{TPid:TEST_SQL, LoadId: loadId}); err != nil {
+		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())
+	} else if len(aas) == 0 {
+		t.Error("No account actions")
+	} else {
+		for aaId := range aas {
+			aa, _ := utils.NewTPAccountActionsFromKeyId(TEST_SQL, loadId, aaId)
+			if err := loader.LoadAccountActionsFiltered(aa); err != nil {
+				t.Fatalf("Could not load account actions with id: %s, error: %s", aaId, err.Error())
+			}
+		}
+	}
+}
+	
+
 // Compares previously loaded data from csv and stor to be identical, redis specific tests
 func TestMatchLoadCsvWithStor(t *testing.T) {
 	if !*testLocal {
@@ -210,24 +263,26 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 	if !redisDb {
 		return // We only support these tests for redis
 	}
-	rsStor := dataDbCsv.(*RedisStorage)
+	rsStor := dataDbStor.(*RedisStorage)
+	rsApier := dataDbApier.(*RedisStorage)
 	keysCsv, err := rsCsv.db.Keys("*")
 	if err != nil {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
 	for _, key := range keysCsv {
-		valCsv, err := rsCsv.db.Get(key)
-		if err != nil {
-			t.Errorf("Error when querying dataDbCsv for key: %s - %s ", key, err.Error())
-			continue
-		}
-		valStor, err := rsStor.db.Get(key)
-		if err != nil {
-			t.Errorf("Error when querying dataDbStor for key: %s - %s", key, err.Error())
-			continue
-		}
-		if valCsv != valStor {
-			t.Errorf("Missmatched data for key: %s\n\t, dataDbCsv: %s \n\t dataDbStor: %s\n", key, valCsv, valStor)
+		refVal := ""
+		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
+			qVal, err := rs.db.Get(key)
+			if err != nil {
+				t.Fatal("Could not retrieve key %s, error: %s", key, err.Error())
+			}
+			if idx == 0 { // Only compare at second iteration, first one is to set reference value
+				refVal = qVal
+				continue
+			}
+			if len(refVal) != len(qVal) {
+				t.Errorf("Missmatched data for key: %s\n\t, reference val: %s \n\t retrieved value: %s\n on iteration: %d", key, refVal, qVal, idx)
+			}
 		}
 	}
 }

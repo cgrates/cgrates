@@ -20,7 +20,7 @@ package console
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
@@ -30,19 +30,19 @@ func init() {
 // Commander implementation
 type CmdSetAccountActions struct {
 	rpcMethod string
-	rpcParams *apier.AttrSetAccountActions
+	rpcParams *utils.TPAccountActions
 	rpcResult string
 }
 
 // name should be exec's name
 func (self *CmdSetAccountActions) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] set_accountactions <tpid> <accountactionsid>")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] set_accountactions <tpid> <loadid> <tenant> <account>")
 }
 
 // set param defaults
 func (self *CmdSetAccountActions) defaults() error {
 	self.rpcMethod = "ApierV1.SetAccountActions"
-	self.rpcParams = &apier.AttrSetAccountActions{}
+	self.rpcParams = new(utils.TPAccountActions)
 	return nil
 }
 
@@ -53,8 +53,7 @@ func (self *CmdSetAccountActions) FromArgs(args []string) error {
 	}
 	// Args look OK, set defaults before going further
 	self.defaults()
-	self.rpcParams.TPid = args[2]
-	self.rpcParams.AccountActionsId = args[3]
+	self.rpcParams = &utils.TPAccountActions{TPid: args[2], LoadId: args[3], Tenant: args[4], Account: args[5], Direction:"*out"}
 	return nil
 }
 

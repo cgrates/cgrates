@@ -530,7 +530,6 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 			ActionTriggers: aTriggers,
 		}
 		csvr.accountActions = append(csvr.accountActions, ub)
-
 		aTimings, exists := csvr.actionsTimings[record[3]]
 		if !exists {
 			log.Printf("Could not get action timing for tag %v", record[3])
