@@ -54,7 +54,7 @@ var rater *rpc.Client
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
-var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
+var waitRater = flag.Int("wait_rater", 200, "Number of miliseconds to wait for rater to start and cache")
 
 // Empty tables before using them
 func TestCreateTables(t *testing.T) {
@@ -615,6 +615,67 @@ func TestApierTPActionTriggers(t *testing.T) {
 	}
 }
 
+// Test here TPAccountActions APIs
+func TestApierTPAccountActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	aa1 := &utils.TPAccountActions{ TPid:engine.TEST_SQL, LoadId:engine.TEST_SQL, Tenant:"cgrates.org", 
+		Account:"1001", Direction:"*out", ActionTimingsId:"PREPAID_10",ActionTriggersId:"STANDARD_TRIGGERS" }
+	aa2 := &utils.TPAccountActions{ TPid:engine.TEST_SQL, LoadId:engine.TEST_SQL, Tenant:"cgrates.org", 
+		Account:"1002", Direction:"*out", ActionTimingsId:"PREPAID_10",ActionTriggersId:"STANDARD_TRIGGERS" }
+	aa3 := &utils.TPAccountActions{ TPid:engine.TEST_SQL, LoadId:engine.TEST_SQL, Tenant:"cgrates.org", 
+		Account:"1003", Direction:"*out", ActionTimingsId:"PREPAID_10",ActionTriggersId:"STANDARD_TRIGGERS" }
+	aa4 := &utils.TPAccountActions{ TPid:engine.TEST_SQL, LoadId:engine.TEST_SQL, Tenant:"cgrates.org", 
+		Account:"1004", Direction:"*out", ActionTimingsId:"PREPAID_10",ActionTriggersId:"STANDARD_TRIGGERS" }
+	aa5 := &utils.TPAccountActions{ TPid:engine.TEST_SQL, LoadId:engine.TEST_SQL, Tenant:"cgrates.org", 
+		Account:"1005", Direction:"*out", ActionTimingsId:"PREPAID_10",ActionTriggersId:"STANDARD_TRIGGERS" }
+	aaTst := new(utils.TPAccountActions)
+	*aaTst = *aa1
+	aaTst.Account = engine.TEST_SQL
+	for _, aact := range []*utils.TPAccountActions{aa1, aa2, aa3, aa4, aa5, aaTst} {
+		if err := rater.Call("ApierV1.SetTPAccountActions", aact, &reply); err!=nil { 
+			t.Error("Got error on ApierV1.SetTPAccountActions: ", err.Error())
+		} else if reply != "OK" {
+			t.Error("Unexpected reply received when calling ApierV1.SetTPAccountActions: ", reply)
+		}
+	}
+	// Check second set
+	if err := rater.Call("ApierV1.SetTPAccountActions", aaTst, &reply); err!=nil { 
+		t.Error("Got error on second ApierV1.SetTPAccountActions: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetTPAccountActions got reply: ", reply)
+	}
+	// Check missing params
+	if err := rater.Call("ApierV1.SetTPAccountActions", new(utils.TPAccountActions), &reply); err==nil {
+		t.Error("Calling ApierV1.SetTPAccountActions, expected error, received: ", reply)
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid LoadId Tenant Account Direction ActionTimingsId ActionTriggersId]" { 
+		t.Error("Calling ApierV1.SetTPAccountActions got unexpected error: ", err.Error())
+	}
+	// Test get
+	var rplyaas []*utils.TPAccountActions
+	if err := rater.Call("ApierV1.GetTPAccountActions", aaTst, &rplyaas); err!=nil { 
+		t.Error("Calling ApierV1.GetTPAccountActions, got error: ", err.Error())
+	} else if !reflect.DeepEqual(aaTst, rplyaas[0])  {
+		t.Errorf("Calling ApierV1.GetTPAccountActions expected: %v, received: %v", aaTst, rplyaas[0])
+	}
+	// Test remove
+	if err := rater.Call("ApierV1.RemTPAccountActions", aaTst, &reply); err!=nil { 
+		t.Error("Calling ApierV1.RemTPAccountActions, got error: ", err.Error())
+	} else if reply != "OK"  {
+		t.Error("Calling ApierV1.RemTPAccountActions received: ", reply)
+	}
+	// Test getLoadIds
+	var rplyRpIds []string
+	expectedRpIds := []string{engine.TEST_SQL}
+	if err := rater.Call("ApierV1.GetTPAccountActionLoadIds", AttrGetTPAccountActionIds{TPid:aaTst.TPid}, &rplyRpIds); err!=nil { 
+		t.Error("Calling ApierV1.GetTPAccountActionLoadIds, got error: ", err.Error())
+	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds)  {
+		t.Errorf("Calling ApierV1.GetTPAccountActionLoadIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
+	}
+}
+
 // Test here SetRatingPlan
 func TestApierSetRatingPlan(t *testing.T) {
 	if !*testLocal {
@@ -642,4 +703,20 @@ func TestApierSetRatingProfile(t *testing.T) {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
 }
+
+// Test here SetAccountActions
+func TestApierSetAccountActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	aa1 := &utils.TPAccountActions{ TPid:engine.TEST_SQL, LoadId:engine.TEST_SQL, Tenant:"cgrates.org", Account:"1001", Direction:"*out"}
+	if err := rater.Call("ApierV1.SetAccountActions", aa1, &reply); err!=nil {
+		t.Error("Got error on second ApierV1.SetAccountActions: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetAccountActions got reply: ", reply)
+	}
+}
+
+
 
