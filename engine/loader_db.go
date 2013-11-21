@@ -299,10 +299,6 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(qriedRpf) //map[string]*utils.TPRatingProfile
 	if err != nil {
 		return fmt.Errorf("No RateProfile for filter %v, error: %s", qriedRpf, err.Error())
-	} else if len(mpTpRpfs) == 0 {
-		return fmt.Errorf("No RateProfile for filter %v", qriedRpf)
-	} else if len(mpTpRpfs) > 1 {
-		return fmt.Errorf("More than one rating profile returned in LoadRatingProfileFiltered") // Should never reach here
 	}
 	for _, tpRpf := range mpTpRpfs {
 		Logger.Debug(fmt.Sprintf("Rating profile: %v", tpRpf))
@@ -324,8 +320,11 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 				&RatingPlanActivation{at, tpRa.RatingPlanId,
 					utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, tpRa.FallbackSubjects)})
 		}
+		if err := dbr.dataDb.SetRatingProfile(resultRatingProfile); err != nil {
+			return err
+		}
 	}
-	return dbr.dataDb.SetRatingProfile(resultRatingProfile)
+	return nil
 }
 
 func (dbr *DbReader) LoadActions() (err error) {
