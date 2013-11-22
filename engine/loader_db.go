@@ -423,146 +423,142 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 	accountActions, err := dbr.storDb.GetTpAccountActions(qriedAA)
 	if err != nil {
 		return err
-	} else if len(accountActions) == 0 {
-		return fmt.Errorf("No AccountActions for queried %v", qriedAA)
-	} else if len(accountActions) > 1 {
-		return fmt.Errorf("StorDb configuration error for AccountActions <%v>", qriedAA)
 	}
-	accountAction := accountActions[qriedAA.KeyId()]
-	id := fmt.Sprintf("%s:%s:%s", accountAction.Direction, accountAction.Tenant, accountAction.Account)
-
-	var actionsIds []string // collects action ids
-
-	// action timings
-	if accountAction.ActionTimingsId != "" {
-		// get old userBalanceIds
-		var exitingUserBalanceIds []string
-		existingActionTimings, err := dbr.dataDb.GetActionTimings(accountAction.ActionTimingsId)
-		if err == nil && len(existingActionTimings) > 0 {
-			// all action timings from a specific tag shuld have the same list of user balances from the first one
-			exitingUserBalanceIds = existingActionTimings[0].UserBalanceIds
-		}
-
-		actionTimingsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, accountAction.ActionTimingsId)
-		if err != nil {
-			return err
-		} else if len(actionTimingsMap) == 0 {
-			return fmt.Errorf("No ActionTimings with id <%s>", accountAction.ActionTimingsId)
-		}
-		var actionTimings []*ActionTiming
-		ats := actionTimingsMap[accountAction.ActionTimingsId]
-		for _, at := range ats {
-			// Check action exists before saving it inside actionTiming key
-			// ToDo: try saving the key after the actions was retrieved in order to save one query here.
-			if actions, err := dbr.storDb.GetTpActions(dbr.tpid, at.ActionsId); err != nil {
-				return err
-			} else if len(actions) == 0 {
-				return fmt.Errorf("No Action with id <%s>", at.ActionsId)
+	for _, accountAction := range accountActions {
+		id := accountAction.KeyId()
+		var actionsIds []string // collects action ids
+		// action timings
+		if accountAction.ActionTimingsId != "" {
+			// get old userBalanceIds
+			var exitingUserBalanceIds []string
+			existingActionTimings, err := dbr.dataDb.GetActionTimings(accountAction.ActionTimingsId)
+			if err == nil && len(existingActionTimings) > 0 {
+				// all action timings from a specific tag shuld have the same list of user balances from the first one
+				exitingUserBalanceIds = existingActionTimings[0].UserBalanceIds
 			}
-			timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, at.TimingId)
+
+			actionTimingsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, accountAction.ActionTimingsId)
 			if err != nil {
 				return err
-			} else if len(timingsMap) == 0 {
-				return fmt.Errorf("No Timing with id <%s>", at.TimingId)
+			} else if len(actionTimingsMap) == 0 {
+				return fmt.Errorf("No ActionTimings with id <%s>", accountAction.ActionTimingsId)
 			}
-			t := timingsMap[at.TimingId]
-			actTmg := &ActionTiming{
-				Id:     utils.GenUUID(),
-				Tag:    accountAction.ActionTimingsId,
-				Weight: at.Weight,
-				Timing: &RateInterval{
-					Timing: &RITiming{
-						Months:    t.Months,
-						MonthDays: t.MonthDays,
-						WeekDays:  t.WeekDays,
-						StartTime: t.StartTime,
+			var actionTimings []*ActionTiming
+			ats := actionTimingsMap[accountAction.ActionTimingsId]
+			for _, at := range ats {
+				// Check action exists before saving it inside actionTiming key
+				// ToDo: try saving the key after the actions was retrieved in order to save one query here.
+				if actions, err := dbr.storDb.GetTpActions(dbr.tpid, at.ActionsId); err != nil {
+					return err
+				} else if len(actions) == 0 {
+					return fmt.Errorf("No Action with id <%s>", at.ActionsId)
+				}
+				timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, at.TimingId)
+				if err != nil {
+					return err
+				} else if len(timingsMap) == 0 {
+					return fmt.Errorf("No Timing with id <%s>", at.TimingId)
+				}
+				t := timingsMap[at.TimingId]
+				actTmg := &ActionTiming{
+					Id:     utils.GenUUID(),
+					Tag:    accountAction.ActionTimingsId,
+					Weight: at.Weight,
+					Timing: &RateInterval{
+						Timing: &RITiming{
+							Months:    t.Months,
+							MonthDays: t.MonthDays,
+							WeekDays:  t.WeekDays,
+							StartTime: t.StartTime,
+						},
 					},
-				},
-				ActionsId: at.ActionsId,
-			}
-			// collect action ids from timings
-			actionsIds = append(actionsIds, actTmg.ActionsId)
-			//add user balance id if no already in
-			found := false
-			for _, ubId := range exitingUserBalanceIds {
-				if ubId == id {
-					found = true
-					break
+					ActionsId: at.ActionsId,
 				}
-			}
-			if !found {
-				actTmg.UserBalanceIds = append(exitingUserBalanceIds, id)
-			}
-			actionTimings = append(actionTimings, actTmg)
-		}
-
-		// write action timings
-		err = dbr.dataDb.SetActionTimings(accountAction.ActionTimingsId, actionTimings)
-		if err != nil {
-			return err
-		}
-	}
-
-	// action triggers
-	var actionTriggers ActionTriggerPriotityList
-	//ActionTriggerPriotityList []*ActionTrigger
-	if accountAction.ActionTriggersId != "" {
-		apiAtrsMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, accountAction.ActionTriggersId)
-		if err != nil {
-			return err
-		}
-		atrsMap := make(map[string][]*ActionTrigger)
-		for key, atrsLst := range apiAtrsMap {
-			atrs := make([]*ActionTrigger, len(atrsLst))
-			for idx, apiAtr := range atrsLst {
-				atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-					BalanceId:      apiAtr.BalanceType,
-					Direction:      apiAtr.Direction,
-					ThresholdType:  apiAtr.ThresholdType,
-					ThresholdValue: apiAtr.ThresholdValue,
-					DestinationId:  apiAtr.DestinationId,
-					Weight:         apiAtr.Weight,
-					ActionsId:      apiAtr.ActionsId,
+				// collect action ids from timings
+				actionsIds = append(actionsIds, actTmg.ActionsId)
+				//add user balance id if no already in
+				found := false
+				for _, ubId := range exitingUserBalanceIds {
+					if ubId == id {
+						found = true
+						break
+					}
 				}
+				if !found {
+					actTmg.UserBalanceIds = append(exitingUserBalanceIds, id)
+				}
+				actionTimings = append(actionTimings, actTmg)
 			}
-			atrsMap[key] = atrs
-		}
-		actionTriggers = atrsMap[accountAction.ActionTriggersId]
-		// collect action ids from triggers
-		for _, atr := range actionTriggers {
-			actionsIds = append(actionsIds, atr.ActionsId)
-		}
-	}
 
-	// actions
-	acts := make(map[string][]*Action)
-	for _, actId := range actionsIds {
-		actions, err := dbr.storDb.GetTpActions(dbr.tpid, actId)
+			// write action timings
+			err = dbr.dataDb.SetActionTimings(accountAction.ActionTimingsId, actionTimings)
+			if err != nil {
+				return err
+			}
+		}
+		// action triggers
+		var actionTriggers ActionTriggerPriotityList
+		//ActionTriggerPriotityList []*ActionTrigger
+		if accountAction.ActionTriggersId != "" {
+			apiAtrsMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, accountAction.ActionTriggersId)
+			if err != nil {
+				return err
+			}
+			atrsMap := make(map[string][]*ActionTrigger)
+			for key, atrsLst := range apiAtrsMap {
+				atrs := make([]*ActionTrigger, len(atrsLst))
+				for idx, apiAtr := range atrsLst {
+					atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
+						BalanceId:      apiAtr.BalanceType,
+						Direction:      apiAtr.Direction,
+						ThresholdType:  apiAtr.ThresholdType,
+						ThresholdValue: apiAtr.ThresholdValue,
+						DestinationId:  apiAtr.DestinationId,
+						Weight:         apiAtr.Weight,
+						ActionsId:      apiAtr.ActionsId,
+					}
+				}
+				atrsMap[key] = atrs
+			}
+			actionTriggers = atrsMap[accountAction.ActionTriggersId]
+			// collect action ids from triggers
+			for _, atr := range actionTriggers {
+				actionsIds = append(actionsIds, atr.ActionsId)
+			}	
+		}
+
+		// actions
+		acts := make(map[string][]*Action)
+		for _, actId := range actionsIds {
+			actions, err := dbr.storDb.GetTpActions(dbr.tpid, actId)
+			if err != nil {
+				return err
+			}
+			for id, act := range actions {
+				acts[id] = act
+			}
+		}
+		// writee actions
+		for k, as := range acts {
+			err = dbr.dataDb.SetActions(k, as)
+			if err != nil {
+				return err
+			}
+		}
+		ub, err := dbr.dataDb.GetUserBalance(id)
 		if err != nil {
+			ub = &UserBalance{
+				Type: UB_TYPE_PREPAID,
+				Id:   id,
+			}
+		}
+		ub.ActionTriggers = actionTriggers
+
+		if err := dbr.dataDb.SetUserBalance(ub); err != nil {
 			return err
 		}
-		for id, act := range actions {
-			acts[id] = act
-		}
 	}
-	// writee actions
-	for k, as := range acts {
-		err = dbr.dataDb.SetActions(k, as)
-		if err != nil {
-			return err
-		}
-	}
-
-	ub, err := dbr.dataDb.GetUserBalance(id)
-	if err != nil {
-		ub = &UserBalance{
-			Type: UB_TYPE_PREPAID,
-			Id:   id,
-		}
-	}
-	ub.ActionTriggers = actionTriggers
-
-	return dbr.dataDb.SetUserBalance(ub)
+	return nil
 }
 
 // Returns the identities loaded for a specific entity category
