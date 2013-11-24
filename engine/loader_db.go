@@ -606,6 +606,42 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 	return nil
 }
 
+// Automated loading
+func (dbr *DbReader) LoadAll() error {
+	var err error
+	if err = dbr.LoadDestinations(); err != nil {
+		return err
+	}
+	if err = dbr.LoadTimings(); err != nil {
+		return err
+	}
+	if err = dbr.LoadRates(); err != nil {
+		return err
+	}
+	if err = dbr.LoadDestinationRates(); err != nil {
+		return err
+	}
+	if err = dbr.LoadRatingPlans(); err != nil {
+		return err
+	}
+	if err = dbr.LoadRatingPlans(); err != nil {
+		return err
+	}
+	if err = dbr.LoadActions(); err != nil {
+		return err
+	}
+	if err = dbr.LoadActionTimings(); err != nil {
+		return err
+	}
+	if err = dbr.LoadActionTriggers(); err != nil {
+		return err
+	}
+	if err = dbr.LoadAccountActions(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Returns the identities loaded for a specific entity category
 func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
@@ -634,3 +670,5 @@ func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 	}
 	return nil, errors.New("Unsupported category")
 }
+
+

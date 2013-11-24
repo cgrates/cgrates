@@ -43,17 +43,11 @@ type TPLoader interface {
 	LoadActionTimings() error
 	LoadActionTriggers() error
 	LoadAccountActions() error
+	LoadAll() error
 	GetLoadedIds(string) ([]string, error)
 	WriteToDatabase(bool, bool) error
 }
 
-/*type LoadRate struct {
-	Tag                                         string
-	ConnectFee, Price                           float64
-	RateUnit, RateIncrement, GroupIntervalStart time.Duration
-	RoundingMethod                              string
-	RoundingDecimals                            int
-}*/
 func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals string) (r *utils.TPRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {

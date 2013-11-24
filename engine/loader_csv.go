@@ -542,6 +542,42 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 	return nil
 }
 
+// Automated loading
+func (csvr *CSVReader) LoadAll() error {
+	var err error
+	if err = csvr.LoadDestinations(); err != nil {
+		return err
+	}
+	if err = csvr.LoadTimings(); err != nil {
+		return err
+	}
+	if err = csvr.LoadRates(); err != nil {
+		return err
+	}
+	if err = csvr.LoadDestinationRates(); err != nil {
+		return err
+	}
+	if err = csvr.LoadRatingPlans(); err != nil {
+		return err
+	}
+	if err = csvr.LoadRatingPlans(); err != nil {
+		return err
+	}
+	if err = csvr.LoadActions(); err != nil {
+		return err
+	}
+	if err = csvr.LoadActionTimings(); err != nil {
+		return err
+	}
+	if err = csvr.LoadActionTriggers(); err != nil {
+		return err
+	}
+	if err = csvr.LoadAccountActions(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Returns the identities loaded for a specific category, useful for cache reloads
 func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
@@ -570,3 +606,4 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 	}
 	return nil, errors.New("Unsupported category")
 }
+
