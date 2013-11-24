@@ -62,5 +62,4 @@ const (
 	JSON                     = "json"
 	MSGPACK                  = "msgpack"
 	CSV_LOAD                 = "CSVLOAD"
-
 )

@@ -108,44 +108,46 @@ type LoadStorage interface {
 	// Apier functions
 	RemTPData(string, string, ...string) error
 	GetTPIds() ([]string, error)
+
 	SetTPTiming(string, *utils.TPTiming) error
-	GetTPTiming(string, string) (*utils.TPTiming, error)
+	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
 	GetTPTimingIds(string) ([]string, error)
+
 	SetTPDestination(string, *Destination) error
-	GetTPDestination(string, string) (*Destination, error)
+	GetTpDestinations(string, string) ([]*Destination, error)
 	GetTPDestinationIds(string) ([]string, error)
+
 	SetTPRates(string, map[string][]*utils.RateSlot) error
-	GetTPRate(string, string) (*utils.TPRate, error)
+	GetTpRates(string, string) (map[string]*utils.TPRate, error)
 	GetTPRateIds(string) ([]string, error)
+
 	SetTPDestinationRates(string, map[string][]*utils.DestinationRate) error
-	GetTPDestinationRate(string, string) (*utils.TPDestinationRate, error)
+	GetTpDestinationRates(string, string) (map[string]*utils.TPDestinationRate, error)
 	GetTPDestinationRateIds(string) ([]string, error)
+
 	SetTPRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
-	GetTPRatingPlan(string, string) (*utils.TPRatingPlan, error)
+	GetTpRatingPlans(string, string) (map[string][]*utils.TPRatingPlanBinding, error)
 	GetTPRatingPlanIds(string) ([]string, error)
+
 	SetTPRatingProfiles(string, map[string]*utils.TPRatingProfile) error
+	GetTpRatingProfiles(*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error)
 	GetTPRatingProfileIds(*utils.AttrTPRatingProfileIds) ([]string, error)
+
 	SetTPActions(string, map[string][]*utils.TPAction) error
-	GetTPActions(string, string) (*utils.TPActions, error)
+	GetTpActions(string, string) (map[string][]*utils.TPAction, error)
 	GetTPActionIds(string) ([]string, error)
+
 	SetTPActionTimings(string, map[string][]*utils.TPActionTiming) error
 	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
 	GetTPActionTimingIds(string) ([]string, error)
+
 	SetTPActionTriggers(string, map[string][]*utils.TPActionTrigger) error
-	GetTPActionTriggerIds(string) ([]string, error)
-	SetTPAccountActions(string, map[string]*utils.TPAccountActions) error
-	GetTPAccountActionIds(string) ([]string, error)
-	// loader functions
-	GetTpDestinations(string, string) ([]*Destination, error)
-	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
-	GetTpRates(string, string) (map[string]*utils.TPRate, error)
-	GetTpDestinationRates(string, string) (map[string]*utils.TPDestinationRate, error)
-	GetTpRatingPlans(string, string) (map[string][]*utils.TPRatingPlanBinding, error)
-	GetTpRatingProfiles(*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error)
-	GetTpActions(string, string) (map[string][]*Action, error)
-	GetTpActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
 	GetTpActionTriggers(string, string) (map[string][]*utils.TPActionTrigger, error)
+	GetTPActionTriggerIds(string) ([]string, error)
+
+	SetTPAccountActions(string, map[string]*utils.TPAccountActions) error
 	GetTpAccountActions(*utils.TPAccountActions) (map[string]*utils.TPAccountActions, error)
+	GetTPAccountActionIds(string) ([]string, error)
 }
 
 type Marshaler interface {

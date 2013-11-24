@@ -30,7 +30,6 @@ type TPDestination struct {
 	Prefixes      []string // Prefixes attached to this destination
 }
 
-
 // This file deals with tp_* data definition
 
 type TPRate struct {
@@ -138,16 +137,15 @@ func (self *TPRatingPlanBinding) Timing() *TPTiming {
 	return self.timing
 }
 
-
 // Used to rebuild a TPRatingProfile (empty RatingPlanActivations) out of it's key in nosqldb
-func NewTPRatingProfileFromKeyId( tpid, loadId, keyId string ) (*TPRatingProfile, error) {
+func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, error) {
 	// *out:cgrates.org:call:*any
 	s := strings.Split(keyId, ":")
 	// [*out cgrates.org call *any]
 	if len(s) != 4 {
 		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
 	}
-	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant:s[1], TOR:s[2], Direction:s[0], Subject:s[3]}, nil
+	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant: s[1], TOR: s[2], Direction: s[0], Subject: s[3]}, nil
 }
 
 type TPRatingProfile struct {
@@ -243,14 +241,14 @@ type TPActionTrigger struct {
 }
 
 // Used to rebuild a TPAccountActions (empty ActionTimingsId and ActionTriggersId) out of it's key in nosqldb
-func NewTPAccountActionsFromKeyId( tpid, loadId, keyId string ) (*TPAccountActions, error) {
+func NewTPAccountActionsFromKeyId(tpid, loadId, keyId string) (*TPAccountActions, error) {
 	// *out:cgrates.org:1001
 	s := strings.Split(keyId, ":")
 	// [*out cgrates.org 1001]
 	if len(s) != 3 {
 		return nil, fmt.Errorf("Cannot parse key %s into AccountActions", keyId)
 	}
-	return &TPAccountActions{TPid: tpid, LoadId: loadId, Tenant:s[1], Account: s[2], Direction:s[0]}, nil
+	return &TPAccountActions{TPid: tpid, LoadId: loadId, Tenant: s[1], Account: s[2], Direction: s[0]}, nil
 }
 
 type TPAccountActions struct {

@@ -55,12 +55,12 @@ func (self *ApierV1) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if acts, err := self.StorDb.GetTPActions(attrs.TPid, attrs.ActionsId); err != nil {
+	if acts, err := self.StorDb.GetTpActions(attrs.TPid, attrs.ActionsId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if acts == nil {
+	} else if len(acts) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = *acts
+		*reply = utils.TPActions{TPid: attrs.TPid, ActionsId: attrs.ActionsId, Actions: acts[attrs.ActionsId]}
 	}
 	return nil
 }

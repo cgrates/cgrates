@@ -66,7 +66,7 @@ func TestConnDataDbs(t *testing.T) {
 	if dataDbApier, err = ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, "15", cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on dataDb connection: ", err.Error())
 	}
-	for _,db := range []DataStorage{dataDbCsv, dataDbStor, dataDbApier} {
+	for _, db := range []DataStorage{dataDbCsv, dataDbStor, dataDbApier} {
 		if err = db.Flush(); err != nil {
 			t.Fatal("Error when flushing datadb")
 		}
@@ -225,8 +225,8 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 	// Load rating profiles
-	loadId := utils.CSV_LOAD+"_"+TEST_SQL
-	if ratingProfiles, err := storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid:TEST_SQL, LoadId: loadId}); err != nil {
+	loadId := utils.CSV_LOAD + "_" + TEST_SQL
+	if ratingProfiles, err := storDb.GetTpRatingProfiles(&utils.TPRatingProfile{TPid: TEST_SQL, LoadId: loadId}); err != nil {
 		t.Fatal("Could not retrieve rating profiles, error: ", err.Error())
 	} else if len(ratingProfiles) == 0 {
 		t.Fatal("Could not retrieve rating profiles")
@@ -239,7 +239,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 	// Load account actions
-	if aas, err := storDb.GetTpAccountActions(&utils.TPAccountActions{TPid:TEST_SQL, LoadId: loadId}); err != nil {
+	if aas, err := storDb.GetTpAccountActions(&utils.TPAccountActions{TPid: TEST_SQL, LoadId: loadId}); err != nil {
 		t.Fatal("Could not retrieve account action profiles, error: ", err.Error())
 	} else if len(aas) == 0 {
 		t.Error("No account actions")
@@ -252,7 +252,6 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		}
 	}
 }
-	
 
 // Compares previously loaded data from csv and stor to be identical, redis specific tests
 func TestMatchLoadCsvWithStor(t *testing.T) {

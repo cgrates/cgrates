@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -90,19 +91,6 @@ func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
 		return err
 	}
 	return nil
-}
-
-func (self *SQLStorage) GetTPTiming(tpid, tmId string) (*utils.TPTiming, error) {
-	var years, months, monthDays, weekDays, time string
-	err := self.Db.QueryRow(fmt.Sprintf("SELECT years, months, month_days, week_days, time FROM %s WHERE tpid='%s' AND tag='%s' LIMIT 1",
-		utils.TBL_TP_TIMINGS, tpid, tmId)).Scan(&years, &months, &monthDays, &weekDays, &time)
-	switch {
-	case err == sql.ErrNoRows:
-		return nil, nil
-	case err != nil:
-		return nil, err
-	}
-	return NewTiming(tmId, years, months, monthDays, weekDays, time), nil
 }
 
 func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
@@ -196,16 +184,16 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	if len(dest.Prefixes) == 0 {
 		return nil
 	}
-	vals := ""
+	var buffer bytes.Buffer // Use bytes buffer istead of string concatenation since that becomes quite heavy on large prefixes
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES ", utils.TBL_TP_DESTINATIONS))
 	for idx, prefix := range dest.Prefixes {
 		if idx != 0 {
-			vals += ","
+			buffer.WriteRune(',')
 		}
-		vals += fmt.Sprintf("('%s','%s','%s')", tpid, dest.Id, prefix)
+		buffer.WriteString(fmt.Sprintf("('%s','%s','%s')", tpid, dest.Id, prefix))
 	}
-	q := fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES %s ON DUPLICATE KEY UPDATE prefix=values(prefix)",
-		utils.TBL_TP_DESTINATIONS, vals)
-	if _, err := self.Db.Exec(q); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE prefix=values(prefix)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
@@ -215,53 +203,26 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
-	vals := ""
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES ",
+		utils.TBL_TP_RATES))
 	i := 0
 	for rtId, rtRows := range rts {
 		for _, rt := range rtRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				vals += ","
+				buffer.WriteRune(',')
 			}
-			vals += fmt.Sprintf("('%s', '%s', %f, %f, '%s', '%s','%s','%s', %d)",
+			buffer.WriteString(fmt.Sprintf("('%s', '%s', %f, %f, '%s', '%s','%s','%s', %d)",
 				tpid, rtId, rt.ConnectFee, rt.Rate, rt.RateUnit, rt.RateIncrement, rt.GroupIntervalStart,
-				rt.RoundingMethod, rt.RoundingDecimals)
+				rt.RoundingMethod, rt.RoundingDecimals))
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES %s ON DUPLICATE KEY UPDATE connect_fee=values(connect_fee), rate=values(rate), rate_increment=values(rate_increment), group_interval_start=values(group_interval_start), rounding_method=values(rounding_method), rounding_decimals=values(rounding_decimals)", utils.TBL_TP_RATES, vals)
-	if _, err := self.Db.Exec(qry); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE connect_fee=values(connect_fee), rate=values(rate), rate_increment=values(rate_increment), group_interval_start=values(group_interval_start), rounding_method=values(rounding_method), rounding_decimals=values(rounding_decimals)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
-}
-
-func (self *SQLStorage) GetTPRate(tpid, rtId string) (*utils.TPRate, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_RATES, tpid, rtId))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	rt := &utils.TPRate{TPid: tpid, RateId: rtId}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one prefix
-		var connectFee, rate float64
-		var roundingDecimals int
-		var rateUnit, rateIncrement, groupIntervalStart, roundingMethod string
-		err = rows.Scan(&connectFee, &rate, &rateUnit, &rateIncrement, &groupIntervalStart, &roundingMethod, &roundingDecimals)
-		if err != nil {
-			return nil, err
-		}
-		if rs, err := utils.NewRateSlot(connectFee, rate, rateUnit, rateIncrement, groupIntervalStart, roundingMethod, roundingDecimals); err != nil {
-			return nil, err
-		} else {
-			rt.RateSlots = append(rt.RateSlots, rs)
-		}
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return rt, nil
 }
 
 func (self *SQLStorage) GetTPRateIds(tpid string) ([]string, error) {
@@ -291,46 +252,23 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 	if len(drs) == 0 {
 		return nil //Nothing to set
 	}
-	vals := ""
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,destinations_tag,rates_tag) VALUES ", utils.TBL_TP_DESTINATION_RATES))
 	i := 0
 	for drId, drRows := range drs {
 		for _, dr := range drRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				vals += ","
+				buffer.WriteRune(',')
 			}
-			vals += fmt.Sprintf("('%s','%s','%s','%s')",
-				tpid, drId, dr.DestinationId, dr.RateId)
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s')", tpid, drId, dr.DestinationId, dr.RateId))
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,destinations_tag,rates_tag) VALUES %s ON DUPLICATE KEY UPDATE destinations_tag=values(destinations_tag),rates_tag=values(rates_tag)", utils.TBL_TP_DESTINATION_RATES, vals)
-	if _, err := self.Db.Exec(qry); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE destinations_tag=values(destinations_tag),rates_tag=values(rates_tag)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
-}
-
-func (self *SQLStorage) GetTPDestinationRate(tpid, drId string) (*utils.TPDestinationRate, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT destinations_tag, rates_tag FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_DESTINATION_RATES, tpid, drId))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	dr := &utils.TPDestinationRate{TPid: tpid, DestinationRateId: drId}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one prefix
-		var dstTag, ratesTag string
-		err = rows.Scan(&dstTag, &ratesTag)
-		if err != nil {
-			return nil, err
-		}
-		dr.DestinationRates = append(dr.DestinationRates, &utils.DestinationRate{dstTag, ratesTag, nil})
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return dr, nil
 }
 
 func (self *SQLStorage) GetTPDestinationRateIds(tpid string) ([]string, error) {
@@ -360,47 +298,23 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 	if len(drts) == 0 {
 		return nil //Nothing to set
 	}
-	vals := ""
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES ", utils.TBL_TP_RATING_PLANS))
 	i := 0
 	for drtId, drtRows := range drts {
 		for _, drt := range drtRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				vals += ","
+				buffer.WriteRune(',')
 			}
-			vals += fmt.Sprintf("('%s','%s','%s','%s',%f)",
-				tpid, drtId, drt.DestinationRatesId, drt.TimingId, drt.Weight)
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%f)", tpid, drtId, drt.DestinationRatesId, drt.TimingId, drt.Weight))
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES %s ON DUPLICATE KEY UPDATE weight=values(weight)", utils.TBL_TP_RATING_PLANS, vals)
-	if _, err := self.Db.Exec(qry); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE weight=values(weight)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
-}
-
-func (self *SQLStorage) GetTPRatingPlan(tpid, drtId string) (*utils.TPRatingPlan, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT destrates_tag, timing_tag, weight from %s where tpid='%s' and tag='%s'", utils.TBL_TP_RATING_PLANS, tpid, drtId))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	drt := &utils.TPRatingPlan{TPid: tpid, RatingPlanId: drtId}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one result
-		var drTag, timingTag string
-		var weight float64
-		err = rows.Scan(&drTag, &timingTag, &weight)
-		if err != nil {
-			return nil, err
-		}
-		drt.RatingPlanBindings = append(drt.RatingPlanBindings, &utils.TPRatingPlanBinding{DestinationRatesId: drTag, TimingId: timingTag, Weight: weight})
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return drt, nil
 }
 
 func (self *SQLStorage) GetTPRatingPlanIds(tpid string) ([]string, error) {
@@ -430,20 +344,22 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 	if len(rps) == 0 {
 		return nil //Nothing to set
 	}
-	vals := ""
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,loadid,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects) VALUES ",
+		utils.TBL_TP_RATE_PROFILES))
 	i := 0
 	for _, rp := range rps {
 		for _, rpa := range rp.RatingPlanActivations {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				vals += ","
+				buffer.WriteRune(',')
 			}
-			vals += fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Tenant, rp.TOR, rp.Direction,
-				rp.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackSubjects)
+			buffer.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Tenant, rp.TOR, rp.Direction,
+				rp.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackSubjects))
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,loadid,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects) VALUES %s ON DUPLICATE KEY UPDATE fallback_subjects=values(fallback_subjects)", utils.TBL_TP_RATE_PROFILES, vals)
-	if _, err := self.Db.Exec(qry); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE fallback_subjects=values(fallback_subjects)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
@@ -489,21 +405,22 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 	if len(acts) == 0 {
 		return nil //Nothing to set
 	}
-	vals := ""
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS))
 	i := 0
 	for actId, actRows := range acts {
 		for _, act := range actRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				vals += ","
+				buffer.WriteRune(',')
 			}
-			vals += fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,'%s',%f)",
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,'%s',%f)",
 				tpid, actId, act.Identifier, act.BalanceType, act.Direction, act.Units, act.ExpiryTime,
-				act.DestinationId, act.RatingSubject, act.BalanceWeight, act.ExtraParameters, act.Weight)
+				act.DestinationId, act.RatingSubject, act.BalanceWeight, act.ExtraParameters, act.Weight))
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,balance_weight,extra_parameters,weight) VALUES %s ON DUPLICATE KEY UPDATE action=values(action),balance_type=values(balance_type),direction=values(direction),units=values(units),expiry_time=values(expiry_time),destination_tag=values(destination_tag),rating_subject=values(rating_subject),balance_weight=values(balance_weight),extra_parameters=values(extra_parameters),weight=values(weight)", utils.TBL_TP_ACTIONS, vals)
-	if _, err := self.Db.Exec(qry); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE action=values(action),balance_type=values(balance_type),direction=values(direction),units=values(units),expiry_time=values(expiry_time),destination_tag=values(destination_tag),rating_subject=values(rating_subject),balance_weight=values(balance_weight),extra_parameters=values(extra_parameters),weight=values(weight)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
@@ -559,20 +476,20 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
-	vals := ""
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES ", utils.TBL_TP_ACTION_TIMINGS))
 	i := 0
 	for atId, atRows := range ats {
 		for _, at := range atRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				vals += ","
+				buffer.WriteRune(',')
 			}
-			vals += fmt.Sprintf("('%s','%s','%s','%s',%f)",
-				tpid, atId, at.ActionsId, at.TimingId, at.Weight)
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%f)", tpid, atId, at.ActionsId, at.TimingId, at.Weight))
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES %s ON DUPLICATE KEY UPDATE timing_tag=values(timing_tag),weight=values(weight)", utils.TBL_TP_ACTION_TIMINGS, vals)
-	if _, err := self.Db.Exec(qry); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE timing_tag=values(timing_tag),weight=values(weight)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
@@ -628,21 +545,23 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
-	vals := ""
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,balance_type,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight) VALUES ",
+		utils.TBL_TP_ACTION_TRIGGERS))
 	i := 0
 	for atId, atRows := range ats {
 		for _, atsRow := range atRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				vals += ","
+				buffer.WriteRune(',')
 			}
-			vals += fmt.Sprintf("('%s','%s','%s','%s','%s', %f, '%s','%s',%f)",
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s', %f, '%s','%s',%f)",
 				tpid, atId, atsRow.BalanceType, atsRow.Direction, atsRow.ThresholdType,
-				atsRow.ThresholdValue, atsRow.DestinationId, atsRow.ActionsId, atsRow.Weight)
+				atsRow.ThresholdValue, atsRow.DestinationId, atsRow.ActionsId, atsRow.Weight))
 			i++
 		}
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid,tag,balance_type,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight) VALUES %s ON DUPLICATE KEY UPDATE weight=values(weight)", utils.TBL_TP_ACTION_TRIGGERS, vals)
-	if _, err := self.Db.Exec(qry); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE weight=values(weight)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
@@ -675,18 +594,19 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 	if len(aa) == 0 {
 		return nil //Nothing to set
 	}
-	vals := ""
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, loadid, tenant, account, direction, action_timings_tag, action_triggers_tag) VALUES ", utils.TBL_TP_ACCOUNT_ACTIONS))
 	i := 0
 	for _, aActs := range aa {
 		if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-			vals += ","
+			buffer.WriteRune(',')
 		}
-		vals += fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
-			tpid, aActs.LoadId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionTimingsId, aActs.ActionTriggersId)
+		buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
+			tpid, aActs.LoadId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionTimingsId, aActs.ActionTriggersId))
 		i++
 	}
-	qry := fmt.Sprintf("INSERT INTO %s (tpid, loadid, tenant, account, direction, action_timings_tag, action_triggers_tag) VALUES %s ON DUPLICATE KEY UPDATE action_timings_tag=values(action_timings_tag), action_triggers_tag=values(action_triggers_tag)", utils.TBL_TP_ACCOUNT_ACTIONS, vals)
-	if _, err := self.Db.Exec(qry); err != nil {
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE action_timings_tag=values(action_timings_tag), action_triggers_tag=values(action_triggers_tag)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
 	return nil
@@ -1066,8 +986,8 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 	return rpfs, nil
 }
 
-func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, error) {
-	as := make(map[string][]*Action)
+func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAction, error) {
+	as := make(map[string][]*utils.TPAction)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTIONS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND tag='%s'", tag)
@@ -1084,52 +1004,21 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*Action, er
 		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rating_subject, &balance_weight, &extra_parameters, &weight); err != nil {
 			return nil, err
 		}
-		a := &Action{
-			Id:               utils.GenUUID(),
-			ActionType:       action,
-			BalanceId:        balance_type,
-			Direction:        direction,
-			Weight:           weight,
-			ExtraParameters:  extra_parameters,
-			ExpirationString: expirationDate,
-			Balance: &Balance{
-				Uuid:          utils.GenUUID(),
-				Value:         units,
-				Weight:        balance_weight,
-				RateSubject:   rating_subject,
-				DestinationId: destinations_tag,
-			},
+		a := &utils.TPAction{
+			Identifier:      action,
+			BalanceType:     balance_type,
+			Direction:       direction,
+			Units:           units,
+			ExpiryTime:      expirationDate,
+			DestinationId:   destinations_tag,
+			RatingSubject:   rating_subject,
+			BalanceWeight:   balance_weight,
+			ExtraParameters: extra_parameters,
+			Weight:          weight,
 		}
 		as[tag] = append(as[tag], a)
 	}
 	return as, nil
-}
-
-func (self *SQLStorage) GetTpActionTimings(tpid, tag string) (map[string][]*utils.TPActionTiming, error) {
-	q := fmt.Sprintf("SELECT tag,actions_tag,timing_tag,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
-	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ats := make(map[string][]*utils.TPActionTiming)
-	for rows.Next() {
-		var weight float64
-		var tag, actions_tag, timing_tag string
-		if err := rows.Scan(&tag, &actions_tag, &timing_tag, &weight); err != nil {
-			return nil, err
-		}
-		at := &utils.TPActionTiming{
-			ActionsId: tag,
-			TimingId:  timing_tag,
-			Weight:    weight,
-		}
-		ats[tag] = append(ats[tag], at)
-	}
-	return ats, nil
 }
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {

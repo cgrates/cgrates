@@ -48,12 +48,12 @@ func (self *ApierV1) GetTPRate(attrs AttrGetTPRate, reply *utils.TPRate) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RateId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if rt, err := self.StorDb.GetTPRate(attrs.TPid, attrs.RateId); err != nil {
+	if rts, err := self.StorDb.GetTpRates(attrs.TPid, attrs.RateId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if rt == nil {
+	} else if len(rts) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = *rt
+		*reply = *rts[attrs.RateId]
 	}
 	return nil
 }

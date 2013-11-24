@@ -48,11 +48,12 @@ func (self *ApierV1) GetTPTiming(attrs AttrGetTPTiming, reply *utils.ApierTPTimi
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if tm, err := self.StorDb.GetTPTiming(attrs.TPid, attrs.TimingId); err != nil {
+	if tms, err := self.StorDb.GetTpTimings(attrs.TPid, attrs.TimingId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if tm == nil {
+	} else if len(tms) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
+		tm := tms[attrs.TimingId]
 		*reply = utils.ApierTPTiming{attrs.TPid, tm.Id, tm.Years.Serialize(";"),
 			tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"), tm.WeekDays.Serialize(";"), tm.StartTime}
 	}

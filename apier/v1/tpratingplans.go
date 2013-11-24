@@ -48,12 +48,12 @@ func (self *ApierV1) GetTPRatingPlan(attrs AttrGetTPRatingPlan, reply *utils.TPR
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if dr, err := self.StorDb.GetTPRatingPlan(attrs.TPid, attrs.RatingPlanId); err != nil {
+	if rps, err := self.StorDb.GetTpRatingPlans(attrs.TPid, attrs.RatingPlanId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if dr == nil {
+	} else if len(rps) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = *dr
+		*reply = utils.TPRatingPlan{TPid: attrs.TPid, RatingPlanId: attrs.RatingPlanId, RatingPlanBindings: rps[attrs.RatingPlanId]}
 	}
 	return nil
 }

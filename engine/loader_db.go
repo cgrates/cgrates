@@ -328,12 +328,38 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 }
 
 func (dbr *DbReader) LoadActions() (err error) {
-	dbr.actions, err = dbr.storDb.GetTpActions(dbr.tpid, "")
-	return err
+	storActs, err := dbr.storDb.GetTpActions(dbr.tpid, "")
+	if err != nil {
+		return err
+	}
+	// map[string][]*Action
+	for tag, tpacts := range storActs {
+		acts := make([]*Action, len(tpacts))
+		for idx, tpact := range tpacts {
+			acts[idx] = &Action{
+				Id:               utils.GenUUID(),
+				ActionType:       tpact.Identifier,
+				BalanceId:        tpact.BalanceType,
+				Direction:        tpact.Direction,
+				Weight:           tpact.Weight,
+				ExtraParameters:  tpact.ExtraParameters,
+				ExpirationString: tpact.ExpiryTime,
+				Balance: &Balance{
+					Uuid:          utils.GenUUID(),
+					Value:         tpact.Units,
+					Weight:        tpact.BalanceWeight,
+					RateSubject:   tpact.RatingSubject,
+					DestinationId: tpact.DestinationId,
+				},
+			}
+		}
+		dbr.actions[tag] = acts
+	}
+	return nil
 }
 
 func (dbr *DbReader) LoadActionTimings() (err error) {
-	atsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, "")
+	atsMap, err := dbr.storDb.GetTPActionTimings(dbr.tpid, "")
 	if err != nil {
 		return err
 	}
@@ -437,7 +463,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				exitingUserBalanceIds = existingActionTimings[0].UserBalanceIds
 			}
 
-			actionTimingsMap, err := dbr.storDb.GetTpActionTimings(dbr.tpid, accountAction.ActionTimingsId)
+			actionTimingsMap, err := dbr.storDb.GetTPActionTimings(dbr.tpid, accountAction.ActionTimingsId)
 			if err != nil {
 				return err
 			} else if len(actionTimingsMap) == 0 {
@@ -524,18 +550,37 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			// collect action ids from triggers
 			for _, atr := range actionTriggers {
 				actionsIds = append(actionsIds, atr.ActionsId)
-			}	
+			}
 		}
 
 		// actions
 		acts := make(map[string][]*Action)
 		for _, actId := range actionsIds {
-			actions, err := dbr.storDb.GetTpActions(dbr.tpid, actId)
+			storActs, err := dbr.storDb.GetTpActions(dbr.tpid, actId)
 			if err != nil {
 				return err
 			}
-			for id, act := range actions {
-				acts[id] = act
+			for tag, tpacts := range storActs {
+				enacts := make([]*Action, len(tpacts))
+				for idx, tpact := range tpacts {
+					enacts[idx] = &Action{
+						Id:               utils.GenUUID(),
+						ActionType:       tpact.Identifier,
+						BalanceId:        tpact.BalanceType,
+						Direction:        tpact.Direction,
+						Weight:           tpact.Weight,
+						ExtraParameters:  tpact.ExtraParameters,
+						ExpirationString: tpact.ExpiryTime,
+						Balance: &Balance{
+							Uuid:          utils.GenUUID(),
+							Value:         tpact.Units,
+							Weight:        tpact.BalanceWeight,
+							RateSubject:   tpact.RatingSubject,
+							DestinationId: tpact.DestinationId,
+						},
+					}
+				}
+				acts[tag] = enacts
 			}
 		}
 		// writee actions
