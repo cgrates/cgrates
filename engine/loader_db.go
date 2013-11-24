@@ -46,6 +46,7 @@ func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader
 	c.storDb = storDB
 	c.dataDb = storage
 	c.tpid = tpid
+	c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
 	c.ratingPlans = make(map[string]*RatingPlan)
@@ -670,5 +671,3 @@ func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 	}
 	return nil, errors.New("Unsupported category")
 }
-
-

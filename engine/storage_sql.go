@@ -832,6 +832,7 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 			return nil, err
 		}
 		r := &utils.TPRate{
+			TPid:      tpid,
 			RateId:    tag,
 			RateSlots: []*utils.RateSlot{rs},
 		}
@@ -871,6 +872,7 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*uti
 		}
 
 		dr := &utils.TPDestinationRate{
+			TPid:              tpid,
 			DestinationRateId: tag,
 			DestinationRates: []*utils.DestinationRate{
 				&utils.DestinationRate{

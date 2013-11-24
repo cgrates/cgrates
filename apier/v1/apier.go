@@ -25,6 +25,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+	"path"
 )
 
 const (
@@ -323,6 +324,38 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 	}
 	if err := self.DataDb.PreCache(dstKeys, rpKeys); err != nil {
 		return err
+	}
+	*reply = "OK"
+	return nil
+}
+
+type AttrLoadTPFromFolder struct {
+	FolderPath string // Take files from folder absolute path
+	DryRun     bool   // Do not write to database but parse only
+	FlushDb    bool   // Flush previous data before loading new one
+}
+
+func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply *string) error {
+	loader := engine.NewFileCSVReader(self.DataDb, utils.CSV_SEP,
+		path.Join(attrs.FolderPath, utils.DESTINATIONS_CSV),
+		path.Join(attrs.FolderPath, utils.TIMINGS_CSV),
+		path.Join(attrs.FolderPath, utils.RATES_CSV),
+		path.Join(attrs.FolderPath, utils.DESTINATION_RATES_CSV),
+		path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
+		path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
+		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
+		path.Join(attrs.FolderPath, utils.ACTION_TIMINGS_CSV),
+		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
+		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV))
+	if err := loader.LoadAll(); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	if attrs.DryRun {
+		*reply = "OK"
+		return nil // Mission complete, no errors
+	}
+	if err := loader.WriteToDatabase(attrs.FlushDb, false); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
 	return nil

@@ -27,9 +27,9 @@ import (
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"log"
-	"path"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"path"
 )
 
 var (
@@ -76,7 +76,7 @@ func main() {
 	var storDb engine.LoadStorage
 	var rater *rpc.Client
 	var loader engine.TPLoader
-	// Init necessary db connections, only if not already 
+	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
 			dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass, *dbdata_encoding)
@@ -139,7 +139,7 @@ func main() {
 	} else {
 		log.Print("WARNING: Rates history archiving is disabled!")
 	}
-	if *raterAddress != "" { // Init connection to rater so we can reload it's data 
+	if *raterAddress != "" { // Init connection to rater so we can reload it's data
 		if *rpcEncoding == "json" {
 			rater, err = jsonrpc.Dial("tcp", *raterAddress)
 		} else {
@@ -160,15 +160,15 @@ func main() {
 	// Reload scheduler and cache
 	if rater != nil {
 		reply := ""
-		actIds,_ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
+		actIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
 		if len(actIds) != 0 { // Reload scheduler first since that could take less time
-			if err = rater.Call("ApierV1.ReloadScheduler", "", &reply); err!=nil { 
+			if err = rater.Call("ApierV1.ReloadScheduler", "", &reply); err != nil {
 				log.Fatalf("Got error on scheduler reload: %s", err.Error())
 			}
 		}
-		dstIds,_ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
-		rplIds,_ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds}, &reply); err!=nil { 
+		dstIds, _ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
+		rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
 	}

@@ -54,7 +54,7 @@ var rater *rpc.Client
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
-var waitRater = flag.Int("wait_rater", 200, "Number of miliseconds to wait for rater to start and cache")
+var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 
 // Empty tables before using them
 func TestCreateTables(t *testing.T) {
@@ -680,7 +680,6 @@ func TestApierSetRatingPlan(t *testing.T) {
 		return
 	}
 	reply := ""
-	//SetRatingPlan(attrs AttrSetRatingPlan
 	if err := rater.Call("ApierV1.SetRatingPlan", AttrSetRatingPlan{TPid: engine.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
 		t.Error("Got error on second ApierV1.SetRatingPlan: ", err.Error())
 	} else if reply != "OK" {
@@ -713,5 +712,20 @@ func TestApierSetAccountActions(t *testing.T) {
 		t.Error("Got error on second ApierV1.SetAccountActions: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetAccountActions got reply: ", reply)
+	}
+}
+
+// Test here LoadTariffPlanFromFolder
+func TestApierLoadTariffPlanFromFolder(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	// Simple test that command is executed without errors
+	attrs := &AttrLoadTPFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
+	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+		t.Error("Got error on second ApierV1.LoadTariffPlanFromFolder: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
 }

@@ -12,9 +12,9 @@ go test -i github.com/cgrates/cgrates/utils
 go test -i github.com/cgrates/cgrates/history
 go test -i github.com/cgrates/cgrates/cdrexporter
 
-go test github.com/cgrates/cgrates/apier/v1
+go test github.com/cgrates/cgrates/apier/v1 -local
 ap=$?
-go test github.com/cgrates/cgrates/engine
+go test github.com/cgrates/cgrates/engine -local
 en=$?
 go test github.com/cgrates/cgrates/sessionmanager
 sm=$?

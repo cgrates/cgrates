@@ -606,4 +606,3 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 	}
 	return nil, errors.New("Unsupported category")
 }
-
