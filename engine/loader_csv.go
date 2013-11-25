@@ -560,7 +560,7 @@ func (csvr *CSVReader) LoadAll() error {
 	if err = csvr.LoadRatingPlans(); err != nil {
 		return err
 	}
-	if err = csvr.LoadRatingPlans(); err != nil {
+	if err = csvr.LoadRatingProfiles(); err != nil {
 		return err
 	}
 	if err = csvr.LoadActions(); err != nil {
