@@ -313,15 +313,11 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 				return errors.New(fmt.Sprintf("Cannot parse activation time from %v", tpRa.ActivationTime))
 			}
 			_, exists := dbr.ratingPlans[tpRa.RatingPlanId]
-			if !exists { // Try loading locally, on errrors, give up
-				if loaded, err := dbr.LoadRatingPlanByTag(tpRa.RatingPlanId); err != nil {
+			if !exists {
+				if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
-				} else if !loaded { // Not found
-					if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
-						return err
-					} else if !dbExists {
-						return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))
-					}
+				} else if !dbExists {
+					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))
 				}
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,
