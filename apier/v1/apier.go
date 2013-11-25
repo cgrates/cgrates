@@ -156,11 +156,11 @@ func (self *ApierV1) SetRatingPlan(attrs AttrSetRatingPlan, reply *string) error
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
-
-	if err := dbReader.LoadRatingPlanByTag(attrs.RatingPlanId); err != nil {
+	if loaded, err := dbReader.LoadRatingPlanByTag(attrs.RatingPlanId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if !loaded {
+		return errors.New("NOT_FOUND")
 	}
-
 	*reply = OK
 	return nil
 }

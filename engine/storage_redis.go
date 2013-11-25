@@ -215,6 +215,9 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 
 func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	result, err := rs.ms.Marshal(dest)
+	if err != nil {
+		return err
+	}
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
 	w.Write(result)

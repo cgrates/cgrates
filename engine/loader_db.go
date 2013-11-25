@@ -241,10 +241,13 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 	return nil
 }
 
-func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
+// Returns true, nil in case of load success, false, nil in case of RatingPlan  not found in storDb
+func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 	mpRpls, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, tag)
-	if err != nil || len(mpRpls) == 0 {
-		return fmt.Errorf("No RatingPlan profile with id %s: %v", tag, err)
+	if err != nil {
+		return false, err
+	} else if len(mpRpls) == 0 {
+		return false, nil
 	}
 	for tag, rplBnds := range mpRpls {
 		ratingPlan := &RatingPlan{Id: tag}
@@ -253,18 +256,18 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, rp.TimingId)
 			Logger.Debug(fmt.Sprintf("Timing: %v", tm))
 			if err != nil || len(tm) == 0 {
-				return fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
+				return false, fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
 			}
 			rp.SetTiming(tm[rp.TimingId])
 			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestinationRatesId)
 			if err != nil || len(drm) == 0 {
-				return fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
+				return false, fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
 			}
 			for _, drate := range drm[rp.DestinationRatesId].DestinationRates {
 				Logger.Debug(fmt.Sprintf("Destination rate: %v", drate))
 				rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateId)
 				if err != nil || len(rt) == 0 {
-					return fmt.Errorf("No Rates profile with id %s: %v", drate.RateId, err)
+					return false, fmt.Errorf("No Rates profile with id %s: %v", drate.RateId, err)
 				}
 				Logger.Debug(fmt.Sprintf("Rate: %v", rt))
 				drate.Rate = rt[drate.RateId]
@@ -272,12 +275,12 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 
 				dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationId)
 				if err != nil {
-					return err
+					return false, err
 				} else if len(dms) == 0 {
 					if dbExists, err := dbr.dataDb.ExistsData(DESTINATION_PREFIX, drate.DestinationId); err != nil {
-						return err
+						return false, err
 					} else if !dbExists {
-						return fmt.Errorf("Could not get destination for tag %v", drate.DestinationId)
+						return false, fmt.Errorf("Could not get destination for tag %v", drate.DestinationId)
 					}
 					continue
 				}
@@ -289,10 +292,10 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) error {
 			}
 		}
 		if err := dbr.dataDb.SetRatingPlan(ratingPlan); err != nil {
-			return err
+			return false, err
 		}
 	}
-	return nil
+	return true, nil
 }
 
 func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) error {
@@ -310,11 +313,15 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 				return errors.New(fmt.Sprintf("Cannot parse activation time from %v", tpRa.ActivationTime))
 			}
 			_, exists := dbr.ratingPlans[tpRa.RatingPlanId]
-			if !exists {
-				if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+			if !exists { // Try loading locally, on errrors, give up
+				if loaded, err := dbr.LoadRatingPlanByTag(tpRa.RatingPlanId); err != nil {
 					return err
-				} else if !dbExists {
-					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))
+				} else if !loaded { // Not found
+					if dbExists, err := dbr.dataDb.ExistsData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+						return err
+					} else if !dbExists {
+						return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))
+					}
 				}
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,

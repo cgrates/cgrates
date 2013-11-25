@@ -1,6 +1,6 @@
 /*
 Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM 
+Copyright (C) 2013 ITsysCOM
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ func (self *CmdSetrRatingProfile) FromArgs(args []string) error {
 	}
 	// Args look OK, set defaults before going further
 	self.defaults()
-	self.rpcParams = &utils.TPRatingProfile{TPid: args[2], LoadId: args[3], Tenant: args[4], TOR: args[5], Direction: "*out"}
+	self.rpcParams = &utils.TPRatingProfile{TPid: args[2], LoadId: args[3], Tenant: args[4], TOR: args[5], Direction: "*out", Subject: args[6]}
 	return nil
 }
 

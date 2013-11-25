@@ -219,8 +219,10 @@ func TestLoadIndividualProfiles(t *testing.T) {
 		t.Fatal("Could not retrieve rating plans")
 	} else {
 		for tag := range ratingPlans {
-			if err := loader.LoadRatingPlanByTag(tag); err != nil {
+			if loaded, err := loader.LoadRatingPlanByTag(tag); err != nil {
 				t.Fatalf("Could not load ratingPlan for tag: %s, error: %s", tag, err.Error())
+			} else if !loaded {
+				t.Fatal("Cound not find ratingPLan with id:", tag)
 			}
 		}
 	}

@@ -729,3 +729,11 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
 }
+
+// Simply kill the engine after we are done with tests within this file
+func TestStopEngine(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	exec.Command("pkill", "cgr-engine").Run()
+}
