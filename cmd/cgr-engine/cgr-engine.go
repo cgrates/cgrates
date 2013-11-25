@@ -57,6 +57,7 @@ var (
 	cfgPath  = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
 	version  = flag.Bool("version", false, "Prints the application version.")
 	raterEnabled = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
+	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
 	bal      = balancer2go.NewBalancer()
 	exitChan = make(chan bool)
 	sm       sessionmanager.SessionManager
@@ -321,6 +322,9 @@ func main() {
 	engine.SetDataStorage(dataDb)
 	if *raterEnabled {
 		cfg.RaterEnabled = *raterEnabled
+	}
+	if *schedEnabled {
+		cfg.SchedulerEnabled = *schedEnabled
 	}
 	if cfg.RaterEnabled {
 		engine.Logger.Info("Starting redis pre-caching...")

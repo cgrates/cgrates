@@ -681,7 +681,7 @@ func TestApierSetRatingPlan(t *testing.T) {
 	}
 	reply := ""
 	if err := rater.Call("ApierV1.SetRatingPlan", AttrSetRatingPlan{TPid: engine.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
-		t.Error("Got error on second ApierV1.SetRatingPlan: ", err.Error())
+		t.Error("Got error on ApierV1.SetRatingPlan: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingPlan got reply: ", reply)
 	}
@@ -695,7 +695,7 @@ func TestApierSetRatingProfile(t *testing.T) {
 	reply := ""
 	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "*any"}
 	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
-		t.Error("Got error on second ApierV1.SetRatingProfile: ", err.Error())
+		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
@@ -709,7 +709,7 @@ func TestApierSetAccountActions(t *testing.T) {
 	reply := ""
 	aa1 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.SetAccountActions", aa1, &reply); err != nil {
-		t.Error("Got error on second ApierV1.SetAccountActions: ", err.Error())
+		t.Error("Got error on ApierV1.SetAccountActions: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetAccountActions got reply: ", reply)
 	}
@@ -724,9 +724,66 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	// Simple test that command is executed without errors
 	attrs := &AttrLoadTPFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
 	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
-		t.Error("Got error on second ApierV1.LoadTariffPlanFromFolder: ", err.Error())
+		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
+	}
+}
+
+/*
+// Test here ReloadScheduler
+func TestApierReloadScheduler(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.ReloadScheduler", reply, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadScheduler: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.ReloadScheduler got reply: ", reply)
+	}
+}
+*/
+// Test here ReloadCache
+func TestApierReloadCache(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	arc := new(utils.ApiReloadCache)
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+	}
+}
+
+// Test here ReloadCache
+func TestResponderGetCost(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
+	tEnd, _ := utils.ParseDate("2013-08-07T17:31:30Z")
+	cd := engine.CallDescriptor{
+		Direction:    "*out",
+		TOR:          "call",
+		Tenant:       "cgrates.org",
+		Subject:      "1001",
+		Account:      "1001",
+		Destination:  "+4917621621391",
+		CallDuration: 90,
+		TimeStart:    tStart,
+		TimeEnd:      tEnd,
+	}
+	var cc engine.CallCost
+	// Simple test that command is executed without errors
+	if err := rater.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 90.0 {
+		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
 	}
 }
 
