@@ -73,3 +73,26 @@ func TestFlushNoTimout(t *testing.T) {
 		t.Error("Error expiring data")
 	}
 }
+
+func TestRemKey(t *testing.T) {
+	Cache("t1", "test")
+	if t1, err := GetCached("t1"); err != nil || t1 != "test" {
+		t.Error("Error setting cache")
+	}
+	RemKey("t1")
+	if t1, err := GetCached("t1"); err == nil || t1 == "test" {
+		t.Error("Error removing cached key")
+	}
+}
+
+func TestXRemKey(t *testing.T) {
+	a := &myStruct{data: "mama are mere"}
+	a.XCache("mama", 10*time.Second, a)
+	if t1, err := GetXCached("mama"); err != nil || t1 != a {
+		t.Error("Error setting xcache")
+	}
+	XRemKey("mama")
+	if t1, err := GetXCached("mama"); err == nil || t1 == a {
+		t.Error("Error removing xcached key: ", err, t1)
+	}
+}
