@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
@@ -45,14 +46,18 @@ func (ms *MapStorage) Flush() error {
 }
 
 func (ms *MapStorage) PreCache(dKeys, rppKeys []string) error {
+	prefixLen := len(DESTINATION_PREFIX)
+	prefixLen1 := len(RATING_PLAN_PREFIX)
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
-			if _, err := ms.GetDestination(k[len(DESTINATION_PREFIX):]); err != nil {
+			cache2go.RemKey(k[prefixLen:])
+			if _, err := ms.GetDestination(k[prefixLen:]); err != nil {
 				return err
 			}
 		}
 		if strings.HasPrefix(k, RATING_PLAN_PREFIX) {
-			if _, err := ms.GetRatingPlan(k[len(RATING_PLAN_PREFIX):]); err != nil {
+			cache2go.RemKey(k[prefixLen1:])
+			if _, err := ms.GetRatingPlan(k[prefixLen1:]); err != nil {
 				return err
 			}
 		}

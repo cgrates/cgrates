@@ -95,6 +95,16 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 	}
 }
 
+func TestPreCacheRefresh(t *testing.T) {
+	storageGetter.SetDestination(&Destination{"T11", []string{"0"}})
+	storageGetter.GetDestination("T11")
+	storageGetter.SetDestination(&Destination{"T11", []string{"1"}})
+	storageGetter.PreCache(nil, nil)
+	if d, err := storageGetter.GetDestination("T11"); err != nil || d.Prefixes[0] != "1" {
+		t.Error("Error refreshing cache:", d)
+	}
+}
+
 /************************** Benchmarks *****************************/
 
 func GetUB() *UserBalance {

@@ -111,14 +111,14 @@ func RemKey(key string) {
 }
 
 func XRemKey(key string) {
-	mux.Lock()
-	defer mux.Unlock()
+	xMux.Lock()
+	defer xMux.Unlock()
 	if r, ok := xcache[key]; ok {
 		if r.timer() != nil {
 			r.timer().Stop()
 		}
 	}
-	delete(cache, key)
+	delete(xcache, key)
 }
 
 // Delete all keys from expiraton cache
