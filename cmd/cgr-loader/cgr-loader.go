@@ -157,19 +157,30 @@ func main() {
 	if err := loader.WriteToDatabase(*flush, *verbose); err != nil {
 		log.Fatal("Could not write to database: ", err)
 	}
+	if len(*historyServer)!=0 && *verbose {
+		log.Print("Wrote history.")
+	}
 	// Reload scheduler and cache
 	if rater != nil {
 		reply := ""
+		dstIds, _ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
+		rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
+		// Reload cache first since actions could be calling info from within
+		if *verbose {
+			log.Print("Reloading cache")
+		}
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds}, &reply); err != nil {
+			log.Fatalf("Got error on cache reload: %s", err.Error())
+		}
 		actIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
-		if len(actIds) != 0 { // Reload scheduler first since that could take less time
+		if len(actIds) != 0 {
+			if *verbose {
+				log.Print("Reloading scheduler")
+			}
 			if err = rater.Call("ApierV1.ReloadScheduler", "", &reply); err != nil {
 				log.Fatalf("Got error on scheduler reload: %s", err.Error())
 			}
 		}
-		dstIds, _ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
-		rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds}, &reply); err != nil {
-			log.Fatalf("Got error on cache reload: %s", err.Error())
-		}
+		
 	}
 }
