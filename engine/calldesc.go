@@ -37,10 +37,10 @@ func init() {
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 	}
 	//db_server := "127.0.0.1"
-	//db_server := "192.168.0.17"
 	m, _ := NewMapStorage()
 	//m, _ := NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
 	//m, _ := NewRedisStorage(db_server+":6379", 11, "", utils.MSGPACK)
+	//m, _ := NewSRedisStorage(db_server+":6379", 11, "", utils.MSGPACK)
 	//fm, _ := NewRedigoStorage(db_server+":6379", 11, "")
 	//m, _ := NewRadixStorage(db_server+":6379", 11, "")
 	storageGetter, _ = m.(DataStorage)
@@ -401,13 +401,15 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
-		Direction:  cd.Direction,
-		TOR:        cd.TOR,
-		Tenant:     cd.Tenant,
-		Account:    cd.Account,
-		Cost:       cost,
-		ConnectFee: connectionFee,
-		Timespans:  timespans}
+		Direction:   cd.Direction,
+		TOR:         cd.TOR,
+		Tenant:      cd.Tenant,
+		Account:     cd.Account,
+		Destination: cd.Destination,
+		Subject:     cd.Subject,
+		Cost:        cost,
+		ConnectFee:  connectionFee,
+		Timespans:   timespans}
 	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	return cc, err
 }
