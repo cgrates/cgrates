@@ -13,6 +13,7 @@ libs = ('github.com/fzzy/radix/redis',
         'github.com/go-sql-driver/mysql',
         'github.com/garyburd/redigo/redis',
         'menteslibres.net/gosexy/redis',
+        'github.com/hoisie/redis'
         'github.com/howeyc/fsnotify',
 )
 
