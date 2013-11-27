@@ -51,7 +51,7 @@ var (
 
 	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.DBDataEncoding, "The encoding used to store object data in strings")
 
-	flush         = flag.Bool("flush", false, "Flush the database before importing")
+	flush         = flag.Bool("flushdb", false, "Flush the database before importing")
 	tpid          = flag.String("tpid", "", "The tariff plan id from the database")
 	dataPath      = flag.String("path", ".", "The path containing the data files")
 	version       = flag.Bool("version", false, "Prints the application version.")
@@ -157,7 +157,7 @@ func main() {
 	if err := loader.WriteToDatabase(*flush, *verbose); err != nil {
 		log.Fatal("Could not write to database: ", err)
 	}
-	if len(*historyServer)!=0 && *verbose {
+	if len(*historyServer) != 0 && *verbose {
 		log.Print("Wrote history.")
 	}
 	// Reload scheduler and cache
@@ -181,6 +181,6 @@ func main() {
 				log.Fatalf("Got error on scheduler reload: %s", err.Error())
 			}
 		}
-		
+
 	}
 }
