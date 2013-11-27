@@ -1,2 +1,2 @@
 #Tag,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart,RoundingMethod,RoundingDecimals
-RT_1CENT,0,1,60s,60s,0s,*up,2
+RT_1CENT,0,1,1s,1s,0s,*up,2
