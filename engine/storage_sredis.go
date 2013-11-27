@@ -26,25 +26,41 @@ import (
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/hoisie/redis"
 	"io/ioutil"
+	"menteslibres.net/gosexy/redis"
+	"strconv"
+	"strings"
 	"time"
 )
 
-type RedisStorage struct {
+type SRedisStorage struct {
 	dbNb int
 	db   *redis.Client
 	ms   Marshaler
 }
 
-func NewRedisStorage(address string, db int, pass, mrshlerStr string) (DataStorage, error) {
-	ndb := &redis.Client{Addr: address, Db: db}
+func NewSRedisStorage(address string, db int, pass, mrshlerStr string) (DataStorage, error) {
+	addrSplit := strings.Split(address, ":")
+	host := addrSplit[0]
+	port := 6379
+	if len(addrSplit) == 2 {
+		port, _ = strconv.Atoi(addrSplit[1])
+	}
+	ndb := redis.New()
+	err := ndb.Connect(host, uint(port))
+	if err != nil {
+		return nil, err
+	}
 	if pass != "" {
-		if err := ndb.Auth(pass); err != nil {
+		if _, err = ndb.Auth(pass); err != nil {
 			return nil, err
 		}
 	}
-
+	if db > 0 {
+		if _, err = ndb.Select(int64(db)); err != nil {
+			return nil, err
+		}
+	}
 	var mrshler Marshaler
 	if mrshlerStr == utils.MSGPACK {
 		mrshler = NewCodecMsgpackMarshaler()
@@ -53,20 +69,19 @@ func NewRedisStorage(address string, db int, pass, mrshlerStr string) (DataStora
 	} else {
 		return nil, fmt.Errorf("Unsupported marshaler: %v", mrshlerStr)
 	}
-	return &RedisStorage{db: ndb, dbNb: db, ms: mrshler}, nil
+	return &SRedisStorage{db: ndb, dbNb: db, ms: mrshler}, nil
 }
 
-func (rs *RedisStorage) Close() {
-	// no close for me
-	//rs.db.Quit()
+func (rs *SRedisStorage) Close() {
+	rs.db.Quit()
 }
 
-func (rs *RedisStorage) Flush() (err error) {
-	err = rs.db.Flush(false)
+func (rs *SRedisStorage) Flush() (err error) {
+	_, err = rs.db.FlushDB()
 	return
 }
 
-func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
+func (rs *SRedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 	if dKeys == nil {
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
 			return
@@ -93,7 +108,7 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (rs *RedisStorage) ExistsData(category, subject string) (bool, error) {
+func (rs *SRedisStorage) ExistsData(category, subject string) (bool, error) {
 	switch category {
 	case DESTINATION_PREFIX, RATING_PLAN_PREFIX, RATING_PROFILE_PREFIX, ACTION_PREFIX, ACTION_TIMING_PREFIX, USER_BALANCE_PREFIX:
 		return rs.db.Exists(category + subject)
@@ -101,13 +116,13 @@ func (rs *RedisStorage) ExistsData(category, subject string) (bool, error) {
 	return false, errors.New("Unsupported category in ExistsData")
 }
 
-func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+func (rs *SRedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*RatingPlan), nil
 	}
-	var values []byte
+	var values string
 	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
-		b := bytes.NewBuffer(values)
+		b := bytes.NewBufferString(values)
 		r, err := zlib.NewReader(b)
 		if err != nil {
 			return nil, err
@@ -124,13 +139,13 @@ func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 	return
 }
 
-func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
+func (rs *SRedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := rs.ms.Marshal(rp)
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, b.Bytes())
+	_, err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
@@ -138,18 +153,18 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
-	var values []byte
+func (rs *SRedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
+	var values string
 	if values, err = rs.db.Get(RATING_PROFILE_PREFIX + key); err == nil {
 		rp = new(RatingProfile)
-		err = rs.ms.Unmarshal(values, rp)
+		err = rs.ms.Unmarshal([]byte(values), rp)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
+func (rs *SRedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	result, err := rs.ms.Marshal(rp)
-	err = rs.db.Set(RATING_PROFILE_PREFIX+rp.Id, result)
+	_, err = rs.db.Set(RATING_PROFILE_PREFIX+rp.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
@@ -157,13 +172,13 @@ func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
+func (rs *SRedisStorage) GetDestination(key string) (dest *Destination, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*Destination), nil
 	}
-	var values []byte
+	var values string
 	if values, err = rs.db.Get(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
-		b := bytes.NewBuffer(values)
+		b := bytes.NewBufferString(values)
 		r, err := zlib.NewReader(b)
 		if err != nil {
 			return nil, err
@@ -180,7 +195,25 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 	return
 }
 
-func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
+/*func (rs *SRedisStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
+	if _, err := rs.db.SAdd(TEMP_DESTINATION_PREFIX+prefix, utils.SplitPrefixInterface(prefix)...); err != nil {
+		return 0, err
+	}
+	var values []string
+	if values, err = rs.db.SInter(DESTINATION_PREFIX+key, TEMP_DESTINATION_PREFIX+prefix); err == nil {
+		for _, p := range values {
+			if len(p) > precision {
+				precision = len(p)
+			}
+		}
+	}
+	if _, err := rs.db.Del(TEMP_DESTINATION_PREFIX + prefix); err != nil {
+		Logger.Err("Error removing temp ")
+	}
+	return
+}*/
+
+func (rs *SRedisStorage) SetDestination(dest *Destination) (err error) {
 	result, err := rs.ms.Marshal(dest)
 	if err != nil {
 		return err
@@ -189,7 +222,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	w := zlib.NewWriter(&b)
 	w.Write(result)
 	w.Close()
-	err = rs.db.Set(DESTINATION_PREFIX+dest.Id, b.Bytes())
+	_, err = rs.db.Set(DESTINATION_PREFIX+dest.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
 		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
@@ -197,56 +230,56 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
-	var values []byte
+func (rs *SRedisStorage) GetActions(key string) (as Actions, err error) {
+	var values string
 	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {
-		err = rs.ms.Unmarshal(values, &as)
+		err = rs.ms.Unmarshal([]byte(values), &as)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
+func (rs *SRedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
-	err = rs.db.Set(ACTION_PREFIX+key, result)
+	_, err = rs.db.Set(ACTION_PREFIX+key, result)
 	return
 }
 
-func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
-	var values []byte
+func (rs *SRedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
+	var values string
 	if values, err = rs.db.Get(USER_BALANCE_PREFIX + key); err == nil {
 		ub = &UserBalance{Id: key}
-		err = rs.ms.Unmarshal(values, ub)
+		err = rs.ms.Unmarshal([]byte(values), ub)
 	}
 
 	return
 }
 
-func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
+func (rs *SRedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 	result, err := rs.ms.Marshal(ub)
-	err = rs.db.Set(USER_BALANCE_PREFIX+ub.Id, result)
+	_, err = rs.db.Set(USER_BALANCE_PREFIX+ub.Id, result)
 	return
 }
 
-func (rs *RedisStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
-	var values []byte
+func (rs *SRedisStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
+	var values string
 	if values, err = rs.db.Get(ACTION_TIMING_PREFIX + key); err == nil {
-		err = rs.ms.Unmarshal(values, &ats)
+		err = rs.ms.Unmarshal([]byte(values), &ats)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
+func (rs *SRedisStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		_, err = rs.db.Del(ACTION_TIMING_PREFIX + key)
 		return err
 	}
 	result, err := rs.ms.Marshal(&ats)
-	err = rs.db.Set(ACTION_TIMING_PREFIX+key, result)
+	_, err = rs.db.Set(ACTION_TIMING_PREFIX+key, result)
 	return
 }
 
-func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
+func (rs *SRedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
 	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
 	if err != nil {
 		return nil, err
@@ -258,32 +291,32 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err
 			continue
 		}
 		var tempAts ActionTimings
-		err = rs.ms.Unmarshal(values, &tempAts)
+		err = rs.ms.Unmarshal([]byte(values), &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}
 
 	return
 }
 
-func (rs *RedisStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
+func (rs *SRedisStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(cc)
 	if err != nil {
 		return
 	}
-	err = rs.db.Set(LOG_CALL_COST_PREFIX+source+"_"+uuid, result)
+	_, err = rs.db.Set(LOG_CALL_COST_PREFIX+source+"_"+uuid, result)
 	return
 }
 
-func (rs *RedisStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	var values []byte
+func (rs *SRedisStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
+	var values string
 	if values, err = rs.db.Get(LOG_CALL_COST_PREFIX + source + "_" + uuid); err == nil {
-		err = rs.ms.Unmarshal(values, cc)
+		err = rs.ms.Unmarshal([]byte(values), cc)
 	}
 	return
 }
 
-func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
+func (rs *SRedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
@@ -296,7 +329,7 @@ func (rs *RedisStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 	return
 }
 
-func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
+func (rs *SRedisStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	mat, err := rs.ms.Marshal(at)
 	if err != nil {
 		return
@@ -305,11 +338,11 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	if err != nil {
 		return
 	}
-	err = rs.db.Set(LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v", string(mat), string(mas))))
+	_, err = rs.db.Set(LOG_ACTION_TIMMING_PREFIX+source+"_"+time.Now().Format(time.RFC3339Nano), []byte(fmt.Sprintf("%v*%v", string(mat), string(mas))))
 	return
 }
 
-func (rs *RedisStorage) LogError(uuid, source, errstr string) (err error) {
-	err = rs.db.Set(LOG_ERR+source+"_"+uuid, []byte(errstr))
+func (rs *SRedisStorage) LogError(uuid, source, errstr string) (err error) {
+	_, err = rs.db.Set(LOG_ERR+source+"_"+uuid, errstr)
 	return
 }

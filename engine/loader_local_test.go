@@ -271,7 +271,7 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 		t.Fatal("Failed querying redis keys for csv data")
 	}
 	for _, key := range keysCsv {
-		refVal := ""
+		var refVal []byte
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
 			qVal, err := rs.db.Get(key)
 			if err != nil {
