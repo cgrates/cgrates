@@ -68,9 +68,12 @@ func (rs *RedisStorage) Flush() (err error) {
 
 func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 	if dKeys == nil {
+		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
 			return
 		}
+	} else if len(dKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching destinations: %v", dKeys))
 	}
 	prefixLen := len(DESTINATION_PREFIX)
 	for _, key := range dKeys {
@@ -79,10 +82,16 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 			return err
 		}
 	}
+	if len(dKeys) != 0 {
+		Logger.Info("Finished destinations caching.")
+	}
 	if rpKeys == nil {
+		Logger.Info("Caching all rating plans")
 		if rpKeys, err = rs.db.Keys(RATING_PLAN_PREFIX + "*"); err != nil {
 			return
 		}
+	} else if len(rpKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching rating plans: %v", rpKeys))
 	}
 	prefixLen = len(RATING_PLAN_PREFIX)
 	for _, key := range rpKeys {
@@ -90,6 +99,9 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 		if _, err = rs.GetRatingPlan(key[prefixLen:]); err != nil {
 			return err
 		}
+	}
+	if len(rpKeys) != 0 {
+		Logger.Info("Finished rating plans caching.")
 	}
 	return
 }

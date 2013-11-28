@@ -63,16 +63,21 @@ func (self *CmdGetCost) FromArgs(args []string) error {
 	} else {
 		tStart,err = utils.ParseDate(args[6])
 		if err != nil {
-			fmt.Println("Cannot parse start time")
+			fmt.Println("\n*start_time* should have one of the formats:")
+			fmt.Println("\ttime.RFC3339\teg:2013-08-07T17:30:00Z in UTC")
+			fmt.Println("\tunix time\teg: 1383823746")
+			fmt.Println("\t*now\t\tmetafunction transformed into localtime at query time")
+			fmt.Println("\t+dur\t\tduration to be added to localtime (valid suffixes: ns, us/µs, ms, s, m, h)\n")
 			return fmt.Errorf(self.Usage(""))
 		}
 	}
 	if _, err := strconv.Atoi(args[7]); err == nil { // No suffix, default to seconds
+		fmt.Println("\n*duration* needs suffix, defaulting to *s* (valid suffixes: ns, us/µs, ms, s, m, h)\n")
 		args[7] += "s"
 	}
 	callDur, err := time.ParseDuration(args[7])
 	if err != nil {
-		fmt.Println("Cannot parse duration")
+		fmt.Println("\n\tExample durations: 60s for 60 seconds, 25m for 25minutes, 1m25s for one minute and 25 seconds\n")
 		return fmt.Errorf(self.Usage(""))
 	}
 	self.rpcParams.TOR = args[2]

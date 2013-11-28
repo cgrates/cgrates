@@ -327,12 +327,10 @@ func main() {
 		cfg.SchedulerEnabled = *schedEnabled
 	}
 	if cfg.RaterEnabled {
-		engine.Logger.Info("Starting redis pre-caching...")
 		if err := dataDb.PreCache(nil, nil); err != nil {
 			engine.Logger.Crit(fmt.Sprintf("Pre-caching error: %v", err))
 			return
 		}
-		engine.Logger.Info("Pre-caching done!")
 	}
 	if cfg.StorDBType == SAME {
 		logDb = dataDb.(engine.LogStorage)
