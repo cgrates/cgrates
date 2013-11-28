@@ -3,7 +3,7 @@ Version: 0.9.1-rc3
 Section: base
 Priority: optional
 Architecture: amd64
-Depends: daemontools, daemontools-run
+Depends: daemontools, daemontools-run, git
 Maintainer: DanB <danb@cgrates.org>
 Description: Carrier Grade Rating System
   CGRateS is a very fast and easy scalable rating engine for Telecom environments.

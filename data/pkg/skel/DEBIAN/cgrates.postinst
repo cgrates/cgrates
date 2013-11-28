@@ -1,0 +1,21 @@
+#!/bin/bash
+
+### CGRateS debian postinstall script
+ 
+set -e
+ 
+case "$1" in
+	configure)
+		adduser --quiet --system --group --disabled-password --shell /bin/false --home  /var/run/cgrates --gecos "CGRateS" cgrates 
+		chown -R cgrates /var/log/cgrates/
+		chown -R cgrates /usr/share/cgrates/
+	;;
+	abort-upgrade|abort-remove|abort-deconfigure)
+		echo "$1"
+	;;
+ 	*)
+	echo "postinst called with unknown argument \`\$1'" >&2
+	exit 0
+	;;
+esac
+ 
