@@ -21,7 +21,9 @@ package engine
 import (
 	"errors"
 	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
+
 	"strings"
 	"time"
 )
@@ -131,7 +133,7 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 			continue
 		}
 		if b.DestinationId != "" {
-			dest, err := storageGetter.GetDestination(b.DestinationId)
+			dest, err := storageGetter.GetDestination(b.DestinationId, false)
 			if err != nil {
 				continue
 			}

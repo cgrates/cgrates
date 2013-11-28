@@ -5,7 +5,6 @@ go get -v -u github.com/ugorji/go/codec
 go get -v -u labix.org/v2/mgo
 go get -v -u github.com/cgrates/fsock
 go get -u -v github.com/go-sql-driver/mysql
-go get -u -v menteslibres.net/gosexy/redis
 go get -u -v github.com/hoisie/redis
 go get -u -v github.com/howeyc/fsnotify
 

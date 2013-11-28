@@ -23,10 +23,12 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/hoisie/redis"
+
 	"io/ioutil"
 	"time"
 )
@@ -75,7 +77,7 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 	prefixLen := len(DESTINATION_PREFIX)
 	for _, key := range dKeys {
 		cache2go.RemKey(key[prefixLen:])
-		if _, err = rs.GetDestination(key[prefixLen:]); err != nil {
+		if _, err = rs.GetDestination(key[prefixLen:], true); err != nil {
 			return err
 		}
 	}
@@ -87,7 +89,7 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 	prefixLen = len(RATING_PLAN_PREFIX)
 	for _, key := range rpKeys {
 		cache2go.RemKey(key[prefixLen:])
-		if _, err = rs.GetRatingPlan(key[prefixLen:]); err != nil {
+		if _, err = rs.GetRatingPlan(key[prefixLen:], true); err != nil {
 			return err
 		}
 	}
@@ -103,9 +105,12 @@ func (rs *RedisStorage) ExistsData(category, subject string) (bool, error) {
 	return false, errors.New("Unsupported category in ExistsData")
 }
 
-func (rs *RedisStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+func (rs *RedisStorage) GetRatingPlan(key string, checkDb bool) (rp *RatingPlan, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*RatingPlan), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	var values []byte
 	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
@@ -137,6 +142,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 		response := 0
 		historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
 	}
+	cache2go.Cache(rp.Id, rp)
 	return
 }
 
@@ -159,9 +165,12 @@ func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
+func (rs *RedisStorage) GetDestination(key string, checkDb bool) (dest *Destination, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*Destination), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	var values []byte
 	if values, err = rs.db.Get(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
@@ -196,6 +205,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 		response := 0
 		historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
+	cache2go.Cache(dest.Id, dest)
 	return
 }
 

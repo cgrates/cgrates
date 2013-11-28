@@ -20,7 +20,9 @@ package engine
 
 import (
 	"encoding/json"
+
 	"github.com/cgrates/cgrates/utils"
+
 	"reflect"
 	"testing"
 	"time"
@@ -270,6 +272,6 @@ func BenchmarkRatingPlanRestore(b *testing.B) {
 	storageGetter.SetRatingPlan(rp)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		storageGetter.GetRatingPlan(rp.Id)
+		storageGetter.GetRatingPlan(rp.Id, true)
 	}
 }
