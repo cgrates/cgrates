@@ -142,12 +142,12 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		//log.Printf("NOT in interval: %+v", i)
 		return
 	}
-	Logger.Debug(fmt.Sprintf("TS: %+v", ts))
+	//Logger.Debug(fmt.Sprintf("TS: %+v", ts))
 	// split by GroupStart
 	if i.Rating != nil {
 		i.Rating.Rates.Sort()
 		for _, rate := range i.Rating.Rates {
-			Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
+			// Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
 			if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
 				Logger.Debug(fmt.Sprintf("Splitting"))
 				ts.SetRateInterval(i)

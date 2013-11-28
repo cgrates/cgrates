@@ -306,13 +306,13 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			}
 		}
 	}
-	Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
+	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
 		//log.Printf("==============%v==================", i)
 		//log.Printf("TS: %+v", timespans[i])
 		rp := timespans[i].ratingInfo
-		Logger.Debug(fmt.Sprintf("rp: %+v", rp))
+		// Logger.Debug(fmt.Sprintf("rp: %+v", rp))
 		//timespans[i].RatingPlan = nil
 		rp.RateIntervals.Sort()
 		for _, interval := range rp.RateIntervals {
@@ -335,7 +335,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 	Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
 	//log.Printf("After SplitByRateInterval: %+v", timespans)
 	timespans = cd.roundTimeSpansToIncrement(timespans)
-	Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
+	// Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
 	//log.Printf("After round: %+v", timespans)
 	return
 }
