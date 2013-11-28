@@ -24,9 +24,11 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
 	"labix.org/v2/mgo/bson"
+
 	"reflect"
 	"time"
 )
@@ -70,11 +72,11 @@ type DataStorage interface {
 	Storage
 	PreCache([]string, []string) error
 	ExistsData(string, string) (bool, error)
-	GetRatingPlan(string) (*RatingPlan, error)
+	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
-	GetDestination(string) (*Destination, error)
+	GetDestination(string, bool) (*Destination, error)
 	//	DestinationContainsPrefix(string, string) (int, error)
 	SetDestination(*Destination) error
 	GetActions(string) (Actions, error)

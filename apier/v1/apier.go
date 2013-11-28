@@ -21,10 +21,12 @@ package apier
 import (
 	"errors"
 	"fmt"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+
 	"path"
 )
 
@@ -46,7 +48,7 @@ type AttrDestination struct {
 }
 
 func (self *ApierV1) GetDestination(attr *AttrDestination, reply *AttrDestination) error {
-	if dst, err := self.DataDb.GetDestination(attr.Id); err != nil {
+	if dst, err := self.DataDb.GetDestination(attr.Id, false); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		reply.Id = dst.Id

@@ -4,15 +4,12 @@ import os
 import os.path
 from subprocess import call
 
-libs = ('github.com/fzzy/radix/redis',
-        'code.google.com/p/goconf/conf',
+libs = ('code.google.com/p/goconf/conf',
         'github.com/bmizerany/pq',
         'github.com/ugorji/go/codec',
         'labix.org/v2/mgo',
         'github.com/cgrates/fsock',
         'github.com/go-sql-driver/mysql',
-        'github.com/garyburd/redigo/redis',
-        'menteslibres.net/gosexy/redis',
         'github.com/hoisie/redis'
         'github.com/howeyc/fsnotify',
 )

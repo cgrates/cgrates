@@ -103,7 +103,7 @@ func (ris RatingInfos) Sort() {
 func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error) {
 	var ris RatingInfos
 	for index, rpa := range rp.RatingPlanActivations.GetActiveForCall(cd) {
-		rpl, err := storageGetter.GetRatingPlan(rpa.RatingPlanId)
+		rpl, err := storageGetter.GetRatingPlan(rpa.RatingPlanId, false)
 		if err != nil || rpl == nil {
 			Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 			continue
@@ -112,7 +112,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		var rps RateIntervalList
 		for dId, _ := range rpl.DestinationRates {
 			//precision, err := storageGetter.DestinationContainsPrefix(dId, cd.Destination)
-			d, err := storageGetter.GetDestination(dId)
+			d, err := storageGetter.GetDestination(dId, false)
 			if err != nil {
 				Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 				continue

@@ -108,6 +108,16 @@ type CallDescriptor struct {
 	userBalance                           *UserBalance
 }
 
+func (cd *CallDescriptor) ValidateCallData() error {
+	if cd.TimeStart.After(cd.TimeEnd) || cd.TimeStart.Equal(cd.TimeEnd) {
+		return errors.New("TimeStart must be strctly before TimeEnd")
+	}
+	if cd.TimeEnd.Sub(cd.TimeStart) < cd.CallDuration {
+		return errors.New("CallDuration must be equal or grater than TimeEnd - TimeStart")
+	}
+	return nil
+}
+
 // Adds a rating plan that applyes to current call descriptor.
 func (cd *CallDescriptor) AddRatingInfo(ris ...*RatingInfo) {
 	cd.RatingInfos = append(cd.RatingInfos, ris...)

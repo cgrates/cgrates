@@ -20,8 +20,10 @@ package engine
 
 import (
 	"encoding/json"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
+
 	"testing"
 )
 
@@ -42,7 +44,7 @@ func TestDestinationStorageStore(t *testing.T) {
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
-	result, err := storageGetter.GetDestination(nationale.Id)
+	result, err := storageGetter.GetDestination(nationale.Id, false)
 	var ss utils.StringSlice = result.Prefixes
 	if !ss.Contains("0257") || !ss.Contains("0256") || !ss.Contains("0723") {
 		t.Errorf("Expected %q was %q", nationale, result)
@@ -74,28 +76,28 @@ func TestDestinationContainsPrefixWrong(t *testing.T) {
 }
 
 func TestDestinationGetExists(t *testing.T) {
-	d, err := storageGetter.GetDestination("NAT")
+	d, err := storageGetter.GetDestination("NAT", false)
 	if err != nil || d == nil {
 		t.Error("Could not get destination: ", d)
 	}
 }
 
 func TestDestinationGetExistsCache(t *testing.T) {
-	storageGetter.GetDestination("NAT")
+	storageGetter.GetDestination("NAT", false)
 	if _, err := cache2go.GetCached("NAT"); err != nil {
 		t.Error("Destination not cached:", err)
 	}
 }
 
 func TestDestinationGetNotExists(t *testing.T) {
-	d, err := storageGetter.GetDestination("not existing")
+	d, err := storageGetter.GetDestination("not existing", false)
 	if d != nil {
 		t.Error("Got false destination: ", d, err)
 	}
 }
 
 func TestDestinationGetNotExistsCache(t *testing.T) {
-	storageGetter.GetDestination("not existing")
+	storageGetter.GetDestination("not existing", false)
 	if d, err := cache2go.GetCached("not existing"); err == nil {
 		t.Error("Bad destination cached: ", d)
 	}
@@ -156,6 +158,6 @@ func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
 	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
 		storageGetter.SetDestination(nationale)
-		storageGetter.GetDestination(nationale.Id)
+		storageGetter.GetDestination(nationale.Id, true)
 	}
 }

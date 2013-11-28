@@ -51,13 +51,13 @@ func (ms *MapStorage) PreCache(dKeys, rppKeys []string) error {
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
 			cache2go.RemKey(k[prefixLen:])
-			if _, err := ms.GetDestination(k[prefixLen:]); err != nil {
+			if _, err := ms.GetDestination(k[prefixLen:], true); err != nil {
 				return err
 			}
 		}
 		if strings.HasPrefix(k, RATING_PLAN_PREFIX) {
 			cache2go.RemKey(k[prefixLen1:])
-			if _, err := ms.GetRatingPlan(k[prefixLen1:]); err != nil {
+			if _, err := ms.GetRatingPlan(k[prefixLen1:], true); err != nil {
 				return err
 			}
 		}
@@ -78,9 +78,12 @@ func (ms *MapStorage) ExistsData(categ, subject string) (bool, error) {
 	return false, errors.New("Unsupported category")
 }
 
-func (ms *MapStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
+func (ms *MapStorage) GetRatingPlan(key string, checkDb bool) (rp *RatingPlan, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*RatingPlan), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	if values, ok := ms.dict[RATING_PLAN_PREFIX+key]; ok {
 		rp = new(RatingPlan)
@@ -98,6 +101,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	ms.dict[RATING_PLAN_PREFIX+rp.Id] = result
 	response := 0
 	go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
+	cache2go.Cache(rp.Id, rp)
 	return
 }
 
@@ -120,9 +124,12 @@ func (ms *MapStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {
+func (ms *MapStorage) GetDestination(key string, checkDb bool) (dest *Destination, err error) {
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*Destination), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	if values, ok := ms.dict[DESTINATION_PREFIX+key]; ok {
 		dest = &Destination{Id: key}
@@ -134,24 +141,12 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 	return
 }
 
-func (ms *MapStorage) DestinationContainsPrefix(key string, prefix string) (precision int, err error) {
-	if d, err := ms.GetDestination(key); err != nil {
-		return 0, err
-	} else {
-		for _, p := range utils.SplitPrefixInterface(prefix) {
-			if precision := d.containsPrefix(p.(string)); precision > 0 {
-				return precision, nil
-			}
-		}
-		return precision, nil
-	}
-}
-
 func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result
 	response := 0
 	go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
+	cache2go.Cache(dest.Id, dest)
 	return
 }
 
