@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"time"
 )
@@ -149,7 +149,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		for _, rate := range i.Rating.Rates {
 			// Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
 			if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
-				Logger.Debug(fmt.Sprintf("Splitting"))
+				// Logger.Debug(fmt.Sprintf("Splitting"))
 				ts.SetRateInterval(i)
 				splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
 				//log.Print("SPLIT: ", splitTime)
@@ -162,7 +162,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 				nts.SetRateInterval(i)
 				nts.CallDuration = ts.CallDuration
 				ts.SetNewCallDuration(nts)
-				Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
+				// Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
 				//log.Printf("Group splitting: %+v %+v", ts, nts)
 				return
 			}
@@ -192,7 +192,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		ts.TimeEnd = splitTime
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
-		Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
+		// Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
 		//log.Printf("right: %+v %+v", ts, nts)
 		return
 	}
@@ -215,7 +215,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.SetRateInterval(i)
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
-		Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
+		// Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
 		//log.Printf("left: %+v %+v", ts, nts)
 		return
 	}
@@ -290,7 +290,7 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 	newTs.CallDuration = ts.CallDuration
 	ts.TimeEnd = rp.ActivationTime
 	ts.SetNewCallDuration(newTs)
-	Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
+	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	//log.Printf("RP SPLITTING: %+v %+v", ts, newTs)
 	return
 }

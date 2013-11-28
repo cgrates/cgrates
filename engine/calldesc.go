@@ -332,7 +332,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			}
 		}
 	}
-	Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
+	//Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
 	//log.Printf("After SplitByRateInterval: %+v", timespans)
 	timespans = cd.roundTimeSpansToIncrement(timespans)
 	// Logger.Debug(fmt.Sprintf("After round: %+v", timespans))
@@ -437,13 +437,13 @@ func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float6
 		return 0, err
 	}
 	availableCredit, availableSeconds := 0.0, 0.0
-	Logger.Debug(fmt.Sprintf("cd: %+v", cd))
+	// Logger.Debug(fmt.Sprintf("cd: %+v", cd))
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		if userBalance.Type == UB_TYPE_POSTPAID {
 			return -1, nil
 		} else {
 			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd)
-			Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
+			// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 		}
 	} else {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetUserBalanceKey(), err.Error()))
@@ -475,7 +475,7 @@ func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float6
 			maxSessionSeconds -= cd.Amount * 0.1
 		}
 	}
-	Logger.Debug("Even 10% of the max session time is too much!")
+	// Logger.Debug("Even 10% of the max session time is too much!")
 	return 0, nil
 }
 
@@ -490,9 +490,9 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	if userBalance, err := cd.getUserBalance(); err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error retrieving user balance: %v", err))
 	} else if userBalance == nil {
-		Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetUserBalanceKey()))
+		// Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetUserBalanceKey()))
 	} else {
-		Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
+		// Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 		defer storageGetter.SetUserBalance(userBalance)
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
 			userBalance.debitCreditBalance(cc, true)
@@ -507,7 +507,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit(startTime time.Time) (cc *CallCost, err error) {
 	remainingSeconds, err := cd.GetMaxSessionTime(startTime)
-	Logger.Debug(fmt.Sprintf("In MaxDebitd remaining seconds: %v", remainingSeconds))
+	// Logger.Debug(fmt.Sprintf("In MaxDebitd remaining seconds: %v", remainingSeconds))
 	if err != nil || remainingSeconds == 0 {
 		return new(CallCost), errors.New("no more credit")
 	}

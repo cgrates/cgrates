@@ -252,9 +252,9 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 	for tag, rplBnds := range mpRpls {
 		ratingPlan := &RatingPlan{Id: tag}
 		for _, rp := range rplBnds {
-			Logger.Debug(fmt.Sprintf("Rating Plan binding: %v", rp))
+			// Logger.Debug(fmt.Sprintf("Rating Plan binding: %v", rp))
 			tm, err := dbr.storDb.GetTpTimings(dbr.tpid, rp.TimingId)
-			Logger.Debug(fmt.Sprintf("Timing: %v", tm))
+			// Logger.Debug(fmt.Sprintf("Timing: %v", tm))
 			if err != nil || len(tm) == 0 {
 				return false, fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
 			}
@@ -264,12 +264,12 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 				return false, fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
 			}
 			for _, drate := range drm[rp.DestinationRatesId].DestinationRates {
-				Logger.Debug(fmt.Sprintf("Destination rate: %v", drate))
+				// Logger.Debug(fmt.Sprintf("Destination rate: %v", drate))
 				rt, err := dbr.storDb.GetTpRates(dbr.tpid, drate.RateId)
 				if err != nil || len(rt) == 0 {
 					return false, fmt.Errorf("No Rates profile with id %s: %v", drate.RateId, err)
 				}
-				Logger.Debug(fmt.Sprintf("Rate: %v", rt))
+				// Logger.Debug(fmt.Sprintf("Rate: %v", rt))
 				drate.Rate = rt[drate.RateId]
 				ratingPlan.AddRateInterval(drate.DestinationId, GetRateInterval(rp, drate))
 
@@ -284,9 +284,9 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 					}
 					continue
 				}
-				Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationId, dms))
+				// Logger.Debug(fmt.Sprintf("Tag: %s Destinations: %v", drate.DestinationId, dms))
 				for _, destination := range dms {
-					Logger.Debug(fmt.Sprintf("Destination: %v", destination))
+					// Logger.Debug(fmt.Sprintf("Destination: %v", destination))
 					dbr.dataDb.SetDestination(destination)
 				}
 			}
@@ -305,7 +305,7 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 		return fmt.Errorf("No RateProfile for filter %v, error: %s", qriedRpf, err.Error())
 	}
 	for _, tpRpf := range mpTpRpfs {
-		Logger.Debug(fmt.Sprintf("Rating profile: %v", tpRpf))
+		// Logger.Debug(fmt.Sprintf("Rating profile: %v", tpRpf))
 		resultRatingProfile = &RatingProfile{Id: tpRpf.KeyId()}
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseDate(tpRa.ActivationTime)
