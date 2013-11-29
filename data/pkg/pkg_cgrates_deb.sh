@@ -19,5 +19,6 @@ cp -r ../../data/ $PKG_DIR/usr/share/cgrates/
 mkdir -p $PKG_DIR/usr/bin
 cp /usr/local/goapps/bin/cgr-* $PKG_DIR/usr/bin/
 mkdir -p $PKG_DIR/var/log/cgrates/cdr/out
+mkdir -p $PKG_DIR/var/log/cgrates/history
 dpkg-deb --build $PKG_DIR
 
