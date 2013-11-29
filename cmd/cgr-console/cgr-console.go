@@ -22,8 +22,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+
 	"github.com/cgrates/cgrates/console"
 	"github.com/cgrates/cgrates/utils"
+
 	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
@@ -64,7 +66,7 @@ func main() {
 	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), res); rpcErr != nil {
 		fmt.Println("Error executing command: " + rpcErr.Error())
 	}
-	result, _ := json.Marshal(res)
+	result, _ := json.MarshalIndent(res, "", " ")
 	fmt.Println(string(result))
 
 }
