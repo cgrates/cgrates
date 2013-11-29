@@ -67,6 +67,8 @@ func NewFileScribe(fileRoot string) (*FileScribe, error) {
 }
 
 func (s *FileScribe) Record(rec *Record, out *int) error {
+	s.Lock()
+	defer s.Unlock()
 	var fileToSave string
 	switch {
 	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
