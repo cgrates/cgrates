@@ -66,7 +66,7 @@ func main() {
 	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), res); rpcErr != nil {
 		fmt.Println("Error executing command: " + rpcErr.Error())
 	}
-	result, _ := json.MarshalIndent(res, "", " ")
+	result, _ := json.MarshalIndent(res, "", "  ")
 	fmt.Println(string(result))
 
 }
