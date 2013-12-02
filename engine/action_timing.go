@@ -20,11 +20,12 @@ package engine
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -88,6 +89,7 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	if i.Timing.MonthDays != nil && len(i.Timing.MonthDays) > 0 {
 		i.Timing.MonthDays.Sort()
 		now := time.Now()
+		year := now.Year()
 		month := now.Month()
 		x := sort.SearchInts(i.Timing.MonthDays, now.Day())
 		d = i.Timing.MonthDays[0]
@@ -107,11 +109,12 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 		} else {
 			if len(i.Timing.Months) == 0 {
 				t = time.Date(now.Year(), month, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
+				year = t.Year()
 				month = t.Month()
 			}
 		}
 		h, m, s := t.Clock()
-		t = time.Date(now.Year(), month, d, h, m, s, 0, time.Local)
+		t = time.Date(year, month, d, h, m, s, 0, time.Local)
 	}
 MONTHS:
 	if i.Timing.Months != nil && len(i.Timing.Months) > 0 {
