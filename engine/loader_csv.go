@@ -392,13 +392,23 @@ func (csvr *CSVReader) LoadActions() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		units, err := strconv.ParseFloat(record[4], 64)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
+		var units float64
+		if len(record[4]) == 0 { // Not defined
+			units = 0.0
+		} else {
+			units, err = strconv.ParseFloat(record[4], 64)
+			if err != nil {
+				return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
+			}
 		}
-		balanceWeight, err := strconv.ParseFloat(record[8], 64)
-		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action balance weight: %v", err))
+		var balanceWeight float64
+		if len(record[8]) == 0 { // Not defined
+			balanceWeight = 0.0
+		} else {
+			balanceWeight, err = strconv.ParseFloat(record[8], 64)
+			if err != nil {
+				return errors.New(fmt.Sprintf("Could not parse action balance weight: %v", err))
+			}
 		}
 		weight, err := strconv.ParseFloat(record[10], 64)
 		if err != nil {

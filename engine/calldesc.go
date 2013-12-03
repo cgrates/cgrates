@@ -492,11 +492,19 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	} else if userBalance == nil {
 		// Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetUserBalanceKey()))
 	} else {
-		// Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
+		Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 		defer storageGetter.SetUserBalance(userBalance)
+		Logger.Debug(fmt.Sprintf("<Rater> Balance before debit: %v", userBalance))
+		for _, blnc := range userBalance.BalanceMap["*monetary*out"] {
+			Logger.Debug(fmt.Sprintf("Balance: %v", blnc))
+		}
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
 			userBalance.debitCreditBalance(cc, true)
 		}
+		Logger.Debug(fmt.Sprintf("<Rater> Balance after debit: %v", userBalance))
+		for _, blnc := range userBalance.BalanceMap["*monetary*out"] {
+                        Logger.Debug(fmt.Sprintf("Balance: %v", blnc))
+                }
 	}
 	return
 }
