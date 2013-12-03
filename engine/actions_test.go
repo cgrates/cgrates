@@ -20,7 +20,9 @@ package engine
 
 import (
 	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
+
 	"testing"
 	"time"
 )
@@ -117,7 +119,7 @@ func TestActionTimingOnlyMonths(t *testing.T) {
 	nextMonth := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Months: utils.Months{time.February, time.May, nextMonth.Month()}}}}
 	st := at.GetNextStartTime()
-	expected := time.Date(y, nextMonth.Month(), 1, 0, 0, 0, 0, time.Local)
+	expected := time.Date(nextMonth.Year(), nextMonth.Month(), 1, 0, 0, 0, 0, time.Local)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -177,7 +179,6 @@ func TestActionTimingFirstOfTheMonth(t *testing.T) {
 	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	at := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
-			Months:    utils.Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
 			MonthDays: utils.MonthDays{1},
 		},
 	}}
