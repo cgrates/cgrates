@@ -91,7 +91,7 @@ func TestStartEngine(t *testing.T) {
 		t.Fatal("Cannot find cgr-engine executable")
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	engine := exec.Command(enginePath, "-rater", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
+	engine := exec.Command(enginePath, "-rater", "-scheduler", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
@@ -459,8 +459,10 @@ func TestApierTPActions(t *testing.T) {
 	}
 	reply := ""
 	act := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
+		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight:10},
 		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
 			DestinationId: "*any", BalanceWeight: 10, Weight: 10},
+	
 	}}
 	actTst := new(utils.TPActions)
 	*actTst = *act
@@ -730,7 +732,6 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	}
 }
 
-/*
 // Test here ReloadScheduler
 func TestApierReloadScheduler(t *testing.T) {
 	if !*testLocal {
@@ -744,7 +745,7 @@ func TestApierReloadScheduler(t *testing.T) {
 		t.Error("Calling ApierV1.ReloadScheduler got reply: ", reply)
 	}
 }
-*/
+
 // Test here ReloadCache
 func TestApierReloadCache(t *testing.T) {
 	if !*testLocal {
