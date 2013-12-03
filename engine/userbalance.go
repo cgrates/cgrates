@@ -132,7 +132,7 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 		if b.IsExpired() || (ub.Type != UB_TYPE_POSTPAID && b.Value <= 0) {
 			continue
 		}
-		if b.DestinationId != "" {
+		if b.DestinationId != "" && b.DestinationId != "*any" {
 			dest, err := storageGetter.GetDestination(b.DestinationId, false)
 			if err != nil {
 				continue
