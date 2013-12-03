@@ -1,5 +1,5 @@
 ApierV1.SetTPTiming
-+++++++++++++++++
+===================
 
 Creates a new timing within a tariff plan.
 
@@ -11,28 +11,28 @@ Creates a new timing within a tariff plan.
    type ApierTPTiming struct {
 	TPid      string // Tariff plan id
 	TimingId  string // Timing id
-	Years     string // semicolon separated list of years this timing is valid on, \*all supported
-	Months    string // semicolon separated list of months this timing is valid on, \*none and \*all supported
-	MonthDays string // semicolon separated list of month's days this timing is valid on, \*none and \*all supported
-	WeekDays  string // semicolon separated list of week day names this timing is valid on \*none and \*all supported
+	Years     string // semicolon separated list of years this timing is valid on, \*any supported
+	Months    string // semicolon separated list of months this timing is valid on, \*any supported
+	MonthDays string // semicolon separated list of month's days this timing is valid on, \*any supported
+	WeekDays  string // semicolon separated list of week day names this timing is valid on \*any supported
 	Time      string // String representing the time this timing starts on
    }
 
- Mandatory parameters: ``[]string{"TPid", "TimingId", "Years","Months","MonthDays", "WeekDays","Time"}``
+ Mandatory parameters: ``[]string{"TPid", "TimingId", "Years", "Months", "MonthDays", "WeekDays", "Time"}``
 
  *JSON sample*:
   ::
 
    {
-    "id": 0,
+    "id": 3,
     "method": "ApierV1.SetTPTiming",
     "params": [
         {
             "MonthDays": "*any",
             "Months": "*any",
-            "TPid": "CGR_API_TESTS",
-            "Time": "*asap",
-            "TimingId": "ASAP",
+            "TPid": "TEST_SQL",
+            "Time": "00:00:00",
+            "TimingId": "ALWAYS",
             "WeekDays": "*any",
             "Years": "*any"
         }
@@ -54,7 +54,7 @@ Creates a new timing within a tariff plan.
 
    {
     "error": null,
-    "id": 0,
+    "id": 3,
     "result": "OK"
    }
 
@@ -64,11 +64,9 @@ Creates a new timing within a tariff plan.
 
  ``SERVER_ERROR`` - Server error occurred.
 
- ``DUPLICATE`` - The specified combination of TPid/TimingId already exists in StorDb.
-
 
 ApierV1.GetTPTiming
-+++++++++++++++++
+===================
 
 Queries specific Timing on tariff plan.
 
@@ -87,13 +85,13 @@ Queries specific Timing on tariff plan.
  *JSON sample*:
   ::
 
-  { 
-    "id": 3,
+  {
+    "id": 5,
     "method": "ApierV1.GetTPTiming",
     "params": [
         {
-            "TPid": "CGR_API_TESTS",
-            "TimingId": "ASAP"
+            "TPid": "TEST_SQL",
+            "TimingId": "ALWAYS"
         }
     ]
    }
@@ -107,10 +105,10 @@ Queries specific Timing on tariff plan.
    type ApierTPTiming struct {
 	TPid      string // Tariff plan id
 	TimingId  string // Timing id
-	Years     string // semicolon separated list of years this timing is valid on, \*all supported
-	Months    string // semicolon separated list of months this timing is valid on, \*none and \*all supported
-	MonthDays string // semicolon separated list of month's days this timing is valid on, \*none and \*all supported
-	WeekDays  string // semicolon separated list of week day names this timing is valid on \*none and \*all supported
+	Years     string // semicolon separated list of years this timing is valid on, \*any supported
+	Months    string // semicolon separated list of months this timing is valid on, \*any supported
+	MonthDays string // semicolon separated list of month's days this timing is valid on, \*any supported
+	WeekDays  string // semicolon separated list of week day names this timing is valid on \*any supported
 	Time      string // String representing the time this timing starts on
    }
 
@@ -119,13 +117,13 @@ Queries specific Timing on tariff plan.
 
    {
     "error": null,
-    "id": 3,
+    "id": 5,
     "result": {
         "MonthDays": "*any",
         "Months": "*any",
-        "TPid": "CGR_API_TESTS",
-        "Time": "*asap",
-        "TimingId": "ASAP",
+        "TPid": "TEST_SQL",
+        "Time": "00:00:00",
+        "TimingId": "ALWAYS2",
         "WeekDays": "*any",
         "Years": "*any"
     }
@@ -141,7 +139,7 @@ Queries specific Timing on tariff plan.
 
 
 ApierV1.GetTPTimingIds
-+++++++++++++++++++++++++
+======================
 
 Queries timing identities on tariff plan.
 

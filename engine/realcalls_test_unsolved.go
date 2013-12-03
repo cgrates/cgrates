@@ -35,7 +35,7 @@ func TestDebitBalanceForCall1(t *testing.T) {
 	}
 	cc1 := new(CallCost)
 	if err := json.Unmarshal([]byte(callCost1), cc1); err != nil {
-		t.Error("Error restoring balance1: ", err)
+		t.Error("Error restoring callCost1: ", err)
 	}
 	err := b1.debitCreditBalance(cc1, false)
 	if err != nil {

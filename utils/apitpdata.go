@@ -100,10 +100,10 @@ type DestinationRate struct {
 type ApierTPTiming struct {
 	TPid      string // Tariff plan id
 	TimingId  string // Timing id
-	Years     string // semicolon separated list of years this timing is valid on, *all supported
-	Months    string // semicolon separated list of months this timing is valid on, *none and *all supported
-	MonthDays string // semicolon separated list of month's days this timing is valid on, *none and *all supported
-	WeekDays  string // semicolon separated list of week day names this timing is valid on *none and *all supported
+	Years     string // semicolon separated list of years this timing is valid on, *any supported
+	Months    string // semicolon separated list of months this timing is valid on, *any supported
+	MonthDays string // semicolon separated list of month's days this timing is valid on, *any supported
+	WeekDays  string // semicolon separated list of week day names this timing is valid on *any supported
 	Time      string // String representing the time this timing starts on
 }
 
