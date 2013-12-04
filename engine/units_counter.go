@@ -59,7 +59,7 @@ func (uc *UnitsCounter) GetGeneralBalance() *Balance {
 func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
 	counted := false
 	if prefix != "" {
-		for _, mb := range uc.Balances[1:] { // skip the general balance
+		for _, mb := range uc.Balances {
 			if !mb.HasDestination() {
 				continue
 			}
