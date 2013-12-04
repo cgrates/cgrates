@@ -1,5 +1,4 @@
 #ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,ExtraParameters,Weight
 PREPAID_10,*topup_reset,*monetary,*out,10,*unlimited,*any,,10,,10
-WARN_HTTP,*call_url,,,,,,,,http://localhost:8000,10
-LOG_BALANCE,*log,,,,,,,,,10
-
+#WARN_HTTP,*call_url,,,,,,,,http://localhost:8000,10
+#LOG_BALANCE,*log,,,,,,,,,10

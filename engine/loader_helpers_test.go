@@ -106,6 +106,230 @@ func TestTimingsValidator(t *testing.T) {
 		}
 	}
 }
+
+
+func TestDestinationsValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(destsSample))
+	lnValidator := FileValidators[utils.DESTINATIONS_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2,4:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+
+func TestRatesValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(ratesSample))
+	lnValidator := FileValidators[utils.RATES_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+
+func TestDestRatesValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(destRatesSample))
+	lnValidator := FileValidators[utils.DESTINATION_RATES_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+
+func TestRatingPlansValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(ratingPlansSample))
+	lnValidator := FileValidators[utils.RATING_PLANS_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+func TestRatingProfilesValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(ratingProfilesSample))
+	lnValidator := FileValidators[utils.RATING_PROFILES_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+
+func TestActionsValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(actionsSample))
+	lnValidator := FileValidators[utils.ACTIONS_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 5:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2,3,4:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+
+func TestActionTimingsValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(actionTimingsSample))
+	lnValidator := FileValidators[utils.ACTION_TIMINGS_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+
+func TestActionTriggersValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(actionTriggersSample))
+	lnValidator := FileValidators[utils.ACTION_TRIGGERS_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 5:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2,3,4:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+
+func TestAccountActionsValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(accountActionsSample))
+	lnValidator := FileValidators[utils.ACCOUNT_ACTIONS_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
 	
 
 func TestTPCSVFileParser(t *testing.T) {
