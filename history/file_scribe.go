@@ -68,7 +68,6 @@ func NewFileScribe(fileRoot string) (*FileScribe, error) {
 
 func (s *FileScribe) Record(rec *Record, out *int) error {
 	s.Lock()
-	defer s.Unlock()
 	var fileToSave string
 	switch {
 	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
@@ -87,6 +86,7 @@ func (s *FileScribe) Record(rec *Record, out *int) error {
 		s.loopChecker <- 1
 	}
 	s.waitingFile = fileToSave
+	defer s.Unlock()
 	go func() {
 		t := time.NewTicker(1 * time.Second)
 		select {
