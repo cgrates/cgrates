@@ -132,7 +132,7 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 		if b.IsExpired() || (ub.Type != UB_TYPE_POSTPAID && b.Value <= 0) {
 			continue
 		}
-		if b.DestinationId != "" && b.DestinationId != "*any" {
+		if b.DestinationId != "" && b.DestinationId != utils.ANY {
 			dest, err := storageGetter.GetDestination(b.DestinationId, false)
 			if err != nil {
 				continue
@@ -472,6 +472,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					ts.SplitByIncrement(incrementIndex)
 					cc.Timespans = cc.Timespans[:tsIndex+1]
 				}
+				//return errors.New("Not enough credit")
 				return nil
 			}
 		}
@@ -539,28 +540,14 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 		if strings.Contains(at.ThresholdType, "counter") {
 			for _, uc := range ub.UnitCounters {
 				if uc.BalanceId == at.BalanceId {
-					if at.BalanceId == MINUTES {
-						for _, mb := range uc.MinuteBalances {
-							if strings.Contains(at.ThresholdType, "*max") {
-								if mb.DestinationId == at.DestinationId && mb.Value >= at.ThresholdValue {
-									// run the actions
-									at.Execute(ub)
-								}
-							} else { //MIN
-								if mb.DestinationId == at.DestinationId && mb.Value <= at.ThresholdValue {
-									// run the actions
-									at.Execute(ub)
-								}
-							}
-						}
-					} else {
+					for _, mb := range uc.Balances {
 						if strings.Contains(at.ThresholdType, "*max") {
-							if uc.Units >= at.ThresholdValue {
+							if mb.MatchDestination(at.DestinationId) && mb.Value >= at.ThresholdValue {
 								// run the actions
 								at.Execute(ub)
 							}
 						} else { //MIN
-							if uc.Units <= at.ThresholdValue {
+							if mb.MatchDestination(at.DestinationId) && mb.Value <= at.ThresholdValue {
 								// run the actions
 								at.Execute(ub)
 							}
@@ -569,32 +556,16 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 				}
 			}
 		} else { // BALANCE
-			for _, b := range ub.BalanceMap[at.BalanceId] {
-				if at.BalanceId == MINUTES {
-					for _, mb := range ub.BalanceMap[MINUTES+OUTBOUND] {
-						if strings.Contains(at.ThresholdType, "*max") {
-							if mb.DestinationId == at.DestinationId && mb.Value >= at.ThresholdValue {
-								// run the actions
-								at.Execute(ub)
-							}
-						} else { //MIN
-							if mb.DestinationId == at.DestinationId && mb.Value <= at.ThresholdValue {
-								// run the actions
-								at.Execute(ub)
-							}
-						}
+			for _, b := range ub.BalanceMap[at.BalanceId+at.Direction] {
+				if strings.Contains(at.ThresholdType, "*max") {
+					if b.MatchDestination(at.DestinationId) && b.Value >= at.ThresholdValue {
+						// run the actions
+						at.Execute(ub)
 					}
-				} else {
-					if strings.Contains(at.ThresholdType, "*max") {
-						if b.Value >= at.ThresholdValue {
-							// run the actions
-							at.Execute(ub)
-						}
-					} else { //MIN
-						if b.Value <= at.ThresholdValue {
-							// run the actions
-							at.Execute(ub)
-						}
+				} else { //MIN
+					if b.MatchDestination(at.DestinationId) && b.Value <= at.ThresholdValue {
+						// run the actions
+						at.Execute(ub)
 					}
 				}
 			}
@@ -641,16 +612,13 @@ func (ub *UserBalance) countUnits(a *Action) {
 		unitsCounter = &UnitsCounter{BalanceId: a.BalanceId, Direction: direction}
 		ub.UnitCounters = append(ub.UnitCounters, unitsCounter)
 	}
-	if a.BalanceId == MINUTES && a.Balance != nil {
-		unitsCounter.addMinutes(a.Balance.Value, a.Balance.DestinationId)
-	} else {
-		unitsCounter.Units += a.Balance.Value
-	}
+
+	unitsCounter.addUnits(a.Balance.Value, a.Balance.DestinationId) // DestinationId is actually a destination (number or prefix)
 	ub.executeActionTriggers(nil)
 }
 
 // Create minute counters for all triggered actions that have actions operating on minute buckets
-func (ub *UserBalance) initMinuteCounters() {
+func (ub *UserBalance) initCounters() {
 	ucTempMap := make(map[string]*UnitsCounter, 2)
 	for _, at := range ub.ActionTriggers {
 		acs, err := storageGetter.GetActions(at.ActionsId)
@@ -658,22 +626,22 @@ func (ub *UserBalance) initMinuteCounters() {
 			continue
 		}
 		for _, a := range acs {
-			if a.BalanceId == MINUTES && a.Balance != nil {
+			if a.Balance != nil {
 				direction := at.Direction
 				if direction == "" {
 					direction = OUTBOUND
 				}
 				uc, exists := ucTempMap[direction]
 				if !exists {
-					uc = &UnitsCounter{BalanceId: MINUTES, Direction: direction}
+					uc = &UnitsCounter{BalanceId: a.BalanceId, Direction: direction}
 					ucTempMap[direction] = uc
-					uc.MinuteBalances = BalanceChain{}
+					uc.Balances = BalanceChain{}
 					ub.UnitCounters = append(ub.UnitCounters, uc)
 				}
 				b := a.Balance.Clone()
 				b.Value = 0
-				uc.MinuteBalances = append(uc.MinuteBalances, b)
-				uc.MinuteBalances.Sort()
+				uc.Balances = append(uc.Balances, b)
+				uc.Balances.Sort()
 			}
 		}
 	}

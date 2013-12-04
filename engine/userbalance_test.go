@@ -842,7 +842,7 @@ func TestUserBalanceExecuteTriggeredActions(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
-		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Balance: &Balance{Value: 1}})
@@ -866,7 +866,7 @@ func TestUserBalanceExecuteTriggeredActionsBalance(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
-		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 100, ThresholdType: TRIGGER_MIN_COUNTER, ActionsId: "TEST_ACTIONS"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Balance: &Balance{Value: 1}})
@@ -879,7 +879,7 @@ func TestUserBalanceExecuteTriggeredActionsOrder(t *testing.T) {
 	ub := &UserBalance{
 		Id:             "TEST_UB_OREDER",
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}},
-		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Units: 1}},
+		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceId: CREDIT, Direction: OUTBOUND, Balances: BalanceChain{&Balance{Value: 1}}}},
 		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceId: CREDIT, Direction: OUTBOUND, ThresholdValue: 2, ThresholdType: TRIGGER_MAX_COUNTER, ActionsId: "TEST_ACTIONS_ORDER"}},
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 1}})
@@ -911,11 +911,11 @@ func TestCleanExpired(t *testing.T) {
 func TestUserBalanceUnitCounting(t *testing.T) {
 	ub := &UserBalance{}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 10 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Balances[0].Value != 10 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 20 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Balances[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 }
@@ -923,15 +923,15 @@ func TestUserBalanceUnitCounting(t *testing.T) {
 func TestUserBalanceUnitCountingOutbound(t *testing.T) {
 	ub := &UserBalance{}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 10 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Balances[0].Value != 10 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 20 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Balances[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 30 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Balances[0].Value != 30 {
 		t.Error("Error counting units")
 	}
 }
@@ -939,15 +939,15 @@ func TestUserBalanceUnitCountingOutbound(t *testing.T) {
 func TestUserBalanceUnitCountingOutboundInbound(t *testing.T) {
 	ub := &UserBalance{}
 	ub.countUnits(&Action{BalanceId: CREDIT, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 10 {
-		t.Error("Error counting units")
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Balances[0].Value != 10 {
+		t.Errorf("Error counting units: %+v", ub.UnitCounters[0])
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Units != 20 {
+	if len(ub.UnitCounters) != 1 && ub.UnitCounters[0].BalanceId != CREDIT || ub.UnitCounters[0].Balances[0].Value != 20 {
 		t.Error("Error counting units")
 	}
 	ub.countUnits(&Action{BalanceId: CREDIT, Direction: INBOUND, Balance: &Balance{Value: 10}})
-	if len(ub.UnitCounters) != 2 && ub.UnitCounters[1].BalanceId != CREDIT || ub.UnitCounters[0].Units != 20 || ub.UnitCounters[1].Units != 10 {
+	if len(ub.UnitCounters) != 2 && ub.UnitCounters[1].BalanceId != CREDIT || ub.UnitCounters[0].Balances[0].Value != 20 || ub.UnitCounters[1].Balances[0].Value != 10 {
 		t.Error("Error counting units")
 	}
 }

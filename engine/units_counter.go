@@ -18,53 +18,68 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import (
-	"fmt"
-)
-
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
-	Direction      string
-	BalanceId      string
-	Units          float64
-	MinuteBalances BalanceChain
+	Direction string
+	BalanceId string
+	//	Units     float64
+	Balances BalanceChain
 }
 
-func (uc *UnitsCounter) initMinuteBalances(ats []*ActionTrigger) {
-	uc.MinuteBalances = make(BalanceChain, 0)
+func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
+	uc.Balances = BalanceChain{&Balance{}} // general balance
 	for _, at := range ats {
 		acs, err := storageGetter.GetActions(at.ActionsId)
 		if err != nil {
 			continue
 		}
 		for _, a := range acs {
-			if a.BalanceId == MINUTES && a.Balance != nil {
+			if a.Balance != nil {
 				b := a.Balance.Clone()
 				b.Value = 0
-				uc.MinuteBalances = append(uc.MinuteBalances, b)
+				if !uc.Balances.HasBalance(b) {
+					uc.Balances = append(uc.Balances, b)
+				}
 			}
 		}
 	}
-	uc.MinuteBalances.Sort()
+	uc.Balances.Sort()
 }
 
-// Adds the minutes from the received minute balance to an existing bucket if the destination
-// is the same or ads the minute balance to the list if none matches.
-func (uc *UnitsCounter) addMinutes(amount float64, prefix string) {
-	for _, mb := range uc.MinuteBalances {
-		dest, err := storageGetter.GetDestination(mb.DestinationId, false)
-		if err != nil {
-			Logger.Err(fmt.Sprintf("Minutes counter: unknown destination: %v", mb.DestinationId))
-			continue
+// returns the first balance that has no destination attached
+func (uc *UnitsCounter) GetGeneralBalance() *Balance {
+	if len(uc.Balances) == 0 { // general balance not present for some reson
+		uc.Balances = append(uc.Balances, &Balance{})
+	}
+	return uc.Balances[0]
+}
+
+// Adds the units from the received balance to an existing balance if the destination
+// is the same or ads the balance to the list if none matches.
+func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
+	counted := false
+	if prefix != "" {
+		for _, mb := range uc.Balances {
+			dest, err := storageGetter.GetDestination(mb.DestinationId, false)
+			if err != nil {
+				Logger.Err("Counter: unknown destination: " + mb.DestinationId)
+				continue
+			}
+			precision := dest.containsPrefix(prefix)
+			if precision > 0 {
+				mb.Value += amount
+				counted = true
+				break
+			}
 		}
-		precision := dest.containsPrefix(prefix)
-		if precision > 0 {
-			mb.Value += amount
-			break
-		}
+	}
+	if !counted {
+		// use general balance
+		b := uc.GetGeneralBalance()
+		b.Value += amount
 	}
 }
 
-func (uc *UnitsCounter) String() string {
+/*func (uc *UnitsCounter) String() string {
 	return fmt.Sprintf("%s %s %v", uc.BalanceId, uc.Direction, uc.Units)
-}
+}*/

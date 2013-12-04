@@ -56,6 +56,7 @@ const (
 	ROUNDING_UP              = "*up"
 	ROUNDING_MIDDLE          = "*middle"
 	ROUNDING_DOWN            = "*down"
+	ANY                      = "*any"
 	COMMENT_CHAR             = '#'
 	CSV_SEP                  = ','
 	FALLBACK_SEP             = ';'

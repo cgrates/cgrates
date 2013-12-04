@@ -109,10 +109,9 @@ func TestPreCacheRefresh(t *testing.T) {
 
 func GetUB() *UserBalance {
 	uc := &UnitsCounter{
-		Direction:      OUTBOUND,
-		BalanceId:      SMS,
-		Units:          100,
-		MinuteBalances: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
+		Direction: OUTBOUND,
+		BalanceId: SMS,
+		Balances:  BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
 		Id:             "some_uuid",

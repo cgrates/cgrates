@@ -24,26 +24,24 @@ import (
 
 func TestUnitsCounterAddBalance(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction:      OUTBOUND,
-		BalanceId:      SMS,
-		Units:          100,
-		MinuteBalances: []*Balance{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
+		Direction: OUTBOUND,
+		BalanceId: SMS,
+		Balances:  BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
-	uc.addMinutes(20, "test")
-	if len(uc.MinuteBalances) != 2 {
-		t.Error("Error adding minute bucket!")
+	uc.addUnits(20, "test")
+	if len(uc.Balances) != 3 {
+		t.Error("Error adding minute bucket: ", uc.Balances)
 	}
 }
 
 func TestUnitsCounterAddBalanceExists(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction:      OUTBOUND,
-		BalanceId:      SMS,
-		Units:          100,
-		MinuteBalances: []*Balance{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
+		Direction: OUTBOUND,
+		BalanceId: SMS,
+		Balances:  BalanceChain{&Balance{Value: 1}, &Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
-	uc.addMinutes(5, "0723")
-	if len(uc.MinuteBalances) != 2 || uc.MinuteBalances[0].Value != 15 {
+	uc.addUnits(5, "0723")
+	if len(uc.Balances) != 3 || uc.Balances[1].Value != 15 {
 		t.Error("Error adding minute bucket!")
 	}
 }

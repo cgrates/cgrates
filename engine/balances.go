@@ -23,6 +23,8 @@ import (
 	"math"
 	"sort"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Can hold different units as seconds or monetary
@@ -48,6 +50,14 @@ func (b *Balance) Equal(o *Balance) bool {
 
 func (b *Balance) IsExpired() bool {
 	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
+}
+
+func (b *Balance) HasDestination() bool {
+	return b.DestinationId != "" && b.DestinationId != utils.ANY
+}
+
+func (b *Balance) MatchDestination(destinationId string) bool {
+	return !b.HasDestination() || b.DestinationId == destinationId
 }
 
 func (b *Balance) Clone() *Balance {
@@ -166,4 +176,13 @@ func (bc BalanceChain) GetBalance(uuid string) *Balance {
 		}
 	}
 	return nil
+}
+
+func (bc BalanceChain) HasBalance(balance *Balance) bool {
+	for _, b := range bc {
+		if b.Equal(balance) {
+			return true
+		}
+	}
+	return false
 }
