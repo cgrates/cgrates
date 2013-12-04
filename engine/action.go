@@ -89,7 +89,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 }
 
 func logAction(ub *UserBalance, a *Action) (err error) {
-	Logger.Info(fmt.Sprintf("%v %v %v", a.BalanceId, a.Balance))
+	Logger.Info(fmt.Sprintf("%v %+v", a.BalanceId, a.Balance))
 	return
 }
 
