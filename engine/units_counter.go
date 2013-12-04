@@ -23,7 +23,7 @@ type UnitsCounter struct {
 	Direction string
 	BalanceId string
 	//	Units     float64
-	Balances BalanceChain
+	Balances BalanceChain // first balance is the general one (no destination)
 }
 
 func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
@@ -59,7 +59,10 @@ func (uc *UnitsCounter) GetGeneralBalance() *Balance {
 func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
 	counted := false
 	if prefix != "" {
-		for _, mb := range uc.Balances {
+		for _, mb := range uc.Balances[1:] { // skip the general balance
+			if !mb.HasDestination() {
+				continue
+			}
 			dest, err := storageGetter.GetDestination(mb.DestinationId, false)
 			if err != nil {
 				Logger.Err("Counter: unknown destination: " + mb.DestinationId)
