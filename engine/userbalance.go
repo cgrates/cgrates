@@ -472,8 +472,8 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					ts.SplitByIncrement(incrementIndex)
 					cc.Timespans = cc.Timespans[:tsIndex+1]
 				}
-				//return errors.New("Not enough credit")
-				return nil
+				return errors.New("Not enough credit")
+				//return nil
 			}
 		}
 	}
