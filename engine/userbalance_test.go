@@ -327,8 +327,8 @@ func TestDebitCreditNoCredit(t *testing.T) {
 		MINUTES + OUTBOUND: BalanceChain{b1},
 	}}
 	err := rifsBalance.debitCreditBalance(cc, false)
-	if err != nil {
-		t.Error("Error debiting balance: ", err)
+	if err == nil {
+		t.Error("Showing no enough credit error ")
 	}
 	if cc.Timespans[0].Increments[0].BalanceUuids[0] != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
@@ -556,8 +556,8 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "money", Value: 50}},
 	}}
 	err := rifsBalance.debitCreditBalance(cc, false)
-	if err != nil {
-		t.Error("Error debiting balance: ", err)
+	if err == nil {
+		t.Error("Missing noy enough credit error ")
 	}
 
 	if cc.Timespans[0].Increments[0].BalanceUuids[0] != "money" ||
