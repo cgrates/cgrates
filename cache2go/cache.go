@@ -3,6 +3,7 @@ package cache2go
 
 import (
 	"errors"
+	"strings"
 	"sync"
 	"time"
 )
@@ -138,4 +139,22 @@ func Flush() {
 	mux.Lock()
 	defer mux.Unlock()
 	cache = make(map[string]timestampedValue)
+}
+
+func CountEntries(prefix string) (result int) {
+	for key, _ := range cache {
+		if strings.HasPrefix(key, prefix) {
+			result++
+		}
+	}
+	return
+}
+
+func XCountEntries(prefix string) (result int) {
+	for key, _ := range xcache {
+		if strings.HasPrefix(key, prefix) {
+			result++
+		}
+	}
+	return
 }

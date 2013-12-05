@@ -22,11 +22,11 @@ import (
 	"errors"
 	"fmt"
 
+	"strings"
+	"time"
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
-	"strings"
-	"time"
 )
 
 type MapStorage struct {
@@ -79,13 +79,14 @@ func (ms *MapStorage) ExistsData(categ, subject string) (bool, error) {
 }
 
 func (ms *MapStorage) GetRatingPlan(key string, checkDb bool) (rp *RatingPlan, err error) {
+	key = RATING_PLAN_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*RatingPlan), nil
 	}
 	if !checkDb {
 		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
-	if values, ok := ms.dict[RATING_PLAN_PREFIX+key]; ok {
+	if values, ok := ms.dict[key]; ok {
 		rp = new(RatingPlan)
 
 		err = ms.ms.Unmarshal(values, rp)
@@ -101,7 +102,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	ms.dict[RATING_PLAN_PREFIX+rp.Id] = result
 	response := 0
 	go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
-	cache2go.Cache(rp.Id, rp)
+	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -125,13 +126,14 @@ func (ms *MapStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 }
 
 func (ms *MapStorage) GetDestination(key string, checkDb bool) (dest *Destination, err error) {
+	key = DESTINATION_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*Destination), nil
 	}
 	if !checkDb {
 		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
-	if values, ok := ms.dict[DESTINATION_PREFIX+key]; ok {
+	if values, ok := ms.dict[key]; ok {
 		dest = &Destination{Id: key}
 		err = ms.ms.Unmarshal(values, dest)
 		cache2go.Cache(key, dest)
@@ -146,7 +148,7 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result
 	response := 0
 	go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
-	cache2go.Cache(dest.Id, dest)
+	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 

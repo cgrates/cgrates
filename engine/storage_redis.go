@@ -118,6 +118,7 @@ func (rs *RedisStorage) ExistsData(category, subject string) (bool, error) {
 }
 
 func (rs *RedisStorage) GetRatingPlan(key string, checkDb bool) (rp *RatingPlan, err error) {
+	key = RATING_PLAN_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*RatingPlan), nil
 	}
@@ -125,7 +126,7 @@ func (rs *RedisStorage) GetRatingPlan(key string, checkDb bool) (rp *RatingPlan,
 		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	var values []byte
-	if values, err = rs.db.Get(RATING_PLAN_PREFIX + key); err == nil {
+	if values, err = rs.db.Get(key); err == nil {
 		b := bytes.NewBuffer(values)
 		r, err := zlib.NewReader(b)
 		if err != nil {
@@ -154,7 +155,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
 	}
-	cache2go.Cache(rp.Id, rp)
+	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -178,6 +179,7 @@ func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
 }
 
 func (rs *RedisStorage) GetDestination(key string, checkDb bool) (dest *Destination, err error) {
+	key = DESTINATION_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(*Destination), nil
 	}
@@ -185,7 +187,7 @@ func (rs *RedisStorage) GetDestination(key string, checkDb bool) (dest *Destinat
 		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	var values []byte
-	if values, err = rs.db.Get(DESTINATION_PREFIX + key); len(values) > 0 && err == nil {
+	if values, err = rs.db.Get(key); len(values) > 0 && err == nil {
 		b := bytes.NewBuffer(values)
 		r, err := zlib.NewReader(b)
 		if err != nil {
@@ -217,7 +219,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
-	cache2go.Cache(dest.Id, dest)
+	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 

@@ -84,7 +84,7 @@ func TestDestinationGetExists(t *testing.T) {
 
 func TestDestinationGetExistsCache(t *testing.T) {
 	storageGetter.GetDestination("NAT", false)
-	if _, err := cache2go.GetCached("NAT"); err != nil {
+	if _, err := cache2go.GetCached(DESTINATION_PREFIX + "NAT"); err != nil {
 		t.Error("Destination not cached:", err)
 	}
 }
