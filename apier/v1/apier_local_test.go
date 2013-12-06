@@ -56,12 +56,16 @@ var testLocal = flag.Bool("local", false, "Perform the tests only on local test 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
 var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 
+func init() {
+	cfgPath := path.Join(*dataDir, "conf", "cgrates.cfg")
+	cfg, _ = config.NewCGRConfig(&cfgPath)
+}
+
 // Empty tables before using them
 func TestCreateTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cfg, _ = config.NewDefaultCGRConfig()
 	var mysql *engine.MySQLStorage
 	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
 		t.Fatal("Error on opening database connection: ", err)
@@ -78,6 +82,19 @@ func TestCreateTables(t *testing.T) {
 		if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
 			t.Fatal(err.Error())
 		}
+	}
+}
+
+func TestInitDataDb(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	dataDb, err := engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding)
+	if err != nil {
+		t.Fatal("Cannot connect to dataDb", err)
+	}
+	if err := dataDb.Flush(); err != nil {
+		t.Fatal("Cannot reset dataDb", err)
 	}
 }
 
@@ -299,10 +316,13 @@ func TestApierTPDestinationRate(t *testing.T) {
 	dr := &utils.TPDestinationRate{TPid: engine.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
 		&utils.DestinationRate{DestinationId: "FS_USERS", RateId: "RT_FS_USERS"},
 	}}
+	drDe := &utils.TPDestinationRate{TPid: engine.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
+		&utils.DestinationRate{DestinationId: "GERMANY_MOBILE", RateId: "RT_FS_USERS"},
+	}}
 	dr2 := new(utils.TPDestinationRate)
 	*dr2 = *dr
 	dr2.DestinationRateId = engine.TEST_SQL
-	for _, d := range []*utils.TPDestinationRate{dr, dr2} {
+	for _, d := range []*utils.TPDestinationRate{dr, dr2, drDe} {
 		if err := rater.Call("ApierV1.SetTPDestinationRate", d, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPDestinationRate: ", err.Error())
 		} else if reply != "OK" {
@@ -459,10 +479,9 @@ func TestApierTPActions(t *testing.T) {
 	}
 	reply := ""
 	act := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight:10},
+		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
 		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
 			DestinationId: "*any", BalanceWeight: 10, Weight: 10},
-	
 	}}
 	actTst := new(utils.TPActions)
 	*actTst = *act
@@ -717,21 +736,6 @@ func TestApierSetAccountActions(t *testing.T) {
 	}
 }
 
-// Test here LoadTariffPlanFromFolder
-func TestApierLoadTariffPlanFromFolder(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	reply := ""
-	// Simple test that command is executed without errors
-	attrs := &AttrLoadTPFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
-	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
-	} else if reply != "OK" {
-		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
-	}
-}
-
 // Test here ReloadScheduler
 func TestApierReloadScheduler(t *testing.T) {
 	if !*testLocal {
@@ -761,7 +765,110 @@ func TestApierReloadCache(t *testing.T) {
 	}
 }
 
-// Test here ReloadCache
+// Test here GetDestination
+func TestApierGetDestination(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := new(engine.Destination)
+	dstId := "GERMANY_MOBILE"
+	expectedReply := &engine.Destination{Id: dstId, Prefixes: []string{"+4915", "+4916", "+4917"}}
+	if err := rater.Call("ApierV1.GetDestination", dstId, reply); err != nil {
+		t.Error("Got error on ApierV1.GetDestination: ", err.Error())
+	} else if !reflect.DeepEqual(expectedReply, reply) {
+		t.Errorf("Calling ApierV1.GetDestination expected: %v, received: %v", expectedReply, reply)
+	}
+}
+
+// Test here GetRatingPlan
+func TestApierGetRatingPlan(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := new(engine.RatingPlan)
+	rplnId := "RETAIL1"
+	//riTiming := &engine.RITiming{StartTime: "00:00:00"}
+	rt := &engine.Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60)*time.Second, RateUnit: time.Duration(60)*time.Second}
+	riRate := &engine.RIRate{ConnectFee:0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{rt}}
+	//{"Id":"RETAIL1","Timings":{"96c78ff5":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""}},"Ratings":{"e41ffcf2":{"ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":0}},"DestinationRates":{"FS_USERS":[{"Timing":"96c78ff5","Rating":"e41ffcf2","Weight":10}],"GERMANY_MOBILE":[{"Timing":"96c78ff5","Rating":"e41ffcf2","Weight":10}]}
+	if err := rater.Call("ApierV1.GetRatingPlan", rplnId, reply); err != nil {
+		t.Error("Got error on ApierV1.GetRatingPlan: ", err.Error())
+	}
+	// Check parts of info received since a full one is not possible due to unique map keys inside reply
+	if reply.Id != rplnId {
+		t.Error("Unexpected id received", reply.Id)
+	}
+	if len(reply.Timings)!= 1  || len(reply.Ratings) != 1 {
+		t.Error("Unexpected number of items received")
+	}
+	//for _, tm := range reply.Timings { // We only get one loop
+	//	if  !reflect.DeepEqual(tm, riTiming) {
+	//		t.Errorf("Unexpected timings value: %v, expecting: %v", tm, riTiming)
+	//	}
+	//}
+	for _, rating := range reply.Ratings {
+		if !reflect.DeepEqual( rating, riRate ) {
+			t.Errorf("Unexpected riRate received: %v", rating)
+		}
+	}
+}
+
+// Test here AddBalance
+func TestApierAddBalance(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	attrs := &AttrAddBalance{Tenant: "cgrates.org", Account: "1001", BalanceId: "*monetary", Direction: "*out", Value: 1.5}
+	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan", BalanceId: "*monetary", Direction: "*out", Value: 1.5}
+	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+}
+
+// Test here GetBalance
+func TestApierGetBalance(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply float64
+	attrs := &AttrGetBalance{Tenant: "cgrates.org", Account: "1001", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
+	} else if reply != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply)
+	}
+	attrs = &AttrGetBalance{Tenant: "cgrates.org", Account: "dan", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
+	} else if reply != 1.5 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 1.5, received: %f", reply)
+	}
+}
+
+// Test here LoadTariffPlanFromFolder
+func TestApierLoadTariffPlanFromFolder(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	// Simple test that command is executed without errors
+	attrs := &AttrLoadTPFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
+	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
+	}
+}
+
+// Test here ResponderGetCost
 func TestResponderGetCost(t *testing.T) {
 	if !*testLocal {
 		return

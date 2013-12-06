@@ -19,12 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bufio"
 	"github.com/cgrates/cgrates/utils"
-	"strings"
-	"testing"
 	"io"
 	"reflect"
-	"bufio"
+	"strings"
+	"testing"
 )
 
 var timingsSample = `#Tag,Years,Months,MonthDays,WeekDays,Time
@@ -81,7 +81,6 @@ cgrates.org,1001,*out,PREPAID_10,STANDARD_TRIGGERS
 DUMMY,INVALID;DATA
 `
 
-
 func TestTimingsValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(timingsSample))
 	lnValidator := FileValidators[utils.TIMINGS_CSV]
@@ -98,14 +97,13 @@ func TestTimingsValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", ln)
 			}
-		case 2,4:
+		case 2, 4:
 			if !valid {
 				t.Error("Validation did not pass for valid line", ln)
 			}
 		}
 	}
 }
-
 
 func TestDestinationsValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(destsSample))
@@ -123,14 +121,13 @@ func TestDestinationsValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2,4:
+		case 2, 4:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
 		}
 	}
 }
-
 
 func TestRatesValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(ratesSample))
@@ -156,7 +153,6 @@ func TestRatesValidator(t *testing.T) {
 	}
 }
 
-
 func TestDestRatesValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(destRatesSample))
 	lnValidator := FileValidators[utils.DESTINATION_RATES_CSV]
@@ -180,7 +176,6 @@ func TestDestRatesValidator(t *testing.T) {
 		}
 	}
 }
-
 
 func TestRatingPlansValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(ratingPlansSample))
@@ -230,7 +225,6 @@ func TestRatingProfilesValidator(t *testing.T) {
 	}
 }
 
-
 func TestActionsValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(actionsSample))
 	lnValidator := FileValidators[utils.ACTIONS_CSV]
@@ -247,14 +241,13 @@ func TestActionsValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2,3,4:
+		case 2, 3, 4:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
 		}
 	}
 }
-
 
 func TestActionTimingsValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(actionTimingsSample))
@@ -280,7 +273,6 @@ func TestActionTimingsValidator(t *testing.T) {
 	}
 }
 
-
 func TestActionTriggersValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(actionTriggersSample))
 	lnValidator := FileValidators[utils.ACTION_TRIGGERS_CSV]
@@ -297,14 +289,13 @@ func TestActionTriggersValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2,3,4:
+		case 2, 3, 4:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
 		}
 	}
 }
-
 
 func TestAccountActionsValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(accountActionsSample))
@@ -329,7 +320,6 @@ func TestAccountActionsValidator(t *testing.T) {
 		}
 	}
 }
-	
 
 func TestTPCSVFileParser(t *testing.T) {
 	bfRdr := bufio.NewReader(strings.NewReader(ratesSample))
@@ -350,15 +340,13 @@ func TestTPCSVFileParser(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			if !reflect.DeepEqual( record, []string{"RT_1CENT","0","1","1s","1s","0s","*up","2"}) {
+			if !reflect.DeepEqual(record, []string{"RT_1CENT", "0", "1", "1s", "1s", "0s", "*up", "2"}) {
 				t.Error("Unexpected record extracted", record)
 			}
 		case 3:
-			if err==nil {
+			if err == nil {
 				t.Error("Expecting invalid line at row 3")
 			}
 		}
 	}
 }
-	
-

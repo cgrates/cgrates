@@ -19,9 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"encoding/json"
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
@@ -496,7 +496,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		defer storageGetter.SetUserBalance(userBalance)
 		ub, _ := json.Marshal(userBalance)
 		Logger.Debug(fmt.Sprintf("UserBalance: %s", ub))
-		cCost,_ := json.Marshal(cc)
+		cCost, _ := json.Marshal(cc)
 		Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
 			userBalance.debitCreditBalance(cc, true)

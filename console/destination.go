@@ -20,7 +20,7 @@ package console
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/engine"
 )
 
 func init() {
@@ -30,8 +30,8 @@ func init() {
 // Commander implementation
 type CmdGetDestination struct {
 	rpcMethod string
-	rpcParams *apier.AttrDestination
-	rpcResult *apier.AttrDestination
+	rpcParams string
+	rpcResult *engine.Destination
 }
 
 // name should be exec's name
@@ -42,7 +42,6 @@ func (self *CmdGetDestination) Usage(name string) string {
 // set param defaults
 func (self *CmdGetDestination) defaults() error {
 	self.rpcMethod = "Apier.GetDestination"
-	self.rpcParams = &apier.AttrDestination{}
 	return nil
 }
 
@@ -53,7 +52,7 @@ func (self *CmdGetDestination) FromArgs(args []string) error {
 	}
 	// Args look OK, set defaults before going further
 	self.defaults()
-	self.rpcParams.Id = args[2]
+	self.rpcParams = args[2]
 	return nil
 }
 
@@ -66,6 +65,6 @@ func (self *CmdGetDestination) RpcParams() interface{} {
 }
 
 func (self *CmdGetDestination) RpcResult() interface{} {
-	self.rpcResult = &apier.AttrDestination{}
+	self.rpcResult = new(engine.Destination)
 	return self.rpcResult
 }

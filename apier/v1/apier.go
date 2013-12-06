@@ -21,7 +21,6 @@ package apier
 import (
 	"errors"
 	"fmt"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
@@ -42,17 +41,20 @@ type ApierV1 struct {
 	Config *config.CGRConfig
 }
 
-type AttrDestination struct {
-	Id       string
-	Prefixes []string
-}
-
-func (self *ApierV1) GetDestination(attr *AttrDestination, reply *AttrDestination) error {
-	if dst, err := self.DataDb.GetDestination(attr.Id, false); err != nil {
+func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
+	if dst, err := self.DataDb.GetDestination(dstId, false); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		reply.Id = dst.Id
-		reply.Prefixes = dst.Prefixes
+		*reply = *dst
+	}
+	return nil
+}
+
+func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) error {
+	if rpln, err := self.DataDb.GetRatingPlan(rplnId, false); err != nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		*reply = *rpln
 	}
 	return nil
 }
@@ -93,7 +95,6 @@ type AttrAddBalance struct {
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	// what storage instance do we use?
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 
 	if _, err := self.DataDb.GetUserBalance(tag); err != nil {
