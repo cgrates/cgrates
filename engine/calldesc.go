@@ -22,11 +22,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/syslog"
+	"time"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
-	"log/syslog"
-	"time"
 )
 
 func init() {
@@ -343,45 +344,28 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 // if the rate interval for any timespan has a RatingIncrement larger than the timespan duration
 // the timespan must expand potentially overlaping folowing timespans and may exceed call
 // descriptor's initial duration
-func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans []*TimeSpan) []*TimeSpan {
-	for i, ts := range timespans {
-		//log.Printf("TS: %+v", ts)
+func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans TimeSpans) []*TimeSpan {
+	for i := 0; i < len(timespans); i++ {
+		ts := timespans[i]
+		if ts.overlapped {
+			continue
+		}
 		if ts.RateInterval != nil {
 			_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-			//log.Printf("Inc: %+v", rateIncrement)
 			// if the timespan duration is larger than the rate increment make sure it is a multiple of it
 			if rateIncrement < ts.GetDuration() {
 				rateIncrement = utils.RoundTo(rateIncrement, ts.GetDuration())
 			}
-			//log.Printf("Inc: %+v", rateIncrement)
 			if rateIncrement > ts.GetDuration() {
 				initialDuration := ts.GetDuration()
-				//log.Printf("Initial: %+v", initialDuration)
 				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
 				ts.CallDuration = ts.CallDuration + (rateIncrement - initialDuration)
-				//log.Printf("After: %+v", ts.CallDuration)
-
-				// overlap the rest of the timespans
-				i += 1
-				for ; i < len(timespans); i++ {
-					if timespans[i].TimeEnd.Before(ts.TimeEnd) || timespans[i].TimeEnd.Equal(ts.TimeEnd) {
-						timespans[i].overlapped = true
-					} else if timespans[i].TimeStart.Before(ts.TimeEnd) {
-						timespans[i].TimeStart = ts.TimeEnd
-					}
-				}
-				break
+				timespans.RemoveOverlapedFromIndex(i)
 			}
 		}
 	}
-	var newTimespans []*TimeSpan
-	// remove overlapped
-	for _, ts := range timespans {
-		if !ts.overlapped {
-			newTimespans = append(newTimespans, ts)
-		}
-	}
-	return newTimespans
+
+	return timespans
 }
 
 /*

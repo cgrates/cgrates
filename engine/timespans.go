@@ -20,8 +20,10 @@ package engine
 
 import (
 	//"fmt"
-	"github.com/cgrates/cgrates/utils"
+
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -33,8 +35,8 @@ type TimeSpan struct {
 	ratingInfo                    *RatingInfo
 	RateInterval                  *RateInterval
 	CallDuration                  time.Duration // the call duration so far till TimeEnd
-	overlapped                    bool          // mark a timespan as overlapped by an expanded one
 	Increments                    Increments
+	overlapped                    bool
 	MatchedSubject, MatchedPrefix string
 }
 
@@ -51,6 +53,87 @@ type MinuteInfo struct {
 	DestinationId string
 	Quantity      float64
 	Price         float64
+}
+
+type TimeSpans []*TimeSpan
+
+func (timespans *TimeSpans) RemoveOverlapedFromIndex(index int) {
+	tss := *timespans
+	ts := tss[index]
+	endOverlapIndex := index
+	for i := index + 1; i < len(tss); i++ {
+		if tss[i].TimeEnd.Before(ts.TimeEnd) || tss[i].TimeEnd.Equal(ts.TimeEnd) {
+			endOverlapIndex = i
+		} else if tss[i].TimeStart.Before(ts.TimeEnd) {
+			tss[i].TimeStart = ts.TimeEnd
+			break
+		}
+	}
+	if endOverlapIndex > index {
+		newSliceEnd := len(tss) - (endOverlapIndex - index)
+		// delete overlapped
+		copy(tss[index+1:], tss[endOverlapIndex+1:])
+		for i := newSliceEnd; i < len(tss); i++ {
+			tss[i] = nil
+		}
+		*timespans = tss[:newSliceEnd]
+	}
+}
+
+// The paidTs will replace the timespans that are exactly under them from the reciver list
+func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSpan, index int) bool {
+	tss := *timespans
+	// calculate overlaped timespans
+	var paidDuration time.Duration
+	for _, pts := range paidTs {
+		paidDuration += pts.GetDuration()
+	}
+	if paidDuration > 0 {
+		// we must add the rest of the current ts to the remaingTs
+		var remainingTs []*TimeSpan
+		overlapStartIndex := index
+		if newTs != nil {
+			remainingTs = append(remainingTs, newTs)
+			overlapStartIndex += 1
+		}
+		for tsi := overlapStartIndex; tsi < len(tss); tsi++ {
+			remainingTs = append(remainingTs, tss[tsi])
+		}
+		overlapEndIndex := 0
+		for i, rts := range remainingTs {
+			if paidDuration >= rts.GetDuration() {
+				paidDuration -= rts.GetDuration()
+			} else {
+				if paidDuration > 0 {
+					// this ts was not fully paid
+					fragment := rts.SplitByDuration(paidDuration)
+					paidTs = append(paidTs, fragment)
+				}
+				// find the end position in tss
+				overlapEndIndex = overlapStartIndex + i
+				break
+			}
+			// find the end position in tss
+			overlapEndIndex = overlapStartIndex + i
+		}
+		// delete from index to current
+		if overlapEndIndex == len(tss)-1 {
+			tss = tss[:overlapStartIndex]
+		} else {
+			tss = append(tss[:overlapStartIndex], tss[overlapEndIndex+1:]...)
+		}
+
+		// append the timespans to outer tss
+		for i, pts := range paidTs {
+			tss = append(tss, nil)
+			copy(tss[overlapStartIndex+i+1:], tss[overlapStartIndex+i:])
+			tss[overlapStartIndex+i] = pts
+		}
+		*timespans = tss
+		return true
+	}
+	*timespans = tss
+	return false
 }
 
 func (incr *Increment) Clone() *Increment {
@@ -318,6 +401,9 @@ func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
 }
 
 func (nts *TimeSpan) copyRatingInfo(ts *TimeSpan) {
+	if ts.ratingInfo == nil {
+		return
+	}
 	nts.ratingInfo = ts.ratingInfo
 	nts.MatchedSubject = ts.ratingInfo.MatchedSubject
 	nts.MatchedPrefix = ts.ratingInfo.MatchedPrefix

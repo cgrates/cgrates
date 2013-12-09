@@ -27,7 +27,7 @@ import (
 type CallCost struct {
 	Direction, TOR, Tenant, Subject, Account, Destination string
 	Cost, ConnectFee                                      float64
-	Timespans                                             []*TimeSpan
+	Timespans                                             TimeSpans
 }
 
 // Pretty printing for call cost

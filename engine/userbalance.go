@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/cgrates/cgrates/utils"
 
@@ -180,16 +181,18 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			return nil
 		}
 	}
-	// debit minutes
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
 		ts.createIncrementsSlice()
 		tsWasSplit := false
+		log.Print("TS: ", ts)
 		for incrementIndex, increment := range ts.Increments {
 			if tsWasSplit {
 				break
 			}
 			paid := false
+			// debit minutes
+			log.Print("Debit minutes")
 			for _, b := range usefulMinuteBalances {
 				// check standard subject tags
 				if b.RateSubject == ZEROSECOND || b.RateSubject == "" {
@@ -228,14 +231,6 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 							},
 						}
 						newTs.createIncrementsSlice()
-						// overlap the rest of the timespans
-						for i := tsIndex + 1; i < len(cc.Timespans); i++ {
-							if cc.Timespans[i].TimeEnd.Before(newTs.TimeEnd) || cc.Timespans[i].TimeEnd.Equal(newTs.TimeEnd) {
-								cc.Timespans[i].overlapped = true
-							} else if cc.Timespans[i].TimeStart.Before(newTs.TimeEnd) {
-								cc.Timespans[i].TimeStart = ts.TimeEnd
-							}
-						}
 						// insert the new timespan
 						if newTs != ts {
 							tsIndex++
@@ -245,14 +240,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 							tsWasSplit = true
 						}
 
-						var newTimespans []*TimeSpan
-						// remove overlapped
-						for _, ots := range cc.Timespans {
-							if !ots.overlapped {
-								newTimespans = append(newTimespans, ots)
-							}
-						}
-						cc.Timespans = newTimespans
+						cc.Timespans.RemoveOverlapedFromIndex(tsIndex)
 						b.Value -= amount
 						newTs.Increments[0].BalanceUuids = append(newTs.Increments[0].BalanceUuids, b.Uuid)
 						newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
@@ -280,6 +268,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				var paidTs []*TimeSpan
 				for _, nts := range newCC.Timespans {
 					nts.createIncrementsSlice()
+					log.Printf("XXX: %+v", nts)
 					paidTs = append(paidTs, nts)
 					for nIdx, nInc := range nts.Increments {
 						// debit minutes and money
@@ -308,51 +297,9 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						}
 					}
 				}
-
-				// calculate overlaped timespans
-				var paidDuration time.Duration
-				for _, pts := range paidTs {
-					paidDuration += pts.GetDuration()
-				}
-				if paidDuration > 0 {
-					// split from current increment
-					newTs := ts.SplitByIncrement(incrementIndex)
-					var remainingTs []*TimeSpan
-					if newTs != nil {
-						remainingTs = append(remainingTs, newTs)
-					} else {
-						// nothing was paied form current ts so remove it
-						cc.Timespans = append(cc.Timespans[:tsIndex], cc.Timespans[tsIndex+1:]...)
-						tsIndex--
-					}
-					for tsi := tsIndex + 1; tsi < len(cc.Timespans); tsi++ {
-						remainingTs = append(remainingTs, cc.Timespans[tsi])
-					}
-					for remainingIndex, rts := range remainingTs {
-						if paidDuration >= rts.GetDuration() {
-							paidDuration -= rts.GetDuration()
-						} else {
-							if paidDuration > 0 {
-								// this ts was not fully paid
-								fragment := rts.SplitByDuration(paidDuration)
-								paidTs = append(paidTs, fragment)
-							}
-							// delete from tsIndex to current
-							cc.Timespans = append(cc.Timespans[:tsIndex], cc.Timespans[remainingIndex:]...)
-							break
-						}
-					}
-
-					// append the timpespans to outer timespans
-					for _, pts := range paidTs {
-						tsIndex++
-						cc.Timespans = append(cc.Timespans, nil)
-						copy(cc.Timespans[tsIndex+1:], cc.Timespans[tsIndex:])
-						cc.Timespans[tsIndex] = pts
-					}
-					paid = true
-					tsWasSplit = true
-				}
+				newTs := ts.SplitByIncrement(incrementIndex)
+				overlapped := (&cc.Timespans).OverlapWithTimeSpans(paidTs, newTs, tsIndex)
+				paid, tsWasSplit = overlapped, overlapped
 			}
 			if paid {
 				continue
@@ -368,9 +315,11 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						newTs.createIncrementsSlice()
 						tsWasSplit = true
 					}
+					log.Print("BREAK ON MINUTES")
 					break
 				}
 			}
+			log.Print("Debit money")
 			// debit monetary
 			for _, b := range usefulMoneyBalances {
 				// check standard subject tags
@@ -401,6 +350,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					var paidTs []*TimeSpan
 					for _, nts := range newCC.Timespans {
 						nts.createIncrementsSlice()
+						log.Printf("COST: %+v", nts)
 						paidTs = append(paidTs, nts)
 						for nIdx, nInc := range nts.Increments {
 							// debit money
@@ -416,54 +366,13 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 							}
 						}
 					}
-					// calculate overlaped timespans
-					var paidDuration time.Duration
-					for _, pts := range paidTs {
-						paidDuration += pts.GetDuration()
-					}
-					if paidDuration > 0 {
-						// split from current increment
-						newTs := ts.SplitByIncrement(incrementIndex)
-						var remainingTs []*TimeSpan
-						if newTs != nil {
-							remainingTs = append(remainingTs, newTs)
-						} else {
-							// nothing was paied form current ts so remove it
-							cc.Timespans = append(cc.Timespans[:tsIndex], cc.Timespans[tsIndex+1:]...)
-							tsIndex--
-						}
-
-						for tsi := tsIndex + 1; tsi < len(cc.Timespans); tsi++ {
-							remainingTs = append(remainingTs, cc.Timespans[tsi])
-						}
-						for remainingIndex, rts := range remainingTs {
-							if paidDuration >= rts.GetDuration() {
-								paidDuration -= rts.GetDuration()
-							} else {
-								if paidDuration > 0 {
-									// this ts was not fully paid
-									fragment := rts.SplitByDuration(paidDuration)
-									paidTs = append(paidTs, fragment)
-								}
-								// delete from tsIndex to current
-								cc.Timespans = append(cc.Timespans[:tsIndex], cc.Timespans[remainingIndex:]...)
-								break
-							}
-						}
-
-						// append the timpespans to outer timespans
-						for _, pts := range paidTs {
-							tsIndex++
-							cc.Timespans = append(cc.Timespans, nil)
-							copy(cc.Timespans[tsIndex+1:], cc.Timespans[tsIndex:])
-							cc.Timespans[tsIndex] = pts
-						}
-						paid = true
-						tsWasSplit = true
-					}
+					newTs := ts.SplitByIncrement(incrementIndex)
+					overlapped := (&cc.Timespans).OverlapWithTimeSpans(paidTs, newTs, tsIndex)
+					paid, tsWasSplit = overlapped, overlapped
 				}
 			}
 			if !paid {
+				// FIXME: must debit all from the first monetary balance (go negative)
 				// no balance was attached to this increment: cut the rest of increments/timespans
 				if incrementIndex == 0 {
 					// if we are right at the begining in the ts leave it out
