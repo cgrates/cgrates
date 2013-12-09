@@ -20,9 +20,10 @@ package config
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Make sure defaults did not change by mistake
@@ -96,6 +97,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.HistoryServerEnabled = false
 	eCfg.HistoryListen = "127.0.0.1:2013"
 	eCfg.HistoryPath = "/var/log/cgrates/history"
+	eCfg.HistorySavePeriod = "1s"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
@@ -194,6 +196,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.HistoryServerEnabled = true
 	eCfg.HistoryListen = "test"
 	eCfg.HistoryPath = "test"
+	eCfg.HistorySavePeriod = "test"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)

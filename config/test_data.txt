@@ -83,3 +83,4 @@ server = test			# Address where to reach the master history server: <internal|x.
 enabled = true			# Starts History service: <true|false>.
 listen = test			# Listening addres for history server: <internal|x.y.z.y:1234>
 path = test				# Location on disk where to store history files.
+save_period = test      # Timeout duration between saves
