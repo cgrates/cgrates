@@ -49,7 +49,7 @@ type FileScribe struct {
 	savePeriod     time.Duration
 }
 
-func NewFileScribe(fileRoot string, savePeriod time.Duration) (*FileScribe, error) {
+func NewFileScribe(fileRoot string, savePeriod string) (*FileScribe, error) {
 	// looking for git
 	gitCommand, err := exec.LookPath("git")
 	if err != nil {
@@ -57,7 +57,9 @@ func NewFileScribe(fileRoot string, savePeriod time.Duration) (*FileScribe, erro
 	}
 	s := &FileScribe{fileRoot: fileRoot, gitCommand: gitCommand}
 	s.loopChecker = make(chan int)
-	s.savePeriod = savePeriod
+	if s.savePeriod, err = time.ParseDuration(savePeriod); err != nil {
+		return nil, err
+	}
 	s.gitInit()
 	if err := s.load(DESTINATIONS_FILE); err != nil {
 		return nil, err
