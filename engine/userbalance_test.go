@@ -659,8 +659,8 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 		Timespans: []*TimeSpan{
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
-				CallDuration: 0,
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 55, 0, time.UTC),
+				CallDuration: 55 * time.Second,
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
@@ -679,12 +679,15 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 80 {
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 20 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
-	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != 40*time.Second {
-		t.Error("Error truncating extra timespans: ", cc.Timespans[0].GetDuration())
+	if len(cc.Timespans) != 9 || cc.Timespans[0].GetDuration() != 40*time.Second {
+		for _, ts := range cc.Timespans {
+			t.Logf("%+v %+v", ts, ts.Increments[0])
+		}
+		t.Error("Error truncating extra timespans: ", len(cc.Timespans), cc.Timespans[0].GetDuration())
 	}
 }
 
@@ -701,13 +704,13 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
 				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}},
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 	}
@@ -732,8 +735,7 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != time.Minute || cc.Timespans[1].GetDuration() != 20*time.Second {
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
 	}
-}
-*/
+}*/
 
 func TestDebitSMSBalance(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}

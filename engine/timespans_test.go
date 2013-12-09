@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestRightMargin(t *testing.T) {
@@ -517,7 +518,7 @@ func TestTimespanExpandingPastEnd(t *testing.T) {
 		t.Error("Error removing overlaped intervals: ", timespans)
 	}
 	if !timespans[0].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 31, 0, 0, time.UTC)) {
-		t.Error("Error expanding timespan: ", timespans[0])
+		t.Errorf("Error expanding timespan: %+v", timespans[0])
 	}
 }
 
@@ -860,5 +861,598 @@ func TestTimespanSplitByDuration(t *testing.T) {
 	}
 	if ts.Increments[4].Duration != 6*time.Second || newTs.Increments[0].Duration != 4*time.Second {
 		t.Error("Error spliting increment: ", ts.Increments[4], newTs.Increments[0])
+	}
+}
+
+func TestRemoveOverlapedFromIndexMiddle(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(1)
+	if len(tss) != 3 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestRemoveOverlapedFromIndexMiddleNonBounds(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(1)
+	if len(tss) != 4 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC) ||
+		tss[2].TimeStart != time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[3].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestRemoveOverlapedFromIndexMiddleNonBoundsOver(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 30, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(1)
+	if len(tss) != 3 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 48, 30, 0, time.UTC) ||
+		tss[2].TimeStart != time.Date(2013, 12, 5, 15, 48, 30, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestRemoveOverlapedFromIndexEnd(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(1)
+	if len(tss) != 2 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestRemoveOverlapedFromIndexEndPast(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 50, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(1)
+	if len(tss) != 2 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 50, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestRemoveOverlapedFromIndexAll(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(0)
+	if len(tss) != 1 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestRemoveOverlapedFromIndexNone(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(0)
+	if len(tss) != 4 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[3].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestRemoveOverlapedFromIndexOne(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(0)
+	if len(tss) != 1 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestRemoveOverlapedFromIndexTwo(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 50, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+	}
+	(&tss).RemoveOverlapedFromIndex(0)
+	if len(tss) != 1 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 50, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %+v", ts)
+		}
+		t.Error("Error removing overlaped timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansMiddleLong(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 30, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 1)
+	if len(tss) != 3 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 48, 30, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansMiddleMedium(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 1)
+	if len(tss) != 4 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[3].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansMiddleShort(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 30, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 1)
+	if len(tss) != 5 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 46, 30, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC) ||
+		tss[3].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[4].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansStart(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 0)
+	if len(tss) != 3 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansAlmostEnd(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 30, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 3)
+	if len(tss) != 5 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[3].TimeEnd != time.Date(2013, 12, 5, 15, 48, 30, 0, time.UTC) ||
+		tss[4].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansEnd(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 3)
+	if len(tss) != 4 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[3].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansPastEnd(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 30, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 3)
+	if len(tss) != 4 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC) ||
+		tss[2].TimeEnd != time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC) ||
+		tss[3].TimeEnd != time.Date(2013, 12, 5, 15, 49, 30, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansAll(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 0)
+	if len(tss) != 1 ||
+		tss[0].TimeStart != time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC) ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansAllPast(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 46, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 47, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+		},
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 48, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 30, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 0)
+	if len(tss) != 1 ||
+		tss[0].TimeStart != time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC) ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 49, 30, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
 	}
 }

@@ -49,7 +49,7 @@ var balanceInsufficient = `{"Id":"*out:192.168.56.66:dan","Type":"*prepaid","Bal
 
 var costInsufficient = `{"Direction":"*out","TOR":"call","Tenant":"192.168.56.66","Subject":"dan","Account":"dan","Destination":"+4986517174963","Cost":1,"ConnectFee":3,"Timespans":[{"TimeStart":"2013-12-05T09:52:17+01:00","TimeEnd":"2013-12-05T09:53:17+01:00","Cost":1,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":3,"Rates":[{"GroupIntervalStart":0,"Value":1,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":2},"Weight":10},"CallDuration":60000000000,"Increments":null,"MatchedSubject":"*out:192.168.56.66:call:*any","MatchedPrefix":"+49"}]}`
 
-func SomeTestDebitInsufficientBalance(t *testing.T) {
+func FIXMETestDebitInsufficientBalance(t *testing.T) {
 	b1 := new(UserBalance)
 	if err := json.Unmarshal([]byte(balanceInsufficient), b1); err != nil {
 		t.Error("Error restoring balance1: ", err)
