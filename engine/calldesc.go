@@ -347,9 +347,6 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans TimeSpans) []*TimeSpan {
 	for i := 0; i < len(timespans); i++ {
 		ts := timespans[i]
-		if ts.overlapped {
-			continue
-		}
 		if ts.RateInterval != nil {
 			_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 			// if the timespan duration is larger than the rate increment make sure it is a multiple of it

@@ -656,7 +656,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 		len(ub.UnitCounters) != 1 ||
 		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Errorf("Topup reset action failed: %#v", ub.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
+		t.Errorf("Topup reset action failed: %+v", ub.BalanceMap[CREDIT+OUTBOUND][0])
 	}
 }
 
@@ -678,7 +678,7 @@ func TestActionTopupResetMinutes(t *testing.T) {
 		len(ub.UnitCounters) != 1 ||
 		len(ub.BalanceMap[MINUTES+OUTBOUND]) != 1 ||
 		ub.ActionTriggers[0].Executed != true || ub.ActionTriggers[1].Executed != true {
-		t.Errorf("Topup reset minutes action failed: %v", ub.BalanceMap[MINUTES+OUTBOUND][0])
+		t.Errorf("Topup reset minutes action failed: %+v", ub.BalanceMap[MINUTES+OUTBOUND][0])
 	}
 }
 
