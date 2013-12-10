@@ -243,7 +243,6 @@ type AttrAddAccount struct {
 // Ads a new account into dataDb. If already defined, returns success.
 func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
-		*reply = fmt.Sprintf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
@@ -253,8 +252,10 @@ func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 	}
 
 	if attr.ActionTimingsId != "" {
+		engine.Logger.Debug(fmt.Sprintf("Querying for ActionTimingsId: %v", attr.ActionTimingsId))
 		if ats, err := self.DataDb.GetActionTimings(attr.ActionTimingsId); err == nil {
 			for _, at := range ats {
+				engine.Logger.Debug(fmt.Sprintf("Found action timings: %v", at))
 				at.UserBalanceIds = append(at.UserBalanceIds, tag)
 			}
 			err = self.DataDb.SetActionTimings(attr.ActionTimingsId, ats)
@@ -265,11 +266,9 @@ func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 				}
 			}
 			if err := self.DataDb.SetUserBalance(ub); err != nil {
-				*reply = fmt.Sprintf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 			}
 		} else {
-			*reply = fmt.Sprintf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		}
 	}

@@ -479,14 +479,16 @@ func TestApierTPActions(t *testing.T) {
 	}
 	reply := ""
 	act := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "PREPAID_10", Actions: []*utils.TPAction{
-		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
 		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
 			DestinationId: "*any", BalanceWeight: 10, Weight: 10},
+	}}
+	actWarn := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
+		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
 	}}
 	actTst := new(utils.TPActions)
 	*actTst = *act
 	actTst.ActionsId = engine.TEST_SQL
-	for _, ac := range []*utils.TPActions{act, actTst} {
+	for _, ac := range []*utils.TPActions{act, actWarn, actTst} {
 		if err := rater.Call("ApierV1.SetTPActions", ac, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActions: ", err.Error())
 		} else if reply != "OK" {
@@ -520,7 +522,7 @@ func TestApierTPActions(t *testing.T) {
 	}
 	// Test getIds
 	var rplyIds []string
-	expectedIds := []string{"PREPAID_10"}
+	expectedIds := []string{"PREPAID_10", "WARN_VIA_HTTP"}
 	if err := rater.Call("ApierV1.GetTPActionIds", AttrGetTPActionIds{TPid: actTst.TPid}, &rplyIds); err != nil {
 		t.Error("Calling ApierV1.GetTPActionIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedIds, rplyIds) {
@@ -787,9 +789,6 @@ func TestApierGetRatingPlan(t *testing.T) {
 	}
 	reply := new(engine.RatingPlan)
 	rplnId := "RETAIL1"
-	//riTiming := &engine.RITiming{StartTime: "00:00:00"}
-	rt := &engine.Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60)*time.Second, RateUnit: time.Duration(60)*time.Second}
-	riRate := &engine.RIRate{ConnectFee:0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{rt}}
 	//{"Id":"RETAIL1","Timings":{"96c78ff5":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""}},"Ratings":{"e41ffcf2":{"ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":0}},"DestinationRates":{"FS_USERS":[{"Timing":"96c78ff5","Rating":"e41ffcf2","Weight":10}],"GERMANY_MOBILE":[{"Timing":"96c78ff5","Rating":"e41ffcf2","Weight":10}]}
 	if err := rater.Call("ApierV1.GetRatingPlan", rplnId, reply); err != nil {
 		t.Error("Got error on ApierV1.GetRatingPlan: ", err.Error())
@@ -801,11 +800,17 @@ func TestApierGetRatingPlan(t *testing.T) {
 	if len(reply.Timings)!= 1  || len(reply.Ratings) != 1 {
 		t.Error("Unexpected number of items received")
 	}
-	//for _, tm := range reply.Timings { // We only get one loop
-	//	if  !reflect.DeepEqual(tm, riTiming) {
-	//		t.Errorf("Unexpected timings value: %v, expecting: %v", tm, riTiming)
-	//	}
-	//}
+	/*
+	riTiming := &engine.RITiming{StartTime: "00:00:00"}
+	for _, tm := range reply.Timings { // We only get one loop
+		if  !reflect.DeepEqual(tm, riTiming) {
+			t.Errorf("Unexpected timings value: %v, expecting: %v", tm, riTiming)
+		}
+	}
+	*/
+	riRate := &engine.RIRate{ConnectFee:0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{
+			&engine.Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60)*time.Second, RateUnit: time.Duration(60)*time.Second},
+			}}
 	for _, rating := range reply.Ratings {
 		if !reflect.DeepEqual( rating, riRate ) {
 			t.Errorf("Unexpected riRate received: %v", rating)
@@ -831,7 +836,83 @@ func TestApierAddBalance(t *testing.T) {
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan2", BalanceId: "*monetary", Direction: "*out", Value: 1.5}
+	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
 }
+
+// Test here ExecuteAction
+func TestApierExecuteAction(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	// Add balance to a previously known account
+	attrs := AttrExecuteAction{ Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "PREPAID_10"}
+	if err := rater.Call("ApierV1.ExecuteAction", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.ExecuteAction received: %s", reply)
+	}
+	reply2 := ""
+	// Add balance to an account which does n exist
+	attrs = AttrExecuteAction{ Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
+	if err := rater.Call("ApierV1.ExecuteAction", attrs, &reply2); err == nil || reply2 == "OK" {
+		t.Error("Expecting error on ApierV1.ExecuteAction.", err, reply2)
+	}
+}
+
+
+// Test here AddTriggeredAction
+func TestApierAddTriggeredAction(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	// Add balance to a previously known account
+	attrs := &AttrAddActionTrigger{ Tenant: "cgrates.org", Account: "dan2", Direction: "*out", BalanceId: "*monetary", 
+		ThresholdValue: 2, DestinationId: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
+	if err := rater.Call("ApierV1.AddTriggeredAction", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddTriggeredAction received: %s", reply)
+	}
+	reply2 := ""
+	attrs2 := new(AttrAddActionTrigger)
+	*attrs2 = *attrs
+	attrs2.Account = "dan3" // Does not exist so it should error when adding triggers on it
+	// Add trigger to an account which does n exist
+	if err := rater.Call("ApierV1.ExecuteAction", attrs2, &reply2); err == nil || reply2 == "OK" {
+		t.Error("Expecting error on ApierV1.AddTriggeredAction.", err, reply2)
+	}
+}
+
+
+// Test here AddAccount
+func TestApierAddAccount(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	//reply := ""
+	attrs := &AttrAddAccount{Tenant: "cgrates.org", Direction: "*out",  Account: "dan4", Type: "prepaid", ActionTimingsId: "PREPAID_10"}
+	//if err := rater.Call("ApierV1.AddAccount", attrs, &reply); err != nil {
+	//	t.Error("Got error on ApierV1.AddAccount: ", err.Error())
+	//} else if reply != "OK" {
+	//	t.Errorf("Calling ApierV1.AddAccount received: %s", reply)
+	//}
+	reply2 := ""
+	attrs2 := new(AttrAddAccount)
+	*attrs2 = *attrs
+	attrs2.ActionTimingsId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
+	// Add account with actions timing which does not exist
+	if err := rater.Call("ApierV1.AddAccount", attrs2, &reply2); err == nil || reply2 == "OK" {
+		t.Error("Expecting error on ApierV1.AddAccount.", err, reply2)
+	}
+}
+
 
 // Test here GetBalance
 func TestApierGetBalance(t *testing.T) {
@@ -850,6 +931,13 @@ func TestApierGetBalance(t *testing.T) {
 		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
 	} else if reply != 1.5 {
 		t.Errorf("Calling ApierV1.GetBalance expected: 1.5, received: %f", reply)
+	}
+	// The one we have topped up though executeAction
+	attrs = &AttrGetBalance{Tenant: "cgrates.org", Account: "dan2", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
+	} else if reply != 10 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10, received: %f", reply)
 	}
 }
 
