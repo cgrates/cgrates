@@ -561,7 +561,7 @@ func TestTimespanExpandingRoundingPastEnd(t *testing.T) {
 	cd := &CallDescriptor{}
 	timespans = cd.roundTimeSpansToIncrement(timespans)
 	if len(timespans) != 2 {
-		t.Error("Error removing overlaped intervals: ", timespans)
+		t.Error("Error removing overlaped intervals: ", timespans[0])
 	}
 	if !timespans[0].TimeEnd.Equal(time.Date(2013, 9, 10, 14, 30, 30, 0, time.UTC)) {
 		t.Error("Error expanding timespan: ", timespans[0])
@@ -1450,6 +1450,30 @@ func TestOverlapWithTimeSpansAllPast(t *testing.T) {
 	if len(tss) != 1 ||
 		tss[0].TimeStart != time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC) ||
 		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 49, 30, 0, time.UTC) {
+		for _, ts := range tss {
+			t.Logf("TS: %v", ts)
+		}
+		t.Error("Error overlaping with timespans timespans: ", tss)
+	}
+}
+
+func TestOverlapWithTimeSpansOne(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC),
+		},
+	}
+	newTss := TimeSpans{
+		&TimeSpan{
+			TimeStart: time.Date(2013, 12, 5, 15, 45, 0, 0, time.UTC),
+			TimeEnd:   time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC),
+		},
+	}
+	(&tss).OverlapWithTimeSpans(newTss, nil, 0)
+	if len(tss) != 2 ||
+		tss[0].TimeEnd != time.Date(2013, 12, 5, 15, 47, 30, 0, time.UTC) ||
+		tss[1].TimeEnd != time.Date(2013, 12, 5, 15, 49, 0, 0, time.UTC) {
 		for _, ts := range tss {
 			t.Logf("TS: %v", ts)
 		}

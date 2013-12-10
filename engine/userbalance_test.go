@@ -227,6 +227,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
+	t.Logf("%+v", cc.Timespans[0])
 	if cc.Timespans[0].Increments[0].BalanceUuids[0] != "testb" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -258,6 +259,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
+	t.Logf("%+v", cc.Timespans)
 	if cc.Timespans[0].Increments[0].BalanceUuids[0] != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
@@ -338,7 +340,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 		t.Error("Error extracting minutes from balance: ",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0])
 	}
-	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != time.Minute {
+	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != time.Minute {
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
 	}
 }
@@ -523,12 +525,12 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 		MINUTES + OUTBOUND: BalanceChain{b1},
 	}}
 	err := rifsBalance.debitCreditBalance(cc, false)
-	if err != nil {
-		t.Error("Error debiting balance: ", err)
+	if err == nil {
+		t.Error("Error showing debiting balance error: ", err)
 	}
 
-	if len(cc.Timespans) != 0 || cc.GetDuration() != 0 {
-		t.Error("Error cutting at no connect fee: ", cc.Timespans)
+	if len(cc.Timespans) != 2 || rifsBalance.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != -30 {
+		t.Error("Error cutting at no connect fee: ", rifsBalance.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
 	}
 }
 
@@ -559,19 +561,20 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 	if err == nil {
 		t.Error("Missing noy enough credit error ")
 	}
-
+	t.Logf("%+v", cc.Timespans[0].Increments)
 	if cc.Timespans[0].Increments[0].BalanceUuids[0] != "money" ||
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
-		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0].Duration)
 	}
-	if rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 {
+	if rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != -30 {
 		t.Error("Error extracting minutes from balance: ",
 			rifsBalance.BalanceMap[CREDIT+OUTBOUND][0])
 	}
-	if len(cc.Timespans) != 2 ||
+	if len(cc.Timespans) != 3 ||
 		cc.Timespans[0].GetDuration() != 10*time.Second ||
-		cc.Timespans[1].GetDuration() != 40*time.Second {
-		t.Error("Error truncating extra timespans: ", cc.Timespans[1].Increments[0])
+		cc.Timespans[1].GetDuration() != 40*time.Second ||
+		cc.Timespans[2].GetDuration() != 30*time.Second {
+		t.Error("Error truncating extra timespans: ", cc.Timespans[2].GetDuration())
 	}
 }
 
@@ -679,13 +682,13 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 20 {
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 95 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
-	if len(cc.Timespans) != 9 || cc.Timespans[0].GetDuration() != 40*time.Second {
+	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != 40*time.Second {
 		for _, ts := range cc.Timespans {
-			t.Logf("%+v %+v", ts, ts.Increments[0])
+			t.Log(ts)
 		}
 		t.Error("Error truncating extra timespans: ", len(cc.Timespans), cc.Timespans[0].GetDuration())
 	}

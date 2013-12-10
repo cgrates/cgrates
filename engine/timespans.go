@@ -36,7 +36,6 @@ type TimeSpan struct {
 	RateInterval                  *RateInterval
 	CallDuration                  time.Duration // the call duration so far till TimeEnd
 	Increments                    Increments
-	overlapped                    bool
 	MatchedSubject, MatchedPrefix string
 }
 
@@ -46,6 +45,7 @@ type Increment struct {
 	BalanceUuids        []string // need more than one for minutes with cost
 	BalanceRateInterval *RateInterval
 	MinuteInfo          *MinuteInfo
+	paid                bool
 }
 
 // Holds the minute information related to a specified timespan
@@ -77,7 +77,9 @@ func (timespans *TimeSpans) RemoveOverlapedFromIndex(index int) {
 			tss[i] = nil
 		}
 		*timespans = tss[:newSliceEnd]
+		return
 	}
+	*timespans = tss
 }
 
 // The paidTs will replace the timespans that are exactly under them from the reciver list
@@ -208,6 +210,21 @@ func (ts *TimeSpan) createIncrementsSlice() {
 		ts.Increments = append(ts.Increments, &Increment{Duration: rateIncrement, Cost: incrementCost})
 		totalCost += incrementCost
 	}
+	ts.Cost = totalCost
+}
+
+// returns whether the timespan has all increments marked as paid and if not
+// it also returns the first unpaied increment
+func (ts *TimeSpan) IsPaid() (bool, int) {
+	if len(ts.Increments) == 0 {
+		return false, 0
+	}
+	for incrementIndex, increment := range ts.Increments {
+		if !increment.paid {
+			return false, incrementIndex
+		}
+	}
+	return true, len(ts.Increments)
 }
 
 /*
@@ -218,11 +235,9 @@ The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	//Logger.Debug("here: ", ts, " +++ ", i)
-	//log.Printf("TS: %+v", ts)
 	// if the span is not in interval return nil
 	if !(i.Contains(ts.TimeStart, false) || i.Contains(ts.TimeEnd, true)) {
 		//Logger.Debug("Not in interval")
-		//log.Printf("NOT in interval: %+v", i)
 		return
 	}
 	//Logger.Debug(fmt.Sprintf("TS: %+v", ts))
@@ -235,7 +250,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 				// Logger.Debug(fmt.Sprintf("Splitting"))
 				ts.SetRateInterval(i)
 				splitTime := ts.TimeStart.Add(rate.GroupIntervalStart - ts.GetGroupStart())
-				//log.Print("SPLIT: ", splitTime)
 				nts = &TimeSpan{
 					TimeStart: splitTime,
 					TimeEnd:   ts.TimeEnd,
@@ -246,12 +260,10 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 				nts.CallDuration = ts.CallDuration
 				ts.SetNewCallDuration(nts)
 				// Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
-				//log.Printf("Group splitting: %+v %+v", ts, nts)
 				return
 			}
 		}
 	}
-	//log.Printf("*************TS: %+v", ts)
 	// if the span is enclosed in the interval try to set as new interval and return nil
 	if i.Contains(ts.TimeStart, false) && i.Contains(ts.TimeEnd, true) {
 		//Logger.Debug("All in interval")
@@ -276,7 +288,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
 		// Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
-		//log.Printf("right: %+v %+v", ts, nts)
 		return
 	}
 	// if only the end time is in the interval split the interval to the left
@@ -299,7 +310,6 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.CallDuration = ts.CallDuration
 		ts.SetNewCallDuration(nts)
 		// Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
-		//log.Printf("left: %+v %+v", ts, nts)
 		return
 	}
 	return
@@ -374,7 +384,6 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 	ts.TimeEnd = rp.ActivationTime
 	ts.SetNewCallDuration(newTs)
 	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
-	//log.Printf("RP SPLITTING: %+v %+v", ts, newTs)
 	return
 }
 
