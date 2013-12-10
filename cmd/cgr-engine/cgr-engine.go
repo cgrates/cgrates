@@ -22,6 +22,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
+	"net"
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"runtime"
+	"time"
+
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrs"
@@ -32,12 +39,6 @@ import (
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
-	"io"
-	"net"
-	"net/rpc"
-	"net/rpc/jsonrpc"
-	"runtime"
-	"time"
 )
 
 const (
@@ -54,16 +55,16 @@ const (
 )
 
 var (
-	cfgPath  = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
-	version  = flag.Bool("version", false, "Prints the application version.")
+	cfgPath      = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
+	version      = flag.Bool("version", false, "Prints the application version.")
 	raterEnabled = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
 	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
-	bal      = balancer2go.NewBalancer()
-	exitChan = make(chan bool)
-	sm       sessionmanager.SessionManager
-	medi     *mediator.Mediator
-	cfg      *config.CGRConfig
-	err      error
+	bal          = balancer2go.NewBalancer()
+	exitChan     = make(chan bool)
+	sm           sessionmanager.SessionManager
+	medi         *mediator.Mediator
+	cfg          *config.CGRConfig
+	err          error
 )
 
 func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddress string, rpc_encoding string, getter engine.DataStorage, loggerDb engine.LogStorage) {
@@ -207,7 +208,7 @@ func startHistoryScribe() {
 	var scribeServer history.Scribe
 
 	if cfg.HistoryServerEnabled {
-		if scribeServer, err = history.NewFileScribe(cfg.HistoryPath); err != nil {
+		if scribeServer, err = history.NewFileScribe(cfg.HistoryPath, cfg.HistorySavePeriod); err != nil {
 			engine.Logger.Crit(err.Error())
 			exitChan <- true
 			return

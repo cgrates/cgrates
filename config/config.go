@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"code.google.com/p/goconf/conf"
 	"errors"
 	"fmt"
+
+	"code.google.com/p/goconf/conf"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -102,6 +103,7 @@ type CGRConfig struct {
 	HistoryServer            string   // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryListen            string   // History server listening interface: <internal|x.y.z.y:1234>
 	HistoryPath              string   // Location on disk where to store history files.
+	HistorySavePeriod        string   // The timout duration between history writes
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -167,7 +169,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.HistoryServer = "127.0.0.1:2013"
 	self.HistoryListen = "127.0.0.1:2013"
 	self.HistoryPath = "/var/log/cgrates/history"
-
+	self.HistorySavePeriod = "1s"
 	return nil
 }
 
@@ -406,6 +408,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("history_server", "path"); hasOpt {
 		cfg.HistoryPath, _ = c.GetString("history_server", "path")
+	}
+	if hasOpt = c.HasOption("history_server", "save_period"); hasOpt {
+		cfg.HistorySavePeriod, _ = c.GetString("history_server", "save_period")
 	}
 	return cfg, nil
 }

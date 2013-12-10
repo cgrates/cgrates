@@ -46,9 +46,10 @@ type FileScribe struct {
 	ratingProfiles records
 	loopChecker    chan int
 	waitingFile    string
+	savePeriod     time.Duration
 }
 
-func NewFileScribe(fileRoot string) (*FileScribe, error) {
+func NewFileScribe(fileRoot string, savePeriod string) (*FileScribe, error) {
 	// looking for git
 	gitCommand, err := exec.LookPath("git")
 	if err != nil {
@@ -56,6 +57,9 @@ func NewFileScribe(fileRoot string) (*FileScribe, error) {
 	}
 	s := &FileScribe{fileRoot: fileRoot, gitCommand: gitCommand}
 	s.loopChecker = make(chan int)
+	if s.savePeriod, err = time.ParseDuration(savePeriod); err != nil {
+		return nil, err
+	}
 	s.gitInit()
 	if err := s.load(DESTINATIONS_FILE); err != nil {
 		return nil, err
@@ -88,7 +92,7 @@ func (s *FileScribe) Record(rec *Record, out *int) error {
 	s.waitingFile = fileToSave
 	defer s.Unlock()
 	go func() {
-		t := time.NewTicker(1 * time.Second)
+		t := time.NewTicker(s.savePeriod)
 		select {
 		case <-s.loopChecker:
 			// cancel saving
