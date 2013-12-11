@@ -743,6 +743,56 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 	}
 }
 
+func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: "minu"}
+	cc := &CallCost{
+		Tenant:      "vdf",
+		TOR:         "0",
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+			},
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				CallDuration: 10 * time.Second,
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+			},
+		},
+	}
+	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
+		MINUTES + OUTBOUND: BalanceChain{b1},
+		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 75, RateSubject: "minu"}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err == nil {
+		t.Error("Error showing debiting balance error: ", err)
+	}
+	//t.Logf("%+v %+v", cc.Timespans[0], cc.Timespans[1])
+	if cc.Timespans[0].Increments[0].BalanceUuids[0] != "testb" ||
+		cc.Timespans[0].Increments[0].Duration != time.Second {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -5 {
+		t.Errorf("Error extracting minutes from balance: %+v, %+v %+v",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value,
+			rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value)
+	}
+	if len(cc.Timespans) != 3 || cc.Timespans[0].GetDuration() != 70*time.Second || cc.Timespans[1].GetDuration() != 5*time.Second || cc.Timespans[2].GetDuration() != 5*time.Second {
+		for _, ts := range cc.Timespans {
+			t.Log(ts.GetDuration())
+		}
+		t.Error("Error truncating extra timespans: ", len(cc.Timespans))
+	}
+}
+
 func TestDebitSMSBalance(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
