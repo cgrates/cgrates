@@ -694,7 +694,6 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 	}
 }
 
-/*
 func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: "minu"}
 	cc := &CallCost{
@@ -722,23 +721,27 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 		CREDIT + OUTBOUND:  BalanceChain{&Balance{Uuid: "moneya", Value: 50, RateSubject: "minu"}},
 	}}
 	err := rifsBalance.debitCreditBalance(cc, false)
-	if err != nil {
-		t.Error("Error debiting balance: ", err)
+	if err == nil {
+		t.Error("Error showing debiting balance error: ", err)
 	}
-	t.Errorf("%+v %+v", cc.Timespans[0], cc.Timespans[1])
+	//t.Logf("%+v %+v", cc.Timespans[0], cc.Timespans[1])
 	if cc.Timespans[0].Increments[0].BalanceUuids[0] != "testb" ||
-		cc.Timespans[0].Increments[0].Duration != time.Minute {
+		cc.Timespans[0].Increments[0].Duration != time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 ||
-		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 30 {
+	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -30 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
-	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != time.Minute || cc.Timespans[1].GetDuration() != 20*time.Second {
-		t.Error("Error truncating extra timespans: ", cc.Timespans)
+	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != 50*time.Second || cc.Timespans[1].GetDuration() != 30*time.Second {
+		for _, ts := range cc.Timespans {
+			t.Log(ts.GetDuration())
+		}
+		t.Error("Error truncating extra timespans: ", len(cc.Timespans))
 	}
-}*/
+}
 
 func TestDebitSMSBalance(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}

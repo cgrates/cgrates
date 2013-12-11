@@ -277,7 +277,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 				for _, nts := range newCC.Timespans {
 					nts.createIncrementsSlice()
 					paidTs = append(paidTs, nts)
-					for nIdx, nInc := range nts.Increments {
+					for _, nInc := range nts.Increments {
 						// debit money
 						amount := nInc.Cost
 						if b.Value >= amount {
@@ -288,7 +288,8 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
 							}
 						} else {
-							nts.SplitByIncrement(nIdx)
+							increment.paid = false
+							break
 						}
 					}
 				}

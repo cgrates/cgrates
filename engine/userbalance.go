@@ -182,7 +182,6 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 	for _, balance := range usefulMinuteBalances {
 		balance.DebitMinutes(cc, count, ub, usefulMoneyBalances)
 	}
-
 	allPaidWithMinutes := true
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
