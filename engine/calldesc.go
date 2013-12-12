@@ -415,7 +415,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	if cd.CallDuration == 0 {
 		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	}
-	Logger.Debug(fmt.Sprintf("MAX SESSION cd: %+v", cd))
+	//Logger.Debug(fmt.Sprintf("MAX SESSION cd: %+v", cd))
 	err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
@@ -434,7 +434,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetUserBalanceKey(), err.Error()))
 		return 0, err
 	}
-	Logger.Debug(fmt.Sprintf("availableDuration: %v, availableCredit: %v", availableDuration, availableCredit))
+	//Logger.Debug(fmt.Sprintf("availableDuration: %v, availableCredit: %v", availableDuration, availableCredit))
 	// check for zero balance
 	if availableCredit == 0 {
 		return availableDuration, nil
@@ -444,7 +444,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 		// there are enough minutes for requested interval
 		return initialDuration, nil
 	}
-	Logger.Debug(fmt.Sprintf("initial Duration: %v", initialDuration))
+	//Logger.Debug(fmt.Sprintf("initial Duration: %v", initialDuration))
 	// we must move the timestart for the interval with the available duration because
 	// that was already checked
 	cd.TimeStart = cd.TimeStart.Add(availableDuration)
@@ -456,15 +456,17 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	// now let's check how many increments are covered with the avilableCredit
 	for _, ts := range cc.Timespans {
 		ts.createIncrementsSlice()
-		Logger.Debug(fmt.Sprintf("TS: %+v", ts))
+		//Logger.Debug(fmt.Sprintf("TS: %+v", ts))
 		for _, incr := range ts.Increments {
 			if incr.Cost <= availableCredit {
 				availableCredit -= incr.Cost
 				availableDuration += incr.Duration
+			} else {
+				return availableDuration, nil
 			}
 		}
 	}
-	return 0, nil
+	return availableDuration, nil
 }
 
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
