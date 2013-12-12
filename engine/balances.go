@@ -20,7 +20,6 @@ package engine
 
 import (
 	"fmt"
-	"math"
 	"sort"
 	"time"
 
@@ -72,7 +71,7 @@ func (b *Balance) MatchDestination(destinationId string) bool {
 func (b *Balance) Clone() *Balance {
 	return &Balance{
 		Uuid:           b.Uuid,
-		Value:          b.Value,
+		Value:          b.Value, // this value is in seconds
 		DestinationId:  b.DestinationId,
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
@@ -81,19 +80,27 @@ func (b *Balance) Clone() *Balance {
 }
 
 // Returns the available number of seconds for a specified credit
-func (b *Balance) GetSecondsForCredit(cd *CallDescriptor, credit float64) (seconds float64) {
-	seconds = b.Value
+func (b *Balance) GetMinutesForCredit(cd *CallDescriptor, initialCredit float64) (duration time.Duration, credit float64) {
+	duration = time.Duration(b.Value) * time.Second
+	credit = initialCredit
 	cc, err := b.GetCost(cd)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
-		return 0
+		return 0, credit
 	}
 	if cc.Cost > 0 {
-		secondCost := cc.Cost / cc.GetDuration().Seconds()
-		// TODO: this is not very accurate
-		// we should iterate timespans and increment to get exact number of minutes for
-		// available credit
-		seconds = math.Min(credit/secondCost, b.Value)
+		duration = 0
+		for _, ts := range cc.Timespans {
+			ts.createIncrementsSlice()
+			for _, incr := range ts.Increments {
+				if incr.Cost <= credit {
+					credit -= incr.Cost
+					duration += incr.Duration
+				} else {
+					return
+				}
+			}
+		}
 	}
 	return
 }

@@ -121,8 +121,8 @@ func TestGetSecondsForPrefix(t *testing.T) {
 		Direction:    OUTBOUND,
 		Destination:  "0723",
 	}
-	seconds, credit, bucketList := ub1.getSecondsForPrefix(cd)
-	expected := 110.0
+	seconds, credit, bucketList := ub1.getCreditForPrefix(cd)
+	expected := 110 * time.Second
 	if credit != 200 || seconds != expected || bucketList[0].Weight < bucketList[1].Weight {
 		t.Log(seconds, credit, bucketList)
 		t.Errorf("Expected %v was %v", expected, seconds)
@@ -133,20 +133,25 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: "minu"}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET", RateSubject: "minu"}
 
-	ub1 := &UserBalance{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
-	cd := &CallDescriptor{
-		TOR:          "0",
-		Tenant:       "vdf",
-		TimeStart:    time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2013, 10, 4, 15, 46, 10, 0, time.UTC),
-		LoopIndex:    0,
-		CallDuration: 10 * time.Second,
-		Direction:    OUTBOUND,
-		Destination:  "0723",
+	ub1 := &UserBalance{
+		Id: "OUT:CUSTOMER_1:rif",
+		BalanceMap: map[string]BalanceChain{
+			MINUTES + OUTBOUND: BalanceChain{b1, b2},
+			CREDIT + OUTBOUND:  BalanceChain{&Balance{Value: 21}},
+		},
 	}
-	seconds, credit, bucketList := ub1.getSecondsForPrefix(cd)
-	expected := 21.0
-	if credit != 0 || seconds != expected || len(bucketList) < 2 || bucketList[0].Weight < bucketList[1].Weight {
+	cd := &CallDescriptor{
+		TOR:         "0",
+		Tenant:      "vdf",
+		TimeStart:   time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 4, 15, 46, 60, 0, time.UTC),
+		LoopIndex:   0,
+		Direction:   OUTBOUND,
+		Destination: "0723",
+	}
+	seconds, credit, bucketList := ub1.getCreditForPrefix(cd)
+	expected := 21 * time.Second
+	if credit != 0 || seconds != expected || len(bucketList) != 2 || bucketList[0].Weight < bucketList[1].Weight {
 		t.Log(seconds, credit, bucketList)
 		t.Errorf("Expected %v was %v", expected, seconds)
 	}
@@ -1023,7 +1028,7 @@ func BenchmarkGetSecondForPrefix(b *testing.B) {
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		ub1.getSecondsForPrefix(cd)
+		ub1.getCreditForPrefix(cd)
 	}
 }
 
@@ -1045,6 +1050,6 @@ func BenchmarkGetSecondsForPrefix(b *testing.B) {
 		Destination: "0723",
 	}
 	for i := 0; i < b.N; i++ {
-		ub1.getSecondsForPrefix(cd)
+		ub1.getCreditForPrefix(cd)
 	}
 }

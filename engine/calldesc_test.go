@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/history"
 	"log"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/history"
 )
 
 var (
@@ -274,11 +275,11 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 		Direction:   "*out",
 		TOR:         "0",
 		Tenant:      "vdf",
-		Subject:     "rif",
-		Destination: "0723", Amount: 1000}
-	result, err := cd.GetMaxSessionTime(time.Now())
-	if result != 1000 || err == nil {
-		t.Errorf("Expected %v was %v (%v)", 1000, result, err)
+		Subject:     "ttttttt",
+		Destination: "0723"}
+	result, err := cd.GetMaxSessionDuration()
+	if result != 0 || err == nil {
+		t.Errorf("Expected %v was %v (%v)", 0, result, err)
 	}
 }
 
@@ -292,8 +293,8 @@ func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 		Subject:     "minu",
 		Destination: "0723",
 		Amount:      1000}
-	result, err := cd.GetMaxSessionTime(time.Now())
-	expected := 300.0
+	result, err := cd.GetMaxSessionDuration()
+	expected := 300 * time.Second
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -310,8 +311,8 @@ func TestMaxSessionTimeWithUserBalanceAccount(t *testing.T) {
 		Account:     "minu",
 		Destination: "0723",
 		Amount:      1000}
-	result, err := cd.GetMaxSessionTime(time.Now())
-	expected := 300.0
+	result, err := cd.GetMaxSessionDuration()
+	expected := 300 * time.Second
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -327,8 +328,8 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Subject:     "broker",
 		Destination: "0723",
 		Amount:      5400}
-	result, err := cd.GetMaxSessionTime(time.Now())
-	if result != 100 || err != nil {
+	result, err := cd.GetMaxSessionDuration()
+	if result != 100*time.Second || err != nil {
 		t.Errorf("Expected %v was %v", 100, result)
 	}
 }
@@ -384,7 +385,7 @@ func BenchmarkStorageSingleGetSessionTime(b *testing.B) {
 	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 100}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime(time.Now())
+		cd.GetMaxSessionDuration()
 	}
 }
 
@@ -393,6 +394,6 @@ func BenchmarkStorageMultipleGetSessionTime(b *testing.B) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.GetMaxSessionTime(time.Now())
+		cd.GetMaxSessionDuration()
 	}
 }

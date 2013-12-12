@@ -20,7 +20,7 @@ package engine
 
 import (
 	"errors"
-	"fmt"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 
@@ -72,22 +72,14 @@ type UserBalance struct {
 }
 
 // Returns user's available minutes for the specified destination
-func (ub *UserBalance) getSecondsForPrefix(cd *CallDescriptor) (seconds, credit float64, balances BalanceChain) {
+func (ub *UserBalance) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
 	credit = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction]).GetTotalValue()
 	balances = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[MINUTES+cd.Direction])
+
 	for _, b := range balances {
-		s := b.GetSecondsForCredit(cd, credit)
-		cc, err := b.GetCost(cd)
-		if err != nil {
-			Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
-			continue
-		}
-		if cc.Cost > 0 && cc.GetDuration() > 0 {
-			// TODO: improve this
-			secondCost := cc.Cost / cc.GetDuration().Seconds()
-			credit -= s * secondCost
-		}
-		seconds += s
+		d, c := b.GetMinutesForCredit(cd, credit)
+		credit = c
+		duration += d
 	}
 	return
 }

@@ -64,6 +64,9 @@ func NewFileScribe(fileRoot string, savePeriod string) (*FileScribe, error) {
 	if err := s.load(DESTINATIONS_FILE); err != nil {
 		return nil, err
 	}
+	if err := s.load(RATING_PLANS_FILE); err != nil {
+		return nil, err
+	}
 	if err := s.load(RATING_PROFILES_FILE); err != nil {
 		return nil, err
 	}

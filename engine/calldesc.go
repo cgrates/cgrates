@@ -369,6 +369,9 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans TimeSpans) []*Time
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
+	if cd.CallDuration == 0 {
+		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
+	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
@@ -408,55 +411,57 @@ and will decrease it by 10% for nine times. So if the user has little credit it 
 If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
-func (cd *CallDescriptor) GetMaxSessionTime(startTime time.Time) (seconds float64, err error) {
+func (cd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	if cd.CallDuration == 0 {
 		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	}
-	err = cd.LoadRatingPlans()
+	err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
 		return 0, err
 	}
-	availableCredit, availableSeconds := 0.0, 0.0
+	var availableDuration time.Duration
+	availableCredit := 0.0
 	// Logger.Debug(fmt.Sprintf("cd: %+v", cd))
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		if userBalance.Type == UB_TYPE_POSTPAID {
 			return -1, nil
 		} else {
-			availableSeconds, availableCredit, _ = userBalance.getSecondsForPrefix(cd)
+			availableDuration, availableCredit, _ = userBalance.getCreditForPrefix(cd)
 			// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 		}
 	} else {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetUserBalanceKey(), err.Error()))
-		return cd.Amount, err
+		return 0, err
 	}
 	// check for zero balance
 	if availableCredit == 0 {
-		return availableSeconds, nil
+		return availableDuration, nil
 	}
-	// the price of a second cannot be determined because all the seconds can have a different cost.
-	// therfore we get the cost for the whole period and then if there are not enough money we backout in steps of 10%.
-	maxSessionSeconds := cd.Amount
-	for i := 0; i < 10; i++ {
-		maxDuration, _ := time.ParseDuration(fmt.Sprintf("%vs", maxSessionSeconds-availableSeconds))
-		ts := &TimeSpan{TimeStart: startTime, TimeEnd: startTime.Add(maxDuration)}
-		timespans := cd.splitInTimeSpans(ts)
+	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
+	if initialDuration <= availableDuration {
+		// there are enough minutes for requested interval
+		return initialDuration, nil
+	}
 
-		cost := 0.0
-		for i, ts := range timespans {
-			if i == 0 && ts.RateInterval != nil {
-				cost += ts.RateInterval.Rating.ConnectFee
+	// we must move the timestart for the interval with the available duration because
+	// that was already checked
+	cd.TimeStart = cd.TimeStart.Add(availableDuration)
+	cc, err := cd.GetCost()
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Could not get cost for %s: %s.", cd.GetKey(cd.Subject), err.Error()))
+		return 0, err
+	}
+	// now let's check how many increments are covered with the avilableCredit
+	for _, ts := range cc.Timespans {
+		ts.createIncrementsSlice()
+		for _, incr := range ts.Increments {
+			if incr.Cost <= availableCredit {
+				availableCredit -= incr.Cost
+				availableDuration += incr.Duration
 			}
-			cost += ts.Cost
-		}
-		//logger.Print(availableCredit, availableSeconds, cost)
-		if cost < availableCredit {
-			return maxSessionSeconds, nil
-		} else { //decrease the period by 10% and try again
-			maxSessionSeconds -= cd.Amount * 0.1
 		}
 	}
-	// Logger.Debug("Even 10% of the max session time is too much!")
 	return 0, nil
 }
 
@@ -490,8 +495,8 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // from user's money balance.
 // This methods combines the Debit and GetMaxSessionTime and will debit the max available time as returned
 // by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
-func (cd *CallDescriptor) MaxDebit(startTime time.Time) (cc *CallCost, err error) {
-	remainingSeconds, err := cd.GetMaxSessionTime(startTime)
+func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
+	remainingSeconds, err := cd.GetMaxSessionDuration()
 	// Logger.Debug(fmt.Sprintf("In MaxDebitd remaining seconds: %v", remainingSeconds))
 	if err != nil || remainingSeconds == 0 {
 		return new(CallCost), errors.New("no more credit")

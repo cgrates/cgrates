@@ -21,12 +21,13 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/balancer2go"
 	"net/rpc"
 	"reflect"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/balancer2go"
 )
 
 type Responder struct {
@@ -69,7 +70,7 @@ func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
 		*reply, err = *r, e
 	} else {
 		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
-			return arg.MaxDebit(arg.TimeStart)
+			return arg.MaxDebit()
 		})
 		*reply, err = *r, e
 	}
@@ -129,7 +130,8 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 		*reply, err = rs.callMethod(&arg, "Responder.GetMaxSessionTime")
 	} else {
 		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
-			return arg.GetMaxSessionTime(arg.TimeStart)
+			d, err := arg.GetMaxSessionDuration()
+			return float64(d), err
 		})
 		*reply, err = r, e
 	}
