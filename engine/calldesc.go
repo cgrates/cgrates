@@ -448,7 +448,9 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	// we must move the timestart for the interval with the available duration because
 	// that was already checked
 	cd.TimeStart = cd.TimeStart.Add(availableDuration)
+	// substract the connect fee
 	cc, err := cd.GetCost()
+	availableCredit -= cc.ConnectFee
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Could not get cost for %s: %s.", cd.GetKey(cd.Subject), err.Error()))
 		return 0, err
