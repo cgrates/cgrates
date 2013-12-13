@@ -22,14 +22,15 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/fsock"
 	"log/syslog"
 	"net"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/fsock"
 )
 
 var cfg *config.CGRConfig // Share the configuration with the rest of the package
@@ -163,15 +164,16 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		Destination: ev.GetDestination(),
 		Amount:      sm.debitPeriod.Seconds(),
 		TimeStart:   startTime}
-	var remainingSeconds float64
-	err = sm.connector.GetMaxSessionTime(cd, &remainingSeconds)
+	var remainingDurationFloat float64
+	err = sm.connector.GetMaxSessionTime(cd, &remainingDurationFloat)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), SYSTEM_ERROR)
 		return
 	}
-	engine.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingSeconds))
-	if remainingSeconds == 0 {
+	remainingDuration := time.Duration(remainingDurationFloat)
+	engine.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingDuration))
+	if remainingDuration == 0 {
 		engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), INSUFFICIENT_FUNDS)
 		return
@@ -294,7 +296,6 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, index float64) (cc *engine.CallCost) {
 	cc = &engine.CallCost{}
 	cd.LoopIndex = index
-	cd.Amount = sm.debitPeriod.Seconds()
 	cd.CallDuration += sm.debitPeriod
 	err := sm.connector.MaxDebit(*cd, cc)
 	if err != nil {

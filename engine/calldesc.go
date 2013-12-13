@@ -499,16 +499,15 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
-// This methods combines the Debit and GetMaxSessionTime and will debit the max available time as returned
+// This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
 // by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
-	remainingSeconds, err := cd.GetMaxSessionDuration()
-	// Logger.Debug(fmt.Sprintf("In MaxDebitd remaining seconds: %v", remainingSeconds))
-	if err != nil || remainingSeconds == 0 {
+	remainingDuration, err := cd.GetMaxSessionDuration()
+	if err != nil || remainingDuration == 0 {
 		return new(CallCost), errors.New("no more credit")
 	}
-	if remainingSeconds > 0 { // for postpaying client returns -1
-		cd.TimeEnd = cd.TimeStart.Add(time.Duration(remainingSeconds) * time.Second)
+	if remainingDuration > 0 { // for postpaying client returns -1
+		cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
 	}
 	return cd.Debit()
 }
