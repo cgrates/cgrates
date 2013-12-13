@@ -245,32 +245,36 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		hangupTime = time.Now()
 	}
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
-	refoundDuration := end.Sub(hangupTime)
-	var refoundIncrements engine.Increments
-	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", refoundDuration))
+	refundDuration := end.Sub(hangupTime)
+	initialRefundDuration := refundDuration
+	var refundIncrements engine.Increments
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
 		tsDuration := ts.GetDuration()
-		if refoundDuration <= tsDuration {
-			lastRefoundedIncrementIndex := 0
-			for incrementIndex, increment := range ts.Increments {
-				if increment.Duration <= refoundDuration {
-					refoundIncrements = append(refoundIncrements, increment)
-					refoundDuration -= increment.Duration
-					lastRefoundedIncrementIndex = incrementIndex
+		if refundDuration <= tsDuration {
+			lastRefundedIncrementIndex := 0
+			for j := len(ts.Increments) - 1; j >= 0; j-- {
+				increment := ts.Increments[j]
+				if increment.Duration <= refundDuration {
+					refundIncrements = append(refundIncrements, increment)
+					refundDuration -= increment.Duration
+					lastRefundedIncrementIndex = j
 				}
 			}
-			ts.SplitByIncrement(lastRefoundedIncrementIndex)
+			ts.SplitByIncrement(lastRefundedIncrementIndex)
 			break // do not go to other timespans
 		} else {
-			refoundIncrements = append(refoundIncrements, ts.Increments...)
+			refundIncrements = append(refundIncrements, ts.Increments...)
 			// remove the timespan entirely
+			lastCC.Timespans[i] = nil
 			lastCC.Timespans = lastCC.Timespans[:i]
-			// continue to the next timespan with what is left to refound
-			refoundDuration -= tsDuration
+			// continue to the next timespan with what is left to refund
+			refundDuration -= tsDuration
 		}
 	}
-	if len(refoundIncrements) > 0 {
+	// show only what was actualy refunded (stopped in timespan)
+	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
+	if len(refundIncrements) > 0 {
 		cd := &engine.CallDescriptor{
 			Direction:   lastCC.Direction,
 			Tenant:      lastCC.Tenant,
@@ -278,7 +282,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			Subject:     lastCC.Subject,
 			Account:     lastCC.Account,
 			Destination: lastCC.Destination,
-			Increments:  refoundIncrements,
+			Increments:  refundIncrements,
 			// FallbackSubject: lastCC.FallbackSubject, // TODO: check how to best add it
 		}
 		var response float64
@@ -287,7 +291,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 		}
 	}
-	cost := refoundIncrements.GetTotalCost()
+	cost := refundIncrements.GetTotalCost()
 	lastCC.Cost -= cost
 	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 
