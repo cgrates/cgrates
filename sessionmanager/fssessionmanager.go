@@ -286,7 +286,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			// FallbackSubject: lastCC.FallbackSubject, // TODO: check how to best add it
 		}
 		var response float64
-		err := sm.connector.DebitCents(*cd, &response)
+		err := sm.connector.RefundIncrements(*cd, &response)
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 		}

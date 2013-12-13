@@ -152,7 +152,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 		for _, b := range usefulMoneyBalances {
 			if b.Value >= amount {
 				b.Value -= amount
-				// the conect fee is not refoundable!
+				// the conect fee is not refundable!
 				if count {
 					ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 				}
@@ -164,7 +164,7 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			// there are no money for the connect fee; go negative
 			moneyBalance := ub.GetDefaultMoneyBalance(cc.Direction)
 			moneyBalance.Value -= amount
-			// the conect fee is not refoundable!
+			// the conect fee is not refundable!
 			if count {
 				ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 			}
@@ -240,34 +240,26 @@ func (ub *UserBalance) GetDefaultMoneyBalance(direction string) *Balance {
 	return defaultBalance
 }
 
-func (ub *UserBalance) refoundIncrements(increments Increments, count bool) {
+func (ub *UserBalance) refundIncrements(increments Increments, direction string, count bool) {
 	for _, increment := range increments {
 		var balance *Balance
-		if increment.MinuteInfo != nil {
-			if balance = ub.BalanceMap[MINUTES+OUTBOUND].GetBalance(increment.BalanceUuids[0]); balance != nil {
-				break
+		if increment.GetMinuteBalance() != "" {
+			if balance = ub.BalanceMap[MINUTES+direction].GetBalance(increment.GetMinuteBalance()); balance == nil {
+				continue
 			}
-			if balance != nil {
-				balance.Value += increment.Duration.Seconds()
-				if count {
-					ub.countUnits(&Action{BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Value: -increment.Duration.Seconds()}})
-				}
-			} else {
-				// TODO: where should put the minutes?
+			balance.Value += increment.Duration.Seconds()
+			if count {
+				ub.countUnits(&Action{BalanceId: MINUTES, Direction: direction, Balance: &Balance{Value: -increment.Duration.Seconds()}})
 			}
 		}
 		// check money too
-		if len(increment.BalanceUuids) == 2 && increment.BalanceUuids[1] != "" {
-			if balance = ub.BalanceMap[CREDIT+OUTBOUND].GetBalance(increment.BalanceUuids[1]); balance != nil {
-				break
+		if increment.GetMoneyBalance() != "" {
+			if balance = ub.BalanceMap[CREDIT+direction].GetBalance(increment.GetMoneyBalance()); balance == nil {
+				continue
 			}
-			if balance != nil {
-				balance.Value += increment.Cost
-				if count {
-					ub.countUnits(&Action{BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: -increment.Cost}})
-				}
-			} else {
-				// TODO: where should put the money?
+			balance.Value += increment.Cost
+			if count {
+				ub.countUnits(&Action{BalanceId: CREDIT, Direction: direction, Balance: &Balance{Value: -increment.Cost}})
 			}
 		}
 	}
@@ -276,12 +268,12 @@ func (ub *UserBalance) refoundIncrements(increments Increments, count bool) {
 /*
 Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
 */
-func (ub *UserBalance) debitGenericBalance(balanceId string, amount float64, count bool) float64 {
+func (ub *UserBalance) debitGenericBalance(balanceId string, direction string, amount float64, count bool) float64 {
 	if count {
-		ub.countUnits(&Action{BalanceId: balanceId, Direction: OUTBOUND, Balance: &Balance{Value: amount}})
+		ub.countUnits(&Action{BalanceId: balanceId, Direction: direction, Balance: &Balance{Value: amount}})
 	}
-	ub.BalanceMap[balanceId+OUTBOUND].Debit(amount)
-	return ub.BalanceMap[balanceId+OUTBOUND].GetTotalValue()
+	ub.BalanceMap[balanceId+direction].Debit(amount)
+	return ub.BalanceMap[balanceId+direction].GetTotalValue()
 }
 
 // Scans the action trigers and execute the actions for which trigger is met

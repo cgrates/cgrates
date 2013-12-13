@@ -150,6 +150,22 @@ func (incr *Increment) Clone() *Increment {
 	return nIncr
 }
 
+func (incr *Increment) SetMinuteBalance(bUuid string) {
+	incr.BalanceUuids[0] = bUuid
+}
+
+func (incr *Increment) GetMinuteBalance() string {
+	return incr.BalanceUuids[0]
+}
+
+func (incr *Increment) SetMoneyBalance(bUuid string) {
+	incr.BalanceUuids[1] = bUuid
+}
+
+func (incr *Increment) GetMoneyBalance() string {
+	return incr.BalanceUuids[1]
+}
+
 type Increments []*Increment
 
 func (incs Increments) GetTotalCost() float64 {
@@ -171,7 +187,7 @@ func (ts *TimeSpan) Contains(t time.Time) bool {
 }
 
 // Returns the cost of the timespan according to the relevant cost interval.
-// It also sets the Cost field of this timespan (used for refound on session
+// It also sets the Cost field of this timespan (used for refund on session
 // manager debit loop where the cost cannot be recalculated)
 func (ts *TimeSpan) getCost() float64 {
 	if ts.RateInterval == nil {
@@ -207,7 +223,12 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	totalCost := 0.0
 	for s := 0; s < int(ts.GetDuration()/rateIncrement); s++ {
-		ts.Increments = append(ts.Increments, &Increment{Duration: rateIncrement, Cost: incrementCost})
+		inc := &Increment{
+			Duration:     rateIncrement,
+			Cost:         incrementCost,
+			BalanceUuids: make([]string, 2),
+		}
+		ts.Increments = append(ts.Increments, inc)
 		totalCost += incrementCost
 	}
 	ts.Cost = totalCost

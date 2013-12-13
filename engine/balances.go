@@ -137,7 +137,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 				amount := increment.Duration.Seconds()
 				if b.Value >= amount {
 					b.Value -= amount
-					increment.BalanceUuids = append(increment.BalanceUuids, b.Uuid)
+					increment.SetMinuteBalance(b.Uuid)
 					increment.MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
 					increment.paid = true
 					if count {
@@ -178,7 +178,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					}
 					cc.Timespans.RemoveOverlapedFromIndex(tsIndex)
 					b.Value -= amount
-					newTs.Increments[0].BalanceUuids = append(newTs.Increments[0].BalanceUuids, b.Uuid)
+					newTs.Increments[0].SetMinuteBalance(b.Uuid)
 					newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
 					newTs.Increments[0].paid = true
 					if count {
@@ -217,8 +217,9 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					if moneyBal != nil && b.Value >= seconds {
 						b.Value -= seconds
 						moneyBal.Value -= cost
-						nInc.BalanceUuids = append(nInc.BalanceUuids, b.Uuid)
-						nInc.BalanceUuids = append(nInc.BalanceUuids, moneyBal.Uuid)
+
+						nInc.SetMinuteBalance(b.Uuid)
+						nInc.SetMoneyBalance(moneyBal.Uuid)
 						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds, 0}
 						nInc.paid = true
 						if count {
@@ -261,7 +262,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 				amount := increment.Cost
 				if b.Value >= amount {
 					b.Value -= amount
-					increment.BalanceUuids = append(increment.BalanceUuids, b.Uuid)
+					increment.SetMoneyBalance(b.Uuid)
 					increment.paid = true
 					if count {
 						ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -289,7 +290,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 						amount := nInc.Cost
 						if b.Value >= amount {
 							b.Value -= amount
-							nInc.BalanceUuids = append(nInc.BalanceUuids, b.Uuid)
+							nInc.SetMoneyBalance(b.Uuid)
 							nInc.paid = true
 							if count {
 								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})

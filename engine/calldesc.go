@@ -512,10 +512,10 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	return cd.Debit()
 }
 
-func (cd *CallDescriptor) RefoundIncrements() (left float64, err error) {
+func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		userBalance.refoundIncrements(cd.Increments, true)
+		userBalance.refundIncrements(cd.Increments, cd.Direction, true)
 	}
 	return 0.0, err
 }
@@ -527,7 +527,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) DebitCents() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitGenericBalance(CREDIT+OUTBOUND, cd.Amount, true), nil
+		return userBalance.debitGenericBalance(CREDIT, cd.Direction, cd.Amount, true), nil
 	}
 	return 0.0, err
 }
@@ -539,7 +539,7 @@ The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
 		defer storageGetter.SetUserBalance(userBalance)
-		return userBalance.debitGenericBalance(SMS+OUTBOUND, cd.Amount, true), nil
+		return userBalance.debitGenericBalance(SMS, cd.Direction, cd.Amount, true), nil
 	}
 	return 0, err
 }
