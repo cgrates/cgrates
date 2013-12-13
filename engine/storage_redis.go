@@ -77,10 +77,9 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 	} else if len(dKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching destinations: %v", dKeys))
 	}
-	prefixLen := len(DESTINATION_PREFIX)
 	for _, key := range dKeys {
-		cache2go.RemKey(key[prefixLen:])
-		if _, err = rs.GetDestination(key[prefixLen:], true); err != nil {
+		cache2go.RemKey(key)
+		if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):], true); err != nil {
 			return err
 		}
 	}
@@ -95,10 +94,9 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 	} else if len(rpKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching rating plans: %v", rpKeys))
 	}
-	prefixLen = len(RATING_PLAN_PREFIX)
 	for _, key := range rpKeys {
-		cache2go.RemKey(key[prefixLen:])
-		if _, err = rs.GetRatingPlan(key[prefixLen:], true); err != nil {
+		cache2go.RemKey(key)
+		if _, err = rs.GetRatingPlan(key[len(RATING_PLAN_PREFIX):], true); err != nil {
 			return err
 		}
 	}
