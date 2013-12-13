@@ -20,29 +20,47 @@ package main
 
 import (
 	"flag"
-	"github.com/cgrates/cgrates/engine"
 	"log"
 	"net/rpc"
+	"os"
+	"github.com/cgrates/cgrates/engine"
 	//"net/rpc/jsonrpc"
 	"net/rpc/jsonrpc"
 	"runtime"
+	"runtime/pprof"
 	"time"
 )
 
 var (
-	balancer = flag.String("balancer", "localhost:2012", "balancer server address")
-	runs     = flag.Int("runs", 10000, "stress cycle number")
-	parallel = flag.Int("parallel", 0, "run n requests in parallel")
-	json     = flag.Bool("json", false, "use JSON for RPC encoding")
+	balancer   = flag.String("balancer", "localhost:2012", "balancer server address")
+	runs       = flag.Int("runs", 10000, "stress cycle number")
+	parallel   = flag.Int("parallel", 0, "run n requests in parallel")
+	json       = flag.Bool("json", false, "use JSON for RPC encoding")
+	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 )
 
 func main() {
 	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	t1 := time.Date(2013, time.August, 07, 17, 30, 0, 0, time.UTC)
-	t2 := time.Date(2013, time.August, 07, 18, 30, 0, 0, time.UTC)
-	cd := engine.CallDescriptor{Direction: "*out", TOR: "call", Tenant: "cgrates.org", Subject: "1001", Destination: "+49", TimeStart: t1, TimeEnd: t2}
+	cd := engine.CallDescriptor{
+		TimeStart:    time.Date(2013, time.December, 13, 22, 30, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2013, time.December, 13, 22, 31, 0, 0, time.UTC),
+		CallDuration: 60 * time.Second,
+		Direction:    "*out",
+		TOR:          "call",
+		Tenant:       "cgrates.org",
+		Subject:      "1001",
+		Destination:  "+49",
+	}
 	result := engine.CallCost{}
 	var client *rpc.Client
 	var err error

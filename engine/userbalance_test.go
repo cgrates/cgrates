@@ -1015,7 +1015,7 @@ func TestUserBalanceUnitCountingOutboundInbound(t *testing.T) {
 	}
 }
 
-func TestUserBalanceRefundSimple(t *testing.T) {
+func TestUserBalanceRefund(t *testing.T) {
 	ub := &UserBalance{
 		BalanceMap: map[string]BalanceChain{
 			CREDIT + OUTBOUND: BalanceChain{
@@ -1028,12 +1028,13 @@ func TestUserBalanceRefundSimple(t *testing.T) {
 		},
 	}
 	increments := Increments{
+		&Increment{Cost: 2, BalanceUuids: []string{"", "moneya"}},
 		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceUuids: []string{"minutea", "moneya"}},
 		&Increment{Duration: 4 * time.Second, BalanceUuids: []string{"minuteb", ""}},
 	}
 
 	ub.refundIncrements(increments, OUTBOUND, false)
-	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 102 ||
+	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 104 ||
 		ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 13 ||
 		ub.BalanceMap[MINUTES+OUTBOUND][1].Value != 14 {
 		t.Error("Error refounding money: ", ub.BalanceMap[MINUTES+OUTBOUND][1].Value)
