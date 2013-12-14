@@ -21,8 +21,9 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"sort"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type ActionTrigger struct {
@@ -40,7 +41,7 @@ type ActionTrigger struct {
 func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
-	aac, err = storageGetter.GetActions(at.ActionsId)
+	aac, err = storageGetter.GetActions(at.ActionsId, false)
 	aac.Sort()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))

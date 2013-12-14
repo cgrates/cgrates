@@ -68,7 +68,7 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
-func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys []string) (err error) {
+func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) (err error) {
 	if dKeys == nil {
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
@@ -118,7 +118,24 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys []string) (err error) {
 		}
 	}
 	if len(rpfKeys) != 0 {
-		Logger.Info("Finished rating profiles caching.")
+		Logger.Info("Finished actions caching.")
+	}
+	if actKeys == nil {
+		Logger.Info("Caching all actions")
+		if actKeys, err = rs.db.Keys(ACTION_PREFIX + "*"); err != nil {
+			return
+		}
+	} else if len(actKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching actions: %v", actKeys))
+	}
+	for _, key := range actKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetActions(key[len(ACTION_PREFIX):], true); err != nil {
+			return err
+		}
+	}
+	if len(actKeys) != 0 {
+		Logger.Info("Finished actions caching.")
 	}
 	return
 }
@@ -247,10 +264,18 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
+func (rs *RedisStorage) GetActions(key string, checkDb bool) (as Actions, err error) {
+	key = ACTION_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(Actions), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
 	var values []byte
-	if values, err = rs.db.Get(ACTION_PREFIX + key); err == nil {
+	if values, err = rs.db.Get(key); err == nil {
 		err = rs.ms.Unmarshal(values, &as)
+		cache2go.Cache(key, as)
 	}
 	return
 }
@@ -258,6 +283,7 @@ func (rs *RedisStorage) GetActions(key string) (as Actions, err error) {
 func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.db.Set(ACTION_PREFIX+key, result)
+	cache2go.Cache(ACTION_PREFIX+key, as)
 	return
 }
 

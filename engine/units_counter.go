@@ -29,7 +29,7 @@ type UnitsCounter struct {
 func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 	uc.Balances = BalanceChain{&Balance{}} // general balance
 	for _, at := range ats {
-		acs, err := storageGetter.GetActions(at.ActionsId)
+		acs, err := storageGetter.GetActions(at.ActionsId, false)
 		if err != nil {
 			continue
 		}

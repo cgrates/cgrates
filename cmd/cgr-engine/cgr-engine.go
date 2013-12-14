@@ -328,7 +328,7 @@ func main() {
 		cfg.SchedulerEnabled = *schedEnabled
 	}
 	if cfg.RaterEnabled {
-		if err := dataDb.PreCache(nil, nil, nil); err != nil {
+		if err := dataDb.PreCache(nil, nil, nil, nil); err != nil {
 			engine.Logger.Crit(fmt.Sprintf("Pre-caching error: %v", err))
 			return
 		}

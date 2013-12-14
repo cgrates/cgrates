@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log/syslog"
@@ -37,11 +36,13 @@ func init() {
 		Logger = new(utils.StdLogger)
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 	}
-	//db_server := "127.0.0.1"
-	m, _ := NewMapStorage()
-	//m, _ := NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-	//m, _ := NewRedisStorage(db_server+":6379", 11, "", utils.MSGPACK)
-	storageGetter, _ = m.(DataStorage)
+	DEBUG := true
+	if DEBUG {
+		storageGetter, _ = NewMapStorage()
+	} else {
+		//storageGetter, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
+		storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 11, "", utils.MSGPACK)
+	}
 
 	storageLogger = storageGetter.(LogStorage)
 }
@@ -480,12 +481,12 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	} else if userBalance == nil {
 		// Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetUserBalanceKey()))
 	} else {
-		Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
+		//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
 		defer storageGetter.SetUserBalance(userBalance)
-		ub, _ := json.Marshal(userBalance)
-		Logger.Debug(fmt.Sprintf("UserBalance: %s", ub))
-		cCost, _ := json.Marshal(cc)
-		Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
+		//ub, _ := json.Marshal(userBalance)
+		//Logger.Debug(fmt.Sprintf("UserBalance: %s", ub))
+		//cCost, _ := json.Marshal(cc)
+		//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
 			userBalance.debitCreditBalance(cc, true)
 		}
@@ -574,7 +575,7 @@ func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
-	storageGetter.PreCache(nil, nil, nil)
+	storageGetter.PreCache(nil, nil, nil, nil)
 	return nil
 
 }

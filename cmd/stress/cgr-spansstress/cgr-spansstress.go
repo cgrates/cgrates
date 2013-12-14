@@ -65,7 +65,7 @@ func main() {
 	defer getter.Close()
 
 	engine.SetDataStorage(getter)
-	if err := getter.PreCache(nil, nil, nil); err != nil {
+	if err := getter.PreCache(nil, nil, nil, nil); err != nil {
 		log.Printf("Pre-caching error: %v", err)
 		return
 	}
@@ -75,9 +75,9 @@ func main() {
 	j := 0
 	start := time.Now()
 	for i := 0; i < *runs; i++ {
-		runtime.MemProfileRate = 1
-		result, err = cd.GetCost()
+		result, err = cd.Debit()
 		if *memprofile != "" {
+			runtime.MemProfileRate = 1
 			runtime.GC()
 			f, err := os.Create(*memprofile)
 			if err != nil {

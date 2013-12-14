@@ -851,7 +851,7 @@ func TestActionTriggerLogging(t *testing.T) {
 		Weight:         10.0,
 		ActionsId:      "TEST_ACTIONS",
 	}
-	as, err := storageGetter.GetActions(at.ActionsId)
+	as, err := storageGetter.GetActions(at.ActionsId, false)
 	if err != nil {
 		t.Error("Error getting actions for the action timing: ", as, err)
 	}
@@ -895,7 +895,7 @@ func TestActionTimingLogging(t *testing.T) {
 		Weight:         10.0,
 		ActionsId:      "TEST_ACTIONS",
 	}
-	as, err := storageGetter.GetActions(at.ActionsId)
+	as, err := storageGetter.GetActions(at.ActionsId, false)
 	if err != nil {
 		t.Error("Error getting actions for the action trigger: ", err)
 	}

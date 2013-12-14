@@ -167,11 +167,12 @@ func main() {
 		dstIds, _ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
 		rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
 		rpfIds, _ := loader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
+		actIds, _ := loader.GetLoadedIds(engine.ACTION_PREFIX)
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds}, &reply); err != nil {
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
 		actIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)

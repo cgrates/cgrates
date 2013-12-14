@@ -372,7 +372,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 func (ub *UserBalance) initCounters() {
 	ucTempMap := make(map[string]*UnitsCounter, 2)
 	for _, at := range ub.ActionTriggers {
-		acs, err := storageGetter.GetActions(at.ActionsId)
+		acs, err := storageGetter.GetActions(at.ActionsId, false)
 		if err != nil {
 			continue
 		}

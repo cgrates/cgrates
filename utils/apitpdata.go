@@ -271,4 +271,5 @@ type ApiReloadCache struct {
 	DestinationIds   []string
 	RatingPlanIds    []string
 	RatingProfileIds []string
+	ActionIds        []string
 }

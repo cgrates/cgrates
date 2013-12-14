@@ -207,7 +207,7 @@ func (at *ActionTiming) SetActions(as Actions) {
 
 func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		at.actions, err = storageGetter.GetActions(at.ActionsId)
+		at.actions, err = storageGetter.GetActions(at.ActionsId, false)
 	}
 	at.actions.Sort()
 	return at.actions, err

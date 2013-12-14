@@ -19,6 +19,7 @@ Data:
 	DestinationIds      []string
 	RatingPlanIds       []string
     RatingProfileIds    []string
+    ActionIds           []string
    }
 
  Mandatory parameters: none

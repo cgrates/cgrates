@@ -45,7 +45,7 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
-func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys []string) error {
+func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) error {
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
 			cache2go.RemKey(k)
@@ -62,6 +62,12 @@ func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys []string) error {
 		if strings.HasPrefix(k, RATING_PROFILE_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetRatingProfile(k[len(RATING_PROFILE_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+		if strings.HasPrefix(k, ACTION_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetActions(k[len(ACTION_PREFIX):], true); err != nil {
 				return err
 			}
 		}
@@ -165,9 +171,24 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
+func (ms *MapStorage) GetActions(key string, checkDb bool) (as Actions, err error) {
 	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &as)
+	} else {
+		return nil, errors.New("not found")
+	}
+	return
+
+	key = ACTION_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(Actions), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		err = ms.ms.Unmarshal(values, &as)
+		cache2go.Cache(key, as)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -177,6 +198,7 @@ func (ms *MapStorage) GetActions(key string) (as Actions, err error) {
 func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[ACTION_PREFIX+key] = result
+	cache2go.Cache(DESTINATION_PREFIX+key, as)
 	return
 }
 

@@ -141,7 +141,7 @@ func init() {
 	csvr.LoadActionTriggers()
 	csvr.LoadAccountActions()
 	csvr.WriteToDatabase(false, false)
-	storageGetter.PreCache(nil, nil, nil)
+	storageGetter.PreCache(nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

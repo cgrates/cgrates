@@ -68,7 +68,7 @@ Interface for storage providers.
 */
 type DataStorage interface {
 	Storage
-	PreCache([]string, []string, []string) error
+	PreCache([]string, []string, []string, []string) error
 	ExistsData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
@@ -77,7 +77,7 @@ type DataStorage interface {
 	GetDestination(string, bool) (*Destination, error)
 	//	DestinationContainsPrefix(string, string) (int, error)
 	SetDestination(*Destination) error
-	GetActions(string) (Actions, error)
+	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)
 	SetUserBalance(*UserBalance) error
