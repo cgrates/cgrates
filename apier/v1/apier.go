@@ -311,7 +311,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
-	var dstKeys, rpKeys []string
+	var dstKeys, rpKeys, rpfKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -324,7 +324,13 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			rpKeys[idx] = engine.RATING_PLAN_PREFIX + rpId
 		}
 	}
-	if err := self.DataDb.PreCache(dstKeys, rpKeys); err != nil {
+	if len(attrs.RatingProfileIds) > 0 {
+		rpfKeys = make([]string, len(attrs.RatingProfileIds))
+		for idx, rpfId := range attrs.RatingProfileIds {
+			rpfKeys[idx] = engine.RATING_PROFILE_PREFIX + rpfId
+		}
+	}
+	if err := self.DataDb.PreCache(dstKeys, rpKeys, rpfKeys); err != nil {
 		return err
 	}
 	*reply = "OK"

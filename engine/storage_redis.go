@@ -68,7 +68,7 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
-func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
+func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys []string) (err error) {
 	if dKeys == nil {
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
@@ -102,6 +102,23 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys []string) (err error) {
 	}
 	if len(rpKeys) != 0 {
 		Logger.Info("Finished rating plans caching.")
+	}
+	if rpfKeys == nil {
+		Logger.Info("Caching all rating profiles")
+		if rpfKeys, err = rs.db.Keys(RATING_PROFILE_PREFIX + "*"); err != nil {
+			return
+		}
+	} else if len(rpfKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching rating profile: %v", rpfKeys))
+	}
+	for _, key := range rpfKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetRatingProfile(key[len(RATING_PROFILE_PREFIX):], true); err != nil {
+			return err
+		}
+	}
+	if len(rpfKeys) != 0 {
+		Logger.Info("Finished rating profiles caching.")
 	}
 	return
 }
@@ -157,22 +174,31 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
+func (rs *RedisStorage) GetRatingProfile(key string, checkDb bool) (rpf *RatingProfile, err error) {
+	key = RATING_PROFILE_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*RatingProfile), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
 	var values []byte
-	if values, err = rs.db.Get(RATING_PROFILE_PREFIX + key); err == nil {
-		rp = new(RatingProfile)
-		err = rs.ms.Unmarshal(values, rp)
+	if values, err = rs.db.Get(key); err == nil {
+		rpf = new(RatingProfile)
+		err = rs.ms.Unmarshal(values, rpf)
+		cache2go.Cache(key, rpf)
 	}
 	return
 }
 
-func (rs *RedisStorage) SetRatingProfile(rp *RatingProfile) (err error) {
-	result, err := rs.ms.Marshal(rp)
-	err = rs.db.Set(RATING_PROFILE_PREFIX+rp.Id, result)
+func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
+	result, err := rs.ms.Marshal(rpf)
+	err = rs.db.Set(RATING_PROFILE_PREFIX+rpf.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
+		go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rpf.Id, rpf}, &response)
 	}
+	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
 

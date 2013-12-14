@@ -48,7 +48,7 @@ func init() {
 
 const (
 	RECURSION_MAX_DEPTH = 3
-	FALLBACK_SUBJECT    = "*any"
+	FALLBACK_SUBJECT    = utils.ANY
 )
 
 var (
@@ -165,11 +165,11 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
-	rp, err := storageGetter.GetRatingProfile(key)
-	if err != nil || rp == nil {
+	rpf, err := storageGetter.GetRatingProfile(key, false)
+	if err != nil || rpf == nil {
 		return err
 	}
-	if err = rp.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
+	if err = rpf.GetRatingPlansForPrefix(cd); err != nil || !cd.continousRatingInfos() {
 		// try rating profile fallback
 		recursionDepth++
 		for index := 0; index < len(cd.RatingInfos); index++ {
@@ -578,7 +578,7 @@ func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
-	storageGetter.PreCache(nil, nil)
+	storageGetter.PreCache(nil, nil, nil)
 	return nil
 
 }

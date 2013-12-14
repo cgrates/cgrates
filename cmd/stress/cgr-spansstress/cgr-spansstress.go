@@ -74,6 +74,10 @@ func main() {
 	defer getter.Close()
 
 	engine.SetDataStorage(getter)
+	if err := getter.PreCache(nil, nil, nil); err != nil {
+		log.Printf("Pre-caching error: %v", err)
+		return
+	}
 
 	log.Printf("Runnning %d cycles...", *runs)
 	var result *engine.CallCost

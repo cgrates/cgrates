@@ -2,7 +2,7 @@
 # A simple JSONRPC client library, created to work with Go servers
 # Written by Stephen Day
 # Modified by Bruce Eckel to work with both Python 2 & 3
-import json, socket, itertools
+import json, socket, itertools, time
 from datetime import datetime
 
 class JSONClient(object):
@@ -50,7 +50,7 @@ cd = {"Direction":"*out",
       "Destination": "+49",
       "TimeStart": "2013-08-07T17:30:00Z",
       "TimeEnd": "2013-08-07T18:30:00Z",
-      "CallDuration": "60000000000",
+      "CallDuration": 60000000000,
 }
 
 # alternative to the above
@@ -58,8 +58,12 @@ cd = {"Direction":"*out",
 #s.sendall(json.dumps({"id": 1, "method": "Responder.GetCost", "params": [cd]}))
 #print(s.recv(4096))
 
+start_time = time.time()
 i = 0
+runs = 1e5
 result = ""
-for i in range(int(1e5) + 1):
+for i in range(int(runs) + 1):
     result = rpc.call("Responder.GetCost", cd)
 print(i, result)
+duration = time.time() - start_time
+print("Elapsed: %ds resulted: %d req/s." % (duration, runs/duration))

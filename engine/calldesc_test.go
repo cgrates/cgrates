@@ -342,7 +342,7 @@ func BenchmarkStorageGetting(b *testing.B) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		storageGetter.GetRatingProfile(cd.GetKey(cd.Subject))
+		storageGetter.GetRatingProfile(cd.GetKey(cd.Subject), false)
 	}
 }
 

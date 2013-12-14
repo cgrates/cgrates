@@ -268,6 +268,7 @@ func (self *TPAccountActions) KeyId() string {
 
 // Data used to do remote cache reloads via api
 type ApiReloadCache struct {
-	DestinationIds []string
-	RatingPlanIds  []string
+	DestinationIds   []string
+	RatingPlanIds    []string
+	RatingProfileIds []string
 }

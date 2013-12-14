@@ -99,7 +99,7 @@ func TestPreCacheRefresh(t *testing.T) {
 	storageGetter.SetDestination(&Destination{"T11", []string{"0"}})
 	storageGetter.GetDestination("T11", false)
 	storageGetter.SetDestination(&Destination{"T11", []string{"1"}})
-	storageGetter.PreCache(nil, nil)
+	storageGetter.PreCache(nil, nil, nil)
 	if d, err := storageGetter.GetDestination("T11", false); err != nil || d.Prefixes[0] != "1" {
 		t.Error("Error refreshing cache:", d)
 	}

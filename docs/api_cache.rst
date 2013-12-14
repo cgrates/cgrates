@@ -18,6 +18,7 @@ Data:
   type ApiReloadCache struct {
 	DestinationIds      []string
 	RatingPlanIds       []string
+    RatingProfileIds    []string
    }
 
  Mandatory parameters: none

@@ -45,7 +45,7 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
-func (ms *MapStorage) PreCache(dKeys, rppKeys []string) error {
+func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys []string) error {
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
 			cache2go.RemKey(k)
@@ -56,6 +56,12 @@ func (ms *MapStorage) PreCache(dKeys, rppKeys []string) error {
 		if strings.HasPrefix(k, RATING_PLAN_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetRatingPlan(k[len(RATING_PLAN_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+		if strings.HasPrefix(k, RATING_PROFILE_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetRatingProfile(k[len(RATING_PROFILE_PREFIX):], true); err != nil {
 				return err
 			}
 		}
@@ -104,22 +110,31 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetRatingProfile(key string) (rp *RatingProfile, err error) {
-	if values, ok := ms.dict[RATING_PROFILE_PREFIX+key]; ok {
-		rp = new(RatingProfile)
+func (ms *MapStorage) GetRatingProfile(key string, checkDb bool) (rpf *RatingProfile, err error) {
+	key = RATING_PROFILE_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*RatingProfile), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		rpf = new(RatingProfile)
 
-		err = ms.ms.Unmarshal(values, rp)
+		err = ms.ms.Unmarshal(values, rpf)
+		cache2go.Cache(key, rpf)
 	} else {
 		return nil, errors.New("not found")
 	}
 	return
 }
 
-func (ms *MapStorage) SetRatingProfile(rp *RatingProfile) (err error) {
-	result, err := ms.ms.Marshal(rp)
-	ms.dict[RATING_PROFILE_PREFIX+rp.Id] = result
+func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
+	result, err := ms.ms.Marshal(rpf)
+	ms.dict[RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
-	go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rp.Id, rp}, &response)
+	go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rpf.Id, rpf}, &response)
+	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
 

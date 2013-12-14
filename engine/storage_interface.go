@@ -68,11 +68,11 @@ Interface for storage providers.
 */
 type DataStorage interface {
 	Storage
-	PreCache([]string, []string) error
+	PreCache([]string, []string, []string) error
 	ExistsData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
-	GetRatingProfile(string) (*RatingProfile, error)
+	GetRatingProfile(string, bool) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string, bool) (*Destination, error)
 	//	DestinationContainsPrefix(string, string) (int, error)

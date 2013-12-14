@@ -22,14 +22,15 @@ import (
 	"encoding/gob"
 	"flag"
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/history"
-	"github.com/cgrates/cgrates/utils"
 	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"path"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/history"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -165,11 +166,12 @@ func main() {
 		reply := ""
 		dstIds, _ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
 		rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
+		rpfIds, _ := loader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds}, &reply); err != nil {
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
 		actIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
