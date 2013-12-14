@@ -175,8 +175,8 @@ func main() {
 		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
-		actIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
-		if len(actIds) != 0 {
+		actTmgIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
+		if len(actTmgIds) != 0 {
 			if *verbose {
 				log.Print("Reloading scheduler")
 			}
