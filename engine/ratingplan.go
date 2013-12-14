@@ -40,15 +40,16 @@ func (rpr *RPRate) Equal(orpr *RPRate) bool {
 
 type RPRateList []*RPRate
 
-func (rp *RatingPlan) RateIntervalList(dId string) (ril RateIntervalList) {
-	for _, rpr := range rp.DestinationRates[dId] {
-		ril = append(ril, &RateInterval{
+func (rp *RatingPlan) RateIntervalList(dId string) RateIntervalList {
+	ril := make(RateIntervalList, len(rp.DestinationRates[dId]))
+	for i, rpr := range rp.DestinationRates[dId] {
+		ril[i] = &RateInterval{
 			Timing: rp.Timings[rpr.Timing],
 			Rating: rp.Ratings[rpr.Rating],
 			Weight: rpr.Weight,
-		})
+		}
 	}
-	return
+	return ril
 }
 
 /*

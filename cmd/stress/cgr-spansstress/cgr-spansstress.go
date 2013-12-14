@@ -48,15 +48,6 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-	if *memprofile != "" {
-		f, err := os.Create(*memprofile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		pprof.WriteHeapProfile(f)
-		f.Close()
-		return
-	}
 	cd := engine.CallDescriptor{
 		TimeStart:    time.Date(2013, time.December, 13, 22, 30, 0, 0, time.UTC),
 		TimeEnd:      time.Date(2013, time.December, 13, 22, 31, 0, 0, time.UTC),
@@ -84,7 +75,18 @@ func main() {
 	j := 0
 	start := time.Now()
 	for i := 0; i < *runs; i++ {
+		runtime.MemProfileRate = 1
 		result, err = cd.GetCost()
+		if *memprofile != "" {
+			runtime.GC()
+			f, err := os.Create(*memprofile)
+			if err != nil {
+				log.Fatal(err)
+			}
+			pprof.WriteHeapProfile(f)
+			f.Close()
+			break
+		}
 		j = i
 	}
 	duration := time.Since(start)

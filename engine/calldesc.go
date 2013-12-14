@@ -266,17 +266,13 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 	return true
 }
 
-/*
-Constructs the key for the storage lookup.
-The prefixLen is limiting the length of the destination prefix.
-*/
+// Constructs the key for the storage lookup.
+// The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, subject)
 }
 
-/*
-Splits the received timespan into sub time spans according to the activation periods intervals.
-*/
+// Splits the received timespan into sub time spans according to the activation periods intervals.
 func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*TimeSpan) {
 	if firstSpan == nil {
 		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration}
