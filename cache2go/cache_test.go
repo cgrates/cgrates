@@ -96,3 +96,20 @@ func TestXRemKey(t *testing.T) {
 		t.Error("Error removing xcached key: ", err, t1)
 	}
 }
+
+func TestGetKeyAge(t *testing.T) {
+	Cache("t1", "test")
+	d, err := GetKeyAge("t1")
+	if err != nil || d > time.Millisecond || d < time.Nanosecond {
+		t.Error("Error getting cache key age: ", d)
+	}
+}
+
+func TestXGetKeyAge(t *testing.T) {
+	a := &myStruct{data: "mama are mere"}
+	a.XCache("t1", 10*time.Second, a)
+	d, err := GetXKeyAge("t1")
+	if err != nil || d > time.Millisecond || d < time.Nanosecond {
+		t.Error("Error getting cache key age: ", d)
+	}
+}

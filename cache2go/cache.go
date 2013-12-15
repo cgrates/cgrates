@@ -11,6 +11,7 @@ import (
 type expiringCacheEntry interface {
 	XCache(key string, expire time.Duration, value expiringCacheEntry)
 	timer() *time.Timer
+	age() time.Duration
 	KeepAlive()
 }
 
@@ -70,6 +71,11 @@ func (xe *XEntry) timer() *time.Timer {
 	return xe.t
 }
 
+func (xe *XEntry) age() time.Duration {
+	return time.Since(xe.timestamp)
+
+}
+
 // Mark entry to be kept another expirationDuration period
 func (xe *XEntry) KeepAlive() {
 	xe.Lock()
@@ -103,6 +109,24 @@ func GetCached(key string) (v interface{}, err error) {
 		return r.value, nil
 	}
 	return nil, errors.New("not found")
+}
+
+func GetKeyAge(key string) (time.Duration, error) {
+	mux.RLock()
+	defer mux.RUnlock()
+	if r, ok := cache[key]; ok {
+		return time.Since(r.timestamp), nil
+	}
+	return 0, errors.New("not found")
+}
+
+func GetXKeyAge(key string) (time.Duration, error) {
+	xMux.RLock()
+	defer xMux.RUnlock()
+	if r, ok := xcache[key]; ok {
+		return r.age(), nil
+	}
+	return 0, errors.New("not found")
 }
 
 func RemKey(key string) {
