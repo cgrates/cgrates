@@ -132,22 +132,12 @@ func RoundTo(whole, amount time.Duration) time.Duration {
 	return time.Duration((w - math.Mod(a, w)) + a)
 }
 
-type StringSlice []string
-
-func (ss StringSlice) Contains(needle string) bool {
-	for _, hay := range ss {
-		if hay == needle {
-			return true
-		}
-	}
-	return false
-}
-
-func SplitPrefixInterface(prefix string) []interface{} {
-	var subs []interface{}
+func SplitPrefix(prefix string) []string {
+	length := int(math.Max(float64(len(prefix)-1), 0))
+	subs := make([]string, length)
 	max := len(prefix)
-	for i := 0; i < len(prefix)-1; i++ {
-		subs = append(subs, prefix[:max-i])
+	for i := 0; i < length; i++ {
+		subs[i] = prefix[:max-i]
 	}
 	return subs
 }

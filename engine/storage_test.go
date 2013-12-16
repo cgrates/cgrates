@@ -96,11 +96,13 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 }
 
 func TestPreCacheRefresh(t *testing.T) {
-	storageGetter.SetDestination(&Destination{"T11", []string{"0"}})
+	storageGetter.SetDestination(&Destination{"T11", map[string]interface{}{"0": nil}})
 	storageGetter.GetDestination("T11", false)
-	storageGetter.SetDestination(&Destination{"T11", []string{"1"}})
+	storageGetter.SetDestination(&Destination{"T11", map[string]interface{}{"1": nil}})
 	storageGetter.PreCache(nil, nil, nil, nil)
-	if d, err := storageGetter.GetDestination("T11", false); err != nil || d.Prefixes[0] != "1" {
+	d, err := storageGetter.GetDestination("T11", false)
+	_, ok := d.Prefixes["1"]
+	if err != nil || !ok {
 		t.Error("Error refreshing cache:", d)
 	}
 }

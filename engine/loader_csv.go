@@ -22,11 +22,12 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type CSVReader struct {
@@ -198,10 +199,10 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 			}
 		}
 		if dest == nil {
-			dest = &Destination{Id: tag}
+			dest = &Destination{Id: tag, Prefixes: make(map[string]interface{}, 1)}
 			csvr.destinations = append(csvr.destinations, dest)
 		}
-		dest.Prefixes = append(dest.Prefixes, record[1])
+		dest.Prefixes[record[1]] = nil
 	}
 	return
 }

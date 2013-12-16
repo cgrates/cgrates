@@ -151,39 +151,39 @@ func TestLoadDestinations(t *testing.T) {
 	for _, d := range csvr.destinations {
 		switch d.Id {
 		case "NAT":
-			if !reflect.DeepEqual(d.Prefixes, []string{`0256`, `0257`, `0723`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`0256`: nil, `0257`: nil, `0723`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "ALL":
-			if !reflect.DeepEqual(d.Prefixes, []string{`49`, `41`, `43`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`49`: nil, `41`: nil, `43`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "RET":
-			if !reflect.DeepEqual(d.Prefixes, []string{`0723`, `0724`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`0723`: nil, `0724`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "GERMANY":
-			if !reflect.DeepEqual(d.Prefixes, []string{`49`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`49`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "GERMANY_O2":
-			if !reflect.DeepEqual(d.Prefixes, []string{`41`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`41`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "GERMANY_PREMIUM":
-			if !reflect.DeepEqual(d.Prefixes, []string{`43`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`43`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "PSTN_71":
-			if !reflect.DeepEqual(d.Prefixes, []string{`+4971`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`+4971`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "PSTN_72":
-			if !reflect.DeepEqual(d.Prefixes, []string{`+4972`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`+4972`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "PSTN_70":
-			if !reflect.DeepEqual(d.Prefixes, []string{`+4970`}) {
+			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`+4970`: nil}) {
 				t.Error("Faild to load destinations", d)
 			}
 		default:
@@ -554,7 +554,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 		RatingPlanActivations: RatingPlanActivations{&RatingPlanActivation{
 			ActivationTime: time.Date(2013, 10, 1, 0, 0, 0, 0, time.UTC),
 			RatingPlanId:   "TDRT",
-			FallbackKeys:   []string{"*out:test:0:rif", "*out:test:0:danb"},
+			FallbackKeys:   []string{"*out:test:0:danb", "*out:test:0:rif"},
 		}},
 	}
 	if !reflect.DeepEqual(rp, expected) {

@@ -20,6 +20,8 @@ package engine
 
 import (
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -27,16 +29,16 @@ Structure that gathers multiple destination prefixes under a common id.
 */
 type Destination struct {
 	Id       string
-	Prefixes []string
+	Prefixes map[string]interface{}
 }
 
 func (d *Destination) containsPrefix(prefix string) (precision int) {
 	if d == nil {
 		return
 	}
-	for _, p := range d.Prefixes {
-		if strings.Index(prefix, p) == 0 && len(p) > precision {
-			precision = len(p)
+	for i, p := range utils.SplitPrefix(prefix) {
+		if _, found := d.Prefixes[p]; found {
+			return len(prefix) - i
 		}
 	}
 	return
@@ -44,8 +46,8 @@ func (d *Destination) containsPrefix(prefix string) (precision int) {
 
 func (d *Destination) String() (result string) {
 	result = d.Id + ": "
-	for _, p := range d.Prefixes {
-		result += p + ", "
+	for k, _ := range d.Prefixes {
+		result += k + ", "
 	}
 	result = strings.TrimRight(result, ", ")
 	return result

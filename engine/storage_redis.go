@@ -69,6 +69,9 @@ func (rs *RedisStorage) Flush() (err error) {
 }
 
 func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) (err error) {
+	if dKeys == nil && rpKeys == nil && rpfKeys == nil && actKeys == nil {
+		cache2go.Flush()
+	}
 	if dKeys == nil {
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {

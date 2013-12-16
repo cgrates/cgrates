@@ -23,10 +23,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"io/ioutil"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type SQLStorage struct {
@@ -163,7 +164,7 @@ func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, er
 		return nil, err
 	}
 	defer rows.Close()
-	d := &Destination{Id: destTag}
+	d := &Destination{Id: destTag, Prefixes: make(map[string]interface{}, 1)}
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix
@@ -172,7 +173,7 @@ func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, er
 		if err != nil {
 			return nil, err
 		}
-		d.Prefixes = append(d.Prefixes, pref)
+		d.Prefixes[pref] = nil
 	}
 	if i == 0 {
 		return nil, nil
@@ -186,11 +187,13 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	}
 	var buffer bytes.Buffer // Use bytes buffer istead of string concatenation since that becomes quite heavy on large prefixes
 	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES ", utils.TBL_TP_DESTINATIONS))
-	for idx, prefix := range dest.Prefixes {
+	idx := 0
+	for prefix, _ := range dest.Prefixes {
 		if idx != 0 {
 			buffer.WriteRune(',')
 		}
 		buffer.WriteString(fmt.Sprintf("('%s','%s','%s')", tpid, dest.Id, prefix))
+		idx++
 	}
 	buffer.WriteString(" ON DUPLICATE KEY UPDATE prefix=values(prefix)")
 	if _, err := self.Db.Exec(buffer.String()); err != nil {
@@ -801,10 +804,10 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 			}
 		}
 		if dest == nil {
-			dest = &Destination{Id: tag}
+			dest = &Destination{Id: tag, Prefixes: make(map[string]interface{}, 1)}
 			dests = append(dests, dest)
 		}
-		dest.Prefixes = append(dest.Prefixes, prefix)
+		dest.Prefixes[prefix] = nil
 	}
 	return dests, nil
 }

@@ -20,14 +20,15 @@ package utils
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 )
 
 type TPDestination struct {
-	TPid          string   // Tariff plan id
-	DestinationId string   // Destination id
-	Prefixes      []string // Prefixes attached to this destination
+	TPid          string                 // Tariff plan id
+	DestinationId string                 // Destination id
+	Prefixes      map[string]interface{} // Prefixes attached to this destination
 }
 
 // This file deals with tp_* data definition
@@ -171,17 +172,25 @@ type TPRatingActivation struct {
 
 // Helper to return the subject fallback keys we need in dataDb
 func FallbackSubjKeys(direction, tenant, tor, fallbackSubjects string) []string {
-	var subjKeys []string
+	var sslice sort.StringSlice
 	if len(fallbackSubjects) != 0 {
-		var sslice StringSlice
 		for _, fbs := range strings.Split(fallbackSubjects, string(FALLBACK_SEP)) {
 			newKey := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, fbs)
-			if !sslice.Contains(newKey) {
-				subjKeys = append(subjKeys, newKey)
-			}
+			i := sslice.Search(newKey)
+			if i < len(sslice) && sslice[i] != newKey {
+				// not found so insert it
+				sslice = append(sslice, "")
+				copy(sslice[i+1:], sslice[i:])
+				sslice[i] = newKey
+			} else {
+				if i == len(sslice) {
+					// not found and at the end
+					sslice = append(sslice, newKey)
+				}
+			} // newKey was foundfound
 		}
 	}
-	return subjKeys
+	return sslice
 }
 
 type AttrTPRatingProfileIds struct {

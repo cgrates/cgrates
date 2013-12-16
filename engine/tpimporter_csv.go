@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"io"
 	"io/ioutil"
 	"log"
 	"strconv"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Import tariff plan from csv into storDb
@@ -114,7 +115,7 @@ func (self *TPCSVImporter) importDestinations(fn string) error {
 			}
 			continue
 		}
-		dst := &Destination{record[0], []string{record[1]}}
+		dst := &Destination{record[0], map[string]interface{}{record[1]: nil}}
 		if err := self.StorDb.SetTPDestination(self.TPid, dst); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())

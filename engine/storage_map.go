@@ -46,6 +46,9 @@ func (ms *MapStorage) Flush() error {
 }
 
 func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) error {
+	if dKeys == nil && rpKeys == nil && rpfKeys == nil && actKeys == nil {
+		cache2go.Flush()
+	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
 			cache2go.RemKey(k)
