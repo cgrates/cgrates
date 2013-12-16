@@ -55,8 +55,8 @@ func main() {
 		Direction:    "*out",
 		TOR:          "call",
 		Tenant:       "cgrates.org",
-		Subject:      "dan",
-		Destination:  "+31676016500",
+		Subject:      "1001",
+		Destination:  "+49676016500",
 	}
 	getter, err := engine.ConfigureDataStorage(utils.REDIS, "127.0.0.1", "6379", "10", "", "", utils.MSGPACK)
 	if err != nil {
@@ -75,7 +75,7 @@ func main() {
 	j := 0
 	start := time.Now()
 	for i := 0; i < *runs; i++ {
-		result, err = cd.GetCost()
+		result, err = cd.Debit()
 		if *memprofile != "" {
 			runtime.MemProfileRate = 1
 			runtime.GC()
