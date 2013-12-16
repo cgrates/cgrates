@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/cgrates/cgrates/cache2go"
 
@@ -27,7 +28,7 @@ import (
 )
 
 func TestDestinationStoreRestore(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: map[string]interface{}{"0257": nil, "0256": nil, "0723": nil}}
+	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	s, _ := json.Marshal(nationale)
 	d1 := &Destination{Id: "nat"}
 	json.Unmarshal(s, d1)
@@ -38,22 +39,19 @@ func TestDestinationStoreRestore(t *testing.T) {
 }
 
 func TestDestinationStorageStore(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: map[string]interface{}{"0257": nil, "0256": nil, "0723": nil}}
+	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	err := storageGetter.SetDestination(nationale)
 	if err != nil {
 		t.Error("Error storing destination: ", err)
 	}
 	result, err := storageGetter.GetDestination(nationale.Id, false)
-	_, a := nationale.Prefixes["0257"]
-	_, b := nationale.Prefixes["0256"]
-	_, c := nationale.Prefixes["0723"]
-	if !a || !b || !c {
+	if nationale.containsPrefix("0257") == 0 || nationale.containsPrefix("0256") == 0 || nationale.containsPrefix("0723") == 0 {
 		t.Errorf("Expected %q was %q", nationale, result)
 	}
 }
 
 func TestDestinationContainsPrefix(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: map[string]interface{}{"0257": nil, "0256": nil, "0723": nil}}
+	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	precision := nationale.containsPrefix("0256")
 	if precision != len("0256") {
 		t.Error("Should contain prefix: ", nationale)
@@ -61,7 +59,7 @@ func TestDestinationContainsPrefix(t *testing.T) {
 }
 
 func TestDestinationContainsPrefixLong(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: map[string]interface{}{"0257": nil, "0256": nil, "0723": nil}}
+	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	precision := nationale.containsPrefix("0256723045")
 	if precision != len("0256") {
 		t.Error("Should contain prefix: ", nationale)
@@ -69,7 +67,7 @@ func TestDestinationContainsPrefixLong(t *testing.T) {
 }
 
 func TestDestinationContainsPrefixWrong(t *testing.T) {
-	nationale := &Destination{Id: "nat", Prefixes: map[string]interface{}{"0257": nil, "0256": nil, "0723": nil}}
+	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	precision := nationale.containsPrefix("01234567")
 	if precision != 0 {
 		t.Error("Should not contain prefix: ", nationale)
@@ -104,59 +102,32 @@ func TestDestinationGetNotExistsCache(t *testing.T) {
 	}
 }
 
-/*
-func TestConcurrentDestReadWrite(t *testing.T) {
-	dst1 := &Destination{Id: "TST_1", Prefixes: []string{"1"}}
-	err := storageGetter.SetDestination(dst1)
-	if err != nil {
-		t.Error("Error setting  destination: ", err)
+func TestDestinationOptimzeShort(t *testing.T) {
+	d := &Destination{}
+	for i := 0; i < LONG_PREFIX_SLICE_LENGTH; i++ {
+		d.AddPrefix(strconv.Itoa(i))
 	}
-	rec := 500
-	go func() {
-		for i := 0; i < rec; i++ {
-			storageGetter.SetDestination(&Destination{Id: fmt.Sprintf("TST_%d", i), Prefixes: []string{"1"}})
-		}
-	}()
-
-	for i := 0; i < rec; i++ {
-		dst2, err := storageGetter.GetDestination(dst1.Id)
-		if err != nil {
-			t.Error("Error retrieving destination: ", err)
-		}
-		if !reflect.DeepEqual(dst1, dst2) {
-			t.Error("Cannot retrieve properly the destination 1", dst1, dst2)
-		}
+	d.OptimizePrefixes()
+	if d.Prefixes == nil || d.longPrefixesMap != nil {
+		t.Logf("Error optimizing destinations %+v", d)
 	}
 }
 
-func TestNonConcurrentDestReadWrite(t *testing.T) {
-	dst1 := &Destination{Id: "TST_1", Prefixes: []string{"1"}}
-	err := storageGetter.SetDestination(dst1)
-	if err != nil {
-		t.Error("Error setting destination: ", err)
+func TestDestinationOptimzeLong(t *testing.T) {
+	d := &Destination{}
+	for i := 0; i < LONG_PREFIX_SLICE_LENGTH+1; i++ {
+		d.AddPrefix(strconv.Itoa(i))
 	}
-	rec := 10000
-	//go func(){
-	for i := 0; i < rec; i++ {
-		storageGetter.SetDestination(&Destination{Id: fmt.Sprintf("TST_%d", i), Prefixes: []string{"1"}})
-	}
-	//}()
-
-	for i := 0; i < rec; i++ {
-		dst2, err := storageGetter.GetDestination(dst1.Id)
-		if err != nil {
-			t.Error("Error retrieving destination: ", err)
-		}
-		if !reflect.DeepEqual(dst1, dst2) {
-			t.Error("Cannot retrieve properly the destination 1", dst1, dst2)
-		}
+	d.OptimizePrefixes()
+	if d.Prefixes != nil || d.longPrefixesMap == nil {
+		t.Logf("Error optimizing destinations %+v", d)
 	}
 }
-*/
+
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
-	nationale := &Destination{Id: "nat", Prefixes: map[string]interface{}{"0257": nil, "0256": nil, "0723": nil}}
+	nationale := &Destination{Id: "nat", Prefixes: []string{"0257", "0256", "0723"}}
 	for i := 0; i < b.N; i++ {
 		storageGetter.SetDestination(nationale)
 		storageGetter.GetDestination(nationale.Id, true)

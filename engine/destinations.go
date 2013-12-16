@@ -24,31 +24,67 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+const (
+	LONG_PREFIX_SLICE_LENGTH = 30
+)
+
 /*
 Structure that gathers multiple destination prefixes under a common id.
 */
 type Destination struct {
-	Id       string
-	Prefixes map[string]interface{}
+	Id              string
+	Prefixes        []string
+	longPrefixesMap map[string]interface{}
 }
 
-func (d *Destination) containsPrefix(prefix string) (precision int) {
+// returns prefix precision
+func (d *Destination) containsPrefix(prefix string) int {
 	if d == nil {
-		return
+		return 0
 	}
-	for i, p := range utils.SplitPrefix(prefix) {
-		if _, found := d.Prefixes[p]; found {
-			return len(prefix) - i
+	if d.Prefixes != nil {
+		for _, p := range d.Prefixes {
+			if strings.Index(prefix, p) == 0 {
+				return len(p)
+			}
 		}
 	}
-	return
+	if d.longPrefixesMap != nil {
+		for i, p := range utils.SplitPrefix(prefix) {
+			if _, found := d.longPrefixesMap[p]; found {
+				return len(prefix) - i
+			}
+		}
+	}
+	return 0
 }
 
 func (d *Destination) String() (result string) {
 	result = d.Id + ": "
-	for k, _ := range d.Prefixes {
-		result += k + ", "
+	if d.Prefixes != nil {
+		for _, k := range d.Prefixes {
+			result += k + ", "
+		}
+	}
+	if d.longPrefixesMap != nil {
+		for k, _ := range d.longPrefixesMap {
+			result += k + ", "
+		}
 	}
 	result = strings.TrimRight(result, ", ")
 	return result
+}
+
+func (d *Destination) AddPrefix(pfx string) {
+	d.Prefixes = append(d.Prefixes, pfx)
+}
+
+func (d *Destination) OptimizePrefixes() {
+	if len(d.Prefixes) > LONG_PREFIX_SLICE_LENGTH {
+		d.longPrefixesMap = make(map[string]interface{})
+		for _, p := range d.Prefixes {
+			d.longPrefixesMap[p] = nil
+		}
+		d.Prefixes = nil
+	}
 }

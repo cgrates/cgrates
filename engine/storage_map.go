@@ -158,6 +158,7 @@ func (ms *MapStorage) GetDestination(key string, checkDb bool) (dest *Destinatio
 	if values, ok := ms.dict[key]; ok {
 		dest = &Destination{Id: key}
 		err = ms.ms.Unmarshal(values, dest)
+		dest.OptimizePrefixes()
 		cache2go.Cache(key, dest)
 	} else {
 		return nil, errors.New("not found")

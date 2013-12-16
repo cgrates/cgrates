@@ -164,7 +164,7 @@ func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, er
 		return nil, err
 	}
 	defer rows.Close()
-	d := &Destination{Id: destTag, Prefixes: make(map[string]interface{}, 1)}
+	d := &Destination{Id: destTag}
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one prefix
@@ -173,7 +173,7 @@ func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, er
 		if err != nil {
 			return nil, err
 		}
-		d.Prefixes[pref] = nil
+		d.AddPrefix(pref)
 	}
 	if i == 0 {
 		return nil, nil
@@ -804,10 +804,10 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 			}
 		}
 		if dest == nil {
-			dest = &Destination{Id: tag, Prefixes: make(map[string]interface{}, 1)}
+			dest = &Destination{Id: tag}
 			dests = append(dests, dest)
 		}
-		dest.Prefixes[prefix] = nil
+		dest.AddPrefix(prefix)
 	}
 	return dests, nil
 }

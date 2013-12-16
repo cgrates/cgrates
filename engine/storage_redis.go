@@ -244,6 +244,7 @@ func (rs *RedisStorage) GetDestination(key string, checkDb bool) (dest *Destinat
 		r.Close()
 		dest = new(Destination)
 		err = rs.ms.Unmarshal(out, dest)
+		dest.OptimizePrefixes()
 		cache2go.Cache(key, dest)
 	}
 	return

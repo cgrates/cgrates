@@ -151,39 +151,39 @@ func TestLoadDestinations(t *testing.T) {
 	for _, d := range csvr.destinations {
 		switch d.Id {
 		case "NAT":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`0256`: nil, `0257`: nil, `0723`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`0256`, `0257`, `0723`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "ALL":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`49`: nil, `41`: nil, `43`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`49`, `41`, `43`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "RET":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`0723`: nil, `0724`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`0723`, `0724`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "GERMANY":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`49`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`49`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "GERMANY_O2":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`41`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`41`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "GERMANY_PREMIUM":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`43`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`43`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "PSTN_71":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`+4971`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`+4971`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "PSTN_72":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`+4972`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`+4972`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		case "PSTN_70":
-			if !reflect.DeepEqual(d.Prefixes, map[string]interface{}{`+4970`: nil}) {
+			if !reflect.DeepEqual(d.Prefixes, []string{`+4970`}) {
 				t.Error("Faild to load destinations", d)
 			}
 		default:

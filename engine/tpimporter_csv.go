@@ -115,7 +115,7 @@ func (self *TPCSVImporter) importDestinations(fn string) error {
 			}
 			continue
 		}
-		dst := &Destination{record[0], map[string]interface{}{record[1]: nil}}
+		dst := &Destination{record[0], []string{record[1]}, nil}
 		if err := self.StorDb.SetTPDestination(self.TPid, dst); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())

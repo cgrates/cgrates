@@ -31,3 +31,20 @@ func TestHistoryRatinPlans(t *testing.T) {
 		t.Error("Error in destination history content:", scribe.RpBuf.String())
 	}
 }
+
+func TestHistoryDestinations(t *testing.T) {
+	scribe := historyScribe.(*history.MockScribe)
+	expected := `[{"Key":"ALL","Object":{"Id":"ALL","Prefixes":["49","41","43"]}}
+{"Key":"GERMANY","Object":{"Id":"GERMANY","Prefixes":["49"]}}
+{"Key":"GERMANY_O2","Object":{"Id":"GERMANY_O2","Prefixes":["41"]}}
+{"Key":"GERMANY_PREMIUM","Object":{"Id":"GERMANY_PREMIUM","Prefixes":["43"]}}
+{"Key":"NAT","Object":{"Id":"NAT","Prefixes":["0256","0257","0723"]}}
+{"Key":"PSTN_70","Object":{"Id":"PSTN_70","Prefixes":["+4970"]}}
+{"Key":"PSTN_71","Object":{"Id":"PSTN_71","Prefixes":["+4971"]}}
+{"Key":"PSTN_72","Object":{"Id":"PSTN_72","Prefixes":["+4972"]}}
+{"Key":"RET","Object":{"Id":"RET","Prefixes":["0723","0724"]}}
+{"Key":"nat","Object":{"Id":"nat","Prefixes":["0257","0256","0723"]}}]`
+	if scribe.DestBuf.String() != expected {
+		t.Error("Error in destination history content:", scribe.DestBuf.String())
+	}
+}

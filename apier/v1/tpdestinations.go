@@ -21,6 +21,7 @@ package apier
 import (
 	"errors"
 	"fmt"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -30,7 +31,7 @@ func (self *ApierV1) SetTPDestination(attrs utils.TPDestination, reply *string) 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId", "Prefixes"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.SetTPDestination(attrs.TPid, &engine.Destination{attrs.DestinationId, attrs.Prefixes}); err != nil {
+	if err := self.StorDb.SetTPDestination(attrs.TPid, &engine.Destination{Id: attrs.DestinationId, Prefixes: attrs.Prefixes}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"

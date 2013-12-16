@@ -24,8 +24,8 @@ import (
 )
 
 var (
-	NAT = &Destination{Id: "NAT", Prefixes: map[string]interface{}{"0257": nil, "0256": nil, "0723": nil}}
-	RET = &Destination{Id: "RET", Prefixes: map[string]interface{}{"0723": nil, "0724": nil}}
+	NAT = &Destination{Id: "NAT", Prefixes: []string{"0257", "0256", "0723"}}
+	RET = &Destination{Id: "RET", Prefixes: []string{"0723", "0724"}}
 )
 
 func init() {

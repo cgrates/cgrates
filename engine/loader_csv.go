@@ -199,10 +199,10 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 			}
 		}
 		if dest == nil {
-			dest = &Destination{Id: tag, Prefixes: make(map[string]interface{}, 1)}
+			dest = &Destination{Id: tag}
 			csvr.destinations = append(csvr.destinations, dest)
 		}
-		dest.Prefixes[record[1]] = nil
+		dest.AddPrefix(record[1])
 	}
 	return
 }
