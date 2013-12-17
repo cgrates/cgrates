@@ -20,9 +20,10 @@ package scheduler
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
 	"sort"
 	"time"
+
+	"github.com/cgrates/cgrates/engine"
 )
 
 type Scheduler struct {
@@ -63,7 +64,7 @@ func (s *Scheduler) Loop() {
 	}
 }
 
-func (s *Scheduler) LoadActionTimings(storage engine.DataStorage) {
+func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 	actionTimings, err := storage.GetAllActionTimings()
 	if err != nil {
 		engine.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))

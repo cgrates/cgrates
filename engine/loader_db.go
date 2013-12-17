@@ -30,6 +30,7 @@ type DbReader struct {
 	tpid             string
 	storDb           LoadStorage
 	dataDb           DataStorage
+	accountDb        AccountingStorage
 	actions          map[string][]*Action
 	actionsTimings   map[string][]*ActionTiming
 	actionsTriggers  map[string][]*ActionTrigger
@@ -42,10 +43,11 @@ type DbReader struct {
 	ratingProfiles   map[string]*RatingProfile
 }
 
-func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader {
+func NewDbReader(storDB LoadStorage, storage DataStorage, accountDb AccountingStorage, tpid string) *DbReader {
 	c := new(DbReader)
 	c.storDb = storDB
 	c.dataDb = storage
+	c.accountDb = accountDb
 	c.tpid = tpid
 	c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
@@ -103,7 +105,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Action timings")
 	}
 	for k, ats := range dbr.actionsTimings {
-		err = storage.SetActionTimings(k, ats)
+		err = accountingStorage.SetActionTimings(k, ats)
 		if err != nil {
 			return err
 		}
@@ -115,7 +117,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Actions")
 	}
 	for k, as := range dbr.actions {
-		err = storage.SetActions(k, as)
+		err = accountingStorage.SetActions(k, as)
 		if err != nil {
 			return err
 		}
@@ -127,7 +129,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Account actions")
 	}
 	for _, ub := range dbr.accountActions {
-		err = storage.SetUserBalance(ub)
+		err = accountingStorage.SetUserBalance(ub)
 		if err != nil {
 			return err
 		}
@@ -465,7 +467,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		if accountAction.ActionTimingsId != "" {
 			// get old userBalanceIds
 			var exitingUserBalanceIds []string
-			existingActionTimings, err := dbr.dataDb.GetActionTimings(accountAction.ActionTimingsId)
+			existingActionTimings, err := dbr.accountDb.GetActionTimings(accountAction.ActionTimingsId)
 			if err == nil && len(existingActionTimings) > 0 {
 				// all action timings from a specific tag shuld have the same list of user balances from the first one
 				exitingUserBalanceIds = existingActionTimings[0].UserBalanceIds
@@ -525,7 +527,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 
 			// write action timings
-			err = dbr.dataDb.SetActionTimings(accountAction.ActionTimingsId, actionTimings)
+			err = dbr.accountDb.SetActionTimings(accountAction.ActionTimingsId, actionTimings)
 			if err != nil {
 				return err
 			}
@@ -593,12 +595,12 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		}
 		// writee actions
 		for k, as := range acts {
-			err = dbr.dataDb.SetActions(k, as)
+			err = dbr.accountDb.SetActions(k, as)
 			if err != nil {
 				return err
 			}
 		}
-		ub, err := dbr.dataDb.GetUserBalance(id)
+		ub, err := dbr.accountDb.GetUserBalance(id)
 		if err != nil {
 			ub = &UserBalance{
 				Type: UB_TYPE_PREPAID,
@@ -607,7 +609,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		}
 		ub.ActionTriggers = actionTriggers
 
-		if err := dbr.dataDb.SetUserBalance(ub); err != nil {
+		if err := dbr.accountDb.SetUserBalance(ub); err != nil {
 			return err
 		}
 	}

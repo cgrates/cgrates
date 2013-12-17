@@ -20,10 +20,11 @@ package engine
 
 import (
 	"flag"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"path"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*

@@ -220,7 +220,7 @@ func (rs *Responder) getBalance(arg *CallDescriptor, balanceId string, reply *Ca
 		return errors.New("No balancer supported for this command right now")
 	}
 	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.Account
-	userBalance, err := storageGetter.GetUserBalance(ubKey)
+	userBalance, err := accountingStorage.GetUserBalance(ubKey)
 	if err != nil {
 		return err
 	}

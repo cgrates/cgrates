@@ -37,12 +37,12 @@ func populateTestActionsForTriggers() {
 		&Action{ActionType: "*topup", BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}},
 		&Action{ActionType: "*topup", BalanceId: MINUTES, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationId: "NAT"}},
 	}
-	storageGetter.SetActions("TEST_ACTIONS", ats)
+	accountingStorage.SetActions("TEST_ACTIONS", ats)
 	ats1 := []*Action{
 		&Action{ActionType: "*topup", BalanceId: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 20},
 		&Action{ActionType: "*reset_prepaid", Weight: 10},
 	}
-	storageGetter.SetActions("TEST_ACTIONS_ORDER", ats1)
+	accountingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
 }
 
 func TestBalanceStoreRestore(t *testing.T) {
@@ -99,8 +99,8 @@ func TestUserBalanceStorageStoreRestore(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
-	storageGetter.SetUserBalance(rifsBalance)
-	ub1, err := storageGetter.GetUserBalance("other")
+	accountingStorage.SetUserBalance(rifsBalance)
+	ub1, err := accountingStorage.GetUserBalance("other")
 	if err != nil || !ub1.BalanceMap[CREDIT+OUTBOUND].Equal(rifsBalance.BalanceMap[CREDIT+OUTBOUND]) {
 		t.Log("UB: ", ub1)
 		t.Errorf("Expected %v was %v", rifsBalance.BalanceMap[CREDIT+OUTBOUND], ub1.BalanceMap[CREDIT+OUTBOUND])
@@ -161,8 +161,8 @@ func TestUserBalanceStorageStore(t *testing.T) {
 	b1 := &Balance{Value: 10, Weight: 10, DestinationId: "NAT"}
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
-	storageGetter.SetUserBalance(rifsBalance)
-	result, err := storageGetter.GetUserBalance(rifsBalance.Id)
+	accountingStorage.SetUserBalance(rifsBalance)
+	result, err := accountingStorage.GetUserBalance(rifsBalance.Id)
 	if err != nil || rifsBalance.Id != result.Id ||
 		len(rifsBalance.BalanceMap[MINUTES+OUTBOUND]) < 2 || len(result.BalanceMap[MINUTES+OUTBOUND]) < 2 ||
 		!(rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Equal(result.BalanceMap[MINUTES+OUTBOUND][0])) ||
@@ -1063,8 +1063,8 @@ func BenchmarkUserBalanceStorageStoreRestore(b *testing.B) {
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
 	for i := 0; i < b.N; i++ {
-		storageGetter.SetUserBalance(rifsBalance)
-		storageGetter.GetUserBalance(rifsBalance.Id)
+		accountingStorage.SetUserBalance(rifsBalance)
+		accountingStorage.GetUserBalance(rifsBalance.Id)
 	}
 }
 

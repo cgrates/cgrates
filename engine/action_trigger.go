@@ -41,7 +41,7 @@ type ActionTrigger struct {
 func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
-	aac, err = storageGetter.GetActions(at.ActionsId, false)
+	aac, err = accountingStorage.GetActions(at.ActionsId, false)
 	aac.Sort()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
@@ -62,7 +62,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 	}
 	storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)
 	at.Executed = true
-	storageGetter.SetUserBalance(ub)
+	accountingStorage.SetUserBalance(ub)
 	return
 }
 

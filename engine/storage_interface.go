@@ -75,8 +75,11 @@ type DataStorage interface {
 	GetRatingProfile(string, bool) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
 	GetDestination(string) (*Destination, error)
-	//	DestinationContainsPrefix(string, string) (int, error)
 	SetDestination(*Destination) error
+}
+
+type AccountingStorage interface {
+	Storage
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)

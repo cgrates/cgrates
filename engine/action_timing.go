@@ -207,7 +207,7 @@ func (at *ActionTiming) SetActions(as Actions) {
 
 func (at *ActionTiming) getActions() (as []*Action, err error) {
 	if at.actions == nil {
-		at.actions, err = storageGetter.GetActions(at.ActionsId, false)
+		at.actions, err = accountingStorage.GetActions(at.ActionsId, false)
 	}
 	at.actions.Sort()
 	return at.actions, err
@@ -229,7 +229,7 @@ func (at *ActionTiming) Execute() (err error) {
 		}
 		for _, ubId := range at.UserBalanceIds {
 			AccLock.Guard(ubId, func() (float64, error) {
-				ub, err := storageGetter.GetUserBalance(ubId)
+				ub, err := accountingStorage.GetUserBalance(ubId)
 				if err != nil {
 					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
 					return 0, err
@@ -237,7 +237,7 @@ func (at *ActionTiming) Execute() (err error) {
 
 				Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
 				err = actionFunction(ub, a)
-				storageGetter.SetUserBalance(ub)
+				accountingStorage.SetUserBalance(ub)
 				return 0, nil
 			})
 		}

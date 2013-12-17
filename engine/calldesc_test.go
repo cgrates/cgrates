@@ -55,10 +55,10 @@ func populateDB() {
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
 	}
-	if storageGetter != nil {
-		storageGetter.(Storage).Flush()
-		storageGetter.SetUserBalance(broker)
-		storageGetter.SetUserBalance(minu)
+	if accountingStorage != nil {
+		accountingStorage.(Storage).Flush()
+		accountingStorage.SetUserBalance(broker)
+		accountingStorage.SetUserBalance(minu)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}

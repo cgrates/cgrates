@@ -39,9 +39,11 @@ func init() {
 	DEBUG := true
 	if DEBUG {
 		storageGetter, _ = NewMapStorage()
+		accountingStorage, _ = NewMapStorage()
 	} else {
 		//storageGetter, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
 		storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 11, "", utils.MSGPACK)
+		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
 	}
 	storageLogger = storageGetter.(LogStorage)
 }
@@ -52,19 +54,24 @@ const (
 )
 
 var (
-	Logger           utils.LoggerInterface
-	storageGetter    DataStorage
-	storageLogger    LogStorage
-	debitPeriod      = 10 * time.Second
-	roundingMethod   = "*middle"
-	roundingDecimals = 4
-	historyScribe    history.Scribe
+	Logger            utils.LoggerInterface
+	storageGetter     DataStorage
+	accountingStorage AccountingStorage
+	storageLogger     LogStorage
+	debitPeriod       = 10 * time.Second
+	roundingMethod    = "*middle"
+	roundingDecimals  = 4
+	historyScribe     history.Scribe
 	//historyScribe, _ = history.NewMockScribe()
 )
 
 // Exported method to set the storage getter.
 func SetDataStorage(sg DataStorage) {
 	storageGetter = sg
+}
+
+func SetAccountingStorage(ag AccountingStorage) {
+	accountingStorage = ag
 }
 
 // Sets the global rounding method and decimal precision for GetCost method
@@ -136,7 +143,7 @@ func (cd *CallDescriptor) GetUserBalanceKey() string {
 // Gets and caches the user balance information.
 func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 	if cd.userBalance == nil {
-		cd.userBalance, err = storageGetter.GetUserBalance(cd.GetUserBalanceKey())
+		cd.userBalance, err = accountingStorage.GetUserBalance(cd.GetUserBalanceKey())
 	}
 	return cd.userBalance, err
 }
@@ -481,7 +488,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		// Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetUserBalanceKey()))
 	} else {
 		//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
-		defer storageGetter.SetUserBalance(userBalance)
+		defer accountingStorage.SetUserBalance(userBalance)
 		//ub, _ := json.Marshal(userBalance)
 		//Logger.Debug(fmt.Sprintf("UserBalance: %s", ub))
 		//cCost, _ := json.Marshal(cc)
@@ -510,7 +517,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 
 func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer storageGetter.SetUserBalance(userBalance)
+		defer accountingStorage.SetUserBalance(userBalance)
 		userBalance.refundIncrements(cd.Increments, cd.Direction, true)
 	}
 	return 0.0, err
@@ -522,7 +529,7 @@ The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitCents() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer storageGetter.SetUserBalance(userBalance)
+		defer accountingStorage.SetUserBalance(userBalance)
 		return userBalance.debitGenericBalance(CREDIT, cd.Direction, cd.Amount, true), nil
 	}
 	return 0.0, err
@@ -534,7 +541,7 @@ The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer storageGetter.SetUserBalance(userBalance)
+		defer accountingStorage.SetUserBalance(userBalance)
 		return userBalance.debitGenericBalance(SMS, cd.Direction, cd.Amount, true), nil
 	}
 	return 0, err
@@ -546,7 +553,7 @@ The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitSeconds() (err error) {
 	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer storageGetter.SetUserBalance(userBalance)
+		defer accountingStorage.SetUserBalance(userBalance)
 		return userBalance.debitCreditBalance(cd.CreateCallCost(), true)
 	}
 	return err

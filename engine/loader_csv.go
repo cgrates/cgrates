@@ -31,28 +31,30 @@ import (
 )
 
 type CSVReader struct {
-	sep              rune
-	storage          DataStorage
-	readerFunc       func(string, rune, int) (*csv.Reader, *os.File, error)
-	actions          map[string][]*Action
-	actionsTimings   map[string][]*ActionTiming
-	actionsTriggers  map[string][]*ActionTrigger
-	accountActions   []*UserBalance
-	destinations     []*Destination
-	timings          map[string]*utils.TPTiming
-	rates            map[string]*utils.TPRate
-	destinationRates map[string]*utils.TPDestinationRate
-	ratingPlans      map[string]*RatingPlan
-	ratingProfiles   map[string]*RatingProfile
+	sep               rune
+	dataStorage       DataStorage
+	accountingStorage AccountingStorage
+	readerFunc        func(string, rune, int) (*csv.Reader, *os.File, error)
+	actions           map[string][]*Action
+	actionsTimings    map[string][]*ActionTiming
+	actionsTriggers   map[string][]*ActionTrigger
+	accountActions    []*UserBalance
+	destinations      []*Destination
+	timings           map[string]*utils.TPTiming
+	rates             map[string]*utils.TPRate
+	destinationRates  map[string]*utils.TPDestinationRate
+	ratingPlans       map[string]*RatingPlan
+	ratingProfiles    map[string]*RatingProfile
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
 }
 
-func NewFileCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+func NewFileCSVReader(dataStorage DataStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
 	c := new(CSVReader)
 	c.sep = sep
-	c.storage = storage
+	c.dataStorage = dataStorage
+	c.accountingStorage = accountingStorage
 	c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
@@ -68,8 +70,8 @@ func NewFileCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn, 
 	return c
 }
 
-func NewStringCSVReader(storage DataStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
-	c := NewFileCSVReader(storage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+func NewStringCSVReader(dataStorage DataStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+	c := NewFileCSVReader(dataStorage, accountingStorage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	c.readerFunc = openStringCSVReader
 	return c
 }
@@ -113,18 +115,19 @@ func (csvr *CSVReader) ShowStatistics() {
 }
 
 func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
-	storage := csvr.storage
-	if storage == nil {
+	dataStorage := csvr.dataStorage
+	accountingStorage := csvr.accountingStorage
+	if dataStorage == nil {
 		return errors.New("No database connection!")
 	}
 	if flush {
-		storage.(Storage).Flush()
+		dataStorage.(Storage).Flush()
 	}
 	if verbose {
 		log.Print("Destinations")
 	}
 	for _, d := range csvr.destinations {
-		err = storage.SetDestination(d)
+		err = dataStorage.SetDestination(d)
 		if err != nil {
 			return err
 		}
@@ -136,7 +139,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Rating plans")
 	}
 	for _, rp := range csvr.ratingPlans {
-		err = storage.SetRatingPlan(rp)
+		err = dataStorage.SetRatingPlan(rp)
 		if err != nil {
 			return err
 		}
@@ -148,7 +151,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Rating profiles")
 	}
 	for _, rp := range csvr.ratingProfiles {
-		err = storage.SetRatingProfile(rp)
+		err = dataStorage.SetRatingProfile(rp)
 		if err != nil {
 			return err
 		}
@@ -160,7 +163,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Action timings")
 	}
 	for k, ats := range csvr.actionsTimings {
-		err = storage.SetActionTimings(k, ats)
+		err = accountingStorage.SetActionTimings(k, ats)
 		if err != nil {
 			return err
 		}
@@ -172,7 +175,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Actions")
 	}
 	for k, as := range csvr.actions {
-		err = storage.SetActions(k, as)
+		err = accountingStorage.SetActions(k, as)
 		if err != nil {
 			return err
 		}
@@ -184,7 +187,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Account actions")
 	}
 	for _, ub := range csvr.accountActions {
-		err = storage.SetUserBalance(ub)
+		err = accountingStorage.SetUserBalance(ub)
 		if err != nil {
 			return err
 		}
@@ -297,7 +300,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 			}
 		}
 		if !destinationExists {
-			if dbExists, err := csvr.storage.ExistsData(DESTINATION_PREFIX, record[1]); err != nil {
+			if dbExists, err := csvr.dataStorage.ExistsData(DESTINATION_PREFIX, record[1]); err != nil {
 				return err
 			} else if !dbExists {
 				return fmt.Errorf("Could not get destination for tag %v", record[1])
@@ -380,7 +383,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		}
 		_, exists := csvr.ratingPlans[record[5]]
 		if !exists {
-			if dbExists, err := csvr.storage.ExistsData(RATING_PLAN_PREFIX, record[5]); err != nil {
+			if dbExists, err := csvr.dataStorage.ExistsData(RATING_PLAN_PREFIX, record[5]); err != nil {
 				return err
 			} else if !dbExists {
 				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", record[5]))

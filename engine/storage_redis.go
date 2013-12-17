@@ -39,7 +39,7 @@ type RedisStorage struct {
 	ms   Marshaler
 }
 
-func NewRedisStorage(address string, db int, pass, mrshlerStr string) (DataStorage, error) {
+func NewRedisStorage(address string, db int, pass, mrshlerStr string) (*RedisStorage, error) {
 	ndb := &redis.Client{Addr: address, Db: db}
 	if pass != "" {
 		if err := ndb.Auth(pass); err != nil {
