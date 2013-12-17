@@ -183,7 +183,7 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	if rs.Bal != nil {
 		rs.Bal.Shutdown("Responder.Shutdown")
 	}
-	storageGetter.(Storage).Close()
+	dataStorage.(Storage).Close()
 	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"
 	return

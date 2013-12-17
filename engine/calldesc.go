@@ -38,14 +38,14 @@ func init() {
 	}
 	DEBUG := true
 	if DEBUG {
-		storageGetter, _ = NewMapStorage()
+		dataStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
 	} else {
-		//storageGetter, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-		storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 11, "", utils.MSGPACK)
+		//dataStorage, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
+		dataStorage, _ = NewRedisStorage("127.0.0.1:6379", 11, "", utils.MSGPACK)
 		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
 	}
-	storageLogger = storageGetter.(LogStorage)
+	storageLogger = dataStorage.(LogStorage)
 }
 
 const (
@@ -55,7 +55,7 @@ const (
 
 var (
 	Logger            utils.LoggerInterface
-	storageGetter     DataStorage
+	dataStorage     DataStorage
 	accountingStorage AccountingStorage
 	storageLogger     LogStorage
 	debitPeriod       = 10 * time.Second
@@ -67,7 +67,7 @@ var (
 
 // Exported method to set the storage getter.
 func SetDataStorage(sg DataStorage) {
-	storageGetter = sg
+	dataStorage = sg
 }
 
 func SetAccountingStorage(ag AccountingStorage) {
@@ -172,7 +172,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 		err = errors.New("Max fallback recursion depth reached!" + key)
 		return
 	}
-	rpf, err := storageGetter.GetRatingProfile(key, false)
+	rpf, err := dataStorage.GetRatingProfile(key, false)
 	if err != nil || rpf == nil {
 		return err
 	}
@@ -581,7 +581,7 @@ func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
-	storageGetter.PreCache(nil, nil, nil, nil)
+	dataStorage.PreCache(nil, nil, nil, nil)
 	return nil
 
 }
