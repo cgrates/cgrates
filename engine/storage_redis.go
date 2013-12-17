@@ -253,6 +253,8 @@ func (rs *RedisStorage) GetDestination(key string, checkDb bool) (dest *Destinat
 		}
 		dest.OptimizePrefixes()
 		cache2go.Cache(key, dest)
+	} else {
+		return nil, errors.New("not found")
 	}
 	return
 }

@@ -50,9 +50,9 @@ func (d *Destination) containsPrefix(prefix string) int {
 		}
 	}
 	if d.longPrefixesMap != nil {
-		for i, p := range utils.SplitPrefix(prefix) {
+		for _, p := range utils.SplitPrefix(prefix) {
 			if _, found := d.longPrefixesMap[p]; found {
-				return len(prefix) - i
+				return len(p)
 			}
 		}
 	}
