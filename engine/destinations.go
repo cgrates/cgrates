@@ -18,23 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import (
-	"strings"
-
-	"github.com/cgrates/cgrates/utils"
-)
-
-const (
-	LONG_PREFIX_SLICE_LENGTH = 30
-)
+import "strings"
 
 /*
 Structure that gathers multiple destination prefixes under a common id.
 */
 type Destination struct {
-	Id              string
-	Prefixes        []string
-	longPrefixesMap map[string]interface{}
+	Id       string
+	Prefixes []string
 }
 
 // returns prefix precision
@@ -42,18 +33,9 @@ func (d *Destination) containsPrefix(prefix string) int {
 	if d == nil {
 		return 0
 	}
-	if d.Prefixes != nil {
-		for _, p := range d.Prefixes {
-			if strings.Index(prefix, p) == 0 {
-				return len(p)
-			}
-		}
-	}
-	if d.longPrefixesMap != nil {
-		for _, p := range utils.SplitPrefix(prefix) {
-			if _, found := d.longPrefixesMap[p]; found {
-				return len(p)
-			}
+	for _, p := range d.Prefixes {
+		if strings.Index(prefix, p) == 0 {
+			return len(p)
 		}
 	}
 	return 0
@@ -61,15 +43,8 @@ func (d *Destination) containsPrefix(prefix string) int {
 
 func (d *Destination) String() (result string) {
 	result = d.Id + ": "
-	if d.Prefixes != nil {
-		for _, k := range d.Prefixes {
-			result += k + ", "
-		}
-	}
-	if d.longPrefixesMap != nil {
-		for k, _ := range d.longPrefixesMap {
-			result += k + ", "
-		}
+	for _, k := range d.Prefixes {
+		result += k + ", "
 	}
 	result = strings.TrimRight(result, ", ")
 	return result
@@ -77,14 +52,4 @@ func (d *Destination) String() (result string) {
 
 func (d *Destination) AddPrefix(pfx string) {
 	d.Prefixes = append(d.Prefixes, pfx)
-}
-
-func (d *Destination) OptimizePrefixes() {
-	if len(d.Prefixes) > LONG_PREFIX_SLICE_LENGTH {
-		d.longPrefixesMap = make(map[string]interface{})
-		for _, p := range d.Prefixes {
-			d.longPrefixesMap[p] = nil
-		}
-		d.Prefixes = nil
-	}
 }

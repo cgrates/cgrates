@@ -113,3 +113,27 @@ func TestXGetKeyAge(t *testing.T) {
 		t.Error("Error getting cache key age: ", d)
 	}
 }
+
+func TestRemPrefixKey(t *testing.T) {
+	Cache("x_t1", "test")
+	Cache("y_t1", "test")
+	RemPrefixKey("x_")
+	_, errX := GetCached("x_t1")
+	_, errY := GetCached("y_t1")
+	if errX == nil || errY != nil {
+		t.Error("Error removing prefix: ", errX, errY)
+	}
+}
+
+func TestXRemPrefixKey(t *testing.T) {
+	a := &myStruct{data: "mama are mere"}
+	a.XCache("x_t1", 10*time.Second, a)
+	a.XCache("y_t1", 10*time.Second, a)
+
+	XRemPrefixKey("x_")
+	_, errX := GetXCached("x_t1")
+	_, errY := GetXCached("y_t1")
+	if errX == nil || errY != nil {
+		t.Error("Error removing prefix: ", errX, errY)
+	}
+}

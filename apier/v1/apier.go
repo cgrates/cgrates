@@ -42,7 +42,7 @@ type ApierV1 struct {
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
-	if dst, err := self.DataDb.GetDestination(dstId, false); err != nil {
+	if dst, err := self.DataDb.GetDestination(dstId); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = *dst

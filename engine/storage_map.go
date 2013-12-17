@@ -49,11 +49,10 @@ func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) error {
 	if dKeys == nil && rpKeys == nil && rpfKeys == nil && actKeys == nil {
 		cache2go.Flush()
 	}
+	cache2go.RemPrefixKey(DESTINATION_PREFIX)
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
-			cache2go.RemKey(k)
-			// TODO: here I must delete all optimized prefixes
-			if _, err := ms.GetDestination(k[len(DESTINATION_PREFIX):], true); err != nil {
+			if _, err := ms.GetDestination(k[len(DESTINATION_PREFIX):]); err != nil {
 				return err
 			}
 		}
@@ -148,28 +147,20 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetDestination(key string, checkDb bool) (dest *Destination, err error) {
+func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {
 	key = DESTINATION_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(*Destination), nil
-	}
-	if !checkDb {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
-	}
 	if values, ok := ms.dict[key]; ok {
 		dest = &Destination{Id: key}
 		err = ms.ms.Unmarshal(values, dest)
 		// create optimized structure
 		for _, p := range dest.Prefixes {
 			var ids []string
-			if x, err := cache2go.GetCached(p); err == nil {
+			if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
 				ids = x.([]string)
 			}
 			ids = append(ids, dest.Id)
-			cache2go.Cache(p, ids)
+			cache2go.Cache(DESTINATION_PREFIX+p, ids)
 		}
-		dest.OptimizePrefixes()
-		cache2go.Cache(key, dest)
 	} else {
 		return nil, errors.New("not found")
 	}

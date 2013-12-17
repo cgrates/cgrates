@@ -18,6 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
+import (
+	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/utils"
+)
+
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
 	Direction string
@@ -63,16 +68,20 @@ func (uc *UnitsCounter) addUnits(amount float64, prefix string) {
 			if !mb.HasDestination() {
 				continue
 			}
-			dest, err := storageGetter.GetDestination(mb.DestinationId, false)
-			if err != nil {
-				Logger.Err("Counter: unknown destination: " + mb.DestinationId)
-				continue
-			}
-			precision := dest.containsPrefix(prefix)
-			if precision > 0 {
-				mb.Value += amount
-				counted = true
-				break
+			for _, p := range utils.SplitPrefix(prefix) {
+				if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
+					destIds := x.([]string)
+					for _, dId := range destIds {
+						if dId == mb.DestinationId {
+							mb.Value += amount
+							counted = true
+							break
+						}
+					}
+				}
+				if counted {
+					break
+				}
 			}
 		}
 	}

@@ -77,12 +77,12 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) (err 
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
 			return
 		}
-	} else if len(dKeys) != 0 {
+		cache2go.RemPrefixKey(DESTINATION_PREFIX)
+	} else if len(rpKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching destinations: %v", dKeys))
 	}
 	for _, key := range dKeys {
-		cache2go.RemKey(key)
-		if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):], true); err != nil {
+		if _, err = rs.GetDestination(key[len(DESTINATION_PREFIX):]); err != nil {
 			return err
 		}
 	}
@@ -222,14 +222,8 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetDestination(key string, checkDb bool) (dest *Destination, err error) {
+func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
 	key = DESTINATION_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(*Destination), nil
-	}
-	if !checkDb {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
-	}
 	var values []byte
 	if values, err = rs.db.Get(key); len(values) > 0 && err == nil {
 		b := bytes.NewBuffer(values)
@@ -247,14 +241,12 @@ func (rs *RedisStorage) GetDestination(key string, checkDb bool) (dest *Destinat
 		// create optimized structure
 		for _, p := range dest.Prefixes {
 			var ids []string
-			if x, err := cache2go.GetCached(p); err == nil {
+			if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
 				ids = x.([]string)
 			}
 			ids = append(ids, dest.Id)
-			cache2go.Cache(p, ids)
+			cache2go.Cache(DESTINATION_PREFIX+p, ids)
 		}
-		dest.OptimizePrefixes()
-		cache2go.Cache(key, dest)
 	} else {
 		return nil, errors.New("not found")
 	}

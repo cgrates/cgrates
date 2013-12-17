@@ -22,6 +22,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 
 	"strings"
@@ -124,14 +125,20 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 			continue
 		}
 		if b.DestinationId != "" && b.DestinationId != utils.ANY {
-			dest, err := storageGetter.GetDestination(b.DestinationId, false)
-			if err != nil {
-				continue
-			}
-			precision := dest.containsPrefix(prefix)
-			if precision > 0 {
-				b.precision = precision
-				usefulBalances = append(usefulBalances, b)
+			for _, p := range utils.SplitPrefix(prefix) {
+				if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
+					destIds := x.([]string)
+					for _, dId := range destIds {
+						if dId == b.DestinationId {
+							b.precision = len(p)
+							usefulBalances = append(usefulBalances, b)
+							break
+						}
+					}
+				}
+				if b.precision > 0 {
+					break
+				}
 			}
 		} else {
 			usefulBalances = append(usefulBalances, b)

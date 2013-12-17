@@ -72,7 +72,7 @@ func TestMsgpackTime(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixShort(t *testing.T) {
-	dest, err := storageGetter.GetDestination("NAT", false)
+	dest, err := storageGetter.GetDestination("NAT")
 	precision := dest.containsPrefix("0723")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -80,7 +80,7 @@ func TestStorageDestinationContainsPrefixShort(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixLong(t *testing.T) {
-	dest, err := storageGetter.GetDestination("NAT", false)
+	dest, err := storageGetter.GetDestination("NAT")
 	precision := dest.containsPrefix("0723045326")
 	if err != nil || precision != 4 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -88,7 +88,7 @@ func TestStorageDestinationContainsPrefixLong(t *testing.T) {
 }
 
 func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
-	dest, err := storageGetter.GetDestination("NAT", false)
+	dest, err := storageGetter.GetDestination("NAT")
 	precision := dest.containsPrefix("072")
 	if err != nil || precision != 0 {
 		t.Error("Error finding prefix: ", err, precision)
@@ -96,11 +96,11 @@ func TestStorageDestinationContainsPrefixNotExisting(t *testing.T) {
 }
 
 func TestPreCacheRefresh(t *testing.T) {
-	storageGetter.SetDestination(&Destination{"T11", []string{"0"}, nil})
-	storageGetter.GetDestination("T11", false)
-	storageGetter.SetDestination(&Destination{"T11", []string{"1"}, nil})
+	storageGetter.SetDestination(&Destination{"T11", []string{"0"}})
+	storageGetter.GetDestination("T11")
+	storageGetter.SetDestination(&Destination{"T11", []string{"1"}})
 	storageGetter.PreCache(nil, nil, nil, nil)
-	d, err := storageGetter.GetDestination("T11", false)
+	d, err := storageGetter.GetDestination("T11")
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
 		t.Error("Error refreshing cache:", d)
