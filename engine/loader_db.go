@@ -21,8 +21,9 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"log"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type DbReader struct {
@@ -52,6 +53,9 @@ func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	return c
+}
+
+func (dbr *DbReader) ShowStatistics() {
 }
 
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {

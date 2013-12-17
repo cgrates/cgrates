@@ -58,6 +58,7 @@ var (
 	version       = flag.Bool("version", false, "Prints the application version.")
 	verbose       = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	dryRun        = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
+	stats         = flag.Bool("stats", false, "Generates statsistics about given data.")
 	fromStorDb    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 	historyServer = flag.String("history_server", cgrConfig.HistoryServer, "The history server address:port, empty to disable automaticautomatic  history archiving")
@@ -124,6 +125,9 @@ func main() {
 	err = loader.LoadAll()
 	if err != nil {
 		log.Fatal(err)
+	}
+	if *stats {
+		loader.ShowStatistics()
 	}
 	if *dryRun { // We were just asked to parse the data, not saving it
 		return

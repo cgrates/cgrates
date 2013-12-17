@@ -96,6 +96,22 @@ func openStringCSVReader(data string, comma rune, nrFields int) (csvReader *csv.
 	return
 }
 
+func (csvr *CSVReader) ShowStatistics() {
+	destCount := len(csvr.destinations)
+	log.Print("Destinations: ", destCount)
+	prefixDist := make(map[int]int, 50)
+	prefixCount := 0
+	for _, d := range csvr.destinations {
+		prefixDist[len(d.Prefixes)] += 1
+		prefixCount += len(d.Prefixes)
+	}
+	log.Print("Avg Prefixes: ", prefixCount/destCount)
+	log.Print("Prefixes distribution:")
+	for k, v := range prefixDist {
+		log.Printf("%d: %d", k, v)
+	}
+}
+
 func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	storage := csvr.storage
 	if storage == nil {

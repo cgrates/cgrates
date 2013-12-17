@@ -22,7 +22,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"log"
 	"math"
 	"os"
@@ -30,6 +29,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type TPLoader interface {
@@ -45,6 +46,7 @@ type TPLoader interface {
 	LoadAccountActions() error
 	LoadAll() error
 	GetLoadedIds(string) ([]string, error)
+	ShowStatistics()
 	WriteToDatabase(bool, bool) error
 }
 
