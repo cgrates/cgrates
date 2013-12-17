@@ -23,6 +23,9 @@ import (
 	"fmt"
 	"sort"
 	"time"
+
+	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type RatingProfile struct {
@@ -110,17 +113,19 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		}
 		bestPrecision := 0
 		var rps RateIntervalList
-		for dId, _ := range rpl.DestinationRates {
-			//precision, err := storageGetter.DestinationContainsPrefix(dId, cd.Destination)
-			d, err := storageGetter.GetDestination(dId, false)
-			if err != nil {
-				Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
-				continue
+		for _, p := range utils.SplitPrefix(cd.Destination) {
+			if x, err := cache2go.GetCached(p); err == nil {
+				destIds := x.([]string)
+				for _, dId := range destIds {
+					if _, ok := rpl.DestinationRates[dId]; ok {
+						rps = rpl.RateIntervalList(dId)
+						bestPrecision = len(p)
+						break
+					}
+				}
 			}
-			precision := d.containsPrefix(cd.Destination)
-			if precision > bestPrecision {
-				bestPrecision = precision
-				rps = rpl.RateIntervalList(dId)
+			if rps != nil {
+				break
 			}
 		}
 		// check if it's the first ri and add a blank one for the initial part not covered

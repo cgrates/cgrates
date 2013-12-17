@@ -52,6 +52,7 @@ func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) error {
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
 			cache2go.RemKey(k)
+			// TODO: here I must delete all optimized prefixes
 			if _, err := ms.GetDestination(k[len(DESTINATION_PREFIX):], true); err != nil {
 				return err
 			}
@@ -115,7 +116,6 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	ms.dict[RATING_PLAN_PREFIX+rp.Id] = result
 	response := 0
 	go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
-	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -143,7 +143,6 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	ms.dict[RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
 	go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rpf.Id, rpf}, &response)
-	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
 
@@ -158,6 +157,15 @@ func (ms *MapStorage) GetDestination(key string, checkDb bool) (dest *Destinatio
 	if values, ok := ms.dict[key]; ok {
 		dest = &Destination{Id: key}
 		err = ms.ms.Unmarshal(values, dest)
+		// create optimized structure
+		for _, p := range dest.Prefixes {
+			var ids []string
+			if x, err := cache2go.GetCached(p); err == nil {
+				ids = x.([]string)
+			}
+			ids = append(ids, dest.Id)
+			cache2go.Cache(p, ids)
+		}
 		dest.OptimizePrefixes()
 		cache2go.Cache(key, dest)
 	} else {
@@ -171,7 +179,6 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result
 	response := 0
 	go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
-	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 
@@ -202,7 +209,6 @@ func (ms *MapStorage) GetActions(key string, checkDb bool) (as Actions, err erro
 func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[ACTION_PREFIX+key] = result
-	cache2go.Cache(DESTINATION_PREFIX+key, as)
 	return
 }
 

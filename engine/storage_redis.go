@@ -190,7 +190,6 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
 	}
-	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -218,7 +217,6 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rpf.Id, rpf}, &response)
 	}
-	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
 
@@ -244,6 +242,15 @@ func (rs *RedisStorage) GetDestination(key string, checkDb bool) (dest *Destinat
 		r.Close()
 		dest = new(Destination)
 		err = rs.ms.Unmarshal(out, dest)
+		// create optimized structure
+		for _, p := range dest.Prefixes {
+			var ids []string
+			if x, err := cache2go.GetCached(p); err == nil {
+				ids = x.([]string)
+			}
+			ids = append(ids, dest.Id)
+			cache2go.Cache(p, ids)
+		}
 		dest.OptimizePrefixes()
 		cache2go.Cache(key, dest)
 	}
@@ -264,7 +271,6 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
-	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 
@@ -287,7 +293,6 @@ func (rs *RedisStorage) GetActions(key string, checkDb bool) (as Actions, err er
 func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.db.Set(ACTION_PREFIX+key, result)
-	cache2go.Cache(ACTION_PREFIX+key, as)
 	return
 }
 

@@ -43,7 +43,6 @@ func init() {
 		//storageGetter, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
 		storageGetter, _ = NewRedisStorage("127.0.0.1:6379", 11, "", utils.MSGPACK)
 	}
-
 	storageLogger = storageGetter.(LogStorage)
 }
 

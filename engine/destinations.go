@@ -38,7 +38,7 @@ type Destination struct {
 }
 
 // returns prefix precision
-func (d *Destination) containsPrefix1(prefix string) int {
+func (d *Destination) containsPrefix(prefix string) int {
 	if d == nil {
 		return 0
 	}
