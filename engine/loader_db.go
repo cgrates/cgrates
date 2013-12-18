@@ -57,7 +57,56 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	return c
 }
 
+// FIXME: this method is code duplication from csv loader
 func (dbr *DbReader) ShowStatistics() {
+	// destinations
+	destCount := len(dbr.destinations)
+	log.Print("Destinations: ", destCount)
+	prefixDist := make(map[int]int, 50)
+	prefixCount := 0
+	for _, d := range dbr.destinations {
+		prefixDist[len(d.Prefixes)] += 1
+		prefixCount += len(d.Prefixes)
+	}
+	log.Print("Avg Prefixes: ", prefixCount/destCount)
+	log.Print("Prefixes distribution:")
+	for k, v := range prefixDist {
+		log.Printf("%d: %d", k, v)
+	}
+	// rating plans
+	rplCount := len(dbr.ratingPlans)
+	log.Print("Rating plans: ", rplCount)
+	destRatesDist := make(map[int]int, 50)
+	destRatesCount := 0
+	for _, rpl := range dbr.ratingPlans {
+		destRatesDist[len(rpl.DestinationRates)] += 1
+		destRatesCount += len(rpl.DestinationRates)
+	}
+	log.Print("Avg Destination Rates: ", destRatesCount/rplCount)
+	log.Print("Destination Rates distribution:")
+	for k, v := range destRatesDist {
+		log.Printf("%d: %d", k, v)
+	}
+	// rating profiles
+	rpfCount := len(dbr.ratingProfiles)
+	log.Print("Rating profiles: ", rpfCount)
+	activDist := make(map[int]int, 50)
+	activCount := 0
+	for _, rpf := range dbr.ratingProfiles {
+		activDist[len(rpf.RatingPlanActivations)] += 1
+		activCount += len(rpf.RatingPlanActivations)
+	}
+	log.Print("Avg Activations: ", activCount/rpfCount)
+	log.Print("Activation distribution:")
+	for k, v := range activDist {
+		log.Printf("%d: %d", k, v)
+	}
+	// actions
+	log.Print("Actions: ", len(dbr.actions))
+	// action timings
+	log.Print("Action timings: ", len(dbr.actionsTimings))
+	// account actions
+	log.Print("Account actions: ", len(dbr.accountActions))
 }
 
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
