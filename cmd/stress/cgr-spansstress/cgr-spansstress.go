@@ -58,15 +58,20 @@ func main() {
 		Subject:      "dan",
 		Destination:  "+4986517174963",
 	}
-	getter, err := engine.ConfigureDataStorage(utils.REDIS, "127.0.0.1", "6379", "10", "", "", utils.MSGPACK)
+	ratingDb, err := engine.ConfigureRatingStorage(utils.REDIS, "127.0.0.1", "6379", "10", "", "", utils.MSGPACK)
 	if err != nil {
-		log.Fatal("Could not connect to data store: ", err)
+		log.Fatal("Could not connect to rating store: ", err)
 	}
-	defer getter.Close()
-
-	engine.SetDataStorage(getter)
-	if err := getter.PreCache(nil, nil, nil, nil); err != nil {
-		log.Printf("Pre-caching error: %v", err)
+	defer ratingDb.Close()
+	engine.SetRatingStorage(ratingDb)
+	accountDb, err := engine.ConfigureAccountingStorage(utils.REDIS, "127.0.0.1", "6379", "11", "", "", utils.MSGPACK)
+	if err != nil {
+		log.Fatal("Could not connect to accounting store: ", err)
+	}
+	defer accountDb.Close()
+	engine.SetAccountingStorage(accountDb)
+	if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
+		log.Printf("Cache rating error: %v", err)
 		return
 	}
 
