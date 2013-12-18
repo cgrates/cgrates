@@ -55,7 +55,7 @@ func NewDbReader(storDB LoadStorage, storage DataStorage, tpid string) *DbReader
 	return c
 }
 
-// dis method is code duplication from csv loader
+// FIXME: this method is code duplication from csv loader
 func (dbr *DbReader) ShowStatistics() {
 	// destinations
 	destCount := len(dbr.destinations)
