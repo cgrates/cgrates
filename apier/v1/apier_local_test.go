@@ -89,12 +89,19 @@ func TestInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	dataDb, err := engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding)
+	ratingDb, err := engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
 	if err != nil {
 		t.Fatal("Cannot connect to dataDb", err)
 	}
-	if err := dataDb.Flush(); err != nil {
-		t.Fatal("Cannot reset dataDb", err)
+	accountDb, err := engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, cfg.AccountDBName, 
+		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
+	if err != nil {
+		t.Fatal("Cannot connect to dataDb", err)
+	}
+	for _, db := range []engine.Storage{ratingDb, accountDb} {
+		if err := db.Flush(); err != nil {
+			t.Fatal("Cannot reset dataDb", err)
+		}
 	}
 }
 

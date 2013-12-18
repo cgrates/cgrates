@@ -40,13 +40,18 @@ const (
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	DataDBType               string
-	DataDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	DataDBPort               string // The port to bind to.
-	DataDBName               string // The name of the database to connect to.
-	DataDBUser               string // The user to sign in as.
-	DataDBPass               string // The user's password.
-	DataDBEncoding           string // The encoding used to store objects in string keys
+	RatingDBType               string
+	RatingDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	RatingDBPort               string // The port to bind to.
+	RatingDBName               string // The name of the database to connect to.
+	RatingDBUser               string // The user to sign in as.
+	RatingDBPass               string // The user's password.
+	AccountDBType               string
+	AccountDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort               string // The port to bind to.
+	AccountDBName               string // The name of the database to connect to.
+	AccountDBUser               string // The user to sign in as.
+	AccountDBPass               string // The user's password.
 	StorDBType               string // Should reflect the database type used to store logs
 	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	StorDBPort               string // The port to bind to.
@@ -107,12 +112,18 @@ type CGRConfig struct {
 }
 
 func (self *CGRConfig) setDefaults() error {
-	self.DataDBType = REDIS
-	self.DataDBHost = "127.0.0.1"
-	self.DataDBPort = "6379"
-	self.DataDBName = "10"
-	self.DataDBUser = ""
-	self.DataDBPass = ""
+	self.RatingDBType = REDIS
+	self.RatingDBHost = "127.0.0.1"
+	self.RatingDBPort = "6379"
+	self.RatingDBName = "10"
+	self.RatingDBUser = ""
+	self.RatingDBPass = ""
+	self.AccountDBType = REDIS
+	self.AccountDBHost = "127.0.0.1"
+	self.AccountDBPort = "6379"
+	self.AccountDBName = "10"
+	self.AccountDBUser = ""
+	self.AccountDBPass = ""
 	self.StorDBType = utils.MYSQL
 	self.StorDBHost = "localhost"
 	self.StorDBPort = "3306"
@@ -201,23 +212,41 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	cfg.setDefaults()
 	var hasOpt bool
 	var errParse error
-	if hasOpt = c.HasOption("global", "datadb_type"); hasOpt {
-		cfg.DataDBType, _ = c.GetString("global", "datadb_type")
+	if hasOpt = c.HasOption("global", "ratingdb_type"); hasOpt {
+		cfg.RatingDBType, _ = c.GetString("global", "ratingdb_type")
 	}
-	if hasOpt = c.HasOption("global", "datadb_host"); hasOpt {
-		cfg.DataDBHost, _ = c.GetString("global", "datadb_host")
+	if hasOpt = c.HasOption("global", "ratingdb_host"); hasOpt {
+		cfg.RatingDBHost, _ = c.GetString("global", "ratingdb_host")
 	}
-	if hasOpt = c.HasOption("global", "datadb_port"); hasOpt {
-		cfg.DataDBPort, _ = c.GetString("global", "datadb_port")
+	if hasOpt = c.HasOption("global", "ratingdb_port"); hasOpt {
+		cfg.RatingDBPort, _ = c.GetString("global", "ratingdb_port")
 	}
-	if hasOpt = c.HasOption("global", "datadb_name"); hasOpt {
-		cfg.DataDBName, _ = c.GetString("global", "datadb_name")
+	if hasOpt = c.HasOption("global", "ratingdb_name"); hasOpt {
+		cfg.RatingDBName, _ = c.GetString("global", "ratingdb_name")
 	}
-	if hasOpt = c.HasOption("global", "datadb_user"); hasOpt {
-		cfg.DataDBUser, _ = c.GetString("global", "datadb_user")
+	if hasOpt = c.HasOption("global", "ratingdb_user"); hasOpt {
+		cfg.RatingDBUser, _ = c.GetString("global", "ratingdb_user")
 	}
-	if hasOpt = c.HasOption("global", "datadb_passwd"); hasOpt {
-		cfg.DataDBPass, _ = c.GetString("global", "datadb_passwd")
+	if hasOpt = c.HasOption("global", "ratingdb_passwd"); hasOpt {
+		cfg.RatingDBPass, _ = c.GetString("global", "ratingdb_passwd")
+	}
+	if hasOpt = c.HasOption("global", "accountdb_type"); hasOpt {
+		cfg.AccountDBType, _ = c.GetString("global", "accountdb_type")
+	}
+	if hasOpt = c.HasOption("global", "accountdb_host"); hasOpt {
+		cfg.AccountDBHost, _ = c.GetString("global", "accountdb_host")
+	}
+	if hasOpt = c.HasOption("global", "accountdb_port"); hasOpt {
+		cfg.AccountDBPort, _ = c.GetString("global", "accountdb_port")
+	}
+	if hasOpt = c.HasOption("global", "accountdb_name"); hasOpt {
+		cfg.AccountDBName, _ = c.GetString("global", "accountdb_name")
+	}
+	if hasOpt = c.HasOption("global", "accountdb_user"); hasOpt {
+		cfg.AccountDBUser, _ = c.GetString("global", "accountdb_user")
+	}
+	if hasOpt = c.HasOption("global", "accountdb_passwd"); hasOpt {
+		cfg.AccountDBPass, _ = c.GetString("global", "accountdb_passwd")
 	}
 	if hasOpt = c.HasOption("global", "stordb_type"); hasOpt {
 		cfg.StorDBType, _ = c.GetString("global", "stordb_type")

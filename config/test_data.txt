@@ -2,12 +2,18 @@
 #
 
 [global]
-datadb_type = test 				# The main database: <redis>.
-datadb_host = test 				# Database host address.
-datadb_port = test 				# Port to reach the database.
-datadb_name = test 				# The name of the database to connect to.
-datadb_user = test				# Username to use when connecting to database.
-datadb_passwd = test				# Password to use when connecting to database.
+ratingdb_type = test	 			# Rating subsystem database: <redis>.
+ratingdb_host = test	 			# Rating subsystem database host address.
+ratingdb_port = test				# Rating subsystem port to reach the database.
+ratingdb_name = test				# Rating subsystem database name to connect to.
+ratingdb_user =	test		 		# Rating subsystem username to use when connecting to database.
+ratingdb_passwd = test				# Rating subsystem password to use when connecting to database.
+accountdb_type = test	 			# Accounting subsystem database: <redis>.
+accountdb_host = test 				# Accounting subsystem database host address.
+accountdb_port = test 				# Accounting subsystem port to reach the database.
+accountdb_name = test				# Accounting subsystem database name to connect to.
+accountdb_user = test		 		# Accounting subsystem username to use when connecting to database.
+accountdb_passwd = test				# Accounting subsystem password to use when connecting to database.
 stordb_type = test				# Log/stored database type to use: <same|postgres|mongo|redis>
 stordb_host = test 				# The host to connect to. Values that start with / are for UNIX domain sockets.
 stordb_port = test				# The port to reach the logdb.

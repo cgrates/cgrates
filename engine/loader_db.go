@@ -29,7 +29,7 @@ import (
 type DbReader struct {
 	tpid             string
 	storDb           LoadStorage
-	dataDb           DataStorage
+	dataDb           RatingStorage
 	accountDb        AccountingStorage
 	actions          map[string][]*Action
 	actionsTimings   map[string][]*ActionTiming
@@ -43,10 +43,10 @@ type DbReader struct {
 	ratingProfiles   map[string]*RatingProfile
 }
 
-func NewDbReader(storDB LoadStorage, storage DataStorage, accountDb AccountingStorage, tpid string) *DbReader {
+func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb AccountingStorage, tpid string) *DbReader {
 	c := new(DbReader)
 	c.storDb = storDB
-	c.dataDb = storage
+	c.dataDb = ratingDb
 	c.accountDb = accountDb
 	c.tpid = tpid
 	c.actions = make(map[string][]*Action)

@@ -45,8 +45,8 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
-func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) error {
-	if dKeys == nil && rpKeys == nil && rpfKeys == nil && actKeys == nil {
+func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) error {
+	if dKeys == nil && rpKeys == nil && rpfKeys == nil {
 		cache2go.Flush()
 	}
 	cache2go.RemPrefixKey(DESTINATION_PREFIX)
@@ -68,6 +68,15 @@ func (ms *MapStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) error {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func (ms *MapStorage) CacheAccounting(actKeys []string) error {
+	if actKeys == nil {
+		cache2go.RemPrefixKey(ACTION_PREFIX) // Forced until we can fine tune it
+	}
+	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, ACTION_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetActions(k[len(ACTION_PREFIX):], true); err != nil {

@@ -32,7 +32,7 @@ import (
 
 type CSVReader struct {
 	sep               rune
-	dataStorage       DataStorage
+	dataStorage       RatingStorage
 	accountingStorage AccountingStorage
 	readerFunc        func(string, rune, int) (*csv.Reader, *os.File, error)
 	actions           map[string][]*Action
@@ -50,7 +50,7 @@ type CSVReader struct {
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
 }
 
-func NewFileCSVReader(dataStorage DataStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
 	c := new(CSVReader)
 	c.sep = sep
 	c.dataStorage = dataStorage
@@ -70,7 +70,7 @@ func NewFileCSVReader(dataStorage DataStorage, accountingStorage AccountingStora
 	return c
 }
 
-func NewStringCSVReader(dataStorage DataStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+func NewStringCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
 	c := NewFileCSVReader(dataStorage, accountingStorage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	c.readerFunc = openStringCSVReader
 	return c

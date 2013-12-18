@@ -26,7 +26,7 @@ import (
 
 // Various helpers to deal with database
 
-func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler string) (db DataStorage, err error) {
+func ConfigureRatingStorage(db_type, host, port, name, user, pass, marshaler string) (db RatingStorage, err error) {
 	var d Storage
 	switch db_type {
 	case utils.REDIS:
@@ -40,10 +40,42 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 			host += ":" + port
 		}
 		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
-		db = d.(DataStorage)
+		db = d.(RatingStorage)
+	/*
+	// Add here as soon as interface implemented
 	case utils.MONGO:
 		d, err = NewMongoStorage(host, port, name, user, pass)
-		db = d.(DataStorage)
+		db = d.(RatingStorage)
+	*/
+	default:
+		err = errors.New("unknown db")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler string) (db AccountingStorage, err error) {
+	var d Storage
+	switch db_type {
+	case utils.REDIS:
+		var db_nb int
+		db_nb, err = strconv.Atoi(name)
+		if err != nil {
+			Logger.Crit("Redis db name must be an integer!")
+			return nil, err
+		}
+		if port != "" {
+			host += ":" + port
+		}
+		d, err = NewRedisStorage(host, db_nb, pass, marshaler)
+		db = d.(AccountingStorage)
+	/*
+	case utils.MONGO:
+		d, err = NewMongoStorage(host, port, name, user, pass)
+		db = d.(AccountingStorage)
+	*/
 	default:
 		err = errors.New("unknown db")
 	}
@@ -56,6 +88,7 @@ func ConfigureDataStorage(db_type, host, port, name, user, pass, marshaler strin
 func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string) (db LogStorage, err error) {
 	var d Storage
 	switch db_type {
+	/*
 	case utils.REDIS:
 		var db_nb int
 		db_nb, err = strconv.Atoi(name)
@@ -74,6 +107,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass)
 		db = d.(LogStorage)
+	*/
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass)
 		db = d.(LogStorage)
@@ -89,9 +123,11 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string) (db LoadStorage, err error) {
 	var d Storage
 	switch db_type {
+	/*
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass)
 		db = d.(LoadStorage)
+	*/
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass)
 		db = d.(LoadStorage)
@@ -107,9 +143,11 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 func ConfigureCdrStorage(db_type, host, port, name, user, pass string) (db CdrStorage, err error) {
 	var d Storage
 	switch db_type {
+	/*
 	case utils.POSTGRES:
 		d, err = NewPostgresStorage(host, port, name, user, pass)
 		db = d.(CdrStorage)
+	*/
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass)
 		db = d.(CdrStorage)

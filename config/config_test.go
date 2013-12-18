@@ -35,12 +35,18 @@ func TestDefaults(t *testing.T) {
 		t.FailNow()
 	}
 	eCfg := &CGRConfig{}
-	eCfg.DataDBType = REDIS
-	eCfg.DataDBHost = "127.0.0.1"
-	eCfg.DataDBPort = "6379"
-	eCfg.DataDBName = "10"
-	eCfg.DataDBUser = ""
-	eCfg.DataDBPass = ""
+	eCfg.RatingDBType = REDIS
+	eCfg.RatingDBHost = "127.0.0.1"
+	eCfg.RatingDBPort = "6379"
+	eCfg.RatingDBName = "10"
+	eCfg.RatingDBUser = ""
+	eCfg.RatingDBPass = ""
+	eCfg.AccountDBType = REDIS
+	eCfg.AccountDBHost = "127.0.0.1"
+	eCfg.AccountDBPort = "6379"
+	eCfg.AccountDBName = "10"
+	eCfg.AccountDBUser = ""
+	eCfg.AccountDBPass = ""
 	eCfg.StorDBType = utils.MYSQL
 	eCfg.StorDBHost = "localhost"
 	eCfg.StorDBPort = "3306"
@@ -134,12 +140,18 @@ func TestConfigFromFile(t *testing.T) {
 	}
 	eCfg := &CGRConfig{} // Instance we expect to get out after reading config file
 	eCfg.setDefaults()
-	eCfg.DataDBType = "test"
-	eCfg.DataDBHost = "test"
-	eCfg.DataDBPort = "test"
-	eCfg.DataDBName = "test"
-	eCfg.DataDBUser = "test"
-	eCfg.DataDBPass = "test"
+	eCfg.RatingDBType = "test"
+	eCfg.RatingDBHost = "test"
+	eCfg.RatingDBPort = "test"
+	eCfg.RatingDBName = "test"
+	eCfg.RatingDBUser = "test"
+	eCfg.RatingDBPass = "test"
+	eCfg.AccountDBType = "test"
+	eCfg.AccountDBHost = "test"
+	eCfg.AccountDBPort = "test"
+	eCfg.AccountDBName = "test"
+	eCfg.AccountDBUser = "test"
+	eCfg.AccountDBPass = "test"
 	eCfg.StorDBType = "test"
 	eCfg.StorDBHost = "test"
 	eCfg.StorDBPort = "test"

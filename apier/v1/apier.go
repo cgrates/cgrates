@@ -35,14 +35,15 @@ const (
 
 type ApierV1 struct {
 	StorDb engine.LoadStorage
-	DataDb engine.DataStorage
+	RatingDb engine.RatingStorage
+	AccountDb   engine.AccountingStorage
 	CdrDb  engine.CdrStorage
 	Sched  *scheduler.Scheduler
 	Config *config.CGRConfig
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
-	if dst, err := self.DataDb.GetDestination(dstId); err != nil {
+	if dst, err := self.RatingDb.GetDestination(dstId); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = *dst
@@ -51,7 +52,7 @@ func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) err
 }
 
 func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) error {
-	if rpln, err := self.DataDb.GetRatingPlan(rplnId, false); err != nil {
+	if rpln, err := self.RatingDb.GetRatingPlan(rplnId, false); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
 		*reply = *rpln
@@ -69,7 +70,7 @@ type AttrGetBalance struct {
 // Get balance
 func (self *ApierV1) GetBalance(attr *AttrGetBalance, reply *float64) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	userBalance, err := self.DataDb.GetUserBalance(tag)
+	userBalance, err := self.AccountDb.GetUserBalance(tag)
 	if err != nil {
 		return err
 	}
@@ -97,12 +98,12 @@ type AttrAddBalance struct {
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 
-	if _, err := self.DataDb.GetUserBalance(tag); err != nil {
+	if _, err := self.AccountDb.GetUserBalance(tag); err != nil {
 		// create user balance if not exists
 		ub := &engine.UserBalance{
 			Id: tag,
 		}
-		if err := self.DataDb.SetUserBalance(ub); err != nil {
+		if err := self.AccountDb.SetUserBalance(ub); err != nil {
 			*reply = err.Error()
 			return err
 		}
@@ -158,7 +159,7 @@ func (self *ApierV1) SetRatingPlan(attrs AttrSetRatingPlan, reply *string) error
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if loaded, err := dbReader.LoadRatingPlanByTag(attrs.RatingPlanId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if !loaded {
@@ -173,7 +174,7 @@ func (self *ApierV1) SetRatingProfile(attrs utils.TPRatingProfile, reply *string
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "TOR", "Direction", "Subject"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 
 	if err := dbReader.LoadRatingProfileFiltered(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -212,14 +213,14 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	_, err := engine.AccLock.Guard(tag, func() (float64, error) {
-		userBalance, err := self.DataDb.GetUserBalance(tag)
+		userBalance, err := self.AccountDb.GetUserBalance(tag)
 		if err != nil {
 			return 0, err
 		}
 
 		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
 
-		if err = self.DataDb.SetUserBalance(userBalance); err != nil {
+		if err = self.AccountDb.SetUserBalance(userBalance); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -253,19 +254,19 @@ func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 
 	if attr.ActionTimingsId != "" {
 		engine.Logger.Debug(fmt.Sprintf("Querying for ActionTimingsId: %v", attr.ActionTimingsId))
-		if ats, err := self.DataDb.GetActionTimings(attr.ActionTimingsId); err == nil {
+		if ats, err := self.AccountDb.GetActionTimings(attr.ActionTimingsId); err == nil {
 			for _, at := range ats {
 				engine.Logger.Debug(fmt.Sprintf("Found action timings: %v", at))
 				at.UserBalanceIds = append(at.UserBalanceIds, tag)
 			}
-			err = self.DataDb.SetActionTimings(attr.ActionTimingsId, ats)
+			err = self.AccountDb.SetActionTimings(attr.ActionTimingsId, ats)
 			if err != nil {
 				if self.Sched != nil {
-					self.Sched.LoadActionTimings(self.DataDb)
+					self.Sched.LoadActionTimings(self.AccountDb)
 					self.Sched.Restart()
 				}
 			}
-			if err := self.DataDb.SetUserBalance(ub); err != nil {
+			if err := self.AccountDb.SetUserBalance(ub); err != nil {
 				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 			}
 		} else {
@@ -281,7 +282,7 @@ func (self *ApierV1) SetAccountActions(attrs utils.TPAccountActions, reply *stri
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	dbReader := engine.NewDbReader(self.StorDb, self.DataDb, attrs.TPid)
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 
 	if _, err := engine.AccLock.Guard(attrs.KeyId(), func() (float64, error) {
 		if err := dbReader.LoadAccountActionsFiltered(&attrs); err != nil {
@@ -292,7 +293,7 @@ func (self *ApierV1) SetAccountActions(attrs utils.TPAccountActions, reply *stri
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	if self.Sched != nil {
-		self.Sched.LoadActionTimings(self.DataDb)
+		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()
 	}
 	*reply = OK
@@ -301,7 +302,7 @@ func (self *ApierV1) SetAccountActions(attrs utils.TPAccountActions, reply *stri
 
 func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	if self.Sched != nil {
-		self.Sched.LoadActionTimings(self.DataDb)
+		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()
 		*reply = OK
 		return nil
@@ -336,7 +337,10 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			actKeys[idx] = engine.ACTION_PREFIX + actId
 		}
 	}
-	if err := self.DataDb.PreCache(dstKeys, rpKeys, rpfKeys, actKeys); err != nil {
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccounting(actKeys); err != nil {
 		return err
 	}
 	*reply = "OK"
@@ -350,7 +354,7 @@ type AttrLoadTPFromFolder struct {
 }
 
 func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply *string) error {
-	loader := engine.NewFileCSVReader(self.DataDb, utils.CSV_SEP,
+	loader := engine.NewFileCSVReader(self.RatingDb, self.AccountDb, utils.CSV_SEP,
 		path.Join(attrs.FolderPath, utils.DESTINATIONS_CSV),
 		path.Join(attrs.FolderPath, utils.TIMINGS_CSV),
 		path.Join(attrs.FolderPath, utils.RATES_CSV),

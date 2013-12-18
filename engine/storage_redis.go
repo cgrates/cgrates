@@ -68,8 +68,8 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
-func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) (err error) {
-	if dKeys == nil && rpKeys == nil && rpfKeys == nil && actKeys == nil {
+func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error) {
+	if dKeys == nil && rpKeys == nil && rpfKeys == nil {
 		cache2go.Flush()
 	}
 	if dKeys == nil {
@@ -121,7 +121,14 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) (err 
 		}
 	}
 	if len(rpfKeys) != 0 {
-		Logger.Info("Finished actions caching.")
+		Logger.Info("Finished rating profile caching.")
+	}
+	return
+}
+
+func (rs *RedisStorage) CacheAccounting(actKeys []string) (err error) {
+	if actKeys == nil {
+		cache2go.RemPrefixKey(ACTION_PREFIX)
 	}
 	if actKeys == nil {
 		Logger.Info("Caching all actions")
@@ -140,7 +147,7 @@ func (rs *RedisStorage) PreCache(dKeys, rpKeys, rpfKeys, actKeys []string) (err 
 	if len(actKeys) != 0 {
 		Logger.Info("Finished actions caching.")
 	}
-	return
+	return nil
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity

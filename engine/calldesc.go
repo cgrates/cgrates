@@ -55,7 +55,7 @@ const (
 
 var (
 	Logger            utils.LoggerInterface
-	dataStorage     DataStorage
+	dataStorage       RatingStorage
 	accountingStorage AccountingStorage
 	storageLogger     LogStorage
 	debitPeriod       = 10 * time.Second
@@ -66,7 +66,7 @@ var (
 )
 
 // Exported method to set the storage getter.
-func SetDataStorage(sg DataStorage) {
+func SetRatingStorage(sg RatingStorage) {
 	dataStorage = sg
 }
 
@@ -577,11 +577,11 @@ func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 	return err
 }
 
-// Cleans all chached data
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
-	dataStorage.PreCache(nil, nil, nil, nil)
+	dataStorage.CacheRating(nil, nil, nil)
+	accountingStorage.CacheAccounting(nil)
 	return nil
 
 }

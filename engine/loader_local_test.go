@@ -22,7 +22,6 @@ import (
 	"flag"
 	"path"
 	"testing"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -41,7 +40,8 @@ README:
 */
 
 // Globals used
-var dataDbCsv, dataDbStor, dataDbApier DataStorage // Each dataDb will have it's own sources to collect data
+var ratingDbCsv, ratingDbStor, ratingDbApier RatingStorage // Each ratingDb will have it's own sources to collect data
+var accountDbCsv, accountDbStor, accountDbApier AccountingStorage // Each ratingDb will have it's own sources to collect data
 var storDb LoadStorage
 var cfg *config.CGRConfig
 
@@ -50,7 +50,7 @@ var testLocal = flag.Bool("local", false, "Perform the tests only on local test 
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
 var tpCsvScenario = flag.String("tp_scenario", "prepaid1centpsec", "Use this scenario folder to import tp csv data from")
 
-// Create connection to dataDb
+// Create connection to ratingDb
 // Will use 3 different datadbs in order to be able to see differences in data loaded
 func TestConnDataDbs(t *testing.T) {
 	if !*testLocal {
@@ -58,20 +58,33 @@ func TestConnDataDbs(t *testing.T) {
 	}
 	cfg, _ = config.NewDefaultCGRConfig()
 	var err error
-	if dataDbCsv, err = ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, "13", cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding); err != nil {
-		t.Fatal("Error on dataDb connection: ", err.Error())
+	if ratingDbCsv, err = ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, "4", cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding); err != nil {
+		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if dataDbStor, err = ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, "14", cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding); err != nil {
-		t.Fatal("Error on dataDb connection: ", err.Error())
+	if ratingDbStor, err = ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, "5", cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding); err != nil {
+		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if dataDbApier, err = ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, "15", cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding); err != nil {
-		t.Fatal("Error on dataDb connection: ", err.Error())
+	if ratingDbApier, err = ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, "6", cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding); err != nil {
+		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	for _, db := range []DataStorage{dataDbCsv, dataDbStor, dataDbApier} {
+	if accountDbCsv, err = ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, "7", 
+		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding); err != nil {
+		t.Fatal("Error on ratingDb connection: ", err.Error())
+	}
+	if accountDbStor, err = ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, "8", 
+		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding); err != nil {
+		t.Fatal("Error on ratingDb connection: ", err.Error())
+	}
+	if accountDbApier, err = ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, "9", 
+		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding); err != nil {
+		t.Fatal("Error on ratingDb connection: ", err.Error())
+	}
+	for _, db := range []Storage{ratingDbCsv, ratingDbStor, ratingDbApier, accountDbCsv, accountDbStor, accountDbApier} {
 		if err = db.Flush(); err != nil {
 			t.Fatal("Error when flushing datadb")
 		}
 	}
+
 }
 
 // Create/reset storage tariff plan tables, used as database connectin establishment also
@@ -94,7 +107,7 @@ func TestCreateStorTpTables(t *testing.T) {
 	}
 }
 
-// Loads data from csv files in tp scenarion to dataDbCsv
+// Loads data from csv files in tp scenarion to ratingDbCsv
 func TestLoadFromCSV(t *testing.T) {
 	if !*testLocal {
 		return
@@ -105,7 +118,7 @@ func TestLoadFromCSV(t *testing.T) {
 			t.Error("Failed validating data: ", err.Error())
 		}
 	}
-	loader := NewFileCSVReader(dataDbCsv, utils.CSV_SEP,
+	loader := NewFileCSVReader(ratingDbCsv, accountDbCsv, utils.CSV_SEP,
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.TIMINGS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATES_CSV),
@@ -149,7 +162,7 @@ func TestLoadFromCSV(t *testing.T) {
 		t.Error("Failed loading account actions: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
-		t.Error("Could not write data into dataDb: ", err.Error())
+		t.Error("Could not write data into ratingDb: ", err.Error())
 	}
 }
 
@@ -169,12 +182,12 @@ func TestImportToStorDb(t *testing.T) {
 	}
 }
 
-// Loads data from storDb into dataDb
+// Loads data from storDb into ratingDb
 func TestLoadFromStorDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewDbReader(storDb, dataDbStor, TEST_SQL)
+	loader := NewDbReader(storDb, ratingDbStor, accountDbStor, TEST_SQL)
 	if err := loader.LoadDestinations(); err != nil {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -206,7 +219,7 @@ func TestLoadFromStorDb(t *testing.T) {
 		t.Error("Failed loading account actions: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
-		t.Error("Could not write data into dataDb: ", err.Error())
+		t.Error("Could not write data into ratingDb: ", err.Error())
 	}
 }
 
@@ -214,7 +227,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	loader := NewDbReader(storDb, dataDbApier, TEST_SQL)
+	loader := NewDbReader(storDb, ratingDbApier, accountDbApier, TEST_SQL)
 	// Load ratingPlans. This will also set destination keys
 	if ratingPlans, err := storDb.GetTpRatingPlans(TEST_SQL, ""); err != nil {
 		t.Fatal("Could not retrieve rating plans")
@@ -261,12 +274,12 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	rsCsv, redisDb := dataDbCsv.(*RedisStorage)
+	rsCsv, redisDb := ratingDbCsv.(*RedisStorage)
 	if !redisDb {
 		return // We only support these tests for redis
 	}
-	rsStor := dataDbStor.(*RedisStorage)
-	rsApier := dataDbApier.(*RedisStorage)
+	rsStor := ratingDbStor.(*RedisStorage)
+	rsApier := ratingDbApier.(*RedisStorage)
 	keysCsv, err := rsCsv.db.Keys("*")
 	if err != nil {
 		t.Fatal("Failed querying redis keys for csv data")

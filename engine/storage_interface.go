@@ -66,9 +66,9 @@ type Storage interface {
 /*
 Interface for storage providers.
 */
-type DataStorage interface {
+type RatingStorage interface {
 	Storage
-	PreCache([]string, []string, []string, []string) error
+	CacheRating([]string, []string, []string) error
 	ExistsData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
@@ -80,6 +80,7 @@ type DataStorage interface {
 
 type AccountingStorage interface {
 	Storage
+	CacheAccounting([]string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)

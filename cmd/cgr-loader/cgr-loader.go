@@ -36,14 +36,21 @@ import (
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
 	cgrConfig, _ = config.NewDefaultCGRConfig()
-	data_db_type = flag.String("datadb_type", cgrConfig.DataDBType, "The type of the dataDb database (redis|mongo|postgres|mysql)")
-	data_db_host = flag.String("datadb_host", cgrConfig.DataDBHost, "The dataDb host to connect to.")
-	data_db_port = flag.String("datadb_port", cgrConfig.DataDBPort, "The dataDb port to bind to.")
-	data_db_name = flag.String("datadb_name", cgrConfig.DataDBName, "The name/number of the dataDb to connect to.")
-	data_db_user = flag.String("datadb_user", cgrConfig.DataDBUser, "The dataDb user to sign in as.")
-	data_db_pass = flag.String("datadb_passwd", cgrConfig.DataDBPass, "The dataDb user's password.")
+	ratingdb_type = flag.String("ratingdb_type", cgrConfig.RatingDBType, "The type of the RatingDb database <redis>")
+	ratingdb_host = flag.String("ratingdb_host", cgrConfig.RatingDBHost, "The RatingDb host to connect to.")
+	ratingdb_port = flag.String("ratingdb_port", cgrConfig.RatingDBPort, "The RatingDb port to bind to.")
+	ratingdb_name = flag.String("ratingdb_name", cgrConfig.RatingDBName, "The name/number of the RatingDb to connect to.")
+	ratingdb_user = flag.String("ratingdb_user", cgrConfig.RatingDBUser, "The RatingDb user to sign in as.")
+	ratingdb_pass = flag.String("ratingdb_passwd", cgrConfig.RatingDBPass, "The RatingDb user's password.")
 
-	stor_db_type = flag.String("stordb_type", cgrConfig.StorDBType, "The type of the storDb database (redis|mongo|postgres|mysql)")
+	accountdb_type = flag.String("accountdb_type", cgrConfig.AccountDBType, "The type of the AccountingDb database <redis>")
+	accountdb_typehost = flag.String("accountdb_host", cgrConfig.AccountDBHost, "The AccountingDb host to connect to.")
+	accountdb_typeport = flag.String("accountdb_port", cgrConfig.AccountDBPort, "The AccountingDb port to bind to.")
+	accountdb_typename = flag.String("accountdb_name", cgrConfig.AccountDBName, "The name/number of the AccountingDb to connect to.")
+	accountdb_typeuser = flag.String("accountdb_user", cgrConfig.AccountDBUser, "The AccountingDb user to sign in as.")
+	accountdb_typepass = flag.String("accountdb_passwd", cgrConfig.AccountDBPass, "The AccountingDb user's password.")
+
+	stor_db_type = flag.String("stordb_type", cgrConfig.StorDBType, "The type of the storDb database <mysql>")
 	stor_db_host = flag.String("stordb_host", cgrConfig.StorDBHost, "The storDb host to connect to.")
 	stor_db_port = flag.String("stordb_port", cgrConfig.StorDBPort, "The storDb port to bind to.")
 	stor_db_name = flag.String("stordb_name", cgrConfig.StorDBName, "The name/number of the storDb to connect to.")
@@ -54,7 +61,7 @@ var (
 
 	flush         = flag.Bool("flushdb", false, "Flush the database before importing")
 	tpid          = flag.String("tpid", "", "The tariff plan id from the database")
-	dataPath      = flag.String("path", ".", "The path containing the data files")
+	dataPath      = flag.String("path", ".", "The path to folder containing the data files")
 	version       = flag.Bool("version", false, "Prints the application version.")
 	verbose       = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	dryRun        = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
@@ -73,29 +80,34 @@ func main() {
 		fmt.Println("CGRateS " + utils.VERSION)
 		return
 	}
-	var errDataDb, errStorDb, err error
-	var dataDb engine.DataStorage
+	var errRatingDb, errAccDb, errStorDb, err error
+	var ratingDb engine.RatingStorage
+	var accountDb  engine.AccountingStorage
 	var storDb engine.LoadStorage
 	var rater *rpc.Client
 	var loader engine.TPLoader
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
-			dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass, *dbdata_encoding)
+			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, 
+				*ratingdb_user, *ratingdb_pass, *dbdata_encoding)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_typehost, *accountdb_typeport, *accountdb_typename, *accountdb_typeuser, *accountdb_typepass, *dbdata_encoding)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding)
 		} else if *toStorDb { // Import from csv files to storDb
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding)
 		} else { // Default load from csv files to dataDb
-			dataDb, errDataDb = engine.ConfigureDataStorage(*data_db_type, *data_db_host, *data_db_port, *data_db_name, *data_db_user, *data_db_pass, *dbdata_encoding)
+			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, 
+				*ratingdb_user, *ratingdb_pass, *dbdata_encoding)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_typehost, *accountdb_typeport, *accountdb_typename, *accountdb_typeuser, *accountdb_typepass, *dbdata_encoding)
 		}
 		// Defer databases opened to be closed when we are done
-		for _, db := range []engine.Storage{dataDb, storDb} {
+		for _, db := range []engine.Storage{ratingDb, accountDb, storDb} {
 			if db != nil {
 				defer db.Close()
 			}
 		}
 		// Stop on db errors
-		for _, err = range []error{errDataDb, errStorDb} {
+		for _, err = range []error{errRatingDb, errAccDb, errStorDb} {
 			if err != nil {
 				log.Fatalf("Could not open database connection: %v", err)
 			}
@@ -112,7 +124,7 @@ func main() {
 		}
 	}
 	if *fromStorDb { // Load Tariff Plan from storDb into dataDb
-		loader = engine.NewDbReader(storDb, dataDb, *tpid)
+		loader = engine.NewDbReader(storDb, ratingDb, accountDb, *tpid)
 	} else { // Default load from csv files to dataDb
 		for fn, v := range engine.FileValidators {
 			err := engine.ValidateCSVData(path.Join(*dataPath, fn), v.Rule)
@@ -120,7 +132,7 @@ func main() {
 				log.Fatal(err, "\n\t", v.Message)
 			}
 		}
-		loader = engine.NewFileCSVReader(dataDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
+		loader = engine.NewFileCSVReader(ratingDb, accountDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
 	}
 	err = loader.LoadAll()
 	if err != nil {

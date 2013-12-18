@@ -187,8 +187,7 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	}
 	var buffer bytes.Buffer // Use bytes buffer istead of string concatenation since that becomes quite heavy on large prefixes
 	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES ", utils.TBL_TP_DESTINATIONS))
-	idx := 0
-	for prefix, _ := range dest.Prefixes {
+	for idx, prefix := range dest.Prefixes {
 		if idx != 0 {
 			buffer.WriteRune(',')
 		}

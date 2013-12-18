@@ -67,7 +67,7 @@ var (
 	err          error
 )
 
-func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddress string, rpc_encoding string, getter engine.DataStorage, loggerDb engine.LogStorage) {
+func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddress string, rpc_encoding string) {
 	l, err := net.Listen("tcp", rpcAddress)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
@@ -310,17 +310,25 @@ func main() {
 		engine.Logger.Crit(errCfg.Error())
 		return
 	}
-	var dataDb engine.DataStorage
+	var ratingDb engine.RatingStorage
+	var accountDb  engine.AccountingStorage
 	var logDb engine.LogStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
-	dataDb, err = engine.ConfigureDataStorage(cfg.DataDBType, cfg.DataDBHost, cfg.DataDBPort, cfg.DataDBName, cfg.DataDBUser, cfg.DataDBPass, cfg.DBDataEncoding)
+	ratingDb, err = engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
 	if err != nil { // Cannot configure getter database, show stopper
 		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
-	defer dataDb.Close()
-	engine.SetDataStorage(dataDb)
+	defer ratingDb.Close()
+	engine.SetRatingStorage(ratingDb)
+	accountDb, err = engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, cfg.AccountDBName, cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
+	if err != nil { // Cannot configure getter database, show stopper
+		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
+		return
+	}
+	defer accountDb.Close()
+	engine.SetAccountingStorage(accountDb)
 	if *raterEnabled {
 		cfg.RaterEnabled = *raterEnabled
 	}
@@ -328,13 +336,13 @@ func main() {
 		cfg.SchedulerEnabled = *schedEnabled
 	}
 	if cfg.RaterEnabled {
-		if err := dataDb.PreCache(nil, nil, nil, nil); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Pre-caching error: %v", err))
+		if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
+			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %v", err))
 			return
 		}
 	}
 	if cfg.StorDBType == SAME {
-		logDb = dataDb.(engine.LogStorage)
+		logDb = ratingDb.(engine.LogStorage)
 	} else {
 		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding)
 		if err != nil { // Cannot configure logger database, show stopper
@@ -360,16 +368,16 @@ func main() {
 		go stopRaterSingnalHandler()
 	}
 	responder := &engine.Responder{ExitChan: exitChan}
-	apier := &apier.ApierV1{StorDb: loadDb, DataDb: dataDb, CdrDb: cdrDb, Config: cfg}
+	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, Config: cfg}
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
 		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
-		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding, dataDb, logDb)
+		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding)
 	}
 	if cfg.BalancerEnabled {
 		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
 		go stopBalancerSingnalHandler()
 		responder.Bal = bal
-		go listenToRPCRequests(responder, apier, cfg.BalancerListen, cfg.RPCEncoding, dataDb, logDb)
+		go listenToRPCRequests(responder, apier, cfg.BalancerListen, cfg.RPCEncoding)
 		if cfg.RaterEnabled {
 			engine.Logger.Info("Starting internal engine.")
 			bal.AddClient("local", new(engine.ResponderWorker))
@@ -380,9 +388,9 @@ func main() {
 		engine.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
-			go reloadSchedulerSingnalHandler(sched, dataDb)
+			go reloadSchedulerSingnalHandler(sched, accountDb)
 			apier.Sched = sched
-			sched.LoadActionTimings(dataDb)
+			sched.LoadActionTimings(accountDb)
 			sched.Loop()
 		}()
 	}
