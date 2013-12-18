@@ -139,6 +139,12 @@ func (csvr *CSVReader) ShowStatistics() {
 	for k, v := range activDist {
 		log.Printf("%d: %d", k, v)
 	}
+	// actions
+	log.Print("Actions: ", len(csvr.actions))
+	// action timings
+	log.Print("Action timings: ", len(csvr.actionsTimings))
+	// account actions
+	log.Print("Account actions: ", len(csvr.accountActions))
 }
 
 func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
