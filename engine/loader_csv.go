@@ -97,6 +97,7 @@ func openStringCSVReader(data string, comma rune, nrFields int) (csvReader *csv.
 }
 
 func (csvr *CSVReader) ShowStatistics() {
+	// destinations
 	destCount := len(csvr.destinations)
 	log.Print("Destinations: ", destCount)
 	prefixDist := make(map[int]int, 50)
@@ -108,6 +109,34 @@ func (csvr *CSVReader) ShowStatistics() {
 	log.Print("Avg Prefixes: ", prefixCount/destCount)
 	log.Print("Prefixes distribution:")
 	for k, v := range prefixDist {
+		log.Printf("%d: %d", k, v)
+	}
+	// rating plans
+	rplCount := len(csvr.ratingPlans)
+	log.Print("Rating plans: ", rplCount)
+	destRatesDist := make(map[int]int, 50)
+	destRatesCount := 0
+	for _, rpl := range csvr.ratingPlans {
+		destRatesDist[len(rpl.DestinationRates)] += 1
+		destRatesCount += len(rpl.DestinationRates)
+	}
+	log.Print("Avg Destination Rates: ", destRatesCount/rplCount)
+	log.Print("Destination Rates distribution:")
+	for k, v := range destRatesDist {
+		log.Printf("%d: %d", k, v)
+	}
+	// rating profiles
+	rpfCount := len(csvr.ratingProfiles)
+	log.Print("Rating profiles: ", rpfCount)
+	activDist := make(map[int]int, 50)
+	activCount := 0
+	for _, rpf := range csvr.ratingProfiles {
+		activDist[len(rpf.RatingPlanActivations)] += 1
+		activCount += len(rpf.RatingPlanActivations)
+	}
+	log.Print("Avg Activations: ", activCount/rpfCount)
+	log.Print("Activation distribution:")
+	for k, v := range activDist {
 		log.Printf("%d: %d", k, v)
 	}
 }
