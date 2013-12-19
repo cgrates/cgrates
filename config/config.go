@@ -40,18 +40,18 @@ const (
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	RatingDBType               string
-	RatingDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	RatingDBPort               string // The port to bind to.
-	RatingDBName               string // The name of the database to connect to.
-	RatingDBUser               string // The user to sign in as.
-	RatingDBPass               string // The user's password.
-	AccountDBType               string
-	AccountDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort               string // The port to bind to.
-	AccountDBName               string // The name of the database to connect to.
-	AccountDBUser               string // The user to sign in as.
-	AccountDBPass               string // The user's password.
+	RatingDBType             string
+	RatingDBHost             string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	RatingDBPort             string // The port to bind to.
+	RatingDBName             string // The name of the database to connect to.
+	RatingDBUser             string // The user to sign in as.
+	RatingDBPass             string // The user's password.
+	AccountDBType            string
+	AccountDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort            string // The port to bind to.
+	AccountDBName            string // The name of the database to connect to.
+	AccountDBUser            string // The user to sign in as.
+	AccountDBPass            string // The user's password.
 	StorDBType               string // Should reflect the database type used to store logs
 	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
 	StorDBPort               string // The port to bind to.
@@ -121,7 +121,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.AccountDBType = REDIS
 	self.AccountDBHost = "127.0.0.1"
 	self.AccountDBPort = "6379"
-	self.AccountDBName = "10"
+	self.AccountDBName = "11"
 	self.AccountDBUser = ""
 	self.AccountDBPass = ""
 	self.StorDBType = utils.MYSQL

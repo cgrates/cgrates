@@ -21,6 +21,7 @@ package engine
 import (
 	//"fmt"
 
+	"log"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -186,17 +187,6 @@ func (ts *TimeSpan) Contains(t time.Time) bool {
 	return t.After(ts.TimeStart) && t.Before(ts.TimeEnd)
 }
 
-// Returns the cost of the timespan according to the relevant cost interval.
-// It also sets the Cost field of this timespan (used for refund on session
-// manager debit loop where the cost cannot be recalculated)
-func (ts *TimeSpan) getCost() float64 {
-	if ts.RateInterval == nil {
-		return 0
-	}
-	ts.Cost = ts.RateInterval.GetCost(ts.GetDuration(), ts.GetGroupStart())
-	return ts.Cost
-}
-
 /*
 Will set the interval as spans's interval if new Weight is lower then span's interval Weight
 or if the Weights are equal and new price is lower then spans's interval price
@@ -213,26 +203,50 @@ func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
 	}
 }
 
+// Returns the cost of the timespan according to the relevant cost interval.
+// It also sets the Cost field of this timespan (used for refund on session
+// manager debit loop where the cost cannot be recalculated)
+func (ts *TimeSpan) getCost() float64 {
+	if len(ts.Increments) == 0 {
+		if ts.RateInterval == nil {
+			return 0
+		}
+		cost := ts.RateInterval.GetCost(ts.GetDuration(), ts.GetGroupStart())
+		ts.Cost = utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
+		return ts.Cost
+	} else {
+		cost := 0.0
+		for _, inc := range ts.Increments {
+			cost += inc.Cost
+			log.Print(inc.Cost, cost)
+		}
+		return cost
+	}
+	return 0
+}
+
 func (ts *TimeSpan) createIncrementsSlice() {
 	if ts.RateInterval == nil {
 		return
 	}
 	ts.Increments = make([]*Increment, 0)
 	// create rated units series
-	rate, rateIncrement, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
-	incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
-	incrementCost = utils.Round(incrementCost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
-	totalCost := 0.0
-	for s := 0; s < int(ts.GetDuration()/rateIncrement); s++ {
+	_, rateIncrement, _ := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+	// we will use the cost calculated cost and devide by nb of increments
+	// because ts cost is rounded
+	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
+	nbIncrements := int(ts.GetDuration() / rateIncrement)
+	incrementCost := ts.getCost() / float64(nbIncrements)
+	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:     rateIncrement,
 			Cost:         incrementCost,
 			BalanceUuids: make([]string, 2),
 		}
 		ts.Increments = append(ts.Increments, inc)
-		totalCost += incrementCost
 	}
-	ts.Cost = totalCost
+	// put the rounded cost back in timespan
+	ts.Cost = incrementCost * float64(nbIncrements)
 }
 
 // returns whether the timespan has all increments marked as paid and if not
