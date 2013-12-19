@@ -44,7 +44,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.AccountDBType = REDIS
 	eCfg.AccountDBHost = "127.0.0.1"
 	eCfg.AccountDBPort = "6379"
-	eCfg.AccountDBName = "10"
+	eCfg.AccountDBName = "11"
 	eCfg.AccountDBUser = ""
 	eCfg.AccountDBPass = ""
 	eCfg.StorDBType = utils.MYSQL

@@ -121,7 +121,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.AccountDBType = REDIS
 	self.AccountDBHost = "127.0.0.1"
 	self.AccountDBPort = "6379"
-	self.AccountDBName = "10"
+	self.AccountDBName = "11"
 	self.AccountDBUser = ""
 	self.AccountDBPass = ""
 	self.StorDBType = utils.MYSQL
