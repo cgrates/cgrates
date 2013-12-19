@@ -42,8 +42,8 @@ func init() {
 		accountingStorage, _ = NewMapStorage()
 	} else {
 		//dataStorage, _ = NewMongoStorage(db_server, "27017", "cgrates_test", "", "")
-		dataStorage, _ = NewRedisStorage("127.0.0.1:6379", 11, "", utils.MSGPACK)
-		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
+		dataStorage, _ = NewRedisStorage("127.0.0.1:6379", 12, "", utils.MSGPACK)
+		accountingStorage, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
 	}
 	storageLogger = dataStorage.(LogStorage)
 }
@@ -496,6 +496,12 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		if cc.Cost != 0 || cc.ConnectFee != 0 {
 			userBalance.debitCreditBalance(cc, true)
 		}
+		cost := 0.0
+		// re-calculate call cost after balances
+		for _, ts := range cc.Timespans {
+			cost += ts.getCost() // FIXME: floating point sum??
+		}
+		cc.Cost = cost
 	}
 	return
 }

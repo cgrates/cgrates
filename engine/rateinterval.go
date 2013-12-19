@@ -20,12 +20,13 @@ package engine
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -241,7 +242,7 @@ func (i *RateInterval) GetCost(duration, startSecond time.Duration) float64 {
 	d := duration.Seconds()
 	price /= rateUnit.Seconds()
 
-	return utils.Round(d*price, i.Rating.RoundingDecimals, i.Rating.RoundingMethod)
+	return d * price
 }
 
 // Gets the price for a the provided start second

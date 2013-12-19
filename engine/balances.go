@@ -139,6 +139,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					b.Value -= amount
 					increment.SetMinuteBalance(b.Uuid)
 					increment.MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
+					increment.Cost = 0
 					increment.paid = true
 					if count {
 						ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -180,6 +181,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					b.Value -= amount
 					newTs.Increments[0].SetMinuteBalance(b.Uuid)
 					newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
+					newTs.Increments[0].Cost = 0
 					newTs.Increments[0].paid = true
 					if count {
 						ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})

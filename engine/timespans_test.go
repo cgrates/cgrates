@@ -718,8 +718,8 @@ func TestTimespanCreateIncrements(t *testing.T) {
 	if len(ts.Increments) != 3 {
 		t.Error("Error creating increment slice: ", len(ts.Increments))
 	}
-	if len(ts.Increments) < 3 || ts.Increments[2].Cost != 20 {
-		t.Error("Wrong second slice: ", ts.Increments)
+	if len(ts.Increments) < 3 || ts.Increments[2].Cost != 20.066666666666666 {
+		t.Error("Wrong second slice: ", ts.Increments[2].Cost)
 	}
 }
 
