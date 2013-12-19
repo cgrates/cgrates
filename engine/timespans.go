@@ -221,6 +221,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	// create rated units series
 	rate, rateIncrement, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
 	incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
+	incrementCost = utils.Round(incrementCost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
 	totalCost := 0.0
 	for s := 0; s < int(ts.GetDuration()/rateIncrement); s++ {
 		inc := &Increment{
