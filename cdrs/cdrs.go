@@ -39,7 +39,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 		storage.SetCdr(fsCdr)
 		go func() { //FS will not send us hangup_complete until we have send back the answer to CDR, so we need to handle mediation async
 			if cfg.CDRSMediator == "internal" {
-				medi.MediateDBCDR(fsCdr, storage)
+				medi.MediateDBCDR(fsCdr)
 			} else {
 				//TODO: use the connection to mediator
 			}
@@ -53,7 +53,7 @@ func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 	if cgrCdr, err := NewCgrCdrFromHttpReq(r); err == nil {
 		storage.SetCdr(cgrCdr)
 		if cfg.CDRSMediator == "internal" {
-			errMedi := medi.MediateDBCDR(cgrCdr, storage)
+			errMedi := medi.MediateDBCDR(cgrCdr)
 			if errMedi != nil {
 				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
 			}

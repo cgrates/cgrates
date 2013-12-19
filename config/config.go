@@ -89,6 +89,7 @@ type CGRConfig struct {
 	MediatorRaterReconnects  int      // Number of reconnects to rater before giving up.
 	MediatorCDRType          string   // CDR type <freeswitch_http_json|freeswitch_file_csv>.
 	MediatorAccIdField       string   // Name of field identifying accounting id used during mediation. Use index number in case of .csv cdrs.
+	MediatorRunIds           []string // Identifiers for each mediation run on CDRs
 	MediatorSubjectFields    []string // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorReqTypeFields    []string // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
 	MediatorDirectionFields  []string // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
@@ -156,6 +157,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorRaterReconnects = 3
 	self.MediatorCDRType = utils.FSCDR_HTTP_JSON
 	self.MediatorAccIdField = "accid"
+	self.MediatorRunIds = []string{"default"}
 	self.MediatorSubjectFields = []string{"subject"}
 	self.MediatorReqTypeFields = []string{"reqtype"}
 	self.MediatorDirectionFields = []string{"direction"}
@@ -347,6 +349,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("mediator", "accid_field"); hasOpt {
 		cfg.MediatorAccIdField, _ = c.GetString("mediator", "accid_field")
+	}
+	if hasOpt = c.HasOption("mediator", "run_ids"); hasOpt {
+		if cfg.MediatorRunIds, errParse = ConfigSlice(c, "mediator", "run_ids"); errParse != nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("mediator", "subject_fields"); hasOpt {
 		if cfg.MediatorSubjectFields, errParse = ConfigSlice(c, "mediator", "subject_fields"); errParse != nil {

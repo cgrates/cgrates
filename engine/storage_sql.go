@@ -692,7 +692,8 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	if err != nil {
 		return err
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_primary VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d, %d)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s VALUES (NULL, '%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d)",
+		utils.TBL_CDRS_PRIMARY,
 		cdr.GetCgrId(),
 		cdr.GetAccId(),
 		cdr.GetCdrHost(),
@@ -703,7 +704,7 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 		cdr.GetAccount(),
 		cdr.GetSubject(),
 		cdr.GetDestination(),
-		startTime.Unix(),
+		startTime,
 		cdr.GetDuration(),
 	))
 	if err != nil {
@@ -713,7 +714,8 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling cdr extra fields to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO cdrs_extra VALUES ('NULL','%s', '%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s VALUES ('NULL','%s', '%s')",
+		utils.TBL_CDRS_EXTRA,
 		cdr.GetCgrId(),
 		extraFields,
 	))
@@ -742,13 +744,13 @@ func (self *SQLStorage) SetRatedCdr(cdr utils.CDR, cc *CallCost, extraInfo strin
 // Return a slice of rated CDRs from storDb using optional timeStart and timeEnd as filters.
 func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]utils.CDR, error) {
 	var cdrs []utils.CDR
-	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,reqtype,direction,tenant,tor,account,%s.subject,destination,answer_timestamp,duration,extra_fields,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
+	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,reqtype,direction,tenant,tor,account,%s.subject,destination,answer_time,duration,extra_fields,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
 	if !timeStart.IsZero() && !timeEnd.IsZero() {
-		q += fmt.Sprintf(" WHERE answer_timestamp>=%d AND answer_timestamp<%d", timeStart.Unix(), timeEnd.Unix())
+		q += fmt.Sprintf(" WHERE answer_time>='%s' AND answer_time<'%s'", timeStart, timeEnd)
 	} else if !timeStart.IsZero() {
-		q += fmt.Sprintf(" WHERE answer_timestamp>=%d", timeStart.Unix())
+		q += fmt.Sprintf(" WHERE answer_time>='%d'", timeStart)
 	} else if !timeEnd.IsZero() {
-		q += fmt.Sprintf(" WHERE answer_timestamp<%d", timeEnd.Unix())
+		q += fmt.Sprintf(" WHERE answer_time<'%d'", timeEnd)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {

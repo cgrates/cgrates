@@ -79,6 +79,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.MediatorRaterReconnects = 3
 	eCfg.MediatorCDRType = "freeswitch_http_json"
 	eCfg.MediatorAccIdField = "accid"
+	eCfg.MediatorRunIds = []string{"default"}
 	eCfg.MediatorSubjectFields = []string{"subject"}
 	eCfg.MediatorReqTypeFields = []string{"reqtype"}
 	eCfg.MediatorDirectionFields = []string{"direction"}
@@ -184,6 +185,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.MediatorRaterReconnects = 99
 	eCfg.MediatorCDRType = "test"
 	eCfg.MediatorAccIdField = "test"
+	eCfg.MediatorRunIds = []string{"test"}
 	eCfg.MediatorSubjectFields = []string{"test"}
 	eCfg.MediatorReqTypeFields = []string{"test"}
 	eCfg.MediatorDirectionFields = []string{"test"}

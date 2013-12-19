@@ -29,7 +29,7 @@ type MySQLStorage struct {
 }
 
 func NewMySQLStorage(host, port, name, user, password string) (Storage, error) {
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8", user, password, host, port, name))
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true", user, password, host, port, name))
 	if err != nil {
 		return nil, err
 	}

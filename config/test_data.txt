@@ -57,6 +57,7 @@ rater = test			# Address where to reach the Rater: <internal|x.y.z.y:1234>
 rater_reconnects = 99				# Number of reconnects to rater before giving up.
 cdr_type = test		# CDR type <freeswitch_http_json|freeswitch_file_csv>.
 accid_field = test				# Name of field identifying accounting id used during mediation. Use index number in case of .csv cdrs.
+run_ids = test				# Identifiers for each mediation run on CDRs
 subject_fields = test			# Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
 reqtype_fields = test				# Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
 direction_fields = test			# Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.

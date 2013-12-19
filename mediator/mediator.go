@@ -278,7 +278,7 @@ func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
 	return
 }
 
-func (self *Mediator) MediateDBCDR(cdr utils.CDR, db engine.CdrStorage) error {
+func (self *Mediator) MediateDBCDR(cdr utils.CDR) error {
 	var qryCC *engine.CallCost
 	cc := &engine.CallCost{Cost: -1}
 	var errCost error
