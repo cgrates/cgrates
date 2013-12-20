@@ -228,6 +228,17 @@ func TestTimespanGetCost(t *testing.T) {
 	}
 }
 
+func TestTimespanGetCostIntervals(t *testing.T) {
+	ts := &TimeSpan{}
+	ts.Increments = make(Increments, 11)
+	for i := 0; i < 11; i++ {
+		ts.Increments[i] = &Increment{Cost: 0.02}
+	}
+	if ts.getCost() != 0.22 {
+		t.Error("Error caclulating timspan cost: ", ts.getCost())
+	}
+}
+
 func TestSetRateInterval(t *testing.T) {
 	i1 := &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{0, 1.0, 1 * time.Second, 1 * time.Second}}}}
 	ts1 := TimeSpan{RateInterval: i1}
@@ -718,7 +729,7 @@ func TestTimespanCreateIncrements(t *testing.T) {
 	if len(ts.Increments) != 3 {
 		t.Error("Error creating increment slice: ", len(ts.Increments))
 	}
-	if len(ts.Increments) < 3 || ts.Increments[2].Cost != 20.066666666666666 {
+	if len(ts.Increments) < 3 || ts.Increments[2].Cost != 20.0667 {
 		t.Error("Wrong second slice: ", ts.Increments[2].Cost)
 	}
 }

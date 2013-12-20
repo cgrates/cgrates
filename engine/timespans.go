@@ -21,7 +21,6 @@ package engine
 import (
 	//"fmt"
 
-	"log"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -215,12 +214,7 @@ func (ts *TimeSpan) getCost() float64 {
 		ts.Cost = utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
 		return ts.Cost
 	} else {
-		cost := 0.0
-		for _, inc := range ts.Increments {
-			cost += inc.Cost
-			log.Print(inc.Cost, cost)
-		}
-		return cost
+		return ts.Increments[0].Cost * float64(len(ts.Increments))
 	}
 	return 0
 }
@@ -237,6 +231,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
 	incrementCost := ts.getCost() / float64(nbIncrements)
+	incrementCost = utils.Round(incrementCost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:     rateIncrement,
