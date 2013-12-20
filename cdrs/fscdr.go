@@ -44,6 +44,7 @@ const (
 	FS_DURATION     = "billsec"
 	FS_USERNAME     = "user_name"
 	FS_IP           = "sip_local_network_addr"
+	FS_CDR_SOURCE   = "freeswitch_json"
 )
 
 type FSCdr map[string]string
@@ -73,6 +74,9 @@ func (fsCdr FSCdr) GetAccId() string {
 }
 func (fsCdr FSCdr) GetCdrHost() string {
 	return fsCdr[FS_IP]
+}
+func (fsCdr FSCdr) GetCdrSource() string {
+	return FS_CDR_SOURCE
 }
 func (fsCdr FSCdr) GetDirection() string {
 	//TODO: implement direction, not related to FS_DIRECTION but traffic towards or from subject/account

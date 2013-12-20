@@ -25,22 +25,6 @@ import (
 	"time"
 )
 
-const (
-	ACCID       = "accid"
-	CDRHOST     = "cdrhost"
-	REQTYPE     = "reqtype"
-	DIRECTION   = "direction"
-	TENANT      = "tenant"
-	TOR         = "tor"
-	ACCOUNT     = "account"
-	SUBJECT     = "subject"
-	DESTINATION = "destination"
-	TIME_ANSWER = "time_answer"
-	DURATION    = "duration"
-)
-
-var primaryFields []string = []string{ACCID, CDRHOST, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, TIME_ANSWER, DURATION}
-
 func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 	if req.Form == nil {
 		if err := req.ParseForm(); err != nil {
@@ -66,6 +50,10 @@ func (cgrCdr CgrCdr) GetAccId() string {
 
 func (cgrCdr CgrCdr) GetCdrHost() string {
 	return cgrCdr[CDRHOST]
+}
+
+func (cgrCdr CgrCdr) GetCdrSource() string {
+	return cgrCdr[CDRSOURCE]
 }
 func (cgrCdr CgrCdr) GetDirection() string {
 	//TODO: implement direction
@@ -99,7 +87,7 @@ func (cgrCdr CgrCdr) GetReqType() string {
 func (cgrCdr CgrCdr) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for k, v := range cgrCdr {
-		if !utils.IsSliceMember(primaryFields, k) {
+		if !utils.IsSliceMember(utils.PrimaryCdrFields, k) {
 			extraFields[k] = v
 		}
 	}

@@ -22,6 +22,8 @@ import (
 	"time"
 )
 
+var PrimaryCdrFields []string = []string{ACCID, CDRHOST, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, ANSWER_TIME, DURATION}
+
 type CDR interface {
 	GetCgrId() string
 	GetAccId() string

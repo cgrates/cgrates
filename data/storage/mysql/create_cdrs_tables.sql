@@ -5,6 +5,7 @@ CREATE TABLE cdrs_primary (
   cgrid char(40) NOT NULL,
   accid varchar(64) NOT NULL,
   cdrhost varchar(64) NOT NULL,
+  cdrsource varchar(64) NOT NULL,
   reqtype varchar(24) NOT NULL,
   direction varchar(8) NOT NULL,
   tenant varchar(64) NOT NULL,

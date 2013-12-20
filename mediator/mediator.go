@@ -27,7 +27,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/howeyc/fsnotify"
 	"os"
 	"path"
 	"strconv"
@@ -83,20 +82,19 @@ func (self *Mediator) loadConfig() error {
 		self.cgrCfg.MediatorTenantFields, self.cgrCfg.MediatorTORFields, self.cgrCfg.MediatorAccountFields, self.cgrCfg.MediatorDestFields,
 		self.cgrCfg.MediatorTimeAnswerFields, self.cgrCfg.MediatorDurationFields}
 
-	refIdx := 0 // Subject becomes reference for our checks
-	if len(cfgVals[refIdx]) == 0 {
-		return fmt.Errorf("Unconfigured %s fields", fieldKeys[refIdx])
+	if len(self.cgrCfg.MediatorRunIds) == 0 {
+		return errors.New("Unconfigured mediator run_ids")
 	}
 	// All other configured fields must match the length of reference fields
 	for iCfgVal := range cfgVals {
-		if len(cfgVals[refIdx]) != len(cfgVals[iCfgVal]) {
-			// Make sure we have everywhere the length of reference key (subject)
+		if len(self.cgrCfg.MediatorRunIds) != len(cfgVals[iCfgVal]) {
+			// Make sure we have everywhere the length of runIds 
 			return errors.New("Inconsistent lenght of mediator fields.")
 		}
 	}
 
 	// AccIdField has no special requirements, should just exist
-	if self.cgrCfg.MediatorAccIdField == "" {
+	if len(self.cgrCfg.MediatorAccIdField) == 0 {
 		return errors.New("Undefined mediator accid field")
 	}
 	self.accIdField = self.cgrCfg.MediatorAccIdField
@@ -134,35 +132,6 @@ func (self *Mediator) loadConfig() error {
 	}
 
 	return nil
-}
-
-// Watch the specified folder for file moves and parse the files on events
-func (self *Mediator) TrackCDRFiles() (err error) {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		return
-	}
-	defer watcher.Close()
-	err = watcher.Watch(self.cdrInDir)
-	if err != nil {
-		return
-	}
-	engine.Logger.Info(fmt.Sprintf("Monitoring %s for file moves.", self.cdrInDir))
-	for {
-		select {
-		case ev := <-watcher.Event:
-			if ev.IsCreate() && path.Ext(ev.Name) != ".csv" {
-				engine.Logger.Info(fmt.Sprintf("Parsing: %s", ev.Name))
-				err = self.MediateCSVCDR(ev.Name)
-				if err != nil {
-					return err
-				}
-			}
-		case err := <-watcher.Error:
-			engine.Logger.Err(fmt.Sprintf("Inotify error: %s", err.Error()))
-		}
-	}
-	return
 }
 
 // Retrive the cost from logging database
@@ -217,66 +186,7 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*engine.CallCost, error)
 	return cc, err
 }
 
-// Parse the files and get cost for every record
-func (self *Mediator) MediateCSVCDR(cdrfn string) (err error) {
-	flag.Parse()
-	file, err := os.Open(cdrfn)
-	defer file.Close()
-	if err != nil {
-		engine.Logger.Crit(err.Error())
-		os.Exit(1)
-	}
-	csvReader := csv.NewReader(bufio.NewReader(file))
 
-	_, fn := path.Split(cdrfn)
-	fout, err := os.Create(path.Join(self.cdrOutDir, fn))
-	if err != nil {
-		return err
-	}
-	defer fout.Close()
-
-	w := bufio.NewWriter(fout)
-	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
-		//t, _ := time.Parse("2006-01-02 15:04:05", record[5])
-		var cc *engine.CallCost
-
-		for runIdx := range self.fieldIdxs["subject"] { // Query costs for every run index given by subject
-			csvCDR, errCDR := NewFScsvCDR(record, self.accIdIdx,
-				self.fieldIdxs["subject"][runIdx],
-				self.fieldIdxs["reqtype"][runIdx],
-				self.fieldIdxs["direction"][runIdx],
-				self.fieldIdxs["tenant"][runIdx],
-				self.fieldIdxs["tor"][runIdx],
-				self.fieldIdxs["account"][runIdx],
-				self.fieldIdxs["destination"][runIdx],
-				self.fieldIdxs["answer_time"][runIdx],
-				self.fieldIdxs["duration"][runIdx],
-				self.cgrCfg)
-			if errCDR != nil {
-				engine.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for accid: <%s>, err: <%s>",
-					record[self.accIdIdx], errCDR.Error()))
-			}
-			var errCost error
-			if csvCDR.GetReqType() == utils.PREPAID || csvCDR.GetReqType() == utils.POSTPAID {
-				// Should be previously calculated and stored in DB
-				cc, errCost = self.getCostsFromDB(csvCDR)
-			} else {
-				cc, errCost = self.getCostsFromRater(csvCDR)
-			}
-			cost := "-1"
-			if errCost != nil || cc == nil {
-				engine.Logger.Err(fmt.Sprintf("<Mediator> Could not calculate price for accid: <%s>, err: <%s>, cost: <%v>", csvCDR.GetAccId(), err.Error(), cc))
-			} else {
-				cost = strconv.FormatFloat(cc.ConnectFee+cc.Cost, 'f', -1, 64)
-				engine.Logger.Debug(fmt.Sprintf("Calculated for accid:%s, cost: %v", csvCDR.GetAccId(), cost))
-			}
-			record = append(record, cost)
-		}
-		w.WriteString(strings.Join(record, ",") + "\n")
-	}
-	w.Flush()
-	return
-}
 
 func (self *Mediator) MediateDBCDR(cdr utils.CDR) error {
 	var qryCC *engine.CallCost

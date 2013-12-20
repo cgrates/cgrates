@@ -50,13 +50,32 @@ mediator = test				# Address where to reach the Mediator. Empty for disabling me
 export_path = test			# Path where exported cdrs will be written
 export_extra_fields = test		# Extra fields list to be exported
 
+[cdrc]
+enabled = true				# Enable CDR client functionality
+cdrs = test				# Address where to reach CDR server
+cdrs_method = test			# Mechanism to use when posting CDRs on server  <http_cgr>
+run_delay = 99				# Period to sleep between two runs, 0 to use automation via inotify
+cdr_type = test				# CDR file format <csv>.
+cdr_in_dir = test		 	# Absolute path towards the directory where the CDRs are kept (file stored CDRs).
+cdr_out_dir = test			# Absolute path towards the directory where processed CDRs will be moved after processing.	
+cdr_source_id = test			# Tag identifying the source of the CDRs within CGRS database.
+accid_field = test			# Accounting id field identifier. Use index number in case of .csv cdrs.
+reqtype_field = test			# Request type field identifier. Use index number in case of .csv cdrs.
+direction_field = test			# Direction field identifier. Use index numbers in case of .csv cdrs.
+tenant_field = test			# Tenant field identifier. Use index numbers in case of .csv cdrs.
+tor_field = test			# Type of Record field identifier. Use index numbers in case of .csv cdrs.
+account_field = test			# Account field identifier. Use index numbers in case of .csv cdrs.
+subject_field = test			# Subject field identifier. Use index numbers in case of .csv CDRs.
+destination_field = test		# Destination field identifier. Use index numbers in case of .csv cdrs.
+answer_time_field = test		# Answer time field identifier. Use index numbers in case of .csv cdrs.
+duration_field = test			# Duration field identifier. Use index numbers in case of .csv cdrs.
+extra_fields = test			# Field identifiers of the fields to add in extra fields section, special format in case of .csv "index1:field1,index2:field2"
+
 [mediator]
 enabled = true				# Starts Mediator service: <true|false>.
 listen=test				# Mediator's listening interface: <internal>.
 rater = test			# Address where to reach the Rater: <internal|x.y.z.y:1234>
 rater_reconnects = 99				# Number of reconnects to rater before giving up.
-cdr_type = test		# CDR type <freeswitch_http_json|freeswitch_file_csv>.
-accid_field = test				# Name of field identifying accounting id used during mediation. Use index number in case of .csv cdrs.
 run_ids = test				# Identifiers for each mediation run on CDRs
 subject_fields = test			# Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
 reqtype_fields = test				# Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
@@ -65,10 +84,8 @@ tenant_fields = test			# Name of tenant fields to be used during mediation. Use 
 tor_fields = test				# Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
 account_fields = test			# Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
 destination_fields = test		# Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
-time_answer_fields = test		# Name of time_answer fields to be used during mediation. Use index numbers in case of .csv cdrs.
+answer_time_fields = test		# Name of time_answer fields to be used during mediation. Use index numbers in case of .csv cdrs.
 duration_fields = test			# Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
-cdr_in_dir = test 	# Absolute path towards the directory where the CDRs are kept (file stored CDRs).
-cdr_out_dir =	test	# Absolute path towards the directory where processed CDRs will be exported (file stored CDRs).
 
 [session_manager]
 enabled = true				# Starts SessionManager service: <true|false>.
