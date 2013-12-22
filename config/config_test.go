@@ -76,8 +76,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcCdrsMethod = "http_cgr"
 	eCfg.CdrcRunDelay = time.Duration(0)
 	eCfg.CdrcCdrType = "csv"
-	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdr/in/csv"
-	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdr/out/csv"
+	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdr/cdrc/in"
+	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdr/cdrc/out"
 	eCfg.CdrcSourceId = "freeswitch_csv"
 	eCfg.CdrcAccIdField = "0"
 	eCfg.CdrcReqTypeField = "1"
@@ -91,7 +91,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcDurationField = "9"
 	eCfg.CdrcExtraFields = []string{"10:supplier","11:orig_ip"}
 	eCfg.CDRSMediator = ""
-	eCfg.CDRSExportPath = "/var/log/cgrates/cdr/out"
+	eCfg.CDRSExportPath = "/var/log/cgrates/cdr/cdrexport/csv"
 	eCfg.CDRSExportExtraFields = []string{}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorListen = "127.0.0.1:2032"

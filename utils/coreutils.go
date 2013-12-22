@@ -154,5 +154,5 @@ func ParseDurationWithSecs(durStr string) (time.Duration, error) {
 	if _, err := strconv.Atoi(durStr); err == nil { // No suffix, default to seconds
 		durStr += "s"
 	}
-	return time.ParseDuration(durStr)	
+	return time.ParseDuration(durStr)
 }

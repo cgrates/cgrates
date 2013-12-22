@@ -60,6 +60,8 @@ var (
 	version      = flag.Bool("version", false, "Prints the application version.")
 	raterEnabled = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
 	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
+	cdrsEnabled = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
+	cdrcEnabled = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
 	bal          = balancer2go.NewBalancer()
 	exitChan     = make(chan bool)
 	sm           sessionmanager.SessionManager
@@ -344,6 +346,12 @@ func main() {
 	}
 	if *schedEnabled {
 		cfg.SchedulerEnabled = *schedEnabled
+	}
+	if *cdrsEnabled {
+		cfg.CDRSEnabled = *cdrsEnabled
+	}
+	if *cdrcEnabled {
+		cfg.CdrcEnabled = *cdrcEnabled
 	}
 	if cfg.RaterEnabled {
 		if err := ratingDb.CacheRating(nil, nil, nil); err != nil {

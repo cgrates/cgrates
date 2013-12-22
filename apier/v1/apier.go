@@ -34,12 +34,12 @@ const (
 )
 
 type ApierV1 struct {
-	StorDb engine.LoadStorage
-	RatingDb engine.RatingStorage
-	AccountDb   engine.AccountingStorage
-	CdrDb  engine.CdrStorage
-	Sched  *scheduler.Scheduler
-	Config *config.CGRConfig
+	StorDb    engine.LoadStorage
+	RatingDb  engine.RatingStorage
+	AccountDb engine.AccountingStorage
+	CdrDb     engine.CdrStorage
+	Sched     *scheduler.Scheduler
+	Config    *config.CGRConfig
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {

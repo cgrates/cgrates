@@ -54,6 +54,7 @@ var rater *rpc.Client
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
 var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
+var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 
 func init() {
@@ -66,6 +67,9 @@ func TestCreateTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
+	if *storDbType != utils.MYSQL {
+		t.Fatal("Unsupported storDbType")
+	}
 	var mysql *engine.MySQLStorage
 	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
 		t.Fatal("Error on opening database connection: ", err)
@@ -73,7 +77,7 @@ func TestCreateTables(t *testing.T) {
 		mysql = d.(*engine.MySQLStorage)
 	}
 	for _, scriptName := range []string{engine.CREATE_CDRS_TABLES_SQL, engine.CREATE_COSTDETAILS_TABLES_SQL, engine.CREATE_MEDIATOR_TABLES_SQL, engine.CREATE_TARIFFPLAN_TABLES_SQL} {
-		if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", scriptName)); err != nil {
+		if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *stprDbType, scriptName)); err != nil {
 			t.Fatal("Error on mysql creation: ", err.Error())
 			return // No point in going further
 		}
@@ -93,7 +97,7 @@ func TestInitDataDb(t *testing.T) {
 	if err != nil {
 		t.Fatal("Cannot connect to dataDb", err)
 	}
-	accountDb, err := engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, cfg.AccountDBName, 
+	accountDb, err := engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, cfg.AccountDBName,
 		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
 	if err != nil {
 		t.Fatal("Cannot connect to dataDb", err)
@@ -804,22 +808,22 @@ func TestApierGetRatingPlan(t *testing.T) {
 	if reply.Id != rplnId {
 		t.Error("Unexpected id received", reply.Id)
 	}
-	if len(reply.Timings)!= 1  || len(reply.Ratings) != 1 {
+	if len(reply.Timings) != 1 || len(reply.Ratings) != 1 {
 		t.Error("Unexpected number of items received")
 	}
 	/*
-	riTiming := &engine.RITiming{StartTime: "00:00:00"}
-	for _, tm := range reply.Timings { // We only get one loop
-		if  !reflect.DeepEqual(tm, riTiming) {
-			t.Errorf("Unexpected timings value: %v, expecting: %v", tm, riTiming)
+		riTiming := &engine.RITiming{StartTime: "00:00:00"}
+		for _, tm := range reply.Timings { // We only get one loop
+			if  !reflect.DeepEqual(tm, riTiming) {
+				t.Errorf("Unexpected timings value: %v, expecting: %v", tm, riTiming)
+			}
 		}
-	}
 	*/
-	riRate := &engine.RIRate{ConnectFee:0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{
-			&engine.Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60)*time.Second, RateUnit: time.Duration(60)*time.Second},
-			}}
+	riRate := &engine.RIRate{ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{
+		&engine.Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60) * time.Second, RateUnit: time.Duration(60) * time.Second},
+	}}
 	for _, rating := range reply.Ratings {
-		if !reflect.DeepEqual( rating, riRate ) {
+		if !reflect.DeepEqual(rating, riRate) {
 			t.Errorf("Unexpected riRate received: %v", rating)
 		}
 	}
@@ -858,7 +862,7 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 	reply := ""
 	// Add balance to a previously known account
-	attrs := AttrExecuteAction{ Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "PREPAID_10"}
+	attrs := AttrExecuteAction{Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "PREPAID_10"}
 	if err := rater.Call("ApierV1.ExecuteAction", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.ExecuteAction: ", err.Error())
 	} else if reply != "OK" {
@@ -866,12 +870,11 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 	reply2 := ""
 	// Add balance to an account which does n exist
-	attrs = AttrExecuteAction{ Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
+	attrs = AttrExecuteAction{Direction: "*out", Tenant: "cgrates.org", Account: "dan2", ActionsId: "DUMMY_ACTION"}
 	if err := rater.Call("ApierV1.ExecuteAction", attrs, &reply2); err == nil || reply2 == "OK" {
 		t.Error("Expecting error on ApierV1.ExecuteAction.", err, reply2)
 	}
 }
-
 
 // Test here AddTriggeredAction
 func TestApierAddTriggeredAction(t *testing.T) {
@@ -880,7 +883,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	}
 	reply := ""
 	// Add balance to a previously known account
-	attrs := &AttrAddActionTrigger{ Tenant: "cgrates.org", Account: "dan2", Direction: "*out", BalanceId: "*monetary", 
+	attrs := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan2", Direction: "*out", BalanceId: "*monetary",
 		ThresholdValue: 2, DestinationId: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
 	if err := rater.Call("ApierV1.AddTriggeredAction", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
@@ -897,14 +900,13 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	}
 }
 
-
 // Test here AddAccount
 func TestApierAddAccount(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	//reply := ""
-	attrs := &AttrAddAccount{Tenant: "cgrates.org", Direction: "*out",  Account: "dan4", Type: "prepaid", ActionTimingsId: "PREPAID_10"}
+	attrs := &AttrAddAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan4", Type: "prepaid", ActionTimingsId: "PREPAID_10"}
 	//if err := rater.Call("ApierV1.AddAccount", attrs, &reply); err != nil {
 	//	t.Error("Got error on ApierV1.AddAccount: ", err.Error())
 	//} else if reply != "OK" {
@@ -919,7 +921,6 @@ func TestApierAddAccount(t *testing.T) {
 		t.Error("Expecting error on ApierV1.AddAccount.", err, reply2)
 	}
 }
-
 
 // Test here GetBalance
 func TestApierGetBalance(t *testing.T) {

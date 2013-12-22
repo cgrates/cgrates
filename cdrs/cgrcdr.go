@@ -32,6 +32,7 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 		}
 	}
 	cgrCdr := make(CgrCdr)
+	cgrCdr[utils.CDRHOST] = req.RemoteAddr
 	for k, vals := range req.Form {
 		cgrCdr[k] = vals[0] // We only support the first value for now, if more are provided it is considered remote's fault
 	}
@@ -94,7 +95,8 @@ func (cgrCdr CgrCdr) GetExtraFields() map[string]string {
 	return extraFields
 }
 func (cgrCdr CgrCdr) GetAnswerTime() (t time.Time, err error) {
-	return utils.ParseDate(cgrCdr[utils.ANSWER_TIME])
+	//return utils.ParseDate(cgrCdr[utils.ANSWER_TIME])
+	return time.Parse("2006-01-02 15:04:05", cgrCdr[utils.ANSWER_TIME])
 }
 
 // Extracts duration as considered by the telecom switch

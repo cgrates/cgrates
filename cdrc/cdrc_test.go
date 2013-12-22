@@ -1,34 +1,60 @@
+/*
+Rating system designed to be used in VoIP Carriers World
+Copyright (C) 2013 ITsysCOM
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
 package cdrc
 
 import (
-	"testing"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"testing"
 )
 
-var cgrConfig  *config.CGRConfig
-var cdrc *Cdrc
-
-func init() {
-	cgrConfig, _ = config.NewDefaultCGRConfig()
-	cdrc = &Cdrc{cgrCfg:cgrConfig}
-}
-
 func TestParseFieldIndexesFromConfig(t *testing.T) {
-	if err := cdrc.parseFieldIndexesFromConfig(); err != nil {
-		t.Error("Failed parsing default fieldIndexesFromConfig", err)
+	// Test default config
+	cgrConfig, _ := config.NewDefaultCGRConfig()
+	// Test primary field index definition
+	cgrConfig.CdrcAccIdField = "detect_me"
+	cdrc := &Cdrc{cgrCfg: cgrConfig}
+	if err := cdrc.parseFieldIndexesFromConfig(); err == nil {
+		t.Error("Failed detecting error in accounting id definition", err)
+	}
+	// Test extra field index definition
+	cgrConfig.CdrcAccIdField = "0" // Put back as int
+	cgrConfig.CdrcExtraFields = []string{"supplier1", "11:orig_ip"}
+	cdrc = &Cdrc{cgrCfg: cgrConfig}
+	if err := cdrc.parseFieldIndexesFromConfig(); err == nil {
+		t.Error("Failed detecting error in extra fields definition", err)
 	}
 }
 
-
 func TestCdrAsHttpForm(t *testing.T) {
+	cgrConfig, _ := config.NewDefaultCGRConfig()
+	cdrc := &Cdrc{cgrCfg: cgrConfig}
+	if err := cdrc.parseFieldIndexesFromConfig(); err != nil {
+		t.Error("Failed parsing default fieldIndexesFromConfig", err)
+	}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := cdrc.cdrAsHttpForm(cdrRow)
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
-	cdrAsForm, err := cdrc.cdrAsHttpForm(cdrRow); 
+	cdrAsForm, err := cdrc.cdrAsHttpForm(cdrRow)
 	if err != nil {
 		t.Error("Failed to parse CDR in form", err)
 	}

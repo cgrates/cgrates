@@ -20,9 +20,9 @@ package console
 
 import (
 	"fmt"
-	"time"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 func init() {
@@ -44,7 +44,7 @@ func (self *CmdGetCost) Usage(name string) string {
 // set param defaults
 func (self *CmdGetCost) defaults() error {
 	self.rpcMethod = "Responder.GetCost"
-	self.rpcParams = &engine.CallDescriptor{ Direction: "*out" }
+	self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	return nil
 }
 
@@ -60,7 +60,7 @@ func (self *CmdGetCost) FromArgs(args []string) error {
 	if args[6] == "*now" {
 		tStart = time.Now()
 	} else {
-		tStart,err = utils.ParseDate(args[6])
+		tStart, err = utils.ParseDate(args[6])
 		if err != nil {
 			fmt.Println("\n*start_time* should have one of the formats:")
 			fmt.Println("\ttime.RFC3339\teg:2013-08-07T17:30:00Z in UTC")

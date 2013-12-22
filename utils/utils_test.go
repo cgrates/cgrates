@@ -250,7 +250,7 @@ func TestSplitPrefixEmpty(t *testing.T) {
 
 func TestParseDurationWithSecs(t *testing.T) {
 	durStr := "2"
-	durExpected := time.Duration(2)*time.Second
+	durExpected := time.Duration(2) * time.Second
 	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
 		t.Error(err)
 	} else if parsed != durExpected {
@@ -263,12 +263,10 @@ func TestParseDurationWithSecs(t *testing.T) {
 		t.Error("Parsed different than expected")
 	}
 	durStr = "2ms"
-	durExpected = time.Duration(2)*time.Millisecond
+	durExpected = time.Duration(2) * time.Millisecond
 	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
 		t.Error(err)
 	} else if parsed != durExpected {
 		t.Error("Parsed different than expected")
 	}
 }
-
-	

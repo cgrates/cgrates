@@ -43,36 +43,21 @@ func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engi
 }
 
 type Mediator struct {
-	connector           engine.Connector
-	logDb               engine.LogStorage
-	cdrDb               engine.CdrStorage
-	cgrCfg              *config.CGRConfig
+	connector engine.Connector
+	logDb     engine.LogStorage
+	cdrDb     engine.CdrStorage
+	cgrCfg    *config.CGRConfig
 }
 
-/*
-Responsible for parsing configuration fields out of CGRConfig instance, doing the necessary pre-checks.
-@param cfgVals: keep ordered references to configuration fields from CGRConfig instance.
-fieldKeys and cfgVals are directly related through index.
-Method logic:
- * Make sure the field used as reference in mediation process loop is not empty.
- * All other fields should match the length of reference field.
- * Accounting id field should not be empty.
- * If we run mediation on csv file:
-  * Make sure cdrInDir and cdrOutDir are valid paths.
-  * Populate fieldIdxs by converting fieldNames into integers
-*/
 func (self *Mediator) parseConfig() error {
 	cfgVals := [][]string{self.cgrCfg.MediatorSubjectFields, self.cgrCfg.MediatorReqTypeFields, self.cgrCfg.MediatorDirectionFields,
 		self.cgrCfg.MediatorTenantFields, self.cgrCfg.MediatorTORFields, self.cgrCfg.MediatorAccountFields, self.cgrCfg.MediatorDestFields,
 		self.cgrCfg.MediatorAnswerTimeFields, self.cgrCfg.MediatorDurationFields}
 
-	if len(self.cgrCfg.MediatorRunIds) == 0 {
-		return errors.New("Unconfigured mediator run_ids")
-	}
 	// All other configured fields must match the length of reference fields
 	for iCfgVal := range cfgVals {
 		if len(self.cgrCfg.MediatorRunIds) != len(cfgVals[iCfgVal]) {
-			// Make sure we have everywhere the length of runIds 
+			// Make sure we have everywhere the length of runIds
 			return errors.New("Inconsistent lenght of mediator fields.")
 		}
 	}
@@ -132,8 +117,6 @@ func (self *Mediator) getCostsFromRater(cdr utils.CDR) (*engine.CallCost, error)
 	return cc, err
 }
 
-
-
 func (self *Mediator) MediateDBCDR(cdr utils.CDR) error {
 	var qryCC *engine.CallCost
 	cc := &engine.CallCost{Cost: -1}
@@ -154,5 +137,5 @@ func (self *Mediator) MediateDBCDR(cdr utils.CDR) error {
 	if errCost != nil {
 		extraInfo = errCost.Error()
 	}
-	return self.cdrDb.SetRatedCdr(cdr, cc, extraInfo)
+	return self.cdrDb.SetRatedCdr(cdr, cdr.GetReqType(), cc, extraInfo)
 }
