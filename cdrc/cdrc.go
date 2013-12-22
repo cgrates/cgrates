@@ -28,6 +28,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/howeyc/fsnotify"
 	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -107,6 +108,7 @@ func (self *Cdrc) parseFieldIndexesFromConfig() error {
 
 // Takes the record out of csv and turns it into http form which can be posted
 func (self *Cdrc) cdrAsHttpForm(record []string) (url.Values, error) {
+	engine.Logger.Info(fmt.Sprintf("Processing record %v", record))
 	v := url.Values{}
 	v.Set(utils.CDRSOURCE, self.cgrCfg.CdrcSourceId)
 	for fldName, idx := range self.fieldIndxes {
@@ -120,7 +122,7 @@ func (self *Cdrc) cdrAsHttpForm(record []string) (url.Values, error) {
 
 // One run over the CDR folder
 func (self *Cdrc) processCdrDir() error {
-	engine.Logger.Info(fmt.Sprintf("Parsing folder %s for CDR files.", self.cgrCfg.CdrcCdrInDir))
+	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.cgrCfg.CdrcCdrInDir))
 	filesInDir, _ := ioutil.ReadDir(self.cgrCfg.CdrcCdrInDir)
 	for _, file := range filesInDir {
 		if err := self.processFile(path.Join(self.cgrCfg.CdrcCdrInDir, file.Name())); err != nil {
@@ -141,11 +143,11 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 	if err != nil {
 		return
 	}
-	engine.Logger.Info(fmt.Sprintf("Monitoring %s for file moves.", self.cgrCfg.CdrcCdrInDir))
+	engine.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.cgrCfg.CdrcCdrInDir))
 	for {
 		select {
 		case ev := <-watcher.Event:
-			if ev.IsCreate() && path.Ext(ev.Name) != ".csv" {
+			if ev.IsCreate() { //&& path.Ext(ev.Name) != ".csv"
 				if err = self.processFile(ev.Name); err != nil {
 					return err
 				}
@@ -160,7 +162,7 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 // Processe file at filePath and posts the valid cdr rows out of it
 func (self *Cdrc) processFile(filePath string) error {
 	_, fn := path.Split(filePath)
-	engine.Logger.Info(fmt.Sprintf("Parsing: %s", filePath))
+	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing: %s", filePath))
 	file, err := os.Open(filePath)
 	defer file.Close()
 	if err != nil {
@@ -168,17 +170,30 @@ func (self *Cdrc) processFile(filePath string) error {
 		return err
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
-	for record, ok := csvReader.Read(); ok == nil; record, ok = csvReader.Read() {
+	for {
+		record, err := csvReader.Read()
+		if err != nil && err == io.EOF {
+			break // End of file
+		} else if err != nil {
+			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
+			continue // Other csv related errors, ignore
+		}
 		cdrAsForm, err := self.cdrAsHttpForm(record)
 		if err != nil {
-			engine.Logger.Err(err.Error())
+			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue
 		}
 		if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cgrCfg.CdrcCdrs), cdrAsForm); err != nil {
-			engine.Logger.Err(fmt.Sprintf("Failed posting CDR, error: %s", err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
 			continue
 		}
 	}
 	// Finished with file, move it to processed folder
-	return os.Rename(filePath, path.Join(self.cgrCfg.CdrcCdrOutDir, fn))
+	newPath := path.Join(self.cgrCfg.CdrcCdrOutDir, fn)
+	if err:= os.Rename(filePath, newPath); err != nil {
+		engine.Logger.Err(err.Error())
+		return err
+	}
+	engine.Logger.Info(fmt.Sprintf("Finished processing %s, moved to %s", fn, newPath))
+	return nil
 }

@@ -32,7 +32,7 @@ curl --data "accid=asbfdsaf&cdrhost=192.168.1.1&reqtype=rated&direction=*out&ten
 func TestCgrCdrFields(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	cgrCdr := CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
-		"account": "1001", "subject": "1001", "destination": "1002", "answer_time": "1383813746", "duration": "10", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+		"account": "1001", "subject": "1001", "destination": "1002", "answer_time": "2013-11-07 08:42:26", "duration": "10", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	if cgrCdr.GetCgrId() != utils.FSCgrId("dsafdsaf") {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
