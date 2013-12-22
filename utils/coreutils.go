@@ -148,3 +148,11 @@ func CopyHour(src, dest time.Time) time.Time {
 	}
 	return time.Date(dest.Year(), dest.Month(), dest.Day(), src.Hour(), src.Minute(), src.Second(), src.Nanosecond(), src.Location())
 }
+
+// Parses duration, considers s as time unit if not provided
+func ParseDurationWithSecs(durStr string) (time.Duration, error) {
+	if _, err := strconv.Atoi(durStr); err == nil { // No suffix, default to seconds
+		durStr += "s"
+	}
+	return time.ParseDuration(durStr)	
+}

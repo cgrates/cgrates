@@ -21,6 +21,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"code.google.com/p/goconf/conf"
 	"github.com/cgrates/cgrates/utils"
@@ -81,7 +82,7 @@ type CGRConfig struct {
 	CdrcEnabled              bool     // Enable CDR client functionality
 	CdrcCdrs                 string   // Address where to reach CDR server
 	CdrcCdrsMethod            string   // Mechanism to use when posting CDRs on server  <http_cgr>
-	CdrcRunDelay             int       // Sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+	CdrcRunDelay             time.Duration       // Sleep interval between consecutive runs, if time unit missing, defaults to seconds, 0 to use automation via inotify
 	CdrcCdrType              string    // CDR file format <csv>.
 	CdrcCdrInDir             string    // Absolute path towards the directory where the CDRs are stored.
 	CdrcCdrOutDir            string    // Absolute path towards the directory where processed CDRs will be moved.
@@ -169,7 +170,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcEnabled = false
 	self.CdrcCdrs = "127.0.0.1:2022"
 	self.CdrcCdrsMethod = "http_cgr"
-	self.CdrcRunDelay = 0
+	self.CdrcRunDelay = time.Duration(0)
 	self.CdrcCdrType = "csv"
 	self.CdrcCdrInDir = "/var/log/cgrates/cdr/in/csv"
 	self.CdrcCdrOutDir = "/var/log/cgrates/cdr/out/csv"
@@ -372,7 +373,10 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.CdrcCdrsMethod, _ = c.GetString("cdrc", "cdrs_method")
 	}
 	if hasOpt = c.HasOption("cdrc", "run_delay"); hasOpt {
-		cfg.CdrcRunDelay, _ = c.GetInt("cdrc", "run_delay")
+		durStr,_ := c.GetString("cdrc", "run_delay")
+		if cfg.CdrcRunDelay, errParse = utils.ParseDurationWithSecs(durStr); errParse != nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("cdrc", "cdr_type"); hasOpt {
 		cfg.CdrcCdrType, _ = c.GetString("cdrc", "cdr_type")

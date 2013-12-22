@@ -27,6 +27,7 @@ type RatedCDR struct {
 	CgrId       string
 	AccId       string
 	CdrHost     string
+	CdrSource   string
 	ReqType     string
 	Direction   string
 	Tenant      string
@@ -50,6 +51,10 @@ func (ratedCdr *RatedCDR) GetAccId() string {
 
 func (ratedCdr *RatedCDR) GetCdrHost() string {
 	return ratedCdr.CdrHost
+}
+
+func (ratedCdr *RatedCDR) GetCdrSource() string {
+	return ratedCdr.CdrSource
 }
 
 func (ratedCdr *RatedCDR) GetDirection() string {

@@ -41,48 +41,48 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 type CgrCdr map[string]string
 
 func (cgrCdr CgrCdr) GetCgrId() string {
-	return utils.FSCgrId(cgrCdr[ACCID])
+	return utils.FSCgrId(cgrCdr[utils.ACCID])
 }
 
 func (cgrCdr CgrCdr) GetAccId() string {
-	return cgrCdr[ACCID]
+	return cgrCdr[utils.ACCID]
 }
 
 func (cgrCdr CgrCdr) GetCdrHost() string {
-	return cgrCdr[CDRHOST]
+	return cgrCdr[utils.CDRHOST]
 }
 
 func (cgrCdr CgrCdr) GetCdrSource() string {
-	return cgrCdr[CDRSOURCE]
+	return cgrCdr[utils.CDRSOURCE]
 }
 func (cgrCdr CgrCdr) GetDirection() string {
 	//TODO: implement direction
 	return "*out"
 }
 func (cgrCdr CgrCdr) GetOrigId() string {
-	return cgrCdr[CDRHOST]
+	return cgrCdr[utils.CDRHOST]
 }
 func (cgrCdr CgrCdr) GetSubject() string {
-	return cgrCdr[SUBJECT]
+	return cgrCdr[utils.SUBJECT]
 }
 func (cgrCdr CgrCdr) GetAccount() string {
-	return cgrCdr[ACCOUNT]
+	return cgrCdr[utils.ACCOUNT]
 }
 
 // Charging destination number
 func (cgrCdr CgrCdr) GetDestination() string {
-	return cgrCdr[DESTINATION]
+	return cgrCdr[utils.DESTINATION]
 }
 
 func (cgrCdr CgrCdr) GetTOR() string {
-	return cgrCdr[TOR]
+	return cgrCdr[utils.TOR]
 }
 
 func (cgrCdr CgrCdr) GetTenant() string {
-	return cgrCdr[TENANT]
+	return cgrCdr[utils.TENANT]
 }
 func (cgrCdr CgrCdr) GetReqType() string {
-	return cgrCdr[REQTYPE]
+	return cgrCdr[utils.REQTYPE]
 }
 func (cgrCdr CgrCdr) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string)
@@ -94,11 +94,11 @@ func (cgrCdr CgrCdr) GetExtraFields() map[string]string {
 	return extraFields
 }
 func (cgrCdr CgrCdr) GetAnswerTime() (t time.Time, err error) {
-	return utils.ParseDate(cgrCdr[TIME_ANSWER])
+	return utils.ParseDate(cgrCdr[utils.ANSWER_TIME])
 }
 
 // Extracts duration as considered by the telecom switch
 func (cgrCdr CgrCdr) GetDuration() int64 {
-	dur, _ := strconv.ParseInt(cgrCdr[DURATION], 0, 64)
+	dur, _ := strconv.ParseInt(cgrCdr[utils.DURATION], 0, 64)
 	return dur
 }

@@ -32,6 +32,9 @@ func TestCdrAsHttpForm(t *testing.T) {
 	if err != nil {
 		t.Error("Failed to parse CDR in form", err)
 	}
+	if cdrAsForm.Get(utils.CDRSOURCE) != cgrConfig.CdrcSourceId {
+		t.Error("Unexpected cdrsource received", cdrAsForm.Get(utils.CDRSOURCE))
+	}
 	if cdrAsForm.Get(utils.REQTYPE) != "prepaid" {
 		t.Error("Unexpected CDR value received", cdrAsForm.Get(utils.REQTYPE))
 	}

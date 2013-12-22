@@ -19,18 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package mediator
 
 import (
-	"bufio"
-	"encoding/csv"
 	"errors"
-	"flag"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"os"
-	"path"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -41,11 +35,9 @@ func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engi
 		cdrDb:     cdrDb,
 		cgrCfg:    cfg,
 	}
-	m.fieldNames = make(map[string][]string)
-	m.fieldIdxs = make(map[string][]int)
-	// Load config fields
-	if errLoad := m.loadConfig(); errLoad != nil {
-		return nil, errLoad
+	// Parse config
+	if err := m.parseConfig(); err != nil {
+		return nil, err
 	}
 	return m, nil
 }
@@ -55,16 +47,10 @@ type Mediator struct {
 	logDb               engine.LogStorage
 	cdrDb               engine.CdrStorage
 	cgrCfg              *config.CGRConfig
-	cdrInDir, cdrOutDir string
-	accIdField          string
-	accIdIdx            int // Populated only for csv files where we have no names but indexes for the fields
-	fieldNames          map[string][]string
-	fieldIdxs           map[string][]int // Populated only for csv files where we have no names but indexes for the fields
 }
 
 /*
-Responsible for loading configuration fields out of CGRConfig instance, doing the necessary pre-checks.
-@param fieldKeys: stores the keys which will be referenced inside fieldNames/fieldIdxs
+Responsible for parsing configuration fields out of CGRConfig instance, doing the necessary pre-checks.
 @param cfgVals: keep ordered references to configuration fields from CGRConfig instance.
 fieldKeys and cfgVals are directly related through index.
 Method logic:
@@ -73,14 +59,12 @@ Method logic:
  * Accounting id field should not be empty.
  * If we run mediation on csv file:
   * Make sure cdrInDir and cdrOutDir are valid paths.
-  * Populate accIdIdx by converting accIdField into integer.
   * Populate fieldIdxs by converting fieldNames into integers
 */
-func (self *Mediator) loadConfig() error {
-	fieldKeys := []string{"subject", "reqtype", "direction", "tenant", "tor", "account", "destination", "time_start", "duration"}
+func (self *Mediator) parseConfig() error {
 	cfgVals := [][]string{self.cgrCfg.MediatorSubjectFields, self.cgrCfg.MediatorReqTypeFields, self.cgrCfg.MediatorDirectionFields,
 		self.cgrCfg.MediatorTenantFields, self.cgrCfg.MediatorTORFields, self.cgrCfg.MediatorAccountFields, self.cgrCfg.MediatorDestFields,
-		self.cgrCfg.MediatorTimeAnswerFields, self.cgrCfg.MediatorDurationFields}
+		self.cgrCfg.MediatorAnswerTimeFields, self.cgrCfg.MediatorDurationFields}
 
 	if len(self.cgrCfg.MediatorRunIds) == 0 {
 		return errors.New("Unconfigured mediator run_ids")
@@ -90,44 +74,6 @@ func (self *Mediator) loadConfig() error {
 		if len(self.cgrCfg.MediatorRunIds) != len(cfgVals[iCfgVal]) {
 			// Make sure we have everywhere the length of runIds 
 			return errors.New("Inconsistent lenght of mediator fields.")
-		}
-	}
-
-	// AccIdField has no special requirements, should just exist
-	if len(self.cgrCfg.MediatorAccIdField) == 0 {
-		return errors.New("Undefined mediator accid field")
-	}
-	self.accIdField = self.cgrCfg.MediatorAccIdField
-
-	var errConv error
-	// Specific settings of CSV style CDRS
-	if self.cgrCfg.MediatorCDRType == utils.FSCDR_FILE_CSV {
-		// Check paths to be valid before adding as configuration
-		if _, err := os.Stat(self.cgrCfg.MediatorCDRInDir); err != nil {
-			return fmt.Errorf("The input path for mediator does not exist: %v", self.cgrCfg.MediatorCDRInDir)
-		} else {
-			self.cdrInDir = self.cgrCfg.MediatorCDRInDir
-		}
-		if _, err := os.Stat(self.cgrCfg.MediatorCDROutDir); err != nil {
-			return fmt.Errorf("The output path for mediator does not exist: %v", self.cgrCfg.MediatorCDROutDir)
-		} else {
-			self.cdrOutDir = self.cgrCfg.MediatorCDROutDir
-		}
-		if self.accIdIdx, errConv = strconv.Atoi(self.cgrCfg.MediatorAccIdField); errConv != nil {
-			return errors.New("AccIdIndex must be integer.")
-		}
-	}
-
-	// Load here field names and convert to integers in case of unamed cdrs like CSV
-	for idx, key := range fieldKeys {
-		self.fieldNames[key] = cfgVals[idx]
-		if self.cgrCfg.MediatorCDRType == utils.FSCDR_FILE_CSV { // Special case when field names represent indexes of their location in file
-			self.fieldIdxs[key] = make([]int, len(cfgVals[idx]))
-			for iStr, cfgStr := range cfgVals[idx] {
-				if self.fieldIdxs[key][iStr], errConv = strconv.Atoi(cfgStr); errConv != nil {
-					return fmt.Errorf("All mediator index members (%s) must be ints", key)
-				}
-			}
 		}
 	}
 

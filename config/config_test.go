@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -73,7 +74,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = "127.0.0.1:2022"
 	eCfg.CdrcCdrsMethod = "http_cgr"
-	eCfg.CdrcRunDelay = 0
+	eCfg.CdrcRunDelay = time.Duration(0)
 	eCfg.CdrcCdrType = "csv"
 	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdr/in/csv"
 	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdr/out/csv"
@@ -197,7 +198,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CdrcEnabled = true
 	eCfg.CdrcCdrs = "test"
 	eCfg.CdrcCdrsMethod = "test"
-	eCfg.CdrcRunDelay = 99
+	eCfg.CdrcRunDelay = time.Duration(99)*time.Second
 	eCfg.CdrcCdrType = "test"
 	eCfg.CdrcCdrInDir = "test"
 	eCfg.CdrcCdrOutDir = "test"

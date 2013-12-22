@@ -24,16 +24,33 @@ import (
 	"github.com/howeyc/fsnotify"
 	"os"
 	"path"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 	"bufio"
 	"encoding/csv"
+	"time"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/engine"
 )
+
+
+func NewCdrc(config *config.CGRConfig) (*Cdrc, error) {
+	cdrc := &Cdrc{cgrCfg: config}
+	// Before processing, make sure in and out folders exist
+	for _, dir := range []string{ cdrc.cgrCfg.CdrcCdrInDir, cdrc.cgrCfg.CdrcCdrOutDir } {
+		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
+			return nil, fmt.Errorf("Folder %s does not exist", dir)
+		}
+	}
+	if err := cdrc.parseFieldIndexesFromConfig(); err != nil {
+		return nil, err
+	}
+	return cdrc, nil
+}
 
 
 type Cdrc struct {
@@ -42,12 +59,31 @@ type Cdrc struct {
 	httpClient          *http.Client
 }
 
+// When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
+func (self *Cdrc) Run() error {
+	if self.cgrCfg.CdrcRunDelay == time.Duration(0) { // Automated via inotify
+		return self.trackCDRFiles()
+	}
+	// No automated, process and sleep approach
+	for {
+		engine.Logger.Info(fmt.Sprintf("Parsing folder %s for CDR files.", self.cgrCfg.CdrcCdrInDir))
+		filesInDir,_ := ioutil.ReadDir(self.cgrCfg.CdrcCdrInDir)
+		for _, file :=  range filesInDir {
+			if err := self.processFile(file.Name()); err != nil {
+				return err
+			}
+		}
+		time.Sleep(self.cgrCfg.CdrcRunDelay)
+	}
+	return nil
+}
+
 // Parses fieldIndex strings into fieldIndex integers needed
 func (self *Cdrc) parseFieldIndexesFromConfig() error {
 	var err error
 	// Add main fields here
 	self.fieldIndxes = make(map[string]int)
-	// PrimaryCdrFields []string = []string{ACCID, CDRHOST, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, ANSWER_TIME, DURATION}
+	// PrimaryCdrFields []string = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, ANSWER_TIME, DURATION}
 	fieldKeys := []string{utils.ACCID, utils.REQTYPE, utils.DIRECTION, utils.TENANT, utils.TOR, utils.ACCOUNT, utils.SUBJECT, utils.DESTINATION, utils.ANSWER_TIME, utils.DURATION}
 	fieldIdxStrs := []string{self.cgrCfg.CdrcAccIdField, self.cgrCfg.CdrcReqTypeField, self.cgrCfg.CdrcDirectionField, self.cgrCfg.CdrcTenantField, self.cgrCfg.CdrcTorField,
 		self.cgrCfg.CdrcAccountField, self.cgrCfg.CdrcSubjectField, self.cgrCfg.CdrcDestinationField, self.cgrCfg.CdrcAnswerTimeField, self.cgrCfg.CdrcDurationField}
@@ -75,6 +111,7 @@ func (self *Cdrc) parseFieldIndexesFromConfig() error {
 // Takes the record out of csv and turns it into http form which can be posted
 func (self *Cdrc) cdrAsHttpForm(record []string) (url.Values, error) {
 	v := url.Values{}
+	v.Set(utils.CDRSOURCE, self.cgrCfg.CdrcSourceId)
 	for fldName, idx := range self.fieldIndxes {
 		if len(record) <= idx {
 			return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, fldName)
@@ -100,7 +137,6 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 		select {
 		case ev := <-watcher.Event:
 			if ev.IsCreate() && path.Ext(ev.Name) != ".csv" {
-				engine.Logger.Info(fmt.Sprintf("Parsing: %s", ev.Name))
 				if err = self.processFile(ev.Name); err != nil {
 					return err
 				}
@@ -114,6 +150,8 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 
 // Processe file at filePath and posts the valid cdr rows out of it
 func (self *Cdrc) processFile(filePath string) error {
+	_, fn := path.Split(filePath)
+	engine.Logger.Info(fmt.Sprintf("Parsing: %s", filePath))
 	file, err := os.Open(filePath)
 	defer file.Close()
 	if err != nil {
@@ -133,6 +171,5 @@ func (self *Cdrc) processFile(filePath string) error {
 		}
 	}
 	// Finished with file, move it to processed folder
-	_, fn := path.Split(filePath)
 	return os.Rename(filePath, path.Join(self.cgrCfg.CdrcCdrOutDir, fn))
 }

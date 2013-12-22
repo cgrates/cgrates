@@ -21,7 +21,6 @@ package console
 import (
 	"fmt"
 	"time"
-	"strconv"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -71,11 +70,7 @@ func (self *CmdGetCost) FromArgs(args []string) error {
 			return fmt.Errorf(self.Usage(""))
 		}
 	}
-	if _, err := strconv.Atoi(args[7]); err == nil { // No suffix, default to seconds
-		fmt.Println("\n*duration* needs suffix, defaulting to *s* (valid suffixes: ns, us/µs, ms, s, m, h)\n")
-		args[7] += "s"
-	}
-	callDur, err := time.ParseDuration(args[7])
+	callDur, err := utils.ParseDurationWithSecs(args[7])
 	if err != nil {
 		fmt.Println("\n\tExample durations: 60s for 60 seconds, 25m for 25minutes, 1m25s for one minute and 25 seconds\n")
 		return fmt.Errorf(self.Usage(""))

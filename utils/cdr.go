@@ -22,12 +22,13 @@ import (
 	"time"
 )
 
-var PrimaryCdrFields []string = []string{ACCID, CDRHOST, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, ANSWER_TIME, DURATION}
+var PrimaryCdrFields []string = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, ANSWER_TIME, DURATION}
 
 type CDR interface {
 	GetCgrId() string
 	GetAccId() string
 	GetCdrHost() string
+	GetCdrSource() string
 	GetDirection() string
 	GetSubject() string
 	GetAccount() string

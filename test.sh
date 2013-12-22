@@ -8,6 +8,7 @@ go test -i github.com/cgrates/cgrates/mediator
 go test -i github.com/cgrates/fsock
 go test -i github.com/cgrates/cgrates/cache2go
 go test -i github.com/cgrates/cgrates/cdrs
+go test -i github.com/cgrates/cgrates/cdrc
 go test -i github.com/cgrates/cgrates/utils
 go test -i github.com/cgrates/cgrates/history
 go test -i github.com/cgrates/cgrates/cdrexporter
@@ -23,7 +24,9 @@ cr=$?
 go test github.com/cgrates/cgrates/mediator
 md=$?
 go test github.com/cgrates/cgrates/cdrs
-cdr=$?
+cdrs=$?
+go test github.com/cgrates/cgrates/cdrc
+cdrcs=$?
 go test github.com/cgrates/cgrates/utils
 ut=$?
 go test github.com/cgrates/fsock
@@ -36,4 +39,4 @@ go test github.com/cgrates/cgrates/cdrexporter
 cdre=$?
 
 
-exit $en && $sm && $cfg && $bl && $cr && $md && $cdr && $fs && $ut && $hs && $c2g && $cdre
+exit $en && $sm && $cfg && $bl && $cr && $md && $cdrs && $cdrc && $fs && $ut && $hs && $c2g && $cdre

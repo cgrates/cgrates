@@ -32,6 +32,7 @@ import (
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrs"
+	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
@@ -133,10 +134,19 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		engine.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
 	}
+}
 
-	if cfg.MediatorCDRType == utils.FSCDR_FILE_CSV { //Mediator as standalone service for file CDRs
-		medi.TrackCDRFiles()
+func startCdrc() {
+	cdrc, err := cdrc.NewCdrc(cfg)
+	if err != nil {
+		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
+		exitChan <- true
+		return
 	}
+	if err := cdrc.Run(); err != nil {
+		engine.Logger.Crit(fmt.Sprintf("Cdrc run error: %s", err.Error()))
+	}
+	exitChan <- true // If run stopped, something is bad, stop the application
 }
 
 func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage) {
@@ -415,6 +425,10 @@ func main() {
 	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {
 		engine.Logger.Info("Starting History Service.")
 		go startHistoryScribe()
+	}
+	if cfg.CdrcEnabled {
+		engine.Logger.Info("Starting CGRateS CDR Client.")
+		go startCdrc()
 	}
 	<-exitChan
 	engine.Logger.Info("Stopped all components. CGRateS shutdown!")
