@@ -499,7 +499,8 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		cost := 0.0
 		// re-calculate call cost after balances
 		for _, ts := range cc.Timespans {
-			cost += ts.getCost() // FIXME: floating point sum??
+			cost += ts.getCost()
+			cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 		}
 		cc.Cost = cost
 	}
