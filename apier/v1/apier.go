@@ -149,13 +149,13 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error
 	return nil
 }
 
-type AttrSetRatingPlan struct {
+type AttrLoadRatingPlan struct {
 	TPid         string
 	RatingPlanId string
 }
 
 // Process dependencies and load a specific rating plan from storDb into dataDb.
-func (self *ApierV1) SetRatingPlan(attrs AttrSetRatingPlan, reply *string) error {
+func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -170,16 +170,63 @@ func (self *ApierV1) SetRatingPlan(attrs AttrSetRatingPlan, reply *string) error
 }
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
-func (self *ApierV1) SetRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
+func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "TOR", "Direction", "Subject"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-
 	if err := dbReader.LoadRatingProfileFiltered(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	*reply = OK
+	return nil
+}
 
+type AttrSetRatingProfile struct {
+	Tenant                string                // Tenant's Id
+	TOR                   string                // TypeOfRecord
+	Direction             string                // Traffic direction, OUT is the only one supported for now
+	Subject               string                // Rating subject, usually the same as account
+	Overwrite             bool                  // Overwrite if exists
+	RatingPlanActivations []*utils.TPRatingActivation // Activate rate profiles at specific time
+}
+
+// Sets a specific rating profile working with data directly in the RatingDb without involving storDb
+func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "TOR", "Direction", "Subject", "RatingPlanActivations"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	for _, rpa := range attrs.RatingPlanActivations {
+		if missing := utils.MissingStructFields(rpa, []string{"ActivationTime", "RatingPlanId"}); len(missing) != 0 {
+			return fmt.Errorf("%s:RatingPlanActivation:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		}
+	}
+	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, TOR: attrs.TOR, Direction: attrs.Direction, Subject: attrs.Subject}
+	keyId := tpRpf.KeyId()
+	if !attrs.Overwrite {
+		if exists, err := self.RatingDb.ExistsData(engine.RATING_PROFILE_PREFIX, keyId); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		} else if exists {
+			return errors.New(utils.ERR_EXISTS)
+		}
+	}
+	rpfl := &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, len(attrs.RatingPlanActivations))}
+	for idx, ra := range attrs.RatingPlanActivations {
+			at, err := utils.ParseDate(ra.ActivationTime)
+			if err != nil {
+				return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ERR_SERVER_ERROR, ra.ActivationTime))
+			}
+			if exists, err := self.RatingDb.ExistsData(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
+				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+			} else if !exists {
+				return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ERR_NOT_FOUND, ra.RatingPlanId))
+			}
+			rpfl.RatingPlanActivations[idx] = &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
+					FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, ra.FallbackSubjects)}
+	}
+	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
 	*reply = OK
 	return nil
 }

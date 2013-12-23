@@ -708,16 +708,30 @@ func TestApierTPAccountActions(t *testing.T) {
 	}
 }
 
-// Test here SetRatingPlan
-func TestApierSetRatingPlan(t *testing.T) {
+// Test here LoadRatingPlan
+func TestApierLoadRatingPlan(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	reply := ""
-	if err := rater.Call("ApierV1.SetRatingPlan", AttrSetRatingPlan{TPid: engine.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetRatingPlan: ", err.Error())
+	if err := rater.Call("ApierV1.LoadRatingPlan", AttrLoadRatingPlan{TPid: engine.TEST_SQL, RatingPlanId: "RETAIL1"}, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadRatingPlan: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.SetRatingPlan got reply: ", reply)
+		t.Error("Calling ApierV1.LoadRatingPlan got reply: ", reply)
+	}
+}
+
+// Test here LoadRatingProfile
+func TestApierLoadRatingProfile(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "*any"}
+	if err := rater.Call("ApierV1.LoadRatingProfile", rpf, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadRatingProfile: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.LoadRatingProfile got reply: ", reply)
 	}
 }
 
@@ -727,11 +741,16 @@ func TestApierSetRatingProfile(t *testing.T) {
 		return
 	}
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "*any"}
+	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2;*any"}
+	rpf := &AttrSetRatingProfile{Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
 	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
+	}
+	// Calling the second time should raise EXISTS
+	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err == nil || err.Error() != "EXISTS"{
+		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 }
 
