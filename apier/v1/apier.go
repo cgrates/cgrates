@@ -511,10 +511,9 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 	return nil
 }
 
-type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
-}
 
-func (self *ApierV1) GetCacheStats(attrs AttrCacheStats, reply *utils.CacheStats) error {
+
+func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.CacheStats) error {
 	cs := new(utils.CacheStats)
 	cs.Destinations = cache2go.CountEntries(engine.DESTINATION_PREFIX)
 	cs.RatingPlans = cache2go.CountEntries(engine.RATING_PLAN_PREFIX)

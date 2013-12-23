@@ -283,6 +283,9 @@ type ApiReloadCache struct {
 	ActionIds        []string
 }
 
+type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
+}
+
 type CacheStats struct {
 	Destinations    int
 	RatingPlans     int
