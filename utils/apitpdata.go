@@ -282,3 +282,16 @@ type ApiReloadCache struct {
 	RatingProfileIds []string
 	ActionIds        []string
 }
+
+type CacheStats struct {
+	Destinations    int
+	RatingPlans     int
+	RatingProfiles  int
+	Actions         int
+}
+
+type AttrCachedItemAge struct {
+	Category        string // Item's category, same name as .csv files without extension
+	ItemId          string // Item's identity tag
+}
+

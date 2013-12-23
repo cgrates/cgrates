@@ -21,10 +21,13 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/cache2go"
 
 	"path"
 )
@@ -415,7 +418,6 @@ func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 	}
 
 	if attr.ActionTimingsId != "" {
-		engine.Logger.Debug(fmt.Sprintf("Querying for ActionTimingsId: %v", attr.ActionTimingsId))
 		if ats, err := self.AccountDb.GetActionTimings(attr.ActionTimingsId); err == nil {
 			for _, at := range ats {
 				engine.Logger.Debug(fmt.Sprintf("Found action timings: %v", at))
@@ -493,7 +495,7 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			rpfKeys[idx] = engine.RATING_PROFILE_PREFIX + rpfId
 		}
 	}
-	if len(attrs.RatingProfileIds) > 0 {
+	if len(attrs.ActionIds) > 0 {
 		actKeys = make([]string, len(attrs.ActionIds))
 		for idx, actId := range attrs.ActionIds {
 			actKeys[idx] = engine.ACTION_PREFIX + actId
@@ -508,6 +510,47 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 	*reply = "OK"
 	return nil
 }
+
+type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
+}
+
+func (self *ApierV1) GetCacheStats(attrs AttrCacheStats, reply *utils.CacheStats) error {
+	cs := new(utils.CacheStats)
+	cs.Destinations = cache2go.CountEntries(engine.DESTINATION_PREFIX)
+	cs.RatingPlans = cache2go.CountEntries(engine.RATING_PLAN_PREFIX)
+	cs.RatingProfiles = cache2go.CountEntries(engine.RATING_PROFILE_PREFIX)
+	cs.Actions = cache2go.CountEntries(engine.ACTION_PREFIX)
+	*reply = *cs
+	return nil
+}
+
+func (self *ApierV1) GetCachedItemAge(attrs utils.AttrCachedItemAge, reply *time.Duration) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Category", "ItemId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	cacheKey := ""
+	switch attrs.Category {
+	case strings.TrimSuffix(utils.DESTINATIONS_CSV, ".csv"):
+		cacheKey = engine.DESTINATION_PREFIX + attrs.ItemId
+	case strings.TrimSuffix(utils.RATING_PLANS_CSV, ".csv"):
+		cacheKey = engine.RATING_PLAN_PREFIX + attrs.ItemId
+	case strings.TrimSuffix(utils.RATING_PROFILES_CSV, ".csv"):
+		cacheKey = engine.RATING_PROFILE_PREFIX + attrs.ItemId
+	case strings.TrimSuffix(utils.ACTIONS_CSV, ".csv"):
+		cacheKey = engine.ACTION_PREFIX + attrs.ItemId
+	}
+	if len(cacheKey) == 0 {
+		return fmt.Errorf("%s:Category", utils.ERR_MANDATORY_IE_MISSING)
+	}
+	//engine.Logger.Debug(fmt.Sprintf("Will query cache age with: %s", cacheKey))
+	if age, err := cache2go.GetKeyAge(cacheKey); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = age
+	}
+	return nil
+}
+
 
 type AttrLoadTPFromFolder struct {
 	FolderPath string // Take files from folder absolute path

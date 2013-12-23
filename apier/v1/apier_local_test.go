@@ -29,8 +29,9 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
-	"testing"
+	"strings"
 	"time"
+	"testing"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
@@ -794,6 +795,39 @@ func TestApierReloadCache(t *testing.T) {
 		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+	}
+}
+
+func TestApierGetCacheStats(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var rcvStats *utils.CacheStats
+	expectedStats := &utils.CacheStats{Destinations:4, RatingPlans: 1, RatingProfiles: 2, Actions: 1}
+	var args AttrCacheStats
+	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
+		t.Errorf("Calling ApierV1.GetCacheStats expected: %v, received: %v", expectedStats, rcvStats)
+	}
+}
+
+func TestApierGetCachedItemAge(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var rcvAge *time.Duration
+	qryData := &utils.AttrCachedItemAge{Category: strings.TrimSuffix(utils.DESTINATIONS_CSV, ".csv"), ItemId: "+4917"} // Destinations are cached per prefix not id
+	if err := rater.Call("ApierV1.GetCachedItemAge", qryData, &rcvAge); err != nil {
+		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	} else if *rcvAge > time.Duration(2)*time.Second {
+		t.Errorf("Cache too old: %d", rcvAge)
+	}
+	qryData = &utils.AttrCachedItemAge{Category: strings.TrimSuffix(utils.RATING_PLANS_CSV, ".csv"), ItemId: "RETAIL1"}
+	if err := rater.Call("ApierV1.GetCachedItemAge", qryData, &rcvAge); err != nil {
+		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
+	} else if *rcvAge > time.Duration(2)*time.Second {
+		t.Errorf("Cache too old: %d", rcvAge)
 	}
 }
 
