@@ -876,6 +876,42 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 }
 
+func TestApierSetActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	act1 := &utils.TPAction {Identifier: engine.TOPUP_RESET, BalanceType: engine.CREDIT, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}
+	attrs1 := &AttrSetActions{ActionsId: "ACTS_1", Actions : []*utils.TPAction{act1}}
+	reply1 := ""
+	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err != nil {
+		t.Error("Got error on ApierV1.SetActions: ", err.Error())
+	} else if reply1 != "OK" {
+		t.Errorf("Calling ApierV1.SetActions received: %s", reply1)
+	}
+	// Calling the second time should raise EXISTS
+	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err == nil || err.Error() != "EXISTS"{
+		t.Error("Unexpected result on duplication: ", err.Error())
+	}
+}
+
+func TestApierSetActionTimings(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	atm1 := &ApiActionTiming{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
+	atms1 := &AttrSetActionTimings{ ActionTimingsId: "ATMS_1", ActionTimings: []*ApiActionTiming{atm1} }
+	reply1 := ""
+	if err := rater.Call("ApierV1.SetActionTimings", atms1, &reply1); err != nil {
+		t.Error("Got error on ApierV1.SetActionTimings: ", err.Error())
+	} else if reply1 != "OK" {
+		t.Errorf("Calling ApierV1.SetActionTimings received: %s", reply1)
+	}
+	// Calling the second time should raise EXISTS
+	if err := rater.Call("ApierV1.SetActionTimings", atms1, &reply1); err == nil || err.Error() != "EXISTS"{
+		t.Error("Unexpected result on duplication: ", err.Error())
+	}
+}
+
 // Test here AddTriggeredAction
 func TestApierAddTriggeredAction(t *testing.T) {
 	if !*testLocal {

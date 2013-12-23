@@ -184,6 +184,121 @@ func (self *ApierV1) SetRatingProfile(attrs utils.TPRatingProfile, reply *string
 	return nil
 }
 
+type AttrSetActions struct {
+	ActionsId string            // Actions id
+	Overwrite  bool         // If previously defined, will be overwritten
+	Actions   []*utils.TPAction // Set of actions this Actions profile will perform
+}
+
+func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"ActionsId", "Actions"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	for _, action := range attrs.Actions {
+		requiredFields := []string{"Identifier", "Weight"}
+		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
+			requiredFields = append(requiredFields, "Direction", "Units")
+		}
+		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
+			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
+		}
+	}
+	if !attrs.Overwrite {
+		if exists, err := self.AccountDb.ExistsData(engine.ACTION_PREFIX, attrs.ActionsId); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		} else if exists {
+			return errors.New(utils.ERR_EXISTS)
+		}
+	}
+	storeActions := make(engine.Actions, len(attrs.Actions))
+	for idx, apiAct := range attrs.Actions {
+		a := &engine.Action{
+			Id:               utils.GenUUID(),
+			ActionType:       apiAct.Identifier,
+			BalanceId:        apiAct.BalanceType,
+			Direction:        apiAct.Direction,
+			Weight:           apiAct.Weight,
+			ExpirationString: apiAct.ExpiryTime,
+			ExtraParameters:  apiAct.ExtraParameters,
+			Balance: &engine.Balance{
+				Uuid:          utils.GenUUID(),
+				Value:         apiAct.Units,
+				Weight:        apiAct.BalanceWeight,
+				DestinationId: apiAct.DestinationId,
+				RateSubject:   apiAct.RatingSubject,
+			},
+		}
+		storeActions[idx] = a
+	}
+	if err := self.AccountDb.SetActions(attrs.ActionsId, storeActions); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = OK
+	return nil
+}
+
+type AttrSetActionTimings struct {
+	ActionTimingsId string  // Profile id
+	Overwrite  bool         // If previously defined, will be overwritten
+	ActionTimings   []*ApiActionTiming // Set of actions this Actions profile will perform
+}
+
+type ApiActionTiming struct {
+	ActionsId string  // Actions id
+	Years     string // semicolon separated list of years this timing is valid on, *any or empty supported
+	Months    string // semicolon separated list of months this timing is valid on, *any or empty supported
+	MonthDays string // semicolon separated list of month's days this timing is valid on, *any or empty supported
+	WeekDays  string // semicolon separated list of week day names this timing is valid on *any or empty supported
+	Time      string // String representing the time this timing starts on, *asap supported
+	Weight    float64 // Binding's weight
+}
+
+func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"ActionTimingsId", "ActionTimings"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	for _, at := range attrs.ActionTimings {
+		requiredFields := []string{"ActionsId", "Time", "Weight"}
+		if missing := utils.MissingStructFields(at, requiredFields); len(missing) != 0 {
+			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.ActionsId, missing)
+		}
+	}
+	if !attrs.Overwrite {
+		if exists, err := self.AccountDb.ExistsData(engine.ACTION_TIMING_PREFIX, attrs.ActionTimingsId); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		} else if exists {
+			return errors.New(utils.ERR_EXISTS)
+		}
+	}
+	storeAtms := make(engine.ActionTimings, len(attrs.ActionTimings))
+	for idx, apiAtm := range attrs.ActionTimings {
+		if exists, err := self.AccountDb.ExistsData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		} else if !exists {
+			return fmt.Errorf("%s:%s", utils.ERR_BROKEN_REFERENCE, err.Error())
+		}
+		timing := new(engine.RITiming)
+		timing.Years.Parse(apiAtm.Years, ";")
+		timing.Months.Parse(apiAtm.Months, ";")
+		timing.MonthDays.Parse(apiAtm.MonthDays, ";")
+		timing.WeekDays.Parse(apiAtm.WeekDays, ";")
+		timing.StartTime = apiAtm.Time
+		at := &engine.ActionTiming{
+			Id:     utils.GenUUID(),
+			Tag:    attrs.ActionTimingsId,
+			Weight: apiAtm.Weight,
+			Timing: &engine.RateInterval{Timing:timing},
+			ActionsId: apiAtm.ActionsId,
+		}
+		storeAtms[idx] = at
+	}
+	if err := self.AccountDb.SetActionTimings(attrs.ActionTimingsId, storeAtms); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = OK
+	return nil
+}
+
 type AttrAddActionTrigger struct {
 	Tenant         string
 	Account        string

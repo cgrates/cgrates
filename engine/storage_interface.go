@@ -80,6 +80,7 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
+	ExistsData(string, string) (bool, error)
 	CacheAccounting([]string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
