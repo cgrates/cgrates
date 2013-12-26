@@ -22,8 +22,9 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/cgrates/cgrates/utils"
-	"strconv"
 	"time"
+	"fmt"
+	"strconv"
 )
 
 const (
@@ -49,7 +50,7 @@ const (
 
 type FSCdr map[string]string
 
-func (fsCdr FSCdr) New(body []byte) (utils.CDR, error) {
+func (fsCdr FSCdr) New(body []byte) (utils.RawCDR, error) {
 	fsCdr = make(map[string]string)
 	var tmp map[string]interface{}
 	var err error
@@ -124,8 +125,8 @@ func (fsCdr FSCdr) GetHangupTime() (t time.Time, err error) {
 }
 
 // Extracts duration as considered by the telecom switch
-func (fsCdr FSCdr) GetDuration() int64 {
-	dur, _ := strconv.ParseInt(fsCdr[FS_DURATION], 0, 64)
+func (fsCdr FSCdr) GetDuration() time.Duration {
+	dur, _ := utils.ParseDurationWithSecs(fsCdr[FS_DURATION])
 	return dur
 }
 
@@ -151,10 +152,18 @@ func (fsCdr FSCdr) Store() (result string, err error) {
 		return "", err
 	}
 	result += strconv.FormatInt(et.UnixNano(), 10) + "|"
-	result += strconv.FormatInt(fsCdr.GetDuration(), 10) + "|"
+	result += strconv.FormatInt(int64(fsCdr.GetDuration().Seconds()), 10) + "|"
 	return
 }
 
 func (fsCdr FSCdr) Restore(input string) error {
 	return errors.New("Not implemented")
+}
+
+// Used in extra mediation
+func(fsCdr FSCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.RatedCDR, error) {
+	if utils.IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
+		return nil, errors.New(fmt.Sprintf("%s:FieldName", utils.ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
+	}
+	return nil, nil
 }

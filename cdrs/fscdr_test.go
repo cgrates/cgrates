@@ -79,7 +79,7 @@ func TestCDRFields(t *testing.T) {
 	if answerTime.UTC() != expectedATime {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
-	if fsCdr.GetDuration() != 4 {
+	if fsCdr.GetDuration() != 4000000000 {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
 	cfg.CDRSExtraFields = []string{"sip_user_agent", "read_codec", "write_codec"}

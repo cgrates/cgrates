@@ -1,31 +1,31 @@
 package mediator
 
 import (
-//"testing"
+	"github.com/cgrates/cgrates/config"
+	"testing"
 )
 
-/*
-func TestIndexLengthDifferent(t *testing.T) {
-	m := new(Mediator)
-	objs := []*mediatorFieldIdxs{&m.directionIndexs, &m.torIndexs, &m.tenantIndexs, &m.subjectIndexs,
-		&m.accountIndexs, &m.timeStartIndexs, &m.durationIndexs, &m.uuidIndexs}
-	for _, o := range objs {
-		o.Load("1,2,3")
+func TestParseConfig(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	m := &Mediator{cgrCfg: cfg}
+	if err := m.parseConfig(); err != nil {
+		t.Error(err)
 	}
-	m.destinationIndexs.Load("4,5")
-	if m.validateIndexses() {
-		t.Error("Error checking length")
+	cfg.MediatorSubjectFields = []string{"subjFieldName1", "subjFieldName2", "subjFieldName3"}
+	if err := m.parseConfig(); err == nil {
+		t.Error("Failed to detect all fields matching reference one")
 	}
+	cfg.MediatorRunIds = []string{"run1", "run2"}
+	if err := m.parseConfig(); err == nil {
+		t.Error("Failed to detect all fields matching reference one")
+	}
+	cfg.MediatorSubjectFields = []string{"subjFieldName1", "subjFieldName2"}
+	cfg.MediatorReqTypeFields = []string{"reqtypeFieldName1", "reqTypeFieldName2"}
+	cfg.MediatorDirectionFields = []string{"dirFieldName1", "dirFieldName1"}
+	cfg.MediatorTenantFields = []string{"tenantFieldName1", "tenantFieldName2"}
+	cfg.MediatorTORFields = []string{"torFieldName1", "torFieldName2"}
+	cfg.MediatorAccountFields = []string{"acntFieldName1", "acntFieldName2"}
+	cfg.MediatorDestFields = []string{"destFieldName1", "destFieldName2"}
+	cfg.MediatorAnswerTimeFields = []string{"answerTimeFieldName1", "answerTimeFieldName1"}
+	cfg.MediatorDurationFields = []string{"durFieldName1", "durFieldName2"}
 }
-
-func TestLoad(t *testing.T) {
-	m := new(Mediator)
-	objs := []*mediatorFieldIdxs{&m.directionIndexs}
-	for _, o := range objs {
-		o.Load("1,2,3")
-	}
-	if len(m.directionIndexs) != 3 {
-		t.Errorf("Expected %v was %v", 3, len(m.directionIndexs))
-	}
-}
-*/

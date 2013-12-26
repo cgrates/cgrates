@@ -24,7 +24,8 @@ import (
 
 var PrimaryCdrFields []string = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, ANSWER_TIME, DURATION}
 
-type CDR interface {
+// RawCDR is the type containing all the original CDR fields, needs it as it is for later usage
+type RawCDR interface {
 	GetCgrId() string
 	GetAccId() string
 	GetCdrHost() string
@@ -37,6 +38,7 @@ type CDR interface {
 	GetTenant() string
 	GetReqType() string
 	GetAnswerTime() (time.Time, error)
-	GetDuration() int64
+	GetDuration() time.Duration
 	GetExtraFields() map[string]string //Stores extra CDR Fields
+	AsRatedCdr(string, string, string, string, string, string, string, string, string, string, []string, bool) (*RatedCDR, error) // Based on fields queried will return a particular instance of RatedCDR
 }

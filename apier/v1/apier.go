@@ -354,6 +354,7 @@ type AttrAddActionTrigger struct {
 	Account        string
 	Direction      string
 	BalanceId      string
+	ThresholdType  string
 	ThresholdValue float64
 	DestinationId  string
 	Weight         float64
@@ -369,6 +370,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		Id:             utils.GenUUID(),
 		BalanceId:      attr.BalanceId,
 		Direction:      attr.Direction,
+		ThresholdType:  attr.ThresholdType,
 		ThresholdValue: attr.ThresholdValue,
 		DestinationId:  attr.DestinationId,
 		Weight:         attr.Weight,

@@ -23,6 +23,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/mediator"
+	"github.com/cgrates/cgrates/utils"
 	"io/ioutil"
 	"net/http"
 )
@@ -39,7 +40,7 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 		storage.SetCdr(fsCdr)
 		go func() { //FS will not send us hangup_complete until we have send back the answer to CDR, so we need to handle mediation async
 			if cfg.CDRSMediator == "internal" {
-				medi.MediateDBCDR(fsCdr)
+				medi.MediateRawCDR(fsCdr)
 			} else {
 				//TODO: use the connection to mediator
 			}
@@ -50,10 +51,10 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
-	if cgrCdr, err := NewCgrCdrFromHttpReq(r); err == nil {
+	if cgrCdr, err := utils.NewCgrCdrFromHttpReq(r); err == nil {
 		storage.SetCdr(cgrCdr)
 		if cfg.CDRSMediator == "internal" {
-			errMedi := medi.MediateDBCDR(cgrCdr)
+			errMedi := medi.MediateRawCDR(cgrCdr)
 			if errMedi != nil {
 				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
 			}

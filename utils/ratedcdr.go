@@ -22,7 +22,31 @@ import (
 	"time"
 )
 
-// Rated CDR as extracted from StorDb. Kinda standard of internal CDR
+func NewRatedCDRFromRawCDR(rawcdr RawCDR) (*RatedCDR, error) {
+	var err error
+	rtCdr := new(RatedCDR)
+	rtCdr.CgrId = rawcdr.GetCgrId()
+	rtCdr.AccId = rawcdr.GetAccId()
+	rtCdr.CdrHost = rawcdr.GetCdrHost()
+	rtCdr.CdrSource = rawcdr.GetCdrSource()
+	rtCdr.ReqType = rawcdr.GetReqType()
+	rtCdr.Direction = rawcdr.GetDirection()
+	rtCdr.Tenant = rawcdr.GetTenant()
+	rtCdr.TOR = rawcdr.GetTOR()
+	rtCdr.Account = rawcdr.GetAccount()
+	rtCdr.Subject = rawcdr.GetSubject()
+	rtCdr.Destination = rawcdr.GetDestination()
+	if rtCdr.AnswerTime, err = rawcdr.GetAnswerTime(); err != nil {
+		return nil, err
+	}
+	rtCdr.Duration = time.Duration(rawcdr.GetDuration()) * time.Second
+	rtCdr.ExtraFields = rawcdr.GetExtraFields()
+	rtCdr.MediationRunId = DEFAULT_RUNID
+	rtCdr.Cost = -1
+	return rtCdr, nil
+}
+
+// Rated CDR as extracted from StorDb. Kinda standard of internal CDR, complies to CDR interface also
 type RatedCDR struct {
 	CgrId          string
 	AccId          string
@@ -36,13 +60,13 @@ type RatedCDR struct {
 	Subject        string
 	Destination    string
 	AnswerTime     time.Time
-	Duration       int64
+	Duration       time.Duration
 	ExtraFields    map[string]string
 	MediationRunId string
 	Cost           float64
 }
 
-// Methods maintaining CDR interface
+// Methods maintaining RawCDR interface
 
 func (ratedCdr *RatedCDR) GetCgrId() string {
         return ratedCdr.CgrId
@@ -92,10 +116,14 @@ func (ratedCdr *RatedCDR) GetAnswerTime() (time.Time, error) {
         return ratedCdr.AnswerTime, nil
 }
 
-func (ratedCdr *RatedCDR) GetDuration() int64 {
+func (ratedCdr *RatedCDR) GetDuration() time.Duration {
         return ratedCdr.Duration
 }
 
 func (ratedCdr *RatedCDR) GetExtraFields() map[string]string {
         return ratedCdr.ExtraFields
+}
+
+func (ratedCdr *RatedCDR) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*RatedCDR, error) {
+	return ratedCdr, nil
 }

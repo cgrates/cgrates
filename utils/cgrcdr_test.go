@@ -16,13 +16,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cdrs
+package utils
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
+	"reflect"
 )
 
 /*
@@ -30,10 +29,9 @@ curl --data "accid=asbfdsaf&cdrhost=192.168.1.1&reqtype=rated&direction=*out&ten
 */
 
 func TestCgrCdrFields(t *testing.T) {
-	cfg, _ = config.NewDefaultCGRConfig()
 	cgrCdr := CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
-		"account": "1001", "subject": "1001", "destination": "1002", "answer_time": "2013-11-07 08:42:26", "duration": "10", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
-	if cgrCdr.GetCgrId() != utils.FSCgrId("dsafdsaf") {
+		"account": "1001", "subject": "1001", "destination": "1002", "answer_time": "2013-11-07T08:42:26Z", "duration": "10", "field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+	if cgrCdr.GetCgrId() != FSCgrId("dsafdsaf") {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
 	if cgrCdr.GetAccId() != "dsafdsaf" {
@@ -60,7 +58,7 @@ func TestCgrCdrFields(t *testing.T) {
 	if cgrCdr.GetTenant() != "cgrates.org" {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
-	if cgrCdr.GetReqType() != utils.RATED {
+	if cgrCdr.GetReqType() != RATED {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
 	answerTime, _ := cgrCdr.GetAnswerTime()
@@ -68,7 +66,7 @@ func TestCgrCdrFields(t *testing.T) {
 	if answerTime.UTC() != expectedATime {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
-	if cgrCdr.GetDuration() != 10 {
+	if cgrCdr.GetDuration() != time.Duration(10)*time.Second {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
 	extraFields := cgrCdr.GetExtraFields()
@@ -78,5 +76,22 @@ func TestCgrCdrFields(t *testing.T) {
 	if extraFields["field_extr1"] != "val_extr1" {
 		t.Error("Error parsing extra fields: ", extraFields)
 	}
-
 }
+
+func TestCgrCdrAsRatedCdr(t *testing.T) {
+	cgrCdr := &CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "cdrsource": "source_test", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
+		"account": "1001", "subject": "1001", "destination": "1002", "answer_time": "2013-11-07T08:42:26Z", "duration": "10", 
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+	rtCdrOut, err := cgrCdr.AsRatedCdr("wholesale_run", "reqtype", "direction", "tenant", "tor", "account", "subject", "destination", "answer_time", "duration", []string{"field_extr1","fieldextr2"}, true)
+	if err != nil {
+		t.Error("Unexpected error received", err)
+	}
+	expctRatedCdr := &RatedCDR{CgrId: FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "source_test", ReqType: "rated", 
+		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: time.Unix(1383813746,0).UTC(),
+		Duration: 10000000000, ExtraFields: map[string]string{"field_extr1":"val_extr1", "fieldextr2": "valextr2"}, MediationRunId:"wholesale_run", Cost: -1}
+	if !reflect.DeepEqual(rtCdrOut, expctRatedCdr) {
+		t.Errorf("Received: %v, expected: %v", rtCdrOut, expctRatedCdr)
+	}
+}
+
+

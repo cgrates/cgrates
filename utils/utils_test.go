@@ -121,6 +121,45 @@ func TestRoundByMethodDown2(t *testing.T) {
 	}
 }
 
+func TestParseTimeDetectLayout(t *testing.T) {
+	tmStr := "2013-12-30T15:00:01Z"
+	expectedTime := time.Date(2013, 12, 30, 15, 0, 1, 0, time.UTC)
+	tm, err := ParseTimeDetectLayout(tmStr)
+	if err != nil {
+		t.Error(err)
+	} else if !tm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", tm, expectedTime)
+	}
+	_, err = ParseTimeDetectLayout(tmStr[1:])
+	if err == nil {
+		t.Errorf("Expecting error")
+	}
+	sqlTmStr := "2013-12-30 15:00:01"
+	sqlTm, err := ParseTimeDetectLayout(sqlTmStr)
+	if err != nil {
+		t.Error(err)
+	} else if !sqlTm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", sqlTm, expectedTime)
+	}
+	_, err = ParseTimeDetectLayout(sqlTmStr[1:])
+	if err == nil {
+		t.Errorf("Expecting error")
+	}
+	unixTmStr := "1388415601"
+	unixTm, err := ParseTimeDetectLayout(unixTmStr)
+	if err != nil {
+		t.Error(err)
+	} else if !unixTm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", unixTm, expectedTime)
+	}
+	_, err = ParseTimeDetectLayout(unixTmStr[1:])
+	if err == nil {
+		t.Errorf("Expecting error")
+	}
+}
+	
+	
+
 func TestParseDateUnix(t *testing.T) {
 	date, err := ParseDate("1375212790")
 	expected := time.Date(2013, 7, 30, 19, 33, 10, 0, time.UTC)

@@ -27,6 +27,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"regexp"
+	"errors"
 )
 
 // Returns first non empty string out of vals. Useful to extract defaults
@@ -95,6 +97,26 @@ func Round(x float64, prec int, method string) float64 {
 	}
 
 	return rounder / pow
+}
+
+func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
+	var nilTime time.Time
+	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+`)
+	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}`)
+	unixTimestampRule := regexp.MustCompile(`^\d{10}`)
+	switch {
+	case rfc3339Rule.MatchString(tmStr):
+		return time.Parse(time.RFC3339, tmStr)
+	case sqlRule.MatchString(tmStr):
+		return time.Parse("2006-01-02 15:04:05", tmStr)
+	case unixTimestampRule.MatchString(tmStr):
+		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
+			return nilTime, err
+		} else {
+			return time.Unix(tmstmp,0), nil
+		}
+	}
+	return nilTime, errors.New("Unsupported time format")
 }
 
 func ParseDate(date string) (expDate time.Time, err error) {

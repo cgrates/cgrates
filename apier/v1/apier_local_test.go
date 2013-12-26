@@ -804,7 +804,7 @@ func TestApierGetCacheStats(t *testing.T) {
 	}
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations:4, RatingPlans: 1, RatingProfiles: 2, Actions: 1}
-	var args AttrCacheStats
+	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
 	} else if !reflect.DeepEqual(expectedStats, rcvStats) {
@@ -973,7 +973,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	reply := ""
 	// Add balance to a previously known account
 	attrs := &AttrAddActionTrigger{Tenant: "cgrates.org", Account: "dan2", Direction: "*out", BalanceId: "*monetary",
-		ThresholdValue: 2, DestinationId: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
+		ThresholdType: "*min_balance", ThresholdValue: 2, DestinationId: "*any", Weight: 10, ActionsId: "WARN_VIA_HTTP"}
 	if err := rater.Call("ApierV1.AddTriggeredAction", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddTriggeredAction: ", err.Error())
 	} else if reply != "OK" {

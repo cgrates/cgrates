@@ -25,7 +25,16 @@ import (
 
 func TestRatedCDRInterfaces(t *testing.T) {
 	ratedCdr := new(RatedCDR)
-	var _ CDR = ratedCdr
+	var _ RawCDR = ratedCdr
+}
+
+func TestNewRatedCDRFromRawCDR(t *testing.T) {
+	cgrCdr := CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
+		"account": "1001", "subject": "1001", "destination": "1002", "answer_time": "2013-11-07T08:42:26Z", "duration": "10", 
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+	if _,err := NewRatedCDRFromRawCDR(cgrCdr); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestRatedCdrFields(t *testing.T) {

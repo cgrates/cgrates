@@ -687,7 +687,7 @@ func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 }
 func (self *SQLStorage) LogError(uuid, source, errstr string) (err error) { return }
 
-func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
+func (self *SQLStorage) SetCdr(cdr utils.RawCDR) (err error) {
 	// map[account:1001 direction:out orig_ip:172.16.1.1 tor:call accid:accid23 answer_time:2013-02-03 19:54:00 cdrsource:freeswitch_csv destination:+4986517174963 duration:62 reqtype:prepaid subject:1001 supplier:supplier1 tenant:cgrates.org]
 	startTime, err := cdr.GetAnswerTime()
 	if err != nil {
@@ -729,19 +729,18 @@ func (self *SQLStorage) SetCdr(cdr utils.CDR) (err error) {
 	return
 }
 
-func (self *SQLStorage) SetRatedCdr(cdr utils.CDR, runId string, cc *CallCost, extraInfo string) (err error) {
+func (self *SQLStorage) SetRatedCdr(ratedCdr *utils.RatedCDR, extraInfo string) (err error) {
 	// ToDo: Add here source and subject
 	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,subject,cost,extra_info) VALUES ('%s','%s','%s',%f,'%s')",
 		utils.TBL_RATED_CDRS,
-		cdr.GetCgrId(),
-		runId,
-		cdr.GetSubject(),
-		cc.Cost+cc.ConnectFee,
+		ratedCdr.CgrId,
+		ratedCdr.MediationRunId,
+		ratedCdr.Subject,
+		ratedCdr.Cost,
 		extraInfo))
 	if err != nil {
-		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
+		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %s", err.Error()))
 	}
-
 	return
 }
 
@@ -777,7 +776,7 @@ func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]*utils.Rat
 		}
 		storCdr := &utils.RatedCDR{
 			CgrId: cgrid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
-			TOR: tor, Account: account, Subject: subject, Destination: destination, AnswerTime: answerTime, Duration: duration,
+			TOR: tor, Account: account, Subject: subject, Destination: destination, AnswerTime: answerTime, Duration: time.Duration(duration),
 			ExtraFields: extraFieldsMp, MediationRunId: runid, Cost: cost,
 		}
 		cdrs = append(cdrs, storCdr)
