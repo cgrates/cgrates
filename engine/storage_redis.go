@@ -355,19 +355,19 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err
 	return
 }
 
-func (rs *RedisStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
+func (rs *RedisStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(cc)
 	if err != nil {
 		return
 	}
-	err = rs.db.Set(LOG_CALL_COST_PREFIX+source+"_"+uuid, result)
+	err = rs.db.Set(LOG_CALL_COST_PREFIX+source+runid+"_"+uuid, result)
 	return
 }
 
-func (rs *RedisStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
+func (rs *RedisStorage) GetCallCostLog(uuid, source, runid string) (cc *CallCost, err error) {
 	var values []byte
-	if values, err = rs.db.Get(LOG_CALL_COST_PREFIX + source + "_" + uuid); err == nil {
+	if values, err = rs.db.Get(LOG_CALL_COST_PREFIX + source + runid + "_" + uuid); err == nil {
 		err = rs.ms.Unmarshal(values, cc)
 	}
 	return
@@ -399,7 +399,7 @@ func (rs *RedisStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 	return
 }
 
-func (rs *RedisStorage) LogError(uuid, source, errstr string) (err error) {
-	err = rs.db.Set(LOG_ERR+source+"_"+uuid, []byte(errstr))
+func (rs *RedisStorage) LogError(uuid, source, runid, errstr string) (err error) {
+	err = rs.db.Set(LOG_ERR+source+runid+"_"+uuid, []byte(errstr))
 	return
 }

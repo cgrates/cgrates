@@ -18,7 +18,8 @@ CREATE TABLE `cost_details` (
   `connect_fee` DECIMAL(5,4) NOT NULL,
   `timespans` text,
   `source` varchar(64) NOT NULL,
+  `runid`  varchar(64) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `costid` (`cgrid`,`subject`)
+  UNIQUE KEY `costid` (`cgrid`,`subject`,`runid`)
 );
 

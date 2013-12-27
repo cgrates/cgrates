@@ -67,7 +67,7 @@ func (self *Mediator) parseConfig() error {
 // Retrive the cost from logging database
 func (self *Mediator) getCostsFromDB(cgrid string) (cc *engine.CallCost, err error) {
 	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
-		cc, err = self.logDb.GetCallCostLog(cgrid, engine.SESSION_MANAGER_SOURCE) //ToDo: What are we getting when there is no log?
+		cc, err = self.logDb.GetCallCostLog(cgrid, engine.SESSION_MANAGER_SOURCE, utils.DEFAULT_RUNID) //ToDo: What are we getting when there is no log?
 		if cc != nil {                                                                     // There were no errors, chances are that we got what we are looking for
 			break
 		}
@@ -101,10 +101,10 @@ func (self *Mediator) getCostsFromRater(cdr *utils.RatedCDR) (*engine.CallCost, 
 		err = self.connector.GetCost(cd, cc)
 	}
 	if err != nil {
-		self.logDb.LogError(cdr.CgrId, engine.MEDIATOR_SOURCE, err.Error())
+		self.logDb.LogError(cdr.CgrId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, err.Error())
 	} else {
 		// If the mediator calculated a price it will write it to logdb
-		self.logDb.LogCallCost(cdr.AccId, engine.MEDIATOR_SOURCE, cc)
+		self.logDb.LogCallCost(cdr.AccId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, cc)
 	}
 	return cc, err
 }

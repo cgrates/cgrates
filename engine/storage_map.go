@@ -266,14 +266,14 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionTimings, err e
 	return
 }
 
-func (ms *MapStorage) LogCallCost(uuid, source string, cc *CallCost) error {
+func (ms *MapStorage) LogCallCost(uuid, source, runid string, cc *CallCost) error {
 	result, err := ms.ms.Marshal(cc)
-	ms.dict[LOG_CALL_COST_PREFIX+source+"_"+uuid] = result
+	ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+uuid] = result
 	return err
 }
 
-func (ms *MapStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
-	if values, ok := ms.dict[LOG_CALL_COST_PREFIX+source+"_"+uuid]; ok {
+func (ms *MapStorage) GetCallCostLog(uuid, source, runid string) (cc *CallCost, err error) {
+	if values, ok := ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+uuid]; ok {
 		err = ms.ms.Unmarshal(values, &cc)
 	} else {
 		return nil, errors.New("not found")
@@ -307,7 +307,7 @@ func (ms *MapStorage) LogActionTiming(source string, at *ActionTiming, as Action
 	return
 }
 
-func (ms *MapStorage) LogError(uuid, source, errstr string) (err error) {
-	ms.dict[LOG_ERR+source+"_"+uuid] = []byte(errstr)
+func (ms *MapStorage) LogError(uuid, source, runid, errstr string) (err error) {
+	ms.dict[LOG_ERR+source+runid+"_"+uuid] = []byte(errstr)
 	return nil
 }

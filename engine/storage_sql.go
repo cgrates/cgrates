@@ -636,7 +636,7 @@ func (self *SQLStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err error) {
+func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (err error) {
 	//ToDo: Add cgrid to logCallCost
 	if self.Db == nil {
 		//timespans.Logger.Warning("Cannot write log to database.")
@@ -646,7 +646,7 @@ func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err erro
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source )VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source, runid)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s','%s')",
 		utils.TBL_COST_DETAILS,
 		utils.FSCgrId(uuid),
 		uuid,
@@ -659,15 +659,16 @@ func (self *SQLStorage) LogCallCost(uuid, source string, cc *CallCost) (err erro
 		cc.Cost,
 		cc.ConnectFee,
 		tss,
-		source))
+		source,
+		runid))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
 	}
 	return
 }
 
-func (self *SQLStorage) GetCallCostLog(cgrid, source string) (cc *CallCost, err error) {
-	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s'", utils.TBL_COST_DETAILS, cgrid, source))
+func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
+	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s'", utils.TBL_COST_DETAILS, cgrid, source, runid))
 	var accid, src string
 	var timespansJson string
 	cc = &CallCost{Cost: -1}
@@ -685,7 +686,7 @@ func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger,
 func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Actions) (err error) {
 	return
 }
-func (self *SQLStorage) LogError(uuid, source, errstr string) (err error) { return }
+func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error) { return }
 
 func (self *SQLStorage) SetCdr(cdr utils.RawCDR) (err error) {
 	// map[account:1001 direction:out orig_ip:172.16.1.1 tor:call accid:accid23 answer_time:2013-02-03 19:54:00 cdrsource:freeswitch_csv destination:+4986517174963 duration:62 reqtype:prepaid subject:1001 supplier:supplier1 tenant:cgrates.org]

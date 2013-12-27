@@ -137,7 +137,7 @@ func (s *Session) SaveOperations() {
 		if s.sessionManager.GetDbLogger() == nil {
 			engine.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
 		}
-		s.sessionManager.GetDbLogger().LogCallCost(s.uuid, engine.SESSION_MANAGER_SOURCE, firstCC)
+		s.sessionManager.GetDbLogger().LogCallCost(s.uuid, engine.SESSION_MANAGER_SOURCE, utils.DEFAULT_RUNID, firstCC)
 		engine.Logger.Debug(fmt.Sprintf("<SessionManager> End of call, having costs: %v", firstCC.String()))
 	}()
 }
