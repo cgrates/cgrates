@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"net/http"
-	"time"
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
+	"strings"
 )
 
 func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
@@ -105,10 +106,11 @@ func (cgrCdr CgrCdr) GetDuration() time.Duration {
 }
 
 // Used in mediation, fieldsMandatory marks whether missing field out of request represents error or can be ignored
-func(cgrCdr CgrCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*RatedCDR, error) {
+// If the fields in parameters start with ^ their value is considered instead of dynamically retrieving it from CDR
+func (cgrCdr CgrCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*RatedCDR, error) {
 	if IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
 		return nil, errors.New(fmt.Sprintf("%s:FieldName", ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
-		}
+	}
 	var err error
 	var hasKey bool
 	var aTimeStr, durStr string
@@ -130,37 +132,57 @@ func(cgrCdr CgrCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 	if rtCdr.CdrSource, hasKey = cgrCdr[CDRSOURCE]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, CDRSOURCE))
 	}
-	if rtCdr.ReqType, hasKey = cgrCdr[reqTypeFld]; !hasKey && fieldsMandatory {
+	if strings.HasPrefix(reqTypeFld, STATIC_VALUE_PREFIX) { // Values starting with prefix are not dynamically populated
+		rtCdr.ReqType = reqTypeFld[1:]
+	} else if rtCdr.ReqType, hasKey = cgrCdr[reqTypeFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, reqTypeFld))
 	}
-	if rtCdr.Direction, hasKey = cgrCdr[directionFld]; !hasKey && fieldsMandatory {
+	if strings.HasPrefix(directionFld, STATIC_VALUE_PREFIX) {
+		rtCdr.Direction = directionFld[1:]
+	} else if rtCdr.Direction, hasKey = cgrCdr[directionFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, directionFld))
 	}
-	if rtCdr.Tenant, hasKey = cgrCdr[tenantFld]; !hasKey && fieldsMandatory {
+	if strings.HasPrefix(tenantFld, STATIC_VALUE_PREFIX) {
+		rtCdr.Tenant = tenantFld[1:]
+	} else if rtCdr.Tenant, hasKey = cgrCdr[tenantFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, tenantFld))
 	}
-	if rtCdr.TOR, hasKey = cgrCdr[torFld]; !hasKey && fieldsMandatory {
+	if strings.HasPrefix(torFld, STATIC_VALUE_PREFIX) {
+		rtCdr.TOR = torFld[1:]
+	} else if rtCdr.TOR, hasKey = cgrCdr[torFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, torFld))
 	}
-	if rtCdr.Account, hasKey = cgrCdr[accountFld]; !hasKey && fieldsMandatory {
+	if strings.HasPrefix(accountFld, STATIC_VALUE_PREFIX) {
+		rtCdr.Account = accountFld[1:]
+	} else if rtCdr.Account, hasKey = cgrCdr[accountFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, accountFld))
 	}
-	if rtCdr.Subject, hasKey = cgrCdr[subjectFld]; !hasKey && fieldsMandatory {
+	if strings.HasPrefix(subjectFld, STATIC_VALUE_PREFIX) {
+		rtCdr.Subject = subjectFld[1:]
+	} else if rtCdr.Subject, hasKey = cgrCdr[subjectFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, subjectFld))
 	}
-	if rtCdr.Destination, hasKey = cgrCdr[destFld]; !hasKey && fieldsMandatory {
+	if strings.HasPrefix(destFld, STATIC_VALUE_PREFIX) {
+		rtCdr.Destination = destFld[1:]
+	} else if rtCdr.Destination, hasKey = cgrCdr[destFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, destFld))
 	}
-	if aTimeStr, hasKey = cgrCdr[answerTimeFld]; !hasKey && fieldsMandatory {
+	if aTimeStr, hasKey = cgrCdr[answerTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(answerTimeFld, STATIC_VALUE_PREFIX) {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, answerTimeFld))
 	} else {
+		if strings.HasPrefix(answerTimeFld, STATIC_VALUE_PREFIX) {
+			aTimeStr = answerTimeFld[1:]
+		}
 		if rtCdr.AnswerTime, err = ParseTimeDetectLayout(aTimeStr); err != nil && fieldsMandatory {
 			return nil, err
 		}
 	}
-	if durStr, hasKey = cgrCdr[durationFld]; !hasKey && fieldsMandatory { 
+	if durStr, hasKey = cgrCdr[durationFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(durationFld, STATIC_VALUE_PREFIX){
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, durationFld))
 	} else {
+		if strings.HasPrefix(durationFld, STATIC_VALUE_PREFIX) {
+			durStr = durationFld[1:]
+		}
 		if rtCdr.Duration, err = ParseDurationWithSecs(durStr); err != nil && fieldsMandatory {
 			return nil, err
 		}

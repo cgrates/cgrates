@@ -22,13 +22,13 @@ import (
 	"crypto/rand"
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"regexp"
-	"errors"
 )
 
 // Returns first non empty string out of vals. Useful to extract defaults
@@ -113,8 +113,10 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
 			return nilTime, err
 		} else {
-			return time.Unix(tmstmp,0), nil
+			return time.Unix(tmstmp, 0), nil
 		}
+	case len(tmStr) == 0: // Time probably missing from request
+		return nilTime, nil
 	}
 	return nilTime, errors.New("Unsupported time format")
 }

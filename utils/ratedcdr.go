@@ -39,7 +39,7 @@ func NewRatedCDRFromRawCDR(rawcdr RawCDR) (*RatedCDR, error) {
 	if rtCdr.AnswerTime, err = rawcdr.GetAnswerTime(); err != nil {
 		return nil, err
 	}
-	rtCdr.Duration = time.Duration(rawcdr.GetDuration()) * time.Second
+	rtCdr.Duration = rawcdr.GetDuration()
 	rtCdr.ExtraFields = rawcdr.GetExtraFields()
 	rtCdr.MediationRunId = DEFAULT_RUNID
 	rtCdr.Cost = -1
@@ -69,59 +69,59 @@ type RatedCDR struct {
 // Methods maintaining RawCDR interface
 
 func (ratedCdr *RatedCDR) GetCgrId() string {
-        return ratedCdr.CgrId
+	return ratedCdr.CgrId
 }
 
 func (ratedCdr *RatedCDR) GetAccId() string {
-        return ratedCdr.AccId
+	return ratedCdr.AccId
 }
 
 func (ratedCdr *RatedCDR) GetCdrHost() string {
-        return ratedCdr.CdrHost
+	return ratedCdr.CdrHost
 }
 
 func (ratedCdr *RatedCDR) GetCdrSource() string {
-        return ratedCdr.CdrSource
+	return ratedCdr.CdrSource
 }
 
 func (ratedCdr *RatedCDR) GetDirection() string {
-        return ratedCdr.Direction
+	return ratedCdr.Direction
 }
 
 func (ratedCdr *RatedCDR) GetSubject() string {
-        return ratedCdr.Subject
+	return ratedCdr.Subject
 }
 
 func (ratedCdr *RatedCDR) GetAccount() string {
-        return ratedCdr.Account
+	return ratedCdr.Account
 }
 
 func (ratedCdr *RatedCDR) GetDestination() string {
-        return ratedCdr.Destination
+	return ratedCdr.Destination
 }
 
 func (ratedCdr *RatedCDR) GetTOR() string {
-        return ratedCdr.TOR
+	return ratedCdr.TOR
 }
 
 func (ratedCdr *RatedCDR) GetTenant() string {
-        return ratedCdr.Tenant
+	return ratedCdr.Tenant
 }
 
 func (ratedCdr *RatedCDR) GetReqType() string {
-        return ratedCdr.ReqType
+	return ratedCdr.ReqType
 }
 
 func (ratedCdr *RatedCDR) GetAnswerTime() (time.Time, error) {
-        return ratedCdr.AnswerTime, nil
+	return ratedCdr.AnswerTime, nil
 }
 
 func (ratedCdr *RatedCDR) GetDuration() time.Duration {
-        return ratedCdr.Duration
+	return ratedCdr.Duration
 }
 
 func (ratedCdr *RatedCDR) GetExtraFields() map[string]string {
-        return ratedCdr.ExtraFields
+	return ratedCdr.ExtraFields
 }
 
 func (ratedCdr *RatedCDR) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*RatedCDR, error) {

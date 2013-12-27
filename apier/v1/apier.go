@@ -21,14 +21,11 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"strings"
-	"time"
+	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/cache2go"
-
 	"path"
 )
 
@@ -186,11 +183,11 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 }
 
 type AttrSetRatingProfile struct {
-	Tenant                string                // Tenant's Id
-	TOR                   string                // TypeOfRecord
-	Direction             string                // Traffic direction, OUT is the only one supported for now
-	Subject               string                // Rating subject, usually the same as account
-	Overwrite             bool                  // Overwrite if exists
+	Tenant                string                      // Tenant's Id
+	TOR                   string                      // TypeOfRecord
+	Direction             string                      // Traffic direction, OUT is the only one supported for now
+	Subject               string                      // Rating subject, usually the same as account
+	Overwrite             bool                        // Overwrite if exists
 	RatingPlanActivations []*utils.TPRatingActivation // Activate rate profiles at specific time
 }
 
@@ -215,17 +212,17 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	}
 	rpfl := &engine.RatingProfile{Id: keyId, RatingPlanActivations: make(engine.RatingPlanActivations, len(attrs.RatingPlanActivations))}
 	for idx, ra := range attrs.RatingPlanActivations {
-			at, err := utils.ParseDate(ra.ActivationTime)
-			if err != nil {
-				return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ERR_SERVER_ERROR, ra.ActivationTime))
-			}
-			if exists, err := self.RatingDb.ExistsData(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
-				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-			} else if !exists {
-				return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ERR_NOT_FOUND, ra.RatingPlanId))
-			}
-			rpfl.RatingPlanActivations[idx] = &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
-					FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, ra.FallbackSubjects)}
+		at, err := utils.ParseDate(ra.ActivationTime)
+		if err != nil {
+			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ERR_SERVER_ERROR, ra.ActivationTime))
+		}
+		if exists, err := self.RatingDb.ExistsData(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		} else if !exists {
+			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ERR_NOT_FOUND, ra.RatingPlanId))
+		}
+		rpfl.RatingPlanActivations[idx] = &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
+			FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, ra.FallbackSubjects)}
 	}
 	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -236,7 +233,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 
 type AttrSetActions struct {
 	ActionsId string            // Actions id
-	Overwrite  bool         // If previously defined, will be overwritten
+	Overwrite bool              // If previously defined, will be overwritten
 	Actions   []*utils.TPAction // Set of actions this Actions profile will perform
 }
 
@@ -288,18 +285,18 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 }
 
 type AttrSetActionTimings struct {
-	ActionTimingsId string  // Profile id
-	Overwrite  bool         // If previously defined, will be overwritten
+	ActionTimingsId string             // Profile id
+	Overwrite       bool               // If previously defined, will be overwritten
 	ActionTimings   []*ApiActionTiming // Set of actions this Actions profile will perform
 }
 
 type ApiActionTiming struct {
 	ActionsId string  // Actions id
-	Years     string // semicolon separated list of years this timing is valid on, *any or empty supported
-	Months    string // semicolon separated list of months this timing is valid on, *any or empty supported
-	MonthDays string // semicolon separated list of month's days this timing is valid on, *any or empty supported
-	WeekDays  string // semicolon separated list of week day names this timing is valid on *any or empty supported
-	Time      string // String representing the time this timing starts on, *asap supported
+	Years     string  // semicolon separated list of years this timing is valid on, *any or empty supported
+	Months    string  // semicolon separated list of months this timing is valid on, *any or empty supported
+	MonthDays string  // semicolon separated list of month's days this timing is valid on, *any or empty supported
+	WeekDays  string  // semicolon separated list of week day names this timing is valid on *any or empty supported
+	Time      string  // String representing the time this timing starts on, *asap supported
 	Weight    float64 // Binding's weight
 }
 
@@ -334,10 +331,10 @@ func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string)
 		timing.WeekDays.Parse(apiAtm.WeekDays, ";")
 		timing.StartTime = apiAtm.Time
 		at := &engine.ActionTiming{
-			Id:     utils.GenUUID(),
-			Tag:    attrs.ActionTimingsId,
-			Weight: apiAtm.Weight,
-			Timing: &engine.RateInterval{Timing:timing},
+			Id:        utils.GenUUID(),
+			Tag:       attrs.ActionTimingsId,
+			Weight:    apiAtm.Weight,
+			Timing:    &engine.RateInterval{Timing: timing},
 			ActionsId: apiAtm.ActionsId,
 		}
 		storeAtms[idx] = at
@@ -513,8 +510,6 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 	return nil
 }
 
-
-
 func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.CacheStats) error {
 	cs := new(utils.CacheStats)
 	cs.Destinations = cache2go.CountEntries(engine.DESTINATION_PREFIX)
@@ -525,33 +520,34 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	return nil
 }
 
-func (self *ApierV1) GetCachedItemAge(attrs utils.AttrCachedItemAge, reply *time.Duration) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Category", "ItemId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge) error {
+	if len(itemId) == 0 {
+		return fmt.Errorf("%s:ItemId", utils.ERR_MANDATORY_IE_MISSING)
 	}
-	cacheKey := ""
-	switch attrs.Category {
-	case strings.TrimSuffix(utils.DESTINATIONS_CSV, ".csv"):
-		cacheKey = engine.DESTINATION_PREFIX + attrs.ItemId
-	case strings.TrimSuffix(utils.RATING_PLANS_CSV, ".csv"):
-		cacheKey = engine.RATING_PLAN_PREFIX + attrs.ItemId
-	case strings.TrimSuffix(utils.RATING_PROFILES_CSV, ".csv"):
-		cacheKey = engine.RATING_PROFILE_PREFIX + attrs.ItemId
-	case strings.TrimSuffix(utils.ACTIONS_CSV, ".csv"):
-		cacheKey = engine.ACTION_PREFIX + attrs.ItemId
+	cachedItemAge := new(utils.CachedItemAge)
+	var found bool
+	for idx, cacheKey := range []string{ engine.DESTINATION_PREFIX+itemId, engine.RATING_PLAN_PREFIX+itemId, engine.RATING_PROFILE_PREFIX+itemId, 
+		engine.ACTION_PREFIX+itemId} {
+		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
+			found = true
+			switch idx {
+			case 0:
+				cachedItemAge.Destination = age
+			case 1:
+				cachedItemAge.RatingPlan = age
+			case 2:
+				cachedItemAge.RatingProfile = age
+			case 3:
+				cachedItemAge.Action = age
+			}
+		}
 	}
-	if len(cacheKey) == 0 {
-		return fmt.Errorf("%s:Category", utils.ERR_MANDATORY_IE_MISSING)
+	if !found {
+		return errors.New(utils.ERR_NOT_FOUND)
 	}
-	//engine.Logger.Debug(fmt.Sprintf("Will query cache age with: %s", cacheKey))
-	if age, err := cache2go.GetKeyAge(cacheKey); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else {
-		*reply = age
-	}
+	*reply = *cachedItemAge
 	return nil
 }
-
 
 type AttrLoadTPFromFolder struct {
 	FolderPath string // Take files from folder absolute path

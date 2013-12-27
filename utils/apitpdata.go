@@ -287,14 +287,20 @@ type AttrCacheStats struct { // Add in the future filters here maybe so we avoid
 }
 
 type CacheStats struct {
-	Destinations    int
-	RatingPlans     int
-	RatingProfiles  int
-	Actions         int
+	Destinations   int
+	RatingPlans    int
+	RatingProfiles int
+	Actions        int
 }
 
 type AttrCachedItemAge struct {
-	Category        string // Item's category, same name as .csv files without extension
-	ItemId          string // Item's identity tag
+	Category string // Item's category, same name as .csv files without extension
+	ItemId   string // Item's identity tag
 }
 
+type CachedItemAge struct {
+	Destination    time.Duration
+	RatingPlan     time.Duration
+	RatingProfile  time.Duration
+	Action         time.Duration
+}

@@ -21,10 +21,10 @@ package cdrs
 import (
 	"encoding/json"
 	"errors"
-	"github.com/cgrates/cgrates/utils"
-	"time"
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"strconv"
+	"time"
 )
 
 const (
@@ -161,7 +161,7 @@ func (fsCdr FSCdr) Restore(input string) error {
 }
 
 // Used in extra mediation
-func(fsCdr FSCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.RatedCDR, error) {
+func (fsCdr FSCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.RatedCDR, error) {
 	if utils.IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
 		return nil, errors.New(fmt.Sprintf("%s:FieldName", utils.ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
 	}

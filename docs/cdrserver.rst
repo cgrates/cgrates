@@ -20,6 +20,7 @@ Primary fields: the fields which CGRateS needs for it's own operations and are s
 
 - accid: represents the unique accounting id given by the switch generating the CDR
 - cdrhost: represents the ip of the host generating the CDR
+- cdrsource: formally identifies the source of the CDR
 - reqtype: matching the supported request types by the CGRateS
 - direction: matching the supported direction identifiers of the CGRateS
 - tenant: tenant whom this call belongs
@@ -27,7 +28,7 @@ Primary fields: the fields which CGRateS needs for it's own operations and are s
 - account: account id (accounting subsystem) the record should be attached to
 - subject: rating subject (rating subsystem) this call should be attached to
 - destination: destination to be charged
-- time_answer: time of the record (in case of tor=call this would be answer time of the call). This will arive as either unix timestamp or datetime RFC3339 compatible.
+- answer_time: time of the record (in case of tor=call this would be answer time of the call). Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
 - duration: used in case of tor=call like, representing the total duration of the call
 
 Extra fields: any field coming in via the http request and not a member of primary fields list. These fields are stored as json encoded into *cdrs_extra* table of storDb.
@@ -35,7 +36,7 @@ Extra fields: any field coming in via the http request and not a member of prima
 Example of sample CDR generated simply using curl:
 ::
 
- curl --data "accid=asbfdsaf&cdrhost=192.168.1.1&reqtype=rated&direction=*out&tenant=cgrates.org&tor=call&account=1001&subject=1001&destination=1002&time_answer=1383813746&duration=10&sip_user=Jitsi" http://ipbxdev:2022/cgr
+ curl --data "curl --data "accid=iiaasbfdsaf&cdrhost=192.168.1.1&cdrsource=curl_cdr&reqtype=rated&direction=*out&tenant=192.168.56.66&tor=call&account=dan&subject=dan&destination=%2B4986517174963&answer_time=1383813746&duration=1&sip_user=Jitsi&subject2=1003" http://127.0.0.1:2022/cgr
 
 
 CDR-FS_JSON 

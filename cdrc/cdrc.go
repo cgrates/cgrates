@@ -27,8 +27,8 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/howeyc/fsnotify"
-	"io/ioutil"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -190,7 +190,7 @@ func (self *Cdrc) processFile(filePath string) error {
 	}
 	// Finished with file, move it to processed folder
 	newPath := path.Join(self.cgrCfg.CdrcCdrOutDir, fn)
-	if err:= os.Rename(filePath, newPath); err != nil {
+	if err := os.Rename(filePath, newPath); err != nil {
 		engine.Logger.Err(err.Error())
 		return err
 	}

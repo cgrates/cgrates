@@ -690,11 +690,7 @@ func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error)
 
 func (self *SQLStorage) SetCdr(cdr utils.RawCDR) (err error) {
 	// map[account:1001 direction:out orig_ip:172.16.1.1 tor:call accid:accid23 answer_time:2013-02-03 19:54:00 cdrsource:freeswitch_csv destination:+4986517174963 duration:62 reqtype:prepaid subject:1001 supplier:supplier1 tenant:cgrates.org]
-	startTime, err := cdr.GetAnswerTime()
-	if err != nil {
-		Logger.Info(err.Error())
-		return err
-	}
+	startTime, _ := cdr.GetAnswerTime() // Ignore errors, we want to store the cdr no matter what
 	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s VALUES (NULL,'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
 		utils.TBL_CDRS_PRIMARY,
 		cdr.GetCgrId(),

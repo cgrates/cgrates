@@ -73,7 +73,6 @@ func (self *CmdGetCost) FromArgs(args []string) error {
 	callDur, err := utils.ParseDurationWithSecs(args[7])
 	if err != nil {
 		fmt.Println("\n\tExample durations: 60s for 60 seconds, 25m for 25minutes, 1m25s for one minute and 25 seconds\n")
-		return fmt.Errorf(self.Usage(""))
 	}
 	self.rpcParams.TOR = args[2]
 	self.rpcParams.Tenant = args[3]

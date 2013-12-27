@@ -29,9 +29,8 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
-	"strings"
-	"time"
 	"testing"
+	"time"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
@@ -750,7 +749,7 @@ func TestApierSetRatingProfile(t *testing.T) {
 		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
 	}
 	// Calling the second time should raise EXISTS
-	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err == nil || err.Error() != "EXISTS"{
+	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err == nil || err.Error() != "EXISTS" {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 }
@@ -803,7 +802,7 @@ func TestApierGetCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations:4, RatingPlans: 1, RatingProfiles: 2, Actions: 1}
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 1, RatingProfiles: 2, Actions: 1}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -816,18 +815,19 @@ func TestApierGetCachedItemAge(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var rcvAge *time.Duration
-	qryData := &utils.AttrCachedItemAge{Category: strings.TrimSuffix(utils.DESTINATIONS_CSV, ".csv"), ItemId: "+4917"} // Destinations are cached per prefix not id
-	if err := rater.Call("ApierV1.GetCachedItemAge", qryData, &rcvAge); err != nil {
+	var rcvAge *utils.CachedItemAge
+	if err := rater.Call("ApierV1.GetCachedItemAge", "+4917", &rcvAge); err != nil {
 		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if *rcvAge > time.Duration(2)*time.Second {
+	} else if rcvAge.Destination > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
 	}
-	qryData = &utils.AttrCachedItemAge{Category: strings.TrimSuffix(utils.RATING_PLANS_CSV, ".csv"), ItemId: "RETAIL1"}
-	if err := rater.Call("ApierV1.GetCachedItemAge", qryData, &rcvAge); err != nil {
+	if err := rater.Call("ApierV1.GetCachedItemAge", "RETAIL1", &rcvAge); err != nil {
 		t.Error("Got error on ApierV1.GetCachedItemAge: ", err.Error())
-	} else if *rcvAge > time.Duration(2)*time.Second {
+	} else if rcvAge.RatingPlan > time.Duration(2)*time.Second {
 		t.Errorf("Cache too old: %d", rcvAge)
+	}
+	if err := rater.Call("ApierV1.GetCachedItemAge", "DUMMY_DATA", &rcvAge); err == nil || err.Error() != "NOT_FOUND" {
+		t.Error("Did not get NOT_FOUND: ", err.Error())
 	}
 }
 
@@ -933,8 +933,8 @@ func TestApierSetActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	act1 := &utils.TPAction {Identifier: engine.TOPUP_RESET, BalanceType: engine.CREDIT, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}
-	attrs1 := &AttrSetActions{ActionsId: "ACTS_1", Actions : []*utils.TPAction{act1}}
+	act1 := &utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: engine.CREDIT, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}
+	attrs1 := &AttrSetActions{ActionsId: "ACTS_1", Actions: []*utils.TPAction{act1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err != nil {
 		t.Error("Got error on ApierV1.SetActions: ", err.Error())
@@ -942,7 +942,7 @@ func TestApierSetActions(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetActions received: %s", reply1)
 	}
 	// Calling the second time should raise EXISTS
-	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err == nil || err.Error() != "EXISTS"{
+	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err == nil || err.Error() != "EXISTS" {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 }
@@ -952,7 +952,7 @@ func TestApierSetActionTimings(t *testing.T) {
 		return
 	}
 	atm1 := &ApiActionTiming{ActionsId: "ACTS_1", MonthDays: "1", Time: "00:00:00", Weight: 20.0}
-	atms1 := &AttrSetActionTimings{ ActionTimingsId: "ATMS_1", ActionTimings: []*ApiActionTiming{atm1} }
+	atms1 := &AttrSetActionTimings{ActionTimingsId: "ATMS_1", ActionTimings: []*ApiActionTiming{atm1}}
 	reply1 := ""
 	if err := rater.Call("ApierV1.SetActionTimings", atms1, &reply1); err != nil {
 		t.Error("Got error on ApierV1.SetActionTimings: ", err.Error())
@@ -960,7 +960,7 @@ func TestApierSetActionTimings(t *testing.T) {
 		t.Errorf("Calling ApierV1.SetActionTimings received: %s", reply1)
 	}
 	// Calling the second time should raise EXISTS
-	if err := rater.Call("ApierV1.SetActionTimings", atms1, &reply1); err == nil || err.Error() != "EXISTS"{
+	if err := rater.Call("ApierV1.SetActionTimings", atms1, &reply1); err == nil || err.Error() != "EXISTS" {
 		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 }

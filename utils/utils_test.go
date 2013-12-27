@@ -157,8 +157,6 @@ func TestParseTimeDetectLayout(t *testing.T) {
 		t.Errorf("Expecting error")
 	}
 }
-	
-	
 
 func TestParseDateUnix(t *testing.T) {
 	date, err := ParseDate("1375212790")
