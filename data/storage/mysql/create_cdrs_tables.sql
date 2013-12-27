@@ -14,7 +14,7 @@ CREATE TABLE cdrs_primary (
   subject varchar(128) NOT NULL,
   destination varchar(128) NOT NULL,
   answer_time datetime NOT NULL,
-  duration int NOT NULL,
+  duration bigint NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY cgrid (cgrid)
 );

@@ -51,7 +51,7 @@ func (s *Scheduler) Loop() {
 			sort.Sort(s.queue)
 		} else {
 			d := a0.GetNextStartTime().Sub(now)
-			engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
+			// engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
