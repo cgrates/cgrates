@@ -39,6 +39,18 @@ const (
 	FS       = "freeswitch"
 )
 
+var cgrCfg *CGRConfig // will be shared
+
+// Used to retrieve system configuration from other packages
+func CgrConfig() *CGRConfig {
+	return cgrCfg
+}
+
+// Used to set system configuration from other places
+func SetCgrConfig(cfg *CGRConfig) {
+	cgrCfg = cfg
+}
+
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
 	RatingDBType             string

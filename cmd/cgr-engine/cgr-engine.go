@@ -316,6 +316,7 @@ func main() {
 		engine.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
 		return
 	}
+	config.SetCgrConfig(cfg) // Share the config object
 	// some consitency checks
 	errCfg := checkConfigSanity()
 	if errCfg != nil {

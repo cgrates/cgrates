@@ -27,6 +27,16 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestConfigSharing(t *testing.T) {
+	cfg,_ := NewDefaultCGRConfig()
+	cfg.RPCEncoding = utils.MSGPACK
+	SetCgrConfig(cfg)
+	cfgReturn := CgrConfig()
+	if !reflect.DeepEqual(cfgReturn, cfg) {
+		t.Errorf("Retrieved %v, Expected %v", cfgReturn, cfg)
+	}
+}
+
 // Make sure defaults did not change by mistake
 func TestDefaults(t *testing.T) {
 	cfg := &CGRConfig{}
