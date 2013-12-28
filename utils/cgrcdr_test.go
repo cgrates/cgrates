@@ -101,7 +101,7 @@ func TestCgrCdrAsRatedCdr(t *testing.T) {
 		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Duration: time.Duration(12)*time.Second, 
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, MediationRunId: "wholesale_run", Cost: -1}
 	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
-		t.Errorf("Received: %v, expected: %v", rtCdrOut, expctRatedCdr)
+		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
 	}
 	_, err = cgrCdr.AsRatedCdr("wholesale_run", "dummy_header", "direction", "tenant", "tor", "account", "subject", "destination", "answer_time", "duration", []string{"field_extr1", "fieldextr2"}, true)
 	if err == nil {
