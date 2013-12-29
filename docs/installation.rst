@@ -32,7 +32,7 @@ Since on Debian we use Daemontools_ to control the CGRateS another way to check 
 3.2. Using source
 -----------------
 
-After the go environment is installed_ and configured_ issue the following commands:
+After the go environment is installed_ (at least go1.2) and configured_ issue the following commands:
 ::
 
         go get github.com/cgrates/cgrates
@@ -41,6 +41,7 @@ This command will install the trunk version of CGRateS together with all the nec
 
 .. _installed: http://golang.org/doc/install
 .. _configured: http://golang.org/doc/code.html
+
 
 3.3. Post-install
 -----------------

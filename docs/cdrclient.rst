@@ -3,19 +3,21 @@ CDR Client (cdrc)
 
 It's role is to gather offline CDRs and post them to CDR Server(CDRS) component.
 
-Controlled within *cdrc* section of the configuration file.
-
 Part of the *cgr-engine*, can be started on a remote server as standalone component.
 
+Controlled within *cdrc* section of the configuration file.
+
 Has two modes of operation:
+
 - Automated: CDR file processing is triggered on file creation/move.
-- Manual: CDR file processing will be triggered at configured time interval (delay/sleep between processes).
+- Periodic: CDR file processing will be triggered at configured time interval (delay/sleep between processes) and it will be performed on all files present in the folder (IN) at run time.
 
 Principles behind functionality:
+
 - Monitor/process a CDR folder (IN) as outlined above.
-- Read every file in the folder, extract the information based on configuration and post it via configured mechanism to CDRS.
+- For every file processed, extract the information based on configuration and post it via configured mechanism to CDRS.
 - The fields extracted out of each CDR row are the same ones depicted in the CDRS documentation (following primary and extra fields concept).
-- Once the file processing completes, move it in it's original format in another folder (OUT) in order to avoid re-processing. Here it worths mentioning the auto-detection of duplicated CDRs at server side based on accid and host fields.
+- Once the file processing completes, move it in it's original format in another folder (OUT) in order to avoid re-processing. Here it's worth mentioning the auto-detection of duplicated CDRs at server side based on accid and host fields.
 
 For the moment we support processing CDRs in the following formats:
 

@@ -130,7 +130,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.HistoryServerEnabled = false
 	eCfg.HistoryListen = "127.0.0.1:2013"
 	eCfg.HistoryPath = "/var/log/cgrates/history"
-	eCfg.HistorySavePeriod = "1s"
+	eCfg.HistorySaveInterval = time.Duration(1)*time.Second
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
@@ -251,7 +251,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.HistoryServerEnabled = true
 	eCfg.HistoryListen = "test"
 	eCfg.HistoryPath = "test"
-	eCfg.HistorySavePeriod = "test"
+	eCfg.HistorySaveInterval = time.Duration(99)*time.Second
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)

@@ -49,17 +49,14 @@ type FileScribe struct {
 	savePeriod     time.Duration
 }
 
-func NewFileScribe(fileRoot string, savePeriod string) (*FileScribe, error) {
+func NewFileScribe(fileRoot string, saveInterval time.Duration) (*FileScribe, error) {
 	// looking for git
 	gitCommand, err := exec.LookPath("git")
 	if err != nil {
 		return nil, errors.New("Please install git: " + err.Error())
 	}
-	s := &FileScribe{fileRoot: fileRoot, gitCommand: gitCommand}
+	s := &FileScribe{fileRoot: fileRoot, gitCommand: gitCommand, savePeriod: saveInterval}
 	s.loopChecker = make(chan int)
-	if s.savePeriod, err = time.ParseDuration(savePeriod); err != nil {
-		return nil, err
-	}
 	s.gitInit()
 	if err := s.load(DESTINATIONS_FILE); err != nil {
 		return nil, err

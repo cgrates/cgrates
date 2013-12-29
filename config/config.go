@@ -133,11 +133,11 @@ type CGRConfig struct {
 	FreeswitchPass           string   // FS socket password
 	FreeswitchReconnects     int      // number of times to attempt reconnect after connect fails
 	HistoryAgentEnabled      bool     // Starts History as an agent: <true|false>.
-	HistoryServerEnabled     bool     // Starts History as server: <true|false>.
 	HistoryServer            string   // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled     bool     // Starts History as server: <true|false>.
 	HistoryListen            string   // History server listening interface: <internal|x.y.z.y:1234>
 	HistoryPath              string   // Location on disk where to store history files.
-	HistorySavePeriod        string   // The timout duration between history writes
+	HistorySaveInterval      time.Duration   // The timout duration between history writes
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -225,7 +225,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.HistoryServer = "127.0.0.1:2013"
 	self.HistoryListen = "127.0.0.1:2013"
 	self.HistoryPath = "/var/log/cgrates/history"
-	self.HistorySavePeriod = "1s"
+	self.HistorySaveInterval = time.Duration(1) * time.Second
 	return nil
 }
 
@@ -538,8 +538,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("history_server", "path"); hasOpt {
 		cfg.HistoryPath, _ = c.GetString("history_server", "path")
 	}
-	if hasOpt = c.HasOption("history_server", "save_period"); hasOpt {
-		cfg.HistorySavePeriod, _ = c.GetString("history_server", "save_period")
+	if hasOpt = c.HasOption("history_server", "save_interval"); hasOpt {
+		saveIntvlStr,_ := c.GetString("history_server", "save_interval")
+		if cfg.HistorySaveInterval, errParse = utils.ParseDurationWithSecs(saveIntvlStr); errParse != nil {
+			return nil, errParse
+		}
 	}
 	return cfg, nil
 }

@@ -108,7 +108,7 @@ func TestFsCdrAsRatedCdr(t *testing.T) {
 	expctRatedCdr := &utils.RatedCDR{CgrId: utils.FSCgrId("01df56f4-d99a-4ef6-b7fe-b924b2415b7f"), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f", 
 		CdrHost: "127.0.0.1", CdrSource: FS_CDR_SOURCE, ReqType: utils.RATED,
 		Direction: "*out", Tenant: "ipbx.itsyscom.com", TOR: "call", Account: "dan", Subject: "dan", Destination: "+4986517174963", 
-		AnswerTime: time.Date(2013, 8, 4, 11, 50, 56, 0, time.Local), Duration: time.Duration(4)*time.Second,
+		AnswerTime: time.Date(2013, 8, 4, 9, 50, 56, 0, time.UTC).Local(), Duration: time.Duration(4)*time.Second,
 		ExtraFields: map[string]string{"effective_caller_id_number": "+4986517174960"}, MediationRunId: "wholesale_run", Cost: -1}
 	if !reflect.DeepEqual(rtCdrOut, expctRatedCdr) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut, expctRatedCdr)

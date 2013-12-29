@@ -99,12 +99,13 @@ server = test			# Adress where to connect to FreeSWITCH socket.
 passwd = test				# FreeSWITCH socket password.
 reconnects = 99				# Number of attempts on connect failure.
 
-[history_agent]
-enabled = true			# Starts History as a client: <true|false>.
-server = test			# Address where to reach the master history server: <internal|x.y.z.y:1234>
-
 [history_server]
 enabled = true			# Starts History service: <true|false>.
 listen = test			# Listening addres for history server: <internal|x.y.z.y:1234>
 path = test				# Location on disk where to store history files.
-save_period = test      # Timeout duration between saves
+save_interval = 99	      # Timeout duration between saves
+
+[history_agent]
+enabled = true			# Starts History as a client: <true|false>.
+server = test			# Address where to reach the master history server: <internal|x.y.z.y:1234>
+

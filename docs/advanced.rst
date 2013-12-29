@@ -8,6 +8,7 @@
    cdrserver
    cdrclient
    cdrexporter
+   history
    ratinglogic
 
 
