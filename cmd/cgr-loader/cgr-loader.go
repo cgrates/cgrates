@@ -44,11 +44,11 @@ var (
 	ratingdb_pass = flag.String("ratingdb_passwd", cgrConfig.RatingDBPass, "The RatingDb user's password.")
 
 	accountdb_type = flag.String("accountdb_type", cgrConfig.AccountDBType, "The type of the AccountingDb database <redis>")
-	accountdb_typehost = flag.String("accountdb_host", cgrConfig.AccountDBHost, "The AccountingDb host to connect to.")
-	accountdb_typeport = flag.String("accountdb_port", cgrConfig.AccountDBPort, "The AccountingDb port to bind to.")
-	accountdb_typename = flag.String("accountdb_name", cgrConfig.AccountDBName, "The name/number of the AccountingDb to connect to.")
-	accountdb_typeuser = flag.String("accountdb_user", cgrConfig.AccountDBUser, "The AccountingDb user to sign in as.")
-	accountdb_typepass = flag.String("accountdb_passwd", cgrConfig.AccountDBPass, "The AccountingDb user's password.")
+	accountdb_host = flag.String("accountdb_host", cgrConfig.AccountDBHost, "The AccountingDb host to connect to.")
+	accountdb_port = flag.String("accountdb_port", cgrConfig.AccountDBPort, "The AccountingDb port to bind to.")
+	accountdb_name = flag.String("accountdb_name", cgrConfig.AccountDBName, "The name/number of the AccountingDb to connect to.")
+	accountdb_user = flag.String("accountdb_user", cgrConfig.AccountDBUser, "The AccountingDb user to sign in as.")
+	accountdb_pass = flag.String("accountdb_passwd", cgrConfig.AccountDBPass, "The AccountingDb user's password.")
 
 	stor_db_type = flag.String("stordb_type", cgrConfig.StorDBType, "The type of the storDb database <mysql>")
 	stor_db_host = flag.String("stordb_host", cgrConfig.StorDBHost, "The storDb host to connect to.")
@@ -70,7 +70,7 @@ var (
 	toStorDb      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 	historyServer = flag.String("history_server", cgrConfig.HistoryServer, "The history server address:port, empty to disable automaticautomatic  history archiving")
 	raterAddress  = flag.String("rater_address", cgrConfig.MediatorRater, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
-	rpcEncoding   = flag.String("rpc_encoding", "json", "The history server rpc encoding json|gob")
+	rpcEncoding   = flag.String("rpc_encoding", cgrConfig.RPCEncoding, "The history server rpc encoding json|gob")
 	runId         = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )
 
@@ -91,14 +91,14 @@ func main() {
 		if *fromStorDb {
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, 
 				*ratingdb_user, *ratingdb_pass, *dbdata_encoding)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_typehost, *accountdb_typeport, *accountdb_typename, *accountdb_typeuser, *accountdb_typepass, *dbdata_encoding)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding)
 		} else if *toStorDb { // Import from csv files to storDb
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding)
 		} else { // Default load from csv files to dataDb
 			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, 
 				*ratingdb_user, *ratingdb_pass, *dbdata_encoding)
-			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_typehost, *accountdb_typeport, *accountdb_typename, *accountdb_typeuser, *accountdb_typepass, *dbdata_encoding)
+			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding)
 		}
 		// Defer databases opened to be closed when we are done
 		for _, db := range []engine.Storage{ratingDb, accountDb, storDb} {
@@ -157,7 +157,7 @@ func main() {
 		log.Print("WARNING: Rates history archiving is disabled!")
 	}
 	if *raterAddress != "" { // Init connection to rater so we can reload it's data
-		if *rpcEncoding == "json" {
+		if *rpcEncoding == config.JSON {
 			rater, err = jsonrpc.Dial("tcp", *raterAddress)
 		} else {
 			rater, err = rpc.Dial("tcp", *raterAddress)
