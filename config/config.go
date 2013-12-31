@@ -89,8 +89,9 @@ type CGRConfig struct {
 	CDRSListen               string   // CDRS's listening interface: <x.y.z.y:1234>.
 	CDRSExtraFields          []string //Extra fields to store in CDRs
 	CDRSMediator             string   // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CDRSExportPath           string   // Path towards exported cdrs
-	CDRSExportExtraFields    []string // Extra fields list to add in exported CDRs
+	CdreCdrFormat               string   // Format of the exported CDRs. <csv>
+	CdreExtraFields    []string // Extra fields list to add in exported CDRs
+	CdreDir           string   // Path towards exported cdrs directory
 	CdrcEnabled              bool     // Enable CDR client functionality
 	CdrcCdrs                 string   // Address where to reach CDR server
 	CdrcCdrsMethod            string   // Mechanism to use when posting CDRs on server  <http_cgr>
@@ -136,7 +137,7 @@ type CGRConfig struct {
 	HistoryServer            string   // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled     bool     // Starts History as server: <true|false>.
 	HistoryListen            string   // History server listening interface: <internal|x.y.z.y:1234>
-	HistoryPath              string   // Location on disk where to store history files.
+	HistoryDir              string   // Location on disk where to store history files.
 	HistorySaveInterval      time.Duration   // The timout duration between history writes
 }
 
@@ -177,8 +178,9 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSListen = "127.0.0.1:2022"
 	self.CDRSExtraFields = []string{}
 	self.CDRSMediator = ""
-	self.CDRSExportPath = "/var/log/cgrates/cdr/cdrexport/csv"
-	self.CDRSExportExtraFields = []string{}
+	self.CdreCdrFormat = "csv"
+	self.CdreExtraFields = []string{}
+	self.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = "127.0.0.1:2022"
 	self.CdrcCdrsMethod = "http_cgr"
@@ -224,7 +226,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.HistoryServerEnabled = false
 	self.HistoryServer = "127.0.0.1:2013"
 	self.HistoryListen = "127.0.0.1:2013"
-	self.HistoryPath = "/var/log/cgrates/history"
+	self.HistoryDir = "/var/log/cgrates/history"
 	self.HistorySaveInterval = time.Duration(1) * time.Second
 	return nil
 }
@@ -367,13 +369,16 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
 		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
 	}
-	if hasOpt = c.HasOption("cdrs", "export_path"); hasOpt {
-		cfg.CDRSExportPath, _ = c.GetString("cdrs", "export_path")
+	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
+		cfg.CdreCdrFormat, _ = c.GetString("cdre", "cdr_format")
 	}
-	if hasOpt = c.HasOption("cdrs", "export_extra_fields"); hasOpt {
-		if cfg.CDRSExportExtraFields, errParse = ConfigSlice(c, "cdrs", "export_extra_fields"); errParse != nil {
+	if hasOpt = c.HasOption("cdre", "extra_fields"); hasOpt {
+		if cfg.CdreExtraFields, errParse = ConfigSlice(c, "cdre", "extra_fields"); errParse != nil {
 			return nil, errParse
 		}
+	}
+	if hasOpt = c.HasOption("cdre", "export_dir"); hasOpt {
+		cfg.CdreDir, _ = c.GetString("cdre", "export_dir")
 	}
 	if hasOpt = c.HasOption("cdrc", "enabled"); hasOpt {
 		cfg.CdrcEnabled, _ = c.GetBool("cdrc", "enabled")
@@ -535,8 +540,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("history_server", "listen"); hasOpt {
 		cfg.HistoryListen, _ = c.GetString("history_server", "listen")
 	}
-	if hasOpt = c.HasOption("history_server", "path"); hasOpt {
-		cfg.HistoryPath, _ = c.GetString("history_server", "path")
+	if hasOpt = c.HasOption("history_server", "history_dir"); hasOpt {
+		cfg.HistoryDir, _ = c.GetString("history_server", "history_dir")
 	}
 	if hasOpt = c.HasOption("history_server", "save_interval"); hasOpt {
 		saveIntvlStr,_ := c.GetString("history_server", "save_interval")

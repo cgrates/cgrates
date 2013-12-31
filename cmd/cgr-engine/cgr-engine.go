@@ -220,7 +220,7 @@ func startHistoryScribe() {
 	var scribeServer history.Scribe
 
 	if cfg.HistoryServerEnabled {
-		if scribeServer, err = history.NewFileScribe(cfg.HistoryPath, cfg.HistorySaveInterval); err != nil {
+		if scribeServer, err = history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval); err != nil {
 			engine.Logger.Crit(err.Error())
 			exitChan <- true
 			return

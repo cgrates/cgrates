@@ -21,9 +21,10 @@ Functionality:
 - When receiving rating information from the agents it will recompile the cache.
 - Based on configured save interval it will dump the rating cache (if changed) into the .git archive.
 - Archives the following rating data:
-  - Destinations inside *destinations.json* file.
-  - Rating plans inside *rating_plans.json* file.
-  - Rating profiles inside *rating_profiles.json* file.
+
+ - Destinations inside *destinations.json* file.
+ - Rating plans inside *rating_plans.json* file.
+ - Rating profiles inside *rating_profiles.json* file.
 
 History-Agent
 -------------

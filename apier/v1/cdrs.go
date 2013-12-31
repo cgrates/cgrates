@@ -54,14 +54,14 @@ func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *ExportedCsvCdrs)
 	if err != nil {
 		return err
 	}
-	fileName := path.Join(self.Config.CDRSExportPath, "cgr", "csv", fmt.Sprintf("cdrs_%d.csv", time.Now().Unix()))
+	fileName := path.Join(self.Config.CdreDir, "cgr", "csv", fmt.Sprintf("cdrs_%d.csv", time.Now().Unix()))
 	fileOut, err := os.Create(fileName)
 	if err != nil {
 		return err
 	} else {
 		defer fileOut.Close()
 	}
-	csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CDRSExportExtraFields)
+	csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CdreExtraFields)
 	for _, cdr := range cdrs {
 		if err := csvWriter.Write(cdr); err != nil {
 			os.Remove(fileName)

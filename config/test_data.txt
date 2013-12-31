@@ -47,8 +47,11 @@ enabled = true				# Start the CDR Server service:  <true|false>.
 listen=test				# CDRS's listening interface: <x.y.z.y:1234>.
 extra_fields = test			# Extra fields to store in CDRs
 mediator = test				# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-export_path = test			# Path where exported cdrs will be written
-export_extra_fields = test		# Extra fields list to be exported
+
+[cdre]
+cdr_format = test				# Exported CDRs format <csv>
+extra_fields = test 				# List of extra fields to be exported out in CDRs
+export_dir = test				# Path where the exported CDRs will be placed
 
 [cdrc]
 enabled = true				# Enable CDR client functionality
@@ -102,7 +105,7 @@ reconnects = 99				# Number of attempts on connect failure.
 [history_server]
 enabled = true			# Starts History service: <true|false>.
 listen = test			# Listening addres for history server: <internal|x.y.z.y:1234>
-path = test				# Location on disk where to store history files.
+history_dir = test				# Location on disk where to store history files.
 save_interval = 99	      # Timeout duration between saves
 
 [history_agent]

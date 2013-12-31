@@ -81,6 +81,10 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSEnabled = false
 	eCfg.CDRSListen = "127.0.0.1:2022"
 	eCfg.CDRSExtraFields = []string{}
+	eCfg.CDRSMediator = ""
+	eCfg.CdreCdrFormat = "csv"
+	eCfg.CdreExtraFields = []string{}
+	eCfg.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = "127.0.0.1:2022"
 	eCfg.CdrcCdrsMethod = "http_cgr"
@@ -100,9 +104,6 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcAnswerTimeField = "8"
 	eCfg.CdrcDurationField = "9"
 	eCfg.CdrcExtraFields = []string{"10:supplier","11:orig_ip"}
-	eCfg.CDRSMediator = ""
-	eCfg.CDRSExportPath = "/var/log/cgrates/cdr/cdrexport/csv"
-	eCfg.CDRSExportExtraFields = []string{}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorListen = "127.0.0.1:2032"
 	eCfg.MediatorRater = "127.0.0.1:2012"
@@ -129,7 +130,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.HistoryServer = "127.0.0.1:2013"
 	eCfg.HistoryServerEnabled = false
 	eCfg.HistoryListen = "127.0.0.1:2013"
-	eCfg.HistoryPath = "/var/log/cgrates/history"
+	eCfg.HistoryDir = "/var/log/cgrates/history"
 	eCfg.HistorySaveInterval = time.Duration(1)*time.Second
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
@@ -203,8 +204,9 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSListen = "test"
 	eCfg.CDRSExtraFields = []string{"test"}
 	eCfg.CDRSMediator = "test"
-	eCfg.CDRSExportPath = "test"
-	eCfg.CDRSExportExtraFields = []string{"test"}
+	eCfg.CdreCdrFormat = "test"
+	eCfg.CdreExtraFields = []string{"test"}
+	eCfg.CdreDir = "test"
 	eCfg.CdrcEnabled = true
 	eCfg.CdrcCdrs = "test"
 	eCfg.CdrcCdrsMethod = "test"
@@ -250,7 +252,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.HistoryServer = "test"
 	eCfg.HistoryServerEnabled = true
 	eCfg.HistoryListen = "test"
-	eCfg.HistoryPath = "test"
+	eCfg.HistoryDir = "test"
 	eCfg.HistorySaveInterval = time.Duration(99)*time.Second
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
