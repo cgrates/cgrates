@@ -102,6 +102,8 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 				}
 				if x+1 < len(i.Timing.MonthDays) { // today was found in the list, jump to the next grater day
 					d = i.Timing.MonthDays[x+1]
+				} else { // jump to next month
+					month = now.AddDate(0, 1, 0).Month()
 				}
 			} else { // today was not found in the list, x is the first greater day
 				d = i.Timing.MonthDays[x]
@@ -136,6 +138,8 @@ MONTHS:
 					if i.Timing.MonthDays != nil {
 						t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 					}
+				} else { // jump to next year
+					year = now.AddDate(1, 0, 0).Year()
 				}
 			} else { // this month was not found in the list, x is the first greater month
 				m = i.Timing.Months[x]
