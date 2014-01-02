@@ -23,16 +23,19 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/rpc"
 	"net/rpc/jsonrpc"
+	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/balancer2go"
-	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/cdrc"
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
@@ -60,8 +63,9 @@ var (
 	version      = flag.Bool("version", false, "Prints the application version.")
 	raterEnabled = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
 	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
-	cdrsEnabled = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
-	cdrcEnabled = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
+	cdrsEnabled  = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
+	cdrcEnabled  = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
+	writepid     = flag.Bool("writepid", false, "Write pid file")
 	bal          = balancer2go.NewBalancer()
 	exitChan     = make(chan bool)
 	sm           sessionmanager.SessionManager
@@ -303,11 +307,25 @@ func checkConfigSanity() error {
 	return nil
 }
 
+func writePid() {
+	f, err := os.Create("/var/run/cgr-engine.pid")
+	if err != nil {
+		log.Fatal("Could not write pid file: ", err)
+	}
+	f.WriteString(strconv.Itoa(os.Getpid()))
+	if err := f.Close(); err != nil {
+		log.Fatal("Could not write pid file: ", err)
+	}
+}
+
 func main() {
 	flag.Parse()
 	if *version {
 		fmt.Println("CGRateS " + utils.VERSION)
 		return
+	}
+	if *writepid {
+		writePid()
 	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
@@ -324,7 +342,7 @@ func main() {
 		return
 	}
 	var ratingDb engine.RatingStorage
-	var accountDb  engine.AccountingStorage
+	var accountDb engine.AccountingStorage
 	var logDb engine.LogStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
