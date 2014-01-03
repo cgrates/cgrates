@@ -65,7 +65,7 @@ var (
 	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
 	cdrsEnabled  = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
 	cdrcEnabled  = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
-	writepid     = flag.Bool("writepid", false, "Write pid file")
+	pidFile      = flag.String("pid", "", "Write pid file")
 	bal          = balancer2go.NewBalancer()
 	exitChan     = make(chan bool)
 	sm           sessionmanager.SessionManager
@@ -308,7 +308,8 @@ func checkConfigSanity() error {
 }
 
 func writePid() {
-	f, err := os.Create("/var/run/cgr-engine.pid")
+	engine.Logger.Info(*pidFile)
+	f, err := os.Create(*pidFile)
 	if err != nil {
 		log.Fatal("Could not write pid file: ", err)
 	}
@@ -324,7 +325,7 @@ func main() {
 		fmt.Println("CGRateS " + utils.VERSION)
 		return
 	}
-	if *writepid {
+	if *pidFile != "" {
 		writePid()
 	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -458,5 +459,10 @@ func main() {
 		go startCdrc()
 	}
 	<-exitChan
+	if *pidFile != "" {
+		if err := os.Remove(*pidFile); err != nil {
+			engine.Logger.Warning("Could not remove pid file: " + err.Error())
+		}
+	}
 	engine.Logger.Info("Stopped all components. CGRateS shutdown!")
 }
