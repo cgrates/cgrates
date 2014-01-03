@@ -166,7 +166,7 @@ func (cd *CallDescriptor) LoadRatingPlans() (err error) {
 }
 
 // FIXME: this method is not exhaustive but will cover 99% of cases just good
-// it will not cover very long calls with very short activation periods fo rates
+// it will not cover very long calls with very short activation periods for rates
 func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int) (err error) {
 	if recursionDepth > RECURSION_MAX_DEPTH {
 		err = errors.New("Max fallback recursion depth reached!" + key)
