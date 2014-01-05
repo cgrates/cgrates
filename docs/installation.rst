@@ -41,30 +41,35 @@ This command will install the trunk version of CGRateS together with all the nec
 3.3. Post-install
 -----------------
 
-Database setup:
-~~~~~~~~~~~~~~~
+Database setup
+~~~~~~~~~~~~~~
 
-For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary.
-
+For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary. 
 At present we support the following databases:
-    As DataDB types (rating and accounting subsystems):
-     - Redis_
-    As StorDB (persistent storage for CDRs and tariff plan versions):
-     - MySQL_
+
+As DataDB types (rating and accounting subsystems):
+
+- Redis_
+
+As StorDB (persistent storage for CDRs and tariff plan versions):
+
+- MySQL_
 
 Redis_: once installed there should be no special requirements in terms of setup since no schema is necessary.
 
-MySQL_: once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)::
+MySQL_: once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
+
+ ::
    
-   cd /usr/share/cgrates/storage/mysql/
-   ./setup_cgr_db.sh root CGRateS.org localhost
+  cd /usr/share/cgrates/storage/mysql/
+  ./setup_cgr_db.sh root CGRateS.org localhost
 
 .. _Redis: http://redis.io/
 .. _MySQL: http://www.mysql.org/
 
 
-Git:
-~~~~
+Git
+~~~
 
 The CGR-History component will use Git_ to archive tariff plan changes, hence it's installation is necessary before using CGR-History.
 
