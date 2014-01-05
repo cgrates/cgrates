@@ -6,14 +6,14 @@
 ---------------------------------
 Organized into configuration sections. All configuration options come with defaults and we have tried our best to choose the best ones for a minimum of efforts necessary when running.
 
-Bellow is the default configuration file which comes hardcoded into cgr-engine.
+Bellow is the default configuration file which comes hardcoded into cgr-engine, most of them being explained and exemplified there.
 
 ::
 
  [global]
  # ratingdb_type = redis 			# Rating subsystem database: <redis>.
  # ratingdb_host = 127.0.0.1 			# Rating subsystem database host address.
- # ratingdb_port = 6379 				# Rating subsystem port to reach the database.
+ # ratingdb_port = 6379 			# Rating subsystem port to reach the database.
  # ratingdb_name = 10 				# Rating subsystem database name to connect to.
  # ratingdb_user =		 		# Rating subsystem username to use when connecting to database.
  # ratingdb_passwd =				# Rating subsystem password to use when connecting to database.
@@ -27,7 +27,7 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine.
  # stordb_host = 127.0.0.1 			# The host to connect to. Values that start with / are for UNIX domain sockets.
  # stordb_port = 3306				# The port to reach the logdb.
  # stordb_name = cgrates 			# The name of the log database to connect to.
- # stordb_user = cgrates	 			# Username to use when connecting to stordb.
+ # stordb_user = cgrates	 		# Username to use when connecting to stordb.
  # stordb_passwd = CGRateS.org			# Password to use when connecting to stordb.
  # dbdata_encoding = msgpack			# The encoding used to store object data in strings: <msgpack|json>
  # rpc_encoding = json 				# RPC encoding used on APIs: <gob|json>.
@@ -36,7 +36,7 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine.
  # default_tenant = 0				# Default Tenant to consider when missing from requests.
  # default_subject = 0				# Default rating Subject to consider when missing from requests.
  # rounding_method = *middle			# Rounding method for floats/costs: <*up|*middle|*down>
- # rounding_decimals = 4				# Number of decimals to round float/costs at
+ # rounding_decimals = 4			# Number of decimals to round float/costs at
 
  [balancer]
  # enabled = false 				# Start Balancer service: <true|false>.
@@ -52,7 +52,7 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine.
 
  [cdrs]
  # enabled = false				# Start the CDR Server service:  <true|false>.
- # listen=127.0.0.1:2022				# CDRS's listening interface: <x.y.z.y:1234>.
+ # listen=127.0.0.1:2022			# CDRS's listening interface: <x.y.z.y:1234>.
  # extra_fields = 				# Extra fields to store in CDRs
  # mediator = 					# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 
@@ -63,24 +63,24 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine.
 
  [cdrc]
  # enabled = false				# Enable CDR client functionality
- # cdrs = 127.0.0.1:2022				# Address where to reach CDR server
+ # cdrs = 127.0.0.1:2022			# Address where to reach CDR server
  # cdrs_method = http_cgr			# Mechanism to use when posting CDRs on server  <http_cgr>
- # run_delay = 0					# Sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+ # run_delay = 0				# Sleep interval in seconds between consecutive runs, 0 to use automation via inotify
  # cdr_type = csv				# CDR file format <csv>.
  # cdr_in_dir = /var/log/cgrates/cdr/in/csv 	# Absolute path towards the directory where the CDRs are stored.
- # cdr_out_dir =	/var/log/cgrates/cdr/out/csv	# Absolute path towards the directory where processed CDRs will be moved.
+ # cdr_out_dir = /var/log/cgrates/cdr/out/csv	# Absolute path towards the directory where processed CDRs will be moved.
  # cdr_source_id = freeswitch_csv		# Free form field, tag identifying the source of the CDRs within CGRS database.
  # accid_field = 0				# Accounting id field identifier. Use index number in case of .csv cdrs.
  # reqtype_field = 1				# Request type field identifier. Use index number in case of .csv cdrs.
  # direction_field = 2				# Direction field identifier. Use index numbers in case of .csv cdrs.
  # tenant_field = 3				# Tenant field identifier. Use index numbers in case of .csv cdrs.
- # tor_field = 4					# Type of Record field identifier. Use index numbers in case of .csv cdrs.
+ # tor_field = 4				# Type of Record field identifier. Use index numbers in case of .csv cdrs.
  # account_field = 5				# Account field identifier. Use index numbers in case of .csv cdrs.
  # subject_field = 6				# Subject field identifier. Use index numbers in case of .csv CDRs.
- # destination_field = 7				# Destination field identifier. Use index numbers in case of .csv cdrs.
- # answer_time_field = 8				# Answer time field identifier. Use index numbers in case of .csv cdrs.
+ # destination_field = 7			# Destination field identifier. Use index numbers in case of .csv cdrs.
+ # answer_time_field = 8			# Answer time field identifier. Use index numbers in case of .csv cdrs.
  # duration_field = 9				# Duration field identifier. Use index numbers in case of .csv cdrs.
- # extra_fields = 10:supplier,11:orig_ip		# Extra fields identifiers. For .csv, format: <index_extrafield_1>:<label_extrafield_1>[,<index_extrafield_n>:<label_extrafield_n>]
+ # extra_fields = 10:supplier,11:orig_ip	# Extra fields identifiers. For .csv, format: <index_extrafield_1>:<label_extrafield_1>[,<index_extrafield_n>:<label_extrafield_n>]
 
  [mediator]
  # enabled = false				# Starts Mediator service: <true|false>.
@@ -91,11 +91,11 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine.
  # reqtype_fields = 				# Name of request type fields to be used during extra mediation. Use index number in case of .csv cdrs.
  # direction_fields = 				# Name of direction fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
  # tenant_fields = 				# Name of tenant fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
- # tor_fields = 					# Name of tor fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # tor_fields = 				# Name of tor fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
  # account_fields = 				# Name of account fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
  # subject_fields = 				# Name of fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
- # destination_fields = 				# Name of destination fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
- # answer_time_fields = 				# Name of time_answer fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # destination_fields = 			# Name of destination fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # answer_time_fields = 			# Name of time_answer fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
  # duration_fields = 				# Name of duration fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
  
  [session_manager]
@@ -114,7 +114,7 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine.
  # enabled = false				# Starts History service: <true|false>.
  # listen = 127.0.0.1:2013			# Listening addres for history server: <internal|x.y.z.y:1234>
  # history_dir = /var/log/cgrates/history	# Location on disk where to store history files.
- # save_interval = 1s                             # Interval to save changed cache into .git archive
+ # save_interval = 1s                           # Interval to save changed cache into .git archive
 
  [history_agent]
  # enabled = false				# Starts History as a client: <true|false>.
