@@ -68,5 +68,5 @@ Git:
 
 The CGR-History component will use Git_ to archive tariff plan changes, hence it's installation is necessary before using CGR-History.
 
--- _Git: http://git-scm.com/
+.. _Git: http://git-scm.com/
 
