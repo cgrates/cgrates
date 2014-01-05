@@ -399,11 +399,12 @@ func main() {
 			engine.SetDebitPeriod(dp)
 		}
 	}
-
+	stopHandled := false
 	// Async starts here
 	if cfg.RaterEnabled && cfg.RaterBalancer != DISABLED && !cfg.BalancerEnabled {
 		go registerToBalancer()
-		go stopRaterSingnalHandler()
+		go stopRaterSignalHandler()
+		stopHandled = true
 	}
 	responder := &engine.Responder{ExitChan: exitChan}
 	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, Config: cfg}
@@ -413,13 +414,17 @@ func main() {
 	}
 	if cfg.BalancerEnabled {
 		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
-		go stopBalancerSingnalHandler()
+		go stopBalancerSignalHandler()
+		stopHandled = true
 		responder.Bal = bal
 		go listenToRPCRequests(responder, apier, cfg.BalancerListen, cfg.RPCEncoding)
 		if cfg.RaterEnabled {
 			engine.Logger.Info("Starting internal engine.")
 			bal.AddClient("local", new(engine.ResponderWorker))
 		}
+	}
+	if !stopHandled {
+		go generalSignalHandler()
 	}
 
 	if cfg.SchedulerEnabled {

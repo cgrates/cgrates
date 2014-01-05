@@ -20,31 +20,41 @@ package main
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/scheduler"
 	"net/rpc"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/scheduler"
 )
 
 /*
 Listens for SIGTERM, SIGINT, SIGQUIT system signals and shuts down all the registered engines.
 */
-func stopBalancerSingnalHandler() {
+func stopBalancerSignalHandler() {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
 	sig := <-c
-	engine.Logger.Info(fmt.Sprintf("Caught signal %v, sending shutdownto engines\n", sig))
+	engine.Logger.Info(fmt.Sprintf("Caught signal %v, sending shutdown to engines\n", sig))
 	bal.Shutdown("Responder.Shutdown")
+	exitChan <- true
+}
+
+func generalSignalHandler() {
+	c := make(chan os.Signal)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+
+	sig := <-c
+	engine.Logger.Info(fmt.Sprintf("Caught signal %v, shuting down cgr-engine\n", sig))
 	exitChan <- true
 }
 
 /*
 Listens for the SIGTERM, SIGINT, SIGQUIT system signals and  gracefuly unregister from balancer and closes the storage before exiting.
 */
-func stopRaterSingnalHandler() {
+func stopRaterSignalHandler() {
 	c := make(chan os.Signal)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	sig := <-c
