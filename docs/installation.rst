@@ -7,8 +7,8 @@ We recommend using source installs for advanced users familiar with Go programmi
 3.1. Using packages
 -------------------
 
-3.1.2. Debian Wheezy (Squeeze is also backwards compatible)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3.1.2. Debian Wheezy
+~~~~~~~~~~~~~~~~~~~~
 
 This is for the moment the only packaged and the most recommended to use method to install CGRateS.
 
@@ -21,13 +21,8 @@ On the server you want to install CGRateS, simply execute the following commands
    apt-get update
    apt-get install cgrates
 
-These commands should set you up with a running version of CGRateS on your machine. 
-Details regarding running and errors should be checked in the syslog.
-Since on Debian we use Daemontools_ to control the CGRateS another way to check the daemon status is to issue following command over your console:
-::
-   svstat /etc/service/cgrates/
-
-.. _Daemontools: http://cr.yp.to/daemontools.html
+Once the installation is completed, one should perform the post-install section in order to have the CGRateS properly set and ready to run.
+After post-install actions are performed, CGRateS will be configured in */etc/cgrates/cgrates.cfg* and enabled in */etc/default/cgrates*.
 
 3.2. Using source
 -----------------
@@ -35,7 +30,7 @@ Since on Debian we use Daemontools_ to control the CGRateS another way to check 
 After the go environment is installed_ (at least go1.2) and configured_ issue the following commands:
 ::
 
-        go get github.com/cgrates/cgrates
+    go get github.com/cgrates/cgrates
 
 This command will install the trunk version of CGRateS together with all the necessary dependencies.
 
@@ -45,35 +40,33 @@ This command will install the trunk version of CGRateS together with all the nec
 
 3.3. Post-install
 -----------------
-CGRateS needs at minimum one external database where to keep it's main data as well as logs of it's operation.
+
+Database setup:
+===============
+
+For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary.
 
 At present we support the following databases:
-    As DataDB:
+    As DataDB types (rating and accounting subsystems):
      - Redis_
-     - mongoDB_
-    As LogDB:
-     - mongoDB_
-     - Redis_
-     - PostgreSQL_ (partially supported)
+    As StorDB (persistent storage for CDRs and tariff plan versions):
+     - MySQL_
 
-When using PostgreSQL_ as your LogDB, the following data table needs to be created and accessible to CGRateS LogDB user::
+Redis_: once installed there should be no special requirements in terms of setup since no schema is necessary.
 
-        CREATE TABLE callcosts (
-            uuid varchar(80) primary key,
-            source varchar(32),
-            direction varchar(32),
-            tenant varchar(32),
-            tor varchar(32),
-            subject varchar(32),
-            account varchar(32),
-            destination varchar(32),
-            cost real,
-            conect_fee real,
-            timespans text
-        );
-
+MySQL_: once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)::
+   
+   cd /usr/share/cgrates/storage/mysql/
+   ./setup_cgr_db.sh root CGRateS.org localhost
 
 .. _Redis: http://redis.io/
-.. _PostgreSQL: http://www.postgresql.org/
-.. _mongoDB: http://www.mongodb.org/
+.. _MySQL: http://www.mysql.org/
+
+
+Git:
+====
+
+The CGR-History component will use Git_ to archive tariff plan changes, hence it's installation is necessary before using CGR-History.
+
+-- _Git: http://git-scm.com/
 
