@@ -1,4 +1,4 @@
 #!/bin/sh
-echo Running CGRateS engine
-exec /usr/bin/cgr-engine -config /etc/cgrates/cgrates.cfg
+echo Firing up CGRateS engine
+exec setuidgid cgrates /usr/bin/cgr-engine -config /etc/cgrates/cgrates.cfg
 

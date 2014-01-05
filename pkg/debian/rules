@@ -1,0 +1,45 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+export GOPATH=$(CURDIR)
+
+PKGDIR=debian/cgrates
+SRCDIR=src/github.com/cgrates/cgrates
+
+%:
+	dh $@ 
+
+clean:
+	dh_clean
+	rm -rf $(GOPATH)/bin/* $(GOPATH)/pkg/*
+	#cd $(GOPATH)/src && find * -name '*.go' -exec dirname {} \; | xargs -n1 go clean
+	rm -f $(GOPATH)/goinstall.log
+
+binary-arch: clean
+	dh_prep
+	dh_installdirs
+	exec $(SRCDIR)/update_external_libs.sh
+	cd $(SRCDIR) && go install
+	mkdir -p $(PKGDIR)/usr/bin
+	cp $(GOPATH)/bin/cgr-* $(PKGDIR)/usr/bin/
+	mkdir -p $(PKGDIR)/etc/cgrates
+	cp $(SRCDIR)/data/conf/cgrates.cfg $(PKGDIR)/etc/cgrates/
+	mkdir -p $(PKGDIR)/usr/share/cgrates
+	cp -r $(SRCDIR)/data/* $(PKGDIR)/usr/share/cgrates/
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrc/in
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrc/out
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrexport/csv
+	mkdir -p $(PKGDIR)/var/log/cgrates/history
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installinit
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-arch

@@ -129,12 +129,12 @@ func (self *Mediator) rateCDR(cdr *utils.RatedCDR) error {
 
 // Forks original CDR based on original request plus runIds for extra mediation
 func (self *Mediator) MediateRawCDR(dbcdr utils.RawCDR) error {
-	engine.Logger.Info(fmt.Sprintf("Mediating rawCdr: %v, duration: %d",dbcdr, dbcdr.GetDuration()))
+	//engine.Logger.Debug(fmt.Sprintf("Mediating rawCdr: %v, duration: %d",dbcdr, dbcdr.GetDuration()))
 	rtCdr, err := utils.NewRatedCDRFromRawCDR(dbcdr)
 	if err != nil {
 		return err
 	}
-	engine.Logger.Info(fmt.Sprintf("Have converted raw into rated: %v", rtCdr))
+	//engine.Logger.Debug(fmt.Sprintf("Have converted raw into rated: %v", rtCdr))
 	cdrs := []*utils.RatedCDR{rtCdr} // Start with initial dbcdr, will add here all to be mediated
 	for runIdx, runId := range self.cgrCfg.MediatorRunIds {
 		forkedCdr, err := dbcdr.AsRatedCdr(self.cgrCfg.MediatorRunIds[runIdx], self.cgrCfg.MediatorReqTypeFields[runIdx], self.cgrCfg.MediatorDirectionFields[runIdx],
