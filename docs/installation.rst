@@ -42,7 +42,7 @@ This command will install the trunk version of CGRateS together with all the nec
 -----------------
 
 Database setup:
-===============
+~~~~~~~~~~~~~~~
 
 For it's operation CGRateS uses more database types, depending on it's nature, install and configuration being further necessary.
 
@@ -64,7 +64,7 @@ MySQL_: once database is installed, CGRateS database needs to be set-up out of p
 
 
 Git:
-====
+~~~~
 
 The CGR-History component will use Git_ to archive tariff plan changes, hence it's installation is necessary before using CGR-History.
 
