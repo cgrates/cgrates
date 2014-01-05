@@ -10,77 +10,119 @@ Bellow is the default configuration file which comes hardcoded into cgr-engine.
 
 ::
 
- # CGRateS Configuration file
- #
- # This file contains the default configuration hardcoded into CGRateS.
- # This is what you get when you load CGRateS with an empty configuration file.
- # [global] must exist in all files, rest of the configuration is inter-changeable.
-
  [global]
- # datadb_type = redis 				# The main database: <redis>.
- # datadb_host = 127.0.0.1 			# Database host address.
- # datadb_port = 6379 				# Port to reach the database.
- # datadb_name = 10 				# The name of the database to connect to.
- # datadb_user = 				# Username to use when connecting to database.
- # datadb_passwd =				# Password to use when connecting to database.
- # logdb_type = mongo				# Log/stored database type to use: <same|postgres|mongo|redis>
- # logdb_host = 127.0.0.1 			# The host to connect to. Values that start with / are for UNIX domain sockets.
- # logdb_port = 27017				# The port to reach the logdb.
- # logdb_name = cgrates 				# The name of the log database to connect to.
- # logdb_user =  	 			# Username to use when connecting to logdb.
- # logdb_passwd =  	 			# Password to use when connecting to logdb.
+ # ratingdb_type = redis 			# Rating subsystem database: <redis>.
+ # ratingdb_host = 127.0.0.1 			# Rating subsystem database host address.
+ # ratingdb_port = 6379 				# Rating subsystem port to reach the database.
+ # ratingdb_name = 10 				# Rating subsystem database name to connect to.
+ # ratingdb_user =		 		# Rating subsystem username to use when connecting to database.
+ # ratingdb_passwd =				# Rating subsystem password to use when connecting to database.
+ # accountdb_type = redis 			# Accounting subsystem database: <redis>.
+ # accountdb_host = 127.0.0.1 			# Accounting subsystem database host address.
+ # accountdb_port = 6379 			# Accounting subsystem port to reach the database.
+ # accountdb_name = 11				# Accounting subsystem database name to connect to.
+ # accountdb_user =		 		# Accounting subsystem username to use when connecting to database.
+ # accountdb_passwd =				# Accounting subsystem password to use when connecting to database.
+ # stordb_type = mysql				# Stor database type to use: <mysql>
+ # stordb_host = 127.0.0.1 			# The host to connect to. Values that start with / are for UNIX domain sockets.
+ # stordb_port = 3306				# The port to reach the logdb.
+ # stordb_name = cgrates 			# The name of the log database to connect to.
+ # stordb_user = cgrates	 			# Username to use when connecting to stordb.
+ # stordb_passwd = CGRateS.org			# Password to use when connecting to stordb.
+ # dbdata_encoding = msgpack			# The encoding used to store object data in strings: <msgpack|json>
+ # rpc_encoding = json 				# RPC encoding used on APIs: <gob|json>.
+ # default_reqtype = rated			# Default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>.
+ # default_tor = 0				# Default Type of Record to consider when missing from requests.
+ # default_tenant = 0				# Default Tenant to consider when missing from requests.
+ # default_subject = 0				# Default rating Subject to consider when missing from requests.
+ # rounding_method = *middle			# Rounding method for floats/costs: <*up|*middle|*down>
+ # rounding_decimals = 4				# Number of decimals to round float/costs at
 
  [balancer]
- # enabled = false 				# Start Balancer service:  <true|false>.
- # listen = 127.0.0.1:2012 			# Balancer listen interface: <disabled|x.y.z.y:1234>.
- # rpc_encoding = gob 				# RPC encoding used: <gob|json>.
+ # enabled = false 				# Start Balancer service: <true|false>.
+ # listen = 127.0.0.1:2012 			# Balancer listen interface: <""|x.y.z.y:1234>.
 
  [rater]
- # enabled = false				# Enable Rater service: <true|false>.
+ # enabled = false				# Enable RaterCDRSExportPath service: <true|false>.
  # balancer = disabled 				# Register to Balancer as worker: <enabled|disabled>.
- # listen = 127.0.0.1:2012 			# Rater's listening interface:  <internal|x.y.z.y:1234>.
- # rpc_encoding = gob 				# RPC encoding used: <gob|json>.
+ # listen = 127.0.0.1:2012 			# Rater's listening interface: <internal|x.y.z.y:1234>.
 
  [scheduler]
  # enabled = false				# Starts Scheduler service: <true|false>.
 
- [mediator]
- # enabled = false				# Starts Mediator service:  <true|false>.
- # rater = 127.0.0.1:2012			# Address where to reach the Rater.
- # rpc_encoding = gob				# RPC encoding used when talking to Rater: <gob|json>.
- # skipdb = false				# Skips database checks for previous recorded prices: <true|false>.
- # pseudoprepaid = false				# Execute debits together with pricing: <true|false>.
- # cdr_type = freeswitch_cdr			# CDR type <freeswitch_cdr>.
- # cdr_in_dir = /var/log/freeswitch/cdr-csv 	# Absolute path towards the directory where the CDRs are kept.
- # cdr_out_dir =/var/log/cgrates/cdr_out	# Absolute path towards the directory where processed CDRs will be exported.
+ [cdrs]
+ # enabled = false				# Start the CDR Server service:  <true|false>.
+ # listen=127.0.0.1:2022				# CDRS's listening interface: <x.y.z.y:1234>.
+ # extra_fields = 				# Extra fields to store in CDRs
+ # mediator = 					# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 
+ [cdre]
+ # cdr_format = csv				# Exported CDRs format <csv>
+ # extra_fields = 				# List of extra fields to be exported out in CDRs
+ # export_dir = /var/log/cgrates/cdr/out/cgr	# Path where the exported CDRs will be placed
+
+ [cdrc]
+ # enabled = false				# Enable CDR client functionality
+ # cdrs = 127.0.0.1:2022				# Address where to reach CDR server
+ # cdrs_method = http_cgr			# Mechanism to use when posting CDRs on server  <http_cgr>
+ # run_delay = 0					# Sleep interval in seconds between consecutive runs, 0 to use automation via inotify
+ # cdr_type = csv				# CDR file format <csv>.
+ # cdr_in_dir = /var/log/cgrates/cdr/in/csv 	# Absolute path towards the directory where the CDRs are stored.
+ # cdr_out_dir =	/var/log/cgrates/cdr/out/csv	# Absolute path towards the directory where processed CDRs will be moved.
+ # cdr_source_id = freeswitch_csv		# Free form field, tag identifying the source of the CDRs within CGRS database.
+ # accid_field = 0				# Accounting id field identifier. Use index number in case of .csv cdrs.
+ # reqtype_field = 1				# Request type field identifier. Use index number in case of .csv cdrs.
+ # direction_field = 2				# Direction field identifier. Use index numbers in case of .csv cdrs.
+ # tenant_field = 3				# Tenant field identifier. Use index numbers in case of .csv cdrs.
+ # tor_field = 4					# Type of Record field identifier. Use index numbers in case of .csv cdrs.
+ # account_field = 5				# Account field identifier. Use index numbers in case of .csv cdrs.
+ # subject_field = 6				# Subject field identifier. Use index numbers in case of .csv CDRs.
+ # destination_field = 7				# Destination field identifier. Use index numbers in case of .csv cdrs.
+ # answer_time_field = 8				# Answer time field identifier. Use index numbers in case of .csv cdrs.
+ # duration_field = 9				# Duration field identifier. Use index numbers in case of .csv cdrs.
+ # extra_fields = 10:supplier,11:orig_ip		# Extra fields identifiers. For .csv, format: <index_extrafield_1>:<label_extrafield_1>[,<index_extrafield_n>:<label_extrafield_n>]
+
+ [mediator]
+ # enabled = false				# Starts Mediator service: <true|false>.
+ # listen=internal				# Mediator's listening interface: <internal>.
+ # rater = 127.0.0.1:2012			# Address where to reach the Rater: <internal|x.y.z.y:1234>
+ # rater_reconnects = 3				# Number of reconnects to rater before giving up.
+ # run_ids = 					# Identifiers of each extra mediation to run on CDRs
+ # reqtype_fields = 				# Name of request type fields to be used during extra mediation. Use index number in case of .csv cdrs.
+ # direction_fields = 				# Name of direction fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # tenant_fields = 				# Name of tenant fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # tor_fields = 					# Name of tor fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # account_fields = 				# Name of account fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # subject_fields = 				# Name of fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # destination_fields = 				# Name of destination fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # answer_time_fields = 				# Name of time_answer fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ # duration_fields = 				# Name of duration fields to be used during extra mediation. Use index numbers in case of .csv cdrs.
+ 
  [session_manager]
  # enabled = false				# Starts SessionManager service: <true|false>.
  # switch_type = freeswitch			# Defines the type of switch behind: <freeswitch>.
  # rater = 127.0.0.1:2012			# Address where to reach the Rater.
+ # rater_reconnects = 3				# Number of reconnects to rater before giving up.
  # debit_interval = 5				# Interval to perform debits on.
- # rpc_encoding = gob				# RPC encoding used when talking to Rater: <gob|json>.
- # default_reqtype = 				# Default request type to consider when missing from requests: <""|prepaid|postpaid>.
- # default_tor = 0				# Default Type of Record to consider when missing from requests.
- # default_tenant = 0				# Default Tenant to consider when missing from requests.
- # default_subject = 0				# Default rating Subject to consider when missing from requests.
-
+ 
  [freeswitch]
  # server = 127.0.0.1:8021			# Adress where to connect to FreeSWITCH socket.
  # passwd = ClueCon				# FreeSWITCH socket password.
  # reconnects = 5				# Number of attempts on connect failure.
- # uuid_index = 	10				# Index of the UUID info in the CDR file.
- # direction_index = -1				# Index of the CallDirection info in the CDR file.
- # tor_index = -1				# Index of the TypeOfRecord info in the CDR file.
- # tenant_index = -1				# Index of the Tenant info in the CDR file. 
- # subject_index = -1				# Index of the Subject info in the CDR file. -1 to query database instead of rater
- # account_index = -1				# Index of the Account info in the CDR file.
- # destination_index = -1			# Index of the Destination info in the CDR file.
- # time_start_index = -1				# Index of the TimeStart info in the CDR file.
- # duration_index = -1				# Index of the CallDuration info in the CDR file.
+ 
+ [history_server]
+ # enabled = false				# Starts History service: <true|false>.
+ # listen = 127.0.0.1:2013			# Listening addres for history server: <internal|x.y.z.y:1234>
+ # history_dir = /var/log/cgrates/history	# Location on disk where to store history files.
+ # save_interval = 1s                             # Interval to save changed cache into .git archive
 
-4.2. Price lists
-----------------
+ [history_agent]
+ # enabled = false				# Starts History as a client: <true|false>.
+ # server = 127.0.0.1:2013			# Address where to reach the master history server: <internal|x.y.z.y:1234>
+
+
+4.2. Tariff plans
+-----------------
 
 For importing the data into CGRateS database we are using cvs files. The import process can be started as many times it is desired with one ore more csv files and the existing values are overwritten. If the -flush option is used then the database is cleaned before importing.For more details see the cgr-loader tool from the tutorial chapter.
 
