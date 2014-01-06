@@ -40,6 +40,7 @@ import (
 
 const (
 	CSV = "csv"
+	FS_CSV = "freeswitch_csv"
 )
 
 func NewCdrc(config *config.CGRConfig) (*Cdrc, error) {
@@ -125,8 +126,10 @@ func (self *Cdrc) processCdrDir() error {
 	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.cgrCfg.CdrcCdrInDir))
 	filesInDir, _ := ioutil.ReadDir(self.cgrCfg.CdrcCdrInDir)
 	for _, file := range filesInDir {
-		if err := self.processFile(path.Join(self.cgrCfg.CdrcCdrInDir, file.Name())); err != nil {
-			return err
+		if self.cgrCfg.CdrcCdrType!=FS_CSV || path.Ext(file.Name())!=".csv" {
+			if err := self.processFile(path.Join(self.cgrCfg.CdrcCdrInDir, file.Name())); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -147,7 +150,7 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 	for {
 		select {
 		case ev := <-watcher.Event:
-			if ev.IsCreate() { //&& path.Ext(ev.Name) != ".csv"
+			if ev.IsCreate() && (self.cgrCfg.CdrcCdrType!=FS_CSV || path.Ext(ev.Name)!=".csv") {
 				if err = self.processFile(ev.Name); err != nil {
 					return err
 				}
