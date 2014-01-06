@@ -67,9 +67,9 @@ func TestDefaults(t *testing.T) {
 	eCfg.DBDataEncoding = utils.MSGPACK
 	eCfg.RPCEncoding = JSON
 	eCfg.DefaultReqType = utils.RATED
-	eCfg.DefaultTOR = "0"
-	eCfg.DefaultTenant = "0"
-	eCfg.DefaultSubject = "0"
+	eCfg.DefaultTOR = "call"
+	eCfg.DefaultTenant = "cgrates.org"
+	eCfg.DefaultSubject = "cgrates"
 	eCfg.RoundingMethod = utils.ROUNDING_MIDDLE
 	eCfg.RoundingDecimals = 4
 	eCfg.RaterEnabled = false

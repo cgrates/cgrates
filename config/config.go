@@ -163,9 +163,9 @@ func (self *CGRConfig) setDefaults() error {
 	self.DBDataEncoding = utils.MSGPACK
 	self.RPCEncoding = JSON
 	self.DefaultReqType = utils.RATED
-	self.DefaultTOR = "0"
-	self.DefaultTenant = "0"
-	self.DefaultSubject = "0"
+	self.DefaultTOR = "call"
+	self.DefaultTenant = "cgrates.org"
+	self.DefaultSubject = "cgrates"
 	self.RoundingMethod = utils.ROUNDING_MIDDLE
 	self.RoundingDecimals = 4
 	self.RaterEnabled = false
