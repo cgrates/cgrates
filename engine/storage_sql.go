@@ -760,14 +760,14 @@ func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]*utils.Rat
 	for rows.Next() {
 		var cgrid, accid, cdrhost, cdrsrc, reqtype, direction, tenant, tor, account, subject, destination, runid string
 		var extraFields []byte
-		var answerTimestamp, duration int64
+		var answerTime time.Time
+		var duration int64
 		var cost float64
 		var extraFieldsMp map[string]string
-		if err := rows.Scan(&cgrid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &answerTimestamp, &duration,
+		if err := rows.Scan(&cgrid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &answerTime, &duration,
 			&extraFields, &runid, &cost); err != nil {
 			return nil, err
 		}
-		answerTime := time.Unix(answerTimestamp, 0)
 		if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
 			return nil, err
 		}
@@ -779,6 +779,32 @@ func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]*utils.Rat
 		cdrs = append(cdrs, storCdr)
 	}
 	return cdrs, nil
+}
+
+// Remove CDR data out of all CDR tables based on their cgrid
+func (self *SQLStorage) RemRatedCdrs(cgrIds []string) error {
+	if len(cgrIds) == 0 {
+		return nil
+	}
+	buffRated := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE", utils.TBL_RATED_CDRS))
+	buffCosts := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE", utils.TBL_COST_DETAILS))
+	buffCdrExtra := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE",utils.TBL_CDRS_EXTRA))
+	buffCdrPrimary := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE",utils.TBL_CDRS_PRIMARY))
+	qryBuffers := []*bytes.Buffer{buffRated, buffCosts, buffCdrExtra, buffCdrPrimary}
+	for idx, cgrId := range cgrIds {
+		for _, buffer := range qryBuffers {
+			if idx != 0 {
+				buffer.WriteString(" OR")
+			}
+			buffer.WriteString(fmt.Sprintf(" cgrid='%s'",cgrId))
+		}
+	}
+	for _, buffer := range qryBuffers {
+		if _, err := self.Db.Exec(buffer.String()); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {

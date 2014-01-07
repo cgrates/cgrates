@@ -156,6 +156,28 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
+	goTmStr := "2013-12-30 15:00:01 +0000 UTC"
+	goTm, err := ParseTimeDetectLayout(goTmStr)
+	if err != nil {
+		t.Error(err)
+	} else if !goTm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", goTm, expectedTime)
+	}
+	_, err = ParseTimeDetectLayout(goTmStr[1:])
+	if err == nil {
+		t.Errorf("Expecting error")
+	}
+	goTmStr = "2013-12-30 15:00:01.000000000 +0000 UTC"
+	goTm, err = ParseTimeDetectLayout(goTmStr)
+	if err != nil {
+		t.Error(err)
+	} else if !goTm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", goTm, expectedTime)
+	}
+	_, err = ParseTimeDetectLayout(goTmStr[1:])
+	if err == nil {
+		t.Errorf("Expecting error")
+	}
 }
 
 func TestParseDateUnix(t *testing.T) {
