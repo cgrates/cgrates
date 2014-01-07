@@ -35,7 +35,7 @@ import (
 
 var (
 	//separator = flag.String("separator", ",", "Default field separator")
-	cgrConfig, _ = config.NewDefaultCGRConfig()
+	cgrConfig, _  = config.NewDefaultCGRConfig()
 	ratingdb_type = flag.String("ratingdb_type", cgrConfig.RatingDBType, "The type of the RatingDb database <redis>")
 	ratingdb_host = flag.String("ratingdb_host", cgrConfig.RatingDBHost, "The RatingDb host to connect to.")
 	ratingdb_port = flag.String("ratingdb_port", cgrConfig.RatingDBPort, "The RatingDb port to bind to.")
@@ -82,21 +82,21 @@ func main() {
 	}
 	var errRatingDb, errAccDb, errStorDb, err error
 	var ratingDb engine.RatingStorage
-	var accountDb  engine.AccountingStorage
+	var accountDb engine.AccountingStorage
 	var storDb engine.LoadStorage
 	var rater *rpc.Client
 	var loader engine.TPLoader
 	// Init necessary db connections, only if not already
 	if !*dryRun { // make sure we do not need db connections on dry run, also not importing into any stordb
 		if *fromStorDb {
-			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, 
+			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name,
 				*ratingdb_user, *ratingdb_pass, *dbdata_encoding)
 			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding)
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding)
 		} else if *toStorDb { // Import from csv files to storDb
 			storDb, errStorDb = engine.ConfigureLoadStorage(*stor_db_type, *stor_db_host, *stor_db_port, *stor_db_name, *stor_db_user, *stor_db_pass, *dbdata_encoding)
 		} else { // Default load from csv files to dataDb
-			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, 
+			ratingDb, errRatingDb = engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name,
 				*ratingdb_user, *ratingdb_pass, *dbdata_encoding)
 			accountDb, errAccDb = engine.ConfigureAccountingStorage(*accountdb_type, *accountdb_host, *accountdb_port, *accountdb_name, *accountdb_user, *accountdb_pass, *dbdata_encoding)
 		}
@@ -184,11 +184,12 @@ func main() {
 		rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
 		rpfIds, _ := loader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
 		actIds, _ := loader.GetLoadedIds(engine.ACTION_PREFIX)
+		shgIds, _ := loader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds}, &reply); err != nil {
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds, shgIds}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
 		actTmgIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
