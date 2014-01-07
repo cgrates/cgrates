@@ -36,6 +36,7 @@ const (
 	RATING_PLAN_PREFIX        = "rpl_"
 	RATING_PROFILE_PREFIX     = "rpf_"
 	ACTION_PREFIX             = "act_"
+	SHARED_GROUP_PREFIX       = "shg_"
 	USER_BALANCE_PREFIX       = "ubl_"
 	DESTINATION_PREFIX        = "dst_"
 	TEMP_DESTINATION_PREFIX   = "tmp_"
@@ -69,7 +70,7 @@ Interface for storage providers.
 type RatingStorage interface {
 	Storage
 	CacheRating([]string, []string, []string) error
-	ExistsData(string, string) (bool, error)
+	DataExists(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string, bool) (*RatingProfile, error)
@@ -80,10 +81,12 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
-	ExistsData(string, string) (bool, error)
-	CacheAccounting([]string) error
+	DataExists(string, string) (bool, error)
+	CacheAccounting([]string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
+	GetSharedGroup(string, bool) (*SharedGroup, error)
+	SetSharedGroup(string, *SharedGroup) error
 	GetUserBalance(string) (*UserBalance, error)
 	SetUserBalance(*UserBalance) error
 	GetActionTimings(string) (ActionTimings, error)

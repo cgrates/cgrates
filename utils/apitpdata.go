@@ -281,6 +281,7 @@ type ApiReloadCache struct {
 	RatingPlanIds    []string
 	RatingProfileIds []string
 	ActionIds        []string
+	SharedGroupIds   []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
@@ -299,8 +300,8 @@ type AttrCachedItemAge struct {
 }
 
 type CachedItemAge struct {
-	Destination    time.Duration
-	RatingPlan     time.Duration
-	RatingProfile  time.Duration
-	Action         time.Duration
+	Destination   time.Duration
+	RatingPlan    time.Duration
+	RatingProfile time.Duration
+	Action        time.Duration
 }

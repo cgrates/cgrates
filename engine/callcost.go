@@ -85,3 +85,12 @@ func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
 		Destination: cc.Destination,
 	}
 }
+
+func (cc *CallCost) IsPaid() bool {
+	for _, ts := range cc.Timespans {
+		if paid, _ := ts.IsPaid(); !paid {
+			return false
+		}
+	}
+	return true
+}

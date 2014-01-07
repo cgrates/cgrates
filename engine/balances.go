@@ -35,6 +35,7 @@ type Balance struct {
 	GroupIds       []string
 	DestinationId  string
 	RateSubject    string
+	SharedGroup    string
 	precision      int
 }
 

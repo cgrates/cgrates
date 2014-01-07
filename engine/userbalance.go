@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
@@ -180,12 +181,31 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 	// debit minutes
 	for _, balance := range usefulMinuteBalances {
 		balance.DebitMinutes(cc, count, ub, usefulMoneyBalances)
+		if cc.IsPaid() {
+			return nil
+		} else {
+			// chack if it's shared
+			if balance.SharedGroup != "" {
+				sharedGroup, err := accountingStorage.GetSharedGroup(balance.SharedGroup, false)
+				if err != nil {
+					Logger.Warning(fmt.Sprintf("Could not get shared group: %s", balance.SharedGroup))
+					continue
+				}
+				for _, ubId := range sharedGroup.Members {
+					AccLock.Guard(ubId, func() (float64, error) {
+						_, err := accountingStorage.GetUserBalance(ubId)
+						if err != nil {
+							Logger.Warning(fmt.Sprintf("Could not get user balance: %s", ubId))
+						}
+						return 0, nil
+					})
+				}
+			}
+		}
 	}
-	allPaidWithMinutes := true
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
 		if paid, incrementIndex := ts.IsPaid(); !paid {
-			allPaidWithMinutes = false
 			newTs := ts.SplitByIncrement(incrementIndex)
 			if newTs != nil {
 				idx := tsIndex + 1
@@ -194,9 +214,6 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				cc.Timespans[idx] = newTs
 			}
 		}
-	}
-	if allPaidWithMinutes {
-		return nil
 	}
 	// debit money
 	for _, balance := range usefulMoneyBalances {
@@ -406,8 +423,7 @@ func (ub *UserBalance) initCounters() {
 }
 
 func (ub *UserBalance) CleanExpiredBalancesAndBuckets() {
-	for key, _ := range ub.BalanceMap {
-		bm := ub.BalanceMap[key]
+	for key, bm := range ub.BalanceMap {
 		for i := 0; i < len(bm); i++ {
 			if bm[i].IsExpired() {
 				// delete it
@@ -416,9 +432,16 @@ func (ub *UserBalance) CleanExpiredBalancesAndBuckets() {
 		}
 		ub.BalanceMap[key] = bm
 	}
-	for i := 0; i < len(ub.BalanceMap[MINUTES+OUTBOUND]); i++ {
-		if ub.BalanceMap[MINUTES+OUTBOUND][i].IsExpired() {
-			ub.BalanceMap[MINUTES+OUTBOUND] = append(ub.BalanceMap[MINUTES+OUTBOUND][:i], ub.BalanceMap[MINUTES+OUTBOUND][i+1:]...)
+}
+
+// returns the shared groups that this user balance belnongs to
+func (ub *UserBalance) GetSharedGroups() (groups []string) {
+	for _, balanceChain := range ub.BalanceMap {
+		for _, b := range balanceChain {
+			if b.SharedGroup != "" {
+				groups = append(groups, b.SharedGroup)
+			}
 		}
 	}
+	return
 }

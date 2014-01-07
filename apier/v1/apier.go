@@ -21,12 +21,13 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"path"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/utils"
-	"path"
 )
 
 const (
@@ -204,7 +205,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, TOR: attrs.TOR, Direction: attrs.Direction, Subject: attrs.Subject}
 	keyId := tpRpf.KeyId()
 	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.ExistsData(engine.RATING_PROFILE_PREFIX, keyId); err != nil {
+		if exists, err := self.RatingDb.DataExists(engine.RATING_PROFILE_PREFIX, keyId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -216,7 +217,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ERR_SERVER_ERROR, ra.ActivationTime))
 		}
-		if exists, err := self.RatingDb.ExistsData(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
+		if exists, err := self.RatingDb.DataExists(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
 			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ERR_NOT_FOUND, ra.RatingPlanId))
@@ -251,7 +252,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.AccountDb.ExistsData(engine.ACTION_PREFIX, attrs.ActionsId); err != nil {
+		if exists, err := self.AccountDb.DataExists(engine.ACTION_PREFIX, attrs.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -311,7 +312,7 @@ func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string)
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.AccountDb.ExistsData(engine.ACTION_TIMING_PREFIX, attrs.ActionTimingsId); err != nil {
+		if exists, err := self.AccountDb.DataExists(engine.ACTION_TIMING_PREFIX, attrs.ActionTimingsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -319,7 +320,7 @@ func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string)
 	}
 	storeAtms := make(engine.ActionTimings, len(attrs.ActionTimings))
 	for idx, apiAtm := range attrs.ActionTimings {
-		if exists, err := self.AccountDb.ExistsData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
+		if exists, err := self.AccountDb.DataExists(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
 			return fmt.Errorf("%s:%s", utils.ERR_BROKEN_REFERENCE, err.Error())
@@ -475,7 +476,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys []string
+	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -500,10 +501,16 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			actKeys[idx] = engine.ACTION_PREFIX + actId
 		}
 	}
+	if len(attrs.SharedGroupIds) > 0 {
+		shgKeys = make([]string, len(attrs.SharedGroupIds))
+		for idx, shgId := range attrs.SharedGroupIds {
+			shgKeys[idx] = engine.SHARED_GROUP_PREFIX + shgId
+		}
+	}
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys); err != nil {
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys); err != nil {
 		return err
 	}
 	*reply = "OK"
@@ -526,8 +533,8 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 	}
 	cachedItemAge := new(utils.CachedItemAge)
 	var found bool
-	for idx, cacheKey := range []string{ engine.DESTINATION_PREFIX+itemId, engine.RATING_PLAN_PREFIX+itemId, engine.RATING_PROFILE_PREFIX+itemId, 
-		engine.ACTION_PREFIX+itemId} {
+	for idx, cacheKey := range []string{engine.DESTINATION_PREFIX + itemId, engine.RATING_PLAN_PREFIX + itemId, engine.RATING_PROFILE_PREFIX + itemId,
+		engine.ACTION_PREFIX + itemId} {
 		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
 			found = true
 			switch idx {

@@ -22,11 +22,11 @@ import (
 	"errors"
 	"fmt"
 
+	"strings"
+	"time"
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
-	"strings"
-	"time"
 )
 
 type MapStorage struct {
@@ -72,7 +72,7 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) error {
 	return nil
 }
 
-func (ms *MapStorage) CacheAccounting(actKeys []string) error {
+func (ms *MapStorage) CacheAccounting(actKeys, shgKeys []string) error {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX) // Forced until we can fine tune it
 	}
@@ -84,11 +84,22 @@ func (ms *MapStorage) CacheAccounting(actKeys []string) error {
 			}
 		}
 	}
+	if shgKeys == nil {
+		cache2go.RemPrefixKey(SHARED_GROUP_PREFIX) // Forced until we can fine tune it
+	}
+	for k, _ := range ms.dict {
+		if strings.HasPrefix(k, SHARED_GROUP_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetSharedGroup(k[len(SHARED_GROUP_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (ms *MapStorage) ExistsData(categ, subject string) (bool, error) {
+func (ms *MapStorage) DataExists(categ, subject string) (bool, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
 		_, exists := ms.dict[DESTINATION_PREFIX+subject]
@@ -213,6 +224,37 @@ func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[ACTION_PREFIX+key] = result
 	cache2go.Cache(ACTION_PREFIX+key, as)
+	return
+}
+
+func (ms *MapStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGroup, err error) {
+	if values, ok := ms.dict[SHARED_GROUP_PREFIX+key]; ok {
+		err = ms.ms.Unmarshal(values, &sg)
+	} else {
+		return nil, errors.New("not found")
+	}
+	return
+
+	key = SHARED_GROUP_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*SharedGroup), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		err = ms.ms.Unmarshal(values, &sg)
+		cache2go.Cache(key, sg)
+	} else {
+		return nil, errors.New("not found")
+	}
+	return
+}
+
+func (ms *MapStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
+	result, err := ms.ms.Marshal(sg)
+	ms.dict[SHARED_GROUP_PREFIX+key] = result
+	cache2go.Cache(ACTION_PREFIX+key, sg)
 	return
 }
 
