@@ -299,21 +299,21 @@ type AttrCachedItemAge struct {
 }
 
 type CachedItemAge struct {
-	Destination    time.Duration
-	RatingPlan     time.Duration
-	RatingProfile  time.Duration
-	Action         time.Duration
+	Destination   time.Duration
+	RatingPlan    time.Duration
+	RatingProfile time.Duration
+	Action        time.Duration
 }
 
 type AttrExpFileCdrs struct {
-	CdrFormat  string  // Cdr output file format <utils.CdreCdrFormats>
-	TimeStart string // If provided, will represent the starting of the CDRs interval (>=)
-	TimeEnd   string // If provided, will represent the end of the CDRs interval (<)
-	RemoveFromDb  bool  // If true the CDRs will be also deleted after export
-	
+	CdrFormat    string // Cdr output file format <utils.CdreCdrFormats>
+	TimeStart    string // If provided, will represent the starting of the CDRs interval (>=)
+	TimeEnd      string // If provided, will represent the end of the CDRs interval (<)
+	RemoveFromDb bool   // If true the CDRs will be also deleted after export
+
 }
 
 type ExportedFileCdrs struct {
 	ExportedFilePath string // Full path to the newly generated export file
-	NumberOfRecords     int    // Number of CDRs in the export file
+	NumberOfRecords  int    // Number of CDRs in the export file
 }

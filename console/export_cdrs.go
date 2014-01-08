@@ -37,7 +37,7 @@ type CmdExportCdrs struct {
 
 // name should be exec's name
 func (self *CmdExportCdrs) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] export_cdrs <csv|dry_run> [<start_time|*one_month> [<stop_time> [remove_from_db]]]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] export_cdrs <dry_run|csv> [<start_time|*one_month> [<stop_time> [remove_from_db]]]")
 }
 
 // set param defaults

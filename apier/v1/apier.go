@@ -526,8 +526,8 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 	}
 	cachedItemAge := new(utils.CachedItemAge)
 	var found bool
-	for idx, cacheKey := range []string{ engine.DESTINATION_PREFIX+itemId, engine.RATING_PLAN_PREFIX+itemId, engine.RATING_PROFILE_PREFIX+itemId, 
-		engine.ACTION_PREFIX+itemId} {
+	for idx, cacheKey := range []string{engine.DESTINATION_PREFIX + itemId, engine.RATING_PLAN_PREFIX + itemId, engine.RATING_PROFILE_PREFIX + itemId,
+		engine.ACTION_PREFIX + itemId} {
 		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
 			found = true
 			switch idx {

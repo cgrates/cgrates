@@ -24,8 +24,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"os"
 	"path"
-	"time"
 	"strings"
+	"time"
 )
 
 func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
@@ -34,7 +34,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	cdrFormat := strings.ToLower(attr.CdrFormat)
 	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
- 	}
+	}
 	if len(attr.TimeStart) != 0 {
 		if tStart, err = utils.ParseTimeDetectLayout(attr.TimeStart); err != nil {
 			return err
@@ -62,7 +62,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		for _, cdr := range cdrs {
 			if err := csvWriter.Write(cdr); err != nil {
 				os.Remove(fileName)
-			return err
+				return err
 			}
 		}
 		csvWriter.Close()

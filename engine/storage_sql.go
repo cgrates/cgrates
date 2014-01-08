@@ -788,15 +788,15 @@ func (self *SQLStorage) RemRatedCdrs(cgrIds []string) error {
 	}
 	buffRated := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE", utils.TBL_RATED_CDRS))
 	buffCosts := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE", utils.TBL_COST_DETAILS))
-	buffCdrExtra := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE",utils.TBL_CDRS_EXTRA))
-	buffCdrPrimary := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE",utils.TBL_CDRS_PRIMARY))
+	buffCdrExtra := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE", utils.TBL_CDRS_EXTRA))
+	buffCdrPrimary := bytes.NewBufferString(fmt.Sprintf("DELETE FROM %s WHERE", utils.TBL_CDRS_PRIMARY))
 	qryBuffers := []*bytes.Buffer{buffRated, buffCosts, buffCdrExtra, buffCdrPrimary}
 	for idx, cgrId := range cgrIds {
 		for _, buffer := range qryBuffers {
 			if idx != 0 {
 				buffer.WriteString(" OR")
 			}
-			buffer.WriteString(fmt.Sprintf(" cgrid='%s'",cgrId))
+			buffer.WriteString(fmt.Sprintf(" cgrid='%s'", cgrId))
 		}
 	}
 	for _, buffer := range qryBuffers {
