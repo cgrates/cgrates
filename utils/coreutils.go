@@ -183,3 +183,7 @@ func ParseDurationWithSecs(durStr string) (time.Duration, error) {
 	}
 	return time.ParseDuration(durStr)
 }
+
+func BalanceKey(tenant, account, direction string ) string {
+	return fmt.Sprintf("%s:%s:%s", direction, tenant, account)
+}

@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/engine"
 	"time"
 )
 
@@ -65,32 +66,35 @@ func (self *ApierV1) GetAccountActionTimings(attrs AttrAcntActionTimings, reply 
 }
 
 type AttrRemAcntActionTiming struct {
+	ActionTimingsId string // Id identifying the ActionTimings profile
+	ActionTimingId  string // Internal CGR id identifying particular ActionTiming, *all for all user related ActionTimings to be canceled
 	Tenant          string // Tenant he account belongs to
 	Account         string // Account name
 	Direction       string // Traffic direction
-	ActionTimingsId string // Id identifying the ActionTimings profile
-	ActionTimingId  string // Internal CGR id identifying particular ActionTiming, *all for all user related ActionTimings to be canceled
 }
 
-func (self *ApierV1) RemAccountActionTiming(attrs AttrRemAcntActionTiming, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction", "ActionTimingsId", "ActionTimingId"}); len(missing) != 0 {
+// Removes an ActionTimings or parts of it depending on filters being set
+func (self *ApierV1) RemActionTiming(attrs AttrRemAcntActionTiming, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"ActionTimingsId"}); len(missing) != 0 { // Only mandatory ActionTimingsId
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
+	if len(attrs.Account) != 0 { // Presence of Account requires complete account details to be provided
+		if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
+			return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+		}
+	}
+	// ToDo: lock here actionTimings
 	ats, err := self.AccountDb.GetActionTimings(attrs.ActionTimingsId)
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(ats) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	}
-	for idx, at := range ats {
-		if utils.IsSliceMember(at.UserBalanceIds, BalanceId(attrs.Tenant, attrs.Account, attrs.Direction)) &&
-			(at.Id == attrs.ActionTimingId || attrs.ActionTimingId == "*any") {
-			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1] // Remove from ats
-		}
-	}
+	ats = engine.RemActionTiming(ats, attrs.ActionTimingId, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction))
 	if err := self.AccountDb.SetActionTimings(attrs.ActionTimingsId, ats); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	// ToDo: Unlock here actionTimings
 	*reply = OK
 	return nil
 }
