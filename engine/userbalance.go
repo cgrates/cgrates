@@ -75,8 +75,8 @@ type UserBalance struct {
 
 // Returns user's available minutes for the specified destination
 func (ub *UserBalance) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
-	credit = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction]).GetTotalValue()
-	balances = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[MINUTES+cd.Direction])
+	credit = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction], "").GetTotalValue()
+	balances = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[MINUTES+cd.Direction], "")
 
 	for _, b := range balances {
 		d, c := b.GetMinutesForCredit(cd, credit)
@@ -119,10 +119,13 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 
-func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain) BalanceChain {
+func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain, sharedGroup string) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
 		if b.IsExpired() || (ub.Type != UB_TYPE_POSTPAID && b.Value <= 0) {
+			continue
+		}
+		if b.SharedGroup != sharedGroup {
 			continue
 		}
 		if b.DestinationId != "" && b.DestinationId != utils.ANY {
@@ -151,8 +154,8 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 }
 
 func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
-	usefulMinuteBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[MINUTES+cc.Direction])
-	usefulMoneyBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[CREDIT+cc.Direction])
+	usefulMinuteBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[MINUTES+cc.Direction], "")
+	usefulMoneyBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[CREDIT+cc.Direction], "")
 	// debit connect fee
 	if cc.ConnectFee > 0 {
 		amount := cc.ConnectFee
@@ -192,10 +195,20 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 					continue
 				}
 				for _, ubId := range sharedGroup.Members {
+					if ubId == ub.Id { // skip the initiating user
+						continue
+					}
 					AccLock.Guard(ubId, func() (float64, error) {
-						_, err := accountingStorage.GetUserBalance(ubId)
+						nUb, err := accountingStorage.GetUserBalance(ubId)
 						if err != nil {
 							Logger.Warning(fmt.Sprintf("Could not get user balance: %s", ubId))
+						}
+						sharedMinuteBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[MINUTES+cc.Direction], balance.SharedGroup)
+						sharedMoneyBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[CREDIT+cc.Direction], balance.SharedGroup)
+						for _, sharedBalance := range sharedMinuteBalances {
+							// FIXME: insert money balances after users balances
+							sharedBalance.DebitMinutes(cc, count, nUb, sharedMoneyBalances)
+							// FIXME: save nUb
 						}
 						return 0, nil
 					})
