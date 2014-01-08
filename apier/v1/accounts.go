@@ -65,7 +65,7 @@ func (self *ApierV1) GetAccountActionTimings(attrs AttrAcntActionTimings, reply 
 	return nil
 }
 
-type AttrRemAcntActionTiming struct {
+type AttrRemActionTiming struct {
 	ActionTimingsId string // Id identifying the ActionTimings profile
 	ActionTimingId  string // Internal CGR id identifying particular ActionTiming, *all for all user related ActionTimings to be canceled
 	Tenant          string // Tenant he account belongs to
@@ -74,7 +74,7 @@ type AttrRemAcntActionTiming struct {
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
-func (self *ApierV1) RemActionTiming(attrs AttrRemAcntActionTiming, reply *string) error {
+func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"ActionTimingsId"}); len(missing) != 0 { // Only mandatory ActionTimingsId
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -95,6 +95,52 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemAcntActionTiming, reply *strin
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	// ToDo: Unlock here actionTimings
+	*reply = OK
+	return nil
+}
+
+// Returns a list of ActionTriggers on an account
+func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntActionTimings, reply *engine.ActionTriggerPriotityList) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if balance, err := self.AccountDb.GetUserBalance(utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = balance.ActionTriggers
+	}
+	return nil
+}
+
+type AttrRemAcntActionTriggers struct {
+	Tenant          string // Tenant he account belongs to
+	Account         string // Account name
+	Direction       string // Traffic direction
+	ActionTriggerId string // Id filtering only specific id to remove
+}
+
+// Returns a list of ActionTriggers on an account
+func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTrigger, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	ub, err := self.AccountDb.GetUserBalance(utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction))
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	for idx, actr := range ub.ActionTriggers {
+		if len(attrs.ActionTriggerId) != 0 && actr.Id != attrs.ActionTriggerId { // Empty actionTriggerId will match always
+			continue
+		}
+		if len(ub.ActionTriggers) != 1 { // Remove by index
+			ub.ActionTriggers[idx], ub.ActionTriggers = ub.ActionTriggers[len(ub.ActionTriggers)-1], ub.ActionTriggers[:len(ub.ActionTriggers)-1]
+		} else { // For last item, simply reinit the slice
+			ub.ActionTriggers = make(engine.ActionTriggerPriotityList, 0)
+		}
+	}
+	if err := self.AccountDb.SetUserBalance(ub); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
 	*reply = OK
 	return nil
 }
