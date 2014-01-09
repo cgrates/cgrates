@@ -40,11 +40,10 @@ func NewScheduler() *Scheduler {
 
 func (s *Scheduler) Loop() {
 	for {
-		s.Lock()
 		for len(s.queue) == 0 { //hang here if empty
-			s.Unlock()
 			<-s.restartLoop
 		}
+		s.Lock()
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
