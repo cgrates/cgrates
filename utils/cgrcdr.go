@@ -22,8 +22,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 	"strings"
+	"time"
 )
 
 func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
@@ -177,7 +177,7 @@ func (cgrCdr CgrCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torF
 			return nil, err
 		}
 	}
-	if durStr, hasKey = cgrCdr[durationFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(durationFld, STATIC_VALUE_PREFIX){
+	if durStr, hasKey = cgrCdr[durationFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(durationFld, STATIC_VALUE_PREFIX) {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, durationFld))
 	} else {
 		if strings.HasPrefix(durationFld, STATIC_VALUE_PREFIX) {

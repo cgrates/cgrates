@@ -24,7 +24,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -295,4 +294,33 @@ func (atpl ActionTimingPriotityList) Sort() {
 
 func (at *ActionTiming) String_DISABLED() string {
 	return at.Tag + " " + at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
+}
+
+// Helper to remove ActionTiming members based on specific filters, empty data means no always match
+func RemActionTiming(ats ActionTimings, actionTimingId, balanceId string) ActionTimings {
+	for idx, at := range ats {
+		if len(actionTimingId)!=0 && at.Id!=actionTimingId { // No Match for ActionTimingId, no need to move further
+			continue
+		}
+		if len(balanceId) == 0 { // No account defined, considered match for complete removal
+			if len(ats) == 1 { // Removing last item, by init empty
+				return make([]*ActionTiming,0)
+			}
+			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
+			continue
+		}
+		for iBlnc, blncId := range at.UserBalanceIds {
+			if blncId == balanceId {
+				if len(at.UserBalanceIds) == 1 { // Only one balance, remove complete at
+					if len(ats) == 1 { // Removing last item, by init empty
+						return make([]*ActionTiming,0)
+					}
+					 ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
+				} else {
+					at.UserBalanceIds[iBlnc], at.UserBalanceIds = at.UserBalanceIds[len(at.UserBalanceIds)-1], at.UserBalanceIds[:len(at.UserBalanceIds)-1]
+				}
+			}
+		}
+	}
+	return ats
 }

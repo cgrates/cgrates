@@ -24,29 +24,24 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"os"
 	"path"
+	"strings"
 	"time"
 )
 
-type AttrExpCsvCdrs struct {
-	TimeStart string // If provided, will represent the starting of the CDRs interval (>=)
-	TimeEnd   string // If provided, will represent the end of the CDRs interval (<)
-}
-
-type ExportedCsvCdrs struct {
-	ExportedFilePath string // Full path to the newly generated export file
-	NumberOfCdrs     int    // Number of CDRs in the export file
-}
-
-func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *ExportedCsvCdrs) error {
+func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
 	var tStart, tEnd time.Time
 	var err error
+	cdrFormat := strings.ToLower(attr.CdrFormat)
+	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
+	}
 	if len(attr.TimeStart) != 0 {
-		if tStart, err = utils.ParseDate(attr.TimeStart); err != nil {
+		if tStart, err = utils.ParseTimeDetectLayout(attr.TimeStart); err != nil {
 			return err
 		}
 	}
 	if len(attr.TimeEnd) != 0 {
-		if tEnd, err = utils.ParseDate(attr.TimeEnd); err != nil {
+		if tEnd, err = utils.ParseTimeDetectLayout(attr.TimeEnd); err != nil {
 			return err
 		}
 	}
@@ -54,21 +49,33 @@ func (self *ApierV1) ExportCsvCdrs(attr *AttrExpCsvCdrs, reply *ExportedCsvCdrs)
 	if err != nil {
 		return err
 	}
-	fileName := path.Join(self.Config.CdreDir, "cgr", "csv", fmt.Sprintf("cdrs_%d.csv", time.Now().Unix()))
-	fileOut, err := os.Create(fileName)
-	if err != nil {
-		return err
-	} else {
-		defer fileOut.Close()
-	}
-	csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CdreExtraFields)
-	for _, cdr := range cdrs {
-		if err := csvWriter.Write(cdr); err != nil {
-			os.Remove(fileName)
+	var fileName string
+	if cdrFormat == utils.CDRE_CSV && len(cdrs) != 0 {
+		fileName = path.Join(self.Config.CdreDir, fmt.Sprintf("cdrs_%d.csv", time.Now().Unix()))
+		fileOut, err := os.Create(fileName)
+		if err != nil {
 			return err
+		} else {
+			defer fileOut.Close()
+		}
+		csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CdreExtraFields)
+		for _, cdr := range cdrs {
+			if err := csvWriter.Write(cdr); err != nil {
+				os.Remove(fileName)
+				return err
+			}
+		}
+		csvWriter.Close()
+		if attr.RemoveFromDb {
+			cgrIds := make([]string, len(cdrs))
+			for idx, cdr := range cdrs {
+				cgrIds[idx] = cdr.CgrId
+			}
+			if err := self.CdrDb.RemRatedCdrs(cgrIds); err != nil {
+				return err
+			}
 		}
 	}
-	csvWriter.Close()
-	*reply = ExportedCsvCdrs{fileName, len(cdrs)}
+	*reply = utils.ExportedFileCdrs{fileName, len(cdrs)}
 	return nil
 }

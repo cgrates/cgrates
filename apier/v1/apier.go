@@ -289,6 +289,7 @@ type AttrSetActionTimings struct {
 	ActionTimingsId string             // Profile id
 	Overwrite       bool               // If previously defined, will be overwritten
 	ActionTimings   []*ApiActionTiming // Set of actions this Actions profile will perform
+	ReloadScheduler bool               // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
 }
 
 type ApiActionTiming struct {
@@ -343,6 +344,10 @@ func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string)
 	if err := self.AccountDb.SetActionTimings(attrs.ActionTimingsId, storeAtms); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	if attrs.ReloadScheduler && self.Sched != nil {
+		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.Restart()
+	}
 	*reply = OK
 	return nil
 }
@@ -376,7 +381,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		Executed:       false,
 	}
 
-	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
+	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
 	_, err := engine.AccLock.Guard(tag, func() (float64, error) {
 		userBalance, err := self.AccountDb.GetUserBalance(tag)
 		if err != nil {
@@ -411,7 +416,7 @@ func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
+	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
 	ub := &engine.UserBalance{
 		Id:   tag,
 		Type: attr.Type,
@@ -442,7 +447,7 @@ func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
 }
 
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
-func (self *ApierV1) SetAccountActions(attrs utils.TPAccountActions, reply *string) error {
+func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -465,14 +470,14 @@ func (self *ApierV1) SetAccountActions(attrs utils.TPAccountActions, reply *stri
 }
 
 func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
-	if self.Sched != nil {
-		self.Sched.LoadActionTimings(self.AccountDb)
-		self.Sched.Restart()
-		*reply = OK
-		return nil
+	if self.Sched == nil {
+		return errors.New(utils.ERR_NOT_FOUND)
 	}
-	*reply = utils.ERR_NOT_FOUND
-	return errors.New(utils.ERR_NOT_FOUND)
+	self.Sched.LoadActionTimings(self.AccountDb)
+	self.Sched.Restart()
+	*reply = OK
+	return nil
+	
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {

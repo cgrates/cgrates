@@ -99,6 +99,7 @@ type CdrStorage interface {
 	SetCdr(utils.RawCDR) error
 	SetRatedCdr(*utils.RatedCDR, string) error
 	GetRatedCdrs(time.Time, time.Time) ([]*utils.RatedCDR, error)
+	RemRatedCdrs([]string) error
 }
 
 type LogStorage interface {

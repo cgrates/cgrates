@@ -31,6 +31,9 @@ import (
 	"reflect"
 	"testing"
 	"time"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
@@ -119,7 +122,7 @@ func TestStartEngine(t *testing.T) {
 		t.Fatal("Cannot find cgr-engine executable")
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	engine := exec.Command(enginePath, "-rater", "-scheduler", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
+	engine := exec.Command(enginePath, "-rater", "-scheduler", "-cdrs", "-mediator", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
@@ -754,17 +757,17 @@ func TestApierSetRatingProfile(t *testing.T) {
 	}
 }
 
-// Test here SetAccountActions
-func TestApierSetAccountActions(t *testing.T) {
+// Test here LoadAccountActions
+func TestApierLoadAccountActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	reply := ""
 	aa1 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
-	if err := rater.Call("ApierV1.SetAccountActions", aa1, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetAccountActions: ", err.Error())
+	if err := rater.Call("ApierV1.LoadAccountActions", aa1, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadAccountActions: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.SetAccountActions got reply: ", reply)
+		t.Error("Calling ApierV1.LoadAccountActions got reply: ", reply)
 	}
 }
 
@@ -984,23 +987,67 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	*attrs2 = *attrs
 	attrs2.Account = "dan3" // Does not exist so it should error when adding triggers on it
 	// Add trigger to an account which does n exist
-	if err := rater.Call("ApierV1.ExecuteAction", attrs2, &reply2); err == nil || reply2 == "OK" {
+	if err := rater.Call("ApierV1.AddTriggeredAction", attrs2, &reply2); err == nil || reply2 == "OK" {
 		t.Error("Expecting error on ApierV1.AddTriggeredAction.", err, reply2)
 	}
 }
+
+
+
+// Test here AddTriggeredAction
+func TestApierGetAccountActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply engine.ActionTriggerPriotityList
+	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan2", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
+	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
+		t.Errorf("Unexpected action triggers received %v", reply)
+	}
+}
+
+// Test here RemAccountActionTriggers
+func TestApierRemAccountActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	// Test first get so we can steal the id which we need to remove
+	var reply engine.ActionTriggerPriotityList
+	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan2", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
+	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
+		t.Errorf("Unexpected action triggers received %v", reply)
+	}
+	var rmReply string
+	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account:"dan2", Direction: "*out", ActionTriggerId: reply[0].Id}
+	if err := rater.Call("ApierV1.RemAccountActionTriggers", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
+	} else if rmReply != OK {
+		t.Error("Unexpected answer received", rmReply)
+	}
+	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTriggers: ", err.Error())
+	} else if len(reply) != 0 {
+		t.Errorf("Unexpected action triggers received %v", reply)
+	}
+}
+
 
 // Test here AddAccount
 func TestApierAddAccount(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	//reply := ""
-	attrs := &AttrAddAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan4", Type: "prepaid", ActionTimingsId: "PREPAID_10"}
-	//if err := rater.Call("ApierV1.AddAccount", attrs, &reply); err != nil {
-	//	t.Error("Got error on ApierV1.AddAccount: ", err.Error())
-	//} else if reply != "OK" {
-	//	t.Errorf("Calling ApierV1.AddAccount received: %s", reply)
-	//}
+	reply := ""
+	attrs := &AttrAddAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan4", Type: "prepaid", ActionTimingsId: "ATMS_1"}
+	if err := rater.Call("ApierV1.AddAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddAccount: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddAccount received: %s", reply)
+	}
 	reply2 := ""
 	attrs2 := new(AttrAddAccount)
 	*attrs2 = *attrs
@@ -1008,6 +1055,45 @@ func TestApierAddAccount(t *testing.T) {
 	// Add account with actions timing which does not exist
 	if err := rater.Call("ApierV1.AddAccount", attrs2, &reply2); err == nil || reply2 == "OK" {
 		t.Error("Expecting error on ApierV1.AddAccount.", err, reply2)
+	}
+}
+
+// Test here GetAccountActionTimings
+func TestApierGetAccountActionTimings(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply []*AccountActionTiming
+	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan4", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccountActionTimings", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
+	} else if len(reply) != 1 {
+		t.Error("Unexpected action timings received")
+	} else {
+		if reply[0].ActionTimingsId != "ATMS_1" {
+			t.Errorf("Unexpected ActionTImingsId received")
+		}
+	}
+}
+
+// Test here RemActionTiming
+func TestApierRemActionTiming(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var rmReply string
+	rmReq := AttrRemActionTiming{ActionTimingsId: "ATMS_1", Tenant: "cgrates.org", Account:"dan4", Direction: "*out"}
+	if err := rater.Call("ApierV1.RemActionTiming", rmReq, &rmReply); err != nil {
+		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
+	} else if rmReply != OK {
+		t.Error("Unexpected answer received", rmReply)
+	}
+	var reply []*AccountActionTiming
+	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan4", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccountActionTimings", req, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
+	} else if len(reply) != 0 {
+		t.Error("Action timings was not removed")
 	}
 }
 
@@ -1079,6 +1165,52 @@ func TestResponderGetCost(t *testing.T) {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
 	}
 }
+
+func TestCdrServer(t *testing.T) {
+	httpClient := new(http.Client)
+	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"}, 
+		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"}, 
+		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"}, 
+		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"}, 
+		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
+		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
+		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cfg.CdrcCdrs), cdrForm); err != nil {
+			t.Error(err.Error())
+		}
+	}
+}
+
+func TestExportCdrsToFile(t *testing.T) {
+	var reply *utils.ExportedFileCdrs
+	req := utils.AttrExpFileCdrs{}
+	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
+		t.Error("Failed to detect missing parameter")
+	}
+	req.CdrFormat = utils.CDRE_DRYRUN
+	expectReply := &utils.ExportedFileCdrs{NumberOfRecords: 2}
+	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(reply, expectReply) {
+		t.Errorf("Unexpected reply: %v", reply)
+	}
+	/* Need to implement temporary file writing in order to test removal from db, not possible on DRYRUN
+	req.RemoveFromDb = true
+	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(reply, expectReply) {
+		t.Errorf("Unexpected reply: %v", reply)
+	}
+	expectReply.NumberOfRecords = 0 // We should have deleted previously
+	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(reply, expectReply) {
+		t.Errorf("Unexpected reply: %v", reply)
+	}
+	*/
+}
+
 
 // Simply kill the engine after we are done with tests within this file
 func TestStopEngine(t *testing.T) {

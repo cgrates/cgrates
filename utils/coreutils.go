@@ -101,12 +101,15 @@ func Round(x float64, prec int, method string) float64 {
 
 func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 	var nilTime time.Time
-	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+`)
-	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}`)
-	unixTimestampRule := regexp.MustCompile(`^\d{10}`)
+	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
+	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
+	gotimeRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
+	unixTimestampRule := regexp.MustCompile(`^\d{10}$`)
 	switch {
 	case rfc3339Rule.MatchString(tmStr):
 		return time.Parse(time.RFC3339, tmStr)
+	case gotimeRule.MatchString(tmStr):
+		return time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", tmStr)
 	case sqlRule.MatchString(tmStr):
 		return time.Parse("2006-01-02 15:04:05", tmStr)
 	case unixTimestampRule.MatchString(tmStr):
@@ -179,4 +182,8 @@ func ParseDurationWithSecs(durStr string) (time.Duration, error) {
 		durStr += "s"
 	}
 	return time.ParseDuration(durStr)
+}
+
+func BalanceKey(tenant, account, direction string ) string {
+	return fmt.Sprintf("%s:%s:%s", direction, tenant, account)
 }

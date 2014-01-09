@@ -78,4 +78,10 @@ const (
 	DURATION                 = "duration"
 	DEFAULT_RUNID            = "default"
 	STATIC_VALUE_PREFIX      = "^"
+	CDRE_CSV                 = "csv"
+	CDRE_DRYRUN              = "dry_run"
+)
+
+var (
+	CdreCdrFormats = []string{CDRE_CSV, CDRE_DRYRUN}
 )
