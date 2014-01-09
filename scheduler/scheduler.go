@@ -42,6 +42,7 @@ func (s *Scheduler) Loop() {
 	for {
 		s.Lock()
 		for len(s.queue) == 0 { //hang here if empty
+			s.Unlock()
 			<-s.restartLoop
 		}
 		a0 := s.queue[0]
