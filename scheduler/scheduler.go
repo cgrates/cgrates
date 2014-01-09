@@ -52,19 +52,20 @@ func (s *Scheduler) Loop() {
 			s.queue = append(s.queue, a0)
 			s.queue = s.queue[1:]
 			sort.Sort(s.queue)
+			s.Unlock()
 		} else {
+			s.Unlock()
 			d := a0.GetNextStartTime().Sub(now)
 			// engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				engine.Logger.Info(fmt.Sprintf("Time for action on %v", s.queue[0]))
+				engine.Logger.Info(fmt.Sprintf("Time for action on %v", a0))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
 		}
-		s.Unlock()
 	}
 }
 
