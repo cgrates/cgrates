@@ -26,7 +26,7 @@ import (
 	"time"
 )
 
-type AttrAcntActionTimings struct {
+type AttrAcntAction struct {
 	Tenant    string
 	Account   string
 	Direction string
@@ -45,7 +45,7 @@ type AccountActionTiming struct {
 	NextExecTime    time.Time // Next execution time
 }
 
-func (self *ApierV1) GetAccountActionTimings(attrs AttrAcntActionTimings, reply *[]*AccountActionTiming) error {
+func (self *ApierV1) GetAccountActionTimings(attrs AttrAcntAction, reply *[]*AccountActionTiming) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -109,7 +109,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 }
 
 // Returns a list of ActionTriggers on an account
-func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntActionTimings, reply *engine.ActionTriggerPriotityList) error {
+func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engine.ActionTriggerPriotityList) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}

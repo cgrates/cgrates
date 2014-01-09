@@ -758,11 +758,12 @@ func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]*utils.Rat
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var cgrid, accid, cdrhost, cdrsrc, reqtype, direction, tenant, tor, account, subject, destination, runid string
+		var cgrid, accid, cdrhost, cdrsrc, reqtype, direction, tenant, tor, account, subject, destination string
 		var extraFields []byte
 		var answerTime time.Time
 		var duration int64
-		var cost float64
+		var runid sql.NullString // So we can export unmediated CDRs
+		var cost sql.NullFloat64 // So we can export unmediated CDRs
 		var extraFieldsMp map[string]string
 		if err := rows.Scan(&cgrid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &answerTime, &duration,
 			&extraFields, &runid, &cost); err != nil {
@@ -774,7 +775,7 @@ func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]*utils.Rat
 		storCdr := &utils.RatedCDR{
 			CgrId: cgrid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
 			TOR: tor, Account: account, Subject: subject, Destination: destination, AnswerTime: answerTime, Duration: time.Duration(duration),
-			ExtraFields: extraFieldsMp, MediationRunId: runid, Cost: cost,
+			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
 		cdrs = append(cdrs, storCdr)
 	}

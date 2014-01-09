@@ -65,6 +65,7 @@ var (
 	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
 	cdrsEnabled  = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
 	cdrcEnabled  = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
+	mediatorEnabled  = flag.Bool("mediator", false, "Enforce starting of the mediator service overwriting config")
 	pidFile      = flag.String("pid", "", "Write pid file")
 	bal          = balancer2go.NewBalancer()
 	exitChan     = make(chan bool)
@@ -372,6 +373,9 @@ func main() {
 	}
 	if *cdrcEnabled {
 		cfg.CdrcEnabled = *cdrcEnabled
+	}
+	if *mediatorEnabled {
+		cfg.MediatorEnabled = *mediatorEnabled
 	}
 	if cfg.RaterEnabled {
 		if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
