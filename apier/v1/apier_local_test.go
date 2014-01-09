@@ -754,17 +754,17 @@ func TestApierSetRatingProfile(t *testing.T) {
 	}
 }
 
-// Test here SetAccountActions
-func TestApierSetAccountActions(t *testing.T) {
+// Test here LoadAccountActions
+func TestApierLoadAccountActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	reply := ""
 	aa1 := &utils.TPAccountActions{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
-	if err := rater.Call("ApierV1.SetAccountActions", aa1, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetAccountActions: ", err.Error())
+	if err := rater.Call("ApierV1.LoadAccountActions", aa1, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadAccountActions: ", err.Error())
 	} else if reply != "OK" {
-		t.Error("Calling ApierV1.SetAccountActions got reply: ", reply)
+		t.Error("Calling ApierV1.LoadAccountActions got reply: ", reply)
 	}
 }
 

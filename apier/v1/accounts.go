@@ -71,6 +71,7 @@ type AttrRemActionTiming struct {
 	Tenant          string // Tenant he account belongs to
 	Account         string // Account name
 	Direction       string // Traffic direction
+	ReloadScheduler bool  // If set it will reload the scheduler after adding
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
@@ -83,18 +84,26 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 		}
 	}
-	// ToDo: lock here actionTimings
-	ats, err := self.AccountDb.GetActionTimings(attrs.ActionTimingsId)
+	_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX+attrs.ActionTimingId, func() (float64, error) { // ToDo: Expand the scheduler to consider the locks also
+		ats, err := self.AccountDb.GetActionTimings(attrs.ActionTimingsId)
+		if err != nil {
+			return 0, err
+		} else if len(ats) == 0 {
+			return 0, errors.New(utils.ERR_NOT_FOUND)
+		}
+		ats = engine.RemActionTiming(ats, attrs.ActionTimingId, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction))
+		if err := self.AccountDb.SetActionTimings(attrs.ActionTimingsId, ats); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	})
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if len(ats) == 0 {
-		return errors.New(utils.ERR_NOT_FOUND)
 	}
-	ats = engine.RemActionTiming(ats, attrs.ActionTimingId, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction))
-	if err := self.AccountDb.SetActionTimings(attrs.ActionTimingsId, ats); err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	if attrs.ReloadScheduler && self.Sched != nil {
+		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.Restart()
 	}
-	// ToDo: Unlock here actionTimings
 	*reply = OK
 	return nil
 }
@@ -120,25 +129,32 @@ type AttrRemAcntActionTriggers struct {
 }
 
 // Returns a list of ActionTriggers on an account
-func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTrigger, reply *string) error {
+func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	ub, err := self.AccountDb.GetUserBalance(utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction))
+	balanceId := utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)
+	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
+		ub, err := self.AccountDb.GetUserBalance(balanceId)
+		if err != nil {
+			return 0, err
+		}
+		for idx, actr := range ub.ActionTriggers {
+			if len(attrs.ActionTriggerId) != 0 && actr.Id != attrs.ActionTriggerId { // Empty actionTriggerId will match always
+				continue
+			}
+			if len(ub.ActionTriggers) != 1 { // Remove by index
+				ub.ActionTriggers[idx], ub.ActionTriggers = ub.ActionTriggers[len(ub.ActionTriggers)-1], ub.ActionTriggers[:len(ub.ActionTriggers)-1]
+			} else { // For last item, simply reinit the slice
+				ub.ActionTriggers = make(engine.ActionTriggerPriotityList, 0)
+			}
+		}
+		if err := self.AccountDb.SetUserBalance(ub); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	})
 	if err != nil {
-		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	}
-	for idx, actr := range ub.ActionTriggers {
-		if len(attrs.ActionTriggerId) != 0 && actr.Id != attrs.ActionTriggerId { // Empty actionTriggerId will match always
-			continue
-		}
-		if len(ub.ActionTriggers) != 1 { // Remove by index
-			ub.ActionTriggers[idx], ub.ActionTriggers = ub.ActionTriggers[len(ub.ActionTriggers)-1], ub.ActionTriggers[:len(ub.ActionTriggers)-1]
-		} else { // For last item, simply reinit the slice
-			ub.ActionTriggers = make(engine.ActionTriggerPriotityList, 0)
-		}
-	}
-	if err := self.AccountDb.SetUserBalance(ub); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = OK
