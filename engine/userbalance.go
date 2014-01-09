@@ -207,7 +207,8 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 						sharedMoneyBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[CREDIT+cc.Direction], balance.SharedGroup)
 						for _, sharedBalance := range sharedMinuteBalances {
 							// FIXME: insert money balances after users balances
-							sharedBalance.DebitMinutes(cc, count, nUb, sharedMoneyBalances)
+              allMoneyBalances := append(usefulMoneyBalances, sharedMoneyBalances)
+							sharedBalance.DebitMinutes(cc, count, nUb, allMoneyBalances)
 							// FIXME: save nUb
 						}
 						return 0, nil
