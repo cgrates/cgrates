@@ -68,3 +68,21 @@ func (cm *AccountLock) Guard(name string, handler func() (float64, error)) (repl
 	<-lock
 	return
 }
+
+func (cm *AccountLock) GuardMany(names []string, handler func() (float64, error)) (reply float64, err error) {
+	for _, name := range names {
+		cm.RLock()
+		lock, exists := AccLock.queue[name]
+		cm.RUnlock()
+		if !exists {
+			cm.Lock()
+			lock = make(chan bool, 1)
+			AccLock.queue[name] = lock
+			cm.Unlock()
+		}
+		lock <- true
+		reply, err = handler()
+		<-lock
+	}
+	return
+}
