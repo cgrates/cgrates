@@ -21,6 +21,7 @@ package scheduler
 import (
 	"fmt"
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
@@ -30,6 +31,7 @@ type Scheduler struct {
 	queue       engine.ActionTimingPriotityList
 	timer       *time.Timer
 	restartLoop chan bool
+	sync.Mutex
 }
 
 func NewScheduler() *Scheduler {
@@ -38,6 +40,7 @@ func NewScheduler() *Scheduler {
 
 func (s *Scheduler) Loop() {
 	for {
+		s.Lock()
 		for len(s.queue) == 0 { //hang here if empty
 			<-s.restartLoop
 		}
@@ -61,6 +64,7 @@ func (s *Scheduler) Loop() {
 				// nothing to do, just continue the loop
 			}
 		}
+		s.Unlock()
 	}
 }
 
@@ -70,6 +74,7 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 		engine.Logger.Warning(fmt.Sprintf("Cannot get action timings: %v", err))
 	}
 	// recreate the queue
+	s.Lock()
 	s.queue = engine.ActionTimingPriotityList{}
 	for key, ats := range actionTimings {
 		toBeSaved := false
@@ -92,6 +97,7 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 		}
 	}
 	sort.Sort(s.queue)
+	s.Unlock()
 }
 
 func (s *Scheduler) Restart() {
