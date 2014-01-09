@@ -909,6 +909,32 @@ func TestApierAddBalance(t *testing.T) {
 	} else if reply != "OK" {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceId: "*monetary", Direction: "*out", Value: 1.5}
+	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan3", BalanceId: "*monetary", Direction: "*out", Value: 2.1}
+	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceId: "*monetary", Direction: "*out", Value: 2.1}
+	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+	attrs = &AttrAddBalance{Tenant: "cgrates.org", Account: "dan6", BalanceId: "*monetary", Direction: "*out", Value: 1, Overwrite: true}
+	if err := rater.Call("ApierV1.AddBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
+	}
+
+
 }
 
 // Test here ExecuteAction
@@ -985,7 +1011,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	reply2 := ""
 	attrs2 := new(AttrAddActionTrigger)
 	*attrs2 = *attrs
-	attrs2.Account = "dan3" // Does not exist so it should error when adding triggers on it
+	attrs2.Account = "dan10" // Does not exist so it should error when adding triggers on it
 	// Add trigger to an account which does n exist
 	if err := rater.Call("ApierV1.AddTriggeredAction", attrs2, &reply2); err == nil || reply2 == "OK" {
 		t.Error("Expecting error on ApierV1.AddTriggeredAction.", err, reply2)
@@ -1121,6 +1147,18 @@ func TestApierGetBalance(t *testing.T) {
 		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
 	} else if reply != 10 {
 		t.Errorf("Calling ApierV1.GetBalance expected: 10, received: %f", reply)
+	}
+	attrs = &AttrGetBalance{Tenant: "cgrates.org", Account: "dan3", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
+	} else if reply != 3.6 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 3.6, received: %f", reply)
+	}
+	attrs = &AttrGetBalance{Tenant: "cgrates.org", Account: "dan6", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
+	} else if reply != 1 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 1, received: %f", reply)
 	}
 }
 

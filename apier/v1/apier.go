@@ -93,11 +93,11 @@ type AttrAddBalance struct {
 	BalanceId string
 	Direction string
 	Value     float64
+	Overwrite bool // When true it will reset if the balance is already there
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-
 	if _, err := self.AccountDb.GetUserBalance(tag); err != nil {
 		// create user balance if not exists
 		ub := &engine.UserBalance{
@@ -108,7 +108,6 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			return err
 		}
 	}
-
 	at := &engine.ActionTiming{
 		UserBalanceIds: []string{tag},
 	}
@@ -116,9 +115,11 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	if attr.Direction == "" {
 		attr.Direction = engine.OUTBOUND
 	}
-
-	at.SetActions(engine.Actions{&engine.Action{ActionType: engine.TOPUP, BalanceId: attr.BalanceId, Direction: attr.Direction, Balance: &engine.Balance{Value: attr.Value}}})
-
+	aType := engine.TOPUP
+	if attr.Overwrite {
+		aType = engine.TOPUP_RESET
+	}
+	at.SetActions(engine.Actions{&engine.Action{ActionType: aType, BalanceId: attr.BalanceId, Direction: attr.Direction, Balance: &engine.Balance{Value: attr.Value}}})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
