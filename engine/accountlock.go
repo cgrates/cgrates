@@ -81,7 +81,10 @@ func (cm *AccountLock) GuardMany(names []string, handler func() (float64, error)
 			cm.Unlock()
 		}
 		lock <- true
-		reply, err = handler()
+	}
+	reply, err = handler()
+	for _, name := range names {
+		lock := AccLock.queue[name]
 		<-lock
 	}
 	return
