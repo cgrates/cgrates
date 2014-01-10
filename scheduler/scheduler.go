@@ -40,10 +40,10 @@ func NewScheduler() *Scheduler {
 
 func (s *Scheduler) Loop() {
 	for {
-		s.Lock()
 		for len(s.queue) == 0 { //hang here if empty
 			<-s.restartLoop
 		}
+		s.Lock()
 		a0 := s.queue[0]
 		now := time.Now()
 		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
@@ -52,19 +52,20 @@ func (s *Scheduler) Loop() {
 			s.queue = append(s.queue, a0)
 			s.queue = s.queue[1:]
 			sort.Sort(s.queue)
+			s.Unlock()
 		} else {
+			s.Unlock()
 			d := a0.GetNextStartTime().Sub(now)
 			// engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
 			s.timer = time.NewTimer(d)
 			select {
 			case <-s.timer.C:
 				// timer has expired
-				engine.Logger.Info(fmt.Sprintf("Time for action on %v", s.queue[0]))
+				engine.Logger.Info(fmt.Sprintf("Time for action on %v", a0))
 			case <-s.restartLoop:
 				// nothing to do, just continue the loop
 			}
 		}
-		s.Unlock()
 	}
 }
 
@@ -93,7 +94,10 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 			}
 		}
 		if toBeSaved {
-			storage.SetActionTimings(key, newAts)
+			engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) {
+				storage.SetActionTimings(key, newAts)
+				return 0, nil
+			})
 		}
 	}
 	sort.Sort(s.queue)

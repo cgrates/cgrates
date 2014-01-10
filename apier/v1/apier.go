@@ -94,11 +94,11 @@ type AttrAddBalance struct {
 	BalanceId string
 	Direction string
 	Value     float64
+	Overwrite bool // When true it will reset if the balance is already there
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-
 	if _, err := self.AccountDb.GetUserBalance(tag); err != nil {
 		// create user balance if not exists
 		ub := &engine.UserBalance{
@@ -109,7 +109,6 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			return err
 		}
 	}
-
 	at := &engine.ActionTiming{
 		UserBalanceIds: []string{tag},
 	}
@@ -117,9 +116,11 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	if attr.Direction == "" {
 		attr.Direction = engine.OUTBOUND
 	}
-
-	at.SetActions(engine.Actions{&engine.Action{ActionType: engine.TOPUP, BalanceId: attr.BalanceId, Direction: attr.Direction, Balance: &engine.Balance{Value: attr.Value}}})
-
+	aType := engine.TOPUP
+	if attr.Overwrite {
+		aType = engine.TOPUP_RESET
+	}
+	at.SetActions(engine.Actions{&engine.Action{ActionType: aType, BalanceId: attr.BalanceId, Direction: attr.Direction, Balance: &engine.Balance{Value: attr.Value}}})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
 		return err
@@ -398,49 +399,6 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	if err != nil {
 		*reply = err.Error()
 		return err
-	}
-	*reply = OK
-	return nil
-}
-
-type AttrAddAccount struct {
-	Tenant          string
-	Direction       string
-	Account         string
-	Type            string // prepaid-postpaid
-	ActionTimingsId string
-}
-
-// Ads a new account into dataDb. If already defined, returns success.
-func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
-	ub := &engine.UserBalance{
-		Id:   tag,
-		Type: attr.Type,
-	}
-
-	if attr.ActionTimingsId != "" {
-		if ats, err := self.AccountDb.GetActionTimings(attr.ActionTimingsId); err == nil {
-			for _, at := range ats {
-				engine.Logger.Debug(fmt.Sprintf("Found action timings: %v", at))
-				at.UserBalanceIds = append(at.UserBalanceIds, tag)
-			}
-			err = self.AccountDb.SetActionTimings(attr.ActionTimingsId, ats)
-			if err != nil {
-				if self.Sched != nil {
-					self.Sched.LoadActionTimings(self.AccountDb)
-					self.Sched.Restart()
-				}
-			}
-			if err := self.AccountDb.SetUserBalance(ub); err != nil {
-				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-			}
-		} else {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-		}
 	}
 	*reply = OK
 	return nil

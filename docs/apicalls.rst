@@ -326,21 +326,21 @@ AddTriggeredAction
 Example
 	AddTriggeredAction(attr \*AttrAddActionTrigger, reply \*float64)
 
-AddAcount
+SetAcount
 +++++++++
 
 ::
 
-	type AttrAddAccount struct {
+	type AttrSetAccount struct {
 		Tenant          string
 		Direction       string
 		Account         string
-		Type            string // prepaid-postpaid
+		Type            string // <*prepaid|*postpaid>
 		ActionTimingsId string
 	}
 	
 Example
-	AddAccount(attr \*AttrAddAccount, reply \*float64)
+	AddAccount(attr \*AttrAddAccount, reply \*string)
 
 
 
