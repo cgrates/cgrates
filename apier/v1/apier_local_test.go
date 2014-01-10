@@ -56,7 +56,7 @@ var cfg *config.CGRConfig
 var rater *rpc.Client
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
-var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
+var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 
