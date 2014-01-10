@@ -403,49 +403,6 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	return nil
 }
 
-type AttrAddAccount struct {
-	Tenant          string
-	Direction       string
-	Account         string
-	Type            string // prepaid-postpaid
-	ActionTimingsId string
-}
-
-// Ads a new account into dataDb. If already defined, returns success.
-func (self *ApierV1) AddAccount(attr AttrAddAccount, reply *string) error {
-	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account", "Type", "ActionTimingsId"}); len(missing) != 0 {
-		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
-	}
-	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
-	ub := &engine.UserBalance{
-		Id:   tag,
-		Type: attr.Type,
-	}
-
-	if attr.ActionTimingsId != "" {
-		if ats, err := self.AccountDb.GetActionTimings(attr.ActionTimingsId); err == nil {
-			for _, at := range ats {
-				engine.Logger.Debug(fmt.Sprintf("Found action timings: %v", at))
-				at.UserBalanceIds = append(at.UserBalanceIds, tag)
-			}
-			err = self.AccountDb.SetActionTimings(attr.ActionTimingsId, ats)
-			if err != nil {
-				if self.Sched != nil {
-					self.Sched.LoadActionTimings(self.AccountDb)
-					self.Sched.Restart()
-				}
-			}
-			if err := self.AccountDb.SetUserBalance(ub); err != nil {
-				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-			}
-		} else {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-		}
-	}
-	*reply = OK
-	return nil
-}
-
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
 func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 {

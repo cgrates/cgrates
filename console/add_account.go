@@ -30,7 +30,7 @@ func init() {
 // Commander implementation
 type CmdAddAccount struct {
 	rpcMethod string
-	rpcParams *apier.AttrAddAccount
+	rpcParams *apier.AttrSetAccount
 	rpcResult string
 }
 
@@ -41,8 +41,8 @@ func (self *CmdAddAccount) Usage(name string) string {
 
 // set param defaults
 func (self *CmdAddAccount) defaults() error {
-	self.rpcMethod = "ApierV1.AddAccount"
-	self.rpcParams = &apier.AttrAddAccount{Direction: "*out"}
+	self.rpcMethod = "ApierV1.SetAccount"
+	self.rpcParams = &apier.AttrSetAccount{Direction: "*out"}
 	return nil
 }
 

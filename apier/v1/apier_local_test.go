@@ -1062,27 +1062,28 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 }
 
 
-// Test here AddAccount
-func TestApierAddAccount(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	reply := ""
-	attrs := &AttrAddAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan4", Type: "prepaid", ActionTimingsId: "ATMS_1"}
-	if err := rater.Call("ApierV1.AddAccount", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.AddAccount: ", err.Error())
-	} else if reply != "OK" {
-		t.Errorf("Calling ApierV1.AddAccount received: %s", reply)
-	}
-	reply2 := ""
-	attrs2 := new(AttrAddAccount)
-	*attrs2 = *attrs
-	attrs2.ActionTimingsId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
-	// Add account with actions timing which does not exist
-	if err := rater.Call("ApierV1.AddAccount", attrs2, &reply2); err == nil || reply2 == "OK" {
-		t.Error("Expecting error on ApierV1.AddAccount.", err, reply2)
-	}
+// Test here SetAccount
+func TestApierSetAccount(t *testing.T) {
+        if !*testLocal {
+                return
+        }
+        reply := ""
+        attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", Type: "*prepaid", ActionTimingsId: "ATMS_1"}
+        if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
+                t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+        } else if reply != "OK" {
+                t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+        }
+        reply2 := ""
+        attrs2 := new(AttrSetAccount)
+        *attrs2 = *attrs
+        attrs2.ActionTimingsId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
+        // Add account with actions timing which does not exist
+        if err := rater.Call("ApierV1.SetAccount", attrs2, &reply2); err == nil || reply2 == "OK" { // OK is not welcomed
+                t.Error("Expecting error on ApierV1.SetAccount.", err, reply2)
+        }
 }
+
 
 // Test here GetAccountActionTimings
 func TestApierGetAccountActionTimings(t *testing.T) {
@@ -1090,7 +1091,7 @@ func TestApierGetAccountActionTimings(t *testing.T) {
 		return
 	}
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan4", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan7", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccountActionTimings", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 {

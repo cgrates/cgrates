@@ -78,7 +78,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 		}
 	}
-	_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) { // ToDo: Expand the scheduler to consider the locks also
+	_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) {
 		ats, err := self.AccountDb.GetActionTimings(attrs.ActionTimingsId)
 		if err != nil {
 			return 0, err
@@ -152,5 +152,75 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = OK
+	return nil
+}
+
+
+type AttrSetAccount struct {
+	Tenant          string
+	Direction       string
+	Account         string
+	Type            string // <*prepaid|*postpaid>
+	ActionTimingsId string
+}
+
+// Ads a new account into dataDb. If already defined, returns success.
+func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
+	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	balanceId := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
+	var ub *engine.UserBalance
+	var ats engine.ActionTimings
+	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
+		if bal, _ := self.AccountDb.GetUserBalance(balanceId); bal != nil {
+			ub = bal
+		} else { // Not found in db, create it here
+			if len(attr.Type) == 0 {
+				attr.Type = engine.UB_TYPE_PREPAID
+			} else if !utils.IsSliceMember([]string{engine.UB_TYPE_POSTPAID, engine.UB_TYPE_PREPAID}, attr.Type) {
+				return 0, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "Type")
+			}
+			ub = &engine.UserBalance{
+				Id:   balanceId,
+				Type: attr.Type,
+			}
+		}
+		
+		if len(attr.ActionTimingsId) != 0  {
+			var err error
+			ats, err = self.AccountDb.GetActionTimings(attr.ActionTimingsId)
+			if err != nil {
+				return 0, err
+			}
+			for _, at := range ats {
+				at.UserBalanceIds = append(at.UserBalanceIds, balanceId)
+			}
+		}
+		// All prepared, save account
+		if err := self.AccountDb.SetUserBalance(ub); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	})
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	if len(ats) != 0 {
+		_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) { // ToDo: Try locking it above on read somehow
+			if err := self.AccountDb.SetActionTimings(attr.ActionTimingsId, ats); err != nil {
+				return 0, err
+			}
+			return 0, nil
+		})
+		if err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		}
+		if self.Sched != nil {
+			self.Sched.LoadActionTimings(self.AccountDb)
+			self.Sched.Restart()
+		}
+	}
+	*reply = OK // This will mark saving of the account, error still can show up in actionTimingsId
 	return nil
 }
