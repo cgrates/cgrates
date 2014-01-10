@@ -94,7 +94,10 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 			}
 		}
 		if toBeSaved {
-			storage.SetActionTimings(key, newAts)
+			engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) {
+				storage.SetActionTimings(key, newAts)
+				return 0, nil
+			})
 		}
 	}
 	sort.Sort(s.queue)

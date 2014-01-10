@@ -32,12 +32,6 @@ type AttrAcntAction struct {
 	Direction string
 }
 
-// Returns the balance id as used internally
-// eg: *out:cgrates.org:1005
-func BalanceId(tenant, account, direction string) string {
-	return fmt.Sprintf("%s:%s:%s", direction, tenant, account)
-}
-
 type AccountActionTiming struct {
 	Id              string    // The id to reference this particular ActionTiming
 	ActionTimingsId string    // The id of the ActionTimings profile attached to the account
@@ -56,7 +50,7 @@ func (self *ApierV1) GetAccountActionTimings(attrs AttrAcntAction, reply *[]*Acc
 	}
 	for _, ats := range allATs {
 		for _, at := range ats {
-			if utils.IsSliceMember(at.UserBalanceIds, BalanceId(attrs.Tenant, attrs.Account, attrs.Direction)) {
+			if utils.IsSliceMember(at.UserBalanceIds, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
 				accountATs = append(accountATs, &AccountActionTiming{Id: at.Id, ActionTimingsId: at.Tag, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime()})
 			}
 		}
@@ -84,7 +78,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 			return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 		}
 	}
-	_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX+attrs.ActionTimingId, func() (float64, error) { // ToDo: Expand the scheduler to consider the locks also
+	_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) { // ToDo: Expand the scheduler to consider the locks also
 		ats, err := self.AccountDb.GetActionTimings(attrs.ActionTimingsId)
 		if err != nil {
 			return 0, err
