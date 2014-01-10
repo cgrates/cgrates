@@ -36,7 +36,7 @@ README:
  It is expected that the data folder of CGRateS exists at path /usr/share/cgrates/data.
 
  Prior running the tests, create database and users by running:
-  mysql -pyourrootpwd < /usr/share/cgrates/data/storage/mysql/create_mysql_with_users.sql
+  mysql -pyourrootpwd < /usr/share/cgrates/storage/mysql/create_mysql_with_users.sql
 */
 
 var mysql *MySQLStorage

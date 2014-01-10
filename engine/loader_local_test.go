@@ -47,7 +47,7 @@ var cfg *config.CGRConfig
 
 // Arguments received via test command
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
-var dataDir = flag.String("data_dir", "/usr/share/cgrates/data", "CGR data dir path here")
+var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var tpCsvScenario = flag.String("tp_scenario", "prepaid1centpsec", "Use this scenario folder to import tp csv data from")
 
 // Create connection to ratingDb
