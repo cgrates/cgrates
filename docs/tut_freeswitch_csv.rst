@@ -13,10 +13,10 @@ Scenario
 - **CGRateS** with following components:
 
  - CGR-SM started as prepaid controller, with debits taking place at 5s intervals.
- - CGR-CDRC component importing FreeSWITCH_ generated *.csv* CDRs into CGR (moving the processed *.csv* files to */tmp* folder).
- - CGR-Mediator compoenent attaching costs to the raw CDRs from CGR-CDRC.
- - CGR-CDRE exporting mediated CDRs (export path: */tmp*).
- - CGR-History component keeping the archive of the rates modifications (path: */tmp/cgr_history*).
+ - CGR-CDRC component importing FreeSWITCH_ generated *.csv* CDRs into CGR and moving the processed *.csv* files to */tmp* folder.
+ - CGR-Mediator compoenent attaching costs to the raw CDRs from CGR-CDRC inside CGR StorDB.
+ - CGR-CDRE exporting mediated CDRs from CGR StorDB (export path: */tmp*).
+ - CGR-History component keeping the archive of the rates modifications (path browsable with git client at */tmp/cgr_history*).
 
 
 Starting FreeSWITCH_ with custom configuration
@@ -103,12 +103,32 @@ To verify that all actions successfully performed, we use following *cgr-console
 Test calls
 ----------
 
-Calling between 1001 and 1003 should generate prepaid debits which can be checked with *get_balance* command integrated within *cgr-console* tool. The difference between calling from 1001 or 1003 should be reflected in fact that 1001 will generate real-time debits as opposite to 1003 which will only generate debits when CDRs will be processed. 
+
+1001 -> 1002
+~~~~~~~~~~~~
+
+Since the user 1001 is marked as prepaid inside FreeSWITCH_ directory configuration, calling between 1001 and 1002 should generate prepaid debits which can be checked with *get_balance* command integrated within *cgr-console* tool. As per our tariff plans, we should get first 60s charged as a whole, then in intervals of 1s (configured SessionManager debit interval of 10s).
+
+*Note*: An important particularity to  note here is the ability of **CGRateS** SessionManager to refund units booked in advance (eg: if debit occurs every 10s and rate increments are set to 1s, the SessionManager will be smart enough to refund pre-booked credits for calls stoped in the middle of debit interval).
+
+Check that 1001 balance is properly debitted, during the call:
 
 ::
 
  cgr-console get_balance cgrates.org 1001
+
+
+1002 -> 1001
+~~~~~~~~~~~~
+
+The user 1002 is marked as postpaid inside FreeSWITCH_ hence his calls will be debited at the end of the call instead of during a call and his balance will be able to go on negative without influencing his calls.
+
+To check that we had debits we use again console command, this time not during the call but at the end of it:
+
+::
+
  cgr-console get_balance cgrates.org 1002
+
 
 
 CDR processing

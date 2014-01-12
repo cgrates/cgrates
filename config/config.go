@@ -116,6 +116,7 @@ type CGRConfig struct {
 	SMRater                  string   // address where to access rater. Can be internal, direct rater address or the address of a balancer
 	SMRaterReconnects        int      // Number of reconnect attempts to rater
 	SMDebitInterval          int      // the period to be debited in advanced during a call (in seconds)
+	SMMaxCallDuration        time.Duration // The maximum duration of a call
 	MediatorEnabled          bool     // Starts Mediator service: <true|false>.
 	MediatorListen           string   // Mediator's listening interface: <internal>.
 	MediatorRater            string   // Address where to reach the Rater: <internal|x.y.z.y:1234>
@@ -219,6 +220,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.SMRater = "127.0.0.1:2012"
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
+	self.SMMaxCallDuration = time.Duration(3) * time.Hour
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
@@ -518,6 +520,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("session_manager", "debit_interval"); hasOpt {
 		cfg.SMDebitInterval, _ = c.GetInt("session_manager", "debit_interval")
+	}
+	if hasOpt = c.HasOption("session_manager", "max_call_duration"); hasOpt {
+		maxCallDurStr,_ := c.GetString("session_manager", "max_call_duration")
+		if cfg.SMMaxCallDuration, errParse = utils.ParseDurationWithSecs(maxCallDurStr); errParse != nil {
+			return nil, errParse
+		}
 	}
 	if hasOpt = c.HasOption("freeswitch", "server"); hasOpt {
 		cfg.FreeswitchServer, _ = c.GetString("freeswitch", "server")
