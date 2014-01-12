@@ -158,8 +158,8 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
-	if strings.TrimSpace(ev.GetReqType()) != utils.PREPAID {
-		return
+	if !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, strings.TrimSpace(ev.GetReqType())) {
+		return // we unpark only prepaid and pseudoprepaid calls
 	}
 	if ev.MissingParameter() {
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), MISSING_PARAMETER)
@@ -286,7 +286,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		}
 	}
 	// show only what was actualy refunded (stopped in timespan)
-	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
+	// engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
 		cd := &engine.CallDescriptor{
 			Direction:   lastCC.Direction,
@@ -306,7 +306,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	}
 	cost := refundIncrements.GetTotalCost()
 	lastCC.Cost -= cost
-	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
+	// engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 
 }
 
@@ -318,7 +318,7 @@ func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor) (c
 		// disconnect session
 		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
 	}
-	engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
+	// engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
 	if cc.GetDuration() == 0 || err != nil {
 		// engine.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		sm.DisconnectSession(s, INSUFFICIENT_FUNDS)

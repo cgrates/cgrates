@@ -112,7 +112,7 @@ func (s *Session) getSessionDurationFrom(now time.Time) (d time.Duration) {
 
 // Stops the debit loop
 func (s *Session) Close(ev Event) {
-	engine.Logger.Debug(fmt.Sprintf("Stopping debit for %s", s.uuid))
+	// engine.Logger.Debug(fmt.Sprintf("Stopping debit for %s", s.uuid))
 	if s == nil {
 		return
 	}
@@ -146,6 +146,6 @@ func (s *Session) SaveOperations() {
 			engine.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
 		}
 		s.sessionManager.GetDbLogger().LogCallCost(s.uuid, engine.SESSION_MANAGER_SOURCE, utils.DEFAULT_RUNID, firstCC)
-		engine.Logger.Debug(fmt.Sprintf("<SessionManager> End of call, having costs: %v", firstCC.String()))
+		// engine.Logger.Debug(fmt.Sprintf("<SessionManager> End of call, having costs: %v", firstCC.String()))
 	}()
 }
