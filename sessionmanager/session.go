@@ -77,6 +77,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 func (s *Session) startDebitLoop() {
 	nextCd := *s.callDescriptor
 	index := 0.0
+	debitPeriod := s.sessionManager.GetDebitPeriod()
 	for {
 		select {
 		case <-s.stopDebit:
@@ -86,9 +87,14 @@ func (s *Session) startDebitLoop() {
 		if index > 0 { // first time use the session start time
 			nextCd.TimeStart = nextCd.TimeEnd
 		}
-		nextCd.TimeEnd = nextCd.TimeStart.Add(s.sessionManager.GetDebitPeriod())
-		cc := s.sessionManager.LoopAction(s, &nextCd, index)
-		nextCd.TimeEnd = cc.GetEndTime()
+		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
+		nextCd.LoopIndex = index
+		nextCd.CallDuration += debitPeriod // first presumed duration
+		cc := s.sessionManager.LoopAction(s, &nextCd)
+		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
+		// update call duration with real debited duration
+		nextCd.CallDuration -= debitPeriod
+		nextCd.CallDuration += nextCd.GetDuration()
 		time.Sleep(cc.GetDuration())
 		index++
 	}
