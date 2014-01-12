@@ -152,7 +152,7 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 		case ev := <-watcher.Event:
 			if ev.IsCreate() && (self.cgrCfg.CdrcCdrType != FS_CSV || path.Ext(ev.Name) != ".csv") {
 				if err = self.processFile(ev.Name); err != nil {
-					return err
+					engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
 				}
 			}
 		case err := <-watcher.Error:
