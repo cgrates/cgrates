@@ -259,7 +259,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	}
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refundDuration := end.Sub(hangupTime)
-	initialRefundDuration := refundDuration
+	//initialRefundDuration := refundDuration
 	var refundIncrements engine.Increments
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]

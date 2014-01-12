@@ -107,7 +107,7 @@ Test calls
 1001 -> 1002
 ~~~~~~~~~~~~
 
-Since the user 1001 is marked as prepaid inside FreeSWITCH_ directory configuration, calling between 1001 and 1002 should generate prepaid debits which can be checked with *get_balance* command integrated within *cgr-console* tool. As per our tariff plans, we should get first 60s charged as a whole, then in intervals of 1s (configured SessionManager debit interval of 10s).
+Since the user 1001 is marked as *prepaid* inside FreeSWITCH_ directory configuration, calling between 1001 and 1002 should generate pre-auth and prepaid debits which can be checked with *get_balance* command integrated within *cgr-console* tool. As per our tariff plans, we should get first 60s charged as a whole, then in intervals of 1s (configured SessionManager debit interval of 10s).
 
 *Note*: An important particularity to  note here is the ability of **CGRateS** SessionManager to refund units booked in advance (eg: if debit occurs every 10s and rate increments are set to 1s, the SessionManager will be smart enough to refund pre-booked credits for calls stoped in the middle of debit interval).
 
@@ -121,7 +121,7 @@ Check that 1001 balance is properly debitted, during the call:
 1002 -> 1001
 ~~~~~~~~~~~~
 
-The user 1002 is marked as postpaid inside FreeSWITCH_ hence his calls will be debited at the end of the call instead of during a call and his balance will be able to go on negative without influencing his calls.
+The user 1002 is marked as *postpaid* inside FreeSWITCH_ hence his calls will be debited at the end of the call instead of during a call and his balance will be able to go on negative without influencing his new calls (no pre-auth).
 
 To check that we had debits we use again console command, this time not during the call but at the end of it:
 
@@ -130,20 +130,42 @@ To check that we had debits we use again console command, this time not during t
  cgr-console get_balance cgrates.org 1002
 
 
+1003 -> 1001
+~~~~~~~~~~~~
+
+The user 1003 is marked as *pseudoprepaid* inside FreeSWITCH_ hence his calls will be considered same as prepaid (no call setups possible on negative balance due to pre-auth mechanism) but not handled automatically by session manager. His call costs will be calculated directly out of CDRs and balance updated by the time when mediation process occurs. This is sometimes a good compromise of prepaid running without influencing performance (there are no recurrent call debits during a call).
+
+To check that there are no debits during or by the end of the call, but when the CDR is imported, run the command before and after rotating the FreeSWITCH_ *.csv* CDRs:
+
+::
+
+ cgr-console get_balance cgrates.org 1003
+
+
+1004 -> 1001
+~~~~~~~~~~~~
+
+The user 1004 is marked as *rated* inside FreeSWITCH_ hence his calls not interact in any way with accounting subsystem. The only action perfomed by **CGRateS** related to his calls wil be rating/mediation of his CDRs.
+
 
 CDR processing
 --------------
 
-For every call FreeSWITCH_ will generate CDR records within the *Master.csv* file. In order to avoid double-processing them we will use the rotate mechanism built in FreeSWITCH_. We rotate files via *fs_console* command:
+For every call FreeSWITCH_ will generate CDR records within the *Master.csv* file. 
+In order to avoid double-processing we will use the rotate mechanism built in FreeSWITCH_. We rotate files via *fs_console* command:
 
 ::
 
  fs_cli -x "cdr_csv rotate"
 
 
-On each rotate CGR-CDRC component will be informed via *inotify* subsystem and will instantly process the CDR file. The records end up in **CGRateS**/StorDB inside *cdrs_primary* table via CGR-CDRS. Once in there mediation will occur, generating the costs inside *rated_cdrs* and *cost_details* tables.
+On each rotate CGR-CDRC component will be informed via *inotify* subsystem and will instantly process the CDR file. The records end up in **CGRateS**/StorDB inside *cdrs_primary* table via CGR-CDRS. As soon as the CDR will hit CDRS component, mediation will occur, either considering the costs calculated in case of prepaid and postpaid calls out of *cost_details* table or query it's own one from rater in case of *pseudoprepaid* and *rated* CDRs.
 
 Once the CDRs are mediated, can be exported as *.csv* format again via remote command offered by *cgr-console* tool:
+
+::
+
+ cgr-console export_cdrs csv
 
 
 .. _FreeSWITCH: http://www.freeswitch.org/
