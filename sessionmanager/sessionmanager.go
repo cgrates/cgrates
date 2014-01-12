@@ -19,16 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"time"
 )
 
 type SessionManager interface {
 	Connect(*config.CGRConfig) error
 	DisconnectSession(*Session, string)
 	RemoveSession(*Session)
-	LoopAction(*Session, *engine.CallDescriptor, float64) *engine.CallCost
+	LoopAction(*Session, *engine.CallDescriptor) *engine.CallCost
 	GetDebitPeriod() time.Duration
 	GetDbLogger() engine.LogStorage
 	Shutdown() error

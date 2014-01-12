@@ -297,10 +297,8 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 
 }
 
-func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, index float64) (cc *engine.CallCost) {
+func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor) (cc *engine.CallCost) {
 	cc = &engine.CallCost{}
-	cd.LoopIndex = index
-	cd.CallDuration += sm.debitPeriod
 	err := sm.connector.MaxDebit(*cd, cc)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
