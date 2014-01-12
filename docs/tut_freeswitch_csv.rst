@@ -126,3 +126,5 @@ On each rotate CGR-CDRC component will be informed via *inotify* subsystem and w
 Once the CDRs are mediated, can be exported as *.csv* format again via remote command offered by *cgr-console* tool:
 
 
+.. _FreeSWITCH: http://www.freeswitch.org/
+.. _Jitsi: http://www.jitsi.org/

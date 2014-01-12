@@ -12,9 +12,3 @@ In these tutorials we exemplify few cases of integration between FreeSWITCH_ and
    tut_freeswitch_json
 
 
-
-.. _Redis: http://redis.io/
-.. _FreeSWITCH: http://www.freeswitch.org/
-.. _MySQL: http://www.mysql.org/
-.. _Jitsi: http://www.jitsi.org/
-.. _Git: http://git-scm.com/ 
