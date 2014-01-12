@@ -4,4 +4,4 @@
 .. toctree::
    :maxdepth: 2
 
-   tutfreeswitch
+   tut_freeswitch

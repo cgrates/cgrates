@@ -61,7 +61,7 @@ var (
 
 	flush         = flag.Bool("flushdb", false, "Flush the database before importing")
 	tpid          = flag.String("tpid", "", "The tariff plan id from the database")
-	dataPath      = flag.String("path", ".", "The path to folder containing the data files")
+	dataPath      = flag.String("path", "./", "The path to folder containing the data files")
 	version       = flag.Bool("version", false, "Prints the application version.")
 	verbose       = flag.Bool("verbose", false, "Enable detailed verbose logging output")
 	dryRun        = flag.Bool("dry_run", false, "When true will not save loaded data to dataDb but just parse it for consistency and errors.")
@@ -132,8 +132,18 @@ func main() {
 				log.Fatal(err, "\n\t", v.Message)
 			}
 		}
-		loader = engine.NewFileCSVReader(ratingDb, accountDb, ',', utils.DESTINATIONS_CSV, utils.TIMINGS_CSV, utils.RATES_CSV, utils.DESTINATION_RATES_CSV, utils.RATING_PLANS_CSV, utils.RATING_PROFILES_CSV, utils.ACTIONS_CSV, utils.ACTION_TIMINGS_CSV, utils.ACTION_TRIGGERS_CSV, utils.ACCOUNT_ACTIONS_CSV)
-	}
+		loader = engine.NewFileCSVReader(ratingDb, accountDb, ',', 
+				path.Join(*dataPath, utils.DESTINATIONS_CSV),
+				path.Join(*dataPath, utils.TIMINGS_CSV),
+				path.Join(*dataPath, utils.RATES_CSV),
+				path.Join(*dataPath, utils.DESTINATION_RATES_CSV),
+				path.Join(*dataPath, utils.RATING_PLANS_CSV),
+				path.Join(*dataPath, utils.RATING_PROFILES_CSV),
+				path.Join(*dataPath, utils.ACTIONS_CSV),
+				path.Join(*dataPath, utils.ACTION_TIMINGS_CSV),
+				path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
+				path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV))
+	}			
 	err = loader.LoadAll()
 	if err != nil {
 		log.Fatal(err)

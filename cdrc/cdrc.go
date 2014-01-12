@@ -109,7 +109,7 @@ func (self *Cdrc) parseFieldIndexesFromConfig() error {
 
 // Takes the record out of csv and turns it into http form which can be posted
 func (self *Cdrc) cdrAsHttpForm(record []string) (url.Values, error) {
-	engine.Logger.Info(fmt.Sprintf("Processing record %v", record))
+	// engine.Logger.Info(fmt.Sprintf("Processing record %v", record))
 	v := url.Values{}
 	v.Set(utils.CDRSOURCE, self.cgrCfg.CdrcSourceId)
 	for fldName, idx := range self.fieldIndxes {
