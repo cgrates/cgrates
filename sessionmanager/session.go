@@ -20,9 +20,10 @@ package sessionmanager
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"time"
 )
 
 // Session type holding the call information fields, a session delegate for specific
@@ -87,6 +88,7 @@ func (s *Session) startDebitLoop() {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(s.sessionManager.GetDebitPeriod())
 		cc := s.sessionManager.LoopAction(s, &nextCd, index)
+		nextCd.TimeEnd = cc.GetEndTime()
 		time.Sleep(cc.GetDuration())
 		index++
 	}
