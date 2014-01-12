@@ -18,7 +18,7 @@ We will install them in one shoot using the command bellow.
 
  apt-get install git redis-server mysql-server
 
-*Note*: For simplicity sake we have used as MySQL_ root password when asked: ***CGRateS**.org*.
+*Note*: For simplicity sake we have used as MySQL_ root password when asked: *CGRateS.org*.
 
 
 FreeSWITCH_
@@ -45,7 +45,7 @@ Once installed we proceed with loading the configuration out of specific tutoria
 **CGRateS**
 -----------
 
-Installation steps are provided on **CGRateS** `install documentation <https://cgrates.readthedocs.org/en/latest/installation.html>`_.
+Installation steps are provided within **CGRateS** `install documentation <https://cgrates.readthedocs.org/en/latest/installation.html>`_.
 
 To get **CGRateS** installed execute the following commands over ssh console:
 
@@ -57,12 +57,12 @@ To get **CGRateS** installed execute the following commands over ssh console:
  apt-get update
  apt-get install cgrates
 
-As described in post-install section, we will need to set up the MySQL_ database (using **CGRateS**.org as our root password):
+As described in post-install section, we will need to set up the MySQL_ database (using *CGRateS.org* as our root password):
 
 ::
 
  cd /usr/share/cgrates/storage/mysql/
- ./setup_cgr_db.sh root **CGRateS**.org localhost
+ ./setup_cgr_db.sh root CGRateS.org localhost
 
 
 Since by default FreeSWITCH_ restricts access to *.csv* CDRs to it's own user, we will add the *cgrates* user to freeswitch group.
@@ -78,7 +78,7 @@ At this point we have **CGRateS** installed but not yet configured. To facilitat
 SIP UA - Jitsi_
 ---------------
 
-On our ubuntu desktop host, we have installed Jitsi_ to be used as SIP UA, out of stable provided packages on `Jitsi download <https://jitsi.org/Main/Download>`_ and had Jitsi_ configured with 4 accounts out of default FreeSWITCH_ provided ones: 1001/**CGRateS**.org and 1002/**CGRateS**.org, 1003/**CGRateS**.org and 1004/**CGRateS**.org.
+On our ubuntu desktop host, we have installed Jitsi_ to be used as SIP UA, out of stable provided packages on `Jitsi download <https://jitsi.org/Main/Download>`_ and had Jitsi_ configured with 4 accounts out of default FreeSWITCH_ provided ones: 1001/CGRateS.org and 1002/CGRateS.org, 1003/CGRateS.org and 1004/CGRateS.org.
 
 
 .. _Redis: http://redis.io/
