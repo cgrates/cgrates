@@ -8,36 +8,43 @@ Software installation
 
 As operating system we have choosen Debian Wheezy, since all the software components we use provide packaging for it.
 
-Redis_
-~~~~~~
+Prerequisites:
+~~~~~~~~~~~~~
 
-Have installed Redis_ to serve as Rating and Accounting DB for CGRateS.
+Some components of CGRateS (whether enabled or not is up to the administrator) depend on external software like:
 
-::
+- Git_ used by CGRateS History Server as archiver.
+- Redis_ to serve as Rating and Accounting DB for CGRateS.
+- MySQL_ to serve as StorDB for CGRateS.
 
- apt-get install redis-server
-
-
-MySQL_
-~~~~~~
-
-Have installed MySQL_ to serve as StorDB for CGRateS.
+We will install them in one shoot using the command bellow.
 
 ::
 
- apt-get install mysql-server
+ apt-get install git redis-server mysql-server
 
-* To keep the tutorial simple, we have used as MySQL *root* password: *CGRateS.org*.
+*Note*: For simplicity sake we have used as MySQL_ root password when asked: *CGRateS.org*.
 
 
-Git_
-~~~~
+FreeSWITCH_
+~~~~~~~~~~~
 
-Install Git_ used by CGRateS History Server as archiver.
+More information regarding installing FreeSWITCH_ on Debian can be found on it's official `installation wiki <http://wiki.freeswitch.org/wiki/Installation_Guide#Debian_packages>`_.
+
+To get FreeSWITCH_ installed and configured, we have choosen the simplest method, out of *vanilla* packages.
+
+We got FreeSWITCH_ installed via following commands:
 
 ::
 
- apt-get install git
+ gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF
+ gpg -a --export D76EDC7725E010CF | sudo apt-key add -
+ cd /etc/apt/sources.list.d/
+ wget http://apt.itsyscom.com/repos/apt/conf/freeswitch.apt.list
+ apt-get update
+ apt-get install freeswitch-meta-vanilla
+
+Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
 
 
 CGRateS
@@ -62,33 +69,22 @@ As described in post-install section, we will need to set up the MySQL_ database
  cd /usr/share/cgrates/storage/mysql/
  ./setup_cgr_db.sh root CGRateS.org localhost
 
+
+Since by default FreeSWITCH_ restricts access to *.csv* CDRs to it's own user, we will add the *cgrates* user to freeswitch group.
+
+::
+
+ usermod -a -G freeswitch cgrates
+
+
 At this point we have CGRateS installed but not yet configured. To facilitate the understanding and speed up the process, CGRateS comes already with the configurations used in this tutorial, available in the */usr/share/cgrates/tutorials* folder, so we will load them custom on each tutorial case.
 
 
-FreeSWITCH_
-~~~~~~~~~~~
+SIP UA - Jitsi_
+~~~~~~~~~~~~~~~
 
-More information regarding installing FreeSWITCH_ on Debian can be found on it's official `installation wiki <http://wiki.freeswitch.org/wiki/Installation_Guide#Debian_packages>`_.
+On our ubuntu desktop host, we have installed Jitsi_ to be used as SIP UA, out of stable provided packages on `Jitsi download <https://jitsi.org/Main/Download>`_ and had Jitsi_ configured with 4 accounts out of default FreeSWITCH_ provided ones: 1001/CGRateS.org and 1002/CGRateS.org, 1003/CGRateS.org and 1004/CGRateS.org.
 
-To get FreeSWITCH_ installed and configured, we have choosen the simplest method, out of *vanilla* packages.
-
-We got FreeSWITCH_ installed via following commands:
-
-::
-
- gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF
- gpg -a --export D76EDC7725E010CF | sudo apt-key add -
- cd /etc/apt/sources.list.d/
- wget http://apt.itsyscom.com/repos/apt/conf/freeswitch.apt.list
- apt-get update
- apt-get install freeswitch-meta-vanilla
-
-Since by default FreeSWITCH_ restricts reading of the cdrs to it's own user/group, we will change permissions so we make sure *cgrates* user can read the folder also.
-
-::
- chmod -R 754 /var/log/freeswitch/cdr-csv
-
-Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
 
 
 Case 1: FreeSWITCH_ with *.csv* CDRs
@@ -97,17 +93,19 @@ Case 1: FreeSWITCH_ with *.csv* CDRs
 Scenario:
 ~~~~~~~~
 
-* FreeSWITCH with default configuration. 
+- FreeSWITCH with *vanilla* configuration, minimal modifications to fit our needs. 
 
- * Modified following users: 1001-prepaid, 1002-postpaid, 1003-pseudoprepaid, 1004-rated, 1005-prepaid.
- * Have added inside default dialplan CGR own extensions just before routing towards users.
- * FreeSWITCH configured to generate default .csv CDRs, modified example template to add cgr_reqtype from user variables.
+ - Modified following users (with configs in *etc/freeswitch/directory/default*): 1001-prepaid, 1002-postpaid, 1003-pseudoprepaid, 1004-rated.
+ - Have added inside default dialplan CGR own extensions just before routing towards users (*etc/freeswitch/dialplan/default.xml*).
+ - FreeSWITCH configured to generate default .csv CDRs, modified example template to add cgr_reqtype from user variables (*etc/freeswitch/autoload_configs/cdr_csv.conf.xml*).
 
-* CGRateS with following components:
+- CGRateS with following components:
 
- * CGR-SM started as prepaid controller.
- * CGR-CDRC component importing FreeSWITCH_ generated *.csv* CDRs into CGR.
- * CGR-CDRE exporting mediated CDRs
+ - CGR-SM started as prepaid controller, with debits taking place at 5s intervals.
+ - CGR-CDRC component importing FreeSWITCH_ generated *.csv* CDRs into CGR (moving the processed *.csv* files to */tmp* folder).
+ - CGR-Mediator compoenent attaching costs to the raw CDRs from CGR-CDRC.
+ - CGR-CDRE exporting mediated CDRs (export path: */tmp*).
+ - CGR-History component keeping the archive of the rates modifications (path: */tmp/cgr_history*).
 
 
 Starting FreeSWITCH_ with custom configuration:
@@ -117,7 +115,7 @@ Starting FreeSWITCH_ with custom configuration:
 
  /usr/share/cgrates/tutorials/fs_csv/freeswitch/etc/init.d/freeswitch start
 
-* To verify that FreeSWITCH_ is running we could run the console command:
+To verify that FreeSWITCH_ is running we run the console command:
 
 ::
 
@@ -129,11 +127,12 @@ Starting CGRateS with custom configuration:
 
 ::
 
- /usr/share/cgrates/tutorials/fs_csv/cgrates/etc/ini.d/cgrates start
+ /usr/share/cgrates/tutorials/fs_csv/cgrates/etc/init.d/cgrates start
 
-* Check that cgrates is running
+Check that cgrates is running
 
 ::
+
  cgr-console status
 
 
@@ -142,27 +141,53 @@ Loading CGRateS Tariff Plans
 
 For our tutorial we load again prepared data out of shared folder, containing following rules:
 
-* Create the necessary timings (always, asap).
-* Configure 3 destinations (1002, 1003 and 10 used as catch all rule).
-* As rating we configure the following:
+- Create the necessary timings (always, asap).
+- Configure 3 destinations (1002, 1003 and 10 used as catch all rule).
+- As rating we configure the following:
 
- * Calls to 1002 destination will be rated with 20cents per minute for the first 60s in 60s increments then 10cents per minute in 1s increments.
- * Calls to 1003 destination will be rated with 40cents per minute for the first 60s in 30s increments then 20cents per minute in 10s increments.
- * Calls to other destinations (1001, 1004) will be rated with 10cents per minute for the first 60s(60s increments) then 5 cents per minute(1s increments).
+ - Calls to 1002 destination will be rated with 20cents per minute for the first 60s in 60s increments then 10cents per minute in 1s increments.
+ - Calls to 1003 destination will be rated with 40cents per minute for the first 60s in 30s increments then 20cents per minute in 10s increments.
+ - Calls to other destinations (1001, 1004) will be rated with 10cents per minute for the first 60s(60s increments) then 5 cents per minute(1s increments).
 
-* Create 4 accounts (equivalent of 2 FreeSWITCH default test users - 1001, 1002, 1003, 1004).
-* 1001, 1002, 1003, 1004 will receive 10units of *\*monetary* balance.
-* For each balance created, attach 3 triggers to control the balance: log on balance=2, log on balance=20, log on 5 mins talked towards 10xx destination.
+- Create 4 accounts (equivalent of 2 FreeSWITCH default test users - 1001, 1002, 1003, 1004).
+- 1001, 1002, 1003, 1004 will receive 10units of *\*monetary* balance.
+- For each balance created, attach 3 triggers to control the balance: log on balance=2, log on balance=20, log on 5 mins talked towards 10xx destination.
 
 ::
 
  cgr-loader -verbose -path=/usr/share/cgrates/tutorials/fs_csv/cgrates/tariffplans
 
+To verify that all actions successfully performed, we use following *cgr-console* commands:
 
-SIP UA - Jitsi_
----------------
+- Make sure our rates were loaded successfully and they are already in cache:
 
-On our ubuntu desktop host, we have installed Jitsi_ to be used as SIP UA, out of stable provided packages on `Jitsi download <https://jitsi.org/Main/Download>`_ and had Jitsi_ configured with 4 accounts out of default FreeSWITCH_ provided ones: 1001/CGRateS.org and 1002/CGRateS.org, 1003/CGRateS.org and 1004/CGRateS.org. For our tests we have configured 1001 as prepaid account, 1002 as postpaid, 1003 as pseudoprepaid and 1004 as rated, hence the type of charging will depend on the account calling.
+ ::
+
+  cgr-console get_cache_stats
+  cgr-console get_cache_age 1002
+  cgr-console get_cache_age RP_RETAIL
+  cgr-console get_cache_age *out:cgrates.org:call:*any
+
+- Make sure all our balances were topped-up:
+
+ ::
+
+  cgr-console get_balance cgrates.org 1001
+  cgr-console get_balance cgrates.org 1002
+  cgr-console get_balance cgrates.org 1003
+  cgr-console get_balance cgrates.org 1004
+
+- Query call costs so we can see our calls will have expected costs (final cost will result as sum of *ConnectFee* and *Cost* fields):
+
+ ::
+
+  cgr-console get_cost call cgrates.org 1001 1002 *now 20s
+  cgr-console get_cost call cgrates.org 1001 1002 *now 1m25s
+  cgr-console get_cost call cgrates.org 1001 1003 *now 20s
+  cgr-console get_cost call cgrates.org 1001 1003 *now 1m25s
+  cgr-console get_cost call cgrates.org 1001 1004 *now 20s
+  cgr-console get_cost call cgrates.org 1001 1004 *now 1m25s
+
 
 Test calls
 ----------
