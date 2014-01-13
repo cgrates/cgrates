@@ -334,12 +334,14 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 				break
 			}
 		}
-		if !destinationExists {
-			if dbExists, err := csvr.dataStorage.ExistsData(DESTINATION_PREFIX, record[1]); err != nil {
+		var err error
+		if !destinationExists && csvr.dataStorage != nil {
+			if destinationExists, err = csvr.dataStorage.ExistsData(DESTINATION_PREFIX, record[1]); err != nil {
 				return err
-			} else if !dbExists {
-				return fmt.Errorf("Could not get destination for tag %v", record[1])
 			}
+		}
+		if !destinationExists {
+			return fmt.Errorf("Could not get destination for tag %v", record[1])
 		}
 		dr := &utils.TPDestinationRate{
 			DestinationRateId: tag,
@@ -417,12 +419,13 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			csvr.ratingProfiles[key] = rp
 		}
 		_, exists := csvr.ratingPlans[record[5]]
-		if !exists {
-			if dbExists, err := csvr.dataStorage.ExistsData(RATING_PLAN_PREFIX, record[5]); err != nil {
+		if !exists && csvr.dataStorage != nil {
+			if exists, err = csvr.dataStorage.ExistsData(RATING_PLAN_PREFIX, record[5]); err != nil {
 				return err
-			} else if !dbExists {
-				return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", record[5]))
 			}
+		}
+		if !exists {
+			return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", record[5]))
 		}
 		rpa := &RatingPlanActivation{
 			ActivationTime: at,

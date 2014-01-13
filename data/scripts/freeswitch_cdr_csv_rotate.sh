@@ -1,7 +1,7 @@
 #! /usr/bin/env sh
 
 FS_CDR_CSV_DIR=/var/log/freeswitch/cdr-csv
-CGR_CDRC_IN_DIR=/var/log/cgrates/cdr/in/csv
+CGR_CDRC_IN_DIR=/var/log/cgrates/cdr/cdrc/in
 
 /usr/bin/fs_cli -x "cdr_csv rotate"
 

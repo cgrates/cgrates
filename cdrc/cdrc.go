@@ -74,7 +74,6 @@ func (self *Cdrc) Run() error {
 		self.processCdrDir()
 		time.Sleep(self.cgrCfg.CdrcRunDelay)
 	}
-	return nil
 }
 
 // Loads all fields (primary and extra) into cfgCdrFields, do some pre-checks (eg: in case of csv make sure that values are integers)
@@ -178,7 +177,6 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 			engine.Logger.Err(fmt.Sprintf("Inotify error: %s", err.Error()))
 		}
 	}
-	return
 }
 
 // Processe file at filePath and posts the valid cdr rows out of it

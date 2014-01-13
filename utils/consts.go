@@ -1,7 +1,7 @@
 package utils
 
 const (
-	VERSION                  = "0.9.1rc3"
+	VERSION                  = "0.9.1c3"
 	POSTGRES                 = "postgres"
 	MYSQL                    = "mysql"
 	MONGO                    = "mongo"
