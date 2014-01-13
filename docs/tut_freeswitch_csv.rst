@@ -152,11 +152,14 @@ CDR processing
 --------------
 
 For every call FreeSWITCH_ will generate CDR records within the *Master.csv* file. 
-In order to avoid double-processing we will use the rotate mechanism built in FreeSWITCH_. We rotate files via *fs_console* command:
+In order to avoid double-processing we will use the rotate mechanism built in FreeSWITCH_. 
+Once rotated, we will move the resulted files inside the path considered by **CGRateS** *CDRC* component as inbound.
+
+These steps are automated in a script provided in the */usr/share/cgrates/scripts* location:
 
 ::
 
- fs_cli -x "cdr_csv rotate"
+ /usr/share/cgrates/scripts/freeswitch_cdr_csv_rotate.sh
 
 
 On each rotate CGR-CDRC component will be informed via *inotify* subsystem and will instantly process the CDR file. The records end up in **CGRateS**/StorDB inside *cdrs_primary* table via CGR-CDRS. As soon as the CDR will hit CDRS component, mediation will occur, either considering the costs calculated in case of prepaid and postpaid calls out of *cost_details* table or query it's own one from rater in case of *pseudoprepaid* and *rated* CDRs.
