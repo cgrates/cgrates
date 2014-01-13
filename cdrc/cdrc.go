@@ -51,10 +51,8 @@ func NewCdrc(config *config.CGRConfig) (*Cdrc, error) {
 			return nil, fmt.Errorf("Folder %s does not exist", dir)
 		}
 	}
-	if cdrc.cgrCfg.CdrcCdrType == CSV {
-		if err := cdrc.parseFieldIndexesFromConfig(); err != nil {
-			return nil, err
-		}
+	if err := cdrc.parseFieldsConfig(); err != nil {
+		return nil, err
 	}
 	cdrc.httpClient = new(http.Client)
 	return cdrc, nil
@@ -62,7 +60,7 @@ func NewCdrc(config *config.CGRConfig) (*Cdrc, error) {
 
 type Cdrc struct {
 	cgrCfg      *config.CGRConfig
-	fieldIndxes map[string]int // Key is the name of the field, int is the position in the csv file
+	cfgCdrFields map[string]string // Key is the name of the field
 	httpClient  *http.Client
 }
 
@@ -79,19 +77,23 @@ func (self *Cdrc) Run() error {
 	return nil
 }
 
-// Parses fieldIndex strings into fieldIndex integers needed
-func (self *Cdrc) parseFieldIndexesFromConfig() error {
+// Loads all fields (primary and extra) into cfgCdrFields, do some pre-checks (eg: in case of csv make sure that values are integers)
+func (self *Cdrc) parseFieldsConfig() error {
 	var err error
-	self.fieldIndxes = make(map[string]int)
-	fieldKeys := []string{utils.ACCID, utils.REQTYPE, utils.DIRECTION, utils.TENANT, utils.TOR, utils.ACCOUNT, utils.SUBJECT, utils.DESTINATION, utils.ANSWER_TIME, utils.DURATION}
-	fieldIdxStrs := []string{self.cgrCfg.CdrcAccIdField, self.cgrCfg.CdrcReqTypeField, self.cgrCfg.CdrcDirectionField, self.cgrCfg.CdrcTenantField, self.cgrCfg.CdrcTorField,
-		self.cgrCfg.CdrcAccountField, self.cgrCfg.CdrcSubjectField, self.cgrCfg.CdrcDestinationField, self.cgrCfg.CdrcAnswerTimeField, self.cgrCfg.CdrcDurationField}
-	for i, strVal := range fieldIdxStrs {
-		if self.fieldIndxes[fieldKeys[i]], err = strconv.Atoi(strVal); err != nil {
-			return fmt.Errorf("Cannot parse configuration field %s into integer", fieldKeys[i])
-		}
-	}
-	// Add extra fields here, extra fields in the form of []string{"indxInCsv1:fieldName1","indexInCsv2:fieldName2"}
+	self.cfgCdrFields = map[string]string{
+				utils.ACCID: self.cgrCfg.CdrcAccIdField,
+				utils.REQTYPE: self.cgrCfg.CdrcReqTypeField,
+				utils.DIRECTION: self.cgrCfg.CdrcDirectionField,
+				utils.TENANT: self.cgrCfg.CdrcTenantField,
+				utils.TOR: self.cgrCfg.CdrcTorField,
+				utils.ACCOUNT: self.cgrCfg.CdrcAccountField,
+				utils.SUBJECT: self.cgrCfg.CdrcSubjectField,
+				utils.DESTINATION: self.cgrCfg.CdrcDestinationField,
+				utils.ANSWER_TIME: self.cgrCfg.CdrcAnswerTimeField,
+				utils.DURATION: self.cgrCfg.CdrcDurationField,
+				}
+
+	// Add extra fields here, config extra fields in the form of []string{"fieldName1:indxInCsv1","fieldName2: indexInCsv2"}
 	for _, fieldWithIdx := range self.cgrCfg.CdrcExtraFields {
 		splt := strings.Split(fieldWithIdx, ":")
 		if len(splt) != 2 {
@@ -100,8 +102,14 @@ func (self *Cdrc) parseFieldIndexesFromConfig() error {
 		if utils.IsSliceMember(utils.PrimaryCdrFields, splt[0]) {
 			return errors.New("Extra cdrc.extra_fields overwriting primary fields")
 		}
-		if self.fieldIndxes[splt[1]], err = strconv.Atoi(splt[0]); err != nil {
-			return fmt.Errorf("Cannot parse configuration cdrc extra field %s into integer", splt[1])
+		self.cfgCdrFields[splt[0]] = splt[1]
+	}
+	// Fields populated, do some sanity checks here
+	for cdrField, cfgVal := range self.cfgCdrFields {
+		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cgrCfg.CdrcCdrType) && !strings.HasPrefix(cfgVal, utils.STATIC_VALUE_PREFIX) {
+			if _, err = strconv.Atoi(cfgVal); err != nil {
+				return fmt.Errorf("Cannot parse configuration field %s into integer", cdrField)
+			}
 		}
 	}
 	return nil
@@ -112,11 +120,22 @@ func (self *Cdrc) cdrAsHttpForm(record []string) (url.Values, error) {
 	// engine.Logger.Info(fmt.Sprintf("Processing record %v", record))
 	v := url.Values{}
 	v.Set(utils.CDRSOURCE, self.cgrCfg.CdrcSourceId)
-	for fldName, idx := range self.fieldIndxes {
-		if len(record) <= idx {
-			return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, fldName)
+	for cfgFieldName, cfgFieldVal := range self.cfgCdrFields {
+		var fieldVal string
+		if strings.HasPrefix(cfgFieldVal, utils.STATIC_VALUE_PREFIX) {
+			fieldVal = cfgFieldVal[1:]
+		} else if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cgrCfg.CdrcCdrType) {
+			if cfgFieldIdx, err := strconv.Atoi(cfgFieldVal); err != nil { // Should in theory never happen since we have already parsed config
+				return nil, err
+			} else if len(record) <= cfgFieldIdx {
+				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
+			} else {
+				fieldVal = record[cfgFieldIdx]
+			}
+		} else { // Modify here when we add more supported cdr formats
+			fieldVal = "UNKNOWN"
 		}
-		v.Set(fldName, record[idx])
+		v.Set(cfgFieldName, fieldVal)
 	}
 	return v, nil
 }

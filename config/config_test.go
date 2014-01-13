@@ -103,7 +103,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcDestinationField = "7"
 	eCfg.CdrcAnswerTimeField = "8"
 	eCfg.CdrcDurationField = "9"
-	eCfg.CdrcExtraFields = []string{"10:supplier","11:orig_ip"}
+	eCfg.CdrcExtraFields = []string{}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorListen = "127.0.0.1:2032"
 	eCfg.MediatorRater = "127.0.0.1:2012"

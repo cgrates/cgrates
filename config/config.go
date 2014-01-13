@@ -110,7 +110,7 @@ type CGRConfig struct {
 	CdrcDestinationField     string    // Destination field identifier. Use index numbers in case of .csv cdrs.
 	CdrcAnswerTimeField      string    // Answer time field identifier. Use index numbers in case of .csv cdrs.
 	CdrcDurationField        string    // Duration field identifier. Use index numbers in case of .csv cdrs.
-	CdrcExtraFields          []string  // Field identifiers of the fields to add in extra fields section, special format in case of .csv "index1:field1,index2:field2"
+	CdrcExtraFields          []string  // Field identifiers of the fields to add in extra fields section, special format in case of .csv "field1:index1,field2:index2"
 	SMEnabled                bool
 	SMSwitchType             string
 	SMRater                  string   // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -200,7 +200,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcDestinationField = "7"
 	self.CdrcAnswerTimeField = "8"
 	self.CdrcDurationField = "9"
-	self.CdrcExtraFields = []string{"10:supplier","11:orig_ip"}
+	self.CdrcExtraFields = []string{}
 	self.MediatorEnabled = false
 	self.MediatorListen = "127.0.0.1:2032"
 	self.MediatorRater = "127.0.0.1:2012"
