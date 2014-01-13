@@ -216,7 +216,6 @@ func (ts *TimeSpan) getCost() float64 {
 	} else {
 		return ts.Increments[0].Cost * float64(len(ts.Increments))
 	}
-	return 0
 }
 
 func (ts *TimeSpan) createIncrementsSlice() {

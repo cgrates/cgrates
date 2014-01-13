@@ -69,15 +69,20 @@ func (rs *RedisStorage) Flush() (err error) {
 }
 
 func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error) {
-	if dKeys == nil && rpKeys == nil && rpfKeys == nil {
-		cache2go.Flush()
+	if dKeys == nil {
+		cache2go.RemPrefixKey(DESTINATION_PREFIX)
+	}
+	if rpKeys == nil {
+		cache2go.RemPrefixKey(RATING_PLAN_PREFIX)
+	}
+	if rpfKeys == nil {
+		cache2go.RemPrefixKey(RATING_PROFILE_PREFIX)
 	}
 	if dKeys == nil {
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
 			return
 		}
-		cache2go.RemPrefixKey(DESTINATION_PREFIX)
 	} else if len(rpKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching destinations: %v", dKeys))
 	}
@@ -215,7 +220,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
+		go historyScribe.Record(&history.Record{Key: RATING_PLAN_PREFIX + rp.Id, Object: rp}, &response)
 	}
 	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
@@ -243,7 +248,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	err = rs.db.Set(RATING_PROFILE_PREFIX+rpf.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rpf.Id, rpf}, &response)
+		go historyScribe.Record(&history.Record{Key: RATING_PROFILE_PREFIX + rpf.Id, Object: rpf}, &response)
 	}
 	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
@@ -292,7 +297,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	err = rs.db.Set(DESTINATION_PREFIX+dest.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
+		go historyScribe.Record(&history.Record{Key: DESTINATION_PREFIX + dest.Id, Object: dest}, &response)
 	}
 	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return

@@ -443,7 +443,17 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &balanceWeight, &extraParameters, &weight); err != nil {
 			return nil, err
 		}
-		acts.Actions = append(acts.Actions, &utils.TPAction{action, balanceId, dir, units, expTime, destId, rateSubject, balanceWeight, extraParameters, weight})
+		acts.Actions = append(acts.Actions, &utils.TPAction{
+			Identifier:      action,
+			BalanceType:     balanceId,
+			Direction:       dir,
+			Units:           units,
+			ExpiryTime:      expTime,
+			DestinationId:   destId,
+			RatingSubject:   rateSubject,
+			BalanceWeight:   balanceWeight,
+			ExtraParameters: extraParameters,
+			Weight:          weight})
 	}
 	if i == 0 {
 		return nil, nil
@@ -516,7 +526,7 @@ func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*uti
 		if err = rows.Scan(&tag, &actionsId, &timingId, &weight); err != nil {
 			return nil, err
 		}
-		ats[tag] = append(ats[tag], &utils.TPActionTiming{actionsId, timingId, weight})
+		ats[tag] = append(ats[tag], &utils.TPActionTiming{ActionsId: actionsId, TimingId: timingId, Weight: weight})
 	}
 	return ats, nil
 }
