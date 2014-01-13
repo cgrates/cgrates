@@ -44,7 +44,7 @@ func filterField(source string, maxLen int, stripAllowed, lStrip, lPadding, padW
 	}
 	if len(source) > maxLen { //the source is bigger than allowed
 		if !stripAllowed {
-			return "", fmt.Errorf("source %s is bigger than the maximum allowed length %s", source, maxLen)
+			return "", fmt.Errorf("source %s is bigger than the maximum allowed length %d", source, maxLen)
 		}
 		if !lStrip {
 			return source[:maxLen], nil
