@@ -37,6 +37,7 @@ type Balance struct {
 	RateSubject    string
 	SharedGroup    string
 	precision      int
+	userBalance    *UserBalance // used to store ub reference for shared balances
 }
 
 func (b *Balance) Equal(o *Balance) bool {
@@ -138,7 +139,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 				amount := increment.Duration.Seconds()
 				if b.Value >= amount {
 					b.Value -= amount
-					increment.SetMinuteBalance(b.Uuid)
+					increment.BalanceInfo.MinuteBalanceUuid = b.Uuid
 					increment.MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
 					increment.Cost = 0
 					increment.paid = true
@@ -180,7 +181,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					}
 					cc.Timespans.RemoveOverlapedFromIndex(tsIndex)
 					b.Value -= amount
-					newTs.Increments[0].SetMinuteBalance(b.Uuid)
+					newTs.Increments[0].BalanceInfo.MinuteBalanceUuid = b.Uuid
 					newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
 					newTs.Increments[0].Cost = 0
 					newTs.Increments[0].paid = true
@@ -221,8 +222,8 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 						b.Value -= seconds
 						moneyBal.Value -= cost
 
-						nInc.SetMinuteBalance(b.Uuid)
-						nInc.SetMoneyBalance(moneyBal.Uuid)
+						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
+						nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
 						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds, 0}
 						nInc.paid = true
 						if count {
@@ -265,7 +266,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 				amount := increment.Cost
 				if b.Value >= amount {
 					b.Value -= amount
-					increment.SetMoneyBalance(b.Uuid)
+					increment.BalanceInfo.MoneyBalanceUuid = b.Uuid
 					increment.paid = true
 					if count {
 						ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -293,7 +294,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 						amount := nInc.Cost
 						if b.Value >= amount {
 							b.Value -= amount
-							nInc.SetMoneyBalance(b.Uuid)
+							nInc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 							nInc.paid = true
 							if count {
 								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
