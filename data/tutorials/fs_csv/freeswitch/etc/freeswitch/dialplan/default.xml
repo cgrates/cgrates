@@ -254,7 +254,7 @@
    -->
     <!-- Place all prepaid requests into park app. Notify must be empty so we do not loop. -->
     <extension name="CGRateS_AuthPrepaid">
-      <condition field="${cgr_reqtype}" expression="^prepaid$" />
+      <condition field="${cgr_reqtype}" expression="^prepaid$|^pseudoprepaid$" />
       <condition field="${cgr_notify}" expression="^$">
         <action application="park"/>
       </condition>
@@ -262,7 +262,7 @@
 
     <!-- In case of CGRateS returning INSUFFICIENT_FUNDS, play the message (if recorded) and disconnect the call with 403. -->
     <extension name="CGRateS_AuthForbidden">
-      <condition field="${cgr_reqtype}" expression="prepaid" />
+      <condition field="${cgr_reqtype}" expression="^prepaid$|^pseudoprepaid$" />
       <condition field="${cgr_notify}" expression="^-INSUFFICIENT_FUNDS$">
         <action application="playback" data="tone_stream://path=$${sounds_dir}/insufficient_funds.wav"/>
         <action application="set" data="proto_specific_hangup_cause=sip:403"/>
@@ -272,7 +272,7 @@
 
    <!-- In case of CGRateS returning SYSTEM_ERROR, disconnect the call so we do not risk prepaid calls going out. -->
    <extension name="CGRateS_Error">
-      <condition field="${cgr_reqtype}" expression="^prepaid$" />
+      <condition field="${cgr_reqtype}" expression="^prepaid$|^pseudoprepaid$" />
       <condition field="${cgr_notify}" expression="^-SYSTEM_ERROR$">
         <action application="set" data="proto_specific_hangup_cause=sip:503"/>
         <action application="hangup"/>

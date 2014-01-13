@@ -368,6 +368,11 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans TimeSpans) []*Time
 	return timespans
 }
 
+// Returns call descripor's total duration
+func (cd *CallDescriptor) GetDuration() time.Duration {
+	return cd.TimeEnd.Sub(cd.TimeStart)
+}
+
 /*
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */

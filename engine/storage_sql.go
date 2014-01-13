@@ -656,7 +656,7 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source, runid)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s','%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, connect_fee, cost, timespans, source, runid)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s','%s')",
 		utils.TBL_COST_DETAILS,
 		utils.FSCgrId(uuid),
 		uuid,
@@ -666,8 +666,8 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 		cc.Account,
 		cc.Subject,
 		cc.Destination,
-		cc.Cost,
 		cc.ConnectFee,
+		cc.Cost,
 		tss,
 		source,
 		runid))
@@ -678,12 +678,12 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 }
 
 func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, connect_fee, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s'", utils.TBL_COST_DETAILS, cgrid, source, runid))
+	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, connect_fee, cost, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s' AND runid='%s'", utils.TBL_COST_DETAILS, cgrid, source, runid))
 	var accid, src string
 	var timespansJson string
 	cc = &CallCost{Cost: -1}
 	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
-		&cc.Destination, &cc.Cost, &cc.ConnectFee, &timespansJson, &src)
+		&cc.Destination, &cc.ConnectFee, &cc.Cost, &timespansJson, &src)
 	if err = json.Unmarshal([]byte(timespansJson), &cc.Timespans); err != nil {
 		return nil, err
 	}

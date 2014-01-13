@@ -94,8 +94,9 @@ duration_fields = test			# Name of duration fields to be used during mediation. 
 enabled = true				# Starts SessionManager service: <true|false>.
 switch_type = test			# Defines the type of switch behind: <freeswitch>.
 rater = test			# Address where to reach the Rater.
-rater_reconnects = 99				# Number of reconnects to rater before giving up.
-debit_interval = 99				# Interval to perform debits on.
+rater_reconnects = 99			# Number of reconnects to rater before giving up.
+debit_interval = 99			# Interval to perform debits on.
+max_call_duration = 99			# Maximum call duration a prepaid call can last
 
 [freeswitch]
 server = test			# Adress where to connect to FreeSWITCH socket.

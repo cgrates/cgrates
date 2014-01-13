@@ -51,13 +51,13 @@ As DataDB types (rating and accounting subsystems):
 
 - Redis_
 
-As StorDB (persistent storage for CDRs and tariff plan versions):
+As StorDB (persistent storage for CDRs and tariff plan versions).
+
+Once installed there should be no special requirements in terms of setup since no schema is necessary.
 
 - MySQL_
 
-Redis_: once installed there should be no special requirements in terms of setup since no schema is necessary.
-
-MySQL_: once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
+Once database is installed, CGRateS database needs to be set-up out of provided scripts (example for the paths set-up by debian package)
 
  ::
    

@@ -101,7 +101,7 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 
 // Disconnects a session by sending hangup command to freeswitch
 func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
-	engine.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
+	// engine.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
 	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("could not send disconect api notification to freeswitch: %v", err))
@@ -123,6 +123,17 @@ func (sm *FSSessionManager) RemoveSession(s *Session) {
 	}
 }
 
+// Sets the call timeout valid of starting of the call
+func (sm *FSSessionManager) setMaxCallDuration(uuid string, maxDur time.Duration) error {
+	err := fsock.FS.SendApiCmd(fmt.Sprintf("sched_hangup +%d %s\n\n", int(maxDur.Seconds()), uuid))
+	if err != nil {
+		engine.Logger.Err("could not send sched_hangup command to freeswitch")
+		return err
+	}
+	return nil
+}
+
+
 // Sends the transfer command to unpark the call to freeswitch
 func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
 	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
@@ -140,15 +151,15 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelPark(ev Event) {
-	engine.Logger.Info("freeswitch park")
+	//engine.Logger.Info("freeswitch park")
 	startTime, err := ev.GetStartTime(PARK_TIME)
 	if err != nil {
 		engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
-	if strings.TrimSpace(ev.GetReqType()) != utils.PREPAID {
-		return
+	if !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, strings.TrimSpace(ev.GetReqType())) {
+		return // we unpark only prepaid and pseudoprepaid calls
 	}
 	if ev.MissingParameter() {
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), MISSING_PARAMETER)
@@ -162,8 +173,9 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		Subject:     ev.GetSubject(),
 		Account:     ev.GetAccount(),
 		Destination: ev.GetDestination(),
-		Amount:      sm.debitPeriod.Seconds(),
-		TimeStart:   startTime}
+		TimeStart:   startTime,
+		TimeEnd:     startTime.Add(cfg.SMMaxCallDuration),
+		}
 	var remainingDurationFloat float64
 	err = sm.connector.GetMaxSessionTime(cd, &remainingDurationFloat)
 	if err != nil {
@@ -172,17 +184,18 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		return
 	}
 	remainingDuration := time.Duration(remainingDurationFloat)
-	engine.Logger.Info(fmt.Sprintf("Remaining seconds: %v", remainingDuration))
+	//engine.Logger.Info(fmt.Sprintf("Remaining duration: %v", remainingDuration))
 	if remainingDuration == 0 {
-		engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
+		//engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), INSUFFICIENT_FUNDS)
 		return
 	}
+	sm.setMaxCallDuration(ev.GetUUID(), remainingDuration)
 	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), AUTH_OK)
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
-	engine.Logger.Info("<SessionManager> FreeSWITCH answer.")
+	//engine.Logger.Info("<SessionManager> FreeSWITCH answer.")
 	// Make sure cgr_type is enforced even if not set by FreeSWITCH
 	if err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err != nil {
 		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
@@ -194,7 +207,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
-	engine.Logger.Info("<SessionManager> FreeSWITCH hangup.")
+	//engine.Logger.Info("<SessionManager> FreeSWITCH hangup.")
 	s := sm.GetSession(ev.GetUUID())
 	if s == nil { // Not handled by us
 		return
@@ -246,7 +259,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	}
 	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 	refundDuration := end.Sub(hangupTime)
-	initialRefundDuration := refundDuration
+	//initialRefundDuration := refundDuration
 	var refundIncrements engine.Increments
 	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
 		ts := lastCC.Timespans[i]
@@ -273,7 +286,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		}
 	}
 	// show only what was actualy refunded (stopped in timespan)
-	engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
+	// engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
 	if len(refundIncrements) > 0 {
 		cd := &engine.CallDescriptor{
 			Direction:   lastCC.Direction,
@@ -293,23 +306,21 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	}
 	cost := refundIncrements.GetTotalCost()
 	lastCC.Cost -= cost
-	engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
+	// engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 
 }
 
-func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor, index float64) (cc *engine.CallCost) {
+func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor) (cc *engine.CallCost) {
 	cc = &engine.CallCost{}
-	cd.LoopIndex = index
-	cd.CallDuration += sm.debitPeriod
 	err := sm.connector.MaxDebit(*cd, cc)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
 		// disconnect session
 		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
 	}
-	engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
+	// engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
 	if cc.GetDuration() == 0 || err != nil {
-		engine.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
+		// engine.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
 		sm.DisconnectSession(s, INSUFFICIENT_FUNDS)
 		return
 	}
