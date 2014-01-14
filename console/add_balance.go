@@ -38,7 +38,7 @@ type CmdAddBalance struct {
 
 // name should be exec's name
 func (self *CmdAddBalance) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_balance <tenant> <account> <value> [<balanceid=monetary|sms|internet|internet_time|minutes> [<direction>]]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_balance <tenant> <account> <value> [<balanceid=monetary|sms|internet|internet_time|minutes> [<weight> [overwrite]]]")
 }
 
 // set param defaults
@@ -51,6 +51,7 @@ func (self *CmdAddBalance) defaults() error {
 
 // Parses command line args and builds CmdBalance value
 func (self *CmdAddBalance) FromArgs(args []string) error {
+	var err error
 	if len(args) < 5 {
 		return fmt.Errorf(self.Usage(""))
 	}
@@ -67,7 +68,14 @@ func (self *CmdAddBalance) FromArgs(args []string) error {
 		self.rpcParams.BalanceId = args[5]
 	}
 	if len(args) > 6 {
-		self.rpcParams.Direction = args[6]
+		if self.rpcParams.Weight, err = strconv.ParseFloat(args[6], 64); err != nil {
+			return fmt.Errorf("Cannot parse weight parameter")
+		}
+	}
+	if len(args) > 7 {
+		if args[7] == "overwrite" {
+			self.rpcParams.Overwrite = true
+		}
 	}
 	return nil
 }

@@ -20,8 +20,9 @@ package engine
 
 import (
 	"errors"
-	"github.com/cgrates/cgrates/utils"
 	"strconv"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Various helpers to deal with database
@@ -100,24 +101,20 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 				host += ":" + port
 			}
 			d, err = NewRedisStorage(host, db_nb, pass, marshaler)
-			db = d.(LogStorage)
 		case utils.MONGO:
 			d, err = NewMongoStorage(host, port, name, user, pass)
-			db = d.(LogStorage)
 		case utils.POSTGRES:
 			d, err = NewPostgresStorage(host, port, name, user, pass)
-			db = d.(LogStorage)
 	*/
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass)
-		db = d.(LogStorage)
 	default:
 		err = errors.New("unknown db")
 	}
 	if err != nil {
 		return nil, err
 	}
-	return db, nil
+	return db.(LogStorage), nil
 }
 
 func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string) (db LoadStorage, err error) {

@@ -1206,6 +1206,9 @@ func TestResponderGetCost(t *testing.T) {
 }
 
 func TestCdrServer(t *testing.T) {
+	if !*testLocal {
+                return
+        }
 	httpClient := new(http.Client)
 	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"}, 
 		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"}, 
@@ -1222,6 +1225,9 @@ func TestCdrServer(t *testing.T) {
 }
 
 func TestExportCdrsToFile(t *testing.T) {
+	if !*testLocal {
+                return
+        }
 	var reply *utils.ExportedFileCdrs
 	req := utils.AttrExpFileCdrs{}
 	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
