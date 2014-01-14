@@ -59,20 +59,20 @@ const (
 )
 
 var (
-	cfgPath      = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
-	version      = flag.Bool("version", false, "Prints the application version.")
-	raterEnabled = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
-	schedEnabled = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
-	cdrsEnabled  = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
-	cdrcEnabled  = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
-	mediatorEnabled  = flag.Bool("mediator", false, "Enforce starting of the mediator service overwriting config")
-	pidFile      = flag.String("pid", "", "Write pid file")
-	bal          = balancer2go.NewBalancer()
-	exitChan     = make(chan bool)
-	sm           sessionmanager.SessionManager
-	medi         *mediator.Mediator
-	cfg          *config.CGRConfig
-	err          error
+	cfgPath         = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
+	version         = flag.Bool("version", false, "Prints the application version.")
+	raterEnabled    = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
+	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
+	cdrsEnabled     = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
+	cdrcEnabled     = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
+	mediatorEnabled = flag.Bool("mediator", false, "Enforce starting of the mediator service overwriting config")
+	pidFile         = flag.String("pid", "", "Write pid file")
+	bal             = balancer2go.NewBalancer()
+	exitChan        = make(chan bool)
+	sm              sessionmanager.SessionManager
+	medi            *mediator.Mediator
+	cfg             *config.CGRConfig
+	err             error
 )
 
 func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddress string, rpc_encoding string) {
@@ -382,7 +382,7 @@ func main() {
 			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
 			return
 		}
-		if err := accountDb.CacheAccounting(nil); err != nil {
+		if err := accountDb.CacheAccounting(nil, nil); err != nil {
 			engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
 			return
 		}
