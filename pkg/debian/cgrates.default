@@ -2,7 +2,7 @@
 
 # start CGRateS init.d script?
 #  starts with "true"
-ENABLE=true
+ENABLE=false
 
 # Start with specific user/group
 #USER=cgrates

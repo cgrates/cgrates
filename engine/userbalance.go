@@ -116,6 +116,7 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 		a.Balance.Value = -a.Balance.Value
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], a.Balance)
 	}
+	ub.executeActionTriggers(nil)
 	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 

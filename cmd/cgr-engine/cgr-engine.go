@@ -379,9 +379,14 @@ func main() {
 	}
 	if cfg.RaterEnabled {
 		if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
 			return
 		}
+		if err := accountDb.CacheAccounting(nil); err != nil {
+			engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
+			return
+		}
+
 	}
 	if cfg.StorDBType == SAME {
 		logDb = ratingDb.(engine.LogStorage)
