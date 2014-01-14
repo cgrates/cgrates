@@ -114,7 +114,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 	if err != nil {
 		return nil, err
 	}
-	return db.(LogStorage), nil
+	return d.(LogStorage), nil
 }
 
 func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string) (db LoadStorage, err error) {
