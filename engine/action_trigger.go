@@ -47,6 +47,8 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		Logger.Err(fmt.Sprintf("Failed to get actions: %v", err))
 		return
 	}
+	at.Executed = true
+	atLeastOneActionExecuted := false
 	for _, a := range aac {
 		if a.Balance == nil {
 			a.Balance = &Balance{}
@@ -59,9 +61,14 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		}
 		go Logger.Info(fmt.Sprintf("Executing %v: %v", ub.Id, a))
 		err = actionFunction(ub, a)
+		if err == nil {
+			atLeastOneActionExecuted = true
+		}
+	}
+	if !atLeastOneActionExecuted {
+		at.Executed = false
 	}
 	storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)
-	at.Executed = true
 	accountingStorage.SetUserBalance(ub)
 	return
 }
