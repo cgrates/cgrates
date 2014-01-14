@@ -115,8 +115,8 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 		a.Balance.Value = -a.Balance.Value
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], a.Balance)
 	}
-	ub.executeActionTriggers(nil) // for triggering min/max_balance triggers
-	return nil                    //ub.BalanceMap[id].GetTotalValue()
+	ub.executeActionTriggers(nil)
+	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 
 func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain) BalanceChain {
