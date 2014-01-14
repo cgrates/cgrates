@@ -31,8 +31,8 @@ var (
 )
 
 func init() {
-	populateDB()
 	historyScribe, _ = history.NewMockScribe()
+	populateDB()
 }
 
 func populateDB() {
