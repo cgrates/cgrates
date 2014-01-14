@@ -12,7 +12,7 @@ Some components of **CGRateS** (whether enabled or not is up to the administrato
 - Redis_ to serve as Rating and Accounting DB for **CGRateS**.
 - MySQL_ to serve as StorDB for **CGRateS**.
 
-We will install them in one shoot using the command bellow.
+We will install them in one shot using the command bellow.
 
 ::
 
@@ -26,7 +26,7 @@ FreeSWITCH_
 
 More information regarding installing FreeSWITCH_ on Debian can be found on it's official `installation wiki <http://wiki.freeswitch.org/wiki/Installation_Guide#Debian_packages>`_.
 
-To get FreeSWITCH_ installed and configured, we have choosen the simplest method, out of *vanilla* packages.
+To get FreeSWITCH_ installed and configured, we have choosen the simplest method, out of *vanilla* packages plus one individual module we need: *mod-json-cdr*.
 
 We got FreeSWITCH_ installed via following commands:
 
@@ -37,7 +37,7 @@ We got FreeSWITCH_ installed via following commands:
  cd /etc/apt/sources.list.d/
  wget http://apt.itsyscom.com/repos/apt/conf/freeswitch.apt.list
  apt-get update
- apt-get install freeswitch-meta-vanilla
+ apt-get install freeswitch-meta-vanilla freeswitch-mod-json-cdr
 
 Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
 
@@ -63,13 +63,6 @@ As described in post-install section, we will need to set up the MySQL_ database
 
  cd /usr/share/cgrates/storage/mysql/
  ./setup_cgr_db.sh root CGRateS.org localhost
-
-
-Since by default FreeSWITCH_ restricts access to *.csv* CDRs to it's own user, we will add the *cgrates* user to freeswitch group.
-
-::
-
- usermod -a -G freeswitch cgrates
 
 
 At this point we have **CGRateS** installed but not yet configured. To facilitate the understanding and speed up the process, **CGRateS** comes already with the configurations used in this tutorial, available in the */usr/share/cgrates/tutorials* folder, so we will load them custom on each tutorial case.

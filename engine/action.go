@@ -89,7 +89,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 }
 
 func logAction(ub *UserBalance, a *Action) (err error) {
-	Logger.Info(fmt.Sprintf("%v %+v", a.BalanceId, a.Balance))
+	ubMarshal,_ := json.Marshal(ub)
+	Logger.Info(fmt.Sprintf("Threshold reached, balance: %s", ubMarshal))
 	return
 }
 

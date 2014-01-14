@@ -78,6 +78,7 @@ To verify that all actions successfully performed, we use following *cgr-console
   cgr-console get_cache_age 1002
   cgr-console get_cache_age RP_RETAIL
   cgr-console get_cache_age *out:cgrates.org:call:*any
+  cgr-console get_cache_age LOG_WARNING
 
 - Make sure all our balances were topped-up:
 
@@ -146,6 +147,19 @@ To check that there are no debits during or by the end of the call, but when the
 ~~~~~~~~~~~~
 
 The user 1004 is marked as *rated* inside FreeSWITCH_ hence his calls not interact in any way with accounting subsystem. The only action perfomed by **CGRateS** related to his calls wil be rating/mediation of his CDRs.
+
+
+Fraud detection
+~~~~~~~~~~~~~~~
+
+Since we have configured some action triggers (more than 20 units of balance topped-up or less than 2 and more than 5 units spent on *FS_USERS* we should be notified over syslog when things like unexpected events happen (eg: fraud with more than 20 units topped-up). To verify this mechanism simply add some random units into one account's balance:
+
+::
+
+ cgr-console add_balance cgrates.org 1003 21
+ tail -f /var/log/syslog -n 20
+
+*Note*: The actions are only executed once, in order to be repetive they need to be reset (via automated or manual process).
 
 
 CDR processing
