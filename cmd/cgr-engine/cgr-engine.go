@@ -382,7 +382,7 @@ func main() {
 			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
 			return
 		}
-		if err := ratingDb.CacheAccounting(nil); err != nil {
+		if err := accountDb.CacheAccounting(nil); err != nil {
 			engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
 			return
 		}
