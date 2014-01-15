@@ -1,5 +1,5 @@
-Tutorial fs_prepaid_csv
-=======================
+Tutorial FS_JSON
+================
 
 Scenario:
 ---------

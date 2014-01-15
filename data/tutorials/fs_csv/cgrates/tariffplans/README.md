@@ -1,5 +1,5 @@
-CGRateS - FSGermanyPrep1
-==========================
+Tutorial - FS_CSV
+=================
 
 Scenario:
 ---------
