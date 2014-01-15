@@ -273,6 +273,9 @@ func (csvr *CSVReader) LoadTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
+		if _, exists := csvr.timings[tag]; exists {
+			log.Print("Warning: duplicate timing found: ", tag)
+		}
 		csvr.timings[tag] = NewTiming(record...)
 	}
 	return
