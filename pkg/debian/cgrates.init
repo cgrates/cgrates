@@ -21,7 +21,8 @@ DAEMON=/usr/bin/cgr-engine
 USER=cgrates
 GROUP=cgrates
 ENGINE_OPTS=""
-PIDFILE=/var/run/$NAME/cgr-engine.pid
+RUNDIR=/var/run/$NAME
+PIDFILE=$RUNDIR/cgr-engine.pid
 SCRIPTNAME=/etc/init.d/$NAME
 DEFAULTS=/etc/default/$NAME
 ENABLE=false
@@ -43,6 +44,12 @@ ENABLE=false
 if [ "$ENABLE" != "true" ]; then
   echo "$DESC not yet configured. Edit $DEFAULTS first."
   exit 0
+fi
+
+# Install the run folder
+if [ ! -d $RUNDIR ]; then
+  mkdir $RUNDIR
+  chown $USER:$GROUP $RUNDIR
 fi
 
 

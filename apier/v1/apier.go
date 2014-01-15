@@ -542,6 +542,37 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply 
 	if err := loader.WriteToDatabase(attrs.FlushDb, false); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	// Make sure the items are in the cache
+	dstIds, _ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
+	dstKeys := make([]string, len(dstIds))
+	for idx, dId := range dstIds {
+		dstKeys[idx] = engine.DESTINATION_PREFIX + dId // Cache expects them as redis keys
+	}
+	rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
+	rpKeys := make([]string, len(rplIds))
+	for idx, rpId := range rplIds {
+		rpKeys[idx] = engine.RATING_PLAN_PREFIX + rpId
+	}
+	rpfIds, _ := loader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
+	rpfKeys := make([]string, len(rpfIds))
+	for idx, rpfId := range rpfIds {
+		rpfKeys[idx] = engine.RATING_PROFILE_PREFIX + rpfId
+	}
+	actIds, _ := loader.GetLoadedIds(engine.ACTION_PREFIX)
+	actKeys := make([]string, len(actIds))
+	for idx, actId := range actIds {
+		actKeys[idx] = engine.ACTION_PREFIX + actId
+	}
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccounting(actKeys); err != nil {
+		return err
+	}
+	if self.Sched != nil {
+		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.Restart()
+	}
 	*reply = "OK"
 	return nil
 }

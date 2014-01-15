@@ -78,7 +78,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error)
 			return
 		}
 		cache2go.RemPrefixKey(DESTINATION_PREFIX)
-	} else if len(rpKeys) != 0 {
+	} else if len(dKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching destinations: %v", dKeys))
 	}
 	for _, key := range dKeys {
