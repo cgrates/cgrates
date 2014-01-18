@@ -666,6 +666,22 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
+	case RATING_PROFILE_PREFIX:
+		keys := make([]string, len(csvr.ratingProfiles))
+		i := 0
+		for k := range csvr.ratingProfiles {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case ACTION_PREFIX: // actionsTimings
+		keys := make([]string, len(csvr.actions))
+		i := 0
+		for k := range csvr.actions {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
 	case ACTION_TIMING_PREFIX: // actionsTimings
 		keys := make([]string, len(csvr.actionsTimings))
 		i := 0

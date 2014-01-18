@@ -420,6 +420,11 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
+	// Need to do it before scheduler otherwise actions to run will be unknown
+	if err := self.AccountDb.CacheAccounting(nil); err != nil {
+		return err
+	}
 	if self.Sched != nil {
 		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()

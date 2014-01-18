@@ -718,6 +718,22 @@ func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
+	case RATING_PROFILE_PREFIX:
+		keys := make([]string, len(dbr.ratingProfiles))
+		i := 0
+		for k := range dbr.ratingProfiles {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case ACTION_PREFIX: // actions
+		keys := make([]string, len(dbr.actions))
+		i := 0
+		for k := range dbr.actions {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
 	case ACTION_TIMING_PREFIX: // actionsTimings
 		keys := make([]string, len(dbr.actionsTimings))
 		i := 0

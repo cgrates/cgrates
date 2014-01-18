@@ -197,7 +197,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
 	}
-	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
+	//cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -225,7 +225,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rpf.Id, rpf}, &response)
 	}
-	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
+	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
 
@@ -274,7 +274,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
 	}
-	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
+	//cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 
@@ -297,7 +297,7 @@ func (rs *RedisStorage) GetActions(key string, checkDb bool) (as Actions, err er
 func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.db.Set(ACTION_PREFIX+key, result)
-	cache2go.Cache(ACTION_PREFIX+key, as)
+	// cache2go.Cache(ACTION_PREFIX+key, as)
 	return
 }
 
