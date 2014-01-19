@@ -251,7 +251,7 @@ func TestActionsValidator(t *testing.T) {
 
 func TestActionTimingsValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(actionTimingsSample))
-	lnValidator := FileValidators[utils.ACTION_TIMINGS_CSV]
+	lnValidator := FileValidators[utils.ACTION_PLANS_CSV]
 	lineNr := 0
 	for {
 		lineNr++

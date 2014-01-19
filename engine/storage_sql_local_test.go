@@ -111,7 +111,7 @@ func TestRemoveData(t *testing.T) {
 
 	// Create AccountActions
 	aa := &utils.TPAccountActions{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Account: "1001",
-		Direction: "*out", ActionTimingsId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
 	if err := mysql.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
 		t.Error(err.Error())
 	}

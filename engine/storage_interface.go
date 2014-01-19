@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	ACTION_TIMING_PREFIX      = "atm_"
+	ACTION_TIMING_PREFIX      = "apl_"
 	RATING_PLAN_PREFIX        = "rpl_"
 	RATING_PROFILE_PREFIX     = "rpf_"
 	ACTION_PREFIX             = "act_"

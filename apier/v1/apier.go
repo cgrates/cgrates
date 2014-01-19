@@ -287,10 +287,10 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 	return nil
 }
 
-type AttrSetActionTimings struct {
-	ActionTimingsId string             // Profile id
+type AttrSetActionPlan struct {
+	Id string             // Profile id
+	ActionPlan   []*ApiActionTiming // Set of actions this Actions profile will perform
 	Overwrite       bool               // If previously defined, will be overwritten
-	ActionTimings   []*ApiActionTiming // Set of actions this Actions profile will perform
 	ReloadScheduler bool               // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
 }
 
@@ -304,25 +304,25 @@ type ApiActionTiming struct {
 	Weight    float64 // Binding's weight
 }
 
-func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"ActionTimingsId", "ActionTimings"}); len(missing) != 0 {
+func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	for _, at := range attrs.ActionTimings {
+	for _, at := range attrs.ActionPlan {
 		requiredFields := []string{"ActionsId", "Time", "Weight"}
 		if missing := utils.MissingStructFields(at, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.ActionsId, missing)
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.AccountDb.ExistsData(engine.ACTION_TIMING_PREFIX, attrs.ActionTimingsId); err != nil {
+		if exists, err := self.AccountDb.ExistsData(engine.ACTION_TIMING_PREFIX, attrs.Id); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
 		}
 	}
-	storeAtms := make(engine.ActionTimings, len(attrs.ActionTimings))
-	for idx, apiAtm := range attrs.ActionTimings {
+	storeAtms := make(engine.ActionTimings, len(attrs.ActionPlan))
+	for idx, apiAtm := range attrs.ActionPlan {
 		if exists, err := self.AccountDb.ExistsData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
@@ -336,17 +336,20 @@ func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string)
 		timing.StartTime = apiAtm.Time
 		at := &engine.ActionTiming{
 			Id:        utils.GenUUID(),
-			Tag:       attrs.ActionTimingsId,
+			Tag:       attrs.Id,
 			Weight:    apiAtm.Weight,
 			Timing:    &engine.RateInterval{Timing: timing},
 			ActionsId: apiAtm.ActionsId,
 		}
 		storeAtms[idx] = at
 	}
-	if err := self.AccountDb.SetActionTimings(attrs.ActionTimingsId, storeAtms); err != nil {
+	if err := self.AccountDb.SetActionTimings(attrs.Id, storeAtms); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	if attrs.ReloadScheduler && self.Sched != nil {
+	if attrs.ReloadScheduler {
+		if self.Sched == nil {
+			return errors.New("SCHEDULER_NOT_ENABLED")
+		}
 		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()
 	}
@@ -534,7 +537,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply 
 		path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
 		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
-		path.Join(attrs.FolderPath, utils.ACTION_TIMINGS_CSV),
+		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV))
 	if err := loader.LoadAll(); err != nil {

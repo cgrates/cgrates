@@ -220,10 +220,10 @@ type TPAction struct {
 	Weight          float64 // Action's weight
 }
 
-type TPActionTimings struct {
+type TPActionPlan struct {
 	TPid            string            // Tariff plan id
-	ActionTimingsId string            // ActionTimings id
-	ActionTimings   []*TPActionTiming // Set of ActionTiming bindings this profile will group
+	Id string            // ActionPlan id
+	ActionPlan   []*TPActionTiming // Set of ActionTiming bindings this profile will group
 }
 
 type TPActionTiming struct {
@@ -266,7 +266,7 @@ type TPAccountActions struct {
 	Tenant           string // Tenant's Id
 	Account          string // Account name
 	Direction        string // Traffic direction
-	ActionTimingsId  string // Id of ActionTimings profile to use
+	ActionPlanId  string // Id of ActionPlan profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
 }
 

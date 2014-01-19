@@ -500,7 +500,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 }
 
 func (csvr *CSVReader) LoadActionTimings() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep, utils.ACTION_TIMINGS_NRCOLS)
+	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep, utils.ACTION_PLANS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load action timings file: ", err)
 		// allow writing of the other values

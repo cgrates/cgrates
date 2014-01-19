@@ -27,7 +27,7 @@ const (
 	TBL_TP_RATING_PLANS      = "tp_rating_plans"
 	TBL_TP_RATE_PROFILES     = "tp_rating_profiles"
 	TBL_TP_ACTIONS           = "tp_actions"
-	TBL_TP_ACTION_TIMINGS    = "tp_action_timings"
+	TBL_TP_ACTION_PLANS      = "tp_action_plans"
 	TBL_TP_ACTION_TRIGGERS   = "tp_action_triggers"
 	TBL_TP_ACCOUNT_ACTIONS   = "tp_account_actions"
 	TBL_CDRS_PRIMARY         = "cdrs_primary"
@@ -41,7 +41,7 @@ const (
 	RATING_PLANS_CSV         = "RatingPlans.csv"
 	RATING_PROFILES_CSV      = "RatingProfiles.csv"
 	ACTIONS_CSV              = "Actions.csv"
-	ACTION_TIMINGS_CSV       = "ActionTimings.csv"
+	ACTION_PLANS_CSV         = "ActionPlans.csv"
 	ACTION_TRIGGERS_CSV      = "ActionTriggers.csv"
 	ACCOUNT_ACTIONS_CSV      = "AccountActions.csv"
 	TIMINGS_NRCOLS           = 6
@@ -51,7 +51,7 @@ const (
 	DESTRATE_TIMINGS_NRCOLS  = 4
 	RATE_PROFILES_NRCOLS     = 7
 	ACTIONS_NRCOLS           = 11
-	ACTION_TIMINGS_NRCOLS    = 4
+	ACTION_PLANS_NRCOLS      = 4
 	ACTION_TRIGGERS_NRCOLS   = 8
 	ACCOUNT_ACTIONS_NRCOLS   = 5
 	ROUNDING_UP              = "*up"

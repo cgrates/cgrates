@@ -492,9 +492,9 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 			ActionTriggers: aTriggers,
 		}
 		dbr.accountActions = append(dbr.accountActions, ub)
-		aTimings, exists := dbr.actionsTimings[aa.ActionTimingsId]
+		aTimings, exists := dbr.actionsTimings[aa.ActionPlanId]
 		if !exists {
-			log.Printf("Could not get action timing for tag %v", aa.ActionTimingsId)
+			log.Printf("Could not get action timing for tag %v", aa.ActionPlanId)
 			// must not continue here
 		}
 		for _, at := range aTimings {
@@ -513,23 +513,23 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		id := accountAction.KeyId()
 		var actionsIds []string // collects action ids
 		// action timings
-		if accountAction.ActionTimingsId != "" {
+		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
 			var exitingUserBalanceIds []string
-			existingActionTimings, err := dbr.accountDb.GetActionTimings(accountAction.ActionTimingsId)
+			existingActionTimings, err := dbr.accountDb.GetActionTimings(accountAction.ActionPlanId)
 			if err == nil && len(existingActionTimings) > 0 {
 				// all action timings from a specific tag shuld have the same list of user balances from the first one
 				exitingUserBalanceIds = existingActionTimings[0].UserBalanceIds
 			}
 
-			actionTimingsMap, err := dbr.storDb.GetTPActionTimings(dbr.tpid, accountAction.ActionTimingsId)
+			actionTimingsMap, err := dbr.storDb.GetTPActionTimings(dbr.tpid, accountAction.ActionPlanId)
 			if err != nil {
 				return err
 			} else if len(actionTimingsMap) == 0 {
-				return fmt.Errorf("No ActionTimings with id <%s>", accountAction.ActionTimingsId)
+				return fmt.Errorf("No ActionTimings with id <%s>", accountAction.ActionPlanId)
 			}
 			var actionTimings []*ActionTiming
-			ats := actionTimingsMap[accountAction.ActionTimingsId]
+			ats := actionTimingsMap[accountAction.ActionPlanId]
 			for _, at := range ats {
 				// Check action exists before saving it inside actionTiming key
 				// ToDo: try saving the key after the actions was retrieved in order to save one query here.
@@ -547,7 +547,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				t := timingsMap[at.TimingId]
 				actTmg := &ActionTiming{
 					Id:     utils.GenUUID(),
-					Tag:    accountAction.ActionTimingsId,
+					Tag:    accountAction.ActionPlanId,
 					Weight: at.Weight,
 					Timing: &RateInterval{
 						Timing: &RITiming{
@@ -576,7 +576,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			}
 
 			// write action timings
-			err = dbr.accountDb.SetActionTimings(accountAction.ActionTimingsId, actionTimings)
+			err = dbr.accountDb.SetActionTimings(accountAction.ActionPlanId, actionTimings)
 			if err != nil {
 				return err
 			}

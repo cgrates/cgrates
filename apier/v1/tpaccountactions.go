@@ -27,7 +27,7 @@ import (
 // Creates a new AccountActions profile within a tariff plan
 func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs,
-		[]string{"TPid", "LoadId", "Tenant", "Account", "Direction", "ActionTimingsId", "ActionTriggersId"}); len(missing) != 0 {
+		[]string{"TPid", "LoadId", "Tenant", "Account", "Direction", "ActionPlanId", "ActionTriggersId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	if err := self.StorDb.SetTPAccountActions(attrs.TPid, map[string]*utils.TPAccountActions{attrs.KeyId(): &attrs}); err != nil {

@@ -56,7 +56,7 @@ func (self *CmdAddAccount) FromArgs(args []string) error {
 	self.rpcParams.Tenant = args[2]
 	self.rpcParams.Account = args[3]
 	self.rpcParams.Type = args[4]
-	self.rpcParams.ActionTimingsId = args[5]
+	self.rpcParams.ActionPlanId = args[5]
 	if len(args) > 6 {
 		self.rpcParams.Direction = args[6]
 	}
