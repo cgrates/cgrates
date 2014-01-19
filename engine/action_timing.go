@@ -44,7 +44,7 @@ type ActionTiming struct {
 	stCache        time.Time // cached time of the next start
 }
 
-type ActionTimings []*ActionTiming
+type ActionPlan []*ActionTiming
 
 func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	if !at.stCache.IsZero() {
@@ -297,7 +297,7 @@ func (at *ActionTiming) String_DISABLED() string {
 }
 
 // Helper to remove ActionTiming members based on specific filters, empty data means no always match
-func RemActionTiming(ats ActionTimings, actionTimingId, balanceId string) ActionTimings {
+func RemActionTiming(ats ActionPlan, actionTimingId, balanceId string) ActionPlan {
 	for idx, at := range ats {
 		if len(actionTimingId)!=0 && at.Id!=actionTimingId { // No Match for ActionTimingId, no need to move further
 			continue

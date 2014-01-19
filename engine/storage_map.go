@@ -232,7 +232,7 @@ func (ms *MapStorage) SetUserBalance(ub *UserBalance) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
+func (ms *MapStorage) GetActionTimings(key string) (ats ActionPlan, err error) {
 	if values, ok := ms.dict[ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
@@ -241,7 +241,7 @@ func (ms *MapStorage) GetActionTimings(key string) (ats ActionTimings, err error
 	return
 }
 
-func (ms *MapStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
+func (ms *MapStorage) SetActionTimings(key string, ats ActionPlan) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		delete(ms.dict, ACTION_TIMING_PREFIX+key)
@@ -252,13 +252,13 @@ func (ms *MapStorage) SetActionTimings(key string, ats ActionTimings) (err error
 	return
 }
 
-func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
-	ats = make(map[string]ActionTimings)
+func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlan, err error) {
+	ats = make(map[string]ActionPlan)
 	for key, value := range ms.dict {
 		if !strings.Contains(key, ACTION_TIMING_PREFIX) {
 			continue
 		}
-		var tempAts ActionTimings
+		var tempAts ActionPlan
 		err = ms.ms.Unmarshal(value, &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}

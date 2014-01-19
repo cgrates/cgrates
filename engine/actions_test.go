@@ -434,7 +434,7 @@ func TestActionTimingsRemoveMember(t *testing.T) {
 		UserBalanceIds: []string{"three", "four"},
 		ActionsId:      "TEST_ACTIONS2",
 		}
-	ats := ActionTimings{at1, at2}
+	ats := ActionPlan{at1, at2}
 	if outAts := RemActionTiming(ats, "", "four");  len(outAts[1].UserBalanceIds) != 1 {
 		t.Error("Expecting fewer balance ids", outAts[1].UserBalanceIds)
 	}
@@ -444,7 +444,7 @@ func TestActionTimingsRemoveMember(t *testing.T) {
 	if ats = RemActionTiming(ats, "some_uuid22", "");len(ats) != 1 {
 		t.Error("Expecting fewer actionTimings members", ats)
 	}
-	ats2 := ActionTimings{at1, at2}
+	ats2 := ActionPlan{at1, at2}
 	if ats2 = RemActionTiming(ats2, "", ""); len(ats2) != 0 {
 		t.Error("Should have no members anymore", ats2)
 	}

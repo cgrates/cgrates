@@ -171,7 +171,7 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 	}
 	balanceId := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
 	var ub *engine.UserBalance
-	var ats engine.ActionTimings
+	var ats engine.ActionPlan
 	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
 		if bal, _ := self.AccountDb.GetUserBalance(balanceId); bal != nil {
 			ub = bal

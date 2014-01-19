@@ -317,7 +317,7 @@ func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
+func (rs *RedisStorage) GetActionTimings(key string) (ats ActionPlan, err error) {
 	var values []byte
 	if values, err = rs.db.Get(ACTION_TIMING_PREFIX + key); err == nil {
 		err = rs.ms.Unmarshal(values, &ats)
@@ -325,7 +325,7 @@ func (rs *RedisStorage) GetActionTimings(key string) (ats ActionTimings, err err
 	return
 }
 
-func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
+func (rs *RedisStorage) SetActionTimings(key string, ats ActionPlan) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		_, err = rs.db.Del(ACTION_TIMING_PREFIX + key)
@@ -336,18 +336,18 @@ func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err err
 	return
 }
 
-func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
+func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionPlan, err error) {
 	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
 	if err != nil {
 		return nil, err
 	}
-	ats = make(map[string]ActionTimings, len(keys))
+	ats = make(map[string]ActionPlan, len(keys))
 	for _, key := range keys {
 		values, err := rs.db.Get(key)
 		if err != nil {
 			continue
 		}
-		var tempAts ActionTimings
+		var tempAts ActionPlan
 		err = rs.ms.Unmarshal(values, &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}

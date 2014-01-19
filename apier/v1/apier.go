@@ -321,7 +321,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 			return errors.New(utils.ERR_EXISTS)
 		}
 	}
-	storeAtms := make(engine.ActionTimings, len(attrs.ActionPlan))
+	storeAtms := make(engine.ActionPlan, len(attrs.ActionPlan))
 	for idx, apiAtm := range attrs.ActionPlan {
 		if exists, err := self.AccountDb.ExistsData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())

@@ -86,9 +86,9 @@ type AccountingStorage interface {
 	SetActions(string, Actions) error
 	GetUserBalance(string) (*UserBalance, error)
 	SetUserBalance(*UserBalance) error
-	GetActionTimings(string) (ActionTimings, error)
-	SetActionTimings(string, ActionTimings) error
-	GetAllActionTimings() (map[string]ActionTimings, error)
+	GetActionTimings(string) (ActionPlan, error)
+	SetActionTimings(string, ActionPlan) error
+	GetAllActionTimings() (map[string]ActionPlan, error)
 }
 
 type CdrStorage interface {
