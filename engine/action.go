@@ -201,8 +201,7 @@ func callUrlAsync(ub *UserBalance, a *Action) error {
 			if _, err = http.Post(a.ExtraParameters, "application/json", bytes.NewBuffer(body)); err == nil {
 				break // Success, no need to reinterate
 			} else if i == 4 { // Last iteration, syslog the warning
-				ubMarshal,_ := json.Marshal(ub)
-				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), ubMarshal))
+				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), body))
 				break
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
