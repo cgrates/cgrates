@@ -196,11 +196,14 @@ func callUrlAsync(ub *UserBalance, a *Action) error {
 	if err != nil {
 		return err
 	}
-	ubMarshal,_ := json.Marshal(ub)
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
 			if _, err = http.Post(a.ExtraParameters, "application/json", bytes.NewBuffer(body)); err == nil {
 				break // Success, no need to reinterate
+			} else if i == 4 { // Last iteration, syslog the warning
+				ubMarshal,_ := json.Marshal(ub)
+				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), ubMarshal))
+				break
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
 		}
