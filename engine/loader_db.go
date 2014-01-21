@@ -104,7 +104,7 @@ func (dbr *DbReader) ShowStatistics() {
 	// actions
 	log.Print("Actions: ", len(dbr.actions))
 	// action timings
-	log.Print("Action timings: ", len(dbr.actionsTimings))
+	log.Print("Action plans: ", len(dbr.actionsTimings))
 	// account actions
 	log.Print("Account actions: ", len(dbr.accountActions))
 }
@@ -151,7 +151,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("Action timings")
+		log.Print("Action plans")
 	}
 	for k, ats := range dbr.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)

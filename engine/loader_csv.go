@@ -144,7 +144,7 @@ func (csvr *CSVReader) ShowStatistics() {
 	// actions
 	log.Print("Actions: ", len(csvr.actions))
 	// action timings
-	log.Print("Action timings: ", len(csvr.actionsTimings))
+	log.Print("Action plans: ", len(csvr.actionsTimings))
 	// account actions
 	log.Print("Account actions: ", len(csvr.accountActions))
 }
@@ -195,7 +195,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("Action timings")
+		log.Print("Action plans")
 	}
 	for k, ats := range csvr.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)
@@ -502,7 +502,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 func (csvr *CSVReader) LoadActionTimings() (err error) {
 	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep, utils.ACTION_PLANS_NRCOLS)
 	if err != nil {
-		log.Print("Could not load action timings file: ", err)
+		log.Print("Could not load action plans file: ", err)
 		// allow writing of the other values
 		return nil
 	}
@@ -513,11 +513,11 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 		tag := record[0]
 		_, exists := csvr.actions[record[1]]
 		if !exists {
-			return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", record[1]))
+			return errors.New(fmt.Sprintf("ActionPlan: Could not load the action for tag: %v", record[1]))
 		}
 		t, exists := csvr.timings[record[2]]
 		if !exists {
-			return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", record[2]))
+			return errors.New(fmt.Sprintf("ActionPlan: Could not load the timing for tag: %v", record[2]))
 		}
 		weight, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {

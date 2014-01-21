@@ -976,7 +976,7 @@ func TestApierSetActions(t *testing.T) {
 	}
 }
 
-func TestApierSetActionTimings(t *testing.T) {
+func TestApierSetActionPlan(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1020,7 +1020,7 @@ func TestApierAddTriggeredAction(t *testing.T) {
 
 
 
-// Test here AddTriggeredAction
+// Test here GetAccountActionTriggers
 func TestApierGetAccountActionTriggers(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1033,6 +1033,7 @@ func TestApierGetAccountActionTriggers(t *testing.T) {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 }
+
 
 // Test here RemAccountActionTriggers
 func TestApierRemAccountActionTriggers(t *testing.T) {
@@ -1103,6 +1104,7 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 	}
 }
 
+
 // Test here RemActionTiming
 func TestApierRemActionTiming(t *testing.T) {
 	if !*testLocal {
@@ -1160,6 +1162,26 @@ func TestApierGetBalance(t *testing.T) {
 		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
 	} else if reply != 1 {
 		t.Errorf("Calling ApierV1.GetBalance expected: 1, received: %f", reply)
+	}
+}
+
+// Start with initial balance, top-up to test max_balance
+func TestTriggersExecute(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+        attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8", Type: "*prepaid"}
+        if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
+                t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+        } else if reply != "OK" {
+                t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+        }
+	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceId: "*monetary", Direction: "*out", Value: 2}
+	if err := rater.Call("ApierV1.AddBalance", attrAddBlnc, &reply); err != nil {
+		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 }
 

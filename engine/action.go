@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"net/http"
 	"sort"
+	"time"
 )
 
 /*
@@ -53,6 +54,7 @@ const (
 	RESET_COUNTER  = "*reset_counter"
 	RESET_COUNTERS = "*reset_counters"
 	CALL_URL       = "*call_url"
+	CALL_URL_ASYNC = "*call_url_async"
 	UNLIMITED      = "*unlimited"
 )
 
@@ -84,6 +86,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return resetCountersAction, true
 	case CALL_URL:
 		return callUrl, true
+	case CALL_URL_ASYNC:
+		return callUrlAsync, true
 	}
 	return nil, false
 }
@@ -184,6 +188,25 @@ func callUrl(ub *UserBalance, a *Action) error {
 	}
 	_, err = http.Post(a.ExtraParameters, "application/json", bytes.NewBuffer(body))
 	return err
+}
+
+// Does not block for posts, no error reports
+func callUrlAsync(ub *UserBalance, a *Action) error {
+	body, err := json.Marshal(ub)
+	if err != nil {
+		return err
+	}
+	ubMarshal,_ := json.Marshal(ub)
+	go func() {
+		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
+			if _, err = http.Post(a.ExtraParameters, "application/json", bytes.NewBuffer(body)); err == nil {
+				break // Success, no need to reinterate
+			}
+			time.Sleep(time.Duration(i) * time.Minute)
+		}
+		
+	}()
+	return nil
 }
 
 // Structure to store actions according to weight
