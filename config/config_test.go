@@ -133,7 +133,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.HistoryListen = "127.0.0.1:2013"
 	eCfg.HistoryDir = "/var/log/cgrates/history"
 	eCfg.HistorySaveInterval = time.Duration(1)*time.Second
-	eCfg.MailerServer = "localhost"
+	eCfg.MailerServer = "localhost:25"
 	eCfg.MailerAuthUser = "cgrates"
 	eCfg.MailerAuthPass = "CGRateS.org"
 	eCfg.MailerFromAddr = "cgr-mailer@localhost.localdomain"
