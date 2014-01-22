@@ -177,9 +177,6 @@ func startHistoryScribe() {
 			exitChan <- true
 			return
 		}
-	}
-
-	if cfg.HistoryServerEnabled {
 		server.RpcRegisterName("Scribe", scribeServer)
 	}
 
@@ -333,8 +330,8 @@ func main() {
 	stopHandled := false
 	// Async starts here
 	if cfg.RaterEnabled && cfg.RaterBalancer != "" && !cfg.BalancerEnabled {
-		go registerToBalancer()
-		go stopRaterSignalHandler()
+		registerToBalancer()
+		stopRaterSignalHandler()
 		stopHandled = true
 	}
 	responder := &engine.Responder{ExitChan: exitChan}
@@ -360,12 +357,11 @@ func main() {
 	if !stopHandled {
 		go generalSignalHandler()
 	}
-
 	if cfg.SchedulerEnabled {
 		engine.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
-			go reloadSchedulerSingnalHandler(sched, accountDb)
+			reloadSchedulerSingnalHandler(sched, accountDb)
 			apier.Sched = sched
 			sched.LoadActionTimings(accountDb)
 			sched.Loop()
@@ -374,28 +370,28 @@ func main() {
 
 	if cfg.SMEnabled {
 		engine.Logger.Info("Starting CGRateS SessionManager.")
-		go startSessionManager(responder, logDb)
+		startSessionManager(responder, logDb)
 		// close all sessions on shutdown
-		go shutdownSessionmanagerSingnalHandler()
+		shutdownSessionmanagerSingnalHandler()
 	}
 
 	if cfg.MediatorEnabled {
 		engine.Logger.Info("Starting CGRateS Mediator.")
-		go startMediator(responder, logDb, cdrDb)
+		startMediator(responder, logDb, cdrDb)
 	}
 
 	if cfg.CDRSEnabled {
 		engine.Logger.Info("Starting CGRateS CDR Server.")
-		go startCDRS(responder, cdrDb)
+		startCDRS(responder, cdrDb)
 	}
 
 	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {
 		engine.Logger.Info("Starting History Service.")
-		go startHistoryScribe()
+		startHistoryScribe()
 	}
 	if cfg.CdrcEnabled {
 		engine.Logger.Info("Starting CGRateS CDR Client.")
-		go startCdrc()
+		startCdrc()
 	}
 	go server.ServeGOB(cfg.RPCGOBListen)
 	go server.ServeJSON(cfg.RPCJSONListen)
