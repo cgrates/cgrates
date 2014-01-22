@@ -133,6 +133,10 @@ func TestDefaults(t *testing.T) {
 	eCfg.HistoryListen = "127.0.0.1:2013"
 	eCfg.HistoryDir = "/var/log/cgrates/history"
 	eCfg.HistorySaveInterval = time.Duration(1)*time.Second
+	eCfg.MailerServer = "localhost"
+	eCfg.MailerAuthUser = "cgrates"
+	eCfg.MailerAuthPass = "CGRateS.org"
+	eCfg.MailerFromAddr = "cgr-mailer@localhost.localdomain"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
@@ -256,6 +260,10 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.HistoryListen = "test"
 	eCfg.HistoryDir = "test"
 	eCfg.HistorySaveInterval = time.Duration(99)*time.Second
+	eCfg.MailerServer = "test"
+	eCfg.MailerAuthUser = "test"
+	eCfg.MailerAuthPass = "test"
+	eCfg.MailerFromAddr = "test"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)

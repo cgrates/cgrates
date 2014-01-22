@@ -113,3 +113,8 @@ save_interval = 99	      # Timeout duration between saves
 enabled = true			# Starts History as a client: <true|false>.
 server = test			# Address where to reach the master history server: <internal|x.y.z.y:1234>
 
+[mailer]
+server = test					# The server to use when sending emails out
+auth_user = test				# Authenticate to email server using this user
+auth_passwd = test				# Authenticate to email server with this password
+from_address = test				# From address used when sending emails out

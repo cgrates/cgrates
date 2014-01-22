@@ -140,6 +140,10 @@ type CGRConfig struct {
 	HistoryListen            string   // History server listening interface: <internal|x.y.z.y:1234>
 	HistoryDir              string   // Location on disk where to store history files.
 	HistorySaveInterval      time.Duration   // The timout duration between history writes
+	MailerServer             string // The server to use when sending emails out
+	MailerAuthUser           string // Authenticate to email server using this user
+	MailerAuthPass           string // Authenticate to email server with this password
+	MailerFromAddr           string // From address used when sending emails out
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -230,6 +234,10 @@ func (self *CGRConfig) setDefaults() error {
 	self.HistoryListen = "127.0.0.1:2013"
 	self.HistoryDir = "/var/log/cgrates/history"
 	self.HistorySaveInterval = time.Duration(1) * time.Second
+	self.MailerServer = "localhost"
+	self.MailerAuthUser = "cgrates"
+	self.MailerAuthPass = "CGRateS.org"
+	self.MailerFromAddr = "cgr-mailer@localhost.localdomain"
 	return nil
 }
 
@@ -556,6 +564,18 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		if cfg.HistorySaveInterval, errParse = utils.ParseDurationWithSecs(saveIntvlStr); errParse != nil {
 			return nil, errParse
 		}
+	}
+	if hasOpt = c.HasOption("mailer", "server"); hasOpt {
+		cfg.MailerServer, _ = c.GetString("mailer", "server")
+	}
+	if hasOpt = c.HasOption("mailer", "auth_user"); hasOpt {
+		cfg.MailerAuthUser, _ = c.GetString("mailer", "auth_user")
+	}
+	if hasOpt = c.HasOption("mailer", "auth_passwd"); hasOpt {
+		cfg.MailerAuthPass, _ = c.GetString("mailer", "auth_passwd")
+	}
+	if hasOpt = c.HasOption("mailer", "from_address"); hasOpt {
+		cfg.MailerFromAddr, _ = c.GetString("mailer", "from_address")
 	}
 	return cfg, nil
 }
