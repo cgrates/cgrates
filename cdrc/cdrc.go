@@ -23,10 +23,6 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"github.com/howeyc/fsnotify"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -36,6 +32,11 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/howeyc/fsnotify"
 )
 
 const (
@@ -59,9 +60,9 @@ func NewCdrc(config *config.CGRConfig) (*Cdrc, error) {
 }
 
 type Cdrc struct {
-	cgrCfg      *config.CGRConfig
+	cgrCfg       *config.CGRConfig
 	cfgCdrFields map[string]string // Key is the name of the field
-	httpClient  *http.Client
+	httpClient   *http.Client
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -80,17 +81,17 @@ func (self *Cdrc) Run() error {
 func (self *Cdrc) parseFieldsConfig() error {
 	var err error
 	self.cfgCdrFields = map[string]string{
-				utils.ACCID: self.cgrCfg.CdrcAccIdField,
-				utils.REQTYPE: self.cgrCfg.CdrcReqTypeField,
-				utils.DIRECTION: self.cgrCfg.CdrcDirectionField,
-				utils.TENANT: self.cgrCfg.CdrcTenantField,
-				utils.TOR: self.cgrCfg.CdrcTorField,
-				utils.ACCOUNT: self.cgrCfg.CdrcAccountField,
-				utils.SUBJECT: self.cgrCfg.CdrcSubjectField,
-				utils.DESTINATION: self.cgrCfg.CdrcDestinationField,
-				utils.ANSWER_TIME: self.cgrCfg.CdrcAnswerTimeField,
-				utils.DURATION: self.cgrCfg.CdrcDurationField,
-				}
+		utils.ACCID:       self.cgrCfg.CdrcAccIdField,
+		utils.REQTYPE:     self.cgrCfg.CdrcReqTypeField,
+		utils.DIRECTION:   self.cgrCfg.CdrcDirectionField,
+		utils.TENANT:      self.cgrCfg.CdrcTenantField,
+		utils.TOR:         self.cgrCfg.CdrcTorField,
+		utils.ACCOUNT:     self.cgrCfg.CdrcAccountField,
+		utils.SUBJECT:     self.cgrCfg.CdrcSubjectField,
+		utils.DESTINATION: self.cgrCfg.CdrcDestinationField,
+		utils.ANSWER_TIME: self.cgrCfg.CdrcAnswerTimeField,
+		utils.DURATION:    self.cgrCfg.CdrcDurationField,
+	}
 
 	// Add extra fields here, config extra fields in the form of []string{"fieldName1:indxInCsv1","fieldName2: indexInCsv2"}
 	for _, fieldWithIdx := range self.cgrCfg.CdrcExtraFields {
@@ -203,7 +204,7 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue
 		}
-		if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cgrCfg.CdrcCdrs), cdrAsForm); err != nil {
+		if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cgrCfg.HTTPListen), cdrAsForm); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
 			continue
 		}
