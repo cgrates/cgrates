@@ -22,9 +22,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"errors"
 	"net/http"
+	"net/smtp"
 	"sort"
 	"time"
+	"strings"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -55,6 +60,7 @@ const (
 	RESET_COUNTERS = "*reset_counters"
 	CALL_URL       = "*call_url"
 	CALL_URL_ASYNC = "*call_url_async"
+	MAIL_ASYNC     = "*mail_async"
 	UNLIMITED      = "*unlimited"
 )
 
@@ -88,6 +94,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return callUrl, true
 	case CALL_URL_ASYNC:
 		return callUrlAsync, true
+	case MAIL_ASYNC:
+		return mailAsync, true
 	}
 	return nil, false
 }
@@ -211,6 +219,36 @@ func callUrlAsync(ub *UserBalance, a *Action) error {
 	return nil
 }
 
+// Mails the balance hitting the threshold towards predefined list of addresses
+func mailAsync(ub *UserBalance, a *Action) error {
+	ubJson, err := json.Marshal(ub)
+	if err != nil {
+		return err
+	}
+	cgrCfg := config.CgrConfig()
+	params := strings.Split(a.ExtraParameters, string(utils.CSV_SEP))
+	if len(params) == 0 {
+		return errors.New("Unconfigured parameters for mail action")
+	}
+	toAddrs := strings.Split(params[0], string(utils.FALLBACK_SEP))
+	message := []byte(fmt.Sprintf("[CGR Notification]: Threshold hit on balance: %s\n\nTime: \n\t%s\n\nBalance:\n\t%s\n\nYour faithful CGR Balance Monitor\n", 
+		ub.Id, time.Now(), ubJson))
+	auth := smtp.PlainAuth("", cgrCfg.MailerAuthUser, cgrCfg.MailerAuthPass, strings.Split(cgrCfg.MailerServer,":")[0]) // We only need host part, so ignore port
+	go func() {
+		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
+			if err := smtp.SendMail(cgrCfg.MailerServer, auth, cgrCfg.MailerFromAddr, toAddrs, message); err == nil {
+				break
+			} else if i == 4 {
+				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), ubJson))
+				break
+			}
+			time.Sleep(time.Duration(i) * time.Minute)
+		}
+        }()
+	return nil
+}
+			
+	
 // Structure to store actions according to weight
 type Actions []*Action
 

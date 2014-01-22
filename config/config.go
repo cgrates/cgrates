@@ -234,7 +234,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.HistoryListen = "127.0.0.1:2013"
 	self.HistoryDir = "/var/log/cgrates/history"
 	self.HistorySaveInterval = time.Duration(1) * time.Second
-	self.MailerServer = "localhost"
+	self.MailerServer = "localhost:25"
 	self.MailerAuthUser = "cgrates"
 	self.MailerAuthPass = "CGRateS.org"
 	self.MailerFromAddr = "cgr-mailer@localhost.localdomain"
