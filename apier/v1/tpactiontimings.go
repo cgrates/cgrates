@@ -25,50 +25,50 @@ import (
 )
 
 // Creates a new ActionTimings profile within a tariff plan
-func (self *ApierV1) SetTPActionTimings(attrs utils.TPActionTimings, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTimingsId", "ActionTimings"}); len(missing) != 0 {
+func (self *ApierV1) SetTPActionPlan(attrs utils.TPActionPlan, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Id", "ActionPlan"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	for _, at := range attrs.ActionTimings {
+	for _, at := range attrs.ActionPlan {
 		requiredFields := []string{"ActionsId", "TimingId", "Weight"}
 		if missing := utils.MissingStructFields(at, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.ActionsId, missing)
 		}
 	}
-	if err := self.StorDb.SetTPActionTimings(attrs.TPid, map[string][]*utils.TPActionTiming{attrs.ActionTimingsId: attrs.ActionTimings}); err != nil {
+	if err := self.StorDb.SetTPActionTimings(attrs.TPid, map[string][]*utils.TPActionTiming{attrs.Id: attrs.ActionPlan}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
 	return nil
 }
 
-type AttrGetTPActionTimings struct {
+type AttrGetTPActionPlan struct {
 	TPid            string // Tariff plan id
-	ActionTimingsId string // ActionTimings id
+	Id string // ActionTimings id
 }
 
-// Queries specific ActionTimings profile on tariff plan
-func (self *ApierV1) GetTPActionTimings(attrs AttrGetTPActionTimings, reply *utils.TPActionTimings) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTimingsId"}); len(missing) != 0 { //Params missing
+// Queries specific ActionPlan profile on tariff plan
+func (self *ApierV1) GetTPActionPlan(attrs AttrGetTPActionPlan, reply *utils.TPActionPlan) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Id"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ats, err := self.StorDb.GetTPActionTimings(attrs.TPid, attrs.ActionTimingsId); err != nil {
+	if ats, err := self.StorDb.GetTPActionTimings(attrs.TPid, attrs.Id); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(ats) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else { // Got the data we need, convert it
-		atRply := &utils.TPActionTimings{attrs.TPid, attrs.ActionTimingsId, ats[attrs.ActionTimingsId]}
+		atRply := &utils.TPActionPlan{attrs.TPid, attrs.Id, ats[attrs.Id]}
 		*reply = *atRply
 	}
 	return nil
 }
 
-type AttrGetTPActionTimingIds struct {
+type AttrGetTPActionPlanIds struct {
 	TPid string // Tariff plan id
 }
 
-// Queries ActionTimings identities on specific tariff plan.
-func (self *ApierV1) GetTPActionTimingIds(attrs AttrGetTPActionTimingIds, reply *[]string) error {
+// Queries ActionPlan identities on specific tariff plan.
+func (self *ApierV1) GetTPActionPlanIds(attrs AttrGetTPActionPlanIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -82,12 +82,12 @@ func (self *ApierV1) GetTPActionTimingIds(attrs AttrGetTPActionTimingIds, reply 
 	return nil
 }
 
-// Removes specific ActionTimings on Tariff plan
-func (self *ApierV1) RemTPActionTimings(attrs AttrGetTPActionTimings, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionTimingsId"}); len(missing) != 0 { //Params missing
+// Removes specific ActionPlan on Tariff plan
+func (self *ApierV1) RemTPActionPlan(attrs AttrGetTPActionPlan, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "Id"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTION_TIMINGS, attrs.TPid, attrs.ActionTimingsId); err != nil {
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTION_PLANS, attrs.TPid, attrs.Id); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

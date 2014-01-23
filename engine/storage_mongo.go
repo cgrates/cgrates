@@ -99,7 +99,7 @@ type AcKeyValue struct {
 
 type AtKeyValue struct {
 	Key   string
-	Value ActionTimings
+	Value ActionPlan
 }
 
 type LogCostEntry struct {
@@ -194,20 +194,20 @@ func (ms *MongoStorage) SetUserBalance(ub *UserBalance) error {
 	return ms.db.C("userbalances").Insert(ub)
 }
 
-func (ms *MongoStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
+func (ms *MongoStorage) GetActionTimings(key string) (ats ActionPlan, err error) {
 	result := AtKeyValue{}
 	err = ms.db.C("actiontimings").Find(bson.M{"key": key}).One(&result)
 	return result.Value, err
 }
 
-func (ms *MongoStorage) SetActionTimings(key string, ats ActionTimings) error {
+func (ms *MongoStorage) SetActionTimings(key string, ats ActionPlan) error {
 	return ms.db.C("actiontimings").Insert(&AtKeyValue{key, ats})
 }
 
-func (ms *MongoStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
+func (ms *MongoStorage) GetAllActionTimings() (ats map[string]ActionPlan, err error) {
 	result := AtKeyValue{}
 	iter := ms.db.C("actiontimings").Find(nil).Iter()
-	ats = make(map[string]ActionTimings)
+	ats = make(map[string]ActionPlan)
 	for iter.Next(&result) {
 		ats[result.Key] = result.Value
 	}

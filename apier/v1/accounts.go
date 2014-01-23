@@ -34,12 +34,12 @@ type AttrAcntAction struct {
 
 type AccountActionTiming struct {
 	Id              string    // The id to reference this particular ActionTiming
-	ActionTimingsId string    // The id of the ActionTimings profile attached to the account
+	ActionPlanId string    // The id of the ActionPlanId profile attached to the account
 	ActionsId       string    // The id of actions which will be executed
 	NextExecTime    time.Time // Next execution time
 }
 
-func (self *ApierV1) GetAccountActionTimings(attrs AttrAcntAction, reply *[]*AccountActionTiming) error {
+func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*AccountActionTiming) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -51,7 +51,7 @@ func (self *ApierV1) GetAccountActionTimings(attrs AttrAcntAction, reply *[]*Acc
 	for _, ats := range allATs {
 		for _, at := range ats {
 			if utils.IsSliceMember(at.UserBalanceIds, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
-				accountATs = append(accountATs, &AccountActionTiming{Id: at.Id, ActionTimingsId: at.Tag, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime()})
+				accountATs = append(accountATs, &AccountActionTiming{Id: at.Id, ActionPlanId: at.Tag, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime()})
 			}
 		}
 	}
@@ -60,7 +60,7 @@ func (self *ApierV1) GetAccountActionTimings(attrs AttrAcntAction, reply *[]*Acc
 }
 
 type AttrRemActionTiming struct {
-	ActionTimingsId string // Id identifying the ActionTimings profile
+	ActionPlanId string // Id identifying the ActionTimings profile
 	ActionTimingId  string // Internal CGR id identifying particular ActionTiming, *all for all user related ActionTimings to be canceled
 	Tenant          string // Tenant he account belongs to
 	Account         string // Account name
@@ -70,7 +70,7 @@ type AttrRemActionTiming struct {
 
 // Removes an ActionTimings or parts of it depending on filters being set
 func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"ActionTimingsId"}); len(missing) != 0 { // Only mandatory ActionTimingsId
+	if missing := utils.MissingStructFields(&attrs, []string{"ActionPlanId"}); len(missing) != 0 { // Only mandatory ActionPlanId
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	if len(attrs.Account) != 0 { // Presence of Account requires complete account details to be provided
@@ -79,14 +79,14 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		}
 	}
 	_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) {
-		ats, err := self.AccountDb.GetActionTimings(attrs.ActionTimingsId)
+		ats, err := self.AccountDb.GetActionTimings(attrs.ActionPlanId)
 		if err != nil {
 			return 0, err
 		} else if len(ats) == 0 {
 			return 0, errors.New(utils.ERR_NOT_FOUND)
 		}
 		ats = engine.RemActionTiming(ats, attrs.ActionTimingId, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction))
-		if err := self.AccountDb.SetActionTimings(attrs.ActionTimingsId, ats); err != nil {
+		if err := self.AccountDb.SetActionTimings(attrs.ActionPlanId, ats); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -161,7 +161,7 @@ type AttrSetAccount struct {
 	Direction       string
 	Account         string
 	Type            string // <*prepaid|*postpaid>
-	ActionTimingsId string
+	ActionPlanId string
 }
 
 // Ads a new account into dataDb. If already defined, returns success.
@@ -171,7 +171,7 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 	}
 	balanceId := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
 	var ub *engine.UserBalance
-	var ats engine.ActionTimings
+	var ats engine.ActionPlan
 	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
 		if bal, _ := self.AccountDb.GetUserBalance(balanceId); bal != nil {
 			ub = bal
@@ -187,9 +187,9 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 			}
 		}
 		
-		if len(attr.ActionTimingsId) != 0  {
+		if len(attr.ActionPlanId) != 0  {
 			var err error
-			ats, err = self.AccountDb.GetActionTimings(attr.ActionTimingsId)
+			ats, err = self.AccountDb.GetActionTimings(attr.ActionPlanId)
 			if err != nil {
 				return 0, err
 			}
@@ -208,7 +208,7 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 	}
 	if len(ats) != 0 {
 		_, err := engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) { // ToDo: Try locking it above on read somehow
-			if err := self.AccountDb.SetActionTimings(attr.ActionTimingsId, ats); err != nil {
+			if err := self.AccountDb.SetActionTimings(attr.ActionPlanId, ats); err != nil {
 				return 0, err
 			}
 			return 0, nil

@@ -70,20 +70,12 @@ func (rs *RedisStorage) Flush() (err error) {
 
 func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error) {
 	if dKeys == nil {
-		cache2go.RemPrefixKey(DESTINATION_PREFIX)
-	}
-	if rpKeys == nil {
-		cache2go.RemPrefixKey(RATING_PLAN_PREFIX)
-	}
-	if rpfKeys == nil {
-		cache2go.RemPrefixKey(RATING_PROFILE_PREFIX)
-	}
-	if dKeys == nil {
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
 			return
 		}
-	} else if len(rpKeys) != 0 {
+		cache2go.RemPrefixKey(DESTINATION_PREFIX)
+	} else if len(dKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching destinations: %v", dKeys))
 	}
 	for _, key := range dKeys {
@@ -99,6 +91,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error)
 		if rpKeys, err = rs.db.Keys(RATING_PLAN_PREFIX + "*"); err != nil {
 			return
 		}
+		cache2go.RemPrefixKey(RATING_PLAN_PREFIX)
 	} else if len(rpKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching rating plans: %v", rpKeys))
 	}
@@ -116,6 +109,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error)
 		if rpfKeys, err = rs.db.Keys(RATING_PROFILE_PREFIX + "*"); err != nil {
 			return
 		}
+		cache2go.RemPrefixKey(RATING_PROFILE_PREFIX)
 	} else if len(rpfKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching rating profile: %v", rpfKeys))
 	}
@@ -222,7 +216,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{Key: RATING_PLAN_PREFIX + rp.Id, Object: rp}, &response)
 	}
-	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
+	//cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -250,7 +244,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{Key: RATING_PROFILE_PREFIX + rpf.Id, Object: rpf}, &response)
 	}
-	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
+	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
 
@@ -299,7 +293,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 		response := 0
 		go historyScribe.Record(&history.Record{Key: DESTINATION_PREFIX + dest.Id, Object: dest}, &response)
 	}
-	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
+	//cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 
@@ -322,7 +316,7 @@ func (rs *RedisStorage) GetActions(key string, checkDb bool) (as Actions, err er
 func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.db.Set(ACTION_PREFIX+key, result)
-	cache2go.Cache(ACTION_PREFIX+key, as)
+	// cache2go.Cache(ACTION_PREFIX+key, as)
 	return
 }
 
@@ -365,7 +359,7 @@ func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetActionTimings(key string) (ats ActionTimings, err error) {
+func (rs *RedisStorage) GetActionTimings(key string) (ats ActionPlan, err error) {
 	var values []byte
 	if values, err = rs.db.Get(ACTION_TIMING_PREFIX + key); err == nil {
 		err = rs.ms.Unmarshal(values, &ats)
@@ -373,7 +367,7 @@ func (rs *RedisStorage) GetActionTimings(key string) (ats ActionTimings, err err
 	return
 }
 
-func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err error) {
+func (rs *RedisStorage) SetActionTimings(key string, ats ActionPlan) (err error) {
 	if len(ats) == 0 {
 		// delete the key
 		_, err = rs.db.Del(ACTION_TIMING_PREFIX + key)
@@ -384,18 +378,18 @@ func (rs *RedisStorage) SetActionTimings(key string, ats ActionTimings) (err err
 	return
 }
 
-func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionTimings, err error) {
+func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionPlan, err error) {
 	keys, err := rs.db.Keys(ACTION_TIMING_PREFIX + "*")
 	if err != nil {
 		return nil, err
 	}
-	ats = make(map[string]ActionTimings, len(keys))
+	ats = make(map[string]ActionPlan, len(keys))
 	for _, key := range keys {
 		values, err := rs.db.Get(key)
 		if err != nil {
 			continue
 		}
-		var tempAts ActionTimings
+		var tempAts ActionPlan
 		err = rs.ms.Unmarshal(values, &tempAts)
 		ats[key[len(ACTION_TIMING_PREFIX):]] = tempAts
 	}

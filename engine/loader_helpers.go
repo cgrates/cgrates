@@ -201,7 +201,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 	utils.ACTIONS_CSV: &FileLineRegexValidator{utils.ACTIONS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*),(?:\*\w+\s*),(?:\*\w+\s*)?,(?:\*out\s*)?,(?:\d+\s*)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\*any|\w+\s*)?,(?:\*\w+\s*)?,(?:\d+\.?\d*\s*)?,(?:\S+\s*)?,(?:\d+\.?\d*\s*)$`),
 		"Tag([0-9A-Za-z_]),Action([0-9A-Za-z_]),BalanceType([*a-z_]),Direction(*out),Units([0-9]),ExpiryTime(*[a-z_]|+[0-9][smh]|[0-9])DestinationTag([0-9A-Za-z_]|*all),RatingSubject([0-9A-Za-z_]),BalanceWeight([0-9.]),ExtraParameters([0-9A-Za-z_:;]),Weight([0-9.])"},
-	utils.ACTION_TIMINGS_CSV: &FileLineRegexValidator{utils.ACTION_TIMINGS_NRCOLS,
+	utils.ACTION_PLANS_CSV: &FileLineRegexValidator{utils.ACTION_PLANS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
 		"Tag([0-9A-Za-z_]),ActionsTag([0-9A-Za-z_]),TimingTag([0-9A-Za-z_]),Weight([0-9.])"},
 	utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{utils.ACTION_TRIGGERS_NRCOLS,

@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"log"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"path"
 
 	"github.com/cgrates/cgrates/config"
@@ -70,7 +69,6 @@ var (
 	toStorDb      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
 	historyServer = flag.String("history_server", cgrConfig.HistoryServer, "The history server address:port, empty to disable automaticautomatic  history archiving")
 	raterAddress  = flag.String("rater_address", cgrConfig.MediatorRater, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
-	rpcEncoding   = flag.String("rpc_encoding", cgrConfig.RPCEncoding, "The history server rpc encoding json|gob")
 	runId         = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )
 
@@ -132,18 +130,18 @@ func main() {
 				log.Fatal(err, "\n\t", v.Message)
 			}
 		}
-		loader = engine.NewFileCSVReader(ratingDb, accountDb, ',', 
-				path.Join(*dataPath, utils.DESTINATIONS_CSV),
-				path.Join(*dataPath, utils.TIMINGS_CSV),
-				path.Join(*dataPath, utils.RATES_CSV),
-				path.Join(*dataPath, utils.DESTINATION_RATES_CSV),
-				path.Join(*dataPath, utils.RATING_PLANS_CSV),
-				path.Join(*dataPath, utils.RATING_PROFILES_CSV),
-				path.Join(*dataPath, utils.ACTIONS_CSV),
-				path.Join(*dataPath, utils.ACTION_TIMINGS_CSV),
-				path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
-				path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV))
-	}			
+		loader = engine.NewFileCSVReader(ratingDb, accountDb, ',',
+			path.Join(*dataPath, utils.DESTINATIONS_CSV),
+			path.Join(*dataPath, utils.TIMINGS_CSV),
+			path.Join(*dataPath, utils.RATES_CSV),
+			path.Join(*dataPath, utils.DESTINATION_RATES_CSV),
+			path.Join(*dataPath, utils.RATING_PLANS_CSV),
+			path.Join(*dataPath, utils.RATING_PROFILES_CSV),
+			path.Join(*dataPath, utils.ACTIONS_CSV),
+			path.Join(*dataPath, utils.ACTION_PLANS_CSV),
+			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
+			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV))
+	}
 	err = loader.LoadAll()
 	if err != nil {
 		log.Fatal(err)
@@ -155,7 +153,7 @@ func main() {
 		return
 	}
 	if *historyServer != "" { // Init scribeAgent so we can store the differences
-		if scribeAgent, err := history.NewProxyScribe(*historyServer, *rpcEncoding); err != nil {
+		if scribeAgent, err := history.NewProxyScribe(*historyServer); err != nil {
 			log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
 			return
 		} else {
@@ -167,11 +165,7 @@ func main() {
 		log.Print("WARNING: Rates history archiving is disabled!")
 	}
 	if *raterAddress != "" { // Init connection to rater so we can reload it's data
-		if *rpcEncoding == config.JSON {
-			rater, err = jsonrpc.Dial("tcp", *raterAddress)
-		} else {
-			rater, err = rpc.Dial("tcp", *raterAddress)
-		}
+		rater, err = rpc.Dial("tcp", *raterAddress)
 		if err != nil {
 			log.Fatalf("Could not connect to rater: %s", err.Error())
 			return

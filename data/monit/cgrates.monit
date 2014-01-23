@@ -1,0 +1,9 @@
+# CGRateS Monit check script
+
+check process CGRateS with pidfile /var/run/cgrates/cgr-engine.pid
+   start program = "/etc/init.d/cgrates start"
+   stop  program = "/etc/init.d/cgrates stop"
+   if failed host 127.0.0.1 port 2012 type TCP 4 times within 4 cycles then restart # Rater
+   if failed host 127.0.0.1 port 2013 type TCP 4 times within 4 cycles then restart # History
+   if failed host 127.0.0.1 port 2022 type TCP 4 times within 4 cycles then restart # CDRS
+   if 5 restarts within 20 cycles then timeout

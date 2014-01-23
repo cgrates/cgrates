@@ -144,7 +144,7 @@ func (csvr *CSVReader) ShowStatistics() {
 	// actions
 	log.Print("Actions: ", len(csvr.actions))
 	// action timings
-	log.Print("Action timings: ", len(csvr.actionsTimings))
+	log.Print("Action plans: ", len(csvr.actionsTimings))
 	// account actions
 	log.Print("Account actions: ", len(csvr.accountActions))
 }
@@ -195,7 +195,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("Action timings")
+		log.Print("Action plans")
 	}
 	for k, ats := range csvr.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)
@@ -273,6 +273,9 @@ func (csvr *CSVReader) LoadTimings() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
+		if _, exists := csvr.timings[tag]; exists {
+			log.Print("Warning: duplicate timing found: ", tag)
+		}
 		csvr.timings[tag] = NewTiming(record...)
 	}
 	return
@@ -497,9 +500,9 @@ func (csvr *CSVReader) LoadActions() (err error) {
 }
 
 func (csvr *CSVReader) LoadActionTimings() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep, utils.ACTION_TIMINGS_NRCOLS)
+	csvReader, fp, err := csvr.readerFunc(csvr.actiontimingsFn, csvr.sep, utils.ACTION_PLANS_NRCOLS)
 	if err != nil {
-		log.Print("Could not load action timings file: ", err)
+		log.Print("Could not load action plans file: ", err)
 		// allow writing of the other values
 		return nil
 	}
@@ -510,11 +513,11 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 		tag := record[0]
 		_, exists := csvr.actions[record[1]]
 		if !exists {
-			return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", record[1]))
+			return errors.New(fmt.Sprintf("ActionPlan: Could not load the action for tag: %v", record[1]))
 		}
 		t, exists := csvr.timings[record[2]]
 		if !exists {
-			return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", record[2]))
+			return errors.New(fmt.Sprintf("ActionPlan: Could not load the timing for tag: %v", record[2]))
 		}
 		weight, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
@@ -659,6 +662,22 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(csvr.ratingPlans))
 		i := 0
 		for k := range csvr.ratingPlans {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case RATING_PROFILE_PREFIX:
+		keys := make([]string, len(csvr.ratingProfiles))
+		i := 0
+		for k := range csvr.ratingProfiles {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case ACTION_PREFIX: // actionsTimings
+		keys := make([]string, len(csvr.actions))
+		i := 0
+		for k := range csvr.actions {
 			keys[i] = k
 			i++
 		}

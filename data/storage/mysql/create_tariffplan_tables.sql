@@ -139,8 +139,8 @@ CREATE TABLE `tp_actions` (
 -- Table structure for table `tp_action_timings`
 --
 
-DROP TABLE IF EXISTS `tp_action_timings`;
-CREATE TABLE `tp_action_timings` (
+DROP TABLE IF EXISTS `tp_action_plans`;
+CREATE TABLE `tp_action_plans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,

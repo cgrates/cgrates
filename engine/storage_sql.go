@@ -489,7 +489,7 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES ", utils.TBL_TP_ACTION_TIMINGS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES ", utils.TBL_TP_ACTION_PLANS))
 	i := 0
 	for atId, atRows := range ats {
 		for _, at := range atRows {
@@ -509,7 +509,7 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 
 func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*utils.TPActionTiming, error) {
 	ats := make(map[string][]*utils.TPActionTiming)
-	q := fmt.Sprintf("SELECT tag,actions_tag,timing_tag,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid)
+	q := fmt.Sprintf("SELECT tag,actions_tag,timing_tag,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_PLANS, tpid)
 	if atId != "" {
 		q += fmt.Sprintf(" AND tag='%s'", atId)
 	}
@@ -532,7 +532,7 @@ func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*uti
 }
 
 func (self *SQLStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTION_TIMINGS, tpid))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTION_PLANS, tpid))
 	if err != nil {
 		return nil, err
 	}
@@ -614,7 +614,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 			buffer.WriteRune(',')
 		}
 		buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
-			tpid, aActs.LoadId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionTimingsId, aActs.ActionTriggersId))
+			tpid, aActs.LoadId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionPlanId, aActs.ActionTriggersId))
 		i++
 	}
 	buffer.WriteString(" ON DUPLICATE KEY UPDATE action_timings_tag=values(action_timings_tag), action_triggers_tag=values(action_triggers_tag)")
@@ -1129,7 +1129,7 @@ func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map
 			Tenant:           tenant,
 			Account:          account,
 			Direction:        direction,
-			ActionTimingsId:  action_timings_tag,
+			ActionPlanId:  action_timings_tag,
 			ActionTriggersId: action_triggers_tag,
 		}
 		aa[aacts.KeyId()] = aacts

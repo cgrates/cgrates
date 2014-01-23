@@ -27,10 +27,9 @@ set -e
 case "$1" in
 
 	configure)
-		adduser --quiet --system --group --disabled-password --shell /bin/false --gecos "CGRateS" cgrates || true
+		adduser --quiet --system --group --disabled-password --shell /bin/false --home /var/run/cgrates --gecos "CGRateS" cgrates || true
 		chown -R cgrates:cgrates /var/log/cgrates/
 		chown -R cgrates:cgrates /usr/share/cgrates/
-		chown -R cgrates:cgrates /var/run/cgrates/
         ;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)

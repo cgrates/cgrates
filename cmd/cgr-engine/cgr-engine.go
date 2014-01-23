@@ -22,11 +22,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io"
 	"log"
-	"net"
 	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
 	"runtime"
 	"strconv"
@@ -46,7 +43,6 @@ import (
 )
 
 const (
-	DISABLED = "disabled"
 	INTERNAL = "internal"
 	JSON     = "json"
 	GOB      = "gob"
@@ -69,41 +65,13 @@ var (
 	pidFile         = flag.String("pid", "", "Write pid file")
 	bal             = balancer2go.NewBalancer()
 	exitChan        = make(chan bool)
-	sm              sessionmanager.SessionManager
-	medi            *mediator.Mediator
-	cfg             *config.CGRConfig
-	err             error
+	server          = &engine.Server{}
+
+	sm   sessionmanager.SessionManager
+	medi *mediator.Mediator
+	cfg  *config.CGRConfig
+	err  error
 )
-
-func listenToRPCRequests(rpcResponder interface{}, apier *apier.ApierV1, rpcAddress string, rpc_encoding string) {
-	l, err := net.Listen("tcp", rpcAddress)
-	if err != nil {
-		engine.Logger.Crit(fmt.Sprintf("<Rater> Could not listen to %v: %v", rpcAddress, err))
-		exitChan <- true
-		return
-	}
-	defer l.Close()
-
-	engine.Logger.Info(fmt.Sprintf("<Rater> Listening for incomming RPC requests on %v", l.Addr()))
-	rpc.Register(rpcResponder)
-	rpc.Register(apier)
-	var serveFunc func(io.ReadWriteCloser)
-	if rpc_encoding == JSON {
-		serveFunc = jsonrpc.ServeConn
-	} else {
-		serveFunc = rpc.ServeConn
-	}
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Rater> Accept error: %v", conn))
-			continue
-		}
-
-		engine.Logger.Info(fmt.Sprintf("<Rater> New incoming connection: %v", conn.RemoteAddr()))
-		go serveFunc(conn)
-	}
-}
 
 func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrDb engine.CdrStorage) {
 	var connector engine.Connector
@@ -112,22 +80,13 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 	} else {
 		var client *rpc.Client
 		var err error
-		if cfg.RPCEncoding == JSON {
-			for i := 0; i < cfg.MediatorRaterReconnects; i++ {
-				client, err = jsonrpc.Dial("tcp", cfg.MediatorRater)
-				if err == nil { //Connected so no need to reiterate
-					break
-				}
-				time.Sleep(time.Duration(i/2) * time.Second)
+
+		for i := 0; i < cfg.MediatorRaterReconnects; i++ {
+			client, err = rpc.Dial("tcp", cfg.MediatorRater)
+			if err == nil { //Connected so no need to reiterate
+				break
 			}
-		} else {
-			for i := 0; i < cfg.MediatorRaterReconnects; i++ {
-				client, err = rpc.Dial("tcp", cfg.MediatorRater)
-				if err == nil { //Connected so no need to reiterate
-					break
-				}
-				time.Sleep(time.Duration(i/2) * time.Second)
-			}
+			time.Sleep(time.Duration(i/2) * time.Second)
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("Could not connect to engine: %v", err))
@@ -163,24 +122,13 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 	} else {
 		var client *rpc.Client
 		var err error
-		if cfg.RPCEncoding == JSON {
-			// We attempt to reconnect more times
-			for i := 0; i < cfg.SMRaterReconnects; i++ {
-				client, err = jsonrpc.Dial("tcp", cfg.SMRater)
-				if err == nil { //Connected so no need to reiterate
-					break
-				}
-				time.Sleep(time.Duration(i/2) * time.Second)
-			}
-		} else {
-			for i := 0; i < cfg.SMRaterReconnects; i++ {
-				client, err = rpc.Dial("tcp", cfg.SMRater)
-				if err == nil { //Connected so no need to reiterate
-					break
-				}
-				time.Sleep(time.Duration(i/2) * time.Second)
-			}
 
+		for i := 0; i < cfg.SMRaterReconnects; i++ {
+			client, err = rpc.Dial("tcp", cfg.SMRater)
+			if err == nil { //Connected so no need to reiterate
+				break
+			}
+			time.Sleep(time.Duration(i/2) * time.Second)
 		}
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("Could not connect to engine: %v", err))
@@ -217,7 +165,7 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage) {
 		}
 	}
 	cs := cdrs.New(cdrDb, medi, cfg)
-	cs.StartCapturingCDRs()
+	cs.RegisterHanlersToServer(server)
 	exitChan <- true
 }
 
@@ -230,35 +178,7 @@ func startHistoryScribe() {
 			exitChan <- true
 			return
 		}
-	}
-
-	if cfg.HistoryServerEnabled {
-		if cfg.HistoryListen != INTERNAL {
-			rpc.RegisterName("Scribe", scribeServer)
-			var serveFunc func(io.ReadWriteCloser)
-			if cfg.RPCEncoding == JSON {
-				serveFunc = jsonrpc.ServeConn
-			} else {
-				serveFunc = rpc.ServeConn
-			}
-			l, err := net.Listen("tcp", cfg.HistoryListen)
-			if err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<History> Could not listen to %v: %v", cfg.HistoryListen, err))
-				exitChan <- true
-				return
-			}
-			defer l.Close()
-			for {
-				conn, err := l.Accept()
-				if err != nil {
-					engine.Logger.Err(fmt.Sprintf("<History> Accept error: %v", conn))
-					continue
-				}
-
-				engine.Logger.Info(fmt.Sprintf("<History> New incoming connection: %v", conn.RemoteAddr()))
-				go serveFunc(conn)
-			}
-		}
+		server.RpcRegisterName("Scribe", scribeServer)
 	}
 
 	var scribeAgent history.Scribe
@@ -266,7 +186,7 @@ func startHistoryScribe() {
 	if cfg.HistoryAgentEnabled {
 		if cfg.HistoryServer != INTERNAL { // Connect in iteration since there are chances of concurrency here
 			for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
-				if scribeAgent, err = history.NewProxyScribe(cfg.HistoryServer, cfg.RPCEncoding); err == nil {
+				if scribeAgent, err = history.NewProxyScribe(cfg.HistoryServer); err == nil {
 					break //Connected so no need to reiterate
 				} else if i == 2 && err != nil {
 					engine.Logger.Crit(err.Error())
@@ -289,11 +209,11 @@ func startHistoryScribe() {
 }
 
 func checkConfigSanity() error {
-	if cfg.SMEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
+	if cfg.SMEnabled && cfg.RaterEnabled && cfg.RaterBalancer != "" {
 		engine.Logger.Crit("The session manager must not be enabled on a worker engine (change [engine]/balancer to disabled)!")
 		return errors.New("SessionManager on Worker")
 	}
-	if cfg.BalancerEnabled && cfg.RaterEnabled && cfg.RaterBalancer != DISABLED {
+	if cfg.BalancerEnabled && cfg.RaterEnabled && cfg.RaterBalancer != "" {
 		engine.Logger.Crit("The balancer is enabled so it cannot connect to another balancer (change rater/balancer to disabled)!")
 		return errors.New("Improperly configured balancer")
 	}
@@ -410,23 +330,26 @@ func main() {
 	}
 	stopHandled := false
 	// Async starts here
-	if cfg.RaterEnabled && cfg.RaterBalancer != DISABLED && !cfg.BalancerEnabled {
-		go registerToBalancer()
-		go stopRaterSignalHandler()
+	if cfg.RaterEnabled && cfg.RaterBalancer != "" && !cfg.BalancerEnabled {
+		registerToBalancer()
+		stopRaterSignalHandler()
 		stopHandled = true
 	}
 	responder := &engine.Responder{ExitChan: exitChan}
 	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, Config: cfg}
-	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterListen != INTERNAL {
-		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Rater on %s.", cfg.RaterListen))
-		go listenToRPCRequests(responder, apier, cfg.RaterListen, cfg.RPCEncoding)
+
+	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterBalancer != INTERNAL {
+		engine.Logger.Info("Starting CGRateS Rater")
+		server.RpcRegister(responder)
+		server.RpcRegister(apier)
 	}
 	if cfg.BalancerEnabled {
-		engine.Logger.Info(fmt.Sprintf("Starting CGRateS Balancer on %s.", cfg.BalancerListen))
+		engine.Logger.Info("Starting CGRateS Balancer")
 		go stopBalancerSignalHandler()
 		stopHandled = true
 		responder.Bal = bal
-		go listenToRPCRequests(responder, apier, cfg.BalancerListen, cfg.RPCEncoding)
+		server.RpcRegister(responder)
+		server.RpcRegister(apier)
 		if cfg.RaterEnabled {
 			engine.Logger.Info("Starting internal engine.")
 			bal.AddClient("local", new(engine.ResponderWorker))
@@ -435,12 +358,11 @@ func main() {
 	if !stopHandled {
 		go generalSignalHandler()
 	}
-
 	if cfg.SchedulerEnabled {
 		engine.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
 			sched := scheduler.NewScheduler()
-			go reloadSchedulerSingnalHandler(sched, accountDb)
+			reloadSchedulerSingnalHandler(sched, accountDb)
 			apier.Sched = sched
 			sched.LoadActionTimings(accountDb)
 			sched.Loop()
@@ -449,29 +371,32 @@ func main() {
 
 	if cfg.SMEnabled {
 		engine.Logger.Info("Starting CGRateS SessionManager.")
-		go startSessionManager(responder, logDb)
+		startSessionManager(responder, logDb)
 		// close all sessions on shutdown
-		go shutdownSessionmanagerSingnalHandler()
+		shutdownSessionmanagerSingnalHandler()
 	}
 
 	if cfg.MediatorEnabled {
 		engine.Logger.Info("Starting CGRateS Mediator.")
-		go startMediator(responder, logDb, cdrDb)
+		startMediator(responder, logDb, cdrDb)
 	}
 
 	if cfg.CDRSEnabled {
 		engine.Logger.Info("Starting CGRateS CDR Server.")
-		go startCDRS(responder, cdrDb)
+		startCDRS(responder, cdrDb)
 	}
 
 	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {
 		engine.Logger.Info("Starting History Service.")
-		go startHistoryScribe()
+		startHistoryScribe()
 	}
 	if cfg.CdrcEnabled {
 		engine.Logger.Info("Starting CGRateS CDR Client.")
-		go startCdrc()
+		startCdrc()
 	}
+	go server.ServeGOB(cfg.RPCGOBListen)
+	go server.ServeJSON(cfg.RPCJSONListen)
+	go server.ServeHTTP(cfg.HTTPListen)
 	<-exitChan
 	if *pidFile != "" {
 		if err := os.Remove(*pidFile); err != nil {

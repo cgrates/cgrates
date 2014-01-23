@@ -121,7 +121,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	if attr.Overwrite {
 		aType = engine.TOPUP_RESET
 	}
-	at.SetActions(engine.Actions{&engine.Action{ActionType: aType, BalanceId: attr.BalanceId, Direction: attr.Direction, 
+	at.SetActions(engine.Actions{&engine.Action{ActionType: aType, BalanceId: attr.BalanceId, Direction: attr.Direction,
 		Balance: &engine.Balance{Value: attr.Value, Weight: attr.Weight}}})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
@@ -288,10 +288,10 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 	return nil
 }
 
-type AttrSetActionTimings struct {
-	ActionTimingsId string             // Profile id
+type AttrSetActionPlan struct {
+	Id              string             // Profile id
+	ActionPlan      []*ApiActionTiming // Set of actions this Actions profile will perform
 	Overwrite       bool               // If previously defined, will be overwritten
-	ActionTimings   []*ApiActionTiming // Set of actions this Actions profile will perform
 	ReloadScheduler bool               // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
 }
 
@@ -305,25 +305,25 @@ type ApiActionTiming struct {
 	Weight    float64 // Binding's weight
 }
 
-func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"ActionTimingsId", "ActionTimings"}); len(missing) != 0 {
+func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"Id", "ActionPlan"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	for _, at := range attrs.ActionTimings {
+	for _, at := range attrs.ActionPlan {
 		requiredFields := []string{"ActionsId", "Time", "Weight"}
 		if missing := utils.MissingStructFields(at, requiredFields); len(missing) != 0 {
 			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, at.ActionsId, missing)
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.AccountDb.DataExists(engine.ACTION_TIMING_PREFIX, attrs.ActionTimingsId); err != nil {
+		if exists, err := self.AccountDb.DataExists(engine.ACTION_TIMING_PREFIX, attrs.Id); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
 		}
 	}
-	storeAtms := make(engine.ActionTimings, len(attrs.ActionTimings))
-	for idx, apiAtm := range attrs.ActionTimings {
+	storeAtms := make(engine.ActionPlan, len(attrs.ActionPlan))
+	for idx, apiAtm := range attrs.ActionPlan {
 		if exists, err := self.AccountDb.DataExists(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
@@ -337,17 +337,20 @@ func (self *ApierV1) SetActionTimings(attrs AttrSetActionTimings, reply *string)
 		timing.StartTime = apiAtm.Time
 		at := &engine.ActionTiming{
 			Id:        utils.GenUUID(),
-			Tag:       attrs.ActionTimingsId,
+			Tag:       attrs.Id,
 			Weight:    apiAtm.Weight,
 			Timing:    &engine.RateInterval{Timing: timing},
 			ActionsId: apiAtm.ActionsId,
 		}
 		storeAtms[idx] = at
 	}
-	if err := self.AccountDb.SetActionTimings(attrs.ActionTimingsId, storeAtms); err != nil {
+	if err := self.AccountDb.SetActionTimings(attrs.Id, storeAtms); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	if attrs.ReloadScheduler && self.Sched != nil {
+	if attrs.ReloadScheduler {
+		if self.Sched == nil {
+			return errors.New("SCHEDULER_NOT_ENABLED")
+		}
 		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()
 	}
@@ -421,6 +424,11 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
+	// Need to do it before scheduler otherwise actions to run will be unknown
+	if err := self.AccountDb.CacheAccounting(nil); err != nil {
+		return err
+	}
 	if self.Sched != nil {
 		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()
@@ -437,7 +445,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	self.Sched.Restart()
 	*reply = OK
 	return nil
-	
+
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
@@ -536,7 +544,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply 
 		path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
 		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
-		path.Join(attrs.FolderPath, utils.ACTION_TIMINGS_CSV),
+		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
 		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV))
 	if err := loader.LoadAll(); err != nil {
@@ -548,6 +556,37 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply 
 	}
 	if err := loader.WriteToDatabase(attrs.FlushDb, false); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	// Make sure the items are in the cache
+	dstIds, _ := loader.GetLoadedIds(engine.DESTINATION_PREFIX)
+	dstKeys := make([]string, len(dstIds))
+	for idx, dId := range dstIds {
+		dstKeys[idx] = engine.DESTINATION_PREFIX + dId // Cache expects them as redis keys
+	}
+	rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
+	rpKeys := make([]string, len(rplIds))
+	for idx, rpId := range rplIds {
+		rpKeys[idx] = engine.RATING_PLAN_PREFIX + rpId
+	}
+	rpfIds, _ := loader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
+	rpfKeys := make([]string, len(rpfIds))
+	for idx, rpfId := range rpfIds {
+		rpfKeys[idx] = engine.RATING_PROFILE_PREFIX + rpfId
+	}
+	actIds, _ := loader.GetLoadedIds(engine.ACTION_PREFIX)
+	actKeys := make([]string, len(actIds))
+	for idx, actId := range actIds {
+		actKeys[idx] = engine.ACTION_PREFIX + actId
+	}
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccounting(actKeys); err != nil {
+		return err
+	}
+	if self.Sched != nil {
+		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.Restart()
 	}
 	*reply = "OK"
 	return nil

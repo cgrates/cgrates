@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	ACTION_TIMING_PREFIX      = "atm_"
+	ACTION_TIMING_PREFIX      = "apl_"
 	RATING_PLAN_PREFIX        = "rpl_"
 	RATING_PROFILE_PREFIX     = "rpf_"
 	ACTION_PREFIX             = "act_"
@@ -89,9 +89,9 @@ type AccountingStorage interface {
 	SetSharedGroup(string, *SharedGroup) error
 	GetUserBalance(string) (*UserBalance, error)
 	SetUserBalance(*UserBalance) error
-	GetActionTimings(string) (ActionTimings, error)
-	SetActionTimings(string, ActionTimings) error
-	GetAllActionTimings() (map[string]ActionTimings, error)
+	GetActionTimings(string) (ActionPlan, error)
+	SetActionTimings(string, ActionPlan) error
+	GetAllActionTimings() (map[string]ActionPlan, error)
 }
 
 type CdrStorage interface {

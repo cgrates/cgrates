@@ -47,7 +47,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.RATING_PLANS_CSV:      (*TPCSVImporter).importRatingPlans,
 	utils.RATING_PROFILES_CSV:   (*TPCSVImporter).importRatingProfiles,
 	utils.ACTIONS_CSV:           (*TPCSVImporter).importActions,
-	utils.ACTION_TIMINGS_CSV:    (*TPCSVImporter).importActionTimings,
+	utils.ACTION_PLANS_CSV:    (*TPCSVImporter).importActionTimings,
 	utils.ACTION_TRIGGERS_CSV:   (*TPCSVImporter).importActionTriggers,
 	utils.ACCOUNT_ACTIONS_CSV:   (*TPCSVImporter).importAccountActions,
 }
@@ -467,7 +467,7 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 			loadId += "_" + self.ImportId
 		}
 		tpaa := &utils.TPAccountActions{TPid: self.TPid, LoadId: loadId, Tenant: tenant, Account: account, Direction: direction,
-			ActionTimingsId: actionTimingsTag, ActionTriggersId: actionTriggersTag}
+			ActionPlanId: actionTimingsTag, ActionTriggersId: actionTriggersTag}
 		aa := map[string]*utils.TPAccountActions{tpaa.KeyId(): tpaa}
 		if err := self.StorDb.SetTPAccountActions(self.TPid, aa); err != nil {
 			if self.Verbose {

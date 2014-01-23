@@ -76,7 +76,7 @@ func unregisterFromBalancer() {
 	}
 	var reply int
 	engine.Logger.Info(fmt.Sprintf("Unregistering from balancer %s", cfg.RaterBalancer))
-	client.Call("Responder.UnRegisterRater", cfg.RaterListen, &reply)
+	client.Call("Responder.UnRegisterRater", cfg.RPCGOBListen, &reply)
 	if err := client.Close(); err != nil {
 		engine.Logger.Crit("Could not close balancer unregistration!")
 		exitChan <- true
@@ -95,7 +95,7 @@ func registerToBalancer() {
 	}
 	var reply int
 	engine.Logger.Info(fmt.Sprintf("Registering to balancer %s", cfg.RaterBalancer))
-	client.Call("Responder.RegisterRater", cfg.RaterListen, &reply)
+	client.Call("Responder.RegisterRater", cfg.RPCGOBListen, &reply)
 	if err := client.Close(); err != nil {
 		engine.Logger.Crit("Could not close balancer registration!")
 		exitChan <- true
