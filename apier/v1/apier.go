@@ -426,7 +426,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.AccountDb.CacheAccounting(nil); err != nil {
+	if err := self.AccountDb.CacheAccounting(nil, nil); err != nil {
 		return err
 	}
 	if self.Sched != nil {
@@ -578,10 +578,15 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply 
 	for idx, actId := range actIds {
 		actKeys[idx] = engine.ACTION_PREFIX + actId
 	}
+	shgIds, _ := loader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
+	shgKeys := make([]string, len(shgIds))
+	for idx, shgId := range shgIds {
+		shgKeys[idx] = engine.SHARED_GROUP_PREFIX + shgId
+	}
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys); err != nil {
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys); err != nil {
 		return err
 	}
 	if self.Sched != nil {
