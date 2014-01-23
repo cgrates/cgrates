@@ -165,7 +165,6 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage) {
 	}
 	cs := cdrs.New(cdrDb, medi, cfg)
 	cs.RegisterHanlersToServer(server)
-	exitChan <- true
 }
 
 func startHistoryScribe() {
