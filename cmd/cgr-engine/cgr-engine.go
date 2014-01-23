@@ -295,6 +295,7 @@ func main() {
 	if *mediatorEnabled {
 		cfg.MediatorEnabled = *mediatorEnabled
 	}
+
 	if cfg.RaterEnabled {
 		if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
 			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
@@ -306,6 +307,7 @@ func main() {
 		}
 
 	}
+
 	if cfg.StorDBType == SAME {
 		logDb = ratingDb.(engine.LogStorage)
 	} else {
@@ -326,6 +328,7 @@ func main() {
 			engine.SetDebitPeriod(dp)
 		}
 	}
+
 	stopHandled := false
 	// Async starts here
 	if cfg.RaterEnabled && cfg.RaterBalancer != "" && !cfg.BalancerEnabled {
@@ -333,6 +336,7 @@ func main() {
 		go stopRaterSignalHandler()
 		stopHandled = true
 	}
+
 	responder := &engine.Responder{ExitChan: exitChan}
 	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, Config: cfg}
 
@@ -341,6 +345,7 @@ func main() {
 		server.RpcRegister(responder)
 		server.RpcRegister(apier)
 	}
+
 	if cfg.BalancerEnabled {
 		engine.Logger.Info("Starting CGRateS Balancer")
 		go stopBalancerSignalHandler()
@@ -353,9 +358,11 @@ func main() {
 			bal.AddClient("local", new(engine.ResponderWorker))
 		}
 	}
+
 	if !stopHandled {
 		go generalSignalHandler()
 	}
+
 	if cfg.SchedulerEnabled {
 		engine.Logger.Info("Starting CGRateS Scheduler.")
 		go func() {
@@ -367,6 +374,26 @@ func main() {
 		}()
 	}
 
+	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {
+		engine.Logger.Info("Starting History Service.")
+		go startHistoryScribe()
+	}
+
+	go server.ServeGOB(cfg.RPCGOBListen)
+	go server.ServeJSON(cfg.RPCJSONListen)
+
+	if cfg.CDRSEnabled {
+		engine.Logger.Info("Starting CGRateS CDR Server.")
+		go startCDRS(responder, cdrDb)
+	}
+
+	go server.ServeHTTP(cfg.HTTPListen)
+
+	if cfg.MediatorEnabled {
+		engine.Logger.Info("Starting CGRateS Mediator.")
+		go startMediator(responder, logDb, cdrDb)
+	}
+
 	if cfg.SMEnabled {
 		engine.Logger.Info("Starting CGRateS SessionManager.")
 		go startSessionManager(responder, logDb)
@@ -374,27 +401,11 @@ func main() {
 		go shutdownSessionmanagerSingnalHandler()
 	}
 
-	if cfg.MediatorEnabled {
-		engine.Logger.Info("Starting CGRateS Mediator.")
-		go startMediator(responder, logDb, cdrDb)
-	}
-
-	if cfg.CDRSEnabled {
-		engine.Logger.Info("Starting CGRateS CDR Server.")
-		go startCDRS(responder, cdrDb)
-	}
-
-	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {
-		engine.Logger.Info("Starting History Service.")
-		go startHistoryScribe()
-	}
 	if cfg.CdrcEnabled {
 		engine.Logger.Info("Starting CGRateS CDR Client.")
 		go startCdrc()
 	}
-	go server.ServeGOB(cfg.RPCGOBListen)
-	go server.ServeJSON(cfg.RPCJSONListen)
-	go server.ServeHTTP(cfg.HTTPListen)
+
 	<-exitChan
 	if *pidFile != "" {
 		if err := os.Remove(*pidFile); err != nil {

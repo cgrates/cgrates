@@ -103,7 +103,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcDurationField = "9"
 	eCfg.CdrcExtraFields = []string{}
 	eCfg.MediatorEnabled = false
-	eCfg.MediatorRater = "127.0.0.1:2013"
+	eCfg.MediatorRater = "internal"
 	eCfg.MediatorRaterReconnects = 3
 	eCfg.MediatorRunIds = []string{}
 	eCfg.MediatorSubjectFields = []string{}
@@ -117,7 +117,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.MediatorDurationFields = []string{}
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
-	eCfg.SMRater = "127.0.0.1:2013"
+	eCfg.SMRater = "internal"
 	eCfg.SMRaterReconnects = 3
 	eCfg.SMDebitInterval = 10
 	eCfg.SMMaxCallDuration = time.Duration(3) * time.Hour
@@ -125,7 +125,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.FreeswitchPass = "ClueCon"
 	eCfg.FreeswitchReconnects = 5
 	eCfg.HistoryAgentEnabled = false
-	eCfg.HistoryServer = "127.0.0.1:2013"
+	eCfg.HistoryServer = "internal"
 	eCfg.HistoryServerEnabled = false
 	eCfg.HistoryDir = "/var/log/cgrates/history"
 	eCfg.HistorySaveInterval = time.Duration(1) * time.Second

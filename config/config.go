@@ -202,7 +202,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcDurationField = "9"
 	self.CdrcExtraFields = []string{}
 	self.MediatorEnabled = false
-	self.MediatorRater = "127.0.0.1:2013"
+	self.MediatorRater = "internal"
 	self.MediatorRaterReconnects = 3
 	self.MediatorRunIds = []string{}
 	self.MediatorSubjectFields = []string{}
@@ -216,7 +216,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorDurationFields = []string{}
 	self.SMEnabled = false
 	self.SMSwitchType = FS
-	self.SMRater = "127.0.0.1:2013"
+	self.SMRater = "internal"
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
@@ -225,7 +225,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.FreeswitchReconnects = 5
 	self.HistoryAgentEnabled = false
 	self.HistoryServerEnabled = false
-	self.HistoryServer = "127.0.0.1:2013"
+	self.HistoryServer = "internal"
 	self.HistoryDir = "/var/log/cgrates/history"
 	self.HistorySaveInterval = time.Duration(1) * time.Second
 	self.MailerServer = "localhost:25"
