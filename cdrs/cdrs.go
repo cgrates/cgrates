@@ -20,12 +20,13 @@ package cdrs
 
 import (
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/utils"
-	"io/ioutil"
-	"net/http"
 )
 
 var (
@@ -75,8 +76,7 @@ func New(s engine.CdrStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
 	return &CDRS{}
 }
 
-func (cdrs *CDRS) StartCapturingCDRs() {
-	http.HandleFunc("/cgr", cgrCdrHandler)            // Attach CGR CDR Handler
-	http.HandleFunc("/freeswitch_json", fsCdrHandler) // Attach FreeSWITCH JSON CDR Handler
-	http.ListenAndServe(cfg.CDRSListen, nil)
+func (cdrs *CDRS) RegisterHanlersToServer(server *engine.Server) {
+	server.RegisterHttpFunc("/cgr", cgrCdrHandler)
+	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
 }

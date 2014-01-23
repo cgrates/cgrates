@@ -20,48 +20,47 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"net/rpc"
 	"os"
 	"runtime"
 	"runtime/pprof"
 	"time"
-	"fmt"
-	"net/rpc"
-	"net/rpc/jsonrpc"
-	"github.com/cgrates/cgrates/engine"
+
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 )
 
 var (
-	cgrConfig, _ = config.NewDefaultCGRConfig()
-	cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-	memprofile = flag.String("memprofile", "", "write memory profile to this file")
-	runs       = flag.Int("runs", 10000, "stress cycle number")
-	parallel   = flag.Int("parallel", 0, "run n requests in parallel")
-	ratingdb_type = flag.String("ratingdb_type", cgrConfig.RatingDBType, "The type of the RatingDb database <redis>")
-	ratingdb_host = flag.String("ratingdb_host", cgrConfig.RatingDBHost, "The RatingDb host to connect to.")
-	ratingdb_port = flag.String("ratingdb_port", cgrConfig.RatingDBPort, "The RatingDb port to bind to.")
-	ratingdb_name = flag.String("ratingdb_name", cgrConfig.RatingDBName, "The name/number of the RatingDb to connect to.")
-	ratingdb_user = flag.String("ratingdb_user", cgrConfig.RatingDBUser, "The RatingDb user to sign in as.")
-	ratingdb_pass = flag.String("ratingdb_passwd", cgrConfig.RatingDBPass, "The RatingDb user's password.")
-	accountdb_type = flag.String("accountdb_type", cgrConfig.AccountDBType, "The type of the AccountingDb database <redis>")
-	accountdb_host = flag.String("accountdb_host", cgrConfig.AccountDBHost, "The AccountingDb host to connect to.")
-	accountdb_port = flag.String("accountdb_port", cgrConfig.AccountDBPort, "The AccountingDb port to bind to.")
-	accountdb_name = flag.String("accountdb_name", cgrConfig.AccountDBName, "The name/number of the AccountingDb to connect to.")
-	accountdb_user = flag.String("accountdb_user", cgrConfig.AccountDBUser, "The AccountingDb user to sign in as.")
-	accountdb_pass = flag.String("accountdb_passwd", cgrConfig.AccountDBPass, "The AccountingDb user's password.")
+	cgrConfig, _    = config.NewDefaultCGRConfig()
+	cpuprofile      = flag.String("cpuprofile", "", "write cpu profile to file")
+	memprofile      = flag.String("memprofile", "", "write memory profile to this file")
+	runs            = flag.Int("runs", 10000, "stress cycle number")
+	parallel        = flag.Int("parallel", 0, "run n requests in parallel")
+	ratingdb_type   = flag.String("ratingdb_type", cgrConfig.RatingDBType, "The type of the RatingDb database <redis>")
+	ratingdb_host   = flag.String("ratingdb_host", cgrConfig.RatingDBHost, "The RatingDb host to connect to.")
+	ratingdb_port   = flag.String("ratingdb_port", cgrConfig.RatingDBPort, "The RatingDb port to bind to.")
+	ratingdb_name   = flag.String("ratingdb_name", cgrConfig.RatingDBName, "The name/number of the RatingDb to connect to.")
+	ratingdb_user   = flag.String("ratingdb_user", cgrConfig.RatingDBUser, "The RatingDb user to sign in as.")
+	ratingdb_pass   = flag.String("ratingdb_passwd", cgrConfig.RatingDBPass, "The RatingDb user's password.")
+	accountdb_type  = flag.String("accountdb_type", cgrConfig.AccountDBType, "The type of the AccountingDb database <redis>")
+	accountdb_host  = flag.String("accountdb_host", cgrConfig.AccountDBHost, "The AccountingDb host to connect to.")
+	accountdb_port  = flag.String("accountdb_port", cgrConfig.AccountDBPort, "The AccountingDb port to bind to.")
+	accountdb_name  = flag.String("accountdb_name", cgrConfig.AccountDBName, "The name/number of the AccountingDb to connect to.")
+	accountdb_user  = flag.String("accountdb_user", cgrConfig.AccountDBUser, "The AccountingDb user to sign in as.")
+	accountdb_pass  = flag.String("accountdb_passwd", cgrConfig.AccountDBPass, "The AccountingDb user's password.")
 	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.DBDataEncoding, "The encoding used to store object data in strings.")
-	raterAddress  = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
-	rpcEncoding   = flag.String("rpc_encoding", cgrConfig.RPCEncoding, "Rpc encoding to use when talking to remote rater <json|gob>")
-	tor = flag.String("tor", "call", "The type of record to use in queries.")
-	tenant = flag.String("tenant", "call", "The type of record to use in queries.")
-	subject = flag.String("subject", "1001", "The rating subject to use in queries.")
-	destination = flag.String("destination", "+4986517174963", "The destination to use in queries.")
-	
+	raterAddress    = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
+	tor             = flag.String("tor", "call", "The type of record to use in queries.")
+	tenant          = flag.String("tenant", "call", "The type of record to use in queries.")
+	subject         = flag.String("subject", "1001", "The rating subject to use in queries.")
+	destination     = flag.String("destination", "+4986517174963", "The destination to use in queries.")
+
 	nilDuration = time.Duration(0)
 )
 
-func durInternalRater( cd *engine.CallDescriptor) (time.Duration, error) {
+func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	ratingDb, err := engine.ConfigureRatingStorage(*ratingdb_type, *ratingdb_host, *ratingdb_port, *ratingdb_name, *ratingdb_user, *ratingdb_pass, *dbdata_encoding)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to rating database: %s", err.Error())
@@ -104,16 +103,9 @@ func durInternalRater( cd *engine.CallDescriptor) (time.Duration, error) {
 	return time.Since(start), nil
 }
 
-
-func durRemoteRater( cd *engine.CallDescriptor) (time.Duration, error) {
+func durRemoteRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	result := engine.CallCost{}
-	var client *rpc.Client
-	var err error
-	if *rpcEncoding=="json" {
-		client, err = jsonrpc.Dial("tcp", *raterAddress)
-	} else {
-		client, err = rpc.Dial("tcp", *raterAddress)
-	}
+	client, err := rpc.Dial("tcp", *raterAddress)
 	if err != nil {
 		return nilDuration, fmt.Errorf("Could not connect to engine: ", err.Error())
 	}
@@ -144,9 +136,6 @@ func durRemoteRater( cd *engine.CallDescriptor) (time.Duration, error) {
 	log.Println(result)
 	return time.Since(start), nil
 }
-	
-	
-
 
 func main() {
 	flag.Parse()

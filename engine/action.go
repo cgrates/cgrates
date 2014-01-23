@@ -231,8 +231,14 @@ func mailAsync(ub *UserBalance, a *Action) error {
 		return errors.New("Unconfigured parameters for mail action")
 	}
 	toAddrs := strings.Split(params[0], string(utils.FALLBACK_SEP))
-	message := []byte(fmt.Sprintf("[CGR Notification]: Threshold hit on balance: %s\n\nTime: \n\t%s\n\nBalance:\n\t%s\n\nYour faithful CGR Balance Monitor\n", 
-		ub.Id, time.Now(), ubJson))
+	toAddrStr := ""
+	for idx, addr := range toAddrs {
+		if idx != 0 {
+			toAddrStr += ", "
+		}
+		toAddrStr += addr
+	}
+	message := []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification]: Threshold hit on balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYour faithful CGR Balance Monitor\r\n",  toAddrStr, ub.Id, time.Now(), ubJson))
 	auth := smtp.PlainAuth("", cgrCfg.MailerAuthUser, cgrCfg.MailerAuthPass, strings.Split(cgrCfg.MailerServer,":")[0]) // We only need host part, so ignore port
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort

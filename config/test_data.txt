@@ -21,7 +21,9 @@ stordb_name = test 				# The name of the log database to connect to.
 stordb_user = test  	 			# Username to use when connecting to logdb.
 stordb_passwd = test 	 			# Password to use when connecting to logdb.
 dbdata_encoding = test				# The encoding used to store object data in strings: <msgpack|json>
-rpc_encoding = test 				# RPC encoding used on APIs: <gob|json>.
+rpc_json_listen = test 				# RPC JSON listening address
+rpc_gob_listen = test 				# RPC GOB listening address
+http_listen = test 				# HTTP listening address
 default_reqtype = test				# Default request type to consider when missing from requests: <""|prepaid|postpaid|pseudoprepaid|rated>.
 default_tor = test				# Default Type of Record to consider when missing from requests.
 default_tenant = test				# Default Tenant to consider when missing from requests.
@@ -32,19 +34,16 @@ rounding_decimals = 99				# Number of decimals to round floats/costs at
 
 [balancer]
 enabled = true 				# Start Balancer service: <true|false>.
-listen = test 			# Balancer listen interface: <disabled|x.y.z.y:1234>.
 
 [rater]
 enabled = true				# Enable Rater service: <true|false>.
 balancer = test 				# Register to Balancer as worker: <enabled|disabled>.
-listen = test 			# Rater's listening interface: <internal|x.y.z.y:1234>.
 
 [scheduler]
 enabled = true				# Starts Scheduler service: <true|false>.
 
 [cdrs]
 enabled = true				# Start the CDR Server service:  <true|false>.
-listen=test				# CDRS's listening interface: <x.y.z.y:1234>.
 extra_fields = test			# Extra fields to store in CDRs
 mediator = test				# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 
@@ -76,7 +75,6 @@ extra_fields = test			# Field identifiers of the fields to add in extra fields s
 
 [mediator]
 enabled = true				# Starts Mediator service: <true|false>.
-listen=test				# Mediator's listening interface: <internal>.
 rater = test			# Address where to reach the Rater: <internal|x.y.z.y:1234>
 rater_reconnects = 99				# Number of reconnects to rater before giving up.
 run_ids = test				# Identifiers for each mediation run on CDRs
@@ -105,7 +103,6 @@ reconnects = 99				# Number of attempts on connect failure.
 
 [history_server]
 enabled = true			# Starts History service: <true|false>.
-listen = test			# Listening addres for history server: <internal|x.y.z.y:1234>
 history_dir = test				# Location on disk where to store history files.
 save_interval = 99	      # Timeout duration between saves
 

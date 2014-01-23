@@ -28,7 +28,7 @@ import (
 )
 
 type MockScribe struct {
-	sync.Mutex
+	mu             sync.Mutex
 	destinations   records
 	ratingPlans    records
 	ratingProfiles records
@@ -58,8 +58,8 @@ func (s *MockScribe) Record(rec *Record, out *int) error {
 }
 
 func (s *MockScribe) save(filename string) error {
-	s.Lock()
-	defer s.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	switch filename {
 	case DESTINATIONS_FILE:
 		s.DestBuf.Reset()
