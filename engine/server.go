@@ -58,11 +58,11 @@ func (s *Server) ServeJSON(addr string) {
 	for {
 		conn, err := lJSON.Accept()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<History> Accept error: %v", conn))
+			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
 			continue
 		}
 
-		Logger.Info(fmt.Sprintf("<History> New incoming connection: %v", conn.RemoteAddr()))
+		//Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
 		go jsonrpc.ServeConn(conn)
 	}
 
@@ -79,11 +79,11 @@ func (s *Server) ServeGOB(addr string) {
 	for {
 		conn, err := lGOB.Accept()
 		if err != nil {
-			Logger.Err(fmt.Sprintf("<History> Accept error: %v", conn))
+			Logger.Err(fmt.Sprintf("<CGRServer> Accept error: %v", conn))
 			continue
 		}
 
-		Logger.Info(fmt.Sprintf("<History> New incoming connection: %v", conn.RemoteAddr()))
+		//Logger.Info(fmt.Sprintf("<CGRServer> New incoming connection: %v", conn.RemoteAddr()))
 		go rpc.ServeConn(conn)
 	}
 }
