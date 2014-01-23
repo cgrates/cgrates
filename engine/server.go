@@ -55,6 +55,7 @@ func (s *Server) ServeJSON(addr string) {
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
+	Logger.Info(fmt.Sprintf("Starting CGRateS JSON server at %s.", addr))
 	for {
 		conn, err := lJSON.Accept()
 		if err != nil {
@@ -76,6 +77,7 @@ func (s *Server) ServeGOB(addr string) {
 	if e != nil {
 		log.Fatal("listen error:", e)
 	}
+	Logger.Info(fmt.Sprintf("Starting CGRateS GOB server at %s.", addr))
 	for {
 		conn, err := lGOB.Accept()
 		if err != nil {
@@ -92,5 +94,6 @@ func (s *Server) ServeHTTP(addr string) {
 	if !s.httpEnabled {
 		return
 	}
+	Logger.Info(fmt.Sprintf("Starting CGRateS HTTP server at %s.", addr))
 	http.ListenAndServe(addr, nil)
 }
