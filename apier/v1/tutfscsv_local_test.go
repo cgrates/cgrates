@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
@@ -102,11 +101,7 @@ func TestFsCsvRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	if cfg.RPCEncoding == utils.JSON {
-		rater, err = jsonrpc.Dial("tcp", cfg.MediatorRater)
-	} else {
-		rater, err = rpc.Dial("tcp", cfg.MediatorRater)
-	}
+	rater, err = jsonrpc.Dial("tcp", "127.0.0.1:2012") // ToDo: Fix here with config loaded from file
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

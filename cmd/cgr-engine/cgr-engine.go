@@ -88,7 +88,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 			time.Sleep(time.Duration(i/2) * time.Second)
 		}
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Could not connect to engine: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("<Mediator> Could not connect to engine: %v", err))
 			exitChan <- true
 		}
 		connector = &engine.RPCClientConnector{Client: client}
@@ -130,7 +130,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 			time.Sleep(time.Duration(i/2) * time.Second)
 		}
 		if err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Could not connect to engine: %v", err))
+			engine.Logger.Crit(fmt.Sprintf("<SessionManager> Could not connect to engine: %v", err))
 			exitChan <- true
 		}
 		connector = &engine.RPCClientConnector{Client: client}
