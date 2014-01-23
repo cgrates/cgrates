@@ -167,42 +167,21 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage) {
 	cs.RegisterHanlersToServer(server)
 }
 
-func startHistoryScribe() {
-	var scribeServer history.Scribe
+func startHistoryAgent(scribeServer history.Scribe) {
 
-	if cfg.HistoryServerEnabled {
-		if scribeServer, err = history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-		server.RpcRegisterName("Scribe", scribeServer)
-	}
-
-	var scribeAgent history.Scribe
-
-	if cfg.HistoryAgentEnabled {
-		if cfg.HistoryServer != INTERNAL { // Connect in iteration since there are chances of concurrency here
-			for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
-				if scribeAgent, err = history.NewProxyScribe(cfg.HistoryServer); err == nil {
-					break //Connected so no need to reiterate
-				} else if i == 2 && err != nil {
-					engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Could not connect to the server, error: %s", err.Error()))
-					exitChan <- true
-					return
-				}
-				time.Sleep(time.Duration(i/2) * time.Second)
+	if cfg.HistoryServer != INTERNAL { // Connect in iteration since there are chances of concurrency here
+		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
+			if scribeServer, err = history.NewProxyScribe(cfg.HistoryServer); err == nil {
+				break //Connected so no need to reiterate
+			} else if i == 2 && err != nil {
+				engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Could not connect to the server, error: %s", err.Error()))
+				exitChan <- true
+				return
 			}
-		} else {
-			scribeAgent = scribeServer
+			time.Sleep(time.Duration(i/2) * time.Second)
 		}
 	}
-	if scribeAgent != nil {
-		engine.SetHistoryScribe(scribeAgent)
-	} else {
-		engine.SetHistoryScribe(scribeServer) // if it is nil so be it
-	}
-
+	engine.SetHistoryScribe(scribeServer)
 	return
 }
 
@@ -374,10 +353,19 @@ func main() {
 		}()
 	}
 
-	if cfg.HistoryServerEnabled || cfg.HistoryAgentEnabled {
-		engine.Logger.Info("Starting History Service.")
-		go startHistoryScribe()
+	var scribeServer history.Scribe
+
+	if cfg.HistoryServerEnabled {
+		if scribeServer, err = history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval); err != nil {
+			engine.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
+			exitChan <- true
+			return
+		}
+		server.RpcRegisterName("Scribe", scribeServer)
 	}
+	engine.Logger.Info("Starting History Service.")
+
+	go startHistoryAgent(scribeServer)
 
 	go server.ServeGOB(cfg.RPCGOBListen)
 	go server.ServeJSON(cfg.RPCJSONListen)
