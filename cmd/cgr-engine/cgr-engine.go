@@ -172,7 +172,7 @@ func startHistoryScribe() {
 
 	if cfg.HistoryServerEnabled {
 		if scribeServer, err = history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval); err != nil {
-			engine.Logger.Crit(err.Error())
+			engine.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
 			exitChan <- true
 			return
 		}
@@ -187,7 +187,7 @@ func startHistoryScribe() {
 				if scribeAgent, err = history.NewProxyScribe(cfg.HistoryServer); err == nil {
 					break //Connected so no need to reiterate
 				} else if i == 2 && err != nil {
-					engine.Logger.Crit(err.Error())
+					engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Could not connect to the server, error: %s", err.Error()))
 					exitChan <- true
 					return
 				}
