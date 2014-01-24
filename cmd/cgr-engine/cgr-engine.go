@@ -58,7 +58,7 @@ var (
 	cfgPath         = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
 	version         = flag.Bool("version", false, "Prints the application version.")
 	raterEnabled    = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
-	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
+	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
 	cdrsEnabled     = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
 	cdrcEnabled     = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
 	mediatorEnabled = flag.Bool("mediator", false, "Enforce starting of the mediator service overwriting config")
@@ -168,7 +168,7 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage) {
 }
 
 func startHistoryAgent(scribeServer history.Scribe) {
-	if cfg.HistoryServer != INTERNAL { // Connect in iteration since there are chances of concurrency here
+	if cfg.HistoryAgentEnabled && cfg.HistoryServer != INTERNAL { // Connect in iteration since there are chances of concurrency here
 		engine.Logger.Info("Starting History Agent.")
 		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
 			//engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Trying to connect, iteration: %d, time %s", i, time.Now()))
@@ -367,7 +367,6 @@ func main() {
 		}
 		server.RpcRegisterName("Scribe", scribeServer)
 	}
-	go startHistoryAgent(scribeServer)
 
 	go server.ServeGOB(cfg.RPCGOBListen)
 	go server.ServeJSON(cfg.RPCJSONListen)
