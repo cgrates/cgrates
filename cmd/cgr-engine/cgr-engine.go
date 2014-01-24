@@ -168,8 +168,8 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage) {
 }
 
 func startHistoryAgent(scribeServer history.Scribe) {
-
 	if cfg.HistoryServer != INTERNAL { // Connect in iteration since there are chances of concurrency here
+		engine.Logger.Info("Starting History Agent.")
 		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
 			//engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Trying to connect, iteration: %d, time %s", i, time.Now()))
 			if scribeServer, err = history.NewProxyScribe(cfg.HistoryServer); err == nil {
@@ -236,20 +236,20 @@ func main() {
 	}
 	config.SetCgrConfig(cfg) // Share the config object
 	if *raterEnabled {
-                cfg.RaterEnabled = *raterEnabled
-        }
-        if *schedEnabled {
-                cfg.SchedulerEnabled = *schedEnabled
-        }
-        if *cdrsEnabled {
-                cfg.CDRSEnabled = *cdrsEnabled
-        }
-        if *cdrcEnabled {
-                cfg.CdrcEnabled = *cdrcEnabled
-        }
-        if *mediatorEnabled {
-                cfg.MediatorEnabled = *mediatorEnabled
-        }
+		cfg.RaterEnabled = *raterEnabled
+	}
+	if *schedEnabled {
+		cfg.SchedulerEnabled = *schedEnabled
+	}
+	if *cdrsEnabled {
+		cfg.CDRSEnabled = *cdrsEnabled
+	}
+	if *cdrcEnabled {
+		cfg.CdrcEnabled = *cdrcEnabled
+	}
+	if *mediatorEnabled {
+		cfg.MediatorEnabled = *mediatorEnabled
+	}
 
 	// some consitency checks
 	errCfg := checkConfigSanity()
@@ -302,15 +302,15 @@ func main() {
 	stopHandled := false
 
 	if cfg.RaterEnabled { // Cache rating if rater enabled
-                if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
-                        engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
-                        return
-                }
-                if err := accountDb.CacheAccounting(nil); err != nil {
-                        engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
-                        return
-                }
-        }
+		if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
+			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
+			return
+		}
+		if err := accountDb.CacheAccounting(nil); err != nil {
+			engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
+			return
+		}
+	}
 
 	// Async starts here
 	if cfg.RaterEnabled && cfg.RaterBalancer != "" && !cfg.BalancerEnabled {
@@ -366,7 +366,9 @@ func main() {
 			return
 		}
 		server.RpcRegisterName("Scribe", scribeServer)
+		engine.Logger.Info("Starting History Service.")
 	}
+	go startHistoryAgent(scribeServer)
 
 	go server.ServeGOB(cfg.RPCGOBListen)
 	go server.ServeJSON(cfg.RPCJSONListen)
