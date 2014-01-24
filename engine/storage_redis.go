@@ -25,7 +25,6 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/hoisie/redis"
 
@@ -195,7 +194,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
+		go historyScribe.Record(rp, &response)
 	}
 	//cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
@@ -223,7 +222,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	err = rs.db.Set(RATING_PROFILE_PREFIX+rpf.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rpf.Id, rpf}, &response)
+		go historyScribe.Record(rpf, &response)
 	}
 	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
@@ -272,7 +271,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	err = rs.db.Set(DESTINATION_PREFIX+dest.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
+		go historyScribe.Record(dest, &response)
 	}
 	//cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return

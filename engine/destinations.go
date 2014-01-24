@@ -53,3 +53,8 @@ func (d *Destination) String() (result string) {
 func (d *Destination) AddPrefix(pfx string) {
 	d.Prefixes = append(d.Prefixes, pfx)
 }
+
+// history record method
+func (d *Destination) GetId() string {
+	return d.Id
+}

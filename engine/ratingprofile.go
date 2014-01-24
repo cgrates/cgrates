@@ -146,3 +146,8 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 
 	return errors.New("not found")
 }
+
+// history record method
+func (rpf *RatingProfile) GetId() string {
+	return rpf.Id
+}

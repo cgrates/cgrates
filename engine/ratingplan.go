@@ -97,3 +97,8 @@ func (rp *RatingPlan) AddRateInterval(dId string, ris ...*RateInterval) {
 func (rp *RatingPlan) Equal(o *RatingPlan) bool {
 	return rp.Id == o.Id
 }
+
+// history record method
+func (rp *RatingPlan) GetId() string {
+	return rp.Id
+}

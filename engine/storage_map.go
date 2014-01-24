@@ -22,11 +22,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/history"
-	"github.com/cgrates/cgrates/utils"
 	"strings"
 	"time"
+	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type MapStorage struct {
@@ -123,7 +122,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := ms.ms.Marshal(rp)
 	ms.dict[RATING_PLAN_PREFIX+rp.Id] = result
 	response := 0
-	go historyScribe.Record(&history.Record{RATING_PLAN_PREFIX + rp.Id, rp}, &response)
+	go historyScribe.Record(rp, &response)
 	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
@@ -151,7 +150,7 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	result, err := ms.ms.Marshal(rpf)
 	ms.dict[RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
-	go historyScribe.Record(&history.Record{RATING_PROFILE_PREFIX + rpf.Id, rpf}, &response)
+	go historyScribe.Record(rpf, &response)
 	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
@@ -180,7 +179,7 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result
 	response := 0
-	go historyScribe.Record(&history.Record{DESTINATION_PREFIX + dest.Id, dest}, &response)
+	go historyScribe.Record(dest, &response)
 	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }

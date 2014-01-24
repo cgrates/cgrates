@@ -96,6 +96,9 @@ func SetDebitPeriod(d time.Duration) {
 
 // Exported method to set the history scribe.
 func SetHistoryScribe(scribe history.Scribe) {
+	history.RegisterRecordFilename(&Destination{})
+	history.RegisterRecordFilename(&RatingPlan{})
+	history.RegisterRecordFilename(&RatingProfile{})
 	historyScribe = scribe
 }
 
