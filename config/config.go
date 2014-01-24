@@ -137,6 +137,10 @@ type CGRConfig struct {
 	HistoryServerEnabled     bool          // Starts History as server: <true|false>.
 	HistoryDir               string        // Location on disk where to store history files.
 	HistorySaveInterval      time.Duration // The timout duration between history writes
+	MailerServer             string // The server to use when sending emails out
+	MailerAuthUser           string // Authenticate to email server using this user
+	MailerAuthPass           string // Authenticate to email server with this password
+	MailerFromAddr           string // From address used when sending emails out
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -198,7 +202,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcDurationField = "9"
 	self.CdrcExtraFields = []string{}
 	self.MediatorEnabled = false
-	self.MediatorRater = "127.0.0.1:2013"
+	self.MediatorRater = "internal"
 	self.MediatorRaterReconnects = 3
 	self.MediatorRunIds = []string{}
 	self.MediatorSubjectFields = []string{}
@@ -212,7 +216,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorDurationFields = []string{}
 	self.SMEnabled = false
 	self.SMSwitchType = FS
-	self.SMRater = "127.0.0.1:2013"
+	self.SMRater = "internal"
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
@@ -221,9 +225,13 @@ func (self *CGRConfig) setDefaults() error {
 	self.FreeswitchReconnects = 5
 	self.HistoryAgentEnabled = false
 	self.HistoryServerEnabled = false
-	self.HistoryServer = "127.0.0.1:2013"
+	self.HistoryServer = "internal"
 	self.HistoryDir = "/var/log/cgrates/history"
 	self.HistorySaveInterval = time.Duration(1) * time.Second
+	self.MailerServer = "localhost:25"
+	self.MailerAuthUser = "cgrates"
+	self.MailerAuthPass = "CGRateS.org"
+	self.MailerFromAddr = "cgr-mailer@localhost.localdomain"
 	return nil
 }
 
@@ -541,6 +549,18 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		if cfg.HistorySaveInterval, errParse = utils.ParseDurationWithSecs(saveIntvlStr); errParse != nil {
 			return nil, errParse
 		}
+	}
+	if hasOpt = c.HasOption("mailer", "server"); hasOpt {
+		cfg.MailerServer, _ = c.GetString("mailer", "server")
+	}
+	if hasOpt = c.HasOption("mailer", "auth_user"); hasOpt {
+		cfg.MailerAuthUser, _ = c.GetString("mailer", "auth_user")
+	}
+	if hasOpt = c.HasOption("mailer", "auth_passwd"); hasOpt {
+		cfg.MailerAuthPass, _ = c.GetString("mailer", "auth_passwd")
+	}
+	if hasOpt = c.HasOption("mailer", "from_address"); hasOpt {
+		cfg.MailerFromAddr, _ = c.GetString("mailer", "from_address")
 	}
 	return cfg, nil
 }

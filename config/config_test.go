@@ -103,7 +103,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcDurationField = "9"
 	eCfg.CdrcExtraFields = []string{}
 	eCfg.MediatorEnabled = false
-	eCfg.MediatorRater = "127.0.0.1:2013"
+	eCfg.MediatorRater = "internal"
 	eCfg.MediatorRaterReconnects = 3
 	eCfg.MediatorRunIds = []string{}
 	eCfg.MediatorSubjectFields = []string{}
@@ -117,7 +117,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.MediatorDurationFields = []string{}
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
-	eCfg.SMRater = "127.0.0.1:2013"
+	eCfg.SMRater = "internal"
 	eCfg.SMRaterReconnects = 3
 	eCfg.SMDebitInterval = 10
 	eCfg.SMMaxCallDuration = time.Duration(3) * time.Hour
@@ -125,10 +125,14 @@ func TestDefaults(t *testing.T) {
 	eCfg.FreeswitchPass = "ClueCon"
 	eCfg.FreeswitchReconnects = 5
 	eCfg.HistoryAgentEnabled = false
-	eCfg.HistoryServer = "127.0.0.1:2013"
+	eCfg.HistoryServer = "internal"
 	eCfg.HistoryServerEnabled = false
 	eCfg.HistoryDir = "/var/log/cgrates/history"
 	eCfg.HistorySaveInterval = time.Duration(1) * time.Second
+	eCfg.MailerServer = "localhost:25"
+	eCfg.MailerAuthUser = "cgrates"
+	eCfg.MailerAuthPass = "CGRateS.org"
+	eCfg.MailerFromAddr = "cgr-mailer@localhost.localdomain"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
@@ -249,6 +253,10 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.HistoryServerEnabled = true
 	eCfg.HistoryDir = "test"
 	eCfg.HistorySaveInterval = time.Duration(99) * time.Second
+	eCfg.MailerServer = "test"
+	eCfg.MailerAuthUser = "test"
+	eCfg.MailerAuthPass = "test"
+	eCfg.MailerFromAddr = "test"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
