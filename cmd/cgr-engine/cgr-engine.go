@@ -366,7 +366,6 @@ func main() {
 			return
 		}
 		server.RpcRegisterName("Scribe", scribeServer)
-		engine.Logger.Info("Starting History Service.")
 	}
 	go startHistoryAgent(scribeServer)
 
