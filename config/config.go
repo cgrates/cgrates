@@ -137,10 +137,10 @@ type CGRConfig struct {
 	HistoryServerEnabled     bool          // Starts History as server: <true|false>.
 	HistoryDir               string        // Location on disk where to store history files.
 	HistorySaveInterval      time.Duration // The timout duration between history writes
-	MailerServer             string // The server to use when sending emails out
-	MailerAuthUser           string // Authenticate to email server using this user
-	MailerAuthPass           string // Authenticate to email server with this password
-	MailerFromAddr           string // From address used when sending emails out
+	MailerServer             string        // The server to use when sending emails out
+	MailerAuthUser           string        // Authenticate to email server using this user
+	MailerAuthPass           string        // Authenticate to email server with this password
+	MailerFromAddr           string        // From address used when sending emails out
 }
 
 func (self *CGRConfig) setDefaults() error {

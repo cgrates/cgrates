@@ -24,15 +24,15 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"net/http"
 	"net/rpc"
+	"net/url"
 	"os/exec"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
@@ -929,7 +929,6 @@ func TestApierAddBalance(t *testing.T) {
 		t.Errorf("Calling ApierV1.AddBalance received: %s", reply)
 	}
 
-
 }
 
 // Test here ExecuteAction
@@ -1013,22 +1012,19 @@ func TestApierAddTriggeredAction(t *testing.T) {
 	}
 }
 
-
-
 // Test here GetAccountActionTriggers
 func TestApierGetAccountActionTriggers(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var reply engine.ActionTriggerPriotityList
-	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan2", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 }
-
 
 // Test here RemAccountActionTriggers
 func TestApierRemAccountActionTriggers(t *testing.T) {
@@ -1037,14 +1033,14 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 	}
 	// Test first get so we can steal the id which we need to remove
 	var reply engine.ActionTriggerPriotityList
-	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan2", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccountActionTriggers", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionTimings: ", err.Error())
 	} else if len(reply) != 1 || reply[0].ActionsId != "WARN_VIA_HTTP" {
 		t.Errorf("Unexpected action triggers received %v", reply)
 	}
 	var rmReply string
-	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account:"dan2", Direction: "*out", ActionTriggerId: reply[0].Id}
+	rmReq := AttrRemAcntActionTriggers{Tenant: "cgrates.org", Account: "dan2", Direction: "*out", ActionTriggerId: reply[0].Id}
 	if err := rater.Call("ApierV1.RemAccountActionTriggers", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
 	} else if rmReply != OK {
@@ -1057,29 +1053,27 @@ func TestApierRemAccountActionTriggers(t *testing.T) {
 	}
 }
 
-
 // Test here SetAccount
 func TestApierSetAccount(t *testing.T) {
-        if !*testLocal {
-                return
-        }
-        reply := ""
-        attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", Type: "*prepaid", ActionPlanId: "ATMS_1"}
-        if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
-                t.Error("Got error on ApierV1.SetAccount: ", err.Error())
-        } else if reply != "OK" {
-                t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
-        }
-        reply2 := ""
-        attrs2 := new(AttrSetAccount)
-        *attrs2 = *attrs
-        attrs2.ActionPlanId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
-        // Add account with actions timing which does not exist
-        if err := rater.Call("ApierV1.SetAccount", attrs2, &reply2); err == nil || reply2 == "OK" { // OK is not welcomed
-                t.Error("Expecting error on ApierV1.SetAccount.", err, reply2)
-        }
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", Type: "*prepaid", ActionPlanId: "ATMS_1"}
+	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+	}
+	reply2 := ""
+	attrs2 := new(AttrSetAccount)
+	*attrs2 = *attrs
+	attrs2.ActionPlanId = "DUMMY_DATA" // Does not exist so it should error when adding triggers on it
+	// Add account with actions timing which does not exist
+	if err := rater.Call("ApierV1.SetAccount", attrs2, &reply2); err == nil || reply2 == "OK" { // OK is not welcomed
+		t.Error("Expecting error on ApierV1.SetAccount.", err, reply2)
+	}
 }
-
 
 // Test here GetAccountActionTimings
 func TestApierGetAccountActionPlan(t *testing.T) {
@@ -1087,7 +1081,7 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 		return
 	}
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan7", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan7", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 1 {
@@ -1099,21 +1093,20 @@ func TestApierGetAccountActionPlan(t *testing.T) {
 	}
 }
 
-
 // Test here RemActionTiming
 func TestApierRemActionTiming(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var rmReply string
-	rmReq := AttrRemActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account:"dan4", Direction: "*out"}
+	rmReq := AttrRemActionTiming{ActionPlanId: "ATMS_1", Tenant: "cgrates.org", Account: "dan4", Direction: "*out"}
 	if err := rater.Call("ApierV1.RemActionTiming", rmReq, &rmReply); err != nil {
 		t.Error("Got error on ApierV1.RemActionTiming: ", err.Error())
 	} else if rmReply != OK {
 		t.Error("Unexpected answer received", rmReply)
 	}
 	var reply []*AccountActionTiming
-	req := AttrAcntAction{Tenant: "cgrates.org", Account:"dan4", Direction: "*out"}
+	req := AttrAcntAction{Tenant: "cgrates.org", Account: "dan4", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccountActionPlan", req, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccountActionPlan: ", err.Error())
 	} else if len(reply) != 0 {
@@ -1166,12 +1159,12 @@ func TestTriggersExecute(t *testing.T) {
 		return
 	}
 	reply := ""
-        attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8", Type: "*prepaid"}
-        if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
-                t.Error("Got error on ApierV1.SetAccount: ", err.Error())
-        } else if reply != "OK" {
-                t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
-        }
+	attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8", Type: "*prepaid"}
+	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
+	} else if reply != "OK" {
+		t.Errorf("Calling ApierV1.SetAccount received: %s", reply)
+	}
 	attrAddBlnc := &AttrAddBalance{Tenant: "cgrates.org", Account: "1008", BalanceId: "*monetary", Direction: "*out", Value: 2}
 	if err := rater.Call("ApierV1.AddBalance", attrAddBlnc, &reply); err != nil {
 		t.Error("Got error on ApierV1.AddBalance: ", err.Error())
@@ -1224,14 +1217,14 @@ func TestResponderGetCost(t *testing.T) {
 
 func TestCdrServer(t *testing.T) {
 	if !*testLocal {
-                return
-        }
+		return
+	}
 	httpClient := new(http.Client)
-	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"}, 
-		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"}, 
+	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
+		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"}, 
-		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"}, 
+	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
+		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
 		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
@@ -1243,8 +1236,8 @@ func TestCdrServer(t *testing.T) {
 
 func TestExportCdrsToFile(t *testing.T) {
 	if !*testLocal {
-                return
-        }
+		return
+	}
 	var reply *utils.ExportedFileCdrs
 	req := utils.AttrExpFileCdrs{}
 	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
@@ -1272,7 +1265,6 @@ func TestExportCdrsToFile(t *testing.T) {
 	}
 	*/
 }
-
 
 // Simply kill the engine after we are done with tests within this file
 func TestStopEngine(t *testing.T) {

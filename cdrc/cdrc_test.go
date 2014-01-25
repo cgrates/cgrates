@@ -50,7 +50,7 @@ func TestParseFieldsConfig(t *testing.T) {
 	cgrConfig.CdrcExtraFields = []string{"supplier1:^top_supplier", "orig_ip:11"}
 	cdrc = &Cdrc{cgrCfg: cgrConfig}
 	if err := cdrc.parseFieldsConfig(); err != nil {
-		t.Errorf("Failed to corectly parse extra fields %v",cdrc.cfgCdrFields)
+		t.Errorf("Failed to corectly parse extra fields %v", cdrc.cfgCdrFields)
 	}
 }
 

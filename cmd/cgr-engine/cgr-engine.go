@@ -219,7 +219,7 @@ func serveRpc(rpcWaitChans []chan struct{}) {
 	for _, chn := range rpcWaitChans {
 		<-chn
 	}
-	// Each of the serve block so need to start in their own goroutine
+	// Each of the serve blocks so need to start in their own goroutine
 	go server.ServeJSON(cfg.RPCJSONListen)
 	go server.ServeGOB(cfg.RPCGOBListen)
 

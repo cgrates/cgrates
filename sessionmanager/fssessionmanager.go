@@ -133,7 +133,6 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid string, maxDur time.Duration
 	return nil
 }
 
-
 // Sends the transfer command to unpark the call to freeswitch
 func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
 	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
@@ -175,7 +174,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		Destination: ev.GetDestination(),
 		TimeStart:   startTime,
 		TimeEnd:     startTime.Add(cfg.SMMaxCallDuration),
-		}
+	}
 	var remainingDurationFloat float64
 	err = sm.connector.GetMaxSessionTime(cd, &remainingDurationFloat)
 	if err != nil {

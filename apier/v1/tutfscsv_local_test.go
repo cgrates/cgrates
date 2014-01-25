@@ -19,17 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
-	"testing"
 	"fmt"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
-	"time"
 	"reflect"
+	"testing"
+	"time"
 )
-
 
 // Empty tables before using them
 func TestFsCsvCreateTables(t *testing.T) {
@@ -107,7 +106,6 @@ func TestFsCsvRpcConn(t *testing.T) {
 	}
 }
 
-
 // Make sure we start with fresh data
 func TestFsCsvEmptyCache(t *testing.T) {
 	if !*testLocal {
@@ -159,7 +157,7 @@ func TestFsCsvCall1(t *testing.T) {
 	}
 	tStart := time.Date(2014, 01, 15, 6, 0, 0, 0, time.UTC)
 	tEnd := time.Date(2014, 01, 15, 6, 0, 35, 0, time.UTC)
-	cd := engine.CallDescriptor {
+	cd := engine.CallDescriptor{
 		Direction:    "*out",
 		TOR:          "call",
 		Tenant:       "cgrates.org",
@@ -168,7 +166,7 @@ func TestFsCsvCall1(t *testing.T) {
 		Destination:  "1002",
 		TimeStart:    tStart,
 		TimeEnd:      tEnd,
-		CallDuration:     35,
+		CallDuration: 35,
 	}
 	var cc engine.CallCost
 	// Simple test that command is executed without errors
@@ -178,7 +176,6 @@ func TestFsCsvCall1(t *testing.T) {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
 	}
 }
-
 
 // Simply kill the engine after we are done with tests within this file
 func TestFsCsvStopEngine(t *testing.T) {

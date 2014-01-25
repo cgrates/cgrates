@@ -427,21 +427,21 @@ func TestActionTimingsRemoveMember(t *testing.T) {
 		Tag:            "test",
 		UserBalanceIds: []string{"one", "two", "three"},
 		ActionsId:      "TEST_ACTIONS",
-		}
+	}
 	at2 := &ActionTiming{
 		Id:             "some uuid22",
 		Tag:            "test2",
 		UserBalanceIds: []string{"three", "four"},
 		ActionsId:      "TEST_ACTIONS2",
-		}
+	}
 	ats := ActionPlan{at1, at2}
-	if outAts := RemActionTiming(ats, "", "four");  len(outAts[1].UserBalanceIds) != 1 {
+	if outAts := RemActionTiming(ats, "", "four"); len(outAts[1].UserBalanceIds) != 1 {
 		t.Error("Expecting fewer balance ids", outAts[1].UserBalanceIds)
 	}
 	if ats = RemActionTiming(ats, "", "three"); len(ats) != 1 {
 		t.Error("Expecting fewer actionTimings", ats)
 	}
-	if ats = RemActionTiming(ats, "some_uuid22", "");len(ats) != 1 {
+	if ats = RemActionTiming(ats, "some_uuid22", ""); len(ats) != 1 {
 		t.Error("Expecting fewer actionTimings members", ats)
 	}
 	ats2 := ActionPlan{at1, at2}
@@ -449,8 +449,6 @@ func TestActionTimingsRemoveMember(t *testing.T) {
 		t.Error("Should have no members anymore", ats2)
 	}
 }
-
-	
 
 func TestActionTriggerMatchNil(t *testing.T) {
 	at := &ActionTrigger{

@@ -21,15 +21,15 @@ package engine
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"errors"
+	"fmt"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 	"net/http"
 	"net/smtp"
 	"sort"
-	"time"
 	"strings"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 /*
@@ -101,7 +101,7 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 }
 
 func logAction(ub *UserBalance, a *Action) (err error) {
-	ubMarshal,_ := json.Marshal(ub)
+	ubMarshal, _ := json.Marshal(ub)
 	Logger.Info(fmt.Sprintf("Threshold reached, balance: %s", ubMarshal))
 	return
 }
@@ -214,7 +214,7 @@ func callUrlAsync(ub *UserBalance, a *Action) error {
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
 		}
-		
+
 	}()
 	return nil
 }
@@ -238,8 +238,8 @@ func mailAsync(ub *UserBalance, a *Action) error {
 		}
 		toAddrStr += addr
 	}
-	message := []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n",  toAddrStr, ub.Id, time.Now(), ubJson))
-	auth := smtp.PlainAuth("", cgrCfg.MailerAuthUser, cgrCfg.MailerAuthPass, strings.Split(cgrCfg.MailerServer,":")[0]) // We only need host part, so ignore port
+	message := []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.Id, time.Now(), ubJson))
+	auth := smtp.PlainAuth("", cgrCfg.MailerAuthUser, cgrCfg.MailerAuthPass, strings.Split(cgrCfg.MailerServer, ":")[0]) // We only need host part, so ignore port
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
 			if err := smtp.SendMail(cgrCfg.MailerServer, auth, cgrCfg.MailerFromAddr, toAddrs, message); err == nil {
@@ -250,11 +250,10 @@ func mailAsync(ub *UserBalance, a *Action) error {
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
 		}
-        }()
+	}()
 	return nil
 }
-			
-	
+
 // Structure to store actions according to weight
 type Actions []*Action
 

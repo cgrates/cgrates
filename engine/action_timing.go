@@ -20,11 +20,11 @@ package engine
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -299,12 +299,12 @@ func (at *ActionTiming) String_DISABLED() string {
 // Helper to remove ActionTiming members based on specific filters, empty data means no always match
 func RemActionTiming(ats ActionPlan, actionTimingId, balanceId string) ActionPlan {
 	for idx, at := range ats {
-		if len(actionTimingId)!=0 && at.Id!=actionTimingId { // No Match for ActionTimingId, no need to move further
+		if len(actionTimingId) != 0 && at.Id != actionTimingId { // No Match for ActionTimingId, no need to move further
 			continue
 		}
 		if len(balanceId) == 0 { // No account defined, considered match for complete removal
 			if len(ats) == 1 { // Removing last item, by init empty
-				return make([]*ActionTiming,0)
+				return make([]*ActionTiming, 0)
 			}
 			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 			continue
@@ -313,9 +313,9 @@ func RemActionTiming(ats ActionPlan, actionTimingId, balanceId string) ActionPla
 			if blncId == balanceId {
 				if len(at.UserBalanceIds) == 1 { // Only one balance, remove complete at
 					if len(ats) == 1 { // Removing last item, by init empty
-						return make([]*ActionTiming,0)
+						return make([]*ActionTiming, 0)
 					}
-					 ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
+					ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 				} else {
 					at.UserBalanceIds[iBlnc], at.UserBalanceIds = at.UserBalanceIds[len(at.UserBalanceIds)-1], at.UserBalanceIds[:len(at.UserBalanceIds)-1]
 				}

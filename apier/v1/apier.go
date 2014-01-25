@@ -120,7 +120,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	if attr.Overwrite {
 		aType = engine.TOPUP_RESET
 	}
-	at.SetActions(engine.Actions{&engine.Action{ActionType: aType, BalanceId: attr.BalanceId, Direction: attr.Direction, 
+	at.SetActions(engine.Actions{&engine.Action{ActionType: aType, BalanceId: attr.BalanceId, Direction: attr.Direction,
 		Balance: &engine.Balance{Value: attr.Value, Weight: attr.Weight}}})
 	if err := at.Execute(); err != nil {
 		*reply = err.Error()
@@ -288,8 +288,8 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 }
 
 type AttrSetActionPlan struct {
-	Id string             // Profile id
-	ActionPlan   []*ApiActionTiming // Set of actions this Actions profile will perform
+	Id              string             // Profile id
+	ActionPlan      []*ApiActionTiming // Set of actions this Actions profile will perform
 	Overwrite       bool               // If previously defined, will be overwritten
 	ReloadScheduler bool               // Enables automatic reload of the scheduler (eg: useful when adding a single action timing)
 }
@@ -444,7 +444,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 	self.Sched.Restart()
 	*reply = OK
 	return nil
-	
+
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
