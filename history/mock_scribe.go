@@ -21,85 +21,38 @@ package history
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
-	"io"
-	"strings"
 	"sync"
 )
 
 type MockScribe struct {
-	mu             sync.Mutex
-	destinations   records
-	ratingPlans    records
-	ratingProfiles records
-	DestBuf        bytes.Buffer
-	RplBuf         bytes.Buffer
-	RpBuf          bytes.Buffer
+	mu     sync.Mutex
+	BufMap map[string]*bytes.Buffer
 }
 
 func NewMockScribe() (*MockScribe, error) {
-	return &MockScribe{}, nil
+	return &MockScribe{BufMap: map[string]*bytes.Buffer{
+		DESTINATIONS_FN:    bytes.NewBuffer(nil),
+		RATING_PLANS_FN:    bytes.NewBuffer(nil),
+		RATING_PROFILES_FN: bytes.NewBuffer(nil),
+	}}, nil
 }
 
-func (s *MockScribe) Record(rec *Record, out *int) error {
-	switch {
-	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
-		s.destinations = s.destinations.SetOrAdd(&Record{rec.Key[len(DESTINATION_PREFIX):], rec.Object})
-		s.save(DESTINATIONS_FILE)
-	case strings.HasPrefix(rec.Key, RATING_PLAN_PREFIX):
-		s.ratingPlans = s.ratingPlans.SetOrAdd(&Record{rec.Key[len(RATING_PLAN_PREFIX):], rec.Object})
-		s.save(RATING_PLANS_FILE)
-	case strings.HasPrefix(rec.Key, RATING_PROFILE_PREFIX):
-		s.ratingProfiles = s.ratingProfiles.SetOrAdd(&Record{rec.Key[len(RATING_PROFILE_PREFIX):], rec.Object})
-		s.save(RATING_PROFILES_FILE)
-	}
-	*out = 0
+func (s *MockScribe) Record(rec Record, out *int) error {
+	fn := rec.Filename
+	recordsMap[fn] = recordsMap[fn].SetOrAdd(&rec)
+	s.save(fn)
 	return nil
 }
 
 func (s *MockScribe) save(filename string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	switch filename {
-	case DESTINATIONS_FILE:
-		s.DestBuf.Reset()
-		b := bufio.NewWriter(&s.DestBuf)
-		defer b.Flush()
-		if err := s.format(b, s.destinations); err != nil {
-			return err
-		}
-	case RATING_PLANS_FILE:
-		s.RplBuf.Reset()
-		b := bufio.NewWriter(&s.RplBuf)
-		defer b.Flush()
-		if err := s.format(b, s.ratingPlans); err != nil {
-			return err
-		}
-	case RATING_PROFILES_FILE:
-		s.RpBuf.Reset()
-		b := bufio.NewWriter(&s.RpBuf)
-		defer b.Flush()
-		if err := s.format(b, s.ratingProfiles); err != nil {
-			return err
-		}
+	records := recordsMap[filename]
+	s.BufMap[filename].Reset()
+	b := bufio.NewWriter(s.BufMap[filename])
+	defer b.Flush()
+	if err := format(b, records); err != nil {
+		return err
 	}
-
-	return nil
-}
-
-func (s *MockScribe) format(b io.Writer, recs records) error {
-	recs.Sort()
-	b.Write([]byte("["))
-	for i, r := range recs {
-		src, err := json.Marshal(r)
-		if err != nil {
-			return err
-		}
-		b.Write(src)
-		if i < len(recs)-1 {
-			b.Write([]byte("\n"))
-		}
-	}
-	b.Write([]byte("]"))
 	return nil
 }

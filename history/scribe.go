@@ -19,25 +19,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package history
 
 import (
+	"io"
+	"reflect"
 	"sort"
 )
 
 const (
-	RATING_PLAN_PREFIX    = "rpl_"
-	RATING_PROFILE_PREFIX = "rpf_"
-	DESTINATION_PREFIX    = "dst_"
+	DESTINATIONS_FN    = "destinations.json"
+	RATING_PLANS_FN    = "rating_plans.json"
+	RATING_PROFILES_FN = "rating_profiles.json"
 )
 
 type Scribe interface {
-	Record(record *Record, out *int) error
+	Record(Record, *int) error
 }
 
 type Record struct {
-	Key    string
-	Object interface{}
+	Id       string
+	Filename string
+	Payload  []byte
 }
 
 type records []*Record
+
+var (
+	recordsMap  = make(map[string]records)
+	filenameMap = make(map[reflect.Type]string)
+)
 
 func (rs records) Len() int {
 	return len(rs)
@@ -48,7 +56,7 @@ func (rs records) Swap(i, j int) {
 }
 
 func (rs records) Less(i, j int) bool {
-	return rs[i].Key < rs[j].Key
+	return rs[i].Id < rs[j].Id
 }
 
 func (rs records) Sort() {
@@ -58,9 +66,9 @@ func (rs records) Sort() {
 func (rs records) SetOrAdd(rec *Record) records {
 	//rs.Sort()
 	n := len(rs)
-	i := sort.Search(n, func(i int) bool { return rs[i].Key >= rec.Key })
-	if i < n && rs[i].Key == rec.Key {
-		rs[i].Object = rec.Object
+	i := sort.Search(n, func(i int) bool { return rs[i].Id >= rec.Id })
+	if i < n && rs[i].Id == rec.Id {
+		rs[i] = rec
 	} else {
 		// i is the index where it would be inserted.
 		rs = append(rs, nil)
@@ -70,17 +78,15 @@ func (rs records) SetOrAdd(rec *Record) records {
 	return rs
 }
 
-func (rs records) SetOrAddOld(rec *Record) records {
-	found := false
-	for _, r := range rs {
-		if r.Key == rec.Key {
-			found = true
-			r.Object = rec.Object
-			return rs
+func format(b io.Writer, recs records) error {
+	recs.Sort()
+	b.Write([]byte("["))
+	for i, r := range recs {
+		b.Write(r.Payload)
+		if i < len(recs)-1 {
+			b.Write([]byte(",\n"))
 		}
 	}
-	if !found {
-		rs = append(rs, rec)
-	}
-	return rs
+	b.Write([]byte("]"))
+	return nil
 }

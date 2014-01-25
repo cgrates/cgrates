@@ -24,17 +24,19 @@ import (
 )
 
 func TestHistorySet(t *testing.T) {
-	rs := records{&Record{"first", "test"}}
-	rs.SetOrAdd(&Record{"first", "new value"})
-	if len(rs) != 1 || rs[0].Object != "new value" {
+	rs := records{&Record{Id: "first"}}
+	second := &Record{Id: "first"}
+	rs.SetOrAdd(second)
+	if len(rs) != 1 || rs[0] != second {
 		t.Error("error setting new value: ", rs[0])
 	}
 }
 
 func TestHistoryAdd(t *testing.T) {
-	rs := records{&Record{"first", "test"}}
-	rs = rs.SetOrAdd(&Record{"second", "new value"})
-	if len(rs) != 2 || rs[1].Object != "new value" {
+	rs := records{&Record{Id: "first"}}
+	second := &Record{Id: "second"}
+	rs = rs.SetOrAdd(second)
+	if len(rs) != 2 || rs[1] != second {
 		t.Error("error setting new value: ", rs)
 	}
 }
@@ -42,19 +44,9 @@ func TestHistoryAdd(t *testing.T) {
 func BenchmarkSetOrAdd(b *testing.B) {
 	var rs records
 	for i := 0; i < 1000; i++ {
-		rs = rs.SetOrAdd(&Record{strconv.Itoa(i), strconv.Itoa(i)})
+		rs = rs.SetOrAdd(&Record{Id: strconv.Itoa(i)})
 	}
 	for i := 0; i < b.N; i++ {
-		rs.SetOrAdd(&Record{"400", "test"})
-	}
-}
-
-func BenchmarkSetOrAddOld(b *testing.B) {
-	var rs records
-	for i := 0; i < 1000; i++ {
-		rs = rs.SetOrAddOld(&Record{strconv.Itoa(i), strconv.Itoa(i)})
-	}
-	for i := 0; i < b.N; i++ {
-		rs.SetOrAddOld(&Record{"400", "test"})
+		rs.SetOrAdd(&Record{Id: "400"})
 	}
 }

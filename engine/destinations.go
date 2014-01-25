@@ -18,7 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import "strings"
+import (
+	"encoding/json"
+	"strings"
+
+	"github.com/cgrates/cgrates/history"
+)
 
 /*
 Structure that gathers multiple destination prefixes under a common id.
@@ -52,4 +57,14 @@ func (d *Destination) String() (result string) {
 
 func (d *Destination) AddPrefix(pfx string) {
 	d.Prefixes = append(d.Prefixes, pfx)
+}
+
+// history record method
+func (d *Destination) GetHistoryRecord() history.Record {
+	js, _ := json.Marshal(d)
+	return history.Record{
+		Id:       d.Id,
+		Filename: history.DESTINATIONS_FN,
+		Payload:  js,
+	}
 }
