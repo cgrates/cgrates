@@ -18,11 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package history
 
-import (
-	"encoding/gob"
-	"log"
-	"net/rpc"
-)
+import "net/rpc"
 
 type ProxyScribe struct {
 	Client *rpc.Client
@@ -37,12 +33,6 @@ func NewProxyScribe(addr string) (*ProxyScribe, error) {
 	return &ProxyScribe{Client: client}, nil
 }
 
-func RRR(r interface{}) {
-	gob.Register(r)
-}
-
 func (ps *ProxyScribe) Record(rec Record, out *int) error {
-	err := ps.Client.Call("Scribe.Record", &rec, out)
-	log.Printf("Result for %v: %v", rec, err)
-	return err
+	return ps.Client.Call("Scribe.Record", rec, out)
 }

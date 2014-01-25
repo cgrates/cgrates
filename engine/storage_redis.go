@@ -194,7 +194,7 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	err = rs.db.Set(RATING_PLAN_PREFIX+rp.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(rp, &response)
+		go historyScribe.Record(rp.GetHistoryRecord(), &response)
 	}
 	//cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
@@ -222,7 +222,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	err = rs.db.Set(RATING_PROFILE_PREFIX+rpf.Id, result)
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(rpf, &response)
+		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
 	}
 	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
@@ -271,7 +271,7 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	err = rs.db.Set(DESTINATION_PREFIX+dest.Id, b.Bytes())
 	if err == nil && historyScribe != nil {
 		response := 0
-		go historyScribe.Record(dest, &response)
+		go historyScribe.Record(dest.GetHistoryRecord(), &response)
 	}
 	//cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return

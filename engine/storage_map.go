@@ -122,7 +122,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := ms.ms.Marshal(rp)
 	ms.dict[RATING_PLAN_PREFIX+rp.Id] = result
 	response := 0
-	go historyScribe.Record(rp, &response)
+	go historyScribe.Record(rp.GetHistoryRecord(), &response)
 	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
@@ -150,7 +150,7 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	result, err := ms.ms.Marshal(rpf)
 	ms.dict[RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
-	go historyScribe.Record(rpf, &response)
+	go historyScribe.Record(rpf.GetHistoryRecord(), &response)
 	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
@@ -179,7 +179,7 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result
 	response := 0
-	go historyScribe.Record(dest, &response)
+	go historyScribe.Record(dest.GetHistoryRecord(), &response)
 	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }

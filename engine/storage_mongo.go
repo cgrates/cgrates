@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
@@ -136,7 +137,7 @@ func (ms *MongoStorage) GetRatingPlan(key string) (rp *RatingPlan, err error) {
 func (ms *MongoStorage) SetRatingPlan(rp *RatingPlan) error {
 	if historyScribe != nil {
 		response := 0
-		historyScribe.Record(rp, &response)
+		historyScribe.Record(rp.GetHistoryRecord(), &response)
 	}
 	return ms.db.C("ratingplans").Insert(rp)
 }
@@ -150,7 +151,7 @@ func (ms *MongoStorage) GetRatingProfile(key string) (rp *RatingProfile, err err
 func (ms *MongoStorage) SetRatingProfile(rp *RatingProfile) error {
 	if historyScribe != nil {
 		response := 0
-		historyScribe.Record(rp, &response)
+		historyScribe.Record(rp.GetHistoryRecord(), &response)
 	}
 	return ms.db.C("ratingprofiles").Insert(rp)
 }
@@ -167,7 +168,7 @@ func (ms *MongoStorage) GetDestination(key string) (result *Destination, err err
 func (ms *MongoStorage) SetDestination(dest *Destination) error {
 	if historyScribe != nil {
 		response := 0
-		historyScribe.Record(dest, &response)
+		historyScribe.Record(dest.GetHistoryRecord(), &response)
 	}
 	return ms.db.C("destinations").Insert(dest)
 }

@@ -50,7 +50,7 @@ func NewFileScribe(fileRoot string, saveInterval time.Duration) (*FileScribe, er
 	s.loopChecker = make(chan int)
 	s.gitInit()
 
-	for fn, _ := range recordsMap {
+	for _, fn := range []string{DESTINATIONS_FN, RATING_PLANS_FN, RATING_PROFILES_FN} {
 		if err := s.load(fn); err != nil {
 			return nil, err
 		}
@@ -60,10 +60,8 @@ func NewFileScribe(fileRoot string, saveInterval time.Duration) (*FileScribe, er
 
 func (s *FileScribe) Record(rec Record, out *int) error {
 	s.mu.Lock()
-	fileToSave := GetRFN(rec)
-	if records, ok := recordsMap[fileToSave]; ok {
-		records.SetOrAdd(rec)
-	}
+	fileToSave := rec.Filename
+	recordsMap[fileToSave] = recordsMap[fileToSave].SetOrAdd(&rec)
 
 	// flood protection for save method (do not save on every loop iteration)
 	if s.waitingFile == fileToSave {

@@ -23,17 +23,9 @@ import (
 	"testing"
 )
 
-type TestRecord struct {
-	Id string
-}
-
-func (tr *TestRecord) GetId() string {
-	return tr.Id
-}
-
 func TestHistorySet(t *testing.T) {
-	rs := records{&TestRecord{"first"}}
-	second := &TestRecord{"first"}
+	rs := records{&Record{Id: "first"}}
+	second := &Record{Id: "first"}
 	rs.SetOrAdd(second)
 	if len(rs) != 1 || rs[0] != second {
 		t.Error("error setting new value: ", rs[0])
@@ -41,8 +33,8 @@ func TestHistorySet(t *testing.T) {
 }
 
 func TestHistoryAdd(t *testing.T) {
-	rs := records{&TestRecord{"first"}}
-	second := &TestRecord{"second"}
+	rs := records{&Record{Id: "first"}}
+	second := &Record{Id: "second"}
 	rs = rs.SetOrAdd(second)
 	if len(rs) != 2 || rs[1] != second {
 		t.Error("error setting new value: ", rs)
@@ -52,9 +44,9 @@ func TestHistoryAdd(t *testing.T) {
 func BenchmarkSetOrAdd(b *testing.B) {
 	var rs records
 	for i := 0; i < 1000; i++ {
-		rs = rs.SetOrAdd(&TestRecord{strconv.Itoa(i)})
+		rs = rs.SetOrAdd(&Record{Id: strconv.Itoa(i)})
 	}
 	for i := 0; i < b.N; i++ {
-		rs.SetOrAdd(&TestRecord{"400"})
+		rs.SetOrAdd(&Record{Id: "400"})
 	}
 }

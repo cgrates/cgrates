@@ -31,15 +31,15 @@ type MockScribe struct {
 
 func NewMockScribe() (*MockScribe, error) {
 	return &MockScribe{BufMap: map[string]*bytes.Buffer{
-		"destinations.json":   bytes.NewBuffer(nil),
-		"ratingplans.json":    bytes.NewBuffer(nil),
-		"ratingprofiles.json": bytes.NewBuffer(nil),
+		DESTINATIONS_FN:    bytes.NewBuffer(nil),
+		RATING_PLANS_FN:    bytes.NewBuffer(nil),
+		RATING_PROFILES_FN: bytes.NewBuffer(nil),
 	}}, nil
 }
 
 func (s *MockScribe) Record(rec Record, out *int) error {
-	fn := GetRFN(rec)
-	recordsMap[fn] = recordsMap[fn].SetOrAdd(rec)
+	fn := rec.Filename
+	recordsMap[fn] = recordsMap[fn].SetOrAdd(&rec)
 	s.save(fn)
 	return nil
 }

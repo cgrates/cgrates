@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"encoding/gob"
 	"flag"
 	"fmt"
 	"log"
@@ -157,7 +156,6 @@ func main() {
 			log.Fatalf("Could not connect to history server, error: %s. Make sure you have properly configured it via -history_server flag.", err.Error())
 			return
 		} else {
-			gob.Register(engine.Destination{})
 			engine.SetHistoryScribe(scribeAgent)
 			defer scribeAgent.Client.Close()
 		}

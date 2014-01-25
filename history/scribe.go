@@ -19,22 +19,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package history
 
 import (
-	"encoding/json"
 	"io"
 	"reflect"
 	"sort"
-	"strings"
+)
+
+const (
+	DESTINATIONS_FN    = "destinations.json"
+	RATING_PLANS_FN    = "rating_plans.json"
+	RATING_PROFILES_FN = "rating_profiles.json"
 )
 
 type Scribe interface {
 	Record(Record, *int) error
 }
 
-type Record interface {
-	GetId() string
+type Record struct {
+	Id       string
+	Filename string
+	Payload  []byte
 }
 
-type records []Record
+type records []*Record
 
 var (
 	recordsMap  = make(map[string]records)
@@ -50,18 +56,18 @@ func (rs records) Swap(i, j int) {
 }
 
 func (rs records) Less(i, j int) bool {
-	return rs[i].GetId() < rs[j].GetId()
+	return rs[i].Id < rs[j].Id
 }
 
 func (rs records) Sort() {
 	sort.Sort(rs)
 }
 
-func (rs records) SetOrAdd(rec Record) records {
+func (rs records) SetOrAdd(rec *Record) records {
 	//rs.Sort()
 	n := len(rs)
-	i := sort.Search(n, func(i int) bool { return rs[i].GetId() >= rec.GetId() })
-	if i < n && rs[i].GetId() == rec.GetId() {
+	i := sort.Search(n, func(i int) bool { return rs[i].Id >= rec.Id })
+	if i < n && rs[i].Id == rec.Id {
 		rs[i] = rec
 	} else {
 		// i is the index where it would be inserted.
@@ -72,30 +78,11 @@ func (rs records) SetOrAdd(rec Record) records {
 	return rs
 }
 
-/*func (rs records) SetOrAdd(rec Record) records {
-	found := false
-	for _, r := range rs {
-		if r.GetId() == rec.GetId() {
-			found = true
-			r.Object = rec.Object
-			return rs
-		}
-	}
-	if !found {
-		rs = append(rs, rec)
-	}
-	return rs
-}*/
-
 func format(b io.Writer, recs records) error {
 	recs.Sort()
 	b.Write([]byte("["))
 	for i, r := range recs {
-		src, err := json.Marshal(r)
-		if err != nil {
-			return err
-		}
-		b.Write(src)
+		b.Write(r.Payload)
 		if i < len(recs)-1 {
 			b.Write([]byte(",\n"))
 		}
@@ -103,18 +90,3 @@ func format(b io.Writer, recs records) error {
 	b.Write([]byte("]"))
 	return nil
 }
-
-func GetRFN(rec Record) string {
-	if fn, ok := filenameMap[reflect.TypeOf(rec)]; ok {
-		return fn
-	} else {
-		typ := reflect.TypeOf(rec)
-		typeSegments := strings.Split(typ.String(), ".")
-		fn = strings.ToLower(typeSegments[len(typeSegments)-1]) + "s.json"
-		filenameMap[typ] = fn
-		recordsMap[fn] = make(records, 0)
-		return fn
-	}
-}
-
-var RegisterRecordFilename = GetRFN // will create a key in filename and records map
