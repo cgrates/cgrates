@@ -87,9 +87,10 @@ func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage
 	close(doneChan)
 }
 
-func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrDb engine.CdrStorage, chanDone chan struct{}) {
+func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrDb engine.CdrStorage, cacheChan, chanDone chan struct{}) {
 	var connector engine.Connector
 	if cfg.MediatorRater == INTERNAL {
+		<-cacheChan // Cache needs to come up before we are ready
 		connector = responder
 	} else {
 		var client *rpc.Client
@@ -132,9 +133,10 @@ func startCdrc() {
 	exitChan <- true // If run stopped, something is bad, stop the application
 }
 
-func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage) {
+func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage, cacheChan chan struct{}) {
 	var connector engine.Connector
 	if cfg.SMRater == INTERNAL {
+		<-cacheChan // Wait for the cache to init before start doing queries
 		connector = responder
 	} else {
 		var client *rpc.Client
@@ -222,7 +224,6 @@ func serveRpc(rpcWaitChans []chan struct{}) {
 	// Each of the serve blocks so need to start in their own goroutine
 	go server.ServeJSON(cfg.RPCJSONListen)
 	go server.ServeGOB(cfg.RPCGOBListen)
-
 }
 
 // Starts the http server, waiting for the necessary components to finish their tasks
@@ -353,8 +354,9 @@ func main() {
 	rpcWait := make([]chan struct{}, 0)  // Rpc server will start as soon as this list is consumed
 	httpWait := make([]chan struct{}, 0) // Http server will start as soon as this list is consumed
 
+	var cacheChan chan struct{}
 	if cfg.RaterEnabled { // Cache rating if rater enabled
-		cacheChan := make(chan struct{})
+		cacheChan = make(chan struct{})
 		rpcWait = append(rpcWait, cacheChan)
 		go cacheData(ratingDb, accountDb, cacheChan)
 	}
@@ -418,7 +420,7 @@ func main() {
 	if cfg.MediatorEnabled {
 		engine.Logger.Info("Starting CGRateS Mediator service.")
 		medChan = make(chan struct{})
-		go startMediator(responder, logDb, cdrDb, medChan)
+		go startMediator(responder, logDb, cdrDb, cacheChan, medChan)
 	}
 
 	if cfg.CDRSEnabled {
@@ -430,7 +432,7 @@ func main() {
 
 	if cfg.SMEnabled {
 		engine.Logger.Info("Starting CGRateS SessionManager service.")
-		go startSessionManager(responder, logDb)
+		go startSessionManager(responder, logDb, cacheChan)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler()
 	}
