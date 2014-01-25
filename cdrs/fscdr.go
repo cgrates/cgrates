@@ -24,8 +24,8 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 )
 
 const (
@@ -172,7 +172,7 @@ func (fsCdr FSCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld
 	rtCdr := new(utils.RatedCDR)
 	rtCdr.MediationRunId = runId
 	rtCdr.Cost = -1.0 // Default for non-rated CDR
-	if rtCdr.AccId = fsCdr.GetAccId(); len(rtCdr.AccId)==0 {
+	if rtCdr.AccId = fsCdr.GetAccId(); len(rtCdr.AccId) == 0 {
 		if fieldsMandatory {
 			return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.ACCID))
 		} else { // Not mandatory, need to generate here CgrId
@@ -181,10 +181,10 @@ func (fsCdr FSCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld
 	} else { // hasKey, use it to generate cgrid
 		rtCdr.CgrId = utils.FSCgrId(rtCdr.AccId)
 	}
-	if rtCdr.CdrHost = fsCdr.GetCdrHost(); len(rtCdr.CdrHost)==0 && fieldsMandatory {
+	if rtCdr.CdrHost = fsCdr.GetCdrHost(); len(rtCdr.CdrHost) == 0 && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.CDRHOST))
 	}
-	if rtCdr.CdrSource = fsCdr.GetCdrSource(); len(rtCdr.CdrSource)==0 && fieldsMandatory {
+	if rtCdr.CdrSource = fsCdr.GetCdrSource(); len(rtCdr.CdrSource) == 0 && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.CDRSOURCE))
 	}
 	if strings.HasPrefix(reqTypeFld, utils.STATIC_VALUE_PREFIX) { // Values starting with prefix are not dynamically populated
@@ -232,7 +232,7 @@ func (fsCdr FSCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld
 			return nil, err
 		}
 	}
-	if durStr, hasKey = fsCdr[durationFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(durationFld, utils.STATIC_VALUE_PREFIX){
+	if durStr, hasKey = fsCdr[durationFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(durationFld, utils.STATIC_VALUE_PREFIX) {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, durationFld))
 	} else {
 		if strings.HasPrefix(durationFld, utils.STATIC_VALUE_PREFIX) {

@@ -20,6 +20,7 @@ package utils
 
 import (
 	"time"
+	"net/url"
 )
 
 func NewRatedCDRFromRawCDR(rawcdr RawCDR) (*RatedCDR, error) {
@@ -126,4 +127,25 @@ func (ratedCdr *RatedCDR) GetExtraFields() map[string]string {
 
 func (ratedCdr *RatedCDR) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*RatedCDR, error) {
 	return ratedCdr, nil
+}
+
+// Converts part of the rated Cdr as httpForm used to post remotely to CDRS
+func (ratedCdr *RatedCDR) AsRawCdrHttpForm() url.Values {
+	v := url.Values{}
+	v.Set(ACCID, ratedCdr.AccId)
+	v.Set(CDRHOST, ratedCdr.CdrHost)
+	v.Set(CDRSOURCE, ratedCdr.CdrSource)
+	v.Set(REQTYPE, ratedCdr.ReqType)
+	v.Set(DIRECTION, ratedCdr.Direction)
+	v.Set(TENANT, ratedCdr.Tenant)
+	v.Set(TOR, ratedCdr.TOR)
+	v.Set(ACCOUNT, ratedCdr.Account)
+	v.Set(SUBJECT, ratedCdr.Subject)
+	v.Set(DESTINATION, ratedCdr.Destination)
+	v.Set(ANSWER_TIME, ratedCdr.AnswerTime.String())
+	//v.Set(DURATION, string(ratedCdr.Duration.Seconds()))
+	for fld, val := range ratedCdr.ExtraFields {
+		v.Set(fld, val)
+	}
+	return v
 }

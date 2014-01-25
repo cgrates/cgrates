@@ -29,7 +29,6 @@ import (
 
 const (
 	DISABLED = "disabled"
-	INTERNAL = "internal"
 	JSON     = "json"
 	GOB      = "gob"
 	POSTGRES = "postgres"
@@ -183,7 +182,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdreExtraFields = []string{}
 	self.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
 	self.CdrcEnabled = false
-	self.CdrcCdrs = "127.0.0.1:2080"
+	self.CdrcCdrs = utils.INTERNAL
 	self.CdrcCdrsMethod = "http_cgr"
 	self.CdrcRunDelay = time.Duration(0)
 	self.CdrcCdrType = "csv"

@@ -130,10 +130,13 @@ func TestProcessCdrDir(t *testing.T) {
 	if !*testLocal {
 		return
 	}
+	if cfg.CdrcCdrs == utils.INTERNAL { // For now we only test over network
+		return
+	}
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cfg)
+	cdrc, err := NewCdrc(cfg, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

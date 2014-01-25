@@ -64,6 +64,7 @@ const (
 	JSON                     = "json"
 	MSGPACK                  = "msgpack"
 	CSV_LOAD                 = "CSVLOAD"
+	CGRID                    = "cgrid"
 	ACCID                    = "accid"
 	CDRHOST                  = "cdrhost"
 	CDRSOURCE                = "cdrsource"
@@ -80,6 +81,7 @@ const (
 	STATIC_VALUE_PREFIX      = "^"
 	CDRE_CSV                 = "csv"
 	CDRE_DRYRUN              = "dry_run"
+	INTERNAL                 = "internal"
 )
 
 var (

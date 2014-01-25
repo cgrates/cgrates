@@ -22,10 +22,10 @@ import (
 	"errors"
 	"fmt"
 
-	"strings"
-	"time"
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
+	"strings"
+	"time"
 )
 
 type MapStorage struct {
