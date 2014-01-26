@@ -19,8 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"time"
 	"net/url"
+	"strconv"
+	"time"
 )
 
 func NewRatedCDRFromRawCDR(rawcdr RawCDR) (*RatedCDR, error) {
@@ -143,7 +144,7 @@ func (ratedCdr *RatedCDR) AsRawCdrHttpForm() url.Values {
 	v.Set(SUBJECT, ratedCdr.Subject)
 	v.Set(DESTINATION, ratedCdr.Destination)
 	v.Set(ANSWER_TIME, ratedCdr.AnswerTime.String())
-	//v.Set(DURATION, string(ratedCdr.Duration.Seconds()))
+	v.Set(DURATION, strconv.FormatFloat(ratedCdr.Duration.Seconds(), 'f', -1, 64))
 	for fld, val := range ratedCdr.ExtraFields {
 		v.Set(fld, val)
 	}

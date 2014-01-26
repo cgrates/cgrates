@@ -26,7 +26,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -118,33 +117,8 @@ func (self *Cdrc) parseFieldsConfig() error {
 }
 
 // Takes the record out of csv and turns it into http form which can be posted
-func (self *Cdrc) cdrAsHttpForm(record []string) (url.Values, error) {
-	// engine.Logger.Info(fmt.Sprintf("Processing record %v", record))
-	v := url.Values{}
-	v.Set(utils.CDRSOURCE, self.cgrCfg.CdrcSourceId)
-	for cfgFieldName, cfgFieldVal := range self.cfgCdrFields {
-		var fieldVal string
-		if strings.HasPrefix(cfgFieldVal, utils.STATIC_VALUE_PREFIX) {
-			fieldVal = cfgFieldVal[1:]
-		} else if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cgrCfg.CdrcCdrType) {
-			if cfgFieldIdx, err := strconv.Atoi(cfgFieldVal); err != nil { // Should in theory never happen since we have already parsed config
-				return nil, err
-			} else if len(record) <= cfgFieldIdx {
-				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
-			} else {
-				fieldVal = record[cfgFieldIdx]
-			}
-		} else { // Modify here when we add more supported cdr formats
-			fieldVal = "UNKNOWN"
-		}
-		v.Set(cfgFieldName, fieldVal)
-	}
-	return v, nil
-}
-
-// Takes the record out of csv and turns it into http form which can be posted
-func (self *Cdrc) cdrAsRatedCdr(record []string) (*utils.RatedCDR, error) {
-	ratedCdr := &utils.RatedCDR{CdrSource: self.cgrCfg.CdrcSourceId}
+func (self *Cdrc) recordAsRatedCdr(record []string) (*utils.RatedCDR, error) {
+	ratedCdr := &utils.RatedCDR{CdrSource: self.cgrCfg.CdrcSourceId, ExtraFields: map[string]string{}, Cost: -1}
 	var err error
 	for cfgFieldName, cfgFieldVal := range self.cfgCdrFields {
 		var fieldVal string
@@ -254,7 +228,7 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue // Other csv related errors, ignore
 		}
-		rawCdr, err := self.cdrAsRatedCdr(record)
+		rawCdr, err := self.recordAsRatedCdr(record)
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue
