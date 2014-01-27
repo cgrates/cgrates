@@ -65,20 +65,12 @@ var (
 	bal             = balancer2go.NewBalancer()
 	exitChan        = make(chan bool)
 	server          = &engine.Server{}
-
-	sm   sessionmanager.SessionManager
-	medi *mediator.Mediator
-	cfg  *config.CGRConfig
-	err  error
-
-/*
 	scribeServer    history.Scribe
 	cdrServer       *cdrs.CDRS
 	sm              sessionmanager.SessionManager
 	medi            *mediator.Mediator
 	cfg             *config.CGRConfig
 	err             error
-*/
 )
 
 func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, doneChan chan struct{}) {
@@ -336,31 +328,6 @@ func main() {
 	}
 	defer accountDb.Close()
 	engine.SetAccountingStorage(accountDb)
-	if *raterEnabled {
-		cfg.RaterEnabled = *raterEnabled
-	}
-	if *schedEnabled {
-		cfg.SchedulerEnabled = *schedEnabled
-	}
-	if *cdrsEnabled {
-		cfg.CDRSEnabled = *cdrsEnabled
-	}
-	if *cdrcEnabled {
-		cfg.CdrcEnabled = *cdrcEnabled
-	}
-	if *mediatorEnabled {
-		cfg.MediatorEnabled = *mediatorEnabled
-	}
-	if cfg.RaterEnabled {
-		if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
-			return
-		}
-		if err := accountDb.CacheAccounting(nil, nil); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
-			return
-		}
-	}
 
 	if cfg.StorDBType == SAME {
 		logDb = ratingDb.(engine.LogStorage)
