@@ -43,7 +43,6 @@ import (
 )
 
 const (
-	INTERNAL = "internal"
 	JSON     = "json"
 	GOB      = "gob"
 	POSTGRES = "postgres"
@@ -58,7 +57,7 @@ var (
 	cfgPath         = flag.String("config", "/etc/cgrates/cgrates.cfg", "Configuration file location.")
 	version         = flag.Bool("version", false, "Prints the application version.")
 	raterEnabled    = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
-	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon overwriting config")
+	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
 	cdrsEnabled     = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
 	cdrcEnabled     = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
 	mediatorEnabled = flag.Bool("mediator", false, "Enforce starting of the mediator service overwriting config")
@@ -71,11 +70,35 @@ var (
 	medi *mediator.Mediator
 	cfg  *config.CGRConfig
 	err  error
+
+/*
+	scribeServer    history.Scribe
+	cdrServer       *cdrs.CDRS
+	sm              sessionmanager.SessionManager
+	medi            *mediator.Mediator
+	cfg             *config.CGRConfig
+	err             error
+*/
 )
 
-func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrDb engine.CdrStorage) {
+func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, doneChan chan struct{}) {
+	if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
+		engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	if err := accountDb.CacheAccounting(nil, nil); err != nil {
+		engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	close(doneChan)
+}
+
+func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrDb engine.CdrStorage, cacheChan, chanDone chan struct{}) {
 	var connector engine.Connector
-	if cfg.MediatorRater == INTERNAL {
+	if cfg.MediatorRater == utils.INTERNAL {
+		<-cacheChan // Cache needs to come up before we are ready
 		connector = responder
 	} else {
 		var client *rpc.Client
@@ -91,6 +114,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		if err != nil {
 			engine.Logger.Crit(fmt.Sprintf("<Mediator> Could not connect to engine: %v", err))
 			exitChan <- true
+			return
 		}
 		connector = &engine.RPCClientConnector{Client: client}
 	}
@@ -99,11 +123,16 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
+		return
 	}
+	close(chanDone)
 }
 
-func startCdrc() {
-	cdrc, err := cdrc.NewCdrc(cfg)
+func startCdrc(cdrsChan chan struct{}) {
+	if cfg.CdrcCdrs == utils.INTERNAL {
+		<-cdrsChan // Wait for CDRServer to come up before start processing
+	}
+	cdrc, err := cdrc.NewCdrc(cfg, cdrServer)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -115,9 +144,10 @@ func startCdrc() {
 	exitChan <- true // If run stopped, something is bad, stop the application
 }
 
-func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage) {
+func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage, cacheChan chan struct{}) {
 	var connector engine.Connector
-	if cfg.SMRater == INTERNAL {
+	if cfg.SMRater == utils.INTERNAL {
+		<-cacheChan // Wait for the cache to init before start doing queries
 		connector = responder
 	} else {
 		var client *rpc.Client
@@ -146,31 +176,40 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		}
 	default:
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.SMSwitchType))
-		exitChan <- true
 	}
 	exitChan <- true
 }
 
-func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage) {
-	if cfg.CDRSMediator == INTERNAL {
-		for i := 0; i < 3; i++ { // ToDo: If the right approach, make the reconnects configurable
-			time.Sleep(time.Duration(i+1) * time.Second)
-			if medi != nil { // Got our mediator, no need to wait any longer
-				break
-			}
-		}
+func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage, mediChan, doneChan chan struct{}) {
+	if cfg.CDRSMediator == utils.INTERNAL {
+		<-mediChan // Deadlock if mediator not started
 		if medi == nil {
 			engine.Logger.Crit("<CDRS> Could not connect to mediator, exiting.")
 			exitChan <- true
+			return
 		}
 	}
-	cs := cdrs.New(cdrDb, medi, cfg)
-	cs.RegisterHanlersToServer(server)
+	cdrServer = cdrs.New(cdrDb, medi, cfg)
+	cdrServer.RegisterHanlersToServer(server)
+	close(doneChan)
 }
 
-func startHistoryAgent(scribeServer history.Scribe) {
-	if cfg.HistoryServer != INTERNAL { // Connect in iteration since there are chances of concurrency here
-		engine.Logger.Info("Starting History Agent.")
+func startHistoryServer(chanDone chan struct{}) {
+	if scribeServer, err = history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval); err != nil {
+		engine.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
+		exitChan <- true
+		return
+	}
+	server.RpcRegisterName("Scribe", scribeServer)
+	close(chanDone)
+}
+
+// chanStartServer will report when server is up, useful for internal requests
+func startHistoryAgent(scribeServer history.Scribe, chanServerStarted chan struct{}) {
+	if cfg.HistoryServer == utils.INTERNAL { // For internal requests, wait for server to come online before connecting
+		engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Connecting internally to HistoryServer"))
+		<-chanServerStarted // If server is not enabled, will have deadlock here
+	} else { // Connect in iteration since there are chances of concurrency here
 		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
 			//engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Trying to connect, iteration: %d, time %s", i, time.Now()))
 			if scribeServer, err = history.NewProxyScribe(cfg.HistoryServer); err == nil {
@@ -180,11 +219,29 @@ func startHistoryAgent(scribeServer history.Scribe) {
 				exitChan <- true
 				return
 			}
-			time.Sleep(time.Duration(i+1) * time.Second)
+			time.Sleep(time.Duration(i) * time.Second)
 		}
 	}
 	engine.SetHistoryScribe(scribeServer)
 	return
+}
+
+// Starts the rpc server, waiting for the necessary components to finish their tasks
+func serveRpc(rpcWaitChans []chan struct{}) {
+	for _, chn := range rpcWaitChans {
+		<-chn
+	}
+	// Each of the serve blocks so need to start in their own goroutine
+	go server.ServeJSON(cfg.RPCJSONListen)
+	go server.ServeGOB(cfg.RPCGOBListen)
+}
+
+// Starts the http server, waiting for the necessary components to finish their tasks
+func serveHttp(httpWaitChans []chan struct{}) {
+	for _, chn := range httpWaitChans {
+		<-chn
+	}
+	server.ServeHTTP(cfg.HTTPListen)
 }
 
 func checkConfigSanity() error {
@@ -196,11 +253,11 @@ func checkConfigSanity() error {
 		engine.Logger.Crit("The balancer is enabled so it cannot connect to another balancer (change rater/balancer to disabled)!")
 		return errors.New("Improperly configured balancer")
 	}
-	if cfg.CDRSEnabled && cfg.CDRSMediator == INTERNAL && !cfg.MediatorEnabled {
+	if cfg.CDRSEnabled && cfg.CDRSMediator == utils.INTERNAL && !cfg.MediatorEnabled {
 		engine.Logger.Crit("CDRS cannot connect to mediator, Mediator not enabled in configuration!")
 		return errors.New("Internal Mediator required by CDRS")
 	}
-	if cfg.HistoryServerEnabled && cfg.HistoryServer == INTERNAL && !cfg.HistoryServerEnabled {
+	if cfg.HistoryServerEnabled && cfg.HistoryServer == utils.INTERNAL && !cfg.HistoryServerEnabled {
 		engine.Logger.Crit("The history agent is enabled and internal and history server is disabled!")
 		return errors.New("Improperly configured history service")
 	}
@@ -263,14 +320,16 @@ func main() {
 	var logDb engine.LogStorage
 	var loadDb engine.LoadStorage
 	var cdrDb engine.CdrStorage
-	ratingDb, err = engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
+	ratingDb, err = engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort,
+		cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
 	if err != nil { // Cannot configure getter database, show stopper
 		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
 	}
 	defer ratingDb.Close()
 	engine.SetRatingStorage(ratingDb)
-	accountDb, err = engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, cfg.AccountDBName, cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
+	accountDb, err = engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort,
+		cfg.AccountDBName, cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
 	if err != nil { // Cannot configure getter database, show stopper
 		engine.Logger.Crit(fmt.Sprintf("Could not configure dataDb: %s exiting!", err))
 		return
@@ -306,7 +365,8 @@ func main() {
 	if cfg.StorDBType == SAME {
 		logDb = ratingDb.(engine.LogStorage)
 	} else {
-		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding)
+		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
+			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding)
 		if err != nil { // Cannot configure logger database, show stopper
 			engine.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return
@@ -327,18 +387,18 @@ func main() {
 
 	stopHandled := false
 
+	// Async starts here
+
+	rpcWait := make([]chan struct{}, 0)  // Rpc server will start as soon as this list is consumed
+	httpWait := make([]chan struct{}, 0) // Http server will start as soon as this list is consumed
+
+	var cacheChan chan struct{}
 	if cfg.RaterEnabled { // Cache rating if rater enabled
-		if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
-			return
-		}
-		if err := accountDb.CacheAccounting(nil, nil); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
-			return
-		}
+		cacheChan = make(chan struct{})
+		rpcWait = append(rpcWait, cacheChan)
+		go cacheData(ratingDb, accountDb, cacheChan)
 	}
 
-	// Async starts here
 	if cfg.RaterEnabled && cfg.RaterBalancer != "" && !cfg.BalancerEnabled {
 		go registerToBalancer()
 		go stopRaterSignalHandler()
@@ -348,14 +408,14 @@ func main() {
 	responder := &engine.Responder{ExitChan: exitChan}
 	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, Config: cfg}
 
-	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterBalancer != INTERNAL {
+	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterBalancer != utils.INTERNAL {
 		engine.Logger.Info("Registering CGRateS Rater service")
 		server.RpcRegister(responder)
 		server.RpcRegister(apier)
 	}
 
 	if cfg.BalancerEnabled {
-		engine.Logger.Info("Registering CGRateS Balancer service")
+		engine.Logger.Info("Registering CGRateS Balancer service.")
 		go stopBalancerSignalHandler()
 		stopHandled = true
 		responder.Bal = bal
@@ -382,49 +442,51 @@ func main() {
 		}()
 	}
 
-	var scribeServer history.Scribe
-
+	var histServChan chan struct{} // Will be initialized only if the server starts
 	if cfg.HistoryServerEnabled {
-		engine.Logger.Info("Registering CGRates History service")
-		if scribeServer, err = history.NewFileScribe(cfg.HistoryDir, cfg.HistorySaveInterval); err != nil {
-			engine.Logger.Crit(fmt.Sprintf("<HistoryServer> Could not start, error: %s", err.Error()))
-			exitChan <- true
-			return
-		}
-		server.RpcRegisterName("Scribe", scribeServer)
-	}
-	go startHistoryAgent(scribeServer)
-
-	go server.ServeGOB(cfg.RPCGOBListen)
-	go server.ServeJSON(cfg.RPCJSONListen)
-
-	go startHistoryAgent(scribeServer)
-
-	if cfg.CDRSEnabled {
-		engine.Logger.Info("Registering CGRateS CDR service")
-		go startCDRS(responder, cdrDb)
+		histServChan = make(chan struct{})
+		rpcWait = append(rpcWait, histServChan)
+		go startHistoryServer(histServChan)
 	}
 
-	go server.ServeHTTP(cfg.HTTPListen)
+	if cfg.HistoryAgentEnabled {
+		engine.Logger.Info("Starting CGRateS History Agent.")
+		go startHistoryAgent(scribeServer, histServChan)
+	}
 
+	var medChan chan struct{}
 	if cfg.MediatorEnabled {
-		engine.Logger.Info("Starting CGRateS Mediator service")
-		go startMediator(responder, logDb, cdrDb)
+		engine.Logger.Info("Starting CGRateS Mediator service.")
+		medChan = make(chan struct{})
+		go startMediator(responder, logDb, cdrDb, cacheChan, medChan)
+	}
+
+	var cdrsChan chan struct{}
+	if cfg.CDRSEnabled {
+		engine.Logger.Info("Starting CGRateS CDRS service.")
+		cdrsChan = make(chan struct{})
+		httpWait = append(httpWait, cdrsChan)
+		go startCDRS(responder, cdrDb, medChan, cdrsChan)
 	}
 
 	if cfg.SMEnabled {
-		engine.Logger.Info("Starting CGRateS SessionManager service")
-		go startSessionManager(responder, logDb)
+		engine.Logger.Info("Starting CGRateS SessionManager service.")
+		go startSessionManager(responder, logDb, cacheChan)
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler()
 	}
 
 	if cfg.CdrcEnabled {
-		engine.Logger.Info("Starting CGRateS CDR client")
-		go startCdrc()
+		engine.Logger.Info("Starting CGRateS CDR client.")
+		go startCdrc(cdrsChan)
 	}
 
+	// Start the servers
+	go serveRpc(rpcWait)
+	go serveHttp(httpWait)
+
 	<-exitChan
+
 	if *pidFile != "" {
 		if err := os.Remove(*pidFile); err != nil {
 			engine.Logger.Warning("Could not remove pid file: " + err.Error())

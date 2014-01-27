@@ -19,21 +19,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
-	"flag"
-	"fmt"
-	"net/http"
-	"net/rpc"
-	"net/url"
-	"os/exec"
 	"path"
 	"reflect"
-	"strings"
+	"os/exec"
 	"testing"
 	"time"
+	"strings"
+	"net/url"
+	"net/http"
+	"net/rpc"
+	"flag"
+	"fmt"
 
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/cgrates/config"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local
@@ -1229,7 +1228,7 @@ func TestCdrServer(t *testing.T) {
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
 		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
-		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cfg.CdrcCdrs), cdrForm); err != nil {
+		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", "127.0.0.1:2080"), cdrForm); err != nil {
 			t.Error(err.Error())
 		}
 	}

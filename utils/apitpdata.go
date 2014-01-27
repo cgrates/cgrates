@@ -221,9 +221,9 @@ type TPAction struct {
 }
 
 type TPActionPlan struct {
-	TPid            string            // Tariff plan id
-	Id string            // ActionPlan id
-	ActionPlan   []*TPActionTiming // Set of ActionTiming bindings this profile will group
+	TPid       string            // Tariff plan id
+	Id         string            // ActionPlan id
+	ActionPlan []*TPActionTiming // Set of ActionTiming bindings this profile will group
 }
 
 type TPActionTiming struct {
@@ -266,7 +266,7 @@ type TPAccountActions struct {
 	Tenant           string // Tenant's Id
 	Account          string // Account name
 	Direction        string // Traffic direction
-	ActionPlanId  string // Id of ActionPlan profile to use
+	ActionPlanId     string // Id of ActionPlan profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
 }
 

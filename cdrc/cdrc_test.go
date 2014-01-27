@@ -21,7 +21,9 @@ package cdrc
 import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"reflect"
 	"testing"
+	"time"
 )
 
 func TestParseFieldsConfig(t *testing.T) {
@@ -50,33 +52,55 @@ func TestParseFieldsConfig(t *testing.T) {
 	cgrConfig.CdrcExtraFields = []string{"supplier1:^top_supplier", "orig_ip:11"}
 	cdrc = &Cdrc{cgrCfg: cgrConfig}
 	if err := cdrc.parseFieldsConfig(); err != nil {
-		t.Errorf("Failed to corectly parse extra fields %v",cdrc.cfgCdrFields)
+		t.Errorf("Failed to corectly parse extra fields %v", cdrc.cfgCdrFields)
 	}
 }
 
-func TestCdrAsHttpForm(t *testing.T) {
+func TestRecordAsRatedCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
+	cgrConfig.CdrcExtraFields = []string{"supplier:10"}
 	cdrc := &Cdrc{cgrCfg: cgrConfig}
 	if err := cdrc.parseFieldsConfig(); err != nil {
 		t.Error("Failed parsing default fieldIndexesFromConfig", err)
 	}
 	cdrRow := []string{"firstField", "secondField"}
-	_, err := cdrc.cdrAsHttpForm(cdrRow)
+	_, err := cdrc.recordAsRatedCdr(cdrRow)
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
-	cdrAsForm, err := cdrc.cdrAsHttpForm(cdrRow)
+	rtCdr, err := cdrc.recordAsRatedCdr(cdrRow)
 	if err != nil {
-		t.Error("Failed to parse CDR in form", err)
+		t.Error("Failed to parse CDR in rated cdr", err)
 	}
-	if cdrAsForm.Get(utils.CDRSOURCE) != cgrConfig.CdrcSourceId {
-		t.Error("Unexpected cdrsource received", cdrAsForm.Get(utils.CDRSOURCE))
+	expectedCdr := &utils.RatedCDR{
+		CgrId:       utils.FSCgrId(cdrRow[0]),
+		AccId:       cdrRow[0],
+		CdrSource:   cgrConfig.CdrcSourceId,
+		ReqType:     cdrRow[1],
+		Direction:   cdrRow[2],
+		Tenant:      cdrRow[3],
+		TOR:         cdrRow[4],
+		Account:     cdrRow[5],
+		Subject:     cdrRow[6],
+		Destination: cdrRow[7],
+		AnswerTime:  time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
+		Duration:    time.Duration(62) * time.Second,
+		ExtraFields: map[string]string{"supplier": "supplier1"},
+		Cost:        -1,
 	}
-	if cdrAsForm.Get(utils.REQTYPE) != "prepaid" {
-		t.Error("Unexpected CDR value received", cdrAsForm.Get(utils.REQTYPE))
+	if !reflect.DeepEqual(expectedCdr, rtCdr) {
+		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
-	//if cdrAsForm.Get("supplier") != "supplier1" {
-	//	t.Error("Unexpected CDR value received", cdrAsForm.Get("supplier"))
-	//}
+	/*
+		if cdrAsForm.Get(utils.CDRSOURCE) != cgrConfig.CdrcSourceId {
+			t.Error("Unexpected cdrsource received", cdrAsForm.Get(utils.CDRSOURCE))
+		}
+		if cdrAsForm.Get(utils.REQTYPE) != "prepaid" {
+			t.Error("Unexpected CDR value received", cdrAsForm.Get(utils.REQTYPE))
+		}
+		if cdrAsForm.Get("supplier") != "supplier1" {
+			t.Error("Unexpected CDR value received", cdrAsForm.Get("supplier"))
+		}
+	*/
 }

@@ -22,31 +22,22 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 )
 
-const (
-	DESTINATIONS_FILE    = "destinations.json"
-	RATING_PLANS_FILE    = "rating_plans.json"
-	RATING_PROFILES_FILE = "rating_profiles.json"
-)
-
 type FileScribe struct {
-	mu             sync.Mutex
-	fileRoot       string
-	gitCommand     string
-	destinations   records
-	ratingPlans    records
-	ratingProfiles records
-	loopChecker    chan int
-	waitingFile    string
-	savePeriod     time.Duration
+	mu          sync.Mutex
+	fileRoot    string
+	gitCommand  string
+	loopChecker chan int
+	waitingFile string
+	savePeriod  time.Duration
 }
 
 func NewFileScribe(fileRoot string, saveInterval time.Duration) (*FileScribe, error) {
@@ -58,32 +49,19 @@ func NewFileScribe(fileRoot string, saveInterval time.Duration) (*FileScribe, er
 	s := &FileScribe{fileRoot: fileRoot, gitCommand: gitCommand, savePeriod: saveInterval}
 	s.loopChecker = make(chan int)
 	s.gitInit()
-	if err := s.load(DESTINATIONS_FILE); err != nil {
-		return nil, err
-	}
-	if err := s.load(RATING_PLANS_FILE); err != nil {
-		return nil, err
-	}
-	if err := s.load(RATING_PROFILES_FILE); err != nil {
-		return nil, err
+
+	for _, fn := range []string{DESTINATIONS_FN, RATING_PLANS_FN, RATING_PROFILES_FN} {
+		if err := s.load(fn); err != nil {
+			return nil, err
+		}
 	}
 	return s, nil
 }
 
-func (s *FileScribe) Record(rec *Record, out *int) error {
+func (s *FileScribe) Record(rec Record, out *int) error {
 	s.mu.Lock()
-	var fileToSave string
-	switch {
-	case strings.HasPrefix(rec.Key, DESTINATION_PREFIX):
-		s.destinations = s.destinations.SetOrAdd(&Record{rec.Key[len(DESTINATION_PREFIX):], rec.Object})
-		fileToSave = DESTINATIONS_FILE
-	case strings.HasPrefix(rec.Key, RATING_PLAN_PREFIX):
-		s.ratingPlans = s.ratingPlans.SetOrAdd(&Record{rec.Key[len(RATING_PLAN_PREFIX):], rec.Object})
-		fileToSave = RATING_PLANS_FILE
-	case strings.HasPrefix(rec.Key, RATING_PROFILE_PREFIX):
-		s.ratingProfiles = s.ratingProfiles.SetOrAdd(&Record{rec.Key[len(RATING_PROFILE_PREFIX):], rec.Object})
-		fileToSave = RATING_PROFILES_FILE
-	}
+	fileToSave := rec.Filename
+	recordsMap[fileToSave] = recordsMap[fileToSave].SetOrAdd(&rec)
 
 	// flood protection for save method (do not save on every loop iteration)
 	if s.waitingFile == fileToSave {
@@ -126,21 +104,14 @@ func (s *FileScribe) gitInit() error {
 		if out, err := cmd.Output(); err != nil {
 			return errors.New(string(out) + " " + err.Error())
 		}
-		if f, err := os.Create(filepath.Join(s.fileRoot, DESTINATIONS_FILE)); err != nil {
-			return errors.New("<History> Error writing destinations file: " + err.Error())
-		} else {
-			f.Close()
+		for fn, _ := range recordsMap {
+			if f, err := os.Create(filepath.Join(s.fileRoot, fn)); err != nil {
+				return fmt.Errorf("<History> Error writing %s file: %s", fn, err.Error())
+			} else {
+				f.Close()
+			}
 		}
-		if f, err := os.Create(filepath.Join(s.fileRoot, RATING_PLANS_FILE)); err != nil {
-			return errors.New("<History> Error writing rating plans file: " + err.Error())
-		} else {
-			f.Close()
-		}
-		if f, err := os.Create(filepath.Join(s.fileRoot, RATING_PROFILES_FILE)); err != nil {
-			return errors.New("<History> Error writing rating profiles file: " + err.Error())
-		} else {
-			f.Close()
-		}
+
 		cmd = exec.Command(s.gitCommand, "add", ".")
 		cmd.Dir = s.fileRoot
 		if out, err := cmd.Output(); err != nil {
@@ -169,23 +140,11 @@ func (s *FileScribe) load(filename string) error {
 	defer f.Close()
 	d := json.NewDecoder(f)
 
-	switch filename {
-	case DESTINATIONS_FILE:
-		if err := d.Decode(&s.destinations); err != nil && err != io.EOF {
-			return errors.New("<History> Error loading destinations: " + err.Error())
-		}
-		s.destinations.Sort()
-	case RATING_PLANS_FILE:
-		if err := d.Decode(&s.ratingPlans); err != nil && err != io.EOF {
-			return errors.New("<History> Error loading rating plans: " + err.Error())
-		}
-		s.ratingPlans.Sort()
-	case RATING_PROFILES_FILE:
-		if err := d.Decode(&s.ratingProfiles); err != nil && err != io.EOF {
-			return errors.New("<History> Error loading rating profiles: " + err.Error())
-		}
-		s.ratingProfiles.Sort()
+	records := recordsMap[filename]
+	if err := d.Decode(&records); err != nil && err != io.EOF {
+		return fmt.Errorf("<History> Error loading %s: %s", filename, err.Error())
 	}
+	records.Sort()
 	return nil
 }
 
@@ -198,38 +157,11 @@ func (s *FileScribe) save(filename string) error {
 	}
 
 	b := bufio.NewWriter(f)
-	switch filename {
-	case DESTINATIONS_FILE:
-		if err := s.format(b, s.destinations); err != nil {
-			return err
-		}
-	case RATING_PLANS_FILE:
-		if err := s.format(b, s.ratingPlans); err != nil {
-			return err
-		}
-	case RATING_PROFILES_FILE:
-		if err := s.format(b, s.ratingProfiles); err != nil {
-			return err
-		}
+	records := recordsMap[filename]
+	if err := format(b, records); err != nil {
+		return err
 	}
 	b.Flush()
 	f.Close()
 	return s.gitCommit()
-}
-
-func (s *FileScribe) format(b io.Writer, recs records) error {
-	recs.Sort()
-	b.Write([]byte("["))
-	for i, r := range recs {
-		src, err := json.Marshal(r)
-		if err != nil {
-			return err
-		}
-		b.Write(src)
-		if i < len(recs)-1 {
-			b.Write([]byte(",\n"))
-		}
-	}
-	b.Write([]byte("]"))
-	return nil
 }

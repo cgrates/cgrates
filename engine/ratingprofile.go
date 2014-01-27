@@ -19,12 +19,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/history"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -145,4 +147,14 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 	}
 
 	return errors.New("not found")
+}
+
+// history record method
+func (rpf *RatingProfile) GetHistoryRecord() history.Record {
+	js, _ := json.Marshal(rpf)
+	return history.Record{
+		Id:       rpf.Id,
+		Filename: history.RATING_PROFILES_FN,
+		Payload:  js,
+	}
 }

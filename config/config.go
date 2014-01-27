@@ -29,7 +29,6 @@ import (
 
 const (
 	DISABLED = "disabled"
-	INTERNAL = "internal"
 	JSON     = "json"
 	GOB      = "gob"
 	POSTGRES = "postgres"
@@ -137,10 +136,10 @@ type CGRConfig struct {
 	HistoryServerEnabled     bool          // Starts History as server: <true|false>.
 	HistoryDir               string        // Location on disk where to store history files.
 	HistorySaveInterval      time.Duration // The timout duration between history writes
-	MailerServer             string // The server to use when sending emails out
-	MailerAuthUser           string // Authenticate to email server using this user
-	MailerAuthPass           string // Authenticate to email server with this password
-	MailerFromAddr           string // From address used when sending emails out
+	MailerServer             string        // The server to use when sending emails out
+	MailerAuthUser           string        // Authenticate to email server using this user
+	MailerAuthPass           string        // Authenticate to email server with this password
+	MailerFromAddr           string        // From address used when sending emails out
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -183,7 +182,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdreExtraFields = []string{}
 	self.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
 	self.CdrcEnabled = false
-	self.CdrcCdrs = "127.0.0.1:2080"
+	self.CdrcCdrs = utils.INTERNAL
 	self.CdrcCdrsMethod = "http_cgr"
 	self.CdrcRunDelay = time.Duration(0)
 	self.CdrcCdrType = "csv"

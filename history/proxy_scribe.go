@@ -20,11 +20,6 @@ package history
 
 import "net/rpc"
 
-const (
-	JSON = "json"
-	GOB  = "gob"
-)
-
 type ProxyScribe struct {
 	Client *rpc.Client
 }
@@ -38,6 +33,6 @@ func NewProxyScribe(addr string) (*ProxyScribe, error) {
 	return &ProxyScribe{Client: client}, nil
 }
 
-func (ps *ProxyScribe) Record(rec *Record, out *int) error {
+func (ps *ProxyScribe) Record(rec Record, out *int) error {
 	return ps.Client.Call("Scribe.Record", rec, out)
 }

@@ -47,7 +47,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.RATING_PLANS_CSV:      (*TPCSVImporter).importRatingPlans,
 	utils.RATING_PROFILES_CSV:   (*TPCSVImporter).importRatingProfiles,
 	utils.ACTIONS_CSV:           (*TPCSVImporter).importActions,
-	utils.ACTION_PLANS_CSV:    (*TPCSVImporter).importActionTimings,
+	utils.ACTION_PLANS_CSV:      (*TPCSVImporter).importActionTimings,
 	utils.ACTION_TRIGGERS_CSV:   (*TPCSVImporter).importActionTriggers,
 	utils.ACCOUNT_ACTIONS_CSV:   (*TPCSVImporter).importAccountActions,
 }

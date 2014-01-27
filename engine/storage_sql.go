@@ -1129,7 +1129,7 @@ func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map
 			Tenant:           tenant,
 			Account:          account,
 			Direction:        direction,
-			ActionPlanId:  action_timings_tag,
+			ActionPlanId:     action_timings_tag,
 			ActionTriggersId: action_triggers_tag,
 		}
 		aa[aacts.KeyId()] = aacts

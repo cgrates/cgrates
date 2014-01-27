@@ -98,3 +98,53 @@ func TestRatedCdrFields(t *testing.T) {
 		t.Error("Error parsing cdr: ", ratedCdr)
 	}
 }
+
+func TestAsRawCdrHttpForm(t *testing.T) {
+	ratedCdr := RatedCDR{CgrId: FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+	cdrForm := ratedCdr.AsRawCdrHttpForm()
+	if cdrForm.Get(ACCID) != ratedCdr.AccId {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.AccId, cdrForm.Get(ACCID))
+	}
+	if cdrForm.Get(CDRHOST) != ratedCdr.CdrHost {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.CdrHost, cdrForm.Get(CDRHOST))
+	}
+	if cdrForm.Get(CDRSOURCE) != ratedCdr.CdrSource {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.CdrSource, cdrForm.Get(CDRSOURCE))
+	}
+	if cdrForm.Get(REQTYPE) != ratedCdr.ReqType {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.ReqType, cdrForm.Get(REQTYPE))
+	}
+	if cdrForm.Get(DIRECTION) != ratedCdr.Direction {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.Direction, cdrForm.Get(DIRECTION))
+	}
+	if cdrForm.Get(TENANT) != ratedCdr.Tenant {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.Tenant, cdrForm.Get(TENANT))
+	}
+	if cdrForm.Get(TOR) != ratedCdr.TOR {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.TOR, cdrForm.Get(TOR))
+	}
+	if cdrForm.Get(ACCOUNT) != ratedCdr.Account {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.Account, cdrForm.Get(ACCOUNT))
+	}
+	if cdrForm.Get(SUBJECT) != ratedCdr.Subject {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.Subject, cdrForm.Get(SUBJECT))
+	}
+	if cdrForm.Get(DESTINATION) != ratedCdr.Destination {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.Destination, cdrForm.Get(DESTINATION))
+	}
+	if cdrForm.Get(ANSWER_TIME) != "2013-11-07 08:42:26 +0000 UTC" {
+		t.Errorf("Expected: %s, received: %s", "2013-11-07 08:42:26 +0000 UTC", cdrForm.Get(ANSWER_TIME))
+	}
+	if cdrForm.Get(DURATION) != "10" {
+		t.Errorf("Expected: %s, received: %s", "10", cdrForm.Get(DURATION))
+	}
+	if cdrForm.Get("field_extr1") != ratedCdr.ExtraFields["field_extr1"] {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.ExtraFields["field_extr1"], cdrForm.Get("field_extr1"))
+	}
+	if cdrForm.Get("fieldextr2") != ratedCdr.ExtraFields["fieldextr2"] {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.ExtraFields["fieldextr2"], cdrForm.Get("fieldextr2"))
+	}
+}

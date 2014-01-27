@@ -35,35 +35,41 @@ var (
 	medi    *mediator.Mediator
 )
 
-func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
-	if fsCdr, err := new(FSCdr).New(body); err == nil {
-		storage.SetCdr(fsCdr)
-		go func() { //FS will not send us hangup_complete until we have send back the answer to CDR, so we need to handle mediation async
-			if cfg.CDRSMediator == "internal" {
-				medi.MediateRawCDR(fsCdr)
-			} else {
-				//TODO: use the connection to mediator
+// Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
+func storeAndMediate(rawCdr utils.RawCDR) error {
+	if err := storage.SetCdr(rawCdr); err != nil {
+		return err
+	}
+	if cfg.CDRSMediator == utils.INTERNAL {
+		go func() {
+			if err := medi.MediateRawCDR(rawCdr); err != nil {
+				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", err.Error()))
 			}
 		}()
-	} else {
+	}
+	return nil
+}
+
+// Handler for generic cgr cdr http
+func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
+	cgrCdr, err := utils.NewCgrCdrFromHttpReq(r)
+	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %s", err.Error()))
+	}
+	if err := storeAndMediate(cgrCdr); err != nil {
+		engine.Logger.Err(fmt.Sprintf("Errors when storing CDR entry: %s", err.Error()))
 	}
 }
 
-func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
-	if cgrCdr, err := utils.NewCgrCdrFromHttpReq(r); err == nil {
-		storage.SetCdr(cgrCdr)
-		if cfg.CDRSMediator == "internal" {
-			errMedi := medi.MediateRawCDR(cgrCdr)
-			if errMedi != nil {
-				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", errMedi.Error()))
-			}
-		} else {
-			//TODO: use the connection to mediator
-		}
-	} else {
+// Handler for fs http
+func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
+	body, _ := ioutil.ReadAll(r.Body)
+	fsCdr, err := new(FSCdr).New(body)
+	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %s", err.Error()))
+	}
+	if err := storeAndMediate(fsCdr); err != nil {
+		engine.Logger.Err(fmt.Sprintf("Errors when storing CDR entry: %s", err.Error()))
 	}
 }
 
@@ -79,4 +85,9 @@ func New(s engine.CdrStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
 func (cdrs *CDRS) RegisterHanlersToServer(server *engine.Server) {
 	server.RegisterHttpFunc("/cgr", cgrCdrHandler)
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
+}
+
+// Used to internally process CDR
+func (cdrs *CDRS) ProcessRawCdr(rawCdr utils.RawCDR) error {
+	return storeAndMediate(rawCdr)
 }

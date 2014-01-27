@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
-	"encoding/gob"
 	"flag"
 	"fmt"
 	"log"
@@ -67,8 +66,8 @@ var (
 	stats         = flag.Bool("stats", false, "Generates statsistics about given data.")
 	fromStorDb    = flag.Bool("from_stordb", false, "Load the tariff plan from storDb to dataDb")
 	toStorDb      = flag.Bool("to_stordb", false, "Import the tariff plan from files to storDb")
-	historyServer = flag.String("history_server", cgrConfig.HistoryServer, "The history server address:port, empty to disable automaticautomatic  history archiving")
-	raterAddress  = flag.String("rater_address", cgrConfig.MediatorRater, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
+	historyServer = flag.String("history_server", cgrConfig.RPCGOBListen, "The history server address:port, empty to disable automaticautomatic  history archiving")
+	raterAddress  = flag.String("rater_address", cgrConfig.RPCGOBListen, "Rater service to contact for cache reloads, empty to disable automatic cache reloads")
 	runId         = flag.String("runid", "", "Uniquely identify an import/load, postpended to some automatic fields")
 )
 
@@ -158,7 +157,6 @@ func main() {
 			return
 		} else {
 			engine.SetHistoryScribe(scribeAgent)
-			gob.Register(&engine.Destination{})
 			defer scribeAgent.Client.Close()
 		}
 	} else {

@@ -21,8 +21,8 @@ package apier
 import (
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"time"
 )
 
@@ -33,10 +33,10 @@ type AttrAcntAction struct {
 }
 
 type AccountActionTiming struct {
-	Id              string    // The id to reference this particular ActionTiming
+	Id           string    // The id to reference this particular ActionTiming
 	ActionPlanId string    // The id of the ActionPlanId profile attached to the account
-	ActionsId       string    // The id of actions which will be executed
-	NextExecTime    time.Time // Next execution time
+	ActionsId    string    // The id of actions which will be executed
+	NextExecTime time.Time // Next execution time
 }
 
 func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*AccountActionTiming) error {
@@ -60,12 +60,12 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 }
 
 type AttrRemActionTiming struct {
-	ActionPlanId string // Id identifying the ActionTimings profile
+	ActionPlanId    string // Id identifying the ActionTimings profile
 	ActionTimingId  string // Internal CGR id identifying particular ActionTiming, *all for all user related ActionTimings to be canceled
 	Tenant          string // Tenant he account belongs to
 	Account         string // Account name
 	Direction       string // Traffic direction
-	ReloadScheduler bool  // If set it will reload the scheduler after adding
+	ReloadScheduler bool   // If set it will reload the scheduler after adding
 }
 
 // Removes an ActionTimings or parts of it depending on filters being set
@@ -155,12 +155,11 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 	return nil
 }
 
-
 type AttrSetAccount struct {
-	Tenant          string
-	Direction       string
-	Account         string
-	Type            string // <*prepaid|*postpaid>
+	Tenant       string
+	Direction    string
+	Account      string
+	Type         string // <*prepaid|*postpaid>
 	ActionPlanId string
 }
 
@@ -186,8 +185,8 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 				Type: attr.Type,
 			}
 		}
-		
-		if len(attr.ActionPlanId) != 0  {
+
+		if len(attr.ActionPlanId) != 0 {
 			var err error
 			ats, err = self.AccountDb.GetActionTimings(attr.ActionPlanId)
 			if err != nil {

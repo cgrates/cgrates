@@ -26,13 +26,13 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -44,8 +44,8 @@ const (
 	FS_CSV = "freeswitch_csv"
 )
 
-func NewCdrc(config *config.CGRConfig) (*Cdrc, error) {
-	cdrc := &Cdrc{cgrCfg: config}
+func NewCdrc(config *config.CGRConfig, cdrServer *cdrs.CDRS) (*Cdrc, error) {
+	cdrc := &Cdrc{cgrCfg: config, cdrServer: cdrServer}
 	// Before processing, make sure in and out folders exist
 	for _, dir := range []string{cdrc.cgrCfg.CdrcCdrInDir, cdrc.cgrCfg.CdrcCdrOutDir} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
@@ -61,6 +61,7 @@ func NewCdrc(config *config.CGRConfig) (*Cdrc, error) {
 
 type Cdrc struct {
 	cgrCfg       *config.CGRConfig
+	cdrServer    *cdrs.CDRS
 	cfgCdrFields map[string]string // Key is the name of the field
 	httpClient   *http.Client
 }
@@ -116,10 +117,9 @@ func (self *Cdrc) parseFieldsConfig() error {
 }
 
 // Takes the record out of csv and turns it into http form which can be posted
-func (self *Cdrc) cdrAsHttpForm(record []string) (url.Values, error) {
-	// engine.Logger.Info(fmt.Sprintf("Processing record %v", record))
-	v := url.Values{}
-	v.Set(utils.CDRSOURCE, self.cgrCfg.CdrcSourceId)
+func (self *Cdrc) recordAsRatedCdr(record []string) (*utils.RatedCDR, error) {
+	ratedCdr := &utils.RatedCDR{CdrSource: self.cgrCfg.CdrcSourceId, ExtraFields: map[string]string{}, Cost: -1}
+	var err error
 	for cfgFieldName, cfgFieldVal := range self.cfgCdrFields {
 		var fieldVal string
 		if strings.HasPrefix(cfgFieldVal, utils.STATIC_VALUE_PREFIX) {
@@ -135,9 +135,38 @@ func (self *Cdrc) cdrAsHttpForm(record []string) (url.Values, error) {
 		} else { // Modify here when we add more supported cdr formats
 			fieldVal = "UNKNOWN"
 		}
-		v.Set(cfgFieldName, fieldVal)
+		switch cfgFieldName {
+		case utils.ACCID:
+			ratedCdr.CgrId = utils.FSCgrId(fieldVal)
+			ratedCdr.AccId = fieldVal
+		case utils.REQTYPE:
+			ratedCdr.ReqType = fieldVal
+		case utils.DIRECTION:
+			ratedCdr.Direction = fieldVal
+		case utils.TENANT:
+			ratedCdr.Tenant = fieldVal
+		case utils.TOR:
+			ratedCdr.TOR = fieldVal
+		case utils.ACCOUNT:
+			ratedCdr.Account = fieldVal
+		case utils.SUBJECT:
+			ratedCdr.Subject = fieldVal
+		case utils.DESTINATION:
+			ratedCdr.Destination = fieldVal
+		case utils.ANSWER_TIME:
+			if ratedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
+				return nil, fmt.Errorf("Cannot parse answer time field, err: %s", err.Error())
+			}
+		case utils.DURATION:
+			if ratedCdr.Duration, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
+				return nil, fmt.Errorf("Cannot parse duration field, err: %s", err.Error())
+			}
+		default: // Extra fields will not match predefined so they all show up here
+			ratedCdr.ExtraFields[cfgFieldName] = fieldVal
+		}
+
 	}
-	return v, nil
+	return ratedCdr, nil
 }
 
 // One run over the CDR folder
@@ -199,14 +228,21 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue // Other csv related errors, ignore
 		}
-		cdrAsForm, err := self.cdrAsHttpForm(record)
+		rawCdr, err := self.recordAsRatedCdr(record)
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue
 		}
-		if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cgrCfg.HTTPListen), cdrAsForm); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
-			continue
+		if self.cgrCfg.CdrcCdrs == utils.INTERNAL {
+			if err := self.cdrServer.ProcessRawCdr(rawCdr); err != nil {
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
+				continue
+			}
+		} else { // CDRs listening on IP
+			if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cgrCfg.HTTPListen), rawCdr.AsRawCdrHttpForm()); err != nil {
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
+				continue
+			}
 		}
 	}
 	// Finished with file, move it to processed folder

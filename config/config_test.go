@@ -84,7 +84,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdreExtraFields = []string{}
 	eCfg.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
 	eCfg.CdrcEnabled = false
-	eCfg.CdrcCdrs = "127.0.0.1:2080"
+	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcCdrsMethod = "http_cgr"
 	eCfg.CdrcRunDelay = time.Duration(0)
 	eCfg.CdrcCdrType = "csv"

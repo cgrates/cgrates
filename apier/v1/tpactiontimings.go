@@ -43,8 +43,8 @@ func (self *ApierV1) SetTPActionPlan(attrs utils.TPActionPlan, reply *string) er
 }
 
 type AttrGetTPActionPlan struct {
-	TPid            string // Tariff plan id
-	Id string // ActionTimings id
+	TPid string // Tariff plan id
+	Id   string // ActionTimings id
 }
 
 // Queries specific ActionPlan profile on tariff plan

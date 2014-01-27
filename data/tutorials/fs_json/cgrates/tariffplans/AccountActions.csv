@@ -1,4 +1,4 @@
-#Tenant,Account,Direction,ActionTimingsTag,ActionTriggersTag
+#Tenant,Account,Direction,ActionPlanTag,ActionTriggersTag
 cgrates.org,1001,*out,PREPAID_10,STANDARD_TRIGGERS
 cgrates.org,1002,*out,PREPAID_10,STANDARD_TRIGGERS
 cgrates.org,1003,*out,PREPAID_10,STANDARD_TRIGGERS
