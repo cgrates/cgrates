@@ -104,7 +104,7 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys []string) error {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (ms *MapStorage) DataExists(categ, subject string) (bool, error) {
+func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
 		_, exists := ms.dict[DESTINATION_PREFIX+subject]

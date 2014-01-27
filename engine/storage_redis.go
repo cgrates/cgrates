@@ -170,7 +170,7 @@ func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys []string) (err error) {
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (rs *RedisStorage) DataExists(category, subject string) (bool, error) {
+func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
 	case DESTINATION_PREFIX, RATING_PLAN_PREFIX, RATING_PROFILE_PREFIX, ACTION_PREFIX, ACTION_TIMING_PREFIX, USER_BALANCE_PREFIX:
 		return rs.db.Exists(category + subject)

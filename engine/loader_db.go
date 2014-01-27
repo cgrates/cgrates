@@ -224,7 +224,7 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 				}
 			}
 			if !destinationExists {
-				if dbExists, err := dbr.dataDb.DataExists(DESTINATION_PREFIX, dr.DestinationId); err != nil {
+				if dbExists, err := dbr.dataDb.HasData(DESTINATION_PREFIX, dr.DestinationId); err != nil {
 					return err
 				} else if !dbExists {
 					return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationId))
@@ -278,7 +278,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 			}
 			_, exists := dbr.ratingPlans[tpRa.RatingPlanId]
 			if !exists {
-				if dbExists, err := dbr.dataDb.DataExists(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if dbExists, err := dbr.dataDb.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				} else if !dbExists {
 					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))
@@ -332,7 +332,7 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 				if err != nil {
 					return false, err
 				} else if len(dms) == 0 {
-					if dbExists, err := dbr.dataDb.DataExists(DESTINATION_PREFIX, drate.DestinationId); err != nil {
+					if dbExists, err := dbr.dataDb.HasData(DESTINATION_PREFIX, drate.DestinationId); err != nil {
 						return false, err
 					} else if !dbExists {
 						return false, fmt.Errorf("Could not get destination for tag %v", drate.DestinationId)
@@ -369,7 +369,7 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 			}
 			_, exists := dbr.ratingPlans[tpRa.RatingPlanId]
 			if !exists {
-				if dbExists, err := dbr.dataDb.DataExists(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
+				if dbExists, err := dbr.dataDb.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				} else if !dbExists {
 					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))

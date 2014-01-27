@@ -70,7 +70,7 @@ Interface for storage providers.
 type RatingStorage interface {
 	Storage
 	CacheRating([]string, []string, []string) error
-	DataExists(string, string) (bool, error)
+	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string, bool) (*RatingProfile, error)
@@ -81,7 +81,7 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
-	DataExists(string, string) (bool, error)
+	HasData(string, string) (bool, error)
 	CacheAccounting([]string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error

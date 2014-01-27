@@ -339,7 +339,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 		}
 		var err error
 		if !destinationExists && csvr.dataStorage != nil {
-			if destinationExists, err = csvr.dataStorage.DataExists(DESTINATION_PREFIX, record[1]); err != nil {
+			if destinationExists, err = csvr.dataStorage.HasData(DESTINATION_PREFIX, record[1]); err != nil {
 				return err
 			}
 		}
@@ -423,7 +423,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		}
 		_, exists := csvr.ratingPlans[record[5]]
 		if !exists && csvr.dataStorage != nil {
-			if exists, err = csvr.dataStorage.DataExists(RATING_PLAN_PREFIX, record[5]); err != nil {
+			if exists, err = csvr.dataStorage.HasData(RATING_PLAN_PREFIX, record[5]); err != nil {
 				return err
 			}
 		}

@@ -208,7 +208,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, TOR: attrs.TOR, Direction: attrs.Direction, Subject: attrs.Subject}
 	keyId := tpRpf.KeyId()
 	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.DataExists(engine.RATING_PROFILE_PREFIX, keyId); err != nil {
+		if exists, err := self.RatingDb.HasData(engine.RATING_PROFILE_PREFIX, keyId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -220,7 +220,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ERR_SERVER_ERROR, ra.ActivationTime))
 		}
-		if exists, err := self.RatingDb.DataExists(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
+		if exists, err := self.RatingDb.HasData(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
 			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ERR_NOT_FOUND, ra.RatingPlanId))
@@ -255,7 +255,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.AccountDb.DataExists(engine.ACTION_PREFIX, attrs.ActionsId); err != nil {
+		if exists, err := self.AccountDb.HasData(engine.ACTION_PREFIX, attrs.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -316,7 +316,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.AccountDb.DataExists(engine.ACTION_TIMING_PREFIX, attrs.Id); err != nil {
+		if exists, err := self.AccountDb.HasData(engine.ACTION_TIMING_PREFIX, attrs.Id); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -324,7 +324,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 	}
 	storeAtms := make(engine.ActionPlan, len(attrs.ActionPlan))
 	for idx, apiAtm := range attrs.ActionPlan {
-		if exists, err := self.AccountDb.DataExists(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
+		if exists, err := self.AccountDb.HasData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
 			return fmt.Errorf("%s:%s", utils.ERR_BROKEN_REFERENCE, err.Error())
