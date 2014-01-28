@@ -23,13 +23,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"net/http"
 	"net/smtp"
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -58,6 +59,8 @@ const (
 	DEBIT          = "*debit"
 	RESET_COUNTER  = "*reset_counter"
 	RESET_COUNTERS = "*reset_counters"
+	ENABLE_USER    = "*enable_user"
+	DISABLE_USER   = "*disable_user"
 	CALL_URL       = "*call_url"
 	CALL_URL_ASYNC = "*call_url_async"
 	MAIL_ASYNC     = "*mail_async"
@@ -90,6 +93,10 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return resetCounterAction, true
 	case RESET_COUNTERS:
 		return resetCountersAction, true
+	case ENABLE_USER:
+		return enableUserAction, true
+	case DISABLE_USER:
+		return disableUserAction, true
 	case CALL_URL:
 		return callUrl, true
 	case CALL_URL_ASYNC:
@@ -178,6 +185,16 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
 	ub.debitBalanceAction(a)
+	return
+}
+
+func enableUserAction(ub *UserBalance, a *Action) (err error) {
+	ub.Disabled = false
+	return
+}
+
+func disableUserAction(ub *UserBalance, a *Action) (err error) {
+	ub.Disabled = true
 	return
 }
 
