@@ -39,6 +39,9 @@ type ActionTrigger struct {
 }
 
 func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
+	if ub.Disabled {
+		return fmt.Errorf("User %s is disabled", ub.Id)
+	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
 	aac, err = accountingStorage.GetActions(at.ActionsId, false)

@@ -145,6 +145,9 @@ func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
 	if cd.userBalance == nil {
 		cd.userBalance, err = accountingStorage.GetUserBalance(cd.GetUserBalanceKey())
 	}
+	if cd.userBalance != nil && cd.userBalance.Disabled {
+		return nil, fmt.Errorf("User %s is disabled", ub.Id)
+	}
 	return cd.userBalance, err
 }
 

@@ -20,11 +20,12 @@ package engine
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -231,8 +232,11 @@ func (at *ActionTiming) Execute() (err error) {
 			return
 		}
 		for _, ubId := range at.UserBalanceIds {
-			AccLock.Guard(ubId, func() (float64, error) {
+			_, err := AccLock.Guard(ubId, func() (float64, error) {
 				ub, err := accountingStorage.GetUserBalance(ubId)
+				if ub.Disabled {
+					return 0, fmt.Errorf("User %s is disabled", ubId)
+				}
 				if err != nil {
 					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
 					return 0, err
@@ -243,6 +247,7 @@ func (at *ActionTiming) Execute() (err error) {
 				accountingStorage.SetUserBalance(ub)
 				return 0, nil
 			})
+			Logger.Warning(fmt.Sprintf("Error executing action timing: %s", err))
 		}
 	}
 	storageLogger.LogActionTiming(SCHED_SOURCE, at, aac)

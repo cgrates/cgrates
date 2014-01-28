@@ -69,7 +69,8 @@ type UserBalance struct {
 	ActionTriggers ActionTriggerPriotityList
 	Groups         GroupLinks // user info about groups
 	// group information
-	UserIds []string // group info about users
+	UserIds  []string // group info about users
+	Disabled bool
 }
 
 // Returns user's available minutes for the specified destination
