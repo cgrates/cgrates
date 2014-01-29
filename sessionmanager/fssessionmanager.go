@@ -102,7 +102,7 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 // Disconnects a session by sending hangup command to freeswitch
 func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
 	// engine.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
-	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
+	_, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("could not send disconect api notification to freeswitch: %v", err))
 	}
@@ -125,7 +125,7 @@ func (sm *FSSessionManager) RemoveSession(s *Session) {
 
 // Sets the call timeout valid of starting of the call
 func (sm *FSSessionManager) setMaxCallDuration(uuid string, maxDur time.Duration) error {
-	err := fsock.FS.SendApiCmd(fmt.Sprintf("sched_hangup +%d %s\n\n", int(maxDur.Seconds()), uuid))
+	_, err := fsock.FS.SendApiCmd(fmt.Sprintf("sched_hangup +%d %s\n\n", int(maxDur.Seconds()), uuid))
 	if err != nil {
 		engine.Logger.Err("could not send sched_hangup command to freeswitch")
 		return err
@@ -135,11 +135,11 @@ func (sm *FSSessionManager) setMaxCallDuration(uuid string, maxDur time.Duration
 
 // Sends the transfer command to unpark the call to freeswitch
 func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
-	err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
+	_, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
 	if err != nil {
 		engine.Logger.Err("could not send unpark api notification to freeswitch")
 	}
-	err = fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
+	_, err = fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
 	if err != nil {
 		engine.Logger.Err("could not send unpark api call to freeswitch")
 	}
@@ -196,7 +196,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	//engine.Logger.Info("<SessionManager> FreeSWITCH answer.")
 	// Make sure cgr_type is enforced even if not set by FreeSWITCH
-	if err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err != nil {
+	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err != nil {
 		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
 	s := NewSession(ev, sm)
@@ -343,7 +343,7 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	cmdKillPrepaid := "hupall MANAGER_REQUEST cgr_reqtype prepaid"
 	cmdKillPostpaid := "hupall MANAGER_REQUEST cgr_reqtype postpaid"
 	for _, cmd := range []string{cmdKillPrepaid, cmdKillPostpaid} {
-		if err = fsock.FS.SendApiCmd(cmd); err != nil {
+		if _, err = fsock.FS.SendApiCmd(cmd); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Error on calls shutdown: %s", err))
 			return
 		}
