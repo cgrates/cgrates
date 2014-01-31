@@ -21,9 +21,10 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"time"
 )
 
 type AttrAcntAction struct {
@@ -51,7 +52,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	for _, ats := range allATs {
 		for _, at := range ats {
 			if utils.IsSliceMember(at.UserBalanceIds, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
-				accountATs = append(accountATs, &AccountActionTiming{Id: at.Id, ActionPlanId: at.Tag, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime()})
+				accountATs = append(accountATs, &AccountActionTiming{Id: at.Id, ActionPlanId: at.Tag, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime(time.Now())})
 			}
 		}
 	}

@@ -46,7 +46,7 @@ func (s *Scheduler) Loop() {
 		s.Lock()
 		a0 := s.queue[0]
 		now := time.Now()
-		if a0.GetNextStartTime().Equal(now) || a0.GetNextStartTime().Before(now) {
+		if a0.GetNextStartTime(now).Equal(now) || a0.GetNextStartTime(now).Before(now) {
 			engine.Logger.Debug(fmt.Sprintf("%v - %v", a0.Tag, a0.Timing))
 			go a0.Execute()
 			s.queue = append(s.queue, a0)
@@ -55,7 +55,7 @@ func (s *Scheduler) Loop() {
 			s.Unlock()
 		} else {
 			s.Unlock()
-			d := a0.GetNextStartTime().Sub(now)
+			d := a0.GetNextStartTime(now).Sub(now)
 			// engine.Logger.Info(fmt.Sprintf("Timer set to wait for %v", d))
 			s.timer = time.NewTimer(d)
 			select {
