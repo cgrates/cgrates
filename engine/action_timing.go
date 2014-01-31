@@ -47,7 +47,7 @@ type ActionTiming struct {
 
 type ActionPlan []*ActionTiming
 
-func (at *ActionTiming) GetNextStartTime() (t time.Time) {
+func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
@@ -55,7 +55,6 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	if i == nil {
 		return
 	}
-	now := time.Now()
 	y, m, d := now.Date()
 	z, _ := now.Zone()
 	if i.Timing.StartTime != "" && i.Timing.StartTime != ASAP {
@@ -88,9 +87,8 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 	// monthdays
 	if i.Timing.MonthDays != nil && len(i.Timing.MonthDays) > 0 {
 		i.Timing.MonthDays.Sort()
-		now := time.Now()
 		year := now.Year()
-		month := now.Month()
+		month := now
 		x := sort.SearchInts(i.Timing.MonthDays, now.Day())
 		d = i.Timing.MonthDays[0]
 		if x < len(i.Timing.MonthDays) {
@@ -103,33 +101,34 @@ func (at *ActionTiming) GetNextStartTime() (t time.Time) {
 				if x+1 < len(i.Timing.MonthDays) { // today was found in the list, jump to the next grater day
 					d = i.Timing.MonthDays[x+1]
 				} else { // jump to next month
-					month = now.AddDate(0, 1, 0).Month()
+					//not using now to make sure the next month has the the 1 date
+					//(if today is 31) next month may not have it
+					tmp := time.Date(year, month.Month(), 1, 0, 0, 0, 0, time.Local)
+					month = tmp.AddDate(0, 1, 0)
 				}
 			} else { // today was not found in the list, x is the first greater day
 				d = i.Timing.MonthDays[x]
 			}
 		} else {
 			if len(i.Timing.Months) == 0 {
-				t = time.Date(now.Year(), month, d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
-				year = t.Year()
-				month = t.Month()
+				t = time.Date(month.Year(), month.Month(), d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
+				month = t
 			}
 		}
 		h, m, s := t.Clock()
-		t = time.Date(year, month, d, h, m, s, 0, time.Local)
+		t = time.Date(month.Year(), month.Month(), d, h, m, s, 0, time.Local)
 	}
 MONTHS:
 	if i.Timing.Months != nil && len(i.Timing.Months) > 0 {
 		i.Timing.Months.Sort()
-		now := time.Now()
 		year := now.Year()
 		x := sort.Search(len(i.Timing.Months), func(x int) bool { return i.Timing.Months[x] >= now.Month() })
 		m = i.Timing.Months[0]
 		if x < len(i.Timing.Months) {
 			if i.Timing.Months[x] == now.Month() {
 				if t.Equal(now) || t.After(now) {
-					h, m, s := t.Clock()
-					t = time.Date(now.Year(), now.Month(), t.Day(), h, m, s, 0, time.Local)
+					//h, m, s := t.Clock()
+					//t = time.Date(now.Year(), now.Month(), t.Day(), h, m, s, 0, time.Local)
 					goto YEARS
 				}
 				if x+1 < len(i.Timing.Months) { // this month was found in the list so jump to next available month
@@ -139,7 +138,10 @@ MONTHS:
 						t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 					}
 				} else { // jump to next year
-					year = now.AddDate(1, 0, 0).Year()
+					//not using now to make sure the next year has the the 1 date
+					//(if today is 31) next month may not have it
+					tmp := time.Date(year, 1, 1, 0, 0, 0, 0, time.Local)
+					year = tmp.AddDate(1, 0, 0).Year()
 				}
 			} else { // this month was not found in the list, x is the first greater month
 				m = i.Timing.Months[x]
@@ -160,8 +162,7 @@ MONTHS:
 YEARS:
 	if i.Timing.Years != nil && len(i.Timing.Years) > 0 {
 		i.Timing.Years.Sort()
-		now := time.Now()
-		x := sort.Search(len(i.Timing.Years), func(x int) bool { return i.Timing.Years[x] >= now.Year() })
+		x := sort.Search(len(i.Timing.Years), func(x int) bool { return i.Timing.Years[x] >= t.Year() })
 		y = i.Timing.Years[0]
 		if x < len(i.Timing.Years) {
 			if i.Timing.Years[x] == now.Year() {
@@ -287,10 +288,10 @@ func (atpl ActionTimingPriotityList) Swap(i, j int) {
 }
 
 func (atpl ActionTimingPriotityList) Less(i, j int) bool {
-	if atpl[i].GetNextStartTime().Equal(atpl[j].GetNextStartTime()) {
+	if atpl[i].GetNextStartTime(time.Now()).Equal(atpl[j].GetNextStartTime(time.Now())) {
 		return atpl[i].Weight < atpl[j].Weight
 	}
-	return atpl[i].GetNextStartTime().Before(atpl[j].GetNextStartTime())
+	return atpl[i].GetNextStartTime(time.Now()).Before(atpl[j].GetNextStartTime(time.Now()))
 }
 
 func (atpl ActionTimingPriotityList) Sort() {
@@ -298,7 +299,7 @@ func (atpl ActionTimingPriotityList) Sort() {
 }
 
 func (at *ActionTiming) String_DISABLED() string {
-	return at.Tag + " " + at.GetNextStartTime().String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
+	return at.Tag + " " + at.GetNextStartTime(time.Now()).String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
 }
 
 // Helper to remove ActionTiming members based on specific filters, empty data means no always match
