@@ -160,7 +160,7 @@ func RoundTo(whole, amount time.Duration) time.Duration {
 }
 
 func SplitPrefix(prefix string) []string {
-	length := int(math.Max(float64(len(prefix)-1), 0))
+	length := int(math.Max(float64(len(prefix)), 0))
 	subs := make([]string, length)
 	max := len(prefix)
 	for i := 0; i < length; i++ {
