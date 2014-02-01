@@ -136,7 +136,7 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 			b.userBalance = ub
 		}
 		if b.DestinationId != "" && b.DestinationId != utils.ANY {
-			for _, p := range utils.SplitPrefix(prefix) {
+			for _, p := range utils.SplitPrefix(prefix, MIN_PREFIX_MATCH) {
 				if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
 					destIds := x.([]string)
 					for _, dId := range destIds {
