@@ -159,8 +159,8 @@ func RoundTo(whole, amount time.Duration) time.Duration {
 	return time.Duration((w - math.Mod(a, w)) + a)
 }
 
-func SplitPrefix(prefix string) []string {
-	length := int(math.Max(float64(len(prefix)), 0))
+func SplitPrefix(prefix string, minLength int) []string {
+	length := int(math.Max(float64(len(prefix)-(minLength-1)), 0))
 	subs := make([]string, length)
 	max := len(prefix)
 	for i := 0; i < length; i++ {
