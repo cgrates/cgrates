@@ -9,6 +9,7 @@ CREATE TABLE `rated_cdrs` (
   `runid`  varchar(64) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `cost` DECIMAL(20,4) DEFAULT NULL,
+  `mediation_time` datetime NOT NULL,
   `extra_info` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `costid` (`cgrid`,`runid`)

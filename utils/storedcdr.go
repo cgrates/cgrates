@@ -24,9 +24,9 @@ import (
 	"time"
 )
 
-func NewRatedCDRFromRawCDR(rawcdr RawCDR) (*RatedCDR, error) {
+func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
 	var err error
-	rtCdr := new(RatedCDR)
+	rtCdr := new(StoredCdr)
 	rtCdr.CgrId = rawcdr.GetCgrId()
 	rtCdr.AccId = rawcdr.GetAccId()
 	rtCdr.CdrHost = rawcdr.GetCdrHost()
@@ -49,7 +49,7 @@ func NewRatedCDRFromRawCDR(rawcdr RawCDR) (*RatedCDR, error) {
 }
 
 // Rated CDR as extracted from StorDb. Kinda standard of internal CDR, complies to CDR interface also
-type RatedCDR struct {
+type StoredCdr struct {
 	CgrId          string
 	AccId          string
 	CdrHost        string
@@ -70,82 +70,82 @@ type RatedCDR struct {
 
 // Methods maintaining RawCDR interface
 
-func (ratedCdr *RatedCDR) GetCgrId() string {
-	return ratedCdr.CgrId
+func (storedCdr *StoredCdr) GetCgrId() string {
+	return storedCdr.CgrId
 }
 
-func (ratedCdr *RatedCDR) GetAccId() string {
-	return ratedCdr.AccId
+func (storedCdr *StoredCdr) GetAccId() string {
+	return storedCdr.AccId
 }
 
-func (ratedCdr *RatedCDR) GetCdrHost() string {
-	return ratedCdr.CdrHost
+func (storedCdr *StoredCdr) GetCdrHost() string {
+	return storedCdr.CdrHost
 }
 
-func (ratedCdr *RatedCDR) GetCdrSource() string {
-	return ratedCdr.CdrSource
+func (storedCdr *StoredCdr) GetCdrSource() string {
+	return storedCdr.CdrSource
 }
 
-func (ratedCdr *RatedCDR) GetDirection() string {
-	return ratedCdr.Direction
+func (storedCdr *StoredCdr) GetDirection() string {
+	return storedCdr.Direction
 }
 
-func (ratedCdr *RatedCDR) GetSubject() string {
-	return ratedCdr.Subject
+func (storedCdr *StoredCdr) GetSubject() string {
+	return storedCdr.Subject
 }
 
-func (ratedCdr *RatedCDR) GetAccount() string {
-	return ratedCdr.Account
+func (storedCdr *StoredCdr) GetAccount() string {
+	return storedCdr.Account
 }
 
-func (ratedCdr *RatedCDR) GetDestination() string {
-	return ratedCdr.Destination
+func (storedCdr *StoredCdr) GetDestination() string {
+	return storedCdr.Destination
 }
 
-func (ratedCdr *RatedCDR) GetTOR() string {
-	return ratedCdr.TOR
+func (storedCdr *StoredCdr) GetTOR() string {
+	return storedCdr.TOR
 }
 
-func (ratedCdr *RatedCDR) GetTenant() string {
-	return ratedCdr.Tenant
+func (storedCdr *StoredCdr) GetTenant() string {
+	return storedCdr.Tenant
 }
 
-func (ratedCdr *RatedCDR) GetReqType() string {
-	return ratedCdr.ReqType
+func (storedCdr *StoredCdr) GetReqType() string {
+	return storedCdr.ReqType
 }
 
-func (ratedCdr *RatedCDR) GetAnswerTime() (time.Time, error) {
-	return ratedCdr.AnswerTime, nil
+func (storedCdr *StoredCdr) GetAnswerTime() (time.Time, error) {
+	return storedCdr.AnswerTime, nil
 }
 
-func (ratedCdr *RatedCDR) GetDuration() time.Duration {
-	return ratedCdr.Duration
+func (storedCdr *StoredCdr) GetDuration() time.Duration {
+	return storedCdr.Duration
 }
 
-func (ratedCdr *RatedCDR) GetExtraFields() map[string]string {
-	return ratedCdr.ExtraFields
+func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
+	return storedCdr.ExtraFields
 }
 
-func (ratedCdr *RatedCDR) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*RatedCDR, error) {
-	return ratedCdr, nil
+func (storedCdr *StoredCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
+	return storedCdr, nil
 }
 
 // Converts part of the rated Cdr as httpForm used to post remotely to CDRS
-func (ratedCdr *RatedCDR) AsRawCdrHttpForm() url.Values {
+func (storedCdr *StoredCdr) AsRawCdrHttpForm() url.Values {
 	v := url.Values{}
-	v.Set(ACCID, ratedCdr.AccId)
-	v.Set(CDRHOST, ratedCdr.CdrHost)
-	v.Set(CDRSOURCE, ratedCdr.CdrSource)
-	v.Set(REQTYPE, ratedCdr.ReqType)
-	v.Set(DIRECTION, ratedCdr.Direction)
-	v.Set(TENANT, ratedCdr.Tenant)
-	v.Set(TOR, ratedCdr.TOR)
-	v.Set(ACCOUNT, ratedCdr.Account)
-	v.Set(SUBJECT, ratedCdr.Subject)
-	v.Set(DESTINATION, ratedCdr.Destination)
-	v.Set(ANSWER_TIME, ratedCdr.AnswerTime.String())
-	v.Set(DURATION, strconv.FormatFloat(ratedCdr.Duration.Seconds(), 'f', -1, 64))
-	for fld, val := range ratedCdr.ExtraFields {
+	v.Set(ACCID, storedCdr.AccId)
+	v.Set(CDRHOST, storedCdr.CdrHost)
+	v.Set(CDRSOURCE, storedCdr.CdrSource)
+	v.Set(REQTYPE, storedCdr.ReqType)
+	v.Set(DIRECTION, storedCdr.Direction)
+	v.Set(TENANT, storedCdr.Tenant)
+	v.Set(TOR, storedCdr.TOR)
+	v.Set(ACCOUNT, storedCdr.Account)
+	v.Set(SUBJECT, storedCdr.Subject)
+	v.Set(DESTINATION, storedCdr.Destination)
+	v.Set(ANSWER_TIME, storedCdr.AnswerTime.String())
+	v.Set(DURATION, strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64))
+	for fld, val := range storedCdr.ExtraFields {
 		v.Set(fld, val)
 	}
 	return v

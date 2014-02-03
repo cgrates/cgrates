@@ -646,7 +646,7 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, connect_fee, cost, timespans, source, runid)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s','%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, connect_fee, cost, timespans, source, runid, cost_time)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s','%s',now()) ON DUPLICATE KEY UPDATE direction=values(direction), tenant=values(tenant), tor=values(tor), account=values(account), subject=values(subject), destination=values(destination), connect_fee=values(connect_fee), cost=values(cost), timespans=values(timespans), source=values(source), cost_time=now()",
 		utils.TBL_COST_DETAILS,
 		utils.FSCgrId(uuid),
 		uuid,
@@ -726,14 +726,13 @@ func (self *SQLStorage) SetCdr(cdr utils.RawCDR) (err error) {
 	return
 }
 
-func (self *SQLStorage) SetRatedCdr(ratedCdr *utils.RatedCDR, extraInfo string) (err error) {
-	// ToDo: Add here source and subject
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,subject,cost,extra_info) VALUES ('%s','%s','%s',%f,'%s')",
+func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string) (err error) {
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,subject,cost,mediation_time,extra_info) VALUES ('%s','%s','%s',%f,now(),'%s') ON DUPLICATE KEY UPDATE subject=values(subject),cost=values(cost),extra_info=values(extra_info)",
 		utils.TBL_RATED_CDRS,
-		ratedCdr.CgrId,
-		ratedCdr.MediationRunId,
-		ratedCdr.Subject,
-		ratedCdr.Cost,
+		storedCdr.CgrId,
+		storedCdr.MediationRunId,
+		storedCdr.Subject,
+		storedCdr.Cost,
 		extraInfo))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %s", err.Error()))
@@ -741,16 +740,37 @@ func (self *SQLStorage) SetRatedCdr(ratedCdr *utils.RatedCDR, extraInfo string) 
 	return
 }
 
-// Return a slice of rated CDRs from storDb using optional timeStart and timeEnd as filters.
-func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]*utils.RatedCDR, error) {
-	var cdrs []*utils.RatedCDR
+// Return a slice of CDRs from storDb using optional filters.
+func (self *SQLStorage) GetStoredCdrs(timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
+	var cdrs []*utils.StoredCdr
 	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
-	if !timeStart.IsZero() && !timeEnd.IsZero() {
-		q += fmt.Sprintf(" WHERE answer_time>='%s' AND answer_time<'%s'", timeStart, timeEnd)
-	} else if !timeStart.IsZero() {
-		q += fmt.Sprintf(" WHERE answer_time>='%d'", timeStart)
-	} else if !timeEnd.IsZero() {
-		q += fmt.Sprintf(" WHERE answer_time<'%d'", timeEnd)
+	fltr := ""
+	if !timeStart.IsZero() {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" answer_time>='%d'", timeStart)
+	}
+	if !timeEnd.IsZero() {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" answer_time<'%d'", timeEnd)
+	}
+	if ignoreErr {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += "cost>-1"
+	}
+	if ignoreRated {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += "cost<=0"
+	}
+	if len(fltr) != 0 {
+		q += fmt.Sprintf(" WHERE %s", fltr)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -772,7 +792,7 @@ func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]*utils.Rat
 		if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
 			return nil, err
 		}
-		storCdr := &utils.RatedCDR{
+		storCdr := &utils.StoredCdr{
 			CgrId: cgrid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
 			TOR: tor, Account: account, Subject: subject, Destination: destination, AnswerTime: answerTime, Duration: time.Duration(duration),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
@@ -783,7 +803,7 @@ func (self *SQLStorage) GetRatedCdrs(timeStart, timeEnd time.Time) ([]*utils.Rat
 }
 
 // Remove CDR data out of all CDR tables based on their cgrid
-func (self *SQLStorage) RemRatedCdrs(cgrIds []string) error {
+func (self *SQLStorage) RemStoredCdrs(cgrIds []string) error {
 	if len(cgrIds) == 0 {
 		return nil
 	}

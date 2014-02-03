@@ -19,7 +19,8 @@ CREATE TABLE `cost_details` (
   `timespans` text,
   `source` varchar(64) NOT NULL,
   `runid`  varchar(64) NOT NULL,
+  `cost_time` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `costid` (`cgrid`,`subject`,`runid`)
+  UNIQUE KEY `costid` (`cgrid`,`runid`)
 );
 

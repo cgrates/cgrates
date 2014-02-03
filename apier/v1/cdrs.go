@@ -45,7 +45,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return err
 		}
 	}
-	cdrs, err := self.CdrDb.GetRatedCdrs(tStart, tEnd)
+	cdrs, err := self.CdrDb.GetStoredCdrs(tStart, tEnd, attr.SkipErrors, attr.SkipRated)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			for idx, cdr := range cdrs {
 				cgrIds[idx] = cdr.CgrId
 			}
-			if err := self.CdrDb.RemRatedCdrs(cgrIds); err != nil {
+			if err := self.CdrDb.RemStoredCdrs(cgrIds); err != nil {
 				return err
 			}
 		}

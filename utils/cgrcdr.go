@@ -107,14 +107,14 @@ func (cgrCdr CgrCdr) GetDuration() time.Duration {
 
 // Used in mediation, fieldsMandatory marks whether missing field out of request represents error or can be ignored
 // If the fields in parameters start with ^ their value is considered instead of dynamically retrieving it from CDR
-func (cgrCdr CgrCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*RatedCDR, error) {
+func (cgrCdr CgrCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
 	if IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
 		return nil, errors.New(fmt.Sprintf("%s:FieldName", ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
 	}
 	var err error
 	var hasKey bool
 	var aTimeStr, durStr string
-	rtCdr := new(RatedCDR)
+	rtCdr := new(StoredCdr)
 	rtCdr.MediationRunId = runId
 	rtCdr.Cost = -1.0 // Default for non-rated CDR
 	if rtCdr.AccId, hasKey = cgrCdr[ACCID]; !hasKey {

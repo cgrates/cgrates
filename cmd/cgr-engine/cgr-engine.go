@@ -117,8 +117,24 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		exitChan <- true
 		return
 	}
+	engine.Logger.Info("Registering Mediator RPC service.")
+	server.RpcRegister(&apier.MediatorV1{Mediator: medi})
+	
 	close(chanDone)
 }
+
+// In case of internal mediator apier needs to wait for it to initialize before offering it's methods
+func registerApier(waitOnChans []chan struct{}) {
+	for _, chn := range waitOnChans {
+		select {
+                case <-time.After(5 * time.Minute):
+			engine.Logger.Crit(fmt.Sprintf("<Apier> Timeout waiting for dependecies to start."))
+			exitChan <- true
+			return
+                case <-chn:
+                }
+	}
+	}
 
 func startCdrc(cdrsChan chan struct{}) {
 	if cfg.CdrcCdrs == utils.INTERNAL {
@@ -200,7 +216,14 @@ func startHistoryServer(chanDone chan struct{}) {
 func startHistoryAgent(scribeServer history.Scribe, chanServerStarted chan struct{}) {
 	if cfg.HistoryServer == utils.INTERNAL { // For internal requests, wait for server to come online before connecting
 		engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Connecting internally to HistoryServer"))
-		<-chanServerStarted // If server is not enabled, will have deadlock here
+		select {
+                case <-time.After(1 * time.Minute):
+			engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Timeout waiting for server to start."))
+			exitChan <- true
+			return
+                case <-chanServerStarted:
+                }
+		//<-chanServerStarted // If server is not enabled, will have deadlock here
 	} else { // Connect in iteration since there are chances of concurrency here
 		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable
 			//engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Trying to connect, iteration: %d, time %s", i, time.Now()))
@@ -376,13 +399,13 @@ func main() {
 	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, Config: cfg}
 
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterBalancer != utils.INTERNAL {
-		engine.Logger.Info("Registering CGRateS Rater service")
+		engine.Logger.Info("Registering Rater service")
 		server.RpcRegister(responder)
 		server.RpcRegister(apier)
 	}
 
 	if cfg.BalancerEnabled {
-		engine.Logger.Info("Registering CGRateS Balancer service.")
+		engine.Logger.Info("Registering Balancer service.")
 		go stopBalancerSignalHandler()
 		stopHandled = true
 		responder.Bal = bal

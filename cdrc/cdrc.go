@@ -117,8 +117,8 @@ func (self *Cdrc) parseFieldsConfig() error {
 }
 
 // Takes the record out of csv and turns it into http form which can be posted
-func (self *Cdrc) recordAsRatedCdr(record []string) (*utils.RatedCDR, error) {
-	ratedCdr := &utils.RatedCDR{CdrSource: self.cgrCfg.CdrcSourceId, ExtraFields: map[string]string{}, Cost: -1}
+func (self *Cdrc) recordAsStoredCdr(record []string) (*utils.StoredCdr, error) {
+	ratedCdr := &utils.StoredCdr{CdrSource: self.cgrCfg.CdrcSourceId, ExtraFields: map[string]string{}, Cost: -1}
 	var err error
 	for cfgFieldName, cfgFieldVal := range self.cfgCdrFields {
 		var fieldVal string
@@ -228,7 +228,7 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue // Other csv related errors, ignore
 		}
-		rawCdr, err := self.recordAsRatedCdr(record)
+		rawCdr, err := self.recordAsStoredCdr(record)
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue
