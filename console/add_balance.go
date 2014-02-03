@@ -20,9 +20,10 @@ package console
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
-	"strconv"
 )
 
 func init() {
@@ -38,7 +39,7 @@ type CmdAddBalance struct {
 
 // name should be exec's name
 func (self *CmdAddBalance) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_balance <tenant> <account> <value> [<balanceid=monetary|sms|internet|internet_time|minutes> [<weight> [overwrite]]]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_balance <tenant> <account> <direction> <value> [<balanceid=monetary|sms|internet|internet_time|minutes> [<weight> [overwrite]]]")
 }
 
 // set param defaults
@@ -59,21 +60,22 @@ func (self *CmdAddBalance) FromArgs(args []string) error {
 	self.defaults()
 	self.rpcParams.Tenant = args[2]
 	self.rpcParams.Account = args[3]
-	value, err := strconv.ParseFloat(args[4], 64)
+	self.rpcParams.Direction = args[4]
+	value, err := strconv.ParseFloat(args[5], 64)
 	if err != nil {
 		return err
 	}
 	self.rpcParams.Value = value
-	if len(args) > 5 {
-		self.rpcParams.BalanceId = args[5]
-	}
 	if len(args) > 6 {
-		if self.rpcParams.Weight, err = strconv.ParseFloat(args[6], 64); err != nil {
+		self.rpcParams.BalanceId = args[6]
+	}
+	if len(args) > 7 {
+		if self.rpcParams.Weight, err = strconv.ParseFloat(args[7], 64); err != nil {
 			return fmt.Errorf("Cannot parse weight parameter")
 		}
 	}
-	if len(args) > 7 {
-		if args[7] == "overwrite" {
+	if len(args) > 8 {
+		if args[8] == "overwrite" {
 			self.rpcParams.Overwrite = true
 		}
 	}
