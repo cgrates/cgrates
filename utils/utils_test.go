@@ -294,14 +294,21 @@ func TestRound(t *testing.T) {
 }
 
 func TestSplitPrefix(t *testing.T) {
-	a := SplitPrefix("0123456789")
+	a := SplitPrefix("0123456789", 1)
 	if len(a) != 10 {
 		t.Error("Error splitting prefix: ", a)
 	}
 }
 
+func TestSplitPrefixFive(t *testing.T) {
+	a := SplitPrefix("0123456789", 5)
+	if len(a) != 6 {
+		t.Error("Error splitting prefix: ", a)
+	}
+}
+
 func TestSplitPrefixEmpty(t *testing.T) {
-	a := SplitPrefix("")
+	a := SplitPrefix("", 1)
 	if len(a) != 0 {
 		t.Error("Error splitting prefix: ", a)
 	}

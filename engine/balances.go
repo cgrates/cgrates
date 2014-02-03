@@ -32,10 +32,10 @@ type Balance struct {
 	Value          float64
 	ExpirationDate time.Time
 	Weight         float64
-	GroupIds       []string
-	DestinationId  string
-	RateSubject    string
-	precision      int
+	//GroupIds       []string
+	DestinationId string
+	RateSubject   string
+	precision     int
 }
 
 func (b *Balance) Equal(o *Balance) bool {

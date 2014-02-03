@@ -49,7 +49,9 @@ func init() {
 }
 
 const (
+	// these might be better in the confs under optimizations section
 	RECURSION_MAX_DEPTH = 3
+	MIN_PREFIX_MATCH    = 1
 	FALLBACK_SUBJECT    = utils.ANY
 )
 
