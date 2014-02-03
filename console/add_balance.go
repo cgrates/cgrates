@@ -39,7 +39,7 @@ type CmdAddBalance struct {
 
 // name should be exec's name
 func (self *CmdAddBalance) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_balance <tenant> <account> <direction> <value> [<balanceid=monetary|sms|internet|internet_time|minutes> [<weight> [overwrite]]]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_balance <tenant> <account> <value> [monetary|sms|internet|internet_time|minutes [<destinationid> [<weight> [overwrite]]]]")
 }
 
 // set param defaults
@@ -60,14 +60,16 @@ func (self *CmdAddBalance) FromArgs(args []string) error {
 	self.defaults()
 	self.rpcParams.Tenant = args[2]
 	self.rpcParams.Account = args[3]
-	self.rpcParams.Direction = args[4]
-	value, err := strconv.ParseFloat(args[5], 64)
+	value, err := strconv.ParseFloat(args[4], 64)
 	if err != nil {
 		return err
 	}
 	self.rpcParams.Value = value
+	if len(args) > 5 {
+		self.rpcParams.BalanceId = args[5]
+	}
 	if len(args) > 6 {
-		self.rpcParams.BalanceId = args[6]
+		self.rpcParams.DestinationId = args[6]
 	}
 	if len(args) > 7 {
 		if self.rpcParams.Weight, err = strconv.ParseFloat(args[7], 64); err != nil {
