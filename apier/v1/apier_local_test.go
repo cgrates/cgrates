@@ -19,20 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
-	"path"
-	"reflect"
-	"os/exec"
-	"testing"
-	"time"
-	"strings"
-	"net/url"
-	"net/http"
-	"net/rpc"
 	"flag"
 	"fmt"
+	"net/http"
+	"net/rpc"
+	"net/url"
+	"os/exec"
+	"path"
+	"reflect"
+	"strings"
+	"testing"
+	"time"
 
-	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // ToDo: Replace rpc.Client with internal rpc server and Apier using internal map as both data and stor so we can run the tests non-local

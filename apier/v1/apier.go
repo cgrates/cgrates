@@ -543,6 +543,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply 
 		path.Join(attrs.FolderPath, utils.DESTINATION_RATES_CSV),
 		path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
+		path.Join(attrs.FolderPath, utils.SHARED_GROUPS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),

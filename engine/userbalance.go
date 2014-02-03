@@ -281,7 +281,8 @@ func (ub *UserBalance) debitMinutesFromSharedBalances(sharedGroupName string, cc
 			sharedMinuteBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[MINUTES+cc.Direction], sharedGroupName)
 			allMinuteSharedBalances = append(allMinuteSharedBalances, sharedMinuteBalances...)
 		}
-		for sharedBalance := sharedGroup.PopBalanceByStrategy(&allMinuteSharedBalances); sharedBalance != nil; sharedBalance = sharedGroup.PopBalanceByStrategy(&allMinuteSharedBalances) {
+		for sharedBalance := sharedGroup.PopBalanceByStrategy(ub.Id, &allMinuteSharedBalances); sharedBalance != nil; sharedBalance = sharedGroup.PopBalanceByStrategy(ub.Id,
+			&allMinuteSharedBalances) {
 			initialValue := sharedBalance.Value
 			sharedBalance.DebitMinutes(cc, count, sharedBalance.userBalance, moneyBalances)
 			if sharedBalance.Value != initialValue {
@@ -320,7 +321,7 @@ func (ub *UserBalance) debitMoneyFromSharedBalances(sharedGroupName string, cc *
 			sharedMoneyBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[CREDIT+cc.Direction], sharedGroupName)
 			allMoneySharedBalances = append(allMoneySharedBalances, sharedMoneyBalances...)
 		}
-		for sharedBalance := sharedGroup.PopBalanceByStrategy(&allMoneySharedBalances); sharedBalance != nil; sharedBalance = sharedGroup.PopBalanceByStrategy(&allMoneySharedBalances) {
+		for sharedBalance := sharedGroup.PopBalanceByStrategy(ub.Id, &allMoneySharedBalances); sharedBalance != nil; sharedBalance = sharedGroup.PopBalanceByStrategy(ub.Id, &allMoneySharedBalances) {
 			initialValue := sharedBalance.Value
 			sharedBalance.DebitMoney(cc, count, sharedBalance.userBalance)
 			if sharedBalance.Value != initialValue {

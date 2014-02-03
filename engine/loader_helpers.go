@@ -40,6 +40,7 @@ type TPLoader interface {
 	LoadTimings() error
 	LoadRatingPlans() error
 	LoadRatingProfiles() error
+	LoadSharedGroups() error
 	LoadActions() error
 	LoadActionTimings() error
 	LoadActionTriggers() error
@@ -198,6 +199,9 @@ var FileValidators = map[string]*FileLineRegexValidator{
 	utils.RATING_PROFILES_CSV: &FileLineRegexValidator{utils.RATE_PROFILES_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){2}(?:\*out\s*,\s*){1}(?:\*any\s*,\s*|\w+\s*,\s*){1}(?:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z){1}(?:\w*\s*,?\s*){2}$`),
 		"Tenant([0-9A-Za-z_]),TOR([0-9A-Za-z_]),Direction(*out),Subject([0-9A-Za-z_]|*all),RatesFallbackSubject([0-9A-Za-z_]|<empty>),RatesTimingTag([0-9A-Za-z_]),ActivationTime([0-9T:X])"},
+	utils.SHARED_GROUPS_CSV: &FileLineRegexValidator{utils.SHARED_GROUPS_NRCOLS,
+		regexp.MustCompile(``),
+		""},
 	utils.ACTIONS_CSV: &FileLineRegexValidator{utils.ACTIONS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*),(?:\*\w+\s*),(?:\*\w+\s*)?,(?:\*out\s*)?,(?:\d+\s*)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\*any|\w+\s*)?,(?:\*\w+\s*)?,(?:\d+\.?\d*\s*)?,(?:\S+\s*)?,(?:\d+\.?\d*\s*)$`),
 		"Tag([0-9A-Za-z_]),Action([0-9A-Za-z_]),BalanceType([*a-z_]),Direction(*out),Units([0-9]),ExpiryTime(*[a-z_]|+[0-9][smh]|[0-9])DestinationTag([0-9A-Za-z_]|*all),RatingSubject([0-9A-Za-z_]),BalanceWeight([0-9.]),ExtraParameters([0-9A-Za-z_:;]),Weight([0-9.])"},

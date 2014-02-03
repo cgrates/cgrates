@@ -31,12 +31,14 @@ const (
 )
 
 type SharedGroup struct {
-	Id          string
+	Id                string
+	AccountParameters map[string]*SharingParameters
+	Members           []string
+}
+
+type SharingParameters struct {
 	Strategy    string
-	Account     string
 	RateSubject string
-	Weight      float64
-	Members     []string
 }
 
 func (sg *SharedGroup) GetMembersExceptUser(ubId string) []string {
@@ -51,19 +53,21 @@ func (sg *SharedGroup) GetMembersExceptUser(ubId string) []string {
 	return sg.Members
 }
 
-func (sg *SharedGroup) PopBalanceByStrategy(balanceChain *BalanceChain) (bal *Balance) {
+func (sg *SharedGroup) PopBalanceByStrategy(account string, balanceChain *BalanceChain) (bal *Balance) {
 	bc := *balanceChain
 	if len(bc) == 0 {
 		return
 	}
 	index := 0
-	switch sg.Strategy {
+	sharingParameters := sg.AccountParameters[account]
+	switch sharingParameters.Strategy {
 	case STRATEGY_RANDOM:
 		rand.Seed(time.Now().Unix())
 		index = rand.Intn(len(bc))
 	case STRATEGY_LOWEST_FIRST:
 		minVal := math.MaxFloat64
 		for i, b := range bc {
+			b.RateSubject = sharingParameters.RateSubject
 			if b.Value < minVal {
 				minVal = b.Value
 				index = i
@@ -72,6 +76,7 @@ func (sg *SharedGroup) PopBalanceByStrategy(balanceChain *BalanceChain) (bal *Ba
 	case STRATEGY_HIGHEST_FIRST:
 		maxVal := math.SmallestNonzeroFloat64
 		for i, b := range bc {
+			b.RateSubject = sharingParameters.RateSubject
 			if b.Value > maxVal {
 				maxVal = b.Value
 				index = i

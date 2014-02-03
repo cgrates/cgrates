@@ -44,8 +44,10 @@ func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 		&Balance{Value: 1.0},
 		&Balance{Value: 3.0},
 	}
-	sg := &SharedGroup{Strategy: STRATEGY_LOWEST_FIRST}
-	b := sg.PopBalanceByStrategy(&bc)
+	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
+		"test": &SharingParameters{Strategy: STRATEGY_LOWEST_FIRST}},
+	}
+	b := sg.PopBalanceByStrategy("test", &bc)
 	if b.Value != 1.0 {
 		t.Error("Error popping the right balance according to strategy: ", b, bc)
 	}
@@ -62,8 +64,10 @@ func TestSharedPopBalanceByStrategyHigh(t *testing.T) {
 		&Balance{Value: 1.0},
 		&Balance{Value: 3.0},
 	}
-	sg := &SharedGroup{Strategy: STRATEGY_HIGHEST_FIRST}
-	b := sg.PopBalanceByStrategy(&bc)
+	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
+		"test": &SharingParameters{Strategy: STRATEGY_HIGHEST_FIRST}},
+	}
+	b := sg.PopBalanceByStrategy("test", &bc)
 	if b.Value != 3.0 {
 		t.Error("Error popping the right balance according to strategy: ", b, bc)
 	}
