@@ -61,7 +61,7 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 	return nil
 }
 
-type AttrGetBalance struct {
+type AttrGetUserBalance struct {
 	Tenant    string
 	Account   string
 	BalanceId string
@@ -69,22 +69,14 @@ type AttrGetBalance struct {
 }
 
 // Get balance
-func (self *ApierV1) GetBalance(attr *AttrGetBalance, reply *float64) error {
+func (self *ApierV1) GetUserBalance(attr *AttrGetUserBalance, reply *engine.UserBalance) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	userBalance, err := self.AccountDb.GetUserBalance(tag)
 	if err != nil {
 		return err
 	}
 
-	if attr.Direction == "" {
-		attr.Direction = engine.OUTBOUND
-	}
-
-	if balance, balExists := userBalance.BalanceMap[attr.BalanceId+attr.Direction]; !balExists {
-		*reply = 0.0
-	} else {
-		*reply = balance.GetTotalValue()
-	}
+	*reply = *userBalance
 	return nil
 }
 
