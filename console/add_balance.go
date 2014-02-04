@@ -39,7 +39,7 @@ type CmdAddBalance struct {
 
 // name should be exec's name
 func (self *CmdAddBalance) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_balance <tenant> <account> <value> [monetary|sms|internet|internet_time|minutes [<destinationid> [<weight> [overwrite]]]]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_balance <tenant> <account> <value> [*monetary|*sms|*internet|*internet_time|*minutes [<destinationid> [<weight> [overwrite]]]]")
 }
 
 // set param defaults

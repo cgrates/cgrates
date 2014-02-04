@@ -248,7 +248,9 @@ func (at *ActionTiming) Execute() (err error) {
 				accountingStorage.SetUserBalance(ub)
 				return 0, nil
 			})
-			Logger.Warning(fmt.Sprintf("Error executing action timing: %s", err))
+			if err != nil {
+				Logger.Warning(fmt.Sprintf("Error executing action timing: %v", err))
+			}
 		}
 	}
 	storageLogger.LogActionTiming(SCHED_SOURCE, at, aac)
