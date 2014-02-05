@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -48,9 +49,10 @@ func NewFileScribe(fileRoot string, saveInterval time.Duration) (*FileScribe, er
 	}
 	s := &FileScribe{fileRoot: fileRoot, gitCommand: gitCommand, savePeriod: saveInterval}
 	s.loopChecker = make(chan int)
-	s.gitInit()
+	files := []string{DESTINATIONS_FN, RATING_PLANS_FN, RATING_PROFILES_FN}
+	s.gitInit(files)
 
-	for _, fn := range []string{DESTINATIONS_FN, RATING_PLANS_FN, RATING_PROFILES_FN} {
+	for _, fn := range files {
 		if err := s.load(fn); err != nil {
 			return nil, err
 		}
@@ -90,7 +92,7 @@ func (s *FileScribe) Record(rec Record, out *int) error {
 	return nil
 }
 
-func (s *FileScribe) gitInit() error {
+func (s *FileScribe) gitInit(files []string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, err := os.Stat(s.fileRoot); os.IsNotExist(err) {
@@ -104,7 +106,9 @@ func (s *FileScribe) gitInit() error {
 		if out, err := cmd.Output(); err != nil {
 			return errors.New(string(out) + " " + err.Error())
 		}
-		for fn, _ := range recordsMap {
+		log.Print("CREATING FILES")
+		for _, fn := range files {
+			log.Print("FILE: ", fn)
 			if f, err := os.Create(filepath.Join(s.fileRoot, fn)); err != nil {
 				return fmt.Errorf("<History> Error writing %s file: %s", fn, err.Error())
 			} else {
