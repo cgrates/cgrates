@@ -26,7 +26,7 @@ import (
 )
 
 func init() {
-	commands["get_balance"] = &CmdGetBalances{}
+	commands["get_balances"] = &CmdGetBalances{}
 }
 
 // Commander implementation
