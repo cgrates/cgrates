@@ -118,6 +118,9 @@ func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
 
 func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyBalances BalanceChain) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
+		if b.Value <= 0 {
+			return nil
+		}
 		ts := cc.Timespans[tsIndex]
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
@@ -234,9 +237,27 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					}
 				}
 			}
+			// make sure the last paid ts is split by the unpaid increment to retain
+			// original rating interval
+			if len(paidTs) > 0 {
+				lastPaidTs := paidTs[len(paidTs)-1]
+				if isPaid, lastPaidIncrementIndex := lastPaidTs.IsPaid(); !isPaid {
+					if lastPaidIncrementIndex > 0 {
+						// shorten the last paid ts
+						lastPaidTs.SplitByIncrement(lastPaidIncrementIndex)
+					} else {
+						// delete if not paid
+						paidTs[len(paidTs)-1] = nil
+						paidTs = paidTs[:len(paidTs)-1]
+					}
+				}
+			}
 			newTs := ts.SplitByIncrement(incrementIndex)
 			increment.paid = (&cc.Timespans).OverlapWithTimeSpans(paidTs, newTs, tsIndex)
 			tsWasSplit = increment.paid
+			if !increment.paid {
+				break
+			}
 		}
 	}
 	return nil
@@ -244,6 +265,9 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 
 func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
+		if b.Value <= 0 {
+			return nil
+		}
 		ts := cc.Timespans[tsIndex]
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
@@ -300,6 +324,19 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 						} else {
 							increment.paid = false
 							break
+						}
+					}
+				}
+				if len(paidTs) > 0 {
+					lastPaidTs := paidTs[len(paidTs)-1]
+					if isPaid, lastPaidIncrementIndex := lastPaidTs.IsPaid(); !isPaid {
+						if lastPaidIncrementIndex > 0 {
+							// shorten the last paid ts
+							lastPaidTs.SplitByIncrement(lastPaidIncrementIndex)
+						} else {
+							// delete if not paid
+							paidTs[len(paidTs)-1] = nil
+							paidTs = paidTs[:len(paidTs)-1]
 						}
 					}
 				}

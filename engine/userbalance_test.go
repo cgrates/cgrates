@@ -617,6 +617,9 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
 	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != 70*time.Second {
+		for _, ts := range cc.Timespans {
+			t.Log(ts)
+		}
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
 	}
 }
@@ -736,8 +739,9 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 ||
 		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 ||
 		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -30 {
-		t.Errorf("Error extracting minutes from balance: %+v, %+v",
-			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
+		t.Errorf("Error extracting minutes from balance: %+v, %+v, %+v",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value,
+			rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value)
 	}
 	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != 50*time.Second || cc.Timespans[1].GetDuration() != 30*time.Second {
 		for _, ts := range cc.Timespans {
@@ -784,7 +788,7 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
 		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -5 {
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -10 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v %+v",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value,
 			rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value)
