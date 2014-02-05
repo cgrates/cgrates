@@ -656,7 +656,6 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 		cc.Account,
 		cc.Subject,
 		cc.Destination,
-		cc.ConnectFee,
 		cc.Cost,
 		tss,
 		source,
@@ -673,7 +672,7 @@ func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCos
 	var timespansJson string
 	cc = &CallCost{Cost: -1}
 	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
-		&cc.Destination, &cc.ConnectFee, &cc.Cost, &timespansJson, &src)
+		&cc.Destination, &cc.Cost, &timespansJson, &src)
 	if err = json.Unmarshal([]byte(timespansJson), &cc.Timespans); err != nil {
 		return nil, err
 	}

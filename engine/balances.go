@@ -138,7 +138,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 				if b.Value >= amount {
 					b.Value -= amount
 					increment.SetMinuteBalance(b.Uuid)
-					increment.MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
+					increment.MinuteInfo = &MinuteInfo{cc.Destination, amount}
 					increment.Cost = 0
 					increment.paid = true
 					if count {
@@ -180,7 +180,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					cc.Timespans.RemoveOverlapedFromIndex(tsIndex)
 					b.Value -= amount
 					newTs.Increments[0].SetMinuteBalance(b.Uuid)
-					newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
+					newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount}
 					newTs.Increments[0].Cost = 0
 					newTs.Increments[0].paid = true
 					if count {
@@ -222,7 +222,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 
 						nInc.SetMinuteBalance(b.Uuid)
 						nInc.SetMoneyBalance(moneyBal.Uuid)
-						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds, 0}
+						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds}
 						nInc.paid = true
 						if count {
 							ub.countUnits(&Action{BalanceId: MINUTES, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})

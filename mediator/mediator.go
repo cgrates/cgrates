@@ -21,10 +21,11 @@ package mediator
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"time"
 )
 
 func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engine.CdrStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
@@ -123,7 +124,7 @@ func (self *Mediator) rateCDR(cdr *utils.StoredCdr) error {
 	} else if qryCC == nil {
 		return errors.New("No cost returned from rater")
 	}
-	cdr.Cost = qryCC.ConnectFee + qryCC.Cost
+	cdr.Cost = qryCC.Cost
 	return nil
 }
 

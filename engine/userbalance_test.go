@@ -510,13 +510,12 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
-		ConnectFee:  10.0,
 		Timespans: []*TimeSpan{
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				RateInterval: &RateInterval{Rating: &RIRate{ConnectFee: 10.0, Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),

@@ -155,8 +155,8 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 	usefulMinuteBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[MINUTES+cc.Direction])
 	usefulMoneyBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[CREDIT+cc.Direction])
 	// debit connect fee
-	if cc.ConnectFee > 0 {
-		amount := cc.ConnectFee
+	if cc.GetConnectFee() > 0 {
+		amount := cc.GetConnectFee()
 		paid := false
 		for _, b := range usefulMoneyBalances {
 			if b.Value >= amount {

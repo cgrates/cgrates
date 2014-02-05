@@ -52,7 +52,7 @@ type Increment struct {
 type MinuteInfo struct {
 	DestinationId string
 	Quantity      float64
-	Price         float64
+	//Price         float64
 }
 
 type TimeSpans []*TimeSpan
@@ -124,7 +124,6 @@ func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSp
 		} else {
 			tss = append(tss[:overlapStartIndex], tss[overlapEndIndex+1:]...)
 		}
-
 		// append the timespans to outer tss
 		for i, pts := range paidTs {
 			tss = append(tss, nil)
