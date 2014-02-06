@@ -404,14 +404,16 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
-		Direction:   cd.Direction,
-		TOR:         cd.TOR,
-		Tenant:      cd.Tenant,
-		Account:     cd.Account,
-		Destination: cd.Destination,
-		Subject:     cd.Subject,
-		Cost:        cost,
-		Timespans:   timespans}
+		Direction:        cd.Direction,
+		TOR:              cd.TOR,
+		Tenant:           cd.Tenant,
+		Account:          cd.Account,
+		Destination:      cd.Destination,
+		Subject:          cd.Subject,
+		Cost:             cost,
+		Timespans:        timespans,
+		deductConnectFee: cd.LoopIndex == 0,
+	}
 	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	return cc, err
 }

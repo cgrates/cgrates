@@ -597,6 +597,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -638,6 +639,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 75, DestinationId: "NAT", RateSubject: "minu"}},
@@ -674,6 +676,7 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -722,6 +725,7 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -772,6 +776,7 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},

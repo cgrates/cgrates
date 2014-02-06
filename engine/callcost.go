@@ -28,6 +28,7 @@ type CallCost struct {
 	Direction, TOR, Tenant, Subject, Account, Destination string
 	Cost                                                  float64
 	Timespans                                             TimeSpans
+	deductConnectFee                                      bool
 }
 
 // Pretty printing for call cost

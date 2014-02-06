@@ -209,26 +209,28 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 		}
 	}
 CONNECT_FEE:
-	amount := cc.GetConnectFee()
-	connectFeePaid := false
-	for _, b := range usefulMoneyBalances {
-		if b.Value >= amount {
-			b.Value -= amount
+	if cc.deductConnectFee {
+		amount := cc.GetConnectFee()
+		connectFeePaid := false
+		for _, b := range usefulMoneyBalances {
+			if b.Value >= amount {
+				b.Value -= amount
+				// the conect fee is not refundable!
+				if count {
+					ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+				}
+				connectFeePaid = true
+				break
+			}
+		}
+		// debit connect fee
+		if cc.GetConnectFee() > 0 && !connectFeePaid {
+			// there are no money for the connect fee; go negative
+			moneyBalance.Value -= amount
 			// the conect fee is not refundable!
 			if count {
 				ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 			}
-			connectFeePaid = true
-			break
-		}
-	}
-	// debit connect fee
-	if cc.GetConnectFee() > 0 && !connectFeePaid {
-		// there are no money for the connect fee; go negative
-		moneyBalance.Value -= amount
-		// the conect fee is not refundable!
-		if count {
-			ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 		}
 	}
 	return returnError
