@@ -343,6 +343,9 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 				newTs := ts.SplitByIncrement(incrementIndex)
 				increment.paid = (&cc.Timespans).OverlapWithTimeSpans(paidTs, newTs, tsIndex)
 				tsWasSplit = increment.paid
+				if !increment.paid {
+					break
+				}
 			}
 		}
 	}
