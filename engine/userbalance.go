@@ -154,31 +154,6 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 	usefulMinuteBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[MINUTES+cc.Direction])
 	usefulMoneyBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[CREDIT+cc.Direction])
-	// debit connect fee
-	if cc.GetConnectFee() > 0 {
-		amount := cc.GetConnectFee()
-		paid := false
-		for _, b := range usefulMoneyBalances {
-			if b.Value >= amount {
-				b.Value -= amount
-				// the conect fee is not refundable!
-				if count {
-					ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
-				}
-				paid = true
-				break
-			}
-		}
-		if !paid {
-			// there are no money for the connect fee; go negative
-			moneyBalance := ub.GetDefaultMoneyBalance(cc.Direction)
-			moneyBalance.Value -= amount
-			// the conect fee is not refundable!
-			if count {
-				ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
-			}
-		}
-	}
 	// debit minutes
 	for _, balance := range usefulMinuteBalances {
 		balance.DebitMinutes(cc, count, ub, usefulMoneyBalances)
@@ -197,18 +172,18 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			}
 		}
 	}
+	var returnError error
+	insuficientCreditError := errors.New("not enough credit")
+	moneyBalance := ub.GetDefaultMoneyBalance(cc.Direction)
 	if allPaidWithMinutes {
-		return nil
+		goto CONNECT_FEE
 	}
 	// debit money
 	for _, balance := range usefulMoneyBalances {
 		balance.DebitMoney(cc, count, ub)
 	}
-	var returnError error
-	insuficientCreditError := errors.New("not enough credit")
 	// get the highest priority money balanance
 	// and go negative on it with the amount still unpaid
-	moneyBalance := ub.GetDefaultMoneyBalance(cc.Direction)
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
 		if ts.Increments == nil {
@@ -231,6 +206,29 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				}
 				returnError = insuficientCreditError
 			}
+		}
+	}
+CONNECT_FEE:
+	amount := cc.GetConnectFee()
+	connectFeePaid := false
+	for _, b := range usefulMoneyBalances {
+		if b.Value >= amount {
+			b.Value -= amount
+			// the conect fee is not refundable!
+			if count {
+				ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+			}
+			connectFeePaid = true
+			break
+		}
+	}
+	// debit connect fee
+	if cc.GetConnectFee() > 0 && !connectFeePaid {
+		// there are no money for the connect fee; go negative
+		moneyBalance.Value -= amount
+		// the conect fee is not refundable!
+		if count {
+			ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 		}
 	}
 	return returnError
