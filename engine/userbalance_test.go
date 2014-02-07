@@ -214,7 +214,7 @@ func TestDebitNegativeMoneyBalance(t *testing.T) {
 }
 
 func TestDebitCreditZeroSecond(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	b1 := &Balance{Uuid: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1s"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -243,7 +243,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 }
 
 func TestDebitCreditZeroMinute(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1m"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -276,8 +276,8 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 	}
 }
 func TestDebitCreditZeroMixedMinute(t *testing.T) {
-	b1 := &Balance{Uuid: "testm", Value: 70, Weight: 5, DestinationId: "NAT", RateSubject: ZEROMINUTE}
-	b2 := &Balance{Uuid: "tests", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	b1 := &Balance{Uuid: "testm", Value: 70, Weight: 5, DestinationId: "NAT", RateSubject: "*zero1m"}
+	b2 := &Balance{Uuid: "tests", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1s"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -311,7 +311,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 }
 
 func TestDebitCreditNoCredit(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1m"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -351,7 +351,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 }
 
 func TestDebitCreditHasCredit(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1m"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -393,7 +393,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 }
 
 func TestDebitCreditSplitMinutesMoney(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	b1 := &Balance{Uuid: "testb", Value: 10, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1s"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -430,7 +430,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 }
 
 func TestDebitCreditMoreTimespans(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 150, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 150, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1m"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -467,8 +467,8 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 }
 
 func TestDebitCreditMoreTimespansMixed(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
-	b2 := &Balance{Uuid: "testa", Value: 150, Weight: 5, DestinationId: "NAT", RateSubject: ZEROSECOND}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1m"}
+	b2 := &Balance{Uuid: "testa", Value: 150, Weight: 5, DestinationId: "NAT", RateSubject: "*zero1s"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
@@ -506,7 +506,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 }
 
 func TestDebitCreditNoConectFeeCredit(t *testing.T) {
-	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: ZEROMINUTE}
+	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RateSubject: "*zero1m"}
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",

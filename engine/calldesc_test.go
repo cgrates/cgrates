@@ -296,7 +296,7 @@ func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 		Destination: "0723",
 		Amount:      1000}
 	result, err := cd.GetMaxSessionDuration()
-	expected := 300 * time.Second
+	expected := time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -314,7 +314,7 @@ func TestMaxSessionTimeWithUserBalanceAccount(t *testing.T) {
 		Destination: "0723",
 		Amount:      1000}
 	result, err := cd.GetMaxSessionDuration()
-	expected := 300 * time.Second
+	expected := time.Minute
 	if result != expected || err != nil {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -331,8 +331,8 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Destination: "0723",
 		Amount:      5400}
 	result, err := cd.GetMaxSessionDuration()
-	if result != 100*time.Second || err != nil {
-		t.Errorf("Expected %v was %v", 100, result)
+	if result != time.Minute || err != nil {
+		t.Errorf("Expected %v was %v", time.Minute, result)
 	}
 }
 
@@ -343,13 +343,54 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		Direction:   "*out",
 		TOR:         "0",
 		Tenant:      "vdf",
-		Subject:     "broker",
+		Subject:     "minu_from_tm",
+		Account:     "minu",
 		Destination: "0723",
 		Amount:      5400}
 	initial := cd.Clone()
 	cd.GetMaxSessionDuration()
 	if !reflect.DeepEqual(cd, initial) {
 		t.Errorf("GetMaxSessionDuration is changing the call descriptor %+v != %+v", cd, initial)
+	}
+}
+
+func TestMaxDebitDurationNoGreatherThanInitialDuration(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "minu_from_tm",
+		Account:     "minu",
+		Destination: "0723",
+		Amount:      1000}
+	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
+	result, _ := cd.GetMaxSessionDuration()
+	if result > initialDuration {
+		t.Error("max session duration greather than initial duration", initialDuration, result)
+	}
+}
+
+func TestDebitAndMaxDebit(t *testing.T) {
+	cd1 := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "minu_from_tm",
+		Account:     "minu",
+		Destination: "0723",
+		Amount:      5400}
+	cd2 := cd1.Clone()
+	cc1, err1 := cd1.Debit()
+	cc2, err2 := cd2.MaxDebit()
+	if err1 != nil || err2 != nil {
+		t.Error("Error debiting and/or maxdebiting: ", err1, err2)
+	}
+	if !reflect.DeepEqual(cc1, cc2) {
+		t.Errorf("Debit and MaxDebit differ: %+v != %+v", cc1, cc2)
 	}
 }
 

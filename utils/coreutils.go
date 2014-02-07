@@ -187,3 +187,22 @@ func ParseDurationWithSecs(durStr string) (time.Duration, error) {
 func BalanceKey(tenant, account, direction string) string {
 	return fmt.Sprintf("%s:%s:%s", direction, tenant, account)
 }
+
+// returns the minimum duration between the two
+func MinDuration(d1, d2 time.Duration) time.Duration {
+	if d1 < d2 {
+		return d1
+	}
+	return d2
+}
+
+func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
+	if rateSubj == "" {
+		rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1s"
+	}
+	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {
+		return 0, errors.New("malformed rating subject: " + rateSubj)
+	}
+	durStr := rateSubj[len(ZERO_RATING_SUBJECT_PREFIX):]
+	return time.ParseDuration(durStr)
+}
