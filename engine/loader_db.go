@@ -41,6 +41,7 @@ type DbReader struct {
 	destinationRates map[string]*utils.TPDestinationRate
 	ratingPlans      map[string]*RatingPlan
 	ratingProfiles   map[string]*RatingProfile
+	sharedGroups     map[string]*SharedGroup
 }
 
 func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb AccountingStorage, tpid string) *DbReader {
@@ -54,6 +55,7 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
+	c.sharedGroups = make(map[string]*SharedGroup)
 	return c
 }
 
@@ -383,6 +385,10 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 			return err
 		}
 	}
+	return nil
+}
+
+func (dbr *DbReader) LoadSharedGroups() (err error) {
 	return nil
 }
 
