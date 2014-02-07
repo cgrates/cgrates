@@ -310,11 +310,19 @@ type AttrExpFileCdrs struct {
 	CdrFormat    string // Cdr output file format <utils.CdreCdrFormats>
 	TimeStart    string // If provided, will represent the starting of the CDRs interval (>=)
 	TimeEnd      string // If provided, will represent the end of the CDRs interval (<)
+	SkipErrors bool   // Do not export errored CDRs
+	SkipRated  bool   // Do not export rated CDRs
 	RemoveFromDb bool   // If true the CDRs will be also deleted after export
-
 }
 
 type ExportedFileCdrs struct {
 	ExportedFilePath string // Full path to the newly generated export file
 	NumberOfRecords  int    // Number of CDRs in the export file
+}
+
+type AttrRateCdrs struct {
+	TimeStart     string  // Cdrs time start
+	TimeEnd       string // Cdrs time end
+	RerateErrors  bool // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
+	RerateRated   bool // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
 }

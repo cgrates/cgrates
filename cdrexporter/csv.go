@@ -36,7 +36,7 @@ func NewCsvCdrWriter(writer io.Writer, roundDecimals int, extraFields []string) 
 	return &CsvCdrWriter{csv.NewWriter(writer), roundDecimals, extraFields}
 }
 
-func (dcw *CsvCdrWriter) Write(cdr *utils.RatedCDR) error {
+func (dcw *CsvCdrWriter) Write(cdr *utils.StoredCdr) error {
 	primaryFields := []string{cdr.CgrId, cdr.MediationRunId, cdr.AccId, cdr.CdrHost, cdr.ReqType, cdr.Direction, cdr.Tenant, cdr.TOR, cdr.Account, cdr.Subject,
 		cdr.Destination, cdr.AnswerTime.String(), strconv.Itoa(int(cdr.Duration)), strconv.FormatFloat(cdr.Cost, 'f', dcw.roundDecimals, 64)}
 	if len(dcw.extraFields) == 0 {

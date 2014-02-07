@@ -1115,42 +1115,42 @@ func TestApierRemActionTiming(t *testing.T) {
 	}
 }
 
-// Test here GetBalance
-func TestApierGetBalance(t *testing.T) {
+// Test here GetUserBalance
+func TestApierGetUserBalance(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var reply float64
-	attrs := &AttrGetBalance{Tenant: "cgrates.org", Account: "1001", BalanceId: "*monetary", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
-	} else if reply != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
+	var reply *engine.UserBalance
+	attrs := &AttrGetUserBalance{Tenant: "cgrates.org", Account: "1001", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetUserBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetUserBalance: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceId+attrs.Direction].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
 		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply)
 	}
-	attrs = &AttrGetBalance{Tenant: "cgrates.org", Account: "dan", BalanceId: "*monetary", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
-	} else if reply != 1.5 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 1.5, received: %f", reply)
+	attrs = &AttrGetUserBalance{Tenant: "cgrates.org", Account: "dan", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetUserBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetUserBalance: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceId+attrs.Direction].GetTotalValue() != 1.5 {
+		t.Errorf("Calling ApierV1.GetUserBalance expected: 1.5, received: %f", reply)
 	}
 	// The one we have topped up though executeAction
-	attrs = &AttrGetBalance{Tenant: "cgrates.org", Account: "dan2", BalanceId: "*monetary", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
-	} else if reply != 10 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 10, received: %f", reply)
+	attrs = &AttrGetUserBalance{Tenant: "cgrates.org", Account: "dan2", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetUserBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetUserBalance: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceId+attrs.Direction].GetTotalValue() != 10 {
+		t.Errorf("Calling ApierV1.GetUserBalance expected: 10, received: %f", reply)
 	}
-	attrs = &AttrGetBalance{Tenant: "cgrates.org", Account: "dan3", BalanceId: "*monetary", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
-	} else if reply != 3.6 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 3.6, received: %f", reply)
+	attrs = &AttrGetUserBalance{Tenant: "cgrates.org", Account: "dan3", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetUserBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetUserBalance: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceId+attrs.Direction].GetTotalValue() != 3.6 {
+		t.Errorf("Calling ApierV1.GetUserBalance expected: 3.6, received: %f", reply)
 	}
-	attrs = &AttrGetBalance{Tenant: "cgrates.org", Account: "dan6", BalanceId: "*monetary", Direction: "*out"}
-	if err := rater.Call("ApierV1.GetBalance", attrs, &reply); err != nil {
-		t.Error("Got error on ApierV1.GetBalance: ", err.Error())
-	} else if reply != 1 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 1, received: %f", reply)
+	attrs = &AttrGetUserBalance{Tenant: "cgrates.org", Account: "dan6", BalanceId: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetUserBalance", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetUserBalance: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceId+attrs.Direction].GetTotalValue() != 1 {
+		t.Errorf("Calling ApierV1.GetUserBalance expected: 1, received: %f", reply)
 	}
 }
 

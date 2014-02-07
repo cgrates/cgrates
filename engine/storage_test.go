@@ -107,6 +107,17 @@ func TestCacheRefresh(t *testing.T) {
 	}
 }
 
+// Install fails to detect them and starting server will panic, these tests will fix this
+func TestStoreInterfaces(t *testing.T) {
+	rds := new(RedisStorage)
+	var _ RatingStorage = rds
+	var _ AccountingStorage = rds
+	sql := new(SQLStorage)
+	var _ CdrStorage = sql
+	var _ LogStorage = sql
+}
+
+
 /************************** Benchmarks *****************************/
 
 func GetUB() *UserBalance {

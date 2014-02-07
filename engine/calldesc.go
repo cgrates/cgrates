@@ -382,7 +382,7 @@ func (cd *CallDescriptor) GetDuration() time.Duration {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	if cd.CallDuration == 0 {
+	if cd.CallDuration < cd.TimeEnd.Sub(cd.TimeStart) {
 		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	}
 	err := cd.LoadRatingPlans()
@@ -392,12 +392,11 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	}
 	timespans := cd.splitInTimeSpans(nil)
 	cost := 0.0
-	connectionFee := 0.0
 
 	for i, ts := range timespans {
 		// only add connect fee if this is the first/only call cost request
 		if cd.LoopIndex == 0 && i == 0 && ts.RateInterval != nil {
-			connectionFee = ts.RateInterval.Rating.ConnectFee
+			cost += ts.RateInterval.Rating.ConnectFee
 		}
 		cost += ts.getCost()
 	}
@@ -405,15 +404,16 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	cost = utils.Round(cost, roundingDecimals, roundingMethod)
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
-		Direction:   cd.Direction,
-		TOR:         cd.TOR,
-		Tenant:      cd.Tenant,
-		Account:     cd.Account,
-		Destination: cd.Destination,
-		Subject:     cd.Subject,
-		Cost:        cost,
-		ConnectFee:  connectionFee,
-		Timespans:   timespans}
+		Direction:        cd.Direction,
+		TOR:              cd.TOR,
+		Tenant:           cd.Tenant,
+		Account:          cd.Account,
+		Destination:      cd.Destination,
+		Subject:          cd.Subject,
+		Cost:             cost,
+		Timespans:        timespans,
+		deductConnectFee: cd.LoopIndex == 0,
+	}
 	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	return cc, err
 }
@@ -463,7 +463,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	cd.TimeStart = cd.TimeStart.Add(availableDuration)
 	// substract the connect fee
 	cc, err := cd.GetCost()
-	availableCredit -= cc.ConnectFee
+	availableCredit -= cc.GetConnectFee()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Could not get cost for %s: %s.", cd.GetKey(cd.Subject), err.Error()))
 		return 0, err
@@ -503,7 +503,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		//Logger.Debug(fmt.Sprintf("UserBalance: %s", ub))
 		//cCost, _ := json.Marshal(cc)
 		//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
-		if cc.Cost != 0 || cc.ConnectFee != 0 {
+		if cc.Cost != 0 || cc.GetConnectFee() != 0 {
 			userBalance.debitCreditBalance(cc, true)
 		}
 		cost := 0.0

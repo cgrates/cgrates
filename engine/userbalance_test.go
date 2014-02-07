@@ -510,13 +510,12 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 	cc := &CallCost{
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
-		ConnectFee:  10.0,
 		Timespans: []*TimeSpan{
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
 				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
 				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				RateInterval: &RateInterval{Rating: &RIRate{ConnectFee: 10.0, Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
 				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
@@ -534,7 +533,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 		t.Error("Error showing debiting balance error: ", err)
 	}
 
-	if len(cc.Timespans) != 2 || rifsBalance.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != -30 {
+	if len(cc.Timespans) != 2 || rifsBalance.BalanceMap[CREDIT+OUTBOUND].GetTotalValue() != -20 {
 		t.Error("Error cutting at no connect fee: ", rifsBalance.BalanceMap[CREDIT+OUTBOUND].GetTotalValue())
 	}
 }
@@ -598,6 +597,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -613,11 +613,14 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 180 ||
-		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 280 {
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 279 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
 	if len(cc.Timespans) != 1 || cc.Timespans[0].GetDuration() != 70*time.Second {
+		for _, ts := range cc.Timespans {
+			t.Log(ts)
+		}
 		t.Error("Error truncating extra timespans: ", cc.Timespans)
 	}
 }
@@ -636,6 +639,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 75, DestinationId: "NAT", RateSubject: "minu"}},
@@ -648,7 +652,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 		cc.Timespans[0].Increments[0].Duration != time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
-	if rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 5 {
+	if rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 4 {
 		t.Errorf("Error extracting minutes from balance: %+v",
 			rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
@@ -672,6 +676,7 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -687,7 +692,7 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 95 {
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 94 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
@@ -720,6 +725,7 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -736,9 +742,10 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 ||
 		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -30 {
-		t.Errorf("Error extracting minutes from balance: %+v, %+v",
-			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -31 {
+		t.Errorf("Error extracting minutes from balance: %+v, %+v, %+v",
+			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value,
+			rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value)
 	}
 	if len(cc.Timespans) != 2 || cc.Timespans[0].GetDuration() != 50*time.Second || cc.Timespans[1].GetDuration() != 30*time.Second {
 		for _, ts := range cc.Timespans {
@@ -769,6 +776,7 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
+		deductConnectFee: true,
 	}
 	rifsBalance := &UserBalance{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -785,7 +793,7 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
 		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 ||
-		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -5 {
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value != -11 {
 		t.Errorf("Error extracting minutes from balance: %+v, %+v %+v",
 			rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value,
 			rifsBalance.BalanceMap[CREDIT+OUTBOUND][1].Value)

@@ -52,7 +52,7 @@ type Increment struct {
 type MinuteInfo struct {
 	DestinationId string
 	Quantity      float64
-	Price         float64
+	//Price         float64
 }
 
 // Holds information about the balance that made a specific payment
@@ -129,9 +129,10 @@ func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSp
 		if overlapEndIndex == len(tss)-1 {
 			tss = tss[:overlapStartIndex]
 		} else {
-			tss = append(tss[:overlapStartIndex], tss[overlapEndIndex+1:]...)
+			if overlapEndIndex+1 < len(tss) {
+				tss = append(tss[:overlapStartIndex], tss[overlapEndIndex+1:]...)
+			}
 		}
-
 		// append the timespans to outer tss
 		for i, pts := range paidTs {
 			tss = append(tss, nil)

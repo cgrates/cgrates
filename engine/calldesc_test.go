@@ -104,8 +104,8 @@ func TestGetCost(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700, ConnectFee: 1}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2701}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -115,8 +115,8 @@ func TestGetCostTimespans(t *testing.T) {
 	t2 := time.Date(2013, time.October, 8, 9, 24, 27, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, CallDuration: 85 * time.Second}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "test", Subject: "trp", Destination: "0256", Cost: 85, ConnectFee: 0}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee || len(result.Timespans) != 2 {
+	expected := &CallCost{Tenant: "test", Subject: "trp", Destination: "0256", Cost: 85}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 0 || len(result.Timespans) != 2 {
 		t.Errorf("Expected %+v was %+v", expected, result)
 	}
 
@@ -172,8 +172,9 @@ func TestGetCostNoConnectFee(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 1}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700, ConnectFee: 0}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700}
+	// connect fee is not added because LoopIndex is 1
+	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -183,8 +184,8 @@ func TestGetCostAccount(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Account: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700, ConnectFee: 1}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2701}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -194,8 +195,8 @@ func TestFullDestNotFound(t *testing.T) {
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700, ConnectFee: 1}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2701}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
 		t.Log(cd.RatingInfos)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -206,8 +207,8 @@ func TestSubjectNotFound(t *testing.T) {
 	t2 := time.Date(2013, time.February, 1, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "not_exiting", Destination: "025740532", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2700, ConnectFee: 1}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2701}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
 		t.Logf("%+v", result.Timespans[0].RateInterval)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -218,8 +219,8 @@ func TestMultipleRatingPlans(t *testing.T) {
 	t2 := time.Date(2012, time.February, 8, 18, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2700, ConnectFee: 1}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2701}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
 		t.Log(result.Timespans)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
@@ -230,7 +231,7 @@ func TestSpansMultipleRatingPlans(t *testing.T) {
 	t2 := time.Date(2012, time.February, 8, 0, 30, 0, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	if result.Cost != 1200 || result.ConnectFee != 0 {
+	if result.Cost != 1200 || result.GetConnectFee() != 0 {
 		t.Errorf("Expected %v was %v", 1200, result)
 	}
 }
@@ -240,8 +241,8 @@ func TestLessThanAMinute(t *testing.T) {
 	t2 := time.Date(2012, time.February, 8, 23, 50, 30, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 15, ConnectFee: 0}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 15}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 0 {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -251,8 +252,8 @@ func TestUniquePrice(t *testing.T) {
 	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723045326", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0723", Cost: 1810.5, ConnectFee: 0}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0723", Cost: 1810.5}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 0 {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -262,8 +263,8 @@ func TestMinutesCost(t *testing.T) {
 	t2 := time.Date(2012, time.February, 8, 22, 51, 50, 0, time.UTC)
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
-	expected := &CallCost{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Cost: 55, ConnectFee: 0}
-	if result.Cost != expected.Cost || result.ConnectFee != expected.ConnectFee {
+	expected := &CallCost{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Cost: 55}
+	if result.Cost != expected.Cost || result.GetConnectFee() != 0 {
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }

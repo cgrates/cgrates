@@ -21,10 +21,11 @@ package mediator
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"time"
 )
 
 func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engine.CdrStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
@@ -77,7 +78,7 @@ func (self *Mediator) getCostsFromDB(cgrid string) (cc *engine.CallCost, err err
 }
 
 // Retrive the cost from engine
-func (self *Mediator) getCostsFromRater(cdr *utils.RatedCDR) (*engine.CallCost, error) {
+func (self *Mediator) getCostsFromRater(cdr *utils.StoredCdr) (*engine.CallCost, error) {
 	cc := &engine.CallCost{}
 	var err error
 	if cdr.Duration == time.Duration(0) { // failed call,  returning empty callcost, no error
@@ -109,7 +110,7 @@ func (self *Mediator) getCostsFromRater(cdr *utils.RatedCDR) (*engine.CallCost, 
 	return cc, err
 }
 
-func (self *Mediator) rateCDR(cdr *utils.RatedCDR) error {
+func (self *Mediator) rateCDR(cdr *utils.StoredCdr) error {
 	var qryCC *engine.CallCost
 	var errCost error
 	if cdr.ReqType == utils.PREPAID || cdr.ReqType == utils.POSTPAID {
@@ -123,26 +124,26 @@ func (self *Mediator) rateCDR(cdr *utils.RatedCDR) error {
 	} else if qryCC == nil {
 		return errors.New("No cost returned from rater")
 	}
-	cdr.Cost = qryCC.ConnectFee + qryCC.Cost
+	cdr.Cost = qryCC.Cost
 	return nil
 }
 
 // Forks original CDR based on original request plus runIds for extra mediation
-func (self *Mediator) MediateRawCDR(dbcdr utils.RawCDR) error {
+func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 	//engine.Logger.Debug(fmt.Sprintf("Mediating rawCdr: %v, duration: %d",dbcdr, dbcdr.GetDuration()))
-	rtCdr, err := utils.NewRatedCDRFromRawCDR(dbcdr)
+	rtCdr, err := utils.NewStoredCdrFromRawCDR(dbcdr)
 	if err != nil {
 		return err
 	}
 	//engine.Logger.Debug(fmt.Sprintf("Have converted raw into rated: %v", rtCdr))
-	cdrs := []*utils.RatedCDR{rtCdr} // Start with initial dbcdr, will add here all to be mediated
+	cdrs := []*utils.StoredCdr{rtCdr} // Start with initial dbcdr, will add here all to be mediated
 	for runIdx, runId := range self.cgrCfg.MediatorRunIds {
-		forkedCdr, err := dbcdr.AsRatedCdr(self.cgrCfg.MediatorRunIds[runIdx], self.cgrCfg.MediatorReqTypeFields[runIdx], self.cgrCfg.MediatorDirectionFields[runIdx],
+		forkedCdr, err := dbcdr.AsStoredCdr(self.cgrCfg.MediatorRunIds[runIdx], self.cgrCfg.MediatorReqTypeFields[runIdx], self.cgrCfg.MediatorDirectionFields[runIdx],
 			self.cgrCfg.MediatorTenantFields[runIdx], self.cgrCfg.MediatorTORFields[runIdx], self.cgrCfg.MediatorAccountFields[runIdx],
 			self.cgrCfg.MediatorSubjectFields[runIdx], self.cgrCfg.MediatorDestFields[runIdx], self.cgrCfg.MediatorAnswerTimeFields[runIdx],
 			self.cgrCfg.MediatorDurationFields[runIdx], []string{}, true)
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis
-			self.cdrDb.SetRatedCdr(&utils.RatedCDR{CgrId: dbcdr.GetCgrId(), MediationRunId: runId, Cost: -1.0}, err.Error()) // Cannot fork CDR, important just runid and error
+			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: dbcdr.GetCgrId(), MediationRunId: runId, Cost: -1.0}, err.Error()) // Cannot fork CDR, important just runid and error
 			continue
 		}
 		cdrs = append(cdrs, forkedCdr)
@@ -155,6 +156,19 @@ func (self *Mediator) MediateRawCDR(dbcdr utils.RawCDR) error {
 		if err := self.cdrDb.SetRatedCdr(cdr, extraInfo); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Mediator> Could not record cost for cgrid: <%s>, err: <%s>, cost: %f, extraInfo: %s",
 				cdr.CgrId, err.Error(), cdr.Cost, extraInfo))
+		}
+	}
+	return nil
+}
+
+func (self *Mediator) RateCdrs(timeStart, timeEnd time.Time, rerateErrors, rerateRated bool) error {
+	cdrs, err := self.cdrDb.GetStoredCdrs(timeStart, timeEnd, !rerateErrors, !rerateRated)
+	if err != nil {
+		return err
+	}
+	for _, cdr := range cdrs {
+		if err := self.RateCdr(cdr); err != nil {
+			return err
 		}
 	}
 	return nil

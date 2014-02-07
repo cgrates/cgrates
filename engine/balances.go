@@ -32,12 +32,12 @@ type Balance struct {
 	Value          float64
 	ExpirationDate time.Time
 	Weight         float64
-	GroupIds       []string
-	DestinationId  string
-	RateSubject    string
-	SharedGroup    string
-	precision      int
-	userBalance    *UserBalance // used to store ub reference for shared balances
+	//GroupIds       []string
+	DestinationId string
+	RateSubject   string
+	SharedGroup   string
+	precision     int
+	userBalance   *UserBalance // used to store ub reference for shared balances
 }
 
 func (b *Balance) Equal(o *Balance) bool {
@@ -120,6 +120,9 @@ func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
 
 func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyBalances BalanceChain) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
+		if b.Value <= 0 {
+			return nil
+		}
 		ts := cc.Timespans[tsIndex]
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
@@ -140,7 +143,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 				if b.Value >= amount {
 					b.Value -= amount
 					increment.BalanceInfo.MinuteBalanceUuid = b.Uuid
-					increment.MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
+					increment.MinuteInfo = &MinuteInfo{cc.Destination, amount}
 					increment.Cost = 0
 					increment.paid = true
 					if count {
@@ -182,7 +185,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					cc.Timespans.RemoveOverlapedFromIndex(tsIndex)
 					b.Value -= amount
 					newTs.Increments[0].BalanceInfo.MinuteBalanceUuid = b.Uuid
-					newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount, 0}
+					newTs.Increments[0].MinuteInfo = &MinuteInfo{cc.Destination, amount}
 					newTs.Increments[0].Cost = 0
 					newTs.Increments[0].paid = true
 					if count {
@@ -221,10 +224,9 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					if moneyBal != nil && b.Value >= seconds {
 						b.Value -= seconds
 						moneyBal.Value -= cost
-
 						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 						nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
-						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds, 0}
+						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds}
 						nInc.paid = true
 						if count {
 							ub.countUnits(&Action{BalanceId: MINUTES, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
@@ -236,9 +238,27 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					}
 				}
 			}
+			// make sure the last paid ts is split by the unpaid increment to retain
+			// original rating interval
+			if len(paidTs) > 0 {
+				lastPaidTs := paidTs[len(paidTs)-1]
+				if isPaid, lastPaidIncrementIndex := lastPaidTs.IsPaid(); !isPaid {
+					if lastPaidIncrementIndex > 0 {
+						// shorten the last paid ts
+						lastPaidTs.SplitByIncrement(lastPaidIncrementIndex)
+					} else {
+						// delete if not paid
+						paidTs[len(paidTs)-1] = nil
+						paidTs = paidTs[:len(paidTs)-1]
+					}
+				}
+			}
 			newTs := ts.SplitByIncrement(incrementIndex)
 			increment.paid = (&cc.Timespans).OverlapWithTimeSpans(paidTs, newTs, tsIndex)
 			tsWasSplit = increment.paid
+			if !increment.paid {
+				break
+			}
 		}
 	}
 	return nil
@@ -246,6 +266,9 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 
 func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
+		if b.Value <= 0 {
+			return nil
+		}
 		ts := cc.Timespans[tsIndex]
 		if ts.Increments == nil {
 			ts.createIncrementsSlice()
@@ -305,9 +328,25 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 						}
 					}
 				}
+				if len(paidTs) > 0 {
+					lastPaidTs := paidTs[len(paidTs)-1]
+					if isPaid, lastPaidIncrementIndex := lastPaidTs.IsPaid(); !isPaid {
+						if lastPaidIncrementIndex > 0 {
+							// shorten the last paid ts
+							lastPaidTs.SplitByIncrement(lastPaidIncrementIndex)
+						} else {
+							// delete if not paid
+							paidTs[len(paidTs)-1] = nil
+							paidTs = paidTs[:len(paidTs)-1]
+						}
+					}
+				}
 				newTs := ts.SplitByIncrement(incrementIndex)
 				increment.paid = (&cc.Timespans).OverlapWithTimeSpans(paidTs, newTs, tsIndex)
 				tsWasSplit = increment.paid
+				if !increment.paid {
+					break
+				}
 			}
 		}
 	}

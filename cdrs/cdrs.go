@@ -42,7 +42,7 @@ func storeAndMediate(rawCdr utils.RawCDR) error {
 	}
 	if cfg.CDRSMediator == utils.INTERNAL {
 		go func() {
-			if err := medi.MediateRawCDR(rawCdr); err != nil {
+			if err := medi.RateCdr(rawCdr); err != nil {
 				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", err.Error()))
 			}
 		}()

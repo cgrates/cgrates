@@ -160,39 +160,18 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 	return usefulBalances
 }
 
-func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
+func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) (err error) {
 	usefulMinuteBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[MINUTES+cc.Direction], "")
 	usefulMoneyBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[CREDIT+cc.Direction], "")
-	// debit connect fee
-	if cc.ConnectFee > 0 {
-		amount := cc.ConnectFee
-		paid := false
-		for _, b := range usefulMoneyBalances {
-			if b.Value >= amount {
-				b.Value -= amount
-				// the conect fee is not refundable!
-				if count {
-					ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
-				}
-				paid = true
-				break
-			}
-		}
-		if !paid {
-			// there are no money for the connect fee; go negative
-			moneyBalance := ub.GetDefaultMoneyBalance(cc.Direction)
-			moneyBalance.Value -= amount
-			// the conect fee is not refundable!
-			if count {
-				ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
-			}
-		}
-	}
+
+	insuficientCreditError := errors.New("not enough credit")
+	moneyBalance := ub.GetDefaultMoneyBalance(cc.Direction)
+
 	// debit minutes
 	for _, balance := range usefulMinuteBalances {
 		balance.DebitMinutes(cc, count, ub, usefulMoneyBalances)
 		if cc.IsPaid() {
-			return nil
+			goto CONNECT_FEE
 		} else {
 			// chack if it's shared
 			if balance.SharedGroup != "" {
@@ -212,11 +191,12 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			}
 		}
 	}
+
 	// debit money
 	for _, balance := range usefulMoneyBalances {
 		balance.DebitMoney(cc, count, ub)
 		if cc.IsPaid() {
-			return nil
+			goto CONNECT_FEE
 		} else {
 			// chack if it's shared
 			if balance.SharedGroup != "" {
@@ -224,11 +204,8 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 			}
 		}
 	}
-	var returnError error
-	insuficientCreditError := errors.New("not enough credit")
 	// get the highest priority money balanance
 	// and go negative on it with the amount still unpaid
-	moneyBalance := ub.GetDefaultMoneyBalance(cc.Direction)
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
 		if ts.Increments == nil {
@@ -249,11 +226,36 @@ func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
 				if count {
 					ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
 				}
-				returnError = insuficientCreditError
+				err = insuficientCreditError
 			}
 		}
 	}
-	return returnError
+CONNECT_FEE:
+	if cc.deductConnectFee {
+		amount := cc.GetConnectFee()
+		connectFeePaid := false
+		for _, b := range usefulMoneyBalances {
+			if b.Value >= amount {
+				b.Value -= amount
+				// the conect fee is not refundable!
+				if count {
+					ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+				}
+				connectFeePaid = true
+				break
+			}
+		}
+		// debit connect fee
+		if cc.GetConnectFee() > 0 && !connectFeePaid {
+			// there are no money for the connect fee; go negative
+			moneyBalance.Value -= amount
+			// the conect fee is not refundable!
+			if count {
+				ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+			}
+		}
+	}
+	return
 }
 
 func (ub *UserBalance) debitMinutesFromSharedBalances(sharedGroupName string, cc *CallCost, moneyBalances BalanceChain, count bool) {

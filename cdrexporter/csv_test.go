@@ -29,7 +29,7 @@ import (
 func TestCsvCdrWriter(t *testing.T) {
 	writer := &bytes.Buffer{}
 	csvCdrWriter := NewCsvCdrWriter(writer, 4, []string{"extra3", "extra1"})
-	ratedCdr := &utils.RatedCDR{CgrId: utils.FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+	ratedCdr := &utils.StoredCdr{CgrId: utils.FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: time.Unix(1383813746, 0).UTC(), Duration: 10, MediationRunId: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
 	}

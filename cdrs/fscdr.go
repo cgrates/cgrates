@@ -162,14 +162,14 @@ func (fsCdr FSCdr) Restore(input string) error {
 }
 
 // Used in extra mediation
-func (fsCdr FSCdr) AsRatedCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.RatedCDR, error) {
+func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.StoredCdr, error) {
 	if utils.IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
 		return nil, errors.New(fmt.Sprintf("%s:FieldName", utils.ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
 	}
 	var err error
 	var hasKey bool
 	var aTimeStr, durStr string
-	rtCdr := new(utils.RatedCDR)
+	rtCdr := new(utils.StoredCdr)
 	rtCdr.MediationRunId = runId
 	rtCdr.Cost = -1.0 // Default for non-rated CDR
 	if rtCdr.AccId = fsCdr.GetAccId(); len(rtCdr.AccId) == 0 {

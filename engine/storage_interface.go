@@ -97,9 +97,9 @@ type AccountingStorage interface {
 type CdrStorage interface {
 	Storage
 	SetCdr(utils.RawCDR) error
-	SetRatedCdr(*utils.RatedCDR, string) error
-	GetRatedCdrs(time.Time, time.Time) ([]*utils.RatedCDR, error)
-	RemRatedCdrs([]string) error
+	SetRatedCdr(*utils.StoredCdr, string) error
+	GetStoredCdrs(time.Time, time.Time, bool, bool) ([]*utils.StoredCdr, error)
+	RemStoredCdrs([]string) error
 }
 
 type LogStorage interface {

@@ -14,12 +14,12 @@ CREATE TABLE `cost_details` (
   `account` varchar(128) NOT NULL,
   `subject` varchar(128) NOT NULL,
   `destination` varchar(128) NOT NULL,
-  `connect_fee` DECIMAL(5,4) NOT NULL,
   `cost` DECIMAL(20,4) NOT NULL,
   `timespans` text,
   `source` varchar(64) NOT NULL,
   `runid`  varchar(64) NOT NULL,
+  `cost_time` datetime NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `costid` (`cgrid`,`subject`,`runid`)
+  UNIQUE KEY `costid` (`cgrid`,`runid`)
 );
 

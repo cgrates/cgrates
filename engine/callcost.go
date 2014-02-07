@@ -26,13 +26,14 @@ import (
 // The output structure that will be returned with the call cost information.
 type CallCost struct {
 	Direction, TOR, Tenant, Subject, Account, Destination string
-	Cost, ConnectFee                                      float64
+	Cost                                                  float64
 	Timespans                                             TimeSpans
+	deductConnectFee                                      bool
 }
 
 // Pretty printing for call cost
 func (cc *CallCost) String() (r string) {
-	r = fmt.Sprintf("%v[%v] : %s(%s) -> %s (", cc.Cost, cc.ConnectFee, cc.Subject, cc.Account, cc.Destination)
+	r = fmt.Sprintf("%v[%v] : %s(%s) -> %s (", cc.Cost, cc.GetConnectFee(), cc.Subject, cc.Account, cc.Destination)
 	for _, ts := range cc.Timespans {
 		r += fmt.Sprintf(" %v,", ts.GetDuration())
 	}
@@ -79,6 +80,15 @@ func (cc *CallCost) GetDuration() (td time.Duration) {
 		td += ts.GetDuration()
 	}
 	return
+}
+
+func (cc *CallCost) GetConnectFee() float64 {
+	if len(cc.Timespans) == 0 ||
+		cc.Timespans[0].RateInterval == nil ||
+		cc.Timespans[0].RateInterval.Rating == nil {
+		return 0
+	}
+	return cc.Timespans[0].RateInterval.Rating.ConnectFee
 }
 
 // Creates a CallDescriptor structure copying related data from CallCost
