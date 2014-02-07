@@ -336,3 +336,13 @@ func TestParseDurationWithSecs(t *testing.T) {
 		t.Error("Parsed different than expected")
 	}
 }
+
+func TestMinDuration(t *testing.T) {
+	d1, _ := time.ParseDuration("1m")
+	d2, _ := time.ParseDuration("59s")
+	minD1 := MinDuration(d1, d2)
+	minD2 := MinDuration(d2, d1)
+	if minD1 != d2 || minD2 != d2 {
+		t.Error("Error getting min duration: ", minD1, minD2)
+	}
+}

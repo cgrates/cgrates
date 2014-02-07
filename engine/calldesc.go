@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"log"
 	"log/syslog"
 	"time"
 	//"encoding/json"
@@ -420,7 +421,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 
 /*
 Returns the approximate max allowed session for user balance. It will try the max amount received in the call descriptor
-and will decrease it by 10% for nine times. So if the user has little credit it will still allow 10% of the initial amount.
 If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
@@ -449,14 +449,14 @@ func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 		return 0, err
 	}
 	//Logger.Debug(fmt.Sprintf("availableDuration: %v, availableCredit: %v", availableDuration, availableCredit))
-	// check for zero balance
-	if availableCredit == 0 {
-		return availableDuration, nil
-	}
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
 	if initialDuration <= availableDuration {
 		// there are enough minutes for requested interval
 		return initialDuration, nil
+	}
+	// check for zero balance
+	if availableCredit == 0 {
+		return utils.MinDuration(initialDuration, availableDuration), nil
 	}
 	//Logger.Debug(fmt.Sprintf("initial Duration: %v", initialDuration))
 	// we must move the timestart for the interval with the available duration because
@@ -482,7 +482,11 @@ func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 			}
 		}
 	}
-	return availableDuration, nil
+	log.Print(initialDuration, availableDuration, initialDuration < availableDuration)
+	if initialDuration < availableDuration {
+		return initialDuration, nil
+	}
+	return utils.MinDuration(initialDuration, availableDuration), nil
 }
 
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
@@ -527,6 +531,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	if err != nil || remainingDuration == 0 {
 		return new(CallCost), errors.New("no more credit")
 	}
+	log.Print("REM_DUR: ", remainingDuration)
 	if remainingDuration > 0 { // for postpaying client returns -1
 		cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
 	}

@@ -187,3 +187,11 @@ func ParseDurationWithSecs(durStr string) (time.Duration, error) {
 func BalanceKey(tenant, account, direction string) string {
 	return fmt.Sprintf("%s:%s:%s", direction, tenant, account)
 }
+
+// returns the minimum duration between the two
+func MinDuration(d1, d2 time.Duration) time.Duration {
+	if d1 < d2 {
+		return d1
+	}
+	return d2
+}
