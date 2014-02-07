@@ -48,9 +48,6 @@ const (
 	TRIGGER_MAX_COUNTER = "*max_counter"
 	TRIGGER_MIN_BALANCE = "*min_balance"
 	TRIGGER_MAX_BALANCE = "*max_balance"
-	// minute subjects
-	ZEROSECOND = "*zerosecond"
-	ZEROMINUTE = "*zerominute"
 )
 
 var (

@@ -531,7 +531,6 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	if err != nil || remainingDuration == 0 {
 		return new(CallCost), errors.New("no more credit")
 	}
-	log.Print("REM_DUR: ", remainingDuration)
 	if remainingDuration > 0 { // for postpaying client returns -1
 		cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
 	}

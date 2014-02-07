@@ -346,3 +346,13 @@ func TestMinDuration(t *testing.T) {
 		t.Error("Error getting min duration: ", minD1, minD2)
 	}
 }
+
+func TestParseZeroRatingSubject(t *testing.T) {
+	subj := []string{"", "*zero1s", "*zero5m", "*zero10h"}
+	dur := []time.Duration{time.Second, time.Second, 5 * time.Minute, 10 * time.Hour}
+	for i, s := range subj {
+		if d, err := ParseZeroRatingSubject(s); err != nil || d != dur[i] {
+			t.Error("Error parsing rating subject: ", s, d, err)
+		}
+	}
+}

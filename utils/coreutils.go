@@ -195,3 +195,14 @@ func MinDuration(d1, d2 time.Duration) time.Duration {
 	}
 	return d2
 }
+
+func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
+	if rateSubj == "" {
+		rateSubj = ZERO_RATING_SUBJECT_PREFIX + "1s"
+	}
+	if !strings.HasPrefix(rateSubj, ZERO_RATING_SUBJECT_PREFIX) {
+		return 0, errors.New("malformed rating subject: " + rateSubj)
+	}
+	durStr := rateSubj[len(ZERO_RATING_SUBJECT_PREFIX):]
+	return time.ParseDuration(durStr)
+}
