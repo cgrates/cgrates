@@ -424,7 +424,8 @@ and will decrease it by 10% for nine times. So if the user has little credit it 
 If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
-func (cd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
+func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
+	cd := origCd.Clone()
 	if cd.CallDuration == 0 {
 		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	}
@@ -612,5 +613,24 @@ func (cd *CallDescriptor) CreateCallCost() *CallCost {
 		Subject:     cd.Subject,
 		Account:     cd.Account,
 		Destination: cd.Destination,
+	}
+}
+
+func (cd *CallDescriptor) Clone() *CallDescriptor {
+	return &CallDescriptor{
+		Direction:       cd.Direction,
+		TOR:             cd.TOR,
+		Tenant:          cd.Tenant,
+		Subject:         cd.Subject,
+		Account:         cd.Account,
+		Destination:     cd.Destination,
+		TimeStart:       cd.TimeStart,
+		TimeEnd:         cd.TimeEnd,
+		LoopIndex:       cd.LoopIndex,
+		CallDuration:    cd.CallDuration,
+		Amount:          cd.Amount,
+		FallbackSubject: cd.FallbackSubject,
+		RatingInfos:     cd.RatingInfos,
+		Increments:      cd.Increments,
 	}
 }

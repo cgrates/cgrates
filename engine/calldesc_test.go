@@ -20,6 +20,7 @@ package engine
 
 import (
 	"log"
+	"reflect"
 	"testing"
 	"time"
 
@@ -332,6 +333,23 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 	result, err := cd.GetMaxSessionDuration()
 	if result != 100*time.Second || err != nil {
 		t.Errorf("Expected %v was %v", 100, result)
+	}
+}
+
+func TestMaxSessionModifiesCallDesc(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "broker",
+		Destination: "0723",
+		Amount:      5400}
+	initial := cd.Clone()
+	cd.GetMaxSessionDuration()
+	if !reflect.DeepEqual(cd, initial) {
+		t.Errorf("GetMaxSessionDuration is changing the call descriptor %+v != %+v", cd, initial)
 	}
 }
 
