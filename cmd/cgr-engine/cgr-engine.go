@@ -29,7 +29,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/cdrs"
@@ -118,7 +118,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		return
 	}
 	engine.Logger.Info("Registering Mediator RPC service.")
-	server.RpcRegister(&apier.MediatorV1{Mediator: medi})
+	server.RpcRegister(&mediator.MediatorV1{Medi: medi})
 	
 	close(chanDone)
 }
@@ -134,7 +134,7 @@ func registerApier(waitOnChans []chan struct{}) {
                 case <-chn:
                 }
 	}
-	}
+}
 
 func startCdrc(cdrsChan chan struct{}) {
 	if cfg.CdrcCdrs == utils.INTERNAL {

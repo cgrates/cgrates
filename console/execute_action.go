@@ -20,7 +20,7 @@ package console
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier"
 )
 
 func init() {
