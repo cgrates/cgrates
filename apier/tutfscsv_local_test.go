@@ -135,7 +135,7 @@ func TestFsCsvLoadTariffPlans(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	attrs := &AttrLoadTPFromFolder{FolderPath: path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "tariffplans")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "tariffplans")}
 	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {

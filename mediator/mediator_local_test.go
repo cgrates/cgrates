@@ -50,14 +50,15 @@ README:
 
 var cfg *config.CGRConfig
 var cgrRpc *rpc.Client
+var cdrStor engine.CdrStorage
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var storDbType = flag.String("stordb_type", utils.MYSQL, "The type of the storDb database <mysql>")
 var startDelay = flag.Int("delay_start", 300, "Number of miliseconds to it for rater to start and cache")
+var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator_test1.cfg")
 
 func init() {
-	cfgPath := path.Join(*dataDir, "conf", "samples", "mediator_test1.cfg")
 	cfg, _ = config.NewCGRConfig(&cfgPath)
 }
 
@@ -83,10 +84,11 @@ func TestInitStorDb(t *testing.T) {
 		t.Fatal("Unsupported storDbType")
 	}
 	var mysql *engine.MySQLStorage
-	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
+	var err error
+	if cdrStor, err = engine.ConfigureCdrStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
 		t.Fatal("Error on opening database connection: ", err)
 	} else {
-		mysql = d.(*engine.MySQLStorage)
+		mysql = cdrStor.(*engine.MySQLStorage)
 	}
 	for _, scriptName := range []string{engine.CREATE_CDRS_TABLES_SQL, engine.CREATE_COSTDETAILS_TABLES_SQL, engine.CREATE_MEDIATOR_TABLES_SQL} {
 		if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, scriptName)); err != nil {
@@ -111,7 +113,7 @@ func TestStartEngine(t *testing.T) {
 		t.Fatal("Cannot find cgr-engine executable")
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	engine := exec.Command(enginePath, "-rater", "-scheduler", "-cdrs", "-mediator", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
+	engine := exec.Command(enginePath, "-config", cfgPath)
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
@@ -130,6 +132,48 @@ func TestRpcConn(t *testing.T) {
 	}
 }
 
+func TestPostCdrs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	httpClient := new(http.Client)
+	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
+		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
+		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
+		"tenant": []string{"itsyscom.com"}, "tor": []string{"call"}, "account": []string{"dan"}, "subject": []string{"dan"}, "destination": []string{"1002"},
+		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
+		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
+		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cfg.HTTPListen), cdrForm); err != nil {
+			t.Error(err.Error())
+		}
+	}
+	if storedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, false, false); err != nil {
+		t.Error(err)
+	} else if len(storedCdrs) != 2 {
+		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
+	}
+}
+
+// Directly inject CDRs into storDb
+func TestInjectCdrs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cgrCdr1 := utils.CgrCdr{"accid": "aaaaadsafdsaf", "cdr_source": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", 
+		"tenant": "cgrates.org", "tor": "call", "account": "1001", "subject": "1001", "destination": "1002",
+		"answer_time": "2013-11-07T08:42:26Z", "duration": "10"}
+	if err := cdrStor.SetCdr(cgrCdr1); err != nil {
+		t.Error(err)
+	}
+	if storedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, false, false); err != nil {
+		t.Error(err)
+	} else if len(storedCdrs) != 3 {
+		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
+	}
+}
+
 // Test here LoadTariffPlanFromFolder
 func TestLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
@@ -142,25 +186,6 @@ func TestLoadTariffPlanFromFolder(t *testing.T) {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
-	}
-}
-
-func TestPostCdrs(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	httpClient := new(http.Client)
-	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
-		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
-		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
-		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
-		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
-		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
-		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cfg.HTTPListen), cdrForm); err != nil {
-			t.Error(err.Error())
-		}
 	}
 }
 
