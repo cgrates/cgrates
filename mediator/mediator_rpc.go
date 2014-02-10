@@ -48,5 +48,6 @@ func (self *MediatorV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error 
 	if err := self.Medi.RateCdrs(tStart, tEnd, attrs.RerateErrors, attrs.RerateRated); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	*reply = utils.OK
 	return nil
 }

@@ -325,3 +325,9 @@ type AttrRateCdrs struct {
 	RerateErrors  bool // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
 	RerateRated   bool // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
 }
+
+type AttrLoadTpFromFolder struct {
+	FolderPath string // Take files from folder absolute path
+	DryRun     bool   // Do not write to database but parse only
+	FlushDb    bool   // Flush previous data before loading new one
+}
