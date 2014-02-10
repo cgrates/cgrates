@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier"
 	"github.com/cgrates/cgrates/engine"
 )
 

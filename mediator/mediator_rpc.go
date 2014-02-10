@@ -16,22 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apier
+package mediator
 
 import (
 	"fmt"
 	"time"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/cgrates/mediator"
 )
 
 type MediatorV1 struct {
-	Mediator *mediator.Mediator
+	Medi *Mediator
 }
 
 // Remotely start mediation with specific runid, runs asynchronously, it's status will be displayed in syslog
 func (self *MediatorV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error {
-	if self.Mediator == nil {
+	if self.Medi == nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "MediatorNotRunning")
 	}
 	var tStart, tEnd time.Time
@@ -46,7 +45,7 @@ func (self *MediatorV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error 
 			return err
 		}
 	}
-	if err := self.Mediator.RateCdrs(tStart, tEnd, attrs.RerateErrors, attrs.RerateRated); err != nil {
+	if err := self.Medi.RateCdrs(tStart, tEnd, attrs.RerateErrors, attrs.RerateRated); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	return nil

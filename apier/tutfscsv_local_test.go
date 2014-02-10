@@ -172,7 +172,7 @@ func TestFsCsvCall1(t *testing.T) {
 	// Simple test that command is executed without errors
 	if err := rater.Call("Responder.GetCost", cd, &cc); err != nil {
 		t.Error("Got error on Responder.GetCost: ", err.Error())
-	} else if cc.ConnectFee != 0.4 && cc.Cost != 0.2 {
+	} else if cc.GetConnectFee() != 0.4 && cc.Cost != 0.6 {
 		t.Errorf("Calling Responder.GetCost got callcost: %v", cc)
 	}
 }
