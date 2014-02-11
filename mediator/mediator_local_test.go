@@ -138,10 +138,10 @@ func TestPostCdrs(t *testing.T) {
 	}
 	httpClient := new(http.Client)
 	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
-		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
+		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"+4986517174963"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
-		"tenant": []string{"itsyscom.com"}, "tor": []string{"call"}, "account": []string{"dan"}, "subject": []string{"dan"}, "destination": []string{"1002"},
+		"tenant": []string{"itsyscom.com"}, "tor": []string{"call"}, "account": []string{"1003"}, "subject": []string{"1003"}, "destination": []string{"+4986517174964"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
 		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
@@ -151,8 +151,13 @@ func TestPostCdrs(t *testing.T) {
 	}
 	if storedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, false, false); err != nil {
 		t.Error(err)
-	} else if len(storedCdrs) != 2 {
+	} else if len(storedCdrs) != 2 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
+	}
+	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, true, false); err != nil {
+		t.Error(err)
+	} else if len(nonErrorCdrs) != 0 { // Just two of them should be without errors
+		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(nonErrorCdrs)))
 	}
 }
 
@@ -161,16 +166,26 @@ func TestInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := utils.CgrCdr{"accid": "aaaaadsafdsaf", "cdr_source": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", 
-		"tenant": "cgrates.org", "tor": "call", "account": "1001", "subject": "1001", "destination": "1002",
+	cgrCdr1 := utils.CgrCdr{"accid": "aaaaadsafdsaf", "cdrsource": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", 
+		"tenant": "cgrates.org", "tor": "call", "account": "dan", "subject": "dan", "destination": "+4986517174963",
 		"answer_time": "2013-11-07T08:42:26Z", "duration": "10"}
-	if err := cdrStor.SetCdr(cgrCdr1); err != nil {
-		t.Error(err)
+	cgrCdr2 := utils.CgrCdr{"accid": "baaaadsafdsaf", "cdrsource": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", 
+		"tenant": "cgrates.org", "tor": "call", "account": "dan", "subject": "dan", "destination": "+4986517173964",
+		"answer_time": "2013-11-07T09:42:26Z", "duration": "20"}
+	for _, cdr := range []utils.CgrCdr{ cgrCdr1, cgrCdr2} {
+		if err := cdrStor.SetCdr(cdr); err != nil {
+			t.Error(err)
+		}
 	}
 	if storedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, false, false); err != nil {
 		t.Error(err)
-	} else if len(storedCdrs) != 3 {
+	} else if len(storedCdrs) != 4 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
+	}
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, true, true); err != nil {
+		t.Error(err)
+	} else if len(nonRatedCdrs) != 2 { // Just two of them should be non-rated
+		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
 	}
 }
 
@@ -198,6 +213,26 @@ func TestRateCdrs(t *testing.T) {
 		t.Error(err.Error())
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
+	}
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, true, true); err != nil {
+		t.Error(err)
+	} else if len(nonRatedCdrs) != 0 { // Just two of them should be non-rated
+		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
+	}
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, false, true); err != nil {
+		t.Error(err)
+	} else if len(errRatedCdrs) != 2 { // The first 2 with errors should be still there before rerating
+		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
+	}
+	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{RerateErrors: true}, &reply); err != nil {
+		t.Error(err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply: %s", reply)
+	}
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, false, true); err != nil {
+		t.Error(err)
+	} else if len(errRatedCdrs) != 1 { // One CDR with errors should be fixed now by rerating
+		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
 }
 

@@ -646,7 +646,7 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, connect_fee, cost, timespans, source, runid, cost_time)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, %f, '%s','%s','%s',now()) ON DUPLICATE KEY UPDATE direction=values(direction), tenant=values(tenant), tor=values(tor), account=values(account), subject=values(subject), destination=values(destination), connect_fee=values(connect_fee), cost=values(cost), timespans=values(timespans), source=values(source), cost_time=now()",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, timespans, source, runid, cost_time)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, '%s','%s','%s',now()) ON DUPLICATE KEY UPDATE direction=values(direction), tenant=values(tenant), tor=values(tor), account=values(account), subject=values(subject), destination=values(destination), cost=values(cost), timespans=values(timespans), source=values(source), cost_time=now()",
 		utils.TBL_COST_DETAILS,
 		utils.FSCgrId(uuid),
 		uuid,
@@ -667,7 +667,7 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 }
 
 func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, connect_fee, cost, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s' AND runid='%s'", utils.TBL_COST_DETAILS, cgrid, source, runid))
+	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s' AND runid='%s'", utils.TBL_COST_DETAILS, cgrid, source, runid))
 	var accid, src string
 	var timespansJson string
 	cc = &CallCost{Cost: -1}
@@ -739,7 +739,9 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 	return
 }
 
-// Return a slice of CDRs from storDb using optional filters.
+// Return a slice of CDRs from storDb using optional filters.a
+// ignoreErr - do not consider cdrs with rating errors
+// ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
 func (self *SQLStorage) GetStoredCdrs(timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
 	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
@@ -756,17 +758,20 @@ func (self *SQLStorage) GetStoredCdrs(timeStart, timeEnd time.Time, ignoreErr, i
 		}
 		fltr += fmt.Sprintf(" answer_time<'%d'", timeEnd)
 	}
-	if ignoreErr {
-		if len(fltr) != 0 {
-			fltr += " AND "
-		}
-		fltr += "cost>-1"
-	}
 	if ignoreRated {
 		if len(fltr) != 0 {
 			fltr += " AND "
 		}
-		fltr += "cost<=0"
+		if ignoreErr {
+			fltr += "cost IS NULL"
+		} else {
+			fltr += "(cost=-1 OR cost IS NULL)"
+		}
+	} else if ignoreErr {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += "(cost!=-1 OR cost IS NULL)"
 	}
 	if len(fltr) != 0 {
 		q += fmt.Sprintf(" WHERE %s", fltr)
