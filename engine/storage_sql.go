@@ -85,20 +85,18 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
-	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s') ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
-		utils.TBL_TP_TIMINGS, tpid, tm.Id, tm.Years.Serialize(";"), tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"),
-		tm.WeekDays.Serialize(";"), tm.StartTime)); err != nil {
-		return err
+func (self *SQLStorage) GetTPTableIds(tpid, table string, filters map[string]string) ([]string, error) {
+	qry := fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", table, tpid)
+	for key, value := range filters {
+		if key != "" && value != "" {
+			qry += fmt.Sprintf(" AND %s='%s'", key, value)
+		}
 	}
-	return nil
-}
-
-func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_TIMINGS, tpid))
+	rows, err := self.Db.Query(qry)
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 	ids := []string{}
 	i := 0
@@ -115,6 +113,15 @@ func (self *SQLStorage) GetTPTimingIds(tpid string) ([]string, error) {
 		return nil, nil
 	}
 	return ids, nil
+}
+
+func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
+	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s') ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
+		utils.TBL_TP_TIMINGS, tpid, tm.Id, tm.Years.Serialize(";"), tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"),
+		tm.WeekDays.Serialize(";"), tm.StartTime)); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
@@ -131,30 +138,6 @@ func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 		return err
 	}
 	return nil
-}
-
-// Extracts destinations from StorDB on specific tariffplan id
-func (self *SQLStorage) GetTPDestinationIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		err = rows.Scan(&id)
-		if err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
 }
 
 // Extracts destinations from StorDB on specific tariffplan id
@@ -227,29 +210,6 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 	return nil
 }
 
-func (self *SQLStorage) GetTPRateIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_RATES, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		err = rows.Scan(&id)
-		if err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
-}
-
 func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*utils.DestinationRate) error {
 	if len(drs) == 0 {
 		return nil //Nothing to set
@@ -273,29 +233,6 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 	return nil
 }
 
-func (self *SQLStorage) GetTPDestinationRateIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_DESTINATION_RATES, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		err = rows.Scan(&id)
-		if err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
-}
-
 func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.TPRatingPlanBinding) error {
 	if len(drts) == 0 {
 		return nil //Nothing to set
@@ -317,29 +254,6 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 		return err
 	}
 	return nil
-}
-
-func (self *SQLStorage) GetTPRatingPlanIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_RATING_PLANS, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		err = rows.Scan(&id)
-		if err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
 }
 
 func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.TPRatingProfile) error {
@@ -367,42 +281,6 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 	return nil
 }
 
-func (self *SQLStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfileIds) ([]string, error) {
-	qry := fmt.Sprintf("SELECT DISTINCT loadid FROM %s where tpid='%s'", utils.TBL_TP_RATE_PROFILES, filters.TPid)
-	if filters.Tenant != "" {
-		qry += fmt.Sprintf(" AND tenant='%s'", filters.Tenant)
-	}
-	if filters.TOR != "" {
-		qry += fmt.Sprintf(" AND tor='%s'", filters.TOR)
-	}
-	if filters.Direction != "" {
-		qry += fmt.Sprintf(" AND direction='%s'", filters.Direction)
-	}
-	if filters.Subject != "" {
-		qry += fmt.Sprintf(" AND subject='%s'", filters.Subject)
-	}
-	rows, err := self.Db.Query(qry)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		err = rows.Scan(&id)
-		if err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
-}
-
 func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string]*SharedGroup) error {
 	if len(sgs) == 0 {
 		return nil //Nothing to set
@@ -425,28 +303,6 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string]*SharedGro
 		return err
 	}
 	return nil
-}
-
-func (self *SQLStorage) GetTPSharedGroupIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_SHARED_GROUPS, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		if err = rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
 }
 
 func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAction) error {
@@ -507,28 +363,6 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	return acts, nil
 }
 
-func (self *SQLStorage) GetTPActionIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTIONS, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		if err = rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
-}
-
 // Sets actionTimings in sqlDB. Imput is expected in form map[actionTimingId][]rows, eg a full .csv file content
 func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.TPActionTiming) error {
 	if len(ats) == 0 {
@@ -577,28 +411,6 @@ func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*uti
 	return ats, nil
 }
 
-func (self *SQLStorage) GetTPActionTimingIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTION_PLANS, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		if err = rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
-}
-
 func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils.TPActionTrigger) error {
 	if len(ats) == 0 {
 		return nil //Nothing to set
@@ -625,28 +437,6 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 	return nil
 }
 
-func (self *SQLStorage) GetTPActionTriggerIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_ACTION_TRIGGERS, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		if err = rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
-}
-
 // Sets a group of account actions. Map key has the role of grouping within a tpid
 func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TPAccountActions) error {
 	if len(aa) == 0 {
@@ -668,28 +458,6 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 		return err
 	}
 	return nil
-}
-
-func (self *SQLStorage) GetTPAccountActionIds(tpid string) ([]string, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT loadid FROM %s where tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, tpid))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	ids := []string{}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one
-		var id string
-		if err = rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return ids, nil
 }
 
 func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (err error) {
