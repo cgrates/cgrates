@@ -389,7 +389,8 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 }
 
 func (dbr *DbReader) LoadSharedGroups() (err error) {
-	return nil
+	dbr.sharedGroups, err = dbr.storDb.GetTpSharedGroups(dbr.tpid, "")
+	return err
 }
 
 func (dbr *DbReader) LoadActions() (err error) {

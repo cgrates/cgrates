@@ -112,6 +112,23 @@ CREATE TABLE `tp_rating_profiles` (
 );
 
 --
+-- Table structure for table `tp_shared_groups`
+--
+
+DROP TABLE IF EXISTS `tp_shared_groups`;
+CREATE TABLE `tp_shared_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
+  `account` varchar(24) NOT NULL,
+  `strategy` varchar(24) NOT NULL,
+  `rate_subject` varchar(24) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_shared_group` (`tpid`,`tag`,`account`,`strategy`,`rate_subject`)
+);
+
+--
 -- Table structure for table `tp_actions`
 --
 

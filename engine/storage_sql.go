@@ -403,6 +403,52 @@ func (self *SQLStorage) GetTPRatingProfileIds(filters *utils.AttrTPRatingProfile
 	return ids, nil
 }
 
+func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string]*SharedGroup) error {
+	if len(sgs) == 0 {
+		return nil //Nothing to set
+	}
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,account,strategy,rate_subject) VALUES ", utils.TBL_TP_SHARED_GROUPS))
+	i := 0
+	for sgId, sg := range sgs {
+		for account, params := range sg.AccountParameters {
+			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
+				buffer.WriteRune(',')
+			}
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s')",
+				tpid, sgId, account, params.Strategy, params.RateSubject))
+			i++
+		}
+	}
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE account=values(account),strategy=values(strategy),rate_subject=values(rate_subject)")
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (self *SQLStorage) GetTPSharedGroupIds(tpid string) ([]string, error) {
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", utils.TBL_TP_SHARED_GROUPS, tpid))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	ids := []string{}
+	i := 0
+	for rows.Next() {
+		i++ //Keep here a reference so we know we got at least one
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if i == 0 {
+		return nil, nil
+	}
+	return ids, nil
+}
+
 func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAction) error {
 	if len(acts) == 0 {
 		return nil //Nothing to set
@@ -1052,6 +1098,47 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 		}
 	}
 	return rpfs, nil
+}
+
+func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string]*SharedGroup, error) {
+	sgs := make(map[string]*SharedGroup)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_SHARED_GROUPS, tpid)
+	if tag != "" {
+		q += fmt.Sprintf(" AND tag='%s'", tag)
+	}
+	rows, err := self.Db.Query(q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id int
+		var tpid, tag, account, strategy, rateSubject string
+		if err := rows.Scan(&id, &tpid, &tag, &account, &strategy, &rateSubject); err != nil {
+			return nil, err
+		}
+
+		sg, found := sgs[tag]
+		if found {
+			sg.AccountParameters[account] = &SharingParameters{
+				Strategy:    strategy,
+				RateSubject: rateSubject,
+			}
+		} else {
+			sg = &SharedGroup{
+				Id: tag,
+				AccountParameters: map[string]*SharingParameters{
+					account: &SharingParameters{
+						Strategy:    strategy,
+						RateSubject: rateSubject,
+					},
+				},
+			}
+		}
+		csvr.sharedGroups[tag] = sg
+
+	}
+	return sgs, nil
 }
 
 func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAction, error) {

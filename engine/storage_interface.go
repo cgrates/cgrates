@@ -142,6 +142,10 @@ type LoadStorage interface {
 	GetTpRatingProfiles(*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error)
 	GetTPRatingProfileIds(*utils.AttrTPRatingProfileIds) ([]string, error)
 
+	SetTPSharedGroups(string, map[string]*SharedGroup) error
+	GetTpSharedGroups(string, string) (map[string]*SharedGroup, error)
+	GetTPSharedGroupIds(string) ([]string, error)
+
 	SetTPActions(string, map[string][]*utils.TPAction) error
 	GetTpActions(string, string) (map[string][]*utils.TPAction, error)
 	GetTPActionIds(string) ([]string, error)
