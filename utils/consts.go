@@ -85,6 +85,7 @@ const (
 	CDRE_DRYRUN                = "dry_run"
 	INTERNAL                   = "internal"
 	ZERO_RATING_SUBJECT_PREFIX = "*zero"
+	OK                         = "OK"
 )
 
 var (

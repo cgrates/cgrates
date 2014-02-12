@@ -8,9 +8,11 @@ go test github.com/cgrates/cgrates/engine -local
 en=$?
 go test github.com/cgrates/cgrates/cdrc -local
 cdrc=$?
+go test github.com/cgrates/cgrates/mediator -local
+med=$?
 
 
 
 
-exit $gen && $ap && $en && cdrc
+exit $gen && $ap && $en && $cdrc && $med
 

@@ -123,19 +123,6 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 	close(chanDone)
 }
 
-// In case of internal mediator apier needs to wait for it to initialize before offering it's methods
-func registerApier(waitOnChans []chan struct{}) {
-	for _, chn := range waitOnChans {
-		select {
-                case <-time.After(5 * time.Minute):
-			engine.Logger.Crit(fmt.Sprintf("<Apier> Timeout waiting for dependecies to start."))
-			exitChan <- true
-			return
-                case <-chn:
-                }
-	}
-}
-
 func startCdrc(cdrsChan chan struct{}) {
 	if cfg.CdrcCdrs == utils.INTERNAL {
 		<-cdrsChan // Wait for CDRServer to come up before start processing

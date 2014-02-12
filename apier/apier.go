@@ -536,13 +536,9 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 	return nil
 }
 
-type AttrLoadTPFromFolder struct {
-	FolderPath string // Take files from folder absolute path
-	DryRun     bool   // Do not write to database but parse only
-	FlushDb    bool   // Flush previous data before loading new one
-}
 
-func (self *ApierV1) LoadTariffPlanFromFolder(attrs AttrLoadTPFromFolder, reply *string) error {
+
+func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
 	loader := engine.NewFileCSVReader(self.RatingDb, self.AccountDb, utils.CSV_SEP,
 		path.Join(attrs.FolderPath, utils.DESTINATIONS_CSV),
 		path.Join(attrs.FolderPath, utils.TIMINGS_CSV),
