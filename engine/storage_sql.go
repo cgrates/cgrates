@@ -1135,7 +1135,7 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string]*SharedG
 				},
 			}
 		}
-		csvr.sharedGroups[tag] = sg
+		sgs[tag] = sg
 
 	}
 	return sgs, nil
