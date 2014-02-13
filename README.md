@@ -1,5 +1,7 @@
 ## Rating system for Telecom & ISP environments ##
 
+[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/cgrates/cgrates/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
 ### Features ###
 + Rates for prepaid and for postpaid
 + The budget expressed in money and/or minutes (seconds)
@@ -23,5 +25,3 @@ PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 API reference [godoc](http://godoc.org/github.com/cgrates/cgrates/apier)
 
 Also check irc.freenode.net#cgrates and [Google group](https://groups.google.com/forum/#!forum/cgrates) for a more real-time support.
-
-[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/cgrates/cgrates/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
