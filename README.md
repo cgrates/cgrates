@@ -12,9 +12,10 @@
 + Commercial support available
 
 ### Documentation ###
-Install & run screencast: http://youtu.be/qTQZZpb-m7Q
+[Step by steps tutorials](https://cgrates.readthedocs.org/en/latest/tut_freeswitch.html)
+[Debian apt-get repository](https://cgrates.readthedocs.org/en/latest/tut_freeswitch_installs.html#cgrates)
 
-Browsable HTML http://readthedocs.org/docs/cgrates/
+Browsable HTML docs http://readthedocs.org/docs/cgrates/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
