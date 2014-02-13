@@ -135,7 +135,7 @@ func TestRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	rater, err = rpc.Dial("tcp", cfg.MediatorRater)
+	rater, err = rpc.Dial("tcp", "127.0.0.1:2013") //ToDo: Fix with automatic config
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
