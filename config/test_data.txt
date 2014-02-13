@@ -91,10 +91,19 @@ duration_fields = test			# Name of duration fields to be used during mediation. 
 [session_manager]
 enabled = true				# Starts SessionManager service: <true|false>.
 switch_type = test			# Defines the type of switch behind: <freeswitch>.
-rater = test			# Address where to reach the Rater.
+rater = test				# Address where to reach the Rater.
 rater_reconnects = 99			# Number of reconnects to rater before giving up.
 debit_interval = 99			# Interval to perform debits on.
 max_call_duration = 99			# Maximum call duration a prepaid call can last
+reqtype_fields = test			# Name of request type fields to be used during additional sessions control <""|*default|field_name>.
+direction_fields = test			# Name of direction fields to be used during additional sessions control <""|*default|field_name>.
+tenant_fields = test			# Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
+tor_fields = test			# Name of tor fields to be used during additional sessions control <""|*default|field_name>.
+account_fields = test			# Name of account fields to be used during additional sessions control <""|*default|field_name>.
+subject_fields = test			# Name of fields to be used during additional sessions control <""|*default|field_name>.
+destination_fields = test		# Name of destination fields to be used during additional sessions control <""|*default|field_name>.
+answer_time_fields = test		# Name of time_answer fields to be used during additional sessions control <""|*default|field_name>.
+duration_fields = test			# Name of duration fields to be used during additional sessions control <""|*default|field_name>.
 
 [freeswitch]
 server = test			# Adress where to connect to FreeSWITCH socket.
