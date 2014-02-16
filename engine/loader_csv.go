@@ -48,10 +48,10 @@ type CSVReader struct {
 	sharedGroups      map[string]*SharedGroup
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
-	sharedGroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
+	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
 }
 
-func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedGroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
 	c := new(CSVReader)
 	c.sep = sep
 	c.dataStorage = dataStorage
@@ -67,13 +67,13 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.sharedGroups = make(map[string]*SharedGroup)
 	c.readerFunc = openFileCSVReader
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
-		c.sharedGroupsFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn = destinationsFn, timingsFn,
-		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedGroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn
+		c.sharedgroupsFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn = destinationsFn, timingsFn,
+		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn
 	return c
 }
 
-func NewStringCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedGroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
-	c := NewFileCSVReader(dataStorage, accountingStorage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedGroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+func NewStringCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+	c := NewFileCSVReader(dataStorage, accountingStorage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	c.readerFunc = openStringCSVReader
 	return c
 }
@@ -201,6 +201,18 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	}
 	for k, ats := range csvr.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(k)
+		}
+	}
+	if verbose {
+		log.Print("Shared groups")
+	}
+	for k, sg := range csvr.sharedGroups {
+		err = accountingStorage.SetSharedGroup(k, sg)
 		if err != nil {
 			return err
 		}
@@ -444,7 +456,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 }
 
 func (csvr *CSVReader) LoadSharedGroups() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.sharedGroupsFn, csvr.sep, utils.SHARED_GROUPS_NRCOLS)
+	csvReader, fp, err := csvr.readerFunc(csvr.sharedgroupsFn, csvr.sep, utils.SHARED_GROUPS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load shared groups file: ", err)
 		// allow writing of the other values
