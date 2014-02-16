@@ -319,7 +319,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 			}
 			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s','%s',%f,'%s',%f)",
 				tpid, actId, act.Identifier, act.BalanceType, act.Direction, act.Units, act.ExpiryTime,
-				act.DestinationId, act.RatingSubject, act.BalanceWeight, act.SharedGroup, act.ExtraParameters, act.Weight))
+				act.DestinationId, act.RatingSubject, act.SharedGroup, act.BalanceWeight, act.ExtraParameters, act.Weight))
 			i++
 		}
 	}
