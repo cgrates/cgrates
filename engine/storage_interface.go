@@ -117,7 +117,7 @@ type LoadStorage interface {
 	// Apier functions
 	RemTPData(string, string, ...string) error
 	GetTPIds() ([]string, error)
-	GetTPTableIds(string, string, map[string]string) ([]string, error)
+	GetTPTableIds(string, string, string, map[string]string) ([]string, error)
 
 	SetTPTiming(string, *utils.TPTiming) error
 	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)

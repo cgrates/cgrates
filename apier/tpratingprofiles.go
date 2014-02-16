@@ -76,7 +76,7 @@ func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileId
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, map[string]string{
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, "loadid", map[string]string{
 		"tenant":    attrs.Tenant,
 		"tor":       attrs.TOR,
 		"direction": attrs.Direction,

@@ -85,8 +85,8 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) GetTPTableIds(tpid, table string, filters map[string]string) ([]string, error) {
-	qry := fmt.Sprintf("SELECT DISTINCT tag FROM %s where tpid='%s'", table, tpid)
+func (self *SQLStorage) GetTPTableIds(tpid, table, distinct string, filters map[string]string) ([]string, error) {
+	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {
 		if key != "" && value != "" {
 			qry += fmt.Sprintf(" AND %s='%s'", key, value)
@@ -936,7 +936,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 			ExpiryTime:      expirationDate,
 			DestinationId:   destinations_tag,
 			RatingSubject:   rating_subject,
-			SharedGroup: shared_group,
+			SharedGroup:     shared_group,
 			BalanceWeight:   balance_weight,
 			ExtraParameters: extra_parameters,
 			Weight:          weight,
