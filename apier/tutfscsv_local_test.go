@@ -101,7 +101,7 @@ func TestFsCsvRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	rater, err = rpc.Dial("tcp", cfg.MediatorRater)
+	rater, err = rpc.Dial("tcp", "127.0.0.1:2012") // ToDo: Fix here with config loaded from file
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
