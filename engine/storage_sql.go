@@ -310,20 +310,20 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,shared_group,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS))
 	i := 0
 	for actId, actRows := range acts {
 		for _, act := range actRows {
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				buffer.WriteRune(',')
 			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s',%f,'%s',%f)",
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s','%s',%f,'%s',%f)",
 				tpid, actId, act.Identifier, act.BalanceType, act.Direction, act.Units, act.ExpiryTime,
-				act.DestinationId, act.RatingSubject, act.BalanceWeight, act.ExtraParameters, act.Weight))
+				act.DestinationId, act.RatingSubject, act.BalanceWeight, act.SharedGroup, act.ExtraParameters, act.Weight))
 			i++
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE action=values(action),balance_type=values(balance_type),direction=values(direction),units=values(units),expiry_time=values(expiry_time),destination_tag=values(destination_tag),rating_subject=values(rating_subject),balance_weight=values(balance_weight),extra_parameters=values(extra_parameters),weight=values(weight)")
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE action=values(action),balance_type=values(balance_type),direction=values(direction),units=values(units),expiry_time=values(expiry_time),destination_tag=values(destination_tag),rating_subject=values(rating_subject),shared_group=values(shared_group),balance_weight=values(balance_weight),extra_parameters=values(extra_parameters),weight=values(weight)")
 	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
@@ -331,7 +331,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
 	if err != nil {
 		return nil, err
 	}
@@ -340,9 +340,9 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateSubject, expTime, extraParameters string
+		var action, balanceId, dir, destId, rateSubject, sharedGroup, expTime, extraParameters string
 		var units, balanceWeight, weight float64
-		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &balanceWeight, &extraParameters, &weight); err != nil {
+		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &sharedGroup, &balanceWeight, &extraParameters, &weight); err != nil {
 			return nil, err
 		}
 		acts.Actions = append(acts.Actions, &utils.TPAction{
@@ -354,6 +354,7 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 			DestinationId:   destId,
 			RatingSubject:   rateSubject,
 			BalanceWeight:   balanceWeight,
+			SharedGroup:     sharedGroup,
 			ExtraParameters: extraParameters,
 			Weight:          weight})
 	}
@@ -923,8 +924,8 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 	for rows.Next() {
 		var id int
 		var units, balance_weight, weight float64
-		var tpid, tag, action, balance_type, direction, destinations_tag, rating_subject, extra_parameters, expirationDate string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rating_subject, &balance_weight, &extra_parameters, &weight); err != nil {
+		var tpid, tag, action, balance_type, direction, destinations_tag, rating_subject, shared_group, extra_parameters, expirationDate string
+		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rating_subject, &shared_group, &balance_weight, &extra_parameters, &weight); err != nil {
 			return nil, err
 		}
 		a := &utils.TPAction{
@@ -935,6 +936,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 			ExpiryTime:      expirationDate,
 			DestinationId:   destinations_tag,
 			RatingSubject:   rating_subject,
+			SharedGroup: shared_group,
 			BalanceWeight:   balance_weight,
 			ExtraParameters: extra_parameters,
 			Weight:          weight,

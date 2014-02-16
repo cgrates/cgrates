@@ -431,6 +431,7 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 	}
 	for atId, ats := range atsMap {
 		for _, at := range ats {
+			
 			_, exists := dbr.actions[at.ActionsId]
 			if !exists {
 				return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", at.ActionsId))

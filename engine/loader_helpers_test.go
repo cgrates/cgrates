@@ -58,7 +58,7 @@ DUMMY,INVALID;DATA
 `
 
 var actionsSample = `#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,ExtraParameters,Weight
-PREPAID_10,*topup_reset,*monetary,*out,5,*unlimited,*any,,10,,10
+PREPAID_10,*topup_reset,*monetary,*out,5,*unlimited,*any,,,10,,10
 WARN_HTTP,*call_url,,,,,,,,http://localhost:8000,10
 LOG_BALANCE,*log,,,,,,,,,10
 DUMMY,INVALID;DATA

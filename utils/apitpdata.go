@@ -215,6 +215,7 @@ type TPAction struct {
 	ExpiryTime      string  // Time when the units will expire
 	DestinationId   string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
+	SharedGroup string // Reference to a shared group
 	BalanceWeight   float64 // Balance weight
 	ExtraParameters string
 	Weight          float64 // Action's weight
