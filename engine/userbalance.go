@@ -113,6 +113,18 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 	if !found && a.Balance.Value <= 0 {
 		a.Balance.Value = -a.Balance.Value
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], a.Balance)
+		if a.Balance.SharedGroup != "" {
+			// add shared group member
+			sg, err := accountingStorage.GetSharedGroup(a.Balance.SharedGroup, false)
+			if err != nil || sg == nil {
+				//than problem
+				Logger.Warning(fmt.Sprintf("Could not get shared group: %v", a.Balance.SharedGroup))
+			} else {
+				// add membere and save
+				sg.Members = append(sg.Members, ub.Id)
+				accountingStorage.SetSharedGroup(sg.Id, sg)
+			}
+		}
 	}
 	ub.executeActionTriggers(nil)
 	return nil //ub.BalanceMap[id].GetTotalValue()
@@ -256,7 +268,7 @@ CONNECT_FEE:
 func (ub *UserBalance) debitMinutesFromSharedBalances(sharedGroupName string, cc *CallCost, moneyBalances BalanceChain, count bool) {
 	sharedGroup, err := accountingStorage.GetSharedGroup(sharedGroupName, false)
 	if err != nil {
-		Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sharedGroup))
+		Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sharedGroupName))
 		return
 	}
 	sharingMembers := sharedGroup.GetMembersExceptUser(ub.Id)
