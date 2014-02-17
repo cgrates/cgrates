@@ -1,5 +1,7 @@
 ## Rating system for Telecom & ISP environments ##
 
+[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/cgrates/cgrates/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
 ### Features ###
 + Rates for prepaid and for postpaid
 + The budget expressed in money and/or minutes (seconds)
@@ -12,14 +14,14 @@
 + Commercial support available
 
 ### Documentation ###
-Install & run screencast: http://youtu.be/qTQZZpb-m7Q
+[Step by steps tutorials](https://cgrates.readthedocs.org/en/latest/tut_freeswitch.html)
 
-Browsable HTML http://readthedocs.org/docs/cgrates/
+[Debian apt-get repository](https://cgrates.readthedocs.org/en/latest/tut_freeswitch_installs.html#cgrates)
+
+Browsable HTML docs http://readthedocs.org/docs/cgrates/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
-API reference [godoc](http://godoc.org/github.com/cgrates/cgrates) or [gowalker](http://gowalker.org/github.com/cgrates/cgrates)
+API reference [godoc](http://godoc.org/github.com/cgrates/cgrates/apier)
 
 Also check irc.freenode.net#cgrates and [Google group](https://groups.google.com/forum/#!forum/cgrates) for a more real-time support.
-
-[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/cgrates/cgrates/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
