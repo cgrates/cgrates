@@ -77,48 +77,48 @@ func (fsev FSEvent) New(body string) Event {
 func (fsev FSEvent) GetName() string {
 	return fsev[NAME]
 }
-func (fsev FSEvent) GetDirection() string {
+func (fsev FSEvent) GetDirection(fieldName string) string {
 	//TODO: implement direction
 	return "*out"
 	//return fsev[DIRECTION]
 }
-func (fsev FSEvent) GetSubject() string {
-	return utils.FirstNonEmpty(fsev[SUBJECT], fsev[USERNAME])
+func (fsev FSEvent) GetSubject(fieldName string) string {
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[SUBJECT], fsev[USERNAME])
 }
-func (fsev FSEvent) GetAccount() string {
-	return utils.FirstNonEmpty(fsev[ACCOUNT], fsev[USERNAME])
+func (fsev FSEvent) GetAccount(fieldName string) string {
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[ACCOUNT], fsev[USERNAME])
 }
 
 // Charging destination number
-func (fsev FSEvent) GetDestination() string {
-	return utils.FirstNonEmpty(fsev[DESTINATION], fsev[CALL_DEST_NR])
+func (fsev FSEvent) GetDestination(fieldName string) string {
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[DESTINATION], fsev[CALL_DEST_NR])
 }
 
 // Original dialed destination number, useful in case of unpark
-func (fsev FSEvent) GetCallDestNr() string {
-	return fsev[CALL_DEST_NR]
+func (fsev FSEvent) GetCallDestNr(fieldName string) string {
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[CALL_DEST_NR])
 }
-func (fsev FSEvent) GetTOR() string {
-	return utils.FirstNonEmpty(fsev[TOR], cfg.DefaultTOR)
+func (fsev FSEvent) GetTOR(fieldName string) string {
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[TOR], cfg.DefaultTOR)
 }
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
 }
-func (fsev FSEvent) GetTenant() string {
-	return utils.FirstNonEmpty(fsev[CSTMID], cfg.DefaultTenant)
+func (fsev FSEvent) GetTenant(fieldName string) string {
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID], cfg.DefaultTenant)
 }
-func (fsev FSEvent) GetReqType() string {
-	return utils.FirstNonEmpty(fsev[REQTYPE], cfg.DefaultReqType)
+func (fsev FSEvent) GetReqType(fieldName string) string {
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], cfg.DefaultReqType)
 }
 func (fsev FSEvent) MissingParameter() bool {
-	return strings.TrimSpace(fsev.GetDirection()) == "" ||
-		strings.TrimSpace(fsev.GetSubject()) == "" ||
-		strings.TrimSpace(fsev.GetAccount()) == "" ||
-		strings.TrimSpace(fsev.GetDestination()) == "" ||
-		strings.TrimSpace(fsev.GetTOR()) == "" ||
+	return strings.TrimSpace(fsev.GetDirection("")) == "" ||
+		strings.TrimSpace(fsev.GetSubject("")) == "" ||
+		strings.TrimSpace(fsev.GetAccount("")) == "" ||
+		strings.TrimSpace(fsev.GetDestination("")) == "" ||
+		strings.TrimSpace(fsev.GetTOR("")) == "" ||
 		strings.TrimSpace(fsev.GetUUID()) == "" ||
-		strings.TrimSpace(fsev.GetTenant()) == "" ||
-		strings.TrimSpace(fsev.GetCallDestNr()) == ""
+		strings.TrimSpace(fsev.GetTenant("")) == "" ||
+		strings.TrimSpace(fsev.GetCallDestNr("")) == ""
 }
 func (fsev FSEvent) GetStartTime(field string) (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev[field], 0, 64)

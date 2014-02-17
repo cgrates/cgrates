@@ -115,6 +115,15 @@ type CGRConfig struct {
 	SMRaterReconnects        int           // Number of reconnect attempts to rater
 	SMDebitInterval          int           // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration        time.Duration // The maximum duration of a call
+	SMReqTypeFields    []string      // Name of request type fields to be used during additional sessions control <""|*default|field_name>.
+	SMDirectionFields  []string      // Name of direction fields to be used during additional sessions control <""|*default|field_name>.
+	SMTenantFields     []string      // Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
+	SMTORFields        []string      // Name of tor fields to be used during additional sessions control <""|*default|field_name>.
+	SMAccountFields    []string      // Name of account fields to be used during additional sessions control <""|*default|field_name>.
+	SMSubjectFields    []string      // Name of fields to be used during additional sessions control <""|*default|field_name>.
+	SMDestFields       []string      // Name of destination fields to be used during additional sessions control <""|*default|field_name>.
+	SMAnswerTimeFields []string      // Name of time_answer fields to be used during additional sessions control <""|*default|field_name>.
+	SMDurationFields   []string      // Name of duration fields to be used during additional sessions control <""|*default|field_name>.
 	MediatorEnabled          bool          // Starts Mediator service: <true|false>.
 	MediatorRater            string        // Address where to reach the Rater: <internal|x.y.z.y:1234>
 	MediatorRaterReconnects  int           // Number of reconnects to rater before giving up.
@@ -219,6 +228,15 @@ func (self *CGRConfig) setDefaults() error {
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
+	self.SMReqTypeFields = []string{}
+	self.SMDirectionFields = []string{} 
+	self.SMTenantFields = []string{}
+	self.SMTORFields = []string{}
+	self.SMAccountFields = []string{}
+	self.SMSubjectFields = []string{}
+	self.SMDestFields = []string{}
+	self.SMAnswerTimeFields = []string{}
+	self.SMDurationFields = []string{}
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
@@ -519,6 +537,52 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("session_manager", "max_call_duration"); hasOpt {
 		maxCallDurStr, _ := c.GetString("session_manager", "max_call_duration")
 		if cfg.SMMaxCallDuration, errParse = utils.ParseDurationWithSecs(maxCallDurStr); errParse != nil {
+			return nil, errParse
+		}
+	}
+		
+	if hasOpt = c.HasOption("session_manager", "reqtype_fields"); hasOpt {
+		if cfg.SMReqTypeFields, errParse = ConfigSlice(c, "session_manager", "reqtype_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "direction_fields"); hasOpt {
+		if cfg.SMDirectionFields, errParse = ConfigSlice(c, "session_manager", "direction_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "tenant_fields"); hasOpt {
+		if cfg.SMTenantFields, errParse = ConfigSlice(c, "session_manager", "tenant_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "tor_fields"); hasOpt {
+		if cfg.SMTORFields, errParse = ConfigSlice(c, "session_manager", "tor_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "account_fields"); hasOpt {
+		if cfg.SMAccountFields, errParse = ConfigSlice(c, "session_manager", "account_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "subject_fields"); hasOpt {
+		if cfg.SMSubjectFields, errParse = ConfigSlice(c, "session_manager", "subject_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "destination_fields"); hasOpt {
+		if cfg.SMDestFields, errParse = ConfigSlice(c, "session_manager", "destination_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "answer_time_fields"); hasOpt {
+		if cfg.SMAnswerTimeFields, errParse = ConfigSlice(c, "session_manager", "answer_time_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "duration_fields"); hasOpt {
+		if cfg.SMDurationFields, errParse = ConfigSlice(c, "session_manager", "duration_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
