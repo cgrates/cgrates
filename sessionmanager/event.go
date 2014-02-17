@@ -25,15 +25,15 @@ import (
 type Event interface {
 	New(string) Event
 	GetName() string
-	GetDirection() string
-	GetSubject() string
-	GetAccount() string
-	GetDestination() string
-	GetCallDestNr() string
-	GetTOR() string
 	GetUUID() string
-	GetTenant() string
-	GetReqType() string
+	GetDirection(string) string
+	GetSubject(string) string
+	GetAccount(string) string
+	GetDestination(string) string
+	GetCallDestNr(string) string
+	GetTOR(string) string
+	GetTenant(string) string
+	GetReqType(string) string
 	GetStartTime(string) (time.Time, error)
 	GetEndTime() (time.Time, error)
 	MissingParameter() bool

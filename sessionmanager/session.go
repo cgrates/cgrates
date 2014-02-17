@@ -39,7 +39,7 @@ type Session struct {
 // Creates a new session and starts the debit loop
 func NewSession(ev Event, sm SessionManager) (s *Session) {
 	// SesionManager only handles prepaid and postpaid calls
-	if ev.GetReqType() != utils.PREPAID && ev.GetReqType() != utils.POSTPAID {
+	if ev.GetReqType("") != utils.PREPAID && ev.GetReqType("") != utils.POSTPAID {
 		return
 	}
 	startTime, err := ev.GetStartTime(START_TIME)
@@ -49,12 +49,12 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	}
 
 	cd := &engine.CallDescriptor{
-		Direction:   ev.GetDirection(),
-		Tenant:      ev.GetTenant(),
-		TOR:         ev.GetTOR(),
-		Subject:     ev.GetSubject(),
-		Account:     ev.GetAccount(),
-		Destination: ev.GetDestination(),
+		Direction:   ev.GetDirection(""),
+		Tenant:      ev.GetTenant(""),
+		TOR:         ev.GetTOR(""),
+		Subject:     ev.GetSubject(""),
+		Account:     ev.GetAccount(""),
+		Destination: ev.GetDestination(""),
 		TimeStart:   startTime}
 	s = &Session{uuid: ev.GetUUID(),
 		callDescriptor: cd,
@@ -63,7 +63,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	if ev.MissingParameter() {
 		sm.DisconnectSession(s, MISSING_PARAMETER)
 	} else {
-		switch ev.GetReqType() {
+		switch ev.GetReqType("") {
 		case utils.PREPAID:
 			go s.startDebitLoop()
 		case utils.POSTPAID:

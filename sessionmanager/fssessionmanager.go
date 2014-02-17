@@ -157,21 +157,21 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		startTime = time.Now()
 	}
 	// if there is no account configured leave the call alone
-	if !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, strings.TrimSpace(ev.GetReqType())) {
+	if !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, strings.TrimSpace(ev.GetReqType(""))) {
 		return // we unpark only prepaid and pseudoprepaid calls
 	}
 	if ev.MissingParameter() {
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), MISSING_PARAMETER)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), MISSING_PARAMETER)
 		engine.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
 		return
 	}
 	cd := engine.CallDescriptor{
-		Direction:   ev.GetDirection(),
-		Tenant:      ev.GetTenant(),
-		TOR:         ev.GetTOR(),
-		Subject:     ev.GetSubject(),
-		Account:     ev.GetAccount(),
-		Destination: ev.GetDestination(),
+		Direction:   ev.GetDirection(""),
+		Tenant:      ev.GetTenant(""),
+		TOR:         ev.GetTOR(""),
+		Subject:     ev.GetSubject(""),
+		Account:     ev.GetAccount(""),
+		Destination: ev.GetDestination(""),
 		TimeStart:   startTime,
 		TimeEnd:     startTime.Add(cfg.SMMaxCallDuration),
 	}
@@ -179,24 +179,24 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	err = sm.connector.GetMaxSessionTime(cd, &remainingDurationFloat)
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), SYSTEM_ERROR)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), SYSTEM_ERROR)
 		return
 	}
 	remainingDuration := time.Duration(remainingDurationFloat)
 	//engine.Logger.Info(fmt.Sprintf("Remaining duration: %v", remainingDuration))
 	if remainingDuration == 0 {
 		//engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), INSUFFICIENT_FUNDS)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), INSUFFICIENT_FUNDS)
 		return
 	}
 	sm.setMaxCallDuration(ev.GetUUID(), remainingDuration)
-	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(), AUTH_OK)
+	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), AUTH_OK)
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	//engine.Logger.Info("<SessionManager> FreeSWITCH answer.")
 	// Make sure cgr_type is enforced even if not set by FreeSWITCH
-	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType())); err != nil {
+	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType(""))); err != nil {
 		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
 	s := NewSession(ev, sm)
@@ -212,7 +212,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		return
 	}
 	defer s.Close(ev) // Stop loop and save the costs deducted so far to database
-	if ev.GetReqType() == utils.POSTPAID {
+	if ev.GetReqType("") == utils.POSTPAID {
 		startTime, err := ev.GetStartTime(START_TIME)
 		if err != nil {
 			engine.Logger.Crit("Error parsing postpaid call start time from event")
@@ -224,14 +224,14 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			return
 		}
 		cd := engine.CallDescriptor{
-			Direction:    ev.GetDirection(),
-			Tenant:       ev.GetTenant(),
-			TOR:          ev.GetTOR(),
-			Subject:      ev.GetSubject(),
-			Account:      ev.GetAccount(),
+			Direction:    ev.GetDirection(""),
+			Tenant:       ev.GetTenant(""),
+			TOR:          ev.GetTOR(""),
+			Subject:      ev.GetSubject(""),
+			Account:      ev.GetAccount(""),
 			LoopIndex:    0,
 			CallDuration: endTime.Sub(startTime),
-			Destination:  ev.GetDestination(),
+			Destination:  ev.GetDestination(""),
 			TimeStart:    startTime,
 			TimeEnd:      endTime,
 		}
