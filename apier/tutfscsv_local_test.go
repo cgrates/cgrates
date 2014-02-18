@@ -88,10 +88,11 @@ func TestFsCsvStartEngine(t *testing.T) {
 		t.Fatal("Cannot find cgr-engine executable")
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	engine := exec.Command(enginePath, "-rater", "-scheduler", "-cdrs", "-mediator", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
-	if err := engine.Start(); err != nil {
-		t.Fatal("Cannot start cgr-engine: ", err.Error())
-	}
+	go func() {
+		eng := exec.Command(enginePath, "-rater", "-scheduler", "-cdrs", "-mediator", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
+		out, _ := eng.CombinedOutput()
+		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
+	}()
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
 }
 
