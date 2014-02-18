@@ -16,8 +16,8 @@ On the server you want to install CGRateS, simply execute the following commands
 ::
 
    cd /etc/apt/sources.list.d/
-   wget -O - http://apt.itsyscom.com/repos/apt/conf/cgrates.gpg.key|apt-key add -
-   wget http://apt.itsyscom.com/repos/apt/conf/cgrates.apt.list
+   wget -O - http://apt.itsyscom.com/conf/cgrates.gpg.key|apt-key add -
+   wget http://apt.itsyscom.com/conf/cgrates.apt.list
    apt-get update
    apt-get install cgrates
 
