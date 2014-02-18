@@ -35,7 +35,7 @@ We got FreeSWITCH_ installed via following commands:
  gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF
  gpg -a --export D76EDC7725E010CF | sudo apt-key add -
  cd /etc/apt/sources.list.d/
- wget http://apt.itsyscom.com/repos/apt/conf/freeswitch.apt.list
+ wget http://apt.itsyscom.com/conf/freeswitch.apt.list
  apt-get update
  apt-get install freeswitch-meta-vanilla freeswitch-mod-json-cdr
 
@@ -52,8 +52,8 @@ To get **CGRateS** installed execute the following commands over ssh console:
 ::
 
  cd /etc/apt/sources.list.d/
- wget -O - http://apt.itsyscom.com/repos/apt/conf/cgrates.gpg.key|apt-key add -
- wget http://apt.itsyscom.com/repos/apt/conf/cgrates.apt.list
+ wget -O - http://apt.itsyscom.com/conf/cgrates.gpg.key|apt-key add -
+ wget http://apt.itsyscom.com/conf/cgrates.apt.list
  apt-get update
  apt-get install cgrates
 

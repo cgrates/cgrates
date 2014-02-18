@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
@@ -81,16 +82,16 @@ func (self *ApierV1) GetUserBalance(attr *AttrGetUserBalance, reply *engine.User
 }
 
 type AttrAddBalance struct {
-	Tenant    string
-	Account   string
-	BalanceId string
-	Direction string
-	Value     float64
-	//ExpirationDate time.Time
-	//RateSubject    string
-	DestinationId string
-	Weight        float64
-	Overwrite     bool // When true it will reset if the balance is already there
+	Tenant         string
+	Account        string
+	BalanceId      string
+	Direction      string
+	Value          float64
+	ExpirationDate time.Time
+	RateSubject    string
+	DestinationId  string
+	Weight         float64
+	Overwrite      bool // When true it will reset if the balance is already there
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
@@ -122,11 +123,11 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			BalanceId:  attr.BalanceId,
 			Direction:  attr.Direction,
 			Balance: &engine.Balance{
-				Value: attr.Value,
-				//ExpirationDate: attr.ExpirationDate,
-				//RateSubject:    attr.RateSubject,
-				DestinationId: attr.DestinationId,
-				Weight:        attr.Weight,
+				Value:          attr.Value,
+				ExpirationDate: attr.ExpirationDate,
+				RateSubject:    attr.RateSubject,
+				DestinationId:  attr.DestinationId,
+				Weight:         attr.Weight,
 			},
 		},
 	})
@@ -535,8 +536,6 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 	*reply = *cachedItemAge
 	return nil
 }
-
-
 
 func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, reply *string) error {
 	loader := engine.NewFileCSVReader(self.RatingDb, self.AccountDb, utils.CSV_SEP,
