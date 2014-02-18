@@ -102,7 +102,7 @@ func TestFsCsvRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	rater, err = rpc.Dial("tcp", "127.0.0.1:2012") // ToDo: Fix here with config loaded from file
+	rater, err = rpc.Dial("tcp", "127.0.0.1:2013") // ToDo: Fix here with config loaded from file
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -144,7 +144,7 @@ func TestFsCsvLoadTariffPlans(t *testing.T) {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 1, Actions: 2}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 1, Actions: 1}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
