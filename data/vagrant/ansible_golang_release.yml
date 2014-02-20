@@ -4,7 +4,7 @@
   user: vagrant
   sudo: yes
   vars:
-    $root_db_password: CGRateS.org
+    root_db_password: CGRateS.org
 
   tasks:
     - name: install dependency
@@ -42,11 +42,14 @@
     - name: install freeswitch
       apt: pkg=cgrates update_cache=yes state=latest
 
-    - name: update mysql root password for all root accounts
-      mysql_user: login_user=root login_password=$root_db_password name=root host=localhost password=$root_db_password
+    - name: update mysql root password for root account
+      mysql_user: name=root host=localhost password={{ root_db_password }}
+
+    - name: copy .my.cnf
+      template: src=my.cnf dest=/root/.my.cnf mode=0600
 
     - name: setup database tables
-      shell: chdir=/usr/share/cgrates/storage/mysql ./setup_cgr_db.sh root $root_db_password localhost
+      shell: chdir=/usr/share/cgrates/storage/mysql ./setup_cgr_db.sh root {{ root_db_password }} localhost
     
 - hosts: all
   user: vagrant
