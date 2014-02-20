@@ -59,6 +59,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # information on available options.
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible_golang_release.yml"
-    ansible.verbose = "vvvv"
+    #ansible.verbose = "vvvv"
   end
 end

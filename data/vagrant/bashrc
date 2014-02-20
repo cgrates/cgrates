@@ -110,6 +110,6 @@ if ! shopt -oq posix; then
 fi
 
 export GOROOT=$HOME/go
-export GOPATH=$HOME/gopath
+export GOPATH=$HOME/go_home
 
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin

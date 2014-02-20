@@ -64,8 +64,5 @@
     - name: copy bashrc
       copy: src=bashrc dest=~/.bashrc
 
-    - name: echo
-      command: echo $GOROOT; echo $GOPATH
-
     - name: get cgrates 
-      shell: ~/go/bin/go get -u -v github.com/cgrates/cgrates
+      shell: GOROOT=~/go GOPATH=~/go_home ~/go/bin/go get -u -v github.com/cgrates/cgrates
