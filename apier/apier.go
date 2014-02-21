@@ -62,7 +62,7 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 	return nil
 }
 
-type AttrGetUserBalance struct {
+type AttrGetAccount struct {
 	Tenant      string
 	Account     string
 	BalanceType string
@@ -70,9 +70,9 @@ type AttrGetUserBalance struct {
 }
 
 // Get balance
-func (self *ApierV1) GetUserBalance(attr *AttrGetUserBalance, reply *engine.UserBalance) error {
+func (self *ApierV1) GetAccount(attr *AttrGetAccount, reply *engine.Account) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	userBalance, err := self.AccountDb.GetUserBalance(tag)
+	userBalance, err := self.AccountDb.GetAccount(tag)
 	if err != nil {
 		return err
 	}
@@ -96,18 +96,18 @@ type AttrAddBalance struct {
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetUserBalance(tag); err != nil {
+	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
-		ub := &engine.UserBalance{
+		ub := &engine.Account{
 			Id: tag,
 		}
-		if err := self.AccountDb.SetUserBalance(ub); err != nil {
+		if err := self.AccountDb.SetAccount(ub); err != nil {
 			*reply = err.Error()
 			return err
 		}
 	}
 	at := &engine.ActionTiming{
-		UserBalanceIds: []string{tag},
+		AccountIds: []string{tag},
 	}
 
 	if attr.Direction == "" {
@@ -149,8 +149,8 @@ type AttrExecuteAction struct {
 func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	at := &engine.ActionTiming{
-		UserBalanceIds: []string{tag},
-		ActionsId:      attr.ActionsId,
+		AccountIds: []string{tag},
+		ActionsId:  attr.ActionsId,
 	}
 
 	if err := at.Execute(); err != nil {
@@ -397,14 +397,14 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 
 	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
 	_, err := engine.AccLock.Guard(tag, func() (float64, error) {
-		userBalance, err := self.AccountDb.GetUserBalance(tag)
+		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {
 			return 0, err
 		}
 
 		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
 
-		if err = self.AccountDb.SetUserBalance(userBalance); err != nil {
+		if err = self.AccountDb.SetAccount(userBalance); err != nil {
 			return 0, err
 		}
 		return 0, nil

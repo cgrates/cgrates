@@ -116,7 +116,7 @@ func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
 	return cc, nil
 }
 
-func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyBalances BalanceChain) error {
+func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalances BalanceChain) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		if b.Value <= 0 {
 			return nil
@@ -257,7 +257,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 	return nil
 }
 
-func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
+func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		if b.Value <= 0 {
 			return nil

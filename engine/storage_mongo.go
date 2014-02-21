@@ -183,13 +183,13 @@ func (ms *MongoStorage) SetActions(key string, as Actions) error {
 	return ms.db.C("actions").Insert(&AcKeyValue{Key: key, Value: as})
 }
 
-func (ms *MongoStorage) GetUserBalance(key string) (result *UserBalance, err error) {
-	result = new(UserBalance)
+func (ms *MongoStorage) GetAccount(key string) (result *Account, err error) {
+	result = new(Account)
 	err = ms.db.C("userbalances").Find(bson.M{"id": key}).One(result)
 	return
 }
 
-func (ms *MongoStorage) SetUserBalance(ub *UserBalance) error {
+func (ms *MongoStorage) SetAccount(ub *Account) error {
 	return ms.db.C("userbalances").Insert(ub)
 }
 

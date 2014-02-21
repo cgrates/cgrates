@@ -28,7 +28,7 @@ var balance1 string = `{"Id":"*out:192.168.56.66:dan","Type":"*prepaid","Balance
 var callCost1 string = `{"Direction":"*out","TOR":"call","Tenant":"192.168.56.66","Subject":"dan","Account":"dan","Destination":"+4986517174963","Cost":0.6,"ConnectFee":0,"Timespans":[{"TimeStart":"2013-12-03T14:36:48+01:00","TimeEnd":"2013-12-03T14:37:48+01:00","Cost":0.6,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0.6,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":2},"Weight":10},"CallDuration":60000000000,"Increments":null,"MatchedSubject":"*out:192.168.56.66:call:*any","MatchedPrefix":"+49"}]}`
 
 func TestDebitBalanceForCall1(t *testing.T) {
-	b1 := new(UserBalance)
+	b1 := new(Account)
 	if err := json.Unmarshal([]byte(balance1), b1); err != nil {
 		t.Error("Error restoring balance1: ", err)
 	}
@@ -50,7 +50,7 @@ var balanceInsufficient = `{"Id":"*out:192.168.56.66:dan","Type":"*prepaid","Bal
 var costInsufficient = `{"Direction":"*out","TOR":"call","Tenant":"192.168.56.66","Subject":"dan","Account":"dan","Destination":"+4986517174963","Cost":1,"ConnectFee":3,"Timespans":[{"TimeStart":"2013-12-05T09:52:17+01:00","TimeEnd":"2013-12-05T09:53:17+01:00","Cost":1,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":3,"Rates":[{"GroupIntervalStart":0,"Value":1,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":2},"Weight":10},"CallDuration":60000000000,"Increments":null,"MatchedSubject":"*out:192.168.56.66:call:*any","MatchedPrefix":"+49"}]}`
 
 func TestDebitInsufficientBalance(t *testing.T) {
-	b1 := new(UserBalance)
+	b1 := new(Account)
 	if err := json.Unmarshal([]byte(balanceInsufficient), b1); err != nil {
 		t.Error("Error restoring balance1: ", err)
 	}

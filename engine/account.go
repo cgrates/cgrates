@@ -29,8 +29,8 @@ import (
 )
 
 const (
-	UB_TYPE_POSTPAID = "*postpaid"
-	UB_TYPE_PREPAID  = "*prepaid"
+	UB_TYPE_POSTPAID = "*unlimited"
+	UB_TYPE_PREPAID  = "*limited"
 	// Direction type
 	INBOUND  = "*in"
 	OUTBOUND = "*out"
@@ -58,9 +58,9 @@ var (
 Structure containing information about user's credit (minutes, cents, sms...).'
 This can represent a user or a shared group.
 */
-type UserBalance struct {
+type Account struct {
 	Id             string
-	Type           string // prepaid-postpaid
+	Type           string // UB_TYPE_POSTPAID/UB_TYPE_PREPAID
 	BalanceMap     map[string]BalanceChain
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
@@ -71,7 +71,7 @@ type UserBalance struct {
 }
 
 // Returns user's available minutes for the specified destination
-func (ub *UserBalance) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
+func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
 	credit = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction]).GetTotalValue()
 	balances = ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[MINUTES+cd.Direction])
 
@@ -85,7 +85,7 @@ func (ub *UserBalance) getCreditForPrefix(cd *CallDescriptor) (duration time.Dur
 
 // Debits some amount of user's specified balance adding the balance if it does not exists.
 // Returns the remaining credit in user's balance.
-func (ub *UserBalance) debitBalanceAction(a *Action) error {
+func (ub *Account) debitBalanceAction(a *Action) error {
 	if a == nil {
 		return errors.New("nil minute action!")
 	}
@@ -116,7 +116,7 @@ func (ub *UserBalance) debitBalanceAction(a *Action) error {
 	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 
-func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain) BalanceChain {
+func (ub *Account) getBalancesForPrefix(prefix string, balances BalanceChain) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
 		if b.IsExpired() || (ub.Type != UB_TYPE_POSTPAID && b.Value <= 0) {
@@ -147,7 +147,7 @@ func (ub *UserBalance) getBalancesForPrefix(prefix string, balances BalanceChain
 	return usefulBalances
 }
 
-func (ub *UserBalance) debitCreditBalance(cc *CallCost, count bool) error {
+func (ub *Account) debitCreditBalance(cc *CallCost, count bool) error {
 	usefulMinuteBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[MINUTES+cc.Direction])
 	usefulMoneyBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[CREDIT+cc.Direction])
 	// debit minutes
@@ -232,7 +232,7 @@ CONNECT_FEE:
 	return returnError
 }
 
-func (ub *UserBalance) GetDefaultMoneyBalance(direction string) *Balance {
+func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 	for _, balance := range ub.BalanceMap[CREDIT+direction] {
 		if balance.IsDefault() {
 			return balance
@@ -245,7 +245,7 @@ func (ub *UserBalance) GetDefaultMoneyBalance(direction string) *Balance {
 	return defaultBalance
 }
 
-func (ub *UserBalance) refundIncrements(increments Increments, direction string, count bool) {
+func (ub *Account) refundIncrements(increments Increments, direction string, count bool) {
 	for _, increment := range increments {
 		var balance *Balance
 		if increment.GetMinuteBalance() != "" {
@@ -273,7 +273,7 @@ func (ub *UserBalance) refundIncrements(increments Increments, direction string,
 /*
 Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
 */
-func (ub *UserBalance) debitGenericBalance(balanceId string, direction string, amount float64, count bool) float64 {
+func (ub *Account) debitGenericBalance(balanceId string, direction string, amount float64, count bool) float64 {
 	if count {
 		ub.countUnits(&Action{BalanceType: balanceId, Direction: direction, Balance: &Balance{Value: amount}})
 	}
@@ -282,7 +282,7 @@ func (ub *UserBalance) debitGenericBalance(balanceId string, direction string, a
 }
 
 // Scans the action trigers and execute the actions for which trigger is met
-func (ub *UserBalance) executeActionTriggers(a *Action) {
+func (ub *Account) executeActionTriggers(a *Action) {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
 		if at.Executed {
@@ -331,7 +331,7 @@ func (ub *UserBalance) executeActionTriggers(a *Action) {
 
 // Mark all action trigers as ready for execution
 // If the action is not nil it acts like a filter
-func (ub *UserBalance) resetActionTriggers(a *Action) {
+func (ub *Account) resetActionTriggers(a *Action) {
 	for _, at := range ub.ActionTriggers {
 		if !at.Match(a) {
 			continue
@@ -342,7 +342,7 @@ func (ub *UserBalance) resetActionTriggers(a *Action) {
 }
 
 // Returns the unit counter that matches the specified action type
-func (ub *UserBalance) getUnitCounter(a *Action) *UnitsCounter {
+func (ub *Account) getUnitCounter(a *Action) *UnitsCounter {
 	for _, uc := range ub.UnitCounters {
 		direction := a.Direction
 		if direction == "" {
@@ -357,7 +357,7 @@ func (ub *UserBalance) getUnitCounter(a *Action) *UnitsCounter {
 
 // Increments the counter for the type specified in the received Action
 // with the actions values
-func (ub *UserBalance) countUnits(a *Action) {
+func (ub *Account) countUnits(a *Action) {
 	unitsCounter := ub.getUnitCounter(a)
 	// if not found add the counter
 	if unitsCounter == nil {
@@ -374,7 +374,7 @@ func (ub *UserBalance) countUnits(a *Action) {
 }
 
 // Create minute counters for all triggered actions that have actions opertating on balances
-func (ub *UserBalance) initCounters() {
+func (ub *Account) initCounters() {
 	ucTempMap := make(map[string]*UnitsCounter, 2)
 	for _, at := range ub.ActionTriggers {
 		acs, err := accountingStorage.GetActions(at.ActionsId, false)
@@ -403,7 +403,7 @@ func (ub *UserBalance) initCounters() {
 	}
 }
 
-func (ub *UserBalance) CleanExpiredBalancesAndBuckets() {
+func (ub *Account) CleanExpiredBalancesAndBuckets() {
 	for key, _ := range ub.BalanceMap {
 		bm := ub.BalanceMap[key]
 		for i := 0; i < len(bm); i++ {

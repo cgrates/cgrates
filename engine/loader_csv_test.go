@@ -142,6 +142,7 @@ func init() {
 	csvr.LoadAccountActions()
 	csvr.WriteToDatabase(false, false)
 	dataStorage.CacheRating(nil, nil, nil)
+	accountingStorage.CacheAccounting(nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -610,9 +611,9 @@ func TestLoadActionTimings(t *testing.T) {
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
 	expected := &ActionTiming{
-		Id:             atm.Id,
-		Tag:            "MORE_MINUTES",
-		UserBalanceIds: []string{"*out:vdf:minitsboy"},
+		Id:         atm.Id,
+		Tag:        "MORE_MINUTES",
+		AccountIds: []string{"*out:vdf:minitsboy"},
 		Timing: &RateInterval{
 			Timing: &RITiming{
 				Years:     utils.Years{2012},
@@ -671,7 +672,7 @@ func TestLoadAccountActions(t *testing.T) {
 		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
 	aa := csvr.accountActions[0]
-	expected := &UserBalance{
+	expected := &Account{
 		Id:             "*out:vdf:minitsboy",
 		Type:           UB_TYPE_PREPAID,
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],

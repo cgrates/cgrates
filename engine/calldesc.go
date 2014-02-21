@@ -116,7 +116,7 @@ type CallDescriptor struct {
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	RatingInfos                           RatingInfos
 	Increments                            Increments
-	userBalance                           *UserBalance
+	userBalance                           *Account
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {
@@ -135,7 +135,7 @@ func (cd *CallDescriptor) AddRatingInfo(ris ...*RatingInfo) {
 }
 
 // Returns the key used to retrive the user balance involved in this call
-func (cd *CallDescriptor) GetUserBalanceKey() string {
+func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
 		subj = cd.Account
@@ -144,9 +144,9 @@ func (cd *CallDescriptor) GetUserBalanceKey() string {
 }
 
 // Gets and caches the user balance information.
-func (cd *CallDescriptor) getUserBalance() (ub *UserBalance, err error) {
+func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 	if cd.userBalance == nil {
-		cd.userBalance, err = accountingStorage.GetUserBalance(cd.GetUserBalanceKey())
+		cd.userBalance, err = accountingStorage.GetAccount(cd.GetAccountKey())
 	}
 	if cd.userBalance != nil && cd.userBalance.Disabled {
 		return nil, fmt.Errorf("User %s is disabled", ub.Id)
@@ -388,7 +388,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
+		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetAccountKey(), err))
 		return &CallCost{Cost: -1}, err
 	}
 	timespans := cd.splitInTimeSpans(nil)
@@ -432,12 +432,12 @@ func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	//Logger.Debug(fmt.Sprintf("MAX SESSION cd: %+v", cd))
 	err := cd.LoadRatingPlans()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetUserBalanceKey(), err))
+		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetAccountKey(), err))
 		return 0, err
 	}
 	var availableDuration time.Duration
 	availableCredit := 0.0
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
 		if userBalance.Type == UB_TYPE_POSTPAID {
 			return -1, nil
 		} else {
@@ -445,7 +445,7 @@ func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 			// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 		}
 	} else {
-		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetUserBalanceKey(), err.Error()))
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	}
 	//Logger.Debug(fmt.Sprintf("availableDuration: %v, availableCredit: %v", availableDuration, availableCredit))
@@ -494,18 +494,18 @@ func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetUserBalanceKey(), err))
+		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetAccountKey(), err))
 		return
 	}
-	if userBalance, err := cd.getUserBalance(); err != nil {
+	if userBalance, err := cd.getAccount(); err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error retrieving user balance: %v", err))
 	} else if userBalance == nil {
-		// Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetUserBalanceKey()))
+		// Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetAccountKey()))
 	} else {
-		//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetUserBalanceKey(), cc.Cost+cc.ConnectFee))
-		defer accountingStorage.SetUserBalance(userBalance)
+		//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetAccountKey(), cc.Cost+cc.ConnectFee))
+		defer accountingStorage.SetAccount(userBalance)
 		//ub, _ := json.Marshal(userBalance)
-		//Logger.Debug(fmt.Sprintf("UserBalance: %s", ub))
+		//Logger.Debug(fmt.Sprintf("Account: %s", ub))
 		//cCost, _ := json.Marshal(cc)
 		//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
 		if cc.Cost != 0 || cc.GetConnectFee() != 0 {
@@ -538,8 +538,8 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 }
 
 func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer accountingStorage.SetUserBalance(userBalance)
+	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
+		defer accountingStorage.SetAccount(userBalance)
 		userBalance.refundIncrements(cd.Increments, cd.Direction, true)
 	}
 	return 0.0, err
@@ -550,8 +550,8 @@ Interface method used to add/substract an amount of cents from user's money bala
 The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitCents() (left float64, err error) {
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer accountingStorage.SetUserBalance(userBalance)
+	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
+		defer accountingStorage.SetAccount(userBalance)
 		return userBalance.debitGenericBalance(CREDIT, cd.Direction, cd.Amount, true), nil
 	}
 	return 0.0, err
@@ -562,8 +562,8 @@ Interface method used to add/substract an amount of units from user's sms balanc
 The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer accountingStorage.SetUserBalance(userBalance)
+	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
+		defer accountingStorage.SetAccount(userBalance)
 		return userBalance.debitGenericBalance(SMS, cd.Direction, cd.Amount, true), nil
 	}
 	return 0, err
@@ -574,8 +574,8 @@ Interface method used to add/substract an amount of seconds from user's minutes 
 The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) DebitSeconds() (err error) {
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
-		defer accountingStorage.SetUserBalance(userBalance)
+	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
+		defer accountingStorage.SetAccount(userBalance)
 		return userBalance.debitCreditBalance(cd.CreateCallCost(), true)
 	}
 	return err
@@ -588,7 +588,7 @@ specified in the tariff plan is applied.
 The amount filed has to be filled in call descriptor.
 */
 func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
-	if userBalance, err := cd.getUserBalance(); err == nil && userBalance != nil {
+	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
 		a := &Action{
 			Direction: INBOUND,
 			Balance:   &Balance{Value: cd.Amount, DestinationId: cd.Destination},

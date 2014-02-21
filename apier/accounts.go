@@ -51,7 +51,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	}
 	for _, ats := range allATs {
 		for _, at := range ats {
-			if utils.IsSliceMember(at.UserBalanceIds, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
+			if utils.IsSliceMember(at.AccountIds, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
 				accountATs = append(accountATs, &AccountActionTiming{Id: at.Id, ActionPlanId: at.Tag, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime(time.Now())})
 			}
 		}
@@ -108,7 +108,7 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if balance, err := self.AccountDb.GetUserBalance(utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)); err != nil {
+	if balance, err := self.AccountDb.GetAccount(utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = balance.ActionTriggers
@@ -130,7 +130,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 	}
 	balanceId := utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)
 	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
-		ub, err := self.AccountDb.GetUserBalance(balanceId)
+		ub, err := self.AccountDb.GetAccount(balanceId)
 		if err != nil {
 			return 0, err
 		}
@@ -144,7 +144,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 				ub.ActionTriggers = make(engine.ActionTriggerPriotityList, 0)
 			}
 		}
-		if err := self.AccountDb.SetUserBalance(ub); err != nil {
+		if err := self.AccountDb.SetAccount(ub); err != nil {
 			return 0, err
 		}
 		return 0, nil
@@ -170,10 +170,10 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	balanceId := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
-	var ub *engine.UserBalance
+	var ub *engine.Account
 	var ats engine.ActionPlan
 	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
-		if bal, _ := self.AccountDb.GetUserBalance(balanceId); bal != nil {
+		if bal, _ := self.AccountDb.GetAccount(balanceId); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
 			if len(attr.Type) == 0 {
@@ -181,7 +181,7 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 			} else if !utils.IsSliceMember([]string{engine.UB_TYPE_POSTPAID, engine.UB_TYPE_PREPAID}, attr.Type) {
 				return 0, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "Type")
 			}
-			ub = &engine.UserBalance{
+			ub = &engine.Account{
 				Id:   balanceId,
 				Type: attr.Type,
 			}
@@ -194,11 +194,11 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 				return 0, err
 			}
 			for _, at := range ats {
-				at.UserBalanceIds = append(at.UserBalanceIds, balanceId)
+				at.AccountIds = append(at.AccountIds, balanceId)
 			}
 		}
 		// All prepared, save account
-		if err := self.AccountDb.SetUserBalance(ub); err != nil {
+		if err := self.AccountDb.SetAccount(ub); err != nil {
 			return 0, err
 		}
 		return 0, nil

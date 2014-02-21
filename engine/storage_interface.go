@@ -36,7 +36,7 @@ const (
 	RATING_PLAN_PREFIX        = "rpl_"
 	RATING_PROFILE_PREFIX     = "rpf_"
 	ACTION_PREFIX             = "act_"
-	USER_BALANCE_PREFIX       = "ubl_"
+	ACCOUNT_PREFIX            = "ubl_"
 	DESTINATION_PREFIX        = "dst_"
 	TEMP_DESTINATION_PREFIX   = "tmp_"
 	LOG_CALL_COST_PREFIX      = "cco_"
@@ -84,8 +84,8 @@ type AccountingStorage interface {
 	CacheAccounting([]string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
-	GetUserBalance(string) (*UserBalance, error)
-	SetUserBalance(*UserBalance) error
+	GetAccount(string) (*Account, error)
+	SetAccount(*Account) error
 	GetActionTimings(string) (ActionPlan, error)
 	SetActionTimings(string, ActionPlan) error
 	GetAllActionTimings() (map[string]ActionPlan, error)

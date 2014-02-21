@@ -431,20 +431,20 @@ func TestActionTimingPriotityListWeight(t *testing.T) {
 
 func TestActionTimingsRemoveMember(t *testing.T) {
 	at1 := &ActionTiming{
-		Id:             "some uuid",
-		Tag:            "test",
-		UserBalanceIds: []string{"one", "two", "three"},
-		ActionsId:      "TEST_ACTIONS",
+		Id:         "some uuid",
+		Tag:        "test",
+		AccountIds: []string{"one", "two", "three"},
+		ActionsId:  "TEST_ACTIONS",
 	}
 	at2 := &ActionTiming{
-		Id:             "some uuid22",
-		Tag:            "test2",
-		UserBalanceIds: []string{"three", "four"},
-		ActionsId:      "TEST_ACTIONS2",
+		Id:         "some uuid22",
+		Tag:        "test2",
+		AccountIds: []string{"three", "four"},
+		ActionsId:  "TEST_ACTIONS2",
 	}
 	ats := ActionPlan{at1, at2}
-	if outAts := RemActionTiming(ats, "", "four"); len(outAts[1].UserBalanceIds) != 1 {
-		t.Error("Expecting fewer balance ids", outAts[1].UserBalanceIds)
+	if outAts := RemActionTiming(ats, "", "four"); len(outAts[1].AccountIds) != 1 {
+		t.Error("Expecting fewer balance ids", outAts[1].AccountIds)
 	}
 	if ats = RemActionTiming(ats, "", "three"); len(ats) != 1 {
 		t.Error("Expecting fewer actionTimings", ats)
@@ -575,7 +575,7 @@ func TestActionTriggerPriotityList(t *testing.T) {
 }
 
 func TestActionResetTriggres(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 10}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Balances: BalanceChain{&Balance{Value: 1}}}},
@@ -588,7 +588,7 @@ func TestActionResetTriggres(t *testing.T) {
 }
 
 func TestActionResetTriggresExecutesThem(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 10}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Balances: BalanceChain{&Balance{Value: 1}}}},
@@ -601,7 +601,7 @@ func TestActionResetTriggresExecutesThem(t *testing.T) {
 }
 
 func TestActionResetTriggresActionFilter(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 10}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Balances: BalanceChain{&Balance{Value: 1}}}},
@@ -614,7 +614,7 @@ func TestActionResetTriggresActionFilter(t *testing.T) {
 }
 
 func TestActionSetPostpaid(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -628,7 +628,7 @@ func TestActionSetPostpaid(t *testing.T) {
 }
 
 func TestActionSetPrepaid(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_POSTPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -642,7 +642,7 @@ func TestActionSetPrepaid(t *testing.T) {
 }
 
 func TestActionResetPrepaid(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_POSTPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -661,7 +661,7 @@ func TestActionResetPrepaid(t *testing.T) {
 }
 
 func TestActionResetPostpaid(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -679,7 +679,7 @@ func TestActionResetPostpaid(t *testing.T) {
 }
 
 func TestActionTopupResetCredit(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -698,7 +698,7 @@ func TestActionTopupResetCredit(t *testing.T) {
 }
 
 func TestActionTopupResetMinutes(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:   "TEST_UB",
 		Type: UB_TYPE_PREPAID,
 		BalanceMap: map[string]BalanceChain{
@@ -720,7 +720,7 @@ func TestActionTopupResetMinutes(t *testing.T) {
 }
 
 func TestActionTopupCredit(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -739,7 +739,7 @@ func TestActionTopupCredit(t *testing.T) {
 }
 
 func TestActionTopupMinutes(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -759,7 +759,7 @@ func TestActionTopupMinutes(t *testing.T) {
 }
 
 func TestActionDebitCredit(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -778,7 +778,7 @@ func TestActionDebitCredit(t *testing.T) {
 }
 
 func TestActionDebitMinutes(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_PREPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -798,7 +798,7 @@ func TestActionDebitMinutes(t *testing.T) {
 }
 
 func TestActionResetAllCounters(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:   "TEST_UB",
 		Type: UB_TYPE_POSTPAID,
 		BalanceMap: map[string]BalanceChain{
@@ -828,7 +828,7 @@ func TestActionResetAllCounters(t *testing.T) {
 }
 
 func TestActionResetCounterMinutes(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:   "TEST_UB",
 		Type: UB_TYPE_POSTPAID,
 		BalanceMap: map[string]BalanceChain{
@@ -860,7 +860,7 @@ func TestActionResetCounterMinutes(t *testing.T) {
 }
 
 func TestActionResetCounterCREDIT(t *testing.T) {
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "TEST_UB",
 		Type:           UB_TYPE_POSTPAID,
 		BalanceMap:     map[string]BalanceChain{CREDIT: BalanceChain{&Balance{Value: 100}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
@@ -925,12 +925,12 @@ func TestActionTimingLogging(t *testing.T) {
 		},
 	}
 	at := &ActionTiming{
-		Id:             "some uuid",
-		Tag:            "test",
-		UserBalanceIds: []string{"one", "two", "three"},
-		Timing:         i,
-		Weight:         10.0,
-		ActionsId:      "TEST_ACTIONS",
+		Id:         "some uuid",
+		Tag:        "test",
+		AccountIds: []string{"one", "two", "three"},
+		Timing:     i,
+		Weight:     10.0,
+		ActionsId:  "TEST_ACTIONS",
 	}
 	as, err := accountingStorage.GetActions(at.ActionsId, false)
 	if err != nil {
@@ -965,7 +965,7 @@ func TestActionMakeNegative(t *testing.T) {
 }
 
 func TestMinBalanceTriggerSimple(t *testing.T) {
-	//ub := &UserBalance{}
+	//ub := &Account{}
 }
 
 /********************************** Benchmarks ********************************/

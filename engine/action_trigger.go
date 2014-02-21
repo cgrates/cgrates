@@ -38,7 +38,7 @@ type ActionTrigger struct {
 	Executed       bool
 }
 
-func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
+func (at *ActionTrigger) Execute(ub *Account) (err error) {
 	if ub.Disabled {
 		return fmt.Errorf("User %s is disabled", ub.Id)
 	}
@@ -72,7 +72,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		at.Executed = false
 	}
 	storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)
-	accountingStorage.SetUserBalance(ub)
+	accountingStorage.SetAccount(ub)
 	return
 }
 

@@ -67,7 +67,7 @@ const (
 	UNLIMITED      = "*unlimited"
 )
 
-type actionTypeFunc func(*UserBalance, *Action) error
+type actionTypeFunc func(*Account, *Action) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	switch typ {
@@ -107,38 +107,38 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	return nil, false
 }
 
-func logAction(ub *UserBalance, a *Action) (err error) {
+func logAction(ub *Account, a *Action) (err error) {
 	ubMarshal, _ := json.Marshal(ub)
 	Logger.Info(fmt.Sprintf("Threshold reached, balance: %s", ubMarshal))
 	return
 }
 
-func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
+func resetTriggersAction(ub *Account, a *Action) (err error) {
 	ub.resetActionTriggers(a)
 	return
 }
 
-func setPostpaidAction(ub *UserBalance, a *Action) (err error) {
+func setPostpaidAction(ub *Account, a *Action) (err error) {
 	ub.Type = UB_TYPE_POSTPAID
 	return
 }
 
-func resetPostpaidAction(ub *UserBalance, a *Action) (err error) {
+func resetPostpaidAction(ub *Account, a *Action) (err error) {
 	genericReset(ub)
 	return setPostpaidAction(ub, a)
 }
 
-func setPrepaidAction(ub *UserBalance, a *Action) (err error) {
+func setPrepaidAction(ub *Account, a *Action) (err error) {
 	ub.Type = UB_TYPE_PREPAID
 	return
 }
 
-func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
+func resetPrepaidAction(ub *Account, a *Action) (err error) {
 	genericReset(ub)
 	return setPrepaidAction(ub, a)
 }
 
-func topupResetAction(ub *UserBalance, a *Action) (err error) {
+func topupResetAction(ub *Account, a *Action) (err error) {
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
@@ -148,17 +148,17 @@ func topupResetAction(ub *UserBalance, a *Action) (err error) {
 	return
 }
 
-func topupAction(ub *UserBalance, a *Action) (err error) {
+func topupAction(ub *Account, a *Action) (err error) {
 	genericMakeNegative(a)
 	genericDebit(ub, a)
 	return
 }
 
-func debitAction(ub *UserBalance, a *Action) (err error) {
+func debitAction(ub *Account, a *Action) (err error) {
 	return genericDebit(ub, a)
 }
 
-func resetCounterAction(ub *UserBalance, a *Action) (err error) {
+func resetCounterAction(ub *Account, a *Action) (err error) {
 	uc := ub.getUnitCounter(a)
 	if uc == nil {
 		uc = &UnitsCounter{BalanceType: a.BalanceType, Direction: a.Direction}
@@ -168,7 +168,7 @@ func resetCounterAction(ub *UserBalance, a *Action) (err error) {
 	return
 }
 
-func resetCountersAction(ub *UserBalance, a *Action) (err error) {
+func resetCountersAction(ub *Account, a *Action) (err error) {
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	ub.initCounters()
 	return
@@ -180,7 +180,7 @@ func genericMakeNegative(a *Action) {
 	}
 }
 
-func genericDebit(ub *UserBalance, a *Action) (err error) {
+func genericDebit(ub *Account, a *Action) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
@@ -188,17 +188,17 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 	return
 }
 
-func enableUserAction(ub *UserBalance, a *Action) (err error) {
+func enableUserAction(ub *Account, a *Action) (err error) {
 	ub.Disabled = false
 	return
 }
 
-func disableUserAction(ub *UserBalance, a *Action) (err error) {
+func disableUserAction(ub *Account, a *Action) (err error) {
 	ub.Disabled = true
 	return
 }
 
-func genericReset(ub *UserBalance) {
+func genericReset(ub *Account) {
 	for k, _ := range ub.BalanceMap {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
@@ -206,7 +206,7 @@ func genericReset(ub *UserBalance) {
 	ub.resetActionTriggers(nil)
 }
 
-func callUrl(ub *UserBalance, a *Action) error {
+func callUrl(ub *Account, a *Action) error {
 	body, err := json.Marshal(ub)
 	if err != nil {
 		return err
@@ -216,7 +216,7 @@ func callUrl(ub *UserBalance, a *Action) error {
 }
 
 // Does not block for posts, no error reports
-func callUrlAsync(ub *UserBalance, a *Action) error {
+func callUrlAsync(ub *Account, a *Action) error {
 	body, err := json.Marshal(ub)
 	if err != nil {
 		return err
@@ -237,7 +237,7 @@ func callUrlAsync(ub *UserBalance, a *Action) error {
 }
 
 // Mails the balance hitting the threshold towards predefined list of addresses
-func mailAsync(ub *UserBalance, a *Action) error {
+func mailAsync(ub *Account, a *Action) error {
 	ubJson, err := json.Marshal(ub)
 	if err != nil {
 		return err

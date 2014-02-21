@@ -37,7 +37,15 @@ func init() {
 }
 
 func populateDB() {
-	minu := &UserBalance{
+	ats := []*Action{
+		&Action{ActionType: "*topup", BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}},
+		&Action{ActionType: "*topup", BalanceType: MINUTES, Direction: OUTBOUND, Balance: &Balance{Weight: 20, Value: 10, DestinationId: "NAT"}},
+	}
+	ats1 := []*Action{
+		&Action{ActionType: "*topup", BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 20},
+		&Action{ActionType: "*reset_prepaid", Weight: 10},
+	}
+	minu := &Account{
 		Id:   "*out:vdf:minu",
 		Type: UB_TYPE_PREPAID,
 		BalanceMap: map[string]BalanceChain{
@@ -47,7 +55,7 @@ func populateDB() {
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
 	}
-	broker := &UserBalance{
+	broker := &Account{
 		Id:   "*out:vdf:broker",
 		Type: UB_TYPE_PREPAID,
 		BalanceMap: map[string]BalanceChain{
@@ -57,9 +65,10 @@ func populateDB() {
 			}},
 	}
 	if accountingStorage != nil {
-		accountingStorage.(Storage).Flush()
-		accountingStorage.SetUserBalance(broker)
-		accountingStorage.SetUserBalance(minu)
+		accountingStorage.SetActions("TEST_ACTIONS", ats)
+		accountingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
+		accountingStorage.SetAccount(broker)
+		accountingStorage.SetAccount(minu)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}
@@ -270,7 +279,7 @@ func TestMinutesCost(t *testing.T) {
 	}
 }
 
-func TestMaxSessionTimeNoUserBalance(t *testing.T) {
+func TestMaxSessionTimeNoAccount(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
@@ -285,7 +294,7 @@ func TestMaxSessionTimeNoUserBalance(t *testing.T) {
 	}
 }
 
-func TestMaxSessionTimeWithUserBalance(t *testing.T) {
+func TestMaxSessionTimeWithAccount(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
@@ -302,7 +311,7 @@ func TestMaxSessionTimeWithUserBalance(t *testing.T) {
 	}
 }
 
-func TestMaxSessionTimeWithUserBalanceAccount(t *testing.T) {
+func TestMaxSessionTimeWithAccountAccount(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),

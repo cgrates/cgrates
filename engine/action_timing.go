@@ -35,14 +35,14 @@ const (
 )
 
 type ActionTiming struct {
-	Id             string // uniquely identify the timing
-	Tag            string // informative purpose only
-	UserBalanceIds []string
-	Timing         *RateInterval
-	Weight         float64
-	ActionsId      string
-	actions        Actions
-	stCache        time.Time // cached time of the next start
+	Id         string // uniquely identify the timing
+	Tag        string // informative purpose only
+	AccountIds []string
+	Timing     *RateInterval
+	Weight     float64
+	ActionsId  string
+	actions    Actions
+	stCache    time.Time // cached time of the next start
 }
 
 type ActionPlan []*ActionTiming
@@ -232,9 +232,9 @@ func (at *ActionTiming) Execute() (err error) {
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
-		for _, ubId := range at.UserBalanceIds {
+		for _, ubId := range at.AccountIds {
 			_, err := AccLock.Guard(ubId, func() (float64, error) {
-				ub, err := accountingStorage.GetUserBalance(ubId)
+				ub, err := accountingStorage.GetAccount(ubId)
 				if ub.Disabled {
 					return 0, fmt.Errorf("User %s is disabled", ubId)
 				}
@@ -245,7 +245,7 @@ func (at *ActionTiming) Execute() (err error) {
 
 				Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
 				err = actionFunction(ub, a)
-				accountingStorage.SetUserBalance(ub)
+				accountingStorage.SetAccount(ub)
 				return 0, nil
 			})
 			if err != nil {
@@ -317,15 +317,15 @@ func RemActionTiming(ats ActionPlan, actionTimingId, balanceId string) ActionPla
 			ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 			continue
 		}
-		for iBlnc, blncId := range at.UserBalanceIds {
+		for iBlnc, blncId := range at.AccountIds {
 			if blncId == balanceId {
-				if len(at.UserBalanceIds) == 1 { // Only one balance, remove complete at
+				if len(at.AccountIds) == 1 { // Only one balance, remove complete at
 					if len(ats) == 1 { // Removing last item, by init empty
 						return make([]*ActionTiming, 0)
 					}
 					ats[idx], ats = ats[len(ats)-1], ats[:len(ats)-1]
 				} else {
-					at.UserBalanceIds[iBlnc], at.UserBalanceIds = at.UserBalanceIds[len(at.UserBalanceIds)-1], at.UserBalanceIds[:len(at.UserBalanceIds)-1]
+					at.AccountIds[iBlnc], at.AccountIds = at.AccountIds[len(at.AccountIds)-1], at.AccountIds[:len(at.AccountIds)-1]
 				}
 			}
 		}
