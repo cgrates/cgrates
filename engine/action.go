@@ -39,7 +39,7 @@ Structure to be filled for each tariff plan with the bonus value for received ca
 type Action struct {
 	Id               string
 	ActionType       string
-	BalanceId        string
+	BalanceType      string
 	Direction        string
 	ExtraParameters  string
 	ExpirationString string
@@ -51,10 +51,9 @@ type Action struct {
 const (
 	LOG            = "*log"
 	RESET_TRIGGERS = "*reset_triggers"
-	SET_POSTPAID   = "*set_postpaid"
-	RESET_POSTPAID = "*reset_postpaid"
-	SET_PREPAID    = "*set_prepaid"
-	RESET_PREPAID  = "*reset_prepaid"
+	ALLOW_NEGATIVE = "*allow_negative"
+	DENY_NEGATIVE  = "*deny_negative"
+	RESET_ACCOUNT  = "*reset_account"
 	TOPUP_RESET    = "*topup_reset"
 	TOPUP          = "*topup"
 	DEBIT          = "*debit"
@@ -68,7 +67,7 @@ const (
 	UNLIMITED      = "*unlimited"
 )
 
-type actionTypeFunc func(*UserBalance, *Action) error
+type actionTypeFunc func(*Account, *Action) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	switch typ {
@@ -76,14 +75,12 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return logAction, true
 	case RESET_TRIGGERS:
 		return resetTriggersAction, true
-	case SET_POSTPAID:
-		return setPostpaidAction, true
-	case RESET_POSTPAID:
-		return resetPostpaidAction, true
-	case SET_PREPAID:
-		return setPrepaidAction, true
-	case RESET_PREPAID:
-		return resetPrepaidAction, true
+	case ALLOW_NEGATIVE:
+		return allowNegativeAction, true
+	case DENY_NEGATIVE:
+		return denyNegativeAction, true
+	case RESET_ACCOUNT:
+		return resetAccountAction, true
 	case TOPUP_RESET:
 		return topupResetAction, true
 	case TOPUP:
@@ -108,68 +105,62 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	return nil, false
 }
 
-func logAction(ub *UserBalance, a *Action) (err error) {
+func logAction(ub *Account, a *Action) (err error) {
 	ubMarshal, _ := json.Marshal(ub)
 	Logger.Info(fmt.Sprintf("Threshold reached, balance: %s", ubMarshal))
 	return
 }
 
-func resetTriggersAction(ub *UserBalance, a *Action) (err error) {
+func resetTriggersAction(ub *Account, a *Action) (err error) {
 	ub.resetActionTriggers(a)
 	return
 }
 
-func setPostpaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_POSTPAID
+func allowNegativeAction(ub *Account, a *Action) (err error) {
+	ub.AllowNegative = true
 	return
 }
 
-func resetPostpaidAction(ub *UserBalance, a *Action) (err error) {
-	genericReset(ub)
-	return setPostpaidAction(ub, a)
-}
-
-func setPrepaidAction(ub *UserBalance, a *Action) (err error) {
-	ub.Type = UB_TYPE_PREPAID
+func denyNegativeAction(ub *Account, a *Action) (err error) {
+	ub.AllowNegative = false
 	return
 }
 
-func resetPrepaidAction(ub *UserBalance, a *Action) (err error) {
-	genericReset(ub)
-	return setPrepaidAction(ub, a)
+func resetAccountAction(ub *Account, a *Action) (err error) {
+	return genericReset(ub)
 }
 
-func topupResetAction(ub *UserBalance, a *Action) (err error) {
+func topupResetAction(ub *Account, a *Action) (err error) {
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
-	ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{}
+	ub.BalanceMap[a.BalanceType+a.Direction] = BalanceChain{}
 	genericMakeNegative(a)
 	genericDebit(ub, a)
 	return
 }
 
-func topupAction(ub *UserBalance, a *Action) (err error) {
+func topupAction(ub *Account, a *Action) (err error) {
 	genericMakeNegative(a)
 	genericDebit(ub, a)
 	return
 }
 
-func debitAction(ub *UserBalance, a *Action) (err error) {
+func debitAction(ub *Account, a *Action) (err error) {
 	return genericDebit(ub, a)
 }
 
-func resetCounterAction(ub *UserBalance, a *Action) (err error) {
+func resetCounterAction(ub *Account, a *Action) (err error) {
 	uc := ub.getUnitCounter(a)
 	if uc == nil {
-		uc = &UnitsCounter{BalanceId: a.BalanceId, Direction: a.Direction}
+		uc = &UnitsCounter{BalanceType: a.BalanceType, Direction: a.Direction}
 		ub.UnitCounters = append(ub.UnitCounters, uc)
 	}
 	uc.initBalances(ub.ActionTriggers)
 	return
 }
 
-func resetCountersAction(ub *UserBalance, a *Action) (err error) {
+func resetCountersAction(ub *Account, a *Action) (err error) {
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	ub.initCounters()
 	return
@@ -181,7 +172,7 @@ func genericMakeNegative(a *Action) {
 	}
 }
 
-func genericDebit(ub *UserBalance, a *Action) (err error) {
+func genericDebit(ub *Account, a *Action) (err error) {
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
@@ -189,25 +180,26 @@ func genericDebit(ub *UserBalance, a *Action) (err error) {
 	return
 }
 
-func enableUserAction(ub *UserBalance, a *Action) (err error) {
+func enableUserAction(ub *Account, a *Action) (err error) {
 	ub.Disabled = false
 	return
 }
 
-func disableUserAction(ub *UserBalance, a *Action) (err error) {
+func disableUserAction(ub *Account, a *Action) (err error) {
 	ub.Disabled = true
 	return
 }
 
-func genericReset(ub *UserBalance) {
+func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	ub.resetActionTriggers(nil)
+	return nil
 }
 
-func callUrl(ub *UserBalance, a *Action) error {
+func callUrl(ub *Account, a *Action) error {
 	body, err := json.Marshal(ub)
 	if err != nil {
 		return err
@@ -217,7 +209,7 @@ func callUrl(ub *UserBalance, a *Action) error {
 }
 
 // Does not block for posts, no error reports
-func callUrlAsync(ub *UserBalance, a *Action) error {
+func callUrlAsync(ub *Account, a *Action) error {
 	body, err := json.Marshal(ub)
 	if err != nil {
 		return err
@@ -238,7 +230,7 @@ func callUrlAsync(ub *UserBalance, a *Action) error {
 }
 
 // Mails the balance hitting the threshold towards predefined list of addresses
-func mailAsync(ub *UserBalance, a *Action) error {
+func mailAsync(ub *Account, a *Action) error {
 	ubJson, err := json.Marshal(ub)
 	if err != nil {
 		return err

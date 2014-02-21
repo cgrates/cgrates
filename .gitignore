@@ -10,3 +10,4 @@ docs/_*
 bin
 .idea
 dean*
+data/vagrant/.vagrant

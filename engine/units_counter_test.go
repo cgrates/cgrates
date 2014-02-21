@@ -24,9 +24,9 @@ import (
 
 func TestUnitsCounterAddBalance(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction: OUTBOUND,
-		BalanceId: SMS,
-		Balances:  BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
+		Direction:   OUTBOUND,
+		BalanceType: SMS,
+		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	uc.addUnits(20, "test")
 	if len(uc.Balances) != 3 {
@@ -36,9 +36,9 @@ func TestUnitsCounterAddBalance(t *testing.T) {
 
 func TestUnitsCounterAddBalanceExists(t *testing.T) {
 	uc := &UnitsCounter{
-		Direction: OUTBOUND,
-		BalanceId: SMS,
-		Balances:  BalanceChain{&Balance{Value: 1}, &Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
+		Direction:   OUTBOUND,
+		BalanceType: SMS,
+		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	uc.addUnits(5, "0723")
 	if len(uc.Balances) != 3 || uc.Balances[1].Value != 15 {

@@ -37,7 +37,7 @@ type Balance struct {
 	RateSubject   string
 	SharedGroup   string
 	precision     int
-	userBalance   *UserBalance // used to store ub reference for shared balances
+	account       *Account // used to store ub reference for shared balances
 }
 
 func (b *Balance) Equal(o *Balance) bool {
@@ -118,7 +118,7 @@ func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
 	return cc, nil
 }
 
-func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyBalances BalanceChain) error {
+func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalances BalanceChain) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		if b.Value <= 0 {
 			return nil
@@ -183,7 +183,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 					inc.Cost = 0
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceId: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+						ub.countUnits(&Action{BalanceType: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 					}
 				}
 				continue
@@ -223,8 +223,8 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds}
 						nInc.paid = true
 						if count {
-							ub.countUnits(&Action{BalanceId: MINUTES, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
-							ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: cost, DestinationId: newCC.Destination}})
+							ub.countUnits(&Action{BalanceType: MINUTES, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
+							ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: cost, DestinationId: newCC.Destination}})
 						}
 					} else {
 						increment.paid = false
@@ -258,7 +258,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *UserBalance, moneyB
 	return nil
 }
 
-func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
+func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		if b.Value <= 0 {
 			return nil
@@ -286,7 +286,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 					increment.BalanceInfo.MoneyBalanceUuid = b.Uuid
 					increment.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceId: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+						ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 					}
 				}
 			} else {
@@ -314,7 +314,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *UserBalance) error {
 							nInc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 							nInc.paid = true
 							if count {
-								ub.countUnits(&Action{BalanceId: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
+								ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})
 							}
 						} else {
 							increment.paid = false

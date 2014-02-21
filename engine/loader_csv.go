@@ -38,7 +38,7 @@ type CSVReader struct {
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
-	accountActions    []*UserBalance
+	accountActions    []*Account
 	destinations      []*Destination
 	timings           map[string]*utils.TPTiming
 	rates             map[string]*utils.TPRate
@@ -236,7 +236,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Account actions")
 	}
 	for _, ub := range csvr.accountActions {
-		err = accountingStorage.SetUserBalance(ub)
+		err = accountingStorage.SetAccount(ub)
 		if err != nil {
 			return err
 		}
@@ -526,7 +526,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		a := &Action{
 			Id:               utils.GenUUID(),
 			ActionType:       record[1],
-			BalanceId:        record[2],
+			BalanceType:      record[2],
 			Direction:        record[3],
 			Weight:           weight,
 			ExpirationString: record[5],
@@ -614,7 +614,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		}
 		at := &ActionTrigger{
 			Id:             utils.GenUUID(),
-			BalanceId:      record[1],
+			BalanceType:    record[1],
 			Direction:      record[2],
 			ThresholdType:  record[3],
 			ThresholdValue: value,
@@ -644,8 +644,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 			// only return error if there was something ther for the tag
 			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", record[4]))
 		}
-		ub := &UserBalance{
-			Type:           UB_TYPE_PREPAID,
+		ub := &Account{
 			Id:             tag,
 			ActionTriggers: aTriggers,
 		}
@@ -656,7 +655,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 			// must not continue here
 		}
 		for _, at := range aTimings {
-			at.UserBalanceIds = append(at.UserBalanceIds, tag)
+			at.AccountIds = append(at.AccountIds, tag)
 		}
 	}
 	return nil

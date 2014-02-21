@@ -576,7 +576,7 @@ func TestLoadActions(t *testing.T) {
 		&Action{
 			Id:               as[0].Id,
 			ActionType:       TOPUP_RESET,
-			BalanceId:        CREDIT,
+			BalanceType:      CREDIT,
 			Direction:        OUTBOUND,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
@@ -590,7 +590,7 @@ func TestLoadActions(t *testing.T) {
 		&Action{
 			Id:               as[1].Id,
 			ActionType:       TOPUP,
-			BalanceId:        MINUTES,
+			BalanceType:      MINUTES,
 			Direction:        OUTBOUND,
 			ExpirationString: UNLIMITED,
 			ExtraParameters:  "",
@@ -615,9 +615,9 @@ func TestLoadActionTimings(t *testing.T) {
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
 	expected := &ActionTiming{
-		Id:             atm.Id,
-		Tag:            "MORE_MINUTES",
-		UserBalanceIds: []string{"*out:vdf:minitsboy"},
+		Id:         atm.Id,
+		Tag:        "MORE_MINUTES",
+		AccountIds: []string{"*out:vdf:minitsboy"},
 		Timing: &RateInterval{
 			Timing: &RITiming{
 				Years:     utils.Years{2012},
@@ -642,7 +642,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
 	expected := &ActionTrigger{
 		Id:             atr.Id,
-		BalanceId:      MINUTES,
+		BalanceType:    MINUTES,
 		Direction:      OUTBOUND,
 		ThresholdType:  TRIGGER_MIN_COUNTER,
 		ThresholdValue: 10,
@@ -657,7 +657,7 @@ func TestLoadActionTriggers(t *testing.T) {
 	atr = csvr.actionsTriggers["STANDARD_TRIGGER"][1]
 	expected = &ActionTrigger{
 		Id:             atr.Id,
-		BalanceId:      MINUTES,
+		BalanceType:    MINUTES,
 		Direction:      OUTBOUND,
 		ThresholdType:  TRIGGER_MAX_BALANCE,
 		ThresholdValue: 200,
@@ -676,9 +676,8 @@ func TestLoadAccountActions(t *testing.T) {
 		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
 	aa := csvr.accountActions[0]
-	expected := &UserBalance{
+	expected := &Account{
 		Id:             "*out:vdf:minitsboy",
-		Type:           UB_TYPE_PREPAID,
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
 	}
 	if !reflect.DeepEqual(aa, expected) {

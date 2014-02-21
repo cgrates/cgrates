@@ -25,12 +25,14 @@ import (
 
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
-	Direction string
-	BalanceId string
+	Direction   string
+	BalanceType string
 	//	Units     float64
 	Balances BalanceChain // first balance is the general one (no destination)
 }
 
+// clears balances for this counter
+// makes sure there are balances for all action triggers
 func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 	uc.Balances = BalanceChain{&Balance{}} // general balance
 	for _, at := range ats {

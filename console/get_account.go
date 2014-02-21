@@ -26,14 +26,14 @@ import (
 )
 
 func init() {
-	commands["get_balances"] = &CmdGetBalances{}
+	commands["get_account"] = &CmdGetBalances{}
 }
 
 // Commander implementation
 type CmdGetBalances struct {
 	rpcMethod string
-	rpcParams *apier.AttrGetUserBalance
-	rpcResult *engine.UserBalance
+	rpcParams *apier.AttrGetAccount
+	rpcResult *engine.Account
 }
 
 // name should be exec's name
@@ -43,8 +43,8 @@ func (self *CmdGetBalances) Usage(name string) string {
 
 // set param defaults
 func (self *CmdGetBalances) defaults() error {
-	self.rpcMethod = "ApierV1.GetUserBalance"
-	self.rpcParams = &apier.AttrGetUserBalance{BalanceId: engine.CREDIT}
+	self.rpcMethod = "ApierV1.GetAccount"
+	self.rpcParams = &apier.AttrGetAccount{BalanceType: engine.CREDIT}
 	self.rpcParams.Direction = "*out"
 	return nil
 }

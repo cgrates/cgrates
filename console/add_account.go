@@ -20,6 +20,8 @@ package console
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/cgrates/cgrates/apier"
 )
 
@@ -36,7 +38,7 @@ type CmdAddAccount struct {
 
 // name should be exec's name
 func (self *CmdAddAccount) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_account <tenant> <account> <type=prepaid|postpaid> <actiontimingsid> [<direction>]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] add_account <tenant> <account> <allownegative> <actiontimingsid> [<direction>]")
 }
 
 // set param defaults
@@ -55,7 +57,11 @@ func (self *CmdAddAccount) FromArgs(args []string) error {
 	self.defaults()
 	self.rpcParams.Tenant = args[2]
 	self.rpcParams.Account = args[3]
-	self.rpcParams.Type = args[4]
+	if an, err := strconv.ParseBool(args[4]); err != nil {
+		return fmt.Errorf("Error parsing allownegative boolean: ", args[4])
+	} else {
+		self.rpcParams.AllowNegative = an
+	}
 	self.rpcParams.ActionPlanId = args[5]
 	if len(args) > 6 {
 		self.rpcParams.Direction = args[6]

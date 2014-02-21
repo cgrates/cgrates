@@ -62,17 +62,17 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 	return nil
 }
 
-type AttrGetUserBalance struct {
-	Tenant    string
-	Account   string
-	BalanceId string
-	Direction string
+type AttrGetAccount struct {
+	Tenant      string
+	Account     string
+	BalanceType string
+	Direction   string
 }
 
 // Get balance
-func (self *ApierV1) GetUserBalance(attr *AttrGetUserBalance, reply *engine.UserBalance) error {
+func (self *ApierV1) GetAccount(attr *AttrGetAccount, reply *engine.Account) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	userBalance, err := self.AccountDb.GetUserBalance(tag)
+	userBalance, err := self.AccountDb.GetAccount(tag)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func (self *ApierV1) GetUserBalance(attr *AttrGetUserBalance, reply *engine.User
 type AttrAddBalance struct {
 	Tenant         string
 	Account        string
-	BalanceId      string
+	BalanceType    string
 	Direction      string
 	Value          float64
 	ExpirationDate time.Time
@@ -96,18 +96,18 @@ type AttrAddBalance struct {
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
-	if _, err := self.AccountDb.GetUserBalance(tag); err != nil {
+	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
-		ub := &engine.UserBalance{
+		ub := &engine.Account{
 			Id: tag,
 		}
-		if err := self.AccountDb.SetUserBalance(ub); err != nil {
+		if err := self.AccountDb.SetAccount(ub); err != nil {
 			*reply = err.Error()
 			return err
 		}
 	}
 	at := &engine.ActionTiming{
-		UserBalanceIds: []string{tag},
+		AccountIds: []string{tag},
 	}
 
 	if attr.Direction == "" {
@@ -119,9 +119,9 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	}
 	at.SetActions(engine.Actions{
 		&engine.Action{
-			ActionType: aType,
-			BalanceId:  attr.BalanceId,
-			Direction:  attr.Direction,
+			ActionType:  aType,
+			BalanceType: attr.BalanceType,
+			Direction:   attr.Direction,
 			Balance: &engine.Balance{
 				Value:          attr.Value,
 				ExpirationDate: attr.ExpirationDate,
@@ -149,8 +149,8 @@ type AttrExecuteAction struct {
 func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	at := &engine.ActionTiming{
-		UserBalanceIds: []string{tag},
-		ActionsId:      attr.ActionsId,
+		AccountIds: []string{tag},
+		ActionsId:  attr.ActionsId,
 	}
 
 	if err := at.Execute(); err != nil {
@@ -274,7 +274,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 		a := &engine.Action{
 			Id:               utils.GenUUID(),
 			ActionType:       apiAct.Identifier,
-			BalanceId:        apiAct.BalanceType,
+			BalanceType:      apiAct.BalanceType,
 			Direction:        apiAct.Direction,
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
@@ -370,7 +370,7 @@ type AttrAddActionTrigger struct {
 	Tenant         string
 	Account        string
 	Direction      string
-	BalanceId      string
+	BalanceType    string
 	ThresholdType  string
 	ThresholdValue float64
 	DestinationId  string
@@ -385,7 +385,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 
 	at := &engine.ActionTrigger{
 		Id:             utils.GenUUID(),
-		BalanceId:      attr.BalanceId,
+		BalanceType:    attr.BalanceType,
 		Direction:      attr.Direction,
 		ThresholdType:  attr.ThresholdType,
 		ThresholdValue: attr.ThresholdValue,
@@ -397,14 +397,14 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 
 	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
 	_, err := engine.AccLock.Guard(tag, func() (float64, error) {
-		userBalance, err := self.AccountDb.GetUserBalance(tag)
+		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {
 			return 0, err
 		}
 
 		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
 
-		if err = self.AccountDb.SetUserBalance(userBalance); err != nil {
+		if err = self.AccountDb.SetAccount(userBalance); err != nil {
 			return 0, err
 		}
 		return 0, nil

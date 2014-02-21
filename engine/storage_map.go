@@ -24,6 +24,7 @@ import (
 
 	"strings"
 	"time"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -249,9 +250,9 @@ func (ms *MapStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
-	if values, ok := ms.dict[USER_BALANCE_PREFIX+key]; ok {
-		ub = &UserBalance{Id: key}
+func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
+	if values, ok := ms.dict[ACCOUNT_PREFIX+key]; ok {
+		ub = &Account{Id: key}
 		err = ms.ms.Unmarshal(values, ub)
 	} else {
 		return nil, errors.New("not found")
@@ -259,9 +260,9 @@ func (ms *MapStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
 	return
 }
 
-func (ms *MapStorage) SetUserBalance(ub *UserBalance) (err error) {
+func (ms *MapStorage) SetAccount(ub *Account) (err error) {
 	result, err := ms.ms.Marshal(ub)
-	ms.dict[USER_BALANCE_PREFIX+ub.Id] = result
+	ms.dict[ACCOUNT_PREFIX+ub.Id] = result
 	return
 }
 

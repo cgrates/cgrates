@@ -28,7 +28,7 @@ import (
 
 type ActionTrigger struct {
 	Id             string // uniquely identify the trigger
-	BalanceId      string
+	BalanceType    string
 	Direction      string
 	ThresholdType  string //*min_counter, *max_counter, *min_balance, *max_balance
 	ThresholdValue float64
@@ -38,7 +38,7 @@ type ActionTrigger struct {
 	Executed       bool
 }
 
-func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
+func (at *ActionTrigger) Execute(ub *Account) (err error) {
 	if ub.Disabled {
 		return fmt.Errorf("User %s is disabled", ub.Id)
 	}
@@ -72,7 +72,7 @@ func (at *ActionTrigger) Execute(ub *UserBalance) (err error) {
 		at.Executed = false
 	}
 	storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)
-	accountingStorage.SetUserBalance(ub)
+	accountingStorage.SetAccount(ub)
 	return
 }
 
@@ -82,7 +82,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	if a == nil {
 		return true
 	}
-	id := a.BalanceId == "" || at.BalanceId == a.BalanceId
+	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
 	direction := a.Direction == "" || at.Direction == a.Direction
 	thresholdType, thresholdValue := true, true
 	if a.ExtraParameters != "" {

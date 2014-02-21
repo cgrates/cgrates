@@ -34,7 +34,7 @@ type DbReader struct {
 	actions          map[string][]*Action
 	actionsTimings   map[string][]*ActionTiming
 	actionsTriggers  map[string][]*ActionTrigger
-	accountActions   []*UserBalance
+	accountActions   []*Account
 	destinations     []*Destination
 	timings          map[string]*utils.TPTiming
 	rates            map[string]*utils.TPRate
@@ -180,7 +180,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Account actions")
 	}
 	for _, ub := range dbr.accountActions {
-		err = accountingStorage.SetUserBalance(ub)
+		err = accountingStorage.SetAccount(ub)
 		if err != nil {
 			return err
 		}
@@ -405,7 +405,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 			acts[idx] = &Action{
 				Id:               utils.GenUUID(),
 				ActionType:       tpact.Identifier,
-				BalanceId:        tpact.BalanceType,
+				BalanceType:      tpact.BalanceType,
 				Direction:        tpact.Direction,
 				Weight:           tpact.Weight,
 				ExtraParameters:  tpact.ExtraParameters,
@@ -470,7 +470,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, apiAtr := range atrsLst {
 			atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-				BalanceId:      apiAtr.BalanceType,
+				BalanceType:    apiAtr.BalanceType,
 				Direction:      apiAtr.Direction,
 				ThresholdType:  apiAtr.ThresholdType,
 				ThresholdValue: apiAtr.ThresholdValue,
@@ -494,8 +494,7 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", aa.ActionTriggersId))
 		}
-		ub := &UserBalance{
-			Type:           UB_TYPE_PREPAID,
+		ub := &Account{
 			Id:             aa.KeyId(),
 			ActionTriggers: aTriggers,
 		}
@@ -506,7 +505,7 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 			// must not continue here
 		}
 		for _, at := range aTimings {
-			at.UserBalanceIds = append(at.UserBalanceIds, aa.KeyId())
+			at.AccountIds = append(at.AccountIds, aa.KeyId())
 		}
 	}
 	return nil
@@ -523,11 +522,11 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		// action timings
 		if accountAction.ActionPlanId != "" {
 			// get old userBalanceIds
-			var exitingUserBalanceIds []string
+			var exitingAccountIds []string
 			existingActionTimings, err := dbr.accountDb.GetActionTimings(accountAction.ActionPlanId)
 			if err == nil && len(existingActionTimings) > 0 {
 				// all action timings from a specific tag shuld have the same list of user balances from the first one
-				exitingUserBalanceIds = existingActionTimings[0].UserBalanceIds
+				exitingAccountIds = existingActionTimings[0].AccountIds
 			}
 
 			actionTimingsMap, err := dbr.storDb.GetTPActionTimings(dbr.tpid, accountAction.ActionPlanId)
@@ -571,14 +570,14 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				actionsIds = append(actionsIds, actTmg.ActionsId)
 				//add user balance id if no already in
 				found := false
-				for _, ubId := range exitingUserBalanceIds {
+				for _, ubId := range exitingAccountIds {
 					if ubId == id {
 						found = true
 						break
 					}
 				}
 				if !found {
-					actTmg.UserBalanceIds = append(exitingUserBalanceIds, id)
+					actTmg.AccountIds = append(exitingAccountIds, id)
 				}
 				actionTimings = append(actionTimings, actTmg)
 			}
@@ -602,7 +601,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				atrs := make([]*ActionTrigger, len(atrsLst))
 				for idx, apiAtr := range atrsLst {
 					atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-						BalanceId:      apiAtr.BalanceType,
+						BalanceType:    apiAtr.BalanceType,
 						Direction:      apiAtr.Direction,
 						ThresholdType:  apiAtr.ThresholdType,
 						ThresholdValue: apiAtr.ThresholdValue,
@@ -633,7 +632,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					enacts[idx] = &Action{
 						Id:               utils.GenUUID(),
 						ActionType:       tpact.Identifier,
-						BalanceId:        tpact.BalanceType,
+						BalanceType:      tpact.BalanceType,
 						Direction:        tpact.Direction,
 						Weight:           tpact.Weight,
 						ExtraParameters:  tpact.ExtraParameters,
@@ -657,16 +656,15 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				return err
 			}
 		}
-		ub, err := dbr.accountDb.GetUserBalance(id)
+		ub, err := dbr.accountDb.GetAccount(id)
 		if err != nil {
-			ub = &UserBalance{
-				Type: UB_TYPE_PREPAID,
-				Id:   id,
+			ub = &Account{
+				Id: id,
 			}
 		}
 		ub.ActionTriggers = actionTriggers
 
-		if err := dbr.accountDb.SetUserBalance(ub); err != nil {
+		if err := dbr.accountDb.SetAccount(ub); err != nil {
 			return err
 		}
 	}

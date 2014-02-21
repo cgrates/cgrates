@@ -117,18 +117,17 @@ func TestStoreInterfaces(t *testing.T) {
 	var _ LogStorage = sql
 }
 
-
 /************************** Benchmarks *****************************/
 
-func GetUB() *UserBalance {
+func GetUB() *Account {
 	uc := &UnitsCounter{
-		Direction: OUTBOUND,
-		BalanceId: SMS,
-		Balances:  BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
+		Direction:   OUTBOUND,
+		BalanceType: SMS,
+		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
 		Id:             "some_uuid",
-		BalanceId:      CREDIT,
+		BalanceType:    CREDIT,
 		Direction:      OUTBOUND,
 		ThresholdValue: 100.0,
 		DestinationId:  "NAT",
@@ -137,9 +136,9 @@ func GetUB() *UserBalance {
 	}
 	var zeroTime time.Time
 	zeroTime = zeroTime.UTC() // for deep equal to find location
-	ub := &UserBalance{
+	ub := &Account{
 		Id:             "rif",
-		Type:           UB_TYPE_POSTPAID,
+		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
@@ -161,7 +160,7 @@ func BenchmarkMarshallerJSONStoreRestore(b *testing.B) {
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
-	ub1 := &UserBalance{}
+	ub1 := &Account{}
 	b.StartTimer()
 	ms := new(JSONMarshaler)
 	for i := 0; i < b.N; i++ {
@@ -186,7 +185,7 @@ func BenchmarkMarshallerBSONStoreRestore(b *testing.B) {
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
-	ub1 := &UserBalance{}
+	ub1 := &Account{}
 	b.StartTimer()
 	ms := new(BSONMarshaler)
 	for i := 0; i < b.N; i++ {
@@ -210,7 +209,7 @@ func BenchmarkMarshallerJSONBufStoreRestore(b *testing.B) {
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
-	ub1 := &UserBalance{}
+	ub1 := &Account{}
 	b.StartTimer()
 	ms := new(JSONBufMarshaler)
 	for i := 0; i < b.N; i++ {
@@ -234,7 +233,7 @@ func BenchmarkMarshallerGOBStoreRestore(b *testing.B) {
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
-	ub1 := &UserBalance{}
+	ub1 := &Account{}
 	b.StartTimer()
 	ms := new(GOBMarshaler)
 	for i := 0; i < b.N; i++ {
@@ -259,7 +258,7 @@ func BenchmarkMarshallerCodecMsgpackStoreRestore(b *testing.B) {
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
-	ub1 := &UserBalance{}
+	ub1 := &Account{}
 	b.StartTimer()
 	ms := NewCodecMsgpackMarshaler()
 	for i := 0; i < b.N; i++ {
@@ -284,7 +283,7 @@ func BenchmarkMarshallerBincStoreRestore(b *testing.B) {
 	ub := GetUB()
 
 	ap1 := RatingPlan{}
-	ub1 := &UserBalance{}
+	ub1 := &Account{}
 	b.StartTimer()
 	ms := NewBincMarshaler()
 	for i := 0; i < b.N; i++ {

@@ -43,7 +43,7 @@ func (rs *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := rs.getCallCost(&arg, "Responder.GetCost")
 		*reply, err = *r, e
 	} else {
-		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
+		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.GetCost()
 		})
 		*reply, err = *r, e
@@ -56,7 +56,7 @@ func (rs *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := rs.getCallCost(&arg, "Responder.Debit")
 		*reply, err = *r, e
 	} else {
-		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
+		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.Debit()
 		})
 		*reply, err = *r, e
@@ -69,7 +69,7 @@ func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := rs.getCallCost(&arg, "Responder.MaxDebit")
 		*reply, err = *r, e
 	} else {
-		r, e := AccLock.GuardGetCost(arg.GetUserBalanceKey(), func() (*CallCost, error) {
+		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.MaxDebit()
 		})
 		*reply, err = *r, e
@@ -81,7 +81,7 @@ func (rs *Responder) RefundIncrements(arg CallDescriptor, reply *float64) (err e
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.RefundIncrements")
 	} else {
-		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
 			return arg.RefundIncrements()
 		})
 		*reply, err = r, e
@@ -93,7 +93,7 @@ func (rs *Responder) DebitCents(arg CallDescriptor, reply *float64) (err error) 
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.DebitCents")
 	} else {
-		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
 			return arg.DebitCents()
 		})
 		*reply, err = r, e
@@ -105,7 +105,7 @@ func (rs *Responder) DebitSMS(arg CallDescriptor, reply *float64) (err error) {
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.DebitSMS")
 	} else {
-		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
 			return arg.DebitSMS()
 		})
 		*reply, err = r, e
@@ -117,7 +117,7 @@ func (rs *Responder) DebitSeconds(arg CallDescriptor, reply *float64) (err error
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.DebitSeconds")
 	} else {
-		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
 			return 0, arg.DebitSeconds()
 		})
 		*reply, err = r, e
@@ -129,7 +129,7 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.GetMaxSessionTime")
 	} else {
-		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
 			d, err := arg.GetMaxSessionDuration()
 			return float64(d), err
 		})
@@ -143,7 +143,7 @@ func (rs *Responder) AddRecievedCallSeconds(arg CallDescriptor, reply *float64) 
 		*reply, err = rs.callMethod(&arg, "Responder.AddRecievedCallSeconds")
 	} else {
 
-		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
 			return 0, arg.AddRecievedCallSeconds()
 		})
 		*reply, err = r, e
@@ -155,7 +155,7 @@ func (rs *Responder) FlushCache(arg CallDescriptor, reply *float64) (err error) 
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.FlushCache")
 	} else {
-		r, e := AccLock.Guard(arg.GetUserBalanceKey(), func() (float64, error) {
+		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
 			return 0, arg.FlushCache()
 		})
 		*reply, err = r, e
@@ -220,7 +220,7 @@ func (rs *Responder) getBalance(arg *CallDescriptor, balanceId string, reply *Ca
 		return errors.New("No balancer supported for this command right now")
 	}
 	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.Account
-	userBalance, err := accountingStorage.GetUserBalance(ubKey)
+	userBalance, err := accountingStorage.GetAccount(ubKey)
 	if err != nil {
 		return err
 	}
@@ -248,7 +248,7 @@ func (rs *Responder) getCallCost(key *CallDescriptor, method string) (reply *Cal
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
 			reply = &CallCost{}
-			reply, err = AccLock.GuardGetCost(key.GetUserBalanceKey(), func() (*CallCost, error) {
+			reply, err = AccLock.GuardGetCost(key.GetAccountKey(), func() (*CallCost, error) {
 				err = client.Call(method, *key, reply)
 				return reply, err
 			})
@@ -271,7 +271,7 @@ func (rs *Responder) callMethod(key *CallDescriptor, method string) (reply float
 			Logger.Info("Waiting for raters to register...")
 			time.Sleep(1 * time.Second) // wait one second and retry
 		} else {
-			reply, err = AccLock.Guard(key.GetUserBalanceKey(), func() (float64, error) {
+			reply, err = AccLock.Guard(key.GetAccountKey(), func() (float64, error) {
 				err = client.Call(method, *key, &reply)
 				return reply, err
 			})

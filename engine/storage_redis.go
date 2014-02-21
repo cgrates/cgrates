@@ -171,7 +171,7 @@ func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys []string) (err error) {
 // Used to check if specific subject is stored using prefix key attached to entity
 func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
-	case DESTINATION_PREFIX, RATING_PLAN_PREFIX, RATING_PROFILE_PREFIX, ACTION_PREFIX, ACTION_TIMING_PREFIX, USER_BALANCE_PREFIX:
+	case DESTINATION_PREFIX, RATING_PLAN_PREFIX, RATING_PROFILE_PREFIX, ACTION_PREFIX, ACTION_TIMING_PREFIX, ACCOUNT_PREFIX:
 		return rs.db.Exists(category + subject)
 	}
 	return false, errors.New("Unsupported category in ExistsData")
@@ -342,19 +342,19 @@ func (rs *RedisStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) 
 	return
 }
 
-func (rs *RedisStorage) GetUserBalance(key string) (ub *UserBalance, err error) {
+func (rs *RedisStorage) GetAccount(key string) (ub *Account, err error) {
 	var values []byte
-	if values, err = rs.db.Get(USER_BALANCE_PREFIX + key); err == nil {
-		ub = &UserBalance{Id: key}
+	if values, err = rs.db.Get(ACCOUNT_PREFIX + key); err == nil {
+		ub = &Account{Id: key}
 		err = rs.ms.Unmarshal(values, ub)
 	}
 
 	return
 }
 
-func (rs *RedisStorage) SetUserBalance(ub *UserBalance) (err error) {
+func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	result, err := rs.ms.Marshal(ub)
-	err = rs.db.Set(USER_BALANCE_PREFIX+ub.Id, result)
+	err = rs.db.Set(ACCOUNT_PREFIX+ub.Id, result)
 	return
 }
 

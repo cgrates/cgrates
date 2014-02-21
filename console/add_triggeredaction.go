@@ -20,8 +20,9 @@ package console
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/apier"
 	"strconv"
+
+	"github.com/cgrates/cgrates/apier"
 )
 
 func init() {
@@ -56,7 +57,7 @@ func (self *CmdAddTriggeredAction) FromArgs(args []string) error {
 	self.defaults()
 	self.rpcParams.Tenant = args[2]
 	self.rpcParams.Account = args[3]
-	self.rpcParams.BalanceId = args[4]
+	self.rpcParams.BalanceType = args[4]
 	thresholdvalue, err := strconv.ParseFloat(args[5], 64)
 	if err != nil {
 		return err
