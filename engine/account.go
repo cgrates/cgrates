@@ -29,8 +29,6 @@ import (
 )
 
 const (
-	UB_TYPE_POSTPAID = "*unlimited"
-	UB_TYPE_PREPAID  = "*limited"
 	// Direction type
 	INBOUND  = "*in"
 	OUTBOUND = "*out"
@@ -60,14 +58,14 @@ This can represent a user or a shared group.
 */
 type Account struct {
 	Id             string
-	Type           string // UB_TYPE_POSTPAID/UB_TYPE_PREPAID
 	BalanceMap     map[string]BalanceChain
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
 	Groups         GroupLinks // user info about groups
 	// group information
-	UserIds  []string // group info about users
-	Disabled bool
+	UserIds       []string // group info about users
+	AllowNegative bool
+	Disabled      bool
 }
 
 // Returns user's available minutes for the specified destination
@@ -119,7 +117,7 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 func (ub *Account) getBalancesForPrefix(prefix string, balances BalanceChain) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
-		if b.IsExpired() || (ub.Type != UB_TYPE_POSTPAID && b.Value <= 0) {
+		if b.IsExpired() || (ub.AllowNegative == false && b.Value <= 0) {
 			continue
 		}
 		if b.DestinationId != "" && b.DestinationId != utils.ANY {

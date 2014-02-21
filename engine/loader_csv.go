@@ -596,7 +596,6 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", record[4]))
 		}
 		ub := &Account{
-			Type:           UB_TYPE_PREPAID,
 			Id:             tag,
 			ActionTriggers: aTriggers,
 		}

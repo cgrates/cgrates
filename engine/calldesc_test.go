@@ -43,11 +43,10 @@ func populateDB() {
 	}
 	ats1 := []*Action{
 		&Action{ActionType: "*topup", BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 10}, Weight: 20},
-		&Action{ActionType: "*reset_prepaid", Weight: 10},
+		&Action{ActionType: "*reset_account", Weight: 10},
 	}
 	minu := &Account{
-		Id:   "*out:vdf:minu",
-		Type: UB_TYPE_PREPAID,
+		Id: "*out:vdf:minu",
 		BalanceMap: map[string]BalanceChain{
 			CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 50}},
 			MINUTES + OUTBOUND: BalanceChain{
@@ -56,8 +55,7 @@ func populateDB() {
 			}},
 	}
 	broker := &Account{
-		Id:   "*out:vdf:broker",
-		Type: UB_TYPE_PREPAID,
+		Id: "*out:vdf:broker",
 		BalanceMap: map[string]BalanceChain{
 			MINUTES + OUTBOUND: BalanceChain{
 				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RateSubject: "rif"},

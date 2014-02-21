@@ -138,7 +138,7 @@ func GetUB() *Account {
 	zeroTime = zeroTime.UTC() // for deep equal to find location
 	ub := &Account{
 		Id:             "rif",
-		Type:           UB_TYPE_POSTPAID,
+		AllowNegative:  true,
 		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},

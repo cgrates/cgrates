@@ -831,9 +831,9 @@ func TestDebitNegativeSMSBalance(t *testing.T) {
 
 func TestAccountdebitBalance(t *testing.T) {
 	ub := &Account{
-		Id:         "rif",
-		Type:       UB_TYPE_POSTPAID,
-		BalanceMap: map[string]BalanceChain{SMS: BalanceChain{&Balance{Value: 14}}, TRAFFIC: BalanceChain{&Balance{Value: 1204}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
+		Id:            "rif",
+		AllowNegative: true,
+		BalanceMap:    map[string]BalanceChain{SMS: BalanceChain{&Balance{Value: 14}}, TRAFFIC: BalanceChain{&Balance{Value: 1204}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 	}
 	newMb := &Balance{Weight: 20, DestinationId: "NEW"}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: newMb}
@@ -846,9 +846,9 @@ func TestAccountdebitBalance(t *testing.T) {
 func TestAccountdebitBalanceExists(t *testing.T) {
 
 	ub := &Account{
-		Id:         "rif",
-		Type:       UB_TYPE_POSTPAID,
-		BalanceMap: map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 15, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
+		Id:            "rif",
+		AllowNegative: true,
+		BalanceMap:    map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Value: 15, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 	}
 	newMb := &Balance{Value: -10, Weight: 20, DestinationId: "NAT"}
 	a := &Action{BalanceType: MINUTES, Direction: OUTBOUND, Balance: newMb}
@@ -860,9 +860,9 @@ func TestAccountdebitBalanceExists(t *testing.T) {
 
 func TestAccountAddMinuteNil(t *testing.T) {
 	ub := &Account{
-		Id:         "rif",
-		Type:       UB_TYPE_POSTPAID,
-		BalanceMap: map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
+		Id:            "rif",
+		AllowNegative: true,
+		BalanceMap:    map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024}}, MINUTES + OUTBOUND: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 	}
 	ub.debitBalanceAction(nil)
 	if len(ub.BalanceMap[MINUTES+OUTBOUND]) != 2 {
@@ -938,7 +938,7 @@ func TestAccountExecuteTriggeredActionsOrder(t *testing.T) {
 	}
 	ub.countUnits(&Action{BalanceType: CREDIT, Direction: OUTBOUND, Balance: &Balance{Value: 1}})
 	if len(ub.BalanceMap[CREDIT+OUTBOUND]) != 1 || ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 10 {
-		t.Error("Error executing triggered actions in order", ub.BalanceMap[CREDIT+OUTBOUND])
+		t.Error("Error executing triggered actions in order", ub.BalanceMap[CREDIT+OUTBOUND][0].Value)
 	}
 }
 

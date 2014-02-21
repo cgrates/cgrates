@@ -438,7 +438,7 @@ func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	var availableDuration time.Duration
 	availableCredit := 0.0
 	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-		if userBalance.Type == UB_TYPE_POSTPAID {
+		if userBalance.AllowNegative {
 			return -1, nil
 		} else {
 			availableDuration, availableCredit, _ = userBalance.getCreditForPrefix(cd)

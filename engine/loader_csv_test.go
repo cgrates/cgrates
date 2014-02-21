@@ -674,7 +674,6 @@ func TestLoadAccountActions(t *testing.T) {
 	aa := csvr.accountActions[0]
 	expected := &Account{
 		Id:             "*out:vdf:minitsboy",
-		Type:           UB_TYPE_PREPAID,
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],
 	}
 	if !reflect.DeepEqual(aa, expected) {

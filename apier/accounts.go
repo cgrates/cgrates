@@ -157,11 +157,11 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 }
 
 type AttrSetAccount struct {
-	Tenant       string
-	Direction    string
-	Account      string
-	Type         string // <*prepaid|*postpaid>
-	ActionPlanId string
+	Tenant        string
+	Direction     string
+	Account       string
+	ActionPlanId  string
+	AllowNegative bool
 }
 
 // Ads a new account into dataDb. If already defined, returns success.
@@ -176,14 +176,9 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 		if bal, _ := self.AccountDb.GetAccount(balanceId); bal != nil {
 			ub = bal
 		} else { // Not found in db, create it here
-			if len(attr.Type) == 0 {
-				attr.Type = engine.UB_TYPE_PREPAID
-			} else if !utils.IsSliceMember([]string{engine.UB_TYPE_POSTPAID, engine.UB_TYPE_PREPAID}, attr.Type) {
-				return 0, fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "Type")
-			}
 			ub = &engine.Account{
-				Id:   balanceId,
-				Type: attr.Type,
+				Id:            balanceId,
+				AllowNegative: attr.AllowNegative,
 			}
 		}
 

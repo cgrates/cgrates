@@ -50,10 +50,9 @@ type Action struct {
 const (
 	LOG            = "*log"
 	RESET_TRIGGERS = "*reset_triggers"
-	SET_POSTPAID   = "*set_postpaid"
-	RESET_POSTPAID = "*reset_postpaid"
-	SET_PREPAID    = "*set_prepaid"
-	RESET_PREPAID  = "*reset_prepaid"
+	ALLOW_NEGATIVE = "*allow_negative"
+	DENY_NEGATIVE  = "*deny_negative"
+	RESET_ACCOUNT  = "*reset_account"
 	TOPUP_RESET    = "*topup_reset"
 	TOPUP          = "*topup"
 	DEBIT          = "*debit"
@@ -75,14 +74,12 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return logAction, true
 	case RESET_TRIGGERS:
 		return resetTriggersAction, true
-	case SET_POSTPAID:
-		return setPostpaidAction, true
-	case RESET_POSTPAID:
-		return resetPostpaidAction, true
-	case SET_PREPAID:
-		return setPrepaidAction, true
-	case RESET_PREPAID:
-		return resetPrepaidAction, true
+	case ALLOW_NEGATIVE:
+		return allowNegativeAction, true
+	case DENY_NEGATIVE:
+		return denyNegativeAction, true
+	case RESET_ACCOUNT:
+		return resetAccountAction, true
 	case TOPUP_RESET:
 		return topupResetAction, true
 	case TOPUP:
@@ -118,24 +115,18 @@ func resetTriggersAction(ub *Account, a *Action) (err error) {
 	return
 }
 
-func setPostpaidAction(ub *Account, a *Action) (err error) {
-	ub.Type = UB_TYPE_POSTPAID
+func allowNegativeAction(ub *Account, a *Action) (err error) {
+	ub.AllowNegative = true
 	return
 }
 
-func resetPostpaidAction(ub *Account, a *Action) (err error) {
-	genericReset(ub)
-	return setPostpaidAction(ub, a)
-}
-
-func setPrepaidAction(ub *Account, a *Action) (err error) {
-	ub.Type = UB_TYPE_PREPAID
+func denyNegativeAction(ub *Account, a *Action) (err error) {
+	ub.AllowNegative = false
 	return
 }
 
-func resetPrepaidAction(ub *Account, a *Action) (err error) {
-	genericReset(ub)
-	return setPrepaidAction(ub, a)
+func resetAccountAction(ub *Account, a *Action) (err error) {
+	return genericReset(ub)
 }
 
 func topupResetAction(ub *Account, a *Action) (err error) {
@@ -198,12 +189,13 @@ func disableUserAction(ub *Account, a *Action) (err error) {
 	return
 }
 
-func genericReset(ub *Account) {
+func genericReset(ub *Account) error {
 	for k, _ := range ub.BalanceMap {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	ub.resetActionTriggers(nil)
+	return nil
 }
 
 func callUrl(ub *Account, a *Action) error {

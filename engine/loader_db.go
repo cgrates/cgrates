@@ -487,7 +487,6 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", aa.ActionTriggersId))
 		}
 		ub := &Account{
-			Type:           UB_TYPE_PREPAID,
 			Id:             aa.KeyId(),
 			ActionTriggers: aTriggers,
 		}
@@ -652,8 +651,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		ub, err := dbr.accountDb.GetAccount(id)
 		if err != nil {
 			ub = &Account{
-				Type: UB_TYPE_PREPAID,
-				Id:   id,
+				Id: id,
 			}
 		}
 		ub.ActionTriggers = actionTriggers

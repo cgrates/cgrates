@@ -1060,7 +1060,7 @@ func TestApierSetAccount(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", Type: "*prepaid", ActionPlanId: "ATMS_1"}
+	attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan7", ActionPlanId: "ATMS_1"}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
@@ -1160,7 +1160,7 @@ func TestTriggersExecute(t *testing.T) {
 		return
 	}
 	reply := ""
-	attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8", Type: "*prepaid"}
+	attrs := &AttrSetAccount{Tenant: "cgrates.org", Direction: "*out", Account: "dan8"}
 	if err := rater.Call("ApierV1.SetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetAccount: ", err.Error())
 	} else if reply != "OK" {
