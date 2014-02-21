@@ -39,7 +39,7 @@ Structure to be filled for each tariff plan with the bonus value for received ca
 type Action struct {
 	Id               string
 	ActionType       string
-	BalanceId        string
+	BalanceType      string
 	Direction        string
 	ExtraParameters  string
 	ExpirationString string
@@ -142,7 +142,7 @@ func topupResetAction(ub *UserBalance, a *Action) (err error) {
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
-	ub.BalanceMap[a.BalanceId+a.Direction] = BalanceChain{}
+	ub.BalanceMap[a.BalanceType+a.Direction] = BalanceChain{}
 	genericMakeNegative(a)
 	genericDebit(ub, a)
 	return
@@ -161,7 +161,7 @@ func debitAction(ub *UserBalance, a *Action) (err error) {
 func resetCounterAction(ub *UserBalance, a *Action) (err error) {
 	uc := ub.getUnitCounter(a)
 	if uc == nil {
-		uc = &UnitsCounter{BalanceId: a.BalanceId, Direction: a.Direction}
+		uc = &UnitsCounter{BalanceType: a.BalanceType, Direction: a.Direction}
 		ub.UnitCounters = append(ub.UnitCounters, uc)
 	}
 	uc.initBalances(ub.ActionTriggers)

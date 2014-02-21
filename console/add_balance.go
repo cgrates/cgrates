@@ -45,7 +45,7 @@ func (self *CmdAddBalance) Usage(name string) string {
 // set param defaults
 func (self *CmdAddBalance) defaults() error {
 	self.rpcMethod = "ApierV1.AddBalance"
-	self.rpcParams = &apier.AttrAddBalance{BalanceId: engine.CREDIT}
+	self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
 	self.rpcParams.Direction = "*out"
 	return nil
 }
@@ -66,7 +66,7 @@ func (self *CmdAddBalance) FromArgs(args []string) error {
 	}
 	self.rpcParams.Value = value
 	if len(args) > 5 {
-		self.rpcParams.BalanceId = args[5]
+		self.rpcParams.BalanceType = args[5]
 	}
 	if len(args) > 6 {
 		self.rpcParams.DestinationId = args[6]

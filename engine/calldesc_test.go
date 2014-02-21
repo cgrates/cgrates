@@ -41,7 +41,7 @@ func populateDB() {
 		Id:   "*out:vdf:minu",
 		Type: UB_TYPE_PREPAID,
 		BalanceMap: map[string]BalanceChain{
-			CREDIT: BalanceChain{&Balance{Value: 0}},
+			CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 50}},
 			MINUTES + OUTBOUND: BalanceChain{
 				&Balance{Value: 200, DestinationId: "NAT", Weight: 10},
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},

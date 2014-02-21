@@ -117,18 +117,17 @@ func TestStoreInterfaces(t *testing.T) {
 	var _ LogStorage = sql
 }
 
-
 /************************** Benchmarks *****************************/
 
 func GetUB() *UserBalance {
 	uc := &UnitsCounter{
-		Direction: OUTBOUND,
-		BalanceId: SMS,
-		Balances:  BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
+		Direction:   OUTBOUND,
+		BalanceType: SMS,
+		Balances:    BalanceChain{&Balance{Value: 1}, &Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}},
 	}
 	at := &ActionTrigger{
 		Id:             "some_uuid",
-		BalanceId:      CREDIT,
+		BalanceType:    CREDIT,
 		Direction:      OUTBOUND,
 		ThresholdValue: 100.0,
 		DestinationId:  "NAT",

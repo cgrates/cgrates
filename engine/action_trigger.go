@@ -28,7 +28,7 @@ import (
 
 type ActionTrigger struct {
 	Id             string // uniquely identify the trigger
-	BalanceId      string
+	BalanceType    string
 	Direction      string
 	ThresholdType  string //*min_counter, *max_counter, *min_balance, *max_balance
 	ThresholdValue float64
@@ -82,7 +82,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	if a == nil {
 		return true
 	}
-	id := a.BalanceId == "" || at.BalanceId == a.BalanceId
+	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
 	direction := a.Direction == "" || at.Direction == a.Direction
 	thresholdType, thresholdValue := true, true
 	if a.ExtraParameters != "" {

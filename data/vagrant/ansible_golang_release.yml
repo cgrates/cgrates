@@ -39,7 +39,7 @@
     - name: add cgrates repo
       apt_repository: repo='deb http://apt.itsyscom.com/debian wheezy main' state=present
 
-    - name: install freeswitch
+    - name: install cgrates
       apt: pkg=cgrates update_cache=yes state=latest
 
     - name: update mysql root password for root account

@@ -478,7 +478,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		a := &Action{
 			Id:               utils.GenUUID(),
 			ActionType:       record[1],
-			BalanceId:        record[2],
+			BalanceType:      record[2],
 			Direction:        record[3],
 			Weight:           weight,
 			ExpirationString: record[5],
@@ -565,7 +565,7 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		}
 		at := &ActionTrigger{
 			Id:             utils.GenUUID(),
-			BalanceId:      record[1],
+			BalanceType:    record[1],
 			Direction:      record[2],
 			ThresholdType:  record[3],
 			ThresholdValue: value,

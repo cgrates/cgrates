@@ -398,7 +398,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 			acts[idx] = &Action{
 				Id:               utils.GenUUID(),
 				ActionType:       tpact.Identifier,
-				BalanceId:        tpact.BalanceType,
+				BalanceType:      tpact.BalanceType,
 				Direction:        tpact.Direction,
 				Weight:           tpact.Weight,
 				ExtraParameters:  tpact.ExtraParameters,
@@ -462,7 +462,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, apiAtr := range atrsLst {
 			atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-				BalanceId:      apiAtr.BalanceType,
+				BalanceType:    apiAtr.BalanceType,
 				Direction:      apiAtr.Direction,
 				ThresholdType:  apiAtr.ThresholdType,
 				ThresholdValue: apiAtr.ThresholdValue,
@@ -594,7 +594,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				atrs := make([]*ActionTrigger, len(atrsLst))
 				for idx, apiAtr := range atrsLst {
 					atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-						BalanceId:      apiAtr.BalanceType,
+						BalanceType:    apiAtr.BalanceType,
 						Direction:      apiAtr.Direction,
 						ThresholdType:  apiAtr.ThresholdType,
 						ThresholdValue: apiAtr.ThresholdValue,
@@ -625,7 +625,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					enacts[idx] = &Action{
 						Id:               utils.GenUUID(),
 						ActionType:       tpact.Identifier,
-						BalanceId:        tpact.BalanceType,
+						BalanceType:      tpact.BalanceType,
 						Direction:        tpact.Direction,
 						Weight:           tpact.Weight,
 						ExtraParameters:  tpact.ExtraParameters,

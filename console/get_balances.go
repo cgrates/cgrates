@@ -44,7 +44,7 @@ func (self *CmdGetBalances) Usage(name string) string {
 // set param defaults
 func (self *CmdGetBalances) defaults() error {
 	self.rpcMethod = "ApierV1.GetUserBalance"
-	self.rpcParams = &apier.AttrGetUserBalance{BalanceId: engine.CREDIT}
+	self.rpcParams = &apier.AttrGetUserBalance{BalanceType: engine.CREDIT}
 	self.rpcParams.Direction = "*out"
 	return nil
 }

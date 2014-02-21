@@ -25,8 +25,8 @@ import (
 
 // Amount of a trafic of a certain type
 type UnitsCounter struct {
-	Direction string
-	BalanceId string
+	Direction   string
+	BalanceType string
 	//	Units     float64
 	Balances BalanceChain // first balance is the general one (no destination)
 }

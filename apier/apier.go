@@ -63,10 +63,10 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 }
 
 type AttrGetUserBalance struct {
-	Tenant    string
-	Account   string
-	BalanceId string
-	Direction string
+	Tenant      string
+	Account     string
+	BalanceType string
+	Direction   string
 }
 
 // Get balance
@@ -84,7 +84,7 @@ func (self *ApierV1) GetUserBalance(attr *AttrGetUserBalance, reply *engine.User
 type AttrAddBalance struct {
 	Tenant         string
 	Account        string
-	BalanceId      string
+	BalanceType    string
 	Direction      string
 	Value          float64
 	ExpirationDate time.Time
@@ -119,9 +119,9 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	}
 	at.SetActions(engine.Actions{
 		&engine.Action{
-			ActionType: aType,
-			BalanceId:  attr.BalanceId,
-			Direction:  attr.Direction,
+			ActionType:  aType,
+			BalanceType: attr.BalanceType,
+			Direction:   attr.Direction,
 			Balance: &engine.Balance{
 				Value:          attr.Value,
 				ExpirationDate: attr.ExpirationDate,
@@ -274,7 +274,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 		a := &engine.Action{
 			Id:               utils.GenUUID(),
 			ActionType:       apiAct.Identifier,
-			BalanceId:        apiAct.BalanceType,
+			BalanceType:      apiAct.BalanceType,
 			Direction:        apiAct.Direction,
 			Weight:           apiAct.Weight,
 			ExpirationString: apiAct.ExpiryTime,
@@ -370,7 +370,7 @@ type AttrAddActionTrigger struct {
 	Tenant         string
 	Account        string
 	Direction      string
-	BalanceId      string
+	BalanceType    string
 	ThresholdType  string
 	ThresholdValue float64
 	DestinationId  string
@@ -385,7 +385,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 
 	at := &engine.ActionTrigger{
 		Id:             utils.GenUUID(),
-		BalanceId:      attr.BalanceId,
+		BalanceType:    attr.BalanceType,
 		Direction:      attr.Direction,
 		ThresholdType:  attr.ThresholdType,
 		ThresholdValue: attr.ThresholdValue,
