@@ -115,15 +115,15 @@ type CGRConfig struct {
 	SMRaterReconnects        int           // Number of reconnect attempts to rater
 	SMDebitInterval          int           // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration        time.Duration // The maximum duration of a call
-	SMReqTypeFields    []string      // Name of request type fields to be used during additional sessions control <""|*default|field_name>.
-	SMDirectionFields  []string      // Name of direction fields to be used during additional sessions control <""|*default|field_name>.
-	SMTenantFields     []string      // Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
-	SMTORFields        []string      // Name of tor fields to be used during additional sessions control <""|*default|field_name>.
-	SMAccountFields    []string      // Name of account fields to be used during additional sessions control <""|*default|field_name>.
-	SMSubjectFields    []string      // Name of fields to be used during additional sessions control <""|*default|field_name>.
-	SMDestFields       []string      // Name of destination fields to be used during additional sessions control <""|*default|field_name>.
-	SMAnswerTimeFields []string      // Name of time_answer fields to be used during additional sessions control <""|*default|field_name>.
-	SMDurationFields   []string      // Name of duration fields to be used during additional sessions control <""|*default|field_name>.
+	SMReqTypeFields          []string      // Name of request type fields to be used during additional sessions control <""|*default|field_name>.
+	SMDirectionFields        []string      // Name of direction fields to be used during additional sessions control <""|*default|field_name>.
+	SMTenantFields           []string      // Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
+	SMTORFields              []string      // Name of tor fields to be used during additional sessions control <""|*default|field_name>.
+	SMAccountFields          []string      // Name of account fields to be used during additional sessions control <""|*default|field_name>.
+	SMSubjectFields          []string      // Name of fields to be used during additional sessions control <""|*default|field_name>.
+	SMDestFields             []string      // Name of destination fields to be used during additional sessions control <""|*default|field_name>.
+	SMAnswerTimeFields       []string      // Name of time_answer fields to be used during additional sessions control <""|*default|field_name>.
+	SMDurationFields         []string      // Name of duration fields to be used during additional sessions control <""|*default|field_name>.
 	MediatorEnabled          bool          // Starts Mediator service: <true|false>.
 	MediatorRater            string        // Address where to reach the Rater: <internal|x.y.z.y:1234>
 	MediatorRaterReconnects  int           // Number of reconnects to rater before giving up.
@@ -229,7 +229,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
 	self.SMReqTypeFields = []string{}
-	self.SMDirectionFields = []string{} 
+	self.SMDirectionFields = []string{}
 	self.SMTenantFields = []string{}
 	self.SMTORFields = []string{}
 	self.SMAccountFields = []string{}
@@ -540,7 +540,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 			return nil, errParse
 		}
 	}
-		
+
 	if hasOpt = c.HasOption("session_manager", "reqtype_fields"); hasOpt {
 		if cfg.SMReqTypeFields, errParse = ConfigSlice(c, "session_manager", "reqtype_fields"); errParse != nil {
 			return nil, errParse

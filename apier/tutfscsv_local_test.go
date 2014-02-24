@@ -20,6 +20,7 @@ package apier
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"net/rpc/jsonrpc"
@@ -30,6 +31,13 @@ import (
 	"time"
 )
 
+var fscsvCfg *config.CGRConfig
+
+func init() {
+	fscsvCfgPath := path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg")
+	fscsvCfg, _ = config.NewCGRConfig(&fscsvCfgPath)
+}
+
 // Empty tables before using them
 func TestFsCsvCreateTables(t *testing.T) {
 	if !*testLocal {
@@ -39,7 +47,7 @@ func TestFsCsvCreateTables(t *testing.T) {
 		t.Fatal("Unsupported storDbType")
 	}
 	var mysql *engine.MySQLStorage
-	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
+	if d, err := engine.NewMySQLStorage(fscsvCfg.StorDBHost, fscsvCfg.StorDBPort, fscsvCfg.StorDBName, fscsvCfg.StorDBUser, fscsvCfg.StorDBPass); err != nil {
 		t.Fatal("Error on opening database connection: ", err)
 	} else {
 		mysql = d.(*engine.MySQLStorage)
@@ -61,12 +69,12 @@ func TestFsCsvInitDataDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	ratingDb, err := engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
+	ratingDb, err := engine.ConfigureRatingStorage(fscsvCfg.RatingDBType, fscsvCfg.RatingDBHost, fscsvCfg.RatingDBPort, fscsvCfg.RatingDBName, fscsvCfg.RatingDBUser, fscsvCfg.RatingDBPass, fscsvCfg.DBDataEncoding)
 	if err != nil {
 		t.Fatal("Cannot connect to dataDb", err)
 	}
-	accountDb, err := engine.ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, cfg.AccountDBName,
-		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding)
+	accountDb, err := engine.ConfigureAccountingStorage(fscsvCfg.AccountDBType, fscsvCfg.AccountDBHost, fscsvCfg.AccountDBPort, fscsvCfg.AccountDBName,
+		fscsvCfg.AccountDBUser, fscsvCfg.AccountDBPass, fscsvCfg.DBDataEncoding)
 	if err != nil {
 		t.Fatal("Cannot connect to dataDb", err)
 	}
@@ -86,8 +94,9 @@ func TestFsCsvStartEngine(t *testing.T) {
 	if err != nil {
 		t.Fatal("Cannot find cgr-engine executable")
 	}
+	fmt.Println(path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg"))
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	engine := exec.Command(enginePath, "-rater", "-scheduler", "-cdrs", "-mediator", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
+	engine := exec.Command(enginePath, "-config", path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg"))
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
@@ -100,7 +109,7 @@ func TestFsCsvRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	rater, err = jsonrpc.Dial("tcp", "127.0.0.1:2012") // ToDo: Fix here with config loaded from file
+	rater, err = jsonrpc.Dial("tcp", fscsvCfg.RPCJSONListen)
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
