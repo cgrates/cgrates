@@ -92,3 +92,10 @@ CREATE TABLE action IF NOT EXISTS(
 	units FLOAT8,
 	weight FLOAT8
 );
+
+CREATE TABLE sharedgroup IF NOT EXISTS(
+	id SERIAL PRIMARY KEY,
+	account TEXT,
+	strategy TEXT,
+	ratesubject TEXT,
+);

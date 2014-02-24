@@ -45,12 +45,13 @@ type CSVReader struct {
 	destinationRates  map[string]*utils.TPDestinationRate
 	ratingPlans       map[string]*RatingPlan
 	ratingProfiles    map[string]*RatingProfile
+	sharedGroups      map[string]*SharedGroup
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
+	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
 }
 
-func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
 	c := new(CSVReader)
 	c.sep = sep
 	c.dataStorage = dataStorage
@@ -63,15 +64,16 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.timings = make(map[string]*utils.TPTiming)
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
+	c.sharedGroups = make(map[string]*SharedGroup)
 	c.readerFunc = openFileCSVReader
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
-		c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn = destinationsFn, timingsFn,
-		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn
+		c.sharedgroupsFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn = destinationsFn, timingsFn,
+		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn
 	return c
 }
 
-func NewStringCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
-	c := NewFileCSVReader(dataStorage, accountingStorage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
+func NewStringCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string) *CSVReader {
+	c := NewFileCSVReader(dataStorage, accountingStorage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn)
 	c.readerFunc = openStringCSVReader
 	return c
 }
@@ -199,6 +201,18 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	}
 	for k, ats := range csvr.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(k)
+		}
+	}
+	if verbose {
+		log.Print("Shared groups")
+	}
+	for k, sg := range csvr.sharedGroups {
+		err = accountingStorage.SetSharedGroup(k, sg)
 		if err != nil {
 			return err
 		}
@@ -339,7 +353,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 		}
 		var err error
 		if !destinationExists && csvr.dataStorage != nil {
-			if destinationExists, err = csvr.dataStorage.ExistsData(DESTINATION_PREFIX, record[1]); err != nil {
+			if destinationExists, err = csvr.dataStorage.HasData(DESTINATION_PREFIX, record[1]); err != nil {
 				return err
 			}
 		}
@@ -423,7 +437,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		}
 		_, exists := csvr.ratingPlans[record[5]]
 		if !exists && csvr.dataStorage != nil {
-			if exists, err = csvr.dataStorage.ExistsData(RATING_PLAN_PREFIX, record[5]); err != nil {
+			if exists, err = csvr.dataStorage.HasData(RATING_PLAN_PREFIX, record[5]); err != nil {
 				return err
 			}
 		}
@@ -437,6 +451,40 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		}
 		rp.RatingPlanActivations = append(rp.RatingPlanActivations, rpa)
 		csvr.ratingProfiles[rp.Id] = rp
+	}
+	return
+}
+
+func (csvr *CSVReader) LoadSharedGroups() (err error) {
+	csvReader, fp, err := csvr.readerFunc(csvr.sharedgroupsFn, csvr.sep, utils.SHARED_GROUPS_NRCOLS)
+	if err != nil {
+		log.Print("Could not load shared groups file: ", err)
+		// allow writing of the other values
+		return nil
+	}
+	if fp != nil {
+		defer fp.Close()
+	}
+	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+		tag := record[0]
+		sg, found := csvr.sharedGroups[tag]
+		if found {
+			sg.AccountParameters[record[1]] = &SharingParameters{
+				Strategy:    record[2],
+				RateSubject: record[3],
+			}
+		} else {
+			sg = &SharedGroup{
+				Id: tag,
+				AccountParameters: map[string]*SharingParameters{
+					record[1]: &SharingParameters{
+						Strategy:    record[2],
+						RateSubject: record[3],
+					},
+				},
+			}
+		}
+		csvr.sharedGroups[tag] = sg
 	}
 	return
 }
@@ -471,7 +519,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				return errors.New(fmt.Sprintf("Could not parse action balance weight: %v", err))
 			}
 		}
-		weight, err := strconv.ParseFloat(record[10], 64)
+		weight, err := strconv.ParseFloat(record[11], 64)
 		if err != nil {
 			return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
 		}
@@ -482,7 +530,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			Direction:        record[3],
 			Weight:           weight,
 			ExpirationString: record[5],
-			ExtraParameters:  record[9],
+			ExtraParameters:  record[10],
 			Balance: &Balance{
 				Uuid:          utils.GenUUID(),
 				Value:         units,
@@ -490,6 +538,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				DestinationId: record[6],
 				RateSubject:   record[7],
 			},
+			SharedGroup: record[9],
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {
 			return errors.New(fmt.Sprintf("Could not parse expiration time: %v", err))

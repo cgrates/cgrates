@@ -42,7 +42,7 @@ type TimeSpan struct {
 type Increment struct {
 	Duration            time.Duration
 	Cost                float64
-	BalanceUuids        []string // need more than one for minutes with cost
+	BalanceInfo         *BalanceInfo // need more than one for minutes with cost
 	BalanceRateInterval *RateInterval
 	MinuteInfo          *MinuteInfo
 	paid                bool
@@ -53,6 +53,13 @@ type MinuteInfo struct {
 	DestinationId string
 	Quantity      float64
 	//Price         float64
+}
+
+// Holds information about the balance that made a specific payment
+type BalanceInfo struct {
+	MinuteBalanceUuid string
+	MoneyBalanceUuid  string
+	UserBalanceId     string // used when debited from shared balance
 }
 
 type TimeSpans []*TimeSpan
@@ -145,26 +152,9 @@ func (incr *Increment) Clone() *Increment {
 		Cost:                incr.Cost,
 		BalanceRateInterval: incr.BalanceRateInterval,
 		MinuteInfo:          incr.MinuteInfo,
+		BalanceInfo:         incr.BalanceInfo,
 	}
-	nIncr.BalanceUuids = make([]string, len(incr.BalanceUuids))
-	copy(nIncr.BalanceUuids, incr.BalanceUuids)
 	return nIncr
-}
-
-func (incr *Increment) SetMinuteBalance(bUuid string) {
-	incr.BalanceUuids[0] = bUuid
-}
-
-func (incr *Increment) GetMinuteBalance() string {
-	return incr.BalanceUuids[0]
-}
-
-func (incr *Increment) SetMoneyBalance(bUuid string) {
-	incr.BalanceUuids[1] = bUuid
-}
-
-func (incr *Increment) GetMoneyBalance() string {
-	return incr.BalanceUuids[1]
 }
 
 type Increments []*Increment
@@ -217,7 +207,6 @@ func (ts *TimeSpan) getCost() float64 {
 	} else {
 		return ts.Increments[0].Cost * float64(len(ts.Increments))
 	}
-	return 0
 }
 
 func (ts *TimeSpan) createIncrementsSlice() {
@@ -235,9 +224,9 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	incrementCost = utils.Round(incrementCost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
-			Duration:     rateIncrement,
-			Cost:         incrementCost,
-			BalanceUuids: make([]string, 2),
+			Duration:    rateIncrement,
+			Cost:        incrementCost,
+			BalanceInfo: &BalanceInfo{},
 		}
 		ts.Increments = append(ts.Increments, inc)
 	}

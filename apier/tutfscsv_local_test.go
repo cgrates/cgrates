@@ -20,15 +20,16 @@ package apier
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var fscsvCfg *config.CGRConfig
@@ -96,10 +97,11 @@ func TestFsCsvStartEngine(t *testing.T) {
 	}
 	fmt.Println(path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg"))
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	engine := exec.Command(enginePath, "-config", path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg"))
-	if err := engine.Start(); err != nil {
-		t.Fatal("Cannot start cgr-engine: ", err.Error())
-	}
+	go func() {
+		eng := exec.Command(enginePath, "-config", path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg"))
+		out, _ := eng.CombinedOutput()
+		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
+	}()
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
 }
 
@@ -151,7 +153,7 @@ func TestFsCsvLoadTariffPlans(t *testing.T) {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 1, Actions: 2}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 1, Actions: 1}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())

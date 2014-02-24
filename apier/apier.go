@@ -216,7 +216,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, TOR: attrs.TOR, Direction: attrs.Direction, Subject: attrs.Subject}
 	keyId := tpRpf.KeyId()
 	if !attrs.Overwrite {
-		if exists, err := self.RatingDb.ExistsData(engine.RATING_PROFILE_PREFIX, keyId); err != nil {
+		if exists, err := self.RatingDb.HasData(engine.RATING_PROFILE_PREFIX, keyId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -228,7 +228,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("%s:Cannot parse activation time from %v", utils.ERR_SERVER_ERROR, ra.ActivationTime))
 		}
-		if exists, err := self.RatingDb.ExistsData(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
+		if exists, err := self.RatingDb.HasData(engine.RATING_PLAN_PREFIX, ra.RatingPlanId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
 			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ERR_NOT_FOUND, ra.RatingPlanId))
@@ -263,7 +263,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.AccountDb.ExistsData(engine.ACTION_PREFIX, attrs.ActionsId); err != nil {
+		if exists, err := self.AccountDb.HasData(engine.ACTION_PREFIX, attrs.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -324,7 +324,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		}
 	}
 	if !attrs.Overwrite {
-		if exists, err := self.AccountDb.ExistsData(engine.ACTION_TIMING_PREFIX, attrs.Id); err != nil {
+		if exists, err := self.AccountDb.HasData(engine.ACTION_TIMING_PREFIX, attrs.Id); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if exists {
 			return errors.New(utils.ERR_EXISTS)
@@ -332,7 +332,7 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 	}
 	storeAtms := make(engine.ActionPlan, len(attrs.ActionPlan))
 	for idx, apiAtm := range attrs.ActionPlan {
-		if exists, err := self.AccountDb.ExistsData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
+		if exists, err := self.AccountDb.HasData(engine.ACTION_PREFIX, apiAtm.ActionsId); err != nil {
 			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		} else if !exists {
 			return fmt.Errorf("%s:%s", utils.ERR_BROKEN_REFERENCE, err.Error())
@@ -434,7 +434,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.AccountDb.CacheAccounting(nil); err != nil {
+	if err := self.AccountDb.CacheAccounting(nil, nil); err != nil {
 		return err
 	}
 	if self.Sched != nil {
@@ -457,7 +457,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys []string
+	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -482,10 +482,16 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			actKeys[idx] = engine.ACTION_PREFIX + actId
 		}
 	}
+	if len(attrs.SharedGroupIds) > 0 {
+		shgKeys = make([]string, len(attrs.SharedGroupIds))
+		for idx, shgId := range attrs.SharedGroupIds {
+			shgKeys[idx] = engine.SHARED_GROUP_PREFIX + shgId
+		}
+	}
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys); err != nil {
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys); err != nil {
 		return err
 	}
 	*reply = "OK"
@@ -539,6 +545,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.DESTINATION_RATES_CSV),
 		path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
+		path.Join(attrs.FolderPath, utils.SHARED_GROUPS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
@@ -574,10 +581,15 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, actId := range actIds {
 		actKeys[idx] = engine.ACTION_PREFIX + actId
 	}
+	shgIds, _ := loader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
+	shgKeys := make([]string, len(shgIds))
+	for idx, shgId := range shgIds {
+		shgKeys[idx] = engine.SHARED_GROUP_PREFIX + shgId
+	}
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys); err != nil {
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys); err != nil {
 		return err
 	}
 	if self.Sched != nil {

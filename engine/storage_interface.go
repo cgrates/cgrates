@@ -36,6 +36,7 @@ const (
 	RATING_PLAN_PREFIX        = "rpl_"
 	RATING_PROFILE_PREFIX     = "rpf_"
 	ACTION_PREFIX             = "act_"
+	SHARED_GROUP_PREFIX       = "shg_"
 	ACCOUNT_PREFIX            = "ubl_"
 	DESTINATION_PREFIX        = "dst_"
 	TEMP_DESTINATION_PREFIX   = "tmp_"
@@ -69,7 +70,7 @@ Interface for storage providers.
 type RatingStorage interface {
 	Storage
 	CacheRating([]string, []string, []string) error
-	ExistsData(string, string) (bool, error)
+	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string, bool) (*RatingProfile, error)
@@ -80,10 +81,12 @@ type RatingStorage interface {
 
 type AccountingStorage interface {
 	Storage
-	ExistsData(string, string) (bool, error)
-	CacheAccounting([]string) error
+	HasData(string, string) (bool, error)
+	CacheAccounting([]string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
+	GetSharedGroup(string, bool) (*SharedGroup, error)
+	SetSharedGroup(string, *SharedGroup) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	GetActionTimings(string) (ActionPlan, error)
@@ -114,46 +117,40 @@ type LoadStorage interface {
 	// Apier functions
 	RemTPData(string, string, ...string) error
 	GetTPIds() ([]string, error)
+	GetTPTableIds(string, string, string, map[string]string) ([]string, error)
 
 	SetTPTiming(string, *utils.TPTiming) error
 	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
-	GetTPTimingIds(string) ([]string, error)
 
 	SetTPDestination(string, *Destination) error
 	GetTpDestinations(string, string) ([]*Destination, error)
-	GetTPDestinationIds(string) ([]string, error)
 
 	SetTPRates(string, map[string][]*utils.RateSlot) error
 	GetTpRates(string, string) (map[string]*utils.TPRate, error)
-	GetTPRateIds(string) ([]string, error)
 
 	SetTPDestinationRates(string, map[string][]*utils.DestinationRate) error
 	GetTpDestinationRates(string, string) (map[string]*utils.TPDestinationRate, error)
-	GetTPDestinationRateIds(string) ([]string, error)
 
 	SetTPRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
 	GetTpRatingPlans(string, string) (map[string][]*utils.TPRatingPlanBinding, error)
-	GetTPRatingPlanIds(string) ([]string, error)
 
 	SetTPRatingProfiles(string, map[string]*utils.TPRatingProfile) error
 	GetTpRatingProfiles(*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error)
-	GetTPRatingProfileIds(*utils.AttrTPRatingProfileIds) ([]string, error)
+
+	SetTPSharedGroups(string, map[string]*SharedGroup) error
+	GetTpSharedGroups(string, string) (map[string]*SharedGroup, error)
 
 	SetTPActions(string, map[string][]*utils.TPAction) error
 	GetTpActions(string, string) (map[string][]*utils.TPAction, error)
-	GetTPActionIds(string) ([]string, error)
 
 	SetTPActionTimings(string, map[string][]*utils.TPActionTiming) error
 	GetTPActionTimings(string, string) (map[string][]*utils.TPActionTiming, error)
-	GetTPActionTimingIds(string) ([]string, error)
 
 	SetTPActionTriggers(string, map[string][]*utils.TPActionTrigger) error
 	GetTpActionTriggers(string, string) (map[string][]*utils.TPActionTrigger, error)
-	GetTPActionTriggerIds(string) ([]string, error)
 
 	SetTPAccountActions(string, map[string]*utils.TPAccountActions) error
 	GetTpAccountActions(*utils.TPAccountActions) (map[string]*utils.TPAccountActions, error)
-	GetTPAccountActionIds(string) ([]string, error)
 }
 
 type Marshaler interface {

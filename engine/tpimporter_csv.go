@@ -46,6 +46,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.DESTINATION_RATES_CSV: (*TPCSVImporter).importDestinationRates,
 	utils.RATING_PLANS_CSV:      (*TPCSVImporter).importRatingPlans,
 	utils.RATING_PROFILES_CSV:   (*TPCSVImporter).importRatingProfiles,
+	utils.SHARED_GROUPS_CSV:     (*TPCSVImporter).importSharedGroups,
 	utils.ACTIONS_CSV:           (*TPCSVImporter).importActions,
 	utils.ACTION_PLANS_CSV:      (*TPCSVImporter).importActionTimings,
 	utils.ACTION_TRIGGERS_CSV:   (*TPCSVImporter).importActionTriggers,
@@ -287,6 +288,10 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 	return nil
 }
 
+func (self *TPCSVImporter) importSharedGroups(fn string) error {
+	return nil
+}
+
 func (self *TPCSVImporter) importActions(fn string) error {
 	if self.Verbose {
 		log.Printf("Processing file: <%s> ", fn)
@@ -307,7 +312,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		actId, actionType, balanceType, direction, destTag, rateSubject := record[0], record[1], record[2], record[3], record[6], record[7]
+		actId, actionType, balanceType, direction, destTag, rateSubject, sharedGroup := record[0], record[1], record[2], record[3], record[6], record[7], record[8]
 		units, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			if self.Verbose {
@@ -315,8 +320,8 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		balanceWeight, _ := strconv.ParseFloat(record[8], 64)
-		weight, err := strconv.ParseFloat(record[10], 64)
+		balanceWeight, _ := strconv.ParseFloat(record[9], 64)
+		weight, err := strconv.ParseFloat(record[11], 64)
 		if err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
@@ -331,8 +336,9 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			ExpiryTime:      record[5],
 			DestinationId:   destTag,
 			RatingSubject:   rateSubject,
+			SharedGroup:     sharedGroup,
 			BalanceWeight:   balanceWeight,
-			ExtraParameters: record[9],
+			ExtraParameters: record[10],
 			Weight:          weight,
 		}
 		if err := self.StorDb.SetTPActions(self.TPid, map[string][]*utils.TPAction{actId: []*utils.TPAction{act}}); err != nil {

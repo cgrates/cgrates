@@ -26,6 +26,7 @@ const (
 	TBL_TP_DESTINATION_RATES   = "tp_destination_rates"
 	TBL_TP_RATING_PLANS        = "tp_rating_plans"
 	TBL_TP_RATE_PROFILES       = "tp_rating_profiles"
+	TBL_TP_SHARED_GROUPS       = "tp_shared_groups"
 	TBL_TP_ACTIONS             = "tp_actions"
 	TBL_TP_ACTION_PLANS        = "tp_action_plans"
 	TBL_TP_ACTION_TRIGGERS     = "tp_action_triggers"
@@ -40,6 +41,7 @@ const (
 	DESTINATION_RATES_CSV      = "DestinationRates.csv"
 	RATING_PLANS_CSV           = "RatingPlans.csv"
 	RATING_PROFILES_CSV        = "RatingProfiles.csv"
+	SHARED_GROUPS_CSV          = "SharedGroups.csv"
 	ACTIONS_CSV                = "Actions.csv"
 	ACTION_PLANS_CSV           = "ActionPlans.csv"
 	ACTION_TRIGGERS_CSV        = "ActionTriggers.csv"
@@ -50,7 +52,8 @@ const (
 	DESTINATION_RATES_NRCOLS   = 3
 	DESTRATE_TIMINGS_NRCOLS    = 4
 	RATE_PROFILES_NRCOLS       = 7
-	ACTIONS_NRCOLS             = 11
+	SHARED_GROUPS_NRCOLS       = 5
+	ACTIONS_NRCOLS             = 12
 	ACTION_PLANS_NRCOLS        = 4
 	ACTION_TRIGGERS_NRCOLS     = 8
 	ACCOUNT_ACTIONS_NRCOLS     = 5

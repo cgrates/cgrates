@@ -68,9 +68,6 @@ func (rs *RedisStorage) Flush() (err error) {
 }
 
 func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error) {
-	if dKeys == nil && rpKeys == nil && rpfKeys == nil {
-		cache2go.Flush()
-	}
 	if dKeys == nil {
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
@@ -93,6 +90,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error)
 		if rpKeys, err = rs.db.Keys(RATING_PLAN_PREFIX + "*"); err != nil {
 			return
 		}
+		cache2go.RemPrefixKey(RATING_PLAN_PREFIX)
 	} else if len(rpKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching rating plans: %v", rpKeys))
 	}
@@ -110,6 +108,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error)
 		if rpfKeys, err = rs.db.Keys(RATING_PROFILE_PREFIX + "*"); err != nil {
 			return
 		}
+		cache2go.RemPrefixKey(RATING_PROFILE_PREFIX)
 	} else if len(rpfKeys) != 0 {
 		Logger.Info(fmt.Sprintf("Caching rating profile: %v", rpfKeys))
 	}
@@ -125,7 +124,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error)
 	return
 }
 
-func (rs *RedisStorage) CacheAccounting(actKeys []string) (err error) {
+func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys []string) (err error) {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX)
 	}
@@ -146,11 +145,31 @@ func (rs *RedisStorage) CacheAccounting(actKeys []string) (err error) {
 	if len(actKeys) != 0 {
 		Logger.Info("Finished actions caching.")
 	}
+	if shgKeys == nil {
+		cache2go.RemPrefixKey(SHARED_GROUP_PREFIX)
+	}
+	if shgKeys == nil {
+		Logger.Info("Caching all shared groups")
+		if shgKeys, err = rs.db.Keys(SHARED_GROUP_PREFIX + "*"); err != nil {
+			return
+		}
+	} else if len(shgKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching shared groups: %v", shgKeys))
+	}
+	for _, key := range shgKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetSharedGroup(key[len(SHARED_GROUP_PREFIX):], true); err != nil {
+			return err
+		}
+	}
+	if len(shgKeys) != 0 {
+		Logger.Info("Finished shared groups caching.")
+	}
 	return nil
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (rs *RedisStorage) ExistsData(category, subject string) (bool, error) {
+func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	switch category {
 	case DESTINATION_PREFIX, RATING_PLAN_PREFIX, RATING_PROFILE_PREFIX, ACTION_PREFIX, ACTION_TIMING_PREFIX, ACCOUNT_PREFIX:
 		return rs.db.Exists(category + subject)
@@ -297,6 +316,29 @@ func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	result, err := rs.ms.Marshal(&as)
 	err = rs.db.Set(ACTION_PREFIX+key, result)
 	// cache2go.Cache(ACTION_PREFIX+key, as)
+	return
+}
+
+func (rs *RedisStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGroup, err error) {
+	key = SHARED_GROUP_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*SharedGroup), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	var values []byte
+	if values, err = rs.db.Get(key); err == nil {
+		err = rs.ms.Unmarshal(values, &sg)
+		cache2go.Cache(key, sg)
+	}
+	return
+}
+
+func (rs *RedisStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
+	result, err := rs.ms.Marshal(sg)
+	err = rs.db.Set(ACTION_PREFIX+key, result)
+	cache2go.Cache(ACTION_PREFIX+key, sg)
 	return
 }
 

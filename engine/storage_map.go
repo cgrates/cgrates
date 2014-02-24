@@ -46,10 +46,15 @@ func (ms *MapStorage) Flush() error {
 }
 
 func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) error {
-	if dKeys == nil && rpKeys == nil && rpfKeys == nil {
-		cache2go.Flush()
+	if dKeys == nil {
+		cache2go.RemPrefixKey(DESTINATION_PREFIX)
 	}
-	cache2go.RemPrefixKey(DESTINATION_PREFIX)
+	if rpKeys == nil {
+		cache2go.RemPrefixKey(RATING_PLAN_PREFIX)
+	}
+	if rpfKeys == nil {
+		cache2go.RemPrefixKey(RATING_PROFILE_PREFIX)
+	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
 			if _, err := ms.GetDestination(k[len(DESTINATION_PREFIX):]); err != nil {
@@ -72,7 +77,7 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) error {
 	return nil
 }
 
-func (ms *MapStorage) CacheAccounting(actKeys []string) error {
+func (ms *MapStorage) CacheAccounting(actKeys, shgKeys []string) error {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX) // Forced until we can fine tune it
 	}
@@ -84,11 +89,22 @@ func (ms *MapStorage) CacheAccounting(actKeys []string) error {
 			}
 		}
 	}
+	if shgKeys == nil {
+		cache2go.RemPrefixKey(SHARED_GROUP_PREFIX) // Forced until we can fine tune it
+	}
+	for k, _ := range ms.dict {
+		if strings.HasPrefix(k, SHARED_GROUP_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetSharedGroup(k[len(SHARED_GROUP_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (ms *MapStorage) ExistsData(categ, subject string) (bool, error) {
+func (ms *MapStorage) HasData(categ, subject string) (bool, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
 		_, exists := ms.dict[DESTINATION_PREFIX+subject]
@@ -123,6 +139,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := ms.ms.Marshal(rp)
 	ms.dict[RATING_PLAN_PREFIX+rp.Id] = result
 	response := 0
+
 	go historyScribe.Record(rp.GetHistoryRecord(), &response)
 	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
@@ -186,13 +203,6 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 }
 
 func (ms *MapStorage) GetActions(key string, checkDb bool) (as Actions, err error) {
-	if values, ok := ms.dict[ACTION_PREFIX+key]; ok {
-		err = ms.ms.Unmarshal(values, &as)
-	} else {
-		return nil, errors.New("not found")
-	}
-	return
-
 	key = ACTION_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(Actions), nil
@@ -213,6 +223,30 @@ func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[ACTION_PREFIX+key] = result
 	cache2go.Cache(ACTION_PREFIX+key, as)
+	return
+}
+
+func (ms *MapStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGroup, err error) {
+	key = SHARED_GROUP_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*SharedGroup), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		err = ms.ms.Unmarshal(values, &sg)
+		cache2go.Cache(key, sg)
+	} else {
+		return nil, errors.New("not found")
+	}
+	return
+}
+
+func (ms *MapStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
+	result, err := ms.ms.Marshal(sg)
+	ms.dict[SHARED_GROUP_PREFIX+key] = result
+	cache2go.Cache(ACTION_PREFIX+key, sg)
 	return
 }
 

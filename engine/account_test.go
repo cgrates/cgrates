@@ -216,7 +216,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 		t.Error("Error debiting balance: ", err)
 	}
 	t.Logf("%+v", cc.Timespans[0])
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" {
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
@@ -248,7 +248,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 		t.Error("Error debiting balance: ", err)
 	}
 	t.Logf("%+v", cc.Timespans)
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -282,8 +282,8 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "tests" ||
-		cc.Timespans[1].Increments[0].GetMinuteBalance() != "testm" {
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "tests" ||
+		cc.Timespans[1].Increments[0].BalanceInfo.MinuteBalanceUuid != "testm" {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0], cc.Timespans[1].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][1].Value != 0 ||
@@ -320,7 +320,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 	if err == nil {
 		t.Error("Showing no enough credit error ")
 	}
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -361,7 +361,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -398,7 +398,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -439,7 +439,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -477,7 +477,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Minute {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -549,9 +549,9 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 		t.Error("Missing noy enough credit error ")
 	}
 	t.Logf("%+v", cc.Timespans[0].Increments)
-	if cc.Timespans[0].Increments[0].GetMoneyBalance() != "money" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MoneyBalanceUuid != "money" ||
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
-		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0].BalanceUuids)
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0].BalanceInfo)
 	}
 	if rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != -30 {
 		t.Error("Error extracting minutes from balance: ",
@@ -590,8 +590,8 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
-		cc.Timespans[0].Increments[0].GetMoneyBalance() != "moneya" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
+		cc.Timespans[0].Increments[0].BalanceInfo.MoneyBalanceUuid != "moneya" ||
 		cc.Timespans[0].Increments[0].Duration != time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -631,7 +631,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].GetMoneyBalance() != "moneya" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MoneyBalanceUuid != "moneya" ||
 		cc.Timespans[0].Increments[0].Duration != time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -669,8 +669,8 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
-		cc.Timespans[0].Increments[0].GetMoneyBalance() != "moneya" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
+		cc.Timespans[0].Increments[0].BalanceInfo.MoneyBalanceUuid != "moneya" ||
 		cc.Timespans[0].Increments[0].Duration != time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -719,7 +719,7 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 		t.Error("Error showing debiting balance error: ", err)
 	}
 	//t.Logf("%+v %+v", cc.Timespans[0], cc.Timespans[1])
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -770,7 +770,7 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 		t.Error("Error showing debiting balance error: ", err)
 	}
 	//t.Logf("%+v %+v", cc.Timespans[0], cc.Timespans[1])
-	if cc.Timespans[0].Increments[0].GetMinuteBalance() != "testb" ||
+	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" ||
 		cc.Timespans[0].Increments[0].Duration != time.Second {
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
@@ -1019,9 +1019,9 @@ func TestAccountRefund(t *testing.T) {
 		},
 	}
 	increments := Increments{
-		&Increment{Cost: 2, BalanceUuids: []string{"", "moneya"}},
-		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceUuids: []string{"minutea", "moneya"}},
-		&Increment{Duration: 4 * time.Second, BalanceUuids: []string{"minuteb", ""}},
+		&Increment{Cost: 2, BalanceInfo: &BalanceInfo{MinuteBalanceUuid: "", MoneyBalanceUuid: "moneya"}},
+		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &BalanceInfo{MinuteBalanceUuid: "minutea", MoneyBalanceUuid: "moneya"}},
+		&Increment{Duration: 4 * time.Second, BalanceInfo: &BalanceInfo{MinuteBalanceUuid: "minuteb", MoneyBalanceUuid: ""}},
 	}
 
 	ub.refundIncrements(increments, OUTBOUND, false)

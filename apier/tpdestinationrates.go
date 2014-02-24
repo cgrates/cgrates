@@ -23,6 +23,7 @@ package apier
 import (
 	"errors"
 	"fmt"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -67,7 +68,7 @@ func (self *ApierV1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]st
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPDestinationRateIds(attrs.TPid); err != nil {
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_DESTINATION_RATES, "tag", nil); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)

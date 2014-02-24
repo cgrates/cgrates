@@ -112,6 +112,23 @@ CREATE TABLE `tp_rating_profiles` (
 );
 
 --
+-- Table structure for table `tp_shared_groups`
+--
+
+DROP TABLE IF EXISTS `tp_shared_groups`;
+CREATE TABLE `tp_shared_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `tag` varchar(64) NOT NULL,
+  `account` varchar(24) NOT NULL,
+  `strategy` varchar(24) NOT NULL,
+  `rate_subject` varchar(24) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tpid` (`tpid`),
+  UNIQUE KEY `unique_shared_group` (`tpid`,`tag`,`account`,`strategy`,`rate_subject`)
+);
+
+--
 -- Table structure for table `tp_actions`
 --
 
@@ -127,12 +144,13 @@ CREATE TABLE `tp_actions` (
   `expiry_time` varchar(24) NOT NULL,
   `destination_tag` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
+  `shared_group` varchar(64) NOT NULL,
   `balance_weight` double(8,2) NOT NULL,
   `extra_parameters` varchar(256) NOT NULL,
   `weight` double(8,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`balance_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`shared_group`,`balance_weight`,`weight`)
 );
 
 --

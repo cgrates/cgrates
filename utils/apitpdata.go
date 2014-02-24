@@ -215,6 +215,7 @@ type TPAction struct {
 	ExpiryTime      string  // Time when the units will expire
 	DestinationId   string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
+	SharedGroup     string  // Reference to a shared group
 	BalanceWeight   float64 // Balance weight
 	ExtraParameters string
 	Weight          float64 // Action's weight
@@ -281,6 +282,7 @@ type ApiReloadCache struct {
 	RatingPlanIds    []string
 	RatingProfileIds []string
 	ActionIds        []string
+	SharedGroupIds   []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
@@ -309,8 +311,8 @@ type AttrExpFileCdrs struct {
 	CdrFormat    string // Cdr output file format <utils.CdreCdrFormats>
 	TimeStart    string // If provided, will represent the starting of the CDRs interval (>=)
 	TimeEnd      string // If provided, will represent the end of the CDRs interval (<)
-	SkipErrors bool   // Do not export errored CDRs
-	SkipRated  bool   // Do not export rated CDRs
+	SkipErrors   bool   // Do not export errored CDRs
+	SkipRated    bool   // Do not export rated CDRs
 	RemoveFromDb bool   // If true the CDRs will be also deleted after export
 }
 
@@ -320,10 +322,10 @@ type ExportedFileCdrs struct {
 }
 
 type AttrRateCdrs struct {
-	TimeStart     string  // Cdrs time start
-	TimeEnd       string // Cdrs time end
-	RerateErrors  bool // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
-	RerateRated   bool // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
+	TimeStart    string // Cdrs time start
+	TimeEnd      string // Cdrs time end
+	RerateErrors bool   // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
+	RerateRated  bool   // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
 }
 
 type AttrLoadTpFromFolder struct {

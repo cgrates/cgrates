@@ -110,9 +110,12 @@ vdf,0,*out,fallback1,2013-11-18T13:46:00Z,G,fallback2
 vdf,0,*out,fallback1,2013-11-18T13:47:00Z,G,fallback2
 vdf,0,*out,fallback2,2013-11-18T13:45:00Z,R,rif
 `
+	sharedGroups = `
+`
+
 	actions = `
-MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,10
-MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,10
+MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,,10
+MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -129,20 +132,21 @@ vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
 var csvr *CSVReader
 
 func init() {
-	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, destinationRateTimings, ratingProfiles, actions, actionTimings, actionTriggers, accountActions)
+	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, destinationRateTimings, ratingProfiles, sharedGroups, actions, actionTimings, actionTriggers, accountActions)
 	csvr.LoadDestinations()
 	csvr.LoadTimings()
 	csvr.LoadRates()
 	csvr.LoadDestinationRates()
 	csvr.LoadRatingPlans()
 	csvr.LoadRatingProfiles()
+	csvr.LoadSharedGroups()
 	csvr.LoadActions()
 	csvr.LoadActionTimings()
 	csvr.LoadActionTriggers()
 	csvr.LoadAccountActions()
 	csvr.WriteToDatabase(false, false)
 	dataStorage.CacheRating(nil, nil, nil)
-	accountingStorage.CacheAccounting(nil)
+	accountingStorage.CacheAccounting(nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {

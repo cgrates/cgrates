@@ -35,7 +35,9 @@ type Balance struct {
 	//GroupIds       []string
 	DestinationId string
 	RateSubject   string
+	SharedGroup   string
 	precision     int
+	account       *Account // used to store ub reference for shared balances
 }
 
 func (b *Balance) Equal(o *Balance) bool {
@@ -176,7 +178,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 						inc = newTs.Increments[0]
 					}
 					b.Value -= amount
-					inc.SetMinuteBalance(b.Uuid)
+					inc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 					inc.MinuteInfo = &MinuteInfo{cc.Destination, amount}
 					inc.Cost = 0
 					inc.paid = true
@@ -216,9 +218,8 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 					if moneyBal != nil && b.Value >= seconds {
 						b.Value -= seconds
 						moneyBal.Value -= cost
-
-						nInc.SetMinuteBalance(b.Uuid)
-						nInc.SetMoneyBalance(moneyBal.Uuid)
+						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
+						nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
 						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds}
 						nInc.paid = true
 						if count {
@@ -282,7 +283,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 				amount := increment.Cost
 				if b.Value >= amount {
 					b.Value -= amount
-					increment.SetMoneyBalance(b.Uuid)
+					increment.BalanceInfo.MoneyBalanceUuid = b.Uuid
 					increment.paid = true
 					if count {
 						ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -310,7 +311,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 						amount := nInc.Cost
 						if b.Value >= amount {
 							b.Value -= amount
-							nInc.SetMoneyBalance(b.Uuid)
+							nInc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 							nInc.paid = true
 							if count {
 								ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})

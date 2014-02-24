@@ -20,10 +20,11 @@ package engine
 
 import (
 	"flag"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"path"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*
@@ -125,6 +126,7 @@ func TestLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DESTINATION_RATES_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PLANS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.RATING_PROFILES_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.SHARED_GROUPS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTIONS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_PLANS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
@@ -289,7 +291,7 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
 			qVal, err := rs.db.Get(key)
 			if err != nil {
-				t.Fatal("Could not retrieve key %s, error: %s", key, err.Error())
+				t.Fatalf("Could not retrieve key %s, error: %s", key, err.Error())
 			}
 			if idx == 0 { // Only compare at second iteration, first one is to set reference value
 				refVal = qVal

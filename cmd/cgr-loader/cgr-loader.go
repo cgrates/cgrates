@@ -136,6 +136,7 @@ func main() {
 			path.Join(*dataPath, utils.DESTINATION_RATES_CSV),
 			path.Join(*dataPath, utils.RATING_PLANS_CSV),
 			path.Join(*dataPath, utils.RATING_PROFILES_CSV),
+			path.Join(*dataPath, utils.SHARED_GROUPS_CSV),
 			path.Join(*dataPath, utils.ACTIONS_CSV),
 			path.Join(*dataPath, utils.ACTION_PLANS_CSV),
 			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
@@ -186,11 +187,12 @@ func main() {
 		rplIds, _ := loader.GetLoadedIds(engine.RATING_PLAN_PREFIX)
 		rpfIds, _ := loader.GetLoadedIds(engine.RATING_PROFILE_PREFIX)
 		actIds, _ := loader.GetLoadedIds(engine.ACTION_PREFIX)
+		shgIds, _ := loader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds}, &reply); err != nil {
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds, shgIds}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
 		actTmgIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)
