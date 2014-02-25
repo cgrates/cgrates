@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"net/url"
 	"os/exec"
 	"path"
@@ -136,7 +137,8 @@ func TestRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	rater, err = rpc.Dial("tcp", "127.0.0.1:2013") //ToDo: Fix with automatic config
+	rater, err = jsonrpc.Dial("tcp", fscsvCfg.RPCJSONListen)
+	//rater, err = rpc.Dial("tcp", "127.0.0.1:2013") //ToDo: Fix with automatic config
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

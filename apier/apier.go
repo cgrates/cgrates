@@ -88,7 +88,7 @@ type AttrAddBalance struct {
 	Direction      string
 	Value          float64
 	ExpirationDate time.Time
-	RateSubject    string
+	RatingSubject  string
 	DestinationId  string
 	Weight         float64
 	Overwrite      bool // When true it will reset if the balance is already there
@@ -125,7 +125,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			Balance: &engine.Balance{
 				Value:          attr.Value,
 				ExpirationDate: attr.ExpirationDate,
-				RateSubject:    attr.RateSubject,
+				RateSubject:    attr.RatingSubject,
 				DestinationId:  attr.DestinationId,
 				Weight:         attr.Weight,
 			},
