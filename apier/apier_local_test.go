@@ -541,7 +541,7 @@ func TestApierTPActions(t *testing.T) {
 	}
 }
 
-func TestApierTPActionTimings(t *testing.T) {
+func TestApierTPActionPlan(t *testing.T) {
 	if !*testLocal {
 		return
 	}

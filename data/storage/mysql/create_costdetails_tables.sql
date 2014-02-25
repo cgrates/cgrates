@@ -5,7 +5,7 @@
 
 DROP TABLE IF EXISTS `cost_details`;
 CREATE TABLE `cost_details` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tbid` int(11) NOT NULL AUTO_INCREMENT,
   `cgrid` char(40) NOT NULL,
   `accid` varchar(64) NOT NULL,
   `direction` varchar(8) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE `cost_details` (
   `source` varchar(64) NOT NULL,
   `runid`  varchar(64) NOT NULL,
   `cost_time` datetime NOT NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`tbid`),
   UNIQUE KEY `costid` (`cgrid`,`runid`)
 );
 

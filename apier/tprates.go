@@ -68,7 +68,7 @@ func (self *ApierV1) GetTPRateIds(attrs AttrGetTPRateIds, reply *[]string) error
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATES, "tag", nil); err != nil {
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATES, "id", nil); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)

@@ -34,8 +34,8 @@ type AttrAcntAction struct {
 }
 
 type AccountActionTiming struct {
-	Id           string    // The id to reference this particular ActionTiming
 	ActionPlanId string    // The id of the ActionPlanId profile attached to the account
+	Id           string    // The id to reference this particular ActionTiming
 	ActionsId    string    // The id of actions which will be executed
 	NextExecTime time.Time // Next execution time
 }

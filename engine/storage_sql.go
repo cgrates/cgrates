@@ -116,7 +116,7 @@ func (self *SQLStorage) GetTPTableIds(tpid, table, distinct string, filters map[
 }
 
 func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
-	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s') ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
+	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, id, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s') ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
 		utils.TBL_TP_TIMINGS, tpid, tm.Id, tm.Years.Serialize(";"), tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"),
 		tm.WeekDays.Serialize(";"), tm.StartTime)); err != nil {
 		return err
@@ -125,7 +125,7 @@ func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
 }
 
 func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
-	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND tag='%s'", table, tpid, args[0])
+	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND id='%s'", table, tpid, args[0])
 	switch table {
 	case utils.TBL_TP_RATE_PROFILES:
 		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND tor='%s' AND direction='%s' AND subject='%s'",
@@ -142,7 +142,7 @@ func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 
 // Extracts destinations from StorDB on specific tariffplan id
 func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 		return nil
 	}
 	var buffer bytes.Buffer // Use bytes buffer istead of string concatenation since that becomes quite heavy on large prefixes
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, tag, prefix) VALUES ", utils.TBL_TP_DESTINATIONS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, id, prefix) VALUES ", utils.TBL_TP_DESTINATIONS))
 	for idx, prefix := range dest.Prefixes {
 		if idx != 0 {
 			buffer.WriteRune(',')
@@ -189,7 +189,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES ",
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, id, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals) VALUES ",
 		utils.TBL_TP_RATES))
 	i := 0
 	for rtId, rtRows := range rts {
@@ -215,7 +215,7 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,destinations_tag,rates_tag) VALUES ", utils.TBL_TP_DESTINATION_RATES))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,destinations_id,rates_id) VALUES ", utils.TBL_TP_DESTINATION_RATES))
 	i := 0
 	for drId, drRows := range drs {
 		for _, dr := range drRows {
@@ -226,7 +226,7 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 			i++
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE destinations_tag=values(destinations_tag),rates_tag=values(rates_tag)")
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE destinations_id=values(destinations_id),rates_id=values(rates_id)")
 	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
@@ -238,7 +238,7 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, tag, destrates_tag, timing_tag, weight) VALUES ", utils.TBL_TP_RATING_PLANS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, id, destrates_id, timing_id, weight) VALUES ", utils.TBL_TP_RATING_PLANS))
 	i := 0
 	for drtId, drtRows := range drts {
 		for _, drt := range drtRows {
@@ -261,7 +261,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,loadid,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects) VALUES ",
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,loadid,tenant,tor,direction,subject,activation_time,rating_plan_id,fallback_subjects) VALUES ",
 		utils.TBL_TP_RATE_PROFILES))
 	i := 0
 	for _, rp := range rps {
@@ -286,7 +286,7 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string]*SharedGro
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,account,strategy,rate_subject) VALUES ", utils.TBL_TP_SHARED_GROUPS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,account,strategy,rate_subject) VALUES ", utils.TBL_TP_SHARED_GROUPS))
 	i := 0
 	for sgId, sg := range sgs {
 		for account, params := range sg.AccountParameters {
@@ -310,7 +310,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,shared_group,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,action,balance_type,direction,units,expiry_time,destination_id,rating_subject,shared_group,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS))
 	i := 0
 	for actId, actRows := range acts {
 		for _, act := range actRows {
@@ -323,7 +323,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 			i++
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE action=values(action),balance_type=values(balance_type),direction=values(direction),units=values(units),expiry_time=values(expiry_time),destination_tag=values(destination_tag),rating_subject=values(rating_subject),shared_group=values(shared_group),balance_weight=values(balance_weight),extra_parameters=values(extra_parameters),weight=values(weight)")
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE action=values(action),balance_type=values(balance_type),direction=values(direction),units=values(units),expiry_time=values(expiry_time),destination_id=values(destination_id),rating_subject=values(rating_subject),shared_group=values(shared_group),balance_weight=values(balance_weight),extra_parameters=values(extra_parameters),weight=values(weight)")
 	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
@@ -331,7 +331,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_id,rating_subject,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +370,7 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,actions_tag,timing_tag,weight) VALUES ", utils.TBL_TP_ACTION_PLANS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,actions_id,timing_id,weight) VALUES ", utils.TBL_TP_ACTION_PLANS))
 	i := 0
 	for atId, atRows := range ats {
 		for _, at := range atRows {
@@ -381,7 +381,7 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 			i++
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE timing_tag=values(timing_tag),weight=values(weight)")
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE timing_id=values(timing_id),weight=values(weight)")
 	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
@@ -390,9 +390,9 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 
 func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*utils.TPActionTiming, error) {
 	ats := make(map[string][]*utils.TPActionTiming)
-	q := fmt.Sprintf("SELECT tag,actions_tag,timing_tag,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_PLANS, tpid)
+	q := fmt.Sprintf("SELECT id,actions_id,timing_id,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_PLANS, tpid)
 	if atId != "" {
-		q += fmt.Sprintf(" AND tag='%s'", atId)
+		q += fmt.Sprintf(" AND id='%s'", atId)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -417,7 +417,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,tag,balance_type,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight) VALUES ",
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,balance_type,direction,threshold_type,threshold_value,destination_id,actions_id,weight) VALUES ",
 		utils.TBL_TP_ACTION_TRIGGERS))
 	i := 0
 	for atId, atRows := range ats {
@@ -444,7 +444,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, loadid, tenant, account, direction, action_timings_tag, action_triggers_tag) VALUES ", utils.TBL_TP_ACCOUNT_ACTIONS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, loadid, tenant, account, direction, action_plan_id, action_triggers_id) VALUES ", utils.TBL_TP_ACCOUNT_ACTIONS))
 	i := 0
 	for _, aActs := range aa {
 		if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
@@ -454,7 +454,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 			tpid, aActs.LoadId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionPlanId, aActs.ActionTriggersId))
 		i++
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE action_timings_tag=values(action_timings_tag), action_triggers_tag=values(action_triggers_tag)")
+	buffer.WriteString(" ON DUPLICATE KEY UPDATE action_plan_id=values(action_plan_id), action_triggers_id=values(action_triggers_id)")
 	if _, err := self.Db.Exec(buffer.String()); err != nil {
 		return err
 	}
@@ -660,8 +660,8 @@ func (self *SQLStorage) RemStoredCdrs(cgrIds []string) error {
 func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
 	var dests []*Destination
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+	if len(tag) != 0 {
+		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -692,9 +692,9 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 
 func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, error) {
 	rts := make(map[string]*utils.TPRate)
-	q := fmt.Sprintf("SELECT tag, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
+	q := fmt.Sprintf("SELECT id, connect_fee, rate, rate_unit, rate_increment, group_interval_start, rounding_method, rounding_decimals FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
 	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -738,7 +738,7 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*uti
 	rts := make(map[string]*utils.TPDestinationRate)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATION_RATES, tpid)
 	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -777,7 +777,7 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.TPTimi
 	tms := make(map[string]*utils.TPTiming)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_TIMINGS, tpid)
 	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -799,7 +799,7 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 	rpbns := make(map[string][]*utils.TPRatingPlanBinding)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_RATING_PLANS, tpid)
 	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -828,7 +828,7 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 }
 
 func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
-	q := fmt.Sprintf("SELECT loadid,tenant,tor,direction,subject,activation_time,rating_plan_tag,fallback_subjects FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT loadid,tenant,tor,direction,subject,activation_time,rating_plan_id,fallback_subjects FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_RATE_PROFILES, qryRpf.TPid)
 	if len(qryRpf.LoadId) != 0 {
 		q += fmt.Sprintf(" AND loadid='%s'", qryRpf.LoadId)
@@ -873,7 +873,7 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string]*SharedG
 	sgs := make(map[string]*SharedGroup)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_SHARED_GROUPS, tpid)
 	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -914,7 +914,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 	as := make(map[string][]*utils.TPAction)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTIONS, tpid)
 	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -948,10 +948,10 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {
 	ats := make(map[string][]*utils.TPActionTrigger)
-	q := fmt.Sprintf("SELECT tpid,tag,balance_type,direction,threshold_type,threshold_value,destination_tag,actions_tag,weight FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT tpid,id,balance_type,direction,threshold_type,threshold_value,destination_id,actions_id,weight FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
-		q += fmt.Sprintf(" AND tag='%s'", tag)
+		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
 	rows, err := self.Db.Query(q)
 	if err != nil {
@@ -980,7 +980,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 }
 
 func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map[string]*utils.TPAccountActions, error) {
-	q := fmt.Sprintf("SELECT loadid, tenant, account, direction, action_timings_tag, action_triggers_tag FROM %s WHERE tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, aaFltr.TPid)
+	q := fmt.Sprintf("SELECT loadid, tenant, account, direction, action_plan_id, action_triggers_id FROM %s WHERE tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, aaFltr.TPid)
 	if len(aaFltr.LoadId) != 0 {
 		q += fmt.Sprintf(" AND loadid='%s'", aaFltr.LoadId)
 	}
@@ -1000,8 +1000,8 @@ func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map
 	defer rows.Close()
 	aa := make(map[string]*utils.TPAccountActions)
 	for rows.Next() {
-		var aaLoadId, tenant, account, direction, action_timings_tag, action_triggers_tag string
-		if err := rows.Scan(&aaLoadId, &tenant, &account, &direction, &action_timings_tag, &action_triggers_tag); err != nil {
+		var aaLoadId, tenant, account, direction, action_plan_tag, action_triggers_tag string
+		if err := rows.Scan(&aaLoadId, &tenant, &account, &direction, &action_plan_tag, &action_triggers_tag); err != nil {
 			return nil, err
 		}
 		aacts := &utils.TPAccountActions{
@@ -1010,7 +1010,7 @@ func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map
 			Tenant:           tenant,
 			Account:          account,
 			Direction:        direction,
-			ActionPlanId:     action_timings_tag,
+			ActionPlanId:     action_plan_tag,
 			ActionTriggersId: action_triggers_tag,
 		}
 		aa[aacts.KeyId()] = aacts

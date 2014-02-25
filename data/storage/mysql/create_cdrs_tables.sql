@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS cdrs_primary;
 
 CREATE TABLE cdrs_primary (
-  id int(11) NOT NULL AUTO_INCREMENT,
+  tbid int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
   accid varchar(64) NOT NULL,
   cdrhost varchar(64) NOT NULL,
@@ -15,16 +15,16 @@ CREATE TABLE cdrs_primary (
   destination varchar(128) NOT NULL,
   answer_time datetime NOT NULL,
   duration bigint NOT NULL,
-  PRIMARY KEY (id),
+  PRIMARY KEY (tbid),
   UNIQUE KEY cgrid (cgrid)
 );
 
 DROP TABLE IF EXISTS cdrs_extra;
 
 CREATE TABLE cdrs_extra (
-  id int(11) NOT NULL AUTO_INCREMENT,
+  tbid int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
   extra_fields text NOT NULL,
-  PRIMARY KEY (id),
+  PRIMARY KEY (tbid),
   UNIQUE KEY cgrid (cgrid)
 );

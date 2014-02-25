@@ -26,23 +26,23 @@ import (
 )
 
 func init() {
-	commands["get_account"] = &CmdGetBalances{}
+	commands["get_account"] = &CmdGetAccount{}
 }
 
 // Commander implementation
-type CmdGetBalances struct {
+type CmdGetAccount struct {
 	rpcMethod string
 	rpcParams *apier.AttrGetAccount
 	rpcResult *engine.Account
 }
 
 // name should be exec's name
-func (self *CmdGetBalances) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_balances <tenant> <account>")
+func (self *CmdGetAccount) Usage(name string) string {
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_account <tenant> <account>")
 }
 
 // set param defaults
-func (self *CmdGetBalances) defaults() error {
+func (self *CmdGetAccount) defaults() error {
 	self.rpcMethod = "ApierV1.GetAccount"
 	self.rpcParams = &apier.AttrGetAccount{BalanceType: engine.CREDIT}
 	self.rpcParams.Direction = "*out"
@@ -50,7 +50,7 @@ func (self *CmdGetBalances) defaults() error {
 }
 
 // Parses command line args and builds CmdBalance value
-func (self *CmdGetBalances) FromArgs(args []string) error {
+func (self *CmdGetAccount) FromArgs(args []string) error {
 	if len(args) < 4 {
 		return fmt.Errorf(self.Usage(""))
 	}
@@ -61,14 +61,14 @@ func (self *CmdGetBalances) FromArgs(args []string) error {
 	return nil
 }
 
-func (self *CmdGetBalances) RpcMethod() string {
+func (self *CmdGetAccount) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetBalances) RpcParams() interface{} {
+func (self *CmdGetAccount) RpcParams() interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdGetBalances) RpcResult() interface{} {
+func (self *CmdGetAccount) RpcResult() interface{} {
 	return &self.rpcResult
 }
