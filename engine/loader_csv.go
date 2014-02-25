@@ -537,8 +537,8 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				Weight:        balanceWeight,
 				DestinationId: record[6],
 				RateSubject:   record[7],
+				SharedGroup:   record[9],
 			},
-			SharedGroup: record[9],
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {
 			return errors.New(fmt.Sprintf("Could not parse expiration time: %v", err))

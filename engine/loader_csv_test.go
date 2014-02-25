@@ -111,14 +111,18 @@ vdf,0,*out,fallback1,2013-11-18T13:47:00Z,G,fallback2
 vdf,0,*out,fallback2,2013-11-18T13:45:00Z,R,rif
 `
 	sharedGroups = `
+SG1,*any,*lowest_first,,
+SG2,*any,*lowest_first,EVENING,
 `
 
 	actions = `
 MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,,10
 MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,,10
+SHARED,*topup,*monetary,*out,100,*unlimited,,,10,SG1,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
+MORE_MINUTES,SHARED,ONE_TIME_RUN,10
 `
 	actionTriggers = `
 STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
@@ -568,13 +572,13 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 1 {
+	if len(csvr.actions) != 2 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
-	as := csvr.actions["MINI"]
+	as1 := csvr.actions["MINI"]
 	expected := []*Action{
 		&Action{
-			Id:               as[0].Id,
+			Id:               as1[0].Id,
 			ActionType:       TOPUP_RESET,
 			BalanceType:      CREDIT,
 			Direction:        OUTBOUND,
@@ -582,13 +586,13 @@ func TestLoadActions(t *testing.T) {
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &Balance{
-				Uuid:   as[0].Balance.Uuid,
+				Uuid:   as1[0].Balance.Uuid,
 				Value:  10,
 				Weight: 10,
 			},
 		},
 		&Action{
-			Id:               as[1].Id,
+			Id:               as1[1].Id,
 			ActionType:       TOPUP,
 			BalanceType:      MINUTES,
 			Direction:        OUTBOUND,
@@ -596,7 +600,7 @@ func TestLoadActions(t *testing.T) {
 			ExtraParameters:  "",
 			Weight:           10,
 			Balance: &Balance{
-				Uuid:          as[1].Balance.Uuid,
+				Uuid:          as1[1].Balance.Uuid,
 				Value:         100,
 				Weight:        10,
 				RateSubject:   "test",
@@ -604,8 +608,60 @@ func TestLoadActions(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(as, expected) {
-		t.Error("Error loading action: ", as)
+	if !reflect.DeepEqual(as1, expected) {
+		t.Error("Error loading action: ", as1)
+	}
+	as2 := csvr.actions["SHARED"]
+	expected = []*Action{
+		&Action{
+			Id:               as2[0].Id,
+			ActionType:       TOPUP,
+			BalanceType:      CREDIT,
+			Direction:        OUTBOUND,
+			ExpirationString: UNLIMITED,
+			Weight:           10,
+			Balance: &Balance{
+				Uuid:        as2[0].Balance.Uuid,
+				Value:       100,
+				Weight:      10,
+				SharedGroup: "SG1",
+			},
+		},
+	}
+	if !reflect.DeepEqual(as2, expected) {
+		t.Errorf("Error loading action: %+v", as2[0].Balance)
+	}
+}
+
+func TestSharedGroups(t *testing.T) {
+	if len(csvr.sharedGroups) != 2 {
+		t.Error("Failed to load actions: ", csvr.sharedGroups)
+	}
+	sg1 := csvr.sharedGroups["SG1"]
+	expected := &SharedGroup{
+		Id: "SG1",
+		AccountParameters: map[string]*SharingParameters{
+			"*any": &SharingParameters{
+				Strategy:    "*lowest_first",
+				RateSubject: "",
+			},
+		},
+	}
+	if !reflect.DeepEqual(sg1, expected) {
+		t.Error("Error loading shared group: ", sg1.AccountParameters)
+	}
+	sg2 := csvr.sharedGroups["SG2"]
+	expected = &SharedGroup{
+		Id: "SG2",
+		AccountParameters: map[string]*SharingParameters{
+			"*any": &SharingParameters{
+				Strategy:    "*lowest_first",
+				RateSubject: "EVENING",
+			},
+		},
+	}
+	if !reflect.DeepEqual(sg2, expected) {
+		t.Error("Error loading shared group: ", sg2.AccountParameters)
 	}
 }
 

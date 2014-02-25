@@ -45,7 +45,6 @@ type Action struct {
 	ExpirationString string
 	Weight           float64
 	Balance          *Balance
-	SharedGroup      string
 }
 
 const (
