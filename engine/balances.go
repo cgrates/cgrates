@@ -178,6 +178,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 						inc = newTs.Increments[0]
 					}
 					b.Value -= amount
+					b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 					inc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 					inc.MinuteInfo = &MinuteInfo{cc.Destination, amount}
 					inc.Cost = 0
@@ -217,6 +218,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 					}
 					if moneyBal != nil && b.Value >= seconds {
 						b.Value -= seconds
+						b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 						moneyBal.Value -= cost
 						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 						nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
@@ -283,6 +285,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 				amount := increment.Cost
 				if b.Value >= amount {
 					b.Value -= amount
+					b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 					increment.BalanceInfo.MoneyBalanceUuid = b.Uuid
 					increment.paid = true
 					if count {
@@ -311,6 +314,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 						amount := nInc.Cost
 						if b.Value >= amount {
 							b.Value -= amount
+							b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 							nInc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 							nInc.paid = true
 							if count {
@@ -386,6 +390,7 @@ func (bc BalanceChain) Debit(amount float64) float64 {
 		}
 		if b.Value >= amount || i == len(bc)-1 { // if last one go negative
 			b.Value -= amount
+			b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 			break
 		}
 		b.Value = 0
