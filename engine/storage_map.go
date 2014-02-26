@@ -45,7 +45,7 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
-func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) error {
+func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) error {
 	if dKeys == nil {
 		cache2go.RemPrefixKey(DESTINATION_PREFIX)
 	}
@@ -54,6 +54,9 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) error {
 	}
 	if rpfKeys == nil {
 		cache2go.RemPrefixKey(RATING_PROFILE_PREFIX)
+	}
+	if alsKeys == nil {
+		cache2go.RemPrefixKey(ALIAS_PREFIX)
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
@@ -70,6 +73,12 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) error {
 		if strings.HasPrefix(k, RATING_PROFILE_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetRatingProfile(k[len(RATING_PROFILE_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+		if strings.HasPrefix(k, ALIAS_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetAlias(k[len(ALIAS_PREFIX):], true); err != nil {
 				return err
 			}
 		}
@@ -141,7 +150,7 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	response := 0
 
 	go historyScribe.Record(rp.GetHistoryRecord(), &response)
-	cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
+	//cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
 
@@ -169,7 +178,30 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	ms.dict[RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
 	go historyScribe.Record(rpf.GetHistoryRecord(), &response)
-	cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
+	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
+	return
+}
+
+func (ms *MapStorage) GetAlias(key string, checkDb bool) (alias string, err error) {
+	key = ALIAS_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(string), nil
+	}
+	if !checkDb {
+		return "", errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		alias = string(values)
+		cache2go.Cache(key, alias)
+	} else {
+		return "", errors.New("not found")
+	}
+	return
+}
+
+func (ms *MapStorage) SetAlias(key, alias string) (err error) {
+	ms.dict[ALIAS_PREFIX+key] = []byte(alias)
+	//cache2go.Cache(ALIAS_PREFIX+key, alias)
 	return
 }
 
@@ -198,7 +230,7 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	ms.dict[DESTINATION_PREFIX+dest.Id] = result
 	response := 0
 	go historyScribe.Record(dest.GetHistoryRecord(), &response)
-	cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
+	//cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
 
@@ -222,7 +254,7 @@ func (ms *MapStorage) GetActions(key string, checkDb bool) (as Actions, err erro
 func (ms *MapStorage) SetActions(key string, as Actions) (err error) {
 	result, err := ms.ms.Marshal(&as)
 	ms.dict[ACTION_PREFIX+key] = result
-	cache2go.Cache(ACTION_PREFIX+key, as)
+	//cache2go.Cache(ACTION_PREFIX+key, as)
 	return
 }
 
@@ -246,7 +278,7 @@ func (ms *MapStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGroup,
 func (ms *MapStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
 	result, err := ms.ms.Marshal(sg)
 	ms.dict[SHARED_GROUP_PREFIX+key] = result
-	cache2go.Cache(ACTION_PREFIX+key, sg)
+	//cache2go.Cache(ACTION_PREFIX+key, sg)
 	return
 }
 

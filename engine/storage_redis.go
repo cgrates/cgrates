@@ -67,7 +67,7 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
-func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error) {
+func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) (err error) {
 	if dKeys == nil {
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
@@ -120,6 +120,24 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys []string) (err error)
 	}
 	if len(rpfKeys) != 0 {
 		Logger.Info("Finished rating profile caching.")
+	}
+	if alsKeys == nil {
+		Logger.Info("Caching all aliases")
+		if alsKeys, err = rs.db.Keys(ALIAS_PREFIX + "*"); err != nil {
+			return
+		}
+		cache2go.RemPrefixKey(ALIAS_PREFIX)
+	} else if len(alsKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
+	}
+	for _, key := range alsKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetAlias(key[len(ALIAS_PREFIX):], true); err != nil {
+			return err
+		}
+	}
+	if len(alsKeys) != 0 {
+		Logger.Info("Finished aliases caching.")
 	}
 	return
 }
@@ -244,6 +262,28 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
 	}
 	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
+	return
+}
+
+func (rs *RedisStorage) GetAlias(key string, checkDb bool) (alias string, err error) {
+	key = ALIAS_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(string), nil
+	}
+	if !checkDb {
+		return "", errors.New(utils.ERR_NOT_FOUND)
+	}
+	var values []byte
+	if values, err = rs.db.Get(key); err == nil {
+		alias = string(values)
+		cache2go.Cache(key, alias)
+	}
+	return
+}
+
+func (rs *RedisStorage) SetAlias(key, alias string) (err error) {
+	err = rs.db.Set(ALIAS_PREFIX+key, []byte(alias))
+	//cache2go.Cache(ALIAS_PREFIX+key, alias)
 	return
 }
 

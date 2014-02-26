@@ -35,6 +35,7 @@ const (
 	ACTION_TIMING_PREFIX      = "apl_"
 	RATING_PLAN_PREFIX        = "rpl_"
 	RATING_PROFILE_PREFIX     = "rpf_"
+	ALIAS_PREFIX              = "als_"
 	ACTION_PREFIX             = "act_"
 	SHARED_GROUP_PREFIX       = "shg_"
 	ACCOUNT_PREFIX            = "ubl_"
@@ -69,12 +70,14 @@ Interface for storage providers.
 */
 type RatingStorage interface {
 	Storage
-	CacheRating([]string, []string, []string) error
+	CacheRating([]string, []string, []string, []string) error
 	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string, bool) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
+	GetAlias(string, bool) (string, error)
+	SetAlias(string, string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 }

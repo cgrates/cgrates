@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -36,6 +37,7 @@ type DbReader struct {
 	actionsTriggers  map[string][]*ActionTrigger
 	accountActions   []*Account
 	destinations     []*Destination
+	aliases          map[string]string
 	timings          map[string]*utils.TPTiming
 	rates            map[string]*utils.TPRate
 	destinationRates map[string]*utils.TPDestinationRate
@@ -188,6 +190,18 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Println(ub.Id)
 		}
 	}
+	if verbose {
+		log.Print("Aliases")
+	}
+	for key, alias := range dbr.aliases {
+		err = storage.SetAlias(key, alias)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(key)
+		}
+	}
 	return
 }
 
@@ -272,6 +286,14 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		return err
 	}
 	for _, tpRpf := range mpTpRpfs {
+		// extract aliases from subject
+		aliases := strings.Split(tpRpf.Subject, ";")
+		if len(aliases) > 1 {
+			tpRpf.Subject = aliases[0]
+			for _, alias := range aliases[1:] {
+				dbr.aliases[RATING_PLAN_PREFIX+alias] = tpRpf.Subject
+			}
+		}
 		rpf := &RatingProfile{Id: tpRpf.KeyId()}
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseDate(tpRa.ActivationTime)
@@ -431,7 +453,7 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 	}
 	for atId, ats := range atsMap {
 		for _, at := range ats {
-			
+
 			_, exists := dbr.actions[at.ActionsId]
 			if !exists {
 				return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", at.ActionsId))
@@ -490,6 +512,14 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		return err
 	}
 	for _, aa := range acs {
+		// extract aliases from subject
+		aliases := strings.Split(aa.Account, ";")
+		if len(aliases) > 1 {
+			aa.Account = aliases[0]
+			for _, alias := range aliases[1:] {
+				dbr.aliases[ACCOUNT_PREFIX+alias] = aa.Account
+			}
+		}
 		aTriggers, exists := dbr.actionsTriggers[aa.ActionTriggersId]
 		if !exists {
 			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", aa.ActionTriggersId))

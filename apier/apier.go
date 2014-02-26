@@ -457,7 +457,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys []string
+	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, alsKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -488,7 +488,13 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			shgKeys[idx] = engine.SHARED_GROUP_PREFIX + shgId
 		}
 	}
-	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
+	if len(attrs.Aliases) > 0 {
+		alsKeys = make([]string, len(attrs.Aliases))
+		for idx, alias := range attrs.Aliases {
+			alsKeys[idx] = engine.ALIAS_PREFIX + alias
+		}
+	}
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, alsKeys); err != nil {
 		return err
 	}
 	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys); err != nil {
@@ -586,7 +592,12 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, shgId := range shgIds {
 		shgKeys[idx] = engine.SHARED_GROUP_PREFIX + shgId
 	}
-	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys); err != nil {
+	aliases, _ := loader.GetLoadedIds(engine.ALIAS_PREFIX)
+	alsKeys := make([]string, len(aliases))
+	for idx, alias := range aliases {
+		alsKeys[idx] = engine.ALIAS_PREFIX + alias
+	}
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, alsKeys); err != nil {
 		return err
 	}
 	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys); err != nil {

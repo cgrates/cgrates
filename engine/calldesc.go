@@ -140,6 +140,16 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	if cd.Account != "" {
 		subj = cd.Account
 	}
+	// check if subject is alias
+	if rs, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + subj); err == nil {
+		realSubject := rs.(string)
+		subj = realSubject
+		if cd.Account != "" {
+			cd.Account = realSubject
+		} else {
+			cd.Subject = realSubject
+		}
+	}
 	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 }
 
@@ -282,6 +292,12 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // Constructs the key for the storage lookup.
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
+	// check if subject is alias
+	if rs, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + subject); err == nil {
+		realSubject := rs.(string)
+		subject = realSubject
+		cd.Subject = realSubject
+	}
 	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, subject)
 }
 
@@ -602,7 +618,7 @@ func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
-	dataStorage.CacheRating(nil, nil, nil)
+	dataStorage.CacheRating(nil, nil, nil, nil)
 	accountingStorage.CacheAccounting(nil, nil)
 	return nil
 

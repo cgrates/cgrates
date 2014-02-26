@@ -74,7 +74,7 @@ var (
 )
 
 func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, doneChan chan struct{}) {
-	if err := ratingDb.CacheRating(nil, nil, nil); err != nil {
+	if err := ratingDb.CacheRating(nil, nil, nil, nil); err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
 		exitChan <- true
 		return
@@ -119,7 +119,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 	}
 	engine.Logger.Info("Registering Mediator RPC service.")
 	server.RpcRegister(&mediator.MediatorV1{Medi: medi})
-	
+
 	close(chanDone)
 }
 
@@ -204,12 +204,12 @@ func startHistoryAgent(scribeServer history.Scribe, chanServerStarted chan struc
 	if cfg.HistoryServer == utils.INTERNAL { // For internal requests, wait for server to come online before connecting
 		engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Connecting internally to HistoryServer"))
 		select {
-                case <-time.After(1 * time.Minute):
+		case <-time.After(1 * time.Minute):
 			engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Timeout waiting for server to start."))
 			exitChan <- true
 			return
-                case <-chanServerStarted:
-                }
+		case <-chanServerStarted:
+		}
 		//<-chanServerStarted // If server is not enabled, will have deadlock here
 	} else { // Connect in iteration since there are chances of concurrency here
 		for i := 0; i < 3; i++ { //ToDo: Make it globally configurable

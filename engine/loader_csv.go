@@ -38,6 +38,7 @@ type CSVReader struct {
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
+	aliases           map[string]string
 	accountActions    []*Account
 	destinations      []*Destination
 	timings           map[string]*utils.TPTiming
@@ -244,6 +245,18 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Println(ub.Id)
 		}
 	}
+	if verbose {
+		log.Print("Aliases")
+	}
+	for key, alias := range csvr.aliases {
+		err = dataStorage.SetAlias(key, alias)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print(key)
+		}
+	}
 	return
 }
 
@@ -428,6 +441,14 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		at, err := utils.ParseDate(record[4])
 		if err != nil {
 			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[4]))
+		}
+		// extract aliases from subject
+		aliases := strings.Split(subject, ";")
+		if len(aliases) > 1 {
+			subject = aliases[0]
+			for _, alias := range aliases[1:] {
+				csvr.aliases[RATING_PROFILE_PREFIX+alias] = subject
+			}
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
 		rp, ok := csvr.ratingProfiles[key]
@@ -638,7 +659,16 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := fmt.Sprintf("%s:%s:%s", record[2], record[0], record[1])
+		tenant, account, direction := record[0], record[1], record[2]
+		// extract aliases from subject
+		aliases := strings.Split(account, ";")
+		if len(aliases) > 1 {
+			account = aliases[0]
+			for _, alias := range aliases[1:] {
+				csvr.aliases[ACCOUNT_PREFIX+alias] = account
+			}
+		}
+		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
 		if record[4] != "" && !exists {
 			// only return error if there was something ther for the tag
@@ -734,6 +764,14 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(csvr.actionsTimings))
 		i := 0
 		for k := range csvr.actionsTimings {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case ALIAS_PREFIX: // aliases
+		keys := make([]string, len(csvr.aliases))
+		i := 0
+		for k := range csvr.aliases {
 			keys[i] = k
 			i++
 		}
