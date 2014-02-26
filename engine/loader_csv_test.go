@@ -99,7 +99,7 @@ CUSTOMER_2,0,*out,danb:87.139.12.167,2012-01-01T00:00:00Z,STANDARD,danb
 CUSTOMER_1,0,*out,danb,2012-01-01T00:00:00Z,PREMIUM,
 vdf,0,*out,rif,2012-01-01T00:00:00Z,EVENING,
 vdf,0,*out,rif,2012-02-28T00:00:00Z,EVENING,
-vdf,0,*out,minu,2012-01-01T00:00:00Z,EVENING,
+vdf,0,*out,minu;a1;a2;a3,2012-01-01T00:00:00Z,EVENING,
 vdf,0,*out,*any,2012-02-28T00:00:00Z,EVENING,
 vdf,0,*out,one,2012-02-28T00:00:00Z,STANDARD,
 vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
@@ -129,7 +129,7 @@ STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
 STANDARD_TRIGGER,*minutes,*out,*max_balance,200,GERMANY,SOME_2,10
 `
 	accountActions = `
-vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
+vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
 `
 )
 

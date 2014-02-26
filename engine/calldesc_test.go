@@ -309,6 +309,23 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 	}
 }
 
+func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "a1",
+		Destination: "0723",
+		Amount:      1000}
+	result, err := cd.GetMaxSessionDuration()
+	expected := time.Minute
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
 func TestMaxSessionTimeWithAccountAccount(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),

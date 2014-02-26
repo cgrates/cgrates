@@ -138,17 +138,11 @@ func (cd *CallDescriptor) AddRatingInfo(ris ...*RatingInfo) {
 func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
-		subj = cd.Account
-	}
-	// check if subject is alias
-	if rs, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + subj); err == nil {
-		realSubject := rs.(string)
-		subj = realSubject
-		if cd.Account != "" {
-			cd.Account = realSubject
-		} else {
-			cd.Subject = realSubject
+		// check if subject is alias
+		if realSubject, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + subj); err == nil {
+			cd.Account = realSubject.(string)
 		}
+		subj = cd.Account
 	}
 	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 }
