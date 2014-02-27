@@ -355,27 +355,25 @@ func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 	return defaultBalance
 }
 
-func (ub *Account) refundIncrements(increments Increments, direction string, count bool) {
-	for _, increment := range increments {
-		var balance *Balance
-		if increment.BalanceInfo.MinuteBalanceUuid != "" {
-			if balance = ub.BalanceMap[MINUTES+direction].GetBalance(increment.BalanceInfo.MinuteBalanceUuid); balance == nil {
-				continue
-			}
-			balance.Value += increment.Duration.Seconds()
-			if count {
-				ub.countUnits(&Action{BalanceType: MINUTES, Direction: direction, Balance: &Balance{Value: -increment.Duration.Seconds()}})
-			}
+func (ub *Account) refundIncrement(increment *Increment, direction string, count bool) {
+	var balance *Balance
+	if increment.BalanceInfo.MinuteBalanceUuid != "" {
+		if balance = ub.BalanceMap[MINUTES+direction].GetBalance(increment.BalanceInfo.MinuteBalanceUuid); balance == nil {
+			return
 		}
-		// check money too
-		if increment.BalanceInfo.MoneyBalanceUuid != "" {
-			if balance = ub.BalanceMap[CREDIT+direction].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
-				continue
-			}
-			balance.Value += increment.Cost
-			if count {
-				ub.countUnits(&Action{BalanceType: CREDIT, Direction: direction, Balance: &Balance{Value: -increment.Cost}})
-			}
+		balance.Value += increment.Duration.Seconds()
+		if count {
+			ub.countUnits(&Action{BalanceType: MINUTES, Direction: direction, Balance: &Balance{Value: -increment.Duration.Seconds()}})
+		}
+	}
+	// check money too
+	if increment.BalanceInfo.MoneyBalanceUuid != "" {
+		if balance = ub.BalanceMap[CREDIT+direction].GetBalance(increment.BalanceInfo.MoneyBalanceUuid); balance == nil {
+			return
+		}
+		balance.Value += increment.Cost
+		if count {
+			ub.countUnits(&Action{BalanceType: CREDIT, Direction: direction, Balance: &Balance{Value: -increment.Cost}})
 		}
 	}
 }

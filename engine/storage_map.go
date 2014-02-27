@@ -278,7 +278,7 @@ func (ms *MapStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGroup,
 func (ms *MapStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
 	result, err := ms.ms.Marshal(sg)
 	ms.dict[SHARED_GROUP_PREFIX+key] = result
-	//cache2go.Cache(ACTION_PREFIX+key, sg)
+	//cache2go.Cache(SHARED_GROUP_PREFIX+key, sg)
 	return
 }
 

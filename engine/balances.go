@@ -180,6 +180,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 					b.Value -= amount
 					b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 					inc.BalanceInfo.MinuteBalanceUuid = b.Uuid
+					inc.BalanceInfo.AccountId = ub.Id
 					inc.MinuteInfo = &MinuteInfo{cc.Destination, amount}
 					inc.Cost = 0
 					inc.paid = true
@@ -222,6 +223,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 						moneyBal.Value -= cost
 						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 						nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
+						nInc.BalanceInfo.AccountId = ub.Id
 						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds}
 						nInc.paid = true
 						if count {
@@ -287,6 +289,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 					b.Value -= amount
 					b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 					increment.BalanceInfo.MoneyBalanceUuid = b.Uuid
+					increment.BalanceInfo.AccountId = ub.Id
 					increment.paid = true
 					if count {
 						ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -316,6 +319,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 							b.Value -= amount
 							b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 							nInc.BalanceInfo.MoneyBalanceUuid = b.Uuid
+							nInc.BalanceInfo.AccountId = ub.Id
 							nInc.paid = true
 							if count {
 								ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: amount, DestinationId: newCC.Destination}})

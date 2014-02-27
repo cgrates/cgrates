@@ -546,9 +546,21 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 }
 
 func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
+	accountsCache := make(map[string]*Account)
+	for _, increment := range cd.Increments {
+		account, found := accountsCache[increment.BalanceInfo.AccountId]
+		if !found {
+			if acc, err := accountingStorage.GetAccount(increment.BalanceInfo.AccountId); err == nil && acc != nil {
+				account = acc
+				accountsCache[increment.BalanceInfo.AccountId] = account
+				defer accountingStorage.SetAccount(account)
+			}
+		}
+		account.refundIncrement(increment, cd.Direction, true)
+	}
+
 	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-		defer accountingStorage.SetAccount(userBalance)
-		userBalance.refundIncrements(cd.Increments, cd.Direction, true)
+
 	}
 	return 0.0, err
 }
