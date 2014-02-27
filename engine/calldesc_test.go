@@ -361,16 +361,19 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 }
 
 func TestMaxSessionModifiesCallDesc(t *testing.T) {
+	t1 := time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC)
+	t2 := time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC)
 	cd := &CallDescriptor{
-		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
-		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
-		Direction:   "*out",
-		TOR:         "0",
-		Tenant:      "vdf",
-		Subject:     "minu_from_tm",
-		Account:     "minu",
-		Destination: "0723",
-		Amount:      5400}
+		TimeStart:    t1,
+		TimeEnd:      t2,
+		Direction:    "*out",
+		TOR:          "0",
+		Tenant:       "vdf",
+		Subject:      "minu_from_tm",
+		Account:      "minu",
+		Destination:  "0723",
+		CallDuration: t2.Sub(t1),
+		Amount:       5400}
 	initial := cd.Clone()
 	cd.GetMaxSessionDuration()
 	if !reflect.DeepEqual(cd, initial) {

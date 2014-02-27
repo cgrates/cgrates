@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"log"
 	"log/syslog"
 	"time"
 	//"encoding/json"
@@ -434,11 +433,11 @@ Returns the approximate max allowed session for user balance. It will try the ma
 If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
-func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
-	cd := origCd.Clone()
-	if cd.CallDuration < cd.TimeEnd.Sub(cd.TimeStart) {
-		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
+func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
+	if origCD.CallDuration < origCD.TimeEnd.Sub(origCD.TimeStart) {
+		origCD.CallDuration = origCD.TimeEnd.Sub(origCD.TimeStart)
 	}
+	cd := origCD.Clone()
 	//Logger.Debug(fmt.Sprintf("MAX SESSION cd: %+v", cd))
 	err := cd.LoadRatingPlans()
 	if err != nil {
@@ -492,7 +491,6 @@ func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 			}
 		}
 	}
-	log.Print(initialDuration, availableDuration, initialDuration < availableDuration)
 	if initialDuration < availableDuration {
 		return initialDuration, nil
 	}
@@ -539,7 +537,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 	remainingDuration, err := cd.GetMaxSessionDuration()
 	if err != nil || remainingDuration == 0 {
-		return new(CallCost), errors.New("no more credit")
+		return new(CallCost), fmt.Errorf("no more credit: %v", err)
 	}
 	if remainingDuration > 0 { // for postpaying client returns -1
 		cd.TimeEnd = cd.TimeStart.Add(remainingDuration)

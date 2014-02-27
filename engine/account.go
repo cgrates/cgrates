@@ -134,7 +134,7 @@ func (ub *Account) getBalancesForPrefix(prefix string, balances BalanceChain, sh
 		if b.IsExpired() || (ub.AllowNegative == false && b.Value <= 0) {
 			continue
 		}
-		if b.SharedGroup != sharedGroup {
+		if sharedGroup != "" && b.SharedGroup != sharedGroup {
 			continue
 		}
 		if b.SharedGroup != "" {
