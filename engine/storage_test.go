@@ -21,6 +21,8 @@ package engine
 import (
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/cache2go"
 )
 
 func TestMsgpackStructsAdded(t *testing.T) {
@@ -104,6 +106,12 @@ func TestCacheRefresh(t *testing.T) {
 	p := d.containsPrefix("1")
 	if err != nil || p == 0 {
 		t.Error("Error refreshing cache:", d)
+	}
+}
+
+func TestCacheAliases(t *testing.T) {
+	if subj, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + "a3"); err != nil || subj != "minu" {
+		t.Error("Error caching alias: ", subj, err)
 	}
 }
 
