@@ -436,7 +436,7 @@ If the user has postpayed plan it returns -1.
 */
 func (origCd *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	cd := origCd.Clone()
-	if cd.CallDuration == 0 {
+	if cd.CallDuration < cd.TimeEnd.Sub(cd.TimeStart) {
 		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	}
 	//Logger.Debug(fmt.Sprintf("MAX SESSION cd: %+v", cd))

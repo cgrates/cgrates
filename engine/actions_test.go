@@ -955,8 +955,27 @@ func TestActionMakeNegative(t *testing.T) {
 	}
 }
 
-func TestMinBalanceTriggerSimple(t *testing.T) {
-	//ub := &Account{}
+func TestTopupAction(t *testing.T) {
+	initialUb, _ := accountingStorage.GetAccount("*out:vdf:minu")
+	a := &Action{
+		ActionType:  "*topup",
+		BalanceType: CREDIT,
+		Direction:   OUTBOUND,
+		Balance:     &Balance{Value: 25, DestinationId: "RET", Weight: 20},
+	}
+
+	at := &ActionTiming{
+		AccountIds: []string{"*out:vdf:minu"},
+		actions:    Actions{a},
+	}
+
+	at.Execute()
+	afterUb, _ := accountingStorage.GetAccount("*out:vdf:minu")
+	initialValue := initialUb.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
+	afterValue := afterUb.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
+	if initialValue != 50 || afterValue != 75 {
+		t.Error("Bad topup before and after: ", initialValue, afterValue)
+	}
 }
 
 /********************************** Benchmarks ********************************/

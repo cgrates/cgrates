@@ -102,6 +102,7 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 		}
 		if b.Equal(a.Balance) {
 			b.Value -= a.Balance.Value
+			b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 			found = true
 			break
 		}
@@ -240,6 +241,7 @@ CONNECT_FEE:
 		for _, b := range usefulMoneyBalances {
 			if b.Value >= amount {
 				b.Value -= amount
+				b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 				// the conect fee is not refundable!
 				if count {
 					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
@@ -378,9 +380,7 @@ func (ub *Account) refundIncrements(increments Increments, direction string, cou
 	}
 }
 
-/*
-Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
-*/
+// Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
 func (ub *Account) debitGenericBalance(balanceId string, direction string, amount float64, count bool) float64 {
 	if count {
 		ub.countUnits(&Action{BalanceType: balanceId, Direction: direction, Balance: &Balance{Value: amount}})
