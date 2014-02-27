@@ -59,7 +59,7 @@ type MinuteInfo struct {
 type BalanceInfo struct {
 	MinuteBalanceUuid string
 	MoneyBalanceUuid  string
-	UserBalanceId     string // used when debited from shared balance
+	AccountId         string // used when debited from shared balance
 }
 
 type TimeSpans []*TimeSpan

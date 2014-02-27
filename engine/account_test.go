@@ -21,6 +21,8 @@ package engine
 import (
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/cache2go"
 )
 
 var (
@@ -1033,7 +1035,62 @@ func TestAccountRefund(t *testing.T) {
 }
 
 func TestDebitShared(t *testing.T) {
+	cc := &CallCost{
+		Tenant:      "vdf",
+		TOR:         "0",
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 0, 0, time.UTC),
+				CallDuration: 55 * time.Second,
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		deductConnectFee: true,
+	}
+	rif := &Account{Id: "rif", BalanceMap: map[string]BalanceChain{
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneya", Value: 60, SharedGroup: "SG_TEST"}},
+	}}
+	groupie := &Account{Id: "groupie", BalanceMap: map[string]BalanceChain{
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneyc", Value: 70, SharedGroup: "SG_TEST"}},
+	}}
 
+	sg := &SharedGroup{Id: "SG_TEST", Members: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_RANDOM}}}
+
+	accountingStorage.SetAccount(groupie)
+	accountingStorage.SetSharedGroup("SG_TEST", sg)
+	cache2go.Cache(SHARED_GROUP_PREFIX+"SG_TEST", sg)
+	err := rif.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if rif.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 {
+		t.Errorf("Error debiting from shared group: %+v", rif.BalanceMap[CREDIT+OUTBOUND][0])
+	}
+	groupie, _ = accountingStorage.GetAccount("groupie")
+	if groupie.BalanceMap[CREDIT+OUTBOUND][0].Value != 10 {
+		t.Errorf("Error debiting from shared group: %+v", groupie.BalanceMap[CREDIT+OUTBOUND][0])
+	}
+
+	if len(cc.Timespans) != 1 {
+		t.Errorf("Wrong number of timespans: %v", cc.Timespans)
+	}
+	if len(cc.Timespans[0].Increments) != 6 {
+		t.Errorf("Wrong number of increments: %v", cc.Timespans[0].Increments)
+		for index, incr := range cc.Timespans[0].Increments {
+			t.Errorf("I%d: %+v (%+v)", index, incr, incr.BalanceInfo)
+		}
+	}
+	if cc.Timespans[0].Increments[0].BalanceInfo.AccountId != "rif" ||
+		cc.Timespans[0].Increments[1].BalanceInfo.AccountId != "rif" ||
+		cc.Timespans[0].Increments[2].BalanceInfo.AccountId != "rif" ||
+		cc.Timespans[0].Increments[3].BalanceInfo.AccountId != "groupie" ||
+		cc.Timespans[0].Increments[4].BalanceInfo.AccountId != "groupie" ||
+		cc.Timespans[0].Increments[5].BalanceInfo.AccountId != "groupie" {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
 }
 
 /*********************************** Benchmarks *******************************/

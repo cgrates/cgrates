@@ -22,6 +22,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -59,8 +61,15 @@ func (sg *SharedGroup) PopBalanceByStrategy(account string, balanceChain *Balanc
 		return
 	}
 	index := 0
-	sharingParameters := sg.AccountParameters[account]
-	switch sharingParameters.Strategy {
+	sharingParameters := sg.AccountParameters[utils.ANY]
+	if sp, hasParamsForAccount := sg.AccountParameters[account]; hasParamsForAccount {
+		sharingParameters = sp
+	}
+	strategy := STRATEGY_RANDOM
+	if sharingParameters != nil {
+		strategy = sharingParameters.Strategy
+	}
+	switch strategy {
 	case STRATEGY_RANDOM:
 		rand.Seed(time.Now().Unix())
 		index = rand.Intn(len(bc))
