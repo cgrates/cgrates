@@ -1025,8 +1025,9 @@ func TestAccountRefund(t *testing.T) {
 		&Increment{Cost: 2, Duration: 3 * time.Second, BalanceInfo: &BalanceInfo{MinuteBalanceUuid: "minutea", MoneyBalanceUuid: "moneya"}},
 		&Increment{Duration: 4 * time.Second, BalanceInfo: &BalanceInfo{MinuteBalanceUuid: "minuteb", MoneyBalanceUuid: ""}},
 	}
-
-	ub.refundIncrements(increments, OUTBOUND, false)
+	for _, increment := range increments {
+		ub.refundIncrement(increment, OUTBOUND, false)
+	}
 	if ub.BalanceMap[CREDIT+OUTBOUND][0].Value != 104 ||
 		ub.BalanceMap[MINUTES+OUTBOUND][0].Value != 13 ||
 		ub.BalanceMap[MINUTES+OUTBOUND][1].Value != 14 {
