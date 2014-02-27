@@ -514,7 +514,7 @@ func (csvr *CSVReader) LoadSharedGroups() (err error) {
 func (csvr *CSVReader) LoadActions() (err error) {
 	csvReader, fp, err := csvr.readerFunc(csvr.actionsFn, csvr.sep, utils.ACTIONS_NRCOLS)
 	if err != nil {
-		log.Print("Could not load action triggers file: ", err)
+		log.Print("Could not load action file: ", err)
 		// allow writing of the other values
 		return nil
 	}

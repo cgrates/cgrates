@@ -57,11 +57,12 @@ cgrates.org,call,*out,*any,2012-01-01T00:00:00Z,RP_RETAIL,
 DUMMY,INVALID;DATA
 `
 
-var actionsSample = `#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,ExtraParameters,Weight
+var actionsSample = `#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,SharedGroup,ExtraParameters,Weight
 PREPAID_10,*topup_reset,*monetary,*out,5,*unlimited,*any,,,10,,10
-WARN_HTTP,*call_url,,,,,,,,http://localhost:8000,10
-LOG_BALANCE,*log,,,,,,,,,10
+WARN_HTTP,*call_url,,,,,,,,,http://localhost:8000,10
+LOG_BALANCE,*log,,,,,,,,,,10
 DUMMY,INVALID;DATA
+PREPAID_10,*topup_reset,*monetary,*out,5,*unlimited,*any,,10,,10
 `
 
 var actionTimingsSample = `#Tag,ActionsTag,TimingTag,Weight
@@ -237,7 +238,7 @@ func TestActionsValidator(t *testing.T) {
 		}
 		valid := lnValidator.Rule.Match(ln)
 		switch lineNr {
-		case 1, 5:
+		case 1, 5, 6:
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
