@@ -633,10 +633,11 @@ func TestLoadActions(t *testing.T) {
 	}
 }
 
-func TestSharedGroups(t *testing.T) {
+func TestLoadSharedGroups(t *testing.T) {
 	if len(csvr.sharedGroups) != 2 {
 		t.Error("Failed to load actions: ", csvr.sharedGroups)
 	}
+
 	sg1 := csvr.sharedGroups["SG1"]
 	expected := &SharedGroup{
 		Id: "SG1",
@@ -663,6 +664,20 @@ func TestSharedGroups(t *testing.T) {
 	if !reflect.DeepEqual(sg2, expected) {
 		t.Error("Error loading shared group: ", sg2.AccountParameters)
 	}
+	sg, _ := accountingStorage.GetSharedGroup("SG1", false)
+	if len(sg.Members) != 0 {
+		t.Errorf("Memebers should be empty: %+v", sg)
+	}
+
+	// execute action timings to fill memebers
+	atm := csvr.actionsTimings["MORE_MINUTES"][1]
+	atm.Execute()
+	atm.actions, atm.stCache = nil, time.Time{}
+
+	sg, _ = accountingStorage.GetSharedGroup("SG1", false)
+	if len(sg.Members) != 1 {
+		t.Errorf("Memebers should not be empty: %+v", sg)
+	}
 }
 
 func TestLoadActionTimings(t *testing.T) {
@@ -687,7 +702,7 @@ func TestLoadActionTimings(t *testing.T) {
 		ActionsId: "MINI",
 	}
 	if !reflect.DeepEqual(atm, expected) {
-		t.Error("Error loading action timing: ", atm, expected)
+		t.Errorf("Error loading action timing:\n%+v\n%+v", atm, expected)
 	}
 }
 
