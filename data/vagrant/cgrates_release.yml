@@ -11,12 +11,9 @@
       apt: pkg={{ item }} state=latest
       with_items:
         - git
-        - bzr
         - redis-server
         - mysql-server
-        - python-pycurl
         - python-mysqldb
-        - mercurial
       
     - name: add freeswitch gpg key
       command: gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF
@@ -51,21 +48,4 @@
     - name: setup database tables
       shell: chdir=/usr/share/cgrates/storage/mysql ./setup_cgr_db.sh root {{ root_db_password }} localhost
     
-- hosts: all
-  user: vagrant
-  
-  tasks:
-    - name: get golang
-      get_url: url=http://go.googlecode.com/files/go1.2.linux-amd64.tar.gz dest=~/go1.2.linux-amd64.tar.gz
-      
-    - name: unpack go
-      command: chdir=~/ tar xvf go1.2.linux-amd64.tar.gz
 
-    - name: delete golang archive
-      file: path=~/go1.2.linux-amd64.tar.gz state=absent
-
-    - name: copy bashrc
-      copy: src=bashrc dest=~/.bashrc
-
-    - name: get cgrates 
-      shell: GOROOT=~/go GOPATH=~/go_home ~/go/bin/go get -u -v github.com/cgrates/cgrates

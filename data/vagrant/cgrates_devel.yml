@@ -1,0 +1,69 @@
+---
+
+- hosts: all
+  user: vagrant
+  sudo: yes
+  vars:
+    root_db_password: CGRateS.org
+
+  tasks:
+    - name: install dependency
+      apt: pkg={{ item }} state=latest
+      with_items:
+        - git
+        - bzr
+        - redis-server
+        - mysql-server
+        - python-pycurl
+        - python-mysqldb
+        - mercurial
+      
+    - name: add freeswitch gpg key
+      command: gpg --keyserver pool.sks-keyservers.net --recv-key D76EDC7725E010CF
+      
+    - name: add freeswitch apt key
+      shell: gpg -a --export D76EDC7725E010CF | sudo apt-key add -
+
+    - name: add freeswitch apt repo
+      apt_repository: repo='deb http://files.freeswitch.org/repo/deb/debian/ wheezy main' state=present
+      
+    - name: install freeswitch
+      apt: pkg={{ item }} update_cache=yes state=latest
+      with_items:
+        - freeswitch-meta-vanilla
+        - freeswitch-mod-json-cdr
+
+    - name: update mysql root password for root account
+      mysql_user: name=root host=localhost password={{ root_db_password }}
+
+    - name: copy .my.cnf
+      template: src=my.cnf dest=/root/.my.cnf mode=0600
+    
+- hosts: all
+  user: vagrant
+  
+  tasks:
+    - name: get golang
+      get_url: url=http://go.googlecode.com/files/go1.2.linux-amd64.tar.gz dest=~/go1.2.linux-amd64.tar.gz
+      
+    - name: unpack go
+      command: chdir=~/ tar xvf go1.2.linux-amd64.tar.gz
+
+    - name: delete golang archive
+      file: path=~/go1.2.linux-amd64.tar.gz state=absent
+
+    - name: copy bashrc
+      copy: src=bashrc dest=~/.bashrc
+
+    - name: get cgrates 
+      shell: GOROOT=~/go GOPATH=~/code ~/go/bin/go get -u -v github.com/cgrates/cgrates
+
+    - name: create a link to data dir
+      file: src=~/code/src/github.com/cgrates/cgrates/data dest=/usr/share/cgrates state=symlink
+    
+    - name: setup database tables
+      shell: chdir=/usr/share/cgrates/storage/mysql ./setup_cgr_db.sh root {{ root_db_password }} localhost
+    
+    - name: create link to cgrates dir
+      file: src=~/code/src/github.com/cgrates/cgrates dest=~/cgr state=symlink
+
