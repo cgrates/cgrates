@@ -62,11 +62,25 @@ func populateDB() {
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
 	}
+	// this is added to test if csv load tests account will not overwrite balances
+	minitsboy := &Account{
+		Id: "*out:vdf:minitsboy",
+		BalanceMap: map[string]BalanceChain{
+			MINUTES + OUTBOUND: BalanceChain{
+				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RateSubject: "rif"},
+				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
+			},
+			CREDIT + OUTBOUND: BalanceChain{
+				&Balance{Value: 100, Weight: 10},
+			},
+		},
+	}
 	if accountingStorage != nil {
 		accountingStorage.SetActions("TEST_ACTIONS", ats)
 		accountingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
 		accountingStorage.SetAccount(broker)
 		accountingStorage.SetAccount(minu)
+		accountingStorage.SetAccount(minitsboy)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}

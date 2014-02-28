@@ -978,6 +978,29 @@ func TestTopupAction(t *testing.T) {
 	}
 }
 
+func TestTopupActionLoaded(t *testing.T) {
+	initialUb, _ := accountingStorage.GetAccount("*out:vdf:minitsboy")
+	a := &Action{
+		ActionType:  "*topup",
+		BalanceType: CREDIT,
+		Direction:   OUTBOUND,
+		Balance:     &Balance{Value: 25, DestinationId: "RET", Weight: 20},
+	}
+
+	at := &ActionTiming{
+		AccountIds: []string{"*out:vdf:minitsboy"},
+		actions:    Actions{a},
+	}
+
+	at.Execute()
+	afterUb, _ := accountingStorage.GetAccount("*out:vdf:minitsboy")
+	initialValue := initialUb.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
+	afterValue := afterUb.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
+	if initialValue != 100 || afterValue != 125 {
+		t.Error("Bad topup before and after: ", initialValue, afterValue)
+	}
+}
+
 /********************************** Benchmarks ********************************/
 
 func BenchmarkUUID(b *testing.B) {
