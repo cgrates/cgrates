@@ -105,16 +105,15 @@ func TestSplitSpansRoundToIncrements(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, CallDuration: 132 * time.Second}
 
 	cd.LoadRatingPlans()
-	t.Logf("%+v", cd)
 	timespans := cd.splitInTimeSpans(nil)
 	if len(timespans) != 2 {
+		t.Logf("%+v", cd)
 		t.Log(cd.RatingInfos)
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 	var d time.Duration
 	for _, ts := range timespans {
 		d += ts.GetDuration()
-		t.Log(ts.GetDuration())
 	}
 	if d != 132*time.Second {
 		t.Error("Wrong duration for timespans: ", d)

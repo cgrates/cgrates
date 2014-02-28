@@ -124,11 +124,11 @@ func TestActionTimingOnlyMonths(t *testing.T) {
 
 	y, m, _ := now.Date()
 	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
-	t.Log("NextMonth: ", nextMonth)
 	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Months: utils.Months{time.February, time.May, nextMonth.Month()}}}}
 	st := at.GetNextStartTime(referenceDate)
 	expected := time.Date(nextMonth.Year(), nextMonth.Month(), 1, 0, 0, 0, 0, time.Local)
 	if !st.Equal(expected) {
+		t.Log("NextMonth: ", nextMonth)
 		t.Errorf("Expected %v was %v", expected, st)
 	}
 }

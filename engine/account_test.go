@@ -217,8 +217,8 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 	if err != nil {
 		t.Error("Error debiting balance: ", err)
 	}
-	t.Logf("%+v", cc.Timespans[0])
 	if cc.Timespans[0].Increments[0].BalanceInfo.MinuteBalanceUuid != "testb" {
+		t.Logf("%+v", cc.Timespans[0])
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 0 ||
@@ -550,9 +550,9 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 	if err == nil {
 		t.Error("Missing noy enough credit error ")
 	}
-	t.Logf("%+v", cc.Timespans[0].Increments)
 	if cc.Timespans[0].Increments[0].BalanceInfo.MoneyBalanceUuid != "money" ||
 		cc.Timespans[0].Increments[0].Duration != 10*time.Second {
+		t.Logf("%+v", cc.Timespans[0].Increments)
 		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0].BalanceInfo)
 	}
 	if rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != -30 {
