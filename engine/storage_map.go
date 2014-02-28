@@ -293,6 +293,13 @@ func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 }
 
 func (ms *MapStorage) SetAccount(ub *Account) (err error) {
+	// never override existing account with an empty one
+	if ub.BalanceMap == nil {
+		if ac, err := ms.GetAccount(ub.Id); err == nil {
+			ac.ActionTriggers = ub.ActionTriggers
+			ub = ac
+		}
+	}
 	result, err := ms.ms.Marshal(ub)
 	ms.dict[ACCOUNT_PREFIX+ub.Id] = result
 	return

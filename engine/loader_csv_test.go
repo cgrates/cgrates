@@ -664,7 +664,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	if !reflect.DeepEqual(sg2, expected) {
 		t.Error("Error loading shared group: ", sg2.AccountParameters)
 	}
-	sg, _ := accountingStorage.GetSharedGroup("SG1", false)
+	/*sg, _ := accountingStorage.GetSharedGroup("SG1", false)
 	if len(sg.Members) != 0 {
 		t.Errorf("Memebers should be empty: %+v", sg)
 	}
@@ -677,7 +677,7 @@ func TestLoadSharedGroups(t *testing.T) {
 	sg, _ = accountingStorage.GetSharedGroup("SG1", false)
 	if len(sg.Members) != 1 {
 		t.Errorf("Memebers should not be empty: %+v", sg)
-	}
+	}*/
 }
 
 func TestLoadActionTimings(t *testing.T) {
