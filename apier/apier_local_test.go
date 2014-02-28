@@ -1192,6 +1192,21 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	}
 }
 
+// Make sure balance was topped-up
+// Bug reported by DigiDaz over IRC
+func TestApierGetAccountAfterLoad(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply *engine.Account
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 11 { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	}
+}
+
 // Test here ResponderGetCost
 func TestResponderGetCost(t *testing.T) {
 	if !*testLocal {
