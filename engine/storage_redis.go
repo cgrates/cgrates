@@ -377,8 +377,8 @@ func (rs *RedisStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGrou
 
 func (rs *RedisStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
 	result, err := rs.ms.Marshal(sg)
-	err = rs.db.Set(ACTION_PREFIX+key, result)
-	cache2go.Cache(ACTION_PREFIX+key, sg)
+	err = rs.db.Set(SHARED_GROUP_PREFIX+key, result)
+	cache2go.Cache(SHARED_GROUP_PREFIX+key, sg)
 	return
 }
 
@@ -393,6 +393,13 @@ func (rs *RedisStorage) GetAccount(key string) (ub *Account, err error) {
 }
 
 func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
+	// never override existing account with an empty one
+	if ub.BalanceMap == nil {
+		if ac, err := rs.GetAccount(ub.Id); err == nil {
+			ac.ActionTriggers = ub.ActionTriggers
+			ub = ac
+		}
+	}
 	result, err := rs.ms.Marshal(ub)
 	err = rs.db.Set(ACCOUNT_PREFIX+ub.Id, result)
 	return

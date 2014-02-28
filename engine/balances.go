@@ -50,7 +50,8 @@ func (b *Balance) Equal(o *Balance) bool {
 	return b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
 		b.DestinationId == o.DestinationId &&
-		b.RateSubject == o.RateSubject
+		b.RateSubject == o.RateSubject &&
+		b.SharedGroup == o.SharedGroup
 }
 
 // the default balance has no destinationid, Expirationdate or ratesubject
