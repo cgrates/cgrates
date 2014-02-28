@@ -473,7 +473,9 @@ func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	cd.TimeStart = cd.TimeStart.Add(availableDuration)
 	// substract the connect fee
 	cc, err := cd.GetCost()
-	availableCredit -= cc.GetConnectFee()
+	if cc.deductConnectFee {
+		availableCredit -= cc.GetConnectFee()
+	}
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Could not get cost for %s: %s.", cd.GetKey(cd.Subject), err.Error()))
 		return 0, err
@@ -516,11 +518,14 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		//Logger.Debug(fmt.Sprintf("Account: %s", ub))
 		//cCost, _ := json.Marshal(cc)
 		//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
-		if cc.Cost != 0 || cc.GetConnectFee() != 0 {
+		if cc.Cost != 0 || (cc.deductConnectFee && cc.GetConnectFee() != 0) {
 			userBalance.debitCreditBalance(cc, true)
 		}
 		cost := 0.0
 		// re-calculate call cost after balances
+		if cc.deductConnectFee { // add back the connectFee
+			cost += cc.GetConnectFee()
+		}
 		for _, ts := range cc.Timespans {
 			cost += ts.getCost()
 			cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
