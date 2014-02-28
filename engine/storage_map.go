@@ -19,8 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"bytes"
+	"compress/zlib"
 	"errors"
 	"fmt"
+	"io/ioutil"
 
 	"strings"
 	"time"
@@ -134,9 +137,18 @@ func (ms *MapStorage) GetRatingPlan(key string, checkDb bool) (rp *RatingPlan, e
 		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	if values, ok := ms.dict[key]; ok {
+		b := bytes.NewBuffer(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return nil, err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		r.Close()
 		rp = new(RatingPlan)
-
-		err = ms.ms.Unmarshal(values, rp)
+		err = ms.ms.Unmarshal(out, rp)
 		cache2go.Cache(key, rp)
 	} else {
 		return nil, errors.New("not found")
@@ -146,7 +158,11 @@ func (ms *MapStorage) GetRatingPlan(key string, checkDb bool) (rp *RatingPlan, e
 
 func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	result, err := ms.ms.Marshal(rp)
-	ms.dict[RATING_PLAN_PREFIX+rp.Id] = result
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	w.Write(result)
+	w.Close()
+	ms.dict[RATING_PLAN_PREFIX+rp.Id] = b.Bytes()
 	response := 0
 
 	go historyScribe.Record(rp.GetHistoryRecord(), &response)
@@ -208,8 +224,18 @@ func (ms *MapStorage) SetAlias(key, alias string) (err error) {
 func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {
 	key = DESTINATION_PREFIX + key
 	if values, ok := ms.dict[key]; ok {
-		dest = &Destination{Id: key}
-		err = ms.ms.Unmarshal(values, dest)
+		b := bytes.NewBuffer(values)
+		r, err := zlib.NewReader(b)
+		if err != nil {
+			return nil, err
+		}
+		out, err := ioutil.ReadAll(r)
+		if err != nil {
+			return nil, err
+		}
+		r.Close()
+		dest = new(Destination)
+		err = ms.ms.Unmarshal(out, dest)
 		// create optimized structure
 		for _, p := range dest.Prefixes {
 			var ids []string
@@ -227,7 +253,11 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 
 func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	result, err := ms.ms.Marshal(dest)
-	ms.dict[DESTINATION_PREFIX+dest.Id] = result
+	var b bytes.Buffer
+	w := zlib.NewWriter(&b)
+	w.Write(result)
+	w.Close()
+	ms.dict[DESTINATION_PREFIX+dest.Id] = b.Bytes()
 	response := 0
 	go historyScribe.Record(dest.GetHistoryRecord(), &response)
 	//cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)

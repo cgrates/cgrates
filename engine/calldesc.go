@@ -36,7 +36,7 @@ func init() {
 		Logger = new(utils.StdLogger)
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 	}
-	DEBUG := false
+	DEBUG := true
 	if DEBUG {
 		dataStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()

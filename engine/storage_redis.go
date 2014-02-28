@@ -377,8 +377,8 @@ func (rs *RedisStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGrou
 
 func (rs *RedisStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
 	result, err := rs.ms.Marshal(sg)
-	err = rs.db.Set(ACTION_PREFIX+key, result)
-	cache2go.Cache(ACTION_PREFIX+key, sg)
+	err = rs.db.Set(SHARED_GROUP_PREFIX+key, result)
+	cache2go.Cache(SHARED_GROUP_PREFIX+key, sg)
 	return
 }
 
