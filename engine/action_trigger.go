@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-
 	"github.com/cgrates/cgrates/utils"
 )
 

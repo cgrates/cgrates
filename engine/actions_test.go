@@ -846,7 +846,7 @@ func TestActionResetCounterMinutes(t *testing.T) {
 	}
 	mb := ub.UnitCounters[1].Balances[0]
 	if mb.Weight != 20 || mb.Value != 0 || mb.DestinationId != "NAT" {
-		t.Errorf("Minute bucked cloned incorrectly: %v!", mb)
+		t.Errorf("Balance cloned incorrectly: %v!", mb)
 	}
 }
 

@@ -1,6 +1,6 @@
 ## Rating system for Telecom & ISP environments ##
 
-[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates) [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/cgrates/cgrates/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
 
 ### Features ###
 + Rates for prepaid and for postpaid
