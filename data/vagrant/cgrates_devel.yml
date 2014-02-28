@@ -38,7 +38,13 @@
 
     - name: copy .my.cnf
       template: src=my.cnf dest=/root/.my.cnf mode=0600
-
+    
+- hosts: all
+  user: vagrant
+  vars:
+    root_db_password: CGRateS.org
+  
+  tasks:
     - name: get golang
       get_url: url=http://go.googlecode.com/files/go1.2.linux-amd64.tar.gz dest=~/go1.2.linux-amd64.tar.gz
       
@@ -56,7 +62,7 @@
 
     - name: create a link to data dir
       sudo: yes
-      file: src=~/code/src/github.com/cgrates/cgrates/data dest=/usr/share/cgrates state=link
+      file: src=/home/vagrant/code/src/github.com/cgrates/cgrates/data dest=/usr/share/cgrates state=link
     
     - name: setup database tables
       shell: chdir=/usr/share/cgrates/storage/mysql ./setup_cgr_db.sh root {{ root_db_password }} localhost

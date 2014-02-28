@@ -394,7 +394,7 @@ func (rs *RedisStorage) GetAccount(key string) (ub *Account, err error) {
 
 func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	// never override existing account with an empty one
-	if ub.BalanceMap == nil {
+	if len(ub.BalanceMap) == 0 {
 		if ac, err := rs.GetAccount(ub.Id); err == nil {
 			ac.ActionTriggers = ub.ActionTriggers
 			ub = ac
