@@ -62,11 +62,25 @@ func populateDB() {
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
 	}
+	// this is added to test if csv load tests account will not overwrite balances
+	minitsboy := &Account{
+		Id: "*out:vdf:minitsboy",
+		BalanceMap: map[string]BalanceChain{
+			MINUTES + OUTBOUND: BalanceChain{
+				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RateSubject: "rif"},
+				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
+			},
+			CREDIT + OUTBOUND: BalanceChain{
+				&Balance{Value: 100, Weight: 10},
+			},
+		},
+	}
 	if accountingStorage != nil {
 		accountingStorage.SetActions("TEST_ACTIONS", ats)
 		accountingStorage.SetActions("TEST_ACTIONS_ORDER", ats1)
 		accountingStorage.SetAccount(broker)
 		accountingStorage.SetAccount(minu)
+		accountingStorage.SetAccount(minitsboy)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}
@@ -91,16 +105,15 @@ func TestSplitSpansRoundToIncrements(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, CallDuration: 132 * time.Second}
 
 	cd.LoadRatingPlans()
-	t.Logf("%+v", cd)
 	timespans := cd.splitInTimeSpans(nil)
 	if len(timespans) != 2 {
+		t.Logf("%+v", cd)
 		t.Log(cd.RatingInfos)
 		t.Error("Wrong number of timespans: ", len(timespans))
 	}
 	var d time.Duration
 	for _, ts := range timespans {
 		d += ts.GetDuration()
-		t.Log(ts.GetDuration())
 	}
 	if d != 132*time.Second {
 		t.Error("Wrong duration for timespans: ", d)

@@ -33,7 +33,11 @@ type CallCost struct {
 
 // Pretty printing for call cost
 func (cc *CallCost) String() (r string) {
-	r = fmt.Sprintf("%v[%v] : %s(%s) -> %s (", cc.Cost, cc.GetConnectFee(), cc.Subject, cc.Account, cc.Destination)
+	connectFee := 0.0
+	if cc.deductConnectFee {
+		connectFee = cc.GetConnectFee()
+	}
+	r = fmt.Sprintf("%v[%v] : %s(%s) - > %s (", cc.Cost, connectFee, cc.Subject, cc.Account, cc.Destination)
 	for _, ts := range cc.Timespans {
 		r += fmt.Sprintf(" %v,", ts.GetDuration())
 	}

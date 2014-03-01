@@ -174,7 +174,6 @@ func TestApAddIntervalIfNotPresent(t *testing.T) {
 	if len(rp.DestinationRates["NAT"]) != 1 {
 		t.Error("Wronfullyrppended interval ;)")
 	}
-	t.Log()
 	rp.AddRateInterval("NAT", i3)
 	if len(rp.DestinationRates["NAT"]) != 2 {
 		t.Error("Wronfully not appended interval ;)", rp.DestinationRates)

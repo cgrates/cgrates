@@ -754,6 +754,16 @@ func TestLoadAccountActions(t *testing.T) {
 	if !reflect.DeepEqual(aa, expected) {
 		t.Error("Error loading account action: ", aa)
 	}
+	// test that it does not overwrite balances
+	existing, err := accountingStorage.GetAccount(aa.Id)
+	if err != nil || len(existing.BalanceMap) != 2 {
+		t.Errorf("The account was not set before load: %+v", existing)
+	}
+	accountingStorage.SetAccount(aa)
+	existing, err = accountingStorage.GetAccount(aa.Id)
+	if err != nil || len(existing.BalanceMap) != 2 {
+		t.Errorf("The set account altered the balances: %+v", existing)
+	}
 }
 
 func TestLoadAliases(t *testing.T) {

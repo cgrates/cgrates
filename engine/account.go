@@ -236,27 +236,27 @@ func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 	}
 CONNECT_FEE:
 	if cc.deductConnectFee {
-		amount := cc.GetConnectFee()
+		connectFee := cc.GetConnectFee()
 		connectFeePaid := false
 		for _, b := range usefulMoneyBalances {
-			if b.Value >= amount {
-				b.Value -= amount
+			if b.Value >= connectFee {
+				b.Value -= connectFee
 				b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
 				// the conect fee is not refundable!
 				if count {
-					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
 				}
 				connectFeePaid = true
 				break
 			}
 		}
 		// debit connect fee
-		if cc.GetConnectFee() > 0 && !connectFeePaid {
+		if connectFee > 0 && !connectFeePaid {
 			// there are no money for the connect fee; go negative
-			defaultMoneyBalance.Value -= amount
+			defaultMoneyBalance.Value -= connectFee
 			// the conect fee is not refundable!
 			if count {
-				ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+				ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
 			}
 		}
 	}
