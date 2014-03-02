@@ -47,6 +47,7 @@ const (
 	FS_USERNAME     = "user_name"
 	FS_IP           = "sip_local_network_addr"
 	FS_CDR_SOURCE   = "freeswitch_json"
+	FS_SIP_REQUSER  = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
 )
 
 type FSCdr map[string]string
@@ -93,7 +94,7 @@ func (fsCdr FSCdr) GetAccount() string {
 
 // Charging destination number
 func (fsCdr FSCdr) GetDestination() string {
-	return utils.FirstNonEmpty(fsCdr[FS_DESTINATION], fsCdr[FS_CALL_DEST_NR])
+	return utils.FirstNonEmpty(fsCdr[FS_DESTINATION], fsCdr[FS_CALL_DEST_NR], fsCdr[FS_SIP_REQUSER])
 }
 
 func (fsCdr FSCdr) GetTOR() string {
