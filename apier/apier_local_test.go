@@ -1177,6 +1177,27 @@ func TestTriggersExecute(t *testing.T) {
 	}
 }
 
+// Start fresh before loading from folder
+func TestResetDataBeforeLoadFromFolder(t *testing.T) {
+	TestInitDataDb(t)
+	reply := ""
+	arc := new(utils.ApiReloadCache)
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+	}
+	var rcvStats *utils.CacheStats
+	expectedStats := &utils.CacheStats{}
+	var args utils.AttrCacheStats
+	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(rcvStats, expectedStats) {
+		t.Errorf("Calling ApierV1.GetCacheStats received: %v, expected: %v", rcvStats, expectedStats)
+	}
+}
+
 // Test here LoadTariffPlanFromFolder
 func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	if !*testLocal {
@@ -1190,6 +1211,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
+	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 }
 
 // Make sure balance was topped-up
@@ -1202,7 +1224,7 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 11 { // We expect 11.5 since we have added in the previous test 1.5
+	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 11 {
 		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
 	}
 }
