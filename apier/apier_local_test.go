@@ -25,6 +25,7 @@ import (
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"net/url"
+	"os"
 	"os/exec"
 	"path"
 	"reflect"
@@ -53,6 +54,7 @@ README:
   * Execute remote Apis and test their replies(follow prepaid1cent scenario so we can test load in dataDb also).
 */
 
+var cfgPath string
 var cfg *config.CGRConfig
 var rater *rpc.Client
 
@@ -62,8 +64,22 @@ var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb dat
 var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 
 func init() {
-	cfgPath := path.Join(*dataDir, "conf", "cgrates.cfg")
+	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
 	cfg, _ = config.NewCGRConfig(&cfgPath)
+}
+
+func TestCreateDirs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	for _, pathDir := range []string{cfg.CdreDir, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.HistoryDir} {
+		if err := os.RemoveAll(pathDir); err != nil {
+			t.Fatal("Error removing folder: ", pathDir, err)
+		}
+		if err := os.MkdirAll(pathDir, 0755); err != nil {
+			t.Fatal("Error creating folder: ", pathDir, err)
+		}
+	}
 }
 
 // Empty tables before using them
@@ -124,7 +140,7 @@ func TestStartEngine(t *testing.T) {
 		t.Fatal("Cannot find cgr-engine executable")
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
-	engine := exec.Command(enginePath, "-rater", "-scheduler", "-cdrs", "-mediator", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
+	engine := exec.Command(enginePath, "-config", cfgPath)
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
@@ -137,8 +153,7 @@ func TestRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	rater, err = jsonrpc.Dial("tcp", fscsvCfg.RPCJSONListen)
-	//rater, err = rpc.Dial("tcp", "127.0.0.1:2013") //ToDo: Fix with automatic config
+	rater, err = jsonrpc.Dial("tcp", fscsvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}

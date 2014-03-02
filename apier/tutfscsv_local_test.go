@@ -21,6 +21,7 @@ package apier
 import (
 	"fmt"
 	"net/rpc/jsonrpc"
+	"os"
 	"os/exec"
 	"path"
 	"reflect"
@@ -32,11 +33,26 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+var fscsvCfgPath string
 var fscsvCfg *config.CGRConfig
 
 func init() {
-	fscsvCfgPath := path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg")
+	fscsvCfgPath = path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg")
 	fscsvCfg, _ = config.NewCGRConfig(&fscsvCfgPath)
+}
+
+func TestFsCsvCreateDirs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	for _, pathDir := range []string{cfg.CdreDir, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.HistoryDir} {
+		if err := os.RemoveAll(pathDir); err != nil {
+			t.Fatal("Error removing folder: ", pathDir, err)
+		}
+		if err := os.MkdirAll(pathDir, 0755); err != nil {
+			t.Fatal("Error creating folder: ", pathDir, err)
+		}
+	}
 }
 
 // Empty tables before using them
@@ -95,10 +111,9 @@ func TestFsCsvStartEngine(t *testing.T) {
 	if err != nil {
 		t.Fatal("Cannot find cgr-engine executable")
 	}
-	fmt.Println(path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg"))
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	go func() {
-		eng := exec.Command(enginePath, "-config", path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg"))
+		eng := exec.Command(enginePath, "-config", fscsvCfgPath)
 		out, _ := eng.CombinedOutput()
 		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
 	}()
