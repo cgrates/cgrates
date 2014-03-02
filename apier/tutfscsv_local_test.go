@@ -152,6 +152,7 @@ func TestFsCsvLoadTariffPlans(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
+	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 1, Actions: 2}
 	var args utils.AttrCacheStats
