@@ -45,6 +45,7 @@ README:
   *
 */
 
+var cfgPath string
 var cfg *config.CGRConfig
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
@@ -53,7 +54,7 @@ var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb dat
 var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 
 func init() {
-	cfgPath := path.Join(*dataDir, "conf", "cgrates.cfg")
+	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
 	cfg, _ = config.NewCGRConfig(&cfgPath)
 }
 
@@ -74,7 +75,7 @@ func startEngine() error {
 		return errors.New("Cannot find cgr-engine executable")
 	}
 	stopEngine()
-	engine := exec.Command(enginePath, "-cdrs", "-config", path.Join(*dataDir, "conf", "cgrates.cfg"))
+	engine := exec.Command(enginePath, "-cdrs", "-config", cfgPath)
 	if err := engine.Start(); err != nil {
 		return fmt.Errorf("Cannot start cgr-engine: %s", err.Error())
 	}

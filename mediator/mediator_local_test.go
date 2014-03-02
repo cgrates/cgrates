@@ -166,13 +166,13 @@ func TestInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := utils.CgrCdr{"accid": "aaaaadsafdsaf", "cdrsource": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", 
+	cgrCdr1 := utils.CgrCdr{"accid": "aaaaadsafdsaf", "cdrsource": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out",
 		"tenant": "cgrates.org", "tor": "call", "account": "dan", "subject": "dan", "destination": "+4986517174963",
 		"answer_time": "2013-11-07T08:42:26Z", "duration": "10"}
-	cgrCdr2 := utils.CgrCdr{"accid": "baaaadsafdsaf", "cdrsource": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", 
+	cgrCdr2 := utils.CgrCdr{"accid": "baaaadsafdsaf", "cdrsource": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out",
 		"tenant": "cgrates.org", "tor": "call", "account": "dan", "subject": "dan", "destination": "+4986517173964",
 		"answer_time": "2013-11-07T09:42:26Z", "duration": "20"}
-	for _, cdr := range []utils.CgrCdr{ cgrCdr1, cgrCdr2} {
+	for _, cdr := range []utils.CgrCdr{cgrCdr1, cgrCdr2} {
 		if err := cdrStor.SetCdr(cdr); err != nil {
 			t.Error(err)
 		}
