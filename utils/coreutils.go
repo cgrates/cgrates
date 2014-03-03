@@ -77,13 +77,21 @@ func GenUUID() string {
 //	Round(NaN) = NaN
 func Round(x float64, prec int, method string) float64 {
 	var rounder float64
+	maxPrec := 7 // define a max precison to cut float errors
+	if maxPrec < prec {
+		maxPrec = prec
+	}
 	pow := math.Pow(10, float64(prec))
 	intermed := x * pow
 	_, frac := math.Modf(intermed)
 
 	switch method {
 	case ROUNDING_UP:
-		rounder = math.Ceil(intermed)
+		if frac >= math.Pow10(-maxPrec) { // Max precision we go, rest is float chaos
+			rounder = math.Ceil(intermed)
+		} else {
+			rounder = math.Floor(intermed)
+		}
 	case ROUNDING_DOWN:
 		rounder = math.Floor(intermed)
 	case ROUNDING_MIDDLE:
