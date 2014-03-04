@@ -83,7 +83,8 @@ func (b *Balance) Clone() *Balance {
 }
 
 // Returns the available number of seconds for a specified credit
-func (b *Balance) GetMinutesForCredit(cd *CallDescriptor, initialCredit float64) (duration time.Duration, credit float64) {
+func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit float64) (duration time.Duration, credit float64) {
+	cd := origCD.Clone()
 	duration = time.Duration(b.Value) * time.Second
 	credit = initialCredit
 	cc, err := b.GetCost(cd)
@@ -112,6 +113,7 @@ func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
 	if b.RateSubject != "" {
 		cd.Subject = b.RateSubject
 		cd.Account = cd.Subject
+		cd.RatingInfos = nil
 		return cd.GetCost()
 	}
 	cc := cd.CreateCallCost()
@@ -221,15 +223,21 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 					if moneyBal != nil && b.Value >= seconds {
 						b.Value -= seconds
 						b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
-						moneyBal.Value -= cost
+
 						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
-						nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
 						nInc.BalanceInfo.AccountId = ub.Id
 						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds}
+						if cost != 0 {
+							nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
+							moneyBal.Value -= cost
+							moneyBal.Value = utils.Round(moneyBal.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+						}
 						nInc.paid = true
 						if count {
 							ub.countUnits(&Action{BalanceType: MINUTES, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
-							ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: cost, DestinationId: newCC.Destination}})
+							if cost != 0 {
+								ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: cost, DestinationId: newCC.Destination}})
+							}
 						}
 					} else {
 						increment.paid = false

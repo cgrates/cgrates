@@ -18,7 +18,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"fmt"
 	"reflect"
 	"time"
 )
@@ -32,7 +31,7 @@ type CallCost struct {
 }
 
 // Pretty printing for call cost
-func (cc *CallCost) String() (r string) {
+/*func (cc *CallCost) String() (r string) {
 	connectFee := 0.0
 	if cc.deductConnectFee {
 		connectFee = cc.GetConnectFee()
@@ -43,7 +42,7 @@ func (cc *CallCost) String() (r string) {
 	}
 	r += " )"
 	return
-}
+}*/
 
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.
 func (cc *CallCost) Merge(other *CallCost) {

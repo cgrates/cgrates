@@ -397,7 +397,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetAccountKey(), err))
+		Logger.Err(fmt.Sprintf("error getting cost for key %s: %v", cd.GetKey(cd.Subject), err))
 		return &CallCost{Cost: -1}, err
 	}
 	timespans := cd.splitInTimeSpans(nil)
@@ -659,7 +659,7 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		CallDuration:    cd.CallDuration,
 		Amount:          cd.Amount,
 		FallbackSubject: cd.FallbackSubject,
-		RatingInfos:     cd.RatingInfos,
-		Increments:      cd.Increments,
+		//RatingInfos:     cd.RatingInfos,
+		//Increments:      cd.Increments,
 	}
 }
