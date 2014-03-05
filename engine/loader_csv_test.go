@@ -43,12 +43,15 @@ RET,0724
 PSTN_71,+4971
 PSTN_72,+4972
 PSTN_70,+4970
+DST_UK_Mobile_BIG5,447956
 `
 	timings = `
 WORKDAYS_00,*any,*any,*any,1;2;3;4;5,00:00:00
 WORKDAYS_18,*any,*any,*any,1;2;3;4;5,18:00:00
 WEEKENDS,*any,*any,*any,6;7,00:00:00
 ONE_TIME_RUN,2012,,,,*asap
+ALWAYS,*any,*any,*any,*any,00:00:00
+ASAP,*any,*any,*any,*any,*asap
 `
 	rates = `
 R1,0,0.2,60s,1s,0,*middle,2
@@ -61,6 +64,8 @@ LANDLINE_OFFPEAK,0,1,1s,1s,60s,*up,4
 GBP_71,0.000000,5.55555,1s,1s,0s,*up,4
 GBP_72,0.000000,7.77777,1s,1s,0s,*up,4
 GBP_70,0.000000,1,1s,1s,0s,*up,4
+RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s,*up,8
+RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1
@@ -75,8 +80,10 @@ T1,NAT,LANDLINE_OFFPEAK
 T2,GERMANY,GBP_72
 T2,GERMANY_O2,GBP_70
 T2,GERMANY_PREMIUM,GBP_71
+DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG
+DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5
 `
-	destinationRateTimings = `
+	ratingPlans = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
 STANDARD,RT_STD_WEEKEND,WORKDAYS_18,10
 STANDARD,RT_STD_WEEKEND,WEEKENDS,10
@@ -91,6 +98,8 @@ TDRT,T1,WORKDAYS_00,10
 TDRT,T2,WORKDAYS_00,10
 G,RT_STANDARD,WORKDAYS_00,10
 R,P1,WORKDAYS_00,10
+RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,ALWAYS,10
+RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10
 `
 	ratingProfiles = `
 CUSTOMER_1,0,*out,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb
@@ -109,6 +118,8 @@ vdf,0,*out,fallback1,2013-11-18T13:45:00Z,G,fallback2
 vdf,0,*out,fallback1,2013-11-18T13:46:00Z,G,fallback2
 vdf,0,*out,fallback1,2013-11-18T13:47:00Z,G,fallback2
 vdf,0,*out,fallback2,2013-11-18T13:45:00Z,R,rif
+cgrates.directvoip.co.uk,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
+cgrates.directvoip.co.uk,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
 `
 	sharedGroups = `
 SG1,*any,*lowest_first,,
@@ -119,24 +130,32 @@ SG2,*any,*lowest_first,EVENING,
 MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,,10
 MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,,10
 SHARED,*topup,*monetary,*out,100,*unlimited,,,10,SG1,,10
+TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,10,,,10
+TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 MORE_MINUTES,SHARED,ONE_TIME_RUN,10
+TOPUP10_AT,TOPUP10_AC,ASAP,10
+TOPUP10_AT,TOPUP10_AC1,ASAP,10
 `
 	actionTriggers = `
 STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
 STANDARD_TRIGGER,*minutes,*out,*max_balance,200,GERMANY,SOME_2,10
+STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,FS_USERS,LOG_WARNING,10
 `
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
+cgrates.directvoip.co.uk,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
 `
 )
 
 var csvr *CSVReader
 
 func init() {
-	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, destinationRateTimings, ratingProfiles, sharedGroups, actions, actionTimings, actionTriggers, accountActions)
+	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionTimings, actionTriggers, accountActions)
 	csvr.LoadDestinations()
 	csvr.LoadTimings()
 	csvr.LoadRates()
@@ -154,7 +173,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 9 {
+	if len(csvr.destinations) != 10 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
@@ -195,14 +214,12 @@ func TestLoadDestinations(t *testing.T) {
 			if !reflect.DeepEqual(d.Prefixes, []string{`+4970`}) {
 				t.Error("Faild to load destinations", d)
 			}
-		default:
-			t.Error("Unknown destination tag!")
 		}
 	}
 }
 
 func TestLoadTimimgs(t *testing.T) {
-	if len(csvr.timings) != 4 {
+	if len(csvr.timings) != 6 {
 		t.Error("Failed to load timings: ", csvr.timings)
 	}
 	timing := csvr.timings["WORKDAYS_00"]
@@ -252,7 +269,7 @@ func TestLoadTimimgs(t *testing.T) {
 }
 
 func TestLoadRates(t *testing.T) {
-	if len(csvr.rates) != 9 {
+	if len(csvr.rates) != 11 {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
@@ -322,7 +339,7 @@ func TestLoadRates(t *testing.T) {
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.destinationRates) != 7 {
+	if len(csvr.destinationRates) != 9 {
 		t.Error("Failed to load destinationrates: ", csvr.destinationRates)
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
@@ -434,7 +451,7 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadDestinationRateTimings(t *testing.T) {
-	if len(csvr.ratingPlans) != 7 {
+	if len(csvr.ratingPlans) != 9 {
 		t.Error("Failed to load rate timings: ", csvr.ratingPlans)
 	}
 	rplan := csvr.ratingPlans["STANDARD"]
@@ -554,7 +571,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 12 {
+	if len(csvr.ratingProfiles) != 14 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
@@ -572,7 +589,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 2 {
+	if len(csvr.actions) != 4 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
 	as1 := csvr.actions["MINI"]
@@ -681,7 +698,7 @@ func TestLoadSharedGroups(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionsTimings) != 1 {
+	if len(csvr.actionsTimings) != 2 {
 		t.Error("Failed to load action timings: ", csvr.actionsTimings)
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
@@ -707,7 +724,7 @@ func TestLoadActionTimings(t *testing.T) {
 }
 
 func TestLoadActionTriggers(t *testing.T) {
-	if len(csvr.actionsTriggers) != 1 {
+	if len(csvr.actionsTriggers) != 2 {
 		t.Error("Failed to load action triggers: ", csvr.actionsTriggers)
 	}
 	atr := csvr.actionsTriggers["STANDARD_TRIGGER"][0]
@@ -743,10 +760,10 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 1 {
+	if len(csvr.accountActions) != 2 {
 		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
-	aa := csvr.accountActions[0]
+	aa := csvr.accountActions["*out:vdf:minitsboy"]
 	expected := &Account{
 		Id:             "*out:vdf:minitsboy",
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],

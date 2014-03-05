@@ -78,6 +78,7 @@ type RatingStorage interface {
 	SetRatingProfile(*RatingProfile) error
 	GetAlias(string, bool) (string, error)
 	SetAlias(string, string) error
+	RemoveAccountAliases([]string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 }

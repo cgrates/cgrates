@@ -105,6 +105,14 @@ func TestRoundByMethodUp2(t *testing.T) {
 	}
 }
 
+func TestRoundByMethodUp3(t *testing.T) {
+	result := Round(0.0701, 2, ROUNDING_UP)
+	expected := 0.08
+	if result != expected {
+		t.Errorf("Error rounding up: sould be %v was %v", expected, result)
+	}
+}
+
 func TestRoundByMethodDown1(t *testing.T) {
 	result := Round(12.49, 1, ROUNDING_DOWN)
 	expected := 12.4
@@ -254,7 +262,7 @@ func TestMissingStructFieldsIncorrect(t *testing.T) {
 	}
 }
 
-func TestRound(t *testing.T) {
+func TestRoundTo(t *testing.T) {
 	minute := time.Minute
 	result := RoundTo(minute, 0*time.Second)
 	expected := 0 * time.Second
@@ -290,6 +298,19 @@ func TestRound(t *testing.T) {
 	expected = 120.0
 	if result != expected {
 		t.Errorf("Error rounding to minute5: expected %v was %v", expected, result)
+	}
+}
+
+func TestRoundAlredyHavingPrecision(t *testing.T) {
+	x := 0.07
+	if y := Round(x, 2, ROUNDING_UP); y != x {
+		t.Error("Error rounding when already has desired precision: ", y)
+	}
+	if y := Round(x, 2, ROUNDING_MIDDLE); y != x {
+		t.Error("Error rounding when already has desired precision: ", y)
+	}
+	if y := Round(x, 2, ROUNDING_DOWN); y != x {
+		t.Error("Error rounding when already has desired precision: ", y)
 	}
 }
 

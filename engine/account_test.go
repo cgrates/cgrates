@@ -135,7 +135,7 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 		Destination: "0723",
 	}
 	seconds, credit, bucketList := ub1.getCreditForPrefix(cd)
-	expected := 21 * time.Second
+	expected := 20 * time.Second
 	if credit != 0 || seconds != expected || len(bucketList) != 2 || bucketList[0].Weight < bucketList[1].Weight {
 		t.Log(seconds, credit, bucketList)
 		t.Errorf("Expected %v was %v", expected, seconds)

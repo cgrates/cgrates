@@ -221,6 +221,15 @@ func (ms *MapStorage) SetAlias(key, alias string) (err error) {
 	return
 }
 
+func (ms *MapStorage) RemoveAccountAliases(accounts []string) (err error) {
+	for key, value := range ms.dict {
+		if strings.HasPrefix(key, ALIAS_PREFIX) && utils.IsSliceMember(accounts, string(value)) {
+			delete(ms.dict, key)
+		}
+	}
+	return
+}
+
 func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {
 	key = DESTINATION_PREFIX + key
 	if values, ok := ms.dict[key]; ok {

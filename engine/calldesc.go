@@ -397,7 +397,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
-		Logger.Err(fmt.Sprintf("error getting cost for key %v: %v", cd.GetAccountKey(), err))
+		Logger.Err(fmt.Sprintf("error getting cost for key %s: %v", cd.GetKey(cd.Subject), err))
 		return &CallCost{Cost: -1}, err
 	}
 	timespans := cd.splitInTimeSpans(nil)
@@ -471,9 +471,10 @@ func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	// we must move the timestart for the interval with the available duration because
 	// that was already checked
 	cd.TimeStart = cd.TimeStart.Add(availableDuration)
+
 	// substract the connect fee
 	cc, err := cd.GetCost()
-	if cc.deductConnectFee {
+	if availableDuration == 0 && cc.deductConnectFee { // only if we did not already used minutes
 		availableCredit -= cc.GetConnectFee()
 	}
 	if err != nil {
@@ -659,7 +660,7 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		CallDuration:    cd.CallDuration,
 		Amount:          cd.Amount,
 		FallbackSubject: cd.FallbackSubject,
-		RatingInfos:     cd.RatingInfos,
-		Increments:      cd.Increments,
+		//RatingInfos:     cd.RatingInfos,
+		//Increments:      cd.Increments,
 	}
 }
