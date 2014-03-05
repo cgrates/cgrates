@@ -85,21 +85,33 @@ func (b *Balance) Clone() *Balance {
 // Returns the available number of seconds for a specified credit
 func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit float64) (duration time.Duration, credit float64) {
 	cd := origCD.Clone()
-	duration = time.Duration(b.Value) * time.Second
+	availableDuration := time.Duration(b.Value) * time.Second
+	duration = availableDuration
 	credit = initialCredit
 	cc, err := b.GetCost(cd)
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
 		return 0, credit
 	}
+	if cc.deductConnectFee {
+		connectFee := cc.GetConnectFee()
+		if connectFee <= credit {
+			credit -= connectFee
+			// remove connect fee from the total cost
+			cc.Cost -= connectFee
+		} else {
+			return 0, credit
+		}
+	}
 	if cc.Cost > 0 {
 		duration = 0
 		for _, ts := range cc.Timespans {
 			ts.createIncrementsSlice()
 			for _, incr := range ts.Increments {
-				if incr.Cost <= credit {
+				if incr.Cost <= credit && availableDuration-incr.Duration >= 0 {
 					credit -= incr.Cost
 					duration += incr.Duration
+					availableDuration -= incr.Duration
 				} else {
 					return
 				}

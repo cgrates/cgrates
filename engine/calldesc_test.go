@@ -461,7 +461,39 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 	if cc.GetDuration() != 49*time.Second {
 		t.Error("Error obtaining max debit duration: ", cc.GetDuration())
 	}
-	if cc.Cost != 0.9 {
+	if cc.Cost != 0.91 {
+		t.Error("Error in max debit cost: ", cc.Cost)
+	}
+}
+
+func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP1000UKMOB_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	ap, _ = accountingStorage.GetActionTimings("TOPUP10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd1 := &CallDescriptor{
+		Direction:    "*out",
+		TOR:          "call",
+		Tenant:       "cgrates.directvoip.co.uk",
+		Subject:      "12345",
+		Account:      "12345",
+		Destination:  "447956",
+		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 40, 0, time.UTC),
+		LoopIndex:    0,
+		CallDuration: 0}
+	cc, err := cd1.MaxDebit()
+	if err != nil {
+		t.Error("Error maxdebiting: ", err)
+	}
+	if cc.GetDuration() != 40*time.Second {
+		t.Error("Error obtaining max debit duration: ", cc.GetDuration())
+	}
+	if cc.Cost != 0.01 {
 		t.Error("Error in max debit cost: ", cc.Cost)
 	}
 }

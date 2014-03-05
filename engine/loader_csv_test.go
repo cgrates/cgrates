@@ -64,7 +64,7 @@ LANDLINE_OFFPEAK,0,1,1s,1s,60s,*up,4
 GBP_71,0.000000,5.55555,1s,1s,0s,*up,4
 GBP_72,0.000000,7.77777,1s,1s,0s,*up,4
 GBP_70,0.000000,1,1s,1s,0s,*up,4
-RT_UK_Mobile_BIG5_PKG,0,0,20s,20s,0s,*up,8
+RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s,*up,8
 RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8
 `
 	destinationRates = `
