@@ -35,7 +35,7 @@ type DbReader struct {
 	actions          map[string][]*Action
 	actionsTimings   map[string][]*ActionTiming
 	actionsTriggers  map[string][]*ActionTrigger
-	accountActions   []*Account
+	accountActions   map[string]*Account
 	destinations     []*Destination
 	aliases          map[string]string
 	timings          map[string]*utils.TPTiming
@@ -59,6 +59,7 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.sharedGroups = make(map[string]*SharedGroup)
 	c.aliases = make(map[string]string)
+	c.accountActions = make(map[string]*Account)
 	return c
 }
 
@@ -230,7 +231,7 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 		for _, dr := range drs.DestinationRates {
 			rate, exists := dbr.rates[dr.RateId]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not find rate for tag %v", dr.RateId))
+				return fmt.Errorf("Could not find rate for tag %v", dr.RateId)
 			}
 			dr.Rate = rate
 			destinationExists := false
@@ -244,7 +245,7 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 				if dbExists, err := dbr.dataDb.HasData(DESTINATION_PREFIX, dr.DestinationId); err != nil {
 					return err
 				} else if !dbExists {
-					return errors.New(fmt.Sprintf("Could not get destination for tag %v", dr.DestinationId))
+					return fmt.Errorf("Could not get destination for tag %v", dr.DestinationId)
 				}
 			}
 		}
@@ -261,12 +262,12 @@ func (dbr *DbReader) LoadRatingPlans() error {
 		for _, rplBnd := range rplBnds {
 			t, exists := dbr.timings[rplBnd.TimingId]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not get timing for tag %v", rplBnd.TimingId))
+				return fmt.Errorf("Could not get timing for tag %v", rplBnd.TimingId)
 			}
 			rplBnd.SetTiming(t)
 			drs, exists := dbr.destinationRates[rplBnd.DestinationRatesId]
 			if !exists {
-				return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", rplBnd.DestinationRatesId))
+				return fmt.Errorf("Could not find destination rate for tag %v", rplBnd.DestinationRatesId)
 			}
 			plan, exists := dbr.ratingPlans[tag]
 			if !exists {
@@ -299,14 +300,14 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseDate(tpRa.ActivationTime)
 			if err != nil {
-				return errors.New(fmt.Sprintf("Cannot parse activation time from %v", tpRa.ActivationTime))
+				return fmt.Errorf("Cannot parse activation time from %v", tpRa.ActivationTime)
 			}
 			_, exists := dbr.ratingPlans[tpRa.RatingPlanId]
 			if !exists {
 				if dbExists, err := dbr.dataDb.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				} else if !dbExists {
-					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))
+					return fmt.Errorf("Could not load rating plans for tag: %v", tpRa.RatingPlanId)
 				}
 			}
 			rpf.RatingPlanActivations = append(rpf.RatingPlanActivations,
@@ -382,7 +383,7 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 	var resultRatingProfile *RatingProfile
 	mpTpRpfs, err := dbr.storDb.GetTpRatingProfiles(qriedRpf) //map[string]*utils.TPRatingProfile
 	if err != nil {
-		return fmt.Errorf("No RateProfile for filter %v, error: %s", qriedRpf, err.Error())
+		return fmt.Errorf("No RateProfile for filter %v, error: %v", qriedRpf, err)
 	}
 	for _, tpRpf := range mpTpRpfs {
 		// Logger.Debug(fmt.Sprintf("Rating profile: %v", tpRpf))
@@ -390,14 +391,14 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 		for _, tpRa := range tpRpf.RatingPlanActivations {
 			at, err := utils.ParseDate(tpRa.ActivationTime)
 			if err != nil {
-				return errors.New(fmt.Sprintf("Cannot parse activation time from %v", tpRa.ActivationTime))
+				return fmt.Errorf("Cannot parse activation time from %v", tpRa.ActivationTime)
 			}
 			_, exists := dbr.ratingPlans[tpRa.RatingPlanId]
 			if !exists {
 				if dbExists, err := dbr.dataDb.HasData(RATING_PLAN_PREFIX, tpRa.RatingPlanId); err != nil {
 					return err
 				} else if !dbExists {
-					return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", tpRa.RatingPlanId))
+					return fmt.Errorf("Could not load rating plans for tag: %v", tpRa.RatingPlanId)
 				}
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,
@@ -457,11 +458,11 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 
 			_, exists := dbr.actions[at.ActionsId]
 			if !exists {
-				return errors.New(fmt.Sprintf("ActionTiming: Could not load the action for tag: %v", at.ActionsId))
+				return fmt.Errorf("ActionTiming: Could not load the action for tag: %v", at.ActionsId)
 			}
 			t, exists := dbr.timings[at.TimingId]
 			if !exists {
-				return errors.New(fmt.Sprintf("ActionTiming: Could not load the timing for tag: %v", at.TimingId))
+				return fmt.Errorf("ActionTiming: Could not load the timing for tag: %v", at.TimingId)
 			}
 			actTmg := &ActionTiming{
 				Id:     utils.GenUUID(),
@@ -513,6 +514,9 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		return err
 	}
 	for _, aa := range acs {
+		if _, alreadyDefined := dbr.accountActions[aa.KeyId()]; alreadyDefined {
+			return fmt.Errorf("Duplicate account action found: %s", aa.KeyId())
+		}
 		// extract aliases from subject
 		aliases := strings.Split(aa.Account, ";")
 		if len(aliases) > 1 {
@@ -523,13 +527,13 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		}
 		aTriggers, exists := dbr.actionsTriggers[aa.ActionTriggersId]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", aa.ActionTriggersId))
+			return fmt.Errorf("Could not get action triggers for tag %v", aa.ActionTriggersId)
 		}
 		ub := &Account{
 			Id:             aa.KeyId(),
 			ActionTriggers: aTriggers,
 		}
-		dbr.accountActions = append(dbr.accountActions, ub)
+		dbr.accountActions[aa.KeyId()] = ub
 		aTimings, exists := dbr.actionsTimings[aa.ActionPlanId]
 		if !exists {
 			log.Printf("Could not get action timing for tag %v", aa.ActionPlanId)
