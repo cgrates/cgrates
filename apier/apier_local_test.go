@@ -738,6 +738,48 @@ func TestApierLoadRatingPlan(t *testing.T) {
 	}
 }
 
+// Test here SetRatingProfile
+func TestApierSetRatingProfile(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
+	rpf := &AttrSetRatingProfile{Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
+	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
+		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
+	}
+	// Calling the second time should raise EXISTS
+	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err == nil || err.Error() != "EXISTS" {
+		t.Error("Unexpected result on duplication: ", err.Error())
+	}
+	time.Sleep(10 * time.Millisecond) // Give time for cache reload
+	// Make sure rates were loaded for account dan
+	// Test here ResponderGetCost
+	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
+	tEnd, _ := utils.ParseDate("2013-08-07T17:31:30Z")
+	cd := engine.CallDescriptor{
+		Direction:    "*out",
+		TOR:          "call",
+		Tenant:       "cgrates.org",
+		Subject:      "dan",
+		Account:      "dan",
+		Destination:  "+4917621621391",
+		CallDuration: 90,
+		TimeStart:    tStart,
+		TimeEnd:      tEnd,
+	}
+	var cc engine.CallCost
+	// Simple test that command is executed without errors
+	if err := rater.Call("Responder.GetCost", cd, &cc); err != nil {
+		t.Error("Got error on Responder.GetCost: ", err.Error())
+	} else if cc.Cost != 0 {
+		t.Errorf("Calling Responder.GetCost got callcost: %v", cc.Cost)
+	}
+}
+
 // Test here LoadRatingProfile
 func TestApierLoadRatingProfile(t *testing.T) {
 	if !*testLocal {
@@ -749,25 +791,6 @@ func TestApierLoadRatingProfile(t *testing.T) {
 		t.Error("Got error on ApierV1.LoadRatingProfile: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadRatingProfile got reply: ", reply)
-	}
-}
-
-// Test here SetRatingProfile
-func TestApierSetRatingProfile(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	reply := ""
-	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2;*any"}
-	rpf := &AttrSetRatingProfile{Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
-	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
-		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
-	} else if reply != "OK" {
-		t.Error("Calling ApierV1.SetRatingProfile got reply: ", reply)
-	}
-	// Calling the second time should raise EXISTS
-	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err == nil || err.Error() != "EXISTS" {
-		t.Error("Unexpected result on duplication: ", err.Error())
 	}
 }
 

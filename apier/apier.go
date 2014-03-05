@@ -200,7 +200,7 @@ type AttrSetRatingProfile struct {
 	Direction             string                      // Traffic direction, OUT is the only one supported for now
 	Subject               string                      // Rating subject, usually the same as account
 	Overwrite             bool                        // Overwrite if exists
-	RatingPlanActivations []*utils.TPRatingActivation // Activate rate profiles at specific time
+	RatingPlanActivations []*utils.TPRatingActivation // Activate rating plans at specific time
 }
 
 // Sets a specific rating profile working with data directly in the RatingDb without involving storDb
@@ -238,6 +238,10 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	}
 	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	//Automatic cache of the newly inserted rating profile
+	if err := self.RatingDb.CacheRating(nil, nil, []string{engine.RATING_PROFILE_PREFIX + keyId}, nil); err != nil {
+		return err
 	}
 	*reply = OK
 	return nil
