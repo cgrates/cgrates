@@ -20,7 +20,7 @@
 
       <!-- HTTP(S) logging -->
       <!-- URL where to POST JSON CDRs. Leave empty for no URL logging. Up to 20 URLs may be specified. -->
-      <param name="url" value="http://127.0.0.1:2022/freeswitch_json"/>
+      <param name="url" value="http://127.0.0.1:2080/freeswitch_json"/>
       <!-- Authentication scheme for the above URL. May be one of basic|digest|NTLM|GSS-NEGOTIATE|any-->
       <param name="auth-scheme" value="basic"/>
       <!-- Credentials in the form  usernameassword  if auth-scheme is used. Leave empty for no authentication. -->

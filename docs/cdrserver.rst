@@ -36,7 +36,7 @@ Extra fields: any field coming in via the http request and not a member of prima
 Example of sample CDR generated simply using curl:
 ::
 
- curl --data "curl --data "accid=iiaasbfdsaf&cdrhost=192.168.1.1&cdrsource=curl_cdr&reqtype=rated&direction=*out&tenant=192.168.56.66&tor=call&account=dan&subject=dan&destination=%2B4986517174963&answer_time=1383813746&duration=1&sip_user=Jitsi&subject2=1003" http://127.0.0.1:2022/cgr
+ curl --data "curl --data "accid=iiaasbfdsaf&cdrhost=192.168.1.1&cdrsource=curl_cdr&reqtype=rated&direction=*out&tenant=192.168.56.66&tor=call&account=dan&subject=dan&destination=%2B4986517174963&answer_time=1383813746&duration=1&sip_user=Jitsi&subject2=1003" http://127.0.0.1:2080/cgr
 
 
 CDR-FS_JSON 
