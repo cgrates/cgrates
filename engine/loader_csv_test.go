@@ -131,13 +131,12 @@ MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,,10
 MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,,10
 SHARED,*topup,*monetary,*out,100,*unlimited,,,10,SG1,,10
 TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,10,,,10
-TOPUP1000UKMOB_AC,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
+TOPUP10_AC,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 MORE_MINUTES,SHARED,ONE_TIME_RUN,10
 TOPUP10_AT,TOPUP10_AC,ASAP,10
-TOPUP1000UKMOB_AT,TOPUP1000UKMOB_AC,ASAP,10
 `
 	actionTriggers = `
 STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
@@ -149,7 +148,6 @@ STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,FS_USERS,LOG_WARNING,10
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
 cgrates.directvoip.co.uk,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
-cgrates.directvoip.co.uk,12345,*out,TOPUP1000UKMOB_AT,STANDARD_TRIGGERS
 `
 )
 
@@ -590,7 +588,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 4 {
+	if len(csvr.actions) != 3 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
 	as1 := csvr.actions["MINI"]
@@ -699,7 +697,7 @@ func TestLoadSharedGroups(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionsTimings) != 3 {
+	if len(csvr.actionsTimings) != 2 {
 		t.Error("Failed to load action timings: ", csvr.actionsTimings)
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
@@ -761,10 +759,10 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 3 {
-		t.Error("Failed to load account actions: ", csvr.accountActions[2])
+	if len(csvr.accountActions) != 2 {
+		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
-	aa := csvr.accountActions[0]
+	aa := csvr.accountActions["*out:vdf:minitsboy"]
 	expected := &Account{
 		Id:             "*out:vdf:minitsboy",
 		ActionTriggers: csvr.actionsTriggers["STANDARD_TRIGGER"],

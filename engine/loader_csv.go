@@ -39,7 +39,7 @@ type CSVReader struct {
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
 	aliases           map[string]string
-	accountActions    []*Account
+	accountActions    map[string]*Account
 	destinations      []*Destination
 	timings           map[string]*utils.TPTiming
 	rates             map[string]*utils.TPRate
@@ -60,6 +60,7 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.actions = make(map[string][]*Action)
 	c.actionsTimings = make(map[string][]*ActionTiming)
 	c.actionsTriggers = make(map[string][]*ActionTrigger)
+	c.accountActions = make(map[string]*Account)
 	c.rates = make(map[string]*utils.TPRate)
 	c.destinationRates = make(map[string]*utils.TPDestinationRate)
 	c.timings = make(map[string]*utils.TPTiming)
@@ -356,7 +357,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 		tag := record[0]
 		r, exists := csvr.rates[record[2]]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get rates for tag %v", record[2]))
+			return fmt.Errorf("Could not get rates for tag %v", record[2])
 		}
 		destinationExists := false
 		for _, d := range csvr.destinations {
@@ -408,11 +409,11 @@ func (csvr *CSVReader) LoadRatingPlans() (err error) {
 		tag := record[0]
 		t, exists := csvr.timings[record[2]]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not get timing for tag %v", record[2]))
+			return fmt.Errorf("Could not get timing for tag %v", record[2])
 		}
 		drs, exists := csvr.destinationRates[record[1]]
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not find destination rate for tag %v", record[1]))
+			return fmt.Errorf("Could not find destination rate for tag %v", record[1])
 		}
 		rpl := NewRatingPlan(t, record[3])
 		plan, exists := csvr.ratingPlans[tag]
@@ -441,7 +442,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
 		at, err := utils.ParseDate(record[4])
 		if err != nil {
-			return errors.New(fmt.Sprintf("Cannot parse activation time from %v", record[4]))
+			return fmt.Errorf("Cannot parse activation time from %v", record[4])
 		}
 		// extract aliases from subject
 		aliases := strings.Split(subject, ";")
@@ -464,7 +465,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 			}
 		}
 		if !exists {
-			return errors.New(fmt.Sprintf("Could not load rating plans for tag: %v", record[5]))
+			return fmt.Errorf("Could not load rating plans for tag: %v", record[5])
 		}
 		rpa := &RatingPlanActivation{
 			ActivationTime: at,
@@ -529,7 +530,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		} else {
 			units, err = strconv.ParseFloat(record[4], 64)
 			if err != nil {
-				return errors.New(fmt.Sprintf("Could not parse action units: %v", err))
+				return fmt.Errorf("Could not parse action units: %v", err)
 			}
 		}
 		var balanceWeight float64
@@ -538,12 +539,12 @@ func (csvr *CSVReader) LoadActions() (err error) {
 		} else {
 			balanceWeight, err = strconv.ParseFloat(record[8], 64)
 			if err != nil {
-				return errors.New(fmt.Sprintf("Could not parse action balance weight: %v", err))
+				return fmt.Errorf("Could not parse action balance weight: %v", err)
 			}
 		}
 		weight, err := strconv.ParseFloat(record[11], 64)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action weight: %v", err))
+			return fmt.Errorf("Could not parse action weight: %v", err)
 		}
 		a := &Action{
 			Id:               utils.GenUUID(),
@@ -563,7 +564,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			},
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {
-			return errors.New(fmt.Sprintf("Could not parse expiration time: %v", err))
+			return fmt.Errorf("Could not parse expiration time: %v", err)
 		}
 		csvr.actions[tag] = append(csvr.actions[tag], a)
 	}
@@ -584,15 +585,15 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 		tag := record[0]
 		_, exists := csvr.actions[record[1]]
 		if !exists {
-			return errors.New(fmt.Sprintf("ActionPlan: Could not load the action for tag: %v", record[1]))
+			return fmt.Errorf("ActionPlan: Could not load the action for tag: %v", record[1])
 		}
 		t, exists := csvr.timings[record[2]]
 		if !exists {
-			return errors.New(fmt.Sprintf("ActionPlan: Could not load the timing for tag: %v", record[2]))
+			return fmt.Errorf("ActionPlan: Could not load the timing for tag: %v", record[2])
 		}
 		weight, err := strconv.ParseFloat(record[3], 64)
 		if err != nil {
-			return errors.New(fmt.Sprintf("ActionTiming: Could not parse action timing weight: %v", err))
+			return fmt.Errorf("ActionTiming: Could not parse action timing weight: %v", err)
 		}
 		at := &ActionTiming{
 			Id:     utils.GenUUID(),
@@ -628,11 +629,11 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		tag := record[0]
 		value, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action trigger value: %v", err))
+			return fmt.Errorf("Could not parse action trigger value: %v", err)
 		}
 		weight, err := strconv.ParseFloat(record[7], 64)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Could not parse action trigger weight: %v", err))
+			return fmt.Errorf("Could not parse action trigger weight: %v", err)
 		}
 		at := &ActionTrigger{
 			Id:             utils.GenUUID(),
@@ -670,19 +671,22 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 			}
 		}
 		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
+		if _, alreadyDefined := csvr.accountActions[tag]; alreadyDefined {
+			return fmt.Errorf("Duplicate account action found: %s", tag)
+		}
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
 		if record[4] != "" && !exists {
 			// only return error if there was something ther for the tag
-			return errors.New(fmt.Sprintf("Could not get action triggers for tag %v", record[4]))
+			return fmt.Errorf("Could not get action triggers for tag %s", record[4])
 		}
 		ub := &Account{
 			Id:             tag,
 			ActionTriggers: aTriggers,
 		}
-		csvr.accountActions = append(csvr.accountActions, ub)
+		csvr.accountActions[tag] = ub
 		aTimings, exists := csvr.actionsTimings[record[3]]
 		if !exists {
-			log.Printf("Could not get action timing for tag %v", record[3])
+			log.Printf("Could not get action timing for tag %s", record[3])
 			// must not continue here
 		}
 		for _, at := range aTimings {
