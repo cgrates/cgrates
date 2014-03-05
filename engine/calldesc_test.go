@@ -435,11 +435,7 @@ func TestDebitAndMaxDebit(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRate(t *testing.T) {
-	ap, _ := accountingStorage.GetActionTimings("TOPUP1000UKMOB_AT")
-	for _, at := range ap {
-		at.Execute()
-	}
-	ap, _ = accountingStorage.GetActionTimings("TOPUP10_AT")
+	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}
@@ -467,11 +463,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 }
 
 func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
-	ap, _ := accountingStorage.GetActionTimings("TOPUP1000UKMOB_AT")
-	for _, at := range ap {
-		at.Execute()
-	}
-	ap, _ = accountingStorage.GetActionTimings("TOPUP10_AT")
+	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
 	for _, at := range ap {
 		at.Execute()
 	}

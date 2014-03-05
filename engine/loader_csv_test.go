@@ -131,12 +131,13 @@ MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,,10
 MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,,10
 SHARED,*topup,*monetary,*out,100,*unlimited,,,10,SG1,,10
 TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,10,,,10
-TOPUP10_AC,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
+TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 MORE_MINUTES,SHARED,ONE_TIME_RUN,10
 TOPUP10_AT,TOPUP10_AC,ASAP,10
+TOPUP10_AT,TOPUP10_AC1,ASAP,10
 `
 	actionTriggers = `
 STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
@@ -588,7 +589,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 3 {
+	if len(csvr.actions) != 4 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
 	as1 := csvr.actions["MINI"]

@@ -287,6 +287,26 @@ func (rs *RedisStorage) SetAlias(key, alias string) (err error) {
 	return
 }
 
+func (rs *RedisStorage) RemoveAccountAliases(accounts []string) (err error) {
+	if alsKeys, err := rs.db.Keys(ALIAS_PREFIX + "*"); err != nil {
+		return err
+	} else {
+		for _, key := range alsKeys {
+			alias, err := rs.GetAlias(key, true)
+			if err != nil {
+				return err
+			}
+			if utils.IsSliceMember(accounts, alias) {
+				if _, err = rs.db.Del(key); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return
+}
+
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {
 	key = DESTINATION_PREFIX + key
 	var values []byte

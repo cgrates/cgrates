@@ -36,6 +36,7 @@ type DbReader struct {
 	actionsTimings   map[string][]*ActionTiming
 	actionsTriggers  map[string][]*ActionTrigger
 	accountActions   map[string]*Account
+	dirtyAliases     []string // used to clean aliases that might have changed
 	destinations     []*Destination
 	aliases          map[string]string
 	timings          map[string]*utils.TPTiming
@@ -195,6 +196,9 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Aliases")
 	}
+	if err := storage.RemoveAccountAliases(dbr.dirtyAliases); err != nil {
+		return err
+	}
 	for key, alias := range dbr.aliases {
 		err = storage.SetAlias(key, alias)
 		if err != nil {
@@ -288,6 +292,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		return err
 	}
 	for _, tpRpf := range mpTpRpfs {
+		dbr.dirtyAliases = append(dbr.dirtyAliases, tpRpf.Subject)
 		// extract aliases from subject
 		aliases := strings.Split(tpRpf.Subject, ";")
 		if len(aliases) > 1 {
@@ -517,6 +522,7 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		if _, alreadyDefined := dbr.accountActions[aa.KeyId()]; alreadyDefined {
 			return fmt.Errorf("Duplicate account action found: %s", aa.KeyId())
 		}
+		dbr.dirtyAliases = append(dbr.dirtyAliases, aa.Account)
 		// extract aliases from subject
 		aliases := strings.Split(aa.Account, ";")
 		if len(aliases) > 1 {

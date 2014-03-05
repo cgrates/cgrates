@@ -40,6 +40,7 @@ type CSVReader struct {
 	actionsTriggers   map[string][]*ActionTrigger
 	aliases           map[string]string
 	accountActions    map[string]*Account
+	dirtyAliases      []string // used to clean aliases that might have changed
 	destinations      []*Destination
 	timings           map[string]*utils.TPTiming
 	rates             map[string]*utils.TPRate
@@ -250,6 +251,9 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	if verbose {
 		log.Print("Aliases")
 	}
+	if err := dataStorage.RemoveAccountAliases(csvr.dirtyAliases); err != nil {
+		return err
+	}
 	for key, alias := range csvr.aliases {
 		err = dataStorage.SetAlias(key, alias)
 		if err != nil {
@@ -444,6 +448,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		if err != nil {
 			return fmt.Errorf("Cannot parse activation time from %v", record[4])
 		}
+		csvr.dirtyAliases = append(csvr.dirtyAliases, subject)
 		// extract aliases from subject
 		aliases := strings.Split(subject, ";")
 		if len(aliases) > 1 {
@@ -662,6 +667,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tenant, account, direction := record[0], record[1], record[2]
+		csvr.dirtyAliases = append(csvr.dirtyAliases, account)
 		// extract aliases from subject
 		aliases := strings.Split(account, ";")
 		if len(aliases) > 1 {
