@@ -97,6 +97,7 @@ rater = test				# Address where to reach the Rater.
 rater_reconnects = 99			# Number of reconnects to rater before giving up.
 debit_interval = 99			# Interval to perform debits on.
 max_call_duration = 99			# Maximum call duration a prepaid call can last
+run_ids = test				# Identifiers of additional sessions control.
 reqtype_fields = test			# Name of request type fields to be used during additional sessions control <""|*default|field_name>.
 direction_fields = test			# Name of direction fields to be used during additional sessions control <""|*default|field_name>.
 tenant_fields = test			# Name of tenant fields to be used during additional sessions control <""|*default|field_name>.

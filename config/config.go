@@ -116,6 +116,7 @@ type CGRConfig struct {
 	SMRaterReconnects        int           // Number of reconnect attempts to rater
 	SMDebitInterval          int           // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration        time.Duration // The maximum duration of a call
+	SMRunIds                 []string      // Identifiers of additional sessions control.
 	SMReqTypeFields          []string      // Name of request type fields to be used during additional sessions control <""|*default|field_name>.
 	SMDirectionFields        []string      // Name of direction fields to be used during additional sessions control <""|*default|field_name>.
 	SMTenantFields           []string      // Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
@@ -233,6 +234,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
+	self.SMRunIds = []string{}
 	self.SMReqTypeFields = []string{}
 	self.SMDirectionFields = []string{}
 	self.SMTenantFields = []string{}
@@ -554,7 +556,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 			return nil, errParse
 		}
 	}
-
+	if hasOpt = c.HasOption("session_manager", "run_ids"); hasOpt {
+		if cfg.SMRunIds, errParse = ConfigSlice(c, "session_manager", "run_ids"); errParse != nil {
+			return nil, errParse
+		}
+	}
 	if hasOpt = c.HasOption("session_manager", "reqtype_fields"); hasOpt {
 		if cfg.SMReqTypeFields, errParse = ConfigSlice(c, "session_manager", "reqtype_fields"); errParse != nil {
 			return nil, errParse

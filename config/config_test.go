@@ -123,6 +123,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.SMRaterReconnects = 3
 	eCfg.SMDebitInterval = 10
 	eCfg.SMMaxCallDuration = time.Duration(3) * time.Hour
+	eCfg.SMRunIds = []string{}
 	eCfg.SMReqTypeFields = []string{}
 	eCfg.SMDirectionFields = []string{}
 	eCfg.SMTenantFields = []string{}
@@ -259,6 +260,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.SMRaterReconnects = 99
 	eCfg.SMDebitInterval = 99
 	eCfg.SMMaxCallDuration = time.Duration(99) * time.Second
+	eCfg.SMRunIds = []string{"test"}
 	eCfg.SMReqTypeFields = []string{"test"}
 	eCfg.SMDirectionFields = []string{"test"}
 	eCfg.SMTenantFields = []string{"test"}
