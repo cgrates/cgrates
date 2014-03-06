@@ -78,6 +78,7 @@ const (
 	ACCOUNT                    = "account"
 	SUBJECT                    = "subject"
 	DESTINATION                = "destination"
+	SETUP_TIME                 = "setup_time"
 	ANSWER_TIME                = "answer_time"
 	DURATION                   = "duration"
 	DEFAULT_RUNID              = "default"

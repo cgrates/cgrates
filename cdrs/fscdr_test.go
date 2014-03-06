@@ -75,6 +75,11 @@ func TestCDRFields(t *testing.T) {
 	if fsCdr.GetReqType() != utils.RATED {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
+	setupTime, _ := fsCdr.GetSetupTime()
+	expectedSTime, _ := time.Parse(time.RFC3339, "2013-08-04T09:50:54Z")
+	if setupTime.UTC() != expectedSTime {
+		t.Error("Error parsing cdr: ", fsCdr)
+	}
 	answerTime, _ := fsCdr.GetAnswerTime()
 	expectedATime, _ := time.Parse(time.RFC3339, "2013-08-04T09:50:56Z")
 	if answerTime.UTC() != expectedATime {
@@ -100,7 +105,7 @@ func TestFsCdrAsStoredCdr(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err)
 	}
-	rtCdrOut, err := fsCdr.AsStoredCdr("wholesale_run", "^"+utils.RATED, "^*out", "cgr_tenant", "cgr_tor", "cgr_account", "cgr_subject", "cgr_destination",
+	rtCdrOut, err := fsCdr.AsStoredCdr("wholesale_run", "^"+utils.RATED, "^*out", "cgr_tenant", "cgr_tor", "cgr_account", "cgr_subject", "cgr_destination", "start_epoch",
 		"answer_epoch", "billsec", []string{"effective_caller_id_number"}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
@@ -108,25 +113,27 @@ func TestFsCdrAsStoredCdr(t *testing.T) {
 	expctRatedCdr := &utils.StoredCdr{CgrId: utils.FSCgrId("01df56f4-d99a-4ef6-b7fe-b924b2415b7f"), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f",
 		CdrHost: "127.0.0.1", CdrSource: FS_CDR_SOURCE, ReqType: utils.RATED,
 		Direction: "*out", Tenant: "ipbx.itsyscom.com", TOR: "call", Account: "dan", Subject: "dan", Destination: "+4986517174963",
+		SetupTime: time.Date(2013, 8, 4, 9, 50, 54, 0, time.UTC).Local(),
 		AnswerTime: time.Date(2013, 8, 4, 9, 50, 56, 0, time.UTC).Local(), Duration: time.Duration(4) * time.Second,
 		ExtraFields: map[string]string{"effective_caller_id_number": "+4986517174960"}, MediationRunId: "wholesale_run", Cost: -1}
 	if !reflect.DeepEqual(rtCdrOut, expctRatedCdr) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut, expctRatedCdr)
 	}
 	rtCdrOut2, err := fsCdr.AsStoredCdr("wholesale_run", "^postpaid", "^*in", "^cgrates.com", "^premium_call", "^first_account", "^first_subject", "cgr_destination",
-		"^2013-12-07T08:42:26Z", "^12s", []string{"effective_caller_id_number"}, true)
+		"^2013-12-07T08:42:24Z", "^2013-12-07T08:42:26Z", "^12s", []string{"effective_caller_id_number"}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
 	expctRatedCdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("01df56f4-d99a-4ef6-b7fe-b924b2415b7f"), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f", CdrHost: "127.0.0.1",
 		CdrSource: FS_CDR_SOURCE, ReqType: "postpaid",
 		Direction: "*in", Tenant: "cgrates.com", TOR: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "+4986517174963",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Duration: time.Duration(12) * time.Second,
 		ExtraFields: map[string]string{"effective_caller_id_number": "+4986517174960"}, MediationRunId: "wholesale_run", Cost: -1}
 	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
 	}
-	_, err = fsCdr.AsStoredCdr("wholesale_run", "dummy_header", "direction", "tenant", "tor", "account", "subject", "destination", "answer_time", "duration", []string{"field_extr1", "fieldextr2"}, true)
+	_, err = fsCdr.AsStoredCdr("wholesale_run", "dummy_header", "direction", "tenant", "tor", "account", "subject", "destination", "setup_time", "answer_time", "duration", []string{"field_extr1", "fieldextr2"}, true)
 	if err == nil {
 		t.Error("Failed to detect missing header")
 	}

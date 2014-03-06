@@ -151,7 +151,7 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 
 func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	//engine.Logger.Info("freeswitch park")
-	startTime, err := ev.GetStartTime(PARK_TIME)
+	startTime, err := ev.GetAnswerTime(PARK_TIME)
 	if err != nil {
 		engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()
@@ -213,7 +213,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	}
 	defer s.Close(ev) // Stop loop and save the costs deducted so far to database
 	if ev.GetReqType("") == utils.POSTPAID {
-		startTime, err := ev.GetStartTime(START_TIME)
+		startTime, err := ev.GetAnswerTime(ANSWER_TIME)
 		if err != nil {
 			engine.Logger.Crit("Error parsing postpaid call start time from event")
 			return

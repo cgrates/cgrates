@@ -42,7 +42,8 @@ const (
 	CSTMID             = "variable_cgr_tenant"
 	CALL_DEST_NR       = "Caller-Destination-Number"
 	PARK_TIME          = "Caller-Profile-Created-Time"
-	START_TIME         = "Caller-Channel-Answered-Time"
+	SETUP_TIME         = "Caller-Channel-Created-Time"
+	ANSWER_TIME        = "Caller-Channel-Answered-Time"
 	END_TIME           = "Caller-Channel-Hangup-Time"
 	NAME               = "Event-Name"
 	HEARTBEAT          = "HEARTBEAT"
@@ -120,7 +121,12 @@ func (fsev FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetTenant("")) == "" ||
 		strings.TrimSpace(fsev.GetCallDestNr("")) == ""
 }
-func (fsev FSEvent) GetStartTime(field string) (t time.Time, err error) {
+func (fsev FSEvent) GetSetupTime(field string) (t time.Time, err error) {
+	st, err := strconv.ParseInt(fsev[field], 0, 64)
+	t = time.Unix(0, st*1000)
+	return
+}
+func (fsev FSEvent) GetAnswerTime(field string) (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev[field], 0, 64)
 	t = time.Unix(0, st*1000)
 	return

@@ -58,7 +58,7 @@ func TestParseFieldsConfig(t *testing.T) {
 
 func TestRecordAsStoredCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cgrConfig.CdrcExtraFields = []string{"supplier:10"}
+	cgrConfig.CdrcExtraFields = []string{"supplier:11"}
 	cdrc := &Cdrc{cgrCfg: cgrConfig}
 	if err := cdrc.parseFieldsConfig(); err != nil {
 		t.Error("Failed parsing default fieldIndexesFromConfig", err)
@@ -68,7 +68,8 @@ func TestRecordAsStoredCdr(t *testing.T) {
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
-	cdrRow = []string{"acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
+	cdrRow = []string{"acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963", "2013-02-03 19:50:00", "2013-02-03 19:54:00", "62",
+		"supplier1", "172.16.1.1"}
 	rtCdr, err := cdrc.recordAsStoredCdr(cdrRow)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
@@ -84,6 +85,7 @@ func TestRecordAsStoredCdr(t *testing.T) {
 		Account:     cdrRow[5],
 		Subject:     cdrRow[6],
 		Destination: cdrRow[7],
+		SetupTime:   time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
 		Duration:    time.Duration(62) * time.Second,
 		ExtraFields: map[string]string{"supplier": "supplier1"},

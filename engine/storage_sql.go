@@ -514,8 +514,9 @@ func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error)
 
 func (self *SQLStorage) SetCdr(cdr utils.RawCDR) (err error) {
 	// map[account:1001 direction:out orig_ip:172.16.1.1 tor:call accid:accid23 answer_time:2013-02-03 19:54:00 cdrsource:freeswitch_csv destination:+4986517174963 duration:62 reqtype:prepaid subject:1001 supplier:supplier1 tenant:cgrates.org]
-	startTime, _ := cdr.GetAnswerTime() // Ignore errors, we want to store the cdr no matter what
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s VALUES (NULL,'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
+	setupTime, _ := cdr.GetSetupTime()   // Ignore errors, we want to store the cdr no matter what
+	answerTime, _ := cdr.GetAnswerTime() // Ignore errors, we want to store the cdr no matter what
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s VALUES (NULL,'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
 		utils.TBL_CDRS_PRIMARY,
 		cdr.GetCgrId(),
 		cdr.GetAccId(),
@@ -528,7 +529,8 @@ func (self *SQLStorage) SetCdr(cdr utils.RawCDR) (err error) {
 		cdr.GetAccount(),
 		cdr.GetSubject(),
 		cdr.GetDestination(),
-		startTime,
+		setupTime,
+		answerTime,
 		cdr.GetDuration(),
 	))
 	if err != nil {
@@ -569,7 +571,7 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
 func (self *SQLStorage) GetStoredCdrs(timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
-	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
+	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,setup_time,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
 	fltr := ""
 	if !timeStart.IsZero() {
 		if len(fltr) != 0 {
@@ -609,12 +611,12 @@ func (self *SQLStorage) GetStoredCdrs(timeStart, timeEnd time.Time, ignoreErr, i
 	for rows.Next() {
 		var cgrid, accid, cdrhost, cdrsrc, reqtype, direction, tenant, tor, account, subject, destination string
 		var extraFields []byte
-		var answerTime time.Time
+		var setupTime, answerTime time.Time
 		var duration int64
 		var runid sql.NullString // So we can export unmediated CDRs
 		var cost sql.NullFloat64 // So we can export unmediated CDRs
 		var extraFieldsMp map[string]string
-		if err := rows.Scan(&cgrid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &answerTime, &duration,
+		if err := rows.Scan(&cgrid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &setupTime, &answerTime, &duration,
 			&extraFields, &runid, &cost); err != nil {
 			return nil, err
 		}
@@ -623,7 +625,7 @@ func (self *SQLStorage) GetStoredCdrs(timeStart, timeEnd time.Time, ignoreErr, i
 		}
 		storCdr := &utils.StoredCdr{
 			CgrId: cgrid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
-			TOR: tor, Account: account, Subject: subject, Destination: destination, AnswerTime: answerTime, Duration: time.Duration(duration),
+			TOR: tor, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(duration),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
 		cdrs = append(cdrs, storCdr)

@@ -106,6 +106,7 @@ type CGRConfig struct {
 	CdrcAccountField         string        // Account field identifier. Use index numbers in case of .csv cdrs.
 	CdrcSubjectField         string        // Subject field identifier. Use index numbers in case of .csv CDRs.
 	CdrcDestinationField     string        // Destination field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSetupTimeField       string        // Setup time field identifier. Use index numbers in case of .csv cdrs.
 	CdrcAnswerTimeField      string        // Answer time field identifier. Use index numbers in case of .csv cdrs.
 	CdrcDurationField        string        // Duration field identifier. Use index numbers in case of .csv cdrs.
 	CdrcExtraFields          []string      // Field identifiers of the fields to add in extra fields section, special format in case of .csv "field1:index1,field2:index2"
@@ -122,7 +123,8 @@ type CGRConfig struct {
 	SMAccountFields          []string      // Name of account fields to be used during additional sessions control <""|*default|field_name>.
 	SMSubjectFields          []string      // Name of fields to be used during additional sessions control <""|*default|field_name>.
 	SMDestFields             []string      // Name of destination fields to be used during additional sessions control <""|*default|field_name>.
-	SMAnswerTimeFields       []string      // Name of time_answer fields to be used during additional sessions control <""|*default|field_name>.
+	SMSetupTimeFields        []string      // Name of setup_time fields to be used during additional sessions control <""|*default|field_name>.
+	SMAnswerTimeFields       []string      // Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
 	SMDurationFields         []string      // Name of duration fields to be used during additional sessions control <""|*default|field_name>.
 	MediatorEnabled          bool          // Starts Mediator service: <true|false>.
 	MediatorRater            string        // Address where to reach the Rater: <internal|x.y.z.y:1234>
@@ -135,7 +137,8 @@ type CGRConfig struct {
 	MediatorAccountFields    []string      // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorSubjectFields    []string      // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorDestFields       []string      // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAnswerTimeFields []string      // Name of time_start fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorSetupTimeFields  []string      // Name of setup_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorAnswerTimeFields []string      // Name of answer_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorDurationFields   []string      // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	FreeswitchServer         string        // freeswitch address host:port
 	FreeswitchPass           string        // FS socket password
@@ -206,8 +209,9 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcAccountField = "5"
 	self.CdrcSubjectField = "6"
 	self.CdrcDestinationField = "7"
-	self.CdrcAnswerTimeField = "8"
-	self.CdrcDurationField = "9"
+	self.CdrcSetupTimeField = "8"
+	self.CdrcAnswerTimeField = "9"
+	self.CdrcDurationField = "10"
 	self.CdrcExtraFields = []string{}
 	self.MediatorEnabled = false
 	self.MediatorRater = "internal"
@@ -220,6 +224,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorTORFields = []string{}
 	self.MediatorAccountFields = []string{}
 	self.MediatorDestFields = []string{}
+	self.MediatorSetupTimeFields = []string{}
 	self.MediatorAnswerTimeFields = []string{}
 	self.MediatorDurationFields = []string{}
 	self.SMEnabled = false
@@ -235,6 +240,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.SMAccountFields = []string{}
 	self.SMSubjectFields = []string{}
 	self.SMDestFields = []string{}
+	self.SMSetupTimeFields = []string{}
 	self.SMAnswerTimeFields = []string{}
 	self.SMDurationFields = []string{}
 	self.FreeswitchServer = "127.0.0.1:8021"
@@ -449,6 +455,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrc", "destination_field"); hasOpt {
 		cfg.CdrcDestinationField, _ = c.GetString("cdrc", "destination_field")
 	}
+	if hasOpt = c.HasOption("cdrc", "setup_time_field"); hasOpt {
+		cfg.CdrcSetupTimeField, _ = c.GetString("cdrc", "setup_time_field")
+	}
 	if hasOpt = c.HasOption("cdrc", "answer_time_field"); hasOpt {
 		cfg.CdrcAnswerTimeField, _ = c.GetString("cdrc", "answer_time_field")
 	}
@@ -506,6 +515,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("mediator", "destination_fields"); hasOpt {
 		if cfg.MediatorDestFields, errParse = ConfigSlice(c, "mediator", "destination_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("mediator", "setup_time_fields"); hasOpt {
+		if cfg.MediatorSetupTimeFields, errParse = ConfigSlice(c, "mediator", "setup_time_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}
@@ -573,6 +587,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("session_manager", "destination_fields"); hasOpt {
 		if cfg.SMDestFields, errParse = ConfigSlice(c, "session_manager", "destination_fields"); errParse != nil {
+			return nil, errParse
+		}
+	}
+	if hasOpt = c.HasOption("session_manager", "setup_time_fields"); hasOpt {
+		if cfg.SMSetupTimeFields, errParse = ConfigSlice(c, "session_manager", "setup_time_fields"); errParse != nil {
 			return nil, errParse
 		}
 	}

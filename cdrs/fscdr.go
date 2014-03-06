@@ -41,6 +41,7 @@ const (
 	FS_CSTMID       = "cgr_tenant"
 	FS_CALL_DEST_NR = "dialed_extension"
 	FS_PARK_TIME    = "start_epoch"
+	FS_SETUP_TIME   = "start_epoch"
 	FS_ANSWER_TIME  = "answer_epoch"
 	FS_HANGUP_TIME  = "end_epoch"
 	FS_DURATION     = "billsec"
@@ -114,6 +115,12 @@ func (fsCdr FSCdr) GetExtraFields() map[string]string {
 	}
 	return extraFields
 }
+func (fsCdr FSCdr) GetSetupTime() (t time.Time, err error) {
+	//ToDo: Make sure we work with UTC instead of local time
+	at, err := strconv.ParseInt(fsCdr[FS_SETUP_TIME], 0, 64)
+	t = time.Unix(at, 0)
+	return
+}
 func (fsCdr FSCdr) GetAnswerTime() (t time.Time, err error) {
 	//ToDo: Make sure we work with UTC instead of local time
 	at, err := strconv.ParseInt(fsCdr[FS_ANSWER_TIME], 0, 64)
@@ -163,13 +170,13 @@ func (fsCdr FSCdr) Restore(input string) error {
 }
 
 // Used in extra mediation
-func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.StoredCdr, error) {
+func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.StoredCdr, error) {
 	if utils.IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
 		return nil, errors.New(fmt.Sprintf("%s:FieldName", utils.ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
 	}
 	var err error
 	var hasKey bool
-	var aTimeStr, durStr string
+	var sTimeStr, aTimeStr, durStr string
 	rtCdr := new(utils.StoredCdr)
 	rtCdr.MediationRunId = runId
 	rtCdr.Cost = -1.0 // Default for non-rated CDR
@@ -222,6 +229,16 @@ func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 		rtCdr.Destination = destFld[1:]
 	} else if rtCdr.Destination, hasKey = fsCdr[destFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, destFld))
+	}
+	if sTimeStr, hasKey = fsCdr[setupTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(setupTimeFld, utils.STATIC_VALUE_PREFIX) {
+		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, setupTimeFld))
+	} else {
+		if strings.HasPrefix(setupTimeFld, utils.STATIC_VALUE_PREFIX) {
+			sTimeStr = setupTimeFld[1:]
+		}
+		if rtCdr.SetupTime, err = utils.ParseTimeDetectLayout(sTimeStr); err != nil && fieldsMandatory {
+			return nil, err
+		}
 	}
 	if aTimeStr, hasKey = fsCdr[answerTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(answerTimeFld, utils.STATIC_VALUE_PREFIX) {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, answerTimeFld))

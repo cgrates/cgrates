@@ -52,7 +52,7 @@ type Mediator struct {
 func (self *Mediator) parseConfig() error {
 	cfgVals := [][]string{self.cgrCfg.MediatorSubjectFields, self.cgrCfg.MediatorReqTypeFields, self.cgrCfg.MediatorDirectionFields,
 		self.cgrCfg.MediatorTenantFields, self.cgrCfg.MediatorTORFields, self.cgrCfg.MediatorAccountFields, self.cgrCfg.MediatorDestFields,
-		self.cgrCfg.MediatorAnswerTimeFields, self.cgrCfg.MediatorDurationFields}
+		self.cgrCfg.MediatorSetupTimeFields, self.cgrCfg.MediatorAnswerTimeFields, self.cgrCfg.MediatorDurationFields}
 
 	// All other configured fields must match the length of reference fields
 	for iCfgVal := range cfgVals {
@@ -138,7 +138,8 @@ func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 	for runIdx, runId := range self.cgrCfg.MediatorRunIds {
 		forkedCdr, err := dbcdr.AsStoredCdr(self.cgrCfg.MediatorRunIds[runIdx], self.cgrCfg.MediatorReqTypeFields[runIdx], self.cgrCfg.MediatorDirectionFields[runIdx],
 			self.cgrCfg.MediatorTenantFields[runIdx], self.cgrCfg.MediatorTORFields[runIdx], self.cgrCfg.MediatorAccountFields[runIdx],
-			self.cgrCfg.MediatorSubjectFields[runIdx], self.cgrCfg.MediatorDestFields[runIdx], self.cgrCfg.MediatorAnswerTimeFields[runIdx],
+			self.cgrCfg.MediatorSubjectFields[runIdx], self.cgrCfg.MediatorDestFields[runIdx],
+			self.cgrCfg.MediatorSetupTimeFields[runIdx], self.cgrCfg.MediatorAnswerTimeFields[runIdx],
 			self.cgrCfg.MediatorDurationFields[runIdx], []string{}, true)
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis
 			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: dbcdr.GetCgrId(), MediationRunId: runId, Cost: -1.0}, err.Error()) // Cannot fork CDR, important just runid and error
