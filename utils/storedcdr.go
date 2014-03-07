@@ -38,6 +38,9 @@ func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
 	rtCdr.Account = rawcdr.GetAccount()
 	rtCdr.Subject = rawcdr.GetSubject()
 	rtCdr.Destination = rawcdr.GetDestination()
+	if rtCdr.SetupTime, err = rawcdr.GetSetupTime(); err != nil {
+		return nil, err
+	}
 	if rtCdr.AnswerTime, err = rawcdr.GetAnswerTime(); err != nil {
 		return nil, err
 	}
@@ -61,6 +64,7 @@ type StoredCdr struct {
 	Account        string
 	Subject        string
 	Destination    string
+	SetupTime      time.Time
 	AnswerTime     time.Time
 	Duration       time.Duration
 	ExtraFields    map[string]string
@@ -114,6 +118,10 @@ func (storedCdr *StoredCdr) GetReqType() string {
 	return storedCdr.ReqType
 }
 
+func (storedCdr *StoredCdr) GetSetupTime() (time.Time, error) {
+	return storedCdr.SetupTime, nil
+}
+
 func (storedCdr *StoredCdr) GetAnswerTime() (time.Time, error) {
 	return storedCdr.AnswerTime, nil
 }
@@ -126,7 +134,7 @@ func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
 	return storedCdr.ExtraFields
 }
 
-func (storedCdr *StoredCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
+func (storedCdr *StoredCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
 	return storedCdr, nil
 }
 
@@ -143,6 +151,7 @@ func (storedCdr *StoredCdr) AsRawCdrHttpForm() url.Values {
 	v.Set(ACCOUNT, storedCdr.Account)
 	v.Set(SUBJECT, storedCdr.Subject)
 	v.Set(DESTINATION, storedCdr.Destination)
+	v.Set(SETUP_TIME, storedCdr.SetupTime.String())
 	v.Set(ANSWER_TIME, storedCdr.AnswerTime.String())
 	v.Set(DURATION, strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64))
 	for fld, val := range storedCdr.ExtraFields {

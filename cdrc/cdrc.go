@@ -90,6 +90,7 @@ func (self *Cdrc) parseFieldsConfig() error {
 		utils.ACCOUNT:     self.cgrCfg.CdrcAccountField,
 		utils.SUBJECT:     self.cgrCfg.CdrcSubjectField,
 		utils.DESTINATION: self.cgrCfg.CdrcDestinationField,
+		utils.SETUP_TIME:  self.cgrCfg.CdrcSetupTimeField,
 		utils.ANSWER_TIME: self.cgrCfg.CdrcAnswerTimeField,
 		utils.DURATION:    self.cgrCfg.CdrcDurationField,
 	}
@@ -153,6 +154,10 @@ func (self *Cdrc) recordAsStoredCdr(record []string) (*utils.StoredCdr, error) {
 			ratedCdr.Subject = fieldVal
 		case utils.DESTINATION:
 			ratedCdr.Destination = fieldVal
+		case utils.SETUP_TIME:
+			if ratedCdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
+				return nil, fmt.Errorf("Cannot parse answer time field, err: %s", err.Error())
+			}
 		case utils.ANSWER_TIME:
 			if ratedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
 				return nil, fmt.Errorf("Cannot parse answer time field, err: %s", err.Error())

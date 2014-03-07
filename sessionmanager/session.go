@@ -42,7 +42,7 @@ func NewSession(ev Event, sm SessionManager) (s *Session) {
 	if ev.GetReqType("") != utils.PREPAID && ev.GetReqType("") != utils.POSTPAID {
 		return
 	}
-	startTime, err := ev.GetStartTime(START_TIME)
+	startTime, err := ev.GetAnswerTime(ANSWER_TIME)
 	if err != nil {
 		engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 		startTime = time.Now()

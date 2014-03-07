@@ -37,8 +37,9 @@ type RawCDR interface {
 	GetTOR() string
 	GetTenant() string
 	GetReqType() string
-	GetAnswerTime() (time.Time, error)
+	GetSetupTime() (time.Time, error)  // Time when the call was set-up
+	GetAnswerTime() (time.Time, error) // Time when the call was answered
 	GetDuration() time.Duration
-	GetExtraFields() map[string]string                                                                                            //Stores extra CDR Fields
-	AsStoredCdr(string, string, string, string, string, string, string, string, string, string, []string, bool) (*StoredCdr, error) // Based on fields queried will return a particular instance of RatedCDR
+	GetExtraFields() map[string]string                                                                                                      //Stores extra CDR Fields
+	AsStoredCdr(string, string, string, string, string, string, string, string, string, string, string, []string, bool) (*StoredCdr, error) // Based on fields queried will return a particular instance of RatedCDR
 }

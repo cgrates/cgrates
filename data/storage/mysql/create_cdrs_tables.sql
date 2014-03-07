@@ -13,6 +13,7 @@ CREATE TABLE cdrs_primary (
   account varchar(128) NOT NULL,
   subject varchar(128) NOT NULL,
   destination varchar(128) NOT NULL,
+  setup_time datetime NOT NULL,
   answer_time datetime NOT NULL,
   duration bigint NOT NULL,
   PRIMARY KEY (tbid),
