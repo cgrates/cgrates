@@ -149,6 +149,7 @@ func TestPostCdrs(t *testing.T) {
 			t.Error(err.Error())
 		}
 	}
+	time.Sleep(10 * time.Millisecond) // Give time for CDRs to reach database
 	if storedCdrs, err := cdrStor.GetStoredCdrs(time.Time{}, time.Time{}, false, false); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 2 { // Make sure CDRs made it into StorDb

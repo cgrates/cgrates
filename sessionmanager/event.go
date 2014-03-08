@@ -34,7 +34,9 @@ type Event interface {
 	GetTOR(string) string
 	GetTenant(string) string
 	GetReqType(string) string
+	GetSetupTime(string) (time.Time, error)
 	GetAnswerTime(string) (time.Time, error)
 	GetEndTime() (time.Time, error)
+	GetDuration(string) (time.Duration, error)
 	MissingParameter() bool
 }

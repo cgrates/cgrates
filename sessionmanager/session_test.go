@@ -19,8 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"testing"
+//"github.com/cgrates/cgrates/config"
+//"testing"
 )
 
 var (
@@ -58,17 +58,7 @@ default_reqtype=
 `)
 )
 
-/*func TestSessionDurationSingle(t *testing.T) {
-	newEvent := new(FSEvent).New(newEventBody)
-	sm := &FSSessionManager{}
-	s := NewSession(newEvent, sm)
-	defer s.Close()
-	twoSeconds, _ := time.ParseDuration("2s")
-	if d := s.getSessionDurationFrom(s.callDescriptor.TimeStart.Add(twoSeconds)); d.Seconds() < 2 || d.Seconds() > 3 {
-		t.Errorf("Wrong session duration %v", d)
-	}
-}*/
-
+/* Missing parameter is not longer tested in NewSession. ToDo: expand this test for more util information
 func TestSessionNilSession(t *testing.T) {
 	var errCfg error
 	cfg, errCfg = config.NewCGRConfigBytes(conf_data) // Needed here to avoid nil on cfg variable
@@ -82,3 +72,4 @@ func TestSessionNilSession(t *testing.T) {
 		t.Error("no account and it still created session.")
 	}
 }
+*/

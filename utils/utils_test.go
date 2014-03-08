@@ -186,6 +186,14 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expecting error")
 	}
+	fsTmstampStr := "1394291049287234"
+	fsTm, err := ParseTimeDetectLayout(fsTmstampStr)
+	expectedTime = time.Date(2014, 3, 8, 15, 4, 9, 287234000, time.UTC)
+	if err != nil {
+		t.Error(err)
+	} else if !fsTm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", fsTm, expectedTime)
+	}
 }
 
 func TestParseDateUnix(t *testing.T) {

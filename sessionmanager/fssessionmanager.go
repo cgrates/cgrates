@@ -24,7 +24,6 @@ import (
 	"fmt"
 	"log/syslog"
 	"net"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -100,23 +99,23 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 }
 
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) DisconnectSession(s *Session, notify string) {
+func (sm *FSSessionManager) DisconnectSession(uuid string, notify string) {
 	// engine.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
-	_, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", s.uuid, notify))
+	_, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("could not send disconect api notification to freeswitch: %v", err))
 	}
-	err = fsock.FS.SendMsgCmd(s.uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}) // without + sign
+	err = fsock.FS.SendMsgCmd(uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}) // without + sign
 	if err != nil {
 		engine.Logger.Err(fmt.Sprintf("could not send disconect msg to freeswitch: %v", err))
 	}
 	return
 }
 
-// Remove session from sessin list
-func (sm *FSSessionManager) RemoveSession(s *Session) {
+// Remove session from sessin list, removes all related in case of multiple runs
+func (sm *FSSessionManager) RemoveSession(uuid string) {
 	for i, ss := range sm.sessions {
-		if ss == s {
+		if ss.uuid == uuid {
 			sm.sessions = append(sm.sessions[:i], sm.sessions[i+1:]...)
 			return
 		}
@@ -150,52 +149,73 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelPark(ev Event) {
-	//engine.Logger.Info("freeswitch park")
-	startTime, err := ev.GetAnswerTime(PARK_TIME)
-	if err != nil {
-		engine.Logger.Err("Error parsing answer event start time, using time.Now!")
-		startTime = time.Now()
+	var maxCallDuration time.Duration                                // This will be the maximum duration this channel will be allowed to last
+	runIds := append([]string{utils.DEFAULT_RUNID}, cfg.SMRunIds...) // Prepend default runid to extra configured for session manager
+	for idx := range runIds {
+		var directionFld, tenantFld, torFld, actFld, subjFld, dstFld string
+		if idx != 0 { // Take fields out of config, default ones are automatically handled as empty
+			idxCfg := idx - 1 // In configuration we did not prepend values
+			directionFld = cfg.SMDirectionFields[idxCfg]
+			tenantFld = cfg.SMTenantFields[idxCfg]
+			torFld = cfg.SMTORFields[idxCfg]
+			actFld = cfg.SMAccountFields[idxCfg]
+			subjFld = cfg.SMSubjectFields[idxCfg]
+			dstFld = cfg.SMDestFields[idxCfg]
+		}
+		startTime, err := ev.GetAnswerTime(PARK_TIME)
+		if err != nil {
+			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
+			startTime = time.Now()
+		}
+		// if there is no account configured leave the call alone
+		if idx == 0 && !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, ev.GetReqType("")) {
+			return // we unpark only prepaid and pseudoprepaid calls
+		}
+		if ev.MissingParameter() {
+			sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(dstFld), MISSING_PARAMETER)
+			engine.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
+			return
+		}
+		cd := engine.CallDescriptor{
+			Direction:   ev.GetDirection(directionFld),
+			Tenant:      ev.GetTenant(tenantFld),
+			TOR:         ev.GetTOR(torFld),
+			Subject:     ev.GetSubject(subjFld),
+			Account:     ev.GetAccount(actFld),
+			Destination: ev.GetDestination(dstFld),
+			TimeStart:   startTime,
+			TimeEnd:     startTime.Add(cfg.SMMaxCallDuration),
+		}
+		var remainingDurationFloat float64
+		err = sm.connector.GetMaxSessionTime(cd, &remainingDurationFloat)
+		if err != nil {
+			engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
+			sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), SYSTEM_ERROR) // We unpark on original destination
+			return
+		}
+		remainingDuration := time.Duration(remainingDurationFloat)
+		// Set maxCallDuration, smallest out of all forked sessions
+		if idx == 0 {
+			maxCallDuration = remainingDuration
+		} else if maxCallDuration > remainingDuration {
+			maxCallDuration = remainingDuration
+		}
 	}
-	// if there is no account configured leave the call alone
-	if !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, strings.TrimSpace(ev.GetReqType(""))) {
-		return // we unpark only prepaid and pseudoprepaid calls
-	}
-	if ev.MissingParameter() {
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), MISSING_PARAMETER)
-		engine.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
-		return
-	}
-	cd := engine.CallDescriptor{
-		Direction:   ev.GetDirection(""),
-		Tenant:      ev.GetTenant(""),
-		TOR:         ev.GetTOR(""),
-		Subject:     ev.GetSubject(""),
-		Account:     ev.GetAccount(""),
-		Destination: ev.GetDestination(""),
-		TimeStart:   startTime,
-		TimeEnd:     startTime.Add(cfg.SMMaxCallDuration),
-	}
-	var remainingDurationFloat float64
-	err = sm.connector.GetMaxSessionTime(cd, &remainingDurationFloat)
-	if err != nil {
-		engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), SYSTEM_ERROR)
-		return
-	}
-	remainingDuration := time.Duration(remainingDurationFloat)
-	//engine.Logger.Info(fmt.Sprintf("Remaining duration: %v", remainingDuration))
-	if remainingDuration == 0 {
+	if maxCallDuration == 0 {
 		//engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), INSUFFICIENT_FUNDS)
 		return
 	}
-	sm.setMaxCallDuration(ev.GetUUID(), remainingDuration)
+	sm.setMaxCallDuration(ev.GetUUID(), maxCallDuration)
 	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), AUTH_OK)
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	//engine.Logger.Info("<SessionManager> FreeSWITCH answer.")
 	// Make sure cgr_type is enforced even if not set by FreeSWITCH
+	if ev.MissingParameter() {
+		sm.DisconnectSession(ev.GetUUID(), MISSING_PARAMETER)
+	}
 	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType(""))); err != nil {
 		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
@@ -206,129 +226,129 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
-	//engine.Logger.Info("<SessionManager> FreeSWITCH hangup.")
 	s := sm.GetSession(ev.GetUUID())
 	if s == nil { // Not handled by us
 		return
+	} else {
+		sm.RemoveSession(s.uuid) // Unreference it early so we avoid concurrency
 	}
-	defer s.Close(ev) // Stop loop and save the costs deducted so far to database
-	if ev.GetReqType("") == utils.POSTPAID {
-		startTime, err := ev.GetAnswerTime(ANSWER_TIME)
-		if err != nil {
-			engine.Logger.Crit("Error parsing postpaid call start time from event")
-			return
+	defer s.Close(ev)                                                // Stop loop and save the costs deducted so far to database
+	runIds := append([]string{utils.DEFAULT_RUNID}, cfg.SMRunIds...) // Prepend default runid to extra configured for session manager
+	for idx := range runIds {
+		var reqTypeFld, directionFld, tenantFld, torFld, actFld, subjFld, dstFld, aTimeFld string // ToDo: Add durFld
+		if idx != 0 {                                                                             // Take fields out of config, default ones are automatically handled as empty
+			idxCfg := idx - 1 // In configuration we did not prepend values
+			reqTypeFld = cfg.SMReqTypeFields[idxCfg]
+			directionFld = cfg.SMDirectionFields[idxCfg]
+			tenantFld = cfg.SMTenantFields[idxCfg]
+			torFld = cfg.SMTORFields[idxCfg]
+			actFld = cfg.SMAccountFields[idxCfg]
+			subjFld = cfg.SMSubjectFields[idxCfg]
+			dstFld = cfg.SMDestFields[idxCfg]
+			aTimeFld = cfg.SMAnswerTimeFields[idxCfg]
+			// durFld = cfg.SMDurationFields[idxCfg]
 		}
-		endTime, err := ev.GetEndTime()
-		if err != nil {
-			engine.Logger.Crit("Error parsing postpaid call start time from event")
-			return
-		}
-		cd := engine.CallDescriptor{
-			Direction:    ev.GetDirection(""),
-			Tenant:       ev.GetTenant(""),
-			TOR:          ev.GetTOR(""),
-			Subject:      ev.GetSubject(""),
-			Account:      ev.GetAccount(""),
-			LoopIndex:    0,
-			CallDuration: endTime.Sub(startTime),
-			Destination:  ev.GetDestination(""),
-			TimeStart:    startTime,
-			TimeEnd:      endTime,
-		}
-		cc := &engine.CallCost{}
-		err = sm.connector.Debit(cd, cc)
-		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("Error making the general debit for postpaid call: %v", ev.GetUUID()))
-			return
-		}
-		s.CallCosts = append(s.CallCosts, cc)
-		return
-	}
-
-	if s == nil || len(s.CallCosts) == 0 {
-		return // why would we have 0 callcosts
-	}
-	lastCC := s.CallCosts[len(s.CallCosts)-1]
-	// put credit back
-	var hangupTime time.Time
-	var err error
-	if hangupTime, err = ev.GetEndTime(); err != nil {
-		engine.Logger.Err("Error parsing answer event hangup time, using time.Now!")
-		hangupTime = time.Now()
-	}
-	end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
-	refundDuration := end.Sub(hangupTime)
-	//initialRefundDuration := refundDuration
-	var refundIncrements engine.Increments
-	for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
-		ts := lastCC.Timespans[i]
-		tsDuration := ts.GetDuration()
-		if refundDuration <= tsDuration {
-			lastRefundedIncrementIndex := 0
-			for j := len(ts.Increments) - 1; j >= 0; j-- {
-				increment := ts.Increments[j]
-				if increment.Duration <= refundDuration {
-					refundIncrements = append(refundIncrements, increment)
-					refundDuration -= increment.Duration
-					lastRefundedIncrementIndex = j
+		if ev.GetReqType(reqTypeFld) == utils.POSTPAID {
+			startTime, err := ev.GetAnswerTime(aTimeFld)
+			if err != nil {
+				engine.Logger.Crit("Error parsing postpaid call start time from event")
+				return
+			}
+			endTime, err := ev.GetEndTime()
+			if err != nil {
+				engine.Logger.Crit("Error parsing postpaid call start time from event")
+				return
+			}
+			cd := engine.CallDescriptor{
+				Direction:    ev.GetDirection(directionFld),
+				Tenant:       ev.GetTenant(tenantFld),
+				TOR:          ev.GetTOR(torFld),
+				Subject:      ev.GetSubject(actFld),
+				Account:      ev.GetAccount(subjFld),
+				LoopIndex:    0,
+				CallDuration: endTime.Sub(startTime),
+				Destination:  ev.GetDestination(dstFld),
+				TimeStart:    startTime,
+				TimeEnd:      endTime,
+			}
+			cc := &engine.CallCost{}
+			err = sm.connector.Debit(cd, cc)
+			if err != nil {
+				engine.Logger.Err(fmt.Sprintf("Error making the general debit for postpaid call: %v", ev.GetUUID()))
+				return
+			}
+			s.sessionRuns[idx].callCosts = append(s.sessionRuns[idx].callCosts, cc)
+		} else if ev.GetReqType(reqTypeFld) == utils.PREPAID { // Prepaid calls
+			if len(s.sessionRuns[idx].callCosts) == 0 {
+				continue // why would we have 0 callcosts
+			}
+			lastCC := s.sessionRuns[idx].callCosts[len(s.sessionRuns[idx].callCosts)-1]
+			// put credit back
+			var hangupTime time.Time
+			var err error
+			if hangupTime, err = ev.GetEndTime(); err != nil {
+				engine.Logger.Err("Error parsing answer event hangup time, using time.Now!")
+				hangupTime = time.Now()
+			}
+			end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
+			refundDuration := end.Sub(hangupTime)
+			var refundIncrements engine.Increments
+			for i := len(lastCC.Timespans) - 1; i >= 0; i-- {
+				ts := lastCC.Timespans[i]
+				tsDuration := ts.GetDuration()
+				if refundDuration <= tsDuration {
+					lastRefundedIncrementIndex := 0
+					for j := len(ts.Increments) - 1; j >= 0; j-- {
+						increment := ts.Increments[j]
+						if increment.Duration <= refundDuration {
+							refundIncrements = append(refundIncrements, increment)
+							refundDuration -= increment.Duration
+							lastRefundedIncrementIndex = j
+						}
+					}
+					ts.SplitByIncrement(lastRefundedIncrementIndex)
+					break // do not go to other timespans
+				} else {
+					refundIncrements = append(refundIncrements, ts.Increments...)
+					// remove the timespan entirely
+					lastCC.Timespans[i] = nil
+					lastCC.Timespans = lastCC.Timespans[:i]
+					// continue to the next timespan with what is left to refund
+					refundDuration -= tsDuration
 				}
 			}
-			ts.SplitByIncrement(lastRefundedIncrementIndex)
-			break // do not go to other timespans
-		} else {
-			refundIncrements = append(refundIncrements, ts.Increments...)
-			// remove the timespan entirely
-			lastCC.Timespans[i] = nil
-			lastCC.Timespans = lastCC.Timespans[:i]
-			// continue to the next timespan with what is left to refund
-			refundDuration -= tsDuration
+			// show only what was actualy refunded (stopped in timespan)
+			// engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
+			if len(refundIncrements) > 0 {
+				cd := &engine.CallDescriptor{
+					Direction:   lastCC.Direction,
+					Tenant:      lastCC.Tenant,
+					TOR:         lastCC.TOR,
+					Subject:     lastCC.Subject,
+					Account:     lastCC.Account,
+					Destination: lastCC.Destination,
+					Increments:  refundIncrements,
+				}
+				var response float64
+				err := sm.connector.RefundIncrements(*cd, &response)
+				if err != nil {
+					engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
+				}
+			}
+			cost := refundIncrements.GetTotalCost()
+			lastCC.Cost -= cost
+			// engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 		}
 	}
-	// show only what was actualy refunded (stopped in timespan)
-	// engine.Logger.Info(fmt.Sprintf("Refund duration: %v", initialRefundDuration-refundDuration))
-	if len(refundIncrements) > 0 {
-		cd := &engine.CallDescriptor{
-			Direction:   lastCC.Direction,
-			Tenant:      lastCC.Tenant,
-			TOR:         lastCC.TOR,
-			Subject:     lastCC.Subject,
-			Account:     lastCC.Account,
-			Destination: lastCC.Destination,
-			Increments:  refundIncrements,
-			// FallbackSubject: lastCC.FallbackSubject, // TODO: check how to best add it
-		}
-		var response float64
-		err := sm.connector.RefundIncrements(*cd, &response)
-		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
-		}
-	}
-	cost := refundIncrements.GetTotalCost()
-	lastCC.Cost -= cost
-	// engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 
-}
-
-func (sm *FSSessionManager) LoopAction(s *Session, cd *engine.CallDescriptor) (cc *engine.CallCost) {
-	cc = &engine.CallCost{}
-	err := sm.connector.MaxDebit(*cd, cc)
-	if err != nil {
-		engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
-		// disconnect session
-		s.sessionManager.DisconnectSession(s, SYSTEM_ERROR)
-	}
-	// engine.Logger.Debug(fmt.Sprintf("Result of MaxDebit call: %v", cc))
-	if cc.GetDuration() == 0 || err != nil {
-		// engine.Logger.Info(fmt.Sprintf("No credit left: Disconnect %v", s))
-		sm.DisconnectSession(s, INSUFFICIENT_FUNDS)
-		return
-	}
-	s.CallCosts = append(s.CallCosts, cc)
-	return
 }
 
 func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
 	return sm.debitPeriod
+}
+
+func (sm *FSSessionManager) MaxDebit(cd *engine.CallDescriptor, cc *engine.CallCost) error {
+	return sm.connector.MaxDebit(*cd, cc)
 }
 
 func (sm *FSSessionManager) GetDbLogger() engine.LogStorage {
@@ -345,7 +365,6 @@ func (sm *FSSessionManager) Shutdown() (err error) {
 	for _, cmd := range []string{cmdKillPrepaid, cmdKillPostpaid} {
 		if _, err = fsock.FS.SendApiCmd(cmd); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Error on calls shutdown: %s", err))
-			return
 		}
 	}
 	for guard := 0; len(sm.sessions) > 0 && guard < 20; guard++ {

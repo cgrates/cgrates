@@ -112,6 +112,7 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 	rfc3339Rule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.+$`)
 	sqlRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$`)
 	gotimeRule := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\.?\d*\s[+,-]\d+\s\w+$`)
+	fsTimestamp := regexp.MustCompile(`^\d{16}$`)
 	unixTimestampRule := regexp.MustCompile(`^\d{10}$`)
 	switch {
 	case rfc3339Rule.MatchString(tmStr):
@@ -120,6 +121,12 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 		return time.Parse("2006-01-02 15:04:05.999999999 -0700 MST", tmStr)
 	case sqlRule.MatchString(tmStr):
 		return time.Parse("2006-01-02 15:04:05", tmStr)
+	case fsTimestamp.MatchString(tmStr):
+		if tmstmp, err := strconv.ParseInt(tmStr+"000", 10, 64); err != nil {
+			return nilTime, err
+		} else {
+			return time.Unix(0, tmstmp), nil
+		}
 	case unixTimestampRule.MatchString(tmStr):
 		if tmstmp, err := strconv.ParseInt(tmStr, 10, 64); err != nil {
 			return nilTime, err
