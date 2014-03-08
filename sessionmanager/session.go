@@ -157,9 +157,9 @@ func (s *Session) SaveOperations() {
 	if s == nil {
 		return
 	}
-	for _, sr := range s.sessionRuns {
-		engine.Logger.Debug(fmt.Sprintf("Saving operations for session %v, runId: %s", s, sr.runId))
-		go func() {
+	go func() {
+		for _, sr := range s.sessionRuns {
+			engine.Logger.Debug(fmt.Sprintf("Saving operations for session %v, runId: %s", s, sr.runId))
 			firstCC := sr.callCosts[0]
 			for _, cc := range sr.callCosts[1:] {
 				firstCC.Merge(cc)
@@ -168,6 +168,6 @@ func (s *Session) SaveOperations() {
 				engine.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
 			}
 			s.sessionManager.GetDbLogger().LogCallCost(s.uuid, engine.SESSION_MANAGER_SOURCE, sr.runId, firstCC)
-		}()
-	}
+		}
+	}()
 }
