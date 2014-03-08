@@ -260,9 +260,42 @@ func (self *CGRConfig) setDefaults() error {
 	return nil
 }
 
+func (self *CGRConfig) checkConfigSanity() error {
+	// SessionManager should have same fields config length for session emulation
+	if len(self.SMReqTypeFields) != len(self.SMRunIds) ||
+		len(self.SMDirectionFields) != len(self.SMRunIds) ||
+		len(self.SMTenantFields) != len(self.SMRunIds) ||
+		len(self.SMTORFields) != len(self.SMRunIds) ||
+		len(self.SMAccountFields) != len(self.SMRunIds) ||
+		len(self.SMSubjectFields) != len(self.SMRunIds) ||
+		len(self.SMDestFields) != len(self.SMRunIds) ||
+		len(self.SMSetupTimeFields) != len(self.SMRunIds) ||
+		len(self.SMAnswerTimeFields) != len(self.SMRunIds) ||
+		len(self.SMDurationFields) != len(self.SMRunIds) {
+		return errors.New("<ConfigSanity> Inconsistent fields length for SessionManager session emulation")
+	}
+	// Mediator needs to have consistent extra fields definition
+	if len(self.MediatorReqTypeFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorDirectionFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorTenantFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorTORFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorAccountFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorSubjectFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorDestFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorSetupTimeFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorAnswerTimeFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorDurationFields) != len(self.MediatorRunIds) {
+		return errors.New("<ConfigSanity> Inconsistent fields length for Mediator extra fields")
+	}
+	return nil
+}
+
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := &CGRConfig{}
 	cfg.setDefaults()
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
 	return cfg, nil
 }
 
@@ -272,7 +305,14 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
 	}
-	return loadConfig(c)
+	cfg, err := loadConfig(c)
+	if err != nil {
+		return nil, err
+	}
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func NewCGRConfigBytes(data []byte) (*CGRConfig, error) {
@@ -280,7 +320,14 @@ func NewCGRConfigBytes(data []byte) (*CGRConfig, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
 	}
-	return loadConfig(c)
+	cfg, err := loadConfig(c)
+	if err != nil {
+		return nil, err
+	}
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {

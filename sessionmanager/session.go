@@ -158,6 +158,7 @@ func (s *Session) SaveOperations() {
 		return
 	}
 	for _, sr := range s.sessionRuns {
+		engine.Logger.Debug(fmt.Sprintf("Saving operations for session %v, runId: %s", s, sr.runId))
 		go func() {
 			firstCC := sr.callCosts[0]
 			for _, cc := range sr.callCosts[1:] {

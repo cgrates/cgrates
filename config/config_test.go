@@ -153,24 +153,20 @@ func TestDefaults(t *testing.T) {
 	}
 }
 
-// Make sure defaults did not change
-/*func TestDefaultsSanity(t *testing.T) {
+func TestSanityCheck(t *testing.T) {
 	cfg := &CGRConfig{}
 	errSet := cfg.setDefaults()
 	if errSet != nil {
-		t.Log(fmt.Sprintf("Coud not set defaults: %s!", errSet.Error()))
-		t.FailNow()
+		t.Error("Coud not set defaults: ", errSet.Error())
 	}
-	if (cfg.RaterListen != INTERNAL &&
-		(cfg.RaterListen == cfg.BalancerListen ||
-			cfg.RaterListen == cfg.CDRSListen ||
-			cfg.RaterListen == cfg.MediatorListen)) ||
-		(cfg.BalancerListen != INTERNAL && (cfg.BalancerListen == cfg.CDRSListen ||
-			cfg.BalancerListen == cfg.MediatorListen)) ||
-		(cfg.CDRSListen != INTERNAL && cfg.CDRSListen == cfg.MediatorListen) {
-		t.Error("Listen defaults on the same port!")
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Error("Invalid defaults: ", err)
 	}
-}*/
+	cfg.SMSubjectFields = []string{"sample1", "sample2", "sample3"}
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed to detect config insanity")
+	}
+}
 
 // Load config from file and make sure we have all set
 func TestConfigFromFile(t *testing.T) {
