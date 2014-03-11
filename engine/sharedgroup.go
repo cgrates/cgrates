@@ -19,17 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"math"
 	"math/rand"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 const (
-	STRATEGY_LOWEST_FIRST  = "*lowest_first"
-	STRATEGY_HIGHEST_FIRST = "*highest_first"
-	STRATEGY_RANDOM        = "*random"
+	MINE_PREFIX           = "*mine_"
+	STRATEGY_MINE_LOWEST  = "*mine_lowest"
+	STRATEGY_MINE_HIGHEST = "*mine_highest"
+	STRATEGY_MINE_RANDOM  = "*mine_random"
+	STRATEGY_LOWEST       = "*lowest"
+	STRATEGY_HIGHEST      = "*highest"
+	STRATEGY_RANDOM       = "*random"
 )
 
 type SharedGroup struct {
@@ -55,43 +60,79 @@ func (sg *SharedGroup) GetMembersExceptUser(ubId string) []string {
 	return sg.Members
 }
 
-func (sg *SharedGroup) PopBalanceByStrategy(account string, balanceChain *BalanceChain) (bal *Balance) {
-	bc := *balanceChain
-	if len(bc) == 0 {
-		return
-	}
-	index := 0
+func (sg *SharedGroup) GetBalancesByStrategy(myBalance *Balance, bc BalanceChain) BalanceChain {
 	sharingParameters := sg.AccountParameters[utils.ANY]
-	if sp, hasParamsForAccount := sg.AccountParameters[account]; hasParamsForAccount {
+	if sp, hasParamsForAccount := sg.AccountParameters[myBalance.account.Id]; hasParamsForAccount {
 		sharingParameters = sp
 	}
-	strategy := STRATEGY_RANDOM
+
+	strategy := STRATEGY_MINE_RANDOM
 	if sharingParameters != nil {
 		strategy = sharingParameters.Strategy
 	}
 	switch strategy {
-	case STRATEGY_RANDOM:
-		rand.Seed(time.Now().Unix())
-		index = rand.Intn(len(bc))
-	case STRATEGY_LOWEST_FIRST:
-		minVal := math.MaxFloat64
-		for i, b := range bc {
-			b.RateSubject = sharingParameters.RateSubject
-			if b.Value < minVal {
-				minVal = b.Value
-				index = i
-			}
-		}
-	case STRATEGY_HIGHEST_FIRST:
-		maxVal := math.SmallestNonzeroFloat64
-		for i, b := range bc {
-			b.RateSubject = sharingParameters.RateSubject
-			if b.Value > maxVal {
-				maxVal = b.Value
-				index = i
-			}
-		}
+	case STRATEGY_LOWEST, STRATEGY_MINE_LOWEST:
+		sort.Sort(LowestBalanceChainSorter(bc))
+	case STRATEGY_HIGHEST, STRATEGY_MINE_HIGHEST:
+		sort.Sort(HighestBalanceChainSorter(bc))
+	case STRATEGY_RANDOM, STRATEGY_MINE_RANDOM:
+		rbc := RandomBalanceChainSorter(bc)
+		(&rbc).Sort()
+		bc = BalanceChain(rbc)
 	}
-	bal, bc[index], *balanceChain = bc[index], bc[len(bc)-1], bc[:len(bc)-1]
-	return
+	if strings.HasPrefix(strategy, MINE_PREFIX) {
+		// find index of my balance
+		index := 0
+		for i, b := range bc {
+			if b.Uuid == myBalance.Uuid {
+				index = i
+				break
+			}
+		}
+		// move my balance first
+		bc[0], bc[index] = bc[index], bc[0]
+	}
+	return bc
+}
+
+type LowestBalanceChainSorter []*Balance
+
+func (lbcs LowestBalanceChainSorter) Len() int {
+	return len(lbcs)
+}
+
+func (lbcs LowestBalanceChainSorter) Swap(i, j int) {
+	lbcs[i], lbcs[j] = lbcs[j], lbcs[i]
+}
+
+func (lbcs LowestBalanceChainSorter) Less(i, j int) bool {
+	return lbcs[i].Value < lbcs[j].Value
+}
+
+type HighestBalanceChainSorter []*Balance
+
+func (hbcs HighestBalanceChainSorter) Len() int {
+	return len(hbcs)
+}
+
+func (hbcs HighestBalanceChainSorter) Swap(i, j int) {
+	hbcs[i], hbcs[j] = hbcs[j], hbcs[i]
+}
+
+func (hbcs HighestBalanceChainSorter) Less(i, j int) bool {
+	return hbcs[i].Value > hbcs[j].Value
+}
+
+type RandomBalanceChainSorter []*Balance
+
+func (rbcs *RandomBalanceChainSorter) Sort() {
+	src := *rbcs
+	// randomize balance chain
+	dest := make([]*Balance, len(src))
+	rand.Seed(time.Now().Unix())
+	perm := rand.Perm(len(src))
+	for i, v := range perm {
+		dest[v] = src[i]
+	}
+	*rbcs = dest
 }

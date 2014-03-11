@@ -1058,7 +1058,7 @@ func TestDebitShared(t *testing.T) {
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "moneyc", Value: 70, SharedGroup: "SG_TEST"}},
 	}}
 
-	sg := &SharedGroup{Id: "SG_TEST", Members: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_RANDOM}}}
+	sg := &SharedGroup{Id: "SG_TEST", Members: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
 	accountingStorage.SetSharedGroup("SG_TEST", sg)
