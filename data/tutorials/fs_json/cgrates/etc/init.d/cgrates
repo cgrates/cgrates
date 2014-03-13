@@ -14,6 +14,8 @@
 # Do NOT "set -e"
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
+RUNDIR=/tmp/$NAME/run
+PIDFILE=$RUNDIR/cgr-engine.pid
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="CGRateS real-time charging system"
 NAME=cgrates
@@ -26,6 +28,8 @@ PIDFILE=/tmp/cgr-engine_tutfsjson.pid
 SCRIPTNAME=$TUTFOLDER/etc/init.d/$NAME
 DEFAULTS=$TUTFOLDER/etc/default/$NAME
 ENABLE=false
+HISTDIR=/tmp/$NAME/history
+CDREDIR=/tmp/$NAME/cdre
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -44,6 +48,22 @@ ENABLE=false
 if [ "$ENABLE" != "true" ]; then
   echo "$DESC not yet configured. Edit $DEFAULTS first."
   exit 0
+fi
+
+# Install the run folder
+if [ ! -d $RUNDIR ]; then
+  mkdir -p $RUNDIR
+  chown $USER:$GROUP $RUNDIR
+fi
+# Install the cdre folder
+if [ ! -d $CDREDIR ]; then
+  mkdir -p $CDREDIR
+  chown $USER:$GROUP $CDREDIR
+fi
+# Install the history folder
+if [ ! -d $HISTDIR ]; then
+  mkdir -p $HISTDIR
+  chown $USER:$GROUP $HISTDIR
 fi
 
 

@@ -76,9 +76,6 @@ func TestCreateDirs(t *testing.T) {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}
-		if err := os.MkdirAll(pathDir, 0755); err != nil {
-			t.Fatal("Error creating folder: ", pathDir, err)
-		}
 	}
 }
 

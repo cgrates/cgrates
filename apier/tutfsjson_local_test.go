@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
+	"flag"
 	"fmt"
 	"net/rpc/jsonrpc"
 	"os"
@@ -36,21 +37,21 @@ import (
 var fsjsonCfgPath string
 var fsjsonCfg *config.CGRConfig
 
+var waitFs = flag.Int("wait_fs", 1000, "Number of miliseconds to wait for FreeSWITCH to start")
+
 func init() {
 	fsjsonCfgPath = path.Join(*dataDir, "tutorials", "fs_json", "cgrates", "etc", "cgrates", "cgrates.cfg")
 	fsjsonCfg, _ = config.NewCGRConfig(&fsjsonCfgPath)
 }
 
-func TestFsJsonCreateDirs(t *testing.T) {
+// Remove here so they can be properly created by init script
+func TestFsJsonRemoveDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, pathDir := range []string{cfg.CdreDir, cfg.HistoryDir} {
+	for _, pathDir := range []string{fsjsonCfg.CdreDir, fsjsonCfg.HistoryDir} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
-		}
-		if err := os.MkdirAll(pathDir, 0755); err != nil {
-			t.Fatal("Error creating folder: ", pathDir, err)
 		}
 	}
 }
@@ -102,18 +103,27 @@ func TestFsJsonInitDataDb(t *testing.T) {
 	}
 }
 
+func TestFsJsonStartFs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	exec.Command("pkill", "freeswitch").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
+	go func() {
+		fs := exec.Command("/usr/share/cgrates/tutorials/fs_json/freeswitch/etc/init.d/freeswitch", "start")
+		out, _ := fs.CombinedOutput()
+		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsJson: %s", out))
+	}()
+	time.Sleep(time.Duration(*waitFs) * time.Millisecond) // Give time to rater to fire up
+}
+
 // Finds cgr-engine executable and starts it with default configuration
 func TestFsJsonStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	enginePath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		t.Fatal("Cannot find cgr-engine executable")
-	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	go func() {
-		eng := exec.Command(enginePath, "-config", fsjsonCfgPath)
+		eng := exec.Command("/usr/share/cgrates/tutorials/fs_json/cgrates/etc/init.d/cgrates", "start")
 		out, _ := eng.CombinedOutput()
 		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsJson: %s", out))
 	}()
@@ -196,5 +206,20 @@ func TestFsJsonStopEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	exec.Command("pkill", "cgr-engine").Run()
+	go func() {
+		eng := exec.Command("/usr/share/cgrates/tutorials/fs_json/cgrates/etc/init.d/cgrates", "stop")
+		out, _ := eng.CombinedOutput()
+		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsJson: %s", out))
+	}()
+}
+
+func TestFsJsonStopFs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	go func() {
+		fs := exec.Command("/usr/share/cgrates/tutorials/fs_json/freeswitch/etc/init.d/freeswitch", "stop")
+		out, _ := fs.CombinedOutput()
+		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsJson: %s", out))
+	}()
 }
