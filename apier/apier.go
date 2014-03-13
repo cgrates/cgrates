@@ -177,6 +177,11 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	} else if !loaded {
 		return errors.New("NOT_FOUND")
 	}
+	//Automatic cache of the newly inserted rating plan
+	didNotChange := []string{}
+	if err := self.RatingDb.CacheRating(nil, nil, didNotChange, didNotChange); err != nil {
+		return err
+	}
 	*reply = OK
 	return nil
 }
@@ -189,6 +194,11 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if err := dbReader.LoadRatingProfileFiltered(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	//Automatic cache of the newly inserted rating profile
+	didNotChange := []string{}
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, []string{engine.RATING_PROFILE_PREFIX + attrs.KeyId()}, didNotChange); err != nil {
+		return err
 	}
 	*reply = OK
 	return nil
@@ -239,9 +249,9 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	dataNotChanged := []string{}
 	//Automatic cache of the newly inserted rating profile
-	if err := self.RatingDb.CacheRating(dataNotChanged, dataNotChanged, []string{engine.RATING_PROFILE_PREFIX + keyId}, dataNotChanged); err != nil {
+	didNotChange := []string{}
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, []string{engine.RATING_PROFILE_PREFIX + keyId}, didNotChange); err != nil {
 		return err
 	}
 	*reply = OK
