@@ -35,45 +35,74 @@ func TestSharedGroupGetMembersExcept(t *testing.T) {
 		!reflect.DeepEqual(a3, []string{"1", "2"}) {
 		t.Error("Error getting shared group members: ", a1, a2, a3)
 	}
-
 }
 
 func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 	bc := BalanceChain{
 		&Balance{Value: 2.0},
-		&Balance{Value: 1.0},
+		&Balance{Uuid: "uuuu", Value: 1.0, account: &Account{Id: "test"}},
 		&Balance{Value: 3.0},
 	}
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
-		"test": &SharingParameters{Strategy: STRATEGY_LOWEST_FIRST}},
+		"test": &SharingParameters{Strategy: STRATEGY_LOWEST}},
 	}
-	b := sg.PopBalanceByStrategy("test", &bc)
-	if b.Value != 1.0 {
-		t.Error("Error popping the right balance according to strategy: ", b, bc)
-	}
-	if len(bc) != 2 ||
-		bc[0].Value != 2.0 ||
-		bc[1].Value != 3.0 {
-		t.Error("Error removing balance from chain: ", bc)
+	sbc := sg.GetBalancesByStrategy(bc[1], bc)
+	if len(sbc) != 3 ||
+		sbc[0].Value != 1.0 ||
+		sbc[1].Value != 2.0 {
+		t.Error("Error sorting balance chain: ", sbc[0].Value)
 	}
 }
 
 func TestSharedPopBalanceByStrategyHigh(t *testing.T) {
 	bc := BalanceChain{
-		&Balance{Value: 2.0},
+		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{Id: "test"}},
 		&Balance{Value: 1.0},
 		&Balance{Value: 3.0},
 	}
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
-		"test": &SharingParameters{Strategy: STRATEGY_HIGHEST_FIRST}},
+		"test": &SharingParameters{Strategy: STRATEGY_HIGHEST}},
 	}
-	b := sg.PopBalanceByStrategy("test", &bc)
-	if b.Value != 3.0 {
-		t.Error("Error popping the right balance according to strategy: ", b, bc)
+	sbc := sg.GetBalancesByStrategy(bc[0], bc)
+	if len(sbc) != 3 ||
+		sbc[0].Value != 3.0 ||
+		sbc[1].Value != 2.0 {
+		t.Error("Error sorting balance chain: ", sbc)
 	}
-	if len(bc) != 2 ||
-		bc[0].Value != 2.0 ||
-		bc[1].Value != 1.0 {
-		t.Error("Error removing balance from chain: ", bc)
+}
+
+func TestSharedPopBalanceByStrategyMineHigh(t *testing.T) {
+	bc := BalanceChain{
+		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{Id: "test"}},
+		&Balance{Value: 1.0},
+		&Balance{Value: 3.0},
+	}
+	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
+		"test": &SharingParameters{Strategy: STRATEGY_MINE_HIGHEST}},
+	}
+	sbc := sg.GetBalancesByStrategy(bc[0], bc)
+	if len(sbc) != 3 ||
+		sbc[0].Value != 2.0 ||
+		sbc[1].Value != 3.0 {
+		t.Error("Error sorting balance chain: ", sbc)
+	}
+}
+
+func TestSharedPopBalanceByStrategyRandomHigh(t *testing.T) {
+	bc := BalanceChain{
+		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{Id: "test"}},
+		&Balance{Value: 1.0},
+		&Balance{Value: 3.0},
+	}
+	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
+		"test": &SharingParameters{Strategy: STRATEGY_RANDOM}},
+	}
+	x := bc[0]
+	sbc := sg.GetBalancesByStrategy(bc[0], bc)
+	firstTest := (sbc[0].Uuid == x.Uuid)
+	sbc = sg.GetBalancesByStrategy(bc[0], bc)
+	secondTest := (sbc[0].Uuid == x.Uuid)
+	if firstTest && secondTest {
+		t.Error("Something is wrong with balance randomizer")
 	}
 }
