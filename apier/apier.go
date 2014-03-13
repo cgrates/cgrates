@@ -239,8 +239,9 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	dataNotChanged := []string{}
 	//Automatic cache of the newly inserted rating profile
-	if err := self.RatingDb.CacheRating(nil, nil, []string{engine.RATING_PROFILE_PREFIX + keyId}, nil); err != nil {
+	if err := self.RatingDb.CacheRating(dataNotChanged, dataNotChanged, []string{engine.RATING_PROFILE_PREFIX + keyId}, dataNotChanged); err != nil {
 		return err
 	}
 	*reply = OK

@@ -159,7 +159,6 @@ func (s *Session) SaveOperations() {
 	}
 	go func() {
 		for _, sr := range s.sessionRuns {
-			engine.Logger.Debug(fmt.Sprintf("Saving operations for session %v, runId: %s", s, sr.runId))
 			if len(sr.callCosts) == 0 {
 				break // There are no costs to save, ignore the operation
 			}
