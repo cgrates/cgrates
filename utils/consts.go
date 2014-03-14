@@ -64,6 +64,7 @@ const (
 	COMMENT_CHAR               = '#'
 	CSV_SEP                    = ','
 	FALLBACK_SEP               = ';'
+	REGEXP_SEP                 = '~'
 	JSON                       = "json"
 	MSGPACK                    = "msgpack"
 	CSV_LOAD                   = "CSVLOAD"

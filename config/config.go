@@ -85,7 +85,7 @@ type CGRConfig struct {
 	BalancerEnabled          bool
 	SchedulerEnabled         bool
 	CDRSEnabled              bool          // Enable CDR Server service
-	CDRSExtraFields          []string      //Extra fields to store in CDRs
+	CDRSExtraFields          []string      // Extra fields to store in CDRs
 	CDRSMediator             string        // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	CdreCdrFormat            string        // Format of the exported CDRs. <csv>
 	CdreExtraFields          []string      // Extra fields list to add in exported CDRs
