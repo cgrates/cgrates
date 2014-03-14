@@ -102,7 +102,11 @@ func TestSharedPopBalanceByStrategyRandomHigh(t *testing.T) {
 	firstTest := (sbc[0].Uuid == x.Uuid)
 	sbc = sg.GetBalancesByStrategy(bc[0], bc)
 	secondTest := (sbc[0].Uuid == x.Uuid)
-	if firstTest && secondTest {
+	sbc = sg.GetBalancesByStrategy(bc[0], bc)
+	thirdTest := (sbc[0].Uuid == x.Uuid)
+	sbc = sg.GetBalancesByStrategy(bc[0], bc)
+	fourthTest := (sbc[0].Uuid == x.Uuid)
+	if firstTest && secondTest && thirdTest && fourthTest {
 		t.Error("Something is wrong with balance randomizer")
 	}
 }

@@ -129,7 +129,7 @@ func (rbcs *RandomBalanceChainSorter) Sort() {
 	src := *rbcs
 	// randomize balance chain
 	dest := make([]*Balance, len(src))
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 	perm := rand.Perm(len(src))
 	for i, v := range perm {
 		dest[v] = src[i]
