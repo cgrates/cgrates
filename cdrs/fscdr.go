@@ -56,7 +56,7 @@ const (
 
 type FSCdr struct {
 	vars map[string]string
-	body map[string]interface{}
+	body map[string]interface{} // keeps the loaded body for extra field search
 }
 
 func (fsCdr FSCdr) New(body []byte) (utils.RawCDR, error) {
