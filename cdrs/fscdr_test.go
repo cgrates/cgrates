@@ -20,6 +20,7 @@ package cdrs
 
 import (
 	"reflect"
+	"regexp"
 	"testing"
 	"time"
 
@@ -89,7 +90,7 @@ func TestCDRFields(t *testing.T) {
 	if fsCdr.GetDuration() != 4000000000 {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
-	cfg.CDRSExtraFields = []string{"sip_user_agent", "read_codec", "write_codec"}
+	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "sip_user_agent"}, &utils.RSRField{Id: "read_codec"}, &utils.RSRField{Id: "write_codec"}}
 	extraFields := fsCdr.GetExtraFields()
 	if len(extraFields) != 3 {
 		t.Error("Error parsing extra fields: ", extraFields)
@@ -150,7 +151,7 @@ func TestSearchExtraFieldLast(t *testing.T) {
 
 func TestSearchExtraField(t *testing.T) {
 	fsCdr, _ := new(FSCdr).New(body)
-	cfg.CDRSExtraFields = []string{"caller_id_name"}
+	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "caller_id_name"}}
 	extraFields := fsCdr.GetExtraFields()
 	if len(extraFields) != 1 || extraFields["caller_id_name"] != "dan" {
 		t.Error("Error parsing extra fields: ", extraFields)
@@ -162,5 +163,20 @@ func TestSearchExtraFieldInSlice(t *testing.T) {
 	value := fsCdr.(FSCdr).searchExtraField("app_data", fsCdr.(FSCdr).body)
 	if value != "effective_caller_id_number=+4986517174960" {
 		t.Error("Error finding extra field: ", value)
+	}
+}
+
+func TestSearchReplaceInExtraFields(t *testing.T) {
+	cfg, _ = config.NewDefaultCGRConfig()
+	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "read_codec"},
+		&utils.RSRField{Id: "sip_user_agent", RSRule: &utils.ReSearchReplace{regexp.MustCompile(`([A-Za-z]*).+`), "$1"}},
+		&utils.RSRField{Id: "write_codec"}}
+	fsCdr, _ := new(FSCdr).New(body)
+	extraFields := fsCdr.GetExtraFields()
+	if len(extraFields) != 3 {
+		t.Error("Error parsing extra fields: ", extraFields)
+	}
+	if extraFields["sip_user_agent"] != "Jitsi" {
+		t.Error("Error parsing extra fields: ", extraFields)
 	}
 }

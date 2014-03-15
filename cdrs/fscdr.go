@@ -116,10 +116,12 @@ func (fsCdr FSCdr) GetReqType() string {
 func (fsCdr FSCdr) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string, len(cfg.CDRSExtraFields))
 	for _, field := range cfg.CDRSExtraFields {
-		if extraValue, found := fsCdr.vars[field]; found {
-			extraFields[field] = extraValue
-		} else {
-			extraFields[field] = fsCdr.searchExtraField(field, fsCdr.body)
+		origFieldVal, foundInVars := fsCdr.vars[field.Id]
+		if !foundInVars {
+			origFieldVal = fsCdr.searchExtraField(field.Id, fsCdr.body)
+		}
+		if len(origFieldVal) != 0 { // Found a value, parse it
+			extraFields[field.Id] = field.ParseValue(origFieldVal)
 		}
 	}
 	return extraFields
