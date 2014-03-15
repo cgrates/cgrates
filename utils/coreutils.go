@@ -226,10 +226,10 @@ func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
 	return time.ParseDuration(durStr)
 }
 
-// Used to parse extra fields definition into regexp rules
-func ParseSearchReplaceRegexp(strRule string) (*regexp.Regexp, string, error) {
+// Used to parse extra fields definition search regexp rule and replace template
+func ParseSearchReplaceStr(strRule string) (*regexp.Regexp, string, error) {
 	// String rule expected in the form ~hdr_name:s/match_rule/replace_rule/
-	getRuleRgxp := regexp.MustCompile(`:s\/(.+[^\\])\/(.+[^\\])\/`) // Make sure the separator / is not escaped in the rule
+	getRuleRgxp := regexp.MustCompile(`~\w+:s\/(.+[^\\])\/(.+[^\\])\/`) // Make sure the separator / is not escaped in the rule
 	allMatches := getRuleRgxp.FindStringSubmatch(strRule)
 	if len(allMatches) != 3 { // Second and third groups are of interest to us
 		return nil, "", errors.New("Invalid Search&Replace rule.")
@@ -242,9 +242,9 @@ func ParseSearchReplaceRegexp(strRule string) (*regexp.Regexp, string, error) {
 }
 
 // Used to expand string sources, eg: extra fields
-func RegexpSearchReplace(src string, searchRl *regexp.Regexp, replaceTpl string) string {
+func RegexpSearchReplace(src string, searchRgxp *regexp.Regexp, replaceTpl string) string {
 	res := []byte{}
-	match := searchRl.FindStringSubmatchIndex(src)
-	res = searchRl.ExpandString(res, replaceTpl, src, match)
+	match := searchRgxp.FindStringSubmatchIndex(src)
+	res = searchRgxp.ExpandString(res, replaceTpl, src, match)
 	return string(res)
 }
