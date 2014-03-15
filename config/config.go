@@ -84,32 +84,33 @@ type CGRConfig struct {
 	RaterBalancer            string // balancer address host:port
 	BalancerEnabled          bool
 	SchedulerEnabled         bool
-	CDRSEnabled              bool          // Enable CDR Server service
-	CDRSExtraFields          []string      // Extra fields to store in CDRs
-	CDRSMediator             string        // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CdreCdrFormat            string        // Format of the exported CDRs. <csv>
-	CdreExtraFields          []string      // Extra fields list to add in exported CDRs
-	CdreDir                  string        // Path towards exported cdrs directory
-	CdrcEnabled              bool          // Enable CDR client functionality
-	CdrcCdrs                 string        // Address where to reach CDR server
-	CdrcCdrsMethod           string        // Mechanism to use when posting CDRs on server  <http_cgr>
-	CdrcRunDelay             time.Duration // Sleep interval between consecutive runs, if time unit missing, defaults to seconds, 0 to use automation via inotify
-	CdrcCdrType              string        // CDR file format <csv>.
-	CdrcCdrInDir             string        // Absolute path towards the directory where the CDRs are stored.
-	CdrcCdrOutDir            string        // Absolute path towards the directory where processed CDRs will be moved.
-	CdrcSourceId             string        // Tag identifying the source of the CDRs within CGRS database.
-	CdrcAccIdField           string        // Accounting id field identifier. Use index number in case of .csv cdrs.
-	CdrcReqTypeField         string        // Request type field identifier. Use index number in case of .csv cdrs.
-	CdrcDirectionField       string        // Direction field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTenantField          string        // Tenant field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTorField             string        // Type of Record field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAccountField         string        // Account field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSubjectField         string        // Subject field identifier. Use index numbers in case of .csv CDRs.
-	CdrcDestinationField     string        // Destination field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSetupTimeField       string        // Setup time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAnswerTimeField      string        // Answer time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcDurationField        string        // Duration field identifier. Use index numbers in case of .csv cdrs.
-	CdrcExtraFields          []string      // Field identifiers of the fields to add in extra fields section, special format in case of .csv "field1:index1,field2:index2"
+	CDRSEnabled              bool                              // Enable CDR Server service
+	CDRSExtraFields          []string                          // Extra fields to store in CDRs
+	CDRSSearchReplaceRules   map[string]*utils.ReSearchReplace // Key will be the field name, values their compiled ReSearchReplace rules
+	CDRSMediator             string                            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CdreCdrFormat            string                            // Format of the exported CDRs. <csv>
+	CdreExtraFields          []string                          // Extra fields list to add in exported CDRs
+	CdreDir                  string                            // Path towards exported cdrs directory
+	CdrcEnabled              bool                              // Enable CDR client functionality
+	CdrcCdrs                 string                            // Address where to reach CDR server
+	CdrcCdrsMethod           string                            // Mechanism to use when posting CDRs on server  <http_cgr>
+	CdrcRunDelay             time.Duration                     // Sleep interval between consecutive runs, 0 to use automation via inotify
+	CdrcCdrType              string                            // CDR file format <csv>.
+	CdrcCdrInDir             string                            // Absolute path towards the directory where the CDRs are stored.
+	CdrcCdrOutDir            string                            // Absolute path towards the directory where processed CDRs will be moved.
+	CdrcSourceId             string                            // Tag identifying the source of the CDRs within CGRS database.
+	CdrcAccIdField           string                            // Accounting id field identifier. Use index number in case of .csv cdrs.
+	CdrcReqTypeField         string                            // Request type field identifier. Use index number in case of .csv cdrs.
+	CdrcDirectionField       string                            // Direction field identifier. Use index numbers in case of .csv cdrs.
+	CdrcTenantField          string                            // Tenant field identifier. Use index numbers in case of .csv cdrs.
+	CdrcTorField             string                            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
+	CdrcAccountField         string                            // Account field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSubjectField         string                            // Subject field identifier. Use index numbers in case of .csv CDRs.
+	CdrcDestinationField     string                            // Destination field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSetupTimeField       string                            // Setup time field identifier. Use index numbers in case of .csv cdrs.
+	CdrcAnswerTimeField      string                            // Answer time field identifier. Use index numbers in case of .csv cdrs.
+	CdrcDurationField        string                            // Duration field identifier. Use index numbers in case of .csv cdrs.
+	CdrcExtraFields          []string                          // Extra fields to extract, special format in case of .csv "field1:index1,field2:index2"
 	SMEnabled                bool
 	SMSwitchType             string
 	SMRater                  string        // address where to access rater. Can be internal, direct rater address or the address of a balancer

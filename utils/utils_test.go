@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"reflect"
-	"regexp"
 	"testing"
 	"time"
 )
@@ -385,48 +383,5 @@ func TestParseZeroRatingSubject(t *testing.T) {
 		if d, err := ParseZeroRatingSubject(s); err != nil || d != dur[i] {
 			t.Error("Error parsing rating subject: ", s, d, err)
 		}
-	}
-}
-
-func TestParseSearchReplaceStr(t *testing.T) {
-	// Normal case
-	strRule := `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
-	srchRgxp, replaceTpl, err := ParseSearchReplaceStr(strRule)
-	if srchRgxp == nil || len(replaceTpl) == 0 || err != nil {
-		t.Error("Could not parse the str rule")
-	} else if !reflect.DeepEqual(srchRgxp, regexp.MustCompile(`sip:\+49(\d+)@`)) {
-		t.Error("Unexpected regexp search parsed")
-	} else if replaceTpl != "0$1" {
-		t.Error("Unexpected replace template parsed")
-	}
-	// Missing ~ prefix
-	strRule = `sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
-	if _, _, err := ParseSearchReplaceStr(strRule); err == nil {
-		t.Error("Parse error, srchrepl rule does not start with ~")
-	}
-	// Separator escaped
-	strRule = `~sip_redirected_to:s\/sip:\+49(\d+)@/0$1/`
-	if _, _, err := ParseSearchReplaceStr(strRule); err == nil {
-		t.Error("Parse error, srchrepl rule does not contain correct number of separators")
-	}
-	// One extra separator but escaped
-	strRule = `~sip_redirected_to:s/sip:\+49(\d+)\/@/0$1/`
-	srchRgxp, replaceTpl, err = ParseSearchReplaceStr(strRule)
-	if srchRgxp == nil || len(replaceTpl) == 0 || err != nil {
-		t.Error("Could not parse the str rule")
-	} else if !reflect.DeepEqual(srchRgxp, regexp.MustCompile(`sip:\+49(\d+)\/@`)) {
-		t.Error("Unexpected regexp search parsed")
-	} else if replaceTpl != "0$1" {
-		t.Error("Unexpected replace template parsed")
-	}
-}
-
-func TestRegexpSearchReplace(t *testing.T) {
-	srchRgxp := regexp.MustCompile(`sip:\+49(\d+)@(\d*\.\d*\.\d*\.\d*)`)
-	replaceTpl := "0$1@$2"
-	source := "<sip:+4986517174963@127.0.0.1;transport=tcp>"
-	expectOut := "086517174963@127.0.0.1"
-	if outStr := RegexpSearchReplace(source, srchRgxp, replaceTpl); outStr != expectOut {
-		t.Error("Unexpected output from SearchReplace: ", outStr)
 	}
 }
