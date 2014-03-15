@@ -78,7 +78,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.BalancerEnabled = false
 	eCfg.SchedulerEnabled = false
 	eCfg.CDRSEnabled = false
-	eCfg.CDRSExtraFields = []string{}
+	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
 	eCfg.CdreCdrFormat = "csv"
 	eCfg.CdreExtraFields = []string{}
@@ -211,7 +211,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.BalancerEnabled = true
 	eCfg.SchedulerEnabled = true
 	eCfg.CDRSEnabled = true
-	eCfg.CDRSExtraFields = []string{"test"}
+	eCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CDRSMediator = "test"
 	eCfg.CdreCdrFormat = "test"
 	eCfg.CdreExtraFields = []string{"test"}

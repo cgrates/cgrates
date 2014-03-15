@@ -21,7 +21,10 @@ package config
 import (
 	"code.google.com/p/goconf/conf"
 	"errors"
+	"regexp"
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Adds support for slice values in config
@@ -41,4 +44,44 @@ func ConfigSlice(c *conf.ConfigFile, section, valName string) ([]string, error) 
 		}
 	}
 	return cfgValStrs, nil
+}
+
+// Used to parse extra fields definition
+func parseSearchReplaceFromFieldRule(fieldRule string) (string, *utils.ReSearchReplace, error) {
+	// String rule expected in the form ~hdr_name:s/match_rule/replace_rule/
+	getRuleRgxp := regexp.MustCompile(`~(\w+):s\/(.+[^\\])\/(.+[^\\])\/`) // Make sure the separator / is not escaped in the rule
+	allMatches := getRuleRgxp.FindStringSubmatch(fieldRule)
+	if len(allMatches) != 4 { // Second and third groups are of interest to us
+		return "", nil, errors.New("Invalid Search&Replace field rule.")
+	}
+	fieldName := allMatches[1]
+	searchRegexp, err := regexp.Compile(allMatches[2])
+	if err != nil {
+		return fieldName, nil, err
+	}
+	return fieldName, &utils.ReSearchReplace{searchRegexp, allMatches[3]}, nil
+}
+
+func ParseRSRFields(configVal string) ([]*utils.RSRField, error) {
+	cfgValStrs := strings.Split(configVal, string(utils.CSV_SEP))
+	if len(cfgValStrs) == 1 && cfgValStrs[0] == "" { // Prevents returning iterable with empty value
+		return []*utils.RSRField{}, nil
+	}
+	rsrFields := make([]*utils.RSRField, len(cfgValStrs))
+	for idx, cfgValStr := range cfgValStrs {
+		if len(cfgValStr) == 0 { //One empty element is presented when splitting empty string
+			return nil, errors.New("Empty values in config slice")
+
+		}
+		if !strings.HasPrefix(cfgValStr, utils.REGEXP_SEP) {
+			rsrFields[idx] = &utils.RSRField{Id: cfgValStr}
+			continue // Nothing to be done for fields without ReSearchReplace rules
+		}
+		if fldId, reSrcRepl, err := parseSearchReplaceFromFieldRule(cfgValStr); err != nil {
+			return nil, err
+		} else {
+			rsrFields[idx] = &utils.RSRField{fldId, reSrcRepl}
+		}
+	}
+	return rsrFields, nil
 }

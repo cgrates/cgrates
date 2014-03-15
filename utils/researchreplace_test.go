@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"reflect"
 	"regexp"
 	"testing"
 )
@@ -30,34 +29,5 @@ func TestProcessReSearchReplace(t *testing.T) {
 	expectOut := "086517174963@127.0.0.1"
 	if outStr := rsr.Process(source); outStr != expectOut {
 		t.Error("Unexpected output from SearchReplace: ", outStr)
-	}
-}
-
-func TestParseSearchReplaceFromFieldRule(t *testing.T) {
-	// Normal case
-	fieldRule := `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
-	field, regSrchRplc, err := ParseSearchReplaceFromFieldRule(fieldRule)
-	if len(field) == 0 || regSrchRplc == nil || err != nil {
-		t.Error("Failed parsing the field rule")
-	} else if !reflect.DeepEqual(regSrchRplc, &ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)@`), "0$1"}) {
-		t.Error("Unexpected ReSearchReplace parsed")
-	}
-	// Missing ~ prefix
-	fieldRule = `sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
-	if _, _, err := ParseSearchReplaceFromFieldRule(fieldRule); err == nil {
-		t.Error("Parse error, field rule does not start with ~")
-	}
-	// Separator escaped
-	fieldRule = `~sip_redirected_to:s\/sip:\+49(\d+)@/0$1/`
-	if _, _, err := ParseSearchReplaceFromFieldRule(fieldRule); err == nil {
-		t.Error("Parse error, field rule does not contain correct number of separators")
-	}
-	// One extra separator but escaped
-	fieldRule = `~sip_redirected_to:s/sip:\+49(\d+)\/@/0$1/`
-	field, regSrchRplc, err = ParseSearchReplaceFromFieldRule(fieldRule)
-	if len(field) == 0 || regSrchRplc == nil || err != nil {
-		t.Error("Failed parsing the field rule")
-	} else if !reflect.DeepEqual(regSrchRplc, &ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)\/@`), "0$1"}) {
-		t.Error("Unexpected ReSearchReplace parsed")
 	}
 }

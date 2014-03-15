@@ -18,19 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"regexp"
-)
-
-// Regexp Search/Replace, used for example for field formatting
-type ReSearchReplace struct {
-	SearchRegexp    *regexp.Regexp
-	ReplaceTemplate string
+type RSRField struct {
+	Id     string           //  Identifier
+	RSRule *ReSearchReplace // Rule to use when processing field value
 }
 
-func (self *ReSearchReplace) Process(source string) string {
-	res := []byte{}
-	match := self.SearchRegexp.FindStringSubmatchIndex(source)
-	res = self.SearchRegexp.ExpandString(res, self.ReplaceTemplate, source, match)
-	return string(res)
+// Parse the field value from a string
+func (rsrf *RSRField) ParseValue(value string) string {
+	if rsrf.RSRule != nil {
+		value = rsrf.RSRule.Process(value)
+	}
+	return value
 }
