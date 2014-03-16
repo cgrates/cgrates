@@ -49,8 +49,8 @@ mediator = test				# Address where to reach the Mediator. Empty for disabling me
 
 [cdre]
 cdr_format = test			# Exported CDRs format <csv>
-extra_fields = test 			# List of extra fields to be exported out in CDRs
 export_dir = test			# Path where the exported CDRs will be placed
+exported_fields = test			# List of fields in the exported CDRs
 
 [cdrc]
 enabled = true				# Enable CDR client functionality

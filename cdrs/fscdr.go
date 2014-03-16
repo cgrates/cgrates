@@ -120,9 +120,7 @@ func (fsCdr FSCdr) GetExtraFields() map[string]string {
 		if !foundInVars {
 			origFieldVal = fsCdr.searchExtraField(field.Id, fsCdr.body)
 		}
-		if len(origFieldVal) != 0 { // Found a value, parse it
-			extraFields[field.Id] = field.ParseValue(origFieldVal)
-		}
+		extraFields[field.Id] = field.ParseValue(origFieldVal)
 	}
 	return extraFields
 }

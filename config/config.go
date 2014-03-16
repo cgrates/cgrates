@@ -88,7 +88,7 @@ type CGRConfig struct {
 	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
 	CDRSMediator             string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	CdreCdrFormat            string            // Format of the exported CDRs. <csv>
-	CdreExtraFields          []string          // Extra fields list to add in exported CDRs
+	CdreExportedFields       []*utils.RSRField // List of fields in the exported CDRs
 	CdreDir                  string            // Path towards exported cdrs directory
 	CdrcEnabled              bool              // Enable CDR client functionality
 	CdrcCdrs                 string            // Address where to reach CDR server
@@ -192,7 +192,6 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSExtraFields = []*utils.RSRField{}
 	self.CDRSMediator = ""
 	self.CdreCdrFormat = "csv"
-	self.CdreExtraFields = []string{}
 	self.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
@@ -257,6 +256,23 @@ func (self *CGRConfig) setDefaults() error {
 	self.MailerAuthUser = "cgrates"
 	self.MailerAuthPass = "CGRateS.org"
 	self.MailerFromAddr = "cgr-mailer@localhost.localdomain"
+	self.CdreExportedFields = []*utils.RSRField{
+		&utils.RSRField{Id: utils.CGRID},
+		&utils.RSRField{Id: utils.MEDI_RUNID},
+		&utils.RSRField{Id: utils.ACCID},
+		&utils.RSRField{Id: utils.CDRHOST},
+		&utils.RSRField{Id: utils.REQTYPE},
+		&utils.RSRField{Id: utils.DIRECTION},
+		&utils.RSRField{Id: utils.TENANT},
+		&utils.RSRField{Id: utils.TOR},
+		&utils.RSRField{Id: utils.ACCOUNT},
+		&utils.RSRField{Id: utils.SUBJECT},
+		&utils.RSRField{Id: utils.DESTINATION},
+		&utils.RSRField{Id: utils.SETUP_TIME},
+		&utils.RSRField{Id: utils.ANSWER_TIME},
+		&utils.RSRField{Id: utils.DURATION},
+		&utils.RSRField{Id: utils.COST},
+	}
 	return nil
 }
 
@@ -448,9 +464,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
 		cfg.CdreCdrFormat, _ = c.GetString("cdre", "cdr_format")
 	}
-	if hasOpt = c.HasOption("cdre", "extra_fields"); hasOpt {
-		if cfg.CdreExtraFields, errParse = ConfigSlice(c, "cdre", "extra_fields"); errParse != nil {
+	if hasOpt = c.HasOption("cdre", "exported_fields"); hasOpt {
+		extraFieldsStr, _ := c.GetString("cdre", "exported_fields")
+		if extraFields, err := ParseRSRFields(extraFieldsStr); err != nil {
 			return nil, errParse
+		} else {
+			cfg.CdreExportedFields = extraFields
 		}
 	}
 	if hasOpt = c.HasOption("cdre", "export_dir"); hasOpt {

@@ -20,6 +20,7 @@ package cdrexporter
 
 import (
 	"bytes"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"strings"
 	"testing"
@@ -28,17 +29,19 @@ import (
 
 func TestCsvCdrWriter(t *testing.T) {
 	writer := &bytes.Buffer{}
-	csvCdrWriter := NewCsvCdrWriter(writer, 4, []string{"extra3", "extra1"})
+	cfg, _ := config.NewDefaultCGRConfig()
+	exportedFields := append(cfg.CdreExportedFields, &utils.RSRField{Id: "extra3"}, &utils.RSRField{Id: "dummy_extra"}, &utils.RSRField{Id: "extra1"})
+	csvCdrWriter := NewCsvCdrWriter(writer, 4, exportedFields)
 	ratedCdr := &utils.StoredCdr{CgrId: utils.FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
-		Duration: 10, MediationRunId: utils.DEFAULT_RUNID,
+		Duration: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
 	}
 	csvCdrWriter.Write(ratedCdr)
 	csvCdrWriter.Close()
-	expected := "b18944ef4dc618569f24c27b9872827a242bad0c,default,dsafdsaf,192.168.1.1,rated,*out,cgrates.org,call,1001,1001,1002,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10,1.0100,val_extra3,val_extra1"
+	expected := `b18944ef4dc618569f24c27b9872827a242bad0c,default,dsafdsaf,192.168.1.1,rated,*out,cgrates.org,call,1001,1001,1002,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10,1.0100,val_extra3,"",val_extra1`
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
-		t.Errorf("Expected %s received %s.", expected, result)
+		t.Errorf("Expected: \n%s received: \n%s.", expected, result)
 	}
 }

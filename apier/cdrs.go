@@ -58,7 +58,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		} else {
 			defer fileOut.Close()
 		}
-		csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CdreExtraFields)
+		csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CdreExportedFields)
 		for _, cdr := range cdrs {
 			if err := csvWriter.Write(cdr); err != nil {
 				os.Remove(fileName)

@@ -22,38 +22,32 @@ import (
 	"encoding/csv"
 	"github.com/cgrates/cgrates/utils"
 	"io"
-	"sort"
-	"strconv"
 )
 
 type CsvCdrWriter struct {
-	writer        *csv.Writer
-	roundDecimals int      // Round floats like Cost using this number of decimals
-	extraFields   []string // Extra fields to append after primary ones, order important
+	writer         *csv.Writer
+	roundDecimals  int               // Round floats like Cost using this number of decimals
+	exportedFields []*utils.RSRField // The fields exported, order important
 }
 
-func NewCsvCdrWriter(writer io.Writer, roundDecimals int, extraFields []string) *CsvCdrWriter {
-	return &CsvCdrWriter{csv.NewWriter(writer), roundDecimals, extraFields}
+func NewCsvCdrWriter(writer io.Writer, roundDecimals int, exportedFields []*utils.RSRField) *CsvCdrWriter {
+	return &CsvCdrWriter{csv.NewWriter(writer), roundDecimals, exportedFields}
 }
 
-func (dcw *CsvCdrWriter) Write(cdr *utils.StoredCdr) error {
-	primaryFields := []string{cdr.CgrId, cdr.MediationRunId, cdr.AccId, cdr.CdrHost, cdr.ReqType, cdr.Direction, cdr.Tenant, cdr.TOR, cdr.Account, cdr.Subject,
-		cdr.Destination, cdr.SetupTime.String(), cdr.AnswerTime.String(), strconv.Itoa(int(cdr.Duration)), strconv.FormatFloat(cdr.Cost, 'f', dcw.roundDecimals, 64)}
-	if len(dcw.extraFields) == 0 {
-		dcw.extraFields = utils.MapKeys(cdr.ExtraFields)
-		sort.Strings(dcw.extraFields) // Controlled order in case of dynamic extra fields
+func (csvwr *CsvCdrWriter) Write(cdr *utils.StoredCdr) error {
+	row := make([]string, len(csvwr.exportedFields))
+	for idx, fld := range csvwr.exportedFields { // Add primary fields
+		var fldVal string
+		if fld.Id == utils.COST {
+			fldVal = cdr.FormatCost(csvwr.roundDecimals)
+		} else {
+			fldVal = cdr.ExportFieldValue(fld.Id)
+		}
+		row[idx] = fld.ParseValue(fldVal)
 	}
-	lenPrimary := len(primaryFields)
-	row := make([]string, lenPrimary+len(dcw.extraFields))
-	for idx, fld := range primaryFields { // Add primary fields
-		row[idx] = fld
-	}
-	for idx, fldKey := range dcw.extraFields { // Add extra fields
-		row[lenPrimary+idx] = cdr.ExtraFields[fldKey]
-	}
-	return dcw.writer.Write(row)
+	return csvwr.writer.Write(row)
 }
 
-func (dcw *CsvCdrWriter) Close() {
-	dcw.writer.Flush()
+func (csvwr *CsvCdrWriter) Close() {
+	csvwr.writer.Flush()
 }

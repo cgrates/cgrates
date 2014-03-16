@@ -148,3 +148,42 @@ func TestAsRawCdrHttpForm(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", ratedCdr.ExtraFields["fieldextr2"], cdrForm.Get("fieldextr2"))
 	}
 }
+
+func TestExportFieldValue(t *testing.T) {
+	cdr := StoredCdr{CgrId: FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
+		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+	if cdr.ExportFieldValue(CGRID) != cdr.CgrId ||
+		cdr.ExportFieldValue(ACCID) != cdr.AccId ||
+		cdr.ExportFieldValue(CDRHOST) != cdr.CdrHost ||
+		cdr.ExportFieldValue(CDRSOURCE) != cdr.CdrSource ||
+		cdr.ExportFieldValue(REQTYPE) != cdr.ReqType ||
+		cdr.ExportFieldValue(DIRECTION) != cdr.Direction ||
+		cdr.ExportFieldValue(TENANT) != cdr.Tenant ||
+		cdr.ExportFieldValue(TOR) != cdr.TOR ||
+		cdr.ExportFieldValue(ACCOUNT) != cdr.Account ||
+		cdr.ExportFieldValue(SUBJECT) != cdr.Subject ||
+		cdr.ExportFieldValue(DESTINATION) != cdr.Destination ||
+		cdr.ExportFieldValue(SETUP_TIME) != "0001-01-01 00:00:00 +0000 UTC" ||
+		cdr.ExportFieldValue(ANSWER_TIME) != cdr.AnswerTime.String() ||
+		cdr.ExportFieldValue(DURATION) != "10" ||
+		cdr.ExportFieldValue(MEDI_RUNID) != cdr.MediationRunId ||
+		cdr.ExportFieldValue(COST) != "1.01" ||
+		cdr.ExportFieldValue("field_extr1") != cdr.ExtraFields["field_extr1"] ||
+		cdr.ExportFieldValue("fieldextr2") != cdr.ExtraFields["fieldextr2"] ||
+		cdr.ExportFieldValue("dummy_field") != "" {
+		t.Error("Unexpected filed value received")
+	}
+}
+
+func TestFormatCost(t *testing.T) {
+	cdr := StoredCdr{Cost: 1.01}
+	if cdr.FormatCost(4) != "1.0100" {
+		t.Error("Unexpected format of the cost: ", cdr.FormatCost(4))
+	}
+	cdr = StoredCdr{Cost: 1.01001}
+	if cdr.FormatCost(4) != "1.0100" {
+		t.Error("Unexpected format of the cost: ", cdr.FormatCost(4))
+	}
+}

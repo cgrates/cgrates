@@ -28,9 +28,12 @@ type ReSearchReplace struct {
 	ReplaceTemplate string
 }
 
-func (self *ReSearchReplace) Process(source string) string {
+func (rsr *ReSearchReplace) Process(source string) string {
+	if rsr.SearchRegexp == nil {
+		return ""
+	}
 	res := []byte{}
-	match := self.SearchRegexp.FindStringSubmatchIndex(source)
-	res = self.SearchRegexp.ExpandString(res, self.ReplaceTemplate, source, match)
+	match := rsr.SearchRegexp.FindStringSubmatchIndex(source)
+	res = rsr.SearchRegexp.ExpandString(res, rsr.ReplaceTemplate, source, match)
 	return string(res)
 }

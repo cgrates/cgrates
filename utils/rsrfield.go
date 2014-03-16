@@ -25,6 +25,9 @@ type RSRField struct {
 
 // Parse the field value from a string
 func (rsrf *RSRField) ParseValue(value string) string {
+	if len(value) == 0 {
+		return value
+	}
 	if rsrf.RSRule != nil {
 		value = rsrf.RSRule.Process(value)
 	}

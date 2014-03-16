@@ -82,6 +82,8 @@ const (
 	SETUP_TIME                 = "setup_time"
 	ANSWER_TIME                = "answer_time"
 	DURATION                   = "duration"
+	MEDI_RUNID                 = "mediation_runid"
+	COST                       = "cost"
 	DEFAULT_RUNID              = "default"
 	STATIC_VALUE_PREFIX        = "^"
 	CDRE_CSV                   = "csv"
