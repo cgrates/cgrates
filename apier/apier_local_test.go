@@ -1291,6 +1291,24 @@ func TestResponderGetCost(t *testing.T) {
 	}
 }
 
+// Test here ResponderGetCost
+func TestGetCallCostLog(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var cc engine.CallCost
+	var attrs AttrGetCallCost
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil {
+		t.Error("Failed to detect missing fields in ApierV1.GetCallCostLog")
+	}
+	attrs.CgrId = "dummyid"
+	attrs.RunId = "default"
+	if err := rater.Call("ApierV1.GetCallCostLog", attrs, &cc); err == nil || err.Error() != utils.ERR_NOT_FOUND {
+		t.Error("ApierV1.GetCallCostLog: should return NOT_FOUND")
+	}
+}
+
 func TestCdrServer(t *testing.T) {
 	if !*testLocal {
 		return

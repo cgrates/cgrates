@@ -23,6 +23,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"path"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -302,5 +303,32 @@ func TestGetStoredCdrs(t *testing.T) {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+}
+
+func TestCallCost(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cgrId := utils.FSCgrId("bbb1")
+	cc := &CallCost{
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart: time.Date(2013, 9, 10, 13, 40, 0, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
+			},
+			&TimeSpan{
+				TimeStart: time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 30, 0, time.UTC),
+			},
+		},
+	}
+	if err := mysql.LogCallCost("bbb1", TEST_SQL, TEST_SQL, cc); err != nil {
+		t.Error(err.Error())
+	}
+	if ccRcv, err := mysql.GetCallCostLog(cgrId, TEST_SQL, TEST_SQL); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(cc, ccRcv) {
+		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
 	}
 }
