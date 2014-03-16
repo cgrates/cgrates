@@ -632,19 +632,19 @@ func (self *SQLStorage) GetStoredCdrs(runId, cdrHost, cdrSource, reqType, direct
 		if len(fltr) != 0 {
 			fltr += " AND "
 		}
-		fltr += fmt.Sprintf(" destination LIKE '%s%'", destPrefix)
+		fltr += fmt.Sprintf(" destination LIKE '%s%%'", destPrefix)
 	}
 	if !timeStart.IsZero() {
 		if len(fltr) != 0 {
 			fltr += " AND "
 		}
-		fltr += fmt.Sprintf(" answer_time>='%d'", timeStart)
+		fltr += fmt.Sprintf(" answer_time>='%s'", timeStart)
 	}
 	if !timeEnd.IsZero() {
 		if len(fltr) != 0 {
 			fltr += " AND "
 		}
-		fltr += fmt.Sprintf(" answer_time<'%d'", timeEnd)
+		fltr += fmt.Sprintf(" answer_time<'%s'", timeEnd)
 	}
 	if ignoreRated {
 		if len(fltr) != 0 {
