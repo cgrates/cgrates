@@ -21,6 +21,7 @@ package apier
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/cdrexporter"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"os"
 	"path"
@@ -35,6 +36,12 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
 	}
+	exportedFields := self.Config.CdreExportedFields
+	if len(attr.ExportedFields) != 0 {
+		if exportedFields, err = config.ParseRSRFields(attr.ExportedFields); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		}
+	}
 	if len(attr.TimeStart) != 0 {
 		if tStart, err = utils.ParseTimeDetectLayout(attr.TimeStart); err != nil {
 			return err
@@ -45,7 +52,8 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return err
 		}
 	}
-	cdrs, err := self.CdrDb.GetStoredCdrs(tStart, tEnd, attr.SkipErrors, attr.SkipRated)
+	cdrs, err := self.CdrDb.GetStoredCdrs(attr.MediationRunId, attr.CdrHost, attr.CdrSource, attr.ReqType, attr.Direction,
+		attr.Tenant, attr.Tor, attr.Account, attr.Subject, attr.DestinationPrefix, tStart, tEnd, attr.SkipErrors, attr.SkipRated)
 	if err != nil {
 		return err
 	}
@@ -58,7 +66,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		} else {
 			defer fileOut.Close()
 		}
-		csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CdreExportedFields)
+		csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, exportedFields)
 		for _, cdr := range cdrs {
 			if err := csvWriter.Write(cdr); err != nil {
 				os.Remove(fileName)

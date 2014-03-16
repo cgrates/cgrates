@@ -161,7 +161,7 @@ func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 }
 
 func (self *Mediator) RateCdrs(timeStart, timeEnd time.Time, rerateErrors, rerateRated bool) error {
-	cdrs, err := self.cdrDb.GetStoredCdrs(timeStart, timeEnd, !rerateErrors, !rerateRated)
+	cdrs, err := self.cdrDb.GetStoredCdrs("", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, !rerateErrors, !rerateRated)
 	if err != nil {
 		return err
 	}

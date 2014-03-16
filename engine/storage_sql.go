@@ -569,10 +569,71 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // Return a slice of CDRs from storDb using optional filters.a
 // ignoreErr - do not consider cdrs with rating errors
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
-func (self *SQLStorage) GetStoredCdrs(timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
+func (self *SQLStorage) GetStoredCdrs(runId, cdrHost, cdrSource, reqType, direction, tenant, tor, account, subject, destPrefix string,
+	timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
 	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,setup_time,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
 	fltr := ""
+	if len(runId) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" runid='%s'", runId)
+	}
+	if len(cdrHost) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" cdrhost='%s'", cdrHost)
+	}
+	if len(cdrSource) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" cdrsource='%s'", cdrSource)
+	}
+	if len(reqType) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" reqtype='%s'", reqType)
+	}
+	if len(direction) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" direction='%s'", direction)
+	}
+	if len(tenant) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" tenant='%s'", tenant)
+	}
+	if len(tor) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" tor='%s'", tor)
+	}
+	if len(account) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" account='%s'", account)
+	}
+	if len(subject) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" %s.subject='%s'", utils.TBL_CDRS_PRIMARY, subject)
+	}
+	if len(destPrefix) != 0 {
+		if len(fltr) != 0 {
+			fltr += " AND "
+		}
+		fltr += fmt.Sprintf(" destination LIKE '%s%'", destPrefix)
+	}
 	if !timeStart.IsZero() {
 		if len(fltr) != 0 {
 			fltr += " AND "
