@@ -492,12 +492,20 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 }
 
 func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	row := self.Db.QueryRow(fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, timespans, source  FROM %s WHERE cgrid='%s' AND source='%s' AND runid='%s'", utils.TBL_COST_DETAILS, cgrid, source, runid))
+	qry := fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, timespans, source  FROM %s WHERE cgrid='%s' AND runid='%s'",
+		utils.TBL_COST_DETAILS, cgrid, runid)
+	if len(source) != 0 {
+		qry += fmt.Sprintf(" AND source='%s'", source)
+	}
+	row := self.Db.QueryRow(qry)
 	var accid, src string
 	var timespansJson string
 	cc = &CallCost{Cost: -1}
 	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
 		&cc.Destination, &cc.Cost, &timespansJson, &src)
+	if len(timespansJson) == 0 { // No costs returned
+		return nil, nil
+	}
 	if err = json.Unmarshal([]byte(timespansJson), &cc.Timespans); err != nil {
 		return nil, err
 	}
