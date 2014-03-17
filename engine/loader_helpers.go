@@ -126,6 +126,7 @@ func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) 
 		},
 		Weight: rpl.Weight,
 		Rating: &RIRate{
+			Id:               dr.Rate.RateId,
 			ConnectFee:       dr.Rate.RateSlots[0].ConnectFee,
 			RoundingMethod:   dr.Rate.RateSlots[0].RoundingMethod,
 			RoundingDecimals: dr.Rate.RateSlots[0].RoundingDecimals,

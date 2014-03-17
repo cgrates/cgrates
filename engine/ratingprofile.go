@@ -82,6 +82,7 @@ func (rpas RatingPlanActivations) GetActiveForCall(cd *CallDescriptor) RatingPla
 type RatingInfo struct {
 	MatchedSubject string
 	MatchedPrefix  string
+	MatchedDestId  string
 	ActivationTime time.Time
 	RateIntervals  RateIntervalList
 	FallbackKeys   []string
@@ -113,7 +114,8 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 			Logger.Err(fmt.Sprintf("Error checking destination: %v", err))
 			continue
 		}
-		bestPrecision := 0
+		prefix := ""
+		destinationId := ""
 		var rps RateIntervalList
 		for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
 			if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
@@ -121,7 +123,8 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 				for _, dId := range destIds {
 					if _, ok := rpl.DestinationRates[dId]; ok {
 						rps = rpl.RateIntervalList(dId)
-						bestPrecision = len(p)
+						prefix = p
+						destinationId = dId
 						break
 					}
 				}
@@ -132,13 +135,13 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		}
 		// check if it's the first ri and add a blank one for the initial part not covered
 		if index == 0 && cd.TimeStart.Before(rpa.ActivationTime) {
-			ris = append(ris, &RatingInfo{"", "", cd.TimeStart, nil, []string{cd.GetKey(FALLBACK_SUBJECT)}})
+			ris = append(ris, &RatingInfo{"", "", "", cd.TimeStart, nil, []string{cd.GetKey(FALLBACK_SUBJECT)}})
 		}
-		if bestPrecision > 0 {
-			ris = append(ris, &RatingInfo{rp.Id, cd.Destination[:bestPrecision], rpa.ActivationTime, rps, rpa.FallbackKeys})
+		if len(prefix) > 0 {
+			ris = append(ris, &RatingInfo{rp.Id, prefix, destinationId, rpa.ActivationTime, rps, rpa.FallbackKeys})
 		} else {
 			// add for fallback information
-			ris = append(ris, &RatingInfo{"", "", rpa.ActivationTime, nil, rpa.FallbackKeys})
+			ris = append(ris, &RatingInfo{"", "", "", rpa.ActivationTime, nil, rpa.FallbackKeys})
 		}
 	}
 	if len(ris) > 0 {

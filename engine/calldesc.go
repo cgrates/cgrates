@@ -312,6 +312,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			firstSpan.ratingInfo = rp
 			firstSpan.MatchedSubject = rp.MatchedSubject
 			firstSpan.MatchedPrefix = rp.MatchedPrefix
+			firstSpan.MatchedDestId = rp.MatchedDestId
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {

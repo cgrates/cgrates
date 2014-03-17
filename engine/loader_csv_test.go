@@ -482,6 +482,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 		Ratings: map[string]*RIRate{
 			"d54545c1": &RIRate{
+				Id:         "R1",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -495,6 +496,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 				RoundingDecimals: 2,
 			},
 			"4bb00b9c": &RIRate{
+				Id:         "R2",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -508,6 +510,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 				RoundingDecimals: 2,
 			},
 			"e06c337f": &RIRate{
+				Id:         "R3",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -566,7 +569,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan)
+		t.Errorf("Error loading destination rate timing: %+v", rplan.Ratings["e06c337f"])
 	}
 }
 
