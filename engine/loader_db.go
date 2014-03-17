@@ -733,6 +733,9 @@ func (dbr *DbReader) LoadAll() error {
 	if err = dbr.LoadRatingProfiles(); err != nil {
 		return err
 	}
+	if err = dbr.LoadSharedGroups(); err != nil {
+		return err
+	}
 	if err = dbr.LoadActions(); err != nil {
 		return err
 	}

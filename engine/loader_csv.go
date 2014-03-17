@@ -723,6 +723,9 @@ func (csvr *CSVReader) LoadAll() error {
 	if err = csvr.LoadRatingProfiles(); err != nil {
 		return err
 	}
+	if err = csvr.LoadSharedGroups(); err != nil {
+		return err
+	}
 	if err = csvr.LoadActions(); err != nil {
 		return err
 	}
