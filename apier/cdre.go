@@ -20,7 +20,7 @@ package apier
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/cdrexporter"
+	"github.com/cgrates/cgrates/cdre"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"os"
@@ -66,7 +66,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		} else {
 			defer fileOut.Close()
 		}
-		csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, exportedFields)
+		csvWriter := cdre.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, exportedFields)
 		for _, cdr := range cdrs {
 			if err := csvWriter.Write(cdr); err != nil {
 				os.Remove(fileName)
