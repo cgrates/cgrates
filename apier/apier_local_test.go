@@ -32,6 +32,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"encoding/json"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -909,12 +910,14 @@ func TestApierGetRatingPlan(t *testing.T) {
 			}
 		}
 	*/
-	riRate := &engine.RIRate{ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{
+	riRate := &engine.RIRate{Id:"RT_FS_USERS", ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{
 		&engine.Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60) * time.Second, RateUnit: time.Duration(60) * time.Second},
 	}}
 	for _, rating := range reply.Ratings {
+		riRateJsson,_ := json.Marshal(rating)
 		if !reflect.DeepEqual(rating, riRate) {
-			t.Errorf("Unexpected riRate received: %v", rating)
+			t.Errorf("Unexpected riRate received: %s", riRateJsson)
+			// {"Id":"RT_FS_USERS","ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":0}
 		}
 	}
 }
