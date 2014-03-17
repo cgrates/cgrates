@@ -55,6 +55,7 @@ DUMMY,INVALID;DATA
 var ratingProfilesSample = `#Tenant,TOR,Direction,Subject,ActivationTime,RatingPlanTag,FallbackSubject
 cgrates.org,call,*out,*any,2012-01-01T00:00:00Z,RP_RETAIL,
 DUMMY,INVALID;DATA
+cgrates.org,call,*out,subj1;alias1,2012-01-01T00:00:00Z,RP_RETAIL,
 `
 
 var actionsSample = `#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,SharedGroup,ExtraParameters,Weight
@@ -81,6 +82,7 @@ DUMMY,INVALID;DATA
 var accountActionsSample = `#Tenant,Account,Direction,ActionTimingsTag,ActionTriggersTag
 cgrates.org,1001,*out,PREPAID_10,STANDARD_TRIGGERS
 DUMMY,INVALID;DATA
+cgrates.org,1002;1006,*out,PACKAGE_10,STANDARD_TRIGGERS
 `
 
 func TestTimingsValidator(t *testing.T) {
@@ -219,7 +221,7 @@ func TestRatingProfilesValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2:
+		case 2, 4:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
@@ -243,7 +245,7 @@ func TestActionsValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2, 3, 4:
+		case 2, 3, 4, 7:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
@@ -315,7 +317,7 @@ func TestAccountActionsValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2:
+		case 2, 4:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
