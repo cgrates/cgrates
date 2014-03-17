@@ -110,7 +110,7 @@ func TestCacheRefresh(t *testing.T) {
 }
 
 func TestCacheAliases(t *testing.T) {
-	if subj, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + "a3"); err != nil || subj != "minu" {
+	if subj, err := cache2go.GetCached(RP_ALIAS_PREFIX + "a3"); err != nil || subj != "minu" {
 		t.Error("Error caching alias: ", subj, err)
 	}
 }

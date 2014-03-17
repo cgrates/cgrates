@@ -1217,6 +1217,9 @@ func TestTriggersExecute(t *testing.T) {
 
 // Start fresh before loading from folder
 func TestResetDataBeforeLoadFromFolder(t *testing.T) {
+	if !*testLocal {
+		return
+	}
 	TestInitDataDb(t)
 	reply := ""
 	arc := new(utils.ApiReloadCache)

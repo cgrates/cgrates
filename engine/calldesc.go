@@ -138,7 +138,7 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
 		// check if subject is alias
-		if realSubject, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + subj); err == nil {
+		if realSubject, err := cache2go.GetCached(ACC_ALIAS_PREFIX + subj); err == nil {
 			cd.Account = realSubject.(string)
 		}
 		subj = cd.Account
@@ -286,7 +286,7 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	// check if subject is alias
-	if rs, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + subject); err == nil {
+	if rs, err := cache2go.GetCached(RP_ALIAS_PREFIX + subject); err == nil {
 		realSubject := rs.(string)
 		subject = realSubject
 		cd.Subject = realSubject
@@ -630,7 +630,7 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
 	dataStorage.CacheRating(nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil)
 	return nil
 
 }

@@ -59,7 +59,7 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) erro
 		cache2go.RemPrefixKey(RATING_PROFILE_PREFIX)
 	}
 	if alsKeys == nil {
-		cache2go.RemPrefixKey(ALIAS_PREFIX)
+		cache2go.RemPrefixKey(RP_ALIAS_PREFIX)
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
@@ -79,9 +79,9 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) erro
 				return err
 			}
 		}
-		if strings.HasPrefix(k, ALIAS_PREFIX) {
+		if strings.HasPrefix(k, RP_ALIAS_PREFIX) {
 			cache2go.RemKey(k)
-			if _, err := ms.GetAlias(k[len(ALIAS_PREFIX):], true); err != nil {
+			if _, err := ms.GetRpAlias(k[len(RP_ALIAS_PREFIX):], true); err != nil {
 				return err
 			}
 		}
@@ -89,9 +89,15 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) erro
 	return nil
 }
 
-func (ms *MapStorage) CacheAccounting(actKeys, shgKeys []string) error {
+func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) error {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX) // Forced until we can fine tune it
+	}
+	if shgKeys == nil {
+		cache2go.RemPrefixKey(SHARED_GROUP_PREFIX) // Forced until we can fine tune it
+	}
+	if alsKeys == nil {
+		cache2go.RemPrefixKey(ACC_ALIAS_PREFIX)
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, ACTION_PREFIX) {
@@ -100,14 +106,15 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys []string) error {
 				return err
 			}
 		}
-	}
-	if shgKeys == nil {
-		cache2go.RemPrefixKey(SHARED_GROUP_PREFIX) // Forced until we can fine tune it
-	}
-	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, SHARED_GROUP_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetSharedGroup(k[len(SHARED_GROUP_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+		if strings.HasPrefix(k, ACC_ALIAS_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetAccAlias(k[len(ACC_ALIAS_PREFIX):], true); err != nil {
 				return err
 			}
 		}
@@ -198,8 +205,8 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	return
 }
 
-func (ms *MapStorage) GetAlias(key string, checkDb bool) (alias string, err error) {
-	key = ALIAS_PREFIX + key
+func (ms *MapStorage) GetRpAlias(key string, checkDb bool) (alias string, err error) {
+	key = RP_ALIAS_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(string), nil
 	}
@@ -215,15 +222,47 @@ func (ms *MapStorage) GetAlias(key string, checkDb bool) (alias string, err erro
 	return
 }
 
-func (ms *MapStorage) SetAlias(key, alias string) (err error) {
-	ms.dict[ALIAS_PREFIX+key] = []byte(alias)
+func (ms *MapStorage) SetRpAlias(key, alias string) (err error) {
+	ms.dict[RP_ALIAS_PREFIX+key] = []byte(alias)
 	//cache2go.Cache(ALIAS_PREFIX+key, alias)
 	return
 }
 
-func (ms *MapStorage) RemoveAccountAliases(accounts []string) (err error) {
+func (ms *MapStorage) RemoveRpAliases(accounts []string) (err error) {
 	for key, value := range ms.dict {
-		if strings.HasPrefix(key, ALIAS_PREFIX) && utils.IsSliceMember(accounts, string(value)) {
+		if strings.HasPrefix(key, RP_ALIAS_PREFIX) && utils.IsSliceMember(accounts, string(value)) {
+			delete(ms.dict, key)
+		}
+	}
+	return
+}
+
+func (ms *MapStorage) GetAccAlias(key string, checkDb bool) (alias string, err error) {
+	key = ACC_ALIAS_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(string), nil
+	}
+	if !checkDb {
+		return "", errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		alias = string(values)
+		cache2go.Cache(key, alias)
+	} else {
+		return "", errors.New("not found")
+	}
+	return
+}
+
+func (ms *MapStorage) SetAccAlias(key, alias string) (err error) {
+	ms.dict[ACC_ALIAS_PREFIX+key] = []byte(alias)
+	//cache2go.Cache(ALIAS_PREFIX+key, alias)
+	return
+}
+
+func (ms *MapStorage) RemoveAccAliases(accounts []string) (err error) {
+	for key, value := range ms.dict {
+		if strings.HasPrefix(key, ACC_ALIAS_PREFIX) && utils.IsSliceMember(accounts, string(value)) {
 			delete(ms.dict, key)
 		}
 	}

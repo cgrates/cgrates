@@ -79,7 +79,7 @@ func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage
 		exitChan <- true
 		return
 	}
-	if err := accountDb.CacheAccounting(nil, nil); err != nil {
+	if err := accountDb.CacheAccounting(nil, nil, nil); err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
 		exitChan <- true
 		return

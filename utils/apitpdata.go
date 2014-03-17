@@ -283,7 +283,8 @@ type ApiReloadCache struct {
 	RatingProfileIds []string
 	ActionIds        []string
 	SharedGroupIds   []string
-	Aliases          []string
+	RpAliases        []string
+	AccAliases       []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache

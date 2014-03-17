@@ -169,7 +169,7 @@ func init() {
 	csvr.LoadAccountActions()
 	csvr.WriteToDatabase(false, false)
 	dataStorage.CacheRating(nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -786,16 +786,24 @@ func TestLoadAccountActions(t *testing.T) {
 	}
 }
 
-func TestLoadAliases(t *testing.T) {
-	if len(csvr.aliases) != 5 {
-		t.Error("Failed to load aliases: ", csvr.aliases)
+func TestLoadRpAliases(t *testing.T) {
+	if len(csvr.rpAliases) != 3 {
+		t.Error("Failed to load rp aliases: ", csvr.rpAliases)
 	}
-	if csvr.aliases[RATING_PROFILE_PREFIX+"a1"] != "minu" ||
-		csvr.aliases[RATING_PROFILE_PREFIX+"a2"] != "minu" ||
-		csvr.aliases[RATING_PROFILE_PREFIX+"a3"] != "minu" ||
-		csvr.aliases[ACCOUNT_PREFIX+"a1"] != "minitsboy" ||
-		csvr.aliases[ACCOUNT_PREFIX+"a2"] != "minitsboy" {
-		t.Error("Error loading aliases: ", csvr.aliases)
+	if csvr.rpAliases["a1"] != "minu" ||
+		csvr.rpAliases["a2"] != "minu" ||
+		csvr.rpAliases["a3"] != "minu" {
+		t.Error("Error loading rp aliases: ", csvr.rpAliases)
+	}
+}
+
+func TestLoadAccAliases(t *testing.T) {
+	if len(csvr.accAliases) != 2 {
+		t.Error("Failed to load acc aliases: ", csvr.accAliases)
+	}
+	if csvr.accAliases["a1"] != "minitsboy" ||
+		csvr.accAliases["a2"] != "minitsboy" {
+		t.Error("Error loading acc aliases: ", csvr.accAliases)
 	}
 }
 
