@@ -692,7 +692,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		csvr.accountActions[tag] = ub
 		aTimings, exists := csvr.actionsTimings[record[3]]
 		if !exists {
-			log.Printf("Could not get action timing for tag %s", record[3])
+			log.Printf("Could not get action plan for tag %s", record[3])
 			// must not continue here
 		}
 		for _, at := range aTimings {

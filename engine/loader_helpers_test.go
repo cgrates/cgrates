@@ -79,6 +79,11 @@ STANDARD_TRIGGERS,*monetary,*out,*max_counter,15,FS_USERS,LOG_BALANCE,10
 DUMMY,INVALID;DATA
 `
 
+var sharedGroupsSample = `#Id,Account,Strategy,RatingSubject
+SHARED_A,*any,*lowest_first,
+DUMMY,INVALID;DATA
+`
+
 var accountActionsSample = `#Tenant,Account,Direction,ActionTimingsTag,ActionTriggersTag
 cgrates.org,1001,*out,PREPAID_10,STANDARD_TRIGGERS
 DUMMY,INVALID;DATA
@@ -294,6 +299,30 @@ func TestActionTriggersValidator(t *testing.T) {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
 		case 2, 3, 4:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
+func TestSharedGroupsValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(sharedGroupsSample))
+	lnValidator := FileValidators[utils.SHARED_GROUPS_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
