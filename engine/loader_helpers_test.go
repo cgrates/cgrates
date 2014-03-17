@@ -63,6 +63,7 @@ WARN_HTTP,*call_url,,,,,,,,,http://localhost:8000,10
 LOG_BALANCE,*log,,,,,,,,,,10
 DUMMY,INVALID;DATA
 PREPAID_10,*topup_reset,*monetary,*out,5,*unlimited,*any,,10,,10
+TOPUP_RST_SHARED_5,*topup_reset,*monetary,*out,5,*unlimited,*any,subj,20,SHARED_A,param&some,10
 `
 
 var actionTimingsSample = `#Tag,ActionsTag,TimingTag,Weight

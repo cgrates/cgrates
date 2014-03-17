@@ -122,8 +122,8 @@ cgrates.directvoip.co.uk,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
 cgrates.directvoip.co.uk,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
 `
 	sharedGroups = `
-SG1,*any,*lowest_first,,
-SG2,*any,*lowest_first,EVENING,
+SG1,*any,*lowest_first,
+SG2,*any,*lowest_first,EVENING
 `
 
 	actions = `
