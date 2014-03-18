@@ -67,7 +67,7 @@ func (sg *SharedGroup) GetBalancesByStrategy(myBalance *Balance, bc BalanceChain
 	}
 
 	strategy := STRATEGY_MINE_RANDOM
-	if sharingParameters != nil {
+	if sharingParameters != nil && sharingParameters.Strategy != "" {
 		strategy = sharingParameters.Strategy
 	}
 	switch strategy {
@@ -76,6 +76,11 @@ func (sg *SharedGroup) GetBalancesByStrategy(myBalance *Balance, bc BalanceChain
 	case STRATEGY_HIGHEST, STRATEGY_MINE_HIGHEST:
 		sort.Sort(HighestBalanceChainSorter(bc))
 	case STRATEGY_RANDOM, STRATEGY_MINE_RANDOM:
+		rbc := RandomBalanceChainSorter(bc)
+		(&rbc).Sort()
+		bc = BalanceChain(rbc)
+	default: // use mine random for anything else
+		strategy = STRATEGY_MINE_RANDOM
 		rbc := RandomBalanceChainSorter(bc)
 		(&rbc).Sort()
 		bc = BalanceChain(rbc)
