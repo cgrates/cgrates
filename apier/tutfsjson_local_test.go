@@ -109,7 +109,7 @@ func TestFsJsonStartFs(t *testing.T) {
 	}
 	exec.Command("pkill", "freeswitch").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	go func() {
-		fs := exec.Command("/usr/share/cgrates/tutorials/fs_json/freeswitch/etc/init.d/freeswitch", "start")
+		fs := exec.Command("sudo", "/usr/share/cgrates/tutorials/fs_json/freeswitch/etc/init.d/freeswitch", "start")
 		out, _ := fs.CombinedOutput()
 		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsJson: %s", out))
 	}()
@@ -123,7 +123,7 @@ func TestFsJsonStartEngine(t *testing.T) {
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	go func() {
-		eng := exec.Command("/usr/share/cgrates/tutorials/fs_json/cgrates/etc/init.d/cgrates", "start")
+		eng := exec.Command("sudo", "/usr/share/cgrates/tutorials/fs_json/cgrates/etc/init.d/cgrates", "start")
 		out, _ := eng.CombinedOutput()
 		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsJson: %s", out))
 	}()
@@ -147,14 +147,6 @@ func TestFsJsonEmptyCache(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	reply := ""
-	arc := new(utils.ApiReloadCache)
-	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
-	} else if reply != "OK" {
-		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
-	}
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 0, RatingProfiles: 0, Actions: 0}
 	var args utils.AttrCacheStats
@@ -171,7 +163,7 @@ func TestFsJsonLoadTariffPlans(t *testing.T) {
 	}
 	reply := ""
 	// Simple test that command is executed without errors
-	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "tariffplans")}
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tutorials", "fs_json", "cgrates", "tariffplans")}
 	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
 	} else if reply != "OK" {
@@ -179,7 +171,7 @@ func TestFsJsonLoadTariffPlans(t *testing.T) {
 	}
 	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 1, Actions: 2}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 2, RatingProfiles: 2, Actions: 5}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())

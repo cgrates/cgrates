@@ -627,7 +627,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAliases); err != nil {
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys); err != nil {
 		return err
 	}
 	if self.Sched != nil {

@@ -104,9 +104,9 @@ func TestFsCsvStartFs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	exec.Command("pkill", "freeswitch").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
+	exec.Command("pkill", "freeswitch").Run() // Just to make sure no freeswitch is running
 	go func() {
-		fs := exec.Command("/usr/share/cgrates/tutorials/fs_csv/freeswitch/etc/init.d/freeswitch", "start")
+		fs := exec.Command("sudo", "/usr/share/cgrates/tutorials/fs_csv/freeswitch/etc/init.d/freeswitch", "start")
 		out, _ := fs.CombinedOutput()
 		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
 	}()
@@ -120,7 +120,7 @@ func TestFsCsvStartEngine(t *testing.T) {
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	go func() {
-		eng := exec.Command("/usr/share/cgrates/tutorials/fs_json/cgrates/etc/init.d/cgrates", "start")
+		eng := exec.Command("sudo", "/usr/share/cgrates/tutorials/fs_json/cgrates/etc/init.d/cgrates", "start")
 		out, _ := eng.CombinedOutput()
 		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
 	}()
@@ -143,14 +143,6 @@ func TestFsCsvRpcConn(t *testing.T) {
 func TestFsCsvEmptyCache(t *testing.T) {
 	if !*testLocal {
 		return
-	}
-	reply := ""
-	arc := new(utils.ApiReloadCache)
-	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
-	} else if reply != "OK" {
-		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 0, RatingProfiles: 0, Actions: 0}

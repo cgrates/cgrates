@@ -284,6 +284,7 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 }
 
 func (rs *RedisStorage) GetRpAlias(key string, checkDb bool) (alias string, err error) {
+
 	key = RP_ALIAS_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(string), nil
