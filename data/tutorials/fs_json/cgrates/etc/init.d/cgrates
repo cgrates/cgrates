@@ -23,7 +23,7 @@ DAEMON=/usr/bin/cgr-engine
 USER=cgrates
 GROUP=cgrates
 TUTFOLDER=/usr/share/cgrates/tutorials/fs_json/cgrates
-ENGINE_OPTS=-config=$TUTFOLDER/etc/cgrates/cgrates.cfg
+ENGINE_OPTS="-config=$TUTFOLDER/etc/cgrates/cgrates.cfg"
 PIDFILE=/tmp/cgr-engine_tutfsjson.pid
 SCRIPTNAME=$TUTFOLDER/etc/init.d/$NAME
 DEFAULTS=$TUTFOLDER/etc/default/$NAME
