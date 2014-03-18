@@ -252,7 +252,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("Rating profile liases")
+		log.Print("Rating profile aliases")
 	}
 	if err := dataStorage.RemoveRpAliases(csvr.dirtyRpAliases); err != nil {
 		return err

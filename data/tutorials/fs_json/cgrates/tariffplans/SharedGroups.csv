@@ -1,2 +1,2 @@
 #Id,Account,Strategy,RatingSubject
-SHARED_A,*any,*lowest_first,
+SHARED_A,*any,*highest_first,
