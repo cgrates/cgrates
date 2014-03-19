@@ -57,11 +57,9 @@
     - name: delete golang archive
       file: path=~/go1.2.linux-amd64.tar.gz state=absent
 
-    - name: add vars to bashrc
-      command: echo "export GOROOT=$HOME/go; export GOPATH=$HOME/code; export PATH=$PATH:$GOROOT/bin:$GOPATH/bin" >> ~/.bashrc
-
     - name: add variables to variables /etc/profile
-      command: echo "export GOROOT=/home/vagrant/go; GOPATH=/home/vagrant/code; PATH=$PATH:$GOROOT/bin:$GOPATH/bin" >> /etc/profile
+      shell: echo 'export GOROOT=/home/vagrant/go GOPATH=/home/vagrant/code; export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin' >> /etc/profile
+      sudo: yes
 
     - name: get cgrates 
       shell: GOROOT=~/go GOPATH=~/code ~/go/bin/go get -u -v github.com/cgrates/cgrates
