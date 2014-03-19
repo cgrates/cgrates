@@ -314,7 +314,7 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 		Tenant:      "vdf",
 		Subject:     "minu",
 		Destination: "0723",
-		Amount:      1000}
+	}
 	result, err := cd.GetMaxSessionDuration()
 	expected := time.Minute
 	if result != expected || err != nil {
@@ -330,8 +330,9 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 		TOR:         "0",
 		Tenant:      "vdf",
 		Subject:     "a1",
+		Account:     "a1",
 		Destination: "0723",
-		Amount:      1000}
+	}
 	result, err := cd.GetMaxSessionDuration()
 	expected := time.Minute
 	if result != expected || err != nil {
@@ -389,6 +390,7 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		Amount:       5400}
 	initial := cd.Clone()
 	cd.GetMaxSessionDuration()
+	cd.account = nil // it's OK to cache the account
 	if !reflect.DeepEqual(cd, initial) {
 		t.Errorf("GetMaxSessionDuration is changing the call descriptor %+v != %+v", cd, initial)
 	}

@@ -115,7 +115,7 @@ type CallDescriptor struct {
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	RatingInfos                           RatingInfos
 	Increments                            Increments
-	userBalance                           *Account
+	account                               *Account
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {
@@ -148,13 +148,13 @@ func (cd *CallDescriptor) GetAccountKey() string {
 
 // Gets and caches the user balance information.
 func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
-	if cd.userBalance == nil {
-		cd.userBalance, err = accountingStorage.GetAccount(cd.GetAccountKey())
+	if cd.account == nil {
+		cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey())
 	}
-	if cd.userBalance != nil && cd.userBalance.Disabled {
+	if cd.account != nil && cd.account.Disabled {
 		return nil, fmt.Errorf("User %s is disabled", ub.Id)
 	}
-	return cd.userBalance, err
+	return cd.account, err
 }
 
 /*
@@ -496,13 +496,20 @@ func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Dura
 	return utils.MinDuration(initialDuration, availableDuration), nil
 }
 
-func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
-	cd := origCD.Clone()
+func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
 	if account, err := cd.getAccount(); err != nil || account == nil {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	} else {
-		return cd.getMaxSessionDuration(account)
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+			AccLock.GuardMany(memberIds, func() (float64, error) {
+				duration, err = cd.getMaxSessionDuration(account)
+				return 0, err
+			})
+		} else {
+			return 0, err
+		}
+		return duration, err
 	}
 }
 
@@ -563,15 +570,24 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
-		remainingDuration, err := cd.getMaxSessionDuration(account)
-		if err != nil || remainingDuration == 0 {
-			return new(CallCost), fmt.Errorf("no more credit: %v", err)
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+			AccLock.GuardMany(memberIds, func() (float64, error) {
+				remainingDuration, err := cd.getMaxSessionDuration(account)
+				if err != nil || remainingDuration == 0 {
+					cc, err = new(CallCost), fmt.Errorf("no more credit: %v", err)
+					return 0, err
+				}
+				if remainingDuration > 0 { // for postpaying client returns -1
+					cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
+				}
+				cc, err = cd.debit(account)
+				return 0, err
+			})
+		} else {
+			return nil, err
 		}
-		if remainingDuration > 0 { // for postpaying client returns -1
-			cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
-		}
-		return cd.debit(account)
 	}
+	return cc, err
 }
 
 func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {

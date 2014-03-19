@@ -25,7 +25,7 @@ import (
 
 func TestSharedGroupGetMembersExcept(t *testing.T) {
 	sg := &SharedGroup{
-		Members: []string{"1", "2", "3"},
+		MemberIds: []string{"1", "2", "3"},
 	}
 	a1 := sg.GetMembersExceptUser("1")
 	a2 := sg.GetMembersExceptUser("2")
@@ -46,7 +46,7 @@ func TestSharedPopBalanceByStrategyLow(t *testing.T) {
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
 		"test": &SharingParameters{Strategy: STRATEGY_LOWEST}},
 	}
-	sbc := sg.GetBalancesByStrategy(bc[1], bc)
+	sbc := sg.SortBalancesByStrategy(bc[1], bc)
 	if len(sbc) != 3 ||
 		sbc[0].Value != 1.0 ||
 		sbc[1].Value != 2.0 {
@@ -63,7 +63,7 @@ func TestSharedPopBalanceByStrategyHigh(t *testing.T) {
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
 		"test": &SharingParameters{Strategy: STRATEGY_HIGHEST}},
 	}
-	sbc := sg.GetBalancesByStrategy(bc[0], bc)
+	sbc := sg.SortBalancesByStrategy(bc[0], bc)
 	if len(sbc) != 3 ||
 		sbc[0].Value != 3.0 ||
 		sbc[1].Value != 2.0 {
@@ -80,7 +80,7 @@ func TestSharedPopBalanceByStrategyMineHigh(t *testing.T) {
 	sg := &SharedGroup{AccountParameters: map[string]*SharingParameters{
 		"test": &SharingParameters{Strategy: STRATEGY_MINE_HIGHEST}},
 	}
-	sbc := sg.GetBalancesByStrategy(bc[0], bc)
+	sbc := sg.SortBalancesByStrategy(bc[0], bc)
 	if len(sbc) != 3 ||
 		sbc[0].Value != 2.0 ||
 		sbc[1].Value != 3.0 {
@@ -88,7 +88,7 @@ func TestSharedPopBalanceByStrategyMineHigh(t *testing.T) {
 	}
 }
 
-func TestSharedPopBalanceByStrategyRandomHigh(t *testing.T) {
+/*func TestSharedPopBalanceByStrategyRandomHigh(t *testing.T) {
 	bc := BalanceChain{
 		&Balance{Uuid: "uuuu", Value: 2.0, account: &Account{Id: "test"}},
 		&Balance{Value: 1.0},
@@ -98,15 +98,15 @@ func TestSharedPopBalanceByStrategyRandomHigh(t *testing.T) {
 		"test": &SharingParameters{Strategy: STRATEGY_RANDOM}},
 	}
 	x := bc[0]
-	sbc := sg.GetBalancesByStrategy(bc[0], bc)
+	sbc := sg.SortBalancesByStrategy(bc[0], bc)
 	firstTest := (sbc[0].Uuid == x.Uuid)
-	sbc = sg.GetBalancesByStrategy(bc[0], bc)
+	sbc = sg.SortBalancesByStrategy(bc[0], bc)
 	secondTest := (sbc[0].Uuid == x.Uuid)
-	sbc = sg.GetBalancesByStrategy(bc[0], bc)
+	sbc = sg.SortBalancesByStrategy(bc[0], bc)
 	thirdTest := (sbc[0].Uuid == x.Uuid)
-	sbc = sg.GetBalancesByStrategy(bc[0], bc)
+	sbc = sg.SortBalancesByStrategy(bc[0], bc)
 	fourthTest := (sbc[0].Uuid == x.Uuid)
 	if firstTest && secondTest && thirdTest && fourthTest {
 		t.Error("Something is wrong with balance randomizer")
 	}
-}
+}*/

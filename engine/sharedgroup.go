@@ -40,7 +40,8 @@ const (
 type SharedGroup struct {
 	Id                string
 	AccountParameters map[string]*SharingParameters
-	Members           []string
+	MemberIds         []string
+	members           []*Account // accounts caching
 }
 
 type SharingParameters struct {
@@ -49,18 +50,18 @@ type SharingParameters struct {
 }
 
 func (sg *SharedGroup) GetMembersExceptUser(ubId string) []string {
-	for i, m := range sg.Members {
+	for i, m := range sg.MemberIds {
 		if m == ubId {
-			a := make([]string, len(sg.Members))
-			copy(a, sg.Members)
+			a := make([]string, len(sg.MemberIds))
+			copy(a, sg.MemberIds)
 			a[i], a = a[len(a)-1], a[:len(a)-1]
 			return a
 		}
 	}
-	return sg.Members
+	return sg.MemberIds
 }
 
-func (sg *SharedGroup) GetBalancesByStrategy(myBalance *Balance, bc BalanceChain) BalanceChain {
+func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChain) BalanceChain {
 	sharingParameters := sg.AccountParameters[utils.ANY]
 	if sp, hasParamsForAccount := sg.AccountParameters[myBalance.account.Id]; hasParamsForAccount {
 		sharingParameters = sp
@@ -98,6 +99,32 @@ func (sg *SharedGroup) GetBalancesByStrategy(myBalance *Balance, bc BalanceChain
 		bc[0], bc[index] = bc[index], bc[0]
 	}
 	return bc
+}
+
+// Returns all shared group's balances collected from user accounts'
+func (sg *SharedGroup) GetBalances(destination, balanceType string, ub *Account) (bc BalanceChain) {
+	if len(sg.members) == 0 {
+		for _, ubId := range sg.MemberIds {
+			var nUb *Account
+			if ubId == ub.Id { // skip the initiating user
+				nUb = ub
+			} else {
+				nUb, _ = accountingStorage.GetAccount(ubId)
+				if nUb == nil || nUb.Disabled {
+					continue
+				}
+			}
+			sg.members = append(sg.members, nUb)
+			sb := nUb.getBalancesForPrefix(destination, nUb.BalanceMap[balanceType], sg.Id)
+			bc = append(bc, sb...)
+		}
+	} else {
+		for _, m := range sg.members {
+			sb := m.getBalancesForPrefix(destination, m.BalanceMap[balanceType], sg.Id)
+			bc = append(bc, sb...)
+		}
+	}
+	return
 }
 
 type LowestBalanceChainSorter []*Balance
