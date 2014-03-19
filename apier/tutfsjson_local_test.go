@@ -37,7 +37,7 @@ import (
 var fsjsonCfgPath string
 var fsjsonCfg *config.CGRConfig
 
-var waitFs = flag.Int("wait_fs", 1000, "Number of miliseconds to wait for FreeSWITCH to start")
+var waitFs = flag.Int("wait_fs", 500, "Number of miliseconds to wait for FreeSWITCH to start")
 
 func init() {
 	fsjsonCfgPath = path.Join(*dataDir, "tutorials", "fs_json", "cgrates", "etc", "cgrates", "cgrates.cfg")
@@ -190,6 +190,140 @@ func TestFsJsonGetAccount(t *testing.T) {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 {
 		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1002", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1003", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1004", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1006", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err == nil {
+		t.Error("Account not created and not returning error")
+	}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1007", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 0.0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 0, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	}
+}
+
+func TestMaxCallDuration(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cd := engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		TOR:         "call",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		TimeStart:   time.Now(),
+		TimeEnd:     time.Now().Add(fsjsonCfg.SMMaxCallDuration),
+	}
+	var remainingDurationFloat float64
+	if err := rater.Call("Responder.GetMaxSessionTime", cd, &remainingDurationFloat); err != nil {
+		t.Error(err)
+	} else {
+		remainingDuration := time.Duration(remainingDurationFloat)
+		if remainingDuration < time.Duration(3)*time.Hour {
+			t.Errorf("Expecting maxSessionTime around 3hs, received as: %v", remainingDuration)
+		}
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		TOR:         "call",
+		Subject:     "1002",
+		Account:     "1002",
+		Destination: "1001",
+		TimeStart:   time.Now(),
+		TimeEnd:     time.Now().Add(fsjsonCfg.SMMaxCallDuration),
+	}
+	if err := rater.Call("Responder.GetMaxSessionTime", cd, &remainingDurationFloat); err != nil {
+		t.Error(err)
+	} else {
+		remainingDuration := time.Duration(remainingDurationFloat)
+		if remainingDuration < time.Duration(3)*time.Hour {
+			t.Errorf("Expecting maxSessionTime around 3hs, received as: %v", remainingDuration)
+		}
+	}
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		TOR:         "call",
+		Subject:     "1006",
+		Account:     "1006",
+		Destination: "1001",
+		TimeStart:   time.Now(),
+		TimeEnd:     time.Now().Add(fsjsonCfg.SMMaxCallDuration),
+	}
+	if err := rater.Call("Responder.GetMaxSessionTime", cd, &remainingDurationFloat); err != nil {
+		t.Error(err)
+	} else {
+		remainingDuration := time.Duration(remainingDurationFloat)
+		if remainingDuration < time.Duration(3)*time.Hour {
+			t.Errorf("Expecting maxSessionTime around 3hs, received as: %v", remainingDuration)
+		}
+	}
+	// 1007 should use the 1001 balance when doing maxSessionTime
+	cd = engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		TOR:         "call",
+		Subject:     "1007",
+		Account:     "1007",
+		Destination: "1001",
+		TimeStart:   time.Now(),
+		TimeEnd:     time.Now().Add(fsjsonCfg.SMMaxCallDuration),
+	}
+	if err := rater.Call("Responder.GetMaxSessionTime", cd, &remainingDurationFloat); err != nil {
+		t.Error(err)
+	} else {
+		remainingDuration := time.Duration(remainingDurationFloat)
+		if remainingDuration < time.Duration(3)*time.Hour {
+			t.Errorf("Expecting maxSessionTime around 3hs, received as: %v", remainingDuration)
+		}
+	}
+}
+
+func TestMaxDebit(t *testing.T) {
+	cc := &engine.CallCost{}
+	var acnt *engine.Account
+	cd := engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		TOR:         "call",
+		Subject:     "1001",
+		Account:     "1001",
+		Destination: "1002",
+		TimeStart:   time.Now(),
+		TimeEnd:     time.Now().Add(time.Duration(10) * time.Second),
+	}
+	if err := rater.Call("Responder.MaxDebit", cd, cc); err != nil {
+		t.Error(err.Error())
+	} else if cc.GetDuration() > time.Duration(1)*time.Minute {
+		t.Errorf("Unexpected call duration received: %v", cc.GetDuration())
+	}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 9.6 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 9.6, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
 	}
 }
 
