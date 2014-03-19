@@ -57,8 +57,11 @@
     - name: delete golang archive
       file: path=~/go1.2.linux-amd64.tar.gz state=absent
 
-    - name: copy bashrc
-      copy: src=bashrc dest=~/.bashrc
+    - name: add vars to bashrc
+      command: echo "export GOROOT=$HOME/go; export GOPATH=$HOME/code; export PATH=$PATH:$GOROOT/bin:$GOPATH/bin" >> ~/.bashrc
+
+    - name: add variables to variables /etc/profile
+      command: echo "export GOROOT=/home/vagrant/go; GOPATH=/home/vagrant/code; PATH=$PATH:$GOROOT/bin:$GOPATH/bin" >> /etc/profile
 
     - name: get cgrates 
       shell: GOROOT=~/go GOPATH=~/code ~/go/bin/go get -u -v github.com/cgrates/cgrates
@@ -66,16 +69,16 @@
     - name: create cgr-engine link
       file: src=/home/vagrant/code/bin/cgr-engine dest=/usr/bin/cgr-engine state=link
       sudo: yes
+      
+    - name: create a link to data dir
+      sudo: yes
+      file: src=/home/vagrant/code/src/github.com/cgrates/cgrates/data dest=/usr/share/cgrates state=link
 
     - name: expand freeswitch json conf
       command: tar -xzvf /usr/share/cgrates/tutorials/fs_json/freeswitch/etc/freeswitch_conf.tar.gz
     
     - name: expand freeswitch csv conf
       command: tar -xzvf /usr/share/cgrates/tutorials/fs_csv/freeswitch/etc/freeswitch_conf.tar.gz
-
-    - name: create a link to data dir
-      sudo: yes
-      file: src=/home/vagrant/code/src/github.com/cgrates/cgrates/data dest=/usr/share/cgrates state=link
     
     - name: setup database tables
       shell: chdir=/usr/share/cgrates/storage/mysql ./setup_cgr_db.sh root {{ root_db_password }} localhost
