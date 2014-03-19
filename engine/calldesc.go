@@ -434,7 +434,7 @@ Returns the approximate max allowed session for user balance. It will try the ma
 If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
-func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
+func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Duration, error) {
 	if origCD.CallDuration < origCD.TimeEnd.Sub(origCD.TimeStart) {
 		origCD.CallDuration = origCD.TimeEnd.Sub(origCD.TimeStart)
 	}
@@ -447,16 +447,11 @@ func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	}
 	var availableDuration time.Duration
 	availableCredit := 0.0
-	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-		if userBalance.AllowNegative {
-			return -1, nil
-		} else {
-			availableDuration, availableCredit, _ = userBalance.getCreditForPrefix(cd)
-			// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
-		}
+	if account.AllowNegative {
+		return -1, nil
 	} else {
-		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
-		return 0, err
+		availableDuration, availableCredit, _ = account.getCreditForPrefix(cd)
+		// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 	}
 	//Logger.Debug(fmt.Sprintf("availableDuration: %v, availableCredit: %v", availableDuration, availableCredit))
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
@@ -501,40 +496,62 @@ func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	return utils.MinDuration(initialDuration, availableDuration), nil
 }
 
+func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
+	cd := origCD.Clone()
+	if account, err := cd.getAccount(); err != nil || account == nil {
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		return 0, err
+	} else {
+		return cd.getMaxSessionDuration(account)
+	}
+}
+
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
-func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetAccountKey(), err))
 		return
 	}
-	if userBalance, err := cd.getAccount(); err != nil {
-		Logger.Err(fmt.Sprintf("<Rater> Error retrieving user balance: %v", err))
-	} else if userBalance == nil {
-		// Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetAccountKey()))
-	} else {
-		//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetAccountKey(), cc.Cost+cc.ConnectFee))
-		defer accountingStorage.SetAccount(userBalance)
-		//ub, _ := json.Marshal(userBalance)
-		//Logger.Debug(fmt.Sprintf("Account: %s", ub))
-		//cCost, _ := json.Marshal(cc)
-		//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
-		if cc.Cost != 0 || (cc.deductConnectFee && cc.GetConnectFee() != 0) {
-			userBalance.debitCreditBalance(cc, true)
-		}
-		cost := 0.0
-		// re-calculate call cost after balances
-		if cc.deductConnectFee { // add back the connectFee
-			cost += cc.GetConnectFee()
-		}
-		for _, ts := range cc.Timespans {
-			cost += ts.getCost()
-			cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
-		}
-		cc.Cost = cost
+	//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetAccountKey(), cc.Cost+cc.ConnectFee))
+	defer accountingStorage.SetAccount(account)
+	//ub, _ := json.Marshal(account)
+	//Logger.Debug(fmt.Sprintf("Account: %s", ub))
+	//cCost, _ := json.Marshal(cc)
+	//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
+	if cc.Cost != 0 || (cc.deductConnectFee && cc.GetConnectFee() != 0) {
+		account.debitCreditBalance(cc, true)
 	}
+	cost := 0.0
+	// re-calculate call cost after balances
+	if cc.deductConnectFee { // add back the connectFee
+		cost += cc.GetConnectFee()
+	}
+	for _, ts := range cc.Timespans {
+		cost += ts.getCost()
+		cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
+	}
+	cc.Cost = cost
 	return
+}
+
+func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+	// lock all group members
+	if account, err := cd.getAccount(); err != nil || account == nil {
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		return nil, err
+	} else {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+			AccLock.GuardMany(memberIds, func() (float64, error) {
+				cc, err = cd.debit(account)
+				return 0, err
+			})
+		} else {
+			return nil, err
+		}
+		return cc, err
+	}
 }
 
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
@@ -542,14 +559,19 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
 // by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
-	remainingDuration, err := cd.GetMaxSessionDuration()
-	if err != nil || remainingDuration == 0 {
-		return new(CallCost), fmt.Errorf("no more credit: %v", err)
+	if account, err := cd.getAccount(); err != nil || account == nil {
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		return nil, err
+	} else {
+		remainingDuration, err := cd.getMaxSessionDuration(account)
+		if err != nil || remainingDuration == 0 {
+			return new(CallCost), fmt.Errorf("no more credit: %v", err)
+		}
+		if remainingDuration > 0 { // for postpaying client returns -1
+			cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
+		}
+		return cd.debit(account)
 	}
-	if remainingDuration > 0 { // for postpaying client returns -1
-		cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
-	}
-	return cd.Debit()
 }
 
 func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {

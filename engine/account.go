@@ -269,37 +269,36 @@ func (ub *Account) debitMinutesFromSharedBalances(myBalance *Balance, cc *CallCo
 		return
 	}
 	sharingMembers := sharedGroup.Members
-	AccLock.GuardMany(sharedGroup.GetMembersExceptUser(ub.Id), func() (float64, error) {
-		var allMinuteSharedBalances BalanceChain
-		for _, ubId := range sharingMembers {
-			var nUb *Account
-			if ubId == ub.Id { // skip the initiating user
-				nUb = ub
-			} else {
-				nUb, err = accountingStorage.GetAccount(ubId)
-				if err != nil {
-					Logger.Warning(fmt.Sprintf("Could not get user balance: %s", ubId))
-				}
-				if nUb.Disabled {
-					Logger.Warning(fmt.Sprintf("Disabled user in shared group: %s (%s)", ubId, sharedGroupName))
-					continue
-				}
+
+	var allMinuteSharedBalances BalanceChain
+	for _, ubId := range sharingMembers {
+		var nUb *Account
+		if ubId == ub.Id { // skip the initiating user
+			nUb = ub
+		} else {
+			nUb, err = accountingStorage.GetAccount(ubId)
+			if err != nil {
+				Logger.Warning(fmt.Sprintf("Could not get user balance: %s", ubId))
 			}
-			sharedMinuteBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[MINUTES+cc.Direction], sharedGroupName)
-			allMinuteSharedBalances = append(allMinuteSharedBalances, sharedMinuteBalances...)
-		}
-		for _, sharedBalance := range sharedGroup.GetBalancesByStrategy(myBalance, allMinuteSharedBalances) {
-			initialValue := sharedBalance.Value
-			sharedBalance.DebitMinutes(cc, count, sharedBalance.account, moneyBalances)
-			if sharedBalance.Value != initialValue {
-				accountingStorage.SetAccount(sharedBalance.account)
-			}
-			if cc.IsPaid() {
-				return 0, nil
+			if nUb.Disabled {
+				Logger.Warning(fmt.Sprintf("Disabled user in shared group: %s (%s)", ubId, sharedGroupName))
+				continue
 			}
 		}
-		return 0, nil
-	})
+		sharedMinuteBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[MINUTES+cc.Direction], sharedGroupName)
+		allMinuteSharedBalances = append(allMinuteSharedBalances, sharedMinuteBalances...)
+	}
+	for _, sharedBalance := range sharedGroup.GetBalancesByStrategy(myBalance, allMinuteSharedBalances) {
+		initialValue := sharedBalance.Value
+		sharedBalance.DebitMinutes(cc, count, sharedBalance.account, moneyBalances)
+		if sharedBalance.Value != initialValue {
+			accountingStorage.SetAccount(sharedBalance.account)
+		}
+		if cc.IsPaid() {
+			return
+		}
+	}
+	return
 }
 
 func (ub *Account) debitMoneyFromSharedBalances(myBalance *Balance, cc *CallCost, count bool) {
@@ -310,37 +309,35 @@ func (ub *Account) debitMoneyFromSharedBalances(myBalance *Balance, cc *CallCost
 		return
 	}
 	sharingMembers := sharedGroup.Members
-	AccLock.GuardMany(sharedGroup.GetMembersExceptUser(ub.Id), func() (float64, error) {
-		var allMoneySharedBalances BalanceChain
-		for _, ubId := range sharingMembers {
-			var nUb *Account
-			if ubId == ub.Id { // skip the initiating user
-				nUb = ub
-			} else {
-				nUb, err = accountingStorage.GetAccount(ubId)
-				if err != nil {
-					Logger.Warning(fmt.Sprintf("Could not get user balance: %s", ubId))
-				}
-				if nUb.Disabled {
-					Logger.Warning(fmt.Sprintf("Disabled user in shared group: %s (%s)", ubId, sharedGroupName))
-					continue
-				}
+	var allMoneySharedBalances BalanceChain
+	for _, ubId := range sharingMembers {
+		var nUb *Account
+		if ubId == ub.Id { // skip the initiating user
+			nUb = ub
+		} else {
+			nUb, err = accountingStorage.GetAccount(ubId)
+			if err != nil {
+				Logger.Warning(fmt.Sprintf("Could not get user balance: %s", ubId))
 			}
-			sharedMoneyBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[CREDIT+cc.Direction], sharedGroupName)
-			allMoneySharedBalances = append(allMoneySharedBalances, sharedMoneyBalances...)
-		}
-		for _, sharedBalance := range sharedGroup.GetBalancesByStrategy(myBalance, allMoneySharedBalances) {
-			initialValue := sharedBalance.Value
-			sharedBalance.DebitMoney(cc, count, sharedBalance.account)
-			if sharedBalance.Value != initialValue {
-				accountingStorage.SetAccount(sharedBalance.account)
-			}
-			if cc.IsPaid() {
-				return 0, nil
+			if nUb.Disabled {
+				Logger.Warning(fmt.Sprintf("Disabled user in shared group: %s (%s)", ubId, sharedGroupName))
+				continue
 			}
 		}
-		return 0, nil
-	})
+		sharedMoneyBalances := nUb.getBalancesForPrefix(cc.Destination, nUb.BalanceMap[CREDIT+cc.Direction], sharedGroupName)
+		allMoneySharedBalances = append(allMoneySharedBalances, sharedMoneyBalances...)
+	}
+	for _, sharedBalance := range sharedGroup.GetBalancesByStrategy(myBalance, allMoneySharedBalances) {
+		initialValue := sharedBalance.Value
+		sharedBalance.DebitMoney(cc, count, sharedBalance.account)
+		if sharedBalance.Value != initialValue {
+			accountingStorage.SetAccount(sharedBalance.account)
+		}
+		if cc.IsPaid() {
+			return
+		}
+	}
+	return
 }
 
 func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
@@ -532,4 +529,35 @@ func (ub *Account) GetSharedGroups() (groups []string) {
 		}
 	}
 	return
+}
+
+func (account *Account) GetUniqueSharedGroupMembers(destination, direction string) ([]string, error) {
+	creditBalances := account.getBalancesForPrefix(destination, account.BalanceMap[CREDIT+direction], "")
+	minuteBalances := account.getBalancesForPrefix(destination, account.BalanceMap[MINUTES+direction], "")
+	// gather all shared group ids
+	var sharedGroupIds []string
+	for _, cb := range creditBalances {
+		if cb.SharedGroup != "" {
+			sharedGroupIds = append(sharedGroupIds, cb.SharedGroup)
+		}
+	}
+	for _, mb := range minuteBalances {
+		if mb.SharedGroup != "" {
+			sharedGroupIds = append(sharedGroupIds, mb.SharedGroup)
+		}
+	}
+	var memberIds []string
+	for _, sgID := range sharedGroupIds {
+		sharedGroup, err := accountingStorage.GetSharedGroup(sgID, false)
+		if err != nil {
+			Logger.Warning(fmt.Sprintf("Could not get shared group: %v", sgID))
+			return nil, err
+		}
+		for _, memberId := range sharedGroup.GetMembersExceptUser(account.Id) {
+			if !utils.IsSliceMember(memberIds, memberId) {
+				memberIds = append(memberIds, memberId)
+			}
+		}
+	}
+	return memberIds, nil
 }

@@ -335,7 +335,7 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 	result, err := cd.GetMaxSessionDuration()
 	expected := time.Minute
 	if result != expected || err != nil {
-		t.Errorf("Expected %v was %v", expected, result)
+		t.Errorf("Expected %v was %v, %v", expected, result, err)
 	}
 }
 
