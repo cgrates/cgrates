@@ -393,8 +393,9 @@ func (bc BalanceChain) Swap(i, j int) {
 }
 
 func (bc BalanceChain) Less(j, i int) bool {
-	return bc[i].Weight < bc[j].Weight ||
-		bc[i].precision < bc[j].precision
+	return bc[i].precision < bc[j].precision ||
+		(bc[i].precision == bc[j].precision && bc[i].Weight < bc[j].Weight)
+
 }
 
 func (bc BalanceChain) Sort() {

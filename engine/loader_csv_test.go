@@ -124,6 +124,7 @@ cgrates.directvoip.co.uk,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK
 	sharedGroups = `
 SG1,*any,*lowest_first,
 SG2,*any,*lowest_first,EVENING
+SG3,*any,*lowest_first,
 `
 
 	actions = `
@@ -133,7 +134,10 @@ SHARED,*topup,*monetary,*out,100,*unlimited,,,10,SG1,,10
 TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,10,,,10
 TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
 SE0,*topup_reset,*monetary,*out,0,*unlimited,,,10,SG2,,10
-SE10,*topup_reset,*monetary,*out,10,*unlimited,,,10,SG2,,10
+SE10,*topup_reset,*monetary,*out,10,*unlimited,,,5,SG2,,10
+SE10,*topup,*monetary,*out,10,*unlimited,,,10,,,10
+EE0,*topup_reset,*monetary,*out,0,*unlimited,,,10,SG3,,10
+EE0,*allow_negative,*monetary,*out,0,*unlimited,,,10,,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -142,6 +146,7 @@ TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10
 TOPUP_SHARED0_AT,SE0,ASAP,10
 TOPUP_SHARED10_AT,SE10,ASAP,10
+TOPUP_EMPTY_AT,EE0,ASAP,10
 `
 	actionTriggers = `
 STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
@@ -155,6 +160,8 @@ vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
 cgrates.directvoip.co.uk,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
 vdf,empty0,*out,TOPUP_SHARED0_AT,
 vdf,empty10,*out,TOPUP_SHARED10_AT,
+vdf,emptyX,*out,TOPUP_EMPTY_AT,
+vdf,emptyY,*out,TOPUP_EMPTY_AT,
 `
 )
 
@@ -598,7 +605,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 6 {
+	if len(csvr.actions) != 7 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
 	as1 := csvr.actions["MINI"]
@@ -660,7 +667,7 @@ func TestLoadActions(t *testing.T) {
 }
 
 func TestLoadSharedGroups(t *testing.T) {
-	if len(csvr.sharedGroups) != 2 {
+	if len(csvr.sharedGroups) != 3 {
 		t.Error("Failed to load actions: ", csvr.sharedGroups)
 	}
 
@@ -707,7 +714,7 @@ func TestLoadSharedGroups(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionsTimings) != 4 {
+	if len(csvr.actionsTimings) != 5 {
 		t.Error("Failed to load action timings: ", csvr.actionsTimings)
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
@@ -769,7 +776,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 4 {
+	if len(csvr.accountActions) != 6 {
 		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
 	aa := csvr.accountActions["*out:vdf:minitsboy"]

@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"log"
 	"log/syslog"
 	"time"
 	//"encoding/json"
@@ -581,9 +582,11 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 					cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
 				}
 				cc, err = cd.debit(account)
+				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
 				return 0, err
 			})
 		} else {
+			log.Print("cxcxxc")
 			return nil, err
 		}
 	}

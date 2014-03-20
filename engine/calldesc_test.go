@@ -374,8 +374,8 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 
 	result0, err := cd0.GetMaxSessionDuration()
 	result1, err := cd1.GetMaxSessionDuration()
-	if result0 != result1 || err != nil {
-		t.Errorf("Expected %v was %v, %v", result1, result0, err)
+	if result0 != result1/2 || err != nil {
+		t.Errorf("Expected %v was %v, %v", result1/2, result0, err)
 	}
 }
 
@@ -472,6 +472,62 @@ func TestDebitAndMaxDebit(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cc1, cc2) {
 		t.Errorf("Debit and MaxDebit differ: %+v != %+v", cc1, cc2)
+	}
+}
+
+func TestDebitFromShareAndNormal(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP_SHARED10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 5, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "rif",
+		Account:     "empty10",
+		Destination: "0723",
+	}
+	acc, _ := cd.getAccount()
+	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
+	cc, err := cd.MaxDebit()
+	if err != nil || cc.Cost != 2.5 {
+		t.Errorf("Debit from share and normal error: %+v, %v", cc, err)
+	}
+
+	if balanceMap[0].Value != 10 || balanceMap[1].Value != 7.5 {
+		t.Errorf("Error debiting from right balance: %v %v", balanceMap[0].Value, balanceMap[1].Value)
+	}
+}
+
+func TestDebitFromEmptyShare(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP_EMPTY_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 5, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "rif",
+		Account:     "emptyX",
+		Destination: "0723",
+	}
+
+	cc, err := cd.MaxDebit()
+	if err != nil || cc.Cost != 2.5 {
+		t.Errorf("Debit from empty share error: %+v, %v", cc, err)
+	}
+	acc, _ := cd.getAccount()
+	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
+	if len(balanceMap) != 2 || balanceMap[0].Value != 0 || balanceMap[1].Value != -2.5 {
+		t.Errorf("Error debiting from empty share: %+v %+v", balanceMap[0], balanceMap[1])
 	}
 }
 

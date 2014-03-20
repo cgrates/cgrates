@@ -23,7 +23,7 @@ import (
 	"testing"
 )
 
-func TestBalanceSortWeight(t *testing.T) {
+func TestBalanceSortPrecision(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 2}
 	mb2 := &Balance{Weight: 2, precision: 1}
 	var bs BalanceChain
@@ -34,13 +34,46 @@ func TestBalanceSortWeight(t *testing.T) {
 	}
 }
 
-func TestBalanceSortPrecision(t *testing.T) {
+func TestBalanceSortPrecisionWeightEqual(t *testing.T) {
 	mb1 := &Balance{Weight: 1, precision: 2}
 	mb2 := &Balance{Weight: 1, precision: 1}
 	var bs BalanceChain
 	bs = append(bs, mb2, mb1)
 	bs.Sort()
 	if bs[0] != mb1 || bs[1] != mb2 {
+		t.Error("Buckets not sorted by precision!")
+	}
+}
+
+func TestBalanceSortPrecisionWeightGreater(t *testing.T) {
+	mb1 := &Balance{Weight: 2, precision: 2}
+	mb2 := &Balance{Weight: 1, precision: 1}
+	var bs BalanceChain
+	bs = append(bs, mb2, mb1)
+	bs.Sort()
+	if bs[0] != mb1 || bs[1] != mb2 {
+		t.Error("Buckets not sorted by precision!")
+	}
+}
+
+func TestBalanceSortWeight(t *testing.T) {
+	mb1 := &Balance{Weight: 2, precision: 1}
+	mb2 := &Balance{Weight: 1, precision: 1}
+	var bs BalanceChain
+	bs = append(bs, mb2, mb1)
+	bs.Sort()
+	if bs[0] != mb1 || bs[1] != mb2 {
+		t.Error("Buckets not sorted by precision!")
+	}
+}
+
+func TestBalanceSortWeightLess(t *testing.T) {
+	mb1 := &Balance{Weight: 1, precision: 1}
+	mb2 := &Balance{Weight: 2, precision: 1}
+	var bs BalanceChain
+	bs = append(bs, mb2, mb1)
+	bs.Sort()
+	if bs[0] != mb2 || bs[1] != mb1 {
 		t.Error("Buckets not sorted by precision!")
 	}
 }

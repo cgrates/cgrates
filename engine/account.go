@@ -197,7 +197,6 @@ func (ub *Account) getBalancesForPrefix(prefix string, balances BalanceChain, sh
 func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 	usefulMinuteBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[MINUTES+cc.Direction], "")
 	usefulMoneyBalances := ub.getBalancesForPrefix(cc.Destination, ub.BalanceMap[CREDIT+cc.Direction], "")
-	defaultMoneyBalance := ub.GetDefaultMoneyBalance(cc.Direction)
 	// debit minutes
 	for _, balance := range usefulMinuteBalances {
 		if balance.SharedGroup != "" {
@@ -221,7 +220,6 @@ func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 			}
 		}
 	}
-
 	// debit money
 	for _, balance := range usefulMoneyBalances {
 		if balance.SharedGroup != "" {
@@ -233,7 +231,7 @@ func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 			goto CONNECT_FEE
 		}
 	}
-	// get the highest priority money balanance
+	// get the default money balanance
 	// and go negative on it with the amount still unpaid
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		ts := cc.Timespans[tsIndex]
@@ -251,7 +249,7 @@ func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 			}
 			for _, increment := range ts.Increments {
 				cost := increment.Cost
-				defaultMoneyBalance.Value -= cost
+				ub.GetDefaultMoneyBalance(cc.Direction).Value -= cost
 				if count {
 					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
 				}
@@ -278,7 +276,7 @@ CONNECT_FEE:
 		// debit connect fee
 		if connectFee > 0 && !connectFeePaid {
 			// there are no money for the connect fee; go negative
-			defaultMoneyBalance.Value -= connectFee
+			ub.GetDefaultMoneyBalance(cc.Direction).Value -= connectFee
 			// the conect fee is not refundable!
 			if count {
 				ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
@@ -336,9 +334,8 @@ func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 			return balance
 		}
 	}
-
 	// create default balance
-	defaultBalance := &Balance{Weight: 999}
+	defaultBalance := &Balance{Weight: 0} // minimum weight
 	ub.BalanceMap[CREDIT+direction] = append(ub.BalanceMap[CREDIT+direction], defaultBalance)
 	return defaultBalance
 }
