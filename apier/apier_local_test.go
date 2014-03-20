@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -32,7 +33,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"encoding/json"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -62,7 +62,7 @@ var rater *rpc.Client
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
-var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
+var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for rater to start and cache")
 
 func init() {
 	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
@@ -910,11 +910,11 @@ func TestApierGetRatingPlan(t *testing.T) {
 			}
 		}
 	*/
-	riRate := &engine.RIRate{Id:"RT_FS_USERS", ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{
+	riRate := &engine.RIRate{Id: "RT_FS_USERS", ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{
 		&engine.Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60) * time.Second, RateUnit: time.Duration(60) * time.Second},
 	}}
 	for _, rating := range reply.Ratings {
-		riRateJsson,_ := json.Marshal(rating)
+		riRateJsson, _ := json.Marshal(rating)
 		if !reflect.DeepEqual(rating, riRate) {
 			t.Errorf("Unexpected riRate received: %s", riRateJsson)
 			// {"Id":"RT_FS_USERS","ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":0}
