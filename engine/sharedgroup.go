@@ -41,7 +41,7 @@ type SharedGroup struct {
 	Id                string
 	AccountParameters map[string]*SharingParameters
 	MemberIds         []string
-	members           []*Account // accounts caching
+	//members           []*Account // accounts caching
 }
 
 type SharingParameters struct {
@@ -103,27 +103,27 @@ func (sg *SharedGroup) SortBalancesByStrategy(myBalance *Balance, bc BalanceChai
 
 // Returns all shared group's balances collected from user accounts'
 func (sg *SharedGroup) GetBalances(destination, balanceType string, ub *Account) (bc BalanceChain) {
-	if len(sg.members) == 0 {
-		for _, ubId := range sg.MemberIds {
-			var nUb *Account
-			if ubId == ub.Id { // skip the initiating user
-				nUb = ub
-			} else {
-				nUb, _ = accountingStorage.GetAccount(ubId)
-				if nUb == nil || nUb.Disabled {
-					continue
-				}
+	//	if len(sg.members) == 0 {
+	for _, ubId := range sg.MemberIds {
+		var nUb *Account
+		if ubId == ub.Id { // skip the initiating user
+			nUb = ub
+		} else {
+			nUb, _ = accountingStorage.GetAccount(ubId)
+			if nUb == nil || nUb.Disabled {
+				continue
 			}
-			sg.members = append(sg.members, nUb)
-			sb := nUb.getBalancesForPrefix(destination, nUb.BalanceMap[balanceType], sg.Id)
-			bc = append(bc, sb...)
 		}
-	} else {
+		//sg.members = append(sg.members, nUb)
+		sb := nUb.getBalancesForPrefix(destination, nUb.BalanceMap[balanceType], sg.Id)
+		bc = append(bc, sb...)
+	}
+	/*	} else {
 		for _, m := range sg.members {
 			sb := m.getBalancesForPrefix(destination, m.BalanceMap[balanceType], sg.Id)
 			bc = append(bc, sb...)
 		}
-	}
+	}*/
 	return
 }
 

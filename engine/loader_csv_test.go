@@ -122,9 +122,9 @@ cgrates.directvoip.co.uk,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
 cgrates.directvoip.co.uk,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
 `
 	sharedGroups = `
-SG1,*any,*lowest_first,
-SG2,*any,*lowest_first,EVENING
-SG3,*any,*lowest_first,
+SG1,*any,*lowest,
+SG2,*any,*lowest,one
+SG3,*any,*lowest,
 `
 
 	actions = `
@@ -676,7 +676,7 @@ func TestLoadSharedGroups(t *testing.T) {
 		Id: "SG1",
 		AccountParameters: map[string]*SharingParameters{
 			"*any": &SharingParameters{
-				Strategy:    "*lowest_first",
+				Strategy:    "*lowest",
 				RateSubject: "",
 			},
 		},
@@ -689,8 +689,8 @@ func TestLoadSharedGroups(t *testing.T) {
 		Id: "SG2",
 		AccountParameters: map[string]*SharingParameters{
 			"*any": &SharingParameters{
-				Strategy:    "*lowest_first",
-				RateSubject: "EVENING",
+				Strategy:    "*lowest",
+				RateSubject: "one",
 			},
 		},
 	}

@@ -379,6 +379,43 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 	}
 }
 
+func TestMaxDebitWithAccountShared(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP_SHARED0_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	ap, _ = accountingStorage.GetActionTimings("TOPUP_SHARED10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 5, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "minu",
+		Account:     "empty0",
+		Destination: "0723",
+	}
+
+	cc, err := cd.MaxDebit()
+	if err != nil || cc.Cost != 2.5 {
+		t.Errorf("Wrong callcost in shared debit: %+v, %v", cc, err)
+	}
+	acc, _ := cd.getAccount()
+	log.Print(cd.GetAccountKey())
+	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
+	if len(balanceMap) != 1 || balanceMap[0].Value != 0 {
+		t.Errorf("Wrong shared balance debited: %+v", balanceMap)
+	}
+	other, err := accountingStorage.GetAccount("*out:vdf:empty10")
+	if err != nil || other.BalanceMap[CREDIT+OUTBOUND][0].Value != 7.5 {
+		t.Errorf("Error debiting shared balance: %+v", other.BalanceMap[CREDIT+OUTBOUND][0])
+	}
+}
+
 func TestMaxSessionTimeWithAccountAccount(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
