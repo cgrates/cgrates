@@ -340,6 +340,45 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 	}
 }
 
+func TestMaxSessionTimeWithAccountShared(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP_SHARED0_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	ap, _ = accountingStorage.GetActionTimings("TOPUP_SHARED10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+
+	cd0 := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "rif",
+		Account:     "empty0",
+		Destination: "0723",
+	}
+
+	cd1 := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "rif",
+		Account:     "empty10",
+		Destination: "0723",
+	}
+
+	result0, err := cd0.GetMaxSessionDuration()
+	result1, err := cd1.GetMaxSessionDuration()
+	if result0 != result1 || err != nil {
+		t.Errorf("Expected %v was %v, %v", result1, result0, err)
+	}
+}
+
 func TestMaxSessionTimeWithAccountAccount(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),

@@ -56,7 +56,10 @@ func (b *Balance) Equal(o *Balance) bool {
 
 // the default balance has no destinationid, Expirationdate or ratesubject
 func (b *Balance) IsDefault() bool {
-	return (b.DestinationId == "" || b.DestinationId == utils.ANY) && b.RateSubject == "" && b.ExpirationDate.IsZero()
+	return (b.DestinationId == "" || b.DestinationId == utils.ANY) &&
+		b.RateSubject == "" &&
+		b.ExpirationDate.IsZero() &&
+		b.SharedGroup == ""
 }
 
 func (b *Balance) IsExpired() bool {

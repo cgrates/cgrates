@@ -158,10 +158,10 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 func (ub *Account) getBalancesForPrefix(prefix string, balances BalanceChain, sharedGroup string) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
-		if b.IsExpired() || (ub.AllowNegative == false && b.Value <= 0) {
+		if b.IsExpired() || (ub.AllowNegative == false && b.SharedGroup == "" && b.Value <= 0) {
 			continue
 		}
-		if sharedGroup != "" && b.SharedGroup != sharedGroup {
+		if sharedGroup != "" && sharedGroup != "" && b.SharedGroup != sharedGroup {
 			continue
 		}
 		if b.SharedGroup != "" {
