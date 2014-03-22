@@ -405,7 +405,6 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 		t.Errorf("Wrong callcost in shared debit: %+v, %v", cc, err)
 	}
 	acc, _ := cd.getAccount()
-	log.Print(cd.GetAccountKey())
 	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
 	if len(balanceMap) != 1 || balanceMap[0].Value != 0 {
 		t.Errorf("Wrong shared balance debited: %+v", balanceMap)

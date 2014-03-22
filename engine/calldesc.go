@@ -606,10 +606,6 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 		}
 		account.refundIncrement(increment, cd.Direction, true)
 	}
-
-	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-
-	}
 	return 0.0, err
 }
 
