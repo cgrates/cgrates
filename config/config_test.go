@@ -73,6 +73,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.DefaultSubject = "cgrates"
 	eCfg.RoundingMethod = utils.ROUNDING_MIDDLE
 	eCfg.RoundingDecimals = 4
+	eCfg.XmlCfgDocument = nil
 	eCfg.RaterEnabled = false
 	eCfg.RaterBalancer = ""
 	eCfg.BalancerEnabled = false
@@ -181,6 +182,11 @@ func TestSanityCheck(t *testing.T) {
 	cfg.SMSubjectFields = []string{"sample1", "sample2", "sample3"}
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect config insanity")
+	}
+	cfg = &CGRConfig{}
+	cfg.CdreCdrFormat = utils.FIXED_WIDTH
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed to detect fixed_width dependency on xml configuration")
 	}
 }
 

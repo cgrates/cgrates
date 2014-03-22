@@ -91,7 +91,9 @@ const (
 	INTERNAL                   = "internal"
 	ZERO_RATING_SUBJECT_PREFIX = "*zero"
 	OK                         = "OK"
-	CDR_FIXED_WIDTH            = "cdr_fixed_width"
+	FIXED_WIDTH                = "fixed_width"
+	XML_PROFILE_PREFIX         = "*xml:"
+	CDRE                       = "cdre"
 )
 
 var (

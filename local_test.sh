@@ -10,9 +10,12 @@ go test github.com/cgrates/cgrates/cdrc -local
 cdrc=$?
 go test github.com/cgrates/cgrates/mediator -local
 med=$?
+go test github.com/cgrates/cgrates/config -local
+cfg=$?
 
 
 
 
-exit $gen && $ap && $en && $cdrc && $med
+
+exit $gen && $ap && $en && $cdrc && $med && $cfg
 

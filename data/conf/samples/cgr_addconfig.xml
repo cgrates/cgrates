@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<document type="cgrates/xml">
+  <configuration section="cdre" type="fixed_width" id="CDREFW-A">
+   <header>
+    <fields>
+     <field name="Filler1" type="filler" width="4"/>
+    </fields>
+   </header>
+   <content>
+    <fields>
+     <field name="TypeOfRecord" type="constant" value="call"/>
+    </fields>
+   </content>
+   <trailer>
+    <fields>
+     <field name="Filler1" type="filler" width="3"/>
+    </fields>
+   </trailer>
+  </configuration>
+</document>

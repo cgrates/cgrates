@@ -28,7 +28,7 @@ var cfgDoc *CgrXmlCfgDocument // Will be populated by first test
 func TestParseXmlConfig(t *testing.T) {
 	cfgXmlStr := `<?xml version="1.0" encoding="UTF-8" ?>
 <document type="cgrates/xml">
-  <configuration section="cdre" type="cdr_fixed_width" id="CDRE-FW1">
+  <configuration section="cdre" type="fixed_width" id="CDRE-FW1">
    <header>
     <fields>
      <field name="RecordType" type="constant" value="10" width="2"/>
@@ -86,6 +86,17 @@ func TestParseXmlConfig(t *testing.T) {
 		t.Error(err.Error())
 	} else if cfgDoc == nil {
 		t.Fatal("Could not parse xml configuration document")
+	}
+}
+
+func TestCacheCdreFWCfgs(t *testing.T) {
+	if len(cfgDoc.cdrefws) != 0 {
+		t.Error("Cache should be empty before caching")
+	}
+	if err := cfgDoc.cacheCdreFWCfgs(); err != nil {
+		t.Error(err)
+	} else if len(cfgDoc.cdrefws) != 1 {
+		t.Error("Did not cache")
 	}
 }
 

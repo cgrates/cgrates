@@ -20,7 +20,7 @@ package config
 
 import (
 	"encoding/xml"
-	"errors"
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"io"
 )
@@ -37,9 +37,10 @@ func ParseCgrXmlConfig(reader io.Reader) (*CgrXmlCfgDocument, error) {
 
 // Define a format for configuration file, one doc contains more configuration instances, identified by section, type and id
 type CgrXmlCfgDocument struct {
-	XMLName        xml.Name               `xml:"document"`
-	Type           string                 `xml:"type,attr"`
-	Configurations []*CgrXmlConfiguration `xml:"configuration"`
+	XMLName        xml.Name                    `xml:"document"`
+	Type           string                      `xml:"type,attr"`
+	Configurations []*CgrXmlConfiguration      `xml:"configuration"`
+	cdrefws        map[string]*CgrXmlCdreFwCfg // Cache for processed fixed width config instances, key will be the id of the instance
 }
 
 // Storage for raw configuration
@@ -48,7 +49,7 @@ type CgrXmlConfiguration struct {
 	Section   string   `xml:"section,attr"`
 	Type      string   `xml:"type,attr"`
 	Id        string   `xml:"id,attr"`
-	RawConfig []byte   `xml:",innerxml"`
+	RawConfig []byte   `xml:",innerxml"` // Used to store the configuration struct, as raw so we can store different types
 }
 
 // The CdrExporter Fixed Width configuration instance
@@ -84,20 +85,34 @@ type CgrXmlCfgCdrField struct {
 	Width   string   `xml:"width,attr"`
 }
 
-func (xmlCfg *CgrXmlCfgDocument) GetCdreFWCfg(instName string) (*CgrXmlCdreFwCfg, error) {
-	cdrefwCfg := new(CgrXmlCdreFwCfg)
+// Avoid building from raw config string always, so build cache here
+func (xmlCfg *CgrXmlCfgDocument) cacheCdreFWCfgs() error {
+	xmlCfg.cdrefws = make(map[string]*CgrXmlCdreFwCfg)
 	for _, cfgInst := range xmlCfg.Configurations {
-		if cfgInst.Section != "cdre" || cfgInst.Type != utils.CDR_FIXED_WIDTH || cfgInst.Id != instName {
-			continue
+		if cfgInst.Section == utils.CDRE || cfgInst.Type == utils.FIXED_WIDTH {
+			cdrefwCfg := new(CgrXmlCdreFwCfg)
+			rawConfig := append([]byte("<element>"), cfgInst.RawConfig...) // Encapsulate the rawConfig in one element so we can Unmarshall
+			rawConfig = append(rawConfig, []byte("</element>")...)
+			if err := xml.Unmarshal(rawConfig, cdrefwCfg); err != nil {
+				return err
+			} else if cdrefwCfg == nil {
+				return fmt.Errorf("Could not unmarshal CgrXmlCdreFwCfg: %s", cfgInst.Id)
+			} else { // All good, cache the config instance
+				xmlCfg.cdrefws[cfgInst.Id] = cdrefwCfg
+			}
 		}
-		rawConfig := append([]byte("<element>"), cfgInst.RawConfig...)
-		rawConfig = append(rawConfig, []byte("</element>")...)
-		if err := xml.Unmarshal(rawConfig, cdrefwCfg); err != nil { // Encapsulate the rawConfig in one element so we can Unmarshall
+	}
+	return nil
+}
+
+func (xmlCfg *CgrXmlCfgDocument) GetCdreFWCfg(instName string) (*CgrXmlCdreFwCfg, error) {
+	if len(xmlCfg.cdrefws) == 0 { // First time, cache also
+		if err := xmlCfg.cacheCdreFWCfgs(); err != nil {
 			return nil, err
-		} else if cdrefwCfg == nil {
-			return nil, errors.New("Could not unmarshal CgrXmlCdreFwCfg")
 		}
-		return cdrefwCfg, nil
+	}
+	if cfg, hasIt := xmlCfg.cdrefws[instName]; hasIt {
+		return cfg, nil
 	}
 	return nil, nil
 }
