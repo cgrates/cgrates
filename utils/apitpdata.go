@@ -295,6 +295,9 @@ type CacheStats struct {
 	RatingPlans    int
 	RatingProfiles int
 	Actions        int
+	SharedGroups   int
+	RatingAliases  int
+	AccountAliases int
 }
 
 type AttrCachedItemAge struct {
@@ -307,6 +310,9 @@ type CachedItemAge struct {
 	RatingPlan    time.Duration
 	RatingProfile time.Duration
 	Action        time.Duration
+	SharedGroup   time.Duration
+	RatingAlias   time.Duration
+	AccountAlias  time.Duration
 }
 
 type AttrExpFileCdrs struct {

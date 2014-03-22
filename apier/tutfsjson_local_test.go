@@ -171,7 +171,7 @@ func TestFsJsonLoadTariffPlans(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 2, RatingProfiles: 2, Actions: 5}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 2, RatingProfiles: 2, Actions: 5, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
@@ -291,7 +291,7 @@ func TestFsJsonGetAccount1007(t *testing.T) {
 	if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 0 {
 		t.Errorf("Calling ApierV1.GetBalance expected: 0, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
 	}
-	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 2 {
+	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 1 {
 		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]))
 	}
 	blncLst := acnt.BalanceMap[attrs.BalanceType+attrs.Direction]
@@ -378,13 +378,13 @@ func TestMaxCallDuration(t *testing.T) {
 		t.Error(err)
 	} else {
 		remainingDuration := time.Duration(remainingDurationFloat)
-		if remainingDuration < time.Duration(90)*time.Minute {
-			t.Errorf("Expecting maxSessionTime around 1h30m, received as: %v", remainingDuration)
+		if remainingDuration < time.Duration(20)*time.Minute {
+			t.Errorf("Expecting maxSessionTime around 20m, received as: %v", remainingDuration)
 		}
 	}
 }
 
-func TestMaxDebit(t *testing.T) {
+func TestMaxDebit1001(t *testing.T) {
 	cc := &engine.CallCost{}
 	var acnt *engine.Account
 	cd := engine.CallDescriptor{
@@ -413,10 +413,64 @@ func TestMaxDebit(t *testing.T) {
 		for _, blnc := range blncLst {
 			if blnc.SharedGroup == "SHARED_A" && blnc.Value != 5 {
 				t.Errorf("Unexpected value for shared balance: %f", blnc.Value)
-			} else if blnc.SharedGroup == "" && blnc.Value != 4.6 {
+			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.4 {
 				t.Errorf("Unexpected value for general balance: %f", blnc.Value)
 			}
 		}
+	}
+}
+
+func TestMaxDebit1007(t *testing.T) {
+	cc := &engine.CallCost{}
+	var acnt *engine.Account
+	cd := engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		TOR:         "call",
+		Subject:     "1007",
+		Account:     "1007",
+		Destination: "1002",
+		TimeStart:   time.Now(),
+		TimeEnd:     time.Now().Add(time.Duration(10) * time.Second),
+	}
+	if err := rater.Call("Responder.MaxDebit", cd, cc); err != nil {
+		t.Error(err.Error())
+	} else if cc.GetDuration() > time.Duration(1)*time.Minute {
+		t.Errorf("Unexpected call duration received: %v", cc.GetDuration())
+	}
+	// Debit out of shared balance should reflect in the 1001 instead of 1007
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else {
+		if len(acnt.BalanceMap["*monetary*out"]) != 2 {
+			t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap["*monetary*out"]))
+		}
+		blncLst := acnt.BalanceMap["*monetary*out"]
+		for _, blnc := range blncLst {
+			if blnc.SharedGroup == "SHARED_A" && blnc.Value != 4 {
+				t.Errorf("Unexpected value for shared balance: %f", blnc.Value)
+			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.4 {
+				t.Errorf("Unexpected value for general balance: %f", blnc.Value)
+			}
+		}
+	}
+	// Make sure 1007 remains the same
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1007", BalanceType: "*monetary", Direction: "*out"}
+	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	}
+	if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 0, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	}
+	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 1 {
+		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]))
+	}
+	blnc := acnt.BalanceMap[attrs.BalanceType+attrs.Direction][0]
+	if len(blnc.SharedGroup) == 0 { // General balance
+		t.Errorf("Unexpected general balance: %f", blnc.Value)
+	} else if blnc.SharedGroup == "SHARED_A" && blnc.Value != 0 {
+		t.Errorf("Unexpected value for shared balance: %f", blnc.Value)
 	}
 }
 

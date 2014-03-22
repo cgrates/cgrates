@@ -532,6 +532,9 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.RatingPlans = cache2go.CountEntries(engine.RATING_PLAN_PREFIX)
 	cs.RatingProfiles = cache2go.CountEntries(engine.RATING_PROFILE_PREFIX)
 	cs.Actions = cache2go.CountEntries(engine.ACTION_PREFIX)
+	cs.SharedGroups = cache2go.CountEntries(engine.SHARED_GROUP_PREFIX)
+	cs.RatingAliases = cache2go.CountEntries(engine.RP_ALIAS_PREFIX)
+	cs.AccountAliases = cache2go.CountEntries(engine.ACC_ALIAS_PREFIX)
 	*reply = *cs
 	return nil
 }
@@ -543,7 +546,7 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 	cachedItemAge := new(utils.CachedItemAge)
 	var found bool
 	for idx, cacheKey := range []string{engine.DESTINATION_PREFIX + itemId, engine.RATING_PLAN_PREFIX + itemId, engine.RATING_PROFILE_PREFIX + itemId,
-		engine.ACTION_PREFIX + itemId} {
+		engine.ACTION_PREFIX + itemId, engine.SHARED_GROUP_PREFIX + itemId, engine.RP_ALIAS_PREFIX + itemId, engine.ACC_ALIAS_PREFIX + itemId} {
 		if age, err := cache2go.GetKeyAge(cacheKey); err == nil {
 			found = true
 			switch idx {
@@ -555,6 +558,12 @@ func (self *ApierV1) GetCachedItemAge(itemId string, reply *utils.CachedItemAge)
 				cachedItemAge.RatingProfile = age
 			case 3:
 				cachedItemAge.Action = age
+			case 4:
+				cachedItemAge.SharedGroup = age
+			case 5:
+				cachedItemAge.RatingAlias = age
+			case 6:
+				cachedItemAge.AccountAlias = age
 			}
 		}
 	}

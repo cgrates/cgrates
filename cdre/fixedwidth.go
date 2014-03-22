@@ -19,48 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdre
 
 import (
-	"fmt"
-	"strconv"
+	"github.com/cgrates/cgrates/utils"
 )
 
-type DeanCdrWriter struct{}
+type FixedWidthCdrWriter struct{}
 
-func (dcw *DeanCdrWriter) Write(cdr []string) error {
+func (fww *FixedWidthCdrWriter) Write(cdr *utils.StoredCdr) error {
 	return nil
-}
-
-// Used as generic function logic for various fields
-
-// Attributes
-//  source - the base source
-//  maxLen - the maximum field lenght
-//  stripAllowed - whether we allow stripping of chars in case of source bigger than the maximum allowed
-//  lStrip - if true, strip from beginning of the string
-//  lPadding - if true, add chars at the beginning of the string
-//  paddingChar - the character wich will be used to fill the existing
-func filterField(source string, maxLen int, stripAllowed, lStrip, lPadding, padWithZero bool) (string, error) {
-	if len(source) == maxLen { // the source is exactly the maximum length
-		return source, nil
-	}
-	if len(source) > maxLen { //the source is bigger than allowed
-		if !stripAllowed {
-			return "", fmt.Errorf("source %s is bigger than the maximum allowed length %d", source, maxLen)
-		}
-		if !lStrip {
-			return source[:maxLen], nil
-		} else {
-			diffIndx := len(source) - maxLen
-			return source[diffIndx:], nil
-		}
-	} else { //the source is smaller as the maximum allowed
-		paddingString := "%"
-		if padWithZero {
-			paddingString += "0" // it will not work for rPadding but this is not needed
-		}
-		if !lPadding {
-			paddingString += "-"
-		}
-		paddingString += strconv.Itoa(maxLen) + "s"
-		return fmt.Sprintf(paddingString, source), nil
-	}
 }
