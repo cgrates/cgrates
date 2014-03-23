@@ -128,8 +128,7 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 			continue // we can clean expired balances balances here
 		}
 		if b.Equal(a.Balance) {
-			b.Value -= a.Balance.Value
-			b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+			b.SubstractAmount(a.Balance.Value)
 			found = true
 			break
 		}
@@ -195,11 +194,7 @@ func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cc.Destination, CREDIT+cc.Direction)
 	// debit minutes
 	for _, balance := range usefulMinuteBalances {
-		initialValue := balance.Value
 		balance.DebitMinutes(cc, count, balance.account, usefulMoneyBalances)
-		if balance.Value != initialValue && balance.account != ub {
-			accountingStorage.SetAccount(balance.account)
-		}
 		if cc.IsPaid() {
 			goto CONNECT_FEE
 		}
@@ -218,11 +213,7 @@ func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 	}
 	// debit money
 	for _, balance := range usefulMoneyBalances {
-		initialValue := balance.Value
 		balance.DebitMoney(cc, count, balance.account)
-		if balance.Value != initialValue && balance.account != ub {
-			accountingStorage.SetAccount(balance.account)
-		}
 		if cc.IsPaid() {
 			goto CONNECT_FEE
 		}
@@ -245,7 +236,7 @@ func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
 			}
 			for _, increment := range ts.Increments {
 				cost := increment.Cost
-				ub.GetDefaultMoneyBalance(cc.Direction).Value -= cost
+				ub.GetDefaultMoneyBalance(cc.Direction).SubstractAmount(cost)
 				if count {
 					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: cost, DestinationId: cc.Destination}})
 				}
@@ -259,8 +250,7 @@ CONNECT_FEE:
 		connectFeePaid := false
 		for _, b := range usefulMoneyBalances {
 			if b.Value >= connectFee {
-				b.Value -= connectFee
-				b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+				b.SubstractAmount(connectFee)
 				// the conect fee is not refundable!
 				if count {
 					ub.countUnits(&Action{BalanceType: CREDIT, Direction: cc.Direction, Balance: &Balance{Value: connectFee, DestinationId: cc.Destination}})
@@ -279,6 +269,9 @@ CONNECT_FEE:
 			}
 		}
 	}
+	// save darty shared balances
+	usefulMoneyBalances.SaveDirtyBalances(ub)
+	usefulMinuteBalances.SaveDirtyBalances(ub)
 	return
 }
 

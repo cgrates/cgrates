@@ -38,6 +38,7 @@ type Balance struct {
 	SharedGroup   string
 	precision     int
 	account       *Account // used to store ub reference for shared balances
+	dirty         bool
 }
 
 func (b *Balance) Equal(o *Balance) bool {
@@ -136,6 +137,12 @@ func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
 	return cc, nil
 }
 
+func (b *Balance) SubstractAmount(amount float64) {
+	b.Value -= amount
+	b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+	b.dirty = true
+}
+
 func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalances BalanceChain) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		if b.Value <= 0 {
@@ -195,8 +202,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 						cc.Timespans.RemoveOverlapedFromIndex(tsIndex)
 						inc = newTs.Increments[0]
 					}
-					b.Value -= amount
-					b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+					b.SubstractAmount(amount)
 					inc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 					inc.BalanceInfo.AccountId = ub.Id
 					inc.MinuteInfo = &MinuteInfo{cc.Destination, amount}
@@ -236,9 +242,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 						}
 					}
 					if moneyBal != nil && b.Value >= seconds {
-						b.Value -= seconds
-						b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
-
+						b.SubstractAmount(seconds)
 						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 						nInc.BalanceInfo.AccountId = ub.Id
 						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds}
@@ -310,8 +314,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 			if b.RateSubject == "" {
 				amount := increment.Cost
 				if b.Value >= amount {
-					b.Value -= amount
-					b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+					b.SubstractAmount(amount)
 					increment.BalanceInfo.MoneyBalanceUuid = b.Uuid
 					increment.BalanceInfo.AccountId = ub.Id
 					increment.paid = true
@@ -340,8 +343,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 						// debit money
 						amount := nInc.Cost
 						if b.Value >= amount {
-							b.Value -= amount
-							b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+							b.SubstractAmount(amount)
 							nInc.BalanceInfo.MoneyBalanceUuid = b.Uuid
 							nInc.BalanceInfo.AccountId = ub.Id
 							nInc.paid = true
@@ -418,8 +420,7 @@ func (bc BalanceChain) Debit(amount float64) float64 {
 			continue
 		}
 		if b.Value >= amount || i == len(bc)-1 { // if last one go negative
-			b.Value -= amount
-			b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+			b.SubstractAmount(amount)
 			break
 		}
 		b.Value = 0
@@ -466,4 +467,12 @@ func (bc BalanceChain) HasBalance(balance *Balance) bool {
 		}
 	}
 	return false
+}
+
+func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
+	for _, b := range bc {
+		if b.account != nil && b.account != acc && b.dirty {
+			accountingStorage.SetAccount(b.account)
+		}
+	}
 }
