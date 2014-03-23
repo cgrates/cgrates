@@ -34,7 +34,7 @@ func TestParseXmlConfig(t *testing.T) {
      <field name="RecordType" type="constant" value="10" width="2"/>
      <field name="Filler1" type="filler" width="3"/>
      <field name="NetworkProviderCode" type="constant" value="VOI" width="3"/>
-     <field name="FileSeqNr" type="metatag" value="exportid" padding="left" padding_char="0" width="5"/>
+     <field name="FileSeqNr" type="metatag" value="exportid" padding="zeroleft" width="5"/>
      <field name="CutOffTime" type="metatag" value="time_lastcdr" layout="020106150400" width="12"/>
      <field name="FileCreationfTime" type="metatag" value="time_now" layout="020106150400" width="12"/>
      <field name="FileSpecificationVersion" type="constant" value="01" width="2"/>
@@ -45,7 +45,7 @@ func TestParseXmlConfig(t *testing.T) {
     <fields>
      <field name="RecordType" type="constant" value="20" width="2"/>
      <field name="SIPTrunkID" type="cdrfield" value="cgrid" width="12"/>
-     <field name="ConnectionNumber" type="cdrfield" value="subject" strip="left" padding="left" padding_char="0" width="5"/>
+     <field name="ConnectionNumber" type="cdrfield" value="subject" strip="left" padding="left" width="5"/>
      <field name="ANumber" type="cdrfield" value="cli" strip="xright" width="15"/>
      <field name="CalledNumber" type="cdrfield" value="destination" strip="xright" width="24"/>
      <field name="ServiceType" type="constant" value="02" width="2"/>
@@ -61,7 +61,7 @@ func TestParseXmlConfig(t *testing.T) {
      <field name="VolumeUP" type="filler" width="8"/>
      <field name="VolumeDown" type="filler" width="8"/>
      <field name="TerminatingOperator" type="concatenated_cdrfield" value="tapcode,operatorcode" width="5"/>
-     <field name="EndCharge" type="metatag" value="total_cost" padding="left" padding_char="0" width="9"/>
+     <field name="EndCharge" type="cdrfield" value="cost" padding="zeroleft" width="9"/>
      <field name="CallMaskingIndicator" type="cdrfield" value="calledmask" width="1"/>
     </fields>
    </content>
@@ -70,9 +70,9 @@ func TestParseXmlConfig(t *testing.T) {
      <field name="RecordType" type="constant" value="90" width="2"/>
      <field name="Filler1" type="filler" width="3"/>
      <field name="NetworkProviderCode" type="constant" value="VOI" width="3"/>
-     <field name="FileSeqNr" type="metatag" value="exportid" padding="left" padding_char="0" width="5"/>
-     <field name="TotalNrRecords" type="metatag" value="nr_cdrs" padding="left" padding_char="0" width="6"/>
-     <field name="TotalDurRecords" type="metatag" value="dur_cdrs" padding="left" padding_char="0" width="8"/>
+     <field name="FileSeqNr" type="metatag" value="exportid" padding="zeroleft" width="5"/>
+     <field name="TotalNrRecords" type="metatag" value="nr_cdrs" padding="zeroleft" width="6"/>
+     <field name="TotalDurRecords" type="metatag" value="dur_cdrs" padding="zeroleft" width="8"/>
      <field name="EarliestCDRTime" type="metatag" value="first_cdr_time" layout="020106150400" width="12"/>
      <field name="LatestCDRTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12"/>
      <field name="Filler1" type="filler" width="93"/>

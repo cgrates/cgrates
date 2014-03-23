@@ -23,6 +23,6 @@ import (
 )
 
 type CdrWriter interface {
-	Write(cdr *utils.StoredCdr) string
+	WriteCdr(cdr *utils.StoredCdr) string
 	Close()
 }

@@ -26,35 +26,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestParseSearchReplaceFromFieldRule(t *testing.T) {
-	// Normal case
-	fieldRule := `~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
-	field, regSrchRplc, err := parseSearchReplaceFromFieldRule(fieldRule)
-	if len(field) == 0 || regSrchRplc == nil || err != nil {
-		t.Error("Failed parsing the field rule")
-	} else if !reflect.DeepEqual(regSrchRplc, &utils.ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)@`), "0$1"}) {
-		t.Error("Unexpected ReSearchReplace parsed")
-	}
-	// Missing ~ prefix
-	fieldRule = `sip_redirected_to:s/sip:\+49(\d+)@/0$1/`
-	if _, _, err := parseSearchReplaceFromFieldRule(fieldRule); err == nil {
-		t.Error("Parse error, field rule does not start with ~")
-	}
-	// Separator escaped
-	fieldRule = `~sip_redirected_to:s\/sip:\+49(\d+)@/0$1/`
-	if _, _, err := parseSearchReplaceFromFieldRule(fieldRule); err == nil {
-		t.Error("Parse error, field rule does not contain correct number of separators")
-	}
-	// One extra separator but escaped
-	fieldRule = `~sip_redirected_to:s/sip:\+49(\d+)\/@/0$1/`
-	field, regSrchRplc, err = parseSearchReplaceFromFieldRule(fieldRule)
-	if len(field) == 0 || regSrchRplc == nil || err != nil {
-		t.Error("Failed parsing the field rule")
-	} else if !reflect.DeepEqual(regSrchRplc, &utils.ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)\/@`), "0$1"}) {
-		t.Error("Unexpected ReSearchReplace parsed")
-	}
-}
-
 func TestParseRSRFields(t *testing.T) {
 	fields := `host,~sip_redirected_to:s/sip:\+49(\d+)@/0$1/,destination`
 	expectParsedFields := []*utils.RSRField{&utils.RSRField{Id: "host"},

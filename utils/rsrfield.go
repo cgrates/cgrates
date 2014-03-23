@@ -18,6 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
+import (
+	"errors"
+	"regexp"
+	"strings"
+)
+
+func ParseSearchReplaceFromFieldRule(fieldRule string) (string, *ReSearchReplace, error) {
+	// String rule expected in the form ~hdr_name:s/match_rule/replace_rule/
+	getRuleRgxp := regexp.MustCompile(`~(\w+):s\/(.+[^\\])\/(.+[^\\])\/`) // Make sure the separator / is not escaped in the rule
+	allMatches := getRuleRgxp.FindStringSubmatch(fieldRule)
+	if len(allMatches) != 4 { // Second and third groups are of interest to us
+		return "", nil, errors.New("Invalid Search&Replace field rule.")
+	}
+	fieldName := allMatches[1]
+	searchRegexp, err := regexp.Compile(allMatches[2])
+	if err != nil {
+		return fieldName, nil, err
+	}
+	return fieldName, &ReSearchReplace{searchRegexp, allMatches[3]}, nil
+}
+
+func NewRSRField(fldStr string) (*RSRField, error) {
+	if len(fldStr) == 0 {
+		return nil, nil
+	}
+	if !strings.HasPrefix(fldStr, REGEXP_SEP) {
+		return &RSRField{Id: fldStr}, nil
+	}
+	if fldId, reSrcRepl, err := ParseSearchReplaceFromFieldRule(fldStr); err != nil {
+		return nil, err
+	} else {
+		return &RSRField{fldId, reSrcRepl}, nil
+	}
+}
+
 type RSRField struct {
 	Id     string           //  Identifier
 	RSRule *ReSearchReplace // Rule to use when processing field value

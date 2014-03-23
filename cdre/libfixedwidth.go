@@ -20,52 +20,50 @@ package cdre
 
 import (
 	"fmt"
-	"strconv"
 )
 
 // Used as generic function logic for various fields
 
 // Attributes
 //  source - the base source
-//  maxLen - the maximum field lenght
-//  stripAllowed - whether we allow stripping of chars in case of source bigger than the maximum allowed
-//  lStrip - if true, strip from beginning of the string
-//  lPadding - if true, add chars at the beginning of the string
-//  paddingChar - the character wich will be used to fill the existing
-func filterField(source string, maxLen int, stripAllowed, lStrip, lPadding, padWithZero bool) (string, error) {
-	if len(source) == maxLen { // the source is exactly the maximum length
+//  width - the field width
+//  strip - if present it will specify the strip strategy, when missing strip will not be allowed
+//  padding - if present it will specify the padding strategy to use, left, right, zeroleft, zeroright
+func FmtFieldWidth(source string, width int, strip, padding string) (string, error) {
+	if len(source) == width { // the source is exactly the maximum length
 		return source, nil
 	}
-	if len(source) > maxLen { //the source is bigger than allowed
-		if !stripAllowed {
-			return "", fmt.Errorf("source %s is bigger than the maximum allowed length %d", source, maxLen)
+	if len(source) > width { //the source is bigger than allowed
+		if len(strip) == 0 {
+			return "", fmt.Errorf("Source %s is bigger than the width %d, no strip defied", source, width)
 		}
-		if !lStrip {
-			return source[:maxLen], nil
-		} else {
-			diffIndx := len(source) - maxLen
+		if strip == "right" {
+			return source[:width], nil
+		} else if strip == "xright" {
+			return source[:width-1] + "x", nil // Suffix with x to mark prefix
+		} else if strip == "left" {
+			diffIndx := len(source) - width
 			return source[diffIndx:], nil
+		} else if strip == "xleft" { // Prefix one x to mark stripping
+			diffIndx := len(source) - width
+			return "x" + source[diffIndx+1:], nil
 		}
 	} else { //the source is smaller as the maximum allowed
-		paddingString := "%"
-		if padWithZero {
-			paddingString += "0" // it will not work for rPadding but this is not needed
+		if len(padding) == 0 {
+			return "", fmt.Errorf("Source %s is smaller than the width %d, no padding defined", source, width)
 		}
-		if !lPadding {
-			paddingString += "-"
+		var paddingFmt string
+		switch padding {
+		case "right":
+			paddingFmt = fmt.Sprintf("%%-%ds", width)
+		case "left":
+			paddingFmt = fmt.Sprintf("%%%ds", width)
+		case "zeroleft":
+			paddingFmt = fmt.Sprintf("%%0%ds", width)
 		}
-		paddingString += strconv.Itoa(maxLen) + "s"
-		return fmt.Sprintf(paddingString, source), nil
+		if len(paddingFmt) != 0 {
+			return fmt.Sprintf(paddingFmt, source), nil
+		}
 	}
+	return source, nil
 }
-
-/*
-type XmlCdreConfig struct {
-	XMLName xml.Name        `xml:"configuration"`
-	Name    string          `xml:"name,attr"`
-	Type    string          `xml:"type,attr"`
-	Header  XMLFWCdrHeader  `xml:"header"`
-	Content XMLFWCdrContent `xml:"content"`
-	Footer  XMLFWCdrFooter  `xml:"footer"`
-}
-*/

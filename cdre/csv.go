@@ -34,9 +34,9 @@ func NewCsvCdrWriter(writer io.Writer, roundDecimals int, exportedFields []*util
 	return &CsvCdrWriter{csv.NewWriter(writer), roundDecimals, exportedFields}
 }
 
-func (csvwr *CsvCdrWriter) Write(cdr *utils.StoredCdr) error {
+func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 	row := make([]string, len(csvwr.exportedFields))
-	for idx, fld := range csvwr.exportedFields { // Add primary fields
+	for idx, fld := range csvwr.exportedFields {
 		var fldVal string
 		if fld.Id == utils.COST {
 			fldVal = cdr.FormatCost(csvwr.roundDecimals)
