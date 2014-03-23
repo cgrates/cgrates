@@ -34,9 +34,9 @@ func TestParseXmlConfig(t *testing.T) {
      <field name="RecordType" type="constant" value="10" width="2"/>
      <field name="Filler1" type="filler" width="3"/>
      <field name="NetworkProviderCode" type="constant" value="VOI" width="3"/>
-     <field name="FileSeqNr" type="metatag" id="exportid" lpadding="true" padding_char="0" width="5"/>
-     <field name="CutOffTime" type="metatag" id="time_lastcdr" layout="020106150400" width="12"/>
-     <field name="FileCreationfTime" type="metatag" id="time_now" layout="020106150400" width="12"/>
+     <field name="FileSeqNr" type="metatag" value="exportid" padding="left" padding_char="0" width="5"/>
+     <field name="CutOffTime" type="metatag" value="time_lastcdr" layout="020106150400" width="12"/>
+     <field name="FileCreationfTime" type="metatag" value="time_now" layout="020106150400" width="12"/>
      <field name="FileSpecificationVersion" type="constant" value="01" width="2"/>
      <field name="Filler2" type="filler" width="105"/>
     </fields>
@@ -44,25 +44,25 @@ func TestParseXmlConfig(t *testing.T) {
    <content>
     <fields>
      <field name="RecordType" type="constant" value="20" width="2"/>
-     <field name="SIPTrunkID" type="cdrfield" id="cgrid" width="12"/>
-     <field name="ConnectionNumber" type="cdrfield" id="subject" strip="left" padding="left" padding_char="0" width="5"/>
-     <field name="ANumber" type="cdrfield" id="cli" strip="xright" width="15"/>
-     <field name="CalledNumber" type="cdrfield" id="destination" strip="xright" width="24"/>
+     <field name="SIPTrunkID" type="cdrfield" value="cgrid" width="12"/>
+     <field name="ConnectionNumber" type="cdrfield" value="subject" strip="left" padding="left" padding_char="0" width="5"/>
+     <field name="ANumber" type="cdrfield" value="cli" strip="xright" width="15"/>
+     <field name="CalledNumber" type="cdrfield" value="destination" strip="xright" width="24"/>
      <field name="ServiceType" type="constant" value="02" width="2"/>
      <field name="ServiceIdentification" type="constant" value="11" width="4"/>
-     <field name="StartChargingDateTime" type="cdrfield" id="start_time" layout="020106150400" width="12"/>
-     <field name="ChargeableTime" type="cdrfield" id="duration" width="6"/>
+     <field name="StartChargingDateTime" type="cdrfield" value="start_time" layout="020106150400" width="12"/>
+     <field name="ChargeableTime" type="cdrfield" value="duration" width="6"/>
      <field name="DataVolume" type="filler" width="6"/>
      <field name="TaxCode" type="constant" value="1" width="1"/>
-     <field name="OperatorTAPCode" type="cdrfield" id="opertapcode" width="2"/>
-     <field name="ProductNumber" type="cdrfield" id="productnumber" width="5"/>
+     <field name="OperatorTAPCode" type="cdrfield" value="opertapcode" width="2"/>
+     <field name="ProductNumber" type="cdrfield" value="productnumber" width="5"/>
      <field name="NetworkSubtype" type="constant" value="3" width="1"/>
-     <field name="SessionID" type="cdrfield" id="accid" width="16"/>
+     <field name="SessionID" type="cdrfield" value="accid" width="16"/>
      <field name="VolumeUP" type="filler" width="8"/>
      <field name="VolumeDown" type="filler" width="8"/>
-     <field name="TerminatingOperator" type="concatenated_cdrfield" id="tapcode,operatorcode" width="5"/>
-     <field name="EndCharge" type="metatag" id="total_cost" lpadding="true" padding_char="0" width="9"/>
-     <field name="CallMaskingIndicator" type="cdrfield" id="calledmask" width="1"/>
+     <field name="TerminatingOperator" type="concatenated_cdrfield" value="tapcode,operatorcode" width="5"/>
+     <field name="EndCharge" type="metatag" value="total_cost" padding="left" padding_char="0" width="9"/>
+     <field name="CallMaskingIndicator" type="cdrfield" value="calledmask" width="1"/>
     </fields>
    </content>
    <trailer>
@@ -70,11 +70,11 @@ func TestParseXmlConfig(t *testing.T) {
      <field name="RecordType" type="constant" value="90" width="2"/>
      <field name="Filler1" type="filler" width="3"/>
      <field name="NetworkProviderCode" type="constant" value="VOI" width="3"/>
-     <field name="FileSeqNr" type="metatag" id="exportid" lpadding="true" padding_char="0" width="5"/>
-     <field name="TotalNrRecords" type="metatag" id="nr_cdrs" lpadding="true" padding_char="0" width="6"/>
-     <field name="TotalDurRecords" type="metatag" id="dur_cdrs" lpadding="true" padding_char="0" width="8"/>
-     <field name="EarliestCDRTime" type="metatag" id="first_cdr_time" layout="020106150400" width="12"/>
-     <field name="LatestCDRTime" type="metatag" id="last_cdr_time" layout="020106150400" width="12"/>
+     <field name="FileSeqNr" type="metatag" value="exportid" padding="left" padding_char="0" width="5"/>
+     <field name="TotalNrRecords" type="metatag" value="nr_cdrs" padding="left" padding_char="0" width="6"/>
+     <field name="TotalDurRecords" type="metatag" value="dur_cdrs" padding="left" padding_char="0" width="8"/>
+     <field name="EarliestCDRTime" type="metatag" value="first_cdr_time" layout="020106150400" width="12"/>
+     <field name="LatestCDRTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12"/>
      <field name="Filler1" type="filler" width="93"/>
     </fields>
    </trailer>

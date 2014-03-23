@@ -79,10 +79,15 @@ type CgrXmlCfgCdrTrailer struct {
 
 // CDR field
 type CgrXmlCfgCdrField struct {
-	XMLName xml.Name `xml:"field"`
-	Name    string   `xml:"name,attr"`
-	Type    string   `xml:"type,attr"`
-	Width   string   `xml:"width,attr"`
+	XMLName     xml.Name `xml:"field"`
+	Name        string   `xml:"name,attr"`
+	Type        string   `xml:"type,attr"`
+	Value       string   `xml:"value,attr"`
+	Width       string   `xml:"width,attr"`
+	Strip       string   `xml:"strip,attr"`
+	Padding     string   `xml:"padding,attr"`
+	PaddingChar string   `xml:"padding_char,attr"`
+	Layout      string   `xml:"layout,attr"` // Eg. time format layout
 }
 
 // Avoid building from raw config string always, so build cache here
@@ -91,7 +96,7 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdreFWCfgs() error {
 	for _, cfgInst := range xmlCfg.Configurations {
 		if cfgInst.Section == utils.CDRE || cfgInst.Type == utils.FIXED_WIDTH {
 			cdrefwCfg := new(CgrXmlCdreFwCfg)
-			rawConfig := append([]byte("<element>"), cfgInst.RawConfig...) // Encapsulate the rawConfig in one element so we can Unmarshall
+			rawConfig := append([]byte("<element>"), cfgInst.RawConfig...) // Encapsulate the rawConfig in one element so we can Unmarshall into one struct
 			rawConfig = append(rawConfig, []byte("</element>")...)
 			if err := xml.Unmarshal(rawConfig, cdrefwCfg); err != nil {
 				return err
