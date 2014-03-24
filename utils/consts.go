@@ -94,7 +94,6 @@ const (
 	FIXED_WIDTH                = "fixed_width"
 	XML_PROFILE_PREFIX         = "*xml:"
 	CDRE                       = "cdre"
-	COST_DETAILS               = "cost_details"
 )
 
 var (

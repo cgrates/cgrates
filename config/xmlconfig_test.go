@@ -34,8 +34,8 @@ func TestParseXmlConfig(t *testing.T) {
      <field name="RecordType" type="constant" value="10" width="2"/>
      <field name="Filler1" type="filler" width="3"/>
      <field name="NetworkProviderCode" type="constant" value="VOI" width="3"/>
-     <field name="FileSeqNr" type="metatag" value="exportid" padding="zeroleft" width="5"/>
-     <field name="CutOffTime" type="metatag" value="time_lastcdr" layout="020106150400" width="12"/>
+     <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5"/>
+     <field name="CutOffTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12"/>
      <field name="FileCreationfTime" type="metatag" value="time_now" layout="020106150400" width="12"/>
      <field name="FileSpecificationVersion" type="constant" value="01" width="2"/>
      <field name="Filler2" type="filler" width="105"/>
@@ -70,9 +70,9 @@ func TestParseXmlConfig(t *testing.T) {
      <field name="RecordType" type="constant" value="90" width="2"/>
      <field name="Filler1" type="filler" width="3"/>
      <field name="NetworkProviderCode" type="constant" value="VOI" width="3"/>
-     <field name="FileSeqNr" type="metatag" value="exportid" padding="zeroleft" width="5"/>
-     <field name="TotalNrRecords" type="metatag" value="nr_cdrs" padding="zeroleft" width="6"/>
-     <field name="TotalDurRecords" type="metatag" value="dur_cdrs" padding="zeroleft" width="8"/>
+     <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5"/>
+     <field name="TotalNrRecords" type="metatag" value="cdrs_number" padding="zeroleft" width="6"/>
+     <field name="TotalDurRecords" type="metatag" value="cdrs_duration" padding="zeroleft" width="8"/>
      <field name="EarliestCDRTime" type="metatag" value="first_cdr_time" layout="020106150400" width="12"/>
      <field name="LatestCDRTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12"/>
      <field name="Filler1" type="filler" width="93"/>

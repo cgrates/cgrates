@@ -79,14 +79,15 @@ type CgrXmlCfgCdrTrailer struct {
 
 // CDR field
 type CgrXmlCfgCdrField struct {
-	XMLName xml.Name `xml:"field"`
-	Name    string   `xml:"name,attr"`
-	Type    string   `xml:"type,attr"`
-	Value   string   `xml:"value,attr"`
-	Width   int      `xml:"width,attr"`   // Field width
-	Strip   string   `xml:"strip,attr"`   // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
-	Padding string   `xml:"padding,attr"` // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
-	Layout  string   `xml:"layout,attr"`  // Eg. time format layout
+	XMLName   xml.Name `xml:"field"`
+	Name      string   `xml:"name,attr"`
+	Type      string   `xml:"type,attr"`
+	Value     string   `xml:"value,attr"`
+	Width     int      `xml:"width,attr"`   // Field width
+	Strip     string   `xml:"strip,attr"`   // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
+	Padding   string   `xml:"padding,attr"` // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
+	Layout    string   `xml:"layout,attr"`  // Eg. time format layout
+	Mandatory bool     `xml:"layout,attr"`  // If field is mandatory, empty value will be considered as error and CDR will not be exported
 }
 
 // Avoid building from raw config string always, so build cache here

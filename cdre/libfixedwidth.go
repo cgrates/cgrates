@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdre
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -29,7 +30,10 @@ import (
 //  width - the field width
 //  strip - if present it will specify the strip strategy, when missing strip will not be allowed
 //  padding - if present it will specify the padding strategy to use, left, right, zeroleft, zeroright
-func FmtFieldWidth(source string, width int, strip, padding string) (string, error) {
+func FmtFieldWidth(source string, width int, strip, padding string, mandatory bool) (string, error) {
+	if mandatory && len(source) == 0 {
+		return "", errors.New("Empty source value")
+	}
 	if len(source) == width { // the source is exactly the maximum length
 		return source, nil
 	}
