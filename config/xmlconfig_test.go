@@ -44,7 +44,7 @@ func TestParseXmlConfig(t *testing.T) {
    <content>
     <fields>
      <field name="RecordType" type="constant" value="20" width="2"/>
-     <field name="SIPTrunkID" type="cdrfield" value="cgrid" width="12"/>
+     <field name="SIPTrunkID" type="cdrfield" value="cgrid" width="12" mandatory="true"/>
      <field name="ConnectionNumber" type="cdrfield" value="subject" strip="left" padding="left" width="5"/>
      <field name="ANumber" type="cdrfield" value="cli" strip="xright" width="15"/>
      <field name="CalledNumber" type="cdrfield" value="destination" strip="xright" width="24"/>

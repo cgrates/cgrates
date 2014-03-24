@@ -184,7 +184,7 @@ func TestSanityCheck(t *testing.T) {
 		t.Error("Failed to detect config insanity")
 	}
 	cfg = &CGRConfig{}
-	cfg.CdreCdrFormat = utils.FIXED_WIDTH
+	cfg.CdreCdrFormat = utils.CDRE_FIXED_WIDTH
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect fixed_width dependency on xml configuration")
 	}

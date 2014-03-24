@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -50,12 +51,23 @@ const (
 
 var err error
 
+func NewFWCdrWriter(logDb engine.LogStorage, outFile *os.File, exportTpl *config.CgrXmlCdreFwCfg, exportId string, roundDecimals int) (*FixedWidthCdrWriter, error) {
+	return &FixedWidthCdrWriter{
+		logDb:          logDb,
+		writer:         outFile,
+		exportTemplate: exportTpl,
+		exportId:       exportId,
+		roundDecimals:  roundDecimals,
+		header:         &bytes.Buffer{},
+		content:        &bytes.Buffer{},
+		trailer:        &bytes.Buffer{}}, nil
+}
+
 type FixedWidthCdrWriter struct {
 	logDb                     engine.LogStorage // Used to extract cost_details if these are requested
 	writer                    io.Writer
 	exportTemplate            *config.CgrXmlCdreFwCfg
 	exportId                  string // Unique identifier or this export
-	exportFileName            string // If defined it will overwrite the file name
 	roundDecimals             int
 	header, content, trailer  *bytes.Buffer
 	firstCdrTime, lastCdrTime time.Time

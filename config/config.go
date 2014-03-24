@@ -283,7 +283,7 @@ func (self *CGRConfig) setDefaults() error {
 
 func (self *CGRConfig) checkConfigSanity() error {
 	// Cdre sanity check for fixed_width
-	if self.CdreCdrFormat == utils.FIXED_WIDTH {
+	if self.CdreCdrFormat == utils.CDRE_FIXED_WIDTH {
 		if self.XmlCfgDocument == nil {
 			return errors.New("Need XmlConfigurationDocument for fixed_width cdr export")
 		} else if self.CdreFWXmlTemplate == nil {
@@ -492,7 +492,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("cdre", "export_template"); hasOpt { // Load configs for csv normally from template, fixed_width from xml file
 		exportTemplate, _ := c.GetString("cdre", "export_template")
-		if cfg.CdreCdrFormat != utils.FIXED_WIDTH { // Csv most likely
+		if cfg.CdreCdrFormat != utils.CDRE_FIXED_WIDTH { // Csv most likely
 			if extraFields, err := ParseRSRFields(exportTemplate); err != nil {
 				return nil, errParse
 			} else {

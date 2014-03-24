@@ -83,18 +83,18 @@ type CgrXmlCfgCdrField struct {
 	Name      string   `xml:"name,attr"`
 	Type      string   `xml:"type,attr"`
 	Value     string   `xml:"value,attr"`
-	Width     int      `xml:"width,attr"`   // Field width
-	Strip     string   `xml:"strip,attr"`   // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
-	Padding   string   `xml:"padding,attr"` // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
-	Layout    string   `xml:"layout,attr"`  // Eg. time format layout
-	Mandatory bool     `xml:"layout,attr"`  // If field is mandatory, empty value will be considered as error and CDR will not be exported
+	Width     int      `xml:"width,attr"`     // Field width
+	Strip     string   `xml:"strip,attr"`     // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
+	Padding   string   `xml:"padding,attr"`   // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
+	Layout    string   `xml:"layout,attr"`    // Eg. time format layout
+	Mandatory bool     `xml:"mandatory,attr"` // If field is mandatory, empty value will be considered as error and CDR will not be exported
 }
 
 // Avoid building from raw config string always, so build cache here
 func (xmlCfg *CgrXmlCfgDocument) cacheCdreFWCfgs() error {
 	xmlCfg.cdrefws = make(map[string]*CgrXmlCdreFwCfg)
 	for _, cfgInst := range xmlCfg.Configurations {
-		if cfgInst.Section == utils.CDRE || cfgInst.Type == utils.FIXED_WIDTH {
+		if cfgInst.Section == utils.CDRE || cfgInst.Type == utils.CDRE_FIXED_WIDTH {
 			cdrefwCfg := new(CgrXmlCdreFwCfg)
 			rawConfig := append([]byte("<element>"), cfgInst.RawConfig...) // Encapsulate the rawConfig in one element so we can Unmarshall into one struct
 			rawConfig = append(rawConfig, []byte("</element>")...)

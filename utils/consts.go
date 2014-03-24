@@ -91,11 +91,11 @@ const (
 	INTERNAL                   = "internal"
 	ZERO_RATING_SUBJECT_PREFIX = "*zero"
 	OK                         = "OK"
-	FIXED_WIDTH                = "fixed_width"
+	CDRE_FIXED_WIDTH           = "fixed_width"
 	XML_PROFILE_PREFIX         = "*xml:"
 	CDRE                       = "cdre"
 )
 
 var (
-	CdreCdrFormats = []string{CDRE_CSV, CDRE_DRYRUN}
+	CdreCdrFormats = []string{CDRE_CSV, CDRE_DRYRUN, CDRE_FIXED_WIDTH}
 )
