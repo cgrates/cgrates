@@ -385,6 +385,9 @@ func TestMaxCallDuration(t *testing.T) {
 }
 
 func TestMaxDebit1001(t *testing.T) {
+	if !*testLocal {
+		return
+	}
 	cc := &engine.CallCost{}
 	var acnt *engine.Account
 	cd := engine.CallDescriptor{
@@ -421,6 +424,9 @@ func TestMaxDebit1001(t *testing.T) {
 }
 
 func TestMaxDebit1007(t *testing.T) {
+	if !*testLocal {
+		return
+	}
 	cc := &engine.CallCost{}
 	var acnt *engine.Account
 	cd := engine.CallDescriptor{

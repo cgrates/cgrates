@@ -431,14 +431,14 @@ func TestActionTimingPriotityListWeight(t *testing.T) {
 
 func TestActionTimingsRemoveMember(t *testing.T) {
 	at1 := &ActionTiming{
-		Id:         "some uuid",
-		Tag:        "test",
+		Uuid:       "some uuid",
+		Id:         "test",
 		AccountIds: []string{"one", "two", "three"},
 		ActionsId:  "TEST_ACTIONS",
 	}
 	at2 := &ActionTiming{
-		Id:         "some uuid22",
-		Tag:        "test2",
+		Uuid:       "some uuid22",
+		Id:         "test2",
 		AccountIds: []string{"three", "four"},
 		ActionsId:  "TEST_ACTIONS2",
 	}
@@ -916,8 +916,8 @@ func TestActionTimingLogging(t *testing.T) {
 		},
 	}
 	at := &ActionTiming{
-		Id:         "some uuid",
-		Tag:        "test",
+		Uuid:       "some uuid",
+		Id:         "test",
 		AccountIds: []string{"one", "two", "three"},
 		Timing:     i,
 		Weight:     10.0,

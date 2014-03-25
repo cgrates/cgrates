@@ -35,7 +35,7 @@ type AttrAcntAction struct {
 
 type AccountActionTiming struct {
 	ActionPlanId string    // The id of the ActionPlanId profile attached to the account
-	Id           string    // The id to reference this particular ActionTiming
+	Uuid         string    // The id to reference this particular ActionTiming
 	ActionsId    string    // The id of actions which will be executed
 	NextExecTime time.Time // Next execution time
 }
@@ -52,7 +52,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	for _, ats := range allATs {
 		for _, at := range ats {
 			if utils.IsSliceMember(at.AccountIds, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
-				accountATs = append(accountATs, &AccountActionTiming{Id: at.Id, ActionPlanId: at.Tag, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime(time.Now())})
+				accountATs = append(accountATs, &AccountActionTiming{Uuid: at.Uuid, ActionPlanId: at.Id, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime(time.Now())})
 			}
 		}
 	}
