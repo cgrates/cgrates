@@ -181,7 +181,7 @@ func init() {
 	csvr.LoadActionTriggers()
 	csvr.LoadAccountActions()
 	csvr.WriteToDatabase(false, false)
-	dataStorage.CacheRating(nil, nil, nil, nil)
+	dataStorage.CacheRating(nil, nil, nil, nil, nil)
 	accountingStorage.CacheAccounting(nil, nil, nil)
 }
 

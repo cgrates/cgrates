@@ -146,7 +146,7 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 			} else {
 				// add membere and save
 				sg.MemberIds = append(sg.MemberIds, ub.Id)
-				accountingStorage.SetSharedGroup(sg.Id, sg)
+				accountingStorage.SetSharedGroup(sg)
 			}
 		}
 	}

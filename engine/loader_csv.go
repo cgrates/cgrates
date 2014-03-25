@@ -219,7 +219,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("Shared groups")
 	}
 	for k, sg := range csvr.sharedGroups {
-		err = accountingStorage.SetSharedGroup(k, sg)
+		err = accountingStorage.SetSharedGroup(sg)
 		if err != nil {
 			return err
 		}

@@ -1061,7 +1061,7 @@ func TestDebitShared(t *testing.T) {
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
-	accountingStorage.SetSharedGroup("SG_TEST", sg)
+	accountingStorage.SetSharedGroup(sg)
 	cache2go.Cache(SHARED_GROUP_PREFIX+"SG_TEST", sg)
 	err := rif.debitCreditBalance(cc, false)
 	if err != nil {

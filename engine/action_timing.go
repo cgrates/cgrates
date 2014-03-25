@@ -301,7 +301,7 @@ func (atpl ActionTimingPriotityList) Sort() {
 }
 
 func (at *ActionTiming) String_DISABLED() string {
-	return at.Tag + " " + at.GetNextStartTime(time.Now()).String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
+	return at.Id + " " + at.GetNextStartTime(time.Now()).String() + ",w: " + strconv.FormatFloat(at.Weight, 'f', -1, 64)
 }
 
 // Helper to remove ActionTiming members based on specific filters, empty data means no always match

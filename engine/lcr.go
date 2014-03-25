@@ -17,3 +17,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 package engine
+
+import (
+	"fmt"
+	"time"
+)
+
+type LCR struct {
+	Tenant    string
+	Customer  string
+	Direction string
+	LCRs      []*LCREntry
+}
+
+type LCREntry struct {
+	Destination    string
+	TOR            string
+	Strategy       string
+	Suppliers      string
+	ActivationTime time.Time
+	Weight         float64
+}
+
+type LCRCost struct {
+	Supplier string
+	Cost     float64
+}
+
+func (lcr *LCR) GetId() string {
+	return fmt.Sprintf("%s:%s:%s", lcr.Direction, lcr.Tenant, lcr.Customer)
+}

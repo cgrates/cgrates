@@ -134,19 +134,6 @@ func (cd *CallDescriptor) AddRatingInfo(ris ...*RatingInfo) {
 	cd.RatingInfos = append(cd.RatingInfos, ris...)
 }
 
-// Returns the key used to retrive the user balance involved in this call
-func (cd *CallDescriptor) GetAccountKey() string {
-	subj := cd.Subject
-	if cd.Account != "" {
-		// check if subject is alias
-		if realSubject, err := cache2go.GetCached(ACC_ALIAS_PREFIX + subj); err == nil {
-			cd.Account = realSubject.(string)
-		}
-		subj = cd.Account
-	}
-	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
-}
-
 // Gets and caches the user balance information.
 func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 	if cd.account == nil {
@@ -293,6 +280,27 @@ func (cd *CallDescriptor) GetKey(subject string) string {
 		cd.Subject = realSubject
 	}
 	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, subject)
+}
+
+// Returns the key used to retrive the user balance involved in this call
+func (cd *CallDescriptor) GetAccountKey() string {
+	subj := cd.Subject
+	if cd.Account != "" {
+		// check if subject is alias
+		if realSubject, err := cache2go.GetCached(ACC_ALIAS_PREFIX + subj); err == nil {
+			cd.Account = realSubject.(string)
+		}
+		subj = cd.Account
+	}
+	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
+}
+
+func (cd *CallDescriptor) GetLCRKey() string {
+	subj := cd.Subject
+	if cd.Account != "" {
+		subj = cd.Account
+	}
+	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 }
 
 // Splits the received timespan into sub time spans according to the activation periods intervals.
@@ -666,7 +674,7 @@ func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
-	dataStorage.CacheRating(nil, nil, nil, nil)
+	dataStorage.CacheRating(nil, nil, nil, nil, nil)
 	accountingStorage.CacheAccounting(nil, nil, nil)
 	return nil
 
@@ -701,4 +709,8 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		//RatingInfos:     cd.RatingInfos,
 		//Increments:      cd.Increments,
 	}
+}
+
+func (cd *CallDescriptor) GetLCR() []*LCRCost {
+	return nil
 }

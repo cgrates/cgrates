@@ -41,6 +41,7 @@ const (
 	SHARED_GROUP_PREFIX       = "shg_"
 	ACCOUNT_PREFIX            = "ubl_"
 	DESTINATION_PREFIX        = "dst_"
+	LCR_PREFIX                = "lcr_"
 	TEMP_DESTINATION_PREFIX   = "tmp_"
 	LOG_CALL_COST_PREFIX      = "cco_"
 	LOG_ACTION_TIMMING_PREFIX = "ltm_"
@@ -71,7 +72,7 @@ Interface for storage providers.
 */
 type RatingStorage interface {
 	Storage
-	CacheRating([]string, []string, []string, []string) error
+	CacheRating([]string, []string, []string, []string, []string) error
 	HasData(string, string) (bool, error)
 	GetRatingPlan(string, bool) (*RatingPlan, error)
 	SetRatingPlan(*RatingPlan) error
@@ -82,6 +83,8 @@ type RatingStorage interface {
 	RemoveRpAliases([]string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
+	GetLCR(string, bool) (*LCR, error)
+	SetLCR(*LCR) error
 }
 
 type AccountingStorage interface {
@@ -91,7 +94,7 @@ type AccountingStorage interface {
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
-	SetSharedGroup(string, *SharedGroup) error
+	SetSharedGroup(*SharedGroup) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
 	GetAccAlias(string, bool) (string, error)

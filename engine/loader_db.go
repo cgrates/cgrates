@@ -173,6 +173,18 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
+		log.Print("Shared groups")
+	}
+	for k, sg := range dbr.sharedGroups {
+		err = accountingStorage.SetSharedGroup(sg)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(k)
+		}
+	}
+	if verbose {
 		log.Print("Actions")
 	}
 	for k, as := range dbr.actions {
