@@ -31,50 +31,50 @@ func TestParseXmlConfig(t *testing.T) {
   <configuration section="cdre" type="fixed_width" id="CDRE-FW1">
    <header>
     <fields>
-     <field name="RecordType" type="constant" value="10" width="2"/>
+     <field name="TypeOfRecord" type="constant" value="10" width="2"/>
      <field name="Filler1" type="filler" width="3"/>
-     <field name="NetworkProviderCode" type="constant" value="VOI" width="3"/>
+     <field name="DistributorCode" type="constant" value="VOI" width="3"/>
      <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5"/>
-     <field name="CutOffTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12"/>
+     <field name="LastCdr" type="metatag" value="last_cdr_time" layout="020106150400" width="12"/>
      <field name="FileCreationfTime" type="metatag" value="time_now" layout="020106150400" width="12"/>
-     <field name="FileSpecificationVersion" type="constant" value="01" width="2"/>
+     <field name="Version" type="constant" value="01" width="2"/>
      <field name="Filler2" type="filler" width="105"/>
     </fields>
    </header>
    <content>
     <fields>
-     <field name="RecordType" type="constant" value="20" width="2"/>
-     <field name="SIPTrunkID" type="cdrfield" value="cgrid" width="12" mandatory="true"/>
-     <field name="ConnectionNumber" type="cdrfield" value="subject" strip="left" padding="left" width="5"/>
-     <field name="ANumber" type="cdrfield" value="cli" strip="xright" width="15"/>
-     <field name="CalledNumber" type="cdrfield" value="destination" strip="xright" width="24"/>
-     <field name="ServiceType" type="constant" value="02" width="2"/>
-     <field name="ServiceIdentification" type="constant" value="11" width="4"/>
-     <field name="StartChargingDateTime" type="cdrfield" value="start_time" layout="020106150400" width="12"/>
-     <field name="ChargeableTime" type="cdrfield" value="duration" width="6"/>
+     <field name="TypeOfRecord" type="constant" value="20" width="2"/>
+     <field name="Account" type="cdrfield" value="cgrid" width="12" mandatory="true"/>
+     <field name="Subject" type="cdrfield" value="subject" strip="left" padding="left" width="5"/>
+     <field name="CLI" type="cdrfield" value="cli" strip="xright" width="15"/>
+     <field name="Destination" type="cdrfield" value="destination" strip="xright" width="24"/>
+     <field name="TOR" type="constant" value="02" width="2"/>
+     <field name="SubtypeTOR" type="constant" value="11" width="4"/>
+     <field name="SetupTime" type="cdrfield" value="start_time" layout="020106150400" width="12"/>
+     <field name="Duration" type="cdrfield" value="duration" width="6"/>
      <field name="DataVolume" type="filler" width="6"/>
      <field name="TaxCode" type="constant" value="1" width="1"/>
-     <field name="OperatorTAPCode" type="cdrfield" value="opertapcode" width="2"/>
-     <field name="ProductNumber" type="cdrfield" value="productnumber" width="5"/>
-     <field name="NetworkSubtype" type="constant" value="3" width="1"/>
-     <field name="SessionID" type="cdrfield" value="accid" width="16"/>
-     <field name="VolumeUP" type="filler" width="8"/>
-     <field name="VolumeDown" type="filler" width="8"/>
-     <field name="TerminatingOperator" type="concatenated_cdrfield" value="tapcode,operatorcode" width="5"/>
-     <field name="EndCharge" type="cdrfield" value="cost" padding="zeroleft" width="9"/>
-     <field name="CallMaskingIndicator" type="cdrfield" value="calledmask" width="1"/>
+     <field name="OperatorCode" type="cdrfield" value="operator" width="2"/>
+     <field name="ProductId" type="cdrfield" value="productid" width="5"/>
+     <field name="NetworkId" type="constant" value="3" width="1"/>
+     <field name="CallId" type="cdrfield" value="accid" width="16"/>
+     <field name="Filler" type="filler" width="8"/>
+     <field name="Filler" type="filler" width="8"/>
+     <field name="TerminationCode" type="concatenated_cdrfield" value="operator,product" width="5"/>
+     <field name="Cost" type="cdrfield" value="cost" padding="zeroleft" width="9"/>
+     <field name="CalledMask" type="cdrfield" value="calledmask" width="1"/>
     </fields>
    </content>
    <trailer>
     <fields>
-     <field name="RecordType" type="constant" value="90" width="2"/>
+     <field name="TypeOfRecord" type="constant" value="90" width="2"/>
      <field name="Filler1" type="filler" width="3"/>
-     <field name="NetworkProviderCode" type="constant" value="VOI" width="3"/>
+     <field name="DistributorCode" type="constant" value="VOI" width="3"/>
      <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5"/>
-     <field name="TotalNrRecords" type="metatag" value="cdrs_number" padding="zeroleft" width="6"/>
-     <field name="TotalDurRecords" type="metatag" value="cdrs_duration" padding="zeroleft" width="8"/>
-     <field name="EarliestCDRTime" type="metatag" value="first_cdr_time" layout="020106150400" width="12"/>
-     <field name="LatestCDRTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12"/>
+     <field name="NumberOfRecords" type="metatag" value="cdrs_number" padding="zeroleft" width="6"/>
+     <field name="CdrsDuration" type="metatag" value="cdrs_duration" padding="zeroleft" width="8"/>
+     <field name="FirstCdrTime" type="metatag" value="first_cdr_time" layout="020106150400" width="12"/>
+     <field name="LastCdrTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12"/>
      <field name="Filler1" type="filler" width="93"/>
     </fields>
    </trailer>
