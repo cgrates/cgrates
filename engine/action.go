@@ -166,7 +166,7 @@ func resetCountersAction(ub *Account, a *Action) (err error) {
 }
 
 func genericMakeNegative(a *Action) {
-	if a.Balance != nil && a.Balance.Value > 0 { // only apply if not allready negative
+	if a.Balance != nil && a.Balance.Value >= 0 { // only apply if not allready negative
 		a.Balance.Value = -a.Balance.Value
 	}
 }

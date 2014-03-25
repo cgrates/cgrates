@@ -134,6 +134,11 @@ func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
 	return storedCdr.ExtraFields
 }
 
+// Return cost as string, formated with number of decimals configured
+func (storedCdr *StoredCdr) FormatCost(roundDecimals int) string {
+	return strconv.FormatFloat(storedCdr.Cost, 'f', roundDecimals, 64)
+}
+
 func (storedCdr *StoredCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
 	return storedCdr, nil
 }
@@ -158,4 +163,44 @@ func (storedCdr *StoredCdr) AsRawCdrHttpForm() url.Values {
 		v.Set(fld, val)
 	}
 	return v
+}
+
+// Used to export fields as string, primary fields are const labeled
+func (storedCdr *StoredCdr) ExportFieldValue(fldName string) string {
+	switch fldName {
+	case CGRID:
+		return storedCdr.CgrId
+	case ACCID:
+		return storedCdr.AccId
+	case CDRHOST:
+		return storedCdr.CdrHost
+	case CDRSOURCE:
+		return storedCdr.CdrSource
+	case REQTYPE:
+		return storedCdr.ReqType
+	case DIRECTION:
+		return storedCdr.Direction
+	case TENANT:
+		return storedCdr.Tenant
+	case TOR:
+		return storedCdr.TOR
+	case ACCOUNT:
+		return storedCdr.Account
+	case SUBJECT:
+		return storedCdr.Subject
+	case DESTINATION:
+		return storedCdr.Destination
+	case SETUP_TIME:
+		return storedCdr.SetupTime.String()
+	case ANSWER_TIME:
+		return storedCdr.AnswerTime.String()
+	case DURATION:
+		return strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64)
+	case MEDI_RUNID:
+		return storedCdr.MediationRunId
+	case COST:
+		return strconv.FormatFloat(storedCdr.Cost, 'f', -1, 64) // Recommended to use FormatCost
+	default:
+		return storedCdr.ExtraFields[fldName]
+	}
 }

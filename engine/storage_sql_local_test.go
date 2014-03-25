@@ -23,7 +23,9 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"path"
+	"reflect"
 	"testing"
+	"time"
 )
 
 /*
@@ -128,5 +130,205 @@ func TestRemoveData(t *testing.T) {
 		t.Error(err.Error())
 	} else if len(aas) != 0 {
 		t.Error("Did not remove TPAccountActions")
+	}
+}
+
+func TestSetCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cgrCdr1 := &utils.CgrCdr{"accid": "aaa1", "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
+		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-08T08:42:20Z", "answer_time": "2013-11-08T08:42:26Z", "duration": "10s",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+	cgrCdr2 := &utils.CgrCdr{"accid": "aaa2", "cdrhost": "192.168.1.1", "reqtype": "prepaid", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
+		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-08T08:42:22Z", "answer_time": "2013-11-08T08:42:26Z", "duration": "20",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+	cgrCdr3 := &utils.CgrCdr{"accid": "aaa3", "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "premium_call",
+		"account": "1002", "subject": "1002", "destination": "1001", "setup_time": "2013-11-07T08:42:24Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "60s",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+	cgrCdr4 := &utils.CgrCdr{"accid": "aaa4", "cdrhost": "192.168.1.2", "reqtype": "pseudoprepaid", "direction": "*out", "tenant": "itsyscom.com", "tor": "call",
+		"account": "1001", "subject": "1001", "destination": "+4986517174964", "setup_time": "2013-11-07T08:42:21Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "1m2s",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+	cgrCdr5 := &utils.CgrCdr{"accid": "aaa5", "cdrhost": "192.168.1.2", "reqtype": "postpaid", "direction": "*out", "tenant": "itsyscom.com", "tor": "call",
+		"account": "1002", "subject": "1002", "destination": "+4986517174963", "setup_time": "2013-11-07T08:42:25Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "15s",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+	for _, cdr := range []*utils.CgrCdr{cgrCdr1, cgrCdr2, cgrCdr3, cgrCdr4, cgrCdr5} {
+		if err := mysql.SetCdr(cdr); err != nil {
+			t.Error(err.Error())
+		}
+	}
+	strCdr1 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb1"), AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: "rated",
+		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb2"), AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: TEST_SQL, ReqType: "prepaid",
+		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Duration: time.Duration(12) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
+	strCdr3 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb3"), AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: "rated",
+		Direction: "*out", Tenant: "itsyscom.com", TOR: "call", Account: "1002", Subject: "1000", Destination: "+4986517174963",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+
+	for _, cdr := range []*utils.StoredCdr{strCdr1, strCdr2, strCdr3} {
+		if err := mysql.SetCdr(cdr); err != nil {
+			t.Error(err.Error())
+		}
+	}
+}
+
+func TestSetRatedCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	strCdr1 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb1"), AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: "rated",
+		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb2"), AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: TEST_SQL, ReqType: "prepaid",
+		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Duration: time.Duration(12) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
+	strCdr3 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb3"), AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: "rated",
+		Direction: "*out", Tenant: "itsyscom.com", TOR: "call", Account: "1002", Subject: "1002", Destination: "+4986517174963",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: "wholesale_run", Cost: 1.201}
+
+	for _, cdr := range []*utils.StoredCdr{strCdr1, strCdr2, strCdr3} {
+		if err := mysql.SetRatedCdr(cdr, ""); err != nil {
+			t.Error(err.Error())
+		}
+	}
+}
+
+func TestGetStoredCdrs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var timeStart, timeEnd time.Time
+	// All CDRs, no filter
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on runId
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, utils.DEFAULT_RUNID, "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on cdrHost
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "192.168.1.2", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on cdrSource
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "UNKNOWN", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on reqType
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "prepaid", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on direction
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "*out", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on tenant
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "itsyscom.com", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on tor
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "premium_call", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on account
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "1002", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on subject
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "1000", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on ignoreErr
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, true, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on ignoreRated
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, true); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 5 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on timeStart
+	timeStart = time.Date(2013, 11, 8, 8, 0, 0, 0, time.UTC)
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 5 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on timeStart and timeEnd
+	timeEnd = time.Date(2013, 12, 1, 8, 0, 0, 0, time.UTC)
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Combined filter
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "rated", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+}
+
+func TestCallCost(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cgrId := utils.FSCgrId("bbb1")
+	cc := &CallCost{
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart: time.Date(2013, 9, 10, 13, 40, 0, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
+			},
+			&TimeSpan{
+				TimeStart: time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 30, 0, time.UTC),
+			},
+		},
+	}
+	if err := mysql.LogCallCost("bbb1", TEST_SQL, TEST_SQL, cc); err != nil {
+		t.Error(err.Error())
+	}
+	if ccRcv, err := mysql.GetCallCostLog(cgrId, TEST_SQL, TEST_SQL); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(cc, ccRcv) {
+		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
 	}
 }

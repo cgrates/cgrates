@@ -6,14 +6,14 @@ Scenario
 
 - FreeSWITCH with *vanilla* configuration, replacing *mod_cdr_csv* with *mod_json_cdr*. 
 
- - Modified following users (with configs in *etc/freeswitch/directory/default*): 1001-prepaid, 1002-postpaid, 1003-pseudoprepaid, 1004-rated.
+ - Modified following users (with configs in *etc/freeswitch/directory/default*): 1001-prepaid, 1002-postpaid, 1003-pseudoprepaid, 1004-rated, 1006-prepaid, 1007-rated.
  - Have added inside default dialplan CGR own extensions just before routing towards users (*etc/freeswitch/dialplan/default.xml*).
  - FreeSWITCH configured to generate default *http-json* CDRs.
 
 - **CGRateS** with following components:
 
  - CGR-SM started as prepaid controller, with debits taking place at 5s intervals.
- - CGR-Mediator compoenent attaching costs to the raw CDRs from FreeSWITCH_ inside CGR StorDB.
+ - CGR-Mediator component attaching costs to the raw CDRs from FreeSWITCH_ inside CGR StorDB.
  - CGR-CDRE exporting mediated CDRs from CGR StorDB (export path: */tmp*).
  - CGR-History component keeping the archive of the rates modifications (path browsable with git client at */tmp/cgr_history*).
 
@@ -61,8 +61,13 @@ For our tutorial we load again prepared data out of shared folder, containing fo
  - Will charge by default *RT_40CNT* for all FreeSWITCH_ destinations during peak times (Monday-Friday 08:00-19:00) and *RT_10CNT* during offpeatimes (rest).
  - Account 1001 will receive a special *deal* for 1002 and 1003 destinations during peak times with *RT_20CNT*, otherwise having default rating.
 
-- Create 4 accounts (equivalent of 2 FreeSWITCH default test users - 1001, 1002, 1003, 1004).
-- 1001, 1002, 1003, 1004 will receive 10units of *\*monetary* balance.
+- Create 5 accounts (equivalent of FreeSWITCH default test users - 1001, 1002, 1003, 1004, 1007).
+- Create 1 account alias (1006 - alias of account 1002).
+- Create 1 rating profile alias (1006 - alias of rating profile 1001).
+- 1002, 1003, 1004 will receive 10units of *\*monetary* balance.
+- 1001 will receive 5 units of general  *\*monetary* and 5 units of shared balance in the shared group "SHARED_A".
+- 1007 will receive 0 units of shared balance in the shared group "SHARED_A".
+- Define the shared balance "SHARED_A" with debit policy *\*highest*.
 - For each balance created, attach 3 triggers to control the balance: log on balance=2, log on balance=20, log on 5 mins talked towards 10xx destination.
 
 ::
@@ -85,10 +90,11 @@ To verify that all actions successfully performed, we use following *cgr-console
 
  ::
 
-  cgr-console get_balance cgrates.org 1001
-  cgr-console get_balance cgrates.org 1002
-  cgr-console get_balance cgrates.org 1003
-  cgr-console get_balance cgrates.org 1004
+  cgr-console get_account cgrates.org 1001
+  cgr-console get_account cgrates.org 1002
+  cgr-console get_account cgrates.org 1003
+  cgr-console get_account cgrates.org 1004
+  cgr-console get_account cgrates.org 1007
 
 - Query call costs so we can see our calls will have expected costs (final cost will result as sum of *ConnectFee* and *Cost* fields):
 
@@ -109,15 +115,15 @@ Test calls
 1001 -> 1002
 ~~~~~~~~~~~~
 
-Since the user 1001 is marked as *prepaid* inside FreeSWITCH_ directory configuration, calling between 1001 and 1002 should generate pre-auth and prepaid debits which can be checked with *get_balance* command integrated within *cgr-console* tool. Charging will be done based on time of day as described above.
+Since the user 1001 is marked as *prepaid* inside FreeSWITCH_ directory configuration, calling between 1001 and 1002 should generate pre-auth and prepaid debits which can be checked with *get_account* command integrated within *cgr-console* tool. Charging will be done based on time of day as described above.
 
 *Note*: An important particularity to  note here is the ability of **CGRateS** SessionManager to refund units booked in advance (eg: if debit occurs every 10s and rate increments are set to 1s, the SessionManager will be smart enough to refund pre-booked credits for calls stoped in the middle of debit interval).
 
-Check that 1001 balance is properly debitted, during the call:
+Check that 1001 balance is properly debitted, during the call, and moreover considering that general balance has priority over the shared one debits for this call should take place at first out of general balance.
 
 ::
 
- cgr-console get_balance cgrates.org 1001
+ cgr-console get_account cgrates.org 1001
 
 
 1002 -> 1001
@@ -129,7 +135,7 @@ To check that we had debits we use again console command, this time not during t
 
 ::
 
- cgr-console get_balance cgrates.org 1002
+ cgr-console get_account cgrates.org 1002
 
 
 1003 -> 1001
@@ -141,13 +147,39 @@ To check that there are no debits during or by the end of the call, but when the
 
 ::
 
- cgr-console get_balance cgrates.org 1003
+ cgr-console get_account cgrates.org 1003
 
 
 1004 -> 1001
 ~~~~~~~~~~~~
 
 The user 1004 is marked as *rated* inside FreeSWITCH_ hence his calls not interact in any way with accounting subsystem. The only action perfomed by **CGRateS** related to his calls wil be rating/mediation of his CDRs.
+
+
+1006 -> 1002
+~~~~~~~~~~~~
+
+Since the user 1006 is marked as *prepaid* inside FreeSWITCH_ directory configuration, calling between 1006 and 1002 should generate pre-auth and prepaid debits which can be checked with *get_account* command integrated within *cgr-console* tool. One thing to note here is that 1006 is not defined as an account inside CGR Accounting Subsystem but as an alias of another account, hence *get_account* ran on 1006 will return "not found" and the debits can be monitored on the real account which is 1001.
+
+Check that 1001 balance is properly debitted, during the call, and moreover considering that general balance has priority over the shared one debits for this call should take place at first out of general balance.
+
+::
+
+ cgr-console get_account cgrates.org 1006
+ cgr-console get_account cgrates.org 1001
+
+
+1007 -> 1002
+~~~~~~~~~~~~
+
+Since the user 1007 is marked as *prepaid* inside FreeSWITCH_ directory configuration, calling between 1007 and 1002 should generate pre-auth and prepaid debits which can be checked with *get_account* command integrated within *cgr-console* tool. Since 1007 has no units left into his accounts but he has one balance marked as shared, debits for this call should take place in accounts which are a part of the same shared balance as the one of *1007/SHARED_A*, which in our scenario corresponds to the one of the account 1001.
+
+Check that call can proceed even if 1007 has no units left into his own balances, and that the costs attached to the call towards 1002 are debited from the balance marked as shared within account 1001.
+
+::
+
+ cgr-console get_account cgrates.org 1007
+ cgr-console get_account cgrates.org 1001
 
 
 Fraud detection

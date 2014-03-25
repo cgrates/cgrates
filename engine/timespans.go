@@ -30,13 +30,13 @@ import (
 A unit in which a call will be split that has a specific price related interval attached to it.
 */
 type TimeSpan struct {
-	TimeStart, TimeEnd            time.Time
-	Cost                          float64
-	ratingInfo                    *RatingInfo
-	RateInterval                  *RateInterval
-	CallDuration                  time.Duration // the call duration so far till TimeEnd
-	Increments                    Increments
-	MatchedSubject, MatchedPrefix string
+	TimeStart, TimeEnd                           time.Time
+	Cost                                         float64
+	ratingInfo                                   *RatingInfo
+	RateInterval                                 *RateInterval
+	CallDuration                                 time.Duration // the call duration so far till TimeEnd
+	Increments                                   Increments
+	MatchedSubject, MatchedPrefix, MatchedDestId string
 }
 
 type Increment struct {
@@ -437,6 +437,7 @@ func (nts *TimeSpan) copyRatingInfo(ts *TimeSpan) {
 	nts.ratingInfo = ts.ratingInfo
 	nts.MatchedSubject = ts.ratingInfo.MatchedSubject
 	nts.MatchedPrefix = ts.ratingInfo.MatchedPrefix
+	nts.MatchedDestId = ts.ratingInfo.MatchedDestId
 }
 
 // returns a time for the specified second in the time span

@@ -41,16 +41,14 @@ func init() {
 	fscsvCfg, _ = config.NewCGRConfig(&fscsvCfgPath)
 }
 
-func TestFsCsvCreateDirs(t *testing.T) {
+// Remove here so they can be properly created by init script
+func TestFsCsvRemoveDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	for _, pathDir := range []string{cfg.CdreDir, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.HistoryDir} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
-		}
-		if err := os.MkdirAll(pathDir, 0755); err != nil {
-			t.Fatal("Error creating folder: ", pathDir, err)
 		}
 	}
 }
@@ -102,18 +100,27 @@ func TestFsCsvInitDataDb(t *testing.T) {
 	}
 }
 
+func TestFsCsvStartFs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	exec.Command("pkill", "freeswitch").Run() // Just to make sure no freeswitch is running
+	go func() {
+		fs := exec.Command("sudo", "/usr/share/cgrates/tutorials/fs_csv/freeswitch/etc/init.d/freeswitch", "start")
+		out, _ := fs.CombinedOutput()
+		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
+	}()
+	time.Sleep(time.Duration(*waitFs) * time.Millisecond) // Give time to rater to fire up
+}
+
 // Finds cgr-engine executable and starts it with default configuration
 func TestFsCsvStartEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	enginePath, err := exec.LookPath("cgr-engine")
-	if err != nil {
-		t.Fatal("Cannot find cgr-engine executable")
-	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	go func() {
-		eng := exec.Command(enginePath, "-config", fscsvCfgPath)
+		eng := exec.Command("sudo", "/usr/share/cgrates/tutorials/fs_json/cgrates/etc/init.d/cgrates", "start")
 		out, _ := eng.CombinedOutput()
 		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
 	}()
@@ -136,14 +143,6 @@ func TestFsCsvRpcConn(t *testing.T) {
 func TestFsCsvEmptyCache(t *testing.T) {
 	if !*testLocal {
 		return
-	}
-	reply := ""
-	arc := new(utils.ApiReloadCache)
-	// Simple test that command is executed without errors
-	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
-		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
-	} else if reply != "OK" {
-		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
 	expectedStats := &utils.CacheStats{Destinations: 0, RatingPlans: 0, RatingProfiles: 0, Actions: 0}
@@ -267,5 +266,20 @@ func TestFsCsvStopEngine(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	exec.Command("pkill", "cgr-engine").Run()
+	go func() {
+		eng := exec.Command("/usr/share/cgrates/tutorials/fs_csv/cgrates/etc/init.d/cgrates", "stop")
+		out, _ := eng.CombinedOutput()
+		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
+	}()
+}
+
+func TestFsCsvStopFs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	go func() {
+		fs := exec.Command("/usr/share/cgrates/tutorials/fs_csv/freeswitch/etc/init.d/freeswitch", "stop")
+		out, _ := fs.CombinedOutput()
+		engine.Logger.Info(fmt.Sprintf("CgrEngine-TestFsCsv: %s", out))
+	}()
 }

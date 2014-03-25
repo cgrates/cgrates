@@ -52,7 +52,7 @@ const (
 	DESTINATION_RATES_NRCOLS   = 3
 	DESTRATE_TIMINGS_NRCOLS    = 4
 	RATE_PROFILES_NRCOLS       = 7
-	SHARED_GROUPS_NRCOLS       = 5
+	SHARED_GROUPS_NRCOLS       = 4
 	ACTIONS_NRCOLS             = 12
 	ACTION_PLANS_NRCOLS        = 4
 	ACTION_TRIGGERS_NRCOLS     = 8
@@ -64,6 +64,7 @@ const (
 	COMMENT_CHAR               = '#'
 	CSV_SEP                    = ','
 	FALLBACK_SEP               = ';'
+	REGEXP_SEP                 = "~"
 	JSON                       = "json"
 	MSGPACK                    = "msgpack"
 	CSV_LOAD                   = "CSVLOAD"
@@ -81,6 +82,8 @@ const (
 	SETUP_TIME                 = "setup_time"
 	ANSWER_TIME                = "answer_time"
 	DURATION                   = "duration"
+	MEDI_RUNID                 = "mediation_runid"
+	COST                       = "cost"
 	DEFAULT_RUNID              = "default"
 	STATIC_VALUE_PREFIX        = "^"
 	CDRE_CSV                   = "csv"
@@ -88,8 +91,11 @@ const (
 	INTERNAL                   = "internal"
 	ZERO_RATING_SUBJECT_PREFIX = "*zero"
 	OK                         = "OK"
+	CDRE_FIXED_WIDTH           = "fixed_width"
+	XML_PROFILE_PREFIX         = "*xml:"
+	CDRE                       = "cdre"
 )
 
 var (
-	CdreCdrFormats = []string{CDRE_CSV, CDRE_DRYRUN}
+	CdreCdrFormats = []string{CDRE_CSV, CDRE_DRYRUN, CDRE_FIXED_WIDTH}
 )

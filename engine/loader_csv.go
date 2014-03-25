@@ -38,9 +38,11 @@ type CSVReader struct {
 	actions           map[string][]*Action
 	actionsTimings    map[string][]*ActionTiming
 	actionsTriggers   map[string][]*ActionTrigger
-	aliases           map[string]string
+	rpAliases         map[string]string
+	accAliases        map[string]string
 	accountActions    map[string]*Account
-	dirtyAliases      []string // used to clean aliases that might have changed
+	dirtyRpAliases    []string // used to clean aliases that might have changed
+	dirtyAccAliases   []string // used to clean aliases that might have changed
 	destinations      []*Destination
 	timings           map[string]*utils.TPTiming
 	rates             map[string]*utils.TPRate
@@ -69,7 +71,8 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.sharedGroups = make(map[string]*SharedGroup)
 	c.readerFunc = openFileCSVReader
-	c.aliases = make(map[string]string)
+	c.rpAliases = make(map[string]string)
+	c.accAliases = make(map[string]string)
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
 		c.sharedgroupsFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn = destinationsFn, timingsFn,
 		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn
@@ -249,13 +252,28 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("Aliases")
+		log.Print("Rating profile aliases")
 	}
-	if err := dataStorage.RemoveAccountAliases(csvr.dirtyAliases); err != nil {
+	if err := dataStorage.RemoveRpAliases(csvr.dirtyRpAliases); err != nil {
 		return err
 	}
-	for key, alias := range csvr.aliases {
-		err = dataStorage.SetAlias(key, alias)
+	for key, alias := range csvr.rpAliases {
+		err = dataStorage.SetRpAlias(key, alias)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print(key)
+		}
+	}
+	if verbose {
+		log.Print("Account aliases")
+	}
+	if err := accountingStorage.RemoveAccAliases(csvr.dirtyAccAliases); err != nil {
+		return err
+	}
+	for key, alias := range csvr.accAliases {
+		err = accountingStorage.SetAccAlias(key, alias)
 		if err != nil {
 			return err
 		}
@@ -448,13 +466,13 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		if err != nil {
 			return fmt.Errorf("Cannot parse activation time from %v", record[4])
 		}
-		csvr.dirtyAliases = append(csvr.dirtyAliases, subject)
+		csvr.dirtyRpAliases = append(csvr.dirtyRpAliases, subject)
 		// extract aliases from subject
 		aliases := strings.Split(subject, ";")
 		if len(aliases) > 1 {
 			subject = aliases[0]
 			for _, alias := range aliases[1:] {
-				csvr.aliases[RATING_PROFILE_PREFIX+alias] = subject
+				csvr.rpAliases[alias] = subject
 			}
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
@@ -667,13 +685,13 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tenant, account, direction := record[0], record[1], record[2]
-		csvr.dirtyAliases = append(csvr.dirtyAliases, account)
+		csvr.dirtyAccAliases = append(csvr.dirtyAccAliases, account)
 		// extract aliases from subject
 		aliases := strings.Split(account, ";")
 		if len(aliases) > 1 {
 			account = aliases[0]
 			for _, alias := range aliases[1:] {
-				csvr.aliases[ACCOUNT_PREFIX+alias] = account
+				csvr.accAliases[alias] = account
 			}
 		}
 		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
@@ -692,7 +710,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		csvr.accountActions[tag] = ub
 		aTimings, exists := csvr.actionsTimings[record[3]]
 		if !exists {
-			log.Printf("Could not get action timing for tag %s", record[3])
+			log.Printf("Could not get action plan for tag %s", record[3])
 			// must not continue here
 		}
 		for _, at := range aTimings {
@@ -721,6 +739,9 @@ func (csvr *CSVReader) LoadAll() error {
 		return err
 	}
 	if err = csvr.LoadRatingProfiles(); err != nil {
+		return err
+	}
+	if err = csvr.LoadSharedGroups(); err != nil {
 		return err
 	}
 	if err = csvr.LoadActions(); err != nil {
@@ -779,10 +800,18 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case ALIAS_PREFIX: // aliases
-		keys := make([]string, len(csvr.aliases))
+	case RP_ALIAS_PREFIX: // aliases
+		keys := make([]string, len(csvr.rpAliases))
 		i := 0
-		for k := range csvr.aliases {
+		for k := range csvr.rpAliases {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case ACC_ALIAS_PREFIX: // aliases
+		keys := make([]string, len(csvr.accAliases))
+		i := 0
+		for k := range csvr.accAliases {
 			keys[i] = k
 			i++
 		}

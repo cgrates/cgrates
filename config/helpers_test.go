@@ -16,13 +16,24 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cdrexporter
+package config
 
 import (
+	"reflect"
+	"regexp"
+	"testing"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
-type CdrWriter interface {
-	Write(cdr *utils.StoredCdr) string
-	Close()
+func TestParseRSRFields(t *testing.T) {
+	fields := `host,~sip_redirected_to:s/sip:\+49(\d+)@/0$1/,destination`
+	expectParsedFields := []*utils.RSRField{&utils.RSRField{Id: "host"},
+		&utils.RSRField{Id: "sip_redirected_to", RSRule: &utils.ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)@`), "0$1"}},
+		&utils.RSRField{Id: "destination"}}
+	if parsedFields, err := ParseRSRFields(fields); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(parsedFields, expectParsedFields) {
+		t.Errorf("Unexpected value of parsed fields")
+	}
 }

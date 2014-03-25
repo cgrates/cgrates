@@ -22,6 +22,8 @@ import (
 	"code.google.com/p/goconf/conf"
 	"errors"
 	"strings"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Adds support for slice values in config
@@ -41,4 +43,24 @@ func ConfigSlice(c *conf.ConfigFile, section, valName string) ([]string, error) 
 		}
 	}
 	return cfgValStrs, nil
+}
+
+func ParseRSRFields(configVal string) ([]*utils.RSRField, error) {
+	cfgValStrs := strings.Split(configVal, string(utils.CSV_SEP))
+	if len(cfgValStrs) == 1 && cfgValStrs[0] == "" { // Prevents returning iterable with empty value
+		return []*utils.RSRField{}, nil
+	}
+	rsrFields := make([]*utils.RSRField, len(cfgValStrs))
+	for idx, cfgValStr := range cfgValStrs {
+		if len(cfgValStr) == 0 { //One empty element is presented when splitting empty string
+			return nil, errors.New("Empty values in config slice")
+
+		}
+		if rsrField, err := utils.NewRSRField(cfgValStr); err != nil {
+			return nil, err
+		} else {
+			rsrFields[idx] = rsrField
+		}
+	}
+	return rsrFields, nil
 }

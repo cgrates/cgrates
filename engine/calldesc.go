@@ -21,6 +21,7 @@ package engine
 import (
 	"errors"
 	"fmt"
+	"log"
 	"log/syslog"
 	"time"
 	//"encoding/json"
@@ -115,7 +116,7 @@ type CallDescriptor struct {
 	FallbackSubject                       string // the subject to check for destination if not found on primary subject
 	RatingInfos                           RatingInfos
 	Increments                            Increments
-	userBalance                           *Account
+	account                               *Account
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {
@@ -138,7 +139,7 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	subj := cd.Subject
 	if cd.Account != "" {
 		// check if subject is alias
-		if realSubject, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + subj); err == nil {
+		if realSubject, err := cache2go.GetCached(ACC_ALIAS_PREFIX + subj); err == nil {
 			cd.Account = realSubject.(string)
 		}
 		subj = cd.Account
@@ -148,13 +149,13 @@ func (cd *CallDescriptor) GetAccountKey() string {
 
 // Gets and caches the user balance information.
 func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
-	if cd.userBalance == nil {
-		cd.userBalance, err = accountingStorage.GetAccount(cd.GetAccountKey())
+	if cd.account == nil {
+		cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey())
 	}
-	if cd.userBalance != nil && cd.userBalance.Disabled {
+	if cd.account != nil && cd.account.Disabled {
 		return nil, fmt.Errorf("User %s is disabled", ub.Id)
 	}
-	return cd.userBalance, err
+	return cd.account, err
 }
 
 /*
@@ -286,7 +287,7 @@ func (cd *CallDescriptor) addRatingInfos(ris RatingInfos) bool {
 // The prefixLen is limiting the length of the destination prefix.
 func (cd *CallDescriptor) GetKey(subject string) string {
 	// check if subject is alias
-	if rs, err := cache2go.GetCached(ALIAS_PREFIX + RATING_PROFILE_PREFIX + subject); err == nil {
+	if rs, err := cache2go.GetCached(RP_ALIAS_PREFIX + subject); err == nil {
 		realSubject := rs.(string)
 		subject = realSubject
 		cd.Subject = realSubject
@@ -312,6 +313,7 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 			firstSpan.ratingInfo = rp
 			firstSpan.MatchedSubject = rp.MatchedSubject
 			firstSpan.MatchedPrefix = rp.MatchedPrefix
+			firstSpan.MatchedDestId = rp.MatchedDestId
 		} else {
 			afterStart = true
 			for i := 0; i < len(timespans); i++ {
@@ -433,7 +435,7 @@ Returns the approximate max allowed session for user balance. It will try the ma
 If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
-func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
+func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Duration, error) {
 	if origCD.CallDuration < origCD.TimeEnd.Sub(origCD.TimeStart) {
 		origCD.CallDuration = origCD.TimeEnd.Sub(origCD.TimeStart)
 	}
@@ -446,16 +448,11 @@ func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	}
 	var availableDuration time.Duration
 	availableCredit := 0.0
-	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-		if userBalance.AllowNegative {
-			return -1, nil
-		} else {
-			availableDuration, availableCredit, _ = userBalance.getCreditForPrefix(cd)
-			// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
-		}
+	if account.AllowNegative {
+		return -1, nil
 	} else {
-		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
-		return 0, err
+		availableDuration, availableCredit, _ = account.getCreditForPrefix(cd)
+		// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 	}
 	//Logger.Debug(fmt.Sprintf("availableDuration: %v, availableCredit: %v", availableDuration, availableCredit))
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
@@ -500,40 +497,69 @@ func (origCD *CallDescriptor) GetMaxSessionDuration() (time.Duration, error) {
 	return utils.MinDuration(initialDuration, availableDuration), nil
 }
 
+func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err error) {
+	if account, err := cd.getAccount(); err != nil || account == nil {
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		return 0, err
+	} else {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+			AccLock.GuardMany(memberIds, func() (float64, error) {
+				duration, err = cd.getMaxSessionDuration(account)
+				return 0, err
+			})
+		} else {
+			return 0, err
+		}
+		return duration, err
+	}
+}
+
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
 // from user's money balance.
-func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetAccountKey(), err))
 		return
 	}
-	if userBalance, err := cd.getAccount(); err != nil {
-		Logger.Err(fmt.Sprintf("<Rater> Error retrieving user balance: %v", err))
-	} else if userBalance == nil {
-		// Logger.Debug(fmt.Sprintf("<Rater> No user balance defined: %v", cd.GetAccountKey()))
-	} else {
-		//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetAccountKey(), cc.Cost+cc.ConnectFee))
-		defer accountingStorage.SetAccount(userBalance)
-		//ub, _ := json.Marshal(userBalance)
-		//Logger.Debug(fmt.Sprintf("Account: %s", ub))
-		//cCost, _ := json.Marshal(cc)
-		//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
-		if cc.Cost != 0 || (cc.deductConnectFee && cc.GetConnectFee() != 0) {
-			userBalance.debitCreditBalance(cc, true)
-		}
-		cost := 0.0
-		// re-calculate call cost after balances
-		if cc.deductConnectFee { // add back the connectFee
-			cost += cc.GetConnectFee()
-		}
-		for _, ts := range cc.Timespans {
-			cost += ts.getCost()
-			cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
-		}
-		cc.Cost = cost
+	//Logger.Debug(fmt.Sprintf("<Rater> Attempting to debit from %v, value: %v", cd.GetAccountKey(), cc.Cost+cc.ConnectFee))
+	defer accountingStorage.SetAccount(account)
+	//ub, _ := json.Marshal(account)
+	//Logger.Debug(fmt.Sprintf("Account: %s", ub))
+	//cCost, _ := json.Marshal(cc)
+	//Logger.Debug(fmt.Sprintf("CallCost: %s", cCost))
+	if cc.Cost != 0 || (cc.deductConnectFee && cc.GetConnectFee() != 0) {
+		account.debitCreditBalance(cc, true)
 	}
+	cost := 0.0
+	// re-calculate call cost after balances
+	if cc.deductConnectFee { // add back the connectFee
+		cost += cc.GetConnectFee()
+	}
+	for _, ts := range cc.Timespans {
+		cost += ts.getCost()
+		cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
+	}
+	cc.Cost = cost
 	return
+}
+
+func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
+	// lock all group members
+	if account, err := cd.getAccount(); err != nil || account == nil {
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		return nil, err
+	} else {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+			AccLock.GuardMany(memberIds, func() (float64, error) {
+				cc, err = cd.debit(account)
+				return 0, err
+			})
+		} else {
+			return nil, err
+		}
+		return cc, err
+	}
 }
 
 // Interface method used to add/substract an amount of cents or bonus seconds (as returned by GetCost method)
@@ -541,14 +567,30 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 // This methods combines the Debit and GetMaxSessionDuration and will debit the max available time as returned
 // by the GetMaxSessionTime method. The amount filed has to be filled in call descriptor.
 func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
-	remainingDuration, err := cd.GetMaxSessionDuration()
-	if err != nil || remainingDuration == 0 {
-		return new(CallCost), fmt.Errorf("no more credit: %v", err)
+	if account, err := cd.getAccount(); err != nil || account == nil {
+		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
+		return nil, err
+	} else {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+			AccLock.GuardMany(memberIds, func() (float64, error) {
+				remainingDuration, err := cd.getMaxSessionDuration(account)
+				if err != nil || remainingDuration == 0 {
+					cc, err = new(CallCost), fmt.Errorf("no more credit: %v", err)
+					return 0, err
+				}
+				if remainingDuration > 0 { // for postpaying client returns -1
+					cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
+				}
+				cc, err = cd.debit(account)
+				//log.Print(balanceMap[0].Value, balanceMap[1].Value)
+				return 0, err
+			})
+		} else {
+			log.Print("cxcxxc")
+			return nil, err
+		}
 	}
-	if remainingDuration > 0 { // for postpaying client returns -1
-		cd.TimeEnd = cd.TimeStart.Add(remainingDuration)
-	}
-	return cd.Debit()
+	return cc, err
 }
 
 func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
@@ -563,10 +605,6 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 			}
 		}
 		account.refundIncrement(increment, cd.Direction, true)
-	}
-
-	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-
 	}
 	return 0.0, err
 }
@@ -629,7 +667,7 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
 	dataStorage.CacheRating(nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil)
 	return nil
 
 }

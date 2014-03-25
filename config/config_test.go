@@ -73,15 +73,15 @@ func TestDefaults(t *testing.T) {
 	eCfg.DefaultSubject = "cgrates"
 	eCfg.RoundingMethod = utils.ROUNDING_MIDDLE
 	eCfg.RoundingDecimals = 4
+	eCfg.XmlCfgDocument = nil
 	eCfg.RaterEnabled = false
 	eCfg.RaterBalancer = ""
 	eCfg.BalancerEnabled = false
 	eCfg.SchedulerEnabled = false
 	eCfg.CDRSEnabled = false
-	eCfg.CDRSExtraFields = []string{}
+	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
 	eCfg.CdreCdrFormat = "csv"
-	eCfg.CdreExtraFields = []string{}
 	eCfg.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
@@ -146,6 +146,23 @@ func TestDefaults(t *testing.T) {
 	eCfg.MailerAuthUser = "cgrates"
 	eCfg.MailerAuthPass = "CGRateS.org"
 	eCfg.MailerFromAddr = "cgr-mailer@localhost.localdomain"
+	eCfg.CdreExportedFields = []*utils.RSRField{
+		&utils.RSRField{Id: utils.CGRID},
+		&utils.RSRField{Id: utils.MEDI_RUNID},
+		&utils.RSRField{Id: utils.ACCID},
+		&utils.RSRField{Id: utils.CDRHOST},
+		&utils.RSRField{Id: utils.REQTYPE},
+		&utils.RSRField{Id: utils.DIRECTION},
+		&utils.RSRField{Id: utils.TENANT},
+		&utils.RSRField{Id: utils.TOR},
+		&utils.RSRField{Id: utils.ACCOUNT},
+		&utils.RSRField{Id: utils.SUBJECT},
+		&utils.RSRField{Id: utils.DESTINATION},
+		&utils.RSRField{Id: utils.SETUP_TIME},
+		&utils.RSRField{Id: utils.ANSWER_TIME},
+		&utils.RSRField{Id: utils.DURATION},
+		&utils.RSRField{Id: utils.COST},
+	}
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
@@ -153,24 +170,25 @@ func TestDefaults(t *testing.T) {
 	}
 }
 
-// Make sure defaults did not change
-/*func TestDefaultsSanity(t *testing.T) {
+func TestSanityCheck(t *testing.T) {
 	cfg := &CGRConfig{}
 	errSet := cfg.setDefaults()
 	if errSet != nil {
-		t.Log(fmt.Sprintf("Coud not set defaults: %s!", errSet.Error()))
-		t.FailNow()
+		t.Error("Coud not set defaults: ", errSet.Error())
 	}
-	if (cfg.RaterListen != INTERNAL &&
-		(cfg.RaterListen == cfg.BalancerListen ||
-			cfg.RaterListen == cfg.CDRSListen ||
-			cfg.RaterListen == cfg.MediatorListen)) ||
-		(cfg.BalancerListen != INTERNAL && (cfg.BalancerListen == cfg.CDRSListen ||
-			cfg.BalancerListen == cfg.MediatorListen)) ||
-		(cfg.CDRSListen != INTERNAL && cfg.CDRSListen == cfg.MediatorListen) {
-		t.Error("Listen defaults on the same port!")
+	if err := cfg.checkConfigSanity(); err != nil {
+		t.Error("Invalid defaults: ", err)
 	}
-}*/
+	cfg.SMSubjectFields = []string{"sample1", "sample2", "sample3"}
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed to detect config insanity")
+	}
+	cfg = &CGRConfig{}
+	cfg.CdreCdrFormat = utils.CDRE_FIXED_WIDTH
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed to detect fixed_width dependency on xml configuration")
+	}
+}
 
 // Load config from file and make sure we have all set
 func TestConfigFromFile(t *testing.T) {
@@ -215,10 +233,10 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.BalancerEnabled = true
 	eCfg.SchedulerEnabled = true
 	eCfg.CDRSEnabled = true
-	eCfg.CDRSExtraFields = []string{"test"}
+	eCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CDRSMediator = "test"
 	eCfg.CdreCdrFormat = "test"
-	eCfg.CdreExtraFields = []string{"test"}
+	eCfg.CdreExportedFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CdreDir = "test"
 	eCfg.CdrcEnabled = true
 	eCfg.CdrcCdrs = "test"

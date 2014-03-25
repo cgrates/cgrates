@@ -27,9 +27,9 @@ import (
 
 type SessionManager interface {
 	Connect(*config.CGRConfig) error
-	DisconnectSession(*Session, string)
-	RemoveSession(*Session)
-	LoopAction(*Session, *engine.CallDescriptor) *engine.CallCost
+	DisconnectSession(string, string)
+	RemoveSession(string)
+	MaxDebit(*engine.CallDescriptor, *engine.CallCost) error
 	GetDebitPeriod() time.Duration
 	GetDbLogger() engine.LogStorage
 	Shutdown() error

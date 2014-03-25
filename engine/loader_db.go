@@ -36,9 +36,11 @@ type DbReader struct {
 	actionsTimings   map[string][]*ActionTiming
 	actionsTriggers  map[string][]*ActionTrigger
 	accountActions   map[string]*Account
-	dirtyAliases     []string // used to clean aliases that might have changed
+	dirtyRpAliases   []string // used to clean aliases that might have changed
+	dirtyAccAliases  []string // used to clean aliases that might have changed
 	destinations     []*Destination
-	aliases          map[string]string
+	rpAliases        map[string]string
+	accAliases       map[string]string
 	timings          map[string]*utils.TPTiming
 	rates            map[string]*utils.TPRate
 	destinationRates map[string]*utils.TPDestinationRate
@@ -59,7 +61,8 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.sharedGroups = make(map[string]*SharedGroup)
-	c.aliases = make(map[string]string)
+	c.rpAliases = make(map[string]string)
+	c.accAliases = make(map[string]string)
 	c.accountActions = make(map[string]*Account)
 	return c
 }
@@ -194,13 +197,28 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("Aliases")
+		log.Print("Rating profile aliases")
 	}
-	if err := storage.RemoveAccountAliases(dbr.dirtyAliases); err != nil {
+	if err := storage.RemoveRpAliases(dbr.dirtyRpAliases); err != nil {
 		return err
 	}
-	for key, alias := range dbr.aliases {
-		err = storage.SetAlias(key, alias)
+	for key, alias := range dbr.rpAliases {
+		err = storage.SetRpAlias(key, alias)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(key)
+		}
+	}
+	if verbose {
+		log.Print("Account aliases")
+	}
+	if err := accountingStorage.RemoveAccAliases(dbr.dirtyAccAliases); err != nil {
+		return err
+	}
+	for key, alias := range dbr.accAliases {
+		err = accountingStorage.SetAccAlias(key, alias)
 		if err != nil {
 			return err
 		}
@@ -292,13 +310,13 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		return err
 	}
 	for _, tpRpf := range mpTpRpfs {
-		dbr.dirtyAliases = append(dbr.dirtyAliases, tpRpf.Subject)
+		dbr.dirtyRpAliases = append(dbr.dirtyRpAliases, tpRpf.Subject)
 		// extract aliases from subject
 		aliases := strings.Split(tpRpf.Subject, ";")
 		if len(aliases) > 1 {
 			tpRpf.Subject = aliases[0]
 			for _, alias := range aliases[1:] {
-				dbr.aliases[RATING_PLAN_PREFIX+alias] = tpRpf.Subject
+				dbr.rpAliases[alias] = tpRpf.Subject
 			}
 		}
 		rpf := &RatingProfile{Id: tpRpf.KeyId()}
@@ -522,13 +540,13 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		if _, alreadyDefined := dbr.accountActions[aa.KeyId()]; alreadyDefined {
 			return fmt.Errorf("Duplicate account action found: %s", aa.KeyId())
 		}
-		dbr.dirtyAliases = append(dbr.dirtyAliases, aa.Account)
+		dbr.dirtyAccAliases = append(dbr.dirtyAccAliases, aa.Account)
 		// extract aliases from subject
 		aliases := strings.Split(aa.Account, ";")
 		if len(aliases) > 1 {
 			aa.Account = aliases[0]
 			for _, alias := range aliases[1:] {
-				dbr.aliases[ACCOUNT_PREFIX+alias] = aa.Account
+				dbr.accAliases[alias] = aa.Account
 			}
 		}
 		aTriggers, exists := dbr.actionsTriggers[aa.ActionTriggersId]
@@ -731,6 +749,9 @@ func (dbr *DbReader) LoadAll() error {
 		return err
 	}
 	if err = dbr.LoadRatingProfiles(); err != nil {
+		return err
+	}
+	if err = dbr.LoadSharedGroups(); err != nil {
 		return err
 	}
 	if err = dbr.LoadActions(); err != nil {

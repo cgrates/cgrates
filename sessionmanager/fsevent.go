@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 	"strconv"
@@ -45,6 +46,7 @@ const (
 	SETUP_TIME         = "Caller-Channel-Created-Time"
 	ANSWER_TIME        = "Caller-Channel-Answered-Time"
 	END_TIME           = "Caller-Channel-Hangup-Time"
+	DURATION           = ""
 	NAME               = "Event-Name"
 	HEARTBEAT          = "HEARTBEAT"
 	ANSWER             = "CHANNEL_ANSWER"
@@ -79,37 +81,60 @@ func (fsev FSEvent) GetName() string {
 	return fsev[NAME]
 }
 func (fsev FSEvent) GetDirection(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
 	//TODO: implement direction
 	return "*out"
-	//return fsev[DIRECTION]
 }
 func (fsev FSEvent) GetSubject(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[SUBJECT], fsev[USERNAME])
 }
 func (fsev FSEvent) GetAccount(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[ACCOUNT], fsev[USERNAME])
 }
 
 // Charging destination number
 func (fsev FSEvent) GetDestination(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[DESTINATION], fsev[CALL_DEST_NR])
 }
 
 // Original dialed destination number, useful in case of unpark
 func (fsev FSEvent) GetCallDestNr(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CALL_DEST_NR])
 }
 func (fsev FSEvent) GetTOR(fieldName string) string {
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[TOR], cfg.DefaultTOR)
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[TOR], config.CgrConfig().DefaultTOR)
 }
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
 }
 func (fsev FSEvent) GetTenant(fieldName string) string {
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID], cfg.DefaultTenant)
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[CSTMID], config.CgrConfig().DefaultTenant)
 }
 func (fsev FSEvent) GetReqType(fieldName string) string {
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], cfg.DefaultReqType)
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[REQTYPE], config.CgrConfig().DefaultReqType)
 }
 func (fsev FSEvent) MissingParameter() bool {
 	return strings.TrimSpace(fsev.GetDirection("")) == "" ||
@@ -121,19 +146,31 @@ func (fsev FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetTenant("")) == "" ||
 		strings.TrimSpace(fsev.GetCallDestNr("")) == ""
 }
-func (fsev FSEvent) GetSetupTime(field string) (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev[field], 0, 64)
-	t = time.Unix(0, st*1000)
-	return
+func (fsev FSEvent) GetSetupTime(fieldName string) (t time.Time, err error) {
+	sTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsev[SETUP_TIME])
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.ParseTimeDetectLayout(sTimeStr)
 }
-func (fsev FSEvent) GetAnswerTime(field string) (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev[field], 0, 64)
-	t = time.Unix(0, st*1000)
-	return
+func (fsev FSEvent) GetAnswerTime(fieldName string) (t time.Time, err error) {
+	aTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsev[ANSWER_TIME])
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		aTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.ParseTimeDetectLayout(aTimeStr)
 }
 
 func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
 	st, err := strconv.ParseInt(fsev[END_TIME], 0, 64)
 	t = time.Unix(0, st*1000)
 	return
+}
+
+func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error) {
+	durStr := utils.FirstNonEmpty(fsev[fieldName], fsev[DURATION])
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		durStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	}
+	return utils.ParseDurationWithSecs(durStr)
 }

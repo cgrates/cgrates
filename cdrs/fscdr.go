@@ -22,10 +22,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -51,17 +54,19 @@ const (
 	FS_SIP_REQUSER  = "sip_req_user" // Apps like FusionPBX do not set dialed_extension, alternative being destination_number but that comes in customer profile, not in vars
 )
 
-type FSCdr map[string]string
+type FSCdr struct {
+	vars map[string]string
+	body map[string]interface{} // keeps the loaded body for extra field search
+}
 
 func (fsCdr FSCdr) New(body []byte) (utils.RawCDR, error) {
-	fsCdr = make(map[string]string)
-	var tmp map[string]interface{}
+	fsCdr.vars = make(map[string]string)
 	var err error
-	if err = json.Unmarshal(body, &tmp); err == nil {
-		if variables, ok := tmp[FS_CDR_MAP]; ok {
+	if err = json.Unmarshal(body, &fsCdr.body); err == nil {
+		if variables, ok := fsCdr.body[FS_CDR_MAP]; ok {
 			if variables, ok := variables.(map[string]interface{}); ok {
 				for k, v := range variables {
-					fsCdr[k] = v.(string)
+					fsCdr.vars[k] = v.(string)
 				}
 			}
 			return fsCdr, nil
@@ -71,13 +76,13 @@ func (fsCdr FSCdr) New(body []byte) (utils.RawCDR, error) {
 }
 
 func (fsCdr FSCdr) GetCgrId() string {
-	return utils.FSCgrId(fsCdr[FS_UUID])
+	return utils.FSCgrId(fsCdr.vars[FS_UUID])
 }
 func (fsCdr FSCdr) GetAccId() string {
-	return fsCdr[FS_UUID]
+	return fsCdr.vars[FS_UUID]
 }
 func (fsCdr FSCdr) GetCdrHost() string {
-	return fsCdr[FS_IP]
+	return fsCdr.vars[FS_IP]
 }
 func (fsCdr FSCdr) GetCdrSource() string {
 	return FS_CDR_SOURCE
@@ -87,55 +92,88 @@ func (fsCdr FSCdr) GetDirection() string {
 	return "*out"
 }
 func (fsCdr FSCdr) GetSubject() string {
-	return utils.FirstNonEmpty(fsCdr[FS_SUBJECT], fsCdr[FS_USERNAME])
+	return utils.FirstNonEmpty(fsCdr.vars[FS_SUBJECT], fsCdr.vars[FS_USERNAME])
 }
 func (fsCdr FSCdr) GetAccount() string {
-	return utils.FirstNonEmpty(fsCdr[FS_ACCOUNT], fsCdr[FS_USERNAME])
+	return utils.FirstNonEmpty(fsCdr.vars[FS_ACCOUNT], fsCdr.vars[FS_USERNAME])
 }
 
 // Charging destination number
 func (fsCdr FSCdr) GetDestination() string {
-	return utils.FirstNonEmpty(fsCdr[FS_DESTINATION], fsCdr[FS_CALL_DEST_NR], fsCdr[FS_SIP_REQUSER])
+	return utils.FirstNonEmpty(fsCdr.vars[FS_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
 }
 
 func (fsCdr FSCdr) GetTOR() string {
-	return utils.FirstNonEmpty(fsCdr[FS_TOR], cfg.DefaultTOR)
+	return utils.FirstNonEmpty(fsCdr.vars[FS_TOR], cfg.DefaultTOR)
 }
 
 func (fsCdr FSCdr) GetTenant() string {
-	return utils.FirstNonEmpty(fsCdr[FS_CSTMID], cfg.DefaultTenant)
+	return utils.FirstNonEmpty(fsCdr.vars[FS_CSTMID], cfg.DefaultTenant)
 }
 func (fsCdr FSCdr) GetReqType() string {
-	return utils.FirstNonEmpty(fsCdr[FS_REQTYPE], cfg.DefaultReqType)
+	return utils.FirstNonEmpty(fsCdr.vars[FS_REQTYPE], cfg.DefaultReqType)
 }
 func (fsCdr FSCdr) GetExtraFields() map[string]string {
 	extraFields := make(map[string]string, len(cfg.CDRSExtraFields))
 	for _, field := range cfg.CDRSExtraFields {
-		extraFields[field] = fsCdr[field]
+		origFieldVal, foundInVars := fsCdr.vars[field.Id]
+		if !foundInVars {
+			origFieldVal = fsCdr.searchExtraField(field.Id, fsCdr.body)
+		}
+		extraFields[field.Id] = field.ParseValue(origFieldVal)
 	}
 	return extraFields
 }
+
+func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (result string) {
+	for key, value := range body {
+		switch v := value.(type) {
+		case string:
+			if key == field {
+				return v
+			}
+		case map[string]interface{}:
+			if result = fsCdr.searchExtraField(field, v); result != "" {
+				return
+			}
+		case []interface{}:
+			for _, item := range v {
+				if otherMap, ok := item.(map[string]interface{}); ok {
+					if result = fsCdr.searchExtraField(field, otherMap); result != "" {
+						return
+					}
+				} else {
+					engine.Logger.Warning(fmt.Sprintf("Slice with no maps: %v", reflect.TypeOf(item)))
+				}
+			}
+		default:
+			engine.Logger.Warning(fmt.Sprintf("Unexpected type: %v", reflect.TypeOf(v)))
+		}
+	}
+	return
+}
+
 func (fsCdr FSCdr) GetSetupTime() (t time.Time, err error) {
 	//ToDo: Make sure we work with UTC instead of local time
-	at, err := strconv.ParseInt(fsCdr[FS_SETUP_TIME], 0, 64)
+	at, err := strconv.ParseInt(fsCdr.vars[FS_SETUP_TIME], 0, 64)
 	t = time.Unix(at, 0)
 	return
 }
 func (fsCdr FSCdr) GetAnswerTime() (t time.Time, err error) {
 	//ToDo: Make sure we work with UTC instead of local time
-	at, err := strconv.ParseInt(fsCdr[FS_ANSWER_TIME], 0, 64)
+	at, err := strconv.ParseInt(fsCdr.vars[FS_ANSWER_TIME], 0, 64)
 	t = time.Unix(at, 0)
 	return
 }
 func (fsCdr FSCdr) GetHangupTime() (t time.Time, err error) {
-	hupt, err := strconv.ParseInt(fsCdr[FS_HANGUP_TIME], 0, 64)
+	hupt, err := strconv.ParseInt(fsCdr.vars[FS_HANGUP_TIME], 0, 64)
 	t = time.Unix(hupt, 0)
 	return
 }
 
 // Extracts duration as considered by the telecom switch
 func (fsCdr FSCdr) GetDuration() time.Duration {
-	dur, _ := utils.ParseDurationWithSecs(fsCdr[FS_DURATION])
+	dur, _ := utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
 	return dur
 }
 
@@ -197,40 +235,40 @@ func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 	}
 	if strings.HasPrefix(reqTypeFld, utils.STATIC_VALUE_PREFIX) { // Values starting with prefix are not dynamically populated
 		rtCdr.ReqType = reqTypeFld[1:]
-	} else if rtCdr.ReqType, hasKey = fsCdr[reqTypeFld]; !hasKey && fieldsMandatory {
+	} else if rtCdr.ReqType, hasKey = fsCdr.vars[reqTypeFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, reqTypeFld))
 	}
 	if strings.HasPrefix(directionFld, utils.STATIC_VALUE_PREFIX) {
 		rtCdr.Direction = directionFld[1:]
-	} else if rtCdr.Direction, hasKey = fsCdr[directionFld]; !hasKey && fieldsMandatory {
+	} else if rtCdr.Direction, hasKey = fsCdr.vars[directionFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, directionFld))
 	}
 	if strings.HasPrefix(tenantFld, utils.STATIC_VALUE_PREFIX) {
 		rtCdr.Tenant = tenantFld[1:]
-	} else if rtCdr.Tenant, hasKey = fsCdr[tenantFld]; !hasKey && fieldsMandatory {
+	} else if rtCdr.Tenant, hasKey = fsCdr.vars[tenantFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, tenantFld))
 	}
 	if strings.HasPrefix(torFld, utils.STATIC_VALUE_PREFIX) {
 		rtCdr.TOR = torFld[1:]
-	} else if rtCdr.TOR, hasKey = fsCdr[torFld]; !hasKey && fieldsMandatory {
+	} else if rtCdr.TOR, hasKey = fsCdr.vars[torFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, torFld))
 	}
 	if strings.HasPrefix(accountFld, utils.STATIC_VALUE_PREFIX) {
 		rtCdr.Account = accountFld[1:]
-	} else if rtCdr.Account, hasKey = fsCdr[accountFld]; !hasKey && fieldsMandatory {
+	} else if rtCdr.Account, hasKey = fsCdr.vars[accountFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, accountFld))
 	}
 	if strings.HasPrefix(subjectFld, utils.STATIC_VALUE_PREFIX) {
 		rtCdr.Subject = subjectFld[1:]
-	} else if rtCdr.Subject, hasKey = fsCdr[subjectFld]; !hasKey && fieldsMandatory {
+	} else if rtCdr.Subject, hasKey = fsCdr.vars[subjectFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, subjectFld))
 	}
 	if strings.HasPrefix(destFld, utils.STATIC_VALUE_PREFIX) {
 		rtCdr.Destination = destFld[1:]
-	} else if rtCdr.Destination, hasKey = fsCdr[destFld]; !hasKey && fieldsMandatory {
+	} else if rtCdr.Destination, hasKey = fsCdr.vars[destFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, destFld))
 	}
-	if sTimeStr, hasKey = fsCdr[setupTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(setupTimeFld, utils.STATIC_VALUE_PREFIX) {
+	if sTimeStr, hasKey = fsCdr.vars[setupTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(setupTimeFld, utils.STATIC_VALUE_PREFIX) {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, setupTimeFld))
 	} else {
 		if strings.HasPrefix(setupTimeFld, utils.STATIC_VALUE_PREFIX) {
@@ -240,7 +278,7 @@ func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 			return nil, err
 		}
 	}
-	if aTimeStr, hasKey = fsCdr[answerTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(answerTimeFld, utils.STATIC_VALUE_PREFIX) {
+	if aTimeStr, hasKey = fsCdr.vars[answerTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(answerTimeFld, utils.STATIC_VALUE_PREFIX) {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, answerTimeFld))
 	} else {
 		if strings.HasPrefix(answerTimeFld, utils.STATIC_VALUE_PREFIX) {
@@ -250,7 +288,7 @@ func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 			return nil, err
 		}
 	}
-	if durStr, hasKey = fsCdr[durationFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(durationFld, utils.STATIC_VALUE_PREFIX) {
+	if durStr, hasKey = fsCdr.vars[durationFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(durationFld, utils.STATIC_VALUE_PREFIX) {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, durationFld))
 	} else {
 		if strings.HasPrefix(durationFld, utils.STATIC_VALUE_PREFIX) {
@@ -262,7 +300,7 @@ func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 	}
 	rtCdr.ExtraFields = make(map[string]string, len(extraFlds))
 	for _, fldName := range extraFlds {
-		if fldVal, hasKey := fsCdr[fldName]; !hasKey && fieldsMandatory {
+		if fldVal, hasKey := fsCdr.vars[fldName]; !hasKey && fieldsMandatory {
 			return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, fldName))
 		} else {
 			rtCdr.ExtraFields[fldName] = fldVal

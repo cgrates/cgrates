@@ -11,7 +11,7 @@ go test -i github.com/cgrates/cgrates/cdrs
 go test -i github.com/cgrates/cgrates/cdrc
 go test -i github.com/cgrates/cgrates/utils
 go test -i github.com/cgrates/cgrates/history
-go test -i github.com/cgrates/cgrates/cdrexporter
+go test -i github.com/cgrates/cgrates/cdre
 
 go test github.com/cgrates/cgrates/engine
 en=$?
@@ -35,7 +35,7 @@ go test github.com/cgrates/cgrates/history
 hs=$?
 go test github.com/cgrates/cgrates/cache2go
 c2g=$?
-go test github.com/cgrates/cgrates/cdrexporter
+go test github.com/cgrates/cgrates/cdre
 cdre=$?
 
 

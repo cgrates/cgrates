@@ -79,7 +79,7 @@ func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage
 		exitChan <- true
 		return
 	}
-	if err := accountDb.CacheAccounting(nil, nil); err != nil {
+	if err := accountDb.CacheAccounting(nil, nil, nil); err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cache accounting error: %s", err.Error()))
 		exitChan <- true
 		return
@@ -383,7 +383,7 @@ func main() {
 	}
 
 	responder := &engine.Responder{ExitChan: exitChan}
-	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, Config: cfg}
+	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg}
 
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterBalancer != utils.INTERNAL {
 		engine.Logger.Info("Registering Rater service")

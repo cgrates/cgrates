@@ -21,6 +21,8 @@ package config
 import (
 	"errors"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"code.google.com/p/goconf/conf"
@@ -59,57 +61,59 @@ type CGRConfig struct {
 	RatingDBUser             string // The user to sign in as.
 	RatingDBPass             string // The user's password.
 	AccountDBType            string
-	AccountDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort            string // The port to bind to.
-	AccountDBName            string // The name of the database to connect to.
-	AccountDBUser            string // The user to sign in as.
-	AccountDBPass            string // The user's password.
-	StorDBType               string // Should reflect the database type used to store logs
-	StorDBHost               string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort               string // Th e port to bind to.
-	StorDBName               string // The name of the database to connect to.
-	StorDBUser               string // The user to sign in as.
-	StorDBPass               string // The user's password.
-	DBDataEncoding           string // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen            string // RPC JSON listening address
-	RPCGOBListen             string // RPC GOB listening address
-	HTTPListen               string // HTTP listening address
-	DefaultReqType           string // Use this request type if not defined on top
-	DefaultTOR               string // set default type of record
-	DefaultTenant            string // set default tenant
-	DefaultSubject           string // set default rating subject, useful in case of fallback
-	RoundingMethod           string // Rounding method for the end price: <*up|*middle|*down>
-	RoundingDecimals         int    // Number of decimals to round end prices at
-	RaterEnabled             bool   // start standalone server (no balancer)
-	RaterBalancer            string // balancer address host:port
+	AccountDBHost            string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort            string             // The port to bind to.
+	AccountDBName            string             // The name of the database to connect to.
+	AccountDBUser            string             // The user to sign in as.
+	AccountDBPass            string             // The user's password.
+	StorDBType               string             // Should reflect the database type used to store logs
+	StorDBHost               string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort               string             // Th e port to bind to.
+	StorDBName               string             // The name of the database to connect to.
+	StorDBUser               string             // The user to sign in as.
+	StorDBPass               string             // The user's password.
+	DBDataEncoding           string             // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen            string             // RPC JSON listening address
+	RPCGOBListen             string             // RPC GOB listening address
+	HTTPListen               string             // HTTP listening address
+	DefaultReqType           string             // Use this request type if not defined on top
+	DefaultTOR               string             // set default type of record
+	DefaultTenant            string             // set default tenant
+	DefaultSubject           string             // set default rating subject, useful in case of fallback
+	RoundingMethod           string             // Rounding method for the end price: <*up|*middle|*down>
+	RoundingDecimals         int                // Number of decimals to round end prices at
+	XmlCfgDocument           *CgrXmlCfgDocument // Load additional configuration inside xml document
+	RaterEnabled             bool               // start standalone server (no balancer)
+	RaterBalancer            string             // balancer address host:port
 	BalancerEnabled          bool
 	SchedulerEnabled         bool
-	CDRSEnabled              bool          // Enable CDR Server service
-	CDRSExtraFields          []string      //Extra fields to store in CDRs
-	CDRSMediator             string        // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CdreCdrFormat            string        // Format of the exported CDRs. <csv>
-	CdreExtraFields          []string      // Extra fields list to add in exported CDRs
-	CdreDir                  string        // Path towards exported cdrs directory
-	CdrcEnabled              bool          // Enable CDR client functionality
-	CdrcCdrs                 string        // Address where to reach CDR server
-	CdrcCdrsMethod           string        // Mechanism to use when posting CDRs on server  <http_cgr>
-	CdrcRunDelay             time.Duration // Sleep interval between consecutive runs, if time unit missing, defaults to seconds, 0 to use automation via inotify
-	CdrcCdrType              string        // CDR file format <csv>.
-	CdrcCdrInDir             string        // Absolute path towards the directory where the CDRs are stored.
-	CdrcCdrOutDir            string        // Absolute path towards the directory where processed CDRs will be moved.
-	CdrcSourceId             string        // Tag identifying the source of the CDRs within CGRS database.
-	CdrcAccIdField           string        // Accounting id field identifier. Use index number in case of .csv cdrs.
-	CdrcReqTypeField         string        // Request type field identifier. Use index number in case of .csv cdrs.
-	CdrcDirectionField       string        // Direction field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTenantField          string        // Tenant field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTorField             string        // Type of Record field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAccountField         string        // Account field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSubjectField         string        // Subject field identifier. Use index numbers in case of .csv CDRs.
-	CdrcDestinationField     string        // Destination field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSetupTimeField       string        // Setup time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAnswerTimeField      string        // Answer time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcDurationField        string        // Duration field identifier. Use index numbers in case of .csv cdrs.
-	CdrcExtraFields          []string      // Field identifiers of the fields to add in extra fields section, special format in case of .csv "field1:index1,field2:index2"
+	CDRSEnabled              bool              // Enable CDR Server service
+	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
+	CDRSMediator             string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CdreCdrFormat            string            // Format of the exported CDRs. <csv>
+	CdreDir                  string            // Path towards exported cdrs directory
+	CdreExportedFields       []*utils.RSRField // List of fields in the exported CDRs
+	CdreFWXmlTemplate        *CgrXmlCdreFwCfg  // Use this configuration as export template in case of fixed fields length
+	CdrcEnabled              bool              // Enable CDR client functionality
+	CdrcCdrs                 string            // Address where to reach CDR server
+	CdrcCdrsMethod           string            // Mechanism to use when posting CDRs on server  <http_cgr>
+	CdrcRunDelay             time.Duration     // Sleep interval between consecutive runs, 0 to use automation via inotify
+	CdrcCdrType              string            // CDR file format <csv>.
+	CdrcCdrInDir             string            // Absolute path towards the directory where the CDRs are stored.
+	CdrcCdrOutDir            string            // Absolute path towards the directory where processed CDRs will be moved.
+	CdrcSourceId             string            // Tag identifying the source of the CDRs within CGRS database.
+	CdrcAccIdField           string            // Accounting id field identifier. Use index number in case of .csv cdrs.
+	CdrcReqTypeField         string            // Request type field identifier. Use index number in case of .csv cdrs.
+	CdrcDirectionField       string            // Direction field identifier. Use index numbers in case of .csv cdrs.
+	CdrcTenantField          string            // Tenant field identifier. Use index numbers in case of .csv cdrs.
+	CdrcTorField             string            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
+	CdrcAccountField         string            // Account field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSubjectField         string            // Subject field identifier. Use index numbers in case of .csv CDRs.
+	CdrcDestinationField     string            // Destination field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSetupTimeField       string            // Setup time field identifier. Use index numbers in case of .csv cdrs.
+	CdrcAnswerTimeField      string            // Answer time field identifier. Use index numbers in case of .csv cdrs.
+	CdrcDurationField        string            // Duration field identifier. Use index numbers in case of .csv cdrs.
+	CdrcExtraFields          []string          // Extra fields to extract, special format in case of .csv "field1:index1,field2:index2"
 	SMEnabled                bool
 	SMSwitchType             string
 	SMRater                  string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -184,15 +188,15 @@ func (self *CGRConfig) setDefaults() error {
 	self.DefaultSubject = "cgrates"
 	self.RoundingMethod = utils.ROUNDING_MIDDLE
 	self.RoundingDecimals = 4
+	self.XmlCfgDocument = nil
 	self.RaterEnabled = false
 	self.RaterBalancer = ""
 	self.BalancerEnabled = false
 	self.SchedulerEnabled = false
 	self.CDRSEnabled = false
-	self.CDRSExtraFields = []string{}
+	self.CDRSExtraFields = []*utils.RSRField{}
 	self.CDRSMediator = ""
 	self.CdreCdrFormat = "csv"
-	self.CdreExtraFields = []string{}
 	self.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
@@ -257,12 +261,70 @@ func (self *CGRConfig) setDefaults() error {
 	self.MailerAuthUser = "cgrates"
 	self.MailerAuthPass = "CGRateS.org"
 	self.MailerFromAddr = "cgr-mailer@localhost.localdomain"
+	self.CdreExportedFields = []*utils.RSRField{
+		&utils.RSRField{Id: utils.CGRID},
+		&utils.RSRField{Id: utils.MEDI_RUNID},
+		&utils.RSRField{Id: utils.ACCID},
+		&utils.RSRField{Id: utils.CDRHOST},
+		&utils.RSRField{Id: utils.REQTYPE},
+		&utils.RSRField{Id: utils.DIRECTION},
+		&utils.RSRField{Id: utils.TENANT},
+		&utils.RSRField{Id: utils.TOR},
+		&utils.RSRField{Id: utils.ACCOUNT},
+		&utils.RSRField{Id: utils.SUBJECT},
+		&utils.RSRField{Id: utils.DESTINATION},
+		&utils.RSRField{Id: utils.SETUP_TIME},
+		&utils.RSRField{Id: utils.ANSWER_TIME},
+		&utils.RSRField{Id: utils.DURATION},
+		&utils.RSRField{Id: utils.COST},
+	}
+	return nil
+}
+
+func (self *CGRConfig) checkConfigSanity() error {
+	// Cdre sanity check for fixed_width
+	if self.CdreCdrFormat == utils.CDRE_FIXED_WIDTH {
+		if self.XmlCfgDocument == nil {
+			return errors.New("Need XmlConfigurationDocument for fixed_width cdr export")
+		} else if self.CdreFWXmlTemplate == nil {
+			return errors.New("Need XmlTemplate for fixed_width cdr export")
+		}
+	}
+	// SessionManager should have same fields config length for session emulation
+	if len(self.SMReqTypeFields) != len(self.SMRunIds) ||
+		len(self.SMDirectionFields) != len(self.SMRunIds) ||
+		len(self.SMTenantFields) != len(self.SMRunIds) ||
+		len(self.SMTORFields) != len(self.SMRunIds) ||
+		len(self.SMAccountFields) != len(self.SMRunIds) ||
+		len(self.SMSubjectFields) != len(self.SMRunIds) ||
+		len(self.SMDestFields) != len(self.SMRunIds) ||
+		len(self.SMSetupTimeFields) != len(self.SMRunIds) ||
+		len(self.SMAnswerTimeFields) != len(self.SMRunIds) ||
+		len(self.SMDurationFields) != len(self.SMRunIds) {
+		return errors.New("<ConfigSanity> Inconsistent fields length for SessionManager session emulation")
+	}
+	// Mediator needs to have consistent extra fields definition
+	if len(self.MediatorReqTypeFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorDirectionFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorTenantFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorTORFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorAccountFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorSubjectFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorDestFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorSetupTimeFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorAnswerTimeFields) != len(self.MediatorRunIds) ||
+		len(self.MediatorDurationFields) != len(self.MediatorRunIds) {
+		return errors.New("<ConfigSanity> Inconsistent fields length for Mediator extra fields")
+	}
 	return nil
 }
 
 func NewDefaultCGRConfig() (*CGRConfig, error) {
 	cfg := &CGRConfig{}
 	cfg.setDefaults()
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
 	return cfg, nil
 }
 
@@ -272,7 +334,14 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
 	}
-	return loadConfig(c)
+	cfg, err := loadConfig(c)
+	if err != nil {
+		return nil, err
+	}
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func NewCGRConfigBytes(data []byte) (*CGRConfig, error) {
@@ -280,7 +349,14 @@ func NewCGRConfigBytes(data []byte) (*CGRConfig, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
 	}
-	return loadConfig(c)
+	cfg, err := loadConfig(c)
+	if err != nil {
+		return nil, err
+	}
+	if err := cfg.checkConfigSanity(); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
@@ -372,6 +448,19 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "rounding_decimals"); hasOpt {
 		cfg.RoundingDecimals, _ = c.GetInt("global", "rounding_decimals")
 	}
+	// XML config path defined, try loading the document
+	if hasOpt = c.HasOption("global", "xmlcfg_path"); hasOpt {
+		xmlCfgPath, _ := c.GetString("global", "xmlcfg_path")
+		xmlFile, err := os.Open(xmlCfgPath)
+		if err != nil {
+			return nil, err
+		}
+		if cgrXmlCfgDoc, err := ParseCgrXmlConfig(xmlFile); err != nil {
+			return nil, err
+		} else {
+			cfg.XmlCfgDocument = cgrXmlCfgDoc
+		}
+	}
 	if hasOpt = c.HasOption("rater", "enabled"); hasOpt {
 		cfg.RaterEnabled, _ = c.GetBool("rater", "enabled")
 	}
@@ -388,8 +477,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.CDRSEnabled, _ = c.GetBool("cdrs", "enabled")
 	}
 	if hasOpt = c.HasOption("cdrs", "extra_fields"); hasOpt {
-		if cfg.CDRSExtraFields, errParse = ConfigSlice(c, "cdrs", "extra_fields"); errParse != nil {
+		extraFieldsStr, _ := c.GetString("cdrs", "extra_fields")
+		if extraFields, err := ParseRSRFields(extraFieldsStr); err != nil {
 			return nil, errParse
+		} else {
+			cfg.CDRSExtraFields = extraFields
 		}
 	}
 	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
@@ -398,9 +490,20 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
 		cfg.CdreCdrFormat, _ = c.GetString("cdre", "cdr_format")
 	}
-	if hasOpt = c.HasOption("cdre", "extra_fields"); hasOpt {
-		if cfg.CdreExtraFields, errParse = ConfigSlice(c, "cdre", "extra_fields"); errParse != nil {
-			return nil, errParse
+	if hasOpt = c.HasOption("cdre", "export_template"); hasOpt { // Load configs for csv normally from template, fixed_width from xml file
+		exportTemplate, _ := c.GetString("cdre", "export_template")
+		if cfg.CdreCdrFormat != utils.CDRE_FIXED_WIDTH { // Csv most likely
+			if extraFields, err := ParseRSRFields(exportTemplate); err != nil {
+				return nil, errParse
+			} else {
+				cfg.CdreExportedFields = extraFields
+			}
+		} else if strings.HasPrefix(exportTemplate, utils.XML_PROFILE_PREFIX) {
+			if xmlTemplate, err := cfg.XmlCfgDocument.GetCdreFWCfg(exportTemplate[len(utils.XML_PROFILE_PREFIX):]); err != nil {
+				return nil, err
+			} else {
+				cfg.CdreFWXmlTemplate = xmlTemplate
+			}
 		}
 	}
 	if hasOpt = c.HasOption("cdre", "export_dir"); hasOpt {

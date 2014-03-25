@@ -122,8 +122,9 @@ cgrates.directvoip.co.uk,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
 cgrates.directvoip.co.uk,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
 `
 	sharedGroups = `
-SG1,*any,*lowest_first,,
-SG2,*any,*lowest_first,EVENING,
+SG1,*any,*lowest,
+SG2,*any,*lowest,one
+SG3,*any,*lowest,
 `
 
 	actions = `
@@ -132,12 +133,20 @@ MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,,10
 SHARED,*topup,*monetary,*out,100,*unlimited,,,10,SG1,,10
 TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,10,,,10
 TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
+SE0,*topup_reset,*monetary,*out,0,*unlimited,,,10,SG2,,10
+SE10,*topup_reset,*monetary,*out,10,*unlimited,,,5,SG2,,10
+SE10,*topup,*monetary,*out,10,*unlimited,,,10,,,10
+EE0,*topup_reset,*monetary,*out,0,*unlimited,,,10,SG3,,10
+EE0,*allow_negative,*monetary,*out,0,*unlimited,,,10,,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
 MORE_MINUTES,SHARED,ONE_TIME_RUN,10
 TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10
+TOPUP_SHARED0_AT,SE0,ASAP,10
+TOPUP_SHARED10_AT,SE10,ASAP,10
+TOPUP_EMPTY_AT,EE0,ASAP,10
 `
 	actionTriggers = `
 STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
@@ -149,6 +158,10 @@ STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,FS_USERS,LOG_WARNING,10
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
 cgrates.directvoip.co.uk,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
+vdf,empty0,*out,TOPUP_SHARED0_AT,
+vdf,empty10,*out,TOPUP_SHARED10_AT,
+vdf,emptyX,*out,TOPUP_EMPTY_AT,
+vdf,emptyY,*out,TOPUP_EMPTY_AT,
 `
 )
 
@@ -169,7 +182,7 @@ func init() {
 	csvr.LoadAccountActions()
 	csvr.WriteToDatabase(false, false)
 	dataStorage.CacheRating(nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -482,6 +495,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 		Ratings: map[string]*RIRate{
 			"d54545c1": &RIRate{
+				Id:         "R1",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -495,6 +509,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 				RoundingDecimals: 2,
 			},
 			"4bb00b9c": &RIRate{
+				Id:         "R2",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -508,6 +523,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 				RoundingDecimals: 2,
 			},
 			"e06c337f": &RIRate{
+				Id:         "R3",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -566,7 +582,7 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan)
+		t.Errorf("Error loading destination rate timing: %+v", rplan.Ratings["e06c337f"])
 	}
 }
 
@@ -589,7 +605,7 @@ func TestLoadRatingProfiles(t *testing.T) {
 }
 
 func TestLoadActions(t *testing.T) {
-	if len(csvr.actions) != 4 {
+	if len(csvr.actions) != 7 {
 		t.Error("Failed to load actions: ", csvr.actions)
 	}
 	as1 := csvr.actions["MINI"]
@@ -651,7 +667,7 @@ func TestLoadActions(t *testing.T) {
 }
 
 func TestLoadSharedGroups(t *testing.T) {
-	if len(csvr.sharedGroups) != 2 {
+	if len(csvr.sharedGroups) != 3 {
 		t.Error("Failed to load actions: ", csvr.sharedGroups)
 	}
 
@@ -660,7 +676,7 @@ func TestLoadSharedGroups(t *testing.T) {
 		Id: "SG1",
 		AccountParameters: map[string]*SharingParameters{
 			"*any": &SharingParameters{
-				Strategy:    "*lowest_first",
+				Strategy:    "*lowest",
 				RateSubject: "",
 			},
 		},
@@ -673,8 +689,8 @@ func TestLoadSharedGroups(t *testing.T) {
 		Id: "SG2",
 		AccountParameters: map[string]*SharingParameters{
 			"*any": &SharingParameters{
-				Strategy:    "*lowest_first",
-				RateSubject: "EVENING",
+				Strategy:    "*lowest",
+				RateSubject: "one",
 			},
 		},
 	}
@@ -698,7 +714,7 @@ func TestLoadSharedGroups(t *testing.T) {
 }
 
 func TestLoadActionTimings(t *testing.T) {
-	if len(csvr.actionsTimings) != 2 {
+	if len(csvr.actionsTimings) != 5 {
 		t.Error("Failed to load action timings: ", csvr.actionsTimings)
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
@@ -760,7 +776,7 @@ func TestLoadActionTriggers(t *testing.T) {
 }
 
 func TestLoadAccountActions(t *testing.T) {
-	if len(csvr.accountActions) != 2 {
+	if len(csvr.accountActions) != 6 {
 		t.Error("Failed to load account actions: ", csvr.accountActions)
 	}
 	aa := csvr.accountActions["*out:vdf:minitsboy"]
@@ -783,16 +799,24 @@ func TestLoadAccountActions(t *testing.T) {
 	}
 }
 
-func TestLoadAliases(t *testing.T) {
-	if len(csvr.aliases) != 5 {
-		t.Error("Failed to load aliases: ", csvr.aliases)
+func TestLoadRpAliases(t *testing.T) {
+	if len(csvr.rpAliases) != 3 {
+		t.Error("Failed to load rp aliases: ", csvr.rpAliases)
 	}
-	if csvr.aliases[RATING_PROFILE_PREFIX+"a1"] != "minu" ||
-		csvr.aliases[RATING_PROFILE_PREFIX+"a2"] != "minu" ||
-		csvr.aliases[RATING_PROFILE_PREFIX+"a3"] != "minu" ||
-		csvr.aliases[ACCOUNT_PREFIX+"a1"] != "minitsboy" ||
-		csvr.aliases[ACCOUNT_PREFIX+"a2"] != "minitsboy" {
-		t.Error("Error loading aliases: ", csvr.aliases)
+	if csvr.rpAliases["a1"] != "minu" ||
+		csvr.rpAliases["a2"] != "minu" ||
+		csvr.rpAliases["a3"] != "minu" {
+		t.Error("Error loading rp aliases: ", csvr.rpAliases)
+	}
+}
+
+func TestLoadAccAliases(t *testing.T) {
+	if len(csvr.accAliases) != 2 {
+		t.Error("Failed to load acc aliases: ", csvr.accAliases)
+	}
+	if csvr.accAliases["a1"] != "minitsboy" ||
+		csvr.accAliases["a2"] != "minitsboy" {
+		t.Error("Error loading acc aliases: ", csvr.accAliases)
 	}
 }
 

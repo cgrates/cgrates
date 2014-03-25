@@ -122,27 +122,27 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) (e
 		Logger.Info("Finished rating profile caching.")
 	}
 	if alsKeys == nil {
-		Logger.Info("Caching all aliases")
-		if alsKeys, err = rs.db.Keys(ALIAS_PREFIX + "*"); err != nil {
+		Logger.Info("Caching rating profile aliases")
+		if alsKeys, err = rs.db.Keys(RP_ALIAS_PREFIX + "*"); err != nil {
 			return
 		}
-		cache2go.RemPrefixKey(ALIAS_PREFIX)
+		cache2go.RemPrefixKey(RP_ALIAS_PREFIX)
 	} else if len(alsKeys) != 0 {
-		Logger.Info(fmt.Sprintf("Caching aliases: %v", alsKeys))
+		Logger.Info(fmt.Sprintf("Caching rating profile aliases: %v", alsKeys))
 	}
 	for _, key := range alsKeys {
 		cache2go.RemKey(key)
-		if _, err = rs.GetAlias(key[len(ALIAS_PREFIX):], true); err != nil {
+		if _, err = rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], true); err != nil {
 			return err
 		}
 	}
 	if len(alsKeys) != 0 {
-		Logger.Info("Finished aliases caching.")
+		Logger.Info("Finished rating profile aliases caching.")
 	}
 	return
 }
 
-func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys []string) (err error) {
+func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) (err error) {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX)
 	}
@@ -182,6 +182,24 @@ func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys []string) (err error) {
 	}
 	if len(shgKeys) != 0 {
 		Logger.Info("Finished shared groups caching.")
+	}
+	if alsKeys == nil {
+		Logger.Info("Caching account aliases")
+		if alsKeys, err = rs.db.Keys(ACC_ALIAS_PREFIX + "*"); err != nil {
+			return
+		}
+		cache2go.RemPrefixKey(ACC_ALIAS_PREFIX)
+	} else if len(alsKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching account aliases: %v", alsKeys))
+	}
+	for _, key := range alsKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], true); err != nil {
+			return err
+		}
+	}
+	if len(alsKeys) != 0 {
+		Logger.Info("Finished account aliases caching.")
 	}
 	return nil
 }
@@ -265,8 +283,9 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetAlias(key string, checkDb bool) (alias string, err error) {
-	key = ALIAS_PREFIX + key
+func (rs *RedisStorage) GetRpAlias(key string, checkDb bool) (alias string, err error) {
+
+	key = RP_ALIAS_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
 		return x.(string), nil
 	}
@@ -281,18 +300,59 @@ func (rs *RedisStorage) GetAlias(key string, checkDb bool) (alias string, err er
 	return
 }
 
-func (rs *RedisStorage) SetAlias(key, alias string) (err error) {
-	err = rs.db.Set(ALIAS_PREFIX+key, []byte(alias))
+func (rs *RedisStorage) SetRpAlias(key, alias string) (err error) {
+	err = rs.db.Set(RP_ALIAS_PREFIX+key, []byte(alias))
+	return
+}
+
+func (rs *RedisStorage) RemoveRpAliases(accounts []string) (err error) {
+	if alsKeys, err := rs.db.Keys(RP_ALIAS_PREFIX + "*"); err != nil {
+		return err
+	} else {
+		for _, key := range alsKeys {
+			alias, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], true)
+			if err != nil {
+				return err
+			}
+			if utils.IsSliceMember(accounts, alias) {
+				if _, err = rs.db.Del(key); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return
+}
+
+func (rs *RedisStorage) GetAccAlias(key string, checkDb bool) (alias string, err error) {
+	key = ACC_ALIAS_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(string), nil
+	}
+	if !checkDb {
+		return "", errors.New(utils.ERR_NOT_FOUND)
+	}
+	var values []byte
+	if values, err = rs.db.Get(key); err == nil {
+		alias = string(values)
+		cache2go.Cache(key, alias)
+	}
+	return
+}
+
+func (rs *RedisStorage) SetAccAlias(key, alias string) (err error) {
+	err = rs.db.Set(ACC_ALIAS_PREFIX+key, []byte(alias))
 	//cache2go.Cache(ALIAS_PREFIX+key, alias)
 	return
 }
 
-func (rs *RedisStorage) RemoveAccountAliases(accounts []string) (err error) {
-	if alsKeys, err := rs.db.Keys(ALIAS_PREFIX + "*"); err != nil {
+func (rs *RedisStorage) RemoveAccAliases(accounts []string) (err error) {
+	if alsKeys, err := rs.db.Keys(ACC_ALIAS_PREFIX + "*"); err != nil {
 		return err
 	} else {
 		for _, key := range alsKeys {
-			alias, err := rs.GetAlias(key, true)
+			alias, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], true)
 			if err != nil {
 				return err
 			}

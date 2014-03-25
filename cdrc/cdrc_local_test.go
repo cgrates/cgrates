@@ -27,6 +27,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"io/ioutil"
 	"os/exec"
+	"os"
 	"path"
 	"testing"
 	"time"
@@ -118,6 +119,12 @@ func TestEmptyTables(t *testing.T) {
 func TestCreateCdrFiles(t *testing.T) {
 	if !*testLocal {
 		return
+	}
+	if err := os.RemoveAll(cfg.CdrcCdrInDir); err != nil {
+		t.Fatal("Error removing folder: ", cfg.CdrcCdrInDir, err)
+	}
+	if err := os.MkdirAll(cfg.CdrcCdrInDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", cfg.CdrcCdrInDir, err)
 	}
 	if err := ioutil.WriteFile(path.Join(cfg.CdrcCdrInDir, "file1.csv"), []byte(fileContent1), 0644); err != nil {
 		t.Fatal(err.Error)

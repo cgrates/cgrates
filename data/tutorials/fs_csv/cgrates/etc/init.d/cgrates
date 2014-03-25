@@ -14,18 +14,24 @@
 # Do NOT "set -e"
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
+RUNDIR=/tmp/$NAME/run
+PIDFILE=$RUNDIR/cgr-engine.pid
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="CGRateS real-time charging system"
 NAME=cgrates
 DAEMON=/usr/bin/cgr-engine
 USER=cgrates
 GROUP=cgrates
-TUTFOLDER=/usr/share/cgrates/tutorials/fs_csv/cgrates
+TUTFOLDER=/usr/share/cgrates/tutorials/fs_json/cgrates
 ENGINE_OPTS=-config=$TUTFOLDER/etc/cgrates/cgrates.cfg
-PIDFILE=/tmp/cgr-engine_tutfscsv.pid
+PIDFILE=/tmp/cgr-engine_tutfsjson.pid
 SCRIPTNAME=$TUTFOLDER/etc/init.d/$NAME
 DEFAULTS=$TUTFOLDER/etc/default/$NAME
 ENABLE=false
+HISTDIR=/tmp/$NAME/history
+CDREDIR=/tmp/$NAME/cdre
+CDRCINDIR=/tmp/$NAME/cdr/cdrc/in
+CDRCOUTDIR=/tmp/cgrates/cdr/cdrc/out
 
 # Exit if the package is not installed
 [ -x "$DAEMON" ] || exit 0
@@ -44,6 +50,30 @@ ENABLE=false
 if [ "$ENABLE" != "true" ]; then
   echo "$DESC not yet configured. Edit $DEFAULTS first."
   exit 0
+fi
+
+# Install the run folder
+if [ ! -d $RUNDIR ]; then
+  mkdir -p $RUNDIR
+  chown $USER:$GROUP $RUNDIR
+fi
+# Install the cdre folder
+if [ ! -d $CDREDIR ]; then
+  mkdir -p $CDREDIR
+  chown $USER:$GROUP $CDREDIR
+fi
+# Install the history folder
+if [ ! -d $HISTDIR ]; then
+  mkdir -p $HISTDIR
+  chown $USER:$GROUP $HISTDIR
+fi
+if [ ! -d $CDRCINDIR ]; then
+  mkdir -p $CDRCINDIR
+  chown $USER:$GROUP $CDRCINDIR
+fi
+if [ ! -d $CDRCOUTDIR ]; then
+  mkdir -p $CDRCOUTDIR
+  chown $USER:$GROUP $CDRCOUTDIR
 fi
 
 

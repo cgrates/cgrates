@@ -35,7 +35,8 @@ const (
 	ACTION_TIMING_PREFIX      = "apl_"
 	RATING_PLAN_PREFIX        = "rpl_"
 	RATING_PROFILE_PREFIX     = "rpf_"
-	ALIAS_PREFIX              = "als_"
+	RP_ALIAS_PREFIX           = "ral_"
+	ACC_ALIAS_PREFIX          = "aal_"
 	ACTION_PREFIX             = "act_"
 	SHARED_GROUP_PREFIX       = "shg_"
 	ACCOUNT_PREFIX            = "ubl_"
@@ -76,9 +77,9 @@ type RatingStorage interface {
 	SetRatingPlan(*RatingPlan) error
 	GetRatingProfile(string, bool) (*RatingProfile, error)
 	SetRatingProfile(*RatingProfile) error
-	GetAlias(string, bool) (string, error)
-	SetAlias(string, string) error
-	RemoveAccountAliases([]string) error
+	GetRpAlias(string, bool) (string, error)
+	SetRpAlias(string, string) error
+	RemoveRpAliases([]string) error
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
 }
@@ -86,13 +87,16 @@ type RatingStorage interface {
 type AccountingStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
-	CacheAccounting([]string, []string) error
+	CacheAccounting([]string, []string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
 	SetSharedGroup(string, *SharedGroup) error
 	GetAccount(string) (*Account, error)
 	SetAccount(*Account) error
+	GetAccAlias(string, bool) (string, error)
+	SetAccAlias(string, string) error
+	RemoveAccAliases([]string) error
 	GetActionTimings(string) (ActionPlan, error)
 	SetActionTimings(string, ActionPlan) error
 	GetAllActionTimings() (map[string]ActionPlan, error)
@@ -102,7 +106,7 @@ type CdrStorage interface {
 	Storage
 	SetCdr(utils.RawCDR) error
 	SetRatedCdr(*utils.StoredCdr, string) error
-	GetStoredCdrs(time.Time, time.Time, bool, bool) ([]*utils.StoredCdr, error)
+	GetStoredCdrs([]string, string, string, string, string, string, string, string, string, string, string, time.Time, time.Time, bool, bool) ([]*utils.StoredCdr, error)
 	RemStoredCdrs([]string) error
 }
 

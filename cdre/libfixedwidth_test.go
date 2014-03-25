@@ -16,14 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cdrexporter
+package cdre
 
 import (
 	"testing"
 )
 
+func TestMandatory(t *testing.T) {
+	_, err := FmtFieldWidth("", 0, "", "", true)
+	if err == nil {
+		t.Errorf("Failed to detect mandatory value")
+	}
+}
+
 func TestMaxLen(t *testing.T) {
-	result, err := filterField("test", 4, false, false, false, false)
+	result, err := FmtFieldWidth("test", 4, "", "", false)
 	expected := "test"
 	if err != nil || result != expected {
 		t.Errorf("Expected \"test\" was \"%s\"", result)
@@ -31,56 +38,79 @@ func TestMaxLen(t *testing.T) {
 }
 
 func TestRPadding(t *testing.T) {
-	result, err := filterField("test", 8, false, false, false, false)
+	result, err := FmtFieldWidth("test", 8, "", "right", false)
 	expected := "test    "
 	if err != nil || result != expected {
 		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
 	}
 }
 
+func TestPaddingFiller(t *testing.T) {
+	result, err := FmtFieldWidth("", 8, "", "right", false)
+	expected := "        "
+	if err != nil || result != expected {
+		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	}
+}
+
 func TestLPadding(t *testing.T) {
-	result, err := filterField("test", 8, false, false, true, false)
+	result, err := FmtFieldWidth("test", 8, "", "left", false)
 	expected := "    test"
 	if err != nil || result != expected {
 		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
 	}
 }
 
+func TestZeroLPadding(t *testing.T) {
+	result, err := FmtFieldWidth("test", 8, "", "zeroleft", false)
+	expected := "0000test"
+	if err != nil || result != expected {
+		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	}
+}
+
 func TestRStrip(t *testing.T) {
-	result, err := filterField("test", 2, true, false, false, false)
+	result, err := FmtFieldWidth("test", 2, "right", "", false)
 	expected := "te"
 	if err != nil || result != expected {
 		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
 	}
 }
 
+func TestXRStrip(t *testing.T) {
+	result, err := FmtFieldWidth("test", 3, "xright", "", false)
+	expected := "tex"
+	if err != nil || result != expected {
+		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	}
+}
+
 func TestLStrip(t *testing.T) {
-	result, err := filterField("test", 2, true, true, false, false)
+	result, err := FmtFieldWidth("test", 2, "left", "", false)
 	expected := "st"
 	if err != nil || result != expected {
 		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
 	}
 }
 
+func TestXLStrip(t *testing.T) {
+	result, err := FmtFieldWidth("test", 3, "xleft", "", false)
+	expected := "xst"
+	if err != nil || result != expected {
+		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+	}
+}
+
 func TestStripNotAllowed(t *testing.T) {
-	_, err := filterField("test", 2, false, false, false, false)
+	_, err := FmtFieldWidth("test", 3, "", "", false)
 	if err == nil {
 		t.Error("Expected error")
 	}
 }
 
-func TestLZeroPadding(t *testing.T) {
-	result, err := filterField("12", 8, false, false, true, true)
-	expected := "00000012"
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
-	}
-}
-
-func TestRZeroPadding(t *testing.T) {
-	result, err := filterField("12", 8, false, false, false, true)
-	expected := "12      "
-	if err != nil || result != expected {
-		t.Errorf("Expected \"%s \" was \"%s\"", expected, result)
+func TestPaddingNotAllowed(t *testing.T) {
+	_, err := FmtFieldWidth("test", 5, "", "", false)
+	if err == nil {
+		t.Error("Expected error")
 	}
 }

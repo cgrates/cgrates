@@ -20,62 +20,26 @@ package apier
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/cdrexporter"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"os"
-	"path"
-	"strings"
-	"time"
 )
 
-func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
-	var tStart, tEnd time.Time
-	var err error
-	cdrFormat := strings.ToLower(attr.CdrFormat)
-	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
-		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
+type AttrGetCallCost struct {
+	CgrId string // Unique id of the CDR
+	RunId string // Run Id
+}
+
+// Retrieves the callCost out of CGR logDb
+func (apier *ApierV1) GetCallCostLog(attrs AttrGetCallCost, reply *engine.CallCost) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"CgrId", "RunId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if len(attr.TimeStart) != 0 {
-		if tStart, err = utils.ParseTimeDetectLayout(attr.TimeStart); err != nil {
-			return err
-		}
+	if cc, err := apier.LogDb.GetCallCostLog(attrs.CgrId, "", attrs.RunId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if cc == nil {
+		return fmt.Errorf("NOT_FOUND")
+	} else {
+		*reply = *cc
 	}
-	if len(attr.TimeEnd) != 0 {
-		if tEnd, err = utils.ParseTimeDetectLayout(attr.TimeEnd); err != nil {
-			return err
-		}
-	}
-	cdrs, err := self.CdrDb.GetStoredCdrs(tStart, tEnd, attr.SkipErrors, attr.SkipRated)
-	if err != nil {
-		return err
-	}
-	var fileName string
-	if cdrFormat == utils.CDRE_CSV && len(cdrs) != 0 {
-		fileName = path.Join(self.Config.CdreDir, fmt.Sprintf("cdrs_%d.csv", time.Now().Unix()))
-		fileOut, err := os.Create(fileName)
-		if err != nil {
-			return err
-		} else {
-			defer fileOut.Close()
-		}
-		csvWriter := cdrexporter.NewCsvCdrWriter(fileOut, self.Config.RoundingDecimals, self.Config.CdreExtraFields)
-		for _, cdr := range cdrs {
-			if err := csvWriter.Write(cdr); err != nil {
-				os.Remove(fileName)
-				return err
-			}
-		}
-		csvWriter.Close()
-		if attr.RemoveFromDb {
-			cgrIds := make([]string, len(cdrs))
-			for idx, cdr := range cdrs {
-				cgrIds[idx] = cdr.CgrId
-			}
-			if err := self.CdrDb.RemStoredCdrs(cgrIds); err != nil {
-				return err
-			}
-		}
-	}
-	*reply = utils.ExportedFileCdrs{fileName, len(cdrs)}
 	return nil
 }
