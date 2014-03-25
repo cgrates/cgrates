@@ -190,11 +190,12 @@ func main() {
 		shgIds, _ := loader.GetLoadedIds(engine.SHARED_GROUP_PREFIX)
 		rpAliases, _ := loader.GetLoadedIds(engine.RP_ALIAS_PREFIX)
 		accAliases, _ := loader.GetLoadedIds(engine.ACC_ALIAS_PREFIX)
+		lcrIds, _ := loader.GetLoadedIds(engine.LCR_PREFIX)
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds, shgIds, rpAliases, accAliases}, &reply); err != nil {
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds, shgIds, rpAliases, accAliases, lcrIds}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
 		actTmgIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)

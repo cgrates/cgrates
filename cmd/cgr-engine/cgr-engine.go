@@ -74,7 +74,7 @@ var (
 )
 
 func cacheData(ratingDb engine.RatingStorage, accountDb engine.AccountingStorage, doneChan chan struct{}) {
-	if err := ratingDb.CacheRating(nil, nil, nil, nil); err != nil {
+	if err := ratingDb.CacheRating(nil, nil, nil, nil, nil); err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cache rating error: %s", err.Error()))
 		exitChan <- true
 		return
