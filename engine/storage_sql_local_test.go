@@ -218,6 +218,20 @@ func TestGetStoredCdrs(t *testing.T) {
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on cgrids
+	if storedCdrs, err := mysql.GetStoredCdrs([]string{utils.FSCgrId("bbb1"), utils.FSCgrId("bbb2")},
+		"", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on cgrids plus reqType
+	if storedCdrs, err := mysql.GetStoredCdrs([]string{utils.FSCgrId("bbb1"), utils.FSCgrId("bbb2")},
+		"", "", "", "prepaid", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Filter on runId
 	if storedCdrs, err := mysql.GetStoredCdrs(nil, utils.DEFAULT_RUNID, "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())

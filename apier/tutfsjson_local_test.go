@@ -413,7 +413,7 @@ func TestMaxDebit1001(t *testing.T) {
 		for _, blnc := range blncLst {
 			if blnc.SharedGroup == "SHARED_A" && blnc.Value != 5 {
 				t.Errorf("Unexpected value for shared balance: %f", blnc.Value)
-			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.7 {
+			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.4 {
 				t.Errorf("Unexpected value for general balance: %f", blnc.Value)
 			}
 		}
@@ -448,9 +448,9 @@ func TestMaxDebit1007(t *testing.T) {
 		}
 		blncLst := acnt.BalanceMap["*monetary*out"]
 		for _, blnc := range blncLst {
-			if blnc.SharedGroup == "SHARED_A" && blnc.Value != 4.7 {
+			if blnc.SharedGroup == "SHARED_A" && blnc.Value != 4 {
 				t.Errorf("Unexpected value for shared balance: %f", blnc.Value)
-			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.7 {
+			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.4 {
 				t.Errorf("Unexpected value for general balance: %f", blnc.Value)
 			}
 		}

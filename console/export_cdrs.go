@@ -37,13 +37,13 @@ type CmdExportCdrs struct {
 
 // name should be exec's name
 func (self *CmdExportCdrs) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] export_cdrs <dry_run|csv> [<start_time|*one_month> [<stop_time> [remove_from_db]]]")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] export_cdrs <dry_run|csv> [<start_time|*one_month> [<stop_time> ]]")
 }
 
 // set param defaults
 func (self *CmdExportCdrs) defaults() error {
 	self.rpcMethod = "ApierV1.ExportCdrsToFile"
-	self.rpcParams = &utils.AttrExpFileCdrs{CdrFormat:"csv"}
+	self.rpcParams = &utils.AttrExpFileCdrs{CdrFormat: "csv"}
 	return nil
 }
 
@@ -60,20 +60,17 @@ func (self *CmdExportCdrs) FromArgs(args []string) error {
 	switch len(args) {
 	case 4:
 		timeStart = args[3]
-		
+
 	case 5:
 		timeStart = args[3]
 		timeEnd = args[4]
 	case 6:
 		timeStart = args[3]
 		timeEnd = args[4]
-		if args[5] == "remove_from_db" {
-			self.rpcParams.RemoveFromDb = true
-		}
 	}
 	if timeStart == "*one_month" {
 		now := time.Now()
-		self.rpcParams.TimeStart = now.AddDate(0,-1,0).String()
+		self.rpcParams.TimeStart = now.AddDate(0, -1, 0).String()
 		self.rpcParams.TimeEnd = now.String()
 	} else {
 		self.rpcParams.TimeStart = timeStart
