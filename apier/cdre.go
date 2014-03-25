@@ -62,10 +62,16 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
-		*reply = utils.ExportedFileCdrs{"", 0}
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
 	switch cdrFormat {
+	case utils.CDRE_DRYRUN:
+		exportedIds := make([]string, len(cdrs))
+		for idxCdr, cdr := range cdrs {
+			exportedIds[idxCdr] = cdr.CgrId
+		}
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds}
 	case utils.CDRE_CSV:
 		if len(fileName) == 0 {
 			fileName = fmt.Sprintf("cdre_%s.csv", exportId)
@@ -86,13 +92,17 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		}
 		defer fileOut.Close()
 		csvWriter := cdre.NewCsvCdrWriter(fileOut, roundDecimals, exportedFields)
+		exportedIds := make([]string, 0)
+		unexportedIds := make(map[string]string)
 		for _, cdr := range cdrs {
 			if err := csvWriter.WriteCdr(cdr); err != nil {
-				os.Remove(filePath)
-				return err
+				unexportedIds[cdr.CgrId] = err.Error()
+			} else {
+				exportedIds = append(exportedIds, cdr.CgrId)
 			}
 		}
 		csvWriter.Close()
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds}
 	case utils.CDRE_FIXED_WIDTH:
 		if len(fileName) == 0 {
 			fileName = fmt.Sprintf("cdre_%s.fwv", exportId)
@@ -115,15 +125,18 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		}
 		defer fileOut.Close()
 		fww, _ := cdre.NewFWCdrWriter(self.LogDb, fileOut, exportTemplate, exportId, roundDecimals)
+		exportedIds := make([]string, 0)
+		unexportedIds := make(map[string]string)
 		for _, cdr := range cdrs {
 			if err := fww.WriteCdr(cdr); err != nil {
-				os.Remove(filePath)
-				return err
+				unexportedIds[cdr.CgrId] = err.Error()
+			} else {
+				exportedIds = append(exportedIds, cdr.CgrId)
 			}
 		}
 		fww.Close()
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds}
 	}
-	*reply = utils.ExportedFileCdrs{fileName, len(cdrs)}
 	return nil
 }
 

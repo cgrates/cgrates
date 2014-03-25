@@ -343,8 +343,10 @@ type AttrRemCdrs struct {
 }
 
 type ExportedFileCdrs struct {
-	ExportedFilePath string // Full path to the newly generated export file
-	NumberOfRecords  int    // Number of CDRs in the export file
+	ExportedFilePath string            // Full path to the newly generated export file
+	TotalRecords     int               // Number of CDRs to be exported
+	ExportedCgrIds   []string          // List of successfuly exported cgrids in the file
+	UnexportedCgrIds map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
 }
 
 type AttrRateCdrs struct {

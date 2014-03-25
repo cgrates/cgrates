@@ -1344,7 +1344,7 @@ func TestExportCdrsToFile(t *testing.T) {
 		t.Error("Failed to detect missing parameter")
 	}
 	req.CdrFormat = utils.CDRE_DRYRUN
-	expectReply := &utils.ExportedFileCdrs{NumberOfRecords: 2}
+	expectReply := &utils.ExportedFileCdrs{TotalRecords: 2}
 	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectReply) {
