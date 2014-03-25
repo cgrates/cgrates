@@ -719,8 +719,8 @@ func TestLoadActionTimings(t *testing.T) {
 	}
 	atm := csvr.actionsTimings["MORE_MINUTES"][0]
 	expected := &ActionTiming{
-		Id:         atm.Id,
-		Tag:        "MORE_MINUTES",
+		Uuid:       atm.Uuid,
+		Id:         "MORE_MINUTES",
 		AccountIds: []string{"*out:vdf:minitsboy"},
 		Timing: &RateInterval{
 			Timing: &RITiming{

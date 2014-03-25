@@ -218,6 +218,20 @@ func TestGetStoredCdrs(t *testing.T) {
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on cgrids
+	if storedCdrs, err := mysql.GetStoredCdrs([]string{utils.FSCgrId("bbb1"), utils.FSCgrId("bbb2")},
+		"", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on cgrids plus reqType
+	if storedCdrs, err := mysql.GetStoredCdrs([]string{utils.FSCgrId("bbb1"), utils.FSCgrId("bbb2")},
+		"", "", "", "prepaid", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Filter on runId
 	if storedCdrs, err := mysql.GetStoredCdrs(nil, utils.DEFAULT_RUNID, "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
@@ -330,5 +344,29 @@ func TestCallCost(t *testing.T) {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(cc, ccRcv) {
 		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
+	}
+}
+
+func TestRemStoredCdrs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var timeStart, timeEnd time.Time
+	if err := mysql.RemStoredCdrs([]string{utils.FSCgrId("bbb1")}); err != nil {
+		t.Error(err.Error())
+	}
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 7 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	if err := mysql.RemStoredCdrs([]string{utils.FSCgrId("aaa1"), utils.FSCgrId("aaa2"), utils.FSCgrId("aaa3"), utils.FSCgrId("aaa4"), utils.FSCgrId("aaa5"),
+		utils.FSCgrId("bbb2"), utils.FSCgrId("bbb3")}); err != nil {
+		t.Error(err.Error())
+	}
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 0 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 }

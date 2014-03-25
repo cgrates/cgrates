@@ -619,8 +619,8 @@ func (csvr *CSVReader) LoadActionTimings() (err error) {
 			return fmt.Errorf("ActionTiming: Could not parse action timing weight: %v", err)
 		}
 		at := &ActionTiming{
-			Id:     utils.GenUUID(),
-			Tag:    record[0],
+			Uuid:   utils.GenUUID(),
+			Id:     record[0],
 			Weight: weight,
 			Timing: &RateInterval{
 				Timing: &RITiming{

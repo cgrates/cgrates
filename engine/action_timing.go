@@ -35,8 +35,8 @@ const (
 )
 
 type ActionTiming struct {
-	Id         string // uniquely identify the timing
-	Tag        string // informative purpose only
+	Uuid       string // uniquely identify the timing
+	Id         string // informative purpose only
 	AccountIds []string
 	Timing     *RateInterval
 	Weight     float64
@@ -307,7 +307,7 @@ func (at *ActionTiming) String_DISABLED() string {
 // Helper to remove ActionTiming members based on specific filters, empty data means no always match
 func RemActionTiming(ats ActionPlan, actionTimingId, balanceId string) ActionPlan {
 	for idx, at := range ats {
-		if len(actionTimingId) != 0 && at.Id != actionTimingId { // No Match for ActionTimingId, no need to move further
+		if len(actionTimingId) != 0 && at.Uuid != actionTimingId { // No Match for ActionTimingId, no need to move further
 			continue
 		}
 		if len(balanceId) == 0 { // No account defined, considered match for complete removal

@@ -385,6 +385,9 @@ func TestMaxCallDuration(t *testing.T) {
 }
 
 func TestMaxDebit1001(t *testing.T) {
+	if !*testLocal {
+		return
+	}
 	cc := &engine.CallCost{}
 	var acnt *engine.Account
 	cd := engine.CallDescriptor{
@@ -413,7 +416,7 @@ func TestMaxDebit1001(t *testing.T) {
 		for _, blnc := range blncLst {
 			if blnc.SharedGroup == "SHARED_A" && blnc.Value != 5 {
 				t.Errorf("Unexpected value for shared balance: %f", blnc.Value)
-			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.7 {
+			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.4 {
 				t.Errorf("Unexpected value for general balance: %f", blnc.Value)
 			}
 		}
@@ -421,6 +424,9 @@ func TestMaxDebit1001(t *testing.T) {
 }
 
 func TestMaxDebit1007(t *testing.T) {
+	if !*testLocal {
+		return
+	}
 	cc := &engine.CallCost{}
 	var acnt *engine.Account
 	cd := engine.CallDescriptor{
@@ -448,9 +454,9 @@ func TestMaxDebit1007(t *testing.T) {
 		}
 		blncLst := acnt.BalanceMap["*monetary*out"]
 		for _, blnc := range blncLst {
-			if blnc.SharedGroup == "SHARED_A" && blnc.Value != 4.7 {
+			if blnc.SharedGroup == "SHARED_A" && blnc.Value != 4 {
 				t.Errorf("Unexpected value for shared balance: %f", blnc.Value)
-			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.7 {
+			} else if len(blnc.SharedGroup) == 0 && blnc.Value != 4.4 {
 				t.Errorf("Unexpected value for general balance: %f", blnc.Value)
 			}
 		}

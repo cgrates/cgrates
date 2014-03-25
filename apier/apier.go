@@ -360,8 +360,8 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 		timing.WeekDays.Parse(apiAtm.WeekDays, ";")
 		timing.StartTime = apiAtm.Time
 		at := &engine.ActionTiming{
-			Id:        utils.GenUUID(),
-			Tag:       attrs.Id,
+			Uuid:      utils.GenUUID(),
+			Id:        attrs.Id,
 			Weight:    apiAtm.Weight,
 			Timing:    &engine.RateInterval{Timing: timing},
 			ActionsId: apiAtm.ActionsId,
