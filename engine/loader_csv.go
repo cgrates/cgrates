@@ -50,6 +50,7 @@ type CSVReader struct {
 	ratingPlans       map[string]*RatingPlan
 	ratingProfiles    map[string]*RatingProfile
 	sharedGroups      map[string]*SharedGroup
+	lcrs              map[string]*LCR
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn string
@@ -70,6 +71,7 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.sharedGroups = make(map[string]*SharedGroup)
+	c.lcrs = make(map[string]*LCR)
 	c.readerFunc = openFileCSVReader
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)

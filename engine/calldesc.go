@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"log"
 	"log/syslog"
+	"strings"
 	"time"
 	//"encoding/json"
 	"github.com/cgrates/cgrates/cache2go"
@@ -711,6 +712,54 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 	}
 }
 
-func (cd *CallDescriptor) GetLCR() []*LCRCost {
-	return nil
+func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
+	lcr, err := dataStorage.GetLCR(cd.GetLCRKey(), false)
+	if err != nil || lcr == nil {
+		return nil, err
+	}
+	lcr.Sort()
+	lcrCost := &LCRCost{
+		TimeSpans: []*LCRTimeSpan{&LCRTimeSpan{StartTime: cd.TimeStart}},
+	}
+	for _, lcrActivation := range lcr.Activations {
+		// TODO: filer entry by destination
+		lcrEntry := lcrActivation.GetLCREntryForPrefix(cd.Destination)
+		if lcrActivation.ActivationTime.Before(cd.TimeStart) ||
+			lcrActivation.ActivationTime.Equal(cd.TimeStart) {
+			lcrCost.TimeSpans[0].Entry = lcrEntry
+		} else {
+			if lcrActivation.ActivationTime.Before(cd.TimeEnd) {
+				// add lcr timespan
+				lcrCost.TimeSpans = append(lcrCost.TimeSpans, &LCRTimeSpan{
+					StartTime: lcrActivation.ActivationTime,
+					Entry:     lcrEntry,
+				})
+			}
+		}
+	}
+	for _, ts := range lcrCost.TimeSpans {
+		if ts.Entry.Strategy == LCR_STRATEGY_STATIC {
+			for _, supplier := range strings.Split(ts.Entry.Suppliers, ";") {
+				supplier = strings.TrimSpace(supplier)
+				lcrCD := cd.Clone()
+				lcrCD.Subject = supplier
+				if cc, err := lcrCD.GetCost(); err != nil || cc == nil {
+					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    err,
+					})
+				} else {
+					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Cost:     cc.Cost,
+					})
+				}
+			}
+		} else {
+			// find rating profiles
+			// sort according to strategy
+			ts.Sort()
+		}
+	}
+	return lcrCost, nil
 }

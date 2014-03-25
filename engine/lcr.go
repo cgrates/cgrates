@@ -20,30 +20,106 @@ package engine
 
 import (
 	"fmt"
+	"sort"
 	"time"
 )
 
-type LCR struct {
-	Tenant    string
-	Customer  string
-	Direction string
-	LCRs      []*LCREntry
-}
+const (
+	LCR_STRATEGY_STATIC  = "*static"
+	LCR_STRATEGY_LOWEST  = "*lowest"
+	LCR_STRATEGY_HIGHEST = "*highest"
+)
 
-type LCREntry struct {
-	Destination    string
-	TOR            string
-	Strategy       string
-	Suppliers      string
+type LCR struct {
+	Tenant      string
+	Customer    string
+	Direction   string
+	Activations []*LCRActivation
+}
+type LCRActivation struct {
 	ActivationTime time.Time
-	Weight         float64
+	Entries        []*LCREntry
+}
+type LCREntry struct {
+	Destination string
+	TOR         string
+	Strategy    string
+	Suppliers   string
 }
 
 type LCRCost struct {
+	TimeSpans []*LCRTimeSpan
+}
+
+type LCRTimeSpan struct {
+	StartTime     time.Time
+	SupplierCosts []*LCRSupplierCost
+	Entry         *LCREntry
+}
+
+type LCRSupplierCost struct {
 	Supplier string
 	Cost     float64
+	Error    error
 }
 
 func (lcr *LCR) GetId() string {
 	return fmt.Sprintf("%s:%s:%s", lcr.Direction, lcr.Tenant, lcr.Customer)
+}
+
+func (lcr *LCR) Len() int {
+	return len(lcr.Activations)
+}
+
+func (lcr *LCR) Swap(i, j int) {
+	lcr.Activations[i], lcr.Activations[j] = lcr.Activations[j], lcr.Activations[i]
+}
+
+func (lcr *LCR) Less(i, j int) bool {
+	return lcr.Activations[i].ActivationTime.Before(lcr.Activations[j].ActivationTime)
+}
+
+func (lcr *LCR) Sort() {
+	sort.Sort(lcr)
+}
+
+func (lcra *LCRActivation) GetLCREntryForPrefix(prefix string) *LCREntry {
+	return nil
+}
+
+func (lts *LCRTimeSpan) Sort() {
+	switch lts.Entry.Strategy {
+	case LCR_STRATEGY_LOWEST:
+		sort.Sort(LowestSupplierCostSorter(lts.SupplierCosts))
+	case LCR_STRATEGY_HIGHEST:
+		sort.Sort(HighestSupplierCostSorter(lts.SupplierCosts))
+	}
+}
+
+type LowestSupplierCostSorter []*LCRSupplierCost
+
+func (lscs LowestSupplierCostSorter) Len() int {
+	return len(lscs)
+}
+
+func (lscs LowestSupplierCostSorter) Swap(i, j int) {
+	lscs[i], lscs[j] = lscs[j], lscs[i]
+}
+
+func (lscs LowestSupplierCostSorter) Less(i, j int) bool {
+	return lscs[i].Cost < lscs[j].Cost
+}
+
+type HighestSupplierCostSorter []*LCRSupplierCost
+
+func (hscs HighestSupplierCostSorter) Len() int {
+	return len(hscs)
+}
+
+func (hscs HighestSupplierCostSorter) Swap(i, j int) {
+	hscs[i], hscs[j] = hscs[j], hscs[i]
+}
+
+func (hscs HighestSupplierCostSorter) Less(i, j int) bool {
+	return hscs[i].Cost > hscs[j].Cost
 }
