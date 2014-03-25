@@ -488,8 +488,8 @@ func (dbr *DbReader) LoadActionTimings() (err error) {
 				return fmt.Errorf("ActionTiming: Could not load the timing for tag: %v", at.TimingId)
 			}
 			actTmg := &ActionTiming{
-				Id:     utils.GenUUID(),
-				Tag:    atId,
+				Uuid:   utils.GenUUID(),
+				Id:     atId,
 				Weight: at.Weight,
 				Timing: &RateInterval{
 					Timing: &RITiming{
@@ -612,8 +612,8 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				}
 				t := timingsMap[at.TimingId]
 				actTmg := &ActionTiming{
-					Id:     utils.GenUUID(),
-					Tag:    accountAction.ActionPlanId,
+					Uuid:   utils.GenUUID(),
+					Id:     accountAction.ActionPlanId,
 					Weight: at.Weight,
 					Timing: &RateInterval{
 						Timing: &RITiming{
