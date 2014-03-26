@@ -296,10 +296,12 @@ func (cd *CallDescriptor) GetAccountKey() string {
 	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 }
 
-func (cd *CallDescriptor) GetLCRKey() string {
-	subj := cd.Subject
-	if cd.Account != "" {
-		subj = cd.Account
+func (cd *CallDescriptor) GetLCRKey(subj string) string {
+	if subj == "" {
+		subj = cd.Subject
+		if cd.Account != "" {
+			subj = cd.Account
+		}
 	}
 	return fmt.Sprintf("%s:%s:%s", cd.Direction, cd.Tenant, subj)
 }
@@ -713,9 +715,12 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 }
 
 func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
-	lcr, err := dataStorage.GetLCR(cd.GetLCRKey(), false)
+	lcr, err := dataStorage.GetLCR(cd.GetLCRKey(""), false)
 	if err != nil || lcr == nil {
-		return nil, err
+		// try the *any customer
+		if lcr, err = dataStorage.GetLCR(cd.GetLCRKey(utils.ANY), false); err != nil || lcr == nil {
+			return nil, err
+		}
 	}
 	lcr.Sort()
 	lcrCost := &LCRCost{
@@ -757,6 +762,25 @@ func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
 			}
 		} else {
 			// find rating profiles
+			ratingProfileSearchKey := fmt.Sprintf("%s:%s:%s:", lcr.Direction, lcr.Tenant, ts.Entry.TOR)
+			suppliers := cache2go.GetEntriesKeys(LCR_PREFIX + ratingProfileSearchKey)
+			for _, supplier := range suppliers {
+				split := strings.Split(supplier, ":")
+				supplier = split[len(split)-1]
+				lcrCD := cd.Clone()
+				lcrCD.Subject = supplier
+				if cc, err := lcrCD.GetCost(); err != nil || cc == nil {
+					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Error:    err,
+					})
+				} else {
+					ts.SupplierCosts = append(ts.SupplierCosts, &LCRSupplierCost{
+						Supplier: supplier,
+						Cost:     cc.Cost,
+					})
+				}
+			}
 			// sort according to strategy
 			ts.Sort()
 		}

@@ -22,6 +22,9 @@ import (
 	"fmt"
 	"sort"
 	"time"
+
+	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -41,10 +44,12 @@ type LCRActivation struct {
 	Entries        []*LCREntry
 }
 type LCREntry struct {
-	Destination string
-	TOR         string
-	Strategy    string
-	Suppliers   string
+	DestinationId string
+	TOR           string
+	Strategy      string
+	Suppliers     string
+	Weight        float64
+	precision     int
 }
 
 type LCRCost struct {
@@ -83,7 +88,52 @@ func (lcr *LCR) Sort() {
 	sort.Sort(lcr)
 }
 
-func (lcra *LCRActivation) GetLCREntryForPrefix(prefix string) *LCREntry {
+type LCREntriesSorter []*LCREntry
+
+func (es LCREntriesSorter) Len() int {
+	return len(es)
+}
+
+func (es LCREntriesSorter) Swap(i, j int) {
+	es[i], es[j] = es[j], es[i]
+}
+
+func (es LCREntriesSorter) Less(j, i int) bool {
+	return es[i].precision < es[j].precision ||
+		(es[i].precision == es[j].precision && es[i].Weight < es[j].Weight)
+
+}
+
+func (es LCREntriesSorter) Sort() {
+	sort.Sort(es)
+}
+
+func (lcra *LCRActivation) GetLCREntryForPrefix(destination string) *LCREntry {
+	var potentials LCREntriesSorter
+	for _, p := range utils.SplitPrefix(destination, MIN_PREFIX_MATCH) {
+		if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
+			destIds := x.([]string)
+			for _, dId := range destIds {
+				for _, entry := range lcra.Entries {
+					if entry.DestinationId == dId {
+						entry.precision = len(p)
+						potentials = append(potentials, entry)
+					}
+				}
+			}
+		}
+	}
+	if len(potentials) > 0 {
+		// sort by precision and weight
+		potentials.Sort()
+		return potentials[0]
+	}
+	// return the *any entry if it exists
+	for _, entry := range lcra.Entries {
+		if entry.DestinationId == utils.ANY {
+			return entry
+		}
+	}
 	return nil
 }
 

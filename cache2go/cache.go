@@ -206,3 +206,21 @@ func XCountEntries(prefix string) (result int) {
 	}
 	return
 }
+
+func GetEntriesKeys(prefix string) (keys []string) {
+	for key, _ := range cache {
+		if strings.HasPrefix(key, prefix) {
+			keys = append(keys, key)
+		}
+	}
+	return
+}
+
+func XGetEntriesKeys(prefix string) (keys []string) {
+	for key, _ := range xcache {
+		if strings.HasPrefix(key, prefix) {
+			keys = append(keys, key)
+		}
+	}
+	return
+}
