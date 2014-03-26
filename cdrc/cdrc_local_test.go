@@ -26,8 +26,8 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"io/ioutil"
-	"os/exec"
 	"os"
+	"os/exec"
 	"path"
 	"testing"
 	"time"
@@ -56,7 +56,7 @@ var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for r
 
 func init() {
 	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
-	cfg, _ = config.NewCGRConfig(&cfgPath)
+	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
 }
 
 var fileContent1 = `accid11,prepaid,out,cgrates.org,call,1001,1001,+4986517174963,2013-02-03 19:54:00,62,supplier1,172.16.1.1

@@ -66,7 +66,7 @@ var waitRater = flag.Int("wait_rater", 500, "Number of miliseconds to wait for r
 
 func init() {
 	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
-	cfg, _ = config.NewCGRConfig(&cfgPath)
+	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
 }
 
 func TestCreateDirs(t *testing.T) {

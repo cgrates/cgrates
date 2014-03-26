@@ -32,7 +32,7 @@ func TestLoadXmlCfg(t *testing.T) {
 		return
 	}
 	cfgPath := path.Join(*dataDir, "conf", "samples", "config_local_test.cfg")
-	cfg, err := NewCGRConfig(&cfgPath)
+	cfg, err := NewCGRConfigFromFile(&cfgPath)
 	if err != nil {
 		t.Error(err)
 	}

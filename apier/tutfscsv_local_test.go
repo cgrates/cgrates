@@ -38,7 +38,7 @@ var fscsvCfg *config.CGRConfig
 
 func init() {
 	fscsvCfgPath = path.Join(*dataDir, "tutorials", "fs_csv", "cgrates", "etc", "cgrates", "cgrates.cfg")
-	fscsvCfg, _ = config.NewCGRConfig(&fscsvCfgPath)
+	fscsvCfg, _ = config.NewCGRConfigFromFile(&fscsvCfgPath)
 }
 
 // Remove here so they can be properly created by init script

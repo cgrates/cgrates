@@ -41,7 +41,7 @@ var waitFs = flag.Int("wait_fs", 500, "Number of miliseconds to wait for FreeSWI
 
 func init() {
 	fsjsonCfgPath = path.Join(*dataDir, "tutorials", "fs_json", "cgrates", "etc", "cgrates", "cgrates.cfg")
-	fsjsonCfg, _ = config.NewCGRConfig(&fsjsonCfgPath)
+	fsjsonCfg, _ = config.NewCGRConfigFromFile(&fsjsonCfgPath)
 }
 
 // Remove here so they can be properly created by init script

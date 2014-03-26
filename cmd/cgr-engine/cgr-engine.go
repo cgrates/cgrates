@@ -289,7 +289,7 @@ func main() {
 	}
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	cfg, err = config.NewCGRConfig(cfgPath)
+	cfg, err = config.NewCGRConfigFromFile(cfgPath)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Could not parse config: %s exiting!", err))
 		return
