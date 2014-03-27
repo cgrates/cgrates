@@ -200,7 +200,7 @@ func startHistoryServer(chanDone chan struct{}) {
 }
 
 // chanStartServer will report when server is up, useful for internal requests
-func startHistoryAgent(scribeServer history.Scribe, chanServerStarted chan struct{}) {
+func startHistoryAgent(chanServerStarted chan struct{}) {
 	if cfg.HistoryServer == utils.INTERNAL { // For internal requests, wait for server to come online before connecting
 		engine.Logger.Crit(fmt.Sprintf("<HistoryAgent> Connecting internally to HistoryServer"))
 		select {
@@ -224,7 +224,7 @@ func startHistoryAgent(scribeServer history.Scribe, chanServerStarted chan struc
 			time.Sleep(time.Duration(i) * time.Second)
 		}
 	}
-	engine.SetHistoryScribe(scribeServer)
+	engine.SetHistoryScribe(scribeServer) // scribeServer comes from global variable
 	return
 }
 
@@ -428,7 +428,7 @@ func main() {
 
 	if cfg.HistoryAgentEnabled {
 		engine.Logger.Info("Starting CGRateS History Agent.")
-		go startHistoryAgent(scribeServer, histServChan)
+		go startHistoryAgent(histServChan)
 	}
 
 	var medChan chan struct{}

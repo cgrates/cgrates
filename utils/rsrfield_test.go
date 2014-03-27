@@ -53,6 +53,17 @@ func TestParseSearchReplaceFromFieldRule(t *testing.T) {
 	}
 }
 
+func TestParseRSRField1(t *testing.T) {
+	fieldRule := `~current_application_data:s/,origination_caller_id_number=(\+?\d+),/$1/`
+	if field, regSrchRplc, err := ParseSearchReplaceFromFieldRule(fieldRule); err != nil {
+		t.Error("Error parsing the filed rule: ", err.Error())
+	} else if field != "current_application_data" {
+		t.Error("Failed parsing field name")
+	} else if regSrchRplc == nil {
+		t.Error("Failed parsing regexp rule")
+	}
+}
+
 func TestNewRSRField(t *testing.T) {
 	expectRSRField := &RSRField{Id: "sip_redirected_to", RSRule: &ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)@`), "0$1"}}
 	if rsrField, err := NewRSRField(`~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`); err != nil {
