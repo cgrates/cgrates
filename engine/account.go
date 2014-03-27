@@ -62,15 +62,11 @@ type Account struct {
 	BalanceMap     map[string]BalanceChain
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
-	Groups         GroupLinks // user info about groups
-	// group information
-	UserIds       []string // group info about users
-	AllowNegative bool
-	Disabled      bool
+	AllowNegative  bool
+	Disabled       bool
 }
 
-// Returns user's available minutes for the specified destination
-
+// User's available minutes for the specified destination
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction], "")
 	minuteBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[MINUTES+cd.Direction], "")
