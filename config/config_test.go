@@ -82,7 +82,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
 	eCfg.CdreCdrFormat = "csv"
-	eCfg.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
+	eCfg.CdreDir = "/var/log/cgrates/cdr/cdre"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcCdrsMethod = "http_cgr"

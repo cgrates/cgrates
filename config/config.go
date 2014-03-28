@@ -197,7 +197,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSExtraFields = []*utils.RSRField{}
 	self.CDRSMediator = ""
 	self.CdreCdrFormat = "csv"
-	self.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
+	self.CdreDir = "/var/log/cgrates/cdr/cdre"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
 	self.CdrcCdrsMethod = "http_cgr"

@@ -32,7 +32,7 @@ var hdrCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "Filler1", Type: FILLER, Width: 3},
 	&config.CgrXmlCfgCdrField{Name: "DistributorCode", Type: CONSTANT, Value: "VOI", Width: 3},
 	&config.CgrXmlCfgCdrField{Name: "FileSeqNr", Type: METATAG, Value: "export_id", Width: 5, Strip: "right", Padding: "zeroleft"},
-	&config.CgrXmlCfgCdrField{Name: "LastCdr", Type: METATAG, Value: "last_cdr_time", Width: 12, Layout: "020106150400"},
+	&config.CgrXmlCfgCdrField{Name: "LastCdr", Type: METATAG, Value: META_LASTCDRATIME, Width: 12, Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "FileCreationfTime", Type: METATAG, Value: "time_now", Width: 12, Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "FileVersion", Type: CONSTANT, Value: "01", Width: 2},
 	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 105},
@@ -68,8 +68,8 @@ var trailerCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "FileSeqNr", Type: METATAG, Value: META_EXPORTID, Width: 5, Strip: "right", Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "NumberOfRecords", Type: METATAG, Value: META_NRCDRS, Width: 6, Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "CdrsDuration", Type: METATAG, Value: META_DURCDRS, Width: 8, Padding: "zeroleft"},
-	&config.CgrXmlCfgCdrField{Name: "FirstCdrTime", Type: METATAG, Value: META_FIRSTCDRTIME, Width: 12, Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "LastCdrTime", Type: METATAG, Value: META_LASTCDRTIME, Width: 12, Layout: "020106150400"},
+	&config.CgrXmlCfgCdrField{Name: "FirstCdrTime", Type: METATAG, Value: META_FIRSTCDRATIME, Width: 12, Layout: "020106150400"},
+	&config.CgrXmlCfgCdrField{Name: "LastCdrTime", Type: METATAG, Value: META_LASTCDRATIME, Width: 12, Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 93},
 }
 
@@ -99,7 +99,7 @@ func TestWriteCdr(t *testing.T) {
 		t.Errorf("Content out different than expected. Have <%s>, expecting: <%s>", contentOut, eContentOut)
 	}
 	eHeader := "10   VOI0000007111308420024031415390001                                                                                                         \n"
-	eTrailer := "90   VOI0000000000100000010071113084200071113084200                                                                                             \n"
+	eTrailer := "90   VOI0000000000100000010071113084260071113084200                                                                                             \n"
 	outBeforeWrite := ""
 	if wrBuf.String() != outBeforeWrite {
 		t.Errorf("Output buffer should be empty before write")
@@ -113,10 +113,10 @@ func TestWriteCdr(t *testing.T) {
 		t.Errorf("Output does not match expected length. Have output %q, expecting: %q", allOut, eAllOut)
 	}
 	// Test stats
-	if !fwWriter.firstCdrTime.Equal(cdr.SetupTime) {
-		t.Error("Unexpected firstCdrTime in stats: ", fwWriter.firstCdrTime)
-	} else if !fwWriter.lastCdrTime.Equal(cdr.SetupTime) {
-		t.Error("Unexpected lastCdrTime in stats: ", fwWriter.lastCdrTime)
+	if !fwWriter.firstCdrATime.Equal(cdr.AnswerTime) {
+		t.Error("Unexpected firstCdrATime in stats: ", fwWriter.firstCdrATime)
+	} else if !fwWriter.lastCdrATime.Equal(cdr.AnswerTime) {
+		t.Error("Unexpected lastCdrATime in stats: ", fwWriter.lastCdrATime)
 	} else if fwWriter.numberOfRecords != 1 {
 		t.Error("Unexpected number of records in the stats: ", fwWriter.numberOfRecords)
 	} else if fwWriter.totalDuration != cdr.Duration {
@@ -172,11 +172,11 @@ func TestWriteCdrs(t *testing.T) {
 		t.Error("Output buffer does not contain expected info. Expecting len: 725, got: ", len(wrBuf.String()))
 	}
 	// Test stats
-	if !fwWriter.firstCdrTime.Equal(cdr2.SetupTime) {
-		t.Error("Unexpected firstCdrTime in stats: ", fwWriter.firstCdrTime)
+	if !fwWriter.firstCdrATime.Equal(cdr2.AnswerTime) {
+		t.Error("Unexpected firstCdrATime in stats: ", fwWriter.firstCdrATime)
 	}
-	if !fwWriter.lastCdrTime.Equal(cdr4.SetupTime) {
-		t.Error("Unexpected lastCdrTime in stats: ", fwWriter.lastCdrTime)
+	if !fwWriter.lastCdrATime.Equal(cdr4.AnswerTime) {
+		t.Error("Unexpected lastCdrATime in stats: ", fwWriter.lastCdrATime)
 	}
 	if fwWriter.numberOfRecords != 3 {
 		t.Error("Unexpected number of records in the stats: ", fwWriter.numberOfRecords)

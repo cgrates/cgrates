@@ -21,7 +21,6 @@ package cdre
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -42,8 +41,8 @@ const (
 	CONCATENATED_CDRFIELD = "concatenated_cdrfield"
 	META_EXPORTID         = "export_id"
 	META_TIMENOW          = "time_now"
-	META_FIRSTCDRTIME     = "first_cdr_time"
-	META_LASTCDRTIME      = "last_cdr_time"
+	META_FIRSTCDRATIME    = "first_cdr_atime"
+	META_LASTCDRATIME     = "last_cdr_atime"
 	META_NRCDRS           = "cdrs_number"
 	META_DURCDRS          = "cdrs_duration"
 	META_COSTCDRS         = "cdrs_cost"
@@ -64,16 +63,16 @@ func NewFWCdrWriter(logDb engine.LogStorage, outFile *os.File, exportTpl *config
 }
 
 type FixedWidthCdrWriter struct {
-	logDb                     engine.LogStorage // Used to extract cost_details if these are requested
-	writer                    io.Writer
-	exportTemplate            *config.CgrXmlCdreFwCfg
-	exportId                  string // Unique identifier or this export
-	roundDecimals             int
-	header, content, trailer  *bytes.Buffer
-	firstCdrTime, lastCdrTime time.Time
-	numberOfRecords           int
-	totalDuration             time.Duration
-	totalCost                 float64
+	logDb                       engine.LogStorage // Used to extract cost_details if these are requested
+	writer                      io.Writer
+	exportTemplate              *config.CgrXmlCdreFwCfg
+	exportId                    string // Unique identifier or this export
+	roundDecimals               int
+	header, content, trailer    *bytes.Buffer
+	firstCdrATime, lastCdrATime time.Time
+	numberOfRecords             int
+	totalDuration               time.Duration
+	totalCost                   float64
 }
 
 // Return Json marshaled callCost attached to
@@ -121,10 +120,10 @@ func (fww *FixedWidthCdrWriter) metaHandler(tag, layout string) (string, error) 
 		return fww.exportId, nil
 	case META_TIMENOW:
 		return time.Now().Format(layout), nil
-	case META_FIRSTCDRTIME:
-		return fww.firstCdrTime.Format(layout), nil
-	case META_LASTCDRTIME:
-		return fww.lastCdrTime.Format(layout), nil
+	case META_FIRSTCDRATIME:
+		return fww.firstCdrATime.Format(layout), nil
+	case META_LASTCDRATIME:
+		return fww.lastCdrATime.Format(layout), nil
 	case META_NRCDRS:
 		return strconv.Itoa(fww.numberOfRecords), nil
 	case META_DURCDRS:
@@ -132,7 +131,7 @@ func (fww *FixedWidthCdrWriter) metaHandler(tag, layout string) (string, error) 
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(fww.totalCost, fww.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 	default:
-		return "", errors.New("Unsupported METATAG")
+		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
 	return "", nil
 }
@@ -238,7 +237,7 @@ func (fww *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 			return err
 		}
 		if fmtOut, err := FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s and runid: %s, error: %s", cdr.CgrId, cdr.MediationRunId, err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Name, outVal, err.Error()))
 			return err
 		} else {
 			cdrRow += fmtOut
@@ -250,11 +249,11 @@ func (fww *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 	cdrRow += "\n" // Done with cdr, postpend new line char
 	fww.content.WriteString(cdrRow)
 	// Done with writing content, compute stats here
-	if fww.firstCdrTime.IsZero() || cdr.SetupTime.Before(fww.firstCdrTime) {
-		fww.firstCdrTime = cdr.SetupTime
+	if fww.firstCdrATime.IsZero() || cdr.AnswerTime.Before(fww.firstCdrATime) {
+		fww.firstCdrATime = cdr.AnswerTime
 	}
-	if cdr.SetupTime.After(fww.lastCdrTime) {
-		fww.lastCdrTime = cdr.SetupTime
+	if cdr.AnswerTime.After(fww.lastCdrATime) {
+		fww.lastCdrATime = cdr.AnswerTime
 	}
 	fww.numberOfRecords += 1
 	fww.totalDuration += cdr.Duration

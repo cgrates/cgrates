@@ -85,7 +85,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		if len(exportedFields) == 0 {
 			return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
 		}
-		filePath := path.Join(self.Config.CdreDir, fileName)
+		filePath := path.Join(self.Config.CdreDir, utils.CDRE_CSV, fileName)
 		fileOut, err := os.Create(filePath)
 		if err != nil {
 			return err
@@ -118,7 +118,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		if exportTemplate == nil {
 			return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
 		}
-		filePath := path.Join(self.Config.CdreDir, fileName)
+		filePath := path.Join(self.Config.CdreDir, utils.CDRE_FIXED_WIDTH, fileName)
 		fileOut, err := os.Create(filePath)
 		if err != nil {
 			return err
