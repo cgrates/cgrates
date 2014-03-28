@@ -32,7 +32,7 @@ binary-arch: clean
 	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrc/in
 	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrc/out
 	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdre/csv
-        mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdre/fixed_width
+        mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdre/fwv
 	mkdir -p $(PKGDIR)/var/log/cgrates/history
 	dh_strip
 	dh_compress
