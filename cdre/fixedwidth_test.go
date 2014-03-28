@@ -29,13 +29,13 @@ import (
 
 var hdrCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "TypeOfRecord", Type: CONSTANT, Value: "10", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "Filler1", Type: FILLER, Width: 3, Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Filler1", Type: FILLER, Width: 3},
 	&config.CgrXmlCfgCdrField{Name: "DistributorCode", Type: CONSTANT, Value: "VOI", Width: 3},
 	&config.CgrXmlCfgCdrField{Name: "FileSeqNr", Type: METATAG, Value: "export_id", Width: 5, Strip: "right", Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "LastCdr", Type: METATAG, Value: "last_cdr_time", Width: 12, Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "FileCreationfTime", Type: METATAG, Value: "time_now", Width: 12, Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "FileVersion", Type: CONSTANT, Value: "01", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 105, Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 105},
 }
 
 var contentCfgFlds = []*config.CgrXmlCfgCdrField{
@@ -48,14 +48,14 @@ var contentCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "SubtypeTOR", Type: CONSTANT, Value: "11", Width: 4, Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "SetupTime", Type: CDRFIELD, Value: utils.SETUP_TIME, Width: 12, Strip: "right", Padding: "right", Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "Duration", Type: CDRFIELD, Value: utils.DURATION, Width: 6, Strip: "right", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "DataVolume", Type: FILLER, Width: 6, Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "DataVolume", Type: FILLER, Width: 6},
 	&config.CgrXmlCfgCdrField{Name: "TaxCode", Type: CONSTANT, Value: "1", Width: 1},
 	&config.CgrXmlCfgCdrField{Name: "OperatorCode", Type: CDRFIELD, Value: "opercode", Width: 2, Strip: "right", Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "ProductId", Type: CDRFIELD, Value: "productid", Width: 5, Strip: "right", Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "NetworkId", Type: CONSTANT, Value: "3", Width: 1},
 	&config.CgrXmlCfgCdrField{Name: "CallId", Type: CDRFIELD, Value: utils.ACCID, Width: 16, Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8, Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8, Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8},
+	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8},
 	&config.CgrXmlCfgCdrField{Name: "TerminationCode", Type: CONCATENATED_CDRFIELD, Value: "operator,product", Width: 5, Strip: "right", Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "Cost", Type: CDRFIELD, Value: utils.COST, Width: 9, Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "DestinationPrivacy", Type: CDRFIELD, Value: "destination_privacy", Width: 1, Strip: "right", Padding: "right"},
@@ -63,14 +63,14 @@ var contentCfgFlds = []*config.CgrXmlCfgCdrField{
 
 var trailerCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "TypeOfRecord", Type: CONSTANT, Value: "90", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "Filler1", Type: FILLER, Width: 3, Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Filler1", Type: FILLER, Width: 3},
 	&config.CgrXmlCfgCdrField{Name: "DistributorCode", Type: CONSTANT, Value: "VOI", Width: 3},
 	&config.CgrXmlCfgCdrField{Name: "FileSeqNr", Type: METATAG, Value: META_EXPORTID, Width: 5, Strip: "right", Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "NumberOfRecords", Type: METATAG, Value: META_NRCDRS, Width: 6, Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "CdrsDuration", Type: METATAG, Value: META_DURCDRS, Width: 8, Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "FirstCdrTime", Type: METATAG, Value: META_FIRSTCDRTIME, Width: 12, Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "LastCdrTime", Type: METATAG, Value: META_LASTCDRTIME, Width: 12, Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 93, Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 93},
 }
 
 // Write one CDR and test it's results only for content buffer

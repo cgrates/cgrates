@@ -143,7 +143,10 @@ func (fww *FixedWidthCdrWriter) ComposeHeader() error {
 	for _, cfgFld := range fww.exportTemplate.Header.Fields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER, CONSTANT:
+		case FILLER:
+			outVal = cfgFld.Value
+			cfgFld.Padding = "right"
+		case CONSTANT:
 			outVal = cfgFld.Value
 		case METATAG:
 			outVal, err = fww.metaHandler(cfgFld.Value, cfgFld.Layout)
@@ -175,7 +178,10 @@ func (fww *FixedWidthCdrWriter) ComposeTrailer() error {
 	for _, cfgFld := range fww.exportTemplate.Trailer.Fields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER, CONSTANT:
+		case FILLER:
+			outVal = cfgFld.Value
+			cfgFld.Padding = "right"
+		case CONSTANT:
 			outVal = cfgFld.Value
 		case METATAG:
 			outVal, err = fww.metaHandler(cfgFld.Value, cfgFld.Layout)
@@ -211,7 +217,10 @@ func (fww *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 	for _, cfgFld := range fww.exportTemplate.Content.Fields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER, CONSTANT:
+		case FILLER:
+			outVal = cfgFld.Value
+			cfgFld.Padding = "right"
+		case CONSTANT:
 			outVal = cfgFld.Value
 		case CDRFIELD:
 			outVal, err = fww.cdrFieldValue(cdr, cfgFld.Value, cfgFld.Layout)
