@@ -20,18 +20,21 @@ package cdre
 
 import (
 	"encoding/csv"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"io"
 )
 
 type CsvCdrWriter struct {
 	writer         *csv.Writer
-	roundDecimals  int               // Round floats like Cost using this number of decimals
+	roundDecimals  int // Round floats like Cost using this number of decimals
+	maskDestId     string
+	maskLen        int
 	exportedFields []*utils.RSRField // The fields exported, order important
 }
 
-func NewCsvCdrWriter(writer io.Writer, roundDecimals int, exportedFields []*utils.RSRField) *CsvCdrWriter {
-	return &CsvCdrWriter{csv.NewWriter(writer), roundDecimals, exportedFields}
+func NewCsvCdrWriter(writer io.Writer, roundDecimals int, maskDestId string, maskLen int, exportedFields []*utils.RSRField) *CsvCdrWriter {
+	return &CsvCdrWriter{csv.NewWriter(writer), roundDecimals, maskDestId, maskLen, exportedFields}
 }
 
 func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
@@ -40,6 +43,11 @@ func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 		var fldVal string
 		if fld.Id == utils.COST {
 			fldVal = cdr.FormatCost(csvwr.roundDecimals)
+		} else if fld.Id == utils.DESTINATION {
+			fldVal = cdr.ExportFieldValue(utils.DESTINATION)
+			if len(csvwr.maskDestId) != 0 && csvwr.maskLen > 0 && engine.CachedDestHasPrefix(csvwr.maskDestId, fldVal) {
+				fldVal = MaskDestination(fldVal, csvwr.maskLen)
+			}
 		} else {
 			fldVal = cdr.ExportFieldValue(fld.Id)
 		}

@@ -99,7 +99,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return err
 		}
 		defer fileOut.Close()
-		csvWriter := cdre.NewCsvCdrWriter(fileOut, roundDecimals, exportedFields)
+		csvWriter := cdre.NewCsvCdrWriter(fileOut, roundDecimals, maskDestId, maskLen, exportedFields)
 		exportedIds := make([]string, 0)
 		unexportedIds := make(map[string]string)
 		for _, cdr := range cdrs {
