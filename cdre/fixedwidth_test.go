@@ -58,7 +58,7 @@ var contentCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8},
 	&config.CgrXmlCfgCdrField{Name: "TerminationCode", Type: CONCATENATED_CDRFIELD, Value: "operator,product", Width: 5, Strip: "right", Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "Cost", Type: CDRFIELD, Value: utils.COST, Width: 9, Padding: "zeroleft"},
-	&config.CgrXmlCfgCdrField{Name: "DestinationPrivacy", Type: CDRFIELD, Value: "destination_privacy", Width: 1, Strip: "right", Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "DestinationPrivacy", Type: METATAG, Value: META_MASKDESTINATION, Width: 1},
 }
 
 var trailerCfgFlds = []*config.CgrXmlCfgCdrField{
@@ -91,7 +91,7 @@ func TestWriteCdr(t *testing.T) {
 	if err := fwWriter.WriteCdr(cdr); err != nil {
 		t.Error(err)
 	}
-	eContentOut := "201001        1001                1002                    0211  07111308420010          1       3dsafdsaf                             0002.3457 \n"
+	eContentOut := "201001        1001                1002                    0211  07111308420010          1       3dsafdsaf                             0002.34570\n"
 	contentOut := fwWriter.content.String()
 	if len(contentOut) != 145 {
 		t.Error("Unexpected content length", len(contentOut))

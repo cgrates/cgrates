@@ -91,6 +91,8 @@ type CGRConfig struct {
 	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
 	CDRSMediator             string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	CdreCdrFormat            string            // Format of the exported CDRs. <csv>
+	CdreMaskDestId           string            // Id of the destination list to be masked in CDRs
+	CdreMaskLength           int               // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
 	CdreDir                  string            // Path towards exported cdrs directory
 	CdreExportedFields       []*utils.RSRField // List of fields in the exported CDRs
 	CdreFWXmlTemplate        *CgrXmlCdreFwCfg  // Use this configuration as export template in case of fixed fields length
@@ -197,6 +199,8 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSExtraFields = []*utils.RSRField{}
 	self.CDRSMediator = ""
 	self.CdreCdrFormat = "csv"
+	self.CdreMaskDestId = ""
+	self.CdreMaskLength = 0
 	self.CdreDir = "/var/log/cgrates/cdr/cdre"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
@@ -487,6 +491,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
 		cfg.CdreCdrFormat, _ = c.GetString("cdre", "cdr_format")
+	}
+	if hasOpt = c.HasOption("cdre", "mask_destination_id"); hasOpt {
+		cfg.CdreMaskDestId, _ = c.GetString("cdre", "mask_destination_id")
+	}
+	if hasOpt = c.HasOption("cdre", "mask_length"); hasOpt {
+		cfg.CdreMaskLength, _ = c.GetInt("cdre", "mask_length")
 	}
 	if hasOpt = c.HasOption("cdre", "export_template"); hasOpt { // Load configs for csv normally from template, fixed_width from xml file
 		exportTemplate, _ := c.GetString("cdre", "export_template")

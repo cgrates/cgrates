@@ -20,6 +20,7 @@ package engine
 
 import (
 	"encoding/json"
+	"github.com/cgrates/cgrates/cache2go"
 	"strings"
 
 	"github.com/cgrates/cgrates/history"
@@ -67,4 +68,16 @@ func (d *Destination) GetHistoryRecord() history.Record {
 		Filename: history.DESTINATIONS_FN,
 		Payload:  js,
 	}
+}
+
+// Reverse search in cache to see if prefix belongs to destination id
+func CachedDestHasPrefix(destId, prefix string) bool {
+	if cached, err := cache2go.GetCached(DESTINATION_PREFIX + prefix); err == nil {
+		for _, cachedDstId := range cached.([]string) {
+			if destId == cachedDstId {
+				return true
+			}
+		}
+	}
+	return false
 }

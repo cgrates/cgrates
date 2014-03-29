@@ -57,6 +57,14 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if roundDecimals == 0 {
 		roundDecimals = self.Config.RoundingDecimals
 	}
+	maskDestId := attr.MaskDestinationId
+	if len(maskDestId) == 0 {
+		maskDestId = self.Config.CdreMaskDestId
+	}
+	maskLen := attr.MaskLength
+	if maskLen == 0 {
+		maskLen = self.Config.CdreMaskLength
+	}
 	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunId, attr.CdrHost, attr.CdrSource, attr.ReqType, attr.Direction,
 		attr.Tenant, attr.Tor, attr.Account, attr.Subject, attr.DestinationPrefix, tStart, tEnd, attr.SkipErrors, attr.SkipRated)
 	if err != nil {
@@ -124,7 +132,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return err
 		}
 		defer fileOut.Close()
-		fww, _ := cdre.NewFWCdrWriter(self.LogDb, fileOut, exportTemplate, exportId, roundDecimals)
+		fww, _ := cdre.NewFWCdrWriter(self.LogDb, fileOut, exportTemplate, exportId, roundDecimals, maskDestId, maskLen)
 		exportedIds := make([]string, 0)
 		unexportedIds := make(map[string]string)
 		for _, cdr := range cdrs {

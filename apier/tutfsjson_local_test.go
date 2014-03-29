@@ -315,8 +315,8 @@ func TestMaxCallDuration(t *testing.T) {
 		Subject:     "1001",
 		Account:     "1001",
 		Destination: "1002",
-		TimeStart:   time.Now(),
-		TimeEnd:     time.Now().Add(fsjsonCfg.SMMaxCallDuration),
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(fsjsonCfg.SMMaxCallDuration),
 	}
 	var remainingDurationFloat float64
 	if err := rater.Call("Responder.GetMaxSessionTime", cd, &remainingDurationFloat); err != nil {
@@ -334,8 +334,8 @@ func TestMaxCallDuration(t *testing.T) {
 		Subject:     "1002",
 		Account:     "1002",
 		Destination: "1001",
-		TimeStart:   time.Now(),
-		TimeEnd:     time.Now().Add(fsjsonCfg.SMMaxCallDuration),
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(fsjsonCfg.SMMaxCallDuration),
 	}
 	if err := rater.Call("Responder.GetMaxSessionTime", cd, &remainingDurationFloat); err != nil {
 		t.Error(err)
@@ -352,8 +352,8 @@ func TestMaxCallDuration(t *testing.T) {
 		Subject:     "1006",
 		Account:     "1006",
 		Destination: "1001",
-		TimeStart:   time.Now(),
-		TimeEnd:     time.Now().Add(fsjsonCfg.SMMaxCallDuration),
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(fsjsonCfg.SMMaxCallDuration),
 	}
 	if err := rater.Call("Responder.GetMaxSessionTime", cd, &remainingDurationFloat); err != nil {
 		t.Error(err)
@@ -371,8 +371,8 @@ func TestMaxCallDuration(t *testing.T) {
 		Subject:     "1007",
 		Account:     "1007",
 		Destination: "1001",
-		TimeStart:   time.Now(),
-		TimeEnd:     time.Now().Add(fsjsonCfg.SMMaxCallDuration),
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(fsjsonCfg.SMMaxCallDuration),
 	}
 	if err := rater.Call("Responder.GetMaxSessionTime", cd, &remainingDurationFloat); err != nil {
 		t.Error(err)
@@ -397,8 +397,8 @@ func TestMaxDebit1001(t *testing.T) {
 		Subject:     "1001",
 		Account:     "1001",
 		Destination: "1002",
-		TimeStart:   time.Now(),
-		TimeEnd:     time.Now().Add(time.Duration(10) * time.Second),
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(time.Duration(10) * time.Second),
 	}
 	if err := rater.Call("Responder.MaxDebit", cd, cc); err != nil {
 		t.Error(err.Error())
@@ -436,8 +436,8 @@ func TestMaxDebit1007(t *testing.T) {
 		Subject:     "1007",
 		Account:     "1007",
 		Destination: "1002",
-		TimeStart:   time.Now(),
-		TimeEnd:     time.Now().Add(time.Duration(10) * time.Second),
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(time.Duration(10) * time.Second),
 	}
 	if err := rater.Call("Responder.MaxDebit", cd, cc); err != nil {
 		t.Error(err.Error())

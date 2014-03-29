@@ -321,6 +321,8 @@ type AttrExpFileCdrs struct {
 	ExportFileName    string   // If provided the output filename will be set to this
 	ExportTemplate    string   // Exported fields template  <""|fld1,fld2|*xml:instance_name>
 	RoundingDecimals  int      // Overwrite configured roundDecimals with this dynamically
+	MaskDestinationId string   // Overwrite configured MaskDestId
+	MaskLength        int      // Overwrite configured MaskLength
 	CgrIds            []string // If provided, it will filter based on the cgrids present in list
 	MediationRunId    string   // If provided, it will filter on mediation runid
 	CdrHost           string   // If provided, it will filter cdrhost
