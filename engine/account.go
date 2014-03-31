@@ -34,11 +34,11 @@ const (
 	INBOUND  = "*in"
 	OUTBOUND = "*out"
 	// Balance types
-	CREDIT       = "*monetary"
-	SMS          = "*sms"
-	TRAFFIC      = "*internet"
-	TRAFFIC_TIME = "*internet_time"
-	MINUTES      = "*minutes"
+	CREDIT    = "*monetary"
+	SMS       = "*sms"
+	DATA      = "*data"
+	DATA_TIME = "*data_time"
+	MINUTES   = "*minutes"
 	// action price type
 	PRICE_PERCENT  = "*percent"
 	PRICE_ABSOLUTE = "*absolute"
@@ -308,15 +308,6 @@ func (ub *Account) refundIncrement(increment *Increment, direction string, count
 			ub.countUnits(&Action{BalanceType: CREDIT, Direction: direction, Balance: &Balance{Value: -increment.Cost}})
 		}
 	}
-}
-
-// Debits some amount of user's specified balance. Returns the remaining credit in user's balance.
-func (ub *Account) debitGenericBalance(balanceId string, direction string, amount float64, count bool) float64 {
-	if count {
-		ub.countUnits(&Action{BalanceType: balanceId, Direction: direction, Balance: &Balance{Value: amount}})
-	}
-	ub.BalanceMap[balanceId+direction].Debit(amount)
-	return ub.BalanceMap[balanceId+direction].GetTotalValue()
 }
 
 // Scans the action trigers and execute the actions for which trigger is met

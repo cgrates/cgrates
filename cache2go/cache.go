@@ -135,16 +135,6 @@ func RemKey(key string) {
 	delete(cache, key)
 }
 
-func RemPrefixKey(prefix string) {
-	mux.Lock()
-	defer mux.Unlock()
-	for key, _ := range cache {
-		if strings.HasPrefix(key, prefix) {
-			delete(cache, key)
-		}
-	}
-}
-
 func XRemKey(key string) {
 	xMux.Lock()
 	defer xMux.Unlock()
@@ -155,6 +145,17 @@ func XRemKey(key string) {
 	}
 	delete(xcache, key)
 }
+
+func RemPrefixKey(prefix string) {
+	mux.Lock()
+	defer mux.Unlock()
+	for key, _ := range cache {
+		if strings.HasPrefix(key, prefix) {
+			delete(cache, key)
+		}
+	}
+}
+
 func XRemPrefixKey(prefix string) {
 	xMux.Lock()
 	defer xMux.Unlock()
@@ -168,6 +169,26 @@ func XRemPrefixKey(prefix string) {
 			delete(xcache, key)
 		}
 	}
+}
+
+func GetAllEntries(prefix string) map[string]interface{} {
+	result := make(map[string]interface{})
+	for key, timestampedValue := range cache {
+		if strings.HasPrefix(key, prefix) {
+			result[key] = timestampedValue.value
+		}
+	}
+	return result
+}
+
+func XGetAllEntries(prefix string) map[string]interface{} {
+	result := make(map[string]interface{})
+	for key, value := range xcache {
+		if strings.HasPrefix(key, prefix) {
+			result[key] = value
+		}
+	}
+	return result
 }
 
 // Delete all keys from expiraton cache

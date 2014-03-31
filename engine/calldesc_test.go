@@ -425,7 +425,7 @@ func TestMaxSessionTimeWithAccountAccount(t *testing.T) {
 		Subject:     "minu_from_tm",
 		Account:     "minu",
 		Destination: "0723",
-		Amount:      1000}
+	}
 	result, err := cd.GetMaxSessionDuration()
 	expected := time.Minute
 	if result != expected || err != nil {
@@ -442,7 +442,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Tenant:      "vdf",
 		Subject:     "broker",
 		Destination: "0723",
-		Amount:      5400}
+	}
 	result, err := cd.GetMaxSessionDuration()
 	if result != time.Minute || err != nil {
 		t.Errorf("Expected %v was %v", time.Minute, result)
@@ -462,7 +462,7 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		Account:      "minu",
 		Destination:  "0723",
 		CallDuration: t2.Sub(t1),
-		Amount:       5400}
+	}
 	initial := cd.Clone()
 	cd.GetMaxSessionDuration()
 	cd.account = nil // it's OK to cache the account
@@ -481,7 +481,7 @@ func TestMaxDebitDurationNoGreatherThanInitialDuration(t *testing.T) {
 		Subject:     "minu_from_tm",
 		Account:     "minu",
 		Destination: "0723",
-		Amount:      1000}
+	}
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
 	result, _ := cd.GetMaxSessionDuration()
 	if result > initialDuration {
@@ -671,7 +671,7 @@ func BenchmarkSplitting(b *testing.B) {
 
 func BenchmarkStorageSingleGetSessionTime(b *testing.B) {
 	b.StopTimer()
-	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 100}
+	cd := &CallDescriptor{Tenant: "vdf", Subject: "minutosu", Destination: "0723"}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.GetMaxSessionDuration()
@@ -680,7 +680,7 @@ func BenchmarkStorageSingleGetSessionTime(b *testing.B) {
 
 func BenchmarkStorageMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723", Amount: 5400}
+	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723"}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.GetMaxSessionDuration()
