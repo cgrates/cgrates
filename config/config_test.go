@@ -82,7 +82,9 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
 	eCfg.CdreCdrFormat = "csv"
-	eCfg.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
+	eCfg.CdreMaskDestId = ""
+	eCfg.CdreMaskLength = 0
+	eCfg.CdreDir = "/var/log/cgrates/cdr/cdre"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcCdrsMethod = "http_cgr"
@@ -193,7 +195,7 @@ func TestSanityCheck(t *testing.T) {
 // Load config from file and make sure we have all set
 func TestConfigFromFile(t *testing.T) {
 	cfgPth := "test_data.txt"
-	cfg, err := NewCGRConfig(&cfgPth)
+	cfg, err := NewCGRConfigFromFile(&cfgPth)
 	if err != nil {
 		t.Log(fmt.Sprintf("Could not parse config: %s!", err))
 		t.FailNow()
@@ -236,6 +238,8 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CDRSMediator = "test"
 	eCfg.CdreCdrFormat = "test"
+	eCfg.CdreMaskDestId = "test"
+	eCfg.CdreMaskLength = 99
 	eCfg.CdreExportedFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CdreDir = "test"
 	eCfg.CdrcEnabled = true
@@ -305,5 +309,54 @@ func TestConfigFromFile(t *testing.T) {
 		t.Log(eCfg)
 		t.Log(cfg)
 		t.Error("Loading of configuration from file failed!")
+	}
+}
+
+func TestCdrsExtraFields(t *testing.T) {
+	eFieldsCfg := []byte(`[cdrs]
+extra_fields = extr1,extr2
+`)
+	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "extr1"}, &utils.RSRField{Id: "extr2"}}) {
+		t.Errorf("Unexpected value for CdrsExtraFields: %v", cfg.CDRSExtraFields)
+	}
+	eFieldsCfg = []byte(`[cdrs]
+extra_fields = extr1,extr2,
+`)
+	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
+		t.Error("Failed to detect empty field in the end of extra fields defition")
+	}
+	eFieldsCfg = []byte(`[cdrs]
+extra_fields = extr1,~extr2:s/x.+/
+`)
+	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
+		t.Error("Failed to detect failed RSRParsing")
+	}
+}
+
+func TestCdreExtraFields(t *testing.T) {
+	eFieldsCfg := []byte(`[cdre]
+cdr_format = csv
+export_template = cgrid,mediation_runid,accid
+`)
+	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.CdreExportedFields, []*utils.RSRField{&utils.RSRField{Id: "cgrid"}, &utils.RSRField{Id: "mediation_runid"}, &utils.RSRField{Id: "accid"}}) {
+		t.Errorf("Unexpected value for CdrsExtraFields: %v", cfg.CDRSExtraFields)
+	}
+	eFieldsCfg = []byte(`[cdre]
+cdr_format = csv
+export_template = cgrid,mediation_runid,accid,
+`)
+	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
+		t.Error("Failed to detect empty field in the end of export_template defition")
+	}
+	eFieldsCfg = []byte(`[cdre]
+cdr_format = csv
+export_template = cgrid,~accid:s/(\d)/$1,runid
+`)
+	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
+		t.Error("Failed to detect failed RSRParsing")
 	}
 }

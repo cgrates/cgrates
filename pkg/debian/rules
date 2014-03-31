@@ -31,7 +31,8 @@ binary-arch: clean
 	cp -r $(SRCDIR)/data/* $(PKGDIR)/usr/share/cgrates/
 	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrc/in
 	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrc/out
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrexport/csv
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdre/csv
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdre/fwv
 	mkdir -p $(PKGDIR)/var/log/cgrates/history
 	dh_strip
 	dh_compress

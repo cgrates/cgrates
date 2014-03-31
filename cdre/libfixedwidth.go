@@ -21,6 +21,7 @@ package cdre
 import (
 	"errors"
 	"fmt"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Used as generic function logic for various fields
@@ -70,4 +71,19 @@ func FmtFieldWidth(source string, width int, strip, padding string, mandatory bo
 		}
 	}
 	return source, nil
+}
+
+// Mask a number of characters in the suffix of the destination
+func MaskDestination(dest string, maskLen int) string {
+	destLen := len(dest)
+	if maskLen < 0 {
+		return dest
+	} else if maskLen > destLen {
+		maskLen = destLen
+	}
+	dest = dest[:destLen-maskLen]
+	for i := 0; i < maskLen; i++ {
+		dest += utils.MASK_CHAR
+	}
+	return dest
 }

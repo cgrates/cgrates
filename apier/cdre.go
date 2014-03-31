@@ -57,6 +57,14 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if roundDecimals == 0 {
 		roundDecimals = self.Config.RoundingDecimals
 	}
+	maskDestId := attr.MaskDestinationId
+	if len(maskDestId) == 0 {
+		maskDestId = self.Config.CdreMaskDestId
+	}
+	maskLen := attr.MaskLength
+	if maskLen == 0 {
+		maskLen = self.Config.CdreMaskLength
+	}
 	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunId, attr.CdrHost, attr.CdrSource, attr.ReqType, attr.Direction,
 		attr.Tenant, attr.Tor, attr.Account, attr.Subject, attr.DestinationPrefix, tStart, tEnd, attr.SkipErrors, attr.SkipRated)
 	if err != nil {
@@ -85,13 +93,13 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		if len(exportedFields) == 0 {
 			return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
 		}
-		filePath := path.Join(self.Config.CdreDir, fileName)
+		filePath := path.Join(self.Config.CdreDir, utils.CDRE_CSV, fileName)
 		fileOut, err := os.Create(filePath)
 		if err != nil {
 			return err
 		}
 		defer fileOut.Close()
-		csvWriter := cdre.NewCsvCdrWriter(fileOut, roundDecimals, exportedFields)
+		csvWriter := cdre.NewCsvCdrWriter(fileOut, roundDecimals, maskDestId, maskLen, exportedFields)
 		exportedIds := make([]string, 0)
 		unexportedIds := make(map[string]string)
 		for _, cdr := range cdrs {
@@ -118,13 +126,13 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		if exportTemplate == nil {
 			return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
 		}
-		filePath := path.Join(self.Config.CdreDir, fileName)
+		filePath := path.Join(self.Config.CdreDir, utils.CDRE_FIXED_WIDTH, fileName)
 		fileOut, err := os.Create(filePath)
 		if err != nil {
 			return err
 		}
 		defer fileOut.Close()
-		fww, _ := cdre.NewFWCdrWriter(self.LogDb, fileOut, exportTemplate, exportId, roundDecimals)
+		fww, _ := cdre.NewFWCdrWriter(self.LogDb, fileOut, exportTemplate, exportId, roundDecimals, maskDestId, maskLen)
 		exportedIds := make([]string, 0)
 		unexportedIds := make(map[string]string)
 		for _, cdr := range cdrs {

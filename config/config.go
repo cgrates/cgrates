@@ -91,6 +91,8 @@ type CGRConfig struct {
 	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
 	CDRSMediator             string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	CdreCdrFormat            string            // Format of the exported CDRs. <csv>
+	CdreMaskDestId           string            // Id of the destination list to be masked in CDRs
+	CdreMaskLength           int               // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
 	CdreDir                  string            // Path towards exported cdrs directory
 	CdreExportedFields       []*utils.RSRField // List of fields in the exported CDRs
 	CdreFWXmlTemplate        *CgrXmlCdreFwCfg  // Use this configuration as export template in case of fixed fields length
@@ -197,7 +199,9 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSExtraFields = []*utils.RSRField{}
 	self.CDRSMediator = ""
 	self.CdreCdrFormat = "csv"
-	self.CdreDir = "/var/log/cgrates/cdr/cdrexport/csv"
+	self.CdreMaskDestId = ""
+	self.CdreMaskLength = 0
+	self.CdreDir = "/var/log/cgrates/cdr/cdre"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
 	self.CdrcCdrsMethod = "http_cgr"
@@ -328,12 +332,8 @@ func NewDefaultCGRConfig() (*CGRConfig, error) {
 	return cfg, nil
 }
 
-// Instantiate a new CGRConfig setting defaults or reading from file
-func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
-	c, err := conf.ReadConfigFile(*cfgPath)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
-	}
+// Unifies the config handling for both tests and real path
+func NewCGRConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	cfg, err := loadConfig(c)
 	if err != nil {
 		return nil, err
@@ -344,26 +344,28 @@ func NewCGRConfig(cfgPath *string) (*CGRConfig, error) {
 	return cfg, nil
 }
 
-func NewCGRConfigBytes(data []byte) (*CGRConfig, error) {
+// Instantiate a new CGRConfig setting defaults or reading from file
+func NewCGRConfigFromFile(cfgPath *string) (*CGRConfig, error) {
+	c, err := conf.ReadConfigFile(*cfgPath)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
+	}
+	return NewCGRConfig(c)
+}
+
+func NewCGRConfigFromBytes(data []byte) (*CGRConfig, error) {
 	c, err := conf.ReadConfigBytes(data)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("Could not open the configuration file: %s", err))
 	}
-	cfg, err := loadConfig(c)
-	if err != nil {
-		return nil, err
-	}
-	if err := cfg.checkConfigSanity(); err != nil {
-		return nil, err
-	}
-	return cfg, nil
+	return NewCGRConfig(c)
 }
 
 func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	cfg := &CGRConfig{}
 	cfg.setDefaults()
 	var hasOpt bool
-	var errParse error
+	var err error
 	if hasOpt = c.HasOption("global", "ratingdb_type"); hasOpt {
 		cfg.RatingDBType, _ = c.GetString("global", "ratingdb_type")
 	}
@@ -479,7 +481,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrs", "extra_fields"); hasOpt {
 		extraFieldsStr, _ := c.GetString("cdrs", "extra_fields")
 		if extraFields, err := ParseRSRFields(extraFieldsStr); err != nil {
-			return nil, errParse
+			return nil, err
 		} else {
 			cfg.CDRSExtraFields = extraFields
 		}
@@ -490,11 +492,17 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
 		cfg.CdreCdrFormat, _ = c.GetString("cdre", "cdr_format")
 	}
+	if hasOpt = c.HasOption("cdre", "mask_destination_id"); hasOpt {
+		cfg.CdreMaskDestId, _ = c.GetString("cdre", "mask_destination_id")
+	}
+	if hasOpt = c.HasOption("cdre", "mask_length"); hasOpt {
+		cfg.CdreMaskLength, _ = c.GetInt("cdre", "mask_length")
+	}
 	if hasOpt = c.HasOption("cdre", "export_template"); hasOpt { // Load configs for csv normally from template, fixed_width from xml file
 		exportTemplate, _ := c.GetString("cdre", "export_template")
 		if cfg.CdreCdrFormat != utils.CDRE_FIXED_WIDTH { // Csv most likely
 			if extraFields, err := ParseRSRFields(exportTemplate); err != nil {
-				return nil, errParse
+				return nil, err
 			} else {
 				cfg.CdreExportedFields = extraFields
 			}
@@ -520,8 +528,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("cdrc", "run_delay"); hasOpt {
 		durStr, _ := c.GetString("cdrc", "run_delay")
-		if cfg.CdrcRunDelay, errParse = utils.ParseDurationWithSecs(durStr); errParse != nil {
-			return nil, errParse
+		if cfg.CdrcRunDelay, err = utils.ParseDurationWithSecs(durStr); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("cdrc", "cdr_type"); hasOpt {
@@ -570,8 +578,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.CdrcDurationField, _ = c.GetString("cdrc", "duration_field")
 	}
 	if hasOpt = c.HasOption("cdrc", "extra_fields"); hasOpt {
-		if cfg.CdrcExtraFields, errParse = ConfigSlice(c, "cdrc", "extra_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.CdrcExtraFields, err = ConfigSlice(c, "cdrc", "extra_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
@@ -584,58 +592,58 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.MediatorRaterReconnects, _ = c.GetInt("mediator", "rater_reconnects")
 	}
 	if hasOpt = c.HasOption("mediator", "run_ids"); hasOpt {
-		if cfg.MediatorRunIds, errParse = ConfigSlice(c, "mediator", "run_ids"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorRunIds, err = ConfigSlice(c, "mediator", "run_ids"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "subject_fields"); hasOpt {
-		if cfg.MediatorSubjectFields, errParse = ConfigSlice(c, "mediator", "subject_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorSubjectFields, err = ConfigSlice(c, "mediator", "subject_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "reqtype_fields"); hasOpt {
-		if cfg.MediatorReqTypeFields, errParse = ConfigSlice(c, "mediator", "reqtype_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorReqTypeFields, err = ConfigSlice(c, "mediator", "reqtype_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "direction_fields"); hasOpt {
-		if cfg.MediatorDirectionFields, errParse = ConfigSlice(c, "mediator", "direction_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorDirectionFields, err = ConfigSlice(c, "mediator", "direction_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "tenant_fields"); hasOpt {
-		if cfg.MediatorTenantFields, errParse = ConfigSlice(c, "mediator", "tenant_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorTenantFields, err = ConfigSlice(c, "mediator", "tenant_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "tor_fields"); hasOpt {
-		if cfg.MediatorTORFields, errParse = ConfigSlice(c, "mediator", "tor_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorTORFields, err = ConfigSlice(c, "mediator", "tor_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "account_fields"); hasOpt {
-		if cfg.MediatorAccountFields, errParse = ConfigSlice(c, "mediator", "account_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorAccountFields, err = ConfigSlice(c, "mediator", "account_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "destination_fields"); hasOpt {
-		if cfg.MediatorDestFields, errParse = ConfigSlice(c, "mediator", "destination_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorDestFields, err = ConfigSlice(c, "mediator", "destination_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "setup_time_fields"); hasOpt {
-		if cfg.MediatorSetupTimeFields, errParse = ConfigSlice(c, "mediator", "setup_time_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorSetupTimeFields, err = ConfigSlice(c, "mediator", "setup_time_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "answer_time_fields"); hasOpt {
-		if cfg.MediatorAnswerTimeFields, errParse = ConfigSlice(c, "mediator", "answer_time_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorAnswerTimeFields, err = ConfigSlice(c, "mediator", "answer_time_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "duration_fields"); hasOpt {
-		if cfg.MediatorDurationFields, errParse = ConfigSlice(c, "mediator", "duration_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.MediatorDurationFields, err = ConfigSlice(c, "mediator", "duration_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "enabled"); hasOpt {
@@ -655,63 +663,63 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("session_manager", "max_call_duration"); hasOpt {
 		maxCallDurStr, _ := c.GetString("session_manager", "max_call_duration")
-		if cfg.SMMaxCallDuration, errParse = utils.ParseDurationWithSecs(maxCallDurStr); errParse != nil {
-			return nil, errParse
+		if cfg.SMMaxCallDuration, err = utils.ParseDurationWithSecs(maxCallDurStr); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "run_ids"); hasOpt {
-		if cfg.SMRunIds, errParse = ConfigSlice(c, "session_manager", "run_ids"); errParse != nil {
-			return nil, errParse
+		if cfg.SMRunIds, err = ConfigSlice(c, "session_manager", "run_ids"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "reqtype_fields"); hasOpt {
-		if cfg.SMReqTypeFields, errParse = ConfigSlice(c, "session_manager", "reqtype_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMReqTypeFields, err = ConfigSlice(c, "session_manager", "reqtype_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "direction_fields"); hasOpt {
-		if cfg.SMDirectionFields, errParse = ConfigSlice(c, "session_manager", "direction_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMDirectionFields, err = ConfigSlice(c, "session_manager", "direction_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "tenant_fields"); hasOpt {
-		if cfg.SMTenantFields, errParse = ConfigSlice(c, "session_manager", "tenant_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMTenantFields, err = ConfigSlice(c, "session_manager", "tenant_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "tor_fields"); hasOpt {
-		if cfg.SMTORFields, errParse = ConfigSlice(c, "session_manager", "tor_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMTORFields, err = ConfigSlice(c, "session_manager", "tor_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "account_fields"); hasOpt {
-		if cfg.SMAccountFields, errParse = ConfigSlice(c, "session_manager", "account_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMAccountFields, err = ConfigSlice(c, "session_manager", "account_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "subject_fields"); hasOpt {
-		if cfg.SMSubjectFields, errParse = ConfigSlice(c, "session_manager", "subject_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMSubjectFields, err = ConfigSlice(c, "session_manager", "subject_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "destination_fields"); hasOpt {
-		if cfg.SMDestFields, errParse = ConfigSlice(c, "session_manager", "destination_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMDestFields, err = ConfigSlice(c, "session_manager", "destination_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "setup_time_fields"); hasOpt {
-		if cfg.SMSetupTimeFields, errParse = ConfigSlice(c, "session_manager", "setup_time_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMSetupTimeFields, err = ConfigSlice(c, "session_manager", "setup_time_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "answer_time_fields"); hasOpt {
-		if cfg.SMAnswerTimeFields, errParse = ConfigSlice(c, "session_manager", "answer_time_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMAnswerTimeFields, err = ConfigSlice(c, "session_manager", "answer_time_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "duration_fields"); hasOpt {
-		if cfg.SMDurationFields, errParse = ConfigSlice(c, "session_manager", "duration_fields"); errParse != nil {
-			return nil, errParse
+		if cfg.SMDurationFields, err = ConfigSlice(c, "session_manager", "duration_fields"); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("freeswitch", "server"); hasOpt {
@@ -737,8 +745,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("history_server", "save_interval"); hasOpt {
 		saveIntvlStr, _ := c.GetString("history_server", "save_interval")
-		if cfg.HistorySaveInterval, errParse = utils.ParseDurationWithSecs(saveIntvlStr); errParse != nil {
-			return nil, errParse
+		if cfg.HistorySaveInterval, err = utils.ParseDurationWithSecs(saveIntvlStr); err != nil {
+			return nil, err
 		}
 	}
 	if hasOpt = c.HasOption("mailer", "server"); hasOpt {

@@ -21,7 +21,6 @@ package cdre
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -42,44 +41,50 @@ const (
 	CONCATENATED_CDRFIELD = "concatenated_cdrfield"
 	META_EXPORTID         = "export_id"
 	META_TIMENOW          = "time_now"
-	META_FIRSTCDRTIME     = "first_cdr_time"
-	META_LASTCDRTIME      = "last_cdr_time"
+	META_FIRSTCDRATIME    = "first_cdr_atime"
+	META_LASTCDRATIME     = "last_cdr_atime"
 	META_NRCDRS           = "cdrs_number"
 	META_DURCDRS          = "cdrs_duration"
 	META_COSTCDRS         = "cdrs_cost"
+	META_MASKDESTINATION  = "mask_destination"
 )
 
 var err error
 
-func NewFWCdrWriter(logDb engine.LogStorage, outFile *os.File, exportTpl *config.CgrXmlCdreFwCfg, exportId string, roundDecimals int) (*FixedWidthCdrWriter, error) {
+func NewFWCdrWriter(logDb engine.LogStorage, outFile *os.File, exportTpl *config.CgrXmlCdreFwCfg, exportId string,
+	roundDecimals int, maskDestId string, maskLen int) (*FixedWidthCdrWriter, error) {
 	return &FixedWidthCdrWriter{
 		logDb:          logDb,
 		writer:         outFile,
 		exportTemplate: exportTpl,
 		exportId:       exportId,
 		roundDecimals:  roundDecimals,
+		maskDestId:     maskDestId,
+		maskLen:        maskLen,
 		header:         &bytes.Buffer{},
 		content:        &bytes.Buffer{},
 		trailer:        &bytes.Buffer{}}, nil
 }
 
 type FixedWidthCdrWriter struct {
-	logDb                     engine.LogStorage // Used to extract cost_details if these are requested
-	writer                    io.Writer
-	exportTemplate            *config.CgrXmlCdreFwCfg
-	exportId                  string // Unique identifier or this export
-	roundDecimals             int
-	header, content, trailer  *bytes.Buffer
-	firstCdrTime, lastCdrTime time.Time
-	numberOfRecords           int
-	totalDuration             time.Duration
-	totalCost                 float64
+	logDb                       engine.LogStorage // Used to extract cost_details if these are requested
+	writer                      io.Writer
+	exportTemplate              *config.CgrXmlCdreFwCfg
+	exportId                    string // Unique identifier or this export
+	roundDecimals               int
+	maskDestId                  string
+	maskLen                     int
+	header, content, trailer    *bytes.Buffer
+	firstCdrATime, lastCdrATime time.Time
+	numberOfRecords             int
+	totalDuration               time.Duration
+	totalCost                   float64
 }
 
 // Return Json marshaled callCost attached to
 // Keep it separately so we test only this part in local tests
-func (fww *FixedWidthCdrWriter) getCdrCostDetails(cgrId, runId string) (string, error) {
-	cc, err := fww.logDb.GetCallCostLog(cgrId, "", runId)
+func (fwv *FixedWidthCdrWriter) getCdrCostDetails(cgrId, runId string) (string, error) {
+	cc, err := fwv.logDb.GetCallCostLog(cgrId, "", runId)
 	if err != nil {
 		return "", err
 	} else if cc == nil {
@@ -89,8 +94,15 @@ func (fww *FixedWidthCdrWriter) getCdrCostDetails(cgrId, runId string) (string, 
 	return string(ccJson), nil
 }
 
+func (fwv *FixedWidthCdrWriter) maskedDestination(destination string) bool {
+	if len(fwv.maskDestId) != 0 && engine.CachedDestHasPrefix(fwv.maskDestId, destination) {
+		return true
+	}
+	return false
+}
+
 // Extracts the value specified by cfgHdr out of cdr
-func (fww *FixedWidthCdrWriter) cdrFieldValue(cdr *utils.StoredCdr, cfgHdr, layout string) (string, error) {
+func (fwv *FixedWidthCdrWriter) cdrFieldValue(cdr *utils.StoredCdr, cfgHdr, layout string) (string, error) {
 	rsrField, err := utils.NewRSRField(cfgHdr)
 	if err != nil {
 		return "", err
@@ -100,53 +112,66 @@ func (fww *FixedWidthCdrWriter) cdrFieldValue(cdr *utils.StoredCdr, cfgHdr, layo
 	var cdrVal string
 	switch rsrField.Id {
 	case COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
-		if cdrVal, err = fww.getCdrCostDetails(cdr.CgrId, cdr.MediationRunId); err != nil {
+		if cdrVal, err = fwv.getCdrCostDetails(cdr.CgrId, cdr.MediationRunId); err != nil {
 			return "", err
 		}
 	case utils.COST:
-		cdrVal = cdr.FormatCost(fww.roundDecimals)
+		cdrVal = cdr.FormatCost(fwv.roundDecimals)
 	case utils.SETUP_TIME:
 		cdrVal = cdr.SetupTime.Format(layout)
 	case utils.ANSWER_TIME: // Format time based on layout
 		cdrVal = cdr.AnswerTime.Format(layout)
+	case utils.DESTINATION:
+		cdrVal = cdr.ExportFieldValue(utils.DESTINATION)
+		if fwv.maskLen != -1 && fwv.maskedDestination(cdrVal) {
+			cdrVal = MaskDestination(cdrVal, fwv.maskLen)
+		}
 	default:
 		cdrVal = cdr.ExportFieldValue(rsrField.Id)
 	}
 	return rsrField.ParseValue(cdrVal), nil
 }
 
-func (fww *FixedWidthCdrWriter) metaHandler(tag, layout string) (string, error) {
+func (fwv *FixedWidthCdrWriter) metaHandler(tag, arg string) (string, error) {
 	switch tag {
 	case META_EXPORTID:
-		return fww.exportId, nil
+		return fwv.exportId, nil
 	case META_TIMENOW:
-		return time.Now().Format(layout), nil
-	case META_FIRSTCDRTIME:
-		return fww.firstCdrTime.Format(layout), nil
-	case META_LASTCDRTIME:
-		return fww.lastCdrTime.Format(layout), nil
+		return time.Now().Format(arg), nil
+	case META_FIRSTCDRATIME:
+		return fwv.firstCdrATime.Format(arg), nil
+	case META_LASTCDRATIME:
+		return fwv.lastCdrATime.Format(arg), nil
 	case META_NRCDRS:
-		return strconv.Itoa(fww.numberOfRecords), nil
+		return strconv.Itoa(fwv.numberOfRecords), nil
 	case META_DURCDRS:
-		return strconv.FormatFloat(fww.totalDuration.Seconds(), 'f', -1, 64), nil
+		return strconv.FormatFloat(fwv.totalDuration.Seconds(), 'f', -1, 64), nil
 	case META_COSTCDRS:
-		return strconv.FormatFloat(utils.Round(fww.totalCost, fww.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+		return strconv.FormatFloat(utils.Round(fwv.totalCost, fwv.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
+	case META_MASKDESTINATION:
+		if fwv.maskedDestination(arg) {
+			return "1", nil
+		}
+		return "0", nil
 	default:
-		return "", errors.New("Unsupported METATAG")
+		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
 	return "", nil
 }
 
 // Writes the header into it's buffer
-func (fww *FixedWidthCdrWriter) ComposeHeader() error {
+func (fwv *FixedWidthCdrWriter) ComposeHeader() error {
 	header := ""
-	for _, cfgFld := range fww.exportTemplate.Header.Fields {
+	for _, cfgFld := range fwv.exportTemplate.Header.Fields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER, CONSTANT:
+		case FILLER:
+			outVal = cfgFld.Value
+			cfgFld.Padding = "right"
+		case CONSTANT:
 			outVal = cfgFld.Value
 		case METATAG:
-			outVal, err = fww.metaHandler(cfgFld.Value, cfgFld.Layout)
+			outVal, err = fwv.metaHandler(cfgFld.Value, cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
@@ -165,20 +190,23 @@ func (fww *FixedWidthCdrWriter) ComposeHeader() error {
 		return nil
 	}
 	header += "\n" // Done with cdr, postpend new line char
-	fww.header.WriteString(header)
+	fwv.header.WriteString(header)
 	return nil
 }
 
 // Writes the trailer into it's buffer
-func (fww *FixedWidthCdrWriter) ComposeTrailer() error {
+func (fwv *FixedWidthCdrWriter) ComposeTrailer() error {
 	trailer := ""
-	for _, cfgFld := range fww.exportTemplate.Trailer.Fields {
+	for _, cfgFld := range fwv.exportTemplate.Trailer.Fields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER, CONSTANT:
+		case FILLER:
+			outVal = cfgFld.Value
+			cfgFld.Padding = "right"
+		case CONSTANT:
 			outVal = cfgFld.Value
 		case METATAG:
-			outVal, err = fww.metaHandler(cfgFld.Value, cfgFld.Layout)
+			outVal, err = fwv.metaHandler(cfgFld.Value, cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
@@ -197,39 +225,44 @@ func (fww *FixedWidthCdrWriter) ComposeTrailer() error {
 		return nil
 	}
 	trailer += "\n" // Done with cdr, postpend new line char
-	fww.trailer.WriteString(trailer)
+	fwv.trailer.WriteString(trailer)
 	return nil
 }
 
 // Write individual cdr into content buffer, build stats
-func (fww *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
+func (fwv *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 	if cdr == nil || len(cdr.CgrId) == 0 { // We do not export empty CDRs
 		return nil
 	}
 	var err error
 	cdrRow := ""
-	for _, cfgFld := range fww.exportTemplate.Content.Fields {
+	for _, cfgFld := range fwv.exportTemplate.Content.Fields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER, CONSTANT:
+		case FILLER:
+			outVal = cfgFld.Value
+			cfgFld.Padding = "right"
+		case CONSTANT:
 			outVal = cfgFld.Value
 		case CDRFIELD:
-			outVal, err = fww.cdrFieldValue(cdr, cfgFld.Value, cfgFld.Layout)
+			outVal, err = fwv.cdrFieldValue(cdr, cfgFld.Value, cfgFld.Layout)
 		case CONCATENATED_CDRFIELD:
 			for _, fld := range strings.Split(cfgFld.Value, ",") {
-				if fldOut, err := fww.cdrFieldValue(cdr, fld, cfgFld.Layout); err != nil {
+				if fldOut, err := fwv.cdrFieldValue(cdr, fld, cfgFld.Layout); err != nil {
 					break // The error will be reported bellow
 				} else {
 					outVal += fldOut
 				}
 			}
+		case METATAG:
+			outVal, err = fwv.metaHandler(cfgFld.Value, cfgFld.Layout)
 		}
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s and runid: %s, error: %s", cdr.CgrId, cdr.MediationRunId, err.Error()))
 			return err
 		}
 		if fmtOut, err := FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s and runid: %s, error: %s", cdr.CgrId, cdr.MediationRunId, err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Name, outVal, err.Error()))
 			return err
 		} else {
 			cdrRow += fmtOut
@@ -239,29 +272,29 @@ func (fww *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 		return nil
 	}
 	cdrRow += "\n" // Done with cdr, postpend new line char
-	fww.content.WriteString(cdrRow)
+	fwv.content.WriteString(cdrRow)
 	// Done with writing content, compute stats here
-	if fww.firstCdrTime.IsZero() || cdr.SetupTime.Before(fww.firstCdrTime) {
-		fww.firstCdrTime = cdr.SetupTime
+	if fwv.firstCdrATime.IsZero() || cdr.AnswerTime.Before(fwv.firstCdrATime) {
+		fwv.firstCdrATime = cdr.AnswerTime
 	}
-	if cdr.SetupTime.After(fww.lastCdrTime) {
-		fww.lastCdrTime = cdr.SetupTime
+	if cdr.AnswerTime.After(fwv.lastCdrATime) {
+		fwv.lastCdrATime = cdr.AnswerTime
 	}
-	fww.numberOfRecords += 1
-	fww.totalDuration += cdr.Duration
-	fww.totalCost += cdr.Cost
-	fww.totalCost = utils.Round(fww.totalCost, fww.roundDecimals, utils.ROUNDING_MIDDLE)
+	fwv.numberOfRecords += 1
+	fwv.totalDuration += cdr.Duration
+	fwv.totalCost += cdr.Cost
+	fwv.totalCost = utils.Round(fwv.totalCost, fwv.roundDecimals, utils.ROUNDING_MIDDLE)
 	return nil
 }
 
-func (fww *FixedWidthCdrWriter) Close() {
-	if fww.exportTemplate.Header != nil {
-		fww.ComposeHeader()
+func (fwv *FixedWidthCdrWriter) Close() {
+	if fwv.exportTemplate.Header != nil {
+		fwv.ComposeHeader()
 	}
-	if fww.exportTemplate.Trailer != nil {
-		fww.ComposeTrailer()
+	if fwv.exportTemplate.Trailer != nil {
+		fwv.ComposeTrailer()
 	}
-	for _, buf := range []*bytes.Buffer{fww.header, fww.content, fww.trailer} {
-		fww.writer.Write(buf.Bytes())
+	for _, buf := range []*bytes.Buffer{fwv.header, fwv.content, fwv.trailer} {
+		fwv.writer.Write(buf.Bytes())
 	}
 }

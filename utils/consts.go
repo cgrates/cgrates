@@ -1,7 +1,7 @@
 package utils
 
 const (
-	VERSION                    = "0.9.1c4"
+	VERSION                    = "0.9.1rc5"
 	POSTGRES                   = "postgres"
 	MYSQL                      = "mysql"
 	MONGO                      = "mongo"
@@ -91,9 +91,10 @@ const (
 	INTERNAL                   = "internal"
 	ZERO_RATING_SUBJECT_PREFIX = "*zero"
 	OK                         = "OK"
-	CDRE_FIXED_WIDTH           = "fixed_width"
+	CDRE_FIXED_WIDTH           = "fwv"
 	XML_PROFILE_PREFIX         = "*xml:"
 	CDRE                       = "cdre"
+	MASK_CHAR                  = "*"
 )
 
 var (

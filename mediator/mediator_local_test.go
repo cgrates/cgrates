@@ -59,7 +59,7 @@ var startDelay = flag.Int("delay_start", 300, "Number of miliseconds to it for r
 var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator_test1.cfg")
 
 func init() {
-	cfg, _ = config.NewCGRConfig(&cfgPath)
+	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
 }
 
 func TestInitRatingDb(t *testing.T) {

@@ -101,6 +101,30 @@ func TestDestinationGetNotExistsCache(t *testing.T) {
 	}
 }
 
+func TestCachedDestHasPrefix(t *testing.T) {
+	if !CachedDestHasPrefix("NAT", "0256") {
+		t.Error("Could not find prefix in destination")
+	}
+}
+
+func TestCachedDestHasWrongPrefix(t *testing.T) {
+	if CachedDestHasPrefix("NAT", "771") {
+		t.Error("Prefix should not belong to destination")
+	}
+}
+
+func TestNonCachedDestRightPrefix(t *testing.T) {
+	if CachedDestHasPrefix("FAKE", "0256") {
+		t.Error("Destination should not belong to prefix")
+	}
+}
+
+func TestNonCachedDestWrongPrefix(t *testing.T) {
+	if CachedDestHasPrefix("FAKE", "771") {
+		t.Error("Both arguments should be fake")
+	}
+}
+
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {

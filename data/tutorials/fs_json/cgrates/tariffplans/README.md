@@ -14,7 +14,11 @@ Scenario:
  - Will charge by default *RT_40CNT* for all FreeSWITCH_ destinations during peak times (Monday-Friday 08:00-19:00) and *RT_10CNT* during offpeatimes (rest).
  - Account 1001 will receive a special *deal* for 1002 and 1003 destinations during peak times with *RT_20CNT*, otherwise same as default rating.
 
-- Create 4 accounts (equivalent of 2 FreeSWITCH default test users - 1001, 1002, 1003, 1004).
-- 1001, 1002, 1003, 1004 will receive 10units of *\*monetary* balance.
+- Create 5 accounts (equivalent of FreeSWITCH default test users - 1001, 1002, 1003, 1004, 1007).
+- 1002, 1003, 1004 will receive 10units of *monetary balance.
+- 1001 will receive 5 units of general *monetary and 5 units of shared balance in the shared group *SHARED_A*.
+- 1007 will receive 0 units of shared balance in the shared group *SHARED_A*.
+- Define the shared balance *SHARED_A* with debit policy *highest.
+
 - For each balance created, attach 3 triggers to control the balance: log on balance=2, log on balance=20, log on 5 mins talked towards 10xx destination.
 
