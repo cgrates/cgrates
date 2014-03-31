@@ -255,7 +255,11 @@ func (fwv *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 				}
 			}
 		case METATAG:
-			outVal, err = fwv.metaHandler(cfgFld.Value, cfgFld.Layout)
+			if cfgFld.Value == META_MASKDESTINATION {
+				outVal, err = fwv.metaHandler(cfgFld.Value, cdr.ExportFieldValue(utils.DESTINATION))
+			} else {
+				outVal, err = fwv.metaHandler(cfgFld.Value, cfgFld.Layout)
+			}
 		}
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s and runid: %s, error: %s", cdr.CgrId, cdr.MediationRunId, err.Error()))
