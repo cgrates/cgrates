@@ -20,8 +20,10 @@ package engine
 
 import (
 	"encoding/json"
-	"github.com/cgrates/cgrates/cache2go"
 	"strings"
+
+	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/history"
 )
@@ -80,4 +82,27 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 		}
 	}
 	return false
+}
+
+func CleanStalePrefixes(destIds []string) {
+	prefixMap := cache2go.GetAllEntries(DESTINATION_PREFIX)
+	for prefix, idIDs := range prefixMap {
+		dIDs := idIDs.([]string)
+		changed := false
+		for _, searchedDID := range destIds {
+			if found, i := utils.GetSliceMemberIndex(dIDs, searchedDID); found {
+				if len(dIDs) == 1 {
+					// remove de prefix from cache
+					cache2go.RemKey(prefix)
+				} else {
+					// delte the testination from list and put the new list in chache
+					dIDs[i], dIDs = dIDs[len(dIDs)-1], dIDs[:len(dIDs)-1]
+					changed = true
+				}
+			}
+		}
+		if changed {
+			cache2go.Cache(prefix, dIDs)
+		}
+	}
 }

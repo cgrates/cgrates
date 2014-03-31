@@ -51,6 +51,8 @@ func (ms *MapStorage) Flush() error {
 func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) error {
 	if dKeys == nil {
 		cache2go.RemPrefixKey(DESTINATION_PREFIX)
+	} else {
+		CleanStalePrefixes(dKeys)
 	}
 	if rpKeys == nil {
 		cache2go.RemPrefixKey(RATING_PLAN_PREFIX)

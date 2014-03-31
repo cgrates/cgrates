@@ -32,7 +32,17 @@ func IsSliceMember(ss []string, s string) bool {
 	return false
 }
 
-//Iterates over slice members and returns true of one starts with prefix
+// Binary string search in slice
+// returns true if found and the index
+func GetSliceMemberIndex(ss []string, s string) (bool, int) {
+	sort.Strings(ss)
+	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
+		return true, i
+	}
+	return false, len(ss)
+}
+
+//Iterates over slice members and returns true if one starts with prefix
 func SliceMemberHasPrefix(ss []string, prfx string) bool {
 	for _, mbr := range ss {
 		if strings.HasPrefix(mbr, prfx) {

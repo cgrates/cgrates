@@ -125,6 +125,22 @@ func TestNonCachedDestWrongPrefix(t *testing.T) {
 	}
 }
 
+func TestCleanStalePrefixes(t *testing.T) {
+	cache2go.Cache(DESTINATION_PREFIX+"1", []string{"D1", "D2"})
+	cache2go.Cache(DESTINATION_PREFIX+"2", []string{"D1"})
+	cache2go.Cache(DESTINATION_PREFIX+"3", []string{"D2"})
+	CleanStalePrefixes([]string{"D1"})
+	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "1"); err != nil || len(r.([]string)) != 1 {
+		t.Error("Error cleaning stale destination ids", r)
+	}
+	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "2"); err == nil {
+		t.Error("Error removing stale prefix: ", r)
+	}
+	if r, err := cache2go.GetCached(DESTINATION_PREFIX + "3"); err != nil || len(r.([]string)) != 1 {
+		t.Error("Error performing stale cleaning: ", r)
+	}
+}
+
 /********************************* Benchmarks **********************************/
 
 func BenchmarkDestinationStorageStoreRestore(b *testing.B) {
