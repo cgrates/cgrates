@@ -112,11 +112,11 @@ type CallDescriptor struct {
 	TimeStart, TimeEnd                    time.Time
 	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
 	CallDuration                          time.Duration // the call duration so far (till TimeEnd)
-	Amount                                float64
-	FallbackSubject                       string // the subject to check for destination if not found on primary subject
-	RatingInfos                           RatingInfos
-	Increments                            Increments
-	account                               *Account
+	//Amount                                float64
+	FallbackSubject string // the subject to check for destination if not found on primary subject
+	RatingInfos     RatingInfos
+	Increments      Increments
+	account         *Account
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {
@@ -609,60 +609,6 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 	return 0.0, err
 }
 
-/*
-Interface method used to add/substract an amount of cents from user's money balance.
-The amount filed has to be filled in call descriptor.
-*/
-func (cd *CallDescriptor) DebitCents() (left float64, err error) {
-	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-		defer accountingStorage.SetAccount(userBalance)
-		return userBalance.debitGenericBalance(CREDIT, cd.Direction, cd.Amount, true), nil
-	}
-	return 0.0, err
-}
-
-/*
-Interface method used to add/substract an amount of units from user's sms balance.
-The amount filed has to be filled in call descriptor.
-*/
-func (cd *CallDescriptor) DebitSMS() (left float64, err error) {
-	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-		defer accountingStorage.SetAccount(userBalance)
-		return userBalance.debitGenericBalance(SMS, cd.Direction, cd.Amount, true), nil
-	}
-	return 0, err
-}
-
-/*
-Interface method used to add/substract an amount of seconds from user's minutes balance.
-The amount filed has to be filled in call descriptor.
-*/
-func (cd *CallDescriptor) DebitSeconds() (err error) {
-	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-		defer accountingStorage.SetAccount(userBalance)
-		return userBalance.debitCreditBalance(cd.CreateCallCost(), true)
-	}
-	return err
-}
-
-/*
-Adds the specified amount of seconds to the received call seconds. When the threshold specified
-in the user's tariff plan is reached then the received call balance is reseted and the bonus
-specified in the tariff plan is applied.
-The amount filed has to be filled in call descriptor.
-*/
-func (cd *CallDescriptor) AddRecievedCallSeconds() (err error) {
-	if userBalance, err := cd.getAccount(); err == nil && userBalance != nil {
-		a := &Action{
-			Direction: INBOUND,
-			Balance:   &Balance{Value: cd.Amount, DestinationId: cd.Destination},
-		}
-		userBalance.countUnits(a)
-		return nil
-	}
-	return err
-}
-
 func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
@@ -686,17 +632,17 @@ func (cd *CallDescriptor) CreateCallCost() *CallCost {
 
 func (cd *CallDescriptor) Clone() *CallDescriptor {
 	return &CallDescriptor{
-		Direction:       cd.Direction,
-		TOR:             cd.TOR,
-		Tenant:          cd.Tenant,
-		Subject:         cd.Subject,
-		Account:         cd.Account,
-		Destination:     cd.Destination,
-		TimeStart:       cd.TimeStart,
-		TimeEnd:         cd.TimeEnd,
-		LoopIndex:       cd.LoopIndex,
-		CallDuration:    cd.CallDuration,
-		Amount:          cd.Amount,
+		Direction:    cd.Direction,
+		TOR:          cd.TOR,
+		Tenant:       cd.Tenant,
+		Subject:      cd.Subject,
+		Account:      cd.Account,
+		Destination:  cd.Destination,
+		TimeStart:    cd.TimeStart,
+		TimeEnd:      cd.TimeEnd,
+		LoopIndex:    cd.LoopIndex,
+		CallDuration: cd.CallDuration,
+		//		Amount:          cd.Amount,
 		FallbackSubject: cd.FallbackSubject,
 		//RatingInfos:     cd.RatingInfos,
 		//Increments:      cd.Increments,

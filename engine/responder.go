@@ -89,42 +89,6 @@ func (rs *Responder) RefundIncrements(arg CallDescriptor, reply *float64) (err e
 	return
 }
 
-func (rs *Responder) DebitCents(arg CallDescriptor, reply *float64) (err error) {
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(&arg, "Responder.DebitCents")
-	} else {
-		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
-			return arg.DebitCents()
-		})
-		*reply, err = r, e
-	}
-	return
-}
-
-func (rs *Responder) DebitSMS(arg CallDescriptor, reply *float64) (err error) {
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(&arg, "Responder.DebitSMS")
-	} else {
-		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
-			return arg.DebitSMS()
-		})
-		*reply, err = r, e
-	}
-	return
-}
-
-func (rs *Responder) DebitSeconds(arg CallDescriptor, reply *float64) (err error) {
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(&arg, "Responder.DebitSeconds")
-	} else {
-		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
-			return 0, arg.DebitSeconds()
-		})
-		*reply, err = r, e
-	}
-	return
-}
-
 func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err error) {
 	if rs.Bal != nil {
 		*reply, err = rs.callMethod(&arg, "Responder.GetMaxSessionTime")
@@ -132,19 +96,6 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
 			d, err := arg.GetMaxSessionDuration()
 			return float64(d), err
-		})
-		*reply, err = r, e
-	}
-	return
-}
-
-func (rs *Responder) AddRecievedCallSeconds(arg CallDescriptor, reply *float64) (err error) {
-	if rs.Bal != nil {
-		*reply, err = rs.callMethod(&arg, "Responder.AddRecievedCallSeconds")
-	} else {
-
-		r, e := AccLock.Guard(arg.GetAccountKey(), func() (float64, error) {
-			return 0, arg.AddRecievedCallSeconds()
 		})
 		*reply, err = r, e
 	}
@@ -200,12 +151,12 @@ func (rs *Responder) GetSMS(arg CallDescriptor, reply *CallCost) (err error) {
 }
 
 func (rs *Responder) GetInternet(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, TRAFFIC, reply)
+	err = rs.getBalance(&arg, DATA, reply)
 	return err
 }
 
 func (rs *Responder) GetInternetTime(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, TRAFFIC_TIME, reply)
+	err = rs.getBalance(&arg, DATA_TIME, reply)
 	return err
 }
 
@@ -355,8 +306,6 @@ type Connector interface {
 	Debit(CallDescriptor, *CallCost) error
 	MaxDebit(CallDescriptor, *CallCost) error
 	RefundIncrements(CallDescriptor, *float64) error
-	DebitCents(CallDescriptor, *float64) error
-	DebitSeconds(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
 }
 
@@ -375,15 +324,11 @@ func (rcc *RPCClientConnector) Debit(cd CallDescriptor, cc *CallCost) error {
 func (rcc *RPCClientConnector) MaxDebit(cd CallDescriptor, cc *CallCost) error {
 	return rcc.Client.Call("Responder.MaxDebit", cd, cc)
 }
+
 func (rcc *RPCClientConnector) RefundIncrements(cd CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.RefundIncrements", cd, resp)
 }
-func (rcc *RPCClientConnector) DebitCents(cd CallDescriptor, resp *float64) error {
-	return rcc.Client.Call("Responder.DebitCents", cd, resp)
-}
-func (rcc *RPCClientConnector) DebitSeconds(cd CallDescriptor, resp *float64) error {
-	return rcc.Client.Call("Responder.DebitSeconds", cd, resp)
-}
+
 func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
 }
