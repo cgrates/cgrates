@@ -62,11 +62,8 @@ type Account struct {
 	BalanceMap     map[string]BalanceChain
 	UnitCounters   []*UnitsCounter
 	ActionTriggers ActionTriggerPriotityList
-	Groups         GroupLinks // user info about groups
-	// group information
-	UserIds       []string // group info about users
-	AllowNegative bool
-	Disabled      bool
+	AllowNegative  bool
+	Disabled       bool
 }
 
 // Returns user's available minutes for the specified destination
