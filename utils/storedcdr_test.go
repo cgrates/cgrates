@@ -179,11 +179,15 @@ func TestExportFieldValue(t *testing.T) {
 
 func TestFormatCost(t *testing.T) {
 	cdr := StoredCdr{Cost: 1.01}
-	if cdr.FormatCost(4) != "1.0100" {
-		t.Error("Unexpected format of the cost: ", cdr.FormatCost(4))
+	if cdr.FormatCost(0, 4) != "1.0100" {
+		t.Error("Unexpected format of the cost: ", cdr.FormatCost(0, 4))
 	}
 	cdr = StoredCdr{Cost: 1.01001}
-	if cdr.FormatCost(4) != "1.0100" {
-		t.Error("Unexpected format of the cost: ", cdr.FormatCost(4))
+	if cdr.FormatCost(0, 4) != "1.0100" {
+		t.Error("Unexpected format of the cost: ", cdr.FormatCost(0, 4))
+	}
+	cdr = StoredCdr{Cost: 1.01001}
+	if cdr.FormatCost(2, 0) != "101" {
+		t.Error("Unexpected format of the cost: ", cdr.FormatCost(2, 0))
 	}
 }

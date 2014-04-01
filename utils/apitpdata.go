@@ -320,7 +320,8 @@ type AttrExpFileCdrs struct {
 	ExportId          string   // Optional exportid
 	ExportFileName    string   // If provided the output filename will be set to this
 	ExportTemplate    string   // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	RoundingDecimals  int      // Overwrite configured roundDecimals with this dynamically
+	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents)
+	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically
 	MaskDestinationId string   // Overwrite configured MaskDestId
 	MaskLength        int      // Overwrite configured MaskLength
 	CgrIds            []string // If provided, it will filter based on the cgrids present in list

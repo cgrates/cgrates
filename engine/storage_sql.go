@@ -784,7 +784,7 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 			return nil, err
 		}
 		if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %s, error: %s", cgrid, runid, err.Error())
 		}
 		storCdr := &utils.StoredCdr{
 			CgrId: cgrid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,

@@ -53,7 +53,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if len(exportId) == 0 {
 		exportId = strconv.FormatInt(time.Now().Unix(), 10)
 	}
-	roundDecimals := attr.RoundingDecimals
+	costShiftDigits := attr.CostShiftDigits
+	if costShiftDigits != 0 {
+		costShiftDigits = self.Config.CdreCostShiftDigits
+	}
+	roundDecimals := attr.RoundDecimals
 	if roundDecimals == 0 {
 		roundDecimals = self.Config.RoundingDecimals
 	}
@@ -99,7 +103,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return err
 		}
 		defer fileOut.Close()
-		csvWriter := cdre.NewCsvCdrWriter(fileOut, roundDecimals, maskDestId, maskLen, exportedFields)
+		csvWriter := cdre.NewCsvCdrWriter(fileOut, costShiftDigits, roundDecimals, maskDestId, maskLen, exportedFields)
 		exportedIds := make([]string, 0)
 		unexportedIds := make(map[string]string)
 		for _, cdr := range cdrs {
@@ -132,7 +136,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return err
 		}
 		defer fileOut.Close()
-		fww, _ := cdre.NewFWCdrWriter(self.LogDb, fileOut, exportTemplate, exportId, roundDecimals, maskDestId, maskLen)
+		fww, _ := cdre.NewFWCdrWriter(self.LogDb, fileOut, exportTemplate, exportId, costShiftDigits, roundDecimals, maskDestId, maskLen)
 		exportedIds := make([]string, 0)
 		unexportedIds := make(map[string]string)
 		for _, cdr := range cdrs {

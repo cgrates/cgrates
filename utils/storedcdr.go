@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"math"
 	"net/url"
 	"strconv"
 	"time"
@@ -135,8 +136,12 @@ func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
 }
 
 // Return cost as string, formated with number of decimals configured
-func (storedCdr *StoredCdr) FormatCost(roundDecimals int) string {
-	return strconv.FormatFloat(storedCdr.Cost, 'f', roundDecimals, 64)
+func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string {
+	cost := storedCdr.Cost
+	if shiftDecimals != 0 {
+		cost = cost * math.Pow10(shiftDecimals)
+	}
+	return strconv.FormatFloat(cost, 'f', roundDecimals, 64)
 }
 
 func (storedCdr *StoredCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
