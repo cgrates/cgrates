@@ -577,116 +577,196 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // Return a slice of CDRs from storDb using optional filters.a
 // ignoreErr - do not consider cdrs with rating errors
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
-func (self *SQLStorage) GetStoredCdrs(cgrIds []string, runId string, cdrHost, cdrSource, reqType, direction, tenant, tor, account, subject, destPrefix string,
+func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqTypes, directions, tenants, tors, accounts, subjects, destPrefixes []string,
 	timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
-	q := fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,setup_time,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS)
-	fltr := ""
+	q := bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,setup_time,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS))
+	fltr := new(bytes.Buffer)
 	if len(cgrIds) != 0 {
-		qIds := " ("
+		qIds := bytes.NewBufferString(" (")
 		for idxId, cgrId := range cgrIds {
 			if idxId != 0 {
-				qIds += " OR"
+				qIds.WriteString(" OR")
 			}
-			qIds += fmt.Sprintf(" %s.cgrid='%s'", utils.TBL_CDRS_PRIMARY, cgrId)
+			qIds.WriteString(fmt.Sprintf(" %s.cgrid='%s'", utils.TBL_CDRS_PRIMARY, cgrId))
 		}
-		qIds += " )"
-		if len(fltr) != 0 {
-			fltr += " AND"
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
 		}
-		fltr += qIds
+		fltr.Write(qIds.Bytes())
 	}
-	if len(runId) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(runIds) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, runId := range runIds {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" runid='%s'", runId))
 		}
-		fltr += fmt.Sprintf(" runid='%s'", runId)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(cdrHost) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(cdrHosts) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, host := range cdrHosts {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" cdrhost='%s'", host))
 		}
-		fltr += fmt.Sprintf(" cdrhost='%s'", cdrHost)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(cdrSource) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(cdrSources) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, src := range cdrSources {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" cdrsource='%s'", src))
 		}
-		fltr += fmt.Sprintf(" cdrsource='%s'", cdrSource)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(reqType) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(reqTypes) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, reqType := range reqTypes {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" reqtype='%s'", reqType))
 		}
-		fltr += fmt.Sprintf(" reqtype='%s'", reqType)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(direction) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(directions) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, direction := range directions {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" direction='%s'", direction))
 		}
-		fltr += fmt.Sprintf(" direction='%s'", direction)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(tenant) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(tenants) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, tenant := range tenants {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" tenant='%s'", tenant))
 		}
-		fltr += fmt.Sprintf(" tenant='%s'", tenant)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(tor) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(tors) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, tor := range tors {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" tor='%s'", tor))
 		}
-		fltr += fmt.Sprintf(" tor='%s'", tor)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(account) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(accounts) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, account := range accounts {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" account='%s'", account))
 		}
-		fltr += fmt.Sprintf(" account='%s'", account)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(subject) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(subjects) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, subject := range subjects {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" %s.subject='%s'", utils.TBL_CDRS_PRIMARY, subject))
 		}
-		fltr += fmt.Sprintf(" %s.subject='%s'", utils.TBL_CDRS_PRIMARY, subject)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
-	if len(destPrefix) != 0 {
-		if len(fltr) != 0 {
-			fltr += " AND"
+	if len(destPrefixes) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, destPrefix := range destPrefixes {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" destination LIKE '%s%%'", destPrefix))
 		}
-		fltr += fmt.Sprintf(" destination LIKE '%s%%'", destPrefix)
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
 	}
 	if !timeStart.IsZero() {
-		if len(fltr) != 0 {
-			fltr += " AND"
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
 		}
-		fltr += fmt.Sprintf(" answer_time>='%s'", timeStart)
+		fltr.WriteString(fmt.Sprintf(" answer_time>='%s'", timeStart))
 	}
 	if !timeEnd.IsZero() {
-		if len(fltr) != 0 {
-			fltr += " AND"
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
 		}
-		fltr += fmt.Sprintf(" answer_time<'%s'", timeEnd)
+		fltr.WriteString(fmt.Sprintf(" answer_time<'%s'", timeEnd))
 	}
 	if ignoreRated {
-		if len(fltr) != 0 {
-			fltr += " AND"
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
 		}
 		if ignoreErr {
-			fltr += " cost IS NULL"
+			fltr.WriteString(" cost IS NULL")
 		} else {
-			fltr += " (cost=-1 OR cost IS NULL)"
+			fltr.WriteString(" (cost=-1 OR cost IS NULL)")
 		}
 	} else if ignoreErr {
-		if len(fltr) != 0 {
-			fltr += " AND"
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
 		}
-		fltr += " (cost!=-1 OR cost IS NULL)"
+		fltr.WriteString(" (cost!=-1 OR cost IS NULL)")
 	}
-	if len(fltr) != 0 {
-		q += fmt.Sprintf(" WHERE %s", fltr)
+	if fltr.Len() != 0 {
+		q.WriteString(fmt.Sprintf(" WHERE %s", fltr.String()))
 	}
-	rows, err := self.Db.Query(q)
+	rows, err := self.Db.Query(q.String())
 	if err != nil {
 		return nil, err
 	}

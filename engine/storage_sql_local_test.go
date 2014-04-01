@@ -162,7 +162,7 @@ func TestSetCdr(t *testing.T) {
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
-	strCdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb2"), AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: TEST_SQL, ReqType: "prepaid",
+	strCdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb2"), AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN2", ReqType: "prepaid",
 		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Duration: time.Duration(12) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
@@ -189,13 +189,13 @@ func TestSetRatedCdr(t *testing.T) {
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
-	strCdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb2"), AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: TEST_SQL, ReqType: "prepaid",
+	strCdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb2"), AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN", ReqType: "prepaid",
 		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Duration: time.Duration(12) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
 	strCdr3 := &utils.StoredCdr{CgrId: utils.FSCgrId("bbb3"), AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: "rated",
-		Direction: "*out", Tenant: "itsyscom.com", TOR: "call", Account: "1002", Subject: "1002", Destination: "+4986517174963",
+		Direction: "*out", Tenant: "itsyscom.com", TOR: "call", Account: "1002", Subject: "1002", Destination: "+4986517174964",
 		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		MediationRunId: "wholesale_run", Cost: 1.201}
@@ -213,107 +213,164 @@ func TestGetStoredCdrs(t *testing.T) {
 	}
 	var timeStart, timeEnd time.Time
 	// All CDRs, no filter
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cgrids
 	if storedCdrs, err := mysql.GetStoredCdrs([]string{utils.FSCgrId("bbb1"), utils.FSCgrId("bbb2")},
-		"", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cgrids plus reqType
 	if storedCdrs, err := mysql.GetStoredCdrs([]string{utils.FSCgrId("bbb1"), utils.FSCgrId("bbb2")},
-		"", "", "", "prepaid", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+		nil, nil, nil, []string{"prepaid"}, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on runId
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, utils.DEFAULT_RUNID, "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, []string{utils.DEFAULT_RUNID}, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on cdrHost
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "192.168.1.2", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, []string{"192.168.1.2"}, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on multiple cdrHost
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, []string{"192.168.1.1", "192.168.1.2"}, nil, nil, nil, nil, nil, nil, nil, nil,
+		timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Filter on cdrSource
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "UNKNOWN", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, []string{"UNKNOWN"}, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
-	// Filter on reqType
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "prepaid", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	// Filter on multiple cdrSource
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, []string{"UNKNOWN", "UNKNOWN2"}, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on reqType
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, []string{"prepaid"}, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple reqType
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, []string{"prepaid", "pseudoprepaid"}, nil, nil, nil, nil, nil, nil,
+		timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Filter on direction
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "*out", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, []string{"*out"}, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on tenant
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "itsyscom.com", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, []string{"itsyscom.com"}, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple tenants
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, []string{"itsyscom.com", "cgrates.org"}, nil, nil, nil, nil,
+		timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on tor
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "premium_call", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, []string{"premium_call"}, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on multiple tor
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, []string{"premium_call", "call"}, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Filter on account
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "1002", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, []string{"1002"}, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on multiple account
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, []string{"1001", "1002"}, nil, nil, timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Filter on subject
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "1000", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1000"}, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on multiple subject
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1000", "1002"}, nil, timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on destPrefix
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"+498651"}, timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple destPrefixes
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1001", "+498651"}, timeStart, timeEnd, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 4 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Filter on ignoreErr
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, true, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, true, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 8 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreRated
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, true); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, true); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on timeStart
 	timeStart = time.Date(2013, 11, 8, 8, 0, 0, 0, time.UTC)
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 5 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on timeStart and timeEnd
 	timeEnd = time.Date(2013, 12, 1, 8, 0, 0, 0, time.UTC)
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Combined filter
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "rated", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, []string{"rated"}, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 1 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -355,7 +412,7 @@ func TestRemStoredCdrs(t *testing.T) {
 	if err := mysql.RemStoredCdrs([]string{utils.FSCgrId("bbb1")}); err != nil {
 		t.Error(err.Error())
 	}
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 7 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
@@ -364,7 +421,7 @@ func TestRemStoredCdrs(t *testing.T) {
 		utils.FSCgrId("bbb2"), utils.FSCgrId("bbb3")}); err != nil {
 		t.Error(err.Error())
 	}
-	if storedCdrs, err := mysql.GetStoredCdrs(nil, "", "", "", "", "", "", "", "", "", "", timeStart, timeEnd, false, false); err != nil {
+	if storedCdrs, err := mysql.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, false, false); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
