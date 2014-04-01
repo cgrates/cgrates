@@ -32,13 +32,12 @@ type Balance struct {
 	Value          float64
 	ExpirationDate time.Time
 	Weight         float64
-	//GroupIds       []string
-	DestinationId string
-	RateSubject   string
-	SharedGroup   string
-	precision     int
-	account       *Account // used to store ub reference for shared balances
-	dirty         bool
+	DestinationId  string
+	RateSubject    string
+	SharedGroup    string
+	precision      int
+	account        *Account // used to store ub reference for shared balances
+	dirty          bool
 }
 
 func (b *Balance) Equal(o *Balance) bool {

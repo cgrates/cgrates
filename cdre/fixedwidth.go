@@ -47,38 +47,40 @@ const (
 	META_DURCDRS          = "cdrs_duration"
 	META_COSTCDRS         = "cdrs_cost"
 	META_MASKDESTINATION  = "mask_destination"
+	META_FORMATCOST       = "format_cost"
 )
 
 var err error
 
 func NewFWCdrWriter(logDb engine.LogStorage, outFile *os.File, exportTpl *config.CgrXmlCdreFwCfg, exportId string,
-	roundDecimals int, maskDestId string, maskLen int) (*FixedWidthCdrWriter, error) {
+	costShiftDigits, roundDecimals int, maskDestId string, maskLen int) (*FixedWidthCdrWriter, error) {
 	return &FixedWidthCdrWriter{
-		logDb:          logDb,
-		writer:         outFile,
-		exportTemplate: exportTpl,
-		exportId:       exportId,
-		roundDecimals:  roundDecimals,
-		maskDestId:     maskDestId,
-		maskLen:        maskLen,
-		header:         &bytes.Buffer{},
-		content:        &bytes.Buffer{},
-		trailer:        &bytes.Buffer{}}, nil
+		logDb:           logDb,
+		writer:          outFile,
+		exportTemplate:  exportTpl,
+		exportId:        exportId,
+		costShiftDigits: costShiftDigits,
+		roundDecimals:   roundDecimals,
+		maskDestId:      maskDestId,
+		maskLen:         maskLen,
+		header:          &bytes.Buffer{},
+		content:         &bytes.Buffer{},
+		trailer:         &bytes.Buffer{}}, nil
 }
 
 type FixedWidthCdrWriter struct {
-	logDb                       engine.LogStorage // Used to extract cost_details if these are requested
-	writer                      io.Writer
-	exportTemplate              *config.CgrXmlCdreFwCfg
-	exportId                    string // Unique identifier or this export
-	roundDecimals               int
-	maskDestId                  string
-	maskLen                     int
-	header, content, trailer    *bytes.Buffer
-	firstCdrATime, lastCdrATime time.Time
-	numberOfRecords             int
-	totalDuration               time.Duration
-	totalCost                   float64
+	logDb                          engine.LogStorage // Used to extract cost_details if these are requested
+	writer                         io.Writer
+	exportTemplate                 *config.CgrXmlCdreFwCfg
+	exportId                       string // Unique identifier or this export
+	costShiftDigits, roundDecimals int
+	maskDestId                     string
+	maskLen                        int
+	header, content, trailer       *bytes.Buffer
+	firstCdrATime, lastCdrATime    time.Time
+	numberOfRecords                int
+	totalDuration                  time.Duration
+	totalCost                      float64
 }
 
 // Return Json marshaled callCost attached to
@@ -116,7 +118,7 @@ func (fwv *FixedWidthCdrWriter) cdrFieldValue(cdr *utils.StoredCdr, cfgHdr, layo
 			return "", err
 		}
 	case utils.COST:
-		cdrVal = cdr.FormatCost(fwv.roundDecimals)
+		cdrVal = cdr.FormatCost(fwv.costShiftDigits, fwv.roundDecimals)
 	case utils.SETUP_TIME:
 		cdrVal = cdr.SetupTime.Format(layout)
 	case utils.ANSWER_TIME: // Format time based on layout
@@ -255,7 +257,11 @@ func (fwv *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 				}
 			}
 		case METATAG:
-			outVal, err = fwv.metaHandler(cfgFld.Value, cfgFld.Layout)
+			if cfgFld.Value == META_MASKDESTINATION {
+				outVal, err = fwv.metaHandler(cfgFld.Value, cdr.ExportFieldValue(utils.DESTINATION))
+			} else {
+				outVal, err = fwv.metaHandler(cfgFld.Value, cfgFld.Layout)
+			}
 		}
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s and runid: %s, error: %s", cdr.CgrId, cdr.MediationRunId, err.Error()))

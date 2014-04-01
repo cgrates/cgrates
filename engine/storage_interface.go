@@ -109,7 +109,8 @@ type CdrStorage interface {
 	Storage
 	SetCdr(utils.RawCDR) error
 	SetRatedCdr(*utils.StoredCdr, string) error
-	GetStoredCdrs([]string, string, string, string, string, string, string, string, string, string, string, time.Time, time.Time, bool, bool) ([]*utils.StoredCdr, error)
+	GetStoredCdrs([]string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string,
+		time.Time, time.Time, bool, bool) ([]*utils.StoredCdr, error)
 	RemStoredCdrs([]string) error
 }
 

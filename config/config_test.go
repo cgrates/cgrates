@@ -84,6 +84,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdreCdrFormat = "csv"
 	eCfg.CdreMaskDestId = ""
 	eCfg.CdreMaskLength = 0
+	eCfg.CdreCostShiftDigits = 0
 	eCfg.CdreDir = "/var/log/cgrates/cdr/cdre"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
@@ -240,6 +241,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CdreCdrFormat = "test"
 	eCfg.CdreMaskDestId = "test"
 	eCfg.CdreMaskLength = 99
+	eCfg.CdreCostShiftDigits = 99
 	eCfg.CdreExportedFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CdreDir = "test"
 	eCfg.CdrcEnabled = true

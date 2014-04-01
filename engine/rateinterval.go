@@ -53,7 +53,6 @@ func (rit *RITiming) Stringify() string {
 
 // Separate structure used for rating plan size optimization
 type RIRate struct {
-	Id               string // informational role only
 	ConnectFee       float64
 	Rates            RateGroups // GroupRateInterval (start time): Rate
 	RoundingMethod   string     //ROUNDING_UP, ROUNDING_DOWN, ROUNDING_MIDDLE

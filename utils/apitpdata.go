@@ -321,20 +321,21 @@ type AttrExpFileCdrs struct {
 	ExportId          string   // Optional exportid
 	ExportFileName    string   // If provided the output filename will be set to this
 	ExportTemplate    string   // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	RoundingDecimals  int      // Overwrite configured roundDecimals with this dynamically
+	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents)
+	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically
 	MaskDestinationId string   // Overwrite configured MaskDestId
 	MaskLength        int      // Overwrite configured MaskLength
 	CgrIds            []string // If provided, it will filter based on the cgrids present in list
-	MediationRunId    string   // If provided, it will filter on mediation runid
-	CdrHost           string   // If provided, it will filter cdrhost
-	CdrSource         string   // If provided, it will filter cdrsource
-	ReqType           string   // If provided, it will fiter reqtype
-	Direction         string   // If provided, it will fiter direction
-	Tenant            string   // If provided, it will filter tenant
-	Tor               string   // If provided, it will filter tor
-	Account           string   // If provided, it will filter account
-	Subject           string   // If provided, it will filter the rating subject
-	DestinationPrefix string   // If provided, it will filter on destination prefix
+	MediationRunId    []string // If provided, it will filter on mediation runid
+	CdrHost           []string // If provided, it will filter cdrhost
+	CdrSource         []string // If provided, it will filter cdrsource
+	ReqType           []string // If provided, it will fiter reqtype
+	Direction         []string // If provided, it will fiter direction
+	Tenant            []string // If provided, it will filter tenant
+	Tor               []string // If provided, it will filter tor
+	Account           []string // If provided, it will filter account
+	Subject           []string // If provided, it will filter the rating subject
+	DestinationPrefix []string // If provided, it will filter on destination prefix
 	TimeStart         string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd           string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors        bool     // Do not export errored CDRs

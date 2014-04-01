@@ -147,7 +147,7 @@ func GetUB() *Account {
 	ub := &Account{
 		Id:             "rif",
 		AllowNegative:  true,
-		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, TRAFFIC + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
+		BalanceMap:     map[string]BalanceChain{SMS + OUTBOUND: BalanceChain{&Balance{Value: 14, ExpirationDate: zeroTime}}, DATA + OUTBOUND: BalanceChain{&Balance{Value: 1024, ExpirationDate: zeroTime}}, MINUTES: BalanceChain{&Balance{Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{uc, uc},
 		ActionTriggers: ActionTriggerPriotityList{at, at, at},
 	}

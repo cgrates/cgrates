@@ -495,7 +495,6 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 		},
 		Ratings: map[string]*RIRate{
 			"d54545c1": &RIRate{
-				Id:         "R1",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -509,7 +508,6 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 				RoundingDecimals: 2,
 			},
 			"4bb00b9c": &RIRate{
-				Id:         "R2",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -523,7 +521,6 @@ func TestLoadDestinationRateTimings(t *testing.T) {
 				RoundingDecimals: 2,
 			},
 			"e06c337f": &RIRate{
-				Id:         "R3",
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
