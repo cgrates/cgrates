@@ -58,8 +58,8 @@ const (
 	DEBIT          = "*debit"
 	RESET_COUNTER  = "*reset_counter"
 	RESET_COUNTERS = "*reset_counters"
-	ENABLE_USER    = "*enable_user"
-	DISABLE_USER   = "*disable_user"
+	ENABLE_ACCOUNT    = "*enable_account"
+	DISABLE_ACCOUNT   = "*disable_account"
 	CALL_URL       = "*call_url"
 	CALL_URL_ASYNC = "*call_url_async"
 	MAIL_ASYNC     = "*mail_async"
@@ -90,9 +90,9 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return resetCounterAction, true
 	case RESET_COUNTERS:
 		return resetCountersAction, true
-	case ENABLE_USER:
+	case ENABLE_ACCOUNT:
 		return enableUserAction, true
-	case DISABLE_USER:
+	case DISABLE_ACCOUNT:
 		return disableUserAction, true
 	case CALL_URL:
 		return callUrl, true
