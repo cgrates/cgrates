@@ -575,7 +575,7 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 	cd1 := &CallDescriptor{
 		Direction:    "*out",
 		TOR:          "call",
-		Tenant:       "cgrates.directvoip.co.uk",
+		Tenant:       "cgrates.org",
 		Subject:      "12345",
 		Account:      "12345",
 		Destination:  "447956",
@@ -603,7 +603,7 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 	cd1 := &CallDescriptor{
 		Direction:    "*out",
 		TOR:          "call",
-		Tenant:       "cgrates.directvoip.co.uk",
+		Tenant:       "cgrates.org",
 		Subject:      "12345",
 		Account:      "12345",
 		Destination:  "447956",
@@ -613,7 +613,7 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 		CallDuration: 0}
 	cc, err := cd1.MaxDebit()
 	if err != nil {
-		t.Error("Error maxdebiting: ", err)
+		t.Fatal("Error maxdebiting: ", err)
 	}
 	if cc.GetDuration() != 40*time.Second {
 		t.Error("Error obtaining max debit duration: ", cc.GetDuration())
@@ -623,7 +623,29 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 	}
 }
 
-/*********************************** BENCHMARKS ***************************************/
+func TestMaxDebitConsumesMinutes(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd1 := &CallDescriptor{
+		Direction:    "*out",
+		TOR:          "call",
+		Tenant:       "cgrates.org",
+		Subject:      "12345",
+		Account:      "12345",
+		Destination:  "447956",
+		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 5, 0, time.UTC),
+		LoopIndex:    0,
+		CallDuration: 0}
+	cd1.MaxDebit()
+	if cd1.account.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 {
+		t.Error("Error using minutes: ", cd1.account.BalanceMap[MINUTES+OUTBOUND][0].Value)
+	}
+}
+
+/*************** BENCHMARKS ********************/
 func BenchmarkStorageGetting(b *testing.B) {
 	b.StopTimer()
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
