@@ -47,9 +47,9 @@ cd = {"Direction":"*out",
       "TOR":"call",
       "Tenant": "cgrates.org",
       "Subject": "1001",
-      "Destination": "+49",
-      "TimeStart": "2013-08-07T17:30:00Z",
-      "TimeEnd": "2013-08-07T18:30:00Z",
+      "Destination": "1002",
+      "TimeStart": "2014-04-03T11:12:23.190554134+02:00",
+      "TimeEnd": "2014-04-03T11:13:23.190554134+02:00",
       "CallDuration": 60000000000,
 }
 
@@ -60,7 +60,7 @@ cd = {"Direction":"*out",
 
 start_time = time.time()
 i = 0
-runs = 1e5
+runs = 5e5
 result = ""
 for i in range(int(runs) + 1):
     result = rpc.call("Responder.GetCost", cd)

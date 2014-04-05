@@ -53,9 +53,9 @@ var (
 	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.DBDataEncoding, "The encoding used to store object data in strings.")
 	raterAddress    = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
 	tor             = flag.String("tor", "call", "The type of record to use in queries.")
-	tenant          = flag.String("tenant", "call", "The type of record to use in queries.")
+	tenant          = flag.String("tenant", "cgrates.org", "The type of record to use in queries.")
 	subject         = flag.String("subject", "1001", "The rating subject to use in queries.")
-	destination     = flag.String("destination", "+4986517174963", "The destination to use in queries.")
+	destination     = flag.String("destination", "1002", "The destination to use in queries.")
 
 	nilDuration = time.Duration(0)
 )
@@ -150,8 +150,8 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	cd := &engine.CallDescriptor{
-		TimeStart:    time.Date(2013, time.December, 13, 22, 30, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2013, time.December, 13, 22, 31, 0, 0, time.UTC),
+		TimeStart:    time.Date(2014, time.December, 11, 55, 30, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2014, time.December, 11, 55, 31, 0, 0, time.UTC),
 		CallDuration: 60 * time.Second,
 		Direction:    "*out",
 		TOR:          *tor,
