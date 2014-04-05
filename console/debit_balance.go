@@ -38,7 +38,7 @@ type CmdDebitBalance struct {
 
 // name should be exec's name
 func (self *CmdDebitBalance) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] debit_balance <tor> <tenant> <subject> <destination> <start_time|*now> <duration>")
+	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] debit_balance <tor> <tenant> <account> <subject> <destination> <start_time|*now> <duration>")
 }
 
 // set param defaults
@@ -50,17 +50,17 @@ func (self *CmdDebitBalance) defaults() error {
 
 // Parses command line args and builds CmdBalance value
 func (self *CmdDebitBalance) FromArgs(args []string) error {
-	if len(args) != 8 {
+	if len(args) != 9 {
 		return fmt.Errorf(self.Usage(""))
 	}
 	// Args look OK, set defaults before going further
 	self.defaults()
 	var tStart time.Time
 	var err error
-	if args[6] == "*now" {
+	if args[7] == "*now" {
 		tStart = time.Now()
 	} else {
-		tStart, err = utils.ParseDate(args[6])
+		tStart, err = utils.ParseDate(args[7])
 		if err != nil {
 			fmt.Println("\n*start_time* should have one of the formats:")
 			fmt.Println("\ttime.RFC3339\teg:2013-08-07T17:30:00Z in UTC")
@@ -70,14 +70,15 @@ func (self *CmdDebitBalance) FromArgs(args []string) error {
 			return fmt.Errorf(self.Usage(""))
 		}
 	}
-	callDur, err := utils.ParseDurationWithSecs(args[7])
+	callDur, err := utils.ParseDurationWithSecs(args[8])
 	if err != nil {
 		fmt.Println("\n\tExample durations: 60s for 60 seconds, 25m for 25minutes, 1m25s for one minute and 25 seconds\n")
 	}
 	self.rpcParams.TOR = args[2]
 	self.rpcParams.Tenant = args[3]
-	self.rpcParams.Subject = args[4]
-	self.rpcParams.Destination = args[5]
+	self.rpcParams.Account = args[4]
+	self.rpcParams.Subject = args[5]
+	self.rpcParams.Destination = args[6]
 	self.rpcParams.TimeStart = tStart
 	self.rpcParams.CallDuration = callDur
 	self.rpcParams.TimeEnd = tStart.Add(callDur)
