@@ -1,0 +1,157 @@
+/*
+Rating system designed to be used in VoIP Carriers World
+Copyright (C) 2012-2014 ITsysCOM GmbH
+
+This program is free software: you can Storagetribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITH*out ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package engine
+
+import (
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/scheduler"
+)
+
+var ratingDb engine.RatingStorage
+var acntDb  engine.AccountingStorage
+
+func init() {
+	ratingDb, _ = engine.NewMapStorageJson()
+	engine.SetRatingStorage(ratingDb)
+	acntDb, _ = engine.NewMapStorageJson()
+	engine.SetAccountingStorage(acntDb)
+}
+
+
+func TestLoadCsvTp(t *testing.T) {
+	timings := `ALWAYS,*any,*any,*any,*any,00:00:00
+ASAP,*any,*any,*any,*any,*asap`
+	destinations := `DST_UK_Mobile_BIG5,447596
+DST_UK_Mobile_BIG5,447956`
+	rates := `RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s,*up,8
+RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8`
+	destinationRates := `DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG
+DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5`
+	ratingPlans := `RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,ALWAYS,10
+RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
+	ratingProfiles := `cgrates.org,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
+cgrates.org,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
+	sharedGroups := ``
+	actions := `TOPUP10_AC,*topup_reset,*monetary,*out,10,*unlimited,*any,,10,,,10
+TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10`
+	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
+TOPUP10_AT,TOPUP10_AC1,ASAP,10`
+	actionTriggers := ``
+	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,`
+	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions)
+	if err := csvr.LoadDestinations(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadTimings(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadRates(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadDestinationRates(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadRatingPlans(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadRatingProfiles(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadSharedGroups(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadActions(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadActionTimings(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadActionTriggers(); err != nil {
+		t.Fatal(err)
+	}
+	if err := csvr.LoadAccountActions(); err != nil {
+		t.Fatal(err)
+	}
+	csvr.WriteToDatabase(false, false)
+	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12345"); err != nil {
+		t.Error(err)
+	} else if acnt == nil {
+		t.Error("No account saved")
+	}
+	ratingDb.CacheRating(nil, nil, nil, nil)
+	acntDb.CacheAccounting(nil, nil, nil)
+	if cachedDests := cache2go.CountEntries(engine.DESTINATION_PREFIX); cachedDests != 2 {
+		t.Error("Wrong number of cached destinations found", cachedDests)
+	}
+	if cachedRPlans := cache2go.CountEntries(engine.RATING_PLAN_PREFIX); cachedRPlans != 2 {
+		t.Error("Wrong number of cached rating plans found", cachedRPlans)
+	}
+	if cachedRProfiles := cache2go.CountEntries(engine.RATING_PROFILE_PREFIX); cachedRProfiles != 2 {
+		t.Error("Wrong number of cached rating profiles found", cachedRProfiles)
+	}
+	if cachedActions := cache2go.CountEntries(engine.ACTION_PREFIX); cachedActions != 2 {
+		t.Error("Wrong number of cached actions found", cachedActions)
+	}
+}
+
+func TestExecuteActions(t *testing.T) {
+	scheduler.NewScheduler().LoadActionTimings(acntDb)
+	time.Sleep(time.Duration(1) * time.Microsecond) // Give time to scheduler to topup the account
+	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12345"); err != nil {
+		t.Error(err)
+	} else if len(acnt.BalanceMap) != 2 {
+		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
+	} else if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 40 {
+		t.Errorf("Account does not have enough minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
+	} else if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != 10 {
+		t.Error("Account does not have enough monetary balance", acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value)
+	}
+}
+
+func TestDebit(t *testing.T) {
+	cd := &engine.CallDescriptor{
+		Direction:    "*out",
+		TOR:          "call",
+		Tenant:       "cgrates.org",
+		Subject:      "12345",
+		Account:      "12345",
+		Destination:  "447956933443",
+		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 10, 0, time.UTC),
+	}
+	if cc, err := cd.Debit(); err != nil {
+		t.Error(err)
+	} else if cc.Cost != 0.01 {
+		t.Error("Wrong cost returned: ", cc.Cost)
+	}
+	acnt, err := acntDb.GetAccount("*out:cgrates.org:12345")
+	if err != nil {
+		t.Error(err)
+	}
+	if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 39.8 { // How does the minutes should look like if we debit in seconds?
+		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
+	}
+	if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != 9.99 {
+		t.Error("Account does not have expected monetary balance", acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value)
+	}
+}

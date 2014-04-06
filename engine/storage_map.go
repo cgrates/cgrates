@@ -41,6 +41,10 @@ func NewMapStorage() (*MapStorage, error) {
 	return &MapStorage{dict: make(map[string][]byte), ms: NewCodecMsgpackMarshaler()}, nil
 }
 
+func NewMapStorageJson() (*MapStorage, error) {
+	return &MapStorage{dict: make(map[string][]byte), ms: new(JSONBufMarshaler)}, nil
+}
+
 func (ms *MapStorage) Close() {}
 
 func (ms *MapStorage) Flush() error {
@@ -173,8 +177,9 @@ func (ms *MapStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	w.Close()
 	ms.dict[RATING_PLAN_PREFIX+rp.Id] = b.Bytes()
 	response := 0
-
-	go historyScribe.Record(rp.GetHistoryRecord(), &response)
+	if historyScribe != nil {
+		go historyScribe.Record(rp.GetHistoryRecord(), &response)
+	}
 	//cache2go.Cache(RATING_PLAN_PREFIX+rp.Id, rp)
 	return
 }
@@ -202,7 +207,9 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	result, err := ms.ms.Marshal(rpf)
 	ms.dict[RATING_PROFILE_PREFIX+rpf.Id] = result
 	response := 0
-	go historyScribe.Record(rpf.GetHistoryRecord(), &response)
+	if historyScribe != nil {
+		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
+	}
 	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
 	return
 }
@@ -309,7 +316,9 @@ func (ms *MapStorage) SetDestination(dest *Destination) (err error) {
 	w.Close()
 	ms.dict[DESTINATION_PREFIX+dest.Id] = b.Bytes()
 	response := 0
-	go historyScribe.Record(dest.GetHistoryRecord(), &response)
+	if historyScribe != nil {
+		go historyScribe.Record(dest.GetHistoryRecord(), &response)
+	}
 	//cache2go.Cache(DESTINATION_PREFIX+dest.Id, dest)
 	return
 }
