@@ -58,7 +58,7 @@ func populateDB() {
 		Id: "*out:vdf:broker",
 		BalanceMap: map[string]BalanceChain{
 			MINUTES + OUTBOUND: BalanceChain{
-				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RateSubject: "rif"},
+				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RatingSubject: "rif"},
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
 	}
@@ -67,7 +67,7 @@ func populateDB() {
 		Id: "*out:vdf:minitsboy",
 		BalanceMap: map[string]BalanceChain{
 			MINUTES + OUTBOUND: BalanceChain{
-				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RateSubject: "rif"},
+				&Balance{Value: 20, DestinationId: "NAT", Weight: 10, RatingSubject: "rif"},
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			},
 			CREDIT + OUTBOUND: BalanceChain{

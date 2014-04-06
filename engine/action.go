@@ -48,22 +48,22 @@ type Action struct {
 }
 
 const (
-	LOG            = "*log"
-	RESET_TRIGGERS = "*reset_triggers"
-	ALLOW_NEGATIVE = "*allow_negative"
-	DENY_NEGATIVE  = "*deny_negative"
-	RESET_ACCOUNT  = "*reset_account"
-	TOPUP_RESET    = "*topup_reset"
-	TOPUP          = "*topup"
-	DEBIT          = "*debit"
-	RESET_COUNTER  = "*reset_counter"
-	RESET_COUNTERS = "*reset_counters"
-	ENABLE_ACCOUNT    = "*enable_account"
-	DISABLE_ACCOUNT   = "*disable_account"
-	CALL_URL       = "*call_url"
-	CALL_URL_ASYNC = "*call_url_async"
-	MAIL_ASYNC     = "*mail_async"
-	UNLIMITED      = "*unlimited"
+	LOG             = "*log"
+	RESET_TRIGGERS  = "*reset_triggers"
+	ALLOW_NEGATIVE  = "*allow_negative"
+	DENY_NEGATIVE   = "*deny_negative"
+	RESET_ACCOUNT   = "*reset_account"
+	TOPUP_RESET     = "*topup_reset"
+	TOPUP           = "*topup"
+	DEBIT           = "*debit"
+	RESET_COUNTER   = "*reset_counter"
+	RESET_COUNTERS  = "*reset_counters"
+	ENABLE_ACCOUNT  = "*enable_account"
+	DISABLE_ACCOUNT = "*disable_account"
+	CALL_URL        = "*call_url"
+	CALL_URL_ASYNC  = "*call_url_async"
+	MAIL_ASYNC      = "*mail_async"
+	UNLIMITED       = "*unlimited"
 )
 
 type actionTypeFunc func(*Account, *Action) error

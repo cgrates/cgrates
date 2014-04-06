@@ -516,16 +516,16 @@ func (csvr *CSVReader) LoadSharedGroups() (err error) {
 		sg, found := csvr.sharedGroups[tag]
 		if found {
 			sg.AccountParameters[record[1]] = &SharingParameters{
-				Strategy:    record[2],
-				RateSubject: record[3],
+				Strategy:      record[2],
+				RatingSubject: record[3],
 			}
 		} else {
 			sg = &SharedGroup{
 				Id: tag,
 				AccountParameters: map[string]*SharingParameters{
 					record[1]: &SharingParameters{
-						Strategy:    record[2],
-						RateSubject: record[3],
+						Strategy:      record[2],
+						RatingSubject: record[3],
 					},
 				},
 			}
@@ -582,7 +582,7 @@ func (csvr *CSVReader) LoadActions() (err error) {
 				Value:         units,
 				Weight:        balanceWeight,
 				DestinationId: record[6],
-				RateSubject:   record[7],
+				RatingSubject: record[7],
 				SharedGroup:   record[9],
 			},
 		}

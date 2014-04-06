@@ -126,7 +126,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			Balance: &engine.Balance{
 				Value:          attr.Value,
 				ExpirationDate: attr.ExpirationDate,
-				RateSubject:    attr.RatingSubject,
+				RatingSubject:  attr.RatingSubject,
 				DestinationId:  attr.DestinationId,
 				Weight:         attr.Weight,
 			},
@@ -300,7 +300,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 				Value:         apiAct.Units,
 				Weight:        apiAct.BalanceWeight,
 				DestinationId: apiAct.DestinationId,
-				RateSubject:   apiAct.RatingSubject,
+				RatingSubject: apiAct.RatingSubject,
 			},
 		}
 		storeActions[idx] = a

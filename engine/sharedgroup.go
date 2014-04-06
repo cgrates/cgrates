@@ -45,8 +45,8 @@ type SharedGroup struct {
 }
 
 type SharingParameters struct {
-	Strategy    string
-	RateSubject string
+	Strategy      string
+	RatingSubject string
 }
 
 func (sg *SharedGroup) GetMembersExceptUser(ubId string) []string {

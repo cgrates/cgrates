@@ -79,16 +79,16 @@ func TestBalanceSortWeightLess(t *testing.T) {
 }
 
 func TestBalanceEqual(t *testing.T) {
-	mb1 := &Balance{Weight: 1, precision: 1, RateSubject: "1", DestinationId: ""}
-	mb2 := &Balance{Weight: 1, precision: 1, RateSubject: "1", DestinationId: ""}
-	mb3 := &Balance{Weight: 1, precision: 1, RateSubject: "2", DestinationId: ""}
+	mb1 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	mb2 := &Balance{Weight: 1, precision: 1, RatingSubject: "1", DestinationId: ""}
+	mb3 := &Balance{Weight: 1, precision: 1, RatingSubject: "2", DestinationId: ""}
 	if !mb1.Equal(mb2) || mb2.Equal(mb3) {
 		t.Error("Equal failure!", mb1 == mb2, mb3)
 	}
 }
 
 func TestBalanceClone(t *testing.T) {
-	mb1 := &Balance{Value: 1, Weight: 2, RateSubject: "test", DestinationId: "5"}
+	mb1 := &Balance{Value: 1, Weight: 2, RatingSubject: "test", DestinationId: "5"}
 	mb2 := mb1.Clone()
 	if mb1 == mb2 || !reflect.DeepEqual(mb1, mb2) {
 		t.Errorf("Cloning failure: \n%v\n%v", mb1, mb2)

@@ -294,7 +294,7 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string]*SharedGro
 				buffer.WriteRune(',')
 			}
 			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s')",
-				tpid, sgId, account, params.Strategy, params.RateSubject))
+				tpid, sgId, account, params.Strategy, params.RatingSubject))
 			i++
 		}
 	}
@@ -1055,16 +1055,16 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string]*SharedG
 		sg, found := sgs[tag]
 		if found {
 			sg.AccountParameters[account] = &SharingParameters{
-				Strategy:    strategy,
-				RateSubject: rateSubject,
+				Strategy:      strategy,
+				RatingSubject: rateSubject,
 			}
 		} else {
 			sg = &SharedGroup{
 				Id: tag,
 				AccountParameters: map[string]*SharingParameters{
 					account: &SharingParameters{
-						Strategy:    strategy,
-						RateSubject: rateSubject,
+						Strategy:      strategy,
+						RatingSubject: rateSubject,
 					},
 				},
 			}

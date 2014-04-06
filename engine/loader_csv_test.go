@@ -633,7 +633,7 @@ func TestLoadActions(t *testing.T) {
 				Uuid:          as1[1].Balance.Uuid,
 				Value:         100,
 				Weight:        10,
-				RateSubject:   "test",
+				RatingSubject: "test",
 				DestinationId: "NAT",
 			},
 		},
@@ -673,8 +673,8 @@ func TestLoadSharedGroups(t *testing.T) {
 		Id: "SG1",
 		AccountParameters: map[string]*SharingParameters{
 			"*any": &SharingParameters{
-				Strategy:    "*lowest",
-				RateSubject: "",
+				Strategy:      "*lowest",
+				RatingSubject: "",
 			},
 		},
 	}
@@ -686,8 +686,8 @@ func TestLoadSharedGroups(t *testing.T) {
 		Id: "SG2",
 		AccountParameters: map[string]*SharingParameters{
 			"*any": &SharingParameters{
-				Strategy:    "*lowest",
-				RateSubject: "one",
+				Strategy:      "*lowest",
+				RatingSubject: "one",
 			},
 		},
 	}
