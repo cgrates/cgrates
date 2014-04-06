@@ -183,7 +183,31 @@ func (ub *Account) getBalancesForPrefix(prefix string, balances BalanceChain, sh
 	}
 	// resort by precision
 	usefulBalances.Sort()
+	// clear precision
+	for _, b := range usefulBalances {
+		b.precision = 0
+	}
 	return usefulBalances
+}
+
+// like getBalancesForPrefix but expanding shared balances
+func (account *Account) getAlldBalancesForPrefix(destination, balanceType string) (bc BalanceChain) {
+	balances := account.getBalancesForPrefix(destination, account.BalanceMap[balanceType], "")
+	for _, b := range balances {
+		if b.SharedGroup != "" {
+			sharedGroup, err := accountingStorage.GetSharedGroup(b.SharedGroup, false)
+			if err != nil {
+				Logger.Warning(fmt.Sprintf("Could not get shared group: %v", b.SharedGroup))
+				continue
+			}
+			sharedBalances := sharedGroup.GetBalances(destination, balanceType, account)
+			sharedBalances = sharedGroup.SortBalancesByStrategy(b, sharedBalances)
+			bc = append(bc, sharedBalances...)
+		} else {
+			bc = append(bc, b)
+		}
+	}
+	return
 }
 
 func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
@@ -482,24 +506,4 @@ func (account *Account) GetUniqueSharedGroupMembers(destination, direction strin
 		}
 	}
 	return memberIds, nil
-}
-
-// like getBalancesForPrefix but expanding shared balances
-func (account *Account) getAlldBalancesForPrefix(destination, balanceType string) (bc BalanceChain) {
-	balances := account.getBalancesForPrefix(destination, account.BalanceMap[balanceType], "")
-	for _, b := range balances {
-		if b.SharedGroup != "" {
-			sharedGroup, err := accountingStorage.GetSharedGroup(b.SharedGroup, false)
-			if err != nil {
-				Logger.Warning(fmt.Sprintf("Could not get shared group: %v", b.SharedGroup))
-				continue
-			}
-			sharedBalances := sharedGroup.GetBalances(destination, balanceType, account)
-			sharedBalances = sharedGroup.SortBalancesByStrategy(b, sharedBalances)
-			bc = append(bc, sharedBalances...)
-		} else {
-			bc = append(bc, b)
-		}
-	}
-	return
 }

@@ -22,13 +22,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/scheduler"
 )
 
 var ratingDb engine.RatingStorage
-var acntDb  engine.AccountingStorage
+var acntDb engine.AccountingStorage
 
 func init() {
 	ratingDb, _ = engine.NewMapStorageJson()
@@ -36,7 +36,6 @@ func init() {
 	acntDb, _ = engine.NewMapStorageJson()
 	engine.SetAccountingStorage(acntDb)
 }
-
 
 func TestLoadCsvTp(t *testing.T) {
 	timings := `ALWAYS,*any,*any,*any,*any,00:00:00
@@ -130,14 +129,14 @@ func TestExecuteActions(t *testing.T) {
 
 func TestDebit(t *testing.T) {
 	cd := &engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "12345",
-		Account:      "12345",
-		Destination:  "447956933443",
-		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 10, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "call",
+		Tenant:      "cgrates.org",
+		Subject:     "12345",
+		Account:     "12345",
+		Destination: "447956933443",
+		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 10, 0, time.UTC),
 	}
 	if cc, err := cd.Debit(); err != nil {
 		t.Error(err)
@@ -148,7 +147,7 @@ func TestDebit(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 39.8 { // How does the minutes should look like if we debit in seconds?
+	if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 20 {
 		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
 	}
 	if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != 9.99 {
