@@ -33,7 +33,7 @@ type Balance struct {
 	ExpirationDate time.Time
 	Weight         float64
 	DestinationId  string
-	RateSubject    string
+	RatingSubject  string
 	SharedGroup    string
 	precision      int
 	account        *Account // used to store ub reference for shared balances
@@ -50,14 +50,14 @@ func (b *Balance) Equal(o *Balance) bool {
 	return b.ExpirationDate.Equal(o.ExpirationDate) &&
 		b.Weight == o.Weight &&
 		b.DestinationId == o.DestinationId &&
-		b.RateSubject == o.RateSubject &&
+		b.RatingSubject == o.RatingSubject &&
 		b.SharedGroup == o.SharedGroup
 }
 
 // the default balance has no destinationid, Expirationdate or ratesubject
 func (b *Balance) IsDefault() bool {
 	return (b.DestinationId == "" || b.DestinationId == utils.ANY) &&
-		b.RateSubject == "" &&
+		b.RatingSubject == "" &&
 		b.ExpirationDate.IsZero() &&
 		b.SharedGroup == ""
 }
@@ -81,7 +81,7 @@ func (b *Balance) Clone() *Balance {
 		DestinationId:  b.DestinationId,
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
-		RateSubject:    b.RateSubject,
+		RatingSubject:  b.RatingSubject,
 	}
 }
 
@@ -125,8 +125,8 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 }
 
 func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
-	if b.RateSubject != "" {
-		cd.Subject = b.RateSubject
+	if b.RatingSubject != "" {
+		cd.Subject = b.RatingSubject
 		cd.Account = cd.Subject
 		cd.RatingInfos = nil
 		return cd.GetCost()
@@ -162,13 +162,13 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 			if increment.paid {
 				continue
 			}
-			if duration, err := utils.ParseZeroRatingSubject(b.RateSubject); err == nil {
+			if duration, err := utils.ParseZeroRatingSubject(b.RatingSubject); err == nil {
 				seconds := duration.Seconds()
 				amount := seconds
 				if seconds == 1 {
 					amount = increment.Duration.Seconds()
 				}
-				if b.Value >= amount { // balance has at least 60 seconds
+				if b.Value >= amount {
 					newTs := ts
 					inc := increment
 					if seconds > 1 { // we need to recreate increments
@@ -215,7 +215,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 			}
 			// get the new rate
 			cd := cc.CreateCallDescriptor()
-			cd.Subject = b.RateSubject
+			cd.Subject = b.RatingSubject
 			cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 			cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
 			cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
@@ -240,7 +240,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 							break
 						}
 					}
-					if moneyBal != nil && b.Value >= seconds {
+					if (cost == 0 || moneyBal != nil) && b.Value >= seconds {
 						b.SubstractAmount(seconds)
 						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 						nInc.BalanceInfo.AccountId = ub.Id
@@ -310,7 +310,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 				continue
 			}
 			// check standard subject tags
-			if b.RateSubject == "" {
+			if b.RatingSubject == "" {
 				amount := increment.Cost
 				if b.Value >= amount {
 					b.SubstractAmount(amount)
@@ -324,7 +324,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 			} else {
 				// get the new rate
 				cd := cc.CreateCallDescriptor()
-				cd.Subject = b.RateSubject
+				cd.Subject = b.RatingSubject
 				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 				cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
 				cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration

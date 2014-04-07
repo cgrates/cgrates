@@ -294,7 +294,7 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string]*SharedGro
 				buffer.WriteRune(',')
 			}
 			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s')",
-				tpid, sgId, account, params.Strategy, params.RateSubject))
+				tpid, sgId, account, params.Strategy, params.RatingSubject))
 			i++
 		}
 	}
@@ -962,7 +962,7 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.TPTimi
 
 func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.TPRatingPlanBinding, error) {
 	rpbns := make(map[string][]*utils.TPRatingPlanBinding)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_RATING_PLANS, tpid)
+	q := fmt.Sprintf("SELECT tpid, id, destrates_id, timing_id, weight FROM %s WHERE tpid='%s'", utils.TBL_TP_RATING_PLANS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND id='%s'", tag)
 	}
@@ -972,10 +972,9 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var id int
 		var weight float64
-		var tpid, tag, destination_rates_tag, timings_tag string
-		if err := rows.Scan(&id, &tpid, &tag, &destination_rates_tag, &timings_tag, &weight); err != nil {
+		var tpid, id, destination_rates_tag, timings_tag string
+		if err := rows.Scan(&tpid, &id, &destination_rates_tag, &timings_tag, &weight); err != nil {
 			return nil, err
 		}
 		rpb := &utils.TPRatingPlanBinding{
@@ -983,10 +982,11 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 			TimingId:           timings_tag,
 			Weight:             weight,
 		}
-		if rpBnLst, exists := rpbns[tag]; exists {
-			rpBnLst = append(rpBnLst, rpb)
+		// Logger.Debug(fmt.Sprintf("For RatingPlan id: %s, loading RatingPlanBinding: %v", tag, rpb))
+		if _, exists := rpbns[id]; exists {
+			rpbns[id] = append(rpbns[id], rpb)
 		} else { // New
-			rpbns[tag] = []*utils.TPRatingPlanBinding{rpb}
+			rpbns[id] = []*utils.TPRatingPlanBinding{rpb}
 		}
 	}
 	return rpbns, nil
@@ -1055,16 +1055,16 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string]*SharedG
 		sg, found := sgs[tag]
 		if found {
 			sg.AccountParameters[account] = &SharingParameters{
-				Strategy:    strategy,
-				RateSubject: rateSubject,
+				Strategy:      strategy,
+				RatingSubject: rateSubject,
 			}
 		} else {
 			sg = &SharedGroup{
 				Id: tag,
 				AccountParameters: map[string]*SharingParameters{
 					account: &SharingParameters{
-						Strategy:    strategy,
-						RateSubject: rateSubject,
+						Strategy:      strategy,
+						RatingSubject: rateSubject,
 					},
 				},
 			}

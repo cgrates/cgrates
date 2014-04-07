@@ -118,8 +118,8 @@ vdf,0,*out,fallback1,2013-11-18T13:45:00Z,G,fallback2
 vdf,0,*out,fallback1,2013-11-18T13:46:00Z,G,fallback2
 vdf,0,*out,fallback1,2013-11-18T13:47:00Z,G,fallback2
 vdf,0,*out,fallback2,2013-11-18T13:45:00Z,R,rif
-cgrates.directvoip.co.uk,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
-cgrates.directvoip.co.uk,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
+cgrates.org,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
+cgrates.org,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -157,7 +157,7 @@ STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,FS_USERS,LOG_WARNING,10
 `
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
-cgrates.directvoip.co.uk,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
+cgrates.org,12345,*out,TOPUP10_AT,STANDARD_TRIGGERS
 vdf,empty0,*out,TOPUP_SHARED0_AT,
 vdf,empty10,*out,TOPUP_SHARED10_AT,
 vdf,emptyX,*out,TOPUP_EMPTY_AT,
@@ -633,7 +633,7 @@ func TestLoadActions(t *testing.T) {
 				Uuid:          as1[1].Balance.Uuid,
 				Value:         100,
 				Weight:        10,
-				RateSubject:   "test",
+				RatingSubject: "test",
 				DestinationId: "NAT",
 			},
 		},
@@ -673,8 +673,8 @@ func TestLoadSharedGroups(t *testing.T) {
 		Id: "SG1",
 		AccountParameters: map[string]*SharingParameters{
 			"*any": &SharingParameters{
-				Strategy:    "*lowest",
-				RateSubject: "",
+				Strategy:      "*lowest",
+				RatingSubject: "",
 			},
 		},
 	}
@@ -686,8 +686,8 @@ func TestLoadSharedGroups(t *testing.T) {
 		Id: "SG2",
 		AccountParameters: map[string]*SharingParameters{
 			"*any": &SharingParameters{
-				Strategy:    "*lowest",
-				RateSubject: "one",
+				Strategy:      "*lowest",
+				RatingSubject: "one",
 			},
 		},
 	}

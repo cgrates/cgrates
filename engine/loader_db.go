@@ -473,7 +473,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 					Uuid:          utils.GenUUID(),
 					Value:         tpact.Units,
 					Weight:        tpact.BalanceWeight,
-					RateSubject:   tpact.RatingSubject,
+					RatingSubject: tpact.RatingSubject,
 					DestinationId: tpact.DestinationId,
 				},
 			}
@@ -712,7 +712,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 							Uuid:          utils.GenUUID(),
 							Value:         tpact.Units,
 							Weight:        tpact.BalanceWeight,
-							RateSubject:   tpact.RatingSubject,
+							RatingSubject: tpact.RatingSubject,
 							DestinationId: tpact.DestinationId,
 						},
 					}
