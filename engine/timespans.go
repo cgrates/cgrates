@@ -21,6 +21,7 @@ package engine
 import (
 	//"fmt"
 
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -45,6 +46,7 @@ type Increment struct {
 	BalanceInfo         *BalanceInfo // need more than one for minutes with cost
 	BalanceRateInterval *RateInterval
 	MinuteInfo          *MinuteInfo
+	Compressed          int
 	paid                bool
 }
 
@@ -55,11 +57,22 @@ type MinuteInfo struct {
 	//Price         float64
 }
 
+func (mi *MinuteInfo) Equal(other *MinuteInfo) bool {
+	return mi.DestinationId == other.DestinationId &&
+		mi.Quantity == other.Quantity
+}
+
 // Holds information about the balance that made a specific payment
 type BalanceInfo struct {
 	MinuteBalanceUuid string
 	MoneyBalanceUuid  string
 	AccountId         string // used when debited from shared balance
+}
+
+func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
+	return bi.MinuteBalanceUuid == other.MinuteBalanceUuid &&
+		bi.MoneyBalanceUuid == other.MoneyBalanceUuid &&
+		bi.AccountId == other.AccountId
 }
 
 type TimeSpans []*TimeSpan
@@ -146,6 +159,35 @@ func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSp
 	return false
 }
 
+func (tss TimeSpans) Compress() {
+	for _, ts := range tss {
+		var cIncrs Increments
+		for _, incr := range ts.Increments {
+			if len(cIncrs) == 0 || !cIncrs[len(cIncrs)-1].Equal(incr) {
+				incr.Compressed = 1
+				cIncrs = append(cIncrs, incr)
+			} else {
+				cIncrs[len(cIncrs)-1].Compressed++
+			}
+		}
+		ts.Increments = cIncrs
+	}
+}
+
+func (tss TimeSpans) Decompress() {
+	for _, ts := range tss {
+		var incrs Increments
+		for _, cIncr := range ts.Increments {
+			if cIncr.Compressed == 0 { // if never compressed
+				cIncr.Compressed = 1
+			}
+			for i := 0; i < cIncr.Compressed; i++ {
+				incrs = append(incrs, cIncr.Clone())
+			}
+		}
+	}
+}
+
 func (incr *Increment) Clone() *Increment {
 	nIncr := &Increment{
 		Duration:            incr.Duration,
@@ -155,6 +197,14 @@ func (incr *Increment) Clone() *Increment {
 		BalanceInfo:         incr.BalanceInfo,
 	}
 	return nIncr
+}
+
+func (incr *Increment) Equal(other *Increment) bool {
+	return incr.Duration == other.Duration &&
+		incr.Cost == other.Cost &&
+		incr.BalanceInfo.Equal(other.BalanceInfo) &&
+		reflect.DeepEqual(incr.BalanceRateInterval, other.BalanceRateInterval) &&
+		incr.MinuteInfo.Equal(other.MinuteInfo)
 }
 
 type Increments []*Increment
