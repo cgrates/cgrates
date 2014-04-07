@@ -168,7 +168,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 				if seconds == 1 {
 					amount = increment.Duration.Seconds()
 				}
-				if b.Value >= amount { // balance has at least 60 seconds
+				if b.Value >= amount {
 					newTs := ts
 					inc := increment
 					if seconds > 1 { // we need to recreate increments
@@ -240,7 +240,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 							break
 						}
 					}
-					if moneyBal != nil && b.Value >= seconds {
+					if (cost == 0 || moneyBal != nil) && b.Value >= seconds {
 						b.SubstractAmount(seconds)
 						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
 						nInc.BalanceInfo.AccountId = ub.Id
