@@ -185,6 +185,7 @@ func (tss TimeSpans) Decompress() {
 				incrs = append(incrs, cIncr.Clone())
 			}
 		}
+		ts.Increments = incrs
 	}
 }
 
