@@ -63,7 +63,7 @@ func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 		}
 		row[idx] = fld.ParseValue(fldVal)
 	}
-	if csvwr.firstExpOrderId > cdr.OrderId {
+	if csvwr.firstExpOrderId > cdr.OrderId || csvwr.firstExpOrderId == 0 {
 		csvwr.firstExpOrderId = cdr.OrderId
 	}
 	if csvwr.lastExpOrderId < cdr.OrderId {

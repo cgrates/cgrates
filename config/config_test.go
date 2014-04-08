@@ -85,14 +85,14 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdreMaskDestId = ""
 	eCfg.CdreMaskLength = 0
 	eCfg.CdreCostShiftDigits = 0
-	eCfg.CdreDir = "/var/log/cgrates/cdr/cdre"
+	eCfg.CdreDir = "/var/log/cgrates/cdre"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcCdrsMethod = "http_cgr"
 	eCfg.CdrcRunDelay = time.Duration(0)
 	eCfg.CdrcCdrType = "csv"
-	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdr/cdrc/in"
-	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdr/cdrc/out"
+	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
+	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	eCfg.CdrcSourceId = "freeswitch_csv"
 	eCfg.CdrcAccIdField = "0"
 	eCfg.CdrcReqTypeField = "1"

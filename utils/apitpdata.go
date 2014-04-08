@@ -346,9 +346,10 @@ type AttrExpFileCdrs struct {
 type ExportedFileCdrs struct {
 	ExportedFilePath string            // Full path to the newly generated export file
 	TotalRecords     int               // Number of CDRs to be exported
+	FirstOrderId, LastOrderId int64            // The order id of the last exported CDR
 	ExportedCgrIds   []string          // List of successfuly exported cgrids in the file
 	UnexportedCgrIds map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
-	FirstOrderId, LastOrderId int64            // The order id of the last exported CDR
+	
 }
 
 type AttrRemCdrs struct {

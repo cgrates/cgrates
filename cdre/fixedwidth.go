@@ -301,7 +301,7 @@ func (fwv *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 	fwv.totalDuration += cdr.Duration
 	fwv.totalCost += cdr.Cost
 	fwv.totalCost = utils.Round(fwv.totalCost, fwv.roundDecimals, utils.ROUNDING_MIDDLE)
-	if fwv.firstExpOrderId > cdr.OrderId {
+	if fwv.firstExpOrderId > cdr.OrderId || fwv.firstExpOrderId == 0 {
 		fwv.firstExpOrderId = cdr.OrderId
 	}
 	if fwv.lastExpOrderId < cdr.OrderId {
