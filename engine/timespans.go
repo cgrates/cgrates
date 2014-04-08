@@ -46,7 +46,7 @@ type Increment struct {
 	BalanceInfo         *BalanceInfo // need more than one for minutes with cost
 	BalanceRateInterval *RateInterval
 	MinuteInfo          *MinuteInfo
-	Compressed          int
+	CompressFactor      int
 	paid                bool
 }
 
@@ -164,10 +164,12 @@ func (tss TimeSpans) Compress() {
 		var cIncrs Increments
 		for _, incr := range ts.Increments {
 			if len(cIncrs) == 0 || !cIncrs[len(cIncrs)-1].Equal(incr) {
-				incr.Compressed = 1
+				if incr.CompressFactor == 0 {
+					incr.CompressFactor = 1
+				}
 				cIncrs = append(cIncrs, incr)
 			} else {
-				cIncrs[len(cIncrs)-1].Compressed++
+				cIncrs[len(cIncrs)-1].CompressFactor++
 			}
 		}
 		ts.Increments = cIncrs
@@ -178,10 +180,10 @@ func (tss TimeSpans) Decompress() {
 	for _, ts := range tss {
 		var incrs Increments
 		for _, cIncr := range ts.Increments {
-			if cIncr.Compressed == 0 { // if never compressed
-				cIncr.Compressed = 1
+			if cIncr.CompressFactor == 0 { // if never compressed
+				cIncr.CompressFactor = 1
 			}
-			for i := 0; i < cIncr.Compressed; i++ {
+			for i := 0; i < cIncr.CompressFactor; i++ {
 				incrs = append(incrs, cIncr.Clone())
 			}
 		}
@@ -203,9 +205,9 @@ func (incr *Increment) Clone() *Increment {
 func (incr *Increment) Equal(other *Increment) bool {
 	return incr.Duration == other.Duration &&
 		incr.Cost == other.Cost &&
-		incr.BalanceInfo.Equal(other.BalanceInfo) &&
-		reflect.DeepEqual(incr.BalanceRateInterval, other.BalanceRateInterval) &&
-		incr.MinuteInfo.Equal(other.MinuteInfo)
+		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo)) &&
+		((incr.BalanceRateInterval == nil && other.BalanceRateInterval == nil) || reflect.DeepEqual(incr.BalanceRateInterval, other.BalanceRateInterval)) &&
+		((incr.MinuteInfo == nil && other.MinuteInfo == nil) || incr.MinuteInfo.Equal(other.MinuteInfo))
 }
 
 type Increments []*Increment
@@ -213,7 +215,10 @@ type Increments []*Increment
 func (incs Increments) GetTotalCost() float64 {
 	cost := 0.0
 	for _, increment := range incs {
-		cost += increment.Cost
+		if increment.CompressFactor == 0 {
+			increment.CompressFactor = 1
+		}
+		cost += (float64(increment.CompressFactor) * increment.Cost)
 	}
 	return cost
 }

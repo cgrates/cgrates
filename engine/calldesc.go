@@ -427,6 +427,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		deductConnectFee: cd.LoopIndex == 0,
 	}
 	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
+	cc.Timespans.Compress()
 	return cc, err
 }
 
@@ -518,6 +519,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 // from user's money balance.
 func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
+	cc.Timespans.Decompress()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetAccountKey(), err))
 		return
@@ -541,6 +543,7 @@ func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
 		cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	}
 	cc.Cost = cost
+	cc.Timespans.Compress()
 	return
 }
 
