@@ -76,7 +76,7 @@ func (fsCdr FSCdr) New(body []byte) (utils.RawCDR, error) {
 }
 
 func (fsCdr FSCdr) GetCgrId() string {
-	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME])
+	setupTime, _ := fsCdr.GetSetupTime()
 	return utils.Sha1(fsCdr.vars[FS_UUID], setupTime.String())
 }
 func (fsCdr FSCdr) GetAccId() string {

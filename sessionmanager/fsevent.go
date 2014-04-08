@@ -122,7 +122,8 @@ func (fsev FSEvent) GetTOR(fieldName string) string {
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[TOR], config.CgrConfig().DefaultTOR)
 }
 func (fsev FSEvent) GetCgrId() string {
-	return utils.Sha1(fsev[UUID], fsev[SETUP_TIME])
+	setupTime, _ := fsev.GetSetupTime("")
+	return utils.Sha1(fsev[UUID], setupTime.String())
 }
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
