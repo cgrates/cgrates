@@ -54,7 +54,7 @@ ALWAYS,*any,*any,*any,*any,00:00:00
 ASAP,*any,*any,*any,*any,*asap
 `
 	rates = `
-R1,0,0.2,60s,1s,0,*middle,2
+R1,0,0.2,60,1,0,*middle,2
 R2,0,0.1,60s,1s,0,*middle,2
 R3,0,0.05,60s,1s,0,*middle,2
 R4,1,1,1s,1s,0,*up,2
@@ -63,7 +63,7 @@ LANDLINE_OFFPEAK,0,1,1s,60s,0s,*up,4
 LANDLINE_OFFPEAK,0,1,1s,1s,60s,*up,4
 GBP_71,0.000000,5.55555,1s,1s,0s,*up,4
 GBP_72,0.000000,7.77777,1s,1s,0s,*up,4
-GBP_70,0.000000,1,1s,1s,0s,*up,4
+GBP_70,0.000000,1,1,1,0,*up,4
 RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s,*up,8
 RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8
 `
@@ -286,7 +286,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
-	expctRs, err := utils.NewRateSlot(0, 0.2, "60s", "1s", "0", utils.ROUNDING_MIDDLE, 2)
+	expctRs, err := utils.NewRateSlot(0, 0.2, "60", "1", "0", utils.ROUNDING_MIDDLE, 2)
 	if err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||

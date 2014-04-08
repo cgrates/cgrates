@@ -65,13 +65,13 @@ type RateSlot struct {
 // Used to set the durations we need out of strings
 func (self *RateSlot) SetDurations() error {
 	var err error
-	if self.rateUnitDur, err = time.ParseDuration(self.RateUnit); err != nil {
+	if self.rateUnitDur, err = ParseDurationWithSecs(self.RateUnit); err != nil {
 		return err
 	}
-	if self.rateIncrementDur, err = time.ParseDuration(self.RateIncrement); err != nil {
+	if self.rateIncrementDur, err = ParseDurationWithSecs(self.RateIncrement); err != nil {
 		return err
 	}
-	if self.groupIntervalStartDur, err = time.ParseDuration(self.GroupIntervalStart); err != nil {
+	if self.groupIntervalStartDur, err = ParseDurationWithSecs(self.GroupIntervalStart); err != nil {
 		return err
 	}
 	return nil
