@@ -23,6 +23,8 @@ import (
 )
 
 type CdrWriter interface {
+	FirstOrderId() int64
+	LastOrderId() int64
 	WriteCdr(cdr *utils.StoredCdr) string
 	Close()
 }

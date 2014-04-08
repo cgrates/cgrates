@@ -150,11 +150,12 @@ func TestAsRawCdrHttpForm(t *testing.T) {
 }
 
 func TestExportFieldValue(t *testing.T) {
-	cdr := StoredCdr{CgrId: FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+	cdr := StoredCdr{CgrId: FSCgrId("dsafdsaf"), OrderId: 123, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if cdr.ExportFieldValue(CGRID) != cdr.CgrId ||
+		cdr.ExportFieldValue(ORDERID) != "123" ||
 		cdr.ExportFieldValue(ACCID) != cdr.AccId ||
 		cdr.ExportFieldValue(CDRHOST) != cdr.CdrHost ||
 		cdr.ExportFieldValue(CDRSOURCE) != cdr.CdrSource ||

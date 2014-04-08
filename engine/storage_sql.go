@@ -577,10 +577,10 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // Return a slice of CDRs from storDb using optional filters.a
 // ignoreErr - do not consider cdrs with rating errors
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
-func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqTypes, directions, tenants, tors, accounts, subjects, destPrefixes []string,
+func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqTypes, directions, tenants, tors, accounts, subjects, destPrefixes []string, orderIdStart, orderIdEnd int64,
 	timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
-	q := bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,setup_time,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS))
+	q := bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,setup_time,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS))
 	fltr := new(bytes.Buffer)
 	if len(cgrIds) != 0 {
 		qIds := bytes.NewBufferString(" (")
@@ -736,6 +736,18 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 		}
 		fltr.Write(qIds.Bytes())
 	}
+	if orderIdStart != 0 {
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.WriteString(fmt.Sprintf(" %s.tbid>=%d", utils.TBL_CDRS_PRIMARY, orderIdStart))
+	}
+	if orderIdEnd != 0 {
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.WriteString(fmt.Sprintf(" %s.tbid<%d", utils.TBL_CDRS_PRIMARY, orderIdEnd))
+	}
 	if !timeStart.IsZero() {
 		if fltr.Len() != 0 {
 			fltr.WriteString(" AND")
@@ -775,11 +787,11 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 		var cgrid, accid, cdrhost, cdrsrc, reqtype, direction, tenant, tor, account, subject, destination string
 		var extraFields []byte
 		var setupTime, answerTime time.Time
-		var duration int64
 		var runid sql.NullString // So we can export unmediated CDRs
+		var orderid, duration int64
 		var cost sql.NullFloat64 // So we can export unmediated CDRs
 		var extraFieldsMp map[string]string
-		if err := rows.Scan(&cgrid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &setupTime, &answerTime, &duration,
+		if err := rows.Scan(&cgrid, &orderid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &setupTime, &answerTime, &duration,
 			&extraFields, &runid, &cost); err != nil {
 			return nil, err
 		}
@@ -787,7 +799,7 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %s, error: %s", cgrid, runid, err.Error())
 		}
 		storCdr := &utils.StoredCdr{
-			CgrId: cgrid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
+			CgrId: cgrid, OrderId: orderid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
 			TOR: tor, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(duration),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}

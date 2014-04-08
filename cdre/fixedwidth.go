@@ -81,6 +81,7 @@ type FixedWidthCdrWriter struct {
 	numberOfRecords                int
 	totalDuration                  time.Duration
 	totalCost                      float64
+	firstExpOrderId, lastExpOrderId                    int64
 }
 
 // Return Json marshaled callCost attached to
@@ -159,6 +160,16 @@ func (fwv *FixedWidthCdrWriter) metaHandler(tag, arg string) (string, error) {
 		return "", fmt.Errorf("Unsupported METATAG: %s", tag)
 	}
 	return "", nil
+}
+
+// Return the first exported Cdr OrderId
+func (fwv *FixedWidthCdrWriter) FirstOrderId() int64 {
+	return fwv.firstExpOrderId
+}
+
+// Return the last exported Cdr OrderId
+func (fwv *FixedWidthCdrWriter) LastOrderId() int64 {
+	return fwv.lastExpOrderId
 }
 
 // Writes the header into it's buffer
@@ -290,6 +301,12 @@ func (fwv *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 	fwv.totalDuration += cdr.Duration
 	fwv.totalCost += cdr.Cost
 	fwv.totalCost = utils.Round(fwv.totalCost, fwv.roundDecimals, utils.ROUNDING_MIDDLE)
+	if fwv.firstExpOrderId > cdr.OrderId {
+		fwv.firstExpOrderId = cdr.OrderId
+	}
+	if fwv.lastExpOrderId < cdr.OrderId {
+		fwv.lastExpOrderId = cdr.OrderId
+	}
 	return nil
 }
 

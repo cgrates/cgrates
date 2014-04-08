@@ -31,10 +31,20 @@ type CsvCdrWriter struct {
 	maskDestId                     string
 	maskLen                        int
 	exportedFields                 []*utils.RSRField // The fields exported, order important
+	firstExpOrderId, lastExpOrderId                 int64
 }
 
 func NewCsvCdrWriter(writer io.Writer, costShiftDigits, roundDecimals int, maskDestId string, maskLen int, exportedFields []*utils.RSRField) *CsvCdrWriter {
-	return &CsvCdrWriter{csv.NewWriter(writer), costShiftDigits, roundDecimals, maskDestId, maskLen, exportedFields}
+	return &CsvCdrWriter{writer:csv.NewWriter(writer), costShiftDigits: costShiftDigits, roundDecimals:roundDecimals, maskDestId:maskDestId, maskLen:maskLen, exportedFields:exportedFields}
+}
+
+// Return the first exported Cdr OrderId
+func (csvwr *CsvCdrWriter) FirstOrderId() int64 {
+	return csvwr.firstExpOrderId
+}
+
+func (csvwr *CsvCdrWriter) LastOrderId() int64 {
+	return csvwr.lastExpOrderId
 }
 
 func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
@@ -53,7 +63,15 @@ func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 		}
 		row[idx] = fld.ParseValue(fldVal)
 	}
+	if csvwr.firstExpOrderId > cdr.OrderId {
+		csvwr.firstExpOrderId = cdr.OrderId
+	}
+	if csvwr.lastExpOrderId < cdr.OrderId {
+		csvwr.lastExpOrderId = cdr.OrderId
+	}
 	return csvwr.writer.Write(row)
+
+	
 }
 
 func (csvwr *CsvCdrWriter) Close() {
