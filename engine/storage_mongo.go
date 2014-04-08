@@ -213,13 +213,13 @@ func (ms *MongoStorage) GetAllActionTimings() (ats map[string]ActionPlan, err er
 	return
 }
 
-func (ms *MongoStorage) LogCallCost(uuid, source string, cc *CallCost) error {
-	return ms.db.C("cclog").Insert(&LogCostEntry{uuid, cc, source})
+func (ms *MongoStorage) LogCallCost(cgrid, source string, cc *CallCost) error {
+	return ms.db.C("cclog").Insert(&LogCostEntry{cgrid, cc, source})
 }
 
-func (ms *MongoStorage) GetCallCostLog(uuid, source string) (cc *CallCost, err error) {
+func (ms *MongoStorage) GetCallCostLog(cgrid, source string) (cc *CallCost, err error) {
 	result := new(LogCostEntry)
-	err = ms.db.C("cclog").Find(bson.M{"_id": uuid, "source": source}).One(result)
+	err = ms.db.C("cclog").Find(bson.M{"_id": cgrid, "source": source}).One(result)
 	cc = result.CallCost
 	return
 }

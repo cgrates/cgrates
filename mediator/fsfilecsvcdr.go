@@ -35,20 +35,21 @@ type FScsvCDR struct {
 	torIdx,
 	accountIdx,
 	destinationIdx,
+	setupTimeIdx,
 	answerTimeIdx,
 	durationIdx int // Field indexes
 	cgrCfg *config.CGRConfig // CGR Config instance
 }
 
 func NewFScsvCDR(cdrRow []string, accIdIdx, subjectIdx, reqtypeIdx, directionIdx, tenantIdx, torIdx,
-	accountIdx, destinationIdx, answerTimeIdx, durationIdx int, cfg *config.CGRConfig) (*FScsvCDR, error) {
+	accountIdx, destinationIdx, setupTimeIdx, answerTimeIdx, durationIdx int, cfg *config.CGRConfig) (*FScsvCDR, error) {
 	fscdr := FScsvCDR{cdrRow, accIdIdx, subjectIdx, reqtypeIdx, directionIdx, tenantIdx,
-		torIdx, accountIdx, destinationIdx, answerTimeIdx, durationIdx, cfg}
+		torIdx, accountIdx, destinationIdx, setupTimeIdx, answerTimeIdx, durationIdx, cfg}
 	return &fscdr, nil
 }
 
 func (self *FScsvCDR) GetCgrId() string {
-	return utils.FSCgrId(self.rowData[self.accIdIdx])
+	return utils.Sha1(self.rowData[self.accIdIdx], self.rowData[self.setupTimeIdx])
 }
 
 func (self *FScsvCDR) GetAccId() string {

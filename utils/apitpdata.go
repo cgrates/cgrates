@@ -335,8 +335,8 @@ type AttrExpFileCdrs struct {
 	Account           []string // If provided, it will filter account
 	Subject           []string // If provided, it will filter the rating subject
 	DestinationPrefix []string // If provided, it will filter on destination prefix
-	OrderIdStart       int64   // Export from this order identifier
-	OrderIdEnd        int64   // Export smaller than this order identifier
+	OrderIdStart      int64    // Export from this order identifier
+	OrderIdEnd        int64    // Export smaller than this order identifier
 	TimeStart         string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd           string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors        bool     // Do not export errored CDRs
@@ -344,12 +344,12 @@ type AttrExpFileCdrs struct {
 }
 
 type ExportedFileCdrs struct {
-	ExportedFilePath string            // Full path to the newly generated export file
-	TotalRecords     int               // Number of CDRs to be exported
-	FirstOrderId, LastOrderId int64            // The order id of the last exported CDR
-	ExportedCgrIds   []string          // List of successfuly exported cgrids in the file
-	UnexportedCgrIds map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
-	
+	ExportedFilePath          string            // Full path to the newly generated export file
+	TotalRecords              int               // Number of CDRs to be exported
+	FirstOrderId, LastOrderId int64             // The order id of the last exported CDR
+	ExportedCgrIds            []string          // List of successfuly exported cgrids in the file
+	UnexportedCgrIds          map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
+
 }
 
 type AttrRemCdrs struct {

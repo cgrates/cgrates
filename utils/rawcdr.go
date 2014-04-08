@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-var PrimaryCdrFields []string = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, ANSWER_TIME, DURATION}
+var PrimaryCdrFields []string = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, DURATION}
 
 // RawCDR is the type containing all the original CDR fields, needs it as it is for later usage
 type RawCDR interface {

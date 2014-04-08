@@ -114,11 +114,11 @@ type CdrStorage interface {
 type LogStorage interface {
 	Storage
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogCallCost(uuid, source, runid string, cc *CallCost) error
+	LogCallCost(cgrid, source, runid string, cc *CallCost) error
 	LogError(uuid, source, runid, errstr string) error
 	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
 	LogActionTiming(source string, at *ActionTiming, as Actions) error
-	GetCallCostLog(uuid, source, runid string) (*CallCost, error)
+	GetCallCostLog(cgrid, source, runid string) (*CallCost, error)
 }
 
 type LoadStorage interface {

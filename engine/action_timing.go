@@ -236,9 +236,9 @@ func (at *ActionTiming) Execute() (err error) {
 			_, err := AccLock.Guard(ubId, func() (float64, error) {
 				ub, err := accountingStorage.GetAccount(ubId)
 				if err != nil {
-                                        Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
-                                        return 0, err
-                                } else if ub.Disabled {
+					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
+					return 0, err
+				} else if ub.Disabled {
 					return 0, fmt.Errorf("User %s is disabled", ubId)
 				}
 				if err != nil {

@@ -26,16 +26,16 @@ import (
 )
 
 type CsvCdrWriter struct {
-	writer                         *csv.Writer
-	costShiftDigits, roundDecimals int // Round floats like Cost using this number of decimals
-	maskDestId                     string
-	maskLen                        int
-	exportedFields                 []*utils.RSRField // The fields exported, order important
-	firstExpOrderId, lastExpOrderId                 int64
+	writer                          *csv.Writer
+	costShiftDigits, roundDecimals  int // Round floats like Cost using this number of decimals
+	maskDestId                      string
+	maskLen                         int
+	exportedFields                  []*utils.RSRField // The fields exported, order important
+	firstExpOrderId, lastExpOrderId int64
 }
 
 func NewCsvCdrWriter(writer io.Writer, costShiftDigits, roundDecimals int, maskDestId string, maskLen int, exportedFields []*utils.RSRField) *CsvCdrWriter {
-	return &CsvCdrWriter{writer:csv.NewWriter(writer), costShiftDigits: costShiftDigits, roundDecimals:roundDecimals, maskDestId:maskDestId, maskLen:maskLen, exportedFields:exportedFields}
+	return &CsvCdrWriter{writer: csv.NewWriter(writer), costShiftDigits: costShiftDigits, roundDecimals: roundDecimals, maskDestId: maskDestId, maskLen: maskLen, exportedFields: exportedFields}
 }
 
 // Return the first exported Cdr OrderId
@@ -71,7 +71,6 @@ func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 	}
 	return csvwr.writer.Write(row)
 
-	
 }
 
 func (csvwr *CsvCdrWriter) Close() {

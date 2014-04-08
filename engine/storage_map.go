@@ -428,14 +428,14 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlan, err erro
 	return
 }
 
-func (ms *MapStorage) LogCallCost(uuid, source, runid string, cc *CallCost) error {
+func (ms *MapStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
 	result, err := ms.ms.Marshal(cc)
-	ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+uuid] = result
+	ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid] = result
 	return err
 }
 
-func (ms *MapStorage) GetCallCostLog(uuid, source, runid string) (cc *CallCost, err error) {
-	if values, ok := ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+uuid]; ok {
+func (ms *MapStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
+	if values, ok := ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid]; ok {
 		err = ms.ms.Unmarshal(values, &cc)
 	} else {
 		return nil, errors.New("not found")

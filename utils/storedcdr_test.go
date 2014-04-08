@@ -31,11 +31,12 @@ func TestStoredCdrInterfaces(t *testing.T) {
 
 func TestNewStoredCdrFromRawCDR(t *testing.T) {
 	cgrCdr := CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "cdrsource": "internal_test", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
-		"account": "1001", "subject": "1001", "destination": "1002", "answer_time": "2013-11-07T08:42:26Z", "duration": "10",
+		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-07T08:42:20Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "10",
 		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
-	expctRtCdr := &StoredCdr{CgrId: FSCgrId(cgrCdr["accid"]), AccId: cgrCdr["accid"], CdrHost: cgrCdr["cdrhost"], CdrSource: cgrCdr["cdrsource"], ReqType: cgrCdr["reqtype"],
+	setupTime, _ := ParseTimeDetectLayout(cgrCdr["setup_time"])
+	expctRtCdr := &StoredCdr{CgrId: Sha1(cgrCdr["accid"], setupTime.String()), AccId: cgrCdr["accid"], CdrHost: cgrCdr["cdrhost"], CdrSource: cgrCdr["cdrsource"], ReqType: cgrCdr["reqtype"],
 		Direction: cgrCdr["direction"], Tenant: cgrCdr["tenant"], TOR: cgrCdr["tor"], Account: cgrCdr["account"], Subject: cgrCdr["subject"],
-		Destination: cgrCdr["destination"], AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), Duration: time.Duration(10) * time.Second,
+		Destination: cgrCdr["destination"], SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), Duration: time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, MediationRunId: DEFAULT_RUNID, Cost: -1}
 	if rt, err := NewStoredCdrFromRawCDR(cgrCdr); err != nil {
 		t.Error(err)
@@ -45,11 +46,11 @@ func TestNewStoredCdrFromRawCDR(t *testing.T) {
 }
 
 func TestStoredCdrFields(t *testing.T) {
-	ratedCdr := StoredCdr{CgrId: FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: time.Unix(1383813746, 0), Duration: 10,
+	ratedCdr := StoredCdr{CgrId: Sha1("dsafdsaf", time.Unix(1383813746, 0).String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813746, 0), AnswerTime: time.Unix(1383813746, 0), Duration: 10,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if ratedCdr.GetCgrId() != "b18944ef4dc618569f24c27b9872827a242bad0c" {
+	if ratedCdr.GetCgrId() != Sha1("dsafdsaf", time.Unix(1383813746, 0).String()) {
 		t.Error("Error parsing cdr: ", ratedCdr)
 	}
 	if ratedCdr.GetAccId() != "dsafdsaf" {
@@ -79,6 +80,11 @@ func TestStoredCdrFields(t *testing.T) {
 	if ratedCdr.GetReqType() != RATED {
 		t.Error("Error parsing cdr: ", ratedCdr)
 	}
+	setupTime, _ := ratedCdr.GetSetupTime()
+	expectedSTime, _ := time.Parse(time.RFC3339, "2013-11-07T08:42:26Z")
+	if setupTime.UTC() != expectedSTime {
+		t.Error("Error parsing cdr: ", ratedCdr)
+	}
 	answerTime, _ := ratedCdr.GetAnswerTime()
 	expectedATime, _ := time.Parse(time.RFC3339, "2013-11-07T08:42:26Z")
 	if answerTime.UTC() != expectedATime {
@@ -100,8 +106,8 @@ func TestStoredCdrFields(t *testing.T) {
 }
 
 func TestAsRawCdrHttpForm(t *testing.T) {
-	ratedCdr := StoredCdr{CgrId: FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+	ratedCdr := StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	cdrForm := ratedCdr.AsRawCdrHttpForm()
@@ -135,6 +141,9 @@ func TestAsRawCdrHttpForm(t *testing.T) {
 	if cdrForm.Get(DESTINATION) != ratedCdr.Destination {
 		t.Errorf("Expected: %s, received: %s", ratedCdr.Destination, cdrForm.Get(DESTINATION))
 	}
+	if cdrForm.Get(SETUP_TIME) != "2013-11-07 08:42:20 +0000 UTC" {
+		t.Errorf("Expected: %s, received: %s", "2013-11-07 08:42:26 +0000 UTC", cdrForm.Get(SETUP_TIME))
+	}
 	if cdrForm.Get(ANSWER_TIME) != "2013-11-07 08:42:26 +0000 UTC" {
 		t.Errorf("Expected: %s, received: %s", "2013-11-07 08:42:26 +0000 UTC", cdrForm.Get(ANSWER_TIME))
 	}
@@ -150,8 +159,8 @@ func TestAsRawCdrHttpForm(t *testing.T) {
 }
 
 func TestExportFieldValue(t *testing.T) {
-	cdr := StoredCdr{CgrId: FSCgrId("dsafdsaf"), OrderId: 123, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
+	cdr := StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if cdr.ExportFieldValue(CGRID) != cdr.CgrId ||
@@ -166,7 +175,7 @@ func TestExportFieldValue(t *testing.T) {
 		cdr.ExportFieldValue(ACCOUNT) != cdr.Account ||
 		cdr.ExportFieldValue(SUBJECT) != cdr.Subject ||
 		cdr.ExportFieldValue(DESTINATION) != cdr.Destination ||
-		cdr.ExportFieldValue(SETUP_TIME) != "0001-01-01 00:00:00 +0000 UTC" ||
+		cdr.ExportFieldValue(SETUP_TIME) != cdr.SetupTime.String() ||
 		cdr.ExportFieldValue(ANSWER_TIME) != cdr.AnswerTime.String() ||
 		cdr.ExportFieldValue(DURATION) != "10" ||
 		cdr.ExportFieldValue(MEDI_RUNID) != cdr.MediationRunId ||

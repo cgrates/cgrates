@@ -461,7 +461,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 	return nil
 }
 
-func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (err error) {
+func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
 	//ToDo: Add cgrid to logCallCost
 	if self.Db == nil {
 		//timespans.Logger.Warning("Cannot write log to database.")
@@ -471,10 +471,9 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, timespans, source, runid, cost_time)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, '%s','%s','%s',now()) ON DUPLICATE KEY UPDATE direction=values(direction), tenant=values(tenant), tor=values(tor), account=values(account), subject=values(subject), destination=values(destination), cost=values(cost), timespans=values(timespans), source=values(source), cost_time=now()",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, direction, tenant, tor, account, subject, destination, cost, timespans, source, runid, cost_time)VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', %f, '%s','%s','%s',now()) ON DUPLICATE KEY UPDATE direction=values(direction), tenant=values(tenant), tor=values(tor), account=values(account), subject=values(subject), destination=values(destination), cost=values(cost), timespans=values(timespans), source=values(source), cost_time=now()",
 		utils.TBL_COST_DETAILS,
-		utils.FSCgrId(uuid),
-		uuid,
+		cgrid,
 		cc.Direction,
 		cc.Tenant,
 		cc.TOR,
@@ -492,16 +491,16 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 }
 
 func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	qry := fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, timespans, source  FROM %s WHERE cgrid='%s' AND runid='%s'",
+	qry := fmt.Sprintf("SELECT cgrid, direction, tenant, tor, account, subject, destination, cost, timespans, source  FROM %s WHERE cgrid='%s' AND runid='%s'",
 		utils.TBL_COST_DETAILS, cgrid, runid)
 	if len(source) != 0 {
 		qry += fmt.Sprintf(" AND source='%s'", source)
 	}
 	row := self.Db.QueryRow(qry)
-	var accid, src string
+	var src string
 	var timespansJson string
 	cc = &CallCost{Cost: -1}
-	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
+	err = row.Scan(&cgrid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
 		&cc.Destination, &cc.Cost, &timespansJson, &src)
 	if len(timespansJson) == 0 { // No costs returned
 		return nil, nil

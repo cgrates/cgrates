@@ -114,7 +114,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			}
 		}
 		csvWriter.Close()
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds, 
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
 			FirstOrderId: csvWriter.FirstOrderId(), LastOrderId: csvWriter.LastOrderId()}
 	case utils.CDRE_FIXED_WIDTH:
 		if len(fileName) == 0 {

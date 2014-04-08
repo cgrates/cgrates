@@ -105,7 +105,7 @@ func (self *Mediator) getCostsFromRater(cdr *utils.StoredCdr) (*engine.CallCost,
 		self.logDb.LogError(cdr.CgrId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, err.Error())
 	} else {
 		// If the mediator calculated a price it will write it to logdb
-		self.logDb.LogCallCost(cdr.AccId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, cc)
+		self.logDb.LogCallCost(utils.Sha1(cdr.AccId, cdr.SetupTime.String()), engine.MEDIATOR_SOURCE, cdr.MediationRunId, cc)
 	}
 	return cc, err
 }

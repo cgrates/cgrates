@@ -25,6 +25,7 @@ import (
 type Event interface {
 	New(string) Event
 	GetName() string
+	GetCgrId() string
 	GetUUID() string
 	GetDirection(string) string
 	GetSubject(string) string

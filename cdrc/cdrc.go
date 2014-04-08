@@ -138,7 +138,6 @@ func (self *Cdrc) recordAsStoredCdr(record []string) (*utils.StoredCdr, error) {
 		}
 		switch cfgFieldName {
 		case utils.ACCID:
-			ratedCdr.CgrId = utils.FSCgrId(fieldVal)
 			ratedCdr.AccId = fieldVal
 		case utils.REQTYPE:
 			ratedCdr.ReqType = fieldVal
@@ -171,6 +170,7 @@ func (self *Cdrc) recordAsStoredCdr(record []string) (*utils.StoredCdr, error) {
 		}
 
 	}
+	ratedCdr.CgrId = utils.Sha1(ratedCdr.AccId, ratedCdr.SetupTime.String())
 	return ratedCdr, nil
 }
 

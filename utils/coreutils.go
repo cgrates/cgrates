@@ -41,18 +41,16 @@ func FirstNonEmpty(vals ...string) string {
 	return ""
 }
 
-func SHA1(text string) string {
+func Sha1(attrs ...string) string {
 	hasher := sha1.New()
-	hasher.Write([]byte(text))
+	for _, attr := range attrs {
+		hasher.Write([]byte(attr))
+	}
 	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
 
-func FSCgrId(uuid string) string {
-	return SHA1(uuid)
-}
-
 func NewTPid() string {
-	return SHA1(GenUUID())
+	return Sha1(GenUUID())
 }
 
 // helper function for uuid generation

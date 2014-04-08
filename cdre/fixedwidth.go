@@ -69,19 +69,19 @@ func NewFWCdrWriter(logDb engine.LogStorage, outFile *os.File, exportTpl *config
 }
 
 type FixedWidthCdrWriter struct {
-	logDb                          engine.LogStorage // Used to extract cost_details if these are requested
-	writer                         io.Writer
-	exportTemplate                 *config.CgrXmlCdreFwCfg
-	exportId                       string // Unique identifier or this export
-	costShiftDigits, roundDecimals int
-	maskDestId                     string
-	maskLen                        int
-	header, content, trailer       *bytes.Buffer
-	firstCdrATime, lastCdrATime    time.Time
-	numberOfRecords                int
-	totalDuration                  time.Duration
-	totalCost                      float64
-	firstExpOrderId, lastExpOrderId                    int64
+	logDb                           engine.LogStorage // Used to extract cost_details if these are requested
+	writer                          io.Writer
+	exportTemplate                  *config.CgrXmlCdreFwCfg
+	exportId                        string // Unique identifier or this export
+	costShiftDigits, roundDecimals  int
+	maskDestId                      string
+	maskLen                         int
+	header, content, trailer        *bytes.Buffer
+	firstCdrATime, lastCdrATime     time.Time
+	numberOfRecords                 int
+	totalDuration                   time.Duration
+	totalCost                       float64
+	firstExpOrderId, lastExpOrderId int64
 }
 
 // Return Json marshaled callCost attached to
