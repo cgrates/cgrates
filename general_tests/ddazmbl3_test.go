@@ -113,7 +113,7 @@ cgrates.org,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_
 
 func TestExecuteActions3(t *testing.T) {
 	scheduler.NewScheduler().LoadActionTimings(acntDb3)
-	time.Sleep(time.Duration(10) * time.Millisecond) // Give time to scheduler to topup the account
+	time.Sleep(time.Duration(100) * time.Microsecond) // Give time to scheduler to topup the account
 	if acnt, err := acntDb3.GetAccount("*out:cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 1 {
