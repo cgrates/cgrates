@@ -164,9 +164,7 @@ func (tss TimeSpans) Compress() {
 		var cIncrs Increments
 		for _, incr := range ts.Increments {
 			if len(cIncrs) == 0 || !cIncrs[len(cIncrs)-1].Equal(incr) {
-				if incr.CompressFactor == 0 {
-					incr.CompressFactor = 1
-				}
+				incr.GetCompressFactor() // sideefect
 				cIncrs = append(cIncrs, incr)
 			} else {
 				cIncrs[len(cIncrs)-1].CompressFactor++
@@ -180,10 +178,7 @@ func (tss TimeSpans) Decompress() {
 	for _, ts := range tss {
 		var incrs Increments
 		for _, cIncr := range ts.Increments {
-			if cIncr.CompressFactor == 0 { // if never compressed
-				cIncr.CompressFactor = 1
-			}
-			for i := 0; i < cIncr.CompressFactor; i++ {
+			for i := 0; i < cIncr.GetCompressFactor(); i++ {
 				incrs = append(incrs, cIncr.Clone())
 			}
 		}
@@ -210,17 +205,28 @@ func (incr *Increment) Equal(other *Increment) bool {
 		((incr.MinuteInfo == nil && other.MinuteInfo == nil) || incr.MinuteInfo.Equal(other.MinuteInfo))
 }
 
+func (incr *Increment) GetCompressFactor() int {
+	if incr.CompressFactor == 0 {
+		incr.CompressFactor = 1
+	}
+	return incr.CompressFactor
+}
+
 type Increments []*Increment
 
 func (incs Increments) GetTotalCost() float64 {
 	cost := 0.0
 	for _, increment := range incs {
-		if increment.CompressFactor == 0 {
-			increment.CompressFactor = 1
-		}
-		cost += (float64(increment.CompressFactor) * increment.Cost)
+		cost += (float64(increment.GetCompressFactor()) * increment.Cost)
 	}
 	return cost
+}
+
+func (incs Increments) Length() (length int) {
+	for _, incr := range incs {
+		length += incr.GetCompressFactor()
+	}
+	return
 }
 
 // Returns the duration of the timespan
@@ -253,7 +259,7 @@ func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
 // It also sets the Cost field of this timespan (used for refund on session
 // manager debit loop where the cost cannot be recalculated)
 func (ts *TimeSpan) getCost() float64 {
-	if len(ts.Increments) == 0 {
+	if ts.Increments.Length() == 0 {
 		if ts.RateInterval == nil {
 			return 0
 		}
@@ -261,7 +267,7 @@ func (ts *TimeSpan) getCost() float64 {
 		ts.Cost = utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
 		return ts.Cost
 	} else {
-		return ts.Increments[0].Cost * float64(len(ts.Increments))
+		return ts.Increments[0].Cost * float64(ts.Increments.Length())
 	}
 }
 
@@ -293,7 +299,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 // returns whether the timespan has all increments marked as paid and if not
 // it also returns the first unpaied increment
 func (ts *TimeSpan) IsPaid() (bool, int) {
-	if len(ts.Increments) == 0 {
+	if ts.Increments.Length() == 0 {
 		return false, 0
 	}
 	for incrementIndex, increment := range ts.Increments {

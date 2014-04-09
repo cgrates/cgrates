@@ -44,6 +44,7 @@ PSTN_71,+4971
 PSTN_72,+4972
 PSTN_70,+4970
 DST_UK_Mobile_BIG5,447956
+*any,
 `
 	timings = `
 WORKDAYS_00,*any,*any,*any,1;2;3;4;5,00:00:00
@@ -82,6 +83,7 @@ T2,GERMANY_O2,GBP_70
 T2,GERMANY_PREMIUM,GBP_71
 DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5
+DATA_RATE,*any,R4
 `
 	ratingPlans = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
@@ -94,6 +96,7 @@ DEFAULT,RT_DEFAULT,WORKDAYS_00,10
 EVENING,P1,WORKDAYS_00,10
 EVENING,P2,WORKDAYS_18,10
 EVENING,P2,WEEKENDS,10
+EVENING,DATA_RATE,ALWAYS,10
 TDRT,T1,WORKDAYS_00,10
 TDRT,T2,WORKDAYS_00,10
 G,RT_STANDARD,WORKDAYS_00,10
@@ -186,7 +189,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 10 {
+	if len(csvr.destinations) != 11 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
@@ -352,7 +355,7 @@ func TestLoadRates(t *testing.T) {
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.destinationRates) != 9 {
+	if len(csvr.destinationRates) != 10 {
 		t.Error("Failed to load destinationrates: ", csvr.destinationRates)
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
@@ -463,9 +466,9 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 }
 
-func TestLoadDestinationRateTimings(t *testing.T) {
+func TestLoadRatingPlans(t *testing.T) {
 	if len(csvr.ratingPlans) != 9 {
-		t.Error("Failed to load rate timings: ", csvr.ratingPlans)
+		t.Error("Failed to load rating plans: ", len(csvr.ratingPlans))
 	}
 	rplan := csvr.ratingPlans["STANDARD"]
 	expected := &RatingPlan{

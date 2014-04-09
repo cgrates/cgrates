@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/history"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -642,6 +643,23 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 	cd1.MaxDebit()
 	if cd1.account.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 {
 		t.Error("Error using minutes: ", cd1.account.BalanceMap[MINUTES+OUTBOUND][0].Value)
+	}
+}
+
+func TestCDGetCostANY(t *testing.T) {
+	cd1 := &CallDescriptor{
+		Direction:    "*out",
+		TOR:          "0",
+		Tenant:       "vdf",
+		Subject:      "rif",
+		Destination:  utils.ANY,
+		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 5, 0, time.UTC),
+		LoopIndex:    0,
+		CallDuration: 0}
+	cc, err := cd1.GetCost()
+	if err != nil || cc.Cost != 6 {
+		t.Errorf("Error getting *any dest: %+v %v", cc, err)
 	}
 }
 
