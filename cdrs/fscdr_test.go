@@ -78,17 +78,17 @@ func TestCDRFields(t *testing.T) {
 	if fsCdr.GetReqType() != utils.RATED {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
-	expectedSTime, _ := time.Parse(time.RFC3339, "2013-08-04T09:50:54Z")
+	expectedSTime := time.Date(2013, 8, 4, 9, 50, 54, 385581000, time.UTC)
 	if setupTime.UTC() != expectedSTime {
-		t.Error("Error parsing cdr: ", fsCdr)
+		t.Error("Error parsing setupTime: ", setupTime.UTC())
 	}
 	answerTime, _ := fsCdr.GetAnswerTime()
-	expectedATime, _ := time.Parse(time.RFC3339, "2013-08-04T09:50:56Z")
+	expectedATime := time.Date(2013, 8, 4, 9, 50, 56, 285587000, time.UTC)
 	if answerTime.UTC() != expectedATime {
-		t.Error("Error parsing cdr: ", fsCdr)
+		t.Error("Error parsing answerTime: ", answerTime.UTC())
 	}
 	if fsCdr.GetDuration() != 4000000000 {
-		t.Error("Error parsing cdr: ", fsCdr)
+		t.Error("Error parsing duration: ", fsCdr.GetDuration())
 	}
 	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "sip_user_agent"}, &utils.RSRField{Id: "read_codec"}, &utils.RSRField{Id: "write_codec"}}
 	extraFields := fsCdr.GetExtraFields()

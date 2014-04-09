@@ -43,10 +43,10 @@ const (
 	FS_UUID         = "uuid" // -Unique ID for this call leg
 	FS_CSTMID       = "cgr_tenant"
 	FS_CALL_DEST_NR = "dialed_extension"
-	FS_PARK_TIME    = "start_epoch"
-	FS_SETUP_TIME   = "start_epoch"
-	FS_ANSWER_TIME  = "answer_epoch"
-	FS_HANGUP_TIME  = "end_epoch"
+	FS_PARK_TIME    = "start_uepoch"
+	FS_SETUP_TIME   = "start_uepoch"
+	FS_ANSWER_TIME  = "answer_uepoch"
+	FS_HANGUP_TIME  = "end_uepoch"
 	FS_DURATION     = "billsec"
 	FS_USERNAME     = "user_name"
 	FS_IP           = "sip_local_network_addr"
@@ -155,19 +155,13 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 }
 
 func (fsCdr FSCdr) GetSetupTime() (t time.Time, err error) {
-	at, err := strconv.ParseInt(fsCdr.vars[FS_SETUP_TIME], 0, 64)
-	t = time.Unix(at, 0)
-	return
+	return utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME])
 }
 func (fsCdr FSCdr) GetAnswerTime() (t time.Time, err error) {
-	at, err := strconv.ParseInt(fsCdr.vars[FS_ANSWER_TIME], 0, 64)
-	t = time.Unix(at, 0)
-	return
+	return utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME])
 }
 func (fsCdr FSCdr) GetHangupTime() (t time.Time, err error) {
-	hupt, err := strconv.ParseInt(fsCdr.vars[FS_HANGUP_TIME], 0, 64)
-	t = time.Unix(hupt, 0)
-	return
+	return utils.ParseTimeDetectLayout(fsCdr.vars[FS_HANGUP_TIME])
 }
 
 // Extracts duration as considered by the telecom switch

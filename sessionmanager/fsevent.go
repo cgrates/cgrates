@@ -23,7 +23,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -166,9 +165,7 @@ func (fsev FSEvent) GetAnswerTime(fieldName string) (t time.Time, err error) {
 }
 
 func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev[END_TIME], 0, 64)
-	t = time.Unix(0, st*1000)
-	return
+	return utils.ParseTimeDetectLayout(fsev[END_TIME])
 }
 
 func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error) {
