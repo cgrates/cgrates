@@ -25,3 +25,5 @@ PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 API reference [godoc](http://godoc.org/github.com/cgrates/cgrates/apier)
 
 Also check irc.freenode.net#cgrates and [Google group](https://groups.google.com/forum/#!forum/cgrates) for a more real-time support.
+
+[![Analytics](https://ga-beacon.appspot.com/UA-10073547-11/cgrates/readme)](https://github.com/igrigorik/ga-beacon)
