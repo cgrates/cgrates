@@ -381,7 +381,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 
 // Mark all action trigers as ready for execution
 // If the action is not nil it acts like a filter
-func (ub *Account) resetActionTriggers(a *Action) {
+func (ub *Account) ResetActionTriggers(a *Action) {
 	for _, at := range ub.ActionTriggers {
 		if !at.Match(a) {
 			continue
