@@ -27,17 +27,17 @@ import (
 	"github.com/cgrates/cgrates/scheduler"
 )
 
-var ratingDb engine.RatingStorage
-var acntDb engine.AccountingStorage
+var ratingDb2 engine.RatingStorage
+var acntDb2 engine.AccountingStorage
 
-func TestSetStorage(t *testing.T) {
-	ratingDb, _ = engine.NewMapStorageJson()
-	engine.SetRatingStorage(ratingDb)
-	acntDb, _ = engine.NewMapStorageJson()
-	engine.SetAccountingStorage(acntDb)
+func TestSetStorage2(t *testing.T) {
+	ratingDb2, _ = engine.NewMapStorageJson()
+	engine.SetRatingStorage(ratingDb2)
+	acntDb2, _ = engine.NewMapStorageJson()
+	engine.SetAccountingStorage(acntDb2)
 }
 
-func TestLoadCsvTp(t *testing.T) {
+func TestLoadCsvTp2(t *testing.T) {
 	timings := `ALWAYS,*any,*any,*any,*any,00:00:00
 ASAP,*any,*any,*any,*any,*asap`
 	destinations := `DST_UK_Mobile_BIG5,447596
@@ -51,13 +51,13 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	ratingProfiles := `cgrates.org,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
 cgrates.org,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	sharedGroups := ``
-	actions := `TOPUP10_AC,*topup_reset,*monetary,*out,10,*unlimited,*any,,10,,,10
+	actions := `TOPUP10_AC,*topup_reset,*monetary,*out,0,*unlimited,*any,,10,,,10
 TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,`
-	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions)
+	csvr := engine.NewStringCSVReader(ratingDb2, acntDb2, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions)
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}
@@ -92,13 +92,13 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12345"); err != nil {
+	if acnt, err := acntDb2.GetAccount("*out:cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
-	ratingDb.CacheRating(nil, nil, nil, nil)
-	acntDb.CacheAccounting(nil, nil, nil)
+	ratingDb2.CacheRating(nil, nil, nil, nil)
+	acntDb2.CacheAccounting(nil, nil, nil)
 	if cachedDests := cache2go.CountEntries(engine.DESTINATION_PREFIX); cachedDests != 2 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}
@@ -113,21 +113,21 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	}
 }
 
-func TestExecuteActions(t *testing.T) {
-	scheduler.NewScheduler().LoadActionTimings(acntDb)
+func TestExecuteActions2(t *testing.T) {
+	scheduler.NewScheduler().LoadActionTimings(acntDb2)
 	time.Sleep(time.Duration(10) * time.Millisecond) // Give time to scheduler to topup the account
-	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12345"); err != nil {
+	if acnt, err := acntDb2.GetAccount("*out:cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
 	} else if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 40 {
 		t.Errorf("Account does not have enough minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
-	} else if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != 10 {
+	} else if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != 0 {
 		t.Error("Account does not have enough monetary balance", acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value)
 	}
 }
 
-func TestDebit(t *testing.T) {
+func TestDebit2(t *testing.T) {
 	cd := &engine.CallDescriptor{
 		Direction:   "*out",
 		TOR:         "call",
@@ -143,14 +143,17 @@ func TestDebit(t *testing.T) {
 	} else if cc.Cost != 0.01 {
 		t.Error("Wrong cost returned: ", cc.Cost)
 	}
-	acnt, err := acntDb.GetAccount("*out:cgrates.org:12345")
+	acnt, err := acntDb2.GetAccount("*out:cgrates.org:12345")
 	if err != nil {
 		t.Error(err)
+	}
+	if len(acnt.BalanceMap) != 2 {
+		t.Error("Wrong number of user balances found", acnt.BalanceMap)
 	}
 	if acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value != 20 {
 		t.Error("Account does not have expected minutes in balance", acnt.BalanceMap[engine.MINUTES+engine.OUTBOUND][0].Value)
 	}
-	if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != 9.99 {
+	if acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value != -0.01 {
 		t.Error("Account does not have expected monetary balance", acnt.BalanceMap[engine.CREDIT+engine.OUTBOUND][0].Value)
 	}
 }
