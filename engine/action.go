@@ -111,7 +111,7 @@ func logAction(ub *Account, a *Action) (err error) {
 }
 
 func resetTriggersAction(ub *Account, a *Action) (err error) {
-	ub.resetActionTriggers(a)
+	ub.ResetActionTriggers(a)
 	return
 }
 
@@ -194,7 +194,7 @@ func genericReset(ub *Account) error {
 		ub.BalanceMap[k] = BalanceChain{&Balance{Value: 0}}
 	}
 	ub.UnitCounters = make([]*UnitsCounter, 0)
-	ub.resetActionTriggers(nil)
+	ub.ResetActionTriggers(nil)
 	return nil
 }
 

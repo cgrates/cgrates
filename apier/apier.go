@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path"
@@ -421,6 +422,54 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		userBalance.ActionTriggers = append(userBalance.ActionTriggers, at)
 
 		if err = self.AccountDb.SetAccount(userBalance); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	})
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+type AttrResetTriggeredAction struct {
+	Tenant         string
+	Account        string
+	Direction      string
+	BalanceType    string
+	ThresholdType  string
+	ThresholdValue float64
+}
+
+func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply *string) error {
+	if attr.Direction == "" {
+		attr.Direction = engine.OUTBOUND
+	}
+	extraParameters, err := json.Marshal(struct {
+		ThresholdType  string
+		ThresholdValue float64
+	}{attr.ThresholdType, attr.ThresholdValue})
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	a := &engine.Action{
+		BalanceType:     attr.BalanceType,
+		Direction:       attr.Direction,
+		ExtraParameters: string(extraParameters),
+	}
+	accID := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
+	_, err = engine.AccLock.Guard(accID, func() (float64, error) {
+		acc, err := self.AccountDb.GetAccount(accID)
+		if err != nil {
+			return 0, err
+		}
+
+		acc.ResetActionTriggers(a)
+
+		if err = self.AccountDb.SetAccount(acc); err != nil {
 			return 0, err
 		}
 		return 0, nil
