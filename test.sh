@@ -15,8 +15,8 @@ go test -i github.com/cgrates/cgrates/cdre
 
 go test github.com/cgrates/cgrates/engine
 en=$?
-go test github.com/cgrates/cgrates/charging_tests
-ct=$?
+go test github.com/cgrates/cgrates/general_tests
+gt=$?
 go test github.com/cgrates/cgrates/sessionmanager
 sm=$?
 go test github.com/cgrates/cgrates/config
@@ -41,4 +41,4 @@ go test github.com/cgrates/cgrates/cdre
 cdre=$?
 
 
-exit $en && $ct && $sm && $cfg && $bl && $cr && $md && $cdrs && $cdrc && $fs && $ut && $hs && $c2g && $cdre
+exit $en && $gt && $sm && $cfg && $bl && $cr && $md && $cdrs && $cdrc && $fs && $ut && $hs && $c2g && $cdre
