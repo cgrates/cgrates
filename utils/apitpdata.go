@@ -318,12 +318,13 @@ type CachedItemAge struct {
 type AttrExpFileCdrs struct {
 	CdrFormat         string   // Cdr output file format <utils.CdreCdrFormats>
 	ExportId          string   // Optional exportid
+	ExportDir         string   // If provided it overwrites the configured export directory
 	ExportFileName    string   // If provided the output filename will be set to this
 	ExportTemplate    string   // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents)
-	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically
+	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
+	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
 	MaskDestinationId string   // Overwrite configured MaskDestId
-	MaskLength        int      // Overwrite configured MaskLength
+	MaskLength        int      // Overwrite configured MaskLength, -1 to use general config ones
 	CgrIds            []string // If provided, it will filter based on the cgrids present in list
 	MediationRunId    []string // If provided, it will filter on mediation runid
 	CdrHost           []string // If provided, it will filter cdrhost
