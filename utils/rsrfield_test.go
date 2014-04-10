@@ -83,3 +83,12 @@ func TestNewRSRField(t *testing.T) {
 		t.Errorf("Unexpected RSRField received: %v", rsrField)
 	}
 }
+
+func TestNewRSRFieldDDz(t *testing.T) {
+	expectRSRField := &RSRField{Id: "effective_caller_id_number", RSRule: &ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}
+	if rsrField, err := NewRSRField(`~effective_caller_id_number:s/(\d+)/+$1/`); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
+		t.Errorf("Unexpected RSRField received: %v", rsrField)
+	}
+}

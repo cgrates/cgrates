@@ -31,3 +31,12 @@ func TestProcessReSearchReplace(t *testing.T) {
 		t.Error("Unexpected output from SearchReplace: ", outStr)
 	}
 }
+
+func TestProcessReSearchReplace2(t *testing.T) {
+	rsr := &ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}
+	source := "4986517174963"
+	expectOut := "+4986517174963"
+	if outStr := rsr.Process(source); outStr != expectOut {
+		t.Error("Unexpected output from SearchReplace: ", outStr)
+	}
+}

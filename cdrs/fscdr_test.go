@@ -180,3 +180,57 @@ func TestSearchReplaceInExtraFields(t *testing.T) {
 		t.Error("Error parsing extra fields: ", extraFields)
 	}
 }
+
+func TestDDazRSRExtraFields(t *testing.T) {
+	eFieldsCfg := []byte(`[cdrs]
+extra_fields =  ~effective_caller_id_number:s/(\d+)/+$1/
+
+`)
+	simpleJsonCdr := []byte(`{
+    "core-uuid": "feef0b51-7fdf-4c4a-878e-aff233752de2",
+    "channel_data": {
+        "state": "CS_REPORTING",
+        "direction": "inbound",
+        "state_number": "11",
+        "flags": "0=1;1=1;3=1;36=1;37=1;39=1;42=1;47=1;52=1;73=1;75=1;94=1",
+        "caps": "1=1;2=1;3=1;4=1;5=1;6=1"
+    },
+    "variables": {
+        "direction": "inbound",
+        "uuid": "86cfd6e2-dbda-45a3-b59d-f683ec368e8b",
+        "session_id": "5",
+        "accountcode": "1001",
+        "user_context": "default",
+        "effective_caller_id_name": "Extension 1001",
+        "effective_caller_id_number": "4986517174963",
+        "outbound_caller_id_name": "FreeSWITCH",
+        "outbound_caller_id_number": "0000000000"
+    },
+    "times": {
+        "created_time": "1396984221278217",
+        "profile_created_time": "1396984221278217",
+        "progress_time": "0",
+        "progress_media_time": "0",
+        "answered_time": "0",
+        "hangup_time": "0",
+        "resurrect_time": "0",
+        "transfer_time": "1396984221377035"
+    }
+}`)
+	var err error
+	cfg, err = config.NewCGRConfigFromBytes(eFieldsCfg)
+	if err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",
+		RSRule: &utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}) {
+		t.Errorf("Unexpected value for config CdrsExtraFields: %v", cfg.CDRSExtraFields)
+	}
+	fsCdr, err := new(FSCdr).New(simpleJsonCdr)
+	if err != nil {
+		t.Error("Could not parse cdr", err.Error())
+	}
+	extraFields := fsCdr.GetExtraFields()
+	if extraFields["effective_caller_id_number"] != "+4986517174963" {
+		t.Error("Unexpected effective_caller_id_number received", extraFields["effective_caller_id_number"])
+	}
+}

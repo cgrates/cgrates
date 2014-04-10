@@ -21,6 +21,7 @@ package config
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"testing"
 	"time"
 
@@ -324,6 +325,15 @@ extra_fields = extr1,extr2
 		t.Errorf("Unexpected value for CdrsExtraFields: %v", cfg.CDRSExtraFields)
 	}
 	eFieldsCfg = []byte(`[cdrs]
+extra_fields = ~effective_caller_id_number:s/(\d+)/+$1/
+`)
+	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",
+		RSRule: &utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}) {
+		t.Errorf("Unexpected value for config CdrsExtraFields: %v", cfg.CDRSExtraFields)
+	}
+	eFieldsCfg = []byte(`[cdrs]
 extra_fields = extr1,extr2,
 `)
 	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
@@ -335,6 +345,7 @@ extra_fields = extr1,~extr2:s/x.+/
 	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
 		t.Error("Failed to detect failed RSRParsing")
 	}
+
 }
 
 func TestCdreExtraFields(t *testing.T) {
