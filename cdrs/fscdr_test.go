@@ -78,12 +78,12 @@ func TestCDRFields(t *testing.T) {
 	if fsCdr.GetReqType() != utils.RATED {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
-	expectedSTime := time.Date(2013, 8, 4, 9, 50, 54, 385581000, time.UTC)
+	expectedSTime := time.Date(2013, 8, 4, 9, 50, 54, 0, time.UTC)
 	if setupTime.UTC() != expectedSTime {
 		t.Error("Error parsing setupTime: ", setupTime.UTC())
 	}
 	answerTime, _ := fsCdr.GetAnswerTime()
-	expectedATime := time.Date(2013, 8, 4, 9, 50, 56, 285587000, time.UTC)
+	expectedATime := time.Date(2013, 8, 4, 9, 50, 56, 0, time.UTC)
 	if answerTime.UTC() != expectedATime {
 		t.Error("Error parsing answerTime: ", answerTime.UTC())
 	}
