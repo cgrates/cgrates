@@ -40,3 +40,12 @@ func TestProcessReSearchReplace2(t *testing.T) {
 		t.Error("Unexpected output from SearchReplace: ", outStr)
 	}
 }
+
+func TestProcessReSearchReplace3(t *testing.T) { //"MatchedDestId":"CST_31800_DE080"
+	rsr := &ReSearchReplace{regexp.MustCompile(`"MatchedDestId":".+_(\w{5})"`), "$1"}
+	source := `[{"TimeStart":"2014-04-15T22:17:57+02:00","TimeEnd":"2014-04-15T22:18:01+02:00","Cost":0,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":1000000000,"RateUnit":60000000000}],"RoundingMethod":"*middle","RoundingDecimals":4},"Weight":10},"CallDuration":4000000000,"Increments":null,"MatchedSubject":"*out:sip.test.cgrates.org:call:*any","MatchedPrefix":"+49800","MatchedDestId":"CST_31800_DE080"}]`
+	expectOut := "DE080"
+	if outStr := rsr.Process(source); outStr != expectOut {
+		t.Error("Unexpected output from SearchReplace: ", outStr)
+	}
+}
