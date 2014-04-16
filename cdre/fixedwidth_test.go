@@ -130,6 +130,9 @@ func TestWriteCdr(t *testing.T) {
 	if fwWriter.LastOrderId() != 1 {
 		t.Error("Unexpected LastOrderId", fwWriter.LastOrderId())
 	}
+	if fwWriter.TotalCost() != utils.Round(cdr.Cost, fwWriter.roundDecimals, utils.ROUNDING_MIDDLE) {
+		t.Error("Unexpected TotalCost: ", fwWriter.TotalCost())
+	}
 }
 
 func TestWriteCdrs(t *testing.T) {
@@ -198,5 +201,8 @@ func TestWriteCdrs(t *testing.T) {
 	}
 	if fwWriter.LastOrderId() != 4 {
 		t.Error("Unexpected LastOrderId", fwWriter.LastOrderId())
+	}
+	if fwWriter.TotalCost() != 5.9957 {
+		t.Error("Unexpected TotalCost: ", fwWriter.TotalCost())
 	}
 }

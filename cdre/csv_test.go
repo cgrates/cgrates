@@ -32,7 +32,8 @@ func TestCsvCdrWriter(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	exportedFields := append(cfg.CdreExportedFields, &utils.RSRField{Id: "extra3"}, &utils.RSRField{Id: "dummy_extra"}, &utils.RSRField{Id: "extra1"})
 	csvCdrWriter := NewCsvCdrWriter(writer, 0, 4, "", -1, exportedFields)
-	ratedCdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+	ratedCdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+		ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Duration: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
@@ -43,5 +44,8 @@ func TestCsvCdrWriter(t *testing.T) {
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
 		t.Errorf("Expected: \n%s received: \n%s.", expected, result)
+	}
+	if csvCdrWriter.TotalCost() != 1.01 {
+		t.Error("Unexpected TotalCost: ", csvCdrWriter.TotalCost())
 	}
 }

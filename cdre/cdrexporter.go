@@ -25,6 +25,7 @@ import (
 type CdrWriter interface {
 	FirstOrderId() int64
 	LastOrderId() int64
+	TotalCost() float64
 	WriteCdr(cdr *utils.StoredCdr) string
 	Close()
 }

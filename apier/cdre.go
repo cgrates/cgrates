@@ -118,7 +118,8 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			}
 		}
 		csvWriter.Close()
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: csvWriter.TotalCost(),
+			ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
 			FirstOrderId: csvWriter.FirstOrderId(), LastOrderId: csvWriter.LastOrderId()}
 	case utils.CDRE_FIXED_WIDTH:
 		if len(exportDir) == 0 {
@@ -155,7 +156,8 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			}
 		}
 		fww.Close()
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: fww.TotalCost(),
+			ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
 			FirstOrderId: fww.FirstOrderId(), LastOrderId: fww.LastOrderId()}
 	}
 	return nil
