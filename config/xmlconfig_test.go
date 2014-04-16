@@ -60,7 +60,7 @@ func TestParseXmlConfig(t *testing.T) {
      <field name="CallId" type="cdrfield" value="accid" width="16"/>
      <field name="Filler" type="filler" width="8"/>
      <field name="Filler" type="filler" width="8"/>
-     <field name="TerminationCode" type="concatenated_cdrfield" value="operator,product" width="5"/>
+     <field name="TerminationCode" type="cdrfield" value='~cost_details:s/"MatchedDestId":".+_(\s\s\s\s\s)"/$1/' width="5"/>
      <field name="Cost" type="cdrfield" value="cost" padding="zeroleft" width="9"/>
      <field name="CalledMask" type="cdrfield" value="calledmask" width="1"/>
     </fields>
