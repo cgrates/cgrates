@@ -19,68 +19,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-	"time"
 )
 
 func init() {
-	commands["get_cost"] = &CmdGetCost{}
+	commands["get_cost"] = &CmdGetCost{
+		rpcMethod:  "Responder.GetCost",
+		rpcParams:  &engine.CallDescriptor{Direction: "*out"},
+		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+	}
 }
 
 // Commander implementation
 type CmdGetCost struct {
-	rpcMethod string
-	rpcParams *engine.CallDescriptor
-	rpcResult engine.CallCost
+	rpcMethod  string
+	rpcParams  *engine.CallDescriptor
+	rpcResult  engine.CallCost
+	clientArgs []string
 }
 
-// name should be exec's name
-func (self *CmdGetCost) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_cost <tor> <tenant> <subject> <destination> <start_time|*now> <duration>")
-}
-
-// set param defaults
-func (self *CmdGetCost) defaults() error {
-	self.rpcMethod = "Responder.GetCost"
-	self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
-	return nil
+func (self *CmdGetCost) Usage() string {
+	jsn, _ := json.Marshal(self.rpcParams)
+	return "\n\tUsage: get_cost " + FromJSON(jsn, self.clientArgs) + "\n"
 }
 
 // Parses command line args and builds CmdBalance value
-func (self *CmdGetCost) FromArgs(args []string) error {
-	if len(args) != 8 {
-		return fmt.Errorf(self.Usage(""))
+func (self *CmdGetCost) FromArgs(args string, verbose bool) error {
+	if len(args) == 0 {
+		return fmt.Errorf(self.Usage())
 	}
-	// Args look OK, set defaults before going further
-	self.defaults()
-	var tStart time.Time
-	var err error
-	if args[6] == "*now" {
-		tStart = time.Now()
-	} else {
-		tStart, err = utils.ParseDate(args[6])
-		if err != nil {
-			fmt.Println("\n*start_time* should have one of the formats:")
-			fmt.Println("\ttime.RFC3339\teg:2013-08-07T17:30:00Z in UTC")
-			fmt.Println("\tunix time\teg: 1383823746")
-			fmt.Println("\t*now\t\tmetafunction transformed into localtime at query time")
-			fmt.Println("\t+dur\t\tduration to be added to localtime (valid suffixes: ns, us/µs, ms, s, m, h)\n")
-			return fmt.Errorf(self.Usage(""))
-		}
+	if err := json.Unmarshal(ToJSON(args), &self.rpcParams); err != nil {
+		return err
 	}
-	callDur, err := utils.ParseDurationWithSecs(args[7])
-	if err != nil {
-		fmt.Println("\n\tExample durations: 60s for 60 seconds, 25m for 25minutes, 1m25s for one minute and 25 seconds\n")
+	if verbose {
+		jsn, _ := json.Marshal(self.rpcParams)
+		fmt.Println("get_cost ", FromJSON(jsn, self.clientArgs))
 	}
-	self.rpcParams.TOR = args[2]
-	self.rpcParams.Tenant = args[3]
-	self.rpcParams.Subject = args[4]
-	self.rpcParams.Destination = args[5]
-	self.rpcParams.TimeStart = tStart
-	self.rpcParams.CallDuration = callDur
-	self.rpcParams.TimeEnd = tStart.Add(callDur)
 	return nil
 }
 
@@ -94,4 +71,8 @@ func (self *CmdGetCost) RpcParams() interface{} {
 
 func (self *CmdGetCost) RpcResult() interface{} {
 	return &self.rpcResult
+}
+
+func (self *CmdGetCost) ClientArgs() []string {
+	return self.clientArgs
 }
