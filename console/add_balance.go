@@ -24,58 +24,60 @@ import (
 	"reflect"
 
 	"github.com/cgrates/cgrates/apier"
+	"github.com/cgrates/cgrates/engine"
 )
 
 func init() {
-	commands["add_account"] = &CmdAddAccount{
-		rpcMethod: "ApierV1.SetAccount",
+	commands["add_balance"] = &CmdAddBalance{
+		rpcMethod: "ApierV1.AddBalance",
+		rpcParams: &apier.AttrAddBalance{BalanceType: engine.CREDIT},
 	}
 }
 
 // Commander implementation
-type CmdAddAccount struct {
+type CmdAddBalance struct {
 	rpcMethod string
-	rpcParams *apier.AttrSetAccount
+	rpcParams *apier.AttrAddBalance
 	rpcResult string
 }
 
-func (self *CmdAddAccount) Usage() string {
-	jsn, _ := json.Marshal(apier.AttrSetAccount{Direction: "*out"})
-	return "\n\tUsage: add_account " + FromJSON(jsn, self.ClientArgs()) + "\n"
+func (self *CmdAddBalance) Usage() string {
+	jsn, _ := json.Marshal(apier.AttrAddBalance{Direction: "*out"})
+	return "\n\tUsage: add_balance " + FromJSON(jsn, self.ClientArgs()) + "\n"
 }
 
 // Parses command line args and builds CmdBalance value
-func (self *CmdAddAccount) FromArgs(args string, verbose bool) error {
+func (self *CmdAddBalance) FromArgs(args string, verbose bool) error {
 	if len(args) == 0 {
 		return fmt.Errorf(self.Usage())
 	}
 	// defaults
-	self.rpcParams = &apier.AttrSetAccount{Direction: "*out"}
+	self.rpcParams = &apier.AttrAddBalance{Direction: "*out"}
 
 	if err := json.Unmarshal(ToJSON(args), &self.rpcParams); err != nil {
 		return err
 	}
 	if verbose {
 		jsn, _ := json.Marshal(self.rpcParams)
-		fmt.Println("add_account ", FromJSON(jsn, self.ClientArgs()))
+		fmt.Println("add_balance ", FromJSON(jsn, self.ClientArgs()))
 	}
 	return nil
 }
 
-func (self *CmdAddAccount) RpcMethod() string {
+func (self *CmdAddBalance) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddAccount) RpcParams() interface{} {
+func (self *CmdAddBalance) RpcParams() interface{} {
 	return self.rpcParams
 }
 
-func (self *CmdAddAccount) RpcResult() interface{} {
+func (self *CmdAddBalance) RpcResult() interface{} {
 	return &self.rpcResult
 }
 
-func (self *CmdAddAccount) ClientArgs() (args []string) {
-	val := reflect.ValueOf(&apier.AttrSetAccount{}).Elem()
+func (self *CmdAddBalance) ClientArgs() (args []string) {
+	val := reflect.ValueOf(&apier.AttrAddBalance{}).Elem()
 
 	for i := 0; i < val.NumField(); i++ {
 		typeField := val.Type().Field(i)

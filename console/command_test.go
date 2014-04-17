@@ -47,8 +47,16 @@ func TestToJSONEmpty(t *testing.T) {
 }
 
 func TestFromJSON(t *testing.T) {
-	line := FromJSON([]byte(`{"TimeStart":"Test","Crazy":1,"Mama":true,"Test":1}`))
+	line := FromJSON([]byte(`{"TimeStart":"Test","Crazy":1,"Mama":true,"Test":1}`), []string{"TimeStart", "Test", "Crazy", "Mama", "Test"})
 	expected := `TimeStart="Test" Crazy=1 Mama=true Test=1`
+	if line != expected {
+		t.Errorf("Expected: %s got: '%s'", expected, line)
+	}
+}
+
+func TestFromJSONInterestingFields(t *testing.T) {
+	line := FromJSON([]byte(`{"TimeStart":"Test","Crazy":1,"Mama":true,"Test":1}`), []string{"TimeStart", "Test"})
+	expected := `TimeStart="Test" Test=1`
 	if line != expected {
 		t.Errorf("Expected: %s got: '%s'", expected, line)
 	}

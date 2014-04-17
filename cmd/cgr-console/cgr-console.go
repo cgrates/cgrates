@@ -135,9 +135,8 @@ func main() {
 	}
 
 	if f, err := os.Create(history_fn); err != nil {
-		fmt.Println("Error writing history file: ", err)
+		log.Print("Error writing history file: ", err)
 	} else {
-		log.Print("Writing history: ", history_fn)
 		line.WriteHistory(f)
 		f.Close()
 	}
