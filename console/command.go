@@ -57,16 +57,24 @@ func getAvailabelCommandsErr() error {
 
 // Process args and return right command Value or error
 func GetCommandValue(command string, verbose bool) (Commander, error) {
-
-	firstSpace := strings.Index(command, " ")
-	if firstSpace < 0 {
+	if len(command) == 0 {
 		return nil, getAvailabelCommandsErr()
 	}
-	cmdVal, exists := commands[command[:firstSpace]]
+	firstSpace := strings.Index(command, " ")
+	var cmdName string
+	var cmdArgs string
+	if firstSpace <= 0 {
+		cmdName = command[:len(command)]
+		cmdArgs = ""
+	} else {
+		cmdName = command[:firstSpace]
+		cmdArgs = command[firstSpace+1:]
+	}
+	cmdVal, exists := commands[cmdName]
 	if !exists {
 		return nil, getAvailabelCommandsErr()
 	}
-	if err := cmdVal.FromArgs(command[firstSpace+1:], verbose); err != nil {
+	if err := cmdVal.FromArgs(cmdArgs, verbose); err != nil {
 		return nil, err
 	}
 	return cmdVal, nil
