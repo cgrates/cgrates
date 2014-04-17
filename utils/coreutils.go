@@ -131,7 +131,7 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 		} else {
 			return time.Unix(tmstmp, 0), nil
 		}
-	case len(tmStr) == 0: // Time probably missing from request
+	case tmStr == "0" || len(tmStr) == 0: // Time probably missing from request
 		return nilTime, nil
 	}
 	return nilTime, errors.New("Unsupported time format")

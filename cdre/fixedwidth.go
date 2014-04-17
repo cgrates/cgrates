@@ -172,6 +172,10 @@ func (fwv *FixedWidthCdrWriter) LastOrderId() int64 {
 	return fwv.lastExpOrderId
 }
 
+func (fwv *FixedWidthCdrWriter) TotalCost() float64 {
+	return fwv.totalCost
+}
+
 // Writes the header into it's buffer
 func (fwv *FixedWidthCdrWriter) ComposeHeader() error {
 	header := ""

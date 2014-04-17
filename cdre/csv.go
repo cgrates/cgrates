@@ -32,6 +32,7 @@ type CsvCdrWriter struct {
 	maskLen                         int
 	exportedFields                  []*utils.RSRField // The fields exported, order important
 	firstExpOrderId, lastExpOrderId int64
+	totalCost                       float64 // Cummulated cost of all the
 }
 
 func NewCsvCdrWriter(writer io.Writer, costShiftDigits, roundDecimals int, maskDestId string, maskLen int, exportedFields []*utils.RSRField) *CsvCdrWriter {
@@ -45,6 +46,10 @@ func (csvwr *CsvCdrWriter) FirstOrderId() int64 {
 
 func (csvwr *CsvCdrWriter) LastOrderId() int64 {
 	return csvwr.lastExpOrderId
+}
+
+func (csvwr *CsvCdrWriter) TotalCost() float64 {
+	return csvwr.totalCost
 }
 
 func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
@@ -69,6 +74,8 @@ func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 	if csvwr.lastExpOrderId < cdr.OrderId {
 		csvwr.lastExpOrderId = cdr.OrderId
 	}
+	csvwr.totalCost += cdr.Cost
+	csvwr.totalCost = utils.Round(csvwr.totalCost, csvwr.roundDecimals, utils.ROUNDING_MIDDLE)
 	return csvwr.writer.Write(row)
 
 }

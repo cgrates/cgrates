@@ -46,7 +46,11 @@ func (rs *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.GetCost()
 		})
-		*reply, err = *r, e
+		if e != nil {
+			return e
+		} else if r != nil {
+			*reply = *r
+		}
 	}
 	return
 }
@@ -59,7 +63,11 @@ func (rs *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.Debit()
 		})
-		*reply, err = *r, e
+		if e != nil {
+			return e
+		} else if r != nil {
+			*reply = *r
+		}
 	}
 	return
 }
@@ -72,7 +80,11 @@ func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.MaxDebit()
 		})
-		*reply, err = *r, e
+		if e != nil {
+			return e
+		} else if r != nil {
+			*reply = *r
+		}
 	}
 	return
 }

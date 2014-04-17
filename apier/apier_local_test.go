@@ -1315,6 +1315,30 @@ func TestGetCallCostLog(t *testing.T) {
 	}
 }
 
+func TestMaxDebitInexistentAcnt(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cc := &engine.CallCost{}
+	cd := engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		TOR:         "call",
+		Subject:     "INVALID",
+		Account:     "INVALID",
+		Destination: "1002",
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(time.Duration(10) * time.Second),
+	}
+	if err := rater.Call("Responder.MaxDebit", cd, cc); err == nil {
+		t.Error(err.Error())
+	}
+	if err := rater.Call("Responder.Debit", cd, cc); err == nil {
+		t.Error(err.Error())
+	}
+
+}
+
 func TestCdrServer(t *testing.T) {
 	if !*testLocal {
 		return
