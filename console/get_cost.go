@@ -28,7 +28,6 @@ import (
 func init() {
 	commands["get_cost"] = &CmdGetCost{
 		rpcMethod:  "Responder.GetCost",
-		rpcParams:  &engine.CallDescriptor{Direction: "*out"},
 		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 }
@@ -42,7 +41,7 @@ type CmdGetCost struct {
 }
 
 func (self *CmdGetCost) Usage() string {
-	jsn, _ := json.Marshal(self.rpcParams)
+	jsn, _ := json.Marshal(engine.CallDescriptor{Direction: "*out"})
 	return "\n\tUsage: get_cost " + FromJSON(jsn, self.clientArgs) + "\n"
 }
 
@@ -51,6 +50,9 @@ func (self *CmdGetCost) FromArgs(args string, verbose bool) error {
 	if len(args) == 0 {
 		return fmt.Errorf(self.Usage())
 	}
+	// defaults
+	self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
+
 	if err := json.Unmarshal(ToJSON(args), &self.rpcParams); err != nil {
 		return err
 	}
