@@ -1,5 +1,5 @@
 /*
-Rating system designed to be used in VoIP Carriers World
+Rating system for Telecom Environments
 Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can Storagetribute it and/or modify

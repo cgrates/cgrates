@@ -130,3 +130,26 @@ Task-Runtime: 1349437318`
 			dur != time.Duration(65)*time.Second)
 	}
 }
+
+func TestDDazEmptyTime(t *testing.T) {
+	body := `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+Caller-Channel-Created-Time: 0
+Caller-Channel-Answered-Time
+Task-Runtime: 1349437318`
+	var nilTime time.Time
+	ev := new(FSEvent).New(body)
+	if setupTime, err := ev.GetSetupTime(""); err != nil {
+		t.Error("Error when parsing empty setupTime")
+	} else if setupTime != nilTime {
+		t.Error("Expecting nil time, got: ", setupTime)
+	}
+	if answerTime, err := ev.GetAnswerTime(""); err != nil {
+		t.Error("Error when parsing empty setupTime")
+	} else if answerTime != nilTime {
+		t.Error("Expecting nil time, got: ", answerTime)
+	}
+}
