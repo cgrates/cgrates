@@ -120,6 +120,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.MediatorDestFields = []string{}
 	eCfg.MediatorSetupTimeFields = []string{}
 	eCfg.MediatorAnswerTimeFields = []string{}
+	eCfg.DerivedChargers = make(DerivedChargers, 0)
 	eCfg.MediatorDurationFields = []string{}
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS

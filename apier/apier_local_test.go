@@ -1255,6 +1255,28 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+func TestResetDataAfterLoadFromFolder(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	arc := new(utils.ApiReloadCache)
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+	}
+	var rcvStats *utils.CacheStats
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 1, RatingProfiles: 1, Actions: 2, DerivedChargers: 2}
+	var args utils.AttrCacheStats
+	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(rcvStats, expectedStats) {
+		t.Errorf("Calling ApierV1.GetCacheStats received: %v, expected: %v", rcvStats, expectedStats)
+	}
+}
+
 // Make sure balance was topped-up
 // Bug reported by DigiDaz over IRC
 func TestApierGetAccountAfterLoad(t *testing.T) {

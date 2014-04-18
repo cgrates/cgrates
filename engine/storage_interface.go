@@ -89,7 +89,7 @@ type RatingStorage interface {
 type AccountingStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
-	CacheAccounting([]string, []string, []string) error
+	CacheAccounting([]string, []string, []string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)

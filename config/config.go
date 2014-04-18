@@ -148,7 +148,7 @@ type CGRConfig struct {
 	MediatorSetupTimeFields  []string        // Name of setup_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorAnswerTimeFields []string        // Name of answer_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorDurationFields   []string        // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	PseudoSessions           DerivedChargers // System wide pseudosessions which will be executed in case of no particular ones defined per account
+	DerivedChargers          DerivedChargers // System wide pseudosessions which will be executed in case of no particular ones defined per account
 	FreeswitchServer         string          // freeswitch address host:port
 	FreeswitchPass           string          // FS socket password
 	FreeswitchReconnects     int             // number of times to attempt reconnect after connect fails
@@ -239,6 +239,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorSetupTimeFields = []string{}
 	self.MediatorAnswerTimeFields = []string{}
 	self.MediatorDurationFields = []string{}
+	self.DerivedChargers = make(DerivedChargers, 0)
 	self.SMEnabled = false
 	self.SMSwitchType = FS
 	self.SMRater = "internal"

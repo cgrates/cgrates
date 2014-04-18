@@ -144,7 +144,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) (e
 	return
 }
 
-func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) (err error) {
+func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) (err error) {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX)
 	}
@@ -202,6 +202,25 @@ func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) (err
 	}
 	if len(alsKeys) != 0 {
 		Logger.Info("Finished account aliases caching.")
+	}
+	// DerivedChargers caching
+	if dcsKeys == nil {
+		Logger.Info("Caching all derived chargers")
+		if dcsKeys, err = rs.db.Keys(DERIVEDCHARGERS_PREFIX + "*"); err != nil {
+			return
+		}
+		cache2go.RemPrefixKey(DERIVEDCHARGERS_PREFIX)
+	} else if len(dcsKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching derived chargers: %v", dcsKeys))
+	}
+	for _, key := range dcsKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetDerivedChargers(key[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
+			return err
+		}
+	}
+	if len(dcsKeys) != 0 {
+		Logger.Info("Finished derived chargers caching.")
 	}
 	return nil
 }
@@ -535,7 +554,7 @@ func (rs *RedisStorage) GetDerivedChargers(key string, checkDb bool) (dcs config
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
-		err = rs.ms.Unmarshal(values, dcs)
+		err = rs.ms.Unmarshal(values, &dcs)
 		cache2go.Cache(key, dcs)
 	}
 	return dcs, err

@@ -195,7 +195,7 @@ func init() {
 	csvr.LoadDerivedChargers()
 	csvr.WriteToDatabase(false, false)
 	dataStorage.CacheRating(nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
