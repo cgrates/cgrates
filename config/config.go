@@ -52,35 +52,6 @@ func SetCgrConfig(cfg *CGRConfig) {
 	cgrCfg = cfg
 }
 
-type DerivedCharger struct {
-	RunId            string // Unique runId in the chain
-	ReqTypeField     string // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
-	DirectionField   string // Field containing direction info
-	TenantField      string // Field containing tenant info
-	TorField         string // Field containing tor info
-	AccountField     string // Field containing account information
-	SubjectField     string // Field containing subject information
-	DestinationField string // Field containing destination information
-	SetupTimeField   string // Field containing setup time information
-	AnswerTimeField  string // Field containing answer time information
-	DurationField    string // Field containing duration information
-}
-
-type DerivedChargers []*DerivedCharger
-
-// Precheck that RunId is unique
-func (dcs DerivedChargers) Append(dc *DerivedCharger) (DerivedChargers, error) {
-	if dc.RunId == utils.DEFAULT_RUNID {
-		return nil, errors.New("Reserved RunId")
-	}
-	for _, dcLocal := range dcs {
-		if dcLocal.RunId == dc.RunId {
-			return nil, errors.New("Duplicated RunId")
-		}
-	}
-	return append(dcs, dc), nil
-}
-
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
 	RatingDBType             string
