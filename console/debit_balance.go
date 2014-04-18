@@ -18,44 +18,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/apier"
-	"github.com/cgrates/cgrates/engine"
-)
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdAddBalance{
-		name:      "add_balance",
-		rpcMethod: "ApierV1.AddBalance",
+	c := &CmdDebitBalance{
+		name:       "debit_balance",
+		rpcMethod:  "Responder.Debit",
+		rpcParams:  &engine.CallDescriptor{Direction: "*out"},
+		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdAddBalance struct {
-	name      string
-	rpcMethod string
-	rpcParams *apier.AttrAddBalance
-	rpcResult string
+type CmdDebitBalance struct {
+	name       string
+	rpcMethod  string
+	rpcParams  *engine.CallDescriptor
+	rpcResult  string
+	clientArgs []string
 	*CommandExecuter
 }
 
-func (self *CmdAddBalance) Name() string {
+func (self *CmdDebitBalance) Name() string {
 	return self.name
 }
 
-func (self *CmdAddBalance) RpcMethod() string {
+func (self *CmdDebitBalance) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddBalance) RpcParams() interface{} {
+func (self *CmdDebitBalance) RpcParams() interface{} {
     if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
+		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAddBalance) RpcResult() interface{} {
+func (self *CmdDebitBalance) RpcResult() interface{} {
 	return &self.rpcResult
+}
+
+func (self *CmdDebitBalance) ClientArgs() []string {
+	return self.clientArgs
 }

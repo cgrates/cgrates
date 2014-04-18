@@ -18,44 +18,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/apier"
-	"github.com/cgrates/cgrates/engine"
-)
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdAddBalance{
-		name:      "add_balance",
-		rpcMethod: "ApierV1.AddBalance",
+	c := &CmdGetMaxDuration{
+		name:       "get_maxduration",
+		rpcMethod:  "Responder.GetMaxSessionTime",
+		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdAddBalance struct {
-	name      string
-	rpcMethod string
-	rpcParams *apier.AttrAddBalance
-	rpcResult string
+type CmdGetMaxDuration struct {
+	name       string
+	rpcMethod  string
+	rpcParams  *engine.CallDescriptor
+	rpcResult  *float64
+	clientArgs []string
 	*CommandExecuter
 }
 
-func (self *CmdAddBalance) Name() string {
+func (self *CmdGetMaxDuration) Name() string {
 	return self.name
 }
 
-func (self *CmdAddBalance) RpcMethod() string {
+func (self *CmdGetMaxDuration) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddBalance) RpcParams() interface{} {
-    if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
+func (self *CmdGetMaxDuration) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAddBalance) RpcResult() interface{} {
+func (self *CmdGetMaxDuration) RpcResult() interface{} {
 	return &self.rpcResult
+}
+
+func (self *CmdGetMaxDuration) ClientArgs() []string {
+	return self.clientArgs
 }

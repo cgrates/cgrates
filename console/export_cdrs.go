@@ -18,44 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/apier"
-	"github.com/cgrates/cgrates/engine"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdAddBalance{
-		name:      "add_balance",
-		rpcMethod: "ApierV1.AddBalance",
+	c := &CmdExportCdrs{
+		name:      "export_cdrs",
+		rpcMethod: "ApierV1.ExportCdrsToFile",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdAddBalance struct {
+type CmdExportCdrs struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrAddBalance
-	rpcResult string
+	rpcParams *utils.AttrExpFileCdrs
+	rpcResult utils.ExportedFileCdrs
 	*CommandExecuter
 }
 
-func (self *CmdAddBalance) Name() string {
+func (self *CmdExportCdrs) Name() string {
 	return self.name
 }
 
-func (self *CmdAddBalance) RpcMethod() string {
+func (self *CmdExportCdrs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddBalance) RpcParams() interface{} {
-    if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
+func (self *CmdExportCdrs) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &utils.AttrExpFileCdrs{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAddBalance) RpcResult() interface{} {
+func (self *CmdExportCdrs) RpcResult() interface{} {
 	return &self.rpcResult
 }

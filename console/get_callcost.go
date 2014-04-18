@@ -20,42 +20,42 @@ package console
 
 import (
 	"github.com/cgrates/cgrates/apier"
-	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	c := &CmdAddBalance{
-		name:      "add_balance",
-		rpcMethod: "ApierV1.AddBalance",
+	c := &CmdGetCallCost{
+		name:      "get_callcost",
+		rpcMethod: "ApierV1.GetCallCostLog",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdAddBalance struct {
+type CmdGetCallCost struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrAddBalance
+	rpcParams *apier.AttrGetCallCost
 	rpcResult string
 	*CommandExecuter
 }
 
-func (self *CmdAddBalance) Name() string {
+func (self *CmdGetCallCost) Name() string {
 	return self.name
 }
 
-func (self *CmdAddBalance) RpcMethod() string {
+func (self *CmdGetCallCost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddBalance) RpcParams() interface{} {
-    if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
+func (self *CmdGetCallCost) RpcParams() interface{} {
+if self.rpcParams == nil {
+		self.rpcParams = &apier.AttrGetCallCost{RunId: utils.DEFAULT_RUNID}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAddBalance) RpcResult() interface{} {
+func (self *CmdGetCallCost) RpcResult() interface{} {
 	return &self.rpcResult
 }

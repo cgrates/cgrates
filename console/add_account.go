@@ -47,6 +47,9 @@ func (self *CmdAddAccount) RpcMethod() string {
 }
 
 func (self *CmdAddAccount) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &apier.AttrSetAccount{Direction: "*out"}
+	}
 	return self.rpcParams
 }
 

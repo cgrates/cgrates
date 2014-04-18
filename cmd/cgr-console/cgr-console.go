@@ -44,6 +44,30 @@ var (
 )
 
 func executeCommand(command string) {
+	if strings.TrimSpace(command) == "help" {
+		commands := console.GetCommands()
+		fmt.Println("Commands:")
+		for name, cmd := range commands {
+			fmt.Print(name, cmd.Usage())
+		}
+		return
+	}
+	if strings.HasPrefix(command, "help") {
+		words := strings.Split(command, " ")
+		if len(words) > 1 {
+			commands := console.GetCommands()
+			if cmd, ok := commands[words[1]]; ok {
+				fmt.Print(cmd.Usage())
+			} else {
+				fmt.Print("Available commands: ")
+				for name, _ := range commands {
+					fmt.Print(name + " ")
+				}
+				fmt.Println()
+			}
+			return
+		}
+	}
 	cmd, cmdErr := console.GetCommandValue(command, *verbose)
 	if cmdErr != nil {
 		fmt.Println(cmdErr)

@@ -18,44 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/apier"
-	"github.com/cgrates/cgrates/engine"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdAddBalance{
-		name:      "add_balance",
-		rpcMethod: "ApierV1.AddBalance",
+	c := &CmdGetCacheStats{
+		name:      "get_cache_stats",
+		rpcMethod: "ApierV1.GetCachedStats",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdAddBalance struct {
+type CmdGetCacheStats struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrAddBalance
-	rpcResult string
+	rpcParams *utils.AttrCacheStats
+	rpcResult utils.CacheStats
 	*CommandExecuter
 }
 
-func (self *CmdAddBalance) Name() string {
+func (self *CmdGetCacheStats) Name() string {
 	return self.name
 }
 
-func (self *CmdAddBalance) RpcMethod() string {
+func (self *CmdGetCacheStats) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddBalance) RpcParams() interface{} {
-    if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
+func (self *CmdGetCacheStats) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &utils.AttrCacheStats{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAddBalance) RpcResult() interface{} {
+func (self *CmdGetCacheStats) RpcResult() interface{} {
 	return &self.rpcResult
 }

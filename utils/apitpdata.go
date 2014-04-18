@@ -370,3 +370,7 @@ type AttrLoadTpFromFolder struct {
 	DryRun     bool   // Do not write to database but parse only
 	FlushDb    bool   // Flush previous data before loading new one
 }
+
+type AttrGetDestination struct {
+	Id string
+}
