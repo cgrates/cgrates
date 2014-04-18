@@ -18,48 +18,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"encoding/json"
-	"fmt"
-	"reflect"
-
-	"github.com/cgrates/cgrates/apier"
-)
+import "github.com/cgrates/cgrates/apier"
 
 func init() {
-	commands["add_account"] = &CmdAddAccount{
+	c := &CmdAddAccount{
+		name:      "add_account",
 		rpcMethod: "ApierV1.SetAccount",
 	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
 type CmdAddAccount struct {
+	name      string
 	rpcMethod string
 	rpcParams *apier.AttrSetAccount
 	rpcResult string
+	*CommandExecuter
 }
 
-func (self *CmdAddAccount) Usage() string {
-	jsn, _ := json.Marshal(apier.AttrSetAccount{Direction: "*out"})
-	return "\n\tUsage: add_account " + FromJSON(jsn, self.ClientArgs()) + "\n"
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdAddAccount) FromArgs(args string, verbose bool) error {
-	if len(args) == 0 {
-		return fmt.Errorf(self.Usage())
-	}
-	// defaults
-	self.rpcParams = &apier.AttrSetAccount{Direction: "*out"}
-
-	if err := json.Unmarshal(ToJSON(args), &self.rpcParams); err != nil {
-		return err
-	}
-	if verbose {
-		jsn, _ := json.Marshal(self.rpcParams)
-		fmt.Println("add_account ", FromJSON(jsn, self.ClientArgs()))
-	}
-	return nil
+func (self *CmdAddAccount) Name() string {
+	return self.name
 }
 
 func (self *CmdAddAccount) RpcMethod() string {
@@ -72,14 +52,4 @@ func (self *CmdAddAccount) RpcParams() interface{} {
 
 func (self *CmdAddAccount) RpcResult() interface{} {
 	return &self.rpcResult
-}
-
-func (self *CmdAddAccount) ClientArgs() (args []string) {
-	val := reflect.ValueOf(&apier.AttrSetAccount{}).Elem()
-
-	for i := 0; i < val.NumField(); i++ {
-		typeField := val.Type().Field(i)
-		args = append(args, typeField.Name)
-	}
-	return
 }

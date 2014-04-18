@@ -19,49 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"encoding/json"
-	"fmt"
-	"reflect"
-
 	"github.com/cgrates/cgrates/apier"
 	"github.com/cgrates/cgrates/engine"
 )
 
 func init() {
-	commands["add_balance"] = &CmdAddBalance{
+	c := &CmdAddBalance{
+		name:      "add_balance",
 		rpcMethod: "ApierV1.AddBalance",
 		rpcParams: &apier.AttrAddBalance{BalanceType: engine.CREDIT},
 	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
 type CmdAddBalance struct {
+	name      string
 	rpcMethod string
 	rpcParams *apier.AttrAddBalance
 	rpcResult string
+	*CommandExecuter
 }
 
-func (self *CmdAddBalance) Usage() string {
-	jsn, _ := json.Marshal(apier.AttrAddBalance{Direction: "*out"})
-	return "\n\tUsage: add_balance " + FromJSON(jsn, self.ClientArgs()) + "\n"
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdAddBalance) FromArgs(args string, verbose bool) error {
-	if len(args) == 0 {
-		return fmt.Errorf(self.Usage())
-	}
-	// defaults
-	self.rpcParams = &apier.AttrAddBalance{Direction: "*out"}
-
-	if err := json.Unmarshal(ToJSON(args), &self.rpcParams); err != nil {
-		return err
-	}
-	if verbose {
-		jsn, _ := json.Marshal(self.rpcParams)
-		fmt.Println("add_balance ", FromJSON(jsn, self.ClientArgs()))
-	}
-	return nil
+func (self *CmdAddBalance) Name() string {
+	return self.name
 }
 
 func (self *CmdAddBalance) RpcMethod() string {
@@ -74,14 +56,4 @@ func (self *CmdAddBalance) RpcParams() interface{} {
 
 func (self *CmdAddBalance) RpcResult() interface{} {
 	return &self.rpcResult
-}
-
-func (self *CmdAddBalance) ClientArgs() (args []string) {
-	val := reflect.ValueOf(&apier.AttrAddBalance{}).Elem()
-
-	for i := 0; i < val.NumField(); i++ {
-		typeField := val.Type().Field(i)
-		args = append(args, typeField.Name)
-	}
-	return
 }

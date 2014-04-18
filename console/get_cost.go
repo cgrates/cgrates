@@ -18,49 +18,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"encoding/json"
-	"fmt"
-
-	"github.com/cgrates/cgrates/engine"
-)
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	commands["get_cost"] = &CmdGetCost{
+	c := &CmdGetCost{
+		name:       "get_cost",
 		rpcMethod:  "Responder.GetCost",
 		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
 type CmdGetCost struct {
+	name       string
 	rpcMethod  string
 	rpcParams  *engine.CallDescriptor
 	rpcResult  engine.CallCost
 	clientArgs []string
+	*CommandExecuter
 }
 
-func (self *CmdGetCost) Usage() string {
-	jsn, _ := json.Marshal(engine.CallDescriptor{Direction: "*out"})
-	return "\n\tUsage: get_cost " + FromJSON(jsn, self.clientArgs) + "\n"
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdGetCost) FromArgs(args string, verbose bool) error {
-	if len(args) == 0 {
-		return fmt.Errorf(self.Usage())
-	}
-	// defaults
-	self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
-
-	if err := json.Unmarshal(ToJSON(args), &self.rpcParams); err != nil {
-		return err
-	}
-	if verbose {
-		jsn, _ := json.Marshal(self.rpcParams)
-		fmt.Println("get_cost ", FromJSON(jsn, self.clientArgs))
-	}
-	return nil
+func (self *CmdGetCost) Name() string {
+	return self.name
 }
 
 func (self *CmdGetCost) RpcMethod() string {
@@ -68,6 +49,9 @@ func (self *CmdGetCost) RpcMethod() string {
 }
 
 func (self *CmdGetCost) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
+	}
 	return self.rpcParams
 }
 

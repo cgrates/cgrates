@@ -5,6 +5,7 @@ Copyright (C) 2013 ITsysCOM
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
+
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -41,6 +42,7 @@ type Commander interface {
 	RpcParams() interface{}                   // Parameters to send out on rpc
 	RpcResult() interface{}                   // Only requirement is to have a String method to print on console
 	ClientArgs() []string                     // for autocompletion
+	Name() string
 }
 
 func GetCommands() map[string]Commander {

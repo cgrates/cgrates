@@ -19,22 +19,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 func init() {
-	commands["status"] = &CmdStatus{rpcMethod: "Responder.Status"}
+	c := &CmdStatus{
+		name:      "status",
+		rpcMethod: "Responder.Status",
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 type CmdStatus struct {
+	name      string
 	rpcMethod string
 	rpcParams string
 	rpcResult string
+	*CommandExecuter
 }
 
-func (self *CmdStatus) Usage() string {
-	return "\n\tUsage: status \n"
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdStatus) FromArgs(args string, verbose bool) error {
-	return nil
+func (self *CmdStatus) Name() string {
+	return self.name
 }
 
 func (self *CmdStatus) RpcMethod() string {
