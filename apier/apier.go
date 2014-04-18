@@ -65,10 +65,9 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 }
 
 type AttrGetAccount struct {
-	Tenant      string
-	Account     string
-	BalanceType string
-	Direction   string
+	Tenant    string
+	Account   string
+	Direction string
 }
 
 // Get balance

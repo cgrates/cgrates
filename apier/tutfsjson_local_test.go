@@ -185,17 +185,17 @@ func TestFsJsonGetAccount1001(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
-	if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	if acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
-	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 2 {
-		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]))
+	if len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]) != 2 {
+		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]))
 	}
-	blncLst := acnt.BalanceMap[attrs.BalanceType+attrs.Direction]
+	blncLst := acnt.BalanceMap[engine.CREDIT+attrs.Direction]
 	for _, blnc := range blncLst {
 		if len(blnc.SharedGroup) == 0 && blnc.Value != 5 {
 			t.Errorf("Unexpected value for general balance: %f", blnc.Value)
@@ -210,17 +210,17 @@ func TestFsJsonGetAccount1002(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1002", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1002", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
-	if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	if acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
-	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 1 {
-		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]))
+	if len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]) != 1 {
+		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]))
 	}
-	blnc := acnt.BalanceMap[attrs.BalanceType+attrs.Direction][0]
+	blnc := acnt.BalanceMap[engine.CREDIT+attrs.Direction][0]
 	if blnc.Value != 10 {
 		t.Errorf("Unexpected value for general balance: %f", blnc.Value)
 	}
@@ -231,17 +231,17 @@ func TestFsJsonGetAccount1003(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1003", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1003", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
-	if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	if acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
-	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 1 {
-		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]))
+	if len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]) != 1 {
+		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]))
 	}
-	blnc := acnt.BalanceMap[attrs.BalanceType+attrs.Direction][0]
+	blnc := acnt.BalanceMap[engine.CREDIT+attrs.Direction][0]
 	if blnc.Value != 10 {
 		t.Errorf("Unexpected value for general balance: %f", blnc.Value)
 	}
@@ -252,17 +252,17 @@ func TestFsJsonGetAccount1004(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1004", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1004", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
-	if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	if acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
-	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 1 {
-		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]))
+	if len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]) != 1 {
+		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]))
 	}
-	blnc := acnt.BalanceMap[attrs.BalanceType+attrs.Direction][0]
+	blnc := acnt.BalanceMap[engine.CREDIT+attrs.Direction][0]
 	if blnc.Value != 10 {
 		t.Errorf("Unexpected value for general balance: %f", blnc.Value)
 	}
@@ -273,7 +273,7 @@ func TestFsJsonGetAccount1006(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1006", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1006", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err == nil {
 		t.Error("Got no error when querying unexisting balance")
 	}
@@ -284,17 +284,17 @@ func TestFsJsonGetAccount1007(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1007", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1007", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
-	if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 0 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 0, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	if acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 0, received: %f", acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
-	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 1 {
-		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]))
+	if len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]) != 1 {
+		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]))
 	}
-	blncLst := acnt.BalanceMap[attrs.BalanceType+attrs.Direction]
+	blncLst := acnt.BalanceMap[engine.CREDIT+attrs.Direction]
 	for _, blnc := range blncLst {
 		if len(blnc.SharedGroup) == 0 && blnc.Value != 0 { // General balance
 			t.Errorf("Unexpected value for general balance: %f", blnc.Value)
@@ -405,7 +405,7 @@ func TestMaxDebit1001(t *testing.T) {
 	} else if cc.GetDuration() > time.Duration(1)*time.Minute {
 		t.Errorf("Unexpected call duration received: %v", cc.GetDuration())
 	}
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else {
@@ -445,7 +445,7 @@ func TestMaxDebit1007(t *testing.T) {
 		t.Errorf("Unexpected call duration received: %v", cc.GetDuration())
 	}
 	// Debit out of shared balance should reflect in the 1001 instead of 1007
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else {
@@ -462,17 +462,17 @@ func TestMaxDebit1007(t *testing.T) {
 		}
 	}
 	// Make sure 1007 remains the same
-	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1007", BalanceType: "*monetary", Direction: "*out"}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1007", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
-	if acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 0 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 0, received: %f", acnt.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	if acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 0 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 0, received: %f", acnt.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
-	if len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]) != 1 {
-		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[attrs.BalanceType+attrs.Direction]))
+	if len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]) != 1 {
+		t.Errorf("Unexpected number of balances found: %d", len(acnt.BalanceMap[engine.CREDIT+attrs.Direction]))
 	}
-	blnc := acnt.BalanceMap[attrs.BalanceType+attrs.Direction][0]
+	blnc := acnt.BalanceMap[engine.CREDIT+attrs.Direction][0]
 	if len(blnc.SharedGroup) == 0 { // General balance
 		t.Errorf("Unexpected general balance: %f", blnc.Value)
 	} else if blnc.SharedGroup == "SHARED_A" && blnc.Value != 0 {
