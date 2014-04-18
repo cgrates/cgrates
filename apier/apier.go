@@ -586,7 +586,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
-		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV))
+		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV))
 	if err := loader.LoadAll(); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}

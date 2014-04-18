@@ -36,6 +36,27 @@ func TestConfigSharing(t *testing.T) {
 	}
 }
 
+func TestAppendDerivedChargers(t *testing.T) {
+	var err error
+	dcs := make(DerivedChargers, 0)
+	if _, err := dcs.Append(&DerivedCharger{RunId: utils.DEFAULT_RUNID}); err == nil {
+		t.Error("Failed to detect using of the default runid")
+	}
+	if dcs, err = dcs.Append(&DerivedCharger{RunId: "FIRST_RUNID"}); err != nil {
+		t.Error("Failed to add runid")
+	} else if len(dcs) != 1 {
+		t.Error("Unexpected number of items inside DerivedChargers configuration", len(dcs))
+	}
+	if dcs, err = dcs.Append(&DerivedCharger{RunId: "SECOND_RUNID"}); err != nil {
+		t.Error("Failed to add runid")
+	} else if len(dcs) != 2 {
+		t.Error("Unexpected number of items inside DerivedChargers configuration", len(dcs))
+	}
+	if _, err := dcs.Append(&DerivedCharger{RunId: "SECOND_RUNID"}); err == nil {
+		t.Error("Failed to detect duplicate runid")
+	}
+}
+
 // Make sure defaults did not change by mistake
 func TestDefaults(t *testing.T) {
 	cfg := &CGRConfig{}

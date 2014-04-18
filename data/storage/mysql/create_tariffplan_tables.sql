@@ -209,3 +209,32 @@ CREATE TABLE `tp_account_actions` (
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_account` (`tpid`,`loadid`,`tenant`,`account`,`direction`)
 );
+
+--
+-- Table structure for table `tp_derived_chargers`
+--
+
+DROP TABLE IF EXISTS tp_derived_chargers;
+CREATE TABLE tp_derived_chargers (
+  tbid int(11) NOT NULL AUTO_INCREMENT,
+  tpid varchar(64) NOT NULL,
+  loadid varchar(64) NOT NULL,
+  tenant varchar(64) NOT NULL,
+  tor varchar(16) NOT NULL,
+  direction varchar(8) NOT NULL,
+  account varchar(24) NOT NULL,
+  subject varchar(64) NOT NULL,
+  runid_field  varchar(24) NOT NULL,
+  reqtype_field  varchar(24) NOT NULL,
+  direction_field  varchar(24) NOT NULL,
+  tenant_field  varchar(24) NOT NULL,
+  tor_field  varchar(24) NOT NULL,
+  account_field  varchar(24) NOT NULL,
+  subject_field  varchar(24) NOT NULL,
+  destination_field  varchar(24) NOT NULL,
+  setup_time_field  varchar(24) NOT NULL,
+  answer_time_field  varchar(24) NOT NULL,
+  duration_field  varchar(24) NOT NULL,
+  PRIMARY KEY (`tbid`),
+  KEY `tpid` (`tpid`)
+);

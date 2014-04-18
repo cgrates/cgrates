@@ -140,7 +140,8 @@ func main() {
 			path.Join(*dataPath, utils.ACTIONS_CSV),
 			path.Join(*dataPath, utils.ACTION_PLANS_CSV),
 			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
-			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV))
+			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
+			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV))
 	}
 	err = loader.LoadAll()
 	if err != nil {

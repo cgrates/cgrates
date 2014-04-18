@@ -46,6 +46,7 @@ const (
 	ACTION_PLANS_CSV           = "ActionPlans.csv"
 	ACTION_TRIGGERS_CSV        = "ActionTriggers.csv"
 	ACCOUNT_ACTIONS_CSV        = "AccountActions.csv"
+	DERIVED_CHARGERS_CSV       = "DerivedChargers.csv"
 	TIMINGS_NRCOLS             = 6
 	DESTINATIONS_NRCOLS        = 2
 	RATES_NRCOLS               = 8
@@ -57,6 +58,7 @@ const (
 	ACTION_PLANS_NRCOLS        = 4
 	ACTION_TRIGGERS_NRCOLS     = 8
 	ACCOUNT_ACTIONS_NRCOLS     = 5
+	DERIVED_CHARGERS_NRCOLS    = 16
 	ROUNDING_UP                = "*up"
 	ROUNDING_MIDDLE            = "*middle"
 	ROUNDING_DOWN              = "*down"
@@ -95,6 +97,7 @@ const (
 	XML_PROFILE_PREFIX         = "*xml:"
 	CDRE                       = "cdre"
 	MASK_CHAR                  = "*"
+	CONCATENATED_KEY_SEP       = ":"
 )
 
 var (

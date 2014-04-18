@@ -131,6 +131,7 @@ func TestLoadFromCSV(t *testing.T) {
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_PLANS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACTION_TRIGGERS_CSV),
 		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(*dataDir, "tariffplans", *tpCsvScenario, utils.DERIVED_CHARGERS_CSV),
 	)
 
 	if err = loader.LoadDestinations(); err != nil {
@@ -162,6 +163,9 @@ func TestLoadFromCSV(t *testing.T) {
 	}
 	if err = loader.LoadAccountActions(); err != nil {
 		t.Error("Failed loading account actions: ", err.Error())
+	}
+	if err = loader.LoadDerivedChargers(); err != nil {
+		t.Error("Failed loading derived chargers: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
 		t.Error("Could not write data into ratingDb: ", err.Error())

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -383,5 +384,17 @@ func TestParseZeroRatingSubject(t *testing.T) {
 		if d, err := ParseZeroRatingSubject(s); err != nil || d != dur[i] {
 			t.Error("Error parsing rating subject: ", s, d, err)
 		}
+	}
+}
+
+func TestConcatenatedKey(t *testing.T) {
+	if key := ConcatenatedKey("a"); key != "a" {
+		t.Error("Unexpected key value received: ", key)
+	}
+	if key := ConcatenatedKey("a", "b"); key != fmt.Sprintf("a%sb", CONCATENATED_KEY_SEP) {
+		t.Error("Unexpected key value received: ", key)
+	}
+	if key := ConcatenatedKey("a", "b", "c"); key != fmt.Sprintf("a%sb%sc", CONCATENATED_KEY_SEP, CONCATENATED_KEY_SEP) {
+		t.Error("Unexpected key value received: ", key)
 	}
 }

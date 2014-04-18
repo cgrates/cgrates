@@ -25,6 +25,7 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/hoisie/redis"
 
@@ -522,6 +523,32 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionPlan, err er
 	}
 
 	return
+}
+
+func (rs *RedisStorage) GetDerivedChargers(key string, checkDb bool) (dcs config.DerivedChargers, err error) {
+	key = DERIVEDCHARGERS_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(config.DerivedChargers), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	var values []byte
+	if values, err = rs.db.Get(key); err == nil {
+		err = rs.ms.Unmarshal(values, dcs)
+		cache2go.Cache(key, dcs)
+	}
+	return dcs, err
+}
+
+func (rs *RedisStorage) SetDerivedChargers(key string, dcs config.DerivedChargers) (err error) {
+	if len(dcs) == 0 {
+		_, err = rs.db.Del(DERIVEDCHARGERS_PREFIX + key)
+		return err
+	}
+	marshaled, err := rs.ms.Marshal(dcs)
+	err = rs.db.Set(DERIVEDCHARGERS_PREFIX+key, marshaled)
+	return err
 }
 
 func (rs *RedisStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (err error) {
