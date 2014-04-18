@@ -41,18 +41,16 @@ func FirstNonEmpty(vals ...string) string {
 	return ""
 }
 
-func SHA1(text string) string {
+func Sha1(attrs ...string) string {
 	hasher := sha1.New()
-	hasher.Write([]byte(text))
+	for _, attr := range attrs {
+		hasher.Write([]byte(attr))
+	}
 	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
 
-func FSCgrId(uuid string) string {
-	return SHA1(uuid)
-}
-
 func NewTPid() string {
-	return SHA1(GenUUID())
+	return Sha1(GenUUID())
 }
 
 // helper function for uuid generation
@@ -133,7 +131,7 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 		} else {
 			return time.Unix(tmstmp, 0), nil
 		}
-	case len(tmStr) == 0: // Time probably missing from request
+	case tmStr == "0" || len(tmStr) == 0: // Time probably missing from request
 		return nilTime, nil
 	}
 	return nilTime, errors.New("Unsupported time format")

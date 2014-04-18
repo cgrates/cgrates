@@ -283,6 +283,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				continue // why would we have 0 callcosts
 			}
 			lastCC := s.sessionRuns[idx].callCosts[len(s.sessionRuns[idx].callCosts)-1]
+			lastCC.Timespans.Decompress()
 			// put credit back
 			var hangupTime time.Time
 			var err error
@@ -337,6 +338,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			}
 			cost := refundIncrements.GetTotalCost()
 			lastCC.Cost -= cost
+			lastCC.Timespans.Compress()
 			// engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
 		}
 	}

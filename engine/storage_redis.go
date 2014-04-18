@@ -551,19 +551,19 @@ func (rs *RedisStorage) SetDerivedChargers(key string, dcs config.DerivedCharger
 	return err
 }
 
-func (rs *RedisStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (err error) {
+func (rs *RedisStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(cc)
 	if err != nil {
 		return
 	}
-	err = rs.db.Set(LOG_CALL_COST_PREFIX+source+runid+"_"+uuid, result)
+	err = rs.db.Set(LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid, result)
 	return
 }
 
-func (rs *RedisStorage) GetCallCostLog(uuid, source, runid string) (cc *CallCost, err error) {
+func (rs *RedisStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
 	var values []byte
-	if values, err = rs.db.Get(LOG_CALL_COST_PREFIX + source + runid + "_" + uuid); err == nil {
+	if values, err = rs.db.Get(LOG_CALL_COST_PREFIX + source + runid + "_" + cgrid); err == nil {
 		err = rs.ms.Unmarshal(values, cc)
 	}
 	return

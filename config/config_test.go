@@ -21,6 +21,7 @@ package config
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"testing"
 	"time"
 
@@ -106,14 +107,14 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdreMaskDestId = ""
 	eCfg.CdreMaskLength = 0
 	eCfg.CdreCostShiftDigits = 0
-	eCfg.CdreDir = "/var/log/cgrates/cdr/cdre"
+	eCfg.CdreDir = "/var/log/cgrates/cdre"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcCdrsMethod = "http_cgr"
 	eCfg.CdrcRunDelay = time.Duration(0)
 	eCfg.CdrcCdrType = "csv"
-	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdr/cdrc/in"
-	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdr/cdrc/out"
+	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
+	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	eCfg.CdrcSourceId = "freeswitch_csv"
 	eCfg.CdrcAccIdField = "0"
 	eCfg.CdrcReqTypeField = "1"
@@ -345,6 +346,15 @@ extra_fields = extr1,extr2
 		t.Errorf("Unexpected value for CdrsExtraFields: %v", cfg.CDRSExtraFields)
 	}
 	eFieldsCfg = []byte(`[cdrs]
+extra_fields = ~effective_caller_id_number:s/(\d+)/+$1/
+`)
+	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",
+		RSRule: &utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}) {
+		t.Errorf("Unexpected value for config CdrsExtraFields: %v", cfg.CDRSExtraFields)
+	}
+	eFieldsCfg = []byte(`[cdrs]
 extra_fields = extr1,extr2,
 `)
 	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
@@ -356,6 +366,7 @@ extra_fields = extr1,~extr2:s/x.+/
 	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
 		t.Error("Failed to detect failed RSRParsing")
 	}
+
 }
 
 func TestCdreExtraFields(t *testing.T) {

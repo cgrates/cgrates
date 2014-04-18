@@ -21,6 +21,7 @@ package engine
 import (
 	//"fmt"
 
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -45,6 +46,7 @@ type Increment struct {
 	BalanceInfo         *BalanceInfo // need more than one for minutes with cost
 	BalanceRateInterval *RateInterval
 	MinuteInfo          *MinuteInfo
+	CompressFactor      int
 	paid                bool
 }
 
@@ -55,11 +57,22 @@ type MinuteInfo struct {
 	//Price         float64
 }
 
+func (mi *MinuteInfo) Equal(other *MinuteInfo) bool {
+	return mi.DestinationId == other.DestinationId &&
+		mi.Quantity == other.Quantity
+}
+
 // Holds information about the balance that made a specific payment
 type BalanceInfo struct {
 	MinuteBalanceUuid string
 	MoneyBalanceUuid  string
 	AccountId         string // used when debited from shared balance
+}
+
+func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
+	return bi.MinuteBalanceUuid == other.MinuteBalanceUuid &&
+		bi.MoneyBalanceUuid == other.MoneyBalanceUuid &&
+		bi.AccountId == other.AccountId
 }
 
 type TimeSpans []*TimeSpan
@@ -146,6 +159,33 @@ func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSp
 	return false
 }
 
+func (tss TimeSpans) Compress() {
+	for _, ts := range tss {
+		var cIncrs Increments
+		for _, incr := range ts.Increments {
+			if len(cIncrs) == 0 || !cIncrs[len(cIncrs)-1].Equal(incr) {
+				incr.GetCompressFactor() // sideefect
+				cIncrs = append(cIncrs, incr)
+			} else {
+				cIncrs[len(cIncrs)-1].CompressFactor++
+			}
+		}
+		ts.Increments = cIncrs
+	}
+}
+
+func (tss TimeSpans) Decompress() {
+	for _, ts := range tss {
+		var incrs Increments
+		for _, cIncr := range ts.Increments {
+			for i := 0; i < cIncr.GetCompressFactor(); i++ {
+				incrs = append(incrs, cIncr.Clone())
+			}
+		}
+		ts.Increments = incrs
+	}
+}
+
 func (incr *Increment) Clone() *Increment {
 	nIncr := &Increment{
 		Duration:            incr.Duration,
@@ -157,14 +197,36 @@ func (incr *Increment) Clone() *Increment {
 	return nIncr
 }
 
+func (incr *Increment) Equal(other *Increment) bool {
+	return incr.Duration == other.Duration &&
+		incr.Cost == other.Cost &&
+		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo)) &&
+		((incr.BalanceRateInterval == nil && other.BalanceRateInterval == nil) || reflect.DeepEqual(incr.BalanceRateInterval, other.BalanceRateInterval)) &&
+		((incr.MinuteInfo == nil && other.MinuteInfo == nil) || incr.MinuteInfo.Equal(other.MinuteInfo))
+}
+
+func (incr *Increment) GetCompressFactor() int {
+	if incr.CompressFactor == 0 {
+		incr.CompressFactor = 1
+	}
+	return incr.CompressFactor
+}
+
 type Increments []*Increment
 
 func (incs Increments) GetTotalCost() float64 {
 	cost := 0.0
 	for _, increment := range incs {
-		cost += increment.Cost
+		cost += (float64(increment.GetCompressFactor()) * increment.Cost)
 	}
 	return cost
+}
+
+func (incs Increments) Length() (length int) {
+	for _, incr := range incs {
+		length += incr.GetCompressFactor()
+	}
+	return
 }
 
 // Returns the duration of the timespan
@@ -197,7 +259,7 @@ func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
 // It also sets the Cost field of this timespan (used for refund on session
 // manager debit loop where the cost cannot be recalculated)
 func (ts *TimeSpan) getCost() float64 {
-	if len(ts.Increments) == 0 {
+	if ts.Increments.Length() == 0 {
 		if ts.RateInterval == nil {
 			return 0
 		}
@@ -205,7 +267,7 @@ func (ts *TimeSpan) getCost() float64 {
 		ts.Cost = utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
 		return ts.Cost
 	} else {
-		return ts.Increments[0].Cost * float64(len(ts.Increments))
+		return ts.Increments[0].Cost * float64(ts.Increments.Length())
 	}
 }
 
@@ -237,7 +299,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 // returns whether the timespan has all increments marked as paid and if not
 // it also returns the first unpaied increment
 func (ts *TimeSpan) IsPaid() (bool, int) {
-	if len(ts.Increments) == 0 {
+	if ts.Increments.Length() == 0 {
 		return false, 0
 	}
 	for incrementIndex, increment := range ts.Increments {

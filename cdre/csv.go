@@ -26,15 +26,30 @@ import (
 )
 
 type CsvCdrWriter struct {
-	writer                         *csv.Writer
-	costShiftDigits, roundDecimals int // Round floats like Cost using this number of decimals
-	maskDestId                     string
-	maskLen                        int
-	exportedFields                 []*utils.RSRField // The fields exported, order important
+	writer                          *csv.Writer
+	costShiftDigits, roundDecimals  int // Round floats like Cost using this number of decimals
+	maskDestId                      string
+	maskLen                         int
+	exportedFields                  []*utils.RSRField // The fields exported, order important
+	firstExpOrderId, lastExpOrderId int64
+	totalCost                       float64 // Cummulated cost of all the
 }
 
 func NewCsvCdrWriter(writer io.Writer, costShiftDigits, roundDecimals int, maskDestId string, maskLen int, exportedFields []*utils.RSRField) *CsvCdrWriter {
-	return &CsvCdrWriter{csv.NewWriter(writer), costShiftDigits, roundDecimals, maskDestId, maskLen, exportedFields}
+	return &CsvCdrWriter{writer: csv.NewWriter(writer), costShiftDigits: costShiftDigits, roundDecimals: roundDecimals, maskDestId: maskDestId, maskLen: maskLen, exportedFields: exportedFields}
+}
+
+// Return the first exported Cdr OrderId
+func (csvwr *CsvCdrWriter) FirstOrderId() int64 {
+	return csvwr.firstExpOrderId
+}
+
+func (csvwr *CsvCdrWriter) LastOrderId() int64 {
+	return csvwr.lastExpOrderId
+}
+
+func (csvwr *CsvCdrWriter) TotalCost() float64 {
+	return csvwr.totalCost
 }
 
 func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
@@ -53,7 +68,16 @@ func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 		}
 		row[idx] = fld.ParseValue(fldVal)
 	}
+	if csvwr.firstExpOrderId > cdr.OrderId || csvwr.firstExpOrderId == 0 {
+		csvwr.firstExpOrderId = cdr.OrderId
+	}
+	if csvwr.lastExpOrderId < cdr.OrderId {
+		csvwr.lastExpOrderId = cdr.OrderId
+	}
+	csvwr.totalCost += cdr.Cost
+	csvwr.totalCost = utils.Round(csvwr.totalCost, csvwr.roundDecimals, utils.ROUNDING_MIDDLE)
 	return csvwr.writer.Write(row)
+
 }
 
 func (csvwr *CsvCdrWriter) Close() {

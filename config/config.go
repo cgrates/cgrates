@@ -233,14 +233,14 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdreMaskDestId = ""
 	self.CdreMaskLength = 0
 	self.CdreCostShiftDigits = 0
-	self.CdreDir = "/var/log/cgrates/cdr/cdre"
+	self.CdreDir = "/var/log/cgrates/cdre"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
 	self.CdrcCdrsMethod = "http_cgr"
 	self.CdrcRunDelay = time.Duration(0)
 	self.CdrcCdrType = "csv"
-	self.CdrcCdrInDir = "/var/log/cgrates/cdr/cdrc/in"
-	self.CdrcCdrOutDir = "/var/log/cgrates/cdr/cdrc/out"
+	self.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
+	self.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	self.CdrcSourceId = "freeswitch_csv"
 	self.CdrcAccIdField = "0"
 	self.CdrcReqTypeField = "1"

@@ -55,6 +55,7 @@ func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
 // Rated CDR as extracted from StorDb. Kinda standard of internal CDR, complies to CDR interface also
 type StoredCdr struct {
 	CgrId          string
+	OrderId        int64 // Stor order id used as export order id
 	AccId          string
 	CdrHost        string
 	CdrSource      string
@@ -175,6 +176,8 @@ func (storedCdr *StoredCdr) ExportFieldValue(fldName string) string {
 	switch fldName {
 	case CGRID:
 		return storedCdr.CgrId
+	case ORDERID:
+		return strconv.FormatInt(storedCdr.OrderId, 10)
 	case ACCID:
 		return storedCdr.AccId
 	case CDRHOST:

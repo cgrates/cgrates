@@ -1491,3 +1491,109 @@ func TestOverlapWithTimeSpansOne(t *testing.T) {
 		t.Error("Error overlaping with timespans timespans: ", tss)
 	}
 }
+
+func TestTSCompressDecompress(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			Increments: Increments{
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+			},
+		},
+	}
+	tss.Compress()
+	if len(tss[0].Increments) != 3 {
+		t.Error("Error compressing timespan: ", tss[0].Increments)
+	}
+	tss.Decompress()
+	if len(tss[0].Increments) != 5 {
+		t.Error("Error decompressing timespans: ", tss[0].Increments)
+	}
+}
+
+func TestTSMultipleCompressDecompress(t *testing.T) {
+	tss := TimeSpans{
+		&TimeSpan{
+			Increments: Increments{
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+				&Increment{
+					Duration:            time.Minute,
+					Cost:                10.4,
+					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
+					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+					MinuteInfo:          &MinuteInfo{"1", 2.3},
+				},
+			},
+		},
+	}
+	tss.Compress()
+	tss.Compress()
+	if len(tss[0].Increments) != 3 {
+		t.Error("Error compressing timespan: ", tss[0].Increments)
+	}
+	tss.Decompress()
+	tss.Decompress()
+	if len(tss[0].Increments) != 5 {
+		t.Error("Error decompressing timespans: ", tss[0].Increments)
+	}
+}

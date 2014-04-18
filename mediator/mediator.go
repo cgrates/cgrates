@@ -105,7 +105,7 @@ func (self *Mediator) getCostsFromRater(cdr *utils.StoredCdr) (*engine.CallCost,
 		self.logDb.LogError(cdr.CgrId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, err.Error())
 	} else {
 		// If the mediator calculated a price it will write it to logdb
-		self.logDb.LogCallCost(cdr.AccId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, cc)
+		self.logDb.LogCallCost(utils.Sha1(cdr.AccId, cdr.SetupTime.String()), engine.MEDIATOR_SOURCE, cdr.MediationRunId, cc)
 	}
 	return cc, err
 }
@@ -161,7 +161,7 @@ func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 }
 
 func (self *Mediator) RateCdrs(timeStart, timeEnd time.Time, rerateErrors, rerateRated bool) error {
-	cdrs, err := self.cdrDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, !rerateErrors, !rerateRated)
+	cdrs, err := self.cdrDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, !rerateErrors, !rerateRated)
 	if err != nil {
 		return err
 	}

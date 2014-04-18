@@ -1315,6 +1315,30 @@ func TestGetCallCostLog(t *testing.T) {
 	}
 }
 
+func TestMaxDebitInexistentAcnt(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cc := &engine.CallCost{}
+	cd := engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		TOR:         "call",
+		Subject:     "INVALID",
+		Account:     "INVALID",
+		Destination: "1002",
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(time.Duration(10) * time.Second),
+	}
+	if err := rater.Call("Responder.MaxDebit", cd, cc); err == nil {
+		t.Error(err.Error())
+	}
+	if err := rater.Call("Responder.Debit", cd, cc); err == nil {
+		t.Error(err.Error())
+	}
+
+}
+
 func TestCdrServer(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1322,9 +1346,11 @@ func TestCdrServer(t *testing.T) {
 	httpClient := new(http.Client)
 	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
 		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
+		"setup_time":  []string{"2013-11-07T08:42:22Z"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
 		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
+		"setup_time":  []string{"2013-11-07T08:42:23Z"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
 		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
@@ -1344,7 +1370,10 @@ func TestExportCdrsToFile(t *testing.T) {
 		t.Error("Failed to detect missing parameter")
 	}
 	req.CdrFormat = utils.CDRE_DRYRUN
-	expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCgrIds: []string{utils.FSCgrId("dsafdsaf"), utils.FSCgrId("adsafdsaf")}}
+	tm1, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:22Z")
+	tm2, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:23Z")
+	expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCgrIds: []string{utils.Sha1("dsafdsaf", tm1.String()),
+		utils.Sha1("adsafdsaf", tm2.String())}}
 	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectReply) {

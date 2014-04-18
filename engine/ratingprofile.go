@@ -117,20 +117,28 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		prefix := ""
 		destinationId := ""
 		var rps RateIntervalList
-		for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
-			if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
-				destIds := x.([]string)
-				for _, dId := range destIds {
-					if _, ok := rpl.DestinationRates[dId]; ok {
-						rps = rpl.RateIntervalList(dId)
-						prefix = p
-						destinationId = dId
-						break
+		if cd.Destination == utils.ANY {
+			if _, ok := rpl.DestinationRates[utils.ANY]; ok {
+				rps = rpl.RateIntervalList(utils.ANY)
+				prefix = utils.ANY
+				destinationId = utils.ANY
+			}
+		} else {
+			for _, p := range utils.SplitPrefix(cd.Destination, MIN_PREFIX_MATCH) {
+				if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
+					destIds := x.([]string)
+					for _, dId := range destIds {
+						if _, ok := rpl.DestinationRates[dId]; ok {
+							rps = rpl.RateIntervalList(dId)
+							prefix = p
+							destinationId = dId
+							break
+						}
 					}
 				}
-			}
-			if rps != nil {
-				break
+				if rps != nil {
+					break
+				}
 			}
 		}
 		// check if it's the first ri and add a blank one for the initial part not covered

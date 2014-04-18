@@ -71,6 +71,7 @@ const (
 	MSGPACK                    = "msgpack"
 	CSV_LOAD                   = "CSVLOAD"
 	CGRID                      = "cgrid"
+	ORDERID                    = "orderid"
 	ACCID                      = "accid"
 	CDRHOST                    = "cdrhost"
 	CDRSOURCE                  = "cdrsource"

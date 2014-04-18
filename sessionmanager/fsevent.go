@@ -23,7 +23,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -46,7 +45,7 @@ const (
 	SETUP_TIME         = "Caller-Channel-Created-Time"
 	ANSWER_TIME        = "Caller-Channel-Answered-Time"
 	END_TIME           = "Caller-Channel-Hangup-Time"
-	DURATION           = ""
+	DURATION           = "billsec"
 	NAME               = "Event-Name"
 	HEARTBEAT          = "HEARTBEAT"
 	ANSWER             = "CHANNEL_ANSWER"
@@ -121,6 +120,10 @@ func (fsev FSEvent) GetTOR(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[TOR], config.CgrConfig().DefaultTOR)
 }
+func (fsev FSEvent) GetCgrId() string {
+	setupTime, _ := fsev.GetSetupTime("")
+	return utils.Sha1(fsev[UUID], setupTime.String())
+}
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
 }
@@ -147,14 +150,24 @@ func (fsev FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetCallDestNr("")) == ""
 }
 func (fsev FSEvent) GetSetupTime(fieldName string) (t time.Time, err error) {
-	sTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsev[SETUP_TIME])
+	fsSTimeStr, hasKey := fsev[SETUP_TIME]
+	if hasKey {
+		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so cgrid will not corelate
+		fsSTimeStr = fsSTimeStr[:len(fsSTimeStr)-6]
+	}
+	sTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsSTimeStr)
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		sTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
 	return utils.ParseTimeDetectLayout(sTimeStr)
 }
 func (fsev FSEvent) GetAnswerTime(fieldName string) (t time.Time, err error) {
-	aTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsev[ANSWER_TIME])
+	fsATimeStr, hasKey := fsev[ANSWER_TIME]
+	if hasKey {
+		// Discard the nanoseconds information since MySQL cannot store them in early versions and csv uses default seconds so cgrid will not corelate
+		fsATimeStr = fsATimeStr[:len(fsATimeStr)-6]
+	}
+	aTimeStr := utils.FirstNonEmpty(fsev[fieldName], fsATimeStr)
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		aTimeStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
@@ -162,9 +175,7 @@ func (fsev FSEvent) GetAnswerTime(fieldName string) (t time.Time, err error) {
 }
 
 func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
-	st, err := strconv.ParseInt(fsev[END_TIME], 0, 64)
-	t = time.Unix(0, st*1000)
-	return
+	return utils.ParseTimeDetectLayout(fsev[END_TIME])
 }
 
 func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error) {

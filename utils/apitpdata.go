@@ -65,13 +65,13 @@ type RateSlot struct {
 // Used to set the durations we need out of strings
 func (self *RateSlot) SetDurations() error {
 	var err error
-	if self.rateUnitDur, err = time.ParseDuration(self.RateUnit); err != nil {
+	if self.rateUnitDur, err = ParseDurationWithSecs(self.RateUnit); err != nil {
 		return err
 	}
-	if self.rateIncrementDur, err = time.ParseDuration(self.RateIncrement); err != nil {
+	if self.rateIncrementDur, err = ParseDurationWithSecs(self.RateIncrement); err != nil {
 		return err
 	}
-	if self.groupIntervalStartDur, err = time.ParseDuration(self.GroupIntervalStart); err != nil {
+	if self.groupIntervalStartDur, err = ParseDurationWithSecs(self.GroupIntervalStart); err != nil {
 		return err
 	}
 	return nil
@@ -318,12 +318,13 @@ type CachedItemAge struct {
 type AttrExpFileCdrs struct {
 	CdrFormat         string   // Cdr output file format <utils.CdreCdrFormats>
 	ExportId          string   // Optional exportid
+	ExportDir         string   // If provided it overwrites the configured export directory
 	ExportFileName    string   // If provided the output filename will be set to this
 	ExportTemplate    string   // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents)
-	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically
+	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
+	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
 	MaskDestinationId string   // Overwrite configured MaskDestId
-	MaskLength        int      // Overwrite configured MaskLength
+	MaskLength        int      // Overwrite configured MaskLength, -1 to use general config ones
 	CgrIds            []string // If provided, it will filter based on the cgrids present in list
 	MediationRunId    []string // If provided, it will filter on mediation runid
 	CdrHost           []string // If provided, it will filter cdrhost
@@ -335,6 +336,8 @@ type AttrExpFileCdrs struct {
 	Account           []string // If provided, it will filter account
 	Subject           []string // If provided, it will filter the rating subject
 	DestinationPrefix []string // If provided, it will filter on destination prefix
+	OrderIdStart      int64    // Export from this order identifier
+	OrderIdEnd        int64    // Export smaller than this order identifier
 	TimeStart         string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd           string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors        bool     // Do not export errored CDRs
@@ -342,10 +345,13 @@ type AttrExpFileCdrs struct {
 }
 
 type ExportedFileCdrs struct {
-	ExportedFilePath string            // Full path to the newly generated export file
-	TotalRecords     int               // Number of CDRs to be exported
-	ExportedCgrIds   []string          // List of successfuly exported cgrids in the file
-	UnexportedCgrIds map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
+	ExportedFilePath          string            // Full path to the newly generated export file
+	TotalRecords              int               // Number of CDRs to be exported
+	TotalCost                 float64           // Sum of all costs in exported CDRs
+	FirstOrderId, LastOrderId int64             // The order id of the last exported CDR
+	ExportedCgrIds            []string          // List of successfuly exported cgrids in the file
+	UnexportedCgrIds          map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
+
 }
 
 type AttrRemCdrs struct {

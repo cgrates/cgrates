@@ -30,6 +30,7 @@ import (
 // Session type holding the call information fields, a session delegate for specific
 // actions and a channel to signal end of the debit loop.
 type Session struct {
+	cgrid          string
 	uuid           string
 	stopDebit      chan bool
 	sessionManager SessionManager
@@ -45,7 +46,8 @@ type SessionRun struct {
 
 // Creates a new session and in case of prepaid starts the debit loop for each of the session runs individually
 func NewSession(ev Event, sm SessionManager) *Session {
-	s := &Session{uuid: ev.GetUUID(),
+	s := &Session{cgrid: ev.GetCgrId(),
+		uuid:           ev.GetUUID(),
 		stopDebit:      make(chan bool),
 		sessionManager: sm,
 		sessionRuns:    make([]*SessionRun, 0),
@@ -169,7 +171,7 @@ func (s *Session) SaveOperations() {
 			if s.sessionManager.GetDbLogger() == nil {
 				engine.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
 			}
-			s.sessionManager.GetDbLogger().LogCallCost(s.uuid, engine.SESSION_MANAGER_SOURCE, sr.runId, firstCC)
+			s.sessionManager.GetDbLogger().LogCallCost(s.cgrid, engine.SESSION_MANAGER_SOURCE, sr.runId, firstCC)
 		}
 	}()
 }

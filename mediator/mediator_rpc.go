@@ -20,8 +20,8 @@ package mediator
 
 import (
 	"fmt"
-	"time"
 	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 type MediatorV1 struct {

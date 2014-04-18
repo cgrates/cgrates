@@ -25,7 +25,7 @@ import (
 	"log"
 	"net/rpc"
 	"os"
-	"runtime"
+	//"runtime"
 	"strconv"
 	"time"
 
@@ -287,7 +287,7 @@ func main() {
 	if *pidFile != "" {
 		writePid()
 	}
-	runtime.GOMAXPROCS(runtime.NumCPU())
+	// runtime.GOMAXPROCS(runtime.NumCPU())   // For now it slows down computing due to CPU management, to be reviewed in future Go releases
 
 	cfg, err = config.NewCGRConfigFromFile(cfgPath)
 	if err != nil {

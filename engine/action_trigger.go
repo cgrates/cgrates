@@ -21,8 +21,9 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"sort"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type ActionTrigger struct {

@@ -45,6 +45,7 @@ PSTN_71,+4971
 PSTN_72,+4972
 PSTN_70,+4970
 DST_UK_Mobile_BIG5,447956
+*any,
 `
 	timings = `
 WORKDAYS_00,*any,*any,*any,1;2;3;4;5,00:00:00
@@ -55,7 +56,7 @@ ALWAYS,*any,*any,*any,*any,00:00:00
 ASAP,*any,*any,*any,*any,*asap
 `
 	rates = `
-R1,0,0.2,60s,1s,0,*middle,2
+R1,0,0.2,60,1,0,*middle,2
 R2,0,0.1,60s,1s,0,*middle,2
 R3,0,0.05,60s,1s,0,*middle,2
 R4,1,1,1s,1s,0,*up,2
@@ -64,7 +65,7 @@ LANDLINE_OFFPEAK,0,1,1s,60s,0s,*up,4
 LANDLINE_OFFPEAK,0,1,1s,1s,60s,*up,4
 GBP_71,0.000000,5.55555,1s,1s,0s,*up,4
 GBP_72,0.000000,7.77777,1s,1s,0s,*up,4
-GBP_70,0.000000,1,1s,1s,0s,*up,4
+GBP_70,0.000000,1,1,1,0,*up,4
 RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s,*up,8
 RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8
 `
@@ -83,6 +84,7 @@ T2,GERMANY_O2,GBP_70
 T2,GERMANY_PREMIUM,GBP_71
 DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5
+DATA_RATE,*any,R4
 `
 	ratingPlans = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
@@ -95,6 +97,7 @@ DEFAULT,RT_DEFAULT,WORKDAYS_00,10
 EVENING,P1,WORKDAYS_00,10
 EVENING,P2,WORKDAYS_18,10
 EVENING,P2,WEEKENDS,10
+EVENING,DATA_RATE,ALWAYS,10
 TDRT,T1,WORKDAYS_00,10
 TDRT,T2,WORKDAYS_00,10
 G,RT_STANDARD,WORKDAYS_00,10
@@ -196,7 +199,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 10 {
+	if len(csvr.destinations) != 11 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
@@ -296,7 +299,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
-	expctRs, err := utils.NewRateSlot(0, 0.2, "60s", "1s", "0", utils.ROUNDING_MIDDLE, 2)
+	expctRs, err := utils.NewRateSlot(0, 0.2, "60", "1", "0", utils.ROUNDING_MIDDLE, 2)
 	if err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -362,7 +365,7 @@ func TestLoadRates(t *testing.T) {
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.destinationRates) != 9 {
+	if len(csvr.destinationRates) != 10 {
 		t.Error("Failed to load destinationrates: ", csvr.destinationRates)
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
@@ -473,9 +476,9 @@ func TestLoadDestinationRates(t *testing.T) {
 	}
 }
 
-func TestLoadDestinationRateTimings(t *testing.T) {
+func TestLoadRatingPlans(t *testing.T) {
 	if len(csvr.ratingPlans) != 9 {
-		t.Error("Failed to load rate timings: ", csvr.ratingPlans)
+		t.Error("Failed to load rating plans: ", len(csvr.ratingPlans))
 	}
 	rplan := csvr.ratingPlans["STANDARD"]
 	expected := &RatingPlan{

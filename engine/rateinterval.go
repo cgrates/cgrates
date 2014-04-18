@@ -48,7 +48,7 @@ type RITiming struct {
 }
 
 func (rit *RITiming) Stringify() string {
-	return utils.SHA1(fmt.Sprintf("%v", rit))[:8]
+	return utils.Sha1(fmt.Sprintf("%v", rit))[:8]
 }
 
 // Separate structure used for rating plan size optimization
@@ -64,7 +64,7 @@ func (rir *RIRate) Stringify() string {
 	for _, r := range rir.Rates {
 		str += r.Stringify()
 	}
-	return utils.SHA1(str)[:8]
+	return utils.Sha1(str)[:8]
 }
 
 type Rate struct {
@@ -75,7 +75,7 @@ type Rate struct {
 }
 
 func (r *Rate) Stringify() string {
-	return utils.SHA1(fmt.Sprintf("%v", r))[:8]
+	return utils.Sha1(fmt.Sprintf("%v", r))[:8]
 }
 
 func (p *Rate) Equal(o *Rate) bool {

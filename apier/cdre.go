@@ -48,6 +48,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return err
 		}
 	}
+	exportDir := attr.ExportDir
 	fileName := attr.ExportFileName
 	exportId := attr.ExportId
 	if len(exportId) == 0 {
@@ -70,7 +71,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		maskLen = attr.MaskLength
 	}
 	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunId, attr.CdrHost, attr.CdrSource, attr.ReqType, attr.Direction,
-		attr.Tenant, attr.Tor, attr.Account, attr.Subject, attr.DestinationPrefix, tStart, tEnd, attr.SkipErrors, attr.SkipRated)
+		attr.Tenant, attr.Tor, attr.Account, attr.Subject, attr.DestinationPrefix, attr.OrderIdStart, attr.OrderIdEnd, tStart, tEnd, attr.SkipErrors, attr.SkipRated)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
@@ -85,6 +86,9 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		}
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds}
 	case utils.CDRE_CSV:
+		if len(exportDir) == 0 {
+			exportDir = path.Join(self.Config.CdreDir, utils.CDRE_CSV)
+		}
 		if len(fileName) == 0 {
 			fileName = fmt.Sprintf("cdre_%s.csv", exportId)
 		}
@@ -97,7 +101,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		if len(exportedFields) == 0 {
 			return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
 		}
-		filePath := path.Join(self.Config.CdreDir, utils.CDRE_CSV, fileName)
+		filePath := path.Join(exportDir, fileName)
 		fileOut, err := os.Create(filePath)
 		if err != nil {
 			return err
@@ -114,8 +118,13 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			}
 		}
 		csvWriter.Close()
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds}
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: csvWriter.TotalCost(),
+			ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
+			FirstOrderId: csvWriter.FirstOrderId(), LastOrderId: csvWriter.LastOrderId()}
 	case utils.CDRE_FIXED_WIDTH:
+		if len(exportDir) == 0 {
+			exportDir = path.Join(self.Config.CdreDir, utils.CDRE_FIXED_WIDTH)
+		}
 		if len(fileName) == 0 {
 			fileName = fmt.Sprintf("cdre_%s.fwv", exportId)
 		}
@@ -130,7 +139,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		if exportTemplate == nil {
 			return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
 		}
-		filePath := path.Join(self.Config.CdreDir, utils.CDRE_FIXED_WIDTH, fileName)
+		filePath := path.Join(exportDir, fileName)
 		fileOut, err := os.Create(filePath)
 		if err != nil {
 			return err
@@ -147,7 +156,9 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			}
 		}
 		fww.Close()
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds}
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: fww.TotalCost(),
+			ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
+			FirstOrderId: fww.FirstOrderId(), LastOrderId: fww.LastOrderId()}
 	}
 	return nil
 }

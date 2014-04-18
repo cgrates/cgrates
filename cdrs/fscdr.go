@@ -76,7 +76,8 @@ func (fsCdr FSCdr) New(body []byte) (utils.RawCDR, error) {
 }
 
 func (fsCdr FSCdr) GetCgrId() string {
-	return utils.FSCgrId(fsCdr.vars[FS_UUID])
+	setupTime, _ := fsCdr.GetSetupTime()
+	return utils.Sha1(fsCdr.vars[FS_UUID], setupTime.String())
 }
 func (fsCdr FSCdr) GetAccId() string {
 	return fsCdr.vars[FS_UUID]
@@ -154,21 +155,13 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 }
 
 func (fsCdr FSCdr) GetSetupTime() (t time.Time, err error) {
-	//ToDo: Make sure we work with UTC instead of local time
-	at, err := strconv.ParseInt(fsCdr.vars[FS_SETUP_TIME], 0, 64)
-	t = time.Unix(at, 0)
-	return
+	return utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME])
 }
 func (fsCdr FSCdr) GetAnswerTime() (t time.Time, err error) {
-	//ToDo: Make sure we work with UTC instead of local time
-	at, err := strconv.ParseInt(fsCdr.vars[FS_ANSWER_TIME], 0, 64)
-	t = time.Unix(at, 0)
-	return
+	return utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME])
 }
 func (fsCdr FSCdr) GetHangupTime() (t time.Time, err error) {
-	hupt, err := strconv.ParseInt(fsCdr.vars[FS_HANGUP_TIME], 0, 64)
-	t = time.Unix(hupt, 0)
-	return
+	return utils.ParseTimeDetectLayout(fsCdr.vars[FS_HANGUP_TIME])
 }
 
 // Extracts duration as considered by the telecom switch
@@ -224,8 +217,6 @@ func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 		} else { // Not mandatory, need to generate here CgrId
 			rtCdr.CgrId = utils.GenUUID()
 		}
-	} else { // hasKey, use it to generate cgrid
-		rtCdr.CgrId = utils.FSCgrId(rtCdr.AccId)
 	}
 	if rtCdr.CdrHost = fsCdr.GetCdrHost(); len(rtCdr.CdrHost) == 0 && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, utils.CDRHOST))
@@ -298,6 +289,7 @@ func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 			return nil, err
 		}
 	}
+	rtCdr.CgrId = utils.Sha1(rtCdr.AccId, rtCdr.SetupTime.String())
 	rtCdr.ExtraFields = make(map[string]string, len(extraFlds))
 	for _, fldName := range extraFlds {
 		if fldVal, hasKey := fsCdr.vars[fldName]; !hasKey && fieldsMandatory {
