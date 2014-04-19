@@ -30,7 +30,7 @@ func init() {
 type CmdStatus struct {
 	name      string
 	rpcMethod string
-	rpcParams string
+	rpcParams *StringWrapper
 	rpcResult string
 	*CommandExecuter
 }
@@ -44,7 +44,10 @@ func (self *CmdStatus) RpcMethod() string {
 }
 
 func (self *CmdStatus) RpcParams() interface{} {
-	return &self.rpcParams
+	if self.rpcParams == nil {
+		self.rpcParams = &StringWrapper{}
+	}
+	return self.rpcParams
 }
 
 func (self *CmdStatus) RpcResult() interface{} {

@@ -1,4 +1,4 @@
- /*
+/*
 Rating system designed to be used in VoIP Carriers World
 Copyright (C) 2013 ITsysCOM
 
@@ -20,18 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"bytes"
 	"fmt"
-	"regexp"
 	"strings"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	commands = make(map[string]Commander)
-	lineR    = regexp.MustCompile(`(\w+)\s*=\s*(.+?)(?:\s+|$)`)
-	jsonR    = regexp.MustCompile(`"(\w+)":(.+?)[,|}]`)
 )
 
 // Console Command interface
@@ -82,25 +76,6 @@ func GetCommandValue(command string, verbose bool) (Commander, error) {
 	return cmdVal, nil
 }
 
-func ToJSON(line string) (jsn []byte) {
-	jsn = append(jsn, '{')
-	for _, group := range lineR.FindAllStringSubmatch(line, -1) {
-		if len(group) == 3 {
-			jsn = append(jsn, []byte(fmt.Sprintf("\"%s\":%s,", group[1], group[2]))...)
-		}
-	}
-	jsn = bytes.TrimRight(jsn, ",")
-	jsn = append(jsn, '}')
-	return
-}
-
-func FromJSON(jsn []byte, interestingFields []string) (line string) {
-	for _, group := range jsonR.FindAllSubmatch(jsn, -1) {
-		if len(group) == 3 {
-			if utils.IsSliceMember(interestingFields, string(group[1])) {
-				line += fmt.Sprintf("%s=%s ", group[1], group[2])
-			}
-		}
-	}
-	return strings.TrimSpace(line)
+type StringWrapper struct {
+	Item string
 }

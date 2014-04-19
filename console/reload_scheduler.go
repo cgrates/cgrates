@@ -31,7 +31,7 @@ func init() {
 type CmdReloadScheduler struct {
 	name      string
 	rpcMethod string
-	rpcParams string
+	rpcParams *StringWrapper
 	rpcResult string
 	*CommandExecuter
 }
@@ -45,9 +45,9 @@ func (self *CmdReloadScheduler) RpcMethod() string {
 }
 
 func (self *CmdReloadScheduler) RpcParams() interface{} {
-	/*if self.rpcParams == nil {
-		self.rpcParams = &utils.ApiReloadCache{}
-	}*/
+	if self.rpcParams == nil {
+		self.rpcParams = &StringWrapper{}
+	}
 	return self.rpcParams
 }
 

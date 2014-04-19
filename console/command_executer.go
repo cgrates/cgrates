@@ -19,11 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
+	"strings"
 
-	"github.com/cgrates/cgrates/apier"
+	"github.com/cgrates/cgrates/utils"
+)
+
+var (
+	lineR = regexp.MustCompile(`(\w+)\s*=\s*(.+?)(?:\s+|$)`)
+	jsonR = regexp.MustCompile(`"(\w+)":(.+?)[,|}]`)
 )
 
 // Commander implementation
@@ -38,10 +46,6 @@ func (ce *CommandExecuter) Usage() string {
 
 // Parses command line args and builds CmdBalance value
 func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
-	if len(args) == 0 {
-		return fmt.Errorf(ce.Usage())
-	}
-
 	if err := json.Unmarshal(ToJSON(args), ce.command.RpcParams()); err != nil {
 		return err
 	}
@@ -53,11 +57,39 @@ func (ce *CommandExecuter) FromArgs(args string, verbose bool) error {
 }
 
 func (ce *CommandExecuter) ClientArgs() (args []string) {
-	val := reflect.ValueOf(&apier.AttrAddBalance{}).Elem()
-
+	val := reflect.ValueOf(ce.command.RpcParams()).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		typeField := val.Type().Field(i)
 		args = append(args, typeField.Name)
 	}
 	return
+}
+
+func ToJSON(line string) (jsn []byte) {
+	if !strings.Contains(line, "=") {
+		line = fmt.Sprintf("Item=\"%s\"", line)
+	}
+	jsn = append(jsn, '{')
+	for _, group := range lineR.FindAllStringSubmatch(line, -1) {
+		if len(group) == 3 {
+			jsn = append(jsn, []byte(fmt.Sprintf("\"%s\":%s,", group[1], group[2]))...)
+		}
+	}
+	jsn = bytes.TrimRight(jsn, ",")
+	jsn = append(jsn, '}')
+	return
+}
+
+func FromJSON(jsn []byte, interestingFields []string) (line string) {
+	if !bytes.Contains(jsn, []byte{':'}) {
+		return fmt.Sprintf("\"%s\"", string(jsn))
+	}
+	for _, group := range jsonR.FindAllSubmatch(jsn, -1) {
+		if len(group) == 3 {
+			if utils.IsSliceMember(interestingFields, string(group[1])) {
+				line += fmt.Sprintf("%s=%s ", group[1], group[2])
+			}
+		}
+	}
+	return strings.TrimSpace(line)
 }

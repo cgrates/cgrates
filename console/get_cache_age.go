@@ -33,7 +33,7 @@ func init() {
 type CmdGetCacheAge struct {
 	name      string
 	rpcMethod string
-	rpcParams string
+	rpcParams *StringWrapper
 	rpcResult *utils.CachedItemAge
 	*CommandExecuter
 }
@@ -47,6 +47,9 @@ func (self *CmdGetCacheAge) RpcMethod() string {
 }
 
 func (self *CmdGetCacheAge) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &StringWrapper{}
+	}
 	return self.rpcParams
 }
 

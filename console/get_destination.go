@@ -18,10 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
 	c := &CmdGetDestination{
@@ -36,7 +33,7 @@ func init() {
 type CmdGetDestination struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrGetDestination
+	rpcParams *StringWrapper
 	rpcResult engine.Destination
 	*CommandExecuter
 }
@@ -51,7 +48,7 @@ func (self *CmdGetDestination) RpcMethod() string {
 
 func (self *CmdGetDestination) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.AttrGetDestination{}
+		self.rpcParams = &StringWrapper{}
 	}
 	return self.rpcParams
 }

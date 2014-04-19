@@ -74,7 +74,14 @@ func executeCommand(command string) {
 		return
 	}
 	res := cmd.RpcResult()
-	if rpcErr := client.Call(cmd.RpcMethod(), cmd.RpcParams(), res); rpcErr != nil {
+	param := cmd.RpcParams()
+	//log.Print(reflect.TypeOf(param))
+	switch param.(type) {
+	case *console.StringWrapper:
+		param = param.(*console.StringWrapper).Item
+	}
+	//log.Printf("Param: %+v", param)
+	if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
 		fmt.Println("Error executing command: " + rpcErr.Error())
 	}
 	result, _ := json.MarshalIndent(res, "", " ")

@@ -41,8 +41,15 @@ func TestToJSONValid(t *testing.T) {
 
 func TestToJSONEmpty(t *testing.T) {
 	jsn := ToJSON("")
-	if string(jsn) != "{}" {
+	if string(jsn) != `{"Item":""}` {
 		t.Error("Error empty: ", string(jsn))
+	}
+}
+
+func TestToJSONString(t *testing.T) {
+	jsn := ToJSON("1002")
+	if string(jsn) != `{"Item":"1002"}` {
+		t.Error("Error string: ", string(jsn))
 	}
 }
 
@@ -57,6 +64,14 @@ func TestFromJSON(t *testing.T) {
 func TestFromJSONInterestingFields(t *testing.T) {
 	line := FromJSON([]byte(`{"TimeStart":"Test","Crazy":1,"Mama":true,"Test":1}`), []string{"TimeStart", "Test"})
 	expected := `TimeStart="Test" Test=1`
+	if line != expected {
+		t.Errorf("Expected: %s got: '%s'", expected, line)
+	}
+}
+
+func TestFromJSONString(t *testing.T) {
+	line := FromJSON([]byte(`1002`), []string{"string"})
+	expected := `"1002"`
 	if line != expected {
 		t.Errorf("Expected: %s got: '%s'", expected, line)
 	}
