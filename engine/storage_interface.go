@@ -23,6 +23,7 @@ import (
 	"encoding/gob"
 	"encoding/json"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
 	"labix.org/v2/mgo/bson"
@@ -41,6 +42,7 @@ const (
 	SHARED_GROUP_PREFIX       = "shg_"
 	ACCOUNT_PREFIX            = "ubl_"
 	DESTINATION_PREFIX        = "dst_"
+	DERIVEDCHARGERS_PREFIX    = "dcs_"
 	TEMP_DESTINATION_PREFIX   = "tmp_"
 	LOG_CALL_COST_PREFIX      = "cco_"
 	LOG_ACTION_TIMMING_PREFIX = "ltm_"
@@ -87,7 +89,7 @@ type RatingStorage interface {
 type AccountingStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
-	CacheAccounting([]string, []string, []string) error
+	CacheAccounting([]string, []string, []string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
@@ -100,6 +102,8 @@ type AccountingStorage interface {
 	GetActionTimings(string) (ActionPlan, error)
 	SetActionTimings(string, ActionPlan) error
 	GetAllActionTimings() (map[string]ActionPlan, error)
+	GetDerivedChargers(string, bool) (config.DerivedChargers, error)
+	SetDerivedChargers(string, config.DerivedChargers) error
 }
 
 type CdrStorage interface {

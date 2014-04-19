@@ -24,6 +24,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -47,6 +48,7 @@ type DbReader struct {
 	ratingPlans      map[string]*RatingPlan
 	ratingProfiles   map[string]*RatingProfile
 	sharedGroups     map[string]*SharedGroup
+	derivedChargers  map[string]config.DerivedChargers
 }
 
 func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb AccountingStorage, tpid string) *DbReader {
@@ -64,6 +66,7 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
 	c.accountActions = make(map[string]*Account)
+	c.derivedChargers = make(map[string]config.DerivedChargers)
 	return c
 }
 
@@ -117,6 +120,8 @@ func (dbr *DbReader) ShowStatistics() {
 	log.Print("Action plans: ", len(dbr.actionsTimings))
 	// account actions
 	log.Print("Account actions: ", len(dbr.accountActions))
+	// derivedChargers
+	log.Print("DerivedChargers: ", len(dbr.derivedChargers))
 }
 
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
@@ -730,6 +735,10 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 	return nil
 }
 
+func (dbr *DbReader) LoadDerivedChargers() (err error) {
+	return nil // Placeholder for now
+}
+
 // Automated loading
 func (dbr *DbReader) LoadAll() error {
 	var err error
@@ -764,6 +773,9 @@ func (dbr *DbReader) LoadAll() error {
 		return err
 	}
 	if err = dbr.LoadAccountActions(); err != nil {
+		return err
+	}
+	if err = dbr.LoadDerivedChargers(); err != nil {
 		return err
 	}
 	return nil
@@ -806,6 +818,14 @@ func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 		keys := make([]string, len(dbr.actionsTimings))
 		i := 0
 		for k := range dbr.actionsTimings {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case DERIVEDCHARGERS_PREFIX: // aliases
+		keys := make([]string, len(dbr.derivedChargers))
+		i := 0
+		for k := range dbr.derivedChargers {
 			keys[i] = k
 			i++
 		}

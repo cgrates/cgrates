@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -166,12 +167,20 @@ vdf,empty10,*out,TOPUP_SHARED10_AT,
 vdf,emptyX,*out,TOPUP_EMPTY_AT,
 vdf,emptyY,*out,TOPUP_EMPTY_AT,
 `
+
+	derivedCharges = `
+#Tenant,Tor,Direction,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
+cgrates.org,call,*out,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
+cgrates.org,call,*out,dan,dan,extra2,,,,,ivo,ivo,,,,
+cgrates.org,call,*out,dan,*any,extra1,,,,,rif2,rif2,,,,
+`
 )
 
 var csvr *CSVReader
 
 func init() {
-	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionTimings, actionTriggers, accountActions)
+	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+		sharedGroups, actions, actionTimings, actionTriggers, accountActions, derivedCharges)
 	csvr.LoadDestinations()
 	csvr.LoadTimings()
 	csvr.LoadRates()
@@ -183,9 +192,10 @@ func init() {
 	csvr.LoadActionTimings()
 	csvr.LoadActionTriggers()
 	csvr.LoadAccountActions()
+	csvr.LoadDerivedChargers()
 	csvr.WriteToDatabase(false, false)
 	dataStorage.CacheRating(nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil, nil)
 }
 
 func TestLoadDestinations(t *testing.T) {
@@ -820,6 +830,18 @@ func TestLoadAccAliases(t *testing.T) {
 	}
 }
 
-/*
-vdf,minitsboy,*out,MORE_MINUTES,STANDARD_TRIGGER
-*/
+func TestLoadDerivedChargers(t *testing.T) {
+	if len(csvr.derivedChargers) != 2 {
+		t.Error("Failed to load derivedChargers: ", csvr.derivedChargers)
+	}
+	expCharger1 := config.DerivedChargers{
+		&config.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+		&config.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+	}
+	keyCharger1 := utils.ConcatenatedKey("cgrates.org", "call", "*out", "dan", "dan")
+	if !reflect.DeepEqual(csvr.derivedChargers[keyCharger1], expCharger1) {
+		t.Error("Unexpected charger", csvr.derivedChargers[keyCharger1])
+	}
+}

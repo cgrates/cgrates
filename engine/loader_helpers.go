@@ -45,6 +45,7 @@ type TPLoader interface {
 	LoadActionTimings() error
 	LoadActionTriggers() error
 	LoadAccountActions() error
+	LoadDerivedChargers() error
 	LoadAll() error
 	GetLoadedIds(string) ([]string, error)
 	ShowStatistics()
@@ -214,6 +215,9 @@ var FileValidators = map[string]*FileLineRegexValidator{
 	utils.ACCOUNT_ACTIONS_CSV: &FileLineRegexValidator{utils.ACCOUNT_ACTIONS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*),(?:(\w+;?)+\s*),(?:\*out\s*),(?:\w+\s*),(?:\w+\s*)$`),
 		"Tenant([0-9A-Za-z_]),Account([0-9A-Za-z_.]),Direction(*out),ActionTimingsTag([0-9A-Za-z_]),ActionTriggersTag([0-9A-Za-z_])"},
+	utils.DERIVED_CHARGERS_CSV: &FileLineRegexValidator{utils.DERIVED_CHARGERS_NRCOLS,
+		regexp.MustCompile(`(?:\w+\s*),(?:\w+\s*),(?:\*out),(?:\w+\s*),(?:\*any\s*|\w+\s*),(?:\*default\s*|\^*\w+\s*)?,(?:\*default\s*|\^*\w+\s*)?,(?:\*default\s*|\^*\w+\s*)?,(?:\*default\s*|\^*\w+\s*)?,(?:\*default\s*|\^*\w+\s*)?,(?:\*default\s*|\^*\w+\s*)?,(?:\*default\s*|\^*\w+\s*)?,(?:\*default\s*|\^*\w+\s*)?,(?:\*default\s*|\^*\w+\s*)?`),
+		"Tenant[0-9A-Za-z_],Tor([0-9A-Za-z_]),Direction(*out),Account[0-9A-Za-z_],Subject([0-9A-Za-z_]|*any),RunId([^0-9A-Za-z_]|*default),ReqTypeField([^0-9A-Za-z_]|*default),DirectionField([^0-9A-Za-z_]|*default),TenantField([^0-9A-Za-z_]|*default),TorField([^0-9A-Za-z_]|*default),AccountField([^0-9A-Za-z_]|*default),SubjectField([^0-9A-Za-z_]|*default),DestinationField([^0-9A-Za-z_]|*default),SetupTimeField([^0-9A-Za-z_]|*default),AnswerTimeField([^0-9A-Za-z_]|*default),DurationField([^0-9A-Za-z_]|*default)"},
 }
 
 func NewTPCSVFileParser(dirPath, fileName string) (*TPCSVFileParser, error) {
@@ -262,4 +266,12 @@ func (self *TPCSVFileParser) ParseNextLine() ([]string, error) {
 		return nil, err
 	}
 	return record, nil
+}
+
+// Used to populate empty values with *any or *default if value missing
+func ValueOrDefault(val string, deflt string) string {
+	if len(val) == 0 {
+		val = deflt
+	}
+	return val
 }

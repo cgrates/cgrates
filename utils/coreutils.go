@@ -223,3 +223,14 @@ func ParseZeroRatingSubject(rateSubj string) (time.Duration, error) {
 	durStr := rateSubj[len(ZERO_RATING_SUBJECT_PREFIX):]
 	return time.ParseDuration(durStr)
 }
+
+func ConcatenatedKey(keyVals ...string) string {
+	resKey := ""
+	for idx, key := range keyVals {
+		if idx != 0 {
+			resKey += CONCATENATED_KEY_SEP
+		}
+		resKey += key
+	}
+	return resKey
+}

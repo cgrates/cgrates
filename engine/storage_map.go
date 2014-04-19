@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -95,7 +96,7 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) erro
 	return nil
 }
 
-func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) error {
+func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) error {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX) // Forced until we can fine tune it
 	}
@@ -104,6 +105,9 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) error 
 	}
 	if alsKeys == nil {
 		cache2go.RemPrefixKey(ACC_ALIAS_PREFIX)
+	}
+	if dcsKeys == nil {
+		cache2go.RemPrefixKey(DERIVEDCHARGERS_PREFIX)
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, ACTION_PREFIX) {
@@ -121,6 +125,12 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) error 
 		if strings.HasPrefix(k, ACC_ALIAS_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetAccAlias(k[len(ACC_ALIAS_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+		if strings.HasPrefix(k, DERIVEDCHARGERS_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetDerivedChargers(k[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
 				return err
 			}
 		}
@@ -426,6 +436,29 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlan, err erro
 	}
 
 	return
+}
+
+func (ms *MapStorage) GetDerivedChargers(key string, checkDb bool) (dcs config.DerivedChargers, err error) {
+	key = DERIVEDCHARGERS_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(config.DerivedChargers), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		err = ms.ms.Unmarshal(values, &dcs)
+		cache2go.Cache(key, dcs)
+	} else {
+		return nil, errors.New("not found")
+	}
+	return
+}
+
+func (ms *MapStorage) SetDerivedChargers(key string, dcs config.DerivedChargers) error {
+	result, err := ms.ms.Marshal(dcs)
+	ms.dict[DERIVEDCHARGERS_PREFIX+key] = result
+	return err
 }
 
 func (ms *MapStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {

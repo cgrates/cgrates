@@ -285,19 +285,21 @@ type ApiReloadCache struct {
 	SharedGroupIds   []string
 	RpAliases        []string
 	AccAliases       []string
+	DerivedChargers  []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
 }
 
 type CacheStats struct {
-	Destinations   int
-	RatingPlans    int
-	RatingProfiles int
-	Actions        int
-	SharedGroups   int
-	RatingAliases  int
-	AccountAliases int
+	Destinations    int
+	RatingPlans     int
+	RatingProfiles  int
+	Actions         int
+	SharedGroups    int
+	RatingAliases   int
+	AccountAliases  int
+	DerivedChargers int
 }
 
 type AttrCachedItemAge struct {
@@ -306,13 +308,14 @@ type AttrCachedItemAge struct {
 }
 
 type CachedItemAge struct {
-	Destination   time.Duration
-	RatingPlan    time.Duration
-	RatingProfile time.Duration
-	Action        time.Duration
-	SharedGroup   time.Duration
-	RatingAlias   time.Duration
-	AccountAlias  time.Duration
+	Destination     time.Duration
+	RatingPlan      time.Duration
+	RatingProfile   time.Duration
+	Action          time.Duration
+	SharedGroup     time.Duration
+	RatingAlias     time.Duration
+	AccountAlias    time.Duration
+	DerivedChargers time.Duration
 }
 
 type AttrExpFileCdrs struct {

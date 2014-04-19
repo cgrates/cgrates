@@ -616,7 +616,7 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
 	dataStorage.CacheRating(nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil, nil)
 	return nil
 
 }

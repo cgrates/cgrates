@@ -25,6 +25,7 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/hoisie/redis"
 
@@ -143,7 +144,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) (e
 	return
 }
 
-func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) (err error) {
+func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) (err error) {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX)
 	}
@@ -201,6 +202,25 @@ func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) (err
 	}
 	if len(alsKeys) != 0 {
 		Logger.Info("Finished account aliases caching.")
+	}
+	// DerivedChargers caching
+	if dcsKeys == nil {
+		Logger.Info("Caching all derived chargers")
+		if dcsKeys, err = rs.db.Keys(DERIVEDCHARGERS_PREFIX + "*"); err != nil {
+			return
+		}
+		cache2go.RemPrefixKey(DERIVEDCHARGERS_PREFIX)
+	} else if len(dcsKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching derived chargers: %v", dcsKeys))
+	}
+	for _, key := range dcsKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetDerivedChargers(key[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
+			return err
+		}
+	}
+	if len(dcsKeys) != 0 {
+		Logger.Info("Finished derived chargers caching.")
 	}
 	return nil
 }
@@ -522,6 +542,32 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionPlan, err er
 	}
 
 	return
+}
+
+func (rs *RedisStorage) GetDerivedChargers(key string, checkDb bool) (dcs config.DerivedChargers, err error) {
+	key = DERIVEDCHARGERS_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(config.DerivedChargers), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	var values []byte
+	if values, err = rs.db.Get(key); err == nil {
+		err = rs.ms.Unmarshal(values, &dcs)
+		cache2go.Cache(key, dcs)
+	}
+	return dcs, err
+}
+
+func (rs *RedisStorage) SetDerivedChargers(key string, dcs config.DerivedChargers) (err error) {
+	if len(dcs) == 0 {
+		_, err = rs.db.Del(DERIVEDCHARGERS_PREFIX + key)
+		return err
+	}
+	marshaled, err := rs.ms.Marshal(dcs)
+	err = rs.db.Set(DERIVEDCHARGERS_PREFIX+key, marshaled)
+	return err
 }
 
 func (rs *RedisStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {

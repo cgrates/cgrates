@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"path"
-	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
@@ -88,7 +87,7 @@ type AttrAddBalance struct {
 	BalanceType    string
 	Direction      string
 	Value          float64
-	ExpirationDate time.Time
+	ExpirationDate string
 	RatingSubject  string
 	DestinationId  string
 	Weight         float64
@@ -96,6 +95,11 @@ type AttrAddBalance struct {
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
+	expTime, err := utils.ParseDate(attr.ExpirationDate)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
@@ -125,7 +129,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			Direction:   attr.Direction,
 			Balance: &engine.Balance{
 				Value:          attr.Value,
-				ExpirationDate: attr.ExpirationDate,
+				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
 				DestinationId:  attr.DestinationId,
 				Weight:         attr.Weight,
@@ -498,7 +502,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.AccountDb.CacheAccounting(nil, nil, nil); err != nil {
+	if err := self.AccountDb.CacheAccounting(nil, nil, nil, []string{}); err != nil {
 		return err
 	}
 	if self.Sched != nil {
@@ -521,7 +525,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, rpAlsKeys, accAlsKeys []string
+	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, rpAlsKeys, accAlsKeys, dcsKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -564,10 +568,16 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			accAlsKeys[idx] = engine.ACC_ALIAS_PREFIX + alias
 		}
 	}
+	if len(attrs.DerivedChargers) > 0 {
+		dcsKeys = make([]string, len(attrs.DerivedChargers))
+		for idx, dc := range attrs.DerivedChargers {
+			dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
+		}
+	}
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys); err != nil {
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
 		return err
 	}
 	*reply = "OK"
@@ -583,6 +593,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.SharedGroups = cache2go.CountEntries(engine.SHARED_GROUP_PREFIX)
 	cs.RatingAliases = cache2go.CountEntries(engine.RP_ALIAS_PREFIX)
 	cs.AccountAliases = cache2go.CountEntries(engine.ACC_ALIAS_PREFIX)
+	cs.DerivedChargers = cache2go.CountEntries(engine.DERIVEDCHARGERS_PREFIX)
 	*reply = *cs
 	return nil
 }
@@ -634,7 +645,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
-		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV))
+		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV))
 	if err := loader.LoadAll(); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -681,10 +693,15 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, alias := range accAliases {
 		accAlsKeys[idx] = engine.ACC_ALIAS_PREFIX + alias
 	}
+	dcs, _ := loader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
+	dcsKeys := make([]string, len(dcs))
+	for idx, dc := range dcs {
+		dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
+	}
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
 		return err
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys); err != nil {
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
 		return err
 	}
 	if self.Sched != nil {
