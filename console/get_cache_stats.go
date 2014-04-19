@@ -23,7 +23,7 @@ import "github.com/cgrates/cgrates/utils"
 func init() {
 	c := &CmdGetCacheStats{
 		name:      "get_cache_stats",
-		rpcMethod: "ApierV1.GetCachedStats",
+		rpcMethod: "ApierV1.GetCacheStats",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}

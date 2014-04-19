@@ -38,7 +38,7 @@ type CmdGetAccount struct {
 	name      string
 	rpcMethod string
 	rpcParams *apier.AttrGetAccount
-	rpcResult *engine.CallCost
+	rpcResult engine.Account
 	*CommandExecuter
 }
 

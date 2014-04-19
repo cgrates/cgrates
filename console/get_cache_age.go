@@ -34,7 +34,7 @@ type CmdGetCacheAge struct {
 	name      string
 	rpcMethod string
 	rpcParams *StringWrapper
-	rpcResult *utils.CachedItemAge
+	rpcResult utils.CachedItemAge
 	*CommandExecuter
 }
 
