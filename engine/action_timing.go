@@ -226,7 +226,9 @@ func (at *ActionTiming) Execute() (err error) {
 		return
 	}
 	for _, a := range aac {
-		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
+		if expDate, parseErr := utils.ParseDate(a.ExpirationString); a.Balance.ExpirationDate.IsZero() && parseErr == nil && !expDate.IsZero() {
+			a.Balance.ExpirationDate = expDate
+		}
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
