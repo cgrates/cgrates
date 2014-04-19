@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"path"
-	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
@@ -89,7 +88,7 @@ type AttrAddBalance struct {
 	BalanceType    string
 	Direction      string
 	Value          float64
-	ExpirationDate time.Time
+	ExpirationDate string
 	RatingSubject  string
 	DestinationId  string
 	Weight         float64
@@ -97,6 +96,11 @@ type AttrAddBalance struct {
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
+	expTime, err := utils.ParseDate(attr.ExpirationDate)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
@@ -126,7 +130,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			Direction:   attr.Direction,
 			Balance: &engine.Balance{
 				Value:          attr.Value,
-				ExpirationDate: attr.ExpirationDate,
+				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
 				DestinationId:  attr.DestinationId,
 				Weight:         attr.Weight,
