@@ -1,4 +1,4 @@
-/*
+f/*
 Rating system designed to be used in VoIP Carriers World
 Copyright (C) 2013 ITsysCOM
 
@@ -18,39 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
+import "github.com/cgrates/cgrates/utils"
+
 func init() {
-	c := &CmdReloadScheduler{
-		name:      "reload_scheduler",
-		rpcMethod: "ApierV1.ReloadScheduler",
+	c := &CmdSetAccountActions{
+		name:      "accountactions_set",
+		rpcMethod: "ApierV1.SetAccountActions",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdReloadScheduler struct {
+type CmdSetAccountActions struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringWrapper
+	rpcParams *utils.TPAccountActions
 	rpcResult string
 	*CommandExecuter
 }
 
-func (self *CmdReloadScheduler) Name() string {
+func (self *CmdSetAccountActions) Name() string {
 	return self.name
 }
 
-func (self *CmdReloadScheduler) RpcMethod() string {
+func (self *CmdSetAccountActions) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdReloadScheduler) RpcParams() interface{} {
+func (self *CmdSetAccountActions) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &StringWrapper{}
+		self.rpcParams = &utils.TPAccountActions{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdReloadScheduler) RpcResult() interface{} {
+func (self *CmdSetAccountActions) RpcResult() interface{} {
 	return &self.rpcResult
 }

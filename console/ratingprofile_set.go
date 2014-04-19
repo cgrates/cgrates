@@ -18,41 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdGetDestination{
-		name:      "get_destination",
-		rpcMethod: "ApierV1.GetDestination",
+	c := &CmdSetRatingProfile{
+		name:      "ratingprofile_set",
+		rpcMethod: "ApierV1.SetRatingProfile",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetDestination struct {
+type CmdSetRatingProfile struct {
 	name      string
 	rpcMethod string
-	rpcParams *StringWrapper
-	rpcResult engine.Destination
+	rpcParams *utils.TPRatingProfile
+	rpcResult string
 	*CommandExecuter
 }
 
-func (self *CmdGetDestination) Name() string {
+func (self *CmdSetRatingProfile) Name() string {
 	return self.name
 }
 
-func (self *CmdGetDestination) RpcMethod() string {
+func (self *CmdSetRatingProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetDestination) RpcParams() interface{} {
+func (self *CmdSetRatingProfile) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &StringWrapper{}
+		self.rpcParams = &utils.TPRatingProfile{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetDestination) RpcResult() interface{} {
+func (self *CmdSetRatingProfile) RpcResult() interface{} {
 	return &self.rpcResult
 }

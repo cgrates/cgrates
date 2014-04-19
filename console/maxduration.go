@@ -21,10 +21,9 @@ package console
 import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdDebitBalance{
-		name:       "debit_balance",
-		rpcMethod:  "Responder.Debit",
-		rpcParams:  &engine.CallDescriptor{Direction: "*out"},
+	c := &CmdGetMaxDuration{
+		name:       "maxduration",
+		rpcMethod:  "Responder.GetMaxSessionTime",
 		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c
@@ -32,34 +31,34 @@ func init() {
 }
 
 // Commander implementation
-type CmdDebitBalance struct {
+type CmdGetMaxDuration struct {
 	name       string
 	rpcMethod  string
 	rpcParams  *engine.CallDescriptor
-	rpcResult  string
+	rpcResult  *float64
 	clientArgs []string
 	*CommandExecuter
 }
 
-func (self *CmdDebitBalance) Name() string {
+func (self *CmdGetMaxDuration) Name() string {
 	return self.name
 }
 
-func (self *CmdDebitBalance) RpcMethod() string {
+func (self *CmdGetMaxDuration) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdDebitBalance) RpcParams() interface{} {
-    if self.rpcParams == nil {
+func (self *CmdGetMaxDuration) RpcParams() interface{} {
+	if self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdDebitBalance) RpcResult() interface{} {
+func (self *CmdGetMaxDuration) RpcResult() interface{} {
 	return &self.rpcResult
 }
 
-func (self *CmdDebitBalance) ClientArgs() []string {
+func (self *CmdGetMaxDuration) ClientArgs() []string {
 	return self.clientArgs
 }

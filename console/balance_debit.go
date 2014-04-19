@@ -18,41 +18,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier"
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdAddTriggeredAction{
-		name:      "add_triggeredaction",
-		rpcMethod: "ApierV1.AddTriggeredAction",
+	c := &CmdDebitBalance{
+		name:       "balance_debit",
+		rpcMethod:  "Responder.Debit",
+		rpcParams:  &engine.CallDescriptor{Direction: "*out"},
+		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdAddTriggeredAction struct {
-	name      string
-	rpcMethod string
-	rpcParams *apier.AttrAddActionTrigger
-	rpcResult string
+type CmdDebitBalance struct {
+	name       string
+	rpcMethod  string
+	rpcParams  *engine.CallDescriptor
+	rpcResult  string
+	clientArgs []string
 	*CommandExecuter
 }
 
-func (self *CmdAddTriggeredAction) Name() string {
+func (self *CmdDebitBalance) Name() string {
 	return self.name
 }
 
-func (self *CmdAddTriggeredAction) RpcMethod() string {
+func (self *CmdDebitBalance) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddTriggeredAction) RpcParams() interface{} {
-	if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddActionTrigger{Direction: "*out"}
+func (self *CmdDebitBalance) RpcParams() interface{} {
+    if self.rpcParams == nil {
+		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAddTriggeredAction) RpcResult() interface{} {
+func (self *CmdDebitBalance) RpcResult() interface{} {
 	return &self.rpcResult
+}
+
+func (self *CmdDebitBalance) ClientArgs() []string {
+	return self.clientArgs
 }

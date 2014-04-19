@@ -24,38 +24,39 @@ import (
 )
 
 func init() {
-	c := &CmdAddBalance{
-		name:      "add_balance",
-		rpcMethod: "ApierV1.AddBalance",
+	c := &CmdGetAccount{
+		name:      "account",
+		rpcMethod: "ApierV1.GetAccount",
+		rpcParams: &apier.AttrGetAccount{Direction: "*out"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdAddBalance struct {
+type CmdGetAccount struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrAddBalance
-	rpcResult string
+	rpcParams *apier.AttrGetAccount
+	rpcResult engine.Account
 	*CommandExecuter
 }
 
-func (self *CmdAddBalance) Name() string {
+func (self *CmdGetAccount) Name() string {
 	return self.name
 }
 
-func (self *CmdAddBalance) RpcMethod() string {
+func (self *CmdGetAccount) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddBalance) RpcParams() interface{} {
-    if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
+func (self *CmdGetAccount) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &apier.AttrGetAccount{Direction: "*out"}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAddBalance) RpcResult() interface{} {
+func (self *CmdGetAccount) RpcResult() interface{} {
 	return &self.rpcResult
 }

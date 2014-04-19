@@ -21,38 +21,38 @@ package console
 import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdSetRatingProfile{
-		name:      "set_ratingprofilet",
-		rpcMethod: "ApierV1.SetRatingProfile",
+	c := &CmdGetCacheStats{
+		name:      "cache_stats",
+		rpcMethod: "ApierV1.GetCacheStats",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSetRatingProfile struct {
+type CmdGetCacheStats struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TPRatingProfile
-	rpcResult string
+	rpcParams *utils.AttrCacheStats
+	rpcResult utils.CacheStats
 	*CommandExecuter
 }
 
-func (self *CmdSetRatingProfile) Name() string {
+func (self *CmdGetCacheStats) Name() string {
 	return self.name
 }
 
-func (self *CmdSetRatingProfile) RpcMethod() string {
+func (self *CmdGetCacheStats) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetRatingProfile) RpcParams() interface{} {
+func (self *CmdGetCacheStats) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.TPRatingProfile{}
+		self.rpcParams = &utils.AttrCacheStats{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetRatingProfile) RpcResult() interface{} {
+func (self *CmdGetCacheStats) RpcResult() interface{} {
 	return &self.rpcResult
 }

@@ -18,41 +18,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
-
 func init() {
-	c := &CmdSetAccountActions{
-		name:      "set_accountactions",
-		rpcMethod: "ApierV1.SetAccountActions",
+	c := &CmdReloadScheduler{
+		name:      "scheduler_reload",
+		rpcMethod: "ApierV1.ReloadScheduler",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdSetAccountActions struct {
+type CmdReloadScheduler struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.TPAccountActions
+	rpcParams *StringWrapper
 	rpcResult string
 	*CommandExecuter
 }
 
-func (self *CmdSetAccountActions) Name() string {
+func (self *CmdReloadScheduler) Name() string {
 	return self.name
 }
 
-func (self *CmdSetAccountActions) RpcMethod() string {
+func (self *CmdReloadScheduler) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdSetAccountActions) RpcParams() interface{} {
+func (self *CmdReloadScheduler) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.TPAccountActions{}
+		self.rpcParams = &StringWrapper{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdSetAccountActions) RpcResult() interface{} {
+func (self *CmdReloadScheduler) RpcResult() interface{} {
 	return &self.rpcResult
 }

@@ -21,38 +21,38 @@ package console
 import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdRemCdrs{
-		name:      "rem_cdrs",
-		rpcMethod: "ApierV1.RemCdrs",
+	c := &CmdGetCacheAge{
+		name:      "cache_age",
+		rpcMethod: "ApierV1.GetCachedItemAge",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdRemCdrs struct {
+type CmdGetCacheAge struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrRemCdrs
-	rpcResult string
+	rpcParams *StringWrapper
+	rpcResult utils.CachedItemAge
 	*CommandExecuter
 }
 
-func (self *CmdRemCdrs) Name() string {
+func (self *CmdGetCacheAge) Name() string {
 	return self.name
 }
 
-func (self *CmdRemCdrs) RpcMethod() string {
+func (self *CmdGetCacheAge) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemCdrs) RpcParams() interface{} {
+func (self *CmdGetCacheAge) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.AttrRemCdrs{}
+		self.rpcParams = &StringWrapper{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdRemCdrs) RpcResult() interface{} {
+func (self *CmdGetCacheAge) RpcResult() interface{} {
 	return &self.rpcResult
 }

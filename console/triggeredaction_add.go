@@ -21,38 +21,38 @@ package console
 import "github.com/cgrates/cgrates/apier"
 
 func init() {
-	c := &CmdAddAccount{
-		name:      "add_account",
-		rpcMethod: "ApierV1.SetAccount",
+	c := &CmdAddTriggeredAction{
+		name:      "triggeredaction_add",
+		rpcMethod: "ApierV1.AddTriggeredAction",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdAddAccount struct {
+type CmdAddTriggeredAction struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrSetAccount
+	rpcParams *apier.AttrAddActionTrigger
 	rpcResult string
 	*CommandExecuter
 }
 
-func (self *CmdAddAccount) Name() string {
+func (self *CmdAddTriggeredAction) Name() string {
 	return self.name
 }
 
-func (self *CmdAddAccount) RpcMethod() string {
+func (self *CmdAddTriggeredAction) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdAddAccount) RpcParams() interface{} {
+func (self *CmdAddTriggeredAction) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrSetAccount{Direction: "*out"}
+		self.rpcParams = &apier.AttrAddActionTrigger{Direction: "*out"}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdAddAccount) RpcResult() interface{} {
+func (self *CmdAddTriggeredAction) RpcResult() interface{} {
 	return &self.rpcResult
 }

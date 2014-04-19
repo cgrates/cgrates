@@ -18,47 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/engine"
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdGetMaxDuration{
-		name:       "get_maxduration",
-		rpcMethod:  "Responder.GetMaxSessionTime",
-		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+	c := &CmdRemCdrs{
+		name:      "cdrs_rem",
+		rpcMethod: "ApierV1.RemCdrs",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetMaxDuration struct {
-	name       string
-	rpcMethod  string
-	rpcParams  *engine.CallDescriptor
-	rpcResult  *float64
-	clientArgs []string
+type CmdRemCdrs struct {
+	name      string
+	rpcMethod string
+	rpcParams *utils.AttrRemCdrs
+	rpcResult string
 	*CommandExecuter
 }
 
-func (self *CmdGetMaxDuration) Name() string {
+func (self *CmdRemCdrs) Name() string {
 	return self.name
 }
 
-func (self *CmdGetMaxDuration) RpcMethod() string {
+func (self *CmdRemCdrs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetMaxDuration) RpcParams() interface{} {
+func (self *CmdRemCdrs) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
+		self.rpcParams = &utils.AttrRemCdrs{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetMaxDuration) RpcResult() interface{} {
+func (self *CmdRemCdrs) RpcResult() interface{} {
 	return &self.rpcResult
-}
-
-func (self *CmdGetMaxDuration) ClientArgs() []string {
-	return self.clientArgs
 }

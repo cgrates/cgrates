@@ -21,38 +21,38 @@ package console
 import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdReloadCache{
-		name:      "reload_cache",
-		rpcMethod: "ApierV1.ReloadCache",
+	c := &CmdExportCdrs{
+		name:      "cdrs_export",
+		rpcMethod: "ApierV1.ExportCdrsToFile",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdReloadCache struct {
+type CmdExportCdrs struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.ApiReloadCache
-	rpcResult string
+	rpcParams *utils.AttrExpFileCdrs
+	rpcResult utils.ExportedFileCdrs
 	*CommandExecuter
 }
 
-func (self *CmdReloadCache) Name() string {
+func (self *CmdExportCdrs) Name() string {
 	return self.name
 }
 
-func (self *CmdReloadCache) RpcMethod() string {
+func (self *CmdExportCdrs) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdReloadCache) RpcParams() interface{} {
+func (self *CmdExportCdrs) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.ApiReloadCache{}
+		self.rpcParams = &utils.AttrExpFileCdrs{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdReloadCache) RpcResult() interface{} {
+func (self *CmdExportCdrs) RpcResult() interface{} {
 	return &self.rpcResult
 }

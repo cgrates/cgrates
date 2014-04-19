@@ -22,7 +22,7 @@ import "github.com/cgrates/cgrates/apier"
 
 func init() {
 	c := &CmdExecuteAction{
-		name:      "execute_action",
+		name:      "action_execute",
 		rpcMethod: "ApierV1.ExecuteAction",
 		rpcParams: &apier.AttrExecuteAction{Direction: "*out"},
 	}

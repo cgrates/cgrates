@@ -22,7 +22,7 @@ import "github.com/cgrates/cgrates/engine"
 
 func init() {
 	c := &CmdGetCost{
-		name:       "get_cost",
+		name:       "cost",
 		rpcMethod:  "Responder.GetCost",
 		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}

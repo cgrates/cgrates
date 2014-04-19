@@ -25,7 +25,7 @@ import (
 
 func init() {
 	c := &CmdGetCallCost{
-		name:      "get_callcost",
+		name:      "callcost",
 		rpcMethod: "ApierV1.GetCallCostLog",
 	}
 	commands[c.Name()] = c

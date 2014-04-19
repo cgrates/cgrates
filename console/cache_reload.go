@@ -21,38 +21,38 @@ package console
 import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	c := &CmdGetCacheStats{
-		name:      "get_cache_stats",
-		rpcMethod: "ApierV1.GetCacheStats",
+	c := &CmdReloadCache{
+		name:      "cache_reload",
+		rpcMethod: "ApierV1.ReloadCache",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetCacheStats struct {
+type CmdReloadCache struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrCacheStats
-	rpcResult utils.CacheStats
+	rpcParams *utils.ApiReloadCache
+	rpcResult string
 	*CommandExecuter
 }
 
-func (self *CmdGetCacheStats) Name() string {
+func (self *CmdReloadCache) Name() string {
 	return self.name
 }
 
-func (self *CmdGetCacheStats) RpcMethod() string {
+func (self *CmdReloadCache) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCacheStats) RpcParams() interface{} {
+func (self *CmdReloadCache) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.AttrCacheStats{}
+		self.rpcParams = &utils.ApiReloadCache{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetCacheStats) RpcResult() interface{} {
+func (self *CmdReloadCache) RpcResult() interface{} {
 	return &self.rpcResult
 }

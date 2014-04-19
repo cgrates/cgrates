@@ -18,45 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"github.com/cgrates/cgrates/apier"
-	"github.com/cgrates/cgrates/engine"
-)
+import "github.com/cgrates/cgrates/apier"
 
 func init() {
-	c := &CmdGetAccount{
-		name:      "get_account",
-		rpcMethod: "ApierV1.GetAccount",
-		rpcParams: &apier.AttrGetAccount{Direction: "*out"},
+	c := &CmdAddAccount{
+		name:      "account_add",
+		rpcMethod: "ApierV1.SetAccount",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetAccount struct {
+type CmdAddAccount struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrGetAccount
-	rpcResult engine.Account
+	rpcParams *apier.AttrSetAccount
+	rpcResult string
 	*CommandExecuter
 }
 
-func (self *CmdGetAccount) Name() string {
+func (self *CmdAddAccount) Name() string {
 	return self.name
 }
 
-func (self *CmdGetAccount) RpcMethod() string {
+func (self *CmdAddAccount) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetAccount) RpcParams() interface{} {
+func (self *CmdAddAccount) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrGetAccount{Direction: "*out"}
+		self.rpcParams = &apier.AttrSetAccount{Direction: "*out"}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdGetAccount) RpcResult() interface{} {
+func (self *CmdAddAccount) RpcResult() interface{} {
 	return &self.rpcResult
 }

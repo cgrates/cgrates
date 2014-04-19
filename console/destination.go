@@ -18,41 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/utils"
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	c := &CmdExportCdrs{
-		name:      "export_cdrs",
-		rpcMethod: "ApierV1.ExportCdrsToFile",
+	c := &CmdGetDestination{
+		name:      "destination",
+		rpcMethod: "ApierV1.GetDestination",
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdExportCdrs struct {
+type CmdGetDestination struct {
 	name      string
 	rpcMethod string
-	rpcParams *utils.AttrExpFileCdrs
-	rpcResult utils.ExportedFileCdrs
+	rpcParams *StringWrapper
+	rpcResult engine.Destination
 	*CommandExecuter
 }
 
-func (self *CmdExportCdrs) Name() string {
+func (self *CmdGetDestination) Name() string {
 	return self.name
 }
 
-func (self *CmdExportCdrs) RpcMethod() string {
+func (self *CmdGetDestination) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdExportCdrs) RpcParams() interface{} {
+func (self *CmdGetDestination) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &utils.AttrExpFileCdrs{}
+		self.rpcParams = &StringWrapper{}
 	}
 	return self.rpcParams
 }
 
-func (self *CmdExportCdrs) RpcResult() interface{} {
+func (self *CmdGetDestination) RpcResult() interface{} {
 	return &self.rpcResult
 }
