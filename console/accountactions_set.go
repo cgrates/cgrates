@@ -1,4 +1,4 @@
-f/*
+/*
 Rating system designed to be used in VoIP Carriers World
 Copyright (C) 2013 ITsysCOM
 

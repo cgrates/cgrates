@@ -141,7 +141,7 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 				//than problem
 				Logger.Warning(fmt.Sprintf("Could not get shared group: %v", a.Balance.SharedGroup))
 			} else {
-				// add membere and save
+				// add member and save
 				sg.MemberIds = append(sg.MemberIds, ub.Id)
 				accountingStorage.SetSharedGroup(sg.Id, sg)
 			}
