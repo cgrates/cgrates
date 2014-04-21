@@ -176,15 +176,15 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 							// if increment it's not at the begining we must split the timespan
 							newTs = ts.SplitByIncrement(incrementIndex)
 						}
-						newTs.RoundToDuration(time.Minute)
+						newTs.RoundToDuration(duration)
 						newTs.RateInterval = &RateInterval{
 							Rating: &RIRate{
 								Rates: RateGroups{
 									&Rate{
 										GroupIntervalStart: 0,
 										Value:              0,
-										RateIncrement:      time.Minute,
-										RateUnit:           time.Minute,
+										RateIncrement:      duration,
+										RateUnit:           duration,
 									},
 								},
 							},
