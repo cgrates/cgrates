@@ -44,6 +44,9 @@ var (
 )
 
 func executeCommand(command string) {
+	if strings.TrimSpace(command) == "" {
+		return
+	}
 	if strings.TrimSpace(command) == "help" {
 		commands := console.GetCommands()
 		fmt.Println("Commands:")
