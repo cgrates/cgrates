@@ -110,38 +110,16 @@ func TestDefaults(t *testing.T) {
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = "internal"
 	eCfg.MediatorRaterReconnects = 3
-	eCfg.MediatorRunIds = []string{}
-	eCfg.MediatorSubjectFields = []string{}
-	eCfg.MediatorReqTypeFields = []string{}
-	eCfg.MediatorDirectionFields = []string{}
-	eCfg.MediatorTenantFields = []string{}
-	eCfg.MediatorTORFields = []string{}
-	eCfg.MediatorAccountFields = []string{}
-	eCfg.MediatorDestFields = []string{}
-	eCfg.MediatorSetupTimeFields = []string{}
-	eCfg.MediatorAnswerTimeFields = []string{}
-	eCfg.DerivedChargers = make(DerivedChargers, 0)
-	eCfg.MediatorDurationFields = []string{}
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
 	eCfg.SMRater = "internal"
 	eCfg.SMRaterReconnects = 3
 	eCfg.SMDebitInterval = 10
 	eCfg.SMMaxCallDuration = time.Duration(3) * time.Hour
-	eCfg.SMRunIds = []string{}
-	eCfg.SMReqTypeFields = []string{}
-	eCfg.SMDirectionFields = []string{}
-	eCfg.SMTenantFields = []string{}
-	eCfg.SMTORFields = []string{}
-	eCfg.SMAccountFields = []string{}
-	eCfg.SMSubjectFields = []string{}
-	eCfg.SMDestFields = []string{}
-	eCfg.SMSetupTimeFields = []string{}
-	eCfg.SMAnswerTimeFields = []string{}
-	eCfg.SMDurationFields = []string{}
 	eCfg.FreeswitchServer = "127.0.0.1:8021"
 	eCfg.FreeswitchPass = "ClueCon"
 	eCfg.FreeswitchReconnects = 5
+	eCfg.DerivedChargers = make(DerivedChargers, 0)
 	eCfg.HistoryAgentEnabled = false
 	eCfg.HistoryServer = "internal"
 	eCfg.HistoryServerEnabled = false
@@ -183,10 +161,6 @@ func TestSanityCheck(t *testing.T) {
 	}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error("Invalid defaults: ", err)
-	}
-	cfg.SMSubjectFields = []string{"sample1", "sample2", "sample3"}
-	if err := cfg.checkConfigSanity(); err == nil {
-		t.Error("Failed to detect config insanity")
 	}
 	cfg = &CGRConfig{}
 	cfg.CdreCdrFormat = utils.CDRE_FIXED_WIDTH
@@ -269,37 +243,17 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorRater = "test"
 	eCfg.MediatorRaterReconnects = 99
-	eCfg.MediatorRunIds = []string{"test"}
-	eCfg.MediatorSubjectFields = []string{"test"}
-	eCfg.MediatorReqTypeFields = []string{"test"}
-	eCfg.MediatorDirectionFields = []string{"test"}
-	eCfg.MediatorTenantFields = []string{"test"}
-	eCfg.MediatorTORFields = []string{"test"}
-	eCfg.MediatorAccountFields = []string{"test"}
-	eCfg.MediatorDestFields = []string{"test"}
-	eCfg.MediatorSetupTimeFields = []string{"test"}
-	eCfg.MediatorAnswerTimeFields = []string{"test"}
-	eCfg.MediatorDurationFields = []string{"test"}
 	eCfg.SMEnabled = true
 	eCfg.SMSwitchType = "test"
 	eCfg.SMRater = "test"
 	eCfg.SMRaterReconnects = 99
 	eCfg.SMDebitInterval = 99
 	eCfg.SMMaxCallDuration = time.Duration(99) * time.Second
-	eCfg.SMRunIds = []string{"test"}
-	eCfg.SMReqTypeFields = []string{"test"}
-	eCfg.SMDirectionFields = []string{"test"}
-	eCfg.SMTenantFields = []string{"test"}
-	eCfg.SMTORFields = []string{"test"}
-	eCfg.SMAccountFields = []string{"test"}
-	eCfg.SMSubjectFields = []string{"test"}
-	eCfg.SMDestFields = []string{"test"}
-	eCfg.SMSetupTimeFields = []string{"test"}
-	eCfg.SMAnswerTimeFields = []string{"test"}
-	eCfg.SMDurationFields = []string{"test"}
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
+	eCfg.DerivedChargers = DerivedChargers{&DerivedCharger{RunId: "test", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
+		TorField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
 	eCfg.HistoryAgentEnabled = true
 	eCfg.HistoryServer = "test"
 	eCfg.HistoryServerEnabled = true

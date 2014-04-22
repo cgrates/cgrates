@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"code.google.com/p/goconf/conf"
 	"errors"
 	"strings"
 
@@ -27,20 +26,17 @@ import (
 )
 
 // Adds support for slice values in config
-func ConfigSlice(c *conf.ConfigFile, section, valName string) ([]string, error) {
-	sliceStr, errGet := c.GetString(section, valName)
-	if errGet != nil {
-		return nil, errGet
-	}
-	cfgValStrs := strings.Split(sliceStr, ",")       // If need arrises, we can make the separator configurable
+func ConfigSlice(cfgVal string) ([]string, error) {
+	cfgValStrs := strings.Split(cfgVal, ",")         // If need arrises, we can make the separator configurable
 	if len(cfgValStrs) == 1 && cfgValStrs[0] == "" { // Prevents returning iterable with empty value
 		return []string{}, nil
 	}
-	for _, elm := range cfgValStrs {
+	for idx, elm := range cfgValStrs {
 		if elm == "" { //One empty element is presented when splitting empty string
 			return nil, errors.New("Empty values in config slice")
 
 		}
+		cfgValStrs[idx] = strings.TrimSpace(elm) // By default spaces are not removed so we do it here to avoid unpredicted results in config
 	}
 	return cfgValStrs, nil
 }

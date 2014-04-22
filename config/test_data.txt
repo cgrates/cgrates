@@ -81,17 +81,6 @@ extra_fields = test			# Field identifiers of the fields to add in extra fields s
 enabled = true				# Starts Mediator service: <true|false>.
 rater = test				# Address where to reach the Rater: <internal|x.y.z.y:1234>
 rater_reconnects = 99			# Number of reconnects to rater before giving up.
-run_ids = test				# Identifiers for each mediation run on CDRs
-subject_fields = test			# Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
-reqtype_fields = test			# Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
-direction_fields = test			# Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
-tenant_fields = test			# Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
-tor_fields = test			# Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
-account_fields = test			# Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
-destination_fields = test		# Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
-setup_time_fields = test		# Name of setup_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
-answer_time_fields = test		# Name of answer_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
-duration_fields = test			# Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
 
 [session_manager]
 enabled = true				# Starts SessionManager service: <true|false>.
@@ -100,22 +89,24 @@ rater = test				# Address where to reach the Rater.
 rater_reconnects = 99			# Number of reconnects to rater before giving up.
 debit_interval = 99			# Interval to perform debits on.
 max_call_duration = 99			# Maximum call duration a prepaid call can last
-run_ids = test				# Identifiers of additional sessions control.
-reqtype_fields = test			# Name of request type fields to be used during additional sessions control <""|*default|field_name>.
-direction_fields = test			# Name of direction fields to be used during additional sessions control <""|*default|field_name>.
-tenant_fields = test			# Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
-tor_fields = test			# Name of tor fields to be used during additional sessions control <""|*default|field_name>.
-account_fields = test			# Name of account fields to be used during additional sessions control <""|*default|field_name>.
-subject_fields = test			# Name of fields to be used during additional sessions control <""|*default|field_name>.
-destination_fields = test		# Name of destination fields to be used during additional sessions control <""|*default|field_name>.
-setup_time_fields = test		# Name of setup_time fields to be used during additional sessions control <""|*default|field_name>.
-answer_time_fields = test		# Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
-duration_fields = test			# Name of duration fields to be used during additional sessions control <""|*default|field_name>.
 
 [freeswitch]
 server = test				# Adress where to connect to FreeSWITCH socket.
 passwd = test				# FreeSWITCH socket password.
 reconnects = 99				# Number of attempts on connect failure.
+
+[derived_charging]
+run_ids = test 				# Identifiers of additional sessions control.
+reqtype_fields = test		# Name of request type fields to be used during additional sessions control <""|*default|field_name>.
+direction_fields = test		# Name of direction fields to be used during additional sessions control <""|*default|field_name>.
+tenant_fields = test		# Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
+tor_fields = test			# Name of tor fields to be used during additional sessions control <""|*default|field_name>.
+account_fields = test		# Name of account fields to be used during additional sessions control <""|*default|field_name>.
+subject_fields = test		# Name of fields to be used during additional sessions control <""|*default|field_name>.
+destination_fields = test	# Name of destination fields to be used during additional sessions control <""|*default|field_name>.
+setup_time_fields = test	# Name of setup_time fields to be used during additional sessions control <""|*default|field_name>.
+answer_time_fields = test	# Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
+duration_fields = test		# Name of duration fields to be used during additional sessions control <""|*default|field_name>.
 
 [history_server]
 enabled = true				# Starts History service: <true|false>.

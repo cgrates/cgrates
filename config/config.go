@@ -123,17 +123,6 @@ type CGRConfig struct {
 	SMRaterReconnects        int             // Number of reconnect attempts to rater
 	SMDebitInterval          int             // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration        time.Duration   // The maximum duration of a call
-	SMRunIds                 []string        // Identifiers of additional sessions control.
-	SMReqTypeFields          []string        // Name of request type fields to be used during additional sessions control <""|*default|field_name>.
-	SMDirectionFields        []string        // Name of direction fields to be used during additional sessions control <""|*default|field_name>.
-	SMTenantFields           []string        // Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
-	SMTORFields              []string        // Name of tor fields to be used during additional sessions control <""|*default|field_name>.
-	SMAccountFields          []string        // Name of account fields to be used during additional sessions control <""|*default|field_name>.
-	SMSubjectFields          []string        // Name of fields to be used during additional sessions control <""|*default|field_name>.
-	SMDestFields             []string        // Name of destination fields to be used during additional sessions control <""|*default|field_name>.
-	SMSetupTimeFields        []string        // Name of setup_time fields to be used during additional sessions control <""|*default|field_name>.
-	SMAnswerTimeFields       []string        // Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
-	SMDurationFields         []string        // Name of duration fields to be used during additional sessions control <""|*default|field_name>.
 	MediatorEnabled          bool            // Starts Mediator service: <true|false>.
 	MediatorRater            string          // Address where to reach the Rater: <internal|x.y.z.y:1234>
 	MediatorRaterReconnects  int             // Number of reconnects to rater before giving up.
@@ -148,7 +137,7 @@ type CGRConfig struct {
 	MediatorSetupTimeFields  []string        // Name of setup_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorAnswerTimeFields []string        // Name of answer_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
 	MediatorDurationFields   []string        // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	DerivedChargers          DerivedChargers // System wide pseudosessions which will be executed in case of no particular ones defined per account
+	DerivedChargers          DerivedChargers // System wide derived chargers, added to the account level ones
 	FreeswitchServer         string          // freeswitch address host:port
 	FreeswitchPass           string          // FS socket password
 	FreeswitchReconnects     int             // number of times to attempt reconnect after connect fails
@@ -228,17 +217,6 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorEnabled = false
 	self.MediatorRater = "internal"
 	self.MediatorRaterReconnects = 3
-	self.MediatorRunIds = []string{}
-	self.MediatorSubjectFields = []string{}
-	self.MediatorReqTypeFields = []string{}
-	self.MediatorDirectionFields = []string{}
-	self.MediatorTenantFields = []string{}
-	self.MediatorTORFields = []string{}
-	self.MediatorAccountFields = []string{}
-	self.MediatorDestFields = []string{}
-	self.MediatorSetupTimeFields = []string{}
-	self.MediatorAnswerTimeFields = []string{}
-	self.MediatorDurationFields = []string{}
 	self.DerivedChargers = make(DerivedChargers, 0)
 	self.SMEnabled = false
 	self.SMSwitchType = FS
@@ -246,17 +224,6 @@ func (self *CGRConfig) setDefaults() error {
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
-	self.SMRunIds = []string{}
-	self.SMReqTypeFields = []string{}
-	self.SMDirectionFields = []string{}
-	self.SMTenantFields = []string{}
-	self.SMTORFields = []string{}
-	self.SMAccountFields = []string{}
-	self.SMSubjectFields = []string{}
-	self.SMDestFields = []string{}
-	self.SMSetupTimeFields = []string{}
-	self.SMAnswerTimeFields = []string{}
-	self.SMDurationFields = []string{}
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
@@ -297,32 +264,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 		} else if self.CdreFWXmlTemplate == nil {
 			return errors.New("Need XmlTemplate for fixed_width cdr export")
 		}
-	}
-	// SessionManager should have same fields config length for session emulation
-	if len(self.SMReqTypeFields) != len(self.SMRunIds) ||
-		len(self.SMDirectionFields) != len(self.SMRunIds) ||
-		len(self.SMTenantFields) != len(self.SMRunIds) ||
-		len(self.SMTORFields) != len(self.SMRunIds) ||
-		len(self.SMAccountFields) != len(self.SMRunIds) ||
-		len(self.SMSubjectFields) != len(self.SMRunIds) ||
-		len(self.SMDestFields) != len(self.SMRunIds) ||
-		len(self.SMSetupTimeFields) != len(self.SMRunIds) ||
-		len(self.SMAnswerTimeFields) != len(self.SMRunIds) ||
-		len(self.SMDurationFields) != len(self.SMRunIds) {
-		return errors.New("<ConfigSanity> Inconsistent fields length for SessionManager session emulation")
-	}
-	// Mediator needs to have consistent extra fields definition
-	if len(self.MediatorReqTypeFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorDirectionFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorTenantFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorTORFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorAccountFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorSubjectFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorDestFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorSetupTimeFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorAnswerTimeFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorDurationFields) != len(self.MediatorRunIds) {
-		return errors.New("<ConfigSanity> Inconsistent fields length for Mediator extra fields")
 	}
 	return nil
 }
@@ -585,7 +526,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.CdrcDurationField, _ = c.GetString("cdrc", "duration_field")
 	}
 	if hasOpt = c.HasOption("cdrc", "extra_fields"); hasOpt {
-		if cfg.CdrcExtraFields, err = ConfigSlice(c, "cdrc", "extra_fields"); err != nil {
+		eFldsStr, _ := c.GetString("cdrc", "extra_fields")
+		if cfg.CdrcExtraFields, err = ConfigSlice(eFldsStr); err != nil {
 			return nil, err
 		}
 	}
@@ -597,61 +539,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("mediator", "rater_reconnects"); hasOpt {
 		cfg.MediatorRaterReconnects, _ = c.GetInt("mediator", "rater_reconnects")
-	}
-	if hasOpt = c.HasOption("mediator", "run_ids"); hasOpt {
-		if cfg.MediatorRunIds, err = ConfigSlice(c, "mediator", "run_ids"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "subject_fields"); hasOpt {
-		if cfg.MediatorSubjectFields, err = ConfigSlice(c, "mediator", "subject_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "reqtype_fields"); hasOpt {
-		if cfg.MediatorReqTypeFields, err = ConfigSlice(c, "mediator", "reqtype_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "direction_fields"); hasOpt {
-		if cfg.MediatorDirectionFields, err = ConfigSlice(c, "mediator", "direction_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "tenant_fields"); hasOpt {
-		if cfg.MediatorTenantFields, err = ConfigSlice(c, "mediator", "tenant_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "tor_fields"); hasOpt {
-		if cfg.MediatorTORFields, err = ConfigSlice(c, "mediator", "tor_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "account_fields"); hasOpt {
-		if cfg.MediatorAccountFields, err = ConfigSlice(c, "mediator", "account_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "destination_fields"); hasOpt {
-		if cfg.MediatorDestFields, err = ConfigSlice(c, "mediator", "destination_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "setup_time_fields"); hasOpt {
-		if cfg.MediatorSetupTimeFields, err = ConfigSlice(c, "mediator", "setup_time_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "answer_time_fields"); hasOpt {
-		if cfg.MediatorAnswerTimeFields, err = ConfigSlice(c, "mediator", "answer_time_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "duration_fields"); hasOpt {
-		if cfg.MediatorDurationFields, err = ConfigSlice(c, "mediator", "duration_fields"); err != nil {
-			return nil, err
-		}
 	}
 	if hasOpt = c.HasOption("session_manager", "enabled"); hasOpt {
 		cfg.SMEnabled, _ = c.GetBool("session_manager", "enabled")
@@ -674,61 +561,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 			return nil, err
 		}
 	}
-	if hasOpt = c.HasOption("session_manager", "run_ids"); hasOpt {
-		if cfg.SMRunIds, err = ConfigSlice(c, "session_manager", "run_ids"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "reqtype_fields"); hasOpt {
-		if cfg.SMReqTypeFields, err = ConfigSlice(c, "session_manager", "reqtype_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "direction_fields"); hasOpt {
-		if cfg.SMDirectionFields, err = ConfigSlice(c, "session_manager", "direction_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "tenant_fields"); hasOpt {
-		if cfg.SMTenantFields, err = ConfigSlice(c, "session_manager", "tenant_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "tor_fields"); hasOpt {
-		if cfg.SMTORFields, err = ConfigSlice(c, "session_manager", "tor_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "account_fields"); hasOpt {
-		if cfg.SMAccountFields, err = ConfigSlice(c, "session_manager", "account_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "subject_fields"); hasOpt {
-		if cfg.SMSubjectFields, err = ConfigSlice(c, "session_manager", "subject_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "destination_fields"); hasOpt {
-		if cfg.SMDestFields, err = ConfigSlice(c, "session_manager", "destination_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "setup_time_fields"); hasOpt {
-		if cfg.SMSetupTimeFields, err = ConfigSlice(c, "session_manager", "setup_time_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "answer_time_fields"); hasOpt {
-		if cfg.SMAnswerTimeFields, err = ConfigSlice(c, "session_manager", "answer_time_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "duration_fields"); hasOpt {
-		if cfg.SMDurationFields, err = ConfigSlice(c, "session_manager", "duration_fields"); err != nil {
-			return nil, err
-		}
-	}
 	if hasOpt = c.HasOption("freeswitch", "server"); hasOpt {
 		cfg.FreeswitchServer, _ = c.GetString("freeswitch", "server")
 	}
@@ -737,6 +569,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
 		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
+	}
+	if cfg.DerivedChargers, err = ParseCfgDerivedCharging(c); err != nil {
+		return nil, err
 	}
 	if hasOpt = c.HasOption("history_agent", "enabled"); hasOpt {
 		cfg.HistoryAgentEnabled, _ = c.GetBool("history_agent", "enabled")

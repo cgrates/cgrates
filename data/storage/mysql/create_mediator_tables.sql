@@ -1,6 +1,6 @@
 
 --
--- Table structure for table `rater_cdrs`
+-- Table structure for table `rated_cdrs`
 --
 DROP TABLE IF EXISTS `rated_cdrs`;
 CREATE TABLE `rated_cdrs` (
