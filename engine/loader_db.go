@@ -24,7 +24,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -48,7 +47,7 @@ type DbReader struct {
 	ratingPlans      map[string]*RatingPlan
 	ratingProfiles   map[string]*RatingProfile
 	sharedGroups     map[string]*SharedGroup
-	derivedChargers  map[string]config.DerivedChargers
+	derivedChargers  map[string]utils.DerivedChargers
 }
 
 func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb AccountingStorage, tpid string) *DbReader {
@@ -66,7 +65,7 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
 	c.accountActions = make(map[string]*Account)
-	c.derivedChargers = make(map[string]config.DerivedChargers)
+	c.derivedChargers = make(map[string]utils.DerivedChargers)
 	return c
 }
 

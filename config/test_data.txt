@@ -107,6 +107,7 @@ destination_fields = test	# Name of destination fields to be used during additio
 setup_time_fields = test	# Name of setup_time fields to be used during additional sessions control <""|*default|field_name>.
 answer_time_fields = test	# Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
 duration_fields = test		# Name of duration fields to be used during additional sessions control <""|*default|field_name>.
+combined_chargers = true	# Combine accounts specific derived_chargers with server configured ones <true|false>.
 
 [history_server]
 enabled = true				# Starts History service: <true|false>.

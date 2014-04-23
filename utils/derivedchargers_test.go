@@ -1,5 +1,5 @@
 /*
-Rating system for Telecom Environments
+Real-time Charging System for Telecom & ISP environments
 Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can Storagetribute it and/or modify
@@ -16,10 +16,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package utils
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
 )
@@ -27,7 +26,7 @@ import (
 func TestAppendDerivedChargers(t *testing.T) {
 	var err error
 	dcs := make(DerivedChargers, 0)
-	if _, err := dcs.Append(&DerivedCharger{RunId: utils.DEFAULT_RUNID}); err == nil {
+	if _, err := dcs.Append(&DerivedCharger{RunId: DEFAULT_RUNID}); err == nil {
 		t.Error("Failed to detect using of the default runid")
 	}
 	if dcs, err = dcs.Append(&DerivedCharger{RunId: "FIRST_RUNID"}); err != nil {
@@ -78,16 +77,16 @@ func TestNewDerivedCharger(t *testing.T) {
 		AnswerTimeField:  "~answertime2:s/sip:(.+)/$1/",
 		DurationField:    "~duration2:s/sip:(.+)/$1/",
 	}
-	edc2.rsrReqTypeField, _ = utils.NewRSRField("~reqtype2:s/sip:(.+)/$1/")
-	edc2.rsrDirectionField, _ = utils.NewRSRField("~direction2:s/sip:(.+)/$1/")
-	edc2.rsrTenantField, _ = utils.NewRSRField("~tenant2:s/sip:(.+)/$1/")
-	edc2.rsrTorField, _ = utils.NewRSRField("~tor2:s/sip:(.+)/$1/")
-	edc2.rsrAccountField, _ = utils.NewRSRField("~account2:s/sip:(.+)/$1/")
-	edc2.rsrSubjectField, _ = utils.NewRSRField("~subject2:s/sip:(.+)/$1/")
-	edc2.rsrDestinationField, _ = utils.NewRSRField("~destination2:s/sip:(.+)/$1/")
-	edc2.rsrSetupTimeField, _ = utils.NewRSRField("~setuptime2:s/sip:(.+)/$1/")
-	edc2.rsrAnswerTimeField, _ = utils.NewRSRField("~answertime2:s/sip:(.+)/$1/")
-	edc2.rsrDurationField, _ = utils.NewRSRField("~duration2:s/sip:(.+)/$1/")
+	edc2.rsrReqTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
+	edc2.rsrDirectionField, _ = NewRSRField("~direction2:s/sip:(.+)/$1/")
+	edc2.rsrTenantField, _ = NewRSRField("~tenant2:s/sip:(.+)/$1/")
+	edc2.rsrTorField, _ = NewRSRField("~tor2:s/sip:(.+)/$1/")
+	edc2.rsrAccountField, _ = NewRSRField("~account2:s/sip:(.+)/$1/")
+	edc2.rsrSubjectField, _ = NewRSRField("~subject2:s/sip:(.+)/$1/")
+	edc2.rsrDestinationField, _ = NewRSRField("~destination2:s/sip:(.+)/$1/")
+	edc2.rsrSetupTimeField, _ = NewRSRField("~setuptime2:s/sip:(.+)/$1/")
+	edc2.rsrAnswerTimeField, _ = NewRSRField("~answertime2:s/sip:(.+)/$1/")
+	edc2.rsrDurationField, _ = NewRSRField("~duration2:s/sip:(.+)/$1/")
 	if dc2, err := NewDerivedCharger("test2",
 		"~reqtype2:s/sip:(.+)/$1/",
 		"~direction2:s/sip:(.+)/$1/",
@@ -105,28 +104,8 @@ func TestNewDerivedCharger(t *testing.T) {
 	}
 }
 
-func TestParseCfgDerivedCharging(t *testing.T) {
-	eFieldsCfg := []byte(`[derived_charging]
-run_ids = run1, run2
-reqtype_fields = test1, test2 
-direction_fields = test1, test2
-tenant_fields = test1, test2
-tor_fields = test1, test2
-account_fields = test1, test2
-subject_fields = test1, test2
-destination_fields = test1, test2
-setup_time_fields = test1, test2
-answer_time_fields = test1, test2
-duration_fields = test1, test2
-`)
-	edcs := DerivedChargers{
-		&DerivedCharger{RunId: "run1", ReqTypeField: "test1", DirectionField: "test1", TenantField: "test1", TorField: "test1",
-			AccountField: "test1", SubjectField: "test1", DestinationField: "test1", SetupTimeField: "test1", AnswerTimeField: "test1", DurationField: "test1"},
-		&DerivedCharger{RunId: "run2", ReqTypeField: "test2", DirectionField: "test2", TenantField: "test2", TorField: "test2",
-			AccountField: "test2", SubjectField: "test2", DestinationField: "test2", SetupTimeField: "test2", AnswerTimeField: "test2", DurationField: "test2"}}
-	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
-		t.Error("Could not parse the config", err.Error())
-	} else if !reflect.DeepEqual(cfg.DerivedChargers, edcs) {
-		t.Errorf("Expecting: %v, received: %v", edcs, cfg.DerivedChargers)
+func TestDerivedChargersKey(t *testing.T) {
+	if dcKey := DerivedChargersKey("cgrates.org", "call", "*out", "dan", "dan"); dcKey != "cgrates.org:call:*out:dan:dan" {
+		t.Error("Unexpected derived chargers key: ", dcKey)
 	}
 }

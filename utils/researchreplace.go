@@ -34,6 +34,9 @@ func (rsr *ReSearchReplace) Process(source string) string {
 	}
 	res := []byte{}
 	match := rsr.SearchRegexp.FindStringSubmatchIndex(source)
+	if match == nil {
+		return source // No match returns unaltered source, so we can play with national vs international dialing
+	}
 	res = rsr.SearchRegexp.ExpandString(res, rsr.ReplaceTemplate, source, match)
 	return string(res)
 }

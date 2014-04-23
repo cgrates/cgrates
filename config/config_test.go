@@ -119,7 +119,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.FreeswitchServer = "127.0.0.1:8021"
 	eCfg.FreeswitchPass = "ClueCon"
 	eCfg.FreeswitchReconnects = 5
-	eCfg.DerivedChargers = make(DerivedChargers, 0)
+	eCfg.DerivedChargers = make(utils.DerivedChargers, 0)
+	eCfg.CombinedDerivedChargers = true
 	eCfg.HistoryAgentEnabled = false
 	eCfg.HistoryServer = "internal"
 	eCfg.HistoryServerEnabled = false
@@ -252,8 +253,9 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
-	eCfg.DerivedChargers = DerivedChargers{&DerivedCharger{RunId: "test", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
+	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		TorField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
+	eCfg.CombinedDerivedChargers = true
 	eCfg.HistoryAgentEnabled = true
 	eCfg.HistoryServer = "test"
 	eCfg.HistoryServerEnabled = true

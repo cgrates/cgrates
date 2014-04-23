@@ -27,7 +27,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -51,7 +50,7 @@ type CSVReader struct {
 	ratingPlans       map[string]*RatingPlan
 	ratingProfiles    map[string]*RatingProfile
 	sharedGroups      map[string]*SharedGroup
-	derivedChargers   map[string]config.DerivedChargers
+	derivedChargers   map[string]utils.DerivedChargers
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
 	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn string
@@ -74,7 +73,7 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.sharedGroups = make(map[string]*SharedGroup)
-	c.derivedChargers = make(map[string]config.DerivedChargers)
+	c.derivedChargers = make(map[string]utils.DerivedChargers)
 	c.readerFunc = openFileCSVReader
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
@@ -753,10 +752,10 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := utils.ConcatenatedKey(record[0], record[1], record[2], record[3], record[4])
+		tag := utils.DerivedChargersKey(record[0], record[1], record[2], record[3], record[4])
 		_, found := csvr.derivedChargers[tag]
 		if found {
-			if csvr.derivedChargers[tag], err = csvr.derivedChargers[tag].Append(&config.DerivedCharger{
+			if csvr.derivedChargers[tag], err = csvr.derivedChargers[tag].Append(&utils.DerivedCharger{
 				RunId:            ValueOrDefault(record[5], "*default"),
 				ReqTypeField:     ValueOrDefault(record[6], "*default"),
 				DirectionField:   ValueOrDefault(record[7], "*default"),
@@ -775,7 +774,7 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 			if record[5] == utils.DEFAULT_RUNID {
 				return errors.New("Reserved RunId")
 			}
-			csvr.derivedChargers[tag] = config.DerivedChargers{&config.DerivedCharger{
+			csvr.derivedChargers[tag] = utils.DerivedChargers{&utils.DerivedCharger{
 				RunId:            ValueOrDefault(record[5], "*default"),
 				ReqTypeField:     ValueOrDefault(record[6], "*default"),
 				DirectionField:   ValueOrDefault(record[7], "*default"),

@@ -377,3 +377,7 @@ type AttrLoadTpFromFolder struct {
 type AttrGetDestination struct {
 	Id string
 }
+
+type AttrDerivedChargers struct {
+	Tenant, Tor, Direction, Account, Subject string
+}

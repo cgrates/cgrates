@@ -199,6 +199,9 @@ func TestFormatCost(t *testing.T) {
 	if cdr.FormatCost(2, 0) != "101" {
 		t.Error("Unexpected format of the cost: ", cdr.FormatCost(2, 0))
 	}
+	if cdr.FormatCost(1, 0) != "10" {
+		t.Error("Unexpected format of the cost: ", cdr.FormatCost(1, 0))
+	}
 	if cdr.FormatCost(2, 3) != "101.001" {
 		t.Error("Unexpected format of the cost: ", cdr.FormatCost(2, 3))
 	}

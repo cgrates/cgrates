@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriems World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -438,10 +437,10 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlan, err erro
 	return
 }
 
-func (ms *MapStorage) GetDerivedChargers(key string, checkDb bool) (dcs config.DerivedChargers, err error) {
+func (ms *MapStorage) GetDerivedChargers(key string, checkDb bool) (dcs utils.DerivedChargers, err error) {
 	key = DERIVEDCHARGERS_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(config.DerivedChargers), nil
+		return x.(utils.DerivedChargers), nil
 	}
 	if !checkDb {
 		return nil, errors.New(utils.ERR_NOT_FOUND)
@@ -455,7 +454,7 @@ func (ms *MapStorage) GetDerivedChargers(key string, checkDb bool) (dcs config.D
 	return
 }
 
-func (ms *MapStorage) SetDerivedChargers(key string, dcs config.DerivedChargers) error {
+func (ms *MapStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) error {
 	result, err := ms.ms.Marshal(dcs)
 	ms.dict[DERIVEDCHARGERS_PREFIX+key] = result
 	return err

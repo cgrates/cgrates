@@ -56,10 +56,10 @@ func TestSetGetDerivedCharges(t *testing.T) {
 		return
 	}
 	keyCharger1 := utils.ConcatenatedKey("cgrates.org", "call", "*out", "dan", "dan")
-	charger1 := config.DerivedChargers{
-		&config.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+	charger1 := utils.DerivedChargers{
+		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
-		&config.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
 	}
 	if err := rds.SetDerivedChargers(keyCharger1, charger1); err != nil {

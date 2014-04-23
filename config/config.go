@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -119,37 +119,38 @@ type CGRConfig struct {
 	CdrcExtraFields          []string          // Extra fields to extract, special format in case of .csv "field1:index1,field2:index2"
 	SMEnabled                bool
 	SMSwitchType             string
-	SMRater                  string          // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMRaterReconnects        int             // Number of reconnect attempts to rater
-	SMDebitInterval          int             // the period to be debited in advanced during a call (in seconds)
-	SMMaxCallDuration        time.Duration   // The maximum duration of a call
-	MediatorEnabled          bool            // Starts Mediator service: <true|false>.
-	MediatorRater            string          // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorRaterReconnects  int             // Number of reconnects to rater before giving up.
-	MediatorRunIds           []string        // Identifiers for each mediation run on CDRs
-	MediatorReqTypeFields    []string        // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
-	MediatorDirectionFields  []string        // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTenantFields     []string        // Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTORFields        []string        // Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAccountFields    []string        // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorSubjectFields    []string        // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDestFields       []string        // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorSetupTimeFields  []string        // Name of setup_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAnswerTimeFields []string        // Name of answer_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDurationFields   []string        // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	DerivedChargers          DerivedChargers // System wide derived chargers, added to the account level ones
-	FreeswitchServer         string          // freeswitch address host:port
-	FreeswitchPass           string          // FS socket password
-	FreeswitchReconnects     int             // number of times to attempt reconnect after connect fails
-	HistoryAgentEnabled      bool            // Starts History as an agent: <true|false>.
-	HistoryServer            string          // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled     bool            // Starts History as server: <true|false>.
-	HistoryDir               string          // Location on disk where to store history files.
-	HistorySaveInterval      time.Duration   // The timout duration between history writes
-	MailerServer             string          // The server to use when sending emails out
-	MailerAuthUser           string          // Authenticate to email server using this user
-	MailerAuthPass           string          // Authenticate to email server with this password
-	MailerFromAddr           string          // From address used when sending emails out
+	SMRater                  string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMRaterReconnects        int                   // Number of reconnect attempts to rater
+	SMDebitInterval          int                   // the period to be debited in advanced during a call (in seconds)
+	SMMaxCallDuration        time.Duration         // The maximum duration of a call
+	MediatorEnabled          bool                  // Starts Mediator service: <true|false>.
+	MediatorRater            string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	MediatorRaterReconnects  int                   // Number of reconnects to rater before giving up.
+	MediatorRunIds           []string              // Identifiers for each mediation run on CDRs
+	MediatorReqTypeFields    []string              // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
+	MediatorDirectionFields  []string              // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorTenantFields     []string              // Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorTORFields        []string              // Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorAccountFields    []string              // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorSubjectFields    []string              // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorDestFields       []string              // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorSetupTimeFields  []string              // Name of setup_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorAnswerTimeFields []string              // Name of answer_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	MediatorDurationFields   []string              // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
+	DerivedChargers          utils.DerivedChargers // System wide derived chargers, added to the account level ones
+	CombinedDerivedChargers  bool                  // Combine accounts specific derived_chargers with server configured
+	FreeswitchServer         string                // freeswitch address host:port
+	FreeswitchPass           string                // FS socket password
+	FreeswitchReconnects     int                   // number of times to attempt reconnect after connect fails
+	HistoryAgentEnabled      bool                  // Starts History as an agent: <true|false>.
+	HistoryServer            string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled     bool                  // Starts History as server: <true|false>.
+	HistoryDir               string                // Location on disk where to store history files.
+	HistorySaveInterval      time.Duration         // The timout duration between history writes
+	MailerServer             string                // The server to use when sending emails out
+	MailerAuthUser           string                // Authenticate to email server using this user
+	MailerAuthPass           string                // Authenticate to email server with this password
+	MailerFromAddr           string                // From address used when sending emails out
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -217,7 +218,8 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorEnabled = false
 	self.MediatorRater = "internal"
 	self.MediatorRaterReconnects = 3
-	self.DerivedChargers = make(DerivedChargers, 0)
+	self.DerivedChargers = make(utils.DerivedChargers, 0)
+	self.CombinedDerivedChargers = true
 	self.SMEnabled = false
 	self.SMSwitchType = FS
 	self.SMRater = "internal"
@@ -572,6 +574,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if cfg.DerivedChargers, err = ParseCfgDerivedCharging(c); err != nil {
 		return nil, err
+	}
+	if hasOpt = c.HasOption("derived_charging", "combined_chargers"); hasOpt {
+		cfg.CombinedDerivedChargers, _ = c.GetBool("derived_charging", "combined_chargers")
 	}
 	if hasOpt = c.HasOption("history_agent", "enabled"); hasOpt {
 		cfg.HistoryAgentEnabled, _ = c.GetBool("history_agent", "enabled")

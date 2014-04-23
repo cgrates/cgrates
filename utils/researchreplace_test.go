@@ -49,3 +49,13 @@ func TestProcessReSearchReplace3(t *testing.T) { //"MatchedDestId":"CST_31800_DE
 		t.Error("Unexpected output from SearchReplace: ", outStr)
 	}
 }
+
+func TestProcessReSearchReplace4(t *testing.T) {
+	rsr := &ReSearchReplace{regexp.MustCompile(`^\+49(\d+)`), "0$1"}
+	if outStr := rsr.Process("+4986517174963"); outStr != "086517174963" {
+		t.Error("Unexpected output from SearchReplace: ", outStr)
+	}
+	if outStr := rsr.Process("+186517174963"); outStr != "+186517174963" {
+		t.Error("Unexpected output from SearchReplace: ", outStr)
+	}
+}
