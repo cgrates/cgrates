@@ -54,103 +54,92 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	RatingDBType             string
-	RatingDBHost             string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	RatingDBPort             string // The port to bind to.
-	RatingDBName             string // The name of the database to connect to.
-	RatingDBUser             string // The user to sign in as.
-	RatingDBPass             string // The user's password.
-	AccountDBType            string
-	AccountDBHost            string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort            string             // The port to bind to.
-	AccountDBName            string             // The name of the database to connect to.
-	AccountDBUser            string             // The user to sign in as.
-	AccountDBPass            string             // The user's password.
-	StorDBType               string             // Should reflect the database type used to store logs
-	StorDBHost               string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort               string             // Th e port to bind to.
-	StorDBName               string             // The name of the database to connect to.
-	StorDBUser               string             // The user to sign in as.
-	StorDBPass               string             // The user's password.
-	DBDataEncoding           string             // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen            string             // RPC JSON listening address
-	RPCGOBListen             string             // RPC GOB listening address
-	HTTPListen               string             // HTTP listening address
-	DefaultReqType           string             // Use this request type if not defined on top
-	DefaultTOR               string             // set default type of record
-	DefaultTenant            string             // set default tenant
-	DefaultSubject           string             // set default rating subject, useful in case of fallback
-	RoundingMethod           string             // Rounding method for the end price: <*up|*middle|*down>
-	RoundingDecimals         int                // Number of decimals to round end prices at
-	XmlCfgDocument           *CgrXmlCfgDocument // Load additional configuration inside xml document
-	RaterEnabled             bool               // start standalone server (no balancer)
-	RaterBalancer            string             // balancer address host:port
-	BalancerEnabled          bool
-	SchedulerEnabled         bool
-	CDRSEnabled              bool              // Enable CDR Server service
-	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
-	CDRSMediator             string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CdreCdrFormat            string            // Format of the exported CDRs. <csv>
-	CdreMaskDestId           string            // Id of the destination list to be masked in CDRs
-	CdreMaskLength           int               // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
-	CdreCostShiftDigits      int               // Shift digits in the cost on export (eg: convert from EUR to cents)
-	CdreDir                  string            // Path towards exported cdrs directory
-	CdreExportedFields       []*utils.RSRField // List of fields in the exported CDRs
-	CdreFWXmlTemplate        *CgrXmlCdreFwCfg  // Use this configuration as export template in case of fixed fields length
-	CdrcEnabled              bool              // Enable CDR client functionality
-	CdrcCdrs                 string            // Address where to reach CDR server
-	CdrcCdrsMethod           string            // Mechanism to use when posting CDRs on server  <http_cgr>
-	CdrcRunDelay             time.Duration     // Sleep interval between consecutive runs, 0 to use automation via inotify
-	CdrcCdrType              string            // CDR file format <csv>.
-	CdrcCdrInDir             string            // Absolute path towards the directory where the CDRs are stored.
-	CdrcCdrOutDir            string            // Absolute path towards the directory where processed CDRs will be moved.
-	CdrcSourceId             string            // Tag identifying the source of the CDRs within CGRS database.
-	CdrcAccIdField           string            // Accounting id field identifier. Use index number in case of .csv cdrs.
-	CdrcReqTypeField         string            // Request type field identifier. Use index number in case of .csv cdrs.
-	CdrcDirectionField       string            // Direction field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTenantField          string            // Tenant field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTorField             string            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAccountField         string            // Account field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSubjectField         string            // Subject field identifier. Use index numbers in case of .csv CDRs.
-	CdrcDestinationField     string            // Destination field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSetupTimeField       string            // Setup time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAnswerTimeField      string            // Answer time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcDurationField        string            // Duration field identifier. Use index numbers in case of .csv cdrs.
-	CdrcExtraFields          []string          // Extra fields to extract, special format in case of .csv "field1:index1,field2:index2"
-	SMEnabled                bool
-	SMSwitchType             string
-	SMRater                  string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMRaterReconnects        int                   // Number of reconnect attempts to rater
-	SMDebitInterval          int                   // the period to be debited in advanced during a call (in seconds)
-	SMMaxCallDuration        time.Duration         // The maximum duration of a call
-	MediatorEnabled          bool                  // Starts Mediator service: <true|false>.
-	MediatorRater            string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorRaterReconnects  int                   // Number of reconnects to rater before giving up.
-	MediatorRunIds           []string              // Identifiers for each mediation run on CDRs
-	MediatorReqTypeFields    []string              // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
-	MediatorDirectionFields  []string              // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTenantFields     []string              // Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTORFields        []string              // Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAccountFields    []string              // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorSubjectFields    []string              // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDestFields       []string              // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorSetupTimeFields  []string              // Name of setup_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAnswerTimeFields []string              // Name of answer_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDurationFields   []string              // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	DerivedChargers          utils.DerivedChargers // System wide derived chargers, added to the account level ones
-	CombinedDerivedChargers  bool                  // Combine accounts specific derived_chargers with server configured
-	FreeswitchServer         string                // freeswitch address host:port
-	FreeswitchPass           string                // FS socket password
-	FreeswitchReconnects     int                   // number of times to attempt reconnect after connect fails
-	HistoryAgentEnabled      bool                  // Starts History as an agent: <true|false>.
-	HistoryServer            string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled     bool                  // Starts History as server: <true|false>.
-	HistoryDir               string                // Location on disk where to store history files.
-	HistorySaveInterval      time.Duration         // The timout duration between history writes
-	MailerServer             string                // The server to use when sending emails out
-	MailerAuthUser           string                // Authenticate to email server using this user
-	MailerAuthPass           string                // Authenticate to email server with this password
-	MailerFromAddr           string                // From address used when sending emails out
+	RatingDBType            string
+	RatingDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	RatingDBPort            string // The port to bind to.
+	RatingDBName            string // The name of the database to connect to.
+	RatingDBUser            string // The user to sign in as.
+	RatingDBPass            string // The user's password.
+	AccountDBType           string
+	AccountDBHost           string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort           string             // The port to bind to.
+	AccountDBName           string             // The name of the database to connect to.
+	AccountDBUser           string             // The user to sign in as.
+	AccountDBPass           string             // The user's password.
+	StorDBType              string             // Should reflect the database type used to store logs
+	StorDBHost              string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort              string             // Th e port to bind to.
+	StorDBName              string             // The name of the database to connect to.
+	StorDBUser              string             // The user to sign in as.
+	StorDBPass              string             // The user's password.
+	DBDataEncoding          string             // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen           string             // RPC JSON listening address
+	RPCGOBListen            string             // RPC GOB listening address
+	HTTPListen              string             // HTTP listening address
+	DefaultReqType          string             // Use this request type if not defined on top
+	DefaultTOR              string             // set default type of record
+	DefaultTenant           string             // set default tenant
+	DefaultSubject          string             // set default rating subject, useful in case of fallback
+	RoundingMethod          string             // Rounding method for the end price: <*up|*middle|*down>
+	RoundingDecimals        int                // Number of decimals to round end prices at
+	XmlCfgDocument          *CgrXmlCfgDocument // Load additional configuration inside xml document
+	RaterEnabled            bool               // start standalone server (no balancer)
+	RaterBalancer           string             // balancer address host:port
+	BalancerEnabled         bool
+	SchedulerEnabled        bool
+	CDRSEnabled             bool              // Enable CDR Server service
+	CDRSExtraFields         []*utils.RSRField // Extra fields to store in CDRs
+	CDRSMediator            string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CdreCdrFormat           string            // Format of the exported CDRs. <csv>
+	CdreMaskDestId          string            // Id of the destination list to be masked in CDRs
+	CdreMaskLength          int               // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
+	CdreCostShiftDigits     int               // Shift digits in the cost on export (eg: convert from EUR to cents)
+	CdreDir                 string            // Path towards exported cdrs directory
+	CdreExportedFields      []*utils.RSRField // List of fields in the exported CDRs
+	CdreFWXmlTemplate       *CgrXmlCdreFwCfg  // Use this configuration as export template in case of fixed fields length
+	CdrcEnabled             bool              // Enable CDR client functionality
+	CdrcCdrs                string            // Address where to reach CDR server
+	CdrcCdrsMethod          string            // Mechanism to use when posting CDRs on server  <http_cgr>
+	CdrcRunDelay            time.Duration     // Sleep interval between consecutive runs, 0 to use automation via inotify
+	CdrcCdrType             string            // CDR file format <csv>.
+	CdrcCdrInDir            string            // Absolute path towards the directory where the CDRs are stored.
+	CdrcCdrOutDir           string            // Absolute path towards the directory where processed CDRs will be moved.
+	CdrcSourceId            string            // Tag identifying the source of the CDRs within CGRS database.
+	CdrcAccIdField          string            // Accounting id field identifier. Use index number in case of .csv cdrs.
+	CdrcReqTypeField        string            // Request type field identifier. Use index number in case of .csv cdrs.
+	CdrcDirectionField      string            // Direction field identifier. Use index numbers in case of .csv cdrs.
+	CdrcTenantField         string            // Tenant field identifier. Use index numbers in case of .csv cdrs.
+	CdrcTorField            string            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
+	CdrcAccountField        string            // Account field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSubjectField        string            // Subject field identifier. Use index numbers in case of .csv CDRs.
+	CdrcDestinationField    string            // Destination field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSetupTimeField      string            // Setup time field identifier. Use index numbers in case of .csv cdrs.
+	CdrcAnswerTimeField     string            // Answer time field identifier. Use index numbers in case of .csv cdrs.
+	CdrcDurationField       string            // Duration field identifier. Use index numbers in case of .csv cdrs.
+	CdrcExtraFields         []string          // Extra fields to extract, special format in case of .csv "field1:index1,field2:index2"
+	SMEnabled               bool
+	SMSwitchType            string
+	SMRater                 string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMRaterReconnects       int                   // Number of reconnect attempts to rater
+	SMDebitInterval         int                   // the period to be debited in advanced during a call (in seconds)
+	SMMaxCallDuration       time.Duration         // The maximum duration of a call
+	MediatorEnabled         bool                  // Starts Mediator service: <true|false>.
+	MediatorRater           string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	MediatorRaterReconnects int                   // Number of reconnects to rater before giving up.
+	DerivedChargers         utils.DerivedChargers // System wide derived chargers, added to the account level ones
+	CombinedDerivedChargers bool                  // Combine accounts specific derived_chargers with server configured
+	FreeswitchServer        string                // freeswitch address host:port
+	FreeswitchPass          string                // FS socket password
+	FreeswitchReconnects    int                   // number of times to attempt reconnect after connect fails
+	HistoryAgentEnabled     bool                  // Starts History as an agent: <true|false>.
+	HistoryServer           string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled    bool                  // Starts History as server: <true|false>.
+	HistoryDir              string                // Location on disk where to store history files.
+	HistorySaveInterval     time.Duration         // The timout duration between history writes
+	MailerServer            string                // The server to use when sending emails out
+	MailerAuthUser          string                // Authenticate to email server using this user
+	MailerAuthPass          string                // Authenticate to email server with this password
+	MailerFromAddr          string                // From address used when sending emails out
 }
 
 func (self *CGRConfig) setDefaults() error {
