@@ -134,3 +134,9 @@ func (dcs DerivedChargers) Append(dc *DerivedCharger) (DerivedChargers, error) {
 	}
 	return append(dcs, dc), nil
 }
+
+func (dcs DerivedChargers) AppendDefaultRun() (DerivedChargers, error) {
+	dcDf, _ := NewDerivedCharger(DEFAULT_RUNID, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT)
+	return append(dcs, dcDf), nil
+}

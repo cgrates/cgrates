@@ -109,3 +109,24 @@ func TestDerivedChargersKey(t *testing.T) {
 		t.Error("Unexpected derived chargers key: ", dcKey)
 	}
 }
+
+func TestAppendDefaultRun(t *testing.T) {
+	var dc1 DerivedChargers
+	dcDf := &DerivedCharger{RunId: DEFAULT_RUNID, ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
+		TenantField: META_DEFAULT, TorField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
+		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT, DurationField: META_DEFAULT}
+	eDc1 := DerivedChargers{dcDf}
+	if dc1, _ = dc1.AppendDefaultRun(); !reflect.DeepEqual(dc1, eDc1) {
+		t.Error("Unexpected result.")
+	}
+	dc2 := DerivedChargers{
+		&DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+		&DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+	}
+	eDc2 := append(dc2, dcDf)
+	if dc2, _ = dc2.AppendDefaultRun(); !reflect.DeepEqual(dc2, eDc2) {
+		t.Error("Unexpected result.")
+	}
+}

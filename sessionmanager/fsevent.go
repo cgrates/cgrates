@@ -27,6 +27,8 @@ import (
 	"time"
 )
 
+// ToDo: Introduce support for RSRFields
+
 // Event type holding a mapping of all event's proprieties
 type FSEvent map[string]string
 
