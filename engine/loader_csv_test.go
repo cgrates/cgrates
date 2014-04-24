@@ -839,7 +839,7 @@ func TestLoadDerivedChargers(t *testing.T) {
 		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
 	}
-	keyCharger1 := utils.ConcatenatedKey("cgrates.org", "call", "*out", "dan", "dan")
+	keyCharger1 := utils.DerivedChargersKey("cgrates.org", "call", "*out", "dan", "dan")
 	if !reflect.DeepEqual(csvr.derivedChargers[keyCharger1], expCharger1) {
 		t.Error("Unexpected charger", csvr.derivedChargers[keyCharger1])
 	}

@@ -116,7 +116,7 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 	return
 }
 
-func (rs *Responder) DerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
+func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
 	// ToDo: Make it work with balancer if needed
 
 	if dcsH, err := HandleGetDerivedChargers(accountingStorage, config.CgrConfig(), attrs); err != nil {
@@ -332,7 +332,7 @@ type Connector interface {
 	MaxDebit(CallDescriptor, *CallCost) error
 	RefundIncrements(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
-	DerivedChargers(utils.AttrDerivedChargers, utils.DerivedChargers) error
+	GetDerivedChargers(utils.AttrDerivedChargers, utils.DerivedChargers) error
 }
 
 type RPCClientConnector struct {
@@ -359,6 +359,6 @@ func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float6
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
 }
 
-func (rcc *RPCClientConnector) DerivedChargers(attrs utils.AttrDerivedChargers, dcs utils.DerivedChargers) error {
+func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs utils.DerivedChargers) error {
 	return rcc.Client.Call("ApierV1.DerivedChargers", attrs, dcs)
 }

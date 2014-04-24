@@ -449,7 +449,7 @@ func (ms *MapStorage) GetDerivedChargers(key string, checkDb bool) (dcs utils.De
 		err = ms.ms.Unmarshal(values, &dcs)
 		cache2go.Cache(key, dcs)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
