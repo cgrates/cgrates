@@ -443,6 +443,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Tenant:      "vdf",
 		Subject:     "broker",
 		Destination: "0723",
+		Type:        MINUTES,
 	}
 	result, err := cd.GetMaxSessionDuration()
 	if result != time.Minute || err != nil {
@@ -463,6 +464,7 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		Account:      "minu",
 		Destination:  "0723",
 		CallDuration: t2.Sub(t1),
+		Type:         MINUTES,
 	}
 	initial := cd.Clone()
 	cd.GetMaxSessionDuration()
@@ -648,15 +650,15 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 
 func TestCDGetCostANY(t *testing.T) {
 	cd1 := &CallDescriptor{
-		Direction:    "*out",
-		TOR:          "data",
-		Tenant:       "cgrates.org",
-		Subject:      "rif",
-		Destination:  utils.ANY,
-		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
-		LoopIndex:    0,
-		CallDuration: 0}
+		Direction:   "*out",
+		TOR:         "data",
+		Tenant:      "cgrates.org",
+		Subject:     "rif",
+		Destination: utils.ANY,
+		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
+		Type:        DATA,
+	}
 	cc, err := cd1.GetCost()
 	if err != nil || cc.Cost != 60 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
@@ -671,10 +673,9 @@ func TestCDSplitInDataSlots(t *testing.T) {
 		Subject:      "rif",
 		Destination:  utils.ANY,
 		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
-		LoopIndex:    0,
-		CallDuration: 0,
-		Amount:       65,
+		TimeEnd:      time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
+		Type:         DATA,
+		CallDuration: 65 * time.Second,
 	}
 	cd.LoadRatingPlans()
 	timespans := cd.splitInTimeSpans()
@@ -686,16 +687,14 @@ func TestCDSplitInDataSlots(t *testing.T) {
 
 func TestCDDataGetCost(t *testing.T) {
 	cd := &CallDescriptor{
-		Direction:    "*out",
-		TOR:          "data",
-		Tenant:       "cgrates.org",
-		Subject:      "rif",
-		Destination:  utils.ANY,
-		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
-		LoopIndex:    0,
-		CallDuration: 0,
-		Amount:       65,
+		Direction:   "*out",
+		TOR:         "data",
+		Tenant:      "cgrates.org",
+		Subject:     "rif",
+		Destination: utils.ANY,
+		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
+		Type:        DATA,
 	}
 	cc, err := cd.GetCost()
 	if err != nil || cc.Cost != 65 {

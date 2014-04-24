@@ -24,10 +24,10 @@ import (
 
 // The output structure that will be returned with the call cost information.
 type CallCost struct {
-	Direction, TOR, Tenant, Subject, Account, Destination string
-	Cost                                                  float64
-	Timespans                                             TimeSpans
-	deductConnectFee                                      bool
+	Direction, TOR, Tenant, Subject, Account, Destination, Type string
+	Cost                                                        float64
+	Timespans                                                   TimeSpans
+	deductConnectFee                                            bool
 }
 
 // Pretty printing for call cost

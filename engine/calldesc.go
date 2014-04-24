@@ -116,7 +116,7 @@ type CallDescriptor struct {
 	FallbackSubject string // the subject to check for destination if not found on primary subject
 	RatingInfos     RatingInfos
 	Increments      Increments
-	Amount          float64
+	Type            string
 	account         *Account
 }
 
@@ -306,33 +306,30 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 	}
 
 	firstSpan.ratingInfo = cd.RatingInfos[0]
-	// split on rating plans
-	afterStart, afterEnd := false, false //optimization for multiple activation periods
-	for _, rp := range cd.RatingInfos {
-		if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
-			firstSpan.ratingInfo = rp
-			firstSpan.MatchedSubject = rp.MatchedSubject
-			firstSpan.MatchedPrefix = rp.MatchedPrefix
-			firstSpan.MatchedDestId = rp.MatchedDestId
-		} else {
-			afterStart = true
-			for i := 0; i < len(timespans); i++ {
-				newTs := timespans[i].SplitByRatingPlan(rp)
-				if newTs != nil {
-					timespans = append(timespans, newTs)
-				} else {
-					afterEnd = true
-					break
+	if cd.Type == MINUTES {
+		// split on rating plans
+		afterStart, afterEnd := false, false //optimization for multiple activation periods
+		for _, rp := range cd.RatingInfos {
+			if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
+				firstSpan.ratingInfo = rp
+				firstSpan.MatchedSubject = rp.MatchedSubject
+				firstSpan.MatchedPrefix = rp.MatchedPrefix
+				firstSpan.MatchedDestId = rp.MatchedDestId
+			} else {
+				afterStart = true
+				for i := 0; i < len(timespans); i++ {
+					newTs := timespans[i].SplitByRatingPlan(rp)
+					if newTs != nil {
+						timespans = append(timespans, newTs)
+					} else {
+						afterEnd = true
+						break
+					}
 				}
 			}
 		}
 	}
-	if cd.Amount > 0 {
-		cd.TimeEnd = cd.TimeStart.Add(time.Duration(utils.Round(cd.Amount, 0, utils.ROUNDING_UP)) * time.Second)
-		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
-		//first span should be still the only one
-		firstSpan.TimeStart, firstSpan.TimeEnd, firstSpan.CallDuration = cd.TimeStart, cd.TimeEnd, cd.CallDuration
-	}
+
 	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
@@ -403,6 +400,9 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	if cd.CallDuration < cd.TimeEnd.Sub(cd.TimeStart) {
 		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
 	}
+	if cd.Type == "" {
+		cd.Type = MINUTES
+	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %s: %v", cd.GetKey(cd.Subject), err))
@@ -432,6 +432,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Cost:             cost,
 		Timespans:        timespans,
 		deductConnectFee: cd.LoopIndex == 0,
+		Type:             cd.Type,
 	}
 	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	cc.Timespans.Compress()
@@ -446,6 +447,9 @@ If the user has postpayed plan it returns -1.
 func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Duration, error) {
 	if origCD.CallDuration < origCD.TimeEnd.Sub(origCD.TimeStart) {
 		origCD.CallDuration = origCD.TimeEnd.Sub(origCD.TimeStart)
+	}
+	if origCD.Type == "" {
+		origCD.Type = MINUTES
 	}
 	cd := origCD.Clone()
 	//Logger.Debug(fmt.Sprintf("MAX SESSION cd: %+v", cd))
@@ -510,7 +514,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Type); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				duration, err = cd.getMaxSessionDuration(account)
 				return 0, err
@@ -560,7 +564,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Type); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				cc, err = cd.debit(account)
 				return 0, err
@@ -581,7 +585,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Type); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				if err != nil || remainingDuration == 0 {
@@ -614,7 +618,7 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 				defer accountingStorage.SetAccount(account)
 			}
 		}
-		account.refundIncrement(increment, cd.Direction, true)
+		account.refundIncrement(increment, cd.Direction, cd.Type, true)
 	}
 	return 0.0, err
 }
@@ -637,6 +641,7 @@ func (cd *CallDescriptor) CreateCallCost() *CallCost {
 		Subject:     cd.Subject,
 		Account:     cd.Account,
 		Destination: cd.Destination,
+		Type:        cd.Type,
 	}
 }
 
@@ -656,5 +661,6 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		FallbackSubject: cd.FallbackSubject,
 		//RatingInfos:     cd.RatingInfos,
 		//Increments:      cd.Increments,
+		Type: cd.Type,
 	}
 }

@@ -45,32 +45,33 @@ type Increment struct {
 	Cost                float64
 	BalanceInfo         *BalanceInfo // need more than one for minutes with cost
 	BalanceRateInterval *RateInterval
-	MinuteInfo          *MinuteInfo
+	UnitInfo            *UnitInfo
 	CompressFactor      int
 	paid                bool
 }
 
 // Holds the minute information related to a specified timespan
-type MinuteInfo struct {
+type UnitInfo struct {
 	DestinationId string
 	Quantity      float64
+	Type          string
 	//Price         float64
 }
 
-func (mi *MinuteInfo) Equal(other *MinuteInfo) bool {
+func (mi *UnitInfo) Equal(other *UnitInfo) bool {
 	return mi.DestinationId == other.DestinationId &&
 		mi.Quantity == other.Quantity
 }
 
 // Holds information about the balance that made a specific payment
 type BalanceInfo struct {
-	MinuteBalanceUuid string
-	MoneyBalanceUuid  string
-	AccountId         string // used when debited from shared balance
+	UnitBalanceUuid  string
+	MoneyBalanceUuid string
+	AccountId        string // used when debited from shared balance
 }
 
 func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
-	return bi.MinuteBalanceUuid == other.MinuteBalanceUuid &&
+	return bi.UnitBalanceUuid == other.UnitBalanceUuid &&
 		bi.MoneyBalanceUuid == other.MoneyBalanceUuid &&
 		bi.AccountId == other.AccountId
 }
@@ -191,7 +192,7 @@ func (incr *Increment) Clone() *Increment {
 		Duration:            incr.Duration,
 		Cost:                incr.Cost,
 		BalanceRateInterval: incr.BalanceRateInterval,
-		MinuteInfo:          incr.MinuteInfo,
+		UnitInfo:            incr.UnitInfo,
 		BalanceInfo:         incr.BalanceInfo,
 	}
 	return nIncr
@@ -202,7 +203,7 @@ func (incr *Increment) Equal(other *Increment) bool {
 		incr.Cost == other.Cost &&
 		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo)) &&
 		((incr.BalanceRateInterval == nil && other.BalanceRateInterval == nil) || reflect.DeepEqual(incr.BalanceRateInterval, other.BalanceRateInterval)) &&
-		((incr.MinuteInfo == nil && other.MinuteInfo == nil) || incr.MinuteInfo.Equal(other.MinuteInfo))
+		((incr.UnitInfo == nil && other.UnitInfo == nil) || incr.UnitInfo.Equal(other.UnitInfo))
 }
 
 func (incr *Increment) GetCompressFactor() int {
