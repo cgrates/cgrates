@@ -317,7 +317,6 @@ a new timespan starting from the end of the received one.
 The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
-	//Logger.Debug("here: ", ts, " +++ ", i)
 	// if the span is not in interval return nil
 	if !(i.Contains(ts.TimeStart, false) || i.Contains(ts.TimeEnd, true)) {
 		//Logger.Debug("Not in interval")
@@ -328,7 +327,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	if i.Rating != nil {
 		i.Rating.Rates.Sort()
 		for _, rate := range i.Rating.Rates {
-			// Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
+			//Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
 			if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
 				// Logger.Debug(fmt.Sprintf("Splitting"))
 				ts.SetRateInterval(i)

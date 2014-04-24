@@ -93,7 +93,7 @@ func TestSplitSpans(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 
 	cd.LoadRatingPlans()
-	timespans := cd.splitInTimeSpans(nil)
+	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Log(cd.RatingInfos)
 		t.Error("Wrong number of timespans: ", len(timespans))
@@ -106,7 +106,7 @@ func TestSplitSpansRoundToIncrements(t *testing.T) {
 	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, CallDuration: 132 * time.Second}
 
 	cd.LoadRatingPlans()
-	timespans := cd.splitInTimeSpans(nil)
+	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Logf("%+v", cd)
 		t.Log(cd.RatingInfos)
@@ -649,16 +649,56 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 func TestCDGetCostANY(t *testing.T) {
 	cd1 := &CallDescriptor{
 		Direction:    "*out",
-		TOR:          "0",
-		Tenant:       "vdf",
+		TOR:          "data",
+		Tenant:       "cgrates.org",
 		Subject:      "rif",
 		Destination:  utils.ANY,
 		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 5, 0, time.UTC),
+		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
 		LoopIndex:    0,
 		CallDuration: 0}
 	cc, err := cd1.GetCost()
-	if err != nil || cc.Cost != 6 {
+	if err != nil || cc.Cost != 60 {
+		t.Errorf("Error getting *any dest: %+v %v", cc, err)
+	}
+}
+
+func TestCDSplitInDataSlots(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		TOR:          "data",
+		Tenant:       "cgrates.org",
+		Subject:      "rif",
+		Destination:  utils.ANY,
+		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
+		LoopIndex:    0,
+		CallDuration: 0,
+		Amount:       65,
+	}
+	cd.LoadRatingPlans()
+	timespans := cd.splitInTimeSpans()
+	if len(timespans) != 2 {
+		t.Log(cd.RatingInfos[0])
+		t.Error("Wrong number of timespans: ", len(timespans))
+	}
+}
+
+func TestCDDataGetCost(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		TOR:          "data",
+		Tenant:       "cgrates.org",
+		Subject:      "rif",
+		Destination:  utils.ANY,
+		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
+		LoopIndex:    0,
+		CallDuration: 0,
+		Amount:       65,
+	}
+	cc, err := cd.GetCost()
+	if err != nil || cc.Cost != 65 {
 		t.Errorf("Error getting *any dest: %+v %v", cc, err)
 	}
 }
@@ -705,7 +745,7 @@ func BenchmarkSplitting(b *testing.B) {
 	cd.LoadRatingPlans()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.splitInTimeSpans(nil)
+		cd.splitInTimeSpans()
 	}
 }
 

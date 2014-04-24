@@ -61,8 +61,8 @@ R2,0,0.1,60s,1s,0,*middle,2
 R3,0,0.05,60s,1s,0,*middle,2
 R4,1,1,1s,1s,0,*up,2
 R5,0,0.5,1s,1s,0,*down,2
-LANDLINE_OFFPEAK,0,1,1s,60s,0s,*up,4
-LANDLINE_OFFPEAK,0,1,1s,1s,60s,*up,4
+LANDLINE_OFFPEAK,0,1,1,60,0,*up,4
+LANDLINE_OFFPEAK,0,1,1,1,60,*up,4
 GBP_71,0.000000,5.55555,1s,1s,0s,*up,4
 GBP_72,0.000000,7.77777,1s,1s,0s,*up,4
 GBP_70,0.000000,1,1,1,0,*up,4
@@ -84,7 +84,7 @@ T2,GERMANY_O2,GBP_70
 T2,GERMANY_PREMIUM,GBP_71
 DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5
-DATA_RATE,*any,R4
+DATA_RATE,*any,LANDLINE_OFFPEAK
 `
 	ratingPlans = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
@@ -97,13 +97,13 @@ DEFAULT,RT_DEFAULT,WORKDAYS_00,10
 EVENING,P1,WORKDAYS_00,10
 EVENING,P2,WORKDAYS_18,10
 EVENING,P2,WEEKENDS,10
-EVENING,DATA_RATE,ALWAYS,10
 TDRT,T1,WORKDAYS_00,10
 TDRT,T2,WORKDAYS_00,10
 G,RT_STANDARD,WORKDAYS_00,10
 R,P1,WORKDAYS_00,10
 RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,ALWAYS,10
 RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10
+RP_DATA,DATA_RATE,ALWAYS,10
 `
 	ratingProfiles = `
 CUSTOMER_1,0,*out,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb
@@ -124,6 +124,7 @@ vdf,0,*out,fallback1,2013-11-18T13:47:00Z,G,fallback2
 vdf,0,*out,fallback2,2013-11-18T13:45:00Z,R,rif
 cgrates.org,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
 cgrates.org,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
+cgrates.org,data,*out,rif,2013-01-06T00:00:00Z,RP_DATA,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -345,7 +346,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1s", "60s", "0s", utils.ROUNDING_UP, 4); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 1, "1", "60", "0", utils.ROUNDING_UP, 4); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -354,7 +355,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[1]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1s", "1s", "60s", utils.ROUNDING_UP, 4); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 1, "1", "1", "60", utils.ROUNDING_UP, 4); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -477,7 +478,7 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadRatingPlans(t *testing.T) {
-	if len(csvr.ratingPlans) != 9 {
+	if len(csvr.ratingPlans) != 10 {
 		t.Error("Failed to load rating plans: ", len(csvr.ratingPlans))
 	}
 	rplan := csvr.ratingPlans["STANDARD"]
@@ -597,7 +598,7 @@ func TestLoadRatingPlans(t *testing.T) {
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 14 {
+	if len(csvr.ratingProfiles) != 15 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]

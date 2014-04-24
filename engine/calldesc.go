@@ -116,6 +116,7 @@ type CallDescriptor struct {
 	FallbackSubject string // the subject to check for destination if not found on primary subject
 	RatingInfos     RatingInfos
 	Increments      Increments
+	Amount          float64
 	account         *Account
 }
 
@@ -296,10 +297,9 @@ func (cd *CallDescriptor) GetKey(subject string) string {
 }
 
 // Splits the received timespan into sub time spans according to the activation periods intervals.
-func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*TimeSpan) {
-	if firstSpan == nil {
-		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration}
-	}
+func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
+	firstSpan := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration}
+
 	timespans = append(timespans, firstSpan)
 	if len(cd.RatingInfos) == 0 {
 		return
@@ -326,6 +326,12 @@ func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*Ti
 				}
 			}
 		}
+	}
+	if cd.Amount > 0 {
+		cd.TimeEnd = cd.TimeStart.Add(time.Duration(utils.Round(cd.Amount, 0, utils.ROUNDING_UP)) * time.Second)
+		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
+		//first span should be still the only one
+		firstSpan.TimeStart, firstSpan.TimeEnd, firstSpan.CallDuration = cd.TimeStart, cd.TimeEnd, cd.CallDuration
 	}
 	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on price intervals
@@ -402,7 +408,8 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Logger.Err(fmt.Sprintf("error getting cost for key %s: %v", cd.GetKey(cd.Subject), err))
 		return &CallCost{Cost: -1}, err
 	}
-	timespans := cd.splitInTimeSpans(nil)
+
+	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 
 	for i, ts := range timespans {
