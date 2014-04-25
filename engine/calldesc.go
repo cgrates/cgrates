@@ -125,7 +125,7 @@ func (cd *CallDescriptor) ValidateCallData() error {
 		return errors.New("TimeStart must be strctly before TimeEnd")
 	}
 	if cd.TimeEnd.Sub(cd.TimeStart) < cd.DurationIndex {
-		return errors.New("CallDuration must be equal or grater than TimeEnd - TimeStart")
+		return errors.New("DurationIndex must be equal or grater than TimeEnd - TimeStart")
 	}
 	return nil
 }

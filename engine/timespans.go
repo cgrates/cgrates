@@ -341,7 +341,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 				ts.TimeEnd = splitTime
 				nts.SetRateInterval(i)
 				nts.DurationIndex = ts.DurationIndex
-				ts.SetNewCallDuration(nts)
+				ts.SetNewDurationIndex(nts)
 				// Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
 				return
 			}
@@ -369,7 +369,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		nts.copyRatingInfo(ts)
 		ts.TimeEnd = splitTime
 		nts.DurationIndex = ts.DurationIndex
-		ts.SetNewCallDuration(nts)
+		ts.SetNewDurationIndex(nts)
 		// Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
 		return
 	}
@@ -391,7 +391,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 
 		nts.SetRateInterval(i)
 		nts.DurationIndex = ts.DurationIndex
-		ts.SetNewCallDuration(nts)
+		ts.SetNewDurationIndex(nts)
 		// Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
 		return
 	}
@@ -414,7 +414,7 @@ func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
 	ts.TimeEnd = timeStart
 	newTs.Increments = ts.Increments[index:]
 	ts.Increments = ts.Increments[:index]
-	ts.SetNewCallDuration(newTs)
+	ts.SetNewDurationIndex(newTs)
 	return newTs
 }
 
@@ -449,7 +449,7 @@ func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
 			break
 		}
 	}
-	ts.SetNewCallDuration(newTs)
+	ts.SetNewDurationIndex(newTs)
 	return newTs
 }
 
@@ -465,7 +465,7 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 	newTs.copyRatingInfo(ts)
 	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = rp.ActivationTime
-	ts.SetNewCallDuration(newTs)
+	ts.SetNewDurationIndex(newTs)
 	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	return
 }
@@ -483,8 +483,8 @@ func (ts *TimeSpan) GetGroupEnd() time.Duration {
 	return ts.DurationIndex
 }
 
-// sets the CallDuration attribute to reflect new timespan
-func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
+// sets the DurationIndex attribute to reflect new timespan
+func (ts *TimeSpan) SetNewDurationIndex(nts *TimeSpan) {
 	d := ts.DurationIndex - nts.GetDuration()
 	if d < 0 {
 		d = 0

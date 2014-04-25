@@ -533,7 +533,7 @@ func TestTimespanExpandingPastEnd(t *testing.T) {
 	}
 }
 
-func TestTimespanExpandingCallDuration(t *testing.T) {
+func TestTimespanExpandingDurationIndex(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
