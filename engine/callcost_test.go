@@ -125,6 +125,18 @@ func TestMultipleInputRightMerge(t *testing.T) {
 	}
 }
 
+func TestCallCostMergeEmpty(t *testing.T) {
+	t1 := time.Date(2012, time.February, 2, 17, 58, 0, 0, time.UTC)
+	t2 := time.Date(2012, time.February, 2, 17, 59, 0, 0, time.UTC)
+	cd := &CallDescriptor{Direction: OUTBOUND, TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cc1, _ := cd.GetCost()
+	cc2 := &CallCost{}
+	cc1.Merge(cc2)
+	if len(cc1.Timespans) != 1 {
+		t.Error("Error mergin empty call cost: ", len(cc1.Timespans))
+	}
+}
+
 func TestCallCostGetDurationZero(t *testing.T) {
 	cc := &CallCost{}
 	if cc.GetDuration().Seconds() != 0 {

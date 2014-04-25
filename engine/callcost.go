@@ -46,7 +46,7 @@ type CallCost struct {
 
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.
 func (cc *CallCost) Merge(other *CallCost) {
-	if len(cc.Timespans)-1 < 0 {
+	if len(cc.Timespans)-1 < 0 || len(other.Timespans) == 0 {
 		return
 	}
 	ts := cc.Timespans[len(cc.Timespans)-1]
