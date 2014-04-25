@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -149,40 +149,39 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelPark(ev Event) {
-	var maxCallDuration time.Duration                                // This will be the maximum duration this channel will be allowed to last
-	runIds := append([]string{utils.DEFAULT_RUNID}, cfg.SMRunIds...) // Prepend default runid to extra configured for session manager
-	for idx := range runIds {
-		var directionFld, tenantFld, torFld, actFld, subjFld, dstFld string
-		if idx != 0 { // Take fields out of config, default ones are automatically handled as empty
-			idxCfg := idx - 1 // In configuration we did not prepend values
-			directionFld = cfg.SMDirectionFields[idxCfg]
-			tenantFld = cfg.SMTenantFields[idxCfg]
-			torFld = cfg.SMTORFields[idxCfg]
-			actFld = cfg.SMAccountFields[idxCfg]
-			subjFld = cfg.SMSubjectFields[idxCfg]
-			dstFld = cfg.SMDestFields[idxCfg]
-		}
+	var maxCallDuration time.Duration // This will be the maximum duration this channel will be allowed to last
+	var durInitialized bool
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Tor: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+	var dcs utils.DerivedChargers
+	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
+		engine.Logger.Err(fmt.Sprintf("Could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR) // We unpark on original destination
+		return
+	}
+	dcs, _ = dcs.AppendDefaultRun()
+	for _, dc := range dcs {
 		startTime, err := ev.GetAnswerTime(PARK_TIME)
 		if err != nil {
 			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 			startTime = time.Now()
 		}
 		// if there is no account configured leave the call alone
-		if idx == 0 && !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, ev.GetReqType("")) {
+		if dc.RunId == utils.DEFAULT_RUNID && !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, ev.GetReqType(utils.META_DEFAULT)) {
 			return // we unpark only prepaid and pseudoprepaid calls
 		}
 		if ev.MissingParameter() {
-			sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(dstFld), MISSING_PARAMETER)
+			sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(dc.DestinationField), MISSING_PARAMETER)
 			engine.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))
 			return
 		}
 		cd := engine.CallDescriptor{
-			Direction:   ev.GetDirection(directionFld),
-			Tenant:      ev.GetTenant(tenantFld),
-			Category:    ev.GetTOR(torFld),
-			Subject:     ev.GetSubject(subjFld),
-			Account:     ev.GetAccount(actFld),
-			Destination: ev.GetDestination(dstFld),
+			Direction:   ev.GetDirection(dc.DirectionField),
+			Tenant:      ev.GetTenant(dc.TenantField),
+			Category:    ev.GetCategory(dc.TorField),
+			Subject:     ev.GetSubject(dc.SubjectField),
+			Account:     ev.GetAccount(dc.AccountField),
+			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime,
 			TimeEnd:     startTime.Add(cfg.SMMaxCallDuration),
 		}
@@ -195,19 +194,20 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		}
 		remainingDuration := time.Duration(remainingDurationFloat)
 		// Set maxCallDuration, smallest out of all forked sessions
-		if idx == 0 {
+		if !durInitialized { // first time we set it /not initialized yet
 			maxCallDuration = remainingDuration
+			durInitialized = true
 		} else if maxCallDuration > remainingDuration {
 			maxCallDuration = remainingDuration
 		}
 	}
 	if maxCallDuration == 0 {
 		//engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), INSUFFICIENT_FUNDS)
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
 		return
 	}
 	sm.setMaxCallDuration(ev.GetUUID(), maxCallDuration)
-	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), AUTH_OK)
+	sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), AUTH_OK)
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
@@ -219,7 +219,16 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType(""))); err != nil {
 		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
-	s := NewSession(ev, sm)
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Tor: ev.GetCategory(utils.META_DEFAULT),
+		Direction: ev.GetDirection(utils.META_DEFAULT), Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+	var dcs utils.DerivedChargers
+	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
+		engine.Logger.Err(fmt.Sprintf("Could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR) // We unpark on original destination
+		return
+	}
+	dcs, _ = dcs.AppendDefaultRun()
+	s := NewSession(ev, sm, dcs)
 	if s != nil {
 		sm.sessions = append(sm.sessions, s)
 	}
@@ -232,44 +241,39 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	} else {
 		sm.RemoveSession(s.uuid) // Unreference it early so we avoid concurrency
 	}
-	defer s.Close(ev)                                                // Stop loop and save the costs deducted so far to database
-	runIds := append([]string{utils.DEFAULT_RUNID}, cfg.SMRunIds...) // Prepend default runid to extra configured for session manager
-	for idx := range runIds {
-		var reqTypeFld, directionFld, tenantFld, torFld, actFld, subjFld, dstFld, aTimeFld string // ToDo: Add durFld
-		if idx != 0 {                                                                             // Take fields out of config, default ones are automatically handled as empty
-			idxCfg := idx - 1 // In configuration we did not prepend values
-			reqTypeFld = cfg.SMReqTypeFields[idxCfg]
-			directionFld = cfg.SMDirectionFields[idxCfg]
-			tenantFld = cfg.SMTenantFields[idxCfg]
-			torFld = cfg.SMTORFields[idxCfg]
-			actFld = cfg.SMAccountFields[idxCfg]
-			subjFld = cfg.SMSubjectFields[idxCfg]
-			dstFld = cfg.SMDestFields[idxCfg]
-			aTimeFld = cfg.SMAnswerTimeFields[idxCfg]
-			// durFld = cfg.SMDurationFields[idxCfg]
-		}
-		if ev.GetReqType(reqTypeFld) == utils.POSTPAID {
-			startTime, err := ev.GetAnswerTime(aTimeFld)
+	defer s.Close(ev)                            // Stop loop and save the costs deducted so far to database
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Tor: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+	var dcs utils.DerivedChargers
+	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
+		engine.Logger.Err(fmt.Sprintf("Could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
+		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR) // We unpark on original destination
+		return
+	}
+	dcs, _ = dcs.AppendDefaultRun()
+	for idx, dc := range dcs {
+		if ev.GetReqType(dc.ReqTypeField) == utils.POSTPAID {
+			startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
 			if err != nil {
 				engine.Logger.Crit("Error parsing postpaid call start time from event")
 				return
 			}
-			endTime, err := ev.GetEndTime()
+			duration, err := ev.GetDuration(dc.DurationField)
 			if err != nil {
-				engine.Logger.Crit("Error parsing postpaid call start time from event")
+				engine.Logger.Crit(fmt.Sprintf("Error parsing call duration from event %s", err.Error()))
 				return
 			}
 			cd := engine.CallDescriptor{
-				Direction:     ev.GetDirection(directionFld),
-				Tenant:        ev.GetTenant(tenantFld),
-				Category:      ev.GetTOR(torFld),
-				Subject:       ev.GetSubject(actFld),
-				Account:       ev.GetAccount(subjFld),
+				Direction:     ev.GetDirection(dc.DirectionField),
+				Tenant:        ev.GetTenant(dc.TenantField),
+				Category:      ev.GetCategory(dc.TorField),
+				Subject:       ev.GetSubject(dc.SubjectField),
+				Account:       ev.GetAccount(dc.AccountField),
 				LoopIndex:     0,
-				DurationIndex: endTime.Sub(startTime),
-				Destination:   ev.GetDestination(dstFld),
+				DurationIndex: duration,
+				Destination:   ev.GetDestination(dc.DestinationField),
 				TimeStart:     startTime,
-				TimeEnd:       endTime,
+				TimeEnd:       startTime.Add(duration),
 			}
 			cc := &engine.CallCost{}
 			err = sm.connector.Debit(cd, cc)
@@ -278,19 +282,24 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				return
 			}
 			s.sessionRuns[idx].callCosts = append(s.sessionRuns[idx].callCosts, cc)
-		} else if ev.GetReqType(reqTypeFld) == utils.PREPAID { // Prepaid calls
+		} else if ev.GetReqType(dc.ReqTypeField) == utils.PREPAID { // Prepaid calls
 			if len(s.sessionRuns[idx].callCosts) == 0 {
 				continue // why would we have 0 callcosts
 			}
 			lastCC := s.sessionRuns[idx].callCosts[len(s.sessionRuns[idx].callCosts)-1]
 			lastCC.Timespans.Decompress()
 			// put credit back
-			var hangupTime time.Time
-			var err error
-			if hangupTime, err = ev.GetEndTime(); err != nil {
-				engine.Logger.Err("Error parsing answer event hangup time, using time.Now!")
-				hangupTime = time.Now()
+			startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
+			if err != nil {
+				engine.Logger.Crit("Error parsing prepaid call start time from event")
+				return
 			}
+			duration, err := ev.GetDuration(dc.DurationField)
+			if err != nil {
+				engine.Logger.Crit(fmt.Sprintf("Error parsing call duration from event %s", err.Error()))
+				return
+			}
+			hangupTime := startTime.Add(duration)
 			end := lastCC.Timespans[len(lastCC.Timespans)-1].TimeEnd
 			refundDuration := end.Sub(hangupTime)
 			var refundIncrements engine.Increments

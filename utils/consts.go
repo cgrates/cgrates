@@ -66,7 +66,7 @@ const (
 	COMMENT_CHAR               = '#'
 	CSV_SEP                    = ','
 	FALLBACK_SEP               = ';'
-	REGEXP_SEP                 = "~"
+	REGEXP_PREFIX              = "~"
 	JSON                       = "json"
 	MSGPACK                    = "msgpack"
 	CSV_LOAD                   = "CSVLOAD"
@@ -99,6 +99,7 @@ const (
 	CDRE                       = "cdre"
 	MASK_CHAR                  = "*"
 	CONCATENATED_KEY_SEP       = ":"
+	META_DEFAULT               = "*default"
 )
 
 var (

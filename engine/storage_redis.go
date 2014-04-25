@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import (
 	"fmt"
 
 	"github.com/cgrates/cgrates/cache2go"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/hoisie/redis"
 
@@ -544,10 +543,10 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionPlan, err er
 	return
 }
 
-func (rs *RedisStorage) GetDerivedChargers(key string, checkDb bool) (dcs config.DerivedChargers, err error) {
+func (rs *RedisStorage) GetDerivedChargers(key string, checkDb bool) (dcs utils.DerivedChargers, err error) {
 	key = DERIVEDCHARGERS_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(config.DerivedChargers), nil
+		return x.(utils.DerivedChargers), nil
 	}
 	if !checkDb {
 		return nil, errors.New(utils.ERR_NOT_FOUND)
@@ -560,7 +559,7 @@ func (rs *RedisStorage) GetDerivedChargers(key string, checkDb bool) (dcs config
 	return dcs, err
 }
 
-func (rs *RedisStorage) SetDerivedChargers(key string, dcs config.DerivedChargers) (err error) {
+func (rs *RedisStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) (err error) {
 	if len(dcs) == 0 {
 		_, err = rs.db.Del(DERIVEDCHARGERS_PREFIX + key)
 		return err

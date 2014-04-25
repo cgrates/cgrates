@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/balancer2go"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type Responder struct {
@@ -112,6 +114,17 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 		*reply, err = r, e
 	}
 	return
+}
+
+func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
+	// ToDo: Make it work with balancer if needed
+
+	if dcsH, err := HandleGetDerivedChargers(accountingStorage, config.CgrConfig(), attrs); err != nil {
+		return err
+	} else if dcsH != nil {
+		*dcs = dcsH
+	}
+	return nil
 }
 
 func (rs *Responder) FlushCache(arg CallDescriptor, reply *float64) (err error) {
@@ -272,6 +285,7 @@ type Connector interface {
 	MaxDebit(CallDescriptor, *CallCost) error
 	RefundIncrements(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
+	GetDerivedChargers(utils.AttrDerivedChargers, *utils.DerivedChargers) error
 }
 
 type RPCClientConnector struct {
@@ -296,4 +310,8 @@ func (rcc *RPCClientConnector) RefundIncrements(cd CallDescriptor, resp *float64
 
 func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
+}
+
+func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
+	return rcc.Client.Call("ApierV1.DerivedChargers", attrs, dcs)
 }

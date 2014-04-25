@@ -23,7 +23,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -866,13 +865,13 @@ func TestLoadDerivedChargers(t *testing.T) {
 	if len(csvr.derivedChargers) != 2 {
 		t.Error("Failed to load derivedChargers: ", csvr.derivedChargers)
 	}
-	expCharger1 := config.DerivedChargers{
-		&config.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+	expCharger1 := utils.DerivedChargers{
+		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
-		&config.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
 	}
-	keyCharger1 := utils.ConcatenatedKey("cgrates.org", "call", "*out", "dan", "dan")
+	keyCharger1 := utils.DerivedChargersKey("cgrates.org", "call", "*out", "dan", "dan")
 	if !reflect.DeepEqual(csvr.derivedChargers[keyCharger1], expCharger1) {
 		t.Error("Unexpected charger", csvr.derivedChargers[keyCharger1])
 	}

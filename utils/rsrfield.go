@@ -43,7 +43,7 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 	if len(fldStr) == 0 {
 		return nil, nil
 	}
-	if !strings.HasPrefix(fldStr, REGEXP_SEP) {
+	if !strings.HasPrefix(fldStr, REGEXP_PREFIX) {
 		return &RSRField{Id: fldStr}, nil
 	}
 	if fldId, reSrcRepl, err := ParseSearchReplaceFromFieldRule(fldStr); err != nil {

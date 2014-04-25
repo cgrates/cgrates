@@ -23,7 +23,6 @@ import (
 	"encoding/gob"
 	"encoding/json"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ugorji/go/codec"
 	"labix.org/v2/mgo/bson"
@@ -102,8 +101,8 @@ type AccountingStorage interface {
 	GetActionTimings(string) (ActionPlan, error)
 	SetActionTimings(string, ActionPlan) error
 	GetAllActionTimings() (map[string]ActionPlan, error)
-	GetDerivedChargers(string, bool) (config.DerivedChargers, error)
-	SetDerivedChargers(string, config.DerivedChargers) error
+	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
+	SetDerivedChargers(string, utils.DerivedChargers) error
 }
 
 type CdrStorage interface {
