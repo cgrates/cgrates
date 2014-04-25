@@ -1030,6 +1030,114 @@ func TestDebitShared(t *testing.T) {
 	}
 }
 
+func TestDebitSMS(t *testing.T) {
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 1, 0, time.UTC),
+				ratingInfo:   &RatingInfo{},
+				CallDuration: 0,
+				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1 * time.Second, RateUnit: time.Second}}}},
+			},
+		},
+		Type: SMS,
+	}
+	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
+		SMS + OUTBOUND:    BalanceChain{&Balance{Uuid: "testm", Value: 100, Weight: 5, DestinationId: "NAT"}},
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value != 99 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 21 {
+		t.Log(cc.Timespans[0].Increments)
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[SMS+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
+	}
+}
+
+func TestDebitDataUnits(t *testing.T) {
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				ratingInfo:   &RatingInfo{},
+				CallDuration: 0,
+				RateInterval: &RateInterval{
+					Rating: &RIRate{
+						Rates: RateGroups{
+							&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: 1 * time.Second, RateUnit: time.Minute},
+							&Rate{GroupIntervalStart: 60, Value: 1, RateIncrement: 1 * time.Second, RateUnit: time.Second},
+						},
+					},
+				},
+			},
+		},
+		Type: DATA,
+	}
+	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
+		DATA + OUTBOUND:   BalanceChain{&Balance{Uuid: "testm", Value: 100, Weight: 5, DestinationId: "NAT"}},
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
+		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0])
+	}
+	if rifsBalance.BalanceMap[DATA+OUTBOUND][0].Value != 20 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 21 {
+		t.Log(cc.Timespans[0].Increments)
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[DATA+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
+	}
+}
+
+func TestDebitDataMoney(t *testing.T) {
+	cc := &CallCost{
+		Direction:   OUTBOUND,
+		Destination: "0723045326",
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				ratingInfo:   &RatingInfo{},
+				CallDuration: 0,
+				RateInterval: &RateInterval{
+					Rating: &RIRate{
+						Rates: RateGroups{
+							&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: time.Minute, RateUnit: time.Second},
+						},
+					},
+				},
+			},
+		},
+		Type: DATA,
+	}
+	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
+		DATA + OUTBOUND:   BalanceChain{&Balance{Uuid: "testm", Value: 0, Weight: 5, DestinationId: "NAT"}},
+		CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 160}},
+	}}
+	err := rifsBalance.debitCreditBalance(cc, false)
+	if err != nil {
+		t.Error("Error debiting balance: ", err)
+	}
+	if rifsBalance.BalanceMap[DATA+OUTBOUND][0].Value != 0 ||
+		rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value != 0 {
+		t.Error("Error extracting minutes from balance: ", rifsBalance.BalanceMap[DATA+OUTBOUND][0].Value, rifsBalance.BalanceMap[CREDIT+OUTBOUND][0].Value)
+	}
+}
+
 /*********************************** Benchmarks *******************************/
 
 func BenchmarkGetSecondForPrefix(b *testing.B) {
