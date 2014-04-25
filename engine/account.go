@@ -62,7 +62,7 @@ type Account struct {
 
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction], "")
-	unitBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[cd.Type+cd.Direction], "")
+	unitBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[cd.Tor+cd.Direction], "")
 	// gather all balances from shared groups
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
@@ -80,7 +80,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	for _, mb := range unitBalances {
 		if mb.SharedGroup != "" {
 			if sharedGroup, _ := accountingStorage.GetSharedGroup(mb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, cd.Type+cd.Direction, ub)
+				sgb := sharedGroup.GetBalances(cd.Destination, cd.Tor+cd.Direction, ub)
 				sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 				extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
 			}
@@ -203,7 +203,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, balanceType string
 }
 
 func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
-	usefulUnitBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.Type+cc.Direction)
+	usefulUnitBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.Tor+cc.Direction)
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cc.Destination, CREDIT+cc.Direction)
 	// debit minutes
 	for _, balance := range usefulUnitBalances {

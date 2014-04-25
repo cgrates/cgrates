@@ -451,7 +451,7 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		Tenant:      "vdf",
 		Subject:     "broker",
 		Destination: "0723",
-		Type:        MINUTES,
+		Tor:         MINUTES,
 	}
 	result, err := cd.GetMaxSessionDuration()
 	if result != time.Minute || err != nil {
@@ -472,7 +472,7 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 		Account:       "minu",
 		Destination:   "0723",
 		DurationIndex: t2.Sub(t1),
-		Type:          MINUTES,
+		Tor:           MINUTES,
 	}
 	initial := cd.Clone()
 	cd.GetMaxSessionDuration()
@@ -701,7 +701,7 @@ func TestCDGetCostANY(t *testing.T) {
 		Destination: utils.ANY,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
-		Type:        DATA,
+		Tor:         DATA,
 	}
 	cc, err := cd1.GetCost()
 	if err != nil || cc.Cost != 60 {
@@ -718,7 +718,7 @@ func TestCDSplitInDataSlots(t *testing.T) {
 		Destination:   utils.ANY,
 		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		Type:          DATA,
+		Tor:           DATA,
 		DurationIndex: 65 * time.Second,
 	}
 	cd.LoadRatingPlans()
@@ -738,7 +738,7 @@ func TestCDDataGetCost(t *testing.T) {
 		Destination: utils.ANY,
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
-		Type:        DATA,
+		Tor:         DATA,
 	}
 	cc, err := cd.GetCost()
 	if err != nil || cc.Cost != 65 {

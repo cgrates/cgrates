@@ -19,10 +19,10 @@ package engine
 
 // type used for showing sane data cost
 type DataCost struct {
-	Direction, Category, Tenant, Subject, Account, Destination, Type string
-	Cost                                                             float64
-	DataSpans                                                        []*DataSpan
-	deductConnectFee                                                 bool
+	Direction, Category, Tenant, Subject, Account, Destination, Tor string
+	Cost                                                            float64
+	DataSpans                                                       []*DataSpan
+	deductConnectFee                                                bool
 }
 type DataSpan struct {
 	DataStart, DataEnd                           float64

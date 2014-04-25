@@ -54,7 +54,7 @@ type Increment struct {
 type UnitInfo struct {
 	DestinationId string
 	Quantity      float64
-	Type          string
+	Tor           string
 	//Price         float64
 }
 
