@@ -45,6 +45,7 @@ PSTN_71,+4971
 PSTN_72,+4972
 PSTN_70,+4970
 DST_UK_Mobile_BIG5,447956
+URG,112
 *any,
 `
 	timings = `
@@ -68,6 +69,7 @@ GBP_72,0.000000,7.77777,1s,1s,0s,*up,4
 GBP_70,0.000000,1,1,1,0,*up,4
 RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s,*up,8
 RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8
+R_URG,0,0,1,1,0,*down,2
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1
@@ -85,11 +87,13 @@ T2,GERMANY_PREMIUM,GBP_71
 DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5
 DATA_RATE,*any,LANDLINE_OFFPEAK
+RT_URG,URG,R_URG
 `
 	ratingPlans = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
 STANDARD,RT_STD_WEEKEND,WORKDAYS_18,10
 STANDARD,RT_STD_WEEKEND,WEEKENDS,10
+STANDARD,RT_URG,ALWAYS,20
 PREMIUM,RT_STANDARD,WORKDAYS_00,10
 PREMIUM,RT_STD_WEEKEND,WORKDAYS_18,10
 PREMIUM,RT_STD_WEEKEND,WEEKENDS,10
@@ -200,7 +204,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 11 {
+	if len(csvr.destinations) != 12 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
@@ -296,7 +300,7 @@ func TestLoadTimimgs(t *testing.T) {
 }
 
 func TestLoadRates(t *testing.T) {
-	if len(csvr.rates) != 11 {
+	if len(csvr.rates) != 12 {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
@@ -366,7 +370,7 @@ func TestLoadRates(t *testing.T) {
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.destinationRates) != 10 {
+	if len(csvr.destinationRates) != 11 {
 		t.Error("Failed to load destinationrates: ", csvr.destinationRates)
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
@@ -506,6 +510,13 @@ func TestLoadRatingPlans(t *testing.T) {
 				WeekDays:  utils.WeekDays{time.Saturday, time.Sunday},
 				StartTime: "00:00:00",
 			},
+			"96c78ff5": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
+				StartTime: "00:00:00",
+			},
 		},
 		Ratings: map[string]*RIRate{
 			"d54545c1": &RIRate{
@@ -545,6 +556,19 @@ func TestLoadRatingPlans(t *testing.T) {
 					},
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+			},
+			"2efe78aa": &RIRate{
+				ConnectFee: 0,
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_DOWN,
 				RoundingDecimals: 2,
 			},
 		},
@@ -590,10 +614,17 @@ func TestLoadRatingPlans(t *testing.T) {
 					Weight: 10,
 				},
 			},
+			"URG": []*RPRate{
+				&RPRate{
+					Timing: "96c78ff5",
+					Rating: "2efe78aa",
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan.Ratings["e06c337f"])
+		t.Errorf("Error loading destination rate timing: %+v", rplan.DestinationRates["URG"][0])
 	}
 }
 

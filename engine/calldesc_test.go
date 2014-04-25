@@ -63,6 +63,13 @@ func populateDB() {
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
 	}
+	luna := &Account{
+		Id: "*out:vdf:luna",
+		BalanceMap: map[string]BalanceChain{
+			CREDIT + OUTBOUND: BalanceChain{
+				&Balance{Value: 0, Weight: 20},
+			}},
+	}
 	// this is added to test if csv load tests account will not overwrite balances
 	minitsboy := &Account{
 		Id: "*out:vdf:minitsboy",
@@ -82,6 +89,7 @@ func populateDB() {
 		accountingStorage.SetAccount(broker)
 		accountingStorage.SetAccount(minu)
 		accountingStorage.SetAccount(minitsboy)
+		accountingStorage.SetAccount(luna)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}
@@ -511,6 +519,42 @@ func TestDebitAndMaxDebit(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cc1, cc2) {
 		t.Errorf("Debit and MaxDebit differ: %+v != %+v", cc1, cc2)
+	}
+}
+
+func TestMaxSesionTimeEmptyBalance(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "minu_from_tm",
+		Account:     "luna",
+		Destination: "0723",
+	}
+	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
+	allowedTime, err := cd.getMaxSessionDuration(acc)
+	if err != nil || allowedTime != 0 {
+		t.Error("Error get max session for 0 acount")
+	}
+}
+
+func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		TOR:         "0",
+		Tenant:      "vdf",
+		Subject:     "one",
+		Account:     "luna",
+		Destination: "112",
+	}
+	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
+	allowedTime, err := cd.getMaxSessionDuration(acc)
+	if err != nil || allowedTime == 0 {
+		t.Error("Error get max session for 0 acount")
 	}
 }
 

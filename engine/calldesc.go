@@ -472,10 +472,6 @@ func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Dura
 		// there are enough minutes for requested interval
 		return initialDuration, nil
 	}
-	// check for zero balance
-	if availableCredit == 0 {
-		return utils.MinDuration(initialDuration, availableDuration), nil
-	}
 	//Logger.Debug(fmt.Sprintf("initial Duration: %v", initialDuration))
 	// we must move the timestart for the interval with the available duration because
 	// that was already checked
@@ -485,6 +481,10 @@ func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Dura
 	cc, err := cd.GetCost()
 	if availableDuration == 0 && cc.deductConnectFee { // only if we did not already used minutes
 		availableCredit -= cc.GetConnectFee()
+	}
+	// check for zero balance
+	if (availableCredit < 0) || (availableCredit == 0 && cc.Cost > 0) {
+		return utils.MinDuration(initialDuration, availableDuration), nil
 	}
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Could not get cost for %s: %s.", cd.GetKey(cd.Subject), err.Error()))
