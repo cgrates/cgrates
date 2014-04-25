@@ -115,7 +115,7 @@ func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 		return err
 	}
 	cdrs := []*utils.StoredCdr{rtCdr}            // Start with initial dbcdr, will add here all to be mediated
-	attrsDC := utils.AttrDerivedChargers{Tenant: rtCdr.Tenant, Tor: rtCdr.TOR, Direction: rtCdr.Direction,
+	attrsDC := utils.AttrDerivedChargers{Tenant: rtCdr.Tenant, Tor: rtCdr.Category, Direction: rtCdr.Direction,
 		Account: rtCdr.Account, Subject: rtCdr.Subject}
 	var dcs utils.DerivedChargers
 	if err := self.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
