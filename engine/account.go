@@ -37,7 +37,7 @@ const (
 	CREDIT  = "*monetary"
 	SMS     = "*sms"
 	DATA    = "*data"
-	MINUTES = "*minutes"
+	MINUTES = "*call"
 	// action trigger threshold types
 	TRIGGER_MIN_COUNTER = "*min_counter"
 	TRIGGER_MAX_COUNTER = "*max_counter"
