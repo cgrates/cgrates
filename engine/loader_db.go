@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -47,6 +48,7 @@ type DbReader struct {
 	ratingPlans      map[string]*RatingPlan
 	ratingProfiles   map[string]*RatingProfile
 	sharedGroups     map[string]*SharedGroup
+	lcrs             map[string]*LCR
 	derivedChargers  map[string]utils.DerivedChargers
 }
 
@@ -62,6 +64,7 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.sharedGroups = make(map[string]*SharedGroup)
+	c.lcrs = make(map[string]*LCR)
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
 	c.accountActions = make(map[string]*Account)
@@ -121,6 +124,8 @@ func (dbr *DbReader) ShowStatistics() {
 	log.Print("Account actions: ", len(dbr.accountActions))
 	// derivedChargers
 	log.Print("DerivedChargers: ", len(dbr.derivedChargers))
+	// lcr rules
+	log.Print("LCR rules: ", len(dbr.lcrs))
 }
 
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
@@ -181,6 +186,18 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	}
 	for k, sg := range dbr.sharedGroups {
 		err = accountingStorage.SetSharedGroup(sg)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(k)
+		}
+	}
+	if verbose {
+		log.Print("LCR Rules")
+	}
+	for k, lcr := range dbr.lcrs {
+		err = dataStorage.SetLCR(lcr)
 		if err != nil {
 			return err
 		}
@@ -454,6 +471,62 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 func (dbr *DbReader) LoadSharedGroups() (err error) {
 	dbr.sharedGroups, err = dbr.storDb.GetTpSharedGroups(dbr.tpid, "")
 	return err
+}
+
+func (dbr *DbReader) LoadLCRs() (err error) {
+	dbr.sharedGroups, err = dbr.storDb.GetTpSharedGroups(dbr.tpid, "")
+	return err
+	csvReader, fp, err := csvr.readerFunc(csvr.lcrFn, csvr.sep, utils.LCRS_NRCOLS)
+	if err != nil {
+		log.Print("Could not load LCR rules file: ", err)
+		// allow writing of the other values
+		return nil
+	}
+	if fp != nil {
+		defer fp.Close()
+	}
+	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+		direction, tenant, customer := record[0], record[1], record[2]
+		id := fmt.Sprintf("%s:%s:%s", direction, tenant, customer)
+		lcr, found := csvr.lcrs[id]
+		activationTime, err := utils.ParseTimeDetectLayout(record[7])
+		if err != nil {
+			return fmt.Errorf("Could not parse LCR activation time: %v", err)
+		}
+		weight, err := strconv.ParseFloat(record[8], 64)
+		if err != nil {
+			return fmt.Errorf("Could not parse LCR weight: %v", err)
+		}
+		if !found {
+			lcr = &LCR{
+				Direction: direction,
+				Tenant:    tenant,
+				Customer:  customer,
+			}
+		}
+		var act *LCRActivation
+		for _, existingAct := range lcr.Activations {
+			if existingAct.ActivationTime.Equal(activationTime) {
+				act = existingAct
+				break
+			}
+		}
+		if act == nil {
+			act = &LCRActivation{
+				ActivationTime: activationTime,
+			}
+			lcr.Activations = append(lcr.Activations, act)
+		}
+		act.Entries = append(act.Entries, &LCREntry{
+			DestinationId: record[3],
+			Category:      record[4],
+			Strategy:      record[5],
+			Suppliers:     record[6],
+			Weight:        weight,
+		})
+		csvr.lcrs[id] = lcr
+	}
+	return
 }
 
 func (dbr *DbReader) LoadActions() (err error) {

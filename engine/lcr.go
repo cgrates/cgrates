@@ -34,9 +34,9 @@ const (
 )
 
 type LCR struct {
+	Direction   string
 	Tenant      string
 	Customer    string
-	Direction   string
 	Activations []*LCRActivation
 }
 type LCRActivation struct {
@@ -45,7 +45,7 @@ type LCRActivation struct {
 }
 type LCREntry struct {
 	DestinationId string
-	TOR           string
+	Category      string
 	Strategy      string
 	Suppliers     string
 	Weight        float64

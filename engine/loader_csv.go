@@ -54,11 +54,11 @@ type CSVReader struct {
 	derivedChargers   map[string]utils.DerivedChargers
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
-	sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn string
+	sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn string
 }
 
 func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune,
-	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
+	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn string) *CSVReader {
 	c := new(CSVReader)
 	c.sep = sep
@@ -80,16 +80,16 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
-		c.sharedgroupsFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn, c.derivedChargersFn = destinationsFn, timingsFn,
-		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn
+		c.sharedgroupsFn, c.lcrFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn, c.derivedChargersFn = destinationsFn, timingsFn,
+		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn
 	return c
 }
 
 func NewStringCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune,
-	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn,
+	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
 	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn string) *CSVReader {
 	c := NewFileCSVReader(dataStorage, accountingStorage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn,
-		ratingprofilesFn, sharedgroupsFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn)
+		ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn)
 	c.readerFunc = openStringCSVReader
 	return c
 }
@@ -167,6 +167,8 @@ func (csvr *CSVReader) ShowStatistics() {
 	log.Print("Account actions: ", len(csvr.accountActions))
 	// derivedChargers
 	log.Print("DerivedChargers: ", len(csvr.derivedChargers))
+	// lcr rules
+	log.Print("LCR rules: ", len(csvr.lcrs))
 }
 
 func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
@@ -231,6 +233,18 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 	}
 	for k, sg := range csvr.sharedGroups {
 		err = accountingStorage.SetSharedGroup(sg)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(k)
+		}
+	}
+	if verbose {
+		log.Print("LCR Rules")
+	}
+	for k, lcr := range csvr.lcrs {
+		err = dataStorage.SetLCR(lcr)
 		if err != nil {
 			return err
 		}
@@ -554,6 +568,60 @@ func (csvr *CSVReader) LoadSharedGroups() (err error) {
 			}
 		}
 		csvr.sharedGroups[tag] = sg
+	}
+	return
+}
+
+func (csvr *CSVReader) LoadLCRs() (err error) {
+	csvReader, fp, err := csvr.readerFunc(csvr.lcrFn, csvr.sep, utils.LCRS_NRCOLS)
+	if err != nil {
+		log.Print("Could not load LCR rules file: ", err)
+		// allow writing of the other values
+		return nil
+	}
+	if fp != nil {
+		defer fp.Close()
+	}
+	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+		direction, tenant, customer := record[0], record[1], record[2]
+		id := fmt.Sprintf("%s:%s:%s", direction, tenant, customer)
+		lcr, found := csvr.lcrs[id]
+		activationTime, err := utils.ParseTimeDetectLayout(record[7])
+		if err != nil {
+			return fmt.Errorf("Could not parse LCR activation time: %v", err)
+		}
+		weight, err := strconv.ParseFloat(record[8], 64)
+		if err != nil {
+			return fmt.Errorf("Could not parse LCR weight: %v", err)
+		}
+		if !found {
+			lcr = &LCR{
+				Direction: direction,
+				Tenant:    tenant,
+				Customer:  customer,
+			}
+		}
+		var act *LCRActivation
+		for _, existingAct := range lcr.Activations {
+			if existingAct.ActivationTime.Equal(activationTime) {
+				act = existingAct
+				break
+			}
+		}
+		if act == nil {
+			act = &LCRActivation{
+				ActivationTime: activationTime,
+			}
+			lcr.Activations = append(lcr.Activations, act)
+		}
+		act.Entries = append(act.Entries, &LCREntry{
+			DestinationId: record[3],
+			Category:      record[4],
+			Strategy:      record[5],
+			Suppliers:     record[6],
+			Weight:        weight,
+		})
+		csvr.lcrs[id] = lcr
 	}
 	return
 }

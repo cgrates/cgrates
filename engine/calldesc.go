@@ -724,7 +724,7 @@ func (cd *CallDescriptor) GetLCR() (*LCRCost, error) {
 			}
 		} else {
 			// find rating profiles
-			ratingProfileSearchKey := fmt.Sprintf("%s:%s:%s:", lcr.Direction, lcr.Tenant, ts.Entry.TOR)
+			ratingProfileSearchKey := fmt.Sprintf("%s:%s:%s:", lcr.Direction, lcr.Tenant, ts.Entry.Category)
 			suppliers := cache2go.GetEntriesKeys(LCR_PREFIX + ratingProfileSearchKey)
 			for _, supplier := range suppliers {
 				split := strings.Split(supplier, ":")

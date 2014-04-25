@@ -305,6 +305,31 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string]*SharedGro
 	return nil
 }
 
+func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
+	if len(lcrs) == 0 {
+		return nil //Nothing to set
+	}
+	var buffer bytes.Buffer
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,direction,tenant,customer,destination_id,category,strategy,suppliers,activation_time,weight) VALUES ", utils.TBL_TP_LCRS))
+	i := 0
+	for _, lcr := range lcrs {
+		for _, act := range lcr.Activations {
+			for _, entry := range act.Entries {
+				if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
+					buffer.WriteRune(',')
+				}
+				buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s','%v','%v')",
+					tpid, lcr.Direction, lcr.Tenant, lcr.Customer, entry.DestinationId, entry.Category, entry.Strategy, entry.Suppliers, act.ActivationTime, entry.Weight))
+				i++
+			}
+		}
+	}
+	if _, err := self.Db.Exec(buffer.String()); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAction) error {
 	if len(acts) == 0 {
 		return nil //Nothing to set
@@ -1084,6 +1109,59 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string]*SharedG
 
 	}
 	return sgs, nil
+}
+
+func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {
+	lcrs := make(map[string]*LCR)
+	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_LCRS, tpid)
+	if tag != "" {
+		q += fmt.Sprintf(" AND id='%s'", tag)
+	}
+	rows, err := self.Db.Query(q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id int
+		var tpid, direction, tenant, customer, destinationId, category, strategy, suppliers, activationTimeString string
+		var weight float64
+		if err := rows.Scan(&id, &tpid, &direction, &tenant, &customer, &destinationId, &category, &strategy, &suppliers, &activationTimeString, &weight); err != nil {
+			return nil, err
+		}
+		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, customer)
+		lcr, found := lcrs[tag]
+		activationTime, _ := utils.ParseTimeDetectLayout(activationTimeString)
+		if !found {
+			lcr = &LCR{
+				Direction: direction,
+				Tenant:    tenant,
+				Customer:  customer,
+			}
+		}
+		var act *LCRActivation
+		for _, existingAct := range lcr.Activations {
+			if existingAct.ActivationTime.Equal(activationTime) {
+				act = existingAct
+				break
+			}
+		}
+		if act == nil {
+			act = &LCRActivation{
+				ActivationTime: activationTime,
+			}
+			lcr.Activations = append(lcr.Activations, act)
+		}
+		act.Entries = append(act.Entries, &LCREntry{
+			DestinationId: destinationId,
+			Category:      category,
+			Strategy:      strategy,
+			Suppliers:     suppliers,
+			Weight:        weight,
+		})
+		lcrs[tag] = lcr
+	}
+	return lcrs, nil
 }
 
 func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAction, error) {

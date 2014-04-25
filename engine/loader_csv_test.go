@@ -135,6 +135,11 @@ SG2,*any,*lowest,one
 SG3,*any,*lowest,
 `
 
+	lcrs = `
+*in,cgrates.org,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
+*in,cgrates.org,*any,*any,LCR_STANDARD,*lowest_cost,,2012-01-01T00:00:00Z,20
+`
+
 	actions = `
 MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,,10
 MINI,*topup,*call_duration,*out,100,*unlimited,NAT,test,10,,,10
@@ -184,7 +189,7 @@ var csvr *CSVReader
 
 func init() {
 	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, actions, actionTimings, actionTriggers, accountActions, derivedCharges)
+		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges)
 	csvr.LoadDestinations()
 	csvr.LoadTimings()
 	csvr.LoadRates()
@@ -192,6 +197,7 @@ func init() {
 	csvr.LoadRatingPlans()
 	csvr.LoadRatingProfiles()
 	csvr.LoadSharedGroups()
+	csvr.LoadLCRs()
 	csvr.LoadActions()
 	csvr.LoadActionTimings()
 	csvr.LoadActionTriggers()
@@ -709,7 +715,7 @@ func TestLoadActions(t *testing.T) {
 
 func TestLoadSharedGroups(t *testing.T) {
 	if len(csvr.sharedGroups) != 3 {
-		t.Error("Failed to load actions: ", csvr.sharedGroups)
+		t.Error("Failed to shared groups: ", csvr.sharedGroups)
 	}
 
 	sg1 := csvr.sharedGroups["SG1"]
@@ -752,6 +758,43 @@ func TestLoadSharedGroups(t *testing.T) {
 	if len(sg.Members) != 1 {
 		t.Errorf("Memebers should not be empty: %+v", sg)
 	}*/
+}
+
+func TestLoadLCRs(t *testing.T) {
+	if len(csvr.lcrs) != 1 {
+		t.Error("Failed to load LCRs: ", csvr.lcrs)
+	}
+
+	lcr := csvr.lcrs["*in:cgrates.org:*any"]
+	expected := &LCR{
+		Direction: "*in",
+		Tenant:    "cgrates.org",
+		Customer:  "*any",
+		Activations: []*LCRActivation{
+			&LCRActivation{
+				ActivationTime: time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC),
+				Entries: []*LCREntry{
+					&LCREntry{
+						DestinationId: "EU_LANDLINE",
+						Category:      "LCR_STANDARD",
+						Strategy:      "*static",
+						Suppliers:     "ivo;dan;rif",
+						Weight:        10,
+					},
+					&LCREntry{
+						DestinationId: "*any",
+						Category:      "LCR_STANDARD",
+						Strategy:      "*lowest_cost",
+						Suppliers:     "",
+						Weight:        20,
+					},
+				},
+			},
+		},
+	}
+	if !reflect.DeepEqual(lcr, expected) {
+		t.Errorf("Error loading lcr %+v: ", lcr.Activations)
+	}
 }
 
 func TestLoadActionTimings(t *testing.T) {
