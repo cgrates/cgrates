@@ -33,7 +33,7 @@ func TestApRestoreFromStorage(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   OUTBOUND,
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "CUSTOMER_1",
 		Subject:     "rif:from:tm",
 		Destination: "49"}
@@ -76,7 +76,7 @@ func TestFallbackDirect(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Tenant:      "CUSTOMER_2",
 		Subject:     "danb:87.139.12.167",
@@ -91,7 +91,7 @@ func TestFallbackMultiple(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Tenant:      "vdf",
 		Subject:     "fall",
@@ -106,7 +106,7 @@ func TestFallbackWithBackTrace(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Tenant:      "CUSTOMER_2",
 		Subject:     "danb:87.139.12.167",
@@ -121,7 +121,7 @@ func TestFallbackDefault(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Tenant:      "vdf",
 		Subject:     "one",
@@ -133,7 +133,7 @@ func TestFallbackDefault(t *testing.T) {
 }
 
 func TestFallbackNoInfiniteLoop(t *testing.T) {
-	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "rif", Destination: "0721"}
+	cd := &CallDescriptor{Category: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "rif", Destination: "0721"}
 	cd.LoadRatingPlans()
 	if len(cd.RatingInfos) != 0 {
 		t.Error("Error restoring activation periods: ", len(cd.RatingInfos))
@@ -141,7 +141,7 @@ func TestFallbackNoInfiniteLoop(t *testing.T) {
 }
 
 func TestFallbackNoInfiniteLoopSelf(t *testing.T) {
-	cd := &CallDescriptor{TOR: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "inf", Destination: "0721"}
+	cd := &CallDescriptor{Category: "0", Direction: OUTBOUND, Tenant: "vdf", Subject: "inf", Destination: "0721"}
 	cd.LoadRatingPlans()
 	if len(cd.RatingInfos) != 0 {
 		t.Error("Error restoring activation periods: ", len(cd.RatingInfos))

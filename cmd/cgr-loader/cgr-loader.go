@@ -140,7 +140,8 @@ func main() {
 			path.Join(*dataPath, utils.ACTIONS_CSV),
 			path.Join(*dataPath, utils.ACTION_PLANS_CSV),
 			path.Join(*dataPath, utils.ACTION_TRIGGERS_CSV),
-			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV))
+			path.Join(*dataPath, utils.ACCOUNT_ACTIONS_CSV),
+			path.Join(*dataPath, utils.DERIVED_CHARGERS_CSV))
 	}
 	err = loader.LoadAll()
 	if err != nil {
@@ -191,11 +192,12 @@ func main() {
 		rpAliases, _ := loader.GetLoadedIds(engine.RP_ALIAS_PREFIX)
 		accAliases, _ := loader.GetLoadedIds(engine.ACC_ALIAS_PREFIX)
 		lcrIds, _ := loader.GetLoadedIds(engine.LCR_PREFIX)
+		dcs, _ := loader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
 		// Reload cache first since actions could be calling info from within
 		if *verbose {
 			log.Print("Reloading cache")
 		}
-		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds, shgIds, rpAliases, accAliases, lcrIds}, &reply); err != nil {
+		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds, shgIds, rpAliases, accAliases, lcrIds, dcs}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
 		actTmgIds, _ := loader.GetLoadedIds(engine.ACTION_TIMING_PREFIX)

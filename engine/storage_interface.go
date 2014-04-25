@@ -42,6 +42,7 @@ const (
 	ACCOUNT_PREFIX            = "ubl_"
 	DESTINATION_PREFIX        = "dst_"
 	LCR_PREFIX                = "lcr_"
+	DERIVEDCHARGERS_PREFIX    = "dcs_"
 	TEMP_DESTINATION_PREFIX   = "tmp_"
 	LOG_CALL_COST_PREFIX      = "cco_"
 	LOG_ACTION_TIMMING_PREFIX = "ltm_"
@@ -90,7 +91,7 @@ type RatingStorage interface {
 type AccountingStorage interface {
 	Storage
 	HasData(string, string) (bool, error)
-	CacheAccounting([]string, []string, []string) error
+	CacheAccounting([]string, []string, []string, []string) error
 	GetActions(string, bool) (Actions, error)
 	SetActions(string, Actions) error
 	GetSharedGroup(string, bool) (*SharedGroup, error)
@@ -103,6 +104,8 @@ type AccountingStorage interface {
 	GetActionTimings(string) (ActionPlan, error)
 	SetActionTimings(string, ActionPlan) error
 	GetAllActionTimings() (map[string]ActionPlan, error)
+	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
+	SetDerivedChargers(string, utils.DerivedChargers) error
 }
 
 type CdrStorage interface {
@@ -110,18 +113,18 @@ type CdrStorage interface {
 	SetCdr(utils.RawCDR) error
 	SetRatedCdr(*utils.StoredCdr, string) error
 	GetStoredCdrs([]string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string,
-		time.Time, time.Time, bool, bool) ([]*utils.StoredCdr, error)
+		int64, int64, time.Time, time.Time, bool, bool) ([]*utils.StoredCdr, error)
 	RemStoredCdrs([]string) error
 }
 
 type LogStorage interface {
 	Storage
 	//GetAllActionTimingsLogs() (map[string]ActionsTimings, error)
-	LogCallCost(uuid, source, runid string, cc *CallCost) error
+	LogCallCost(cgrid, source, runid string, cc *CallCost) error
 	LogError(uuid, source, runid, errstr string) error
 	LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) error
 	LogActionTiming(source string, at *ActionTiming, as Actions) error
-	GetCallCostLog(uuid, source, runid string) (*CallCost, error)
+	GetCallCostLog(cgrid, source, runid string) (*CallCost, error)
 }
 
 type LoadStorage interface {

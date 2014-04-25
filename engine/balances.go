@@ -142,7 +142,7 @@ func (b *Balance) SubstractAmount(amount float64) {
 	b.dirty = true
 }
 
-func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalances BalanceChain) error {
+func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalances BalanceChain) error {
 	for tsIndex := 0; tsIndex < len(cc.Timespans); tsIndex++ {
 		if b.Value <= 0 {
 			return nil
@@ -176,15 +176,15 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 							// if increment it's not at the begining we must split the timespan
 							newTs = ts.SplitByIncrement(incrementIndex)
 						}
-						newTs.RoundToDuration(time.Minute)
+						newTs.RoundToDuration(duration)
 						newTs.RateInterval = &RateInterval{
 							Rating: &RIRate{
 								Rates: RateGroups{
 									&Rate{
 										GroupIntervalStart: 0,
 										Value:              0,
-										RateIncrement:      time.Minute,
-										RateUnit:           time.Minute,
+										RateIncrement:      duration,
+										RateUnit:           duration,
 									},
 								},
 							},
@@ -202,13 +202,13 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 						inc = newTs.Increments[0]
 					}
 					b.SubstractAmount(amount)
-					inc.BalanceInfo.MinuteBalanceUuid = b.Uuid
+					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
 					inc.BalanceInfo.AccountId = ub.Id
-					inc.MinuteInfo = &MinuteInfo{cc.Destination, amount}
+					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.Tor}
 					inc.Cost = 0
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: MINUTES, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+						ub.countUnits(&Action{BalanceType: cc.Tor, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 					}
 				}
 				continue
@@ -218,7 +218,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 			cd.Subject = b.RatingSubject
 			cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 			cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
-			cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
+			cd.DurationIndex = cc.Timespans[len(cc.Timespans)-1].DurationIndex
 			newCC, err := b.GetCost(cd)
 			if err != nil {
 				Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
@@ -242,9 +242,9 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 					}
 					if (cost == 0 || moneyBal != nil) && b.Value >= seconds {
 						b.SubstractAmount(seconds)
-						nInc.BalanceInfo.MinuteBalanceUuid = b.Uuid
+						nInc.BalanceInfo.UnitBalanceUuid = b.Uuid
 						nInc.BalanceInfo.AccountId = ub.Id
-						nInc.MinuteInfo = &MinuteInfo{newCC.Destination, seconds}
+						nInc.UnitInfo = &UnitInfo{newCC.Destination, seconds, cc.Tor}
 						if cost != 0 {
 							nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
 							moneyBal.Value -= cost
@@ -252,7 +252,7 @@ func (b *Balance) DebitMinutes(cc *CallCost, count bool, ub *Account, moneyBalan
 						}
 						nInc.paid = true
 						if count {
-							ub.countUnits(&Action{BalanceType: MINUTES, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
+							ub.countUnits(&Action{BalanceType: newCC.Tor, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
 							if cost != 0 {
 								ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: cost, DestinationId: newCC.Destination}})
 							}
@@ -327,7 +327,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 				cd.Subject = b.RatingSubject
 				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 				cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
-				cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
+				cd.DurationIndex = cc.Timespans[len(cc.Timespans)-1].DurationIndex
 				newCC, err := b.GetCost(cd)
 				if err != nil {
 					Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))

@@ -18,46 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"fmt"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	commands["get_cache_stats"] = &CmdGetCacheStats{}
+	c := &CmdSetRatingProfile{
+		name:      "ratingprofile_set",
+		rpcMethod: "ApierV1.SetRatingProfile",
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdGetCacheStats struct {
+type CmdSetRatingProfile struct {
+	name      string
 	rpcMethod string
-	rpcParams *utils.AttrCacheStats
-	rpcResult utils.CacheStats
+	rpcParams *utils.TPRatingProfile
+	rpcResult string
+	*CommandExecuter
 }
 
-// name should be exec's name
-func (self *CmdGetCacheStats) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_cache_stats")
+func (self *CmdSetRatingProfile) Name() string {
+	return self.name
 }
 
-// set param defaults
-func (self *CmdGetCacheStats) defaults() error {
-	self.rpcMethod = "ApierV1.GetCacheStats"
-	return nil
-}
-
-func (self *CmdGetCacheStats) FromArgs(args []string) error {
-	self.defaults()
-	return nil
-}
-
-func (self *CmdGetCacheStats) RpcMethod() string {
+func (self *CmdSetRatingProfile) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdGetCacheStats) RpcParams() interface{} {
+func (self *CmdSetRatingProfile) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &utils.TPRatingProfile{}
+	}
 	return self.rpcParams
 }
 
-func (self *CmdGetCacheStats) RpcResult() interface{} {
+func (self *CmdSetRatingProfile) RpcResult() interface{} {
 	return &self.rpcResult
 }

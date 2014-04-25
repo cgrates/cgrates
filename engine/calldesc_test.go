@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/history"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var (
@@ -62,6 +63,13 @@ func populateDB() {
 				&Balance{Value: 100, DestinationId: "RET", Weight: 20},
 			}},
 	}
+	luna := &Account{
+		Id: "*out:vdf:luna",
+		BalanceMap: map[string]BalanceChain{
+			CREDIT + OUTBOUND: BalanceChain{
+				&Balance{Value: 0, Weight: 20},
+			}},
+	}
 	// this is added to test if csv load tests account will not overwrite balances
 	minitsboy := &Account{
 		Id: "*out:vdf:minitsboy",
@@ -81,6 +89,7 @@ func populateDB() {
 		accountingStorage.SetAccount(broker)
 		accountingStorage.SetAccount(minu)
 		accountingStorage.SetAccount(minitsboy)
+		accountingStorage.SetAccount(luna)
 	} else {
 		log.Fatal("Could not connect to db!")
 	}
@@ -89,10 +98,10 @@ func populateDB() {
 func TestSplitSpans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 
 	cd.LoadRatingPlans()
-	timespans := cd.splitInTimeSpans(nil)
+	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Log(cd.RatingInfos)
 		t.Error("Wrong number of timespans: ", len(timespans))
@@ -102,10 +111,10 @@ func TestSplitSpans(t *testing.T) {
 func TestSplitSpansRoundToIncrements(t *testing.T) {
 	t1 := time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, CallDuration: 132 * time.Second}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, DurationIndex: 132 * time.Second}
 
 	cd.LoadRatingPlans()
-	timespans := cd.splitInTimeSpans(nil)
+	timespans := cd.splitInTimeSpans()
 	if len(timespans) != 2 {
 		t.Logf("%+v", cd)
 		t.Log(cd.RatingInfos)
@@ -123,7 +132,7 @@ func TestSplitSpansRoundToIncrements(t *testing.T) {
 func TestGetCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 0}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2701}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
@@ -134,7 +143,7 @@ func TestGetCost(t *testing.T) {
 func TestGetCostTimespans(t *testing.T) {
 	t1 := time.Date(2013, time.October, 8, 9, 23, 2, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 8, 9, 24, 27, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, CallDuration: 85 * time.Second}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: 85 * time.Second}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "test", Subject: "trp", Destination: "0256", Cost: 85}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 0 || len(result.Timespans) != 2 {
@@ -146,7 +155,7 @@ func TestGetCostTimespans(t *testing.T) {
 func TestGetCostRatingPlansAndRatingIntervals(t *testing.T) {
 	t1 := time.Date(2012, time.February, 27, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 28, 18, 10, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, CallDuration: t2.Sub(t1)}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: t2.Sub(t1)}
 	result, _ := cd.GetCost()
 	if len(result.Timespans) != 3 ||
 		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
@@ -161,7 +170,7 @@ func TestGetCostRatingPlansAndRatingIntervals(t *testing.T) {
 func TestGetCostRatingPlansAndRatingIntervalsMore(t *testing.T) {
 	t1 := time.Date(2012, time.February, 27, 9, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 28, 18, 10, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, CallDuration: t2.Sub(t1)}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "CUSTOMER_1", Subject: "rif:from:tm", Destination: "49178", TimeStart: t1, TimeEnd: t2, LoopIndex: 0, DurationIndex: t2.Sub(t1)}
 	result, _ := cd.GetCost()
 	if len(result.Timespans) != 4 ||
 		!result.Timespans[0].TimeEnd.Equal(result.Timespans[1].TimeStart) ||
@@ -177,7 +186,7 @@ func TestGetCostRatingPlansAndRatingIntervalsMore(t *testing.T) {
 func TestGetCostRateGroups(t *testing.T) {
 	t1 := time.Date(2013, time.October, 7, 14, 50, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 7, 14, 52, 12, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, CallDuration: 132 * time.Second}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "test", Subject: "trp", Destination: "0256", TimeStart: t1, TimeEnd: t2, DurationIndex: 132 * time.Second}
 
 	result, err := cd.GetCost()
 	if err != nil {
@@ -191,7 +200,7 @@ func TestGetCostRateGroups(t *testing.T) {
 func TestGetCostNoConnectFee(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 1}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2, LoopIndex: 1}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2700}
 	// connect fee is not added because LoopIndex is 1
@@ -203,7 +212,7 @@ func TestGetCostNoConnectFee(t *testing.T) {
 func TestGetCostAccount(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Account: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Account: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2701}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
@@ -214,7 +223,7 @@ func TestGetCostAccount(t *testing.T) {
 func TestFullDestNotFound(t *testing.T) {
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256308200", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0256", Cost: 2701}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
@@ -226,7 +235,7 @@ func TestFullDestNotFound(t *testing.T) {
 func TestSubjectNotFound(t *testing.T) {
 	t1 := time.Date(2013, time.February, 1, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.February, 1, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "not_exiting", Destination: "025740532", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "not_exiting", Destination: "025740532", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2701}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
@@ -238,7 +247,7 @@ func TestSubjectNotFound(t *testing.T) {
 func TestMultipleRatingPlans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 8, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2701}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
@@ -250,7 +259,7 @@ func TestMultipleRatingPlans(t *testing.T) {
 func TestSpansMultipleRatingPlans(t *testing.T) {
 	t1 := time.Date(2012, time.February, 7, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 0, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	if result.Cost != 1200 || result.GetConnectFee() != 0 {
 		t.Errorf("Expected %v was %v", 1200, result)
@@ -260,7 +269,7 @@ func TestSpansMultipleRatingPlans(t *testing.T) {
 func TestLessThanAMinute(t *testing.T) {
 	t1 := time.Date(2012, time.February, 8, 23, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 30, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0257308200", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 15}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 0 {
@@ -271,7 +280,7 @@ func TestLessThanAMinute(t *testing.T) {
 func TestUniquePrice(t *testing.T) {
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 23, 50, 21, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723045326", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0723045326", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0723", Cost: 1810.5}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 0 {
@@ -282,7 +291,7 @@ func TestUniquePrice(t *testing.T) {
 func TestMinutesCost(t *testing.T) {
 	t1 := time.Date(2012, time.February, 8, 22, 50, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 8, 22, 51, 50, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0723", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0723", TimeStart: t1, TimeEnd: t2}
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "minutosu", Destination: "0723", Cost: 55}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 0 {
@@ -295,7 +304,7 @@ func TestMaxSessionTimeNoAccount(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "ttttttt",
 		Destination: "0723"}
@@ -310,7 +319,7 @@ func TestMaxSessionTimeWithAccount(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "minu",
 		Destination: "0723",
@@ -327,7 +336,7 @@ func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "a1",
 		Account:     "a1",
@@ -354,7 +363,7 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "rif",
 		Account:     "empty0",
@@ -365,7 +374,7 @@ func TestMaxSessionTimeWithAccountShared(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "rif",
 		Account:     "empty10",
@@ -393,7 +402,7 @@ func TestMaxDebitWithAccountShared(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 5, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "minu",
 		Account:     "empty0",
@@ -420,7 +429,7 @@ func TestMaxSessionTimeWithAccountAccount(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "minu_from_tm",
 		Account:     "minu",
@@ -438,10 +447,11 @@ func TestMaxSessionTimeNoCredit(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "broker",
 		Destination: "0723",
+		Tor:         MINUTES,
 	}
 	result, err := cd.GetMaxSessionDuration()
 	if result != time.Minute || err != nil {
@@ -453,15 +463,16 @@ func TestMaxSessionModifiesCallDesc(t *testing.T) {
 	t1 := time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC)
 	t2 := time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC)
 	cd := &CallDescriptor{
-		TimeStart:    t1,
-		TimeEnd:      t2,
-		Direction:    "*out",
-		TOR:          "0",
-		Tenant:       "vdf",
-		Subject:      "minu_from_tm",
-		Account:      "minu",
-		Destination:  "0723",
-		CallDuration: t2.Sub(t1),
+		TimeStart:     t1,
+		TimeEnd:       t2,
+		Direction:     "*out",
+		Category:      "0",
+		Tenant:        "vdf",
+		Subject:       "minu_from_tm",
+		Account:       "minu",
+		Destination:   "0723",
+		DurationIndex: t2.Sub(t1),
+		Tor:           MINUTES,
 	}
 	initial := cd.Clone()
 	cd.GetMaxSessionDuration()
@@ -476,7 +487,7 @@ func TestMaxDebitDurationNoGreatherThanInitialDuration(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "minu_from_tm",
 		Account:     "minu",
@@ -494,7 +505,7 @@ func TestDebitAndMaxDebit(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "minu_from_tm",
 		Account:     "minu",
@@ -511,6 +522,42 @@ func TestDebitAndMaxDebit(t *testing.T) {
 	}
 }
 
+func TestMaxSesionTimeEmptyBalance(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		Category:    "0",
+		Tenant:      "vdf",
+		Subject:     "minu_from_tm",
+		Account:     "luna",
+		Destination: "0723",
+	}
+	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
+	allowedTime, err := cd.getMaxSessionDuration(acc)
+	if err != nil || allowedTime != 0 {
+		t.Error("Error get max session for 0 acount")
+	}
+}
+
+func TestMaxSesionTimeEmptyBalanceAndNoCost(t *testing.T) {
+	cd := &CallDescriptor{
+		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2013, 10, 21, 18, 35, 0, 0, time.UTC),
+		Direction:   "*out",
+		Category:    "0",
+		Tenant:      "vdf",
+		Subject:     "one",
+		Account:     "luna",
+		Destination: "112",
+	}
+	acc, _ := accountingStorage.GetAccount("*out:vdf:luna")
+	allowedTime, err := cd.getMaxSessionDuration(acc)
+	if err != nil || allowedTime == 0 {
+		t.Error("Error get max session for 0 acount")
+	}
+}
+
 func TestDebitFromShareAndNormal(t *testing.T) {
 	ap, _ := accountingStorage.GetActionTimings("TOPUP_SHARED10_AT")
 	for _, at := range ap {
@@ -521,7 +568,7 @@ func TestDebitFromShareAndNormal(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 5, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "rif",
 		Account:     "empty10",
@@ -549,7 +596,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 21, 18, 34, 5, 0, time.UTC),
 		Direction:   "*out",
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		Subject:     "rif",
 		Account:     "emptyX",
@@ -573,16 +620,16 @@ func TestMaxDebitZeroDefinedRate(t *testing.T) {
 		at.Execute()
 	}
 	cd1 := &CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "12345",
-		Account:      "12345",
-		Destination:  "447956",
-		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 1, 0, 0, time.UTC),
-		LoopIndex:    0,
-		CallDuration: 0}
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "12345",
+		Account:       "12345",
+		Destination:   "447956",
+		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 0, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 0}
 	cc, err := cd1.MaxDebit()
 	if err != nil {
 		t.Error("Error maxdebiting: ", err)
@@ -601,16 +648,16 @@ func TestMaxDebitZeroDefinedRateOnlyMinutes(t *testing.T) {
 		at.Execute()
 	}
 	cd1 := &CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "12345",
-		Account:      "12345",
-		Destination:  "447956",
-		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 40, 0, time.UTC),
-		LoopIndex:    0,
-		CallDuration: 0}
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "12345",
+		Account:       "12345",
+		Destination:   "447956",
+		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, 3, 4, 6, 0, 40, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 0}
 	cc, err := cd1.MaxDebit()
 	if err != nil {
 		t.Fatal("Error maxdebiting: ", err)
@@ -629,19 +676,73 @@ func TestMaxDebitConsumesMinutes(t *testing.T) {
 		at.Execute()
 	}
 	cd1 := &CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "12345",
-		Account:      "12345",
-		Destination:  "447956",
-		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, 3, 4, 6, 0, 5, 0, time.UTC),
-		LoopIndex:    0,
-		CallDuration: 0}
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "12345",
+		Account:       "12345",
+		Destination:   "447956",
+		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, 3, 4, 6, 0, 5, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 0}
 	cd1.MaxDebit()
 	if cd1.account.BalanceMap[MINUTES+OUTBOUND][0].Value != 20 {
 		t.Error("Error using minutes: ", cd1.account.BalanceMap[MINUTES+OUTBOUND][0].Value)
+	}
+}
+
+func TestCDGetCostANY(t *testing.T) {
+	cd1 := &CallDescriptor{
+		Direction:   "*out",
+		Category:    "data",
+		Tenant:      "cgrates.org",
+		Subject:     "rif",
+		Destination: utils.ANY,
+		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 1, 0, time.UTC),
+		Tor:         DATA,
+	}
+	cc, err := cd1.GetCost()
+	if err != nil || cc.Cost != 60 {
+		t.Errorf("Error getting *any dest: %+v %v", cc, err)
+	}
+}
+
+func TestCDSplitInDataSlots(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:     "*out",
+		Category:      "data",
+		Tenant:        "cgrates.org",
+		Subject:       "rif",
+		Destination:   utils.ANY,
+		TimeStart:     time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
+		Tor:           DATA,
+		DurationIndex: 65 * time.Second,
+	}
+	cd.LoadRatingPlans()
+	timespans := cd.splitInTimeSpans()
+	if len(timespans) != 2 {
+		t.Log(cd.RatingInfos[0])
+		t.Error("Wrong number of timespans: ", len(timespans))
+	}
+}
+
+func TestCDDataGetCost(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:   "*out",
+		Category:    "data",
+		Tenant:      "cgrates.org",
+		Subject:     "rif",
+		Destination: utils.ANY,
+		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
+		Tor:         DATA,
+	}
+	cc, err := cd.GetCost()
+	if err != nil || cc.Cost != 65 {
+		t.Errorf("Error getting *any dest: %+v %v", cc, err)
 	}
 }
 
@@ -650,7 +751,7 @@ func BenchmarkStorageGetting(b *testing.B) {
 	b.StopTimer()
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		dataStorage.GetRatingProfile(cd.GetKey(cd.Subject), false)
@@ -661,7 +762,7 @@ func BenchmarkStorageRestoring(b *testing.B) {
 	b.StopTimer()
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.LoadRatingPlans()
@@ -672,7 +773,7 @@ func BenchmarkStorageGetCost(b *testing.B) {
 	b.StopTimer()
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.GetCost()
@@ -683,11 +784,11 @@ func BenchmarkSplitting(b *testing.B) {
 	b.StopTimer()
 	t1 := time.Date(2012, time.February, 2, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 2, 18, 30, 0, 0, time.UTC)
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "rif", Destination: "0256", TimeStart: t1, TimeEnd: t2}
 	cd.LoadRatingPlans()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		cd.splitInTimeSpans(nil)
+		cd.splitInTimeSpans()
 	}
 }
 
@@ -702,7 +803,7 @@ func BenchmarkStorageSingleGetSessionTime(b *testing.B) {
 
 func BenchmarkStorageMultipleGetSessionTime(b *testing.B) {
 	b.StopTimer()
-	cd := &CallDescriptor{Direction: "*out", TOR: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723"}
+	cd := &CallDescriptor{Direction: "*out", Category: "0", Tenant: "vdf", Subject: "minutosu", Destination: "0723"}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		cd.GetMaxSessionDuration()

@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"path"
-	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/config"
@@ -64,10 +64,9 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 }
 
 type AttrGetAccount struct {
-	Tenant      string
-	Account     string
-	BalanceType string
-	Direction   string
+	Tenant    string
+	Account   string
+	Direction string
 }
 
 // Get balance
@@ -88,7 +87,7 @@ type AttrAddBalance struct {
 	BalanceType    string
 	Direction      string
 	Value          float64
-	ExpirationDate time.Time
+	ExpirationDate string
 	RatingSubject  string
 	DestinationId  string
 	Weight         float64
@@ -96,6 +95,11 @@ type AttrAddBalance struct {
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
+	expTime, err := utils.ParseDate(attr.ExpirationDate)
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	if _, err := self.AccountDb.GetAccount(tag); err != nil {
 		// create user balance if not exists
@@ -125,7 +129,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 			Direction:   attr.Direction,
 			Balance: &engine.Balance{
 				Value:          attr.Value,
-				ExpirationDate: attr.ExpirationDate,
+				ExpirationDate: expTime,
 				RatingSubject:  attr.RatingSubject,
 				DestinationId:  attr.DestinationId,
 				Weight:         attr.Weight,
@@ -207,7 +211,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 
 type AttrSetRatingProfile struct {
 	Tenant                string                      // Tenant's Id
-	TOR                   string                      // TypeOfRecord
+	Category              string                      // TypeOfRecord
 	Direction             string                      // Traffic direction, OUT is the only one supported for now
 	Subject               string                      // Rating subject, usually the same as account
 	Overwrite             bool                        // Overwrite if exists
@@ -224,7 +228,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 			return fmt.Errorf("%s:RatingPlanActivation:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 		}
 	}
-	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, TOR: attrs.TOR, Direction: attrs.Direction, Subject: attrs.Subject}
+	tpRpf := utils.TPRatingProfile{Tenant: attrs.Tenant, Category: attrs.Category, Direction: attrs.Direction, Subject: attrs.Subject}
 	keyId := tpRpf.KeyId()
 	if !attrs.Overwrite {
 		if exists, err := self.RatingDb.HasData(engine.RATING_PROFILE_PREFIX, keyId); err != nil {
@@ -245,7 +249,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 			return fmt.Errorf(fmt.Sprintf("%s:RatingPlanId:%s", utils.ERR_NOT_FOUND, ra.RatingPlanId))
 		}
 		rpfl.RatingPlanActivations[idx] = &engine.RatingPlanActivation{ActivationTime: at, RatingPlanId: ra.RatingPlanId,
-			FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, ra.FallbackSubjects)}
+			FallbackKeys: utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, ra.FallbackSubjects)}
 	}
 	if err := self.RatingDb.SetRatingProfile(rpfl); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
@@ -433,6 +437,54 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 	return nil
 }
 
+type AttrResetTriggeredAction struct {
+	Tenant         string
+	Account        string
+	Direction      string
+	BalanceType    string
+	ThresholdType  string
+	ThresholdValue float64
+}
+
+func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply *string) error {
+	if attr.Direction == "" {
+		attr.Direction = engine.OUTBOUND
+	}
+	extraParameters, err := json.Marshal(struct {
+		ThresholdType  string
+		ThresholdValue float64
+	}{attr.ThresholdType, attr.ThresholdValue})
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	a := &engine.Action{
+		BalanceType:     attr.BalanceType,
+		Direction:       attr.Direction,
+		ExtraParameters: string(extraParameters),
+	}
+	accID := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
+	_, err = engine.AccLock.Guard(accID, func() (float64, error) {
+		acc, err := self.AccountDb.GetAccount(accID)
+		if err != nil {
+			return 0, err
+		}
+
+		acc.ResetActionTriggers(a)
+
+		if err = self.AccountDb.SetAccount(acc); err != nil {
+			return 0, err
+		}
+		return 0, nil
+	})
+	if err != nil {
+		*reply = err.Error()
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
 // Process dependencies and load a specific AccountActions profile from storDb into dataDb.
 func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 {
@@ -450,7 +502,7 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 	}
 	// ToDo: Get the action keys loaded by dbReader so we reload only these in cache
 	// Need to do it before scheduler otherwise actions to run will be unknown
-	if err := self.AccountDb.CacheAccounting(nil, nil, nil); err != nil {
+	if err := self.AccountDb.CacheAccounting(nil, nil, nil, []string{}); err != nil {
 		return err
 	}
 	if self.Sched != nil {
@@ -473,7 +525,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, rpAlsKeys, accAlsKeys, lcrKeys []string
+	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, rpAlsKeys, accAlsKeys, lcrKeys, dcsKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -523,13 +575,21 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 		}
 	}
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
-		return err
+		if len(attrs.DerivedChargers) > 0 {
+			dcsKeys = make([]string, len(attrs.DerivedChargers))
+			for idx, dc := range attrs.DerivedChargers {
+				dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
+			}
+		}
+		if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
+			return err
+		}
+		if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
+			return err
+		}
+		*reply = "OK"
+		return nil
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys); err != nil {
-		return err
-	}
-	*reply = "OK"
-	return nil
 }
 
 func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.CacheStats) error {
@@ -541,6 +601,7 @@ func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.Cach
 	cs.SharedGroups = cache2go.CountEntries(engine.SHARED_GROUP_PREFIX)
 	cs.RatingAliases = cache2go.CountEntries(engine.RP_ALIAS_PREFIX)
 	cs.AccountAliases = cache2go.CountEntries(engine.ACC_ALIAS_PREFIX)
+	cs.DerivedChargers = cache2go.CountEntries(engine.DERIVEDCHARGERS_PREFIX)
 	*reply = *cs
 	return nil
 }
@@ -592,7 +653,8 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
-		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV))
+		path.Join(attrs.FolderPath, utils.ACCOUNT_ACTIONS_CSV),
+		path.Join(attrs.FolderPath, utils.DERIVED_CHARGERS_CSV))
 	if err := loader.LoadAll(); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -645,15 +707,22 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		lcrKeys[idx] = engine.LCR_PREFIX + lcrId
 	}
 	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
-		return err
+		dcs, _ := loader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
+		dcsKeys := make([]string, len(dcs))
+		for idx, dc := range dcs {
+			dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
+		}
+		if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
+			return err
+		}
+		if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
+			return err
+		}
+		if self.Sched != nil {
+			self.Sched.LoadActionTimings(self.AccountDb)
+			self.Sched.Restart()
+		}
+		*reply = "OK"
+		return nil
 	}
-	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys); err != nil {
-		return err
-	}
-	if self.Sched != nil {
-		self.Sched.LoadActionTimings(self.AccountDb)
-		self.Sched.Restart()
-	}
-	*reply = "OK"
-	return nil
 }

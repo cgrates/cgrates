@@ -21,6 +21,7 @@ package engine
 import (
 	//"fmt"
 
+	"reflect"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +35,7 @@ type TimeSpan struct {
 	Cost                                         float64
 	ratingInfo                                   *RatingInfo
 	RateInterval                                 *RateInterval
-	CallDuration                                 time.Duration // the call duration so far till TimeEnd
+	DurationIndex                                time.Duration // the call duration so far till TimeEnd
 	Increments                                   Increments
 	MatchedSubject, MatchedPrefix, MatchedDestId string
 }
@@ -42,24 +43,37 @@ type TimeSpan struct {
 type Increment struct {
 	Duration            time.Duration
 	Cost                float64
-	BalanceInfo         *BalanceInfo // need more than one for minutes with cost
+	BalanceInfo         *BalanceInfo // need more than one for units with cost
 	BalanceRateInterval *RateInterval
-	MinuteInfo          *MinuteInfo
+	UnitInfo            *UnitInfo
+	CompressFactor      int
 	paid                bool
 }
 
 // Holds the minute information related to a specified timespan
-type MinuteInfo struct {
+type UnitInfo struct {
 	DestinationId string
 	Quantity      float64
+	Tor           string
 	//Price         float64
+}
+
+func (mi *UnitInfo) Equal(other *UnitInfo) bool {
+	return mi.DestinationId == other.DestinationId &&
+		mi.Quantity == other.Quantity
 }
 
 // Holds information about the balance that made a specific payment
 type BalanceInfo struct {
-	MinuteBalanceUuid string
-	MoneyBalanceUuid  string
-	AccountId         string // used when debited from shared balance
+	UnitBalanceUuid  string
+	MoneyBalanceUuid string
+	AccountId        string // used when debited from shared balance
+}
+
+func (bi *BalanceInfo) Equal(other *BalanceInfo) bool {
+	return bi.UnitBalanceUuid == other.UnitBalanceUuid &&
+		bi.MoneyBalanceUuid == other.MoneyBalanceUuid &&
+		bi.AccountId == other.AccountId
 }
 
 type TimeSpans []*TimeSpan
@@ -146,15 +160,57 @@ func (timespans *TimeSpans) OverlapWithTimeSpans(paidTs TimeSpans, newTs *TimeSp
 	return false
 }
 
+func (tss TimeSpans) Compress() {
+	for _, ts := range tss {
+		var cIncrs Increments
+		for _, incr := range ts.Increments {
+			if len(cIncrs) == 0 || !cIncrs[len(cIncrs)-1].Equal(incr) {
+				incr.GetCompressFactor() // sideefect
+				cIncrs = append(cIncrs, incr)
+			} else {
+				cIncrs[len(cIncrs)-1].CompressFactor++
+			}
+		}
+		ts.Increments = cIncrs
+	}
+}
+
+func (tss TimeSpans) Decompress() {
+	for _, ts := range tss {
+		var incrs Increments
+		for _, cIncr := range ts.Increments {
+			for i := 0; i < cIncr.GetCompressFactor(); i++ {
+				incrs = append(incrs, cIncr.Clone())
+			}
+		}
+		ts.Increments = incrs
+	}
+}
+
 func (incr *Increment) Clone() *Increment {
 	nIncr := &Increment{
 		Duration:            incr.Duration,
 		Cost:                incr.Cost,
 		BalanceRateInterval: incr.BalanceRateInterval,
-		MinuteInfo:          incr.MinuteInfo,
+		UnitInfo:            incr.UnitInfo,
 		BalanceInfo:         incr.BalanceInfo,
 	}
 	return nIncr
+}
+
+func (incr *Increment) Equal(other *Increment) bool {
+	return incr.Duration == other.Duration &&
+		incr.Cost == other.Cost &&
+		((incr.BalanceInfo == nil && other.BalanceInfo == nil) || incr.BalanceInfo.Equal(other.BalanceInfo)) &&
+		((incr.BalanceRateInterval == nil && other.BalanceRateInterval == nil) || reflect.DeepEqual(incr.BalanceRateInterval, other.BalanceRateInterval)) &&
+		((incr.UnitInfo == nil && other.UnitInfo == nil) || incr.UnitInfo.Equal(other.UnitInfo))
+}
+
+func (incr *Increment) GetCompressFactor() int {
+	if incr.CompressFactor == 0 {
+		incr.CompressFactor = 1
+	}
+	return incr.CompressFactor
 }
 
 type Increments []*Increment
@@ -162,9 +218,16 @@ type Increments []*Increment
 func (incs Increments) GetTotalCost() float64 {
 	cost := 0.0
 	for _, increment := range incs {
-		cost += increment.Cost
+		cost += (float64(increment.GetCompressFactor()) * increment.Cost)
 	}
 	return cost
+}
+
+func (incs Increments) Length() (length int) {
+	for _, incr := range incs {
+		length += incr.GetCompressFactor()
+	}
+	return
 }
 
 // Returns the duration of the timespan
@@ -197,7 +260,7 @@ func (ts *TimeSpan) SetRateInterval(i *RateInterval) {
 // It also sets the Cost field of this timespan (used for refund on session
 // manager debit loop where the cost cannot be recalculated)
 func (ts *TimeSpan) getCost() float64 {
-	if len(ts.Increments) == 0 {
+	if ts.Increments.Length() == 0 {
 		if ts.RateInterval == nil {
 			return 0
 		}
@@ -205,7 +268,7 @@ func (ts *TimeSpan) getCost() float64 {
 		ts.Cost = utils.Round(cost, ts.RateInterval.Rating.RoundingDecimals, ts.RateInterval.Rating.RoundingMethod)
 		return ts.Cost
 	} else {
-		return ts.Increments[0].Cost * float64(len(ts.Increments))
+		return ts.Increments[0].Cost * float64(ts.Increments.Length())
 	}
 }
 
@@ -237,7 +300,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 // returns whether the timespan has all increments marked as paid and if not
 // it also returns the first unpaied increment
 func (ts *TimeSpan) IsPaid() (bool, int) {
-	if len(ts.Increments) == 0 {
+	if ts.Increments.Length() == 0 {
 		return false, 0
 	}
 	for incrementIndex, increment := range ts.Increments {
@@ -255,7 +318,6 @@ a new timespan starting from the end of the received one.
 The interval will attach itself to the timespan that overlaps the interval.
 */
 func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
-	//Logger.Debug("here: ", ts, " +++ ", i)
 	// if the span is not in interval return nil
 	if !(i.Contains(ts.TimeStart, false) || i.Contains(ts.TimeEnd, true)) {
 		//Logger.Debug("Not in interval")
@@ -266,7 +328,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 	if i.Rating != nil {
 		i.Rating.Rates.Sort()
 		for _, rate := range i.Rating.Rates {
-			// Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
+			//Logger.Debug(fmt.Sprintf("Rate: %+v", rate))
 			if ts.GetGroupStart() < rate.GroupIntervalStart && ts.GetGroupEnd() > rate.GroupIntervalStart {
 				// Logger.Debug(fmt.Sprintf("Splitting"))
 				ts.SetRateInterval(i)
@@ -278,8 +340,8 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 				nts.copyRatingInfo(ts)
 				ts.TimeEnd = splitTime
 				nts.SetRateInterval(i)
-				nts.CallDuration = ts.CallDuration
-				ts.SetNewCallDuration(nts)
+				nts.DurationIndex = ts.DurationIndex
+				ts.SetNewDurationIndex(nts)
 				// Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
 				return
 			}
@@ -306,8 +368,8 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		}
 		nts.copyRatingInfo(ts)
 		ts.TimeEnd = splitTime
-		nts.CallDuration = ts.CallDuration
-		ts.SetNewCallDuration(nts)
+		nts.DurationIndex = ts.DurationIndex
+		ts.SetNewDurationIndex(nts)
 		// Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
 		return
 	}
@@ -328,8 +390,8 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		ts.TimeEnd = splitTime
 
 		nts.SetRateInterval(i)
-		nts.CallDuration = ts.CallDuration
-		ts.SetNewCallDuration(nts)
+		nts.DurationIndex = ts.DurationIndex
+		ts.SetNewDurationIndex(nts)
 		// Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
 		return
 	}
@@ -348,11 +410,11 @@ func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
 		TimeEnd:      ts.TimeEnd,
 	}
 	newTs.copyRatingInfo(ts)
-	newTs.CallDuration = ts.CallDuration
+	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = timeStart
 	newTs.Increments = ts.Increments[index:]
 	ts.Increments = ts.Increments[:index]
-	ts.SetNewCallDuration(newTs)
+	ts.SetNewDurationIndex(newTs)
 	return newTs
 }
 
@@ -368,7 +430,7 @@ func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
 		TimeEnd:      ts.TimeEnd,
 	}
 	newTs.copyRatingInfo(ts)
-	newTs.CallDuration = ts.CallDuration
+	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = timeStart
 	// split the increment
 	for incrIndex, incr := range ts.Increments {
@@ -387,7 +449,7 @@ func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
 			break
 		}
 	}
-	ts.SetNewCallDuration(newTs)
+	ts.SetNewDurationIndex(newTs)
 	return newTs
 }
 
@@ -401,16 +463,16 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 		TimeEnd:   ts.TimeEnd,
 	}
 	newTs.copyRatingInfo(ts)
-	newTs.CallDuration = ts.CallDuration
+	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = rp.ActivationTime
-	ts.SetNewCallDuration(newTs)
+	ts.SetNewDurationIndex(newTs)
 	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
 	return
 }
 
 // Returns the starting time of this timespan
 func (ts *TimeSpan) GetGroupStart() time.Duration {
-	s := ts.CallDuration - ts.GetDuration()
+	s := ts.DurationIndex - ts.GetDuration()
 	if s < 0 {
 		s = 0
 	}
@@ -418,16 +480,16 @@ func (ts *TimeSpan) GetGroupStart() time.Duration {
 }
 
 func (ts *TimeSpan) GetGroupEnd() time.Duration {
-	return ts.CallDuration
+	return ts.DurationIndex
 }
 
-// sets the CallDuration attribute to reflect new timespan
-func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
-	d := ts.CallDuration - nts.GetDuration()
+// sets the DurationIndex attribute to reflect new timespan
+func (ts *TimeSpan) SetNewDurationIndex(nts *TimeSpan) {
+	d := ts.DurationIndex - nts.GetDuration()
 	if d < 0 {
 		d = 0
 	}
-	ts.CallDuration = d
+	ts.DurationIndex = d
 }
 
 func (nts *TimeSpan) copyRatingInfo(ts *TimeSpan) {
@@ -452,6 +514,6 @@ func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
 	if duration > ts.GetDuration() {
 		initialDuration := ts.GetDuration()
 		ts.TimeEnd = ts.TimeStart.Add(duration)
-		ts.CallDuration = ts.CallDuration + (duration - initialDuration)
+		ts.DurationIndex = ts.DurationIndex + (duration - initialDuration)
 	}
 }

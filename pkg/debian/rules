@@ -29,10 +29,10 @@ binary-arch: clean
 	cp $(SRCDIR)/data/conf/cgrates.cfg $(PKGDIR)/etc/cgrates/
 	mkdir -p $(PKGDIR)/usr/share/cgrates
 	cp -r $(SRCDIR)/data/* $(PKGDIR)/usr/share/cgrates/
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrc/in
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdrc/out
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdre/csv
-	mkdir -p $(PKGDIR)/var/log/cgrates/cdr/cdre/fwv
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdrc/in
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdrc/out
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdre/csv
+	mkdir -p $(PKGDIR)/var/log/cgrates/cdre/fwv
 	mkdir -p $(PKGDIR)/var/log/cgrates/history
 	dh_strip
 	dh_compress

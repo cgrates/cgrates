@@ -40,9 +40,7 @@ func MirrorMap(mapIn map[string]string) (map[string]string, error) {
 func MissingMapKeys(inMap map[string]string, requiredKeys []string) []string {
 	missingKeys := []string{}
 	for _, reqKey := range requiredKeys {
-		if val, hasKey := inMap[reqKey]; !hasKey {
-			missingKeys = append(missingKeys, reqKey)
-		} else if val == "" {
+		if val, hasKey := inMap[reqKey]; !hasKey || val == "" {
 			missingKeys = append(missingKeys, reqKey)
 		}
 	}

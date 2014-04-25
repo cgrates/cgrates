@@ -18,47 +18,41 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"fmt"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/apier"
 
 func init() {
-	commands["reload_cache"] = &CmdReloadCache{}
+	c := &CmdAddAccount{
+		name:      "account_add",
+		rpcMethod: "ApierV1.SetAccount",
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdReloadCache struct {
+type CmdAddAccount struct {
+	name      string
 	rpcMethod string
-	rpcParams *utils.ApiReloadCache
+	rpcParams *apier.AttrSetAccount
 	rpcResult string
+	*CommandExecuter
 }
 
-// name should be exec's name
-func (self *CmdReloadCache) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] reload_cache")
+func (self *CmdAddAccount) Name() string {
+	return self.name
 }
 
-// set param defaults
-func (self *CmdReloadCache) defaults() error {
-	self.rpcMethod = "ApierV1.ReloadCache"
-	return nil
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdReloadCache) FromArgs(args []string) error {
-	self.defaults()
-	return nil
-}
-
-func (self *CmdReloadCache) RpcMethod() string {
+func (self *CmdAddAccount) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdReloadCache) RpcParams() interface{} {
+func (self *CmdAddAccount) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &apier.AttrSetAccount{Direction: "*out"}
+	}
 	return self.rpcParams
 }
 
-func (self *CmdReloadCache) RpcResult() interface{} {
+func (self *CmdAddAccount) RpcResult() interface{} {
 	return &self.rpcResult
 }

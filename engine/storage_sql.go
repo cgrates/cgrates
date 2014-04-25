@@ -269,7 +269,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				buffer.WriteRune(',')
 			}
-			buffer.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Tenant, rp.TOR, rp.Direction,
+			buffer.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Tenant, rp.Category, rp.Direction,
 				rp.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackSubjects))
 			i++
 		}
@@ -461,7 +461,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TP
 	return nil
 }
 
-func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (err error) {
+func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
 	//ToDo: Add cgrid to logCallCost
 	if self.Db == nil {
 		//timespans.Logger.Warning("Cannot write log to database.")
@@ -471,13 +471,12 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, accid, direction, tenant, tor, account, subject, destination, cost, timespans, source, runid, cost_time)VALUES ('%s', '%s','%s', '%s', '%s', '%s', '%s', '%s', %f, '%s','%s','%s',now()) ON DUPLICATE KEY UPDATE direction=values(direction), tenant=values(tenant), tor=values(tor), account=values(account), subject=values(subject), destination=values(destination), cost=values(cost), timespans=values(timespans), source=values(source), cost_time=now()",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid, direction, tenant, tor, account, subject, destination, cost, timespans, source, runid, cost_time)VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', %f, '%s','%s','%s',now()) ON DUPLICATE KEY UPDATE direction=values(direction), tenant=values(tenant), tor=values(tor), account=values(account), subject=values(subject), destination=values(destination), cost=values(cost), timespans=values(timespans), source=values(source), cost_time=now()",
 		utils.TBL_COST_DETAILS,
-		utils.FSCgrId(uuid),
-		uuid,
+		cgrid,
 		cc.Direction,
 		cc.Tenant,
-		cc.TOR,
+		cc.Category,
 		cc.Account,
 		cc.Subject,
 		cc.Destination,
@@ -492,16 +491,16 @@ func (self *SQLStorage) LogCallCost(uuid, source, runid string, cc *CallCost) (e
 }
 
 func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	qry := fmt.Sprintf("SELECT cgrid, accid, direction, tenant, tor, account, subject, destination, cost, timespans, source  FROM %s WHERE cgrid='%s' AND runid='%s'",
+	qry := fmt.Sprintf("SELECT cgrid, direction, tenant, tor, account, subject, destination, cost, timespans, source  FROM %s WHERE cgrid='%s' AND runid='%s'",
 		utils.TBL_COST_DETAILS, cgrid, runid)
 	if len(source) != 0 {
 		qry += fmt.Sprintf(" AND source='%s'", source)
 	}
 	row := self.Db.QueryRow(qry)
-	var accid, src string
+	var src string
 	var timespansJson string
 	cc = &CallCost{Cost: -1}
-	err = row.Scan(&cgrid, &accid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
+	err = row.Scan(&cgrid, &cc.Direction, &cc.Tenant, &cc.Category, &cc.Account, &cc.Subject,
 		&cc.Destination, &cc.Cost, &timespansJson, &src)
 	if len(timespansJson) == 0 { // No costs returned
 		return nil, nil
@@ -577,10 +576,10 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // Return a slice of CDRs from storDb using optional filters.a
 // ignoreErr - do not consider cdrs with rating errors
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
-func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqTypes, directions, tenants, tors, accounts, subjects, destPrefixes []string,
+func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqTypes, directions, tenants, tors, accounts, subjects, destPrefixes []string, orderIdStart, orderIdEnd int64,
 	timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
-	q := bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,setup_time,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS))
+	q := bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,accid,cdrhost,cdrsource,reqtype,direction,tenant,tor,account,%s.subject,destination,setup_time,answer_time,duration,extra_fields,runid,cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid", utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS))
 	fltr := new(bytes.Buffer)
 	if len(cgrIds) != 0 {
 		qIds := bytes.NewBufferString(" (")
@@ -736,6 +735,18 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 		}
 		fltr.Write(qIds.Bytes())
 	}
+	if orderIdStart != 0 {
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.WriteString(fmt.Sprintf(" %s.tbid>=%d", utils.TBL_CDRS_PRIMARY, orderIdStart))
+	}
+	if orderIdEnd != 0 {
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.WriteString(fmt.Sprintf(" %s.tbid<%d", utils.TBL_CDRS_PRIMARY, orderIdEnd))
+	}
 	if !timeStart.IsZero() {
 		if fltr.Len() != 0 {
 			fltr.WriteString(" AND")
@@ -775,20 +786,20 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 		var cgrid, accid, cdrhost, cdrsrc, reqtype, direction, tenant, tor, account, subject, destination string
 		var extraFields []byte
 		var setupTime, answerTime time.Time
-		var duration int64
 		var runid sql.NullString // So we can export unmediated CDRs
+		var orderid, duration int64
 		var cost sql.NullFloat64 // So we can export unmediated CDRs
 		var extraFieldsMp map[string]string
-		if err := rows.Scan(&cgrid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &setupTime, &answerTime, &duration,
+		if err := rows.Scan(&cgrid, &orderid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &tor, &account, &subject, &destination, &setupTime, &answerTime, &duration,
 			&extraFields, &runid, &cost); err != nil {
 			return nil, err
 		}
 		if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
-			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %s, error: %s", cgrid, runid, err.Error())
+			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid, runid, err.Error())
 		}
 		storCdr := &utils.StoredCdr{
-			CgrId: cgrid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
-			TOR: tor, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(duration),
+			CgrId: cgrid, OrderId: orderid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
+			Category: tor, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(duration),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
 		cdrs = append(cdrs, storCdr)
@@ -993,7 +1004,7 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 }
 
 func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
-	q := fmt.Sprintf("SELECT loadid,tenant,tor,direction,subject,activation_time,rating_plan_id,fallback_subjects FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT loadid,direction,tenant,tor,subject,activation_time,rating_plan_id,fallback_subjects FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_RATE_PROFILES, qryRpf.TPid)
 	if len(qryRpf.LoadId) != 0 {
 		q += fmt.Sprintf(" AND loadid='%s'", qryRpf.LoadId)
@@ -1001,8 +1012,8 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 	if len(qryRpf.Tenant) != 0 {
 		q += fmt.Sprintf(" AND tenant='%s'", qryRpf.Tenant)
 	}
-	if len(qryRpf.TOR) != 0 {
-		q += fmt.Sprintf(" AND tor='%s'", qryRpf.TOR)
+	if len(qryRpf.Category) != 0 {
+		q += fmt.Sprintf(" AND tor='%s'", qryRpf.Category)
 	}
 	if len(qryRpf.Direction) != 0 {
 		q += fmt.Sprintf(" AND direction='%s'", qryRpf.Direction)
@@ -1021,7 +1032,7 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 		if err := rows.Scan(&rcvLoadId, &tenant, &tor, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
 			return nil, err
 		}
-		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Tenant: tenant, TOR: tor, Direction: direction, Subject: subject}
+		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Tenant: tenant, Category: tor, Direction: direction, Subject: subject}
 		if existingRp, has := rpfs[rp.KeyId()]; !has {
 			rp.RatingPlanActivations = []*utils.TPRatingActivation{
 				&utils.TPRatingActivation{ActivationTime: activation_time, RatingPlanId: rating_plan_tag, FallbackSubjects: fallback_subjects}}
@@ -1126,7 +1137,8 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 	for rows.Next() {
 		var threshold, weight float64
 		var tpid, tag, balances_type, direction, destinations_tag, actions_tag, thresholdType string
-		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &thresholdType, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
+		var recurrent bool
+		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &thresholdType, &threshold, &recurrent, &destinations_tag, &actions_tag, &weight); err != nil {
 			return nil, err
 		}
 

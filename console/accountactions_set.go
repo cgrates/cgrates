@@ -18,42 +18,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"fmt"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	commands["set_accountactions"] = &CmdSetAccountActions{}
+	c := &CmdSetAccountActions{
+		name:      "accountactions_set",
+		rpcMethod: "ApierV1.SetAccountActions",
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
 type CmdSetAccountActions struct {
+	name      string
 	rpcMethod string
 	rpcParams *utils.TPAccountActions
 	rpcResult string
+	*CommandExecuter
 }
 
-// name should be exec's name
-func (self *CmdSetAccountActions) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] set_accountactions <tpid> <loadid> <tenant> <account>")
-}
-
-// set param defaults
-func (self *CmdSetAccountActions) defaults() error {
-	self.rpcMethod = "ApierV1.SetAccountActions"
-	return nil
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdSetAccountActions) FromArgs(args []string) error {
-	if len(args) < 3 {
-		return fmt.Errorf(self.Usage(""))
-	}
-	// Args look OK, set defaults before going further
-	self.defaults()
-	self.rpcParams = &utils.TPAccountActions{TPid: args[2], LoadId: args[3], Tenant: args[4], Account: args[5], Direction: "*out"}
-	return nil
+func (self *CmdSetAccountActions) Name() string {
+	return self.name
 }
 
 func (self *CmdSetAccountActions) RpcMethod() string {
@@ -61,6 +47,9 @@ func (self *CmdSetAccountActions) RpcMethod() string {
 }
 
 func (self *CmdSetAccountActions) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &utils.TPAccountActions{}
+	}
 	return self.rpcParams
 }
 

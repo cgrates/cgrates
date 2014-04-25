@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/balancer2go"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 type Responder struct {
@@ -46,7 +48,11 @@ func (rs *Responder) GetCost(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.GetCost()
 		})
-		*reply, err = *r, e
+		if e != nil {
+			return e
+		} else if r != nil {
+			*reply = *r
+		}
 	}
 	return
 }
@@ -59,7 +65,11 @@ func (rs *Responder) Debit(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.Debit()
 		})
-		*reply, err = *r, e
+		if e != nil {
+			return e
+		} else if r != nil {
+			*reply = *r
+		}
 	}
 	return
 }
@@ -72,7 +82,11 @@ func (rs *Responder) MaxDebit(arg CallDescriptor, reply *CallCost) (err error) {
 		r, e := AccLock.GuardGetCost(arg.GetAccountKey(), func() (*CallCost, error) {
 			return arg.MaxDebit()
 		})
-		*reply, err = *r, e
+		if e != nil {
+			return e
+		} else if r != nil {
+			*reply = *r
+		}
 	}
 	return
 }
@@ -100,6 +114,17 @@ func (rs *Responder) GetMaxSessionTime(arg CallDescriptor, reply *float64) (err 
 		*reply, err = r, e
 	}
 	return
+}
+
+func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
+	// ToDo: Make it work with balancer if needed
+
+	if dcsH, err := HandleGetDerivedChargers(accountingStorage, config.CgrConfig(), attrs); err != nil {
+		return err
+	} else if dcsH != nil {
+		*dcs = dcsH
+	}
+	return nil
 }
 
 func (rs *Responder) FlushCache(arg CallDescriptor, reply *float64) (err error) {
@@ -138,53 +163,6 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	defer func() { rs.ExitChan <- true }()
 	*reply = "Done!"
 	return
-}
-
-func (rs *Responder) GetMonetary(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, CREDIT, reply)
-	return err
-}
-
-func (rs *Responder) GetSMS(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, SMS, reply)
-	return err
-}
-
-func (rs *Responder) GetInternet(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, DATA, reply)
-	return err
-}
-
-func (rs *Responder) GetInternetTime(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, DATA_TIME, reply)
-	return err
-}
-
-func (rs *Responder) GetMinutes(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, MINUTES, reply)
-	return err
-}
-
-// Get balance
-func (rs *Responder) getBalance(arg *CallDescriptor, balanceId string, reply *CallCost) (err error) {
-	if rs.Bal != nil {
-		return errors.New("No balancer supported for this command right now")
-	}
-	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.Account
-	userBalance, err := accountingStorage.GetAccount(ubKey)
-	if err != nil {
-		return err
-	}
-	if balance, balExists := userBalance.BalanceMap[balanceId+arg.Direction]; !balExists {
-		// No match, balanceId not found
-		return errors.New("-BALANCE_NOT_FOUND")
-	} else {
-		reply.Tenant = arg.Tenant
-		reply.Account = arg.Account
-		reply.Direction = arg.Direction
-		reply.Cost = balance.GetTotalValue()
-	}
-	return nil
 }
 
 /*
@@ -307,6 +285,7 @@ type Connector interface {
 	MaxDebit(CallDescriptor, *CallCost) error
 	RefundIncrements(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
+	GetDerivedChargers(utils.AttrDerivedChargers, *utils.DerivedChargers) error
 }
 
 type RPCClientConnector struct {
@@ -331,4 +310,8 @@ func (rcc *RPCClientConnector) RefundIncrements(cd CallDescriptor, resp *float64
 
 func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float64) error {
 	return rcc.Client.Call("Responder.GetMaxSessionTime", cd, resp)
+}
+
+func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
+	return rcc.Client.Call("ApierV1.DerivedChargers", attrs, dcs)
 }

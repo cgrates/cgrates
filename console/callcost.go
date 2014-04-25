@@ -19,53 +19,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"fmt"
-
+	"github.com/cgrates/cgrates/apier"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func init() {
-	commands["rem_cdrs"] = &CmdRemCdrs{}
+	c := &CmdGetCallCost{
+		name:      "callcost",
+		rpcMethod: "ApierV1.GetCallCostLog",
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdRemCdrs struct {
+type CmdGetCallCost struct {
+	name      string
 	rpcMethod string
-	rpcParams *utils.AttrRemCdrs
+	rpcParams *apier.AttrGetCallCost
 	rpcResult string
+	*CommandExecuter
 }
 
-// name should be exec's name
-func (self *CmdRemCdrs) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] rem_cdrs <cgrid> [<cdrid> [<cdrid>...]]")
+func (self *CmdGetCallCost) Name() string {
+	return self.name
 }
 
-// set param defaults
-func (self *CmdRemCdrs) defaults() error {
-	self.rpcMethod = "ApierV1.RemCdrs"
-	self.rpcParams = &utils.AttrRemCdrs{}
-	return nil
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdRemCdrs) FromArgs(args []string) error {
-	if len(args) < 3 {
-		return fmt.Errorf(self.Usage(""))
-	}
-	// Args look OK, set defaults before going further
-	self.defaults()
-	self.rpcParams.CgrIds = args[2:]
-	return nil
-}
-
-func (self *CmdRemCdrs) RpcMethod() string {
+func (self *CmdGetCallCost) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdRemCdrs) RpcParams() interface{} {
+func (self *CmdGetCallCost) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &apier.AttrGetCallCost{RunId: utils.DEFAULT_RUNID}
+	}
 	return self.rpcParams
 }
 
-func (self *CmdRemCdrs) RpcResult() interface{} {
+func (self *CmdGetCallCost) RpcResult() interface{} {
 	return &self.rpcResult
 }

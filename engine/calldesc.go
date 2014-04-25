@@ -108,15 +108,16 @@ The input stucture that contains call information.
 */
 type CallDescriptor struct {
 	Direction                             string
-	TOR                                   string
+	Category                              string
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
 	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
-	CallDuration                          time.Duration // the call duration so far (till TimeEnd)
+	DurationIndex                         time.Duration // the call duration so far (till TimeEnd)
 	//Amount                                float64
 	FallbackSubject string // the subject to check for destination if not found on primary subject
 	RatingInfos     RatingInfos
 	Increments      Increments
+	Tor             string
 	account         *Account
 }
 
@@ -124,8 +125,8 @@ func (cd *CallDescriptor) ValidateCallData() error {
 	if cd.TimeStart.After(cd.TimeEnd) || cd.TimeStart.Equal(cd.TimeEnd) {
 		return errors.New("TimeStart must be strctly before TimeEnd")
 	}
-	if cd.TimeEnd.Sub(cd.TimeStart) < cd.CallDuration {
-		return errors.New("CallDuration must be equal or grater than TimeEnd - TimeStart")
+	if cd.TimeEnd.Sub(cd.TimeStart) < cd.DurationIndex {
+		return errors.New("DurationIndex must be equal or grater than TimeEnd - TimeStart")
 	}
 	return nil
 }
@@ -141,7 +142,7 @@ func (cd *CallDescriptor) getAccount() (ub *Account, err error) {
 		cd.account, err = accountingStorage.GetAccount(cd.GetAccountKey())
 	}
 	if cd.account != nil && cd.account.Disabled {
-		return nil, fmt.Errorf("User %s is disabled", ub.Id)
+		return nil, fmt.Errorf("User %s is disabled", cd.account.Id)
 	}
 	return cd.account, err
 }
@@ -185,7 +186,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 			}
 			if len(ri.FallbackKeys) > 0 {
 				tempCD := &CallDescriptor{
-					TOR:         cd.TOR,
+					Category:    cd.Category,
 					Direction:   cd.Direction,
 					Tenant:      cd.Tenant,
 					Destination: cd.Destination,
@@ -280,7 +281,7 @@ func (cd *CallDescriptor) GetKey(subject string) string {
 		subject = realSubject
 		cd.Subject = realSubject
 	}
-	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, subject)
+	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.Category, subject)
 }
 
 // Returns the key used to retrive the user balance involved in this call
@@ -307,37 +308,39 @@ func (cd *CallDescriptor) GetLCRKey(subj string) string {
 }
 
 // Splits the received timespan into sub time spans according to the activation periods intervals.
-func (cd *CallDescriptor) splitInTimeSpans(firstSpan *TimeSpan) (timespans []*TimeSpan) {
-	if firstSpan == nil {
-		firstSpan = &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration}
-	}
+func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
+	firstSpan := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, DurationIndex: cd.DurationIndex}
+
 	timespans = append(timespans, firstSpan)
 	if len(cd.RatingInfos) == 0 {
 		return
 	}
 
 	firstSpan.ratingInfo = cd.RatingInfos[0]
-	// split on rating plans
-	afterStart, afterEnd := false, false //optimization for multiple activation periods
-	for _, rp := range cd.RatingInfos {
-		if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
-			firstSpan.ratingInfo = rp
-			firstSpan.MatchedSubject = rp.MatchedSubject
-			firstSpan.MatchedPrefix = rp.MatchedPrefix
-			firstSpan.MatchedDestId = rp.MatchedDestId
-		} else {
-			afterStart = true
-			for i := 0; i < len(timespans); i++ {
-				newTs := timespans[i].SplitByRatingPlan(rp)
-				if newTs != nil {
-					timespans = append(timespans, newTs)
-				} else {
-					afterEnd = true
-					break
+	if cd.Tor == MINUTES {
+		// split on rating plans
+		afterStart, afterEnd := false, false //optimization for multiple activation periods
+		for _, rp := range cd.RatingInfos {
+			if !afterStart && !afterEnd && rp.ActivationTime.Before(cd.TimeStart) {
+				firstSpan.ratingInfo = rp
+				firstSpan.MatchedSubject = rp.MatchedSubject
+				firstSpan.MatchedPrefix = rp.MatchedPrefix
+				firstSpan.MatchedDestId = rp.MatchedDestId
+			} else {
+				afterStart = true
+				for i := 0; i < len(timespans); i++ {
+					newTs := timespans[i].SplitByRatingPlan(rp)
+					if newTs != nil {
+						timespans = append(timespans, newTs)
+					} else {
+						afterEnd = true
+						break
+					}
 				}
 			}
 		}
 	}
+
 	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
@@ -387,7 +390,7 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans TimeSpans) []*Time
 			if rateIncrement > ts.GetDuration() {
 				initialDuration := ts.GetDuration()
 				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
-				ts.CallDuration = ts.CallDuration + (rateIncrement - initialDuration)
+				ts.DurationIndex = ts.DurationIndex + (rateIncrement - initialDuration)
 				timespans.RemoveOverlapedFromIndex(i)
 			}
 		}
@@ -405,15 +408,19 @@ func (cd *CallDescriptor) GetDuration() time.Duration {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	if cd.CallDuration < cd.TimeEnd.Sub(cd.TimeStart) {
-		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
+	if cd.DurationIndex < cd.TimeEnd.Sub(cd.TimeStart) {
+		cd.DurationIndex = cd.TimeEnd.Sub(cd.TimeStart)
+	}
+	if cd.Tor == "" {
+		cd.Tor = MINUTES
 	}
 	err := cd.LoadRatingPlans()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("error getting cost for key %s: %v", cd.GetKey(cd.Subject), err))
 		return &CallCost{Cost: -1}, err
 	}
-	timespans := cd.splitInTimeSpans(nil)
+
+	timespans := cd.splitInTimeSpans()
 	cost := 0.0
 
 	for i, ts := range timespans {
@@ -428,7 +435,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
 		Direction:        cd.Direction,
-		TOR:              cd.TOR,
+		Category:         cd.Category,
 		Tenant:           cd.Tenant,
 		Account:          cd.Account,
 		Destination:      cd.Destination,
@@ -436,8 +443,10 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		Cost:             cost,
 		Timespans:        timespans,
 		deductConnectFee: cd.LoopIndex == 0,
+		Tor:              cd.Tor,
 	}
 	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
+	cc.Timespans.Compress()
 	return cc, err
 }
 
@@ -447,8 +456,11 @@ If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
 func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Duration, error) {
-	if origCD.CallDuration < origCD.TimeEnd.Sub(origCD.TimeStart) {
-		origCD.CallDuration = origCD.TimeEnd.Sub(origCD.TimeStart)
+	if origCD.DurationIndex < origCD.TimeEnd.Sub(origCD.TimeStart) {
+		origCD.DurationIndex = origCD.TimeEnd.Sub(origCD.TimeStart)
+	}
+	if origCD.Tor == "" {
+		origCD.Tor = MINUTES
 	}
 	cd := origCD.Clone()
 	//Logger.Debug(fmt.Sprintf("MAX SESSION cd: %+v", cd))
@@ -471,10 +483,6 @@ func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Dura
 		// there are enough minutes for requested interval
 		return initialDuration, nil
 	}
-	// check for zero balance
-	if availableCredit == 0 {
-		return utils.MinDuration(initialDuration, availableDuration), nil
-	}
 	//Logger.Debug(fmt.Sprintf("initial Duration: %v", initialDuration))
 	// we must move the timestart for the interval with the available duration because
 	// that was already checked
@@ -484,6 +492,10 @@ func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Dura
 	cc, err := cd.GetCost()
 	if availableDuration == 0 && cc.deductConnectFee { // only if we did not already used minutes
 		availableCredit -= cc.GetConnectFee()
+	}
+	// check for zero balance
+	if (availableCredit < 0) || (availableCredit == 0 && cc.Cost > 0) {
+		return utils.MinDuration(initialDuration, availableDuration), nil
 	}
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Could not get cost for %s: %s.", cd.GetKey(cd.Subject), err.Error()))
@@ -513,7 +525,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Tor); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				duration, err = cd.getMaxSessionDuration(account)
 				return 0, err
@@ -529,6 +541,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 // from user's money balance.
 func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
 	cc, err = cd.GetCost()
+	cc.Timespans.Decompress()
 	if err != nil {
 		Logger.Err(fmt.Sprintf("<Rater> Error getting cost for account key %v: %v", cd.GetAccountKey(), err))
 		return
@@ -552,6 +565,7 @@ func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
 		cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	}
 	cc.Cost = cost
+	cc.Timespans.Compress()
 	return
 }
 
@@ -561,7 +575,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Tor); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				cc, err = cd.debit(account)
 				return 0, err
@@ -582,7 +596,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Tor); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				if err != nil || remainingDuration == 0 {
@@ -615,7 +629,7 @@ func (cd *CallDescriptor) RefundIncrements() (left float64, err error) {
 				defer accountingStorage.SetAccount(account)
 			}
 		}
-		account.refundIncrement(increment, cd.Direction, true)
+		account.refundIncrement(increment, cd.Direction, cd.Tor, true)
 	}
 	return 0.0, err
 }
@@ -624,7 +638,7 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 	cache2go.XFlush()
 	cache2go.Flush()
 	dataStorage.CacheRating(nil, nil, nil, nil, nil)
-	accountingStorage.CacheAccounting(nil, nil, nil)
+	accountingStorage.CacheAccounting(nil, nil, nil, nil)
 	return nil
 
 }
@@ -633,30 +647,32 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 func (cd *CallDescriptor) CreateCallCost() *CallCost {
 	return &CallCost{
 		Direction:   cd.Direction,
-		TOR:         cd.TOR,
+		Category:    cd.Category,
 		Tenant:      cd.Tenant,
 		Subject:     cd.Subject,
 		Account:     cd.Account,
 		Destination: cd.Destination,
+		Tor:         cd.Tor,
 	}
 }
 
 func (cd *CallDescriptor) Clone() *CallDescriptor {
 	return &CallDescriptor{
-		Direction:    cd.Direction,
-		TOR:          cd.TOR,
-		Tenant:       cd.Tenant,
-		Subject:      cd.Subject,
-		Account:      cd.Account,
-		Destination:  cd.Destination,
-		TimeStart:    cd.TimeStart,
-		TimeEnd:      cd.TimeEnd,
-		LoopIndex:    cd.LoopIndex,
-		CallDuration: cd.CallDuration,
+		Direction:     cd.Direction,
+		Category:      cd.Category,
+		Tenant:        cd.Tenant,
+		Subject:       cd.Subject,
+		Account:       cd.Account,
+		Destination:   cd.Destination,
+		TimeStart:     cd.TimeStart,
+		TimeEnd:       cd.TimeEnd,
+		LoopIndex:     cd.LoopIndex,
+		DurationIndex: cd.DurationIndex,
 		//		Amount:          cd.Amount,
 		FallbackSubject: cd.FallbackSubject,
 		//RatingInfos:     cd.RatingInfos,
 		//Increments:      cd.Increments,
+		Tor: cd.Tor,
 	}
 }
 

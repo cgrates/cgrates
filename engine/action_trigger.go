@@ -21,8 +21,9 @@ package engine
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cgrates/cgrates/utils"
 	"sort"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 type ActionTrigger struct {
@@ -31,6 +32,7 @@ type ActionTrigger struct {
 	Direction      string
 	ThresholdType  string //*min_counter, *max_counter, *min_balance, *max_balance
 	ThresholdValue float64
+	Recurrent      bool // reset eexcuted flag each run
 	DestinationId  string
 	Weight         float64
 	ActionsId      string
@@ -67,7 +69,7 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 			atLeastOneActionExecuted = true
 		}
 	}
-	if !atLeastOneActionExecuted {
+	if !atLeastOneActionExecuted || at.Recurrent {
 		at.Executed = false
 	}
 	storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)

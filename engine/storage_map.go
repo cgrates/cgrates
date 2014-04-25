@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriems World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []str
 	return nil
 }
 
-func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) error {
+func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) error {
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX) // Forced until we can fine tune it
 	}
@@ -113,6 +113,9 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) error 
 	}
 	if alsKeys == nil {
 		cache2go.RemPrefixKey(ACC_ALIAS_PREFIX)
+	}
+	if dcsKeys == nil {
+		cache2go.RemPrefixKey(DERIVEDCHARGERS_PREFIX)
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, ACTION_PREFIX) {
@@ -130,6 +133,12 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys []string) error 
 		if strings.HasPrefix(k, ACC_ALIAS_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetAccAlias(k[len(ACC_ALIAS_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+		if strings.HasPrefix(k, DERIVEDCHARGERS_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetDerivedChargers(k[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
 				return err
 			}
 		}
@@ -461,14 +470,37 @@ func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlan, err erro
 	return
 }
 
-func (ms *MapStorage) LogCallCost(uuid, source, runid string, cc *CallCost) error {
-	result, err := ms.ms.Marshal(cc)
-	ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+uuid] = result
+func (ms *MapStorage) GetDerivedChargers(key string, checkDb bool) (dcs utils.DerivedChargers, err error) {
+	key = DERIVEDCHARGERS_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(utils.DerivedChargers), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		err = ms.ms.Unmarshal(values, &dcs)
+		cache2go.Cache(key, dcs)
+	} else {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	return
+}
+
+func (ms *MapStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) error {
+	result, err := ms.ms.Marshal(dcs)
+	ms.dict[DERIVEDCHARGERS_PREFIX+key] = result
 	return err
 }
 
-func (ms *MapStorage) GetCallCostLog(uuid, source, runid string) (cc *CallCost, err error) {
-	if values, ok := ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+uuid]; ok {
+func (ms *MapStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {
+	result, err := ms.ms.Marshal(cc)
+	ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid] = result
+	return err
+}
+
+func (ms *MapStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
+	if values, ok := ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid]; ok {
 		err = ms.ms.Unmarshal(values, &cc)
 	} else {
 		return nil, errors.New("not found")

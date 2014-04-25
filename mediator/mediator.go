@@ -1,14 +1,14 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
-This program is free software: you can redistribute it and/or modify
+This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITH*out ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -35,10 +35,6 @@ func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engi
 		cdrDb:     cdrDb,
 		cgrCfg:    cfg,
 	}
-	// Parse config
-	if err := m.parseConfig(); err != nil {
-		return nil, err
-	}
 	return m, nil
 }
 
@@ -47,22 +43,6 @@ type Mediator struct {
 	logDb     engine.LogStorage
 	cdrDb     engine.CdrStorage
 	cgrCfg    *config.CGRConfig
-}
-
-func (self *Mediator) parseConfig() error {
-	cfgVals := [][]string{self.cgrCfg.MediatorSubjectFields, self.cgrCfg.MediatorReqTypeFields, self.cgrCfg.MediatorDirectionFields,
-		self.cgrCfg.MediatorTenantFields, self.cgrCfg.MediatorTORFields, self.cgrCfg.MediatorAccountFields, self.cgrCfg.MediatorDestFields,
-		self.cgrCfg.MediatorSetupTimeFields, self.cgrCfg.MediatorAnswerTimeFields, self.cgrCfg.MediatorDurationFields}
-
-	// All other configured fields must match the length of reference fields
-	for iCfgVal := range cfgVals {
-		if len(self.cgrCfg.MediatorRunIds) != len(cfgVals[iCfgVal]) {
-			// Make sure we have everywhere the length of runIds
-			return errors.New("Inconsistent lenght of mediator fields.")
-		}
-	}
-
-	return nil
 }
 
 // Retrive the cost from logging database
@@ -85,16 +65,16 @@ func (self *Mediator) getCostsFromRater(cdr *utils.StoredCdr) (*engine.CallCost,
 		return cc, nil
 	}
 	cd := engine.CallDescriptor{
-		Direction:    "*out", //record[m.directionFields[runIdx]] TODO: fix me
-		Tenant:       cdr.Tenant,
-		TOR:          cdr.TOR,
-		Subject:      cdr.Subject,
-		Account:      cdr.Account,
-		Destination:  cdr.Destination,
-		TimeStart:    cdr.AnswerTime,
-		TimeEnd:      cdr.AnswerTime.Add(cdr.Duration),
-		LoopIndex:    0,
-		CallDuration: cdr.Duration,
+		Direction:     "*out", //record[m.directionFields[runIdx]] TODO: fix me
+		Tenant:        cdr.Tenant,
+		Category:      cdr.Category,
+		Subject:       cdr.Subject,
+		Account:       cdr.Account,
+		Destination:   cdr.Destination,
+		TimeStart:     cdr.AnswerTime,
+		TimeEnd:       cdr.AnswerTime.Add(cdr.Duration),
+		LoopIndex:     0,
+		DurationIndex: cdr.Duration,
 	}
 	if cdr.ReqType == utils.PSEUDOPREPAID {
 		err = self.connector.Debit(cd, cc)
@@ -105,7 +85,7 @@ func (self *Mediator) getCostsFromRater(cdr *utils.StoredCdr) (*engine.CallCost,
 		self.logDb.LogError(cdr.CgrId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, err.Error())
 	} else {
 		// If the mediator calculated a price it will write it to logdb
-		self.logDb.LogCallCost(cdr.AccId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, cc)
+		self.logDb.LogCallCost(utils.Sha1(cdr.AccId, cdr.SetupTime.String()), engine.MEDIATOR_SOURCE, cdr.MediationRunId, cc)
 	}
 	return cc, err
 }
@@ -134,15 +114,20 @@ func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 	if err != nil {
 		return err
 	}
-	cdrs := []*utils.StoredCdr{rtCdr} // Start with initial dbcdr, will add here all to be mediated
-	for runIdx, runId := range self.cgrCfg.MediatorRunIds {
-		forkedCdr, err := dbcdr.AsStoredCdr(self.cgrCfg.MediatorRunIds[runIdx], self.cgrCfg.MediatorReqTypeFields[runIdx], self.cgrCfg.MediatorDirectionFields[runIdx],
-			self.cgrCfg.MediatorTenantFields[runIdx], self.cgrCfg.MediatorTORFields[runIdx], self.cgrCfg.MediatorAccountFields[runIdx],
-			self.cgrCfg.MediatorSubjectFields[runIdx], self.cgrCfg.MediatorDestFields[runIdx],
-			self.cgrCfg.MediatorSetupTimeFields[runIdx], self.cgrCfg.MediatorAnswerTimeFields[runIdx],
-			self.cgrCfg.MediatorDurationFields[runIdx], []string{}, true)
+	cdrs := []*utils.StoredCdr{rtCdr}            // Start with initial dbcdr, will add here all to be mediated
+	attrsDC := utils.AttrDerivedChargers{Tenant: rtCdr.Tenant, Tor: rtCdr.Category, Direction: rtCdr.Direction,
+		Account: rtCdr.Account, Subject: rtCdr.Subject}
+	var dcs utils.DerivedChargers
+	if err := self.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
+		errText := fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", rtCdr.CgrId, err.Error())
+		engine.Logger.Err(errText)
+		return errors.New(errText)
+	}
+	for _, dc := range dcs {
+		forkedCdr, err := dbcdr.AsStoredCdr(dc.RunId, dc.ReqTypeField, dc.DirectionField,
+			dc.TenantField, dc.TorField, dc.AccountField, dc.SubjectField, dc.DestinationField, dc.SetupTimeField, dc.AnswerTimeField, dc.DurationField, []string{}, true)
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis
-			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: dbcdr.GetCgrId(), MediationRunId: runId, Cost: -1.0}, err.Error()) // Cannot fork CDR, important just runid and error
+			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: dbcdr.GetCgrId(), MediationRunId: dc.RunId, Cost: -1.0}, err.Error()) // Cannot fork CDR, important just runid and error
 			continue
 		}
 		cdrs = append(cdrs, forkedCdr)
@@ -161,7 +146,7 @@ func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 }
 
 func (self *Mediator) RateCdrs(timeStart, timeEnd time.Time, rerateErrors, rerateRated bool) error {
-	cdrs, err := self.cdrDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, timeStart, timeEnd, !rerateErrors, !rerateRated)
+	cdrs, err := self.cdrDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, !rerateErrors, !rerateRated)
 	if err != nil {
 		return err
 	}

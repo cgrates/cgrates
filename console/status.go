@@ -18,32 +18,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"fmt"
-)
-
 func init() {
-	commands["status"] = &CmdStatus{}
+	c := &CmdStatus{
+		name:      "status",
+		rpcMethod: "Responder.Status",
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 type CmdStatus struct {
+	name      string
 	rpcMethod string
-	rpcParams string
+	rpcParams *StringWrapper
 	rpcResult string
+	*CommandExecuter
 }
 
-func (self *CmdStatus) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: %s [cfg_opts...{-h}] status", name)
-}
-
-func (self *CmdStatus) defaults() error {
-	self.rpcMethod = "Responder.Status"
-	return nil
-}
-
-func (self *CmdStatus) FromArgs(args []string) error {
-	self.defaults()
-	return nil
+func (self *CmdStatus) Name() string {
+	return self.name
 }
 
 func (self *CmdStatus) RpcMethod() string {
@@ -51,9 +44,16 @@ func (self *CmdStatus) RpcMethod() string {
 }
 
 func (self *CmdStatus) RpcParams() interface{} {
-	return &self.rpcParams
+	if self.rpcParams == nil {
+		self.rpcParams = &StringWrapper{}
+	}
+	return self.rpcParams
 }
 
 func (self *CmdStatus) RpcResult() interface{} {
 	return &self.rpcResult
+}
+
+func (self *CmdStatus) ClientArgs() (args []string) {
+	return
 }

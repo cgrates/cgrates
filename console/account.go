@@ -19,46 +19,31 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"fmt"
-
 	"github.com/cgrates/cgrates/apier"
 	"github.com/cgrates/cgrates/engine"
 )
 
 func init() {
-	commands["get_account"] = &CmdGetAccount{}
+	c := &CmdGetAccount{
+		name:      "account",
+		rpcMethod: "ApierV1.GetAccount",
+		rpcParams: &apier.AttrGetAccount{Direction: "*out"},
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
 type CmdGetAccount struct {
+	name      string
 	rpcMethod string
 	rpcParams *apier.AttrGetAccount
-	rpcResult *engine.Account
+	rpcResult engine.Account
+	*CommandExecuter
 }
 
-// name should be exec's name
-func (self *CmdGetAccount) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_account <tenant> <account>")
-}
-
-// set param defaults
-func (self *CmdGetAccount) defaults() error {
-	self.rpcMethod = "ApierV1.GetAccount"
-	self.rpcParams = &apier.AttrGetAccount{BalanceType: engine.CREDIT}
-	self.rpcParams.Direction = "*out"
-	return nil
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdGetAccount) FromArgs(args []string) error {
-	if len(args) < 4 {
-		return fmt.Errorf(self.Usage(""))
-	}
-	// Args look OK, set defaults before going further
-	self.defaults()
-	self.rpcParams.Tenant = args[2]
-	self.rpcParams.Account = args[3]
-	return nil
+func (self *CmdGetAccount) Name() string {
+	return self.name
 }
 
 func (self *CmdGetAccount) RpcMethod() string {
@@ -66,6 +51,9 @@ func (self *CmdGetAccount) RpcMethod() string {
 }
 
 func (self *CmdGetAccount) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &apier.AttrGetAccount{Direction: "*out"}
+	}
 	return self.rpcParams
 }
 

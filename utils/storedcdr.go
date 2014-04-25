@@ -1,14 +1,14 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
-This program is free software: you can redistribute it and/or modify
+This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITH*out ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -35,7 +35,7 @@ func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
 	rtCdr.ReqType = rawcdr.GetReqType()
 	rtCdr.Direction = rawcdr.GetDirection()
 	rtCdr.Tenant = rawcdr.GetTenant()
-	rtCdr.TOR = rawcdr.GetTOR()
+	rtCdr.Category = rawcdr.GetTOR()
 	rtCdr.Account = rawcdr.GetAccount()
 	rtCdr.Subject = rawcdr.GetSubject()
 	rtCdr.Destination = rawcdr.GetDestination()
@@ -55,13 +55,14 @@ func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
 // Rated CDR as extracted from StorDb. Kinda standard of internal CDR, complies to CDR interface also
 type StoredCdr struct {
 	CgrId          string
+	OrderId        int64 // Stor order id used as export order id
 	AccId          string
 	CdrHost        string
 	CdrSource      string
 	ReqType        string
 	Direction      string
 	Tenant         string
-	TOR            string
+	Category       string
 	Account        string
 	Subject        string
 	Destination    string
@@ -108,7 +109,7 @@ func (storedCdr *StoredCdr) GetDestination() string {
 }
 
 func (storedCdr *StoredCdr) GetTOR() string {
-	return storedCdr.TOR
+	return storedCdr.Category
 }
 
 func (storedCdr *StoredCdr) GetTenant() string {
@@ -157,7 +158,7 @@ func (storedCdr *StoredCdr) AsRawCdrHttpForm() url.Values {
 	v.Set(REQTYPE, storedCdr.ReqType)
 	v.Set(DIRECTION, storedCdr.Direction)
 	v.Set(TENANT, storedCdr.Tenant)
-	v.Set(TOR, storedCdr.TOR)
+	v.Set(Category, storedCdr.Category)
 	v.Set(ACCOUNT, storedCdr.Account)
 	v.Set(SUBJECT, storedCdr.Subject)
 	v.Set(DESTINATION, storedCdr.Destination)
@@ -175,6 +176,8 @@ func (storedCdr *StoredCdr) ExportFieldValue(fldName string) string {
 	switch fldName {
 	case CGRID:
 		return storedCdr.CgrId
+	case ORDERID:
+		return strconv.FormatInt(storedCdr.OrderId, 10)
 	case ACCID:
 		return storedCdr.AccId
 	case CDRHOST:
@@ -187,8 +190,8 @@ func (storedCdr *StoredCdr) ExportFieldValue(fldName string) string {
 		return storedCdr.Direction
 	case TENANT:
 		return storedCdr.Tenant
-	case TOR:
-		return storedCdr.TOR
+	case Category:
+		return storedCdr.Category
 	case ACCOUNT:
 		return storedCdr.Account
 	case SUBJECT:

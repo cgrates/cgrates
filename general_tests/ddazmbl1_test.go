@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package engine
+package general_tests
 
 import (
 	"testing"
@@ -30,7 +30,7 @@ import (
 var ratingDb engine.RatingStorage
 var acntDb engine.AccountingStorage
 
-func init() {
+func TestSetStorage(t *testing.T) {
 	ratingDb, _ = engine.NewMapStorageJson()
 	engine.SetRatingStorage(ratingDb)
 	acntDb, _ = engine.NewMapStorageJson()
@@ -48,16 +48,18 @@ RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8`
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5`
 	ratingPlans := `RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,ALWAYS,10
 RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
-	ratingProfiles := `cgrates.org,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
-cgrates.org,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
+	ratingProfiles := `*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_UK,
+*out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	sharedGroups := ``
 	actions := `TOPUP10_AC,*topup_reset,*monetary,*out,10,*unlimited,*any,,10,,,10
-TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10`
+TOPUP10_AC1,*topup_reset,*call_duration,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,`
-	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions)
+	derivedCharges := ``
+	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
+		sharedGroups, actions, actionPlans, actionTriggers, accountActions, derivedCharges)
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}
@@ -91,14 +93,19 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	if err := csvr.LoadAccountActions(); err != nil {
 		t.Fatal(err)
 	}
+	if err := csvr.LoadDerivedChargers(); err != nil {
+		t.Fatal(err)
+	}
 	csvr.WriteToDatabase(false, false)
 	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")
 	}
+
 	ratingDb.CacheRating(nil, nil, nil, nil, nil)
-	acntDb.CacheAccounting(nil, nil, nil)
+	acntDb.CacheAccounting(nil, nil, nil, nil)
+
 	if cachedDests := cache2go.CountEntries(engine.DESTINATION_PREFIX); cachedDests != 2 {
 		t.Error("Wrong number of cached destinations found", cachedDests)
 	}
@@ -115,7 +122,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 
 func TestExecuteActions(t *testing.T) {
 	scheduler.NewScheduler().LoadActionTimings(acntDb)
-	time.Sleep(time.Duration(1) * time.Microsecond) // Give time to scheduler to topup the account
+	time.Sleep(time.Millisecond) // Give time to scheduler to topup the account
 	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12345"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
@@ -130,7 +137,7 @@ func TestExecuteActions(t *testing.T) {
 func TestDebit(t *testing.T) {
 	cd := &engine.CallDescriptor{
 		Direction:   "*out",
-		TOR:         "call",
+		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "12345",
 		Account:     "12345",

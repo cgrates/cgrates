@@ -30,6 +30,7 @@ import (
 // Session type holding the call information fields, a session delegate for specific
 // actions and a channel to signal end of the debit loop.
 type Session struct {
+	cgrid          string
 	uuid           string
 	stopDebit      chan bool
 	sessionManager SessionManager
@@ -44,45 +45,33 @@ type SessionRun struct {
 }
 
 // Creates a new session and in case of prepaid starts the debit loop for each of the session runs individually
-func NewSession(ev Event, sm SessionManager) *Session {
-	s := &Session{uuid: ev.GetUUID(),
+func NewSession(ev Event, sm SessionManager, dcs utils.DerivedChargers) *Session {
+	s := &Session{cgrid: ev.GetCgrId(),
+		uuid:           ev.GetUUID(),
 		stopDebit:      make(chan bool),
 		sessionManager: sm,
 		sessionRuns:    make([]*SessionRun, 0),
 	}
-	runIds := append([]string{utils.DEFAULT_RUNID}, cfg.SMRunIds...) // Prepend default runid to extra configured for session manager
-	for idx, runId := range runIds {                                 // Create the SessionRuns here
-		var reqTypeFld, directionFld, tenantFld, torFld, actFld, subjFld, dstFld, aTimeFld string
-		if idx != 0 { // Take fields out of config, default ones are automatically handled as empty
-			idxCfg := idx - 1 // In configuration we did not prepend values
-			reqTypeFld = cfg.SMReqTypeFields[idxCfg]
-			directionFld = cfg.SMDirectionFields[idxCfg]
-			tenantFld = cfg.SMTenantFields[idxCfg]
-			torFld = cfg.SMTORFields[idxCfg]
-			actFld = cfg.SMAccountFields[idxCfg]
-			subjFld = cfg.SMSubjectFields[idxCfg]
-			dstFld = cfg.SMDestFields[idxCfg]
-			aTimeFld = cfg.SMAnswerTimeFields[idxCfg]
-		}
-		startTime, err := ev.GetAnswerTime(aTimeFld)
+	for _, dc := range dcs {
+		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
 		if err != nil {
 			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
-			startTime = time.Now()
+			return nil
 		}
 		cd := &engine.CallDescriptor{
-			Direction:   ev.GetDirection(directionFld),
-			Tenant:      ev.GetTenant(tenantFld),
-			TOR:         ev.GetTOR(torFld),
-			Subject:     ev.GetSubject(subjFld),
-			Account:     ev.GetAccount(actFld),
-			Destination: ev.GetDestination(dstFld),
+			Direction:   ev.GetDirection(dc.DirectionField),
+			Tenant:      ev.GetTenant(dc.TenantField),
+			Category:    ev.GetCategory(dc.TorField),
+			Subject:     ev.GetSubject(dc.SubjectField),
+			Account:     ev.GetAccount(dc.AccountField),
+			Destination: ev.GetDestination(dc.DestinationField),
 			TimeStart:   startTime}
 		sr := &SessionRun{
-			runId:          runId,
+			runId:          dc.RunId,
 			callDescriptor: cd,
 		}
 		s.sessionRuns = append(s.sessionRuns, sr)
-		if ev.GetReqType(reqTypeFld) == utils.PREPAID {
+		if ev.GetReqType(dc.ReqTypeField) == utils.PREPAID {
 			go s.debitLoop(len(s.sessionRuns) - 1) // Send index of the just appended sessionRun
 		}
 	}
@@ -108,7 +97,7 @@ func (s *Session) debitLoop(runIdx int) {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
 		nextCd.LoopIndex = index
-		nextCd.CallDuration += debitPeriod // first presumed duration
+		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := &engine.CallCost{}
 		if err := s.sessionManager.MaxDebit(&nextCd, cc); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
@@ -123,8 +112,8 @@ func (s *Session) debitLoop(runIdx int) {
 		s.sessionRuns[runIdx].callCosts = append(s.sessionRuns[runIdx].callCosts, cc)
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 		// update call duration with real debited duration
-		nextCd.CallDuration -= debitPeriod
-		nextCd.CallDuration += nextCd.GetDuration()
+		nextCd.DurationIndex -= debitPeriod
+		nextCd.DurationIndex += nextCd.GetDuration()
 		time.Sleep(cc.GetDuration())
 		index++
 	}
@@ -140,7 +129,7 @@ func (s *Session) Close(ev Event) {
 	if _, err := ev.GetEndTime(); err != nil {
 		engine.Logger.Err("Error parsing answer event stop time.")
 		for idx := range s.sessionRuns {
-			s.sessionRuns[idx].callDescriptor.TimeEnd = s.sessionRuns[idx].callDescriptor.TimeStart.Add(s.sessionRuns[idx].callDescriptor.CallDuration)
+			s.sessionRuns[idx].callDescriptor.TimeEnd = s.sessionRuns[idx].callDescriptor.TimeStart.Add(s.sessionRuns[idx].callDescriptor.DurationIndex)
 		}
 	}
 	s.SaveOperations()
@@ -169,7 +158,7 @@ func (s *Session) SaveOperations() {
 			if s.sessionManager.GetDbLogger() == nil {
 				engine.Logger.Err("<SessionManager> Error: no connection to logger database, cannot save costs")
 			}
-			s.sessionManager.GetDbLogger().LogCallCost(s.uuid, engine.SESSION_MANAGER_SOURCE, sr.runId, firstCC)
+			s.sessionManager.GetDbLogger().LogCallCost(s.cgrid, engine.SESSION_MANAGER_SOURCE, sr.runId, firstCC)
 		}
 	}()
 }

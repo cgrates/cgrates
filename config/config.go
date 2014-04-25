@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -54,112 +54,92 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	RatingDBType             string
-	RatingDBHost             string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	RatingDBPort             string // The port to bind to.
-	RatingDBName             string // The name of the database to connect to.
-	RatingDBUser             string // The user to sign in as.
-	RatingDBPass             string // The user's password.
-	AccountDBType            string
-	AccountDBHost            string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort            string             // The port to bind to.
-	AccountDBName            string             // The name of the database to connect to.
-	AccountDBUser            string             // The user to sign in as.
-	AccountDBPass            string             // The user's password.
-	StorDBType               string             // Should reflect the database type used to store logs
-	StorDBHost               string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort               string             // Th e port to bind to.
-	StorDBName               string             // The name of the database to connect to.
-	StorDBUser               string             // The user to sign in as.
-	StorDBPass               string             // The user's password.
-	DBDataEncoding           string             // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen            string             // RPC JSON listening address
-	RPCGOBListen             string             // RPC GOB listening address
-	HTTPListen               string             // HTTP listening address
-	DefaultReqType           string             // Use this request type if not defined on top
-	DefaultTOR               string             // set default type of record
-	DefaultTenant            string             // set default tenant
-	DefaultSubject           string             // set default rating subject, useful in case of fallback
-	RoundingMethod           string             // Rounding method for the end price: <*up|*middle|*down>
-	RoundingDecimals         int                // Number of decimals to round end prices at
-	XmlCfgDocument           *CgrXmlCfgDocument // Load additional configuration inside xml document
-	RaterEnabled             bool               // start standalone server (no balancer)
-	RaterBalancer            string             // balancer address host:port
-	BalancerEnabled          bool
-	SchedulerEnabled         bool
-	CDRSEnabled              bool              // Enable CDR Server service
-	CDRSExtraFields          []*utils.RSRField // Extra fields to store in CDRs
-	CDRSMediator             string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CdreCdrFormat            string            // Format of the exported CDRs. <csv>
-	CdreMaskDestId           string            // Id of the destination list to be masked in CDRs
-	CdreMaskLength           int               // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
-	CdreCostShiftDigits      int               // Shift digits in the cost on export (eg: convert from EUR to cents)
-	CdreDir                  string            // Path towards exported cdrs directory
-	CdreExportedFields       []*utils.RSRField // List of fields in the exported CDRs
-	CdreFWXmlTemplate        *CgrXmlCdreFwCfg  // Use this configuration as export template in case of fixed fields length
-	CdrcEnabled              bool              // Enable CDR client functionality
-	CdrcCdrs                 string            // Address where to reach CDR server
-	CdrcCdrsMethod           string            // Mechanism to use when posting CDRs on server  <http_cgr>
-	CdrcRunDelay             time.Duration     // Sleep interval between consecutive runs, 0 to use automation via inotify
-	CdrcCdrType              string            // CDR file format <csv>.
-	CdrcCdrInDir             string            // Absolute path towards the directory where the CDRs are stored.
-	CdrcCdrOutDir            string            // Absolute path towards the directory where processed CDRs will be moved.
-	CdrcSourceId             string            // Tag identifying the source of the CDRs within CGRS database.
-	CdrcAccIdField           string            // Accounting id field identifier. Use index number in case of .csv cdrs.
-	CdrcReqTypeField         string            // Request type field identifier. Use index number in case of .csv cdrs.
-	CdrcDirectionField       string            // Direction field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTenantField          string            // Tenant field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTorField             string            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAccountField         string            // Account field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSubjectField         string            // Subject field identifier. Use index numbers in case of .csv CDRs.
-	CdrcDestinationField     string            // Destination field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSetupTimeField       string            // Setup time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAnswerTimeField      string            // Answer time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcDurationField        string            // Duration field identifier. Use index numbers in case of .csv cdrs.
-	CdrcExtraFields          []string          // Extra fields to extract, special format in case of .csv "field1:index1,field2:index2"
-	SMEnabled                bool
-	SMSwitchType             string
-	SMRater                  string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMRaterReconnects        int           // Number of reconnect attempts to rater
-	SMDebitInterval          int           // the period to be debited in advanced during a call (in seconds)
-	SMMaxCallDuration        time.Duration // The maximum duration of a call
-	SMRunIds                 []string      // Identifiers of additional sessions control.
-	SMReqTypeFields          []string      // Name of request type fields to be used during additional sessions control <""|*default|field_name>.
-	SMDirectionFields        []string      // Name of direction fields to be used during additional sessions control <""|*default|field_name>.
-	SMTenantFields           []string      // Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
-	SMTORFields              []string      // Name of tor fields to be used during additional sessions control <""|*default|field_name>.
-	SMAccountFields          []string      // Name of account fields to be used during additional sessions control <""|*default|field_name>.
-	SMSubjectFields          []string      // Name of fields to be used during additional sessions control <""|*default|field_name>.
-	SMDestFields             []string      // Name of destination fields to be used during additional sessions control <""|*default|field_name>.
-	SMSetupTimeFields        []string      // Name of setup_time fields to be used during additional sessions control <""|*default|field_name>.
-	SMAnswerTimeFields       []string      // Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
-	SMDurationFields         []string      // Name of duration fields to be used during additional sessions control <""|*default|field_name>.
-	MediatorEnabled          bool          // Starts Mediator service: <true|false>.
-	MediatorRater            string        // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorRaterReconnects  int           // Number of reconnects to rater before giving up.
-	MediatorRunIds           []string      // Identifiers for each mediation run on CDRs
-	MediatorReqTypeFields    []string      // Name of request type fields to be used during mediation. Use index number in case of .csv cdrs.
-	MediatorDirectionFields  []string      // Name of direction fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTenantFields     []string      // Name of tenant fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorTORFields        []string      // Name of tor fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAccountFields    []string      // Name of account fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorSubjectFields    []string      // Name of subject fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDestFields       []string      // Name of destination fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorSetupTimeFields  []string      // Name of setup_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorAnswerTimeFields []string      // Name of answer_time fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	MediatorDurationFields   []string      // Name of duration fields to be used during mediation. Use index numbers in case of .csv cdrs.
-	FreeswitchServer         string        // freeswitch address host:port
-	FreeswitchPass           string        // FS socket password
-	FreeswitchReconnects     int           // number of times to attempt reconnect after connect fails
-	HistoryAgentEnabled      bool          // Starts History as an agent: <true|false>.
-	HistoryServer            string        // Address where to reach the master history server: <internal|x.y.z.y:1234>
-	HistoryServerEnabled     bool          // Starts History as server: <true|false>.
-	HistoryDir               string        // Location on disk where to store history files.
-	HistorySaveInterval      time.Duration // The timout duration between history writes
-	MailerServer             string        // The server to use when sending emails out
-	MailerAuthUser           string        // Authenticate to email server using this user
-	MailerAuthPass           string        // Authenticate to email server with this password
-	MailerFromAddr           string        // From address used when sending emails out
+	RatingDBType            string
+	RatingDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	RatingDBPort            string // The port to bind to.
+	RatingDBName            string // The name of the database to connect to.
+	RatingDBUser            string // The user to sign in as.
+	RatingDBPass            string // The user's password.
+	AccountDBType           string
+	AccountDBHost           string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort           string             // The port to bind to.
+	AccountDBName           string             // The name of the database to connect to.
+	AccountDBUser           string             // The user to sign in as.
+	AccountDBPass           string             // The user's password.
+	StorDBType              string             // Should reflect the database type used to store logs
+	StorDBHost              string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort              string             // Th e port to bind to.
+	StorDBName              string             // The name of the database to connect to.
+	StorDBUser              string             // The user to sign in as.
+	StorDBPass              string             // The user's password.
+	DBDataEncoding          string             // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen           string             // RPC JSON listening address
+	RPCGOBListen            string             // RPC GOB listening address
+	HTTPListen              string             // HTTP listening address
+	DefaultReqType          string             // Use this request type if not defined on top
+	DefaultTOR              string             // set default type of record
+	DefaultTenant           string             // set default tenant
+	DefaultSubject          string             // set default rating subject, useful in case of fallback
+	RoundingMethod          string             // Rounding method for the end price: <*up|*middle|*down>
+	RoundingDecimals        int                // Number of decimals to round end prices at
+	XmlCfgDocument          *CgrXmlCfgDocument // Load additional configuration inside xml document
+	RaterEnabled            bool               // start standalone server (no balancer)
+	RaterBalancer           string             // balancer address host:port
+	BalancerEnabled         bool
+	SchedulerEnabled        bool
+	CDRSEnabled             bool              // Enable CDR Server service
+	CDRSExtraFields         []*utils.RSRField // Extra fields to store in CDRs
+	CDRSMediator            string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CdreCdrFormat           string            // Format of the exported CDRs. <csv>
+	CdreMaskDestId          string            // Id of the destination list to be masked in CDRs
+	CdreMaskLength          int               // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
+	CdreCostShiftDigits     int               // Shift digits in the cost on export (eg: convert from EUR to cents)
+	CdreDir                 string            // Path towards exported cdrs directory
+	CdreExportedFields      []*utils.RSRField // List of fields in the exported CDRs
+	CdreFWXmlTemplate       *CgrXmlCdreFwCfg  // Use this configuration as export template in case of fixed fields length
+	CdrcEnabled             bool              // Enable CDR client functionality
+	CdrcCdrs                string            // Address where to reach CDR server
+	CdrcCdrsMethod          string            // Mechanism to use when posting CDRs on server  <http_cgr>
+	CdrcRunDelay            time.Duration     // Sleep interval between consecutive runs, 0 to use automation via inotify
+	CdrcCdrType             string            // CDR file format <csv>.
+	CdrcCdrInDir            string            // Absolute path towards the directory where the CDRs are stored.
+	CdrcCdrOutDir           string            // Absolute path towards the directory where processed CDRs will be moved.
+	CdrcSourceId            string            // Tag identifying the source of the CDRs within CGRS database.
+	CdrcAccIdField          string            // Accounting id field identifier. Use index number in case of .csv cdrs.
+	CdrcReqTypeField        string            // Request type field identifier. Use index number in case of .csv cdrs.
+	CdrcDirectionField      string            // Direction field identifier. Use index numbers in case of .csv cdrs.
+	CdrcTenantField         string            // Tenant field identifier. Use index numbers in case of .csv cdrs.
+	CdrcTorField            string            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
+	CdrcAccountField        string            // Account field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSubjectField        string            // Subject field identifier. Use index numbers in case of .csv CDRs.
+	CdrcDestinationField    string            // Destination field identifier. Use index numbers in case of .csv cdrs.
+	CdrcSetupTimeField      string            // Setup time field identifier. Use index numbers in case of .csv cdrs.
+	CdrcAnswerTimeField     string            // Answer time field identifier. Use index numbers in case of .csv cdrs.
+	CdrcDurationField       string            // Duration field identifier. Use index numbers in case of .csv cdrs.
+	CdrcExtraFields         []string          // Extra fields to extract, special format in case of .csv "field1:index1,field2:index2"
+	SMEnabled               bool
+	SMSwitchType            string
+	SMRater                 string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMRaterReconnects       int                   // Number of reconnect attempts to rater
+	SMDebitInterval         int                   // the period to be debited in advanced during a call (in seconds)
+	SMMaxCallDuration       time.Duration         // The maximum duration of a call
+	MediatorEnabled         bool                  // Starts Mediator service: <true|false>.
+	MediatorRater           string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	MediatorRaterReconnects int                   // Number of reconnects to rater before giving up.
+	DerivedChargers         utils.DerivedChargers // System wide derived chargers, added to the account level ones
+	CombinedDerivedChargers bool                  // Combine accounts specific derived_chargers with server configured
+	FreeswitchServer        string                // freeswitch address host:port
+	FreeswitchPass          string                // FS socket password
+	FreeswitchReconnects    int                   // number of times to attempt reconnect after connect fails
+	HistoryAgentEnabled     bool                  // Starts History as an agent: <true|false>.
+	HistoryServer           string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
+	HistoryServerEnabled    bool                  // Starts History as server: <true|false>.
+	HistoryDir              string                // Location on disk where to store history files.
+	HistorySaveInterval     time.Duration         // The timout duration between history writes
+	MailerServer            string                // The server to use when sending emails out
+	MailerAuthUser          string                // Authenticate to email server using this user
+	MailerAuthPass          string                // Authenticate to email server with this password
+	MailerFromAddr          string                // From address used when sending emails out
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -203,14 +183,14 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdreMaskDestId = ""
 	self.CdreMaskLength = 0
 	self.CdreCostShiftDigits = 0
-	self.CdreDir = "/var/log/cgrates/cdr/cdre"
+	self.CdreDir = "/var/log/cgrates/cdre"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
 	self.CdrcCdrsMethod = "http_cgr"
 	self.CdrcRunDelay = time.Duration(0)
 	self.CdrcCdrType = "csv"
-	self.CdrcCdrInDir = "/var/log/cgrates/cdr/cdrc/in"
-	self.CdrcCdrOutDir = "/var/log/cgrates/cdr/cdrc/out"
+	self.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
+	self.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	self.CdrcSourceId = "freeswitch_csv"
 	self.CdrcAccIdField = "0"
 	self.CdrcReqTypeField = "1"
@@ -227,34 +207,14 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorEnabled = false
 	self.MediatorRater = "internal"
 	self.MediatorRaterReconnects = 3
-	self.MediatorRunIds = []string{}
-	self.MediatorSubjectFields = []string{}
-	self.MediatorReqTypeFields = []string{}
-	self.MediatorDirectionFields = []string{}
-	self.MediatorTenantFields = []string{}
-	self.MediatorTORFields = []string{}
-	self.MediatorAccountFields = []string{}
-	self.MediatorDestFields = []string{}
-	self.MediatorSetupTimeFields = []string{}
-	self.MediatorAnswerTimeFields = []string{}
-	self.MediatorDurationFields = []string{}
+	self.DerivedChargers = make(utils.DerivedChargers, 0)
+	self.CombinedDerivedChargers = true
 	self.SMEnabled = false
 	self.SMSwitchType = FS
 	self.SMRater = "internal"
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
-	self.SMRunIds = []string{}
-	self.SMReqTypeFields = []string{}
-	self.SMDirectionFields = []string{}
-	self.SMTenantFields = []string{}
-	self.SMTORFields = []string{}
-	self.SMAccountFields = []string{}
-	self.SMSubjectFields = []string{}
-	self.SMDestFields = []string{}
-	self.SMSetupTimeFields = []string{}
-	self.SMAnswerTimeFields = []string{}
-	self.SMDurationFields = []string{}
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
@@ -275,7 +235,7 @@ func (self *CGRConfig) setDefaults() error {
 		&utils.RSRField{Id: utils.REQTYPE},
 		&utils.RSRField{Id: utils.DIRECTION},
 		&utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.TOR},
+		&utils.RSRField{Id: utils.Category},
 		&utils.RSRField{Id: utils.ACCOUNT},
 		&utils.RSRField{Id: utils.SUBJECT},
 		&utils.RSRField{Id: utils.DESTINATION},
@@ -295,32 +255,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 		} else if self.CdreFWXmlTemplate == nil {
 			return errors.New("Need XmlTemplate for fixed_width cdr export")
 		}
-	}
-	// SessionManager should have same fields config length for session emulation
-	if len(self.SMReqTypeFields) != len(self.SMRunIds) ||
-		len(self.SMDirectionFields) != len(self.SMRunIds) ||
-		len(self.SMTenantFields) != len(self.SMRunIds) ||
-		len(self.SMTORFields) != len(self.SMRunIds) ||
-		len(self.SMAccountFields) != len(self.SMRunIds) ||
-		len(self.SMSubjectFields) != len(self.SMRunIds) ||
-		len(self.SMDestFields) != len(self.SMRunIds) ||
-		len(self.SMSetupTimeFields) != len(self.SMRunIds) ||
-		len(self.SMAnswerTimeFields) != len(self.SMRunIds) ||
-		len(self.SMDurationFields) != len(self.SMRunIds) {
-		return errors.New("<ConfigSanity> Inconsistent fields length for SessionManager session emulation")
-	}
-	// Mediator needs to have consistent extra fields definition
-	if len(self.MediatorReqTypeFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorDirectionFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorTenantFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorTORFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorAccountFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorSubjectFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorDestFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorSetupTimeFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorAnswerTimeFields) != len(self.MediatorRunIds) ||
-		len(self.MediatorDurationFields) != len(self.MediatorRunIds) {
-		return errors.New("<ConfigSanity> Inconsistent fields length for Mediator extra fields")
 	}
 	return nil
 }
@@ -583,7 +517,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.CdrcDurationField, _ = c.GetString("cdrc", "duration_field")
 	}
 	if hasOpt = c.HasOption("cdrc", "extra_fields"); hasOpt {
-		if cfg.CdrcExtraFields, err = ConfigSlice(c, "cdrc", "extra_fields"); err != nil {
+		eFldsStr, _ := c.GetString("cdrc", "extra_fields")
+		if cfg.CdrcExtraFields, err = ConfigSlice(eFldsStr); err != nil {
 			return nil, err
 		}
 	}
@@ -595,61 +530,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("mediator", "rater_reconnects"); hasOpt {
 		cfg.MediatorRaterReconnects, _ = c.GetInt("mediator", "rater_reconnects")
-	}
-	if hasOpt = c.HasOption("mediator", "run_ids"); hasOpt {
-		if cfg.MediatorRunIds, err = ConfigSlice(c, "mediator", "run_ids"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "subject_fields"); hasOpt {
-		if cfg.MediatorSubjectFields, err = ConfigSlice(c, "mediator", "subject_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "reqtype_fields"); hasOpt {
-		if cfg.MediatorReqTypeFields, err = ConfigSlice(c, "mediator", "reqtype_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "direction_fields"); hasOpt {
-		if cfg.MediatorDirectionFields, err = ConfigSlice(c, "mediator", "direction_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "tenant_fields"); hasOpt {
-		if cfg.MediatorTenantFields, err = ConfigSlice(c, "mediator", "tenant_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "tor_fields"); hasOpt {
-		if cfg.MediatorTORFields, err = ConfigSlice(c, "mediator", "tor_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "account_fields"); hasOpt {
-		if cfg.MediatorAccountFields, err = ConfigSlice(c, "mediator", "account_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "destination_fields"); hasOpt {
-		if cfg.MediatorDestFields, err = ConfigSlice(c, "mediator", "destination_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "setup_time_fields"); hasOpt {
-		if cfg.MediatorSetupTimeFields, err = ConfigSlice(c, "mediator", "setup_time_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "answer_time_fields"); hasOpt {
-		if cfg.MediatorAnswerTimeFields, err = ConfigSlice(c, "mediator", "answer_time_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("mediator", "duration_fields"); hasOpt {
-		if cfg.MediatorDurationFields, err = ConfigSlice(c, "mediator", "duration_fields"); err != nil {
-			return nil, err
-		}
 	}
 	if hasOpt = c.HasOption("session_manager", "enabled"); hasOpt {
 		cfg.SMEnabled, _ = c.GetBool("session_manager", "enabled")
@@ -672,61 +552,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 			return nil, err
 		}
 	}
-	if hasOpt = c.HasOption("session_manager", "run_ids"); hasOpt {
-		if cfg.SMRunIds, err = ConfigSlice(c, "session_manager", "run_ids"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "reqtype_fields"); hasOpt {
-		if cfg.SMReqTypeFields, err = ConfigSlice(c, "session_manager", "reqtype_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "direction_fields"); hasOpt {
-		if cfg.SMDirectionFields, err = ConfigSlice(c, "session_manager", "direction_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "tenant_fields"); hasOpt {
-		if cfg.SMTenantFields, err = ConfigSlice(c, "session_manager", "tenant_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "tor_fields"); hasOpt {
-		if cfg.SMTORFields, err = ConfigSlice(c, "session_manager", "tor_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "account_fields"); hasOpt {
-		if cfg.SMAccountFields, err = ConfigSlice(c, "session_manager", "account_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "subject_fields"); hasOpt {
-		if cfg.SMSubjectFields, err = ConfigSlice(c, "session_manager", "subject_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "destination_fields"); hasOpt {
-		if cfg.SMDestFields, err = ConfigSlice(c, "session_manager", "destination_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "setup_time_fields"); hasOpt {
-		if cfg.SMSetupTimeFields, err = ConfigSlice(c, "session_manager", "setup_time_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "answer_time_fields"); hasOpt {
-		if cfg.SMAnswerTimeFields, err = ConfigSlice(c, "session_manager", "answer_time_fields"); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("session_manager", "duration_fields"); hasOpt {
-		if cfg.SMDurationFields, err = ConfigSlice(c, "session_manager", "duration_fields"); err != nil {
-			return nil, err
-		}
-	}
 	if hasOpt = c.HasOption("freeswitch", "server"); hasOpt {
 		cfg.FreeswitchServer, _ = c.GetString("freeswitch", "server")
 	}
@@ -735,6 +560,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
 		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
+	}
+	if cfg.DerivedChargers, err = ParseCfgDerivedCharging(c); err != nil {
+		return nil, err
+	}
+	if hasOpt = c.HasOption("derived_charging", "combined_chargers"); hasOpt {
+		cfg.CombinedDerivedChargers, _ = c.GetBool("derived_charging", "combined_chargers")
 	}
 	if hasOpt = c.HasOption("history_agent", "enabled"); hasOpt {
 		cfg.HistoryAgentEnabled, _ = c.GetBool("history_agent", "enabled")

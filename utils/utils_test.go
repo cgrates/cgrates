@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -189,6 +190,14 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	fsTmstampStr := "1394291049287234"
 	fsTm, err := ParseTimeDetectLayout(fsTmstampStr)
 	expectedTime = time.Date(2014, 3, 8, 15, 4, 9, 287234000, time.UTC)
+	if err != nil {
+		t.Error(err)
+	} else if !fsTm.Equal(expectedTime) {
+		t.Errorf("Unexpected time parsed: %v, expecting: %v", fsTm, expectedTime)
+	}
+	fsTmstampStr = "0"
+	fsTm, err = ParseTimeDetectLayout(fsTmstampStr)
+	expectedTime = time.Time{}
 	if err != nil {
 		t.Error(err)
 	} else if !fsTm.Equal(expectedTime) {
@@ -383,5 +392,17 @@ func TestParseZeroRatingSubject(t *testing.T) {
 		if d, err := ParseZeroRatingSubject(s); err != nil || d != dur[i] {
 			t.Error("Error parsing rating subject: ", s, d, err)
 		}
+	}
+}
+
+func TestConcatenatedKey(t *testing.T) {
+	if key := ConcatenatedKey("a"); key != "a" {
+		t.Error("Unexpected key value received: ", key)
+	}
+	if key := ConcatenatedKey("a", "b"); key != fmt.Sprintf("a%sb", CONCATENATED_KEY_SEP) {
+		t.Error("Unexpected key value received: ", key)
+	}
+	if key := ConcatenatedKey("a", "b", "c"); key != fmt.Sprintf("a%sb%sc", CONCATENATED_KEY_SEP, CONCATENATED_KEY_SEP) {
+		t.Error("Unexpected key value received: ", key)
 	}
 }

@@ -5,6 +5,7 @@ Copyright (C) 2013 ITsysCOM
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
+
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -19,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -30,29 +30,52 @@ var (
 
 // Console Command interface
 type Commander interface {
-	FromArgs(args []string) error // Load data from os arguments or flag.Args()
-	Usage(string) string          // usage message
-	RpcMethod() string            // Method which should be called remotely
-	RpcParams() interface{}       // Parameters to send out on rpc
-	RpcResult() interface{}       // Only requirement is to have a String method to print on console
-	defaults() error              // set defaults wherever necessary
+	FromArgs(args string, verbose bool) error // Load data from os arguments or flag.Args()
+	Usage() string                            // usage message
+	RpcMethod() string                        // Method which should be called remotely
+	RpcParams() interface{}                   // Parameters to send out on rpc
+	RpcResult() interface{}                   // Only requirement is to have a String method to print on console
+	ClientArgs() []string                     // for autocompletion
+	Name() string
+}
+
+func GetCommands() map[string]Commander {
+	return commands
+}
+
+func getAvailabelCommandsErr() error {
+	var keys []string
+	for key, _ := range commands {
+		keys = append(keys, key)
+	}
+	return fmt.Errorf("\n\tAvailable commands <%s>\n", strings.Join(keys, "|"))
 }
 
 // Process args and return right command Value or error
-func GetCommandValue(args []string) (Commander, error) {
-	if len(args) < 2 {
-		return nil, errors.New("\n\tUsage: cgr-console [cfg_opts...{-h}] <command>\n")
+func GetCommandValue(command string, verbose bool) (Commander, error) {
+	if len(command) == 0 {
+		return nil, getAvailabelCommandsErr()
 	}
-	cmdVal, exists := commands[args[1]]
+	firstSpace := strings.Index(command, " ")
+	var cmdName string
+	var cmdArgs string
+	if firstSpace <= 0 {
+		cmdName = command[:len(command)]
+		cmdArgs = ""
+	} else {
+		cmdName = command[:firstSpace]
+		cmdArgs = command[firstSpace+1:]
+	}
+	cmdVal, exists := commands[cmdName]
 	if !exists {
-		var keys []string
-		for key, _ := range commands {
-			keys = append(keys, key)
-		}
-		return nil, fmt.Errorf("\n\tUsage: cgr-console [cfg_opts...{-h}] <%s>\n", strings.Join(keys, "|"))
+		return nil, getAvailabelCommandsErr()
 	}
-	if err := cmdVal.FromArgs(args); err != nil {
+	if err := cmdVal.FromArgs(cmdArgs, verbose); err != nil {
 		return nil, err
 	}
 	return cmdVal, nil
+}
+
+type StringWrapper struct {
+	Item string
 }

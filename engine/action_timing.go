@@ -226,7 +226,9 @@ func (at *ActionTiming) Execute() (err error) {
 		return
 	}
 	for _, a := range aac {
-		a.Balance.ExpirationDate, _ = utils.ParseDate(a.ExpirationString)
+		if expDate, parseErr := utils.ParseDate(a.ExpirationString); a.Balance.ExpirationDate.IsZero() && parseErr == nil && !expDate.IsZero() {
+			a.Balance.ExpirationDate = expDate
+		}
 		actionFunction, exists := getActionFunc(a.ActionType)
 		if !exists {
 			Logger.Crit(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
@@ -236,16 +238,11 @@ func (at *ActionTiming) Execute() (err error) {
 			_, err := AccLock.Guard(ubId, func() (float64, error) {
 				ub, err := accountingStorage.GetAccount(ubId)
 				if err != nil {
-                                        Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
-                                        return 0, err
-                                } else if ub.Disabled {
-					return 0, fmt.Errorf("User %s is disabled", ubId)
-				}
-				if err != nil {
 					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
 					return 0, err
+				} else if ub.Disabled {
+					return 0, fmt.Errorf("User %s is disabled", ubId)
 				}
-
 				Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
 				err = actionFunction(ub, a)
 				accountingStorage.SetAccount(ub)

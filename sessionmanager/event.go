@@ -25,13 +25,14 @@ import (
 type Event interface {
 	New(string) Event
 	GetName() string
+	GetCgrId() string
 	GetUUID() string
 	GetDirection(string) string
 	GetSubject(string) string
 	GetAccount(string) string
 	GetDestination(string) string
 	GetCallDestNr(string) string
-	GetTOR(string) string
+	GetCategory(string) string
 	GetTenant(string) string
 	GetReqType(string) string
 	GetSetupTime(string) (time.Time, error)

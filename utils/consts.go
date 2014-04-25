@@ -46,6 +46,7 @@ const (
 	ACTION_PLANS_CSV           = "ActionPlans.csv"
 	ACTION_TRIGGERS_CSV        = "ActionTriggers.csv"
 	ACCOUNT_ACTIONS_CSV        = "AccountActions.csv"
+	DERIVED_CHARGERS_CSV       = "DerivedChargers.csv"
 	TIMINGS_NRCOLS             = 6
 	DESTINATIONS_NRCOLS        = 2
 	RATES_NRCOLS               = 8
@@ -55,8 +56,9 @@ const (
 	SHARED_GROUPS_NRCOLS       = 4
 	ACTIONS_NRCOLS             = 12
 	ACTION_PLANS_NRCOLS        = 4
-	ACTION_TRIGGERS_NRCOLS     = 8
+	ACTION_TRIGGERS_NRCOLS     = 9
 	ACCOUNT_ACTIONS_NRCOLS     = 5
+	DERIVED_CHARGERS_NRCOLS    = 16
 	ROUNDING_UP                = "*up"
 	ROUNDING_MIDDLE            = "*middle"
 	ROUNDING_DOWN              = "*down"
@@ -64,18 +66,19 @@ const (
 	COMMENT_CHAR               = '#'
 	CSV_SEP                    = ','
 	FALLBACK_SEP               = ';'
-	REGEXP_SEP                 = "~"
+	REGEXP_PREFIX              = "~"
 	JSON                       = "json"
 	MSGPACK                    = "msgpack"
 	CSV_LOAD                   = "CSVLOAD"
 	CGRID                      = "cgrid"
+	ORDERID                    = "orderid"
 	ACCID                      = "accid"
 	CDRHOST                    = "cdrhost"
 	CDRSOURCE                  = "cdrsource"
 	REQTYPE                    = "reqtype"
 	DIRECTION                  = "direction"
 	TENANT                     = "tenant"
-	TOR                        = "tor"
+	Category                   = "tor"
 	ACCOUNT                    = "account"
 	SUBJECT                    = "subject"
 	DESTINATION                = "destination"
@@ -95,6 +98,8 @@ const (
 	XML_PROFILE_PREFIX         = "*xml:"
 	CDRE                       = "cdre"
 	MASK_CHAR                  = "*"
+	CONCATENATED_KEY_SEP       = ":"
+	META_DEFAULT               = "*default"
 )
 
 var (

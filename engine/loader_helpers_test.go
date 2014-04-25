@@ -89,6 +89,19 @@ cgrates.org,1001,*out,PREPAID_10,STANDARD_TRIGGERS
 DUMMY,INVALID;DATA
 cgrates.org,1002;1006,*out,PACKAGE_10,STANDARD_TRIGGERS
 `
+var derivedChargesSample = `#Tenant,Tor,Direction,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
+cgrates.org,call,*out,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
+cgrates.org,,*out,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
+cgrates.org,call,*in,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
+DUMMY_DATA
+cgrates.org,call,*out,dan,dan,extra2,,,,,ivo,ivo,,,,
+cgrates.org,call,*out,dan,*any,extra1,,,,,rif2,rif2,,,,
+cgrates.org,call,*out,dan,*any,*any,,,,,rif2,rif2,,,,
+cgrates.org,call,*out,dan,*any,*default,*default,*default,*default,*default,rif2,rif2,*default,*default,*default,*default
+cgrates.org,call,*out,dan,*any,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test
+cgrates.org,call,*out,dan,*any,,,,,,,,,,,
+cgrates.org,call,*out,dan,*default,,,,,,,,,,,
+`
 
 func TestTimingsValidator(t *testing.T) {
 	reader := bufio.NewReader(strings.NewReader(timingsSample))
@@ -354,6 +367,30 @@ func TestAccountActionsValidator(t *testing.T) {
 	}
 }
 
+func TestDerivedChargersValidator(t *testing.T) {
+	reader := bufio.NewReader(strings.NewReader(derivedChargesSample))
+	lnValidator := FileValidators[utils.DERIVED_CHARGERS_CSV]
+	lineNr := 0
+	for {
+		lineNr++
+		ln, _, err := reader.ReadLine()
+		if err == io.EOF { // Reached end of the string
+			break
+		}
+		valid := lnValidator.Rule.Match(ln)
+		switch lineNr {
+		case 1, 3, 4, 5, 8, 12:
+			if valid {
+				t.Error("Validation passed for invalid line", string(ln))
+			}
+		case 2, 6, 7, 9, 10, 11:
+			if !valid {
+				t.Error("Validation did not pass for valid line", string(ln))
+			}
+		}
+	}
+}
+
 func TestTPCSVFileParser(t *testing.T) {
 	bfRdr := bufio.NewReader(strings.NewReader(ratesSample))
 	fParser := &TPCSVFileParser{FileValidators[utils.RATES_CSV], bfRdr}
@@ -381,5 +418,14 @@ func TestTPCSVFileParser(t *testing.T) {
 				t.Error("Expecting invalid line at row 3")
 			}
 		}
+	}
+}
+
+func TestValueOrDefault(t *testing.T) {
+	if res := ValueOrDefault("someval", "*any"); res != "someval" {
+		t.Error("Unexpected value received", res)
+	}
+	if res := ValueOrDefault("", "*any"); res != "*any" {
+		t.Error("Unexpected value received", res)
 	}
 }

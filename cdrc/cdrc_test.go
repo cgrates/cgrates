@@ -75,13 +75,13 @@ func TestRecordAsStoredCdr(t *testing.T) {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	expectedCdr := &utils.StoredCdr{
-		CgrId:       utils.FSCgrId(cdrRow[0]),
+		CgrId:       utils.Sha1(cdrRow[0], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
 		AccId:       cdrRow[0],
 		CdrSource:   cgrConfig.CdrcSourceId,
 		ReqType:     cdrRow[1],
 		Direction:   cdrRow[2],
 		Tenant:      cdrRow[3],
-		TOR:         cdrRow[4],
+		Category:    cdrRow[4],
 		Account:     cdrRow[5],
 		Subject:     cdrRow[6],
 		Destination: cdrRow[7],

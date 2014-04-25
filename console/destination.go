@@ -18,42 +18,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"fmt"
-	"github.com/cgrates/cgrates/engine"
-)
+import "github.com/cgrates/cgrates/engine"
 
 func init() {
-	commands["get_destination"] = &CmdGetDestination{}
+	c := &CmdGetDestination{
+		name:      "destination",
+		rpcMethod: "ApierV1.GetDestination",
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
 type CmdGetDestination struct {
+	name      string
 	rpcMethod string
-	rpcParams string
-	rpcResult *engine.Destination
+	rpcParams *StringWrapper
+	rpcResult engine.Destination
+	*CommandExecuter
 }
 
-// name should be exec's name
-func (self *CmdGetDestination) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_destination <id>")
-}
-
-// set param defaults
-func (self *CmdGetDestination) defaults() error {
-	self.rpcMethod = "Apier.GetDestination"
-	return nil
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdGetDestination) FromArgs(args []string) error {
-	if len(args) < 3 {
-		return fmt.Errorf(self.Usage(""))
-	}
-	// Args look OK, set defaults before going further
-	self.defaults()
-	self.rpcParams = args[2]
-	return nil
+func (self *CmdGetDestination) Name() string {
+	return self.name
 }
 
 func (self *CmdGetDestination) RpcMethod() string {
@@ -61,10 +47,12 @@ func (self *CmdGetDestination) RpcMethod() string {
 }
 
 func (self *CmdGetDestination) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &StringWrapper{}
+	}
 	return self.rpcParams
 }
 
 func (self *CmdGetDestination) RpcResult() interface{} {
-	self.rpcResult = new(engine.Destination)
-	return self.rpcResult
+	return &self.rpcResult
 }

@@ -18,16 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"errors"
 	"reflect"
 	"time"
 )
 
 // The output structure that will be returned with the call cost information.
 type CallCost struct {
-	Direction, TOR, Tenant, Subject, Account, Destination string
-	Cost                                                  float64
-	Timespans                                             TimeSpans
-	deductConnectFee                                      bool
+	Direction, Category, Tenant, Subject, Account, Destination, Tor string
+	Cost                                                            float64
+	Timespans                                                       TimeSpans
+	deductConnectFee                                                bool
 }
 
 // Pretty printing for call cost
@@ -46,7 +47,7 @@ type CallCost struct {
 
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.
 func (cc *CallCost) Merge(other *CallCost) {
-	if len(cc.Timespans)-1 < 0 {
+	if len(cc.Timespans)-1 < 0 || len(other.Timespans) == 0 {
 		return
 	}
 	ts := cc.Timespans[len(cc.Timespans)-1]
@@ -98,7 +99,7 @@ func (cc *CallCost) GetConnectFee() float64 {
 func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
 	return &CallDescriptor{
 		Direction:   cc.Direction,
-		TOR:         cc.TOR,
+		Category:    cc.Category,
 		Tenant:      cc.Tenant,
 		Subject:     cc.Subject,
 		Account:     cc.Account,
@@ -113,4 +114,50 @@ func (cc *CallCost) IsPaid() bool {
 		}
 	}
 	return true
+}
+
+func (cc *CallCost) ToDataCost() (*DataCost, error) {
+	if cc.Tor == MINUTES {
+		return nil, errors.New("Not a data call!")
+	}
+	dc := &DataCost{
+		Direction:        cc.Direction,
+		Category:         cc.Category,
+		Tenant:           cc.Tenant,
+		Subject:          cc.Subject,
+		Account:          cc.Account,
+		Destination:      cc.Destination,
+		Tor:              cc.Tor,
+		Cost:             cc.Cost,
+		deductConnectFee: cc.deductConnectFee,
+	}
+	dc.DataSpans = make([]*DataSpan, len(cc.Timespans))
+	for i, ts := range cc.Timespans {
+		length := ts.TimeEnd.Sub(ts.TimeStart).Seconds()
+		callDuration := ts.DurationIndex.Seconds()
+		dc.DataSpans[i] = &DataSpan{
+			DataStart:      callDuration - length,
+			DataEnd:        callDuration,
+			Cost:           ts.Cost,
+			ratingInfo:     ts.ratingInfo,
+			RateInterval:   ts.RateInterval,
+			DataIndex:      callDuration,
+			MatchedSubject: ts.MatchedSubject,
+			MatchedPrefix:  ts.MatchedPrefix,
+			MatchedDestId:  ts.MatchedDestId,
+		}
+		dc.DataSpans[i].Increments = make([]*DataIncrement, len(ts.Increments))
+		for j, incr := range ts.Increments {
+			dc.DataSpans[i].Increments[j] = &DataIncrement{
+				Amount:              incr.Duration.Seconds(),
+				Cost:                incr.Cost,
+				BalanceInfo:         incr.BalanceInfo,
+				BalanceRateInterval: incr.BalanceRateInterval,
+				UnitInfo:            incr.UnitInfo,
+				CompressFactor:      incr.CompressFactor,
+				paid:                incr.paid,
+			}
+		}
+	}
+	return dc, nil
 }

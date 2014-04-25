@@ -65,13 +65,13 @@ type RateSlot struct {
 // Used to set the durations we need out of strings
 func (self *RateSlot) SetDurations() error {
 	var err error
-	if self.rateUnitDur, err = time.ParseDuration(self.RateUnit); err != nil {
+	if self.rateUnitDur, err = ParseDurationWithSecs(self.RateUnit); err != nil {
 		return err
 	}
-	if self.rateIncrementDur, err = time.ParseDuration(self.RateIncrement); err != nil {
+	if self.rateIncrementDur, err = ParseDurationWithSecs(self.RateIncrement); err != nil {
 		return err
 	}
-	if self.groupIntervalStartDur, err = time.ParseDuration(self.GroupIntervalStart); err != nil {
+	if self.groupIntervalStartDur, err = ParseDurationWithSecs(self.GroupIntervalStart); err != nil {
 		return err
 	}
 	return nil
@@ -146,14 +146,14 @@ func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, 
 	if len(s) != 4 {
 		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
 	}
-	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant: s[1], TOR: s[2], Direction: s[0], Subject: s[3]}, nil
+	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant: s[1], Category: s[2], Direction: s[0], Subject: s[3]}, nil
 }
 
 type TPRatingProfile struct {
 	TPid                  string                // Tariff plan id
 	LoadId                string                // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
 	Tenant                string                // Tenant's Id
-	TOR                   string                // TypeOfRecord
+	Category              string                // TypeOfRecord
 	Direction             string                // Traffic direction, OUT is the only one supported for now
 	Subject               string                // Rating subject, usually the same as account
 	RatingPlanActivations []*TPRatingActivation // Activate rate profiles at specific time
@@ -161,7 +161,7 @@ type TPRatingProfile struct {
 
 // Used as key in nosql db (eg: redis)
 func (self *TPRatingProfile) KeyId() string {
-	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.TOR, self.Subject)
+	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.Category, self.Subject)
 }
 
 type TPRatingActivation struct {
@@ -196,7 +196,7 @@ func FallbackSubjKeys(direction, tenant, tor, fallbackSubjects string) []string 
 type AttrTPRatingProfileIds struct {
 	TPid      string // Tariff plan id
 	Tenant    string // Tenant's Id
-	TOR       string // TypeOfRecord
+	Category  string // TypeOfRecord
 	Direction string // Traffic direction
 	Subject   string // Rating subject, usually the same as account
 }
@@ -245,6 +245,7 @@ type TPActionTrigger struct {
 	Direction      string  // Traffic direction
 	ThresholdType  string  // This threshold type
 	ThresholdValue float64 // Threshold
+	Recurrent      bool    // reset executed flag each run
 	DestinationId  string  // Id of the destination profile
 	ActionsId      string  // Actions which will execute on threshold reached
 	Weight         float64 // weight
@@ -286,19 +287,21 @@ type ApiReloadCache struct {
 	RpAliases        []string
 	AccAliases       []string
 	LCRIds           []string
+	DerivedChargers  []string
 }
 
 type AttrCacheStats struct { // Add in the future filters here maybe so we avoid counting complete cache
 }
 
 type CacheStats struct {
-	Destinations   int
-	RatingPlans    int
-	RatingProfiles int
-	Actions        int
-	SharedGroups   int
-	RatingAliases  int
-	AccountAliases int
+	Destinations    int
+	RatingPlans     int
+	RatingProfiles  int
+	Actions         int
+	SharedGroups    int
+	RatingAliases   int
+	AccountAliases  int
+	DerivedChargers int
 }
 
 type AttrCachedItemAge struct {
@@ -307,24 +310,26 @@ type AttrCachedItemAge struct {
 }
 
 type CachedItemAge struct {
-	Destination   time.Duration
-	RatingPlan    time.Duration
-	RatingProfile time.Duration
-	Action        time.Duration
-	SharedGroup   time.Duration
-	RatingAlias   time.Duration
-	AccountAlias  time.Duration
+	Destination     time.Duration
+	RatingPlan      time.Duration
+	RatingProfile   time.Duration
+	Action          time.Duration
+	SharedGroup     time.Duration
+	RatingAlias     time.Duration
+	AccountAlias    time.Duration
+	DerivedChargers time.Duration
 }
 
 type AttrExpFileCdrs struct {
 	CdrFormat         string   // Cdr output file format <utils.CdreCdrFormats>
 	ExportId          string   // Optional exportid
+	ExportDir         string   // If provided it overwrites the configured export directory
 	ExportFileName    string   // If provided the output filename will be set to this
 	ExportTemplate    string   // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents)
-	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically
+	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
+	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
 	MaskDestinationId string   // Overwrite configured MaskDestId
-	MaskLength        int      // Overwrite configured MaskLength
+	MaskLength        int      // Overwrite configured MaskLength, -1 to use general config ones
 	CgrIds            []string // If provided, it will filter based on the cgrids present in list
 	MediationRunId    []string // If provided, it will filter on mediation runid
 	CdrHost           []string // If provided, it will filter cdrhost
@@ -336,6 +341,8 @@ type AttrExpFileCdrs struct {
 	Account           []string // If provided, it will filter account
 	Subject           []string // If provided, it will filter the rating subject
 	DestinationPrefix []string // If provided, it will filter on destination prefix
+	OrderIdStart      int64    // Export from this order identifier
+	OrderIdEnd        int64    // Export smaller than this order identifier
 	TimeStart         string   // If provided, it will represent the starting of the CDRs interval (>=)
 	TimeEnd           string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors        bool     // Do not export errored CDRs
@@ -343,10 +350,13 @@ type AttrExpFileCdrs struct {
 }
 
 type ExportedFileCdrs struct {
-	ExportedFilePath string            // Full path to the newly generated export file
-	TotalRecords     int               // Number of CDRs to be exported
-	ExportedCgrIds   []string          // List of successfuly exported cgrids in the file
-	UnexportedCgrIds map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
+	ExportedFilePath          string            // Full path to the newly generated export file
+	TotalRecords              int               // Number of CDRs to be exported
+	TotalCost                 float64           // Sum of all costs in exported CDRs
+	FirstOrderId, LastOrderId int64             // The order id of the last exported CDR
+	ExportedCgrIds            []string          // List of successfuly exported cgrids in the file
+	UnexportedCgrIds          map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
+
 }
 
 type AttrRemCdrs struct {
@@ -364,4 +374,12 @@ type AttrLoadTpFromFolder struct {
 	FolderPath string // Take files from folder absolute path
 	DryRun     bool   // Do not write to database but parse only
 	FlushDb    bool   // Flush previous data before loading new one
+}
+
+type AttrGetDestination struct {
+	Id string
+}
+
+type AttrDerivedChargers struct {
+	Tenant, Tor, Direction, Account, Subject string
 }

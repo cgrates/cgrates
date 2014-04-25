@@ -450,7 +450,7 @@ func TestApierTPRatingProfile(t *testing.T) {
 		return
 	}
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "*any",
+	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: ""},
 		}}
@@ -743,7 +743,7 @@ func TestApierSetRatingProfile(t *testing.T) {
 	}
 	reply := ""
 	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
-	rpf := &AttrSetRatingProfile{Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
+	rpf := &AttrSetRatingProfile{Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
 	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
@@ -759,15 +759,15 @@ func TestApierSetRatingProfile(t *testing.T) {
 	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
 	tEnd, _ := utils.ParseDate("2013-08-07T17:31:30Z")
 	cd := engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "dan",
-		Account:      "dan",
-		Destination:  "+4917621621391",
-		CallDuration: 90,
-		TimeStart:    tStart,
-		TimeEnd:      tEnd,
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Account:       "dan",
+		Destination:   "+4917621621391",
+		DurationIndex: 90,
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
 	}
 	var cc engine.CallCost
 	// Simple test that command is executed without errors
@@ -784,7 +784,7 @@ func TestApierLoadRatingProfile(t *testing.T) {
 		return
 	}
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "*any"}
+	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any"}
 	if err := rater.Call("ApierV1.LoadRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadRatingProfile: ", err.Error())
 	} else if reply != "OK" {
@@ -1162,35 +1162,35 @@ func TestApierGetAccount(t *testing.T) {
 		return
 	}
 	var reply *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 11.5 { // We expect 11.5 since we have added in the previous test 1.5
 		t.Errorf("Calling ApierV1.GetBalance expected: 11.5, received: %f", reply)
 	}
-	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "dan", BalanceType: "*monetary", Direction: "*out"}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "dan", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 1.5 {
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 1.5 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 1.5, received: %f", reply)
 	}
 	// The one we have topped up though executeAction
-	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "dan2", BalanceType: "*monetary", Direction: "*out"}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "dan2", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10 {
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 10, received: %f", reply)
 	}
-	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "dan3", BalanceType: "*monetary", Direction: "*out"}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "dan3", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 3.6 {
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 3.6 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 3.6, received: %f", reply)
 	}
-	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "dan6", BalanceType: "*monetary", Direction: "*out"}
+	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "dan6", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 1 {
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 1 {
 		t.Errorf("Calling ApierV1.GetAccount expected: 1, received: %f", reply)
 	}
 }
@@ -1255,6 +1255,28 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
 }
 
+func TestResetDataAfterLoadFromFolder(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	arc := new(utils.ApiReloadCache)
+	// Simple test that command is executed without errors
+	if err := rater.Call("ApierV1.ReloadCache", arc, &reply); err != nil {
+		t.Error("Got error on ApierV1.ReloadCache: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
+	}
+	var rcvStats *utils.CacheStats
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 1, RatingProfiles: 1, Actions: 2, DerivedChargers: 2}
+	var args utils.AttrCacheStats
+	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
+		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
+	} else if !reflect.DeepEqual(rcvStats, expectedStats) {
+		t.Errorf("Calling ApierV1.GetCacheStats received: %v, expected: %v", rcvStats, expectedStats)
+	}
+}
+
 // Make sure balance was topped-up
 // Bug reported by DigiDaz over IRC
 func TestApierGetAccountAfterLoad(t *testing.T) {
@@ -1262,11 +1284,11 @@ func TestApierGetAccountAfterLoad(t *testing.T) {
 		return
 	}
 	var reply *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 11 {
-		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 11 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 11, received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
 }
 
@@ -1278,15 +1300,15 @@ func TestResponderGetCost(t *testing.T) {
 	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
 	tEnd, _ := utils.ParseDate("2013-08-07T17:31:30Z")
 	cd := engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "1001",
-		Account:      "1001",
-		Destination:  "+4917621621391",
-		CallDuration: 90,
-		TimeStart:    tStart,
-		TimeEnd:      tEnd,
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "+4917621621391",
+		DurationIndex: 90,
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
 	}
 	var cc engine.CallCost
 	// Simple test that command is executed without errors
@@ -1315,6 +1337,30 @@ func TestGetCallCostLog(t *testing.T) {
 	}
 }
 
+func TestMaxDebitInexistentAcnt(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cc := &engine.CallCost{}
+	cd := engine.CallDescriptor{
+		Direction:   "*out",
+		Tenant:      "cgrates.org",
+		Category:    "call",
+		Subject:     "INVALID",
+		Account:     "INVALID",
+		Destination: "1002",
+		TimeStart:   time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 27, 10, 42, 26, 0, time.UTC).Add(time.Duration(10) * time.Second),
+	}
+	if err := rater.Call("Responder.MaxDebit", cd, cc); err == nil {
+		t.Error(err.Error())
+	}
+	if err := rater.Call("Responder.Debit", cd, cc); err == nil {
+		t.Error(err.Error())
+	}
+
+}
+
 func TestCdrServer(t *testing.T) {
 	if !*testLocal {
 		return
@@ -1322,9 +1368,11 @@ func TestCdrServer(t *testing.T) {
 	httpClient := new(http.Client)
 	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
 		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
+		"setup_time":  []string{"2013-11-07T08:42:22Z"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
 		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"1002"},
+		"setup_time":  []string{"2013-11-07T08:42:23Z"},
 		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
 		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
@@ -1344,7 +1392,10 @@ func TestExportCdrsToFile(t *testing.T) {
 		t.Error("Failed to detect missing parameter")
 	}
 	req.CdrFormat = utils.CDRE_DRYRUN
-	expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCgrIds: []string{utils.FSCgrId("dsafdsaf"), utils.FSCgrId("adsafdsaf")}}
+	tm1, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:22Z")
+	tm2, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:23Z")
+	expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCgrIds: []string{utils.Sha1("dsafdsaf", tm1.String()),
+		utils.Sha1("adsafdsaf", tm2.String())}}
 	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
 		t.Error(err.Error())
 	} else if !reflect.DeepEqual(reply, expectReply) {

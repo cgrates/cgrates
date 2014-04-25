@@ -36,7 +36,8 @@ func TestHistoryRatinPlans(t *testing.T) {
 func TestHistoryDestinations(t *testing.T) {
 	scribe := historyScribe.(*history.MockScribe)
 	buf := scribe.BufMap[history.DESTINATIONS_FN]
-	expected := `[{"Id":"ALL","Prefixes":["49","41","43"]},
+	expected := `[{"Id":"*any","Prefixes":[""]},
+{"Id":"ALL","Prefixes":["49","41","43"]},
 {"Id":"DST_UK_Mobile_BIG5","Prefixes":["447956"]},
 {"Id":"GERMANY","Prefixes":["49"]},
 {"Id":"GERMANY_O2","Prefixes":["41"]},
@@ -46,6 +47,7 @@ func TestHistoryDestinations(t *testing.T) {
 {"Id":"PSTN_71","Prefixes":["+4971"]},
 {"Id":"PSTN_72","Prefixes":["+4972"]},
 {"Id":"RET","Prefixes":["0723","0724"]},
+{"Id":"URG","Prefixes":["112"]},
 {"Id":"nat","Prefixes":["0257","0256","0723"]}]`
 	if buf.String() != expected {
 		t.Error("Error in destination history content:", buf.String())

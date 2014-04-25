@@ -43,7 +43,8 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 type CgrCdr map[string]string
 
 func (cgrCdr CgrCdr) GetCgrId() string {
-	return FSCgrId(cgrCdr[ACCID])
+	setupTime, _ := cgrCdr.GetSetupTime()
+	return Sha1(cgrCdr[ACCID], setupTime.String())
 }
 
 func (cgrCdr CgrCdr) GetAccId() string {
@@ -77,7 +78,7 @@ func (cgrCdr CgrCdr) GetDestination() string {
 }
 
 func (cgrCdr CgrCdr) GetTOR() string {
-	return cgrCdr[TOR]
+	return cgrCdr[Category]
 }
 
 func (cgrCdr CgrCdr) GetTenant() string {
@@ -123,11 +124,7 @@ func (cgrCdr CgrCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, tor
 	if rtCdr.AccId, hasKey = cgrCdr[ACCID]; !hasKey {
 		if fieldsMandatory {
 			return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, ACCID))
-		} else { // Not mandatory, cgrid needs however to be unique
-			rtCdr.CgrId = GenUUID()
 		}
-	} else { // hasKey, use it to generate cgrid
-		rtCdr.CgrId = FSCgrId(rtCdr.AccId)
 	}
 	if rtCdr.CdrHost, hasKey = cgrCdr[CDRHOST]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, CDRHOST))
@@ -151,8 +148,8 @@ func (cgrCdr CgrCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, tor
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, tenantFld))
 	}
 	if strings.HasPrefix(torFld, STATIC_VALUE_PREFIX) {
-		rtCdr.TOR = torFld[1:]
-	} else if rtCdr.TOR, hasKey = cgrCdr[torFld]; !hasKey && fieldsMandatory {
+		rtCdr.Category = torFld[1:]
+	} else if rtCdr.Category, hasKey = cgrCdr[torFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, torFld))
 	}
 	if strings.HasPrefix(accountFld, STATIC_VALUE_PREFIX) {
@@ -208,5 +205,6 @@ func (cgrCdr CgrCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, tor
 			rtCdr.ExtraFields[fldName] = fldVal
 		}
 	}
+	rtCdr.CgrId = Sha1(rtCdr.AccId, rtCdr.SetupTime.String())
 	return rtCdr, nil
 }

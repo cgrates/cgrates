@@ -81,8 +81,8 @@ func TestWriteCdr(t *testing.T) {
 		Trailer: &config.CgrXmlCfgCdrTrailer{Fields: trailerCfgFlds},
 	}
 	fwWriter := FixedWidthCdrWriter{writer: wrBuf, exportTemplate: exportTpl, roundDecimals: 4, header: &bytes.Buffer{}, content: &bytes.Buffer{}, trailer: &bytes.Buffer{}}
-	cdr := &utils.StoredCdr{CgrId: utils.FSCgrId("dsafdsaf"), AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
+	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 1, AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Duration:   time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
@@ -124,6 +124,15 @@ func TestWriteCdr(t *testing.T) {
 	} else if fwWriter.totalCost != utils.Round(cdr.Cost, fwWriter.roundDecimals, utils.ROUNDING_MIDDLE) {
 		t.Error("Unexpected total cost in the stats: ", fwWriter.totalCost)
 	}
+	if fwWriter.FirstOrderId() != 1 {
+		t.Error("Unexpected FirstOrderId", fwWriter.FirstOrderId())
+	}
+	if fwWriter.LastOrderId() != 1 {
+		t.Error("Unexpected LastOrderId", fwWriter.LastOrderId())
+	}
+	if fwWriter.TotalCost() != utils.Round(cdr.Cost, fwWriter.roundDecimals, utils.ROUNDING_MIDDLE) {
+		t.Error("Unexpected TotalCost: ", fwWriter.TotalCost())
+	}
 }
 
 func TestWriteCdrs(t *testing.T) {
@@ -133,23 +142,23 @@ func TestWriteCdrs(t *testing.T) {
 		Trailer: &config.CgrXmlCfgCdrTrailer{Fields: trailerCfgFlds},
 	}
 	fwWriter := FixedWidthCdrWriter{writer: wrBuf, exportTemplate: exportTpl, roundDecimals: 4, header: &bytes.Buffer{}, content: &bytes.Buffer{}, trailer: &bytes.Buffer{}}
-	cdr1 := &utils.StoredCdr{CgrId: utils.FSCgrId("aaa1"), AccId: "aaa1", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1010",
+	cdr1 := &utils.StoredCdr{CgrId: utils.Sha1("aaa1", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 2, AccId: "aaa1", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1010",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Duration:   time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.25,
 		ExtraFields: map[string]string{"productnumber": "12341", "fieldextr2": "valextr2"},
 	}
-	cdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("aaa2"), AccId: "aaa2", CdrHost: "192.168.1.2", ReqType: "prepaid", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1002", Subject: "1002", Destination: "1011",
+	cdr2 := &utils.StoredCdr{CgrId: utils.Sha1("aaa2", time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String()), OrderId: 4, AccId: "aaa2", CdrHost: "192.168.1.2", ReqType: "prepaid", Direction: "*out", Tenant: "cgrates.org",
+		Category: "call", Account: "1002", Subject: "1002", Destination: "1011",
 		SetupTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 7, 42, 26, 0, time.UTC),
 		Duration:   time.Duration(5) * time.Minute, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.40001,
 		ExtraFields: map[string]string{"productnumber": "12342", "fieldextr2": "valextr2"},
 	}
 	cdr3 := &utils.StoredCdr{}
-	cdr4 := &utils.StoredCdr{CgrId: utils.FSCgrId("aaa3"), AccId: "aaa4", CdrHost: "192.168.1.4", ReqType: "postpaid", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1004", Subject: "1004", Destination: "1013",
+	cdr4 := &utils.StoredCdr{CgrId: utils.Sha1("aaa3", time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC).String()), OrderId: 3, AccId: "aaa4", CdrHost: "192.168.1.4", ReqType: "postpaid", Direction: "*out", Tenant: "cgrates.org",
+		Category: "call", Account: "1004", Subject: "1004", Destination: "1013",
 		SetupTime:  time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 9, 42, 26, 0, time.UTC),
 		Duration:   time.Duration(20) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
@@ -186,5 +195,14 @@ func TestWriteCdrs(t *testing.T) {
 	}
 	if fwWriter.totalCost != 5.9957 {
 		t.Error("Unexpected total cost in the stats: ", fwWriter.totalCost)
+	}
+	if fwWriter.FirstOrderId() != 2 {
+		t.Error("Unexpected FirstOrderId", fwWriter.FirstOrderId())
+	}
+	if fwWriter.LastOrderId() != 4 {
+		t.Error("Unexpected LastOrderId", fwWriter.LastOrderId())
+	}
+	if fwWriter.TotalCost() != 5.9957 {
+		t.Error("Unexpected TotalCost: ", fwWriter.TotalCost())
 	}
 }

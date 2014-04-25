@@ -47,7 +47,8 @@ func TestCDRFields(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err)
 	}
-	if fsCdr.GetCgrId() != utils.FSCgrId("01df56f4-d99a-4ef6-b7fe-b924b2415b7f") {
+	setupTime, _ := fsCdr.GetSetupTime()
+	if fsCdr.GetCgrId() != utils.Sha1("01df56f4-d99a-4ef6-b7fe-b924b2415b7f", setupTime.String()) {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
 	if fsCdr.GetAccId() != "01df56f4-d99a-4ef6-b7fe-b924b2415b7f" {
@@ -77,18 +78,17 @@ func TestCDRFields(t *testing.T) {
 	if fsCdr.GetReqType() != utils.RATED {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
-	setupTime, _ := fsCdr.GetSetupTime()
-	expectedSTime, _ := time.Parse(time.RFC3339, "2013-08-04T09:50:54Z")
+	expectedSTime := time.Date(2013, 8, 4, 9, 50, 54, 0, time.UTC)
 	if setupTime.UTC() != expectedSTime {
-		t.Error("Error parsing cdr: ", fsCdr)
+		t.Error("Error parsing setupTime: ", setupTime.UTC())
 	}
 	answerTime, _ := fsCdr.GetAnswerTime()
-	expectedATime, _ := time.Parse(time.RFC3339, "2013-08-04T09:50:56Z")
+	expectedATime := time.Date(2013, 8, 4, 9, 50, 56, 0, time.UTC)
 	if answerTime.UTC() != expectedATime {
-		t.Error("Error parsing cdr: ", fsCdr)
+		t.Error("Error parsing answerTime: ", answerTime.UTC())
 	}
 	if fsCdr.GetDuration() != 4000000000 {
-		t.Error("Error parsing cdr: ", fsCdr)
+		t.Error("Error parsing duration: ", fsCdr.GetDuration())
 	}
 	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "sip_user_agent"}, &utils.RSRField{Id: "read_codec"}, &utils.RSRField{Id: "write_codec"}}
 	extraFields := fsCdr.GetExtraFields()
@@ -112,9 +112,9 @@ func TestFsCdrAsStoredCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
-	expctRatedCdr := &utils.StoredCdr{CgrId: utils.FSCgrId("01df56f4-d99a-4ef6-b7fe-b924b2415b7f"), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f",
+	expctRatedCdr := &utils.StoredCdr{CgrId: utils.Sha1("01df56f4-d99a-4ef6-b7fe-b924b2415b7f", time.Date(2013, 8, 4, 9, 50, 54, 0, time.UTC).Local().String()), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f",
 		CdrHost: "127.0.0.1", CdrSource: FS_CDR_SOURCE, ReqType: utils.RATED,
-		Direction: "*out", Tenant: "ipbx.itsyscom.com", TOR: "call", Account: "dan", Subject: "dan", Destination: "+4986517174963",
+		Direction: "*out", Tenant: "ipbx.itsyscom.com", Category: "call", Account: "dan", Subject: "dan", Destination: "+4986517174963",
 		SetupTime:  time.Date(2013, 8, 4, 9, 50, 54, 0, time.UTC).Local(),
 		AnswerTime: time.Date(2013, 8, 4, 9, 50, 56, 0, time.UTC).Local(), Duration: time.Duration(4) * time.Second,
 		ExtraFields: map[string]string{"effective_caller_id_number": "+4986517174960"}, MediationRunId: "wholesale_run", Cost: -1}
@@ -126,9 +126,9 @@ func TestFsCdrAsStoredCdr(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error received", err)
 	}
-	expctRatedCdr2 := &utils.StoredCdr{CgrId: utils.FSCgrId("01df56f4-d99a-4ef6-b7fe-b924b2415b7f"), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f", CdrHost: "127.0.0.1",
+	expctRatedCdr2 := &utils.StoredCdr{CgrId: utils.Sha1("01df56f4-d99a-4ef6-b7fe-b924b2415b7f", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f", CdrHost: "127.0.0.1",
 		CdrSource: FS_CDR_SOURCE, ReqType: "postpaid",
-		Direction: "*in", Tenant: "cgrates.com", TOR: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "+4986517174963",
+		Direction: "*in", Tenant: "cgrates.com", Category: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "+4986517174963",
 		SetupTime:  time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Duration: time.Duration(12) * time.Second,
 		ExtraFields: map[string]string{"effective_caller_id_number": "+4986517174960"}, MediationRunId: "wholesale_run", Cost: -1}
@@ -178,5 +178,59 @@ func TestSearchReplaceInExtraFields(t *testing.T) {
 	}
 	if extraFields["sip_user_agent"] != "Jitsi" {
 		t.Error("Error parsing extra fields: ", extraFields)
+	}
+}
+
+func TestDDazRSRExtraFields(t *testing.T) {
+	eFieldsCfg := []byte(`[cdrs]
+extra_fields =  ~effective_caller_id_number:s/(\d+)/+$1/
+
+`)
+	simpleJsonCdr := []byte(`{
+    "core-uuid": "feef0b51-7fdf-4c4a-878e-aff233752de2",
+    "channel_data": {
+        "state": "CS_REPORTING",
+        "direction": "inbound",
+        "state_number": "11",
+        "flags": "0=1;1=1;3=1;36=1;37=1;39=1;42=1;47=1;52=1;73=1;75=1;94=1",
+        "caps": "1=1;2=1;3=1;4=1;5=1;6=1"
+    },
+    "variables": {
+        "direction": "inbound",
+        "uuid": "86cfd6e2-dbda-45a3-b59d-f683ec368e8b",
+        "session_id": "5",
+        "accountcode": "1001",
+        "user_context": "default",
+        "effective_caller_id_name": "Extension 1001",
+        "effective_caller_id_number": "4986517174963",
+        "outbound_caller_id_name": "FreeSWITCH",
+        "outbound_caller_id_number": "0000000000"
+    },
+    "times": {
+        "created_time": "1396984221278217",
+        "profile_created_time": "1396984221278217",
+        "progress_time": "0",
+        "progress_media_time": "0",
+        "answered_time": "0",
+        "hangup_time": "0",
+        "resurrect_time": "0",
+        "transfer_time": "1396984221377035"
+    }
+}`)
+	var err error
+	cfg, err = config.NewCGRConfigFromBytes(eFieldsCfg)
+	if err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",
+		RSRule: &utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}) {
+		t.Errorf("Unexpected value for config CdrsExtraFields: %v", cfg.CDRSExtraFields)
+	}
+	fsCdr, err := new(FSCdr).New(simpleJsonCdr)
+	if err != nil {
+		t.Error("Could not parse cdr", err.Error())
+	}
+	extraFields := fsCdr.GetExtraFields()
+	if extraFields["effective_caller_id_number"] != "+4986517174963" {
+		t.Error("Unexpected effective_caller_id_number received", extraFields["effective_caller_id_number"])
 	}
 }

@@ -182,11 +182,11 @@ func TestFsCsvGetAccount(t *testing.T) {
 		return
 	}
 	var reply *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 10.0 { // We expect 11.5 since we have added in the previous test 1.5
-		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
 }
 
@@ -197,15 +197,15 @@ func TestFsCsvCall1(t *testing.T) {
 	tStart := time.Date(2014, 01, 15, 6, 0, 0, 0, time.UTC)
 	tEnd := time.Date(2014, 01, 15, 6, 0, 35, 0, time.UTC)
 	cd := engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "1001",
-		Account:      "1001",
-		Destination:  "1002",
-		TimeStart:    tStart,
-		TimeEnd:      tEnd,
-		CallDuration: 35,
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "1002",
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
+		DurationIndex: 35,
 	}
 	var cc engine.CallCost
 	// Make sure the cost is what we expect it is
@@ -222,26 +222,26 @@ func TestFsCsvCall1(t *testing.T) {
 	}
 	// Make sure the account was debited correctly for the first loop index (ConnectFee included)
 	var reply *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", BalanceType: "*monetary", Direction: "*out"}
+	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue() != 9.4 { // We expect 11.5 since we have added in the previous test 1.5
-		t.Errorf("Calling ApierV1.GetAccount expected: 9.4, received: %f", reply.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 9.4 { // We expect 11.5 since we have added in the previous test 1.5
+		t.Errorf("Calling ApierV1.GetAccount expected: 9.4, received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	} else if len(reply.UnitCounters) != 1 ||
 		utils.Round(reply.UnitCounters[0].Balances[0].Value, 2, utils.ROUNDING_MIDDLE) != 0.6 { // Make sure we correctly count usage
 		t.Errorf("Received unexpected UnitCounters: %v", reply.UnitCounters)
 	}
 	cd = engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "1001",
-		Account:      "1001",
-		Destination:  "1002",
-		TimeStart:    tStart,
-		TimeEnd:      tEnd,
-		CallDuration: 35,
-		LoopIndex:    1, // Should not charge ConnectFee
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "1002",
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
+		DurationIndex: 35,
+		LoopIndex:     1, // Should not charge ConnectFee
 	}
 	// Make sure debit charges what cost returned
 	if err := rater.Call("Responder.MaxDebit", cd, &cc); err != nil {
@@ -253,8 +253,8 @@ func TestFsCsvCall1(t *testing.T) {
 	var reply2 *engine.Account
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply2); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
-	} else if utils.Round(reply2.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue(), 2, utils.ROUNDING_MIDDLE) != 9.20 {
-		t.Errorf("Calling ApierV1.GetAccount expected: 9.2, received: %f", reply2.BalanceMap[attrs.BalanceType+attrs.Direction].GetTotalValue())
+	} else if utils.Round(reply2.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue(), 2, utils.ROUNDING_MIDDLE) != 9.20 {
+		t.Errorf("Calling ApierV1.GetAccount expected: 9.2, received: %f", reply2.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	} else if len(reply2.UnitCounters) != 1 ||
 		utils.Round(reply2.UnitCounters[0].Balances[0].Value, 2, utils.ROUNDING_MIDDLE) != 0.8 { // Make sure we correctly count usage
 		t.Errorf("Received unexpected UnitCounters: %v", reply2.UnitCounters)

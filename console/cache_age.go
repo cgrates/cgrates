@@ -18,40 +18,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"fmt"
-	"github.com/cgrates/cgrates/utils"
-)
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
-	commands["get_cache_age"] = &CmdGetCacheAge{}
+	c := &CmdGetCacheAge{
+		name:      "cache_age",
+		rpcMethod: "ApierV1.GetCachedItemAge",
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
 type CmdGetCacheAge struct {
+	name      string
 	rpcMethod string
-	rpcParams string
-	rpcResult *utils.CachedItemAge
+	rpcParams *StringWrapper
+	rpcResult utils.CachedItemAge
+	*CommandExecuter
 }
 
-// name should be exec's name
-func (self *CmdGetCacheAge) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] get_cache_age <item_id>")
-}
-
-// set param defaults
-func (self *CmdGetCacheAge) defaults() error {
-	self.rpcMethod = "ApierV1.GetCachedItemAge"
-	return nil
-}
-
-func (self *CmdGetCacheAge) FromArgs(args []string) error {
-	if len(args) != 3 {
-		return fmt.Errorf(self.Usage(""))
-	}
-	self.defaults()
-	self.rpcParams = args[2]
-	return nil
+func (self *CmdGetCacheAge) Name() string {
+	return self.name
 }
 
 func (self *CmdGetCacheAge) RpcMethod() string {
@@ -59,6 +47,9 @@ func (self *CmdGetCacheAge) RpcMethod() string {
 }
 
 func (self *CmdGetCacheAge) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &StringWrapper{}
+	}
 	return self.rpcParams
 }
 

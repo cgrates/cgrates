@@ -18,46 +18,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import (
-	"fmt"
-)
+import "github.com/cgrates/cgrates/apier"
 
 func init() {
-	commands["reload_scheduler"] = &CmdReloadScheduler{}
+	c := &CmdExecuteAction{
+		name:      "action_execute",
+		rpcMethod: "ApierV1.ExecuteAction",
+		rpcParams: &apier.AttrExecuteAction{Direction: "*out"},
+	}
+	commands[c.Name()] = c
+	c.CommandExecuter = &CommandExecuter{c}
 }
 
 // Commander implementation
-type CmdReloadScheduler struct {
+type CmdExecuteAction struct {
+	name      string
 	rpcMethod string
-	rpcParams string
+	rpcParams *apier.AttrExecuteAction
 	rpcResult string
+	*CommandExecuter
 }
 
-// name should be exec's name
-func (self *CmdReloadScheduler) Usage(name string) string {
-	return fmt.Sprintf("\n\tUsage: cgr-console [cfg_opts...{-h}] reload_scheduler")
+func (self *CmdExecuteAction) Name() string {
+	return self.name
 }
 
-// set param defaults
-func (self *CmdReloadScheduler) defaults() error {
-	self.rpcMethod = "ApierV1.ReloadScheduler"
-	return nil
-}
-
-// Parses command line args and builds CmdBalance value
-func (self *CmdReloadScheduler) FromArgs(args []string) error {
-	self.defaults()
-	return nil
-}
-
-func (self *CmdReloadScheduler) RpcMethod() string {
+func (self *CmdExecuteAction) RpcMethod() string {
 	return self.rpcMethod
 }
 
-func (self *CmdReloadScheduler) RpcParams() interface{} {
+func (self *CmdExecuteAction) RpcParams() interface{} {
+	if self.rpcParams == nil {
+		self.rpcParams = &apier.AttrExecuteAction{Direction: "*out"}
+	}
 	return self.rpcParams
 }
 
-func (self *CmdReloadScheduler) RpcResult() interface{} {
+func (self *CmdExecuteAction) RpcResult() interface{} {
 	return &self.rpcResult
 }
