@@ -43,7 +43,7 @@ type TimeSpan struct {
 type Increment struct {
 	Duration            time.Duration
 	Cost                float64
-	BalanceInfo         *BalanceInfo // need more than one for minutes with cost
+	BalanceInfo         *BalanceInfo // need more than one for units with cost
 	BalanceRateInterval *RateInterval
 	UnitInfo            *UnitInfo
 	CompressFactor      int

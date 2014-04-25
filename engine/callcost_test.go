@@ -19,8 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestSingleResultMerge(t *testing.T) {
@@ -159,5 +162,46 @@ func TestCallCostGetDuration(t *testing.T) {
 	}
 	if cc.GetDuration().Seconds() != 90 {
 		t.Error("Wrong call cost duration: ", cc.GetDuration())
+	}
+}
+
+func TestCallCostToDataCostError(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:   "*out",
+		TOR:         "data",
+		Tenant:      "cgrates.org",
+		Subject:     "rif",
+		Destination: utils.ANY,
+		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
+		Type:        MINUTES,
+	}
+	cc, _ := cd.GetCost()
+	_, err := cc.ToDataCost()
+	if err == nil {
+		t.Error("Failed to throw error on call to datacost!")
+	}
+}
+
+func TestCallCostToDataCost(t *testing.T) {
+	cd := &CallDescriptor{
+		Direction:   "*out",
+		TOR:         "data",
+		Tenant:      "cgrates.org",
+		Subject:     "rif",
+		Destination: utils.ANY,
+		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:     time.Date(2014, 3, 4, 6, 1, 5, 0, time.UTC),
+		Type:        DATA,
+	}
+	cc, _ := cd.GetCost()
+	dc, err := cc.ToDataCost()
+	if err != nil {
+		t.Error("Error convertiong to data cost: ", err)
+	}
+	js, _ := json.Marshal(dc)
+	expected := `{"Direction":"*out","TOR":"data","Tenant":"cgrates.org","Subject":"rif","Account":"","Destination":"*any","Type":"*data","Cost":65,"DataSpans":[{"DataStart":0,"DataEnd":60,"Cost":60,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":1,"RateIncrement":60000000000,"RateUnit":1000000000},{"GroupIntervalStart":60000000000,"Value":1,"RateIncrement":1000000000,"RateUnit":1000000000}],"RoundingMethod":"*up","RoundingDecimals":4},"Weight":10},"DataIndex":60,"Increments":[],"MatchedSubject":"","MatchedPrefix":"","MatchedDestId":""},{"DataStart":60,"DataEnd":65,"Cost":5,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":1,"RateIncrement":60000000000,"RateUnit":1000000000},{"GroupIntervalStart":60000000000,"Value":1,"RateIncrement":1000000000,"RateUnit":1000000000}],"RoundingMethod":"*up","RoundingDecimals":4},"Weight":10},"DataIndex":65,"Increments":[],"MatchedSubject":"*out:cgrates.org:data:rif","MatchedPrefix":"*any","MatchedDestId":"*any"}]}`
+	if string(js) != expected {
+		t.Error("Error coverting to data cost: ", string(js))
 	}
 }

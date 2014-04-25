@@ -50,7 +50,7 @@ func (self *CmdGetCallCost) RpcMethod() string {
 }
 
 func (self *CmdGetCallCost) RpcParams() interface{} {
-if self.rpcParams == nil {
+	if self.rpcParams == nil {
 		self.rpcParams = &apier.AttrGetCallCost{RunId: utils.DEFAULT_RUNID}
 	}
 	return self.rpcParams
