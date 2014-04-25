@@ -245,6 +245,7 @@ type TPActionTrigger struct {
 	Direction      string  // Traffic direction
 	ThresholdType  string  // This threshold type
 	ThresholdValue float64 // Threshold
+	Recurrent      bool    // reset executed flag each run
 	DestinationId  string  // Id of the destination profile
 	ActionsId      string  // Actions which will execute on threshold reached
 	Weight         float64 // weight

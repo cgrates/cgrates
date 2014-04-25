@@ -676,7 +676,11 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		if err != nil {
 			return fmt.Errorf("Could not parse action trigger value: %v", err)
 		}
-		weight, err := strconv.ParseFloat(record[7], 64)
+		recurrent, err := strconv.ParseBool(record[5])
+		if err != nil {
+			return fmt.Errorf("Could not parse action trigger recurrent flag: %v", err)
+		}
+		weight, err := strconv.ParseFloat(record[8], 64)
 		if err != nil {
 			return fmt.Errorf("Could not parse action trigger weight: %v", err)
 		}
@@ -686,8 +690,9 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			Direction:      record[2],
 			ThresholdType:  record[3],
 			ThresholdValue: value,
-			DestinationId:  record[5],
-			ActionsId:      record[6],
+			Recurrent:      recurrent,
+			DestinationId:  record[6],
+			ActionsId:      record[7],
 			Weight:         weight,
 		}
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)

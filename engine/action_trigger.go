@@ -32,11 +32,11 @@ type ActionTrigger struct {
 	Direction      string
 	ThresholdType  string //*min_counter, *max_counter, *min_balance, *max_balance
 	ThresholdValue float64
+	Recurrent      bool // reset eexcuted flag each run
 	DestinationId  string
 	Weight         float64
 	ActionsId      string
 	Executed       bool
-	Recurrent      bool
 }
 
 func (at *ActionTrigger) Execute(ub *Account) (err error) {

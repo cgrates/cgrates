@@ -529,6 +529,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 				DestinationId:  apiAtr.DestinationId,
 				Weight:         apiAtr.Weight,
 				ActionsId:      apiAtr.ActionsId,
+				Recurrent:      apiAtr.Recurrent,
 			}
 		}
 		dbr.actionsTriggers[key] = atrs

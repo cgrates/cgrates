@@ -1137,7 +1137,8 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 	for rows.Next() {
 		var threshold, weight float64
 		var tpid, tag, balances_type, direction, destinations_tag, actions_tag, thresholdType string
-		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &thresholdType, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
+		var recurrent bool
+		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &thresholdType, &threshold, &recurrent, &destinations_tag, &actions_tag, &weight); err != nil {
 			return nil, err
 		}
 
