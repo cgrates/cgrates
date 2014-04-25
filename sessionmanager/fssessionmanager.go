@@ -178,7 +178,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		cd := engine.CallDescriptor{
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
-			Category:    ev.GetCategory(dc.TorField),
+			Category:    ev.GetCategory(dc.CategoryField),
 			Subject:     ev.GetSubject(dc.SubjectField),
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
@@ -266,7 +266,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 			cd := engine.CallDescriptor{
 				Direction:     ev.GetDirection(dc.DirectionField),
 				Tenant:        ev.GetTenant(dc.TenantField),
-				Category:      ev.GetCategory(dc.TorField),
+				Category:      ev.GetCategory(dc.CategoryField),
 				Subject:       ev.GetSubject(dc.SubjectField),
 				Account:       ev.GetAccount(dc.AccountField),
 				LoopIndex:     0,

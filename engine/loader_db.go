@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -474,59 +473,8 @@ func (dbr *DbReader) LoadSharedGroups() (err error) {
 }
 
 func (dbr *DbReader) LoadLCRs() (err error) {
-	dbr.sharedGroups, err = dbr.storDb.GetTpSharedGroups(dbr.tpid, "")
+	dbr.lcrs, err = dbr.storDb.GetTpLCRs(dbr.tpid, "")
 	return err
-	csvReader, fp, err := csvr.readerFunc(csvr.lcrFn, csvr.sep, utils.LCRS_NRCOLS)
-	if err != nil {
-		log.Print("Could not load LCR rules file: ", err)
-		// allow writing of the other values
-		return nil
-	}
-	if fp != nil {
-		defer fp.Close()
-	}
-	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		direction, tenant, customer := record[0], record[1], record[2]
-		id := fmt.Sprintf("%s:%s:%s", direction, tenant, customer)
-		lcr, found := csvr.lcrs[id]
-		activationTime, err := utils.ParseTimeDetectLayout(record[7])
-		if err != nil {
-			return fmt.Errorf("Could not parse LCR activation time: %v", err)
-		}
-		weight, err := strconv.ParseFloat(record[8], 64)
-		if err != nil {
-			return fmt.Errorf("Could not parse LCR weight: %v", err)
-		}
-		if !found {
-			lcr = &LCR{
-				Direction: direction,
-				Tenant:    tenant,
-				Customer:  customer,
-			}
-		}
-		var act *LCRActivation
-		for _, existingAct := range lcr.Activations {
-			if existingAct.ActivationTime.Equal(activationTime) {
-				act = existingAct
-				break
-			}
-		}
-		if act == nil {
-			act = &LCRActivation{
-				ActivationTime: activationTime,
-			}
-			lcr.Activations = append(lcr.Activations, act)
-		}
-		act.Entries = append(act.Entries, &LCREntry{
-			DestinationId: record[3],
-			Category:      record[4],
-			Strategy:      record[5],
-			Suppliers:     record[6],
-			Weight:        weight,
-		})
-		csvr.lcrs[id] = lcr
-	}
-	return
 }
 
 func (dbr *DbReader) LoadActions() (err error) {

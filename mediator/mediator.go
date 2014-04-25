@@ -125,7 +125,7 @@ func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 	}
 	for _, dc := range dcs {
 		forkedCdr, err := dbcdr.AsStoredCdr(dc.RunId, dc.ReqTypeField, dc.DirectionField,
-			dc.TenantField, dc.TorField, dc.AccountField, dc.SubjectField, dc.DestinationField, dc.SetupTimeField, dc.AnswerTimeField, dc.DurationField, []string{}, true)
+			dc.TenantField, dc.CategoryField, dc.AccountField, dc.SubjectField, dc.DestinationField, dc.SetupTimeField, dc.AnswerTimeField, dc.DurationField, []string{}, true)
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis
 			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: dbcdr.GetCgrId(), MediationRunId: dc.RunId, Cost: -1.0}, err.Error()) // Cannot fork CDR, important just runid and error
 			continue

@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var cfgDcT *config.CGRConfig
@@ -47,7 +48,7 @@ func TestHandleGetEmptyDC(t *testing.T) {
 // Accounting db has no DerivedChargers, configured defaults
 func TestHandleGetConfiguredDC(t *testing.T) {
 	cfgedDC := utils.DerivedChargers{&utils.DerivedCharger{RunId: "responder1", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
-		TorField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
+		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
 	cfgDcT.DerivedChargers = cfgedDC
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Tor: "call", Direction: "*out", Account: "test3", Subject: "test3"}
 	if dcs, err := HandleGetDerivedChargers(acntDb, cfgDcT, attrs); err != nil {
@@ -61,9 +62,9 @@ func TestHandleGetConfiguredDC(t *testing.T) {
 func TestHandleGetStoredDC(t *testing.T) {
 	keyCharger1 := utils.DerivedChargersKey("cgrates.org", "call", "*out", "rif", "rif")
 	charger1 := utils.DerivedChargers{
-		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
-		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
 	}
 	if err := acntDb.SetDerivedChargers(keyCharger1, charger1); err != nil {
@@ -71,7 +72,7 @@ func TestHandleGetStoredDC(t *testing.T) {
 	}
 	// Expected Charger should have default configured values added
 	expCharger1 := append(charger1, &utils.DerivedCharger{RunId: "responder1", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
-		TorField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"})
+		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"})
 	acntDb.CacheAccounting(nil, nil, nil, nil)
 	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Tor: "call", Direction: "*out", Account: "rif", Subject: "rif"}
 	if dcs, err := HandleGetDerivedChargers(acntDb, cfgDcT, attrs); err != nil {

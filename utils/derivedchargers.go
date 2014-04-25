@@ -24,7 +24,7 @@ import (
 )
 
 // Wraps regexp compiling in case of rsr fields
-func NewDerivedCharger(runId, reqTypeFld, dirFld, tenantFld, totFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld string) (dc *DerivedCharger, err error) {
+func NewDerivedCharger(runId, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld string) (dc *DerivedCharger, err error) {
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
@@ -47,9 +47,9 @@ func NewDerivedCharger(runId, reqTypeFld, dirFld, tenantFld, totFld, acntFld, su
 			return nil, err
 		}
 	}
-	dc.TorField = totFld
-	if strings.HasPrefix(dc.TorField, REGEXP_PREFIX) {
-		if dc.rsrTorField, err = NewRSRField(dc.TorField); err != nil {
+	dc.CategoryField = catFld
+	if strings.HasPrefix(dc.CategoryField, REGEXP_PREFIX) {
+		if dc.rsrCategoryField, err = NewRSRField(dc.CategoryField); err != nil {
 			return nil, err
 		}
 	}
@@ -97,7 +97,7 @@ type DerivedCharger struct {
 	ReqTypeField        string    // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
 	DirectionField      string    // Field containing direction info
 	TenantField         string    // Field containing tenant info
-	TorField            string    // Field containing tor info
+	CategoryField       string    // Field containing tor info
 	AccountField        string    // Field containing account information
 	SubjectField        string    // Field containing subject information
 	DestinationField    string    // Field containing destination information
@@ -107,7 +107,7 @@ type DerivedCharger struct {
 	rsrReqTypeField     *RSRField // Storage for compiled Regexp in case of RSRFields
 	rsrDirectionField   *RSRField
 	rsrTenantField      *RSRField
-	rsrTorField         *RSRField
+	rsrCategoryField    *RSRField
 	rsrAccountField     *RSRField
 	rsrSubjectField     *RSRField
 	rsrDestinationField *RSRField

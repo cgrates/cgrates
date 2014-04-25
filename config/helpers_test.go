@@ -53,9 +53,9 @@ answer_time_fields = test1, test2
 duration_fields = test1, test2
 `)
 	edcs := utils.DerivedChargers{
-		&utils.DerivedCharger{RunId: "run1", ReqTypeField: "test1", DirectionField: "test1", TenantField: "test1", TorField: "test1",
+		&utils.DerivedCharger{RunId: "run1", ReqTypeField: "test1", DirectionField: "test1", TenantField: "test1", CategoryField: "test1",
 			AccountField: "test1", SubjectField: "test1", DestinationField: "test1", SetupTimeField: "test1", AnswerTimeField: "test1", DurationField: "test1"},
-		&utils.DerivedCharger{RunId: "run2", ReqTypeField: "test2", DirectionField: "test2", TenantField: "test2", TorField: "test2",
+		&utils.DerivedCharger{RunId: "run2", ReqTypeField: "test2", DirectionField: "test2", TenantField: "test2", CategoryField: "test2",
 			AccountField: "test2", SubjectField: "test2", DestinationField: "test2", SetupTimeField: "test2", AnswerTimeField: "test2", DurationField: "test2"}}
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())
