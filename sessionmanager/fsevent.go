@@ -21,6 +21,7 @@ package sessionmanager
 import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 	"strings"
@@ -47,7 +48,7 @@ const (
 	SETUP_TIME         = "Caller-Channel-Created-Time"
 	ANSWER_TIME        = "Caller-Channel-Answered-Time"
 	END_TIME           = "Caller-Channel-Hangup-Time"
-	DURATION           = "billsec"
+	DURATION           = "variable_billsec"
 	NAME               = "Event-Name"
 	HEARTBEAT          = "HEARTBEAT"
 	ANSWER             = "CHANNEL_ANSWER"
@@ -200,5 +201,6 @@ func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error)
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		durStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
+	engine.Logger.Info(fmt.Sprintf("Parsing duration out of string: %s, fieldName: %s, field dur: %s, fsev: %s", durStr, fsev[fieldName], fsev[DURATION], fsev))
 	return utils.ParseDurationWithSecs(durStr)
 }
