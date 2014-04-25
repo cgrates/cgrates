@@ -197,15 +197,15 @@ func TestFsCsvCall1(t *testing.T) {
 	tStart := time.Date(2014, 01, 15, 6, 0, 0, 0, time.UTC)
 	tEnd := time.Date(2014, 01, 15, 6, 0, 35, 0, time.UTC)
 	cd := engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "1001",
-		Account:      "1001",
-		Destination:  "1002",
-		TimeStart:    tStart,
-		TimeEnd:      tEnd,
-		CallDuration: 35,
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "1002",
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
+		DurationIndex: 35,
 	}
 	var cc engine.CallCost
 	// Make sure the cost is what we expect it is
@@ -232,16 +232,16 @@ func TestFsCsvCall1(t *testing.T) {
 		t.Errorf("Received unexpected UnitCounters: %v", reply.UnitCounters)
 	}
 	cd = engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "1001",
-		Account:      "1001",
-		Destination:  "1002",
-		TimeStart:    tStart,
-		TimeEnd:      tEnd,
-		CallDuration: 35,
-		LoopIndex:    1, // Should not charge ConnectFee
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "1002",
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
+		DurationIndex: 35,
+		LoopIndex:     1, // Should not charge ConnectFee
 	}
 	// Make sure debit charges what cost returned
 	if err := rater.Call("Responder.MaxDebit", cd, &cc); err != nil {

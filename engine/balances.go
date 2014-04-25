@@ -218,7 +218,7 @@ func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalance
 			cd.Subject = b.RatingSubject
 			cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 			cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
-			cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
+			cd.DurationIndex = cc.Timespans[len(cc.Timespans)-1].DurationIndex
 			newCC, err := b.GetCost(cd)
 			if err != nil {
 				Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))
@@ -327,7 +327,7 @@ func (b *Balance) DebitMoney(cc *CallCost, count bool, ub *Account) error {
 				cd.Subject = b.RatingSubject
 				cd.TimeStart = ts.GetTimeStartForIncrement(incrementIndex)
 				cd.TimeEnd = cc.Timespans[len(cc.Timespans)-1].TimeEnd
-				cd.CallDuration = cc.Timespans[len(cc.Timespans)-1].CallDuration
+				cd.DurationIndex = cc.Timespans[len(cc.Timespans)-1].DurationIndex
 				newCC, err := b.GetCost(cd)
 				if err != nil {
 					Logger.Err(fmt.Sprintf("Error getting new cost for balance subject: %v", err))

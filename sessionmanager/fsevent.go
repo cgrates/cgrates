@@ -37,7 +37,7 @@ const (
 	ACCOUNT            = "variable_cgr_account"
 	DESTINATION        = "variable_cgr_destination"
 	REQTYPE            = "variable_cgr_reqtype" //prepaid or postpaid
-	TOR                = "variable_cgr_tor"
+	Category           = "variable_cgr_tor"
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_cgr_tenant"
 	CALL_DEST_NR       = "Caller-Destination-Number"
@@ -118,7 +118,7 @@ func (fsev FSEvent) GetTOR(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[TOR], config.CgrConfig().DefaultTOR)
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[Category], config.CgrConfig().DefaultTOR)
 }
 func (fsev FSEvent) GetCgrId() string {
 	setupTime, _ := fsev.GetSetupTime("")

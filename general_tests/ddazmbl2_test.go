@@ -135,7 +135,7 @@ func TestExecuteActions2(t *testing.T) {
 func TestDebit2(t *testing.T) {
 	cd := &engine.CallDescriptor{
 		Direction:   "*out",
-		TOR:         "call",
+		Category:    "call",
 		Tenant:      "cgrates.org",
 		Subject:     "12345",
 		Account:     "12345",

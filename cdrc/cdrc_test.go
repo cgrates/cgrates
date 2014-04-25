@@ -81,7 +81,7 @@ func TestRecordAsStoredCdr(t *testing.T) {
 		ReqType:     cdrRow[1],
 		Direction:   cdrRow[2],
 		Tenant:      cdrRow[3],
-		TOR:         cdrRow[4],
+		Category:    cdrRow[4],
 		Account:     cdrRow[5],
 		Subject:     cdrRow[6],
 		Destination: cdrRow[7],

@@ -179,7 +179,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		cd := engine.CallDescriptor{
 			Direction:   ev.GetDirection(directionFld),
 			Tenant:      ev.GetTenant(tenantFld),
-			TOR:         ev.GetTOR(torFld),
+			Category:    ev.GetTOR(torFld),
 			Subject:     ev.GetSubject(subjFld),
 			Account:     ev.GetAccount(actFld),
 			Destination: ev.GetDestination(dstFld),
@@ -260,16 +260,16 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				return
 			}
 			cd := engine.CallDescriptor{
-				Direction:    ev.GetDirection(directionFld),
-				Tenant:       ev.GetTenant(tenantFld),
-				TOR:          ev.GetTOR(torFld),
-				Subject:      ev.GetSubject(actFld),
-				Account:      ev.GetAccount(subjFld),
-				LoopIndex:    0,
-				CallDuration: endTime.Sub(startTime),
-				Destination:  ev.GetDestination(dstFld),
-				TimeStart:    startTime,
-				TimeEnd:      endTime,
+				Direction:     ev.GetDirection(directionFld),
+				Tenant:        ev.GetTenant(tenantFld),
+				Category:      ev.GetTOR(torFld),
+				Subject:       ev.GetSubject(actFld),
+				Account:       ev.GetAccount(subjFld),
+				LoopIndex:     0,
+				DurationIndex: endTime.Sub(startTime),
+				Destination:   ev.GetDestination(dstFld),
+				TimeStart:     startTime,
+				TimeEnd:       endTime,
 			}
 			cc := &engine.CallCost{}
 			err = sm.connector.Debit(cd, cc)
@@ -324,7 +324,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				cd := &engine.CallDescriptor{
 					Direction:   lastCC.Direction,
 					Tenant:      lastCC.Tenant,
-					TOR:         lastCC.TOR,
+					Category:    lastCC.Category,
 					Subject:     lastCC.Subject,
 					Account:     lastCC.Account,
 					Destination: lastCC.Destination,

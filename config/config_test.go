@@ -159,7 +159,7 @@ func TestDefaults(t *testing.T) {
 		&utils.RSRField{Id: utils.REQTYPE},
 		&utils.RSRField{Id: utils.DIRECTION},
 		&utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.TOR},
+		&utils.RSRField{Id: utils.Category},
 		&utils.RSRField{Id: utils.ACCOUNT},
 		&utils.RSRField{Id: utils.SUBJECT},
 		&utils.RSRField{Id: utils.DESTINATION},

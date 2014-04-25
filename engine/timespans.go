@@ -35,7 +35,7 @@ type TimeSpan struct {
 	Cost                                         float64
 	ratingInfo                                   *RatingInfo
 	RateInterval                                 *RateInterval
-	CallDuration                                 time.Duration // the call duration so far till TimeEnd
+	DurationIndex                                time.Duration // the call duration so far till TimeEnd
 	Increments                                   Increments
 	MatchedSubject, MatchedPrefix, MatchedDestId string
 }
@@ -340,7 +340,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 				nts.copyRatingInfo(ts)
 				ts.TimeEnd = splitTime
 				nts.SetRateInterval(i)
-				nts.CallDuration = ts.CallDuration
+				nts.DurationIndex = ts.DurationIndex
 				ts.SetNewCallDuration(nts)
 				// Logger.Debug(fmt.Sprintf("Group splitting: %+v %+v", ts, nts))
 				return
@@ -368,7 +368,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		}
 		nts.copyRatingInfo(ts)
 		ts.TimeEnd = splitTime
-		nts.CallDuration = ts.CallDuration
+		nts.DurationIndex = ts.DurationIndex
 		ts.SetNewCallDuration(nts)
 		// Logger.Debug(fmt.Sprintf("right: %+v %+v", ts, nts))
 		return
@@ -390,7 +390,7 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 		ts.TimeEnd = splitTime
 
 		nts.SetRateInterval(i)
-		nts.CallDuration = ts.CallDuration
+		nts.DurationIndex = ts.DurationIndex
 		ts.SetNewCallDuration(nts)
 		// Logger.Debug(fmt.Sprintf("left: %+v %+v", ts, nts))
 		return
@@ -410,7 +410,7 @@ func (ts *TimeSpan) SplitByIncrement(index int) *TimeSpan {
 		TimeEnd:      ts.TimeEnd,
 	}
 	newTs.copyRatingInfo(ts)
-	newTs.CallDuration = ts.CallDuration
+	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = timeStart
 	newTs.Increments = ts.Increments[index:]
 	ts.Increments = ts.Increments[:index]
@@ -430,7 +430,7 @@ func (ts *TimeSpan) SplitByDuration(duration time.Duration) *TimeSpan {
 		TimeEnd:      ts.TimeEnd,
 	}
 	newTs.copyRatingInfo(ts)
-	newTs.CallDuration = ts.CallDuration
+	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = timeStart
 	// split the increment
 	for incrIndex, incr := range ts.Increments {
@@ -463,7 +463,7 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 		TimeEnd:   ts.TimeEnd,
 	}
 	newTs.copyRatingInfo(ts)
-	newTs.CallDuration = ts.CallDuration
+	newTs.DurationIndex = ts.DurationIndex
 	ts.TimeEnd = rp.ActivationTime
 	ts.SetNewCallDuration(newTs)
 	// Logger.Debug(fmt.Sprintf("RP SPLITTING: %+v %+v", ts, newTs))
@@ -472,7 +472,7 @@ func (ts *TimeSpan) SplitByRatingPlan(rp *RatingInfo) (newTs *TimeSpan) {
 
 // Returns the starting time of this timespan
 func (ts *TimeSpan) GetGroupStart() time.Duration {
-	s := ts.CallDuration - ts.GetDuration()
+	s := ts.DurationIndex - ts.GetDuration()
 	if s < 0 {
 		s = 0
 	}
@@ -480,16 +480,16 @@ func (ts *TimeSpan) GetGroupStart() time.Duration {
 }
 
 func (ts *TimeSpan) GetGroupEnd() time.Duration {
-	return ts.CallDuration
+	return ts.DurationIndex
 }
 
 // sets the CallDuration attribute to reflect new timespan
 func (ts *TimeSpan) SetNewCallDuration(nts *TimeSpan) {
-	d := ts.CallDuration - nts.GetDuration()
+	d := ts.DurationIndex - nts.GetDuration()
 	if d < 0 {
 		d = 0
 	}
-	ts.CallDuration = d
+	ts.DurationIndex = d
 }
 
 func (nts *TimeSpan) copyRatingInfo(ts *TimeSpan) {
@@ -514,6 +514,6 @@ func (ts *TimeSpan) RoundToDuration(duration time.Duration) {
 	if duration > ts.GetDuration() {
 		initialDuration := ts.GetDuration()
 		ts.TimeEnd = ts.TimeStart.Add(duration)
-		ts.CallDuration = ts.CallDuration + (duration - initialDuration)
+		ts.DurationIndex = ts.DurationIndex + (duration - initialDuration)
 	}
 }

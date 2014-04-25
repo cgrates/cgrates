@@ -74,7 +74,7 @@ func NewSession(ev Event, sm SessionManager) *Session {
 		cd := &engine.CallDescriptor{
 			Direction:   ev.GetDirection(directionFld),
 			Tenant:      ev.GetTenant(tenantFld),
-			TOR:         ev.GetTOR(torFld),
+			Category:    ev.GetTOR(torFld),
 			Subject:     ev.GetSubject(subjFld),
 			Account:     ev.GetAccount(actFld),
 			Destination: ev.GetDestination(dstFld),
@@ -110,7 +110,7 @@ func (s *Session) debitLoop(runIdx int) {
 		}
 		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
 		nextCd.LoopIndex = index
-		nextCd.CallDuration += debitPeriod // first presumed duration
+		nextCd.DurationIndex += debitPeriod // first presumed duration
 		cc := &engine.CallCost{}
 		if err := s.sessionManager.MaxDebit(&nextCd, cc); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
@@ -125,8 +125,8 @@ func (s *Session) debitLoop(runIdx int) {
 		s.sessionRuns[runIdx].callCosts = append(s.sessionRuns[runIdx].callCosts, cc)
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd
 		// update call duration with real debited duration
-		nextCd.CallDuration -= debitPeriod
-		nextCd.CallDuration += nextCd.GetDuration()
+		nextCd.DurationIndex -= debitPeriod
+		nextCd.DurationIndex += nextCd.GetDuration()
 		time.Sleep(cc.GetDuration())
 		index++
 	}
@@ -142,7 +142,7 @@ func (s *Session) Close(ev Event) {
 	if _, err := ev.GetEndTime(); err != nil {
 		engine.Logger.Err("Error parsing answer event stop time.")
 		for idx := range s.sessionRuns {
-			s.sessionRuns[idx].callDescriptor.TimeEnd = s.sessionRuns[idx].callDescriptor.TimeStart.Add(s.sessionRuns[idx].callDescriptor.CallDuration)
+			s.sessionRuns[idx].callDescriptor.TimeEnd = s.sessionRuns[idx].callDescriptor.TimeStart.Add(s.sessionRuns[idx].callDescriptor.DurationIndex)
 		}
 	}
 	s.SaveOperations()

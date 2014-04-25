@@ -25,10 +25,10 @@ import (
 
 // The output structure that will be returned with the call cost information.
 type CallCost struct {
-	Direction, TOR, Tenant, Subject, Account, Destination, Type string
-	Cost                                                        float64
-	Timespans                                                   TimeSpans
-	deductConnectFee                                            bool
+	Direction, Category, Tenant, Subject, Account, Destination, Type string
+	Cost                                                             float64
+	Timespans                                                        TimeSpans
+	deductConnectFee                                                 bool
 }
 
 // Pretty printing for call cost
@@ -99,7 +99,7 @@ func (cc *CallCost) GetConnectFee() float64 {
 func (cc *CallCost) CreateCallDescriptor() *CallDescriptor {
 	return &CallDescriptor{
 		Direction:   cc.Direction,
-		TOR:         cc.TOR,
+		Category:    cc.Category,
 		Tenant:      cc.Tenant,
 		Subject:     cc.Subject,
 		Account:     cc.Account,
@@ -122,7 +122,7 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 	}
 	dc := &DataCost{
 		Direction:        cc.Direction,
-		TOR:              cc.TOR,
+		Category:         cc.Category,
 		Tenant:           cc.Tenant,
 		Subject:          cc.Subject,
 		Account:          cc.Account,
@@ -134,7 +134,7 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 	dc.DataSpans = make([]*DataSpan, len(cc.Timespans))
 	for i, ts := range cc.Timespans {
 		length := ts.TimeEnd.Sub(ts.TimeStart).Seconds()
-		callDuration := ts.CallDuration.Seconds()
+		callDuration := ts.DurationIndex.Seconds()
 		dc.DataSpans[i] = &DataSpan{
 			DataStart:      callDuration - length,
 			DataEnd:        callDuration,

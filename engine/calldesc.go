@@ -107,11 +107,11 @@ The input stucture that contains call information.
 */
 type CallDescriptor struct {
 	Direction                             string
-	TOR                                   string
+	Category                              string
 	Tenant, Subject, Account, Destination string
 	TimeStart, TimeEnd                    time.Time
 	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
-	CallDuration                          time.Duration // the call duration so far (till TimeEnd)
+	DurationIndex                         time.Duration // the call duration so far (till TimeEnd)
 	//Amount                                float64
 	FallbackSubject string // the subject to check for destination if not found on primary subject
 	RatingInfos     RatingInfos
@@ -124,7 +124,7 @@ func (cd *CallDescriptor) ValidateCallData() error {
 	if cd.TimeStart.After(cd.TimeEnd) || cd.TimeStart.Equal(cd.TimeEnd) {
 		return errors.New("TimeStart must be strctly before TimeEnd")
 	}
-	if cd.TimeEnd.Sub(cd.TimeStart) < cd.CallDuration {
+	if cd.TimeEnd.Sub(cd.TimeStart) < cd.DurationIndex {
 		return errors.New("CallDuration must be equal or grater than TimeEnd - TimeStart")
 	}
 	return nil
@@ -198,7 +198,7 @@ func (cd *CallDescriptor) getRatingPlansForPrefix(key string, recursionDepth int
 			}
 			if len(ri.FallbackKeys) > 0 {
 				tempCD := &CallDescriptor{
-					TOR:         cd.TOR,
+					Category:    cd.Category,
 					Direction:   cd.Direction,
 					Tenant:      cd.Tenant,
 					Destination: cd.Destination,
@@ -293,12 +293,12 @@ func (cd *CallDescriptor) GetKey(subject string) string {
 		subject = realSubject
 		cd.Subject = realSubject
 	}
-	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.TOR, subject)
+	return fmt.Sprintf("%s:%s:%s:%s", cd.Direction, cd.Tenant, cd.Category, subject)
 }
 
 // Splits the received timespan into sub time spans according to the activation periods intervals.
 func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
-	firstSpan := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, CallDuration: cd.CallDuration}
+	firstSpan := &TimeSpan{TimeStart: cd.TimeStart, TimeEnd: cd.TimeEnd, DurationIndex: cd.DurationIndex}
 
 	timespans = append(timespans, firstSpan)
 	if len(cd.RatingInfos) == 0 {
@@ -379,7 +379,7 @@ func (cd *CallDescriptor) roundTimeSpansToIncrement(timespans TimeSpans) []*Time
 			if rateIncrement > ts.GetDuration() {
 				initialDuration := ts.GetDuration()
 				ts.TimeEnd = ts.TimeStart.Add(rateIncrement)
-				ts.CallDuration = ts.CallDuration + (rateIncrement - initialDuration)
+				ts.DurationIndex = ts.DurationIndex + (rateIncrement - initialDuration)
 				timespans.RemoveOverlapedFromIndex(i)
 			}
 		}
@@ -397,8 +397,8 @@ func (cd *CallDescriptor) GetDuration() time.Duration {
 Creates a CallCost structure with the cost information calculated for the received CallDescriptor.
 */
 func (cd *CallDescriptor) GetCost() (*CallCost, error) {
-	if cd.CallDuration < cd.TimeEnd.Sub(cd.TimeStart) {
-		cd.CallDuration = cd.TimeEnd.Sub(cd.TimeStart)
+	if cd.DurationIndex < cd.TimeEnd.Sub(cd.TimeStart) {
+		cd.DurationIndex = cd.TimeEnd.Sub(cd.TimeStart)
 	}
 	if cd.Type == "" {
 		cd.Type = MINUTES
@@ -424,7 +424,7 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.TOR))
 	cc := &CallCost{
 		Direction:        cd.Direction,
-		TOR:              cd.TOR,
+		Category:         cd.Category,
 		Tenant:           cd.Tenant,
 		Account:          cd.Account,
 		Destination:      cd.Destination,
@@ -445,8 +445,8 @@ If the user has no credit then it will return 0.
 If the user has postpayed plan it returns -1.
 */
 func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Duration, error) {
-	if origCD.CallDuration < origCD.TimeEnd.Sub(origCD.TimeStart) {
-		origCD.CallDuration = origCD.TimeEnd.Sub(origCD.TimeStart)
+	if origCD.DurationIndex < origCD.TimeEnd.Sub(origCD.TimeStart) {
+		origCD.DurationIndex = origCD.TimeEnd.Sub(origCD.TimeStart)
 	}
 	if origCD.Type == "" {
 		origCD.Type = MINUTES
@@ -636,7 +636,7 @@ func (cd *CallDescriptor) FlushCache() (err error) {
 func (cd *CallDescriptor) CreateCallCost() *CallCost {
 	return &CallCost{
 		Direction:   cd.Direction,
-		TOR:         cd.TOR,
+		Category:    cd.Category,
 		Tenant:      cd.Tenant,
 		Subject:     cd.Subject,
 		Account:     cd.Account,
@@ -647,16 +647,16 @@ func (cd *CallDescriptor) CreateCallCost() *CallCost {
 
 func (cd *CallDescriptor) Clone() *CallDescriptor {
 	return &CallDescriptor{
-		Direction:    cd.Direction,
-		TOR:          cd.TOR,
-		Tenant:       cd.Tenant,
-		Subject:      cd.Subject,
-		Account:      cd.Account,
-		Destination:  cd.Destination,
-		TimeStart:    cd.TimeStart,
-		TimeEnd:      cd.TimeEnd,
-		LoopIndex:    cd.LoopIndex,
-		CallDuration: cd.CallDuration,
+		Direction:     cd.Direction,
+		Category:      cd.Category,
+		Tenant:        cd.Tenant,
+		Subject:       cd.Subject,
+		Account:       cd.Account,
+		Destination:   cd.Destination,
+		TimeStart:     cd.TimeStart,
+		TimeEnd:       cd.TimeEnd,
+		LoopIndex:     cd.LoopIndex,
+		DurationIndex: cd.DurationIndex,
 		//		Amount:          cd.Amount,
 		FallbackSubject: cd.FallbackSubject,
 		//RatingInfos:     cd.RatingInfos,

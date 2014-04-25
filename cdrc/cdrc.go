@@ -86,7 +86,7 @@ func (self *Cdrc) parseFieldsConfig() error {
 		utils.REQTYPE:     self.cgrCfg.CdrcReqTypeField,
 		utils.DIRECTION:   self.cgrCfg.CdrcDirectionField,
 		utils.TENANT:      self.cgrCfg.CdrcTenantField,
-		utils.TOR:         self.cgrCfg.CdrcTorField,
+		utils.Category:    self.cgrCfg.CdrcTorField,
 		utils.ACCOUNT:     self.cgrCfg.CdrcAccountField,
 		utils.SUBJECT:     self.cgrCfg.CdrcSubjectField,
 		utils.DESTINATION: self.cgrCfg.CdrcDestinationField,
@@ -145,8 +145,8 @@ func (self *Cdrc) recordAsStoredCdr(record []string) (*utils.StoredCdr, error) {
 			ratedCdr.Direction = fieldVal
 		case utils.TENANT:
 			ratedCdr.Tenant = fieldVal
-		case utils.TOR:
-			ratedCdr.TOR = fieldVal
+		case utils.Category:
+			ratedCdr.Category = fieldVal
 		case utils.ACCOUNT:
 			ratedCdr.Account = fieldVal
 		case utils.SUBJECT:

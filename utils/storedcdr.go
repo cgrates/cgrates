@@ -35,7 +35,7 @@ func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
 	rtCdr.ReqType = rawcdr.GetReqType()
 	rtCdr.Direction = rawcdr.GetDirection()
 	rtCdr.Tenant = rawcdr.GetTenant()
-	rtCdr.TOR = rawcdr.GetTOR()
+	rtCdr.Category = rawcdr.GetTOR()
 	rtCdr.Account = rawcdr.GetAccount()
 	rtCdr.Subject = rawcdr.GetSubject()
 	rtCdr.Destination = rawcdr.GetDestination()
@@ -62,7 +62,7 @@ type StoredCdr struct {
 	ReqType        string
 	Direction      string
 	Tenant         string
-	TOR            string
+	Category       string
 	Account        string
 	Subject        string
 	Destination    string
@@ -109,7 +109,7 @@ func (storedCdr *StoredCdr) GetDestination() string {
 }
 
 func (storedCdr *StoredCdr) GetTOR() string {
-	return storedCdr.TOR
+	return storedCdr.Category
 }
 
 func (storedCdr *StoredCdr) GetTenant() string {
@@ -158,7 +158,7 @@ func (storedCdr *StoredCdr) AsRawCdrHttpForm() url.Values {
 	v.Set(REQTYPE, storedCdr.ReqType)
 	v.Set(DIRECTION, storedCdr.Direction)
 	v.Set(TENANT, storedCdr.Tenant)
-	v.Set(TOR, storedCdr.TOR)
+	v.Set(Category, storedCdr.Category)
 	v.Set(ACCOUNT, storedCdr.Account)
 	v.Set(SUBJECT, storedCdr.Subject)
 	v.Set(DESTINATION, storedCdr.Destination)
@@ -190,8 +190,8 @@ func (storedCdr *StoredCdr) ExportFieldValue(fldName string) string {
 		return storedCdr.Direction
 	case TENANT:
 		return storedCdr.Tenant
-	case TOR:
-		return storedCdr.TOR
+	case Category:
+		return storedCdr.Category
 	case ACCOUNT:
 		return storedCdr.Account
 	case SUBJECT:

@@ -240,8 +240,8 @@ func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFl
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, tenantFld))
 	}
 	if strings.HasPrefix(torFld, utils.STATIC_VALUE_PREFIX) {
-		rtCdr.TOR = torFld[1:]
-	} else if rtCdr.TOR, hasKey = fsCdr.vars[torFld]; !hasKey && fieldsMandatory {
+		rtCdr.Category = torFld[1:]
+	} else if rtCdr.Category, hasKey = fsCdr.vars[torFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, torFld))
 	}
 	if strings.HasPrefix(accountFld, utils.STATIC_VALUE_PREFIX) {

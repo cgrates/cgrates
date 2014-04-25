@@ -97,15 +97,15 @@ func TestGetSecondsForPrefix(t *testing.T) {
 	b2 := &Balance{Value: 100, Weight: 20, DestinationId: "RET"}
 	ub1 := &Account{Id: "OUT:CUSTOMER_1:rif", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1, b2}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 200}}}}
 	cd := &CallDescriptor{
-		TOR:          "0",
-		Tenant:       "vdf",
-		TimeStart:    time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2013, 10, 4, 15, 46, 10, 0, time.UTC),
-		LoopIndex:    0,
-		CallDuration: 10 * time.Second,
-		Direction:    OUTBOUND,
-		Destination:  "0723",
-		Type:         MINUTES,
+		Category:      "0",
+		Tenant:        "vdf",
+		TimeStart:     time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 10, 4, 15, 46, 10, 0, time.UTC),
+		LoopIndex:     0,
+		DurationIndex: 10 * time.Second,
+		Direction:     OUTBOUND,
+		Destination:   "0723",
+		Type:          MINUTES,
 	}
 	seconds, credit, bucketList := ub1.getCreditForPrefix(cd)
 	expected := 110 * time.Second
@@ -127,7 +127,7 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 		},
 	}
 	cd := &CallDescriptor{
-		TOR:         "0",
+		Category:    "0",
 		Tenant:      "vdf",
 		TimeStart:   time.Date(2013, 10, 4, 15, 46, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2013, 10, 4, 15, 46, 60, 0, time.UTC),
@@ -166,10 +166,10 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -196,10 +196,10 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -231,11 +231,11 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
-				ratingInfo:   &RatingInfo{},
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
+				ratingInfo:    &RatingInfo{},
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -266,16 +266,16 @@ func TestDebitCreditNoCredit(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -307,16 +307,16 @@ func TestDebitCreditHasCredit(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -350,11 +350,11 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
-				CallDuration: 0,
-				ratingInfo:   &RatingInfo{},
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 20, 0, time.UTC),
+				DurationIndex: 0,
+				ratingInfo:    &RatingInfo{},
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -388,16 +388,16 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -427,16 +427,16 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -466,16 +466,16 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{ConnectFee: 10.0, Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{ConnectFee: 10.0, Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -499,17 +499,17 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				CallDuration: 10 * time.Second,
-				ratingInfo:   &RatingInfo{},
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				ratingInfo:    &RatingInfo{},
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: MINUTES,
@@ -542,15 +542,15 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 250, Weight: 10, DestinationId: "NAT", RatingSubject: "minu"}
 	cc := &CallCost{
 		Tenant:      "vdf",
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type:             MINUTES,
@@ -585,15 +585,15 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 func TestDebitCreditSubjectMoney(t *testing.T) {
 	cc := &CallCost{
 		Tenant:      "vdf",
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type:             MINUTES,
@@ -623,15 +623,15 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 40, Weight: 10, DestinationId: "NAT", RatingSubject: "minu"}
 	cc := &CallCost{
 		Tenant:      "vdf",
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 55, 0, time.UTC),
-				CallDuration: 55 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 55, 0, time.UTC),
+				DurationIndex: 55 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type:             MINUTES,
@@ -667,21 +667,21 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RatingSubject: "minu"}
 	cc := &CallCost{
 		Tenant:      "vdf",
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type:             MINUTES,
@@ -719,21 +719,21 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 	b1 := &Balance{Uuid: "testb", Value: 70, Weight: 10, DestinationId: "NAT", RatingSubject: "minu"}
 	cc := &CallCost{
 		Tenant:      "vdf",
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				CallDuration: 10 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 10, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				DurationIndex: 10 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type:             MINUTES,
@@ -974,15 +974,15 @@ func TestAccountRefund(t *testing.T) {
 func TestDebitShared(t *testing.T) {
 	cc := &CallCost{
 		Tenant:      "vdf",
-		TOR:         "0",
+		Category:    "0",
 		Direction:   OUTBOUND,
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 0, 0, time.UTC),
-				CallDuration: 55 * time.Second,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 0, 0, time.UTC),
+				DurationIndex: 55 * time.Second,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 2, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		deductConnectFee: true,
@@ -1036,11 +1036,11 @@ func TestDebitSMS(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 48, 1, 0, time.UTC),
-				ratingInfo:   &RatingInfo{},
-				CallDuration: 0,
-				RateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1 * time.Second, RateUnit: time.Second}}}},
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 48, 1, 0, time.UTC),
+				ratingInfo:    &RatingInfo{},
+				DurationIndex: 0,
+				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
 		Type: SMS,
@@ -1069,10 +1069,10 @@ func TestDebitDataUnits(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				ratingInfo:   &RatingInfo{},
-				CallDuration: 0,
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				ratingInfo:    &RatingInfo{},
+				DurationIndex: 0,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{
@@ -1109,10 +1109,10 @@ func TestDebitDataMoney(t *testing.T) {
 		Destination: "0723045326",
 		Timespans: []*TimeSpan{
 			&TimeSpan{
-				TimeStart:    time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
-				TimeEnd:      time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
-				ratingInfo:   &RatingInfo{},
-				CallDuration: 0,
+				TimeStart:     time.Date(2013, 9, 24, 10, 48, 0, 0, time.UTC),
+				TimeEnd:       time.Date(2013, 9, 24, 10, 49, 20, 0, time.UTC),
+				ratingInfo:    &RatingInfo{},
+				DurationIndex: 0,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						Rates: RateGroups{

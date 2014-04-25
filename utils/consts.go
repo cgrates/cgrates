@@ -78,7 +78,7 @@ const (
 	REQTYPE                    = "reqtype"
 	DIRECTION                  = "direction"
 	TENANT                     = "tenant"
-	TOR                        = "tor"
+	Category                   = "tor"
 	ACCOUNT                    = "account"
 	SUBJECT                    = "subject"
 	DESTINATION                = "destination"
