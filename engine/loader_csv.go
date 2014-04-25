@@ -483,7 +483,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
+		direction, tenant, tor, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
 		at, err := utils.ParseDate(record[4])
 		if err != nil {
 			return fmt.Errorf("Cannot parse activation time from %v", record[4])

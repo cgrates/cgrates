@@ -1004,7 +1004,7 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 }
 
 func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
-	q := fmt.Sprintf("SELECT loadid,tenant,tor,direction,subject,activation_time,rating_plan_id,fallback_subjects FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT loadid,direction,tenant,tor,subject,activation_time,rating_plan_id,fallback_subjects FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_RATE_PROFILES, qryRpf.TPid)
 	if len(qryRpf.LoadId) != 0 {
 		q += fmt.Sprintf(" AND loadid='%s'", qryRpf.LoadId)

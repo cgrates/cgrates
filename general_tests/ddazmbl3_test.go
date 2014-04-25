@@ -48,10 +48,10 @@ RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8`
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5`
 	ratingPlans := `RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,ALWAYS,10
 RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
-	ratingProfiles := `cgrates.org,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
-cgrates.org,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
+	ratingProfiles := `*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_UK,
+*out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,`
 	sharedGroups := ``
-	actions := `TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10`
+	actions := `TOPUP10_AC1,*topup_reset,*call_duration,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,`
