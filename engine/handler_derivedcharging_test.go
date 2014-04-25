@@ -37,7 +37,7 @@ func init() {
 
 // Accounting db has no DerivedChargers nor configured defaults
 func TestHandleGetEmptyDC(t *testing.T) {
-	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Tor: "call", Direction: "*out", Account: "test2", Subject: "test2"}
+	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "test2", Subject: "test2"}
 	if dcs, err := HandleGetDerivedChargers(acntDb, cfgDcT, attrs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, cfgDcT.DerivedChargers) {
@@ -50,7 +50,7 @@ func TestHandleGetConfiguredDC(t *testing.T) {
 	cfgedDC := utils.DerivedChargers{&utils.DerivedCharger{RunId: "responder1", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
 	cfgDcT.DerivedChargers = cfgedDC
-	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Tor: "call", Direction: "*out", Account: "test3", Subject: "test3"}
+	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "test3", Subject: "test3"}
 	if dcs, err := HandleGetDerivedChargers(acntDb, cfgDcT, attrs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, cfgedDC) {
@@ -74,7 +74,7 @@ func TestHandleGetStoredDC(t *testing.T) {
 	expCharger1 := append(charger1, &utils.DerivedCharger{RunId: "responder1", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"})
 	acntDb.CacheAccounting(nil, nil, nil, nil)
-	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Tor: "call", Direction: "*out", Account: "rif", Subject: "rif"}
+	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "rif", Subject: "rif"}
 	if dcs, err := HandleGetDerivedChargers(acntDb, cfgDcT, attrs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, expCharger1) {

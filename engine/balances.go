@@ -204,11 +204,11 @@ func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalance
 					b.SubstractAmount(amount)
 					inc.BalanceInfo.UnitBalanceUuid = b.Uuid
 					inc.BalanceInfo.AccountId = ub.Id
-					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.Tor}
+					inc.UnitInfo = &UnitInfo{cc.Destination, amount, cc.TOR}
 					inc.Cost = 0
 					inc.paid = true
 					if count {
-						ub.countUnits(&Action{BalanceType: cc.Tor, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
+						ub.countUnits(&Action{BalanceType: cc.TOR, Direction: cc.Direction, Balance: &Balance{Value: amount, DestinationId: cc.Destination}})
 					}
 				}
 				continue
@@ -244,7 +244,7 @@ func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalance
 						b.SubstractAmount(seconds)
 						nInc.BalanceInfo.UnitBalanceUuid = b.Uuid
 						nInc.BalanceInfo.AccountId = ub.Id
-						nInc.UnitInfo = &UnitInfo{newCC.Destination, seconds, cc.Tor}
+						nInc.UnitInfo = &UnitInfo{newCC.Destination, seconds, cc.TOR}
 						if cost != 0 {
 							nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
 							moneyBal.Value -= cost
@@ -252,7 +252,7 @@ func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalance
 						}
 						nInc.paid = true
 						if count {
-							ub.countUnits(&Action{BalanceType: newCC.Tor, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
+							ub.countUnits(&Action{BalanceType: newCC.TOR, Direction: newCC.Direction, Balance: &Balance{Value: seconds, DestinationId: newCC.Destination}})
 							if cost != 0 {
 								ub.countUnits(&Action{BalanceType: CREDIT, Direction: newCC.Direction, Balance: &Balance{Value: cost, DestinationId: newCC.Destination}})
 							}
