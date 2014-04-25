@@ -574,22 +574,21 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			lcrKeys[idx] = engine.LCR_PREFIX + lcrId
 		}
 	}
-	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
-		if len(attrs.DerivedChargers) > 0 {
-			dcsKeys = make([]string, len(attrs.DerivedChargers))
-			for idx, dc := range attrs.DerivedChargers {
-				dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
-			}
+
+	if len(attrs.DerivedChargers) > 0 {
+		dcsKeys = make([]string, len(attrs.DerivedChargers))
+		for idx, dc := range attrs.DerivedChargers {
+			dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
 		}
-		if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
-			return err
-		}
-		if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
-			return err
-		}
-		*reply = "OK"
-		return nil
 	}
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
+		return err
+	}
+	*reply = "OK"
+	return nil
 }
 
 func (self *ApierV1) GetCacheStats(attrs utils.AttrCacheStats, reply *utils.CacheStats) error {
@@ -706,23 +705,21 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, lcrId := range lcrIds {
 		lcrKeys[idx] = engine.LCR_PREFIX + lcrId
 	}
-	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
-		dcs, _ := loader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
-		dcsKeys := make([]string, len(dcs))
-		for idx, dc := range dcs {
-			dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
-		}
-		if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
-			return err
-		}
-		if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
-			return err
-		}
-		if self.Sched != nil {
-			self.Sched.LoadActionTimings(self.AccountDb)
-			self.Sched.Restart()
-		}
-		*reply = "OK"
-		return nil
+	dcs, _ := loader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
+	dcsKeys := make([]string, len(dcs))
+	for idx, dc := range dcs {
+		dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
 	}
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
+		return err
+	}
+	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
+		return err
+	}
+	if self.Sched != nil {
+		self.Sched.LoadActionTimings(self.AccountDb)
+		self.Sched.Restart()
+	}
+	*reply = "OK"
+	return nil
 }
