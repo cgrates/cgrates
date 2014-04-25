@@ -36,6 +36,7 @@ type ActionTrigger struct {
 	Weight         float64
 	ActionsId      string
 	Executed       bool
+	Recurrent      bool
 }
 
 func (at *ActionTrigger) Execute(ub *Account) (err error) {
@@ -68,7 +69,7 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 			atLeastOneActionExecuted = true
 		}
 	}
-	if !atLeastOneActionExecuted {
+	if !atLeastOneActionExecuted || at.Recurrent {
 		at.Executed = false
 	}
 	storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)

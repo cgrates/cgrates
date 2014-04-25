@@ -50,6 +50,8 @@ type Action struct {
 const (
 	LOG             = "*log"
 	RESET_TRIGGERS  = "*reset_triggers"
+	SET_RECURRENT   = "*set_recurrent"
+	UNSET_RECURRENT = "*unset_recurrent"
 	ALLOW_NEGATIVE  = "*allow_negative"
 	DENY_NEGATIVE   = "*deny_negative"
 	RESET_ACCOUNT   = "*reset_account"
@@ -74,6 +76,10 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return logAction, true
 	case RESET_TRIGGERS:
 		return resetTriggersAction, true
+	case SET_RECURRENT:
+		return setRecurrentAction, true
+	case UNSET_RECURRENT:
+		return unsetRecurrentAction, true
 	case ALLOW_NEGATIVE:
 		return allowNegativeAction, true
 	case DENY_NEGATIVE:
@@ -112,6 +118,16 @@ func logAction(ub *Account, a *Action) (err error) {
 
 func resetTriggersAction(ub *Account, a *Action) (err error) {
 	ub.ResetActionTriggers(a)
+	return
+}
+
+func setRecurrentAction(ub *Account, a *Action) (err error) {
+	ub.SetRecurrent(a, true)
+	return
+}
+
+func unsetRecurrentAction(ub *Account, a *Action) (err error) {
+	ub.SetRecurrent(a, false)
 	return
 }
 

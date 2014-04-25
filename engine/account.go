@@ -383,6 +383,16 @@ func (ub *Account) ResetActionTriggers(a *Action) {
 	ub.executeActionTriggers(a)
 }
 
+// Sets/Unsets recurrent flag for action triggers
+func (ub *Account) SetRecurrent(a *Action, recurrent bool) {
+	for _, at := range ub.ActionTriggers {
+		if !at.Match(a) {
+			continue
+		}
+		at.Recurrent = recurrent
+	}
+}
+
 // Returns the unit counter that matches the specified action type
 func (ub *Account) getUnitCounter(a *Action) *UnitsCounter {
 	for _, uc := range ub.UnitCounters {
