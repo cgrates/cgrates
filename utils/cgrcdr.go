@@ -126,9 +126,36 @@ func (cgrCdr CgrCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, tor
 		}
 	}
 	// MetaDefault will automatically be converted to their standard values
-	//if reqTypeFld == META_DEFAULT {
-	//	reqTypeFld =
-	//}
+	if reqTypeFld == META_DEFAULT {
+		reqTypeFld = REQTYPE
+	}
+	if directionFld == META_DEFAULT {
+		directionFld = DIRECTION
+	}
+	if tenantFld == META_DEFAULT {
+		tenantFld = TENANT
+	}
+	if torFld == META_DEFAULT {
+		torFld = TOR
+	}
+	if accountFld == META_DEFAULT {
+		accountFld = ACCOUNT
+	}
+	if subjectFld == META_DEFAULT {
+		subjectFld = SUBJECT
+	}
+	if destFld == META_DEFAULT {
+		destFld = DESTINATION
+	}
+	if setupTimeFld == META_DEFAULT {
+		setupTimeFld = SETUP_TIME
+	}
+	if answerTimeFld == META_DEFAULT {
+		answerTimeFld = ANSWER_TIME
+	}
+	if durationFld == META_DEFAULT {
+		durationFld = DURATION
+	}
 	if rtCdr.CdrHost, hasKey = cgrCdr[CDRHOST]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, CDRHOST))
 	}

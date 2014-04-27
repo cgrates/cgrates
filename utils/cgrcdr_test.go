@@ -121,3 +121,24 @@ func TestCgrCdrAsStoredCdr(t *testing.T) {
 		t.Error("Failed to detect missing header")
 	}
 }
+
+func TestCgrCdrAsStoredCdrFromMetaDefaults(t *testing.T) {
+	cgrCdr := &CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "cdrsource": "source_test", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
+		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-07T08:42:24Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "10",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+	setupTime := time.Date(2013, 11, 7, 8, 42, 24, 0, time.UTC)
+	expctCdr := &StoredCdr{CgrId: Sha1("dsafdsaf", setupTime.String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "source_test", ReqType: "rated",
+		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: setupTime, AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Duration:    time.Duration(10) * time.Second,
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, MediationRunId: "wholesale_run", Cost: -1}
+	cdrOut, err := cgrCdr.AsStoredCdr("wholesale_run", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
+		META_DEFAULT, META_DEFAULT, META_DEFAULT, []string{"field_extr1", "fieldextr2"}, true)
+	if err != nil {
+		t.Fatal("Unexpected error received", err)
+	}
+
+	if !reflect.DeepEqual(expctCdr, cdrOut) {
+		t.Errorf("Expected: %v, received: %v", expctCdr, cdrOut)
+	}
+}
