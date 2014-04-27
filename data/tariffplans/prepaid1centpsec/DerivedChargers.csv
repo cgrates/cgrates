@@ -1,4 +1,4 @@
 #Tenant,Tor,Direction,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
-cgrates.org,call,*out,dan,dan,extra1,^prepaid,,,,rif,rif,,,,cgr_duration
-cgrates.org,call,*out,dan,dan,extra2,,,,,ivo,ivo,,,,
-cgrates.org,call,*out,dan,*any,extra1,,,,,rif2,rif2,,,,
+cgrates.org,call,*out,dan,dan,extra1,^prepaid,,,,^rif,^rif,,,,^1s
+cgrates.org,call,*out,dan,dan,extra2,,,,,^ivo,^ivo,,,,
+cgrates.org,call,*out,dan,*any,extra1,,,,,^rif2,^rif2,,,,
