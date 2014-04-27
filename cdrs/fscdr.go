@@ -165,9 +165,8 @@ func (fsCdr FSCdr) GetHangupTime() (t time.Time, err error) {
 }
 
 // Extracts duration as considered by the telecom switch
-func (fsCdr FSCdr) GetDuration() time.Duration {
-	dur, _ := utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
-	return dur
+func (fsCdr FSCdr) GetDuration() (time.Duration, error) {
+	return utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
 }
 
 func (fsCdr FSCdr) Store() (result string, err error) {
@@ -192,7 +191,8 @@ func (fsCdr FSCdr) Store() (result string, err error) {
 		return "", err
 	}
 	result += strconv.FormatInt(et.UnixNano(), 10) + "|"
-	result += strconv.FormatInt(int64(fsCdr.GetDuration().Seconds()), 10) + "|"
+	dur, _ := fsCdr.GetDuration()
+	result += strconv.FormatInt(int64(dur.Seconds()), 10) + "|"
 	return
 }
 

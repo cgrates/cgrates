@@ -72,7 +72,8 @@ func TestCgrCdrFields(t *testing.T) {
 	if answerTime.UTC() != expectedATime {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
-	if cgrCdr.GetDuration() != time.Duration(10)*time.Second {
+	dur, _ := cgrCdr.GetDuration()
+	if dur != time.Duration(10)*time.Second {
 		t.Error("Error parsing cdr: ", cgrCdr)
 	}
 	extraFields := cgrCdr.GetExtraFields()

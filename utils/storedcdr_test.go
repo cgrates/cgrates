@@ -90,7 +90,8 @@ func TestStoredCdrFields(t *testing.T) {
 	if answerTime.UTC() != expectedATime {
 		t.Error("Error parsing cdr: ", ratedCdr)
 	}
-	if ratedCdr.GetDuration() != 10 {
+	dur, _ := ratedCdr.GetDuration()
+	if dur != 10 {
 		t.Error("Error parsing cdr: ", ratedCdr)
 	}
 	extraFields := ratedCdr.GetExtraFields()

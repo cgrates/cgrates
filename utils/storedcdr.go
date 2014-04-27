@@ -45,7 +45,7 @@ func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
 	if rtCdr.AnswerTime, err = rawcdr.GetAnswerTime(); err != nil {
 		return nil, err
 	}
-	rtCdr.Duration = rawcdr.GetDuration()
+	rtCdr.Duration, _ = rawcdr.GetDuration()
 	rtCdr.ExtraFields = rawcdr.GetExtraFields()
 	rtCdr.MediationRunId = DEFAULT_RUNID
 	rtCdr.Cost = -1
@@ -128,8 +128,8 @@ func (storedCdr *StoredCdr) GetAnswerTime() (time.Time, error) {
 	return storedCdr.AnswerTime, nil
 }
 
-func (storedCdr *StoredCdr) GetDuration() time.Duration {
-	return storedCdr.Duration
+func (storedCdr *StoredCdr) GetDuration() (time.Duration, error) {
+	return storedCdr.Duration, nil
 }
 
 func (storedCdr *StoredCdr) GetExtraFields() map[string]string {

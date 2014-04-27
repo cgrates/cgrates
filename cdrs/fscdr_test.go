@@ -87,8 +87,9 @@ func TestCDRFields(t *testing.T) {
 	if answerTime.UTC() != expectedATime {
 		t.Error("Error parsing answerTime: ", answerTime.UTC())
 	}
-	if fsCdr.GetDuration() != 4000000000 {
-		t.Error("Error parsing duration: ", fsCdr.GetDuration())
+	dur, _ := fsCdr.GetDuration()
+	if dur != 4000000000 {
+		t.Error("Error parsing duration: ", dur)
 	}
 	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "sip_user_agent"}, &utils.RSRField{Id: "read_codec"}, &utils.RSRField{Id: "write_codec"}}
 	extraFields := fsCdr.GetExtraFields()

@@ -39,7 +39,7 @@ type RawCDR interface {
 	GetReqType() string
 	GetSetupTime() (time.Time, error)  // Time when the call was set-up
 	GetAnswerTime() (time.Time, error) // Time when the call was answered
-	GetDuration() time.Duration
+	GetDuration() (time.Duration, error)
 	GetExtraFields() map[string]string                                                                                                      //Stores extra CDR Fields
 	AsStoredCdr(string, string, string, string, string, string, string, string, string, string, string, []string, bool) (*StoredCdr, error) // Based on fields queried will return a particular instance of RatedCDR
 }

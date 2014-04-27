@@ -104,9 +104,8 @@ func (cgrCdr CgrCdr) GetAnswerTime() (t time.Time, err error) {
 }
 
 // Extracts duration as considered by the telecom switch
-func (cgrCdr CgrCdr) GetDuration() time.Duration {
-	dur, _ := ParseDurationWithSecs(cgrCdr[DURATION])
-	return dur
+func (cgrCdr CgrCdr) GetDuration() (time.Duration, error) {
+	return ParseDurationWithSecs(cgrCdr[DURATION])
 }
 
 // Used in mediation, fieldsMandatory marks whether missing field out of request represents error or can be ignored
@@ -126,6 +125,10 @@ func (cgrCdr CgrCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, tor
 			return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, ACCID))
 		}
 	}
+	// MetaDefault will automatically be converted to their standard values
+	//if reqTypeFld == META_DEFAULT {
+	//	reqTypeFld =
+	//}
 	if rtCdr.CdrHost, hasKey = cgrCdr[CDRHOST]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, CDRHOST))
 	}
