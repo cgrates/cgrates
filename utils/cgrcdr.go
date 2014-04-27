@@ -110,7 +110,7 @@ func (cgrCdr CgrCdr) GetDuration() (time.Duration, error) {
 
 // Used in mediation, fieldsMandatory marks whether missing field out of request represents error or can be ignored
 // If the fields in parameters start with ^ their value is considered instead of dynamically retrieving it from CDR
-func (cgrCdr CgrCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
+func (cgrCdr CgrCdr) ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
 	if IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
 		return nil, errors.New(fmt.Sprintf("%s:FieldName", ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
 	}

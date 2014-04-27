@@ -100,6 +100,7 @@ const (
 	MASK_CHAR                  = "*"
 	CONCATENATED_KEY_SEP       = ":"
 	META_DEFAULT               = "*default"
+	FORKED_CDR                 = "forked_cdr"
 )
 
 var (

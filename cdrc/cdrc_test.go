@@ -56,7 +56,7 @@ func TestParseFieldsConfig(t *testing.T) {
 	}
 }
 
-func TestRecordAsStoredCdr(t *testing.T) {
+func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cgrConfig.CdrcExtraFields = []string{"supplier:11"}
 	cdrc := &Cdrc{cgrCfg: cgrConfig}
@@ -64,13 +64,13 @@ func TestRecordAsStoredCdr(t *testing.T) {
 		t.Error("Failed parsing default fieldIndexesFromConfig", err)
 	}
 	cdrRow := []string{"firstField", "secondField"}
-	_, err := cdrc.recordAsStoredCdr(cdrRow)
+	_, err := cdrc.recordForkCdr(cdrRow)
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963", "2013-02-03 19:50:00", "2013-02-03 19:54:00", "62",
 		"supplier1", "172.16.1.1"}
-	rtCdr, err := cdrc.recordAsStoredCdr(cdrRow)
+	rtCdr, err := cdrc.recordForkCdr(cdrRow)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}

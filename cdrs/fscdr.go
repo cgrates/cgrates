@@ -201,7 +201,7 @@ func (fsCdr FSCdr) Restore(input string) error {
 }
 
 // Used in extra mediation
-func (fsCdr FSCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.StoredCdr, error) {
+func (fsCdr FSCdr) ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*utils.StoredCdr, error) {
 	if utils.IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
 		return nil, errors.New(fmt.Sprintf("%s:FieldName", utils.ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
 	}

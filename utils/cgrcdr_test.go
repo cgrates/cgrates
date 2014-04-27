@@ -85,11 +85,27 @@ func TestCgrCdrFields(t *testing.T) {
 	}
 }
 
-func TestCgrCdrAsStoredCdr(t *testing.T) {
+func TestCgrCdrForkCdr(t *testing.T) {
+	sampleCdr1 := &CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "cdrsource": "source_test", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
+		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-07T08:42:24Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "10",
+		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
+	rtSampleCdrOut, err := sampleCdr1.ForkCdr("sample_run1", "reqtype", "direction", "tenant", "tor", "account", "subject", "destination", "setup_time", "answer_time", "duration",
+		[]string{}, true)
+	if err != nil {
+		t.Error("Unexpected error received", err)
+	}
+	setupTime1 := time.Date(2013, 11, 7, 8, 42, 24, 0, time.UTC)
+	expctSplRatedCdr := &StoredCdr{CgrId: Sha1("dsafdsaf", setupTime1.String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "source_test", ReqType: "rated",
+		Direction: "*out", Tenant: "cgrates.org", TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: setupTime1, AnswerTime: time.Unix(1383813746, 0).UTC(),
+		Duration: 10000000000, ExtraFields: map[string]string{}, MediationRunId: "sample_run1", Cost: -1}
+	if !reflect.DeepEqual(expctSplRatedCdr, rtSampleCdrOut) {
+		t.Errorf("Expected: %v, received: %v", expctSplRatedCdr, rtSampleCdrOut)
+	}
 	cgrCdr := &CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "cdrsource": "source_test", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
 		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-07T08:42:24Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "10",
 		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
-	rtCdrOut, err := cgrCdr.AsStoredCdr("wholesale_run", "reqtype", "direction", "tenant", "tor", "account", "subject", "destination", "setup_time", "answer_time", "duration",
+	rtCdrOut, err := cgrCdr.ForkCdr("wholesale_run", "reqtype", "direction", "tenant", "tor", "account", "subject", "destination", "setup_time", "answer_time", "duration",
 		[]string{"field_extr1", "fieldextr2"}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
@@ -102,7 +118,7 @@ func TestCgrCdrAsStoredCdr(t *testing.T) {
 	if !reflect.DeepEqual(rtCdrOut, expctRatedCdr) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut, expctRatedCdr)
 	}
-	rtCdrOut2, err := cgrCdr.AsStoredCdr("wholesale_run", "^postpaid", "^*in", "^cgrates.com", "^premium_call", "^first_account", "^first_subject", "destination",
+	rtCdrOut2, err := cgrCdr.ForkCdr("wholesale_run", "^postpaid", "^*in", "^cgrates.com", "^premium_call", "^first_account", "^first_subject", "destination",
 		"^2013-12-07T08:42:24Z", "^2013-12-07T08:42:26Z", "^12s", []string{"field_extr1", "fieldextr2"}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
@@ -115,14 +131,14 @@ func TestCgrCdrAsStoredCdr(t *testing.T) {
 	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
 	}
-	_, err = cgrCdr.AsStoredCdr("wholesale_run", "dummy_header", "direction", "tenant", "tor", "account", "subject", "destination", "setup_time", "answer_time", "duration",
+	_, err = cgrCdr.ForkCdr("wholesale_run", "dummy_header", "direction", "tenant", "tor", "account", "subject", "destination", "setup_time", "answer_time", "duration",
 		[]string{"field_extr1", "fieldextr2"}, true)
 	if err == nil {
 		t.Error("Failed to detect missing header")
 	}
 }
 
-func TestCgrCdrAsStoredCdrFromMetaDefaults(t *testing.T) {
+func TestCgrCdrForkCdrFromMetaDefaults(t *testing.T) {
 	cgrCdr := &CgrCdr{"accid": "dsafdsaf", "cdrhost": "192.168.1.1", "cdrsource": "source_test", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
 		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-07T08:42:24Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "10",
 		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
@@ -132,7 +148,7 @@ func TestCgrCdrAsStoredCdrFromMetaDefaults(t *testing.T) {
 		SetupTime: setupTime, AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Duration:    time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, MediationRunId: "wholesale_run", Cost: -1}
-	cdrOut, err := cgrCdr.AsStoredCdr("wholesale_run", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
+	cdrOut, err := cgrCdr.ForkCdr("wholesale_run", META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT, META_DEFAULT,
 		META_DEFAULT, META_DEFAULT, META_DEFAULT, []string{"field_extr1", "fieldextr2"}, true)
 	if err != nil {
 		t.Fatal("Unexpected error received", err)

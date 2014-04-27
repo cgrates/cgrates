@@ -102,13 +102,13 @@ func TestCDRFields(t *testing.T) {
 
 }
 
-func TestFsCdrAsStoredCdr(t *testing.T) {
+func TestFsCdrForkCdr(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	fsCdr, err := new(FSCdr).New(body)
 	if err != nil {
 		t.Errorf("Error loading cdr: %v", err)
 	}
-	rtCdrOut, err := fsCdr.AsStoredCdr("wholesale_run", "^"+utils.RATED, "^*out", "cgr_tenant", "cgr_tor", "cgr_account", "cgr_subject", "cgr_destination", "start_epoch",
+	rtCdrOut, err := fsCdr.ForkCdr("wholesale_run", "^"+utils.RATED, "^*out", "cgr_tenant", "cgr_tor", "cgr_account", "cgr_subject", "cgr_destination", "start_epoch",
 		"answer_epoch", "billsec", []string{"effective_caller_id_number"}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
@@ -122,7 +122,7 @@ func TestFsCdrAsStoredCdr(t *testing.T) {
 	if !reflect.DeepEqual(rtCdrOut, expctRatedCdr) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut, expctRatedCdr)
 	}
-	rtCdrOut2, err := fsCdr.AsStoredCdr("wholesale_run", "^postpaid", "^*in", "^cgrates.com", "^premium_call", "^first_account", "^first_subject", "cgr_destination",
+	rtCdrOut2, err := fsCdr.ForkCdr("wholesale_run", "^postpaid", "^*in", "^cgrates.com", "^premium_call", "^first_account", "^first_subject", "cgr_destination",
 		"^2013-12-07T08:42:24Z", "^2013-12-07T08:42:26Z", "^12s", []string{"effective_caller_id_number"}, true)
 	if err != nil {
 		t.Error("Unexpected error received", err)
@@ -136,7 +136,7 @@ func TestFsCdrAsStoredCdr(t *testing.T) {
 	if !reflect.DeepEqual(rtCdrOut2, expctRatedCdr2) {
 		t.Errorf("Received: %v, expected: %v", rtCdrOut2, expctRatedCdr2)
 	}
-	_, err = fsCdr.AsStoredCdr("wholesale_run", "dummy_header", "direction", "tenant", "tor", "account", "subject", "destination", "setup_time", "answer_time", "duration", []string{"field_extr1", "fieldextr2"}, true)
+	_, err = fsCdr.ForkCdr("wholesale_run", "dummy_header", "direction", "tenant", "tor", "account", "subject", "destination", "setup_time", "answer_time", "duration", []string{"field_extr1", "fieldextr2"}, true)
 	if err == nil {
 		t.Error("Failed to detect missing header")
 	}

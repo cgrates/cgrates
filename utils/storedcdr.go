@@ -27,29 +27,29 @@ import (
 
 func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
 	var err error
-	rtCdr := new(StoredCdr)
-	rtCdr.CgrId = rawcdr.GetCgrId()
-	rtCdr.AccId = rawcdr.GetAccId()
-	rtCdr.CdrHost = rawcdr.GetCdrHost()
-	rtCdr.CdrSource = rawcdr.GetCdrSource()
-	rtCdr.ReqType = rawcdr.GetReqType()
-	rtCdr.Direction = rawcdr.GetDirection()
-	rtCdr.Tenant = rawcdr.GetTenant()
-	rtCdr.TOR = rawcdr.GetTOR()
-	rtCdr.Account = rawcdr.GetAccount()
-	rtCdr.Subject = rawcdr.GetSubject()
-	rtCdr.Destination = rawcdr.GetDestination()
-	if rtCdr.SetupTime, err = rawcdr.GetSetupTime(); err != nil {
+	strCdr := new(StoredCdr)
+	strCdr.CgrId = rawcdr.GetCgrId()
+	strCdr.AccId = rawcdr.GetAccId()
+	strCdr.CdrHost = rawcdr.GetCdrHost()
+	strCdr.CdrSource = rawcdr.GetCdrSource()
+	strCdr.ReqType = rawcdr.GetReqType()
+	strCdr.Direction = rawcdr.GetDirection()
+	strCdr.Tenant = rawcdr.GetTenant()
+	strCdr.TOR = rawcdr.GetTOR()
+	strCdr.Account = rawcdr.GetAccount()
+	strCdr.Subject = rawcdr.GetSubject()
+	strCdr.Destination = rawcdr.GetDestination()
+	if strCdr.SetupTime, err = rawcdr.GetSetupTime(); err != nil {
 		return nil, err
 	}
-	if rtCdr.AnswerTime, err = rawcdr.GetAnswerTime(); err != nil {
+	if strCdr.AnswerTime, err = rawcdr.GetAnswerTime(); err != nil {
 		return nil, err
 	}
-	rtCdr.Duration, _ = rawcdr.GetDuration()
-	rtCdr.ExtraFields = rawcdr.GetExtraFields()
-	rtCdr.MediationRunId = DEFAULT_RUNID
-	rtCdr.Cost = -1
-	return rtCdr, nil
+	strCdr.Duration, _ = rawcdr.GetDuration()
+	strCdr.ExtraFields = rawcdr.GetExtraFields()
+	strCdr.MediationRunId = DEFAULT_RUNID
+	strCdr.Cost = -1
+	return strCdr, nil
 }
 
 // Rated CDR as extracted from StorDb. Kinda standard of internal CDR, complies to CDR interface also
@@ -145,10 +145,6 @@ func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string 
 	return strconv.FormatFloat(cost, 'f', roundDecimals, 64)
 }
 
-func (storedCdr *StoredCdr) AsStoredCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
-	return storedCdr, nil
-}
-
 // Converts part of the rated Cdr as httpForm used to post remotely to CDRS
 func (storedCdr *StoredCdr) AsRawCdrHttpForm() url.Values {
 	v := url.Values{}
@@ -211,4 +207,19 @@ func (storedCdr *StoredCdr) ExportFieldValue(fldName string) string {
 	default:
 		return storedCdr.ExtraFields[fldName]
 	}
+}
+
+// Converts to CgrCdr, so we can fork with less code
+func (storedCdr *StoredCdr) AsCgrCdr() CgrCdr {
+	cgrCdr := make(CgrCdr)
+	for _, fldName := range PrimaryCdrFields {
+		cgrCdr[fldName] = storedCdr.ExportFieldValue(fldName)
+	}
+	return cgrCdr
+}
+
+func (storedCdr *StoredCdr) ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld,
+	setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
+	return storedCdr.AsCgrCdr().ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld,
+		setupTimeFld, answerTimeFld, durationFld, extraFlds, fieldsMandatory)
 }

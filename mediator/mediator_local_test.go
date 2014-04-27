@@ -237,6 +237,38 @@ func TestRateCdrs(t *testing.T) {
 	}
 }
 
+func TestDerivedCharging(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply string
+	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{}, &reply); err != nil {
+		t.Error(err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply: %s", reply)
+	}
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true); err != nil {
+		t.Error(err)
+	} else if len(nonRatedCdrs) != 0 { // Just two of them should be non-rated
+		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
+	}
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
+		t.Error(err)
+	} else if len(errRatedCdrs) != 2 { // The first 2 with errors should be still there before rerating
+		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
+	}
+	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{RerateErrors: true}, &reply); err != nil {
+		t.Error(err.Error())
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply: %s", reply)
+	}
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
+		t.Error(err)
+	} else if len(errRatedCdrs) != 1 { // One CDR with errors should be fixed now by rerating
+		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
+	}
+}
+
 // Simply kill the engine after we are done with tests within this file
 func TestStopEngine(t *testing.T) {
 	if !*testLocal {
