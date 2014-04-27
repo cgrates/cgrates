@@ -287,7 +287,7 @@ extra_fields = ~effective_caller_id_number:s/(\d+)/+$1/
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",
-		RSRule: &utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}) {
+		RSRules: []*utils.ReSearchReplace{&utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}}) {
 		t.Errorf("Unexpected value for config CdrsExtraFields: %v", cfg.CDRSExtraFields)
 	}
 	eFieldsCfg = []byte(`[cdrs]

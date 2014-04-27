@@ -19,25 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"errors"
+	"fmt"
 	"regexp"
 	"strings"
 )
-
-func ParseSearchReplaceFromFieldRule(fieldRule string) (string, *ReSearchReplace, error) {
-	// String rule expected in the form ~hdr_name:s/match_rule/replace_rule/
-	getRuleRgxp := regexp.MustCompile(`~(\w+):s\/(.+[^\\])\/(.+[^\\])\/`) // Make sure the separator / is not escaped in the rule
-	allMatches := getRuleRgxp.FindStringSubmatch(fieldRule)
-	if len(allMatches) != 4 { // Second and third groups are of interest to us
-		return "", nil, errors.New("Invalid Search&Replace field rule.")
-	}
-	fieldName := allMatches[1]
-	searchRegexp, err := regexp.Compile(allMatches[2])
-	if err != nil {
-		return fieldName, nil, err
-	}
-	return fieldName, &ReSearchReplace{searchRegexp, allMatches[3]}, nil
-}
 
 func NewRSRField(fldStr string) (*RSRField, error) {
 	if len(fldStr) == 0 {
@@ -46,16 +31,30 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 	if !strings.HasPrefix(fldStr, REGEXP_PREFIX) {
 		return &RSRField{Id: fldStr}, nil
 	}
-	if fldId, reSrcRepl, err := ParseSearchReplaceFromFieldRule(fldStr); err != nil {
-		return nil, err
-	} else {
-		return &RSRField{fldId, reSrcRepl}, nil
+	spltRgxp := regexp.MustCompile(`:s\/`)
+	spltRules := spltRgxp.Split(fldStr, -1)
+	if len(spltRules) < 2 {
+		return nil, fmt.Errorf("Invalid Search&Replace field rule. %s", fldStr)
 	}
+	rsrField := &RSRField{Id: spltRules[0][1:]} // Original id in form ~hdr_name
+	rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.+[^\\])\/){1,}`)
+	for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
+		allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
+		if len(allMatches) != 3 {
+			return nil, fmt.Errorf("Invalid Search&Replace field rule. %s", fldStr)
+		}
+		if srRegexp, err := regexp.Compile(allMatches[1]); err != nil {
+			return nil, fmt.Errorf("Invalid Search&Replace field rule. %s", fldStr)
+		} else {
+			rsrField.RSRules = append(rsrField.RSRules, &ReSearchReplace{SearchRegexp: srRegexp, ReplaceTemplate: allMatches[2]})
+		}
+	}
+	return rsrField, nil
 }
 
 type RSRField struct {
-	Id     string           //  Identifier
-	RSRule *ReSearchReplace // Rule to use when processing field value
+	Id      string             //  Identifier
+	RSRules []*ReSearchReplace // Rules to use when processing field value
 }
 
 // Parse the field value from a string
@@ -63,8 +62,10 @@ func (rsrf *RSRField) ParseValue(value string) string {
 	if len(value) == 0 {
 		return value
 	}
-	if rsrf.RSRule != nil {
-		value = rsrf.RSRule.Process(value)
+	for _, rsRule := range rsrf.RSRules {
+		if rsRule != nil {
+			value = rsRule.Process(value)
+		}
 	}
 	return value
 }

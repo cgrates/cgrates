@@ -170,7 +170,7 @@ func TestSearchExtraFieldInSlice(t *testing.T) {
 func TestSearchReplaceInExtraFields(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "read_codec"},
-		&utils.RSRField{Id: "sip_user_agent", RSRule: &utils.ReSearchReplace{regexp.MustCompile(`([A-Za-z]*).+`), "$1"}},
+		&utils.RSRField{Id: "sip_user_agent", RSRules: []*utils.ReSearchReplace{&utils.ReSearchReplace{regexp.MustCompile(`([A-Za-z]*).+`), "$1"}}},
 		&utils.RSRField{Id: "write_codec"}}
 	fsCdr, _ := new(FSCdr).New(body)
 	extraFields := fsCdr.GetExtraFields()
@@ -223,7 +223,7 @@ extra_fields =  ~effective_caller_id_number:s/(\d+)/+$1/
 	if err != nil {
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",
-		RSRule: &utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}) {
+		RSRules: []*utils.ReSearchReplace{&utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}}) {
 		t.Errorf("Unexpected value for config CdrsExtraFields: %v", cfg.CDRSExtraFields)
 	}
 	fsCdr, err := new(FSCdr).New(simpleJsonCdr)
