@@ -75,12 +75,12 @@ func TestFlushNoTimout(t *testing.T) {
 }
 
 func TestRemKey(t *testing.T) {
-	Cache("t1", "test")
-	if t1, err := GetCached("t1"); err != nil || t1 != "test" {
+	Cache("t11_mm", "test")
+	if t1, err := GetCached("t11_mm"); err != nil || t1 != "test" {
 		t.Error("Error setting cache")
 	}
-	RemKey("t1")
-	if t1, err := GetCached("t1"); err == nil || t1 == "test" {
+	RemKey("t11_mm")
+	if t1, err := GetCached("t11_mm"); err == nil || t1 == "test" {
 		t.Error("Error removing cached key")
 	}
 }

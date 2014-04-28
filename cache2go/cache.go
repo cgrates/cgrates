@@ -67,8 +67,10 @@ func (xe *XEntry) expire() {
 		<-xe.t.C
 		if !xe.keepAlive {
 			xMux.Lock()
-			delete(xcache, xe.key)
-			descount(xe.key)
+			if _, ok := xcache[xe.key]; ok {
+				delete(xcache, xe.key)
+				descount(xe.key)
+			}
 			xMux.Unlock()
 		}
 	}
@@ -137,7 +139,10 @@ func GetKeyAge(key string) (time.Duration, error) {
 func RemKey(key string) {
 	mux.Lock()
 	defer mux.Unlock()
-	delete(cache, key)
+	if _, ok := cache[key]; ok {
+		delete(cache, key)
+		descount(key)
+	}
 	xMux.Lock()
 	defer xMux.Unlock()
 	if r, ok := xcache[key]; ok {
@@ -145,8 +150,10 @@ func RemKey(key string) {
 			r.timer().Stop()
 		}
 	}
-	delete(xcache, key)
-	descount(key)
+	if _, ok := xcache[key]; ok {
+		delete(xcache, key)
+		descount(key)
+	}
 }
 
 func RemPrefixKey(prefix string) {
@@ -235,7 +242,7 @@ func descount(key string) {
 	cMux.Lock()
 	defer cMux.Unlock()
 	prefix := key[:PREFIX_LEN]
-	if _, ok := counters[prefix]; ok {
+	if value, ok := counters[prefix]; ok && value > 0 {
 		counters[prefix] -= 1
 	}
 }
