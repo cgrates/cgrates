@@ -57,7 +57,7 @@ func TestFlush(t *testing.T) {
 	a := &myStruct{data: "mama are mere"}
 	a.XCache("mama", 10*time.Second, a)
 	time.Sleep(1000 * time.Millisecond)
-	XFlush()
+	Flush()
 	b, err := GetXCached("mama")
 	if err == nil || b != nil {
 		t.Error("Error expiring data")
@@ -67,7 +67,7 @@ func TestFlush(t *testing.T) {
 func TestFlushNoTimout(t *testing.T) {
 	a := &myStruct{data: "mama are mere"}
 	a.XCache("mama", 10*time.Second, a)
-	XFlush()
+	Flush()
 	b, err := GetXCached("mama")
 	if err == nil || b != nil {
 		t.Error("Error expiring data")
@@ -75,12 +75,12 @@ func TestFlushNoTimout(t *testing.T) {
 }
 
 func TestRemKey(t *testing.T) {
-	Cache("t1", "test")
-	if t1, err := GetCached("t1"); err != nil || t1 != "test" {
+	Cache("t11_mm", "test")
+	if t1, err := GetCached("t11_mm"); err != nil || t1 != "test" {
 		t.Error("Error setting cache")
 	}
-	RemKey("t1")
-	if t1, err := GetCached("t1"); err == nil || t1 == "test" {
+	RemKey("t11_mm")
+	if t1, err := GetCached("t11_mm"); err == nil || t1 == "test" {
 		t.Error("Error removing cached key")
 	}
 }
@@ -91,7 +91,7 @@ func TestXRemKey(t *testing.T) {
 	if t1, err := GetXCached("mama"); err != nil || t1 != a {
 		t.Error("Error setting xcache")
 	}
-	XRemKey("mama")
+	RemKey("mama")
 	if t1, err := GetXCached("mama"); err == nil || t1 == a {
 		t.Error("Error removing xcached key: ", err, t1)
 	}
@@ -134,10 +134,21 @@ func TestXRemPrefixKey(t *testing.T) {
 	a.XCache("x_t1", 10*time.Second, a)
 	a.XCache("y_t1", 10*time.Second, a)
 
-	XRemPrefixKey("x_")
+	RemPrefixKey("x_")
 	_, errX := GetXCached("x_t1")
 	_, errY := GetXCached("y_t1")
 	if errX == nil || errY != nil {
 		t.Error("Error removing prefix: ", errX, errY)
+	}
+}
+
+func TestCount(t *testing.T) {
+	Cache("dst_A1", "1")
+	Cache("dst_A2", "2")
+	Cache("rpf_A3", "3")
+	Cache("dst_A4", "4")
+	Cache("dst_A5", "5")
+	if CountEntries("dst_") != 4 {
+		t.Error("Error countiong entries: ", CountEntries("dst_"))
 	}
 }

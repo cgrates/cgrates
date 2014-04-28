@@ -31,11 +31,17 @@ type timestampedValue struct {
 	value     interface{}
 }
 
+const (
+	PREFIX_LEN = 4
+)
+
 var (
-	xcache = make(map[string]expiringCacheEntry)
-	xMux   sync.RWMutex
-	cache  = make(map[string]timestampedValue)
-	mux    sync.RWMutex
+	xcache   = make(map[string]expiringCacheEntry)
+	xMux     sync.RWMutex
+	cache    = make(map[string]timestampedValue)
+	mux      sync.RWMutex
+	cMux     sync.Mutex
+	counters = make(map[string]int64)
 )
 
 // The main function to cache with expiration
@@ -46,6 +52,7 @@ func (xe *XEntry) XCache(key string, expire time.Duration, value expiringCacheEn
 	xe.timestamp = time.Now()
 	xMux.Lock()
 	xcache[key] = value
+	count(key)
 	xMux.Unlock()
 	go xe.expire()
 }
@@ -60,7 +67,10 @@ func (xe *XEntry) expire() {
 		<-xe.t.C
 		if !xe.keepAlive {
 			xMux.Lock()
-			delete(xcache, xe.key)
+			if _, ok := xcache[xe.key]; ok {
+				delete(xcache, xe.key)
+				descount(xe.key)
+			}
 			xMux.Unlock()
 		}
 	}
@@ -99,6 +109,7 @@ func Cache(key string, value interface{}) {
 	mux.Lock()
 	defer mux.Unlock()
 	cache[key] = timestampedValue{time.Now(), value}
+	count(key)
 }
 
 // The function to extract a value for a key that never expire
@@ -117,10 +128,6 @@ func GetKeyAge(key string) (time.Duration, error) {
 	if r, ok := cache[key]; ok {
 		return time.Since(r.timestamp), nil
 	}
-	return 0, errors.New("not found")
-}
-
-func GetXKeyAge(key string) (time.Duration, error) {
 	xMux.RLock()
 	defer xMux.RUnlock()
 	if r, ok := xcache[key]; ok {
@@ -132,10 +139,10 @@ func GetXKeyAge(key string) (time.Duration, error) {
 func RemKey(key string) {
 	mux.Lock()
 	defer mux.Unlock()
-	delete(cache, key)
-}
-
-func XRemKey(key string) {
+	if _, ok := cache[key]; ok {
+		delete(cache, key)
+		descount(key)
+	}
 	xMux.Lock()
 	defer xMux.Unlock()
 	if r, ok := xcache[key]; ok {
@@ -143,7 +150,10 @@ func XRemKey(key string) {
 			r.timer().Stop()
 		}
 	}
-	delete(xcache, key)
+	if _, ok := xcache[key]; ok {
+		delete(xcache, key)
+		descount(key)
+	}
 }
 
 func RemPrefixKey(prefix string) {
@@ -152,11 +162,9 @@ func RemPrefixKey(prefix string) {
 	for key, _ := range cache {
 		if strings.HasPrefix(key, prefix) {
 			delete(cache, key)
+			descount(key)
 		}
 	}
-}
-
-func XRemPrefixKey(prefix string) {
 	xMux.Lock()
 	defer xMux.Unlock()
 	for key, _ := range xcache {
@@ -167,6 +175,7 @@ func XRemPrefixKey(prefix string) {
 				}
 			}
 			delete(xcache, key)
+			descount(key)
 		}
 	}
 }
@@ -178,11 +187,6 @@ func GetAllEntries(prefix string) map[string]interface{} {
 			result[key] = timestampedValue.value
 		}
 	}
-	return result
-}
-
-func XGetAllEntries(prefix string) map[string]interface{} {
-	result := make(map[string]interface{})
 	for key, value := range xcache {
 		if strings.HasPrefix(key, prefix) {
 			result[key] = value
@@ -191,8 +195,8 @@ func XGetAllEntries(prefix string) map[string]interface{} {
 	return result
 }
 
-// Delete all keys from expiraton cache
-func XFlush() {
+// Delete all keys from cache
+func Flush() {
 	xMux.Lock()
 	defer xMux.Unlock()
 	for _, v := range xcache {
@@ -201,29 +205,44 @@ func XFlush() {
 		}
 	}
 	xcache = make(map[string]expiringCacheEntry)
-}
-
-// Delete all keys from cache
-func Flush() {
 	mux.Lock()
 	defer mux.Unlock()
 	cache = make(map[string]timestampedValue)
+	counters = make(map[string]int64)
 }
 
-func CountEntries(prefix string) (result int) {
-	for key, _ := range cache {
-		if strings.HasPrefix(key, prefix) {
-			result++
-		}
+func CountEntries(prefix string) (result int64) {
+	if _, ok := counters[prefix]; ok {
+		return counters[prefix]
 	}
-	return
+	return 0
 }
 
-func XCountEntries(prefix string) (result int) {
-	for key, _ := range xcache {
-		if strings.HasPrefix(key, prefix) {
-			result++
-		}
+// increments the counter for the specified key prefix
+func count(key string) {
+	if len(key) < PREFIX_LEN {
+		return
 	}
-	return
+	cMux.Lock()
+	defer cMux.Unlock()
+	prefix := key[:PREFIX_LEN]
+	if _, ok := counters[prefix]; ok {
+		// increase the value
+		counters[prefix] += 1
+	} else {
+		counters[prefix] = 1
+	}
+}
+
+// decrements the counter for the specified key prefix
+func descount(key string) {
+	if len(key) < PREFIX_LEN {
+		return
+	}
+	cMux.Lock()
+	defer cMux.Unlock()
+	prefix := key[:PREFIX_LEN]
+	if value, ok := counters[prefix]; ok && value > 0 {
+		counters[prefix] -= 1
+	}
 }
