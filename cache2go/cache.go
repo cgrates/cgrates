@@ -51,8 +51,11 @@ func (xe *XEntry) XCache(key string, expire time.Duration, value expiringCacheEn
 	xe.expireDuration = expire
 	xe.timestamp = time.Now()
 	xMux.Lock()
+	if _, ok := xcache[key]; !ok {
+		// only count if the key is not already there
+		count(key)
+	}
 	xcache[key] = value
-	count(key)
 	xMux.Unlock()
 	go xe.expire()
 }
@@ -108,8 +111,11 @@ func GetXCached(key string) (ece expiringCacheEntry, err error) {
 func Cache(key string, value interface{}) {
 	mux.Lock()
 	defer mux.Unlock()
+	if _, ok := cache[key]; !ok {
+		// only count if the key is not already there
+		count(key)
+	}
 	cache[key] = timestampedValue{time.Now(), value}
-	count(key)
 }
 
 // The function to extract a value for a key that never expire
