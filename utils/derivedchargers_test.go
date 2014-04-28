@@ -105,7 +105,7 @@ func TestNewDerivedCharger(t *testing.T) {
 }
 
 func TestDerivedChargersKey(t *testing.T) {
-	if dcKey := DerivedChargersKey("cgrates.org", "call", "*out", "dan", "dan"); dcKey != "cgrates.org:call:*out:dan:dan" {
+	if dcKey := DerivedChargersKey("*out", "cgrates.org", "call", "dan", "dan"); dcKey != "*out:cgrates.org:call:dan:dan" {
 		t.Error("Unexpected derived chargers key: ", dcKey)
 	}
 }

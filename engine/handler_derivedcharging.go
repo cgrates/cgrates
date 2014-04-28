@@ -27,8 +27,8 @@ import (
 func HandleGetDerivedChargers(acntStorage AccountingStorage, cfg *config.CGRConfig, attrs utils.AttrDerivedChargers) (utils.DerivedChargers, error) {
 	var dcs utils.DerivedChargers
 	var err error
-	strictKey := utils.DerivedChargersKey(attrs.Tenant, attrs.Tor, attrs.Direction, attrs.Account, attrs.Subject)
-	anySubjKey := utils.DerivedChargersKey(attrs.Tenant, attrs.Tor, attrs.Direction, attrs.Account, utils.ANY)
+	strictKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
+	anySubjKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, utils.ANY)
 	for _, dcKey := range []string{strictKey, anySubjKey} {
 		if dcsDb, err := acntStorage.GetDerivedChargers(dcKey, false); err != nil && err.Error() != utils.ERR_NOT_FOUND {
 			return nil, err

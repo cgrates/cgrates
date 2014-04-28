@@ -379,5 +379,5 @@ type AttrGetDestination struct {
 }
 
 type AttrDerivedChargers struct {
-	Tenant, Tor, Direction, Account, Subject string
+	Direction, Tenant, Category, Account, Subject string
 }

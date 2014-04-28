@@ -168,10 +168,10 @@ vdf,emptyY,*out,TOPUP_EMPTY_AT,
 `
 
 	derivedCharges = `
-#Tenant,Tor,Direction,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
-cgrates.org,call,*out,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
-cgrates.org,call,*out,dan,dan,extra2,,,,,ivo,ivo,,,,
-cgrates.org,call,*out,dan,*any,extra1,,,,,rif2,rif2,,,,
+#Direction,Tenant,Category,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
+*out,cgrates.org,call,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
+*out,cgrates.org,call,dan,dan,extra2,,,,,ivo,ivo,,,,
+*out,cgrates.org,call,dan,*any,extra1,,,,,rif2,rif2,,,,
 `
 )
 

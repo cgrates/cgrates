@@ -59,7 +59,7 @@ func TestHandleGetConfiguredDC(t *testing.T) {
 
 // Receive composed derived chargers
 func TestHandleGetStoredDC(t *testing.T) {
-	keyCharger1 := utils.DerivedChargersKey("cgrates.org", "call", "*out", "rif", "rif")
+	keyCharger1 := utils.DerivedChargersKey("*out", "cgrates.org", "call", "rif", "rif")
 	charger1 := utils.DerivedChargers{
 		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},

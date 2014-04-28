@@ -116,8 +116,8 @@ type DerivedCharger struct {
 	rsrDurationField    *RSRField
 }
 
-func DerivedChargersKey(tenant, tor, direction, account, subject string) string {
-	return ConcatenatedKey(tenant, tor, direction, account, subject)
+func DerivedChargersKey(direction, tenant, category, account, subject string) string {
+	return ConcatenatedKey(direction, tenant, category, account, subject)
 }
 
 type DerivedChargers []*DerivedCharger
