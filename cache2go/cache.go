@@ -197,6 +197,9 @@ func GetAllEntries(prefix string) map[string]interface{} {
 
 // Delete all keys from cache
 func Flush() {
+	mux.Lock()
+	defer mux.Unlock()
+	cache = make(map[string]timestampedValue)
 	xMux.Lock()
 	defer xMux.Unlock()
 	for _, v := range xcache {
@@ -205,9 +208,8 @@ func Flush() {
 		}
 	}
 	xcache = make(map[string]expiringCacheEntry)
-	mux.Lock()
-	defer mux.Unlock()
-	cache = make(map[string]timestampedValue)
+	cMux.Lock()
+	defer cMux.Unlock()
 	counters = make(map[string]int64)
 }
 
