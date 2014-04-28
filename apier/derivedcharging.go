@@ -25,7 +25,7 @@ import (
 )
 
 // Get DerivedChargers applying to our call, appends general configured to account specific ones if that is configured
-func (self *ApierV1) DerivedChargers(attrs utils.AttrDerivedChargers, reply *utils.DerivedChargers) (err error) {
+func (self *ApierV1) GetDerivedChargers(attrs utils.AttrDerivedChargers, reply *utils.DerivedChargers) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Direction", "Account", "Subject"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
@@ -42,31 +42,36 @@ type AttrSetDerivedChargers struct {
 	DerivedChargers                               utils.DerivedChargers
 }
 
-func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *utils.DerivedChargers) (err error) {
+func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *string) (err error) {
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Category", "Direction", "Account", "Subject", "DerivedChargers"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.AccountDb.SetDerivedChargers(utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject),
-		attrs.DerivedChargers); err != nil {
+	dcKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
+	if err := self.AccountDb.SetDerivedChargers(dcKey, attrs.DerivedChargers); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	if err := self.AccountDb.CacheAccounting([]string{}, []string{}, []string{}, []string{engine.DERIVEDCHARGERS_PREFIX + dcKey}); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = utils.OK
 	return nil
 }
 
-/*
 type AttrRemDerivedChargers struct {
-	Tenant, Category, Direction, Account, Subject string
+	Direction, Tenant, Category, Account, Subject string
 }
 
 func (self *ApierV1) RemDerivedChargers(attrs AttrRemDerivedChargers, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, ]string{"Tenant", "Category", "Direction", "Account", "Subject"}); len(missing) != 0 { //Params missing
+	if missing := utils.MissingStructFields(&attrs, []string{"Direction", "Tenant", "Category", "Account", "Subject"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.DerivedChargersKey(attrs.Tenant, attrs.Category, attrs.Direction, attrs.Account, attrs.Subject), nil); err != nil {
+	if err := self.AccountDb.SetDerivedChargers(utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject), nil); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"
 	}
+	if err := self.AccountDb.CacheAccounting([]string{}, []string{}, []string{}, nil); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
 	return nil
 }
-*/

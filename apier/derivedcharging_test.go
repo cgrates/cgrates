@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -35,11 +36,66 @@ func init() {
 }
 
 func TestGetEmptyDC(t *testing.T) {
-	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Tor: "call", Direction: "*out", Account: "dan", Subject: "dan"}
+	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
 	var dcs utils.DerivedChargers
-	if err := apierDcT.DerivedChargers(attrs, &dcs); err != nil {
+	if err := apierDcT.GetDerivedChargers(attrs, &dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, apierDcT.Config.DerivedChargers) {
+		t.Error("Returned DerivedChargers not matching the configured ones")
+	}
+}
+
+func TestSetDC(t *testing.T) {
+	dcs1 := utils.DerivedChargers{
+		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+	}
+	attrs := AttrSetDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: dcs1}
+	var reply string
+	if err := apierDcT.SetDerivedChargers(attrs, &reply); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func TestGetDC(t *testing.T) {
+	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
+	eDcs := utils.DerivedChargers{
+		&utils.DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+	}
+	var dcs utils.DerivedChargers
+	if err := apierDcT.GetDerivedChargers(attrs, &dcs); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if !reflect.DeepEqual(dcs, eDcs) {
+		t.Errorf("Expecting: %v, received: %v", eDcs, dcs)
+	}
+}
+
+func TestRemDC(t *testing.T) {
+	attrs := AttrRemDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan"}
+	var reply string
+	if err := apierDcT.RemDerivedChargers(attrs, &reply); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if reply != utils.OK {
+		t.Error("Unexpected reply returned", reply)
+	}
+}
+
+func TestGetEmptyDC2(t *testing.T) {
+	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
+	var dcs utils.DerivedChargers
+	if err := apierDcT.GetDerivedChargers(attrs, &dcs); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if !reflect.DeepEqual(dcs, apierDcT.Config.DerivedChargers) {
+		for _, dc := range dcs {
+			fmt.Printf("Got dc: %v\n", dc)
+		}
 		t.Error("Returned DerivedChargers not matching the configured ones")
 	}
 }
