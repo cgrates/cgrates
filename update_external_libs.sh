@@ -7,4 +7,4 @@ go get -v -u github.com/cgrates/fsock
 go get -u -v github.com/go-sql-driver/mysql
 go get -u -v github.com/hoisie/redis
 go get -u -v github.com/howeyc/fsnotify
-
+go get -u -v github.com/rif/liner
