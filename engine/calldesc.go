@@ -116,7 +116,10 @@ type CallDescriptor struct {
 	FallbackSubject string // the subject to check for destination if not found on primary subject
 	RatingInfos     RatingInfos
 	Increments      Increments
-	account         *Account
+	// session limits
+	MaxRate     float64
+	MaxRateUnit time.Duration
+	account     *Account
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {
@@ -480,9 +483,16 @@ func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Dura
 		return 0, err
 	}
 	// now let's check how many increments are covered with the avilableCredit
+	// also check for max rate/max rate unit
 	for _, ts := range cc.Timespans {
 		ts.createIncrementsSlice()
 		//Logger.Debug(fmt.Sprintf("TS: %+v", ts))
+		if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
+			rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+			if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
+				return availableDuration, nil
+			}
+		}
 		for _, incr := range ts.Increments {
 			if incr.Cost <= availableCredit {
 				availableCredit -= incr.Cost
@@ -644,6 +654,8 @@ func (cd *CallDescriptor) Clone() *CallDescriptor {
 		TimeEnd:      cd.TimeEnd,
 		LoopIndex:    cd.LoopIndex,
 		CallDuration: cd.CallDuration,
+		MaxRate:      cd.MaxRate,
+		MaxRateUnit:  cd.MaxRateUnit,
 		//		Amount:          cd.Amount,
 		FallbackSubject: cd.FallbackSubject,
 		//RatingInfos:     cd.RatingInfos,
