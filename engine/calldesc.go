@@ -113,15 +113,16 @@ type CallDescriptor struct {
 	TimeStart, TimeEnd                    time.Time
 	LoopIndex                             float64       // indicates the position of this segment in a cost request loop
 	DurationIndex                         time.Duration // the call duration so far (till TimeEnd)
-	//Amount                                float64
-	FallbackSubject string // the subject to check for destination if not found on primary subject
-	RatingInfos     RatingInfos
-	Increments      Increments
-	TOR             string // used unit balances selector
+	FallbackSubject                       string        // the subject to check for destination if not found on primary subject
+	RatingInfos                           RatingInfos
+	Increments                            Increments
+	TOR                                   string // used unit balances selector
 	// session limits
-	MaxRate     float64
-	MaxRateUnit time.Duration
-	account     *Account
+	MaxRate      float64
+	MaxRateUnit  time.Duration
+	MaxCost      float64
+	MaxCostSoFar float64
+	account      *Account
 }
 
 func (cd *CallDescriptor) ValidateCallData() error {
@@ -480,6 +481,12 @@ func (origCD *CallDescriptor) getMaxSessionDuration(account *Account) (time.Dura
 		availableDuration, availableCredit, _ = account.getCreditForPrefix(cd)
 		// Logger.Debug(fmt.Sprintf("available sec: %v credit: %v", availableSeconds, availableCredit))
 	}
+	if cd.MaxCost > 0 {
+		// limit availableCredit
+		if cd.MaxCostSoFar+availableCredit > cd.MaxCost {
+			availableCredit = cd.MaxCost - cd.MaxCostSoFar
+		}
+	}
 	//Logger.Debug(fmt.Sprintf("availableDuration: %v, availableCredit: %v", availableDuration, availableCredit))
 	initialDuration := cd.TimeEnd.Sub(cd.TimeStart)
 	if initialDuration <= availableDuration {
@@ -667,19 +674,20 @@ func (cd *CallDescriptor) CreateCallCost() *CallCost {
 
 func (cd *CallDescriptor) Clone() *CallDescriptor {
 	return &CallDescriptor{
-		Direction:     cd.Direction,
-		Category:      cd.Category,
-		Tenant:        cd.Tenant,
-		Subject:       cd.Subject,
-		Account:       cd.Account,
-		Destination:   cd.Destination,
-		TimeStart:     cd.TimeStart,
-		TimeEnd:       cd.TimeEnd,
-		LoopIndex:     cd.LoopIndex,
-		DurationIndex: cd.DurationIndex,
-		MaxRate:       cd.MaxRate,
-		MaxRateUnit:   cd.MaxRateUnit,
-		//		Amount:          cd.Amount,
+		Direction:       cd.Direction,
+		Category:        cd.Category,
+		Tenant:          cd.Tenant,
+		Subject:         cd.Subject,
+		Account:         cd.Account,
+		Destination:     cd.Destination,
+		TimeStart:       cd.TimeStart,
+		TimeEnd:         cd.TimeEnd,
+		LoopIndex:       cd.LoopIndex,
+		DurationIndex:   cd.DurationIndex,
+		MaxRate:         cd.MaxRate,
+		MaxRateUnit:     cd.MaxRateUnit,
+		MaxCost:         cd.MaxCost,
+		MaxCostSoFar:    cd.MaxCostSoFar,
 		FallbackSubject: cd.FallbackSubject,
 		//RatingInfos:     cd.RatingInfos,
 		//Increments:      cd.Increments,

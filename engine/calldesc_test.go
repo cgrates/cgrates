@@ -355,6 +355,30 @@ func TestMaxSessionTimeWithMaxRate(t *testing.T) {
 	}
 }
 
+func TestMaxSessionTimeWithMaxCost(t *testing.T) {
+	ap, _ := accountingStorage.GetActionTimings("TOPUP10_AT")
+	for _, at := range ap {
+		at.Execute()
+	}
+	cd := &CallDescriptor{
+		Direction:    "*out",
+		Category:     "call",
+		Tenant:       "cgrates.org",
+		Subject:      "12345",
+		Account:      "12345",
+		Destination:  "447956",
+		TimeStart:    time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
+		TimeEnd:      time.Date(2014, 3, 4, 6, 1, 0, 0, time.UTC),
+		MaxCost:      0.5,
+		MaxCostSoFar: 0,
+	}
+	result, err := cd.GetMaxSessionDuration()
+	expected := 45 * time.Second
+	if result != expected || err != nil {
+		t.Errorf("Expected %v was %v", expected, result)
+	}
+}
+
 func TestMaxSessionTimeWithAccountAlias(t *testing.T) {
 	cd := &CallDescriptor{
 		TimeStart:   time.Date(2013, 10, 21, 18, 34, 0, 0, time.UTC),
