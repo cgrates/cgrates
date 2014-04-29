@@ -69,7 +69,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.RPCGOBListen = "127.0.0.1:2013"
 	eCfg.HTTPListen = "127.0.0.1:2080"
 	eCfg.DefaultReqType = utils.RATED
-	eCfg.DefaultTOR = "call"
+	eCfg.DefaultCategory = "call"
 	eCfg.DefaultTenant = "cgrates.org"
 	eCfg.DefaultSubject = "cgrates"
 	eCfg.RoundingMethod = utils.ROUNDING_MIDDLE
@@ -138,7 +138,7 @@ func TestDefaults(t *testing.T) {
 		&utils.RSRField{Id: utils.REQTYPE},
 		&utils.RSRField{Id: utils.DIRECTION},
 		&utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.TOR},
+		&utils.RSRField{Id: utils.Category},
 		&utils.RSRField{Id: utils.ACCOUNT},
 		&utils.RSRField{Id: utils.SUBJECT},
 		&utils.RSRField{Id: utils.DESTINATION},
@@ -203,7 +203,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.RPCGOBListen = "test"
 	eCfg.HTTPListen = "test"
 	eCfg.DefaultReqType = "test"
-	eCfg.DefaultTOR = "test"
+	eCfg.DefaultCategory = "test"
 	eCfg.DefaultTenant = "test"
 	eCfg.DefaultSubject = "test"
 	eCfg.RoundingMethod = "test"

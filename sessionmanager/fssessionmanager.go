@@ -151,7 +151,7 @@ func (sm *FSSessionManager) OnHeartBeat(ev Event) {
 func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	var maxCallDuration time.Duration // This will be the maximum duration this channel will be allowed to last
 	var durInitialized bool
-	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetTOR(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
@@ -178,7 +178,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		cd := engine.CallDescriptor{
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
-			TOR:         ev.GetTOR(dc.TorField),
+			Category:    ev.GetCategory(dc.TorField),
 			Subject:     ev.GetSubject(dc.SubjectField),
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),
@@ -219,7 +219,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType(""))); err != nil {
 		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
 	}
-	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetTOR(utils.META_DEFAULT),
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT),
 		Direction: ev.GetDirection(utils.META_DEFAULT), Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
@@ -242,7 +242,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		sm.RemoveSession(s.uuid) // Unreference it early so we avoid concurrency
 	}
 	defer s.Close(ev)                            // Stop loop and save the costs deducted so far to database
-	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetTOR(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
@@ -264,16 +264,16 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				return
 			}
 			cd := engine.CallDescriptor{
-				Direction:    ev.GetDirection(dc.DirectionField),
-				Tenant:       ev.GetTenant(dc.TenantField),
-				TOR:          ev.GetTOR(dc.TorField),
-				Subject:      ev.GetSubject(dc.SubjectField),
-				Account:      ev.GetAccount(dc.AccountField),
-				LoopIndex:    0,
-				CallDuration: duration,
-				Destination:  ev.GetDestination(dc.DestinationField),
-				TimeStart:    startTime,
-				TimeEnd:      startTime.Add(duration),
+				Direction:     ev.GetDirection(dc.DirectionField),
+				Tenant:        ev.GetTenant(dc.TenantField),
+				Category:      ev.GetCategory(dc.TorField),
+				Subject:       ev.GetSubject(dc.SubjectField),
+				Account:       ev.GetAccount(dc.AccountField),
+				LoopIndex:     0,
+				DurationIndex: duration,
+				Destination:   ev.GetDestination(dc.DestinationField),
+				TimeStart:     startTime,
+				TimeEnd:       startTime.Add(duration),
 			}
 			cc := &engine.CallCost{}
 			err = sm.connector.Debit(cd, cc)
@@ -333,7 +333,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				cd := &engine.CallDescriptor{
 					Direction:   lastCC.Direction,
 					Tenant:      lastCC.Tenant,
-					TOR:         lastCC.TOR,
+					Category:    lastCC.Category,
 					Subject:     lastCC.Subject,
 					Account:     lastCC.Account,
 					Destination: lastCC.Destination,

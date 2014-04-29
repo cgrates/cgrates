@@ -35,7 +35,7 @@ func TestNewStoredCdrFromRawCDR(t *testing.T) {
 		"field_extr1": "val_extr1", "fieldextr2": "valextr2"}
 	setupTime, _ := ParseTimeDetectLayout(cgrCdr["setup_time"])
 	expctRtCdr := &StoredCdr{CgrId: Sha1(cgrCdr["accid"], setupTime.String()), AccId: cgrCdr["accid"], CdrHost: cgrCdr["cdrhost"], CdrSource: cgrCdr["cdrsource"], ReqType: cgrCdr["reqtype"],
-		Direction: cgrCdr["direction"], Tenant: cgrCdr["tenant"], TOR: cgrCdr["tor"], Account: cgrCdr["account"], Subject: cgrCdr["subject"],
+		Direction: cgrCdr["direction"], Tenant: cgrCdr["tenant"], Category: cgrCdr["tor"], Account: cgrCdr["account"], Subject: cgrCdr["subject"],
 		Destination: cgrCdr["destination"], SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), Duration: time.Duration(10) * time.Second,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, MediationRunId: DEFAULT_RUNID, Cost: -1}
 	if rt, err := NewStoredCdrFromRawCDR(cgrCdr); err != nil {
@@ -47,7 +47,7 @@ func TestNewStoredCdrFromRawCDR(t *testing.T) {
 
 func TestStoredCdrFields(t *testing.T) {
 	ratedCdr := StoredCdr{CgrId: Sha1("dsafdsaf", time.Unix(1383813746, 0).String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813746, 0), AnswerTime: time.Unix(1383813746, 0), Duration: 10,
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813746, 0), AnswerTime: time.Unix(1383813746, 0), Duration: 10,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if ratedCdr.GetCgrId() != Sha1("dsafdsaf", time.Unix(1383813746, 0).String()) {
@@ -71,7 +71,7 @@ func TestStoredCdrFields(t *testing.T) {
 	if ratedCdr.GetDestination() != "1002" {
 		t.Error("Error parsing cdr: ", ratedCdr)
 	}
-	if ratedCdr.GetTOR() != "call" {
+	if ratedCdr.GetCategory() != "call" {
 		t.Error("Error parsing cdr: ", ratedCdr)
 	}
 	if ratedCdr.GetTenant() != "cgrates.org" {
@@ -108,7 +108,7 @@ func TestStoredCdrFields(t *testing.T) {
 
 func TestAsRawCdrHttpForm(t *testing.T) {
 	ratedCdr := StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	cdrForm := ratedCdr.AsRawCdrHttpForm()
@@ -130,8 +130,8 @@ func TestAsRawCdrHttpForm(t *testing.T) {
 	if cdrForm.Get(TENANT) != ratedCdr.Tenant {
 		t.Errorf("Expected: %s, received: %s", ratedCdr.Tenant, cdrForm.Get(TENANT))
 	}
-	if cdrForm.Get(TOR) != ratedCdr.TOR {
-		t.Errorf("Expected: %s, received: %s", ratedCdr.TOR, cdrForm.Get(TOR))
+	if cdrForm.Get(Category) != ratedCdr.Category {
+		t.Errorf("Expected: %s, received: %s", ratedCdr.Category, cdrForm.Get(Category))
 	}
 	if cdrForm.Get(ACCOUNT) != ratedCdr.Account {
 		t.Errorf("Expected: %s, received: %s", ratedCdr.Account, cdrForm.Get(ACCOUNT))
@@ -161,7 +161,7 @@ func TestAsRawCdrHttpForm(t *testing.T) {
 
 func TestExportFieldValue(t *testing.T) {
 	cdr := StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if cdr.ExportFieldValue(CGRID) != cdr.CgrId ||
@@ -172,7 +172,7 @@ func TestExportFieldValue(t *testing.T) {
 		cdr.ExportFieldValue(REQTYPE) != cdr.ReqType ||
 		cdr.ExportFieldValue(DIRECTION) != cdr.Direction ||
 		cdr.ExportFieldValue(TENANT) != cdr.Tenant ||
-		cdr.ExportFieldValue(TOR) != cdr.TOR ||
+		cdr.ExportFieldValue(Category) != cdr.Category ||
 		cdr.ExportFieldValue(ACCOUNT) != cdr.Account ||
 		cdr.ExportFieldValue(SUBJECT) != cdr.Subject ||
 		cdr.ExportFieldValue(DESTINATION) != cdr.Destination ||

@@ -269,7 +269,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				buffer.WriteRune(',')
 			}
-			buffer.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Tenant, rp.TOR, rp.Direction,
+			buffer.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Tenant, rp.Category, rp.Direction,
 				rp.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackSubjects))
 			i++
 		}
@@ -476,7 +476,7 @@ func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (
 		cgrid,
 		cc.Direction,
 		cc.Tenant,
-		cc.TOR,
+		cc.Category,
 		cc.Account,
 		cc.Subject,
 		cc.Destination,
@@ -500,7 +500,7 @@ func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCos
 	var src string
 	var timespansJson string
 	cc = &CallCost{Cost: -1}
-	err = row.Scan(&cgrid, &cc.Direction, &cc.Tenant, &cc.TOR, &cc.Account, &cc.Subject,
+	err = row.Scan(&cgrid, &cc.Direction, &cc.Tenant, &cc.Category, &cc.Account, &cc.Subject,
 		&cc.Destination, &cc.Cost, &timespansJson, &src)
 	if len(timespansJson) == 0 { // No costs returned
 		return nil, nil
@@ -533,7 +533,7 @@ func (self *SQLStorage) SetCdr(cdr utils.RawCDR) (err error) {
 		cdr.GetReqType(),
 		cdr.GetDirection(),
 		cdr.GetTenant(),
-		cdr.GetTOR(),
+		cdr.GetCategory(),
 		cdr.GetAccount(),
 		cdr.GetSubject(),
 		cdr.GetDestination(),
@@ -796,11 +796,11 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 			return nil, err
 		}
 		if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
-			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %s, error: %s", cgrid, runid, err.Error())
+			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid, runid, err.Error())
 		}
 		storCdr := &utils.StoredCdr{
 			CgrId: cgrid, OrderId: orderid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
-			TOR: tor, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(duration),
+			Category: tor, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(duration),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
 		cdrs = append(cdrs, storCdr)
@@ -1005,7 +1005,7 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 }
 
 func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
-	q := fmt.Sprintf("SELECT loadid,tenant,tor,direction,subject,activation_time,rating_plan_id,fallback_subjects FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT loadid,direction,tenant,tor,subject,activation_time,rating_plan_id,fallback_subjects FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_RATE_PROFILES, qryRpf.TPid)
 	if len(qryRpf.LoadId) != 0 {
 		q += fmt.Sprintf(" AND loadid='%s'", qryRpf.LoadId)
@@ -1013,8 +1013,8 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 	if len(qryRpf.Tenant) != 0 {
 		q += fmt.Sprintf(" AND tenant='%s'", qryRpf.Tenant)
 	}
-	if len(qryRpf.TOR) != 0 {
-		q += fmt.Sprintf(" AND tor='%s'", qryRpf.TOR)
+	if len(qryRpf.Category) != 0 {
+		q += fmt.Sprintf(" AND tor='%s'", qryRpf.Category)
 	}
 	if len(qryRpf.Direction) != 0 {
 		q += fmt.Sprintf(" AND direction='%s'", qryRpf.Direction)
@@ -1033,7 +1033,7 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 		if err := rows.Scan(&rcvLoadId, &tenant, &tor, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
 			return nil, err
 		}
-		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Tenant: tenant, TOR: tor, Direction: direction, Subject: subject}
+		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Tenant: tenant, Category: tor, Direction: direction, Subject: subject}
 		if existingRp, has := rpfs[rp.KeyId()]; !has {
 			rp.RatingPlanActivations = []*utils.TPRatingActivation{
 				&utils.TPRatingActivation{ActivationTime: activation_time, RatingPlanId: rating_plan_tag, FallbackSubjects: fallback_subjects}}
@@ -1138,7 +1138,8 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 	for rows.Next() {
 		var threshold, weight float64
 		var tpid, tag, balances_type, direction, destinations_tag, actions_tag, thresholdType string
-		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &thresholdType, &threshold, &destinations_tag, &actions_tag, &weight); err != nil {
+		var recurrent bool
+		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &thresholdType, &threshold, &recurrent, &destinations_tag, &actions_tag, &weight); err != nil {
 			return nil, err
 		}
 

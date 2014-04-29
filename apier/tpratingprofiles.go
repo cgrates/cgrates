@@ -78,7 +78,7 @@ func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileId
 	}
 	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, "loadid", map[string]string{
 		"tenant":    attrs.Tenant,
-		"tor":       attrs.TOR,
+		"tor":       attrs.Category,
 		"direction": attrs.Direction,
 		"subject":   attrs.Subject,
 	}); err != nil {
@@ -96,7 +96,7 @@ func (self *ApierV1) RemTPRatingProfile(attrs utils.TPRatingProfile, reply *stri
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "TOR", "Direction", "Subject"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, attrs.LoadId, attrs.Tenant, attrs.TOR, attrs.Direction, attrs.Subject); err != nil {
+	if err := self.StorDb.RemTPData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, attrs.LoadId, attrs.Tenant, attrs.Category, attrs.Direction, attrs.Subject); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

@@ -32,7 +32,7 @@ type Event interface {
 	GetAccount(string) string
 	GetDestination(string) string
 	GetCallDestNr(string) string
-	GetTOR(string) string
+	GetCategory(string) string
 	GetTenant(string) string
 	GetReqType(string) string
 	GetSetupTime(string) (time.Time, error)

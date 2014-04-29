@@ -65,16 +65,16 @@ func (self *Mediator) getCostsFromRater(cdr *utils.StoredCdr) (*engine.CallCost,
 		return cc, nil
 	}
 	cd := engine.CallDescriptor{
-		Direction:    "*out", //record[m.directionFields[runIdx]] TODO: fix me
-		Tenant:       cdr.Tenant,
-		TOR:          cdr.TOR,
-		Subject:      cdr.Subject,
-		Account:      cdr.Account,
-		Destination:  cdr.Destination,
-		TimeStart:    cdr.AnswerTime,
-		TimeEnd:      cdr.AnswerTime.Add(cdr.Duration),
-		LoopIndex:    0,
-		CallDuration: cdr.Duration,
+		Direction:     "*out", //record[m.directionFields[runIdx]] TODO: fix me
+		Tenant:        cdr.Tenant,
+		Category:      cdr.Category,
+		Subject:       cdr.Subject,
+		Account:       cdr.Account,
+		Destination:   cdr.Destination,
+		TimeStart:     cdr.AnswerTime,
+		TimeEnd:       cdr.AnswerTime.Add(cdr.Duration),
+		LoopIndex:     0,
+		DurationIndex: cdr.Duration,
 	}
 	if cdr.ReqType == utils.PSEUDOPREPAID {
 		err = self.connector.Debit(cd, cc)
@@ -114,8 +114,8 @@ func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
 	if err != nil {
 		return err
 	}
-	cdrs := []*utils.StoredCdr{rtCdr}               // Start with initial dbcdr, will add here all to be mediated
-	attrsDC := utils.AttrDerivedChargers{Direction: rtCdr.Direction, Tenant: rtCdr.Tenant, Category: rtCdr.TOR,
+	cdrs := []*utils.StoredCdr{rtCdr}            // Start with initial dbcdr, will add here all to be mediated
+	attrsDC := utils.AttrDerivedChargers{Tenant: rtCdr.Tenant, Category: rtCdr.Category, Direction: rtCdr.Direction,
 		Account: rtCdr.Account, Subject: rtCdr.Subject}
 	var dcs utils.DerivedChargers
 	if err := self.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {

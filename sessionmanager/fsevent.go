@@ -20,12 +20,13 @@ package sessionmanager
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
-	"strings"
-	"time"
 )
 
 // ToDo: Introduce support for RSRFields
@@ -40,7 +41,7 @@ const (
 	ACCOUNT            = "variable_cgr_account"
 	DESTINATION        = "variable_cgr_destination"
 	REQTYPE            = "variable_cgr_reqtype" //prepaid or postpaid
-	TOR                = "variable_cgr_tor"
+	Category           = "variable_cgr_tor"
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_cgr_tenant"
 	CALL_DEST_NR       = "Caller-Destination-Number"
@@ -126,13 +127,13 @@ func (fsev FSEvent) GetCallDestNr(fieldName string) string {
 	}
 	return utils.FirstNonEmpty(fsev[fieldName], fsev[CALL_DEST_NR])
 }
-func (fsev FSEvent) GetTOR(fieldName string) string {
+func (fsev FSEvent) GetCategory(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	} else if fieldName == utils.META_DEFAULT {
-		return utils.FirstNonEmpty(fsev[TOR], config.CgrConfig().DefaultTOR)
+		return utils.FirstNonEmpty(fsev[Category], config.CgrConfig().DefaultCategory)
 	}
-	return utils.FirstNonEmpty(fsev[fieldName], fsev[TOR], config.CgrConfig().DefaultTOR)
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[Category], config.CgrConfig().DefaultCategory)
 }
 func (fsev FSEvent) GetCgrId() string {
 	setupTime, _ := fsev.GetSetupTime(utils.META_DEFAULT)
@@ -162,7 +163,7 @@ func (fsev FSEvent) MissingParameter() bool {
 		strings.TrimSpace(fsev.GetSubject(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetAccount(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetDestination(utils.META_DEFAULT)) == "" ||
-		strings.TrimSpace(fsev.GetTOR(utils.META_DEFAULT)) == "" ||
+		strings.TrimSpace(fsev.GetCategory(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetUUID()) == "" ||
 		strings.TrimSpace(fsev.GetTenant(utils.META_DEFAULT)) == "" ||
 		strings.TrimSpace(fsev.GetCallDestNr(utils.META_DEFAULT)) == ""

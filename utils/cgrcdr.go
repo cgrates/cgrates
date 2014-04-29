@@ -77,8 +77,8 @@ func (cgrCdr CgrCdr) GetDestination() string {
 	return cgrCdr[DESTINATION]
 }
 
-func (cgrCdr CgrCdr) GetTOR() string {
-	return cgrCdr[TOR]
+func (cgrCdr CgrCdr) GetCategory() string {
+	return cgrCdr[Category]
 }
 
 func (cgrCdr CgrCdr) GetTenant() string {
@@ -136,7 +136,7 @@ func (cgrCdr CgrCdr) ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld,
 		tenantFld = TENANT
 	}
 	if torFld == META_DEFAULT {
-		torFld = TOR
+		torFld = Category
 	}
 	if accountFld == META_DEFAULT {
 		accountFld = ACCOUNT
@@ -178,8 +178,8 @@ func (cgrCdr CgrCdr) ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld,
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, tenantFld))
 	}
 	if strings.HasPrefix(torFld, STATIC_VALUE_PREFIX) {
-		rtCdr.TOR = torFld[1:]
-	} else if rtCdr.TOR, hasKey = cgrCdr[torFld]; !hasKey && fieldsMandatory {
+		rtCdr.Category = torFld[1:]
+	} else if rtCdr.Category, hasKey = cgrCdr[torFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, torFld))
 	}
 	if strings.HasPrefix(accountFld, STATIC_VALUE_PREFIX) {

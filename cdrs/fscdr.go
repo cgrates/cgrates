@@ -39,7 +39,7 @@ const (
 	FS_ACCOUNT      = "cgr_account"
 	FS_DESTINATION  = "cgr_destination"
 	FS_REQTYPE      = "cgr_reqtype" //prepaid or postpaid
-	FS_TOR          = "cgr_tor"
+	FS_CATEGORY     = "cgr_category"
 	FS_UUID         = "uuid" // -Unique ID for this call leg
 	FS_CSTMID       = "cgr_tenant"
 	FS_CALL_DEST_NR = "dialed_extension"
@@ -104,8 +104,8 @@ func (fsCdr FSCdr) GetDestination() string {
 	return utils.FirstNonEmpty(fsCdr.vars[FS_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
 }
 
-func (fsCdr FSCdr) GetTOR() string {
-	return utils.FirstNonEmpty(fsCdr.vars[FS_TOR], cfg.DefaultTOR)
+func (fsCdr FSCdr) GetCategory() string {
+	return utils.FirstNonEmpty(fsCdr.vars[FS_CATEGORY], cfg.DefaultCategory)
 }
 
 func (fsCdr FSCdr) GetTenant() string {
@@ -177,7 +177,7 @@ func (fsCdr FSCdr) Store() (result string, err error) {
 	result += fsCdr.GetSubject() + "|"
 	result += fsCdr.GetAccount() + "|"
 	result += fsCdr.GetDestination() + "|"
-	result += fsCdr.GetTOR() + "|"
+	result += fsCdr.GetCategory() + "|"
 	result += fsCdr.GetAccId() + "|"
 	result += fsCdr.GetTenant() + "|"
 	result += fsCdr.GetReqType() + "|"
@@ -240,8 +240,8 @@ func (fsCdr FSCdr) ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, a
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, tenantFld))
 	}
 	if strings.HasPrefix(torFld, utils.STATIC_VALUE_PREFIX) {
-		rtCdr.TOR = torFld[1:]
-	} else if rtCdr.TOR, hasKey = fsCdr.vars[torFld]; !hasKey && fieldsMandatory {
+		rtCdr.Category = torFld[1:]
+	} else if rtCdr.Category, hasKey = fsCdr.vars[torFld]; !hasKey && fieldsMandatory {
 		return nil, errors.New(fmt.Sprintf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, torFld))
 	}
 	if strings.HasPrefix(accountFld, utils.STATIC_VALUE_PREFIX) {

@@ -165,53 +165,6 @@ func (rs *Responder) Shutdown(arg string, reply *string) (err error) {
 	return
 }
 
-func (rs *Responder) GetMonetary(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, CREDIT, reply)
-	return err
-}
-
-func (rs *Responder) GetSMS(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, SMS, reply)
-	return err
-}
-
-func (rs *Responder) GetInternet(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, DATA, reply)
-	return err
-}
-
-func (rs *Responder) GetInternetTime(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, DATA_TIME, reply)
-	return err
-}
-
-func (rs *Responder) GetMinutes(arg CallDescriptor, reply *CallCost) (err error) {
-	err = rs.getBalance(&arg, MINUTES, reply)
-	return err
-}
-
-// Get balance
-func (rs *Responder) getBalance(arg *CallDescriptor, balanceId string, reply *CallCost) (err error) {
-	if rs.Bal != nil {
-		return errors.New("No balancer supported for this command right now")
-	}
-	ubKey := arg.Direction + ":" + arg.Tenant + ":" + arg.Account
-	userBalance, err := accountingStorage.GetAccount(ubKey)
-	if err != nil {
-		return err
-	}
-	if balance, balExists := userBalance.BalanceMap[balanceId+arg.Direction]; !balExists {
-		// No match, balanceId not found
-		return errors.New("-BALANCE_NOT_FOUND")
-	} else {
-		reply.Tenant = arg.Tenant
-		reply.Account = arg.Account
-		reply.Direction = arg.Direction
-		reply.Cost = balance.GetTotalValue()
-	}
-	return nil
-}
-
 /*
 The function that gets the information from the raters using balancer.
 */

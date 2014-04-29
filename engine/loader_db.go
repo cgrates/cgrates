@@ -341,7 +341,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 				&RatingPlanActivation{
 					ActivationTime: at,
 					RatingPlanId:   tpRa.RatingPlanId,
-					FallbackKeys:   utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, tpRa.FallbackSubjects),
+					FallbackKeys:   utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, tpRa.FallbackSubjects),
 				})
 		}
 		dbr.ratingProfiles[tpRpf.KeyId()] = rpf
@@ -430,7 +430,7 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 			}
 			resultRatingProfile.RatingPlanActivations = append(resultRatingProfile.RatingPlanActivations,
 				&RatingPlanActivation{at, tpRa.RatingPlanId,
-					utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.TOR, tpRa.FallbackSubjects)})
+					utils.FallbackSubjKeys(tpRpf.Direction, tpRpf.Tenant, tpRpf.Category, tpRa.FallbackSubjects)})
 		}
 		if err := dbr.dataDb.SetRatingProfile(resultRatingProfile); err != nil {
 			return err
@@ -528,6 +528,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 				DestinationId:  apiAtr.DestinationId,
 				Weight:         apiAtr.Weight,
 				ActionsId:      apiAtr.ActionsId,
+				Recurrent:      apiAtr.Recurrent,
 			}
 		}
 		dbr.actionsTriggers[key] = atrs

@@ -82,7 +82,7 @@ func TestWriteCdr(t *testing.T) {
 	}
 	fwWriter := FixedWidthCdrWriter{writer: wrBuf, exportTemplate: exportTpl, roundDecimals: 4, header: &bytes.Buffer{}, content: &bytes.Buffer{}, trailer: &bytes.Buffer{}}
 	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 1, AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Duration:   time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
@@ -143,14 +143,14 @@ func TestWriteCdrs(t *testing.T) {
 	}
 	fwWriter := FixedWidthCdrWriter{writer: wrBuf, exportTemplate: exportTpl, roundDecimals: 4, header: &bytes.Buffer{}, content: &bytes.Buffer{}, trailer: &bytes.Buffer{}}
 	cdr1 := &utils.StoredCdr{CgrId: utils.Sha1("aaa1", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 2, AccId: "aaa1", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1001", Subject: "1001", Destination: "1010",
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1010",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Duration:   time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.25,
 		ExtraFields: map[string]string{"productnumber": "12341", "fieldextr2": "valextr2"},
 	}
 	cdr2 := &utils.StoredCdr{CgrId: utils.Sha1("aaa2", time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String()), OrderId: 4, AccId: "aaa2", CdrHost: "192.168.1.2", ReqType: "prepaid", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1002", Subject: "1002", Destination: "1011",
+		Category: "call", Account: "1002", Subject: "1002", Destination: "1011",
 		SetupTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 7, 42, 26, 0, time.UTC),
 		Duration:   time.Duration(5) * time.Minute, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.40001,
@@ -158,7 +158,7 @@ func TestWriteCdrs(t *testing.T) {
 	}
 	cdr3 := &utils.StoredCdr{}
 	cdr4 := &utils.StoredCdr{CgrId: utils.Sha1("aaa3", time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC).String()), OrderId: 3, AccId: "aaa4", CdrHost: "192.168.1.4", ReqType: "postpaid", Direction: "*out", Tenant: "cgrates.org",
-		TOR: "call", Account: "1004", Subject: "1004", Destination: "1013",
+		Category: "call", Account: "1004", Subject: "1004", Destination: "1013",
 		SetupTime:  time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 9, 42, 26, 0, time.UTC),
 		Duration:   time.Duration(20) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,

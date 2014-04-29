@@ -273,7 +273,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 		rp := &utils.TPRatingProfile{
 			LoadId:    loadId,
 			Tenant:    tenant,
-			TOR:       tor,
+			Category:  tor,
 			Direction: direction,
 			Subject:   subject,
 			RatingPlanActivations: []*utils.TPRatingActivation{

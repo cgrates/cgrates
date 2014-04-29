@@ -22,7 +22,7 @@ import (
 	"time"
 )
 
-var PrimaryCdrFields []string = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, TOR, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, DURATION}
+var PrimaryCdrFields []string = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, Category, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, DURATION}
 
 // RawCDR is the type containing all the original CDR fields, needs it as it is for later usage
 type RawCDR interface {
@@ -34,7 +34,7 @@ type RawCDR interface {
 	GetSubject() string
 	GetAccount() string
 	GetDestination() string
-	GetTOR() string
+	GetCategory() string
 	GetTenant() string
 	GetReqType() string
 	GetSetupTime() (time.Time, error)  // Time when the call was set-up

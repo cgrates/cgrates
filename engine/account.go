@@ -34,23 +34,15 @@ const (
 	INBOUND  = "*in"
 	OUTBOUND = "*out"
 	// Balance types
-	CREDIT    = "*monetary"
-	SMS       = "*sms"
-	DATA      = "*data"
-	DATA_TIME = "*data_time"
-	MINUTES   = "*minutes"
-	// action price type
-	PRICE_PERCENT  = "*percent"
-	PRICE_ABSOLUTE = "*absolute"
+	CREDIT  = "*monetary"
+	SMS     = "*sms"
+	DATA    = "*data"
+	MINUTES = "*call_duration"
 	// action trigger threshold types
 	TRIGGER_MIN_COUNTER = "*min_counter"
 	TRIGGER_MAX_COUNTER = "*max_counter"
 	TRIGGER_MIN_BALANCE = "*min_balance"
 	TRIGGER_MAX_BALANCE = "*max_balance"
-)
-
-var (
-	AMOUNT_TOO_BIG = errors.New("Amount excedes balance!")
 )
 
 /*
@@ -70,7 +62,7 @@ type Account struct {
 
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction], "")
-	minuteBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[MINUTES+cd.Direction], "")
+	unitBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[cd.Tor+cd.Direction], "")
 	// gather all balances from shared groups
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
@@ -85,10 +77,10 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 		}
 	}
 	var extendedMinuteBalances BalanceChain
-	for _, mb := range minuteBalances {
+	for _, mb := range unitBalances {
 		if mb.SharedGroup != "" {
 			if sharedGroup, _ := accountingStorage.GetSharedGroup(mb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, MINUTES+cd.Direction, ub)
+				sgb := sharedGroup.GetBalances(cd.Destination, cd.Tor+cd.Direction, ub)
 				sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 				extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
 			}
@@ -211,11 +203,11 @@ func (account *Account) getAlldBalancesForPrefix(destination, balanceType string
 }
 
 func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
-	usefulMinuteBalances := ub.getAlldBalancesForPrefix(cc.Destination, MINUTES+cc.Direction)
+	usefulUnitBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.Tor+cc.Direction)
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cc.Destination, CREDIT+cc.Direction)
 	// debit minutes
-	for _, balance := range usefulMinuteBalances {
-		balance.DebitMinutes(cc, count, balance.account, usefulMoneyBalances)
+	for _, balance := range usefulUnitBalances {
+		balance.DebitUnits(cc, count, balance.account, usefulMoneyBalances)
 		if cc.IsPaid() {
 			goto CONNECT_FEE
 		}
@@ -292,7 +284,7 @@ CONNECT_FEE:
 	}
 	// save darty shared balances
 	usefulMoneyBalances.SaveDirtyBalances(ub)
-	usefulMinuteBalances.SaveDirtyBalances(ub)
+	usefulUnitBalances.SaveDirtyBalances(ub)
 	return
 }
 
@@ -308,15 +300,15 @@ func (ub *Account) GetDefaultMoneyBalance(direction string) *Balance {
 	return defaultBalance
 }
 
-func (ub *Account) refundIncrement(increment *Increment, direction string, count bool) {
+func (ub *Account) refundIncrement(increment *Increment, direction, unitType string, count bool) {
 	var balance *Balance
-	if increment.BalanceInfo.MinuteBalanceUuid != "" {
-		if balance = ub.BalanceMap[MINUTES+direction].GetBalance(increment.BalanceInfo.MinuteBalanceUuid); balance == nil {
+	if increment.BalanceInfo.UnitBalanceUuid != "" {
+		if balance = ub.BalanceMap[unitType+direction].GetBalance(increment.BalanceInfo.UnitBalanceUuid); balance == nil {
 			return
 		}
 		balance.Value += increment.Duration.Seconds()
 		if count {
-			ub.countUnits(&Action{BalanceType: MINUTES, Direction: direction, Balance: &Balance{Value: -increment.Duration.Seconds()}})
+			ub.countUnits(&Action{BalanceType: unitType, Direction: direction, Balance: &Balance{Value: -increment.Duration.Seconds()}})
 		}
 	}
 	// check money too
@@ -389,6 +381,16 @@ func (ub *Account) ResetActionTriggers(a *Action) {
 		at.Executed = false
 	}
 	ub.executeActionTriggers(a)
+}
+
+// Sets/Unsets recurrent flag for action triggers
+func (ub *Account) SetRecurrent(a *Action, recurrent bool) {
+	for _, at := range ub.ActionTriggers {
+		if !at.Match(a) {
+			continue
+		}
+		at.Recurrent = recurrent
+	}
 }
 
 // Returns the unit counter that matches the specified action type
@@ -477,9 +479,9 @@ func (ub *Account) GetSharedGroups() (groups []string) {
 	return
 }
 
-func (account *Account) GetUniqueSharedGroupMembers(destination, direction string) ([]string, error) {
+func (account *Account) GetUniqueSharedGroupMembers(destination, direction, unitType string) ([]string, error) {
 	creditBalances := account.getBalancesForPrefix(destination, account.BalanceMap[CREDIT+direction], "")
-	minuteBalances := account.getBalancesForPrefix(destination, account.BalanceMap[MINUTES+direction], "")
+	unitBalances := account.getBalancesForPrefix(destination, account.BalanceMap[unitType+direction], "")
 	// gather all shared group ids
 	var sharedGroupIds []string
 	for _, cb := range creditBalances {
@@ -487,7 +489,7 @@ func (account *Account) GetUniqueSharedGroupMembers(destination, direction strin
 			sharedGroupIds = append(sharedGroupIds, cb.SharedGroup)
 		}
 	}
-	for _, mb := range minuteBalances {
+	for _, mb := range unitBalances {
 		if mb.SharedGroup != "" {
 			sharedGroupIds = append(sharedGroupIds, mb.SharedGroup)
 		}

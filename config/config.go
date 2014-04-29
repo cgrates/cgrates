@@ -77,7 +77,7 @@ type CGRConfig struct {
 	RPCGOBListen            string             // RPC GOB listening address
 	HTTPListen              string             // HTTP listening address
 	DefaultReqType          string             // Use this request type if not defined on top
-	DefaultTOR              string             // set default type of record
+	DefaultCategory         string             // set default type of record
 	DefaultTenant           string             // set default tenant
 	DefaultSubject          string             // set default rating subject, useful in case of fallback
 	RoundingMethod          string             // Rounding method for the end price: <*up|*middle|*down>
@@ -166,7 +166,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.RPCGOBListen = "127.0.0.1:2013"
 	self.HTTPListen = "127.0.0.1:2080"
 	self.DefaultReqType = utils.RATED
-	self.DefaultTOR = "call"
+	self.DefaultCategory = "call"
 	self.DefaultTenant = "cgrates.org"
 	self.DefaultSubject = "cgrates"
 	self.RoundingMethod = utils.ROUNDING_MIDDLE
@@ -235,7 +235,7 @@ func (self *CGRConfig) setDefaults() error {
 		&utils.RSRField{Id: utils.REQTYPE},
 		&utils.RSRField{Id: utils.DIRECTION},
 		&utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.TOR},
+		&utils.RSRField{Id: utils.Category},
 		&utils.RSRField{Id: utils.ACCOUNT},
 		&utils.RSRField{Id: utils.SUBJECT},
 		&utils.RSRField{Id: utils.DESTINATION},
@@ -371,8 +371,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("global", "default_reqtype"); hasOpt {
 		cfg.DefaultReqType, _ = c.GetString("global", "default_reqtype")
 	}
-	if hasOpt = c.HasOption("global", "default_tor"); hasOpt {
-		cfg.DefaultTOR, _ = c.GetString("global", "default_tor")
+	if hasOpt = c.HasOption("global", "default_category"); hasOpt {
+		cfg.DefaultCategory, _ = c.GetString("global", "default_category")
 	}
 	if hasOpt = c.HasOption("global", "default_tenant"); hasOpt {
 		cfg.DefaultTenant, _ = c.GetString("global", "default_tenant")

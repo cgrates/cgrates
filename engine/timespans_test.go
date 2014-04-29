@@ -265,7 +265,7 @@ func TestTimespanSplitGroupedRates(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 1800 * time.Second, ratingInfo: &RatingInfo{}}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: 1800 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 45, 00, 0, time.UTC)
@@ -313,7 +313,7 @@ func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 30, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 31, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 60 * time.Second, ratingInfo: &RatingInfo{}}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: 60 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	cd := &CallDescriptor{}
@@ -395,7 +395,7 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240 * time.Second, ratingInfo: &RatingInfo{}}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: 240 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
@@ -440,7 +440,7 @@ func TestTimespanSplitLong(t *testing.T) {
 	}
 	t1 := time.Date(2013, time.October, 9, 9, 0, 0, 0, time.UTC)
 	t2 := time.Date(2013, time.October, 10, 20, 0, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: t2.Sub(t1), ratingInfo: &RatingInfo{}}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: t2.Sub(t1), ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2013, time.October, 9, 18, 0, 0, 0, time.UTC)
@@ -472,7 +472,7 @@ func TestTimespanSplitMultipleGroup(t *testing.T) {
 	}
 	t1 := time.Date(2012, time.February, 3, 17, 00, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
-	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, CallDuration: 240 * time.Second, ratingInfo: &RatingInfo{}}
+	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: 240 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
 	nts := ts.SplitByRateInterval(i)
 	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
@@ -533,7 +533,7 @@ func TestTimespanExpandingPastEnd(t *testing.T) {
 	}
 }
 
-func TestTimespanExpandingCallDuration(t *testing.T) {
+func TestTimespanExpandingDurationIndex(t *testing.T) {
 	timespans := []*TimeSpan{
 		&TimeSpan{
 			TimeStart: time.Date(2013, 9, 10, 14, 30, 0, 0, time.UTC),
@@ -736,10 +736,10 @@ func TestTimespanCreateIncrements(t *testing.T) {
 
 func TestTimespanSplitByIncrement(t *testing.T) {
 	ts := &TimeSpan{
-		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
-		CallDuration: 60 * time.Second,
-		ratingInfo:   &RatingInfo{},
+		TimeStart:     time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
+		DurationIndex: 60 * time.Second,
+		ratingInfo:    &RatingInfo{},
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
@@ -761,8 +761,8 @@ func TestTimespanSplitByIncrement(t *testing.T) {
 	if ts.GetDuration() != 50*time.Second || newTs.GetDuration() != 10*time.Second {
 		t.Error("Error spliting by increment: ", ts.GetDuration(), newTs.GetDuration())
 	}
-	if ts.CallDuration != 50*time.Second || newTs.CallDuration != 60*time.Second {
-		t.Error("Error spliting by increment at setting call duration: ", ts.CallDuration, newTs.CallDuration)
+	if ts.DurationIndex != 50*time.Second || newTs.DurationIndex != 60*time.Second {
+		t.Error("Error spliting by increment at setting call duration: ", ts.DurationIndex, newTs.DurationIndex)
 	}
 	if len(ts.Increments) != 5 || len(newTs.Increments) != 1 {
 		t.Error("Error spliting increments: ", ts.Increments, newTs.Increments)
@@ -771,9 +771,9 @@ func TestTimespanSplitByIncrement(t *testing.T) {
 
 func TestTimespanSplitByIncrementStart(t *testing.T) {
 	ts := &TimeSpan{
-		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
-		CallDuration: 60 * time.Second,
+		TimeStart:     time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
+		DurationIndex: 60 * time.Second,
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
@@ -795,8 +795,8 @@ func TestTimespanSplitByIncrementStart(t *testing.T) {
 	if ts.GetDuration() != 60*time.Second || newTs != nil {
 		t.Error("Error spliting by increment: ", ts.GetDuration())
 	}
-	if ts.CallDuration != 60*time.Second {
-		t.Error("Error spliting by incrementat setting call duration: ", ts.CallDuration)
+	if ts.DurationIndex != 60*time.Second {
+		t.Error("Error spliting by incrementat setting call duration: ", ts.DurationIndex)
 	}
 	if len(ts.Increments) != 6 {
 		t.Error("Error spliting increments: ", ts.Increments)
@@ -805,9 +805,9 @@ func TestTimespanSplitByIncrementStart(t *testing.T) {
 
 func TestTimespanSplitByIncrementEnd(t *testing.T) {
 	ts := &TimeSpan{
-		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
-		CallDuration: 60 * time.Second,
+		TimeStart:     time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
+		DurationIndex: 60 * time.Second,
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
@@ -829,8 +829,8 @@ func TestTimespanSplitByIncrementEnd(t *testing.T) {
 	if ts.GetDuration() != 60*time.Second || newTs != nil {
 		t.Error("Error spliting by increment: ", ts.GetDuration())
 	}
-	if ts.CallDuration != 60*time.Second {
-		t.Error("Error spliting by increment at setting call duration: ", ts.CallDuration)
+	if ts.DurationIndex != 60*time.Second {
+		t.Error("Error spliting by increment at setting call duration: ", ts.DurationIndex)
 	}
 	if len(ts.Increments) != 6 {
 		t.Error("Error spliting increments: ", ts.Increments)
@@ -839,10 +839,10 @@ func TestTimespanSplitByIncrementEnd(t *testing.T) {
 
 func TestTimespanSplitByDuration(t *testing.T) {
 	ts := &TimeSpan{
-		TimeStart:    time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
-		CallDuration: 60 * time.Second,
-		ratingInfo:   &RatingInfo{},
+		TimeStart:     time.Date(2013, 9, 19, 18, 30, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2013, 9, 19, 18, 31, 00, 0, time.UTC),
+		DurationIndex: 60 * time.Second,
+		ratingInfo:    &RatingInfo{},
 		RateInterval: &RateInterval{
 			Rating: &RIRate{
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
@@ -864,8 +864,8 @@ func TestTimespanSplitByDuration(t *testing.T) {
 	if ts.GetDuration() != 46*time.Second || newTs.GetDuration() != 14*time.Second {
 		t.Error("Error spliting by duration: ", ts.GetDuration(), newTs.GetDuration())
 	}
-	if ts.CallDuration != 46*time.Second || newTs.CallDuration != 60*time.Second {
-		t.Error("Error spliting by duration at setting call duration: ", ts.CallDuration, newTs.CallDuration)
+	if ts.DurationIndex != 46*time.Second || newTs.DurationIndex != 60*time.Second {
+		t.Error("Error spliting by duration at setting call duration: ", ts.DurationIndex, newTs.DurationIndex)
 	}
 	if len(ts.Increments) != 5 || len(newTs.Increments) != 2 {
 		t.Error("Error spliting increments: ", ts.Increments, newTs.Increments)
@@ -1501,35 +1501,35 @@ func TestTSCompressDecompress(t *testing.T) {
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 				&Increment{
 					Duration:            time.Minute,
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 				&Increment{
 					Duration:            time.Minute,
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 				&Increment{
 					Duration:            time.Minute,
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 				&Increment{
 					Duration:            time.Minute,
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 			},
 		},
@@ -1553,35 +1553,35 @@ func TestTSMultipleCompressDecompress(t *testing.T) {
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 				&Increment{
 					Duration:            time.Minute,
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 				&Increment{
 					Duration:            time.Minute,
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 				&Increment{
 					Duration:            time.Minute,
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1111 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 				&Increment{
 					Duration:            time.Minute,
 					Cost:                10.4,
 					BalanceInfo:         &BalanceInfo{"1", "2", "3"},
 					BalanceRateInterval: &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
-					MinuteInfo:          &MinuteInfo{"1", 2.3},
+					UnitInfo:            &UnitInfo{"1", 2.3, MINUTES},
 				},
 			},
 		},

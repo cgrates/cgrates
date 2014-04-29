@@ -482,7 +482,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tenant, tor, direction, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
+		direction, tenant, tor, subject, fallbacksubject := record[0], record[1], record[2], record[3], record[6]
 		at, err := utils.ParseDate(record[4])
 		if err != nil {
 			return fmt.Errorf("Cannot parse activation time from %v", record[4])
@@ -675,7 +675,11 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		if err != nil {
 			return fmt.Errorf("Could not parse action trigger value: %v", err)
 		}
-		weight, err := strconv.ParseFloat(record[7], 64)
+		recurrent, err := strconv.ParseBool(record[5])
+		if err != nil {
+			return fmt.Errorf("Could not parse action trigger recurrent flag: %v", err)
+		}
+		weight, err := strconv.ParseFloat(record[8], 64)
 		if err != nil {
 			return fmt.Errorf("Could not parse action trigger weight: %v", err)
 		}
@@ -685,8 +689,9 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			Direction:      record[2],
 			ThresholdType:  record[3],
 			ThresholdValue: value,
-			DestinationId:  record[5],
-			ActionsId:      record[6],
+			Recurrent:      recurrent,
+			DestinationId:  record[6],
+			ActionsId:      record[7],
 			Weight:         weight,
 		}
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)

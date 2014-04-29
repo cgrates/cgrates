@@ -56,7 +56,7 @@ const (
 	SHARED_GROUPS_NRCOLS       = 4
 	ACTIONS_NRCOLS             = 12
 	ACTION_PLANS_NRCOLS        = 4
-	ACTION_TRIGGERS_NRCOLS     = 8
+	ACTION_TRIGGERS_NRCOLS     = 9
 	ACCOUNT_ACTIONS_NRCOLS     = 5
 	DERIVED_CHARGERS_NRCOLS    = 16
 	ROUNDING_UP                = "*up"
@@ -78,7 +78,7 @@ const (
 	REQTYPE                    = "reqtype"
 	DIRECTION                  = "direction"
 	TENANT                     = "tenant"
-	TOR                        = "tor"
+	Category                   = "tor"
 	ACCOUNT                    = "account"
 	SUBJECT                    = "subject"
 	DESTINATION                = "destination"

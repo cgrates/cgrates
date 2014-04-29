@@ -450,7 +450,7 @@ func TestApierTPRatingProfile(t *testing.T) {
 		return
 	}
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "*any",
+	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any",
 		RatingPlanActivations: []*utils.TPRatingActivation{
 			&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: ""},
 		}}
@@ -743,7 +743,7 @@ func TestApierSetRatingProfile(t *testing.T) {
 	}
 	reply := ""
 	rpa := &utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1", FallbackSubjects: "dan2"}
-	rpf := &AttrSetRatingProfile{Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
+	rpf := &AttrSetRatingProfile{Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "dan", RatingPlanActivations: []*utils.TPRatingActivation{rpa}}
 	if err := rater.Call("ApierV1.SetRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.SetRatingProfile: ", err.Error())
 	} else if reply != "OK" {
@@ -759,15 +759,15 @@ func TestApierSetRatingProfile(t *testing.T) {
 	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
 	tEnd, _ := utils.ParseDate("2013-08-07T17:31:30Z")
 	cd := engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "dan",
-		Account:      "dan",
-		Destination:  "+4917621621391",
-		CallDuration: 90,
-		TimeStart:    tStart,
-		TimeEnd:      tEnd,
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "dan",
+		Account:       "dan",
+		Destination:   "+4917621621391",
+		DurationIndex: 90,
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
 	}
 	var cc engine.CallCost
 	// Simple test that command is executed without errors
@@ -784,7 +784,7 @@ func TestApierLoadRatingProfile(t *testing.T) {
 		return
 	}
 	reply := ""
-	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", TOR: "call", Direction: "*out", Subject: "*any"}
+	rpf := &utils.TPRatingProfile{TPid: engine.TEST_SQL, LoadId: engine.TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any"}
 	if err := rater.Call("ApierV1.LoadRatingProfile", rpf, &reply); err != nil {
 		t.Error("Got error on ApierV1.LoadRatingProfile: ", err.Error())
 	} else if reply != "OK" {
@@ -1300,15 +1300,15 @@ func TestResponderGetCost(t *testing.T) {
 	tStart, _ := utils.ParseDate("2013-08-07T17:30:00Z")
 	tEnd, _ := utils.ParseDate("2013-08-07T17:31:30Z")
 	cd := engine.CallDescriptor{
-		Direction:    "*out",
-		TOR:          "call",
-		Tenant:       "cgrates.org",
-		Subject:      "1001",
-		Account:      "1001",
-		Destination:  "+4917621621391",
-		CallDuration: 90,
-		TimeStart:    tStart,
-		TimeEnd:      tEnd,
+		Direction:     "*out",
+		Category:      "call",
+		Tenant:        "cgrates.org",
+		Subject:       "1001",
+		Account:       "1001",
+		Destination:   "+4917621621391",
+		DurationIndex: 90,
+		TimeStart:     tStart,
+		TimeEnd:       tEnd,
 	}
 	var cc engine.CallCost
 	// Simple test that command is executed without errors
@@ -1345,7 +1345,7 @@ func TestMaxDebitInexistentAcnt(t *testing.T) {
 	cd := engine.CallDescriptor{
 		Direction:   "*out",
 		Tenant:      "cgrates.org",
-		TOR:         "call",
+		Category:    "call",
 		Subject:     "INVALID",
 		Account:     "INVALID",
 		Destination: "1002",

@@ -69,7 +69,7 @@ func TestCDRFields(t *testing.T) {
 	if fsCdr.GetDestination() != "+4986517174963" {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
-	if fsCdr.GetTOR() != "call" {
+	if fsCdr.GetCategory() != "call" {
 		t.Error("Error parsing cdr: ", fsCdr)
 	}
 	if fsCdr.GetTenant() != "ipbx.itsyscom.com" {
@@ -115,7 +115,7 @@ func TestFsCdrForkCdr(t *testing.T) {
 	}
 	expctRatedCdr := &utils.StoredCdr{CgrId: utils.Sha1("01df56f4-d99a-4ef6-b7fe-b924b2415b7f", time.Date(2013, 8, 4, 9, 50, 54, 0, time.UTC).Local().String()), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f",
 		CdrHost: "127.0.0.1", CdrSource: FS_CDR_SOURCE, ReqType: utils.RATED,
-		Direction: "*out", Tenant: "ipbx.itsyscom.com", TOR: "call", Account: "dan", Subject: "dan", Destination: "+4986517174963",
+		Direction: "*out", Tenant: "ipbx.itsyscom.com", Category: "call", Account: "dan", Subject: "dan", Destination: "+4986517174963",
 		SetupTime:  time.Date(2013, 8, 4, 9, 50, 54, 0, time.UTC).Local(),
 		AnswerTime: time.Date(2013, 8, 4, 9, 50, 56, 0, time.UTC).Local(), Duration: time.Duration(4) * time.Second,
 		ExtraFields: map[string]string{"effective_caller_id_number": "+4986517174960"}, MediationRunId: "wholesale_run", Cost: -1}
@@ -129,7 +129,7 @@ func TestFsCdrForkCdr(t *testing.T) {
 	}
 	expctRatedCdr2 := &utils.StoredCdr{CgrId: utils.Sha1("01df56f4-d99a-4ef6-b7fe-b924b2415b7f", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f", CdrHost: "127.0.0.1",
 		CdrSource: FS_CDR_SOURCE, ReqType: "postpaid",
-		Direction: "*in", Tenant: "cgrates.com", TOR: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "+4986517174963",
+		Direction: "*in", Tenant: "cgrates.com", Category: "premium_call", Account: "first_account", Subject: "first_subject", Destination: "+4986517174963",
 		SetupTime:  time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
 		AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC), Duration: time.Duration(12) * time.Second,
 		ExtraFields: map[string]string{"effective_caller_id_number": "+4986517174960"}, MediationRunId: "wholesale_run", Cost: -1}

@@ -146,14 +146,14 @@ func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, 
 	if len(s) != 4 {
 		return nil, fmt.Errorf("Cannot parse key %s into RatingProfile", keyId)
 	}
-	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant: s[1], TOR: s[2], Direction: s[0], Subject: s[3]}, nil
+	return &TPRatingProfile{TPid: tpid, LoadId: loadId, Tenant: s[1], Category: s[2], Direction: s[0], Subject: s[3]}, nil
 }
 
 type TPRatingProfile struct {
 	TPid                  string                // Tariff plan id
 	LoadId                string                // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
 	Tenant                string                // Tenant's Id
-	TOR                   string                // TypeOfRecord
+	Category              string                // TypeOfRecord
 	Direction             string                // Traffic direction, OUT is the only one supported for now
 	Subject               string                // Rating subject, usually the same as account
 	RatingPlanActivations []*TPRatingActivation // Activate rate profiles at specific time
@@ -161,7 +161,7 @@ type TPRatingProfile struct {
 
 // Used as key in nosql db (eg: redis)
 func (self *TPRatingProfile) KeyId() string {
-	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.TOR, self.Subject)
+	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.Category, self.Subject)
 }
 
 type TPRatingActivation struct {
@@ -196,7 +196,7 @@ func FallbackSubjKeys(direction, tenant, tor, fallbackSubjects string) []string 
 type AttrTPRatingProfileIds struct {
 	TPid      string // Tariff plan id
 	Tenant    string // Tenant's Id
-	TOR       string // TypeOfRecord
+	Category  string // TypeOfRecord
 	Direction string // Traffic direction
 	Subject   string // Rating subject, usually the same as account
 }
@@ -245,6 +245,7 @@ type TPActionTrigger struct {
 	Direction      string  // Traffic direction
 	ThresholdType  string  // This threshold type
 	ThresholdValue float64 // Threshold
+	Recurrent      bool    // reset executed flag each run
 	DestinationId  string  // Id of the destination profile
 	ActionsId      string  // Actions which will execute on threshold reached
 	Weight         float64 // weight

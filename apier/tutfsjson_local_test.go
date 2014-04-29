@@ -311,7 +311,7 @@ func TestMaxCallDuration(t *testing.T) {
 	cd := engine.CallDescriptor{
 		Direction:   "*out",
 		Tenant:      "cgrates.org",
-		TOR:         "call",
+		Category:    "call",
 		Subject:     "1001",
 		Account:     "1001",
 		Destination: "1002",
@@ -330,7 +330,7 @@ func TestMaxCallDuration(t *testing.T) {
 	cd = engine.CallDescriptor{
 		Direction:   "*out",
 		Tenant:      "cgrates.org",
-		TOR:         "call",
+		Category:    "call",
 		Subject:     "1002",
 		Account:     "1002",
 		Destination: "1001",
@@ -348,7 +348,7 @@ func TestMaxCallDuration(t *testing.T) {
 	cd = engine.CallDescriptor{
 		Direction:   "*out",
 		Tenant:      "cgrates.org",
-		TOR:         "call",
+		Category:    "call",
 		Subject:     "1006",
 		Account:     "1006",
 		Destination: "1001",
@@ -367,7 +367,7 @@ func TestMaxCallDuration(t *testing.T) {
 	cd = engine.CallDescriptor{
 		Direction:   "*out",
 		Tenant:      "cgrates.org",
-		TOR:         "call",
+		Category:    "call",
 		Subject:     "1007",
 		Account:     "1007",
 		Destination: "1001",
@@ -393,7 +393,7 @@ func TestMaxDebit1001(t *testing.T) {
 	cd := engine.CallDescriptor{
 		Direction:   "*out",
 		Tenant:      "cgrates.org",
-		TOR:         "call",
+		Category:    "call",
 		Subject:     "1001",
 		Account:     "1001",
 		Destination: "1002",
@@ -432,7 +432,7 @@ func TestMaxDebit1007(t *testing.T) {
 	cd := engine.CallDescriptor{
 		Direction:   "*out",
 		Tenant:      "cgrates.org",
-		TOR:         "call",
+		Category:    "call",
 		Subject:     "1007",
 		Account:     "1007",
 		Destination: "1002",

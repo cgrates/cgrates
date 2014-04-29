@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestEventCreation(t *testing.T) {
@@ -62,7 +63,7 @@ func TestEventParseStatic(t *testing.T) {
 	if ev.GetReqType("^test") != "test" ||
 		ev.GetDirection("^test") != "test" ||
 		ev.GetTenant("^test") != "test" ||
-		ev.GetTOR("^test") != "test" ||
+		ev.GetCategory("^test") != "test" ||
 		ev.GetAccount("^test") != "test" ||
 		ev.GetSubject("^test") != "test" ||
 		ev.GetDestination("^test") != "test" ||
@@ -73,7 +74,7 @@ func TestEventParseStatic(t *testing.T) {
 			ev.GetReqType("^test") != "test",
 			ev.GetDirection("^test") != "test",
 			ev.GetTenant("^test") != "test",
-			ev.GetTOR("^test") != "test",
+			ev.GetCategory("^test") != "test",
 			ev.GetAccount("^test") != "test",
 			ev.GetSubject("^test") != "test",
 			ev.GetDestination("^test") != "test",
@@ -111,7 +112,7 @@ Task-Runtime: 1349437318`
 	if ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		ev.GetDirection("FreeSWITCH-Hostname") != "*out" ||
 		ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		ev.GetTOR("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
+		ev.GetCategory("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		ev.GetAccount("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		ev.GetSubject("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
 		ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
@@ -122,7 +123,7 @@ Task-Runtime: 1349437318`
 			ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetDirection("FreeSWITCH-Hostname") != "*out",
 			ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			ev.GetTOR("FreeSWITCH-Hostname") != "h1.ip-switch.net",
+			ev.GetCategory("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetAccount("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetSubject("FreeSWITCH-Hostname") != "h1.ip-switch.net",
 			ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net",
@@ -477,7 +478,7 @@ variable_rtp_audio_rtcp_octet_count: 0
 	if ev.GetReqType(utils.META_DEFAULT) != utils.PSEUDOPREPAID ||
 		ev.GetDirection(utils.META_DEFAULT) != "*out" ||
 		ev.GetTenant(utils.META_DEFAULT) != "cgrates.org" ||
-		ev.GetTOR(utils.META_DEFAULT) != "call" ||
+		ev.GetCategory(utils.META_DEFAULT) != "call" ||
 		ev.GetAccount(utils.META_DEFAULT) != "1003" ||
 		ev.GetSubject(utils.META_DEFAULT) != "1003" ||
 		ev.GetDestination(utils.META_DEFAULT) != "1002" ||
@@ -488,7 +489,7 @@ variable_rtp_audio_rtcp_octet_count: 0
 			ev.GetReqType(utils.META_DEFAULT) != utils.PSEUDOPREPAID,
 			ev.GetDirection(utils.META_DEFAULT) != "*out",
 			ev.GetTenant(utils.META_DEFAULT) != "cgrates.org",
-			ev.GetTOR(utils.META_DEFAULT) != "call",
+			ev.GetCategory(utils.META_DEFAULT) != "call",
 			ev.GetAccount(utils.META_DEFAULT) != "1003",
 			ev.GetSubject(utils.META_DEFAULT) != "1003",
 			ev.GetDestination(utils.META_DEFAULT) != "1002",

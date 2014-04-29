@@ -44,6 +44,7 @@ PSTN_71,+4971
 PSTN_72,+4972
 PSTN_70,+4970
 DST_UK_Mobile_BIG5,447956
+URG,112
 *any,
 `
 	timings = `
@@ -60,13 +61,14 @@ R2,0,0.1,60s,1s,0,*middle,2
 R3,0,0.05,60s,1s,0,*middle,2
 R4,1,1,1s,1s,0,*up,2
 R5,0,0.5,1s,1s,0,*down,2
-LANDLINE_OFFPEAK,0,1,1s,60s,0s,*up,4
-LANDLINE_OFFPEAK,0,1,1s,1s,60s,*up,4
+LANDLINE_OFFPEAK,0,1,1,60,0,*up,4
+LANDLINE_OFFPEAK,0,1,1,1,60,*up,4
 GBP_71,0.000000,5.55555,1s,1s,0s,*up,4
 GBP_72,0.000000,7.77777,1s,1s,0s,*up,4
 GBP_70,0.000000,1,1,1,0,*up,4
 RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s,*up,8
 RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8
+R_URG,0,0,1,1,0,*down,2
 `
 	destinationRates = `
 RT_STANDARD,GERMANY,R1
@@ -83,12 +85,14 @@ T2,GERMANY_O2,GBP_70
 T2,GERMANY_PREMIUM,GBP_71
 DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG
 DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5
-DATA_RATE,*any,R4
+DATA_RATE,*any,LANDLINE_OFFPEAK
+RT_URG,URG,R_URG
 `
 	ratingPlans = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
 STANDARD,RT_STD_WEEKEND,WORKDAYS_18,10
 STANDARD,RT_STD_WEEKEND,WEEKENDS,10
+STANDARD,RT_URG,ALWAYS,20
 PREMIUM,RT_STANDARD,WORKDAYS_00,10
 PREMIUM,RT_STD_WEEKEND,WORKDAYS_18,10
 PREMIUM,RT_STD_WEEKEND,WEEKENDS,10
@@ -96,33 +100,34 @@ DEFAULT,RT_DEFAULT,WORKDAYS_00,10
 EVENING,P1,WORKDAYS_00,10
 EVENING,P2,WORKDAYS_18,10
 EVENING,P2,WEEKENDS,10
-EVENING,DATA_RATE,ALWAYS,10
 TDRT,T1,WORKDAYS_00,10
 TDRT,T2,WORKDAYS_00,10
 G,RT_STANDARD,WORKDAYS_00,10
 R,P1,WORKDAYS_00,10
 RP_UK_Mobile_BIG5_PKG,DR_UK_Mobile_BIG5_PKG,ALWAYS,10
 RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10
+RP_DATA,DATA_RATE,ALWAYS,10
 `
 	ratingProfiles = `
-CUSTOMER_1,0,*out,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb
-CUSTOMER_1,0,*out,rif:from:tm,2012-02-28T00:00:00Z,STANDARD,danb
-CUSTOMER_2,0,*out,danb:87.139.12.167,2012-01-01T00:00:00Z,STANDARD,danb
-CUSTOMER_1,0,*out,danb,2012-01-01T00:00:00Z,PREMIUM,
-vdf,0,*out,rif,2012-01-01T00:00:00Z,EVENING,
-vdf,0,*out,rif,2012-02-28T00:00:00Z,EVENING,
-vdf,0,*out,minu;a1;a2;a3,2012-01-01T00:00:00Z,EVENING,
-vdf,0,*out,*any,2012-02-28T00:00:00Z,EVENING,
-vdf,0,*out,one,2012-02-28T00:00:00Z,STANDARD,
-vdf,0,*out,inf,2012-02-28T00:00:00Z,STANDARD,inf
-vdf,0,*out,fall,2012-02-28T00:00:00Z,PREMIUM,rif
-test,0,*out,trp,2013-10-01T00:00:00Z,TDRT,rif;danb
-vdf,0,*out,fallback1,2013-11-18T13:45:00Z,G,fallback2
-vdf,0,*out,fallback1,2013-11-18T13:46:00Z,G,fallback2
-vdf,0,*out,fallback1,2013-11-18T13:47:00Z,G,fallback2
-vdf,0,*out,fallback2,2013-11-18T13:45:00Z,R,rif
-cgrates.org,call,*out,*any,2013-01-06T00:00:00Z,RP_UK,
-cgrates.org,call,*out,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
+*out,CUSTOMER_1,0,rif:from:tm,2012-01-01T00:00:00Z,PREMIUM,danb
+*out,CUSTOMER_1,0,rif:from:tm,2012-02-28T00:00:00Z,STANDARD,danb
+*out,CUSTOMER_2,0,danb:87.139.12.167,2012-01-01T00:00:00Z,STANDARD,danb
+*out,CUSTOMER_1,0,danb,2012-01-01T00:00:00Z,PREMIUM,
+*out,vdf,0,rif,2012-01-01T00:00:00Z,EVENING,
+*out,vdf,0,rif,2012-02-28T00:00:00Z,EVENING,
+*out,vdf,0,minu;a1;a2;a3,2012-01-01T00:00:00Z,EVENING,
+*out,vdf,0,*any,2012-02-28T00:00:00Z,EVENING,
+*out,vdf,0,one,2012-02-28T00:00:00Z,STANDARD,
+*out,vdf,0,inf,2012-02-28T00:00:00Z,STANDARD,inf
+*out,vdf,0,fall,2012-02-28T00:00:00Z,PREMIUM,rif
+*out,test,0,trp,2013-10-01T00:00:00Z,TDRT,rif;danb
+*out,vdf,0,fallback1,2013-11-18T13:45:00Z,G,fallback2
+*out,vdf,0,fallback1,2013-11-18T13:46:00Z,G,fallback2
+*out,vdf,0,fallback1,2013-11-18T13:47:00Z,G,fallback2
+*out,vdf,0,fallback2,2013-11-18T13:45:00Z,R,rif
+*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_UK,
+*out,cgrates.org,call,discounted_minutes,2013-01-06T00:00:00Z,RP_UK_Mobile_BIG5_PKG,
+*out,cgrates.org,data,rif,2013-01-06T00:00:00Z,RP_DATA,
 `
 	sharedGroups = `
 SG1,*any,*lowest,
@@ -132,10 +137,10 @@ SG3,*any,*lowest,
 
 	actions = `
 MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,,10
-MINI,*topup,*minutes,*out,100,*unlimited,NAT,test,10,,,10
+MINI,*topup,*call_duration,*out,100,*unlimited,NAT,test,10,,,10
 SHARED,*topup,*monetary,*out,100,*unlimited,,,10,SG1,,10
 TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,10,,,10
-TOPUP10_AC1,*topup_reset,*minutes,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
+TOPUP10_AC1,*topup_reset,*call_duration,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
 SE0,*topup_reset,*monetary,*out,0,*unlimited,,,10,SG2,,10
 SE10,*topup_reset,*monetary,*out,10,*unlimited,,,5,SG2,,10
 SE10,*topup,*monetary,*out,10,*unlimited,,,10,,,10
@@ -152,11 +157,11 @@ TOPUP_SHARED10_AT,SE10,ASAP,10
 TOPUP_EMPTY_AT,EE0,ASAP,10
 `
 	actionTriggers = `
-STANDARD_TRIGGER,*minutes,*out,*min_counter,10,GERMANY_O2,SOME_1,10
-STANDARD_TRIGGER,*minutes,*out,*max_balance,200,GERMANY,SOME_2,10
-STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,,LOG_WARNING,10
-STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,,LOG_WARNING,10
-STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,FS_USERS,LOG_WARNING,10
+STANDARD_TRIGGER,*call_duration,*out,*min_counter,10,false,GERMANY_O2,SOME_1,10
+STANDARD_TRIGGER,*call_duration,*out,*max_balance,200,false,GERMANY,SOME_2,10
+STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,false,FS_USERS,LOG_WARNING,10
 `
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
@@ -198,7 +203,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 11 {
+	if len(csvr.destinations) != 12 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {
@@ -294,7 +299,7 @@ func TestLoadTimimgs(t *testing.T) {
 }
 
 func TestLoadRates(t *testing.T) {
-	if len(csvr.rates) != 11 {
+	if len(csvr.rates) != 12 {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
@@ -344,7 +349,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1s", "60s", "0s", utils.ROUNDING_UP, 4); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 1, "1", "60", "0", utils.ROUNDING_UP, 4); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -353,7 +358,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[1]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1s", "1s", "60s", utils.ROUNDING_UP, 4); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 1, "1", "1", "60", utils.ROUNDING_UP, 4); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -364,7 +369,7 @@ func TestLoadRates(t *testing.T) {
 }
 
 func TestLoadDestinationRates(t *testing.T) {
-	if len(csvr.destinationRates) != 10 {
+	if len(csvr.destinationRates) != 11 {
 		t.Error("Failed to load destinationrates: ", csvr.destinationRates)
 	}
 	drs := csvr.destinationRates["RT_STANDARD"]
@@ -476,7 +481,7 @@ func TestLoadDestinationRates(t *testing.T) {
 }
 
 func TestLoadRatingPlans(t *testing.T) {
-	if len(csvr.ratingPlans) != 9 {
+	if len(csvr.ratingPlans) != 10 {
 		t.Error("Failed to load rating plans: ", len(csvr.ratingPlans))
 	}
 	rplan := csvr.ratingPlans["STANDARD"]
@@ -502,6 +507,13 @@ func TestLoadRatingPlans(t *testing.T) {
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{time.Saturday, time.Sunday},
+				StartTime: "00:00:00",
+			},
+			"96c78ff5": &RITiming{
+				Years:     utils.Years{},
+				Months:    utils.Months{},
+				MonthDays: utils.MonthDays{},
+				WeekDays:  utils.WeekDays{},
 				StartTime: "00:00:00",
 			},
 		},
@@ -543,6 +555,19 @@ func TestLoadRatingPlans(t *testing.T) {
 					},
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 2,
+			},
+			"2efe78aa": &RIRate{
+				ConnectFee: 0,
+				Rates: []*Rate{
+					&Rate{
+						GroupIntervalStart: 0,
+						Value:              0,
+						RateIncrement:      time.Second,
+						RateUnit:           time.Second,
+					},
+				},
+				RoundingMethod:   utils.ROUNDING_DOWN,
 				RoundingDecimals: 2,
 			},
 		},
@@ -588,15 +613,22 @@ func TestLoadRatingPlans(t *testing.T) {
 					Weight: 10,
 				},
 			},
+			"URG": []*RPRate{
+				&RPRate{
+					Timing: "96c78ff5",
+					Rating: "2efe78aa",
+					Weight: 20,
+				},
+			},
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan.Ratings["e06c337f"])
+		t.Errorf("Error loading destination rate timing: %+v", rplan.DestinationRates["URG"][0])
 	}
 }
 
 func TestLoadRatingProfiles(t *testing.T) {
-	if len(csvr.ratingProfiles) != 14 {
+	if len(csvr.ratingProfiles) != 15 {
 		t.Error("Failed to load rating profiles: ", len(csvr.ratingProfiles), csvr.ratingProfiles)
 	}
 	rp := csvr.ratingProfiles["*out:test:0:trp"]
