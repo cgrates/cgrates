@@ -31,7 +31,7 @@ import (
 
 	"github.com/cgrates/cgrates/console"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/rif/liner"
+	"github.com/cgrates/liner"
 )
 
 var (

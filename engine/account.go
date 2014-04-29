@@ -58,11 +58,10 @@ type Account struct {
 	Disabled       bool
 }
 
-// Returns user's available minutes for the specified destination
-
+// User's available minutes for the specified destination
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
 	creditBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction], "")
-	unitBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[cd.Tor+cd.Direction], "")
+	unitBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[cd.TOR+cd.Direction], "")
 	// gather all balances from shared groups
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
@@ -80,7 +79,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	for _, mb := range unitBalances {
 		if mb.SharedGroup != "" {
 			if sharedGroup, _ := accountingStorage.GetSharedGroup(mb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, cd.Tor+cd.Direction, ub)
+				sgb := sharedGroup.GetBalances(cd.Destination, cd.TOR+cd.Direction, ub)
 				sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 				extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
 			}
@@ -135,7 +134,7 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 			} else {
 				// add member and save
 				sg.MemberIds = append(sg.MemberIds, ub.Id)
-				accountingStorage.SetSharedGroup(sg.Id, sg)
+				accountingStorage.SetSharedGroup(sg)
 			}
 		}
 	}
@@ -203,7 +202,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, balanceType string
 }
 
 func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
-	usefulUnitBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.Tor+cc.Direction)
+	usefulUnitBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.TOR+cc.Direction)
 	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cc.Destination, CREDIT+cc.Direction)
 	// debit minutes
 	for _, balance := range usefulUnitBalances {

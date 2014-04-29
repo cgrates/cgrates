@@ -50,7 +50,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		ReqTypeField:     "reqtype1",
 		DirectionField:   "direction1",
 		TenantField:      "tenant1",
-		TorField:         "tor1",
+		CategoryField:    "tor1",
 		AccountField:     "account1",
 		SubjectField:     "subject1",
 		DestinationField: "destination1",
@@ -69,7 +69,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		ReqTypeField:     "~reqtype2:s/sip:(.+)/$1/",
 		DirectionField:   "~direction2:s/sip:(.+)/$1/",
 		TenantField:      "~tenant2:s/sip:(.+)/$1/",
-		TorField:         "~tor2:s/sip:(.+)/$1/",
+		CategoryField:    "~tor2:s/sip:(.+)/$1/",
 		AccountField:     "~account2:s/sip:(.+)/$1/",
 		SubjectField:     "~subject2:s/sip:(.+)/$1/",
 		DestinationField: "~destination2:s/sip:(.+)/$1/",
@@ -80,7 +80,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	edc2.rsrReqTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
 	edc2.rsrDirectionField, _ = NewRSRField("~direction2:s/sip:(.+)/$1/")
 	edc2.rsrTenantField, _ = NewRSRField("~tenant2:s/sip:(.+)/$1/")
-	edc2.rsrTorField, _ = NewRSRField("~tor2:s/sip:(.+)/$1/")
+	edc2.rsrCategoryField, _ = NewRSRField("~tor2:s/sip:(.+)/$1/")
 	edc2.rsrAccountField, _ = NewRSRField("~account2:s/sip:(.+)/$1/")
 	edc2.rsrSubjectField, _ = NewRSRField("~subject2:s/sip:(.+)/$1/")
 	edc2.rsrDestinationField, _ = NewRSRField("~destination2:s/sip:(.+)/$1/")
@@ -113,16 +113,16 @@ func TestDerivedChargersKey(t *testing.T) {
 func TestAppendDefaultRun(t *testing.T) {
 	var dc1 DerivedChargers
 	dcDf := &DerivedCharger{RunId: DEFAULT_RUNID, ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
-		TenantField: META_DEFAULT, TorField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
+		TenantField: META_DEFAULT, CategoryField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
 		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT, DurationField: META_DEFAULT}
 	eDc1 := DerivedChargers{dcDf}
 	if dc1, _ = dc1.AppendDefaultRun(); !reflect.DeepEqual(dc1, eDc1) {
 		t.Error("Unexpected result.")
 	}
 	dc2 := DerivedChargers{
-		&DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+		&DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
-		&DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", TorField: "*default",
+		&DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
 	}
 	eDc2 := append(dc2, dcDf)

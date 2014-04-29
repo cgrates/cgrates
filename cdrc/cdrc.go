@@ -86,7 +86,7 @@ func (self *Cdrc) parseFieldsConfig() error {
 		utils.REQTYPE:     self.cgrCfg.CdrcReqTypeField,
 		utils.DIRECTION:   self.cgrCfg.CdrcDirectionField,
 		utils.TENANT:      self.cgrCfg.CdrcTenantField,
-		utils.Category:    self.cgrCfg.CdrcTorField,
+		utils.Category:    self.cgrCfg.CdrcCategoryField,
 		utils.ACCOUNT:     self.cgrCfg.CdrcAccountField,
 		utils.SUBJECT:     self.cgrCfg.CdrcSubjectField,
 		utils.DESTINATION: self.cgrCfg.CdrcDestinationField,

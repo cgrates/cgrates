@@ -109,7 +109,7 @@ type CGRConfig struct {
 	CdrcReqTypeField        string            // Request type field identifier. Use index number in case of .csv cdrs.
 	CdrcDirectionField      string            // Direction field identifier. Use index numbers in case of .csv cdrs.
 	CdrcTenantField         string            // Tenant field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTorField            string            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
+	CdrcCategoryField       string            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
 	CdrcAccountField        string            // Account field identifier. Use index numbers in case of .csv cdrs.
 	CdrcSubjectField        string            // Subject field identifier. Use index numbers in case of .csv CDRs.
 	CdrcDestinationField    string            // Destination field identifier. Use index numbers in case of .csv cdrs.
@@ -196,7 +196,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcReqTypeField = "1"
 	self.CdrcDirectionField = "2"
 	self.CdrcTenantField = "3"
-	self.CdrcTorField = "4"
+	self.CdrcCategoryField = "4"
 	self.CdrcAccountField = "5"
 	self.CdrcSubjectField = "6"
 	self.CdrcDestinationField = "7"
@@ -496,7 +496,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.CdrcTenantField, _ = c.GetString("cdrc", "tenant_field")
 	}
 	if hasOpt = c.HasOption("cdrc", "tor_field"); hasOpt {
-		cfg.CdrcTorField, _ = c.GetString("cdrc", "tor_field")
+		cfg.CdrcCategoryField, _ = c.GetString("cdrc", "tor_field")
 	}
 	if hasOpt = c.HasOption("cdrc", "account_field"); hasOpt {
 		cfg.CdrcAccountField, _ = c.GetString("cdrc", "account_field")

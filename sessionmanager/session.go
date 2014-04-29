@@ -61,7 +61,7 @@ func NewSession(ev Event, sm SessionManager, dcs utils.DerivedChargers) *Session
 		cd := &engine.CallDescriptor{
 			Direction:   ev.GetDirection(dc.DirectionField),
 			Tenant:      ev.GetTenant(dc.TenantField),
-			Category:    ev.GetCategory(dc.TorField),
+			Category:    ev.GetCategory(dc.CategoryField),
 			Subject:     ev.GetSubject(dc.SubjectField),
 			Account:     ev.GetAccount(dc.AccountField),
 			Destination: ev.GetDestination(dc.DestinationField),

@@ -19,17 +19,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
 )
 
 // Test internal abilites of GetDerivedChargers
 func TestResponderGetDerivedChargers(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cfgedDC := utils.DerivedChargers{&utils.DerivedCharger{RunId: "responder1", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
-		TorField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
+		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
 	cfg.DerivedChargers = cfgedDC
 	config.SetCgrConfig(cfg)
 	r := Responder{}

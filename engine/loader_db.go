@@ -47,6 +47,7 @@ type DbReader struct {
 	ratingPlans      map[string]*RatingPlan
 	ratingProfiles   map[string]*RatingProfile
 	sharedGroups     map[string]*SharedGroup
+	lcrs             map[string]*LCR
 	derivedChargers  map[string]utils.DerivedChargers
 }
 
@@ -62,6 +63,7 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.sharedGroups = make(map[string]*SharedGroup)
+	c.lcrs = make(map[string]*LCR)
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
 	c.accountActions = make(map[string]*Account)
@@ -121,6 +123,8 @@ func (dbr *DbReader) ShowStatistics() {
 	log.Print("Account actions: ", len(dbr.accountActions))
 	// derivedChargers
 	log.Print("DerivedChargers: ", len(dbr.derivedChargers))
+	// lcr rules
+	log.Print("LCR rules: ", len(dbr.lcrs))
 }
 
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
@@ -169,6 +173,30 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	}
 	for k, ats := range dbr.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(k)
+		}
+	}
+	if verbose {
+		log.Print("Shared groups")
+	}
+	for k, sg := range dbr.sharedGroups {
+		err = accountingStorage.SetSharedGroup(sg)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Println(k)
+		}
+	}
+	if verbose {
+		log.Print("LCR Rules")
+	}
+	for k, lcr := range dbr.lcrs {
+		err = dataStorage.SetLCR(lcr)
 		if err != nil {
 			return err
 		}
@@ -441,6 +469,11 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 
 func (dbr *DbReader) LoadSharedGroups() (err error) {
 	dbr.sharedGroups, err = dbr.storDb.GetTpSharedGroups(dbr.tpid, "")
+	return err
+}
+
+func (dbr *DbReader) LoadLCRs() (err error) {
+	dbr.lcrs, err = dbr.storDb.GetTpLCRs(dbr.tpid, "")
 	return err
 }
 

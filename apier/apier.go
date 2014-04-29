@@ -184,7 +184,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	}
 	//Automatic cache of the newly inserted rating plan
 	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(nil, nil, didNotChange, didNotChange); err != nil {
+	if err := self.RatingDb.CacheRating(nil, nil, didNotChange, didNotChange, didNotChange); err != nil {
 		return err
 	}
 	*reply = OK
@@ -202,7 +202,7 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	}
 	//Automatic cache of the newly inserted rating profile
 	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, []string{engine.RATING_PROFILE_PREFIX + attrs.KeyId()}, didNotChange); err != nil {
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, []string{engine.RATING_PROFILE_PREFIX + attrs.KeyId()}, didNotChange, didNotChange); err != nil {
 		return err
 	}
 	*reply = OK
@@ -256,7 +256,7 @@ func (self *ApierV1) SetRatingProfile(attrs AttrSetRatingProfile, reply *string)
 	}
 	//Automatic cache of the newly inserted rating profile
 	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, []string{engine.RATING_PROFILE_PREFIX + keyId}, didNotChange); err != nil {
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, []string{engine.RATING_PROFILE_PREFIX + keyId}, didNotChange, didNotChange); err != nil {
 		return err
 	}
 	*reply = OK
@@ -525,7 +525,7 @@ func (self *ApierV1) ReloadScheduler(input string, reply *string) error {
 }
 
 func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) error {
-	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, rpAlsKeys, accAlsKeys, dcsKeys []string
+	var dstKeys, rpKeys, rpfKeys, actKeys, shgKeys, rpAlsKeys, accAlsKeys, lcrKeys, dcsKeys []string
 	if len(attrs.DestinationIds) > 0 {
 		dstKeys = make([]string, len(attrs.DestinationIds))
 		for idx, dId := range attrs.DestinationIds {
@@ -568,13 +568,20 @@ func (self *ApierV1) ReloadCache(attrs utils.ApiReloadCache, reply *string) erro
 			accAlsKeys[idx] = engine.ACC_ALIAS_PREFIX + alias
 		}
 	}
+	if len(attrs.LCRIds) > 0 {
+		lcrKeys = make([]string, len(attrs.LCRIds))
+		for idx, lcrId := range attrs.LCRIds {
+			lcrKeys[idx] = engine.LCR_PREFIX + lcrId
+		}
+	}
+
 	if len(attrs.DerivedChargers) > 0 {
 		dcsKeys = make([]string, len(attrs.DerivedChargers))
 		for idx, dc := range attrs.DerivedChargers {
 			dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
 		}
 	}
-	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
 		return err
 	}
 	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {
@@ -642,6 +649,7 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 		path.Join(attrs.FolderPath, utils.RATING_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.RATING_PROFILES_CSV),
 		path.Join(attrs.FolderPath, utils.SHARED_GROUPS_CSV),
+		path.Join(attrs.FolderPath, utils.LCRS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTIONS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_PLANS_CSV),
 		path.Join(attrs.FolderPath, utils.ACTION_TRIGGERS_CSV),
@@ -693,12 +701,17 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	for idx, alias := range accAliases {
 		accAlsKeys[idx] = engine.ACC_ALIAS_PREFIX + alias
 	}
+	lcrIds, _ := loader.GetLoadedIds(engine.LCR_PREFIX)
+	lcrKeys := make([]string, len(lcrIds))
+	for idx, lcrId := range lcrIds {
+		lcrKeys[idx] = engine.LCR_PREFIX + lcrId
+	}
 	dcs, _ := loader.GetLoadedIds(engine.DERIVEDCHARGERS_PREFIX)
 	dcsKeys := make([]string, len(dcs))
 	for idx, dc := range dcs {
 		dcsKeys[idx] = engine.DERIVEDCHARGERS_PREFIX + dc
 	}
-	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys); err != nil {
+	if err := self.RatingDb.CacheRating(dstKeys, rpKeys, rpfKeys, rpAlsKeys, lcrKeys); err != nil {
 		return err
 	}
 	if err := self.AccountDb.CacheAccounting(actKeys, shgKeys, accAlsKeys, dcsKeys); err != nil {

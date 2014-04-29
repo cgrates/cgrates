@@ -105,7 +105,7 @@ func TestGetSecondsForPrefix(t *testing.T) {
 		DurationIndex: 10 * time.Second,
 		Direction:     OUTBOUND,
 		Destination:   "0723",
-		Tor:           MINUTES,
+		TOR:           MINUTES,
 	}
 	seconds, credit, bucketList := ub1.getCreditForPrefix(cd)
 	expected := 110 * time.Second
@@ -134,7 +134,7 @@ func TestGetSpecialPricedSeconds(t *testing.T) {
 		LoopIndex:   0,
 		Direction:   OUTBOUND,
 		Destination: "0723",
-		Tor:         MINUTES,
+		TOR:         MINUTES,
 	}
 	seconds, credit, bucketList := ub1.getCreditForPrefix(cd)
 	expected := 20 * time.Second
@@ -172,7 +172,7 @@ func TestDebitCreditZeroSecond(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{MINUTES + OUTBOUND: BalanceChain{b1}, CREDIT + OUTBOUND: BalanceChain{&Balance{Value: 21}}}}
 	err := rifsBalance.debitCreditBalance(cc, false)
@@ -202,7 +202,7 @@ func TestDebitCreditZeroMinute(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -238,7 +238,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1, b2},
@@ -278,7 +278,7 @@ func TestDebitCreditNoCredit(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -319,7 +319,7 @@ func TestDebitCreditHasCredit(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -357,7 +357,7 @@ func TestDebitCreditSplitMinutesMoney(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -400,7 +400,7 @@ func TestDebitCreditMoreTimespans(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -439,7 +439,7 @@ func TestDebitCreditMoreTimespansMixed(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1, b2},
@@ -478,7 +478,7 @@ func TestDebitCreditNoConectFeeCredit(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		MINUTES + OUTBOUND: BalanceChain{b1},
@@ -512,7 +512,7 @@ func TestDebitCreditMoneyOnly(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: MINUTES,
+		TOR: MINUTES,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		CREDIT + OUTBOUND: BalanceChain{&Balance{Uuid: "money", Value: 50}},
@@ -553,7 +553,7 @@ func TestDebitCreditSubjectMinutes(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor:              MINUTES,
+		TOR:              MINUTES,
 		deductConnectFee: true,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
@@ -596,7 +596,7 @@ func TestDebitCreditSubjectMoney(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor:              MINUTES,
+		TOR:              MINUTES,
 		deductConnectFee: true,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
@@ -634,7 +634,7 @@ func TestDebitCreditSubjectMixed(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor:              MINUTES,
+		TOR:              MINUTES,
 		deductConnectFee: true,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
@@ -684,7 +684,7 @@ func TestDebitCreditSubjectMixedMoreTS(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor:              MINUTES,
+		TOR:              MINUTES,
 		deductConnectFee: true,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
@@ -736,7 +736,7 @@ func TestDebitCreditSubjectMixedPartPay(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 1, RateIncrement: 10 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor:              MINUTES,
+		TOR:              MINUTES,
 		deductConnectFee: true,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
@@ -997,7 +997,7 @@ func TestDebitShared(t *testing.T) {
 	sg := &SharedGroup{Id: "SG_TEST", MemberIds: []string{rif.Id, groupie.Id}, AccountParameters: map[string]*SharingParameters{"*any": &SharingParameters{Strategy: STRATEGY_MINE_RANDOM}}}
 
 	accountingStorage.SetAccount(groupie)
-	accountingStorage.SetSharedGroup("SG_TEST", sg)
+	accountingStorage.SetSharedGroup(sg)
 	cache2go.Cache(SHARED_GROUP_PREFIX+"SG_TEST", sg)
 	err := rif.debitCreditBalance(cc, false)
 	if err != nil {
@@ -1043,7 +1043,7 @@ func TestDebitSMS(t *testing.T) {
 				RateInterval:  &RateInterval{Rating: &RIRate{Rates: RateGroups{&Rate{GroupIntervalStart: 0, Value: 100, RateIncrement: 1 * time.Second, RateUnit: time.Second}}}},
 			},
 		},
-		Tor: SMS,
+		TOR: SMS,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		SMS + OUTBOUND:    BalanceChain{&Balance{Uuid: "testm", Value: 100, Weight: 5, DestinationId: "NAT"}},
@@ -1083,7 +1083,7 @@ func TestDebitDataUnits(t *testing.T) {
 				},
 			},
 		},
-		Tor: DATA,
+		TOR: DATA,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		DATA + OUTBOUND:   BalanceChain{&Balance{Uuid: "testm", Value: 100, Weight: 5, DestinationId: "NAT"}},
@@ -1122,7 +1122,7 @@ func TestDebitDataMoney(t *testing.T) {
 				},
 			},
 		},
-		Tor: DATA,
+		TOR: DATA,
 	}
 	rifsBalance := &Account{Id: "other", BalanceMap: map[string]BalanceChain{
 		DATA + OUTBOUND:   BalanceChain{&Balance{Uuid: "testm", Value: 0, Weight: 5, DestinationId: "NAT"}},

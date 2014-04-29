@@ -286,6 +286,7 @@ type ApiReloadCache struct {
 	SharedGroupIds   []string
 	RpAliases        []string
 	AccAliases       []string
+	LCRIds           []string
 	DerivedChargers  []string
 }
 

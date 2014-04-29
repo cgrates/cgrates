@@ -67,7 +67,7 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
-func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) (err error) {
+func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) (err error) {
 	if dKeys == nil {
 		Logger.Info("Caching all destinations")
 		if dKeys, err = rs.db.Keys(DESTINATION_PREFIX + "*"); err != nil {
@@ -120,6 +120,24 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) (e
 		}
 	}
 	if len(rpfKeys) != 0 {
+		Logger.Info("Finished rating profile caching.")
+	}
+	if lcrKeys == nil {
+		Logger.Info("Caching LCRs")
+		if lcrKeys, err = rs.db.Keys(LCR_PREFIX + "*"); err != nil {
+			return
+		}
+		cache2go.RemPrefixKey(LCR_PREFIX)
+	} else if len(lcrKeys) != 0 {
+		Logger.Info(fmt.Sprintf("Caching LCR: %v", lcrKeys))
+	}
+	for _, key := range lcrKeys {
+		cache2go.RemKey(key)
+		if _, err = rs.GetLCR(key[len(LCR_PREFIX):], true); err != nil {
+			return err
+		}
+	}
+	if len(lcrKeys) != 0 {
 		Logger.Info("Finished rating profile caching.")
 	}
 	if alsKeys == nil {
@@ -345,6 +363,29 @@ func (rs *RedisStorage) RemoveRpAliases(accounts []string) (err error) {
 	return
 }
 
+func (rs *RedisStorage) GetLCR(key string, checkDb bool) (lcr *LCR, err error) {
+	key = LCR_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*LCR), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	var values []byte
+	if values, err = rs.db.Get(key); err == nil {
+		err = rs.ms.Unmarshal(values, &lcr)
+		cache2go.Cache(key, lcr)
+	}
+	return
+}
+
+func (rs *RedisStorage) SetLCR(lcr *LCR) (err error) {
+	result, err := rs.ms.Marshal(lcr)
+	err = rs.db.Set(LCR_PREFIX+lcr.GetId(), result)
+	cache2go.Cache(LCR_PREFIX+lcr.GetId(), lcr)
+	return
+}
+
 func (rs *RedisStorage) GetAccAlias(key string, checkDb bool) (alias string, err error) {
 	key = ACC_ALIAS_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
@@ -475,10 +516,10 @@ func (rs *RedisStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGrou
 	return
 }
 
-func (rs *RedisStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
+func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 	result, err := rs.ms.Marshal(sg)
-	err = rs.db.Set(SHARED_GROUP_PREFIX+key, result)
-	cache2go.Cache(SHARED_GROUP_PREFIX+key, sg)
+	err = rs.db.Set(SHARED_GROUP_PREFIX+sg.Id, result)
+	cache2go.Cache(SHARED_GROUP_PREFIX+sg.Id, sg)
 	return
 }
 

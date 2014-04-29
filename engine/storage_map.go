@@ -52,7 +52,7 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
-func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) error {
+func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) error {
 	if dKeys == nil {
 		cache2go.RemPrefixKey(DESTINATION_PREFIX)
 	} else {
@@ -66,6 +66,9 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) erro
 	}
 	if alsKeys == nil {
 		cache2go.RemPrefixKey(RP_ALIAS_PREFIX)
+	}
+	if lcrKeys == nil {
+		cache2go.RemPrefixKey(LCR_PREFIX)
 	}
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
@@ -88,6 +91,12 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys []string) erro
 		if strings.HasPrefix(k, RP_ALIAS_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetRpAlias(k[len(RP_ALIAS_PREFIX):], true); err != nil {
+				return err
+			}
+		}
+		if strings.HasPrefix(k, LCR_PREFIX) {
+			cache2go.RemKey(k)
+			if _, err := ms.GetLCR(k[len(LCR_PREFIX):], true); err != nil {
 				return err
 			}
 		}
@@ -220,6 +229,30 @@ func (ms *MapStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 		go historyScribe.Record(rpf.GetHistoryRecord(), &response)
 	}
 	//cache2go.Cache(RATING_PROFILE_PREFIX+rpf.Id, rpf)
+	return
+}
+
+func (ms *MapStorage) GetLCR(key string, checkDb bool) (lcr *LCR, err error) {
+	key = LCR_PREFIX + key
+	if x, err := cache2go.GetCached(key); err == nil {
+		return x.(*LCR), nil
+	}
+	if !checkDb {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	if values, ok := ms.dict[key]; ok {
+		err = ms.ms.Unmarshal(values, &lcr)
+		cache2go.Cache(key, lcr)
+	} else {
+		return nil, errors.New("not found")
+	}
+	return
+}
+
+func (ms *MapStorage) SetLCR(lcr *LCR) (err error) {
+	result, err := ms.ms.Marshal(lcr)
+	ms.dict[LCR_PREFIX+lcr.GetId()] = result
+	//cache2go.Cache(LCR_PREFIX+key, lcr)
 	return
 }
 
@@ -373,9 +406,9 @@ func (ms *MapStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGroup,
 	return
 }
 
-func (ms *MapStorage) SetSharedGroup(key string, sg *SharedGroup) (err error) {
+func (ms *MapStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 	result, err := ms.ms.Marshal(sg)
-	ms.dict[SHARED_GROUP_PREFIX+key] = result
+	ms.dict[SHARED_GROUP_PREFIX+sg.Id] = result
 	//cache2go.Cache(SHARED_GROUP_PREFIX+key, sg)
 	return
 }

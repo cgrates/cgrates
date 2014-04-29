@@ -73,7 +73,7 @@ func durInternalRater(cd *engine.CallDescriptor) (time.Duration, error) {
 	}
 	defer accountDb.Close()
 	engine.SetAccountingStorage(accountDb)
-	if err := ratingDb.CacheRating(nil, nil, nil, nil); err != nil {
+	if err := ratingDb.CacheRating(nil, nil, nil, nil, nil); err != nil {
 		return nilDuration, fmt.Errorf("Cache rating error: %s", err.Error())
 	}
 	log.Printf("Runnning %d cycles...", *runs)
@@ -150,14 +150,14 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 	cd := &engine.CallDescriptor{
-		TimeStart:    time.Date(2014, time.December, 11, 55, 30, 0, 0, time.UTC),
-		TimeEnd:      time.Date(2014, time.December, 11, 55, 31, 0, 0, time.UTC),
-		CallDuration: 60 * time.Second,
-		Direction:    "*out",
-		TOR:          *tor,
-		Tenant:       *tenant,
-		Subject:      *subject,
-		Destination:  *destination,
+		TimeStart:     time.Date(2014, time.December, 11, 55, 30, 0, 0, time.UTC),
+		TimeEnd:       time.Date(2014, time.December, 11, 55, 31, 0, 0, time.UTC),
+		DurationIndex: 60 * time.Second,
+		Direction:     "*out",
+		TOR:           *tor,
+		Tenant:        *tenant,
+		Subject:       *subject,
+		Destination:   *destination,
 	}
 	var duration time.Duration
 	var err error
