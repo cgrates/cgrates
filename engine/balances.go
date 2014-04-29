@@ -110,6 +110,12 @@ func (b *Balance) GetMinutesForCredit(origCD *CallDescriptor, initialCredit floa
 		duration = 0
 		for _, ts := range cc.Timespans {
 			ts.createIncrementsSlice()
+			if cd.MaxRate > 0 && cd.MaxRateUnit > 0 {
+				rate, _, rateUnit := ts.RateInterval.GetRateParameters(ts.GetGroupStart())
+				if rate/rateUnit.Seconds() > cd.MaxRate/cd.MaxRateUnit.Seconds() {
+					return
+				}
+			}
 			for _, incr := range ts.Increments {
 				if incr.Cost <= credit && availableDuration-incr.Duration >= 0 {
 					credit -= incr.Cost
