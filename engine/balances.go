@@ -253,8 +253,7 @@ func (b *Balance) DebitUnits(cc *CallCost, count bool, ub *Account, moneyBalance
 						nInc.UnitInfo = &UnitInfo{newCC.Destination, seconds, cc.TOR}
 						if cost != 0 {
 							nInc.BalanceInfo.MoneyBalanceUuid = moneyBal.Uuid
-							moneyBal.Value -= cost
-							moneyBal.Value = utils.Round(moneyBal.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+							moneyBal.SubstractAmount(cost)
 						}
 						nInc.paid = true
 						if count {
