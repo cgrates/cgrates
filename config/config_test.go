@@ -72,7 +72,6 @@ func TestDefaults(t *testing.T) {
 	eCfg.DefaultCategory = "call"
 	eCfg.DefaultTenant = "cgrates.org"
 	eCfg.DefaultSubject = "cgrates"
-	eCfg.RoundingMethod = utils.ROUNDING_MIDDLE
 	eCfg.RoundingDecimals = 4
 	eCfg.XmlCfgDocument = nil
 	eCfg.RaterEnabled = false
@@ -217,7 +216,6 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.DefaultCategory = "test"
 	eCfg.DefaultTenant = "test"
 	eCfg.DefaultSubject = "test"
-	eCfg.RoundingMethod = "test"
 	eCfg.RoundingDecimals = 99
 	eCfg.RaterEnabled = true
 	eCfg.RaterBalancer = "test"

@@ -284,7 +284,7 @@ func (ts *TimeSpan) createIncrementsSlice() {
 	//incrementCost := rate / rateUnit.Seconds() * rateIncrement.Seconds()
 	nbIncrements := int(ts.GetDuration() / rateIncrement)
 	incrementCost := ts.getCost() / float64(nbIncrements)
-	incrementCost = utils.Round(incrementCost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
+	incrementCost = utils.Round(incrementCost, globalRoundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	for s := 0; s < nbIncrements; s++ {
 		inc := &Increment{
 			Duration:    rateIncrement,

@@ -81,7 +81,6 @@ type CGRConfig struct {
 	DefaultCategory         string             // set default type of record
 	DefaultTenant           string             // set default tenant
 	DefaultSubject          string             // set default rating subject, useful in case of fallback
-	RoundingMethod          string             // Rounding method for the end price: <*up|*middle|*down>
 	RoundingDecimals        int                // Number of decimals to round end prices at
 	XmlCfgDocument          *CgrXmlCfgDocument // Load additional configuration inside xml document
 	RaterEnabled            bool               // start standalone server (no balancer)
@@ -159,7 +158,6 @@ func (self *CGRConfig) setDefaults() error {
 	self.DefaultCategory = "call"
 	self.DefaultTenant = "cgrates.org"
 	self.DefaultSubject = "cgrates"
-	self.RoundingMethod = utils.ROUNDING_MIDDLE
 	self.RoundingDecimals = 4
 	self.XmlCfgDocument = nil
 	self.RaterEnabled = false
@@ -377,9 +375,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("global", "default_subject"); hasOpt {
 		cfg.DefaultSubject, _ = c.GetString("global", "default_subject")
-	}
-	if hasOpt = c.HasOption("global", "rounding_method"); hasOpt {
-		cfg.RoundingMethod, _ = c.GetString("global", "rounding_method")
 	}
 	if hasOpt = c.HasOption("global", "rounding_decimals"); hasOpt {
 		cfg.RoundingDecimals, _ = c.GetInt("global", "rounding_decimals")

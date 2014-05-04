@@ -355,7 +355,7 @@ func main() {
 	loadDb = logDb.(engine.LoadStorage)
 	cdrDb = logDb.(engine.CdrStorage)
 
-	engine.SetRoundingMethodAndDecimals(cfg.RoundingMethod, cfg.RoundingDecimals)
+	engine.SetRoundingDecimals(cfg.RoundingDecimals)
 	if cfg.SMDebitInterval > 0 {
 		if dp, err := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval)); err == nil {
 			engine.SetDebitPeriod(dp)

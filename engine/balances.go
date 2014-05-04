@@ -144,7 +144,7 @@ func (b *Balance) GetCost(cd *CallDescriptor) (*CallCost, error) {
 
 func (b *Balance) SubstractAmount(amount float64) {
 	b.Value -= amount
-	b.Value = utils.Round(b.Value, roundingDecimals, utils.ROUNDING_MIDDLE)
+	b.Value = utils.Round(b.Value, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 	b.dirty = true
 }
 

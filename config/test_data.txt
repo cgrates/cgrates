@@ -28,7 +28,6 @@ default_reqtype = test			# Default request type to consider when missing from re
 default_category = test			# Default Type of Record to consider when missing from requests.
 default_tenant = test			# Default Tenant to consider when missing from requests.
 default_subject = test			# Default rating Subject to consider when missing from requests.
-rounding_method = test			# Rounding method for floats/costs: <up|middle|down>
 rounding_decimals = 99			# Number of decimals to round floats/costs at
 
 

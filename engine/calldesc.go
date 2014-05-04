@@ -57,14 +57,13 @@ const (
 )
 
 var (
-	Logger            utils.LoggerInterface
-	dataStorage       RatingStorage
-	accountingStorage AccountingStorage
-	storageLogger     LogStorage
-	debitPeriod       = 10 * time.Second
-	roundingMethod    = "*middle"
-	roundingDecimals  = 4
-	historyScribe     history.Scribe
+	Logger                 utils.LoggerInterface
+	dataStorage            RatingStorage
+	accountingStorage      AccountingStorage
+	storageLogger          LogStorage
+	debitPeriod            = 10 * time.Second
+	globalRoundingDecimals = 10
+	historyScribe          history.Scribe
 	//historyScribe, _ = history.NewMockScribe()
 )
 
@@ -78,9 +77,8 @@ func SetAccountingStorage(ag AccountingStorage) {
 }
 
 // Sets the global rounding method and decimal precision for GetCost method
-func SetRoundingMethodAndDecimals(rm string, rd int) {
-	roundingMethod = rm
-	roundingDecimals = rd
+func SetRoundingDecimals(rd int) {
+	globalRoundingDecimals = rd
 }
 
 /*
@@ -434,7 +432,8 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		cost += ts.getCost()
 	}
 	// global rounding
-	cost = utils.Round(cost, roundingDecimals, roundingMethod)
+	//TODO: use the longest rounding/method from ts
+	cost = utils.Round(cost, globalRoundingDecimals, globalRoundingMethod)
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
 	cc := &CallCost{
 		Direction:        cd.Direction,
@@ -578,7 +577,7 @@ func (cd *CallDescriptor) debit(account *Account) (cc *CallCost, err error) {
 	}
 	for _, ts := range cc.Timespans {
 		cost += ts.getCost()
-		cost = utils.Round(cost, roundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
+		cost = utils.Round(cost, globalRoundingDecimals, utils.ROUNDING_MIDDLE) // just get rid of the extra decimals
 	}
 	cc.Cost = cost
 	cc.Timespans.Compress()
