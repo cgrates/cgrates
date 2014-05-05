@@ -10,7 +10,7 @@ CREATE TABLE `cost_details` (
   `accid` varchar(64) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `tenant` varchar(128) NOT NULL,
-  `tor` varchar(32) NOT NULL,
+  `category` varchar(32) NOT NULL,
   `account` varchar(128) NOT NULL,
   `subject` varchar(128) NOT NULL,
   `destination` varchar(128) NOT NULL,

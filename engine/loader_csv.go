@@ -161,8 +161,10 @@ func (csvr *CSVReader) ShowStatistics() {
 	}
 	// actions
 	log.Print("Actions: ", len(csvr.actions))
-	// action timings
+	// action plans
 	log.Print("Action plans: ", len(csvr.actionsTimings))
+	// action trigers
+	log.Print("Action trigers: ", len(csvr.actionsTriggers))
 	// account actions
 	log.Print("Account actions: ", len(csvr.accountActions))
 	// derivedChargers

@@ -9,7 +9,7 @@ CREATE TABLE cdrs_primary (
   reqtype varchar(24) NOT NULL,
   direction varchar(8) NOT NULL,
   tenant varchar(64) NOT NULL,
-  tor varchar(16) NOT NULL,
+  category varchar(16) NOT NULL,
   account varchar(128) NOT NULL,
   subject varchar(128) NOT NULL,
   destination varchar(128) NOT NULL,

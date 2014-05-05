@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,36 +88,25 @@ type CGRConfig struct {
 	RaterBalancer           string             // balancer address host:port
 	BalancerEnabled         bool
 	SchedulerEnabled        bool
-	CDRSEnabled             bool              // Enable CDR Server service
-	CDRSExtraFields         []*utils.RSRField // Extra fields to store in CDRs
-	CDRSMediator            string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CdreCdrFormat           string            // Format of the exported CDRs. <csv>
-	CdreMaskDestId          string            // Id of the destination list to be masked in CDRs
-	CdreMaskLength          int               // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
-	CdreCostShiftDigits     int               // Shift digits in the cost on export (eg: convert from EUR to cents)
-	CdreDir                 string            // Path towards exported cdrs directory
-	CdreExportedFields      []*utils.RSRField // List of fields in the exported CDRs
-	CdreFWXmlTemplate       *CgrXmlCdreFwCfg  // Use this configuration as export template in case of fixed fields length
-	CdrcEnabled             bool              // Enable CDR client functionality
-	CdrcCdrs                string            // Address where to reach CDR server
-	CdrcCdrsMethod          string            // Mechanism to use when posting CDRs on server  <http_cgr>
-	CdrcRunDelay            time.Duration     // Sleep interval between consecutive runs, 0 to use automation via inotify
-	CdrcCdrType             string            // CDR file format <csv>.
-	CdrcCdrInDir            string            // Absolute path towards the directory where the CDRs are stored.
-	CdrcCdrOutDir           string            // Absolute path towards the directory where processed CDRs will be moved.
-	CdrcSourceId            string            // Tag identifying the source of the CDRs within CGRS database.
-	CdrcAccIdField          string            // Accounting id field identifier. Use index number in case of .csv cdrs.
-	CdrcReqTypeField        string            // Request type field identifier. Use index number in case of .csv cdrs.
-	CdrcDirectionField      string            // Direction field identifier. Use index numbers in case of .csv cdrs.
-	CdrcTenantField         string            // Tenant field identifier. Use index numbers in case of .csv cdrs.
-	CdrcCategoryField       string            // Type of Record field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAccountField        string            // Account field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSubjectField        string            // Subject field identifier. Use index numbers in case of .csv CDRs.
-	CdrcDestinationField    string            // Destination field identifier. Use index numbers in case of .csv cdrs.
-	CdrcSetupTimeField      string            // Setup time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcAnswerTimeField     string            // Answer time field identifier. Use index numbers in case of .csv cdrs.
-	CdrcDurationField       string            // Duration field identifier. Use index numbers in case of .csv cdrs.
-	CdrcExtraFields         []string          // Extra fields to extract, special format in case of .csv "field1:index1,field2:index2"
+	CDRSEnabled             bool                       // Enable CDR Server service
+	CDRSExtraFields         []*utils.RSRField          // Extra fields to store in CDRs
+	CDRSMediator            string                     // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CdreCdrFormat           string                     // Format of the exported CDRs. <csv>
+	CdreMaskDestId          string                     // Id of the destination list to be masked in CDRs
+	CdreMaskLength          int                        // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
+	CdreCostShiftDigits     int                        // Shift digits in the cost on export (eg: convert from EUR to cents)
+	CdreDir                 string                     // Path towards exported cdrs directory
+	CdreExportedFields      []*utils.RSRField          // List of fields in the exported CDRs
+	CdreFWXmlTemplate       *CgrXmlCdreFwCfg           // Use this configuration as export template in case of fixed fields length
+	CdrcEnabled             bool                       // Enable CDR client functionality
+	CdrcCdrs                string                     // Address where to reach CDR server
+	CdrcCdrsMethod          string                     // Mechanism to use when posting CDRs on server  <http_cgr>
+	CdrcRunDelay            time.Duration              // Sleep interval between consecutive runs, 0 to use automation via inotify
+	CdrcCdrType             string                     // CDR file format <csv>.
+	CdrcCdrInDir            string                     // Absolute path towards the directory where the CDRs are stored.
+	CdrcCdrOutDir           string                     // Absolute path towards the directory where processed CDRs will be moved.
+	CdrcSourceId            string                     // Tag identifying the source of the CDRs within CGRS database.
+	CdrcCdrFields           map[string]*utils.RSRField // FieldName/RSRField format. Index number in case of .csv cdrs.
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -188,22 +178,23 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcCdrs = utils.INTERNAL
 	self.CdrcCdrsMethod = "http_cgr"
 	self.CdrcRunDelay = time.Duration(0)
-	self.CdrcCdrType = "csv"
+	self.CdrcCdrType = utils.CSV
 	self.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
 	self.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	self.CdrcSourceId = "freeswitch_csv"
-	self.CdrcAccIdField = "0"
-	self.CdrcReqTypeField = "1"
-	self.CdrcDirectionField = "2"
-	self.CdrcTenantField = "3"
-	self.CdrcCategoryField = "4"
-	self.CdrcAccountField = "5"
-	self.CdrcSubjectField = "6"
-	self.CdrcDestinationField = "7"
-	self.CdrcSetupTimeField = "8"
-	self.CdrcAnswerTimeField = "9"
-	self.CdrcDurationField = "10"
-	self.CdrcExtraFields = []string{}
+	self.CdrcCdrFields = map[string]*utils.RSRField{
+		utils.ACCID:       &utils.RSRField{Id: "0"},
+		utils.REQTYPE:     &utils.RSRField{Id: "1"},
+		utils.DIRECTION:   &utils.RSRField{Id: "2"},
+		utils.TENANT:      &utils.RSRField{Id: "3"},
+		utils.CATEGORY:    &utils.RSRField{Id: "4"},
+		utils.ACCOUNT:     &utils.RSRField{Id: "5"},
+		utils.SUBJECT:     &utils.RSRField{Id: "6"},
+		utils.DESTINATION: &utils.RSRField{Id: "7"},
+		utils.SETUP_TIME:  &utils.RSRField{Id: "8"},
+		utils.ANSWER_TIME: &utils.RSRField{Id: "9"},
+		utils.DURATION:    &utils.RSRField{Id: "10"},
+	}
 	self.MediatorEnabled = false
 	self.MediatorRater = "internal"
 	self.MediatorRaterReconnects = 3
@@ -235,7 +226,7 @@ func (self *CGRConfig) setDefaults() error {
 		&utils.RSRField{Id: utils.REQTYPE},
 		&utils.RSRField{Id: utils.DIRECTION},
 		&utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.Category},
+		&utils.RSRField{Id: utils.CATEGORY},
 		&utils.RSRField{Id: utils.ACCOUNT},
 		&utils.RSRField{Id: utils.SUBJECT},
 		&utils.RSRField{Id: utils.DESTINATION},
@@ -254,6 +245,13 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return errors.New("Need XmlConfigurationDocument for fixed_width cdr export")
 		} else if self.CdreFWXmlTemplate == nil {
 			return errors.New("Need XmlTemplate for fixed_width cdr export")
+		}
+	}
+	if self.CdrcCdrType == utils.CSV {
+		for _, rsrFld := range self.CdrcCdrFields {
+			if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {
+				return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
+			}
 		}
 	}
 	return nil
@@ -483,44 +481,22 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrc", "cdr_source_id"); hasOpt {
 		cfg.CdrcSourceId, _ = c.GetString("cdrc", "cdr_source_id")
 	}
-	if hasOpt = c.HasOption("cdrc", "accid_field"); hasOpt {
-		cfg.CdrcAccIdField, _ = c.GetString("cdrc", "accid_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "reqtype_field"); hasOpt {
-		cfg.CdrcReqTypeField, _ = c.GetString("cdrc", "reqtype_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "direction_field"); hasOpt {
-		cfg.CdrcDirectionField, _ = c.GetString("cdrc", "direction_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "tenant_field"); hasOpt {
-		cfg.CdrcTenantField, _ = c.GetString("cdrc", "tenant_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "tor_field"); hasOpt {
-		cfg.CdrcCategoryField, _ = c.GetString("cdrc", "tor_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "account_field"); hasOpt {
-		cfg.CdrcAccountField, _ = c.GetString("cdrc", "account_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "subject_field"); hasOpt {
-		cfg.CdrcSubjectField, _ = c.GetString("cdrc", "subject_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "destination_field"); hasOpt {
-		cfg.CdrcDestinationField, _ = c.GetString("cdrc", "destination_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "setup_time_field"); hasOpt {
-		cfg.CdrcSetupTimeField, _ = c.GetString("cdrc", "setup_time_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "answer_time_field"); hasOpt {
-		cfg.CdrcAnswerTimeField, _ = c.GetString("cdrc", "answer_time_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "duration_field"); hasOpt {
-		cfg.CdrcDurationField, _ = c.GetString("cdrc", "duration_field")
-	}
-	if hasOpt = c.HasOption("cdrc", "extra_fields"); hasOpt {
-		eFldsStr, _ := c.GetString("cdrc", "extra_fields")
-		if cfg.CdrcExtraFields, err = ConfigSlice(eFldsStr); err != nil {
-			return nil, err
-		}
+	// ParseCdrcCdrFields
+	accIdFld, _ := c.GetString("cdrc", "accid_field")
+	reqtypeFld, _ := c.GetString("cdrc", "reqtype_field")
+	directionFld, _ := c.GetString("cdrc", "direction_field")
+	tenantFld, _ := c.GetString("cdrc", "tenant_field")
+	categoryFld, _ := c.GetString("cdrc", "category_field")
+	acntFld, _ := c.GetString("cdrc", "account_field")
+	subjectFld, _ := c.GetString("cdrc", "subject_field")
+	destFld, _ := c.GetString("cdrc", "destination_field")
+	setupTimeFld, _ := c.GetString("cdrc", "setup_time_field")
+	answerTimeFld, _ := c.GetString("cdrc", "answer_time_field")
+	durFld, _ := c.GetString("cdrc", "duration_field")
+	extraFlds, _ := c.GetString("cdrc", "extra_fields")
+	if cfg.CdrcCdrFields, err = ParseCdrcCdrFields(accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
+		setupTimeFld, answerTimeFld, durFld, extraFlds); err != nil {
+		return nil, err
 	}
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {
 		cfg.MediatorEnabled, _ = c.GetBool("mediator", "enabled")

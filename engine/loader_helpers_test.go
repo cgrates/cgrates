@@ -73,9 +73,9 @@ DUMMY,INVALID;DATA
 `
 
 var actionTriggersSample = `#Tag,BalanceType,Direction,ThresholdType,ThresholdValue,DestinationTag,ActionsTag,Weight
-STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,,LOG_BALANCE,10
-STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,,LOG_BALANCE,10
-STANDARD_TRIGGERS,*monetary,*out,*max_counter,15,FS_USERS,LOG_BALANCE,10
+STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,,LOG_BALANCE,10
+STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,,LOG_BALANCE,10
+STANDARD_TRIGGERS,*monetary,*out,*max_counter,15,false,FS_USERS,LOG_BALANCE,10
 DUMMY,INVALID;DATA
 `
 

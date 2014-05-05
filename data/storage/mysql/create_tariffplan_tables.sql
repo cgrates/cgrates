@@ -100,7 +100,7 @@ CREATE TABLE `tp_rating_profiles` (
   `tpid` varchar(64) NOT NULL,
   `loadid` varchar(64) NOT NULL,
   `tenant` varchar(64) NOT NULL,
-  `tor` varchar(16) NOT NULL,
+  `category` varchar(16) NOT NULL,
   `direction` varchar(8) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `activation_time` varchar(24) NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE `tp_rating_profiles` (
   `fallback_subjects` varchar(64),
   PRIMARY KEY (`tbid`),
   KEY `tpid_loadid` (`tpid`, `loadid`),
-  UNIQUE KEY `tpid_loadid_tenant_tor_dir_subj_atime` (`tpid`,`loadid`, `tenant`,`tor`,`direction`,`subject`,`activation_time`)
+  UNIQUE KEY `tpid_loadid_tenant_category_dir_subj_atime` (`tpid`,`loadid`, `tenant`,`category`,`direction`,`subject`,`activation_time`)
 );
 
 --
@@ -215,14 +215,14 @@ CREATE TABLE `tp_account_actions` (
 -- Table structure for table `tp_lcrs`
 --
 
-DROP TABLE IF EXISTS tp_lcrs;
-CREATE TABLE tp_lcrs (
+DROP TABLE IF EXISTS tp_lcr_rules;
+CREATE TABLE tp_lcr (
   `tbid` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `direction`	varchar(8) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `customer` varchar(64) NOT NULL,
-  `destination`_id varchar(64) NOT NULL,
+  `destination_id` varchar(64) NOT NULL,
   `category` varchar(16) NOT NULL,
   `strategy` varchar(16) NOT NULL,
   `suppliers`	varchar(64) NOT NULL,
@@ -250,12 +250,12 @@ CREATE TABLE tp_derived_chargers (
   `reqtype_field`  varchar(24) NOT NULL,
   `direction_field`  varchar(24) NOT NULL,
   `tenant_field`  varchar(24) NOT NULL,
-  `tor_field`  varchar(24) NOT NULL,
+  `category_field`  varchar(24) NOT NULL,
   `account_field`  varchar(24) NOT NULL,
   `subject_field`  varchar(24) NOT NULL,
   `destination_field`  varchar(24) NOT NULL,
-  `setup_time`_field  varchar(24) NOT NULL,
-  `answer_time`_field  varchar(24) NOT NULL,
+  `setup_time_field`  varchar(24) NOT NULL,
+  `answer_time_field`  varchar(24) NOT NULL,
   `duration_field`  varchar(24) NOT NULL,
   PRIMARY KEY (`tbid`),
   KEY `tpid` (`tpid`)

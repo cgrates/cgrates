@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -125,12 +125,12 @@ func (fwv *FixedWidthCdrWriter) cdrFieldValue(cdr *utils.StoredCdr, cfgHdr, layo
 	case utils.ANSWER_TIME: // Format time based on layout
 		cdrVal = cdr.AnswerTime.Format(layout)
 	case utils.DESTINATION:
-		cdrVal = cdr.ExportFieldValue(utils.DESTINATION)
+		cdrVal = cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION})
 		if fwv.maskLen != -1 && fwv.maskedDestination(cdrVal) {
 			cdrVal = MaskDestination(cdrVal, fwv.maskLen)
 		}
 	default:
-		cdrVal = cdr.ExportFieldValue(rsrField.Id)
+		cdrVal = cdr.FieldAsString(rsrField)
 	}
 	return rsrField.ParseValue(cdrVal), nil
 }
@@ -273,7 +273,7 @@ func (fwv *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 			}
 		case METATAG:
 			if cfgFld.Value == META_MASKDESTINATION {
-				outVal, err = fwv.metaHandler(cfgFld.Value, cdr.ExportFieldValue(utils.DESTINATION))
+				outVal, err = fwv.metaHandler(cfgFld.Value, cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}))
 			} else {
 				outVal, err = fwv.metaHandler(cfgFld.Value, cfgFld.Layout)
 			}

@@ -14,13 +14,13 @@ accountdb_port = test 			# Accounting subsystem port to reach the database.
 accountdb_name = test			# Accounting subsystem database name to connect to.
 accountdb_user = test		 	# Accounting subsystem username to use when connecting to database.
 accountdb_passwd = test			# Accounting subsystem password to use when connecting to database.
-stordb_type = test			# Log/stored database type to use: <same|postgres|mongo|redis>
+stordb_type = test			# Log/scategoryed database type to use: <same|postgres|mongo|redis>
 stordb_host = test 			# The host to connect to. Values that start with / are for UNIX domain sockets.
 stordb_port = test			# The port to reach the logdb.
 stordb_name = test 			# The name of the log database to connect to.
 stordb_user = test  	 		# Username to use when connecting to logdb.
 stordb_passwd = test 	 		# Password to use when connecting to logdb.
-dbdata_encoding = test			# The encoding used to store object data in strings: <msgpack|json>
+dbdata_encoding = test			# The encoding used to scategorye object data in strings: <msgpack|json>
 rpc_json_listen = test 			# RPC JSON listening address
 rpc_gob_listen = test 			# RPC GOB listening address
 http_listen = test 			# HTTP listening address
@@ -44,8 +44,8 @@ enabled = true				# Starts Scheduler service: <true|false>.
 
 [cdrs]
 enabled = true				# Start the CDR Server service:  <true|false>.
-extra_fields = test			# Extra fields to store in CDRs
-mediator = test				# Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+extra_fields = test			# Extra fields to scategorye in CDRs
+mediator = test				# Address where to reach the Mediacategory. Empty for disabling mediation. <""|internal>
 
 [cdre]
 cdr_format = test			# Exported CDRs format <csv>
@@ -61,24 +61,24 @@ cdrs = test				# Address where to reach CDR server
 cdrs_method = test			# Mechanism to use when posting CDRs on server  <http_cgr>
 run_delay = 99				# Period to sleep between two runs, 0 to use automation via inotify
 cdr_type = test				# CDR file format <csv>.
-cdr_in_dir = test		 	# Absolute path towards the directory where the CDRs are kept (file stored CDRs).
-cdr_out_dir = test			# Absolute path towards the directory where processed CDRs will be moved after processing.	
+cdr_in_dir = test		 	# Absolute path towards the direccategoryy where the CDRs are kept (file scategoryed CDRs).
+cdr_out_dir = test			# Absolute path towards the direccategoryy where processed CDRs will be moved after processing.	
 cdr_source_id = test			# Tag identifying the source of the CDRs within CGRS database.
 accid_field = test			# Accounting id field identifier. Use index number in case of .csv cdrs.
 reqtype_field = test			# Request type field identifier. Use index number in case of .csv cdrs.
 direction_field = test			# Direction field identifier. Use index numbers in case of .csv cdrs.
 tenant_field = test			# Tenant field identifier. Use index numbers in case of .csv cdrs.
-tor_field = test			# Type of Record field identifier. Use index numbers in case of .csv cdrs.
+category_field = test			# Type of Record field identifier. Use index numbers in case of .csv cdrs.
 account_field = test			# Account field identifier. Use index numbers in case of .csv cdrs.
 subject_field = test			# Subject field identifier. Use index numbers in case of .csv CDRs.
 destination_field = test		# Destination field identifier. Use index numbers in case of .csv cdrs.
 setup_time_field = test			# Answer time field identifier. Use index numbers in case of .csv cdrs.
 answer_time_field = test		# Answer time field identifier. Use index numbers in case of .csv cdrs.
 duration_field = test			# Duration field identifier. Use index numbers in case of .csv cdrs.
-extra_fields = test			# Field identifiers of the fields to add in extra fields section, special format in case of .csv "index1:field1,index2:field2"
+extra_fields = test:test			# Field identifiers of the fields to add in extra fields section, special format in case of .csv "index1|field1,index2|field2"
 
 [mediator]
-enabled = true				# Starts Mediator service: <true|false>.
+enabled = true				# Starts Mediacategory service: <true|false>.
 rater = test				# Address where to reach the Rater: <internal|x.y.z.y:1234>
 rater_reconnects = 99			# Number of reconnects to rater before giving up.
 
@@ -100,7 +100,7 @@ run_ids = test 				# Identifiers of additional sessions control.
 reqtype_fields = test		# Name of request type fields to be used during additional sessions control <""|*default|field_name>.
 direction_fields = test		# Name of direction fields to be used during additional sessions control <""|*default|field_name>.
 tenant_fields = test		# Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
-tor_fields = test			# Name of tor fields to be used during additional sessions control <""|*default|field_name>.
+category_fields = test			# Name of category fields to be used during additional sessions control <""|*default|field_name>.
 account_fields = test		# Name of account fields to be used during additional sessions control <""|*default|field_name>.
 subject_fields = test		# Name of fields to be used during additional sessions control <""|*default|field_name>.
 destination_fields = test	# Name of destination fields to be used during additional sessions control <""|*default|field_name>.
@@ -110,13 +110,13 @@ duration_fields = test		# Name of duration fields to be used during additional s
 combined_chargers = true	# Combine accounts specific derived_chargers with server configured ones <true|false>.
 
 [history_server]
-enabled = true				# Starts History service: <true|false>.
-history_dir = test			# Location on disk where to store history files.
+enabled = true				# Starts Hiscategoryy service: <true|false>.
+history_dir = test			# Location on disk where to scategorye hiscategoryy files.
 save_interval = 99			# Timeout duration between saves
 
 [history_agent]
-enabled = true				# Starts History as a client: <true|false>.
-server = test				# Address where to reach the master history server: <internal|x.y.z.y:1234>
+enabled = true				# Starts Hiscategoryy as a client: <true|false>.
+server = test				# Address where to reach the master hiscategoryy server: <internal|x.y.z.y:1234>
 
 [mailer]
 server = test				# The server to use when sending emails out

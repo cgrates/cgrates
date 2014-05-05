@@ -18,28 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package utils
 
-import (
-	"time"
-)
-
-var PrimaryCdrFields []string = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, Category, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, DURATION}
-
-// RawCDR is the type containing all the original CDR fields, needs it as it is for later usage
-type RawCDR interface {
-	GetCgrId() string
-	GetAccId() string
-	GetCdrHost() string
-	GetCdrSource() string
-	GetDirection() string
-	GetSubject() string
-	GetAccount() string
-	GetDestination() string
-	GetCategory() string
-	GetTenant() string
-	GetReqType() string
-	GetSetupTime() (time.Time, error)  // Time when the call was set-up
-	GetAnswerTime() (time.Time, error) // Time when the call was answered
-	GetDuration() (time.Duration, error)
-	GetExtraFields() map[string]string                                                                                                  //Stores extra CDR Fields
-	ForkCdr(string, string, string, string, string, string, string, string, string, string, string, []string, bool) (*StoredCdr, error) // Based on fields queried will return a particular instance of RatedCDR
+// RawCDR is the original CDR received from external sources (eg: FreeSWITCH)
+type RawCdr interface {
+	AsStoredCdr() *StoredCdr // Convert the inbound Cdr into internally used one, CgrCdr
 }

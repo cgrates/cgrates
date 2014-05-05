@@ -81,7 +81,7 @@ const (
 	REQTYPE                    = "reqtype"
 	DIRECTION                  = "direction"
 	TENANT                     = "tenant"
-	Category                   = "tor"
+	CATEGORY                   = "category"
 	ACCOUNT                    = "account"
 	SUBJECT                    = "subject"
 	DESTINATION                = "destination"
@@ -92,7 +92,7 @@ const (
 	COST                       = "cost"
 	DEFAULT_RUNID              = "default"
 	STATIC_VALUE_PREFIX        = "^"
-	CDRE_CSV                   = "csv"
+	CSV                        = "csv"
 	CDRE_DRYRUN                = "dry_run"
 	INTERNAL                   = "internal"
 	ZERO_RATING_SUBJECT_PREFIX = "*zero"
@@ -104,8 +104,11 @@ const (
 	CONCATENATED_KEY_SEP       = ":"
 	META_DEFAULT               = "*default"
 	FORKED_CDR                 = "forked_cdr"
+	UNIT_TEST                  = "UNIT_TEST"
+	HDR_VAL_SEP                = "/"
 )
 
 var (
-	CdreCdrFormats = []string{CDRE_CSV, CDRE_DRYRUN, CDRE_FIXED_WIDTH}
+	CdreCdrFormats   = []string{CSV, CDRE_DRYRUN, CDRE_FIXED_WIDTH}
+	PrimaryCdrFields = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, DURATION}
 )

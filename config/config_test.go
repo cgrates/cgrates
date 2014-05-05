@@ -95,18 +95,19 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
 	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	eCfg.CdrcSourceId = "freeswitch_csv"
-	eCfg.CdrcAccIdField = "0"
-	eCfg.CdrcReqTypeField = "1"
-	eCfg.CdrcDirectionField = "2"
-	eCfg.CdrcTenantField = "3"
-	eCfg.CdrcCategoryField = "4"
-	eCfg.CdrcAccountField = "5"
-	eCfg.CdrcSubjectField = "6"
-	eCfg.CdrcDestinationField = "7"
-	eCfg.CdrcSetupTimeField = "8"
-	eCfg.CdrcAnswerTimeField = "9"
-	eCfg.CdrcDurationField = "10"
-	eCfg.CdrcExtraFields = []string{}
+	eCfg.CdrcCdrFields = map[string]*utils.RSRField{
+		utils.ACCID:       &utils.RSRField{Id: "0"},
+		utils.REQTYPE:     &utils.RSRField{Id: "1"},
+		utils.DIRECTION:   &utils.RSRField{Id: "2"},
+		utils.TENANT:      &utils.RSRField{Id: "3"},
+		utils.CATEGORY:    &utils.RSRField{Id: "4"},
+		utils.ACCOUNT:     &utils.RSRField{Id: "5"},
+		utils.SUBJECT:     &utils.RSRField{Id: "6"},
+		utils.DESTINATION: &utils.RSRField{Id: "7"},
+		utils.SETUP_TIME:  &utils.RSRField{Id: "8"},
+		utils.ANSWER_TIME: &utils.RSRField{Id: "9"},
+		utils.DURATION:    &utils.RSRField{Id: "10"},
+	}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = "internal"
 	eCfg.MediatorRaterReconnects = 3
@@ -138,7 +139,7 @@ func TestDefaults(t *testing.T) {
 		&utils.RSRField{Id: utils.REQTYPE},
 		&utils.RSRField{Id: utils.DIRECTION},
 		&utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.Category},
+		&utils.RSRField{Id: utils.CATEGORY},
 		&utils.RSRField{Id: utils.ACCOUNT},
 		&utils.RSRField{Id: utils.SUBJECT},
 		&utils.RSRField{Id: utils.DESTINATION},
@@ -167,6 +168,16 @@ func TestSanityCheck(t *testing.T) {
 	cfg.CdreCdrFormat = utils.CDRE_FIXED_WIDTH
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect fixed_width dependency on xml configuration")
+	}
+	cfg.CdrcCdrFields = map[string]*utils.RSRField{utils.ACCID: &utils.RSRField{Id: "test"}}
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed to detect improper use of CDR field names")
+	}
+	cfg = &CGRConfig{}
+	cfg.CdrcCdrType = utils.CSV
+	cfg.CdrcCdrFields = map[string]*utils.RSRField{"extra1": &utils.RSRField{Id: "test"}}
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed to detect improper use of CDR field names")
 	}
 }
 
@@ -229,18 +240,20 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CdrcCdrInDir = "test"
 	eCfg.CdrcCdrOutDir = "test"
 	eCfg.CdrcSourceId = "test"
-	eCfg.CdrcAccIdField = "test"
-	eCfg.CdrcReqTypeField = "test"
-	eCfg.CdrcDirectionField = "test"
-	eCfg.CdrcTenantField = "test"
-	eCfg.CdrcCategoryField = "test"
-	eCfg.CdrcAccountField = "test"
-	eCfg.CdrcSubjectField = "test"
-	eCfg.CdrcDestinationField = "test"
-	eCfg.CdrcSetupTimeField = "test"
-	eCfg.CdrcAnswerTimeField = "test"
-	eCfg.CdrcDurationField = "test"
-	eCfg.CdrcExtraFields = []string{"test"}
+	eCfg.CdrcCdrFields = map[string]*utils.RSRField{
+		utils.ACCID:       &utils.RSRField{Id: "test"},
+		utils.REQTYPE:     &utils.RSRField{Id: "test"},
+		utils.DIRECTION:   &utils.RSRField{Id: "test"},
+		utils.TENANT:      &utils.RSRField{Id: "test"},
+		utils.CATEGORY:    &utils.RSRField{Id: "test"},
+		utils.ACCOUNT:     &utils.RSRField{Id: "test"},
+		utils.SUBJECT:     &utils.RSRField{Id: "test"},
+		utils.DESTINATION: &utils.RSRField{Id: "test"},
+		utils.SETUP_TIME:  &utils.RSRField{Id: "test"},
+		utils.ANSWER_TIME: &utils.RSRField{Id: "test"},
+		utils.DURATION:    &utils.RSRField{Id: "test"},
+		"test":            &utils.RSRField{Id: "test"},
+	}
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorRater = "test"
 	eCfg.MediatorRaterReconnects = 99

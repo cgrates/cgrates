@@ -26,43 +26,10 @@ import (
 	"time"
 )
 
-func TestParseFieldsConfig(t *testing.T) {
-	// Test default config
-	cgrConfig, _ := config.NewDefaultCGRConfig()
-	// Test primary field index definition
-	cgrConfig.CdrcAccIdField = "detect_me"
-	cdrc := &Cdrc{cgrCfg: cgrConfig}
-	if err := cdrc.parseFieldsConfig(); err == nil {
-		t.Error("Failed detecting error in accounting id definition", err)
-	}
-	cgrConfig.CdrcAccIdField = "^static_val"
-	cgrConfig.CdrcSubjectField = "1"
-	cdrc = &Cdrc{cgrCfg: cgrConfig}
-	if err := cdrc.parseFieldsConfig(); err != nil {
-		t.Error("Failed to corectly parse primary fields %v", cdrc.cfgCdrFields)
-	}
-	cgrConfig.CdrcExtraFields = []string{"^static_val:orig_ip"}
-	// Test extra field index definition
-	cgrConfig.CdrcAccIdField = "0" // Put back as int
-	cgrConfig.CdrcExtraFields = []string{"supplier1", "orig_ip:11"}
-	cdrc = &Cdrc{cgrCfg: cgrConfig}
-	if err := cdrc.parseFieldsConfig(); err == nil {
-		t.Error("Failed detecting error in extra fields definition", err)
-	}
-	cgrConfig.CdrcExtraFields = []string{"supplier1:^top_supplier", "orig_ip:11"}
-	cdrc = &Cdrc{cgrCfg: cgrConfig}
-	if err := cdrc.parseFieldsConfig(); err != nil {
-		t.Errorf("Failed to corectly parse extra fields %v", cdrc.cfgCdrFields)
-	}
-}
-
 func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cgrConfig.CdrcExtraFields = []string{"supplier:11"}
+	cgrConfig.CdrcCdrFields["supplier"] = &utils.RSRField{Id: "11"}
 	cdrc := &Cdrc{cgrCfg: cgrConfig}
-	if err := cdrc.parseFieldsConfig(); err != nil {
-		t.Error("Failed parsing default fieldIndexesFromConfig", err)
-	}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := cdrc.recordForkCdr(cdrRow)
 	if err == nil {

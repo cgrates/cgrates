@@ -46,10 +46,10 @@ type Mediator struct {
 }
 
 // Retrive the cost from logging database
-func (self *Mediator) getCostsFromDB(cgrid string) (cc *engine.CallCost, err error) {
+func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *engine.CallCost, err error) {
 	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
-		cc, err = self.logDb.GetCallCostLog(cgrid, engine.SESSION_MANAGER_SOURCE, utils.DEFAULT_RUNID) //ToDo: What are we getting when there is no log?
-		if cc != nil {                                                                                 // There were no errors, chances are that we got what we are looking for
+		cc, err = self.logDb.GetCallCostLog(cgrid, engine.SESSION_MANAGER_SOURCE, runId) //ToDo: What are we getting when there is no log?
+		if cc != nil {                                                                   // There were no errors, chances are that we got what we are looking for
 			break
 		}
 		time.Sleep(time.Duration(i) * time.Second)
@@ -58,88 +58,86 @@ func (self *Mediator) getCostsFromDB(cgrid string) (cc *engine.CallCost, err err
 }
 
 // Retrive the cost from engine
-func (self *Mediator) getCostsFromRater(cdr *utils.StoredCdr) (*engine.CallCost, error) {
+func (self *Mediator) getCostsFromRater(storedCdr *utils.StoredCdr) (*engine.CallCost, error) {
 	cc := &engine.CallCost{}
 	var err error
-	if cdr.Duration == time.Duration(0) { // failed call,  returning empty callcost, no error
+	if storedCdr.Duration == time.Duration(0) { // failed call,  returning empty callcost, no error
 		return cc, nil
 	}
 	cd := engine.CallDescriptor{
 		Direction:     "*out", //record[m.directionFields[runIdx]] TODO: fix me
-		Tenant:        cdr.Tenant,
-		Category:      cdr.Category,
-		Subject:       cdr.Subject,
-		Account:       cdr.Account,
-		Destination:   cdr.Destination,
-		TimeStart:     cdr.AnswerTime,
-		TimeEnd:       cdr.AnswerTime.Add(cdr.Duration),
+		Tenant:        storedCdr.Tenant,
+		Category:      storedCdr.Category,
+		Subject:       storedCdr.Subject,
+		Account:       storedCdr.Account,
+		Destination:   storedCdr.Destination,
+		TimeStart:     storedCdr.AnswerTime,
+		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Duration),
 		LoopIndex:     0,
-		DurationIndex: cdr.Duration,
+		DurationIndex: storedCdr.Duration,
 	}
-	if cdr.ReqType == utils.PSEUDOPREPAID {
+	if storedCdr.ReqType == utils.PSEUDOPREPAID {
 		err = self.connector.Debit(cd, cc)
 	} else {
 		err = self.connector.GetCost(cd, cc)
 	}
 	if err != nil {
-		self.logDb.LogError(cdr.CgrId, engine.MEDIATOR_SOURCE, cdr.MediationRunId, err.Error())
+		self.logDb.LogError(storedCdr.CgrId, engine.MEDIATOR_SOURCE, storedCdr.MediationRunId, err.Error())
 	} else {
 		// If the mediator calculated a price it will write it to logdb
-		self.logDb.LogCallCost(utils.Sha1(cdr.AccId, cdr.SetupTime.String()), engine.MEDIATOR_SOURCE, cdr.MediationRunId, cc)
+		self.logDb.LogCallCost(storedCdr.CgrId, engine.MEDIATOR_SOURCE, storedCdr.MediationRunId, cc)
 	}
 	return cc, err
 }
 
-func (self *Mediator) rateCDR(cdr *utils.StoredCdr) error {
+func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 	var qryCC *engine.CallCost
 	var errCost error
-	if cdr.ReqType == utils.PREPAID || cdr.ReqType == utils.POSTPAID {
+	if storedCdr.ReqType == utils.PREPAID || storedCdr.ReqType == utils.POSTPAID {
 		// Should be previously calculated and stored in DB
-		qryCC, errCost = self.getCostsFromDB(cdr.CgrId)
+		qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
 	} else {
-		qryCC, errCost = self.getCostsFromRater(cdr)
+		qryCC, errCost = self.getCostsFromRater(storedCdr)
 	}
 	if errCost != nil {
 		return errCost
 	} else if qryCC == nil {
 		return errors.New("No cost returned from rater")
 	}
-	cdr.Cost = qryCC.Cost
+	storedCdr.Cost = qryCC.Cost
 	return nil
 }
 
-// Forks original CDR based on original request plus runIds for extra mediation
-func (self *Mediator) RateCdr(dbcdr utils.RawCDR) error {
-	rtCdr, err := utils.NewStoredCdrFromRawCDR(dbcdr)
-	if err != nil {
-		return err
-	}
-	cdrs := []*utils.StoredCdr{rtCdr}            // Start with initial dbcdr, will add here all to be mediated
-	attrsDC := utils.AttrDerivedChargers{Tenant: rtCdr.Tenant, Category: rtCdr.Category, Direction: rtCdr.Direction,
-		Account: rtCdr.Account, Subject: rtCdr.Subject}
+func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
+	cdrs := []*utils.StoredCdr{storedCdr}        // Start with initial storCdr, will add here all to be mediated
+	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
+		Account: storedCdr.Account, Subject: storedCdr.Subject}
 	var dcs utils.DerivedChargers
 	if err := self.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		errText := fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", rtCdr.CgrId, err.Error())
+		errText := fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", storedCdr.CgrId, err.Error())
 		engine.Logger.Err(errText)
 		return errors.New(errText)
 	}
 	for _, dc := range dcs {
-		forkedCdr, err := dbcdr.ForkCdr(dc.RunId, dc.ReqTypeField, dc.DirectionField,
-			dc.TenantField, dc.CategoryField, dc.AccountField, dc.SubjectField, dc.DestinationField, dc.SetupTimeField, dc.AnswerTimeField, dc.DurationField, []string{}, true)
+		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, &utils.RSRField{Id: dc.ReqTypeField}, &utils.RSRField{Id: dc.DirectionField},
+			&utils.RSRField{Id: dc.TenantField}, &utils.RSRField{Id: dc.CategoryField}, &utils.RSRField{Id: dc.AccountField},
+			&utils.RSRField{Id: dc.SubjectField}, &utils.RSRField{Id: dc.DestinationField}, &utils.RSRField{Id: dc.SetupTimeField},
+			&utils.RSRField{Id: dc.AnswerTimeField}, &utils.RSRField{Id: dc.DurationField}, []*utils.RSRField{}, true)
 		engine.Logger.Debug(fmt.Sprintf("Forked CDR for dc: %v, is: %v", dc, forkedCdr))
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis
-			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: dbcdr.GetCgrId(), MediationRunId: dc.RunId, Cost: -1.0}, err.Error()) // Cannot fork CDR, important just runid and error
+			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: storedCdr.CgrId, CdrSource: utils.FORKED_CDR, MediationRunId: dc.RunId, Cost: -1},
+				err.Error()) // Cannot fork CDR, important just runid and error
 			continue
 		}
 		cdrs = append(cdrs, forkedCdr)
 	}
 	for _, cdr := range cdrs {
 		extraInfo := ""
-		if err = self.rateCDR(cdr); err != nil {
+		if err := self.rateCDR(cdr); err != nil {
 			extraInfo = err.Error()
 		}
 		if err := self.cdrDb.SetRatedCdr(cdr, extraInfo); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Mediator> Could not record cost for cgrid: <%s>, err: <%s>, cost: %f, extraInfo: %s",
+			engine.Logger.Err(fmt.Sprintf("<Mediator> Could not record cost for cgrid: <%s>, ERROR: <%s>, cost: %f, extraInfo: %s",
 				cdr.CgrId, err.Error(), cdr.Cost, extraInfo))
 		}
 	}

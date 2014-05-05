@@ -19,10 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -78,7 +75,7 @@ func (cgrCdr CgrCdr) GetDestination() string {
 }
 
 func (cgrCdr CgrCdr) GetCategory() string {
-	return cgrCdr[Category]
+	return cgrCdr[CATEGORY]
 }
 
 func (cgrCdr CgrCdr) GetTenant() string {
@@ -108,133 +105,23 @@ func (cgrCdr CgrCdr) GetDuration() (time.Duration, error) {
 	return ParseDurationWithSecs(cgrCdr[DURATION])
 }
 
-// Used in mediation, fieldsMandatory marks whether missing field out of request represents error or can be ignored
-// If the fields in parameters start with ^ their value is considered instead of dynamically retrieving it from CDR
-func (cgrCdr CgrCdr) ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
-	if IsSliceMember([]string{runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld, answerTimeFld, durationFld}, "") {
-		return nil, errors.New(fmt.Sprintf("%s:FieldName", ERR_MANDATORY_IE_MISSING)) // All input field names are mandatory
-	}
-	var err error
-	var hasKey bool
-	var sTimeStr, aTimeStr, durStr string
-	rtCdr := new(StoredCdr)
-	rtCdr.MediationRunId = runId
-	rtCdr.Cost = -1.0 // Default for non-rated CDR
-	if rtCdr.AccId, hasKey = cgrCdr[ACCID]; !hasKey {
-		if fieldsMandatory {
-			return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, ACCID))
-		}
-	}
-	// MetaDefault will automatically be converted to their standard values
-	if reqTypeFld == META_DEFAULT {
-		reqTypeFld = REQTYPE
-	}
-	if directionFld == META_DEFAULT {
-		directionFld = DIRECTION
-	}
-	if tenantFld == META_DEFAULT {
-		tenantFld = TENANT
-	}
-	if torFld == META_DEFAULT {
-		torFld = Category
-	}
-	if accountFld == META_DEFAULT {
-		accountFld = ACCOUNT
-	}
-	if subjectFld == META_DEFAULT {
-		subjectFld = SUBJECT
-	}
-	if destFld == META_DEFAULT {
-		destFld = DESTINATION
-	}
-	if setupTimeFld == META_DEFAULT {
-		setupTimeFld = SETUP_TIME
-	}
-	if answerTimeFld == META_DEFAULT {
-		answerTimeFld = ANSWER_TIME
-	}
-	if durationFld == META_DEFAULT {
-		durationFld = DURATION
-	}
-	if rtCdr.CdrHost, hasKey = cgrCdr[CDRHOST]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, CDRHOST))
-	}
-	if rtCdr.CdrSource, hasKey = cgrCdr[CDRSOURCE]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, CDRSOURCE))
-	}
-	if strings.HasPrefix(reqTypeFld, STATIC_VALUE_PREFIX) { // Values starting with prefix are not dynamically populated
-		rtCdr.ReqType = reqTypeFld[1:]
-	} else if rtCdr.ReqType, hasKey = cgrCdr[reqTypeFld]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, reqTypeFld))
-	}
-	if strings.HasPrefix(directionFld, STATIC_VALUE_PREFIX) {
-		rtCdr.Direction = directionFld[1:]
-	} else if rtCdr.Direction, hasKey = cgrCdr[directionFld]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, directionFld))
-	}
-	if strings.HasPrefix(tenantFld, STATIC_VALUE_PREFIX) {
-		rtCdr.Tenant = tenantFld[1:]
-	} else if rtCdr.Tenant, hasKey = cgrCdr[tenantFld]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, tenantFld))
-	}
-	if strings.HasPrefix(torFld, STATIC_VALUE_PREFIX) {
-		rtCdr.Category = torFld[1:]
-	} else if rtCdr.Category, hasKey = cgrCdr[torFld]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, torFld))
-	}
-	if strings.HasPrefix(accountFld, STATIC_VALUE_PREFIX) {
-		rtCdr.Account = accountFld[1:]
-	} else if rtCdr.Account, hasKey = cgrCdr[accountFld]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, accountFld))
-	}
-	if strings.HasPrefix(subjectFld, STATIC_VALUE_PREFIX) {
-		rtCdr.Subject = subjectFld[1:]
-	} else if rtCdr.Subject, hasKey = cgrCdr[subjectFld]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, subjectFld))
-	}
-	if strings.HasPrefix(destFld, STATIC_VALUE_PREFIX) {
-		rtCdr.Destination = destFld[1:]
-	} else if rtCdr.Destination, hasKey = cgrCdr[destFld]; !hasKey && fieldsMandatory {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, destFld))
-	}
-	if sTimeStr, hasKey = cgrCdr[setupTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(setupTimeFld, STATIC_VALUE_PREFIX) {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, setupTimeFld))
-	} else {
-		if strings.HasPrefix(setupTimeFld, STATIC_VALUE_PREFIX) {
-			sTimeStr = setupTimeFld[1:]
-		}
-		if rtCdr.SetupTime, err = ParseTimeDetectLayout(sTimeStr); err != nil && fieldsMandatory {
-			return nil, err
-		}
-	}
-	if aTimeStr, hasKey = cgrCdr[answerTimeFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(answerTimeFld, STATIC_VALUE_PREFIX) {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, answerTimeFld))
-	} else {
-		if strings.HasPrefix(answerTimeFld, STATIC_VALUE_PREFIX) {
-			aTimeStr = answerTimeFld[1:]
-		}
-		if rtCdr.AnswerTime, err = ParseTimeDetectLayout(aTimeStr); err != nil && fieldsMandatory {
-			return nil, err
-		}
-	}
-	if durStr, hasKey = cgrCdr[durationFld]; !hasKey && fieldsMandatory && !strings.HasPrefix(durationFld, STATIC_VALUE_PREFIX) {
-		return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, durationFld))
-	} else {
-		if strings.HasPrefix(durationFld, STATIC_VALUE_PREFIX) {
-			durStr = durationFld[1:]
-		}
-		if rtCdr.Duration, err = ParseDurationWithSecs(durStr); err != nil && fieldsMandatory {
-			return nil, err
-		}
-	}
-	rtCdr.ExtraFields = make(map[string]string, len(extraFlds))
-	for _, fldName := range extraFlds {
-		if fldVal, hasKey := cgrCdr[fldName]; !hasKey && fieldsMandatory {
-			return nil, errors.New(fmt.Sprintf("%s:%s", ERR_MANDATORY_IE_MISSING, fldName))
-		} else {
-			rtCdr.ExtraFields[fldName] = fldVal
-		}
-	}
-	rtCdr.CgrId = Sha1(rtCdr.AccId, rtCdr.SetupTime.String())
-	return rtCdr, nil
+func (cgrCdr CgrCdr) AsStoredCdr() *StoredCdr {
+	storCdr := new(StoredCdr)
+	storCdr.CgrId = cgrCdr.GetCgrId()
+	storCdr.AccId = cgrCdr.GetAccId()
+	storCdr.CdrHost = cgrCdr.GetCdrHost()
+	storCdr.CdrSource = cgrCdr.GetCdrSource()
+	storCdr.ReqType = cgrCdr.GetReqType()
+	storCdr.Direction = cgrCdr.GetDirection()
+	storCdr.Tenant = cgrCdr.GetTenant()
+	storCdr.Category = cgrCdr.GetCategory()
+	storCdr.Account = cgrCdr.GetAccount()
+	storCdr.Subject = cgrCdr.GetSubject()
+	storCdr.Destination = cgrCdr.GetDestination()
+	storCdr.SetupTime, _ = cgrCdr.GetSetupTime() // Not interested to process errors, should do them if necessary in a previous step
+	storCdr.AnswerTime, _ = cgrCdr.GetAnswerTime()
+	storCdr.Duration, _ = cgrCdr.GetDuration()
+	storCdr.ExtraFields = cgrCdr.GetExtraFields()
+	storCdr.Cost = -1
+	return storCdr
 }

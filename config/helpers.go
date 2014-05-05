@@ -21,6 +21,7 @@ package config
 import (
 	"code.google.com/p/goconf/conf"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/cgrates/cgrates/utils"
@@ -81,7 +82,7 @@ func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err
 	if tenantFlds, err = ConfigSlice(cfgVal); err != nil {
 		return nil, err
 	}
-	cfgVal, _ = c.GetString("derived_charging", "tor_fields")
+	cfgVal, _ = c.GetString("derived_charging", "category_fields")
 	if torFlds, err = ConfigSlice(cfgVal); err != nil {
 		return nil, err
 	}
@@ -135,4 +136,39 @@ func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err
 		}
 	}
 	return dcs, nil
+}
+
+func ParseCdrcCdrFields(accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
+	setupTimeFld, answerTimeFld, durFld, extraFlds string) (map[string]*utils.RSRField, error) {
+	cdrcCdrFlds := make(map[string]*utils.RSRField)
+	if len(extraFlds) != 0 {
+		if sepExtraFlds, err := ConfigSlice(extraFlds); err != nil {
+			return nil, err
+		} else {
+			for _, fldStr := range sepExtraFlds {
+				// extra fields defined as: <label_extrafield_1>:<index_extrafield_1>
+				if spltLbl := strings.Split(fldStr, utils.CONCATENATED_KEY_SEP); len(spltLbl) != 2 {
+					return nil, fmt.Errorf("Wrong format for cdrc.extra_fields: %s", fldStr)
+				} else {
+					if rsrFld, err := utils.NewRSRField(spltLbl[1]); err != nil {
+						return nil, err
+					} else {
+						cdrcCdrFlds[spltLbl[0]] = rsrFld
+					}
+				}
+			}
+		}
+	}
+	for fldTag, fldVal := range map[string]string{utils.ACCID: accIdFld, utils.REQTYPE: reqtypeFld, utils.DIRECTION: directionFld, utils.TENANT: tenantFld,
+		utils.CATEGORY: categoryFld, utils.ACCOUNT: acntFld, utils.SUBJECT: subjectFld, utils.DESTINATION: destFld, utils.SETUP_TIME: setupTimeFld,
+		utils.ANSWER_TIME: answerTimeFld, utils.DURATION: durFld} {
+		if len(fldVal) != 0 {
+			if rsrFld, err := utils.NewRSRField(fldVal); err != nil {
+				return nil, err
+			} else {
+				cdrcCdrFlds[fldTag] = rsrFld
+			}
+		}
+	}
+	return cdrcCdrFlds, nil
 }

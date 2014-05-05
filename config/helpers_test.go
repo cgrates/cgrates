@@ -44,7 +44,7 @@ run_ids = run1, run2
 reqtype_fields = test1, test2 
 direction_fields = test1, test2
 tenant_fields = test1, test2
-tor_fields = test1, test2
+category_fields = test1, test2
 account_fields = test1, test2
 subject_fields = test1, test2
 destination_fields = test1, test2
@@ -61,5 +61,43 @@ duration_fields = test1, test2
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(cfg.DerivedChargers, edcs) {
 		t.Errorf("Expecting: %v, received: %v", edcs, cfg.DerivedChargers)
+	}
+}
+
+func TestParseCdrcCdrFields(t *testing.T) {
+	eFieldsCfg := []byte(`[cdrc]
+cdr_type = test
+accid_field = accid1
+reqtype_field = reqtype1
+direction_field = direction1
+tenant_field = tenant1
+category_field = category1
+account_field = account1
+subject_field = subject1
+destination_field = destination1
+setup_time_field = setuptime1
+answer_time_field = answertime1
+duration_field = duration1
+extra_fields = extra1:extraval1,extra2:extraval1
+`)
+	eCdrcCdrFlds := map[string]*utils.RSRField{
+		utils.ACCID:       &utils.RSRField{Id: "accid1"},
+		utils.REQTYPE:     &utils.RSRField{Id: "reqtype1"},
+		utils.DIRECTION:   &utils.RSRField{Id: "direction1"},
+		utils.TENANT:      &utils.RSRField{Id: "tenant1"},
+		utils.CATEGORY:    &utils.RSRField{Id: "category1"},
+		utils.ACCOUNT:     &utils.RSRField{Id: "account1"},
+		utils.SUBJECT:     &utils.RSRField{Id: "subject1"},
+		utils.DESTINATION: &utils.RSRField{Id: "destination1"},
+		utils.SETUP_TIME:  &utils.RSRField{Id: "setuptime1"},
+		utils.ANSWER_TIME: &utils.RSRField{Id: "answertime1"},
+		utils.DURATION:    &utils.RSRField{Id: "duration1"},
+		"extra1":          &utils.RSRField{Id: "extraval1"},
+		"extra2":          &utils.RSRField{Id: "extraval1"},
+	}
+	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.CdrcCdrFields, eCdrcCdrFlds) {
+		t.Errorf("Expecting: %v, received: %v", eCdrcCdrFlds, cfg.CdrcCdrFields)
 	}
 }

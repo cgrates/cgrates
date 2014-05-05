@@ -19,40 +19,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package utils
 
 import (
+	"errors"
+	"fmt"
 	"math"
 	"net/url"
 	"strconv"
 	"time"
 )
 
-func NewStoredCdrFromRawCDR(rawcdr RawCDR) (*StoredCdr, error) {
-	var err error
-	strCdr := new(StoredCdr)
-	strCdr.CgrId = rawcdr.GetCgrId()
-	strCdr.AccId = rawcdr.GetAccId()
-	strCdr.CdrHost = rawcdr.GetCdrHost()
-	strCdr.CdrSource = rawcdr.GetCdrSource()
-	strCdr.ReqType = rawcdr.GetReqType()
-	strCdr.Direction = rawcdr.GetDirection()
-	strCdr.Tenant = rawcdr.GetTenant()
-	strCdr.Category = rawcdr.GetCategory()
-	strCdr.Account = rawcdr.GetAccount()
-	strCdr.Subject = rawcdr.GetSubject()
-	strCdr.Destination = rawcdr.GetDestination()
-	if strCdr.SetupTime, err = rawcdr.GetSetupTime(); err != nil {
-		return nil, err
-	}
-	if strCdr.AnswerTime, err = rawcdr.GetAnswerTime(); err != nil {
-		return nil, err
-	}
-	strCdr.Duration, _ = rawcdr.GetDuration()
-	strCdr.ExtraFields = rawcdr.GetExtraFields()
-	strCdr.MediationRunId = DEFAULT_RUNID
-	strCdr.Cost = -1
-	return strCdr, nil
-}
-
-// Rated CDR as extracted from StorDb. Kinda standard of internal CDR, complies to CDR interface also
+// Kinda standard of internal CDR, complies to CDR interface also
 type StoredCdr struct {
 	CgrId          string
 	OrderId        int64 // Stor order id used as export order id
@@ -74,68 +49,6 @@ type StoredCdr struct {
 	Cost           float64
 }
 
-// Methods maintaining RawCDR interface
-
-func (storedCdr *StoredCdr) GetCgrId() string {
-	return storedCdr.CgrId
-}
-
-func (storedCdr *StoredCdr) GetAccId() string {
-	return storedCdr.AccId
-}
-
-func (storedCdr *StoredCdr) GetCdrHost() string {
-	return storedCdr.CdrHost
-}
-
-func (storedCdr *StoredCdr) GetCdrSource() string {
-	return storedCdr.CdrSource
-}
-
-func (storedCdr *StoredCdr) GetDirection() string {
-	return storedCdr.Direction
-}
-
-func (storedCdr *StoredCdr) GetSubject() string {
-	return storedCdr.Subject
-}
-
-func (storedCdr *StoredCdr) GetAccount() string {
-	return storedCdr.Account
-}
-
-func (storedCdr *StoredCdr) GetDestination() string {
-	return storedCdr.Destination
-}
-
-func (storedCdr *StoredCdr) GetCategory() string {
-	return storedCdr.Category
-}
-
-func (storedCdr *StoredCdr) GetTenant() string {
-	return storedCdr.Tenant
-}
-
-func (storedCdr *StoredCdr) GetReqType() string {
-	return storedCdr.ReqType
-}
-
-func (storedCdr *StoredCdr) GetSetupTime() (time.Time, error) {
-	return storedCdr.SetupTime, nil
-}
-
-func (storedCdr *StoredCdr) GetAnswerTime() (time.Time, error) {
-	return storedCdr.AnswerTime, nil
-}
-
-func (storedCdr *StoredCdr) GetDuration() (time.Duration, error) {
-	return storedCdr.Duration, nil
-}
-
-func (storedCdr *StoredCdr) GetExtraFields() map[string]string {
-	return storedCdr.ExtraFields
-}
-
 // Return cost as string, formated with number of decimals configured
 func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string {
 	cost := storedCdr.Cost
@@ -145,81 +58,165 @@ func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string 
 	return strconv.FormatFloat(cost, 'f', roundDecimals, 64)
 }
 
-// Converts part of the rated Cdr as httpForm used to post remotely to CDRS
-func (storedCdr *StoredCdr) AsRawCdrHttpForm() url.Values {
+// Used to retrieve fields as string, primary fields are const labeled
+func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
+	switch rsrFld.Id {
+	case CGRID:
+		return rsrFld.ParseValue(storedCdr.CgrId)
+	case ORDERID:
+		return rsrFld.ParseValue(strconv.FormatInt(storedCdr.OrderId, 10))
+	case ACCID:
+		return rsrFld.ParseValue(storedCdr.AccId)
+	case CDRHOST:
+		return rsrFld.ParseValue(storedCdr.CdrHost)
+	case CDRSOURCE:
+		return rsrFld.ParseValue(storedCdr.CdrSource)
+	case REQTYPE:
+		return rsrFld.ParseValue(storedCdr.ReqType)
+	case DIRECTION:
+		return rsrFld.ParseValue(storedCdr.Direction)
+	case TENANT:
+		return rsrFld.ParseValue(storedCdr.Tenant)
+	case CATEGORY:
+		return rsrFld.ParseValue(storedCdr.Category)
+	case ACCOUNT:
+		return rsrFld.ParseValue(storedCdr.Account)
+	case SUBJECT:
+		return rsrFld.ParseValue(storedCdr.Subject)
+	case DESTINATION:
+		return rsrFld.ParseValue(storedCdr.Destination)
+	case SETUP_TIME:
+		return rsrFld.ParseValue(storedCdr.SetupTime.String())
+	case ANSWER_TIME:
+		return rsrFld.ParseValue(storedCdr.AnswerTime.String())
+	case DURATION:
+		return rsrFld.ParseValue(strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64))
+	case MEDI_RUNID:
+		return rsrFld.ParseValue(storedCdr.MediationRunId)
+	case COST:
+		return rsrFld.ParseValue(strconv.FormatFloat(storedCdr.Cost, 'f', -1, 64)) // Recommended to use FormatCost
+	default:
+		return rsrFld.ParseValue(storedCdr.ExtraFields[rsrFld.Id])
+	}
+}
+
+func (storedCdr *StoredCdr) AsStoredCdr() *StoredCdr {
+	return storedCdr
+}
+
+// Ability to send the CgrCdr remotely to another CDR server
+func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v := url.Values{}
+	for fld, val := range storedCdr.ExtraFields {
+		v.Set(fld, val)
+	}
 	v.Set(ACCID, storedCdr.AccId)
 	v.Set(CDRHOST, storedCdr.CdrHost)
 	v.Set(CDRSOURCE, storedCdr.CdrSource)
 	v.Set(REQTYPE, storedCdr.ReqType)
 	v.Set(DIRECTION, storedCdr.Direction)
 	v.Set(TENANT, storedCdr.Tenant)
-	v.Set(Category, storedCdr.Category)
+	v.Set(CATEGORY, storedCdr.Category)
 	v.Set(ACCOUNT, storedCdr.Account)
 	v.Set(SUBJECT, storedCdr.Subject)
 	v.Set(DESTINATION, storedCdr.Destination)
 	v.Set(SETUP_TIME, storedCdr.SetupTime.String())
 	v.Set(ANSWER_TIME, storedCdr.AnswerTime.String())
 	v.Set(DURATION, strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64))
-	for fld, val := range storedCdr.ExtraFields {
-		v.Set(fld, val)
-	}
 	return v
 }
 
-// Used to export fields as string, primary fields are const labeled
-func (storedCdr *StoredCdr) ExportFieldValue(fldName string) string {
-	switch fldName {
-	case CGRID:
-		return storedCdr.CgrId
-	case ORDERID:
-		return strconv.FormatInt(storedCdr.OrderId, 10)
-	case ACCID:
-		return storedCdr.AccId
-	case CDRHOST:
-		return storedCdr.CdrHost
-	case CDRSOURCE:
-		return storedCdr.CdrSource
-	case REQTYPE:
-		return storedCdr.ReqType
-	case DIRECTION:
-		return storedCdr.Direction
-	case TENANT:
-		return storedCdr.Tenant
-	case Category:
-		return storedCdr.Category
-	case ACCOUNT:
-		return storedCdr.Account
-	case SUBJECT:
-		return storedCdr.Subject
-	case DESTINATION:
-		return storedCdr.Destination
-	case SETUP_TIME:
-		return storedCdr.SetupTime.String()
-	case ANSWER_TIME:
-		return storedCdr.AnswerTime.String()
-	case DURATION:
-		return strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64)
-	case MEDI_RUNID:
-		return storedCdr.MediationRunId
-	case COST:
-		return strconv.FormatFloat(storedCdr.Cost, 'f', -1, 64) // Recommended to use FormatCost
-	default:
-		return storedCdr.ExtraFields[fldName]
+// Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
+func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld *RSRField,
+	extraFlds []*RSRField, primaryMandatory bool) (*StoredCdr, error) {
+	// MetaDefault will automatically be converted to their standard values
+	if reqTypeFld.Id == META_DEFAULT {
+		reqTypeFld.Id = REQTYPE
 	}
-}
-
-// Converts to CgrCdr, so we can fork with less code
-func (storedCdr *StoredCdr) AsCgrCdr() CgrCdr {
-	cgrCdr := make(CgrCdr)
-	for _, fldName := range PrimaryCdrFields {
-		cgrCdr[fldName] = storedCdr.ExportFieldValue(fldName)
+	if directionFld.Id == META_DEFAULT {
+		directionFld.Id = DIRECTION
 	}
-	return cgrCdr
-}
-
-func (storedCdr *StoredCdr) ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld,
-	setupTimeFld, answerTimeFld, durationFld string, extraFlds []string, fieldsMandatory bool) (*StoredCdr, error) {
-	return storedCdr.AsCgrCdr().ForkCdr(runId, reqTypeFld, directionFld, tenantFld, torFld, accountFld, subjectFld, destFld,
-		setupTimeFld, answerTimeFld, durationFld, extraFlds, fieldsMandatory)
+	if tenantFld.Id == META_DEFAULT {
+		tenantFld.Id = TENANT
+	}
+	if categFld.Id == META_DEFAULT {
+		categFld.Id = CATEGORY
+	}
+	if accountFld.Id == META_DEFAULT {
+		accountFld.Id = ACCOUNT
+	}
+	if subjectFld.Id == META_DEFAULT {
+		subjectFld.Id = SUBJECT
+	}
+	if destFld.Id == META_DEFAULT {
+		destFld.Id = DESTINATION
+	}
+	if setupTimeFld.Id == META_DEFAULT {
+		setupTimeFld.Id = SETUP_TIME
+	}
+	if answerTimeFld.Id == META_DEFAULT {
+		answerTimeFld.Id = ANSWER_TIME
+	}
+	if durationFld.Id == META_DEFAULT {
+		durationFld.Id = DURATION
+	}
+	var err error
+	frkStorCdr := new(StoredCdr)
+	frkStorCdr.CgrId = storedCdr.CgrId
+	frkStorCdr.MediationRunId = runId
+	frkStorCdr.Cost = -1.0 // Default for non-rated CDR
+	frkStorCdr.AccId = storedCdr.AccId
+	frkStorCdr.CdrHost = storedCdr.CdrHost
+	frkStorCdr.CdrSource = storedCdr.CdrSource
+	frkStorCdr.ReqType = storedCdr.FieldAsString(reqTypeFld)
+	if primaryMandatory && len(frkStorCdr.ReqType) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, REQTYPE, reqTypeFld.Id))
+	}
+	frkStorCdr.Direction = storedCdr.FieldAsString(directionFld)
+	if primaryMandatory && len(frkStorCdr.Direction) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, DIRECTION, directionFld.Id))
+	}
+	frkStorCdr.Tenant = storedCdr.FieldAsString(tenantFld)
+	if primaryMandatory && len(frkStorCdr.Tenant) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, TENANT, tenantFld.Id))
+	}
+	frkStorCdr.Category = storedCdr.FieldAsString(categFld)
+	if primaryMandatory && len(frkStorCdr.Category) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, CATEGORY, categFld.Id))
+	}
+	frkStorCdr.Account = storedCdr.FieldAsString(accountFld)
+	if primaryMandatory && len(frkStorCdr.Account) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, ACCOUNT, accountFld.Id))
+	}
+	frkStorCdr.Subject = storedCdr.FieldAsString(subjectFld)
+	if primaryMandatory && len(frkStorCdr.Subject) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, SUBJECT, subjectFld.Id))
+	}
+	frkStorCdr.Destination = storedCdr.FieldAsString(destFld)
+	if primaryMandatory && len(frkStorCdr.Destination) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, DESTINATION, destFld.Id))
+	}
+	sTimeStr := storedCdr.FieldAsString(setupTimeFld)
+	if primaryMandatory && len(sTimeStr) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, SETUP_TIME, setupTimeFld.Id))
+	} else if frkStorCdr.SetupTime, err = ParseTimeDetectLayout(sTimeStr); err != nil {
+		return nil, err
+	}
+	aTimeStr := storedCdr.FieldAsString(answerTimeFld)
+	if primaryMandatory && len(aTimeStr) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, ANSWER_TIME, answerTimeFld.Id))
+	} else if frkStorCdr.AnswerTime, err = ParseTimeDetectLayout(aTimeStr); err != nil {
+		return nil, err
+	}
+	durStr := storedCdr.FieldAsString(durationFld)
+	if primaryMandatory && len(durStr) == 0 {
+		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, DURATION, durationFld.Id))
+	} else if frkStorCdr.Duration, err = ParseDurationWithSecs(durStr); err != nil {
+		return nil, err
+	}
+	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))
+	for _, fld := range extraFlds {
+		frkStorCdr.ExtraFields[fld.Id] = storedCdr.FieldAsString(fld)
+	}
+	return frkStorCdr, nil
 }

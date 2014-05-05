@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -153,7 +153,7 @@ func TestSetCdr(t *testing.T) {
 		"account": "1002", "subject": "1002", "destination": "+4986517174963", "setup_time": "2013-11-07T08:42:25Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "15s",
 		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
 	for _, cdr := range []*utils.CgrCdr{cgrCdr1, cgrCdr2, cgrCdr3, cgrCdr4, cgrCdr5} {
-		if err := mysql.SetCdr(cdr); err != nil {
+		if err := mysql.SetCdr(cdr.AsStoredCdr()); err != nil {
 			t.Error(err.Error())
 		}
 	}
@@ -468,5 +468,30 @@ func TestRemStoredCdrs(t *testing.T) {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+}
+
+func TestSetGetTPActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	atrg := &utils.TPActionTrigger{
+		BalanceType:    "*monetary",
+		Direction:      "*out",
+		ThresholdType:  "*min_balance",
+		ThresholdValue: 2.0,
+		Recurrent:      true,
+		DestinationId:  "*any",
+		Weight:         10.0,
+		ActionsId:      "LOG_BALANCE",
+	}
+	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
+	if err := mysql.SetTPActionTriggers(TEST_SQL, mpAtrgs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	if rcvMpAtrgs, err := mysql.GetTpActionTriggers(TEST_SQL, TEST_SQL); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(mpAtrgs, rcvMpAtrgs) {
+		t.Errorf("Expecting: %v, received: %v", mpAtrgs, rcvMpAtrgs)
 	}
 }

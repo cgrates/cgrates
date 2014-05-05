@@ -20,6 +20,7 @@ package engine
 
 import (
 	"flag"
+	"fmt"
 	"path"
 	"testing"
 
@@ -223,6 +224,7 @@ func TestLoadFromStorDb(t *testing.T) {
 		t.Error("Failed loading action triggers: ", err.Error())
 	}
 	if err := loader.LoadAccountActions(); err != nil {
+		fmt.Printf("Have actionTriggers loaded :%v\n", loader.actionsTriggers)
 		t.Error("Failed loading account actions: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {

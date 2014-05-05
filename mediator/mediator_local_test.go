@@ -174,7 +174,7 @@ func TestInjectCdrs(t *testing.T) {
 		"tenant": "cgrates.org", "tor": "call", "account": "dan", "subject": "dan", "destination": "+4986517173964",
 		"answer_time": "2013-11-07T09:42:26Z", "duration": "20"}
 	for _, cdr := range []utils.CgrCdr{cgrCdr1, cgrCdr2} {
-		if err := cdrStor.SetCdr(cdr); err != nil {
+		if err := cdrStor.SetCdr(cdr.AsStoredCdr()); err != nil {
 			t.Error(err)
 		}
 	}

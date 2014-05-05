@@ -414,7 +414,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		tag, balanceType, direction, thresholdType, destinationTag, actionsTag := record[0], record[1], record[2], record[3], record[5], record[6]
+		tag, balanceType, direction, thresholdType, destinationTag, actionsTag := record[0], record[1], record[2], record[3], record[6], record[7]
 		threshold, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			if self.Verbose {
@@ -422,7 +422,11 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		weight, err := strconv.ParseFloat(record[7], 64)
+		recurrent, err := strconv.ParseBool(record[5])
+		if err != nil {
+			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
+		}
+		weight, err := strconv.ParseFloat(record[8], 64)
 		if err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
@@ -434,6 +438,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			Direction:      direction,
 			ThresholdType:  thresholdType,
 			ThresholdValue: threshold,
+			Recurrent:      recurrent,
 			DestinationId:  destinationTag,
 			Weight:         weight,
 			ActionsId:      actionsTag,

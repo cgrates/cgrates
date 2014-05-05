@@ -21,7 +21,6 @@ package cdrc
 import (
 	"bufio"
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -29,7 +28,6 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/cdrs"
@@ -51,9 +49,6 @@ func NewCdrc(config *config.CGRConfig, cdrServer *cdrs.CDRS) (*Cdrc, error) {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
 			return nil, fmt.Errorf("Folder %s does not exist", dir)
 		}
-	}
-	if err := cdrc.parseFieldsConfig(); err != nil {
-		return nil, err
 	}
 	cdrc.httpClient = new(http.Client)
 	return cdrc, nil
@@ -78,100 +73,57 @@ func (self *Cdrc) Run() error {
 	}
 }
 
-// Loads all fields (primary and extra) into cfgCdrFields, do some pre-checks (eg: in case of csv make sure that values are integers)
-func (self *Cdrc) parseFieldsConfig() error {
-	var err error
-	self.cfgCdrFields = map[string]string{
-		utils.ACCID:       self.cgrCfg.CdrcAccIdField,
-		utils.REQTYPE:     self.cgrCfg.CdrcReqTypeField,
-		utils.DIRECTION:   self.cgrCfg.CdrcDirectionField,
-		utils.TENANT:      self.cgrCfg.CdrcTenantField,
-		utils.Category:    self.cgrCfg.CdrcCategoryField,
-		utils.ACCOUNT:     self.cgrCfg.CdrcAccountField,
-		utils.SUBJECT:     self.cgrCfg.CdrcSubjectField,
-		utils.DESTINATION: self.cgrCfg.CdrcDestinationField,
-		utils.SETUP_TIME:  self.cgrCfg.CdrcSetupTimeField,
-		utils.ANSWER_TIME: self.cgrCfg.CdrcAnswerTimeField,
-		utils.DURATION:    self.cgrCfg.CdrcDurationField,
-	}
-
-	// Add extra fields here, config extra fields in the form of []string{"fieldName1:indxInCsv1","fieldName2: indexInCsv2"}
-	for _, fieldWithIdx := range self.cgrCfg.CdrcExtraFields {
-		splt := strings.Split(fieldWithIdx, ":")
-		if len(splt) != 2 {
-			return errors.New("Cannot parse cdrc.extra_fields")
-		}
-		if utils.IsSliceMember(utils.PrimaryCdrFields, splt[0]) {
-			return errors.New("Extra cdrc.extra_fields overwriting primary fields")
-		}
-		self.cfgCdrFields[splt[0]] = splt[1]
-	}
-	// Fields populated, do some sanity checks here
-	for cdrField, cfgVal := range self.cfgCdrFields {
-		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cgrCfg.CdrcCdrType) && !strings.HasPrefix(cfgVal, utils.STATIC_VALUE_PREFIX) {
-			if _, err = strconv.Atoi(cfgVal); err != nil {
-				return fmt.Errorf("Cannot parse configuration field %s into integer", cdrField)
-			}
-		}
-	}
-	return nil
-}
-
 // Takes the record out of csv and turns it into http form which can be posted
 func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
-	ratedCdr := &utils.StoredCdr{CdrSource: self.cgrCfg.CdrcSourceId, ExtraFields: map[string]string{}, Cost: -1}
+	storedCdr := &utils.StoredCdr{CdrSource: self.cgrCfg.CdrcSourceId, ExtraFields: map[string]string{}, Cost: -1}
 	var err error
-	for cfgFieldName, cfgFieldVal := range self.cfgCdrFields {
+	for cfgFieldName, cfgFieldRSR := range self.cgrCfg.CdrcCdrFields {
 		var fieldVal string
-		if strings.HasPrefix(cfgFieldVal, utils.STATIC_VALUE_PREFIX) {
-			fieldVal = cfgFieldVal[1:]
-		} else if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cgrCfg.CdrcCdrType) {
-			if cfgFieldIdx, err := strconv.Atoi(cfgFieldVal); err != nil { // Should in theory never happen since we have already parsed config
-				return nil, err
-			} else if len(record) <= cfgFieldIdx {
+		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cgrCfg.CdrcCdrType) {
+			if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
 			} else {
-				fieldVal = record[cfgFieldIdx]
+				fieldVal = cfgFieldRSR.ParseValue(record[cfgFieldIdx])
 			}
 		} else { // Modify here when we add more supported cdr formats
 			fieldVal = "UNKNOWN"
 		}
 		switch cfgFieldName {
 		case utils.ACCID:
-			ratedCdr.AccId = fieldVal
+			storedCdr.AccId = fieldVal
 		case utils.REQTYPE:
-			ratedCdr.ReqType = fieldVal
+			storedCdr.ReqType = fieldVal
 		case utils.DIRECTION:
-			ratedCdr.Direction = fieldVal
+			storedCdr.Direction = fieldVal
 		case utils.TENANT:
-			ratedCdr.Tenant = fieldVal
-		case utils.Category:
-			ratedCdr.Category = fieldVal
+			storedCdr.Tenant = fieldVal
+		case utils.CATEGORY:
+			storedCdr.Category = fieldVal
 		case utils.ACCOUNT:
-			ratedCdr.Account = fieldVal
+			storedCdr.Account = fieldVal
 		case utils.SUBJECT:
-			ratedCdr.Subject = fieldVal
+			storedCdr.Subject = fieldVal
 		case utils.DESTINATION:
-			ratedCdr.Destination = fieldVal
+			storedCdr.Destination = fieldVal
 		case utils.SETUP_TIME:
-			if ratedCdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
+			if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
 				return nil, fmt.Errorf("Cannot parse answer time field, err: %s", err.Error())
 			}
 		case utils.ANSWER_TIME:
-			if ratedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
+			if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
 				return nil, fmt.Errorf("Cannot parse answer time field, err: %s", err.Error())
 			}
 		case utils.DURATION:
-			if ratedCdr.Duration, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
+			if storedCdr.Duration, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
 				return nil, fmt.Errorf("Cannot parse duration field, err: %s", err.Error())
 			}
 		default: // Extra fields will not match predefined so they all show up here
-			ratedCdr.ExtraFields[cfgFieldName] = fieldVal
+			storedCdr.ExtraFields[cfgFieldName] = fieldVal
 		}
 
 	}
-	ratedCdr.CgrId = utils.Sha1(ratedCdr.AccId, ratedCdr.SetupTime.String())
-	return ratedCdr, nil
+	storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+	return storedCdr, nil
 }
 
 // One run over the CDR folder
@@ -233,18 +185,18 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue // Other csv related errors, ignore
 		}
-		rawCdr, err := self.recordForkCdr(record)
+		storedCdr, err := self.recordForkCdr(record)
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue
 		}
 		if self.cgrCfg.CdrcCdrs == utils.INTERNAL {
-			if err := self.cdrServer.ProcessRawCdr(rawCdr); err != nil {
+			if err := self.cdrServer.ProcessRawCdr(storedCdr); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
 				continue
 			}
 		} else { // CDRs listening on IP
-			if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cgrCfg.HTTPListen), rawCdr.AsRawCdrHttpForm()); err != nil {
+			if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cgrCfg.HTTPListen), storedCdr.AsHttpForm()); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
 				continue
 			}

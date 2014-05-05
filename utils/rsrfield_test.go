@@ -80,3 +80,20 @@ func TestConvertPlusNationalAnd00(t *testing.T) {
 		t.Errorf("Expecting: 003186517174963, received: %s", parsedVal)
 	}
 }
+
+func TestRSRParseStatic(t *testing.T) {
+	if rsrField, err := NewRSRField("^static_header/static_value"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rsrField, &RSRField{Id: "static_header", staticValue: "static_value"}) {
+		t.Errorf("Unexpected RSRField received: %v", rsrField)
+	} else if parsed := rsrField.ParseValue("dynamic_value"); parsed != "static_value" {
+		t.Errorf("Expected: %s, received: %s", "static_value", parsed)
+	}
+	if rsrField, err := NewRSRField(`^static_hdrvalue`); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rsrField, &RSRField{Id: "static_hdrvalue", staticValue: "static_hdrvalue"}) {
+		t.Errorf("Unexpected RSRField received: %v", rsrField)
+	} else if parsed := rsrField.ParseValue("dynamic_value"); parsed != "static_hdrvalue" {
+		t.Errorf("Expected: %s, received: %s", "static_hdrvalue", parsed)
+	}
+}

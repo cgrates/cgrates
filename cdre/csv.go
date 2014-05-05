@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -59,12 +59,12 @@ func (csvwr *CsvCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 		if fld.Id == utils.COST {
 			fldVal = cdr.FormatCost(csvwr.costShiftDigits, csvwr.roundDecimals)
 		} else if fld.Id == utils.DESTINATION {
-			fldVal = cdr.ExportFieldValue(utils.DESTINATION)
+			fldVal = cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION})
 			if len(csvwr.maskDestId) != 0 && csvwr.maskLen > 0 && engine.CachedDestHasPrefix(csvwr.maskDestId, fldVal) {
 				fldVal = MaskDestination(fldVal, csvwr.maskLen)
 			}
 		} else {
-			fldVal = cdr.ExportFieldValue(fld.Id)
+			fldVal = cdr.FieldAsString(fld)
 		}
 		row[idx] = fld.ParseValue(fldVal)
 	}

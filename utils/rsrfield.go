@@ -28,6 +28,15 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 	if len(fldStr) == 0 {
 		return nil, nil
 	}
+	if strings.HasPrefix(fldStr, STATIC_VALUE_PREFIX) { // Special case when RSR is defined as static header/value
+		var staticHdr, staticVal string
+		if splt := strings.Split(fldStr, HDR_VAL_SEP); len(splt) == 2 { // Using | as separator since ':' is often use in date/time fields
+			staticHdr, staticVal = splt[0][1:], splt[1]
+		} else {
+			staticHdr, staticVal = splt[0][1:], splt[0][1:] // If no split, header will remain as original, value as header without the prefix
+		}
+		return &RSRField{Id: staticHdr, staticValue: staticVal}, nil
+	}
 	if !strings.HasPrefix(fldStr, REGEXP_PREFIX) {
 		return &RSRField{Id: fldStr}, nil
 	}
@@ -53,12 +62,16 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 }
 
 type RSRField struct {
-	Id      string             //  Identifier
-	RSRules []*ReSearchReplace // Rules to use when processing field value
+	Id          string             //  Identifier
+	RSRules     []*ReSearchReplace // Rules to use when processing field value
+	staticValue string             // If defined, enforces parsing always to this value
 }
 
 // Parse the field value from a string
 func (rsrf *RSRField) ParseValue(value string) string {
+	if len(rsrf.staticValue) != 0 { // Enforce parsing of static values
+		return rsrf.staticValue
+	}
 	if len(value) == 0 {
 		return value
 	}
