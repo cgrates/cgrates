@@ -258,7 +258,7 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 			}
 			continue
 		}
-		tenant, tor, direction, subject, ratingPlanTag, fallbacksubject := record[0], record[1], record[2], record[3], record[5], record[6]
+		direction, tenant, tor, subject, ratingPlanTag, fallbacksubject := record[0], record[1], record[2], record[3], record[5], record[6]
 		_, err = utils.ParseDate(record[4])
 		if err != nil {
 			if self.Verbose {

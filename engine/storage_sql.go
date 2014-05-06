@@ -261,7 +261,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,loadid,tenant,category,direction,subject,activation_time,rating_plan_id,fallback_subjects) VALUES ",
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,loadid,direction,tenant,category,subject,activation_time,rating_plan_id,fallback_subjects) VALUES ",
 		utils.TBL_TP_RATE_PROFILES))
 	i := 0
 	for _, rp := range rps {
@@ -269,7 +269,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				buffer.WriteRune(',')
 			}
-			buffer.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Tenant, rp.Category, rp.Direction,
+			buffer.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Direction, rp.Tenant, rp.Category,
 				rp.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackSubjects))
 			i++
 		}
@@ -1031,15 +1031,16 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 	if len(qryRpf.LoadId) != 0 {
 		q += fmt.Sprintf(" AND loadid='%s'", qryRpf.LoadId)
 	}
+	if len(qryRpf.Direction) != 0 {
+		q += fmt.Sprintf(" AND direction='%s'", qryRpf.Direction)
+	}
 	if len(qryRpf.Tenant) != 0 {
 		q += fmt.Sprintf(" AND tenant='%s'", qryRpf.Tenant)
 	}
 	if len(qryRpf.Category) != 0 {
 		q += fmt.Sprintf(" AND category='%s'", qryRpf.Category)
 	}
-	if len(qryRpf.Direction) != 0 {
-		q += fmt.Sprintf(" AND direction='%s'", qryRpf.Direction)
-	}
+
 	if len(qryRpf.Subject) != 0 {
 		q += fmt.Sprintf(" AND subject='%s'", qryRpf.Subject)
 	}
@@ -1051,10 +1052,10 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 	rpfs := make(map[string]*utils.TPRatingProfile)
 	for rows.Next() {
 		var rcvLoadId, tenant, category, direction, subject, fallback_subjects, rating_plan_tag, activation_time string
-		if err := rows.Scan(&rcvLoadId, &tenant, &category, &direction, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
+		if err := rows.Scan(&rcvLoadId, &direction, &tenant, &category, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
 			return nil, err
 		}
-		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Tenant: tenant, Category: category, Direction: direction, Subject: subject}
+		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Direction: direction, Tenant: tenant, Category: category, Subject: subject}
 		if existingRp, has := rpfs[rp.KeyId()]; !has {
 			rp.RatingPlanActivations = []*utils.TPRatingActivation{
 				&utils.TPRatingActivation{ActivationTime: activation_time, RatingPlanId: rating_plan_tag, FallbackSubjects: fallback_subjects}}

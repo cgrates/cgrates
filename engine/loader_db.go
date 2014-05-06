@@ -558,10 +558,10 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 				Direction:      apiAtr.Direction,
 				ThresholdType:  apiAtr.ThresholdType,
 				ThresholdValue: apiAtr.ThresholdValue,
+				Recurrent:      apiAtr.Recurrent,
 				DestinationId:  apiAtr.DestinationId,
 				Weight:         apiAtr.Weight,
 				ActionsId:      apiAtr.ActionsId,
-				Recurrent:      apiAtr.Recurrent,
 			}
 		}
 		dbr.actionsTriggers[key] = atrs

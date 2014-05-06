@@ -20,7 +20,6 @@ package engine
 
 import (
 	"flag"
-	"fmt"
 	"path"
 	"testing"
 
@@ -224,7 +223,6 @@ func TestLoadFromStorDb(t *testing.T) {
 		t.Error("Failed loading action triggers: ", err.Error())
 	}
 	if err := loader.LoadAccountActions(); err != nil {
-		fmt.Printf("Have actionTriggers loaded :%v\n", loader.actionsTriggers)
 		t.Error("Failed loading account actions: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
@@ -298,7 +296,7 @@ func TestMatchLoadCsvWithStor(t *testing.T) {
 		for idx, rs := range []*RedisStorage{rsCsv, rsStor, rsApier} {
 			qVal, err := rs.db.Get(key)
 			if err != nil {
-				t.Fatalf("Could not retrieve key %s, error: %s", key, err.Error())
+				t.Fatalf("Run: %d, could not retrieve key %s, error: %s", idx, key, err.Error())
 			}
 			if idx == 0 { // Only compare at second iteration, first one is to set reference value
 				refVal = qVal

@@ -486,10 +486,10 @@ func TestSetGetTPActionTriggers(t *testing.T) {
 		ActionsId:      "LOG_BALANCE",
 	}
 	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
-	if err := mysql.SetTPActionTriggers(TEST_SQL, mpAtrgs); err != nil {
+	if err := mysql.SetTPActionTriggers(TEST_SQL+"1", mpAtrgs); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	}
-	if rcvMpAtrgs, err := mysql.GetTpActionTriggers(TEST_SQL, TEST_SQL); err != nil {
+	if rcvMpAtrgs, err := mysql.GetTpActionTriggers(TEST_SQL+"1", TEST_SQL); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(mpAtrgs, rcvMpAtrgs) {
 		t.Errorf("Expecting: %v, received: %v", mpAtrgs, rcvMpAtrgs)

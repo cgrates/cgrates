@@ -99,9 +99,9 @@ CREATE TABLE `tp_rating_profiles` (
   `tbid` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `loadid` varchar(64) NOT NULL,
+  `direction` varchar(8) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `category` varchar(16) NOT NULL,
-  `direction` varchar(8) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `activation_time` varchar(24) NOT NULL,
   `rating_plan_id` varchar(64) NOT NULL,
@@ -212,11 +212,11 @@ CREATE TABLE `tp_account_actions` (
 );
 
 --
--- Table structure for table `tp_lcrs`
+-- Table structure for table `tp_lcr_rules`
 --
 
 DROP TABLE IF EXISTS tp_lcr_rules;
-CREATE TABLE tp_lcr (
+CREATE TABLE tp_lcr_rules (
   `tbid` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `direction`	varchar(8) NOT NULL,
