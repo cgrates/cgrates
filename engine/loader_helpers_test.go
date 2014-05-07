@@ -20,11 +20,12 @@ package engine
 
 import (
 	"bufio"
-	"github.com/cgrates/cgrates/utils"
 	"io"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 var timingsSample = `#Tag,Years,Months,MonthDays,WeekDays,Time
@@ -39,7 +40,7 @@ DUMMY,INVALID;DATA
 GERMANY_MOBILE,+4915
 `
 var ratesSample = `#Tag,DestinationRatesTag,TimingTag,Weight
-RT_1CENT,0,1,1s,1s,0s,*up,2
+RT_1CENT,0,1,1s,1s,0s
 DUMMY,INVALID;DATA
 `
 
@@ -410,7 +411,7 @@ func TestTPCSVFileParser(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			if !reflect.DeepEqual(record, []string{"RT_1CENT", "0", "1", "1s", "1s", "0s", "*up", "2"}) {
+			if !reflect.DeepEqual(record, []string{"RT_1CENT", "0", "1", "1s", "1s", "0s"}) {
 				t.Error("Unexpected record extracted", record)
 			}
 		case 3:

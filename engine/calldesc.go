@@ -431,9 +431,6 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		}
 		cost += ts.getCost()
 	}
-	// global rounding
-	//TODO: use the longest rounding/method from ts
-	cost = utils.Round(cost, globalRoundingDecimals, globalRoundingMethod)
 	//startIndex := len(fmt.Sprintf("%s:%s:%s:", cd.Direction, cd.Tenant, cd.Category))
 	cc := &CallCost{
 		Direction:        cd.Direction,
@@ -447,6 +444,9 @@ func (cd *CallDescriptor) GetCost() (*CallCost, error) {
 		deductConnectFee: cd.LoopIndex == 0,
 		TOR:              cd.TOR,
 	}
+	// global rounding
+	roundingDecimals, roundingMethod := cc.GetLongestRounding()
+	cc.Cost = utils.Round(cc.Cost, roundingDecimals, roundingMethod)
 	//Logger.Info(fmt.Sprintf("<Rater> Get Cost: %s => %v", cd.GetKey(), cc))
 	cc.Timespans.Compress()
 	return cc, err

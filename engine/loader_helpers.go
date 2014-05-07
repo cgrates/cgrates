@@ -52,7 +52,7 @@ type TPLoader interface {
 	WriteToDatabase(bool, bool) error
 }
 
-func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval, roundingMethod, roundingDecimals string) (r *utils.TPRate, err error) {
+func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterval string) (r *utils.TPRate, err error) {
 	cf, err := strconv.ParseFloat(connectFee, 64)
 	if err != nil {
 		log.Printf("Error parsing connect fee from: %v", connectFee)
@@ -63,12 +63,7 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 		log.Printf("Error parsing price from: %v", price)
 		return
 	}
-	rd, err := strconv.Atoi(roundingDecimals)
-	if err != nil {
-		log.Printf("Error parsing rounding decimals: %s", roundingDecimals)
-		return
-	}
-	rs, err := utils.NewRateSlot(cf, p, ratedUnits, rateIncrements, groupInterval, roundingMethod, rd)
+	rs, err := utils.NewRateSlot(cf, p, ratedUnits, rateIncrements, groupInterval)
 	if err != nil {
 		return nil, err
 	}
@@ -85,9 +80,6 @@ func ValidNextGroup(present, next *utils.RateSlot) error {
 	}
 	if math.Mod(next.GroupIntervalStartDuration().Seconds(), present.RateIncrementDuration().Seconds()) != 0 {
 		return errors.New(fmt.Sprintf("GroupIntervalStart of %#v must be a multiple of RateIncrement of %#v", next, present))
-	}
-	if present.RoundingMethod != next.RoundingMethod || present.RoundingDecimals != next.RoundingDecimals {
-		return errors.New(fmt.Sprintf("Rounding stuff must be equal for sam rate tag: %#v, %#v", present, next))
 	}
 	return nil
 }
@@ -128,8 +120,8 @@ func GetRateInterval(rpl *utils.TPRatingPlanBinding, dr *utils.DestinationRate) 
 		Weight: rpl.Weight,
 		Rating: &RIRate{
 			ConnectFee:       dr.Rate.RateSlots[0].ConnectFee,
-			RoundingMethod:   dr.Rate.RateSlots[0].RoundingMethod,
-			RoundingDecimals: dr.Rate.RateSlots[0].RoundingDecimals,
+			RoundingMethod:   dr.RoundingMethod,
+			RoundingDecimals: dr.RoundingDecimals,
 		},
 	}
 	for _, rl := range dr.Rate.RateSlots {
@@ -189,7 +181,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\*any\s*,\s*|(?:\d{1,4};?)+\s*,\s*|\s*,\s*){4}(?:\d{2}:\d{2}:\d{2}|\*asap){1}$`),
 		"Tag([0-9A-Za-z_]),Years([0-9;]|*any|<empty>),Months([0-9;]|*any|<empty>),MonthDays([0-9;]|*any|<empty>),WeekDays([0-9;]|*any|<empty>),Time([0-9:]|*asap)"},
 	utils.RATES_CSV: &FileLineRegexValidator{utils.RATES_NRCOLS,
-		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,){3}(?:\*\w+,){1}(?:\d+\.?\d*,?){1}$`),
+		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,?){3}$`),
 		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RateUnit([0-9.]),RateIncrementStart([0-9.])"},
 	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
 		regexp.MustCompile(`^(?:\w+\s*),(?:\w+\s*),(?:\w+\s*)$`),

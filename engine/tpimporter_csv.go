@@ -146,7 +146,7 @@ func (self *TPCSVImporter) importRates(fn string) error {
 			}
 			continue
 		}
-		rt, err := NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
+		rt, err := NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5])
 		if err != nil {
 			return err
 		}

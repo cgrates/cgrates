@@ -385,7 +385,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		var r *utils.TPRate
-		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7])
+		r, err = NewLoadRate(record[0], record[1], record[2], record[3], record[4], record[5])
 		if err != nil {
 			return err
 		}
@@ -420,6 +420,11 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 		if !exists {
 			return fmt.Errorf("Could not get rates for tag %v", record[2])
 		}
+		roundingDecimals, err := strconv.Atoi(record[4])
+		if err != nil {
+			log.Printf("Error parsing rounding decimals: %s", record[4])
+			return err
+		}
 		destinationExists := false
 		for _, d := range csvr.destinations {
 			if d.Id == record[1] {
@@ -427,7 +432,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 				break
 			}
 		}
-		var err error
+
 		if !destinationExists && csvr.dataStorage != nil {
 			if destinationExists, err = csvr.dataStorage.HasData(DESTINATION_PREFIX, record[1]); err != nil {
 				return err
@@ -440,8 +445,10 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 			DestinationRateId: tag,
 			DestinationRates: []*utils.DestinationRate{
 				&utils.DestinationRate{
-					DestinationId: record[1],
-					Rate:          r,
+					DestinationId:    record[1],
+					Rate:             r,
+					RoundingMethod:   record[3],
+					RoundingDecimals: roundingDecimals,
 				},
 			},
 		}

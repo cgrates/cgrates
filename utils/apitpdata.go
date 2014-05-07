@@ -40,9 +40,9 @@ type TPRate struct {
 }
 
 // Needed so we make sure we always use SetDurations() on a newly created value
-func NewRateSlot(connectFee, rate float64, rateUnit, rateIncrement, grpInterval, rndMethod string, rndDecimals int) (*RateSlot, error) {
+func NewRateSlot(connectFee, rate float64, rateUnit, rateIncrement, grpInterval string) (*RateSlot, error) {
 	rs := &RateSlot{ConnectFee: connectFee, Rate: rate, RateUnit: rateUnit, RateIncrement: rateIncrement,
-		GroupIntervalStart: grpInterval, RoundingMethod: rndMethod, RoundingDecimals: rndDecimals}
+		GroupIntervalStart: grpInterval}
 	if err := rs.SetDurations(); err != nil {
 		return nil, err
 	}
@@ -55,8 +55,6 @@ type RateSlot struct {
 	RateUnit              string  //  Number of billing units this rate applies to
 	RateIncrement         string  // This rate will apply in increments of duration
 	GroupIntervalStart    string  // Group position
-	RoundingMethod        string  // Use this method to round the cost
-	RoundingDecimals      int     // Round the cost number of decimals
 	rateUnitDur           time.Duration
 	rateIncrementDur      time.Duration
 	groupIntervalStartDur time.Duration
@@ -93,9 +91,11 @@ type TPDestinationRate struct {
 }
 
 type DestinationRate struct {
-	DestinationId string // The destination identity
-	RateId        string // The rate identity
-	Rate          *TPRate
+	DestinationId    string // The destination identity
+	RateId           string // The rate identity
+	Rate             *TPRate
+	RoundingMethod   string
+	RoundingDecimals int
 }
 
 type ApierTPTiming struct {

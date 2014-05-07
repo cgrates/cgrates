@@ -161,3 +161,13 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 	}
 	return dc, nil
 }
+
+func (cc *CallCost) GetLongestRounding() (roundingDecimals int, roundingMethod string) {
+	for _, ts := range cc.Timespans {
+		if ts.RateInterval.Rating.RoundingDecimals > roundingDecimals {
+			roundingDecimals = ts.RateInterval.Rating.RoundingDecimals
+			roundingMethod = ts.RateInterval.Rating.RoundingMethod
+		}
+	}
+	return
+}

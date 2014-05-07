@@ -54,9 +54,9 @@ func (rit *RITiming) Stringify() string {
 // Separate structure used for rating plan size optimization
 type RIRate struct {
 	ConnectFee       float64
-	Rates            RateGroups // GroupRateInterval (start time): Rate
-	RoundingMethod   string     //ROUNDING_UP, ROUNDING_DOWN, ROUNDING_MIDDLE
+	RoundingMethod   string
 	RoundingDecimals int
+	Rates            RateGroups // GroupRateInterval (start time): Rate
 }
 
 func (rir *RIRate) Stringify() string {

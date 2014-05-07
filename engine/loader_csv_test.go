@@ -56,37 +56,37 @@ ALWAYS,*any,*any,*any,*any,00:00:00
 ASAP,*any,*any,*any,*any,*asap
 `
 	rates = `
-R1,0,0.2,60,1,0,*middle,2
-R2,0,0.1,60s,1s,0,*middle,2
-R3,0,0.05,60s,1s,0,*middle,2
-R4,1,1,1s,1s,0,*up,2
-R5,0,0.5,1s,1s,0,*down,2
-LANDLINE_OFFPEAK,0,1,1,60,0,*up,4
-LANDLINE_OFFPEAK,0,1,1,1,60,*up,4
-GBP_71,0.000000,5.55555,1s,1s,0s,*up,4
-GBP_72,0.000000,7.77777,1s,1s,0s,*up,4
-GBP_70,0.000000,1,1,1,0,*up,4
-RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s,*up,8
-RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s,*up,8
-R_URG,0,0,1,1,0,*down,2
+R1,0,0.2,60,1,0
+R2,0,0.1,60s,1s,0
+R3,0,0.05,60s,1s,0
+R4,1,1,1s,1s,0
+R5,0,0.5,1s,1s,0
+LANDLINE_OFFPEAK,0,1,1,60,0
+LANDLINE_OFFPEAK,0,1,1,1,60
+GBP_71,0.000000,5.55555,1s,1s,0s
+GBP_72,0.000000,7.77777,1s,1s,0s
+GBP_70,0.000000,1,1,1,0
+RT_UK_Mobile_BIG5_PKG,0.01,0,20s,20s,0s
+RT_UK_Mobile_BIG5,0.01,0.10,1s,1s,0s
+R_URG,0,0,1,1,0
 `
 	destinationRates = `
-RT_STANDARD,GERMANY,R1
-RT_STANDARD,GERMANY_O2,R2
-RT_STANDARD,GERMANY_PREMIUM,R2
-RT_DEFAULT,ALL,R2
-RT_STD_WEEKEND,GERMANY,R2
-RT_STD_WEEKEND,GERMANY_O2,R3
-P1,NAT,R4
-P2,NAT,R5
-T1,NAT,LANDLINE_OFFPEAK
-T2,GERMANY,GBP_72
-T2,GERMANY_O2,GBP_70
-T2,GERMANY_PREMIUM,GBP_71
-DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG
-DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5
-DATA_RATE,*any,LANDLINE_OFFPEAK
-RT_URG,URG,R_URG
+RT_STANDARD,GERMANY,R1,*middle,4
+RT_STANDARD,GERMANY_O2,R2,*middle,4
+RT_STANDARD,GERMANY_PREMIUM,R2,*middle,4
+RT_DEFAULT,ALL,R2,*middle,4
+RT_STD_WEEKEND,GERMANY,R2,*middle,4
+RT_STD_WEEKEND,GERMANY_O2,R3,*middle,4
+P1,NAT,R4,*middle,4
+P2,NAT,R5,*middle,4
+T1,NAT,LANDLINE_OFFPEAK,*middle,4
+T2,GERMANY,GBP_72,*middle,4
+T2,GERMANY_O2,GBP_70,*middle,4
+T2,GERMANY_PREMIUM,GBP_71,*middle,4
+DR_UK_Mobile_BIG5_PKG,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5_PKG,*middle,4
+DR_UK_Mobile_BIG5,DST_UK_Mobile_BIG5,RT_UK_Mobile_BIG5,*middle,4
+DATA_RATE,*any,LANDLINE_OFFPEAK,*middle,4
+RT_URG,URG,R_URG,*middle,4
 `
 	ratingPlans = `
 STANDARD,RT_STANDARD,WORKDAYS_00,10
@@ -309,7 +309,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Failed to load rates: ", csvr.rates)
 	}
 	rate := csvr.rates["R1"].RateSlots[0]
-	expctRs, err := utils.NewRateSlot(0, 0.2, "60", "1", "0", utils.ROUNDING_MIDDLE, 2)
+	expctRs, err := utils.NewRateSlot(0, 0.2, "60", "1", "0")
 	if err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
@@ -319,7 +319,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate, expctRs)
 	}
 	rate = csvr.rates["R2"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.1, "60s", "1s", "0", utils.ROUNDING_MIDDLE, 2); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0.1, "60s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -328,7 +328,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R3"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.05, "60s", "1s", "0", utils.ROUNDING_MIDDLE, 2); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0.05, "60s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -337,7 +337,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R4"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(1, 1.0, "1s", "1s", "0", utils.ROUNDING_UP, 2); err != nil {
+	if expctRs, err = utils.NewRateSlot(1, 1.0, "1s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -346,7 +346,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["R5"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 0.5, "1s", "1s", "0", utils.ROUNDING_DOWN, 2); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 0.5, "1s", "1s", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -355,7 +355,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[0]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1", "60", "0", utils.ROUNDING_UP, 4); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 1, "1", "60", "0"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -364,7 +364,7 @@ func TestLoadRates(t *testing.T) {
 		t.Error("Error loading rate: ", rate)
 	}
 	rate = csvr.rates["LANDLINE_OFFPEAK"].RateSlots[1]
-	if expctRs, err = utils.NewRateSlot(0, 1, "1", "1", "60", utils.ROUNDING_UP, 4); err != nil {
+	if expctRs, err = utils.NewRateSlot(0, 1, "1", "1", "60"); err != nil {
 		t.Error("Error loading rate: ", rate, err.Error())
 	} else if !reflect.DeepEqual(rate, expctRs) ||
 		rate.RateUnitDuration() != expctRs.RateUnitDuration() ||
@@ -384,16 +384,22 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRateId: "RT_STANDARD",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
-				DestinationId: "GERMANY",
-				Rate:          csvr.rates["R1"],
+				DestinationId:    "GERMANY",
+				Rate:             csvr.rates["R1"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
-				DestinationId: "GERMANY_O2",
-				Rate:          csvr.rates["R2"],
+				DestinationId:    "GERMANY_O2",
+				Rate:             csvr.rates["R2"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
-				DestinationId: "GERMANY_PREMIUM",
-				Rate:          csvr.rates["R2"],
+				DestinationId:    "GERMANY_PREMIUM",
+				Rate:             csvr.rates["R2"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 		},
 	}
@@ -405,24 +411,30 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRateId: "RT_DEFAULT",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
-				DestinationId: "ALL",
-				Rate:          csvr.rates["R2"],
+				DestinationId:    "ALL",
+				Rate:             csvr.rates["R2"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 		},
 	}) {
-		t.Errorf("Error loading destination rate: %+v", drs)
+		t.Errorf("Error loading destination rate: %+v", drs.DestinationRates[0])
 	}
 	drs = csvr.destinationRates["RT_STD_WEEKEND"]
 	if !reflect.DeepEqual(drs, &utils.TPDestinationRate{
 		DestinationRateId: "RT_STD_WEEKEND",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
-				DestinationId: "GERMANY",
-				Rate:          csvr.rates["R2"],
+				DestinationId:    "GERMANY",
+				Rate:             csvr.rates["R2"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
-				DestinationId: "GERMANY_O2",
-				Rate:          csvr.rates["R3"],
+				DestinationId:    "GERMANY_O2",
+				Rate:             csvr.rates["R3"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 		},
 	}) {
@@ -433,8 +445,10 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRateId: "P1",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
-				DestinationId: "NAT",
-				Rate:          csvr.rates["R4"],
+				DestinationId:    "NAT",
+				Rate:             csvr.rates["R4"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 		},
 	}) {
@@ -445,8 +459,10 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRateId: "P2",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
-				DestinationId: "NAT",
-				Rate:          csvr.rates["R5"],
+				DestinationId:    "NAT",
+				Rate:             csvr.rates["R5"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 		},
 	}) {
@@ -457,8 +473,10 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRateId: "T1",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
-				DestinationId: "NAT",
-				Rate:          csvr.rates["LANDLINE_OFFPEAK"],
+				DestinationId:    "NAT",
+				Rate:             csvr.rates["LANDLINE_OFFPEAK"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 		},
 	}) {
@@ -469,16 +487,22 @@ func TestLoadDestinationRates(t *testing.T) {
 		DestinationRateId: "T2",
 		DestinationRates: []*utils.DestinationRate{
 			&utils.DestinationRate{
-				DestinationId: "GERMANY",
-				Rate:          csvr.rates["GBP_72"],
+				DestinationId:    "GERMANY",
+				Rate:             csvr.rates["GBP_72"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
-				DestinationId: "GERMANY_O2",
-				Rate:          csvr.rates["GBP_70"],
+				DestinationId:    "GERMANY_O2",
+				Rate:             csvr.rates["GBP_70"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 			&utils.DestinationRate{
-				DestinationId: "GERMANY_PREMIUM",
-				Rate:          csvr.rates["GBP_71"],
+				DestinationId:    "GERMANY_PREMIUM",
+				Rate:             csvr.rates["GBP_71"],
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 		},
 	}) {
@@ -524,7 +548,7 @@ func TestLoadRatingPlans(t *testing.T) {
 			},
 		},
 		Ratings: map[string]*RIRate{
-			"d54545c1": &RIRate{
+			"822a5aef": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -535,9 +559,9 @@ func TestLoadRatingPlans(t *testing.T) {
 					},
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
-				RoundingDecimals: 2,
+				RoundingDecimals: 4,
 			},
-			"4bb00b9c": &RIRate{
+			"4a25c533": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -548,9 +572,9 @@ func TestLoadRatingPlans(t *testing.T) {
 					},
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
-				RoundingDecimals: 2,
+				RoundingDecimals: 4,
 			},
-			"e06c337f": &RIRate{
+			"b05c5f6b": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -561,9 +585,9 @@ func TestLoadRatingPlans(t *testing.T) {
 					},
 				},
 				RoundingMethod:   utils.ROUNDING_MIDDLE,
-				RoundingDecimals: 2,
+				RoundingDecimals: 4,
 			},
-			"2efe78aa": &RIRate{
+			"9f49ef8e": &RIRate{
 				ConnectFee: 0,
 				Rates: []*Rate{
 					&Rate{
@@ -573,56 +597,56 @@ func TestLoadRatingPlans(t *testing.T) {
 						RateUnit:           time.Second,
 					},
 				},
-				RoundingMethod:   utils.ROUNDING_DOWN,
-				RoundingDecimals: 2,
+				RoundingMethod:   utils.ROUNDING_MIDDLE,
+				RoundingDecimals: 4,
 			},
 		},
 		DestinationRates: map[string]RPRateList{
 			"GERMANY": []*RPRate{
 				&RPRate{
 					Timing: "14ae6e41",
-					Rating: "d54545c1",
+					Rating: "822a5aef",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "9a6f8e32",
-					Rating: "4bb00b9c",
+					Rating: "4a25c533",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "7181e535",
-					Rating: "4bb00b9c",
+					Rating: "4a25c533",
 					Weight: 10,
 				},
 			},
 			"GERMANY_O2": []*RPRate{
 				&RPRate{
 					Timing: "14ae6e41",
-					Rating: "4bb00b9c",
+					Rating: "4a25c533",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "9a6f8e32",
-					Rating: "e06c337f",
+					Rating: "b05c5f6b",
 					Weight: 10,
 				},
 				&RPRate{
 					Timing: "7181e535",
-					Rating: "e06c337f",
+					Rating: "b05c5f6b",
 					Weight: 10,
 				},
 			},
 			"GERMANY_PREMIUM": []*RPRate{
 				&RPRate{
 					Timing: "14ae6e41",
-					Rating: "4bb00b9c",
+					Rating: "4a25c533",
 					Weight: 10,
 				},
 			},
 			"URG": []*RPRate{
 				&RPRate{
 					Timing: "96c78ff5",
-					Rating: "2efe78aa",
+					Rating: "9f49ef8e",
 					Weight: 20,
 				},
 			},
