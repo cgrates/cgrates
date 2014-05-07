@@ -46,19 +46,20 @@
   user: vagrant
   vars:
     root_db_password: CGRateS.org
+    go_version: 1.2.2
   
   tasks:
     - name: get golang
-      get_url: url=http://go.googlecode.com/files/go1.2.linux-amd64.tar.gz dest=~/go1.2.linux-amd64.tar.gz
+      get_url: url=https://storage.googleapis.com/golang/go{{ go_version }}.linux-amd64.tar.gz dest=~/go{{ go_version }}.linux-amd64.tar.gz
       
     - name: unpack go
-      command: chdir=~/ tar xvf go1.2.linux-amd64.tar.gz
+      command: chdir=~/ tar xvf go{{ go_version }}.linux-amd64.tar.gz
 
     - name: delete golang archive
-      file: path=~/go1.2.linux-amd64.tar.gz state=absent
+      file: path=~/go{{ go_version }}.linux-amd64.tar.gz state=absent
 
     - name: add variables to variables /etc/profile
-      shell: echo 'export GOROOT=/home/vagrant/go GOPATH=/home/vagrant/code; export PATH=\$PATH:\$GOROOT/bin:\$GOPATH/bin' >> /etc/profile
+      copy: src=golang.sh dest=/etc/profile.d/golang.sh
       sudo: yes
 
     - name: get cgrates 
