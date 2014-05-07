@@ -1,3 +1,3 @@
-#Tag,DestinationsTag,RatesTag
+#Tag,DestinationsTag,RatesTag,RoundingMethod,RoundingDecimals
 DR_RETAIL,GERMANY,RT_1CENT,*up,2
 DR_RETAIL,GERMANY_MOBILE,RT_1CENT,*up,2

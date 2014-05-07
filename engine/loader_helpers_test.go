@@ -45,7 +45,7 @@ DUMMY,INVALID;DATA
 `
 
 var destRatesSample = `#Tag,DestinationsTag,RatesTag
-DR_RETAIL,GERMANY,RT_1CENT
+DR_RETAIL,GERMANY,RT_1CENT,*up,0
 DUMMY,INVALID;DATA
 `
 var ratingPlansSample = `#Tag,DestinationRatesTag,TimingTag,Weight

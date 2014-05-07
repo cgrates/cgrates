@@ -286,7 +286,7 @@ func TestApierTPRate(t *testing.T) {
 	}
 	reply := ""
 	rt := &utils.TPRate{TPid: engine.TEST_SQL, RateId: "RT_FS_USERS", RateSlots: []*utils.RateSlot{
-		&utils.RateSlot{ConnectFee: 0, Rate: 0, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s", RoundingMethod: "*up", RoundingDecimals: 0},
+		&utils.RateSlot{ConnectFee: 0, Rate: 0, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s"},
 	}}
 	rt2 := new(utils.TPRate)
 	*rt2 = *rt
