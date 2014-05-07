@@ -582,7 +582,7 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
 }
 
 func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,subject,cost,mediation_time,extra_info) VALUES ('%s','%s','%s',%f,now(),'%s') ON DUPLICATE KEY UPDATE subject=values(subject),cost=values(cost),extra_info=values(extra_info)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,subject,cost,mediation_time,extra_info) VALUES ('%s','%s','%s',%f,now(),'%s') ON DUPLICATE KEY UPDATE subject=values(subject),cost=values(cost),mediation_time=now(),extra_info=values(extra_info)",
 		utils.TBL_RATED_CDRS,
 		storedCdr.CgrId,
 		storedCdr.MediationRunId,

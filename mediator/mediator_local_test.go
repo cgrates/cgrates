@@ -224,7 +224,7 @@ func TestRateCdrs(t *testing.T) {
 	}
 	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
 		t.Error(err)
-	} else if len(errRatedCdrs) != 6 { // The first 2 with errors should be still there before rerating
+	} else if len(errRatedCdrs) != 4 { // The first 2 with errors should be still there before rerating
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
 	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{RerateErrors: true}, &reply); err != nil {

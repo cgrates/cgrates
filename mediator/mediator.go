@@ -109,7 +109,8 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 }
 
 func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
-	cdrs := []*utils.StoredCdr{storedCdr}        // Start with initial storCdr, will add here all to be mediated
+	storedCdr.MediationRunId = utils.DEFAULT_RUNID
+	cdrRuns := []*utils.StoredCdr{storedCdr}     // Start with initial storCdr, will add here all to be mediated
 	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
 		Account: storedCdr.Account, Subject: storedCdr.Subject}
 	var dcs utils.DerivedChargers
@@ -119,19 +120,26 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 		return errors.New(errText)
 	}
 	for _, dc := range dcs {
-		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, &utils.RSRField{Id: dc.ReqTypeField}, &utils.RSRField{Id: dc.DirectionField},
-			&utils.RSRField{Id: dc.TenantField}, &utils.RSRField{Id: dc.CategoryField}, &utils.RSRField{Id: dc.AccountField},
-			&utils.RSRField{Id: dc.SubjectField}, &utils.RSRField{Id: dc.DestinationField}, &utils.RSRField{Id: dc.SetupTimeField},
-			&utils.RSRField{Id: dc.AnswerTimeField}, &utils.RSRField{Id: dc.DurationField}, []*utils.RSRField{}, true)
-		engine.Logger.Debug(fmt.Sprintf("Forked CDR for dc: %v, is: %v", dc, forkedCdr))
+		dcReqTypeFld, _ := utils.NewRSRField(dc.ReqTypeField)
+		dcDirFld, _ := utils.NewRSRField(dc.DirectionField)
+		dcTenantFld, _ := utils.NewRSRField(dc.TenantField)
+		dcCategoryFld, _ := utils.NewRSRField(dc.CategoryField)
+		dcAcntFld, _ := utils.NewRSRField(dc.AccountField)
+		dcSubjFld, _ := utils.NewRSRField(dc.SubjectField)
+		dcDstFld, _ := utils.NewRSRField(dc.DestinationField)
+		dcSTimeFld, _ := utils.NewRSRField(dc.SetupTimeField)
+		dcATimeFld, _ := utils.NewRSRField(dc.AnswerTimeField)
+		dcDurFld, _ := utils.NewRSRField(dc.DurationField)
+		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld, dcSTimeFld, dcATimeFld, dcDurFld,
+			[]*utils.RSRField{}, true)
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis
 			self.cdrDb.SetRatedCdr(&utils.StoredCdr{CgrId: storedCdr.CgrId, CdrSource: utils.FORKED_CDR, MediationRunId: dc.RunId, Cost: -1},
 				err.Error()) // Cannot fork CDR, important just runid and error
 			continue
 		}
-		cdrs = append(cdrs, forkedCdr)
+		cdrRuns = append(cdrRuns, forkedCdr)
 	}
-	for _, cdr := range cdrs {
+	for _, cdr := range cdrRuns {
 		extraInfo := ""
 		if err := self.rateCDR(cdr); err != nil {
 			extraInfo = err.Error()
