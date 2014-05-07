@@ -21,7 +21,6 @@ package engine
 import (
 	"errors"
 	"fmt"
-	"log"
 	"log/syslog"
 	"strings"
 	"time"
@@ -628,7 +627,6 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 				return 0, err
 			})
 		} else {
-			log.Print("cxcxxc")
 			return nil, err
 		}
 	}
