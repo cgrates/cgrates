@@ -184,7 +184,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\d+\.?\d*,){2}(?:\d+s*,?){3}$`),
 		"Tag([0-9A-Za-z_]),ConnectFee([0-9.]),Rate([0-9.]),RateUnit([0-9.]),RateIncrementStart([0-9.])"},
 	utils.DESTINATION_RATES_CSV: &FileLineRegexValidator{utils.DESTINATION_RATES_NRCOLS,
-		regexp.MustCompile(`^(?:\w+\s*),(?:\w+\s*),(?:\w+\s*),(?:\w+\s*)(?:\*\w+,){1}(?:\d+\.?\d*,?){1}$`),
+		regexp.MustCompile(`^(?:\w+\s*),(?:\w+\s*),(?:\w+\s*),(?:\*\w+,){1}(?:\d+){1}$`),
 		"Tag([0-9A-Za-z_]),DestinationsTag([0-9A-Za-z_]),RateTag([0-9A-Za-z_])"},
 	utils.RATING_PLANS_CSV: &FileLineRegexValidator{utils.DESTRATE_TIMINGS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+.?\d*){1}$`),
