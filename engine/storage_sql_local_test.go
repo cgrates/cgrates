@@ -137,21 +137,25 @@ func TestSetCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := &utils.CgrCdr{"accid": "aaa1", "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
-		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-08T08:42:20Z", "answer_time": "2013-11-08T08:42:26Z", "duration": "10s",
-		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
-	cgrCdr2 := &utils.CgrCdr{"accid": "aaa2", "cdrhost": "192.168.1.1", "reqtype": "prepaid", "direction": "*out", "tenant": "cgrates.org", "tor": "call",
-		"account": "1001", "subject": "1001", "destination": "1002", "setup_time": "2013-11-08T08:42:22Z", "answer_time": "2013-11-08T08:42:26Z", "duration": "20",
-		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
-	cgrCdr3 := &utils.CgrCdr{"accid": "aaa3", "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out", "tenant": "cgrates.org", "tor": "premium_call",
-		"account": "1002", "subject": "1002", "destination": "1001", "setup_time": "2013-11-07T08:42:24Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "60s",
-		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
-	cgrCdr4 := &utils.CgrCdr{"accid": "aaa4", "cdrhost": "192.168.1.2", "reqtype": "pseudoprepaid", "direction": "*out", "tenant": "itsyscom.com", "tor": "call",
-		"account": "1001", "subject": "1001", "destination": "+4986517174964", "setup_time": "2013-11-07T08:42:21Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "1m2s",
-		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
-	cgrCdr5 := &utils.CgrCdr{"accid": "aaa5", "cdrhost": "192.168.1.2", "reqtype": "postpaid", "direction": "*out", "tenant": "itsyscom.com", "tor": "call",
-		"account": "1002", "subject": "1002", "destination": "+4986517174963", "setup_time": "2013-11-07T08:42:25Z", "answer_time": "2013-11-07T08:42:26Z", "duration": "15s",
-		"field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+	cgrCdr1 := &utils.CgrCdr{utils.ACCID: "aaa1", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
+		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:20Z",
+		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.DURATION: "10s", "field_extr1": "val_extr1", "fieldextr2": "valextr2", utils.CDRSOURCE: TEST_SQL}
+	cgrCdr2 := &utils.CgrCdr{utils.ACCID: "aaa2", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "prepaid", utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
+		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:22Z",
+		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.DURATION: "20", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+
+	cgrCdr3 := &utils.CgrCdr{utils.ACCID: "aaa3", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
+		utils.CATEGORY: "premium_call", utils.ACCOUNT: "1002", utils.SUBJECT: "1002", utils.DESTINATION: "1001", utils.SETUP_TIME: "2013-11-07T08:42:24Z",
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.DURATION: "60s", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+
+	cgrCdr4 := &utils.CgrCdr{utils.ACCID: "aaa4", utils.CDRHOST: "192.168.1.2", utils.REQTYPE: "pseudoprepaid", utils.DIRECTION: "*out", utils.TENANT: "itsyscom.com",
+		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "+4986517174964", utils.SETUP_TIME: "2013-11-07T08:42:21Z",
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.DURATION: "1m2s", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+
+	cgrCdr5 := &utils.CgrCdr{utils.ACCID: "aaa5", utils.CDRHOST: "192.168.1.2", utils.REQTYPE: "postpaid", utils.DIRECTION: "*out", utils.TENANT: "itsyscom.com",
+		utils.CATEGORY: "call", utils.ACCOUNT: "1002", utils.SUBJECT: "1002", utils.DESTINATION: "+4986517174963", utils.SETUP_TIME: "2013-11-07T08:42:25Z",
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.DURATION: "15s", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+
 	for _, cdr := range []*utils.CgrCdr{cgrCdr1, cgrCdr2, cgrCdr3, cgrCdr4, cgrCdr5} {
 		if err := mysql.SetCdr(cdr.AsStoredCdr()); err != nil {
 			t.Error(err.Error())

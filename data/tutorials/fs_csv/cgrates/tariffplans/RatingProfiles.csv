@@ -1,2 +1,2 @@
-#Tenant,TOR,Direction,Subject,ActivationTime,RatingPlanTag,FallbackSubject
-cgrates.org,call,*out,*any,2013-01-06T00:00:00Z,RP_RETAIL,
+#Direction,Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+*out,cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_RETAIL,

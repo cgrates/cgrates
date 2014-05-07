@@ -473,7 +473,7 @@ func TestApierTPRatingProfile(t *testing.T) {
 	// Check missing params
 	if err := rater.Call("ApierV1.SetTPRatingProfile", new(utils.TPRatingProfile), &reply); err == nil {
 		t.Error("Calling ApierV1.SetTPRatingProfile, expected error, received: ", reply)
-	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid LoadId Tenant TOR Direction Subject RatingPlanActivations]" {
+	} else if err.Error() != "MANDATORY_IE_MISSING:[TPid LoadId Tenant Category Direction Subject RatingPlanActivations]" {
 		t.Error("Calling ApierV1.SetTPRatingProfile got unexpected error: ", err.Error())
 	}
 	// Test get

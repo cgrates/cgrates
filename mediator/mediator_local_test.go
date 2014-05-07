@@ -58,13 +58,14 @@ var storDbType = flag.String("stordb_type", utils.MYSQL, "The type of the storDb
 var startDelay = flag.Int("delay_start", 300, "Number of miliseconds to it for rater to start and cache")
 var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator_test1.cfg")
 
-func init() {
-	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
-}
-
 func TestInitRatingDb(t *testing.T) {
 	if !*testLocal {
 		return
+	}
+	var err error
+	cfg, err = config.NewCGRConfigFromFile(&cfgPath)
+	if err != nil {
+		t.Fatal("Got config error: ", err.Error())
 	}
 	ratingDb, err := engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
 	if err != nil {
@@ -137,12 +138,13 @@ func TestPostCdrs(t *testing.T) {
 		return
 	}
 	httpClient := new(http.Client)
-	cdrForm1 := url.Values{"accid": []string{"dsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
-		"tenant": []string{"cgrates.org"}, "tor": []string{"call"}, "account": []string{"1001"}, "subject": []string{"1001"}, "destination": []string{"+4986517174963"},
-		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrForm2 := url.Values{"accid": []string{"adsafdsaf"}, "cdrhost": []string{"192.168.1.1"}, "reqtype": []string{"rated"}, "direction": []string{"*out"},
-		"tenant": []string{"itsyscom.com"}, "tor": []string{"call"}, "account": []string{"1003"}, "subject": []string{"1003"}, "destination": []string{"+4986517174964"},
-		"answer_time": []string{"2013-11-07T08:42:26Z"}, "duration": []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+	cdrForm1 := url.Values{utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
+		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1001"}, utils.SUBJECT: []string{"1001"},
+		utils.DESTINATION: []string{"+4986517174963"},
+		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.DURATION: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
+	cdrForm2 := url.Values{utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
+		utils.TENANT: []string{"itsyscom.com"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1003"}, utils.SUBJECT: []string{"1003"}, utils.DESTINATION: []string{"+4986517174964"},
+		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.DURATION: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
 		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
 		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cfg.HTTPListen), cdrForm); err != nil {
@@ -167,12 +169,12 @@ func TestInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := utils.CgrCdr{"accid": "aaaaadsafdsaf", "cdrsource": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out",
-		"tenant": "cgrates.org", "tor": "call", "account": "dan", "subject": "dan", "destination": "+4986517174963",
-		"answer_time": "2013-11-07T08:42:26Z", "duration": "10"}
-	cgrCdr2 := utils.CgrCdr{"accid": "baaaadsafdsaf", "cdrsource": engine.TEST_SQL, "cdrhost": "192.168.1.1", "reqtype": "rated", "direction": "*out",
-		"tenant": "cgrates.org", "tor": "call", "account": "dan", "subject": "dan", "destination": "+4986517173964",
-		"answer_time": "2013-11-07T09:42:26Z", "duration": "20"}
+	cgrCdr1 := utils.CgrCdr{utils.ACCID: "aaaaadsafdsaf", "cdrsource": engine.TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
+		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517174963",
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.DURATION: "10"}
+	cgrCdr2 := utils.CgrCdr{utils.ACCID: "baaaadsafdsaf", "cdrsource": engine.TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
+		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517173964",
+		utils.ANSWER_TIME: "2013-11-07T09:42:26Z", utils.DURATION: "20"}
 	for _, cdr := range []utils.CgrCdr{cgrCdr1, cgrCdr2} {
 		if err := cdrStor.SetCdr(cdr.AsStoredCdr()); err != nil {
 			t.Error(err)
@@ -222,7 +224,7 @@ func TestRateCdrs(t *testing.T) {
 	}
 	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
 		t.Error(err)
-	} else if len(errRatedCdrs) != 4 { // The first 2 with errors should be still there before rerating
+	} else if len(errRatedCdrs) != 6 { // The first 2 with errors should be still there before rerating
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
 	if err := cgrRpc.Call("MediatorV1.RateCdrs", utils.AttrRateCdrs{RerateErrors: true}, &reply); err != nil {
@@ -232,7 +234,7 @@ func TestRateCdrs(t *testing.T) {
 	}
 	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
 		t.Error(err)
-	} else if len(errRatedCdrs) != 3 {
+	} else if len(errRatedCdrs) != 2 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
 	}
 }

@@ -545,7 +545,7 @@ func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error) { return }
 
 func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s VALUES (NULL,'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO  %s (cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,duration) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
 		utils.TBL_CDRS_PRIMARY,
 		cdr.CgrId,
 		cdr.AccId,
@@ -569,7 +569,7 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
 	if err != nil {
 		Logger.Err(fmt.Sprintf("Error marshalling cdr extra fields to json: %v", err))
 	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s VALUES ('NULL','%s', '%s')",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO  %s (cgrid,extra_fields) VALUES ('%s', '%s')",
 		utils.TBL_CDRS_EXTRA,
 		cdr.CgrId,
 		extraFields,
