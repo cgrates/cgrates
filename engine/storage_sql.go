@@ -943,8 +943,9 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*uti
 	defer rows.Close()
 	for rows.Next() {
 		var id int
-		var tpid, tag, destinations_tag, rate_tag string
-		if err := rows.Scan(&id, &tpid, &tag, &destinations_tag, &rate_tag); err != nil {
+		var tpid, tag, destinations_tag, rate_tag, rounding_method string
+		var rounding_decimals int
+		if err := rows.Scan(&id, &tpid, &tag, &destinations_tag, &rate_tag, &rounding_method, &rounding_decimals); err != nil {
 			return nil, err
 		}
 
@@ -953,8 +954,10 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*uti
 			DestinationRateId: tag,
 			DestinationRates: []*utils.DestinationRate{
 				&utils.DestinationRate{
-					DestinationId: destinations_tag,
-					RateId:        rate_tag,
+					DestinationId:    destinations_tag,
+					RateId:           rate_tag,
+					RoundingMethod:   rounding_method,
+					RoundingDecimals: rounding_decimals,
 				},
 			},
 		}
