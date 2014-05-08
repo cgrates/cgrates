@@ -53,7 +53,7 @@ RP_UK,DR_UK_Mobile_BIG5,ALWAYS,10`
 	sharedGroups := ``
 	lcrs := ``
 	actions := `TOPUP10_AC,*topup_reset,*monetary,*out,0,*unlimited,*any,,10,,,10
-TOPUP10_AC1,*topup_reset,*call_duration,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10`
+TOPUP10_AC1,*topup_reset,*voice,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10`
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
