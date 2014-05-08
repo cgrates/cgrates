@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS cdrs_primary;
 CREATE TABLE cdrs_primary (
   tbid int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
+  tor  varchar(16) NOT NULL, 
   accid varchar(64) NOT NULL,
   cdrhost varchar(64) NOT NULL,
   cdrsource varchar(64) NOT NULL,
@@ -19,7 +20,7 @@ CREATE TABLE cdrs_primary (
   destination varchar(128) NOT NULL,
   setup_time datetime NOT NULL,
   answer_time datetime NOT NULL,
-  duration bigint NOT NULL,
+  `usage` bigint NOT NULL,
   PRIMARY KEY (tbid),
   UNIQUE KEY cgrid (cgrid)
 );
@@ -79,7 +80,7 @@ CREATE TABLE `rated_cdrs` (
   destination varchar(128) NOT NULL,
   setup_time datetime NOT NULL,
   answer_time datetime NOT NULL,
-  duration bigint NOT NULL,
+  `usage` bigint NOT NULL,
   cost DECIMAL(20,4) DEFAULT NULL,
   extra_info text,
   PRIMARY KEY (`tbid`),

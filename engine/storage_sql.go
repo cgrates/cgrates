@@ -543,7 +543,7 @@ func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error) { return }
 
 func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO  %s (cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,duration) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO  %s (cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
 		utils.TBL_CDRS_PRIMARY,
 		cdr.CgrId,
 		cdr.AccId,
@@ -580,7 +580,7 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
 }
 
 func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (mediation_time,cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,duration,cost,extra_info) VALUES (now(),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%f,'%s') ON DUPLICATE KEY UPDATE mediation_time=now(),reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),duration=values(duration),cost=values(cost),extra_info=values(extra_info)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (mediation_time,cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,cost,extra_info) VALUES (now(),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%f,'%s') ON DUPLICATE KEY UPDATE mediation_time=now(),reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),cost=values(cost),extra_info=values(extra_info)",
 		utils.TBL_RATED_CDRS,
 		storedCdr.CgrId,
 		storedCdr.MediationRunId,
@@ -608,7 +608,7 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes []string, orderIdStart, orderIdEnd int64,
 	timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
-	q := bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.duration,%s.extra_fields,%s.runid,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid",
+	q := bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.`usage`,%s.extra_fields,%s.runid,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid",
 		utils.TBL_CDRS_PRIMARY,
 		utils.TBL_CDRS_PRIMARY,
 		utils.TBL_CDRS_PRIMARY,
@@ -841,10 +841,10 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 		var extraFields []byte
 		var setupTime, answerTime time.Time
 		var runid sql.NullString // So we can export unmediated CDRs
-		var orderid, duration int64
+		var orderid, usage int64
 		var cost sql.NullFloat64 // So we can export unmediated CDRs
 		var extraFieldsMp map[string]string
-		if err := rows.Scan(&cgrid, &orderid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination, &setupTime, &answerTime, &duration,
+		if err := rows.Scan(&cgrid, &orderid, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination, &setupTime, &answerTime, &usage,
 			&extraFields, &runid, &cost); err != nil {
 			return nil, err
 		}
@@ -853,7 +853,7 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, cdrHosts, cdrSources, reqT
 		}
 		storCdr := &utils.StoredCdr{
 			CgrId: cgrid, OrderId: orderid, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
-			Category: category, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(duration),
+			Category: category, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(usage),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
 		cdrs = append(cdrs, storCdr)

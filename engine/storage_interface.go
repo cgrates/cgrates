@@ -56,11 +56,9 @@ const (
 	SCHED_SOURCE           = "SCH"
 	RATER_SOURCE           = "RAT"
 	// Some consts used in tests
-	CREATE_CDRS_TABLES_SQL        = "create_cdrs_tables.sql"
-	CREATE_COSTDETAILS_TABLES_SQL = "create_costdetails_tables.sql"
-	CREATE_MEDIATOR_TABLES_SQL    = "create_mediator_tables.sql"
-	CREATE_TARIFFPLAN_TABLES_SQL  = "create_tariffplan_tables.sql"
-	TEST_SQL                      = "TEST_SQL"
+	CREATE_CDRS_TABLES_SQL       = "create_cdrs_tables.sql"
+	CREATE_TARIFFPLAN_TABLES_SQL = "create_tariffplan_tables.sql"
+	TEST_SQL                     = "TEST_SQL"
 )
 
 type Storage interface {
