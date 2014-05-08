@@ -31,20 +31,6 @@ type CallCost struct {
 	deductConnectFee                                                bool
 }
 
-// Pretty printing for call cost
-/*func (cc *CallCost) String() (r string) {
-	connectFee := 0.0
-	if cc.deductConnectFee {
-		connectFee = cc.GetConnectFee()
-	}
-	r = fmt.Sprintf("%v[%v] : %s(%s) - > %s (", cc.Cost, connectFee, cc.Subject, cc.Account, cc.Destination)
-	for _, ts := range cc.Timespans {
-		r += fmt.Sprintf(" %v,", ts.GetDuration())
-	}
-	r += " )"
-	return
-}*/
-
 // Merges the received timespan if they are similar (same activation period, same interval, same minute info.
 func (cc *CallCost) Merge(other *CallCost) {
 	if len(cc.Timespans)-1 < 0 || len(other.Timespans) == 0 {

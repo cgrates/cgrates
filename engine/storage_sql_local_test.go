@@ -54,7 +54,7 @@ func TestCreateTables(t *testing.T) {
 	} else {
 		mysql = d.(*MySQLStorage)
 	}
-	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_COSTDETAILS_TABLES_SQL, CREATE_MEDIATOR_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
+	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
 		if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", scriptName)); err != nil {
 			t.Error("Error on mysql creation: ", err.Error())
 			return // No point in going further

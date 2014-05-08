@@ -70,11 +70,9 @@ func TestFsJsonCreateTables(t *testing.T) {
 	} else {
 		mysql = d.(*engine.MySQLStorage)
 	}
-	for _, scriptName := range []string{engine.CREATE_CDRS_TABLES_SQL, engine.CREATE_COSTDETAILS_TABLES_SQL, engine.CREATE_MEDIATOR_TABLES_SQL} {
-		if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, scriptName)); err != nil {
-			t.Fatal("Error on mysql creation: ", err.Error())
-			return // No point in going further
-		}
+	if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, engine.CREATE_CDRS_TABLES_SQL)); err != nil {
+		t.Fatal("Error on mysql creation: ", err.Error())
+		return // No point in going further
 	}
 	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
 		if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {

@@ -179,10 +179,17 @@ func (self *TPCSVImporter) importDestinationRates(fn string) error {
 			}
 			continue
 		}
+		roundingDecimals, err := strconv.Atoi(record[4])
+		if err != nil {
+			log.Printf("Error parsing rounding decimals: %s", record[4])
+			return err
+		}
 		drs := []*utils.DestinationRate{
 			&utils.DestinationRate{
-				DestinationId: record[1],
-				RateId:        record[2],
+				DestinationId:    record[1],
+				RateId:           record[2],
+				RoundingMethod:   record[3],
+				RoundingDecimals: roundingDecimals,
 			},
 		}
 		if err := self.StorDb.SetTPDestinationRates(self.TPid,

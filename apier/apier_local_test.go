@@ -94,8 +94,7 @@ func TestCreateTables(t *testing.T) {
 	} else {
 		mysql = d.(*engine.MySQLStorage)
 	}
-	for _, scriptName := range []string{engine.CREATE_CDRS_TABLES_SQL, engine.CREATE_COSTDETAILS_TABLES_SQL, engine.CREATE_MEDIATOR_TABLES_SQL,
-		engine.CREATE_TARIFFPLAN_TABLES_SQL} {
+	for _, scriptName := range []string{engine.CREATE_CDRS_TABLES_SQL, engine.CREATE_TARIFFPLAN_TABLES_SQL} {
 		if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, scriptName)); err != nil {
 			t.Fatal("Error on mysql creation: ", err.Error())
 			return // No point in going further
@@ -340,10 +339,10 @@ func TestApierTPDestinationRate(t *testing.T) {
 	}
 	reply := ""
 	dr := &utils.TPDestinationRate{TPid: engine.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
-		&utils.DestinationRate{DestinationId: "FS_USERS", RateId: "RT_FS_USERS"},
+		&utils.DestinationRate{DestinationId: "FS_USERS", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
 	drDe := &utils.TPDestinationRate{TPid: engine.TEST_SQL, DestinationRateId: "DR_FREESWITCH_USERS", DestinationRates: []*utils.DestinationRate{
-		&utils.DestinationRate{DestinationId: "GERMANY_MOBILE", RateId: "RT_FS_USERS"},
+		&utils.DestinationRate{DestinationId: "GERMANY_MOBILE", RateId: "RT_FS_USERS", RoundingMethod: "*up", RoundingDecimals: 2},
 	}}
 	dr2 := new(utils.TPDestinationRate)
 	*dr2 = *dr
@@ -891,7 +890,6 @@ func TestApierGetRatingPlan(t *testing.T) {
 	}
 	reply := new(engine.RatingPlan)
 	rplnId := "RETAIL1"
-	//{"Id":"RETAIL1","Timings":{"96c78ff5":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""}},"Ratings":{"e41ffcf2":{"ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":0}},"DestinationRates":{"FS_USERS":[{"Timing":"96c78ff5","Rating":"e41ffcf2","Weight":10}],"GERMANY_MOBILE":[{"Timing":"96c78ff5","Rating":"e41ffcf2","Weight":10}]}
 	if err := rater.Call("ApierV1.GetRatingPlan", rplnId, reply); err != nil {
 		t.Error("Got error on ApierV1.GetRatingPlan: ", err.Error())
 	}
@@ -902,21 +900,13 @@ func TestApierGetRatingPlan(t *testing.T) {
 	if len(reply.Timings) != 1 || len(reply.Ratings) != 1 {
 		t.Error("Unexpected number of items received")
 	}
-	/*
-		riTiming := &engine.RITiming{StartTime: "00:00:00"}
-		for _, tm := range reply.Timings { // We only get one loop
-			if  !reflect.DeepEqual(tm, riTiming) {
-				t.Errorf("Unexpected timings value: %v, expecting: %v", tm, riTiming)
-			}
-		}
-	*/
-	riRate := &engine.RIRate{ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 0, Rates: []*engine.Rate{
+	riRate := &engine.RIRate{ConnectFee: 0, RoundingMethod: "*up", RoundingDecimals: 2, Rates: []*engine.Rate{
 		&engine.Rate{GroupIntervalStart: 0, Value: 0, RateIncrement: time.Duration(60) * time.Second, RateUnit: time.Duration(60) * time.Second},
 	}}
 	for _, rating := range reply.Ratings {
-		riRateJsson, _ := json.Marshal(rating)
+		riRateJson, _ := json.Marshal(rating)
 		if !reflect.DeepEqual(rating, riRate) {
-			t.Errorf("Unexpected riRate received: %s", riRateJsson)
+			t.Errorf("Unexpected riRate received: %s", riRateJson)
 			// {"Id":"RT_FS_USERS","ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":60000000000,"RateUnit":60000000000}],"RoundingMethod":"*up","RoundingDecimals":0}
 		}
 	}
