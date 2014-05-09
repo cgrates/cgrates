@@ -106,9 +106,14 @@ const (
 	FORKED_CDR                 = "forked_cdr"
 	UNIT_TEST                  = "UNIT_TEST"
 	HDR_VAL_SEP                = "/"
+	MONETARY                   = "*monetary"
+	SMS                        = "*sms"
+	DATA                       = "*data"
+	VOICE                      = "*voice"
+	TOR                        = "tor"
 )
 
 var (
 	CdreCdrFormats   = []string{CSV, CDRE_DRYRUN, CDRE_FIXED_WIDTH}
-	PrimaryCdrFields = []string{ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, DURATION}
+	PrimaryCdrFields = []string{TOR, ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, DURATION}
 )

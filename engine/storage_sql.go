@@ -543,9 +543,10 @@ func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error) { return }
 
 func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO  %s (cgrid,accid,cdrhost,cdrsource,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO  %s (cgrid,tor,accid,cdrhost,cdrsource,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
 		utils.TBL_CDRS_PRIMARY,
 		cdr.CgrId,
+		cdr.TOR,
 		cdr.AccId,
 		cdr.CdrHost,
 		cdr.CdrSource,

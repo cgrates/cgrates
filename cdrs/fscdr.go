@@ -124,6 +124,7 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 func (fsCdr FSCdr) AsStoredCdr() *utils.StoredCdr {
 	storCdr := new(utils.StoredCdr)
 	storCdr.CgrId = fsCdr.getCgrId()
+	storCdr.TOR = utils.VOICE
 	storCdr.AccId = fsCdr.vars[FS_UUID]
 	storCdr.CdrHost = fsCdr.vars[FS_IP]
 	storCdr.CdrSource = FS_CDR_SOURCE

@@ -54,7 +54,7 @@ func TestCDRFields(t *testing.T) {
 	}
 	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME])
 	answerTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME])
-	expctStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("01df56f4-d99a-4ef6-b7fe-b924b2415b7f", setupTime.String()), AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f",
+	expctStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("01df56f4-d99a-4ef6-b7fe-b924b2415b7f", setupTime.String()), TOR: utils.VOICE, AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f",
 		CdrHost: "127.0.0.1", CdrSource: "freeswitch_json", Direction: "*out", Category: "call", ReqType: utils.RATED, Tenant: "ipbx.itsyscom.com", Account: "dan", Subject: "dan",
 		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(4) * time.Second,
 		ExtraFields: map[string]string{"sip_user_agent": "Jitsi2.2.4603.9615Linux"}, Cost: -1}

@@ -34,10 +34,10 @@ const (
 	INBOUND  = "*in"
 	OUTBOUND = "*out"
 	// Balance types
-	CREDIT  = "*monetary"
-	SMS     = "*sms"
-	DATA    = "*data"
-	MINUTES = "*voice"
+	CREDIT  = utils.MONETARY
+	SMS     = utils.SMS
+	DATA    = utils.DATA
+	MINUTES = utils.VOICE
 	// action trigger threshold types
 	TRIGGER_MIN_COUNTER = "*min_counter"
 	TRIGGER_MAX_COUNTER = "*max_counter"

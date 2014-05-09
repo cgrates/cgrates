@@ -31,6 +31,7 @@ import (
 type StoredCdr struct {
 	CgrId          string
 	OrderId        int64 // Stor order id used as export order id
+	TOR            string
 	AccId          string
 	CdrHost        string
 	CdrSource      string
@@ -163,6 +164,7 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	var err error
 	frkStorCdr := new(StoredCdr)
 	frkStorCdr.CgrId = storedCdr.CgrId
+	frkStorCdr.TOR = storedCdr.TOR
 	frkStorCdr.MediationRunId = runId
 	frkStorCdr.Cost = -1.0 // Default for non-rated CDR
 	frkStorCdr.AccId = storedCdr.AccId

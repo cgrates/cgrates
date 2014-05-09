@@ -20,7 +20,6 @@ package utils
 
 import (
 	"net/http"
-	"time"
 )
 
 func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
@@ -39,52 +38,12 @@ func NewCgrCdrFromHttpReq(req *http.Request) (CgrCdr, error) {
 
 type CgrCdr map[string]string
 
-func (cgrCdr CgrCdr) GetCgrId() string {
-	setupTime, _ := cgrCdr.GetSetupTime()
+func (cgrCdr CgrCdr) getCgrId() string {
+	setupTime, _ := ParseTimeDetectLayout(cgrCdr[SETUP_TIME])
 	return Sha1(cgrCdr[ACCID], setupTime.String())
 }
 
-func (cgrCdr CgrCdr) GetAccId() string {
-	return cgrCdr[ACCID]
-}
-
-func (cgrCdr CgrCdr) GetCdrHost() string {
-	return cgrCdr[CDRHOST]
-}
-
-func (cgrCdr CgrCdr) GetCdrSource() string {
-	return cgrCdr[CDRSOURCE]
-}
-func (cgrCdr CgrCdr) GetDirection() string {
-	//TODO: implement direction
-	return "*out"
-}
-func (cgrCdr CgrCdr) GetOrigId() string {
-	return cgrCdr[CDRHOST]
-}
-func (cgrCdr CgrCdr) GetSubject() string {
-	return cgrCdr[SUBJECT]
-}
-func (cgrCdr CgrCdr) GetAccount() string {
-	return cgrCdr[ACCOUNT]
-}
-
-// Charging destination number
-func (cgrCdr CgrCdr) GetDestination() string {
-	return cgrCdr[DESTINATION]
-}
-
-func (cgrCdr CgrCdr) GetCategory() string {
-	return cgrCdr[CATEGORY]
-}
-
-func (cgrCdr CgrCdr) GetTenant() string {
-	return cgrCdr[TENANT]
-}
-func (cgrCdr CgrCdr) GetReqType() string {
-	return cgrCdr[REQTYPE]
-}
-func (cgrCdr CgrCdr) GetExtraFields() map[string]string {
+func (cgrCdr CgrCdr) getExtraFields() map[string]string {
 	extraFields := make(map[string]string)
 	for k, v := range cgrCdr {
 		if !IsSliceMember(PrimaryCdrFields, k) {
@@ -93,35 +52,25 @@ func (cgrCdr CgrCdr) GetExtraFields() map[string]string {
 	}
 	return extraFields
 }
-func (cgrCdr CgrCdr) GetSetupTime() (t time.Time, err error) {
-	return ParseTimeDetectLayout(cgrCdr[SETUP_TIME])
-}
-func (cgrCdr CgrCdr) GetAnswerTime() (t time.Time, err error) {
-	return ParseTimeDetectLayout(cgrCdr[ANSWER_TIME])
-}
-
-// Extracts duration as considered by the telecom switch
-func (cgrCdr CgrCdr) GetDuration() (time.Duration, error) {
-	return ParseDurationWithSecs(cgrCdr[DURATION])
-}
 
 func (cgrCdr CgrCdr) AsStoredCdr() *StoredCdr {
 	storCdr := new(StoredCdr)
-	storCdr.CgrId = cgrCdr.GetCgrId()
-	storCdr.AccId = cgrCdr.GetAccId()
-	storCdr.CdrHost = cgrCdr.GetCdrHost()
-	storCdr.CdrSource = cgrCdr.GetCdrSource()
-	storCdr.ReqType = cgrCdr.GetReqType()
-	storCdr.Direction = cgrCdr.GetDirection()
-	storCdr.Tenant = cgrCdr.GetTenant()
-	storCdr.Category = cgrCdr.GetCategory()
-	storCdr.Account = cgrCdr.GetAccount()
-	storCdr.Subject = cgrCdr.GetSubject()
-	storCdr.Destination = cgrCdr.GetDestination()
-	storCdr.SetupTime, _ = cgrCdr.GetSetupTime() // Not interested to process errors, should do them if necessary in a previous step
-	storCdr.AnswerTime, _ = cgrCdr.GetAnswerTime()
-	storCdr.Duration, _ = cgrCdr.GetDuration()
-	storCdr.ExtraFields = cgrCdr.GetExtraFields()
+	storCdr.CgrId = cgrCdr.getCgrId()
+	storCdr.TOR = cgrCdr[TOR]
+	storCdr.AccId = cgrCdr[ACCID]
+	storCdr.CdrHost = cgrCdr[CDRHOST]
+	storCdr.CdrSource = cgrCdr[CDRSOURCE]
+	storCdr.ReqType = cgrCdr[REQTYPE]
+	storCdr.Direction = "*out"
+	storCdr.Tenant = cgrCdr[TENANT]
+	storCdr.Category = cgrCdr[CATEGORY]
+	storCdr.Account = cgrCdr[ACCOUNT]
+	storCdr.Subject = cgrCdr[SUBJECT]
+	storCdr.Destination = cgrCdr[DESTINATION]
+	storCdr.SetupTime, _ = ParseTimeDetectLayout(cgrCdr[SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
+	storCdr.AnswerTime, _ = ParseTimeDetectLayout(cgrCdr[ANSWER_TIME])
+	storCdr.Duration, _ = ParseDurationWithSecs(cgrCdr[DURATION])
+	storCdr.ExtraFields = cgrCdr.getExtraFields()
 	storCdr.Cost = -1
 	return storCdr
 }
