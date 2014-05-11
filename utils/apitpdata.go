@@ -332,6 +332,7 @@ type AttrExpFileCdrs struct {
 	MaskLength        int      // Overwrite configured MaskLength, -1 to use general config ones
 	CgrIds            []string // If provided, it will filter based on the cgrids present in list
 	MediationRunId    []string // If provided, it will filter on mediation runid
+	TOR               []string // If provided, filter on TypeOfRecord
 	CdrHost           []string // If provided, it will filter cdrhost
 	CdrSource         []string // If provided, it will filter cdrsource
 	ReqType           []string // If provided, it will fiter reqtype

@@ -70,7 +70,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.MaskLength != -1 {
 		maskLen = attr.MaskLength
 	}
-	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunId, attr.CdrHost, attr.CdrSource, attr.ReqType, attr.Direction,
+	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunId, attr.TOR, attr.CdrHost, attr.CdrSource, attr.ReqType, attr.Direction,
 		attr.Tenant, attr.Tor, attr.Account, attr.Subject, attr.DestinationPrefix, attr.OrderIdStart, attr.OrderIdEnd, tStart, tEnd, attr.SkipErrors, attr.SkipRated)
 	if err != nil {
 		return err

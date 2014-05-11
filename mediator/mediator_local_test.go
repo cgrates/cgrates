@@ -136,11 +136,11 @@ func TestPostCdrs(t *testing.T) {
 		return
 	}
 	httpClient := new(http.Client)
-	cdrForm1 := url.Values{utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
+	cdrForm1 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
 		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1001"}, utils.SUBJECT: []string{"1001"},
 		utils.DESTINATION: []string{"+4986517174963"},
 		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.DURATION: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
-	cdrForm2 := url.Values{utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
+	cdrForm2 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"adsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
 		utils.TENANT: []string{"itsyscom.com"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1003"}, utils.SUBJECT: []string{"1003"}, utils.DESTINATION: []string{"+4986517174964"},
 		utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"}, utils.DURATION: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2} {
@@ -150,12 +150,12 @@ func TestPostCdrs(t *testing.T) {
 		}
 	}
 	time.Sleep(100 * time.Millisecond) // Give time for CDRs to reach database
-	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false); err != nil {
+	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 4 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
-	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, false); err != nil {
+	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, false); err != nil {
 		t.Error(err)
 	} else if len(nonErrorCdrs) != 0 { // Just two of them should be without errors
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(nonErrorCdrs)))
@@ -167,10 +167,10 @@ func TestInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := utils.CgrCdr{utils.ACCID: "aaaaadsafdsaf", "cdrsource": engine.TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
+	cgrCdr1 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": engine.TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517174963",
 		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.DURATION: "10"}
-	cgrCdr2 := utils.CgrCdr{utils.ACCID: "baaaadsafdsaf", "cdrsource": engine.TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
+	cgrCdr2 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": engine.TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517173964",
 		utils.ANSWER_TIME: "2013-11-07T09:42:26Z", utils.DURATION: "20"}
 	for _, cdr := range []utils.CgrCdr{cgrCdr1, cgrCdr2} {
@@ -178,12 +178,12 @@ func TestInjectCdrs(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false); err != nil {
+	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 6 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
-	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true); err != nil {
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true); err != nil {
 		t.Error(err)
 	} else if len(nonRatedCdrs) != 2 { // Just two of them should be non-rated
 		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
@@ -215,12 +215,12 @@ func TestRateCdrs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true); err != nil {
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true); err != nil {
 		t.Error(err)
 	} else if len(nonRatedCdrs) != 0 { // Just two of them should be non-rated
 		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
 	}
-	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
 		t.Error(err)
 	} else if len(errRatedCdrs) != 4 { // The first 2 with errors should be still there before rerating
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
@@ -230,7 +230,7 @@ func TestRateCdrs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
 		t.Error(err)
 	} else if len(errRatedCdrs) != 2 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))

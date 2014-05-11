@@ -45,11 +45,11 @@ type Mediator struct {
 	cgrCfg    *config.CGRConfig
 }
 
-// Retrive the cost from logging database
+// Retrive the cost from logging database, nil in case of no log
 func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *engine.CallCost, err error) {
 	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
-		cc, err = self.logDb.GetCallCostLog(cgrid, engine.SESSION_MANAGER_SOURCE, runId) //ToDo: What are we getting when there is no log?
-		if cc != nil {                                                                   // There were no errors, chances are that we got what we are looking for
+		cc, err = self.logDb.GetCallCostLog(cgrid, engine.SESSION_MANAGER_SOURCE, runId)
+		if cc != nil {
 			break
 		}
 		time.Sleep(time.Duration(i) * time.Second)
@@ -58,7 +58,7 @@ func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *engine.CallCost, 
 }
 
 // Retrive the cost from engine
-func (self *Mediator) getCostsFromRater(storedCdr *utils.StoredCdr) (*engine.CallCost, error) {
+func (self *Mediator) getCostsVoiceFromRater(storedCdr *utils.StoredCdr) (*engine.CallCost, error) {
 	cc := &engine.CallCost{}
 	var err error
 	if storedCdr.Duration == time.Duration(0) { // failed call,  returning empty callcost, no error
@@ -96,8 +96,10 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 	if storedCdr.ReqType == utils.PREPAID || storedCdr.ReqType == utils.POSTPAID {
 		// Should be previously calculated and stored in DB
 		qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
+	} else if storedCdr.TOR == utils.VOICE {
+		qryCC, errCost = self.getCostsVoiceFromRater(storedCdr)
 	} else {
-		qryCC, errCost = self.getCostsFromRater(storedCdr)
+		return fmt.Errorf("Unsupported TOR: %s", storedCdr.TOR)
 	}
 	if errCost != nil {
 		return errCost
@@ -109,6 +111,7 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 }
 
 func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
+	engine.Logger.Debug(fmt.Sprintf("Rating CDR: %v", storedCdr))
 	storedCdr.MediationRunId = utils.DEFAULT_RUNID
 	cdrRuns := []*utils.StoredCdr{storedCdr}     // Start with initial storCdr, will add here all to be mediated
 	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
@@ -153,7 +156,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 }
 
 func (self *Mediator) RateCdrs(timeStart, timeEnd time.Time, rerateErrors, rerateRated bool) error {
-	cdrs, err := self.cdrDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, !rerateErrors, !rerateRated)
+	cdrs, err := self.cdrDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, !rerateErrors, !rerateRated)
 	if err != nil {
 		return err
 	}
