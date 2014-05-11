@@ -118,7 +118,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		return
 	}
 	engine.Logger.Info("Registering Mediator RPC service.")
-	server.RpcRegister(&mediator.MediatorV1{Medi: medi})
+	server.RpcRegister(&apier.MediatorV1{Medi: medi})
 
 	close(chanDone)
 }
