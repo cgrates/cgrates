@@ -1458,6 +1458,32 @@ func TestLocalRemDC(t *testing.T) {
 	}
 }
 
+func TestLocalGetRatingSubjectAliases(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	attrs := utils.AttrGetRatingSubjectAliases{Tenant: "cgrates.org", Subject: "1001"}
+	var subjAliases []string
+	if err := rater.Call("ApierV1.GetRatingSubjectAliases", attrs, &subjAliases); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if len(subjAliases) != 0 {
+		t.Error("Unexpected subject aliases returned", subjAliases)
+	}
+}
+
+func TestLocalAccountAliases(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	attrs := utils.AttrGetAccountAliases{Tenant: "cgrates.org", Account: "1001"}
+	var acntAliases []string
+	if err := rater.Call("ApierV1.GetAccountAliases", attrs, &acntAliases); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if len(acntAliases) != 0 {
+		t.Error("Unexpected subject aliases returned", acntAliases)
+	}
+}
+
 // Simply kill the engine after we are done with tests within this file
 func TestStopEngine(t *testing.T) {
 	if !*testLocal {

@@ -343,6 +343,7 @@ func (rs *RedisStorage) SetRpAlias(key, alias string) (err error) {
 	return
 }
 
+// Returns the aliases of one specific rating profile subject on a tenant
 func (rs *RedisStorage) RemoveRpAliases(accounts []string) (err error) {
 	if alsKeys, err := rs.db.Keys(RP_ALIAS_PREFIX + "*"); err != nil {
 		return err
@@ -361,6 +362,26 @@ func (rs *RedisStorage) RemoveRpAliases(accounts []string) (err error) {
 	}
 
 	return
+}
+
+func (rs *RedisStorage) GetRPAliases(tenant, subject string) (aliases []string, err error) {
+	alsKeys, err := rs.db.Keys(RP_ALIAS_PREFIX + "*")
+	if err != nil {
+		return nil, err
+	}
+	for _, key := range alsKeys {
+		tenantPrfx := RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
+		if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
+			continue
+		}
+		if alsSubj, err := rs.GetRpAlias(key[len(ACC_ALIAS_PREFIX):], true); err != nil {
+			return nil, err
+		} else if alsSubj == subject {
+			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
+			aliases = append(aliases, alsFromKey)
+		}
+	}
+	return aliases, nil
 }
 
 func (rs *RedisStorage) GetLCR(key string, checkDb bool) (lcr *LCR, err error) {
@@ -402,6 +423,7 @@ func (rs *RedisStorage) GetAccAlias(key string, checkDb bool) (alias string, err
 	return
 }
 
+// Adds one alias for one account
 func (rs *RedisStorage) SetAccAlias(key, alias string) (err error) {
 	err = rs.db.Set(ACC_ALIAS_PREFIX+key, []byte(alias))
 	//cache2go.Cache(ALIAS_PREFIX+key, alias)
@@ -426,6 +448,27 @@ func (rs *RedisStorage) RemoveAccAliases(accounts []string) (err error) {
 	}
 
 	return
+}
+
+// Returns the aliases of one specific account on a tenant
+func (rs *RedisStorage) GetAccountAliases(tenant, account string) (aliases []string, err error) {
+	alsKeys, err := rs.db.Keys(ACC_ALIAS_PREFIX + "*")
+	if err != nil {
+		return nil, err
+	}
+	for _, key := range alsKeys {
+		tenantPrfx := ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
+		if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
+			continue
+		}
+		if alsAcnt, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], true); err != nil {
+			return nil, err
+		} else if alsAcnt == account {
+			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
+			aliases = append(aliases, alsFromKey)
+		}
+	}
+	return aliases, nil
 }
 
 func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error) {

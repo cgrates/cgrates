@@ -348,7 +348,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		if len(aliases) > 1 {
 			tpRpf.Subject = aliases[0]
 			for _, alias := range aliases[1:] {
-				dbr.rpAliases[alias] = tpRpf.Subject
+				dbr.rpAliases[utils.RatingProfileAliasKey(tpRpf.Tenant, alias)] = tpRpf.Subject
 			}
 		}
 		rpf := &RatingProfile{Id: tpRpf.KeyId()}
@@ -584,7 +584,7 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		if len(aliases) > 1 {
 			aa.Account = aliases[0]
 			for _, alias := range aliases[1:] {
-				dbr.accAliases[alias] = aa.Account
+				dbr.accAliases[utils.AccountAliasKey(aa.Tenant, alias)] = aa.Account
 			}
 		}
 		aTriggers, exists := dbr.actionsTriggers[aa.ActionTriggersId]

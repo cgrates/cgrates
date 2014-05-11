@@ -234,3 +234,11 @@ func ConcatenatedKey(keyVals ...string) string {
 	}
 	return resKey
 }
+
+func RatingProfileAliasKey(tenant, subject string) string {
+	return ConcatenatedKey(tenant, subject)
+}
+
+func AccountAliasKey(tenant, account string) string {
+	return ConcatenatedKey(tenant, account)
+}

@@ -288,6 +288,16 @@ func (ms *MapStorage) RemoveRpAliases(accounts []string) (err error) {
 	return
 }
 
+func (ms *MapStorage) GetRPAliases(tenant, subject string) (aliases []string, err error) {
+	for key, value := range ms.dict {
+		tenantPrfx := RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
+		if strings.HasPrefix(key, RP_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && subject == string(value) {
+			aliases = append(aliases, key[len(tenantPrfx):])
+		}
+	}
+	return aliases, nil
+}
+
 func (ms *MapStorage) GetAccAlias(key string, checkDb bool) (alias string, err error) {
 	key = ACC_ALIAS_PREFIX + key
 	if x, err := cache2go.GetCached(key); err == nil {
@@ -318,6 +328,16 @@ func (ms *MapStorage) RemoveAccAliases(accounts []string) (err error) {
 		}
 	}
 	return
+}
+
+func (ms *MapStorage) GetAccountAliases(tenant, account string) (aliases []string, err error) {
+	for key, value := range ms.dict {
+		tenantPrfx := ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
+		if strings.HasPrefix(key, ACC_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && account == string(value) {
+			aliases = append(aliases, key[len(tenantPrfx):])
+		}
+	}
+	return aliases, nil
 }
 
 func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) {

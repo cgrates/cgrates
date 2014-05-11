@@ -19,10 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"reflect"
+	"sort"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/cache2go"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestMsgpackStructsAdded(t *testing.T) {
@@ -110,7 +113,7 @@ func TestCacheRefresh(t *testing.T) {
 }
 
 func TestCacheAliases(t *testing.T) {
-	if subj, err := cache2go.GetCached(RP_ALIAS_PREFIX + "a3"); err != nil || subj != "minu" {
+	if subj, err := cache2go.GetCached(RP_ALIAS_PREFIX + utils.RatingProfileAliasKey("vdf", "a3")); err != nil || subj != "minu" {
 		t.Error("Error caching alias: ", subj, err)
 	}
 }
@@ -123,6 +126,52 @@ func TestStoreInterfaces(t *testing.T) {
 	sql := new(SQLStorage)
 	var _ CdrStorage = sql
 	var _ LogStorage = sql
+}
+
+func TestGetRPAliases(t *testing.T) {
+	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("cgrates.org", "2001"), "1001"); err != nil {
+		t.Error(err)
+	}
+	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("cgrates.org", "2002"), "1001"); err != nil {
+		t.Error(err)
+	}
+	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
+		t.Error(err)
+	}
+	expectAliases := sort.StringSlice([]string{"2001", "2002"})
+	expectAliases.Sort()
+	if aliases, err := dataStorage.GetRPAliases("cgrates.org", "1001"); err != nil {
+		t.Error(err)
+	} else {
+		aliases := sort.StringSlice(aliases)
+		aliases.Sort()
+		if !reflect.DeepEqual(aliases, expectAliases) {
+			t.Errorf("Expecting: %v, received: %v", expectAliases, aliases)
+		}
+	}
+}
+
+func TestGetAccountAliases(t *testing.T) {
+	if err := accountingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2001"), "1001"); err != nil {
+		t.Error(err)
+	}
+	if err := accountingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2002"), "1001"); err != nil {
+		t.Error(err)
+	}
+	if err := accountingStorage.SetAccAlias(utils.AccountAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
+		t.Error(err)
+	}
+	expectAliases := sort.StringSlice([]string{"2001", "2002"})
+	expectAliases.Sort()
+	if aliases, err := accountingStorage.GetAccountAliases("cgrates.org", "1001"); err != nil {
+		t.Error(err)
+	} else {
+		aliases := sort.StringSlice(aliases)
+		aliases.Sort()
+		if !reflect.DeepEqual(aliases, expectAliases) {
+			t.Errorf("Expecting: %v, received: %v", expectAliases, aliases)
+		}
+	}
 }
 
 /************************** Benchmarks *****************************/

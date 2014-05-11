@@ -518,7 +518,7 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		if len(aliases) > 1 {
 			subject = aliases[0]
 			for _, alias := range aliases[1:] {
-				csvr.rpAliases[alias] = subject
+				csvr.rpAliases[utils.RatingProfileAliasKey(tenant, alias)] = subject
 			}
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
@@ -796,7 +796,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		if len(aliases) > 1 {
 			account = aliases[0]
 			for _, alias := range aliases[1:] {
-				csvr.accAliases[alias] = account
+				csvr.accAliases[utils.AccountAliasKey(tenant, alias)] = account
 			}
 		}
 		tag := fmt.Sprintf("%s:%s:%s", direction, tenant, account)
