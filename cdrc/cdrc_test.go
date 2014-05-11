@@ -43,6 +43,7 @@ func TestRecordForkCdr(t *testing.T) {
 	}
 	expectedCdr := &utils.StoredCdr{
 		CgrId:       utils.Sha1(cdrRow[0], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
+		TOR:         utils.VOICE,
 		AccId:       cdrRow[0],
 		CdrSource:   cgrConfig.CdrcSourceId,
 		ReqType:     cdrRow[1],
