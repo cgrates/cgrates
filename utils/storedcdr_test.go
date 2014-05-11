@@ -36,6 +36,7 @@ func TestFieldAsString(t *testing.T) {
 	}
 	if cdr.FieldAsString(&RSRField{Id: CGRID}) != cdr.CgrId ||
 		cdr.FieldAsString(&RSRField{Id: ORDERID}) != "123" ||
+		cdr.FieldAsString(&RSRField{Id: TOR}) != VOICE ||
 		cdr.FieldAsString(&RSRField{Id: ACCID}) != cdr.AccId ||
 		cdr.FieldAsString(&RSRField{Id: CDRHOST}) != cdr.CdrHost ||
 		cdr.FieldAsString(&RSRField{Id: CDRSOURCE}) != cdr.CdrSource ||
@@ -56,6 +57,7 @@ func TestFieldAsString(t *testing.T) {
 		t.Error("Unexpected filed value received",
 			cdr.FieldAsString(&RSRField{Id: CGRID}) != cdr.CgrId,
 			cdr.FieldAsString(&RSRField{Id: ORDERID}) != "123",
+			cdr.FieldAsString(&RSRField{Id: TOR}) != VOICE,
 			cdr.FieldAsString(&RSRField{Id: ACCID}) != cdr.AccId,
 			cdr.FieldAsString(&RSRField{Id: CDRHOST}) != cdr.CdrHost,
 			cdr.FieldAsString(&RSRField{Id: CDRSOURCE}) != cdr.CdrSource,
@@ -103,6 +105,9 @@ func TestStoredCdrAsHttpForm(t *testing.T) {
 		Duration: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	cdrForm := storCdr.AsHttpForm()
+	if cdrForm.Get(TOR) != VOICE {
+		t.Errorf("Expected: %s, received: %s", VOICE, cdrForm.Get(TOR))
+	}
 	if cdrForm.Get(ACCID) != "dsafdsaf" {
 		t.Errorf("Expected: %s, received: %s", "dsafdsaf", cdrForm.Get(ACCID))
 	}

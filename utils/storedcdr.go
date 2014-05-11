@@ -66,6 +66,8 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 		return rsrFld.ParseValue(storedCdr.CgrId)
 	case ORDERID:
 		return rsrFld.ParseValue(strconv.FormatInt(storedCdr.OrderId, 10))
+	case TOR:
+		return rsrFld.ParseValue(storedCdr.TOR)
 	case ACCID:
 		return rsrFld.ParseValue(storedCdr.AccId)
 	case CDRHOST:
@@ -111,6 +113,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	for fld, val := range storedCdr.ExtraFields {
 		v.Set(fld, val)
 	}
+	v.Set(TOR, storedCdr.TOR)
 	v.Set(ACCID, storedCdr.AccId)
 	v.Set(CDRHOST, storedCdr.CdrHost)
 	v.Set(CDRSOURCE, storedCdr.CdrSource)

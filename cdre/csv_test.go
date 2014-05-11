@@ -32,7 +32,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	exportedFields := append(cfg.CdreExportedFields, &utils.RSRField{Id: "extra3"}, &utils.RSRField{Id: "dummy_extra"}, &utils.RSRField{Id: "extra1"})
 	csvCdrWriter := NewCsvCdrWriter(writer, 0, 4, "", -1, exportedFields)
-	ratedCdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+	ratedCdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 		ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Duration: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID,
@@ -40,7 +40,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	}
 	csvCdrWriter.WriteCdr(ratedCdr)
 	csvCdrWriter.Close()
-	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,dsafdsaf,192.168.1.1,rated,*out,cgrates.org,call,1001,1001,1002,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10,1.0100,val_extra3,"",val_extra1`
+	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,192.168.1.1,rated,*out,cgrates.org,call,1001,1001,1002,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10,1.0100,val_extra3,"",val_extra1`
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
 		t.Errorf("Expected: \n%s received: \n%s.", expected, result)

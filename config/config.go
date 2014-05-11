@@ -219,6 +219,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdreExportedFields = []*utils.RSRField{
 		&utils.RSRField{Id: utils.CGRID},
 		&utils.RSRField{Id: utils.MEDI_RUNID},
+		&utils.RSRField{Id: utils.TOR},
 		&utils.RSRField{Id: utils.ACCID},
 		&utils.RSRField{Id: utils.CDRHOST},
 		&utils.RSRField{Id: utils.REQTYPE},
