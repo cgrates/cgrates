@@ -113,7 +113,7 @@ func TestCacheRefresh(t *testing.T) {
 }
 
 func TestCacheAliases(t *testing.T) {
-	if subj, err := cache2go.GetCached(RP_ALIAS_PREFIX + utils.RatingProfileAliasKey("vdf", "a3")); err != nil || subj != "minu" {
+	if subj, err := cache2go.GetCached(RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey("vdf", "a3")); err != nil || subj != "minu" {
 		t.Error("Error caching alias: ", subj, err)
 	}
 }
@@ -129,13 +129,13 @@ func TestStoreInterfaces(t *testing.T) {
 }
 
 func TestGetRPAliases(t *testing.T) {
-	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("cgrates.org", "2001"), "1001"); err != nil {
+	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("cgrates.org", "2002"), "1001"); err != nil {
+	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
+	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
 		t.Error(err)
 	}
 	expectAliases := sort.StringSlice([]string{"2001", "2002"})
@@ -152,13 +152,13 @@ func TestGetRPAliases(t *testing.T) {
 }
 
 func TestRemRSubjAliases(t *testing.T) {
-	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("cgrates.org", "2001"), "1001"); err != nil {
+	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2001"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("cgrates.org", "2002"), "1001"); err != nil {
+	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("cgrates.org", "2002"), "1001"); err != nil {
 		t.Error(err)
 	}
-	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
+	if err := dataStorage.SetRpAlias(utils.RatingSubjectAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
 		t.Error(err)
 	}
 	if err := dataStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}); err != nil {

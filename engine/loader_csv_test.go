@@ -911,9 +911,9 @@ func TestLoadRpAliases(t *testing.T) {
 	if len(csvr.rpAliases) != 3 {
 		t.Error("Failed to load rp aliases: ", csvr.rpAliases)
 	}
-	if csvr.rpAliases[utils.RatingProfileAliasKey("vdf", "a1")] != "minu" ||
-		csvr.rpAliases[utils.RatingProfileAliasKey("vdf", "a2")] != "minu" ||
-		csvr.rpAliases[utils.RatingProfileAliasKey("vdf", "a3")] != "minu" {
+	if csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a1")] != "minu" ||
+		csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a2")] != "minu" ||
+		csvr.rpAliases[utils.RatingSubjectAliasKey("vdf", "a3")] != "minu" {
 		t.Error("Error loading rp aliases: ", csvr.rpAliases)
 	}
 }
