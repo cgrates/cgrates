@@ -110,3 +110,7 @@ func (s *Scheduler) Restart() {
 		s.timer.Stop()
 	}
 }
+
+func (s *Scheduler) GetQueue() engine.ActionTimingPriotityList {
+	return s.queue
+}
