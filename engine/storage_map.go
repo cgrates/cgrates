@@ -279,10 +279,13 @@ func (ms *MapStorage) SetRpAlias(key, alias string) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveRpAliases(accounts []string) (err error) {
+func (ms *MapStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject) (err error) {
 	for key, value := range ms.dict {
-		if strings.HasPrefix(key, RP_ALIAS_PREFIX) && utils.IsSliceMember(accounts, string(value)) {
-			delete(ms.dict, key)
+		for _, tntRtSubj := range tenantRtSubjects {
+			tenantPrfx := RP_ALIAS_PREFIX + tntRtSubj.Tenant + utils.CONCATENATED_KEY_SEP
+			if strings.HasPrefix(key, RP_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && tntRtSubj.Subject == string(value) {
+				delete(ms.dict, key)
+			}
 		}
 	}
 	return
@@ -321,10 +324,13 @@ func (ms *MapStorage) SetAccAlias(key, alias string) (err error) {
 	return
 }
 
-func (ms *MapStorage) RemoveAccAliases(accounts []string) (err error) {
+func (ms *MapStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err error) {
 	for key, value := range ms.dict {
-		if strings.HasPrefix(key, ACC_ALIAS_PREFIX) && utils.IsSliceMember(accounts, string(value)) {
-			delete(ms.dict, key)
+		for _, tntAcnt := range tenantAccounts {
+			tenantPrfx := ACC_ALIAS_PREFIX + tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
+			if strings.HasPrefix(key, ACC_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && tntAcnt.Account == string(value) {
+				delete(ms.dict, key)
+			}
 		}
 	}
 	return

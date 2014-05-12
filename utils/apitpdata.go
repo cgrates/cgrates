@@ -384,29 +384,3 @@ type AttrGetDestination struct {
 type AttrDerivedChargers struct {
 	Direction, Tenant, Category, Account, Subject string
 }
-
-type AttrGetRatingSubjectAliases struct {
-	Tenant, Subject string
-}
-
-type AttrRemRatingSubjectAliases struct {
-	Tenant, Subject string
-}
-
-type AttrAddRatingSubjectAliases struct {
-	Tenant, Subject string
-	Aliases         []string
-}
-
-type AttrGetAccountAliases struct {
-	Tenant, Account string
-}
-
-type AttrRemAccountAliases struct {
-	Tenant, Account string
-}
-
-type AttrAddAccountAliases struct {
-	Tenant, Account string
-	Aliases         []string
-}

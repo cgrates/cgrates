@@ -235,7 +235,7 @@ func ConcatenatedKey(keyVals ...string) string {
 	return resKey
 }
 
-func RatingProfileAliasKey(tenant, subject string) string {
+func RatingSubjectAliasKey(tenant, subject string) string {
 	return ConcatenatedKey(tenant, subject)
 }
 

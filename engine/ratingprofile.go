@@ -169,3 +169,7 @@ func (rpf *RatingProfile) GetHistoryRecord() history.Record {
 		Payload:  js,
 	}
 }
+
+type TenantRatingSubject struct {
+	Tenant, Subject string
+}

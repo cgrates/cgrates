@@ -343,24 +343,30 @@ func (rs *RedisStorage) SetRpAlias(key, alias string) (err error) {
 	return
 }
 
-// Returns the aliases of one specific rating profile subject on a tenant
-func (rs *RedisStorage) RemoveRpAliases(accounts []string) (err error) {
-	if alsKeys, err := rs.db.Keys(RP_ALIAS_PREFIX + "*"); err != nil {
+// Removes the aliases of a specific account, on a tenant
+func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject) (err error) {
+	alsKeys, err := rs.db.Keys(RP_ALIAS_PREFIX + "*")
+	if err != nil {
 		return err
-	} else {
-		for _, key := range alsKeys {
+	}
+	for _, key := range alsKeys {
+		for _, tntRSubj := range tenantRtSubjects {
+			tenantPrfx := RP_ALIAS_PREFIX + tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
+			if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
+				continue
+			}
 			alias, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], true)
 			if err != nil {
 				return err
 			}
-			if utils.IsSliceMember(accounts, alias) {
-				if _, err = rs.db.Del(key); err != nil {
-					return err
-				}
+			if tntRSubj.Subject != alias {
+				continue
+			}
+			if _, err = rs.db.Del(key); err != nil {
+				return err
 			}
 		}
 	}
-
 	return
 }
 
@@ -374,7 +380,7 @@ func (rs *RedisStorage) GetRPAliases(tenant, subject string) (aliases []string, 
 		if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
 			continue
 		}
-		if alsSubj, err := rs.GetRpAlias(key[len(ACC_ALIAS_PREFIX):], true); err != nil {
+		if alsSubj, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], true); err != nil {
 			return nil, err
 		} else if alsSubj == subject {
 			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
@@ -430,23 +436,29 @@ func (rs *RedisStorage) SetAccAlias(key, alias string) (err error) {
 	return
 }
 
-func (rs *RedisStorage) RemoveAccAliases(accounts []string) (err error) {
-	if alsKeys, err := rs.db.Keys(ACC_ALIAS_PREFIX + "*"); err != nil {
+func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err error) {
+	alsKeys, err := rs.db.Keys(ACC_ALIAS_PREFIX + "*")
+	if err != nil {
 		return err
-	} else {
-		for _, key := range alsKeys {
+	}
+	for _, key := range alsKeys {
+		for _, tntAcnt := range tenantAccounts {
+			tenantPrfx := ACC_ALIAS_PREFIX + tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
+			if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
+				continue
+			}
 			alias, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], true)
 			if err != nil {
 				return err
 			}
-			if utils.IsSliceMember(accounts, alias) {
-				if _, err = rs.db.Del(key); err != nil {
-					return err
-				}
+			if tntAcnt.Account != alias {
+				continue
+			}
+			if _, err = rs.db.Del(key); err != nil {
+				return err
 			}
 		}
 	}
-
 	return
 }
 

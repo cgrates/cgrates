@@ -36,8 +36,8 @@ type DbReader struct {
 	actionsTimings   map[string][]*ActionTiming
 	actionsTriggers  map[string][]*ActionTrigger
 	accountActions   map[string]*Account
-	dirtyRpAliases   []string // used to clean aliases that might have changed
-	dirtyAccAliases  []string // used to clean aliases that might have changed
+	dirtyRpAliases   []*TenantRatingSubject // used to clean aliases that might have changed
+	dirtyAccAliases  []*TenantAccount       // used to clean aliases that might have changed
 	destinations     []*Destination
 	rpAliases        map[string]string
 	accAliases       map[string]string
@@ -342,13 +342,13 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 		return err
 	}
 	for _, tpRpf := range mpTpRpfs {
-		dbr.dirtyRpAliases = append(dbr.dirtyRpAliases, tpRpf.Subject)
 		// extract aliases from subject
 		aliases := strings.Split(tpRpf.Subject, ";")
+		dbr.dirtyRpAliases = append(dbr.dirtyRpAliases, &TenantRatingSubject{Tenant: tpRpf.Tenant, Subject: aliases[0]})
 		if len(aliases) > 1 {
 			tpRpf.Subject = aliases[0]
 			for _, alias := range aliases[1:] {
-				dbr.rpAliases[utils.RatingProfileAliasKey(tpRpf.Tenant, alias)] = tpRpf.Subject
+				dbr.rpAliases[utils.RatingSubjectAliasKey(tpRpf.Tenant, alias)] = tpRpf.Subject
 			}
 		}
 		rpf := &RatingProfile{Id: tpRpf.KeyId()}
@@ -578,9 +578,10 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 		if _, alreadyDefined := dbr.accountActions[aa.KeyId()]; alreadyDefined {
 			return fmt.Errorf("Duplicate account action found: %s", aa.KeyId())
 		}
-		dbr.dirtyAccAliases = append(dbr.dirtyAccAliases, aa.Account)
+
 		// extract aliases from subject
 		aliases := strings.Split(aa.Account, ";")
+		dbr.dirtyAccAliases = append(dbr.dirtyAccAliases, &TenantAccount{Tenant: aa.Tenant, Account: aliases[0]})
 		if len(aliases) > 1 {
 			aa.Account = aliases[0]
 			for _, alias := range aliases[1:] {

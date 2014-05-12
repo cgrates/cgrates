@@ -508,3 +508,7 @@ func (account *Account) GetUniqueSharedGroupMembers(destination, direction, unit
 	}
 	return memberIds, nil
 }
+
+type TenantAccount struct {
+	Tenant, Account string
+}

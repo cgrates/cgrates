@@ -151,6 +151,31 @@ func TestGetRPAliases(t *testing.T) {
 	}
 }
 
+func TestRemRSubjAliases(t *testing.T) {
+	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("cgrates.org", "2001"), "1001"); err != nil {
+		t.Error(err)
+	}
+	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("cgrates.org", "2002"), "1001"); err != nil {
+		t.Error(err)
+	}
+	if err := dataStorage.SetRpAlias(utils.RatingProfileAliasKey("itsyscom.com", "2003"), "1001"); err != nil {
+		t.Error(err)
+	}
+	if err := dataStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}); err != nil {
+		t.Error(err)
+	}
+	if cgrAliases, err := dataStorage.GetRPAliases("cgrates.org", "1001"); err != nil {
+		t.Error(err)
+	} else if len(cgrAliases) != 0 {
+		t.Error("Subject aliases not removed")
+	}
+	if iscAliases, err := dataStorage.GetRPAliases("itsyscom.com", "1001"); err != nil { // Make sure the aliases were removed at tenant level
+		t.Error(err)
+	} else if !reflect.DeepEqual(iscAliases, []string{"2003"}) {
+		t.Errorf("Unexpected aliases: %v", iscAliases)
+	}
+}
+
 func TestGetAccountAliases(t *testing.T) {
 	if err := accountingStorage.SetAccAlias(utils.AccountAliasKey("cgrates.org", "2001"), "1001"); err != nil {
 		t.Error(err)

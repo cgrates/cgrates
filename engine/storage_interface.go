@@ -79,7 +79,7 @@ type RatingStorage interface {
 	SetRatingProfile(*RatingProfile) error
 	GetRpAlias(string, bool) (string, error)
 	SetRpAlias(string, string) error
-	RemoveRpAliases([]string) error
+	RemoveRpAliases([]*TenantRatingSubject) error
 	GetRPAliases(string, string) ([]string, error)
 	GetDestination(string) (*Destination, error)
 	SetDestination(*Destination) error
@@ -99,7 +99,7 @@ type AccountingStorage interface {
 	SetAccount(*Account) error
 	GetAccAlias(string, bool) (string, error)
 	SetAccAlias(string, string) error
-	RemoveAccAliases([]string) error
+	RemoveAccAliases([]*TenantAccount) error
 	GetAccountAliases(string, string) ([]string, error)
 	GetActionTimings(string) (ActionPlan, error)
 	SetActionTimings(string, ActionPlan) error

@@ -41,8 +41,8 @@ type CSVReader struct {
 	rpAliases         map[string]string
 	accAliases        map[string]string
 	accountActions    map[string]*Account
-	dirtyRpAliases    []string // used to clean aliases that might have changed
-	dirtyAccAliases   []string // used to clean aliases that might have changed
+	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
+	dirtyAccAliases   []*TenantAccount       // used to clean aliases that might have changed
 	destinations      []*Destination
 	timings           map[string]*utils.TPTiming
 	rates             map[string]*utils.TPRate
@@ -512,13 +512,13 @@ func (csvr *CSVReader) LoadRatingProfiles() (err error) {
 		if err != nil {
 			return fmt.Errorf("Cannot parse activation time from %v", record[4])
 		}
-		csvr.dirtyRpAliases = append(csvr.dirtyRpAliases, subject)
 		// extract aliases from subject
 		aliases := strings.Split(subject, ";")
+		csvr.dirtyRpAliases = append(csvr.dirtyRpAliases, &TenantRatingSubject{Tenant: tenant, Subject: aliases[0]})
 		if len(aliases) > 1 {
 			subject = aliases[0]
 			for _, alias := range aliases[1:] {
-				csvr.rpAliases[utils.RatingProfileAliasKey(tenant, alias)] = subject
+				csvr.rpAliases[utils.RatingSubjectAliasKey(tenant, alias)] = subject
 			}
 		}
 		key := fmt.Sprintf("%s:%s:%s:%s", direction, tenant, tor, subject)
@@ -790,9 +790,9 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tenant, account, direction := record[0], record[1], record[2]
-		csvr.dirtyAccAliases = append(csvr.dirtyAccAliases, account)
 		// extract aliases from subject
 		aliases := strings.Split(account, ";")
+		csvr.dirtyAccAliases = append(csvr.dirtyAccAliases, &TenantAccount{Tenant: tenant, Account: aliases[0]})
 		if len(aliases) > 1 {
 			account = aliases[0]
 			for _, alias := range aliases[1:] {

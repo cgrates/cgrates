@@ -30,6 +30,7 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -1462,25 +1463,112 @@ func TestLocalGetRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	attrs := utils.AttrGetRatingSubjectAliases{Tenant: "cgrates.org", Subject: "1001"}
 	var subjAliases []string
-	if err := rater.Call("ApierV1.GetRatingSubjectAliases", attrs, &subjAliases); err != nil {
+	if err := rater.Call("ApierV1.GetRatingSubjectAliases", engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}, &subjAliases); err == nil {
+		t.Error("Unexpected nil error received")
+	} else if err.Error() != utils.ERR_NOT_FOUND {
 		t.Error("Unexpected error", err.Error())
-	} else if len(subjAliases) != 0 {
-		t.Error("Unexpected subject aliases returned", subjAliases)
 	}
 }
 
-func TestLocalAccountAliases(t *testing.T) {
+func TestLocalAddRatingSubjectAliases(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	attrs := utils.AttrGetAccountAliases{Tenant: "cgrates.org", Account: "1001"}
-	var acntAliases []string
-	if err := rater.Call("ApierV1.GetAccountAliases", attrs, &acntAliases); err != nil {
+	addRtSubjAliases := &AttrAddRatingSubjectAliases{Tenant: "cgrates.org", Subject: "1001", Aliases: []string{"2001", "2002", "2003"}}
+	var rply string
+	if err := rater.Call("ApierV1.AddRatingSubjectAliases", addRtSubjAliases, &rply); err != nil {
 		t.Error("Unexpected error", err.Error())
-	} else if len(acntAliases) != 0 {
-		t.Error("Unexpected subject aliases returned", acntAliases)
+	} else if rply != utils.OK {
+		t.Error("Unexpected reply: ", rply)
+	}
+	var subjAliases []string
+	expectSubjAliases := sort.StringSlice(addRtSubjAliases.Aliases)
+	expectSubjAliases.Sort()
+	if err := rater.Call("ApierV1.GetRatingSubjectAliases", engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}, &subjAliases); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else {
+		subjAliases := sort.StringSlice(subjAliases)
+		subjAliases.Sort()
+		if !reflect.DeepEqual(expectSubjAliases, subjAliases) {
+			t.Errorf("Expecting: %v, received: %v", expectSubjAliases, subjAliases)
+		}
+	}
+}
+
+func TestLocalRemRatingSubjectAliases(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tenantRatingSubj := engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}
+	var rply string
+	if err := rater.Call("ApierV1.RemRatingSubjectAliases", tenantRatingSubj, &rply); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if rply != utils.OK {
+		t.Error("Unexpected reply: ", rply)
+	}
+	var subjAliases []string
+	if err := rater.Call("ApierV1.GetRatingSubjectAliases", engine.TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}, &subjAliases); err == nil {
+		t.Error("Unexpected nil error received")
+	} else if err.Error() != utils.ERR_NOT_FOUND {
+		t.Error("Unexpected error", err.Error())
+	}
+}
+
+func TestLocalGetAccountAliases(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tenantAcnt := engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}
+	var acntAliases []string
+	if err := rater.Call("ApierV1.GetAccountAliases", tenantAcnt, &acntAliases); err == nil {
+		t.Error("Unexpected nil error received")
+	} else if err.Error() != utils.ERR_NOT_FOUND {
+		t.Error("Unexpected error", err.Error())
+	}
+}
+
+func TestLocalAddAccountAliases(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	addAcntAliases := &AttrAddAccountAliases{Tenant: "cgrates.org", Account: "1001", Aliases: []string{"2001", "2002", "2003"}}
+	var rply string
+	if err := rater.Call("ApierV1.AddAccountAliases", addAcntAliases, &rply); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if rply != utils.OK {
+		t.Error("Unexpected reply: ", rply)
+	}
+	var acntAliases []string
+	expectAcntAliases := sort.StringSlice(addAcntAliases.Aliases)
+	expectAcntAliases.Sort()
+	if err := rater.Call("ApierV1.GetAccountAliases", engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAliases); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else {
+		acntAliases := sort.StringSlice(acntAliases)
+		acntAliases.Sort()
+		if !reflect.DeepEqual(expectAcntAliases, acntAliases) {
+			t.Errorf("Expecting: %v, received: %v", expectAcntAliases, acntAliases)
+		}
+	}
+}
+
+func TestLocalRemAccountAliases(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tenantAcnt := engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}
+	var rply string
+	if err := rater.Call("ApierV1.RemAccountAliases", tenantAcnt, &rply); err != nil {
+		t.Error("Unexpected error", err.Error())
+	} else if rply != utils.OK {
+		t.Error("Unexpected reply: ", rply)
+	}
+	var acntAliases []string
+	if err := rater.Call("ApierV1.GetAccountAliases", engine.TenantAccount{Tenant: "cgrates.org", Account: "1001"}, &acntAliases); err == nil {
+		t.Error("Unexpected nil error received")
+	} else if err.Error() != utils.ERR_NOT_FOUND {
+		t.Error("Unexpected error", err.Error())
 	}
 }
 
