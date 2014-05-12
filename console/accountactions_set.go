@@ -34,7 +34,6 @@ type CmdSetAccountActions struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.TPAccountActions
-	rpcResult string
 	*CommandExecuter
 }
 
@@ -54,5 +53,6 @@ func (self *CmdSetAccountActions) RpcParams() interface{} {
 }
 
 func (self *CmdSetAccountActions) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }

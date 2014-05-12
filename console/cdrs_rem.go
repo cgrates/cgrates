@@ -34,7 +34,6 @@ type CmdRemCdrs struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.AttrRemCdrs
-	rpcResult string
 	*CommandExecuter
 }
 
@@ -54,5 +53,6 @@ func (self *CmdRemCdrs) RpcParams() interface{} {
 }
 
 func (self *CmdRemCdrs) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }

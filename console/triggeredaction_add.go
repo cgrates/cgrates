@@ -34,7 +34,6 @@ type CmdAddTriggeredAction struct {
 	name      string
 	rpcMethod string
 	rpcParams *apier.AttrAddActionTrigger
-	rpcResult string
 	*CommandExecuter
 }
 
@@ -54,5 +53,6 @@ func (self *CmdAddTriggeredAction) RpcParams() interface{} {
 }
 
 func (self *CmdAddTriggeredAction) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }

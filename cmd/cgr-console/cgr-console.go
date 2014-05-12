@@ -86,9 +86,10 @@ func executeCommand(command string) {
 	//log.Printf("Param: %+v", param)
 	if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
 		fmt.Println("Error executing command: " + rpcErr.Error())
+	} else {
+		result, _ := json.MarshalIndent(res, "", " ")
+		fmt.Println(string(result))
 	}
-	result, _ := json.MarshalIndent(res, "", " ")
-	fmt.Println(string(result))
 }
 
 func main() {

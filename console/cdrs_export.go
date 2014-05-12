@@ -34,7 +34,6 @@ type CmdExportCdrs struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.AttrExpFileCdrs
-	rpcResult utils.ExportedFileCdrs
 	*CommandExecuter
 }
 
@@ -54,5 +53,5 @@ func (self *CmdExportCdrs) RpcParams() interface{} {
 }
 
 func (self *CmdExportCdrs) RpcResult() interface{} {
-	return &self.rpcResult
+	return &utils.ExportedFileCdrs{}
 }

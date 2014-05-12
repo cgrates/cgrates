@@ -34,7 +34,6 @@ type CmdGetCacheStats struct {
 	name      string
 	rpcMethod string
 	rpcParams *utils.AttrCacheStats
-	rpcResult utils.CacheStats
 	*CommandExecuter
 }
 
@@ -54,5 +53,5 @@ func (self *CmdGetCacheStats) RpcParams() interface{} {
 }
 
 func (self *CmdGetCacheStats) RpcResult() interface{} {
-	return &self.rpcResult
+	return &utils.CacheStats{}
 }

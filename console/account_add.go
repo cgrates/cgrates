@@ -34,7 +34,6 @@ type CmdAddAccount struct {
 	name      string
 	rpcMethod string
 	rpcParams *apier.AttrSetAccount
-	rpcResult string
 	*CommandExecuter
 }
 
@@ -54,5 +53,6 @@ func (self *CmdAddAccount) RpcParams() interface{} {
 }
 
 func (self *CmdAddAccount) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }

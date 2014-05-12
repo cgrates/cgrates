@@ -54,5 +54,6 @@ func (self *CmdReloadCache) RpcParams() interface{} {
 }
 
 func (self *CmdReloadCache) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }

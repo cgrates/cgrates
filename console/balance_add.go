@@ -37,7 +37,6 @@ type CmdAddBalance struct {
 	name      string
 	rpcMethod string
 	rpcParams *apier.AttrAddBalance
-	rpcResult string
 	*CommandExecuter
 }
 
@@ -50,12 +49,13 @@ func (self *CmdAddBalance) RpcMethod() string {
 }
 
 func (self *CmdAddBalance) RpcParams() interface{} {
-    if self.rpcParams == nil {
+	if self.rpcParams == nil {
 		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
 	}
 	return self.rpcParams
 }
 
 func (self *CmdAddBalance) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }
