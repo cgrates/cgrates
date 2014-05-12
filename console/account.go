@@ -38,7 +38,6 @@ type CmdGetAccount struct {
 	name      string
 	rpcMethod string
 	rpcParams *apier.AttrGetAccount
-	rpcResult engine.Account
 	*CommandExecuter
 }
 
@@ -58,5 +57,5 @@ func (self *CmdGetAccount) RpcParams() interface{} {
 }
 
 func (self *CmdGetAccount) RpcResult() interface{} {
-	return &self.rpcResult
+	return &engine.Account{}
 }

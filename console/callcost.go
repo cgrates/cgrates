@@ -57,5 +57,6 @@ func (self *CmdGetCallCost) RpcParams() interface{} {
 }
 
 func (self *CmdGetCallCost) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }

@@ -34,7 +34,6 @@ type CmdGetDestination struct {
 	name      string
 	rpcMethod string
 	rpcParams *StringWrapper
-	rpcResult engine.Destination
 	*CommandExecuter
 }
 
@@ -54,5 +53,5 @@ func (self *CmdGetDestination) RpcParams() interface{} {
 }
 
 func (self *CmdGetDestination) RpcResult() interface{} {
-	return &self.rpcResult
+	return &engine.Destination{}
 }

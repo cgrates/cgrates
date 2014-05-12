@@ -32,7 +32,6 @@ type CmdReloadScheduler struct {
 	name      string
 	rpcMethod string
 	rpcParams *StringWrapper
-	rpcResult string
 	*CommandExecuter
 }
 
@@ -52,5 +51,6 @@ func (self *CmdReloadScheduler) RpcParams() interface{} {
 }
 
 func (self *CmdReloadScheduler) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }

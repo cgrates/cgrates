@@ -36,7 +36,6 @@ type CmdDebitBalance struct {
 	name       string
 	rpcMethod  string
 	rpcParams  *engine.CallDescriptor
-	rpcResult  string
 	clientArgs []string
 	*CommandExecuter
 }
@@ -50,14 +49,15 @@ func (self *CmdDebitBalance) RpcMethod() string {
 }
 
 func (self *CmdDebitBalance) RpcParams() interface{} {
-    if self.rpcParams == nil {
+	if self.rpcParams == nil {
 		self.rpcParams = &engine.CallDescriptor{Direction: "*out"}
 	}
 	return self.rpcParams
 }
 
 func (self *CmdDebitBalance) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }
 
 func (self *CmdDebitBalance) ClientArgs() []string {

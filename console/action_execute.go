@@ -35,7 +35,6 @@ type CmdExecuteAction struct {
 	name      string
 	rpcMethod string
 	rpcParams *apier.AttrExecuteAction
-	rpcResult string
 	*CommandExecuter
 }
 
@@ -55,5 +54,6 @@ func (self *CmdExecuteAction) RpcParams() interface{} {
 }
 
 func (self *CmdExecuteAction) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }

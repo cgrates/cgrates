@@ -31,7 +31,6 @@ type CmdStatus struct {
 	name      string
 	rpcMethod string
 	rpcParams *StringWrapper
-	rpcResult string
 	*CommandExecuter
 }
 
@@ -51,7 +50,8 @@ func (self *CmdStatus) RpcParams() interface{} {
 }
 
 func (self *CmdStatus) RpcResult() interface{} {
-	return &self.rpcResult
+	var s string
+	return &s
 }
 
 func (self *CmdStatus) ClientArgs() (args []string) {

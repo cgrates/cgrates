@@ -24,7 +24,7 @@ func init() {
 	c := &CmdGetCost{
 		name:       "cost",
 		rpcMethod:  "Responder.GetCost",
-		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+		clientArgs: []string{"Direction", "Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -35,7 +35,6 @@ type CmdGetCost struct {
 	name       string
 	rpcMethod  string
 	rpcParams  *engine.CallDescriptor
-	rpcResult  engine.CallCost
 	clientArgs []string
 	*CommandExecuter
 }
@@ -56,7 +55,7 @@ func (self *CmdGetCost) RpcParams() interface{} {
 }
 
 func (self *CmdGetCost) RpcResult() interface{} {
-	return &self.rpcResult
+	return &engine.CallCost{}
 }
 
 func (self *CmdGetCost) ClientArgs() []string {

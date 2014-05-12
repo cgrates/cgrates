@@ -35,7 +35,6 @@ type CmdGetMaxDuration struct {
 	name       string
 	rpcMethod  string
 	rpcParams  *engine.CallDescriptor
-	rpcResult  *float64
 	clientArgs []string
 	*CommandExecuter
 }
@@ -56,7 +55,8 @@ func (self *CmdGetMaxDuration) RpcParams() interface{} {
 }
 
 func (self *CmdGetMaxDuration) RpcResult() interface{} {
-	return &self.rpcResult
+	var f float64
+	return &f
 }
 
 func (self *CmdGetMaxDuration) ClientArgs() []string {
