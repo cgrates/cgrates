@@ -1572,6 +1572,16 @@ func TestLocalRemAccountAliases(t *testing.T) {
 	}
 }
 
+func TestLocalGetScheduledActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var rply []*ScheduledActions
+	if err := rater.Call("ApierV1.GetScheduledActions", AttrsGetScheduledActions{}, &rply); err != nil {
+		t.Error("Unexpected error: ", err.Error)
+	}
+}
+
 // Simply kill the engine after we are done with tests within this file
 func TestStopEngine(t *testing.T) {
 	if !*testLocal {

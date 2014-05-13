@@ -384,3 +384,15 @@ type AttrGetDestination struct {
 type AttrDerivedChargers struct {
 	Direction, Tenant, Category, Account, Subject string
 }
+
+func NewDTAFromAccountKey(accountKey string) (*DirectionTenantAccount, error) {
+	accountSplt := strings.Split(accountKey, CONCATENATED_KEY_SEP)
+	if len(accountSplt) != 3 {
+		return nil, fmt.Errorf("Unsupported format for DirectionTenantAccount: %s", accountKey)
+	}
+	return &DirectionTenantAccount{accountSplt[0], accountSplt[1], accountSplt[2]}, nil
+}
+
+type DirectionTenantAccount struct {
+	Direction, Tenant, Account string
+}
