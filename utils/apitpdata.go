@@ -338,7 +338,7 @@ type AttrExpFileCdrs struct {
 	ReqType           []string // If provided, it will fiter reqtype
 	Direction         []string // If provided, it will fiter direction
 	Tenant            []string // If provided, it will filter tenant
-	Tor               []string // If provided, it will filter tor
+	Category          []string // If provided, it will filter çategory
 	Account           []string // If provided, it will filter account
 	Subject           []string // If provided, it will filter the rating subject
 	DestinationPrefix []string // If provided, it will filter on destination prefix
