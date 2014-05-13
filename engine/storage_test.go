@@ -140,7 +140,7 @@ func TestGetRPAliases(t *testing.T) {
 	}
 	expectAliases := sort.StringSlice([]string{"2001", "2002"})
 	expectAliases.Sort()
-	if aliases, err := dataStorage.GetRPAliases("cgrates.org", "1001"); err != nil {
+	if aliases, err := dataStorage.GetRPAliases("cgrates.org", "1001", false); err != nil {
 		t.Error(err)
 	} else {
 		aliases := sort.StringSlice(aliases)
@@ -164,12 +164,12 @@ func TestRemRSubjAliases(t *testing.T) {
 	if err := dataStorage.RemoveRpAliases([]*TenantRatingSubject{&TenantRatingSubject{Tenant: "cgrates.org", Subject: "1001"}}); err != nil {
 		t.Error(err)
 	}
-	if cgrAliases, err := dataStorage.GetRPAliases("cgrates.org", "1001"); err != nil {
+	if cgrAliases, err := dataStorage.GetRPAliases("cgrates.org", "1001", false); err != nil {
 		t.Error(err)
 	} else if len(cgrAliases) != 0 {
 		t.Error("Subject aliases not removed")
 	}
-	if iscAliases, err := dataStorage.GetRPAliases("itsyscom.com", "1001"); err != nil { // Make sure the aliases were removed at tenant level
+	if iscAliases, err := dataStorage.GetRPAliases("itsyscom.com", "1001", false); err != nil { // Make sure the aliases were removed at tenant level
 		t.Error(err)
 	} else if !reflect.DeepEqual(iscAliases, []string{"2003"}) {
 		t.Errorf("Unexpected aliases: %v", iscAliases)
@@ -188,7 +188,7 @@ func TestGetAccountAliases(t *testing.T) {
 	}
 	expectAliases := sort.StringSlice([]string{"2001", "2002"})
 	expectAliases.Sort()
-	if aliases, err := accountingStorage.GetAccountAliases("cgrates.org", "1001"); err != nil {
+	if aliases, err := accountingStorage.GetAccountAliases("cgrates.org", "1001", true); err != nil {
 		t.Error(err)
 	} else {
 		aliases := sort.StringSlice(aliases)

@@ -40,10 +40,16 @@ func (self *ApierV1) AddRatingSubjectAliases(attrs AttrAddRatingSubjectAliases, 
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Subject", "Aliases"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
+	aliasesChanged := []string{}
 	for _, alias := range attrs.Aliases {
 		if err := self.RatingDb.SetRpAlias(utils.RatingSubjectAliasKey(attrs.Tenant, alias), attrs.Subject); err != nil {
 			return fmt.Errorf("%s:%s:%s", utils.ERR_SERVER_ERROR, alias, err.Error())
 		}
+		aliasesChanged = append(aliasesChanged, engine.RP_ALIAS_PREFIX+utils.RatingSubjectAliasKey(attrs.Tenant, alias))
+	}
+	didNotChange := []string{}
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, aliasesChanged, didNotChange); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK
 	return nil
@@ -54,7 +60,7 @@ func (self *ApierV1) GetRatingSubjectAliases(attrs engine.TenantRatingSubject, r
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Subject"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if aliases, err := self.RatingDb.GetRPAliases(attrs.Tenant, attrs.Subject); err != nil {
+	if aliases, err := self.RatingDb.GetRPAliases(attrs.Tenant, attrs.Subject, false); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(aliases) == 0 { // Need it since otherwise we get some unexpected errrors in the client
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -72,6 +78,10 @@ func (self *ApierV1) RemRatingSubjectAliases(tenantRatingSubject engine.TenantRa
 	if err := self.RatingDb.RemoveRpAliases([]*engine.TenantRatingSubject{&tenantRatingSubject}); err != nil {
 		return fmt.Errorf("%s:% s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	didNotChange := []string{}
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, didNotChange, nil, didNotChange); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
 	*reply = utils.OK
 	return nil
 }
@@ -80,10 +90,16 @@ func (self *ApierV1) AddAccountAliases(attrs AttrAddAccountAliases, reply *strin
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Aliases"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
+	aliasesChanged := []string{}
 	for _, alias := range attrs.Aliases {
 		if err := self.AccountDb.SetAccAlias(utils.AccountAliasKey(attrs.Tenant, alias), attrs.Account); err != nil {
 			return fmt.Errorf("%s:%s:%s", utils.ERR_SERVER_ERROR, alias, err.Error())
 		}
+		aliasesChanged = append(aliasesChanged, engine.ACC_ALIAS_PREFIX+utils.AccountAliasKey(attrs.Tenant, alias))
+	}
+	didNotChange := []string{}
+	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, aliasesChanged, didNotChange); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK
 	return nil
@@ -94,7 +110,7 @@ func (self *ApierV1) GetAccountAliases(attrs engine.TenantAccount, reply *[]stri
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if aliases, err := self.AccountDb.GetAccountAliases(attrs.Tenant, attrs.Account); err != nil {
+	if aliases, err := self.AccountDb.GetAccountAliases(attrs.Tenant, attrs.Account, false); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(aliases) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -110,6 +126,10 @@ func (self *ApierV1) RemAccountAliases(tenantAccount engine.TenantAccount, reply
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	if err := self.AccountDb.RemoveAccAliases([]*engine.TenantAccount{&tenantAccount}); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	didNotChange := []string{}
+	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, nil, didNotChange); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK

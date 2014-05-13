@@ -141,13 +141,13 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []s
 		Logger.Info("Finished rating profile caching.")
 	}
 	if alsKeys == nil {
-		Logger.Info("Caching rating profile aliases")
+		Logger.Info("Caching all rating subject aliases.")
 		if alsKeys, err = rs.db.Keys(RP_ALIAS_PREFIX + "*"); err != nil {
 			return
 		}
 		cache2go.RemPrefixKey(RP_ALIAS_PREFIX)
 	} else if len(alsKeys) != 0 {
-		Logger.Info(fmt.Sprintf("Caching rating profile aliases: %v", alsKeys))
+		Logger.Info(fmt.Sprintf("Caching rating subject aliases: %v", alsKeys))
 	}
 	for _, key := range alsKeys {
 		cache2go.RemKey(key)
@@ -203,7 +203,7 @@ func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []str
 		Logger.Info("Finished shared groups caching.")
 	}
 	if alsKeys == nil {
-		Logger.Info("Caching account aliases")
+		Logger.Info("Caching all account aliases.")
 		if alsKeys, err = rs.db.Keys(ACC_ALIAS_PREFIX + "*"); err != nil {
 			return
 		}
@@ -370,17 +370,16 @@ func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject)
 	return
 }
 
-func (rs *RedisStorage) GetRPAliases(tenant, subject string) (aliases []string, err error) {
-	alsKeys, err := rs.db.Keys(RP_ALIAS_PREFIX + "*")
-	if err != nil {
-		return nil, err
+func (rs *RedisStorage) GetRPAliases(tenant, subject string, checkDb bool) (aliases []string, err error) {
+	tenantPrfx := RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
+	alsKeys := cache2go.GetEntriesKeys(tenantPrfx)
+	if len(alsKeys) == 0 && checkDb {
+		if alsKeys, err = rs.db.Keys(tenantPrfx + "*"); err != nil {
+			return nil, err
+		}
 	}
 	for _, key := range alsKeys {
-		tenantPrfx := RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
-		if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
-			continue
-		}
-		if alsSubj, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], true); err != nil {
+		if alsSubj, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], checkDb); err != nil {
 			return nil, err
 		} else if alsSubj == subject {
 			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
@@ -463,17 +462,17 @@ func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err e
 }
 
 // Returns the aliases of one specific account on a tenant
-func (rs *RedisStorage) GetAccountAliases(tenant, account string) (aliases []string, err error) {
-	alsKeys, err := rs.db.Keys(ACC_ALIAS_PREFIX + "*")
-	if err != nil {
-		return nil, err
+func (rs *RedisStorage) GetAccountAliases(tenant, account string, checkDb bool) (aliases []string, err error) {
+	tenantPrfx := ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
+	alsKeys := cache2go.GetEntriesKeys(tenantPrfx)
+	if len(alsKeys) == 0 && checkDb {
+		if alsKeys, err = rs.db.Keys(tenantPrfx + "*"); err != nil {
+			return nil, err
+		}
 	}
 	for _, key := range alsKeys {
 		tenantPrfx := ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
-		if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
-			continue
-		}
-		if alsAcnt, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], true); err != nil {
+		if alsAcnt, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], checkDb); err != nil {
 			return nil, err
 		} else if alsAcnt == account {
 			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant

@@ -291,7 +291,7 @@ func (ms *MapStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject) (
 	return
 }
 
-func (ms *MapStorage) GetRPAliases(tenant, subject string) (aliases []string, err error) {
+func (ms *MapStorage) GetRPAliases(tenant, subject string, checkDb bool) (aliases []string, err error) {
 	for key, value := range ms.dict {
 		tenantPrfx := RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
 		if strings.HasPrefix(key, RP_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && subject == string(value) {
@@ -336,7 +336,7 @@ func (ms *MapStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err err
 	return
 }
 
-func (ms *MapStorage) GetAccountAliases(tenant, account string) (aliases []string, err error) {
+func (ms *MapStorage) GetAccountAliases(tenant, account string, checkDb bool) (aliases []string, err error) {
 	for key, value := range ms.dict {
 		tenantPrfx := ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
 		if strings.HasPrefix(key, ACC_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && account == string(value) {
