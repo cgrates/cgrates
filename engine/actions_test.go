@@ -212,6 +212,15 @@ func TestActionTimingOnlyYears(t *testing.T) {
 	}
 }
 
+func TestActionTimingPast(t *testing.T) {
+	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2013}}}}
+	st := at.GetNextStartTime(referenceDate)
+	expected := time.Date(2013, 1, 1, 0, 0, 0, 0, time.Local)
+	if !st.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, st)
+	}
+}
+
 func TestActionTimingHourYears(t *testing.T) {
 
 	y, m, d := now.Date()
@@ -334,27 +343,8 @@ func TestActionTimingFirstMonthOfTheYear(t *testing.T) {
 
 func TestActionTimingCheckForASAP(t *testing.T) {
 	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: ASAP}}}
-	if !at.CheckForASAP() {
+	if !at.IsASAP() {
 		t.Errorf("%v should be asap!", at)
-	}
-}
-
-func TestActionTimingIsOneTimeRun(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: ASAP}}}
-	if !at.CheckForASAP() {
-		t.Errorf("%v should be asap!", at)
-	}
-	if !at.IsOneTimeRun() {
-		t.Errorf("%v should be one time run!", at)
-	}
-}
-
-func TestActionTimingOneTimeRun(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: ASAP}}}
-	at.CheckForASAP()
-	nextRun := at.GetNextStartTime(referenceDate)
-	if nextRun.IsZero() {
-		t.Error("next time failed for asap")
 	}
 }
 
