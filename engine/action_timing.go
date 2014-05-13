@@ -22,16 +22,14 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 const (
-	FORMAT     = "2006-1-2 15:04:05 MST"
-	ASAP       = "*asap"
-	ASAP_DELAY = "1m"
+	FORMAT = "2006-1-2 15:04:05 MST"
+	ASAP   = "*asap"
 )
 
 type ActionTiming struct {
@@ -257,25 +255,8 @@ func (at *ActionTiming) Execute() (err error) {
 	return
 }
 
-// checks for *asap string as start time and replaces it wit an actual time in the newar future
-// returns true if the *asap string was found
-func (at *ActionTiming) CheckForASAP() bool {
-	if at.Timing.Timing.StartTime == ASAP {
-		delay, _ := time.ParseDuration(ASAP_DELAY)
-		timeTokens := strings.Split(time.Now().Add(delay).Format(time.Stamp), " ")
-		at.Timing.Timing.StartTime = timeTokens[len(timeTokens)-1]
-		return true
-	}
-	return false
-}
-
-// returns true if only the starting time was is filled in the Timing field
-func (at *ActionTiming) IsOneTimeRun() bool {
-	return len(at.Timing.Timing.Years) == 0 &&
-		len(at.Timing.Timing.Months) == 0 &&
-		len(at.Timing.Timing.MonthDays) == 0 &&
-		len(at.Timing.Timing.WeekDays) == 0 &&
-		len(at.Timing.Timing.StartTime) != 0
+func (at *ActionTiming) IsASAP() bool {
+	return at.Timing.Timing.StartTime == ASAP
 }
 
 // Structure to store actions according to weight

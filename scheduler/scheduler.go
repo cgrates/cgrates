@@ -49,9 +49,13 @@ func (s *Scheduler) Loop() {
 		if a0.GetNextStartTime(now).Equal(now) || a0.GetNextStartTime(now).Before(now) {
 			engine.Logger.Debug(fmt.Sprintf("%v - %v", a0.Id, a0.Timing))
 			go a0.Execute()
-			s.queue = append(s.queue, a0)
-			s.queue = s.queue[1:]
-			sort.Sort(s.queue)
+			// if after execute the next start time is in the past then
+			// do not add it to the queue
+			if !a0.GetNextStartTime(now).Before(now) {
+				s.queue = append(s.queue, a0)
+				s.queue = s.queue[1:]
+				sort.Sort(s.queue)
+			}
 			s.Unlock()
 		} else {
 			s.Unlock()
@@ -82,13 +86,18 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 		isAsap := false
 		newAts := make([]*engine.ActionTiming, 0) // will remove the one time runs from the database
 		for _, at := range ats {
-			isAsap = at.CheckForASAP()
+			isAsap = at.IsASAP()
 			toBeSaved = toBeSaved || isAsap
-			if at.IsOneTimeRun() {
+			if isAsap {
 				engine.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
 				go at.Execute()
 				// do not append it to the newAts list to be saved
 			} else {
+				now := time.Now()
+				if at.GetNextStartTime(now).Before(now) {
+					// the task is obsolete, do not add it to the queue
+					continue
+				}
 				s.queue = append(s.queue, at)
 				newAts = append(newAts, at)
 			}
