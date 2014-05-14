@@ -51,6 +51,7 @@ func (s *Scheduler) Loop() {
 			go a0.Execute()
 			// if after execute the next start time is in the past then
 			// do not add it to the queue
+			now = time.Now()
 			if !a0.GetNextStartTime(now).Before(now) {
 				s.queue = append(s.queue, a0)
 				s.queue = s.queue[1:]
