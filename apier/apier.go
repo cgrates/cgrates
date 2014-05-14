@@ -305,6 +305,7 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 				Weight:        apiAct.BalanceWeight,
 				DestinationId: apiAct.DestinationId,
 				RatingSubject: apiAct.RatingSubject,
+				SharedGroup:   apiAct.SharedGroup,
 			},
 		}
 		storeActions[idx] = a
@@ -312,7 +313,40 @@ func (self *ApierV1) SetActions(attrs AttrSetActions, reply *string) error {
 	if err := self.AccountDb.SetActions(attrs.ActionsId, storeActions); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	didNotChange := []string{}
+	self.AccountDb.CacheAccounting(nil, didNotChange, didNotChange, didNotChange)
 	*reply = OK
+	return nil
+}
+
+// Retrieves actions attached to specific ActionsId within cache
+func (self *ApierV1) GetActions(actsId string, reply *[]*utils.TPAction) error {
+	if len(actsId) == 0 {
+		return fmt.Errorf("%s:ActionsId", utils.ERR_MANDATORY_IE_MISSING, actsId)
+	}
+	acts := make([]*utils.TPAction, 0)
+	engActs, err := self.AccountDb.GetActions(actsId, false)
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	for _, engAct := range engActs {
+		act := &utils.TPAction{Identifier: engAct.ActionType,
+			BalanceType:     engAct.BalanceType,
+			Direction:       engAct.Direction,
+			ExpiryTime:      engAct.ExpirationString,
+			ExtraParameters: engAct.ExtraParameters,
+			Weight:          engAct.Weight,
+		}
+		if engAct.Balance != nil {
+			act.Units = engAct.Balance.Value
+			act.DestinationId = engAct.Balance.DestinationId
+			act.RatingSubject = engAct.Balance.RatingSubject
+			act.SharedGroup = engAct.Balance.SharedGroup
+			act.BalanceWeight = engAct.Balance.Weight
+		}
+		acts = append(acts, act)
+	}
+	*reply = acts
 	return nil
 }
 

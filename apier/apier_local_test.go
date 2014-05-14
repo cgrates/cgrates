@@ -985,7 +985,7 @@ func TestApierExecuteAction(t *testing.T) {
 	}
 }
 
-func TestApierSetActions(t *testing.T) {
+func TestLocalApierSetActions(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -1000,6 +1000,21 @@ func TestApierSetActions(t *testing.T) {
 	// Calling the second time should raise EXISTS
 	if err := rater.Call("ApierV1.SetActions", attrs1, &reply1); err == nil || err.Error() != "EXISTS" {
 		t.Error("Unexpected result on duplication: ", err.Error())
+	}
+}
+
+func TestLocalApierGetActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	expectActs := []*utils.TPAction{
+		&utils.TPAction{Identifier: engine.TOPUP_RESET, BalanceType: engine.CREDIT, Direction: engine.OUTBOUND, Units: 75.0, ExpiryTime: engine.UNLIMITED, Weight: 20.0}}
+
+	var reply []*utils.TPAction
+	if err := rater.Call("ApierV1.GetActions", "ACTS_1", &reply); err != nil {
+		t.Error("Got error on ApierV1.GetActions: ", err.Error())
+	} else if !reflect.DeepEqual(expectActs, reply) {
+		t.Errorf("Expected: %v, received: %v", expectActs, reply)
 	}
 }
 
