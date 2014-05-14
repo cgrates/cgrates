@@ -55,6 +55,17 @@ func TestActionTimingOnlyHour(t *testing.T) {
 	}
 }
 
+func TestActionTimingHourYear(t *testing.T) {
+	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2012}, StartTime: "10:01:00"}}}
+	st := at.GetNextStartTime(referenceDate)
+
+	_, m, d := now.Date()
+	expected := time.Date(2012, m, d, 10, 1, 0, 0, time.Local)
+	if !st.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, st)
+	}
+}
+
 func TestActionTimingOnlyWeekdays(t *testing.T) {
 	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{WeekDays: []time.Weekday{time.Monday}}}}
 	st := at.GetNextStartTime(referenceDate)
