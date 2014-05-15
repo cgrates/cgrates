@@ -360,6 +360,27 @@ type ExportedFileCdrs struct {
 
 }
 
+type AttrGetCdrs struct {
+	CgrIds            []string // If provided, it will filter based on the cgrids present in list
+	MediationRunId    []string // If provided, it will filter on mediation runid
+	TOR               []string // If provided, filter on TypeOfRecord
+	CdrHost           []string // If provided, it will filter cdrhost
+	CdrSource         []string // If provided, it will filter cdrsource
+	ReqType           []string // If provided, it will fiter reqtype
+	Direction         []string // If provided, it will fiter direction
+	Tenant            []string // If provided, it will filter tenant
+	Category          []string // If provided, it will filter çategory
+	Account           []string // If provided, it will filter account
+	Subject           []string // If provided, it will filter the rating subject
+	DestinationPrefix []string // If provided, it will filter on destination prefix
+	OrderIdStart      int64    // Export from this order identifier
+	OrderIdEnd        int64    // Export smaller than this order identifier
+	TimeStart         string   // If provided, it will represent the starting of the CDRs interval (>=)
+	TimeEnd           string   // If provided, it will represent the end of the CDRs interval (<)
+	SkipErrors        bool     // Do not export errored CDRs
+	SkipRated         bool     // Do not export rated CDRs
+}
+
 type AttrRemCdrs struct {
 	CgrIds []string // List of CgrIds to remove from storeDb
 }

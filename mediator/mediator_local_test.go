@@ -150,12 +150,12 @@ func TestPostCdrs(t *testing.T) {
 		}
 	}
 	time.Sleep(100 * time.Millisecond) // Give time for CDRs to reach database
-	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false); err != nil {
+	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false, false); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 4 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
-	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, false); err != nil {
+	if nonErrorCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, false, false); err != nil {
 		t.Error(err)
 	} else if len(nonErrorCdrs) != 0 { // Just two of them should be without errors
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(nonErrorCdrs)))
@@ -178,12 +178,12 @@ func TestInjectCdrs(t *testing.T) {
 			t.Error(err)
 		}
 	}
-	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false); err != nil {
+	if storedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, false, false); err != nil {
 		t.Error(err)
 	} else if len(storedCdrs) != 6 { // Make sure CDRs made it into StorDb
 		t.Error(fmt.Sprintf("Unexpected number of CDRs stored: %d", len(storedCdrs)))
 	}
-	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true); err != nil {
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true, false); err != nil {
 		t.Error(err)
 	} else if len(nonRatedCdrs) != 2 { // Just two of them should be non-rated
 		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
@@ -215,12 +215,12 @@ func TestRateCdrs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true); err != nil {
+	if nonRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, true, true, false); err != nil {
 		t.Error(err)
-	} else if len(nonRatedCdrs) != 0 { // Just two of them should be non-rated
+	} else if len(nonRatedCdrs) != 0 { // All CDRs should be rated
 		t.Error(fmt.Sprintf("Unexpected number of CDRs non-rated: %d", len(nonRatedCdrs)))
 	}
-	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true, false); err != nil {
 		t.Error(err)
 	} else if len(errRatedCdrs) != 4 { // The first 2 with errors should be still there before rerating
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
@@ -230,7 +230,7 @@ func TestRateCdrs(t *testing.T) {
 	} else if reply != utils.OK {
 		t.Errorf("Unexpected reply: %s", reply)
 	}
-	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true); err != nil {
+	if errRatedCdrs, err := cdrStor.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, time.Time{}, time.Time{}, false, true, false); err != nil {
 		t.Error(err)
 	} else if len(errRatedCdrs) != 2 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))

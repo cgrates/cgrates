@@ -48,7 +48,7 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&RSRField{Id: DESTINATION}) != cdr.Destination ||
 		cdr.FieldAsString(&RSRField{Id: SETUP_TIME}) != cdr.SetupTime.String() ||
 		cdr.FieldAsString(&RSRField{Id: ANSWER_TIME}) != cdr.AnswerTime.String() ||
-		cdr.FieldAsString(&RSRField{Id: DURATION}) != "10" ||
+		cdr.FieldAsString(&RSRField{Id: DURATION}) != "10000000000" ||
 		cdr.FieldAsString(&RSRField{Id: MEDI_RUNID}) != cdr.MediationRunId ||
 		cdr.FieldAsString(&RSRField{Id: COST}) != "1.01" ||
 		cdr.FieldAsString(&RSRField{Id: "field_extr1"}) != cdr.ExtraFields["field_extr1"] ||
@@ -69,7 +69,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&RSRField{Id: DESTINATION}) != cdr.Destination,
 			cdr.FieldAsString(&RSRField{Id: SETUP_TIME}) != cdr.SetupTime.String(),
 			cdr.FieldAsString(&RSRField{Id: ANSWER_TIME}) != cdr.AnswerTime.String(),
-			cdr.FieldAsString(&RSRField{Id: DURATION}) != "10",
+			cdr.FieldAsString(&RSRField{Id: DURATION}) != "10000000000",
 			cdr.FieldAsString(&RSRField{Id: MEDI_RUNID}) != cdr.MediationRunId,
 			cdr.FieldAsString(&RSRField{Id: COST}) != "1.01",
 			cdr.FieldAsString(&RSRField{Id: "field_extr1"}) != cdr.ExtraFields["field_extr1"],
@@ -95,6 +95,16 @@ func TestFormatCost(t *testing.T) {
 	}
 	if cdr.FormatCost(2, 3) != "101.001" {
 		t.Error("Unexpected format of the cost: ", cdr.FormatCost(2, 3))
+	}
+}
+
+func TestFormatDuration(t *testing.T) {
+	cdr := StoredCdr{Duration: time.Duration(10) * time.Second}
+	if cdr.FormatDuration(SECONDS) != "10" {
+		t.Error("Wrong duration format: ", cdr.FormatDuration(SECONDS))
+	}
+	if cdr.FormatDuration("default") != "10000000000" {
+		t.Error("Wrong duration format: ", cdr.FormatDuration("default"))
 	}
 }
 
@@ -144,8 +154,8 @@ func TestStoredCdrAsHttpForm(t *testing.T) {
 	if cdrForm.Get(ANSWER_TIME) != "2013-11-07 08:42:26 +0000 UTC" {
 		t.Errorf("Expected: %s, received: %s", "2013-11-07 08:42:26 +0000 UTC", cdrForm.Get(ANSWER_TIME))
 	}
-	if cdrForm.Get(DURATION) != "10" {
-		t.Errorf("Expected: %s, received: %s", "10", cdrForm.Get(DURATION))
+	if cdrForm.Get(DURATION) != "10000000000" {
+		t.Errorf("Expected: %s, received: %s", "10000000000", cdrForm.Get(DURATION))
 	}
 	if cdrForm.Get("field_extr1") != "val_extr1" {
 		t.Errorf("Expected: %s, received: %s", "val_extr1", cdrForm.Get("field_extr1"))

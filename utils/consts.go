@@ -111,6 +111,10 @@ const (
 	DATA                       = "*data"
 	VOICE                      = "*voice"
 	TOR                        = "tor"
+	HOURS                      = "hours"
+	MINUTES                    = "minutes"
+	NANOSECONDS                = "nanoseconds"
+	SECONDS                    = "seconds"
 )
 
 var (

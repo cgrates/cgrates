@@ -375,6 +375,30 @@ func TestParseDurationWithSecs(t *testing.T) {
 	}
 }
 
+func TestParseDurationWithNanosecs(t *testing.T) {
+	durStr := "2"
+	durExpected := time.Duration(2) * time.Nanosecond
+	if parsed, err := ParseDurationWithNanosecs(durStr); err != nil {
+		t.Error(err)
+	} else if parsed != durExpected {
+		t.Error("Parsed different than expected")
+	}
+	durStr = "2s"
+	durExpected = time.Duration(2) * time.Second
+	if parsed, err := ParseDurationWithNanosecs(durStr); err != nil {
+		t.Error(err)
+	} else if parsed != durExpected {
+		t.Error("Parsed different than expected")
+	}
+	durStr = "2ms"
+	durExpected = time.Duration(2) * time.Millisecond
+	if parsed, err := ParseDurationWithNanosecs(durStr); err != nil {
+		t.Error(err)
+	} else if parsed != durExpected {
+		t.Error("Parsed different than expected")
+	}
+}
+
 func TestMinDuration(t *testing.T) {
 	d1, _ := time.ParseDuration("1m")
 	d2, _ := time.ParseDuration("59s")

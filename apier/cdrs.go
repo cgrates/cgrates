@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"time"
 )
 
 type AttrGetCallCost struct {
@@ -40,6 +41,30 @@ func (apier *ApierV1) GetCallCostLog(attrs AttrGetCallCost, reply *engine.CallCo
 		return fmt.Errorf("NOT_FOUND")
 	} else {
 		*reply = *cc
+	}
+	return nil
+}
+
+// Retrieves CDRs based on the filters
+func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*utils.StoredCdr) error {
+	var tStart, tEnd time.Time
+	var err error
+	if len(attrs.TimeStart) != 0 {
+		if tStart, err = utils.ParseTimeDetectLayout(attrs.TimeStart); err != nil {
+			return err
+		}
+	}
+	if len(attrs.TimeEnd) != 0 {
+		if tEnd, err = utils.ParseTimeDetectLayout(attrs.TimeEnd); err != nil {
+			return err
+		}
+	}
+	if cdrs, err := apier.CdrDb.GetStoredCdrs(attrs.CgrIds, attrs.MediationRunId, attrs.TOR, attrs.CdrHost, attrs.CdrSource, attrs.ReqType, attrs.Direction,
+		attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject, attrs.DestinationPrefix,
+		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.SkipErrors, attrs.SkipRated, false); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else {
+		*reply = cdrs
 	}
 	return nil
 }

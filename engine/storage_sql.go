@@ -23,6 +23,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -607,35 +608,66 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // ignoreErr - do not consider cdrs with rating errors
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
 func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes []string, orderIdStart, orderIdEnd int64,
-	timeStart, timeEnd time.Time, ignoreErr, ignoreRated bool) ([]*utils.StoredCdr, error) {
+	timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
-	q := bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.`usage`,%s.extra_fields,%s.runid,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid",
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_EXTRA,
-		utils.TBL_RATED_CDRS,
-		utils.TBL_RATED_CDRS,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_EXTRA,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_CDRS_EXTRA,
-		utils.TBL_RATED_CDRS,
-		utils.TBL_CDRS_PRIMARY,
-		utils.TBL_RATED_CDRS))
+	var q *bytes.Buffer // Need to query differently since in case of primary, unmediated CDRs some values will be missing
+	if ignoreDerived {
+		q = bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.`usage`,%s.extra_fields,%s.runid,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid",
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_EXTRA,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_EXTRA,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_EXTRA,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_RATED_CDRS))
+	} else {
+		q = bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.`usage`,%s.extra_fields,%s.runid,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid",
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_CDRS_EXTRA,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_EXTRA,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_EXTRA,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_CDRS_PRIMARY,
+			utils.TBL_RATED_CDRS))
+	}
 	fltr := new(bytes.Buffer)
 	if len(cgrIds) != 0 {
 		qIds := bytes.NewBufferString(" (")
@@ -844,6 +876,12 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 		}
 		fltr.WriteString(fmt.Sprintf(" (%s.cost!=-1 OR %s.cost IS NULL)", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS))
 	}
+	if ignoreDerived {
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.WriteString(fmt.Sprintf(" (%s.runid='%s' OR %s.cost IS NULL)", utils.TBL_RATED_CDRS, utils.DEFAULT_RUNID, utils.TBL_RATED_CDRS))
+	}
 	if fltr.Len() != 0 {
 		q.WriteString(fmt.Sprintf(" WHERE %s", fltr.String()))
 	}
@@ -853,11 +891,11 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var cgrid, tor, accid, cdrhost, cdrsrc, reqtype, direction, tenant, category, account, subject, destination string
+		var cgrid, tor, accid, cdrhost, cdrsrc, reqtype, direction, tenant, category, account, subject, destination, runid sql.NullString
 		var extraFields []byte
-		var setupTime, answerTime time.Time
-		var runid sql.NullString // So we can export unmediated CDRs
-		var orderid, usage int64
+		var setupTime, answerTime mysql.NullTime
+		var orderid int64
+		var usage sql.NullInt64
 		var cost sql.NullFloat64 // So we can export unmediated CDRs
 		var extraFieldsMp map[string]string
 		if err := rows.Scan(&cgrid, &orderid, &tor, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination, &setupTime, &answerTime, &usage,
@@ -868,8 +906,10 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid, runid, err.Error())
 		}
 		storCdr := &utils.StoredCdr{
-			CgrId: cgrid, OrderId: orderid, TOR: tor, AccId: accid, CdrHost: cdrhost, CdrSource: cdrsrc, ReqType: reqtype, Direction: direction, Tenant: tenant,
-			Category: category, Account: account, Subject: subject, Destination: destination, SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(usage),
+			CgrId: cgrid.String, OrderId: orderid, TOR: tor.String, AccId: accid.String, CdrHost: cdrhost.String, CdrSource: cdrsrc.String, ReqType: reqtype.String,
+			Direction: direction.String, Tenant: tenant.String,
+			Category: category.String, Account: account.String, Subject: subject.String, Destination: destination.String,
+			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Duration: time.Duration(usage.Int64),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
 		cdrs = append(cdrs, storCdr)

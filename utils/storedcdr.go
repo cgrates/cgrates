@@ -59,6 +59,19 @@ func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string 
 	return strconv.FormatFloat(cost, 'f', roundDecimals, 64)
 }
 
+func (storedCdr *StoredCdr) FormatDuration(layout string) string {
+	switch layout {
+	case HOURS:
+		return strconv.FormatFloat(storedCdr.Duration.Hours(), 'f', -1, 64)
+	case MINUTES:
+		return strconv.FormatFloat(storedCdr.Duration.Minutes(), 'f', -1, 64)
+	case SECONDS:
+		return strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64)
+	default:
+		return strconv.FormatInt(storedCdr.Duration.Nanoseconds(), 10)
+	}
+}
+
 // Used to retrieve fields as string, primary fields are const labeled
 func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 	switch rsrFld.Id {
@@ -93,7 +106,7 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 	case ANSWER_TIME:
 		return rsrFld.ParseValue(storedCdr.AnswerTime.String())
 	case DURATION:
-		return rsrFld.ParseValue(strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64))
+		return rsrFld.ParseValue(strconv.FormatInt(storedCdr.Duration.Nanoseconds(), 10))
 	case MEDI_RUNID:
 		return rsrFld.ParseValue(storedCdr.MediationRunId)
 	case COST:
@@ -126,7 +139,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v.Set(DESTINATION, storedCdr.Destination)
 	v.Set(SETUP_TIME, storedCdr.SetupTime.String())
 	v.Set(ANSWER_TIME, storedCdr.AnswerTime.String())
-	v.Set(DURATION, strconv.FormatFloat(storedCdr.Duration.Seconds(), 'f', -1, 64))
+	v.Set(DURATION, strconv.FormatInt(storedCdr.Duration.Nanoseconds(), 10))
 	return v
 }
 
@@ -216,7 +229,7 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	durStr := storedCdr.FieldAsString(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
 		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, DURATION, durationFld.Id))
-	} else if frkStorCdr.Duration, err = ParseDurationWithSecs(durStr); err != nil {
+	} else if frkStorCdr.Duration, err = ParseDurationWithNanosecs(durStr); err != nil {
 		return nil, err
 	}
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))

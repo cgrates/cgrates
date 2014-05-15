@@ -40,7 +40,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	}
 	csvCdrWriter.WriteCdr(ratedCdr)
 	csvCdrWriter.Close()
-	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,192.168.1.1,rated,*out,cgrates.org,call,1001,1001,1002,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10,1.0100,val_extra3,"",val_extra1`
+	expected := `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,192.168.1.1,rated,*out,cgrates.org,call,1001,1001,1002,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10000000000,1.0100,val_extra3,"",val_extra1`
 	result := strings.TrimSpace(writer.String())
 	if result != expected {
 		t.Errorf("Expected: \n%s received: \n%s.", expected, result)

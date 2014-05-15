@@ -47,7 +47,7 @@ var contentCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "TOR", Type: CONSTANT, Value: "02", Width: 2},
 	&config.CgrXmlCfgCdrField{Name: "SubtypeTOR", Type: CONSTANT, Value: "11", Width: 4, Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "SetupTime", Type: CDRFIELD, Value: utils.SETUP_TIME, Width: 12, Strip: "right", Padding: "right", Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "Duration", Type: CDRFIELD, Value: utils.DURATION, Width: 6, Strip: "right", Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Duration", Type: CDRFIELD, Value: utils.DURATION, Width: 6, Strip: "right", Padding: "right", Layout: utils.SECONDS},
 	&config.CgrXmlCfgCdrField{Name: "DataVolume", Type: FILLER, Width: 6},
 	&config.CgrXmlCfgCdrField{Name: "TaxCode", Type: CONSTANT, Value: "1", Width: 1},
 	&config.CgrXmlCfgCdrField{Name: "OperatorCode", Type: CDRFIELD, Value: "opercode", Width: 2, Strip: "right", Padding: "right"},
