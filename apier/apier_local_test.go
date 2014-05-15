@@ -1423,6 +1423,17 @@ func TestExportCdrsToFile(t *testing.T) {
 	*/
 }
 
+func TestLocalGetCdrs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply []*utils.StoredCdr
+	req := utils.AttrGetCdrs{}
+	if err := rater.Call("ApierV1.GetCdrs", req, &reply); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+}
+
 func TestLocalSetDC(t *testing.T) {
 	if !*testLocal {
 		return

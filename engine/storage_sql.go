@@ -912,6 +912,9 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Duration: time.Duration(usage.Int64),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
+		if !cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating
+			storCdr.Cost = -1
+		}
 		cdrs = append(cdrs, storCdr)
 	}
 	return cdrs, nil
