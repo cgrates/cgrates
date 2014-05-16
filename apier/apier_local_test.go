@@ -1608,6 +1608,19 @@ func TestLocalGetScheduledActions(t *testing.T) {
 	}
 }
 
+func TestLocalGetDataCosts(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	attrs := AttrGetDataCosts{Direction: "*out", Category: "data", Tenant: "cgrates.org", Account: "1001", Subject: "1001", StartTime: time.Now(), Usage: 640113}
+	var rply *engine.DataCost
+	if err := rater.Call("ApierV1.GetDataCosts", attrs, &rply); err == nil {
+		t.Error("Should give out error")
+	} else if err.Error() != "SERVER_ERROR:Could not determine rating plans for call" {
+		t.Error("Unexpected error: ", err.Error())
+	}
+}
+
 // Simply kill the engine after we are done with tests within this file
 func TestStopEngine(t *testing.T) {
 	if !*testLocal {

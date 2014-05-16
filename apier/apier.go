@@ -43,6 +43,7 @@ type ApierV1 struct {
 	LogDb     engine.LogStorage
 	Sched     *scheduler.Scheduler
 	Config    *config.CGRConfig
+	Responder *engine.Responder
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
