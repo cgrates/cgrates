@@ -45,7 +45,6 @@ PSTN_72,+4972
 PSTN_70,+4970
 DST_UK_Mobile_BIG5,447956
 URG,112
-*any,
 `
 	timings = `
 WORKDAYS_00,*any,*any,*any,1;2;3;4;5,00:00:00
@@ -209,7 +208,7 @@ func init() {
 }
 
 func TestLoadDestinations(t *testing.T) {
-	if len(csvr.destinations) != 12 {
+	if len(csvr.destinations) != 11 {
 		t.Error("Failed to load destinations: ", len(csvr.destinations))
 	}
 	for _, d := range csvr.destinations {

@@ -117,7 +117,8 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		prefix := ""
 		destinationId := ""
 		var rps RateIntervalList
-		if cd.Destination == utils.ANY {
+		if cd.Destination == utils.ANY || cd.Destination == "" {
+			cd.Destination = utils.ANY
 			if _, ok := rpl.DestinationRates[utils.ANY]; ok {
 				rps = rpl.RateIntervalList(utils.ANY)
 				prefix = utils.ANY
