@@ -42,11 +42,13 @@ GERMANY_MOBILE,+4915
 var ratesSample = `#Tag,DestinationRatesTag,TimingTag,Weight
 RT_1CENT,0,1,1s,1s,0s
 DUMMY,INVALID;DATA
+RT_DATA_2c,0,0.002,10,10,0
 `
 
 var destRatesSample = `#Tag,DestinationsTag,RatesTag
 DR_RETAIL,GERMANY,RT_1CENT,*up,0
 DUMMY,INVALID;DATA
+DR_DATA_1,*any,RT_DATA_2c,*up,2
 `
 var ratingPlansSample = `#Tag,DestinationRatesTag,TimingTag,Weight
 RP_RETAIL,DR_RETAIL,ALWAYS,10
@@ -168,7 +170,7 @@ func TestRatesValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2:
+		case 2, 4:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
@@ -192,7 +194,7 @@ func TestDestRatesValidator(t *testing.T) {
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2:
+		case 2, 4:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}

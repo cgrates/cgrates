@@ -1,2 +1,3 @@
 #Tag,DestinationRatesTag,TimingTag,Weight
 RP_RETAIL,DR_RETAIL,ALWAYS,10
+RP_DATA1,DR_DATA_1,ALWAYS,10

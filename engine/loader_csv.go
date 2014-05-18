@@ -425,14 +425,15 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 			log.Printf("Error parsing rounding decimals: %s", record[4])
 			return err
 		}
-		destinationExists := false
-		for _, d := range csvr.destinations {
-			if d.Id == record[1] {
-				destinationExists = true
-				break
+		destinationExists := record[1] == utils.ANY
+		if !destinationExists {
+			for _, d := range csvr.destinations {
+				if d.Id == record[1] {
+					destinationExists = true
+					break
+				}
 			}
 		}
-
 		if !destinationExists && csvr.dataStorage != nil {
 			if destinationExists, err = csvr.dataStorage.HasData(DESTINATION_PREFIX, record[1]); err != nil {
 				return err

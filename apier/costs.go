@@ -34,7 +34,7 @@ type AttrGetDataCosts struct {
 }
 
 func (apier *ApierV1) GetDataCosts(attrs AttrGetDataCosts, reply *engine.DataCost) error {
-	usageAsDuration := time.Duration(attrs.Usage)
+	usageAsDuration := time.Duration(attrs.Usage) * time.Second // Convert to seconds to match the loaded rates
 	cd := engine.CallDescriptor{
 		Direction:     attrs.Direction,
 		Category:      attrs.Category,

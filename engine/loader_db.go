@@ -288,11 +288,13 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 				return fmt.Errorf("Could not find rate for tag %v", dr.RateId)
 			}
 			dr.Rate = rate
-			destinationExists := false
-			for _, d := range dbr.destinations {
-				if d.Id == dr.DestinationId {
-					destinationExists = true
-					break
+			destinationExists := dr.DestinationId == utils.ANY
+			if !destinationExists {
+				for _, d := range dbr.destinations {
+					if d.Id == dr.DestinationId {
+						destinationExists = true
+						break
+					}
 				}
 			}
 			if !destinationExists {
@@ -408,7 +410,9 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 				// Logger.Debug(fmt.Sprintf("Rate: %v", rt))
 				drate.Rate = rt[drate.RateId]
 				ratingPlan.AddRateInterval(drate.DestinationId, GetRateInterval(rp, drate))
-
+				if drate.DestinationId == utils.ANY {
+					continue // no need of loading the destinations in this case
+				}
 				dms, err := dbr.storDb.GetTpDestinations(dbr.tpid, drate.DestinationId)
 				if err != nil {
 					return false, err
