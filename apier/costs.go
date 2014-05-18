@@ -25,7 +25,7 @@ import (
 	"time"
 )
 
-type AttrGetDataCosts struct {
+type AttrGetDataCost struct {
 	Direction                string
 	Category                 string
 	Tenant, Account, Subject string
@@ -33,7 +33,7 @@ type AttrGetDataCosts struct {
 	Usage                    int64 // the call duration so far (till TimeEnd)
 }
 
-func (apier *ApierV1) GetDataCosts(attrs AttrGetDataCosts, reply *engine.DataCost) error {
+func (apier *ApierV1) GetDataCost(attrs AttrGetDataCost, reply *engine.DataCost) error {
 	usageAsDuration := time.Duration(attrs.Usage) * time.Second // Convert to seconds to match the loaded rates
 	cd := engine.CallDescriptor{
 		Direction:     attrs.Direction,

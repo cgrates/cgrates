@@ -115,6 +115,7 @@ const (
 	MINUTES                    = "minutes"
 	NANOSECONDS                = "nanoseconds"
 	SECONDS                    = "seconds"
+	OUT                        = "*out"
 )
 
 var (

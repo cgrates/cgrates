@@ -1608,13 +1608,13 @@ func TestLocalGetScheduledActions(t *testing.T) {
 	}
 }
 
-func TestLocalGetDataCosts(t *testing.T) {
+func TestLocalGetDataCost(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	attrs := AttrGetDataCosts{Direction: "*out", Category: "data", Tenant: "cgrates.org", Account: "1001", Subject: "1001", StartTime: time.Now(), Usage: 640113}
+	attrs := AttrGetDataCost{Direction: "*out", Category: "data", Tenant: "cgrates.org", Account: "1001", Subject: "1001", StartTime: time.Now(), Usage: 640113}
 	var rply *engine.DataCost
-	if err := rater.Call("ApierV1.GetDataCosts", attrs, &rply); err == nil {
+	if err := rater.Call("ApierV1.GetDataCost", attrs, &rply); err == nil {
 		t.Error("Should give out error")
 	} else if err.Error() != "SERVER_ERROR:Could not determine rating plans for call" {
 		t.Error("Unexpected error: ", err.Error())
