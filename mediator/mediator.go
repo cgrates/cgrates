@@ -58,14 +58,15 @@ func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *engine.CallCost, 
 }
 
 // Retrive the cost from engine
-func (self *Mediator) getCostsVoiceFromRater(storedCdr *utils.StoredCdr) (*engine.CallCost, error) {
+func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*engine.CallCost, error) {
 	cc := &engine.CallCost{}
 	var err error
 	if storedCdr.Duration == time.Duration(0) { // failed call,  returning empty callcost, no error
 		return cc, nil
 	}
 	cd := engine.CallDescriptor{
-		Direction:     "*out", //record[m.directionFields[runIdx]] TODO: fix me
+		TOR:           storedCdr.TOR,
+		Direction:     storedCdr.Direction,
 		Tenant:        storedCdr.Tenant,
 		Category:      storedCdr.Category,
 		Subject:       storedCdr.Subject,
@@ -73,7 +74,6 @@ func (self *Mediator) getCostsVoiceFromRater(storedCdr *utils.StoredCdr) (*engin
 		Destination:   storedCdr.Destination,
 		TimeStart:     storedCdr.AnswerTime,
 		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Duration),
-		LoopIndex:     0,
 		DurationIndex: storedCdr.Duration,
 	}
 	if storedCdr.ReqType == utils.PSEUDOPREPAID {
@@ -97,7 +97,7 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 		// Should be previously calculated and stored in DB
 		qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
 	} else if storedCdr.TOR == utils.VOICE {
-		qryCC, errCost = self.getCostsVoiceFromRater(storedCdr)
+		qryCC, errCost = self.getCostFromRater(storedCdr)
 	} else {
 		return fmt.Errorf("Unsupported TOR: %s", storedCdr.TOR)
 	}
