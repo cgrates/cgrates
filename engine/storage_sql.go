@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -560,7 +560,7 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
 		cdr.Destination,
 		cdr.SetupTime,
 		cdr.AnswerTime,
-		cdr.Duration,
+		cdr.Usage,
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
@@ -595,7 +595,7 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 		storedCdr.Destination,
 		storedCdr.SetupTime,
 		storedCdr.AnswerTime,
-		storedCdr.Duration,
+		storedCdr.Usage,
 		storedCdr.Cost,
 		extraInfo))
 	if err != nil {
@@ -909,7 +909,7 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			CgrId: cgrid.String, OrderId: orderid, TOR: tor.String, AccId: accid.String, CdrHost: cdrhost.String, CdrSource: cdrsrc.String, ReqType: reqtype.String,
 			Direction: direction.String, Tenant: tenant.String,
 			Category: category.String, Account: account.String, Subject: subject.String, Destination: destination.String,
-			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Duration: time.Duration(usage.Int64),
+			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Usage: time.Duration(usage.Int64),
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
 		if !cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating

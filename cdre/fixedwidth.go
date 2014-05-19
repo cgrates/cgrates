@@ -120,7 +120,7 @@ func (fwv *FixedWidthCdrWriter) cdrFieldValue(cdr *utils.StoredCdr, cfgHdr, layo
 		}
 	case utils.COST:
 		cdrVal = cdr.FormatCost(fwv.costShiftDigits, fwv.roundDecimals)
-	case utils.DURATION:
+	case utils.USAGE:
 		cdrVal = cdr.FormatDuration(layout)
 	case utils.SETUP_TIME:
 		cdrVal = cdr.SetupTime.Format(layout)
@@ -304,7 +304,7 @@ func (fwv *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 		fwv.lastCdrATime = cdr.AnswerTime
 	}
 	fwv.numberOfRecords += 1
-	fwv.totalDuration += cdr.Duration
+	fwv.totalDuration += cdr.Usage
 	fwv.totalCost += cdr.Cost
 	fwv.totalCost = utils.Round(fwv.totalCost, fwv.roundDecimals, utils.ROUNDING_MIDDLE)
 	if fwv.firstExpOrderId > cdr.OrderId || fwv.firstExpOrderId == 0 {

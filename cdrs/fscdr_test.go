@@ -56,7 +56,7 @@ func TestCDRFields(t *testing.T) {
 	answerTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME])
 	expctStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("01df56f4-d99a-4ef6-b7fe-b924b2415b7f", setupTime.String()), TOR: utils.VOICE, AccId: "01df56f4-d99a-4ef6-b7fe-b924b2415b7f",
 		CdrHost: "127.0.0.1", CdrSource: "freeswitch_json", Direction: "*out", Category: "call", ReqType: utils.RATED, Tenant: "ipbx.itsyscom.com", Account: "dan", Subject: "dan",
-		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime, Duration: time.Duration(4) * time.Second,
+		Destination: "+4986517174963", SetupTime: setupTime, AnswerTime: answerTime, Usage: time.Duration(4) * time.Second,
 		ExtraFields: map[string]string{"sip_user_agent": "Jitsi2.2.4603.9615Linux"}, Cost: -1}
 	if storedCdr := fsCdr.AsStoredCdr(); !reflect.DeepEqual(expctStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %v, received: %v", expctStoredCdr, storedCdr)

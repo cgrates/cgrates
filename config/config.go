@@ -191,7 +191,7 @@ func (self *CGRConfig) setDefaults() error {
 		utils.DESTINATION: &utils.RSRField{Id: "7"},
 		utils.SETUP_TIME:  &utils.RSRField{Id: "8"},
 		utils.ANSWER_TIME: &utils.RSRField{Id: "9"},
-		utils.DURATION:    &utils.RSRField{Id: "10"},
+		utils.USAGE:       &utils.RSRField{Id: "10"},
 	}
 	self.MediatorEnabled = false
 	self.MediatorRater = "internal"
@@ -231,7 +231,7 @@ func (self *CGRConfig) setDefaults() error {
 		&utils.RSRField{Id: utils.DESTINATION},
 		&utils.RSRField{Id: utils.SETUP_TIME},
 		&utils.RSRField{Id: utils.ANSWER_TIME},
-		&utils.RSRField{Id: utils.DURATION},
+		&utils.RSRField{Id: utils.USAGE},
 		&utils.RSRField{Id: utils.COST},
 	}
 	return nil

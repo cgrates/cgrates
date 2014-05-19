@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -137,7 +137,7 @@ func (fsCdr FSCdr) AsStoredCdr() *utils.StoredCdr {
 	storCdr.Destination = utils.FirstNonEmpty(fsCdr.vars[FS_DESTINATION], fsCdr.vars[FS_CALL_DEST_NR], fsCdr.vars[FS_SIP_REQUSER])
 	storCdr.SetupTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
 	storCdr.AnswerTime, _ = utils.ParseTimeDetectLayout(fsCdr.vars[FS_ANSWER_TIME])
-	storCdr.Duration, _ = utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
+	storCdr.Usage, _ = utils.ParseDurationWithSecs(fsCdr.vars[FS_DURATION])
 	storCdr.ExtraFields = fsCdr.getExtraFields()
 	storCdr.Cost = -1
 	return storCdr

@@ -69,7 +69,7 @@ func (cgrCdr CgrCdr) AsStoredCdr() *StoredCdr {
 	storCdr.Destination = cgrCdr[DESTINATION]
 	storCdr.SetupTime, _ = ParseTimeDetectLayout(cgrCdr[SETUP_TIME]) // Not interested to process errors, should do them if necessary in a previous step
 	storCdr.AnswerTime, _ = ParseTimeDetectLayout(cgrCdr[ANSWER_TIME])
-	storCdr.Duration, _ = ParseDurationWithSecs(cgrCdr[USAGE])
+	storCdr.Usage, _ = ParseDurationWithSecs(cgrCdr[USAGE])
 	storCdr.ExtraFields = cgrCdr.getExtraFields()
 	storCdr.Cost = -1
 	return storCdr

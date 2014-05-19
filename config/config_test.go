@@ -105,7 +105,7 @@ func TestDefaults(t *testing.T) {
 		utils.DESTINATION: &utils.RSRField{Id: "7"},
 		utils.SETUP_TIME:  &utils.RSRField{Id: "8"},
 		utils.ANSWER_TIME: &utils.RSRField{Id: "9"},
-		utils.DURATION:    &utils.RSRField{Id: "10"},
+		utils.USAGE:       &utils.RSRField{Id: "10"},
 	}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = "internal"
@@ -145,7 +145,7 @@ func TestDefaults(t *testing.T) {
 		&utils.RSRField{Id: utils.DESTINATION},
 		&utils.RSRField{Id: utils.SETUP_TIME},
 		&utils.RSRField{Id: utils.ANSWER_TIME},
-		&utils.RSRField{Id: utils.DURATION},
+		&utils.RSRField{Id: utils.USAGE},
 		&utils.RSRField{Id: utils.COST},
 	}
 	if !reflect.DeepEqual(cfg, eCfg) {
@@ -250,7 +250,7 @@ func TestConfigFromFile(t *testing.T) {
 		utils.DESTINATION: &utils.RSRField{Id: "test"},
 		utils.SETUP_TIME:  &utils.RSRField{Id: "test"},
 		utils.ANSWER_TIME: &utils.RSRField{Id: "test"},
-		utils.DURATION:    &utils.RSRField{Id: "test"},
+		utils.USAGE:       &utils.RSRField{Id: "test"},
 		"test":            &utils.RSRField{Id: "test"},
 	}
 	eCfg.MediatorEnabled = true

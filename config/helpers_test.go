@@ -91,7 +91,7 @@ extra_fields = extra1:extraval1,extra2:extraval1
 		utils.DESTINATION: &utils.RSRField{Id: "destination1"},
 		utils.SETUP_TIME:  &utils.RSRField{Id: "setuptime1"},
 		utils.ANSWER_TIME: &utils.RSRField{Id: "answertime1"},
-		utils.DURATION:    &utils.RSRField{Id: "duration1"},
+		utils.USAGE:       &utils.RSRField{Id: "duration1"},
 		"extra1":          &utils.RSRField{Id: "extraval1"},
 		"extra2":          &utils.RSRField{Id: "extraval1"},
 	}

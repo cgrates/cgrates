@@ -1616,7 +1616,7 @@ func TestLocalGetDataCost(t *testing.T) {
 	var rply *engine.DataCost
 	if err := rater.Call("ApierV1.GetDataCost", attrs, &rply); err != nil {
 		t.Error("Unexpected nil error received: ", err.Error())
-	} else if rply.Cost != 128.03 {
+	} else if rply.Cost != 128.0240 {
 		t.Errorf("Unexpected cost received: %f", rply.Cost)
 	}
 }

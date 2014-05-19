@@ -35,7 +35,7 @@ func TestCsvCdrWriter(t *testing.T) {
 	ratedCdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 		ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
-		Duration: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID,
+		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
 	}
 	csvCdrWriter.WriteCdr(ratedCdr)

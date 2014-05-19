@@ -47,7 +47,7 @@ var contentCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "TOR", Type: CONSTANT, Value: "02", Width: 2},
 	&config.CgrXmlCfgCdrField{Name: "SubtypeTOR", Type: CONSTANT, Value: "11", Width: 4, Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "SetupTime", Type: CDRFIELD, Value: utils.SETUP_TIME, Width: 12, Strip: "right", Padding: "right", Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "Duration", Type: CDRFIELD, Value: utils.DURATION, Width: 6, Strip: "right", Padding: "right", Layout: utils.SECONDS},
+	&config.CgrXmlCfgCdrField{Name: "Duration", Type: CDRFIELD, Value: utils.USAGE, Width: 6, Strip: "right", Padding: "right", Layout: utils.SECONDS},
 	&config.CgrXmlCfgCdrField{Name: "DataVolume", Type: FILLER, Width: 6},
 	&config.CgrXmlCfgCdrField{Name: "TaxCode", Type: CONSTANT, Value: "1", Width: 1},
 	&config.CgrXmlCfgCdrField{Name: "OperatorCode", Type: CDRFIELD, Value: "opercode", Width: 2, Strip: "right", Padding: "right"},
@@ -85,7 +85,7 @@ func TestWriteCdr(t *testing.T) {
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Duration:   time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
+		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
 	if err := fwWriter.WriteCdr(cdr); err != nil {
@@ -119,7 +119,7 @@ func TestWriteCdr(t *testing.T) {
 		t.Error("Unexpected lastCdrATime in stats: ", fwWriter.lastCdrATime)
 	} else if fwWriter.numberOfRecords != 1 {
 		t.Error("Unexpected number of records in the stats: ", fwWriter.numberOfRecords)
-	} else if fwWriter.totalDuration != cdr.Duration {
+	} else if fwWriter.totalDuration != cdr.Usage {
 		t.Error("Unexpected total duration in the stats: ", fwWriter.totalDuration)
 	} else if fwWriter.totalCost != utils.Round(cdr.Cost, fwWriter.roundDecimals, utils.ROUNDING_MIDDLE) {
 		t.Error("Unexpected total cost in the stats: ", fwWriter.totalCost)
@@ -146,14 +146,14 @@ func TestWriteCdrs(t *testing.T) {
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1010",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
-		Duration:   time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.25,
+		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.25,
 		ExtraFields: map[string]string{"productnumber": "12341", "fieldextr2": "valextr2"},
 	}
 	cdr2 := &utils.StoredCdr{CgrId: utils.Sha1("aaa2", time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String()), OrderId: 4, AccId: "aaa2", CdrHost: "192.168.1.2", ReqType: "prepaid", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1002", Subject: "1002", Destination: "1011",
 		SetupTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 7, 42, 26, 0, time.UTC),
-		Duration:   time.Duration(5) * time.Minute, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.40001,
+		Usage:      time.Duration(5) * time.Minute, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.40001,
 		ExtraFields: map[string]string{"productnumber": "12342", "fieldextr2": "valextr2"},
 	}
 	cdr3 := &utils.StoredCdr{}
@@ -161,7 +161,7 @@ func TestWriteCdrs(t *testing.T) {
 		Category: "call", Account: "1004", Subject: "1004", Destination: "1013",
 		SetupTime:  time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 9, 42, 26, 0, time.UTC),
-		Duration:   time.Duration(20) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
+		Usage:      time.Duration(20) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"productnumber": "12344", "fieldextr2": "valextr2"},
 	}
 	for _, cdr := range []*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4} {

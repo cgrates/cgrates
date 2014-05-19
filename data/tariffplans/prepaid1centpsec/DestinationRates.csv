@@ -1,4 +1,4 @@
 #Tag,DestinationsTag,RatesTag,RoundingMethod,RoundingDecimals
-DR_RETAIL,GERMANY,RT_1CENT,*up,2
-DR_RETAIL,GERMANY_MOBILE,RT_1CENT,*up,2
-DR_DATA_1,*any,RT_DATA_2c,*up,2
+DR_RETAIL,GERMANY,RT_1CENT,*up,4
+DR_RETAIL,GERMANY_MOBILE,RT_1CENT,*up,4
+DR_DATA_1,*any,RT_DATA_2c,*up,4

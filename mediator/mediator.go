@@ -61,7 +61,7 @@ func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *engine.CallCost, 
 func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*engine.CallCost, error) {
 	cc := &engine.CallCost{}
 	var err error
-	if storedCdr.Duration == time.Duration(0) { // failed call,  returning empty callcost, no error
+	if storedCdr.Usage == time.Duration(0) { // failed call,  returning empty callcost, no error
 		return cc, nil
 	}
 	cd := engine.CallDescriptor{
@@ -73,8 +73,8 @@ func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*engine.Call
 		Account:       storedCdr.Account,
 		Destination:   storedCdr.Destination,
 		TimeStart:     storedCdr.AnswerTime,
-		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Duration),
-		DurationIndex: storedCdr.Duration,
+		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Usage),
+		DurationIndex: storedCdr.Usage,
 	}
 	if storedCdr.ReqType == utils.PSEUDOPREPAID {
 		err = self.connector.Debit(cd, cc)

@@ -87,7 +87,6 @@ const (
 	DESTINATION                = "destination"
 	SETUP_TIME                 = "setup_time"
 	ANSWER_TIME                = "answer_time"
-	DURATION                   = "duration"
 	USAGE                      = "usage"
 	MEDI_RUNID                 = "mediation_runid"
 	COST                       = "cost"

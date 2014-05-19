@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -113,8 +113,8 @@ func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
 			if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
 				return nil, fmt.Errorf("Cannot parse answer time field, err: %s", err.Error())
 			}
-		case utils.DURATION:
-			if storedCdr.Duration, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
+		case utils.USAGE:
+			if storedCdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
 				return nil, fmt.Errorf("Cannot parse duration field, err: %s", err.Error())
 			}
 		default: // Extra fields will not match predefined so they all show up here

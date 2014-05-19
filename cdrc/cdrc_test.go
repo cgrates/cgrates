@@ -55,7 +55,7 @@ func TestRecordForkCdr(t *testing.T) {
 		Destination: cdrRow[7],
 		SetupTime:   time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
-		Duration:    time.Duration(62) * time.Second,
+		Usage:       time.Duration(62) * time.Second,
 		ExtraFields: map[string]string{"supplier": "supplier1"},
 		Cost:        -1,
 	}
