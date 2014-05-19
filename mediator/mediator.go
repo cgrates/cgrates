@@ -96,10 +96,8 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 	if storedCdr.ReqType == utils.PREPAID || storedCdr.ReqType == utils.POSTPAID {
 		// Should be previously calculated and stored in DB
 		qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
-	} else if storedCdr.TOR == utils.VOICE {
-		qryCC, errCost = self.getCostFromRater(storedCdr)
 	} else {
-		return fmt.Errorf("Unsupported TOR: %s", storedCdr.TOR)
+		qryCC, errCost = self.getCostFromRater(storedCdr)
 	}
 	if errCost != nil {
 		return errCost

@@ -212,7 +212,7 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, SUBJECT, subjectFld.Id))
 	}
 	frkStorCdr.Destination = storedCdr.FieldAsString(destFld)
-	if primaryMandatory && len(frkStorCdr.Destination) == 0 {
+	if primaryMandatory && len(frkStorCdr.Destination) == 0 && frkStorCdr.TOR == VOICE {
 		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, DESTINATION, destFld.Id))
 	}
 	sTimeStr := storedCdr.FieldAsString(setupTimeFld)
