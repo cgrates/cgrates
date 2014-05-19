@@ -32,7 +32,7 @@ func TestRightMargin(t *testing.T) {
 	t2 := time.Date(2012, time.February, 4, 0, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 24, 0, 0, 0, time.UTC) {
 		t.Error("Incorrect first half", ts)
 	}
@@ -69,7 +69,7 @@ func TestSplitMiddle(t *testing.T) {
 		t.Errorf("%+v should contain %+v", i, ts.TimeEnd)
 	}
 
-	newTs := ts.SplitByRateInterval(i)
+	newTs := ts.SplitByRateInterval(i, false)
 	if newTs == nil {
 		t.Errorf("Error spliting interval %+v", newTs)
 	}
@@ -81,7 +81,7 @@ func TestRightHourMargin(t *testing.T) {
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 3, 17, 59, 0, 0, time.UTC) {
 		t.Error("Incorrect first half", ts)
 	}
@@ -106,7 +106,7 @@ func TestLeftMargin(t *testing.T) {
 	t2 := time.Date(2012, time.February, 6, 0, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.February, 6, 0, 0, 0, 0, time.UTC) {
 		t.Error("Incorrect first half", ts)
 	}
@@ -130,7 +130,7 @@ func TestLeftHourMargin(t *testing.T) {
 	t2 := time.Date(2012, time.December, 1, 9, 20, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	if ts.TimeStart != t1 || ts.TimeEnd != time.Date(2012, time.December, 1, 9, 0, 0, 0, time.UTC) {
 		t.Error("Incorrect first half", ts)
 	}
@@ -153,7 +153,7 @@ func TestEnclosingMargin(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	if ts.TimeStart != t1 || ts.TimeEnd != t2 || nts != nil {
 		t.Error("Incorrect enclosing", ts)
 	}
@@ -167,7 +167,7 @@ func TestOutsideMargin(t *testing.T) {
 	t1 := time.Date(2012, time.February, 5, 17, 45, 0, 0, time.UTC)
 	t2 := time.Date(2012, time.February, 5, 18, 10, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2}
-	result := ts.SplitByRateInterval(i)
+	result := ts.SplitByRateInterval(i, false)
 	if result != nil {
 		t.Error("RateInterval not split correctly")
 	}
@@ -267,7 +267,7 @@ func TestTimespanSplitGroupedRates(t *testing.T) {
 	t2 := time.Date(2012, time.February, 3, 18, 00, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: 1800 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	splitTime := time.Date(2012, time.February, 3, 17, 45, 00, 0, time.UTC)
 	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
 		t.Error("Incorrect first half", ts.TimeStart, ts.TimeEnd)
@@ -315,7 +315,7 @@ func TestTimespanSplitGroupedRatesIncrements(t *testing.T) {
 	t2 := time.Date(2012, time.February, 3, 17, 31, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: 60 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	cd := &CallDescriptor{}
 	timespans := cd.roundTimeSpansToIncrement([]*TimeSpan{ts, nts})
 	if len(timespans) != 2 {
@@ -361,7 +361,7 @@ func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 	t2 := time.Date(2012, time.February, 3, 17, 01, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	splitTime := time.Date(2012, time.February, 3, 17, 00, 30, 0, time.UTC)
 	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
 		t.Error("Incorrect first half", ts)
@@ -379,7 +379,7 @@ func TestTimespanSplitRightHourMarginBeforeGroup(t *testing.T) {
 	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
 		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
-	nnts := nts.SplitByRateInterval(i)
+	nnts := nts.SplitByRateInterval(i, false)
 	if nnts != nil {
 		t.Error("Bad new split", nnts)
 	}
@@ -397,7 +397,7 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: 240 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
 	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
 		t.Error("Incorrect first half", nts)
@@ -415,7 +415,7 @@ func TestTimespanSplitGroupSecondSplit(t *testing.T) {
 	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
 		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
-	nnts := nts.SplitByRateInterval(i)
+	nnts := nts.SplitByRateInterval(i, false)
 	nsplitTime := time.Date(2012, time.February, 3, 17, 03, 30, 0, time.UTC)
 	if nts.TimeStart != splitTime || nts.TimeEnd != nsplitTime {
 		t.Error("Incorrect first half", nts)
@@ -442,7 +442,7 @@ func TestTimespanSplitLong(t *testing.T) {
 	t2 := time.Date(2013, time.October, 10, 20, 0, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: t2.Sub(t1), ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	splitTime := time.Date(2013, time.October, 9, 18, 0, 0, 0, time.UTC)
 	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
 		t.Error("Incorrect first half", nts)
@@ -474,7 +474,7 @@ func TestTimespanSplitMultipleGroup(t *testing.T) {
 	t2 := time.Date(2012, time.February, 3, 17, 04, 0, 0, time.UTC)
 	ts := &TimeSpan{TimeStart: t1, TimeEnd: t2, DurationIndex: 240 * time.Second, ratingInfo: &RatingInfo{}}
 	oldDuration := ts.GetDuration()
-	nts := ts.SplitByRateInterval(i)
+	nts := ts.SplitByRateInterval(i, false)
 	splitTime := time.Date(2012, time.February, 3, 17, 01, 00, 0, time.UTC)
 	if ts.TimeStart != t1 || ts.TimeEnd != splitTime {
 		t.Error("Incorrect first half", nts)
@@ -492,7 +492,7 @@ func TestTimespanSplitMultipleGroup(t *testing.T) {
 	if ts.GetDuration().Seconds()+nts.GetDuration().Seconds() != oldDuration.Seconds() {
 		t.Errorf("The duration has changed: %v + %v != %v", ts.GetDuration().Seconds(), nts.GetDuration().Seconds(), oldDuration.Seconds())
 	}
-	nnts := nts.SplitByRateInterval(i)
+	nnts := nts.SplitByRateInterval(i, false)
 	nsplitTime := time.Date(2012, time.February, 3, 17, 03, 00, 0, time.UTC)
 	if nts.TimeStart != splitTime || nts.TimeEnd != nsplitTime {
 		t.Error("Incorrect first half", nts)

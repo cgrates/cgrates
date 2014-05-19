@@ -317,7 +317,7 @@ It will modify the endtime of the received timespan and it will return
 a new timespan starting from the end of the received one.
 The interval will attach itself to the timespan that overlaps the interval.
 */
-func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
+func (ts *TimeSpan) SplitByRateInterval(i *RateInterval, data bool) (nts *TimeSpan) {
 	// if the span is not in interval return nil
 	if !(i.Contains(ts.TimeStart, false) || i.Contains(ts.TimeEnd, true)) {
 		//Logger.Debug("Not in interval")
@@ -346,6 +346,12 @@ func (ts *TimeSpan) SplitByRateInterval(i *RateInterval) (nts *TimeSpan) {
 				return
 			}
 		}
+	}
+	if data {
+		if i.Contains(ts.TimeStart, false) {
+			ts.SetRateInterval(i)
+		}
+		return
 	}
 	// if the span is enclosed in the interval try to set as new interval and return nil
 	if i.Contains(ts.TimeStart, false) && i.Contains(ts.TimeEnd, true) {
