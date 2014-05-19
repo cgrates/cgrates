@@ -56,7 +56,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		DestinationField: "destination1",
 		SetupTimeField:   "setuptime1",
 		AnswerTimeField:  "answertime1",
-		DurationField:    "duration1",
+		UsageField:       "duration1",
 	}
 	if dc1, err := NewDerivedCharger("test1", "reqtype1", "direction1", "tenant1", "tor1", "account1", "subject1", "destination1",
 		"setuptime1", "answertime1", "duration1"); err != nil {
@@ -75,7 +75,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		DestinationField: "~destination2:s/sip:(.+)/$1/",
 		SetupTimeField:   "~setuptime2:s/sip:(.+)/$1/",
 		AnswerTimeField:  "~answertime2:s/sip:(.+)/$1/",
-		DurationField:    "~duration2:s/sip:(.+)/$1/",
+		UsageField:       "~duration2:s/sip:(.+)/$1/",
 	}
 	edc2.rsrReqTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
 	edc2.rsrDirectionField, _ = NewRSRField("~direction2:s/sip:(.+)/$1/")
@@ -86,7 +86,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	edc2.rsrDestinationField, _ = NewRSRField("~destination2:s/sip:(.+)/$1/")
 	edc2.rsrSetupTimeField, _ = NewRSRField("~setuptime2:s/sip:(.+)/$1/")
 	edc2.rsrAnswerTimeField, _ = NewRSRField("~answertime2:s/sip:(.+)/$1/")
-	edc2.rsrDurationField, _ = NewRSRField("~duration2:s/sip:(.+)/$1/")
+	edc2.rsrUsageField, _ = NewRSRField("~duration2:s/sip:(.+)/$1/")
 	if dc2, err := NewDerivedCharger("test2",
 		"~reqtype2:s/sip:(.+)/$1/",
 		"~direction2:s/sip:(.+)/$1/",
@@ -114,16 +114,16 @@ func TestAppendDefaultRun(t *testing.T) {
 	var dc1 DerivedChargers
 	dcDf := &DerivedCharger{RunId: DEFAULT_RUNID, ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
 		TenantField: META_DEFAULT, CategoryField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
-		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT, DurationField: META_DEFAULT}
+		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT}
 	eDc1 := DerivedChargers{dcDf}
 	if dc1, _ = dc1.AppendDefaultRun(); !reflect.DeepEqual(dc1, eDc1) {
 		t.Error("Unexpected result.")
 	}
 	dc2 := DerivedChargers{
 		&DerivedCharger{RunId: "extra1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		&DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
-			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", DurationField: "*default"},
+			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 	}
 	eDc2 := append(dc2, dcDf)
 	if dc2, _ = dc2.AppendDefaultRun(); !reflect.DeepEqual(dc2, eDc2) {

@@ -266,7 +266,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
 	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
-		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
+		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
 	eCfg.CombinedDerivedChargers = true
 	eCfg.HistoryAgentEnabled = true
 	eCfg.HistoryServer = "test"

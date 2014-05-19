@@ -132,7 +132,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 		dcDstFld, _ := utils.NewRSRField(dc.DestinationField)
 		dcSTimeFld, _ := utils.NewRSRField(dc.SetupTimeField)
 		dcATimeFld, _ := utils.NewRSRField(dc.AnswerTimeField)
-		dcDurFld, _ := utils.NewRSRField(dc.DurationField)
+		dcDurFld, _ := utils.NewRSRField(dc.UsageField)
 		forkedCdr, err := storedCdr.ForkCdr(dc.RunId, dcReqTypeFld, dcDirFld, dcTenantFld, dcCategoryFld, dcAcntFld, dcSubjFld, dcDstFld, dcSTimeFld, dcATimeFld, dcDurFld,
 			[]*utils.RSRField{}, true)
 		if err != nil { // Errors on fork, cannot calculate further, write that into db for later analysis

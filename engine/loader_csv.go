@@ -851,7 +851,7 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 				DestinationField: ValueOrDefault(record[12], "*default"),
 				SetupTimeField:   ValueOrDefault(record[13], "*default"),
 				AnswerTimeField:  ValueOrDefault(record[14], "*default"),
-				DurationField:    ValueOrDefault(record[15], "*default"),
+				UsageField:       ValueOrDefault(record[15], "*default"),
 			}); err != nil {
 				return err
 			}
@@ -870,7 +870,7 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 				DestinationField: ValueOrDefault(record[12], "*default"),
 				SetupTimeField:   ValueOrDefault(record[13], "*default"),
 				AnswerTimeField:  ValueOrDefault(record[14], "*default"),
-				DurationField:    ValueOrDefault(record[15], "*default"),
+				UsageField:       ValueOrDefault(record[15], "*default"),
 			}}
 		}
 	}

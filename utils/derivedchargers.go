@@ -83,9 +83,9 @@ func NewDerivedCharger(runId, reqTypeFld, dirFld, tenantFld, catFld, acntFld, su
 			return nil, err
 		}
 	}
-	dc.DurationField = durFld
-	if strings.HasPrefix(dc.DurationField, REGEXP_PREFIX) {
-		if dc.rsrDurationField, err = NewRSRField(dc.DurationField); err != nil {
+	dc.UsageField = durFld
+	if strings.HasPrefix(dc.UsageField, REGEXP_PREFIX) {
+		if dc.rsrUsageField, err = NewRSRField(dc.UsageField); err != nil {
 			return nil, err
 		}
 	}
@@ -103,7 +103,7 @@ type DerivedCharger struct {
 	DestinationField    string    // Field containing destination information
 	SetupTimeField      string    // Field containing setup time information
 	AnswerTimeField     string    // Field containing answer time information
-	DurationField       string    // Field containing duration information
+	UsageField          string    // Field containing usage information
 	rsrReqTypeField     *RSRField // Storage for compiled Regexp in case of RSRFields
 	rsrDirectionField   *RSRField
 	rsrTenantField      *RSRField
@@ -113,7 +113,7 @@ type DerivedCharger struct {
 	rsrDestinationField *RSRField
 	rsrSetupTimeField   *RSRField
 	rsrAnswerTimeField  *RSRField
-	rsrDurationField    *RSRField
+	rsrUsageField       *RSRField
 }
 
 func DerivedChargersKey(direction, tenant, category, account, subject string) string {

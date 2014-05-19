@@ -30,7 +30,7 @@ import (
 func TestResponderGetDerivedChargers(t *testing.T) {
 	cfg, _ := config.NewDefaultCGRConfig()
 	cfgedDC := utils.DerivedChargers{&utils.DerivedCharger{RunId: "responder1", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
-		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", DurationField: "test"}}
+		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
 	cfg.DerivedChargers = cfgedDC
 	config.SetCgrConfig(cfg)
 	r := Responder{}

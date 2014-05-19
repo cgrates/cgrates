@@ -258,7 +258,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				engine.Logger.Crit("Error parsing postpaid call start time from event")
 				return
 			}
-			duration, err := ev.GetDuration(dc.DurationField)
+			duration, err := ev.GetDuration(dc.UsageField)
 			if err != nil {
 				engine.Logger.Crit(fmt.Sprintf("Error parsing call duration from event %s", err.Error()))
 				return
@@ -294,7 +294,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				engine.Logger.Crit("Error parsing prepaid call start time from event")
 				return
 			}
-			duration, err := ev.GetDuration(dc.DurationField)
+			duration, err := ev.GetDuration(dc.UsageField)
 			if err != nil {
 				engine.Logger.Crit(fmt.Sprintf("Error parsing call duration from event %s", err.Error()))
 				return
