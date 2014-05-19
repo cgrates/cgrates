@@ -182,7 +182,7 @@ func TestFsCsvGetAccount(t *testing.T) {
 		return
 	}
 	var reply *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 10.0 { // We expect 11.5 since we have added in the previous test 1.5
@@ -222,7 +222,7 @@ func TestFsCsvCall1(t *testing.T) {
 	}
 	// Make sure the account was debited correctly for the first loop index (ConnectFee included)
 	var reply *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 9.4 { // We expect 11.5 since we have added in the previous test 1.5

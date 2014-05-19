@@ -183,7 +183,7 @@ func TestFsJsonGetAccount1001(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
@@ -208,7 +208,7 @@ func TestFsJsonGetAccount1002(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1002", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1002", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
@@ -229,7 +229,7 @@ func TestFsJsonGetAccount1003(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1003", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
@@ -250,7 +250,7 @@ func TestFsJsonGetAccount1004(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1004", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1004", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
@@ -271,7 +271,7 @@ func TestFsJsonGetAccount1006(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1006", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1006", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err == nil {
 		t.Error("Got no error when querying unexisting balance")
 	}
@@ -282,7 +282,7 @@ func TestFsJsonGetAccount1007(t *testing.T) {
 		return
 	}
 	var acnt *engine.Account
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1007", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1007", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
@@ -403,7 +403,7 @@ func TestMaxDebit1001(t *testing.T) {
 	} else if cc.GetDuration() > time.Duration(1)*time.Minute {
 		t.Errorf("Unexpected call duration received: %v", cc.GetDuration())
 	}
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else {
@@ -443,7 +443,7 @@ func TestMaxDebit1007(t *testing.T) {
 		t.Errorf("Unexpected call duration received: %v", cc.GetDuration())
 	}
 	// Debit out of shared balance should reflect in the 1001 instead of 1007
-	attrs := &AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else {
@@ -460,7 +460,7 @@ func TestMaxDebit1007(t *testing.T) {
 		}
 	}
 	// Make sure 1007 remains the same
-	attrs = &AttrGetAccount{Tenant: "cgrates.org", Account: "1007", Direction: "*out"}
+	attrs = &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1007", Direction: "*out"}
 	if err := rater.Call("ApierV1.GetAccount", attrs, &acnt); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	}
