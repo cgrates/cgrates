@@ -277,6 +277,12 @@ func (self *TPAccountActions) KeyId() string {
 	return fmt.Sprintf("%s:%s:%s", self.Direction, self.Tenant, self.Account)
 }
 
+type AttrGetAccount struct {
+	Tenant    string
+	Account   string
+	Direction string
+}
+
 // Data used to do remote cache reloads via api
 type ApiReloadCache struct {
 	DestinationIds   []string

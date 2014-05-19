@@ -51,6 +51,7 @@ README:
 var cfg *config.CGRConfig
 var cgrRpc *rpc.Client
 var cdrStor engine.CdrStorage
+var httpClient *http.Client
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
@@ -117,6 +118,7 @@ func TestStartEngine(t *testing.T) {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
 	time.Sleep(time.Duration(*startDelay) * time.Millisecond) // Give time to rater to fire up
+	httpClient = new(http.Client)
 }
 
 // Connect rpc client
@@ -135,7 +137,6 @@ func TestPostCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	httpClient := new(http.Client)
 	cdrForm1 := url.Values{utils.TOR: []string{utils.VOICE}, utils.ACCID: []string{"dsafdsaf"}, utils.CDRHOST: []string{"192.168.1.1"}, utils.REQTYPE: []string{"rated"}, utils.DIRECTION: []string{"*out"},
 		utils.TENANT: []string{"cgrates.org"}, utils.CATEGORY: []string{"call"}, utils.ACCOUNT: []string{"1001"}, utils.SUBJECT: []string{"1001"},
 		utils.DESTINATION: []string{"+4986517174963"},
@@ -238,6 +239,40 @@ func TestRateCdrs(t *testing.T) {
 		t.Error(err)
 	} else if len(errRatedCdrs) != 2 {
 		t.Error(fmt.Sprintf("Unexpected number of CDRs with errors: %d", len(errRatedCdrs)))
+	}
+}
+
+func TestMediatePseudoprepaid(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var reply *engine.Account
+	attrs := &utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1003", Direction: "*out"}
+	if err := cgrRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != 11 {
+		t.Errorf("Calling ApierV1.GetBalance expected: 10.0, received: %f", reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
+	}
+	voiceCdr := &utils.StoredCdr{TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.PSEUDOPREPAID, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003", Destination: "+4986517174963",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(5) * time.Second}
+	dataCdr := &utils.StoredCdr{TOR: utils.DATA, AccId: "6163508432", CdrHost: "192.168.1.1", CdrSource: "test", ReqType: utils.PSEUDOPREPAID, Direction: utils.OUT,
+		Tenant: "cgrates.org", Category: "data", Account: "1003", Subject: "1003",
+		SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second}
+	for _, cdrForm := range []url.Values{voiceCdr.AsHttpForm(), dataCdr.AsHttpForm()} {
+		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
+		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cfg.HTTPListen), cdrForm); err != nil {
+			t.Error(err.Error())
+		}
+	}
+	time.Sleep(time.Duration(*startDelay) * time.Millisecond) // Give time for debits to happen
+	expectBalance := 5.998
+	if err := cgrRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
+	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != expectBalance { // 5 from voice, 0.002 from DATA
+		t.Errorf("Calling ApierV1.GetBalance expected: %f, received: %f", expectBalance, reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue())
 	}
 }
 

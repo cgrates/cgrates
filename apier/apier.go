@@ -64,14 +64,8 @@ func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) erro
 	return nil
 }
 
-type AttrGetAccount struct {
-	Tenant    string
-	Account   string
-	Direction string
-}
-
 // Get balance
-func (self *ApierV1) GetAccount(attr *AttrGetAccount, reply *engine.Account) error {
+func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Account) error {
 	tag := fmt.Sprintf("%s:%s:%s", attr.Direction, attr.Tenant, attr.Account)
 	userBalance, err := self.AccountDb.GetAccount(tag)
 	if err != nil {
