@@ -488,7 +488,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	destFld, _ := c.GetString("cdrc", "destination_field")
 	setupTimeFld, _ := c.GetString("cdrc", "setup_time_field")
 	answerTimeFld, _ := c.GetString("cdrc", "answer_time_field")
-	durFld, _ := c.GetString("cdrc", "duration_field")
+	durFld, _ := c.GetString("cdrc", "usage_field")
 	extraFlds, _ := c.GetString("cdrc", "extra_fields")
 	if cfg.CdrcCdrFields, err = ParseCdrcCdrFields(accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
 		setupTimeFld, answerTimeFld, durFld, extraFlds); err != nil {

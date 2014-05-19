@@ -73,7 +73,7 @@ subject_field = test			# Subject field identifier. Use index numbers in case of 
 destination_field = test		# Destination field identifier. Use index numbers in case of .csv cdrs.
 setup_time_field = test			# Answer time field identifier. Use index numbers in case of .csv cdrs.
 answer_time_field = test		# Answer time field identifier. Use index numbers in case of .csv cdrs.
-duration_field = test			# Duration field identifier. Use index numbers in case of .csv cdrs.
+usage_field = test			# Duration field identifier. Use index numbers in case of .csv cdrs.
 extra_fields = test:test			# Field identifiers of the fields to add in extra fields section, special format in case of .csv "index1|field1,index2|field2"
 
 [mediator]
@@ -105,7 +105,7 @@ subject_fields = test		# Name of fields to be used during additional sessions co
 destination_fields = test	# Name of destination fields to be used during additional sessions control <""|*default|field_name>.
 setup_time_fields = test	# Name of setup_time fields to be used during additional sessions control <""|*default|field_name>.
 answer_time_fields = test	# Name of answer_time fields to be used during additional sessions control <""|*default|field_name>.
-duration_fields = test		# Name of duration fields to be used during additional sessions control <""|*default|field_name>.
+usage_fields = test			# Name of duration fields to be used during additional sessions control <""|*default|field_name>.
 combined_chargers = true	# Combine accounts specific derived_chargers with server configured ones <true|false>.
 
 [history_server]

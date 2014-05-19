@@ -50,7 +50,7 @@ subject_fields = test1, test2
 destination_fields = test1, test2
 setup_time_fields = test1, test2
 answer_time_fields = test1, test2
-duration_fields = test1, test2
+usage_fields = test1, test2
 `)
 	edcs := utils.DerivedChargers{
 		&utils.DerivedCharger{RunId: "run1", ReqTypeField: "test1", DirectionField: "test1", TenantField: "test1", CategoryField: "test1",
@@ -77,7 +77,7 @@ subject_field = subject1
 destination_field = destination1
 setup_time_field = setuptime1
 answer_time_field = answertime1
-duration_field = duration1
+usage_field = duration1
 extra_fields = extra1:extraval1,extra2:extraval1
 `)
 	eCdrcCdrFlds := map[string]*utils.RSRField{

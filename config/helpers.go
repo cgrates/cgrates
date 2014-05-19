@@ -106,7 +106,7 @@ func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err
 	if aTimeFlds, err = ConfigSlice(cfgVal); err != nil {
 		return nil, err
 	}
-	cfgVal, _ = c.GetString("derived_charging", "duration_fields")
+	cfgVal, _ = c.GetString("derived_charging", "usage_fields")
 	if durFlds, err = ConfigSlice(cfgVal); err != nil {
 		return nil, err
 	}
