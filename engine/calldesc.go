@@ -340,8 +340,8 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 				}
 			}
 		}
-	}
 
+	}
 	// Logger.Debug(fmt.Sprintf("After SplitByRatingPlan: %+v", timespans))
 	// split on price intervals
 	for i := 0; i < len(timespans); i++ {
@@ -356,7 +356,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			if timespans[i].RateInterval != nil && timespans[i].RateInterval.Weight < interval.Weight {
 				continue // if the timespan has an interval than it already has a heigher weight
 			}
-			newTs := timespans[i].SplitByRateInterval(interval)
+			newTs := timespans[i].SplitByRateInterval(interval, cd.TOR != MINUTES)
 			if newTs != nil {
 				newTs.ratingInfo = rp
 				// insert the new timespan
@@ -368,6 +368,7 @@ func (cd *CallDescriptor) splitInTimeSpans() (timespans []*TimeSpan) {
 			}
 		}
 	}
+
 	//Logger.Debug(fmt.Sprintf("After SplitByRateInterval: %+v", timespans))
 	//log.Printf("After SplitByRateInterval: %+v", timespans)
 	timespans = cd.roundTimeSpansToIncrement(timespans)

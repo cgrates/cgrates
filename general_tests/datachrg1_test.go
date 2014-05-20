@@ -116,7 +116,7 @@ func TestGetDataCostSecondIntDtChrg1(t *testing.T) {
 	}
 }
 
-func TestGetBetweenCostDtChrg1(t *testing.T) {
+func TestGetDataBetweenCostDtChrg1(t *testing.T) {
 	usedData := 20
 	usageDur := time.Duration(usedData) * time.Second
 	timeStart := time.Date(2014, 3, 4, 0, 59, 50, 0, time.Local)
@@ -134,6 +134,7 @@ func TestGetBetweenCostDtChrg1(t *testing.T) {
 	if cc, err := cd.GetCost(); err != nil {
 		t.Error(err)
 	} else if cc.Cost != 0.004 {
+		t.Logf("%+v", cc.Timespans[1].RateInterval.Timing)
 		t.Error("Wrong cost returned: ", cc.Cost)
 	}
 }
