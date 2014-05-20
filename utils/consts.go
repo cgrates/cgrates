@@ -100,6 +100,7 @@ const (
 	CDRE_FIXED_WIDTH           = "fwv"
 	XML_PROFILE_PREFIX         = "*xml:"
 	CDRE                       = "cdre"
+	CDRC                       = "cdrc"
 	MASK_CHAR                  = "*"
 	CONCATENATED_KEY_SEP       = ":"
 	META_DEFAULT               = "*default"

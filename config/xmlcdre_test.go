@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -87,15 +87,7 @@ func TestParseXmlConfig(t *testing.T) {
 	} else if cfgDoc == nil {
 		t.Fatal("Could not parse xml configuration document")
 	}
-}
-
-func TestCacheCdreFWCfgs(t *testing.T) {
-	if len(cfgDoc.cdrefws) != 0 {
-		t.Error("Cache should be empty before caching")
-	}
-	if err := cfgDoc.cacheCdreFWCfgs(); err != nil {
-		t.Error(err)
-	} else if len(cfgDoc.cdrefws) != 1 {
+	if len(cfgDoc.cdrefws) != 1 {
 		t.Error("Did not cache")
 	}
 }

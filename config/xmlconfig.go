@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,6 +32,9 @@ func ParseCgrXmlConfig(reader io.Reader) (*CgrXmlCfgDocument, error) {
 	if err := decoder.Decode(xmlConfig); err != nil {
 		return nil, err
 	}
+	if err := xmlConfig.cacheAll(); err != nil {
+		return nil, err
+	}
 	return xmlConfig, nil
 }
 
@@ -41,6 +44,7 @@ type CgrXmlCfgDocument struct {
 	Type           string                      `xml:"type,attr"`
 	Configurations []*CgrXmlConfiguration      `xml:"configuration"`
 	cdrefws        map[string]*CgrXmlCdreFwCfg // Cache for processed fixed width config instances, key will be the id of the instance
+	cdrcs          map[string]*CgrXmlCdrcCfg
 }
 
 // Storage for raw configuration
@@ -52,42 +56,19 @@ type CgrXmlConfiguration struct {
 	RawConfig []byte   `xml:",innerxml"` // Used to store the configuration struct, as raw so we can store different types
 }
 
-// The CdrExporter Fixed Width configuration instance
-type CgrXmlCdreFwCfg struct {
-	Header  *CgrXmlCfgCdrHeader  `xml:"header"`
-	Content *CgrXmlCfgCdrContent `xml:"content"`
-	Trailer *CgrXmlCfgCdrTrailer `xml:"trailer"`
+func (cfgInst *CgrXmlConfiguration) rawConfigElement() []byte {
+	rawConfig := append([]byte("<element>"), cfgInst.RawConfig...) // Encapsulate the rawConfig in one element so we can Unmarshall into one struct
+	rawConfig = append(rawConfig, []byte("</element>")...)
+	return rawConfig
 }
 
-// CDR header
-type CgrXmlCfgCdrHeader struct {
-	XMLName xml.Name             `xml:"header"`
-	Fields  []*CgrXmlCfgCdrField `xml:"fields>field"`
-}
-
-// CDR content
-type CgrXmlCfgCdrContent struct {
-	XMLName xml.Name             `xml:"content"`
-	Fields  []*CgrXmlCfgCdrField `xml:"fields>field"`
-}
-
-// CDR trailer
-type CgrXmlCfgCdrTrailer struct {
-	XMLName xml.Name             `xml:"trailer"`
-	Fields  []*CgrXmlCfgCdrField `xml:"fields>field"`
-}
-
-// CDR field
-type CgrXmlCfgCdrField struct {
-	XMLName   xml.Name `xml:"field"`
-	Name      string   `xml:"name,attr"`
-	Type      string   `xml:"type,attr"`
-	Value     string   `xml:"value,attr"`
-	Width     int      `xml:"width,attr"`     // Field width
-	Strip     string   `xml:"strip,attr"`     // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
-	Padding   string   `xml:"padding,attr"`   // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
-	Layout    string   `xml:"layout,attr"`    // Eg. time format layout
-	Mandatory bool     `xml:"mandatory,attr"` // If field is mandatory, empty value will be considered as error and CDR will not be exported
+func (xmlCfg *CgrXmlCfgDocument) cacheAll() error {
+	for _, cacheFunc := range []func() error{xmlCfg.cacheCdreFWCfgs, xmlCfg.cacheCdrcCfgs} {
+		if err := cacheFunc(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Avoid building from raw config string always, so build cache here
@@ -110,14 +91,42 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdreFWCfgs() error {
 	return nil
 }
 
-func (xmlCfg *CgrXmlCfgDocument) GetCdreFWCfg(instName string) (*CgrXmlCdreFwCfg, error) {
-	if len(xmlCfg.cdrefws) == 0 { // First time, cache also
-		if err := xmlCfg.cacheCdreFWCfgs(); err != nil {
-			return nil, err
+// Avoid building from raw config string always, so build cache here
+func (xmlCfg *CgrXmlCfgDocument) cacheCdrcCfgs() error {
+	xmlCfg.cdrcs = make(map[string]*CgrXmlCdrcCfg)
+	for _, cfgInst := range xmlCfg.Configurations {
+		if cfgInst.Section != utils.CDRC {
+			continue // Another type of config instance, not interesting to process
 		}
+		cdrcCfg := new(CgrXmlCdrcCfg)
+		if err := xml.Unmarshal(cfgInst.rawConfigElement(), cdrcCfg); err != nil {
+			return err
+		} else if cdrcCfg == nil {
+			return fmt.Errorf("Could not unmarshal config instance: %s", cfgInst.Id)
+		}
+		// Cache rsr fields
+		for _, fld := range cdrcCfg.CdrFields {
+			if err := fld.PopulateRSRFIeld(); err != nil {
+				return fmt.Errorf("Populating field %s, error: %s", fld.Id, err.Error())
+			}
+		}
+		xmlCfg.cdrcs[cfgInst.Id] = cdrcCfg
 	}
-	if cfg, hasIt := xmlCfg.cdrefws[instName]; hasIt {
+	return nil
+}
+
+func (xmlCfg *CgrXmlCfgDocument) GetCdreFWCfg(instName string) (*CgrXmlCdreFwCfg, error) {
+	if cfg, hasIt := xmlCfg.cdrefws[instName]; !hasIt {
+		return nil, nil
+	} else {
 		return cfg, nil
 	}
-	return nil, nil
+}
+
+func (xmlCfg *CgrXmlCfgDocument) GetCdrcCfg(instName string) (*CgrXmlCdrcCfg, error) {
+	if cfg, hasIt := xmlCfg.cdrcs[instName]; !hasIt {
+		return nil, nil
+	} else {
+		return cfg, nil
+	}
 }
