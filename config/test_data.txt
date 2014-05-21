@@ -57,7 +57,6 @@ export_template = test			# List of fields in the exported CDRs
 [cdrc]
 enabled = true				# Enable CDR client functionality
 cdrs = test				# Address where to reach CDR server
-cdrs_method = test			# Mechanism to use when posting CDRs on server  <http_cgr>
 run_delay = 99				# Period to sleep between two runs, 0 to use automation via inotify
 cdr_type = test				# CDR file format <csv>.
 cdr_in_dir = test		 	# Absolute path towards the direccategoryy where the CDRs are kept (file scategoryed CDRs).

@@ -99,7 +99,6 @@ type CGRConfig struct {
 	CdreFWXmlTemplate       *CgrXmlCdreFwCfg           // Use this configuration as export template in case of fixed fields length
 	CdrcEnabled             bool                       // Enable CDR client functionality
 	CdrcCdrs                string                     // Address where to reach CDR server
-	CdrcCdrsMethod          string                     // Mechanism to use when posting CDRs on server  <http_cgr>
 	CdrcRunDelay            time.Duration              // Sleep interval between consecutive runs, 0 to use automation via inotify
 	CdrcCdrType             string                     // CDR file format <csv>.
 	CdrcCdrInDir            string                     // Absolute path towards the directory where the CDRs are stored.
@@ -158,7 +157,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.DefaultCategory = "call"
 	self.DefaultTenant = "cgrates.org"
 	self.DefaultSubject = "cgrates"
-	self.RoundingDecimals = 4
+	self.RoundingDecimals = 10
 	self.XmlCfgDocument = nil
 	self.RaterEnabled = false
 	self.RaterBalancer = ""
@@ -174,7 +173,6 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdreDir = "/var/log/cgrates/cdre"
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
-	self.CdrcCdrsMethod = "http_cgr"
 	self.CdrcRunDelay = time.Duration(0)
 	self.CdrcCdrType = utils.CSV
 	self.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
@@ -455,9 +453,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("cdrc", "cdrs"); hasOpt {
 		cfg.CdrcCdrs, _ = c.GetString("cdrc", "cdrs")
-	}
-	if hasOpt = c.HasOption("cdrc", "cdrs_method"); hasOpt {
-		cfg.CdrcCdrsMethod, _ = c.GetString("cdrc", "cdrs_method")
 	}
 	if hasOpt = c.HasOption("cdrc", "run_delay"); hasOpt {
 		durStr, _ := c.GetString("cdrc", "run_delay")

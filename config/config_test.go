@@ -72,7 +72,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.DefaultCategory = "call"
 	eCfg.DefaultTenant = "cgrates.org"
 	eCfg.DefaultSubject = "cgrates"
-	eCfg.RoundingDecimals = 4
+	eCfg.RoundingDecimals = 10
 	eCfg.XmlCfgDocument = nil
 	eCfg.RaterEnabled = false
 	eCfg.RaterBalancer = ""
@@ -88,7 +88,6 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdreDir = "/var/log/cgrates/cdre"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
-	eCfg.CdrcCdrsMethod = "http_cgr"
 	eCfg.CdrcRunDelay = time.Duration(0)
 	eCfg.CdrcCdrType = "csv"
 	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
@@ -233,7 +232,6 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CdreDir = "test"
 	eCfg.CdrcEnabled = true
 	eCfg.CdrcCdrs = "test"
-	eCfg.CdrcCdrsMethod = "test"
 	eCfg.CdrcRunDelay = time.Duration(99) * time.Second
 	eCfg.CdrcCdrType = "test"
 	eCfg.CdrcCdrInDir = "test"
