@@ -438,10 +438,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 				cfg.CdreExportedFields = extraFields
 			}
 		} else if strings.HasPrefix(exportTemplate, utils.XML_PROFILE_PREFIX) {
-			if xmlTemplate, err := cfg.XmlCfgDocument.GetCdreFWCfg(exportTemplate[len(utils.XML_PROFILE_PREFIX):]); err != nil {
-				return nil, err
-			} else {
-				cfg.CdreFWXmlTemplate = xmlTemplate
+			if xmlTemplate := cfg.XmlCfgDocument.GetCdreFWCfgs(exportTemplate[len(utils.XML_PROFILE_PREFIX):]); xmlTemplate != nil {
+				cfg.CdreFWXmlTemplate = xmlTemplate[exportTemplate[len(utils.XML_PROFILE_PREFIX):]]
 			}
 		}
 	}

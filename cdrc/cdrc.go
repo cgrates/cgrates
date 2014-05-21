@@ -31,7 +31,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/cdrs"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/howeyc/fsnotify"
@@ -42,12 +41,13 @@ const (
 	FS_CSV = "freeswitch_csv"
 )
 
-func NewCdrc(config *config.CGRConfig, cdrServer *cdrs.CDRS) (*Cdrc, error) {
-	cdrc := &Cdrc{cgrCfg: config, cdrServer: cdrServer}
+func NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, cdrFields map[string]*utils.RSRField, cdrServer *cdrs.CDRS) (*Cdrc, error) {
+	cdrc := &Cdrc{cdrsAddress: cdrsAddress, cdrType: cdrType, cdrInDir: cdrInDir, cdrOutDir: cdrOutDir,
+		cdrSourceId: cdrSourceId, runDelay: runDelay, cdrFields: cdrFields, cdrServer: cdrServer}
 	// Before processing, make sure in and out folders exist
-	for _, dir := range []string{cdrc.cgrCfg.CdrcCdrInDir, cdrc.cgrCfg.CdrcCdrOutDir} {
+	for _, dir := range []string{cdrc.cdrInDir, cdrc.cdrOutDir} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-			return nil, fmt.Errorf("Folder %s does not exist", dir)
+			return nil, fmt.Errorf("Inexistent folder: %s", dir)
 		}
 	}
 	cdrc.httpClient = new(http.Client)
@@ -55,31 +55,36 @@ func NewCdrc(config *config.CGRConfig, cdrServer *cdrs.CDRS) (*Cdrc, error) {
 }
 
 type Cdrc struct {
-	cgrCfg       *config.CGRConfig
-	cdrServer    *cdrs.CDRS
-	cfgCdrFields map[string]string // Key is the name of the field
-	httpClient   *http.Client
+	cdrsAddress,
+	cdrType,
+	cdrInDir,
+	cdrOutDir,
+	cdrSourceId string
+	runDelay   time.Duration
+	cdrFields  map[string]*utils.RSRField
+	cdrServer  *cdrs.CDRS // Reference towards internal cdrServer if that is the case
+	httpClient *http.Client
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
 func (self *Cdrc) Run() error {
-	if self.cgrCfg.CdrcRunDelay == time.Duration(0) { // Automated via inotify
+	if self.runDelay == time.Duration(0) { // Automated via inotify
 		return self.trackCDRFiles()
 	}
 	// No automated, process and sleep approach
 	for {
 		self.processCdrDir()
-		time.Sleep(self.cgrCfg.CdrcRunDelay)
+		time.Sleep(self.runDelay)
 	}
 }
 
 // Takes the record out of csv and turns it into http form which can be posted
 func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
-	storedCdr := &utils.StoredCdr{TOR: utils.VOICE, CdrSource: self.cgrCfg.CdrcSourceId, ExtraFields: make(map[string]string), Cost: -1}
+	storedCdr := &utils.StoredCdr{TOR: utils.VOICE, CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
-	for cfgFieldName, cfgFieldRSR := range self.cgrCfg.CdrcCdrFields {
+	for cfgFieldName, cfgFieldRSR := range self.cdrFields {
 		var fieldVal string
-		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cgrCfg.CdrcCdrType) {
+		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cdrType) {
 			if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
 				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
 			} else {
@@ -128,11 +133,11 @@ func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
 
 // One run over the CDR folder
 func (self *Cdrc) processCdrDir() error {
-	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.cgrCfg.CdrcCdrInDir))
-	filesInDir, _ := ioutil.ReadDir(self.cgrCfg.CdrcCdrInDir)
+	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.cdrInDir))
+	filesInDir, _ := ioutil.ReadDir(self.cdrInDir)
 	for _, file := range filesInDir {
-		if self.cgrCfg.CdrcCdrType != FS_CSV || path.Ext(file.Name()) != ".csv" {
-			if err := self.processFile(path.Join(self.cgrCfg.CdrcCdrInDir, file.Name())); err != nil {
+		if self.cdrType != FS_CSV || path.Ext(file.Name()) != ".csv" {
+			if err := self.processFile(path.Join(self.cdrInDir, file.Name())); err != nil {
 				return err
 			}
 		}
@@ -147,15 +152,15 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 		return
 	}
 	defer watcher.Close()
-	err = watcher.Watch(self.cgrCfg.CdrcCdrInDir)
+	err = watcher.Watch(self.cdrInDir)
 	if err != nil {
 		return
 	}
-	engine.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.cgrCfg.CdrcCdrInDir))
+	engine.Logger.Info(fmt.Sprintf("<Cdrc> Monitoring %s for file moves.", self.cdrInDir))
 	for {
 		select {
 		case ev := <-watcher.Event:
-			if ev.IsCreate() && (self.cgrCfg.CdrcCdrType != FS_CSV || path.Ext(ev.Name) != ".csv") {
+			if ev.IsCreate() && (self.cdrType != FS_CSV || path.Ext(ev.Name) != ".csv") {
 				if err = self.processFile(ev.Name); err != nil {
 					engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
 				}
@@ -190,20 +195,20 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue
 		}
-		if self.cgrCfg.CdrcCdrs == utils.INTERNAL {
+		if self.cdrsAddress == utils.INTERNAL {
 			if err := self.cdrServer.ProcessRawCdr(storedCdr); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
 				continue
 			}
 		} else { // CDRs listening on IP
-			if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cgrCfg.HTTPListen), storedCdr.AsHttpForm()); err != nil {
+			if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cdrsAddress), storedCdr.AsHttpForm()); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
 				continue
 			}
 		}
 	}
 	// Finished with file, move it to processed folder
-	newPath := path.Join(self.cgrCfg.CdrcCdrOutDir, fn)
+	newPath := path.Join(self.cdrOutDir, fn)
 	if err := os.Rename(filePath, newPath); err != nil {
 		engine.Logger.Err(err.Error())
 		return err

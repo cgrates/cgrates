@@ -106,7 +106,7 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdrcCfgs() error {
 		}
 		// Cache rsr fields
 		for _, fld := range cdrcCfg.CdrFields {
-			if err := fld.PopulateRSRFIeld(); err != nil {
+			if err := fld.PopulateRSRField(); err != nil {
 				return fmt.Errorf("Populating field %s, error: %s", fld.Id, err.Error())
 			}
 		}
@@ -115,18 +115,26 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdrcCfgs() error {
 	return nil
 }
 
-func (xmlCfg *CgrXmlCfgDocument) GetCdreFWCfg(instName string) (*CgrXmlCdreFwCfg, error) {
-	if cfg, hasIt := xmlCfg.cdrefws[instName]; !hasIt {
-		return nil, nil
-	} else {
-		return cfg, nil
+// Return instances or filtered instance of cdrefw configuration
+func (xmlCfg *CgrXmlCfgDocument) GetCdreFWCfgs(instName string) map[string]*CgrXmlCdreFwCfg {
+	if len(instName) != 0 {
+		if cfg, hasIt := xmlCfg.cdrefws[instName]; !hasIt {
+			return nil
+		} else {
+			return map[string]*CgrXmlCdreFwCfg{instName: cfg}
+		}
 	}
+	return xmlCfg.cdrefws
 }
 
-func (xmlCfg *CgrXmlCfgDocument) GetCdrcCfg(instName string) (*CgrXmlCdrcCfg, error) {
-	if cfg, hasIt := xmlCfg.cdrcs[instName]; !hasIt {
-		return nil, nil
-	} else {
-		return cfg, nil
+// Return instances or filtered instance of cdrc configuration
+func (xmlCfg *CgrXmlCfgDocument) GetCdrcCfgs(instName string) map[string]*CgrXmlCdrcCfg {
+	if len(instName) != 0 {
+		if cfg, hasIt := xmlCfg.cdrcs[instName]; !hasIt {
+			return nil
+		} else {
+			return map[string]*CgrXmlCdrcCfg{instName: cfg} // Filtered
+		}
 	}
+	return xmlCfg.cdrcs // Unfiltered
 }

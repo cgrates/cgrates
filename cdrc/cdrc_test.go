@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
+	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"reflect"
@@ -29,7 +30,8 @@ import (
 func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cgrConfig.CdrcCdrFields["supplier"] = &utils.RSRField{Id: "11"}
-	cdrc := &Cdrc{cgrCfg: cgrConfig}
+	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrType, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay,
+		cgrConfig.CdrcCdrFields, new(cdrs.CDRS), nil}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := cdrc.recordForkCdr(cdrRow)
 	if err == nil {

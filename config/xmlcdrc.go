@@ -24,26 +24,33 @@ import (
 )
 
 type CgrXmlCdrcCfg struct {
-	Enabled     bool        `xml:"enabled"`       // Enable/Disable the
-	CdrsAddress string      `xml:"cdrs_address"`  // The address where CDRs can be reached
-	CdrsMethod  string      `xml:"cdrs_method"`   // Method to use when posting CDRs
-	CdrType     string      `xml:"cdr_type"`      // The type of CDR to process <csv>
-	RunDelay    int64       `xml:"run_delay"`     // Delay between runs
-	CdrInDir    string      `xml:"cdr_in_dir"`    // Folder to process CDRs from
-	CdrOutDir   string      `xml:"cdr_out_dir"`   // Folder to move processed CDRs to
-	CdrSourceId string      `xml:"cdr_source_id"` // Source identifier for the processed CDRs
-	CdrFields   []CdrcField `xml:"fields>field"`
+	Enabled     bool         `xml:"enabled"`       // Enable/Disable the
+	CdrsAddress string       `xml:"cdrs_address"`  // The address where CDRs can be reached
+	CdrType     string       `xml:"cdr_type"`      // The type of CDR to process <csv>
+	RunDelay    int64        `xml:"run_delay"`     // Delay between runs
+	CdrInDir    string       `xml:"cdr_in_dir"`    // Folder to process CDRs from
+	CdrOutDir   string       `xml:"cdr_out_dir"`   // Folder to move processed CDRs to
+	CdrSourceId string       `xml:"cdr_source_id"` // Source identifier for the processed CDRs
+	CdrFields   []*CdrcField `xml:"fields>field"`
+}
+
+func (cdrcCfg *CgrXmlCdrcCfg) CdrRSRFields() map[string]*utils.RSRField {
+	rsrFields := make(map[string]*utils.RSRField)
+	for _, fld := range cdrcCfg.CdrFields {
+		rsrFields[fld.Id] = fld.rsrField
+	}
+	return rsrFields
 }
 
 type CdrcField struct {
 	XMLName  xml.Name `xml:"field"`
 	Id       string   `xml:"id,attr"`
 	Filter   string   `xml:"filter,attr"`
-	RSRField *utils.RSRField
+	rsrField *utils.RSRField
 }
 
-func (cdrcFld *CdrcField) PopulateRSRFIeld() (err error) {
-	if cdrcFld.RSRField, err = utils.NewRSRField(cdrcFld.Filter); err != nil {
+func (cdrcFld *CdrcField) PopulateRSRField() (err error) {
+	if cdrcFld.rsrField, err = utils.NewRSRField(cdrcFld.Filter); err != nil {
 		return err
 	}
 	return nil

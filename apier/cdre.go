@@ -130,10 +130,8 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		}
 		exportTemplate := self.Config.CdreFWXmlTemplate
 		if len(attr.ExportTemplate) != 0 && self.Config.XmlCfgDocument != nil {
-			if xmlTemplate, err := self.Config.XmlCfgDocument.GetCdreFWCfg(attr.ExportTemplate[len(utils.XML_PROFILE_PREFIX):]); err != nil {
-				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-			} else if xmlTemplate != nil {
-				exportTemplate = xmlTemplate
+			if xmlTemplate := self.Config.XmlCfgDocument.GetCdreFWCfgs(attr.ExportTemplate[len(utils.XML_PROFILE_PREFIX):]); xmlTemplate != nil {
+				exportTemplate = xmlTemplate[attr.ExportTemplate[len(utils.XML_PROFILE_PREFIX):]]
 			}
 		}
 		if exportTemplate == nil {

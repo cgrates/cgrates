@@ -123,11 +123,12 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 	close(chanDone)
 }
 
-func startCdrc(cdrsChan chan struct{}) {
-	if cfg.CdrcCdrs == utils.INTERNAL {
+// Fires up a cdrc instance
+func startCdrc(cdrsChan chan struct{}, cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, cdrFields map[string]*utils.RSRField) {
+	if cdrsAddress == utils.INTERNAL {
 		<-cdrsChan // Wait for CDRServer to come up before start processing
 	}
-	cdrc, err := cdrc.NewCdrc(cfg, cdrServer)
+	cdrc, err := cdrc.NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId, runDelay, cdrFields, cdrServer)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -452,10 +453,23 @@ func main() {
 		// close all sessions on shutdown
 		go shutdownSessionmanagerSingnalHandler()
 	}
-
-	if cfg.CdrcEnabled {
+	var cdrcEnabled bool
+	if cfg.CdrcEnabled { // Start default cdrc configured in csv here
+		cdrcEnabled = true
+		go startCdrc(cdrsChan, cfg.CdrcCdrs, cfg.CdrcCdrType, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.CdrcSourceId, cfg.CdrcRunDelay, cfg.CdrcCdrFields)
+	}
+	if cfg.XmlCfgDocument != nil {
+		for _, xmlCdrc := range cfg.XmlCfgDocument.GetCdrcCfgs("") {
+			if !xmlCdrc.Enabled {
+				continue
+			}
+			cdrcEnabled = true
+			go startCdrc(cdrsChan, xmlCdrc.CdrsAddress, xmlCdrc.CdrType, xmlCdrc.CdrInDir,
+				xmlCdrc.CdrOutDir, xmlCdrc.CdrSourceId, time.Duration(xmlCdrc.RunDelay), xmlCdrc.CdrRSRFields())
+		}
+	}
+	if cdrcEnabled {
 		engine.Logger.Info("Starting CGRateS CDR client.")
-		go startCdrc(cdrsChan)
 	}
 
 	// Start the servers

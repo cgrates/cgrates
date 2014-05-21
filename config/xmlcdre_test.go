@@ -93,19 +93,17 @@ func TestParseXmlConfig(t *testing.T) {
 }
 
 func TestGetCdreFWCfg(t *testing.T) {
-	cdreFWCfg, err := cfgDoc.GetCdreFWCfg("CDRE-FW1")
-	if err != nil {
-		t.Error(err)
-	} else if cdreFWCfg == nil {
+	cdreFWCfg := cfgDoc.GetCdreFWCfgs("CDRE-FW1")
+	if cdreFWCfg == nil {
 		t.Error("Could not parse CdreFw instance")
 	}
-	if len(cdreFWCfg.Header.Fields) != 8 {
-		t.Error("Unexpected number of header fields parsed", len(cdreFWCfg.Header.Fields))
+	if len(cdreFWCfg["CDRE-FW1"].Header.Fields) != 8 {
+		t.Error("Unexpected number of header fields parsed", len(cdreFWCfg["CDRE-FW1"].Header.Fields))
 	}
-	if len(cdreFWCfg.Content.Fields) != 20 {
-		t.Error("Unexpected number of content fields parsed", len(cdreFWCfg.Content.Fields))
+	if len(cdreFWCfg["CDRE-FW1"].Content.Fields) != 20 {
+		t.Error("Unexpected number of content fields parsed", len(cdreFWCfg["CDRE-FW1"].Content.Fields))
 	}
-	if len(cdreFWCfg.Trailer.Fields) != 9 {
-		t.Error("Unexpected number of trailer fields parsed", len(cdreFWCfg.Trailer.Fields))
+	if len(cdreFWCfg["CDRE-FW1"].Trailer.Fields) != 9 {
+		t.Error("Unexpected number of trailer fields parsed", len(cdreFWCfg["CDRE-FW1"].Trailer.Fields))
 	}
 }

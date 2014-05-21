@@ -144,7 +144,8 @@ func TestProcessCdrDir(t *testing.T) {
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cfg, nil)
+	cdrc, err := NewCdrc(cfg.CdrcCdrs, cfg.CdrcCdrType, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.CdrcSourceId, cfg.CdrcRunDelay,
+		cfg.CdrcCdrFields, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
