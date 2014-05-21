@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="cgrates/xml">
+  <configuration section="cdrc" type="csv" id="CDRC-CSV1">
+    <enabled>true</enabled>
+    <cdrs_address>internal</cdrs_address>
+    <cdr_type>csv</cdr_type>
+    <run_delay>0</run_delay>
+    <cdr_in_dir>/var/log/cgrates/cdrc/in</cdr_in_dir>
+    <cdr_out_dir>/var/log/cgrates/cdrc/out</cdr_out_dir>
+    <cdr_source_id>freeswitch_csv</cdr_source_id>
+    <fields>
+      <field id="accid" filter="0" />
+      <field id="reqtype" filter="1" />
+      <field id="direction" filter="2" />
+      <field id="tenant" filter="3" />
+      <field id="category" filter="4" />
+      <field id="account" filter="5" />
+      <field id="subject" filter="6" />
+      <field id="destination" filter="7" />
+      <field id="setup_time" filter="8" />
+      <field id="answer_time" filter="9" />
+      <field id="usage" filter="10" />
+      <field id="extr1" filter="11" />
+      <field id="extr2" filter="12" />
+    </fields>
+  </configuration>
+  <configuration section="cdrc" type="csv" id="CDRC-CSV2">
+    <enabled>true</enabled>
+    <cdrs_address>internal</cdrs_address>
+    <cdr_type>csv</cdr_type>
+    <run_delay>5</run_delay>
+    <cdr_in_dir>/var/log/cgrates/cdrc/in</cdr_in_dir>
+    <cdr_out_dir>/var/log/cgrates/cdrc/out</cdr_out_dir>
+    <cdr_source_id>freeswitch_csv</cdr_source_id>
+    <fields>
+      <field id="accid" filter="0" />
+      <field id="reqtype" filter="^rated" />
+      <field id="direction" filter="^*out" />
+      <field id="tenant" filter="^cgrates.org" />
+      <field id="category" filter="7" />
+      <field id="account" filter="3" />
+      <field id="subject" filter="3" />
+      <field id="destination" filter="5" />
+      <field id="setup_time" filter="1" />
+      <field id="answer_time" filter="1" />
+      <field id="usage" filter="9" />
+    </fields>
+  </configuration>
+  <configuration section="cdre" type="fixed_width" id="CDRE-FW1">
+    <header>
+      <fields>
+        <field name="TypeOfRecord" type="constant" value="10" width="2" />
+        <field name="Filler1" type="filler" width="3" />
+        <field name="DistributorCode" type="constant" value="VOI" width="3" />
+        <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
+        <field name="LastCdr" type="metatag" value="last_cdr_time" layout="020106150400" width="12" />
+        <field name="FileCreationfTime" type="metatag" value="time_now" layout="020106150400" width="12" />
+        <field name="Version" type="constant" value="01" width="2" />
+        <field name="Filler2" type="filler" width="105" />
+      </fields>
+    </header>
+    <content>
+      <fields>
+        <field name="TypeOfRecord" type="constant" value="20" width="2" />
+        <field name="Account" type="cdrfield" value="cgrid" width="12" mandatory="true" />
+        <field name="Subject" type="cdrfield" value="subject" strip="left" padding="left" width="5" />
+        <field name="CLI" type="cdrfield" value="cli" strip="xright" width="15" />
+        <field name="Destination" type="cdrfield" value="destination" strip="xright" width="24" />
+        <field name="TOR" type="constant" value="02" width="2" />
+        <field name="SubtypeTOR" type="constant" value="11" width="4" />
+        <field name="SetupTime" type="cdrfield" value="start_time" layout="020106150400" width="12" />
+        <field name="Duration" type="cdrfield" value="duration" width="6" />
+        <field name="DataVolume" type="filler" width="6" />
+        <field name="TaxCode" type="constant" value="1" width="1" />
+        <field name="OperatorCode" type="cdrfield" value="operator" width="2" />
+        <field name="ProductId" type="cdrfield" value="productid" width="5" />
+        <field name="NetworkId" type="constant" value="3" width="1" />
+        <field name="CallId" type="cdrfield" value="accid" width="16" />
+        <field name="Filler" type="filler" width="8" />
+        <field name="Filler" type="filler" width="8" />
+        <field name="TerminationCode" type="cdrfield" value="~cost_details:s/&quot;MatchedDestId&quot;:&quot;.+_(\s\s\s\s\s)&quot;/$1/" width="5" />
+        <field name="Cost" type="cdrfield" value="cost" padding="zeroleft" width="9" />
+        <field name="CalledMask" type="cdrfield" value="calledmask" width="1" />
+      </fields>
+    </content>
+    <trailer>
+      <fields>
+        <field name="TypeOfRecord" type="constant" value="90" width="2" />
+        <field name="Filler1" type="filler" width="3" />
+        <field name="DistributorCode" type="constant" value="VOI" width="3" />
+        <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
+        <field name="NumberOfRecords" type="metatag" value="cdrs_number" padding="zeroleft" width="6" />
+        <field name="CdrsDuration" type="metatag" value="cdrs_duration" padding="zeroleft" width="8" />
+        <field name="FirstCdrTime" type="metatag" value="first_cdr_time" layout="020106150400" width="12" />
+        <field name="LastCdrTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12" />
+        <field name="Filler1" type="filler" width="93" />
+      </fields>
+    </trailer>
+  </configuration>
+</document>
