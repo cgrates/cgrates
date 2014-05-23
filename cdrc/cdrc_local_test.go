@@ -70,6 +70,11 @@ accid22,prepaid,out,cgrates.org,call,1001,1001,+4986517174963,2013-02-03 19:54:0
 #accid1,prepaid,out,cgrates.org,call,1001,1001,+4986517174963,2013-02-03 19:54:00,62,supplier1,172.16.1.1
 accid23,prepaid,out,cgrates.org,call,1001,1001,+4986517174963,2013-02-03 19:54:00,62,supplier1,172.16.1.1`
 
+var fileContent3 = `accid31;prepaid;out;cgrates.org;call;1001;1001;+4986517174963;2013-02-03 19:54:00;62;supplier1;172.16.1.1
+accid32;prepaid;out;cgrates.org;call;1001;1001;+4986517174963;2013-02-03 19:54:00;62;supplier1;172.16.1.1
+#accid1;prepaid;out;cgrates.org;call;1001;1001;+4986517174963;2013-02-03 19:54:00;62;supplier1;172.16.1.1
+accid33;prepaid;out;cgrates.org;call;1001;1001;+4986517174963;2013-02-03 19:54:00;62;supplier1;172.16.1.1`
+
 func startEngine() error {
 	enginePath, err := exec.LookPath("cgr-engine")
 	if err != nil {
@@ -126,6 +131,12 @@ func TestCreateCdrFiles(t *testing.T) {
 	if err := os.MkdirAll(cfg.CdrcCdrInDir, 0755); err != nil {
 		t.Fatal("Error creating folder: ", cfg.CdrcCdrInDir, err)
 	}
+	if err := os.RemoveAll(cfg.CdrcCdrOutDir); err != nil {
+		t.Fatal("Error removing folder: ", cfg.CdrcCdrInDir, err)
+	}
+	if err := os.MkdirAll(cfg.CdrcCdrOutDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", cfg.CdrcCdrOutDir, err)
+	}
 	if err := ioutil.WriteFile(path.Join(cfg.CdrcCdrInDir, "file1.csv"), []byte(fileContent1), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
@@ -144,7 +155,44 @@ func TestProcessCdrDir(t *testing.T) {
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cfg.CdrcCdrs, cfg.CdrcCdrType, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.CdrcSourceId, cfg.CdrcRunDelay,
+	cdrc, err := NewCdrc(cfg.CdrcCdrs, cfg.CdrcCdrType, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.CdrcSourceId, cfg.CdrcRunDelay, cfg.CdrcCsvSep,
+		cfg.CdrcCdrFields, nil)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := cdrc.processCdrDir(); err != nil {
+		t.Error(err)
+	}
+	stopEngine()
+}
+
+// Creates cdr files and starts the engine
+func TestCreateCdr3File(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if err := os.RemoveAll(cfg.CdrcCdrInDir); err != nil {
+		t.Fatal("Error removing folder: ", cfg.CdrcCdrInDir, err)
+	}
+	if err := os.MkdirAll(cfg.CdrcCdrInDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", cfg.CdrcCdrInDir, err)
+	}
+	if err := ioutil.WriteFile(path.Join(cfg.CdrcCdrInDir, "file3.csv"), []byte(fileContent3), 0644); err != nil {
+		t.Fatal(err.Error)
+	}
+}
+
+func TestProcessCdr3Dir(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if cfg.CdrcCdrs == utils.INTERNAL { // For now we only test over network
+		return
+	}
+	if err := startEngine(); err != nil {
+		t.Fatal(err.Error())
+	}
+	cdrc, err := NewCdrc(cfg.CdrcCdrs, cfg.CdrcCdrType, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.CdrcSourceId, cfg.CdrcRunDelay, ";",
 		cfg.CdrcCdrFields, nil)
 	if err != nil {
 		t.Fatal(err.Error())

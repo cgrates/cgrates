@@ -29,6 +29,7 @@ import (
 	"path"
 	"strconv"
 	"time"
+	"unicode/utf8"
 
 	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/engine"
@@ -41,13 +42,17 @@ const (
 	FS_CSV = "freeswitch_csv"
 )
 
-func NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, cdrFields map[string]*utils.RSRField, cdrServer *cdrs.CDRS) (*Cdrc, error) {
+func NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string]*utils.RSRField, cdrServer *cdrs.CDRS) (*Cdrc, error) {
+	if len(csvSep) != 1 {
+		return nil, fmt.Errorf("Unsupported csv separator: %s", csvSep)
+	}
+	csvSepRune, _ := utf8.DecodeRune([]byte(csvSep))
 	cdrc := &Cdrc{cdrsAddress: cdrsAddress, cdrType: cdrType, cdrInDir: cdrInDir, cdrOutDir: cdrOutDir,
-		cdrSourceId: cdrSourceId, runDelay: runDelay, cdrFields: cdrFields, cdrServer: cdrServer}
+		cdrSourceId: cdrSourceId, runDelay: runDelay, csvSep: csvSepRune, cdrFields: cdrFields, cdrServer: cdrServer}
 	// Before processing, make sure in and out folders exist
 	for _, dir := range []string{cdrc.cdrInDir, cdrc.cdrOutDir} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
-			return nil, fmt.Errorf("Inexistent folder: %s", dir)
+			return nil, fmt.Errorf("Nonexistent folder: %s", dir)
 		}
 	}
 	cdrc.httpClient = new(http.Client)
@@ -61,6 +66,7 @@ type Cdrc struct {
 	cdrOutDir,
 	cdrSourceId string
 	runDelay   time.Duration
+	csvSep     rune
 	cdrFields  map[string]*utils.RSRField
 	cdrServer  *cdrs.CDRS // Reference towards internal cdrServer if that is the case
 	httpClient *http.Client
@@ -182,6 +188,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		return err
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
+	csvReader.Comma = self.csvSep
 	for {
 		record, err := csvReader.Read()
 		if err != nil && err == io.EOF {

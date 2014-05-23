@@ -43,6 +43,37 @@ func TestPopulateRSRFIeld(t *testing.T) {
 	}
 }
 
+func TestSetDefaults(t *testing.T) {
+	cfgXmlStr := `<?xml version="1.0" encoding="UTF-8"?>
+<document type="cgrates/xml">
+  <configuration section="cdrc" type="csv" id="CDRC-CSVDF">
+    <enabled>true</enabled>
+  </configuration>
+</document>`
+	var xmlCdrc *CgrXmlCdrcCfg
+	reader := strings.NewReader(cfgXmlStr)
+	if cfgDocCdrcDf, err := ParseCgrXmlConfig(reader); err != nil {
+		t.Error(err.Error())
+	} else if cfgDocCdrcDf == nil {
+		t.Fatal("Could not parse xml configuration document")
+	} else if len(cfgDocCdrcDf.cdrcs) != 1 {
+		t.Error("Did not load cdrc")
+	} else {
+		xmlCdrc = cfgDocCdrcDf.cdrcs["CDRC-CSVDF"]
+	}
+	dfCfg, _ := NewDefaultCGRConfig()
+	xmlCdrc.setDefaults()
+	if xmlCdrc.CdrsAddress != dfCfg.CdrcCdrs ||
+		xmlCdrc.CdrType != dfCfg.CdrcCdrType ||
+		xmlCdrc.CsvSeparator != dfCfg.CdrcCsvSep ||
+		xmlCdrc.CdrInDir != dfCfg.CdrcCdrInDir ||
+		xmlCdrc.CdrOutDir != dfCfg.CdrcCdrOutDir ||
+		xmlCdrc.CdrSourceId != dfCfg.CdrcSourceId ||
+		len(xmlCdrc.CdrFields) != len(dfCfg.CdrcCdrFields) {
+		t.Error("Failed loading default configuration")
+	}
+}
+
 func TestParseXmlCdrcConfig(t *testing.T) {
 	cfgXmlStr := `<?xml version="1.0" encoding="UTF-8"?>
 <document type="cgrates/xml">
@@ -50,6 +81,7 @@ func TestParseXmlCdrcConfig(t *testing.T) {
     <enabled>true</enabled>
     <cdrs_address>internal</cdrs_address>
     <cdr_type>csv</cdr_type>
+    <csv_separator>,</csv_separator>
     <run_delay>0</run_delay>
     <cdr_in_dir>/var/log/cgrates/cdrc/in</cdr_in_dir>
     <cdr_out_dir>/var/log/cgrates/cdrc/out</cdr_out_dir>
@@ -88,7 +120,7 @@ func TestGetCdrcCfgs(t *testing.T) {
 	if cdrcfgs == nil {
 		t.Error("No config instance returned")
 	}
-	expectCdrc := &CgrXmlCdrcCfg{Enabled: true, CdrsAddress: "internal", CdrType: "csv",
+	expectCdrc := &CgrXmlCdrcCfg{Enabled: true, CdrsAddress: "internal", CdrType: "csv", CsvSeparator: ",",
 		RunDelay: 0, CdrInDir: "/var/log/cgrates/cdrc/in", CdrOutDir: "/var/log/cgrates/cdrc/out", CdrSourceId: "freeswitch_csv"}
 	cdrFlds := []*CdrcField{
 		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.ACCID, Filter: "0"},

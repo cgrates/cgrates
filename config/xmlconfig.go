@@ -110,6 +110,7 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdrcCfgs() error {
 				return fmt.Errorf("Populating field %s, error: %s", fld.Id, err.Error())
 			}
 		}
+		cdrcCfg.setDefaults()
 		xmlCfg.cdrcs[cfgInst.Id] = cdrcCfg
 	}
 	return nil

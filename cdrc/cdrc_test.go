@@ -25,12 +25,14 @@ import (
 	"reflect"
 	"testing"
 	"time"
+	"unicode/utf8"
 )
 
 func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cgrConfig.CdrcCdrFields["supplier"] = &utils.RSRField{Id: "11"}
-	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrType, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay,
+	csvSepRune, _ := utf8.DecodeRune([]byte(cgrConfig.CdrcCsvSep))
+	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrType, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay, csvSepRune,
 		cgrConfig.CdrcCdrFields, new(cdrs.CDRS), nil}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := cdrc.recordForkCdr(cdrRow)
@@ -64,15 +66,4 @@ func TestRecordForkCdr(t *testing.T) {
 	if !reflect.DeepEqual(expectedCdr, rtCdr) {
 		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
 	}
-	/*
-		if cdrAsForm.Get(utils.CDRSOURCE) != cgrConfig.CdrcSourceId {
-			t.Error("Unexpected cdrsource received", cdrAsForm.Get(utils.CDRSOURCE))
-		}
-		if cdrAsForm.Get(utils.REQTYPE) != "prepaid" {
-			t.Error("Unexpected CDR value received", cdrAsForm.Get(utils.REQTYPE))
-		}
-		if cdrAsForm.Get("supplier") != "supplier1" {
-			t.Error("Unexpected CDR value received", cdrAsForm.Get("supplier"))
-		}
-	*/
 }
