@@ -18,7 +18,7 @@
       <field id="category" filter="~7:s/^voice$/call/" />
       <field id="account" filter="3" />
       <field id="subject" filter="3" />
-      <field id="destination" filter="~5:s/^0([1-9]+)$/+49$1/" />
+      <field id="destination" filter="~5:s/^0([1-9]\d+)$/+49$1/" />
       <field id="setup_time" filter="1" />
       <field id="answer_time" filter="1" />
       <field id="usage" filter="~9:s/^(\d+)$/${1}s/" />
@@ -40,9 +40,9 @@
       <field id="direction" filter="^*out" />
       <field id="tenant" filter="^cgrates.org" />
       <field id="category" filter="^call" />
-      <field id="account" filter="~0:s/^([1-9]+)$/+$1/" />
-      <field id="subject" filter="~0:s/^([1-9]+)$/+$1/" />
-      <field id="destination" filter="~1:s/^([1-9]+)$/+$1/" />
+      <field id="account" filter="~0:s/^([1-9]\d+)$/+$1/" />
+      <field id="subject" filter="~0:s/^([1-9]\d+)$/+$1/" />
+      <field id="destination" filter="~1:s/^([1-9]\d+)$/+$1/" />
       <field id="setup_time" filter="4" />
       <field id="answer_time" filter="4" />
       <field id="usage" filter="~6:s/^(\d+)$/${1}s/" />

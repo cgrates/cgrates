@@ -111,3 +111,17 @@ func TestConvertDurToSecs(t *testing.T) {
 		t.Errorf("Expecting: 640113s, received: %s", parsedVal)
 	}
 }
+
+func TestPrefix164(t *testing.T) {
+	expectRSRField := &RSRField{Id: "0", RSRules: []*ReSearchReplace{
+		&ReSearchReplace{regexp.MustCompile(`^([1-9]\d+)$`), "+$1"}}}
+	rsrField, err := NewRSRField(`~0:s/^([1-9]\d+)$/+$1/`)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
+		t.Errorf("Expecting: %v, received: %v", expectRSRField, rsrField)
+	}
+	if parsedVal := rsrField.ParseValue("4986517174960"); parsedVal != "+4986517174960" {
+		t.Errorf("Expecting: +4986517174960, received: %s", parsedVal)
+	}
+}
