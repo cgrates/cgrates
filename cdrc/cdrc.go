@@ -86,7 +86,7 @@ func (self *Cdrc) Run() error {
 
 // Takes the record out of csv and turns it into http form which can be posted
 func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
-	storedCdr := &utils.StoredCdr{TOR: utils.VOICE, CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
+	storedCdr := &utils.StoredCdr{CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	for cfgFieldName, cfgFieldRSR := range self.cdrFields {
 		var fieldVal string
@@ -100,6 +100,8 @@ func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
 			fieldVal = "UNKNOWN"
 		}
 		switch cfgFieldName {
+		case utils.TOR:
+			storedCdr.TOR = fieldVal
 		case utils.ACCID:
 			storedCdr.AccId = fieldVal
 		case utils.REQTYPE:

@@ -30,7 +30,7 @@ import (
 
 func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cgrConfig.CdrcCdrFields["supplier"] = &utils.RSRField{Id: "11"}
+	cgrConfig.CdrcCdrFields["supplier"] = &utils.RSRField{Id: "14"}
 	csvSepRune, _ := utf8.DecodeRune([]byte(cgrConfig.CdrcCsvSep))
 	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrType, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay, csvSepRune,
 		cgrConfig.CdrcCdrFields, new(cdrs.CDRS), nil}
@@ -39,24 +39,24 @@ func TestRecordForkCdr(t *testing.T) {
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
-	cdrRow = []string{"acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963", "2013-02-03 19:50:00", "2013-02-03 19:54:00", "62",
-		"supplier1", "172.16.1.1"}
+	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
+		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
 	rtCdr, err := cdrc.recordForkCdr(cdrRow)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
 	}
 	expectedCdr := &utils.StoredCdr{
-		CgrId:       utils.Sha1(cdrRow[0], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
-		TOR:         utils.VOICE,
-		AccId:       cdrRow[0],
+		CgrId:       utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
+		TOR:         cdrRow[2],
+		AccId:       cdrRow[3],
 		CdrSource:   cgrConfig.CdrcSourceId,
-		ReqType:     cdrRow[1],
-		Direction:   cdrRow[2],
-		Tenant:      cdrRow[3],
-		Category:    cdrRow[4],
-		Account:     cdrRow[5],
-		Subject:     cdrRow[6],
-		Destination: cdrRow[7],
+		ReqType:     cdrRow[4],
+		Direction:   cdrRow[5],
+		Tenant:      cdrRow[6],
+		Category:    cdrRow[7],
+		Account:     cdrRow[8],
+		Subject:     cdrRow[9],
+		Destination: cdrRow[10],
 		SetupTime:   time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC),
 		AnswerTime:  time.Date(2013, 2, 3, 19, 54, 0, 0, time.UTC),
 		Usage:       time.Duration(62) * time.Second,
