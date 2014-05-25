@@ -86,7 +86,7 @@ func (self *Cdrc) Run() error {
 
 // Takes the record out of csv and turns it into http form which can be posted
 func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
-	storedCdr := &utils.StoredCdr{CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
+	storedCdr := &utils.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	for cfgFieldName, cfgFieldRSR := range self.cdrFields {
 		var fieldVal string
@@ -120,15 +120,15 @@ func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
 			storedCdr.Destination = fieldVal
 		case utils.SETUP_TIME:
 			if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
-				return nil, fmt.Errorf("Cannot parse answer time field, err: %s", err.Error())
+				return nil, fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 			}
 		case utils.ANSWER_TIME:
 			if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
-				return nil, fmt.Errorf("Cannot parse answer time field, err: %s", err.Error())
+				return nil, fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 			}
 		case utils.USAGE:
-			if storedCdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
-				return nil, fmt.Errorf("Cannot parse duration field, err: %s", err.Error())
+			if storedCdr.Usage, err = utils.ParseDurationWithNanosecs(fieldVal); err != nil {
+				return nil, fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
 			}
 		default: // Extra fields will not match predefined so they all show up here
 			storedCdr.ExtraFields[cfgFieldName] = fieldVal

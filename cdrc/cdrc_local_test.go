@@ -81,7 +81,7 @@ func startEngine() error {
 		return errors.New("Cannot find cgr-engine executable")
 	}
 	stopEngine()
-	engine := exec.Command(enginePath, "-cdrs", "-config", cfgPath)
+	engine := exec.Command(enginePath, "-config", cfgPath)
 	if err := engine.Start(); err != nil {
 		return fmt.Errorf("Cannot start cgr-engine: %s", err.Error())
 	}

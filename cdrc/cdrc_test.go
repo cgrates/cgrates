@@ -40,7 +40,7 @@ func TestRecordForkCdr(t *testing.T) {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
-		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
+		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62000000000", "supplier1", "172.16.1.1"}
 	rtCdr, err := cdrc.recordForkCdr(cdrRow)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)
@@ -49,6 +49,7 @@ func TestRecordForkCdr(t *testing.T) {
 		CgrId:       utils.Sha1(cdrRow[3], time.Date(2013, 2, 3, 19, 50, 0, 0, time.UTC).String()),
 		TOR:         cdrRow[2],
 		AccId:       cdrRow[3],
+		CdrHost:     "0.0.0.0", // Got it over internal interface
 		CdrSource:   cgrConfig.CdrcSourceId,
 		ReqType:     cdrRow[4],
 		Direction:   cdrRow[5],

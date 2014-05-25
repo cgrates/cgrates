@@ -4,46 +4,48 @@
     <enabled>true</enabled>
     <cdrs_address>internal</cdrs_address>
     <cdr_type>csv</cdr_type>
+    <csv_separator>,</csv_separator>
     <run_delay>0</run_delay>
     <cdr_in_dir>/tmp/cgrates/cdrc2/in</cdr_in_dir>
     <cdr_out_dir>/tmp/cgrates/cdrc2/out</cdr_out_dir>
     <cdr_source_id>csv2</cdr_source_id>
     <fields>
-      <field id="tor" filter="7" />
+      <field id="tor" filter="~7:s/^(voice|data)$/*$1/" />
       <field id="accid" filter="0" />
       <field id="reqtype" filter="^rated" />
       <field id="direction" filter="^*out" />
       <field id="tenant" filter="^cgrates.org" />
-      <field id="category" filter="7" />
+      <field id="category" filter="~7:s/^voice$/call/" />
       <field id="account" filter="3" />
       <field id="subject" filter="3" />
-      <field id="destination" filter="5" />
+      <field id="destination" filter="~5:s/^0([1-9]+)$/+49$1/" />
       <field id="setup_time" filter="1" />
       <field id="answer_time" filter="1" />
-      <field id="usage" filter="9" />
+      <field id="usage" filter="~9:s/^(\d+)$/${1}s/" />
     </fields>
   </configuration>
   <configuration section="cdrc" type="csv" id="CDRC-CSV3">
     <enabled>true</enabled>
     <cdrs_address>internal</cdrs_address>
     <cdr_type>csv</cdr_type>
+    <csv_separator>;</csv_separator>
     <run_delay>0</run_delay>
     <cdr_in_dir>/tmp/cgrates/cdrc3/in</cdr_in_dir>
     <cdr_out_dir>/tmp/cgrates/cdrc3/out</cdr_out_dir>
     <cdr_source_id>csv3</cdr_source_id>
     <fields>
-      <field id="tor" filter="7" />
-      <field id="accid" filter="0" />
+      <field id="tor" filter="^*voice" />
+      <field id="accid" filter="~3:s/^(\d{2})\.(\d{2})\.(\d{4})\s{2}(\d{2}):(\d{2}):(\d{2})$/$1$2$3$4$5$6/" />
       <field id="reqtype" filter="^rated" />
       <field id="direction" filter="^*out" />
       <field id="tenant" filter="^cgrates.org" />
-      <field id="category" filter="7" />
-      <field id="account" filter="3" />
-      <field id="subject" filter="3" />
-      <field id="destination" filter="5" />
-      <field id="setup_time" filter="1" />
-      <field id="answer_time" filter="1" />
-      <field id="usage" filter="9" />
+      <field id="category" filter="^call" />
+      <field id="account" filter="~0:s/^([1-9]+)$/+$1/" />
+      <field id="subject" filter="~0:s/^([1-9]+)$/+$1/" />
+      <field id="destination" filter="~1:s/^([1-9]+)$/+$1/" />
+      <field id="setup_time" filter="4" />
+      <field id="answer_time" filter="4" />
+      <field id="usage" filter="~6:s/^(\d+)$/${1}s/" />
     </fields>
   </configuration>
   <configuration section="cdre" type="fwv" id="CDRE-FW1">

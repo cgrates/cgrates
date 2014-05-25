@@ -1,0 +1,191 @@
+/*
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
+*/
+
+package general_tests
+
+import (
+	"errors"
+	"flag"
+	"fmt"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+	"io/ioutil"
+	"net/rpc"
+	"net/rpc/jsonrpc"
+	"os"
+	"os/exec"
+	"path"
+	"testing"
+	"time"
+)
+
+var cfgPath string
+var cfg *config.CGRConfig
+var rater *rpc.Client
+
+var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
+var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
+var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
+var waitRater = flag.Int("wait_rater", 100, "Number of miliseconds to wait for rater to start and cache")
+
+func init() {
+	cfgPath = path.Join(*dataDir, "conf", "samples", "multiplecdrc_fwexport.cfg")
+	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
+}
+
+func startEngine() error {
+	enginePath, err := exec.LookPath("cgr-engine")
+	if err != nil {
+		return errors.New("Cannot find cgr-engine executable")
+	}
+	stopEngine()
+	engine := exec.Command(enginePath, "-config", cfgPath)
+	if err := engine.Start(); err != nil {
+		return fmt.Errorf("Cannot start cgr-engine: %s", err.Error())
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to rater to fire up
+	return nil
+}
+
+func stopEngine() error {
+	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
+	return nil
+}
+
+func TestEmptyTables(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	if *storDbType != utils.MYSQL {
+		t.Fatal("Unsupported storDbType")
+	}
+	var mysql *engine.MySQLStorage
+	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
+		t.Fatal("Error on opening database connection: ", err)
+	} else {
+		mysql = d.(*engine.MySQLStorage)
+	}
+	if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, engine.CREATE_CDRS_TABLES_SQL)); err != nil {
+		t.Fatal("Error on mysql creation: ", err.Error())
+		return // No point in going further
+	}
+	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
+		if _, err := mysql.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
+			t.Fatal(err.Error())
+		}
+	}
+}
+
+func TestCreateCdrDirs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	for _, cdrcDir := range []string{cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir,
+		cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrInDir, cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrOutDir,
+		cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrInDir, cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrOutDir} {
+		if err := os.RemoveAll(cdrcDir); err != nil {
+			t.Fatal("Error removing folder: ", cdrcDir, err)
+		}
+		if err := os.MkdirAll(cdrcDir, 0755); err != nil {
+			t.Fatal("Error creating folder: ", cdrcDir, err)
+		}
+	}
+}
+
+// Connect rpc client to rater
+func TestRpcConn(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	startEngine()
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
+	var err error
+	rater, err = jsonrpc.Dial("tcp", cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	if err != nil {
+		t.Fatal("Could not connect to rater: ", err.Error())
+	}
+}
+
+// Test here LoadTariffPlanFromFolder
+func TestApierLoadTariffPlanFromFolder(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	reply := ""
+	// Simple test that command is executed without errors
+	attrs := &utils.AttrLoadTpFromFolder{FolderPath: path.Join(*dataDir, "tariffplans", "prepaid1centpsec")}
+	if err := rater.Call("ApierV1.LoadTariffPlanFromFolder", attrs, &reply); err != nil {
+		t.Error("Got error on ApierV1.LoadTariffPlanFromFolder: ", err.Error())
+	} else if reply != "OK" {
+		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
+	}
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+}
+
+// The default scenario, out of cdrc defined in .cfg file
+func TestHandleCdr1File(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var fileContent1 = `dbafe9c8614c785a65aabd116dd3959c3c56f7f6,default,*voice,dsafdsaf,rated,*out,cgrates.org,call,1001,1001,+4986517174963,2013-11-07 08:42:25 +0000 UTC,2013-11-07 08:42:26 +0000 UTC,10000000000,1.0100,val_extra3,"",val_extra1
+dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,rated,*out,cgrates.org,call,1001,1001,+4986517174964,2013-11-07 09:42:25 +0000 UTC,2013-11-07 09:42:26 +0000 UTC,20000000000,1.0100,val_extra3,"",val_extra1
+`
+	fileName := "file1.csv"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
+		t.Fatal(err.Error)
+	}
+	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcCdrInDir, fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+// Scenario out of first .xml config
+func TestHandleCdr2File(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var fileContent = `616350843,20131022145011,20131022172857,3656,1001,,,data,mo,640113,0.000000,1.222656,1.222660
+616199016,20131022154924,20131022154955,3656,1001,086517174963,,voice,mo,31,0.000000,0.000000,0.000000`
+	fileName := "file2.csv"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
+		t.Fatal(err.Error)
+	}
+	if err := os.Rename(tmpFilePath, path.Join(cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrInDir, fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}
+
+// Scenario out of second .xml config
+func TestHandleCdr3File(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var fileContent = `4986517174960;4986517174963;Sample Mobile;08.04.2014  22:14:29;08.04.2014  22:14:29;1;193;Offeak;0,072728833;31619
+4986517174960;4986517174964;National;08.04.2014  20:34:55;08.04.2014  20:34:55;1;21;Offeak;0,0079135;311`
+	fileName := "file3.csv"
+	tmpFilePath := path.Join("/tmp", fileName)
+	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
+		t.Fatal(err.Error)
+	}
+	if err := os.Rename(tmpFilePath, path.Join(cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrInDir, fileName)); err != nil {
+		t.Fatal("Error moving file to processing directory: ", err)
+	}
+}

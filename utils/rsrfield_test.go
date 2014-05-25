@@ -97,3 +97,17 @@ func TestRSRParseStatic(t *testing.T) {
 		t.Errorf("Expected: %s, received: %s", "static_hdrvalue", parsed)
 	}
 }
+
+func TestConvertDurToSecs(t *testing.T) {
+	expectRSRField := &RSRField{Id: "9", RSRules: []*ReSearchReplace{
+		&ReSearchReplace{regexp.MustCompile(`^(\d+)$`), "${1}s"}}}
+	rsrField, err := NewRSRField(`~9:s/^(\d+)$/${1}s/`)
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
+		t.Errorf("Expecting: %v, received: %v", expectRSRField, rsrField)
+	}
+	if parsedVal := rsrField.ParseValue("640113"); parsedVal != "640113s" {
+		t.Errorf("Expecting: 640113s, received: %s", parsedVal)
+	}
+}

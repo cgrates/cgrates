@@ -57,7 +57,7 @@ TOPUP10_AC1,*topup_reset,*voice,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted
 	actionPlans := `TOPUP10_AT,TOPUP10_AC,ASAP,10
 TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
-	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,`
+	accountActions := `cgrates.org,12344,*out,TOPUP10_AT,`
 	derivedCharges := ``
 	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
 		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges)
@@ -101,7 +101,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 		t.Fatal(err)
 	}
 	csvr.WriteToDatabase(false, false)
-	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12345"); err != nil {
+	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12344"); err != nil {
 		t.Error(err)
 	} else if acnt == nil {
 		t.Error("No account saved")
@@ -127,7 +127,7 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 func TestExecuteActions(t *testing.T) {
 	scheduler.NewScheduler().LoadActionTimings(acntDb)
 	time.Sleep(time.Millisecond) // Give time to scheduler to topup the account
-	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12345"); err != nil {
+	if acnt, err := acntDb.GetAccount("*out:cgrates.org:12344"); err != nil {
 		t.Error(err)
 	} else if len(acnt.BalanceMap) != 2 {
 		t.Error("Account does not have enough balances: ", acnt.BalanceMap)
@@ -143,8 +143,8 @@ func TestDebit(t *testing.T) {
 		Direction:   "*out",
 		Category:    "call",
 		Tenant:      "cgrates.org",
-		Subject:     "12345",
-		Account:     "12345",
+		Subject:     "12344",
+		Account:     "12344",
 		Destination: "447956933443",
 		TimeStart:   time.Date(2014, 3, 4, 6, 0, 0, 0, time.UTC),
 		TimeEnd:     time.Date(2014, 3, 4, 6, 0, 10, 0, time.UTC),
@@ -154,7 +154,7 @@ func TestDebit(t *testing.T) {
 	} else if cc.Cost != 0.01 {
 		t.Error("Wrong cost returned: ", cc.Cost)
 	}
-	acnt, err := acntDb.GetAccount("*out:cgrates.org:12345")
+	acnt, err := acntDb.GetAccount("*out:cgrates.org:12344")
 	if err != nil {
 		t.Error(err)
 	}
