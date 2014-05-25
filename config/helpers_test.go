@@ -67,6 +67,7 @@ usage_fields = test1, test2
 func TestParseCdrcCdrFields(t *testing.T) {
 	eFieldsCfg := []byte(`[cdrc]
 cdr_type = test
+tor_field = tor1
 accid_field = accid1
 reqtype_field = reqtype1
 direction_field = direction1
@@ -81,6 +82,7 @@ usage_field = duration1
 extra_fields = extra1:extraval1,extra2:extraval1
 `)
 	eCdrcCdrFlds := map[string]*utils.RSRField{
+		utils.TOR:         &utils.RSRField{Id: "tor1"},
 		utils.ACCID:       &utils.RSRField{Id: "accid1"},
 		utils.REQTYPE:     &utils.RSRField{Id: "reqtype1"},
 		utils.DIRECTION:   &utils.RSRField{Id: "direction1"},
@@ -98,6 +100,6 @@ extra_fields = extra1:extraval1,extra2:extraval1
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(cfg.CdrcCdrFields, eCdrcCdrFlds) {
-		t.Errorf("Expecting: %v, received: %v", eCdrcCdrFlds, cfg.CdrcCdrFields)
+		t.Errorf("Expecting: %v, received: %v, tor: %v", eCdrcCdrFlds, cfg.CdrcCdrFields, cfg.CdrcCdrFields[utils.TOR])
 	}
 }

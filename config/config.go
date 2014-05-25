@@ -179,7 +179,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcCsvSep = string(utils.CSV_SEP)
 	self.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
 	self.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
-	self.CdrcSourceId = "freeswitch_csv"
+	self.CdrcSourceId = "csv"
 	self.CdrcCdrFields = map[string]*utils.RSRField{
 		utils.TOR:         &utils.RSRField{Id: "2"},
 		utils.ACCID:       &utils.RSRField{Id: "3"},
@@ -482,6 +482,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.CdrcSourceId, _ = c.GetString("cdrc", "cdr_source_id")
 	}
 	// ParseCdrcCdrFields
+	torIdFld, _ := c.GetString("cdrc", "tor_field")
 	accIdFld, _ := c.GetString("cdrc", "accid_field")
 	reqtypeFld, _ := c.GetString("cdrc", "reqtype_field")
 	directionFld, _ := c.GetString("cdrc", "direction_field")
@@ -494,10 +495,10 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	answerTimeFld, _ := c.GetString("cdrc", "answer_time_field")
 	durFld, _ := c.GetString("cdrc", "usage_field")
 	extraFlds, _ := c.GetString("cdrc", "extra_fields")
-	if len(accIdFld) != 0 || len(reqtypeFld) != 0 || len(directionFld) != 0 || len(tenantFld) != 0 || len(categoryFld) != 0 || len(acntFld) != 0 ||
+	if len(torIdFld) != 0 || len(accIdFld) != 0 || len(reqtypeFld) != 0 || len(directionFld) != 0 || len(tenantFld) != 0 || len(categoryFld) != 0 || len(acntFld) != 0 ||
 		len(subjectFld) != 0 || len(destFld) != 0 || len(setupTimeFld) != 0 || len(answerTimeFld) != 0 || len(durFld) != 0 || len(extraFlds) != 0 {
 		// We overwrite the defaults only if at least one of the fields were defined
-		if cfg.CdrcCdrFields, err = ParseCdrcCdrFields(accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
+		if cfg.CdrcCdrFields, err = ParseCdrcCdrFields(torIdFld, accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
 			setupTimeFld, answerTimeFld, durFld, extraFlds); err != nil {
 			return nil, err
 		}

@@ -138,7 +138,7 @@ func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err
 	return dcs, nil
 }
 
-func ParseCdrcCdrFields(accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
+func ParseCdrcCdrFields(torFld, accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
 	setupTimeFld, answerTimeFld, durFld, extraFlds string) (map[string]*utils.RSRField, error) {
 	cdrcCdrFlds := make(map[string]*utils.RSRField)
 	if len(extraFlds) != 0 {
@@ -159,7 +159,7 @@ func ParseCdrcCdrFields(accIdFld, reqtypeFld, directionFld, tenantFld, categoryF
 			}
 		}
 	}
-	for fldTag, fldVal := range map[string]string{utils.ACCID: accIdFld, utils.REQTYPE: reqtypeFld, utils.DIRECTION: directionFld, utils.TENANT: tenantFld,
+	for fldTag, fldVal := range map[string]string{utils.TOR: torFld, utils.ACCID: accIdFld, utils.REQTYPE: reqtypeFld, utils.DIRECTION: directionFld, utils.TENANT: tenantFld,
 		utils.CATEGORY: categoryFld, utils.ACCOUNT: acntFld, utils.SUBJECT: subjectFld, utils.DESTINATION: destFld, utils.SETUP_TIME: setupTimeFld,
 		utils.ANSWER_TIME: answerTimeFld, utils.USAGE: durFld} {
 		if len(fldVal) != 0 {

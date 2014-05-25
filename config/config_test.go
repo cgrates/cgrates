@@ -93,7 +93,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcCsvSep = string(utils.CSV_SEP)
 	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
 	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
-	eCfg.CdrcSourceId = "freeswitch_csv"
+	eCfg.CdrcSourceId = "csv"
 	eCfg.CdrcCdrFields = map[string]*utils.RSRField{
 		utils.TOR:         &utils.RSRField{Id: "2"},
 		utils.ACCID:       &utils.RSRField{Id: "3"},
@@ -243,6 +243,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CdrcCdrOutDir = "test"
 	eCfg.CdrcSourceId = "test"
 	eCfg.CdrcCdrFields = map[string]*utils.RSRField{
+		utils.TOR:         &utils.RSRField{Id: "test"},
 		utils.ACCID:       &utils.RSRField{Id: "test"},
 		utils.REQTYPE:     &utils.RSRField{Id: "test"},
 		utils.DIRECTION:   &utils.RSRField{Id: "test"},

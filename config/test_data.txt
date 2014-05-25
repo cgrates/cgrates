@@ -48,33 +48,34 @@ mediator = test				# Address where to reach the Mediacategory. Empty for disabli
 
 [cdre]
 cdr_format = test			# Exported CDRs format <csv>
-mask_destination_id = test		# Destination id containing called addresses to be masked on export
+mask_destination_id = test	# Destination id containing called addresses to be masked on export
 mask_length = 99			# Length of the destination suffix to be masked
-cost_shift_digits = 99			# Shift the number of cost 
+cost_shift_digits = 99		# Shift the number of cost 
 export_dir = test			# Path where the exported CDRs will be placed
-export_template = test			# List of fields in the exported CDRs
+export_template = test		# List of fields in the exported CDRs
 
 [cdrc]
 enabled = true				# Enable CDR client functionality
-cdrs = test				# Address where to reach CDR server
+cdrs = test					# Address where to reach CDR server
 run_delay = 99				# Period to sleep between two runs, 0 to use automation via inotify
 cdr_type = test				# CDR file format <csv>.
 csv_separator =;			# Csv separator, one character only and should be next to equal sign
 cdr_in_dir = test		 	# Absolute path towards the direccategoryy where the CDRs are kept (file scategoryed CDRs).
 cdr_out_dir = test			# Absolute path towards the direccategoryy where processed CDRs will be moved after processing.	
-cdr_source_id = test			# Tag identifying the source of the CDRs within CGRS database.
+cdr_source_id = test		# Tag identifying the source of the CDRs within CGRS database.
+tor_field = test 			# TypeOfRecord field identifier. Use index number in case of .csv cdrs.
 accid_field = test			# Accounting id field identifier. Use index number in case of .csv cdrs.
-reqtype_field = test			# Request type field identifier. Use index number in case of .csv cdrs.
-direction_field = test			# Direction field identifier. Use index numbers in case of .csv cdrs.
+reqtype_field = test		# Request type field identifier. Use index number in case of .csv cdrs.
+direction_field = test		# Direction field identifier. Use index numbers in case of .csv cdrs.
 tenant_field = test			# Tenant field identifier. Use index numbers in case of .csv cdrs.
-category_field = test			# Type of Record field identifier. Use index numbers in case of .csv cdrs.
-account_field = test			# Account field identifier. Use index numbers in case of .csv cdrs.
-subject_field = test			# Subject field identifier. Use index numbers in case of .csv CDRs.
-destination_field = test		# Destination field identifier. Use index numbers in case of .csv cdrs.
-setup_time_field = test			# Answer time field identifier. Use index numbers in case of .csv cdrs.
-answer_time_field = test		# Answer time field identifier. Use index numbers in case of .csv cdrs.
+category_field = test		# Type of Record field identifier. Use index numbers in case of .csv cdrs.
+account_field = test		# Account field identifier. Use index numbers in case of .csv cdrs.
+subject_field = test		# Subject field identifier. Use index numbers in case of .csv CDRs.
+destination_field = test	# Destination field identifier. Use index numbers in case of .csv cdrs.
+setup_time_field = test		# Answer time field identifier. Use index numbers in case of .csv cdrs.
+answer_time_field = test	# Answer time field identifier. Use index numbers in case of .csv cdrs.
 usage_field = test			# Duration field identifier. Use index numbers in case of .csv cdrs.
-extra_fields = test:test			# Field identifiers of the fields to add in extra fields section, special format in case of .csv "index1|field1,index2|field2"
+extra_fields = test:test	# Field identifiers of the fields to add in extra fields section, special format in case of .csv "index1|field1,index2|field2"
 
 [mediator]
 enabled = true				# Starts Mediacategory service: <true|false>.
