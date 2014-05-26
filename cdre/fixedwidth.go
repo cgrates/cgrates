@@ -304,7 +304,9 @@ func (fwv *FixedWidthCdrWriter) WriteCdr(cdr *utils.StoredCdr) error {
 		fwv.lastCdrATime = cdr.AnswerTime
 	}
 	fwv.numberOfRecords += 1
-	fwv.totalDuration += cdr.Usage
+	if !utils.IsSliceMember([]string{utils.DATA, utils.SMS}, cdr.TOR) { // Only count duration for non data cdrs
+		fwv.totalDuration += cdr.Usage
+	}
 	fwv.totalCost += cdr.Cost
 	fwv.totalCost = utils.Round(fwv.totalCost, fwv.roundDecimals, utils.ROUNDING_MIDDLE)
 	if fwv.firstExpOrderId > cdr.OrderId || fwv.firstExpOrderId == 0 {

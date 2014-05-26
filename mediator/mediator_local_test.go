@@ -268,7 +268,7 @@ func TestMediatePseudoprepaid(t *testing.T) {
 		}
 	}
 	time.Sleep(time.Duration(*startDelay) * time.Millisecond) // Give time for debits to happen
-	expectBalance := 5.998
+	expectBalance := 6.0
 	if err := cgrRpc.Call("ApierV1.GetAccount", attrs, &reply); err != nil {
 		t.Error("Got error on ApierV1.GetAccount: ", err.Error())
 	} else if reply.BalanceMap[engine.CREDIT+attrs.Direction].GetTotalValue() != expectBalance { // 5 from voice, 0.002 from DATA

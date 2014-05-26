@@ -51,9 +51,14 @@ type StoredCdr struct {
 }
 
 // Should only be used for display purposes, bad otherwise.
-func (storedCdr *StoredCdr) MangleDataUsage() {
+// cdrDirection: CDR_IMPORT or CDR_EXPORT
+func (storedCdr *StoredCdr) MangleDataUsage(cdrDirection string) {
 	if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
-		storedCdr.Usage = time.Duration(int(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE))) // 0.1 should be reflected as 1 and not 0
+		if cdrDirection == CDR_IMPORT { // On import CDRs usages are converted to nanoseconds, for data we need seconds, fix it here.
+			storedCdr.Usage = time.Duration(storedCdr.Usage.Nanoseconds()) * time.Second
+		} else if cdrDirection == CDR_EXPORT { // On exports we need to show the data back in seconds instead of internally stored as nanoseconds
+			storedCdr.Usage = time.Duration(int(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE)))
+		}
 	}
 }
 
@@ -117,6 +122,9 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 	case ANSWER_TIME:
 		return rsrFld.ParseValue(storedCdr.AnswerTime.String())
 	case USAGE:
+		if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
+			return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
+		}
 		return rsrFld.ParseValue(strconv.FormatInt(storedCdr.Usage.Nanoseconds(), 10))
 	case MEDI_RUNID:
 		return rsrFld.ParseValue(storedCdr.MediationRunId)

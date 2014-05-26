@@ -76,15 +76,27 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&RSRField{Id: "fieldextr2"}) != cdr.ExtraFields["fieldextr2"],
 			cdr.FieldAsString(&RSRField{Id: "dummy_field"}) != "")
 	}
+	cdr.TOR = DATA
+	if formated := cdr.FieldAsString(&RSRField{Id: USAGE}); formated != "10" {
+		t.Error("Wrong exported value for data field: ", formated)
+	}
 }
 
 func TestMangleDataUsage(t *testing.T) {
-	cdr := StoredCdr{TOR: DATA, Usage: time.Duration(1640113000000000)}
-	if cdr.MangleDataUsage(); cdr.Usage != time.Duration(1640113) {
+	cdr := StoredCdr{TOR: DATA, Usage: time.Duration(1640113)}
+	if cdr.MangleDataUsage(CDR_IMPORT); cdr.Usage != time.Duration(1640113000000000) {
 		t.Error("Unexpected usage after mangling: ", cdr.Usage)
 	}
 	cdr = StoredCdr{TOR: VOICE, Usage: time.Duration(1640113000000000)}
-	if cdr.MangleDataUsage(); cdr.Usage != time.Duration(1640113000000000) {
+	if cdr.MangleDataUsage(CDR_IMPORT); cdr.Usage != time.Duration(1640113000000000) {
+		t.Error("Unexpected usage after mangling: ", cdr.Usage)
+	}
+	cdr = StoredCdr{TOR: DATA, Usage: time.Duration(1640113000000000)}
+	if cdr.MangleDataUsage(CDR_EXPORT); cdr.Usage != time.Duration(1640113) {
+		t.Error("Unexpected usage after mangling: ", cdr.Usage)
+	}
+	cdr = StoredCdr{TOR: VOICE, Usage: time.Duration(1640113000000000)}
+	if cdr.MangleDataUsage(CDR_EXPORT); cdr.Usage != time.Duration(1640113000000000) {
 		t.Error("Unexpected usage after mangling: ", cdr.Usage)
 	}
 }

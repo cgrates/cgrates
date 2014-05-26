@@ -64,6 +64,9 @@ func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*utils.StoredCdr
 		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.SkipErrors, attrs.SkipRated, false); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
+		for _, cdr := range cdrs {
+			cdr.MangleDataUsage(utils.CDR_EXPORT) // Convert data usage to the right format
+		}
 		*reply = cdrs
 	}
 	return nil

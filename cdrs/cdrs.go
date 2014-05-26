@@ -37,6 +37,7 @@ var (
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func storeAndMediate(storedCdr *utils.StoredCdr) error {
+	storedCdr.MangleDataUsage(utils.CDR_IMPORT) // Fix the data usage here
 	if err := storage.SetCdr(storedCdr); err != nil {
 		return err
 	}

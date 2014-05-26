@@ -117,6 +117,8 @@ const (
 	NANOSECONDS                = "nanoseconds"
 	SECONDS                    = "seconds"
 	OUT                        = "*out"
+	CDR_IMPORT                 = "cdr_import"
+	CDR_EXPORT                 = "cdr_export"
 )
 
 var (
