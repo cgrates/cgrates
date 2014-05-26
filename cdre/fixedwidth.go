@@ -121,7 +121,7 @@ func (fwv *FixedWidthCdrWriter) cdrFieldValue(cdr *utils.StoredCdr, cfgHdr, layo
 	case utils.COST:
 		cdrVal = cdr.FormatCost(fwv.costShiftDigits, fwv.roundDecimals)
 	case utils.USAGE:
-		cdrVal = cdr.FormatDuration(layout)
+		cdrVal = cdr.FormatUsage(layout)
 	case utils.SETUP_TIME:
 		cdrVal = cdr.SetupTime.Format(layout)
 	case utils.ANSWER_TIME: // Format time based on layout

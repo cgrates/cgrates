@@ -50,6 +50,13 @@ type StoredCdr struct {
 	Cost           float64
 }
 
+// Should only be used for display purposes, bad otherwise.
+func (storedCdr *StoredCdr) MangleDataUsage() {
+	if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
+		storedCdr.Usage = time.Duration(int(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE))) // 0.1 should be reflected as 1 and not 0
+	}
+}
+
 // Return cost as string, formated with number of decimals configured
 func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string {
 	cost := storedCdr.Cost
@@ -60,7 +67,10 @@ func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string 
 }
 
 // Rounds up so 0.8 seconds will become 1
-func (storedCdr *StoredCdr) FormatDuration(layout string) string {
+func (storedCdr *StoredCdr) FormatUsage(layout string) string {
+	if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
+		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
+	}
 	switch layout {
 	case HOURS:
 		return strconv.FormatFloat(math.Ceil(storedCdr.Usage.Hours()), 'f', -1, 64)

@@ -78,6 +78,17 @@ func TestFieldAsString(t *testing.T) {
 	}
 }
 
+func TestMangleDataUsage(t *testing.T) {
+	cdr := StoredCdr{TOR: DATA, Usage: time.Duration(1640113000000000)}
+	if cdr.MangleDataUsage(); cdr.Usage != time.Duration(1640113) {
+		t.Error("Unexpected usage after mangling: ", cdr.Usage)
+	}
+	cdr = StoredCdr{TOR: VOICE, Usage: time.Duration(1640113000000000)}
+	if cdr.MangleDataUsage(); cdr.Usage != time.Duration(1640113000000000) {
+		t.Error("Unexpected usage after mangling: ", cdr.Usage)
+	}
+}
+
 func TestFormatCost(t *testing.T) {
 	cdr := StoredCdr{Cost: 1.01}
 	if cdr.FormatCost(0, 4) != "1.0100" {
@@ -98,13 +109,17 @@ func TestFormatCost(t *testing.T) {
 	}
 }
 
-func TestFormatDuration(t *testing.T) {
+func TestFormatUsage(t *testing.T) {
 	cdr := StoredCdr{Usage: time.Duration(10) * time.Second}
-	if cdr.FormatDuration(SECONDS) != "10" {
-		t.Error("Wrong duration format: ", cdr.FormatDuration(SECONDS))
+	if cdr.FormatUsage(SECONDS) != "10" {
+		t.Error("Wrong usage format: ", cdr.FormatUsage(SECONDS))
 	}
-	if cdr.FormatDuration("default") != "10000000000" {
-		t.Error("Wrong duration format: ", cdr.FormatDuration("default"))
+	if cdr.FormatUsage("default") != "10000000000" {
+		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
+	}
+	cdr = StoredCdr{TOR: DATA, Usage: time.Duration(1640113000000000)}
+	if cdr.FormatUsage("default") != "1640113" {
+		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
 }
 
