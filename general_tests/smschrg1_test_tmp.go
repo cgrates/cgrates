@@ -69,14 +69,15 @@ func TestLoadCsvTpSmsChrg1(t *testing.T) {
 }
 
 func TestGetDataCostSmsChrg1(t *testing.T) {
-	usageDur := time.Duration(1) * time.Second
+	usageDur := time.Second
 	timeStart := time.Date(2014, 3, 4, 0, 0, 0, 0, time.Local)
 	cd := &engine.CallDescriptor{
 		Direction:     "*out",
-		Category:      "data",
+		Category:      "sms",
 		Tenant:        "cgrates.org",
 		Subject:       "12345",
 		Account:       "12345",
+		Destination:   "+4917621621391",
 		TimeStart:     timeStart,
 		TimeEnd:       timeStart.Add(usageDur),
 		DurationIndex: usageDur,
