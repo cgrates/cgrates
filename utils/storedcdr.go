@@ -257,3 +257,48 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	}
 	return frkStorCdr, nil
 }
+
+func (storedCdr *StoredCdr) AsCgrCdrOut() *CgrCdrOut {
+	return &CgrCdrOut{CgrId: storedCdr.CgrId,
+		OrderId:        storedCdr.OrderId,
+		TOR:            storedCdr.TOR,
+		AccId:          storedCdr.AccId,
+		CdrHost:        storedCdr.CdrHost,
+		CdrSource:      storedCdr.CdrSource,
+		ReqType:        storedCdr.ReqType,
+		Direction:      storedCdr.Direction,
+		Tenant:         storedCdr.Tenant,
+		Category:       storedCdr.Category,
+		Account:        storedCdr.Account,
+		Subject:        storedCdr.Subject,
+		Destination:    storedCdr.Destination,
+		SetupTime:      storedCdr.SetupTime,
+		AnswerTime:     storedCdr.AnswerTime,
+		Usage:          storedCdr.Usage.Seconds(),
+		ExtraFields:    storedCdr.ExtraFields,
+		MediationRunId: storedCdr.MediationRunId,
+		Cost:           storedCdr.Cost,
+	}
+}
+
+type CgrCdrOut struct {
+	CgrId          string
+	OrderId        int64
+	TOR            string
+	AccId          string
+	CdrHost        string
+	CdrSource      string
+	ReqType        string
+	Direction      string
+	Tenant         string
+	Category       string
+	Account        string
+	Subject        string
+	Destination    string
+	SetupTime      time.Time
+	AnswerTime     time.Time
+	Usage          float64
+	ExtraFields    map[string]string
+	MediationRunId string
+	Cost           float64
+}

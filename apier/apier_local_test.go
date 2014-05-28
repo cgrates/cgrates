@@ -1434,6 +1434,8 @@ func TestLocalGetCdrs(t *testing.T) {
 	req := utils.AttrGetCdrs{}
 	if err := rater.Call("ApierV1.GetCdrs", req, &reply); err != nil {
 		t.Error("Unexpected error: ", err.Error())
+	} else if len(reply) != 2 {
+		t.Error("Unexpected number of CDRs returned: ", len(reply))
 	}
 }
 

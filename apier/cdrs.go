@@ -46,7 +46,7 @@ func (apier *ApierV1) GetCallCostLog(attrs AttrGetCallCost, reply *engine.CallCo
 }
 
 // Retrieves CDRs based on the filters
-func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*utils.StoredCdr) error {
+func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*utils.CgrCdrOut) error {
 	var tStart, tEnd time.Time
 	var err error
 	if len(attrs.TimeStart) != 0 {
@@ -65,9 +65,8 @@ func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*utils.StoredCdr
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		for _, cdr := range cdrs {
-			cdr.MangleDataUsage(utils.CDR_EXPORT) // Convert data usage to the right format
+			*reply = append(*reply, cdr.AsCgrCdrOut())
 		}
-		*reply = cdrs
 	}
 	return nil
 }
