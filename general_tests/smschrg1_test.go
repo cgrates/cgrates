@@ -27,14 +27,14 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestSetStorageSmsChrg1(t *testing.T) {
+func TestSMSSetStorageSmsChrg1(t *testing.T) {
 	ratingDb, _ = engine.NewMapStorageJson()
 	engine.SetRatingStorage(ratingDb)
 	acntDb, _ = engine.NewMapStorageJson()
 	engine.SetAccountingStorage(acntDb)
 }
 
-func TestLoadCsvTpSmsChrg1(t *testing.T) {
+func TestSMSLoadCsvTpSmsChrg1(t *testing.T) {
 	timings := `ALWAYS,*any,*any,*any,*any,00:00:00`
 	rates := `RT_SMS_5c,0,0.005,1,1,0`
 	destinationRates := `DR_SMS_1,*any,RT_SMS_5c,*up,4`
@@ -68,7 +68,7 @@ func TestLoadCsvTpSmsChrg1(t *testing.T) {
 	}
 }
 
-func TestGetDataCostSmsChrg1(t *testing.T) {
+func TestSMSGetDataCostSmsChrg1(t *testing.T) {
 	usageDur := time.Second
 	timeStart := time.Date(2014, 3, 4, 0, 0, 0, 0, time.Local)
 	cd := &engine.CallDescriptor{

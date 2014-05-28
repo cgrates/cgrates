@@ -141,6 +141,13 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 					break
 				}
 			}
+			if rps == nil { // fallback on *any destination
+				if _, ok := rpl.DestinationRates[utils.ANY]; ok {
+					rps = rpl.RateIntervalList(utils.ANY)
+					prefix = utils.ANY
+					destinationId = utils.ANY
+				}
+			}
 		}
 		// check if it's the first ri and add a blank one for the initial part not covered
 		if index == 0 && cd.TimeStart.Before(rpa.ActivationTime) {
