@@ -122,7 +122,7 @@ func (dbr *DbReader) ShowStatistics() {
 	// account actions
 	log.Print("Account actions: ", len(dbr.accountActions))
 	// derivedChargers
-	log.Print("DerivedChargers: ", len(dbr.derivedChargers))
+	log.Print("Derived Chargers: ", len(dbr.derivedChargers))
 	// lcr rules
 	log.Print("LCR rules: ", len(dbr.lcrs))
 }

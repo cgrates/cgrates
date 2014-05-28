@@ -122,9 +122,9 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 	case ANSWER_TIME:
 		return rsrFld.ParseValue(storedCdr.AnswerTime.String())
 	case USAGE:
-		if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
-			return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
-		}
+		//if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
+		//	return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
+		//}
 		return rsrFld.ParseValue(strconv.FormatInt(storedCdr.Usage.Nanoseconds(), 10))
 	case MEDI_RUNID:
 		return rsrFld.ParseValue(storedCdr.MediationRunId)

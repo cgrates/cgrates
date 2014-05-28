@@ -10,7 +10,7 @@
     <cdr_out_dir>/tmp/cgrates/cdrc2/out</cdr_out_dir>
     <cdr_source_id>csv2</cdr_source_id>
     <fields>
-      <field id="tor" filter="~7:s/^(voice|data)$/*$1/" />
+      <field id="tor" filter="~7:s/^(voice|data|sms)$/*$1/" />
       <field id="accid" filter="0" />
       <field id="reqtype" filter="^rated" />
       <field id="direction" filter="^*out" />

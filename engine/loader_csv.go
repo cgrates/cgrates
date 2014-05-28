@@ -168,7 +168,7 @@ func (csvr *CSVReader) ShowStatistics() {
 	// account actions
 	log.Print("Account actions: ", len(csvr.accountActions))
 	// derivedChargers
-	log.Print("DerivedChargers: ", len(csvr.derivedChargers))
+	log.Print("Derived Chargers: ", len(csvr.derivedChargers))
 	// lcr rules
 	log.Print("LCR rules: ", len(csvr.lcrs))
 }
@@ -309,7 +309,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		}
 	}
 	if verbose {
-		log.Print("derivedChargers")
+		log.Print("Derived Chargers")
 	}
 	for key, dcs := range csvr.derivedChargers {
 		err = accountingStorage.SetDerivedChargers(key, dcs)

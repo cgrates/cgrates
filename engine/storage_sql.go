@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"io/ioutil"
+	"strconv"
 	"strings"
 	"time"
 
@@ -544,7 +545,7 @@ func (self *SQLStorage) LogActionTiming(source string, at *ActionTiming, as Acti
 func (self *SQLStorage) LogError(uuid, source, runid, errstr string) (err error) { return }
 
 func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO  %s (cgrid,tor,accid,cdrhost,cdrsource,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %d)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO  %s (cgrid,tor,accid,cdrhost,cdrsource,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', %v)",
 		utils.TBL_CDRS_PRIMARY,
 		cdr.CgrId,
 		cdr.TOR,
@@ -560,7 +561,7 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
 		cdr.Destination,
 		cdr.SetupTime,
 		cdr.AnswerTime,
-		cdr.Usage,
+		cdr.Usage.Seconds(),
 	))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %v", err))
@@ -582,7 +583,8 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
 }
 
 func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (mediation_time,cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,cost,extra_info) VALUES (now(),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%d,%f,'%s') ON DUPLICATE KEY UPDATE mediation_time=now(),reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),cost=values(cost),extra_info=values(extra_info)",
+	Logger.Debug(fmt.Sprintf("SetRatedCdr for CDR: %+v", storedCdr))
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (mediation_time,cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,cost,extra_info) VALUES (now(),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%v,%f,'%s') ON DUPLICATE KEY UPDATE mediation_time=now(),reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),cost=values(cost),extra_info=values(extra_info)",
 		utils.TBL_RATED_CDRS,
 		storedCdr.CgrId,
 		storedCdr.MediationRunId,
@@ -595,7 +597,7 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 		storedCdr.Destination,
 		storedCdr.SetupTime,
 		storedCdr.AnswerTime,
-		storedCdr.Usage,
+		storedCdr.Usage.Seconds(),
 		storedCdr.Cost,
 		extraInfo))
 	if err != nil {
@@ -895,8 +897,7 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 		var extraFields []byte
 		var setupTime, answerTime mysql.NullTime
 		var orderid int64
-		var usage sql.NullInt64
-		var cost sql.NullFloat64 // So we can export unmediated CDRs
+		var usage, cost sql.NullFloat64
 		var extraFieldsMp map[string]string
 		if err := rows.Scan(&cgrid, &orderid, &tor, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination, &setupTime, &answerTime, &usage,
 			&extraFields, &runid, &cost); err != nil {
@@ -905,11 +906,12 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 		if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
 			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid, runid, err.Error())
 		}
+		usageDur, _ := time.ParseDuration(strconv.FormatFloat(usage.Float64, 'f', -1, 64) + "s")
 		storCdr := &utils.StoredCdr{
 			CgrId: cgrid.String, OrderId: orderid, TOR: tor.String, AccId: accid.String, CdrHost: cdrhost.String, CdrSource: cdrsrc.String, ReqType: reqtype.String,
 			Direction: direction.String, Tenant: tenant.String,
 			Category: category.String, Account: account.String, Subject: subject.String, Destination: destination.String,
-			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Usage: time.Duration(usage.Int64),
+			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Usage: usageDur,
 			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
 		}
 		if !cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating

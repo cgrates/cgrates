@@ -20,7 +20,7 @@ CREATE TABLE cdrs_primary (
   destination varchar(128) NOT NULL,
   setup_time datetime NOT NULL,
   answer_time datetime NOT NULL,
-  `usage` bigint NOT NULL,
+  `usage` DECIMAL(30,9) NOT NULL,
   PRIMARY KEY (tbid),
   UNIQUE KEY cgrid (cgrid)
 );
@@ -80,7 +80,7 @@ CREATE TABLE `rated_cdrs` (
   destination varchar(128) NOT NULL,
   setup_time datetime NOT NULL,
   answer_time datetime NOT NULL,
-  `usage` bigint NOT NULL,
+  `usage` DECIMAL(30,9) NOT NULL,
   cost DECIMAL(20,4) DEFAULT NULL,
   extra_info text,
   PRIMARY KEY (`tbid`),

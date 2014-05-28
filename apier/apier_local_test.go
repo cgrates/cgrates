@@ -1277,7 +1277,7 @@ func TestResetDataAfterLoadFromFolder(t *testing.T) {
 		t.Error("Calling ApierV1.ReloadCache got reply: ", reply)
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 2, RatingProfiles: 2, Actions: 3, DerivedChargers: 2}
+	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 3, RatingProfiles: 3, Actions: 3, DerivedChargers: 2}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())
