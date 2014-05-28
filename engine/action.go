@@ -1,14 +1,14 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
-This program is free software: you can redistribute it and/or modify
+This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
+but WITH*out ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
@@ -19,11 +19,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
 	"net/smtp"
 	"sort"
 	"strings"
@@ -215,26 +213,22 @@ func genericReset(ub *Account) error {
 }
 
 func callUrl(ub *Account, a *Action) error {
-	body, err := json.Marshal(ub)
-	if err != nil {
-		return err
-	}
-	_, err = http.Post(a.ExtraParameters, "application/json", bytes.NewBuffer(body))
+	_, err := utils.HttpJsonPost(a.ExtraParameters, ub)
 	return err
 }
 
 // Does not block for posts, no error reports
 func callUrlAsync(ub *Account, a *Action) error {
-	body, err := json.Marshal(ub)
+	ubJson, err := json.Marshal(ub)
 	if err != nil {
 		return err
 	}
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-			if _, err = http.Post(a.ExtraParameters, "application/json", bytes.NewBuffer(body)); err == nil {
+			if _, err = utils.HttpJsonPost(a.ExtraParameters, ub); err == nil {
 				break // Success, no need to reinterate
 			} else if i == 4 { // Last iteration, syslog the warning
-				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), body))
+				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), ubJson))
 				break
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
