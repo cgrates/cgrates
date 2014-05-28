@@ -583,7 +583,6 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
 }
 
 func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string) (err error) {
-	Logger.Debug(fmt.Sprintf("SetRatedCdr for CDR: %+v", storedCdr))
 	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (mediation_time,cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,cost,extra_info) VALUES (now(),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%v,%f,'%s') ON DUPLICATE KEY UPDATE mediation_time=now(),reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),cost=values(cost),extra_info=values(extra_info)",
 		utils.TBL_RATED_CDRS,
 		storedCdr.CgrId,
@@ -1109,7 +1108,6 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 			TimingId:           timings_tag,
 			Weight:             weight,
 		}
-		// Logger.Debug(fmt.Sprintf("For RatingPlan id: %s, loading RatingPlanBinding: %v", tag, rpb))
 		if _, exists := rpbns[id]; exists {
 			rpbns[id] = append(rpbns[id], rpb)
 		} else { // New
