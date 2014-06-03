@@ -327,33 +327,35 @@ type CachedItemAge struct {
 }
 
 type AttrExpFileCdrs struct {
-	CdrFormat         string   // Cdr output file format <utils.CdreCdrFormats>
-	ExportId          string   // Optional exportid
-	ExportDir         string   // If provided it overwrites the configured export directory
-	ExportFileName    string   // If provided the output filename will be set to this
-	ExportTemplate    string   // Exported fields template  <""|fld1,fld2|*xml:instance_name>
-	CostShiftDigits   int      // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
-	RoundDecimals     int      // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
-	MaskDestinationId string   // Overwrite configured MaskDestId
-	MaskLength        int      // Overwrite configured MaskLength, -1 to use general config ones
-	CgrIds            []string // If provided, it will filter based on the cgrids present in list
-	MediationRunId    []string // If provided, it will filter on mediation runid
-	TOR               []string // If provided, filter on TypeOfRecord
-	CdrHost           []string // If provided, it will filter cdrhost
-	CdrSource         []string // If provided, it will filter cdrsource
-	ReqType           []string // If provided, it will fiter reqtype
-	Direction         []string // If provided, it will fiter direction
-	Tenant            []string // If provided, it will filter tenant
-	Category          []string // If provided, it will filter çategory
-	Account           []string // If provided, it will filter account
-	Subject           []string // If provided, it will filter the rating subject
-	DestinationPrefix []string // If provided, it will filter on destination prefix
-	OrderIdStart      int64    // Export from this order identifier
-	OrderIdEnd        int64    // Export smaller than this order identifier
-	TimeStart         string   // If provided, it will represent the starting of the CDRs interval (>=)
-	TimeEnd           string   // If provided, it will represent the end of the CDRs interval (<)
-	SkipErrors        bool     // Do not export errored CDRs
-	SkipRated         bool     // Do not export rated CDRs
+	CdrFormat               *string  // Cdr output file format <utils.CdreCdrFormats>
+	ExportId                *string  // Optional exportid
+	ExportDir               *string  // If provided it overwrites the configured export directory
+	ExportFileName          *string  // If provided the output filename will be set to this
+	ExportTemplate          *string  // Exported fields template  <""|fld1,fld2|*xml:instance_name>
+	DataUsageMultiplyFactor *float64 // Multiply data usage before export (eg: convert from KBytes to Bytes)
+	CostMultiplyFactor      *float64 // Multiply the cost before export, eg: apply VAT
+	CostShiftDigits         *int     // If defined it will shift cost digits before applying rouding (eg: convert from Eur->cents), -1 to use general config ones
+	RoundDecimals           *int     // Overwrite configured roundDecimals with this dynamically, -1 to use general config ones
+	MaskDestinationId       *string  // Overwrite configured MaskDestId
+	MaskLength              *int     // Overwrite configured MaskLength, -1 to use general config ones
+	CgrIds                  []string // If provided, it will filter based on the cgrids present in list
+	MediationRunId          []string // If provided, it will filter on mediation runid
+	TOR                     []string // If provided, filter on TypeOfRecord
+	CdrHost                 []string // If provided, it will filter cdrhost
+	CdrSource               []string // If provided, it will filter cdrsource
+	ReqType                 []string // If provided, it will fiter reqtype
+	Direction               []string // If provided, it will fiter direction
+	Tenant                  []string // If provided, it will filter tenant
+	Category                []string // If provided, it will filter çategory
+	Account                 []string // If provided, it will filter account
+	Subject                 []string // If provided, it will filter the rating subject
+	DestinationPrefix       []string // If provided, it will filter on destination prefix
+	OrderIdStart            int64    // Export from this order identifier
+	OrderIdEnd              int64    // Export smaller than this order identifier
+	TimeStart               string   // If provided, it will represent the starting of the CDRs interval (>=)
+	TimeEnd                 string   // If provided, it will represent the end of the CDRs interval (<)
+	SkipErrors              bool     // Do not export errored CDRs
+	SkipRated               bool     // Do not export rated CDRs
 }
 
 type ExportedFileCdrs struct {

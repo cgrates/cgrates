@@ -49,7 +49,7 @@ func TestFsJsonRemoveDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, pathDir := range []string{fsjsonCfg.CdreDir, fsjsonCfg.HistoryDir} {
+	for _, pathDir := range []string{cfg.CdreDefaultInstance.ExportDir, fsjsonCfg.HistoryDir} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}

@@ -39,7 +39,7 @@ func TestLoadXmlCfg(t *testing.T) {
 	if cfg.XmlCfgDocument == nil {
 		t.Error("Did not load the XML Config Document")
 	}
-	if cdreFWCfg := cfg.XmlCfgDocument.GetCdreFWCfgs("CDREFW-A"); cdreFWCfg == nil {
+	if cdreFWCfg := cfg.XmlCfgDocument.GetCdreCfgs("CDREFW-A"); cdreFWCfg == nil {
 		t.Error("Could not retrieve CDRExporter FixedWidth config instance")
 	}
 }

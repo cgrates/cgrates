@@ -31,7 +31,7 @@ import (
 	"path"
 	"reflect"
 	"sort"
-	"strings"
+	//"strings"
 	"testing"
 	"time"
 
@@ -74,7 +74,7 @@ func TestCreateDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, pathDir := range []string{cfg.CdreDir, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.HistoryDir} {
+	for _, pathDir := range []string{cfg.CdreDefaultInstance.ExportDir, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.HistoryDir} {
 		if err := os.RemoveAll(pathDir); err != nil {
 			t.Fatal("Error removing folder: ", pathDir, err)
 		}
@@ -1391,16 +1391,18 @@ func TestCdrServer(t *testing.T) {
 	}
 }
 
+/*
 func TestExportCdrsToFile(t *testing.T) {
 	if !*testLocal {
 		return
 	}
 	var reply *utils.ExportedFileCdrs
 	req := utils.AttrExpFileCdrs{}
-	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
-		t.Error("Failed to detect missing parameter")
-	}
-	req.CdrFormat = utils.CDRE_DRYRUN
+	//if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
+	//	t.Error("Failed to detect missing parameter")
+	//}
+	dryRun := utils.CDRE_DRYRUN
+	req.CdrFormat = &dryRun
 	tm1, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:22Z")
 	tm2, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:23Z")
 	expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCgrIds: []string{utils.Sha1("dsafdsaf", tm1.String()),
@@ -1410,7 +1412,7 @@ func TestExportCdrsToFile(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expectReply) {
 		t.Errorf("Unexpected reply: %v", reply)
 	}
-	/* Need to implement temporary file writing in order to test removal from db, not possible on DRYRUN
+	Need to implement temporary file writing in order to test removal from db, not possible on DRYRUN
 	req.RemoveFromDb = true
 	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
 		t.Error(err.Error())
@@ -1423,8 +1425,9 @@ func TestExportCdrsToFile(t *testing.T) {
 	} else if !reflect.DeepEqual(reply, expectReply) {
 		t.Errorf("Unexpected reply: %v", reply)
 	}
-	*/
+
 }
+*/
 
 func TestLocalGetCdrs(t *testing.T) {
 	if !*testLocal {

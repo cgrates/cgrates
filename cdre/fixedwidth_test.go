@@ -21,6 +21,7 @@ package cdre
 import (
 	"bytes"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"math"
 	"testing"
@@ -40,24 +41,24 @@ var hdrCfgFlds = []*config.CgrXmlCfgCdrField{
 
 var contentCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "TypeOfRecord", Type: CONSTANT, Value: "20", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "Account", Type: CDRFIELD, Value: utils.ACCOUNT, Width: 12, Strip: "left", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Subject", Type: CDRFIELD, Value: utils.SUBJECT, Width: 5, Strip: "right", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "CLI", Type: CDRFIELD, Value: "cli", Width: 15, Strip: "xright", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Destination", Type: CDRFIELD, Value: utils.DESTINATION, Width: 24, Strip: "xright", Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Account", Type: utils.CDRFIELD, Value: utils.ACCOUNT, Width: 12, Strip: "left", Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Subject", Type: utils.CDRFIELD, Value: utils.SUBJECT, Width: 5, Strip: "right", Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "CLI", Type: utils.CDRFIELD, Value: "cli", Width: 15, Strip: "xright", Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "Destination", Type: utils.CDRFIELD, Value: utils.DESTINATION, Width: 24, Strip: "xright", Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "TOR", Type: CONSTANT, Value: "02", Width: 2},
 	&config.CgrXmlCfgCdrField{Name: "SubtypeTOR", Type: CONSTANT, Value: "11", Width: 4, Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "SetupTime", Type: CDRFIELD, Value: utils.SETUP_TIME, Width: 12, Strip: "right", Padding: "right", Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "Duration", Type: CDRFIELD, Value: utils.USAGE, Width: 6, Strip: "right", Padding: "right", Layout: utils.SECONDS},
+	&config.CgrXmlCfgCdrField{Name: "SetupTime", Type: utils.CDRFIELD, Value: utils.SETUP_TIME, Width: 12, Strip: "right", Padding: "right", Layout: "020106150400"},
+	&config.CgrXmlCfgCdrField{Name: "Duration", Type: utils.CDRFIELD, Value: utils.USAGE, Width: 6, Strip: "right", Padding: "right", Layout: utils.SECONDS},
 	&config.CgrXmlCfgCdrField{Name: "DataVolume", Type: FILLER, Width: 6},
 	&config.CgrXmlCfgCdrField{Name: "TaxCode", Type: CONSTANT, Value: "1", Width: 1},
-	&config.CgrXmlCfgCdrField{Name: "OperatorCode", Type: CDRFIELD, Value: "opercode", Width: 2, Strip: "right", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "ProductId", Type: CDRFIELD, Value: "productid", Width: 5, Strip: "right", Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "OperatorCode", Type: utils.CDRFIELD, Value: "opercode", Width: 2, Strip: "right", Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "ProductId", Type: utils.CDRFIELD, Value: "productid", Width: 5, Strip: "right", Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "NetworkId", Type: CONSTANT, Value: "3", Width: 1},
-	&config.CgrXmlCfgCdrField{Name: "CallId", Type: CDRFIELD, Value: utils.ACCID, Width: 16, Padding: "right"},
+	&config.CgrXmlCfgCdrField{Name: "CallId", Type: utils.CDRFIELD, Value: utils.ACCID, Width: 16, Padding: "right"},
 	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8},
 	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8},
 	&config.CgrXmlCfgCdrField{Name: "TerminationCode", Type: CONCATENATED_CDRFIELD, Value: "operator,product", Width: 5, Strip: "right", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Cost", Type: CDRFIELD, Value: utils.COST, Width: 9, Padding: "zeroleft"},
+	&config.CgrXmlCfgCdrField{Name: "Cost", Type: utils.CDRFIELD, Value: utils.COST, Width: 9, Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "DestinationPrivacy", Type: METATAG, Value: META_MASKDESTINATION, Width: 1},
 }
 
@@ -76,35 +77,33 @@ var trailerCfgFlds = []*config.CgrXmlCfgCdrField{
 // Write one CDR and test it's results only for content buffer
 func TestWriteCdr(t *testing.T) {
 	wrBuf := &bytes.Buffer{}
-	exportTpl := &config.CgrXmlCdreFwCfg{Header: &config.CgrXmlCfgCdrHeader{Fields: hdrCfgFlds},
-		Content: &config.CgrXmlCfgCdrContent{Fields: contentCfgFlds},
-		Trailer: &config.CgrXmlCfgCdrTrailer{Fields: trailerCfgFlds},
+	logDb, _ := engine.NewMapStorage()
+	cfg, _ := config.NewDefaultCGRConfig()
+	fixedWidth := utils.CDRE_FIXED_WIDTH
+	exportTpl := &config.CgrXmlCdreCfg{
+		CdrFormat: &fixedWidth,
+		Header:    &config.CgrXmlCfgCdrHeader{Fields: hdrCfgFlds},
+		Content:   &config.CgrXmlCfgCdrContent{Fields: contentCfgFlds},
+		Trailer:   &config.CgrXmlCfgCdrTrailer{Fields: trailerCfgFlds},
 	}
-	fwWriter := FixedWidthCdrWriter{writer: wrBuf, exportTemplate: exportTpl, roundDecimals: 4, header: &bytes.Buffer{}, content: &bytes.Buffer{}, trailer: &bytes.Buffer{}}
-	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 1, AccId: "dsafdsaf", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 1, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+		ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	if err := fwWriter.WriteCdr(cdr); err != nil {
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, exportTpl.AsCdreConfig(), "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1)
+	if err != nil {
 		t.Error(err)
 	}
-	eContentOut := "201001        1001                1002                    0211  07111308420010          1       3dsafdsaf                             0002.34570\n"
-	contentOut := fwWriter.content.String()
-	if len(contentOut) != 145 {
-		t.Error("Unexpected content length", len(contentOut))
-	} else if contentOut != eContentOut {
-		t.Errorf("Content out different than expected. Have <%s>, expecting: <%s>", contentOut, eContentOut)
-	}
 	eHeader := "10   VOI0000007111308420024031415390001                                                                                                         \n"
+	eContentOut := "201001        1001                1002                    0211  07111308420010          1       3dsafdsaf                             0002.34570\n"
 	eTrailer := "90   VOI0000000000100000010071113084260071113084200                                                                                             \n"
-	outBeforeWrite := ""
-	if wrBuf.String() != outBeforeWrite {
-		t.Errorf("Output buffer should be empty before write")
+	if err := cdre.WriteOut(wrBuf); err != nil {
+		t.Error(err)
 	}
-	fwWriter.Close()
 	allOut := wrBuf.String()
 	eAllOut := eHeader + eContentOut + eTrailer
 	if math.Mod(float64(len(allOut)), 145) != 0 {
@@ -113,35 +112,38 @@ func TestWriteCdr(t *testing.T) {
 		t.Errorf("Output does not match expected length. Have output %q, expecting: %q", allOut, eAllOut)
 	}
 	// Test stats
-	if !fwWriter.firstCdrATime.Equal(cdr.AnswerTime) {
-		t.Error("Unexpected firstCdrATime in stats: ", fwWriter.firstCdrATime)
-	} else if !fwWriter.lastCdrATime.Equal(cdr.AnswerTime) {
-		t.Error("Unexpected lastCdrATime in stats: ", fwWriter.lastCdrATime)
-	} else if fwWriter.numberOfRecords != 1 {
-		t.Error("Unexpected number of records in the stats: ", fwWriter.numberOfRecords)
-	} else if fwWriter.totalDuration != cdr.Usage {
-		t.Error("Unexpected total duration in the stats: ", fwWriter.totalDuration)
-	} else if fwWriter.totalCost != utils.Round(cdr.Cost, fwWriter.roundDecimals, utils.ROUNDING_MIDDLE) {
-		t.Error("Unexpected total cost in the stats: ", fwWriter.totalCost)
+	if !cdre.firstCdrATime.Equal(cdr.AnswerTime) {
+		t.Error("Unexpected firstCdrATime in stats: ", cdre.firstCdrATime)
+	} else if !cdre.lastCdrATime.Equal(cdr.AnswerTime) {
+		t.Error("Unexpected lastCdrATime in stats: ", cdre.lastCdrATime)
+	} else if cdre.numberOfRecords != 1 {
+		t.Error("Unexpected number of records in the stats: ", cdre.numberOfRecords)
+	} else if cdre.totalDuration != cdr.Usage {
+		t.Error("Unexpected total duration in the stats: ", cdre.totalDuration)
+	} else if cdre.totalCost != utils.Round(cdr.Cost, cdre.roundDecimals, utils.ROUNDING_MIDDLE) {
+		t.Error("Unexpected total cost in the stats: ", cdre.totalCost)
 	}
-	if fwWriter.FirstOrderId() != 1 {
-		t.Error("Unexpected FirstOrderId", fwWriter.FirstOrderId())
+	if cdre.FirstOrderId() != 1 {
+		t.Error("Unexpected FirstOrderId", cdre.FirstOrderId())
 	}
-	if fwWriter.LastOrderId() != 1 {
-		t.Error("Unexpected LastOrderId", fwWriter.LastOrderId())
+	if cdre.LastOrderId() != 1 {
+		t.Error("Unexpected LastOrderId", cdre.LastOrderId())
 	}
-	if fwWriter.TotalCost() != utils.Round(cdr.Cost, fwWriter.roundDecimals, utils.ROUNDING_MIDDLE) {
-		t.Error("Unexpected TotalCost: ", fwWriter.TotalCost())
+	if cdre.TotalCost() != utils.Round(cdr.Cost, cdre.roundDecimals, utils.ROUNDING_MIDDLE) {
+		t.Error("Unexpected TotalCost: ", cdre.TotalCost())
 	}
 }
 
 func TestWriteCdrs(t *testing.T) {
 	wrBuf := &bytes.Buffer{}
-	exportTpl := &config.CgrXmlCdreFwCfg{Header: &config.CgrXmlCfgCdrHeader{Fields: hdrCfgFlds},
-		Content: &config.CgrXmlCfgCdrContent{Fields: contentCfgFlds},
-		Trailer: &config.CgrXmlCfgCdrTrailer{Fields: trailerCfgFlds},
+	logDb, _ := engine.NewMapStorage()
+	fixedWidth := utils.CDRE_FIXED_WIDTH
+	exportTpl := &config.CgrXmlCdreCfg{
+		CdrFormat: &fixedWidth,
+		Header:    &config.CgrXmlCfgCdrHeader{Fields: hdrCfgFlds},
+		Content:   &config.CgrXmlCfgCdrContent{Fields: contentCfgFlds},
+		Trailer:   &config.CgrXmlCfgCdrTrailer{Fields: trailerCfgFlds},
 	}
-	fwWriter := FixedWidthCdrWriter{writer: wrBuf, exportTemplate: exportTpl, roundDecimals: 4, header: &bytes.Buffer{}, content: &bytes.Buffer{}, trailer: &bytes.Buffer{}}
 	cdr1 := &utils.StoredCdr{CgrId: utils.Sha1("aaa1", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 2, AccId: "aaa1", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1010",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
@@ -164,45 +166,40 @@ func TestWriteCdrs(t *testing.T) {
 		Usage:      time.Duration(20) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"productnumber": "12344", "fieldextr2": "valextr2"},
 	}
-	for _, cdr := range []*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4} {
-		if err := fwWriter.WriteCdr(cdr); err != nil {
-			t.Error(err)
-		}
-		contentOut := fwWriter.content.String()
-		if math.Mod(float64(len(contentOut)), 145) != 0 { // Rest must be 0 always, so content is always multiple of 145 which is our row fixLength
-			t.Error("Unexpected content length", len(contentOut))
-		}
+	cfg, _ := config.NewDefaultCGRConfig()
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, exportTpl.AsCdreConfig(), "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1)
+	if err != nil {
+		t.Error(err)
 	}
-	if len(wrBuf.String()) != 0 {
-		t.Errorf("Output buffer should be empty before write")
+	if err := cdre.WriteOut(wrBuf); err != nil {
+		t.Error(err)
 	}
-	fwWriter.Close()
 	if len(wrBuf.String()) != 725 {
 		t.Error("Output buffer does not contain expected info. Expecting len: 725, got: ", len(wrBuf.String()))
 	}
 	// Test stats
-	if !fwWriter.firstCdrATime.Equal(cdr2.AnswerTime) {
-		t.Error("Unexpected firstCdrATime in stats: ", fwWriter.firstCdrATime)
+	if !cdre.firstCdrATime.Equal(cdr2.AnswerTime) {
+		t.Error("Unexpected firstCdrATime in stats: ", cdre.firstCdrATime)
 	}
-	if !fwWriter.lastCdrATime.Equal(cdr4.AnswerTime) {
-		t.Error("Unexpected lastCdrATime in stats: ", fwWriter.lastCdrATime)
+	if !cdre.lastCdrATime.Equal(cdr4.AnswerTime) {
+		t.Error("Unexpected lastCdrATime in stats: ", cdre.lastCdrATime)
 	}
-	if fwWriter.numberOfRecords != 3 {
-		t.Error("Unexpected number of records in the stats: ", fwWriter.numberOfRecords)
+	if cdre.numberOfRecords != 3 {
+		t.Error("Unexpected number of records in the stats: ", cdre.numberOfRecords)
 	}
-	if fwWriter.totalDuration != time.Duration(330)*time.Second {
-		t.Error("Unexpected total duration in the stats: ", fwWriter.totalDuration)
+	if cdre.totalDuration != time.Duration(330)*time.Second {
+		t.Error("Unexpected total duration in the stats: ", cdre.totalDuration)
 	}
-	if fwWriter.totalCost != 5.9957 {
-		t.Error("Unexpected total cost in the stats: ", fwWriter.totalCost)
+	if cdre.totalCost != 5.9957 {
+		t.Error("Unexpected total cost in the stats: ", cdre.totalCost)
 	}
-	if fwWriter.FirstOrderId() != 2 {
-		t.Error("Unexpected FirstOrderId", fwWriter.FirstOrderId())
+	if cdre.FirstOrderId() != 2 {
+		t.Error("Unexpected FirstOrderId", cdre.FirstOrderId())
 	}
-	if fwWriter.LastOrderId() != 4 {
-		t.Error("Unexpected LastOrderId", fwWriter.LastOrderId())
+	if cdre.LastOrderId() != 4 {
+		t.Error("Unexpected LastOrderId", cdre.LastOrderId())
 	}
-	if fwWriter.TotalCost() != 5.9957 {
-		t.Error("Unexpected TotalCost: ", fwWriter.TotalCost())
+	if cdre.TotalCost() != 5.9957 {
+		t.Error("Unexpected TotalCost: ", cdre.TotalCost())
 	}
 }

@@ -90,13 +90,7 @@ type CGRConfig struct {
 	CDRSEnabled             bool                       // Enable CDR Server service
 	CDRSExtraFields         []*utils.RSRField          // Extra fields to store in CDRs
 	CDRSMediator            string                     // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CdreCdrFormat           string                     // Format of the exported CDRs. <csv>
-	CdreMaskDestId          string                     // Id of the destination list to be masked in CDRs
-	CdreMaskLength          int                        // Number of digits to mask in the destination suffix if destination is in the MaskDestinationdsId
-	CdreCostShiftDigits     int                        // Shift digits in the cost on export (eg: convert from EUR to cents)
-	CdreDir                 string                     // Path towards exported cdrs directory
-	CdreExportedFields      []*utils.RSRField          // List of fields in the exported CDRs
-	CdreFWXmlTemplate       *CgrXmlCdreFwCfg           // Use this configuration as export template in case of fixed fields length
+	CdreDefaultInstance     *CdreConfig                // Will be used in the case no specific one selected by API
 	CdrcEnabled             bool                       // Enable CDR client functionality
 	CdrcCdrs                string                     // Address where to reach CDR server
 	CdrcRunDelay            time.Duration              // Sleep interval between consecutive runs, 0 to use automation via inotify
@@ -167,11 +161,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSEnabled = false
 	self.CDRSExtraFields = []*utils.RSRField{}
 	self.CDRSMediator = ""
-	self.CdreCdrFormat = "csv"
-	self.CdreMaskDestId = ""
-	self.CdreMaskLength = 0
-	self.CdreCostShiftDigits = 0
-	self.CdreDir = "/var/log/cgrates/cdre"
+	self.CdreDefaultInstance, _ = NewDefaultCdreConfig()
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
 	self.CdrcRunDelay = time.Duration(0)
@@ -217,35 +207,10 @@ func (self *CGRConfig) setDefaults() error {
 	self.MailerAuthUser = "cgrates"
 	self.MailerAuthPass = "CGRateS.org"
 	self.MailerFromAddr = "cgr-mailer@localhost.localdomain"
-	self.CdreExportedFields = []*utils.RSRField{
-		&utils.RSRField{Id: utils.CGRID},
-		&utils.RSRField{Id: utils.MEDI_RUNID},
-		&utils.RSRField{Id: utils.TOR},
-		&utils.RSRField{Id: utils.ACCID},
-		&utils.RSRField{Id: utils.REQTYPE},
-		&utils.RSRField{Id: utils.DIRECTION},
-		&utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.CATEGORY},
-		&utils.RSRField{Id: utils.ACCOUNT},
-		&utils.RSRField{Id: utils.SUBJECT},
-		&utils.RSRField{Id: utils.DESTINATION},
-		&utils.RSRField{Id: utils.SETUP_TIME},
-		&utils.RSRField{Id: utils.ANSWER_TIME},
-		&utils.RSRField{Id: utils.USAGE},
-		&utils.RSRField{Id: utils.COST},
-	}
 	return nil
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
-	// Cdre sanity check for fixed_width
-	if self.CdreCdrFormat == utils.CDRE_FIXED_WIDTH {
-		if self.XmlCfgDocument == nil {
-			return errors.New("Need XmlConfigurationDocument for fixed_width cdr export")
-		} else if self.CdreFWXmlTemplate == nil {
-			return errors.New("Need XmlTemplate for fixed_width cdr export")
-		}
-	}
 	if self.CdrcEnabled {
 		if len(self.CdrcCdrFields) == 0 {
 			return errors.New("CdrC enabled but no fields to be processed defined!")
@@ -253,7 +218,6 @@ func (self *CGRConfig) checkConfigSanity() error {
 		if self.CdrcCdrType == utils.CSV {
 			for _, rsrFld := range self.CdrcCdrFields {
 				if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {
-					fmt.Println("5")
 					return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
 				}
 			}
@@ -426,33 +390,42 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
 	}
 	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
-		cfg.CdreCdrFormat, _ = c.GetString("cdre", "cdr_format")
+		cfg.CdreDefaultInstance.CdrFormat, _ = c.GetString("cdre", "cdr_format")
 	}
 	if hasOpt = c.HasOption("cdre", "mask_destination_id"); hasOpt {
-		cfg.CdreMaskDestId, _ = c.GetString("cdre", "mask_destination_id")
+		cfg.CdreDefaultInstance.MaskDestId, _ = c.GetString("cdre", "mask_destination_id")
 	}
 	if hasOpt = c.HasOption("cdre", "mask_length"); hasOpt {
-		cfg.CdreMaskLength, _ = c.GetInt("cdre", "mask_length")
+		cfg.CdreDefaultInstance.MaskLength, _ = c.GetInt("cdre", "mask_length")
+	}
+	if hasOpt = c.HasOption("cdre", "data_usage_multiply_factor"); hasOpt {
+		cfg.CdreDefaultInstance.DataUsageMultiplyFactor, _ = c.GetFloat64("cdre", "data_usage_multiply_factor")
+	}
+	if hasOpt = c.HasOption("cdre", "cost_multiply_factor"); hasOpt {
+		cfg.CdreDefaultInstance.CostMultiplyFactor, _ = c.GetFloat64("cdre", "cost_multiply_factor")
+	}
+	if hasOpt = c.HasOption("cdre", "cost_rounding_decimals"); hasOpt {
+		cfg.CdreDefaultInstance.CostRoundingDecimals, _ = c.GetInt("cdre", "cost_rounding_decimals")
 	}
 	if hasOpt = c.HasOption("cdre", "cost_shift_digits"); hasOpt {
-		cfg.CdreCostShiftDigits, _ = c.GetInt("cdre", "cost_shift_digits")
+		cfg.CdreDefaultInstance.CostShiftDigits, _ = c.GetInt("cdre", "cost_shift_digits")
 	}
 	if hasOpt = c.HasOption("cdre", "export_template"); hasOpt { // Load configs for csv normally from template, fixed_width from xml file
 		exportTemplate, _ := c.GetString("cdre", "export_template")
-		if cfg.CdreCdrFormat != utils.CDRE_FIXED_WIDTH { // Csv most likely
-			if extraFields, err := ParseRSRFields(exportTemplate); err != nil {
+		if strings.HasPrefix(exportTemplate, utils.XML_PROFILE_PREFIX) {
+			if xmlTemplates := cfg.XmlCfgDocument.GetCdreCfgs(exportTemplate[len(utils.XML_PROFILE_PREFIX):]); xmlTemplates != nil {
+				cfg.CdreDefaultInstance = xmlTemplates[exportTemplate[len(utils.XML_PROFILE_PREFIX):]].AsCdreConfig()
+			}
+		} else { // Not loading out of template
+			if flds, err := NewCdreCdrFieldsFromIds(strings.Split(exportTemplate, string(utils.CSV_SEP))...); err != nil {
 				return nil, err
 			} else {
-				cfg.CdreExportedFields = extraFields
-			}
-		} else if strings.HasPrefix(exportTemplate, utils.XML_PROFILE_PREFIX) {
-			if xmlTemplate := cfg.XmlCfgDocument.GetCdreFWCfgs(exportTemplate[len(utils.XML_PROFILE_PREFIX):]); xmlTemplate != nil {
-				cfg.CdreFWXmlTemplate = xmlTemplate[exportTemplate[len(utils.XML_PROFILE_PREFIX):]]
+				cfg.CdreDefaultInstance.ContentFields = flds
 			}
 		}
 	}
 	if hasOpt = c.HasOption("cdre", "export_dir"); hasOpt {
-		cfg.CdreDir, _ = c.GetString("cdre", "export_dir")
+		cfg.CdreDefaultInstance.ExportDir, _ = c.GetString("cdre", "export_dir")
 	}
 	if hasOpt = c.HasOption("cdrc", "enabled"); hasOpt {
 		cfg.CdrcEnabled, _ = c.GetBool("cdrc", "enabled")

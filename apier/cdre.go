@@ -19,9 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
+	"encoding/csv"
 	"fmt"
 	"github.com/cgrates/cgrates/cdre"
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"os"
 	"path"
@@ -34,10 +36,7 @@ import (
 func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
 	var tStart, tEnd time.Time
 	var err error
-	cdrFormat := strings.ToLower(attr.CdrFormat)
-	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
-		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
-	}
+	engine.Logger.Debug(fmt.Sprintf("ExportCdrsToFile: %+v", attr))
 	if len(attr.TimeStart) != 0 {
 		if tStart, err = utils.ParseTimeDetectLayout(attr.TimeStart); err != nil {
 			return err
@@ -48,27 +47,76 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			return err
 		}
 	}
-	exportDir := attr.ExportDir
-	fileName := attr.ExportFileName
-	exportId := attr.ExportId
-	if len(exportId) == 0 {
-		exportId = strconv.FormatInt(time.Now().Unix(), 10)
+	exportTemplate := self.Config.CdreDefaultInstance
+	if attr.ExportTemplate != nil { // XML Template defined, can be field names or xml reference
+		if strings.HasPrefix(*attr.ExportTemplate, utils.XML_PROFILE_PREFIX) {
+			if self.Config.XmlCfgDocument == nil {
+				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "XmlDocumentNotLoaded")
+			}
+			expTplStr := *attr.ExportTemplate
+			if xmlTemplates := self.Config.XmlCfgDocument.GetCdreCfgs(expTplStr[len(utils.XML_PROFILE_PREFIX):]); xmlTemplates == nil {
+				return fmt.Errorf("%s:ExportTemplate", utils.ERR_NOT_FOUND)
+			} else {
+				exportTemplate = xmlTemplates[expTplStr[len(utils.XML_PROFILE_PREFIX):]].AsCdreConfig()
+			}
+		} else {
+			exportTemplate, _ = config.NewDefaultCdreConfig()
+			if contentFlds, err := config.NewCdreCdrFieldsFromIds(strings.Split(*attr.ExportTemplate, string(utils.CSV_SEP))...); err != nil {
+				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+			} else {
+				exportTemplate.ContentFields = contentFlds
+			}
+		}
 	}
-	costShiftDigits := self.Config.CdreCostShiftDigits
-	if attr.CostShiftDigits != -1 { // -1 enables system general config
-		costShiftDigits = attr.CostShiftDigits
+	if exportTemplate == nil {
+		return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
 	}
-	roundDecimals := self.Config.RoundingDecimals
-	if attr.RoundDecimals != -1 { // -1 enables system default config
-		roundDecimals = attr.RoundDecimals
+	cdrFormat := exportTemplate.CdrFormat
+	if attr.CdrFormat != nil {
+		cdrFormat = strings.ToLower(*attr.CdrFormat)
 	}
-	maskDestId := attr.MaskDestinationId
-	if len(maskDestId) == 0 {
-		maskDestId = self.Config.CdreMaskDestId
+	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
+		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
 	}
-	maskLen := self.Config.CdreMaskLength
-	if attr.MaskLength != -1 {
-		maskLen = attr.MaskLength
+	exportDir := exportTemplate.ExportDir
+	if attr.ExportDir != nil {
+		exportDir = *attr.ExportDir
+	}
+	exportId := strconv.FormatInt(time.Now().Unix(), 10)
+	if attr.ExportId != nil {
+		exportId = exportId
+	}
+	fileName := fmt.Sprintf("cdre_%s.%s", exportId, cdrFormat)
+	if attr.ExportFileName != nil {
+		fileName = *attr.ExportFileName
+	}
+	filePath := path.Join(exportDir, fileName)
+	if cdrFormat == utils.CDRE_DRYRUN {
+		filePath = utils.CDRE_DRYRUN
+	}
+	dataUsageMultiplyFactor := exportTemplate.DataUsageMultiplyFactor
+	if attr.DataUsageMultiplyFactor != nil {
+		dataUsageMultiplyFactor = *attr.DataUsageMultiplyFactor
+	}
+	costMultiplyFactor := exportTemplate.CostMultiplyFactor
+	if attr.CostMultiplyFactor != nil {
+		costMultiplyFactor = *attr.CostMultiplyFactor
+	}
+	costShiftDigits := exportTemplate.CostShiftDigits
+	if attr.CostShiftDigits != nil {
+		costShiftDigits = *attr.CostShiftDigits
+	}
+	roundingDecimals := exportTemplate.CostRoundingDecimals
+	if attr.RoundDecimals != nil {
+		roundingDecimals = *attr.RoundDecimals
+	}
+	maskDestId := exportTemplate.MaskDestId
+	if attr.MaskDestinationId != nil {
+		maskDestId = *attr.MaskDestinationId
+	}
+	maskLen := exportTemplate.MaskLength
+	if attr.MaskLength != nil {
+		maskLen = *attr.MaskLength
 	}
 	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunId, attr.TOR, attr.CdrHost, attr.CdrSource, attr.ReqType, attr.Direction,
 		attr.Tenant, attr.Category, attr.Account, attr.Subject, attr.DestinationPrefix, attr.OrderIdStart, attr.OrderIdEnd, tStart, tEnd, attr.SkipErrors, attr.SkipRated, false)
@@ -78,86 +126,29 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	switch cdrFormat {
-	case utils.CDRE_DRYRUN:
-		exportedIds := make([]string, len(cdrs))
-		for idxCdr, cdr := range cdrs {
-			exportedIds[idxCdr] = cdr.CgrId
-		}
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: len(cdrs), ExportedCgrIds: exportedIds}
-	case utils.CSV:
-		if len(exportDir) == 0 {
-			exportDir = path.Join(self.Config.CdreDir, utils.CSV)
-		}
-		if len(fileName) == 0 {
-			fileName = fmt.Sprintf("cdre_%s.csv", exportId)
-		}
-		exportedFields := self.Config.CdreExportedFields
-		if len(attr.ExportTemplate) != 0 {
-			if exportedFields, err = config.ParseRSRFields(attr.ExportTemplate); err != nil {
-				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-			}
-		}
-		if len(exportedFields) == 0 {
-			return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
-		}
-		filePath := path.Join(exportDir, fileName)
-		fileOut, err := os.Create(filePath)
-		if err != nil {
-			return err
-		}
-		defer fileOut.Close()
-		csvWriter := cdre.NewCsvCdrWriter(fileOut, costShiftDigits, roundDecimals, maskDestId, maskLen, exportedFields)
-		exportedIds := make([]string, 0)
-		unexportedIds := make(map[string]string)
-		for _, cdr := range cdrs {
-			if err := csvWriter.WriteCdr(cdr); err != nil {
-				unexportedIds[cdr.CgrId] = err.Error()
-			} else {
-				exportedIds = append(exportedIds, cdr.CgrId)
-			}
-		}
-		csvWriter.Close()
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: csvWriter.TotalCost(),
-			ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
-			FirstOrderId: csvWriter.FirstOrderId(), LastOrderId: csvWriter.LastOrderId()}
-	case utils.CDRE_FIXED_WIDTH:
-		if len(exportDir) == 0 {
-			exportDir = path.Join(self.Config.CdreDir, utils.CDRE_FIXED_WIDTH)
-		}
-		if len(fileName) == 0 {
-			fileName = fmt.Sprintf("cdre_%s.fwv", exportId)
-		}
-		exportTemplate := self.Config.CdreFWXmlTemplate
-		if len(attr.ExportTemplate) != 0 && self.Config.XmlCfgDocument != nil {
-			if xmlTemplate := self.Config.XmlCfgDocument.GetCdreFWCfgs(attr.ExportTemplate[len(utils.XML_PROFILE_PREFIX):]); xmlTemplate != nil {
-				exportTemplate = xmlTemplate[attr.ExportTemplate[len(utils.XML_PROFILE_PREFIX):]]
-			}
-		}
-		if exportTemplate == nil {
-			return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
-		}
-		filePath := path.Join(exportDir, fileName)
-		fileOut, err := os.Create(filePath)
-		if err != nil {
-			return err
-		}
-		defer fileOut.Close()
-		fww, _ := cdre.NewFWCdrWriter(self.LogDb, fileOut, exportTemplate, exportId, costShiftDigits, roundDecimals, maskDestId, maskLen)
-		exportedIds := make([]string, 0)
-		unexportedIds := make(map[string]string)
-		for _, cdr := range cdrs {
-			if err := fww.WriteCdr(cdr); err != nil {
-				unexportedIds[cdr.CgrId] = err.Error()
-			} else {
-				exportedIds = append(exportedIds, cdr.CgrId)
-			}
-		}
-		fww.Close()
-		*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: fww.TotalCost(),
-			ExportedCgrIds: exportedIds, UnexportedCgrIds: unexportedIds,
-			FirstOrderId: fww.FirstOrderId(), LastOrderId: fww.LastOrderId()}
+	fileOut, err := os.Create(filePath)
+	if err != nil {
+		return err
 	}
+	defer fileOut.Close()
+	cdrexp, err := cdre.NewCdrExporter(cdrs, self.LogDb, exportTemplate, exportId,
+		dataUsageMultiplyFactor, costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen)
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	switch cdrFormat {
+	case utils.CDRE_FIXED_WIDTH:
+		if err := cdrexp.WriteOut(fileOut); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		}
+	case utils.CSV:
+		csvWriter := csv.NewWriter(fileOut)
+		if err := cdrexp.WriteCsv(csvWriter); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		}
+	}
+	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(),
+		ExportedCgrIds: cdrexp.PositiveExports(), UnexportedCgrIds: cdrexp.NegativeExports(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
 	return nil
 }
 

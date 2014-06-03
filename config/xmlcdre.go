@@ -20,13 +20,69 @@ package config
 
 import (
 	"encoding/xml"
+	"github.com/cgrates/cgrates/utils"
 )
 
-// The CdrExporter Fixed Width configuration instance
-type CgrXmlCdreFwCfg struct {
-	Header  *CgrXmlCfgCdrHeader  `xml:"header"`
-	Content *CgrXmlCfgCdrContent `xml:"content"`
-	Trailer *CgrXmlCfgCdrTrailer `xml:"trailer"`
+// The CdrExporter configuration instance
+type CgrXmlCdreCfg struct {
+	CdrFormat               *string              `xml:"cdr_format"`
+	DataUsageMultiplyFactor *float64             `xml:"data_usage_multiply_factor"`
+	CostMultiplyFactor      *float64             `xml:"cost_multiply_factor"`
+	CostRoundingDecimals    *int                 `xml:"cost_rounding_decimals"`
+	CostShiftDigits         *int                 `xml:"cost_shift_digits"`
+	MaskDestId              *string              `xml:"mask_destination_id"`
+	MaskLength              *int                 `xml:"mask_length"`
+	ExportDir               *string              `xml:"export_dir"`
+	Header                  *CgrXmlCfgCdrHeader  `xml:"export_template>header"`
+	Content                 *CgrXmlCfgCdrContent `xml:"export_template>content"`
+	Trailer                 *CgrXmlCfgCdrTrailer `xml:"export_template>trailer"`
+}
+
+func (xmlCdreCfg *CgrXmlCdreCfg) AsCdreConfig() *CdreConfig {
+	cdreCfg, _ := NewDefaultCdreConfig()
+	if xmlCdreCfg.CdrFormat != nil {
+		cdreCfg.CdrFormat = *xmlCdreCfg.CdrFormat
+	}
+	if xmlCdreCfg.DataUsageMultiplyFactor != nil {
+		cdreCfg.DataUsageMultiplyFactor = *xmlCdreCfg.DataUsageMultiplyFactor
+	}
+	if xmlCdreCfg.CostMultiplyFactor != nil {
+		cdreCfg.CostMultiplyFactor = *xmlCdreCfg.CostMultiplyFactor
+	}
+	if xmlCdreCfg.CostRoundingDecimals != nil {
+		cdreCfg.CostRoundingDecimals = *xmlCdreCfg.CostRoundingDecimals
+	}
+	if xmlCdreCfg.CostShiftDigits != nil {
+		cdreCfg.CostShiftDigits = *xmlCdreCfg.CostShiftDigits
+	}
+	if xmlCdreCfg.MaskDestId != nil {
+		cdreCfg.MaskDestId = *xmlCdreCfg.MaskDestId
+	}
+	if xmlCdreCfg.MaskLength != nil {
+		cdreCfg.MaskLength = *xmlCdreCfg.MaskLength
+	}
+	if xmlCdreCfg.ExportDir != nil {
+		cdreCfg.ExportDir = *xmlCdreCfg.ExportDir
+	}
+	if xmlCdreCfg.Header != nil {
+		cdreCfg.HeaderFields = make([]*CdreCdrField, len(xmlCdreCfg.Header.Fields))
+		for idx, xmlFld := range xmlCdreCfg.Header.Fields {
+			cdreCfg.HeaderFields[idx] = xmlFld.AsCdreCdrField()
+		}
+	}
+	if xmlCdreCfg.Content != nil {
+		cdreCfg.ContentFields = make([]*CdreCdrField, len(xmlCdreCfg.Content.Fields))
+		for idx, xmlFld := range xmlCdreCfg.Content.Fields {
+			cdreCfg.ContentFields[idx] = xmlFld.AsCdreCdrField()
+		}
+	}
+	if xmlCdreCfg.Trailer != nil {
+		cdreCfg.TrailerFields = make([]*CdreCdrField, len(xmlCdreCfg.Trailer.Fields))
+		for idx, xmlFld := range xmlCdreCfg.Trailer.Fields {
+			cdreCfg.TrailerFields[idx] = xmlFld.AsCdreCdrField()
+		}
+	}
+	return cdreCfg
 }
 
 // CDR header
@@ -49,13 +105,42 @@ type CgrXmlCfgCdrTrailer struct {
 
 // CDR field
 type CgrXmlCfgCdrField struct {
-	XMLName   xml.Name `xml:"field"`
-	Name      string   `xml:"name,attr"`
-	Type      string   `xml:"type,attr"`
-	Value     string   `xml:"value,attr"`
-	Width     int      `xml:"width,attr"`     // Field width
-	Strip     string   `xml:"strip,attr"`     // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
-	Padding   string   `xml:"padding,attr"`   // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
-	Layout    string   `xml:"layout,attr"`    // Eg. time format layout
-	Mandatory bool     `xml:"mandatory,attr"` // If field is mandatory, empty value will be considered as error and CDR will not be exported
+	XMLName         xml.Name        `xml:"field"`
+	Name            string          `xml:"name,attr"`
+	Type            string          `xml:"type,attr"`
+	Value           string          `xml:"value,attr"`
+	Width           int             `xml:"width,attr"`     // Field width
+	Strip           string          `xml:"strip,attr"`     // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
+	Padding         string          `xml:"padding,attr"`   // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
+	Layout          string          `xml:"layout,attr"`    // Eg. time format layout
+	Mandatory       bool            `xml:"mandatory,attr"` // If field is mandatory, empty value will be considered as error and CDR will not be exported
+	valueAsRsrField *utils.RSRField // Cached if the need arrises
+}
+
+func (cdrFld *CgrXmlCfgCdrField) populateRSRField() (err error) {
+	if cdrFld.Type != utils.CDRFIELD { // We only need rsrField in case of cdrfield type
+		return nil
+	}
+	if cdrFld.valueAsRsrField, err = utils.NewRSRField(cdrFld.Value); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cdrFld *CgrXmlCfgCdrField) ValueAsRSRField() *utils.RSRField {
+	return cdrFld.valueAsRsrField
+}
+
+func (cdrFld *CgrXmlCfgCdrField) AsCdreCdrField() *CdreCdrField {
+	return &CdreCdrField{
+		Name:            cdrFld.Name,
+		Type:            cdrFld.Type,
+		Value:           cdrFld.Value,
+		Width:           cdrFld.Width,
+		Strip:           cdrFld.Strip,
+		Padding:         cdrFld.Padding,
+		Layout:          cdrFld.Layout,
+		Mandatory:       cdrFld.Mandatory,
+		valueAsRsrField: cdrFld.valueAsRsrField,
+	}
 }

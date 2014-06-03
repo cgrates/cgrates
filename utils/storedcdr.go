@@ -50,19 +50,17 @@ type StoredCdr struct {
 	Cost           float64
 }
 
-// Should only be used for display purposes, bad otherwise.
-// cdrDirection: CDR_IMPORT or CDR_EXPORT
-func (storedCdr *StoredCdr) MangleDataUsage(cdrDirection string) {
-	if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
-		if cdrDirection == CDR_IMPORT { // On import CDRs usages are converted to nanoseconds, for data we need seconds, fix it here.
-			storedCdr.Usage = time.Duration(storedCdr.Usage.Nanoseconds()) * time.Second
-		} else if cdrDirection == CDR_EXPORT { // On exports we need to show the data back in seconds instead of internally stored as nanoseconds
-			storedCdr.Usage = time.Duration(int(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE)))
-		}
-	}
+// Used to multiply usage on export
+func (storedCdr *StoredCdr) UsageMultiply(multiplyFactor float64, roundDecimals int) {
+	storedCdr.Usage = time.Duration(int(Round(float64(storedCdr.Usage.Nanoseconds())*multiplyFactor, roundDecimals, ROUNDING_MIDDLE))) // Rounding down could introduce a slight loss here but only at nanoseconds level
 }
 
-// Return cost as string, formated with number of decimals configured
+// Used to multiply cost on export
+func (storedCdr *StoredCdr) CostMultiply(multiplyFactor float64, roundDecimals int) {
+	storedCdr.Cost = Round(storedCdr.Cost*multiplyFactor, roundDecimals, ROUNDING_MIDDLE)
+}
+
+// Format cost as string on export
 func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string {
 	cost := storedCdr.Cost
 	if shiftDecimals != 0 {
@@ -71,18 +69,18 @@ func (storedCdr *StoredCdr) FormatCost(shiftDecimals, roundDecimals int) string 
 	return strconv.FormatFloat(cost, 'f', roundDecimals, 64)
 }
 
-// Rounds up so 0.8 seconds will become 1
+// Formats usage on export
 func (storedCdr *StoredCdr) FormatUsage(layout string) string {
 	if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
 		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
 	}
 	switch layout {
 	case HOURS:
-		return strconv.FormatFloat(math.Ceil(storedCdr.Usage.Hours()), 'f', -1, 64)
+		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
 	case MINUTES:
-		return strconv.FormatFloat(math.Ceil(storedCdr.Usage.Minutes()), 'f', -1, 64)
+		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
 	case SECONDS:
-		return strconv.FormatFloat(math.Ceil(storedCdr.Usage.Seconds()), 'f', -1, 64)
+		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
 	default:
 		return strconv.FormatInt(storedCdr.Usage.Nanoseconds(), 10)
 	}

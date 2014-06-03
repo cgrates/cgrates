@@ -76,28 +76,28 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&RSRField{Id: "fieldextr2"}) != cdr.ExtraFields["fieldextr2"],
 			cdr.FieldAsString(&RSRField{Id: "dummy_field"}) != "")
 	}
-	/*cdr.TOR = DATA
-	if formated := cdr.FieldAsString(&RSRField{Id: USAGE}); formated != "10" {
-		t.Error("Wrong exported value for data field: ", formated)
-	}*/
 }
 
-func TestMangleDataUsage(t *testing.T) {
-	cdr := StoredCdr{TOR: DATA, Usage: time.Duration(1640113)}
-	if cdr.MangleDataUsage(CDR_IMPORT); cdr.Usage != time.Duration(1640113000000000) {
-		t.Error("Unexpected usage after mangling: ", cdr.Usage)
+func TestUsageMultiply(t *testing.T) {
+	cdr := StoredCdr{Usage: time.Duration(10) * time.Second}
+	if cdr.UsageMultiply(1024.0, 0); cdr.Usage != time.Duration(10240)*time.Second {
+		t.Errorf("Unexpected usage after multiply: %v", cdr.Usage.Nanoseconds())
 	}
-	cdr = StoredCdr{TOR: VOICE, Usage: time.Duration(1640113000000000)}
-	if cdr.MangleDataUsage(CDR_IMPORT); cdr.Usage != time.Duration(1640113000000000) {
-		t.Error("Unexpected usage after mangling: ", cdr.Usage)
+	cdr = StoredCdr{Usage: time.Duration(10240) * time.Second} // Simulate conversion back, gives out a bit odd result but this can be rounded on export
+	expectDuration, _ := time.ParseDuration("10.000005120s")
+	if cdr.UsageMultiply(0.000976563, 0); cdr.Usage != expectDuration {
+		t.Errorf("Unexpected usage after multiply: %v", cdr.Usage.Nanoseconds())
 	}
-	cdr = StoredCdr{TOR: DATA, Usage: time.Duration(1640113000000000)}
-	if cdr.MangleDataUsage(CDR_EXPORT); cdr.Usage != time.Duration(1640113) {
-		t.Error("Unexpected usage after mangling: ", cdr.Usage)
+}
+
+func TestCostMultiply(t *testing.T) {
+	cdr := StoredCdr{Cost: 1.01}
+	if cdr.CostMultiply(1.19, 4); cdr.Cost != 1.2019 {
+		t.Error("Unexpected cost after multiply: %v", cdr.Cost)
 	}
-	cdr = StoredCdr{TOR: VOICE, Usage: time.Duration(1640113000000000)}
-	if cdr.MangleDataUsage(CDR_EXPORT); cdr.Usage != time.Duration(1640113000000000) {
-		t.Error("Unexpected usage after mangling: ", cdr.Usage)
+	cdr = StoredCdr{Cost: 1.01}
+	if cdr.CostMultiply(1000, 0); cdr.Cost != 1010 {
+		t.Error("Unexpected cost after multiply: %v", cdr.Cost)
 	}
 }
 

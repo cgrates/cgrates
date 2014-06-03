@@ -1,6 +1,6 @@
 /*
-Rating system designed to be used in VoIP Carriers World
-Copyright (C) 2013 ITsysCOM
+Real-time Charging System for Telecom & ISP environments
+Copyright (C) 2012-2014 ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -78,14 +78,10 @@ func TestDefaults(t *testing.T) {
 	eCfg.RaterBalancer = ""
 	eCfg.BalancerEnabled = false
 	eCfg.SchedulerEnabled = false
+	eCfg.CdreDefaultInstance, _ = NewDefaultCdreConfig()
 	eCfg.CDRSEnabled = false
 	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
-	eCfg.CdreCdrFormat = "csv"
-	eCfg.CdreMaskDestId = ""
-	eCfg.CdreMaskLength = 0
-	eCfg.CdreCostShiftDigits = 0
-	eCfg.CdreDir = "/var/log/cgrates/cdre"
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcRunDelay = time.Duration(0)
@@ -131,23 +127,6 @@ func TestDefaults(t *testing.T) {
 	eCfg.MailerAuthUser = "cgrates"
 	eCfg.MailerAuthPass = "CGRateS.org"
 	eCfg.MailerFromAddr = "cgr-mailer@localhost.localdomain"
-	eCfg.CdreExportedFields = []*utils.RSRField{
-		&utils.RSRField{Id: utils.CGRID},
-		&utils.RSRField{Id: utils.MEDI_RUNID},
-		&utils.RSRField{Id: utils.TOR},
-		&utils.RSRField{Id: utils.ACCID},
-		&utils.RSRField{Id: utils.REQTYPE},
-		&utils.RSRField{Id: utils.DIRECTION},
-		&utils.RSRField{Id: utils.TENANT},
-		&utils.RSRField{Id: utils.CATEGORY},
-		&utils.RSRField{Id: utils.ACCOUNT},
-		&utils.RSRField{Id: utils.SUBJECT},
-		&utils.RSRField{Id: utils.DESTINATION},
-		&utils.RSRField{Id: utils.SETUP_TIME},
-		&utils.RSRField{Id: utils.ANSWER_TIME},
-		&utils.RSRField{Id: utils.USAGE},
-		&utils.RSRField{Id: utils.COST},
-	}
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
@@ -165,10 +144,6 @@ func TestSanityCheck(t *testing.T) {
 		t.Error("Invalid defaults: ", err)
 	}
 	cfg = &CGRConfig{}
-	cfg.CdreCdrFormat = utils.CDRE_FIXED_WIDTH
-	if err := cfg.checkConfigSanity(); err == nil {
-		t.Error("Failed to detect fixed_width dependency on xml configuration")
-	}
 	cfg.CdrcEnabled = true
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect missing CDR fields definition")
@@ -228,12 +203,16 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSEnabled = true
 	eCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CDRSMediator = "test"
-	eCfg.CdreCdrFormat = "test"
-	eCfg.CdreMaskDestId = "test"
-	eCfg.CdreMaskLength = 99
-	eCfg.CdreCostShiftDigits = 99
-	eCfg.CdreExportedFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
-	eCfg.CdreDir = "test"
+	eCfg.CdreDefaultInstance = &CdreConfig{
+		CdrFormat:               "test",
+		DataUsageMultiplyFactor: 99.0,
+		CostMultiplyFactor:      99.0,
+		CostRoundingDecimals:    99,
+		CostShiftDigits:         99,
+		MaskDestId:              "test",
+		MaskLength:              99,
+		ExportDir:               "test"}
+	eCfg.CdreDefaultInstance.ContentFields, _ = NewCdreCdrFieldsFromIds("test")
 	eCfg.CdrcEnabled = true
 	eCfg.CdrcCdrs = "test"
 	eCfg.CdrcRunDelay = time.Duration(99) * time.Second
@@ -326,17 +305,32 @@ func TestCdreExtraFields(t *testing.T) {
 cdr_format = csv
 export_template = cgrid,mediation_runid,accid
 `)
+	expectedFlds := []*CdreCdrField{
+		&CdreCdrField{Name: "cgrid", Type: utils.CDRFIELD, Value: "cgrid", valueAsRsrField: &utils.RSRField{Id: "cgrid"}, Width: 10, Strip: "xright", Mandatory: true},
+		&CdreCdrField{Name: "mediation_runid", Type: utils.CDRFIELD, Value: "mediation_runid", valueAsRsrField: &utils.RSRField{Id: "mediation_runid"},
+			Width: 10, Strip: "xright", Mandatory: true},
+		&CdreCdrField{Name: "accid", Type: utils.CDRFIELD, Value: "accid", valueAsRsrField: &utils.RSRField{Id: "accid"}, Width: 10, Strip: "xright", Mandatory: true},
+	}
+	expCdreCfg := &CdreConfig{CdrFormat: utils.CSV, CostRoundingDecimals: -1, ExportDir: "/var/log/cgrates/cdre", ContentFields: expectedFlds}
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())
-	} else if !reflect.DeepEqual(cfg.CdreExportedFields, []*utils.RSRField{&utils.RSRField{Id: "cgrid"}, &utils.RSRField{Id: "mediation_runid"}, &utils.RSRField{Id: "accid"}}) {
-		t.Errorf("Unexpected value for CdrsExtraFields: %v", cfg.CDRSExtraFields)
+	} else if !reflect.DeepEqual(cfg.CdreDefaultInstance, expCdreCfg) {
+		t.Errorf("Expecting: %v, received: %v", expCdreCfg, cfg.CdreDefaultInstance)
 	}
 	eFieldsCfg = []byte(`[cdre]
 cdr_format = csv
-export_template = cgrid,mediation_runid,accid,
+export_template = cgrid,~effective_caller_id_number:s/(\d+)/+$1/
 `)
-	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
-		t.Error("Failed to detect empty field in the end of export_template defition")
+	rsrField, _ := utils.NewRSRField(`~effective_caller_id_number:s/(\d+)/+$1/`)
+	expectedFlds = []*CdreCdrField{
+		&CdreCdrField{Name: "cgrid", Type: utils.CDRFIELD, Value: "cgrid", valueAsRsrField: &utils.RSRField{Id: "cgrid"}, Width: 10, Strip: "xright", Mandatory: true},
+		&CdreCdrField{Name: `~effective_caller_id_number:s/(\d+)/+$1/`, Type: utils.CDRFIELD, Value: `~effective_caller_id_number:s/(\d+)/+$1/`, valueAsRsrField: rsrField,
+			Width: 10, Strip: "xright", Mandatory: true}}
+	expCdreCfg.ContentFields = expectedFlds
+	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.CdreDefaultInstance, expCdreCfg) {
+		t.Errorf("Expecting: %v, received: %v", expCdreCfg, cfg.CdreDefaultInstance)
 	}
 	eFieldsCfg = []byte(`[cdre]
 cdr_format = csv

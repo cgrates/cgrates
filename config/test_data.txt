@@ -30,7 +30,6 @@ default_tenant = test			# Default Tenant to consider when missing from requests.
 default_subject = test			# Default rating Subject to consider when missing from requests.
 rounding_decimals = 99			# Number of decimals to round floats/costs at
 
-
 [balancer]
 enabled = true 				# Start Balancer service: <true|false>.
 
@@ -47,12 +46,15 @@ extra_fields = test			# Extra fields to scategorye in CDRs
 mediator = test				# Address where to reach the Mediacategory. Empty for disabling mediation. <""|internal>
 
 [cdre]
-cdr_format = test			# Exported CDRs format <csv>
-mask_destination_id = test	# Destination id containing called addresses to be masked on export
-mask_length = 99			# Length of the destination suffix to be masked
-cost_shift_digits = 99		# Shift the number of cost 
-export_dir = test			# Path where the exported CDRs will be placed
-export_template = test		# List of fields in the exported CDRs
+cdr_format = test					# Exported CDRs format <csv>
+data_usage_multiply_factor = 99.0	# Multiply data usage before export (eg: convert from KBytes to Bytes)
+cost_multiply_factor = 99.0			# Multiply cost before export (0.0 to disable), eg: add VAT
+cost_rounding_decimals = 99			# Rounding decimals for Cost values. -1 to disable rounding
+cost_shift_digits = 99 				# Shift digits in the cost on export (eg: convert from EUR to cents)
+mask_destination_id = test			# Destination id containing called addresses to be masked on export
+mask_length = 99					# Length of the destination suffix to be masked
+export_dir = test					# Path where the exported CDRs will be placed
+export_template = test				# List of fields in the exported CDRs
 
 [cdrc]
 enabled = true				# Enable CDR client functionality

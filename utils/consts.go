@@ -119,6 +119,7 @@ const (
 	OUT                        = "*out"
 	CDR_IMPORT                 = "cdr_import"
 	CDR_EXPORT                 = "cdr_export"
+	CDRFIELD                   = "cdrfield"
 )
 
 var (
