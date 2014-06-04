@@ -30,8 +30,10 @@ func TestCdreCfgNewCdreCdrFieldsFromIds(t *testing.T) {
 			Name:            utils.CGRID,
 			Type:            utils.CDRFIELD,
 			Value:           utils.CGRID,
-			Width:           10,
-			Strip:           "xright",
+			Width:           40,
+			Strip:           "",
+			Padding:         "",
+			Layout:          "",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
 		},
@@ -39,9 +41,11 @@ func TestCdreCfgNewCdreCdrFieldsFromIds(t *testing.T) {
 			Name:            "extra1",
 			Type:            utils.CDRFIELD,
 			Value:           "extra1",
-			Width:           10,
+			Width:           30,
 			Strip:           "xright",
-			Mandatory:       true,
+			Padding:         "left",
+			Layout:          "",
+			Mandatory:       false,
 			valueAsRsrField: &utils.RSRField{Id: "extra1"},
 		},
 	}
@@ -66,22 +70,6 @@ func TestCdreCfgValueAsRSRField(t *testing.T) {
 		t.Error("Unexpected value received: ", rsrVal)
 	}
 }
-func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
-	cdreCdrFld := &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
-	}
-	eCdreCdrFld := &CdreCdrField{
-		Width:           10,
-		Strip:           "xright",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
-	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-}
 
 func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 	eCdreCfg := new(CdreConfig)
@@ -98,8 +86,7 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.CGRID,
 			Type:            utils.CDRFIELD,
 			Value:           utils.CGRID,
-			Width:           10,
-			Strip:           "xright",
+			Width:           40,
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
 		},
@@ -107,8 +94,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.MEDI_RUNID,
 			Type:            utils.CDRFIELD,
 			Value:           utils.MEDI_RUNID,
-			Width:           10,
+			Width:           20,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.MEDI_RUNID},
 		},
@@ -116,8 +104,8 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.TOR,
 			Type:            utils.CDRFIELD,
 			Value:           utils.TOR,
-			Width:           10,
-			Strip:           "xright",
+			Width:           6,
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.TOR},
 		},
@@ -125,8 +113,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.ACCID,
 			Type:            utils.CDRFIELD,
 			Value:           utils.ACCID,
-			Width:           10,
-			Strip:           "xright",
+			Width:           36,
+			Strip:           "left",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.ACCID},
 		},
@@ -134,8 +123,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.REQTYPE,
 			Type:            utils.CDRFIELD,
 			Value:           utils.REQTYPE,
-			Width:           10,
+			Width:           13,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.REQTYPE},
 		},
@@ -143,8 +133,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.DIRECTION,
 			Type:            utils.CDRFIELD,
 			Value:           utils.DIRECTION,
-			Width:           10,
+			Width:           4,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.DIRECTION},
 		},
@@ -152,8 +143,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.TENANT,
 			Type:            utils.CDRFIELD,
 			Value:           utils.TENANT,
-			Width:           10,
+			Width:           24,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.TENANT},
 		},
@@ -163,6 +155,7 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Value:           utils.CATEGORY,
 			Width:           10,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.CATEGORY},
 		},
@@ -170,8 +163,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.ACCOUNT,
 			Type:            utils.CDRFIELD,
 			Value:           utils.ACCOUNT,
-			Width:           10,
+			Width:           24,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.ACCOUNT},
 		},
@@ -179,8 +173,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.SUBJECT,
 			Type:            utils.CDRFIELD,
 			Value:           utils.SUBJECT,
-			Width:           10,
+			Width:           24,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.SUBJECT},
 		},
@@ -188,8 +183,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.DESTINATION,
 			Type:            utils.CDRFIELD,
 			Value:           utils.DESTINATION,
-			Width:           10,
+			Width:           24,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.DESTINATION},
 		},
@@ -197,8 +193,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.SETUP_TIME,
 			Type:            utils.CDRFIELD,
 			Value:           utils.SETUP_TIME,
-			Width:           10,
+			Width:           30,
 			Strip:           "xright",
+			Padding:         "left",
 			Layout:          "2006-01-02T15:04:05Z07:00",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.SETUP_TIME},
@@ -207,8 +204,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.ANSWER_TIME,
 			Type:            utils.CDRFIELD,
 			Value:           utils.ANSWER_TIME,
-			Width:           10,
+			Width:           30,
 			Strip:           "xright",
+			Padding:         "left",
 			Layout:          "2006-01-02T15:04:05Z07:00",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.ANSWER_TIME},
@@ -217,8 +215,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.USAGE,
 			Type:            utils.CDRFIELD,
 			Value:           utils.USAGE,
-			Width:           10,
+			Width:           30,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.USAGE},
 		},
@@ -226,8 +225,9 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.COST,
 			Type:            utils.CDRFIELD,
 			Value:           utils.COST,
-			Width:           10,
+			Width:           24,
 			Strip:           "xright",
+			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.COST},
 		},
@@ -236,5 +236,291 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCfg, cdreCfg) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCfg, cdreCfg)
+	}
+}
+
+func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
+	cdreCdrFld := &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
+	}
+	eCdreCdrFld := &CdreCdrField{
+		Width:           40,
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.ORDERID},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           11,
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.ORDERID},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.TOR},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           6,
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.TOR},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.ACCID},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           36,
+		Strip:           "left",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.ACCID},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.CDRHOST},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           15,
+		Strip:           "left",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.CDRHOST},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.CDRSOURCE},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           15,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.CDRSOURCE},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.REQTYPE},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           13,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.REQTYPE},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.DIRECTION},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           4,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.DIRECTION},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.TENANT},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           24,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.TENANT},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.CATEGORY},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           10,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.CATEGORY},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.ACCOUNT},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           24,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.ACCOUNT},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.SUBJECT},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           24,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.SUBJECT},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.DESTINATION},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           24,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.DESTINATION},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.SETUP_TIME},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           30,
+		Strip:           "xright",
+		Padding:         "left",
+		Layout:          "2006-01-02T15:04:05Z07:00",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.SETUP_TIME},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.ANSWER_TIME},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           30,
+		Strip:           "xright",
+		Padding:         "left",
+		Layout:          "2006-01-02T15:04:05Z07:00",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.ANSWER_TIME},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.USAGE},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           30,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.USAGE},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.MEDI_RUNID},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           20,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.MEDI_RUNID},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: utils.COST},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           24,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       true,
+		valueAsRsrField: &utils.RSRField{Id: utils.COST},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
+	}
+	cdreCdrFld = &CdreCdrField{
+		valueAsRsrField: &utils.RSRField{Id: "extra_1"},
+	}
+	eCdreCdrFld = &CdreCdrField{
+		Width:           30,
+		Strip:           "xright",
+		Padding:         "left",
+		Mandatory:       false,
+		valueAsRsrField: &utils.RSRField{Id: "extra_1"},
+	}
+	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
+		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
 	}
 }

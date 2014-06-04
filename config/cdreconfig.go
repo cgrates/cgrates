@@ -105,119 +105,119 @@ func (cdrField *CdreCdrField) setDefaultFixedWidthProperties() error {
 	}
 	switch cdrField.valueAsRsrField.Id {
 	case utils.CGRID:
-		cdrField.Width = 10
-		cdrField.Strip = "xright"
+		cdrField.Width = 40
+		cdrField.Strip = ""
 		cdrField.Padding = ""
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.ORDERID:
-		cdrField.Width = 10
-		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Width = 11
+		cdrField.Strip = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.TOR:
-		cdrField.Width = 10
-		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Width = 6
+		cdrField.Strip = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.ACCID:
-		cdrField.Width = 10
-		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Width = 36
+		cdrField.Strip = "left"
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.CDRHOST:
-		cdrField.Width = 10
-		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Width = 15
+		cdrField.Strip = "left"
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.CDRSOURCE:
-		cdrField.Width = 10
+		cdrField.Width = 15
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.REQTYPE:
-		cdrField.Width = 10
+		cdrField.Width = 13
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.DIRECTION:
-		cdrField.Width = 10
+		cdrField.Width = 4
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.TENANT:
-		cdrField.Width = 10
+		cdrField.Width = 24
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.CATEGORY:
 		cdrField.Width = 10
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.ACCOUNT:
-		cdrField.Width = 10
+		cdrField.Width = 24
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.SUBJECT:
-		cdrField.Width = 10
+		cdrField.Width = 24
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.DESTINATION:
-		cdrField.Width = 10
+		cdrField.Width = 24
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.SETUP_TIME:
-		cdrField.Width = 10
+		cdrField.Width = 30
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = "2006-01-02T15:04:05Z07:00"
 		cdrField.Mandatory = true
 	case utils.ANSWER_TIME:
-		cdrField.Width = 10
+		cdrField.Width = 30
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = "2006-01-02T15:04:05Z07:00"
 		cdrField.Mandatory = true
 	case utils.USAGE:
-		cdrField.Width = 10
+		cdrField.Width = 30
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.MEDI_RUNID:
-		cdrField.Width = 10
+		cdrField.Width = 20
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	case utils.COST:
-		cdrField.Width = 10
+		cdrField.Width = 24
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
 		cdrField.Mandatory = true
 	default:
-		cdrField.Width = 10
+		cdrField.Width = 30
 		cdrField.Strip = "xright"
-		cdrField.Padding = ""
+		cdrField.Padding = "left"
 		cdrField.Layout = ""
-		cdrField.Mandatory = true
+		cdrField.Mandatory = false
 	}
 	return nil
 }
