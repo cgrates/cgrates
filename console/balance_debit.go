@@ -25,7 +25,7 @@ func init() {
 		name:       "balance_debit",
 		rpcMethod:  "Responder.Debit",
 		rpcParams:  &engine.CallDescriptor{Direction: "*out"},
-		clientArgs: []string{"Direction", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
+		clientArgs: []string{"Direction", "Category", "TOR", "Tenant", "Subject", "Account", "Destination", "TimeStart", "TimeEnd", "CallDuration", "FallbackSubject"},
 	}
 	commands[c.Name()] = c
 	c.CommandExecuter = &CommandExecuter{c}
@@ -56,8 +56,7 @@ func (self *CmdDebitBalance) RpcParams() interface{} {
 }
 
 func (self *CmdDebitBalance) RpcResult() interface{} {
-	var cc engine.CallDescriptor
-	return &cc
+	return &engine.CallCost{}
 }
 
 func (self *CmdDebitBalance) ClientArgs() []string {
