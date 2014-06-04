@@ -25,7 +25,7 @@ import (
 
 func init() {
 	c := &CmdAddBalance{
-		name:      "balance_add",
+		name:      "balance_set",
 		rpcMethod: "ApierV1.AddBalance",
 	}
 	commands[c.Name()] = c
@@ -50,7 +50,7 @@ func (self *CmdAddBalance) RpcMethod() string {
 
 func (self *CmdAddBalance) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT}
+		self.rpcParams = &apier.AttrAddBalance{BalanceType: engine.CREDIT, Overwrite: false}
 	}
 	return self.rpcParams
 }
