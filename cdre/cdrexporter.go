@@ -37,6 +37,7 @@ const (
 	CONSTANT              = "constant"
 	METATAG               = "metatag"
 	CONCATENATED_CDRFIELD = "concatenated_cdrfield"
+	HTTP_POST             = "http_post"
 	META_EXPORTID         = "export_id"
 	META_TIMENOW          = "time_now"
 	META_FIRSTCDRATIME    = "first_cdr_atime"
@@ -259,6 +260,10 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 			outVal = cfgFld.Value
 		case utils.CDRFIELD:
 			outVal, err = cdre.cdrFieldValue(cdr, cfgFld.ValueAsRSRField(), cfgFld.Layout)
+		case HTTP_POST:
+			if outValByte, err := utils.HttpJsonPost(cfgFld.Value, cdr); err == nil {
+				outVal = string(outValByte)
+			}
 		case CONCATENATED_CDRFIELD:
 			for _, fld := range strings.Split(cfgFld.Value, ",") {
 				if fldOut, err := cdre.cdrFieldValue(cdr, &utils.RSRField{Id: fld}, cfgFld.Layout); err != nil {

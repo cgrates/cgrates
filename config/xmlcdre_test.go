@@ -163,6 +163,7 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
           <field name="OperatorCode" type="cdrfield" value="operator" width="2" />
           <field name="ProductId" type="cdrfield" value="productid" width="5" />
           <field name="NetworkId" type="constant" value="3" width="1" />
+          <field name="FromHttpPost1" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" />
         </fields>
       </content>
       <trailer>
@@ -228,6 +229,14 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
 			Type:  "constant",
 			Value: "3",
 			Width: 1,
+		},
+		&CdreCdrField{
+			Name:    "FromHttpPost1",
+			Type:    "http_post",
+			Value:   "https://localhost:8000",
+			Width:   10,
+			Strip:   "xright",
+			Padding: "left",
 		},
 	}
 	eCdreCfg.TrailerFields = []*CdreCdrField{

@@ -56,8 +56,8 @@ func (self *CmdDebitBalance) RpcParams() interface{} {
 }
 
 func (self *CmdDebitBalance) RpcResult() interface{} {
-	var s string
-	return &s
+	var cc engine.CallDescriptor
+	return &cc
 }
 
 func (self *CmdDebitBalance) ClientArgs() []string {
