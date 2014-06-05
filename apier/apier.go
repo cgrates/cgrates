@@ -113,9 +113,12 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 	if attr.Direction == "" {
 		attr.Direction = engine.OUTBOUND
 	}
-	aType := engine.TOPUP
+	aType := engine.DEBIT
+	// reverse the sign as it is a debit
+	attr.Value = -attr.Value
+
 	if attr.Overwrite {
-		aType = engine.TOPUP_RESET
+		aType = engine.DEBIT_RESET
 	}
 	at.SetActions(engine.Actions{
 		&engine.Action{

@@ -55,6 +55,7 @@ const (
 	RESET_ACCOUNT   = "*reset_account"
 	TOPUP_RESET     = "*topup_reset"
 	TOPUP           = "*topup"
+	DEBIT_RESET     = "*debit_reset"
 	DEBIT           = "*debit"
 	RESET_COUNTER   = "*reset_counter"
 	RESET_COUNTERS  = "*reset_counters"
@@ -88,6 +89,8 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 		return topupResetAction, true
 	case TOPUP:
 		return topupAction, true
+	case DEBIT_RESET:
+		return debitResetAction, true
 	case DEBIT:
 		return debitAction, true
 	case RESET_COUNTER:
@@ -149,14 +152,20 @@ func topupResetAction(ub *Account, a *Action) (err error) {
 	}
 	ub.BalanceMap[a.BalanceType+a.Direction] = BalanceChain{}
 	genericMakeNegative(a)
-	genericDebit(ub, a)
-	return
+	return genericDebit(ub, a)
 }
 
 func topupAction(ub *Account, a *Action) (err error) {
 	genericMakeNegative(a)
-	genericDebit(ub, a)
-	return
+	return genericDebit(ub, a)
+}
+
+func debitResetAction(ub *Account, a *Action) (err error) {
+	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
+		ub.BalanceMap = make(map[string]BalanceChain, 0)
+	}
+	ub.BalanceMap[a.BalanceType+a.Direction] = BalanceChain{}
+	return genericDebit(ub, a)
 }
 
 func debitAction(ub *Account, a *Action) (err error) {
