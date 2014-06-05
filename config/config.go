@@ -91,6 +91,7 @@ type CGRConfig struct {
 	CDRSEnabled             bool                       // Enable CDR Server service
 	CDRSExtraFields         []*utils.RSRField          // Extra fields to store in CDRs
 	CDRSMediator            string                     // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CdrStatsConfigs         []*CdrStatsConfig          // Active cdr stats configuration instances
 	CdreDefaultInstance     *CdreConfig                // Will be used in the case no specific one selected by API
 	CdrcEnabled             bool                       // Enable CDR client functionality
 	CdrcCdrs                string                     // Address where to reach CDR server
