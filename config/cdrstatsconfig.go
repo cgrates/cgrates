@@ -23,6 +23,7 @@ import (
 )
 
 type CdrStatsConfig struct {
+	RatedCdrs         bool        // Build the stats for rated cdrs instead of raw ones
 	QueuedItems       int64       // Number of items in the stats buffer
 	SetupInterval     []time.Time // 2 or less items (>= start interval,< stop_interval)
 	TOR               []string
