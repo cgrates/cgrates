@@ -82,6 +82,7 @@ type CGRConfig struct {
 	DefaultTenant           string             // set default tenant
 	DefaultSubject          string             // set default rating subject, useful in case of fallback
 	RoundingDecimals        int                // Number of decimals to round end prices at
+	HttpSkipTlsVerify       bool               // If enabled Http Client will accept any TLS certificate
 	XmlCfgDocument          *CgrXmlCfgDocument // Load additional configuration inside xml document
 	RaterEnabled            bool               // start standalone server (no balancer)
 	RaterBalancer           string             // balancer address host:port
@@ -153,6 +154,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.DefaultTenant = "cgrates.org"
 	self.DefaultSubject = "cgrates"
 	self.RoundingDecimals = 10
+	self.HttpSkipTlsVerify = false
 	self.XmlCfgDocument = nil
 	self.RaterEnabled = false
 	self.RaterBalancer = ""
@@ -349,6 +351,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("global", "rounding_decimals"); hasOpt {
 		cfg.RoundingDecimals, _ = c.GetInt("global", "rounding_decimals")
+	}
+	if hasOpt = c.HasOption("global", "http_skip_tls_veify"); hasOpt {
+		cfg.HttpSkipTlsVerify, _ = c.GetBool("global", "http_skip_tls_veify")
 	}
 	// XML config path defined, try loading the document
 	if hasOpt = c.HasOption("global", "xmlcfg_path"); hasOpt {

@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha1"
+	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -260,12 +261,16 @@ func AccountAliasKey(tenant, account string) string {
 	return ConcatenatedKey(tenant, account)
 }
 
-func HttpJsonPost(url string, content interface{}) ([]byte, error) {
+func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, error) {
 	body, err := json.Marshal(content)
 	if err != nil {
 		return nil, err
 	}
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipTlsVerify},
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Post(url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}

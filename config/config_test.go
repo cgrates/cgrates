@@ -73,6 +73,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.DefaultTenant = "cgrates.org"
 	eCfg.DefaultSubject = "cgrates"
 	eCfg.RoundingDecimals = 10
+	eCfg.HttpSkipTlsVerify = false
 	eCfg.XmlCfgDocument = nil
 	eCfg.RaterEnabled = false
 	eCfg.RaterBalancer = ""
@@ -196,6 +197,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.DefaultTenant = "test"
 	eCfg.DefaultSubject = "test"
 	eCfg.RoundingDecimals = 99
+	eCfg.HttpSkipTlsVerify = true
 	eCfg.RaterEnabled = true
 	eCfg.RaterBalancer = "test"
 	eCfg.BalancerEnabled = true

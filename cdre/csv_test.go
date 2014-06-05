@@ -39,7 +39,7 @@ func TestCsvCdrWriter(t *testing.T) {
 		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID,
 		ExtraFields: map[string]string{"extra1": "val_extra1", "extra2": "val_extra2", "extra3": "val_extra3"}, Cost: 1.01,
 	}
-	cdre, err := NewCdrExporter([]*utils.StoredCdr{storedCdr1}, logDb, cfg.CdreDefaultInstance, "firstexport", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", 0)
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{storedCdr1}, logDb, cfg.CdreDefaultInstance, "firstexport", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", 0, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}

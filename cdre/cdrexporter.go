@@ -52,7 +52,7 @@ const (
 var err error
 
 func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, exportId string,
-	dataUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int) (*CdrExporter, error) {
+	dataUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
 	}
@@ -67,6 +67,7 @@ func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl 
 		roundDecimals:           roundDecimals,
 		cgrPrecision:            cgrPrecision,
 		maskDestId:              maskDestId,
+		httpSkipTlsCheck:        httpSkipTlsCheck,
 		maskLen:                 maskLen,
 		negativeExports:         make(map[string]string),
 	}
@@ -85,6 +86,7 @@ type CdrExporter struct {
 	costShiftDigits, roundDecimals, cgrPrecision int
 	maskDestId                                   string
 	maskLen                                      int
+	httpSkipTlsCheck                             bool
 	header, trailer                              []string   // Header and Trailer fields
 	content                                      [][]string // Rows of cdr fields
 	firstCdrATime, lastCdrATime                  time.Time
@@ -261,8 +263,12 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 		case utils.CDRFIELD:
 			outVal, err = cdre.cdrFieldValue(cdr, cfgFld.ValueAsRSRField(), cfgFld.Layout)
 		case HTTP_POST:
-			if outValByte, err := utils.HttpJsonPost(cfgFld.Value, cdr); err == nil {
+			var outValByte []byte
+			if outValByte, err = utils.HttpJsonPost(cfgFld.Value, cdre.httpSkipTlsCheck, cdr); err == nil {
 				outVal = string(outValByte)
+				if len(outVal) == 0 && cfgFld.Mandatory {
+					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Name)
+				}
 			}
 		case CONCATENATED_CDRFIELD:
 			for _, fld := range strings.Split(cfgFld.Value, ",") {

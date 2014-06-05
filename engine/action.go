@@ -213,7 +213,8 @@ func genericReset(ub *Account) error {
 }
 
 func callUrl(ub *Account, a *Action) error {
-	_, err := utils.HttpJsonPost(a.ExtraParameters, ub)
+	cfg := config.CgrConfig()
+	_, err := utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, ub)
 	return err
 }
 
@@ -223,9 +224,10 @@ func callUrlAsync(ub *Account, a *Action) error {
 	if err != nil {
 		return err
 	}
+	cfg := config.CgrConfig()
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-			if _, err = utils.HttpJsonPost(a.ExtraParameters, ub); err == nil {
+			if _, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, ub); err == nil {
 				break // Success, no need to reinterate
 			} else if i == 4 { // Last iteration, syslog the warning
 				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), ubJson))

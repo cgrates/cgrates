@@ -36,7 +36,7 @@ func TestHttpJsonPost(t *testing.T) {
 		SetupTime: time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC), AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
 		Usage: 0.00000001, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if _, err := HttpJsonPost("http://localhost:8000", cdrOut); err == nil || err.Error() != "Post http://localhost:8000: dial tcp 127.0.0.1:8000: connection refused" {
+	if _, err := HttpJsonPost("http://localhost:8000", false, cdrOut); err == nil || err.Error() != "Post http://localhost:8000: dial tcp 127.0.0.1:8000: connection refused" {
 		t.Error(err)
 	}
 }

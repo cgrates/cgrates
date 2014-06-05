@@ -110,6 +110,20 @@ func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
       </trailer>
     </export_template>
   </configuration>
+  <configuration section="cdre" type="csv" id="CHECK-CSV1">
+  <export_template>
+    <content>
+     <fields>
+      <field name="CGRID" type="cdrfield" value="cgrid" width="40"/>
+      <field name="RatingSubject" type="cdrfield" value="subject" width="24" padding="left" strip="xright" mandatory="true"/>
+      <field name="Usage" type="cdrfield" value="usage" layout="seconds" width="6" padding="right" mandatory="true"/>
+      <field name="AccountReference" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" mandatory="true" />
+      <field name="AccountType" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" mandatory="true" />
+     </fields>
+    </content>
+   </export_template>
+  </configuration>
+
 </document>`
 	var err error
 	reader := strings.NewReader(cfgXmlStr)
@@ -118,7 +132,7 @@ func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
 	} else if cfgDoc == nil {
 		t.Fatal("Could not parse xml configuration document")
 	}
-	if len(cfgDoc.cdres) != 1 {
+	if len(cfgDoc.cdres) != 2 {
 		t.Error("Did not cache")
 	}
 }
@@ -136,6 +150,13 @@ func TestXmlCdreCfgGetCdreCfg(t *testing.T) {
 	}
 	if len(cdreFWCfg["CDRE-FW1"].Trailer.Fields) != 9 {
 		t.Error("Unexpected number of trailer fields parsed", len(cdreFWCfg["CDRE-FW1"].Trailer.Fields))
+	}
+	cdreCsvCfg1 := cfgDoc.GetCdreCfgs("CHECK-CSV1")
+	if cdreCsvCfg1 == nil {
+		t.Error("Could not parse CdreFw instance")
+	}
+	if len(cdreCsvCfg1["CHECK-CSV1"].Content.Fields) != 5 {
+		t.Error("Unexpected number of content fields parsed", len(cdreCsvCfg1["CHECK-CSV1"].Content.Fields))
 	}
 }
 

@@ -29,6 +29,7 @@ default_category = test			# Default Type of Record to consider when missing from
 default_tenant = test			# Default Tenant to consider when missing from requests.
 default_subject = test			# Default rating Subject to consider when missing from requests.
 rounding_decimals = 99			# Number of decimals to round floats/costs at
+http_skip_tls_veify = true		# If enabled Http Client will accept any TLS certificate
 
 [balancer]
 enabled = true 				# Start Balancer service: <true|false>.
