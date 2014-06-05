@@ -120,6 +120,8 @@ const (
 	CDR_IMPORT                 = "cdr_import"
 	CDR_EXPORT                 = "cdr_export"
 	CDRFIELD                   = "cdrfield"
+	ASR                        = "ASR"
+	ACD                        = "ACD"
 )
 
 var (

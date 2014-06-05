@@ -23,9 +23,12 @@ import (
 )
 
 type CdrStatsConfig struct {
-	RatedCdrs         bool        // Build the stats for rated cdrs instead of raw ones
-	QueuedItems       int64       // Number of items in the stats buffer
-	SetupInterval     []time.Time // 2 or less items (>= start interval,< stop_interval)
+	Id                string        // Config id, unique per config instance
+	RatedCdrs         bool          // Build the stats for rated cdrs instead of raw ones
+	QueuedItems       int64         // Number of items in the stats buffer
+	TimeWindow        time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+	ProcessedStats    []string      // ASR, ACD, ACC
+	SetupInterval     []time.Time   // 2 or less items (>= start interval,< stop_interval)
 	TOR               []string
 	CdrHost           []string
 	CdrSource         []string
@@ -39,4 +42,14 @@ type CdrStatsConfig struct {
 	UsageInterval     []time.Duration // 2 or less items (>= Usage, <Usage)
 	MediationRunIds   []string
 	CostInterval      []float64 // 2 or less items, (>=Cost, <Cost)
+	CdrStatsTriggers  []*CdrStatsTrigger
+}
+
+type CdrStatsTrigger struct {
+	ThresholdType  string // *min_asr, *max_asr, *min_acd, *max_acd, *min_acc, *max_acc
+	ThresholdValue float64
+	MinQueuedItems int    // Trigger actions only if this number is hit
+	ActionsId      string // Id of actions to be executed
+	Recurrent      bool   // Re-enable automatically once executed
+	Weight         float64
 }
