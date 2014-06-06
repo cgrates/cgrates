@@ -37,6 +37,7 @@ const (
 	CONSTANT              = "constant"
 	METATAG               = "metatag"
 	CONCATENATED_CDRFIELD = "concatenated_cdrfield"
+	COMBIMED              = "combimed"
 	HTTP_POST             = "http_post"
 	META_EXPORTID         = "export_id"
 	META_TIMENOW          = "time_now"

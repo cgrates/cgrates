@@ -109,10 +109,35 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdreCfgs() error {
 		} else if cdreCfg == nil {
 			return fmt.Errorf("Could not unmarshal CgrXmlCdreCfg: %s", cfgInst.Id)
 		}
+		if cdreCfg.Header != nil {
+			// Cache rsr fields
+			for _, fld := range cdreCfg.Header.Fields {
+				if err := fld.populateRSRField(); err != nil {
+					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
+				}
+				if err := fld.populateFltrRSRField(); err != nil {
+					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
+				}
+			}
+		}
 		if cdreCfg.Content != nil {
 			// Cache rsr fields
 			for _, fld := range cdreCfg.Content.Fields {
 				if err := fld.populateRSRField(); err != nil {
+					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
+				}
+				if err := fld.populateFltrRSRField(); err != nil {
+					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
+				}
+			}
+		}
+		if cdreCfg.Trailer != nil {
+			// Cache rsr fields
+			for _, fld := range cdreCfg.Trailer.Fields {
+				if err := fld.populateRSRField(); err != nil {
+					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
+				}
+				if err := fld.populateFltrRSRField(); err != nil {
 					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
 				}
 			}

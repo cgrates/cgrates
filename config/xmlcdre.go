@@ -105,26 +105,28 @@ type CgrXmlCfgCdrTrailer struct {
 
 // CDR field
 type CgrXmlCfgCdrField struct {
-	XMLName         xml.Name        `xml:"field"`
-	Name            string          `xml:"name,attr"`
-	Type            string          `xml:"type,attr"`
-	Value           string          `xml:"value,attr"`
-	Width           int             `xml:"width,attr"`     // Field width
-	Strip           string          `xml:"strip,attr"`     // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
-	Padding         string          `xml:"padding,attr"`   // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
-	Layout          string          `xml:"layout,attr"`    // Eg. time format layout
-	Mandatory       bool            `xml:"mandatory,attr"` // If field is mandatory, empty value will be considered as error and CDR will not be exported
-	valueAsRsrField *utils.RSRField // Cached if the need arrises
+	XMLName          xml.Name        `xml:"field"`
+	Name             string          `xml:"name,attr"`
+	Type             string          `xml:"type,attr"`
+	Value            string          `xml:"value,attr"`
+	Width            int             `xml:"width,attr"`     // Field width
+	Strip            string          `xml:"strip,attr"`     // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
+	Padding          string          `xml:"padding,attr"`   // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
+	Layout           string          `xml:"layout,attr"`    // Eg. time format layout
+	Filter           string          `xml:"filter,attr"`    // Eg. combimed filters
+	Mandatory        bool            `xml:"mandatory,attr"` // If field is mandatory, empty value will be considered as error and CDR will not be exported
+	valueAsRsrField  *utils.RSRField // Cached if the need arrises
+	filterAsRsrField *utils.RSRField
 }
 
 func (cdrFld *CgrXmlCfgCdrField) populateRSRField() (err error) {
-	if cdrFld.Type != utils.CDRFIELD { // We only need rsrField in case of cdrfield type
-		return nil
-	}
-	if cdrFld.valueAsRsrField, err = utils.NewRSRField(cdrFld.Value); err != nil {
-		return err
-	}
-	return nil
+	cdrFld.valueAsRsrField, err = utils.NewRSRField(cdrFld.Value)
+	return err
+}
+
+func (cdrFld *CgrXmlCfgCdrField) populateFltrRSRField() (err error) {
+	cdrFld.filterAsRsrField, err = utils.NewRSRField(cdrFld.Filter)
+	return err
 }
 
 func (cdrFld *CgrXmlCfgCdrField) ValueAsRSRField() *utils.RSRField {
@@ -140,6 +142,7 @@ func (cdrFld *CgrXmlCfgCdrField) AsCdreCdrField() *CdreCdrField {
 		Strip:           cdrFld.Strip,
 		Padding:         cdrFld.Padding,
 		Layout:          cdrFld.Layout,
+		Filter:          cdrFld.filterAsRsrField,
 		Mandatory:       cdrFld.Mandatory,
 		valueAsRsrField: cdrFld.valueAsRsrField,
 	}

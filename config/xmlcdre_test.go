@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"strings"
@@ -38,12 +39,12 @@ func TestXmlCdreCfgPopulateCdreRSRFIeld(t *testing.T) {
 	if recv := cdreField.ValueAsRSRField(); !reflect.DeepEqual(valRSRField, recv) {
 		t.Errorf("Expecting %v, received %v", valRSRField, recv)
 	}
-	cdreField = CgrXmlCfgCdrField{Name: "TEST1", Type: "constant", Value: `someval`}
+	/*cdreField = CgrXmlCfgCdrField{Name: "TEST1", Type: "constant", Value: `someval`}
 	if err := cdreField.populateRSRField(); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if cdreField.valueAsRsrField != nil {
 		t.Error("Should not load the RSRField")
-	}
+	}*/
 }
 
 func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
@@ -119,6 +120,7 @@ func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
       <field name="Usage" type="cdrfield" value="usage" layout="seconds" width="6" padding="right" mandatory="true"/>
       <field name="AccountReference" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" mandatory="true" />
       <field name="AccountType" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" mandatory="true" />
+      <field name="MultipleMed1" type="combimed" value="cost" strip="xright" padding="left" mandatory="true" filter="~mediation_runid:s/DEFAULT/SECOND_RUN/"/>
      </fields>
     </content>
    </export_template>
@@ -155,7 +157,7 @@ func TestXmlCdreCfgGetCdreCfg(t *testing.T) {
 	if cdreCsvCfg1 == nil {
 		t.Error("Could not parse CdreFw instance")
 	}
-	if len(cdreCsvCfg1["CHECK-CSV1"].Content.Fields) != 5 {
+	if len(cdreCsvCfg1["CHECK-CSV1"].Content.Fields) != 6 {
 		t.Error("Unexpected number of content fields parsed", len(cdreCsvCfg1["CHECK-CSV1"].Content.Fields))
 	}
 }
@@ -185,6 +187,7 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
           <field name="ProductId" type="cdrfield" value="productid" width="5" />
           <field name="NetworkId" type="constant" value="3" width="1" />
           <field name="FromHttpPost1" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" />
+          <field name="CombiMed1" type="combimed" value="cost" width="10" strip="xright" padding="left" filter="~mediation_runid:s/DEFAULT/SECOND_RUN/"/>
         </fields>
       </content>
       <trailer>
@@ -217,18 +220,21 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
 		MaskLength:              1,
 		ExportDir:               "/var/log/cgrates/cdre",
 	}
+	fltrCombiMed, _ := utils.NewRSRField("~mediation_runid:s/DEFAULT/SECOND_RUN/")
 	eCdreCfg.HeaderFields = []*CdreCdrField{
 		&CdreCdrField{
-			Name:  "TypeOfRecord",
-			Type:  "constant",
-			Value: "10",
-			Width: 2},
+			Name:            "TypeOfRecord",
+			Type:            "constant",
+			Value:           "10",
+			Width:           2,
+			valueAsRsrField: &utils.RSRField{Id: "10"}},
 		&CdreCdrField{
-			Name:   "LastCdr",
-			Type:   "metatag",
-			Value:  "last_cdr_time",
-			Layout: "020106150400",
-			Width:  12},
+			Name:            "LastCdr",
+			Type:            "metatag",
+			Value:           "last_cdr_time",
+			Layout:          "020106150400",
+			Width:           12,
+			valueAsRsrField: &utils.RSRField{Id: "last_cdr_time"}},
 	}
 	eCdreCfg.ContentFields = []*CdreCdrField{
 		&CdreCdrField{
@@ -246,36 +252,53 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
 			valueAsRsrField: &utils.RSRField{Id: "productid"},
 		},
 		&CdreCdrField{
-			Name:  "NetworkId",
-			Type:  "constant",
-			Value: "3",
-			Width: 1,
+			Name:            "NetworkId",
+			Type:            "constant",
+			Value:           "3",
+			Width:           1,
+			valueAsRsrField: &utils.RSRField{Id: "3"},
 		},
 		&CdreCdrField{
-			Name:    "FromHttpPost1",
-			Type:    "http_post",
-			Value:   "https://localhost:8000",
-			Width:   10,
-			Strip:   "xright",
-			Padding: "left",
+			Name:            "FromHttpPost1",
+			Type:            "http_post",
+			Value:           "https://localhost:8000",
+			Width:           10,
+			Strip:           "xright",
+			Padding:         "left",
+			valueAsRsrField: &utils.RSRField{Id: "https://localhost:8000"},
+		},
+		&CdreCdrField{
+			Name:            "CombiMed1",
+			Type:            "combimed",
+			Value:           "cost",
+			Width:           10,
+			Strip:           "xright",
+			Padding:         "left",
+			Filter:          fltrCombiMed,
+			valueAsRsrField: &utils.RSRField{Id: "cost"},
 		},
 	}
 	eCdreCfg.TrailerFields = []*CdreCdrField{
 		&CdreCdrField{
-			Name:  "DistributorCode",
-			Type:  "constant",
-			Value: "VOI",
-			Width: 3,
+			Name:            "DistributorCode",
+			Type:            "constant",
+			Value:           "VOI",
+			Width:           3,
+			valueAsRsrField: &utils.RSRField{Id: "VOI"},
 		},
 		&CdreCdrField{
-			Name:    "FileSeqNr",
-			Type:    "metatag",
-			Value:   "export_id",
-			Width:   5,
-			Padding: "zeroleft",
+			Name:            "FileSeqNr",
+			Type:            "metatag",
+			Value:           "export_id",
+			Width:           5,
+			Padding:         "zeroleft",
+			valueAsRsrField: &utils.RSRField{Id: "export_id"},
 		},
 	}
 	if rcvCdreCfg := xmlCdreCfgs["CDRE-FW2"].AsCdreConfig(); !reflect.DeepEqual(rcvCdreCfg, eCdreCfg) {
+		for _, fld := range rcvCdreCfg.ContentFields {
+			fmt.Printf("Fld: %+v\n", fld)
+		}
 		t.Errorf("Expecting: %v, received: %v", eCdreCfg, rcvCdreCfg)
 	}
 }

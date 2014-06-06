@@ -90,6 +90,7 @@ type CdreCdrField struct {
 	Strip           string
 	Padding         string
 	Layout          string
+	Filter          *utils.RSRField
 	Mandatory       bool
 	valueAsRsrField *utils.RSRField // Cached if the need arrises
 }
