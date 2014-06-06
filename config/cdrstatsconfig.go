@@ -48,8 +48,9 @@ type CdrStatsConfig struct {
 type CdrStatsTrigger struct {
 	ThresholdType  string // *min_asr, *max_asr, *min_acd, *max_acd, *min_acc, *max_acc
 	ThresholdValue float64
-	MinQueuedItems int    // Trigger actions only if this number is hit
-	ActionsId      string // Id of actions to be executed
-	Recurrent      bool   // Re-enable automatically once executed
+	MinQueuedItems int           // Trigger actions only if this number is hit
+	MinSleep       time.Duration // Minimum duration between two executions in case of recurrent triggers
+	ActionsId      string        // Id of actions to be executed
+	Recurrent      bool          // Re-enable automatically once executed
 	Weight         float64
 }
