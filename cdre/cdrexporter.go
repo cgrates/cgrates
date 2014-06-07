@@ -112,6 +112,19 @@ func (cdre *CdrExporter) getCdrCostDetails(cgrId, runId string) (string, error) 
 	return string(ccJson), nil
 }
 
+func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *utils.StoredCdr, filterRule, fieldRule *utils.RSRField) (string, error) {
+	filterVal := processedCdr.FieldAsString(filterRule)
+	for _, cdr := range cdre.cdrs {
+		if cdr.CgrId != processedCdr.CgrId {
+			continue // We only care about cdrs with same primary cdr behind
+		}
+		if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == filterVal {
+			return cdr.FieldAsString(fieldRule), nil
+		}
+	}
+	return "", nil
+}
+
 // Check if the destination should be masked in output
 func (cdre *CdrExporter) maskedDestination(destination string) bool {
 	if len(cdre.maskDestId) != 0 && engine.CachedDestHasPrefix(cdre.maskDestId, destination) {
@@ -121,9 +134,12 @@ func (cdre *CdrExporter) maskedDestination(destination string) bool {
 }
 
 // Extracts the value specified by cfgHdr out of cdr
-func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, rsrFld *utils.RSRField, layout string) (string, error) {
+func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, fltrRl, rsrFld *utils.RSRField, layout string) (string, error) {
 	if rsrFld == nil {
 		return "", nil
+	}
+	if fltrRl != nil && cdr.FieldAsString(&utils.RSRField{Id: fltrRl.Id}) != cdr.FieldAsString(fltrRl) {
+		return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
 	}
 	var cdrVal string
 	switch rsrFld.Id {
@@ -262,7 +278,7 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 		case CONSTANT:
 			outVal = cfgFld.Value
 		case utils.CDRFIELD:
-			outVal, err = cdre.cdrFieldValue(cdr, cfgFld.ValueAsRSRField(), cfgFld.Layout)
+			outVal, err = cdre.cdrFieldValue(cdr, cfgFld.Filter, cfgFld.ValueAsRSRField(), cfgFld.Layout)
 		case HTTP_POST:
 			var outValByte []byte
 			if outValByte, err = utils.HttpJsonPost(cfgFld.Value, cdre.httpSkipTlsCheck, cdr); err == nil {
@@ -271,9 +287,11 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Name)
 				}
 			}
+		case COMBIMED:
+			outVal, err = cdre.getCombimedCdrFieldVal(cdr, cfgFld.Filter, cfgFld.ValueAsRSRField())
 		case CONCATENATED_CDRFIELD:
 			for _, fld := range strings.Split(cfgFld.Value, ",") {
-				if fldOut, err := cdre.cdrFieldValue(cdr, &utils.RSRField{Id: fld}, cfgFld.Layout); err != nil {
+				if fldOut, err := cdre.cdrFieldValue(cdr, cfgFld.Filter, &utils.RSRField{Id: fld}, cfgFld.Layout); err != nil {
 					break // The error will be reported bellow
 				} else {
 					outVal += fldOut
