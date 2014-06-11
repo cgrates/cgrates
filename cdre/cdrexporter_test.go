@@ -70,6 +70,29 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 	}
 }
 
+func TestGetDateTimeFieldVal(t *testing.T) {
+	cdreTst := new(CdrExporter)
+	cdrTst := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+		ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
+		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.01,
+		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
+	if cdrVal, err := cdreTst.getDateTimeFieldVal(cdrTst, nil, &utils.RSRField{Id: "stop_time"}, "2006-01-02 15:04:05"); err != nil {
+		t.Error(err)
+	} else if cdrVal != "2014-06-11 19:19:00" {
+		t.Error("Expecting: 2014-06-11 19:19:00, got: ", cdrVal)
+	}
+	// Test filter
+	fltrRule, _ := utils.NewRSRField("~tenant:s/(.+)/itsyscom.com/")
+	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, fltrRule, &utils.RSRField{Id: "stop_time"}, "2006-01-02 15:04:05"); err == nil {
+		t.Error(err)
+	}
+	// Test time parse error
+	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, nil, &utils.RSRField{Id: "fieldextr2"}, "2006-01-02 15:04:05"); err == nil {
+		t.Error("Should give error here, got none.")
+	}
+}
+
 func TestCdreCdrFieldValue(t *testing.T) {
 	cdre := new(CdrExporter)
 	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Unix(1383813745, 0).UTC().String()), TOR: utils.VOICE, AccId: "dsafdsaf", CdrHost: "192.168.1.1",

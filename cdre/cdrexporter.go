@@ -38,6 +38,7 @@ const (
 	METATAG               = "metatag"
 	CONCATENATED_CDRFIELD = "concatenated_cdrfield"
 	COMBIMED              = "combimed"
+	DATETIME              = "datetime"
 	HTTP_POST             = "http_post"
 	META_EXPORTID         = "export_id"
 	META_TIMENOW          = "time_now"
@@ -133,6 +134,23 @@ func (cdre *CdrExporter) maskedDestination(destination string) bool {
 	return false
 }
 
+func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, fltrRl, fieldRl *utils.RSRField, layout string) (string, error) {
+	if fieldRl == nil {
+		return "", nil
+	}
+	if fltrRl != nil && cdr.FieldAsString(&utils.RSRField{Id: fltrRl.Id}) != cdr.FieldAsString(fltrRl) {
+		return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+	}
+	if len(layout) == 0 {
+		layout = time.RFC3339
+	}
+	if dtFld, err := utils.ParseTimeDetectLayout(cdr.FieldAsString(fieldRl)); err != nil {
+		return "", err
+	} else {
+		return dtFld.Format(layout), nil
+	}
+}
+
 // Extracts the value specified by cfgHdr out of cdr
 func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, fltrRl, rsrFld *utils.RSRField, layout string) (string, error) {
 	if rsrFld == nil {
@@ -140,6 +158,9 @@ func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, fltrRl, rsrFld *uti
 	}
 	if fltrRl != nil && cdr.FieldAsString(&utils.RSRField{Id: fltrRl.Id}) != cdr.FieldAsString(fltrRl) {
 		return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+	}
+	if len(layout) == 0 {
+		layout = time.RFC3339
 	}
 	var cdrVal string
 	switch rsrFld.Id {
@@ -279,6 +300,8 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 			outVal = cfgFld.Value
 		case utils.CDRFIELD:
 			outVal, err = cdre.cdrFieldValue(cdr, cfgFld.Filter, cfgFld.ValueAsRSRField(), cfgFld.Layout)
+		case DATETIME:
+			outVal, err = cdre.getDateTimeFieldVal(cdr, cfgFld.Filter, cfgFld.ValueAsRSRField(), cfgFld.Layout)
 		case HTTP_POST:
 			var outValByte []byte
 			if outValByte, err = utils.HttpJsonPost(cfgFld.Value, cdre.httpSkipTlsCheck, cdr); err == nil {
