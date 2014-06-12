@@ -902,8 +902,10 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			&extraFields, &runid, &cost); err != nil {
 			return nil, err
 		}
-		if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
-			return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid, runid, err.Error())
+		if len(extraFields) != 0 {
+			if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
+				return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid.String, runid.String, err.Error())
+			}
 		}
 		usageDur, _ := time.ParseDuration(strconv.FormatFloat(usage.Float64, 'f', -1, 64) + "s")
 		storCdr := &utils.StoredCdr{
