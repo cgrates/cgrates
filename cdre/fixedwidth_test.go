@@ -94,14 +94,14 @@ func TestWriteCdr(t *testing.T) {
 		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, exportTpl.AsCdreConfig(), "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, exportTpl.AsCdreConfig(), utils.CDRE_FIXED_WIDTH, "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)
 	}
 	eHeader := "10   VOI0000007111308420024031415390001                                                                                                         \n"
 	eContentOut := "201001        1001                1002                    0211  07111308420010          1       3dsafdsaf                             0002.34570\n"
 	eTrailer := "90   VOI0000000000100000010071113084260071113084200                                                                                             \n"
-	if err := cdre.WriteOut(wrBuf); err != nil {
+	if err := cdre.writeOut(wrBuf); err != nil {
 		t.Error(err)
 	}
 	allOut := wrBuf.String()
@@ -167,12 +167,12 @@ func TestWriteCdrs(t *testing.T) {
 		ExtraFields: map[string]string{"productnumber": "12344", "fieldextr2": "valextr2"},
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, exportTpl.AsCdreConfig(),
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, exportTpl.AsCdreConfig(), utils.CDRE_FIXED_WIDTH,
 		"fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)
 	}
-	if err := cdre.WriteOut(wrBuf); err != nil {
+	if err := cdre.writeOut(wrBuf); err != nil {
 		t.Error(err)
 	}
 	if len(wrBuf.String()) != 725 {

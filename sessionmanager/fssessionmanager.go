@@ -155,7 +155,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		engine.Logger.Err(fmt.Sprintf("Could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
+		engine.Logger.Err(fmt.Sprintf("OnPark: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR) // We unpark on original destination
 		return
 	}
@@ -211,8 +211,6 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 }
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
-	//engine.Logger.Info("<SessionManager> FreeSWITCH answer.")
-	// Make sure cgr_type is enforced even if not set by FreeSWITCH
 	if ev.MissingParameter() {
 		sm.DisconnectSession(ev.GetUUID(), MISSING_PARAMETER)
 	}
@@ -223,8 +221,8 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 		Direction: ev.GetDirection(utils.META_DEFAULT), Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		engine.Logger.Err(fmt.Sprintf("Could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR) // We unpark on original destination
+		engine.Logger.Err(fmt.Sprintf("OnAnswer: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
+		sm.DisconnectSession(ev.GetUUID(), SYSTEM_ERROR) // Disconnect the session since we are not able to process sessions
 		return
 	}
 	dcs, _ = dcs.AppendDefaultRun()
@@ -246,8 +244,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
 	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
-		engine.Logger.Err(fmt.Sprintf("Could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
-		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR) // We unpark on original destination
+		engine.Logger.Err(fmt.Sprintf("OnHangup: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
 		return
 	}
 	dcs, _ = dcs.AppendDefaultRun()

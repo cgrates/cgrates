@@ -26,6 +26,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"io"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -53,7 +54,7 @@ const (
 
 var err error
 
-func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, exportId string,
+func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, cdrFormat, exportId string,
 	dataUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
@@ -62,6 +63,7 @@ func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl 
 		cdrs:                    cdrs,
 		logDb:                   logDb,
 		exportTemplate:          exportTpl,
+		cdrFormat:               cdrFormat,
 		exportId:                exportId,
 		dataUsageMultiplyFactor: dataUsageMultiplyFactor,
 		costMultiplyFactor:      costMultiplyFactor,
@@ -83,6 +85,7 @@ type CdrExporter struct {
 	cdrs                                         []*utils.StoredCdr
 	logDb                                        engine.LogStorage // Used to extract cost_details if these are requested
 	exportTemplate                               *config.CdreConfig
+	cdrFormat                                    string // csv, fwv
 	exportId                                     string // Unique identifier or this export
 	dataUsageMultiplyFactor, costMultiplyFactor  float64
 	costShiftDigits, roundDecimals, cgrPrecision int
@@ -231,13 +234,13 @@ func (cdre *CdrExporter) composeHeader() error {
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
 		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, error: %s", err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Name, err.Error()))
 			return err
 		}
 		fmtOut := outVal
-		if cdre.exportTemplate.CdrFormat == utils.CDRE_FIXED_WIDTH {
+		if cdre.cdrFormat == utils.CDRE_FIXED_WIDTH {
 			if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<CdrExporter> Cannot export CDR header, error: %s", err.Error()))
+				engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Name, err.Error()))
 				return err
 			}
 		}
@@ -262,13 +265,13 @@ func (cdre *CdrExporter) composeTrailer() error {
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
 		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, error: %s", err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Name, err.Error()))
 			return err
 		}
 		fmtOut := outVal
-		if cdre.exportTemplate.CdrFormat == utils.CDRE_FIXED_WIDTH {
+		if cdre.cdrFormat == utils.CDRE_FIXED_WIDTH {
 			if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, error: %s", err.Error()))
+				engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Name, err.Error()))
 				return err
 			}
 		}
@@ -332,7 +335,7 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 			return err
 		}
 		fmtOut := outVal
-		if cdre.exportTemplate.CdrFormat == utils.CDRE_FIXED_WIDTH {
+		if cdre.cdrFormat == utils.CDRE_FIXED_WIDTH {
 			if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Name, outVal, err.Error()))
 				return err
@@ -389,28 +392,8 @@ func (cdre *CdrExporter) processCdrs() error {
 	return nil
 }
 
-func (cdre *CdrExporter) WriteCsv(csvWriter *csv.Writer) error {
-	if len(cdre.header) != 0 {
-		if err := csvWriter.Write(cdre.header); err != nil {
-			return err
-		}
-	}
-	for _, cdrContent := range cdre.content {
-		if err := csvWriter.Write(cdrContent); err != nil {
-			return err
-		}
-	}
-	if len(cdre.trailer) != 0 {
-		if err := csvWriter.Write(cdre.trailer); err != nil {
-			return err
-		}
-	}
-	csvWriter.Flush()
-	return nil
-}
-
-// Write fwv content
-func (cdre *CdrExporter) WriteOut(ioWriter io.Writer) error {
+// Simple write method
+func (cdre *CdrExporter) writeOut(ioWriter io.Writer) error {
 	if len(cdre.header) != 0 {
 		for _, fld := range append(cdre.header, "\n") {
 			if _, err := io.WriteString(ioWriter, fld); err != nil {
@@ -430,6 +413,50 @@ func (cdre *CdrExporter) WriteOut(ioWriter io.Writer) error {
 			if _, err := io.WriteString(ioWriter, fld); err != nil {
 				return err
 			}
+		}
+	}
+	return nil
+}
+
+// csvWriter specific method
+func (cdre *CdrExporter) writeCsv(csvWriter *csv.Writer) error {
+	if len(cdre.header) != 0 {
+		if err := csvWriter.Write(cdre.header); err != nil {
+			return err
+		}
+	}
+	for _, cdrContent := range cdre.content {
+		if err := csvWriter.Write(cdrContent); err != nil {
+			return err
+		}
+	}
+	if len(cdre.trailer) != 0 {
+		if err := csvWriter.Write(cdre.trailer); err != nil {
+			return err
+		}
+	}
+	csvWriter.Flush()
+	return nil
+}
+
+// General method to write the content out to a file
+func (cdre *CdrExporter) WriteToFile(filePath string) error {
+	fileOut, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer fileOut.Close()
+	switch cdre.cdrFormat {
+	case utils.CDRE_DRYRUN:
+		return nil
+	case utils.CDRE_FIXED_WIDTH:
+		if err := cdre.writeOut(fileOut); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+		}
+	case utils.CSV:
+		csvWriter := csv.NewWriter(fileOut)
+		if err := cdre.writeCsv(csvWriter); err != nil {
+			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 		}
 	}
 	return nil

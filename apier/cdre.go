@@ -19,13 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
-	"encoding/csv"
 	"fmt"
 	"github.com/cgrates/cgrates/cdre"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -84,7 +82,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	}
 	exportId := strconv.FormatInt(time.Now().Unix(), 10)
 	if attr.ExportId != nil {
-		exportId = exportId
+		exportId = *attr.ExportId
 	}
 	fileName := fmt.Sprintf("cdre_%s.%s", exportId, cdrFormat)
 	if attr.ExportFileName != nil {
@@ -126,26 +124,13 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	fileOut, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer fileOut.Close()
-	cdrexp, err := cdre.NewCdrExporter(cdrs, self.LogDb, exportTemplate, exportId,
+	cdrexp, err := cdre.NewCdrExporter(cdrs, self.LogDb, exportTemplate, cdrFormat, exportId,
 		dataUsageMultiplyFactor, costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify)
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	switch cdrFormat {
-	case utils.CDRE_FIXED_WIDTH:
-		if err := cdrexp.WriteOut(fileOut); err != nil {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-		}
-	case utils.CSV:
-		csvWriter := csv.NewWriter(fileOut)
-		if err := cdrexp.WriteCsv(csvWriter); err != nil {
-			return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-		}
+	if err := cdrexp.WriteToFile(filePath); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(),
 		ExportedCgrIds: cdrexp.PositiveExports(), UnexportedCgrIds: cdrexp.NegativeExports(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
