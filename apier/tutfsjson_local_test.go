@@ -169,7 +169,7 @@ func TestFsJsonLoadTariffPlans(t *testing.T) {
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 2, RatingProfiles: 2, Actions: 5, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 3, RatingProfiles: 3, Actions: 5, SharedGroups: 1, RatingAliases: 1, AccountAliases: 1, DerivedChargers: 1}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())

@@ -92,18 +92,18 @@ cgrates.org,1001,*out,PREPAID_10,STANDARD_TRIGGERS
 DUMMY,INVALID;DATA
 cgrates.org,1002;1006,*out,PACKAGE_10,STANDARD_TRIGGERS
 `
-var derivedChargesSample = `#Tenant,Tor,Direction,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
-cgrates.org,call,*out,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
-cgrates.org,,*out,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
-cgrates.org,call,*in,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
+var derivedChargesSample = `#Direction,Tenant,Tor,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
+*out,cgrates.org,call,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
+*out,cgrates.org,,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
+*in,cgrates.org,call,dan,dan,extra1,^prepaid,,,,rif,rif,,,,
 DUMMY_DATA
-cgrates.org,call,*out,dan,dan,extra2,,,,,ivo,ivo,,,,
-cgrates.org,call,*out,dan,*any,extra1,,,,,rif2,rif2,,,,
-cgrates.org,call,*out,dan,*any,*any,,,,,rif2,rif2,,,,
-cgrates.org,call,*out,dan,*any,*default,*default,*default,*default,*default,rif2,rif2,*default,*default,*default,*default
-cgrates.org,call,*out,dan,*any,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test
-cgrates.org,call,*out,dan,*any,,,,,,,,,,,
-cgrates.org,call,*out,dan,*default,,,,,,,,,,,
+*out,cgrates.org,call,dan,dan,extra2,,,,,ivo,ivo,,,,
+*out,cgrates.org,call,dan,*any,extra1,,,,,rif2,rif2,,,,
+*out,cgrates.org,call,dan,*any,*any,,,,,rif2,rif2,,,,
+*out,cgrates.org,call,dan,*any,*default,*default,*default,*default,*default,rif2,rif2,*default,*default,*default,*default
+*out,cgrates.org,call,dan,*any,test,^test,^test,^test,^test,^test,^test,^test,^test,^test,^test
+*out,cgrates.org,call,dan,*any,run1,,,,,,,,,,
+*out,cgrates.org,call,dan,*default,,,,,,,,,,,
 `
 
 func TestTimingsValidator(t *testing.T) {
@@ -382,11 +382,11 @@ func TestDerivedChargersValidator(t *testing.T) {
 		}
 		valid := lnValidator.Rule.Match(ln)
 		switch lineNr {
-		case 1, 3, 4, 5, 8, 12:
+		case 1, 3, 4, 5, 8, 9, 12:
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2, 6, 7, 9, 10, 11:
+		case 2, 6, 7, 10, 11:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
