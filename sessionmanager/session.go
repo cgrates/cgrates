@@ -37,6 +37,15 @@ type Session struct {
 	sessionRuns    []*SessionRun
 }
 
+func (s *Session) GetSessionRun(runid string) *SessionRun {
+	for _, sr := range s.sessionRuns {
+		if sr.runId == runid {
+			return sr
+		}
+	}
+	return nil
+}
+
 // One individual run
 type SessionRun struct {
 	runId          string
@@ -50,7 +59,6 @@ func NewSession(ev Event, sm SessionManager, dcs utils.DerivedChargers) *Session
 		uuid:           ev.GetUUID(),
 		stopDebit:      make(chan bool),
 		sessionManager: sm,
-		sessionRuns:    make([]*SessionRun, 0),
 	}
 	for _, dc := range dcs {
 		if ev.GetReqType(dc.ReqTypeField) != utils.PREPAID {
@@ -99,10 +107,9 @@ func (s *Session) debitLoop(runIdx int) {
 		nextCd.TimeEnd = nextCd.TimeStart.Add(debitPeriod)
 		nextCd.LoopIndex = index
 		nextCd.DurationIndex += debitPeriod // first presumed duration
-		cc := &engine.CallCost{}
+		cc := new(engine.CallCost)
 		if err := s.sessionManager.MaxDebit(&nextCd, cc); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
-			// disconnect session
 			s.sessionManager.DisconnectSession(s.uuid, SYSTEM_ERROR)
 			return
 		}

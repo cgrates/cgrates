@@ -248,14 +248,18 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		return
 	}
 	dcs, _ = dcs.AppendDefaultRun()
-	for idx, dc := range dcs {
+	for _, dc := range dcs {
 		if ev.GetReqType(dc.ReqTypeField) != utils.PREPAID {
 			continue
 		}
-		if len(s.sessionRuns[idx].callCosts) == 0 {
+		sr := s.GetSessionRun(dc.RunId)
+		if sr == nil {
+			continue // Did not save a sessionRun for this dc
+		}
+		if len(sr.callCosts) == 0 {
 			continue // why would we have 0 callcosts
 		}
-		lastCC := s.sessionRuns[idx].callCosts[len(s.sessionRuns[idx].callCosts)-1]
+		lastCC := sr.callCosts[len(sr.callCosts)-1]
 		lastCC.Timespans.Decompress()
 		// put credit back
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)

@@ -109,7 +109,6 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 }
 
 func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
-	engine.Logger.Debug(fmt.Sprintf("Rating CDR: %v", storedCdr))
 	storedCdr.MediationRunId = utils.DEFAULT_RUNID
 	cdrRuns := []*utils.StoredCdr{storedCdr}     // Start with initial storCdr, will add here all to be mediated
 	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
