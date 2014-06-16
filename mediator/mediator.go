@@ -76,7 +76,7 @@ func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*engine.Call
 		TimeEnd:       storedCdr.AnswerTime.Add(storedCdr.Usage),
 		DurationIndex: storedCdr.Usage,
 	}
-	if storedCdr.ReqType == utils.PSEUDOPREPAID {
+	if utils.IsSliceMember([]string{utils.PSEUDOPREPAID, utils.POSTPAID}, storedCdr.ReqType) {
 		err = self.connector.Debit(cd, cc)
 	} else {
 		err = self.connector.GetCost(cd, cc)
@@ -93,7 +93,7 @@ func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*engine.Call
 func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 	var qryCC *engine.CallCost
 	var errCost error
-	if storedCdr.ReqType == utils.PREPAID || storedCdr.ReqType == utils.POSTPAID {
+	if storedCdr.ReqType == utils.PREPAID {
 		// Should be previously calculated and stored in DB
 		qryCC, errCost = self.getCostsFromDB(storedCdr.CgrId, storedCdr.MediationRunId)
 	} else {

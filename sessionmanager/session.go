@@ -53,6 +53,9 @@ func NewSession(ev Event, sm SessionManager, dcs utils.DerivedChargers) *Session
 		sessionRuns:    make([]*SessionRun, 0),
 	}
 	for _, dc := range dcs {
+		if ev.GetReqType(dc.ReqTypeField) != utils.PREPAID {
+			continue // We only consider prepaid sessions
+		}
 		startTime, err := ev.GetAnswerTime(dc.AnswerTimeField)
 		if err != nil {
 			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
@@ -71,9 +74,7 @@ func NewSession(ev Event, sm SessionManager, dcs utils.DerivedChargers) *Session
 			callDescriptor: cd,
 		}
 		s.sessionRuns = append(s.sessionRuns, sr)
-		if ev.GetReqType(dc.ReqTypeField) == utils.PREPAID {
-			go s.debitLoop(len(s.sessionRuns) - 1) // Send index of the just appended sessionRun
-		}
+		go s.debitLoop(len(s.sessionRuns) - 1) // Send index of the just appended sessionRun
 	}
 	if len(s.sessionRuns) == 0 {
 		return nil
