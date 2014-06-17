@@ -313,5 +313,5 @@ func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float6
 }
 
 func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
-	return rcc.Client.Call("ApierV1.DerivedChargers", attrs, dcs)
+	return rcc.Client.Call("ApierV1.GetDerivedChargers", attrs, dcs)
 }

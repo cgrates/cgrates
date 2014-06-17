@@ -478,6 +478,30 @@ func TestMaxDebit1007(t *testing.T) {
 	}
 }
 
+func TestDerivedChargers1001(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	attrs := &utils.AttrDerivedChargers{Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001"}
+	expectedDCs := utils.DerivedChargers([]*utils.DerivedCharger{
+		&utils.DerivedCharger{RunId: "fs_json_run", ReqTypeField: "^rated", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+			AccountField: "*default", SubjectField: "^1002", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
+	})
+	var rcvRspDCs utils.DerivedChargers
+	if err := rater.Call("Responder.GetDerivedChargers", attrs, &rcvRspDCs); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(expectedDCs, rcvRspDCs) {
+		t.Errorf("Expected: %v: received: %v", expectedDCs, rcvRspDCs)
+	}
+	// Make sure that over Apier we get the same result as over Responder
+	var rcvApierDCs utils.DerivedChargers
+	if err := rater.Call("ApierV1.GetDerivedChargers", attrs, &rcvApierDCs); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(rcvRspDCs, rcvApierDCs) {
+		t.Errorf("Expected: %v: received: %v", rcvRspDCs, rcvApierDCs)
+	}
+}
+
 // Simply kill the engine after we are done with tests within this file
 func TestFsJsonStopEngine(t *testing.T) {
 	if !*testLocal {
