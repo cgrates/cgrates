@@ -372,6 +372,14 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 
 // Builds header, content and trailers
 func (cdre *CdrExporter) processCdrs() error {
+	for _, cdr := range cdre.cdrs {
+		if err := cdre.processCdr(cdr); err != nil {
+			cdre.negativeExports[cdr.CgrId] = err.Error()
+		} else {
+			cdre.positiveExports = append(cdre.positiveExports, cdr.CgrId)
+		}
+	}
+	// Process header and trailer after processing cdrs since the metatag functions can access stats out of built cdrs
 	if cdre.exportTemplate.HeaderFields != nil {
 		if err := cdre.composeHeader(); err != nil {
 			return err
@@ -380,13 +388,6 @@ func (cdre *CdrExporter) processCdrs() error {
 	if cdre.exportTemplate.TrailerFields != nil {
 		if err := cdre.composeTrailer(); err != nil {
 			return err
-		}
-	}
-	for _, cdr := range cdre.cdrs {
-		if err := cdre.processCdr(cdr); err != nil {
-			cdre.negativeExports[cdr.CgrId] = err.Error()
-		} else {
-			cdre.positiveExports = append(cdre.positiveExports, cdr.CgrId)
 		}
 	}
 	return nil
