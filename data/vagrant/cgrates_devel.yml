@@ -46,7 +46,7 @@
   user: vagrant
   vars:
     root_db_password: CGRateS.org
-    go_version: 1.2.2
+    go_version: 1.3
   
   tasks:
     - name: get golang
