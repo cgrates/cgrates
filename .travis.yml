@@ -2,6 +2,8 @@ language: go
 
 go:
   - 1.2
+  - 1.3
+  - tip
 
 script: $TRAVIS_BUILD_DIR/test.sh
 
