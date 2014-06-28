@@ -27,7 +27,7 @@ type CdrStatsConfig struct {
 	RatedCdrs         bool          // Build the stats for rated cdrs instead of raw ones
 	QueuedItems       int64         // Number of items in the stats buffer
 	TimeWindow        time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-	ProcessedStats    []string      // ASR, ACD, ACC
+	Metrics           []string      // ASR, ACD, ACC
 	SetupInterval     []time.Time   // 2 or less items (>= start interval,< stop_interval)
 	TOR               []string
 	CdrHost           []string
