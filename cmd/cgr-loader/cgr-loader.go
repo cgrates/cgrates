@@ -198,6 +198,9 @@ func main() {
 		if *verbose {
 			log.Print("Reloading cache")
 		}
+		if *flush {
+			dstIds, rplIds, rpfIds, rpAliases, lcrIds = nil, nil, nil, nil, nil // Should reload all these on flush
+		}
 		if err = rater.Call("ApierV1.ReloadCache", utils.ApiReloadCache{dstIds, rplIds, rpfIds, actIds, shgIds, rpAliases, accAliases, lcrIds, dcs}, &reply); err != nil {
 			log.Fatalf("Got error on cache reload: %s", err.Error())
 		}
