@@ -1,4 +1,4 @@
- *utilssssss/*
+/*
 Real-time Charging System for Telecom & ISP environments
 Copyright (C) 2012-2014 ITsysCOM GmbH
 

@@ -18,12 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package cdrstats
 
+import "time"
+
 type Metric interface {
 	AddCDR(*QCDR)
 	RemoveCDR(*QCDR)
+	GetValue() float64
 }
 
-func CreateMetric(metric string) *Metric {
+func CreateMetric(metric string) Metric {
 	switch metric {
 	case "ASR":
 		return &ASRMetric{}
@@ -38,23 +41,74 @@ func CreateMetric(metric string) *Metric {
 // ASR - Answer-Seizure Ratio
 // successfully answered Calls divided by the total number of Calls attempted and multiplied by 100
 type ASRMetric struct {
-	sum   float64
-	count int64
+	answered float64
+	total    float64
 }
 
-func (asr *ASRMetric) AddCdr(cdr *QCDR) {
+func (asr *ASRMetric) AddCDR(cdr *QCDR) {
+	if !cdr.AnswerTime.IsZero() {
+		asr.answered += 1
+	}
+	asr.total += 1
+}
+
+func (asr *ASRMetric) RemoveCDR(cdr *QCDR) {
+	if !cdr.AnswerTime.IsZero() {
+		asr.answered -= 1
+	}
+	asr.total -= 1
+}
+
+func (asr *ASRMetric) GetValue() float64 {
+	return asr.answered / asr.total * 100
 }
 
 // ACD – Average Call Duration
 // the sum of billable seconds (billsec) of answered calls divided by the number of these answered calls.
 type ACDMetric struct {
-	sum   float64
-	count int64
+	sum   time.Duration
+	count float64
+}
+
+func (acd *ACDMetric) AddCDR(cdr *QCDR) {
+	if !cdr.AnswerTime.IsZero() {
+		acd.sum += cdr.Usage
+		acd.count += 1
+	}
+}
+
+func (acd *ACDMetric) RemoveCDR(cdr *QCDR) {
+	if !cdr.AnswerTime.IsZero() {
+		acd.sum -= cdr.Usage
+		acd.count -= 1
+	}
+}
+
+func (acd *ACDMetric) GetValue() float64 {
+	return acd.sum.Seconds() / acd.count
 }
 
 // ACC – Average Call Cost
 // the sum of cost of answered calls divided by the number of these answered calls.
 type ACCMetric struct {
 	sum   float64
-	count int64
+	count float64
+}
+
+func (acc *ACCMetric) AddCDR(cdr *QCDR) {
+	if !cdr.AnswerTime.IsZero() && cdr.Cost >= 0 {
+		acc.sum += cdr.Cost
+		acc.count += 1
+	}
+}
+
+func (acc *ACCMetric) RemoveCDR(cdr *QCDR) {
+	if !cdr.AnswerTime.IsZero() && cdr.Cost >= 0 {
+		acc.sum -= cdr.Cost
+		acc.count -= 1
+	}
+}
+
+func (acc *ACCMetric) GetValue() float64 {
+	return acc.sum / acc.count
 }
