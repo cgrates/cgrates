@@ -12,6 +12,7 @@ go test -i github.com/cgrates/cgrates/cdrc
 go test -i github.com/cgrates/cgrates/utils
 go test -i github.com/cgrates/cgrates/history
 go test -i github.com/cgrates/cgrates/cdre
+go test -i github.com/cgrates/cgrates/cdrstats
 
 go test github.com/cgrates/cgrates/engine
 en=$?
@@ -39,6 +40,8 @@ go test github.com/cgrates/cgrates/cache2go
 c2g=$?
 go test github.com/cgrates/cgrates/cdre
 cdre=$?
+go test github.com/cgrates/cgrates/cdrstats
+stats=$?
 
 
-exit $en && $gt && $sm && $cfg && $bl && $cr && $md && $cdrs && $cdrc && $fs && $ut && $hs && $c2g && $cdre
+exit $en && $gt && $sm && $cfg && $bl && $cr && $md && $cdrs && $cdrc && $fs && $ut && $hs && $c2g && $cdre && $stats

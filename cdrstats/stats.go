@@ -104,6 +104,14 @@ func (sq *StatsQueue) PurgeObsoleteCDRs() {
 	}
 }
 
+func (sq *StatsQueue) GetStats() map[string]float64 {
+	stat := make(map[string]float64, len(sq.metrics))
+	for key, metric := range sq.metrics {
+		stat[key] = metric.GetValue()
+	}
+	return stat
+}
+
 func (sq *StatsQueue) AcceptCDR(cdr *utils.StoredCdr) bool {
 	if len(sq.conf.SetupInterval) > 0 {
 		if cdr.SetupTime.Before(sq.conf.SetupInterval[0]) {
