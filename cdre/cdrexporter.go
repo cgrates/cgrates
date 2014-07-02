@@ -442,10 +442,6 @@ func (cdre *CdrExporter) writeCsv(csvWriter *csv.Writer) error {
 
 // General method to write the content out to a file
 func (cdre *CdrExporter) WriteToFile(filePath string) error {
-	if cdre.numberOfRecords == 0 { // Not writing the file in case of no CDRs to be exported
-		engine.Logger.Err("<Cdre> Not writing file out since there are no records to export")
-		return nil
-	}
 	fileOut, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -480,6 +476,10 @@ func (cdre *CdrExporter) LastOrderId() int64 {
 // Return total cost in the exported cdrs
 func (cdre *CdrExporter) TotalCost() float64 {
 	return cdre.totalCost
+}
+
+func (cdre *CdrExporter) TotalExportedCdrs() int {
+	return cdre.numberOfRecords
 }
 
 // Return successfully exported CgrIds

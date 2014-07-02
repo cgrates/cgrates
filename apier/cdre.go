@@ -129,6 +129,10 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
+	if cdrexp.TotalExportedCdrs() == 0 {
+		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
+		return nil
+	}
 	if err := cdrexp.WriteToFile(filePath); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
