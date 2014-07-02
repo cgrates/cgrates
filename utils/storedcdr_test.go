@@ -271,6 +271,13 @@ func TestStoredCdrForkCdrFromMetaDefaults(t *testing.T) {
 	if !reflect.DeepEqual(expctCdr, cdrOut) {
 		t.Errorf("Expected: %v, received: %v", expctCdr, cdrOut)
 	}
+	// Should also accept nil as defaults
+	if cdrOut, err := storCdr.ForkCdr("wholesale_run", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		[]*RSRField{&RSRField{Id: "field_extr1"}, &RSRField{Id: "fieldextr2"}}, true); err != nil {
+		t.Fatal("Unexpected error received", err)
+	} else if !reflect.DeepEqual(expctCdr, cdrOut) {
+		t.Errorf("Expected: %v, received: %v", expctCdr, cdrOut)
+	}
 }
 
 func TestStoredCdrAsCgrCdrOut(t *testing.T) {

@@ -163,33 +163,70 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
 func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld *RSRField,
 	extraFlds []*RSRField, primaryMandatory bool) (*StoredCdr, error) {
-	// MetaDefault will automatically be converted to their standard values
+	// A more elegant solution for the future to fix
+	/*for _, fld := range []*RSRField{reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld} {
+		if fld == nil {
+			tmp, _ := NewRSRField(META_DEFAULT)
+			*fld = *tmp
+		}
+	}
+	*/
+	if reqTypeFld == nil {
+		reqTypeFld, _ = NewRSRField(META_DEFAULT)
+	}
 	if reqTypeFld.Id == META_DEFAULT {
 		reqTypeFld.Id = REQTYPE
+	}
+	if directionFld == nil {
+		directionFld, _ = NewRSRField(META_DEFAULT)
 	}
 	if directionFld.Id == META_DEFAULT {
 		directionFld.Id = DIRECTION
 	}
+	if tenantFld == nil {
+		tenantFld, _ = NewRSRField(META_DEFAULT)
+	}
 	if tenantFld.Id == META_DEFAULT {
 		tenantFld.Id = TENANT
+	}
+	if categFld == nil {
+		categFld, _ = NewRSRField(META_DEFAULT)
 	}
 	if categFld.Id == META_DEFAULT {
 		categFld.Id = CATEGORY
 	}
+	if accountFld == nil {
+		accountFld, _ = NewRSRField(META_DEFAULT)
+	}
 	if accountFld.Id == META_DEFAULT {
 		accountFld.Id = ACCOUNT
+	}
+	if subjectFld == nil {
+		subjectFld, _ = NewRSRField(META_DEFAULT)
 	}
 	if subjectFld.Id == META_DEFAULT {
 		subjectFld.Id = SUBJECT
 	}
+	if destFld == nil {
+		destFld, _ = NewRSRField(META_DEFAULT)
+	}
 	if destFld.Id == META_DEFAULT {
 		destFld.Id = DESTINATION
+	}
+	if setupTimeFld == nil {
+		setupTimeFld, _ = NewRSRField(META_DEFAULT)
 	}
 	if setupTimeFld.Id == META_DEFAULT {
 		setupTimeFld.Id = SETUP_TIME
 	}
+	if answerTimeFld == nil {
+		answerTimeFld, _ = NewRSRField(META_DEFAULT)
+	}
 	if answerTimeFld.Id == META_DEFAULT {
 		answerTimeFld.Id = ANSWER_TIME
+	}
+	if durationFld == nil {
+		durationFld, _ = NewRSRField(META_DEFAULT)
 	}
 	if durationFld.Id == META_DEFAULT {
 		durationFld.Id = USAGE
