@@ -118,7 +118,7 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 	fsTimestamp := regexp.MustCompile(`^\d{16}$`)
 	unixTimestampRule := regexp.MustCompile(`^\d{10}$`)
 	oneLineTimestampRule := regexp.MustCompile(`^\d{14}$`)
-	twoSpaceTimestampRule := regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{2}\d{2}:\d{2}:\d{2}$`)
+	oneSpaceTimestampRule := regexp.MustCompile(`^\d{2}\.\d{2}.\d{4}\s{1}\d{2}:\d{2}:\d{2}$`)
 	switch {
 	case rfc3339Rule.MatchString(tmStr):
 		return time.Parse(time.RFC3339, tmStr)
@@ -142,7 +142,7 @@ func ParseTimeDetectLayout(tmStr string) (time.Time, error) {
 		return nilTime, nil
 	case oneLineTimestampRule.MatchString(tmStr):
 		return time.Parse("20060102150405", tmStr)
-	case twoSpaceTimestampRule.MatchString(tmStr):
+	case oneSpaceTimestampRule.MatchString(tmStr):
 		return time.Parse("02.01.2006  15:04:05", tmStr)
 	}
 	return nilTime, errors.New("Unsupported time format")

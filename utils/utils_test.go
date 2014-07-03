@@ -211,8 +211,8 @@ func TestParseTimeDetectLayout(t *testing.T) {
 	} else if !olTm.Equal(expectedTime) {
 		t.Errorf("Unexpected time parsed: %v, expecting: %v", olTm, expectedTime)
 	}
-	twoSpaceTmStr := "08.04.2014  22:14:29"
-	tsTm, err := ParseTimeDetectLayout(twoSpaceTmStr)
+	oneSpaceTmStr := "08.04.2014 22:14:29"
+	tsTm, err := ParseTimeDetectLayout(oneSpaceTmStr)
 	expectedTime = time.Date(2014, 4, 8, 22, 14, 29, 0, time.UTC)
 	if err != nil {
 		t.Error(err)
