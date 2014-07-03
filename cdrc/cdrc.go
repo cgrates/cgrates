@@ -28,6 +28,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -85,16 +86,20 @@ func (self *Cdrc) Run() error {
 }
 
 // Takes the record out of csv and turns it into http form which can be posted
-func (self *Cdrc) recordForkCdr(record []string) (*utils.StoredCdr, error) {
+func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 	storedCdr := &utils.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
 	for cfgFieldName, cfgFieldRSR := range self.cdrFields {
 		var fieldVal string
 		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cdrType) {
-			if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
-				return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
-			} else {
-				fieldVal = cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+			if strings.HasPrefix(cfgFieldRSR.Id, utils.STATIC_VALUE_PREFIX) {
+				fieldVal = cfgFieldRSR.ParseValue("PLACEHOLDER")
+			} else { // Dynamic value extracted using index
+				if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
+					return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
+				} else {
+					fieldVal = cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+				}
 			}
 		} else { // Modify here when we add more supported cdr formats
 			fieldVal = "UNKNOWN"
@@ -199,7 +204,7 @@ func (self *Cdrc) processFile(filePath string) error {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue // Other csv related errors, ignore
 		}
-		storedCdr, err := self.recordForkCdr(record)
+		storedCdr, err := self.recordToStoredCdr(record)
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue

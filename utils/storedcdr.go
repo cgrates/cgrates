@@ -163,14 +163,6 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 // Used in mediation, primaryMandatory marks whether missing field out of request represents error or can be ignored
 func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld *RSRField,
 	extraFlds []*RSRField, primaryMandatory bool) (*StoredCdr, error) {
-	// A more elegant solution for the future to fix
-	/*for _, fld := range []*RSRField{reqTypeFld, directionFld, tenantFld, categFld, accountFld, subjectFld, destFld, setupTimeFld, answerTimeFld, durationFld} {
-		if fld == nil {
-			tmp, _ := NewRSRField(META_DEFAULT)
-			*fld = *tmp
-		}
-	}
-	*/
 	if reqTypeFld == nil {
 		reqTypeFld, _ = NewRSRField(META_DEFAULT)
 	}
