@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"github.com/cgrates/cgrates/utils"
 	"time"
 )
 
@@ -40,4 +41,5 @@ type Event interface {
 	GetEndTime() (time.Time, error)
 	GetDuration(string) (time.Duration, error)
 	MissingParameter() bool
+	ParseEventValue(*utils.RSRField) string
 }

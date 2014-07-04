@@ -29,15 +29,11 @@ import (
 
 // Adds support for slice values in config
 func ConfigSlice(cfgVal string) ([]string, error) {
-	cfgValStrs := strings.Split(cfgVal, ",")         // If need arrises, we can make the separator configurable
-	if len(cfgValStrs) == 1 && cfgValStrs[0] == "" { // Prevents returning iterable with empty value
-		return []string{}, nil
-	}
+	cfgValStrs := strings.Split(cfgVal, ",") // If need arrises, we can make the separator configurable
 	for idx, elm := range cfgValStrs {
-		if elm == "" { //One empty element is presented when splitting empty string
-			return nil, errors.New("Empty values in config slice")
-
-		}
+		//if elm == "" { //One empty element is presented when splitting empty string
+		//	return nil, errors.New("Empty values in config slice")
+		//}
 		cfgValStrs[idx] = strings.TrimSpace(elm) // By default spaces are not removed so we do it here to avoid unpredicted results in config
 	}
 	return cfgValStrs, nil
@@ -50,10 +46,6 @@ func ParseRSRFields(configVal string) ([]*utils.RSRField, error) {
 	}
 	rsrFields := make([]*utils.RSRField, len(cfgValStrs))
 	for idx, cfgValStr := range cfgValStrs {
-		if len(cfgValStr) == 0 { //One empty element is presented when splitting empty string
-			return nil, errors.New("Empty values in config slice")
-
-		}
 		if rsrField, err := utils.NewRSRField(cfgValStr); err != nil {
 			return nil, err
 		} else {
@@ -65,9 +57,13 @@ func ParseRSRFields(configVal string) ([]*utils.RSRField, error) {
 
 // Parse the configuration file and returns utils.DerivedChargers instance if no errors
 func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err error) {
-	var runIds, reqTypeFlds, directionFlds, tenantFlds, torFlds, acntFlds, subjFlds, dstFlds, sTimeFlds, aTimeFlds, durFlds []string
+	var runIds, runFilters, reqTypeFlds, directionFlds, tenantFlds, torFlds, acntFlds, subjFlds, dstFlds, sTimeFlds, aTimeFlds, durFlds []string
 	cfgVal, _ := c.GetString("derived_charging", "run_ids")
 	if runIds, err = ConfigSlice(cfgVal); err != nil {
+		return nil, err
+	}
+	cfgVal, _ = c.GetString("derived_charging", "run_filters")
+	if runFilters, err = ConfigSlice(cfgVal); err != nil {
 		return nil, err
 	}
 	cfgVal, _ = c.GetString("derived_charging", "reqtype_fields")
@@ -111,7 +107,8 @@ func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err
 		return nil, err
 	}
 	// We need all to be the same length
-	if len(reqTypeFlds) != len(runIds) ||
+	if len(runFilters) != len(runIds) ||
+		len(reqTypeFlds) != len(runIds) ||
 		len(directionFlds) != len(runIds) ||
 		len(tenantFlds) != len(runIds) ||
 		len(torFlds) != len(runIds) ||
@@ -125,8 +122,11 @@ func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err
 	}
 	// Create the individual chargers and append them to the final instance
 	dcs = make(utils.DerivedChargers, 0)
+	if len(runIds) == 1 && len(runIds[0]) == 0 { // Avoid iterating on empty runid
+		return dcs, nil
+	}
 	for runIdx, runId := range runIds {
-		dc, err := utils.NewDerivedCharger(runId, reqTypeFlds[runIdx], directionFlds[runIdx], tenantFlds[runIdx], torFlds[runIdx],
+		dc, err := utils.NewDerivedCharger(runId, runFilters[runIdx], reqTypeFlds[runIdx], directionFlds[runIdx], tenantFlds[runIdx], torFlds[runIdx],
 			acntFlds[runIdx], subjFlds[runIdx], dstFlds[runIdx], sTimeFlds[runIdx], aTimeFlds[runIdx], durFlds[runIdx])
 		if err != nil {
 			return nil, err

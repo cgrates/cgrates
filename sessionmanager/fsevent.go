@@ -20,6 +20,7 @@ package sessionmanager
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -202,4 +203,49 @@ func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error)
 		durStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
 	return utils.ParseDurationWithSecs(durStr)
+}
+
+// Used in derived charging and sittuations when we need to run regexp on fields
+func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField) string {
+	switch rsrFld.Id {
+	case utils.CGRID:
+		return rsrFld.ParseValue(fsev.GetCgrId())
+	case utils.TOR:
+		return rsrFld.ParseValue(utils.VOICE)
+	case utils.ACCID:
+		return rsrFld.ParseValue(fsev.GetUUID())
+	case utils.CDRHOST:
+		return rsrFld.ParseValue(fsev["FreeSWITCH-IPv4"])
+	case utils.CDRSOURCE:
+		return rsrFld.ParseValue("FS_EVENT")
+	case utils.REQTYPE:
+		return rsrFld.ParseValue(fsev.GetReqType(""))
+	case utils.DIRECTION:
+		return rsrFld.ParseValue(fsev.GetDirection(""))
+	case utils.TENANT:
+		return rsrFld.ParseValue(fsev.GetTenant(""))
+	case utils.CATEGORY:
+		return rsrFld.ParseValue(fsev.GetCategory(""))
+	case utils.ACCOUNT:
+		return rsrFld.ParseValue(fsev.GetAccount(""))
+	case utils.SUBJECT:
+		return rsrFld.ParseValue(fsev.GetSubject(""))
+	case utils.DESTINATION:
+		return rsrFld.ParseValue(fsev.GetDestination(""))
+	case utils.SETUP_TIME:
+		st, _ := fsev.GetSetupTime("")
+		return rsrFld.ParseValue(st.String())
+	case utils.ANSWER_TIME:
+		at, _ := fsev.GetAnswerTime("")
+		return rsrFld.ParseValue(at.String())
+	case utils.USAGE:
+		dur, _ := fsev.GetDuration("")
+		return rsrFld.ParseValue(strconv.FormatInt(dur.Nanoseconds(), 10))
+	case utils.MEDI_RUNID:
+		return rsrFld.ParseValue(utils.DEFAULT_RUNID)
+	case utils.COST:
+		return rsrFld.ParseValue(strconv.FormatFloat(-1, 'f', -1, 64)) // Recommended to use FormatCost
+	default:
+		return rsrFld.ParseValue(fsev[rsrFld.Id])
+	}
 }

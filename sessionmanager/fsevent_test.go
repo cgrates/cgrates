@@ -26,138 +26,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestEventCreation(t *testing.T) {
-	body := `Event-Name: RE_SCHEDULE
-Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
-FreeSWITCH-Hostname: h1.ip-switch.net
-FreeSWITCH-Switchname: h1.ip-switch.net
-FreeSWITCH-IPv4: 88.198.12.156
-FreeSWITCH-IPv6: %3A%3A1
-Event-Date-Local: 2012-10-05%2013%3A41%3A38
-Event-Date-GMT: Fri,%2005%20Oct%202012%2011%3A41%3A38%20GMT
-Event-Date-Timestamp: 1349437298012866
-Event-Calling-File: switch_scheduler.c
-Event-Calling-Function: switch_scheduler_execute
-Event-Calling-Line-Number: 65
-Event-Sequence: 34263
-Task-ID: 2
-Task-Desc: heartbeat
-Task-Group: core
-Task-Runtime: 1349437318`
-	ev := new(FSEvent).New(body)
-	if ev.GetName() != "RE_SCHEDULE" {
-		t.Error("Event not parsed correctly: ", ev)
-	}
-	l := len(ev.(FSEvent))
-	if l != 17 {
-		t.Error("Incorrect number of event fields: ", l)
-	}
-}
-
-// Detects if any of the parsers do not return static values
-func TestEventParseStatic(t *testing.T) {
-	ev := new(FSEvent).New("")
-	setupTime, _ := ev.GetSetupTime("^2013-12-07 08:42:24")
-	answerTime, _ := ev.GetAnswerTime("^2013-12-07 08:42:24")
-	dur, _ := ev.GetDuration("^60s")
-	if ev.GetReqType("^test") != "test" ||
-		ev.GetDirection("^test") != "test" ||
-		ev.GetTenant("^test") != "test" ||
-		ev.GetCategory("^test") != "test" ||
-		ev.GetAccount("^test") != "test" ||
-		ev.GetSubject("^test") != "test" ||
-		ev.GetDestination("^test") != "test" ||
-		setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
-		answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
-		dur != time.Duration(60)*time.Second {
-		t.Error("Values out of static not matching",
-			ev.GetReqType("^test") != "test",
-			ev.GetDirection("^test") != "test",
-			ev.GetTenant("^test") != "test",
-			ev.GetCategory("^test") != "test",
-			ev.GetAccount("^test") != "test",
-			ev.GetSubject("^test") != "test",
-			ev.GetDestination("^test") != "test",
-			setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
-			answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
-			dur != time.Duration(60)*time.Second)
-	}
-}
-
-// Test here if the answer is selected out of headers we specify, even if not default defined
-func TestEventSelectiveHeaders(t *testing.T) {
-	body := `Event-Name: RE_SCHEDULE
-Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
-FreeSWITCH-Hostname: h1.ip-switch.net
-FreeSWITCH-Switchname: h1.ip-switch.net
-FreeSWITCH-IPv4: 88.198.12.156
-FreeSWITCH-IPv6: %3A%3A1
-Event-Date-Local: 2012-10-05%2013%3A41%3A38
-Event-Date-GMT: Fri,%2005%20Oct%202012%2011%3A41%3A38%20GMT
-Event-Date-Timestamp: 1349437298012866
-Event-Calling-File: switch_scheduler.c
-Event-Calling-Function: switch_scheduler_execute
-Event-Calling-Line-Number: 65
-Event-Sequence: 34263
-Task-ID: 2
-Task-Desc: heartbeat
-Task-Group: core
-Task-Runtime: 1349437318`
-	cfg, _ = config.NewDefaultCGRConfig()
-	config.SetCgrConfig(cfg)
-	ev := new(FSEvent).New(body)
-	setupTime, _ := ev.GetSetupTime("Event-Date-Local")
-	answerTime, _ := ev.GetAnswerTime("Event-Date-Local")
-	dur, _ := ev.GetDuration("Event-Calling-Line-Number")
-	if ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		ev.GetDirection("FreeSWITCH-Hostname") != "*out" ||
-		ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		ev.GetCategory("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		ev.GetAccount("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		ev.GetSubject("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
-		setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
-		answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
-		dur != time.Duration(65)*time.Second {
-		t.Error("Values out of static not matching",
-			ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			ev.GetDirection("FreeSWITCH-Hostname") != "*out",
-			ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			ev.GetCategory("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			ev.GetAccount("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			ev.GetSubject("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net",
-			setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
-			answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
-			dur != time.Duration(65)*time.Second)
-	}
-}
-
-func TestDDazEmptyTime(t *testing.T) {
-	body := `Event-Name: RE_SCHEDULE
-Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
-FreeSWITCH-Hostname: h1.ip-switch.net
-FreeSWITCH-Switchname: h1.ip-switch.net
-FreeSWITCH-IPv4: 88.198.12.156
-Caller-Channel-Created-Time: 0
-Caller-Channel-Answered-Time
-Task-Runtime: 1349437318`
-	var nilTime time.Time
-	ev := new(FSEvent).New(body)
-	if setupTime, err := ev.GetSetupTime(""); err != nil {
-		t.Error("Error when parsing empty setupTime")
-	} else if setupTime != nilTime {
-		t.Error("Expecting nil time, got: ", setupTime)
-	}
-	if answerTime, err := ev.GetAnswerTime(""); err != nil {
-		t.Error("Error when parsing empty setupTime")
-	} else if answerTime != nilTime {
-		t.Error("Expecting nil time, got: ", answerTime)
-	}
-}
-
-func TestParseFsHangup(t *testing.T) {
-	hangupEv := `Event-Name: CHANNEL_HANGUP_COMPLETE
+var hangupEv string = `Event-Name: CHANNEL_HANGUP_COMPLETE
 Core-UUID: bb890f9e-0aae-476d-8292-91b434eb4f73
 FreeSWITCH-Hostname: iPBXDev
 FreeSWITCH-Switchname: iPBXDev
@@ -469,6 +338,138 @@ variable_rtp_audio_out_cng_packet_count: 0
 variable_rtp_audio_rtcp_packet_count: 0
 variable_rtp_audio_rtcp_octet_count: 0
 `
+
+func TestEventCreation(t *testing.T) {
+	body := `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+FreeSWITCH-IPv6: %3A%3A1
+Event-Date-Local: 2012-10-05%2013%3A41%3A38
+Event-Date-GMT: Fri,%2005%20Oct%202012%2011%3A41%3A38%20GMT
+Event-Date-Timestamp: 1349437298012866
+Event-Calling-File: switch_scheduler.c
+Event-Calling-Function: switch_scheduler_execute
+Event-Calling-Line-Number: 65
+Event-Sequence: 34263
+Task-ID: 2
+Task-Desc: heartbeat
+Task-Group: core
+Task-Runtime: 1349437318`
+	ev := new(FSEvent).New(body)
+	if ev.GetName() != "RE_SCHEDULE" {
+		t.Error("Event not parsed correctly: ", ev)
+	}
+	l := len(ev.(FSEvent))
+	if l != 17 {
+		t.Error("Incorrect number of event fields: ", l)
+	}
+}
+
+// Detects if any of the parsers do not return static values
+func TestEventParseStatic(t *testing.T) {
+	ev := new(FSEvent).New("")
+	setupTime, _ := ev.GetSetupTime("^2013-12-07 08:42:24")
+	answerTime, _ := ev.GetAnswerTime("^2013-12-07 08:42:24")
+	dur, _ := ev.GetDuration("^60s")
+	if ev.GetReqType("^test") != "test" ||
+		ev.GetDirection("^test") != "test" ||
+		ev.GetTenant("^test") != "test" ||
+		ev.GetCategory("^test") != "test" ||
+		ev.GetAccount("^test") != "test" ||
+		ev.GetSubject("^test") != "test" ||
+		ev.GetDestination("^test") != "test" ||
+		setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
+		answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC) ||
+		dur != time.Duration(60)*time.Second {
+		t.Error("Values out of static not matching",
+			ev.GetReqType("^test") != "test",
+			ev.GetDirection("^test") != "test",
+			ev.GetTenant("^test") != "test",
+			ev.GetCategory("^test") != "test",
+			ev.GetAccount("^test") != "test",
+			ev.GetSubject("^test") != "test",
+			ev.GetDestination("^test") != "test",
+			setupTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
+			answerTime != time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC),
+			dur != time.Duration(60)*time.Second)
+	}
+}
+
+// Test here if the answer is selected out of headers we specify, even if not default defined
+func TestEventSelectiveHeaders(t *testing.T) {
+	body := `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+FreeSWITCH-IPv6: %3A%3A1
+Event-Date-Local: 2012-10-05%2013%3A41%3A38
+Event-Date-GMT: Fri,%2005%20Oct%202012%2011%3A41%3A38%20GMT
+Event-Date-Timestamp: 1349437298012866
+Event-Calling-File: switch_scheduler.c
+Event-Calling-Function: switch_scheduler_execute
+Event-Calling-Line-Number: 65
+Event-Sequence: 34263
+Task-ID: 2
+Task-Desc: heartbeat
+Task-Group: core
+Task-Runtime: 1349437318`
+	cfg, _ = config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+	ev := new(FSEvent).New(body)
+	setupTime, _ := ev.GetSetupTime("Event-Date-Local")
+	answerTime, _ := ev.GetAnswerTime("Event-Date-Local")
+	dur, _ := ev.GetDuration("Event-Calling-Line-Number")
+	if ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
+		ev.GetDirection("FreeSWITCH-Hostname") != "*out" ||
+		ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
+		ev.GetCategory("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
+		ev.GetAccount("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
+		ev.GetSubject("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
+		ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net" ||
+		setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
+		answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC) ||
+		dur != time.Duration(65)*time.Second {
+		t.Error("Values out of static not matching",
+			ev.GetReqType("FreeSWITCH-Hostname") != "h1.ip-switch.net",
+			ev.GetDirection("FreeSWITCH-Hostname") != "*out",
+			ev.GetTenant("FreeSWITCH-Hostname") != "h1.ip-switch.net",
+			ev.GetCategory("FreeSWITCH-Hostname") != "h1.ip-switch.net",
+			ev.GetAccount("FreeSWITCH-Hostname") != "h1.ip-switch.net",
+			ev.GetSubject("FreeSWITCH-Hostname") != "h1.ip-switch.net",
+			ev.GetDestination("FreeSWITCH-Hostname") != "h1.ip-switch.net",
+			setupTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
+			answerTime != time.Date(2012, 10, 5, 13, 41, 38, 0, time.UTC),
+			dur != time.Duration(65)*time.Second)
+	}
+}
+
+func TestDDazEmptyTime(t *testing.T) {
+	body := `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+Caller-Channel-Created-Time: 0
+Caller-Channel-Answered-Time
+Task-Runtime: 1349437318`
+	var nilTime time.Time
+	ev := new(FSEvent).New(body)
+	if setupTime, err := ev.GetSetupTime(""); err != nil {
+		t.Error("Error when parsing empty setupTime")
+	} else if setupTime != nilTime {
+		t.Error("Expecting nil time, got: ", setupTime)
+	}
+	if answerTime, err := ev.GetAnswerTime(""); err != nil {
+		t.Error("Error when parsing empty setupTime")
+	} else if answerTime != nilTime {
+		t.Error("Expecting nil time, got: ", answerTime)
+	}
+}
+
+func TestParseFsHangup(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).New(hangupEv)
@@ -496,5 +497,65 @@ variable_rtp_audio_rtcp_octet_count: 0
 			setupTime.UTC() != time.Date(2014, 4, 25, 17, 8, 27, 0, time.UTC),
 			answerTime.UTC() != time.Date(2014, 4, 25, 17, 8, 40, 0, time.UTC),
 			dur != time.Duration(5)*time.Second)
+	}
+}
+
+func TestParseEventValue(t *testing.T) {
+	cfg, _ = config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+	ev := new(FSEvent).New(hangupEv)
+	if cgrid := ev.ParseEventValue(&utils.RSRField{Id: utils.CGRID}); cgrid != "8b1ca78a9bbaa42c811e60b974188197c425dbe7" {
+		t.Error("Unexpected cgrid parsed", cgrid)
+	}
+	if tor := ev.ParseEventValue(&utils.RSRField{Id: utils.TOR}); tor != utils.VOICE {
+		t.Error("Unexpected tor parsed", tor)
+	}
+	if accid := ev.ParseEventValue(&utils.RSRField{Id: utils.ACCID}); accid != "37e9b766-5256-4e4b-b1ed-3767b930fec8" {
+		t.Error("Unexpected result parsed", accid)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CDRHOST}); parsed != "10.0.2.15" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CDRSOURCE}); parsed != "FS_EVENT" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.REQTYPE}); parsed != utils.PSEUDOPREPAID {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DIRECTION}); parsed != utils.OUT {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.TENANT}); parsed != "cgrates.org" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.CATEGORY}); parsed != "call" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ACCOUNT}); parsed != "1003" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SUBJECT}); parsed != "1003" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DESTINATION}); parsed != "1002" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SETUP_TIME}); parsed != "2014-04-25 18:08:27 +0200 CEST" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ANSWER_TIME}); parsed != "2014-04-25 18:08:40 +0200 CEST" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.USAGE}); parsed != "5000000000" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.MEDI_RUNID}); parsed != utils.DEFAULT_RUNID {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.COST}); parsed != "-1" {
+		t.Error("Unexpected result parsed", parsed)
+	}
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: "Hangup-Cause"}); parsed != "NORMAL_CLEARING" {
+		t.Error("Unexpected result parsed", parsed)
 	}
 }

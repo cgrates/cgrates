@@ -100,6 +100,7 @@ reconnects = 99				# Number of attempts on connect failure.
 
 [derived_charging]
 run_ids = test 				# Identifiers of additional sessions control.
+run_filters = 				# No filters applied
 reqtype_fields = test		# Name of request type fields to be used during additional sessions control <""|*default|field_name>.
 direction_fields = test		# Name of direction fields to be used during additional sessions control <""|*default|field_name>.
 tenant_fields = test		# Name of tenant fields to be used during additional sessions control <""|*default|field_name>.
