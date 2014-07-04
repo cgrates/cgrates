@@ -250,7 +250,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
-	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
+	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", RunFilter: "", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
 	eCfg.CombinedDerivedChargers = true
 	eCfg.HistoryAgentEnabled = true
@@ -264,7 +264,13 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.MailerFromAddr = "test"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
+		for _, eDC := range eCfg.DerivedChargers {
+			fmt.Printf("ExpectDerivedChargers: %+v\n", eDC)
+		}
 		t.Log(cfg)
+		for _, eDC := range cfg.DerivedChargers {
+			fmt.Printf("DerivedChargers: %+v\n", eDC)
+		}
 		t.Error("Loading of configuration from file failed!")
 	}
 }
@@ -286,12 +292,6 @@ extra_fields = ~effective_caller_id_number:s/(\d+)/+$1/
 	} else if !reflect.DeepEqual(cfg.CDRSExtraFields, []*utils.RSRField{&utils.RSRField{Id: "effective_caller_id_number",
 		RSRules: []*utils.ReSearchReplace{&utils.ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}}) {
 		t.Errorf("Unexpected value for config CdrsExtraFields: %v", cfg.CDRSExtraFields)
-	}
-	eFieldsCfg = []byte(`[cdrs]
-extra_fields = extr1,extr2,
-`)
-	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
-		t.Error("Failed to detect empty field in the end of extra fields defition")
 	}
 	eFieldsCfg = []byte(`[cdrs]
 extra_fields = extr1,~extr2:s/x.+/

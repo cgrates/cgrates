@@ -26,6 +26,15 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestConfigSlice(t *testing.T) {
+	eCS := []string{"", ""}
+	if cs, err := ConfigSlice(" , "); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else if !reflect.DeepEqual(eCS, cs) {
+		t.Errorf("Expecting: %v, received: %v", eCS, cs)
+	}
+}
+
 func TestParseRSRFields(t *testing.T) {
 	fields := `host,~sip_redirected_to:s/sip:\+49(\d+)@/0$1/,destination`
 	expectParsedFields := []*utils.RSRField{&utils.RSRField{Id: "host"},
@@ -41,6 +50,7 @@ func TestParseRSRFields(t *testing.T) {
 func TestParseCfgDerivedCharging(t *testing.T) {
 	eFieldsCfg := []byte(`[derived_charging]
 run_ids = run1, run2
+run_filters =,
 reqtype_fields = test1, test2 
 direction_fields = test1, test2
 tenant_fields = test1, test2
