@@ -163,7 +163,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	for _, dc := range dcs {
 		dcRunFilter, _ := utils.NewRSRField(dc.RunFilter)
 		if dcRunFilter != nil && ev.ParseEventValue(&utils.RSRField{Id: dcRunFilter.Id}) != ev.ParseEventValue(dcRunFilter) {
-			engine.Logger.Info(fmt.Sprintf("Ignoring DerivedCharger with id %s due to non matching filter", dc.RunId))
+			engine.Logger.Info(fmt.Sprintf("<SessionManager> Ignoring DerivedCharger with id %s - non matching filter", dc.RunId))
 		}
 		startTime, err := ev.GetAnswerTime(PARK_TIME)
 		if err != nil {
