@@ -1,4 +1,5 @@
-#Direction,Tenant,Tor,Account,Subject,RunId,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
-*out,cgrates.org,call,dan,dan,extra1,^prepaid,,,,^rif,^rif,,,,^1s
-*out,cgrates.org,call,dan,dan,extra2,,,,,^ivo,^ivo,,,,
-*out,cgrates.org,call,dan,*any,extra1,,,,,^rif2,^rif2,,,,
+#Direction,Tenant,Tor,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,DurationField
+*out,cgrates.org,call,dan,dan,extra1,,^prepaid,,,,^rif,^rif,,,,^1s
+*out,cgrates.org,call,dan,dan,extra2,,,,,,^ivo,^ivo,,,,
+*out,cgrates.org,call,dan,dan,extra3,~filterhdr1:s/(.+)/special_run3/,,,,,^runusr3,^runusr3,,,,
+*out,cgrates.org,call,dan,*any,extra1,,,,,,^rif2,^rif2,,,,

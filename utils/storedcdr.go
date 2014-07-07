@@ -133,6 +133,17 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 	}
 }
 
+func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *RSRField) bool {
+	if fieldFilter == nil {
+		return true
+	}
+	if storedCdr.FieldAsString(&RSRField{Id: fieldFilter.Id}) == storedCdr.FieldAsString(fieldFilter) && len(storedCdr.FieldAsString(fieldFilter)) != 0 {
+		// Field value must be non empty in order to declare it filtered, otherwise filter makes no sense
+		return true
+	}
+	return false
+}
+
 func (storedCdr *StoredCdr) AsStoredCdr() *StoredCdr {
 	return storedCdr
 }

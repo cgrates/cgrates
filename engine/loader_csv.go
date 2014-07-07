@@ -842,16 +842,17 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 		if found {
 			if csvr.derivedChargers[tag], err = csvr.derivedChargers[tag].Append(&utils.DerivedCharger{
 				RunId:            ValueOrDefault(record[5], "*default"),
-				ReqTypeField:     ValueOrDefault(record[6], "*default"),
-				DirectionField:   ValueOrDefault(record[7], "*default"),
-				TenantField:      ValueOrDefault(record[8], "*default"),
-				CategoryField:    ValueOrDefault(record[9], "*default"),
-				AccountField:     ValueOrDefault(record[10], "*default"),
-				SubjectField:     ValueOrDefault(record[11], "*default"),
-				DestinationField: ValueOrDefault(record[12], "*default"),
-				SetupTimeField:   ValueOrDefault(record[13], "*default"),
-				AnswerTimeField:  ValueOrDefault(record[14], "*default"),
-				UsageField:       ValueOrDefault(record[15], "*default"),
+				RunFilter:        record[6],
+				ReqTypeField:     ValueOrDefault(record[7], "*default"),
+				DirectionField:   ValueOrDefault(record[8], "*default"),
+				TenantField:      ValueOrDefault(record[9], "*default"),
+				CategoryField:    ValueOrDefault(record[10], "*default"),
+				AccountField:     ValueOrDefault(record[11], "*default"),
+				SubjectField:     ValueOrDefault(record[12], "*default"),
+				DestinationField: ValueOrDefault(record[13], "*default"),
+				SetupTimeField:   ValueOrDefault(record[14], "*default"),
+				AnswerTimeField:  ValueOrDefault(record[15], "*default"),
+				UsageField:       ValueOrDefault(record[16], "*default"),
 			}); err != nil {
 				return err
 			}
@@ -861,16 +862,17 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 			}
 			csvr.derivedChargers[tag] = utils.DerivedChargers{&utils.DerivedCharger{
 				RunId:            ValueOrDefault(record[5], "*default"),
-				ReqTypeField:     ValueOrDefault(record[6], "*default"),
-				DirectionField:   ValueOrDefault(record[7], "*default"),
-				TenantField:      ValueOrDefault(record[8], "*default"),
-				CategoryField:    ValueOrDefault(record[9], "*default"),
-				AccountField:     ValueOrDefault(record[10], "*default"),
-				SubjectField:     ValueOrDefault(record[11], "*default"),
-				DestinationField: ValueOrDefault(record[12], "*default"),
-				SetupTimeField:   ValueOrDefault(record[13], "*default"),
-				AnswerTimeField:  ValueOrDefault(record[14], "*default"),
-				UsageField:       ValueOrDefault(record[15], "*default"),
+				RunFilter:        record[6],
+				ReqTypeField:     ValueOrDefault(record[7], "*default"),
+				DirectionField:   ValueOrDefault(record[8], "*default"),
+				TenantField:      ValueOrDefault(record[9], "*default"),
+				CategoryField:    ValueOrDefault(record[10], "*default"),
+				AccountField:     ValueOrDefault(record[11], "*default"),
+				SubjectField:     ValueOrDefault(record[12], "*default"),
+				DestinationField: ValueOrDefault(record[13], "*default"),
+				SetupTimeField:   ValueOrDefault(record[14], "*default"),
+				AnswerTimeField:  ValueOrDefault(record[15], "*default"),
+				UsageField:       ValueOrDefault(record[16], "*default"),
 			}}
 		}
 	}
