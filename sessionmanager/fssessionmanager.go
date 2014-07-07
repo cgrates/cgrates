@@ -161,8 +161,8 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	for _, dc := range dcs {
-		dcRunFilter, _ := utils.NewRSRField(dc.RunFilter)
-		/*if dcRunFilter != nil && ev.ParseEventValue(&utils.RSRField{Id: dcRunFilter.Id}) != ev.ParseEventValue(dcRunFilter) { //ToDo: Fix here filter
+		/*dcRunFilter, _ := utils.NewRSRField(dc.RunFilter)
+		if dcRunFilter != nil && ev.ParseEventValue(&utils.RSRField{Id: dcRunFilter.Id}) != ev.ParseEventValue(dcRunFilter) { //ToDo: Fix here filter
 			//engine.Logger.Info(fmt.Sprintf("<SessionManager> Ignoring DerivedCharger with id %s - non matching filter", dc.RunId))
 			continue
 		}*/
