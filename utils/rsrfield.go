@@ -46,7 +46,7 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 		return nil, fmt.Errorf("Invalid Search&Replace field rule. %s", fldStr)
 	}
 	rsrField := &RSRField{Id: spltRules[0][1:]} // Original id in form ~hdr_name
-	rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.+[^\\])\/){1,}`)
+	rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.+[^\\])*\/){1,}`)
 	for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
 		allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
 		if len(allMatches) != 3 {

@@ -79,7 +79,7 @@ func TestFieldAsString(t *testing.T) {
 }
 
 func TestPassesFieldFilter(t *testing.T) {
-	cdr := StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: VOICE, AccId: "dsafdsaf",
+	cdr := &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), OrderId: 123, TOR: VOICE, AccId: "dsafdsaf",
 		CdrHost: "192.168.1.1", CdrSource: "test", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
@@ -119,6 +119,35 @@ func TestPassesFieldFilter(t *testing.T) {
 	inexistentFieldFltr, _ := NewRSRField(`^fakefield/fakevalue`)
 	if cdr.PassesFieldFilter(inexistentFieldFltr) {
 		t.Error("Passing filter")
+	}
+}
+
+func TestPassesFieldFilterDn1(t *testing.T) {
+	cdr := &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem0005",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+	acntPrefxFltr, _ := NewRSRField(`~account:s/^\w+[s,h,m,p]\d{4}$//`)
+	if !cdr.PassesFieldFilter(acntPrefxFltr) {
+		t.Error("Not passing valid filter")
+	}
+	cdr = &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem00005",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+	if cdr.PassesFieldFilter(acntPrefxFltr) {
+		t.Error("Should not pass filter")
+	}
+	cdr = &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0402129281",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+	acntPrefxFltr, _ = NewRSRField(`~account:s/^0\d{9}$//`)
+	if !cdr.PassesFieldFilter(acntPrefxFltr) {
+		t.Error("Not passing valid filter")
+	}
+	cdr = &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "04021292812",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+	if cdr.PassesFieldFilter(acntPrefxFltr) {
+		t.Error("Should not pass filter")
 	}
 }
 

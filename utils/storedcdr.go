@@ -145,6 +145,8 @@ func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *RSRField) bool {
 		// Hardcode the template with maximum of 5 groups ordered
 		preparedFilter.RSRules[idx] = &ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: "$1$2$3$4$5"}
 	}
+	fmt.Printf("For filterId: %s, preparedFilter match result: %s, filter match result: %s\n",
+		fieldFilter.Id, storedCdr.FieldAsString(preparedFilter), storedCdr.FieldAsString(fieldFilter))
 	if storedCdr.FieldAsString(preparedFilter) == storedCdr.FieldAsString(fieldFilter) && preparedFilter.RegexpMatched() {
 		return true
 	}
