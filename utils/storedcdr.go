@@ -137,8 +137,15 @@ func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *RSRField) bool {
 	if fieldFilter == nil {
 		return true
 	}
-	if storedCdr.FieldAsString(&RSRField{Id: fieldFilter.Id}) == storedCdr.FieldAsString(fieldFilter) && len(storedCdr.FieldAsString(fieldFilter)) != 0 {
-		// Field value must be non empty in order to declare it filtered, otherwise filter makes no sense
+	if fieldFilter.IsStatic() && storedCdr.FieldAsString(&RSRField{Id: fieldFilter.Id}) == storedCdr.FieldAsString(fieldFilter) {
+		return true
+	}
+	preparedFilter := &RSRField{Id: fieldFilter.Id, RSRules: make([]*ReSearchReplace, len(fieldFilter.RSRules))} // Reset rules so they do not point towards same structures as original fieldFilter
+	for idx := range fieldFilter.RSRules {
+		// Hardcode the template with maximum of 5 groups ordered
+		preparedFilter.RSRules[idx] = &ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: "$1$2$3$4$5"}
+	}
+	if storedCdr.FieldAsString(preparedFilter) == storedCdr.FieldAsString(fieldFilter) && preparedFilter.RegexpMatched() {
 		return true
 	}
 	return false

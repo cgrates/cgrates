@@ -196,7 +196,9 @@ func (self *Cdrc) processFile(filePath string) error {
 	}
 	csvReader := csv.NewReader(bufio.NewReader(file))
 	csvReader.Comma = self.csvSep
+	procRowNr := 0
 	for {
+		procRowNr += 1
 		record, err := csvReader.Read()
 		if err != nil && err == io.EOF {
 			break // End of file
@@ -211,12 +213,12 @@ func (self *Cdrc) processFile(filePath string) error {
 		}
 		if self.cdrsAddress == utils.INTERNAL {
 			if err := self.cdrServer.ProcessRawCdr(storedCdr); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
 				continue
 			}
 		} else { // CDRs listening on IP
 			if _, err := self.httpClient.PostForm(fmt.Sprintf("http://%s/cgr", self.cdrsAddress), storedCdr.AsHttpForm()); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, error: %s", err.Error()))
+				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
 				continue
 			}
 		}

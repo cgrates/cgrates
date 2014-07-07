@@ -26,7 +26,8 @@ import (
 
 func TestNewRSRField1(t *testing.T) {
 	// Normal case
-	expRSRField1 := &RSRField{Id: "sip_redirected_to", RSRules: []*ReSearchReplace{&ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)@`), "0$1"}}}
+	expRSRField1 := &RSRField{Id: "sip_redirected_to",
+		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}}
 	if rsrField, err := NewRSRField(`~sip_redirected_to:s/sip:\+49(\d+)@/0$1/`); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField1, rsrField) {
@@ -37,7 +38,8 @@ func TestNewRSRField1(t *testing.T) {
 		t.Error("Parse error, field rule does not contain correct number of separators, received: %v", rsrField)
 	}
 	// One extra separator but escaped
-	expRSRField3 := &RSRField{Id: "sip_redirected_to", RSRules: []*ReSearchReplace{&ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)\/@`), "0$1"}}}
+	expRSRField3 := &RSRField{Id: "sip_redirected_to",
+		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)\/@`), ReplaceTemplate: "0$1"}}}
 	if rsrField, err := NewRSRField(`~sip_redirected_to:s/sip:\+49(\d+)\/@/0$1/`); err != nil {
 		t.Error("Unexpected error: ", err.Error())
 	} else if !reflect.DeepEqual(expRSRField3, rsrField) {
@@ -46,7 +48,8 @@ func TestNewRSRField1(t *testing.T) {
 }
 
 func TestNewRSRFieldDDz(t *testing.T) {
-	expectRSRField := &RSRField{Id: "effective_caller_id_number", RSRules: []*ReSearchReplace{&ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}}}
+	expectRSRField := &RSRField{Id: "effective_caller_id_number",
+		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`(\d+)`), ReplaceTemplate: "+$1"}}}
 	if rsrField, err := NewRSRField(`~effective_caller_id_number:s/(\d+)/+$1/`); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
@@ -55,7 +58,8 @@ func TestNewRSRFieldDDz(t *testing.T) {
 }
 
 func TestNewRSRFieldIvo(t *testing.T) {
-	expectRSRField := &RSRField{Id: "cost_details", RSRules: []*ReSearchReplace{&ReSearchReplace{regexp.MustCompile(`MatchedDestId":".+_(\s\s\s\s\s)"`), "$1"}}}
+	expectRSRField := &RSRField{Id: "cost_details",
+		RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`MatchedDestId":".+_(\s\s\s\s\s)"`), ReplaceTemplate: "$1"}}}
 	if rsrField, err := NewRSRField(`~cost_details:s/MatchedDestId":".+_(\s\s\s\s\s)"/$1/`); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
@@ -65,8 +69,8 @@ func TestNewRSRFieldIvo(t *testing.T) {
 
 func TestConvertPlusNationalAnd00(t *testing.T) {
 	expectRSRField := &RSRField{Id: "effective_caller_id_number", RSRules: []*ReSearchReplace{
-		&ReSearchReplace{regexp.MustCompile(`\+49(\d+)`), "0$1"},
-		&ReSearchReplace{regexp.MustCompile(`\+(\d+)`), "00$1"}}}
+		&ReSearchReplace{SearchRegexp: regexp.MustCompile(`\+49(\d+)`), ReplaceTemplate: "0$1"},
+		&ReSearchReplace{SearchRegexp: regexp.MustCompile(`\+(\d+)`), ReplaceTemplate: "00$1"}}}
 	rsrField, err := NewRSRField(`~effective_caller_id_number:s/\+49(\d+)/0$1/:s/\+(\d+)/00$1/`)
 	if err != nil {
 		t.Error(err)
@@ -100,7 +104,7 @@ func TestRSRParseStatic(t *testing.T) {
 
 func TestConvertDurToSecs(t *testing.T) {
 	expectRSRField := &RSRField{Id: "9", RSRules: []*ReSearchReplace{
-		&ReSearchReplace{regexp.MustCompile(`^(\d+)$`), "${1}s"}}}
+		&ReSearchReplace{SearchRegexp: regexp.MustCompile(`^(\d+)$`), ReplaceTemplate: "${1}s"}}}
 	rsrField, err := NewRSRField(`~9:s/^(\d+)$/${1}s/`)
 	if err != nil {
 		t.Error(err)
@@ -114,7 +118,7 @@ func TestConvertDurToSecs(t *testing.T) {
 
 func TestPrefix164(t *testing.T) {
 	expectRSRField := &RSRField{Id: "0", RSRules: []*ReSearchReplace{
-		&ReSearchReplace{regexp.MustCompile(`^([1-9]\d+)$`), "+$1"}}}
+		&ReSearchReplace{SearchRegexp: regexp.MustCompile(`^([1-9]\d+)$`), ReplaceTemplate: "+$1"}}}
 	rsrField, err := NewRSRField(`~0:s/^([1-9]\d+)$/+$1/`)
 	if err != nil {
 		t.Error(err)
@@ -123,5 +127,16 @@ func TestPrefix164(t *testing.T) {
 	}
 	if parsedVal := rsrField.ParseValue("4986517174960"); parsedVal != "+4986517174960" {
 		t.Errorf("Expecting: +4986517174960, received: %s", parsedVal)
+	}
+}
+
+func TestIsStatic(t *testing.T) {
+	rsr1 := &RSRField{Id: "0", staticValue: "0"}
+	if !rsr1.IsStatic() {
+		t.Error("Failed to detect static value.")
+	}
+	rsr2 := &RSRField{Id: "0", RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`^([1-9]\d+)$`), ReplaceTemplate: "+$1"}}}
+	if rsr2.IsStatic() {
+		t.Error("Non static detected as static value")
 	}
 }

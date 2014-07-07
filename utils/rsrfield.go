@@ -82,3 +82,16 @@ func (rsrf *RSRField) ParseValue(value string) string {
 	}
 	return value
 }
+
+func (rsrf *RSRField) IsStatic() bool {
+	return len(rsrf.staticValue) != 0
+}
+
+func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a regexp match through the rules
+	for _, rsrule := range rsrf.RSRules {
+		if rsrule.Matched {
+			return true
+		}
+	}
+	return false
+}

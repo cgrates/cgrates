@@ -24,7 +24,7 @@ import (
 )
 
 func TestProcessReSearchReplace(t *testing.T) {
-	rsr := &ReSearchReplace{regexp.MustCompile(`sip:\+49(\d+)@(\d*\.\d*\.\d*\.\d*)`), "0$1@$2"}
+	rsr := &ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@(\d*\.\d*\.\d*\.\d*)`), ReplaceTemplate: "0$1@$2"}
 	source := "<sip:+4986517174963@127.0.0.1;transport=tcp>"
 	expectOut := "086517174963@127.0.0.1"
 	if outStr := rsr.Process(source); outStr != expectOut {
@@ -33,7 +33,7 @@ func TestProcessReSearchReplace(t *testing.T) {
 }
 
 func TestProcessReSearchReplace2(t *testing.T) {
-	rsr := &ReSearchReplace{regexp.MustCompile(`(\d+)`), "+$1"}
+	rsr := &ReSearchReplace{SearchRegexp: regexp.MustCompile(`(\d+)`), ReplaceTemplate: "+$1"}
 	source := "4986517174963"
 	expectOut := "+4986517174963"
 	if outStr := rsr.Process(source); outStr != expectOut {
@@ -42,7 +42,7 @@ func TestProcessReSearchReplace2(t *testing.T) {
 }
 
 func TestProcessReSearchReplace3(t *testing.T) { //"MatchedDestId":"CST_31800_DE080"
-	rsr := &ReSearchReplace{regexp.MustCompile(`"MatchedDestId":".+_(\w{5})"`), "$1"}
+	rsr := &ReSearchReplace{SearchRegexp: regexp.MustCompile(`"MatchedDestId":".+_(\w{5})"`), ReplaceTemplate: "$1"}
 	source := `[{"TimeStart":"2014-04-15T22:17:57+02:00","TimeEnd":"2014-04-15T22:18:01+02:00","Cost":0,"RateInterval":{"Timing":{"Years":[],"Months":[],"MonthDays":[],"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"Rates":[{"GroupIntervalStart":0,"Value":0,"RateIncrement":1000000000,"RateUnit":60000000000}],"RoundingMethod":"*middle","RoundingDecimals":4},"Weight":10},"CallDuration":4000000000,"Increments":null,"MatchedSubject":"*out:sip.test.cgrates.org:call:*any","MatchedPrefix":"+49800","MatchedDestId":"CST_31800_DE080"}]`
 	expectOut := "DE080"
 	if outStr := rsr.Process(source); outStr != expectOut {
@@ -51,7 +51,7 @@ func TestProcessReSearchReplace3(t *testing.T) { //"MatchedDestId":"CST_31800_DE
 }
 
 func TestProcessReSearchReplace4(t *testing.T) {
-	rsr := &ReSearchReplace{regexp.MustCompile(`^\+49(\d+)`), "0$1"}
+	rsr := &ReSearchReplace{SearchRegexp: regexp.MustCompile(`^\+49(\d+)`), ReplaceTemplate: "0$1"}
 	if outStr := rsr.Process("+4986517174963"); outStr != "086517174963" {
 		t.Error("Unexpected output from SearchReplace: ", outStr)
 	}
