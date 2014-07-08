@@ -42,4 +42,5 @@ type Event interface {
 	GetDuration(string) (time.Duration, error)
 	MissingParameter() bool
 	ParseEventValue(*utils.RSRField) string
+	PassesFieldFilter(*utils.RSRField) (bool, string)
 }

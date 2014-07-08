@@ -117,12 +117,15 @@ func (cdre *CdrExporter) getCdrCostDetails(cgrId, runId string) (string, error) 
 }
 
 func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *utils.StoredCdr, filterRule, fieldRule *utils.RSRField) (string, error) {
-	filterVal := processedCdr.FieldAsString(filterRule)
+	fltrPass, ftrPassValue := processedCdr.PassesFieldFilter(filterRule)
+	if !fltrPass {
+		return "", nil
+	}
 	for _, cdr := range cdre.cdrs {
 		if cdr.CgrId != processedCdr.CgrId {
 			continue // We only care about cdrs with same primary cdr behind
 		}
-		if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == filterVal {
+		if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == ftrPassValue {
 			return cdr.FieldAsString(fieldRule), nil
 		}
 	}
@@ -141,7 +144,7 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, fltrRl, field
 	if fieldRl == nil {
 		return "", nil
 	}
-	if fltrRl != nil && cdr.FieldAsString(&utils.RSRField{Id: fltrRl.Id}) != cdr.FieldAsString(fltrRl) {
+	if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
 		return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
 	}
 	if len(layout) == 0 {
@@ -159,7 +162,7 @@ func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, fltrRl, rsrFld *uti
 	if rsrFld == nil {
 		return "", nil
 	}
-	if fltrRl != nil && cdr.FieldAsString(&utils.RSRField{Id: fltrRl.Id}) != cdr.FieldAsString(fltrRl) {
+	if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
 		return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
 	}
 	if len(layout) == 0 {

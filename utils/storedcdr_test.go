@@ -85,39 +85,39 @@ func TestPassesFieldFilter(t *testing.T) {
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC), MediationRunId: DEFAULT_RUNID,
 		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if !cdr.PassesFieldFilter(nil) {
+	if pass, _ := cdr.PassesFieldFilter(nil); !pass {
 		t.Error("Not passing filter")
 	}
 	acntPrefxFltr, _ := NewRSRField(`~account:s/(.+)/1001/`)
-	if !cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing filter")
 	}
 	acntPrefxFltr, _ = NewRSRField(`~account:s/^(10)\d\d$/10/`)
-	if !cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}
 	acntPrefxFltr, _ = NewRSRField(`~account:s/^\d(10)\d$/10/`)
-	if cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Passing filter")
 	}
 	acntPrefxFltr, _ = NewRSRField(`~account:s/^(10)\d\d$/010/`)
-	if cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Passing filter")
 	}
 	acntPrefxFltr, _ = NewRSRField(`~account:s/^1010$/1010/`)
-	if cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Passing filter")
 	}
 	torFltr, _ := NewRSRField(`^tor/*voice`)
-	if !cdr.PassesFieldFilter(torFltr) {
+	if pass, _ := cdr.PassesFieldFilter(torFltr); !pass {
 		t.Error("Not passing filter")
 	}
 	torFltr, _ = NewRSRField(`^tor/*data`)
-	if cdr.PassesFieldFilter(torFltr) {
+	if pass, _ := cdr.PassesFieldFilter(torFltr); pass {
 		t.Error("Passing filter")
 	}
 	inexistentFieldFltr, _ := NewRSRField(`^fakefield/fakevalue`)
-	if cdr.PassesFieldFilter(inexistentFieldFltr) {
+	if pass, _ := cdr.PassesFieldFilter(inexistentFieldFltr); pass {
 		t.Error("Passing filter")
 	}
 }
@@ -127,26 +127,30 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	acntPrefxFltr, _ := NewRSRField(`~account:s/^\w+[s,h,m,p]\d{4}$//`)
-	if !cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}
 	cdr = &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem00005",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
 	cdr = &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0402129281",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	acntPrefxFltr, _ = NewRSRField(`~account:s/^0\d{9}$//`)
-	if !cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
+	}
+	acntPrefxFltr, _ = NewRSRField(`~account:s/^0(\d{9})$/placeholder/`)
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
+		t.Error("Should not pass filter")
 	}
 	cdr = &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "04021292812",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	if cdr.PassesFieldFilter(acntPrefxFltr) {
+	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
 }

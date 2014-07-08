@@ -249,3 +249,23 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 		return rsrFld.ParseValue(fsev[rsrFld.Id])
 	}
 }
+
+func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string) {
+	if fieldFilter == nil {
+		return true, ""
+	}
+	if fieldFilter.IsStatic() && fsev.ParseEventValue(&utils.RSRField{Id: fieldFilter.Id}) == fsev.ParseEventValue(fieldFilter) {
+		return true, fsev.ParseEventValue(&utils.RSRField{Id: fieldFilter.Id})
+	}
+	preparedFilter := &utils.RSRField{Id: fieldFilter.Id, RSRules: make([]*utils.ReSearchReplace, len(fieldFilter.RSRules))} // Reset rules so they do not point towards same structures as original fieldFilter
+	for idx := range fieldFilter.RSRules {
+		// Hardcode the template with maximum of 5 groups ordered
+		preparedFilter.RSRules[idx] = &utils.ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: utils.FILTER_REGEXP_TPL}
+	}
+	preparedVal := fsev.ParseEventValue(preparedFilter)
+	filteredValue := fsev.ParseEventValue(fieldFilter)
+	if preparedFilter.RegexpMatched() && (len(preparedVal) == 0 || preparedVal == filteredValue) {
+		return true, filteredValue
+	}
+	return false, ""
+}

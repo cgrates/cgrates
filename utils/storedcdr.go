@@ -133,22 +133,24 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 	}
 }
 
-func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *RSRField) bool {
+func (storedCdr *StoredCdr) PassesFieldFilter(fieldFilter *RSRField) (bool, string) {
 	if fieldFilter == nil {
-		return true
+		return true, ""
 	}
 	if fieldFilter.IsStatic() && storedCdr.FieldAsString(&RSRField{Id: fieldFilter.Id}) == storedCdr.FieldAsString(fieldFilter) {
-		return true
+		return true, storedCdr.FieldAsString(&RSRField{Id: fieldFilter.Id})
 	}
 	preparedFilter := &RSRField{Id: fieldFilter.Id, RSRules: make([]*ReSearchReplace, len(fieldFilter.RSRules))} // Reset rules so they do not point towards same structures as original fieldFilter
 	for idx := range fieldFilter.RSRules {
 		// Hardcode the template with maximum of 5 groups ordered
-		preparedFilter.RSRules[idx] = &ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: "$1$2$3$4$5"}
+		preparedFilter.RSRules[idx] = &ReSearchReplace{SearchRegexp: fieldFilter.RSRules[idx].SearchRegexp, ReplaceTemplate: FILTER_REGEXP_TPL}
 	}
-	if storedCdr.FieldAsString(preparedFilter) == storedCdr.FieldAsString(fieldFilter) && preparedFilter.RegexpMatched() {
-		return true
+	preparedVal := storedCdr.FieldAsString(preparedFilter)
+	filteredValue := storedCdr.FieldAsString(fieldFilter)
+	if preparedFilter.RegexpMatched() && (len(preparedVal) == 0 || preparedVal == filteredValue) {
+		return true, filteredValue
 	}
-	return false
+	return false, ""
 }
 
 func (storedCdr *StoredCdr) AsStoredCdr() *StoredCdr {

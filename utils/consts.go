@@ -122,6 +122,7 @@ const (
 	CDRFIELD                   = "cdrfield"
 	ASR                        = "ASR"
 	ACD                        = "ACD"
+	FILTER_REGEXP_TPL          = "$1$2$3$4$5"
 )
 
 var (
