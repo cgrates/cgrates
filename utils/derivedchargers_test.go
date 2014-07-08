@@ -67,7 +67,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	}
 	edc2 := &DerivedCharger{
 		RunId:            "test2",
-		RunFilter:        "^cdr_source/tdm_cdrs",
+		RunFilter:        "^cdr_source/tdm_cdrs/",
 		ReqTypeField:     "~reqtype2:s/sip:(.+)/$1/",
 		DirectionField:   "~direction2:s/sip:(.+)/$1/",
 		TenantField:      "~tenant2:s/sip:(.+)/$1/",
@@ -79,7 +79,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		AnswerTimeField:  "~answertime2:s/sip:(.+)/$1/",
 		UsageField:       "~duration2:s/sip:(.+)/$1/",
 	}
-	edc2.rsrRunFilter, _ = NewRSRField("^cdr_source/tdm_cdrs")
+	edc2.rsrRunFilter, _ = NewRSRField("^cdr_source/tdm_cdrs/")
 	edc2.rsrReqTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
 	edc2.rsrDirectionField, _ = NewRSRField("~direction2:s/sip:(.+)/$1/")
 	edc2.rsrTenantField, _ = NewRSRField("~tenant2:s/sip:(.+)/$1/")
@@ -91,7 +91,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	edc2.rsrAnswerTimeField, _ = NewRSRField("~answertime2:s/sip:(.+)/$1/")
 	edc2.rsrUsageField, _ = NewRSRField("~duration2:s/sip:(.+)/$1/")
 	if dc2, err := NewDerivedCharger("test2",
-		"^cdr_source/tdm_cdrs",
+		"^cdr_source/tdm_cdrs/",
 		"~reqtype2:s/sip:(.+)/$1/",
 		"~direction2:s/sip:(.+)/$1/",
 		"~tenant2:s/sip:(.+)/$1/",
@@ -102,7 +102,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		"~setuptime2:s/sip:(.+)/$1/",
 		"~answertime2:s/sip:(.+)/$1/",
 		"~duration2:s/sip:(.+)/$1/"); err != nil {
-		t.Error("Unexpected error", err.Error)
+		t.Error("Unexpected error", err)
 	} else if !reflect.DeepEqual(edc2, dc2) {
 		t.Errorf("Expecting: %v, received: %v", edc2, dc2)
 	}
