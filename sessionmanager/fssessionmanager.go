@@ -161,11 +161,11 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	for _, dc := range dcs {
-		/*dcRunFilter, _ := utils.NewRSRField(dc.RunFilter)
-		if dcRunFilter != nil && ev.ParseEventValue(&utils.RSRField{Id: dcRunFilter.Id}) != ev.ParseEventValue(dcRunFilter) { //ToDo: Fix here filter
-			//engine.Logger.Info(fmt.Sprintf("<SessionManager> Ignoring DerivedCharger with id %s - non matching filter", dc.RunId))
+		dcRunFilter, _ := utils.NewRSRField(dc.RunFilter)
+		if fltrPass, _ := ev.PassesFieldFilter(dcRunFilter); !fltrPass {
+			//engine.Logger.Debug(fmt.Sprintf("<SessionManager> Ignoring DerivedCharger with id %s - non matching filter", dc.RunId))
 			continue
-		}*/
+		}
 		startTime, err := ev.GetAnswerTime(PARK_TIME)
 		if err != nil {
 			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
