@@ -30,8 +30,11 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 	}
 	if strings.HasPrefix(fldStr, STATIC_VALUE_PREFIX) { // Special case when RSR is defined as static header/value
 		var staticHdr, staticVal string
-		if splt := strings.Split(fldStr, HDR_VAL_SEP); len(splt) == 2 { // Using | as separator since ':' is often use in date/time fields
-			staticHdr, staticVal = splt[0][1:], splt[1]
+		if splt := strings.Split(fldStr, "/"); len(splt) == 3 { // Using / as separator since ':' is often use in date/time fields
+			if len(splt[2]) != 0 { // Last split has created empty element
+				return nil, fmt.Errorf("Invalid static header/value combination: %s", fldStr)
+			}
+			staticHdr, staticVal = splt[0][1:], splt[1] // Strip the / suffix
 		} else {
 			staticHdr, staticVal = splt[0][1:], splt[0][1:] // If no split, header will remain as original, value as header without the prefix
 		}
@@ -94,4 +97,22 @@ func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a reg
 		}
 	}
 	return false
+}
+
+// Parses list of RSRFields, used for example as multiple filters in derived charging
+func ParseRSRFields(fldsStr string) ([]*RSRField, error) {
+	//rsrRlsPattern := regexp.MustCompile(`^(~\w+:s/.+/.*/)|(\^.+(/.+/)?)(;(~\w+:s/.+/.*/)|(\^.+(/.+/)?))*$`) //ToDo:Fix here rule able to confirm the content
+	rulesSplt := strings.Split(fldsStr, ";")
+	rsrFields := make([]*RSRField, len(rulesSplt))
+	for idx, ruleStr := range rulesSplt {
+		if !strings.HasSuffix(ruleStr, "/") {
+			return nil, fmt.Errorf("Invalid RSRField string: %s", ruleStr)
+		}
+		if rsrField, err := NewRSRField(ruleStr); err != nil {
+			return nil, err
+		} else {
+			rsrFields[idx] = rsrField
+		}
+	}
+	return rsrFields, nil
 }

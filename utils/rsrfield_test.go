@@ -86,7 +86,7 @@ func TestConvertPlusNationalAnd00(t *testing.T) {
 }
 
 func TestRSRParseStatic(t *testing.T) {
-	if rsrField, err := NewRSRField("^static_header/static_value"); err != nil {
+	if rsrField, err := NewRSRField("^static_header/static_value/"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsrField, &RSRField{Id: "static_header", staticValue: "static_value"}) {
 		t.Errorf("Unexpected RSRField received: %v", rsrField)
@@ -138,5 +138,19 @@ func TestIsStatic(t *testing.T) {
 	rsr2 := &RSRField{Id: "0", RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`^([1-9]\d+)$`), ReplaceTemplate: "+$1"}}}
 	if rsr2.IsStatic() {
 		t.Error("Non static detected as static value")
+	}
+}
+
+func TestParseRSRFields(t *testing.T) {
+	fieldsStr1 := `~account:s/^\w+[mpls]\d{6}$//;~subject:s/^0\d{9}$//;^destination/+4912345/;~mediation_runid:s/^default$/default/`
+	rsrFld1, _ := NewRSRField(`~account:s/^\w+[mpls]\d{6}$//`)
+	rsrFld2, _ := NewRSRField(`~subject:s/^0\d{9}$//`)
+	rsrFld3, _ := NewRSRField(`^destination/+4912345/`)
+	rsrFld4, _ := NewRSRField(`~mediation_runid:s/^default$/default/`)
+	eRSRFields := []*RSRField{rsrFld1, rsrFld2, rsrFld3, rsrFld4}
+	if rsrFlds, err := ParseRSRFields(fieldsStr1); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else if !reflect.DeepEqual(eRSRFields, rsrFlds) {
+		t.Errorf("Expecting: %v, received: %v", eRSRFields, rsrFlds)
 	}
 }
