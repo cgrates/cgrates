@@ -39,7 +39,7 @@ func ConfigSlice(cfgVal string) ([]string, error) {
 	return cfgValStrs, nil
 }
 
-func ParseRSRFields(configVal string) ([]*utils.RSRField, error) {
+func ParseRSRFields(configVal string) ([]*utils.RSRField, error) { //ToDo: Unify it with the Parser inside RSRField
 	cfgValStrs := strings.Split(configVal, string(utils.CSV_SEP))
 	if len(cfgValStrs) == 1 && cfgValStrs[0] == "" { // Prevents returning iterable with empty value
 		return []*utils.RSRField{}, nil

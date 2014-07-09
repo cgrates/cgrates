@@ -112,7 +112,7 @@ func (sm *FSSessionManager) DisconnectSession(uuid string, notify string) {
 	return
 }
 
-// Remove session from sessin list, removes all related in case of multiple runs
+// Remove session from session list, removes all related in case of multiple runs
 func (sm *FSSessionManager) RemoveSession(uuid string) {
 	for i, ss := range sm.sessions {
 		if ss.uuid == uuid {
@@ -161,10 +161,11 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	}
 	dcs, _ = dcs.AppendDefaultRun()
 	for _, dc := range dcs {
-		dcRunFilter, _ := utils.NewRSRField(dc.RunFilter)
-		if fltrPass, _ := ev.PassesFieldFilter(dcRunFilter); !fltrPass {
-			//engine.Logger.Debug(fmt.Sprintf("<SessionManager> Ignoring DerivedCharger with id %s - non matching filter", dc.RunId))
-			continue
+		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
+		for _, dcRunFilter := range runFilters {
+			if fltrPass, _ := ev.PassesFieldFilter(dcRunFilter); !fltrPass {
+				continue
+			}
 		}
 		startTime, err := ev.GetAnswerTime(PARK_TIME)
 		if err != nil {

@@ -46,6 +46,11 @@ func (self *ApierV1) SetDerivedChargers(attrs AttrSetDerivedChargers, reply *str
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Category", "Direction", "Account", "Subject", "DerivedChargers"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
+	for _, dc := range attrs.DerivedChargers {
+		if _, err = utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP); err != nil { // Make sure rules are OK before loading in db
+			return fmt.Errorf("%s:%s", utils.ERR_PARSER_ERROR, err.Error())
+		}
+	}
 	dcKey := utils.DerivedChargersKey(attrs.Direction, attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject)
 	if err := self.AccountDb.SetDerivedChargers(dcKey, attrs.DerivedChargers); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())

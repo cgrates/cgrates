@@ -148,7 +148,7 @@ func TestParseRSRFields(t *testing.T) {
 	rsrFld3, _ := NewRSRField(`^destination/+4912345/`)
 	rsrFld4, _ := NewRSRField(`~mediation_runid:s/^default$/default/`)
 	eRSRFields := []*RSRField{rsrFld1, rsrFld2, rsrFld3, rsrFld4}
-	if rsrFlds, err := ParseRSRFields(fieldsStr1); err != nil {
+	if rsrFlds, err := ParseRSRFields(fieldsStr1, INFIELD_SEP); err != nil {
 		t.Error("Unexpected error: ", err)
 	} else if !reflect.DeepEqual(eRSRFields, rsrFlds) {
 		t.Errorf("Expecting: %v, received: %v", eRSRFields, rsrFlds)

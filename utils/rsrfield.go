@@ -100,9 +100,12 @@ func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a reg
 }
 
 // Parses list of RSRFields, used for example as multiple filters in derived charging
-func ParseRSRFields(fldsStr string) ([]*RSRField, error) {
+func ParseRSRFields(fldsStr, sep string) ([]*RSRField, error) {
 	//rsrRlsPattern := regexp.MustCompile(`^(~\w+:s/.+/.*/)|(\^.+(/.+/)?)(;(~\w+:s/.+/.*/)|(\^.+(/.+/)?))*$`) //ToDo:Fix here rule able to confirm the content
-	rulesSplt := strings.Split(fldsStr, ";")
+	if len(fldsStr) == 0 {
+		return nil, nil
+	}
+	rulesSplt := strings.Split(fldsStr, sep)
 	rsrFields := make([]*RSRField, len(rulesSplt))
 	for idx, ruleStr := range rulesSplt {
 		if !strings.HasSuffix(ruleStr, "/") {

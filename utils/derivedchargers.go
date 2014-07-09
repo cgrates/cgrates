@@ -24,75 +24,73 @@ import (
 )
 
 // Wraps regexp compiling in case of rsr fields
-func NewDerivedCharger(runId, runFilter, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld string) (dc *DerivedCharger, err error) {
+func NewDerivedCharger(runId, runFilters, reqTypeFld, dirFld, tenantFld, catFld, acntFld, subjFld, dstFld, sTimeFld, aTimeFld, durFld string) (dc *DerivedCharger, err error) {
 	if len(runId) == 0 {
 		return nil, errors.New("Empty run id field")
 	}
 	dc = &DerivedCharger{RunId: runId}
-	dc.RunFilter = runFilter
-	if strings.HasPrefix(dc.RunFilter, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
-		if dc.rsrRunFilter, err = NewRSRField(dc.RunFilter); err != nil {
+	dc.RunFilters = runFilters
+	if strings.HasPrefix(dc.RunFilters, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilters, STATIC_VALUE_PREFIX) {
+		if dc.rsrRunFilters, err = ParseRSRFields(dc.RunFilters, INFIELD_SEP); err != nil {
 			return nil, err
-		} else if len(dc.rsrRunFilter.Id) == 0 {
-			return nil, errors.New("Empty filter header.")
 		}
 	}
 	dc.ReqTypeField = reqTypeFld
-	if strings.HasPrefix(dc.ReqTypeField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.ReqTypeField, REGEXP_PREFIX) || strings.HasPrefix(dc.ReqTypeField, STATIC_VALUE_PREFIX) {
 		if dc.rsrReqTypeField, err = NewRSRField(dc.ReqTypeField); err != nil {
 			return nil, err
 		}
 	}
 	dc.DirectionField = dirFld
-	if strings.HasPrefix(dc.DirectionField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.DirectionField, REGEXP_PREFIX) || strings.HasPrefix(dc.DirectionField, STATIC_VALUE_PREFIX) {
 		if dc.rsrDirectionField, err = NewRSRField(dc.DirectionField); err != nil {
 			return nil, err
 		}
 	}
 	dc.TenantField = tenantFld
-	if strings.HasPrefix(dc.TenantField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.TenantField, REGEXP_PREFIX) || strings.HasPrefix(dc.TenantField, STATIC_VALUE_PREFIX) {
 		if dc.rsrTenantField, err = NewRSRField(dc.TenantField); err != nil {
 			return nil, err
 		}
 	}
 	dc.CategoryField = catFld
-	if strings.HasPrefix(dc.CategoryField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.CategoryField, REGEXP_PREFIX) || strings.HasPrefix(dc.CategoryField, STATIC_VALUE_PREFIX) {
 		if dc.rsrCategoryField, err = NewRSRField(dc.CategoryField); err != nil {
 			return nil, err
 		}
 	}
 	dc.AccountField = acntFld
-	if strings.HasPrefix(dc.AccountField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.AccountField, REGEXP_PREFIX) || strings.HasPrefix(dc.AccountField, STATIC_VALUE_PREFIX) {
 		if dc.rsrAccountField, err = NewRSRField(dc.AccountField); err != nil {
 			return nil, err
 		}
 	}
 	dc.SubjectField = subjFld
-	if strings.HasPrefix(dc.SubjectField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.SubjectField, REGEXP_PREFIX) || strings.HasPrefix(dc.SubjectField, STATIC_VALUE_PREFIX) {
 		if dc.rsrSubjectField, err = NewRSRField(dc.SubjectField); err != nil {
 			return nil, err
 		}
 	}
 	dc.DestinationField = dstFld
-	if strings.HasPrefix(dc.DestinationField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.DestinationField, REGEXP_PREFIX) || strings.HasPrefix(dc.DestinationField, STATIC_VALUE_PREFIX) {
 		if dc.rsrDestinationField, err = NewRSRField(dc.DestinationField); err != nil {
 			return nil, err
 		}
 	}
 	dc.SetupTimeField = sTimeFld
-	if strings.HasPrefix(dc.SetupTimeField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.SetupTimeField, REGEXP_PREFIX) || strings.HasPrefix(dc.SetupTimeField, STATIC_VALUE_PREFIX) {
 		if dc.rsrSetupTimeField, err = NewRSRField(dc.SetupTimeField); err != nil {
 			return nil, err
 		}
 	}
 	dc.AnswerTimeField = aTimeFld
-	if strings.HasPrefix(dc.AnswerTimeField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.AnswerTimeField, REGEXP_PREFIX) || strings.HasPrefix(dc.AnswerTimeField, STATIC_VALUE_PREFIX) {
 		if dc.rsrAnswerTimeField, err = NewRSRField(dc.AnswerTimeField); err != nil {
 			return nil, err
 		}
 	}
 	dc.UsageField = durFld
-	if strings.HasPrefix(dc.UsageField, REGEXP_PREFIX) || strings.HasPrefix(dc.RunFilter, STATIC_VALUE_PREFIX) {
+	if strings.HasPrefix(dc.UsageField, REGEXP_PREFIX) || strings.HasPrefix(dc.UsageField, STATIC_VALUE_PREFIX) {
 		if dc.rsrUsageField, err = NewRSRField(dc.UsageField); err != nil {
 			return nil, err
 		}
@@ -101,19 +99,19 @@ func NewDerivedCharger(runId, runFilter, reqTypeFld, dirFld, tenantFld, catFld, 
 }
 
 type DerivedCharger struct {
-	RunId               string    // Unique runId in the chain
-	RunFilter           string    // Only run the charger if the filter matches
-	ReqTypeField        string    // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
-	DirectionField      string    // Field containing direction info
-	TenantField         string    // Field containing tenant info
-	CategoryField       string    // Field containing tor info
-	AccountField        string    // Field containing account information
-	SubjectField        string    // Field containing subject information
-	DestinationField    string    // Field containing destination information
-	SetupTimeField      string    // Field containing setup time information
-	AnswerTimeField     string    // Field containing answer time information
-	UsageField          string    // Field containing usage information
-	rsrRunFilter        *RSRField // Storage for compiled Regexp in case of RSRFields
+	RunId               string      // Unique runId in the chain
+	RunFilters          string      // Only run the charger if all the filters match
+	ReqTypeField        string      // Field containing request type info, number in case of csv source, '^' as prefix in case of static values
+	DirectionField      string      // Field containing direction info
+	TenantField         string      // Field containing tenant info
+	CategoryField       string      // Field containing tor info
+	AccountField        string      // Field containing account information
+	SubjectField        string      // Field containing subject information
+	DestinationField    string      // Field containing destination information
+	SetupTimeField      string      // Field containing setup time information
+	AnswerTimeField     string      // Field containing answer time information
+	UsageField          string      // Field containing usage information
+	rsrRunFilters       []*RSRField // Storage for compiled Regexp in case of RSRFields
 	rsrReqTypeField     *RSRField
 	rsrDirectionField   *RSRField
 	rsrTenantField      *RSRField
