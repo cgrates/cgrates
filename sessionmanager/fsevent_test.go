@@ -540,11 +540,13 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.DESTINATION}); parsed != "1002" {
 		t.Error("Unexpected result parsed", parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SETUP_TIME}); parsed != "2014-04-25 18:08:27 +0200 CEST" {
-		t.Error("Unexpected result parsed", parsed)
+	sTime, _ := utils.ParseTimeDetectLayout("1398442107770704"[:len("1398442107770704")-6]) // We discard nanoseconds information so we can correlate csv
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.SETUP_TIME}); parsed != sTime.String() {
+		t.Errorf("Expecting: %s, parsed: %s", sTime.String(), parsed)
 	}
-	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ANSWER_TIME}); parsed != "2014-04-25 18:08:40 +0200 CEST" {
-		t.Error("Unexpected result parsed", parsed)
+	aTime, _ := utils.ParseTimeDetectLayout("1398442120831856"[:len("1398442120831856")-6])
+	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.ANSWER_TIME}); parsed != aTime.String() {
+		t.Errorf("Expecting: %s, parsed: %s", aTime.String(), parsed)
 	}
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: utils.USAGE}); parsed != "5000000000" {
 		t.Error("Unexpected result parsed", parsed)
