@@ -562,6 +562,51 @@ func TestParseEventValue(t *testing.T) {
 	}
 }
 
-func TestPassesFieldFilter(t *testing.T) {
-
+func TestPassesFieldFilterDn1(t *testing.T) {
+	body := `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+Caller-Username: futurem0005`
+	ev := new(FSEvent).New(body)
+	acntPrefxFltr, _ := utils.NewRSRField(`~account:s/^\w+[s,h,m,p]\d{4}$//`)
+	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); !pass {
+		t.Error("Not passing valid filter")
+	}
+	body = `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+Caller-Username: futurem00005`
+	ev = new(FSEvent).New(body)
+	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); pass {
+		t.Error("Should not pass filter")
+	}
+	body = `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+Caller-Username: 0402129281`
+	ev = new(FSEvent).New(body)
+	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^0\d{9}$//`)
+	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); !pass {
+		t.Error("Not passing valid filter")
+	}
+	acntPrefxFltr, _ = utils.NewRSRField(`~account:s/^0(\d{9})$/placeholder/`)
+	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); pass {
+		t.Error("Should not pass filter")
+	}
+	body = `Event-Name: RE_SCHEDULE
+Core-UUID: 792e181c-b6e6-499c-82a1-52a778e7d82d
+FreeSWITCH-Hostname: h1.ip-switch.net
+FreeSWITCH-Switchname: h1.ip-switch.net
+FreeSWITCH-IPv4: 88.198.12.156
+Caller-Username: 04021292812`
+	ev = new(FSEvent).New(body)
+	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); pass {
+		t.Error("Should not pass filter")
+	}
 }
