@@ -40,7 +40,7 @@ type CgrCdr map[string]string
 
 func (cgrCdr CgrCdr) getCgrId() string {
 	setupTime, _ := ParseTimeDetectLayout(cgrCdr[SETUP_TIME])
-	return Sha1(cgrCdr[ACCID], setupTime.String())
+	return Sha1(cgrCdr[ACCID], setupTime.UTC().String())
 }
 
 func (cgrCdr CgrCdr) getExtraFields() map[string]string {

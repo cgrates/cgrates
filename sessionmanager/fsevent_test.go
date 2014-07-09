@@ -504,7 +504,7 @@ func TestParseEventValue(t *testing.T) {
 	cfg, _ = config.NewDefaultCGRConfig()
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).New(hangupEv)
-	if cgrid := ev.ParseEventValue(&utils.RSRField{Id: utils.CGRID}); cgrid != "8b1ca78a9bbaa42c811e60b974188197c425dbe7" {
+	if cgrid := ev.ParseEventValue(&utils.RSRField{Id: utils.CGRID}); cgrid != "873e5bf7903978f305f7d8fed3f92f968cf82873" {
 		t.Error("Unexpected cgrid parsed", cgrid)
 	}
 	if tor := ev.ParseEventValue(&utils.RSRField{Id: utils.TOR}); tor != utils.VOICE {
@@ -558,4 +558,8 @@ func TestParseEventValue(t *testing.T) {
 	if parsed := ev.ParseEventValue(&utils.RSRField{Id: "Hangup-Cause"}); parsed != "NORMAL_CLEARING" {
 		t.Error("Unexpected result parsed", parsed)
 	}
+}
+
+func TestPassesFieldFilter(t *testing.T) {
+
 }

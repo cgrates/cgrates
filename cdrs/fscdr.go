@@ -75,7 +75,7 @@ type FSCdr struct {
 
 func (fsCdr FSCdr) getCgrId() string {
 	setupTime, _ := utils.ParseTimeDetectLayout(fsCdr.vars[FS_SETUP_TIME])
-	return utils.Sha1(fsCdr.vars[FS_UUID], setupTime.String())
+	return utils.Sha1(fsCdr.vars[FS_UUID], setupTime.UTC().String())
 }
 
 func (fsCdr FSCdr) getExtraFields() map[string]string {
