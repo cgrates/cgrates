@@ -39,22 +39,6 @@ func ConfigSlice(cfgVal string) ([]string, error) {
 	return cfgValStrs, nil
 }
 
-func ParseRSRFields(configVal string) ([]*utils.RSRField, error) { //ToDo: Unify it with the Parser inside RSRField
-	cfgValStrs := strings.Split(configVal, string(utils.CSV_SEP))
-	if len(cfgValStrs) == 1 && cfgValStrs[0] == "" { // Prevents returning iterable with empty value
-		return []*utils.RSRField{}, nil
-	}
-	rsrFields := make([]*utils.RSRField, len(cfgValStrs))
-	for idx, cfgValStr := range cfgValStrs {
-		if rsrField, err := utils.NewRSRField(cfgValStr); err != nil {
-			return nil, err
-		} else {
-			rsrFields[idx] = rsrField
-		}
-	}
-	return rsrFields, nil
-}
-
 // Parse the configuration file and returns utils.DerivedChargers instance if no errors
 func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err error) {
 	var runIds, runFilters, reqTypeFlds, directionFlds, tenantFlds, torFlds, acntFlds, subjFlds, dstFlds, sTimeFlds, aTimeFlds, durFlds []string
