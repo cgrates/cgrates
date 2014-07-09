@@ -47,7 +47,7 @@ func TestAppendDerivedChargers(t *testing.T) {
 func TestNewDerivedCharger(t *testing.T) {
 	edc1 := &DerivedCharger{
 		RunId:            "test1",
-		RunFilter:        "",
+		RunFilters:       "",
 		ReqTypeField:     "reqtype1",
 		DirectionField:   "direction1",
 		TenantField:      "tenant1",
@@ -67,7 +67,7 @@ func TestNewDerivedCharger(t *testing.T) {
 	}
 	edc2 := &DerivedCharger{
 		RunId:            "test2",
-		RunFilter:        "^cdr_source/tdm_cdrs/",
+		RunFilters:       "^cdr_source/tdm_cdrs/",
 		ReqTypeField:     "~reqtype2:s/sip:(.+)/$1/",
 		DirectionField:   "~direction2:s/sip:(.+)/$1/",
 		TenantField:      "~tenant2:s/sip:(.+)/$1/",
@@ -79,7 +79,7 @@ func TestNewDerivedCharger(t *testing.T) {
 		AnswerTimeField:  "~answertime2:s/sip:(.+)/$1/",
 		UsageField:       "~duration2:s/sip:(.+)/$1/",
 	}
-	edc2.rsrRunFilter, _ = NewRSRField("^cdr_source/tdm_cdrs/")
+	edc2.rsrRunFilters, _ = ParseRSRFields("^cdr_source/tdm_cdrs/", INFIELD_SEP)
 	edc2.rsrReqTypeField, _ = NewRSRField("~reqtype2:s/sip:(.+)/$1/")
 	edc2.rsrDirectionField, _ = NewRSRField("~direction2:s/sip:(.+)/$1/")
 	edc2.rsrTenantField, _ = NewRSRField("~tenant2:s/sip:(.+)/$1/")
@@ -116,7 +116,7 @@ func TestDerivedChargersKey(t *testing.T) {
 
 func TestAppendDefaultRun(t *testing.T) {
 	var dc1 DerivedChargers
-	dcDf := &DerivedCharger{RunId: DEFAULT_RUNID, RunFilter: "", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
+	dcDf := &DerivedCharger{RunId: DEFAULT_RUNID, RunFilters: "", ReqTypeField: META_DEFAULT, DirectionField: META_DEFAULT,
 		TenantField: META_DEFAULT, CategoryField: META_DEFAULT, AccountField: META_DEFAULT, SubjectField: META_DEFAULT,
 		DestinationField: META_DEFAULT, SetupTimeField: META_DEFAULT, AnswerTimeField: META_DEFAULT, UsageField: META_DEFAULT}
 	eDc1 := DerivedChargers{dcDf}
@@ -124,7 +124,7 @@ func TestAppendDefaultRun(t *testing.T) {
 		t.Error("Unexpected result.")
 	}
 	dc2 := DerivedChargers{
-		&DerivedCharger{RunId: "extra1", RunFilter: "", ReqTypeField: "reqtype2", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
+		&DerivedCharger{RunId: "extra1", RunFilters: "", ReqTypeField: "reqtype2", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "rif", SubjectField: "rif", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		&DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},

@@ -126,7 +126,7 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 	cdr := &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem0005",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
-	acntPrefxFltr, _ := NewRSRField(`~account:s/^\w+[s,h,m,p]\d{4}$//`)
+	acntPrefxFltr, _ := NewRSRField(`~account:s/^\w+[shmp]\d{4}$//`)
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}

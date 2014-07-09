@@ -178,7 +178,7 @@ vdf,emptyY,*out,TOPUP_EMPTY_AT,
 
 	derivedCharges = `
 #Direction,Tenant,Category,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,UsageField
-*out,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1,^prepaid,,,,rif,rif,,,,
+*out,cgrates.org,call,dan,dan,extra1,^filteredHeader1/filterValue1/,^prepaid,,,,rif,rif,,,,
 *out,cgrates.org,call,dan,dan,extra2,,,,,,ivo,ivo,,,,
 *out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,
 `
@@ -932,8 +932,8 @@ func TestLoadDerivedChargers(t *testing.T) {
 		t.Error("Failed to load derivedChargers: ", csvr.derivedChargers)
 	}
 	expCharger1 := utils.DerivedChargers{
-		&utils.DerivedCharger{RunId: "extra1", RunFilter: "^filteredHeader1/filterValue1", ReqTypeField: "^prepaid", DirectionField: "*default", TenantField: "*default",
-			CategoryField: "*default", AccountField: "rif", SubjectField: "rif", DestinationField: "*default",
+		&utils.DerivedCharger{RunId: "extra1", RunFilters: "^filteredHeader1/filterValue1/", ReqTypeField: "^prepaid", DirectionField: "*default",
+			TenantField: "*default", CategoryField: "*default", AccountField: "rif", SubjectField: "rif", DestinationField: "*default",
 			SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},
 		&utils.DerivedCharger{RunId: "extra2", ReqTypeField: "*default", DirectionField: "*default", TenantField: "*default", CategoryField: "*default",
 			AccountField: "ivo", SubjectField: "ivo", DestinationField: "*default", SetupTimeField: "*default", AnswerTimeField: "*default", UsageField: "*default"},

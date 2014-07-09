@@ -120,10 +120,11 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 		return errors.New(errText)
 	}
 	for _, dc := range dcs {
-		dcRunFilter, _ := utils.NewRSRField(dc.RunFilter)
-		if fltrPass, _ := storedCdr.PassesFieldFilter(dcRunFilter); !fltrPass {
-			//engine.Logger.Info(fmt.Sprintf("<Mediator> Ignoring DerivedCharger with id %s - non matching filter", dc.RunId))
-			continue
+		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
+		for _, dcRunFilter := range runFilters {
+			if fltrPass, _ := storedCdr.PassesFieldFilter(dcRunFilter); !fltrPass {
+				continue
+			}
 		}
 		dcReqTypeFld, _ := utils.NewRSRField(dc.ReqTypeField)
 		dcDirFld, _ := utils.NewRSRField(dc.DirectionField)
