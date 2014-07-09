@@ -35,6 +35,8 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 				return nil, fmt.Errorf("Invalid static header/value combination: %s", fldStr)
 			}
 			staticHdr, staticVal = splt[0][1:], splt[1] // Strip the / suffix
+		} else if len(splt) == 2 {
+			return nil, fmt.Errorf("Invalid RSRField string: %s", fldStr)
 		} else {
 			staticHdr, staticVal = splt[0][1:], splt[0][1:] // If no split, header will remain as original, value as header without the prefix
 		}
@@ -108,9 +110,6 @@ func ParseRSRFields(fldsStr, sep string) ([]*RSRField, error) {
 	rulesSplt := strings.Split(fldsStr, sep)
 	rsrFields := make([]*RSRField, len(rulesSplt))
 	for idx, ruleStr := range rulesSplt {
-		if !strings.HasSuffix(ruleStr, "/") {
-			return nil, fmt.Errorf("Invalid RSRField string: %s", ruleStr)
-		}
 		if rsrField, err := NewRSRField(ruleStr); err != nil {
 			return nil, err
 		} else {

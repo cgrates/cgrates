@@ -386,7 +386,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("cdrs", "extra_fields"); hasOpt {
 		extraFieldsStr, _ := c.GetString("cdrs", "extra_fields")
-		if extraFields, err := ParseRSRFields(extraFieldsStr); err != nil {
+		if extraFields, err := utils.ParseRSRFields(extraFieldsStr, utils.FIELDS_SEP); err != nil {
 			return nil, err
 		} else {
 			cfg.CDRSExtraFields = extraFields

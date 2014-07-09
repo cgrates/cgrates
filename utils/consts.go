@@ -71,6 +71,7 @@ const (
 	CSV_SEP                    = ','
 	FALLBACK_SEP               = ';'
 	INFIELD_SEP                = ";"
+	FIELDS_SEP                 = ","
 	REGEXP_PREFIX              = "~"
 	JSON                       = "json"
 	MSGPACK                    = "msgpack"

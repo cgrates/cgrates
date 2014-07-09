@@ -153,4 +153,15 @@ func TestParseRSRFields(t *testing.T) {
 	} else if !reflect.DeepEqual(eRSRFields, rsrFlds) {
 		t.Errorf("Expecting: %v, received: %v", eRSRFields, rsrFlds)
 	}
+	fields := `host,~sip_redirected_to:s/sip:\+49(\d+)@/0$1/,destination`
+	expectParsedFields := []*RSRField{
+		&RSRField{Id: "host"},
+		&RSRField{Id: "sip_redirected_to",
+			RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}},
+		&RSRField{Id: "destination"}}
+	if parsedFields, err := ParseRSRFields(fields, FIELDS_SEP); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(parsedFields, expectParsedFields) {
+		t.Errorf("Unexpected value of parsed fields")
+	}
 }
