@@ -137,7 +137,7 @@ func (fsev FSEvent) GetCategory(fieldName string) string {
 }
 func (fsev FSEvent) GetCgrId() string {
 	setupTime, _ := fsev.GetSetupTime(utils.META_DEFAULT)
-	return utils.Sha1(fsev[UUID], setupTime.String())
+	return utils.Sha1(fsev[UUID], setupTime.UTC().String())
 }
 func (fsev FSEvent) GetUUID() string {
 	return fsev[UUID]
@@ -251,6 +251,7 @@ func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 }
 
 func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string) {
+	// Keep in sync (or merge) with StoredCdr.PassesFieldFielter()
 	if fieldFilter == nil {
 		return true, ""
 	}
