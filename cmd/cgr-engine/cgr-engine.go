@@ -23,7 +23,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/rpc"
 	"os"
 	//"runtime"
 	"strconv"
@@ -40,6 +39,7 @@ import (
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 const (
@@ -93,11 +93,11 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		<-cacheChan // Cache needs to come up before we are ready
 		connector = responder
 	} else {
-		var client *rpc.Client
+		var client *rpcclient.RpcClient
 		var err error
 
 		for i := 0; i < cfg.MediatorRaterReconnects; i++ {
-			client, err = rpc.Dial("tcp", cfg.MediatorRater)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, 0, 3, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -146,11 +146,11 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		<-cacheChan // Wait for the cache to init before start doing queries
 		connector = responder
 	} else {
-		var client *rpc.Client
+		var client *rpcclient.RpcClient
 		var err error
 
 		for i := 0; i < cfg.SMRaterReconnects; i++ {
-			client, err = rpc.Dial("tcp", cfg.SMRater)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SMRater, 0, 3, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
