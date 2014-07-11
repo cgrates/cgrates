@@ -121,12 +121,9 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 	}
 	for _, dc := range dcs {
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
-		engine.Logger.Debug(fmt.Sprintf("RunFiltersStr: %s", dc.RunFilters))
 		matchingAllFilters := true
 		for _, dcRunFilter := range runFilters {
-			engine.Logger.Debug(fmt.Sprintf("Processing runFilter Id: %s with rules: %+v", dcRunFilter.Id, dcRunFilter.RSRules[0]))
 			if fltrPass, _ := storedCdr.PassesFieldFilter(dcRunFilter); !fltrPass {
-				engine.Logger.Debug(fmt.Sprintf("Not matching runFilter Id: %s with rules: %+v, cdr: %+v", dcRunFilter.Id, dcRunFilter.RSRules[0], storedCdr))
 				matchingAllFilters = false
 				break
 			}
