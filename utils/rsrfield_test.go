@@ -165,3 +165,13 @@ func TestParseRSRFields(t *testing.T) {
 		t.Errorf("Unexpected value of parsed fields")
 	}
 }
+
+func TestParseCdrcDn1(t *testing.T) {
+	if rl, err := NewRSRField(`~1:s/^00(\d+)(?:[a-zA-Z].{3})*0*([1-9]\d+)$/+$1$2/:s/^\+49(18\d{2})$/+491400$1/`); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else if parsed := rl.ParseValue("0049ABOC0630415354"); parsed != "+49630415354" {
+		t.Errorf("Expecting: +49630415354, received: %s", parsed)
+	} else if parsed2 := rl.ParseValue("00491888"); parsed2 != "+4914001888" {
+		t.Errorf("Expecting: +4914001888, received: %s", parsed2)
+	}
+}

@@ -197,12 +197,14 @@ func (self *Cdrc) processFile(filePath string) error {
 	csvReader := csv.NewReader(bufio.NewReader(file))
 	csvReader.Comma = self.csvSep
 	procRowNr := 0
+	timeStart := time.Now()
 	for {
-		procRowNr += 1
 		record, err := csvReader.Read()
 		if err != nil && err == io.EOF {
 			break // End of file
-		} else if err != nil {
+		}
+		procRowNr += 1 // Only increase if not end of file
+		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
 			continue // Other csv related errors, ignore
 		}
@@ -229,6 +231,7 @@ func (self *Cdrc) processFile(filePath string) error {
 		engine.Logger.Err(err.Error())
 		return err
 	}
-	engine.Logger.Info(fmt.Sprintf("Finished processing %s, moved to %s", fn, newPath))
+	engine.Logger.Info(fmt.Sprintf("Finished processing %s, moved to %s. Total records processed: %d, run duration: %s",
+		fn, newPath, procRowNr, time.Now().Sub(timeStart)))
 	return nil
 }
