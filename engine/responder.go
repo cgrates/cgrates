@@ -30,6 +30,7 @@ import (
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 )
 
 type Responder struct {
@@ -289,7 +290,7 @@ type Connector interface {
 }
 
 type RPCClientConnector struct {
-	Client *rpc.Client
+	Client *rpcclient.RpcClient
 }
 
 func (rcc *RPCClientConnector) GetCost(cd CallDescriptor, cc *CallCost) error {
