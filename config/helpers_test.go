@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 
@@ -58,6 +59,43 @@ usage_fields = test1, test2
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(cfg.DerivedChargers, edcs) {
 		t.Errorf("Expecting: %v, received: %v", edcs, cfg.DerivedChargers)
+	}
+}
+
+func TestParseCfgDerivedChargingDn1(t *testing.T) {
+	eFieldsCfg := []byte(`[derived_charging]
+run_ids = run1, run2
+run_filters =~account:s/^\w+[mpls]\d{6}$//,~account:s/^0\d{9}$//;^account/value/
+reqtype_fields = test1, test2 
+direction_fields = test1, test2
+tenant_fields = test1, test2
+category_fields = test1, test2
+account_fields = test1, test2
+subject_fields = test1, test2
+destination_fields = test1, test2
+setup_time_fields = test1, test2
+answer_time_fields = test1, test2
+usage_fields = test1, test2
+`)
+	eDcs := make(utils.DerivedChargers, 2)
+	if dc, err := utils.NewDerivedCharger("run1", `~account:s/^\w+[mpls]\d{6}$//`, "test1", "test1", "test1",
+		"test1", "test1", "test1", "test1", "test1", "test1", "test1"); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else {
+		eDcs[0] = dc
+	}
+	if dc, err := utils.NewDerivedCharger("run2", `~account:s/^0\d{9}$//;^account/value/`, "test2", "test2", "test2",
+		"test2", "test2", "test2", "test2", "test2", "test2", "test2"); err != nil {
+		t.Error("Unexpected error: ", err)
+	} else {
+		eDcs[1] = dc
+	}
+
+	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
+		t.Error("Could not parse the config", err.Error())
+	} else if !reflect.DeepEqual(cfg.DerivedChargers, eDcs) {
+		dcsJson, _ := json.Marshal(cfg.DerivedChargers)
+		t.Errorf("Received: %s", string(dcsJson))
 	}
 }
 

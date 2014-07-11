@@ -74,6 +74,7 @@ const (
 	FIELDS_SEP                 = ","
 	REGEXP_PREFIX              = "~"
 	JSON                       = "json"
+	GOB                        = "gob"
 	MSGPACK                    = "msgpack"
 	CSV_LOAD                   = "CSVLOAD"
 	CGRID                      = "cgrid"

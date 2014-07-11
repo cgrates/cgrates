@@ -29,11 +29,8 @@ import (
 
 // Adds support for slice values in config
 func ConfigSlice(cfgVal string) ([]string, error) {
-	cfgValStrs := strings.Split(cfgVal, ",") // If need arrises, we can make the separator configurable
+	cfgValStrs := strings.Split(cfgVal, utils.FIELDS_SEP) // If need arrises, we can make the separator configurable
 	for idx, elm := range cfgValStrs {
-		//if elm == "" { //One empty element is presented when splitting empty string
-		//	return nil, errors.New("Empty values in config slice")
-		//}
 		cfgValStrs[idx] = strings.TrimSpace(elm) // By default spaces are not removed so we do it here to avoid unpredicted results in config
 	}
 	return cfgValStrs, nil

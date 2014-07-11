@@ -130,6 +130,7 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
 		t.Error("Not passing valid filter")
 	}
+
 	cdr = &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "futurem00005",
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
@@ -151,6 +152,23 @@ func TestPassesFieldFilterDn1(t *testing.T) {
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
 	}
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
+		t.Error("Should not pass filter")
+	}
+	cdr = &StoredCdr{CgrId: Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()), Account: "0162447222",
+		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"}, Cost: 1.01,
+	}
+	if acntPrefxFltr, err := NewRSRField(`~account:s/^0\d{9}$//`); err != nil {
+		t.Error("Unexpected parse error", err)
+	} else if acntPrefxFltr == nil {
+		t.Error("Failed parsing rule")
+	} else if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); !pass {
+		t.Error("Not passing valid filter")
+	}
+	if acntPrefxFltr, err := NewRSRField(`~account:s/^\w+[shmp]\d{4}$//`); err != nil {
+		t.Error("Unexpected parse error", err)
+	} else if acntPrefxFltr == nil {
+		t.Error("Failed parsing rule")
+	} else if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
 	}
 }

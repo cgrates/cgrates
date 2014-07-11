@@ -121,10 +121,15 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 	}
 	for _, dc := range dcs {
 		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
+		matchingAllFilters := true
 		for _, dcRunFilter := range runFilters {
 			if fltrPass, _ := storedCdr.PassesFieldFilter(dcRunFilter); !fltrPass {
-				continue
+				matchingAllFilters = false
+				break
 			}
+		}
+		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
+			continue
 		}
 		dcReqTypeFld, _ := utils.NewRSRField(dc.ReqTypeField)
 		dcDirFld, _ := utils.NewRSRField(dc.DirectionField)
@@ -143,6 +148,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 				err.Error()) // Cannot fork CDR, important just runid and error
 			continue
 		}
+		engine.Logger.Debug(fmt.Sprintf("Appending CdrRun: %+v\n", forkedCdr))
 		cdrRuns = append(cdrRuns, forkedCdr)
 	}
 	for _, cdr := range cdrRuns {
