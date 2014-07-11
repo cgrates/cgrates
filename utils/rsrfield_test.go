@@ -65,6 +65,9 @@ func TestNewRSRFieldIvo(t *testing.T) {
 	} else if !reflect.DeepEqual(rsrField, expectRSRField) {
 		t.Errorf("Unexpected RSRField received: %v", rsrField)
 	}
+	if _, err := NewRSRField(`~account:s/^[A-Za-z0-9]*[c|a]\d{4}$/S/:s/^[A-Za-z0-9]*n\d{4}$/C/:s/^\d{10}$//`); err != nil {
+		t.Error(err)
+	}
 }
 
 func TestConvertPlusNationalAnd00(t *testing.T) {

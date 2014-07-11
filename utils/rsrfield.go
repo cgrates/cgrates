@@ -48,17 +48,17 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 	spltRgxp := regexp.MustCompile(`:s\/`)
 	spltRules := spltRgxp.Split(fldStr, -1)
 	if len(spltRules) < 2 {
-		return nil, fmt.Errorf("Invalid Search&Replace field rule. %s", fldStr)
+		return nil, fmt.Errorf("Invalid Split of Search&Replace field rule. %s", fldStr)
 	}
 	rsrField := &RSRField{Id: spltRules[0][1:]} // Original id in form ~hdr_name
-	rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.+[^\\])*\/){1,}`)
+	rulesRgxp := regexp.MustCompile(`(?:(.+[^\\])\/(.*[^\\])*\/){1,}`)
 	for _, ruleStr := range spltRules[1:] { // :s/ already removed through split
 		allMatches := rulesRgxp.FindStringSubmatch(ruleStr)
 		if len(allMatches) != 3 {
-			return nil, fmt.Errorf("Invalid Search&Replace field rule. %s", fldStr)
+			return nil, fmt.Errorf("Not enough members in Search&Replace, ruleStr: %s, matches: %v, ", ruleStr, allMatches)
 		}
 		if srRegexp, err := regexp.Compile(allMatches[1]); err != nil {
-			return nil, fmt.Errorf("Invalid Search&Replace field rule. %s", fldStr)
+			return nil, fmt.Errorf("Invalid Search&Replace subfield rule: %s", allMatches[1])
 		} else {
 			rsrField.RSRules = append(rsrField.RSRules, &ReSearchReplace{SearchRegexp: srRegexp, ReplaceTemplate: allMatches[2]})
 		}
