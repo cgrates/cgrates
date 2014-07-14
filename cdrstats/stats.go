@@ -41,6 +41,9 @@ type QCDR struct {
 }
 
 func NewStatsQueue(conf *config.CdrStatsConfig) *StatsQueue {
+	if conf == nil {
+		return &StatsQueue{metrics: make(map[string]Metric)}
+	}
 	sq := &StatsQueue{
 		conf:    conf,
 		metrics: make(map[string]Metric, len(conf.Metrics)),
@@ -58,17 +61,17 @@ func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
 	if sq.AcceptCDR(cdr) {
 		qcdr := sq.SimplifyCDR(cdr)
 		sq.cdrs = append(sq.cdrs, qcdr)
-		sq.AddToMetrics(qcdr)
+		sq.addToMetrics(qcdr)
 	}
 }
 
-func (sq *StatsQueue) AddToMetrics(cdr *QCDR) {
+func (sq *StatsQueue) addToMetrics(cdr *QCDR) {
 	for _, metric := range sq.metrics {
 		metric.AddCDR(cdr)
 	}
 }
 
-func (sq *StatsQueue) RemoveFromMetrics(cdr *QCDR) {
+func (sq *StatsQueue) removeFromMetrics(cdr *QCDR) {
 	for _, metric := range sq.metrics {
 		metric.RemoveCDR(cdr)
 	}
@@ -87,13 +90,13 @@ func (sq *StatsQueue) PurgeObsoleteCDRs() {
 	currentLength := len(sq.cdrs)
 	if currentLength > sq.conf.QueuedItems {
 		for _, cdr := range sq.cdrs[:currentLength-sq.conf.QueuedItems] {
-			sq.RemoveFromMetrics(cdr)
+			sq.removeFromMetrics(cdr)
 		}
 		sq.cdrs = sq.cdrs[currentLength-sq.conf.QueuedItems:]
 	}
 	for i, cdr := range sq.cdrs {
 		if time.Now().Sub(cdr.SetupTime) > sq.conf.TimeWindow {
-			sq.RemoveFromMetrics(cdr)
+			sq.removeFromMetrics(cdr)
 			continue
 		} else {
 			if i > 0 {

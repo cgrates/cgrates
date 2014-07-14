@@ -26,13 +26,17 @@ type Metric interface {
 	GetValue() float64
 }
 
+const ASR = "ASR"
+const ACD = "ACD"
+const ACC = "ACC"
+
 func CreateMetric(metric string) Metric {
 	switch metric {
-	case "ASR":
+	case ASR:
 		return &ASRMetric{}
-	case "ACD":
+	case ACD:
 		return &ACDMetric{}
-	case "ACC":
+	case ACC:
 		return &ACCMetric{}
 	}
 	return nil
