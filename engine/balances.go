@@ -475,6 +475,7 @@ func (bc BalanceChain) HasBalance(balance *Balance) bool {
 
 func (bc BalanceChain) SaveDirtyBalances(acc *Account) {
 	for _, b := range bc {
+		// TODO: check if teh account was not already saved ?
 		if b.account != nil && b.account != acc && b.dirty {
 			accountingStorage.SetAccount(b.account)
 		}

@@ -16,25 +16,24 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cdrstats
+package engine
 
 import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestStatsInit(t *testing.T) {
-	sq := NewStatsQueue(&config.CdrStatsConfig{Metrics: []string{ASR, ACC}})
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACC}})
 	if len(sq.metrics) != 2 {
 		t.Error("Expected 2 metrics got ", len(sq.metrics))
 	}
 }
 
 func TestStatsValue(t *testing.T) {
-	sq := NewStatsQueue(&config.CdrStatsConfig{Metrics: []string{ASR, ACD, ACC}})
+	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACD, ACC}})
 	cdr := &utils.StoredCdr{
 		AnswerTime: time.Date(2014, 7, 14, 14, 25, 0, 0, time.UTC),
 		Usage:      10 * time.Second,
@@ -72,7 +71,7 @@ func TestStatsSimplifyCDR(t *testing.T) {
 		Cost:           10,
 	}
 	sq := &StatsQueue{}
-	qcdr := sq.SimplifyCDR(cdr)
+	qcdr := sq.simplifyCDR(cdr)
 	if cdr.SetupTime != qcdr.SetupTime ||
 		cdr.AnswerTime != qcdr.AnswerTime ||
 		cdr.Usage != qcdr.Usage ||
@@ -100,76 +99,76 @@ func TestAcceptCDR(t *testing.T) {
 		MediationRunId: "mri",
 		Cost:           10,
 	}
-	sq.conf = &config.CdrStatsConfig{}
-	if sq.AcceptCDR(cdr) != true {
+	sq.conf = &CdrStats{}
+	if sq.acceptCDR(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{TOR: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{TOR: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{CdrHost: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{CdrHost: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{CdrSource: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{CdrSource: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{Direction: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{Direction: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{Tenant: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{Tenant: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{Category: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{Category: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{Account: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{Account: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{Subject: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{Subject: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{DestinationPrefix: []string{"test"}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{DestinationPrefix: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{DestinationPrefix: []string{"test", "123"}}
-	if sq.AcceptCDR(cdr) != true {
+	sq.conf = &CdrStats{DestinationPrefix: []string{"test", "123"}}
+	if sq.acceptCDR(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC)}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC)}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC)}}
-	if sq.AcceptCDR(cdr) != true {
+	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC)}}
+	if sq.acceptCDR(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
-	if sq.AcceptCDR(cdr) != true {
+	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
+	if sq.acceptCDR(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{UsageInterval: []time.Duration{11 * time.Second}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{UsageInterval: []time.Duration{11 * time.Second}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{UsageInterval: []time.Duration{1 * time.Second, 10 * time.Second}}
-	if sq.AcceptCDR(cdr) == true {
+	sq.conf = &CdrStats{UsageInterval: []time.Duration{1 * time.Second, 10 * time.Second}}
+	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
-	sq.conf = &config.CdrStatsConfig{UsageInterval: []time.Duration{10 * time.Second, 11 * time.Second}}
-	if sq.AcceptCDR(cdr) != true {
+	sq.conf = &CdrStats{UsageInterval: []time.Duration{10 * time.Second, 11 * time.Second}}
+	if sq.acceptCDR(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
 }

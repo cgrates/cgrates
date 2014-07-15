@@ -326,6 +326,11 @@ func (ub *Account) refundIncrement(increment *Increment, direction, unitType str
 func (ub *Account) executeActionTriggers(a *Action) {
 	ub.ActionTriggers.Sort()
 	for _, at := range ub.ActionTriggers {
+		// sanity check
+		if !strings.Contains(at.ThresholdType, "counter") &&
+			strings.Contains(at.ThresholdType, "balance") {
+			continue
+		}
 		if at.Executed {
 			// trigger is marked as executed, so skipp it until
 			// the next reset (see RESET_TRIGGERS action type)
@@ -454,7 +459,7 @@ func (ub *Account) initCounters() {
 	}
 }
 
-func (ub *Account) CleanExpiredBalancesAndBuckets() {
+func (ub *Account) CleanExpiredBalances() {
 	for key, bm := range ub.BalanceMap {
 		for i := 0; i < len(bm); i++ {
 			if bm[i].IsExpired() {

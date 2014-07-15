@@ -55,43 +55,43 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	RatingDBType            string
-	RatingDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	RatingDBPort            string // The port to bind to.
-	RatingDBName            string // The name of the database to connect to.
-	RatingDBUser            string // The user to sign in as.
-	RatingDBPass            string // The user's password.
-	AccountDBType           string
-	AccountDBHost           string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort           string             // The port to bind to.
-	AccountDBName           string             // The name of the database to connect to.
-	AccountDBUser           string             // The user to sign in as.
-	AccountDBPass           string             // The user's password.
-	StorDBType              string             // Should reflect the database type used to store logs
-	StorDBHost              string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort              string             // Th e port to bind to.
-	StorDBName              string             // The name of the database to connect to.
-	StorDBUser              string             // The user to sign in as.
-	StorDBPass              string             // The user's password.
-	DBDataEncoding          string             // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen           string             // RPC JSON listening address
-	RPCGOBListen            string             // RPC GOB listening address
-	HTTPListen              string             // HTTP listening address
-	DefaultReqType          string             // Use this request type if not defined on top
-	DefaultCategory         string             // set default type of record
-	DefaultTenant           string             // set default tenant
-	DefaultSubject          string             // set default rating subject, useful in case of fallback
-	RoundingDecimals        int                // Number of decimals to round end prices at
-	HttpSkipTlsVerify       bool               // If enabled Http Client will accept any TLS certificate
-	XmlCfgDocument          *CgrXmlCfgDocument // Load additional configuration inside xml document
-	RaterEnabled            bool               // start standalone server (no balancer)
-	RaterBalancer           string             // balancer address host:port
-	BalancerEnabled         bool
-	SchedulerEnabled        bool
-	CDRSEnabled             bool                       // Enable CDR Server service
-	CDRSExtraFields         []*utils.RSRField          // Extra fields to store in CDRs
-	CDRSMediator            string                     // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CdrStatsConfigs         []*CdrStatsConfig          // Active cdr stats configuration instances
+	RatingDBType      string
+	RatingDBHost      string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	RatingDBPort      string // The port to bind to.
+	RatingDBName      string // The name of the database to connect to.
+	RatingDBUser      string // The user to sign in as.
+	RatingDBPass      string // The user's password.
+	AccountDBType     string
+	AccountDBHost     string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort     string             // The port to bind to.
+	AccountDBName     string             // The name of the database to connect to.
+	AccountDBUser     string             // The user to sign in as.
+	AccountDBPass     string             // The user's password.
+	StorDBType        string             // Should reflect the database type used to store logs
+	StorDBHost        string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort        string             // Th e port to bind to.
+	StorDBName        string             // The name of the database to connect to.
+	StorDBUser        string             // The user to sign in as.
+	StorDBPass        string             // The user's password.
+	DBDataEncoding    string             // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen     string             // RPC JSON listening address
+	RPCGOBListen      string             // RPC GOB listening address
+	HTTPListen        string             // HTTP listening address
+	DefaultReqType    string             // Use this request type if not defined on top
+	DefaultCategory   string             // set default type of record
+	DefaultTenant     string             // set default tenant
+	DefaultSubject    string             // set default rating subject, useful in case of fallback
+	RoundingDecimals  int                // Number of decimals to round end prices at
+	HttpSkipTlsVerify bool               // If enabled Http Client will accept any TLS certificate
+	XmlCfgDocument    *CgrXmlCfgDocument // Load additional configuration inside xml document
+	RaterEnabled      bool               // start standalone server (no balancer)
+	RaterBalancer     string             // balancer address host:port
+	BalancerEnabled   bool
+	SchedulerEnabled  bool
+	CDRSEnabled       bool              // Enable CDR Server service
+	CDRSExtraFields   []*utils.RSRField // Extra fields to store in CDRs
+	CDRSMediator      string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	//CdrStats                []*cdrstats.CdrStats       // Active cdr stats configuration instances
 	CdreDefaultInstance     *CdreConfig                // Will be used in the case no specific one selected by API
 	CdrcEnabled             bool                       // Enable CDR client functionality
 	CdrcCdrs                string                     // Address where to reach CDR server

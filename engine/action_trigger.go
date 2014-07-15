@@ -22,24 +22,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 type ActionTrigger struct {
-	Id             string // uniquely identify the trigger
-	BalanceType    string
-	Direction      string
-	ThresholdType  string //*min_counter, *max_counter, *min_balance, *max_balance
-	ThresholdValue float64
-	Recurrent      bool // reset eexcuted flag each run
-	DestinationId  string
-	Weight         float64
-	ActionsId      string
-	Executed       bool
+	Id            string // uniquely identify the trigger
+	BalanceType   string
+	Direction     string
+	ThresholdType string //*min_counter, *max_counter, *min_balance, *max_balance
+	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_acc, *max_acc
+	ThresholdValue    float64
+	Recurrent         bool          // reset eexcuted flag each run
+	MinSleep          time.Duration // Minimum duration between two executions in case of recurrent triggers
+	DestinationId     string
+	Weight            float64
+	ActionsId         string
+	Executed          bool
+	MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
+	lastExecutionTime time.Time
 }
 
 func (at *ActionTrigger) Execute(ub *Account) (err error) {
+	// check for min sleep time
+	if at.Recurrent && !at.lastExecutionTime.IsZero() && time.Since(at.lastExecutionTime) < at.MinSleep {
+		return
+	}
+	at.lastExecutionTime = time.Now()
 	if ub.Disabled {
 		return fmt.Errorf("User %s is disabled", ub.Id)
 	}

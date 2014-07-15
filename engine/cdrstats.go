@@ -16,13 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package config
+package engine
 
-import (
-	"time"
-)
+import "time"
 
-type CdrStatsConfig struct {
+type CdrStats struct {
 	Id                string        // Config id, unique per config instance
 	QueuedItems       int           // Number of items in the stats buffer
 	TimeWindow        time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
@@ -41,15 +39,5 @@ type CdrStatsConfig struct {
 	UsageInterval     []time.Duration // 2 or less items (>= Usage, <Usage)
 	MediationRunIds   []string
 	CostInterval      []float64 // 2 or less items, (>=Cost, <Cost)
-	CdrStatsTriggers  []*CdrStatsTrigger
-}
-
-type CdrStatsTrigger struct {
-	ThresholdType  string // *min_asr, *max_asr, *min_acd, *max_acd, *min_acc, *max_acc
-	ThresholdValue float64
-	MinQueuedItems int           // Trigger actions only if this number is hit
-	MinSleep       time.Duration // Minimum duration between two executions in case of recurrent triggers
-	ActionsId      string        // Id of actions to be executed
-	Recurrent      bool          // Re-enable automatically once executed
-	Weight         float64
+	Triggers          ActionTriggerPriotityList
 }

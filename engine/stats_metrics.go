@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cdrstats
+package engine
 
 import "time"
 
@@ -26,9 +26,9 @@ type Metric interface {
 	GetValue() float64
 }
 
-const ASR = "ASR"
-const ACD = "ACD"
-const ACC = "ACC"
+const ASR = "asr"
+const ACD = "acd"
+const ACC = "acc"
 
 func CreateMetric(metric string) Metric {
 	switch metric {
