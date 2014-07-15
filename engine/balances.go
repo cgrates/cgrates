@@ -74,6 +74,20 @@ func (b *Balance) MatchDestination(destinationId string) bool {
 	return !b.HasDestination() || b.DestinationId == destinationId
 }
 
+func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
+	matchesExpirationDate := true
+	if !at.BalanceExpirationDate.IsZero() {
+		matchesExpirationDate = (at.BalanceExpirationDate.Equal(b.ExpirationDate))
+	}
+	matchesWeight := true
+	if at.BalanceWeight > 0 {
+		matchesWeight = (at.BalanceWeight == b.Weight)
+	}
+	return b.MatchDestination(at.DestinationId) &&
+		matchesExpirationDate &&
+		matchesWeight
+}
+
 func (b *Balance) Clone() *Balance {
 	return &Balance{
 		Uuid:           b.Uuid,
