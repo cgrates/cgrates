@@ -214,7 +214,7 @@ func TestConfigFromFile(t *testing.T) {
 		MaskDestId:              "test",
 		MaskLength:              99,
 		ExportDir:               "test"}
-	eCfg.CdreDefaultInstance.ContentFields, _ = NewCdreCdrFieldsFromIds("test")
+	eCfg.CdreDefaultInstance.ContentFields, _ = NewCdreCdrFieldsFromIds(false, "test")
 	eCfg.CdrcEnabled = true
 	eCfg.CdrcCdrs = "test"
 	eCfg.CdrcRunDelay = time.Duration(99) * time.Second
@@ -308,11 +308,11 @@ cdr_format = csv
 export_template = cgrid,mediation_runid,accid
 `)
 	expectedFlds := []*CdreCdrField{
-		&CdreCdrField{Name: "cgrid", Type: utils.CDRFIELD, Value: "cgrid", valueAsRsrField: &utils.RSRField{Id: "cgrid"}, Width: 40, Mandatory: true},
+		&CdreCdrField{Name: "cgrid", Type: utils.CDRFIELD, Value: "cgrid", valueAsRsrField: &utils.RSRField{Id: "cgrid"}, Mandatory: true},
 		&CdreCdrField{Name: "mediation_runid", Type: utils.CDRFIELD, Value: "mediation_runid", valueAsRsrField: &utils.RSRField{Id: "mediation_runid"},
-			Width: 20, Strip: "xright", Padding: "left", Mandatory: true},
+			Mandatory: true},
 		&CdreCdrField{Name: "accid", Type: utils.CDRFIELD, Value: "accid", valueAsRsrField: &utils.RSRField{Id: "accid"},
-			Width: 36, Strip: "left", Padding: "left", Mandatory: true},
+			Mandatory: true},
 	}
 	expCdreCfg := &CdreConfig{CdrFormat: utils.CSV, CostRoundingDecimals: -1, ExportDir: "/var/log/cgrates/cdre", ContentFields: expectedFlds}
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
@@ -326,9 +326,9 @@ export_template = cgrid,~effective_caller_id_number:s/(\d+)/+$1/
 `)
 	rsrField, _ := utils.NewRSRField(`~effective_caller_id_number:s/(\d+)/+$1/`)
 	expectedFlds = []*CdreCdrField{
-		&CdreCdrField{Name: "cgrid", Type: utils.CDRFIELD, Value: "cgrid", valueAsRsrField: &utils.RSRField{Id: "cgrid"}, Width: 40, Mandatory: true},
-		&CdreCdrField{Name: `~effective_caller_id_number:s/(\d+)/+$1/`, Type: utils.CDRFIELD, Value: `~effective_caller_id_number:s/(\d+)/+$1/`, valueAsRsrField: rsrField,
-			Width: 30, Strip: "xright", Padding: "left", Mandatory: false}}
+		&CdreCdrField{Name: "cgrid", Type: utils.CDRFIELD, Value: "cgrid", valueAsRsrField: &utils.RSRField{Id: "cgrid"}, Mandatory: true},
+		&CdreCdrField{Name: `~effective_caller_id_number:s/(\d+)/+$1/`, Type: utils.CDRFIELD, Value: `~effective_caller_id_number:s/(\d+)/+$1/`,
+			valueAsRsrField: rsrField, Mandatory: false}}
 	expCdreCfg.ContentFields = expectedFlds
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())

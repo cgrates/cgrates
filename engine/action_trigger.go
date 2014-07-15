@@ -33,15 +33,17 @@ type ActionTrigger struct {
 	Direction     string
 	ThresholdType string //*min_counter, *max_counter, *min_balance, *max_balance
 	// stats: *min_asr, *max_asr, *min_acd, *max_acd, *min_acc, *max_acc
-	ThresholdValue    float64
-	Recurrent         bool          // reset eexcuted flag each run
-	MinSleep          time.Duration // Minimum duration between two executions in case of recurrent triggers
-	DestinationId     string
-	Weight            float64
-	ActionsId         string
-	Executed          bool
-	MinQueuedItems    int // Trigger actions only if this number is hit (stats only)
-	lastExecutionTime time.Time
+	ThresholdValue        float64
+	Recurrent             bool          // reset eexcuted flag each run
+	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
+	DestinationId         string        // filter for balance
+	BalanceWeight         float64       // filter for balance
+	BalanceExpirationDate time.Time     // filter for balance
+	Weight                float64
+	ActionsId             string
+	Executed              bool
+	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
+	lastExecutionTime     time.Time
 }
 
 func (at *ActionTrigger) Execute(ub *Account) (err error) {
@@ -51,7 +53,7 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 	}
 	at.lastExecutionTime = time.Now()
 	if ub.Disabled {
-		return fmt.Errorf("User %s is disabled", ub.Id)
+		return fmt.Errorf("User %s is disabled and there are triggers in action!", ub.Id)
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions

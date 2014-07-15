@@ -24,15 +24,16 @@ import (
 )
 
 // Converts a list of field identifiers into proper CDR field content
-func NewCdreCdrFieldsFromIds(fldsIds ...string) ([]*CdreCdrField, error) {
+func NewCdreCdrFieldsFromIds(withFixedWith bool, fldsIds ...string) ([]*CdreCdrField, error) {
 	cdrFields := make([]*CdreCdrField, len(fldsIds))
 	for idx, fldId := range fldsIds {
 		if parsedRsr, err := utils.NewRSRField(fldId); err != nil {
 			return nil, err
 		} else {
 			cdrFld := &CdreCdrField{Name: fldId, Type: utils.CDRFIELD, Value: fldId, valueAsRsrField: parsedRsr}
-			if err := cdrFld.setDefaultFixedWidthProperties(); err != nil { // Set default fixed width properties to be used later if needed
+			if err := cdrFld.setDefaultFieldProperties(withFixedWith); err != nil { // Set default fixed width properties to be used later if needed
 				return nil, err
+
 			}
 			cdrFields[idx] = cdrFld
 		}
@@ -73,7 +74,7 @@ func (cdreCfg *CdreConfig) setDefaults() error {
 	cdreCfg.MaskDestId = ""
 	cdreCfg.MaskLength = 0
 	cdreCfg.ExportDir = "/var/log/cgrates/cdre"
-	if flds, err := NewCdreCdrFieldsFromIds(utils.CGRID, utils.MEDI_RUNID, utils.TOR, utils.ACCID, utils.REQTYPE, utils.DIRECTION, utils.TENANT,
+	if flds, err := NewCdreCdrFieldsFromIds(false, utils.CGRID, utils.MEDI_RUNID, utils.TOR, utils.ACCID, utils.REQTYPE, utils.DIRECTION, utils.TENANT,
 		utils.CATEGORY, utils.ACCOUNT, utils.SUBJECT, utils.DESTINATION, utils.SETUP_TIME, utils.ANSWER_TIME, utils.USAGE, utils.COST); err != nil {
 		return err
 	} else {
@@ -100,125 +101,142 @@ func (cdrField *CdreCdrField) ValueAsRSRField() *utils.RSRField {
 }
 
 // Should be called on .fwv configuration without providing default values for fixed with parameters
-func (cdrField *CdreCdrField) setDefaultFixedWidthProperties() error {
+func (cdrField *CdreCdrField) setDefaultFieldProperties(fixedWidth bool) error {
 	if cdrField.valueAsRsrField == nil {
 		return errors.New("Missing valueAsRsrField")
 	}
 	switch cdrField.valueAsRsrField.Id {
 	case utils.CGRID:
-		cdrField.Width = 40
-		cdrField.Strip = ""
-		cdrField.Padding = ""
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 40
+		}
 	case utils.ORDERID:
-		cdrField.Width = 11
-		cdrField.Strip = ""
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 11
+			cdrField.Padding = "left"
+		}
 	case utils.TOR:
-		cdrField.Width = 6
-		cdrField.Strip = ""
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 6
+			cdrField.Padding = "left"
+		}
 	case utils.ACCID:
-		cdrField.Width = 36
-		cdrField.Strip = "left"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 36
+			cdrField.Strip = "left"
+			cdrField.Padding = "left"
+		}
 	case utils.CDRHOST:
-		cdrField.Width = 15
-		cdrField.Strip = "left"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 15
+			cdrField.Strip = "left"
+			cdrField.Padding = "left"
+		}
 	case utils.CDRSOURCE:
-		cdrField.Width = 15
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 15
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.REQTYPE:
-		cdrField.Width = 13
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 13
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.DIRECTION:
-		cdrField.Width = 4
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 4
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.TENANT:
-		cdrField.Width = 24
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 24
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.CATEGORY:
-		cdrField.Width = 10
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 10
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.ACCOUNT:
-		cdrField.Width = 24
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 24
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.SUBJECT:
-		cdrField.Width = 24
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 24
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.DESTINATION:
-		cdrField.Width = 24
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 24
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.SETUP_TIME:
-		cdrField.Width = 30
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = "2006-01-02T15:04:05Z07:00"
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 30
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+			cdrField.Layout = "2006-01-02T15:04:05Z07:00"
+		}
 	case utils.ANSWER_TIME:
-		cdrField.Width = 30
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = "2006-01-02T15:04:05Z07:00"
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 30
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+			cdrField.Layout = "2006-01-02T15:04:05Z07:00"
+		}
 	case utils.USAGE:
-		cdrField.Width = 30
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 30
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.MEDI_RUNID:
-		cdrField.Width = 20
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 20
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	case utils.COST:
-		cdrField.Width = 24
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = true
+		if fixedWidth {
+			cdrField.Width = 24
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	default:
-		cdrField.Width = 30
-		cdrField.Strip = "xright"
-		cdrField.Padding = "left"
-		cdrField.Layout = ""
 		cdrField.Mandatory = false
+		if fixedWidth {
+			cdrField.Width = 30
+			cdrField.Strip = "xright"
+			cdrField.Padding = "left"
+		}
 	}
 	return nil
 }

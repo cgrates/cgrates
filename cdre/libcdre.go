@@ -35,6 +35,9 @@ func FmtFieldWidth(source string, width int, strip, padding string, mandatory bo
 	if mandatory && len(source) == 0 {
 		return "", errors.New("Empty source value")
 	}
+	if width == 0 { // Disable width processing if not defined
+		return source, nil
+	}
 	if len(source) == width { // the source is exactly the maximum length
 		return source, nil
 	}

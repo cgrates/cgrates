@@ -97,7 +97,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		var err error
 
 		for i := 0; i < cfg.MediatorRaterReconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, 0, 3, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, 0, cfg.MediatorRaterReconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -150,7 +150,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		var err error
 
 		for i := 0; i < cfg.SMRaterReconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SMRater, 0, 3, utils.GOB)
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SMRater, 0, cfg.SMRaterReconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
