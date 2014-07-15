@@ -46,13 +46,13 @@ type ActionTrigger struct {
 	lastExecutionTime     time.Time
 }
 
-func (at *ActionTrigger) Execute(ub *Account) (err error) {
+func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueue) (err error) {
 	// check for min sleep time
 	if at.Recurrent && !at.lastExecutionTime.IsZero() && time.Since(at.lastExecutionTime) < at.MinSleep {
 		return
 	}
 	at.lastExecutionTime = time.Now()
-	if ub.Disabled {
+	if ub != nil && ub.Disabled {
 		return fmt.Errorf("User %s is disabled and there are triggers in action!", ub.Id)
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
@@ -76,7 +76,7 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 			return
 		}
 		go Logger.Info(fmt.Sprintf("Executing %v: %v", ub.Id, a))
-		err = actionFunction(ub, a)
+		err = actionFunction(ub, sq, a)
 		if err == nil {
 			atLeastOneActionExecuted = true
 		}
@@ -84,8 +84,10 @@ func (at *ActionTrigger) Execute(ub *Account) (err error) {
 	if !atLeastOneActionExecuted || at.Recurrent {
 		at.Executed = false
 	}
-	storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)
-	accountingStorage.SetAccount(ub)
+	if ub != nil {
+		storageLogger.LogActionTrigger(ub.Id, RATER_SOURCE, at, aac)
+		accountingStorage.SetAccount(ub)
+	}
 	return
 }
 

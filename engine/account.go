@@ -346,12 +346,12 @@ func (ub *Account) executeActionTriggers(a *Action) {
 						if strings.Contains(at.ThresholdType, "*max") {
 							if mb.MatchActionTrigger(at) && mb.Value >= at.ThresholdValue {
 								// run the actions
-								at.Execute(ub)
+								at.Execute(ub, nil)
 							}
 						} else { //MIN
 							if mb.MatchActionTrigger(at) && mb.Value <= at.ThresholdValue {
 								// run the actions
-								at.Execute(ub)
+								at.Execute(ub, nil)
 							}
 						}
 					}
@@ -365,12 +365,12 @@ func (ub *Account) executeActionTriggers(a *Action) {
 				if strings.Contains(at.ThresholdType, "*max") {
 					if b.MatchActionTrigger(at) && b.Value >= at.ThresholdValue {
 						// run the actions
-						at.Execute(ub)
+						at.Execute(ub, nil)
 					}
 				} else { //MIN
 					if b.MatchActionTrigger(at) && b.Value <= at.ThresholdValue {
 						// run the actions
-						at.Execute(ub)
+						at.Execute(ub, nil)
 					}
 				}
 			}

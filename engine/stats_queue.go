@@ -76,14 +76,14 @@ func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
 			if strings.HasPrefix(at.ThresholdType, "*min_") {
 				if value, ok := stats[at.ThresholdType[len("*min_"):]]; ok {
 					if value <= at.ThresholdValue {
-						//at.Execute()
+						at.Execute(nil, sq)
 					}
 				}
 			}
 			if strings.HasPrefix(at.ThresholdType, "*max_") {
 				if value, ok := stats[at.ThresholdType[len("*max_"):]]; ok {
 					if value >= at.ThresholdValue {
-						//at.Execute()
+						at.Execute(nil, sq)
 					}
 				}
 			}

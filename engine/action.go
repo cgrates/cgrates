@@ -67,7 +67,7 @@ const (
 	UNLIMITED       = "*unlimited"
 )
 
-type actionTypeFunc func(*Account, *Action) error
+type actionTypeFunc func(*Account, *StatsQueue, *Action) error
 
 func getActionFunc(typ string) (actionTypeFunc, bool) {
 	switch typ {
@@ -111,42 +111,70 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 	return nil, false
 }
 
-func logAction(ub *Account, a *Action) (err error) {
-	ubMarshal, _ := json.Marshal(ub)
-	Logger.Info(fmt.Sprintf("Threshold reached, balance: %s", ubMarshal))
+func logAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	var o interface{}
+	if ub != nil {
+		o = ub
+	}
+	if sq != nil {
+		o = sq
+	}
+	body, _ := json.Marshal(o)
+	Logger.Info(fmt.Sprintf("Threshold reached, balance: %s", body))
 	return
 }
 
-func resetTriggersAction(ub *Account, a *Action) (err error) {
+func resetTriggersAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	ub.ResetActionTriggers(a)
 	return
 }
 
-func setRecurrentAction(ub *Account, a *Action) (err error) {
+func setRecurrentAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	ub.SetRecurrent(a, true)
 	return
 }
 
-func unsetRecurrentAction(ub *Account, a *Action) (err error) {
+func unsetRecurrentAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	ub.SetRecurrent(a, false)
 	return
 }
 
-func allowNegativeAction(ub *Account, a *Action) (err error) {
+func allowNegativeAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	ub.AllowNegative = true
 	return
 }
 
-func denyNegativeAction(ub *Account, a *Action) (err error) {
+func denyNegativeAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	ub.AllowNegative = false
 	return
 }
 
-func resetAccountAction(ub *Account, a *Action) (err error) {
+func resetAccountAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	return genericReset(ub)
 }
 
-func topupResetAction(ub *Account, a *Action) (err error) {
+func topupResetAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
@@ -155,12 +183,18 @@ func topupResetAction(ub *Account, a *Action) (err error) {
 	return genericDebit(ub, a)
 }
 
-func topupAction(ub *Account, a *Action) (err error) {
+func topupAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	genericMakeNegative(a)
 	return genericDebit(ub, a)
 }
 
-func debitResetAction(ub *Account, a *Action) (err error) {
+func debitResetAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	if ub.BalanceMap == nil { // Init the map since otherwise will get error if nil
 		ub.BalanceMap = make(map[string]BalanceChain, 0)
 	}
@@ -168,11 +202,17 @@ func debitResetAction(ub *Account, a *Action) (err error) {
 	return genericDebit(ub, a)
 }
 
-func debitAction(ub *Account, a *Action) (err error) {
+func debitAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	return genericDebit(ub, a)
 }
 
-func resetCounterAction(ub *Account, a *Action) (err error) {
+func resetCounterAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	uc := ub.getUnitCounter(a)
 	if uc == nil {
 		uc = &UnitsCounter{BalanceType: a.BalanceType, Direction: a.Direction}
@@ -182,7 +222,10 @@ func resetCounterAction(ub *Account, a *Action) (err error) {
 	return
 }
 
-func resetCountersAction(ub *Account, a *Action) (err error) {
+func resetCountersAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	ub.UnitCounters = make([]*UnitsCounter, 0)
 	ub.initCounters()
 	return
@@ -195,6 +238,9 @@ func genericMakeNegative(a *Action) {
 }
 
 func genericDebit(ub *Account, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	if ub.BalanceMap == nil {
 		ub.BalanceMap = make(map[string]BalanceChain)
 	}
@@ -202,12 +248,18 @@ func genericDebit(ub *Account, a *Action) (err error) {
 	return
 }
 
-func enableUserAction(ub *Account, a *Action) (err error) {
+func enableUserAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	ub.Disabled = false
 	return
 }
 
-func disableUserAction(ub *Account, a *Action) (err error) {
+func disableUserAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
+	if ub == nil {
+		return errors.New("Nil user balance")
+	}
 	ub.Disabled = true
 	return
 }
@@ -221,25 +273,37 @@ func genericReset(ub *Account) error {
 	return nil
 }
 
-func callUrl(ub *Account, a *Action) error {
+func callUrl(ub *Account, sq *StatsQueue, a *Action) (err error) {
 	cfg := config.CgrConfig()
-	_, err := utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, ub)
+	if ub != nil {
+		_, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, ub)
+	}
+	if sq != nil {
+		_, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, sq)
+	}
 	return err
 }
 
 // Does not block for posts, no error reports
-func callUrlAsync(ub *Account, a *Action) error {
-	ubJson, err := json.Marshal(ub)
+func callUrlAsync(ub *Account, sq *StatsQueue, a *Action) error {
+	var o interface{}
+	if ub != nil {
+		o = ub
+	}
+	if sq != nil {
+		o = sq.GetStats()
+	}
+	jsn, err := json.Marshal(o)
 	if err != nil {
 		return err
 	}
 	cfg := config.CgrConfig()
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
-			if _, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, ub); err == nil {
+			if _, err = utils.HttpJsonPost(a.ExtraParameters, cfg.HttpSkipTlsVerify, o); err == nil {
 				break // Success, no need to reinterate
 			} else if i == 4 { // Last iteration, syslog the warning
-				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), ubJson))
+				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed calling url: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), jsn))
 				break
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
@@ -250,8 +314,15 @@ func callUrlAsync(ub *Account, a *Action) error {
 }
 
 // Mails the balance hitting the threshold towards predefined list of addresses
-func mailAsync(ub *Account, a *Action) error {
-	ubJson, err := json.Marshal(ub)
+func mailAsync(ub *Account, sq *StatsQueue, a *Action) error {
+	var o interface{}
+	if ub != nil {
+		o = ub
+	}
+	if sq != nil {
+		o = sq.GetStats()
+	}
+	jsn, err := json.Marshal(o)
 	if err != nil {
 		return err
 	}
@@ -268,14 +339,14 @@ func mailAsync(ub *Account, a *Action) error {
 		}
 		toAddrStr += addr
 	}
-	message := []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.Id, time.Now(), ubJson))
+	message := []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.Id, time.Now(), jsn))
 	auth := smtp.PlainAuth("", cgrCfg.MailerAuthUser, cgrCfg.MailerAuthPass, strings.Split(cgrCfg.MailerServer, ":")[0]) // We only need host part, so ignore port
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
 			if err := smtp.SendMail(cgrCfg.MailerServer, auth, cgrCfg.MailerFromAddr, toAddrs, message); err == nil {
 				break
 			} else if i == 4 {
-				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), ubJson))
+				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), jsn))
 				break
 			}
 			time.Sleep(time.Duration(i) * time.Minute)
