@@ -44,7 +44,7 @@ type ActionTrigger struct {
 
 func (at *ActionTrigger) Execute(ub *Account) (err error) {
 	if ub.Disabled {
-		return Logger.Err(fmt.Errorf("User %s is disabled and there are triggers in action!", ub.Id))
+		return fmt.Errorf("User %s is disabled and there are triggers in action!", ub.Id)
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions
