@@ -150,9 +150,11 @@ func (self *Cdrc) processCdrDir() error {
 	filesInDir, _ := ioutil.ReadDir(self.cdrInDir)
 	for _, file := range filesInDir {
 		if self.cdrType != FS_CSV || path.Ext(file.Name()) != ".csv" {
-			if err := self.processFile(path.Join(self.cdrInDir, file.Name())); err != nil {
-				return err
-			}
+			go func() { //Enable async processing here
+				if err := self.processFile(path.Join(self.cdrInDir, file.Name())); err != nil {
+					engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", file, err.Error()))
+				}
+			}()
 		}
 	}
 	return nil
@@ -174,9 +176,11 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 		select {
 		case ev := <-watcher.Event:
 			if ev.IsCreate() && (self.cdrType != FS_CSV || path.Ext(ev.Name) != ".csv") {
-				if err = self.processFile(ev.Name); err != nil {
-					engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
-				}
+				go func() { //Enable async processing here
+					if err = self.processFile(ev.Name); err != nil {
+						engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))
+					}
+				}()
 			}
 		case err := <-watcher.Error:
 			engine.Logger.Err(fmt.Sprintf("Inotify error: %s", err.Error()))
