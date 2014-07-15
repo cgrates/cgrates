@@ -827,7 +827,7 @@ func TestActionResetCounterMinutes(t *testing.T) {
 			CREDIT:  BalanceChain{&Balance{Value: 100}},
 			MINUTES: BalanceChain{&Balance{Value: 10, Weight: 20, DestinationId: "NAT"}, &Balance{Weight: 10, DestinationId: "RET"}}},
 		UnitCounters:   []*UnitsCounter{&UnitsCounter{BalanceType: CREDIT, Balances: BalanceChain{&Balance{Value: 1}}}},
-		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
+		ActionTriggers: ActionTriggerPriotityList{&ActionTrigger{BalanceType: CREDIT, ThresholdType: "*max_counter", ThresholdValue: 2, ActionsId: "TEST_ACTIONS", Executed: true}},
 	}
 	a := &Action{BalanceType: MINUTES}
 	resetCounterAction(ub, a)
@@ -840,14 +840,14 @@ func TestActionResetCounterMinutes(t *testing.T) {
 		for _, b := range ub.UnitCounters[1].Balances {
 			t.Logf("B: %+v", b)
 		}
-		t.Error("Reset counters action failed!", ub.UnitCounters[1])
+		t.Errorf("Reset counters action failed: %+v", ub)
 	}
 	if len(ub.UnitCounters) < 2 || len(ub.UnitCounters[1].Balances) < 1 {
 		t.FailNow()
 	}
 	mb := ub.UnitCounters[1].Balances[0]
 	if mb.Weight != 20 || mb.Value != 0 || mb.DestinationId != "NAT" {
-		t.Errorf("Balance cloned incorrectly: %v!", mb)
+		t.Errorf("Balance cloned incorrectly: %+v!", mb)
 	}
 }
 

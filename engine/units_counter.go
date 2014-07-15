@@ -19,6 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"strings"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -36,6 +38,10 @@ type UnitsCounter struct {
 func (uc *UnitsCounter) initBalances(ats []*ActionTrigger) {
 	uc.Balances = BalanceChain{&Balance{}} // general balance
 	for _, at := range ats {
+		if !strings.Contains(at.ThresholdType, "counter") {
+			// only get actions fo counter type action triggers
+			continue
+		}
 		acs, err := accountingStorage.GetActions(at.ActionsId, false)
 		if err != nil {
 			continue

@@ -22,26 +22,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
 
 type ActionTrigger struct {
-	Id             string // uniquely identify the trigger
-	BalanceType    string
-	Direction      string
-	ThresholdType  string //*min_counter, *max_counter, *min_balance, *max_balance
-	ThresholdValue float64
-	Recurrent      bool // reset eexcuted flag each run
-	DestinationId  string
-	Weight         float64
-	ActionsId      string
-	Executed       bool
+	Id                    string // uniquely identify the trigger
+	BalanceType           string
+	Direction             string
+	ThresholdType         string //*min_counter, *max_counter, *min_balance, *max_balance
+	ThresholdValue        float64
+	Recurrent             bool // reset eexcuted flag each run
+	DestinationId         string
+	BalanceWeight         float64
+	BalanceExpirationDate time.Time
+	Weight                float64
+	ActionsId             string
+	Executed              bool
 }
 
 func (at *ActionTrigger) Execute(ub *Account) (err error) {
 	if ub.Disabled {
-		return fmt.Errorf("User %s is disabled", ub.Id)
+		return Logger.Err(fmt.Errorf("User %s is disabled and there are triggers in action!", ub.Id))
 	}
 	// does NOT need to Lock() because it is triggered from a method that took the Lock
 	var aac Actions

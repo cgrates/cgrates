@@ -339,12 +339,12 @@ func (ub *Account) executeActionTriggers(a *Action) {
 				if uc.BalanceType == at.BalanceType {
 					for _, mb := range uc.Balances {
 						if strings.Contains(at.ThresholdType, "*max") {
-							if mb.MatchDestination(at.DestinationId) && mb.Value >= at.ThresholdValue {
+							if mb.MatchActionTrigger(at) && mb.Value >= at.ThresholdValue {
 								// run the actions
 								at.Execute(ub)
 							}
 						} else { //MIN
-							if mb.MatchDestination(at.DestinationId) && mb.Value <= at.ThresholdValue {
+							if mb.MatchActionTrigger(at) && mb.Value <= at.ThresholdValue {
 								// run the actions
 								at.Execute(ub)
 							}
@@ -354,13 +354,16 @@ func (ub *Account) executeActionTriggers(a *Action) {
 			}
 		} else { // BALANCE
 			for _, b := range ub.BalanceMap[at.BalanceType+at.Direction] {
+				if !b.dirty { // do not check clean balances
+					continue
+				}
 				if strings.Contains(at.ThresholdType, "*max") {
-					if b.MatchDestination(at.DestinationId) && b.Value >= at.ThresholdValue {
+					if b.MatchActionTrigger(at) && b.Value >= at.ThresholdValue {
 						// run the actions
 						at.Execute(ub)
 					}
 				} else { //MIN
-					if b.MatchDestination(at.DestinationId) && b.Value <= at.ThresholdValue {
+					if b.MatchActionTrigger(at) && b.Value <= at.ThresholdValue {
 						// run the actions
 						at.Execute(ub)
 					}
