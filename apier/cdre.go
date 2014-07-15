@@ -59,7 +59,8 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			}
 		} else {
 			exportTemplate, _ = config.NewDefaultCdreConfig()
-			if contentFlds, err := config.NewCdreCdrFieldsFromIds(strings.Split(*attr.ExportTemplate, string(utils.CSV_SEP))...); err != nil {
+			if contentFlds, err := config.NewCdreCdrFieldsFromIds(exportTemplate.CdrFormat == utils.CDRE_FIXED_WIDTH,
+				strings.Split(*attr.ExportTemplate, string(utils.CSV_SEP))...); err != nil {
 				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 			} else {
 				exportTemplate.ContentFields = contentFlds

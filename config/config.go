@@ -423,7 +423,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 				cfg.CdreDefaultInstance = xmlTemplates[exportTemplate[len(utils.XML_PROFILE_PREFIX):]].AsCdreConfig()
 			}
 		} else { // Not loading out of template
-			if flds, err := NewCdreCdrFieldsFromIds(strings.Split(exportTemplate, string(utils.CSV_SEP))...); err != nil {
+			if flds, err := NewCdreCdrFieldsFromIds(cfg.CdreDefaultInstance.CdrFormat == utils.CDRE_FIXED_WIDTH,
+				strings.Split(exportTemplate, string(utils.CSV_SEP))...); err != nil {
 				return nil, err
 			} else {
 				cfg.CdreDefaultInstance.ContentFields = flds

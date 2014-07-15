@@ -241,11 +241,9 @@ func (cdre *CdrExporter) composeHeader() error {
 			return err
 		}
 		fmtOut := outVal
-		if cdre.cdrFormat == utils.CDRE_FIXED_WIDTH {
-			if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Name, err.Error()))
-				return err
-			}
+		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Name, err.Error()))
+			return err
 		}
 		cdre.header = append(cdre.header, fmtOut)
 	}
@@ -272,11 +270,9 @@ func (cdre *CdrExporter) composeTrailer() error {
 			return err
 		}
 		fmtOut := outVal
-		if cdre.cdrFormat == utils.CDRE_FIXED_WIDTH {
-			if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Name, err.Error()))
-				return err
-			}
+		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Name, err.Error()))
+			return err
 		}
 		cdre.trailer = append(cdre.trailer, fmtOut)
 	}
@@ -338,11 +334,9 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 			return err
 		}
 		fmtOut := outVal
-		if cdre.cdrFormat == utils.CDRE_FIXED_WIDTH {
-			if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-				engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Name, outVal, err.Error()))
-				return err
-			}
+		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Name, outVal, err.Error()))
+			return err
 		}
 		cdrRow[idx] += fmtOut
 	}
@@ -362,8 +356,10 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 	if !utils.IsSliceMember([]string{utils.DATA, utils.SMS}, cdr.TOR) { // Only count duration for non data cdrs
 		cdre.totalDuration += cdr.Usage
 	}
-	cdre.totalCost += cdr.Cost
-	cdre.totalCost = utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE)
+	if cdr.Cost != -1 {
+		cdre.totalCost += cdr.Cost
+		cdre.totalCost = utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE)
+	}
 	if cdre.firstExpOrderId > cdr.OrderId || cdre.firstExpOrderId == 0 {
 		cdre.firstExpOrderId = cdr.OrderId
 	}

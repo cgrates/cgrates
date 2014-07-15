@@ -49,7 +49,7 @@ func TestCdreCfgNewCdreCdrFieldsFromIds(t *testing.T) {
 			valueAsRsrField: &utils.RSRField{Id: "extra1"},
 		},
 	}
-	if cdreFlds, err := NewCdreCdrFieldsFromIds(utils.CGRID, "extra1"); err != nil {
+	if cdreFlds, err := NewCdreCdrFieldsFromIds(true, utils.CGRID, "extra1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedFlds, cdreFlds) {
 		t.Errorf("Expected: %v, received: %v", expectedFlds, cdreFlds)
@@ -86,7 +86,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.CGRID,
 			Type:            utils.CDRFIELD,
 			Value:           utils.CGRID,
-			Width:           40,
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
 		},
@@ -94,9 +93,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.MEDI_RUNID,
 			Type:            utils.CDRFIELD,
 			Value:           utils.MEDI_RUNID,
-			Width:           20,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.MEDI_RUNID},
 		},
@@ -104,8 +100,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.TOR,
 			Type:            utils.CDRFIELD,
 			Value:           utils.TOR,
-			Width:           6,
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.TOR},
 		},
@@ -113,9 +107,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.ACCID,
 			Type:            utils.CDRFIELD,
 			Value:           utils.ACCID,
-			Width:           36,
-			Strip:           "left",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.ACCID},
 		},
@@ -123,9 +114,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.REQTYPE,
 			Type:            utils.CDRFIELD,
 			Value:           utils.REQTYPE,
-			Width:           13,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.REQTYPE},
 		},
@@ -133,9 +121,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.DIRECTION,
 			Type:            utils.CDRFIELD,
 			Value:           utils.DIRECTION,
-			Width:           4,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.DIRECTION},
 		},
@@ -143,9 +128,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.TENANT,
 			Type:            utils.CDRFIELD,
 			Value:           utils.TENANT,
-			Width:           24,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.TENANT},
 		},
@@ -153,9 +135,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.CATEGORY,
 			Type:            utils.CDRFIELD,
 			Value:           utils.CATEGORY,
-			Width:           10,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.CATEGORY},
 		},
@@ -163,9 +142,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.ACCOUNT,
 			Type:            utils.CDRFIELD,
 			Value:           utils.ACCOUNT,
-			Width:           24,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.ACCOUNT},
 		},
@@ -173,9 +149,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.SUBJECT,
 			Type:            utils.CDRFIELD,
 			Value:           utils.SUBJECT,
-			Width:           24,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.SUBJECT},
 		},
@@ -183,9 +156,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.DESTINATION,
 			Type:            utils.CDRFIELD,
 			Value:           utils.DESTINATION,
-			Width:           24,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.DESTINATION},
 		},
@@ -193,10 +163,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.SETUP_TIME,
 			Type:            utils.CDRFIELD,
 			Value:           utils.SETUP_TIME,
-			Width:           30,
-			Strip:           "xright",
-			Padding:         "left",
-			Layout:          "2006-01-02T15:04:05Z07:00",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.SETUP_TIME},
 		},
@@ -204,10 +170,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.ANSWER_TIME,
 			Type:            utils.CDRFIELD,
 			Value:           utils.ANSWER_TIME,
-			Width:           30,
-			Strip:           "xright",
-			Padding:         "left",
-			Layout:          "2006-01-02T15:04:05Z07:00",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.ANSWER_TIME},
 		},
@@ -215,9 +177,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.USAGE,
 			Type:            utils.CDRFIELD,
 			Value:           utils.USAGE,
-			Width:           30,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.USAGE},
 		},
@@ -225,9 +184,6 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 			Name:            utils.COST,
 			Type:            utils.CDRFIELD,
 			Value:           utils.COST,
-			Width:           24,
-			Strip:           "xright",
-			Padding:         "left",
 			Mandatory:       true,
 			valueAsRsrField: &utils.RSRField{Id: utils.COST},
 		},
@@ -239,7 +195,7 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 	}
 }
 
-func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
+func TestCdreCfgSetDefaultFieldProperties(t *testing.T) {
 	cdreCdrFld := &CdreCdrField{
 		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
 	}
@@ -248,7 +204,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -262,7 +218,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.ORDERID},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -276,7 +232,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.TOR},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -291,7 +247,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.ACCID},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -306,7 +262,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.CDRHOST},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -321,7 +277,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.CDRSOURCE},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -336,7 +292,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.REQTYPE},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -351,7 +307,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.DIRECTION},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -366,7 +322,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.TENANT},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -381,7 +337,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.CATEGORY},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -396,7 +352,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.ACCOUNT},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -411,7 +367,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.SUBJECT},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -426,7 +382,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.DESTINATION},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -442,7 +398,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.SETUP_TIME},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -458,7 +414,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.ANSWER_TIME},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -473,7 +429,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.USAGE},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -488,7 +444,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.MEDI_RUNID},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -503,7 +459,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       true,
 		valueAsRsrField: &utils.RSRField{Id: utils.COST},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
@@ -518,7 +474,7 @@ func TestCdreCfgSetDefaultFixedWidthProperties(t *testing.T) {
 		Mandatory:       false,
 		valueAsRsrField: &utils.RSRField{Id: "extra_1"},
 	}
-	if err := cdreCdrFld.setDefaultFixedWidthProperties(); err != nil {
+	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
