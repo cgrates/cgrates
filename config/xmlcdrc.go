@@ -58,7 +58,7 @@ func (cdrcCfg *CgrXmlCdrcCfg) setDefaults() error {
 	}
 	if len(cdrcCfg.CdrFields) == 0 {
 		for key, cfgRsrField := range dfCfg.CdrcCdrFields {
-			cdrcCfg.CdrFields = append(cdrcCfg.CdrFields, &CdrcField{Id: key, Filter: cfgRsrField.Id, rsrField: cfgRsrField})
+			cdrcCfg.CdrFields = append(cdrcCfg.CdrFields, &CdrcField{Id: key, Value: cfgRsrField.Id, rsrField: cfgRsrField})
 		}
 	}
 	return nil
@@ -75,12 +75,12 @@ func (cdrcCfg *CgrXmlCdrcCfg) CdrRSRFields() map[string]*utils.RSRField {
 type CdrcField struct {
 	XMLName  xml.Name `xml:"field"`
 	Id       string   `xml:"id,attr"`
-	Filter   string   `xml:"filter,attr"`
+	Value    string   `xml:"value,attr"`
 	rsrField *utils.RSRField
 }
 
 func (cdrcFld *CdrcField) PopulateRSRField() (err error) {
-	if cdrcFld.rsrField, err = utils.NewRSRField(cdrcFld.Filter); err != nil {
+	if cdrcFld.rsrField, err = utils.NewRSRField(cdrcFld.Value); err != nil {
 		return err
 	}
 	return nil
