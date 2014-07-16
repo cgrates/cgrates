@@ -419,36 +419,43 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 }
 
 type AttrAddActionTrigger struct {
-	Tenant         string
-	Account        string
-	Direction      string
-	BalanceType    string
-	ThresholdType  string
-	ThresholdValue float64
-	DestinationId  string
-	Weight         float64
-	ActionsId      string
+	Tenant            string
+	Account           string
+	Direction         string
+	BalanceType       string
+	ThresholdType     string
+	ThresholdValue    float64
+	DestinationId     string
+	BalanceWeight     float64
+	BalanceExpiryTime string
+	Weight            float64
+	ActionsId         string
 }
 
 func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {
 	if attr.Direction == "" {
 		attr.Direction = engine.OUTBOUND
 	}
-
+	balExpiryTime, err := utils.ParseTimeDetectLayout(attr.BalanceExpiryTime)
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
 	at := &engine.ActionTrigger{
-		Id:             utils.GenUUID(),
-		BalanceType:    attr.BalanceType,
-		Direction:      attr.Direction,
-		ThresholdType:  attr.ThresholdType,
-		ThresholdValue: attr.ThresholdValue,
-		DestinationId:  attr.DestinationId,
-		Weight:         attr.Weight,
-		ActionsId:      attr.ActionsId,
-		Executed:       false,
+		Id:                utils.GenUUID(),
+		BalanceType:       attr.BalanceType,
+		Direction:         attr.Direction,
+		ThresholdType:     attr.ThresholdType,
+		ThresholdValue:    attr.ThresholdValue,
+		DestinationId:     attr.DestinationId,
+		BalanceWeight:     attr.BalanceWeight,
+		BalanceExpiryTime: balExpiryTime,
+		Weight:            attr.Weight,
+		ActionsId:         attr.ActionsId,
+		Executed:          false,
 	}
 
 	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
-	_, err := engine.AccLock.Guard(tag, func() (float64, error) {
+	_, err = engine.AccLock.Guard(tag, func() (float64, error) {
 		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {
 			return 0, err

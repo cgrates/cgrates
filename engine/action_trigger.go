@@ -28,18 +28,18 @@ import (
 )
 
 type ActionTrigger struct {
-	Id                    string // uniquely identify the trigger
-	BalanceType           string
-	Direction             string
-	ThresholdType         string //*min_counter, *max_counter, *min_balance, *max_balance
-	ThresholdValue        float64
-	Recurrent             bool // reset eexcuted flag each run
-	DestinationId         string
-	BalanceWeight         float64
-	BalanceExpirationDate time.Time
-	Weight                float64
-	ActionsId             string
-	Executed              bool
+	Id                string // uniquely identify the trigger
+	BalanceType       string
+	Direction         string
+	ThresholdType     string //*min_counter, *max_counter, *min_balance, *max_balance
+	ThresholdValue    float64
+	Recurrent         bool // reset eexcuted flag each run
+	DestinationId     string
+	BalanceWeight     float64
+	BalanceExpiryTime time.Time
+	Weight            float64
+	ActionsId         string
+	Executed          bool
 }
 
 func (at *ActionTrigger) Execute(ub *Account) (err error) {

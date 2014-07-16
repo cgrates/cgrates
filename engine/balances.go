@@ -76,8 +76,8 @@ func (b *Balance) MatchDestination(destinationId string) bool {
 
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 	matchesExpirationDate := true
-	if !at.BalanceExpirationDate.IsZero() {
-		matchesExpirationDate = (at.BalanceExpirationDate.Equal(b.ExpirationDate))
+	if !at.BalanceExpiryTime.IsZero() {
+		matchesExpirationDate = (at.BalanceExpiryTime.Equal(b.ExpirationDate))
 	}
 	matchesWeight := true
 	if at.BalanceWeight > 0 {
