@@ -108,6 +108,7 @@ type CGRConfig struct {
 	SMRaterReconnects       int                   // Number of reconnect attempts to rater
 	SMDebitInterval         int                   // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration       time.Duration         // The maximum duration of a call
+	SMMinCallDuration       time.Duration         // Only authorize calls with allowed duration bigger than this
 	MediatorEnabled         bool                  // Starts Mediator service: <true|false>.
 	MediatorRater           string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
 	MediatorRaterReconnects int                   // Number of reconnects to rater before giving up.
@@ -198,6 +199,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.SMRaterReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
+	self.SMMinCallDuration = time.Duration(0)
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
@@ -507,8 +509,14 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("session_manager", "debit_interval"); hasOpt {
 		cfg.SMDebitInterval, _ = c.GetInt("session_manager", "debit_interval")
 	}
+	if hasOpt = c.HasOption("session_manager", "min_call_duration"); hasOpt {
+		minCallDurStr, _ := c.GetString("session_manager", "min_call_duration")
+		if cfg.SMMinCallDuration, err = utils.ParseDurationWithSecs(minCallDurStr); err != nil {
+			return nil, err
+		}
+	}
 	if hasOpt = c.HasOption("session_manager", "max_call_duration"); hasOpt {
-		maxCallDurStr, _ := c.GetString("session_manager", "max_call_duration")
+		maxCallDurStr, _ := c.GetString("session_manager", "min_call_duration")
 		if cfg.SMMaxCallDuration, err = utils.ParseDurationWithSecs(maxCallDurStr); err != nil {
 			return nil, err
 		}

@@ -113,6 +113,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.SMRater = "internal"
 	eCfg.SMRaterReconnects = 3
 	eCfg.SMDebitInterval = 10
+	eCfg.SMMinCallDuration = time.Duration(0)
 	eCfg.SMMaxCallDuration = time.Duration(3) * time.Hour
 	eCfg.FreeswitchServer = "127.0.0.1:8021"
 	eCfg.FreeswitchPass = "ClueCon"
@@ -247,6 +248,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.SMRater = "test"
 	eCfg.SMRaterReconnects = 99
 	eCfg.SMDebitInterval = 99
+	eCfg.SMMinCallDuration = time.Duration(99) * time.Second
 	eCfg.SMMaxCallDuration = time.Duration(99) * time.Second
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
