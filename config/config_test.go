@@ -207,6 +207,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSMediator = "test"
 	eCfg.CdreDefaultInstance = &CdreConfig{
 		CdrFormat:               "test",
+		FieldSeparator:          utils.CSV_SEP,
 		DataUsageMultiplyFactor: 99.0,
 		CostMultiplyFactor:      99.0,
 		CostRoundingDecimals:    99,
@@ -308,7 +309,7 @@ export_template = cgrid,mediation_runid,accid
 		&CdreCdrField{Name: "accid", Type: utils.CDRFIELD, Value: "accid", valueAsRsrField: &utils.RSRField{Id: "accid"},
 			Mandatory: true},
 	}
-	expCdreCfg := &CdreConfig{CdrFormat: utils.CSV, CostRoundingDecimals: -1, ExportDir: "/var/log/cgrates/cdre", ContentFields: expectedFlds}
+	expCdreCfg := &CdreConfig{CdrFormat: utils.CSV, FieldSeparator: utils.CSV_SEP, CostRoundingDecimals: -1, ExportDir: "/var/log/cgrates/cdre", ContentFields: expectedFlds}
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(cfg.CdreDefaultInstance, expCdreCfg) {

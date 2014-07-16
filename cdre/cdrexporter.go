@@ -47,6 +47,8 @@ const (
 	META_LASTCDRATIME     = "last_cdr_atime"
 	META_NRCDRS           = "cdrs_number"
 	META_DURCDRS          = "cdrs_duration"
+	META_SMSUSAGE         = "sms_usage"
+	META_DATAUSAGE        = "data_usage"
 	META_COSTCDRS         = "cdrs_cost"
 	META_MASKDESTINATION  = "mask_destination"
 	META_FORMATCOST       = "format_cost"
@@ -54,7 +56,7 @@ const (
 
 var err error
 
-func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, cdrFormat, exportId string,
+func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl *config.CdreConfig, cdrFormat string, fieldSeparator rune, exportId string,
 	dataUsageMultiplyFactor, costMultiplyFactor float64, costShiftDigits, roundDecimals, cgrPrecision int, maskDestId string, maskLen int, httpSkipTlsCheck bool) (*CdrExporter, error) {
 	if len(cdrs) == 0 { // Nothing to export
 		return nil, nil
@@ -64,6 +66,7 @@ func NewCdrExporter(cdrs []*utils.StoredCdr, logDb engine.LogStorage, exportTpl 
 		logDb:                   logDb,
 		exportTemplate:          exportTpl,
 		cdrFormat:               cdrFormat,
+		fieldSeparator:          fieldSeparator,
 		exportId:                exportId,
 		dataUsageMultiplyFactor: dataUsageMultiplyFactor,
 		costMultiplyFactor:      costMultiplyFactor,
@@ -86,6 +89,7 @@ type CdrExporter struct {
 	logDb                                        engine.LogStorage // Used to extract cost_details if these are requested
 	exportTemplate                               *config.CdreConfig
 	cdrFormat                                    string // csv, fwv
+	fieldSeparator                               rune
 	exportId                                     string // Unique identifier or this export
 	dataUsageMultiplyFactor, costMultiplyFactor  float64
 	costShiftDigits, roundDecimals, cgrPrecision int
@@ -96,11 +100,12 @@ type CdrExporter struct {
 	content                                      [][]string // Rows of cdr fields
 	firstCdrATime, lastCdrATime                  time.Time
 	numberOfRecords                              int
-	totalDuration                                time.Duration
-	totalCost                                    float64
-	firstExpOrderId, lastExpOrderId              int64
-	positiveExports                              []string          // CGRIds of successfully exported CDRs
-	negativeExports                              map[string]string // CgrIds of failed exports
+	totalDuration, totalDataUsage, totalSmsUsage time.Duration
+
+	totalCost                       float64
+	firstExpOrderId, lastExpOrderId int64
+	positiveExports                 []string          // CGRIds of successfully exported CDRs
+	negativeExports                 map[string]string // CgrIds of failed exports
 }
 
 // Return Json marshaled callCost attached to
@@ -207,7 +212,17 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	case META_NRCDRS:
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case META_DURCDRS:
-		return strconv.FormatFloat(cdre.totalDuration.Seconds(), 'f', -1, 64), nil
+		//return strconv.FormatFloat(cdre.totalDuration.Seconds(), 'f', -1, 64), nil
+		emulatedCdr := &utils.StoredCdr{TOR: utils.VOICE, Usage: cdre.totalDuration}
+		return emulatedCdr.FormatUsage(arg), nil
+	case META_SMSUSAGE:
+		//return strconv.FormatFloat(cdre.totalDuration.Seconds(), 'f', -1, 64), nil
+		emulatedCdr := &utils.StoredCdr{TOR: utils.SMS, Usage: cdre.totalSmsUsage}
+		return emulatedCdr.FormatUsage(arg), nil
+	case META_DATAUSAGE:
+		//return strconv.FormatFloat(cdre.totalDuration.Seconds(), 'f', -1, 64), nil
+		emulatedCdr := &utils.StoredCdr{TOR: utils.DATA, Usage: cdre.totalDataUsage}
+		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
 		return strconv.FormatFloat(utils.Round(cdre.totalCost, cdre.roundDecimals, utils.ROUNDING_MIDDLE), 'f', -1, 64), nil
 	case META_MASKDESTINATION:
@@ -353,8 +368,14 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 		cdre.lastCdrATime = cdr.AnswerTime
 	}
 	cdre.numberOfRecords += 1
-	if !utils.IsSliceMember([]string{utils.DATA, utils.SMS}, cdr.TOR) { // Only count duration for non data cdrs
+	if cdr.TOR == utils.VOICE { // Only count duration for non data cdrs
 		cdre.totalDuration += cdr.Usage
+	}
+	if cdr.TOR == utils.SMS { // Count usage for SMS
+		cdre.totalSmsUsage += cdr.Usage
+	}
+	if cdr.TOR == utils.DATA { // Count usage for SMS
+		cdre.totalDataUsage += cdr.Usage
 	}
 	if cdr.Cost != -1 {
 		cdre.totalCost += cdr.Cost
@@ -420,6 +441,7 @@ func (cdre *CdrExporter) writeOut(ioWriter io.Writer) error {
 
 // csvWriter specific method
 func (cdre *CdrExporter) writeCsv(csvWriter *csv.Writer) error {
+	csvWriter.Comma = cdre.fieldSeparator
 	if len(cdre.header) != 0 {
 		if err := csvWriter.Write(cdre.header); err != nil {
 			return err

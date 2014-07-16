@@ -68,7 +68,7 @@ var trailerCfgFlds = []*config.CgrXmlCfgCdrField{
 	&config.CgrXmlCfgCdrField{Name: "DistributorCode", Type: CONSTANT, Value: "VOI", Width: 3},
 	&config.CgrXmlCfgCdrField{Name: "FileSeqNr", Type: METATAG, Value: META_EXPORTID, Width: 5, Strip: "right", Padding: "zeroleft"},
 	&config.CgrXmlCfgCdrField{Name: "NumberOfRecords", Type: METATAG, Value: META_NRCDRS, Width: 6, Padding: "zeroleft"},
-	&config.CgrXmlCfgCdrField{Name: "CdrsDuration", Type: METATAG, Value: META_DURCDRS, Width: 8, Padding: "zeroleft"},
+	&config.CgrXmlCfgCdrField{Name: "CdrsDuration", Type: METATAG, Value: META_DURCDRS, Width: 8, Padding: "zeroleft", Layout: "seconds"},
 	&config.CgrXmlCfgCdrField{Name: "FirstCdrTime", Type: METATAG, Value: META_FIRSTCDRATIME, Width: 12, Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "LastCdrTime", Type: METATAG, Value: META_LASTCDRATIME, Width: 12, Layout: "020106150400"},
 	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 93},
@@ -86,7 +86,8 @@ func TestWriteCdr(t *testing.T) {
 		Content:   &config.CgrXmlCfgCdrContent{Fields: contentCfgFlds},
 		Trailer:   &config.CgrXmlCfgCdrTrailer{Fields: trailerCfgFlds},
 	}
-	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 1, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
+	cdr := &utils.StoredCdr{CgrId: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		TOR: utils.VOICE, OrderId: 1, AccId: "dsafdsaf", CdrHost: "192.168.1.1",
 		ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
@@ -94,7 +95,7 @@ func TestWriteCdr(t *testing.T) {
 		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, exportTpl.AsCdreConfig(), utils.CDRE_FIXED_WIDTH, "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, exportTpl.AsCdreConfig(), utils.CDRE_FIXED_WIDTH, ',', "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)
 	}
@@ -144,14 +145,16 @@ func TestWriteCdrs(t *testing.T) {
 		Content:   &config.CgrXmlCfgCdrContent{Fields: contentCfgFlds},
 		Trailer:   &config.CgrXmlCfgCdrTrailer{Fields: trailerCfgFlds},
 	}
-	cdr1 := &utils.StoredCdr{CgrId: utils.Sha1("aaa1", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()), OrderId: 2, AccId: "aaa1", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
+	cdr1 := &utils.StoredCdr{CgrId: utils.Sha1("aaa1", time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC).String()),
+		TOR: utils.VOICE, OrderId: 2, AccId: "aaa1", CdrHost: "192.168.1.1", ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1010",
 		SetupTime:  time.Date(2013, 11, 7, 8, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC),
 		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.25,
 		ExtraFields: map[string]string{"productnumber": "12341", "fieldextr2": "valextr2"},
 	}
-	cdr2 := &utils.StoredCdr{CgrId: utils.Sha1("aaa2", time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String()), OrderId: 4, AccId: "aaa2", CdrHost: "192.168.1.2", ReqType: "prepaid", Direction: "*out", Tenant: "cgrates.org",
+	cdr2 := &utils.StoredCdr{CgrId: utils.Sha1("aaa2", time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC).String()),
+		TOR: utils.VOICE, OrderId: 4, AccId: "aaa2", CdrHost: "192.168.1.2", ReqType: "prepaid", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1002", Subject: "1002", Destination: "1011",
 		SetupTime:  time.Date(2013, 11, 7, 7, 42, 20, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 7, 42, 26, 0, time.UTC),
@@ -159,7 +162,8 @@ func TestWriteCdrs(t *testing.T) {
 		ExtraFields: map[string]string{"productnumber": "12342", "fieldextr2": "valextr2"},
 	}
 	cdr3 := &utils.StoredCdr{}
-	cdr4 := &utils.StoredCdr{CgrId: utils.Sha1("aaa3", time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC).String()), OrderId: 3, AccId: "aaa4", CdrHost: "192.168.1.4", ReqType: "postpaid", Direction: "*out", Tenant: "cgrates.org",
+	cdr4 := &utils.StoredCdr{CgrId: utils.Sha1("aaa3", time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC).String()),
+		TOR: utils.VOICE, OrderId: 3, AccId: "aaa4", CdrHost: "192.168.1.4", ReqType: "postpaid", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1004", Subject: "1004", Destination: "1013",
 		SetupTime:  time.Date(2013, 11, 7, 9, 42, 18, 0, time.UTC),
 		AnswerTime: time.Date(2013, 11, 7, 9, 42, 26, 0, time.UTC),
@@ -167,7 +171,7 @@ func TestWriteCdrs(t *testing.T) {
 		ExtraFields: map[string]string{"productnumber": "12344", "fieldextr2": "valextr2"},
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, exportTpl.AsCdreConfig(), utils.CDRE_FIXED_WIDTH,
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, exportTpl.AsCdreConfig(), utils.CDRE_FIXED_WIDTH, ',',
 		"fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)

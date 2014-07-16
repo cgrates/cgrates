@@ -26,6 +26,7 @@ import (
 // The CdrExporter configuration instance
 type CgrXmlCdreCfg struct {
 	CdrFormat               *string              `xml:"cdr_format"`
+	FieldSeparator          *string              `xml:"field_separator"`
 	DataUsageMultiplyFactor *float64             `xml:"data_usage_multiply_factor"`
 	CostMultiplyFactor      *float64             `xml:"cost_multiply_factor"`
 	CostRoundingDecimals    *int                 `xml:"cost_rounding_decimals"`
@@ -42,6 +43,10 @@ func (xmlCdreCfg *CgrXmlCdreCfg) AsCdreConfig() *CdreConfig {
 	cdreCfg, _ := NewDefaultCdreConfig()
 	if xmlCdreCfg.CdrFormat != nil {
 		cdreCfg.CdrFormat = *xmlCdreCfg.CdrFormat
+	}
+	if xmlCdreCfg.FieldSeparator != nil && len(*xmlCdreCfg.FieldSeparator) == 1 {
+		sepStr := *xmlCdreCfg.FieldSeparator
+		cdreCfg.FieldSeparator = rune(sepStr[0])
 	}
 	if xmlCdreCfg.DataUsageMultiplyFactor != nil {
 		cdreCfg.DataUsageMultiplyFactor = *xmlCdreCfg.DataUsageMultiplyFactor
