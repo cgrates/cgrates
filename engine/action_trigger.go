@@ -101,17 +101,25 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
 	direction := a.Direction == "" || at.Direction == a.Direction
-	thresholdType, thresholdValue := true, true
+	thresholdType, thresholdValue, destinationId, weight, ratingSubject, sharedGroup := true, true, true, true, true, true
 	if a.ExtraParameters != "" {
 		t := struct {
-			ThresholdType  string
-			ThresholdValue float64
+			ThresholdType        string
+			ThresholdValue       float64
+			DestinationId        string
+			BalanceWeight        float64
+			BalanceRatingSubject string
+			BalanceSharedGroup   string
 		}{}
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
 		thresholdType = t.ThresholdType == "" || at.ThresholdType == t.ThresholdType
 		thresholdValue = t.ThresholdValue == 0 || at.ThresholdValue == t.ThresholdValue
+		destinationId = t.DestinationId == "" || at.DestinationId == t.DestinationId
+		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
+		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
+		sharedGroup = t.BalanceSharedGroup == "" || at.BalanceSharedGroup == t.BalanceSharedGroup
 	}
-	return id && direction && thresholdType && thresholdValue
+	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && sharedGroup
 }
 
 // Structure to store actions according to weight
