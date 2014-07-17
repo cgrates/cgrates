@@ -852,6 +852,34 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 		}
 		fltr.Write(qIds.Bytes())
 	}
+	if len(ratedAccounts) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, ratedAccount := range ratedAccounts {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" %s.account='%s'", utils.TBL_COST_DETAILS, ratedAccount))
+		}
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
+	}
+	if len(ratedSubjects) != 0 {
+		qIds := bytes.NewBufferString(" (")
+		for idx, ratedSubject := range ratedSubjects {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" %s.subject='%s'", utils.TBL_COST_DETAILS, ratedSubject))
+		}
+		qIds.WriteString(" )")
+		if fltr.Len() != 0 {
+			fltr.WriteString(" AND")
+		}
+		fltr.Write(qIds.Bytes())
+	}
 	if orderIdStart != 0 {
 		if fltr.Len() != 0 {
 			fltr.WriteString(" AND")

@@ -217,6 +217,40 @@ func TestSetRatedCdr(t *testing.T) {
 	}
 }
 
+func TestCallCost(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cgrId := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	cc := &CallCost{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "91001",
+		Account:     "8001",
+		Destination: "1002",
+		TOR:         utils.VOICE,
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart: time.Date(2013, 9, 10, 13, 40, 0, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
+			},
+			&TimeSpan{
+				TimeStart: time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 30, 0, time.UTC),
+			},
+		},
+	}
+	if err := mysqlDb.LogCallCost(cgrId, TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
+		t.Error(err.Error())
+	}
+	if ccRcv, err := mysqlDb.GetCallCostLog(cgrId, TEST_SQL, utils.DEFAULT_RUNID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(cc, ccRcv) {
+		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
+	}
+}
+
 func TestGetStoredCdrs(t *testing.T) {
 	if !*testLocal {
 		return
@@ -382,6 +416,20 @@ func TestGetStoredCdrs(t *testing.T) {
 	} else if len(storedCdrs) != 4 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
+	// Filter on ratedAccount
+	if storedCdrs, err := mysqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, []string{"8001"}, nil, 0, 0, timeStart, timeEnd, false, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on ratedSubject
+	if storedCdrs, err := mysqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, []string{"91001"}, 0, 0, timeStart, timeEnd, false, false, false); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
 	// Filter on ignoreErr
 	if storedCdrs, err := mysqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, true, false, false); err != nil {
 		t.Error(err.Error())
@@ -443,33 +491,6 @@ func TestGetStoredCdrs(t *testing.T) {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 2 { // ToDo: Recheck this value
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
-	}
-}
-
-func TestCallCost(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	cgrId := utils.Sha1("bbb1", "123")
-	cc := &CallCost{
-		Timespans: []*TimeSpan{
-			&TimeSpan{
-				TimeStart: time.Date(2013, 9, 10, 13, 40, 0, 0, time.UTC),
-				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
-			},
-			&TimeSpan{
-				TimeStart: time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
-				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 30, 0, time.UTC),
-			},
-		},
-	}
-	if err := mysqlDb.LogCallCost(cgrId, TEST_SQL, TEST_SQL, cc); err != nil {
-		t.Error(err.Error())
-	}
-	if ccRcv, err := mysqlDb.GetCallCostLog(cgrId, TEST_SQL, TEST_SQL); err != nil {
-		t.Error(err.Error())
-	} else if !reflect.DeepEqual(cc, ccRcv) {
-		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
 	}
 }
 
