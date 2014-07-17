@@ -34,8 +34,7 @@ CREATE TABLE cdrs_extra (
   tbid int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
   extra_fields text NOT NULL,
-  PRIMARY KEY (tbid),
-  UNIQUE KEY cgrid (cgrid)
+  PRIMARY KEY (tbid)
 );
 
 --

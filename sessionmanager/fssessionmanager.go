@@ -212,7 +212,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 			maxCallDuration = remainingDuration
 		}
 	}
-	if maxCallDuration == 0 {
+	if maxCallDuration <= cfg.SMMinCallDuration {
 		//engine.Logger.Info(fmt.Sprintf("Not enough credit for trasferring the call %s for %s.", ev.GetUUID(), cd.GetKey(cd.Subject)))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), INSUFFICIENT_FUNDS)
 		return

@@ -41,8 +41,8 @@ type ActionTrigger struct {
 	BalanceExpirationDate time.Time     // filter for balance
 	Weight                float64
 	ActionsId             string
-	Executed              bool
 	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
+	Executed              bool
 	lastExecutionTime     time.Time
 }
 

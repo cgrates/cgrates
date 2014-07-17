@@ -52,6 +52,7 @@ func NewDefaultCdreConfig() (*CdreConfig, error) {
 // One instance of CdrExporter
 type CdreConfig struct {
 	CdrFormat               string
+	FieldSeparator          rune
 	DataUsageMultiplyFactor float64
 	CostMultiplyFactor      float64
 	CostRoundingDecimals    int
@@ -67,6 +68,7 @@ type CdreConfig struct {
 // Set here defaults
 func (cdreCfg *CdreConfig) setDefaults() error {
 	cdreCfg.CdrFormat = utils.CSV
+	cdreCfg.FieldSeparator = utils.CSV_SEP
 	cdreCfg.DataUsageMultiplyFactor = 0.0
 	cdreCfg.CostMultiplyFactor = 0.0
 	cdreCfg.CostRoundingDecimals = -1

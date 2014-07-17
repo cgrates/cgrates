@@ -74,6 +74,7 @@ func TestCdreCfgValueAsRSRField(t *testing.T) {
 func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 	eCdreCfg := new(CdreConfig)
 	eCdreCfg.CdrFormat = utils.CSV
+	eCdreCfg.FieldSeparator = utils.CSV_SEP
 	eCdreCfg.DataUsageMultiplyFactor = 0.0
 	eCdreCfg.CostMultiplyFactor = 0.0
 	eCdreCfg.CostRoundingDecimals = -1

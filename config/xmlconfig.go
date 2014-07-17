@@ -51,7 +51,6 @@ type CgrXmlCfgDocument struct {
 type CgrXmlConfiguration struct {
 	XMLName   xml.Name `xml:"configuration"`
 	Section   string   `xml:"section,attr"`
-	Type      string   `xml:"type,attr"`
 	Id        string   `xml:"id,attr"`
 	RawConfig []byte   `xml:",innerxml"` // Used to store the configuration struct, as raw so we can store different types
 }

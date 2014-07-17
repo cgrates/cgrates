@@ -24,14 +24,14 @@ import (
 )
 
 type CgrXmlCdrcCfg struct {
-	Enabled      bool         `xml:"enabled"`       // Enable/Disable the
-	CdrsAddress  string       `xml:"cdrs_address"`  // The address where CDRs can be reached
-	CdrType      string       `xml:"cdr_type"`      // The type of CDR to process <csv>
-	CsvSeparator string       `xml:"csv_separator"` // The separator to use when reading csvs
-	RunDelay     int64        `xml:"run_delay"`     // Delay between runs
-	CdrInDir     string       `xml:"cdr_in_dir"`    // Folder to process CDRs from
-	CdrOutDir    string       `xml:"cdr_out_dir"`   // Folder to move processed CDRs to
-	CdrSourceId  string       `xml:"cdr_source_id"` // Source identifier for the processed CDRs
+	Enabled      bool         `xml:"enabled"`         // Enable/Disable the
+	CdrsAddress  string       `xml:"cdrs_address"`    // The address where CDRs can be reached
+	CdrType      string       `xml:"cdr_type"`        // The type of CDR to process <csv>
+	CsvSeparator string       `xml:"field_separator"` // The separator to use when reading csvs
+	RunDelay     int64        `xml:"run_delay"`       // Delay between runs
+	CdrInDir     string       `xml:"cdr_in_dir"`      // Folder to process CDRs from
+	CdrOutDir    string       `xml:"cdr_out_dir"`     // Folder to move processed CDRs to
+	CdrSourceId  string       `xml:"cdr_source_id"`   // Source identifier for the processed CDRs
 	CdrFields    []*CdrcField `xml:"fields>field"`
 }
 
@@ -58,7 +58,7 @@ func (cdrcCfg *CgrXmlCdrcCfg) setDefaults() error {
 	}
 	if len(cdrcCfg.CdrFields) == 0 {
 		for key, cfgRsrField := range dfCfg.CdrcCdrFields {
-			cdrcCfg.CdrFields = append(cdrcCfg.CdrFields, &CdrcField{Id: key, Filter: cfgRsrField.Id, rsrField: cfgRsrField})
+			cdrcCfg.CdrFields = append(cdrcCfg.CdrFields, &CdrcField{Id: key, Value: cfgRsrField.Id, rsrField: cfgRsrField})
 		}
 	}
 	return nil
@@ -75,12 +75,12 @@ func (cdrcCfg *CgrXmlCdrcCfg) CdrRSRFields() map[string]*utils.RSRField {
 type CdrcField struct {
 	XMLName  xml.Name `xml:"field"`
 	Id       string   `xml:"id,attr"`
-	Filter   string   `xml:"filter,attr"`
+	Value    string   `xml:"value,attr"`
 	rsrField *utils.RSRField
 }
 
 func (cdrcFld *CdrcField) PopulateRSRField() (err error) {
-	if cdrcFld.rsrField, err = utils.NewRSRField(cdrcFld.Filter); err != nil {
+	if cdrcFld.rsrField, err = utils.NewRSRField(cdrcFld.Value); err != nil {
 		return err
 	}
 	return nil

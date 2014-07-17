@@ -77,6 +77,10 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
 	}
+	fieldSep := exportTemplate.FieldSeparator
+	if attr.FieldSeparator != nil {
+		fieldSep = *attr.FieldSeparator
+	}
 	exportDir := exportTemplate.ExportDir
 	if attr.ExportDir != nil {
 		exportDir = *attr.ExportDir
@@ -125,7 +129,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		*reply = utils.ExportedFileCdrs{ExportedFilePath: ""}
 		return nil
 	}
-	cdrexp, err := cdre.NewCdrExporter(cdrs, self.LogDb, exportTemplate, cdrFormat, exportId,
+	cdrexp, err := cdre.NewCdrExporter(cdrs, self.LogDb, exportTemplate, cdrFormat, fieldSep, exportId,
 		dataUsageMultiplyFactor, costMultiplyFactor, costShiftDigits, roundingDecimals, self.Config.RoundingDecimals, maskDestId, maskLen, self.Config.HttpSkipTlsVerify)
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())

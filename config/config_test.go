@@ -113,6 +113,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.SMRater = "internal"
 	eCfg.SMRaterReconnects = 3
 	eCfg.SMDebitInterval = 10
+	eCfg.SMMinCallDuration = time.Duration(0)
 	eCfg.SMMaxCallDuration = time.Duration(3) * time.Hour
 	eCfg.FreeswitchServer = "127.0.0.1:8021"
 	eCfg.FreeswitchPass = "ClueCon"
@@ -207,6 +208,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSMediator = "test"
 	eCfg.CdreDefaultInstance = &CdreConfig{
 		CdrFormat:               "test",
+		FieldSeparator:          utils.CSV_SEP,
 		DataUsageMultiplyFactor: 99.0,
 		CostMultiplyFactor:      99.0,
 		CostRoundingDecimals:    99,
@@ -246,6 +248,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.SMRater = "test"
 	eCfg.SMRaterReconnects = 99
 	eCfg.SMDebitInterval = 99
+	eCfg.SMMinCallDuration = time.Duration(99) * time.Second
 	eCfg.SMMaxCallDuration = time.Duration(99) * time.Second
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
@@ -314,7 +317,7 @@ export_template = cgrid,mediation_runid,accid
 		&CdreCdrField{Name: "accid", Type: utils.CDRFIELD, Value: "accid", valueAsRsrField: &utils.RSRField{Id: "accid"},
 			Mandatory: true},
 	}
-	expCdreCfg := &CdreConfig{CdrFormat: utils.CSV, CostRoundingDecimals: -1, ExportDir: "/var/log/cgrates/cdre", ContentFields: expectedFlds}
+	expCdreCfg := &CdreConfig{CdrFormat: utils.CSV, FieldSeparator: utils.CSV_SEP, CostRoundingDecimals: -1, ExportDir: "/var/log/cgrates/cdre", ContentFields: expectedFlds}
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())
 	} else if !reflect.DeepEqual(cfg.CdreDefaultInstance, expCdreCfg) {

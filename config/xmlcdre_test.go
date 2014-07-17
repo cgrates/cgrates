@@ -50,7 +50,7 @@ func TestXmlCdreCfgPopulateCdreRSRFIeld(t *testing.T) {
 func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
 	cfgXmlStr := `<?xml version="1.0" encoding="UTF-8"?>
 <document type="cgrates/xml">
-  <configuration section="cdre" type="fixed_width" id="CDRE-FW1">
+  <configuration section="cdre" id="CDRE-FW1">
     <cdr_format>fwv</cdr_format>
     <data_usage_multiply_factor>0.0</data_usage_multiply_factor>
     <cost_multiply_factor>0.0</cost_multiply_factor>
@@ -167,6 +167,7 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
 <document type="cgrates/xml">
   <configuration section="cdre" type="fixed_width" id="CDRE-FW2">
     <cdr_format>fwv</cdr_format>
+    <field_separator>;</field_separator>
     <data_usage_multiply_factor>1024.0</data_usage_multiply_factor>
     <cost_multiply_factor>1.19</cost_multiply_factor>
     <cost_rounding_decimals>-1</cost_rounding_decimals>
@@ -212,6 +213,7 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
 	}
 	eCdreCfg := &CdreConfig{
 		CdrFormat:               "fwv",
+		FieldSeparator:          ';',
 		DataUsageMultiplyFactor: 1024.0,
 		CostMultiplyFactor:      1.19,
 		CostRoundingDecimals:    -1,
