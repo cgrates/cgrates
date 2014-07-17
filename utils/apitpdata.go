@@ -351,6 +351,8 @@ type AttrExpFileCdrs struct {
 	Account                 []string // If provided, it will filter account
 	Subject                 []string // If provided, it will filter the rating subject
 	DestinationPrefix       []string // If provided, it will filter on destination prefix
+	RatedAccount            []string // If provided, it will filter ratedaccount
+	RatedSubject            []string // If provided, it will filter the ratedsubject
 	OrderIdStart            int64    // Export from this order identifier
 	OrderIdEnd              int64    // Export smaller than this order identifier
 	TimeStart               string   // If provided, it will represent the starting of the CDRs interval (>=)
@@ -382,6 +384,8 @@ type AttrGetCdrs struct {
 	Account           []string // If provided, it will filter account
 	Subject           []string // If provided, it will filter the rating subject
 	DestinationPrefix []string // If provided, it will filter on destination prefix
+	RatedAccount      []string // If provided, it will filter ratedaccount
+	RatedSubject      []string // If provided, it will filter the ratedsubject
 	OrderIdStart      int64    // Export from this order identifier
 	OrderIdEnd        int64    // Export smaller than this order identifier
 	TimeStart         string   // If provided, it will represent the starting of the CDRs interval (>=)

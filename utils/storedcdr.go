@@ -47,6 +47,8 @@ type StoredCdr struct {
 	Usage          time.Duration
 	ExtraFields    map[string]string
 	MediationRunId string
+	RatedAccount   string // Populated out of rating data
+	RatedSubject   string
 	Cost           float64
 }
 

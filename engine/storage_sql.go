@@ -608,12 +608,12 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // Return a slice of CDRs from storDb using optional filters.a
 // ignoreErr - do not consider cdrs with rating errors
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
-func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes []string, orderIdStart, orderIdEnd int64,
-	timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool) ([]*utils.StoredCdr, error) {
+func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
+	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
 	var q *bytes.Buffer // Need to query differently since in case of primary, unmediated CDRs some values will be missing
 	if ignoreDerived {
-		q = bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.`usage`,%s.extra_fields,%s.runid,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid",
+		q = bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.`usage`,%s.extra_fields,%s.runid,%s.account,%s.subject,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid AND %s.runid=%s.runid",
 			utils.TBL_CDRS_PRIMARY,
 			utils.TBL_CDRS_PRIMARY,
 			utils.TBL_CDRS_PRIMARY,
@@ -632,6 +632,8 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			utils.TBL_CDRS_PRIMARY,
 			utils.TBL_CDRS_EXTRA,
 			utils.TBL_RATED_CDRS,
+			utils.TBL_COST_DETAILS,
+			utils.TBL_COST_DETAILS,
 			utils.TBL_RATED_CDRS,
 			utils.TBL_CDRS_PRIMARY,
 			utils.TBL_CDRS_EXTRA,
@@ -639,9 +641,14 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			utils.TBL_CDRS_EXTRA,
 			utils.TBL_RATED_CDRS,
 			utils.TBL_CDRS_PRIMARY,
-			utils.TBL_RATED_CDRS))
+			utils.TBL_RATED_CDRS,
+			utils.TBL_COST_DETAILS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_COST_DETAILS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_COST_DETAILS))
 	} else {
-		q = bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.`usage`,%s.extra_fields,%s.runid,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid",
+		q = bytes.NewBufferString(fmt.Sprintf("SELECT %s.cgrid,%s.tbid,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.`usage`,%s.extra_fields,%s.runid,%s.account,%s.subject,%s.cost FROM %s LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid AND %s.runid=%s.runid",
 			utils.TBL_CDRS_PRIMARY,
 			utils.TBL_CDRS_PRIMARY,
 			utils.TBL_CDRS_PRIMARY,
@@ -660,6 +667,8 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			utils.TBL_RATED_CDRS,
 			utils.TBL_CDRS_EXTRA,
 			utils.TBL_RATED_CDRS,
+			utils.TBL_COST_DETAILS,
+			utils.TBL_COST_DETAILS,
 			utils.TBL_RATED_CDRS,
 			utils.TBL_CDRS_PRIMARY,
 			utils.TBL_CDRS_EXTRA,
@@ -667,7 +676,12 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			utils.TBL_CDRS_EXTRA,
 			utils.TBL_RATED_CDRS,
 			utils.TBL_CDRS_PRIMARY,
-			utils.TBL_RATED_CDRS))
+			utils.TBL_RATED_CDRS,
+			utils.TBL_COST_DETAILS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_COST_DETAILS,
+			utils.TBL_RATED_CDRS,
+			utils.TBL_COST_DETAILS))
 	}
 	fltr := new(bytes.Buffer)
 	if len(cgrIds) != 0 {
@@ -892,14 +906,14 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var cgrid, tor, accid, cdrhost, cdrsrc, reqtype, direction, tenant, category, account, subject, destination, runid sql.NullString
+		var cgrid, tor, accid, cdrhost, cdrsrc, reqtype, direction, tenant, category, account, subject, destination, runid, ratedAccount, ratedSubject sql.NullString
 		var extraFields []byte
 		var setupTime, answerTime mysql.NullTime
 		var orderid int64
 		var usage, cost sql.NullFloat64
 		var extraFieldsMp map[string]string
 		if err := rows.Scan(&cgrid, &orderid, &tor, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination, &setupTime, &answerTime, &usage,
-			&extraFields, &runid, &cost); err != nil {
+			&extraFields, &runid, &ratedAccount, &ratedSubject, &cost); err != nil {
 			return nil, err
 		}
 		if len(extraFields) != 0 {
@@ -913,7 +927,7 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 			Direction: direction.String, Tenant: tenant.String,
 			Category: category.String, Account: account.String, Subject: subject.String, Destination: destination.String,
 			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Usage: usageDur,
-			ExtraFields: extraFieldsMp, MediationRunId: runid.String, Cost: cost.Float64,
+			ExtraFields: extraFieldsMp, MediationRunId: runid.String, RatedAccount: ratedAccount.String, RatedSubject: ratedSubject.String, Cost: cost.Float64,
 		}
 		if !cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating
 			storCdr.Cost = -1
