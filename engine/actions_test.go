@@ -563,6 +563,23 @@ func TestActionTriggerMatcAllFalse(t *testing.T) {
 	}
 }
 
+func TestActionTriggerMatchAll(t *testing.T) {
+	at := &ActionTrigger{
+		Direction:            OUTBOUND,
+		BalanceType:          CREDIT,
+		ThresholdType:        TRIGGER_MAX_BALANCE,
+		ThresholdValue:       2,
+		DestinationId:        "NAT",
+		BalanceWeight:        1.0,
+		BalanceRatingSubject: "test1",
+		BalanceSharedGroup:   "test2",
+	}
+	a := &Action{Direction: OUTBOUND, BalanceType: CREDIT, ExtraParameters: fmt.Sprintf(`{"ThresholdType":"%v", "ThresholdValue": %v, "DestinationId": "%v", "BalanceWeight": %v, "BalanceRatingSubject": "%v", "BalanceSharedGroup": "%v"}`, TRIGGER_MAX_BALANCE, 2, "NAT", 1.0, "test1", "test2")}
+	if !at.Match(a) {
+		t.Errorf("Action trigger [%v] does not match action [%v]", at, a)
+	}
+}
+
 func TestActionTriggerPriotityList(t *testing.T) {
 	at1 := &ActionTrigger{Weight: 10}
 	at2 := &ActionTrigger{Weight: 20}
