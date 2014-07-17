@@ -130,27 +130,26 @@ func GetCached(key string) (v interface{}, err error) {
 
 func GetKeyAge(key string) (time.Duration, error) {
 	mux.RLock()
-	defer mux.RUnlock()
 	if r, ok := cache[key]; ok {
 		return time.Since(r.timestamp), nil
 	}
+	mux.RUnlock()
 	xMux.RLock()
-	defer xMux.RUnlock()
 	if r, ok := xcache[key]; ok {
 		return r.age(), nil
 	}
+	xMux.RUnlock()
 	return 0, errors.New("not found")
 }
 
 func RemKey(key string) {
 	mux.Lock()
-	defer mux.Unlock()
 	if _, ok := cache[key]; ok {
 		delete(cache, key)
 		descount(key)
 	}
+	mux.Unlock()
 	xMux.Lock()
-	defer xMux.Unlock()
 	if r, ok := xcache[key]; ok {
 		if r.timer() != nil {
 			r.timer().Stop()
@@ -160,19 +159,19 @@ func RemKey(key string) {
 		delete(xcache, key)
 		descount(key)
 	}
+	xMux.Unlock()
 }
 
 func RemPrefixKey(prefix string) {
 	mux.Lock()
-	defer mux.Unlock()
 	for key, _ := range cache {
 		if strings.HasPrefix(key, prefix) {
 			delete(cache, key)
 			descount(key)
 		}
 	}
+	mux.Unlock()
 	xMux.Lock()
-	defer xMux.Unlock()
 	for key, _ := range xcache {
 		if strings.HasPrefix(key, prefix) {
 			if r, ok := xcache[key]; ok {
@@ -184,39 +183,44 @@ func RemPrefixKey(prefix string) {
 			descount(key)
 		}
 	}
+	xMux.Unlock()
 }
 
 func GetAllEntries(prefix string) map[string]interface{} {
+	mux.Lock()
 	result := make(map[string]interface{})
 	for key, timestampedValue := range cache {
 		if strings.HasPrefix(key, prefix) {
 			result[key] = timestampedValue.value
 		}
 	}
+	mux.Unlock()
+	xMux.Lock()
 	for key, value := range xcache {
 		if strings.HasPrefix(key, prefix) {
 			result[key] = value
 		}
 	}
+	xMux.Unlock()
 	return result
 }
 
 // Delete all keys from cache
 func Flush() {
 	mux.Lock()
-	defer mux.Unlock()
 	cache = make(map[string]timestampedValue)
 	xMux.Lock()
-	defer xMux.Unlock()
+	mux.Unlock()
 	for _, v := range xcache {
 		if v.timer() != nil {
 			v.timer().Stop()
 		}
 	}
 	xcache = make(map[string]expiringCacheEntry)
+	xMux.Unlock()
 	cMux.Lock()
-	defer cMux.Unlock()
 	counters = make(map[string]int64)
+	defer cMux.Unlock()
 }
 
 func CountEntries(prefix string) (result int64) {
@@ -256,6 +260,8 @@ func descount(key string) {
 }
 
 func GetEntriesKeys(prefix string) (keys []string) {
+	mux.RLock()
+	defer mux.RUnlock()
 	for key, _ := range cache {
 		if strings.HasPrefix(key, prefix) {
 			keys = append(keys, key)
@@ -265,6 +271,8 @@ func GetEntriesKeys(prefix string) (keys []string) {
 }
 
 func XGetEntriesKeys(prefix string) (keys []string) {
+	xMux.RLock()
+	defer xMux.RUnlock()
 	for key, _ := range xcache {
 		if strings.HasPrefix(key, prefix) {
 			keys = append(keys, key)
