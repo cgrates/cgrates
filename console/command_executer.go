@@ -65,6 +65,11 @@ func (ce *CommandExecuter) ClientArgs() (args []string) {
 	return
 }
 
+// To be overwritten by commands that do not need a rpc call
+func (ce *CommandExecuter) LocalExecute() string {
+	return ""
+}
+
 func ToJSON(line string) (jsn []byte) {
 	if !strings.Contains(line, "=") {
 		line = fmt.Sprintf("Item=\"%s\"", line)

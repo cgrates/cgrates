@@ -75,6 +75,10 @@ func (b *Balance) MatchDestination(destinationId string) bool {
 }
 
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
+	matchesDestination := true
+	if at.DestinationId != "" {
+		matchesDestination = b.MatchDestination(at.DestinationId)
+	}
 	matchesExpirationDate := true
 	if !at.BalanceExpirationDate.IsZero() {
 		matchesExpirationDate = (at.BalanceExpirationDate.Equal(b.ExpirationDate))
@@ -83,9 +87,21 @@ func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 	if at.BalanceWeight > 0 {
 		matchesWeight = (at.BalanceWeight == b.Weight)
 	}
-	return b.MatchDestination(at.DestinationId) &&
+	matchesRatingSubject := true
+	if at.BalanceRatingSubject != "" {
+		matchesRatingSubject = (at.BalanceRatingSubject == b.RatingSubject)
+	}
+
+	matchesSharedGroup := true
+	if at.BalanceSharedGroup != "" {
+		matchesSharedGroup = (at.BalanceSharedGroup == b.SharedGroup)
+	}
+
+	return matchesDestination &&
 		matchesExpirationDate &&
-		matchesWeight
+		matchesWeight &&
+		matchesRatingSubject &&
+		matchesSharedGroup
 }
 
 func (b *Balance) Clone() *Balance {

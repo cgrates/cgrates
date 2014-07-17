@@ -39,6 +39,8 @@ type ActionTrigger struct {
 	DestinationId         string        // filter for balance
 	BalanceWeight         float64       // filter for balance
 	BalanceExpirationDate time.Time     // filter for balance
+	BalanceRatingSubject  string        // filter for balance
+	BalanceSharedGroup    string        // filter for balance
 	Weight                float64
 	ActionsId             string
 	MinQueuedItems        int // Trigger actions only if this number is hit (stats only)
