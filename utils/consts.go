@@ -93,6 +93,8 @@ const (
 	ANSWER_TIME                = "answer_time"
 	USAGE                      = "usage"
 	MEDI_RUNID                 = "mediation_runid"
+	RATED_ACCOUNT              = "rated_account"
+	RATED_SUBJECT              = "rated_subject"
 	COST                       = "cost"
 	DEFAULT_RUNID              = "default"
 	STATIC_VALUE_PREFIX        = "^"
