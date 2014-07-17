@@ -37,6 +37,7 @@ type Commander interface {
 	RpcResult() interface{}                   // Only requirement is to have a String method to print on console
 	ClientArgs() []string                     // for autocompletion
 	Name() string
+	LocalExecute() string
 }
 
 func GetCommands() map[string]Commander {

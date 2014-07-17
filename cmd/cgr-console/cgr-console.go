@@ -76,19 +76,23 @@ func executeCommand(command string) {
 		fmt.Println(cmdErr)
 		return
 	}
-	res := cmd.RpcResult()
-	param := cmd.RpcParams()
-	//log.Print(reflect.TypeOf(param))
-	switch param.(type) {
-	case *console.StringWrapper:
-		param = param.(*console.StringWrapper).Item
-	}
-	//log.Printf("Param: %+v", param)
-	if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
-		fmt.Println("Error executing command: " + rpcErr.Error())
+	if cmd.RpcMethod() != "" {
+		res := cmd.RpcResult()
+		param := cmd.RpcParams()
+		//log.Print(reflect.TypeOf(param))
+		switch param.(type) {
+		case *console.StringWrapper:
+			param = param.(*console.StringWrapper).Item
+		}
+		//log.Printf("Param: %+v", param)
+		if rpcErr := client.Call(cmd.RpcMethod(), param, res); rpcErr != nil {
+			fmt.Println("Error executing command: " + rpcErr.Error())
+		} else {
+			result, _ := json.MarshalIndent(res, "", " ")
+			fmt.Println(string(result))
+		}
 	} else {
-		result, _ := json.MarshalIndent(res, "", " ")
-		fmt.Println(string(result))
+		fmt.Println(cmd.LocalExecute())
 	}
 }
 
