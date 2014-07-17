@@ -94,3 +94,87 @@ func TestBalanceClone(t *testing.T) {
 		t.Errorf("Cloning failure: \n%v\n%v", mb1, mb2)
 	}
 }
+
+func TestBalanceMatchActionTriggerDestination(t *testing.T) {
+	at := &ActionTrigger{DestinationId: "test"}
+	b := &Balance{DestinationId: "test"}
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.DestinationId = "test1"
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.DestinationId = ""
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.DestinationId = "test"
+	at.DestinationId = ""
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+}
+
+func TestBalanceMatchActionTriggerWeight(t *testing.T) {
+	at := &ActionTrigger{BalanceWeight: 1}
+	b := &Balance{Weight: 1}
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.Weight = 2
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.Weight = 0
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.Weight = 1
+	at.BalanceWeight = 0
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+}
+
+func TestBalanceMatchActionTriggerRatingSubject(t *testing.T) {
+	at := &ActionTrigger{BalanceRatingSubject: "test"}
+	b := &Balance{RatingSubject: "test"}
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.RatingSubject = "test1"
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.RatingSubject = ""
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.RatingSubject = "test"
+	at.BalanceRatingSubject = ""
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+}
+
+func TestBalanceMatchActionTriggerSharedGroup(t *testing.T) {
+	at := &ActionTrigger{BalanceSharedGroup: "test"}
+	b := &Balance{SharedGroup: "test"}
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.SharedGroup = "test1"
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.SharedGroup = ""
+	if b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+	b.SharedGroup = "test"
+	at.BalanceSharedGroup = ""
+	if !b.MatchActionTrigger(at) {
+		t.Errorf("Error matching action trigger: %+v %+v", b, at)
+	}
+}

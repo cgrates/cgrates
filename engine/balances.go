@@ -77,7 +77,7 @@ func (b *Balance) MatchDestination(destinationId string) bool {
 func (b *Balance) MatchActionTrigger(at *ActionTrigger) bool {
 	matchesDestination := true
 	if at.DestinationId != "" {
-		matchesDestination = b.MatchDestination(at.DestinationId)
+		matchesDestination = (at.DestinationId == b.DestinationId)
 	}
 	matchesExpirationDate := true
 	if !at.BalanceExpirationDate.IsZero() {
