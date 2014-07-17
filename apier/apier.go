@@ -454,7 +454,7 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		Executed:              false,
 	}
 
-	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
+	tag := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
 	_, err = engine.AccLock.Guard(tag, func() (float64, error) {
 		userBalance, err := self.AccountDb.GetAccount(tag)
 		if err != nil {
@@ -502,7 +502,7 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 		Direction:       attr.Direction,
 		ExtraParameters: string(extraParameters),
 	}
-	accID := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
+	accID := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
 	_, err = engine.AccLock.Guard(accID, func() (float64, error) {
 		acc, err := self.AccountDb.GetAccount(accID)
 		if err != nil {

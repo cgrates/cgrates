@@ -51,7 +51,7 @@ func (self *ApierV1) GetAccountActionPlan(attrs AttrAcntAction, reply *[]*Accoun
 	}
 	for _, ats := range allATs {
 		for _, at := range ats {
-			if utils.IsSliceMember(at.AccountIds, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
+			if utils.IsSliceMember(at.AccountIds, utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)) {
 				accountATs = append(accountATs, &AccountActionTiming{Uuid: at.Uuid, ActionPlanId: at.Id, ActionsId: at.ActionsId, NextExecTime: at.GetNextStartTime(time.Now())})
 			}
 		}
@@ -86,7 +86,7 @@ func (self *ApierV1) RemActionTiming(attrs AttrRemActionTiming, reply *string) e
 		} else if len(ats) == 0 {
 			return 0, errors.New(utils.ERR_NOT_FOUND)
 		}
-		ats = engine.RemActionTiming(ats, attrs.ActionTimingId, utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction))
+		ats = engine.RemActionTiming(ats, attrs.ActionTimingId, utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction))
 		if err := self.AccountDb.SetActionTimings(attrs.ActionPlanId, ats); err != nil {
 			return 0, err
 		}
@@ -108,7 +108,7 @@ func (self *ApierV1) GetAccountActionTriggers(attrs AttrAcntAction, reply *engin
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if balance, err := self.AccountDb.GetAccount(utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)); err != nil {
+	if balance, err := self.AccountDb.GetAccount(utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = balance.ActionTriggers
@@ -128,7 +128,7 @@ func (self *ApierV1) RemAccountActionTriggers(attrs AttrRemAcntActionTriggers, r
 	if missing := utils.MissingStructFields(&attrs, []string{"Tenant", "Account", "Direction"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	balanceId := utils.BalanceKey(attrs.Tenant, attrs.Account, attrs.Direction)
+	balanceId := utils.AccountKey(attrs.Tenant, attrs.Account, attrs.Direction)
 	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
 		ub, err := self.AccountDb.GetAccount(balanceId)
 		if err != nil {
@@ -169,7 +169,7 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 	if missing := utils.MissingStructFields(&attr, []string{"Tenant", "Direction", "Account"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	balanceId := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
+	balanceId := utils.AccountKey(attr.Tenant, attr.Account, attr.Direction)
 	var ub *engine.Account
 	var ats engine.ActionPlan
 	_, err := engine.AccLock.Guard(balanceId, func() (float64, error) {
