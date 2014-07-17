@@ -441,17 +441,17 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	at := &engine.ActionTrigger{
-		Id:                utils.GenUUID(),
-		BalanceType:       attr.BalanceType,
-		Direction:         attr.Direction,
-		ThresholdType:     attr.ThresholdType,
-		ThresholdValue:    attr.ThresholdValue,
-		DestinationId:     attr.DestinationId,
-		BalanceWeight:     attr.BalanceWeight,
-		BalanceExpiryTime: balExpiryTime,
-		Weight:            attr.Weight,
-		ActionsId:         attr.ActionsId,
-		Executed:          false,
+		Id:                    utils.GenUUID(),
+		BalanceType:           attr.BalanceType,
+		Direction:             attr.Direction,
+		ThresholdType:         attr.ThresholdType,
+		ThresholdValue:        attr.ThresholdValue,
+		DestinationId:         attr.DestinationId,
+		BalanceWeight:         attr.BalanceWeight,
+		BalanceExpirationDate: balExpiryTime,
+		Weight:                attr.Weight,
+		ActionsId:             attr.ActionsId,
+		Executed:              false,
 	}
 
 	tag := utils.BalanceKey(attr.Tenant, attr.Account, attr.Direction)
