@@ -477,12 +477,16 @@ func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string
 }
 
 type AttrResetTriggeredAction struct {
-	Tenant         string
-	Account        string
-	Direction      string
-	BalanceType    string
-	ThresholdType  string
-	ThresholdValue float64
+	Tenant               string
+	Account              string
+	Direction            string
+	BalanceType          string
+	ThresholdType        string
+	ThresholdValue       float64
+	DestinationId        string
+	BalanceWeight        float64
+	BalanceRatingSubject string
+	BalanceSharedGroup   string
 }
 
 func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply *string) error {
@@ -490,9 +494,20 @@ func (self *ApierV1) ResetTriggeredActions(attr AttrResetTriggeredAction, reply 
 		attr.Direction = engine.OUTBOUND
 	}
 	extraParameters, err := json.Marshal(struct {
-		ThresholdType  string
-		ThresholdValue float64
-	}{attr.ThresholdType, attr.ThresholdValue})
+		ThresholdType        string
+		ThresholdValue       float64
+		DestinationId        string
+		BalanceWeight        float64
+		BalanceRatingSubject string
+		BalanceSharedGroup   string
+	}{
+		attr.ThresholdType,
+		attr.ThresholdValue,
+		attr.DestinationId,
+		attr.BalanceWeight,
+		attr.BalanceRatingSubject,
+		attr.BalanceSharedGroup,
+	})
 	if err != nil {
 		*reply = err.Error()
 		return err
