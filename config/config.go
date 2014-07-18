@@ -516,7 +516,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "max_call_duration"); hasOpt {
-		maxCallDurStr, _ := c.GetString("session_manager", "min_call_duration")
+		maxCallDurStr, _ := c.GetString("session_manager", "max_call_duration")
 		if cfg.SMMaxCallDuration, err = utils.ParseDurationWithSecs(maxCallDurStr); err != nil {
 			return nil, err
 		}

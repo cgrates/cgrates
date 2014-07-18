@@ -248,7 +248,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.SMRater = "test"
 	eCfg.SMRaterReconnects = 99
 	eCfg.SMDebitInterval = 99
-	eCfg.SMMinCallDuration = time.Duration(99) * time.Second
+	eCfg.SMMinCallDuration = time.Duration(98) * time.Second
 	eCfg.SMMaxCallDuration = time.Duration(99) * time.Second
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
