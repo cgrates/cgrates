@@ -67,6 +67,7 @@ var (
 	server          = &engine.Server{}
 	scribeServer    history.Scribe
 	cdrServer       *cdrs.CDRS
+	cdrStats        *engine.Stats
 	sm              sessionmanager.SessionManager
 	medi            *mediator.Mediator
 	cfg             *config.CGRConfig
@@ -111,7 +112,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		connector = &engine.RPCClientConnector{Client: client}
 	}
 	var err error
-	medi, err = mediator.NewMediator(connector, loggerDb, cdrDb, cfg)
+	medi, err = mediator.NewMediator(connector, loggerDb, cdrDb, cdrStats, cfg)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
@@ -185,7 +186,7 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage, mediChan, d
 			return
 		}
 	}
-	cdrServer = cdrs.New(cdrDb, medi, cfg)
+	cdrServer = cdrs.New(cdrDb, medi, cdrStats, cfg)
 	cdrServer.RegisterHanlersToServer(server)
 	close(doneChan)
 }
@@ -437,6 +438,11 @@ func main() {
 		engine.Logger.Info("Starting CGRateS Mediator service.")
 		medChan = make(chan struct{})
 		go startMediator(responder, logDb, cdrDb, cacheChan, medChan)
+	}
+
+	if cfg.CDRStatsEnabled {
+		cdrStats = &engine.Stats{}
+		server.RpcRegister(cdrStats)
 	}
 
 	var cdrsChan chan struct{}

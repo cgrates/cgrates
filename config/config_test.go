@@ -83,6 +83,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSEnabled = false
 	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
+	eCfg.CDRStatsEnabled = false
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcRunDelay = time.Duration(0)
@@ -106,11 +107,12 @@ func TestDefaults(t *testing.T) {
 		utils.USAGE:       &utils.RSRField{Id: "13"},
 	}
 	eCfg.MediatorEnabled = false
-	eCfg.MediatorRater = "internal"
+	eCfg.MediatorRater = utils.INTERNAL
 	eCfg.MediatorRaterReconnects = 3
+	eCfg.MediatorStats = utils.INTERNAL
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
-	eCfg.SMRater = "internal"
+	eCfg.SMRater = utils.INTERNAL
 	eCfg.SMRaterReconnects = 3
 	eCfg.SMDebitInterval = 10
 	eCfg.SMMinCallDuration = time.Duration(0)
@@ -121,7 +123,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.DerivedChargers = make(utils.DerivedChargers, 0)
 	eCfg.CombinedDerivedChargers = true
 	eCfg.HistoryAgentEnabled = false
-	eCfg.HistoryServer = "internal"
+	eCfg.HistoryServer = utils.INTERNAL
 	eCfg.HistoryServerEnabled = false
 	eCfg.HistoryDir = "/var/log/cgrates/history"
 	eCfg.HistorySaveInterval = time.Duration(1) * time.Second
@@ -206,6 +208,8 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSEnabled = true
 	eCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CDRSMediator = "test"
+	eCfg.CDRStatsEnabled = true
+	eCfg.CDRSStats = "test"
 	eCfg.CdreDefaultInstance = &CdreConfig{
 		CdrFormat:               "test",
 		FieldSeparator:          utils.CSV_SEP,
@@ -243,6 +247,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorRater = "test"
 	eCfg.MediatorRaterReconnects = 99
+	eCfg.MediatorStats = "test"
 	eCfg.SMEnabled = true
 	eCfg.SMSwitchType = "test"
 	eCfg.SMRater = "test"

@@ -28,12 +28,25 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engine.CdrStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
+func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engine.CdrStorage, st engine.StatsInterface, cfg *config.CGRConfig) (m *Mediator, err error) {
 	m = &Mediator{
 		connector: connector,
 		logDb:     logDb,
 		cdrDb:     cdrDb,
+		stats:     st,
 		cgrCfg:    cfg,
+	}
+	if m.cgrCfg.MediatorStats != "" {
+		if m.cgrCfg.MediatorStats != utils.INTERNAL {
+			if s, err := engine.NewProxyStats(m.cgrCfg.MediatorStats); err == nil {
+				m.stats = s
+			} else {
+				engine.Logger.Err(fmt.Sprintf("Errors connecting to CDRS stats service (mediator): %s", err.Error()))
+			}
+		}
+	} else {
+		// disable stats for mediator
+		m.stats = nil
 	}
 	return m, nil
 }
@@ -42,6 +55,7 @@ type Mediator struct {
 	connector engine.Connector
 	logDb     engine.LogStorage
 	cdrDb     engine.CdrStorage
+	stats     engine.StatsInterface
 	cgrCfg    *config.CGRConfig
 }
 
@@ -154,6 +168,14 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 		extraInfo := ""
 		if err := self.rateCDR(cdr); err != nil {
 			extraInfo = err.Error()
+		}
+		if self.stats != nil {
+			go func() {
+				var x int = 0 // not used
+				if err := self.stats.AppendCDR(cdr, &x); err != nil {
+					engine.Logger.Err(fmt.Sprintf("Could not append cdr to stats (mediator): %s", err.Error()))
+				}
+			}()
 		}
 		if err := self.cdrDb.SetRatedCdr(cdr, extraInfo); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<Mediator> Could not record cost for cgrid: <%s>, ERROR: <%s>, cost: %f, extraInfo: %s",

@@ -33,10 +33,19 @@ var (
 	cfg     *config.CGRConfig // Share the configuration with the rest of the package
 	storage engine.CdrStorage
 	medi    *mediator.Mediator
+	stats   engine.StatsInterface
 )
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func storeAndMediate(storedCdr *utils.StoredCdr) error {
+	if stats != nil {
+		go func() {
+			var x int = 0 // not used
+			if err := stats.AppendCDR(storedCdr, &x); err != nil {
+				engine.Logger.Err(fmt.Sprintf("Could not append cdr to stats: %s", err.Error()))
+			}
+		}()
+	}
 	if err := storage.SetCdr(storedCdr); err != nil {
 		return err
 	}
@@ -75,10 +84,23 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 
 type CDRS struct{}
 
-func New(s engine.CdrStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
+func New(s engine.CdrStorage, m *mediator.Mediator, st *engine.Stats, c *config.CGRConfig) *CDRS {
 	storage = s
 	medi = m
 	cfg = c
+	stats = st
+	if cfg.CDRSStats != "" {
+		if cfg.CDRSStats != utils.INTERNAL {
+			if s, err := engine.NewProxyStats(cfg.CDRSStats); err == nil {
+				stats = s
+			} else {
+				engine.Logger.Err(fmt.Sprintf("Errors connecting to CDRS stats service : %s", err.Error()))
+			}
+		}
+	} else {
+		// disable stats for cdrs
+		stats = nil
+	}
 	return &CDRS{}
 }
 

@@ -45,6 +45,10 @@ enabled = true				# Starts Scheduler service: <true|false>.
 enabled = true				# Start the CDR Server service:  <true|false>.
 extra_fields = test			# Extra fields to scategorye in CDRs
 mediator = test				# Address where to reach the Mediacategory. Empty for disabling mediation. <""|internal>
+stats = test				# Address where to reach the stats sevre. Empty for disabling stats. <""|internal>
+
+[stats]
+enabled = true              # Start the CDR stats service:  <true|false>.
 
 [cdre]
 cdr_format = test					# Exported CDRs format <csv>
@@ -83,7 +87,8 @@ extra_fields = test:test	# Field identifiers of the fields to add in extra field
 [mediator]
 enabled = true				# Starts Mediacategory service: <true|false>.
 rater = test				# Address where to reach the Rater: <internal|x.y.z.y:1234>
-rater_reconnects = 99			# Number of reconnects to rater before giving up.
+rater_reconnects = 99		# Number of reconnects to rater before giving up.
+stats = test                # Address where to reach the stats service: <internal|x.y.z.y:1234>
 
 [session_manager]
 enabled = true				# Starts SessionManager service: <true|false>.
