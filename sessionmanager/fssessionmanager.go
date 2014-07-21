@@ -124,7 +124,8 @@ func (sm *FSSessionManager) RemoveSession(uuid string) {
 
 // Sets the call timeout valid of starting of the call
 func (sm *FSSessionManager) setMaxCallDuration(uuid string, maxDur time.Duration) error {
-	_, err := fsock.FS.SendApiCmd(fmt.Sprintf("sched_hangup +%d %s\n\n", int(maxDur.Seconds()), uuid))
+	// _, err := fsock.FS.SendApiCmd(fmt.Sprintf("sched_hangup +%d %s\n\n", int(maxDur.Seconds()), uuid))
+	_, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s execute_on_answer sched_hangup +%d alloted_timeout\n\n", uuid, int(maxDur.Seconds())))
 	if err != nil {
 		engine.Logger.Err("could not send sched_hangup command to freeswitch")
 		return err
