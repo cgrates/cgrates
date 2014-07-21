@@ -442,7 +442,7 @@ func main() {
 
 	if cfg.CDRStatsEnabled {
 		cdrStats = &engine.Stats{}
-		server.RpcRegister("Stats", cdrStats)
+		server.RpcRegister(cdrStats)
 	}
 
 	var cdrsChan chan struct{}
