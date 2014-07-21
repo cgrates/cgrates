@@ -51,7 +51,7 @@ func storeAndMediate(storedCdr *utils.StoredCdr) error {
 	}
 	if cfg.CDRSMediator == utils.INTERNAL {
 		go func() {
-			if err := medi.RateCdr(storedCdr); err != nil {
+			if err := medi.RateCdr(storedCdr, true); err != nil {
 				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", err.Error()))
 			}
 		}()

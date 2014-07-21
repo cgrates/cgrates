@@ -20,9 +20,10 @@ package apier
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/utils"
-	"time"
 )
 
 type MediatorV1 struct {
@@ -46,7 +47,7 @@ func (self *MediatorV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error 
 			return err
 		}
 	}
-	if err := self.Medi.RateCdrs(tStart, tEnd, attrs.RerateErrors, attrs.RerateRated); err != nil {
+	if err := self.Medi.RateCdrs(tStart, tEnd, attrs.RerateErrors, attrs.RerateRated, attrs.SendToStats); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK

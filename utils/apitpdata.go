@@ -399,6 +399,7 @@ type AttrRateCdrs struct {
 	TimeEnd      string // Cdrs time end
 	RerateErrors bool   // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
 	RerateRated  bool   // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
+	SendToStats  bool   // Set to true if the CDRs should be sent to stats server
 }
 
 type AttrLoadTpFromFolder struct {

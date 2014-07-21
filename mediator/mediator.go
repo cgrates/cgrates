@@ -122,7 +122,7 @@ func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
 	return nil
 }
 
-func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
+func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) error {
 	storedCdr.MediationRunId = utils.DEFAULT_RUNID
 	cdrRuns := []*utils.StoredCdr{storedCdr}     // Start with initial storCdr, will add here all to be mediated
 	attrsDC := utils.AttrDerivedChargers{Tenant: storedCdr.Tenant, Category: storedCdr.Category, Direction: storedCdr.Direction,
@@ -169,7 +169,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 		if err := self.rateCDR(cdr); err != nil {
 			extraInfo = err.Error()
 		}
-		if self.stats != nil {
+		if sendToStats && self.stats != nil {
 			go func() {
 				var x int = 0 // not used
 				if err := self.stats.AppendCDR(cdr, &x); err != nil {
@@ -185,13 +185,13 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 	return nil
 }
 
-func (self *Mediator) RateCdrs(timeStart, timeEnd time.Time, rerateErrors, rerateRated bool) error {
+func (self *Mediator) RateCdrs(timeStart, timeEnd time.Time, rerateErrors, rerateRated bool, sentToStats bool) error {
 	cdrs, err := self.cdrDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, !rerateErrors, !rerateRated, true)
 	if err != nil {
 		return err
 	}
 	for _, cdr := range cdrs {
-		if err := self.RateCdr(cdr); err != nil {
+		if err := self.RateCdr(cdr, sentToStats); err != nil {
 			return err
 		}
 	}
