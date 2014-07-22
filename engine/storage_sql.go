@@ -23,11 +23,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
 	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -949,8 +950,8 @@ func (self *SQLStorage) RemStoredCdrs(cgrIds []string) error {
 	return nil
 }
 
-func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, error) {
-	var dests []*Destination
+func (self *SQLStorage) GetTpDestinations(tpid, tag string) (map[string]*Destination, error) {
+	var dests map[string]*Destination
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid)
 	if len(tag) != 0 {
 		q += fmt.Sprintf(" AND id='%s'", tag)
@@ -967,15 +968,10 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) ([]*Destination, err
 			return nil, err
 		}
 		var dest *Destination
-		for _, d := range dests {
-			if d.Id == tag {
-				dest = d
-				break
-			}
-		}
-		if dest == nil {
+		var found bool
+		if dest, found = dests[tag]; !found {
 			dest = &Destination{Id: tag}
-			dests = append(dests, dest)
+			dests[tag] = dest
 		}
 		dest.AddPrefix(prefix)
 	}

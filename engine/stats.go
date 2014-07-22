@@ -40,6 +40,9 @@ type Stats struct {
 func (s *Stats) AddQueue(sq *StatsQueue, out *int) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
+	if s.queues == nil {
+		s.queues = make(map[string]*StatsQueue)
+	}
 	s.queues[sq.conf.Id] = sq
 	return nil
 }
@@ -52,6 +55,27 @@ func (s *Stats) GetValues(sqID string, values *map[string]float64) error {
 		return nil
 	}
 	return errors.New("Not Found")
+}
+
+// change the xisting ones
+// add new ones
+// delete the ones missing from the new list
+func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	oldQueues := s.queues
+	s.queues = make(map[string]*StatsQueue)
+	for _, cs := range css {
+		var sq *StatsQueue
+		var existing bool
+		if sq, existing = oldQueues[cs.Id]; existing {
+			sq.conf = cs
+		} else {
+			sq = NewStatsQueue(cs)
+		}
+		s.queues[cs.Id] = sq
+	}
+	return nil
 }
 
 func (s *Stats) AppendCDR(cdr *utils.StoredCdr, out *int) error {

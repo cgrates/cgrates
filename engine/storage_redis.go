@@ -664,6 +664,37 @@ func (rs *RedisStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers
 	return err
 }
 
+func (rs *RedisStorage) SetCdrStats(cs *CdrStats) error {
+	marshaled, err := rs.ms.Marshal(cs)
+	err = rs.db.Set(CDR_STATS_PREFIX+cs.Id, marshaled)
+	return err
+}
+
+func (rs *RedisStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
+	var values []byte
+	if values, err = rs.db.Get(key); err == nil {
+		err = rs.ms.Unmarshal(values, &cs)
+	}
+	return
+}
+
+func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
+	keys, err := rs.db.Keys(CDR_STATS_PREFIX + "*")
+	if err != nil {
+		return nil, err
+	}
+	for _, key := range keys {
+		value, err := rs.db.Get(key)
+		if err != nil {
+			continue
+		}
+		var cs *CdrStats
+		err = rs.ms.Unmarshal(value, cs)
+		css = append(css, cs)
+	}
+	return
+}
+
 func (rs *RedisStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
 	var result []byte
 	result, err = rs.ms.Marshal(cc)

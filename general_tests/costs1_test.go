@@ -19,10 +19,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
+	"testing"
+
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"testing"
 )
 
 func TestCosts1SetStorage(t *testing.T) {
@@ -53,7 +54,7 @@ RP_SMS1,DR_SMS_1,ALWAYS,10`
 *out,cgrates.org,data,*any,2012-01-01T00:00:00Z,RP_DATA1,
 *out,cgrates.org,sms,*any,2012-01-01T00:00:00Z,RP_SMS1,`
 	csvr := engine.NewStringCSVReader(ratingDb, acntDb, ',', dests, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		"", "", "", "", "", "", "")
+		"", "", "", "", "", "", "", "")
 	if err := csvr.LoadTimings(); err != nil {
 		t.Fatal(err)
 	}

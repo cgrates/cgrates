@@ -161,11 +161,11 @@ TOPUP_SHARED10_AT,SE10,ASAP,10
 TOPUP_EMPTY_AT,EE0,ASAP,10
 `
 	actionTriggers = `
-STANDARD_TRIGGER,*voice,*out,*min_counter,10,false,GERMANY_O2,SOME_1,10
-STANDARD_TRIGGER,*voice,*out,*max_balance,200,false,GERMANY,SOME_2,10
-STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,,LOG_WARNING,10
-STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,,LOG_WARNING,10
-STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,false,FS_USERS,LOG_WARNING,10
+STANDARD_TRIGGER,*voice,*out,*min_counter,10,false,0,GERMANY_O2,,,,,,SOME_1,10
+STANDARD_TRIGGER,*voice,*out,*max_balance,200,false,0,GERMANY,,,,,,SOME_2,10
+STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,0,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,0,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,false,0,FS_USERS,,,,,,LOG_WARNING,10
 `
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
@@ -182,13 +182,15 @@ vdf,emptyY,*out,TOPUP_EMPTY_AT,
 *out,cgrates.org,call,dan,dan,extra2,,,,,,ivo,ivo,,,,
 *out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,
 `
+	cdrStats = `
+`
 )
 
 var csvr *CSVReader
 
 func init() {
 	csvr = NewStringCSVReader(dataStorage, accountingStorage, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges)
+		sharedGroups, lcrs, actions, actionTimings, actionTriggers, accountActions, derivedCharges, cdrStats)
 	csvr.LoadDestinations()
 	csvr.LoadTimings()
 	csvr.LoadRates()

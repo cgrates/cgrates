@@ -26,6 +26,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -43,7 +44,7 @@ type CSVReader struct {
 	accountActions    map[string]*Account
 	dirtyRpAliases    []*TenantRatingSubject // used to clean aliases that might have changed
 	dirtyAccAliases   []*TenantAccount       // used to clean aliases that might have changed
-	destinations      []*Destination
+	destinations      map[string]*Destination
 	timings           map[string]*utils.TPTiming
 	rates             map[string]*utils.TPRate
 	destinationRates  map[string]*utils.TPDestinationRate
@@ -52,14 +53,15 @@ type CSVReader struct {
 	sharedGroups      map[string]*SharedGroup
 	lcrs              map[string]*LCR
 	derivedChargers   map[string]utils.DerivedChargers
+	cdrStats          map[string]*CdrStats
 	// file names
 	destinationsFn, ratesFn, destinationratesFn, timingsFn, destinationratetimingsFn, ratingprofilesFn,
-	sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn string
+	sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn string
 }
 
 func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn string) *CSVReader {
+	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn string) *CSVReader {
 	c := new(CSVReader)
 	c.sep = sep
 	c.dataStorage = dataStorage
@@ -71,25 +73,27 @@ func NewFileCSVReader(dataStorage RatingStorage, accountingStorage AccountingSto
 	c.rates = make(map[string]*utils.TPRate)
 	c.destinationRates = make(map[string]*utils.TPDestinationRate)
 	c.timings = make(map[string]*utils.TPTiming)
+	c.destinations = make(map[string]*Destination)
 	c.ratingPlans = make(map[string]*RatingPlan)
 	c.ratingProfiles = make(map[string]*RatingProfile)
 	c.sharedGroups = make(map[string]*SharedGroup)
 	c.lcrs = make(map[string]*LCR)
 	c.derivedChargers = make(map[string]utils.DerivedChargers)
+	c.cdrStats = make(map[string]*CdrStats)
 	c.readerFunc = openFileCSVReader
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
 	c.destinationsFn, c.timingsFn, c.ratesFn, c.destinationratesFn, c.destinationratetimingsFn, c.ratingprofilesFn,
-		c.sharedgroupsFn, c.lcrFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn, c.derivedChargersFn = destinationsFn, timingsFn,
-		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn
+		c.sharedgroupsFn, c.lcrFn, c.actionsFn, c.actiontimingsFn, c.actiontriggersFn, c.accountactionsFn, c.derivedChargersFn, c.cdrStatsFn = destinationsFn, timingsFn,
+		ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn
 	return c
 }
 
 func NewStringCSVReader(dataStorage RatingStorage, accountingStorage AccountingStorage, sep rune,
 	destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn, ratingprofilesFn, sharedgroupsFn, lcrFn,
-	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn string) *CSVReader {
+	actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn string) *CSVReader {
 	c := NewFileCSVReader(dataStorage, accountingStorage, sep, destinationsFn, timingsFn, ratesFn, destinationratesFn, destinationratetimingsFn,
-		ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn)
+		ratingprofilesFn, sharedgroupsFn, lcrFn, actionsFn, actiontimingsFn, actiontriggersFn, accountactionsFn, derivedChargersFn, cdrStatsFn)
 	c.readerFunc = openStringCSVReader
 	return c
 }
@@ -171,6 +175,8 @@ func (csvr *CSVReader) ShowStatistics() {
 	log.Print("Derived Chargers: ", len(csvr.derivedChargers))
 	// lcr rules
 	log.Print("LCR rules: ", len(csvr.lcrs))
+	// cdr stats
+	log.Print("CDR stats: ", len(csvr.cdrStats))
 }
 
 func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
@@ -320,6 +326,18 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Print(key)
 		}
 	}
+	if verbose {
+		log.Print("CDR Stats Queues")
+	}
+	for _, sq := range csvr.cdrStats {
+		err = accountingStorage.SetCdrStats(sq)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print(sq.Id)
+		}
+	}
 	return
 }
 
@@ -336,15 +354,10 @@ func (csvr *CSVReader) LoadDestinations() (err error) {
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
 		var dest *Destination
-		for _, d := range csvr.destinations {
-			if d.Id == tag {
-				dest = d
-				break
-			}
-		}
-		if dest == nil {
+		var found bool
+		if dest, found = csvr.destinations[tag]; !found {
 			dest = &Destination{Id: tag}
-			csvr.destinations = append(csvr.destinations, dest)
+			csvr.destinations[tag] = dest
 		}
 		dest.AddPrefix(record[1])
 	}
@@ -427,12 +440,7 @@ func (csvr *CSVReader) LoadDestinationRates() (err error) {
 		}
 		destinationExists := record[1] == utils.ANY
 		if !destinationExists {
-			for _, d := range csvr.destinations {
-				if d.Id == record[1] {
-					destinationExists = true
-					break
-				}
-			}
+			_, destinationExists = csvr.destinations[record[1]]
 		}
 		if !destinationExists && csvr.dataStorage != nil {
 			if destinationExists, err = csvr.dataStorage.HasData(DESTINATION_PREFIX, record[1]); err != nil {
@@ -753,26 +761,49 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		tag := record[0]
 		value, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger value: %v", err)
+			return fmt.Errorf("Could not parse action trigger value (%v): %v", record[4], err)
 		}
 		recurrent, err := strconv.ParseBool(record[5])
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger recurrent flag: %v", err)
+			return fmt.Errorf("Could not parse action trigger recurrent flag (%v): %v", record[5], err)
 		}
-		weight, err := strconv.ParseFloat(record[8], 64)
+		minSleep, err := time.ParseDuration(record[6])
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger weight: %v", err)
+			return fmt.Errorf("Could not parse action trigger MinSleep (%v): %v", record[6], err)
 		}
+		balanceWeight, err := strconv.ParseFloat(record[8], 64)
+		if record[8] != "" && err != nil {
+			return fmt.Errorf("Could not parse action trigger BalanceWeight (%v): %v", record[8], err)
+		}
+		balanceExp, err := utils.ParseTimeDetectLayout(record[9])
+		if record[9] != "" && err != nil {
+			return fmt.Errorf("Could not parse action trigger BalanceExpirationDate (%v): %v", record[9], err)
+		}
+		minQI, err := strconv.Atoi(record[12])
+		if record[12] != "" && err != nil {
+			return fmt.Errorf("Could not parse action trigger MinQueuedItems (%v): %v", record[12], err)
+		}
+		weight, err := strconv.ParseFloat(record[14], 64)
+		if err != nil {
+			return fmt.Errorf("Could not parse action trigger weight (%v): %v", record[14], err)
+		}
+
 		at := &ActionTrigger{
-			Id:             utils.GenUUID(),
-			BalanceType:    record[1],
-			Direction:      record[2],
-			ThresholdType:  record[3],
-			ThresholdValue: value,
-			Recurrent:      recurrent,
-			DestinationId:  record[6],
-			ActionsId:      record[7],
-			Weight:         weight,
+			Id:                    utils.GenUUID(),
+			BalanceType:           record[1],
+			Direction:             record[2],
+			ThresholdType:         record[3],
+			ThresholdValue:        value,
+			Recurrent:             recurrent,
+			MinSleep:              minSleep,
+			DestinationId:         record[7],
+			BalanceWeight:         balanceWeight,
+			BalanceExpirationDate: balanceExp,
+			BalanceRatingSubject:  record[10],
+			BalanceSharedGroup:    record[11],
+			MinQueuedItems:        minQI,
+			ActionsId:             record[13],
+			Weight:                weight,
 		}
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)
 	}
@@ -806,7 +837,7 @@ func (csvr *CSVReader) LoadAccountActions() (err error) {
 		}
 		aTriggers, exists := csvr.actionsTriggers[record[4]]
 		if record[4] != "" && !exists {
-			// only return error if there was something ther for the tag
+			// only return error if there was something there for the tag
 			return fmt.Errorf("Could not get action triggers for tag %s", record[4])
 		}
 		ub := &Account{
@@ -882,6 +913,37 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 	return
 }
 
+func (csvr *CSVReader) LoadCdrStats() (err error) {
+	csvReader, fp, err := csvr.readerFunc(csvr.timingsFn, csvr.sep, utils.TIMINGS_NRCOLS)
+	if err != nil {
+		log.Print("Could not load cdr stats file: ", err)
+		// allow writing of the other values
+		return nil
+	}
+	if fp != nil {
+		defer fp.Close()
+	}
+	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
+		tag := record[0]
+		if _, exists := csvr.cdrStats[tag]; exists {
+			log.Print("Warning: duplicate cdr stats found: ", tag)
+		}
+		var cs *CdrStats
+		var exists bool
+		if cs, exists = csvr.cdrStats[tag]; !exists {
+			cs = &CdrStats{}
+		}
+		triggers, exists := csvr.actionsTriggers[record[18]]
+		if record[18] != "" && !exists {
+			// only return error if there was something there for the tag
+			return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, record[18])
+		}
+		UpdateCdrStats(cs, triggers, record...)
+		csvr.cdrStats[tag] = cs
+	}
+	return
+}
+
 // Automated loading
 func (csvr *CSVReader) LoadAll() error {
 	var err error
@@ -921,6 +983,9 @@ func (csvr *CSVReader) LoadAll() error {
 	if err = csvr.LoadDerivedChargers(); err != nil {
 		return err
 	}
+	if err = csvr.LoadCdrStats(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -929,8 +994,10 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
 		ids := make([]string, len(csvr.destinations))
-		for idx, dst := range csvr.destinations {
-			ids[idx] = dst.Id
+		i := 0
+		for k := range csvr.destinations {
+			ids[i] = k
+			i++
 		}
 		return ids, nil
 	case RATING_PLAN_PREFIX:
@@ -981,10 +1048,18 @@ func (csvr *CSVReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case DERIVEDCHARGERS_PREFIX: // aliases
+	case DERIVEDCHARGERS_PREFIX: // derived chargers
 		keys := make([]string, len(csvr.derivedChargers))
 		i := 0
 		for k := range csvr.derivedChargers {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case CDR_STATS_PREFIX: // cdr stats
+		keys := make([]string, len(csvr.cdrStats))
+		i := 0
+		for k := range csvr.cdrStats {
 			keys[i] = k
 			i++
 		}

@@ -59,8 +59,9 @@ TOPUP10_AT,TOPUP10_AC1,ASAP,10`
 	actionTriggers := ``
 	accountActions := `cgrates.org,12345,*out,TOPUP10_AT,`
 	derivedCharges := ``
+	cdrStats := ``
 	csvr := engine.NewStringCSVReader(ratingDb2, acntDb2, ',', destinations, timings, rates, destinationRates, ratingPlans, ratingProfiles,
-		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges)
+		sharedGroups, lcrs, actions, actionPlans, actionTriggers, accountActions, derivedCharges, cdrStats)
 	if err := csvr.LoadDestinations(); err != nil {
 		t.Fatal(err)
 	}

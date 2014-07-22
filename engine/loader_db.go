@@ -38,7 +38,7 @@ type DbReader struct {
 	accountActions   map[string]*Account
 	dirtyRpAliases   []*TenantRatingSubject // used to clean aliases that might have changed
 	dirtyAccAliases  []*TenantAccount       // used to clean aliases that might have changed
-	destinations     []*Destination
+	destinations     map[string]*Destination
 	rpAliases        map[string]string
 	accAliases       map[string]string
 	timings          map[string]*utils.TPTiming
@@ -49,6 +49,7 @@ type DbReader struct {
 	sharedGroups     map[string]*SharedGroup
 	lcrs             map[string]*LCR
 	derivedChargers  map[string]utils.DerivedChargers
+	cdrStats         map[string]*CdrStats
 }
 
 func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb AccountingStorage, tpid string) *DbReader {
@@ -67,6 +68,8 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
 	c.accountActions = make(map[string]*Account)
+	c.destinations = make(map[string]*Destination)
+	c.cdrStats = make(map[string]*CdrStats)
 	c.derivedChargers = make(map[string]utils.DerivedChargers)
 	return c
 }
@@ -290,12 +293,7 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 			dr.Rate = rate
 			destinationExists := dr.DestinationId == utils.ANY
 			if !destinationExists {
-				for _, d := range dbr.destinations {
-					if d.Id == dr.DestinationId {
-						destinationExists = true
-						break
-					}
-				}
+				_, destinationExists = dbr.destinations[dr.DestinationId]
 			}
 			if !destinationExists {
 				if dbExists, err := dbr.dataDb.HasData(DESTINATION_PREFIX, dr.DestinationId); err != nil {
@@ -824,8 +822,10 @@ func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 	switch categ {
 	case DESTINATION_PREFIX:
 		ids := make([]string, len(dbr.destinations))
-		for idx, dst := range dbr.destinations {
-			ids[idx] = dst.Id
+		i := 0
+		for k := range dbr.destinations {
+			ids[i] = k
+			i++
 		}
 		return ids, nil
 	case RATING_PLAN_PREFIX:

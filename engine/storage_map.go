@@ -485,7 +485,7 @@ func (ms *MapStorage) SetActionTimings(key string, ats ActionPlan) (err error) {
 func (ms *MapStorage) GetAllActionTimings() (ats map[string]ActionPlan, err error) {
 	ats = make(map[string]ActionPlan)
 	for key, value := range ms.dict {
-		if !strings.Contains(key, ACTION_TIMING_PREFIX) {
+		if !strings.HasPrefix(key, ACTION_TIMING_PREFIX) {
 			continue
 		}
 		var tempAts ActionPlan
@@ -517,6 +517,33 @@ func (ms *MapStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) 
 	result, err := ms.ms.Marshal(dcs)
 	ms.dict[DERIVEDCHARGERS_PREFIX+key] = result
 	return err
+}
+
+func (ms *MapStorage) SetCdrStats(cs *CdrStats) error {
+	result, err := ms.ms.Marshal(cs)
+	ms.dict[CDR_STATS_PREFIX+cs.Id] = result
+	return err
+}
+
+func (ms *MapStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
+	if values, ok := ms.dict[key]; ok {
+		err = ms.ms.Unmarshal(values, &cs)
+	} else {
+		return nil, errors.New(utils.ERR_NOT_FOUND)
+	}
+	return
+}
+
+func (ms *MapStorage) GetAllCdrStats() (css []*CdrStats, err error) {
+	for key, value := range ms.dict {
+		if !strings.HasPrefix(key, CDR_STATS_PREFIX) {
+			continue
+		}
+		var cs *CdrStats
+		err = ms.ms.Unmarshal(value, cs)
+		css = append(css, cs)
+	}
+	return
 }
 
 func (ms *MapStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) error {

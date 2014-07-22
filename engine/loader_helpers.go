@@ -29,6 +29,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -93,6 +94,140 @@ func NewTiming(timingInfo ...string) (rt *utils.TPTiming) {
 	rt.WeekDays.Parse(timingInfo[4], ";")
 	rt.StartTime = timingInfo[5]
 	return
+}
+
+func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...string) {
+	cs = &CdrStats{}
+	cs.Id = record[0]
+	if record[1] != "" {
+		if qi, err := strconv.Atoi(record[1]); err == nil {
+			cs.QueuedItems = qi
+		} else {
+			log.Printf("Error parsing QueuedItems %v for cdrs stats %v", record[1], cs.Id)
+		}
+	}
+	if record[2] != "" {
+		if d, err := time.ParseDuration(record[2]); err == nil {
+			cs.TimeWindow = d
+		} else {
+			log.Printf("Error parsing TimeWindow %v for cdrs stats %v", record[2], cs.Id)
+		}
+	}
+	if record[3] != "" {
+		cs.Metrics = append(cs.Metrics, record[3])
+	}
+	if record[4] != "" {
+		times := strings.Split(record[4], utils.INFIELD_SEP)
+		if len(times) > 0 {
+			if sTime, err := utils.ParseTimeDetectLayout(times[0]); err == nil {
+				if len(cs.SetupInterval) < 1 {
+					cs.SetupInterval = append(cs.SetupInterval, sTime)
+				} else {
+					cs.SetupInterval[0] = sTime
+				}
+			} else {
+				log.Printf("Error parsing TimeWindow %v for cdrs stats %v", record[4], cs.Id)
+			}
+		}
+		if len(times) > 1 {
+			if eTime, err := utils.ParseTimeDetectLayout(times[1]); err == nil {
+				if len(cs.SetupInterval) < 2 {
+					cs.SetupInterval = append(cs.SetupInterval, eTime)
+				} else {
+					cs.SetupInterval[1] = eTime
+				}
+			} else {
+				log.Printf("Error parsing TimeWindow %v for cdrs stats %v", record[4], cs.Id)
+			}
+		}
+	}
+	if record[5] != "" {
+		cs.TOR = append(cs.TOR, record[5])
+	}
+	if record[6] != "" {
+		cs.CdrHost = append(cs.CdrHost, record[6])
+	}
+	if record[7] != "" {
+		cs.CdrSource = append(cs.CdrSource, record[7])
+	}
+	if record[8] != "" {
+		cs.ReqType = append(cs.ReqType, record[8])
+	}
+	if record[9] != "" {
+		cs.Direction = append(cs.Direction, record[9])
+	}
+	if record[10] != "" {
+		cs.Tenant = append(cs.Tenant, record[10])
+	}
+	if record[11] != "" {
+		cs.Category = append(cs.Category, record[11])
+	}
+	if record[12] != "" {
+		cs.Account = append(cs.Account, record[12])
+	}
+	if record[13] != "" {
+		cs.Subject = append(cs.Subject, record[13])
+	}
+	if record[14] != "" {
+		cs.DestinationPrefix = append(cs.DestinationPrefix, record[14])
+	}
+	if record[15] != "" {
+		durations := strings.Split(record[15], utils.INFIELD_SEP)
+		if len(durations) > 0 {
+			if sDuration, err := time.ParseDuration(durations[0]); err == nil {
+				if len(cs.UsageInterval) < 1 {
+					cs.UsageInterval = append(cs.UsageInterval, sDuration)
+				} else {
+					cs.UsageInterval[0] = sDuration
+				}
+			} else {
+				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", record[15], cs.Id)
+			}
+		}
+		if len(durations) > 1 {
+			if eDuration, err := time.ParseDuration(durations[1]); err == nil {
+				if len(cs.UsageInterval) < 2 {
+					cs.UsageInterval = append(cs.UsageInterval, eDuration)
+				} else {
+					cs.UsageInterval[1] = eDuration
+				}
+			} else {
+				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", record[15], cs.Id)
+			}
+		}
+	}
+	if record[16] != "" {
+		cs.MediationRunIds = append(cs.MediationRunIds, record[16])
+	}
+	if record[17] != "" {
+		costs := strings.Split(record[17], utils.INFIELD_SEP)
+		if len(costs) > 0 {
+			if sCost, err := strconv.ParseFloat(costs[0], 64); err == nil {
+				if len(cs.CostInterval) < 1 {
+					cs.CostInterval = append(cs.CostInterval, sCost)
+				} else {
+					cs.CostInterval[0] = sCost
+				}
+			} else {
+				log.Printf("Error parsing CostInterval %v for cdrs stats %v", record[17], cs.Id)
+			}
+		}
+		if len(costs) > 1 {
+			if eCost, err := strconv.ParseFloat(costs[1], 64); err == nil {
+				if len(cs.CostInterval) < 2 {
+					cs.CostInterval = append(cs.CostInterval, eCost)
+				} else {
+					cs.CostInterval[1] = eCost
+				}
+			} else {
+				log.Printf("Error parsing CostInterval %v for cdrs stats %v", record[17], cs.Id)
+			}
+		}
+	}
+
+	if triggers != nil {
+		cs.Triggers = triggers
+	}
 }
 
 func NewRatingPlan(timing *utils.TPTiming, weight string) (drt *utils.TPRatingPlanBinding) {

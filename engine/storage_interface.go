@@ -43,6 +43,7 @@ const (
 	DESTINATION_PREFIX        = "dst_"
 	LCR_PREFIX                = "lcr_"
 	DERIVEDCHARGERS_PREFIX    = "dcs_"
+	CDR_STATS_PREFIX          = "cst_"
 	TEMP_DESTINATION_PREFIX   = "tmp_"
 	LOG_CALL_COST_PREFIX      = "cco_"
 	LOG_ACTION_TIMMING_PREFIX = "ltm_"
@@ -106,6 +107,9 @@ type AccountingStorage interface {
 	GetAllActionTimings() (map[string]ActionPlan, error)
 	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
 	SetDerivedChargers(string, utils.DerivedChargers) error
+	SetCdrStats(*CdrStats) error
+	GetCdrStats(string) (*CdrStats, error)
+	GetAllCdrStats() ([]*CdrStats, error)
 }
 
 type CdrStorage interface {
@@ -138,7 +142,7 @@ type LoadStorage interface {
 	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
 
 	SetTPDestination(string, *Destination) error
-	GetTpDestinations(string, string) ([]*Destination, error)
+	GetTpDestinations(string, string) (map[string]*Destination, error)
 
 	SetTPRates(string, map[string][]*utils.RateSlot) error
 	GetTpRates(string, string) (map[string]*utils.TPRate, error)
