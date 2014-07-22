@@ -41,7 +41,6 @@ func (s *Stats) AddQueue(sq *StatsQueue, out *int) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	s.queues[sq.conf.Id] = sq
-	*out = 0
 	return nil
 }
 
@@ -61,7 +60,6 @@ func (s *Stats) AppendCDR(cdr *utils.StoredCdr, out *int) error {
 	for _, sq := range s.queues {
 		sq.AppendCDR(cdr)
 	}
-	*out = 0
 	return nil
 }
 

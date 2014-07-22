@@ -40,8 +40,7 @@ var (
 func storeAndMediate(storedCdr *utils.StoredCdr) error {
 	if stats != nil {
 		go func() {
-			var x int = 0 // not used
-			if err := stats.AppendCDR(storedCdr, &x); err != nil {
+			if err := stats.AppendCDR(storedCdr, nil); err != nil {
 				engine.Logger.Err(fmt.Sprintf("Could not append cdr to stats: %s", err.Error()))
 			}
 		}()

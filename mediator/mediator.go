@@ -171,8 +171,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 		}
 		if sendToStats && self.stats != nil {
 			go func() {
-				var x int = 0 // not used
-				if err := self.stats.AppendCDR(cdr, &x); err != nil {
+				if err := self.stats.AppendCDR(cdr, nil); err != nil {
 					engine.Logger.Err(fmt.Sprintf("Could not append cdr to stats (mediator): %s", err.Error()))
 				}
 			}()
