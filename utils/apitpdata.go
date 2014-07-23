@@ -340,19 +340,19 @@ type AttrExpFileCdrs struct {
 	MaskDestinationId       *string  // Overwrite configured MaskDestId
 	MaskLength              *int     // Overwrite configured MaskLength, -1 to use general config ones
 	CgrIds                  []string // If provided, it will filter based on the cgrids present in list
-	MediationRunId          []string // If provided, it will filter on mediation runid
-	TOR                     []string // If provided, filter on TypeOfRecord
-	CdrHost                 []string // If provided, it will filter cdrhost
-	CdrSource               []string // If provided, it will filter cdrsource
-	ReqType                 []string // If provided, it will fiter reqtype
-	Direction               []string // If provided, it will fiter direction
-	Tenant                  []string // If provided, it will filter tenant
-	Category                []string // If provided, it will filter çategory
-	Account                 []string // If provided, it will filter account
-	Subject                 []string // If provided, it will filter the rating subject
-	DestinationPrefix       []string // If provided, it will filter on destination prefix
-	RatedAccount            []string // If provided, it will filter ratedaccount
-	RatedSubject            []string // If provided, it will filter the ratedsubject
+	MediationRunIds         []string // If provided, it will filter on mediation runid
+	TORs                    []string // If provided, filter on TypeOfRecord
+	CdrHosts                []string // If provided, it will filter cdrhost
+	CdrSources              []string // If provided, it will filter cdrsource
+	ReqTypes                []string // If provided, it will fiter reqtype
+	Directions              []string // If provided, it will fiter direction
+	Tenants                 []string // If provided, it will filter tenant
+	Categories              []string // If provided, it will filter çategory
+	Accounts                []string // If provided, it will filter account
+	Subjects                []string // If provided, it will filter the rating subject
+	DestinationPrefixes     []string // If provided, it will filter on destination prefix
+	RatedAccounts           []string // If provided, it will filter ratedaccount
+	RatedSubjects           []string // If provided, it will filter the ratedsubject
 	OrderIdStart            int64    // Export from this order identifier
 	OrderIdEnd              int64    // Export smaller than this order identifier
 	TimeStart               string   // If provided, it will represent the starting of the CDRs interval (>=)
@@ -372,26 +372,26 @@ type ExportedFileCdrs struct {
 }
 
 type AttrGetCdrs struct {
-	CgrIds            []string // If provided, it will filter based on the cgrids present in list
-	MediationRunId    []string // If provided, it will filter on mediation runid
-	TOR               []string // If provided, filter on TypeOfRecord
-	CdrHost           []string // If provided, it will filter cdrhost
-	CdrSource         []string // If provided, it will filter cdrsource
-	ReqType           []string // If provided, it will fiter reqtype
-	Direction         []string // If provided, it will fiter direction
-	Tenant            []string // If provided, it will filter tenant
-	Category          []string // If provided, it will filter çategory
-	Account           []string // If provided, it will filter account
-	Subject           []string // If provided, it will filter the rating subject
-	DestinationPrefix []string // If provided, it will filter on destination prefix
-	RatedAccount      []string // If provided, it will filter ratedaccount
-	RatedSubject      []string // If provided, it will filter the ratedsubject
-	OrderIdStart      int64    // Export from this order identifier
-	OrderIdEnd        int64    // Export smaller than this order identifier
-	TimeStart         string   // If provided, it will represent the starting of the CDRs interval (>=)
-	TimeEnd           string   // If provided, it will represent the end of the CDRs interval (<)
-	SkipErrors        bool     // Do not export errored CDRs
-	SkipRated         bool     // Do not export rated CDRs
+	CgrIds              []string // If provided, it will filter based on the cgrids present in list
+	MediationRunIds     []string // If provided, it will filter on mediation runid
+	TORs                []string // If provided, filter on TypeOfRecord
+	CdrHosts            []string // If provided, it will filter cdrhost
+	CdrSources          []string // If provided, it will filter cdrsource
+	ReqTypes            []string // If provided, it will fiter reqtype
+	Directions          []string // If provided, it will fiter direction
+	Tenants             []string // If provided, it will filter tenant
+	Categories          []string // If provided, it will filter çategory
+	Accounts            []string // If provided, it will filter account
+	Subjects            []string // If provided, it will filter the rating subject
+	DestinationPrefixes []string // If provided, it will filter on destination prefix
+	RatedAccounts       []string // If provided, it will filter ratedaccount
+	RatedSubjects       []string // If provided, it will filter the ratedsubject
+	OrderIdStart        int64    // Export from this order identifier
+	OrderIdEnd          int64    // Export smaller than this order identifier
+	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
+	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
+	SkipErrors          bool     // Do not export errored CDRs
+	SkipRated           bool     // Do not export rated CDRs
 }
 
 type AttrRemCdrs struct {
@@ -399,10 +399,26 @@ type AttrRemCdrs struct {
 }
 
 type AttrRateCdrs struct {
-	TimeStart    string // Cdrs time start
-	TimeEnd      string // Cdrs time end
-	RerateErrors bool   // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
-	RerateRated  bool   // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
+	CgrIds              []string // If provided, it will filter based on the cgrids present in list
+	MediationRunIds     []string // If provided, it will filter on mediation runid
+	TORs                []string // If provided, filter on TypeOfRecord
+	CdrHosts            []string // If provided, it will filter cdrhost
+	CdrSources          []string // If provided, it will filter cdrsource
+	ReqTypes            []string // If provided, it will fiter reqtype
+	Directions          []string // If provided, it will fiter direction
+	Tenants             []string // If provided, it will filter tenant
+	Categories          []string // If provided, it will filter çategory
+	Accounts            []string // If provided, it will filter account
+	Subjects            []string // If provided, it will filter the rating subject
+	DestinationPrefixes []string // If provided, it will filter on destination prefix
+	RatedAccounts       []string // If provided, it will filter ratedaccount
+	RatedSubjects       []string // If provided, it will filter the ratedsubject
+	OrderIdStart        int64    // Export from this order identifier
+	OrderIdEnd          int64    // Export smaller than this order identifier
+	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
+	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
+	RerateErrors        bool     // Rerate previous CDRs with errors (makes sense for reqtype rated and pseudoprepaid
+	RerateRated         bool     // Rerate CDRs which were previously rated (makes sense for reqtype rated and pseudoprepaid)
 }
 
 type AttrLoadTpFromFolder struct {

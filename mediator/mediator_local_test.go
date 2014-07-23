@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/rpc"
+	"net/rpc/jsonrpc"
 	"net/url"
 	"os/exec"
 	"path"
@@ -127,7 +128,8 @@ func TestRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	cgrRpc, err = rpc.Dial("tcp", cfg.RPCGOBListen) //ToDo: Fix with automatic config
+	//cgrRpc, err = rpc.Dial("tcp", cfg.RPCGOBListen) //ToDo: Fix with automatic config
+	cgrRpc, err = jsonrpc.Dial("tcp", cfg.RPCJSONListen)
 	if err != nil {
 		t.Fatal("Could not connect to CGR GOB-RPC Server: ", err.Error())
 	}

@@ -46,7 +46,11 @@ func (self *MediatorV1) RateCdrs(attrs utils.AttrRateCdrs, reply *string) error 
 			return err
 		}
 	}
-	if err := self.Medi.RateCdrs(tStart, tEnd, attrs.RerateErrors, attrs.RerateRated); err != nil {
+	//RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes []string,
+	//orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated bool)
+	if err := self.Medi.RateCdrs(attrs.CgrIds, attrs.MediationRunIds, attrs.TORs, attrs.CdrHosts, attrs.CdrSources, attrs.ReqTypes, attrs.Directions,
+		attrs.Tenants, attrs.Categories, attrs.Accounts, attrs.Subjects, attrs.DestinationPrefixes, attrs.RatedAccounts, attrs.RatedSubjects,
+		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.RerateErrors, attrs.RerateRated); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = utils.OK
