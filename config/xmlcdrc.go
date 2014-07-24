@@ -57,30 +57,30 @@ func (cdrcCfg *CgrXmlCdrcCfg) setDefaults() error {
 		cdrcCfg.CdrSourceId = dfCfg.CdrcSourceId
 	}
 	if len(cdrcCfg.CdrFields) == 0 {
-		for key, cfgRsrField := range dfCfg.CdrcCdrFields {
-			cdrcCfg.CdrFields = append(cdrcCfg.CdrFields, &CdrcField{Id: key, Value: cfgRsrField.Id, rsrField: cfgRsrField})
+		for key, cfgRsrFields := range dfCfg.CdrcCdrFields {
+			cdrcCfg.CdrFields = append(cdrcCfg.CdrFields, &CdrcField{Id: key, Value: "PLACEHOLDER", rsrFields: cfgRsrFields})
 		}
 	}
 	return nil
 }
 
-func (cdrcCfg *CgrXmlCdrcCfg) CdrRSRFields() map[string]*utils.RSRField {
-	rsrFields := make(map[string]*utils.RSRField)
+func (cdrcCfg *CgrXmlCdrcCfg) CdrRSRFields() map[string][]*utils.RSRField {
+	rsrFields := make(map[string][]*utils.RSRField)
 	for _, fld := range cdrcCfg.CdrFields {
-		rsrFields[fld.Id] = fld.rsrField
+		rsrFields[fld.Id] = fld.rsrFields
 	}
 	return rsrFields
 }
 
 type CdrcField struct {
-	XMLName  xml.Name `xml:"field"`
-	Id       string   `xml:"id,attr"`
-	Value    string   `xml:"value,attr"`
-	rsrField *utils.RSRField
+	XMLName   xml.Name `xml:"field"`
+	Id        string   `xml:"id,attr"`
+	Value     string   `xml:"value,attr"`
+	rsrFields []*utils.RSRField
 }
 
-func (cdrcFld *CdrcField) PopulateRSRField() (err error) {
-	if cdrcFld.rsrField, err = utils.NewRSRField(cdrcFld.Value); err != nil {
+func (cdrcFld *CdrcField) PopulateRSRFields() (err error) {
+	if cdrcFld.rsrFields, err = utils.ParseRSRFields(cdrcFld.Value, utils.INFIELD_SEP); err != nil {
 		return err
 	}
 	return nil

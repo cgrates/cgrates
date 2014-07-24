@@ -120,8 +120,8 @@ func ParseCfgDerivedCharging(c *conf.ConfigFile) (dcs utils.DerivedChargers, err
 }
 
 func ParseCdrcCdrFields(torFld, accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
-	setupTimeFld, answerTimeFld, durFld, extraFlds string) (map[string]*utils.RSRField, error) {
-	cdrcCdrFlds := make(map[string]*utils.RSRField)
+	setupTimeFld, answerTimeFld, durFld, extraFlds string) (map[string][]*utils.RSRField, error) {
+	cdrcCdrFlds := make(map[string][]*utils.RSRField)
 	if len(extraFlds) != 0 {
 		if sepExtraFlds, err := ConfigSlice(extraFlds); err != nil {
 			return nil, err
@@ -131,10 +131,10 @@ func ParseCdrcCdrFields(torFld, accIdFld, reqtypeFld, directionFld, tenantFld, c
 				if spltLbl := strings.Split(fldStr, utils.CONCATENATED_KEY_SEP); len(spltLbl) != 2 {
 					return nil, fmt.Errorf("Wrong format for cdrc.extra_fields: %s", fldStr)
 				} else {
-					if rsrFld, err := utils.NewRSRField(spltLbl[1]); err != nil {
+					if rsrFlds, err := utils.ParseRSRFields(spltLbl[1], utils.INFIELD_SEP); err != nil {
 						return nil, err
 					} else {
-						cdrcCdrFlds[spltLbl[0]] = rsrFld
+						cdrcCdrFlds[spltLbl[0]] = rsrFlds
 					}
 				}
 			}
@@ -144,10 +144,10 @@ func ParseCdrcCdrFields(torFld, accIdFld, reqtypeFld, directionFld, tenantFld, c
 		utils.CATEGORY: categoryFld, utils.ACCOUNT: acntFld, utils.SUBJECT: subjectFld, utils.DESTINATION: destFld, utils.SETUP_TIME: setupTimeFld,
 		utils.ANSWER_TIME: answerTimeFld, utils.USAGE: durFld} {
 		if len(fldVal) != 0 {
-			if rsrFld, err := utils.NewRSRField(fldVal); err != nil {
+			if rsrFlds, err := utils.ParseRSRFields(fldVal, utils.INFIELD_SEP); err != nil {
 				return nil, err
 			} else {
-				cdrcCdrFlds[fldTag] = rsrFld
+				cdrcCdrFlds[fldTag] = rsrFlds
 			}
 		}
 	}

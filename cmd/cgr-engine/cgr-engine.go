@@ -124,7 +124,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 }
 
 // Fires up a cdrc instance
-func startCdrc(cdrsChan chan struct{}, cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string]*utils.RSRField) {
+func startCdrc(cdrsChan chan struct{}, cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string][]*utils.RSRField) {
 	if cdrsAddress == utils.INTERNAL {
 		<-cdrsChan // Wait for CDRServer to come up before start processing
 	}

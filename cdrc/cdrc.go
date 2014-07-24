@@ -43,7 +43,7 @@ const (
 	FS_CSV = "freeswitch_csv"
 )
 
-func NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string]*utils.RSRField, cdrServer *cdrs.CDRS) (*Cdrc, error) {
+func NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string][]*utils.RSRField, cdrServer *cdrs.CDRS) (*Cdrc, error) {
 	if len(csvSep) != 1 {
 		return nil, fmt.Errorf("Unsupported csv separator: %s", csvSep)
 	}
@@ -68,7 +68,7 @@ type Cdrc struct {
 	cdrSourceId string
 	runDelay   time.Duration
 	csvSep     rune
-	cdrFields  map[string]*utils.RSRField
+	cdrFields  map[string][]*utils.RSRField
 	cdrServer  *cdrs.CDRS // Reference towards internal cdrServer if that is the case
 	httpClient *http.Client
 }
@@ -89,16 +89,18 @@ func (self *Cdrc) Run() error {
 func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 	storedCdr := &utils.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
-	for cfgFieldName, cfgFieldRSR := range self.cdrFields {
+	for cfgFieldName, cfgFieldRSRs := range self.cdrFields {
 		var fieldVal string
 		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cdrType) {
-			if strings.HasPrefix(cfgFieldRSR.Id, utils.STATIC_VALUE_PREFIX) {
-				fieldVal = cfgFieldRSR.ParseValue("PLACEHOLDER")
-			} else { // Dynamic value extracted using index
-				if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
-					return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
-				} else {
-					fieldVal = cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+			for _, cfgFieldRSR := range cfgFieldRSRs {
+				if strings.HasPrefix(cfgFieldRSR.Id, utils.STATIC_VALUE_PREFIX) {
+					fieldVal += cfgFieldRSR.ParseValue("PLACEHOLDER")
+				} else { // Dynamic value extracted using index
+					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
+						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
+					} else {
+						fieldVal += cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+					}
 				}
 			}
 		} else { // Modify here when we add more supported cdr formats

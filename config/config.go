@@ -88,20 +88,20 @@ type CGRConfig struct {
 	RaterBalancer           string             // balancer address host:port
 	BalancerEnabled         bool
 	SchedulerEnabled        bool
-	CDRSEnabled             bool                       // Enable CDR Server service
-	CDRSExtraFields         []*utils.RSRField          // Extra fields to store in CDRs
-	CDRSMediator            string                     // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CdrStatsConfigs         []*CdrStatsConfig          // Active cdr stats configuration instances
-	CdreDefaultInstance     *CdreConfig                // Will be used in the case no specific one selected by API
-	CdrcEnabled             bool                       // Enable CDR client functionality
-	CdrcCdrs                string                     // Address where to reach CDR server
-	CdrcRunDelay            time.Duration              // Sleep interval between consecutive runs, 0 to use automation via inotify
-	CdrcCdrType             string                     // CDR file format <csv>.
-	CdrcCsvSep              string                     // Separator used in case of csv files. One character only supported.
-	CdrcCdrInDir            string                     // Absolute path towards the directory where the CDRs are stored.
-	CdrcCdrOutDir           string                     // Absolute path towards the directory where processed CDRs will be moved.
-	CdrcSourceId            string                     // Tag identifying the source of the CDRs within CGRS database.
-	CdrcCdrFields           map[string]*utils.RSRField // FieldName/RSRField format. Index number in case of .csv cdrs.
+	CDRSEnabled             bool                         // Enable CDR Server service
+	CDRSExtraFields         []*utils.RSRField            // Extra fields to store in CDRs
+	CDRSMediator            string                       // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CdrStatsConfigs         []*CdrStatsConfig            // Active cdr stats configuration instances
+	CdreDefaultInstance     *CdreConfig                  // Will be used in the case no specific one selected by API
+	CdrcEnabled             bool                         // Enable CDR client functionality
+	CdrcCdrs                string                       // Address where to reach CDR server
+	CdrcRunDelay            time.Duration                // Sleep interval between consecutive runs, 0 to use automation via inotify
+	CdrcCdrType             string                       // CDR file format <csv>.
+	CdrcCsvSep              string                       // Separator used in case of csv files. One character only supported.
+	CdrcCdrInDir            string                       // Absolute path towards the directory where the CDRs are stored.
+	CdrcCdrOutDir           string                       // Absolute path towards the directory where processed CDRs will be moved.
+	CdrcSourceId            string                       // Tag identifying the source of the CDRs within CGRS database.
+	CdrcCdrFields           map[string][]*utils.RSRField // FieldName/RSRField format. Index number in case of .csv cdrs.
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -174,19 +174,19 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
 	self.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	self.CdrcSourceId = "csv"
-	self.CdrcCdrFields = map[string]*utils.RSRField{
-		utils.TOR:         &utils.RSRField{Id: "2"},
-		utils.ACCID:       &utils.RSRField{Id: "3"},
-		utils.REQTYPE:     &utils.RSRField{Id: "4"},
-		utils.DIRECTION:   &utils.RSRField{Id: "5"},
-		utils.TENANT:      &utils.RSRField{Id: "6"},
-		utils.CATEGORY:    &utils.RSRField{Id: "7"},
-		utils.ACCOUNT:     &utils.RSRField{Id: "8"},
-		utils.SUBJECT:     &utils.RSRField{Id: "9"},
-		utils.DESTINATION: &utils.RSRField{Id: "10"},
-		utils.SETUP_TIME:  &utils.RSRField{Id: "11"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "12"},
-		utils.USAGE:       &utils.RSRField{Id: "13"},
+	self.CdrcCdrFields = map[string][]*utils.RSRField{
+		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "2"}},
+		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "3"}},
+		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "4"}},
+		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "5"}},
+		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "6"}},
+		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "7"}},
+		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "8"}},
+		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "9"}},
+		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "10"}},
+		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "11"}},
+		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "12"}},
+		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "13"}},
 	}
 	self.MediatorEnabled = false
 	self.MediatorRater = "internal"
@@ -221,9 +221,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return errors.New("CdrC enabled but no fields to be processed defined!")
 		}
 		if self.CdrcCdrType == utils.CSV {
-			for _, rsrFld := range self.CdrcCdrFields {
-				if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {
-					return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
+			for _, rsrFldLst := range self.CdrcCdrFields {
+				for _, rsrFld := range rsrFldLst {
+					if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {
+						return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
+					}
 				}
 			}
 		}

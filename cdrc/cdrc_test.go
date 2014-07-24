@@ -34,7 +34,7 @@ import (
 
 func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cgrConfig.CdrcCdrFields["supplier"] = &utils.RSRField{Id: "14"}
+	cgrConfig.CdrcCdrFields["supplier"] = []*utils.RSRField{&utils.RSRField{Id: "14"}}
 	csvSepRune, _ := utf8.DecodeRune([]byte(cgrConfig.CdrcCsvSep))
 	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrType, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay, csvSepRune,
 		cgrConfig.CdrcCdrFields, new(cdrs.CDRS), nil}

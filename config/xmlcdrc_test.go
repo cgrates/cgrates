@@ -30,15 +30,15 @@ var cfgDocCdrc *CgrXmlCfgDocument // Will be populated by first test
 
 func TestPopulateRSRFIeld(t *testing.T) {
 	cdrcField := CdrcField{Id: "TEST1", Value: `~effective_caller_id_number:s/(\d+)/+$1/`}
-	if err := cdrcField.PopulateRSRField(); err != nil {
+	if err := cdrcField.PopulateRSRFields(); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if cdrcField.rsrField == nil {
+	} else if cdrcField.rsrFields == nil {
 		t.Error("Failed loading the RSRField")
 	}
 	cdrcField = CdrcField{Id: "TEST2", Value: `99`}
-	if err := cdrcField.PopulateRSRField(); err != nil {
+	if err := cdrcField.PopulateRSRFields(); err != nil {
 		t.Error("Unexpected error: ", err.Error())
-	} else if cdrcField.rsrField == nil {
+	} else if cdrcField.rsrFields == nil {
 		t.Error("Failed loading the RSRField")
 	}
 }
@@ -87,7 +87,7 @@ func TestParseXmlCdrcConfig(t *testing.T) {
     <cdr_out_dir>/var/log/cgrates/cdrc/out</cdr_out_dir>
     <cdr_source_id>freeswitch_csv</cdr_source_id>
     <fields>
-      <field id="accid" value="0" />
+      <field id="accid" value="0;13" />
       <field id="reqtype" value="1" />
       <field id="direction" value="2" />
       <field id="tenant" value="3" />
@@ -123,7 +123,7 @@ func TestGetCdrcCfgs(t *testing.T) {
 	expectCdrc := &CgrXmlCdrcCfg{Enabled: true, CdrsAddress: "internal", CdrType: "csv", CsvSeparator: ",",
 		RunDelay: 0, CdrInDir: "/var/log/cgrates/cdrc/in", CdrOutDir: "/var/log/cgrates/cdrc/out", CdrSourceId: "freeswitch_csv"}
 	cdrFlds := []*CdrcField{
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.ACCID, Value: "0"},
+		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.ACCID, Value: "0;13"},
 		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.REQTYPE, Value: "1"},
 		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.DIRECTION, Value: "2"},
 		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.TENANT, Value: "3"},
@@ -137,7 +137,7 @@ func TestGetCdrcCfgs(t *testing.T) {
 		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: "extr1", Value: "11"},
 		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: "extr2", Value: "12"}}
 	for _, fld := range cdrFlds {
-		fld.PopulateRSRField()
+		fld.PopulateRSRFields()
 	}
 	expectCdrc.CdrFields = cdrFlds
 	if !reflect.DeepEqual(expectCdrc, cdrcfgs["CDRC-CSV1"]) {
@@ -150,20 +150,20 @@ func TestCdrRSRFields(t *testing.T) {
 	if cdrcfgs == nil {
 		t.Error("No config instance returned")
 	}
-	eRSRFields := map[string]*utils.RSRField{
-		utils.ACCID:       &utils.RSRField{Id: "0"},
-		utils.REQTYPE:     &utils.RSRField{Id: "1"},
-		utils.DIRECTION:   &utils.RSRField{Id: "2"},
-		utils.TENANT:      &utils.RSRField{Id: "3"},
-		utils.CATEGORY:    &utils.RSRField{Id: "4"},
-		utils.ACCOUNT:     &utils.RSRField{Id: "5"},
-		utils.SUBJECT:     &utils.RSRField{Id: "6"},
-		utils.DESTINATION: &utils.RSRField{Id: "7"},
-		utils.SETUP_TIME:  &utils.RSRField{Id: "8"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "9"},
-		utils.USAGE:       &utils.RSRField{Id: "10"},
-		"extr1":           &utils.RSRField{Id: "11"},
-		"extr2":           &utils.RSRField{Id: "12"},
+	eRSRFields := map[string][]*utils.RSRField{
+		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "0"}, &utils.RSRField{Id: "13"}},
+		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "1"}},
+		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "2"}},
+		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "3"}},
+		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "4"}},
+		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "5"}},
+		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "6"}},
+		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "7"}},
+		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "8"}},
+		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "9"}},
+		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "10"}},
+		"extr1":           []*utils.RSRField{&utils.RSRField{Id: "11"}},
+		"extr2":           []*utils.RSRField{&utils.RSRField{Id: "12"}},
 	}
 	if rsrFields := cdrcfgs["CDRC-CSV1"].CdrRSRFields(); !reflect.DeepEqual(rsrFields, eRSRFields) {
 		t.Errorf("Expecting: %v, received: %v", eRSRFields, rsrFields)

@@ -91,19 +91,19 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
 	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	eCfg.CdrcSourceId = "csv"
-	eCfg.CdrcCdrFields = map[string]*utils.RSRField{
-		utils.TOR:         &utils.RSRField{Id: "2"},
-		utils.ACCID:       &utils.RSRField{Id: "3"},
-		utils.REQTYPE:     &utils.RSRField{Id: "4"},
-		utils.DIRECTION:   &utils.RSRField{Id: "5"},
-		utils.TENANT:      &utils.RSRField{Id: "6"},
-		utils.CATEGORY:    &utils.RSRField{Id: "7"},
-		utils.ACCOUNT:     &utils.RSRField{Id: "8"},
-		utils.SUBJECT:     &utils.RSRField{Id: "9"},
-		utils.DESTINATION: &utils.RSRField{Id: "10"},
-		utils.SETUP_TIME:  &utils.RSRField{Id: "11"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "12"},
-		utils.USAGE:       &utils.RSRField{Id: "13"},
+	eCfg.CdrcCdrFields = map[string][]*utils.RSRField{
+		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "2"}},
+		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "3"}},
+		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "4"}},
+		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "5"}},
+		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "6"}},
+		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "7"}},
+		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "8"}},
+		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "9"}},
+		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "10"}},
+		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "11"}},
+		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "12"}},
+		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "13"}},
 	}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = "internal"
@@ -151,11 +151,11 @@ func TestSanityCheck(t *testing.T) {
 		t.Error("Failed to detect missing CDR fields definition")
 	}
 	cfg.CdrcCdrType = utils.CSV
-	cfg.CdrcCdrFields = map[string]*utils.RSRField{utils.ACCID: &utils.RSRField{Id: "test"}}
+	cfg.CdrcCdrFields = map[string][]*utils.RSRField{utils.ACCID: []*utils.RSRField{&utils.RSRField{Id: "test"}}}
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect improper use of CDR field names")
 	}
-	cfg.CdrcCdrFields = map[string]*utils.RSRField{"extra1": &utils.RSRField{Id: "test"}}
+	cfg.CdrcCdrFields = map[string][]*utils.RSRField{"extra1": []*utils.RSRField{&utils.RSRField{Id: "test"}}}
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect improper use of CDR field names")
 	}
@@ -225,20 +225,20 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CdrcCdrInDir = "test"
 	eCfg.CdrcCdrOutDir = "test"
 	eCfg.CdrcSourceId = "test"
-	eCfg.CdrcCdrFields = map[string]*utils.RSRField{
-		utils.TOR:         &utils.RSRField{Id: "test"},
-		utils.ACCID:       &utils.RSRField{Id: "test"},
-		utils.REQTYPE:     &utils.RSRField{Id: "test"},
-		utils.DIRECTION:   &utils.RSRField{Id: "test"},
-		utils.TENANT:      &utils.RSRField{Id: "test"},
-		utils.CATEGORY:    &utils.RSRField{Id: "test"},
-		utils.ACCOUNT:     &utils.RSRField{Id: "test"},
-		utils.SUBJECT:     &utils.RSRField{Id: "test"},
-		utils.DESTINATION: &utils.RSRField{Id: "test"},
-		utils.SETUP_TIME:  &utils.RSRField{Id: "test"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "test"},
-		utils.USAGE:       &utils.RSRField{Id: "test"},
-		"test":            &utils.RSRField{Id: "test"},
+	eCfg.CdrcCdrFields = map[string][]*utils.RSRField{
+		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		"test":            []*utils.RSRField{&utils.RSRField{Id: "test"}},
 	}
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorRater = "test"
