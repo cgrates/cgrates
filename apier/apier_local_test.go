@@ -1458,7 +1458,6 @@ func TestLocalProcessCdr(t *testing.T) {
 		t.Error("Unexpected reply received: ", reply)
 	}
 	var cdrs []*utils.StoredCdr
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time to CDR to reach db
 	req := utils.AttrGetCdrs{}
 	if err := rater.Call("ApierV1.GetCdrs", req, &cdrs); err != nil {
 		t.Error("Unexpected error: ", err.Error())

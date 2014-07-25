@@ -36,6 +36,7 @@ import (
 type Responder struct {
 	Bal      *balancer2go.Balancer
 	ExitChan chan bool
+	CdrSrv   *CDRS
 }
 
 /*
@@ -125,6 +126,17 @@ func (rs *Responder) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *ut
 	} else if dcsH != nil {
 		*dcs = dcsH
 	}
+	return nil
+}
+
+func (rs *Responder) ProcessCdr(cdr *utils.StoredCdr, reply *string) error {
+	if rs.CdrSrv == nil {
+		return errors.New("CdrServerNotRunning")
+	}
+	if err := rs.CdrSrv.ProcessCdr(cdr); err != nil {
+		return err
+	}
+	*reply = utils.OK
 	return nil
 }
 
@@ -287,6 +299,7 @@ type Connector interface {
 	RefundIncrements(CallDescriptor, *float64) error
 	GetMaxSessionTime(CallDescriptor, *float64) error
 	GetDerivedChargers(utils.AttrDerivedChargers, *utils.DerivedChargers) error
+	ProcessCdr(*utils.StoredCdr, *string) error
 }
 
 type RPCClientConnector struct {
@@ -315,4 +328,8 @@ func (rcc *RPCClientConnector) GetMaxSessionTime(cd CallDescriptor, resp *float6
 
 func (rcc *RPCClientConnector) GetDerivedChargers(attrs utils.AttrDerivedChargers, dcs *utils.DerivedChargers) error {
 	return rcc.Client.Call("ApierV1.GetDerivedChargers", attrs, dcs)
+}
+
+func (rcc *RPCClientConnector) ProcessCdr(cdr *utils.StoredCdr, reply *string) error {
+	return rcc.Client.Call("CDRSV1.ProcessCdr", cdr, reply)
 }

@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package mediator
+package engine
 
 import (
 	"errors"
@@ -24,11 +24,10 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engine.CdrStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
+func NewMediator(connector Connector, logDb LogStorage, cdrDb CdrStorage, cfg *config.CGRConfig) (m *Mediator, err error) {
 	m = &Mediator{
 		connector: connector,
 		logDb:     logDb,
@@ -39,16 +38,16 @@ func NewMediator(connector engine.Connector, logDb engine.LogStorage, cdrDb engi
 }
 
 type Mediator struct {
-	connector engine.Connector
-	logDb     engine.LogStorage
-	cdrDb     engine.CdrStorage
+	connector Connector
+	logDb     LogStorage
+	cdrDb     CdrStorage
 	cgrCfg    *config.CGRConfig
 }
 
 // Retrive the cost from logging database, nil in case of no log
-func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *engine.CallCost, err error) {
+func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *CallCost, err error) {
 	for i := 0; i < 3; i++ { // Mechanism to avoid concurrency between SessionManager writing the costs and mediator picking them up
-		cc, err = self.logDb.GetCallCostLog(cgrid, engine.SESSION_MANAGER_SOURCE, runId)
+		cc, err = self.logDb.GetCallCostLog(cgrid, SESSION_MANAGER_SOURCE, runId)
 		if cc != nil {
 			break
 		}
@@ -58,13 +57,13 @@ func (self *Mediator) getCostsFromDB(cgrid, runId string) (cc *engine.CallCost, 
 }
 
 // Retrive the cost from engine
-func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*engine.CallCost, error) {
-	cc := &engine.CallCost{}
+func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*CallCost, error) {
+	cc := &CallCost{}
 	var err error
 	if storedCdr.Usage == time.Duration(0) { // failed call,  returning empty callcost, no error
 		return cc, nil
 	}
-	cd := engine.CallDescriptor{
+	cd := CallDescriptor{
 		TOR:           storedCdr.TOR,
 		Direction:     storedCdr.Direction,
 		Tenant:        storedCdr.Tenant,
@@ -82,16 +81,16 @@ func (self *Mediator) getCostFromRater(storedCdr *utils.StoredCdr) (*engine.Call
 		err = self.connector.GetCost(cd, cc)
 	}
 	if err != nil {
-		self.logDb.LogError(storedCdr.CgrId, engine.MEDIATOR_SOURCE, storedCdr.MediationRunId, err.Error())
+		self.logDb.LogError(storedCdr.CgrId, MEDIATOR_SOURCE, storedCdr.MediationRunId, err.Error())
 	} else {
 		// If the mediator calculated a price it will write it to logdb
-		self.logDb.LogCallCost(storedCdr.CgrId, engine.MEDIATOR_SOURCE, storedCdr.MediationRunId, cc)
+		self.logDb.LogCallCost(storedCdr.CgrId, MEDIATOR_SOURCE, storedCdr.MediationRunId, cc)
 	}
 	return cc, err
 }
 
 func (self *Mediator) rateCDR(storedCdr *utils.StoredCdr) error {
-	var qryCC *engine.CallCost
+	var qryCC *CallCost
 	var errCost error
 	if storedCdr.ReqType == utils.PREPAID {
 		// Should be previously calculated and stored in DB
@@ -116,7 +115,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 	var dcs utils.DerivedChargers
 	if err := self.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
 		errText := fmt.Sprintf("Could not get derived charging for cgrid %s, error: %s", storedCdr.CgrId, err.Error())
-		engine.Logger.Err(errText)
+		Logger.Err(errText)
 		return errors.New(errText)
 	}
 	for _, dc := range dcs {
@@ -156,7 +155,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr) error {
 			extraInfo = err.Error()
 		}
 		if err := self.cdrDb.SetRatedCdr(cdr, extraInfo); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Mediator> Could not record cost for cgrid: <%s>, ERROR: <%s>, cost: %f, extraInfo: %s",
+			Logger.Err(fmt.Sprintf("<Mediator> Could not record cost for cgrid: <%s>, ERROR: <%s>, cost: %f, extraInfo: %s",
 				cdr.CgrId, err.Error(), cdr.Cost, extraInfo))
 		}
 	}
