@@ -187,6 +187,8 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage, mediChan, d
 	}
 	cdrServer = cdrs.New(cdrDb, medi, cfg)
 	cdrServer.RegisterHanlersToServer(server)
+	engine.Logger.Info("Registering CDRS RPC service.")
+	server.RpcRegister(&apier.CDRSV1{CdrSrv: cdrServer})
 	close(doneChan)
 }
 

@@ -88,6 +88,6 @@ func (cdrs *CDRS) RegisterHanlersToServer(server *engine.Server) {
 }
 
 // Used to internally process CDR
-func (cdrs *CDRS) ProcessRawCdr(rawCdr utils.RawCdr) error {
-	return storeAndMediate(rawCdr.AsStoredCdr())
+func (cdrs *CDRS) ProcessCdr(cdr *utils.StoredCdr) error {
+	return storeAndMediate(cdr)
 }

@@ -220,7 +220,7 @@ func (self *Cdrc) processFile(filePath string) error {
 			continue
 		}
 		if self.cdrsAddress == utils.INTERNAL {
-			if err := self.cdrServer.ProcessRawCdr(storedCdr); err != nil {
+			if err := self.cdrServer.ProcessCdr(storedCdr); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
 				continue
 			}
