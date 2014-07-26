@@ -21,12 +21,11 @@ package sessionmanager
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 )
 
 type SessionManager interface {
-	Connect(*config.CGRConfig) error
+	Connect() error
 	DisconnectSession(string, string)
 	RemoveSession(string)
 	MaxDebit(*engine.CallDescriptor, *engine.CallCost) error

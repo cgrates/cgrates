@@ -49,6 +49,7 @@ const (
 	REDIS    = "redis"
 	SAME     = "same"
 	FS       = "freeswitch"
+	OSIPS    = "opensips"
 )
 
 var (
@@ -163,13 +164,14 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 	switch cfg.SMSwitchType {
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval))
-		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
-		errConn := sm.Connect(cfg)
-		if errConn != nil {
-			engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", errConn))
-		}
+		sm = sessionmanager.NewFSSessionManager(cfg, loggerDb, connector, dp)
+	case OSIPS:
+		sm, _ = sessionmanager.NewOSipsSessionManager(cfg, connector)
 	default:
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.SMSwitchType))
+	}
+	if err = sm.Connect(); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
 	exitChan <- true
 }

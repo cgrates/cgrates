@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -45,14 +45,14 @@ type FSSessionManager struct {
 	loggerDB    engine.LogStorage
 }
 
-func NewFSSessionManager(storage engine.LogStorage, connector engine.Connector, debitPeriod time.Duration) *FSSessionManager {
+func NewFSSessionManager(cgrCfg *config.CGRConfig, storage engine.LogStorage, connector engine.Connector, debitPeriod time.Duration) *FSSessionManager {
+	cfg = cgrCfg // make config global
 	return &FSSessionManager{loggerDB: storage, connector: connector, debitPeriod: debitPeriod}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
 // listening for events.
-func (sm *FSSessionManager) Connect(cgrCfg *config.CGRConfig) (err error) {
-	cfg = cgrCfg // make config global
+func (sm *FSSessionManager) Connect() (err error) {
 	eventFilters := map[string]string{"Call-Direction": "inbound"}
 	if fsock.FS, err = fsock.NewFSock(cfg.FreeswitchServer, cfg.FreeswitchPass, cfg.FreeswitchReconnects, sm.createHandlers(), eventFilters, engine.Logger.(*syslog.Writer)); err != nil {
 		return err
