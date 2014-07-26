@@ -103,7 +103,7 @@ func (osipsev *OsipsEvent) GetCategory(fieldName string) string {
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], utils.VOICE)
+	return utils.FirstNonEmpty(osipsev.osipsEvent.AttrValues[fieldName], osipsev.osipsEvent.AttrValues[CGR_CATEGORY], config.CgrConfig().DefaultCategory)
 }
 
 func (osipsev *OsipsEvent) GetTenant(fieldName string) string {
@@ -167,9 +167,45 @@ func (osipsev *OsipsEvent) MissingParameter() bool {
 		aTime == nilTime ||
 		dur == nilDur
 }
+
 func (osipsev *OsipsEvent) ParseEventValue(*utils.RSRField) string {
 	return ""
 }
 func (osipsev *OsipsEvent) PassesFieldFilter(*utils.RSRField) (bool, string) {
 	return false, ""
+}
+func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
+	primaryFields := []string{"to_tag", "setuptime", "created", "method", "callid", "sip_reason", "time", "sip_code", "duration", "from_tag",
+		"cgr_tenant", "cgr_category", "cgr_reqtype", "cgr_account", "cgr_subject", "cgr_destination"}
+	extraFields := make(map[string]string)
+	for field, val := range osipsev.osipsEvent.AttrValues {
+		if !utils.IsSliceMember(primaryFields, field) {
+			extraFields[field] = val
+		}
+	}
+	if len(extraFields) == 0 {
+		return nil // No need of populating extra fields if no members defined
+	}
+	return extraFields
+}
+func (osipsEv *OsipsEvent) AsStoredCdr() *utils.StoredCdr {
+	storCdr := new(utils.StoredCdr)
+	storCdr.CgrId = osipsEv.GetCgrId()
+	storCdr.TOR = utils.VOICE
+	storCdr.AccId = osipsEv.GetUUID()
+	storCdr.CdrHost = "localhost" // ToDo: Fix me
+	storCdr.CdrSource = "OSIPS_" + osipsEv.GetName()
+	storCdr.ReqType = osipsEv.GetReqType(utils.META_DEFAULT)
+	storCdr.Direction = osipsEv.GetDirection(utils.META_DEFAULT)
+	storCdr.Tenant = osipsEv.GetTenant(utils.META_DEFAULT)
+	storCdr.Category = osipsEv.GetCategory(utils.META_DEFAULT)
+	storCdr.Account = osipsEv.GetAccount(utils.META_DEFAULT)
+	storCdr.Subject = osipsEv.GetSubject(utils.META_DEFAULT)
+	storCdr.Destination = osipsEv.GetDestination(utils.META_DEFAULT)
+	storCdr.SetupTime, _ = osipsEv.GetSetupTime(utils.META_DEFAULT)
+	storCdr.AnswerTime, _ = osipsEv.GetAnswerTime(utils.META_DEFAULT)
+	storCdr.Usage, _ = osipsEv.GetDuration(utils.META_DEFAULT)
+	storCdr.ExtraFields = osipsEv.GetExtraFields()
+	storCdr.Cost = -1
+	return storCdr
 }

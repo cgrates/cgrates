@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -30,7 +31,7 @@ import (
 var osipsEv = &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_CDR",
 	AttrValues: map[string]string{"to_tag": "4ea9687f", "cgr_account": "dan", "setuptime": "7", "created": "1406370492", "method": "INVITE", "callid": "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ",
 		"sip_reason": "OK", "time": "1406370499", "cgr_reqtype": "prepaid", "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com", "sip_code": "200",
-		"duration": "20", "from_tag": "eb082607"}}}
+		"duration": "20", "from_tag": "eb082607", "extra1": "val1", "extra2": "val2"}}}
 
 func TestOsipsEventInterface(t *testing.T) {
 	var _ Event = Event(osipsEv)
@@ -79,7 +80,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 		osipsEv.GetAccount(utils.META_DEFAULT) != "dan" ||
 		osipsEv.GetDestination(utils.META_DEFAULT) != "+4986517174963" ||
 		osipsEv.GetCallDestNr(utils.META_DEFAULT) != "+4986517174963" ||
-		osipsEv.GetCategory(utils.META_DEFAULT) != utils.VOICE ||
+		osipsEv.GetCategory(utils.META_DEFAULT) != cfg.DefaultCategory ||
 		osipsEv.GetTenant(utils.META_DEFAULT) != "itsyscom.com" ||
 		osipsEv.GetReqType(utils.META_DEFAULT) != "prepaid" ||
 		setupTime != time.Date(2014, 7, 26, 12, 28, 12, 0, time.Local) ||
@@ -94,7 +95,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 			osipsEv.GetAccount(utils.META_DEFAULT) != "dan",
 			osipsEv.GetDestination(utils.META_DEFAULT) != "+4986517174963",
 			osipsEv.GetCallDestNr(utils.META_DEFAULT) != "+4986517174963",
-			osipsEv.GetCategory(utils.META_DEFAULT) != utils.VOICE,
+			osipsEv.GetCategory(utils.META_DEFAULT) != cfg.DefaultCategory,
 			osipsEv.GetTenant(utils.META_DEFAULT) != "itsyscom.com",
 			osipsEv.GetReqType(utils.META_DEFAULT) != "prepaid",
 			setupTime != time.Date(2014, 7, 26, 12, 28, 12, 0, time.Local),
@@ -105,7 +106,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 	}
 }
 
-func TestMissingParameter(t *testing.T) {
+func TestOsipsEventMissingParameter(t *testing.T) {
 	if osipsEv.MissingParameter() {
 		t.Errorf("Wrongly detected missing parameter: %+v", osipsEv)
 	}
@@ -115,5 +116,16 @@ func TestMissingParameter(t *testing.T) {
 			"duration": "20", "from_tag": "eb082607"}}}
 	if !osipsEv2.MissingParameter() {
 		t.Error("Failed to detect missing parameter.")
+	}
+}
+
+func TestOsipsEventAsStoredCdr(t *testing.T) {
+	eStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", time.Date(2014, 7, 26, 12, 28, 12, 0, time.Local).UTC().String()),
+		TOR: utils.VOICE, AccId: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", CdrHost: "localhost", CdrSource: "OSIPS_E_ACC_CDR", ReqType: "prepaid",
+		Direction: utils.OUT, Tenant: "itsyscom.com", Category: "call", Account: "dan", Subject: "dan",
+		Destination: "+4986517174963", SetupTime: time.Date(2014, 7, 26, 12, 28, 12, 0, time.Local), AnswerTime: time.Date(2014, 7, 26, 12, 28, 19, 0, time.Local),
+		Usage: time.Duration(20) * time.Second, ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
+	if storedCdr := osipsEv.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }
