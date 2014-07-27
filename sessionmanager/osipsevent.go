@@ -46,6 +46,10 @@ const (
 	OSIPS_DURATION    = "duration"
 )
 
+func NewOsipsEvent(osipsDagramEvent *osipsdagram.OsipsEvent) (*OsipsEvent, error) {
+	return &OsipsEvent{osipsEvent: osipsDagramEvent}, nil
+}
+
 type OsipsEvent struct {
 	osipsEvent *osipsdagram.OsipsEvent
 }
@@ -181,9 +185,6 @@ func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
 		if !utils.IsSliceMember(primaryFields, field) {
 			extraFields[field] = val
 		}
-	}
-	if len(extraFields) == 0 {
-		return nil // No need of populating extra fields if no members defined
 	}
 	return extraFields
 }

@@ -75,6 +75,6 @@ func (osm *OsipsSessionManager) Shutdown() error {
 func (osm *OsipsSessionManager) OnCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPSr> Received cdr datagram: %+v", cdrDagram))
 	var reply *string
-	osipsEv := &OsipsEvent{osipsEvent: cdrDagram}
+	osipsEv, _ := NewOsipsEvent(cdrDagram)
 	osm.cdrsrv.ProcessCdr(osipsEv.AsStoredCdr(), reply)
 }
