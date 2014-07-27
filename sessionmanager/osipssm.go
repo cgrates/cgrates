@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
 	"time"
 )
@@ -74,6 +73,4 @@ func (osm *OsipsSessionManager) Shutdown() error {
 
 func (osm *OsipsSessionManager) OnCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	engine.Logger.Info(fmt.Sprintf("<OsipsSessionManager> Received cdr datagram: %+v", cdrDagram))
-	tm, err := utils.ParseTimeDetectLayout(cdrDagram.AttrValues[TIME])
-	engine.Logger.Info(fmt.Sprintf("<OsipsSessionManager> Time on datagram: %s, error: %v", tm, err))
 }

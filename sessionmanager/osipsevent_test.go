@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -28,10 +29,11 @@ import (
 	"github.com/cgrates/osipsdagram"
 )
 
+var addr, _ = net.ResolveUDPAddr("udp", "172.16.254.77:42574")
 var osipsEv = &OsipsEvent{osipsEvent: &osipsdagram.OsipsEvent{Name: "E_ACC_CDR",
 	AttrValues: map[string]string{"to_tag": "4ea9687f", "cgr_account": "dan", "setuptime": "7", "created": "1406370492", "method": "INVITE", "callid": "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ",
 		"sip_reason": "OK", "time": "1406370499", "cgr_reqtype": "prepaid", "cgr_subject": "dan", "cgr_destination": "+4986517174963", "cgr_tenant": "itsyscom.com", "sip_code": "200",
-		"duration": "20", "from_tag": "eb082607", "extra1": "val1", "extra2": "val2"}}}
+		"duration": "20", "from_tag": "eb082607", "extra1": "val1", "extra2": "val2"}, OriginatorAddress: addr}}
 
 func TestOsipsEventInterface(t *testing.T) {
 	var _ Event = Event(osipsEv)
@@ -86,7 +88,8 @@ func TestOsipsEventGetValues(t *testing.T) {
 		setupTime != time.Date(2014, 7, 26, 12, 28, 12, 0, time.Local) ||
 		answerTime != time.Date(2014, 7, 26, 12, 28, 19, 0, time.Local) ||
 		endTime != time.Date(2014, 7, 26, 12, 28, 39, 0, time.Local) ||
-		dur != time.Duration(20*time.Second) {
+		dur != time.Duration(20*time.Second) ||
+		osipsEv.GetOriginatorIP() != "172.16.254.77" {
 		t.Error("GetValues not matching: ", osipsEv.GetName() != "E_ACC_CDR",
 			osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ"+";"+"eb082607"+";"+"4ea9687f", setupTime.UTC().String()),
 			osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f",
@@ -102,6 +105,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 			answerTime != time.Date(2014, 7, 26, 12, 28, 19, 0, time.Local),
 			endTime != time.Date(2014, 7, 26, 12, 28, 39, 0, time.Local),
 			dur != time.Duration(20*time.Second),
+			osipsEv.GetOriginatorIP() != "172.16.254.77",
 		)
 	}
 }
@@ -121,7 +125,7 @@ func TestOsipsEventMissingParameter(t *testing.T) {
 
 func TestOsipsEventAsStoredCdr(t *testing.T) {
 	eStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", time.Date(2014, 7, 26, 12, 28, 12, 0, time.Local).UTC().String()),
-		TOR: utils.VOICE, AccId: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", CdrHost: "localhost", CdrSource: "OSIPS_E_ACC_CDR", ReqType: "prepaid",
+		TOR: utils.VOICE, AccId: "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f", CdrHost: "172.16.254.77", CdrSource: "OSIPS_E_ACC_CDR", ReqType: "prepaid",
 		Direction: utils.OUT, Tenant: "itsyscom.com", Category: "call", Account: "dan", Subject: "dan",
 		Destination: "+4986517174963", SetupTime: time.Date(2014, 7, 26, 12, 28, 12, 0, time.Local), AnswerTime: time.Date(2014, 7, 26, 12, 28, 19, 0, time.Local),
 		Usage: time.Duration(20) * time.Second, ExtraFields: map[string]string{"extra1": "val1", "extra2": "val2"}, Cost: -1}
