@@ -27,13 +27,14 @@ import (
 	"time"
 )
 
-func NewOSipsSessionManager(cfg *config.CGRConfig, connector engine.Connector) (*OsipsSessionManager, error) {
-	return &OsipsSessionManager{cfg: cfg, connector: connector}, nil
+func NewOSipsSessionManager(cfg *config.CGRConfig, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
+	return &OsipsSessionManager{cfg: cfg, cdrsrv: cdrsrv}, nil
 }
 
 type OsipsSessionManager struct {
-	cfg       *config.CGRConfig
-	connector engine.Connector
+	cfg    *config.CGRConfig
+	rater  engine.Connector
+	cdrsrv engine.Connector
 }
 
 func (osm *OsipsSessionManager) Connect() (err error) {
@@ -46,9 +47,9 @@ func (osm *OsipsSessionManager) Connect() (err error) {
 		fmt.Printf("Cannot initiate OpenSIPS Datagram Server: %s", err.Error())
 		return
 	}
-	engine.Logger.Err(fmt.Sprintf("<OpenSIPS-SM> Started listening for event datagrams at <%s>", addr))
+	engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Started listening for event datagrams at <%s>", addr))
 	evsrv.ServeEvents()
-	return errors.New("<OpenSIPS-SM> Stopped reading events")
+	return errors.New("<SM-OpenSIPS> Stopped reading events")
 }
 
 func (osm *OsipsSessionManager) DisconnectSession(uuid string, notify string) {
@@ -72,5 +73,8 @@ func (osm *OsipsSessionManager) Shutdown() error {
 }
 
 func (osm *OsipsSessionManager) OnCdr(cdrDagram *osipsdagram.OsipsEvent) {
-	engine.Logger.Info(fmt.Sprintf("<OsipsSessionManager> Received cdr datagram: %+v", cdrDagram))
+	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPSr> Received cdr datagram: %+v", cdrDagram))
+	var reply *string
+	osipsEv := &OsipsEvent{osipsEvent: cdrDagram}
+	osm.cdrsrv.ProcessCdr(osipsEv.AsStoredCdr(), reply)
 }
