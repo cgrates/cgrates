@@ -142,8 +142,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if err := cdrexp.WriteToFile(filePath); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(),
-		ExportedCgrIds: cdrexp.PositiveExports(), UnexportedCgrIds: cdrexp.NegativeExports(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
+	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
+	if !attr.SuppressCgrIds {
+		*reply.ExportedCgrIds = cdrexp.PositiveExports()
+		*reply.UnexportedCgrIds = cdrexp.NegativeExports()
+	}
 	return nil
 }
 

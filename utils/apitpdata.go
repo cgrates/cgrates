@@ -359,6 +359,7 @@ type AttrExpFileCdrs struct {
 	TimeEnd                 string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors              bool     // Do not export errored CDRs
 	SkipRated               bool     // Do not export rated CDRs
+	SuppressCgrIds          bool
 }
 
 type ExportedFileCdrs struct {
