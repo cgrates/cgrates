@@ -107,17 +107,22 @@ func TestDefaults(t *testing.T) {
 	}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = "internal"
-	eCfg.MediatorRaterReconnects = 3
+	eCfg.MediatorReconnects = 3
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
 	eCfg.SMRater = "internal"
-	eCfg.SMRaterReconnects = 3
+	eCfg.SMReconnects = 3
 	eCfg.SMDebitInterval = 10
 	eCfg.SMMinCallDuration = time.Duration(0)
 	eCfg.SMMaxCallDuration = time.Duration(3) * time.Hour
 	eCfg.FreeswitchServer = "127.0.0.1:8021"
 	eCfg.FreeswitchPass = "ClueCon"
 	eCfg.FreeswitchReconnects = 5
+	eCfg.OsipsListenUdp = "127.0.0.1:2020"
+	eCfg.OsipsMiAddr = "127.0.0.1:8020"
+	eCfg.OsipsEvSubscInterval = time.Duration(60) * time.Second
+	eCfg.OsipCDRS = "internal"
+	eCfg.OsipsReconnects = 3
 	eCfg.DerivedChargers = make(utils.DerivedChargers, 0)
 	eCfg.CombinedDerivedChargers = true
 	eCfg.HistoryAgentEnabled = false
@@ -242,17 +247,22 @@ func TestConfigFromFile(t *testing.T) {
 	}
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorRater = "test"
-	eCfg.MediatorRaterReconnects = 99
+	eCfg.MediatorReconnects = 99
 	eCfg.SMEnabled = true
 	eCfg.SMSwitchType = "test"
 	eCfg.SMRater = "test"
-	eCfg.SMRaterReconnects = 99
+	eCfg.SMReconnects = 99
 	eCfg.SMDebitInterval = 99
 	eCfg.SMMinCallDuration = time.Duration(98) * time.Second
 	eCfg.SMMaxCallDuration = time.Duration(99) * time.Second
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
+	eCfg.OsipsListenUdp = "test"
+	eCfg.OsipsMiAddr = "test"
+	eCfg.OsipsEvSubscInterval = time.Duration(99) * time.Second
+	eCfg.OsipCDRS = "test"
+	eCfg.OsipsReconnects = 99
 	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", RunFilters: "", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
 	eCfg.CombinedDerivedChargers = true

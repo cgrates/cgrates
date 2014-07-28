@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can Storagetribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,4 +16,26 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package mediator
+package apier
+
+import (
+	"fmt"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
+)
+
+// Receive CDRs via RPC methods
+type CDRSV1 struct {
+	CdrSrv *engine.CDRS
+}
+
+func (cdrsrv *CDRSV1) ProcessCdr(cdr *utils.StoredCdr, reply *string) error {
+	if cdrsrv.CdrSrv == nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "CDRS_NOT_RUNNING")
+	}
+	if err := cdrsrv.CdrSrv.ProcessCdr(cdr); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = utils.OK
+	return nil
+}

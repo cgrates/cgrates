@@ -105,18 +105,23 @@ type CGRConfig struct {
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMRaterReconnects       int                   // Number of reconnect attempts to rater
+	SMReconnects            int                   // Number of reconnect attempts to rater
 	SMDebitInterval         int                   // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration       time.Duration         // The maximum duration of a call
 	SMMinCallDuration       time.Duration         // Only authorize calls with allowed duration bigger than this
 	MediatorEnabled         bool                  // Starts Mediator service: <true|false>.
 	MediatorRater           string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorRaterReconnects int                   // Number of reconnects to rater before giving up.
+	MediatorReconnects      int                   // Number of reconnects to rater before giving up.
 	DerivedChargers         utils.DerivedChargers // System wide derived chargers, added to the account level ones
 	CombinedDerivedChargers bool                  // Combine accounts specific derived_chargers with server configured
 	FreeswitchServer        string                // freeswitch address host:port
 	FreeswitchPass          string                // FS socket password
 	FreeswitchReconnects    int                   // number of times to attempt reconnect after connect fails
+	OsipsListenUdp          string                // Address where to listen for event datagrams coming from OpenSIPS
+	OsipsMiAddr             string                // Adress where to reach OpenSIPS mi_datagram module
+	OsipsEvSubscInterval    time.Duration         // Refresh event subscription at this interval
+	OsipCDRS                string                // Address where to reach CDR Server, empty to disable CDR processing <""|internal|127.0.0.1:2013>
+	OsipsReconnects         int                   // Number of attempts on connect failure.
 	HistoryAgentEnabled     bool                  // Starts History as an agent: <true|false>.
 	HistoryServer           string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled    bool                  // Starts History as server: <true|false>.
@@ -190,19 +195,24 @@ func (self *CGRConfig) setDefaults() error {
 	}
 	self.MediatorEnabled = false
 	self.MediatorRater = "internal"
-	self.MediatorRaterReconnects = 3
+	self.MediatorReconnects = 3
 	self.DerivedChargers = make(utils.DerivedChargers, 0)
 	self.CombinedDerivedChargers = true
 	self.SMEnabled = false
 	self.SMSwitchType = FS
 	self.SMRater = "internal"
-	self.SMRaterReconnects = 3
+	self.SMReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
 	self.SMMinCallDuration = time.Duration(0)
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
+	self.OsipsListenUdp = "127.0.0.1:2020"
+	self.OsipsMiAddr = "127.0.0.1:8020"
+	self.OsipsEvSubscInterval = time.Duration(60) * time.Second
+	self.OsipCDRS = "internal"
+	self.OsipsReconnects = 3
 	self.HistoryAgentEnabled = false
 	self.HistoryServerEnabled = false
 	self.HistoryServer = "internal"
@@ -493,8 +503,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("mediator", "rater"); hasOpt {
 		cfg.MediatorRater, _ = c.GetString("mediator", "rater")
 	}
-	if hasOpt = c.HasOption("mediator", "rater_reconnects"); hasOpt {
-		cfg.MediatorRaterReconnects, _ = c.GetInt("mediator", "rater_reconnects")
+	if hasOpt = c.HasOption("mediator", "reconnects"); hasOpt {
+		cfg.MediatorReconnects, _ = c.GetInt("mediator", "reconnects")
 	}
 	if hasOpt = c.HasOption("session_manager", "enabled"); hasOpt {
 		cfg.SMEnabled, _ = c.GetBool("session_manager", "enabled")
@@ -505,8 +515,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("session_manager", "rater"); hasOpt {
 		cfg.SMRater, _ = c.GetString("session_manager", "rater")
 	}
-	if hasOpt = c.HasOption("session_manager", "rater_reconnects"); hasOpt {
-		cfg.SMRaterReconnects, _ = c.GetInt("session_manager", "rater_reconnects")
+	if hasOpt = c.HasOption("session_manager", "reconnects"); hasOpt {
+		cfg.SMReconnects, _ = c.GetInt("session_manager", "reconnects")
 	}
 	if hasOpt = c.HasOption("session_manager", "debit_interval"); hasOpt {
 		cfg.SMDebitInterval, _ = c.GetInt("session_manager", "debit_interval")
@@ -531,6 +541,24 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
 		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
+	}
+	if hasOpt = c.HasOption("opensips", "listen_udp"); hasOpt {
+		cfg.OsipsListenUdp, _ = c.GetString("opensips", "listen_udp")
+	}
+	if hasOpt = c.HasOption("opensips", "mi_addr"); hasOpt {
+		cfg.OsipsMiAddr, _ = c.GetString("opensips", "mi_addr")
+	}
+	if hasOpt = c.HasOption("opensips", "events_subscribe_interval"); hasOpt {
+		evSubscIntervalStr, _ := c.GetString("opensips", "events_subscribe_interval")
+		if cfg.OsipsEvSubscInterval, err = utils.ParseDurationWithSecs(evSubscIntervalStr); err != nil {
+			return nil, err
+		}
+	}
+	if hasOpt = c.HasOption("opensips", "cdrs"); hasOpt {
+		cfg.OsipCDRS, _ = c.GetString("opensips", "cdrs")
+	}
+	if hasOpt = c.HasOption("opensips", "reconnects"); hasOpt {
+		cfg.OsipsReconnects, _ = c.GetInt("opensips", "reconnects")
 	}
 	if cfg.DerivedChargers, err = ParseCfgDerivedCharging(c); err != nil {
 		return nil, err

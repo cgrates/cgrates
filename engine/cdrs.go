@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cdrs
+package engine
 
 import (
 	"fmt"
@@ -24,15 +24,13 @@ import (
 	"net/http"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	cfg     *config.CGRConfig // Share the configuration with the rest of the package
-	storage engine.CdrStorage
-	medi    *mediator.Mediator
+	storage CdrStorage
+	medi    *Mediator
 )
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
@@ -43,7 +41,7 @@ func storeAndMediate(storedCdr *utils.StoredCdr) error {
 	if cfg.CDRSMediator == utils.INTERNAL {
 		go func() {
 			if err := medi.RateCdr(storedCdr); err != nil {
-				engine.Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", err.Error()))
+				Logger.Err(fmt.Sprintf("Could not run mediation on CDR: %s", err.Error()))
 			}
 		}()
 	}
@@ -54,10 +52,10 @@ func storeAndMediate(storedCdr *utils.StoredCdr) error {
 func cgrCdrHandler(w http.ResponseWriter, r *http.Request) {
 	cgrCdr, err := utils.NewCgrCdrFromHttpReq(r)
 	if err != nil {
-		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %s", err.Error()))
+		Logger.Err(fmt.Sprintf("Could not create CDR entry: %s", err.Error()))
 	}
 	if err := storeAndMediate(cgrCdr.AsStoredCdr()); err != nil {
-		engine.Logger.Err(fmt.Sprintf("Errors when storing CDR entry: %s", err.Error()))
+		Logger.Err(fmt.Sprintf("Errors when storing CDR entry: %s", err.Error()))
 	}
 }
 
@@ -66,28 +64,28 @@ func fsCdrHandler(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	fsCdr, err := NewFSCdr(body)
 	if err != nil {
-		engine.Logger.Err(fmt.Sprintf("Could not create CDR entry: %s", err.Error()))
+		Logger.Err(fmt.Sprintf("Could not create CDR entry: %s", err.Error()))
 	}
 	if err := storeAndMediate(fsCdr.AsStoredCdr()); err != nil {
-		engine.Logger.Err(fmt.Sprintf("Errors when storing CDR entry: %s", err.Error()))
+		Logger.Err(fmt.Sprintf("Errors when storing CDR entry: %s", err.Error()))
 	}
 }
 
 type CDRS struct{}
 
-func New(s engine.CdrStorage, m *mediator.Mediator, c *config.CGRConfig) *CDRS {
+func NewCdrS(s CdrStorage, m *Mediator, c *config.CGRConfig) *CDRS {
 	storage = s
 	medi = m
 	cfg = c
 	return &CDRS{}
 }
 
-func (cdrs *CDRS) RegisterHanlersToServer(server *engine.Server) {
+func (cdrs *CDRS) RegisterHanlersToServer(server *Server) {
 	server.RegisterHttpFunc("/cgr", cgrCdrHandler)
 	server.RegisterHttpFunc("/freeswitch_json", fsCdrHandler)
 }
 
 // Used to internally process CDR
-func (cdrs *CDRS) ProcessRawCdr(rawCdr utils.RawCdr) error {
-	return storeAndMediate(rawCdr.AsStoredCdr())
+func (cdrs *CDRS) ProcessCdr(cdr *utils.StoredCdr) error {
+	return storeAndMediate(cdr)
 }

@@ -31,11 +31,9 @@ import (
 	"github.com/cgrates/cgrates/apier"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrc"
-	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/history"
-	"github.com/cgrates/cgrates/mediator"
 	"github.com/cgrates/cgrates/scheduler"
 	"github.com/cgrates/cgrates/sessionmanager"
 	"github.com/cgrates/cgrates/utils"
@@ -51,6 +49,7 @@ const (
 	REDIS    = "redis"
 	SAME     = "same"
 	FS       = "freeswitch"
+	OSIPS    = "opensips"
 )
 
 var (
@@ -66,9 +65,9 @@ var (
 	exitChan        = make(chan bool)
 	server          = &engine.Server{}
 	scribeServer    history.Scribe
-	cdrServer       *cdrs.CDRS
+	cdrServer       *engine.CDRS
 	sm              sessionmanager.SessionManager
-	medi            *mediator.Mediator
+	medi            *engine.Mediator
 	cfg             *config.CGRConfig
 	err             error
 )
@@ -96,8 +95,8 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		var client *rpcclient.RpcClient
 		var err error
 
-		for i := 0; i < cfg.MediatorRaterReconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, 0, cfg.MediatorRaterReconnects, utils.GOB)
+		for i := 0; i < cfg.MediatorReconnects; i++ {
+			client, err = rpcclient.NewRpcClient("tcp", cfg.MediatorRater, 0, cfg.MediatorReconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -111,7 +110,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		connector = &engine.RPCClientConnector{Client: client}
 	}
 	var err error
-	medi, err = mediator.NewMediator(connector, loggerDb, cdrDb, cfg)
+	medi, err = engine.NewMediator(connector, loggerDb, cdrDb, cfg)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Mediator config parsing error: %v", err))
 		exitChan <- true
@@ -149,8 +148,8 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		var client *rpcclient.RpcClient
 		var err error
 
-		for i := 0; i < cfg.SMRaterReconnects; i++ {
-			client, err = rpcclient.NewRpcClient("tcp", cfg.SMRater, 0, cfg.SMRaterReconnects, utils.GOB)
+		for i := 0; i < cfg.SMReconnects; i++ {
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SMRater, 0, cfg.SMReconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
 				break
 			}
@@ -165,13 +164,14 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 	switch cfg.SMSwitchType {
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval))
-		sm = sessionmanager.NewFSSessionManager(loggerDb, connector, dp)
-		errConn := sm.Connect(cfg)
-		if errConn != nil {
-			engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", errConn))
-		}
+		sm = sessionmanager.NewFSSessionManager(cfg, loggerDb, connector, dp)
+	case OSIPS:
+		sm, _ = sessionmanager.NewOSipsSessionManager(cfg, connector)
 	default:
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.SMSwitchType))
+	}
+	if err = sm.Connect(); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
 	}
 	exitChan <- true
 }
@@ -185,8 +185,11 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage, mediChan, d
 			return
 		}
 	}
-	cdrServer = cdrs.New(cdrDb, medi, cfg)
+	cdrServer = engine.NewCdrS(cdrDb, medi, cfg)
 	cdrServer.RegisterHanlersToServer(server)
+	engine.Logger.Info("Registering CDRS RPC service.")
+	server.RpcRegister(&apier.CDRSV1{CdrSrv: cdrServer})
+	responder.CdrSrv = cdrServer // Make the cdrserver available for internal communication
 	close(doneChan)
 }
 

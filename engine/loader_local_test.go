@@ -44,7 +44,7 @@ README:
 var ratingDbCsv, ratingDbStor, ratingDbApier RatingStorage        // Each ratingDb will have it's own sources to collect data
 var accountDbCsv, accountDbStor, accountDbApier AccountingStorage // Each ratingDb will have it's own sources to collect data
 var storDb LoadStorage
-var cfg *config.CGRConfig
+var lCfg *config.CGRConfig
 
 // Arguments received via test command
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
@@ -57,27 +57,27 @@ func TestConnDataDbs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cfg, _ = config.NewDefaultCGRConfig()
+	lCfg, _ = config.NewDefaultCGRConfig()
 	var err error
-	if ratingDbCsv, err = ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, "4", cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding); err != nil {
+	if ratingDbCsv, err = ConfigureRatingStorage(lCfg.RatingDBType, lCfg.RatingDBHost, lCfg.RatingDBPort, "4", lCfg.RatingDBUser, lCfg.RatingDBPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if ratingDbStor, err = ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, "5", cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding); err != nil {
+	if ratingDbStor, err = ConfigureRatingStorage(lCfg.RatingDBType, lCfg.RatingDBHost, lCfg.RatingDBPort, "5", lCfg.RatingDBUser, lCfg.RatingDBPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if ratingDbApier, err = ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, "6", cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding); err != nil {
+	if ratingDbApier, err = ConfigureRatingStorage(lCfg.RatingDBType, lCfg.RatingDBHost, lCfg.RatingDBPort, "6", lCfg.RatingDBUser, lCfg.RatingDBPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if accountDbCsv, err = ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, "7",
-		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding); err != nil {
+	if accountDbCsv, err = ConfigureAccountingStorage(lCfg.AccountDBType, lCfg.AccountDBHost, lCfg.AccountDBPort, "7",
+		lCfg.AccountDBUser, lCfg.AccountDBPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if accountDbStor, err = ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, "8",
-		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding); err != nil {
+	if accountDbStor, err = ConfigureAccountingStorage(lCfg.AccountDBType, lCfg.AccountDBHost, lCfg.AccountDBPort, "8",
+		lCfg.AccountDBUser, lCfg.AccountDBPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
-	if accountDbApier, err = ConfigureAccountingStorage(cfg.AccountDBType, cfg.AccountDBHost, cfg.AccountDBPort, "9",
-		cfg.AccountDBUser, cfg.AccountDBPass, cfg.DBDataEncoding); err != nil {
+	if accountDbApier, err = ConfigureAccountingStorage(lCfg.AccountDBType, lCfg.AccountDBHost, lCfg.AccountDBPort, "9",
+		lCfg.AccountDBUser, lCfg.AccountDBPass, lCfg.DBDataEncoding); err != nil {
 		t.Fatal("Error on ratingDb connection: ", err.Error())
 	}
 	for _, db := range []Storage{ratingDbCsv, ratingDbStor, ratingDbApier, accountDbCsv, accountDbStor, accountDbApier} {
@@ -94,7 +94,7 @@ func TestCreateStorTpTables(t *testing.T) {
 		return
 	}
 	var db *MySQLStorage
-	if d, err := NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
+	if d, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass); err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
 	} else {

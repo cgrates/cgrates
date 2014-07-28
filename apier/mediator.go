@@ -20,13 +20,13 @@ package apier
 
 import (
 	"fmt"
-	"github.com/cgrates/cgrates/mediator"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"time"
 )
 
 type MediatorV1 struct {
-	Medi *mediator.Mediator
+	Medi *engine.Mediator
 }
 
 // Remotely start mediation with specific runid, runs asynchronously, it's status will be displayed in syslog

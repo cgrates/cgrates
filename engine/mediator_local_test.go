@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package mediator
+package engine
 
 import (
 	"flag"
@@ -31,7 +31,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -49,13 +48,11 @@ README:
   * Execute remote Apis and test their replies(follow prepaid1cent scenario so we can test load in dataDb also).
 */
 
-var cfg *config.CGRConfig
+var cgrCfg *config.CGRConfig
 var cgrRpc *rpc.Client
-var cdrStor engine.CdrStorage
+var cdrStor CdrStorage
 var httpClient *http.Client
 
-var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
-var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
 var storDbType = flag.String("stordb_type", utils.MYSQL, "The type of the storDb database <mysql>")
 var startDelay = flag.Int("delay_start", 300, "Number of miliseconds to it for rater to start and cache")
 var cfgPath = path.Join(*dataDir, "conf", "samples", "mediator_test1.cfg")
@@ -65,11 +62,11 @@ func TestInitRatingDb(t *testing.T) {
 		return
 	}
 	var err error
-	cfg, err = config.NewCGRConfigFromFile(&cfgPath)
+	cgrCfg, err = config.NewCGRConfigFromFile(&cfgPath)
 	if err != nil {
 		t.Fatal("Got config error: ", err.Error())
 	}
-	ratingDb, err := engine.ConfigureRatingStorage(cfg.RatingDBType, cfg.RatingDBHost, cfg.RatingDBPort, cfg.RatingDBName, cfg.RatingDBUser, cfg.RatingDBPass, cfg.DBDataEncoding)
+	ratingDb, err := ConfigureRatingStorage(cgrCfg.RatingDBType, cgrCfg.RatingDBHost, cgrCfg.RatingDBPort, cgrCfg.RatingDBName, cgrCfg.RatingDBUser, cgrCfg.RatingDBPass, cgrCfg.DBDataEncoding)
 	if err != nil {
 		t.Fatal("Cannot connect to dataDb", err)
 	}
@@ -86,14 +83,14 @@ func TestInitStorDb(t *testing.T) {
 	if *storDbType != utils.MYSQL {
 		t.Fatal("Unsupported storDbType")
 	}
-	var mysql *engine.MySQLStorage
+	var mysql *MySQLStorage
 	var err error
-	if cdrStor, err = engine.ConfigureCdrStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
+	if cdrStor, err = ConfigureCdrStorage(cgrCfg.StorDBType, cgrCfg.StorDBHost, cgrCfg.StorDBPort, cgrCfg.StorDBName, cgrCfg.StorDBUser, cgrCfg.StorDBPass); err != nil {
 		t.Fatal("Error on opening database connection: ", err)
 	} else {
-		mysql = cdrStor.(*engine.MySQLStorage)
+		mysql = cdrStor.(*MySQLStorage)
 	}
-	if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, engine.CREATE_CDRS_TABLES_SQL)); err != nil {
+	if err := mysql.CreateTablesFromScript(path.Join(*dataDir, "storage", *storDbType, CREATE_CDRS_TABLES_SQL)); err != nil {
 		t.Fatal("Error on mysql creation: ", err.Error())
 		return // No point in going further
 	}
@@ -129,7 +126,7 @@ func TestRpcConn(t *testing.T) {
 	}
 	var err error
 	//cgrRpc, err = rpc.Dial("tcp", cfg.RPCGOBListen) //ToDo: Fix with automatic config
-	cgrRpc, err = jsonrpc.Dial("tcp", cfg.RPCJSONListen)
+	cgrRpc, err = jsonrpc.Dial("tcp", cgrCfg.RPCJSONListen)
 	if err != nil {
 		t.Fatal("Could not connect to CGR GOB-RPC Server: ", err.Error())
 	}
@@ -151,8 +148,8 @@ func TestPostCdrs(t *testing.T) {
 		utils.ACCOUNT: []string{"1010"}, utils.SUBJECT: []string{"1010"}, utils.ANSWER_TIME: []string{"2013-11-07T08:42:26Z"},
 		utils.USAGE: []string{"10"}, "field_extr1": []string{"val_extr1"}, "fieldextr2": []string{"valextr2"}}
 	for _, cdrForm := range []url.Values{cdrForm1, cdrForm2, cdrFormData1} {
-		cdrForm.Set(utils.CDRSOURCE, engine.TEST_SQL)
-		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cfg.HTTPListen), cdrForm); err != nil {
+		cdrForm.Set(utils.CDRSOURCE, TEST_SQL)
+		if _, err := httpClient.PostForm(fmt.Sprintf("http://%s/cgr", cgrCfg.HTTPListen), cdrForm); err != nil {
 			t.Error(err.Error())
 		}
 	}
@@ -174,10 +171,10 @@ func TestInjectCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	cgrCdr1 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": engine.TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
+	cgrCdr1 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517174963",
 		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "10"}
-	cgrCdr2 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": engine.TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
+	cgrCdr2 := utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "baaaadsafdsaf", "cdrsource": TEST_SQL, utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out",
 		utils.TENANT: "cgrates.org", utils.CATEGORY: "call", utils.ACCOUNT: "dan", utils.SUBJECT: "dan", utils.DESTINATION: "+4986517173964",
 		utils.ANSWER_TIME: "2013-11-07T09:42:26Z", utils.USAGE: "20"}
 	for _, cdr := range []utils.CgrCdr{cgrCdr1, cgrCdr2} {

@@ -32,7 +32,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/cgrates/cgrates/cdrs"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/howeyc/fsnotify"
@@ -43,7 +42,7 @@ const (
 	FS_CSV = "freeswitch_csv"
 )
 
-func NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string][]*utils.RSRField, cdrServer *cdrs.CDRS) (*Cdrc, error) {
+func NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string][]*utils.RSRField, cdrServer *engine.CDRS) (*Cdrc, error) {
 	if len(csvSep) != 1 {
 		return nil, fmt.Errorf("Unsupported csv separator: %s", csvSep)
 	}
@@ -69,7 +68,7 @@ type Cdrc struct {
 	runDelay   time.Duration
 	csvSep     rune
 	cdrFields  map[string][]*utils.RSRField
-	cdrServer  *cdrs.CDRS // Reference towards internal cdrServer if that is the case
+	cdrServer  *engine.CDRS // Reference towards internal cdrServer if that is the case
 	httpClient *http.Client
 }
 
@@ -220,7 +219,7 @@ func (self *Cdrc) processFile(filePath string) error {
 			continue
 		}
 		if self.cdrsAddress == utils.INTERNAL {
-			if err := self.cdrServer.ProcessRawCdr(storedCdr); err != nil {
+			if err := self.cdrServer.ProcessCdr(storedCdr); err != nil {
 				engine.Logger.Err(fmt.Sprintf("<Cdrc> Failed posting CDR, row: %d, error: %s", procRowNr, err.Error()))
 				continue
 			}

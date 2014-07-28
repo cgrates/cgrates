@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package cdrs
+package engine
 
 import (
 	"encoding/json"
@@ -24,7 +24,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -111,11 +110,11 @@ func (fsCdr FSCdr) searchExtraField(field string, body map[string]interface{}) (
 						return
 					}
 				} else {
-					engine.Logger.Warning(fmt.Sprintf("Slice with no maps: %v", reflect.TypeOf(item)))
+					Logger.Warning(fmt.Sprintf("Slice with no maps: %v", reflect.TypeOf(item)))
 				}
 			}
 		default:
-			engine.Logger.Warning(fmt.Sprintf("Unexpected type: %v", reflect.TypeOf(v)))
+			Logger.Warning(fmt.Sprintf("Unexpected type: %v", reflect.TypeOf(v)))
 		}
 	}
 	return
