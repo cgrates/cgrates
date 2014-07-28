@@ -25,6 +25,7 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/fsock"
 )
 
 // Session type holding the call information fields, a session delegate for specific
@@ -110,12 +111,17 @@ func (s *Session) debitLoop(runIdx int) {
 		cc := new(engine.CallCost)
 		if err := s.sessionManager.MaxDebit(&nextCd, cc); err != nil {
 			engine.Logger.Err(fmt.Sprintf("Could not complete debit opperation: %v", err))
-			s.sessionManager.DisconnectSession(s.uuid, SYSTEM_ERROR)
+			s.sessionManager.DisconnectSession(s.uuid, SYSTEM_ERROR, "")
 			return
 		}
 		if cc.GetDuration() == 0 {
-			s.sessionManager.DisconnectSession(s.uuid, INSUFFICIENT_FUNDS)
+			s.sessionManager.DisconnectSession(s.uuid, INSUFFICIENT_FUNDS, nextCd.Destination)
 			return
+		}
+		if cc.GetDuration() <= cfg.FSMinDurLowBalance && len(cfg.FSLowBalanceAnnFile) != 0 {
+			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_broadcast %s %s aleg\n\n", s.uuid, cfg.FSLowBalanceAnnFile)); err != nil {
+				engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send uuid_broadcast to freeswitch: %s", err.Error()))
+			}
 		}
 		s.sessionRuns[runIdx].callCosts = append(s.sessionRuns[runIdx].callCosts, cc)
 		nextCd.TimeEnd = cc.GetEndTime() // set debited timeEnd

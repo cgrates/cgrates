@@ -66,7 +66,7 @@ func (osm *OsipsSessionManager) Connect() (err error) {
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
 }
 
-func (osm *OsipsSessionManager) DisconnectSession(uuid string, notify string) {
+func (osm *OsipsSessionManager) DisconnectSession(uuid, notify, destnr string) {
 	return
 }
 func (osm *OsipsSessionManager) RemoveSession(uuid string) {

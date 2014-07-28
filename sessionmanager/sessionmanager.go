@@ -26,7 +26,7 @@ import (
 
 type SessionManager interface {
 	Connect() error
-	DisconnectSession(string, string)
+	DisconnectSession(string, string, string)
 	RemoveSession(string)
 	MaxDebit(*engine.CallDescriptor, *engine.CallCost) error
 	GetDebitPeriod() time.Duration

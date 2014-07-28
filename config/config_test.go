@@ -118,6 +118,10 @@ func TestDefaults(t *testing.T) {
 	eCfg.FreeswitchServer = "127.0.0.1:8021"
 	eCfg.FreeswitchPass = "ClueCon"
 	eCfg.FreeswitchReconnects = 5
+	eCfg.FSMinDurLowBalance = time.Duration(5) * time.Second
+	eCfg.FSLowBalanceAnnFile = ""
+	eCfg.FSEmptyBalanceContext = ""
+	eCfg.FSEmptyBalanceAnnFile = ""
 	eCfg.OsipsListenUdp = "127.0.0.1:2020"
 	eCfg.OsipsMiAddr = "127.0.0.1:8020"
 	eCfg.OsipsEvSubscInterval = time.Duration(60) * time.Second
@@ -258,6 +262,10 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
+	eCfg.FSMinDurLowBalance = time.Duration(99) * time.Second
+	eCfg.FSLowBalanceAnnFile = "test"
+	eCfg.FSEmptyBalanceContext = "test"
+	eCfg.FSEmptyBalanceAnnFile = "test"
 	eCfg.OsipsListenUdp = "test"
 	eCfg.OsipsMiAddr = "test"
 	eCfg.OsipsEvSubscInterval = time.Duration(99) * time.Second

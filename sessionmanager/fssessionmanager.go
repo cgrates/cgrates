@@ -99,14 +99,24 @@ func (sm *FSSessionManager) GetSession(uuid string) *Session {
 }
 
 // Disconnects a session by sending hangup command to freeswitch
-func (sm *FSSessionManager) DisconnectSession(uuid string, notify string) {
-	// engine.Logger.Debug(fmt.Sprintf("Session: %+v", s.uuid))
-	_, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify))
-	if err != nil {
-		engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send disconect api notification to freeswitch: %v", err))
+func (sm *FSSessionManager) DisconnectSession(uuid, notify, destnr string) {
+	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_notify %s\n\n", uuid, notify)); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send disconect api notification to freeswitch: %s", err.Error()))
 	}
-	err = fsock.FS.SendMsgCmd(uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}) // without + sign
-	if err != nil {
+	if notify == INSUFFICIENT_FUNDS {
+		if len(cfg.FSEmptyBalanceContext) != 0 {
+			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s %s\n\n", uuid, destnr, cfg.FSEmptyBalanceContext)); err != nil {
+				engine.Logger.Err("<SessionManager> Could not transfer the call to empty balance context")
+			}
+			return
+		} else if len(cfg.FSEmptyBalanceAnnFile) != 0 {
+			if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_broadcast %s playback!manager_request::%s aleg\n\n", uuid, cfg.FSEmptyBalanceAnnFile)); err != nil {
+				engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send uuid_broadcast to freeswitch: %s", err.Error()))
+			}
+			return
+		}
+	}
+	if err := fsock.FS.SendMsgCmd(uuid, map[string]string{"call-command": "hangup", "hangup-cause": "MANAGER_REQUEST"}); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Could not send disconect msg to freeswitch: %v", err))
 	}
 	return
@@ -139,8 +149,7 @@ func (sm *FSSessionManager) unparkCall(uuid, call_dest_nb, notify string) {
 	if err != nil {
 		engine.Logger.Err("<SessionManager> Could not send unpark api notification to freeswitch")
 	}
-	_, err = fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb))
-	if err != nil {
+	if _, err = fsock.FS.SendApiCmd(fmt.Sprintf("uuid_transfer %s %s\n\n", uuid, call_dest_nb)); err != nil {
 		engine.Logger.Err("<SessionManager> Could not send unpark api call to freeswitch")
 	}
 }
@@ -224,7 +233,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 
 func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	if ev.MissingParameter() {
-		sm.DisconnectSession(ev.GetUUID(), MISSING_PARAMETER)
+		sm.DisconnectSession(ev.GetUUID(), MISSING_PARAMETER, "")
 	}
 	if _, err := fsock.FS.SendApiCmd(fmt.Sprintf("uuid_setvar %s cgr_reqtype %s\n\n", ev.GetUUID(), ev.GetReqType(""))); err != nil {
 		engine.Logger.Err(fmt.Sprintf("Error on attempting to overwrite cgr_type in chan variables: %v", err))
@@ -234,7 +243,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	var dcs utils.DerivedChargers
 	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> OnAnswer: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
-		sm.DisconnectSession(ev.GetUUID(), SYSTEM_ERROR) // Disconnect the session since we are not able to process sessions
+		sm.DisconnectSession(ev.GetUUID(), SYSTEM_ERROR, "") // Disconnect the session since we are not able to process sessions
 		return
 	}
 	dcs, _ = dcs.AppendDefaultRun()

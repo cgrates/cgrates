@@ -117,6 +117,10 @@ type CGRConfig struct {
 	FreeswitchServer        string                // freeswitch address host:port
 	FreeswitchPass          string                // FS socket password
 	FreeswitchReconnects    int                   // number of times to attempt reconnect after connect fails
+	FSMinDurLowBalance      time.Duration         // Threshold which will trigger low balance warnings
+	FSLowBalanceAnnFile     string                // File to be played when low balance is reached
+	FSEmptyBalanceContext   string                // If defined, call will be transfered to this context on empty balance
+	FSEmptyBalanceAnnFile   string                // File to be played before disconnecting prepaid calls (applies only if no context defined)
 	OsipsListenUdp          string                // Address where to listen for event datagrams coming from OpenSIPS
 	OsipsMiAddr             string                // Adress where to reach OpenSIPS mi_datagram module
 	OsipsEvSubscInterval    time.Duration         // Refresh event subscription at this interval
@@ -208,6 +212,10 @@ func (self *CGRConfig) setDefaults() error {
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
+	self.FSMinDurLowBalance = time.Duration(5) * time.Second
+	self.FSLowBalanceAnnFile = ""
+	self.FSEmptyBalanceContext = ""
+	self.FSEmptyBalanceAnnFile = ""
 	self.OsipsListenUdp = "127.0.0.1:2020"
 	self.OsipsMiAddr = "127.0.0.1:8020"
 	self.OsipsEvSubscInterval = time.Duration(60) * time.Second
@@ -541,6 +549,21 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
 		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
+	}
+	if hasOpt = c.HasOption("freeswitch", "min_dur_low_balance"); hasOpt {
+		minDurStr, _ := c.GetString("freeswitch", "min_dur_low_balance")
+		if cfg.FSMinDurLowBalance, err = utils.ParseDurationWithSecs(minDurStr); err != nil {
+			return nil, err
+		}
+	}
+	if hasOpt = c.HasOption("freeswitch", "low_balance_ann_file"); hasOpt {
+		cfg.FSLowBalanceAnnFile, _ = c.GetString("freeswitch", "low_balance_ann_file")
+	}
+	if hasOpt = c.HasOption("freeswitch", "empty_balance_context"); hasOpt {
+		cfg.FSEmptyBalanceContext, _ = c.GetString("freeswitch", "empty_balance_context")
+	}
+	if hasOpt = c.HasOption("freeswitch", "empty_balance_ann_file"); hasOpt {
+		cfg.FSEmptyBalanceAnnFile, _ = c.GetString("freeswitch", "empty_balance_ann_file")
 	}
 	if hasOpt = c.HasOption("opensips", "listen_udp"); hasOpt {
 		cfg.OsipsListenUdp, _ = c.GetString("opensips", "listen_udp")
