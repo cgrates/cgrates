@@ -120,6 +120,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.FreeswitchReconnects = 5
 	eCfg.OsipsListenUdp = "127.0.0.1:2020"
 	eCfg.OsipsMiAddr = "127.0.0.1:8020"
+	eCfg.OsipsEvSubscInterval = time.Duration(60) * time.Second
 	eCfg.OsipCDRS = "internal"
 	eCfg.OsipsReconnects = 3
 	eCfg.DerivedChargers = make(utils.DerivedChargers, 0)
@@ -259,6 +260,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FreeswitchReconnects = 99
 	eCfg.OsipsListenUdp = "test"
 	eCfg.OsipsMiAddr = "test"
+	eCfg.OsipsEvSubscInterval = time.Duration(99) * time.Second
 	eCfg.OsipCDRS = "test"
 	eCfg.OsipsReconnects = 99
 	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", RunFilters: "", ReqTypeField: "test", DirectionField: "test", TenantField: "test",

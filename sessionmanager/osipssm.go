@@ -19,36 +19,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/osipsdagram"
+	"strings"
 	"time"
 )
 
 func NewOSipsSessionManager(cfg *config.CGRConfig, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
-	return &OsipsSessionManager{cfg: cfg, cdrsrv: cdrsrv}, nil
+	osm := &OsipsSessionManager{cgrCfg: cfg, cdrsrv: cdrsrv}
+	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
+		"E_OPENSIPS_START": []func(*osipsdagram.OsipsEvent){osm.OnOpensipsStart},
+		"E_ACC_CDR":        []func(*osipsdagram.OsipsEvent){osm.OnCdr},
+	}
+	return osm, nil
 }
 
 type OsipsSessionManager struct {
-	cfg    *config.CGRConfig
-	rater  engine.Connector
-	cdrsrv engine.Connector
+	cgrCfg          *config.CGRConfig
+	cdrsrv          engine.Connector
+	eventHandlers   map[string][]func(*osipsdagram.OsipsEvent)
+	evSubscribeStop *chan struct{} // Reference towards the channel controlling subscriptions, keep it as reference so we do not need to copy it
+	stopServing     chan struct{}  // Stop serving datagrams
+	miConn          *osipsdagram.OsipsMiDatagramConnector
 }
 
 func (osm *OsipsSessionManager) Connect() (err error) {
-	addr := ":2020"
-	evsrv, err := osipsdagram.NewEventServer(addr,
-		map[string][]func(*osipsdagram.OsipsEvent){
-			"E_ACC_CDR": []func(*osipsdagram.OsipsEvent){osm.OnCdr},
-		})
+	osm.stopServing = make(chan struct{})
+	if osm.miConn, err = osipsdagram.NewOsipsMiDatagramConnector(osm.cgrCfg.OsipsMiAddr, osm.cgrCfg.OsipsReconnects); err != nil {
+		return fmt.Errorf("Cannot connect to OpenSIPS at %s, error: %s", osm.cgrCfg.OsipsMiAddr, err.Error())
+	}
+	evSubscribeStop := make(chan struct{})
+	osm.evSubscribeStop = &evSubscribeStop
+	defer close(*osm.evSubscribeStop) // Stop subscribing on disconnect
+	go osm.SubscribeEvents(evSubscribeStop)
+	evsrv, err := osipsdagram.NewEventServer(osm.cgrCfg.OsipsListenUdp, osm.eventHandlers)
 	if err != nil {
-		fmt.Printf("Cannot initiate OpenSIPS Datagram Server: %s", err.Error())
+		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Cannot initialize datagram server, error: <%s>", err.Error()))
 		return
 	}
-	engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Started listening for event datagrams at <%s>", addr))
-	evsrv.ServeEvents()
+	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPS> Listening for datagram events at <%s>", osm.cgrCfg.OsipsListenUdp))
+	evsrv.ServeEvents(osm.stopServing) // Will break through stopServing on error in other places
 	return errors.New("<SM-OpenSIPS> Stopped reading events")
 }
 
@@ -72,9 +86,61 @@ func (osm *OsipsSessionManager) Shutdown() error {
 	return nil
 }
 
+// Event Handlers
+
+// Automatic subscribe to OpenSIPS for events, trigered on Connect or OpenSIPS restart
+func (osm *OsipsSessionManager) SubscribeEvents(evStop chan struct{}) error {
+	for {
+		select {
+		case <-evStop: // Break this loop from outside
+			return nil
+		default:
+			subscribeInterval := osm.cgrCfg.OsipsEvSubscInterval + time.Duration(1)*time.Second // Avoid concurrency on expiry
+			listenAddrSplt := strings.Split(osm.cgrCfg.OsipsListenUdp, ":")
+			portListen := listenAddrSplt[1]
+			addrListen := listenAddrSplt[0]
+			if len(addrListen) == 0 { //Listen on all addresses, try finding out from mi connection
+				if localAddr := osm.miConn.LocallAddr(); localAddr != nil {
+					addrListen = strings.Split(localAddr.String(), ":")[1]
+				}
+			}
+			for eventName := range osm.eventHandlers {
+				if eventName == "E_OPENSIPS_START" { // Do not subscribe for start since this should be hardcoded
+					continue
+				}
+				cmd := fmt.Sprintf(":event_subscribe:\n%s\nudp:%s:%s\n%d\n", eventName, addrListen, portListen, int(subscribeInterval.Seconds()))
+				success := false
+				for attempts := 0; attempts < osm.cgrCfg.OsipsReconnects; attempts++ {
+					if reply, err := osm.miConn.SendCommand([]byte(cmd)); err == nil && bytes.HasPrefix(reply, []byte("200 OK")) {
+						success = true
+						break
+					}
+					time.Sleep(time.Duration((attempts+1)/2) * time.Second) // Allow OpenSIPS to recover from errors
+					continue                                                // Try again
+				}
+				if !success {
+					close(osm.stopServing) // Do not serve anymore since we got errors on subscribing
+					return errors.New("Failed subscribing to OpenSIPS events")
+				}
+			}
+			time.Sleep(osm.cgrCfg.OsipsEvSubscInterval)
+		}
+	}
+	return nil
+}
+
+func (osm *OsipsSessionManager) OnOpensipsStart(cdrDagram *osipsdagram.OsipsEvent) {
+	close(*osm.evSubscribeStop) // Cancel previous subscribes
+	evStop := make(chan struct{})
+	osm.evSubscribeStop = &evStop
+	go osm.SubscribeEvents(evStop)
+}
+
 func (osm *OsipsSessionManager) OnCdr(cdrDagram *osipsdagram.OsipsEvent) {
-	engine.Logger.Info(fmt.Sprintf("<SM-OpenSIPSr> Received cdr datagram: %+v", cdrDagram))
-	var reply *string
+	var reply string
 	osipsEv, _ := NewOsipsEvent(cdrDagram)
-	osm.cdrsrv.ProcessCdr(osipsEv.AsStoredCdr(), reply)
+	storedCdr := osipsEv.AsStoredCdr()
+	if err := osm.cdrsrv.ProcessCdr(storedCdr, &reply); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
+	}
 }

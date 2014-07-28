@@ -119,6 +119,7 @@ type CGRConfig struct {
 	FreeswitchReconnects    int                   // number of times to attempt reconnect after connect fails
 	OsipsListenUdp          string                // Address where to listen for event datagrams coming from OpenSIPS
 	OsipsMiAddr             string                // Adress where to reach OpenSIPS mi_datagram module
+	OsipsEvSubscInterval    time.Duration         // Refresh event subscription at this interval
 	OsipCDRS                string                // Address where to reach CDR Server, empty to disable CDR processing <""|internal|127.0.0.1:2013>
 	OsipsReconnects         int                   // Number of attempts on connect failure.
 	HistoryAgentEnabled     bool                  // Starts History as an agent: <true|false>.
@@ -209,6 +210,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.FreeswitchReconnects = 5
 	self.OsipsListenUdp = "127.0.0.1:2020"
 	self.OsipsMiAddr = "127.0.0.1:8020"
+	self.OsipsEvSubscInterval = time.Duration(60) * time.Second
 	self.OsipCDRS = "internal"
 	self.OsipsReconnects = 3
 	self.HistoryAgentEnabled = false
@@ -545,6 +547,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("opensips", "mi_addr"); hasOpt {
 		cfg.OsipsMiAddr, _ = c.GetString("opensips", "mi_addr")
+	}
+	if hasOpt = c.HasOption("opensips", "events_subscribe_interval"); hasOpt {
+		evSubscIntervalStr, _ := c.GetString("opensips", "events_subscribe_interval")
+		if cfg.OsipsEvSubscInterval, err = utils.ParseDurationWithSecs(evSubscIntervalStr); err != nil {
+			return nil, err
+		}
 	}
 	if hasOpt = c.HasOption("opensips", "cdrs"); hasOpt {
 		cfg.OsipCDRS, _ = c.GetString("opensips", "cdrs")

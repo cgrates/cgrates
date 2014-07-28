@@ -100,10 +100,11 @@ passwd = test				# FreeSWITCH socket password.
 reconnects = 99				# Number of attempts on connect failure.
 
 [opensips]
-listen_udp = test 			# Address where to listen for event datagrams coming from OpenSIPS
-mi_addr = test				# Adress where to reach OpenSIPS mi_datagram module
-cdrs = test					# Address where to reach CDR Server, empty to disable CDR processing <""|internal|127.0.0.1:2013>
-reconnects = 99				# Number of attempts on connect failure.
+listen_udp = test 				# Address where to listen for event datagrams coming from OpenSIPS
+mi_addr = test					# Adress where to reach OpenSIPS mi_datagram module
+events_subscribe_interval = 99	# Automatic events subscription to OpenSIPS, 0 to disable it
+cdrs = test						# Address where to reach CDR Server, empty to disable CDR processing <""|internal|127.0.0.1:2013>
+reconnects = 99					# Number of attempts on connect failure.
 
 [derived_charging]
 run_ids = test 				# Identifiers of additional sessions control.
