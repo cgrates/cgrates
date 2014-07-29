@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,13 +21,12 @@ package sessionmanager
 import (
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 )
 
 type SessionManager interface {
-	Connect(*config.CGRConfig) error
-	DisconnectSession(string, string)
+	Connect() error
+	DisconnectSession(string, string, string)
 	RemoveSession(string)
 	MaxDebit(*engine.CallDescriptor, *engine.CallCost) error
 	GetDebitPeriod() time.Duration

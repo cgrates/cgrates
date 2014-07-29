@@ -92,19 +92,19 @@ func TestDefaults(t *testing.T) {
 	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
 	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	eCfg.CdrcSourceId = "csv"
-	eCfg.CdrcCdrFields = map[string]*utils.RSRField{
-		utils.TOR:         &utils.RSRField{Id: "2"},
-		utils.ACCID:       &utils.RSRField{Id: "3"},
-		utils.REQTYPE:     &utils.RSRField{Id: "4"},
-		utils.DIRECTION:   &utils.RSRField{Id: "5"},
-		utils.TENANT:      &utils.RSRField{Id: "6"},
-		utils.CATEGORY:    &utils.RSRField{Id: "7"},
-		utils.ACCOUNT:     &utils.RSRField{Id: "8"},
-		utils.SUBJECT:     &utils.RSRField{Id: "9"},
-		utils.DESTINATION: &utils.RSRField{Id: "10"},
-		utils.SETUP_TIME:  &utils.RSRField{Id: "11"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "12"},
-		utils.USAGE:       &utils.RSRField{Id: "13"},
+	eCfg.CdrcCdrFields = map[string][]*utils.RSRField{
+		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "2"}},
+		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "3"}},
+		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "4"}},
+		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "5"}},
+		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "6"}},
+		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "7"}},
+		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "8"}},
+		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "9"}},
+		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "10"}},
+		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "11"}},
+		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "12"}},
+		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "13"}},
 	}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = utils.INTERNAL
@@ -113,13 +113,22 @@ func TestDefaults(t *testing.T) {
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
 	eCfg.SMRater = utils.INTERNAL
-	eCfg.SMRaterReconnects = 3
+	eCfg.SMReconnects = 3
 	eCfg.SMDebitInterval = 10
 	eCfg.SMMinCallDuration = time.Duration(0)
 	eCfg.SMMaxCallDuration = time.Duration(3) * time.Hour
 	eCfg.FreeswitchServer = "127.0.0.1:8021"
 	eCfg.FreeswitchPass = "ClueCon"
 	eCfg.FreeswitchReconnects = 5
+	eCfg.FSMinDurLowBalance = time.Duration(5) * time.Second
+	eCfg.FSLowBalanceAnnFile = ""
+	eCfg.FSEmptyBalanceContext = ""
+	eCfg.FSEmptyBalanceAnnFile = ""
+	eCfg.OsipsListenUdp = "127.0.0.1:2020"
+	eCfg.OsipsMiAddr = "127.0.0.1:8020"
+	eCfg.OsipsEvSubscInterval = time.Duration(60) * time.Second
+	eCfg.OsipCDRS = "internal"
+	eCfg.OsipsReconnects = 3
 	eCfg.DerivedChargers = make(utils.DerivedChargers, 0)
 	eCfg.CombinedDerivedChargers = true
 	eCfg.HistoryAgentEnabled = false
@@ -153,11 +162,11 @@ func TestSanityCheck(t *testing.T) {
 		t.Error("Failed to detect missing CDR fields definition")
 	}
 	cfg.CdrcCdrType = utils.CSV
-	cfg.CdrcCdrFields = map[string]*utils.RSRField{utils.ACCID: &utils.RSRField{Id: "test"}}
+	cfg.CdrcCdrFields = map[string][]*utils.RSRField{utils.ACCID: []*utils.RSRField{&utils.RSRField{Id: "test"}}}
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect improper use of CDR field names")
 	}
-	cfg.CdrcCdrFields = map[string]*utils.RSRField{"extra1": &utils.RSRField{Id: "test"}}
+	cfg.CdrcCdrFields = map[string][]*utils.RSRField{"extra1": []*utils.RSRField{&utils.RSRField{Id: "test"}}}
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect improper use of CDR field names")
 	}
@@ -229,35 +238,44 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CdrcCdrInDir = "test"
 	eCfg.CdrcCdrOutDir = "test"
 	eCfg.CdrcSourceId = "test"
-	eCfg.CdrcCdrFields = map[string]*utils.RSRField{
-		utils.TOR:         &utils.RSRField{Id: "test"},
-		utils.ACCID:       &utils.RSRField{Id: "test"},
-		utils.REQTYPE:     &utils.RSRField{Id: "test"},
-		utils.DIRECTION:   &utils.RSRField{Id: "test"},
-		utils.TENANT:      &utils.RSRField{Id: "test"},
-		utils.CATEGORY:    &utils.RSRField{Id: "test"},
-		utils.ACCOUNT:     &utils.RSRField{Id: "test"},
-		utils.SUBJECT:     &utils.RSRField{Id: "test"},
-		utils.DESTINATION: &utils.RSRField{Id: "test"},
-		utils.SETUP_TIME:  &utils.RSRField{Id: "test"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "test"},
-		utils.USAGE:       &utils.RSRField{Id: "test"},
-		"test":            &utils.RSRField{Id: "test"},
+	eCfg.CdrcCdrFields = map[string][]*utils.RSRField{
+		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "test"}},
+		"test":            []*utils.RSRField{&utils.RSRField{Id: "test"}},
 	}
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorRater = "test"
-	eCfg.MediatorRaterReconnects = 99
+	eCfg.MediatorReconnects = 99
 	eCfg.MediatorStats = "test"
 	eCfg.SMEnabled = true
 	eCfg.SMSwitchType = "test"
 	eCfg.SMRater = "test"
-	eCfg.SMRaterReconnects = 99
+	eCfg.SMReconnects = 99
 	eCfg.SMDebitInterval = 99
-	eCfg.SMMinCallDuration = time.Duration(99) * time.Second
+	eCfg.SMMinCallDuration = time.Duration(98) * time.Second
 	eCfg.SMMaxCallDuration = time.Duration(99) * time.Second
 	eCfg.FreeswitchServer = "test"
 	eCfg.FreeswitchPass = "test"
 	eCfg.FreeswitchReconnects = 99
+	eCfg.FSMinDurLowBalance = time.Duration(99) * time.Second
+	eCfg.FSLowBalanceAnnFile = "test"
+	eCfg.FSEmptyBalanceContext = "test"
+	eCfg.FSEmptyBalanceAnnFile = "test"
+	eCfg.OsipsListenUdp = "test"
+	eCfg.OsipsMiAddr = "test"
+	eCfg.OsipsEvSubscInterval = time.Duration(99) * time.Second
+	eCfg.OsipCDRS = "test"
+	eCfg.OsipsReconnects = 99
 	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", RunFilters: "", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}
 	eCfg.CombinedDerivedChargers = true

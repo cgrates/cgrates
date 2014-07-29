@@ -55,6 +55,12 @@ func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) err
 	return nil
 }
 
+type AttrSetDestination struct { //ToDo
+	Id        string
+	Prefixes  []string
+	Overwrite bool
+}
+
 func (self *ApierV1) GetRatingPlan(rplnId string, reply *engine.RatingPlan) error {
 	if rpln, err := self.RatingDb.GetRatingPlan(rplnId, false); err != nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -77,20 +83,21 @@ func (self *ApierV1) GetAccount(attr *utils.AttrGetAccount, reply *engine.Accoun
 }
 
 type AttrAddBalance struct {
-	Tenant         string
-	Account        string
-	BalanceType    string
-	Direction      string
-	Value          float64
-	ExpirationDate string
-	RatingSubject  string
-	DestinationId  string
-	Weight         float64
-	Overwrite      bool // When true it will reset if the balance is already there
+	Tenant        string
+	Account       string
+	BalanceType   string
+	Direction     string
+	Value         float64
+	ExpiryTime    string
+	RatingSubject string
+	DestinationId string
+	Weight        float64
+	SharedGroup   string
+	Overwrite     bool // When true it will reset if the balance is already there
 }
 
 func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
-	expTime, err := utils.ParseDate(attr.ExpirationDate)
+	expTime, err := utils.ParseDate(attr.ExpiryTime)
 	if err != nil {
 		*reply = err.Error()
 		return err
@@ -131,6 +138,7 @@ func (self *ApierV1) AddBalance(attr *AttrAddBalance, reply *string) error {
 				RatingSubject:  attr.RatingSubject,
 				DestinationId:  attr.DestinationId,
 				Weight:         attr.Weight,
+				SharedGroup:    attr.SharedGroup,
 			},
 		},
 	})
@@ -419,17 +427,19 @@ func (self *ApierV1) SetActionPlan(attrs AttrSetActionPlan, reply *string) error
 }
 
 type AttrAddActionTrigger struct {
-	Tenant            string
-	Account           string
-	Direction         string
-	BalanceType       string
-	ThresholdType     string
-	ThresholdValue    float64
-	DestinationId     string
-	BalanceWeight     float64
-	BalanceExpiryTime string
-	Weight            float64
-	ActionsId         string
+	Tenant               string
+	Account              string
+	Direction            string
+	BalanceType          string
+	ThresholdType        string
+	ThresholdValue       float64
+	DestinationId        string
+	BalanceRatingSubject string //ToDo
+	BalanceWeight        float64
+	BalanceExpiryTime    string
+	BalanceSharedGroup   string //ToDo
+	Weight               float64
+	ActionsId            string
 }
 
 func (self *ApierV1) AddTriggeredAction(attr AttrAddActionTrigger, reply *string) error {

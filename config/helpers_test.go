@@ -116,21 +116,21 @@ answer_time_field = answertime1
 usage_field = duration1
 extra_fields = extra1:extraval1,extra2:extraval1
 `)
-	eCdrcCdrFlds := map[string]*utils.RSRField{
-		utils.TOR:         &utils.RSRField{Id: "tor1"},
-		utils.ACCID:       &utils.RSRField{Id: "accid1"},
-		utils.REQTYPE:     &utils.RSRField{Id: "reqtype1"},
-		utils.DIRECTION:   &utils.RSRField{Id: "direction1"},
-		utils.TENANT:      &utils.RSRField{Id: "tenant1"},
-		utils.CATEGORY:    &utils.RSRField{Id: "category1"},
-		utils.ACCOUNT:     &utils.RSRField{Id: "account1"},
-		utils.SUBJECT:     &utils.RSRField{Id: "subject1"},
-		utils.DESTINATION: &utils.RSRField{Id: "destination1"},
-		utils.SETUP_TIME:  &utils.RSRField{Id: "setuptime1"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "answertime1"},
-		utils.USAGE:       &utils.RSRField{Id: "duration1"},
-		"extra1":          &utils.RSRField{Id: "extraval1"},
-		"extra2":          &utils.RSRField{Id: "extraval1"},
+	eCdrcCdrFlds := map[string][]*utils.RSRField{
+		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "tor1"}},
+		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "accid1"}},
+		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "reqtype1"}},
+		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "direction1"}},
+		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "tenant1"}},
+		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "category1"}},
+		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "account1"}},
+		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "subject1"}},
+		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "destination1"}},
+		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "setuptime1"}},
+		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "answertime1"}},
+		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "duration1"}},
+		"extra1":          []*utils.RSRField{&utils.RSRField{Id: "extraval1"}},
+		"extra2":          []*utils.RSRField{&utils.RSRField{Id: "extraval1"}},
 	}
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())

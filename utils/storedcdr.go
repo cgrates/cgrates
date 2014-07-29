@@ -47,6 +47,8 @@ type StoredCdr struct {
 	Usage          time.Duration
 	ExtraFields    map[string]string
 	MediationRunId string
+	RatedAccount   string // Populated out of rating data
+	RatedSubject   string
 	Cost           float64
 }
 
@@ -126,6 +128,10 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 		return rsrFld.ParseValue(strconv.FormatInt(storedCdr.Usage.Nanoseconds(), 10))
 	case MEDI_RUNID:
 		return rsrFld.ParseValue(storedCdr.MediationRunId)
+	case RATED_ACCOUNT:
+		return rsrFld.ParseValue(storedCdr.RatedAccount)
+	case RATED_SUBJECT:
+		return rsrFld.ParseValue(storedCdr.RatedSubject)
 	case COST:
 		return rsrFld.ParseValue(strconv.FormatFloat(storedCdr.Cost, 'f', -1, 64)) // Recommended to use FormatCost
 	default:
@@ -157,7 +163,7 @@ func (storedCdr *StoredCdr) AsStoredCdr() *StoredCdr {
 	return storedCdr
 }
 
-// Ability to send the CgrCdr remotely to another CDR server
+// Ability to send the CgrCdr remotely to another CDR server, we do not include rating variables for now
 func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v := url.Values{}
 	for fld, val := range storedCdr.ExtraFields {
@@ -324,6 +330,8 @@ func (storedCdr *StoredCdr) AsCgrCdrOut() *CgrCdrOut {
 		Usage:          storedCdr.Usage.Seconds(),
 		ExtraFields:    storedCdr.ExtraFields,
 		MediationRunId: storedCdr.MediationRunId,
+		RatedAccount:   storedCdr.RatedAccount,
+		RatedSubject:   storedCdr.RatedSubject,
 		Cost:           storedCdr.Cost,
 	}
 }
@@ -347,5 +355,7 @@ type CgrCdrOut struct {
 	Usage          float64
 	ExtraFields    map[string]string
 	MediationRunId string
+	RatedAccount   string
+	RatedSubject   string
 	Cost           float64
 }

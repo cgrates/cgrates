@@ -55,71 +55,80 @@ func SetCgrConfig(cfg *CGRConfig) {
 
 // Holds system configuration, defaults are overwritten with values from config file if found
 type CGRConfig struct {
-	RatingDBType      string
-	RatingDBHost      string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	RatingDBPort      string // The port to bind to.
-	RatingDBName      string // The name of the database to connect to.
-	RatingDBUser      string // The user to sign in as.
-	RatingDBPass      string // The user's password.
-	AccountDBType     string
-	AccountDBHost     string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	AccountDBPort     string             // The port to bind to.
-	AccountDBName     string             // The name of the database to connect to.
-	AccountDBUser     string             // The user to sign in as.
-	AccountDBPass     string             // The user's password.
-	StorDBType        string             // Should reflect the database type used to store logs
-	StorDBHost        string             // The host to connect to. Values that start with / are for UNIX domain sockets.
-	StorDBPort        string             // Th e port to bind to.
-	StorDBName        string             // The name of the database to connect to.
-	StorDBUser        string             // The user to sign in as.
-	StorDBPass        string             // The user's password.
-	DBDataEncoding    string             // The encoding used to store object data in strings: <msgpack|json>
-	RPCJSONListen     string             // RPC JSON listening address
-	RPCGOBListen      string             // RPC GOB listening address
-	HTTPListen        string             // HTTP listening address
-	DefaultReqType    string             // Use this request type if not defined on top
-	DefaultCategory   string             // set default type of record
-	DefaultTenant     string             // set default tenant
-	DefaultSubject    string             // set default rating subject, useful in case of fallback
-	RoundingDecimals  int                // Number of decimals to round end prices at
-	HttpSkipTlsVerify bool               // If enabled Http Client will accept any TLS certificate
-	XmlCfgDocument    *CgrXmlCfgDocument // Load additional configuration inside xml document
-	RaterEnabled      bool               // start standalone server (no balancer)
-	RaterBalancer     string             // balancer address host:port
-	BalancerEnabled   bool
-	SchedulerEnabled  bool
-	CDRSEnabled       bool              // Enable CDR Server service
-	CDRSExtraFields   []*utils.RSRField // Extra fields to store in CDRs
-	CDRSMediator      string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	RatingDBType            string
+	RatingDBHost            string // The host to connect to. Values that start with / are for UNIX domain sockets.
+	RatingDBPort            string // The port to bind to.
+	RatingDBName            string // The name of the database to connect to.
+	RatingDBUser            string // The user to sign in as.
+	RatingDBPass            string // The user's password.
+	AccountDBType           string
+	AccountDBHost           string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	AccountDBPort           string             // The port to bind to.
+	AccountDBName           string             // The name of the database to connect to.
+	AccountDBUser           string             // The user to sign in as.
+	AccountDBPass           string             // The user's password.
+	StorDBType              string             // Should reflect the database type used to store logs
+	StorDBHost              string             // The host to connect to. Values that start with / are for UNIX domain sockets.
+	StorDBPort              string             // Th e port to bind to.
+	StorDBName              string             // The name of the database to connect to.
+	StorDBUser              string             // The user to sign in as.
+	StorDBPass              string             // The user's password.
+	DBDataEncoding          string             // The encoding used to store object data in strings: <msgpack|json>
+	RPCJSONListen           string             // RPC JSON listening address
+	RPCGOBListen            string             // RPC GOB listening address
+	HTTPListen              string             // HTTP listening address
+	DefaultReqType          string             // Use this request type if not defined on top
+	DefaultCategory         string             // set default type of record
+	DefaultTenant           string             // set default tenant
+	DefaultSubject          string             // set default rating subject, useful in case of fallback
+	RoundingDecimals        int                // Number of decimals to round end prices at
+	HttpSkipTlsVerify       bool               // If enabled Http Client will accept any TLS certificate
+	XmlCfgDocument          *CgrXmlCfgDocument // Load additional configuration inside xml document
+	RaterEnabled            bool               // start standalone server (no balancer)
+	RaterBalancer           string             // balancer address host:port
+	BalancerEnabled         bool
+	SchedulerEnabled        bool
+	CDRSEnabled             bool                         // Enable CDR Server service
+	CDRSExtraFields         []*utils.RSRField            // Extra fields to store in CDRs
+	CDRSMediator            string                       // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	CDRSStats         string            // Address where to reach the Mediator. <""|intenal>
 	CDRStatsEnabled   bool              // Enable CDR Stats service
-	//CdrStats                []*cdrstats.CdrStats       // Active cdr stats configuration instances
-	CdreDefaultInstance     *CdreConfig                // Will be used in the case no specific one selected by API
-	CdrcEnabled             bool                       // Enable CDR client functionality
-	CdrcCdrs                string                     // Address where to reach CDR server
-	CdrcRunDelay            time.Duration              // Sleep interval between consecutive runs, 0 to use automation via inotify
-	CdrcCdrType             string                     // CDR file format <csv>.
-	CdrcCsvSep              string                     // Separator used in case of csv files. One character only supported.
-	CdrcCdrInDir            string                     // Absolute path towards the directory where the CDRs are stored.
-	CdrcCdrOutDir           string                     // Absolute path towards the directory where processed CDRs will be moved.
-	CdrcSourceId            string                     // Tag identifying the source of the CDRs within CGRS database.
-	CdrcCdrFields           map[string]*utils.RSRField // FieldName/RSRField format. Index number in case of .csv cdrs.
+	//CdrStats                []*cdrstats.CdrStats            // Active cdr stats configuration instances
+	CdreDefaultInstance     *CdreConfig                  // Will be used in the case no specific one selected by API
+	CdrcEnabled             bool                         // Enable CDR client functionality
+	CdrcCdrs                string                       // Address where to reach CDR server
+	CdrcRunDelay            time.Duration                // Sleep interval between consecutive runs, 0 to use automation via inotify
+	CdrcCdrType             string                       // CDR file format <csv>.
+	CdrcCsvSep              string                       // Separator used in case of csv files. One character only supported.
+	CdrcCdrInDir            string                       // Absolute path towards the directory where the CDRs are stored.
+	CdrcCdrOutDir           string                       // Absolute path towards the directory where processed CDRs will be moved.
+	CdrcSourceId            string                       // Tag identifying the source of the CDRs within CGRS database.
+	CdrcCdrFields           map[string][]*utils.RSRField // FieldName/RSRField format. Index number in case of .csv cdrs.
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMRaterReconnects       int                   // Number of reconnect attempts to rater
+	SMReconnects            int                   // Number of reconnect attempts to rater
 	SMDebitInterval         int                   // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration       time.Duration         // The maximum duration of a call
 	SMMinCallDuration       time.Duration         // Only authorize calls with allowed duration bigger than this
 	MediatorEnabled         bool                  // Starts Mediator service: <true|false>.
-	MediatorRater           string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorStats           string                // Address where to reach the stats service: <internal|x.y.z.y:1234>
-	MediatorRaterReconnects int                   // Number of reconnects to rater before giving up.
+	MediatorRater           string 
+    MediatorStats           string               // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	MediatorReconnects      int                   // Number of reconnects to rater before giving up.
 	DerivedChargers         utils.DerivedChargers // System wide derived chargers, added to the account level ones
 	CombinedDerivedChargers bool                  // Combine accounts specific derived_chargers with server configured
 	FreeswitchServer        string                // freeswitch address host:port
 	FreeswitchPass          string                // FS socket password
 	FreeswitchReconnects    int                   // number of times to attempt reconnect after connect fails
+	FSMinDurLowBalance      time.Duration         // Threshold which will trigger low balance warnings
+	FSLowBalanceAnnFile     string                // File to be played when low balance is reached
+	FSEmptyBalanceContext   string                // If defined, call will be transfered to this context on empty balance
+	FSEmptyBalanceAnnFile   string                // File to be played before disconnecting prepaid calls (applies only if no context defined)
+	OsipsListenUdp          string                // Address where to listen for event datagrams coming from OpenSIPS
+	OsipsMiAddr             string                // Adress where to reach OpenSIPS mi_datagram module
+	OsipsEvSubscInterval    time.Duration         // Refresh event subscription at this interval
+	OsipCDRS                string                // Address where to reach CDR Server, empty to disable CDR processing <""|internal|127.0.0.1:2013>
+	OsipsReconnects         int                   // Number of attempts on connect failure.
 	HistoryAgentEnabled     bool                  // Starts History as an agent: <true|false>.
 	HistoryServer           string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
 	HistoryServerEnabled    bool                  // Starts History as server: <true|false>.
@@ -179,36 +188,45 @@ func (self *CGRConfig) setDefaults() error {
 	self.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
 	self.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
 	self.CdrcSourceId = "csv"
-	self.CdrcCdrFields = map[string]*utils.RSRField{
-		utils.TOR:         &utils.RSRField{Id: "2"},
-		utils.ACCID:       &utils.RSRField{Id: "3"},
-		utils.REQTYPE:     &utils.RSRField{Id: "4"},
-		utils.DIRECTION:   &utils.RSRField{Id: "5"},
-		utils.TENANT:      &utils.RSRField{Id: "6"},
-		utils.CATEGORY:    &utils.RSRField{Id: "7"},
-		utils.ACCOUNT:     &utils.RSRField{Id: "8"},
-		utils.SUBJECT:     &utils.RSRField{Id: "9"},
-		utils.DESTINATION: &utils.RSRField{Id: "10"},
-		utils.SETUP_TIME:  &utils.RSRField{Id: "11"},
-		utils.ANSWER_TIME: &utils.RSRField{Id: "12"},
-		utils.USAGE:       &utils.RSRField{Id: "13"},
+	self.CdrcCdrFields = map[string][]*utils.RSRField{
+		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "2"}},
+		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "3"}},
+		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "4"}},
+		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "5"}},
+		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "6"}},
+		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "7"}},
+		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "8"}},
+		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "9"}},
+		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "10"}},
+		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "11"}},
+		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "12"}},
+		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "13"}},
 	}
 	self.MediatorEnabled = false
 	self.MediatorRater = utils.INTERNAL
-	self.MediatorRaterReconnects = 3
+	self.MediatorReconnects = 3
 	self.MediatorStats = utils.INTERNAL
 	self.DerivedChargers = make(utils.DerivedChargers, 0)
 	self.CombinedDerivedChargers = true
 	self.SMEnabled = false
 	self.SMSwitchType = FS
 	self.SMRater = utils.INTERNAL
-	self.SMRaterReconnects = 3
+	self.SMReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
 	self.SMMinCallDuration = time.Duration(0)
 	self.FreeswitchServer = "127.0.0.1:8021"
 	self.FreeswitchPass = "ClueCon"
 	self.FreeswitchReconnects = 5
+	self.FSMinDurLowBalance = time.Duration(5) * time.Second
+	self.FSLowBalanceAnnFile = ""
+	self.FSEmptyBalanceContext = ""
+	self.FSEmptyBalanceAnnFile = ""
+	self.OsipsListenUdp = "127.0.0.1:2020"
+	self.OsipsMiAddr = "127.0.0.1:8020"
+	self.OsipsEvSubscInterval = time.Duration(60) * time.Second
+	self.OsipCDRS = "internal"
+	self.OsipsReconnects = 3
 	self.HistoryAgentEnabled = false
 	self.HistoryServerEnabled = false
 	self.HistoryServer = utils.INTERNAL
@@ -227,9 +245,11 @@ func (self *CGRConfig) checkConfigSanity() error {
 			return errors.New("CdrC enabled but no fields to be processed defined!")
 		}
 		if self.CdrcCdrType == utils.CSV {
-			for _, rsrFld := range self.CdrcCdrFields {
-				if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {
-					return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
+			for _, rsrFldLst := range self.CdrcCdrFields {
+				for _, rsrFld := range rsrFldLst {
+					if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {
+						return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
+					}
 				}
 			}
 		}
@@ -503,8 +523,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("mediator", "rater"); hasOpt {
 		cfg.MediatorRater, _ = c.GetString("mediator", "rater")
 	}
-	if hasOpt = c.HasOption("mediator", "rater_reconnects"); hasOpt {
-		cfg.MediatorRaterReconnects, _ = c.GetInt("mediator", "rater_reconnects")
+	if hasOpt = c.HasOption("mediator", "reconnects"); hasOpt {
+		cfg.MediatorReconnects, _ = c.GetInt("mediator", "reconnects")
 	}
 	if hasOpt = c.HasOption("mediator", "stats"); hasOpt {
 		cfg.MediatorStats, _ = c.GetString("mediator", "stats")
@@ -518,8 +538,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("session_manager", "rater"); hasOpt {
 		cfg.SMRater, _ = c.GetString("session_manager", "rater")
 	}
-	if hasOpt = c.HasOption("session_manager", "rater_reconnects"); hasOpt {
-		cfg.SMRaterReconnects, _ = c.GetInt("session_manager", "rater_reconnects")
+	if hasOpt = c.HasOption("session_manager", "reconnects"); hasOpt {
+		cfg.SMReconnects, _ = c.GetInt("session_manager", "reconnects")
 	}
 	if hasOpt = c.HasOption("session_manager", "debit_interval"); hasOpt {
 		cfg.SMDebitInterval, _ = c.GetInt("session_manager", "debit_interval")
@@ -531,7 +551,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		}
 	}
 	if hasOpt = c.HasOption("session_manager", "max_call_duration"); hasOpt {
-		maxCallDurStr, _ := c.GetString("session_manager", "min_call_duration")
+		maxCallDurStr, _ := c.GetString("session_manager", "max_call_duration")
 		if cfg.SMMaxCallDuration, err = utils.ParseDurationWithSecs(maxCallDurStr); err != nil {
 			return nil, err
 		}
@@ -544,6 +564,39 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("freeswitch", "reconnects"); hasOpt {
 		cfg.FreeswitchReconnects, _ = c.GetInt("freeswitch", "reconnects")
+	}
+	if hasOpt = c.HasOption("freeswitch", "min_dur_low_balance"); hasOpt {
+		minDurStr, _ := c.GetString("freeswitch", "min_dur_low_balance")
+		if cfg.FSMinDurLowBalance, err = utils.ParseDurationWithSecs(minDurStr); err != nil {
+			return nil, err
+		}
+	}
+	if hasOpt = c.HasOption("freeswitch", "low_balance_ann_file"); hasOpt {
+		cfg.FSLowBalanceAnnFile, _ = c.GetString("freeswitch", "low_balance_ann_file")
+	}
+	if hasOpt = c.HasOption("freeswitch", "empty_balance_context"); hasOpt {
+		cfg.FSEmptyBalanceContext, _ = c.GetString("freeswitch", "empty_balance_context")
+	}
+	if hasOpt = c.HasOption("freeswitch", "empty_balance_ann_file"); hasOpt {
+		cfg.FSEmptyBalanceAnnFile, _ = c.GetString("freeswitch", "empty_balance_ann_file")
+	}
+	if hasOpt = c.HasOption("opensips", "listen_udp"); hasOpt {
+		cfg.OsipsListenUdp, _ = c.GetString("opensips", "listen_udp")
+	}
+	if hasOpt = c.HasOption("opensips", "mi_addr"); hasOpt {
+		cfg.OsipsMiAddr, _ = c.GetString("opensips", "mi_addr")
+	}
+	if hasOpt = c.HasOption("opensips", "events_subscribe_interval"); hasOpt {
+		evSubscIntervalStr, _ := c.GetString("opensips", "events_subscribe_interval")
+		if cfg.OsipsEvSubscInterval, err = utils.ParseDurationWithSecs(evSubscIntervalStr); err != nil {
+			return nil, err
+		}
+	}
+	if hasOpt = c.HasOption("opensips", "cdrs"); hasOpt {
+		cfg.OsipCDRS, _ = c.GetString("opensips", "cdrs")
+	}
+	if hasOpt = c.HasOption("opensips", "reconnects"); hasOpt {
+		cfg.OsipsReconnects, _ = c.GetInt("opensips", "reconnects")
 	}
 	if cfg.DerivedChargers, err = ParseCfgDerivedCharging(c); err != nil {
 		return nil, err

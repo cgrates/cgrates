@@ -59,8 +59,8 @@ func (apier *ApierV1) GetCdrs(attrs utils.AttrGetCdrs, reply *[]*utils.CgrCdrOut
 			return err
 		}
 	}
-	if cdrs, err := apier.CdrDb.GetStoredCdrs(attrs.CgrIds, attrs.MediationRunId, attrs.TOR, attrs.CdrHost, attrs.CdrSource, attrs.ReqType, attrs.Direction,
-		attrs.Tenant, attrs.Category, attrs.Account, attrs.Subject, attrs.DestinationPrefix,
+	if cdrs, err := apier.CdrDb.GetStoredCdrs(attrs.CgrIds, attrs.MediationRunIds, attrs.TORs, attrs.CdrHosts, attrs.CdrSources, attrs.ReqTypes, attrs.Directions,
+		attrs.Tenants, attrs.Categories, attrs.Accounts, attrs.Subjects, attrs.DestinationPrefixes, attrs.RatedAccounts, attrs.RatedSubjects,
 		attrs.OrderIdStart, attrs.OrderIdEnd, tStart, tEnd, attrs.SkipErrors, attrs.SkipRated, false); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {

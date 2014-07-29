@@ -121,8 +121,9 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if attr.MaskLength != nil {
 		maskLen = *attr.MaskLength
 	}
-	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunId, attr.TOR, attr.CdrHost, attr.CdrSource, attr.ReqType, attr.Direction,
-		attr.Tenant, attr.Category, attr.Account, attr.Subject, attr.DestinationPrefix, attr.OrderIdStart, attr.OrderIdEnd, tStart, tEnd, attr.SkipErrors, attr.SkipRated, false)
+	cdrs, err := self.CdrDb.GetStoredCdrs(attr.CgrIds, attr.MediationRunIds, attr.TORs, attr.CdrHosts, attr.CdrSources, attr.ReqTypes, attr.Directions,
+		attr.Tenants, attr.Categories, attr.Accounts, attr.Subjects, attr.DestinationPrefixes, attr.RatedAccounts, attr.RatedSubjects, attr.OrderIdStart, attr.OrderIdEnd,
+		tStart, tEnd, attr.SkipErrors, attr.SkipRated, false)
 	if err != nil {
 		return err
 	} else if len(cdrs) == 0 {
@@ -141,8 +142,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 	if err := cdrexp.WriteToFile(filePath); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
-	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(),
-		ExportedCgrIds: cdrexp.PositiveExports(), UnexportedCgrIds: cdrexp.NegativeExports(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
+	*reply = utils.ExportedFileCdrs{ExportedFilePath: filePath, TotalRecords: len(cdrs), TotalCost: cdrexp.TotalCost(), FirstOrderId: cdrexp.FirstOrderId(), LastOrderId: cdrexp.LastOrderId()}
+	if !attr.SuppressCgrIds {
+		reply.ExportedCgrIds = cdrexp.PositiveExports()
+		reply.UnexportedCgrIds = cdrexp.NegativeExports()
+	}
 	return nil
 }
 

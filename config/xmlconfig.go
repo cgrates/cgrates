@@ -85,7 +85,7 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdrcCfgs() error {
 		}
 		// Cache rsr fields
 		for _, fld := range cdrcCfg.CdrFields {
-			if err := fld.PopulateRSRField(); err != nil {
+			if err := fld.PopulateRSRFields(); err != nil {
 				return fmt.Errorf("Populating field %s, error: %s", fld.Id, err.Error())
 			}
 		}
