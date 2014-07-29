@@ -113,13 +113,13 @@ func (sq *StatsQueue) simplifyCDR(cdr *utils.StoredCdr) *QCDR {
 }
 
 func (sq *StatsQueue) purgeObsoleteCDRs() {
-	if sq.conf.QueuedItems > 0 {
+	if sq.conf.QueueLength > 0 {
 		currentLength := len(sq.cdrs)
-		if currentLength > sq.conf.QueuedItems {
-			for _, cdr := range sq.cdrs[:currentLength-sq.conf.QueuedItems] {
+		if currentLength > sq.conf.QueueLength {
+			for _, cdr := range sq.cdrs[:currentLength-sq.conf.QueueLength] {
 				sq.removeFromMetrics(cdr)
 			}
-			sq.cdrs = sq.cdrs[currentLength-sq.conf.QueuedItems:]
+			sq.cdrs = sq.cdrs[currentLength-sq.conf.QueueLength:]
 		}
 	}
 	if sq.conf.TimeWindow > 0 {

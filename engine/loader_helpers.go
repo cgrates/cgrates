@@ -101,7 +101,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 	cs.Id = record[0]
 	if record[1] != "" {
 		if qi, err := strconv.Atoi(record[1]); err == nil {
-			cs.QueuedItems = qi
+			cs.QueueLength = qi
 		} else {
 			log.Printf("Error parsing QueuedItems %v for cdrs stats %v", record[1], cs.Id)
 		}
