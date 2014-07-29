@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"fmt"
 	"net"
 	"reflect"
 	"testing"
@@ -73,6 +74,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 	setupTime, _ := osipsEv.GetSetupTime(utils.META_DEFAULT)
 	answerTime, _ := osipsEv.GetAnswerTime(utils.META_DEFAULT)
 	endTime, _ := osipsEv.GetEndTime()
+	fmt.Printf("setupTime %v, answerTime: %v, endTime%v", setupTime, answerTime, endTime)
 	dur, _ := osipsEv.GetDuration(utils.META_DEFAULT)
 	if osipsEv.GetName() != "E_ACC_CDR" ||
 		osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ"+";"+"eb082607"+";"+"4ea9687f", setupTime.UTC().String()) ||
