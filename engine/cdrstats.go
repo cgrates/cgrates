@@ -38,6 +38,8 @@ type CdrStats struct {
 	DestinationPrefix []string
 	UsageInterval     []time.Duration // 2 or less items (>= Usage, <Usage)
 	MediationRunIds   []string
+	RatedAccount      []string
+	RatedSubject      []string
 	CostInterval      []float64 // 2 or less items, (>=Cost, <Cost)
 	Triggers          ActionTriggerPriotityList
 }

@@ -135,6 +135,14 @@ func TestAcceptCDR(t *testing.T) {
 	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
+	sq.conf = &CdrStats{RatedAccount: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
+		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
+	}
+	sq.conf = &CdrStats{RatedSubject: []string{"test"}}
+	if sq.acceptCDR(cdr) == true {
+		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
+	}
 	sq.conf = &CdrStats{DestinationPrefix: []string{"test"}}
 	if sq.acceptCDR(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)

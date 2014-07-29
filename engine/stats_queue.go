@@ -218,5 +218,11 @@ func (sq *StatsQueue) acceptCDR(cdr *utils.StoredCdr) bool {
 			return false
 		}
 	}
+	if len(sq.conf.RatedAccount) > 0 && !utils.IsSliceMember(sq.conf.RatedAccount, cdr.RatedAccount) {
+		return false
+	}
+	if len(sq.conf.RatedSubject) > 0 && !utils.IsSliceMember(sq.conf.RatedSubject, cdr.RatedSubject) {
+		return false
+	}
 	return true
 }
