@@ -24,15 +24,14 @@ import (
 	"net/http"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 var (
 	cfg     *config.CGRConfig // Share the configuration with the rest of the package
-	storage engine.CdrStorage
+	storage CdrStorage
 	medi    *Mediator
-	stats   engine.StatsInterface
+	stats   StatsInterface
 )
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
@@ -40,7 +39,7 @@ func storeAndMediate(storedCdr *utils.StoredCdr) error {
 	if stats != nil {
 		go func() {
 			if err := stats.AppendCDR(storedCdr, nil); err != nil {
-				engine.Logger.Err(fmt.Sprintf("Could not append cdr to stats: %s", err.Error()))
+				Logger.Err(fmt.Sprintf("Could not append cdr to stats: %s", err.Error()))
 			}
 		}()
 	}
@@ -89,10 +88,10 @@ func NewCdrS(s CdrStorage, m *Mediator, st *Stats, c *config.CGRConfig) *CDRS {
 	stats = st
 	if cfg.CDRSStats != "" {
 		if cfg.CDRSStats != utils.INTERNAL {
-			if s, err := engine.NewProxyStats(cfg.CDRSStats); err == nil {
+			if s, err := NewProxyStats(cfg.CDRSStats); err == nil {
 				stats = s
 			} else {
-				engine.Logger.Err(fmt.Sprintf("Errors connecting to CDRS stats service : %s", err.Error()))
+				Logger.Err(fmt.Sprintf("Errors connecting to CDRS stats service : %s", err.Error()))
 			}
 		}
 	} else {

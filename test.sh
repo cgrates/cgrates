@@ -1,4 +1,4 @@
-1#! /usr/bin/env sh
+#! /usr/bin/env sh
 
 go test -i github.com/cgrates/cgrates/engine
 go test -i github.com/cgrates/cgrates/sessionmanager

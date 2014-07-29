@@ -108,7 +108,7 @@ func TestDefaults(t *testing.T) {
 	}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = utils.INTERNAL
-	eCfg.MediatorRaterReconnects = 3
+	eCfg.MediatorReconnects = 3
 	eCfg.MediatorStats = utils.INTERNAL
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS

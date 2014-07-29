@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,10 +37,10 @@ func NewMediator(connector Connector, logDb LogStorage, cdrDb CdrStorage, st Sta
 	}
 	if m.cgrCfg.MediatorStats != "" {
 		if m.cgrCfg.MediatorStats != utils.INTERNAL {
-			if s, err := engine.NewProxyStats(m.cgrCfg.MediatorStats); err == nil {
+			if s, err := NewProxyStats(m.cgrCfg.MediatorStats); err == nil {
 				m.stats = s
 			} else {
-				engine.Logger.Err(fmt.Sprintf("Errors connecting to CDRS stats service (mediator): %s", err.Error()))
+				Logger.Err(fmt.Sprintf("Errors connecting to CDRS stats service (mediator): %s", err.Error()))
 			}
 		}
 	} else {
@@ -172,7 +171,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 		if sendToStats && self.stats != nil {
 			go func() {
 				if err := self.stats.AppendCDR(cdr, nil); err != nil {
-					engine.Logger.Err(fmt.Sprintf("Could not append cdr to stats (mediator): %s", err.Error()))
+					Logger.Err(fmt.Sprintf("Could not append cdr to stats (mediator): %s", err.Error()))
 				}
 			}()
 		}
@@ -184,15 +183,14 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 	return nil
 }
 
-func (self *Mediator) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
-	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated bool, sendToStats bool) error {
+func (self *Mediator) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string, orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
 	cdrs, err := self.cdrDb.GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects,
 		orderIdStart, orderIdEnd, timeStart, timeEnd, !rerateErrors, !rerateRated, true)
 	if err != nil {
 		return err
 	}
 	for _, cdr := range cdrs {
-		if err := self.RateCdr(cdr, sentToStats); err != nil {
+		if err := self.RateCdr(cdr, sendToStats); err != nil {
 			return err
 		}
 	}
