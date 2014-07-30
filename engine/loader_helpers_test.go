@@ -75,10 +75,10 @@ PREPAID_10,PREPAID_10,ASAP,10
 DUMMY,INVALID;DATA
 `
 
-var actionTriggersSample = `#Tag,BalanceType,Direction,ThresholdType,ThresholdValue,DestinationTag,ActionsTag,Weight
-STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,,LOG_BALANCE,10
-STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,,LOG_BALANCE,10
-STANDARD_TRIGGERS,*monetary,*out,*max_counter,15,false,FS_USERS,LOG_BALANCE,10
+var actionTriggersSample = `#Tag,BalanceTag,Direction,ThresholdType,ThresholdValue,Recurrent,MinSleep,BalanceDestinationTag,BalanceWeight,BalanceExpiryTime,BalanceRatingSubject,BalanceSharedGroup,StatsMinQueuedItems,ActionsTag,Weight
+STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,0,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,0,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_counter,15,false,0,FS_USERS,,,,,,LOG_WARNING,10
 DUMMY,INVALID;DATA
 `
 

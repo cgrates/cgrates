@@ -261,6 +261,30 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 			log.Println(key)
 		}
 	}
+	if verbose {
+		log.Print("Derived Chargers")
+	}
+	for key, dcs := range dbr.derivedChargers {
+		err = accountingStorage.SetDerivedChargers(key, dcs)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print(key)
+		}
+	}
+	if verbose {
+		log.Print("CDR Stats Queues")
+	}
+	for _, sq := range dbr.cdrStats {
+		err = accountingStorage.SetCdrStats(sq)
+		if err != nil {
+			return err
+		}
+		if verbose {
+			log.Print(sq.Id)
+		}
+	}
 	return
 }
 
@@ -860,10 +884,34 @@ func (dbr *DbReader) GetLoadedIds(categ string) ([]string, error) {
 			i++
 		}
 		return keys, nil
-	case DERIVEDCHARGERS_PREFIX: // aliases
+	case RP_ALIAS_PREFIX: // aliases
+		keys := make([]string, len(dbr.rpAliases))
+		i := 0
+		for k := range dbr.rpAliases {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case ACC_ALIAS_PREFIX: // aliases
+		keys := make([]string, len(dbr.accAliases))
+		i := 0
+		for k := range dbr.accAliases {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case DERIVEDCHARGERS_PREFIX: // derived charges
 		keys := make([]string, len(dbr.derivedChargers))
 		i := 0
 		for k := range dbr.derivedChargers {
+			keys[i] = k
+			i++
+		}
+		return keys, nil
+	case CDR_STATS_PREFIX: // cdr stats
+		keys := make([]string, len(dbr.cdrStats))
+		i := 0
+		for k := range dbr.cdrStats {
 			keys[i] = k
 			i++
 		}
