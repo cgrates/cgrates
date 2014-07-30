@@ -50,7 +50,7 @@ const (
 	ACTION_TRIGGERS_CSV          = "ActionTriggers.csv"
 	ACCOUNT_ACTIONS_CSV          = "AccountActions.csv"
 	DERIVED_CHARGERS_CSV         = "DerivedChargers.csv"
-    CDR_STATS_CSV              = "CdrStats.csv"
+	CDR_STATS_CSV                = "CdrStats.csv"
 	TIMINGS_NRCOLS               = 6
 	DESTINATIONS_NRCOLS          = 2
 	RATES_NRCOLS                 = 6
@@ -64,7 +64,7 @@ const (
 	ACTION_TRIGGERS_NRCOLS       = 15
 	ACCOUNT_ACTIONS_NRCOLS       = 5
 	DERIVED_CHARGERS_NRCOLS      = 17
-    CDR_STATS_NRCOLS             = 19
+	CDR_STATS_NRCOLS             = 21
 	ROUNDING_UP                  = "*up"
 	ROUNDING_MIDDLE              = "*middle"
 	ROUNDING_DOWN                = "*down"

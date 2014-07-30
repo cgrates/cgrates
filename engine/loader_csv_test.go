@@ -183,6 +183,12 @@ vdf,emptyY,*out,TOPUP_EMPTY_AT,
 *out,cgrates.org,call,dan,*any,extra1,,,,,,rif2,rif2,,,,
 `
 	cdrStats = `
+#Id,QueueLength,TimeWindow,Metrics,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
+CDRST1,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,rated,*out,cgrates.org,call,dan,dan,49,5m;10m,default,rif,rif,0;2,STANDARD_TRIGGERS
+CDRST1,,,ACD,,,,,,,,,,,,,,,,,STANDARD_TRIGGER
+CDRST1,,,ACC,,,,,,,,,,,,,,,,,
+CDRST2,10,10m,ASR,,,,,,,cgrates.org,call,,,,,,,,,
+CDRST2,,,ACD,,,,,,,,,,,,,,,,,
 `
 )
 
@@ -204,6 +210,7 @@ func init() {
 	csvr.LoadActionTriggers()
 	csvr.LoadAccountActions()
 	csvr.LoadDerivedChargers()
+	csvr.LoadCdrStats()
 	csvr.WriteToDatabase(false, false)
 	dataStorage.CacheRating(nil, nil, nil, nil, nil)
 	accountingStorage.CacheAccounting(nil, nil, nil, nil)
@@ -770,19 +777,19 @@ func TestLoadSharedGroups(t *testing.T) {
 		t.Error("Error loading shared group: ", sg2.AccountParameters)
 	}
 	/*sg, _ := accountingStorage.GetSharedGroup("SG1", false)
-	if len(sg.Members) != 0 {
-		t.Errorf("Memebers should be empty: %+v", sg)
-	}
+	  if len(sg.Members) != 0 {
+	      t.Errorf("Memebers should be empty: %+v", sg)
+	  }
 
-	// execute action timings to fill memebers
-	atm := csvr.actionsTimings["MORE_MINUTES"][1]
-	atm.Execute()
-	atm.actions, atm.stCache = nil, time.Time{}
+	  // execute action timings to fill memebers
+	  atm := csvr.actionsTimings["MORE_MINUTES"][1]
+	  atm.Execute()
+	  atm.actions, atm.stCache = nil, time.Time{}
 
-	sg, _ = accountingStorage.GetSharedGroup("SG1", false)
-	if len(sg.Members) != 1 {
-		t.Errorf("Memebers should not be empty: %+v", sg)
-	}*/
+	  sg, _ = accountingStorage.GetSharedGroup("SG1", false)
+	  if len(sg.Members) != 1 {
+	      t.Errorf("Memebers should not be empty: %+v", sg)
+	  }*/
 }
 
 func TestLoadLCRs(t *testing.T) {
@@ -943,5 +950,40 @@ func TestLoadDerivedChargers(t *testing.T) {
 	keyCharger1 := utils.DerivedChargersKey("*out", "cgrates.org", "call", "dan", "dan")
 	if !reflect.DeepEqual(csvr.derivedChargers[keyCharger1], expCharger1) {
 		t.Error("Unexpected charger", csvr.derivedChargers[keyCharger1])
+	}
+}
+func TestLoadCdrStats(t *testing.T) {
+	if len(csvr.cdrStats) != 2 {
+		t.Error("Failed to load cdr stats: ", csvr.cdrStats)
+	}
+	cdrStats1 := &CdrStats{
+		Id:          "CDRST1",
+		QueueLength: 5,
+		TimeWindow:  60 * time.Minute,
+		Metrics:     []string{"ASR", "ACD", "ACC"},
+		SetupInterval: []time.Time{
+			time.Date(2014, 7, 29, 15, 0, 0, 0, time.UTC),
+			time.Date(2014, 7, 29, 16, 0, 0, 0, time.UTC),
+		},
+		TOR:               []string{utils.VOICE},
+		CdrHost:           []string{"87.139.12.167"},
+		CdrSource:         []string{"FS_JSON"},
+		ReqType:           []string{"rated"},
+		Direction:         []string{utils.OUT},
+		Tenant:            []string{"cgrates.org"},
+		Category:          []string{"call"},
+		Account:           []string{"dan"},
+		Subject:           []string{"dan"},
+		DestinationPrefix: []string{"49"},
+		UsageInterval:     []time.Duration{5 * time.Minute, 10 * time.Minute},
+		MediationRunIds:   []string{"default"},
+		RatedAccount:      []string{"rif"},
+		RatedSubject:      []string{"rif"},
+		CostInterval:      []float64{0, 2},
+	}
+	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers["STANDARD_TRIGGERS"]...)
+	cdrStats1.Triggers = append(cdrStats1.Triggers, csvr.actionsTriggers["STANDARD_TRIGGER"]...)
+	if !reflect.DeepEqual(csvr.cdrStats[cdrStats1.Id], cdrStats1) {
+		t.Error("Unexpected stats", csvr.cdrStats[cdrStats1.Id])
 	}
 }

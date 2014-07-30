@@ -97,13 +97,12 @@ func NewTiming(timingInfo ...string) (rt *utils.TPTiming) {
 }
 
 func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...string) {
-	cs = &CdrStats{}
 	cs.Id = record[0]
 	if record[1] != "" {
 		if qi, err := strconv.Atoi(record[1]); err == nil {
 			cs.QueueLength = qi
 		} else {
-			log.Printf("Error parsing QueuedItems %v for cdrs stats %v", record[1], cs.Id)
+			log.Printf("Error parsing QueuedLength %v for cdrs stats %v", record[1], cs.Id)
 		}
 	}
 	if record[2] != "" {
@@ -200,7 +199,13 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 		cs.MediationRunIds = append(cs.MediationRunIds, record[16])
 	}
 	if record[17] != "" {
-		costs := strings.Split(record[17], utils.INFIELD_SEP)
+		cs.RatedAccount = append(cs.RatedAccount, record[17])
+	}
+	if record[18] != "" {
+		cs.RatedSubject = append(cs.RatedSubject, record[18])
+	}
+	if record[19] != "" {
+		costs := strings.Split(record[19], utils.INFIELD_SEP)
 		if len(costs) > 0 {
 			if sCost, err := strconv.ParseFloat(costs[0], 64); err == nil {
 				if len(cs.CostInterval) < 1 {
@@ -209,7 +214,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 					cs.CostInterval[0] = sCost
 				}
 			} else {
-				log.Printf("Error parsing CostInterval %v for cdrs stats %v", record[17], cs.Id)
+				log.Printf("Error parsing CostInterval %v for cdrs stats %v", record[19], cs.Id)
 			}
 		}
 		if len(costs) > 1 {
@@ -220,13 +225,12 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 					cs.CostInterval[1] = eCost
 				}
 			} else {
-				log.Printf("Error parsing CostInterval %v for cdrs stats %v", record[17], cs.Id)
+				log.Printf("Error parsing CostInterval %v for cdrs stats %v", record[19], cs.Id)
 			}
 		}
 	}
-
 	if triggers != nil {
-		cs.Triggers = triggers
+		cs.Triggers = append(cs.Triggers, triggers...)
 	}
 }
 
@@ -337,7 +341,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
 		"Tag([0-9A-Za-z_]),ActionsTag([0-9A-Za-z_]),TimingTag([0-9A-Za-z_]),Weight([0-9.])"},
 	utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{utils.ACTION_TRIGGERS_NRCOLS,
-		regexp.MustCompile(`(?:\w+),(?:\*\w+),(?:\*out),(?:\*\w+),(?:\d+\.?\d*),(?:true|false)?,(?:\w+|\*any)?,(?:\w+),(?:\d+\.?\d*)$`),
+		regexp.MustCompile(`(?:\w+),(?:\*\w+),(?:\*out),(?:\*\w+),(?:\d+\.?\d*),(?:true|false)?,(?:\d+),(?:\w+|\*any)?,(?:\d+\.?\d*)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\w+|\*any)?,(?:\w+|\*any)?,(?:\d+),(?:\w+),(?:\d+\.?\d*)$`),
 		"Tag([0-9A-Za-z_]),BalanceType(*[a-z_]),Direction(*out),ThresholdType(*[a-z_]),ThresholdValue([0-9]+),Recurrent(true|false),DestinationTag([0-9A-Za-z_]|*all),ActionsTag([0-9A-Za-z_]),Weight([0-9]+)"},
 	utils.ACCOUNT_ACTIONS_CSV: &FileLineRegexValidator{utils.ACCOUNT_ACTIONS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*),(?:(\w+;?)+\s*),(?:\*out\s*),(?:\w+\s*),(?:\w+\s*)$`),

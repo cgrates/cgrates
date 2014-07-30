@@ -914,7 +914,7 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 }
 
 func (csvr *CSVReader) LoadCdrStats() (err error) {
-	csvReader, fp, err := csvr.readerFunc(csvr.timingsFn, csvr.sep, utils.TIMINGS_NRCOLS)
+	csvReader, fp, err := csvr.readerFunc(csvr.cdrStatsFn, csvr.sep, utils.CDR_STATS_NRCOLS)
 	if err != nil {
 		log.Print("Could not load cdr stats file: ", err)
 		// allow writing of the other values
@@ -925,18 +925,16 @@ func (csvr *CSVReader) LoadCdrStats() (err error) {
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
 		tag := record[0]
-		if _, exists := csvr.cdrStats[tag]; exists {
-			log.Print("Warning: duplicate cdr stats found: ", tag)
-		}
 		var cs *CdrStats
 		var exists bool
 		if cs, exists = csvr.cdrStats[tag]; !exists {
 			cs = &CdrStats{}
 		}
-		triggers, exists := csvr.actionsTriggers[record[18]]
-		if record[18] != "" && !exists {
+		triggerTag := record[20]
+		triggers, exists := csvr.actionsTriggers[triggerTag]
+		if triggerTag != "" && !exists {
 			// only return error if there was something there for the tag
-			return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, record[18])
+			return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
 		}
 		UpdateCdrStats(cs, triggers, record...)
 		csvr.cdrStats[tag] = cs
