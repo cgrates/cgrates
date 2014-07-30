@@ -1348,7 +1348,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 		var recurrent bool
 		var min_sleep time.Duration
 		var min_queued_items int
-		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &threshold_type, &threshold, &recurrent, &min_sleep, &destinations_tag, &actions_tag, &weight); err != nil {
+		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &threshold_type, &threshold, &recurrent, &min_sleep, &destinations_tag, &balance_weight, &balance_expiration_time, &balance_rating_subject, &balance_shared_group, &min_queued_items, &actions_tag, &weight); err != nil {
 			return nil, err
 		}
 
