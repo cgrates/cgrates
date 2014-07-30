@@ -767,9 +767,14 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		if err != nil {
 			return fmt.Errorf("Could not parse action trigger recurrent flag (%v): %v", record[5], err)
 		}
+
 		minSleep, err := time.ParseDuration(record[6])
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger MinSleep (%v): %v", record[6], err)
+			if record[6] == "" {
+				minSleep = 0
+			} else {
+				return fmt.Errorf("Could not parse action trigger MinSleep (%v): %v", record[6], err)
+			}
 		}
 		balanceWeight, err := strconv.ParseFloat(record[8], 64)
 		if record[8] != "" && err != nil {
