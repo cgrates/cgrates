@@ -452,7 +452,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				buffer.WriteRune(',')
 			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s', %f, %t, %d, '%s', %f, '%s', '%s', '%s', 5d, '%s',%f)",
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s', %f, %t, %d, '%s', %f, '%s', '%s', '%s', %d, '%s', %f)",
 				tpid, atId, atsRow.BalanceType, atsRow.Direction, atsRow.ThresholdType,
 				atsRow.ThresholdValue, atsRow.Recurrent, atsRow.MinSleep, atsRow.DestinationId, atsRow.BalanceWeight, atsRow.BalanceExpirationDate, atsRow.BalanceRatingSubject, atsRow.BalanceSharedGroup, atsRow.MinQueuedItems, atsRow.ActionsId, atsRow.Weight))
 			i++
