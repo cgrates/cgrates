@@ -1332,7 +1332,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {
 	ats := make(map[string][]*utils.TPActionTrigger)
-	q := fmt.Sprintf("SELECT tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,destination_id,actions_id,weight FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,min_sleep, ,destination_id, balance_weight, balance_expiration_time, balance_rating_subject, balance_expiration_time, balance_shared_group, min_queued_items, actions_id, weight FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND id='%s'", tag)
@@ -1343,22 +1343,30 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var threshold, weight float64
-		var tpid, tag, balances_type, direction, destinations_tag, actions_tag, thresholdType string
+		var threshold, balance_weight, weight float64
+		var tpid, tag, balances_type, direction, destinations_tag, balance_expiration_time, balance_rating_subject, balance_shared_group, actions_tag, threshold_type string
 		var recurrent bool
-		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &thresholdType, &threshold, &recurrent, &destinations_tag, &actions_tag, &weight); err != nil {
+		var min_sleep time.Duration
+		var min_queued_items int
+		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &threshold_type, &threshold, &recurrent, &min_sleep, &destinations_tag, &actions_tag, &weight); err != nil {
 			return nil, err
 		}
 
 		at := &utils.TPActionTrigger{
-			BalanceType:    balances_type,
-			Direction:      direction,
-			ThresholdType:  thresholdType,
-			ThresholdValue: threshold,
-			Recurrent:      recurrent,
-			DestinationId:  destinations_tag,
-			ActionsId:      actions_tag,
-			Weight:         weight,
+			BalanceType:           balances_type,
+			Direction:             direction,
+			ThresholdType:         threshold_type,
+			ThresholdValue:        threshold,
+			Recurrent:             recurrent,
+			MinSleep:              min_sleep,
+			DestinationId:         destinations_tag,
+			BalanceWeight:         balance_weight,
+			BalanceExpirationDate: balance_expiration_time,
+			BalanceRatingSubject:  balance_rating_subject,
+			BalanceSharedGroup:    balance_shared_group,
+			Weight:                weight,
+			ActionsId:             actions_tag,
+			MinQueuedItems:        min_queued_items,
 		}
 		ats[tag] = append(ats[tag], at)
 	}

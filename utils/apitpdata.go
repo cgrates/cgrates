@@ -241,14 +241,21 @@ type TPActionTriggers struct {
 }
 
 type TPActionTrigger struct {
-	BalanceType    string  // Type of balance this trigger monitors
-	Direction      string  // Traffic direction
-	ThresholdType  string  // This threshold type
-	ThresholdValue float64 // Threshold
-	Recurrent      bool    // reset executed flag each run
-	DestinationId  string  // Id of the destination profile
-	ActionsId      string  // Actions which will execute on threshold reached
-	Weight         float64 // weight
+	BalanceType           string        // Type of balance this trigger monitors
+	Direction             string        // Traffic direction
+	ThresholdType         string        // This threshold type
+	ThresholdValue        float64       // Threshold
+	Recurrent             bool          // reset executed flag each run
+	MinSleep              time.Duration // Minimum duration between two executions in case of recurrent triggers
+	DestinationId         string        // filter for balance
+	BalanceWeight         float64       // filter for balance
+	BalanceExpirationDate string        // filter for balance
+	BalanceRatingSubject  string        // filter for balance
+	BalanceSharedGroup    string        // filter for balance
+	MinQueuedItems        int           // Trigger actions only if this number is hit (stats only)
+	ActionsId             string        // Actions which will execute on threshold reached
+	Weight                float64       // weight
+
 }
 
 // Used to rebuild a TPAccountActions (empty ActionTimingsId and ActionTriggersId) out of it's key in nosqldb

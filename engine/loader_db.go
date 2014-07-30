@@ -579,15 +579,23 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 	for key, atrsLst := range atrsMap {
 		atrs := make([]*ActionTrigger, len(atrsLst))
 		for idx, apiAtr := range atrsLst {
-			atrs[idx] = &ActionTrigger{Id: utils.GenUUID(),
-				BalanceType:    apiAtr.BalanceType,
-				Direction:      apiAtr.Direction,
-				ThresholdType:  apiAtr.ThresholdType,
-				ThresholdValue: apiAtr.ThresholdValue,
-				Recurrent:      apiAtr.Recurrent,
-				DestinationId:  apiAtr.DestinationId,
-				Weight:         apiAtr.Weight,
-				ActionsId:      apiAtr.ActionsId,
+			balance_expiration_date, _ := utils.ParseTimeDetectLayout(apiAtr.BalanceExpirationDate)
+			atrs[idx] = &ActionTrigger{
+				Id:                    utils.GenUUID(),
+				BalanceType:           apiAtr.BalanceType,
+				Direction:             apiAtr.Direction,
+				ThresholdType:         apiAtr.ThresholdType,
+				ThresholdValue:        apiAtr.ThresholdValue,
+				Recurrent:             apiAtr.Recurrent,
+				MinSleep:              apiAtr.MinSleep,
+				DestinationId:         apiAtr.DestinationId,
+				BalanceWeight:         apiAtr.BalanceWeight,
+				BalanceExpirationDate: balance_expiration_date,
+				BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
+				BalanceSharedGroup:    apiAtr.BalanceSharedGroup,
+				Weight:                apiAtr.Weight,
+				ActionsId:             apiAtr.ActionsId,
+				MinQueuedItems:        apiAtr.MinQueuedItems,
 			}
 		}
 		dbr.actionsTriggers[key] = atrs
@@ -796,6 +804,10 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 }
 
 func (dbr *DbReader) LoadDerivedChargers() (err error) {
+	return nil // Placeholder for now
+}
+
+func (dbr *DbReader) LoadCdrStats() (err error) {
 	return nil // Placeholder for now
 }
 
