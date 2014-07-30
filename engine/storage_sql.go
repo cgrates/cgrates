@@ -993,7 +993,7 @@ func (self *SQLStorage) RemStoredCdrs(cgrIds []string) error {
 }
 
 func (self *SQLStorage) GetTpDestinations(tpid, tag string) (map[string]*Destination, error) {
-	var dests map[string]*Destination
+	dests := make(map[string]*Destination)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid)
 	if len(tag) != 0 {
 		q += fmt.Sprintf(" AND id='%s'", tag)
