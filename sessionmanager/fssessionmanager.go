@@ -187,10 +187,6 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
 			startTime = time.Now()
 		}
-		// if there is no account configured leave the call alone
-		if dc.RunId == utils.DEFAULT_RUNID && !utils.IsSliceMember([]string{utils.PREPAID, utils.PSEUDOPREPAID}, ev.GetReqType(utils.META_DEFAULT)) {
-			return // we unpark only prepaid and pseudoprepaid calls
-		}
 		if ev.MissingParameter() {
 			sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(dc.DestinationField), MISSING_PARAMETER)
 			engine.Logger.Err(fmt.Sprintf("Missing parameter for %s", ev.GetUUID()))

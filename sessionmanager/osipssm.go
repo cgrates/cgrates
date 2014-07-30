@@ -24,22 +24,25 @@ import (
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/osipsdagram"
 	"strings"
 	"time"
 )
 
-func NewOSipsSessionManager(cfg *config.CGRConfig, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
-	osm := &OsipsSessionManager{cgrCfg: cfg, cdrsrv: cdrsrv}
+func NewOSipsSessionManager(cfg *config.CGRConfig, rater, cdrsrv engine.Connector) (*OsipsSessionManager, error) {
+	osm := &OsipsSessionManager{cgrCfg: cfg, rater: rater, cdrsrv: cdrsrv}
 	osm.eventHandlers = map[string][]func(*osipsdagram.OsipsEvent){
 		"E_OPENSIPS_START": []func(*osipsdagram.OsipsEvent){osm.OnOpensipsStart},
 		"E_ACC_CDR":        []func(*osipsdagram.OsipsEvent){osm.OnCdr},
+		"E_CGR_AUTHORIZE":  []func(*osipsdagram.OsipsEvent){osm.OnAuthorize},
 	}
 	return osm, nil
 }
 
 type OsipsSessionManager struct {
 	cgrCfg          *config.CGRConfig
+	rater           engine.Connector
 	cdrsrv          engine.Connector
 	eventHandlers   map[string][]func(*osipsdagram.OsipsEvent)
 	evSubscribeStop *chan struct{} // Reference towards the channel controlling subscriptions, keep it as reference so we do not need to copy it
@@ -142,5 +145,92 @@ func (osm *OsipsSessionManager) OnCdr(cdrDagram *osipsdagram.OsipsEvent) {
 	storedCdr := osipsEv.AsStoredCdr()
 	if err := osm.cdrsrv.ProcessCdr(storedCdr, &reply); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
+	}
+}
+
+// Process Authorize request from OpenSIPS and communicate back maxdur
+func (osm *OsipsSessionManager) OnAuthorize(osipsDagram *osipsdagram.OsipsEvent) {
+	ev, _ := NewOsipsEvent(osipsDagram)
+	if ev.MissingParameter() {
+		cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n2\n\n", ev.GetUUID(), utils.ERR_MANDATORY_IE_MISSING)
+		if reply, err := osm.miConn.SendCommand([]byte(cmdNotify)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {
+			engine.Logger.Err(fmt.Sprintf("Failed setting cgr_notify variable for accid: %s, err: %v, reply: %s", ev.GetUUID(), err, string(reply)))
+		}
+		return
+	}
+	var maxCallDuration time.Duration // This will be the maximum duration this channel will be allowed to last
+	var durInitialized bool
+	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
+		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
+	var dcs utils.DerivedChargers
+	if err := osm.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
+		engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> OnAuthorize: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
+		cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n2\n\n", ev.GetUUID(), utils.ERR_SERVER_ERROR)
+		if reply, err := osm.miConn.SendCommand([]byte(cmdNotify)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {
+			engine.Logger.Err(fmt.Sprintf("Failed setting cgr_notify variable for accid: %s, err: %v, reply: %s", ev.GetUUID(), err, string(reply)))
+		}
+		return
+	}
+	dcs, _ = dcs.AppendDefaultRun()
+	for _, dc := range dcs {
+		runFilters, _ := utils.ParseRSRFields(dc.RunFilters, utils.INFIELD_SEP)
+		matchingAllFilters := true
+		for _, dcRunFilter := range runFilters {
+			if fltrPass, _ := ev.PassesFieldFilter(dcRunFilter); !fltrPass {
+				matchingAllFilters = false
+				break
+			}
+		}
+		if !matchingAllFilters { // Do not process the derived charger further if not all filters were matched
+			continue
+		}
+		startTime, err := ev.GetSetupTime(utils.META_DEFAULT)
+		if err != nil {
+			engine.Logger.Err("Error parsing answer event start time, using time.Now!")
+			startTime = time.Now()
+		}
+		cd := engine.CallDescriptor{
+			Direction:   ev.GetDirection(dc.DirectionField),
+			Tenant:      ev.GetTenant(dc.TenantField),
+			Category:    ev.GetCategory(dc.CategoryField),
+			Subject:     ev.GetSubject(dc.SubjectField),
+			Account:     ev.GetAccount(dc.AccountField),
+			Destination: ev.GetDestination(dc.DestinationField),
+			TimeStart:   startTime,
+			TimeEnd:     startTime.Add(osm.cgrCfg.SMMaxCallDuration),
+		}
+		var remainingDurationFloat float64
+		err = osm.rater.GetMaxSessionTime(cd, &remainingDurationFloat)
+		if err != nil {
+			engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
+			cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n2\n\n", ev.GetUUID(), utils.ERR_SERVER_ERROR)
+			if reply, err := osm.miConn.SendCommand([]byte(cmdNotify)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {
+				engine.Logger.Err(fmt.Sprintf("Failed setting cgr_notify variable for accid: %s, err: %v, reply: %s", ev.GetUUID(), err, string(reply)))
+			}
+			return
+		}
+		remainingDuration := time.Duration(remainingDurationFloat)
+		// Set maxCallDuration, smallest out of all forked sessions
+		if !durInitialized { // first time we set it /not initialized yet
+			maxCallDuration = remainingDuration
+			durInitialized = true
+		} else if maxCallDuration > remainingDuration {
+			maxCallDuration = remainingDuration
+		}
+	}
+	if maxCallDuration <= osm.cgrCfg.SMMinCallDuration {
+		cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n2\n\n", ev.GetUUID(), INSUFFICIENT_FUNDS)
+		if reply, err := osm.miConn.SendCommand([]byte(cmdNotify)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {
+			engine.Logger.Err(fmt.Sprintf("Failed setting cgr_notify variable for accid: %s, err: %v, reply: %s", ev.GetUUID(), err, string(reply)))
+		}
+		return
+	}
+	cmdMaxDur := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_maxdur\n%d\n\n", ev.GetUUID(), int(maxCallDuration.Seconds()))
+	if reply, err := osm.miConn.SendCommand([]byte(cmdMaxDur)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {
+		engine.Logger.Err(fmt.Sprintf("Failed setting cgr_maxdur variable for accid: %s, err: %v, reply: %s", ev.GetUUID(), err, string(reply)))
+	}
+	cmdNotify := fmt.Sprintf(":cache_store:\nlocal\n%s/cgr_notify\n%s\n", ev.GetUUID(), OSIPS_AUTH_OK)
+	if reply, err := osm.miConn.SendCommand([]byte(cmdNotify)); err != nil || !bytes.HasPrefix(reply, []byte("200 OK")) {
+		engine.Logger.Err(fmt.Sprintf("Failed setting cgr_notify variable for accid: %s, err: %v, reply: %s", ev.GetUUID(), err, string(reply)))
 	}
 }

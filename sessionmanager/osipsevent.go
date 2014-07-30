@@ -44,6 +44,7 @@ const (
 	SETUP_DURATION    = "setuptime"
 	OSIPS__SETUP_TIME = "created"
 	OSIPS_DURATION    = "duration"
+	OSIPS_AUTH_OK     = "AUTH_OK"
 )
 
 func NewOsipsEvent(osipsDagramEvent *osipsdagram.OsipsEvent) (*OsipsEvent, error) {
@@ -160,16 +161,10 @@ func (osipsev *OsipsEvent) GetDuration(fieldName string) (time.Duration, error) 
 	return utils.ParseDurationWithSecs(durStr)
 }
 func (osipsev *OsipsEvent) MissingParameter() bool {
-	var nilTime time.Time
-	var nilDur time.Duration
-	aTime, _ := osipsev.GetAnswerTime(utils.META_DEFAULT)
-	dur, _ := osipsev.GetDuration(utils.META_DEFAULT)
 	return len(osipsev.GetUUID()) == 0 ||
 		len(osipsev.GetAccount(utils.META_DEFAULT)) == 0 ||
 		len(osipsev.GetSubject(utils.META_DEFAULT)) == 0 ||
-		len(osipsev.GetDestination(utils.META_DEFAULT)) == 0 ||
-		aTime == nilTime ||
-		dur == nilDur
+		len(osipsev.GetDestination(utils.META_DEFAULT)) == 0
 }
 func (osipsev *OsipsEvent) ParseEventValue(*utils.RSRField) string {
 	return ""
