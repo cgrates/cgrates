@@ -444,7 +444,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,destination_id,actions_id,weight) VALUES ",
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,min_sleep,destination_id,balance_weight,balance_expiry_time,balance_rate_subject,balance_shared_group,min_queued_items,actions_id,weight) VALUES ",
 		utils.TBL_TP_ACTION_TRIGGERS))
 	i := 0
 	for atId, atRows := range ats {
@@ -452,9 +452,9 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
 				buffer.WriteRune(',')
 			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s', %f, %t, '%s','%s',%f)",
+			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s', %f, %t, %d, '%s', %f, '%s', '%s', '%s', 5d, '%s',%f)",
 				tpid, atId, atsRow.BalanceType, atsRow.Direction, atsRow.ThresholdType,
-				atsRow.ThresholdValue, atsRow.Recurrent, atsRow.DestinationId, atsRow.ActionsId, atsRow.Weight))
+				atsRow.ThresholdValue, atsRow.Recurrent, atsRow.MinSleep, atsRow.DestinationId, atsRow.BalanceWeight, atsRow.BalanceExpirationDate, atsRow.BalanceRatingSubject, atsRow.BalanceSharedGroup, atsRow.MinQueuedItems, atsRow.ActionsId, atsRow.Weight))
 			i++
 		}
 	}
