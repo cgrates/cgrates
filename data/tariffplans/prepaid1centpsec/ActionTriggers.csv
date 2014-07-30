@@ -5,5 +5,5 @@ STANDARD_TRIGGERS,*monetary,*out,*max_counter,15,false,0,FS_USERS,,,,,,LOG_BALAN
 CDRST1_WARN_ASR,,,*min_asr,45,true,1h,,,,,,3,CDRST_WARN_HTTP,10
 CDRST1_WARN_ACD,,,*min_acd,10,true,1h,,,,,,5,CDRST_WARN_HTTP,10
 CDRST1_WARN_ACC,,,*max_acc,10,true,10m,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ASR,,,*min_asr,30,true,,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ACD,,,*min_acd,3,true,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ASR,,,*min_asr,30,true,0,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ACD,,,*min_acd,3,true,0,,,,,,5,CDRST_WARN_HTTP,10
