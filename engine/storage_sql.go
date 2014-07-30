@@ -444,7 +444,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,min_sleep,destination_id,balance_weight,balance_expiry_time,balance_rate_subject,balance_shared_group,min_queued_items,actions_id,weight) VALUES ",
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,min_sleep,destination_id,balance_weight,balance_expiry_time,balance_rating_subject,balance_shared_group,min_queued_items,actions_id,weight) VALUES ",
 		utils.TBL_TP_ACTION_TRIGGERS))
 	i := 0
 	for atId, atRows := range ats {
