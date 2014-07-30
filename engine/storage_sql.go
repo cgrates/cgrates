@@ -1332,7 +1332,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {
 	ats := make(map[string][]*utils.TPActionTrigger)
-	q := fmt.Sprintf("SELECT tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,min_sleep,destination_id, balance_weight, balance_expiration_time, balance_rating_subject, balance_expiration_time, balance_shared_group, min_queued_items, actions_id, weight FROM %s WHERE tpid='%s'",
+	q := fmt.Sprintf("SELECT tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,min_sleep,destination_id, balance_weight, balance_expiration_time, balance_rating_subject, balance_expiry_time, balance_shared_group, min_queued_items, actions_id, weight FROM %s WHERE tpid='%s'",
 		utils.TBL_TP_ACTION_TRIGGERS, tpid)
 	if tag != "" {
 		q += fmt.Sprintf(" AND id='%s'", tag)
