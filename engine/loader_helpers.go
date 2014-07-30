@@ -340,7 +340,7 @@ var FileValidators = map[string]*FileLineRegexValidator{
 	utils.ACTION_PLANS_CSV: &FileLineRegexValidator{utils.ACTION_PLANS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
 		"Tag([0-9A-Za-z_]),ActionsTag([0-9A-Za-z_]),TimingTag([0-9A-Za-z_]),Weight([0-9.])"},
-	utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{utils.ACTION_TRIGGERS_NRCOLS, regexp.MustCompile(`(?:\w+),(?:\*\w+),(?:\*out),(?:\*\w+),(?:\d+\.?\d*),(?:true|false)?,(?:\d+[smh]?),(?:\w+|\*any)?,(?:\d+\.?\d*)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\w+|\*any)?,(?:\w+|\*any)?,(?:\d+)?,(?:\w+),(?:\d+\.?\d*)$`),
+	utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{utils.ACTION_TRIGGERS_NRCOLS, regexp.MustCompile(`(?:\w+),(?:\*\w+)?,(?:\*out)?,(?:\*\w+),(?:\d+\.?\d*),(?:true|false)?,(?:\d+[smh]?),(?:\w+|\*any)?,(?:\d+\.?\d*)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\w+|\*any)?,(?:\w+|\*any)?,(?:\d+)?,(?:\w+),(?:\d+\.?\d*)$`),
 		"Tag([0-9A-Za-z_]),BalanceType(*[a-z_]),Direction(*out),ThresholdType(*[a-z_]),ThresholdValue([0-9]+),Recurrent(true|false),MinSleep([0-9]+)?,BalanceDestinationTag([0-9A-Za-z_]|*all),BalanceWeight(*[a-z_]),BalanceExpiryTime(*[a-z_]|+[0-9][smh]|[0-9]),BalanceRatingSubject(*[a-z_]),BalanceSharedGroup(*[a-z_]),StatsMinQueuedItems([0-9]+),ActionsTag([0-9A-Za-z_]),Weight([0-9]+)"},
 	utils.ACCOUNT_ACTIONS_CSV: &FileLineRegexValidator{utils.ACCOUNT_ACTIONS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*),(?:(\w+;?)+\s*),(?:\*out\s*),(?:\w+\s*),(?:\w+\s*)$`),

@@ -79,6 +79,7 @@ var actionTriggersSample = `#Tag,BalanceTag,Direction,ThresholdType,ThresholdVal
 STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,0,,,,,,,LOG_WARNING,10
 STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,0,,,,,,,LOG_WARNING,10
 STANDARD_TRIGGERS,*monetary,*out,*max_counter,15,false,0,FS_USERS,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,,,*min_asr,45,true,1h,,,,,,3,CDRST_WARN_HTTP,10
 DUMMY,INVALID;DATA
 `
 
@@ -311,11 +312,11 @@ func TestActionTriggersValidator(t *testing.T) {
 		}
 		valid := lnValidator.Rule.Match(ln)
 		switch lineNr {
-		case 1, 5:
+		case 1, 6:
 			if valid {
 				t.Error("Validation passed for invalid line", string(ln))
 			}
-		case 2, 3, 4:
+		case 2, 3, 4, 5:
 			if !valid {
 				t.Error("Validation did not pass for valid line", string(ln))
 			}
