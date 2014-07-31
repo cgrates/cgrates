@@ -45,17 +45,20 @@ func NewStatsQueue(conf *CdrStats) *StatsQueue {
 	if conf == nil {
 		return &StatsQueue{metrics: make(map[string]Metric)}
 	}
-	sq := &StatsQueue{
-		conf:    conf,
-		metrics: make(map[string]Metric, len(conf.Metrics)),
-	}
+	sq := &StatsQueue{}
+	sq.UpdateConf(conf)
+	return sq
+}
+
+func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
+	sq.conf = conf
+	sq.metrics = make(map[string]Metric, len(conf.Metrics))
 	for _, m := range conf.Metrics {
 		metric := CreateMetric(m)
 		if metric != nil {
 			sq.metrics[m] = metric
 		}
 	}
-	return sq
 }
 
 func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
