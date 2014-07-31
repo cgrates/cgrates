@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -421,7 +422,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		tag, balanceType, direction, thresholdType, destinationTag, actionsTag := record[0], record[1], record[2], record[3], record[7], record[9], record[10], record[11], record[13]
+		tag, balanceType, direction, thresholdType, destinationTag, balanceExpirationDate, balanceRatingSubject, balanceSharedGroup, actionsTag := record[0], record[1], record[2], record[3], record[7], record[9], record[10], record[11], record[13]
 		threshold, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			if self.Verbose {
@@ -434,7 +435,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
 			continue
 		}
-		minSleep, err := strconv.Atoi(record[6])
+		minSleep, err := time.ParseDuration(record[6])
 		if err != nil && record[6] != "" {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
 			continue
@@ -467,9 +468,9 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			MinSleep:              minSleep,
 			DestinationId:         destinationTag,
 			BalanceWeight:         balanceWeight,
-			BalanceExpirationDate: balanceExpiationDate,
-			BalanceratingSubject:  balanceratingSubject,
-			BalanceSharedGroup:    BalanceSharedGroup,
+			BalanceExpirationDate: balanceExpirationDate,
+			BalanceRatingSubject:  balanceRatingSubject,
+			BalanceSharedGroup:    balanceSharedGroup,
 			MinQueuedItems:        minQueuedItems,
 			Weight:                weight,
 			ActionsId:             actionsTag,
