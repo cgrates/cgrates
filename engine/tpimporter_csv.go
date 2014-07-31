@@ -321,7 +321,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 		}
 		actId, actionType, balanceType, direction, destTag, rateSubject, sharedGroup := record[0], record[1], record[2], record[3], record[6], record[7], record[8]
 		units, err := strconv.ParseFloat(record[4], 64)
-		if err != nil {
+		if err != nil && record[4] != "" {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
 			}
@@ -421,7 +421,7 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		tag, balanceType, direction, thresholdType, destinationTag, actionsTag := record[0], record[1], record[2], record[3], record[6], record[7]
+		tag, balanceType, direction, thresholdType, destinationTag, actionsTag := record[0], record[1], record[2], record[3], record[7], record[9], record[10], record[11], record[13]
 		threshold, err := strconv.ParseFloat(record[4], 64)
 		if err != nil {
 			if self.Verbose {
@@ -432,8 +432,26 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 		recurrent, err := strconv.ParseBool(record[5])
 		if err != nil {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
+			continue
 		}
-		weight, err := strconv.ParseFloat(record[8], 64)
+		minSleep, err := strconv.Atoi(record[6])
+		if err != nil && record[6] != "" {
+			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
+			continue
+		}
+		balanceWeight, err := strconv.ParseFloat(record[8], 64)
+		if err != nil && record[8] != "" {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		minQueuedItems, err := strconv.Atoi(record[12])
+		if err != nil && record[12] != "" {
+			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
+			continue
+		}
+		weight, err := strconv.ParseFloat(record[14], 64)
 		if err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
@@ -441,14 +459,20 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			continue
 		}
 		at := &utils.TPActionTrigger{
-			BalanceType:    balanceType,
-			Direction:      direction,
-			ThresholdType:  thresholdType,
-			ThresholdValue: threshold,
-			Recurrent:      recurrent,
-			DestinationId:  destinationTag,
-			Weight:         weight,
-			ActionsId:      actionsTag,
+			BalanceType:           balanceType,
+			Direction:             direction,
+			ThresholdType:         thresholdType,
+			ThresholdValue:        threshold,
+			Recurrent:             recurrent,
+			MinSleep:              minSleep,
+			DestinationId:         destinationTag,
+			BalanceWeight:         balanceWeight,
+			BalanceExpirationDate: balanceExpiationDate,
+			BalanceratingSubject:  balanceratingSubject,
+			BalanceSharedGroup:    BalanceSharedGroup,
+			MinQueuedItems:        minQueuedItems,
+			Weight:                weight,
+			ActionsId:             actionsTag,
 		}
 		if err := self.StorDb.SetTPActionTriggers(self.TPid, map[string][]*utils.TPActionTrigger{tag: []*utils.TPActionTrigger{at}}); err != nil {
 			if self.Verbose {
