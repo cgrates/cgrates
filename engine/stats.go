@@ -101,13 +101,17 @@ func NewProxyStats(addr string) (*ProxyStats, error) {
 }
 
 func (ps *ProxyStats) AddQueue(sq *StatsQueue, out *int) error {
-	return ps.Client.Call("Scribe.AddQueue", sq, out)
+	return ps.Client.Call("Stats.AddQueue", sq, out)
 }
 
 func (ps *ProxyStats) GetValues(sqID string, values *map[string]float64) error {
-	return ps.Client.Call("Scribe.GetValues", sqID, values)
+	return ps.Client.Call("Stats.GetValues", sqID, values)
 }
 
 func (ps *ProxyStats) AppendCDR(cdr *utils.StoredCdr, out *int) error {
-	return ps.Client.Call("Scribe.AppendCDR", cdr, out)
+	return ps.Client.Call("Stats.AppendCDR", cdr, out)
 }
+
+/*func (ps *ProxyStats) UpdateQueues(css []*CdrStats, out *int) error {
+	return ps.Client.Call("Stats.UpdateQueues", css, out)
+}*/

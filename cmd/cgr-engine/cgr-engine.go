@@ -464,6 +464,11 @@ func main() {
 
 	if cfg.CDRStatsEnabled {
 		cdrStats = &engine.Stats{}
+		if css, err := accountDb.GetAllCdrStats(); err == nil {
+			cdrStats.UpdateQueues(css, nil)
+		} else {
+			engine.Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
+		}
 		server.RpcRegister(cdrStats)
 	}
 
