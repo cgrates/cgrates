@@ -463,7 +463,7 @@ func main() {
 	}
 
 	if cfg.CDRStatsEnabled {
-		cdrStats = &engine.Stats{}
+		cdrStats = engine.NewStats(accountDb)
 		server.RpcRegister(cdrStats)
 		server.RpcRegister(apier.CDRStatsV1{cdrStats}) // Public APIs
 	}

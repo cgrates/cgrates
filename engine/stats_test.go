@@ -71,7 +71,7 @@ func TestStatsSimplifyCDR(t *testing.T) {
 		Cost:           10,
 	}
 	sq := &StatsQueue{}
-	qcdr := sq.simplifyCDR(cdr)
+	qcdr := sq.simplifyCdr(cdr)
 	if cdr.SetupTime != qcdr.SetupTime ||
 		cdr.AnswerTime != qcdr.AnswerTime ||
 		cdr.Usage != qcdr.Usage ||
@@ -80,7 +80,7 @@ func TestStatsSimplifyCDR(t *testing.T) {
 	}
 }
 
-func TestAcceptCDR(t *testing.T) {
+func TestAcceptCdr(t *testing.T) {
 	sq := NewStatsQueue(nil)
 	cdr := &utils.StoredCdr{
 		TOR:            "tor",
@@ -100,83 +100,83 @@ func TestAcceptCDR(t *testing.T) {
 		Cost:           10,
 	}
 	sq.conf = &CdrStats{}
-	if sq.acceptCDR(cdr) != true {
+	if sq.conf.AcceptCdr(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{TOR: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{CdrHost: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{CdrSource: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{Direction: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{Tenant: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{Category: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{Account: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{Subject: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{RatedAccount: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{RatedSubject: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{DestinationPrefix: []string{"test"}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{DestinationPrefix: []string{"test", "123"}}
-	if sq.acceptCDR(cdr) != true {
+	if sq.conf.AcceptCdr(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 0, time.UTC)}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC)}}
-	if sq.acceptCDR(cdr) != true {
+	if sq.conf.AcceptCdr(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{SetupInterval: []time.Time{time.Date(2014, 7, 3, 13, 42, 0, 0, time.UTC), time.Date(2014, 7, 3, 13, 43, 0, 1, time.UTC)}}
-	if sq.acceptCDR(cdr) != true {
+	if sq.conf.AcceptCdr(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{UsageInterval: []time.Duration{11 * time.Second}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{UsageInterval: []time.Duration{1 * time.Second, 10 * time.Second}}
-	if sq.acceptCDR(cdr) == true {
+	if sq.conf.AcceptCdr(cdr) == true {
 		t.Error("Should have NOT accepted thif CDR: %+v", cdr)
 	}
 	sq.conf = &CdrStats{UsageInterval: []time.Duration{10 * time.Second, 11 * time.Second}}
-	if sq.acceptCDR(cdr) != true {
+	if sq.conf.AcceptCdr(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
 	}
 }

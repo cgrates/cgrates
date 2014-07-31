@@ -20,6 +20,7 @@ package engine
 
 import (
 	"errors"
+	"fmt"
 	"net/rpc"
 	"sync"
 
@@ -27,7 +28,7 @@ import (
 )
 
 type StatsInterface interface {
-	AddQueue(*StatsQueue, *int) error
+	AddQueue(*CdrStats, *int) error
 	GetValues(string, *map[string]float64) error
 	AppendCDR(*utils.StoredCdr, *int) error
 }
@@ -37,14 +38,28 @@ type Stats struct {
 	mux    sync.RWMutex
 }
 
-func (s *Stats) AddQueue(sq *StatsQueue, out *int) error {
+func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	if s.queues == nil {
 		s.queues = make(map[string]*StatsQueue)
 	}
-	s.queues[sq.conf.Id] = sq
+	if sq, exists := s.queues[cs.Id]; exists {
+		sq.UpdateConf(cs)
+	} else {
+		s.queues[cs.Id] = NewStatsQueue(cs)
+	}
 	return nil
+}
+
+func NewStats(accountDb AccountingStorage) *Stats {
+	cdrStats := &Stats{}
+	if css, err := accountDb.GetAllCdrStats(); err == nil {
+		cdrStats.UpdateQueues(css, nil)
+	} else {
+		Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
+	}
+	return cdrStats
 }
 
 func (s *Stats) GetValues(sqID string, values *map[string]float64) error {
@@ -100,14 +115,14 @@ func NewProxyStats(addr string) (*ProxyStats, error) {
 	return &ProxyStats{Client: client}, nil
 }
 
-func (ps *ProxyStats) AddQueue(sq *StatsQueue, out *int) error {
-	return ps.Client.Call("Scribe.AddQueue", sq, out)
+func (ps *ProxyStats) AddQueue(cs *CdrStats, out *int) error {
+	return ps.Client.Call("Stats.AddQueue", cs, out)
 }
 
 func (ps *ProxyStats) GetValues(sqID string, values *map[string]float64) error {
-	return ps.Client.Call("Scribe.GetValues", sqID, values)
+	return ps.Client.Call("Stats.GetValues", sqID, values)
 }
 
 func (ps *ProxyStats) AppendCDR(cdr *utils.StoredCdr, out *int) error {
-	return ps.Client.Call("Scribe.AppendCDR", cdr, out)
+	return ps.Client.Call("Stats.AppendCDR", cdr, out)
 }
