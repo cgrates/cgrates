@@ -93,7 +93,7 @@ type CGRConfig struct {
 	CDRSMediator            string                       // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	CDRSStats               string                       // Address where to reach the Mediator. <""|intenal>
 	CDRStatsEnabled         bool                         // Enable CDR Stats service
-	CDRStatConfigs          []*CdrStatsConfig            // Active cdr stats configuration instances
+	CDRStatConfig           *CdrStatsConfig              // Active cdr stats configuration instances
 	CdreDefaultInstance     *CdreConfig                  // Will be used in the case no specific one selected by API
 	CdrcEnabled             bool                         // Enable CDR client functionality
 	CdrcCdrs                string                       // Address where to reach CDR server
@@ -179,6 +179,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSMediator = ""
 	self.CDRSStats = ""
 	self.CDRStatsEnabled = false
+	self.CDRStatConfig = &CdrStatsConfig{Id: utils.DEFAULT_RUNID, QueueLength: 50, TimeWindow: time.Duration(1) * time.Hour, Metrics: []string{"ASR", "ACD", "ACC"}}
 	self.CdreDefaultInstance, _ = NewDefaultCdreConfig()
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL
@@ -428,6 +429,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("cdrstats", "enabled"); hasOpt {
 		cfg.CDRStatsEnabled, _ = c.GetBool("cdrstats", "enabled")
+	}
+	if cfg.CDRStatConfig, err = ParseCfgDefaultCDRStatsConfig(c); err != nil {
+		return nil, err
 	}
 	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
 		cfg.CdreDefaultInstance.CdrFormat, _ = c.GetString("cdre", "cdr_format")

@@ -26,9 +26,9 @@ type Metric interface {
 	GetValue() float64
 }
 
-const ASR = "asr"
-const ACD = "acd"
-const ACC = "acc"
+const ASR = "ASR"
+const ACD = "ACD"
+const ACC = "ACC"
 
 func CreateMetric(metric string) Metric {
 	switch metric {

@@ -84,6 +84,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
 	eCfg.CDRStatsEnabled = false
+	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.DEFAULT_RUNID, QueueLength: 50, TimeWindow: time.Duration(1) * time.Hour, Metrics: []string{"ASR", "ACD", "ACC"}}
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcRunDelay = time.Duration(0)
@@ -218,6 +219,11 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CDRSMediator = "test"
 	eCfg.CDRStatsEnabled = true
+	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.DEFAULT_RUNID, QueueLength: 99, TimeWindow: time.Duration(99) * time.Second,
+		Metrics: []string{"test"}, TOR: []string{"test"}, CdrHost: []string{"test"}, CdrSource: []string{"test"}, ReqType: []string{"test"}, Direction: []string{"test"},
+		Tenant: []string{"test"}, Category: []string{"test"}, Account: []string{"test"}, Subject: []string{"test"}, DestinationPrefix: []string{"test"},
+		UsageInterval:   []time.Duration{time.Duration(99) * time.Second},
+		MediationRunIds: []string{"test"}, RatedAccount: []string{"test"}, RatedSubject: []string{"test"}, CostInterval: []float64{99.0}}
 	eCfg.CDRSStats = "test"
 	eCfg.CdreDefaultInstance = &CdreConfig{
 		CdrFormat:               "test",
