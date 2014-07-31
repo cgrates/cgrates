@@ -27,14 +27,14 @@ import (
 )
 
 type StatsQueue struct {
-	cdrs    []*QCDR
+	cdrs    []*QCdr
 	conf    *CdrStats
 	metrics map[string]Metric
 	mux     sync.RWMutex
 }
 
 // Simplified cdr structure containing only the necessary info
-type QCDR struct {
+type QCdr struct {
 	SetupTime  time.Time
 	AnswerTime time.Time
 	Usage      time.Duration
@@ -64,11 +64,11 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
-	if sq.conf.AcceptCDR(cdr) {
-		qcdr := sq.simplifyCDR(cdr)
+	if sq.conf.AcceptCdr(cdr) {
+		qcdr := sq.simplifyCdr(cdr)
 		sq.cdrs = append(sq.cdrs, qcdr)
 		sq.addToMetrics(qcdr)
-		sq.purgeObsoleteCDRs()
+		sq.purgeObsoleteCdrs()
 		// check for trigger
 		stats := sq.getStats()
 		sq.conf.Triggers.Sort()
@@ -94,20 +94,20 @@ func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
 	}
 }
 
-func (sq *StatsQueue) addToMetrics(cdr *QCDR) {
+func (sq *StatsQueue) addToMetrics(cdr *QCdr) {
 	for _, metric := range sq.metrics {
-		metric.AddCDR(cdr)
+		metric.AddCdr(cdr)
 	}
 }
 
-func (sq *StatsQueue) removeFromMetrics(cdr *QCDR) {
+func (sq *StatsQueue) removeFromMetrics(cdr *QCdr) {
 	for _, metric := range sq.metrics {
-		metric.RemoveCDR(cdr)
+		metric.RemoveCdr(cdr)
 	}
 }
 
-func (sq *StatsQueue) simplifyCDR(cdr *utils.StoredCdr) *QCDR {
-	return &QCDR{
+func (sq *StatsQueue) simplifyCdr(cdr *utils.StoredCdr) *QCdr {
+	return &QCdr{
 		SetupTime:  cdr.SetupTime,
 		AnswerTime: cdr.AnswerTime,
 		Usage:      cdr.Usage,
@@ -115,7 +115,7 @@ func (sq *StatsQueue) simplifyCDR(cdr *utils.StoredCdr) *QCDR {
 	}
 }
 
-func (sq *StatsQueue) purgeObsoleteCDRs() {
+func (sq *StatsQueue) purgeObsoleteCdrs() {
 	if sq.conf.QueueLength > 0 {
 		currentLength := len(sq.cdrs)
 		if currentLength > sq.conf.QueueLength {

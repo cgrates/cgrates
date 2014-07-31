@@ -21,8 +21,8 @@ package engine
 import "time"
 
 type Metric interface {
-	AddCDR(*QCDR)
-	RemoveCDR(*QCDR)
+	AddCdr(*QCdr)
+	RemoveCdr(*QCdr)
 	GetValue() float64
 }
 
@@ -49,14 +49,14 @@ type ASRMetric struct {
 	total    float64
 }
 
-func (asr *ASRMetric) AddCDR(cdr *QCDR) {
+func (asr *ASRMetric) AddCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() {
 		asr.answered += 1
 	}
 	asr.total += 1
 }
 
-func (asr *ASRMetric) RemoveCDR(cdr *QCDR) {
+func (asr *ASRMetric) RemoveCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() {
 		asr.answered -= 1
 	}
@@ -74,14 +74,14 @@ type ACDMetric struct {
 	count float64
 }
 
-func (acd *ACDMetric) AddCDR(cdr *QCDR) {
+func (acd *ACDMetric) AddCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() {
 		acd.sum += cdr.Usage
 		acd.count += 1
 	}
 }
 
-func (acd *ACDMetric) RemoveCDR(cdr *QCDR) {
+func (acd *ACDMetric) RemoveCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() {
 		acd.sum -= cdr.Usage
 		acd.count -= 1
@@ -99,14 +99,14 @@ type ACCMetric struct {
 	count float64
 }
 
-func (acc *ACCMetric) AddCDR(cdr *QCDR) {
+func (acc *ACCMetric) AddCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() && cdr.Cost >= 0 {
 		acc.sum += cdr.Cost
 		acc.count += 1
 	}
 }
 
-func (acc *ACCMetric) RemoveCDR(cdr *QCDR) {
+func (acc *ACCMetric) RemoveCdr(cdr *QCdr) {
 	if !cdr.AnswerTime.IsZero() && cdr.Cost >= 0 {
 		acc.sum -= cdr.Cost
 		acc.count -= 1

@@ -49,7 +49,7 @@ type CdrStats struct {
 	Triggers          ActionTriggerPriotityList
 }
 
-func (cs *CdrStats) AcceptCDR(cdr *utils.StoredCdr) bool {
+func (cs *CdrStats) AcceptCdr(cdr *utils.StoredCdr) bool {
 	if len(cs.SetupInterval) > 0 {
 		if cdr.SetupTime.Before(cs.SetupInterval[0]) {
 			return false
