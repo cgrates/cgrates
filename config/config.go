@@ -423,11 +423,11 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrs", "mediator"); hasOpt {
 		cfg.CDRSMediator, _ = c.GetString("cdrs", "mediator")
 	}
-	if hasOpt = c.HasOption("cdrs", "stats"); hasOpt {
-		cfg.CDRSStats, _ = c.GetString("cdrs", "stats")
+	if hasOpt = c.HasOption("cdrs", "cdrstats"); hasOpt {
+		cfg.CDRSStats, _ = c.GetString("cdrs", "cdrstats")
 	}
-	if hasOpt = c.HasOption("stats", "enabled"); hasOpt {
-		cfg.CDRStatsEnabled, _ = c.GetBool("stats", "enabled")
+	if hasOpt = c.HasOption("cdrstats", "enabled"); hasOpt {
+		cfg.CDRStatsEnabled, _ = c.GetBool("cdrstats", "enabled")
 	}
 	if hasOpt = c.HasOption("cdre", "cdr_format"); hasOpt {
 		cfg.CdreDefaultInstance.CdrFormat, _ = c.GetString("cdre", "cdr_format")
@@ -526,8 +526,8 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("mediator", "reconnects"); hasOpt {
 		cfg.MediatorReconnects, _ = c.GetInt("mediator", "reconnects")
 	}
-	if hasOpt = c.HasOption("mediator", "stats"); hasOpt {
-		cfg.MediatorStats, _ = c.GetString("mediator", "stats")
+	if hasOpt = c.HasOption("mediator", "cdrstats"); hasOpt {
+		cfg.MediatorStats, _ = c.GetString("mediator", "cdrstats")
 	}
 	if hasOpt = c.HasOption("session_manager", "enabled"); hasOpt {
 		cfg.SMEnabled, _ = c.GetBool("session_manager", "enabled")

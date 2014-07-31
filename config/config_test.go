@@ -290,13 +290,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.MailerFromAddr = "test"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
-		for _, eDC := range eCfg.DerivedChargers {
-			fmt.Printf("ExpectDerivedChargers: %+v\n", eDC)
-		}
 		t.Log(cfg)
-		for _, eDC := range cfg.DerivedChargers {
-			fmt.Printf("DerivedChargers: %+v\n", eDC)
-		}
 		t.Error("Loading of configuration from file failed!")
 	}
 }
