@@ -64,7 +64,7 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
-	if sq.acceptCDR(cdr) {
+	if sq.conf.AcceptCDR(cdr) {
 		qcdr := sq.simplifyCDR(cdr)
 		sq.cdrs = append(sq.cdrs, qcdr)
 		sq.addToMetrics(qcdr)
@@ -152,80 +152,4 @@ func (sq *StatsQueue) getStats() map[string]float64 {
 		stat[key] = metric.GetValue()
 	}
 	return stat
-}
-
-func (sq *StatsQueue) acceptCDR(cdr *utils.StoredCdr) bool {
-	if len(sq.conf.SetupInterval) > 0 {
-		if cdr.SetupTime.Before(sq.conf.SetupInterval[0]) {
-			return false
-		}
-		if len(sq.conf.SetupInterval) > 1 && (cdr.SetupTime.Equal(sq.conf.SetupInterval[1]) || cdr.SetupTime.After(sq.conf.SetupInterval[1])) {
-			return false
-		}
-	}
-	if len(sq.conf.TOR) > 0 && !utils.IsSliceMember(sq.conf.TOR, cdr.TOR) {
-		return false
-	}
-	if len(sq.conf.CdrHost) > 0 && !utils.IsSliceMember(sq.conf.CdrHost, cdr.CdrHost) {
-		return false
-	}
-	if len(sq.conf.CdrSource) > 0 && !utils.IsSliceMember(sq.conf.CdrSource, cdr.CdrSource) {
-		return false
-	}
-	if len(sq.conf.ReqType) > 0 && !utils.IsSliceMember(sq.conf.ReqType, cdr.ReqType) {
-		return false
-	}
-	if len(sq.conf.Direction) > 0 && !utils.IsSliceMember(sq.conf.Direction, cdr.Direction) {
-		return false
-	}
-	if len(sq.conf.Tenant) > 0 && !utils.IsSliceMember(sq.conf.Tenant, cdr.Tenant) {
-		return false
-	}
-	if len(sq.conf.Category) > 0 && !utils.IsSliceMember(sq.conf.Category, cdr.Category) {
-		return false
-	}
-	if len(sq.conf.Account) > 0 && !utils.IsSliceMember(sq.conf.Account, cdr.Account) {
-		return false
-	}
-	if len(sq.conf.Subject) > 0 && !utils.IsSliceMember(sq.conf.Subject, cdr.Subject) {
-		return false
-	}
-	if len(sq.conf.DestinationPrefix) > 0 {
-		found := false
-		for _, prefix := range sq.conf.DestinationPrefix {
-			if strings.HasPrefix(cdr.Destination, prefix) {
-				found = true
-				break
-			}
-		}
-		if !found {
-			return false
-		}
-	}
-	if len(sq.conf.UsageInterval) > 0 {
-		if cdr.Usage < sq.conf.UsageInterval[0] {
-			return false
-		}
-		if len(sq.conf.UsageInterval) > 1 && cdr.Usage >= sq.conf.UsageInterval[1] {
-			return false
-		}
-	}
-	if len(sq.conf.MediationRunIds) > 0 && !utils.IsSliceMember(sq.conf.MediationRunIds, cdr.MediationRunId) {
-		return false
-	}
-	if len(sq.conf.CostInterval) > 0 {
-		if cdr.Cost < sq.conf.CostInterval[0] {
-			return false
-		}
-		if len(sq.conf.CostInterval) > 1 && cdr.Cost >= sq.conf.CostInterval[1] {
-			return false
-		}
-	}
-	if len(sq.conf.RatedAccount) > 0 && !utils.IsSliceMember(sq.conf.RatedAccount, cdr.RatedAccount) {
-		return false
-	}
-	if len(sq.conf.RatedSubject) > 0 && !utils.IsSliceMember(sq.conf.RatedSubject, cdr.RatedSubject) {
-		return false
-	}
-	return true
 }
