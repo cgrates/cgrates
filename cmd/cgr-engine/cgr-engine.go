@@ -407,12 +407,12 @@ func main() {
 	}
 
 	responder := &engine.Responder{ExitChan: exitChan}
-	apier := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder}
+	apierRpc := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder}
 
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterBalancer != utils.INTERNAL {
 		engine.Logger.Info("Registering Rater service")
 		server.RpcRegister(responder)
-		server.RpcRegister(apier)
+		server.RpcRegister(apierRpc)
 	}
 
 	if cfg.BalancerEnabled {
@@ -421,7 +421,7 @@ func main() {
 		stopHandled = true
 		responder.Bal = bal
 		server.RpcRegister(responder)
-		server.RpcRegister(apier)
+		server.RpcRegister(apierRpc)
 		if cfg.RaterEnabled {
 			engine.Logger.Info("<Balancer> Registering internal rater")
 			bal.AddClient("local", new(engine.ResponderWorker))
@@ -437,7 +437,7 @@ func main() {
 		go func() {
 			sched := scheduler.NewScheduler()
 			go reloadSchedulerSingnalHandler(sched, accountDb)
-			apier.Sched = sched
+			apierRpc.Sched = sched
 			sched.LoadActionTimings(accountDb)
 			sched.Loop()
 		}()
@@ -465,6 +465,7 @@ func main() {
 	if cfg.CDRStatsEnabled {
 		cdrStats = &engine.Stats{}
 		server.RpcRegister(cdrStats)
+		server.RpcRegister(apier.CDRStatsV1{cdrStats}) // Public APIs
 	}
 
 	var cdrsChan chan struct{}

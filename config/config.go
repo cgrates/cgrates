@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -91,9 +91,9 @@ type CGRConfig struct {
 	CDRSEnabled             bool                         // Enable CDR Server service
 	CDRSExtraFields         []*utils.RSRField            // Extra fields to store in CDRs
 	CDRSMediator            string                       // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CDRSStats         string            // Address where to reach the Mediator. <""|intenal>
-	CDRStatsEnabled   bool              // Enable CDR Stats service
-	//CdrStats                []*cdrstats.CdrStats            // Active cdr stats configuration instances
+	CDRSStats               string                       // Address where to reach the Mediator. <""|intenal>
+	CDRStatsEnabled         bool                         // Enable CDR Stats service
+	CDRStatConfigs          []*CdrStatsConfig            // Active cdr stats configuration instances
 	CdreDefaultInstance     *CdreConfig                  // Will be used in the case no specific one selected by API
 	CdrcEnabled             bool                         // Enable CDR client functionality
 	CdrcCdrs                string                       // Address where to reach CDR server
@@ -106,14 +106,14 @@ type CGRConfig struct {
 	CdrcCdrFields           map[string][]*utils.RSRField // FieldName/RSRField format. Index number in case of .csv cdrs.
 	SMEnabled               bool
 	SMSwitchType            string
-	SMRater                 string                // address where to access rater. Can be internal, direct rater address or the address of a balancer
-	SMReconnects            int                   // Number of reconnect attempts to rater
-	SMDebitInterval         int                   // the period to be debited in advanced during a call (in seconds)
-	SMMaxCallDuration       time.Duration         // The maximum duration of a call
-	SMMinCallDuration       time.Duration         // Only authorize calls with allowed duration bigger than this
-	MediatorEnabled         bool                  // Starts Mediator service: <true|false>.
-	MediatorRater           string 
-    MediatorStats           string               // Address where to reach the Rater: <internal|x.y.z.y:1234>
+	SMRater                 string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMReconnects            int           // Number of reconnect attempts to rater
+	SMDebitInterval         int           // the period to be debited in advanced during a call (in seconds)
+	SMMaxCallDuration       time.Duration // The maximum duration of a call
+	SMMinCallDuration       time.Duration // Only authorize calls with allowed duration bigger than this
+	MediatorEnabled         bool          // Starts Mediator service: <true|false>.
+	MediatorRater           string
+	MediatorStats           string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
 	MediatorReconnects      int                   // Number of reconnects to rater before giving up.
 	DerivedChargers         utils.DerivedChargers // System wide derived chargers, added to the account level ones
 	CombinedDerivedChargers bool                  // Combine accounts specific derived_chargers with server configured
