@@ -88,7 +88,7 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 }
 
 func (s *Stats) ReloadQueues(ids []string, out *int) error {
-	if ids == nil {
+	if len(ids) == 0 {
 		if css, err := s.ratingDb.GetAllCdrStats(); err == nil {
 			s.UpdateQueues(css, nil)
 		} else {
@@ -106,7 +106,7 @@ func (s *Stats) ReloadQueues(ids []string, out *int) error {
 }
 
 func (s *Stats) ResetQueues(ids []string, out *int) error {
-	if ids == nil {
+	if len(ids) == 0 {
 		for _, sq := range s.queues {
 			sq.cdrs = make([]*QCdr, 0)
 			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
