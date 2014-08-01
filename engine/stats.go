@@ -30,12 +30,23 @@ import (
 type StatsInterface interface {
 	AddQueue(*CdrStats, *int) error
 	GetValues(string, *map[string]float64) error
+	GetQueueIds(int, *[]string) error
 	AppendCDR(*utils.StoredCdr, *int) error
 }
 
 type Stats struct {
 	queues map[string]*StatsQueue
 	mux    sync.RWMutex
+}
+
+func NewStats(accountDb AccountingStorage) *Stats {
+	cdrStats := &Stats{}
+	if css, err := accountDb.GetAllCdrStats(); err == nil {
+		cdrStats.UpdateQueues(css, nil)
+	} else {
+		Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
+	}
+	return cdrStats
 }
 
 func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
@@ -52,14 +63,15 @@ func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
 	return nil
 }
 
-func NewStats(accountDb AccountingStorage) *Stats {
-	cdrStats := &Stats{}
-	if css, err := accountDb.GetAllCdrStats(); err == nil {
-		cdrStats.UpdateQueues(css, nil)
-	} else {
-		Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
+func (s *Stats) GetQueueIds(in int, ids *[]string) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	var result []string
+	for id, _ := range s.queues {
+		result = append(result, id)
 	}
-	return cdrStats
+	*ids = result
+	return nil
 }
 
 func (s *Stats) GetValues(sqID string, values *map[string]float64) error {
@@ -128,4 +140,8 @@ func (ps *ProxyStats) GetValues(sqID string, values *map[string]float64) error {
 
 func (ps *ProxyStats) AppendCDR(cdr *utils.StoredCdr, out *int) error {
 	return ps.Client.Call("Stats.AppendCDR", cdr, out)
+}
+
+func (ps *ProxyStats) GetQueueIds(in int, ids *[]string) error {
+	return ps.Client.Call("Stats.GetQueueIds", in, ids)
 }

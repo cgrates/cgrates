@@ -30,7 +30,7 @@ type StatsQueue struct {
 	cdrs    []*QCdr
 	conf    *CdrStats
 	metrics map[string]Metric
-	mux     sync.RWMutex
+	mux     sync.Mutex
 }
 
 // Simplified cdr structure containing only the necessary info
@@ -141,8 +141,9 @@ func (sq *StatsQueue) purgeObsoleteCdrs() {
 }
 
 func (sq *StatsQueue) GetStats() map[string]float64 {
-	sq.mux.RLock()
-	defer sq.mux.RUnlock()
+	sq.mux.Lock()
+	defer sq.mux.Unlock()
+	sq.purgeObsoleteCdrs()
 	return sq.getStats()
 }
 
