@@ -36,7 +36,7 @@ type AttrGetMetrics struct {
 
 func (sts *CDRStatsV1) GetMetrics(attr AttrGetMetrics, reply *map[string]float64) error {
 	if len(attr.StatsQueueId) == 0 {
-		return fmt.Errorf("%s:StatsInstanceId", utils.ERR_MANDATORY_IE_MISSING)
+		return fmt.Errorf("%s:StatsQueueId", utils.ERR_MANDATORY_IE_MISSING)
 	}
 	return sts.CdrStats.GetValues(attr.StatsQueueId, reply)
 }
@@ -58,7 +58,7 @@ func (sts *CDRStatsV1) ReloadQueues(attr AttrReloadQueues, reply *string) error 
 }
 
 func (sts *CDRStatsV1) ResetQueues(attr AttrReloadQueues, reply *string) error {
-	if err := sts.CdrStats.ReloadQueues(attr.StatsQueueIds, nil); err != nil {
+	if err := sts.CdrStats.ResetQueues(attr.StatsQueueIds, nil); err != nil {
 		return err
 	}
 	*reply = utils.OK
