@@ -33,6 +33,15 @@ type StatsQueue struct {
 	mux     sync.Mutex
 }
 
+var METRIC_TRIGGER_MAP = map[string]string{
+	"*min_asr": ASR,
+	"*max_asr": ASR,
+	"*min_acd": ACD,
+	"*max_acd": ACD,
+	"*min_acc": ACC,
+	"*max_acc": ACC,
+}
+
 // Simplified cdr structure containing only the necessary info
 type QCdr struct {
 	SetupTime  time.Time
@@ -79,14 +88,14 @@ func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
 				continue
 			}
 			if strings.HasPrefix(at.ThresholdType, "*min_") {
-				if value, ok := stats[at.ThresholdType[len("*min_"):]]; ok {
+				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
 					if value <= at.ThresholdValue {
 						at.Execute(nil, sq)
 					}
 				}
 			}
 			if strings.HasPrefix(at.ThresholdType, "*max_") {
-				if value, ok := stats[at.ThresholdType[len("*max_"):]]; ok {
+				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]] {
 					if value >= at.ThresholdValue {
 						at.Execute(nil, sq)
 					}

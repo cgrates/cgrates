@@ -144,8 +144,7 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	oldQueues := s.queues
 	s.queues = make(map[string]*StatsQueue, len(css))
 	if def, exists := oldQueues[utils.META_DEFAULT]; exists {
-		// for reset
-		def.UpdateConf(def.conf)
+		def.UpdateConf(def.conf) // for reset
 		s.queues[utils.META_DEFAULT] = def
 	}
 	for _, cs := range css {
