@@ -63,61 +63,61 @@ func ParseCfgDefaultCDRStatsConfig(c *conf.ConfigFile) (*CdrStatsConfig, error) 
 	}
 	if hasOpt := c.HasOption("cdrstats", "tors"); hasOpt {
 		torsStr, _ := c.GetString("cdrstats", "tors")
-		if csCfg.TOR, err = ConfigSlice(torsStr); err != nil {
+		if csCfg.TORs, err = ConfigSlice(torsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "cdr_hosts"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "cdr_hosts")
-		if csCfg.CdrHost, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.CdrHosts, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "cdr_sources"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "cdr_sources")
-		if csCfg.CdrSource, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.CdrSources, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "req_types"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "req_types")
-		if csCfg.ReqType, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.ReqTypes, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "directions"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "directions")
-		if csCfg.Direction, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.Directions, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "tenants"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "tenants")
-		if csCfg.Tenant, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.Tenants, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "categories"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "categories")
-		if csCfg.Category, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.Categories, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "accounts"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "accounts")
-		if csCfg.Account, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.Accounts, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "subjects"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "subjects")
-		if csCfg.Subject, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.Subjects, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "destination_prefixes"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "destination_prefixes")
-		if csCfg.DestinationPrefix, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.DestinationPrefixes, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
@@ -143,13 +143,13 @@ func ParseCfgDefaultCDRStatsConfig(c *conf.ConfigFile) (*CdrStatsConfig, error) 
 	}
 	if hasOpt := c.HasOption("cdrstats", "rated_accounts"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "rated_accounts")
-		if csCfg.RatedAccount, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.RatedAccounts, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
 	if hasOpt := c.HasOption("cdrstats", "rated_subjects"); hasOpt {
 		valsStr, _ := c.GetString("cdrstats", "rated_subjects")
-		if csCfg.RatedSubject, err = ConfigSlice(valsStr); err != nil {
+		if csCfg.RatedSubjects, err = ConfigSlice(valsStr); err != nil {
 			return nil, err
 		}
 	}
@@ -172,24 +172,24 @@ func ParseCfgDefaultCDRStatsConfig(c *conf.ConfigFile) (*CdrStatsConfig, error) 
 }
 
 type CdrStatsConfig struct {
-	Id                string        // Config id, unique per config instance
-	QueueLength       int           // Number of items in the stats buffer
-	TimeWindow        time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-	Metrics           []string      // ASR, ACD, ACC
-	SetupInterval     []time.Time   // 2 or less items (>= start interval,< stop_interval)
-	TOR               []string
-	CdrHost           []string
-	CdrSource         []string
-	ReqType           []string
-	Direction         []string
-	Tenant            []string
-	Category          []string
-	Account           []string
-	Subject           []string
-	DestinationPrefix []string
-	UsageInterval     []time.Duration // 2 or less items (>= Usage, <Usage)
-	MediationRunIds   []string
-	RatedAccount      []string
-	RatedSubject      []string
-	CostInterval      []float64 // 2 or less items, (>=Cost, <Cost)
+	Id                  string        // Config id, unique per config instance
+	QueueLength         int           // Number of items in the stats buffer
+	TimeWindow          time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+	Metrics             []string      // ASR, ACD, ACC
+	SetupInterval       []time.Time   // 2 or less items (>= start interval,< stop_interval)
+	TORs                []string
+	CdrHosts            []string
+	CdrSources          []string
+	ReqTypes            []string
+	Directions          []string
+	Tenants             []string
+	Categories          []string
+	Accounts            []string
+	Subjects            []string
+	DestinationPrefixes []string
+	UsageInterval       []time.Duration // 2 or less items (>= Usage, <Usage)
+	MediationRunIds     []string
+	RatedAccounts       []string
+	RatedSubjects       []string
+	CostInterval        []float64 // 2 or less items, (>=Cost, <Cost)
 }

@@ -22,8 +22,34 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
+
+func NewCdrStatsFromCdrStatsCfg(csCfg *config.CdrStatsConfig) *CdrStats {
+	return &CdrStats{
+		Id:                csCfg.Id,
+		QueueLength:       csCfg.QueueLength,
+		TimeWindow:        csCfg.TimeWindow,
+		Metrics:           csCfg.Metrics,
+		SetupInterval:     csCfg.SetupInterval,
+		TOR:               csCfg.TORs,
+		CdrHost:           csCfg.CdrHosts,
+		CdrSource:         csCfg.CdrSources,
+		ReqType:           csCfg.ReqTypes,
+		Direction:         csCfg.Directions,
+		Tenant:            csCfg.Tenants,
+		Category:          csCfg.Categories,
+		Account:           csCfg.Accounts,
+		Subject:           csCfg.Subjects,
+		DestinationPrefix: csCfg.DestinationPrefixes,
+		UsageInterval:     csCfg.UsageInterval,
+		MediationRunIds:   csCfg.MediationRunIds,
+		RatedAccount:      csCfg.RatedAccounts,
+		RatedSubject:      csCfg.RatedSubjects,
+		CostInterval:      csCfg.CostInterval,
+	}
+}
 
 type CdrStats struct {
 	Id                string        // Config id, unique per config instance

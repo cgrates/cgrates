@@ -26,16 +26,16 @@ import (
 
 // Interact with Stats server
 type CDRStatsV1 struct {
-	CdrSts *engine.Stats
+	CdrStats *engine.Stats
 }
 
 type AttrGetMetrics struct {
-	StatsInstanceId string // Id of the stats instance queried
+	StatsQueueId string // Id of the stats instance queried
 }
 
 func (sts *CDRStatsV1) GetMetrics(attr AttrGetMetrics, reply *map[string]float64) error {
-	if len(attr.StatsInstanceId) == 0 {
+	if len(attr.StatsQueueId) == 0 {
 		return fmt.Errorf("%s:StatsInstanceId", utils.ERR_MANDATORY_IE_MISSING)
 	}
-	return sts.CdrSts.GetValues(attr.StatsInstanceId, reply)
+	return sts.CdrStats.GetValues(attr.StatsQueueId, reply)
 }

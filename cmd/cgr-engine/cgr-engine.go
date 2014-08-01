@@ -464,6 +464,10 @@ func main() {
 
 	if cfg.CDRStatsEnabled {
 		cdrStats = engine.NewStats(accountDb)
+		if cfg.CDRStatConfig != nil && len(cfg.CDRStatConfig.Metrics) != 0 {
+			var out int
+			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), &out)
+		}
 		server.RpcRegister(cdrStats)
 		server.RpcRegister(apier.CDRStatsV1{cdrStats}) // Public APIs
 	}
