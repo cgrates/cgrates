@@ -83,9 +83,12 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	for _, cs := range css {
 		var sq *StatsQueue
 		var existing bool
-		if sq, existing = oldQueues[cs.Id]; existing {
-			sq.conf = cs
-		} else {
+		if oldQueues != nil {
+			if sq, existing = oldQueues[cs.Id]; existing {
+				sq.conf = cs
+			}
+		}
+		if sq == nil {
 			sq = NewStatsQueue(cs)
 		}
 		s.queues[cs.Id] = sq
