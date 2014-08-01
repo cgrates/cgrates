@@ -95,7 +95,7 @@ func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
 				}
 			}
 			if strings.HasPrefix(at.ThresholdType, "*max_") {
-				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]] {
+				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
 					if value >= at.ThresholdValue {
 						at.Execute(nil, sq)
 					}
