@@ -33,6 +33,7 @@ type StatsInterface interface {
 	AppendCDR(*utils.StoredCdr, *int) error
 	AddQueue(*CdrStats, *int) error
 	ReloadQueues([]string, *int) error
+	ResetQueues([]string, *int) error
 }
 
 type Stats struct {
@@ -104,6 +105,36 @@ func (s *Stats) ReloadQueues(ids []string, out *int) error {
 	return nil
 }
 
+func (s *Stats) ResetQueues(ids []string, out *int) error {
+	if ids == nil {
+		for _, sq := range s.queues {
+			sq.cdrs = make([]*QCdr, sq.conf.QueueLength)
+			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
+			for _, m := range sq.conf.Metrics {
+				if metric := CreateMetric(m); metric != nil {
+					sq.metrics[m] = metric
+				}
+			}
+		}
+	} else {
+		for _, id := range ids {
+			sq, exists := s.queues[id]
+			if !exists {
+				Logger.Err(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
+				continue
+			}
+			sq.cdrs = make([]*QCdr, sq.conf.QueueLength)
+			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
+			for _, m := range sq.conf.Metrics {
+				if metric := CreateMetric(m); metric != nil {
+					sq.metrics[m] = metric
+				}
+			}
+		}
+	}
+	return nil
+}
+
 // change the xisting ones
 // add new ones
 // delete the ones missing from the new list
@@ -168,4 +199,8 @@ func (ps *ProxyStats) AddQueue(cs *CdrStats, out *int) error {
 
 func (ps *ProxyStats) ReloadQueues(ids []string, out *int) error {
 	return ps.Client.Call("Stats.ReloadQueues", ids, out)
+}
+
+func (ps *ProxyStats) ResetQueues(ids []string, out *int) error {
+	return ps.Client.Call("Stats.ReserQueues", ids, out)
 }
