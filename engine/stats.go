@@ -79,7 +79,7 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 	oldQueues := s.queues
-	s.queues = make(map[string]*StatsQueue)
+	s.queues = make(map[string]*StatsQueue, len(css))
 	for _, cs := range css {
 		var sq *StatsQueue
 		var existing bool
