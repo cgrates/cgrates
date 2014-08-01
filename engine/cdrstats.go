@@ -76,6 +76,9 @@ type CdrStats struct {
 }
 
 func (cs *CdrStats) AcceptCdr(cdr *utils.StoredCdr) bool {
+	if cdr == nil {
+		return false
+	}
 	if len(cs.SetupInterval) > 0 {
 		if cdr.SetupTime.Before(cs.SetupInterval[0]) {
 			return false
