@@ -115,6 +115,7 @@ func TestStartEngine(t *testing.T) {
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
 	}
+
 	time.Sleep(time.Duration(*startDelay) * time.Millisecond) // Give time to rater to fire up
 	httpClient = new(http.Client)
 }
