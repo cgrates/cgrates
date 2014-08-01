@@ -40,3 +40,7 @@ func (sts *CDRStatsV1) GetMetrics(attr AttrGetMetrics, reply *map[string]float64
 	}
 	return sts.CdrStats.GetValues(attr.StatsQueueId, reply)
 }
+
+func (sts *CDRStatsV1) GetQueueIds(empty string, reply *[]string) error {
+	return sts.CdrStats.GetQueueIds(0, reply)
+}
