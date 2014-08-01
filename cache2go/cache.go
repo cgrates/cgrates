@@ -130,15 +130,15 @@ func GetCached(key string) (v interface{}, err error) {
 
 func GetKeyAge(key string) (time.Duration, error) {
 	mux.RLock()
+	defer mux.RUnlock()
 	if r, ok := cache[key]; ok {
 		return time.Since(r.timestamp), nil
 	}
-	mux.RUnlock()
 	xMux.RLock()
+	defer xMux.RUnlock()
 	if r, ok := xcache[key]; ok {
 		return r.age(), nil
 	}
-	xMux.RUnlock()
 	return 0, errors.New("not found")
 }
 
@@ -209,8 +209,8 @@ func GetAllEntries(prefix string) map[string]interface{} {
 func Flush() {
 	mux.Lock()
 	cache = make(map[string]timestampedValue)
-	xMux.Lock()
 	mux.Unlock()
+	xMux.Lock()
 	for _, v := range xcache {
 		if v.timer() != nil {
 			v.timer().Stop()
@@ -220,7 +220,7 @@ func Flush() {
 	xMux.Unlock()
 	cMux.Lock()
 	counters = make(map[string]int64)
-	defer cMux.Unlock()
+	cMux.Unlock()
 }
 
 func CountEntries(prefix string) (result int64) {
