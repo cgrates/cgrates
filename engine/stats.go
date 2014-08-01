@@ -148,7 +148,7 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 		var existing bool
 		if oldQueues != nil {
 			if sq, existing = oldQueues[cs.Id]; existing {
-				sq.conf = cs
+				sq.UpdateConf(cs)
 			}
 		}
 		if sq == nil {
