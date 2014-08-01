@@ -469,7 +469,7 @@ func main() {
 			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), &out)
 		}
 		server.RpcRegister(cdrStats)
-		server.RpcRegister(apier.CDRStatsV1{cdrStats}) // Public APIs
+		server.RpcRegister(&apier.CDRStatsV1{cdrStats}) // Public APIs
 	}
 
 	var cdrsChan chan struct{}

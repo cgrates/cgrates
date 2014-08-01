@@ -688,7 +688,7 @@ func (rs *RedisStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 		if err != nil {
 			continue
 		}
-		var cs *CdrStats
+		cs := &CdrStats{}
 		err = rs.ms.Unmarshal(value, cs)
 		css = append(css, cs)
 	}
