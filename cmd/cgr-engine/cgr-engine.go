@@ -463,7 +463,7 @@ func main() {
 	}
 
 	if cfg.CDRStatsEnabled {
-		cdrStats = engine.NewStats(accountDb)
+		cdrStats = engine.NewStats(ratingDb)
 		if cfg.CDRStatConfig != nil && len(cfg.CDRStatConfig.Metrics) != 0 {
 			var out int
 			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), &out)

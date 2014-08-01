@@ -277,7 +277,7 @@ func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("CDR Stats Queues")
 	}
 	for _, sq := range dbr.cdrStats {
-		err = accountingStorage.SetCdrStats(sq)
+		err = dataStorage.SetCdrStats(sq)
 		if err != nil {
 			return err
 		}

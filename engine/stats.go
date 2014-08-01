@@ -39,9 +39,9 @@ type Stats struct {
 	mux    sync.RWMutex
 }
 
-func NewStats(accountDb AccountingStorage) *Stats {
+func NewStats(ratingDb RatingStorage) *Stats {
 	cdrStats := &Stats{}
-	if css, err := accountDb.GetAllCdrStats(); err == nil {
+	if css, err := ratingDb.GetAllCdrStats(); err == nil {
 		cdrStats.UpdateQueues(css, nil)
 	} else {
 		Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))

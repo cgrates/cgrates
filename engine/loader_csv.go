@@ -330,7 +330,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		log.Print("CDR Stats Queues")
 	}
 	for _, sq := range csvr.cdrStats {
-		err = accountingStorage.SetCdrStats(sq)
+		err = dataStorage.SetCdrStats(sq)
 		if err != nil {
 			return err
 		}

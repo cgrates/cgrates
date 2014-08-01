@@ -86,6 +86,9 @@ type RatingStorage interface {
 	SetDestination(*Destination) error
 	GetLCR(string, bool) (*LCR, error)
 	SetLCR(*LCR) error
+	SetCdrStats(*CdrStats) error
+	GetCdrStats(string) (*CdrStats, error)
+	GetAllCdrStats() ([]*CdrStats, error)
 }
 
 type AccountingStorage interface {
@@ -107,9 +110,6 @@ type AccountingStorage interface {
 	GetAllActionTimings() (map[string]ActionPlan, error)
 	GetDerivedChargers(string, bool) (utils.DerivedChargers, error)
 	SetDerivedChargers(string, utils.DerivedChargers) error
-	SetCdrStats(*CdrStats) error
-	GetCdrStats(string) (*CdrStats, error)
-	GetAllCdrStats() ([]*CdrStats, error)
 }
 
 type CdrStorage interface {
