@@ -44,3 +44,12 @@ func (sts *CDRStatsV1) GetMetrics(attr AttrGetMetrics, reply *map[string]float64
 func (sts *CDRStatsV1) GetQueueIds(empty string, reply *[]string) error {
 	return sts.CdrStats.GetQueueIds(0, reply)
 }
+
+type AttrReloadStatsQueues struct {
+	StatsQueueIds []string
+}
+
+func (sts *CDRStatsV1) ReloadStatsQueues(attr AttrReloadStatsQueues, reply *string) error {
+	*reply = utils.OK
+	return nil
+}
