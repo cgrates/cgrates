@@ -54,7 +54,7 @@ func (sq *StatsQueue) UpdateConf(conf *CdrStats) {
 	sq.mux.Lock()
 	defer sq.mux.Unlock()
 	sq.conf = conf
-	sq.cdrs = make([]*QCdr, conf.QueueLength)
+	sq.cdrs = make([]*QCdr, 0)
 	sq.metrics = make(map[string]Metric, len(conf.Metrics))
 	for _, m := range conf.Metrics {
 		if metric := CreateMetric(m); metric != nil {

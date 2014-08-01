@@ -108,7 +108,7 @@ func (s *Stats) ReloadQueues(ids []string, out *int) error {
 func (s *Stats) ResetQueues(ids []string, out *int) error {
 	if ids == nil {
 		for _, sq := range s.queues {
-			sq.cdrs = make([]*QCdr, sq.conf.QueueLength)
+			sq.cdrs = make([]*QCdr, 0)
 			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
 			for _, m := range sq.conf.Metrics {
 				if metric := CreateMetric(m); metric != nil {
@@ -123,7 +123,7 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 				Logger.Warning(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
 				continue
 			}
-			sq.cdrs = make([]*QCdr, sq.conf.QueueLength)
+			sq.cdrs = make([]*QCdr, 0)
 			sq.metrics = make(map[string]Metric, len(sq.conf.Metrics))
 			for _, m := range sq.conf.Metrics {
 				if metric := CreateMetric(m); metric != nil {
