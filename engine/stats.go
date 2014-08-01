@@ -28,39 +28,27 @@ import (
 )
 
 type StatsInterface interface {
-	AddQueue(*CdrStats, *int) error
 	GetValues(string, *map[string]float64) error
 	GetQueueIds(int, *[]string) error
 	AppendCDR(*utils.StoredCdr, *int) error
+	AddQueue(*CdrStats, *int) error
+	ReloadQueues([]string, *int) error
 }
 
 type Stats struct {
-	queues map[string]*StatsQueue
-	mux    sync.RWMutex
+	queues   map[string]*StatsQueue
+	mux      sync.RWMutex
+	ratingDb RatingStorage
 }
 
 func NewStats(ratingDb RatingStorage) *Stats {
-	cdrStats := &Stats{}
+	cdrStats := &Stats{ratingDb: ratingDb}
 	if css, err := ratingDb.GetAllCdrStats(); err == nil {
 		cdrStats.UpdateQueues(css, nil)
 	} else {
 		Logger.Err(fmt.Sprintf("Cannot load cdr stats: %v", err))
 	}
 	return cdrStats
-}
-
-func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-	if s.queues == nil {
-		s.queues = make(map[string]*StatsQueue)
-	}
-	if sq, exists := s.queues[cs.Id]; exists {
-		sq.UpdateConf(cs)
-	} else {
-		s.queues[cs.Id] = NewStatsQueue(cs)
-	}
-	return nil
 }
 
 func (s *Stats) GetQueueIds(in int, ids *[]string) error {
@@ -82,6 +70,38 @@ func (s *Stats) GetValues(sqID string, values *map[string]float64) error {
 		return nil
 	}
 	return errors.New("Not Found")
+}
+
+func (s *Stats) AddQueue(cs *CdrStats, out *int) error {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	if s.queues == nil {
+		s.queues = make(map[string]*StatsQueue)
+	}
+	if sq, exists := s.queues[cs.Id]; exists {
+		sq.UpdateConf(cs)
+	} else {
+		s.queues[cs.Id] = NewStatsQueue(cs)
+	}
+	return nil
+}
+
+func (s *Stats) ReloadQueues(ids []string, out *int) error {
+	if ids == nil {
+		if css, err := s.ratingDb.GetAllCdrStats(); err == nil {
+			s.UpdateQueues(css, nil)
+		} else {
+			return fmt.Errorf("Cannot load cdr stats: %v", err)
+		}
+	}
+	for _, id := range ids {
+		if cs, err := s.ratingDb.GetCdrStats(id); err == nil {
+			s.AddQueue(cs, nil)
+		} else {
+			return fmt.Errorf("Cannot load cdr stats for id %v: %v", id, err)
+		}
+	}
+	return nil
 }
 
 // change the xisting ones
@@ -130,10 +150,6 @@ func NewProxyStats(addr string) (*ProxyStats, error) {
 	return &ProxyStats{Client: client}, nil
 }
 
-func (ps *ProxyStats) AddQueue(cs *CdrStats, out *int) error {
-	return ps.Client.Call("Stats.AddQueue", cs, out)
-}
-
 func (ps *ProxyStats) GetValues(sqID string, values *map[string]float64) error {
 	return ps.Client.Call("Stats.GetValues", sqID, values)
 }
@@ -144,4 +160,12 @@ func (ps *ProxyStats) AppendCDR(cdr *utils.StoredCdr, out *int) error {
 
 func (ps *ProxyStats) GetQueueIds(in int, ids *[]string) error {
 	return ps.Client.Call("Stats.GetQueueIds", in, ids)
+}
+
+func (ps *ProxyStats) AddQueue(cs *CdrStats, out *int) error {
+	return ps.Client.Call("Stats.AddQueue", cs, out)
+}
+
+func (ps *ProxyStats) ReloadQueues(ids []string, out *int) error {
+	return ps.Client.Call("Stats.ReloadQueues", ids, out)
 }
