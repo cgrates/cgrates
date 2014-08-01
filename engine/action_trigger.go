@@ -77,7 +77,7 @@ func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueue) (err error) {
 			Logger.Warning(fmt.Sprintf("Function type %v not available, aborting execution!", a.ActionType))
 			return
 		}
-		go Logger.Info(fmt.Sprintf("Executing %v: %v", ub.Id, a))
+		go Logger.Info(fmt.Sprintf("Executing %v, %v: %v", ub, sq, a))
 		err = actionFunction(ub, sq, a)
 		if err == nil {
 			atLeastOneActionExecuted = true
