@@ -64,6 +64,9 @@ func (asr *ASRMetric) RemoveCdr(cdr *QCdr) {
 }
 
 func (asr *ASRMetric) GetValue() float64 {
+	if asr.total == 0 {
+		return 0
+	}
 	return asr.answered / asr.total * 100
 }
 
@@ -89,6 +92,9 @@ func (acd *ACDMetric) RemoveCdr(cdr *QCdr) {
 }
 
 func (acd *ACDMetric) GetValue() float64 {
+	if acd.count == 0 {
+		return 0
+	}
 	return acd.sum.Seconds() / acd.count
 }
 
@@ -114,5 +120,8 @@ func (acc *ACCMetric) RemoveCdr(cdr *QCdr) {
 }
 
 func (acc *ACCMetric) GetValue() float64 {
+	if acc.count == 0 {
+		return 0
+	}
 	return acc.sum / acc.count
 }
