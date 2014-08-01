@@ -58,10 +58,9 @@ func (sts *CDRStatsV1) ReloadQueues(attr AttrReloadQueues, reply *string) error 
 }
 
 func (sts *CDRStatsV1) ResetQueues(attr AttrReloadQueues, reply *string) error {
-	/*if err := sts.CdrStats.ReloadQueues(attr.StatsQueueIds, nil); err != nil {
+	if err := sts.CdrStats.ReloadQueues(attr.StatsQueueIds, nil); err != nil {
 		return err
 	}
-	*/
 	*reply = utils.OK
 	return nil
 }
