@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
-import "time"
+import (
+	"time"
+
+	"github.com/cgrates/cgrates/utils"
+)
 
 type Metric interface {
 	AddCdr(*QCdr)
@@ -68,7 +72,7 @@ func (asr *ASRMetric) GetValue() float64 {
 		return 0
 	}
 	val := asr.answered / asr.total * 100
-	return val //utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
 
 // ACD – Average Call Duration
@@ -97,7 +101,7 @@ func (acd *ACDMetric) GetValue() float64 {
 		return 0
 	}
 	val := acd.sum.Seconds() / acd.count
-	return val //utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
 
 // ACC – Average Call Cost
@@ -126,5 +130,5 @@ func (acc *ACCMetric) GetValue() float64 {
 		return 0
 	}
 	val := acc.sum / acc.count
-	return val //utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
+	return utils.Round(val, globalRoundingDecimals, utils.ROUNDING_MIDDLE)
 }
