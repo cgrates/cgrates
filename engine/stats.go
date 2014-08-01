@@ -55,7 +55,7 @@ func NewStats(ratingDb RatingStorage) *Stats {
 func (s *Stats) GetQueueIds(in int, ids *[]string) error {
 	s.mux.Lock()
 	defer s.mux.Unlock()
-	result := make([]string)
+	result := make([]string, 0)
 	for id, _ := range s.queues {
 		result = append(result, id)
 	}
