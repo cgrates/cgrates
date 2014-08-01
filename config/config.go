@@ -179,7 +179,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSMediator = ""
 	self.CDRSStats = ""
 	self.CDRStatsEnabled = false
-	self.CDRStatConfig = &CdrStatsConfig{Id: utils.DEFAULT_RUNID, QueueLength: 50, TimeWindow: time.Duration(1) * time.Hour, Metrics: []string{"ASR", "ACD", "ACC"}}
+	self.CDRStatConfig = NewCdrStatsConfigWithDefaults()
 	self.CdreDefaultInstance, _ = NewDefaultCdreConfig()
 	self.CdrcEnabled = false
 	self.CdrcCdrs = utils.INTERNAL

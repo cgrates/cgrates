@@ -84,7 +84,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
 	eCfg.CDRStatsEnabled = false
-	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.DEFAULT_RUNID, QueueLength: 50, TimeWindow: time.Duration(1) * time.Hour, Metrics: []string{"ASR", "ACD", "ACC"}}
+	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.META_DEFAULT, QueueLength: 50, TimeWindow: time.Duration(1) * time.Hour, Metrics: []string{"ASR", "ACD", "ACC"}}
 	eCfg.CdrcEnabled = false
 	eCfg.CdrcCdrs = utils.INTERNAL
 	eCfg.CdrcRunDelay = time.Duration(0)
@@ -219,7 +219,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CDRSMediator = "test"
 	eCfg.CDRStatsEnabled = true
-	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.DEFAULT_RUNID, QueueLength: 99, TimeWindow: time.Duration(99) * time.Second,
+	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.META_DEFAULT, QueueLength: 99, TimeWindow: time.Duration(99) * time.Second,
 		Metrics: []string{"test"}, TORs: []string{"test"}, CdrHosts: []string{"test"}, CdrSources: []string{"test"}, ReqTypes: []string{"test"}, Directions: []string{"test"},
 		Tenants: []string{"test"}, Categories: []string{"test"}, Accounts: []string{"test"}, Subjects: []string{"test"}, DestinationPrefixes: []string{"test"},
 		UsageInterval:   []time.Duration{time.Duration(99) * time.Second},

@@ -28,8 +28,7 @@ import (
 // Parse the configuration file for CDRStatConfigs
 func ParseCfgDefaultCDRStatsConfig(c *conf.ConfigFile) (*CdrStatsConfig, error) {
 	var err error
-	csCfg := new(CdrStatsConfig)
-	csCfg.Id = utils.DEFAULT_RUNID
+	csCfg := NewCdrStatsConfigWithDefaults()
 	if hasOpt := c.HasOption("cdrstats", "queue_length"); hasOpt {
 		csCfg.QueueLength, _ = c.GetInt("cdrstats", "queue_length")
 	}
@@ -171,6 +170,12 @@ func ParseCfgDefaultCDRStatsConfig(c *conf.ConfigFile) (*CdrStatsConfig, error) 
 	return csCfg, nil
 }
 
+func NewCdrStatsConfigWithDefaults() *CdrStatsConfig {
+	csCfg := new(CdrStatsConfig)
+	csCfg.setDefaults()
+	return csCfg
+}
+
 type CdrStatsConfig struct {
 	Id                  string        // Config id, unique per config instance
 	QueueLength         int           // Number of items in the stats buffer
@@ -192,4 +197,11 @@ type CdrStatsConfig struct {
 	RatedAccounts       []string
 	RatedSubjects       []string
 	CostInterval        []float64 // 2 or less items, (>=Cost, <Cost)
+}
+
+func (csCfg *CdrStatsConfig) setDefaults() {
+	csCfg.Id = utils.META_DEFAULT
+	csCfg.QueueLength = 50
+	csCfg.TimeWindow = time.Duration(1) * time.Hour
+	csCfg.Metrics = []string{"ASR", "ACD", "ACC"}
 }
