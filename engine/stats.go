@@ -120,7 +120,7 @@ func (s *Stats) ResetQueues(ids []string, out *int) error {
 		for _, id := range ids {
 			sq, exists := s.queues[id]
 			if !exists {
-				Logger.Err(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
+				Logger.Warning(fmt.Sprintf("Cannot reset queue id %v: Not Fund", id))
 				continue
 			}
 			sq.cdrs = make([]*QCdr, sq.conf.QueueLength)
