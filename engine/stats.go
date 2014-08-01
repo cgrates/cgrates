@@ -143,6 +143,11 @@ func (s *Stats) UpdateQueues(css []*CdrStats, out *int) error {
 	defer s.mux.Unlock()
 	oldQueues := s.queues
 	s.queues = make(map[string]*StatsQueue, len(css))
+	if def, exists := oldQueues[utils.META_DEFAULT]; exists {
+		// for reset
+		def.UpdateConf(def.conf)
+		s.queues[utils.META_DEFAULT] = def
+	}
 	for _, cs := range css {
 		var sq *StatsQueue
 		var existing bool
