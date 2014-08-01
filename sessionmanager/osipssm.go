@@ -104,7 +104,7 @@ func (osm *OsipsSessionManager) SubscribeEvents(evStop chan struct{}) error {
 			addrListen := listenAddrSplt[0]
 			if len(addrListen) == 0 { //Listen on all addresses, try finding out from mi connection
 				if localAddr := osm.miConn.LocallAddr(); localAddr != nil {
-					addrListen = strings.Split(localAddr.String(), ":")[1]
+					addrListen = strings.Split(localAddr.String(), ":")[0]
 				}
 			}
 			for eventName := range osm.eventHandlers {
