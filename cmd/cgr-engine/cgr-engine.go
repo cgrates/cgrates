@@ -465,8 +465,7 @@ func main() {
 	if cfg.CDRStatsEnabled {
 		cdrStats = engine.NewStats(ratingDb)
 		if cfg.CDRStatConfig != nil && len(cfg.CDRStatConfig.Metrics) != 0 {
-			var out int
-			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), &out)
+			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), nil)
 		}
 		server.RpcRegister(cdrStats)
 		server.RpcRegister(&apier.CDRStatsV1{cdrStats}) // Public APIs
