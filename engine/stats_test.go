@@ -311,6 +311,38 @@ func TestStatsReloadQueuesWithDefault(t *testing.T) {
 	}
 }
 
+func TestStatsReloadQueuesWithIds(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	if err := cdrStats.ReloadQueues([]string{"CDRST1"}, nil); err != nil {
+		t.Error("Error reloading queues: ", err)
+	}
+	ids := []string{}
+	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
+		t.Error("Error getting queue ids: ", err)
+	}
+	result := len(ids)
+	expected := 2
+	if result != expected {
+		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+	}
+	valMap := make(map[string]float64)
+	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
+		t.Error("Error getting metric values: ", err)
+	}
+	if len(valMap) != 2 || valMap["ACD"] != 10 || valMap["ASR"] != 100 {
+		t.Error("Error on metric map: ", valMap)
+	}
+}
+
 func TestStatsResetQueues(t *testing.T) {
 	cdrStats := NewStats(dataStorage)
 	cdr := &utils.StoredCdr{
@@ -339,6 +371,38 @@ func TestStatsResetQueues(t *testing.T) {
 		t.Error("Error getting metric values: ", err)
 	}
 	if len(valMap) != 2 || valMap["ACD"] != 0 || valMap["ASR"] != 0 {
+		t.Error("Error on metric map: ", valMap)
+	}
+}
+
+func TestStatsResetQueuesWithIds(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	if err := cdrStats.ResetQueues([]string{"CDRST1"}, nil); err != nil {
+		t.Error("Error reloading queues: ", err)
+	}
+	ids := []string{}
+	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
+		t.Error("Error getting queue ids: ", err)
+	}
+	result := len(ids)
+	expected := 2
+	if result != expected {
+		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+	}
+	valMap := make(map[string]float64)
+	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
+		t.Error("Error getting metric values: ", err)
+	}
+	if len(valMap) != 2 || valMap["ACD"] != 10 || valMap["ASR"] != 100 {
 		t.Error("Error on metric map: ", valMap)
 	}
 }
