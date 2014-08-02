@@ -36,15 +36,17 @@ var (
 
 // Returns error if not able to properly store the CDR, mediation is async since we can always recover offline
 func storeAndMediate(storedCdr *utils.StoredCdr) error {
+	if !cfg.CDRSStoreDisable {
+		if err := storage.SetCdr(storedCdr); err != nil {
+			return err
+		}
+	}
 	if stats != nil {
 		go func() {
 			if err := stats.AppendCDR(storedCdr, nil); err != nil {
 				Logger.Err(fmt.Sprintf("Could not append cdr to stats: %s", err.Error()))
 			}
 		}()
-	}
-	if err := storage.SetCdr(storedCdr); err != nil {
-		return err
 	}
 	if cfg.CDRSMediator == utils.INTERNAL {
 		go func() {

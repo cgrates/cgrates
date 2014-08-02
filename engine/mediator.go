@@ -168,9 +168,11 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 		if err := self.rateCDR(cdr); err != nil {
 			extraInfo = err.Error()
 		}
-		if err := self.cdrDb.SetRatedCdr(cdr, extraInfo); err != nil {
-			Logger.Err(fmt.Sprintf("<Mediator> Could not record cost for cgrid: <%s>, ERROR: <%s>, cost: %f, extraInfo: %s",
-				cdr.CgrId, err.Error(), cdr.Cost, extraInfo))
+		if !self.cgrCfg.MediatorStoreDisable {
+			if err := self.cdrDb.SetRatedCdr(cdr, extraInfo); err != nil {
+				Logger.Err(fmt.Sprintf("<Mediator> Could not record cost for cgrid: <%s>, ERROR: <%s>, cost: %f, extraInfo: %s",
+					cdr.CgrId, err.Error(), cdr.Cost, extraInfo))
+			}
 		}
 		if sendToStats && self.stats != nil { // We send to stats only after saving to db since there are chances we cannot store and then no way to reproduce stats offline
 			go func() {
