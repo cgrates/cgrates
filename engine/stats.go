@@ -99,7 +99,7 @@ func (s *Stats) ReloadQueues(ids []string, out *int) error {
 		if cs, err := s.ratingDb.GetCdrStats(id); err == nil {
 			s.AddQueue(cs, nil)
 		} else {
-			return fmt.Errorf("Cannot load cdr stats for id %v: %v", id, err)
+			return err
 		}
 	}
 	return nil
