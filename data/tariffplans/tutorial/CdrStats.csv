@@ -1,0 +1,6 @@
+#Id,QueueLength,TimeWindow,Metrics,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
+CDRST5,5,1m,ASR,,*voice,,,,*out,cgrates.org,call,1001,1001,,,default,,,,CDRST5_WARN
+CDRST5,,,ACD,,,,,,,,,,,,,,,,,
+CDRST5,,,ACC,,,,,,,,,,,,,,,,,
+CDRST6,10,0,ASR,,,,,,,cgrates.org,,,,,,default,,,,CDRST6_WARN
+CDRST6,,,ACD,,,,,,,,,,,,,,,,,

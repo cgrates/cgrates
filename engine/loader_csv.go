@@ -189,7 +189,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 		dataStorage.(Storage).Flush()
 	}
 	if verbose {
-		log.Print("Destinations")
+		log.Print("Destinations:")
 	}
 	for _, d := range csvr.destinations {
 		err = dataStorage.SetDestination(d)
@@ -197,11 +197,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Print(d.Id, " : ", d.Prefixes)
+			log.Print("\t", d.Id, " : ", d.Prefixes)
 		}
 	}
 	if verbose {
-		log.Print("Rating plans")
+		log.Print("Rating Plans:")
 	}
 	for _, rp := range csvr.ratingPlans {
 		err = dataStorage.SetRatingPlan(rp)
@@ -209,11 +209,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Print(rp.Id)
+			log.Print("\t", rp.Id)
 		}
 	}
 	if verbose {
-		log.Print("Rating profiles")
+		log.Print("Rating Profiles:")
 	}
 	for _, rp := range csvr.ratingProfiles {
 		err = dataStorage.SetRatingProfile(rp)
@@ -221,11 +221,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Print(rp.Id)
+			log.Print("\t", rp.Id)
 		}
 	}
 	if verbose {
-		log.Print("Action plans")
+		log.Print("Action Plans:")
 	}
 	for k, ats := range csvr.actionsTimings {
 		err = accountingStorage.SetActionTimings(k, ats)
@@ -233,11 +233,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Println(k)
+			log.Println("\t", k)
 		}
 	}
 	if verbose {
-		log.Print("Shared groups")
+		log.Print("Shared Groups:")
 	}
 	for k, sg := range csvr.sharedGroups {
 		err = accountingStorage.SetSharedGroup(sg)
@@ -245,11 +245,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Println(k)
+			log.Println("\t", k)
 		}
 	}
 	if verbose {
-		log.Print("LCR Rules")
+		log.Print("LCR Rules:")
 	}
 	for k, lcr := range csvr.lcrs {
 		err = dataStorage.SetLCR(lcr)
@@ -257,11 +257,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Println(k)
+			log.Println("\t", k)
 		}
 	}
 	if verbose {
-		log.Print("Actions")
+		log.Print("Actions:")
 	}
 	for k, as := range csvr.actions {
 		err = accountingStorage.SetActions(k, as)
@@ -269,11 +269,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Println(k)
+			log.Println("\t", k)
 		}
 	}
 	if verbose {
-		log.Print("Account actions")
+		log.Print("Account Actions:")
 	}
 	for _, ub := range csvr.accountActions {
 		err = accountingStorage.SetAccount(ub)
@@ -281,11 +281,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Println(ub.Id)
+			log.Println("\t", ub.Id)
 		}
 	}
 	if verbose {
-		log.Print("Rating profile aliases")
+		log.Print("Rating Profile Aliases:")
 	}
 	if err := dataStorage.RemoveRpAliases(csvr.dirtyRpAliases); err != nil {
 		return err
@@ -296,11 +296,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Print(key)
+			log.Print("\t", key)
 		}
 	}
 	if verbose {
-		log.Print("Account aliases")
+		log.Print("Account Aliases:")
 	}
 	if err := accountingStorage.RemoveAccAliases(csvr.dirtyAccAliases); err != nil {
 		return err
@@ -311,11 +311,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Print(key)
+			log.Print("\t", key)
 		}
 	}
 	if verbose {
-		log.Print("Derived Chargers")
+		log.Print("Derived Chargers:")
 	}
 	for key, dcs := range csvr.derivedChargers {
 		err = accountingStorage.SetDerivedChargers(key, dcs)
@@ -323,11 +323,11 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Print(key)
+			log.Print("\t", key)
 		}
 	}
 	if verbose {
-		log.Print("CDR Stats Queues")
+		log.Print("CDR Stats Queues:")
 	}
 	for _, sq := range csvr.cdrStats {
 		err = dataStorage.SetCdrStats(sq)
@@ -335,7 +335,7 @@ func (csvr *CSVReader) WriteToDatabase(flush, verbose bool) (err error) {
 			return err
 		}
 		if verbose {
-			log.Print(sq.Id)
+			log.Print("\t", sq.Id)
 		}
 	}
 	return
