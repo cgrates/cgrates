@@ -1,0 +1,6 @@
+#Id,QueueLength,TimeWindow,Metrics,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,DestinationPrefix,UsageInterval,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
+CDRST3,5,60m,ASR,2014-07-29T15:00:00Z;2014-07-29T16:00:00Z,*voice,87.139.12.167,FS_JSON,rated,*out,cgrates.org,call,dan,dan,+49,5m;10m,default,rif,rif,0;2,CDRST3_WARN_ASR
+CDRST3,,,ACD,,,,,,,,,,,,,,,,,CDRST3_WARN_ACD
+CDRST3,,,ACC,,,,,,,,,,,,,,,,,CDRST3_WARN_ACC
+CDRST4,10,0,ASR,,,,,,,cgrates.org,call,,,,,,,,,CDRST4_WARN_ASR
+CDRST4,,,ACD,,,,,,,,,,,,,,,,,CDRST4_WARN_ACD

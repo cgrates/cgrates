@@ -1,0 +1,2 @@
+#Tag,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_1CENT,0,1,1s,1s,0s

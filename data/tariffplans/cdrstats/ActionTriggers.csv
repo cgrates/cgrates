@@ -1,0 +1,6 @@
+#Tag,BalanceTag,Direction,ThresholdType,ThresholdValue,Recurrent,MinSleep,BalanceDestinationTag,BalanceWeight,BalanceExpiryTime,BalanceRatingSubject,BalanceSharedGroup,StatsMinQueuedItems,ActionsTag,Weight
+CDRST3_WARN_ASR,,,*min_asr,45,true,1h,,,,,,3,CDRST_LOG,10
+CDRST3_WARN_ACD,,,*min_acd,10,true,1h,,,,,,5,CDRST_LOG,10
+CDRST3_WARN_ACC,,,*max_acc,10,true,10m,,,,,,5,CDRST_LOG,10
+CDRST4_WARN_ASR,,,*min_asr,30,true,0,,,,,,5,CDRST_LOG,10
+CDRST4_WARN_ACD,,,*min_acd,3,true,0,,,,,,2,CDRST_LOG,10
