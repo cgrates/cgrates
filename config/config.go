@@ -92,6 +92,7 @@ type CGRConfig struct {
 	CDRSExtraFields         []*utils.RSRField            // Extra fields to store in CDRs
 	CDRSMediator            string                       // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
 	CDRSStats               string                       // Address where to reach the Mediator. <""|intenal>
+	CDRSStoreDisable        bool                         // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
 	CDRStatsEnabled         bool                         // Enable CDR Stats service
 	CDRStatConfig           *CdrStatsConfig              // Active cdr stats configuration instances
 	CdreDefaultInstance     *CdreConfig                  // Will be used in the case no specific one selected by API
@@ -112,9 +113,10 @@ type CGRConfig struct {
 	SMMaxCallDuration       time.Duration // The maximum duration of a call
 	SMMinCallDuration       time.Duration // Only authorize calls with allowed duration bigger than this
 	MediatorEnabled         bool          // Starts Mediator service: <true|false>.
+	MediatorReconnects      int           // Number of reconnects to rater before giving up.
 	MediatorRater           string
 	MediatorStats           string                // Address where to reach the Rater: <internal|x.y.z.y:1234>
-	MediatorReconnects      int                   // Number of reconnects to rater before giving up.
+	MediatorStoreDisable    bool                  // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
 	DerivedChargers         utils.DerivedChargers // System wide derived chargers, added to the account level ones
 	CombinedDerivedChargers bool                  // Combine accounts specific derived_chargers with server configured
 	FreeswitchServer        string                // freeswitch address host:port
@@ -178,6 +180,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSExtraFields = []*utils.RSRField{}
 	self.CDRSMediator = ""
 	self.CDRSStats = ""
+	self.CDRSStoreDisable = false
 	self.CDRStatsEnabled = false
 	self.CDRStatConfig = NewCdrStatsConfigWithDefaults()
 	self.CdreDefaultInstance, _ = NewDefaultCdreConfig()
@@ -207,6 +210,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorRater = utils.INTERNAL
 	self.MediatorReconnects = 3
 	self.MediatorStats = utils.INTERNAL
+	self.MediatorStoreDisable = false
 	self.DerivedChargers = make(utils.DerivedChargers, 0)
 	self.CombinedDerivedChargers = true
 	self.SMEnabled = false
@@ -427,6 +431,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdrs", "cdrstats"); hasOpt {
 		cfg.CDRSStats, _ = c.GetString("cdrs", "cdrstats")
 	}
+	if hasOpt = c.HasOption("cdrs", "store_disable"); hasOpt {
+		cfg.CDRSStoreDisable, _ = c.GetBool("cdrs", "store_disable")
+	}
 	if hasOpt = c.HasOption("cdrstats", "enabled"); hasOpt {
 		cfg.CDRStatsEnabled, _ = c.GetBool("cdrstats", "enabled")
 	}
@@ -532,6 +539,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("mediator", "cdrstats"); hasOpt {
 		cfg.MediatorStats, _ = c.GetString("mediator", "cdrstats")
+	}
+	if hasOpt = c.HasOption("mediator", "store_disable"); hasOpt {
+		cfg.MediatorStoreDisable, _ = c.GetBool("mediator", "store_disable")
 	}
 	if hasOpt = c.HasOption("session_manager", "enabled"); hasOpt {
 		cfg.SMEnabled, _ = c.GetBool("session_manager", "enabled")

@@ -83,6 +83,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSEnabled = false
 	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
+	eCfg.CDRSStats = ""
+	eCfg.CDRSStoreDisable = false
 	eCfg.CDRStatsEnabled = false
 	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.META_DEFAULT, QueueLength: 50, TimeWindow: time.Duration(1) * time.Hour, Metrics: []string{"ASR", "ACD", "ACC"}}
 	eCfg.CdrcEnabled = false
@@ -111,6 +113,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.MediatorRater = utils.INTERNAL
 	eCfg.MediatorReconnects = 3
 	eCfg.MediatorStats = utils.INTERNAL
+	eCfg.MediatorStoreDisable = false
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
 	eCfg.SMRater = utils.INTERNAL
@@ -218,6 +221,8 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.CDRSEnabled = true
 	eCfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.CDRSMediator = "test"
+	eCfg.CDRSStats = "test"
+	eCfg.CDRSStoreDisable = true
 	eCfg.CDRStatsEnabled = true
 	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.META_DEFAULT, QueueLength: 99, TimeWindow: time.Duration(99) * time.Second,
 		Metrics: []string{"test"}, TORs: []string{"test"}, CdrHosts: []string{"test"}, CdrSources: []string{"test"}, ReqTypes: []string{"test"}, Directions: []string{"test"},
@@ -263,6 +268,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.MediatorRater = "test"
 	eCfg.MediatorReconnects = 99
 	eCfg.MediatorStats = "test"
+	eCfg.MediatorStoreDisable = true
 	eCfg.SMEnabled = true
 	eCfg.SMSwitchType = "test"
 	eCfg.SMRater = "test"
