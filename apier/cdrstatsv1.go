@@ -45,11 +45,7 @@ func (sts *CDRStatsV1) GetQueueIds(empty string, reply *[]string) error {
 	return sts.CdrStats.GetQueueIds(0, reply)
 }
 
-type AttrReloadQueues struct {
-	StatsQueueIds []string
-}
-
-func (sts *CDRStatsV1) ReloadQueues(attr AttrReloadQueues, reply *string) error {
+func (sts *CDRStatsV1) ReloadQueues(attr utils.AttrCDRStatsReloadQueues, reply *string) error {
 	if err := sts.CdrStats.ReloadQueues(attr.StatsQueueIds, nil); err != nil {
 		return err
 	}
@@ -57,7 +53,7 @@ func (sts *CDRStatsV1) ReloadQueues(attr AttrReloadQueues, reply *string) error 
 	return nil
 }
 
-func (sts *CDRStatsV1) ResetQueues(attr AttrReloadQueues, reply *string) error {
+func (sts *CDRStatsV1) ResetQueues(attr utils.AttrCDRStatsReloadQueues, reply *string) error {
 	if err := sts.CdrStats.ResetQueues(attr.StatsQueueIds, nil); err != nil {
 		return err
 	}

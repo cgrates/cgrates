@@ -198,7 +198,7 @@ func TestCDRStatsLclResetMetrics(t *testing.T) {
 		return
 	}
 	var reply string
-	if err := cdrstRpc.Call("CDRStatsV1.ResetQueues", AttrReloadQueues{StatsQueueIds: []string{"CDRST4"}}, &reply); err != nil {
+	if err := cdrstRpc.Call("CDRStatsV1.ResetQueues", utils.AttrCDRStatsReloadQueues{StatsQueueIds: []string{"CDRST4"}}, &reply); err != nil {
 		t.Error("Calling CDRStatsV1.ResetQueues, got error: ", err.Error())
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply received: ", reply)

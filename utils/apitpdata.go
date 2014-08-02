@@ -455,3 +455,7 @@ func NewDTAFromAccountKey(accountKey string) (*DirectionTenantAccount, error) {
 type DirectionTenantAccount struct {
 	Direction, Tenant, Account string
 }
+
+type AttrCDRStatsReloadQueues struct {
+	StatsQueueIds []string
+}

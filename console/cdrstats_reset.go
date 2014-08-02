@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier"
+import "github.com/cgrates/cgrates/utils"
 
 func init() {
 	c := &CmdCdrResetQueues{
@@ -33,7 +33,7 @@ func init() {
 type CmdCdrResetQueues struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrReloadQueues
+	rpcParams *utils.AttrCDRStatsReloadQueues
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdCdrResetQueues) RpcMethod() string {
 
 func (self *CmdCdrResetQueues) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrReloadQueues{}
+		self.rpcParams = &utils.AttrCDRStatsReloadQueues{}
 	}
 	return self.rpcParams
 }
