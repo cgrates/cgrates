@@ -672,7 +672,7 @@ func (rs *RedisStorage) SetCdrStats(cs *CdrStats) error {
 
 func (rs *RedisStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
 	var values []byte
-	if values, err = rs.db.Get(key); err == nil {
+	if values, err = rs.db.Get(CDR_STATS_PREFIX + key); err == nil {
 		err = rs.ms.Unmarshal(values, &cs)
 	}
 	return

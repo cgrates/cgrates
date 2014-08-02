@@ -53,8 +53,22 @@ func TestToJSONString(t *testing.T) {
 	}
 }
 
+func TestToJSONArrayNoSpace(t *testing.T) {
+	jsn := ToJSON(`Param=["id1","id2","id3"] Another="Patram"`)
+	if string(jsn) != `{"Param":["id1","id2","id3"],"Another":"Patram"}` {
+		t.Error("Error string: ", string(jsn))
+	}
+}
+
+func TestToJSONArraySpace(t *testing.T) {
+	jsn := ToJSON(`Param=["id1", "id2", "id3"]  Another="Patram"`)
+	if string(jsn) != `{"Param":["id1", "id2", "id3"],"Another":"Patram"}` {
+		t.Error("Error string: ", string(jsn))
+	}
+}
+
 func TestFromJSON(t *testing.T) {
-	line := FromJSON([]byte(`{"TimeStart":"Test","Crazy":1,"Mama":true,"Test":1}`), []string{"TimeStart", "Test", "Crazy", "Mama", "Test"})
+	line := FromJSON([]byte(`{"TimeStart":"Test","Crazy":1,"Mama":true,"Test":1}`), []string{"TimeStart", "Crazy", "Mama", "Test"})
 	expected := `TimeStart="Test" Crazy=1 Mama=true Test=1`
 	if line != expected {
 		t.Errorf("Expected: %s got: '%s'", expected, line)
@@ -72,6 +86,22 @@ func TestFromJSONInterestingFields(t *testing.T) {
 func TestFromJSONString(t *testing.T) {
 	line := FromJSON([]byte(`1002`), []string{"string"})
 	expected := `"1002"`
+	if line != expected {
+		t.Errorf("Expected: %s got: '%s'", expected, line)
+	}
+}
+
+func TestFromJSONArrayNoSpace(t *testing.T) {
+	line := FromJSON([]byte(`{"Param":["id1","id2","id3"], "TimeStart":"Test", "Test":1}`), []string{"Param", "TimeStart", "Test"})
+	expected := `Param=["id1","id2","id3"] TimeStart="Test" Test=1`
+	if line != expected {
+		t.Errorf("Expected: %s got: '%s'", expected, line)
+	}
+}
+
+func TestFromJSONArraySpace(t *testing.T) {
+	line := FromJSON([]byte(`{"Param":["id1", "id2", "id3"], "TimeStart":"Test", "Test":1}`), []string{"Param", "TimeStart", "Test"})
+	expected := `Param=["id1", "id2", "id3"] TimeStart="Test" Test=1`
 	if line != expected {
 		t.Errorf("Expected: %s got: '%s'", expected, line)
 	}
