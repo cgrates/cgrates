@@ -11,7 +11,7 @@ Scenario:
  - Rate id: *RT_10CNT* with connect fee of 20cents, 10cents per minute for the first 60s in 60s increments followed by 5cents per minute in 1s increments.
  - Rate id: *RT_20CNT* with connect fee of 40cents, 20cents per minute for the first 60s in 60s increments, followed by 10 cents per minute charged in 1s increments.
  - Rate id: *RT_40CNT* with connect fee of 80cents, 40cents per minute for the first 60s in 60s increments, follwed by 20cents per minute charged in 10s increments.
- - Will charge by default *RT_40CNT* for all FreeSWITCH_ destinations during peak times (Monday-Friday 08:00-19:00) and *RT_10CNT* during offpeatimes (rest).
+ - Will charge by default *RT_40CNT* for all FreeSWITCH_ destinations during peak time (Monday-Friday 08:00-19:00) and *RT_10CNT* during offpeatimes (rest).
  - Account 1001 will receive a special *deal* for 1002 and 1003 destinations during peak times with *RT_20CNT*, otherwise same as default rating.
 
 - Create 5 accounts (equivalent of FreeSWITCH default test users - 1001, 1002, 1003, 1004, 1007).

@@ -241,7 +241,7 @@ func (at *ActionTiming) Execute() (err error) {
 				} else if ub.Disabled {
 					return 0, fmt.Errorf("User %s is disabled", ubId)
 				}
-				Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
+				//Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
 				err = actionFunction(ub, nil, a)
 				accountingStorage.SetAccount(ub)
 				return 0, nil

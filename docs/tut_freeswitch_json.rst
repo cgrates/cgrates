@@ -80,32 +80,32 @@ To verify that all actions successfully performed, we use following *cgr-console
 
  ::
 
-  cgr-console get_cache_stats
-  cgr-console get_cache_age 1002
-  cgr-console get_cache_age RP_RETAIL1
-  cgr-console get_cache_age *out:cgrates.org:call:*any
-  cgr-console get_cache_age LOG_WARNING
+  cgr-console cache_stats
+  cgr-console 'cache_age 1002'
+  cgr-console 'cache_age RP_RETAIL1'
+  cgr-console 'cache_age *out:cgrates.org:call:*any'
+  cgr-console 'cache_age LOG_WARNING'
 
 - Make sure all our balances were topped-up:
 
  ::
 
-  cgr-console get_account cgrates.org 1001
-  cgr-console get_account cgrates.org 1002
-  cgr-console get_account cgrates.org 1003
-  cgr-console get_account cgrates.org 1004
-  cgr-console get_account cgrates.org 1007
+  cgr-console 'account Tenant="cgrates.org" Account="1001"'
+  cgr-console 'account Tenant="cgrates.org" Account="1002"'
+  cgr-console 'account Tenant="cgrates.org" Account="1003"'
+  cgr-console 'account Tenant="cgrates.org" Account="1004"'
+  cgr-console 'account Tenant="cgrates.org" Account="1005"'
 
 - Query call costs so we can see our calls will have expected costs (final cost will result as sum of *ConnectFee* and *Cost* fields):
 
  ::
 
-  cgr-console get_cost call cgrates.org 1001 1002 *now 20s
-  cgr-console get_cost call cgrates.org 1001 1002 *now 1m25s
-  cgr-console get_cost call cgrates.org 1001 1003 *now 20s
-  cgr-console get_cost call cgrates.org 1001 1003 *now 1m25s
-  cgr-console get_cost call cgrates.org 1001 1004 *now 20s
-  cgr-console get_cost call cgrates.org 1001 1004 *now 1m25s
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:00:20Z"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1002" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:01:25Z"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:00:20Z"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1003" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:01:25Z"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:00:20Z"'
+  cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:01:25Z"'
 
 
 Test calls
@@ -123,7 +123,7 @@ Check that 1001 balance is properly debitted, during the call, and moreover cons
 
 ::
 
- cgr-console get_account cgrates.org 1001
+ cgr-console 'account Tenant="cgrates.org" Account="1001"'
 
 
 1002 -> 1001
@@ -135,7 +135,7 @@ To check that we had debits we use again console command, this time not during t
 
 ::
 
- cgr-console get_account cgrates.org 1002
+ cgr-console 'account Tenant="cgrates.org" Account="1002"'
 
 
 1003 -> 1001
@@ -147,7 +147,7 @@ To check that there are no debits during or by the end of the call, but when the
 
 ::
 
- cgr-console get_account cgrates.org 1003
+ cgr-console 'account Tenant="cgrates.org" Account="1003"'
 
 
 1004 -> 1001
@@ -165,8 +165,8 @@ Check that 1001 balance is properly debitted, during the call, and moreover cons
 
 ::
 
- cgr-console get_account cgrates.org 1006
- cgr-console get_account cgrates.org 1001
+ cgr-console 'account Tenant="cgrates.org" Account="1006"'
+ cgr-console 'account Tenant="cgrates.org" Account="1001"'
 
 
 1007 -> 1002
@@ -178,8 +178,8 @@ Check that call can proceed even if 1007 has no units left into his own balances
 
 ::
 
- cgr-console get_account cgrates.org 1007
- cgr-console get_account cgrates.org 1001
+ cgr-console 'account Tenant="cgrates.org" Account="1007"'
+ cgr-console 'account Tenant="cgrates.org" Account="1001"'
 
 
 Fraud detection
@@ -189,10 +189,10 @@ Since we have configured some action triggers (more than 20 units of balance top
 
 ::
 
- cgr-console add_balance cgrates.org 1003 21
+ cgr-console 'balance_set Tenant="cgrates.org" Account="1003" Direction="*out" Value=23'
  tail -f /var/log/syslog -n 20
 
-*Note*: The actions are only executed once, in order to be repetive they need to be reset (via automated or manual process).
+*Note*: The actions are only executed once, in order to be repetive they need to be recurrent or reset via a manual or automated process.
 
 
 CDR processing
@@ -202,7 +202,7 @@ At the end of each call FreeSWITCH_ will issue a http post with the CDR. This wi
 
 ::
 
- cgr-console export_cdrs csv
+ cgr-console 'cdrs_export CdrFormat="csv" ExportDir="/tmp"'
 
 
 .. _FreeSWITCH: http://www.freeswitch.org/

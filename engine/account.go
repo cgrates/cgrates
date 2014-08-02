@@ -328,7 +328,7 @@ func (ub *Account) executeActionTriggers(a *Action) {
 	for _, at := range ub.ActionTriggers {
 		// sanity check
 		if !strings.Contains(at.ThresholdType, "counter") &&
-			strings.Contains(at.ThresholdType, "balance") {
+			!strings.Contains(at.ThresholdType, "balance") {
 			continue
 		}
 		if at.Executed {
