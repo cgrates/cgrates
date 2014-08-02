@@ -36,14 +36,15 @@ const (
 )
 
 type ApierV1 struct {
-	StorDb    engine.LoadStorage
-	RatingDb  engine.RatingStorage
-	AccountDb engine.AccountingStorage
-	CdrDb     engine.CdrStorage
-	LogDb     engine.LogStorage
-	Sched     *scheduler.Scheduler
-	Config    *config.CGRConfig
-	Responder *engine.Responder
+	StorDb      engine.LoadStorage
+	RatingDb    engine.RatingStorage
+	AccountDb   engine.AccountingStorage
+	CdrDb       engine.CdrStorage
+	LogDb       engine.LogStorage
+	Sched       *scheduler.Scheduler
+	Config      *config.CGRConfig
+	Responder   *engine.Responder
+	CdrStatsSrv *engine.Stats
 }
 
 func (self *ApierV1) GetDestination(dstId string, reply *engine.Destination) error {
@@ -785,6 +786,12 @@ func (self *ApierV1) LoadTariffPlanFromFolder(attrs utils.AttrLoadTpFromFolder, 
 	if self.Sched != nil {
 		self.Sched.LoadActionTimings(self.AccountDb)
 		self.Sched.Restart()
+	}
+	cstKeys, _ := loader.GetLoadedIds(engine.CDR_STATS_PREFIX)
+	if len(cstKeys) != 0 && self.CdrStatsSrv != nil {
+		if err := self.CdrStatsSrv.ReloadQueues(cstKeys, nil); err != nil {
+			return err
+		}
 	}
 	*reply = "OK"
 	return nil

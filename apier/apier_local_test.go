@@ -31,7 +31,6 @@ import (
 	"path"
 	"reflect"
 	"sort"
-	//"strings"
 	"testing"
 	"time"
 
@@ -1261,7 +1260,7 @@ func TestApierLoadTariffPlanFromFolder(t *testing.T) {
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.LoadTariffPlanFromFolder got reply: ", reply)
 	}
-	time.Sleep(100 * time.Millisecond) // Give time for scheduler to execute topups
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }
 
 func TestResetDataAfterLoadFromFolder(t *testing.T) {

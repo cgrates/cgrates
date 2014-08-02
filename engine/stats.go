@@ -206,5 +206,5 @@ func (ps *ProxyStats) ReloadQueues(ids []string, out *int) error {
 }
 
 func (ps *ProxyStats) ResetQueues(ids []string, out *int) error {
-	return ps.Client.Call("Stats.ReserQueues", ids, out)
+	return ps.Client.Call("Stats.ResetQueues", ids, out)
 }

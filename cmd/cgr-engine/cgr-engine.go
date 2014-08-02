@@ -406,8 +406,17 @@ func main() {
 		stopHandled = true
 	}
 
+	if cfg.CDRStatsEnabled { // Init it here so we make it availabe to the Apier
+		cdrStats = engine.NewStats(ratingDb)
+		if cfg.CDRStatConfig != nil && len(cfg.CDRStatConfig.Metrics) != 0 {
+			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), nil)
+		}
+		server.RpcRegister(cdrStats)
+		server.RpcRegister(&apier.CDRStatsV1{cdrStats}) // Public APIs
+	}
+
 	responder := &engine.Responder{ExitChan: exitChan}
-	apierRpc := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder}
+	apierRpc := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder, CdrStatsSrv: cdrStats}
 
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterBalancer != utils.INTERNAL {
 		engine.Logger.Info("Registering Rater service")
@@ -460,16 +469,6 @@ func main() {
 		engine.Logger.Info("Starting CGRateS Mediator service.")
 		medChan = make(chan struct{})
 		go startMediator(responder, logDb, cdrDb, cacheChan, medChan)
-	}
-
-	if cfg.CDRStatsEnabled {
-		cdrStats = engine.NewStats(ratingDb)
-		if cfg.CDRStatConfig != nil && len(cfg.CDRStatConfig.Metrics) != 0 {
-			var out int
-			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), &out)
-		}
-		server.RpcRegister(cdrStats)
-		server.RpcRegister(&apier.CDRStatsV1{cdrStats}) // Public APIs
 	}
 
 	var cdrsChan chan struct{}
