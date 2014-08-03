@@ -31,20 +31,21 @@ import (
 	// sip_reason:OK time:1406312795 cgr_reqtype:prepaid cgr_destination:dan cgr_subject:dan sip_code:200 duration:7 from_tag:a5716471] Values:[]}*/
 
 const (
-	FROM_TAG          = "from_tag"
-	TO_TAG            = "to_tag"
-	CALLID            = "callid"
-	CGR_CATEGORY      = "cgr_category"
-	CGR_REQTYPE       = "cgr_reqtype"
-	CGR_TENANT        = "cgr_tenant"
-	CGR_SUBJECT       = "cgr_subject"
-	CGR_ACCOUNT       = "cgr_account"
-	CGR_DESTINATION   = "cgr_destination"
-	TIME              = "time"
-	SETUP_DURATION    = "setuptime"
-	OSIPS__SETUP_TIME = "created"
-	OSIPS_DURATION    = "duration"
-	OSIPS_AUTH_OK     = "AUTH_OK"
+	FROM_TAG                 = "from_tag"
+	TO_TAG                   = "to_tag"
+	CALLID                   = "callid"
+	CGR_CATEGORY             = "cgr_category"
+	CGR_REQTYPE              = "cgr_reqtype"
+	CGR_TENANT               = "cgr_tenant"
+	CGR_SUBJECT              = "cgr_subject"
+	CGR_ACCOUNT              = "cgr_account"
+	CGR_DESTINATION          = "cgr_destination"
+	TIME                     = "time"
+	SETUP_DURATION           = "setuptime"
+	OSIPS__SETUP_TIME        = "created"
+	OSIPS_DURATION           = "duration"
+	OSIPS_AUTH_OK            = "AUTH_OK"
+	OSIPS_INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS"
 )
 
 func NewOsipsEvent(osipsDagramEvent *osipsdagram.OsipsEvent) (*OsipsEvent, error) {
