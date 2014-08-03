@@ -122,6 +122,7 @@ func (osm *OsipsSessionManager) SubscribeEvents(evStop chan struct{}) error {
 					continue                                                // Try again
 				}
 				if !success {
+					engine.Logger.Err(fmt.Sprintf("<SM-OpenSIPS> Shutting down, failed subscribing to OpenSIPS at address: <%s>", osm.cgrCfg.OsipsMiAddr))
 					close(osm.stopServing) // Do not serve anymore since we got errors on subscribing
 					return errors.New("Failed subscribing to OpenSIPS events")
 				}

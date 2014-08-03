@@ -1,4 +1,4 @@
-Tutorial FS_JSON
+CGRateS Tutorial
 ================
 
 Scenario:
@@ -15,25 +15,30 @@ Scenario:
  - Account 1001 will receive a special *deal* for 1002 and 1003 destinations during peak times with *RT_20CNT*, otherwise same as default rating.
 
 - Create 5 accounts (equivalent of FreeSWITCH default test users - 1001, 1002, 1003, 1004, 1007).
-- 1002, 1003, 1004 will receive 10units of *monetary balance.
-- 1001 will receive 5 units of general *monetary and 5 units of shared balance in the shared group *SHARED_A*.
-- 1007 will receive 0 units of shared balance in the shared group *SHARED_A*.
-- Define the shared balance *SHARED_A* with debit policy *highest.
+ 
+ - 1002, 1003, 1004 will receive 10units of *monetary balance.
+ - 1001 will receive 5 units of general *monetary and 5 units of shared balance in the shared group *SHARED_A*.
+ - 1007 will receive 0 units of shared balance in the shared group *SHARED_A*.
+ - Define the shared balance *SHARED_A* with debit policy *highest.
+
+- Create 1 RatingProfile Alias: 1006 - alias of rating profile 1001.
+- Create 1 Account Alias: 1006 - alias of account 1002.
 
 - For each balance created, attach 3 triggers to control the balance: log on balance=2, log on balance=20, log on 5 mins talked towards 10xx destination.
 
-- Add 2 CDRStats Queue configurations:
+- Add 4 CDRStats Queue configurations (extra to default one configured in .cfg file):
 
- - CDRStatsQueueId: *CDRST5* with a QueueLength of 5 CDRs and a TimeWindow of 1 minute monitoring ASR, ACD and ACC for CDRs with filters on TOR=*voice, Direction=*out, Tenant=cgrates.org, Category=call, Account=1001, Subject=1001 and MediationRunId=default. To this queue we attach ActionTriggers profile named CDRST5_WARN
- - CDRStatsQueueId: *CDRST6* with a QueueLength of 10 CDRs and no TimeWindow gathering ASR and ACD metrics with CDR filters on Tenant=cgrates.org and MediationRunId=default. To this queue we attach an ActionTrigger profile named CDRST6_WARN.
+ - CDRStatsQueueId: *CDRST1* with purpose of monitoring calls on the Tenant=cgrates.org, and MediationRunId=default, with a QueueLength of 10 CDRs and no TimeWindow, monitoring ASR, ACD and ACC. Thrrough ActionTriggers *CDRST1_WARN* we monitor *min_asr(45), *min_acd(10) and *max_acc(10) parameters and log the warning on thresholds reached.
+ - CDRStatsQueueId: *CDRST_1001* with a QueueLength of 10 CDRs and a TimeWindow of 10 minutes, gathering ASR,ACD and ACC metrics with CDR filters on Tenant=cgrates.org, Subject=1001 and MediationRunId=default with the purpose of monitoring calls of user 1001. To this queue we attach an ActionTrigger profile named *CDRST1001_WARN* which will monitor min_asr(65), min_acd(10), max_acc(5) and log to syslog a warning once thresholds are reached.
+
 - ActionTrigger: *CDRST5_WARN* with thresholds explained bellow and having as action the *log on syslog
 
-  - Threshold on *min_asr of 45, configured as recurrent with a sleep time of 1 minute and a minimum of 3 items in the stats queue.
-  - Threshold on *min_acd of 10, configured as recurrent with a sleep time of 1 minute and a minimum of 5 items in the stats queue.
-  - Threshold on *max_acc of 10, configured as recurrent with a sleep time of 1 minute and a minimum of 5 items in the stats queue.
+ - Threshold on *min_asr of 45, configured as recurrent with a sleep time of 1 minute and a minimum of 3 items in the stats queue.
+ - Threshold on *min_acd of 10, configured as recurrent with a sleep time of 1 minute and a minimum of 5 items in the stats queue.
+ - Threshold on *max_acc of 10, configured as recurrent with a sleep time of 1 minute and a minimum of 5 items in the stats queue.
 
 - ActionTrigger: *CDRST6_WARN* with thresholds explained bellow and having as action the *log on syslog
 
-  - Threshold on *min_asr of 30, configured as recurrent without sleep time and a minimum of 5 items in the stats queue.
-  - Threshold on *min_acd of 3, configured as recurrent without sleep time and a minimum of 2 items in the stats queue.
+ - Threshold on *min_asr of 30, configured as recurrent without sleep time and a minimum of 5 items in the stats queue.
+ - Threshold on *min_acd of 3, configured as recurrent without sleep time and a minimum of 2 items in the stats queue.
 

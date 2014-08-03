@@ -232,6 +232,9 @@ func main() {
 	}
 	if cdrstats != nil {
 		statsQueueIds, _ := loader.GetLoadedIds(engine.CDR_STATS_PREFIX)
+		if *flush {
+			statsQueueIds = []string{} // Force reload all
+		}
 		if len(statsQueueIds) != 0 {
 			if *verbose {
 				log.Print("Reloading CDRStats data")

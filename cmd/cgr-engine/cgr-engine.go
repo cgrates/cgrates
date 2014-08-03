@@ -189,6 +189,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		sm, _ = sessionmanager.NewOSipsSessionManager(cfg, raterConn, cdrsConn)
 	default:
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.SMSwitchType))
+		exitChan <- true
 	}
 	if err = sm.Connect(); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> error: %s!", err))
