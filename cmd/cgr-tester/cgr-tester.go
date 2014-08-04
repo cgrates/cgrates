@@ -53,7 +53,7 @@ var (
 	accountdb_pass  = flag.String("accountdb_passwd", cgrConfig.AccountDBPass, "The AccountingDb user's password.")
 	dbdata_encoding = flag.String("dbdata_encoding", cgrConfig.DBDataEncoding, "The encoding used to store object data in strings.")
 	raterAddress    = flag.String("rater_address", "", "Rater address for remote tests. Empty for internal rater.")
-	tor             = flag.String("category", utils.VOICE, "The type of record to use in queries.")
+	tor             = flag.String("tor", utils.VOICE, "The type of record to use in queries.")
 	category        = flag.String("category", "call", "The Record category to test.")
 	tenant          = flag.String("tenant", "cgrates.org", "The type of record to use in queries.")
 	subject         = flag.String("subject", "1001", "The rating subject to use in queries.")
