@@ -140,6 +140,7 @@ type CGRConfig struct {
 	MailerAuthUser          string                // Authenticate to email server using this user
 	MailerAuthPass          string                // Authenticate to email server with this password
 	MailerFromAddr          string                // From address used when sending emails out
+	DataFolderPath          string                // Path towards data folder, for tests internal usage, not loading out of .cfg options
 }
 
 func (self *CGRConfig) setDefaults() error {
@@ -241,6 +242,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.MailerAuthUser = "cgrates"
 	self.MailerAuthPass = "CGRateS.org"
 	self.MailerFromAddr = "cgr-mailer@localhost.localdomain"
+	self.DataFolderPath = "/usr/share/cgrates/"
 	return nil
 }
 

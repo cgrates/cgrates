@@ -24,12 +24,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"path"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -42,7 +44,18 @@ func (self *SQLStorage) Close() {
 }
 
 func (self *SQLStorage) Flush() (err error) {
-	return
+	cfg := config.CgrConfig()
+	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
+		if err := self.CreateTablesFromScript(path.Join(cfg.DataFolderPath, "storage", "mysql", scriptName)); err != nil {
+			return err
+		}
+	}
+	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
+		if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {

@@ -39,7 +39,7 @@ var cdrstRpc *rpc.Client
 
 func init() {
 	cdrstCfgPath = path.Join(*dataDir, "conf", "samples", "cdrstatsv1_local_test.cfg")
-	cdrstCfg, _ = config.NewCGRConfigFromFile(&cfgPath)
+	cdrstCfg, _ = config.NewCGRConfigFromFile(&cdrstCfgPath)
 }
 
 func TestCDRStatsLclInitDataDb(t *testing.T) {

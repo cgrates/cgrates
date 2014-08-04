@@ -144,11 +144,13 @@ func TestDefaults(t *testing.T) {
 	eCfg.MailerAuthUser = "cgrates"
 	eCfg.MailerAuthPass = "CGRateS.org"
 	eCfg.MailerFromAddr = "cgr-mailer@localhost.localdomain"
+	eCfg.DataFolderPath = "/usr/share/cgrates/"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
 		t.Error("Defaults different than expected!")
 	}
+
 }
 
 func TestSanityCheck(t *testing.T) {
@@ -300,6 +302,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.MailerAuthUser = "test"
 	eCfg.MailerAuthPass = "test"
 	eCfg.MailerFromAddr = "test"
+	eCfg.DataFolderPath = "/usr/share/cgrates/"
 	if !reflect.DeepEqual(cfg, eCfg) {
 		t.Log(eCfg)
 		t.Log(cfg)
