@@ -25,7 +25,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestStatsInit(t *testing.T) {
+func TestStatsQueueInit(t *testing.T) {
 	sq := NewStatsQueue(&CdrStats{Metrics: []string{ASR, ACC}})
 	if len(sq.metrics) != 2 {
 		t.Error("Expected 2 metrics got ", len(sq.metrics))
@@ -178,5 +178,231 @@ func TestAcceptCdr(t *testing.T) {
 	sq.conf = &CdrStats{UsageInterval: []time.Duration{10 * time.Second, 11 * time.Second}}
 	if sq.conf.AcceptCdr(cdr) != true {
 		t.Error("Should have accepted thif CDR: %+v", cdr)
+	}
+}
+
+func TestStatsQueueIds(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	ids := []string{}
+	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
+		t.Error("Error getting queue ids: ", err)
+	}
+	result := len(ids)
+	expected := 2
+	if result != expected {
+		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+	}
+}
+
+func TestStatsAppendCdr(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	err := cdrStats.AppendCDR(cdr, nil)
+	if err != nil {
+		t.Error("Error appending cdr to stats: ", err)
+	}
+	if len(cdrStats.queues["CDRST1"].cdrs) != 0 ||
+		len(cdrStats.queues["CDRST2"].cdrs) != 1 {
+		t.Error("Error appending cdr to queue: ", len(cdrStats.queues["CDRST2"].cdrs))
+	}
+}
+
+func TestStatsGetValues(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	cdr = &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      2 * time.Second,
+		Cost:       4,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	valMap := make(map[string]float64)
+	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
+		t.Error("Error getting metric values: ", err)
+	}
+	if len(valMap) != 2 || valMap["ACD"] != 6 || valMap["ASR"] != 100 {
+		t.Error("Error on metric map: ", valMap)
+	}
+}
+
+func TestStatsReloadQueues(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	if err := cdrStats.ReloadQueues(nil, nil); err != nil {
+		t.Error("Error reloading queues: ", err)
+	}
+	ids := []string{}
+	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
+		t.Error("Error getting queue ids: ", err)
+	}
+	result := len(ids)
+	expected := 2
+	if result != expected {
+		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+	}
+	valMap := make(map[string]float64)
+	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
+		t.Error("Error getting metric values: ", err)
+	}
+	if len(valMap) != 2 || valMap["ACD"] != 0 || valMap["ASR"] != 0 {
+		t.Error("Error on metric map: ", valMap)
+	}
+}
+
+func TestStatsReloadQueuesWithDefault(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdrStats.AddQueue(&CdrStats{
+		Id: utils.META_DEFAULT,
+	}, nil)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+
+	if err := cdrStats.ReloadQueues(nil, nil); err != nil {
+		t.Error("Error reloading queues: ", err)
+	}
+	ids := []string{}
+	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
+		t.Error("Error getting queue ids: ", err)
+	}
+	result := len(ids)
+	expected := 3
+	if result != expected {
+		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+	}
+	valMap := make(map[string]float64)
+	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
+		t.Error("Error getting metric values: ", err)
+	}
+	if len(valMap) != 2 || valMap["ACD"] != 0 || valMap["ASR"] != 0 {
+		t.Error("Error on metric map: ", valMap)
+	}
+}
+
+func TestStatsReloadQueuesWithIds(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	if err := cdrStats.ReloadQueues([]string{"CDRST1"}, nil); err != nil {
+		t.Error("Error reloading queues: ", err)
+	}
+	ids := []string{}
+	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
+		t.Error("Error getting queue ids: ", err)
+	}
+	result := len(ids)
+	expected := 2
+	if result != expected {
+		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+	}
+	valMap := make(map[string]float64)
+	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
+		t.Error("Error getting metric values: ", err)
+	}
+	if len(valMap) != 2 || valMap["ACD"] != 10 || valMap["ASR"] != 100 {
+		t.Error("Error on metric map: ", valMap)
+	}
+}
+
+func TestStatsResetQueues(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	if err := cdrStats.ResetQueues(nil, nil); err != nil {
+		t.Error("Error reloading queues: ", err)
+	}
+	ids := []string{}
+	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
+		t.Error("Error getting queue ids: ", err)
+	}
+	result := len(ids)
+	expected := 2
+	if result != expected {
+		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+	}
+	valMap := make(map[string]float64)
+	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
+		t.Error("Error getting metric values: ", err)
+	}
+	if len(valMap) != 2 || valMap["ACD"] != 0 || valMap["ASR"] != 0 {
+		t.Error("Error on metric map: ", valMap)
+	}
+}
+
+func TestStatsResetQueuesWithIds(t *testing.T) {
+	cdrStats := NewStats(dataStorage)
+	cdr := &utils.StoredCdr{
+		Tenant:     "cgrates.org",
+		Category:   "call",
+		AnswerTime: time.Now(),
+		SetupTime:  time.Now(),
+		Usage:      10 * time.Second,
+		Cost:       10,
+	}
+	cdrStats.AppendCDR(cdr, nil)
+	if err := cdrStats.ResetQueues([]string{"CDRST1"}, nil); err != nil {
+		t.Error("Error reloading queues: ", err)
+	}
+	ids := []string{}
+	if err := cdrStats.GetQueueIds(0, &ids); err != nil {
+		t.Error("Error getting queue ids: ", err)
+	}
+	result := len(ids)
+	expected := 2
+	if result != expected {
+		t.Errorf("Error loading stats queues. Expected %v was %v", expected, result)
+	}
+	valMap := make(map[string]float64)
+	if err := cdrStats.GetValues("CDRST2", &valMap); err != nil {
+		t.Error("Error getting metric values: ", err)
+	}
+	if len(valMap) != 2 || valMap["ACD"] != 10 || valMap["ASR"] != 100 {
+		t.Error("Error on metric map: ", valMap)
 	}
 }

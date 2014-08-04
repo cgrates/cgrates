@@ -526,7 +526,7 @@ func (ms *MapStorage) SetCdrStats(cs *CdrStats) error {
 }
 
 func (ms *MapStorage) GetCdrStats(key string) (cs *CdrStats, err error) {
-	if values, ok := ms.dict[key]; ok {
+	if values, ok := ms.dict[CDR_STATS_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &cs)
 	} else {
 		return nil, errors.New(utils.ERR_NOT_FOUND)
@@ -539,7 +539,7 @@ func (ms *MapStorage) GetAllCdrStats() (css []*CdrStats, err error) {
 		if !strings.HasPrefix(key, CDR_STATS_PREFIX) {
 			continue
 		}
-		var cs *CdrStats
+		cs := &CdrStats{}
 		err = ms.ms.Unmarshal(value, cs)
 		css = append(css, cs)
 	}
