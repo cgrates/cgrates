@@ -45,7 +45,7 @@ rpc =JSONClient(("127.0.0.1", 2012))
 
 cd = {"Direction":"*out",
       "TOR":"*voice",
-      "Category": "call"
+      "Category": "call",
       "Tenant": "cgrates.org",
       "Subject": "1001",
       "Destination": "1002",
@@ -61,7 +61,7 @@ cd = {"Direction":"*out",
 
 start_time = time.time()
 i = 0
-runs = 5e5
+runs = 1e4
 result = ""
 for i in range(int(runs) + 1):
     result = rpc.call("Responder.GetCost", cd)
