@@ -150,7 +150,7 @@ func (cc *CallCost) ToDataCost() (*DataCost, error) {
 
 func (cc *CallCost) GetLongestRounding() (roundingDecimals int, roundingMethod string) {
 	for _, ts := range cc.Timespans {
-		if ts.RateInterval.Rating.RoundingDecimals > roundingDecimals {
+		if ts.RateInterval != nil && ts.RateInterval.Rating.RoundingDecimals > roundingDecimals { //ToDo: When will ts.RateInterval be empty?
 			roundingDecimals = ts.RateInterval.Rating.RoundingDecimals
 			roundingMethod = ts.RateInterval.Rating.RoundingMethod
 		}
