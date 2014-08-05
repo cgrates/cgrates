@@ -72,7 +72,7 @@ For our tutorial we load again prepared data out of shared folder, containing fo
 
 ::
 
- cgr-loader -verbose -path=/usr/share/cgrates/tutorials/fs_json/cgrates/tariffplans
+ cgr-loader -verbose -path=/usr/share/cgrates/tariffplans/tutorial
 
 To verify that all actions successfully performed, we use following *cgr-console* commands:
 

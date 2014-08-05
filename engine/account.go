@@ -124,6 +124,7 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 	// if it is not found then we add it to the list
 	if !found {
 		a.Balance.Value = -a.Balance.Value
+		a.Balance.dirty = true // Mark the balance as dirty since we have modified and it should be checked by action triggers
 		ub.BalanceMap[id] = append(ub.BalanceMap[id], a.Balance)
 		if a.Balance.SharedGroup != "" {
 			// add shared group member
