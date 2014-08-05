@@ -4,8 +4,8 @@
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
 
-#export GOPATH=$(CURDIR)
-export GOPATH=/usr/local/goapps
+export GOPATH=$(CURDIR)
+#export GOPATH=/usr/local/goapps
 
 PKGDIR=debian/cgrates
 SRCDIR=/usr/local/src/cgrates/cgrates.git/cgrates
@@ -15,15 +15,15 @@ SRCDIR=/usr/local/src/cgrates/cgrates.git/cgrates
 
 clean:
 	dh_clean
-	#rm -rf $(GOPATH)/bin/* $(GOPATH)/pkg/*
+	rm -rf $(GOPATH)/bin/* $(GOPATH)/pkg/*
 	#cd $(GOPATH)/src && find * -name '*.go' -exec dirname {} \; | xargs -n1 go clean
 	rm -f $(GOPATH)/goinstall.log
 
 binary-arch: clean
 	dh_prep
 	dh_installdirs
-	#exec $(SRCDIR)/update_external_libs.sh
-	#cd $(SRCDIR) && go install
+	exec $(SRCDIR)/update_external_libs.sh
+	cd $(SRCDIR) && go install
 	mkdir -p $(PKGDIR)/usr/bin
 	cp $(GOPATH)/bin/cgr-* $(PKGDIR)/usr/bin/
 	mkdir -p $(PKGDIR)/etc/cgrates
