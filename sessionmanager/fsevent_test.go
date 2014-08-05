@@ -627,3 +627,14 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }
+
+func TestFsEvGetExtraFields(t *testing.T) {
+	cfg, _ = config.NewDefaultCGRConfig()
+	cfg.FSCdrExtraFields = []*utils.RSRField{&utils.RSRField{Id: "Channel-Read-Codec-Name"}, &utils.RSRField{Id: "Channel-Write-Codec-Name"}, &utils.RSRField{Id: "NonExistingHeader"}}
+	config.SetCgrConfig(cfg)
+	ev := new(FSEvent).New(hangupEv)
+	expectedExtraFields := map[string]string{"Channel-Read-Codec-Name": "G722", "Channel-Write-Codec-Name": "G722", "NonExistingHeader": ""}
+	if extraFields := ev.GetExtraFields(); !reflect.DeepEqual(extraFields, extraFields) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedExtraFields, extraFields)
+	}
+}

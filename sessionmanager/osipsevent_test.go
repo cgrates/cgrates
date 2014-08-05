@@ -91,7 +91,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 		!answerTime.Equal(eAnswerTime) ||
 		!endTime.Equal(eAnswerTime.Add(dur)) ||
 		dur != time.Duration(20*time.Second) ||
-		osipsEv.GetOriginatorIP() != "172.16.254.77" {
+		osipsEv.GetOriginatorIP(utils.META_DEFAULT) != "172.16.254.77" {
 		t.Error("GetValues not matching: ", osipsEv.GetName() != "E_ACC_CDR",
 			osipsEv.GetCgrId() != utils.Sha1("ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ"+";"+"eb082607"+";"+"4ea9687f", setupTime.UTC().String()),
 			osipsEv.GetUUID() != "ODVkMDI2Mzc2MDY5N2EzODhjNTAzNTdlODhiZjRlYWQ;eb082607;4ea9687f",
@@ -107,7 +107,7 @@ func TestOsipsEventGetValues(t *testing.T) {
 			!answerTime.Equal(time.Date(2014, 7, 26, 12, 28, 19, 0, time.Local)),
 			!endTime.Equal(time.Date(2014, 7, 26, 12, 28, 39, 0, time.Local)),
 			dur != time.Duration(20*time.Second),
-			osipsEv.GetOriginatorIP() != "172.16.254.77",
+			osipsEv.GetOriginatorIP(utils.META_DEFAULT) != "172.16.254.77",
 		)
 	}
 }

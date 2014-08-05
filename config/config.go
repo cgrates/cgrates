@@ -127,6 +127,7 @@ type CGRConfig struct {
 	FSLowBalanceAnnFile     string                // File to be played when low balance is reached
 	FSEmptyBalanceContext   string                // If defined, call will be transfered to this context on empty balance
 	FSEmptyBalanceAnnFile   string                // File to be played before disconnecting prepaid calls (applies only if no context defined)
+	FSCdrExtraFields        []*utils.RSRField     // Extra fields to store in CDRs in case of processing them
 	OsipsListenUdp          string                // Address where to listen for event datagrams coming from OpenSIPS
 	OsipsMiAddr             string                // Adress where to reach OpenSIPS mi_datagram module
 	OsipsEvSubscInterval    time.Duration         // Refresh event subscription at this interval
@@ -229,6 +230,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.FSLowBalanceAnnFile = ""
 	self.FSEmptyBalanceContext = ""
 	self.FSEmptyBalanceAnnFile = ""
+	self.FSCdrExtraFields = []*utils.RSRField{}
 	self.OsipsListenUdp = "127.0.0.1:2020"
 	self.OsipsMiAddr = "127.0.0.1:8020"
 	self.OsipsEvSubscInterval = time.Duration(60) * time.Second
@@ -598,6 +600,14 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("freeswitch", "empty_balance_ann_file"); hasOpt {
 		cfg.FSEmptyBalanceAnnFile, _ = c.GetString("freeswitch", "empty_balance_ann_file")
+	}
+	if hasOpt = c.HasOption("freeswitch", "cdr_extra_fields"); hasOpt {
+		extraFieldsStr, _ := c.GetString("freeswitch", "cdr_extra_fields")
+		if extraFields, err := utils.ParseRSRFields(extraFieldsStr, utils.FIELDS_SEP); err != nil {
+			return nil, err
+		} else {
+			cfg.FSCdrExtraFields = extraFields
+		}
 	}
 	if hasOpt = c.HasOption("opensips", "listen_udp"); hasOpt {
 		cfg.OsipsListenUdp, _ = c.GetString("opensips", "listen_udp")

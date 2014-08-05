@@ -129,6 +129,7 @@ min_dur_low_balance = 99      	# Threshold which will trigger low balance warnin
 low_balance_ann_file =  test  	# File to be played when low balance is reached
 empty_balance_context = test    # If defined, call will be transfered to this context on empty balance 
 empty_balance_ann_file = test  	# File to be played before disconnecting prepaid calls (applies only if no context defined)
+cdr_extra_fields = test			# Extra fields to store in CDRs in case of processing them
 
 [opensips]
 listen_udp = test 				# Address where to listen for event datagrams coming from OpenSIPS

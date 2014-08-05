@@ -161,6 +161,12 @@ func (osipsev *OsipsEvent) GetDuration(fieldName string) (time.Duration, error) 
 	}
 	return utils.ParseDurationWithSecs(durStr)
 }
+func (osipsEv *OsipsEvent) GetOriginatorIP(fieldName string) string {
+	if osipsEv.osipsEvent == nil || osipsEv.osipsEvent.OriginatorAddress == nil {
+		return ""
+	}
+	return osipsEv.osipsEvent.OriginatorAddress.IP.String()
+}
 func (osipsev *OsipsEvent) MissingParameter() bool {
 	return len(osipsev.GetUUID()) == 0 ||
 		len(osipsev.GetAccount(utils.META_DEFAULT)) == 0 ||
@@ -184,18 +190,13 @@ func (osipsev *OsipsEvent) GetExtraFields() map[string]string {
 	}
 	return extraFields
 }
-func (osipsEv *OsipsEvent) GetOriginatorIP() string {
-	if osipsEv.osipsEvent == nil || osipsEv.osipsEvent.OriginatorAddress == nil {
-		return ""
-	}
-	return osipsEv.osipsEvent.OriginatorAddress.IP.String()
-}
+
 func (osipsEv *OsipsEvent) AsStoredCdr() *utils.StoredCdr {
 	storCdr := new(utils.StoredCdr)
 	storCdr.CgrId = osipsEv.GetCgrId()
 	storCdr.TOR = utils.VOICE
 	storCdr.AccId = osipsEv.GetUUID()
-	storCdr.CdrHost = osipsEv.GetOriginatorIP()
+	storCdr.CdrHost = osipsEv.GetOriginatorIP(utils.META_DEFAULT)
 	storCdr.CdrSource = "OSIPS_" + osipsEv.GetName()
 	storCdr.ReqType = osipsEv.GetReqType(utils.META_DEFAULT)
 	storCdr.Direction = osipsEv.GetDirection(utils.META_DEFAULT)

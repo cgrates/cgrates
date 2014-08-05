@@ -129,6 +129,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.FSLowBalanceAnnFile = ""
 	eCfg.FSEmptyBalanceContext = ""
 	eCfg.FSEmptyBalanceAnnFile = ""
+	eCfg.FSCdrExtraFields = []*utils.RSRField{}
 	eCfg.OsipsListenUdp = "127.0.0.1:2020"
 	eCfg.OsipsMiAddr = "127.0.0.1:8020"
 	eCfg.OsipsEvSubscInterval = time.Duration(60) * time.Second
@@ -286,6 +287,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.FSLowBalanceAnnFile = "test"
 	eCfg.FSEmptyBalanceContext = "test"
 	eCfg.FSEmptyBalanceAnnFile = "test"
+	eCfg.FSCdrExtraFields = []*utils.RSRField{&utils.RSRField{Id: "test"}}
 	eCfg.OsipsListenUdp = "test"
 	eCfg.OsipsMiAddr = "test"
 	eCfg.OsipsEvSubscInterval = time.Duration(99) * time.Second
