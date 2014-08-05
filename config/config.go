@@ -108,6 +108,7 @@ type CGRConfig struct {
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
+	SMCdrS                  string        //
 	SMReconnects            int           // Number of reconnect attempts to rater
 	SMDebitInterval         int           // the period to be debited in advanced during a call (in seconds)
 	SMMaxCallDuration       time.Duration // The maximum duration of a call
@@ -129,7 +130,6 @@ type CGRConfig struct {
 	OsipsListenUdp          string                // Address where to listen for event datagrams coming from OpenSIPS
 	OsipsMiAddr             string                // Adress where to reach OpenSIPS mi_datagram module
 	OsipsEvSubscInterval    time.Duration         // Refresh event subscription at this interval
-	OsipCDRS                string                // Address where to reach CDR Server, empty to disable CDR processing <""|internal|127.0.0.1:2013>
 	OsipsReconnects         int                   // Number of attempts on connect failure.
 	HistoryAgentEnabled     bool                  // Starts History as an agent: <true|false>.
 	HistoryServer           string                // Address where to reach the master history server: <internal|x.y.z.y:1234>
@@ -217,6 +217,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.SMEnabled = false
 	self.SMSwitchType = FS
 	self.SMRater = utils.INTERNAL
+	self.SMCdrS = ""
 	self.SMReconnects = 3
 	self.SMDebitInterval = 10
 	self.SMMaxCallDuration = time.Duration(3) * time.Hour
@@ -231,7 +232,6 @@ func (self *CGRConfig) setDefaults() error {
 	self.OsipsListenUdp = "127.0.0.1:2020"
 	self.OsipsMiAddr = "127.0.0.1:8020"
 	self.OsipsEvSubscInterval = time.Duration(60) * time.Second
-	self.OsipCDRS = "internal"
 	self.OsipsReconnects = 3
 	self.HistoryAgentEnabled = false
 	self.HistoryServerEnabled = false
@@ -554,6 +554,9 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("session_manager", "rater"); hasOpt {
 		cfg.SMRater, _ = c.GetString("session_manager", "rater")
 	}
+	if hasOpt = c.HasOption("session_manager", "cdrs"); hasOpt {
+		cfg.SMCdrS, _ = c.GetString("session_manager", "cdrs")
+	}
 	if hasOpt = c.HasOption("session_manager", "reconnects"); hasOpt {
 		cfg.SMReconnects, _ = c.GetInt("session_manager", "reconnects")
 	}
@@ -607,9 +610,6 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		if cfg.OsipsEvSubscInterval, err = utils.ParseDurationWithSecs(evSubscIntervalStr); err != nil {
 			return nil, err
 		}
-	}
-	if hasOpt = c.HasOption("opensips", "cdrs"); hasOpt {
-		cfg.OsipCDRS, _ = c.GetString("opensips", "cdrs")
 	}
 	if hasOpt = c.HasOption("opensips", "reconnects"); hasOpt {
 		cfg.OsipsReconnects, _ = c.GetInt("opensips", "reconnects")

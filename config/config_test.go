@@ -117,6 +117,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
 	eCfg.SMRater = utils.INTERNAL
+	eCfg.SMCdrS = ""
 	eCfg.SMReconnects = 3
 	eCfg.SMDebitInterval = 10
 	eCfg.SMMinCallDuration = time.Duration(0)
@@ -131,7 +132,6 @@ func TestDefaults(t *testing.T) {
 	eCfg.OsipsListenUdp = "127.0.0.1:2020"
 	eCfg.OsipsMiAddr = "127.0.0.1:8020"
 	eCfg.OsipsEvSubscInterval = time.Duration(60) * time.Second
-	eCfg.OsipCDRS = "internal"
 	eCfg.OsipsReconnects = 3
 	eCfg.DerivedChargers = make(utils.DerivedChargers, 0)
 	eCfg.CombinedDerivedChargers = true
@@ -274,6 +274,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.SMEnabled = true
 	eCfg.SMSwitchType = "test"
 	eCfg.SMRater = "test"
+	eCfg.SMCdrS = "test"
 	eCfg.SMReconnects = 99
 	eCfg.SMDebitInterval = 99
 	eCfg.SMMinCallDuration = time.Duration(98) * time.Second
@@ -288,7 +289,6 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.OsipsListenUdp = "test"
 	eCfg.OsipsMiAddr = "test"
 	eCfg.OsipsEvSubscInterval = time.Duration(99) * time.Second
-	eCfg.OsipCDRS = "test"
 	eCfg.OsipsReconnects = 99
 	eCfg.DerivedChargers = utils.DerivedChargers{&utils.DerivedCharger{RunId: "test", RunFilters: "", ReqTypeField: "test", DirectionField: "test", TenantField: "test",
 		CategoryField: "test", AccountField: "test", SubjectField: "test", DestinationField: "test", SetupTimeField: "test", AnswerTimeField: "test", UsageField: "test"}}

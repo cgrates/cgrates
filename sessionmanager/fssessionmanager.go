@@ -40,14 +40,16 @@ type FSSessionManager struct {
 	conn        net.Conn
 	buf         *bufio.Reader
 	sessions    []*Session
-	connector   engine.Connector
+	rater       engine.Connector
+	cdrs        engine.Connector
 	debitPeriod time.Duration
 	loggerDB    engine.LogStorage
 }
 
-func NewFSSessionManager(cgrCfg *config.CGRConfig, storage engine.LogStorage, connector engine.Connector, debitPeriod time.Duration) *FSSessionManager {
+func NewFSSessionManager(cgrCfg *config.CGRConfig, storage engine.LogStorage, rater, cdrs engine.Connector, debitPeriod time.Duration) *FSSessionManager {
+
 	cfg = cgrCfg // make config global
-	return &FSSessionManager{loggerDB: storage, connector: connector, debitPeriod: debitPeriod}
+	return &FSSessionManager{loggerDB: storage, rater: rater, cdrs: cdrs, debitPeriod: debitPeriod}
 }
 
 // Connects to the freeswitch mod_event_socket server and starts
@@ -164,7 +166,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
-	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
+	if err := sm.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> OnPark: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
 		sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(utils.META_DEFAULT), SYSTEM_ERROR) // We unpark on original destination
 		return
@@ -203,7 +205,7 @@ func (sm *FSSessionManager) OnChannelPark(ev Event) {
 			TimeEnd:     startTime.Add(cfg.SMMaxCallDuration),
 		}
 		var remainingDurationFloat float64
-		err = sm.connector.GetMaxSessionTime(cd, &remainingDurationFloat)
+		err = sm.rater.GetMaxSessionTime(cd, &remainingDurationFloat)
 		if err != nil {
 			engine.Logger.Err(fmt.Sprintf("Could not get max session time for %s: %v", ev.GetUUID(), err))
 			sm.unparkCall(ev.GetUUID(), ev.GetCallDestNr(""), SYSTEM_ERROR) // We unpark on original destination
@@ -237,7 +239,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT),
 		Direction: ev.GetDirection(utils.META_DEFAULT), Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
-	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
+	if err := sm.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> OnAnswer: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
 		sm.DisconnectSession(ev.GetUUID(), SYSTEM_ERROR, "") // Disconnect the session since we are not able to process sessions
 		return
@@ -260,7 +262,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	attrsDC := utils.AttrDerivedChargers{Tenant: ev.GetTenant(utils.META_DEFAULT), Category: ev.GetCategory(utils.META_DEFAULT), Direction: ev.GetDirection(utils.META_DEFAULT),
 		Account: ev.GetAccount(utils.META_DEFAULT), Subject: ev.GetSubject(utils.META_DEFAULT)}
 	var dcs utils.DerivedChargers
-	if err := sm.connector.GetDerivedChargers(attrsDC, &dcs); err != nil {
+	if err := sm.rater.GetDerivedChargers(attrsDC, &dcs); err != nil {
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> OnHangup: could not get derived charging for event %s: %s", ev.GetUUID(), err.Error()))
 		return
 	}
@@ -330,7 +332,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 				Increments:  refundIncrements,
 			}
 			var response float64
-			err := sm.connector.RefundIncrements(*cd, &response)
+			err := sm.rater.RefundIncrements(*cd, &response)
 			if err != nil {
 				engine.Logger.Err(fmt.Sprintf("Debit cents failed: %v", err))
 			}
@@ -338,7 +340,13 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		cost := refundIncrements.GetTotalCost()
 		lastCC.Cost -= cost
 		lastCC.Timespans.Compress()
-		// engine.Logger.Info(fmt.Sprintf("Rambursed %v cents", cost))
+	}
+	if sm.cdrs != nil {
+		var reply string
+		storedCdr := ev.AsStoredCdr()
+		if err := sm.cdrs.ProcessCdr(storedCdr, &reply); err != nil {
+			engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
+		}
 	}
 }
 
@@ -347,7 +355,7 @@ func (sm *FSSessionManager) GetDebitPeriod() time.Duration {
 }
 
 func (sm *FSSessionManager) MaxDebit(cd *engine.CallDescriptor, cc *engine.CallCost) error {
-	return sm.connector.MaxDebit(*cd, cc)
+	return sm.rater.MaxDebit(*cd, cc)
 }
 
 func (sm *FSSessionManager) GetDbLogger() engine.LogStorage {

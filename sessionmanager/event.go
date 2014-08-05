@@ -43,4 +43,5 @@ type Event interface {
 	MissingParameter() bool
 	ParseEventValue(*utils.RSRField) string
 	PassesFieldFilter(*utils.RSRField) (bool, string)
+	AsStoredCdr() *utils.StoredCdr
 }

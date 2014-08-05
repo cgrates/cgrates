@@ -41,7 +41,7 @@ const (
 	ACCOUNT            = "variable_cgr_account"
 	DESTINATION        = "variable_cgr_destination"
 	REQTYPE            = "variable_cgr_reqtype" //prepaid or postpaid
-	Category           = "variable_cgr_tor"
+	Category           = "variable_cgr_category"
 	UUID               = "Unique-ID" // -Unique ID for this call leg
 	CSTMID             = "variable_cgr_tenant"
 	CALL_DEST_NR       = "Caller-Destination-Number"
@@ -62,6 +62,7 @@ const (
 	SYSTEM_ERROR       = "-SYSTEM_ERROR"
 	MANAGER_REQUEST    = "+MANAGER_REQUEST"
 	USERNAME           = "Caller-Username"
+	FS_IPv4            = "FreeSWITCH-IPv4"
 )
 
 // Nice printing for the event object.
@@ -205,6 +206,23 @@ func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error)
 	return utils.ParseDurationWithSecs(durStr)
 }
 
+func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
+	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
+		return fieldName[len(utils.STATIC_VALUE_PREFIX):]
+	} else if fieldName == utils.META_DEFAULT {
+		return fsev[FS_IPv4]
+	}
+	return utils.FirstNonEmpty(fsev[fieldName], fsev[FS_IPv4])
+}
+
+func (fsev FSEvent) GetExtraFields() map[string]string {
+	var extraFields map[string]string
+	for _, fldRule := range config.CgrConfig().CDRSExtraFields {
+		extraFields[fldRule.Id] = fsev.ParseEventValue(fldRule)
+	}
+	return extraFields
+}
+
 // Used in derived charging and sittuations when we need to run regexp on fields
 func (fsev FSEvent) ParseEventValue(rsrFld *utils.RSRField) string {
 	switch rsrFld.Id {
@@ -269,4 +287,26 @@ func (fsev FSEvent) PassesFieldFilter(fieldFilter *utils.RSRField) (bool, string
 		return true, filteredValue
 	}
 	return false, ""
+}
+
+func (fsev FSEvent) AsStoredCdr() *utils.StoredCdr {
+	storCdr := new(utils.StoredCdr)
+	storCdr.CgrId = fsev.GetCgrId()
+	storCdr.TOR = utils.VOICE
+	storCdr.AccId = fsev.GetUUID()
+	storCdr.CdrHost = fsev.GetOriginatorIP(utils.META_DEFAULT)
+	storCdr.CdrSource = "FS_" + fsev.GetName()
+	storCdr.ReqType = fsev.GetReqType(utils.META_DEFAULT)
+	storCdr.Direction = fsev.GetDirection(utils.META_DEFAULT)
+	storCdr.Tenant = fsev.GetTenant(utils.META_DEFAULT)
+	storCdr.Category = fsev.GetCategory(utils.META_DEFAULT)
+	storCdr.Account = fsev.GetAccount(utils.META_DEFAULT)
+	storCdr.Subject = fsev.GetSubject(utils.META_DEFAULT)
+	storCdr.Destination = fsev.GetDestination(utils.META_DEFAULT)
+	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT)
+	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT)
+	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
+	storCdr.ExtraFields = fsev.GetExtraFields()
+	storCdr.Cost = -1
+	return storCdr
 }

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package sessionmanager
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -608,5 +609,21 @@ Caller-Username: 04021292812`
 	ev = new(FSEvent).New(body)
 	if pass, _ := ev.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Should not pass filter")
+	}
+}
+
+func TestFsEvAsStoredCdr(t *testing.T) {
+	cfg, _ = config.NewDefaultCGRConfig()
+	config.SetCgrConfig(cfg)
+	ev := new(FSEvent).New(hangupEv)
+	setupTime, _ := utils.ParseTimeDetectLayout("1398442107")
+	aTime, _ := utils.ParseTimeDetectLayout("1398442120")
+	eStoredCdr := &utils.StoredCdr{CgrId: utils.Sha1("37e9b766-5256-4e4b-b1ed-3767b930fec8", setupTime.UTC().String()),
+		TOR: utils.VOICE, AccId: "37e9b766-5256-4e4b-b1ed-3767b930fec8", CdrHost: "10.0.2.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.PSEUDOPREPAID,
+		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003",
+		Destination: "1002", SetupTime: setupTime, AnswerTime: aTime,
+		Usage: time.Duration(5) * time.Second, Cost: -1}
+	if storedCdr := ev.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
+		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
 }

@@ -141,7 +141,7 @@ func startCdrc(cdrsChan chan struct{}, cdrsAddress, cdrType, cdrInDir, cdrOutDir
 }
 
 func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage, cacheChan chan struct{}) {
-	var raterConn engine.Connector
+	var raterConn, cdrsConn engine.Connector
 	var client *rpcclient.RpcClient
 	if cfg.SMRater == utils.INTERNAL {
 		<-cacheChan // Wait for the cache to init before start doing queries
@@ -161,31 +161,30 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 		}
 		raterConn = &engine.RPCClientConnector{Client: client}
 	}
+	if cfg.SMCdrS == cfg.SMRater {
+		cdrsConn = raterConn
+	} else if cfg.SMCdrS == utils.INTERNAL {
+		<-cacheChan // Wait for the cache to init before start doing queries
+		cdrsConn = responder
+	} else {
+		for i := 0; i < cfg.SMReconnects; i++ {
+			client, err = rpcclient.NewRpcClient("tcp", cfg.SMCdrS, 0, cfg.SMReconnects, utils.GOB)
+			if err == nil { //Connected so no need to reiterate
+				break
+			}
+			time.Sleep(time.Duration(i+1) * time.Second)
+		}
+		if err != nil {
+			engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
+			exitChan <- true
+		}
+		cdrsConn = &engine.RPCClientConnector{Client: client}
+	}
 	switch cfg.SMSwitchType {
 	case FS:
 		dp, _ := time.ParseDuration(fmt.Sprintf("%vs", cfg.SMDebitInterval))
-		sm = sessionmanager.NewFSSessionManager(cfg, loggerDb, raterConn, dp)
+		sm = sessionmanager.NewFSSessionManager(cfg, loggerDb, raterConn, cdrsConn, dp)
 	case OSIPS:
-		var cdrsConn engine.Connector
-		if cfg.OsipCDRS == cfg.SMRater {
-			cdrsConn = raterConn
-		} else if cfg.OsipCDRS == utils.INTERNAL {
-			<-cacheChan // Wait for the cache to init before start doing queries
-			cdrsConn = responder
-		} else {
-			for i := 0; i < cfg.OsipsReconnects; i++ {
-				client, err = rpcclient.NewRpcClient("tcp", cfg.OsipCDRS, 0, cfg.SMReconnects, utils.GOB)
-				if err == nil { //Connected so no need to reiterate
-					break
-				}
-				time.Sleep(time.Duration(i+1) * time.Second)
-			}
-			if err != nil {
-				engine.Logger.Crit(fmt.Sprintf("<SM-OpenSIPS> Could not connect to CDRS via RPC: %v", err))
-				exitChan <- true
-			}
-			cdrsConn = &engine.RPCClientConnector{Client: client}
-		}
 		sm, _ = sessionmanager.NewOSipsSessionManager(cfg, raterConn, cdrsConn)
 	default:
 		engine.Logger.Err(fmt.Sprintf("<SessionManager> Unsupported session manger type: %s!", cfg.SMSwitchType))
