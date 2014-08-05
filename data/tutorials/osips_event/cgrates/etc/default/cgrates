@@ -10,7 +10,7 @@ ENABLE=true
 
 # what extra options to give cgrates binary?
 #  See cgr-engine -h for options
-#ENGINE_OPTS=''
+ENGINE_OPTS='-config=/usr/share/cgrates/tutorials/osips_event/cgrates/etc/cgrates/cgrates.cfg'
 
 # Don't forget to create an appropriate config file,
 # else the CGRateS system will not start.
