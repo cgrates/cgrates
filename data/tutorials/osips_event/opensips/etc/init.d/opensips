@@ -19,7 +19,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/sbin/opensips
 NAME=opensips
 DESC=opensips
-TUTFOLDER = /usr/share/cgrates/tutorials/osips_event/opensips
+TUTFOLDER=/usr/share/cgrates/tutorials/osips_event/opensips
 CFGFILE=$TUTFOLDER/etc/opensips/opensips.cfg
 M4CFGFILE=$TUTFOLDER/etc/opensips/opensips.m4
 M4ARCHIVEDIR=$TUTFOLDER/etc/opensips/archive
@@ -107,7 +107,7 @@ if test "$DUMP_CORE" = "yes" ; then
     # echo "$COREDIR/core.%e.sig%s.%p" > /proc/sys/kernel/core_pattern
 fi
 
-OPTIONS="-P $PIDFILE -m $S_MEMORY -M $P_MEMORY -u $USER -g $GROUP"
+OPTIONS="-f $CFGFILE -P $PIDFILE -m $S_MEMORY -M $P_MEMORY -u $USER -g $GROUP"
 
 case "$1" in
   start|debug)

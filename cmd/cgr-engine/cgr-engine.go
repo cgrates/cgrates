@@ -166,7 +166,7 @@ func startSessionManager(responder *engine.Responder, loggerDb engine.LogStorage
 	} else if cfg.SMCdrS == utils.INTERNAL {
 		<-cacheChan // Wait for the cache to init before start doing queries
 		cdrsConn = responder
-	} else {
+	} else if len(cfg.SMCdrS) != 0 {
 		for i := 0; i < cfg.SMReconnects; i++ {
 			client, err = rpcclient.NewRpcClient("tcp", cfg.SMCdrS, 0, cfg.SMReconnects, utils.GOB)
 			if err == nil { //Connected so no need to reiterate
