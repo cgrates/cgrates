@@ -112,15 +112,13 @@ func getActionFunc(typ string) (actionTypeFunc, bool) {
 }
 
 func logAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
-	var o interface{}
 	if ub != nil {
-		o = ub
+		body, _ := json.Marshal(ub)
+		Logger.Info(fmt.Sprintf("Threshold hit, Balance: %s", body))
 	}
 	if sq != nil {
-		o = sq
+		Logger.Info(fmt.Sprintf("Threshold hit, StatsQueueId: %s", sq.GetId()))
 	}
-	body, _ := json.Marshal(o)
-	Logger.Info(fmt.Sprintf("Threshold reached, balance: %s", body))
 	return
 }
 
@@ -291,7 +289,7 @@ func callUrlAsync(ub *Account, sq *StatsQueue, a *Action) error {
 		o = ub
 	}
 	if sq != nil {
-		o = sq.GetStats()
+		o = sq.GetId()
 	}
 	jsn, err := json.Marshal(o)
 	if err != nil {
@@ -315,17 +313,6 @@ func callUrlAsync(ub *Account, sq *StatsQueue, a *Action) error {
 
 // Mails the balance hitting the threshold towards predefined list of addresses
 func mailAsync(ub *Account, sq *StatsQueue, a *Action) error {
-	var o interface{}
-	if ub != nil {
-		o = ub
-	}
-	if sq != nil {
-		o = sq.GetStats()
-	}
-	jsn, err := json.Marshal(o)
-	if err != nil {
-		return err
-	}
 	cgrCfg := config.CgrConfig()
 	params := strings.Split(a.ExtraParameters, string(utils.CSV_SEP))
 	if len(params) == 0 {
@@ -339,14 +326,27 @@ func mailAsync(ub *Account, sq *StatsQueue, a *Action) error {
 		}
 		toAddrStr += addr
 	}
-	message := []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.Id, time.Now(), jsn))
+	var message []byte
+	if ub != nil {
+		balJsn, err := json.Marshal(ub)
+		if err != nil {
+			return err
+		}
+		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on Balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.Id, time.Now(), balJsn))
+	} else if sq != nil {
+		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on StatsQueueId: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nStatsQueueId:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR CDR Stats Monitor\r\n", toAddrStr, sq.GetId(), time.Now(), sq.GetId()))
+	}
 	auth := smtp.PlainAuth("", cgrCfg.MailerAuthUser, cgrCfg.MailerAuthPass, strings.Split(cgrCfg.MailerServer, ":")[0]) // We only need host part, so ignore port
 	go func() {
 		for i := 0; i < 5; i++ { // Loop so we can increase the success rate on best effort
 			if err := smtp.SendMail(cgrCfg.MailerServer, auth, cgrCfg.MailerFromAddr, toAddrs, message); err == nil {
 				break
 			} else if i == 4 {
-				Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], balance: %s", a.ExtraParameters, err.Error(), jsn))
+				if ub != nil {
+					Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], BalanceId: %s", a.ExtraParameters, err.Error(), ub.Id))
+				} else if sq != nil {
+					Logger.Warning(fmt.Sprintf("<Triggers> WARNING: Failed emailing, params: [%s], error: [%s], StatsQueueId: %s", a.ExtraParameters, err.Error(), sq.GetId()))
+				}
 				break
 			}
 			time.Sleep(time.Duration(i) * time.Minute)

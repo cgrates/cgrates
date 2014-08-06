@@ -165,3 +165,7 @@ func (sq *StatsQueue) getStats() map[string]float64 {
 	}
 	return stat
 }
+
+func (sq *StatsQueue) GetId() string {
+	return sq.conf.Id
+}
