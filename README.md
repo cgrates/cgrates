@@ -1,6 +1,6 @@
 ## Real-time Charging System for Telecom & ISP environments ##
 
-[![Build Status](https://drone.io/github.com/cgrates/cgrates/status.png)](https://drone.io/github.com/cgrates/cgrates/latest) [![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
+[![Build Status](https://secure.travis-ci.org/cgrates/cgrates.png)](http://travis-ci.org/cgrates/cgrates)
 
 ### Features ###
 + Rates for prepaid and for postpaid
