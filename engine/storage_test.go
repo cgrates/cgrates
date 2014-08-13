@@ -113,7 +113,7 @@ func TestCacheRefresh(t *testing.T) {
 }
 
 func TestCacheAliases(t *testing.T) {
-	if subj, err := cache2go.GetCached(RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey("vdf", "a3")); err != nil || subj != "minu" {
+	if subj, err := cache2go.GetCached(RP_ALIAS_PREFIX + utils.RatingSubjectAliasKey("vdf", "a3")); err == nil && subj != "minu" {
 		t.Error("Error caching alias: ", subj, err)
 	}
 }
@@ -140,7 +140,7 @@ func TestGetRPAliases(t *testing.T) {
 	}
 	expectAliases := sort.StringSlice([]string{"2001", "2002"})
 	expectAliases.Sort()
-	if aliases, err := dataStorage.GetRPAliases("cgrates.org", "1001", false); err != nil {
+	if aliases, err := dataStorage.GetRPAliases("cgrates.org", "1001", true); err != nil {
 		t.Error(err)
 	} else {
 		aliases := sort.StringSlice(aliases)
@@ -167,7 +167,7 @@ func TestRemRSubjAliases(t *testing.T) {
 	if cgrAliases, err := dataStorage.GetRPAliases("cgrates.org", "1001", false); err != nil {
 		t.Error(err)
 	} else if len(cgrAliases) != 0 {
-		t.Error("Subject aliases not removed")
+		t.Error("Subject aliases not removed: ", cgrAliases)
 	}
 	if iscAliases, err := dataStorage.GetRPAliases("itsyscom.com", "1001", false); err != nil { // Make sure the aliases were removed at tenant level
 		t.Error(err)

@@ -280,11 +280,18 @@ func (ms *MapStorage) SetRpAlias(key, alias string) (err error) {
 }
 
 func (ms *MapStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject) (err error) {
-	for key, value := range ms.dict {
+	for key, _ := range ms.dict {
 		for _, tntRtSubj := range tenantRtSubjects {
 			tenantPrfx := RP_ALIAS_PREFIX + tntRtSubj.Tenant + utils.CONCATENATED_KEY_SEP
-			if strings.HasPrefix(key, RP_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && tntRtSubj.Subject == string(value) {
-				delete(ms.dict, key)
+			if strings.HasPrefix(key, RP_ALIAS_PREFIX) {
+				alsSubj, err := ms.GetRpAlias(key[len(RP_ALIAS_PREFIX):], true)
+				if err != nil {
+					return err
+				}
+				if len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && tntRtSubj.Subject == alsSubj {
+					cache2go.RemKey(key)
+					delete(ms.dict, key)
+				}
 			}
 		}
 	}
@@ -292,10 +299,21 @@ func (ms *MapStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject) (
 }
 
 func (ms *MapStorage) GetRPAliases(tenant, subject string, checkDb bool) (aliases []string, err error) {
-	for key, value := range ms.dict {
-		tenantPrfx := RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
-		if strings.HasPrefix(key, RP_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && subject == string(value) {
-			aliases = append(aliases, key[len(tenantPrfx):])
+	tenantPrfx := RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
+	alsKeys := cache2go.GetEntriesKeys(tenantPrfx)
+	for _, key := range alsKeys {
+		if alsSubj, err := ms.GetRpAlias(key[len(RP_ALIAS_PREFIX):], checkDb); err != nil {
+			return nil, err
+		} else if alsSubj == subject {
+			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
+			aliases = append(aliases, alsFromKey)
+		}
+	}
+	if len(alsKeys) == 0 && checkDb {
+		for key, value := range ms.dict {
+			if strings.HasPrefix(key, RP_ALIAS_PREFIX) && len(key) >= len(tenantPrfx) && key[:len(tenantPrfx)] == tenantPrfx && subject == string(value) {
+				aliases = append(aliases, key[len(tenantPrfx):])
+			}
 		}
 	}
 	return aliases, nil

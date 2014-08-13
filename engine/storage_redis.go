@@ -362,6 +362,7 @@ func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject)
 			if tntRSubj.Subject != alias {
 				continue
 			}
+			cache2go.RemKey(key)
 			if _, err = rs.db.Del(key); err != nil {
 				return err
 			}
