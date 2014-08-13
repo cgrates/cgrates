@@ -117,7 +117,7 @@ func logAction(ub *Account, sq *StatsQueue, a *Action) (err error) {
 		Logger.Info(fmt.Sprintf("Threshold hit, Balance: %s", body))
 	}
 	if sq != nil {
-		Logger.Info(fmt.Sprintf("Threshold hit, StatsQueueId: %s", sq.GetId()))
+		Logger.Info(fmt.Sprintf("Threshold hit, StatsQueueId: %s, Metrics: %+v", sq.GetId(), sq.getStats()))
 	}
 	return
 }
@@ -334,7 +334,7 @@ func mailAsync(ub *Account, sq *StatsQueue, a *Action) error {
 		}
 		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on Balance: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nBalance:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR Balance Monitor\r\n", toAddrStr, ub.Id, time.Now(), balJsn))
 	} else if sq != nil {
-		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on StatsQueueId: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nStatsQueueId:\r\n\t%s\r\n\r\nYours faithfully,\r\nCGR CDR Stats Monitor\r\n", toAddrStr, sq.GetId(), time.Now(), sq.GetId()))
+		message = []byte(fmt.Sprintf("To: %s\r\nSubject: [CGR Notification] Threshold hit on StatsQueueId: %s\r\n\r\nTime: \r\n\t%s\r\n\r\nStatsQueueId:\r\n\t%s\r\n\r\nMetrics:\r\n\t%+v\r\n\r\nYours faithfully,\r\nCGR CDR Stats Monitor\r\n", toAddrStr, sq.GetId(), time.Now(), sq.GetId(), sq.getStats()))
 	}
 	auth := smtp.PlainAuth("", cgrCfg.MailerAuthUser, cgrCfg.MailerAuthPass, strings.Split(cgrCfg.MailerServer, ":")[0]) // We only need host part, so ignore port
 	go func() {
