@@ -19,15 +19,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
+	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 var tutCfgPath string
@@ -35,8 +37,15 @@ var tutCfg *config.CGRConfig
 var tutRpc *rpc.Client
 
 func init() {
+	if !*testLocal {
+		return
+	}
 	tutCfgPath = path.Join(*dataDir, "conf", "samples", "tutorial_local_test.cfg")
-	tutCfg, _ = config.NewCGRConfigFromFile(&tutCfgPath)
+	var err error
+	tutCfg, err = config.NewCGRConfigFromFile(&tutCfgPath)
+	if err != nil {
+		log.Print("ERROR: ", err)
+	}
 	tutCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tutCfg)
 }
