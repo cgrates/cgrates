@@ -93,10 +93,8 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 				if len(at.AccountIds) > 0 {
 					engine.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
 				}
-				go func() {
-					at.Execute()
-					at.AccountIds = make([]string, 0)
-				}()
+				at.Execute()
+				at.AccountIds = make([]string, 0)
 				// do not append it to the newAts list to be saved
 			} else {
 				now := time.Now()
