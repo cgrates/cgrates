@@ -217,6 +217,9 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 }
 
 func (at *ActionTiming) Execute() (err error) {
+	if len(at.AccountIds) == 0 { // nothing to do if no accounts set
+		return
+	}
 	at.resetStartTimeCache()
 	aac, err := at.getActions()
 	if err != nil {

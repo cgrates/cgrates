@@ -90,8 +90,13 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 			isAsap = at.IsASAP()
 			toBeSaved = toBeSaved || isAsap
 			if isAsap {
-				engine.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
-				go at.Execute()
+				if len(at.AccountIds) > 0 {
+					engine.Logger.Info(fmt.Sprintf("Time for one time action on %v", key))
+				}
+				go func() {
+					at.Execute()
+					at.AccountIds = make([]string, 0)
+				}()
 				// do not append it to the newAts list to be saved
 			} else {
 				now := time.Now()
@@ -100,8 +105,9 @@ func (s *Scheduler) LoadActionTimings(storage engine.AccountingStorage) {
 					continue
 				}
 				s.queue = append(s.queue, at)
-				newAts = append(newAts, at)
 			}
+			// save even asap action timings with empty account id list
+			newAts = append(newAts, at)
 		}
 		if toBeSaved {
 			engine.AccLock.Guard(engine.ACTION_TIMING_PREFIX, func() (float64, error) {
