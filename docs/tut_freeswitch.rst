@@ -9,6 +9,7 @@ In these tutorials we exemplify few cases of integration between FreeSWITCH_ and
 
    tut_freeswitch_installs
    tut_cgrates_installs
+   tut_jitsi_installs
    tut_freeswitch_csv
    tut_freeswitch_json
    tut_cgrates_usage

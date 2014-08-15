@@ -45,3 +45,7 @@ As described in post-install section, we will need to set up the MySQL_ database
 
 
 At this point we have **CGRateS** installed but not yet configured. To facilitate the understanding and speed up the process, **CGRateS** comes already with the configurations used in these tutorials, available in the */usr/share/cgrates/tutorials* folder, so we will load them custom on each tutorial case.
+
+.. _Redis: http://redis.io/
+.. _MySQL: http://www.mysql.org/
+.. _Git: http://git-scm.com/ 
