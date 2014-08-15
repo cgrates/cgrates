@@ -64,6 +64,13 @@ To verify that all actions successfully performed, we use following *cgr-console
   cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:00:20Z"'
   cgr-console 'cost Category="call" Tenant="cgrates.org" Subject="1001" Destination="1004" TimeStart="2014-08-04T13:00:00Z" TimeEnd="2014-08-04T13:01:25Z"'
 
+- Make sure *CDRStats Queues* were created:
+
+ ::
+
+  cgr-console cdrstats_queueids
+  cgr-console 'cdrstats_metrics StatsQueueId="*default"'
+
 
 Test calls
 ----------
