@@ -8,8 +8,10 @@ In these tutorials we exemplify few cases of integration between FreeSWITCH_ and
    :maxdepth: 2
 
    tut_freeswitch_installs
+   tut_cgrates_installs
    tut_freeswitch_csv
    tut_freeswitch_json
+   tut_cgrates_usage
 
 .. _FreeSWITCH: http://www.freeswitch.org/
 

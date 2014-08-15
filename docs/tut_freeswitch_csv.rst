@@ -1,5 +1,5 @@
-Case 1: FreeSWITCH_ generating *.csv* CDRs
-==========================================
+FreeSWITCH_ generating *.csv* CDRs
+==================================
 
 Scenario
 --------
