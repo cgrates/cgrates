@@ -57,7 +57,8 @@ At the end of each call FreeSWITCH_ will issue a http post with the CDR. This wi
 
 
 **CGRateS** Usage
--------------
+-----------------
+
 Since it is common to most of the tutorials, the example for **CGRateS** usage is provided in a separate page `here <http://cgrates.readthedocs.org/en/latest/tut_cgrates_usage.html>`_
 
 

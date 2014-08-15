@@ -70,7 +70,8 @@ Once the CDRs are mediated, can be exported as *.csv* format again via remote co
 
 
 **CGRateS** Usage
--------------
+-----------------
+
 Since it is common to most of the tutorials, the example for **CGRateS** usage is provided in a separate page `here <http://cgrates.readthedocs.org/en/latest/tut_cgrates_usage.html>`_
 
 
