@@ -48,7 +48,7 @@ type ActionTrigger struct {
 	lastExecutionTime     time.Time
 }
 
-func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueue) (err error) {
+func (at *ActionTrigger) Execute(ub *Account, sq *StatsQueueTriggered) (err error) {
 	// check for min sleep time
 	if at.Recurrent && !at.lastExecutionTime.IsZero() && time.Since(at.lastExecutionTime) < at.MinSleep {
 		return

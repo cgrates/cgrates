@@ -90,14 +90,14 @@ func (sq *StatsQueue) AppendCDR(cdr *utils.StoredCdr) {
 			if strings.HasPrefix(at.ThresholdType, "*min_") {
 				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
 					if value <= at.ThresholdValue {
-						at.Execute(nil, sq)
+						at.Execute(nil, sq.Triggered(at))
 					}
 				}
 			}
 			if strings.HasPrefix(at.ThresholdType, "*max_") {
 				if value, ok := stats[METRIC_TRIGGER_MAP[at.ThresholdType]]; ok {
 					if value >= at.ThresholdValue {
-						at.Execute(nil, sq)
+						at.Execute(nil, sq.Triggered(at))
 					}
 				}
 			}
@@ -168,4 +168,16 @@ func (sq *StatsQueue) getStats() map[string]float64 {
 
 func (sq *StatsQueue) GetId() string {
 	return sq.conf.Id
+}
+
+// Convert data into a struct which can be used in actions based on triggers hit
+func (sq *StatsQueue) Triggered(at *ActionTrigger) *StatsQueueTriggered {
+	return &StatsQueueTriggered{Id: sq.conf.Id, Metrics: sq.getStats(), Trigger: at}
+}
+
+// Struct to be passed to triggered actions
+type StatsQueueTriggered struct {
+	Id      string // StatsQueueId
+	Metrics map[string]float64
+	Trigger *ActionTrigger
 }
