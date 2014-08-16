@@ -1,2 +1,2 @@
 #Direction,Tenant,Category,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,TorField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,UsageField
-*out,cgrates.org,call,1001,1001,fs_json_run,,^rated,*default,*default,*default,*default,^1002,*default,*default,*default,*default
+*out,cgrates.org,call,1001,1001,derived_run1,,^rated,*default,*default,*default,*default,^1002,*default,*default,*default,*default

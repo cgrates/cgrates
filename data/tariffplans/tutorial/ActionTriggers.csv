@@ -9,4 +9,4 @@ CDRST1_WARN,,,*max_acc,10,true,1m,,,,,,5,LOG_WARNING,10
 CDRST1001_WARN,,,*min_asr,65,true,1m,,,,,,3,LOG_WARNING,10
 CDRST1001_WARN,,,*min_acd,10,true,1m,,,,,,5,LOG_WARNING,10
 CDRST1001_WARN,,,*max_acc,5,true,1m,,,,,,5,LOG_WARNING,10
-CDRST3_WARN,,,*min_acd,60,true,1m,,,,,,5,LOG_WARNING,10
+CDRST3_WARN,,,*min_acd,60,false,1m,,,,,,5,LOG_WARNING,10
