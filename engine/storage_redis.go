@@ -366,6 +366,7 @@ func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject)
 			if _, err = rs.db.Del(key); err != nil {
 				return err
 			}
+			break
 		}
 	}
 	return
