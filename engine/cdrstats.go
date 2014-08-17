@@ -52,26 +52,26 @@ func NewCdrStatsFromCdrStatsCfg(csCfg *config.CdrStatsConfig) *CdrStats {
 }
 
 type CdrStats struct {
-	Id                string        // Config id, unique per config instance
-	QueueLength       int           // Number of items in the stats buffer
-	TimeWindow        time.Duration // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
-	Metrics           []string      // ASR, ACD, ACC
-	SetupInterval     []time.Time   // 2 or less items (>= start interval,< stop_interval)
-	TOR               []string
-	CdrHost           []string
-	CdrSource         []string
-	ReqType           []string
-	Direction         []string
-	Tenant            []string
-	Category          []string
-	Account           []string
-	Subject           []string
-	DestinationPrefix []string
-	UsageInterval     []time.Duration // 2 or less items (>= Usage, <Usage)
-	MediationRunIds   []string
-	RatedAccount      []string
-	RatedSubject      []string
-	CostInterval      []float64 // 2 or less items, (>=Cost, <Cost)
+	Id                string          // Config id, unique per config instance
+	QueueLength       int             // Number of items in the stats buffer
+	TimeWindow        time.Duration   // Will only keep the CDRs who's call setup time is not older than time.Now()-TimeWindow
+	Metrics           []string        // ASR, ACD, ACC
+	SetupInterval     []time.Time     // CDRFieldFilter on SetupInterval, 2 or less items (>= start interval,< stop_interval)
+	TOR               []string        // CDRFieldFilter on TORs
+	CdrHost           []string        // CDRFieldFilter on CdrHosts
+	CdrSource         []string        // CDRFieldFilter on CdrSources
+	ReqType           []string        // CDRFieldFilter on ReqTypes
+	Direction         []string        // CDRFieldFilter on Directions
+	Tenant            []string        // CDRFieldFilter on Tenants
+	Category          []string        // CDRFieldFilter on Categories
+	Account           []string        // CDRFieldFilter on Accounts
+	Subject           []string        // CDRFieldFilter on Subjects
+	DestinationPrefix []string        // CDRFieldFilter on DestinationPrefixes
+	UsageInterval     []time.Duration // CDRFieldFilter on UsageInterval, 2 or less items (>= Usage, <Usage)
+	MediationRunIds   []string        // CDRFieldFilter on MediationRunIds
+	RatedAccount      []string        // CDRFieldFilter on RatedAccounts
+	RatedSubject      []string        // CDRFieldFilter on RatedSubjects
+	CostInterval      []float64       // CDRFieldFilter on CostInterval, 2 or less items, (>=Cost, <Cost)
 	Triggers          ActionTriggerPriotityList
 }
 

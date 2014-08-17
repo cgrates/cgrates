@@ -8,6 +8,8 @@
    cdrserver
    cdrclient
    cdrexporter
+   cdrstats
+   derived_charging
    history
    ratinglogic
 

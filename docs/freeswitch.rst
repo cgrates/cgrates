@@ -1,7 +1,7 @@
 8.1. FreeSWITCH integration
 ================================
 
-FreeSWITCH_ used as Telecom Switch is fully supported by all of the 3 rating modes: prepaid/postpaid/pseudoprepaid.
+FreeSWITCH_ used as Telecom Switch is fully supported by all of the 4 rating modes: prepaid/postpaid/pseudoprepaid/rated.
 A typical use case would be like the one in the diagram bellow:
 
 .. image::  images/CGRateSFSTypicalUsage.png

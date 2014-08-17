@@ -1,42 +1,44 @@
 CDR Server
 ==========
 
-An important component of every rating system is represented by the CDR Server. CGRateS includes an out of the box CDR Server component, controlable in the configuration file and supporting multiple interfaces for CDR feeds. This component makes the CDRs real-time accessible (raported to the time of receiving them) to CGRateS subsystems.
+An important component of every rating system is represented by the CDR Server. CGRateS includes an out of the box CDR Server component, controlable in the configuration file and supporting multiple interfaces for CDR feeds. This component makes the CDRs real-time accessible (influenced by the time of receiving them) to CGRateS subsystems.
 
-For the moment we support receiving CDRs over the following interfaces:
+Following interfaces are supported:
 
 
 CDR-CGR 
 -------
 
-Available as handler within http server, it represents the lightest and fastest way to get CDRs inside CGRateS in real-time.
+Available as handler within http server.
 
 To feed CDRs in via this interface, one must use url of the form: <http://$ip_configured:$port_configured/cgr>.
 
 The CDR fields are received via http form (although for simplicity we support inserting them within query parameters as well) and are expected to be urlencoded in order to transport special characters reliably. All fields are expected by CGRateS as string, particular conversions being done on processing each CDR.
-The fields received are splitt into two different categories based on CGRateS interest in them:
+The fields received are split into two different categories based on CGRateS interest in them:
 
 Primary fields: the fields which CGRateS needs for it's own operations and are stored into cdrs_primary table of storDb.
 
-- accid: represents the unique accounting id given by the switch generating the CDR
-- cdrhost: represents the ip of the host generating the CDR
-- cdrsource: formally identifies the source of the CDR
-- reqtype: matching the supported request types by the CGRateS
-- direction: matching the supported direction identifiers of the CGRateS
-- tenant: tenant whom this call belongs
-- tor: TypeOfRecord for the CDR
+- tor: type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
+- accid: represents the unique accounting id given by the telecom switch generating the CDR
+- cdrhost: represents the IP address of the host generating the CDR (automatically populated by the server)
+- cdrsource: formally identifies the source of the CDR (free form field)
+- reqtype: matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
+- direction: matching the supported direction identifiers of the CGRateS <*out>
+- tenant: tenant whom this record belongs
+- category: free-form filter for this record, matching the category defined in rating profiles.
 - account: account id (accounting subsystem) the record should be attached to
-- subject: rating subject (rating subsystem) this call should be attached to
+- subject: rating subject (rating subsystem) this record should be attached to
 - destination: destination to be charged
-- answer_time: time of the record (in case of tor=call this would be answer time of the call). Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
-- duration: used in case of tor=call like, representing the total duration of the call
+- setup_time: set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+- answer_time: answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+- usage: event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
 
 Extra fields: any field coming in via the http request and not a member of primary fields list. These fields are stored as json encoded into *cdrs_extra* table of storDb.
 
 Example of sample CDR generated simply using curl:
 ::
 
- curl --data "curl --data "accid=iiaasbfdsaf&cdrhost=192.168.1.1&cdrsource=curl_cdr&reqtype=rated&direction=*out&tenant=192.168.56.66&tor=call&account=dan&subject=dan&destination=%2B4986517174963&answer_time=1383813746&duration=1&sip_user=Jitsi&subject2=1003" http://127.0.0.1:2080/cgr
+ curl --data "curl --data "tor=*voice&accid=iiaasbfdsaf&cdrhost=192.168.1.1&cdrsource=curl_cdr&reqtype=rated&direction=*out&tenant=192.168.56.66&category=call&account=dan&subject=dan&destination=%2B4986517174963&answer_time=1383813746&usage=1&sip_user=Jitsi&subject2=1003" http://127.0.0.1:2080/cgr
 
 
 CDR-FS_JSON 
@@ -65,4 +67,39 @@ The mechanism of extracting CDR information out of JSON encoded CDR received fro
       - dialed_extension: destination number considered if cgr_destination is missing
    - Fields stored at request in cdr_extra and definable in configuration file under *extra_fields*.
 - Once the content will be filtered, the real CDR object will be processed, stored into storDb under *cdrs_primary* and *cdrs_extra* tables and, if configured, it will be passed further for mediation.
+
+
+CDR-RPC 
+-------
+
+Available as RPC handler on top of CGR APIs exposed (in-process as well as GOB-RPC and JSON-RPC). This interface is used for example by CGR-SM component capturing the CDRs over event interface (eg: OpenSIPS or FreeSWITCH-ZeroConfig scenario)
+
+The RPC function signature looks like this:
+::
+
+ CDRSV1.ProcessCdr(cdr *utils.StoredCdr, reply *string) error
+
+
+The simplified StoredCdr object is represented by following:
+::
+
+ type StoredCdr struct {
+   CgrId          string
+   OrderId        int64             // Stor order id used as export order id
+   TOR            string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
+   AccId          string            // represents the unique accounting id given by the telecom switch generating the CDR
+   CdrHost        string            // represents the IP address of the host generating the CDR (automatically populated by the server)
+   CdrSource      string            // formally identifies the source of the CDR (free form field)
+   ReqType        string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
+   Direction      string            // matching the supported direction identifiers of the CGRateS <*out>
+   Tenant         string            // tenant whom this record belongs
+   Category       string            // free-form filter for this record, matching the category defined in rating profiles.
+   Account        string            // account id (accounting subsystem) the record should be attached to
+   Subject        string            // rating subject (rating subsystem) this record should be attached to
+   Destination    string            // destination to be charged
+   SetupTime      time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+   AnswerTime     time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+   Usage          time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+   ExtraFields    map[string]string // Extra fields to be stored in CDR
+}
 

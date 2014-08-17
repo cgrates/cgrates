@@ -30,22 +30,22 @@ import (
 // Kinda standard of internal CDR, complies to CDR interface also
 type StoredCdr struct {
 	CgrId          string
-	OrderId        int64 // Stor order id used as export order id
-	TOR            string
-	AccId          string
-	CdrHost        string
-	CdrSource      string
-	ReqType        string
-	Direction      string
-	Tenant         string
-	Category       string
-	Account        string
-	Subject        string
-	Destination    string
-	SetupTime      time.Time
-	AnswerTime     time.Time
-	Usage          time.Duration
-	ExtraFields    map[string]string
+	OrderId        int64             // Stor order id used as export order id
+	TOR            string            // type of record, meta-field, should map to one of the TORs hardcoded inside the server <*voice|*data|*sms>
+	AccId          string            // represents the unique accounting id given by the telecom switch generating the CDR
+	CdrHost        string            // represents the IP address of the host generating the CDR (automatically populated by the server)
+	CdrSource      string            // formally identifies the source of the CDR (free form field)
+	ReqType        string            // matching the supported request types by the **CGRateS**, accepted values are hardcoded in the server <prepaid|postpaid|pseudoprepaid|rated>.
+	Direction      string            // matching the supported direction identifiers of the CGRateS <*out>
+	Tenant         string            // tenant whom this record belongs
+	Category       string            // free-form filter for this record, matching the category defined in rating profiles.
+	Account        string            // account id (accounting subsystem) the record should be attached to
+	Subject        string            // rating subject (rating subsystem) this record should be attached to
+	Destination    string            // destination to be charged
+	SetupTime      time.Time         // set-up time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	AnswerTime     time.Time         // answer time of the event. Supported formats: datetime RFC3339 compatible, SQL datetime (eg: MySQL), unix timestamp.
+	Usage          time.Duration     // event usage information (eg: in case of tor=*voice this will represent the total duration of a call)
+	ExtraFields    map[string]string // Extra fields to be stored in CDR
 	MediationRunId string
 	RatedAccount   string // Populated out of rating data
 	RatedSubject   string
