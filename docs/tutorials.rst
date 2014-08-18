@@ -5,3 +5,4 @@
    :maxdepth: 2
 
    tut_freeswitch
+   tut_opensips

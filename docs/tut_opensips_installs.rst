@@ -6,6 +6,16 @@ As operating system we have choosen Debian Wheezy, since all the software compon
 OpenSIPS_
 ---------
 
+We got OpenSIPS_ installed via following commands:
+::
 
+ wget http://apt.opensips.org/key.asc
+ apt-key add key.asc
+ cd /etc/apt/sources.list.d/
+ wget http://apt.itsyscom.com/conf/opensips.apt.list
+ apt-get update
+ apt-get install
 
 Once installed we proceed with loading the configuration out of specific tutorial cases bellow.
+
+.. _OpenSIPS: http://www.opensips.org/

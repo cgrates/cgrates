@@ -1,7 +1,7 @@
 OpenSIPS_ Integration Tutorials
 ===============================
 
-In these tutorials we exemplify few cases of integration between OpenSIPS_ and **CGRateS**. We start with common steps, installation and postinstall processes then we dive into particular configurations, depending on the case we run.
+In these tutorials we exemplify few cases of integration between OpenSIPS_ and CGRateS_. We start with common steps, installation and postinstall processes then we dive into particular configurations, depending on the case we run.
 
 
 .. toctree::
@@ -14,4 +14,5 @@ In these tutorials we exemplify few cases of integration between OpenSIPS_ and *
    tut_cgrates_usage
 
 .. _OpenSIPS: http://www.opensips.org/
+.. _CGRateS: http://www.cgrates.org/
 
