@@ -28,7 +28,7 @@ To verify that OpenSIPS_ is running we run the console command:
 
 ::
 
- fs_cli -x status
+ opensipsctl moni
 
 
 Starting **CGRateS** with custom configuration

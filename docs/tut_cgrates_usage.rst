@@ -16,11 +16,11 @@ For our tutorial we load again prepared data out of shared folder, containing fo
  - Rate id: *RT_20CNT* with connect fee of 40cents, 20cents per minute for the first 60s in 60s increments, followed by 10 cents per minute charged in 1s increments.
  - Rate id: *RT_40CNT* with connect fee of 80cents, 40cents per minute for the first 60s in 60s increments, follwed by 20cents per minute charged in 10s increments.
  - Rate id: *RT_1CNT* having no connect fee and a rate of 1 cent per minute, chargeable in 1 minute increments.
- - Will charge by default *RT_40CNT* for all FreeSWITCH_ destinations during peak times (Monday-Friday 08:00-19:00) and *RT_10CNT* during offpeatimes (rest).
+ - Will charge by default *RT_40CNT* for all 10xx destinations during peak times (Monday-Friday 08:00-19:00) and *RT_10CNT* during offpeatimes (rest).
  - Account 1001 will receive a special *deal* for 1002 and 1003 destinations during peak times with *RT_20CNT*, otherwise having default rating.
 
 - Accounting part will have following configured:
- - Create 5 accounts (equivalent of FreeSWITCH default test users - 1001, 1002, 1003, 1004, 1007).
+ - Create 5 accounts: 1001, 1002, 1003, 1004, 1007.
  - Create 1 account alias (1006 - alias of account 1002).
  - Create 1 rating profile alias (1006 - alias of rating profile 1001).
  - 1002, 1003, 1004 will receive 10units of *\*monetary* balance.
