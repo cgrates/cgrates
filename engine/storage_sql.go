@@ -450,25 +450,35 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,min_sleep,destination_id,balance_weight,balance_expiry_time,balance_rating_subject,balance_shared_group,min_queued_items,actions_id,weight) VALUES ",
-		utils.TBL_TP_ACTION_TRIGGERS))
-	i := 0
-	for atId, atRows := range ats {
-		for _, atsRow := range atRows {
-			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				buffer.WriteRune(',')
+	tx := self.db.Begin()
+	for atId, aTriggers := range ats {
+		tx.Where("tpid = ?", tpid).Where("id = ?", atId).Delete(TpActionTriggers{})
+		for _, at := range aTriggers {
+			recurrent := 0
+			if at.Recurrent {
+				recurrent = 1
 			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s', %f, %t, %d, '%s', %f, '%s', '%s', '%s', %d, '%s', %f)",
-				tpid, atId, atsRow.BalanceType, atsRow.Direction, atsRow.ThresholdType,
-				atsRow.ThresholdValue, atsRow.Recurrent, atsRow.MinSleep, atsRow.DestinationId, atsRow.BalanceWeight, atsRow.BalanceExpirationDate, atsRow.BalanceRatingSubject, atsRow.BalanceSharedGroup, atsRow.MinQueuedItems, atsRow.ActionsId, atsRow.Weight))
-			i++
+			tx.Save(TpActionTriggers{
+				Tpid:                 tpid,
+				Id:                   atId,
+				BalanceType:          at.BalanceType,
+				Direction:            at.Direction,
+				ThresholdType:        at.ThresholdType,
+				ThresholdValue:       at.ThresholdValue,
+				Recurrent:            recurrent,
+				MinSleep:             int64(at.MinSleep),
+				DestinationId:        at.DestinationId,
+				BalanceWeight:        at.BalanceWeight,
+				BalanceExpiryTime:    at.BalanceExpirationDate,
+				BalanceRatingSubject: at.BalanceRatingSubject,
+				BalanceSharedGroup:   at.BalanceRatingSubject,
+				MinQueuedItems:       at.MinQueuedItems,
+				ActionsId:            at.ActionsId,
+				Weight:               at.Weight,
+			})
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE recurrent=values(recurrent), weight=values(weight)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
@@ -1309,41 +1319,32 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {
 	ats := make(map[string][]*utils.TPActionTrigger)
-	q := fmt.Sprintf("SELECT tpid,id,balance_type,direction,threshold_type,threshold_value,recurrent,min_sleep,destination_id, balance_weight, balance_expiry_time, balance_rating_subject, balance_shared_group, min_queued_items, actions_id, weight FROM %s WHERE tpid='%s'",
-		utils.TBL_TP_ACTION_TRIGGERS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND id='%s'", tag)
+	var tpActionTriggers []TpActionTriggers
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpActionTriggers).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var threshold, balance_weight, weight float64
-		var tpid, tag, balances_type, direction, destinations_tag, balance_expiration_time, balance_rating_subject, balance_shared_group, actions_tag, threshold_type string
-		var recurrent bool
-		var min_sleep time.Duration
-		var min_queued_items int
-		if err := rows.Scan(&tpid, &tag, &balances_type, &direction, &threshold_type, &threshold, &recurrent, &min_sleep, &destinations_tag, &balance_weight, &balance_expiration_time, &balance_rating_subject, &balance_shared_group, &min_queued_items, &actions_tag, &weight); err != nil {
-			return nil, err
-		}
 
+	for _, tpAt := range tpActionTriggers {
+		recurrent := tpAt.Recurrent == 1
 		at := &utils.TPActionTrigger{
-			BalanceType:           balances_type,
-			Direction:             direction,
-			ThresholdType:         threshold_type,
-			ThresholdValue:        threshold,
+			BalanceType:           tpAt.BalanceType,
+			Direction:             tpAt.Direction,
+			ThresholdType:         tpAt.ThresholdType,
+			ThresholdValue:        tpAt.ThresholdValue,
 			Recurrent:             recurrent,
-			MinSleep:              min_sleep,
-			DestinationId:         destinations_tag,
-			BalanceWeight:         balance_weight,
-			BalanceExpirationDate: balance_expiration_time,
-			BalanceRatingSubject:  balance_rating_subject,
-			BalanceSharedGroup:    balance_shared_group,
-			Weight:                weight,
-			ActionsId:             actions_tag,
-			MinQueuedItems:        min_queued_items,
+			MinSleep:              time.Duration(tpAt.MinSleep),
+			DestinationId:         tpAt.DestinationId,
+			BalanceWeight:         tpAt.BalanceWeight,
+			BalanceExpirationDate: tpAt.BalanceExpiryTime,
+			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
+			BalanceSharedGroup:    tpAt.BalanceSharedGroup,
+			Weight:                tpAt.Weight,
+			ActionsId:             tpAt.ActionsId,
+			MinQueuedItems:        tpAt.MinQueuedItems,
 		}
 		ats[tag] = append(ats[tag], at)
 	}

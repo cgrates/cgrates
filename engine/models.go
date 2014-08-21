@@ -91,3 +91,23 @@ type TpActionPlan struct {
 	TimingId  string
 	Weight    float64
 }
+
+type TpActionTriggers struct {
+	Tbid                 int64 `gorm:"primary_key:yes"`
+	Tpid                 string
+	Id                   string
+	BalanceType          string
+	Direction            string
+	ThresholdType        string
+	ThresholdValue       float64
+	Recurrent            int
+	MinSleep             int64
+	DestinationId        string
+	BalanceWeight        float64
+	BalanceExpiryTime    string
+	BalanceRatingSubject string
+	BalanceSharedGroup   string
+	MinQueuedItems       int
+	ActionsId            string
+	Weight               float64
+}
