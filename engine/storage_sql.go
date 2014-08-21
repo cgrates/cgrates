@@ -346,24 +346,29 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 	if len(acts) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,action,balance_type,direction,units,expiry_time,destination_id,rating_subject,shared_group,balance_weight,extra_parameters,weight) VALUES ", utils.TBL_TP_ACTIONS))
-	i := 0
-	for actId, actRows := range acts {
-		for _, act := range actRows {
-			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				buffer.WriteRune(',')
-			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s',%f,'%s','%s','%s','%s',%f,'%s',%f)",
-				tpid, actId, act.Identifier, act.BalanceType, act.Direction, act.Units, act.ExpiryTime,
-				act.DestinationId, act.RatingSubject, act.SharedGroup, act.BalanceWeight, act.ExtraParameters, act.Weight))
-			i++
+
+	tx := self.db.Begin()
+	for acId, acs := range acts {
+		tx.Where("tpid = ?", tpid).Where("id = ?", acId).Delete(TpAction{})
+		for _, ac := range acs {
+			tx.Save(TpAction{
+				Tpid:            tpid,
+				Id:              acId,
+				Action:          ac.Identifier,
+				BalanceType:     ac.BalanceType,
+				Direction:       ac.Direction,
+				Units:           ac.Units,
+				ExpiryTime:      ac.ExpiryTime,
+				DestinationId:   ac.DestinationId,
+				RatingSubject:   ac.RatingSubject,
+				SharedGroup:     ac.SharedGroup,
+				BalanceWeight:   ac.BalanceWeight,
+				ExtraParameters: ac.ExtraParameters,
+				Weight:          ac.Weight,
+			})
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE action=values(action),balance_type=values(balance_type),direction=values(direction),units=values(units),expiry_time=values(expiry_time),destination_id=values(destination_id),rating_subject=values(rating_subject),shared_group=values(shared_group),balance_weight=values(balance_weight),extra_parameters=values(extra_parameters),weight=values(weight)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
@@ -1281,34 +1286,29 @@ func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {
 
 func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAction, error) {
 	as := make(map[string][]*utils.TPAction)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTIONS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND id='%s'", tag)
+
+	var tpActions []TpAction
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpActions).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var id int
-		var units, balance_weight, weight float64
-		var tpid, tag, action, balance_type, direction, destinations_tag, rating_subject, shared_group, extra_parameters, expirationDate string
-		if err := rows.Scan(&id, &tpid, &tag, &action, &balance_type, &direction, &units, &expirationDate, &destinations_tag, &rating_subject, &shared_group, &balance_weight, &extra_parameters, &weight); err != nil {
-			return nil, err
-		}
+
+	for _, tpAc := range tpActions {
 		a := &utils.TPAction{
-			Identifier:      action,
-			BalanceType:     balance_type,
-			Direction:       direction,
-			Units:           units,
-			ExpiryTime:      expirationDate,
-			DestinationId:   destinations_tag,
-			RatingSubject:   rating_subject,
-			SharedGroup:     shared_group,
-			BalanceWeight:   balance_weight,
-			ExtraParameters: extra_parameters,
-			Weight:          weight,
+			Identifier:      tpAc.Action,
+			BalanceType:     tpAc.BalanceType,
+			Direction:       tpAc.Direction,
+			Units:           tpAc.Units,
+			ExpiryTime:      tpAc.ExpiryTime,
+			DestinationId:   tpAc.DestinationId,
+			RatingSubject:   tpAc.RatingSubject,
+			SharedGroup:     tpAc.SharedGroup,
+			BalanceWeight:   tpAc.BalanceWeight,
+			ExtraParameters: tpAc.ExtraParameters,
+			Weight:          tpAc.Weight,
 		}
 		as[tag] = append(as[tag], a)
 	}

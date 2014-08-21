@@ -65,3 +65,20 @@ type TpRatingPlan struct {
 	TimingId    string
 	Weight      float64
 }
+
+type TpAction struct {
+	Tbid            int64 `gorm:"primary_key:yes"`
+	Tpid            string
+	Id              string
+	Action          string
+	BalanceType     string
+	Direction       string
+	Units           float64
+	ExpiryTime      string
+	DestinationId   string
+	RatingSubject   string
+	SharedGroup     string
+	BalanceWeight   float64
+	ExtraParameters string
+	Weight          float64
+}
