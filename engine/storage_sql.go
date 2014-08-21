@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"path"
 	"strconv"
 	"strings"
@@ -160,28 +159,28 @@ func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 }
 
 // Extracts destinations from StorDB on specific tariffplan id
-func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	d := &Destination{Id: destTag}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one prefix
-		var pref string
-		err = rows.Scan(&pref)
-		if err != nil {
-			return nil, err
-		}
-		d.AddPrefix(pref)
-	}
-	if i == 0 {
-		return nil, nil
-	}
-	return d, nil
-}
+/*func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
+    rows, err := self.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    d := &Destination{Id: destTag}
+    i := 0
+    for rows.Next() {
+        i++ //Keep here a reference so we know we got at least one prefix
+        var pref string
+        err = rows.Scan(&pref)
+        if err != nil {
+            return nil, err
+        }
+        d.AddPrefix(pref)
+    }
+    if i == 0 {
+        return nil, nil
+    }
+    return d, nil
+}*/
 
 func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	if len(dest.Prefixes) == 0 {
@@ -204,24 +203,23 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, id, connect_fee, rate, rate_unit, rate_increment, group_interval_start) VALUES ",
-		utils.TBL_TP_RATES))
-	i := 0
-	for rtId, rtRows := range rts {
-		for _, rt := range rtRows {
-			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				buffer.WriteRune(',')
-			}
-			buffer.WriteString(fmt.Sprintf("('%s', '%s', %f, %f, '%s', '%s','%s')",
-				tpid, rtId, rt.ConnectFee, rt.Rate, rt.RateUnit, rt.RateIncrement, rt.GroupIntervalStart))
-			i++
+
+	tx := self.db.Begin()
+	for rtId, rSlots := range rts {
+		tx.Where("tpid = ?", tpid).Where("id = ?", rtId).Delete(TpRate{})
+		for _, rs := range rSlots {
+			tx.Save(TpRate{
+				Tpid:               tpid,
+				Id:                 rtId,
+				ConnectFee:         rs.ConnectFee,
+				Rate:               rs.Rate,
+				RateUnit:           rs.RateUnit,
+				RateIncrement:      rs.RateIncrement,
+				GroupIntervalStart: rs.GroupIntervalStart,
+			})
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE connect_fee=values(connect_fee),rate=values(rate),rate_increment=values(rate_increment),group_interval_start=values(group_interval_start)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
@@ -229,22 +227,22 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 	if len(drs) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,destinations_id,rates_id,rounding_method,rounding_decimals) VALUES ", utils.TBL_TP_DESTINATION_RATES))
-	i := 0
-	for drId, drRows := range drs {
-		for _, dr := range drRows {
-			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				buffer.WriteRune(',')
-			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s', %d)", tpid, drId, dr.DestinationId, dr.RateId, dr.RoundingMethod, dr.RoundingDecimals))
-			i++
+
+	tx := self.db.Begin()
+	for drId, dRates := range drs {
+		tx.Where("tpid = ?", tpid).Where("id = ?", drId).Delete(TpDestinationRate{})
+		for _, dr := range dRates {
+			tx.Save(TpDestinationRate{
+				Tpid:             tpid,
+				Id:               drId,
+				DestinationsId:   dr.DestinationId,
+				RatesId:          dr.RateId,
+				RoundingMethod:   dr.RoundingMethod,
+				RoundingDecimals: dr.RoundingDecimals,
+			})
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE destinations_id=values(destinations_id),rates_id=values(rates_id),rounding_method=values(rounding_method),rounding_decimals=values(rounding_decimals)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
@@ -252,22 +250,21 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 	if len(drts) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, id, destrates_id, timing_id, weight) VALUES ", utils.TBL_TP_RATING_PLANS))
-	i := 0
-	for drtId, drtRows := range drts {
-		for _, drt := range drtRows {
-			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				buffer.WriteRune(',')
-			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%f)", tpid, drtId, drt.DestinationRatesId, drt.TimingId, drt.Weight))
-			i++
+
+	tx := self.db.Begin()
+	for rpId, rPlans := range drts {
+		tx.Where("tpid = ?", tpid).Where("id = ?", rpId).Delete(TpRatingPlan{})
+		for _, rp := range rPlans {
+			tx.Save(TpRatingPlan{
+				Tpid:        tpid,
+				Id:          rpId,
+				DestratesId: rp.DestinationRatesId,
+				TimingId:    rp.TimingId,
+				Weight:      rp.Weight,
+			})
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE weight=values(weight)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
@@ -1012,13 +1009,11 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) (map[string]*Destina
 	if len(tag) != 0 {
 		q = q.Where("id = ?", tag)
 	}
-	log.Printf("%+v", q)
 	if err := q.Find(&tpDests).Error; err != nil {
 		return nil, err
 	}
 
 	for _, tpDest := range tpDests {
-		log.Print(tpDest)
 		var dest *Destination
 		var found bool
 		if dest, found = dests[tag]; !found {
@@ -1032,22 +1027,17 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) (map[string]*Destina
 
 func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, error) {
 	rts := make(map[string]*utils.TPRate)
-	q := fmt.Sprintf("SELECT id, connect_fee, rate, rate_unit, rate_increment, group_interval_start FROM %s WHERE tpid='%s' ", utils.TBL_TP_RATES, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND id='%s'", tag)
+	var tpRates []TpRate
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpRates).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var tag, rate_unit, rate_increment, group_interval_start string
-		var connect_fee, rate float64
-		if err := rows.Scan(&tag, &connect_fee, &rate, &rate_unit, &rate_increment, &group_interval_start); err != nil {
-			return nil, err
-		}
-		rs, err := utils.NewRateSlot(connect_fee, rate, rate_unit, rate_increment, group_interval_start)
+
+	for _, tr := range tpRates {
+		rs, err := utils.NewRateSlot(tr.ConnectFee, tr.Rate, tr.RateUnit, tr.RateIncrement, tr.GroupIntervalStart)
 		if err != nil {
 			return nil, err
 		}
@@ -1058,16 +1048,14 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 		}
 
 		// same tag only to create rate groups
-		existingRates, exists := rts[tag]
+		er, exists := rts[tag]
 		if exists {
-			rss := existingRates.RateSlots
-			if err := ValidNextGroup(rss[len(rss)-1], r.RateSlots[0]); err != nil {
+			if err := ValidNextGroup(er.RateSlots[len(er.RateSlots)-1], r.RateSlots[0]); err != nil {
 				return nil, err
 			}
-			rts[tag].RateSlots = append(rts[tag].RateSlots, r.RateSlots[0])
+			er.RateSlots = append(er.RateSlots, r.RateSlots[0])
 		} else {
 			rts[tag] = r
-
 		}
 	}
 	return rts, nil
@@ -1075,31 +1063,25 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 
 func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*utils.TPDestinationRate, error) {
 	rts := make(map[string]*utils.TPDestinationRate)
-	q := fmt.Sprintf("SELECT tpid,id,destinations_id,rates_id,rounding_method,rounding_decimals FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATION_RATES, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND id='%s'", tag)
+	var tpDestinationRates []TpDestinationRate
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpDestinationRates).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var tpid, tag, destinations_tag, rate_tag, rounding_method string
-		var rounding_decimals int
-		if err := rows.Scan(&tpid, &tag, &destinations_tag, &rate_tag, &rounding_method, &rounding_decimals); err != nil {
-			return nil, err
-		}
 
+	for _, tpDr := range tpDestinationRates {
 		dr := &utils.TPDestinationRate{
 			TPid:              tpid,
 			DestinationRateId: tag,
 			DestinationRates: []*utils.DestinationRate{
 				&utils.DestinationRate{
-					DestinationId:    destinations_tag,
-					RateId:           rate_tag,
-					RoundingMethod:   rounding_method,
-					RoundingDecimals: rounding_decimals,
+					DestinationId:    tpDr.DestinationsId,
+					RateId:           tpDr.RatesId,
+					RoundingMethod:   tpDr.RoundingMethod,
+					RoundingDecimals: tpDr.RoundingDecimals,
 				},
 			},
 		}
@@ -1110,58 +1092,51 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*uti
 			existingDR = dr
 		}
 		rts[tag] = existingDR
+
 	}
 	return rts, nil
 }
 
 func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.TPTiming, error) {
 	tms := make(map[string]*utils.TPTiming)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_TIMINGS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND id='%s'", tag)
+	var tpTimings []TpTiming
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpTimings).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var id int
-		var tpid, tag, years, months, month_days, week_days, start_time string
-		if err := rows.Scan(&id, &tpid, &tag, &years, &months, &month_days, &week_days, &start_time); err != nil {
-			return nil, err
-		}
-		tms[tag] = NewTiming(tag, years, months, month_days, week_days, start_time)
+
+	for _, tpTm := range tpTimings {
+		tms[tag] = NewTiming(tag, tpTm.Years, tpTm.Months, tpTm.MonthDays, tpTm.WeekDays, tpTm.Time)
 	}
+
 	return tms, nil
 }
 
 func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.TPRatingPlanBinding, error) {
 	rpbns := make(map[string][]*utils.TPRatingPlanBinding)
-	q := fmt.Sprintf("SELECT tpid, id, destrates_id, timing_id, weight FROM %s WHERE tpid='%s'", utils.TBL_TP_RATING_PLANS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND id='%s'", tag)
+
+	var tpRatingPlans []TpRatingPlan
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpRatingPlans).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var weight float64
-		var tpid, id, destination_rates_tag, timings_tag string
-		if err := rows.Scan(&tpid, &id, &destination_rates_tag, &timings_tag, &weight); err != nil {
-			return nil, err
-		}
+
+	for _, tpRp := range tpRatingPlans {
 		rpb := &utils.TPRatingPlanBinding{
-			DestinationRatesId: destination_rates_tag,
-			TimingId:           timings_tag,
-			Weight:             weight,
+			DestinationRatesId: tpRp.DestratesId,
+			TimingId:           tpRp.TimingId,
+			Weight:             tpRp.Weight,
 		}
-		if _, exists := rpbns[id]; exists {
-			rpbns[id] = append(rpbns[id], rpb)
+		if _, exists := rpbns[tag]; exists {
+			rpbns[tag] = append(rpbns[tag], rpb)
 		} else { // New
-			rpbns[id] = []*utils.TPRatingPlanBinding{rpb}
+			rpbns[tag] = []*utils.TPRatingPlanBinding{rpb}
 		}
 	}
 	return rpbns, nil

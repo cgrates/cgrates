@@ -18,9 +18,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
+type TpTiming struct {
+	Tbid      int64 `gorm:"primary_key:yes"`
+	Tpid      string
+	Id        string
+	Years     string
+	Months    string
+	MonthDays string
+	WeekDays  string
+	Time      string
+}
+
 type TpDestination struct {
 	Tbid   int64 `gorm:"primary_key:yes"`
 	Tpid   string
 	Id     string
 	Prefix string
+}
+
+type TpRate struct {
+	Tbid               int64 `gorm:"primary_key:yes"`
+	Tpid               string
+	Id                 string
+	ConnectFee         float64
+	Rate               float64
+	RateUnit           string
+	RateIncrement      string
+	GroupIntervalStart string
+}
+
+type TpDestinationRate struct {
+	Tbid             int64 `gorm:"primary_key:yes"`
+	Tpid             string
+	Id               string
+	DestinationsId   string
+	RatesId          string
+	RoundingMethod   string
+	RoundingDecimals int
+}
+
+type TpRatingPlan struct {
+	Tbid        int64 `gorm:"primary_key:yes"`
+	Tpid        string
+	Id          string
+	DestratesId string
+	TimingId    string
+	Weight      float64
 }
