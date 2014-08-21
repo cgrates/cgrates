@@ -10,3 +10,4 @@ go get -u -v github.com/hoisie/redis
 go get -u -v github.com/howeyc/fsnotify
 go get -u -v github.com/cgrates/liner
 go get -u -v github.com/cgrates/rpcclient
+go get -u -v github.com/jinzhu/gorm

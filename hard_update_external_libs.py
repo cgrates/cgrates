@@ -13,6 +13,7 @@ libs = ('code.google.com/p/goconf/conf',
         'github.com/go-sql-driver/mysql',
         'github.com/hoisie/redis'
         'github.com/howeyc/fsnotify',
+        'github.com/jinzhu/gorm',
 )
 
 if __name__ == "__main__":

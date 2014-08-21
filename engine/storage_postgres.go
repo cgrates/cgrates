@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"database/sql"
 	"fmt"
+
 	_ "github.com/bmizerany/pq"
+	"github.com/jinzhu/gorm"
 )
 
 type PostgresStorage struct {
@@ -29,9 +30,18 @@ type PostgresStorage struct {
 }
 
 func NewPostgresStorage(host, port, name, user, password string) (Storage, error) {
-	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password))
+	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password)
+	db, err := gorm.Open("postgres", connectString)
 	if err != nil {
 		return nil, err
 	}
-	return &PostgresStorage{&SQLStorage{db}}, nil
+	err = db.DB().Ping()
+	if err != nil {
+		return nil, err
+	}
+	db.DB().SetMaxIdleConns(10)
+	db.DB().SetMaxOpenConns(100)
+	//db.LogMode(true)
+
+	return &PostgresStorage{&SQLStorage{Db: db.DB(), db: db}}, nil
 }

@@ -24,23 +24,26 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
 )
 
 type SQLStorage struct {
 	Db *sql.DB
+	db gorm.DB
 }
 
 func (self *SQLStorage) Close() {
 	self.Db.Close()
+	self.db.Close()
 }
 
 func (self *SQLStorage) Flush() (err error) {
@@ -184,19 +187,16 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	if len(dest.Prefixes) == 0 {
 		return nil
 	}
-	var buffer bytes.Buffer // Use bytes buffer istead of string concatenation since that becomes quite heavy on large prefixes
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, id, prefix) VALUES ", utils.TBL_TP_DESTINATIONS))
-	for idx, prefix := range dest.Prefixes {
-		if idx != 0 {
-			buffer.WriteRune(',')
-		}
-		buffer.WriteString(fmt.Sprintf("('%s','%s','%s')", tpid, dest.Id, prefix))
-		idx++
+	tx := self.db.Begin()
+	tx.Where("tpid = ?", tpid).Where("id = ?", dest.Id).Delete(TpDestination{})
+	for _, prefix := range dest.Prefixes {
+		tx.Save(TpDestination{
+			Tpid:   tpid,
+			Id:     dest.Id,
+			Prefix: prefix,
+		})
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE prefix=values(prefix)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
@@ -1007,28 +1007,25 @@ func (self *SQLStorage) RemStoredCdrs(cgrIds []string) error {
 
 func (self *SQLStorage) GetTpDestinations(tpid, tag string) (map[string]*Destination, error) {
 	dests := make(map[string]*Destination)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_DESTINATIONS, tpid)
+	var tpDests []TpDestination
+	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
-		q += fmt.Sprintf(" AND id='%s'", tag)
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	log.Printf("%+v", q)
+	if err := q.Find(&tpDests).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var id int
-		var tpid, tag, prefix string
-		if err := rows.Scan(&id, &tpid, &tag, &prefix); err != nil {
-			return nil, err
-		}
+
+	for _, tpDest := range tpDests {
+		log.Print(tpDest)
 		var dest *Destination
 		var found bool
 		if dest, found = dests[tag]; !found {
 			dest = &Destination{Id: tag}
 			dests[tag] = dest
 		}
-		dest.AddPrefix(prefix)
+		dest.AddPrefix(tpDest.Prefix)
 	}
 	return dests, nil
 }
