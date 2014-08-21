@@ -82,3 +82,12 @@ type TpAction struct {
 	ExtraParameters string
 	Weight          float64
 }
+
+type TpActionPlan struct {
+	Tbid      int64 `gorm:"primary_key:yes"`
+	Tpid      string
+	Id        string
+	ActionsId string
+	TimingId  string
+	Weight    float64
+}

@@ -411,45 +411,37 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 	if len(ats) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,actions_id,timing_id,weight) VALUES ", utils.TBL_TP_ACTION_PLANS))
-	i := 0
-	for atId, atRows := range ats {
-		for _, at := range atRows {
-			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				buffer.WriteRune(',')
-			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s',%f)", tpid, atId, at.ActionsId, at.TimingId, at.Weight))
-			i++
+	tx := self.db.Begin()
+	for apId, aPlans := range ats {
+		tx.Where("tpid = ?", tpid).Where("id = ?", apId).Delete(TpActionPlan{})
+		for _, ap := range aPlans {
+			tx.Save(TpActionPlan{
+				Tpid:      tpid,
+				Id:        apId,
+				ActionsId: ap.ActionsId,
+				TimingId:  ap.TimingId,
+				Weight:    ap.Weight,
+			})
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE timing_id=values(timing_id),weight=values(weight)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
-func (self *SQLStorage) GetTPActionTimings(tpid, atId string) (map[string][]*utils.TPActionTiming, error) {
+func (self *SQLStorage) GetTPActionTimings(tpid, tag string) (map[string][]*utils.TPActionTiming, error) {
 	ats := make(map[string][]*utils.TPActionTiming)
-	q := fmt.Sprintf("SELECT id,actions_id,timing_id,weight FROM %s WHERE tpid='%s'", utils.TBL_TP_ACTION_PLANS, tpid)
-	if atId != "" {
-		q += fmt.Sprintf(" AND id='%s'", atId)
+
+	var tpActionPlans []TpActionPlan
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpActionPlans).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one result
-		var tag, actionsId, timingId string
-		var weight float64
-		if err = rows.Scan(&tag, &actionsId, &timingId, &weight); err != nil {
-			return nil, err
-		}
-		ats[tag] = append(ats[tag], &utils.TPActionTiming{ActionsId: actionsId, TimingId: timingId, Weight: weight})
+
+	for _, tpAp := range tpActionPlans {
+		ats[tag] = append(ats[tag], &utils.TPActionTiming{ActionsId: tpAp.ActionsId, TimingId: tpAp.TimingId, Weight: tpAp.Weight})
 	}
 	return ats, nil
 }
