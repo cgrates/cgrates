@@ -314,6 +314,44 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string][]*utils.T
 	return nil
 }
 
+func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdrStat) error {
+	if len(css) == 0 {
+		return nil //Nothing to set
+	}
+	tx := self.db.Begin()
+	for csId, cStats := range css {
+		tx.Where("tpid = ?", tpid).Where("id = ?", csId).Delete(TpCdrStat{})
+		for _, cs := range cStats {
+			tx.Save(TpCdrStat{
+				Tpid:              tpid,
+				Id:                csId,
+				QueueLength:       cs.QueueLength,
+				TimeWindow:        cs.TimeWindow,
+				Metrics:           cs.Metrics,
+				SetupInterval:     cs.SetupInterval,
+				Tor:               cs.TOR,
+				CdrHost:           cs.CdrHost,
+				CdrSource:         cs.CdrSource,
+				ReqType:           cs.ReqType,
+				Direction:         cs.Direction,
+				Tenant:            cs.Tenant,
+				Category:          cs.Category,
+				Account:           cs.Account,
+				Subject:           cs.Subject,
+				DestinationPrefix: cs.DestinationPrefix,
+				UsageInterval:     cs.UsageInterval,
+				MediationRunIds:   cs.MediationRunIds,
+				RatedAccount:      cs.RatedAccount,
+				RatedSubject:      cs.RatedSubject,
+				CostInterval:      cs.CostInterval,
+				ActionTriggers:    cs.ActionTriggers,
+			})
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
 	if len(lcrs) == 0 {
 		return nil //Nothing to set
@@ -1192,16 +1230,16 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string][]*utils.TPSharedGroup, error) {
 	sgs := make(map[string][]*utils.TPSharedGroup)
 
-	var tpSharedGroups []TpSharedGroup
+	var tpCdrStats []TpSharedGroup
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("id = ?", tag)
 	}
-	if err := q.Find(&tpSharedGroups).Error; err != nil {
+	if err := q.Find(&tpCdrStats).Error; err != nil {
 		return nil, err
 	}
 
-	for _, tpSg := range tpSharedGroups {
+	for _, tpSg := range tpCdrStats {
 		sgs[tag] = append(sgs[tag], &utils.TPSharedGroup{
 			Account:       tpSg.Account,
 			Strategy:      tpSg.Strategy,
@@ -1209,6 +1247,45 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string][]*utils
 		})
 	}
 	return sgs, nil
+}
+
+func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPCdrStat, error) {
+	css := make(map[string][]*utils.TPCdrStat)
+
+	var tpCdrStats []TpCdrStat
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
+	}
+	if err := q.Find(&tpCdrStats).Error; err != nil {
+		return nil, err
+	}
+
+	for _, tpCs := range tpCdrStats {
+		css[tag] = append(css[tag], &utils.TPCdrStat{
+			QueueLength:       tpCs.QueueLength,
+			TimeWindow:        tpCs.TimeWindow,
+			Metrics:           tpCs.Metrics,
+			SetupInterval:     tpCs.SetupInterval,
+			TOR:               tpCs.Tor,
+			CdrHost:           tpCs.CdrHost,
+			CdrSource:         tpCs.CdrSource,
+			ReqType:           tpCs.ReqType,
+			Direction:         tpCs.Direction,
+			Tenant:            tpCs.Tenant,
+			Category:          tpCs.Category,
+			Account:           tpCs.Account,
+			Subject:           tpCs.Subject,
+			DestinationPrefix: tpCs.DestinationPrefix,
+			UsageInterval:     tpCs.UsageInterval,
+			MediationRunIds:   tpCs.MediationRunIds,
+			RatedAccount:      tpCs.RatedAccount,
+			RatedSubject:      tpCs.RatedSubject,
+			CostInterval:      tpCs.CostInterval,
+			ActionTriggers:    tpCs.ActionTriggers,
+		})
+	}
+	return css, nil
 }
 
 func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {

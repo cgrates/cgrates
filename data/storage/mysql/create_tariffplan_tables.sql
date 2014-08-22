@@ -269,3 +269,35 @@ CREATE TABLE tp_derived_chargers (
 );
 
 
+--
+-- Table structure for table `tp_cdr_stats`
+--
+
+DROP TABLE IF EXISTS tp_cdr_stats;
+CREATE TABLE tp_cdr_stats (
+  `tbid` int(11) NOT NULL AUTO_INCREMENT,
+  `tpid` varchar(64) NOT NULL,
+  `id` varchar(64) NOT NULL,
+  `queue_length` int(11) NOT NULL,
+  `time_window` int(11) NOT NULL,
+  `metrics` varchar(64) NOT NULL,
+  `setup_interval` varchar(64) NOT NULL,
+  `tor` varchar(64) NOT NULL,
+  `cdr_host` varchar(64) NOT NULL,
+  `cdr_source` varchar(64) NOT NULL,
+  `req_type` varchar(64) NOT NULL,
+  `direction` varchar(8) NOT NULL,
+  `tenant` varchar(64) NOT NULL,
+  `category` varchar(16) NOT NULL,
+  `account` varchar(24) NOT NULL,
+  `subject` varchar(64) NOT NULL,
+  `destination_prefix` varchar(64) NOT NULL,
+  `usage_interval` varchar(64) NOT NULL,
+  `mediation_run_ids` varchar(64) NOT NULL,
+  `rated_account` varchar(64) NOT NULL,
+  `rated_subject` varchar(64) NOT NULL,
+  `cost_interval` varchar(24) NOT NULL,
+  `action_triggers` varchar(64) NOT NULL,
+  PRIMARY KEY (`tbid`),
+  KEY `tpid` (`tpid`)
+);

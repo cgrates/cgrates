@@ -159,6 +159,9 @@ type LoadStorage interface {
 	SetTPSharedGroups(string, map[string][]*utils.TPSharedGroup) error
 	GetTpSharedGroups(string, string) (map[string][]*utils.TPSharedGroup, error)
 
+	SetTPCdrStats(string, map[string][]*utils.TPCdrStat) error
+	GetTpCdrStats(string, string) (map[string][]*utils.TPCdrStat, error)
+
 	SetTPLCRs(string, map[string]*LCR) error
 	GetTpLCRs(string, string) (map[string]*LCR, error)
 

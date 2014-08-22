@@ -251,6 +251,35 @@ type TPLcrRule struct {
 	Weight        float64
 }
 
+type TPCdrStats struct {
+	TPid       string
+	CdrStatsId string
+	CdrStats   []*TPCdrStat
+}
+
+type TPCdrStat struct {
+	QueueLength       int
+	TimeWindow        int64
+	Metrics           string
+	SetupInterval     string
+	TOR               string
+	CdrHost           string
+	CdrSource         string
+	ReqType           string
+	Direction         string
+	Tenant            string
+	Category          string
+	Account           string
+	Subject           string
+	DestinationPrefix string
+	UsageInterval     string
+	MediationRunIds   string
+	RatedAccount      string
+	RatedSubject      string
+	CostInterval      string
+	ActionTriggers    string
+}
+
 type TPActionPlan struct {
 	TPid       string            // Tariff plan id
 	Id         string            // ActionPlan id

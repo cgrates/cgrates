@@ -137,3 +137,52 @@ type TpSharedGroup struct {
 	Strategy      string
 	RatingSubject string
 }
+
+type TpDerivedCharges struct {
+	Tbid             int64 `gorm:"primary_key:yes"`
+	Tpid             string
+	Loadid           string
+	Direction        string
+	Tenant           string
+	Category         string
+	Account          string
+	Subject          string
+	RunId            string
+	RunFilter        string
+	ReqtypeField     string
+	DirectionField   string
+	TenantField      string
+	CategoryField    string
+	AccountField     string
+	SubjectField     string
+	DestinationField string
+	SetupTimeField   string
+	AnswerTimeField  string
+	DurationField    string
+}
+
+type TpCdrStat struct {
+	Tbid              int64 `gorm:"primary_key:yes"`
+	Tpid              string
+	Id                string
+	QueueLength       int
+	TimeWindow        int64
+	Metrics           string
+	SetupInterval     string
+	Tor               string
+	CdrHost           string
+	CdrSource         string
+	ReqType           string
+	Direction         string
+	Tenant            string
+	Category          string
+	Account           string
+	Subject           string
+	DestinationPrefix string
+	UsageInterval     string
+	MediationRunIds   string
+	RatedAccount      string
+	RatedSubject      string
+	CostInterval      string
+	ActionTriggers    string
+}
