@@ -221,6 +221,36 @@ type TPAction struct {
 	Weight          float64 // Action's weight
 }
 
+type TPSharedGroups struct {
+	TPid           string
+	SharedGroupsId string
+	SharedGroups   []*TPSharedGroup
+}
+
+type TPSharedGroup struct {
+	Account       string
+	Strategy      string
+	RatingSubject string
+}
+
+type TPLcrRules struct {
+	TPid       string
+	LcrRulesId string
+	LcrRules   []*TPLcrRule
+}
+
+type TPLcrRule struct {
+	Direction     string
+	Tenant        string
+	Customer      string
+	DestinationId string
+	Category      string
+	Strategy      string
+	Suppliers     string
+	ActivatinTime string
+	Weight        float64
+}
+
 type TPActionPlan struct {
 	TPid       string            // Tariff plan id
 	Id         string            // ActionPlan id

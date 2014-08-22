@@ -293,27 +293,24 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.T
 	return nil
 }
 
-func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string]*SharedGroup) error {
+func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string][]*utils.TPSharedGroup) error {
 	if len(sgs) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,id,account,strategy,rate_subject) VALUES ", utils.TBL_TP_SHARED_GROUPS))
-	i := 0
-	for sgId, sg := range sgs {
-		for account, params := range sg.AccountParameters {
-			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				buffer.WriteRune(',')
-			}
-			buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s')",
-				tpid, sgId, account, params.Strategy, params.RatingSubject))
-			i++
+	tx := self.db.Begin()
+	for sgId, sGroups := range sgs {
+		tx.Where("tpid = ?", tpid).Where("id = ?", sgId).Delete(TpSharedGroup{})
+		for _, sg := range sGroups {
+			tx.Save(TpSharedGroup{
+				Tpid:          tpid,
+				Id:            sgId,
+				Account:       sg.Account,
+				Strategy:      sg.Strategy,
+				RatingSubject: sg.RatingSubject,
+			})
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE account=values(account),strategy=values(strategy),rate_subject=values(rate_subject)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
@@ -452,13 +449,13 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 	}
 	tx := self.db.Begin()
 	for atId, aTriggers := range ats {
-		tx.Where("tpid = ?", tpid).Where("id = ?", atId).Delete(TpActionTriggers{})
+		tx.Where("tpid = ?", tpid).Where("id = ?", atId).Delete(TpActionTrigger{})
 		for _, at := range aTriggers {
 			recurrent := 0
 			if at.Recurrent {
 				recurrent = 1
 			}
-			tx.Save(TpActionTriggers{
+			tx.Save(TpActionTrigger{
 				Tpid:                 tpid,
 				Id:                   atId,
 				BalanceType:          at.BalanceType,
@@ -1192,43 +1189,24 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 	return rpfs, nil
 }
 
-func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string]*SharedGroup, error) {
-	sgs := make(map[string]*SharedGroup)
-	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_SHARED_GROUPS, tpid)
-	if tag != "" {
-		q += fmt.Sprintf(" AND id='%s'", tag)
+func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string][]*utils.TPSharedGroup, error) {
+	sgs := make(map[string][]*utils.TPSharedGroup)
+
+	var tpSharedGroups []TpSharedGroup
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		q = q.Where("id = ?", tag)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpSharedGroups).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var id int
-		var tpid, tag, account, strategy, rateSubject string
-		if err := rows.Scan(&id, &tpid, &tag, &account, &strategy, &rateSubject); err != nil {
-			return nil, err
-		}
 
-		sg, found := sgs[tag]
-		if found {
-			sg.AccountParameters[account] = &SharingParameters{
-				Strategy:      strategy,
-				RatingSubject: rateSubject,
-			}
-		} else {
-			sg = &SharedGroup{
-				Id: tag,
-				AccountParameters: map[string]*SharingParameters{
-					account: &SharingParameters{
-						Strategy:      strategy,
-						RatingSubject: rateSubject,
-					},
-				},
-			}
-		}
-		sgs[tag] = sg
-
+	for _, tpSg := range tpSharedGroups {
+		sgs[tag] = append(sgs[tag], &utils.TPSharedGroup{
+			Account:       tpSg.Account,
+			Strategy:      tpSg.Strategy,
+			RatingSubject: tpSg.RatingSubject,
+		})
 	}
 	return sgs, nil
 }
@@ -1319,7 +1297,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {
 	ats := make(map[string][]*utils.TPActionTrigger)
-	var tpActionTriggers []TpActionTriggers
+	var tpActionTriggers []TpActionTrigger
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("id = ?", tag)

@@ -494,8 +494,27 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 }
 
 func (dbr *DbReader) LoadSharedGroups() (err error) {
-	dbr.sharedGroups, err = dbr.storDb.GetTpSharedGroups(dbr.tpid, "")
-	return err
+	storSgs, err := dbr.storDb.GetTpSharedGroups(dbr.tpid, "")
+	if err != nil {
+		return err
+	}
+	for tag, tpSgs := range storSgs {
+		sg, exists := dbr.sharedGroups[tag]
+		if !exists {
+			sg = &SharedGroup{
+				Id:                tag,
+				AccountParameters: make(map[string]*SharingParameters, len(tpSgs)),
+			}
+		}
+		for _, tpSg := range tpSgs {
+			sg.AccountParameters[tpSg.Account] = &SharingParameters{
+				Strategy:      tpSg.Strategy,
+				RatingSubject: tpSg.RatingSubject,
+			}
+		}
+		dbr.sharedGroups[tag] = sg
+	}
+	return nil
 }
 
 func (dbr *DbReader) LoadLCRs() (err error) {

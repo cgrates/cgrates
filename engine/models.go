@@ -18,6 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
+// Structs here are one to one mapping of the tables and fields
+// to be used by gorm orm
+
 type TpTiming struct {
 	Tbid      int64 `gorm:"primary_key:yes"`
 	Tpid      string
@@ -66,6 +69,20 @@ type TpRatingPlan struct {
 	Weight      float64
 }
 
+type TpLcrRules struct {
+	Tbid          int64 `gorm:"primary_key:yes"`
+	Tpid          string
+	Direction     string
+	Tenant        string
+	Customer      string
+	DestinationId string
+	Category      string
+	Strategy      string
+	Suppliers     string
+	ActivatinTime string
+	Weight        float64
+}
+
 type TpAction struct {
 	Tbid            int64 `gorm:"primary_key:yes"`
 	Tpid            string
@@ -92,7 +109,7 @@ type TpActionPlan struct {
 	Weight    float64
 }
 
-type TpActionTriggers struct {
+type TpActionTrigger struct {
 	Tbid                 int64 `gorm:"primary_key:yes"`
 	Tpid                 string
 	Id                   string
@@ -110,4 +127,13 @@ type TpActionTriggers struct {
 	MinQueuedItems       int
 	ActionsId            string
 	Weight               float64
+}
+
+type TpSharedGroup struct {
+	Tbid          int64 `gorm:"primary_key:yes"`
+	Tpid          string
+	Id            string
+	Account       string
+	Strategy      string
+	RatingSubject string
 }
