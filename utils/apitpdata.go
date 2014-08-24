@@ -174,6 +174,7 @@ type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	RatingPlanId     string // Id of RatingPlan profile
 	FallbackSubjects string // So we follow the api
+	Weight           float64
 }
 
 // Helper to return the subject fallback keys we need in dataDb
