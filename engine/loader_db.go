@@ -544,6 +544,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 					Value:         tpact.Units,
 					Weight:        tpact.BalanceWeight,
 					RatingSubject: tpact.RatingSubject,
+					Category:      tpact.Category,
 					DestinationId: tpact.DestinationId,
 				},
 			}

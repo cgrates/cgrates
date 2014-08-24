@@ -101,6 +101,7 @@ type TpAction struct {
 	ExpiryTime      string
 	DestinationId   string
 	RatingSubject   string
+	Category        string
 	SharedGroup     string
 	BalanceWeight   float64
 	ExtraParameters string

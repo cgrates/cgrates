@@ -144,6 +144,7 @@ CREATE TABLE `tp_actions` (
   `expiry_time` varchar(24) NOT NULL,
   `destination_id` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
+  `category` varchar(16) NOT NULL,
   `shared_group` varchar(64) NOT NULL,
   `balance_weight` double(8,2) NOT NULL,
   `extra_parameters` varchar(256) NOT NULL,

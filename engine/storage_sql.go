@@ -436,6 +436,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 				ExpiryTime:      ac.ExpiryTime,
 				DestinationId:   ac.DestinationId,
 				RatingSubject:   ac.RatingSubject,
+				Category:        ac.Category,
 				SharedGroup:     ac.SharedGroup,
 				BalanceWeight:   ac.BalanceWeight,
 				ExtraParameters: ac.ExtraParameters,
@@ -448,7 +449,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_id,rating_subject,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_id,rating_subject,category,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
 	if err != nil {
 		return nil, err
 	}
@@ -457,9 +458,9 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateSubject, sharedGroup, expTime, extraParameters string
+		var action, balanceId, dir, destId, rateSubject, category, sharedGroup, expTime, extraParameters string
 		var units, balanceWeight, weight float64
-		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &sharedGroup, &balanceWeight, &extraParameters, &weight); err != nil {
+		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &category, &sharedGroup, &balanceWeight, &extraParameters, &weight); err != nil {
 			return nil, err
 		}
 		acts.Actions = append(acts.Actions, &utils.TPAction{
@@ -470,6 +471,7 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 			ExpiryTime:      expTime,
 			DestinationId:   destId,
 			RatingSubject:   rateSubject,
+			Category:        category,
 			BalanceWeight:   balanceWeight,
 			SharedGroup:     sharedGroup,
 			ExtraParameters: extraParameters,
@@ -1444,6 +1446,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 			ExpiryTime:      tpAc.ExpiryTime,
 			DestinationId:   tpAc.DestinationId,
 			RatingSubject:   tpAc.RatingSubject,
+			Category:        tpAc.Category,
 			SharedGroup:     tpAc.SharedGroup,
 			BalanceWeight:   tpAc.BalanceWeight,
 			ExtraParameters: tpAc.ExtraParameters,

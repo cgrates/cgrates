@@ -666,15 +666,15 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			}
 		}
 		var balanceWeight float64
-		if len(record[8]) == 0 { // Not defined
+		if len(record[9]) == 0 { // Not defined
 			balanceWeight = 0.0
 		} else {
-			balanceWeight, err = strconv.ParseFloat(record[8], 64)
+			balanceWeight, err = strconv.ParseFloat(record[9], 64)
 			if err != nil {
 				return fmt.Errorf("Could not parse action balance weight: %v", err)
 			}
 		}
-		weight, err := strconv.ParseFloat(record[11], 64)
+		weight, err := strconv.ParseFloat(record[12], 64)
 		if err != nil {
 			return fmt.Errorf("Could not parse action weight: %v", err)
 		}
@@ -685,14 +685,15 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			Direction:        record[3],
 			Weight:           weight,
 			ExpirationString: record[5],
-			ExtraParameters:  record[10],
+			ExtraParameters:  record[11],
 			Balance: &Balance{
 				Uuid:          utils.GenUUID(),
 				Value:         units,
 				Weight:        balanceWeight,
 				DestinationId: record[6],
 				RatingSubject: record[7],
-				SharedGroup:   record[9],
+				Category:      record[8],
+				SharedGroup:   record[10],
 			},
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {

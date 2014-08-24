@@ -541,7 +541,7 @@ func (cd *CallDescriptor) GetMaxSessionDuration() (duration time.Duration, err e
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return 0, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.TOR); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				duration, err = cd.getMaxSessionDuration(account)
 				return 0, err
@@ -591,7 +591,7 @@ func (cd *CallDescriptor) Debit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.TOR); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				cc, err = cd.debit(account)
 				return 0, err
@@ -612,7 +612,7 @@ func (cd *CallDescriptor) MaxDebit() (cc *CallCost, err error) {
 		Logger.Err(fmt.Sprintf("Could not get user balance for %s: %s.", cd.GetAccountKey(), err.Error()))
 		return nil, err
 	} else {
-		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.TOR); err == nil {
+		if memberIds, err := account.GetUniqueSharedGroupMembers(cd.Destination, cd.Direction, cd.Category, cd.TOR); err == nil {
 			AccLock.GuardMany(memberIds, func() (float64, error) {
 				remainingDuration, err := cd.getMaxSessionDuration(account)
 				if err != nil || remainingDuration == 0 {
