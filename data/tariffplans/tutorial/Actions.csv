@@ -1,4 +1,4 @@
-#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,SharedGroup,ExtraParameters,Weight
+#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,Category,BalanceWeight,SharedGroup,ExtraParameters,Weight
 TOPUP_RST_10,*topup_reset,*monetary,*out,10,*unlimited,*any,,,10,,,10
 TOPUP_RST_5,*topup_reset,*monetary,*out,5,*unlimited,*any,,,20,,,10
 TOPUP_RST_5,*topup_reset,*voice,*out,90,*unlimited,DST_1002,SPECIAL_1002,,20,,,10

@@ -1,4 +1,4 @@
-#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,SharedGroup,ExtraParameters,Weight
+#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,Category,BalanceWeight,SharedGroup,ExtraParameters,Weight
 PREPAID_10,*topup_reset,*monetary,*out,10,*unlimited,*any,,,10,,,10
 BONUS_1,*topup,*monetary,*out,1,*unlimited,*any,,,10,,,10
 LOG_BALANCE,*log,,,,,,,,,,,10

@@ -785,13 +785,13 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		if record[9] != "" && err != nil {
 			return fmt.Errorf("Could not parse action trigger BalanceExpirationDate (%v): %v", record[9], err)
 		}
-		minQI, err := strconv.Atoi(record[12])
-		if record[12] != "" && err != nil {
-			return fmt.Errorf("Could not parse action trigger MinQueuedItems (%v): %v", record[12], err)
+		minQI, err := strconv.Atoi(record[13])
+		if record[13] != "" && err != nil {
+			return fmt.Errorf("Could not parse action trigger MinQueuedItems (%v): %v", record[13], err)
 		}
-		weight, err := strconv.ParseFloat(record[14], 64)
+		weight, err := strconv.ParseFloat(record[15], 64)
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger weight (%v): %v", record[14], err)
+			return fmt.Errorf("Could not parse action trigger weight (%v): %v", record[15], err)
 		}
 
 		at := &ActionTrigger{
@@ -806,9 +806,10 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			BalanceWeight:         balanceWeight,
 			BalanceExpirationDate: balanceExp,
 			BalanceRatingSubject:  record[10],
-			BalanceSharedGroup:    record[11],
+			BalanceCategory:       record[11],
+			BalanceSharedGroup:    record[12],
 			MinQueuedItems:        minQI,
-			ActionsId:             record[13],
+			ActionsId:             record[14],
 			Weight:                weight,
 		}
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)

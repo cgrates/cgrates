@@ -131,6 +131,7 @@ type TpActionTrigger struct {
 	BalanceWeight        float64
 	BalanceExpiryTime    string
 	BalanceRatingSubject string
+	BalanceCategory      string
 	BalanceSharedGroup   string
 	MinQueuedItems       int
 	ActionsId            string

@@ -612,6 +612,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 				BalanceWeight:         apiAtr.BalanceWeight,
 				BalanceExpirationDate: balance_expiration_date,
 				BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
+				BalanceCategory:       apiAtr.BalanceCategory,
 				BalanceSharedGroup:    apiAtr.BalanceSharedGroup,
 				Weight:                apiAtr.Weight,
 				ActionsId:             apiAtr.ActionsId,

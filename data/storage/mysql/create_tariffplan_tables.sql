@@ -190,6 +190,7 @@ CREATE TABLE `tp_action_triggers` (
   `balance_weight` double(8,2) NOT NULL, 
   `balance_expiry_time` varchar(24) NOT NULL, 
   `balance_rating_subject` varchar(64) NOT NULL,
+  `balance_category` varchar(16) NOT NULL,
   `balance_shared_group` varchar(64) NOT NULL,
   `min_queued_items` int(11) NOT NULL,
   `actions_id` varchar(64) NOT NULL,
