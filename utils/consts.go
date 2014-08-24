@@ -34,7 +34,7 @@ const (
 	TBL_TP_ACTION_PLANS          = "tp_action_plans"
 	TBL_TP_ACTION_TRIGGERS       = "tp_action_triggers"
 	TBL_TP_ACCOUNT_ACTIONS       = "tp_account_actions"
-	TBL_TP_DERIVED_CHARGES       = "tp_derived_charges"
+	TBL_TP_DERIVED_CHARGERS      = "tp_derived_chargers"
 	TBL_CDRS_PRIMARY             = "cdrs_primary"
 	TBL_CDRS_EXTRA               = "cdrs_extra"
 	TBL_COST_DETAILS             = "cost_details"
@@ -158,6 +158,7 @@ const (
 	CREATE_CDRS_TABLES_SQL       = "create_cdrs_tables.sql"
 	CREATE_TARIFFPLAN_TABLES_SQL = "create_tariffplan_tables.sql"
 	TEST_SQL                     = "TEST_SQL"
+	TP_ID_SEP                    = "|"
 )
 
 var (

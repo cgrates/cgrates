@@ -41,7 +41,7 @@ func NewMySQLStorage(host, port, name, user, password string) (Storage, error) {
 	}
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxOpenConns(100)
-	db.LogMode(true)
+	//db.LogMode(true)
 
 	return &MySQLStorage{&SQLStorage{Db: db.DB(), db: db}}, nil
 }

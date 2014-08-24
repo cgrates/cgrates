@@ -25,6 +25,12 @@ import (
 	"time"
 )
 
+type TPDistinctIds []string
+
+func (tpdi TPDistinctIds) String() string {
+	return strings.Join(tpdi, ",")
+}
+
 type TPDestination struct {
 	TPid          string   // Tariff plan id
 	DestinationId string   // Destination id
@@ -278,6 +284,60 @@ type TPCdrStat struct {
 	RatedSubject      string
 	CostInterval      string
 	ActionTriggers    string
+}
+
+type TPDerivedChargers struct {
+	TPid            string
+	Loadid          string
+	Direction       string
+	Tenant          string
+	Category        string
+	Account         string
+	Subject         string
+	DerivedChargers []*TPDerivedCharger
+}
+
+func (tpdc TPDerivedChargers) GetDerivedChargesId() string {
+	return tpdc.Direction +
+		TP_ID_SEP +
+		tpdc.Tenant +
+		TP_ID_SEP +
+		tpdc.Category +
+		TP_ID_SEP +
+		tpdc.Account +
+		TP_ID_SEP +
+		tpdc.Subject +
+		TP_ID_SEP +
+		tpdc.Loadid
+}
+
+func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
+	ids := strings.Split(id, TP_ID_SEP)
+	if len(ids) != 6 {
+		return fmt.Errorf("Wrong TP Derived Charge Id: %s", id)
+	}
+	tpdc.Direction = ids[0]
+	tpdc.Tenant = ids[1]
+	tpdc.Category = ids[2]
+	tpdc.Account = ids[3]
+	tpdc.Subject = ids[4]
+	tpdc.Loadid = ids[5]
+	return nil
+}
+
+type TPDerivedCharger struct {
+	RunId            string
+	RunFilter        string
+	ReqtypeField     string
+	DirectionField   string
+	TenantField      string
+	CategoryField    string
+	AccountField     string
+	SubjectField     string
+	DestinationField string
+	SetupTimeField   string
+	AnswerTimeField  string
+	DurationField    string
 }
 
 type TPActionPlan struct {

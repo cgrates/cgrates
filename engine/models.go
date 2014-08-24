@@ -18,6 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
+import (
+	"fmt"
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
 // Structs here are one to one mapping of the tables and fields
 // to be used by gorm orm
 
@@ -138,7 +145,7 @@ type TpSharedGroup struct {
 	RatingSubject string
 }
 
-type TpDerivedCharges struct {
+type TpDerivedCharger struct {
 	Tbid             int64 `gorm:"primary_key:yes"`
 	Tpid             string
 	Loadid           string
@@ -159,6 +166,20 @@ type TpDerivedCharges struct {
 	SetupTimeField   string
 	AnswerTimeField  string
 	DurationField    string
+}
+
+func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
+	ids := strings.Split(id, utils.TP_ID_SEP)
+	if len(ids) != 6 {
+		return fmt.Errorf("Wrong TP Derived Charge Id!")
+	}
+	tpdc.Direction = ids[0]
+	tpdc.Tenant = ids[1]
+	tpdc.Category = ids[2]
+	tpdc.Account = ids[3]
+	tpdc.Subject = ids[4]
+	tpdc.Loadid = ids[5]
+	return nil
 }
 
 type TpCdrStat struct {

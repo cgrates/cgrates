@@ -136,7 +136,7 @@ type LoadStorage interface {
 	// Apier functions
 	RemTPData(string, string, ...string) error
 	GetTPIds() ([]string, error)
-	GetTPTableIds(string, string, string, map[string]string) ([]string, error)
+	GetTPTableIds(string, string, utils.TPDistinctIds, map[string]string) ([]string, error)
 
 	SetTPTiming(string, *utils.TPTiming) error
 	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
@@ -161,6 +161,9 @@ type LoadStorage interface {
 
 	SetTPCdrStats(string, map[string][]*utils.TPCdrStat) error
 	GetTpCdrStats(string, string) (map[string][]*utils.TPCdrStat, error)
+
+	SetTPDerivedChargers(string, map[string][]*utils.TPDerivedCharger) error
+	GetTpDerivedChargers(string, string) (map[string][]*utils.TPDerivedCharger, error)
 
 	SetTPLCRs(string, map[string]*LCR) error
 	GetTpLCRs(string, string) (map[string]*LCR, error)

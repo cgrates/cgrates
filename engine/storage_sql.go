@@ -81,7 +81,13 @@ func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
 func (self *SQLStorage) GetTPIds() ([]string, error) {
 	rows, err := self.Db.Query(
-		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)", utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES))
+		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			utils.TBL_TP_TIMINGS,
+			utils.TBL_TP_DESTINATIONS,
+			utils.TBL_TP_RATES,
+			utils.TBL_TP_DESTINATION_RATES,
+			utils.TBL_TP_RATING_PLANS,
+			utils.TBL_TP_RATE_PROFILES))
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +109,7 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) GetTPTableIds(tpid, table, distinct string, filters map[string]string) ([]string, error) {
+func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string) ([]string, error) {
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {
 		if key != "" && value != "" {
@@ -120,12 +126,23 @@ func (self *SQLStorage) GetTPTableIds(tpid, table, distinct string, filters map[
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one
-		var id string
-		err = rows.Scan(&id)
+
+		cols, err := rows.Columns()            // Get the column names; remember to check err
+		vals := make([]string, len(cols))      // Allocate enough values
+		ints := make([]interface{}, len(cols)) // Make a slice of []interface{}
+		for i := range ints {
+			ints[i] = &vals[i] // Copy references into the slice
+		}
+
+		err = rows.Scan(ints...)
 		if err != nil {
 			return nil, err
 		}
-		ids = append(ids, id)
+		finalId := vals[0]
+		if len(vals) > 1 {
+			finalId = strings.Join(vals, utils.TP_ID_SEP)
+		}
+		ids = append(ids, finalId)
 	}
 	if i == 0 {
 		return nil, nil
@@ -157,30 +174,6 @@ func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 	}
 	return nil
 }
-
-// Extracts destinations from StorDB on specific tariffplan id
-/*func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
-    rows, err := self.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-    d := &Destination{Id: destTag}
-    i := 0
-    for rows.Next() {
-        i++ //Keep here a reference so we know we got at least one prefix
-        var pref string
-        err = rows.Scan(&pref)
-        if err != nil {
-            return nil, err
-        }
-        d.AddPrefix(pref)
-    }
-    if i == 0 {
-        return nil, nil
-    }
-    return d, nil
-}*/
 
 func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	if len(dest.Prefixes) == 0 {
@@ -346,6 +339,53 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 				CostInterval:      cs.CostInterval,
 				ActionTriggers:    cs.ActionTriggers,
 			})
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*utils.TPDerivedCharger) error {
+	if len(sgs) == 0 {
+		return nil //Nothing to set
+	}
+	tx := self.db.Begin()
+	for dcId, dChargers := range sgs {
+		// parse identifiers
+		tmpDc := TpDerivedCharger{}
+		if err := tmpDc.SetDerivedChargersId(dcId); err != nil {
+			tx.Rollback()
+			return err
+		}
+		tx.Where("tpid = ?", tpid).
+			Where("direction = ?", tmpDc.Direction).
+			Where("tenant = ?", tmpDc.Tenant).
+			Where("account = ?", tmpDc.Account).
+			Where("category = ?", tmpDc.Category).
+			Where("subject = ?", tmpDc.Subject).
+			Where("loadid = ?", tmpDc.Loadid).
+			Delete(TpDerivedCharger{})
+		for _, dc := range dChargers {
+			newDc := TpDerivedCharger{
+				Tpid:             tpid,
+				RunId:            dc.RunId,
+				RunFilter:        dc.RunFilter,
+				ReqtypeField:     dc.ReqtypeField,
+				DirectionField:   dc.DirectionField,
+				TenantField:      dc.TenantField,
+				CategoryField:    dc.CategoryField,
+				AccountField:     dc.AccountField,
+				SubjectField:     dc.SubjectField,
+				DestinationField: dc.DestinationField,
+				SetupTimeField:   dc.SetupTimeField,
+				AnswerTimeField:  dc.AnswerTimeField,
+				DurationField:    dc.DurationField,
+			}
+			if err := newDc.SetDerivedChargersId(dcId); err != nil {
+				tx.Rollback()
+				return err
+			}
+			tx.Save(newDc)
 		}
 	}
 	tx.Commit()
@@ -1286,6 +1326,48 @@ func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPC
 		})
 	}
 	return css, nil
+}
+
+func (self *SQLStorage) GetTpDerivedChargers(tpid, tag string) (map[string][]*utils.TPDerivedCharger, error) {
+	dcs := make(map[string][]*utils.TPDerivedCharger)
+
+	var tpDerivedChargers []TpDerivedCharger
+	q := self.db.Where("tpid = ?", tpid)
+	if len(tag) != 0 {
+		// parse identifiers
+		tmpDc := TpDerivedCharger{}
+		if err := tmpDc.SetDerivedChargersId(tag); err != nil {
+			return nil, err
+		}
+		q = q.Where("tpid = ?", tpid).
+			Where("direction = ?", tmpDc.Direction).
+			Where("tenant = ?", tmpDc.Tenant).
+			Where("account = ?", tmpDc.Account).
+			Where("category = ?", tmpDc.Category).
+			Where("subject = ?", tmpDc.Subject).
+			Where("loadid = ?", tmpDc.Loadid)
+	}
+	if err := q.Find(&tpDerivedChargers).Error; err != nil {
+		return nil, err
+	}
+
+	for _, tpDc := range tpDerivedChargers {
+		dcs[tag] = append(dcs[tag], &utils.TPDerivedCharger{
+			RunId:            tpDc.RunId,
+			RunFilter:        tpDc.RunFilter,
+			ReqtypeField:     tpDc.ReqtypeField,
+			DirectionField:   tpDc.DirectionField,
+			TenantField:      tpDc.TenantField,
+			CategoryField:    tpDc.CategoryField,
+			AccountField:     tpDc.AccountField,
+			SubjectField:     tpDc.SubjectField,
+			DestinationField: tpDc.DestinationField,
+			SetupTimeField:   tpDc.SetupTimeField,
+			AnswerTimeField:  tpDc.AnswerTimeField,
+			DurationField:    tpDc.DurationField,
+		})
+	}
+	return dcs, nil
 }
 
 func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {
