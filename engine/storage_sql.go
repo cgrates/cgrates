@@ -163,10 +163,10 @@ func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND id='%s'", table, tpid, args[0])
 	switch table {
 	case utils.TBL_TP_RATE_PROFILES:
-		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND category='%s' AND direction='%s' AND subject='%s'",
+		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND direction='%s' AND tenant='%s' AND category='%s' AND subject='%s'",
 			table, tpid, args[0], args[1], args[2], args[3], args[4])
 	case utils.TBL_TP_ACCOUNT_ACTIONS:
-		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND account='%s' AND direction='%s'",
+		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND direction='%s' AND tenant='%s' AND account='%s'",
 			table, tpid, args[0], args[1], args[2], args[3])
 	case utils.TBL_TP_DERIVED_CHARGERS:
 		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND direction='%s' AND tenant='%s' AND category='%s' AND account='%s' AND subject='%s'",
@@ -264,28 +264,35 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 	return nil
 }
 
-func (self *SQLStorage) SetTPRatingProfiles(tpid string, rps map[string]*utils.TPRatingProfile) error {
-	if len(rps) == 0 {
+func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.TPRatingProfile) error {
+	if len(rpfs) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,loadid,direction,tenant,category,subject,activation_time,rating_plan_id,fallback_subjects) VALUES ",
-		utils.TBL_TP_RATE_PROFILES))
-	i := 0
-	for _, rp := range rps {
-		for _, rpa := range rp.RatingPlanActivations {
-			if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-				buffer.WriteRune(',')
-			}
-			buffer.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s', '%s', '%s','%s','%s')", tpid, rp.LoadId, rp.Direction, rp.Tenant, rp.Category,
-				rp.Subject, rpa.ActivationTime, rpa.RatingPlanId, rpa.FallbackSubjects))
-			i++
+	tx := self.db.Begin()
+	for _, rpf := range rpfs {
+		// parse identifiers
+		tx.Where("tpid = ?", tpid).
+			Where("direction = ?", rpf.Direction).
+			Where("tenant = ?", rpf.Tenant).
+			Where("subject = ?", rpf.Subject).
+			Where("category = ?", rpf.Category).
+			Where("loadid = ?", rpf.LoadId).
+			Delete(TpRatingProfile{})
+		for _, ra := range rpf.RatingPlanActivations {
+			tx.Save(TpRatingProfile{
+				Tpid:             rpf.TPid,
+				Loadid:           rpf.LoadId,
+				Tenant:           rpf.Tenant,
+				Category:         rpf.Category,
+				Subject:          rpf.Subject,
+				Direction:        rpf.Direction,
+				ActivationTime:   ra.ActivationTime,
+				RatingPlanId:     ra.RatingPlanId,
+				FallbackSubjects: ra.FallbackSubjects,
+			})
 		}
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE fallback_subjects=values(fallback_subjects)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
@@ -1238,44 +1245,50 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 }
 
 func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error) {
-	q := fmt.Sprintf("SELECT loadid,direction,tenant,category,subject,activation_time,rating_plan_id,fallback_subjects FROM %s WHERE tpid='%s'",
-		utils.TBL_TP_RATE_PROFILES, qryRpf.TPid)
-	if len(qryRpf.LoadId) != 0 {
-		q += fmt.Sprintf(" AND loadid='%s'", qryRpf.LoadId)
-	}
+
+	rpfs := make(map[string]*utils.TPRatingProfile)
+	var tpRpfs []TpRatingProfile
+	q := self.db.Where("tpid = ?", qryRpf.TPid)
 	if len(qryRpf.Direction) != 0 {
-		q += fmt.Sprintf(" AND direction='%s'", qryRpf.Direction)
+		q = q.Where("direction = ?", qryRpf.Direction)
 	}
 	if len(qryRpf.Tenant) != 0 {
-		q += fmt.Sprintf(" AND tenant='%s'", qryRpf.Tenant)
+		q = q.Where("tenant = ?", qryRpf.Tenant)
 	}
 	if len(qryRpf.Category) != 0 {
-		q += fmt.Sprintf(" AND category='%s'", qryRpf.Category)
+		q = q.Where("category = ?", qryRpf.Category)
 	}
-
 	if len(qryRpf.Subject) != 0 {
-		q += fmt.Sprintf(" AND subject='%s'", qryRpf.Subject)
+		q = q.Where("subject = ?", qryRpf.Subject)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if len(qryRpf.LoadId) != 0 {
+		q = q.Where("loadid = ?", qryRpf.LoadId)
+	}
+	if err := q.Find(&tpRpfs).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	rpfs := make(map[string]*utils.TPRatingProfile)
-	for rows.Next() {
-		var rcvLoadId, tenant, category, direction, subject, fallback_subjects, rating_plan_tag, activation_time string
-		if err := rows.Scan(&rcvLoadId, &direction, &tenant, &category, &subject, &activation_time, &rating_plan_tag, &fallback_subjects); err != nil {
-			return nil, err
+	for _, tpRpf := range tpRpfs {
+
+		rp := &utils.TPRatingProfile{
+			TPid:      tpRpf.Tpid,
+			LoadId:    tpRpf.Loadid,
+			Direction: tpRpf.Direction,
+			Tenant:    tpRpf.Tenant,
+			Category:  tpRpf.Category,
+			Subject:   tpRpf.Subject,
 		}
-		rp := &utils.TPRatingProfile{TPid: qryRpf.TPid, LoadId: rcvLoadId, Direction: direction, Tenant: tenant, Category: category, Subject: subject}
-		if existingRp, has := rpfs[rp.KeyId()]; !has {
-			rp.RatingPlanActivations = []*utils.TPRatingActivation{
-				&utils.TPRatingActivation{ActivationTime: activation_time, RatingPlanId: rating_plan_tag, FallbackSubjects: fallback_subjects}}
+		ra := &utils.TPRatingActivation{
+			ActivationTime:   tpRpf.ActivationTime,
+			RatingPlanId:     tpRpf.RatingPlanId,
+			FallbackSubjects: tpRpf.FallbackSubjects,
+		}
+		if existingRpf, exists := rpfs[rp.KeyId()]; !exists {
+			rp.RatingPlanActivations = []*utils.TPRatingActivation{ra}
 			rpfs[rp.KeyId()] = rp
 		} else { // Exists, update
-			existingRp.RatingPlanActivations = append(existingRp.RatingPlanActivations,
-				&utils.TPRatingActivation{ActivationTime: activation_time, RatingPlanId: rating_plan_tag, FallbackSubjects: fallback_subjects})
+			existingRpf.RatingPlanActivations = append(existingRpf.RatingPlanActivations, ra)
 		}
+
 	}
 	return rpfs, nil
 }

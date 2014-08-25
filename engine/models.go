@@ -76,6 +76,32 @@ type TpRatingPlan struct {
 	Weight      float64
 }
 
+type TpRatingProfile struct {
+	Tbid             int64 `gorm:"primary_key:yes"`
+	Tpid             string
+	Loadid           string
+	Direction        string
+	Tenant           string
+	Category         string
+	Subject          string
+	ActivationTime   string
+	RatingPlanId     string
+	FallbackSubjects string
+}
+
+func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
+	ids := strings.Split(id, utils.TP_ID_SEP)
+	if len(ids) != 5 {
+		return fmt.Errorf("Wrong TP Rating Profile Id: %s", id)
+	}
+	rpf.Loadid = ids[0]
+	rpf.Direction = ids[1]
+	rpf.Tenant = ids[2]
+	rpf.Category = ids[3]
+	rpf.Subject = ids[4]
+	return nil
+}
+
 type TpLcrRules struct {
 	Tbid          int64 `gorm:"primary_key:yes"`
 	Tpid          string
@@ -152,7 +178,7 @@ type TpAccountAction struct {
 func (aa *TpAccountAction) SetAccountActionId(id string) error {
 	ids := strings.Split(id, utils.TP_ID_SEP)
 	if len(ids) != 4 {
-		return fmt.Errorf("Wrong TP Account Action Id!")
+		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
 	aa.Loadid = ids[0]
 	aa.Direction = ids[1]

@@ -170,11 +170,35 @@ func (self *TPRatingProfile) KeyId() string {
 	return fmt.Sprintf("%s:%s:%s:%s", self.Direction, self.Tenant, self.Category, self.Subject)
 }
 
+func (rpf *TPRatingProfile) GetRatingProfilesId() string {
+	return rpf.LoadId +
+		TP_ID_SEP +
+		rpf.Direction +
+		TP_ID_SEP +
+		rpf.Tenant +
+		TP_ID_SEP +
+		rpf.Category +
+		TP_ID_SEP +
+		rpf.Subject
+}
+
+func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
+	ids := strings.Split(id, TP_ID_SEP)
+	if len(ids) != 5 {
+		return fmt.Errorf("Wrong TP Rating Profiles Id: %s", id)
+	}
+	rpf.LoadId = ids[0]
+	rpf.Direction = ids[1]
+	rpf.Tenant = ids[2]
+	rpf.Category = ids[3]
+	rpf.Subject = ids[4]
+	return nil
+}
+
 type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	RatingPlanId     string // Id of RatingPlan profile
 	FallbackSubjects string // So we follow the api
-	Weight           float64
 }
 
 // Helper to return the subject fallback keys we need in dataDb

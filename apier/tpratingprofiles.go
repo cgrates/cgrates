@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,13 +40,13 @@ func (self *ApierV1) SetTPRatingProfile(attrs utils.TPRatingProfile, reply *stri
 	return nil
 }
 
-type AttrGetTPRatingProfile struct {
+type AttrGetTPRatingProfileByLoadId struct {
 	TPid   string // Tariff plan id
 	LoadId string // RatingProfile id
 }
 
 // Queries specific RatingProfile on tariff plan
-func (self *ApierV1) GetTPRatingProfiles(attrs utils.TPRatingProfile, reply *[]*utils.TPRatingProfile) error {
+func (self *ApierV1) GetTPRatingProfilesByLoadId(attrs utils.TPRatingProfile, reply *[]*utils.TPRatingProfile) error {
 	mndtryFlds := []string{"TPid", "LoadId"}
 	if len(attrs.Subject) != 0 { // If Subject provided as filter, make all related fields mandatory
 		mndtryFlds = append(mndtryFlds, "Tenant", "TOR", "Direction", "Subject")
@@ -91,12 +92,67 @@ func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileId
 	return nil
 }
 
-// Removes specific RatingProfile on Tariff plan
-func (self *ApierV1) RemTPRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "TOR", "Direction", "Subject"}); len(missing) != 0 { //Params missing
+type AttrGetTPRatingProfiles struct {
+	TPid             string // Tariff plan id
+	RatingProfilesId string // RatingProfile id
+}
+
+// Queries specific RatingProfile on tariff plan
+func (self *ApierV1) GetTPRatingProfiles(attrs AttrGetTPRatingProfiles, reply *utils.TPRatingProfile) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfilesId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, attrs.LoadId, attrs.Tenant, attrs.Category, attrs.Direction, attrs.Subject); err != nil {
+	tmpRpf := &utils.TPRatingProfile{TPid: attrs.TPid}
+	if err := tmpRpf.SetRatingProfilesId(attrs.RatingProfilesId); err != nil {
+		return err
+	}
+	if rpfs, err := self.StorDb.GetTpRatingProfiles(tmpRpf); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if len(rpfs) == 0 {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		rpf := rpfs[tmpRpf.KeyId()]
+		tpdc := utils.TPRatingProfile{
+			TPid: attrs.TPid,
+			RatingPlanActivations: rpf.RatingPlanActivations,
+		}
+		if err := tpdc.SetRatingProfilesId(attrs.RatingProfilesId); err != nil {
+			return err
+		}
+		*reply = tpdc
+	}
+	return nil
+}
+
+type AttrGetTPRatingProfileIds struct {
+	TPid string // Tariff plan id
+}
+
+// Queries RatingProfiles identities on specific tariff plan.
+func (self *ApierV1) GetTPRatingProfileIds(attrs AttrGetTPRatingProfileIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"}, nil); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if ids == nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		*reply = ids
+	}
+	return nil
+}
+
+// Removes specific RatingProfiles on Tariff plan
+func (self *ApierV1) RemTPRatingProfiles(attrs AttrGetTPRatingProfiles, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingProfilesId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	tmpRpf := engine.TpRatingProfile{}
+	if err := tmpRpf.SetRatingProfileId(attrs.RatingProfilesId); err != nil {
+		return err
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_RATE_PROFILES, attrs.TPid, tmpRpf.Loadid, tmpRpf.Direction, tmpRpf.Tenant, tmpRpf.Category, tmpRpf.Subject); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

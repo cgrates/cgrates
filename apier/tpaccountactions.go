@@ -147,7 +147,7 @@ func (self *ApierV1) RemTPAccountActions(attrs AttrGetTPAccountActions, reply *s
 	if err := aa.SetAccountActionId(attrs.AccountActionsId); err != nil {
 		return err
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.Tpid, aa.Loadid, aa.Tenant, aa.Account, aa.Direction); err != nil {
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.Tpid, aa.Loadid, aa.Direction, aa.Tenant, aa.Account); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"
