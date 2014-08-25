@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"path"
 	"strconv"
 	"strings"
@@ -124,7 +123,6 @@ func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDisti
 			qry += fmt.Sprintf(" OR %s LIKE '%%%s%%'", d, pagination.SearchTerm)
 		}
 		qry += fmt.Sprintf(")")
-		log.Print("QUERY: ", qry)
 	}
 	if pagination != nil {
 		limLow, limHigh := pagination.GetLimit()
