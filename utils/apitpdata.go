@@ -300,7 +300,9 @@ type TPDerivedChargers struct {
 }
 
 func (tpdc TPDerivedChargers) GetDerivedChargesId() string {
-	return tpdc.Direction +
+	return tpdc.Loadid +
+		TP_ID_SEP +
+		tpdc.Direction +
 		TP_ID_SEP +
 		tpdc.Tenant +
 		TP_ID_SEP +
@@ -308,9 +310,7 @@ func (tpdc TPDerivedChargers) GetDerivedChargesId() string {
 		TP_ID_SEP +
 		tpdc.Account +
 		TP_ID_SEP +
-		tpdc.Subject +
-		TP_ID_SEP +
-		tpdc.Loadid
+		tpdc.Subject
 }
 
 func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
@@ -318,12 +318,12 @@ func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
 	if len(ids) != 6 {
 		return fmt.Errorf("Wrong TP Derived Charge Id: %s", id)
 	}
-	tpdc.Direction = ids[0]
-	tpdc.Tenant = ids[1]
-	tpdc.Category = ids[2]
-	tpdc.Account = ids[3]
-	tpdc.Subject = ids[4]
-	tpdc.Loadid = ids[5]
+	tpdc.Loadid = ids[0]
+	tpdc.Direction = ids[1]
+	tpdc.Tenant = ids[2]
+	tpdc.Category = ids[3]
+	tpdc.Account = ids[4]
+	tpdc.Subject = ids[5]
 	return nil
 }
 
@@ -404,6 +404,28 @@ type TPAccountActions struct {
 // Returns the id used in some nosql dbs (eg: redis)
 func (self *TPAccountActions) KeyId() string {
 	return fmt.Sprintf("%s:%s:%s", self.Direction, self.Tenant, self.Account)
+}
+
+func (aa *TPAccountActions) GetAccountActionsId() string {
+	return aa.LoadId +
+		TP_ID_SEP +
+		aa.Direction +
+		TP_ID_SEP +
+		aa.Tenant +
+		TP_ID_SEP +
+		aa.Account
+}
+
+func (aa *TPAccountActions) SetAccountActionsId(id string) error {
+	ids := strings.Split(id, TP_ID_SEP)
+	if len(ids) != 4 {
+		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
+	}
+	aa.LoadId = ids[0]
+	aa.Direction = ids[1]
+	aa.Tenant = ids[2]
+	aa.Account = ids[3]
+	return nil
 }
 
 type AttrGetAccount struct {

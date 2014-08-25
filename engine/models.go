@@ -138,6 +138,29 @@ type TpActionTrigger struct {
 	Weight               float64
 }
 
+type TpAccountAction struct {
+	Tbid             int64 `gorm:"primary_key:yes"`
+	Tpid             string
+	Loadid           string
+	Direction        string
+	Tenant           string
+	Account          string
+	ActionPlanId     string
+	ActionTriggersId string
+}
+
+func (aa *TpAccountAction) SetAccountActionId(id string) error {
+	ids := strings.Split(id, utils.TP_ID_SEP)
+	if len(ids) != 4 {
+		return fmt.Errorf("Wrong TP Account Action Id!")
+	}
+	aa.Loadid = ids[0]
+	aa.Direction = ids[1]
+	aa.Tenant = ids[2]
+	aa.Account = ids[3]
+	return nil
+}
+
 type TpSharedGroup struct {
 	Tbid          int64 `gorm:"primary_key:yes"`
 	Tpid          string
@@ -173,14 +196,14 @@ type TpDerivedCharger struct {
 func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
 	ids := strings.Split(id, utils.TP_ID_SEP)
 	if len(ids) != 6 {
-		return fmt.Errorf("Wrong TP Derived Charge Id!")
+		return fmt.Errorf("Wrong TP Derived Charger Id: %s", id)
 	}
-	tpdc.Direction = ids[0]
-	tpdc.Tenant = ids[1]
-	tpdc.Category = ids[2]
-	tpdc.Account = ids[3]
-	tpdc.Subject = ids[4]
-	tpdc.Loadid = ids[5]
+	tpdc.Loadid = ids[0]
+	tpdc.Direction = ids[1]
+	tpdc.Tenant = ids[2]
+	tpdc.Category = ids[3]
+	tpdc.Account = ids[4]
+	tpdc.Subject = ids[5]
 	return nil
 }
 

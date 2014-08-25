@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,13 +39,13 @@ func (self *ApierV1) SetTPAccountActions(attrs utils.TPAccountActions, reply *st
 	return nil
 }
 
-type AttrGetTPAccountActions struct {
+type AttrGetTPAccountActionsByLoadId struct {
 	TPid   string // Tariff plan id
 	LoadId string // AccountActions id
 }
 
 // Queries specific AccountActions profile on tariff plan
-func (self *ApierV1) GetTPAccountActions(attrs utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
+func (self *ApierV1) GetTPAccountActionsByLoadId(attrs utils.TPAccountActions, reply *[]*utils.TPAccountActions) error {
 	mndtryFlds := []string{"TPid", "LoadId"}
 	if len(attrs.Account) != 0 { // If account provided as filter, make all related fields mandatory
 		mndtryFlds = append(mndtryFlds, "Tenant", "Account", "Direction")
@@ -70,6 +71,39 @@ func (self *ApierV1) GetTPAccountActions(attrs utils.TPAccountActions, reply *[]
 	return nil
 }
 
+type AttrGetTPAccountActions struct {
+	TPid             string // Tariff plan id
+	AccountActionsId string // DerivedCharge id
+}
+
+// Queries specific DerivedCharge on tariff plan
+func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *utils.TPAccountActions) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "AccountActionsId"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	tmpAa := &utils.TPAccountActions{TPid: attrs.TPid}
+	if err := tmpAa.SetAccountActionsId(attrs.AccountActionsId); err != nil {
+		return err
+	}
+	if aas, err := self.StorDb.GetTpAccountActions(tmpAa); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if len(aas) == 0 {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		aa := aas[tmpAa.KeyId()]
+		tpdc := utils.TPAccountActions{
+			TPid:             attrs.TPid,
+			ActionPlanId:     aa.ActionPlanId,
+			ActionTriggersId: aa.ActionTriggersId,
+		}
+		if err := tpdc.SetAccountActionsId(attrs.AccountActionsId); err != nil {
+			return err
+		}
+		*reply = tpdc
+	}
+	return nil
+}
+
 type AttrGetTPAccountActionIds struct {
 	TPid string // Tariff plan id
 }
@@ -89,12 +123,31 @@ func (self *ApierV1) GetTPAccountActionLoadIds(attrs AttrGetTPAccountActionIds, 
 	return nil
 }
 
+// Queries DerivedCharges identities on specific tariff plan.
+func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, reply *[]string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TPDistinctIds{"loadid", "direction", "tenant", "account"}, nil); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if ids == nil {
+		return errors.New(utils.ERR_NOT_FOUND)
+	} else {
+		*reply = ids
+	}
+	return nil
+}
+
 // Removes specific AccountActions on Tariff plan
-func (self *ApierV1) RemTPAccountActions(attrs utils.TPAccountActions, reply *string) error {
+func (self *ApierV1) RemTPAccountActions(attrs AttrGetTPAccountActions, reply *string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Account", "Direction"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, attrs.TPid, attrs.LoadId, attrs.Tenant, attrs.Account, attrs.Direction); err != nil {
+	aa := engine.TpAccountAction{Tpid: attrs.TPid}
+	if err := aa.SetAccountActionId(attrs.AccountActionsId); err != nil {
+		return err
+	}
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.Tpid, aa.Loadid, aa.Tenant, aa.Account, aa.Direction); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"
