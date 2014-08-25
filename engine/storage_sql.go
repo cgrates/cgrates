@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path"
 	"strconv"
 	"strings"
@@ -109,13 +110,27 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string) ([]string, error) {
+func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, pagination *utils.TPPagination) ([]string, error) {
+
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {
 		if key != "" && value != "" {
 			qry += fmt.Sprintf(" AND %s='%s'", key, value)
 		}
 	}
+	if pagination.SearchTerm != "" {
+		qry += fmt.Sprintf(" AND (%s LIKE '%%%s%%'", distinct[0], pagination.SearchTerm)
+		for _, d := range distinct[1:] {
+			qry += fmt.Sprintf(" OR %s LIKE '%%%s%%'", d, pagination.SearchTerm)
+		}
+		qry += fmt.Sprintf(")")
+		log.Print("QUERY: ", qry)
+	}
+	if pagination != nil {
+		limLow, limHigh := pagination.GetLimit()
+		qry += fmt.Sprintf(" LIMIT %d,%d", limLow, limHigh)
+	}
+
 	rows, err := self.Db.Query(qry)
 	if err != nil {
 		return nil, err

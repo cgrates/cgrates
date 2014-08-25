@@ -82,7 +82,7 @@ func (self *ApierV1) GetTPRatingProfileLoadIds(attrs utils.AttrTPRatingProfileId
 		"tor":       attrs.Category,
 		"direction": attrs.Direction,
 		"subject":   attrs.Subject,
-	}); err != nil {
+	}, nil); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -125,7 +125,10 @@ func (self *ApierV1) GetTPRatingProfiles(attrs AttrGetTPRatingProfiles, reply *u
 }
 
 type AttrGetTPRatingProfileIds struct {
-	TPid string // Tariff plan id
+	TPid         string // Tariff plan id
+	Page         int
+	ItemsPerPage int
+	SearchTerm   string
 }
 
 // Queries RatingProfiles identities on specific tariff plan.
@@ -133,7 +136,7 @@ func (self *ApierV1) GetTPRatingProfileIds(attrs AttrGetTPRatingProfileIds, repl
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"}, nil); err != nil {
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATE_PROFILES, utils.TPDistinctIds{"loadid", "direction", "tenant", "category", "subject"}, nil, &utils.TPPagination{Page: attrs.Page, ItemsPerPage: attrs.ItemsPerPage, SearchTerm: attrs.SearchTerm}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)

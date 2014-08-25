@@ -20,15 +20,31 @@ package utils
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"time"
 )
 
+// Used to extract ids from stordb
 type TPDistinctIds []string
 
 func (tpdi TPDistinctIds) String() string {
 	return strings.Join(tpdi, ",")
+}
+
+// To paginate stuff from stordb (e.g. ids)
+type TPPagination struct {
+	Page         int
+	ItemsPerPage int
+	SearchTerm   string
+}
+
+func (pag *TPPagination) GetLimit() (low, high int) {
+	if pag.ItemsPerPage == 0 {
+		return 0, math.MaxInt32
+	}
+	return pag.Page * pag.ItemsPerPage, pag.ItemsPerPage
 }
 
 type TPDestination struct {
