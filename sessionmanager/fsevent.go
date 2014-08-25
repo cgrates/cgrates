@@ -216,8 +216,8 @@ func (fsev FSEvent) GetOriginatorIP(fieldName string) string {
 }
 
 func (fsev FSEvent) GetExtraFields() map[string]string {
-	var extraFields map[string]string
-	for _, fldRule := range config.CgrConfig().CDRSExtraFields {
+	extraFields := make(map[string]string)
+	for _, fldRule := range config.CgrConfig().FSCdrExtraFields {
 		extraFields[fldRule.Id] = fsev.ParseEventValue(fldRule)
 	}
 	return extraFields

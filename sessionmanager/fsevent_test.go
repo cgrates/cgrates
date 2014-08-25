@@ -622,7 +622,7 @@ func TestFsEvAsStoredCdr(t *testing.T) {
 		TOR: utils.VOICE, AccId: "37e9b766-5256-4e4b-b1ed-3767b930fec8", CdrHost: "10.0.2.15", CdrSource: "FS_CHANNEL_HANGUP_COMPLETE", ReqType: utils.PSEUDOPREPAID,
 		Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "1003", Subject: "1003",
 		Destination: "1002", SetupTime: setupTime, AnswerTime: aTime,
-		Usage: time.Duration(5) * time.Second, Cost: -1}
+		Usage: time.Duration(5) * time.Second, ExtraFields: make(map[string]string), Cost: -1}
 	if storedCdr := ev.AsStoredCdr(); !reflect.DeepEqual(eStoredCdr, storedCdr) {
 		t.Errorf("Expecting: %+v, received: %+v", eStoredCdr, storedCdr)
 	}
@@ -634,7 +634,7 @@ func TestFsEvGetExtraFields(t *testing.T) {
 	config.SetCgrConfig(cfg)
 	ev := new(FSEvent).New(hangupEv)
 	expectedExtraFields := map[string]string{"Channel-Read-Codec-Name": "G722", "Channel-Write-Codec-Name": "G722", "NonExistingHeader": ""}
-	if extraFields := ev.GetExtraFields(); !reflect.DeepEqual(extraFields, extraFields) {
+	if extraFields := ev.GetExtraFields(); !reflect.DeepEqual(expectedExtraFields, extraFields) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedExtraFields, extraFields)
 	}
 }
