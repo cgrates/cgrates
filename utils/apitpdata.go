@@ -25,6 +25,12 @@ import (
 	"time"
 )
 
+type TPDistinctIds []string
+
+func (tpdi TPDistinctIds) String() string {
+	return strings.Join(tpdi, ",")
+}
+
 type TPDestination struct {
 	TPid          string   // Tariff plan id
 	DestinationId string   // Destination id
@@ -168,6 +174,7 @@ type TPRatingActivation struct {
 	ActivationTime   string // Time when this profile will become active, defined as unix epoch time
 	RatingPlanId     string // Id of RatingPlan profile
 	FallbackSubjects string // So we follow the api
+	Weight           float64
 }
 
 // Helper to return the subject fallback keys we need in dataDb
@@ -215,6 +222,7 @@ type TPAction struct {
 	ExpiryTime      string  // Time when the units will expire
 	DestinationId   string  // Destination profile id
 	RatingSubject   string  // Reference a rate subject defined in RatingProfiles
+	Category        string  // category filter for balances
 	SharedGroup     string  // Reference to a shared group
 	BalanceWeight   float64 // Balance weight
 	ExtraParameters string
@@ -280,6 +288,60 @@ type TPCdrStat struct {
 	ActionTriggers    string
 }
 
+type TPDerivedChargers struct {
+	TPid            string
+	Loadid          string
+	Direction       string
+	Tenant          string
+	Category        string
+	Account         string
+	Subject         string
+	DerivedChargers []*TPDerivedCharger
+}
+
+func (tpdc TPDerivedChargers) GetDerivedChargesId() string {
+	return tpdc.Loadid +
+		TP_ID_SEP +
+		tpdc.Direction +
+		TP_ID_SEP +
+		tpdc.Tenant +
+		TP_ID_SEP +
+		tpdc.Category +
+		TP_ID_SEP +
+		tpdc.Account +
+		TP_ID_SEP +
+		tpdc.Subject
+}
+
+func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
+	ids := strings.Split(id, TP_ID_SEP)
+	if len(ids) != 6 {
+		return fmt.Errorf("Wrong TP Derived Charge Id: %s", id)
+	}
+	tpdc.Loadid = ids[0]
+	tpdc.Direction = ids[1]
+	tpdc.Tenant = ids[2]
+	tpdc.Category = ids[3]
+	tpdc.Account = ids[4]
+	tpdc.Subject = ids[5]
+	return nil
+}
+
+type TPDerivedCharger struct {
+	RunId            string
+	RunFilter        string
+	ReqtypeField     string
+	DirectionField   string
+	TenantField      string
+	CategoryField    string
+	AccountField     string
+	SubjectField     string
+	DestinationField string
+	SetupTimeField   string
+	AnswerTimeField  string
+	DurationField    string
+}
+
 type TPActionPlan struct {
 	TPid       string            // Tariff plan id
 	Id         string            // ActionPlan id
@@ -310,6 +372,7 @@ type TPActionTrigger struct {
 	BalanceWeight         float64       // filter for balance
 	BalanceExpirationDate string        // filter for balance
 	BalanceRatingSubject  string        // filter for balance
+	BalanceCategory       string        // filter for balance
 	BalanceSharedGroup    string        // filter for balance
 	MinQueuedItems        int           // Trigger actions only if this number is hit (stats only)
 	ActionsId             string        // Actions which will execute on threshold reached
@@ -341,6 +404,28 @@ type TPAccountActions struct {
 // Returns the id used in some nosql dbs (eg: redis)
 func (self *TPAccountActions) KeyId() string {
 	return fmt.Sprintf("%s:%s:%s", self.Direction, self.Tenant, self.Account)
+}
+
+func (aa *TPAccountActions) GetAccountActionsId() string {
+	return aa.LoadId +
+		TP_ID_SEP +
+		aa.Direction +
+		TP_ID_SEP +
+		aa.Tenant +
+		TP_ID_SEP +
+		aa.Account
+}
+
+func (aa *TPAccountActions) SetAccountActionsId(id string) error {
+	ids := strings.Split(id, TP_ID_SEP)
+	if len(ids) != 4 {
+		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
+	}
+	aa.LoadId = ids[0]
+	aa.Direction = ids[1]
+	aa.Tenant = ids[2]
+	aa.Account = ids[3]
+	return nil
 }
 
 type AttrGetAccount struct {

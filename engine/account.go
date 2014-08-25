@@ -60,14 +60,14 @@ type Account struct {
 
 // User's available minutes for the specified destination
 func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duration, credit float64, balances BalanceChain) {
-	creditBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[CREDIT+cd.Direction], "")
-	unitBalances := ub.getBalancesForPrefix(cd.Destination, ub.BalanceMap[cd.TOR+cd.Direction], "")
+	creditBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, ub.BalanceMap[CREDIT+cd.Direction], "")
+	unitBalances := ub.getBalancesForPrefix(cd.Destination, cd.Category, ub.BalanceMap[cd.TOR+cd.Direction], "")
 	// gather all balances from shared groups
 	var extendedCreditBalances BalanceChain
 	for _, cb := range creditBalances {
 		if cb.SharedGroup != "" {
 			if sharedGroup, _ := accountingStorage.GetSharedGroup(cb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, CREDIT+cd.Direction, ub)
+				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, CREDIT+cd.Direction, ub)
 				sgb = sharedGroup.SortBalancesByStrategy(cb, sgb)
 				extendedCreditBalances = append(extendedCreditBalances, sgb...)
 			}
@@ -79,7 +79,7 @@ func (ub *Account) getCreditForPrefix(cd *CallDescriptor) (duration time.Duratio
 	for _, mb := range unitBalances {
 		if mb.SharedGroup != "" {
 			if sharedGroup, _ := accountingStorage.GetSharedGroup(mb.SharedGroup, false); sharedGroup != nil {
-				sgb := sharedGroup.GetBalances(cd.Destination, cd.TOR+cd.Direction, ub)
+				sgb := sharedGroup.GetBalances(cd.Destination, cd.Category, cd.TOR+cd.Direction, ub)
 				sgb = sharedGroup.SortBalancesByStrategy(mb, sgb)
 				extendedMinuteBalances = append(extendedMinuteBalances, sgb...)
 			}
@@ -143,13 +143,16 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 	return nil //ub.BalanceMap[id].GetTotalValue()
 }
 
-func (ub *Account) getBalancesForPrefix(prefix string, balances BalanceChain, sharedGroup string) BalanceChain {
+func (ub *Account) getBalancesForPrefix(prefix, category string, balances BalanceChain, sharedGroup string) BalanceChain {
 	var usefulBalances BalanceChain
 	for _, b := range balances {
 		if b.IsExpired() || (ub.AllowNegative == false && b.SharedGroup == "" && b.Value <= 0) {
 			continue
 		}
 		if sharedGroup != "" && sharedGroup != "" && b.SharedGroup != sharedGroup {
+			continue
+		}
+		if !b.MatchCategory(category) {
 			continue
 		}
 		b.account = ub
@@ -183,8 +186,8 @@ func (ub *Account) getBalancesForPrefix(prefix string, balances BalanceChain, sh
 }
 
 // like getBalancesForPrefix but expanding shared balances
-func (account *Account) getAlldBalancesForPrefix(destination, balanceType string) (bc BalanceChain) {
-	balances := account.getBalancesForPrefix(destination, account.BalanceMap[balanceType], "")
+func (account *Account) getAlldBalancesForPrefix(destination, category, balanceType string) (bc BalanceChain) {
+	balances := account.getBalancesForPrefix(destination, category, account.BalanceMap[balanceType], "")
 	for _, b := range balances {
 		if b.SharedGroup != "" {
 			sharedGroup, err := accountingStorage.GetSharedGroup(b.SharedGroup, false)
@@ -192,7 +195,7 @@ func (account *Account) getAlldBalancesForPrefix(destination, balanceType string
 				Logger.Warning(fmt.Sprintf("Could not get shared group: %v", b.SharedGroup))
 				continue
 			}
-			sharedBalances := sharedGroup.GetBalances(destination, balanceType, account)
+			sharedBalances := sharedGroup.GetBalances(destination, category, balanceType, account)
 			sharedBalances = sharedGroup.SortBalancesByStrategy(b, sharedBalances)
 			bc = append(bc, sharedBalances...)
 		} else {
@@ -203,8 +206,8 @@ func (account *Account) getAlldBalancesForPrefix(destination, balanceType string
 }
 
 func (ub *Account) debitCreditBalance(cc *CallCost, count bool) (err error) {
-	usefulUnitBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.TOR+cc.Direction)
-	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cc.Destination, CREDIT+cc.Direction)
+	usefulUnitBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.Category, cc.TOR+cc.Direction)
+	usefulMoneyBalances := ub.getAlldBalancesForPrefix(cc.Destination, cc.Category, CREDIT+cc.Direction)
 	// debit minutes
 	for _, balance := range usefulUnitBalances {
 		balance.DebitUnits(cc, count, balance.account, usefulMoneyBalances)
@@ -487,9 +490,9 @@ func (ub *Account) GetSharedGroups() (groups []string) {
 	return
 }
 
-func (account *Account) GetUniqueSharedGroupMembers(destination, direction, unitType string) ([]string, error) {
-	creditBalances := account.getBalancesForPrefix(destination, account.BalanceMap[CREDIT+direction], "")
-	unitBalances := account.getBalancesForPrefix(destination, account.BalanceMap[unitType+direction], "")
+func (account *Account) GetUniqueSharedGroupMembers(destination, direction, category, unitType string) ([]string, error) {
+	creditBalances := account.getBalancesForPrefix(destination, category, account.BalanceMap[CREDIT+direction], "")
+	unitBalances := account.getBalancesForPrefix(destination, category, account.BalanceMap[unitType+direction], "")
 	// gather all shared group ids
 	var sharedGroupIds []string
 	for _, cb := range creditBalances {

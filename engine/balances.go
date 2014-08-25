@@ -34,6 +34,7 @@ type Balance struct {
 	Weight         float64
 	DestinationId  string
 	RatingSubject  string
+	Category       string
 	SharedGroup    string
 	precision      int
 	account        *Account // used to store ub reference for shared balances
@@ -51,6 +52,7 @@ func (b *Balance) Equal(o *Balance) bool {
 		b.Weight == o.Weight &&
 		b.DestinationId == o.DestinationId &&
 		b.RatingSubject == o.RatingSubject &&
+		b.Category == o.Category &&
 		b.SharedGroup == o.SharedGroup
 }
 
@@ -58,12 +60,17 @@ func (b *Balance) Equal(o *Balance) bool {
 func (b *Balance) IsDefault() bool {
 	return (b.DestinationId == "" || b.DestinationId == utils.ANY) &&
 		b.RatingSubject == "" &&
+		b.Category == "" &&
 		b.ExpirationDate.IsZero() &&
 		b.SharedGroup == ""
 }
 
 func (b *Balance) IsExpired() bool {
 	return !b.ExpirationDate.IsZero() && b.ExpirationDate.Before(time.Now())
+}
+
+func (b *Balance) MatchCategory(category string) bool {
+	return b.Category == "" || b.Category == category
 }
 
 func (b *Balance) HasDestination() bool {
@@ -112,6 +119,7 @@ func (b *Balance) Clone() *Balance {
 		ExpirationDate: b.ExpirationDate,
 		Weight:         b.Weight,
 		RatingSubject:  b.RatingSubject,
+		Category:       b.Category,
 	}
 }
 

@@ -666,15 +666,15 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			}
 		}
 		var balanceWeight float64
-		if len(record[8]) == 0 { // Not defined
+		if len(record[9]) == 0 { // Not defined
 			balanceWeight = 0.0
 		} else {
-			balanceWeight, err = strconv.ParseFloat(record[8], 64)
+			balanceWeight, err = strconv.ParseFloat(record[9], 64)
 			if err != nil {
 				return fmt.Errorf("Could not parse action balance weight: %v", err)
 			}
 		}
-		weight, err := strconv.ParseFloat(record[11], 64)
+		weight, err := strconv.ParseFloat(record[12], 64)
 		if err != nil {
 			return fmt.Errorf("Could not parse action weight: %v", err)
 		}
@@ -685,14 +685,15 @@ func (csvr *CSVReader) LoadActions() (err error) {
 			Direction:        record[3],
 			Weight:           weight,
 			ExpirationString: record[5],
-			ExtraParameters:  record[10],
+			ExtraParameters:  record[11],
 			Balance: &Balance{
 				Uuid:          utils.GenUUID(),
 				Value:         units,
 				Weight:        balanceWeight,
 				DestinationId: record[6],
 				RatingSubject: record[7],
-				SharedGroup:   record[9],
+				Category:      record[8],
+				SharedGroup:   record[10],
 			},
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {
@@ -784,13 +785,13 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		if record[9] != "" && err != nil {
 			return fmt.Errorf("Could not parse action trigger BalanceExpirationDate (%v): %v", record[9], err)
 		}
-		minQI, err := strconv.Atoi(record[12])
-		if record[12] != "" && err != nil {
-			return fmt.Errorf("Could not parse action trigger MinQueuedItems (%v): %v", record[12], err)
+		minQI, err := strconv.Atoi(record[13])
+		if record[13] != "" && err != nil {
+			return fmt.Errorf("Could not parse action trigger MinQueuedItems (%v): %v", record[13], err)
 		}
-		weight, err := strconv.ParseFloat(record[14], 64)
+		weight, err := strconv.ParseFloat(record[15], 64)
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger weight (%v): %v", record[14], err)
+			return fmt.Errorf("Could not parse action trigger weight (%v): %v", record[15], err)
 		}
 
 		at := &ActionTrigger{
@@ -805,9 +806,10 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 			BalanceWeight:         balanceWeight,
 			BalanceExpirationDate: balanceExp,
 			BalanceRatingSubject:  record[10],
-			BalanceSharedGroup:    record[11],
+			BalanceCategory:       record[11],
+			BalanceSharedGroup:    record[12],
 			MinQueuedItems:        minQI,
-			ActionsId:             record[13],
+			ActionsId:             record[14],
 			Weight:                weight,
 		}
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)

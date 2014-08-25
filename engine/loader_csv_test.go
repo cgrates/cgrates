@@ -140,16 +140,16 @@ SG3,*any,*lowest,
 `
 
 	actions = `
-MINI,*topup_reset,*monetary,*out,10,*unlimited,,,10,,,10
-MINI,*topup,*voice,*out,100,*unlimited,NAT,test,10,,,10
-SHARED,*topup,*monetary,*out,100,*unlimited,,,10,SG1,,10
-TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,10,,,10
-TOPUP10_AC1,*topup_reset,*voice,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,10,,,10
-SE0,*topup_reset,*monetary,*out,0,*unlimited,,,10,SG2,,10
-SE10,*topup_reset,*monetary,*out,10,*unlimited,,,5,SG2,,10
-SE10,*topup,*monetary,*out,10,*unlimited,,,10,,,10
-EE0,*topup_reset,*monetary,*out,0,*unlimited,,,10,SG3,,10
-EE0,*allow_negative,*monetary,*out,0,*unlimited,,,10,,,10
+MINI,*topup_reset,*monetary,*out,10,*unlimited,,,,10,,,10
+MINI,*topup,*voice,*out,100,*unlimited,NAT,test,,10,,,10
+SHARED,*topup,*monetary,*out,100,*unlimited,,,,10,SG1,,10
+TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,,10,,,10
+TOPUP10_AC1,*topup_reset,*voice,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,,10,,,10
+SE0,*topup_reset,*monetary,*out,0,*unlimited,,,,10,SG2,,10
+SE10,*topup_reset,*monetary,*out,10,*unlimited,,,,5,SG2,,10
+SE10,*topup,*monetary,*out,10,*unlimited,,,,10,,,10
+EE0,*topup_reset,*monetary,*out,0,*unlimited,,,,10,SG3,,10
+EE0,*allow_negative,*monetary,*out,0,*unlimited,,,,10,,,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10
@@ -161,16 +161,16 @@ TOPUP_SHARED10_AT,SE10,ASAP,10
 TOPUP_EMPTY_AT,EE0,ASAP,10
 `
 	actionTriggers = `
-STANDARD_TRIGGER,*voice,*out,*min_counter,10,false,0,GERMANY_O2,,,,,,SOME_1,10
-STANDARD_TRIGGER,*voice,*out,*max_balance,200,false,0,GERMANY,,,,,,SOME_2,10
-STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,0,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,0,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,false,0,FS_USERS,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,,,*min_asr,45,true,1h,,,,,,3,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACD,,,*min_acd,10,true,1h,,,,,,5,CDRST_WARN_HTTP,10
-CDRST1_WARN_ACC,,,*max_acc,10,true,10m,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ASR,,,*min_asr,30,true,0,,,,,,5,CDRST_WARN_HTTP,10
-CDRST2_WARN_ACD,,,*min_acd,3,true,0,,,,,,5,CDRST_WARN_HTTP,10
+STANDARD_TRIGGER,*voice,*out,*min_counter,10,false,0,GERMANY_O2,,,,,,,SOME_1,10
+STANDARD_TRIGGER,*voice,*out,*max_balance,200,false,0,GERMANY,,,,,,,SOME_2,10
+STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,0,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,0,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*monetary,*out,*max_counter,5,false,0,FS_USERS,,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,,,*min_asr,45,true,1h,,,,,,,3,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACD,,,*min_acd,10,true,1h,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST1_WARN_ACC,,,*max_acc,10,true,10m,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ASR,,,*min_asr,30,true,0,,,,,,,5,CDRST_WARN_HTTP,10
+CDRST2_WARN_ACD,,,*min_acd,3,true,0,,,,,,,5,CDRST_WARN_HTTP,10
 `
 	accountActions = `
 vdf,minitsboy;a1;a2,*out,MORE_MINUTES,STANDARD_TRIGGER
@@ -725,8 +725,8 @@ func TestLoadActions(t *testing.T) {
 			},
 		},
 	}
-	if !reflect.DeepEqual(as1, expected) {
-		t.Error("Error loading action: ", as1)
+	if !reflect.DeepEqual(as1[1], expected[1]) {
+		t.Errorf("Error loading action1: %+v", as1[0].Balance)
 	}
 	as2 := csvr.actions["SHARED"]
 	expected = []*Action{

@@ -81,7 +81,13 @@ func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 // Return a list with all TPids defined in the system, even if incomplete, isolated in some table.
 func (self *SQLStorage) GetTPIds() ([]string, error) {
 	rows, err := self.Db.Query(
-		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)", utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES))
+		fmt.Sprintf("(SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s) UNION (SELECT tpid FROM %s)",
+			utils.TBL_TP_TIMINGS,
+			utils.TBL_TP_DESTINATIONS,
+			utils.TBL_TP_RATES,
+			utils.TBL_TP_DESTINATION_RATES,
+			utils.TBL_TP_RATING_PLANS,
+			utils.TBL_TP_RATE_PROFILES))
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +109,7 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) GetTPTableIds(tpid, table, distinct string, filters map[string]string) ([]string, error) {
+func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string) ([]string, error) {
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {
 		if key != "" && value != "" {
@@ -120,12 +126,23 @@ func (self *SQLStorage) GetTPTableIds(tpid, table, distinct string, filters map[
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one
-		var id string
-		err = rows.Scan(&id)
+
+		cols, err := rows.Columns()            // Get the column names; remember to check err
+		vals := make([]string, len(cols))      // Allocate enough values
+		ints := make([]interface{}, len(cols)) // Make a slice of []interface{}
+		for i := range ints {
+			ints[i] = &vals[i] // Copy references into the slice
+		}
+
+		err = rows.Scan(ints...)
 		if err != nil {
 			return nil, err
 		}
-		ids = append(ids, id)
+		finalId := vals[0]
+		if len(vals) > 1 {
+			finalId = strings.Join(vals, utils.TP_ID_SEP)
+		}
+		ids = append(ids, finalId)
 	}
 	if i == 0 {
 		return nil, nil
@@ -151,36 +168,15 @@ func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 	case utils.TBL_TP_ACCOUNT_ACTIONS:
 		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND tenant='%s' AND account='%s' AND direction='%s'",
 			table, tpid, args[0], args[1], args[2], args[3])
+	case utils.TBL_TP_DERIVED_CHARGERS:
+		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND direction='%s' AND tenant='%s' AND category='%s' AND account='%s' AND subject='%s'",
+			table, tpid, args[0], args[1], args[2], args[3], args[4], args[5])
 	}
 	if _, err := self.Db.Exec(q); err != nil {
 		return err
 	}
 	return nil
 }
-
-// Extracts destinations from StorDB on specific tariffplan id
-/*func (self *SQLStorage) GetTPDestination(tpid, destTag string) (*Destination, error) {
-    rows, err := self.Db.Query(fmt.Sprintf("SELECT prefix FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_DESTINATIONS, tpid, destTag))
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
-    d := &Destination{Id: destTag}
-    i := 0
-    for rows.Next() {
-        i++ //Keep here a reference so we know we got at least one prefix
-        var pref string
-        err = rows.Scan(&pref)
-        if err != nil {
-            return nil, err
-        }
-        d.AddPrefix(pref)
-    }
-    if i == 0 {
-        return nil, nil
-    }
-    return d, nil
-}*/
 
 func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	if len(dest.Prefixes) == 0 {
@@ -352,6 +348,53 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 	return nil
 }
 
+func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*utils.TPDerivedCharger) error {
+	if len(sgs) == 0 {
+		return nil //Nothing to set
+	}
+	tx := self.db.Begin()
+	for dcId, dChargers := range sgs {
+		// parse identifiers
+		tmpDc := TpDerivedCharger{}
+		if err := tmpDc.SetDerivedChargersId(dcId); err != nil {
+			tx.Rollback()
+			return err
+		}
+		tx.Where("tpid = ?", tpid).
+			Where("direction = ?", tmpDc.Direction).
+			Where("tenant = ?", tmpDc.Tenant).
+			Where("account = ?", tmpDc.Account).
+			Where("category = ?", tmpDc.Category).
+			Where("subject = ?", tmpDc.Subject).
+			Where("loadid = ?", tmpDc.Loadid).
+			Delete(TpDerivedCharger{})
+		for _, dc := range dChargers {
+			newDc := TpDerivedCharger{
+				Tpid:             tpid,
+				RunId:            dc.RunId,
+				RunFilter:        dc.RunFilter,
+				ReqtypeField:     dc.ReqtypeField,
+				DirectionField:   dc.DirectionField,
+				TenantField:      dc.TenantField,
+				CategoryField:    dc.CategoryField,
+				AccountField:     dc.AccountField,
+				SubjectField:     dc.SubjectField,
+				DestinationField: dc.DestinationField,
+				SetupTimeField:   dc.SetupTimeField,
+				AnswerTimeField:  dc.AnswerTimeField,
+				DurationField:    dc.DurationField,
+			}
+			if err := newDc.SetDerivedChargersId(dcId); err != nil {
+				tx.Rollback()
+				return err
+			}
+			tx.Save(newDc)
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
 	if len(lcrs) == 0 {
 		return nil //Nothing to set
@@ -396,6 +439,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 				ExpiryTime:      ac.ExpiryTime,
 				DestinationId:   ac.DestinationId,
 				RatingSubject:   ac.RatingSubject,
+				Category:        ac.Category,
 				SharedGroup:     ac.SharedGroup,
 				BalanceWeight:   ac.BalanceWeight,
 				ExtraParameters: ac.ExtraParameters,
@@ -408,7 +452,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_id,rating_subject,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_id,rating_subject,category,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND id='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
 	if err != nil {
 		return nil, err
 	}
@@ -417,9 +461,9 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateSubject, sharedGroup, expTime, extraParameters string
+		var action, balanceId, dir, destId, rateSubject, category, sharedGroup, expTime, extraParameters string
 		var units, balanceWeight, weight float64
-		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &sharedGroup, &balanceWeight, &extraParameters, &weight); err != nil {
+		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &category, &sharedGroup, &balanceWeight, &extraParameters, &weight); err != nil {
 			return nil, err
 		}
 		acts.Actions = append(acts.Actions, &utils.TPAction{
@@ -430,6 +474,7 @@ func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, err
 			ExpiryTime:      expTime,
 			DestinationId:   destId,
 			RatingSubject:   rateSubject,
+			Category:        category,
 			BalanceWeight:   balanceWeight,
 			SharedGroup:     sharedGroup,
 			ExtraParameters: extraParameters,
@@ -506,7 +551,8 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 				BalanceWeight:        at.BalanceWeight,
 				BalanceExpiryTime:    at.BalanceExpirationDate,
 				BalanceRatingSubject: at.BalanceRatingSubject,
-				BalanceSharedGroup:   at.BalanceRatingSubject,
+				BalanceCategory:      at.BalanceCategory,
+				BalanceSharedGroup:   at.BalanceSharedGroup,
 				MinQueuedItems:       at.MinQueuedItems,
 				ActionsId:            at.ActionsId,
 				Weight:               at.Weight,
@@ -518,26 +564,33 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 }
 
 // Sets a group of account actions. Map key has the role of grouping within a tpid
-func (self *SQLStorage) SetTPAccountActions(tpid string, aa map[string]*utils.TPAccountActions) error {
-	if len(aa) == 0 {
+func (self *SQLStorage) SetTPAccountActions(tpid string, aas map[string]*utils.TPAccountActions) error {
+	if len(aas) == 0 {
 		return nil //Nothing to set
 	}
-	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid, loadid, tenant, account, direction, action_plan_id, action_triggers_id) VALUES ", utils.TBL_TP_ACCOUNT_ACTIONS))
-	i := 0
-	for _, aActs := range aa {
-		if i != 0 { //Consecutive values after the first will be prefixed with "," as separator
-			buffer.WriteRune(',')
-		}
-		buffer.WriteString(fmt.Sprintf("('%s','%s','%s','%s','%s','%s','%s')",
-			tpid, aActs.LoadId, aActs.Tenant, aActs.Account, aActs.Direction, aActs.ActionPlanId, aActs.ActionTriggersId))
-		i++
+	tx := self.db.Begin()
+	for _, aa := range aas {
+		// parse identifiers
+		tx.Where("tpid = ?", tpid).
+			Where("direction = ?", aa.Direction).
+			Where("tenant = ?", aa.Tenant).
+			Where("account = ?", aa.Account).
+			Where("loadid = ?", aa.LoadId).
+			Delete(TpAccountAction{})
+
+		tx.Save(TpAccountAction{
+			Tpid:             aa.TPid,
+			Loadid:           aa.LoadId,
+			Tenant:           aa.Tenant,
+			Account:          aa.Account,
+			Direction:        aa.Direction,
+			ActionPlanId:     aa.ActionPlanId,
+			ActionTriggersId: aa.ActionTriggersId,
+		})
 	}
-	buffer.WriteString(" ON DUPLICATE KEY UPDATE action_plan_id=values(action_plan_id), action_triggers_id=values(action_triggers_id)")
-	if _, err := self.Db.Exec(buffer.String()); err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
+
 }
 
 func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
@@ -1288,6 +1341,52 @@ func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPC
 	return css, nil
 }
 
+func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[string][]*utils.TPDerivedCharger, error) {
+	dcs := make(map[string][]*utils.TPDerivedCharger)
+
+	var tpDerivedChargers []TpDerivedCharger
+	q := self.db.Where("tpid = ?", dc.TPid)
+	if len(dc.Direction) != 0 {
+		q = q.Where("direction = ?", dc.Direction)
+	}
+	if len(dc.Tenant) != 0 {
+		q = q.Where("tenant = ?", dc.Tenant)
+	}
+	if len(dc.Account) != 0 {
+		q = q.Where("account = ?", dc.Account)
+	}
+	if len(dc.Category) != 0 {
+		q = q.Where("category = ?", dc.Category)
+	}
+	if len(dc.Subject) != 0 {
+		q = q.Where("subject = ?", dc.Subject)
+	}
+	if len(dc.Loadid) != 0 {
+		q = q.Where("loadid = ?", dc.Loadid)
+	}
+	if err := q.Find(&tpDerivedChargers).Error; err != nil {
+		return nil, err
+	}
+	tag := dc.GetDerivedChargesId()
+	for _, tpDc := range tpDerivedChargers {
+		dcs[tag] = append(dcs[tag], &utils.TPDerivedCharger{
+			RunId:            tpDc.RunId,
+			RunFilter:        tpDc.RunFilter,
+			ReqtypeField:     tpDc.ReqtypeField,
+			DirectionField:   tpDc.DirectionField,
+			TenantField:      tpDc.TenantField,
+			CategoryField:    tpDc.CategoryField,
+			AccountField:     tpDc.AccountField,
+			SubjectField:     tpDc.SubjectField,
+			DestinationField: tpDc.DestinationField,
+			SetupTimeField:   tpDc.SetupTimeField,
+			AnswerTimeField:  tpDc.AnswerTimeField,
+			DurationField:    tpDc.DurationField,
+		})
+	}
+	return dcs, nil
+}
+
 func (self *SQLStorage) GetTpLCRs(tpid, tag string) (map[string]*LCR, error) {
 	lcrs := make(map[string]*LCR)
 	q := fmt.Sprintf("SELECT * FROM %s WHERE tpid='%s'", utils.TBL_TP_LCRS, tpid)
@@ -1362,6 +1461,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 			ExpiryTime:      tpAc.ExpiryTime,
 			DestinationId:   tpAc.DestinationId,
 			RatingSubject:   tpAc.RatingSubject,
+			Category:        tpAc.Category,
 			SharedGroup:     tpAc.SharedGroup,
 			BalanceWeight:   tpAc.BalanceWeight,
 			ExtraParameters: tpAc.ExtraParameters,
@@ -1396,6 +1496,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 			BalanceWeight:         tpAt.BalanceWeight,
 			BalanceExpirationDate: tpAt.BalanceExpiryTime,
 			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
+			BalanceCategory:       tpAt.BalanceCategory,
 			BalanceSharedGroup:    tpAt.BalanceSharedGroup,
 			Weight:                tpAt.Weight,
 			ActionsId:             tpAt.ActionsId,
@@ -1407,40 +1508,35 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 }
 
 func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map[string]*utils.TPAccountActions, error) {
-	q := fmt.Sprintf("SELECT loadid, tenant, account, direction, action_plan_id, action_triggers_id FROM %s WHERE tpid='%s'", utils.TBL_TP_ACCOUNT_ACTIONS, aaFltr.TPid)
-	if len(aaFltr.LoadId) != 0 {
-		q += fmt.Sprintf(" AND loadid='%s'", aaFltr.LoadId)
+	aas := make(map[string]*utils.TPAccountActions)
+	var tpAccActs []TpAccountAction
+	q := self.db.Where("tpid = ?", aaFltr.TPid)
+	if len(aaFltr.Direction) != 0 {
+		q = q.Where("direction = ?", aaFltr.Direction)
 	}
 	if len(aaFltr.Tenant) != 0 {
-		q += fmt.Sprintf(" AND tenant='%s'", aaFltr.Tenant)
+		q = q.Where("tenant = ?", aaFltr.Tenant)
 	}
 	if len(aaFltr.Account) != 0 {
-		q += fmt.Sprintf(" AND account='%s'", aaFltr.Account)
+		q = q.Where("account = ?", aaFltr.Account)
 	}
-	if len(aaFltr.Direction) != 0 {
-		q += fmt.Sprintf(" AND direction='%s'", aaFltr.Direction)
+	if len(aaFltr.LoadId) != 0 {
+		q = q.Where("loadid = ?", aaFltr.LoadId)
 	}
-	rows, err := self.Db.Query(q)
-	if err != nil {
+	if err := q.Find(&tpAccActs).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	aa := make(map[string]*utils.TPAccountActions)
-	for rows.Next() {
-		var aaLoadId, tenant, account, direction, action_plan_tag, action_triggers_tag string
-		if err := rows.Scan(&aaLoadId, &tenant, &account, &direction, &action_plan_tag, &action_triggers_tag); err != nil {
-			return nil, err
-		}
+	for _, tpAa := range tpAccActs {
 		aacts := &utils.TPAccountActions{
-			TPid:             aaFltr.TPid,
-			LoadId:           aaLoadId,
-			Tenant:           tenant,
-			Account:          account,
-			Direction:        direction,
-			ActionPlanId:     action_plan_tag,
-			ActionTriggersId: action_triggers_tag,
+			TPid:             tpAa.Tpid,
+			LoadId:           tpAa.Loadid,
+			Tenant:           tpAa.Tenant,
+			Account:          tpAa.Account,
+			Direction:        tpAa.Direction,
+			ActionPlanId:     tpAa.ActionPlanId,
+			ActionTriggersId: tpAa.ActionTriggersId,
 		}
-		aa[aacts.KeyId()] = aacts
+		aas[aacts.KeyId()] = aacts
 	}
-	return aa, nil
+	return aas, nil
 }

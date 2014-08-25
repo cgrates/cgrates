@@ -40,6 +40,7 @@ type ActionTrigger struct {
 	BalanceWeight         float64       // filter for balance
 	BalanceExpirationDate time.Time     // filter for balance
 	BalanceRatingSubject  string        // filter for balance
+	BalanceCategory       string        // filter for balance
 	BalanceSharedGroup    string        // filter for balance
 	Weight                float64
 	ActionsId             string
@@ -101,7 +102,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 	}
 	id := a.BalanceType == "" || at.BalanceType == a.BalanceType
 	direction := a.Direction == "" || at.Direction == a.Direction
-	thresholdType, thresholdValue, destinationId, weight, ratingSubject, sharedGroup := true, true, true, true, true, true
+	thresholdType, thresholdValue, destinationId, weight, ratingSubject, category, sharedGroup := true, true, true, true, true, true, true
 	if a.ExtraParameters != "" {
 		t := struct {
 			ThresholdType        string
@@ -109,6 +110,7 @@ func (at *ActionTrigger) Match(a *Action) bool {
 			DestinationId        string
 			BalanceWeight        float64
 			BalanceRatingSubject string
+			BalanceCategory      string
 			BalanceSharedGroup   string
 		}{}
 		json.Unmarshal([]byte(a.ExtraParameters), &t)
@@ -117,9 +119,10 @@ func (at *ActionTrigger) Match(a *Action) bool {
 		destinationId = t.DestinationId == "" || at.DestinationId == t.DestinationId
 		weight = t.BalanceWeight == 0 || at.BalanceWeight == t.BalanceWeight
 		ratingSubject = t.BalanceRatingSubject == "" || at.BalanceRatingSubject == t.BalanceRatingSubject
+		category = t.BalanceCategory == "" || at.BalanceCategory == t.BalanceCategory
 		sharedGroup = t.BalanceSharedGroup == "" || at.BalanceSharedGroup == t.BalanceSharedGroup
 	}
-	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && sharedGroup
+	return id && direction && thresholdType && thresholdValue && destinationId && weight && ratingSubject && category && sharedGroup
 }
 
 // Structure to store actions according to weight

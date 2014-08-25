@@ -18,6 +18,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package engine
 
+import (
+	"fmt"
+	"strings"
+
+	"github.com/cgrates/cgrates/utils"
+)
+
 // Structs here are one to one mapping of the tables and fields
 // to be used by gorm orm
 
@@ -94,6 +101,7 @@ type TpAction struct {
 	ExpiryTime      string
 	DestinationId   string
 	RatingSubject   string
+	Category        string
 	SharedGroup     string
 	BalanceWeight   float64
 	ExtraParameters string
@@ -123,10 +131,34 @@ type TpActionTrigger struct {
 	BalanceWeight        float64
 	BalanceExpiryTime    string
 	BalanceRatingSubject string
+	BalanceCategory      string
 	BalanceSharedGroup   string
 	MinQueuedItems       int
 	ActionsId            string
 	Weight               float64
+}
+
+type TpAccountAction struct {
+	Tbid             int64 `gorm:"primary_key:yes"`
+	Tpid             string
+	Loadid           string
+	Direction        string
+	Tenant           string
+	Account          string
+	ActionPlanId     string
+	ActionTriggersId string
+}
+
+func (aa *TpAccountAction) SetAccountActionId(id string) error {
+	ids := strings.Split(id, utils.TP_ID_SEP)
+	if len(ids) != 4 {
+		return fmt.Errorf("Wrong TP Account Action Id!")
+	}
+	aa.Loadid = ids[0]
+	aa.Direction = ids[1]
+	aa.Tenant = ids[2]
+	aa.Account = ids[3]
+	return nil
 }
 
 type TpSharedGroup struct {
@@ -138,7 +170,7 @@ type TpSharedGroup struct {
 	RatingSubject string
 }
 
-type TpDerivedCharges struct {
+type TpDerivedCharger struct {
 	Tbid             int64 `gorm:"primary_key:yes"`
 	Tpid             string
 	Loadid           string
@@ -159,6 +191,20 @@ type TpDerivedCharges struct {
 	SetupTimeField   string
 	AnswerTimeField  string
 	DurationField    string
+}
+
+func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
+	ids := strings.Split(id, utils.TP_ID_SEP)
+	if len(ids) != 6 {
+		return fmt.Errorf("Wrong TP Derived Charger Id: %s", id)
+	}
+	tpdc.Loadid = ids[0]
+	tpdc.Direction = ids[1]
+	tpdc.Tenant = ids[2]
+	tpdc.Category = ids[3]
+	tpdc.Account = ids[4]
+	tpdc.Subject = ids[5]
+	return nil
 }
 
 type TpCdrStat struct {

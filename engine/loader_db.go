@@ -544,6 +544,7 @@ func (dbr *DbReader) LoadActions() (err error) {
 					Value:         tpact.Units,
 					Weight:        tpact.BalanceWeight,
 					RatingSubject: tpact.RatingSubject,
+					Category:      tpact.Category,
 					DestinationId: tpact.DestinationId,
 				},
 			}
@@ -611,6 +612,7 @@ func (dbr *DbReader) LoadActionTriggers() (err error) {
 				BalanceWeight:         apiAtr.BalanceWeight,
 				BalanceExpirationDate: balance_expiration_date,
 				BalanceRatingSubject:  apiAtr.BalanceRatingSubject,
+				BalanceCategory:       apiAtr.BalanceCategory,
 				BalanceSharedGroup:    apiAtr.BalanceSharedGroup,
 				Weight:                apiAtr.Weight,
 				ActionsId:             apiAtr.ActionsId,

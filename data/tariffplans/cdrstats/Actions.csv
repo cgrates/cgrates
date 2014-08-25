@@ -1,2 +1,2 @@
-#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,SharedGroup,ExtraParameters,Weight
-CDRST_LOG,*log,,,,,,,,,,10
+#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,Category,BalanceWeight,SharedGroup,ExtraParameters,Weight
+CDRST_LOG,*log,,,,,,,,,,,10
