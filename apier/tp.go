@@ -23,6 +23,12 @@ package apier
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
+
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,5 +44,50 @@ func (self *ApierV1) GetTPIds(attrs AttrGetTPIds, reply *[]string) error {
 	} else {
 		*reply = ids
 	}
+	return nil
+}
+
+type AttrImportTPZipFile struct {
+	TPid string
+	File []byte
+}
+
+func (self *ApierV1) ImportTPZipFile(attrs AttrImportTPZipFile, reply *string) error {
+	tmpDir, err := ioutil.TempDir("/tmp", "cgr_")
+	if err != nil {
+		*reply = "ERROR: creating temp directory!"
+		return err
+	}
+	zipFile := filepath.Join(tmpDir, "/file.zip")
+	if err = ioutil.WriteFile(zipFile, attrs.File, os.ModePerm); err != nil {
+		*reply = "ERROR: writing zip file!"
+		return err
+	}
+	if err = utils.Unzip(zipFile, tmpDir); err != nil {
+		*reply = "ERROR: unziping file!"
+		return err
+	}
+	if err = filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			return nil
+		}
+		csvFiles, err := filepath.Glob(filepath.Join(path, "*csv"))
+		if csvFiles != nil {
+			if attrs.TPid == "" {
+				*reply = "ERROR: missing TPid!"
+				return err
+			}
+			csvImporter := engine.TPCSVImporter{attrs.TPid, self.StorDb, path, ',', false, ""}
+			if errImport := csvImporter.Run(); errImport != nil {
+				log.Fatal(errImport)
+			}
+		}
+		return err
+	}); err != nil {
+		*reply = "ERROR: finding csv files!"
+		return err
+	}
+	os.RemoveAll(tmpDir)
+	*reply = "OK"
 	return nil
 }
