@@ -24,7 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -67,6 +66,7 @@ func (self *ApierV1) ImportTPZipFile(attrs AttrImportTPZipFile, reply *string) e
 		*reply = "ERROR: unziping file!"
 		return err
 	}
+	csvfilesFound := false
 	if err = filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			return nil
@@ -79,11 +79,12 @@ func (self *ApierV1) ImportTPZipFile(attrs AttrImportTPZipFile, reply *string) e
 			}
 			csvImporter := engine.TPCSVImporter{attrs.TPid, self.StorDb, path, ',', false, ""}
 			if errImport := csvImporter.Run(); errImport != nil {
-				log.Fatal(errImport)
+				return errImport
 			}
+			csvfilesFound = true
 		}
 		return err
-	}); err != nil {
+	}); err != nil || !csvfilesFound {
 		*reply = "ERROR: finding csv files!"
 		return err
 	}

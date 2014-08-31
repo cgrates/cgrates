@@ -19,16 +19,54 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package apier
 
 import (
+	"archive/zip"
+	"bytes"
+	"encoding/base64"
 	"fmt"
-	"github.com/cgrates/cgrates/cdre"
-	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/utils"
+	"io/ioutil"
 	"path"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/cgrates/cgrates/cdre"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
+
+func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *string) error {
+	efc := utils.ExportedFileCdrs{}
+	if err := self.ExportCdrsToFile(attr, &efc); err != nil {
+		return err
+	}
+	// Create a buffer to write our archive to.
+	buf := new(bytes.Buffer)
+
+	// Create a new zip archive.
+	w := zip.NewWriter(buf)
+
+	// read generated file
+	content, err := ioutil.ReadFile(efc.ExportedFilePath)
+	if err != nil {
+		return err
+	}
+
+	f, err := w.Create("cdrs.csv")
+	if err != nil {
+		return err
+	}
+	_, err = f.Write(content)
+	if err != nil {
+		return err
+	}
+	// Make sure to check the error on Close.
+	if err := w.Close(); err != nil {
+		return err
+	}
+	*reply = base64.StdEncoding.EncodeToString(buf.Bytes())
+	return nil
+}
 
 // Export Cdrs to file
 func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
