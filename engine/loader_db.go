@@ -133,7 +133,7 @@ func (dbr *DbReader) ShowStatistics() {
 func (dbr *DbReader) WriteToDatabase(flush, verbose bool) (err error) {
 	storage := dbr.dataDb
 	if flush {
-		storage.(Storage).Flush()
+		storage.Flush()
 	}
 	if verbose {
 		log.Print("Destinations")
