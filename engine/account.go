@@ -111,9 +111,10 @@ func (ub *Account) debitBalanceAction(a *Action) error {
 	}
 	found := false
 	id := a.BalanceType + a.Direction
+	ub.CleanExpiredBalances()
 	for _, b := range ub.BalanceMap[id] {
 		if b.IsExpired() {
-			continue // we can clean expired balances balances here
+			continue // just to be safe (cleaned expired balances above)
 		}
 		if b.Equal(a.Balance) {
 			b.SubstractAmount(a.Balance.Value)
