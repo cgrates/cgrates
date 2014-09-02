@@ -92,7 +92,7 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	ids := []string{}
+	ids := make([]string, 0)
 	i := 0
 	for rows.Next() {
 		i++ //Keep here a reference so we know we got at least one
@@ -212,7 +212,6 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 	if len(rts) == 0 {
 		return nil //Nothing to set
 	}
-
 	tx := self.db.Begin()
 	for rtId, rSlots := range rts {
 		tx.Where("tpid = ?", tpid).Where("id = ?", rtId).Delete(TpRate{})
@@ -259,7 +258,6 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 	if len(drts) == 0 {
 		return nil //Nothing to set
 	}
-
 	tx := self.db.Begin()
 	for rpId, rPlans := range drts {
 		tx.Where("tpid = ?", tpid).Where("id = ?", rpId).Delete(TpRatingPlan{})
@@ -541,7 +539,7 @@ func (self *SQLStorage) GetTPActionTimings(tpid, tag string) (map[string][]*util
 	}
 
 	for _, tpAp := range tpActionPlans {
-		ats[tag] = append(ats[tag], &utils.TPActionTiming{ActionsId: tpAp.ActionsId, TimingId: tpAp.TimingId, Weight: tpAp.Weight})
+		ats[tpAp.Id] = append(ats[tpAp.Id], &utils.TPActionTiming{ActionsId: tpAp.ActionsId, TimingId: tpAp.TimingId, Weight: tpAp.Weight})
 	}
 	return ats, nil
 }
@@ -1131,9 +1129,9 @@ func (self *SQLStorage) GetTpDestinations(tpid, tag string) (map[string]*Destina
 	for _, tpDest := range tpDests {
 		var dest *Destination
 		var found bool
-		if dest, found = dests[tag]; !found {
-			dest = &Destination{Id: tag}
-			dests[tag] = dest
+		if dest, found = dests[tpDest.Id]; !found {
+			dest = &Destination{Id: tpDest.Id}
+			dests[tpDest.Id] = dest
 		}
 		dest.AddPrefix(tpDest.Prefix)
 	}
@@ -1158,19 +1156,19 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 		}
 		r := &utils.TPRate{
 			TPid:      tpid,
-			RateId:    tag,
+			RateId:    tr.Id,
 			RateSlots: []*utils.RateSlot{rs},
 		}
 
 		// same tag only to create rate groups
-		er, exists := rts[tag]
+		er, exists := rts[tr.Id]
 		if exists {
 			if err := ValidNextGroup(er.RateSlots[len(er.RateSlots)-1], r.RateSlots[0]); err != nil {
 				return nil, err
 			}
 			er.RateSlots = append(er.RateSlots, r.RateSlots[0])
 		} else {
-			rts[tag] = r
+			rts[tr.Id] = r
 		}
 	}
 	return rts, nil
@@ -1190,7 +1188,7 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*uti
 	for _, tpDr := range tpDestinationRates {
 		dr := &utils.TPDestinationRate{
 			TPid:              tpid,
-			DestinationRateId: tag,
+			DestinationRateId: tpDr.Id,
 			DestinationRates: []*utils.DestinationRate{
 				&utils.DestinationRate{
 					DestinationId:    tpDr.DestinationsId,
@@ -1200,13 +1198,13 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*uti
 				},
 			},
 		}
-		existingDR, exists := rts[tag]
+		existingDR, exists := rts[tpDr.Id]
 		if exists {
 			existingDR.DestinationRates = append(existingDR.DestinationRates, dr.DestinationRates[0])
 		} else {
 			existingDR = dr
 		}
-		rts[tag] = existingDR
+		rts[tpDr.Id] = existingDR
 
 	}
 	return rts, nil
@@ -1224,7 +1222,7 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.TPTimi
 	}
 
 	for _, tpTm := range tpTimings {
-		tms[tag] = NewTiming(tag, tpTm.Years, tpTm.Months, tpTm.MonthDays, tpTm.WeekDays, tpTm.Time)
+		tms[tpTm.Id] = NewTiming(tpTm.Id, tpTm.Years, tpTm.Months, tpTm.MonthDays, tpTm.WeekDays, tpTm.Time)
 	}
 
 	return tms, nil
@@ -1248,10 +1246,10 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 			TimingId:           tpRp.TimingId,
 			Weight:             tpRp.Weight,
 		}
-		if _, exists := rpbns[tag]; exists {
-			rpbns[tag] = append(rpbns[tag], rpb)
+		if _, exists := rpbns[tpRp.Id]; exists {
+			rpbns[tpRp.Id] = append(rpbns[tpRp.Id], rpb)
 		} else { // New
-			rpbns[tag] = []*utils.TPRatingPlanBinding{rpb}
+			rpbns[tpRp.Id] = []*utils.TPRatingPlanBinding{rpb}
 		}
 	}
 	return rpbns, nil
@@ -1319,7 +1317,7 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string][]*utils
 	}
 
 	for _, tpSg := range tpCdrStats {
-		sgs[tag] = append(sgs[tag], &utils.TPSharedGroup{
+		sgs[tag] = append(sgs[tpSg.Id], &utils.TPSharedGroup{
 			Account:       tpSg.Account,
 			Strategy:      tpSg.Strategy,
 			RatingSubject: tpSg.RatingSubject,
@@ -1341,7 +1339,7 @@ func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPC
 	}
 
 	for _, tpCs := range tpCdrStats {
-		css[tag] = append(css[tag], &utils.TPCdrStat{
+		css[tag] = append(css[tpCs.Id], &utils.TPCdrStat{
 			QueueLength:       tpCs.QueueLength,
 			TimeWindow:        tpCs.TimeWindow,
 			Metrics:           tpCs.Metrics,
@@ -1493,7 +1491,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 			ExtraParameters: tpAc.ExtraParameters,
 			Weight:          tpAc.Weight,
 		}
-		as[tag] = append(as[tag], a)
+		as[tpAc.Id] = append(as[tpAc.Id], a)
 	}
 	return as, nil
 }
@@ -1528,7 +1526,7 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 			ActionsId:             tpAt.ActionsId,
 			MinQueuedItems:        tpAt.MinQueuedItems,
 		}
-		ats[tag] = append(ats[tag], at)
+		ats[tpAt.Id] = append(ats[tpAt.Id], at)
 	}
 	return ats, nil
 }

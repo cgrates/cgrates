@@ -20,6 +20,7 @@ package engine
 
 import (
 	"flag"
+	"fmt"
 	"path"
 	"testing"
 
@@ -186,6 +187,7 @@ func TestImportToStorDb(t *testing.T) {
 	if tpids, err := storDb.GetTPIds(); err != nil {
 		t.Error("Error when querying storDb for imported data: ", err)
 	} else if len(tpids) != 1 || tpids[0] != TEST_SQL {
+		fmt.Printf("len(tpids): %d, tpids[0]=%s, tpids: %+v\n", len(tpids), tpids[0], tpids)
 		t.Errorf("Data in storDb is different than expected %v", tpids)
 	}
 }
