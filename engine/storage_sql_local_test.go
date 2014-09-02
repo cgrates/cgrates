@@ -85,10 +85,10 @@ func TestRemoveData(t *testing.T) {
 	if err := mysqlDb.RemTPData(utils.TBL_TP_TIMINGS, TEST_SQL, tm.Id); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Id); err != nil {
+	if _, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Id); err == nil {
+		t.Error("Should report error on querying here")
+	} else if err.Error() != "Record Not Found" {
 		t.Error(err.Error())
-	} else if len(tmgs) != 0 {
-		t.Error("Did not remove TPTiming")
 	}
 	// Create RatingProfile
 	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1"}}
@@ -102,13 +102,13 @@ func TestRemoveData(t *testing.T) {
 		t.Error("Could not store TPRatingProfile")
 	}
 	// Remove RatingProfile
-	if err := mysqlDb.RemTPData(utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.LoadId, rp.Tenant, rp.Category, rp.Direction, rp.Subject); err != nil {
+	if err := mysqlDb.RemTPData(utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.LoadId, rp.Direction, rp.Tenant, rp.Category, rp.Subject); err != nil {
 		t.Error(err.Error())
 	}
-	if rps, err := mysqlDb.GetTpRatingProfiles(rp); err != nil {
+	if _, err := mysqlDb.GetTpRatingProfiles(rp); err == nil {
+		t.Error("Should return error in case of record not found from ORM")
+	} else if err.Error() != "Record Not Found" {
 		t.Error(err.Error())
-	} else if len(rps) != 0 {
-		t.Error("Did not remove TPRatingProfile")
 	}
 
 	// Create AccountActions
@@ -123,13 +123,13 @@ func TestRemoveData(t *testing.T) {
 		t.Error("Could not create TPAccountActions")
 	}
 	// Remove AccountActions
-	if err := mysqlDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, aa.LoadId, aa.Tenant, aa.Account, aa.Direction); err != nil {
+	if err := mysqlDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, aa.LoadId, aa.Direction, aa.Tenant, aa.Account); err != nil {
 		t.Error(err.Error())
 	}
-	if aas, err := mysqlDb.GetTpAccountActions(aa); err != nil {
+	if _, err := mysqlDb.GetTpAccountActions(aa); err == nil {
+		t.Error("Should receive error in case of not found")
+	} else if err.Error() != "Record Not Found" {
 		t.Error(err.Error())
-	} else if len(aas) != 0 {
-		t.Error("Did not remove TPAccountActions")
 	}
 }
 
