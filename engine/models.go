@@ -238,7 +238,7 @@ type TpCdrStat struct {
 	Tpid              string
 	Id                string
 	QueueLength       int
-	TimeWindow        int64
+	TimeWindow        string
 	Metrics           string
 	SetupInterval     string
 	Tor               string

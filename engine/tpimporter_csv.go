@@ -53,6 +53,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ACTION_TRIGGERS_CSV:   (*TPCSVImporter).importActionTriggers,
 	utils.ACCOUNT_ACTIONS_CSV:   (*TPCSVImporter).importAccountActions,
 	utils.DERIVED_CHARGERS_CSV:  (*TPCSVImporter).importDerivedChargers,
+	utils.CDR_STATS_CSV:         (*TPCSVImporter).importCdrStats,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -648,6 +649,69 @@ func (self *TPCSVImporter) importDerivedChargers(fn string) error {
 		})
 	}
 	if err := self.StorDb.SetTPDerivedChargers(self.TPid, dcs); err != nil {
+		if self.Verbose {
+			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+		}
+	}
+	return nil
+}
+
+func (self *TPCSVImporter) importCdrStats(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
+	if err != nil {
+		return err
+	}
+	css := make(map[string][]*utils.TPCdrStat)
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		if len(record[1]) == 0 {
+			record[1] = "0" // Empty value will be translated to 0 as QueueLength
+		}
+		ql, err := strconv.Atoi(record[1])
+		if err != nil {
+			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
+			continue
+		}
+		if _, hasIt := css[record[0]]; !hasIt {
+			css[record[0]] = make([]*utils.TPCdrStat, 0)
+		}
+		css[record[0]] = append(css[record[0]], &utils.TPCdrStat{
+			QueueLength:       ql,
+			TimeWindow:        ValueOrDefault(record[2], "0"),
+			Metrics:           record[3],
+			SetupInterval:     record[4],
+			TOR:               record[5],
+			CdrHost:           record[6],
+			CdrSource:         record[7],
+			ReqType:           record[8],
+			Direction:         record[9],
+			Tenant:            record[10],
+			Category:          record[11],
+			Account:           record[12],
+			Subject:           record[13],
+			DestinationPrefix: record[14],
+			UsageInterval:     record[15],
+			MediationRunIds:   record[16],
+			RatedAccount:      record[17],
+			RatedSubject:      record[18],
+			CostInterval:      record[19],
+			ActionTriggers:    record[20],
+		})
+	}
+	if err := self.StorDb.SetTPCdrStats(self.TPid, css); err != nil {
 		if self.Verbose {
 			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 		}

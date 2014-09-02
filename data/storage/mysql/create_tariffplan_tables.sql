@@ -281,7 +281,7 @@ CREATE TABLE tp_cdr_stats (
   `tpid` varchar(64) NOT NULL,
   `id` varchar(64) NOT NULL,
   `queue_length` int(11) NOT NULL,
-  `time_window` int(11) NOT NULL,
+  `time_window` varchar(8) NOT NULL,
   `metrics` varchar(64) NOT NULL,
   `setup_interval` varchar(64) NOT NULL,
   `tor` varchar(64) NOT NULL,
