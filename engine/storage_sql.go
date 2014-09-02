@@ -390,8 +390,8 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 			newDc := TpDerivedCharger{
 				Tpid:             tpid,
 				RunId:            dc.RunId,
-				RunFilter:        dc.RunFilter,
-				ReqtypeField:     dc.ReqtypeField,
+				RunFilters:       dc.RunFilters,
+				ReqTypeField:     dc.ReqTypeField,
 				DirectionField:   dc.DirectionField,
 				TenantField:      dc.TenantField,
 				CategoryField:    dc.CategoryField,
@@ -400,7 +400,7 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 				DestinationField: dc.DestinationField,
 				SetupTimeField:   dc.SetupTimeField,
 				AnswerTimeField:  dc.AnswerTimeField,
-				DurationField:    dc.DurationField,
+				UsageField:       dc.UsageField,
 			}
 			if err := newDc.SetDerivedChargersId(dcId); err != nil {
 				tx.Rollback()
@@ -1395,8 +1395,8 @@ func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[s
 	for _, tpDc := range tpDerivedChargers {
 		dcs[tag] = append(dcs[tag], &utils.TPDerivedCharger{
 			RunId:            tpDc.RunId,
-			RunFilter:        tpDc.RunFilter,
-			ReqtypeField:     tpDc.ReqtypeField,
+			RunFilters:       tpDc.RunFilters,
+			ReqTypeField:     tpDc.ReqTypeField,
 			DirectionField:   tpDc.DirectionField,
 			TenantField:      tpDc.TenantField,
 			CategoryField:    tpDc.CategoryField,
@@ -1405,7 +1405,7 @@ func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[s
 			DestinationField: tpDc.DestinationField,
 			SetupTimeField:   tpDc.SetupTimeField,
 			AnswerTimeField:  tpDc.AnswerTimeField,
-			DurationField:    tpDc.DurationField,
+			UsageField:       tpDc.UsageField,
 		})
 	}
 	return dcs, nil

@@ -875,12 +875,11 @@ func (csvr *CSVReader) LoadDerivedChargers() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := utils.DerivedChargersKey(record[0], record[1], record[2], record[3], record[4])
-		_, found := csvr.derivedChargers[tag]
 		if _, err = utils.ParseRSRFields(record[6], utils.INFIELD_SEP); err != nil { // Make sure rules are OK before loading in db
 			return err
 		}
-		if found {
+		tag := utils.DerivedChargersKey(record[0], record[1], record[2], record[3], record[4])
+		if _, found := csvr.derivedChargers[tag]; found {
 			if csvr.derivedChargers[tag], err = csvr.derivedChargers[tag].Append(&utils.DerivedCharger{
 				RunId:            ValueOrDefault(record[5], "*default"),
 				RunFilters:       record[6],

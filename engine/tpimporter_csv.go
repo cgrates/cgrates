@@ -52,6 +52,7 @@ var fileHandlers = map[string]func(*TPCSVImporter, string) error{
 	utils.ACTION_PLANS_CSV:      (*TPCSVImporter).importActionTimings,
 	utils.ACTION_TRIGGERS_CSV:   (*TPCSVImporter).importActionTriggers,
 	utils.ACCOUNT_ACTIONS_CSV:   (*TPCSVImporter).importAccountActions,
+	utils.DERIVED_CHARGERS_CSV:  (*TPCSVImporter).importDerivedChargers,
 }
 
 func (self *TPCSVImporter) Run() error {
@@ -324,6 +325,36 @@ func (self *TPCSVImporter) importRatingProfiles(fn string) error {
 }
 
 func (self *TPCSVImporter) importSharedGroups(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
+	if err != nil {
+		return err
+	}
+	shgs := make(map[string][]*utils.TPSharedGroup)
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		if _, hasIt := shgs[record[0]]; !hasIt {
+			shgs[record[0]] = make([]*utils.TPSharedGroup, 0)
+		}
+		shgs[record[0]] = append(shgs[record[0]], &utils.TPSharedGroup{Account: record[1], Strategy: record[2], RatingSubject: record[3]})
+	}
+	if err := self.StorDb.SetTPSharedGroups(self.TPid, shgs); err != nil {
+		if self.Verbose {
+			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
+		}
+	}
 	return nil
 }
 
@@ -335,8 +366,8 @@ func (self *TPCSVImporter) importActions(fn string) error {
 	if err != nil {
 		return err
 	}
-	lineNr := 0
 	acts := make(map[string][]*utils.TPAction)
+	lineNr := 0
 	for {
 		lineNr++
 		record, err := fParser.ParseNextLine()
@@ -534,6 +565,10 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 	if err != nil {
 		return err
 	}
+	loadId := utils.CSV_LOAD //Autogenerate account actions profile id
+	if self.ImportId != "" {
+		loadId += "_" + self.ImportId
+	}
 	lineNr := 0
 	for {
 		lineNr++
@@ -547,10 +582,7 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 			continue
 		}
 		tenant, account, direction, actionTimingsTag, actionTriggersTag := record[0], record[1], record[2], record[3], record[4]
-		loadId := utils.CSV_LOAD //Autogenerate account actions profile id
-		if self.ImportId != "" {
-			loadId += "_" + self.ImportId
-		}
+
 		tpaa := &utils.TPAccountActions{TPid: self.TPid, LoadId: loadId, Tenant: tenant, Account: account, Direction: direction,
 			ActionPlanId: actionTimingsTag, ActionTriggersId: actionTriggersTag}
 		aa := map[string]*utils.TPAccountActions{tpaa.KeyId(): tpaa}
@@ -558,6 +590,66 @@ func (self *TPCSVImporter) importAccountActions(fn string) error {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}
+		}
+	}
+	return nil
+}
+
+func (self *TPCSVImporter) importDerivedChargers(fn string) error {
+	if self.Verbose {
+		log.Printf("Processing file: <%s> ", fn)
+	}
+	fParser, err := NewTPCSVFileParser(self.DirPath, fn)
+	if err != nil {
+		return err
+	}
+	loadId := utils.CSV_LOAD //Autogenerate account actions profile id
+	if self.ImportId != "" {
+		loadId += "_" + self.ImportId
+	}
+	dcs := make(map[string][]*utils.TPDerivedCharger)
+	lineNr := 0
+	for {
+		lineNr++
+		record, err := fParser.ParseNextLine()
+		if err == io.EOF { // Reached end of file
+			break
+		} else if err != nil {
+			if self.Verbose {
+				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
+			}
+			continue
+		}
+		newDcs := utils.TPDerivedChargers{TPid: self.TPid,
+			Loadid:    loadId,
+			Direction: record[0],
+			Tenant:    record[1],
+			Category:  record[2],
+			Account:   record[3],
+			Subject:   record[4]}
+		dcsId := newDcs.GetDerivedChargesId()
+
+		if _, hasIt := dcs[dcsId]; !hasIt {
+			dcs[dcsId] = make([]*utils.TPDerivedCharger, 0)
+		}
+		dcs[dcsId] = append(dcs[dcsId], &utils.TPDerivedCharger{
+			RunId:            ValueOrDefault(record[5], "*default"),
+			RunFilters:       record[6],
+			ReqTypeField:     ValueOrDefault(record[7], "*default"),
+			DirectionField:   ValueOrDefault(record[8], "*default"),
+			TenantField:      ValueOrDefault(record[9], "*default"),
+			CategoryField:    ValueOrDefault(record[10], "*default"),
+			AccountField:     ValueOrDefault(record[11], "*default"),
+			SubjectField:     ValueOrDefault(record[12], "*default"),
+			DestinationField: ValueOrDefault(record[13], "*default"),
+			SetupTimeField:   ValueOrDefault(record[14], "*default"),
+			AnswerTimeField:  ValueOrDefault(record[15], "*default"),
+			UsageField:       ValueOrDefault(record[16], "*default"),
+		})
+	}
+	if err := self.StorDb.SetTPDerivedChargers(self.TPid, dcs); err != nil {
+		if self.Verbose {
+			log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 		}
 	}
 	return nil

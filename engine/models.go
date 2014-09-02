@@ -206,8 +206,8 @@ type TpDerivedCharger struct {
 	Account          string
 	Subject          string
 	RunId            string
-	RunFilter        string
-	ReqtypeField     string
+	RunFilters       string
+	ReqTypeField     string
 	DirectionField   string
 	TenantField      string
 	CategoryField    string
@@ -216,7 +216,7 @@ type TpDerivedCharger struct {
 	DestinationField string
 	SetupTimeField   string
 	AnswerTimeField  string
-	DurationField    string
+	UsageField       string
 }
 
 func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {

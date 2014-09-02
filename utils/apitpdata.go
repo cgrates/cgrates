@@ -361,8 +361,8 @@ func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
 
 type TPDerivedCharger struct {
 	RunId            string
-	RunFilter        string
-	ReqtypeField     string
+	RunFilters       string
+	ReqTypeField     string
 	DirectionField   string
 	TenantField      string
 	CategoryField    string
@@ -371,7 +371,7 @@ type TPDerivedCharger struct {
 	DestinationField string
 	SetupTimeField   string
 	AnswerTimeField  string
-	DurationField    string
+	UsageField       string
 }
 
 type TPActionPlan struct {

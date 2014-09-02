@@ -255,8 +255,8 @@ CREATE TABLE tp_derived_chargers (
   `account` varchar(24) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `run_id`  varchar(24) NOT NULL,
-  `run_filter`  varchar(24) NOT NULL,
-  `reqtype_field`  varchar(24) NOT NULL,
+  `run_filters`  varchar(24) NOT NULL,
+  `req_type_field`  varchar(24) NOT NULL,
   `direction_field`  varchar(24) NOT NULL,
   `tenant_field`  varchar(24) NOT NULL,
   `category_field`  varchar(24) NOT NULL,
@@ -265,7 +265,7 @@ CREATE TABLE tp_derived_chargers (
   `destination_field`  varchar(24) NOT NULL,
   `setup_time_field`  varchar(24) NOT NULL,
   `answer_time_field`  varchar(24) NOT NULL,
-  `duration_field`  varchar(24) NOT NULL,
+  `usage_field`  varchar(24) NOT NULL,
   PRIMARY KEY (`tbid`),
   KEY `tpid` (`tpid`)
 );
