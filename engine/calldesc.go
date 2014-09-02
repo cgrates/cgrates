@@ -30,14 +30,21 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+const (
+	// these might be better in the confs under optimizations section
+	RECURSION_MAX_DEPTH = 3
+	MIN_PREFIX_MATCH    = 1
+	FALLBACK_SUBJECT    = utils.ANY
+	DEBUG               = true
+)
+
 func init() {
 	var err error
-	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateS")
+	Logger, err = syslog.New(syslog.LOG_INFO, "CGRateSxb")
 	if err != nil {
 		Logger = new(utils.StdLogger)
 		Logger.Err(fmt.Sprintf("Could not connect to syslog: %v", err))
 	}
-	DEBUG := true
 	if DEBUG {
 		dataStorage, _ = NewMapStorage()
 		accountingStorage, _ = NewMapStorage()
@@ -48,13 +55,6 @@ func init() {
 	}
 	storageLogger = dataStorage.(LogStorage)
 }
-
-const (
-	// these might be better in the confs under optimizations section
-	RECURSION_MAX_DEPTH = 3
-	MIN_PREFIX_MATCH    = 1
-	FALLBACK_SUBJECT    = utils.ANY
-)
 
 var (
 	Logger                 utils.LoggerInterface

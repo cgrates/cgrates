@@ -239,7 +239,7 @@ func TestSubjectNotFound(t *testing.T) {
 	result, _ := cd.GetCost()
 	expected := &CallCost{Tenant: "vdf", Subject: "rif", Destination: "0257", Cost: 2701}
 	if result.Cost != expected.Cost || result.GetConnectFee() != 1 {
-		t.Logf("%+v", result.Timespans[0].RateInterval)
+		//t.Logf("%+v", result.Timespans[0].RateInterval)
 		t.Errorf("Expected %v was %v", expected, result)
 	}
 }
@@ -658,7 +658,7 @@ func TestDebitFromEmptyShare(t *testing.T) {
 	acc, _ := cd.getAccount()
 	balanceMap := acc.BalanceMap[CREDIT+OUTBOUND]
 	if len(balanceMap) != 2 || balanceMap[0].Value != 0 || balanceMap[1].Value != -2.5 {
-		t.Errorf("Error debiting from empty share: %+v %+v", balanceMap[0], balanceMap[1])
+		t.Errorf("Error debiting from empty share: %+v", balanceMap)
 	}
 }
 

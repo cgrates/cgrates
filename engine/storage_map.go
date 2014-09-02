@@ -70,41 +70,49 @@ func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []str
 	if lcrKeys == nil {
 		cache2go.RemPrefixKey(LCR_PREFIX)
 	}
+	cache2go.BeginTransaction()
 	for k, _ := range ms.dict {
 		if strings.HasPrefix(k, DESTINATION_PREFIX) {
 			if _, err := ms.GetDestination(k[len(DESTINATION_PREFIX):]); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 		if strings.HasPrefix(k, RATING_PLAN_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetRatingPlan(k[len(RATING_PLAN_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 		if strings.HasPrefix(k, RATING_PROFILE_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetRatingProfile(k[len(RATING_PROFILE_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 		if strings.HasPrefix(k, RP_ALIAS_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetRpAlias(k[len(RP_ALIAS_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 		if strings.HasPrefix(k, LCR_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetLCR(k[len(LCR_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 	}
+	cache2go.CommitTransaction()
 	return nil
 }
 
 func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) error {
+	cache2go.BeginTransaction()
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX) // Forced until we can fine tune it
 	}
@@ -121,28 +129,33 @@ func (ms *MapStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []strin
 		if strings.HasPrefix(k, ACTION_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetActions(k[len(ACTION_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 		if strings.HasPrefix(k, SHARED_GROUP_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetSharedGroup(k[len(SHARED_GROUP_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 		if strings.HasPrefix(k, ACC_ALIAS_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetAccAlias(k[len(ACC_ALIAS_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 		if strings.HasPrefix(k, DERIVEDCHARGERS_PREFIX) {
 			cache2go.RemKey(k)
 			if _, err := ms.GetDerivedChargers(k[len(DERIVEDCHARGERS_PREFIX):], true); err != nil {
+				cache2go.RollbackTransaction()
 				return err
 			}
 		}
 	}
+	cache2go.CommitTransaction()
 	return nil
 }
 
@@ -385,7 +398,9 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 			if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
 				ids = x.([]string)
 			}
-			ids = append(ids, dest.Id)
+			if !utils.IsSliceMember(ids, dest.Id) {
+				ids = append(ids, dest.Id)
+			}
 			cache2go.Cache(DESTINATION_PREFIX+p, ids)
 		}
 	} else {

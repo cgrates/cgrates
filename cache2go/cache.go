@@ -10,6 +10,9 @@ import (
 
 const (
 	PREFIX_LEN = 4
+	KIND_ADD   = "ADD"
+	KIND_REM   = "REM"
+	KIND_PRF   = "PRF"
 )
 
 type timestampedValue struct {
@@ -17,21 +20,72 @@ type timestampedValue struct {
 	value     interface{}
 }
 
+type transactionItem struct {
+	key   string
+	value interface{}
+	kind  string
+}
+
 var (
 	cache    = make(map[string]timestampedValue)
 	mux      sync.RWMutex
 	counters = make(map[string]int64)
+
+	// transaction stuff
+	transactionBuffer []transactionItem
+	transactionMux    sync.Mutex
+	transactionON     = false
+	transactionLock   = false
 )
+
+func BeginTransaction() {
+	transactionMux.Lock()
+	transactionLock = true
+	transactionON = true
+}
+
+func RollbackTransaction() {
+	transactionBuffer = nil
+	transactionLock = false
+	transactionON = false
+	transactionMux.Unlock()
+}
+
+func CommitTransaction() {
+	transactionON = false
+	// apply all transactioned items
+	mux.Lock()
+	for _, item := range transactionBuffer {
+		switch item.kind {
+		case KIND_REM:
+			RemKey(item.key)
+		case KIND_PRF:
+			RemPrefixKey(item.key)
+		case KIND_ADD:
+			Cache(item.key, item.value)
+		}
+	}
+	mux.Unlock()
+	transactionBuffer = nil
+	transactionLock = false
+	transactionMux.Unlock()
+}
 
 // The function to be used to cache a key/value pair when expiration is not needed
 func Cache(key string, value interface{}) {
-	mux.Lock()
-	defer mux.Unlock()
-	if _, ok := cache[key]; !ok {
-		// only count if the key is not already there
-		count(key)
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
 	}
-	cache[key] = timestampedValue{time.Now(), value}
+	if !transactionON {
+		if _, ok := cache[key]; !ok {
+			// only count if the key is not already there
+			count(key)
+		}
+		cache[key] = timestampedValue{time.Now(), value}
+	} else {
+		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: value, kind: KIND_ADD})
+	}
 }
 
 // The function to extract a value for a key that never expire
@@ -54,28 +108,41 @@ func GetKeyAge(key string) (time.Duration, error) {
 }
 
 func RemKey(key string) {
-	mux.Lock()
-	defer mux.Unlock()
-	if _, ok := cache[key]; ok {
-		delete(cache, key)
-		descount(key)
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
+	}
+	if !transactionON {
+		if _, ok := cache[key]; ok {
+			delete(cache, key)
+			descount(key)
+		}
+	} else {
+		transactionBuffer = append(transactionBuffer, transactionItem{key: key, kind: KIND_REM})
 	}
 }
 
 func RemPrefixKey(prefix string) {
-	mux.Lock()
-	defer mux.Unlock()
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
+	}
 	for key, _ := range cache {
-		if strings.HasPrefix(key, prefix) {
-			delete(cache, key)
-			descount(key)
+		if !transactionON {
+			if strings.HasPrefix(key, prefix) {
+				delete(cache, key)
+				descount(key)
+			}
 		}
+	}
+	if transactionON {
+		transactionBuffer = append(transactionBuffer, transactionItem{key: prefix, kind: KIND_PRF})
 	}
 }
 
 func GetAllEntries(prefix string) map[string]interface{} {
-	mux.Lock()
-	defer mux.Unlock()
+	mux.RLock()
+	defer mux.RUnlock()
 	result := make(map[string]interface{})
 	for key, timestampedValue := range cache {
 		if strings.HasPrefix(key, prefix) {

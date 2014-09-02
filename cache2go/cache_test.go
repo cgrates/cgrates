@@ -13,6 +13,53 @@ func TestRemKey(t *testing.T) {
 	}
 }
 
+func TestTransaction(t *testing.T) {
+	BeginTransaction()
+	Cache("t11_mm", "test")
+	if t1, err := GetCached("t11_mm"); err == nil || t1 == "test" {
+		t.Error("Error in transaction cache")
+	}
+	Cache("t12_mm", "test")
+	RemKey("t11_mm")
+	CommitTransaction()
+	if t1, err := GetCached("t12_mm"); err != nil || t1 != "test" {
+		t.Error("Error commiting transaction")
+	}
+	if t1, err := GetCached("t11_mm"); err == nil || t1 == "test" {
+		t.Error("Error in transaction cache")
+	}
+}
+
+func TestTransactionRem(t *testing.T) {
+	BeginTransaction()
+	Cache("t21_mm", "test")
+	Cache("t21_nn", "test")
+	RemPrefixKey("t21_")
+	CommitTransaction()
+	if t1, err := GetCached("t21_mm"); err == nil || t1 == "test" {
+		t.Error("Error commiting transaction")
+	}
+	if t1, err := GetCached("t21_nn"); err == nil || t1 == "test" {
+		t.Error("Error in transaction cache")
+	}
+}
+
+func TestTransactionRollback(t *testing.T) {
+	BeginTransaction()
+	Cache("t31_mm", "test")
+	if t1, err := GetCached("t31_mm"); err == nil || t1 == "test" {
+		t.Error("Error in transaction cache")
+	}
+	Cache("t32_mm", "test")
+	RollbackTransaction()
+	if t1, err := GetCached("t32_mm"); err == nil || t1 == "test" {
+		t.Error("Error commiting transaction")
+	}
+	if t1, err := GetCached("t31_mm"); err == nil || t1 == "test" {
+		t.Error("Error in transaction cache")
+	}
+}
+
 func TestRemPrefixKey(t *testing.T) {
 	Cache("x_t1", "test")
 	Cache("y_t1", "test")

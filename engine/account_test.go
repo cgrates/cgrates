@@ -250,7 +250,7 @@ func TestDebitCreditZeroMixedMinute(t *testing.T) {
 	}
 	if cc.Timespans[0].Increments[0].BalanceInfo.UnitBalanceUuid != "tests" ||
 		cc.Timespans[1].Increments[0].BalanceInfo.UnitBalanceUuid != "testm" {
-		t.Error("Error setting balance id to increment: ", cc.Timespans[0].Increments[0], cc.Timespans[1].Increments[0])
+		t.Error("Error setting balance id to increment: ", cc.Timespans)
 	}
 	if rifsBalance.BalanceMap[MINUTES+OUTBOUND][1].Value != 0 ||
 		rifsBalance.BalanceMap[MINUTES+OUTBOUND][0].Value != 10 ||
