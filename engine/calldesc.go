@@ -35,7 +35,7 @@ const (
 	RECURSION_MAX_DEPTH = 3
 	MIN_PREFIX_MATCH    = 1
 	FALLBACK_SUBJECT    = utils.ANY
-	DEBUG               = true
+	DEBUG               = false
 )
 
 func init() {

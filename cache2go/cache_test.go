@@ -60,6 +60,20 @@ func TestTransactionRollback(t *testing.T) {
 	}
 }
 
+func TestTransactionRemBefore(t *testing.T) {
+	BeginTransaction()
+	RemPrefixKey("t41_")
+	Cache("t41_mm", "test")
+	Cache("t41_nn", "test")
+	CommitTransaction()
+	if t1, err := GetCached("t41_mm"); err != nil || t1 != "test" {
+		t.Error("Error commiting transaction")
+	}
+	if t1, err := GetCached("t41_nn"); err != nil || t1 != "test" {
+		t.Error("Error in transaction cache")
+	}
+}
+
 func TestRemPrefixKey(t *testing.T) {
 	Cache("x_t1", "test")
 	Cache("y_t1", "test")
