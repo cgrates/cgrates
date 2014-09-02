@@ -153,7 +153,7 @@ func TestRpcConn(t *testing.T) {
 		return
 	}
 	var err error
-	rater, err = jsonrpc.Dial("tcp", fscsvCfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
+	rater, err = jsonrpc.Dial("tcp", cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {
 		t.Fatal("Could not connect to rater: ", err.Error())
 	}
@@ -479,14 +479,14 @@ func TestApierTPRatingProfile(t *testing.T) {
 		t.Error("Calling ApierV1.SetTPRatingProfile got unexpected error: ", err.Error())
 	}
 	// Test get
-	var rplyRpfs []*utils.TPRatingProfile
-	if err := rater.Call("ApierV1.GetTPRatingProfiles", rpfTst, &rplyRpfs); err != nil {
+	var rplyRpf *utils.TPRatingProfile
+	if err := rater.Call("ApierV1.GetTPRatingProfile", AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileId: rpfTst.GetRatingProfilesId()}, &rplyRpf); err != nil {
 		t.Error("Calling ApierV1.GetTPRatingProfiles, got error: ", err.Error())
-	} else if !reflect.DeepEqual(rpfTst, rplyRpfs[0]) {
-		t.Errorf("Calling ApierV1.GetTPRatingProfiles expected: %v, received: %v", rpfTst, rplyRpfs[0])
+	} else if !reflect.DeepEqual(rpfTst, rplyRpf) {
+		t.Errorf("Calling ApierV1.GetTPRatingProfiles expected: %v, received: %v", rpfTst, rplyRpf)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPRatingProfile", rpfTst, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPRatingProfile", AttrGetTPRatingProfile{TPid: rpfTst.TPid, RatingProfileId: rpfTst.GetRatingProfilesId()}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPRatingProfile, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPRatingProfile received: ", reply)
@@ -513,10 +513,13 @@ func TestApierTPActions(t *testing.T) {
 	actWarn := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "WARN_VIA_HTTP", Actions: []*utils.TPAction{
 		&utils.TPAction{Identifier: "*call_url", ExtraParameters: "http://localhost:8000", Weight: 10},
 	}}
+	actLog := &utils.TPActions{TPid: engine.TEST_SQL, ActionsId: "LOG_BALANCE", Actions: []*utils.TPAction{
+		&utils.TPAction{Identifier: "*log", Weight: 10},
+	}}
 	actTst := new(utils.TPActions)
 	*actTst = *act
 	actTst.ActionsId = engine.TEST_SQL
-	for _, ac := range []*utils.TPActions{act, actWarn, actTst} {
+	for _, ac := range []*utils.TPActions{act, actWarn, actTst, actLog} {
 		if err := rater.Call("ApierV1.SetTPActions", ac, &reply); err != nil {
 			t.Error("Got error on ApierV1.SetTPActions: ", err.Error())
 		} else if reply != "OK" {
@@ -550,7 +553,7 @@ func TestApierTPActions(t *testing.T) {
 	}
 	// Test getIds
 	var rplyIds []string
-	expectedIds := []string{"PREPAID_10", "WARN_VIA_HTTP"}
+	expectedIds := []string{"LOG_BALANCE", "PREPAID_10", "WARN_VIA_HTTP"}
 	if err := rater.Call("ApierV1.GetTPActionIds", AttrGetTPActionIds{TPid: actTst.TPid}, &rplyIds); err != nil {
 		t.Error("Calling ApierV1.GetTPActionIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedIds, rplyIds) {
@@ -703,14 +706,14 @@ func TestApierTPAccountActions(t *testing.T) {
 		t.Error("Calling ApierV1.SetTPAccountActions got unexpected error: ", err.Error())
 	}
 	// Test get
-	var rplyaas []*utils.TPAccountActions
-	if err := rater.Call("ApierV1.GetTPAccountActions", aaTst, &rplyaas); err != nil {
+	var rplyaa *utils.TPAccountActions
+	if err := rater.Call("ApierV1.GetTPAccountActions", AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetAccountActionsId()}, &rplyaa); err != nil {
 		t.Error("Calling ApierV1.GetTPAccountActions, got error: ", err.Error())
-	} else if !reflect.DeepEqual(aaTst, rplyaas[0]) {
-		t.Errorf("Calling ApierV1.GetTPAccountActions expected: %v, received: %v", aaTst, rplyaas[0])
+	} else if !reflect.DeepEqual(aaTst, rplyaa) {
+		t.Errorf("Calling ApierV1.GetTPAccountActions expected: %v, received: %v", aaTst, rplyaa)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPAccountActions", aaTst, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPAccountActions", AttrGetTPAccountActions{TPid: aaTst.TPid, AccountActionsId: aaTst.GetAccountActionsId()}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPAccountActions, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPAccountActions received: ", reply)
@@ -842,7 +845,7 @@ func TestApierGetCacheStats(t *testing.T) {
 		return
 	}
 	var rcvStats *utils.CacheStats
-	expectedStats := &utils.CacheStats{Destinations: 4, RatingPlans: 1, RatingProfiles: 2, Actions: 1}
+	expectedStats := &utils.CacheStats{Destinations: 3, RatingPlans: 1, RatingProfiles: 2, Actions: 2}
 	var args utils.AttrCacheStats
 	if err := rater.Call("ApierV1.GetCacheStats", args, &rcvStats); err != nil {
 		t.Error("Got error on ApierV1.GetCacheStats: ", err.Error())

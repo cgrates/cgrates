@@ -153,7 +153,7 @@ func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDisti
 		}
 		finalId := vals[0]
 		if len(vals) > 1 {
-			finalId = strings.Join(vals, utils.TP_ID_SEP)
+			finalId = strings.Join(vals, utils.CONCATENATED_KEY_SEP)
 		}
 		ids = append(ids, finalId)
 	}

@@ -90,7 +90,7 @@ type TpRatingProfile struct {
 }
 
 func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
-	ids := strings.Split(id, utils.TP_ID_SEP)
+	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
 	if len(ids) != 5 {
 		return fmt.Errorf("Wrong TP Rating Profile Id: %s", id)
 	}
@@ -176,7 +176,7 @@ type TpAccountAction struct {
 }
 
 func (aa *TpAccountAction) SetAccountActionId(id string) error {
-	ids := strings.Split(id, utils.TP_ID_SEP)
+	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
 	if len(ids) != 4 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
@@ -220,7 +220,7 @@ type TpDerivedCharger struct {
 }
 
 func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
-	ids := strings.Split(id, utils.TP_ID_SEP)
+	ids := strings.Split(id, utils.CONCATENATED_KEY_SEP)
 	if len(ids) != 6 {
 		return fmt.Errorf("Wrong TP Derived Charger Id: %s", id)
 	}

@@ -187,21 +187,13 @@ func (self *TPRatingProfile) KeyId() string {
 }
 
 func (rpf *TPRatingProfile) GetRatingProfilesId() string {
-	return rpf.LoadId +
-		TP_ID_SEP +
-		rpf.Direction +
-		TP_ID_SEP +
-		rpf.Tenant +
-		TP_ID_SEP +
-		rpf.Category +
-		TP_ID_SEP +
-		rpf.Subject
+	return fmt.Sprintf("%s%s%s%s%s%s%s%s%s", rpf.LoadId, CONCATENATED_KEY_SEP, rpf.Direction, CONCATENATED_KEY_SEP, rpf.Tenant, CONCATENATED_KEY_SEP, rpf.Category, CONCATENATED_KEY_SEP, rpf.Subject)
 }
 
 func (rpf *TPRatingProfile) SetRatingProfilesId(id string) error {
-	ids := strings.Split(id, TP_ID_SEP)
+	ids := strings.Split(id, CONCATENATED_KEY_SEP)
 	if len(ids) != 5 {
-		return fmt.Errorf("Wrong TP Rating Profiles Id: %s", id)
+		return fmt.Errorf("Wrong TPRatingProfileId: %s", id)
 	}
 	rpf.LoadId = ids[0]
 	rpf.Direction = ids[1]
@@ -341,20 +333,20 @@ type TPDerivedChargers struct {
 
 func (tpdc TPDerivedChargers) GetDerivedChargesId() string {
 	return tpdc.Loadid +
-		TP_ID_SEP +
+		CONCATENATED_KEY_SEP +
 		tpdc.Direction +
-		TP_ID_SEP +
+		CONCATENATED_KEY_SEP +
 		tpdc.Tenant +
-		TP_ID_SEP +
+		CONCATENATED_KEY_SEP +
 		tpdc.Category +
-		TP_ID_SEP +
+		CONCATENATED_KEY_SEP +
 		tpdc.Account +
-		TP_ID_SEP +
+		CONCATENATED_KEY_SEP +
 		tpdc.Subject
 }
 
 func (tpdc *TPDerivedChargers) SetDerivedChargersId(id string) error {
-	ids := strings.Split(id, TP_ID_SEP)
+	ids := strings.Split(id, CONCATENATED_KEY_SEP)
 	if len(ids) != 6 {
 		return fmt.Errorf("Wrong TP Derived Charge Id: %s", id)
 	}
@@ -448,16 +440,16 @@ func (self *TPAccountActions) KeyId() string {
 
 func (aa *TPAccountActions) GetAccountActionsId() string {
 	return aa.LoadId +
-		TP_ID_SEP +
+		CONCATENATED_KEY_SEP +
 		aa.Direction +
-		TP_ID_SEP +
+		CONCATENATED_KEY_SEP +
 		aa.Tenant +
-		TP_ID_SEP +
+		CONCATENATED_KEY_SEP +
 		aa.Account
 }
 
 func (aa *TPAccountActions) SetAccountActionsId(id string) error {
-	ids := strings.Split(id, TP_ID_SEP)
+	ids := strings.Split(id, CONCATENATED_KEY_SEP)
 	if len(ids) != 4 {
 		return fmt.Errorf("Wrong TP Account Action Id: %s", id)
 	}
