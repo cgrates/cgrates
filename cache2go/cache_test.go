@@ -85,6 +85,15 @@ func TestRemPrefixKey(t *testing.T) {
 	}
 }
 
+func TestCachePush(t *testing.T) {
+	CachePush("x_t1", "1")
+	CachePush("x_t1", "2")
+	v, err := GetCached("x_t1")
+	if err != nil || len(v.([]interface{})) != 2 {
+		t.Error("Error in cache push: ", v)
+	}
+}
+
 func TestCount(t *testing.T) {
 	Cache("dst_A1", "1")
 	Cache("dst_A2", "2")

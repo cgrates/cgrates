@@ -11,6 +11,7 @@ import (
 const (
 	PREFIX_LEN = 4
 	KIND_ADD   = "ADD"
+	KIND_ADP   = "ADP"
 	KIND_REM   = "REM"
 	KIND_PRF   = "PRF"
 )
@@ -63,6 +64,8 @@ func CommitTransaction() {
 			RemPrefixKey(item.key)
 		case KIND_ADD:
 			Cache(item.key, item.value)
+		case KIND_ADP:
+			CachePush(item.key, item.value)
 		}
 	}
 	mux.Unlock()
@@ -83,8 +86,37 @@ func Cache(key string, value interface{}) {
 			count(key)
 		}
 		cache[key] = timestampedValue{time.Now(), value}
+		//fmt.Println("ADD: ", key)
 	} else {
 		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: value, kind: KIND_ADD})
+	}
+}
+
+// Appends to an existing slice in the cache key
+func CachePush(key string, val interface{}) {
+	if !transactionLock {
+		mux.Lock()
+		defer mux.Unlock()
+	}
+	if !transactionON {
+		var elements []interface{}
+		if ti, exists := cache[key]; exists {
+			elements = ti.value.([]interface{})
+		}
+		// check if the val is already present
+		found := false
+		for _, v := range elements {
+			if val == v {
+				found = true
+				break
+			}
+		}
+		if !found {
+			elements = append(elements, val)
+		}
+		cache[key] = timestampedValue{time.Now(), elements}
+	} else {
+		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: val, kind: KIND_ADP})
 	}
 }
 
@@ -114,6 +146,7 @@ func RemKey(key string) {
 	}
 	if !transactionON {
 		if _, ok := cache[key]; ok {
+			//fmt.Println("REM: ", key)
 			delete(cache, key)
 			descount(key)
 		}
@@ -127,15 +160,16 @@ func RemPrefixKey(prefix string) {
 		mux.Lock()
 		defer mux.Unlock()
 	}
-	for key, _ := range cache {
-		if !transactionON {
+	if !transactionON {
+		for key, _ := range cache {
 			if strings.HasPrefix(key, prefix) {
+				//fmt.Println("PRF: ", key)
 				delete(cache, key)
 				descount(key)
 			}
 		}
-	}
-	if transactionON {
+	} else {
+
 		transactionBuffer = append(transactionBuffer, transactionItem{key: prefix, kind: KIND_PRF})
 	}
 }

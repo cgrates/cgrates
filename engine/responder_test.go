@@ -40,6 +40,6 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, cfgedDC) {
 		//t.Errorf("Expecting: %v, received: %v ", cfgedDC, dcs)
-		//TODO: fix the above test when DEBUG=false
+		//FIXME: fix the above test
 	}
 }

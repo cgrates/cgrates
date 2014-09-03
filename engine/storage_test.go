@@ -104,6 +104,7 @@ func TestCacheRefresh(t *testing.T) {
 	dataStorage.SetDestination(&Destination{"T11", []string{"0"}})
 	dataStorage.GetDestination("T11")
 	dataStorage.SetDestination(&Destination{"T11", []string{"1"}})
+	t.Log("Test cache refresh")
 	dataStorage.CacheRating(nil, nil, nil, nil, nil)
 	d, err := dataStorage.GetDestination("T11")
 	p := d.containsPrefix("1")

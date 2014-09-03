@@ -75,7 +75,7 @@ func (d *Destination) GetHistoryRecord() history.Record {
 // Reverse search in cache to see if prefix belongs to destination id
 func CachedDestHasPrefix(destId, prefix string) bool {
 	if cached, err := cache2go.GetCached(DESTINATION_PREFIX + prefix); err == nil {
-		for _, cachedDstId := range cached.([]string) {
+		for _, cachedDstId := range cached.([]interface{}) {
 			if destId == cachedDstId {
 				return true
 			}
@@ -87,10 +87,10 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 func CleanStalePrefixes(destIds []string) {
 	prefixMap := cache2go.GetAllEntries(DESTINATION_PREFIX)
 	for prefix, idIDs := range prefixMap {
-		dIDs := idIDs.([]string)
+		dIDs := idIDs.([]interface{})
 		changed := false
 		for _, searchedDID := range destIds {
-			if found, i := utils.GetSliceMemberIndex(dIDs, searchedDID); found {
+			if i, found := utils.GetSliceMemberIndex(utils.ConvertInterfaceSliceToStringSlice(dIDs), searchedDID); found {
 				if len(dIDs) == 1 {
 					// remove de prefix from cache
 					cache2go.RemKey(prefix)

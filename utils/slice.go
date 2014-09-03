@@ -34,12 +34,12 @@ func IsSliceMember(ss []string, s string) bool {
 
 // Binary string search in slice
 // returns true if found and the index
-func GetSliceMemberIndex(ss []string, s string) (bool, int) {
+func GetSliceMemberIndex(ss []string, s string) (int, bool) {
 	sort.Strings(ss)
 	if i := sort.SearchStrings(ss, s); i < len(ss) && ss[i] == s {
-		return true, i
+		return i, true
 	}
-	return false, len(ss)
+	return len(ss), false
 }
 
 //Iterates over slice members and returns true if one starts with prefix
@@ -50,4 +50,11 @@ func SliceMemberHasPrefix(ss []string, prfx string) bool {
 		}
 	}
 	return false
+}
+
+func ConvertInterfaceSliceToStringSlice(is []interface{}) (result []string) {
+	for _, i := range is {
+		result = append(result, i.(string))
+	}
+	return result
 }

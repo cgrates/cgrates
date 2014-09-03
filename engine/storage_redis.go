@@ -67,7 +67,7 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
-func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) error {
+func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) (err error) {
 	cache2go.BeginTransaction()
 	if dKeys == nil {
 		Logger.Info("Caching all destinations")
@@ -173,7 +173,7 @@ func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []s
 	return nil
 }
 
-func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) error {
+func (rs *RedisStorage) CacheAccounting(actKeys, shgKeys, alsKeys, dcsKeys []string) (err error) {
 	cache2go.BeginTransaction()
 	if actKeys == nil {
 		cache2go.RemPrefixKey(ACTION_PREFIX)
@@ -273,13 +273,12 @@ func (rs *RedisStorage) HasData(category, subject string) (bool, error) {
 	return false, errors.New("Unsupported category in ExistsData")
 }
 
-func (rs *RedisStorage) GetRatingPlan(key string, checkDb bool) (rp *RatingPlan, err error) {
+func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan, err error) {
 	key = RATING_PLAN_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(*RatingPlan), nil
-	}
-	if !checkDb {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			return x.(*RatingPlan), nil
+		}
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
@@ -315,13 +314,13 @@ func (rs *RedisStorage) SetRatingPlan(rp *RatingPlan) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetRatingProfile(key string, checkDb bool) (rpf *RatingProfile, err error) {
+func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingProfile, err error) {
+
 	key = RATING_PROFILE_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(*RatingProfile), nil
-	}
-	if !checkDb {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			return x.(*RatingProfile), nil
+		}
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
@@ -343,14 +342,12 @@ func (rs *RedisStorage) SetRatingProfile(rpf *RatingProfile) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetRpAlias(key string, checkDb bool) (alias string, err error) {
-
+func (rs *RedisStorage) GetRpAlias(key string, skipCache bool) (alias string, err error) {
 	key = RP_ALIAS_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(string), nil
-	}
-	if !checkDb {
-		return "", errors.New(utils.ERR_NOT_FOUND)
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			return x.(string), nil
+		}
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
@@ -394,16 +391,19 @@ func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject)
 	return
 }
 
-func (rs *RedisStorage) GetRPAliases(tenant, subject string, checkDb bool) (aliases []string, err error) {
+func (rs *RedisStorage) GetRPAliases(tenant, subject string, skipCache bool) (aliases []string, err error) {
 	tenantPrfx := RP_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
-	alsKeys := cache2go.GetEntriesKeys(tenantPrfx)
-	if len(alsKeys) == 0 && checkDb {
+	var alsKeys []string
+	if !skipCache {
+		alsKeys = cache2go.GetEntriesKeys(tenantPrfx)
+	}
+	if len(alsKeys) == 0 {
 		if alsKeys, err = rs.db.Keys(tenantPrfx + "*"); err != nil {
 			return nil, err
 		}
 	}
 	for _, key := range alsKeys {
-		if alsSubj, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], checkDb); err != nil {
+		if alsSubj, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], skipCache); err != nil {
 			return nil, err
 		} else if alsSubj == subject {
 			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
@@ -413,13 +413,12 @@ func (rs *RedisStorage) GetRPAliases(tenant, subject string, checkDb bool) (alia
 	return aliases, nil
 }
 
-func (rs *RedisStorage) GetLCR(key string, checkDb bool) (lcr *LCR, err error) {
+func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 	key = LCR_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(*LCR), nil
-	}
-	if !checkDb {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			return x.(*LCR), nil
+		}
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
@@ -436,13 +435,12 @@ func (rs *RedisStorage) SetLCR(lcr *LCR) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetAccAlias(key string, checkDb bool) (alias string, err error) {
+func (rs *RedisStorage) GetAccAlias(key string, skipCache bool) (alias string, err error) {
 	key = ACC_ALIAS_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(string), nil
-	}
-	if !checkDb {
-		return "", errors.New(utils.ERR_NOT_FOUND)
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			return x.(string), nil
+		}
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
@@ -486,17 +484,20 @@ func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err e
 }
 
 // Returns the aliases of one specific account on a tenant
-func (rs *RedisStorage) GetAccountAliases(tenant, account string, checkDb bool) (aliases []string, err error) {
+func (rs *RedisStorage) GetAccountAliases(tenant, account string, skipCache bool) (aliases []string, err error) {
 	tenantPrfx := ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
-	alsKeys := cache2go.GetEntriesKeys(tenantPrfx)
-	if len(alsKeys) == 0 && checkDb {
+	var alsKeys []string
+	if !skipCache {
+		alsKeys = cache2go.GetEntriesKeys(tenantPrfx)
+	}
+	if len(alsKeys) == 0 {
 		if alsKeys, err = rs.db.Keys(tenantPrfx + "*"); err != nil {
 			return nil, err
 		}
 	}
 	for _, key := range alsKeys {
 		tenantPrfx := ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
-		if alsAcnt, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], checkDb); err != nil {
+		if alsAcnt, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], skipCache); err != nil {
 			return nil, err
 		} else if alsAcnt == account {
 			alsFromKey := key[len(tenantPrfx):] // take out the alias out of key+tenant
@@ -524,14 +525,7 @@ func (rs *RedisStorage) GetDestination(key string) (dest *Destination, err error
 		err = rs.ms.Unmarshal(out, dest)
 		// create optimized structure
 		for _, p := range dest.Prefixes {
-			var ids []string
-			if x, err := cache2go.GetCached(DESTINATION_PREFIX + p); err == nil {
-				ids = x.([]string)
-			}
-			if !utils.IsSliceMember(ids, dest.Id) {
-				ids = append(ids, dest.Id)
-			}
-			cache2go.Cache(DESTINATION_PREFIX+p, ids)
+			cache2go.CachePush(DESTINATION_PREFIX+p, dest.Id)
 		}
 	} else {
 		return nil, errors.New("not found")
@@ -557,13 +551,12 @@ func (rs *RedisStorage) SetDestination(dest *Destination) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetActions(key string, checkDb bool) (as Actions, err error) {
+func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err error) {
 	key = ACTION_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(Actions), nil
-	}
-	if !checkDb {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			return x.(Actions), nil
+		}
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
@@ -580,13 +573,12 @@ func (rs *RedisStorage) SetActions(key string, as Actions) (err error) {
 	return
 }
 
-func (rs *RedisStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGroup, err error) {
+func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGroup, err error) {
 	key = SHARED_GROUP_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(*SharedGroup), nil
-	}
-	if !checkDb {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			return x.(*SharedGroup), nil
+		}
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
@@ -599,7 +591,7 @@ func (rs *RedisStorage) GetSharedGroup(key string, checkDb bool) (sg *SharedGrou
 func (rs *RedisStorage) SetSharedGroup(sg *SharedGroup) (err error) {
 	result, err := rs.ms.Marshal(sg)
 	err = rs.db.Set(SHARED_GROUP_PREFIX+sg.Id, result)
-	cache2go.Cache(SHARED_GROUP_PREFIX+sg.Id, sg)
+	//cache2go.Cache(SHARED_GROUP_PREFIX+sg.Id, sg)
 	return
 }
 
@@ -664,13 +656,12 @@ func (rs *RedisStorage) GetAllActionTimings() (ats map[string]ActionPlan, err er
 	return
 }
 
-func (rs *RedisStorage) GetDerivedChargers(key string, checkDb bool) (dcs utils.DerivedChargers, err error) {
+func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs utils.DerivedChargers, err error) {
 	key = DERIVEDCHARGERS_PREFIX + key
-	if x, err := cache2go.GetCached(key); err == nil {
-		return x.(utils.DerivedChargers), nil
-	}
-	if !checkDb {
-		return nil, errors.New(utils.ERR_NOT_FOUND)
+	if !skipCache {
+		if x, err := cache2go.GetCached(key); err == nil {
+			return x.(utils.DerivedChargers), nil
+		}
 	}
 	var values []byte
 	if values, err = rs.db.Get(key); err == nil {
@@ -683,6 +674,7 @@ func (rs *RedisStorage) GetDerivedChargers(key string, checkDb bool) (dcs utils.
 func (rs *RedisStorage) SetDerivedChargers(key string, dcs utils.DerivedChargers) (err error) {
 	if len(dcs) == 0 {
 		_, err = rs.db.Del(DERIVEDCHARGERS_PREFIX + key)
+		// FIXME: Does cache need cleanup too?
 		return err
 	}
 	marshaled, err := rs.ms.Marshal(dcs)
