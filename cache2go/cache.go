@@ -3,9 +3,10 @@ package cache2go
 
 import (
 	"errors"
-	"strings"
 	"sync"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 const (
@@ -21,6 +22,10 @@ type timestampedValue struct {
 	value     interface{}
 }
 
+func (tsv timestampedValue) Value() interface{} {
+	return tsv.value
+}
+
 type transactionItem struct {
 	key   string
 	value interface{}
@@ -28,9 +33,8 @@ type transactionItem struct {
 }
 
 var (
-	cache    = make(map[string]timestampedValue)
-	mux      sync.RWMutex
-	counters = make(map[string]int64)
+	cache = make(cacheStore)
+	mux   sync.RWMutex
 
 	// transaction stuff
 	transactionBuffer []transactionItem
@@ -81,11 +85,7 @@ func Cache(key string, value interface{}) {
 		defer mux.Unlock()
 	}
 	if !transactionON {
-		if _, ok := cache[key]; !ok {
-			// only count if the key is not already there
-			count(key)
-		}
-		cache[key] = timestampedValue{time.Now(), value}
+		cache.Put(key, value)
 		//fmt.Println("ADD: ", key)
 	} else {
 		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: value, kind: KIND_ADD})
@@ -93,34 +93,15 @@ func Cache(key string, value interface{}) {
 }
 
 // Appends to an existing slice in the cache key
-func CachePush(key string, val interface{}) {
+func CachePush(key string, value interface{}) {
 	if !transactionLock {
 		mux.Lock()
 		defer mux.Unlock()
 	}
 	if !transactionON {
-		var elements []interface{}
-		if ti, exists := cache[key]; exists {
-			elements = ti.value.([]interface{})
-		}
-		// check if the val is already present
-		found := false
-		for _, v := range elements {
-			if val == v {
-				found = true
-				break
-			}
-		}
-		if !found {
-			elements = append(elements, val)
-		}
-		if _, ok := cache[key]; !ok {
-			// only count if the key is not already there
-			count(key)
-		}
-		cache[key] = timestampedValue{time.Now(), elements}
+		cache.Append(key, value)
 	} else {
-		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: val, kind: KIND_ADP})
+		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: value, kind: KIND_ADP})
 	}
 }
 
@@ -128,19 +109,13 @@ func CachePush(key string, val interface{}) {
 func GetCached(key string) (v interface{}, err error) {
 	mux.RLock()
 	defer mux.RUnlock()
-	if r, ok := cache[key]; ok {
-		return r.value, nil
-	}
-	return nil, errors.New("not found")
+	return cache.Get(key)
 }
 
 func GetKeyAge(key string) (time.Duration, error) {
 	mux.RLock()
 	defer mux.RUnlock()
-	if r, ok := cache[key]; ok {
-		return time.Since(r.timestamp), nil
-	}
-	return 0, errors.New("not found")
+	return cache.GetAge(key)
 }
 
 func RemKey(key string) {
@@ -149,11 +124,7 @@ func RemKey(key string) {
 		defer mux.Unlock()
 	}
 	if !transactionON {
-		if _, ok := cache[key]; ok {
-			//fmt.Println("REM: ", key)
-			delete(cache, key)
-			descount(key)
-		}
+		cache.Delete(key)
 	} else {
 		transactionBuffer = append(transactionBuffer, transactionItem{key: key, kind: KIND_REM})
 	}
@@ -165,15 +136,8 @@ func RemPrefixKey(prefix string) {
 		defer mux.Unlock()
 	}
 	if !transactionON {
-		for key, _ := range cache {
-			if strings.HasPrefix(key, prefix) {
-				//fmt.Println("PRF: ", key)
-				delete(cache, key)
-				descount(key)
-			}
-		}
+		cache.DeletePrefix(prefix)
 	} else {
-
 		transactionBuffer = append(transactionBuffer, transactionItem{key: prefix, kind: KIND_PRF})
 	}
 }
@@ -182,61 +146,32 @@ func RemPrefixKey(prefix string) {
 func Flush() {
 	mux.Lock()
 	defer mux.Unlock()
-	cache = make(map[string]timestampedValue)
-	counters = make(map[string]int64)
+	cache = make(cacheStore)
 }
 
 func CountEntries(prefix string) (result int64) {
 	mux.RLock()
 	defer mux.RUnlock()
-	if _, ok := counters[prefix]; ok {
-		return counters[prefix]
+	if _, ok := cache[prefix]; ok {
+		return int64(len(cache[prefix]))
 	}
 	return 0
 }
 
-// increments the counter for the specified key prefix
-func count(key string) {
-	if len(key) < PREFIX_LEN {
-		return
-	}
-	prefix := key[:PREFIX_LEN]
-	if _, ok := counters[prefix]; ok {
-		// increase the value
-		counters[prefix] += 1
-	} else {
-		counters[prefix] = 1
-	}
-}
-
-// decrements the counter for the specified key prefix
-func descount(key string) {
-	if len(key) < PREFIX_LEN {
-		return
-	}
-	prefix := key[:PREFIX_LEN]
-	if value, ok := counters[prefix]; ok && value > 0 {
-		counters[prefix] -= 1
-	}
-}
-
-func GetAllEntries(prefix string) map[string]interface{} {
+func GetAllEntries(prefix string) (map[string]timestampedValue, error) {
 	mux.RLock()
 	defer mux.RUnlock()
-	result := make(map[string]interface{})
-	for key, timestampedValue := range cache {
-		if strings.HasPrefix(key, prefix) {
-			result[key] = timestampedValue.value
-		}
+	if keyMap, ok := cache[prefix]; ok {
+		return keyMap, nil
 	}
-	return result
+	return nil, errors.New(utils.ERR_NOT_FOUND)
 }
 
 func GetEntriesKeys(prefix string) (keys []string) {
 	mux.RLock()
 	defer mux.RUnlock()
-	for key, _ := range cache {
-		if strings.HasPrefix(key, prefix) {
+	if keyMap, ok := cache[prefix]; ok {
+		for key := range keyMap {
 			keys = append(keys, key)
 		}
 	}

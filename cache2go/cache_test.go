@@ -5,7 +5,7 @@ import "testing"
 func TestRemKey(t *testing.T) {
 	Cache("t11_mm", "test")
 	if t1, err := GetCached("t11_mm"); err != nil || t1 != "test" {
-		t.Error("Error setting cache")
+		t.Error("Error setting cache: ", err, t1)
 	}
 	RemKey("t11_mm")
 	if t1, err := GetCached("t11_mm"); err == nil || t1 == "test" {
@@ -75,20 +75,20 @@ func TestTransactionRemBefore(t *testing.T) {
 }
 
 func TestRemPrefixKey(t *testing.T) {
-	Cache("x_t1", "test")
-	Cache("y_t1", "test")
-	RemPrefixKey("x_")
-	_, errX := GetCached("x_t1")
-	_, errY := GetCached("y_t1")
+	Cache("xxx_t1", "test")
+	Cache("yyy_t1", "test")
+	RemPrefixKey("xxx_")
+	_, errX := GetCached("xxx_t1")
+	_, errY := GetCached("yyy_t1")
 	if errX == nil || errY != nil {
 		t.Error("Error removing prefix: ", errX, errY)
 	}
 }
 
 func TestCachePush(t *testing.T) {
-	CachePush("x_t1", "1")
-	CachePush("x_t1", "2")
-	v, err := GetCached("x_t1")
+	CachePush("ccc_t1", "1")
+	CachePush("ccc_t1", "2")
+	v, err := GetCached("ccc_t1")
 	if err != nil || len(v.([]interface{})) != 2 {
 		t.Error("Error in cache push: ", v)
 	}

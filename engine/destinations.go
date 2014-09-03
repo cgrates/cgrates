@@ -85,15 +85,18 @@ func CachedDestHasPrefix(destId, prefix string) bool {
 }
 
 func CleanStalePrefixes(destIds []string) {
-	prefixMap := cache2go.GetAllEntries(DESTINATION_PREFIX)
+	prefixMap, err := cache2go.GetAllEntries(DESTINATION_PREFIX)
+	if err != nil {
+		return
+	}
 	for prefix, idIDs := range prefixMap {
-		dIDs := idIDs.([]interface{})
+		dIDs := idIDs.Value().([]interface{})
 		changed := false
 		for _, searchedDID := range destIds {
 			if i, found := utils.GetSliceMemberIndex(utils.ConvertInterfaceSliceToStringSlice(dIDs), searchedDID); found {
 				if len(dIDs) == 1 {
 					// remove de prefix from cache
-					cache2go.RemKey(prefix)
+					cache2go.RemKey(DESTINATION_PREFIX + prefix)
 				} else {
 					// delte the testination from list and put the new list in chache
 					dIDs[i], dIDs = dIDs[len(dIDs)-1], dIDs[:len(dIDs)-1]
@@ -102,7 +105,7 @@ func CleanStalePrefixes(destIds []string) {
 			}
 		}
 		if changed {
-			cache2go.Cache(prefix, dIDs)
+			cache2go.Cache(DESTINATION_PREFIX+prefix, dIDs)
 		}
 	}
 }
