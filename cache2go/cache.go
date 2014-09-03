@@ -114,6 +114,10 @@ func CachePush(key string, val interface{}) {
 		if !found {
 			elements = append(elements, val)
 		}
+		if _, ok := cache[key]; !ok {
+			// only count if the key is not already there
+			count(key)
+		}
 		cache[key] = timestampedValue{time.Now(), elements}
 	} else {
 		transactionBuffer = append(transactionBuffer, transactionItem{key: key, value: val, kind: KIND_ADP})
@@ -174,18 +178,6 @@ func RemPrefixKey(prefix string) {
 	}
 }
 
-func GetAllEntries(prefix string) map[string]interface{} {
-	mux.RLock()
-	defer mux.RUnlock()
-	result := make(map[string]interface{})
-	for key, timestampedValue := range cache {
-		if strings.HasPrefix(key, prefix) {
-			result[key] = timestampedValue.value
-		}
-	}
-	return result
-}
-
 // Delete all keys from cache
 func Flush() {
 	mux.Lock()
@@ -226,6 +218,18 @@ func descount(key string) {
 	if value, ok := counters[prefix]; ok && value > 0 {
 		counters[prefix] -= 1
 	}
+}
+
+func GetAllEntries(prefix string) map[string]interface{} {
+	mux.RLock()
+	defer mux.RUnlock()
+	result := make(map[string]interface{})
+	for key, timestampedValue := range cache {
+		if strings.HasPrefix(key, prefix) {
+			result[key] = timestampedValue.value
+		}
+	}
+	return result
 }
 
 func GetEntriesKeys(prefix string) (keys []string) {
