@@ -183,11 +183,14 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
+	if attrs.RatingPlanId == utils.ANY {
+		attrs.RatingPlanId = ""
+	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if loaded, err := dbReader.LoadRatingPlanByTag(attrs.RatingPlanId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if !loaded {
-		return errors.New("NOT_FOUND")
+		return errors.New(utils.ERR_NOT_FOUND)
 	}
 	//Automatic cache of the newly inserted rating plan
 	didNotChange := []string{}
@@ -200,16 +203,37 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 
 // Process dependencies and load a specific rating profile from storDb into dataDb.
 func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "TOR", "Direction", "Subject"}); len(missing) != 0 {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Category", "Direction", "Subject"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
+
+	if attrs.LoadId == utils.ANY {
+		attrs.LoadId = ""
+	}
+	if attrs.Tenant == utils.ANY {
+		attrs.Tenant = ""
+	}
+	if attrs.Category == utils.ANY {
+		attrs.Category = ""
+	}
+	if attrs.Direction == utils.ANY {
+		attrs.Direction = ""
+	}
+	if attrs.Subject == utils.ANY {
+		attrs.Subject = ""
+	}
+
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
 	if err := dbReader.LoadRatingProfileFiltered(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	//Automatic cache of the newly inserted rating profile
 	didNotChange := []string{}
-	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, []string{engine.RATING_PROFILE_PREFIX + attrs.KeyId()}, didNotChange, didNotChange); err != nil {
+	var ratingProfile []string
+	if attrs.KeyId() != ":::" { // if has some filters
+		ratingProfile = []string{engine.RATING_PROFILE_PREFIX + attrs.KeyId()}
+	}
+	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, ratingProfile, didNotChange, didNotChange); err != nil {
 		return err
 	}
 	*reply = OK
@@ -556,7 +580,18 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-
+	if attrs.LoadId == utils.ANY {
+		attrs.LoadId = ""
+	}
+	if attrs.Tenant == utils.ANY {
+		attrs.Tenant = ""
+	}
+	if attrs.Account == utils.ANY {
+		attrs.Account = ""
+	}
+	if attrs.Direction == utils.ANY {
+		attrs.Direction = ""
+	}
 	if _, err := engine.AccLock.Guard(attrs.KeyId(), func() (float64, error) {
 		if err := dbReader.LoadAccountActionsFiltered(&attrs); err != nil {
 			return 0, err
