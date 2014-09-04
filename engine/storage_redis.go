@@ -278,6 +278,8 @@ func (rs *RedisStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPla
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(*RatingPlan), nil
+		} else {
+			return nil, err
 		}
 	}
 	var values []byte
@@ -320,6 +322,8 @@ func (rs *RedisStorage) GetRatingProfile(key string, skipCache bool) (rpf *Ratin
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(*RatingProfile), nil
+		} else {
+			return nil, err
 		}
 	}
 	var values []byte
@@ -347,6 +351,8 @@ func (rs *RedisStorage) GetRpAlias(key string, skipCache bool) (alias string, er
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(string), nil
+		} else {
+			return "", err
 		}
 	}
 	var values []byte
@@ -418,6 +424,8 @@ func (rs *RedisStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error)
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(*LCR), nil
+		} else {
+			return nil, err
 		}
 	}
 	var values []byte
@@ -440,6 +448,8 @@ func (rs *RedisStorage) GetAccAlias(key string, skipCache bool) (alias string, e
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(string), nil
+		} else {
+			return "", err
 		}
 	}
 	var values []byte
@@ -556,6 +566,8 @@ func (rs *RedisStorage) GetActions(key string, skipCache bool) (as Actions, err 
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(Actions), nil
+		} else {
+			return nil, err
 		}
 	}
 	var values []byte
@@ -578,6 +590,8 @@ func (rs *RedisStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGr
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(*SharedGroup), nil
+		} else {
+			return nil, err
 		}
 	}
 	var values []byte
@@ -661,6 +675,8 @@ func (rs *RedisStorage) GetDerivedChargers(key string, skipCache bool) (dcs util
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(utils.DerivedChargers), nil
+		} else {
+			return nil, err
 		}
 	}
 	var values []byte

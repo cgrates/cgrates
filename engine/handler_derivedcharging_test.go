@@ -31,7 +31,11 @@ var acntDb AccountingStorage
 
 func init() {
 	cfgDcT, _ = config.NewDefaultCGRConfig()
-	acntDb = accountingStorage
+	if DEBUG {
+		acntDb, _ = NewMapStorage()
+	} else {
+		acntDb, _ = NewRedisStorage("127.0.0.1:6379", 13, "", utils.MSGPACK)
+	}
 	acntDb.CacheAccounting(nil, nil, nil, nil)
 }
 

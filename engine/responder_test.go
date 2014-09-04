@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -34,12 +35,14 @@ func TestResponderGetDerivedChargers(t *testing.T) {
 	cfg.DerivedChargers = cfgedDC
 	config.SetCgrConfig(cfg)
 	r := Responder{}
-	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "dan", Subject: "dan"}
+	attrs := utils.AttrDerivedChargers{Tenant: "cgrates.org", Category: "call", Direction: "*out", Account: "responder_test", Subject: "responder_test"}
 	var dcs utils.DerivedChargers
 	if err := r.GetDerivedChargers(attrs, &dcs); err != nil {
 		t.Error("Unexpected error", err.Error())
 	} else if !reflect.DeepEqual(dcs, cfgedDC) {
-		//t.Errorf("Expecting: %v, received: %v ", cfgedDC, dcs)
-		//FIXME: fix the above test
+		for _, dc := range dcs {
+			fmt.Printf("DerivedCharger: %+v\n", dc)
+		}
+		t.Errorf("Expecting: %v, received: %v ", cfgedDC, dcs)
 	}
 }

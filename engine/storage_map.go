@@ -177,6 +177,8 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan,
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(*RatingPlan), nil
+		} else {
+			return nil, err
 		}
 	}
 	if values, ok := ms.dict[key]; ok {
@@ -219,6 +221,8 @@ func (ms *MapStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingP
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(*RatingProfile), nil
+		} else {
+			return nil, err
 		}
 	}
 	if values, ok := ms.dict[key]; ok {
@@ -248,6 +252,8 @@ func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(*LCR), nil
+		} else {
+			return nil, err
 		}
 	}
 	if values, ok := ms.dict[key]; ok {
@@ -271,6 +277,8 @@ func (ms *MapStorage) GetRpAlias(key string, skipCache bool) (alias string, err 
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(string), nil
+		} else {
+			return "", err
 		}
 	}
 	if values, ok := ms.dict[key]; ok {
@@ -336,6 +344,8 @@ func (ms *MapStorage) GetAccAlias(key string, skipCache bool) (alias string, err
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(string), nil
+		} else {
+			return "", err
 		}
 	}
 	if values, ok := ms.dict[key]; ok {
@@ -420,6 +430,8 @@ func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err er
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(Actions), nil
+		} else {
+			return nil, err
 		}
 	}
 	if values, ok := ms.dict[key]; ok {
@@ -443,6 +455,8 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGrou
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(*SharedGroup), nil
+		} else {
+			return nil, err
 		}
 	}
 	if values, ok := ms.dict[key]; ok {
@@ -523,6 +537,8 @@ func (ms *MapStorage) GetDerivedChargers(key string, skipCache bool) (dcs utils.
 	if !skipCache {
 		if x, err := cache2go.GetCached(key); err == nil {
 			return x.(utils.DerivedChargers), nil
+		} else {
+			return nil, err
 		}
 	}
 	if values, ok := ms.dict[key]; ok {
