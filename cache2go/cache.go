@@ -2,19 +2,17 @@
 package cache2go
 
 import (
-	"errors"
 	"sync"
 	"time"
-
-	"github.com/cgrates/cgrates/utils"
 )
 
 const (
-	PREFIX_LEN = 4
-	KIND_ADD   = "ADD"
-	KIND_ADP   = "ADP"
-	KIND_REM   = "REM"
-	KIND_PRF   = "PRF"
+	PREFIX_LEN   = 4
+	KIND_ADD     = "ADD"
+	KIND_ADP     = "ADP"
+	KIND_REM     = "REM"
+	KIND_PRF     = "PRF"
+	DOUBLE_CACHE = true
 )
 
 type timestampedValue struct {
@@ -32,10 +30,17 @@ type transactionItem struct {
 	kind  string
 }
 
-var (
-	cache = make(cacheStore)
-	mux   sync.RWMutex
+func init() {
+	if DOUBLE_CACHE {
+		cache = newDoubleStore()
+	} else {
+		cache = newSimpleStore()
+	}
+}
 
+var (
+	mux   sync.RWMutex
+	cache cacheStore
 	// transaction stuff
 	transactionBuffer []transactionItem
 	transactionMux    sync.Mutex
@@ -146,34 +151,27 @@ func RemPrefixKey(prefix string) {
 func Flush() {
 	mux.Lock()
 	defer mux.Unlock()
-	cache = make(cacheStore)
+	if DOUBLE_CACHE {
+		cache = newDoubleStore()
+	} else {
+		cache = newSimpleStore()
+	}
 }
 
 func CountEntries(prefix string) (result int64) {
 	mux.RLock()
 	defer mux.RUnlock()
-	if _, ok := cache[prefix]; ok {
-		return int64(len(cache[prefix]))
-	}
-	return 0
+	return cache.CountEntriesForPrefix(prefix)
 }
 
 func GetAllEntries(prefix string) (map[string]timestampedValue, error) {
 	mux.RLock()
 	defer mux.RUnlock()
-	if keyMap, ok := cache[prefix]; ok {
-		return keyMap, nil
-	}
-	return nil, errors.New(utils.ERR_NOT_FOUND)
+	return cache.GetAllForPrefix(prefix)
 }
 
 func GetEntriesKeys(prefix string) (keys []string) {
 	mux.RLock()
 	defer mux.RUnlock()
-	if keyMap, ok := cache[prefix]; ok {
-		for key := range keyMap {
-			keys = append(keys, key)
-		}
-	}
-	return
+	return cache.GetKeysForPrefix(prefix)
 }
