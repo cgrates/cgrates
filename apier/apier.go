@@ -173,6 +173,34 @@ func (self *ApierV1) ExecuteAction(attr *AttrExecuteAction, reply *string) error
 	return nil
 }
 
+type AttrLoadDestination struct {
+	TPid          string
+	DestinationId string
+}
+
+// Load destinations from storDb into dataDb.
+func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if attrs.DestinationId == utils.ANY {
+		attrs.DestinationId = ""
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	if loaded, err := dbReader.LoadDestinationByTag(attrs.DestinationId); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	} else if !loaded {
+		return errors.New(utils.ERR_NOT_FOUND)
+	}
+	//Automatic cache of the newly inserted rating plan
+	didNotChange := []string{}
+	if err := self.RatingDb.CacheRating(nil, didNotChange, didNotChange, didNotChange, didNotChange); err != nil {
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
 type AttrLoadRatingPlan struct {
 	TPid         string
 	RatingPlanId string

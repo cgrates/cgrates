@@ -293,6 +293,14 @@ func (dbr *DbReader) LoadDestinations() (err error) {
 	return
 }
 
+func (dbr *DbReader) LoadDestinationByTag(tag string) (bool, error) {
+	destinations, err := dbr.storDb.GetTpDestinations(dbr.tpid, tag)
+	for _, destination := range destinations {
+		dbr.dataDb.SetDestination(destination)
+	}
+	return len(destinations) > 0, err
+}
+
 func (dbr *DbReader) LoadTimings() (err error) {
 	dbr.timings, err = dbr.storDb.GetTpTimings(dbr.tpid, "")
 	return err
