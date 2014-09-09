@@ -166,7 +166,7 @@ func (rp *RatingProfile) GetRatingPlansForPrefix(cd *CallDescriptor) (err error)
 		return
 	}
 
-	return errors.New("not found")
+	return errors.New(utils.ERR_NOT_FOUND)
 }
 
 // history record method

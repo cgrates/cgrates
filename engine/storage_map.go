@@ -196,7 +196,7 @@ func (ms *MapStorage) GetRatingPlan(key string, skipCache bool) (rp *RatingPlan,
 		err = ms.ms.Unmarshal(out, rp)
 		cache2go.Cache(key, rp)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -231,7 +231,7 @@ func (ms *MapStorage) GetRatingProfile(key string, skipCache bool) (rpf *RatingP
 		err = ms.ms.Unmarshal(values, rpf)
 		cache2go.Cache(key, rpf)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -260,7 +260,7 @@ func (ms *MapStorage) GetLCR(key string, skipCache bool) (lcr *LCR, err error) {
 		err = ms.ms.Unmarshal(values, &lcr)
 		cache2go.Cache(key, lcr)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -285,7 +285,7 @@ func (ms *MapStorage) GetRpAlias(key string, skipCache bool) (alias string, err 
 		alias = string(values)
 		cache2go.Cache(key, alias)
 	} else {
-		return "", errors.New("not found")
+		return "", errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -352,7 +352,7 @@ func (ms *MapStorage) GetAccAlias(key string, skipCache bool) (alias string, err
 		alias = string(values)
 		cache2go.Cache(key, alias)
 	} else {
-		return "", errors.New("not found")
+		return "", errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -405,7 +405,7 @@ func (ms *MapStorage) GetDestination(key string) (dest *Destination, err error) 
 			cache2go.CachePush(DESTINATION_PREFIX+p, dest.Id)
 		}
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -438,7 +438,7 @@ func (ms *MapStorage) GetActions(key string, skipCache bool) (as Actions, err er
 		err = ms.ms.Unmarshal(values, &as)
 		cache2go.Cache(key, as)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -463,7 +463,7 @@ func (ms *MapStorage) GetSharedGroup(key string, skipCache bool) (sg *SharedGrou
 		err = ms.ms.Unmarshal(values, &sg)
 		cache2go.Cache(key, sg)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -480,7 +480,7 @@ func (ms *MapStorage) GetAccount(key string) (ub *Account, err error) {
 		ub = &Account{Id: key}
 		err = ms.ms.Unmarshal(values, ub)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -502,7 +502,7 @@ func (ms *MapStorage) GetActionTimings(key string) (ats ActionPlan, err error) {
 	if values, ok := ms.dict[ACTION_TIMING_PREFIX+key]; ok {
 		err = ms.ms.Unmarshal(values, &ats)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }
@@ -593,7 +593,7 @@ func (ms *MapStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost,
 	if values, ok := ms.dict[LOG_CALL_COST_PREFIX+source+runid+"_"+cgrid]; ok {
 		err = ms.ms.Unmarshal(values, &cc)
 	} else {
-		return nil, errors.New("not found")
+		return nil, errors.New(utils.ERR_NOT_FOUND)
 	}
 	return
 }

@@ -485,6 +485,7 @@ func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err e
 			if tntAcnt.Account != alias {
 				continue
 			}
+			cache2go.RemKey(key)
 			if _, err = rs.db.Del(key); err != nil {
 				return err
 			}
@@ -506,7 +507,6 @@ func (rs *RedisStorage) GetAccountAliases(tenant, account string, skipCache bool
 		}
 	}
 	for _, key := range alsKeys {
-		tenantPrfx := ACC_ALIAS_PREFIX + tenant + utils.CONCATENATED_KEY_SEP
 		if alsAcnt, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], skipCache); err != nil {
 			return nil, err
 		} else if alsAcnt == account {
