@@ -255,7 +255,7 @@ CREATE TABLE tp_derived_chargers (
   `account` varchar(24) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `run_id`  varchar(24) NOT NULL,
-  `run_filters`  varchar(24) NOT NULL,
+  `run_filters`  varchar(256) NOT NULL,
   `req_type_field`  varchar(24) NOT NULL,
   `direction_field`  varchar(24) NOT NULL,
   `tenant_field`  varchar(24) NOT NULL,

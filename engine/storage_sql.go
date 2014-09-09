@@ -1365,9 +1365,8 @@ func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPC
 	return css, nil
 }
 
-func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[string][]*utils.TPDerivedCharger, error) {
-	dcs := make(map[string][]*utils.TPDerivedCharger)
-
+func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[string]*utils.TPDerivedChargers, error) {
+	dcs := make(map[string]*utils.TPDerivedChargers)
 	var tpDerivedChargers []TpDerivedCharger
 	q := self.db.Where("tpid = ?", dc.TPid)
 	if len(dc.Direction) != 0 {
@@ -1391,21 +1390,26 @@ func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[s
 	if err := q.Find(&tpDerivedChargers).Error; err != nil {
 		return nil, err
 	}
-	tag := dc.GetDerivedChargesId()
-	for _, tpDc := range tpDerivedChargers {
-		dcs[tag] = append(dcs[tag], &utils.TPDerivedCharger{
-			RunId:            tpDc.RunId,
-			RunFilters:       tpDc.RunFilters,
-			ReqTypeField:     tpDc.ReqTypeField,
-			DirectionField:   tpDc.DirectionField,
-			TenantField:      tpDc.TenantField,
-			CategoryField:    tpDc.CategoryField,
-			AccountField:     tpDc.AccountField,
-			SubjectField:     tpDc.SubjectField,
-			DestinationField: tpDc.DestinationField,
-			SetupTimeField:   tpDc.SetupTimeField,
-			AnswerTimeField:  tpDc.AnswerTimeField,
-			UsageField:       tpDc.UsageField,
+	for _, tpDcMdl := range tpDerivedChargers {
+		tpDc := &utils.TPDerivedChargers{TPid: tpDcMdl.Tpid, Loadid: tpDcMdl.Loadid, Direction: tpDcMdl.Direction, Tenant: tpDcMdl.Tenant, Category: tpDcMdl.Category,
+			Account: tpDcMdl.Account, Subject: tpDcMdl.Subject}
+		tag := tpDc.GetDerivedChargesId()
+		if _, hasIt := dcs[tag]; !hasIt {
+			dcs[tag] = tpDc
+		}
+		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, &utils.TPDerivedCharger{
+			RunId:            tpDcMdl.RunId,
+			RunFilters:       tpDcMdl.RunFilters,
+			ReqTypeField:     tpDcMdl.ReqTypeField,
+			DirectionField:   tpDcMdl.DirectionField,
+			TenantField:      tpDcMdl.TenantField,
+			CategoryField:    tpDcMdl.CategoryField,
+			AccountField:     tpDcMdl.AccountField,
+			SubjectField:     tpDcMdl.SubjectField,
+			DestinationField: tpDcMdl.DestinationField,
+			SetupTimeField:   tpDcMdl.SetupTimeField,
+			AnswerTimeField:  tpDcMdl.AnswerTimeField,
+			UsageField:       tpDcMdl.UsageField,
 		})
 	}
 	return dcs, nil

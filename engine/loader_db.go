@@ -825,6 +825,30 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 }
 
 func (dbr *DbReader) LoadDerivedChargers() (err error) {
+	tpDcses, err := dbr.storDb.GetTpDerivedChargers(&utils.TPDerivedChargers{TPid: dbr.tpid})
+	if err != nil {
+		return err
+	}
+	allDcs := make(map[string]utils.DerivedChargers) // We load in map first so we can pre-process data for errors
+	for _, tpDcs := range tpDcses {
+		tag := tpDcs.GetDerivedChargersKey()
+		if _, hasIt := allDcs[tag]; !hasIt {
+			allDcs[tag] = make(utils.DerivedChargers, 0)
+		}
+		for _, tpDc := range tpDcs.DerivedChargers {
+			if dc, err := utils.NewDerivedCharger(tpDc.RunId, tpDc.RunFilters, tpDc.ReqTypeField, tpDc.DirectionField, tpDc.TenantField, tpDc.CategoryField,
+				tpDc.AccountField, tpDc.SubjectField, tpDc.DestinationField, tpDc.SetupTimeField, tpDc.AnswerTimeField, tpDc.UsageField); err != nil {
+				return err
+			} else {
+				allDcs[tag] = append(allDcs[tag], dc)
+			}
+		}
+	}
+	for dcsKey, dcs := range allDcs {
+		if err := dbr.accountDb.SetDerivedChargers(dcsKey, dcs); err != nil {
+			return err
+		}
+	}
 	return nil // Placeholder for now
 }
 

@@ -331,7 +331,13 @@ type TPDerivedChargers struct {
 	DerivedChargers []*TPDerivedCharger
 }
 
-func (tpdc TPDerivedChargers) GetDerivedChargesId() string {
+// Key used in dataDb to identify DerivedChargers set
+func (tpdc *TPDerivedChargers) GetDerivedChargersKey() string {
+	return DerivedChargersKey(tpdc.Direction, tpdc.Tenant, tpdc.Category, tpdc.Account, tpdc.Subject)
+
+}
+
+func (tpdc *TPDerivedChargers) GetDerivedChargesId() string {
 	return tpdc.Loadid +
 		CONCATENATED_KEY_SEP +
 		tpdc.Direction +

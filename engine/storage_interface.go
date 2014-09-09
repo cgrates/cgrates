@@ -163,7 +163,7 @@ type LoadStorage interface {
 	GetTpCdrStats(string, string) (map[string][]*utils.TPCdrStat, error)
 
 	SetTPDerivedChargers(string, map[string][]*utils.TPDerivedCharger) error
-	GetTpDerivedChargers(*utils.TPDerivedChargers) (map[string][]*utils.TPDerivedCharger, error)
+	GetTpDerivedChargers(*utils.TPDerivedChargers) (map[string]*utils.TPDerivedChargers, error)
 
 	SetTPLCRs(string, map[string]*LCR) error
 	GetTpLCRs(string, string) (map[string]*LCR, error)

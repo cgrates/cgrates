@@ -109,7 +109,7 @@ func TestCreateStorTpTables(t *testing.T) {
 	}
 }
 
-// Loads data from csv files in tp scenarion to ratingDbCsv
+// Loads data from csv files in tp scenario to ratingDbCsv
 func TestLoadFromCSV(t *testing.T) {
 	if !*testLocal {
 		return
@@ -227,6 +227,9 @@ func TestLoadFromStorDb(t *testing.T) {
 	}
 	if err := loader.LoadAccountActions(); err != nil {
 		t.Error("Failed loading account actions: ", err.Error())
+	}
+	if err := loader.LoadDerivedChargers(); err != nil {
+		t.Error("Failed loading derived chargers: ", err.Error())
 	}
 	if err := loader.WriteToDatabase(true, false); err != nil {
 		t.Error("Could not write data into ratingDb: ", err.Error())

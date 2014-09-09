@@ -68,14 +68,7 @@ func (self *ApierV1) GetTPDerivedChargers(attrs AttrGetTPDerivedChargers, reply 
 	} else if len(sgs) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		tpdc := utils.TPDerivedChargers{
-			TPid:            attrs.TPid,
-			DerivedChargers: sgs[attrs.DerivedChargersId],
-		}
-		if err := tpdc.SetDerivedChargersId(attrs.DerivedChargersId); err != nil {
-			return err
-		}
-		*reply = tpdc
+		*reply = *sgs[attrs.DerivedChargersId]
 	}
 	return nil
 }
