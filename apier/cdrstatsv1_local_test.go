@@ -40,7 +40,6 @@ var cdrstRpc *rpc.Client
 func init() {
 	cdrstCfgPath = path.Join(*dataDir, "conf", "samples", "cdrstatsv1_local_test.cfg")
 	cdrstCfg, _ = config.NewCGRConfigFromFile(&cdrstCfgPath)
-	//fmt.Printf("CdrstCfg: %+v\n", cdrstCfg)
 }
 
 func TestCDRStatsLclInitDataDb(t *testing.T) {
@@ -73,6 +72,7 @@ func TestCDRStatsLclStartEngine(t *testing.T) {
 		t.Fatal("Cannot find cgr-engine executable")
 	}
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	engine := exec.Command(enginePath, "-config", cdrstCfgPath)
 	if err := engine.Start(); err != nil {
 		t.Fatal("Cannot start cgr-engine: ", err.Error())
