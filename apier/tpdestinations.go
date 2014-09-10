@@ -53,7 +53,10 @@ func (self *ApierV1) GetTPDestination(attrs AttrGetTPDestination, reply *utils.T
 	} else if len(dsts) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = utils.TPDestination{attrs.TPid, dsts[attrs.DestinationId].Id, dsts[attrs.DestinationId].Prefixes}
+		*reply = utils.TPDestination{
+			TPid:          attrs.TPid,
+			DestinationId: dsts[attrs.DestinationId].Id,
+			Prefixes:      dsts[attrs.DestinationId].Prefixes}
 	}
 	return nil
 }
