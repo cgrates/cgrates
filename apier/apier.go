@@ -211,7 +211,7 @@ func (self *ApierV1) LoadRatingPlan(attrs AttrLoadRatingPlan, reply *string) err
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if attrs.RatingPlanId == utils.ANY {
+	if attrs.RatingPlanId == utils.EMPTY {
 		attrs.RatingPlanId = ""
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
@@ -235,19 +235,19 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 
-	if attrs.LoadId == utils.ANY {
+	if attrs.LoadId == utils.EMPTY {
 		attrs.LoadId = ""
 	}
-	if attrs.Tenant == utils.ANY {
+	if attrs.Tenant == utils.EMPTY {
 		attrs.Tenant = ""
 	}
-	if attrs.Category == utils.ANY {
+	if attrs.Category == utils.EMPTY {
 		attrs.Category = ""
 	}
-	if attrs.Direction == utils.ANY {
+	if attrs.Direction == utils.EMPTY {
 		attrs.Direction = ""
 	}
-	if attrs.Subject == utils.ANY {
+	if attrs.Subject == utils.EMPTY {
 		attrs.Subject = ""
 	}
 
@@ -608,16 +608,16 @@ func (self *ApierV1) LoadAccountActions(attrs utils.TPAccountActions, reply *str
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
-	if attrs.LoadId == utils.ANY {
+	if attrs.LoadId == utils.EMPTY {
 		attrs.LoadId = ""
 	}
-	if attrs.Tenant == utils.ANY {
+	if attrs.Tenant == utils.EMPTY {
 		attrs.Tenant = ""
 	}
-	if attrs.Account == utils.ANY {
+	if attrs.Account == utils.EMPTY {
 		attrs.Account = ""
 	}
-	if attrs.Direction == utils.ANY {
+	if attrs.Direction == utils.EMPTY {
 		attrs.Direction = ""
 	}
 	if _, err := engine.AccLock.Guard(attrs.KeyId(), func() (float64, error) {

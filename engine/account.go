@@ -150,7 +150,7 @@ func (ub *Account) getBalancesForPrefix(prefix, category string, balances Balanc
 		if b.IsExpired() || (ub.AllowNegative == false && b.SharedGroup == "" && b.Value <= 0) {
 			continue
 		}
-		if sharedGroup != "" && sharedGroup != "" && b.SharedGroup != sharedGroup {
+		if sharedGroup != "" && b.SharedGroup != sharedGroup {
 			continue
 		}
 		if !b.MatchCategory(category) {

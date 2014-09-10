@@ -158,6 +158,7 @@ const (
 	CREATE_CDRS_TABLES_SQL       = "create_cdrs_tables.sql"
 	CREATE_TARIFFPLAN_TABLES_SQL = "create_tariffplan_tables.sql"
 	TEST_SQL                     = "TEST_SQL"
+	EMPTY                        = "_empty_"
 )
 
 var (
