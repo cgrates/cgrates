@@ -833,7 +833,11 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 }
 
 func (dbr *DbReader) LoadDerivedChargers() (err error) {
-	tpDcses, err := dbr.storDb.GetTpDerivedChargers(&utils.TPDerivedChargers{TPid: dbr.tpid})
+	return dbr.LoadDerivedChargersFiltered(&utils.TPDerivedChargers{TPid: dbr.tpid})
+}
+
+func (dbr *DbReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers) (err error) {
+	tpDcses, err := dbr.storDb.GetTpDerivedChargers(filter)
 	if err != nil {
 		return err
 	}

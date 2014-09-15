@@ -201,6 +201,42 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	return nil
 }
 
+// Load derived chargers from storDb into dataDb.
+func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Category", "Direction", "Account", "Subject"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if attrs.Loadid == utils.EMPTY {
+		attrs.Loadid = ""
+	}
+	if attrs.Tenant == utils.EMPTY {
+		attrs.Tenant = ""
+	}
+	if attrs.Category == utils.EMPTY {
+		attrs.Category = ""
+	}
+	if attrs.Direction == utils.EMPTY {
+		attrs.Direction = ""
+	}
+	if attrs.Account == utils.EMPTY {
+		attrs.Account = ""
+	}
+	if attrs.Subject == utils.EMPTY {
+		attrs.Subject = ""
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	if err := dbReader.LoadDerivedChargersFiltered(&attrs); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	//Automatic cache of the newly inserted rating plan
+	didNotChange := []string{}
+	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, didNotChange, nil); err != nil {
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
 type AttrLoadRatingPlan struct {
 	TPid         string
 	RatingPlanId string
