@@ -336,10 +336,11 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 	for csId, cStats := range css {
 		tx.Where("tpid = ?", tpid).Where("id = ?", csId).Delete(TpCdrStat{})
 		for _, cs := range cStats {
+			ql, _ := strconv.Atoi(cs.QueueLength)
 			tx.Save(TpCdrStat{
 				Tpid:              tpid,
 				Id:                csId,
-				QueueLength:       cs.QueueLength,
+				QueueLength:       ql,
 				TimeWindow:        cs.TimeWindow,
 				Metrics:           cs.Metrics,
 				SetupInterval:     cs.SetupInterval,
@@ -1317,7 +1318,7 @@ func (self *SQLStorage) GetTpSharedGroups(tpid, tag string) (map[string][]*utils
 	}
 
 	for _, tpSg := range tpCdrStats {
-		sgs[tag] = append(sgs[tpSg.Id], &utils.TPSharedGroup{
+		sgs[tpSg.Id] = append(sgs[tpSg.Id], &utils.TPSharedGroup{
 			Account:       tpSg.Account,
 			Strategy:      tpSg.Strategy,
 			RatingSubject: tpSg.RatingSubject,
@@ -1339,8 +1340,8 @@ func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPC
 	}
 
 	for _, tpCs := range tpCdrStats {
-		css[tag] = append(css[tpCs.Id], &utils.TPCdrStat{
-			QueueLength:       tpCs.QueueLength,
+		css[tpCs.Id] = append(css[tpCs.Id], &utils.TPCdrStat{
+			QueueLength:       strconv.Itoa(tpCs.QueueLength),
 			TimeWindow:        tpCs.TimeWindow,
 			Metrics:           tpCs.Metrics,
 			SetupInterval:     tpCs.SetupInterval,

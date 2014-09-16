@@ -304,6 +304,53 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	return nil
 }
 
+type AttrLoadSharedGroup struct {
+	TPid          string
+	SharedGroupId string
+}
+
+// Load destinations from storDb into dataDb.
+func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if attrs.SharedGroupId == utils.EMPTY {
+		attrs.SharedGroupId = ""
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	if err := dbReader.LoadSharedGroupByTag(attrs.SharedGroupId, true); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	//Automatic cache of the newly inserted rating plan
+	didNotChange := []string{}
+	if err := self.AccountDb.CacheAccounting(didNotChange, nil, didNotChange, didNotChange); err != nil {
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+type AttrLoadCdrStats struct {
+	TPid       string
+	CdrStatsId string
+}
+
+// Load destinations from storDb into dataDb.
+func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "CdrStatsId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if attrs.CdrStatsId == utils.EMPTY {
+		attrs.CdrStatsId = ""
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	if err := dbReader.LoadCdrStatsByTag(attrs.CdrStatsId, true); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = OK
+	return nil
+}
+
 type AttrSetRatingProfile struct {
 	Tenant                string                      // Tenant's Id
 	Category              string                      // TypeOfRecord

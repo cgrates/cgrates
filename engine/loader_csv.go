@@ -934,7 +934,7 @@ func (csvr *CSVReader) LoadCdrStats() (err error) {
 		var cs *CdrStats
 		var exists bool
 		if cs, exists = csvr.cdrStats[tag]; !exists {
-			cs = &CdrStats{}
+			cs = &CdrStats{Id: tag}
 		}
 		triggerTag := record[20]
 		triggers, exists := csvr.actionsTriggers[triggerTag]
@@ -942,7 +942,29 @@ func (csvr *CSVReader) LoadCdrStats() (err error) {
 			// only return error if there was something there for the tag
 			return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
 		}
-		UpdateCdrStats(cs, triggers, record...)
+		tpCs := &utils.TPCdrStat{
+			QueueLength:       record[1],
+			TimeWindow:        record[2],
+			Metrics:           record[3],
+			SetupInterval:     record[4],
+			TOR:               record[5],
+			CdrHost:           record[6],
+			CdrSource:         record[7],
+			ReqType:           record[8],
+			Direction:         record[9],
+			Tenant:            record[10],
+			Category:          record[11],
+			Account:           record[12],
+			Subject:           record[13],
+			DestinationPrefix: record[14],
+			UsageInterval:     record[15],
+			MediationRunIds:   record[16],
+			RatedAccount:      record[17],
+			RatedSubject:      record[18],
+			CostInterval:      record[19],
+			ActionTriggers:    record[20],
+		}
+		UpdateCdrStats(cs, triggers, tpCs)
 		csvr.cdrStats[tag] = cs
 	}
 	return
