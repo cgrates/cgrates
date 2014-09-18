@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier"
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
 	c := &CmdAddTriggeredAction{
@@ -33,7 +33,7 @@ func init() {
 type CmdAddTriggeredAction struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrAddActionTrigger
+	rpcParams *v1.AttrAddActionTrigger
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdAddTriggeredAction) RpcMethod() string {
 
 func (self *CmdAddTriggeredAction) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrAddActionTrigger{Direction: "*out"}
+		self.rpcParams = &v1.AttrAddActionTrigger{Direction: "*out"}
 	}
 	return self.rpcParams
 }

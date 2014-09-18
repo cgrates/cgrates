@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apier
+package v1
 
 import (
 	"errors"
@@ -25,60 +25,60 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// Creates a new SharedGroups profile within a tariff plan
-func (self *ApierV1) SetTPSharedGroups(attrs utils.TPSharedGroups, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupsId", "SharedGroups"}); len(missing) != 0 {
+// Creates a new Actions profile within a tariff plan
+func (self *ApierV1) SetTPActions(attrs utils.TPActions, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId", "Actions"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	/*for _, action := range attrs.SharedGroups {
+	for _, action := range attrs.Actions {
 		requiredFields := []string{"Identifier", "Weight"}
 		if action.BalanceType != "" { // Add some inter-dependent parameters - if balanceType then we are not talking about simply calling actions
 			requiredFields = append(requiredFields, "Direction", "Units")
 		}
 		if missing := utils.MissingStructFields(action, requiredFields); len(missing) != 0 {
-			return fmt.Errorf("%s:SharedGroup:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
+			return fmt.Errorf("%s:Action:%s:%v", utils.ERR_MANDATORY_IE_MISSING, action.Identifier, missing)
 		}
-	}*/
-	if err := self.StorDb.SetTPSharedGroups(attrs.TPid, map[string][]*utils.TPSharedGroup{attrs.SharedGroupsId: attrs.SharedGroups}); err != nil {
+	}
+	if err := self.StorDb.SetTPActions(attrs.TPid, map[string][]*utils.TPAction{attrs.ActionsId: attrs.Actions}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
 	return nil
 }
 
-type AttrGetTPSharedGroups struct {
-	TPid           string // Tariff plan id
-	SharedGroupsId string // SharedGroup id
+type AttrGetTPActions struct {
+	TPid      string // Tariff plan id
+	ActionsId string // Actions id
 }
 
-// Queries specific SharedGroup on tariff plan
-func (self *ApierV1) GetTPSharedGroups(attrs AttrGetTPSharedGroups, reply *utils.TPSharedGroups) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupsId"}); len(missing) != 0 { //Params missing
+// Queries specific Actions profile on tariff plan
+func (self *ApierV1) GetTPActions(attrs AttrGetTPActions, reply *utils.TPActions) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if sgs, err := self.StorDb.GetTpSharedGroups(attrs.TPid, attrs.SharedGroupsId); err != nil {
+	if acts, err := self.StorDb.GetTpActions(attrs.TPid, attrs.ActionsId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
-	} else if len(sgs) == 0 {
+	} else if len(acts) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		*reply = utils.TPSharedGroups{TPid: attrs.TPid, SharedGroupsId: attrs.SharedGroupsId, SharedGroups: sgs[attrs.SharedGroupsId]}
+		*reply = utils.TPActions{TPid: attrs.TPid, ActionsId: attrs.ActionsId, Actions: acts[attrs.ActionsId]}
 	}
 	return nil
 }
 
-type AttrGetTPSharedGroupIds struct {
+type AttrGetTPActionIds struct {
 	TPid         string // Tariff plan id
 	Page         int
 	ItemsPerPage int
 	SearchTerm   string
 }
 
-// Queries SharedGroups identities on specific tariff plan.
-func (self *ApierV1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[]string) error {
+// Queries Actions identities on specific tariff plan.
+func (self *ApierV1) GetTPActionIds(attrs AttrGetTPActionIds, reply *[]string) error {
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_SHARED_GROUPS, utils.TPDistinctIds{"id"}, nil, &utils.TPPagination{Page: attrs.Page, ItemsPerPage: attrs.ItemsPerPage, SearchTerm: attrs.SearchTerm}); err != nil {
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACTIONS, utils.TPDistinctIds{"id"}, nil, &utils.TPPagination{Page: attrs.Page, ItemsPerPage: attrs.ItemsPerPage, SearchTerm: attrs.SearchTerm}); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -88,12 +88,12 @@ func (self *ApierV1) GetTPSharedGroupIds(attrs AttrGetTPSharedGroupIds, reply *[
 	return nil
 }
 
-// Removes specific SharedGroups on Tariff plan
-func (self *ApierV1) RemTPSharedGroups(attrs AttrGetTPSharedGroups, reply *string) error {
-	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupsId"}); len(missing) != 0 { //Params missing
+// Removes specific Actions on Tariff plan
+func (self *ApierV1) RemTPActions(attrs AttrGetTPActions, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "ActionsId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if err := self.StorDb.RemTPData(utils.TBL_TP_SHARED_GROUPS, attrs.TPid, attrs.SharedGroupsId); err != nil {
+	if err := self.StorDb.RemTPData(utils.TBL_TP_ACTIONS, attrs.TPid, attrs.ActionsId); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {
 		*reply = "OK"

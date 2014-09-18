@@ -28,7 +28,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cgrates/cgrates/apier"
+	"github.com/cgrates/cgrates/apier/v1"
+	"github.com/cgrates/cgrates/apier/v2"
 	"github.com/cgrates/cgrates/balancer2go"
 	"github.com/cgrates/cgrates/cdrc"
 	"github.com/cgrates/cgrates/config"
@@ -118,7 +119,7 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 		return
 	}
 	engine.Logger.Info("Registering Mediator RPC service.")
-	server.RpcRegister(&apier.MediatorV1{Medi: medi})
+	server.RpcRegister(&v1.MediatorV1{Medi: medi})
 
 	close(chanDone)
 }
@@ -208,7 +209,7 @@ func startCDRS(responder *engine.Responder, cdrDb engine.CdrStorage, mediChan, d
 	cdrServer = engine.NewCdrS(cdrDb, medi, cdrStats, cfg)
 	cdrServer.RegisterHanlersToServer(server)
 	engine.Logger.Info("Registering CDRS RPC service.")
-	server.RpcRegister(&apier.CDRSV1{CdrSrv: cdrServer})
+	server.RpcRegister(&v1.CDRSV1{CdrSrv: cdrServer})
 	responder.CdrSrv = cdrServer // Make the cdrserver available for internal communication
 	close(doneChan)
 }
@@ -412,16 +413,18 @@ func main() {
 			cdrStats.AddQueue(engine.NewCdrStatsFromCdrStatsCfg(cfg.CDRStatConfig), nil)
 		}
 		server.RpcRegister(cdrStats)
-		server.RpcRegister(&apier.CDRStatsV1{cdrStats}) // Public APIs
+		server.RpcRegister(&v1.CDRStatsV1{cdrStats}) // Public APIs
 	}
 
 	responder := &engine.Responder{ExitChan: exitChan}
-	apierRpc := &apier.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder, CdrStatsSrv: cdrStats}
+	apierRpcV1 := &v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder, CdrStatsSrv: cdrStats}
+	apierRpcV2 := &v2.ApierV2{ApierV1: v1.ApierV1{StorDb: loadDb, RatingDb: ratingDb, AccountDb: accountDb, CdrDb: cdrDb, LogDb: logDb, Config: cfg, Responder: responder, CdrStatsSrv: cdrStats}}
 
 	if cfg.RaterEnabled && !cfg.BalancerEnabled && cfg.RaterBalancer != utils.INTERNAL {
 		engine.Logger.Info("Registering Rater service")
 		server.RpcRegister(responder)
-		server.RpcRegister(apierRpc)
+		server.RpcRegister(apierRpcV1)
+		server.RpcRegister(apierRpcV2)
 	}
 
 	if cfg.BalancerEnabled {
@@ -430,7 +433,8 @@ func main() {
 		stopHandled = true
 		responder.Bal = bal
 		server.RpcRegister(responder)
-		server.RpcRegister(apierRpc)
+		server.RpcRegister(apierRpcV1)
+		server.RpcRegister(apierRpcV2)
 		if cfg.RaterEnabled {
 			engine.Logger.Info("<Balancer> Registering internal rater")
 			bal.AddClient("local", new(engine.ResponderWorker))
@@ -446,7 +450,8 @@ func main() {
 		go func() {
 			sched := scheduler.NewScheduler()
 			go reloadSchedulerSingnalHandler(sched, accountDb)
-			apierRpc.Sched = sched
+			apierRpcV1.Sched = sched
+			apierRpcV2.Sched = sched
 			sched.LoadActionTimings(accountDb)
 			sched.Loop()
 		}()

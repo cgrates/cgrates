@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 package console
 
-import "github.com/cgrates/cgrates/apier"
+import "github.com/cgrates/cgrates/apier/v1"
 
 func init() {
 	c := &CmdCdrStatsMetrics{
@@ -33,7 +33,7 @@ func init() {
 type CmdCdrStatsMetrics struct {
 	name      string
 	rpcMethod string
-	rpcParams *apier.AttrGetMetrics
+	rpcParams *v1.AttrGetMetrics
 	*CommandExecuter
 }
 
@@ -47,7 +47,7 @@ func (self *CmdCdrStatsMetrics) RpcMethod() string {
 
 func (self *CmdCdrStatsMetrics) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrGetMetrics{}
+		self.rpcParams = &v1.AttrGetMetrics{}
 	}
 	return self.rpcParams
 }
