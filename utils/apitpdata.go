@@ -298,7 +298,7 @@ type TPCdrStats struct {
 }
 
 type TPCdrStat struct {
-	QueueLength       int
+	QueueLength       string
 	TimeWindow        string
 	Metrics           string
 	SetupInterval     string

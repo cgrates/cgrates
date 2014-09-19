@@ -680,8 +680,7 @@ func (self *TPCSVImporter) importCdrStats(fn string) error {
 		if len(record[1]) == 0 {
 			record[1] = "0" // Empty value will be translated to 0 as QueueLength
 		}
-		ql, err := strconv.Atoi(record[1])
-		if err != nil {
+		if _, err = strconv.Atoi(record[1]); err != nil {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
 			continue
 		}
@@ -689,7 +688,7 @@ func (self *TPCSVImporter) importCdrStats(fn string) error {
 			css[record[0]] = make([]*utils.TPCdrStat, 0)
 		}
 		css[record[0]] = append(css[record[0]], &utils.TPCdrStat{
-			QueueLength:       ql,
+			QueueLength:       record[1],
 			TimeWindow:        ValueOrDefault(record[2], "0"),
 			Metrics:           record[3],
 			SetupInterval:     record[4],

@@ -501,11 +501,12 @@ func (dbr *DbReader) LoadRatingProfileFiltered(qriedRpf *utils.TPRatingProfile) 
 	return nil
 }
 
-func (dbr *DbReader) LoadSharedGroups() (err error) {
-	storSgs, err := dbr.storDb.GetTpSharedGroups(dbr.tpid, "")
+func (dbr *DbReader) LoadSharedGroupByTag(tag string, save bool) error {
+	storSgs, err := dbr.storDb.GetTpSharedGroups(dbr.tpid, tag)
 	if err != nil {
 		return err
 	}
+	var loadedTags []string
 	for tag, tpSgs := range storSgs {
 		sg, exists := dbr.sharedGroups[tag]
 		if !exists {
@@ -521,8 +522,20 @@ func (dbr *DbReader) LoadSharedGroups() (err error) {
 			}
 		}
 		dbr.sharedGroups[tag] = sg
+		loadedTags = append(loadedTags, tag)
+	}
+	if save {
+		for _, tag := range loadedTags {
+			if err := dbr.accountDb.SetSharedGroup(dbr.sharedGroups[tag]); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
+}
+
+func (dbr *DbReader) LoadSharedGroups() error {
+	return dbr.LoadSharedGroupByTag("", false)
 }
 
 func (dbr *DbReader) LoadLCRs() (err error) {
@@ -833,7 +846,11 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 }
 
 func (dbr *DbReader) LoadDerivedChargers() (err error) {
-	tpDcses, err := dbr.storDb.GetTpDerivedChargers(&utils.TPDerivedChargers{TPid: dbr.tpid})
+	return dbr.LoadDerivedChargersFiltered(&utils.TPDerivedChargers{TPid: dbr.tpid})
+}
+
+func (dbr *DbReader) LoadDerivedChargersFiltered(filter *utils.TPDerivedChargers) (err error) {
+	tpDcses, err := dbr.storDb.GetTpDerivedChargers(filter)
 	if err != nil {
 		return err
 	}
@@ -860,8 +877,46 @@ func (dbr *DbReader) LoadDerivedChargers() (err error) {
 	return nil // Placeholder for now
 }
 
-func (dbr *DbReader) LoadCdrStats() (err error) {
-	return nil // Placeholder for now
+func (dbr *DbReader) LoadCdrStatsByTag(tag string, save bool) error {
+	storStats, err := dbr.storDb.GetTpCdrStats(dbr.tpid, tag)
+	if err != nil {
+		return err
+	}
+	if save && len(dbr.actionsTriggers) == 0 {
+		// load action triggers to check existence
+		dbr.LoadActionTriggers()
+	}
+	var loadedTags []string
+	for tag, tpStats := range storStats {
+		for _, tpStat := range tpStats {
+			var cs *CdrStats
+			var exists bool
+			if cs, exists = dbr.cdrStats[tag]; !exists {
+				cs = &CdrStats{Id: tag}
+			}
+			triggerTag := tpStat.ActionTriggers
+			triggers, exists := dbr.actionsTriggers[triggerTag]
+			if triggerTag != "" && !exists {
+				// only return error if there was something there for the tag
+				return fmt.Errorf("Could not get action triggers for cdr stats id %s: %s", cs.Id, triggerTag)
+			}
+			UpdateCdrStats(cs, triggers, tpStat)
+			dbr.cdrStats[tag] = cs
+			loadedTags = append(loadedTags, tag)
+		}
+	}
+	if save {
+		for _, tag := range loadedTags {
+			if err := dbr.dataDb.SetCdrStats(dbr.cdrStats[tag]); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (dbr *DbReader) LoadCdrStats() error {
+	return dbr.LoadCdrStatsByTag("", false)
 }
 
 // Automated loading

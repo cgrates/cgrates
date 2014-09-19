@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-package apier
+package v1
 
 import (
 	"encoding/json"
@@ -183,7 +183,7 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationId"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if attrs.DestinationId == utils.ANY {
+	if attrs.DestinationId == utils.EMPTY {
 		attrs.DestinationId = ""
 	}
 	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
@@ -195,6 +195,42 @@ func (self *ApierV1) LoadDestination(attrs AttrLoadDestination, reply *string) e
 	//Automatic cache of the newly inserted rating plan
 	didNotChange := []string{}
 	if err := self.RatingDb.CacheRating(nil, didNotChange, didNotChange, didNotChange, didNotChange); err != nil {
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+// Load derived chargers from storDb into dataDb.
+func (self *ApierV1) LoadDerivedChargers(attrs utils.TPDerivedChargers, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "LoadId", "Tenant", "Category", "Direction", "Account", "Subject"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if attrs.Loadid == utils.EMPTY {
+		attrs.Loadid = ""
+	}
+	if attrs.Tenant == utils.EMPTY {
+		attrs.Tenant = ""
+	}
+	if attrs.Category == utils.EMPTY {
+		attrs.Category = ""
+	}
+	if attrs.Direction == utils.EMPTY {
+		attrs.Direction = ""
+	}
+	if attrs.Account == utils.EMPTY {
+		attrs.Account = ""
+	}
+	if attrs.Subject == utils.EMPTY {
+		attrs.Subject = ""
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	if err := dbReader.LoadDerivedChargersFiltered(&attrs); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	//Automatic cache of the newly inserted rating plan
+	didNotChange := []string{}
+	if err := self.AccountDb.CacheAccounting(didNotChange, didNotChange, didNotChange, nil); err != nil {
 		return err
 	}
 	*reply = OK
@@ -263,6 +299,53 @@ func (self *ApierV1) LoadRatingProfile(attrs utils.TPRatingProfile, reply *strin
 	}
 	if err := self.RatingDb.CacheRating(didNotChange, didNotChange, ratingProfile, didNotChange, didNotChange); err != nil {
 		return err
+	}
+	*reply = OK
+	return nil
+}
+
+type AttrLoadSharedGroup struct {
+	TPid          string
+	SharedGroupId string
+}
+
+// Load destinations from storDb into dataDb.
+func (self *ApierV1) LoadSharedGroup(attrs AttrLoadSharedGroup, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "SharedGroupId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if attrs.SharedGroupId == utils.EMPTY {
+		attrs.SharedGroupId = ""
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	if err := dbReader.LoadSharedGroupByTag(attrs.SharedGroupId, true); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	//Automatic cache of the newly inserted rating plan
+	didNotChange := []string{}
+	if err := self.AccountDb.CacheAccounting(didNotChange, nil, didNotChange, didNotChange); err != nil {
+		return err
+	}
+	*reply = OK
+	return nil
+}
+
+type AttrLoadCdrStats struct {
+	TPid       string
+	CdrStatsId string
+}
+
+// Load destinations from storDb into dataDb.
+func (self *ApierV1) LoadCdrStats(attrs AttrLoadCdrStats, reply *string) error {
+	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "CdrStatsId"}); len(missing) != 0 {
+		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
+	}
+	if attrs.CdrStatsId == utils.EMPTY {
+		attrs.CdrStatsId = ""
+	}
+	dbReader := engine.NewDbReader(self.StorDb, self.RatingDb, self.AccountDb, attrs.TPid)
+	if err := dbReader.LoadCdrStatsByTag(attrs.CdrStatsId, true); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = OK
 	return nil

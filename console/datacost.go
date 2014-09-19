@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package console
 
 import (
-	"github.com/cgrates/cgrates/apier"
+	"github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -38,7 +38,7 @@ func init() {
 type CmdGetDataCost struct {
 	name       string
 	rpcMethod  string
-	rpcParams  *apier.AttrGetDataCost
+	rpcParams  *v1.AttrGetDataCost
 	clientArgs []string
 	*CommandExecuter
 }
@@ -53,7 +53,7 @@ func (self *CmdGetDataCost) RpcMethod() string {
 
 func (self *CmdGetDataCost) RpcParams() interface{} {
 	if self.rpcParams == nil {
-		self.rpcParams = &apier.AttrGetDataCost{Direction: utils.OUT}
+		self.rpcParams = &v1.AttrGetDataCost{Direction: utils.OUT}
 	}
 	return self.rpcParams
 }

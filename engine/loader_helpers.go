@@ -96,27 +96,27 @@ func NewTiming(timingInfo ...string) (rt *utils.TPTiming) {
 	return
 }
 
-func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...string) {
-	cs.Id = record[0]
-	if record[1] != "" {
-		if qi, err := strconv.Atoi(record[1]); err == nil {
+func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *utils.TPCdrStat) {
+
+	if tpCs.QueueLength != "" {
+		if qi, err := strconv.Atoi(tpCs.QueueLength); err == nil {
 			cs.QueueLength = qi
 		} else {
-			log.Printf("Error parsing QueuedLength %v for cdrs stats %v", record[1], cs.Id)
+			log.Printf("Error parsing QueuedLength %v for cdrs stats %v", tpCs.QueueLength, cs.Id)
 		}
 	}
-	if record[2] != "" {
-		if d, err := time.ParseDuration(record[2]); err == nil {
+	if tpCs.TimeWindow != "" {
+		if d, err := time.ParseDuration(tpCs.TimeWindow); err == nil {
 			cs.TimeWindow = d
 		} else {
-			log.Printf("Error parsing TimeWindow %v for cdrs stats %v", record[2], cs.Id)
+			log.Printf("Error parsing TimeWindow %v for cdrs stats %v", tpCs.TimeWindow, cs.Id)
 		}
 	}
-	if record[3] != "" {
-		cs.Metrics = append(cs.Metrics, record[3])
+	if tpCs.Metrics != "" {
+		cs.Metrics = append(cs.Metrics, tpCs.Metrics)
 	}
-	if record[4] != "" {
-		times := strings.Split(record[4], utils.INFIELD_SEP)
+	if tpCs.SetupInterval != "" {
+		times := strings.Split(tpCs.SetupInterval, utils.INFIELD_SEP)
 		if len(times) > 0 {
 			if sTime, err := utils.ParseTimeDetectLayout(times[0]); err == nil {
 				if len(cs.SetupInterval) < 1 {
@@ -125,7 +125,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 					cs.SetupInterval[0] = sTime
 				}
 			} else {
-				log.Printf("Error parsing TimeWindow %v for cdrs stats %v", record[4], cs.Id)
+				log.Printf("Error parsing TimeWindow %v for cdrs stats %v", tpCs.SetupInterval, cs.Id)
 			}
 		}
 		if len(times) > 1 {
@@ -136,42 +136,42 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 					cs.SetupInterval[1] = eTime
 				}
 			} else {
-				log.Printf("Error parsing TimeWindow %v for cdrs stats %v", record[4], cs.Id)
+				log.Printf("Error parsing TimeWindow %v for cdrs stats %v", tpCs.SetupInterval, cs.Id)
 			}
 		}
 	}
-	if record[5] != "" {
-		cs.TOR = append(cs.TOR, record[5])
+	if tpCs.TOR != "" {
+		cs.TOR = append(cs.TOR, tpCs.TOR)
 	}
-	if record[6] != "" {
-		cs.CdrHost = append(cs.CdrHost, record[6])
+	if tpCs.CdrHost != "" {
+		cs.CdrHost = append(cs.CdrHost, tpCs.CdrHost)
 	}
-	if record[7] != "" {
-		cs.CdrSource = append(cs.CdrSource, record[7])
+	if tpCs.CdrSource != "" {
+		cs.CdrSource = append(cs.CdrSource, tpCs.CdrSource)
 	}
-	if record[8] != "" {
-		cs.ReqType = append(cs.ReqType, record[8])
+	if tpCs.ReqType != "" {
+		cs.ReqType = append(cs.ReqType, tpCs.ReqType)
 	}
-	if record[9] != "" {
-		cs.Direction = append(cs.Direction, record[9])
+	if tpCs.Direction != "" {
+		cs.Direction = append(cs.Direction, tpCs.Direction)
 	}
-	if record[10] != "" {
-		cs.Tenant = append(cs.Tenant, record[10])
+	if tpCs.Tenant != "" {
+		cs.Tenant = append(cs.Tenant, tpCs.Tenant)
 	}
-	if record[11] != "" {
-		cs.Category = append(cs.Category, record[11])
+	if tpCs.Category != "" {
+		cs.Category = append(cs.Category, tpCs.Category)
 	}
-	if record[12] != "" {
-		cs.Account = append(cs.Account, record[12])
+	if tpCs.Account != "" {
+		cs.Account = append(cs.Account, tpCs.Account)
 	}
-	if record[13] != "" {
-		cs.Subject = append(cs.Subject, record[13])
+	if tpCs.Subject != "" {
+		cs.Subject = append(cs.Subject, tpCs.Subject)
 	}
-	if record[14] != "" {
-		cs.DestinationPrefix = append(cs.DestinationPrefix, record[14])
+	if tpCs.DestinationPrefix != "" {
+		cs.DestinationPrefix = append(cs.DestinationPrefix, tpCs.DestinationPrefix)
 	}
-	if record[15] != "" {
-		durations := strings.Split(record[15], utils.INFIELD_SEP)
+	if tpCs.UsageInterval != "" {
+		durations := strings.Split(tpCs.UsageInterval, utils.INFIELD_SEP)
 		if len(durations) > 0 {
 			if sDuration, err := time.ParseDuration(durations[0]); err == nil {
 				if len(cs.UsageInterval) < 1 {
@@ -180,7 +180,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 					cs.UsageInterval[0] = sDuration
 				}
 			} else {
-				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", record[15], cs.Id)
+				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", tpCs.UsageInterval, cs.Id)
 			}
 		}
 		if len(durations) > 1 {
@@ -191,21 +191,21 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 					cs.UsageInterval[1] = eDuration
 				}
 			} else {
-				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", record[15], cs.Id)
+				log.Printf("Error parsing UsageInterval %v for cdrs stats %v", tpCs.UsageInterval, cs.Id)
 			}
 		}
 	}
-	if record[16] != "" {
-		cs.MediationRunIds = append(cs.MediationRunIds, record[16])
+	if tpCs.MediationRunIds != "" {
+		cs.MediationRunIds = append(cs.MediationRunIds, tpCs.MediationRunIds)
 	}
-	if record[17] != "" {
-		cs.RatedAccount = append(cs.RatedAccount, record[17])
+	if tpCs.RatedAccount != "" {
+		cs.RatedAccount = append(cs.RatedAccount, tpCs.RatedAccount)
 	}
-	if record[18] != "" {
-		cs.RatedSubject = append(cs.RatedSubject, record[18])
+	if tpCs.RatedSubject != "" {
+		cs.RatedSubject = append(cs.RatedSubject, tpCs.RatedSubject)
 	}
-	if record[19] != "" {
-		costs := strings.Split(record[19], utils.INFIELD_SEP)
+	if tpCs.CostInterval != "" {
+		costs := strings.Split(tpCs.CostInterval, utils.INFIELD_SEP)
 		if len(costs) > 0 {
 			if sCost, err := strconv.ParseFloat(costs[0], 64); err == nil {
 				if len(cs.CostInterval) < 1 {
@@ -214,7 +214,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 					cs.CostInterval[0] = sCost
 				}
 			} else {
-				log.Printf("Error parsing CostInterval %v for cdrs stats %v", record[19], cs.Id)
+				log.Printf("Error parsing CostInterval %v for cdrs stats %v", tpCs.CostInterval, cs.Id)
 			}
 		}
 		if len(costs) > 1 {
@@ -225,7 +225,7 @@ func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, record ...
 					cs.CostInterval[1] = eCost
 				}
 			} else {
-				log.Printf("Error parsing CostInterval %v for cdrs stats %v", record[19], cs.Id)
+				log.Printf("Error parsing CostInterval %v for cdrs stats %v", tpCs.CostInterval, cs.Id)
 			}
 		}
 	}
