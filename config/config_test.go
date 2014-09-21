@@ -112,7 +112,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = utils.INTERNAL
 	eCfg.MediatorReconnects = 3
-	eCfg.MediatorStats = utils.INTERNAL
+	eCfg.MediatorStats = ""
 	eCfg.MediatorStoreDisable = false
 	eCfg.SMEnabled = false
 	eCfg.SMSwitchType = FS
@@ -176,6 +176,21 @@ func TestSanityCheck(t *testing.T) {
 	cfg.CdrcCdrFields = map[string][]*utils.RSRField{"extra1": []*utils.RSRField{&utils.RSRField{Id: "test"}}}
 	if err := cfg.checkConfigSanity(); err == nil {
 		t.Error("Failed to detect improper use of CDR field names")
+	}
+	cfg = &CGRConfig{}
+	cfg.CDRSStats = utils.INTERNAL
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed detecting improper CDRStats configuration within CDRS")
+	}
+	cfg = &CGRConfig{}
+	cfg.MediatorStats = utils.INTERNAL
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed detecting improper CDRStats configuration within Mediator")
+	}
+	cfg = &CGRConfig{}
+	cfg.SMCdrS = utils.INTERNAL
+	if err := cfg.checkConfigSanity(); err == nil {
+		t.Error("Failed detecting improper CDRS configuration within SM")
 	}
 }
 

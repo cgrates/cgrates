@@ -211,7 +211,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.MediatorEnabled = false
 	self.MediatorRater = utils.INTERNAL
 	self.MediatorReconnects = 3
-	self.MediatorStats = utils.INTERNAL
+	self.MediatorStats = ""
 	self.MediatorStoreDisable = false
 	self.DerivedChargers = make(utils.DerivedChargers, 0)
 	self.CombinedDerivedChargers = true
@@ -262,6 +262,15 @@ func (self *CGRConfig) checkConfigSanity() error {
 				}
 			}
 		}
+	}
+	if self.CDRSStats == utils.INTERNAL && !self.CDRStatsEnabled {
+		return errors.New("CDRStats not enabled but requested by CDRS component.")
+	}
+	if self.MediatorStats == utils.INTERNAL && !self.CDRStatsEnabled {
+		return errors.New("CDRStats not enabled but requested by Mediator.")
+	}
+	if self.SMCdrS == utils.INTERNAL && !self.CDRSEnabled {
+		return errors.New("CDRS not enabled but requested by SessionManager")
 	}
 	return nil
 }
