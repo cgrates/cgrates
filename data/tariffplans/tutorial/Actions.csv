@@ -1,9 +1,9 @@
-#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,Category,BalanceWeight,SharedGroup,ExtraParameters,Weight
-TOPUP_RST_10,*topup_reset,*monetary,*out,10,*unlimited,*any,,,10,,,10
-TOPUP_RST_5,*topup_reset,*monetary,*out,5,*unlimited,*any,,,20,,,10
-TOPUP_RST_5,*topup_reset,*voice,*out,90,*unlimited,DST_1002,SPECIAL_1002,,20,,,10
-TOPUP_RST_SHARED_5,*topup,*monetary,*out,5,*unlimited,*any,,,10,SHARED_A,,10
-SHARED_A_0,*topup_reset,*monetary,*out,0,*unlimited,*any,,,10,SHARED_A,,10
+#ActionsTag[0],Action[1],ExtraParameters[2],BalanceType[3],Direction[4],Category[5],DestinationTag[6],RatingSubject[7],SharedGroup[8],ExpiryTime[9],Units[10],BalanceWeight[11],Weight[12]
+TOPUP_RST_10,*topup_reset,,*monetary,*out,,*any,,,*unlimited,10,10,10
+TOPUP_RST_5,*topup_reset,,*monetary,*out,,*any,,,*unlimited,5,20,10
+TOPUP_RST_5,*topup_reset,,*voice,*out,,DST_1002,SPECIAL_1002,,*unlimited,90,20,10
+TOPUP_RST_SHARED_5,*topup,,*monetary,*out,,*any,,SHARED_A,*unlimited,5,10,10
+SHARED_A_0,*topup_reset,,*monetary,*out,,*any,,SHARED_A,*unlimited,0,10,10
 LOG_WARNING,*log,,,,,,,,,,,10
 DISABLE_AND_LOG,*log,,,,,,,,,,,10
 DISABLE_AND_LOG,*disable_account,,,,,,,,,,,10

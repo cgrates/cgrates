@@ -312,6 +312,26 @@ type FileLineRegexValidator struct {
 	Message         string         // Pass this message as helper
 }
 
+// Keep here the index reference for all the files, so we can use it as base for both loader and importer
+//ToDo: Add the rest of the files
+var CSV_FIELD_INDEX = map[string]map[string]int{
+	utils.ACTIONS_CSV: map[string]int{
+		utils.CSVFLD_ACTIONS_TAG:     0,
+		utils.CSVFLD_ACTION:          1,
+		utils.CSVFLD_EXTRA_PARAMS:    2,
+		utils.CSVFLD_BALANCE_TYPE:    3,
+		utils.CSVFLD_DIRECTION:       4,
+		utils.CSVFLD_CATEGORY:        5,
+		utils.CSVFLD_DESTINATION_TAG: 6,
+		utils.CSVFLD_RATING_SUBJECT:  7,
+		utils.CSVFLD_SHARED_GROUP:    8,
+		utils.CSVFLD_EXPIRY_TIME:     9,
+		utils.CSVFLD_UNITS:           10,
+		utils.CSVFLD_BALANCE_WEIGHT:  11,
+		utils.CSVFLD_WEIGHT:          12,
+	},
+}
+
 var FileValidators = map[string]*FileLineRegexValidator{
 	utils.DESTINATIONS_CSV: &FileLineRegexValidator{utils.DESTINATIONS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\+?\d+.?\d*){1}$`),
@@ -335,8 +355,8 @@ var FileValidators = map[string]*FileLineRegexValidator{
 		regexp.MustCompile(`(?:\w+\s*),(?:\*?\w+\s*),(?:\*\w+\s*),(?:\*?\w]+\s*)?`),
 		"Id([0-9A-Za-z_]),Account(*?[0-9A-Za-z_]),Strategy(*[0-9A-Za-z_]),RatingSubject(*?[0-9A-Za-z_])"},
 	utils.ACTIONS_CSV: &FileLineRegexValidator{utils.ACTIONS_NRCOLS,
-		regexp.MustCompile(`^(?:\w+\s*),(?:\*\w+\s*),(?:\*\w+\s*)?,(?:\*out\s*)?,(?:\d+\s*)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\*any|\w+\s*)?,(?:\*?\w+\s*)?,(?:\d+\.?\d*\s*)?,(?:\w+\s*)?,(?:\S+\s*)?,(?:\d+\.?\d*\s*)$`),
-		"Tag([0-9A-Za-z_]),Action([0-9A-Za-z_]),BalanceType([*a-z_]),Direction(*out),Units([0-9]),ExpiryTime(*[a-z_]|+[0-9][smh]|[0-9]),DestinationTag([0-9A-Za-z_]|*all),RatingSubject([0-9A-Za-z_]),BalanceWeight([0-9.]),ExtraParameters([0-9A-Za-z_:;]),Weight([0-9.])"},
+		regexp.MustCompile(`^(?:\w+\s*),(?:\*\w+\s*),(?:\S+\s*)?,(?:\*\w+\s*)?,(?:\*out\s*)?,(?:\*?\w+\s*)?,(?:\*any|\w+\s*)?,(?:\w+\s*)?,(?:\w+\s*)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\d+\s*)?,(?:\d+\.?\d*\s*)?,(?:\d+\.?\d*\s*)$`),
+		"Tag([0-9A-Za-z_]),Action([0-9A-Za-z_]),ExtraParameters([0-9A-Za-z_:;]),BalanceType([*a-z_]),Direction(*out),Category([0-9A-Za-z_]),DestinationTag([0-9A-Za-z_]|*any),RatingSubject([0-9A-Za-z_]),SharedGroup([0-9A-Za-z_]),ExpiryTime(*[a-z_]|+[0-9][smh]|[0-9]),Units([0-9]),BalanceWeight([0-9.]),Weight([0-9.])"},
 	utils.ACTION_PLANS_CSV: &FileLineRegexValidator{utils.ACTION_PLANS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
 		"Tag([0-9A-Za-z_]),ActionsTag([0-9A-Za-z_]),TimingTag([0-9A-Za-z_]),Weight([0-9.])"},

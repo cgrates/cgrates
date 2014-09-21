@@ -367,6 +367,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 	if err != nil {
 		return err
 	}
+	fieldIndex := CSV_FIELD_INDEX[utils.ACTIONS_CSV]
 	acts := make(map[string][]*utils.TPAction)
 	lineNr := 0
 	for {
@@ -380,16 +381,18 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		actId, actionType, balanceType, direction, destTag, rateSubject, category, sharedGroup := record[0], record[1], record[2], record[3], record[6], record[7], record[8], record[10]
-		units, err := strconv.ParseFloat(record[4], 64)
-		if err != nil && record[4] != "" {
+		actId, actionType, balanceType, direction, destTag, rateSubject, category, sharedGroup := record[fieldIndex[utils.CSVFLD_ACTIONS_TAG]], record[fieldIndex[utils.CSVFLD_ACTION]],
+			record[fieldIndex[utils.CSVFLD_BALANCE_TYPE]], record[fieldIndex[utils.CSVFLD_DIRECTION]], record[fieldIndex[utils.CSVFLD_DESTINATION_TAG]], record[fieldIndex[utils.CSVFLD_RATING_SUBJECT]],
+			record[fieldIndex[utils.CSVFLD_CATEGORY]], record[fieldIndex[utils.CSVFLD_SHARED_GROUP]]
+		units, err := strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_UNITS]], 64)
+		if err != nil && record[fieldIndex[utils.CSVFLD_UNITS]] != "" {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
 			}
 			continue
 		}
-		balanceWeight, _ := strconv.ParseFloat(record[9], 64)
-		weight, err := strconv.ParseFloat(record[12], 64)
+		balanceWeight, _ := strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_BALANCE_WEIGHT]], 64)
+		weight, err := strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_WEIGHT]], 64)
 		if err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
@@ -410,7 +413,7 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			Category:        category,
 			SharedGroup:     sharedGroup,
 			BalanceWeight:   balanceWeight,
-			ExtraParameters: record[11],
+			ExtraParameters: record[fieldIndex[utils.CSVFLD_EXTRA_PARAMS]],
 			Weight:          weight,
 		})
 	}

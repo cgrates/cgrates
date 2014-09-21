@@ -654,46 +654,47 @@ func (csvr *CSVReader) LoadActions() (err error) {
 	if fp != nil {
 		defer fp.Close()
 	}
+	fieldIndex := CSV_FIELD_INDEX[utils.ACTIONS_CSV]
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
+		tag := record[fieldIndex[utils.CSVFLD_ACTIONS_TAG]]
 		var units float64
-		if len(record[4]) == 0 { // Not defined
+		if len(record[fieldIndex[utils.CSVFLD_UNITS]]) == 0 { // Not defined
 			units = 0.0
 		} else {
-			units, err = strconv.ParseFloat(record[4], 64)
+			units, err = strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_UNITS]], 64)
 			if err != nil {
 				return fmt.Errorf("Could not parse action units: %v", err)
 			}
 		}
 		var balanceWeight float64
-		if len(record[9]) == 0 { // Not defined
+		if len(record[fieldIndex[utils.CSVFLD_BALANCE_WEIGHT]]) == 0 { // Not defined
 			balanceWeight = 0.0
 		} else {
-			balanceWeight, err = strconv.ParseFloat(record[9], 64)
+			balanceWeight, err = strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_BALANCE_WEIGHT]], 64)
 			if err != nil {
 				return fmt.Errorf("Could not parse action balance weight: %v", err)
 			}
 		}
-		weight, err := strconv.ParseFloat(record[12], 64)
+		weight, err := strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_WEIGHT]], 64)
 		if err != nil {
 			return fmt.Errorf("Could not parse action weight: %v", err)
 		}
 		a := &Action{
 			Id:               utils.GenUUID(),
-			ActionType:       record[1],
-			BalanceType:      record[2],
-			Direction:        record[3],
+			ActionType:       record[fieldIndex[utils.CSVFLD_ACTION]],
+			BalanceType:      record[fieldIndex[utils.CSVFLD_BALANCE_TYPE]],
+			Direction:        record[fieldIndex[utils.CSVFLD_DIRECTION]],
 			Weight:           weight,
-			ExpirationString: record[5],
-			ExtraParameters:  record[11],
+			ExpirationString: record[fieldIndex[utils.CSVFLD_EXPIRY_TIME]],
+			ExtraParameters:  record[fieldIndex[utils.CSVFLD_EXTRA_PARAMS]],
 			Balance: &Balance{
 				Uuid:          utils.GenUUID(),
 				Value:         units,
 				Weight:        balanceWeight,
-				DestinationId: record[6],
-				RatingSubject: record[7],
-				Category:      record[8],
-				SharedGroup:   record[10],
+				DestinationId: record[fieldIndex[utils.CSVFLD_DESTINATION_TAG]],
+				RatingSubject: record[fieldIndex[utils.CSVFLD_RATING_SUBJECT]],
+				Category:      record[fieldIndex[utils.CSVFLD_CATEGORY]],
+				SharedGroup:   record[fieldIndex[utils.CSVFLD_SHARED_GROUP]],
 			},
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {

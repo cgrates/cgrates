@@ -140,16 +140,16 @@ SG3,*any,*lowest,
 `
 
 	actions = `
-MINI,*topup_reset,*monetary,*out,10,*unlimited,,,,10,,,10
-MINI,*topup,*voice,*out,100,*unlimited,NAT,test,,10,,,10
-SHARED,*topup,*monetary,*out,100,*unlimited,,,,10,SG1,,10
-TOPUP10_AC,*topup_reset,*monetary,*out,1,*unlimited,*any,,,10,,,10
-TOPUP10_AC1,*topup_reset,*voice,*out,40,*unlimited,DST_UK_Mobile_BIG5,discounted_minutes,,10,,,10
-SE0,*topup_reset,*monetary,*out,0,*unlimited,,,,10,SG2,,10
-SE10,*topup_reset,*monetary,*out,10,*unlimited,,,,5,SG2,,10
-SE10,*topup,*monetary,*out,10,*unlimited,,,,10,,,10
-EE0,*topup_reset,*monetary,*out,0,*unlimited,,,,10,SG3,,10
-EE0,*allow_negative,*monetary,*out,0,*unlimited,,,,10,,,10
+MINI,*topup_reset,,*monetary,*out,,,,,*unlimited,10,10,10
+MINI,*topup,,*voice,*out,,NAT,test,,*unlimited,100,10,10
+SHARED,*topup,,*monetary,*out,,,,SG1,*unlimited,100,10,10
+TOPUP10_AC,*topup_reset,,*monetary,*out,,*any,,,*unlimited,1,10,10
+TOPUP10_AC1,*topup_reset,,*voice,*out,,DST_UK_Mobile_BIG5,discounted_minutes,,*unlimited,40,10,10
+SE0,*topup_reset,,*monetary,*out,,,,SG2,*unlimited,0,10,10
+SE10,*topup_reset,,*monetary,*out,,,,SG2,*unlimited,10,5,10
+SE10,*topup,,*monetary,*out,,,,,*unlimited,10,10,10
+EE0,*topup_reset,,*monetary,*out,,,,SG3,*unlimited,0,10,10
+EE0,*allow_negative,,*monetary,*out,,,,,*unlimited,0,10,10
 `
 	actionTimings = `
 MORE_MINUTES,MINI,ONE_TIME_RUN,10

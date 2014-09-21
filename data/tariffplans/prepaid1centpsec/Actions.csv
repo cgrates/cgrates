@@ -1,6 +1,6 @@
-#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,Category,BalanceWeight,SharedGroup,ExtraParameters,Weight
-PREPAID_10,*topup_reset,*monetary,*out,10,*unlimited,*any,,,10,,,10
-BONUS_1,*topup,*monetary,*out,1,*unlimited,*any,,,10,,,10
+#ActionsTag[0],Action[1],ActionExtraParameters[2],BalanceType[3],Direction[4],Category[5],DestinationTag[6],RatingSubject[7],SharedGroup[8],ExpiryTime[9],Units[10],BalanceWeight[11],Weight[12]
+PREPAID_10,*topup_reset,,*monetary,*out,,*any,,,*unlimited,10,10,10
+BONUS_1,*topup,,*monetary,*out,,*any,,,*unlimited,1,10,10
 LOG_BALANCE,*log,,,,,,,,,,,10
-CDRST_WARN_HTTP,*call_url,,,,,,,,,,http://localhost:8080,10
+CDRST_WARN_HTTP,*call_url,http://localhost:8080,,,,,,,,,,10
 CDRST_LOG,*log,,,,,,,,,,,10

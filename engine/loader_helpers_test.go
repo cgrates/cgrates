@@ -61,13 +61,13 @@ DUMMY,INVALID;DATA
 *out,cgrates.org,call,subj1;alias1,2012-01-01T00:00:00Z,RP_RETAIL,
 `
 
-var actionsSample = `#ActionsTag,Action,BalanceType,Direction,Units,ExpiryTime,DestinationTag,RatingSubject,BalanceWeight,SharedGroup,ExtraParameters,Weight
-PREPAID_10,*topup_reset,*monetary,*out,5,*unlimited,*any,,,10,,10
-WARN_HTTP,*call_url,,,,,,,,,http://localhost:8000,10
-LOG_BALANCE,*log,,,,,,,,,,10
+var actionsSample = `#ActionsTag[0],Action[1],ExtraParameters[2],BalanceType[3],Direction[4],Category[5],DestinationTag[6],RatingSubject[7],SharedGroup[8],ExpiryTime[9],Units[10],BalanceWeight[11],Weight[12]
+PREPAID_10,*topup_reset,,*monetary,*out,,*any,,,*unlimited,5,10,10
+WARN_HTTP,*call_url,http://localhost:8000,,,,,,,,,,10
+LOG_BALANCE,*log,,,,,,,,,,,10
 DUMMY,INVALID;DATA
-PREPAID_10,*topup_reset,*monetary,*out,5,*unlimited,*any,,10,,10
-TOPUP_RST_SHARED_5,*topup_reset,*monetary,*out,5,*unlimited,*any,subj,20,SHARED_A,param&some,10
+PREPAID_10,*topup_reset,,*monetary,*out,,*any,,*unlimited,5,10,10
+TOPUP_RST_SHARED_5,*topup_reset,param&some,*monetary,*out,,*any,subj,SHARED_A,*unlimited,5,20,10
 `
 
 var actionTimingsSample = `#Tag,ActionsTag,TimingTag,Weight

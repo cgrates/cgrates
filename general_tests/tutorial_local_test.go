@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"log"
 	"net/rpc"
 	"net/rpc/jsonrpc"
 	"os/exec"
@@ -36,15 +35,16 @@ var tutCfgPath string
 var tutCfg *config.CGRConfig
 var tutRpc *rpc.Client
 
-func init() {
+func TestInitCfg(t *testing.T) {
 	if !*testLocal {
 		return
 	}
+	// Init config first
 	tutCfgPath = path.Join(*dataDir, "conf", "samples", "tutorial_local_test.cfg")
 	var err error
 	tutCfg, err = config.NewCGRConfigFromFile(&tutCfgPath)
 	if err != nil {
-		log.Print("ERROR: ", err)
+		t.Error(err)
 	}
 	tutCfg.DataFolderPath = *dataDir // Share DataFolderPath through config towards StoreDb for Flush()
 	config.SetCgrConfig(tutCfg)
