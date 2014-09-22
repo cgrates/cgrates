@@ -84,7 +84,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		}
 	}
 	exportTemplate := self.Config.CdreDefaultInstance
-	if attr.ExportTemplate != nil { // XML Template defined, can be field names or xml reference
+	if attr.ExportTemplate != nil && len(*attr.ExportTemplate) != 0 { // XML Template defined, can be field names or xml reference
 		if strings.HasPrefix(*attr.ExportTemplate, utils.XML_PROFILE_PREFIX) {
 			if self.Config.XmlCfgDocument == nil {
 				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, "XmlDocumentNotLoaded")
@@ -109,7 +109,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		return fmt.Errorf("%s:ExportTemplate", utils.ERR_MANDATORY_IE_MISSING)
 	}
 	cdrFormat := exportTemplate.CdrFormat
-	if attr.CdrFormat != nil {
+	if attr.CdrFormat != nil && len(*attr.CdrFormat) != 0 {
 		cdrFormat = strings.ToLower(*attr.CdrFormat)
 	}
 	if !utils.IsSliceMember(utils.CdreCdrFormats, cdrFormat) {
@@ -120,15 +120,15 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		fieldSep = *attr.FieldSeparator
 	}
 	exportDir := exportTemplate.ExportDir
-	if attr.ExportDir != nil {
+	if attr.ExportDir != nil && len(*attr.ExportDir) != 0 {
 		exportDir = *attr.ExportDir
 	}
 	exportId := strconv.FormatInt(time.Now().Unix(), 10)
-	if attr.ExportId != nil {
+	if attr.ExportId != nil && len(*attr.ExportId) != 0 {
 		exportId = *attr.ExportId
 	}
 	fileName := fmt.Sprintf("cdre_%s.%s", exportId, cdrFormat)
-	if attr.ExportFileName != nil {
+	if attr.ExportFileName != nil && len(*attr.ExportFileName) != 0 {
 		fileName = *attr.ExportFileName
 	}
 	filePath := path.Join(exportDir, fileName)
@@ -136,11 +136,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		filePath = utils.CDRE_DRYRUN
 	}
 	dataUsageMultiplyFactor := exportTemplate.DataUsageMultiplyFactor
-	if attr.DataUsageMultiplyFactor != nil {
+	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
 		dataUsageMultiplyFactor = *attr.DataUsageMultiplyFactor
 	}
 	costMultiplyFactor := exportTemplate.CostMultiplyFactor
-	if attr.CostMultiplyFactor != nil {
+	if attr.CostMultiplyFactor != nil && *attr.CostMultiplyFactor != 0.0 {
 		costMultiplyFactor = *attr.CostMultiplyFactor
 	}
 	costShiftDigits := exportTemplate.CostShiftDigits
@@ -152,7 +152,7 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		roundingDecimals = *attr.RoundDecimals
 	}
 	maskDestId := exportTemplate.MaskDestId
-	if attr.MaskDestinationId != nil {
+	if attr.MaskDestinationId != nil && len(*attr.MaskDestinationId) != 0 {
 		maskDestId = *attr.MaskDestinationId
 	}
 	maskLen := exportTemplate.MaskLength
