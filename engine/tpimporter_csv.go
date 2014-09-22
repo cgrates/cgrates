@@ -367,7 +367,6 @@ func (self *TPCSVImporter) importActions(fn string) error {
 	if err != nil {
 		return err
 	}
-	fieldIndex := CSV_FIELD_INDEX[utils.ACTIONS_CSV]
 	acts := make(map[string][]*utils.TPAction)
 	lineNr := 0
 	for {
@@ -381,18 +380,18 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			}
 			continue
 		}
-		actId, actionType, balanceType, direction, destTag, rateSubject, category, sharedGroup := record[fieldIndex[utils.CSVFLD_ACTIONS_TAG]], record[fieldIndex[utils.CSVFLD_ACTION]],
-			record[fieldIndex[utils.CSVFLD_BALANCE_TYPE]], record[fieldIndex[utils.CSVFLD_DIRECTION]], record[fieldIndex[utils.CSVFLD_DESTINATION_TAG]], record[fieldIndex[utils.CSVFLD_RATING_SUBJECT]],
-			record[fieldIndex[utils.CSVFLD_CATEGORY]], record[fieldIndex[utils.CSVFLD_SHARED_GROUP]]
-		units, err := strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_UNITS]], 64)
-		if err != nil && record[fieldIndex[utils.CSVFLD_UNITS]] != "" {
+		actId, actionType, balanceType, direction, destTag, rateSubject, category, sharedGroup := record[ACTSCSVIDX_TAG], record[ACTSCSVIDX_ACTION],
+			record[ACTSCSVIDX_BALANCE_TYPE], record[ACTSCSVIDX_DIRECTION], record[ACTSCSVIDX_DESTINATION_TAG], record[ACTSCSVIDX_RATING_SUBJECT],
+			record[ACTSCSVIDX_CATEGORY], record[ACTSCSVIDX_SHARED_GROUP]
+		units, err := strconv.ParseFloat(record[ACTSCSVIDX_UNITS], 64)
+		if err != nil && record[ACTSCSVIDX_UNITS] != "" {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
 			}
 			continue
 		}
-		balanceWeight, _ := strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_BALANCE_WEIGHT]], 64)
-		weight, err := strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_WEIGHT]], 64)
+		balanceWeight, _ := strconv.ParseFloat(record[ACTSCSVIDX_BALANCE_WEIGHT], 64)
+		weight, err := strconv.ParseFloat(record[ACTSCSVIDX_WEIGHT], 64)
 		if err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
@@ -407,13 +406,13 @@ func (self *TPCSVImporter) importActions(fn string) error {
 			BalanceType:     balanceType,
 			Direction:       direction,
 			Units:           units,
-			ExpiryTime:      record[5],
+			ExpiryTime:      record[ACTSCSVIDX_EXPIRY_TIME],
 			DestinationId:   destTag,
 			RatingSubject:   rateSubject,
 			Category:        category,
 			SharedGroup:     sharedGroup,
 			BalanceWeight:   balanceWeight,
-			ExtraParameters: record[fieldIndex[utils.CSVFLD_EXTRA_PARAMS]],
+			ExtraParameters: record[ACTSCSVIDX_EXTRA_PARAMS],
 			Weight:          weight,
 		})
 	}
@@ -494,37 +493,39 @@ func (self *TPCSVImporter) importActionTriggers(fn string) error {
 			}
 			continue
 		}
-		tag, balanceType, direction, thresholdType, destinationTag, balanceExpirationDate, balanceRatingSubject, balanceCategory, balanceSharedGroup, actionsTag := record[0], record[1], record[2], record[3], record[7], record[9], record[10], record[10], record[12], record[14]
-		threshold, err := strconv.ParseFloat(record[4], 64)
+		tag, balanceType, direction, thresholdType, destinationTag, balanceExpirationDate, balanceRatingSubject, balanceCategory, balanceSharedGroup, actionsTag := record[ATRIGCSVIDX_TAG], record[ATRIGCSVIDX_BAL_TYPE],
+			record[ATRIGCSVIDX_BAL_DIRECTION], record[ATRIGCSVIDX_THRESHOLD_TYPE], record[ATRIGCSVIDX_BAL_DESTINATION_TAG], record[ATRIGCSVIDX_BAL_EXPIRY_TIME], record[ATRIGCSVIDX_BAL_RATING_SUBJECT],
+			record[ATRIGCSVIDX_BAL_CATEGORY], record[ATRIGCSVIDX_BAL_SHARED_GROUP], record[ATRIGCSVIDX_ACTIONS_TAG]
+		threshold, err := strconv.ParseFloat(record[ATRIGCSVIDX_THRESHOLD_VALUE], 64)
 		if err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
 			}
 			continue
 		}
-		recurrent, err := strconv.ParseBool(record[5])
+		recurrent, err := strconv.ParseBool(record[ATRIGCSVIDX_RECURRENT])
 		if err != nil {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
 			continue
 		}
-		minSleep, err := time.ParseDuration(record[6])
-		if err != nil && record[6] != "" {
+		minSleep, err := time.ParseDuration(record[ATRIGCSVIDX_MIN_SLEEP])
+		if err != nil && record[ATRIGCSVIDX_MIN_SLEEP] != "" {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
 			continue
 		}
-		balanceWeight, err := strconv.ParseFloat(record[8], 64)
-		if err != nil && record[8] != "" {
+		balanceWeight, err := strconv.ParseFloat(record[ATRIGCSVIDX_BAL_WEIGHT], 64)
+		if err != nil && record[ATRIGCSVIDX_BAL_WEIGHT] != "" {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())
 			}
 			continue
 		}
-		minQueuedItems, err := strconv.Atoi(record[13])
-		if err != nil && record[12] != "" {
+		minQueuedItems, err := strconv.Atoi(record[ATRIGCSVIDX_STATS_MIN_QUEUED_ITEMS])
+		if err != nil && record[ATRIGCSVIDX_STATS_MIN_QUEUED_ITEMS] != "" {
 			log.Printf("Ignoring line %d, warning: <%s>", lineNr, err.Error())
 			continue
 		}
-		weight, err := strconv.ParseFloat(record[15], 64)
+		weight, err := strconv.ParseFloat(record[ATRIGCSVIDX_WEIGHT], 64)
 		if err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, warning: <%s> ", lineNr, err.Error())

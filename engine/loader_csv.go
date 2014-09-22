@@ -654,47 +654,46 @@ func (csvr *CSVReader) LoadActions() (err error) {
 	if fp != nil {
 		defer fp.Close()
 	}
-	fieldIndex := CSV_FIELD_INDEX[utils.ACTIONS_CSV]
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[fieldIndex[utils.CSVFLD_ACTIONS_TAG]]
+		tag := record[ACTSCSVIDX_TAG]
 		var units float64
-		if len(record[fieldIndex[utils.CSVFLD_UNITS]]) == 0 { // Not defined
+		if len(record[ACTSCSVIDX_UNITS]) == 0 { // Not defined
 			units = 0.0
 		} else {
-			units, err = strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_UNITS]], 64)
+			units, err = strconv.ParseFloat(record[ACTSCSVIDX_UNITS], 64)
 			if err != nil {
 				return fmt.Errorf("Could not parse action units: %v", err)
 			}
 		}
 		var balanceWeight float64
-		if len(record[fieldIndex[utils.CSVFLD_BALANCE_WEIGHT]]) == 0 { // Not defined
+		if len(record[ACTSCSVIDX_BALANCE_WEIGHT]) == 0 { // Not defined
 			balanceWeight = 0.0
 		} else {
-			balanceWeight, err = strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_BALANCE_WEIGHT]], 64)
+			balanceWeight, err = strconv.ParseFloat(record[ACTSCSVIDX_BALANCE_WEIGHT], 64)
 			if err != nil {
 				return fmt.Errorf("Could not parse action balance weight: %v", err)
 			}
 		}
-		weight, err := strconv.ParseFloat(record[fieldIndex[utils.CSVFLD_WEIGHT]], 64)
+		weight, err := strconv.ParseFloat(record[ACTSCSVIDX_WEIGHT], 64)
 		if err != nil {
 			return fmt.Errorf("Could not parse action weight: %v", err)
 		}
 		a := &Action{
 			Id:               utils.GenUUID(),
-			ActionType:       record[fieldIndex[utils.CSVFLD_ACTION]],
-			BalanceType:      record[fieldIndex[utils.CSVFLD_BALANCE_TYPE]],
-			Direction:        record[fieldIndex[utils.CSVFLD_DIRECTION]],
+			ActionType:       record[ACTSCSVIDX_ACTION],
+			BalanceType:      record[ACTSCSVIDX_BALANCE_TYPE],
+			Direction:        record[ACTSCSVIDX_DIRECTION],
 			Weight:           weight,
-			ExpirationString: record[fieldIndex[utils.CSVFLD_EXPIRY_TIME]],
-			ExtraParameters:  record[fieldIndex[utils.CSVFLD_EXTRA_PARAMS]],
+			ExpirationString: record[ACTSCSVIDX_EXPIRY_TIME],
+			ExtraParameters:  record[ACTSCSVIDX_EXTRA_PARAMS],
 			Balance: &Balance{
 				Uuid:          utils.GenUUID(),
 				Value:         units,
 				Weight:        balanceWeight,
-				DestinationId: record[fieldIndex[utils.CSVFLD_DESTINATION_TAG]],
-				RatingSubject: record[fieldIndex[utils.CSVFLD_RATING_SUBJECT]],
-				Category:      record[fieldIndex[utils.CSVFLD_CATEGORY]],
-				SharedGroup:   record[fieldIndex[utils.CSVFLD_SHARED_GROUP]],
+				DestinationId: record[ACTSCSVIDX_DESTINATION_TAG],
+				RatingSubject: record[ACTSCSVIDX_RATING_SUBJECT],
+				Category:      record[ACTSCSVIDX_CATEGORY],
+				SharedGroup:   record[ACTSCSVIDX_SHARED_GROUP],
 			},
 		}
 		if _, err := utils.ParseDate(a.ExpirationString); err != nil {
@@ -760,57 +759,57 @@ func (csvr *CSVReader) LoadActionTriggers() (err error) {
 		defer fp.Close()
 	}
 	for record, err := csvReader.Read(); err == nil; record, err = csvReader.Read() {
-		tag := record[0]
-		value, err := strconv.ParseFloat(record[4], 64)
+		tag := record[ATRIGCSVIDX_TAG]
+		value, err := strconv.ParseFloat(record[ATRIGCSVIDX_THRESHOLD_VALUE], 64)
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger value (%v): %v", record[4], err)
+			return fmt.Errorf("Could not parse action trigger threshold value (%v): %v", record[ATRIGCSVIDX_THRESHOLD_VALUE], err)
 		}
-		recurrent, err := strconv.ParseBool(record[5])
+		recurrent, err := strconv.ParseBool(record[ATRIGCSVIDX_RECURRENT])
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger recurrent flag (%v): %v", record[5], err)
+			return fmt.Errorf("Could not parse action trigger recurrent flag (%v): %v", record[ATRIGCSVIDX_RECURRENT], err)
 		}
 
-		minSleep, err := time.ParseDuration(record[6])
+		minSleep, err := time.ParseDuration(record[ATRIGCSVIDX_MIN_SLEEP])
 		if err != nil {
-			if record[6] == "" {
+			if record[ATRIGCSVIDX_MIN_SLEEP] == "" {
 				minSleep = 0
 			} else {
-				return fmt.Errorf("Could not parse action trigger MinSleep (%v): %v", record[6], err)
+				return fmt.Errorf("Could not parse action trigger MinSleep (%v): %v", record[ATRIGCSVIDX_MIN_SLEEP], err)
 			}
 		}
-		balanceWeight, err := strconv.ParseFloat(record[8], 64)
-		if record[8] != "" && err != nil {
-			return fmt.Errorf("Could not parse action trigger BalanceWeight (%v): %v", record[8], err)
+		balanceWeight, err := strconv.ParseFloat(record[ATRIGCSVIDX_BAL_WEIGHT], 64)
+		if record[ATRIGCSVIDX_BAL_WEIGHT] != "" && err != nil {
+			return fmt.Errorf("Could not parse action trigger BalanceWeight (%v): %v", record[ATRIGCSVIDX_BAL_WEIGHT], err)
 		}
-		balanceExp, err := utils.ParseTimeDetectLayout(record[9])
-		if record[9] != "" && err != nil {
-			return fmt.Errorf("Could not parse action trigger BalanceExpirationDate (%v): %v", record[9], err)
+		balanceExp, err := utils.ParseTimeDetectLayout(record[ATRIGCSVIDX_BAL_EXPIRY_TIME])
+		if record[ATRIGCSVIDX_BAL_EXPIRY_TIME] != "" && err != nil {
+			return fmt.Errorf("Could not parse action trigger BalanceExpirationDate (%v): %v", record[ATRIGCSVIDX_BAL_EXPIRY_TIME], err)
 		}
-		minQI, err := strconv.Atoi(record[13])
-		if record[13] != "" && err != nil {
-			return fmt.Errorf("Could not parse action trigger MinQueuedItems (%v): %v", record[13], err)
+		minQI, err := strconv.Atoi(record[ATRIGCSVIDX_STATS_MIN_QUEUED_ITEMS])
+		if record[ATRIGCSVIDX_STATS_MIN_QUEUED_ITEMS] != "" && err != nil {
+			return fmt.Errorf("Could not parse action trigger MinQueuedItems (%v): %v", record[ATRIGCSVIDX_STATS_MIN_QUEUED_ITEMS], err)
 		}
-		weight, err := strconv.ParseFloat(record[15], 64)
+		weight, err := strconv.ParseFloat(record[ATRIGCSVIDX_WEIGHT], 64)
 		if err != nil {
-			return fmt.Errorf("Could not parse action trigger weight (%v): %v", record[15], err)
+			return fmt.Errorf("Could not parse action trigger weight (%v): %v", record[ATRIGCSVIDX_WEIGHT], err)
 		}
 
 		at := &ActionTrigger{
 			Id:                    utils.GenUUID(),
-			BalanceType:           record[1],
-			Direction:             record[2],
-			ThresholdType:         record[3],
+			BalanceType:           record[ATRIGCSVIDX_BAL_TYPE],
+			Direction:             record[ATRIGCSVIDX_BAL_DIRECTION],
+			ThresholdType:         record[ATRIGCSVIDX_THRESHOLD_TYPE],
 			ThresholdValue:        value,
 			Recurrent:             recurrent,
 			MinSleep:              minSleep,
-			DestinationId:         record[7],
+			DestinationId:         record[ATRIGCSVIDX_BAL_DESTINATION_TAG],
 			BalanceWeight:         balanceWeight,
 			BalanceExpirationDate: balanceExp,
-			BalanceRatingSubject:  record[10],
-			BalanceCategory:       record[11],
-			BalanceSharedGroup:    record[12],
+			BalanceRatingSubject:  record[ATRIGCSVIDX_BAL_RATING_SUBJECT],
+			BalanceCategory:       record[ATRIGCSVIDX_BAL_CATEGORY],
+			BalanceSharedGroup:    record[ATRIGCSVIDX_BAL_SHARED_GROUP],
 			MinQueuedItems:        minQI,
-			ActionsId:             record[14],
+			ActionsId:             record[ATRIGCSVIDX_ACTIONS_TAG],
 			Weight:                weight,
 		}
 		csvr.actionsTriggers[tag] = append(csvr.actionsTriggers[tag], at)

@@ -76,10 +76,10 @@ DUMMY,INVALID;DATA
 `
 
 var actionTriggersSample = `#Tag,BalanceTag,Direction,ThresholdType,ThresholdValue,Recurrent,MinSleep,BalanceDestinationTag,BalanceWeight,BalanceExpiryTime,BalanceRatingSubject,BalanceCategory,BalanceSharedGroup,StatsMinQueuedItems,ActionsTag,Weight
-STANDARD_TRIGGERS,*monetary,*out,*min_balance,2,false,0,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*monetary,*out,*max_balance,20,false,0,,,,,,,,LOG_WARNING,10
-STANDARD_TRIGGERS,*monetary,*out,*max_counter,15,false,0,FS_USERS,,,,,,,LOG_WARNING,10
-CDRST1_WARN_ASR,,,*min_asr,45,true,1h,,,,,,,3,CDRST_WARN_HTTP,10
+STANDARD_TRIGGERS,*min_balance,2,false,0,*monetary,*out,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*max_balance,20,false,0,*monetary,*out,,,,,,,,LOG_WARNING,10
+STANDARD_TRIGGERS,*max_counter,15,false,0,*monetary,*out,,FS_USERS,,,,,,LOG_WARNING,10
+CDRST1_WARN_ASR,*min_asr,45,true,1h,,,,,,,,,3,CDRST_WARN_HTTP,10
 DUMMY,INVALID;DATA
 `
 

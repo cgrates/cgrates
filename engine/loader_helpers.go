@@ -34,6 +34,43 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+// Define here fields within utils.ACTIONS_CSV file
+const (
+	ACTSCSVIDX_TAG = iota
+	ACTSCSVIDX_ACTION
+	ACTSCSVIDX_EXTRA_PARAMS
+	ACTSCSVIDX_BALANCE_TYPE
+	ACTSCSVIDX_DIRECTION
+	ACTSCSVIDX_CATEGORY
+	ACTSCSVIDX_DESTINATION_TAG
+	ACTSCSVIDX_RATING_SUBJECT
+	ACTSCSVIDX_SHARED_GROUP
+	ACTSCSVIDX_EXPIRY_TIME
+	ACTSCSVIDX_UNITS
+	ACTSCSVIDX_BALANCE_WEIGHT
+	ACTSCSVIDX_WEIGHT
+)
+
+// Define here fields within utils.ACTION_TRIGGERS_CSV file
+const (
+	ATRIGCSVIDX_TAG = iota
+	ATRIGCSVIDX_THRESHOLD_TYPE
+	ATRIGCSVIDX_THRESHOLD_VALUE
+	ATRIGCSVIDX_RECURRENT
+	ATRIGCSVIDX_MIN_SLEEP
+	ATRIGCSVIDX_BAL_TYPE
+	ATRIGCSVIDX_BAL_DIRECTION
+	ATRIGCSVIDX_BAL_CATEGORY
+	ATRIGCSVIDX_BAL_DESTINATION_TAG
+	ATRIGCSVIDX_BAL_RATING_SUBJECT
+	ATRIGCSVIDX_BAL_SHARED_GROUP
+	ATRIGCSVIDX_BAL_EXPIRY_TIME
+	ATRIGCSVIDX_BAL_WEIGHT
+	ATRIGCSVIDX_STATS_MIN_QUEUED_ITEMS
+	ATRIGCSVIDX_ACTIONS_TAG
+	ATRIGCSVIDX_WEIGHT
+)
+
 type TPLoader interface {
 	LoadDestinations() error
 	LoadRates() error
@@ -97,7 +134,6 @@ func NewTiming(timingInfo ...string) (rt *utils.TPTiming) {
 }
 
 func UpdateCdrStats(cs *CdrStats, triggers ActionTriggerPriotityList, tpCs *utils.TPCdrStat) {
-
 	if tpCs.QueueLength != "" {
 		if qi, err := strconv.Atoi(tpCs.QueueLength); err == nil {
 			cs.QueueLength = qi
@@ -312,26 +348,6 @@ type FileLineRegexValidator struct {
 	Message         string         // Pass this message as helper
 }
 
-// Keep here the index reference for all the files, so we can use it as base for both loader and importer
-//ToDo: Add the rest of the files
-var CSV_FIELD_INDEX = map[string]map[string]int{
-	utils.ACTIONS_CSV: map[string]int{
-		utils.CSVFLD_ACTIONS_TAG:     0,
-		utils.CSVFLD_ACTION:          1,
-		utils.CSVFLD_EXTRA_PARAMS:    2,
-		utils.CSVFLD_BALANCE_TYPE:    3,
-		utils.CSVFLD_DIRECTION:       4,
-		utils.CSVFLD_CATEGORY:        5,
-		utils.CSVFLD_DESTINATION_TAG: 6,
-		utils.CSVFLD_RATING_SUBJECT:  7,
-		utils.CSVFLD_SHARED_GROUP:    8,
-		utils.CSVFLD_EXPIRY_TIME:     9,
-		utils.CSVFLD_UNITS:           10,
-		utils.CSVFLD_BALANCE_WEIGHT:  11,
-		utils.CSVFLD_WEIGHT:          12,
-	},
-}
-
 var FileValidators = map[string]*FileLineRegexValidator{
 	utils.DESTINATIONS_CSV: &FileLineRegexValidator{utils.DESTINATIONS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){1}(?:\+?\d+.?\d*){1}$`),
@@ -360,8 +376,8 @@ var FileValidators = map[string]*FileLineRegexValidator{
 	utils.ACTION_PLANS_CSV: &FileLineRegexValidator{utils.ACTION_PLANS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*,\s*){3}(?:\d+\.?\d*){1}`),
 		"Tag([0-9A-Za-z_]),ActionsTag([0-9A-Za-z_]),TimingTag([0-9A-Za-z_]),Weight([0-9.])"},
-	utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{utils.ACTION_TRIGGERS_NRCOLS, regexp.MustCompile(`(?:\w+),(?:\*\w+)?,(?:\*out)?,(?:\*\w+),(?:\d+\.?\d*),(?:true|false)?,(?:\d+[smh]?),(?:\w+|\*any)?,(?:\d+\.?\d*)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\w+|\*any)?,(?:\w+|\*any)?,(?:\w+|\*any)?,(?:\d+)?,(?:\w+),(?:\d+\.?\d*)$`),
-		"Tag([0-9A-Za-z_]),BalanceType(*[a-z_]),Direction(*out),ThresholdType(*[a-z_]),ThresholdValue([0-9]+),Recurrent(true|false),MinSleep([0-9]+)?,BalanceDestinationTag([0-9A-Za-z_]|*all),BalanceWeight(*[a-z_]),BalanceExpiryTime(*[a-z_]|+[0-9][smh]|[0-9]),BalanceRatingSubject(*[a-z_]),BalanceCategory([a-z_]),BalanceSharedGroup(*[a-z_]),StatsMinQueuedItems([0-9]+),ActionsTag([0-9A-Za-z_]),Weight([0-9]+)"},
+	utils.ACTION_TRIGGERS_CSV: &FileLineRegexValidator{utils.ACTION_TRIGGERS_NRCOLS, regexp.MustCompile(`(?:\w+),(?:\*\w+),(?:\d+\.?\d*),(?:true|false)?,(?:\d+[smh]?),(?:\*\w+)?,(?:\*out)?,(?:\w+|\*any)?,(?:\w+|\*any)?,(?:\w+|\*any)?,(?:\w+|\*any)?,(?:\*\w+\s*|\+\d+[smh]\s*|\d+\s*)?,(?:\d+\.?\d*)?,(?:\d+)?,(?:\w+),(?:\d+\.?\d*)$`),
+		"Tag([0-9A-Za-z_]),ThresholdType(*[a-z_]),ThresholdValue([0-9]+),Recurrent(true|false),MinSleep([0-9]+)?,#### BalanceType(*[a-z_]),BalanceDirection(*out),BalanceCategory([a-z_]),BalanceDestinationTag([0-9A-Za-z_]|*all),BalanceRatingSubject(*[a-z_]),BalanceSharedGroup(*[a-z_]),BalanceExpiryTime(*[a-z_]|+[0-9][smh]|[0-9]),BalanceWeight(*[a-z_]),StatsMinQueuedItems([0-9]+),ActionsTag([0-9A-Za-z_]),Weight([0-9]+)"},
 	utils.ACCOUNT_ACTIONS_CSV: &FileLineRegexValidator{utils.ACCOUNT_ACTIONS_NRCOLS,
 		regexp.MustCompile(`(?:\w+\s*),(?:(\w+;?)+\s*),(?:\*out\s*),(?:\w+\s*),(?:\w+\s*)$`),
 		"Tenant([0-9A-Za-z_]),Account([0-9A-Za-z_.]),Direction(*out),ActionTimingsTag([0-9A-Za-z_]),ActionTriggersTag([0-9A-Za-z_])"},
