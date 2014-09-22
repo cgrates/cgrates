@@ -22,6 +22,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"path"
@@ -31,7 +32,6 @@ import (
 
 	"github.com/cgrates/cgrates/cdre"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -39,6 +39,8 @@ func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 	efc := utils.ExportedFileCdrs{}
 	if err := self.ExportCdrsToFile(attr, &efc); err != nil {
 		return err
+	} else if efc.TotalRecords == 0 || len(efc.ExportedFilePath) == 0 {
+		return errors.New("NO_CDR_RECORDS")
 	}
 	// Create a buffer to write our archive to.
 	buf := new(bytes.Buffer)
@@ -72,7 +74,6 @@ func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.ExportedFileCdrs) error {
 	var tStart, tEnd time.Time
 	var err error
-	engine.Logger.Debug(fmt.Sprintf("ExportCdrsToFile: %+v", attr))
 	if len(attr.TimeStart) != 0 {
 		if tStart, err = utils.ParseTimeDetectLayout(attr.TimeStart); err != nil {
 			return err
