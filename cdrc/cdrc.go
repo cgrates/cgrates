@@ -133,7 +133,7 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 				return nil, fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
 			}
 		case utils.USAGE:
-			if storedCdr.Usage, err = utils.ParseDurationWithNanosecs(fieldVal); err != nil {
+			if storedCdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
 				return nil, fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
 			}
 		default: // Extra fields will not match predefined so they all show up here

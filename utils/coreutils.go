@@ -208,19 +208,14 @@ func CopyHour(src, dest time.Time) time.Time {
 	return time.Date(dest.Year(), dest.Month(), dest.Day(), src.Hour(), src.Minute(), src.Second(), src.Nanosecond(), src.Location())
 }
 
-// Parses duration, considers s as time unit if not provided
+// Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
 func ParseDurationWithSecs(durStr string) (time.Duration, error) {
-	if _, err := strconv.Atoi(durStr); err == nil { // No suffix, default to seconds
-		durStr += "s"
+	if durSecs, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
+		durNanosecs := int(durSecs * 1000000000)
+		return time.Duration(durNanosecs), nil
+	} else {
+		return time.ParseDuration(durStr)
 	}
-	return time.ParseDuration(durStr)
-}
-
-func ParseDurationWithNanosecs(durStr string) (time.Duration, error) {
-	if _, err := strconv.Atoi(durStr); err == nil { // No suffix, default to seconds
-		durStr += "ns"
-	}
-	return time.ParseDuration(durStr)
 }
 
 func AccountKey(tenant, account, direction string) string {

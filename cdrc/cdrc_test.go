@@ -44,7 +44,7 @@ func TestRecordForkCdr(t *testing.T) {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
 	cdrRow = []string{"ignored", "ignored", utils.VOICE, "acc1", "prepaid", "*out", "cgrates.org", "call", "1001", "1001", "+4986517174963",
-		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62000000000", "supplier1", "172.16.1.1"}
+		"2013-02-03 19:50:00", "2013-02-03 19:54:00", "62", "supplier1", "172.16.1.1"}
 	rtCdr, err := cdrc.recordToStoredCdr(cdrRow)
 	if err != nil {
 		t.Error("Failed to parse CDR in rated cdr", err)

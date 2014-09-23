@@ -77,14 +77,8 @@ func (storedCdr *StoredCdr) FormatUsage(layout string) string {
 		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
 	}
 	switch layout {
-	case HOURS:
-		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
-	case MINUTES:
-		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
-	case SECONDS:
-		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
 	default:
-		return strconv.FormatInt(storedCdr.Usage.Nanoseconds(), 10)
+		return strconv.FormatFloat(float64(storedCdr.Usage.Nanoseconds())/1000000000, 'f', -1, 64)
 	}
 }
 
@@ -122,10 +116,7 @@ func (storedCdr *StoredCdr) FieldAsString(rsrFld *RSRField) string {
 	case ANSWER_TIME:
 		return rsrFld.ParseValue(storedCdr.AnswerTime.String())
 	case USAGE:
-		//if IsSliceMember([]string{DATA, SMS}, storedCdr.TOR) {
-		//	return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
-		//}
-		return rsrFld.ParseValue(strconv.FormatInt(storedCdr.Usage.Nanoseconds(), 10))
+		return strconv.FormatFloat(Round(storedCdr.Usage.Seconds(), 0, ROUNDING_MIDDLE), 'f', -1, 64)
 	case MEDI_RUNID:
 		return rsrFld.ParseValue(storedCdr.MediationRunId)
 	case RATED_ACCOUNT:
@@ -182,7 +173,7 @@ func (storedCdr *StoredCdr) AsHttpForm() url.Values {
 	v.Set(DESTINATION, storedCdr.Destination)
 	v.Set(SETUP_TIME, storedCdr.SetupTime.String())
 	v.Set(ANSWER_TIME, storedCdr.AnswerTime.String())
-	v.Set(USAGE, strconv.FormatInt(storedCdr.Usage.Nanoseconds(), 10))
+	v.Set(USAGE, storedCdr.FormatUsage(SECONDS))
 	return v
 }
 
@@ -301,7 +292,7 @@ func (storedCdr *StoredCdr) ForkCdr(runId string, reqTypeFld, directionFld, tena
 	durStr := storedCdr.FieldAsString(durationFld)
 	if primaryMandatory && len(durStr) == 0 {
 		return nil, errors.New(fmt.Sprintf("%s:%s:%s", ERR_MANDATORY_IE_MISSING, USAGE, durationFld.Id))
-	} else if frkStorCdr.Usage, err = ParseDurationWithNanosecs(durStr); err != nil {
+	} else if frkStorCdr.Usage, err = ParseDurationWithSecs(durStr); err != nil {
 		return nil, err
 	}
 	frkStorCdr.ExtraFields = make(map[string]string, len(extraFlds))

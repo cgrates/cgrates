@@ -48,7 +48,7 @@ func TestFieldAsString(t *testing.T) {
 		cdr.FieldAsString(&RSRField{Id: DESTINATION}) != cdr.Destination ||
 		cdr.FieldAsString(&RSRField{Id: SETUP_TIME}) != cdr.SetupTime.String() ||
 		cdr.FieldAsString(&RSRField{Id: ANSWER_TIME}) != cdr.AnswerTime.String() ||
-		cdr.FieldAsString(&RSRField{Id: USAGE}) != "10000000000" ||
+		cdr.FieldAsString(&RSRField{Id: USAGE}) != "10" ||
 		cdr.FieldAsString(&RSRField{Id: MEDI_RUNID}) != cdr.MediationRunId ||
 		cdr.FieldAsString(&RSRField{Id: COST}) != "1.01" ||
 		cdr.FieldAsString(&RSRField{Id: RATED_ACCOUNT}) != "dan" ||
@@ -71,7 +71,7 @@ func TestFieldAsString(t *testing.T) {
 			cdr.FieldAsString(&RSRField{Id: DESTINATION}) != cdr.Destination,
 			cdr.FieldAsString(&RSRField{Id: SETUP_TIME}) != cdr.SetupTime.String(),
 			cdr.FieldAsString(&RSRField{Id: ANSWER_TIME}) != cdr.AnswerTime.String(),
-			cdr.FieldAsString(&RSRField{Id: USAGE}) != "10000000000",
+			cdr.FieldAsString(&RSRField{Id: USAGE}) != "10",
 			cdr.FieldAsString(&RSRField{Id: MEDI_RUNID}) != cdr.MediationRunId,
 			cdr.FieldAsString(&RSRField{Id: RATED_ACCOUNT}) != "dan",
 			cdr.FieldAsString(&RSRField{Id: RATED_SUBJECT}) != "dans",
@@ -225,7 +225,7 @@ func TestFormatUsage(t *testing.T) {
 	if cdr.FormatUsage(SECONDS) != "10" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage(SECONDS))
 	}
-	if cdr.FormatUsage("default") != "10000000000" {
+	if cdr.FormatUsage("default") != "10" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
 	cdr = StoredCdr{TOR: DATA, Usage: time.Duration(1640113000000000)}
@@ -280,8 +280,8 @@ func TestStoredCdrAsHttpForm(t *testing.T) {
 	if cdrForm.Get(ANSWER_TIME) != "2013-11-07 08:42:26 +0000 UTC" {
 		t.Errorf("Expected: %s, received: %s", "2013-11-07 08:42:26 +0000 UTC", cdrForm.Get(ANSWER_TIME))
 	}
-	if cdrForm.Get(USAGE) != "10000000000" {
-		t.Errorf("Expected: %s, received: %s", "10000000000", cdrForm.Get(USAGE))
+	if cdrForm.Get(USAGE) != "10" {
+		t.Errorf("Expected: %s, received: %s", "10", cdrForm.Get(USAGE))
 	}
 	if cdrForm.Get("field_extr1") != "val_extr1" {
 		t.Errorf("Expected: %s, received: %s", "val_extr1", cdrForm.Get("field_extr1"))
