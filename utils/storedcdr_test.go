@@ -232,6 +232,14 @@ func TestFormatUsage(t *testing.T) {
 	if cdr.FormatUsage("default") != "1640113" {
 		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
 	}
+	cdr = StoredCdr{Usage: time.Duration(2) * time.Millisecond}
+	if cdr.FormatUsage("default") != "0.002" {
+		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
+	}
+	cdr = StoredCdr{Usage: time.Duration(1002) * time.Millisecond}
+	if cdr.FormatUsage("default") != "1.002" {
+		t.Error("Wrong usage format: ", cdr.FormatUsage("default"))
+	}
 }
 
 func TestStoredCdrAsHttpForm(t *testing.T) {

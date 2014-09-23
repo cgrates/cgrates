@@ -517,7 +517,7 @@ type CachedItemAge struct {
 
 type AttrExpFileCdrs struct {
 	CdrFormat               *string  // Cdr output file format <utils.CdreCdrFormats>
-	FieldSeparator          *rune    // Separator used between fields
+	FieldSeparator          *string  // Separator used between fields
 	ExportId                *string  // Optional exportid
 	ExportDir               *string  // If provided it overwrites the configured export directory
 	ExportFileName          *string  // If provided the output filename will be set to this

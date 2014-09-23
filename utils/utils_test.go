@@ -389,6 +389,20 @@ func TestParseDurationWithSecs(t *testing.T) {
 	} else if parsed != durExpected {
 		t.Error("Parsed different than expected")
 	}
+	durStr = "0.002"
+	durExpected = time.Duration(2) * time.Millisecond
+	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
+		t.Error(err)
+	} else if parsed != durExpected {
+		t.Error("Parsed different than expected")
+	}
+	durStr = "1.002"
+	durExpected = time.Duration(1002) * time.Millisecond
+	if parsed, err := ParseDurationWithSecs(durStr); err != nil {
+		t.Error(err)
+	} else if parsed != durExpected {
+		t.Error("Parsed different than expected")
+	}
 }
 
 func TestMinDuration(t *testing.T) {

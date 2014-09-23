@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/cgrates/cgrates/cdre"
 	"github.com/cgrates/cgrates/config"
@@ -117,8 +118,11 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		return fmt.Errorf("%s:%s", utils.ERR_MANDATORY_IE_MISSING, "CdrFormat")
 	}
 	fieldSep := exportTemplate.FieldSeparator
-	if attr.FieldSeparator != nil {
-		fieldSep = *attr.FieldSeparator
+	if attr.FieldSeparator != nil && len(*attr.FieldSeparator) != 0 {
+		fieldSep, _ = utf8.DecodeRuneInString(*attr.FieldSeparator)
+		if fieldSep == utf8.RuneError {
+			return fmt.Errorf("%s:FieldSeparator:%s", utils.ERR_SERVER_ERROR, "Invalid")
+		}
 	}
 	exportDir := exportTemplate.ExportDir
 	if attr.ExportDir != nil && len(*attr.ExportDir) != 0 {
