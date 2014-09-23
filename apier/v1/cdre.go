@@ -22,9 +22,11 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -37,25 +39,25 @@ import (
 )
 
 func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *string) error {
+	tmpDir := "/tmp"
+	attr.ExportDir = &tmpDir // Enforce exporting to tmp always so we avoid cleanup issues
 	efc := utils.ExportedFileCdrs{}
 	if err := self.ExportCdrsToFile(attr, &efc); err != nil {
 		return err
 	} else if efc.TotalRecords == 0 || len(efc.ExportedFilePath) == 0 {
-		return errors.New("NO_CDR_RECORDS")
+		return errors.New("No CDR records to export")
 	}
 	// Create a buffer to write our archive to.
 	buf := new(bytes.Buffer)
-
 	// Create a new zip archive.
 	w := zip.NewWriter(buf)
-
 	// read generated file
 	content, err := ioutil.ReadFile(efc.ExportedFilePath)
 	if err != nil {
 		return err
 	}
-
-	f, err := w.Create("cdrs.csv")
+	exportFileName := path.Base(efc.ExportedFilePath)
+	f, err := w.Create(exportFileName)
 	if err != nil {
 		return err
 	}
@@ -63,9 +65,26 @@ func (self *ApierV1) ExportCdrsToZipString(attr utils.AttrExpFileCdrs, reply *st
 	if err != nil {
 		return err
 	}
+	// Write metadata into a separate file with extension .cgr
+	medaData, err := json.MarshalIndent(efc, "", "  ")
+	if err != nil {
+		errors.New("Failed creating metadata content")
+	}
+	medatadaFileName := exportFileName[:len(path.Ext(exportFileName))] + ".cgr"
+	mf, err := w.Create(medatadaFileName)
+	if err != nil {
+		return err
+	}
+	_, err = mf.Write(medaData)
+	if err != nil {
+		return err
+	}
 	// Make sure to check the error on Close.
 	if err := w.Close(); err != nil {
 		return err
+	}
+	if err := os.Remove(efc.ExportedFilePath); err != nil {
+		fmt.Errorf("Failed removing exported file at path: %s", efc.ExportedFilePath)
 	}
 	*reply = base64.StdEncoding.EncodeToString(buf.Bytes())
 	return nil
