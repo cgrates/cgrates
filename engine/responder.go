@@ -152,19 +152,16 @@ func (rs *Responder) FlushCache(arg CallDescriptor, reply *float64) (err error) 
 	return
 }
 
-func (rs *Responder) Status(arg string, reply *string) (err error) {
+func (rs *Responder) Status(arg string, reply *map[string]interface{}) (err error) {
 	memstats := new(runtime.MemStats)
 	runtime.ReadMemStats(memstats)
+	response := make(map[string]interface{})
 	if rs.Bal != nil {
-
-		*reply = "Connected raters:\n"
-		for _, rater := range rs.Bal.GetClientAddresses() {
-			*reply += fmt.Sprintf("%v\n", rater)
-		}
-		*reply += fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
-	} else {
-		*reply = fmt.Sprintf("memstats before GC: %dKb footprint: %dKb", memstats.HeapAlloc/1024, memstats.Sys/1024)
+		response["Raters"] = rs.Bal.GetClientAddresses()
 	}
+	response["memstat"] = memstats.HeapAlloc / 1024
+	response["footprint"] = memstats.Sys / 1024
+	*reply = response
 	return
 }
 

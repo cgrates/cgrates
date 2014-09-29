@@ -20,8 +20,9 @@ package v1
 
 import (
 	"errors"
-	"github.com/cgrates/cgrates/utils"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 /*

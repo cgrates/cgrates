@@ -523,8 +523,8 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 			})
 		}
 	}
-	tx.Commit()
-	return nil
+	r := tx.Commit()
+	return r.Error
 }
 
 func (self *SQLStorage) GetTPActionTimings(tpid, tag string) (map[string][]*utils.TPActionTiming, error) {

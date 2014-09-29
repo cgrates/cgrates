@@ -28,12 +28,22 @@ import (
 )
 
 var (
-	//referenceDate = time.Date(2014, 1, 1, 0, 0, 0, 0, time.Local)
 	//referenceDate = time.Date(2013, 7, 10, 10, 30, 0, 0, time.Local)
 	//referenceDate = time.Date(2013, 12, 31, 23, 59, 59, 0, time.Local)
+	//referenceDate = time.Date(2011, 1, 1, 0, 0, 0, 1, time.Local)
 	referenceDate = time.Now()
 	now           = referenceDate
 )
+
+func TestActionTimingAlways(t *testing.T) {
+	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{StartTime: "00:00:00"}}}
+	st := at.GetNextStartTime(referenceDate)
+	y, m, d := referenceDate.Date()
+	expected := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
+	if !st.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, st)
+	}
+}
 
 func TestActionTimingNothing(t *testing.T) {
 	at := &ActionTiming{}
@@ -50,6 +60,9 @@ func TestActionTimingOnlyHour(t *testing.T) {
 
 	y, m, d := now.Date()
 	expected := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
+	if referenceDate.After(expected) {
+		expected = expected.AddDate(0, 0, 1)
+	}
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -58,9 +71,7 @@ func TestActionTimingOnlyHour(t *testing.T) {
 func TestActionTimingHourYear(t *testing.T) {
 	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2012}, StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
-
-	_, m, d := now.Date()
-	expected := time.Date(2012, m, d, 10, 1, 0, 0, time.Local)
+	expected := time.Date(2012, 1, 1, 10, 1, 0, 0, time.Local)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -74,9 +85,11 @@ func TestActionTimingOnlyWeekdays(t *testing.T) {
 	h, min, s := now.Clock()
 	e := time.Date(y, m, d, h, min, s, 0, time.Local)
 	day := e.Day()
-	for _, i := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
-		e = time.Date(e.Year(), e.Month(), day, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location()).AddDate(0, 0, i)
-		if e.Weekday() == time.Monday && (e.Equal(now) || e.After(now)) {
+	e = time.Date(e.Year(), e.Month(), day, 0, 0, 0, 0, e.Location())
+	for i := 0; i < 8; i++ {
+		n := e.AddDate(0, 0, i)
+		if n.Weekday() == time.Monday && (n.Equal(now) || n.After(now)) {
+			e = n
 			break
 		}
 	}
@@ -92,9 +105,11 @@ func TestActionTimingHourWeekdays(t *testing.T) {
 	y, m, d := now.Date()
 	e := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
 	day := e.Day()
-	for _, i := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
-		e = time.Date(e.Year(), e.Month(), day, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location()).AddDate(0, 0, i)
-		if e.Weekday() == time.Monday && (e.Equal(now) || e.After(now)) {
+	for i := 0; i < 8; i++ {
+		e = time.Date(e.Year(), e.Month(), day, e.Hour(), e.Minute(), e.Second(), e.Nanosecond(), e.Location())
+		n := e.AddDate(0, 0, i)
+		if n.Weekday() == time.Monday && (n.Equal(now) || n.After(now)) {
+			e = n
 			break
 		}
 	}
@@ -148,6 +163,10 @@ func TestActionTimingHourMonths(t *testing.T) {
 
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
+	if now.After(testTime) {
+		testTime = testTime.AddDate(0, 0, 1)
+		y, m, d = testTime.Date()
+	}
 	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	if now.After(testTime) {
 		m = nextMonth.Month()
@@ -158,7 +177,10 @@ func TestActionTimingHourMonths(t *testing.T) {
 		Months:    utils.Months{now.Month(), nextMonth.Month()},
 		StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
-	expected := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
+	expected := time.Date(y, m, 1, 10, 1, 0, 0, time.Local)
+	if referenceDate.After(expected) {
+		expected = expected.AddDate(0, 1, 0)
+	}
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -212,12 +234,11 @@ func TestActionTimingFirstOfTheMonth(t *testing.T) {
 }
 
 func TestActionTimingOnlyYears(t *testing.T) {
-
-	y, m, d := now.Date()
-	nextYear := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
+	y, _, _ := referenceDate.Date()
+	nextYear := time.Date(y, 1, 1, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
 	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{now.Year(), nextYear.Year()}}}}
 	st := at.GetNextStartTime(referenceDate)
-	expected := time.Date(nextYear.Year(), 1, 1, 0, 0, 0, 0, time.Local)
+	expected := nextYear
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -233,17 +254,12 @@ func TestActionTimingPast(t *testing.T) {
 }
 
 func TestActionTimingHourYears(t *testing.T) {
-
-	y, m, d := now.Date()
-	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	nextYear := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
-	year := now.Year()
-	if now.After(testTime) {
-		year = nextYear.Year()
-	}
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{now.Year(), nextYear.Year()}, StartTime: "10:01:00"}}}
+	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{referenceDate.Year(), referenceDate.Year() + 1}, StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
-	expected := time.Date(year, m, d, 10, 1, 0, 0, time.Local)
+	expected := time.Date(referenceDate.Year(), 1, 1, 10, 1, 0, 0, time.Local)
+	if referenceDate.After(expected) {
+		expected = expected.AddDate(1, 0, 0)
+	}
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -252,17 +268,16 @@ func TestActionTimingHourYears(t *testing.T) {
 func TestActionTimingHourMonthdaysYear(t *testing.T) {
 
 	y, m, d := now.Date()
-	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	nextYear := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
+	testTime := time.Date(y, 1, d, 10, 1, 0, 0, time.Local)
 	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
-	if now.After(testTime) {
-		y, m, d = tomorrow.Date()
-	}
-	nextDay := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
-	year := nextDay.Year()
-	if nextDay.Before(now) {
-		if now.After(testTime) {
-			year = nextYear.Year()
+	nextYear := time.Date(y, 1, 1, 10, 1, 0, 0, time.Local).AddDate(1, 0, 0)
+	nextDay := time.Date(y, 1, 1, 10, 1, 0, 0, time.Local).AddDate(1, 0, 0)
+	expected := testTime
+	if referenceDate.After(testTime) {
+		if referenceDate.After(nextDay) {
+			expected = nextYear
+		} else {
+			expected = nextDay
 		}
 	}
 	at := &ActionTiming{Timing: &RateInterval{
@@ -273,7 +288,6 @@ func TestActionTimingHourMonthdaysYear(t *testing.T) {
 		},
 	}}
 	st := at.GetNextStartTime(referenceDate)
-	expected := time.Date(year, m, d, 10, 1, 0, 0, time.Local)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -339,14 +353,34 @@ func TestActionTimingFirstOfTheYear(t *testing.T) {
 
 func TestActionTimingFirstMonthOfTheYear(t *testing.T) {
 	y, _, _ := now.Date()
-	nextYear := time.Date(y, 1, 1, 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
+	expected := time.Date(y, 1, 1, 0, 0, 0, 0, time.Local)
+	if referenceDate.After(expected) {
+		expected = expected.AddDate(1, 0, 0)
+	}
 	at := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
 			Months: utils.Months{time.January},
 		},
 	}}
 	st := at.GetNextStartTime(referenceDate)
-	expected := nextYear
+	if !st.Equal(expected) {
+		t.Errorf("Expected %v was %v", expected, st)
+	}
+}
+
+func TestActionTimingFirstMonthOfTheYearSecondDay(t *testing.T) {
+	y, _, _ := now.Date()
+	expected := time.Date(y, 1, 2, 0, 0, 0, 0, time.Local)
+	if referenceDate.After(expected) {
+		expected = expected.AddDate(1, 0, 0)
+	}
+	at := &ActionTiming{Timing: &RateInterval{
+		Timing: &RITiming{
+			Months:    utils.Months{time.January},
+			MonthDays: utils.MonthDays{2},
+		},
+	}}
+	st := at.GetNextStartTime(referenceDate)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -909,8 +943,8 @@ func TestActionTriggerLogging(t *testing.T) {
 		_ = k
 		_ = v
 		/*if strings.Contains(k, LOG_ACTION_TRIGGER_PREFIX) && strings.Contains(v, expected) {
-			key = k
-			break
+		    key = k
+		    break
 		}*/
 	}
 	if key != "" {
@@ -953,7 +987,7 @@ func TestActionTimingLogging(t *testing.T) {
 		_ = k
 		_ = v
 		/*if strings.Contains(k, LOG_ACTION_TIMMING_PREFIX) && strings.Contains(string(v), expected) {
-			key = k
+		    key = k
 		}*/
 	}
 	if key != "" {
