@@ -69,9 +69,9 @@ func TestActionTimingOnlyHour(t *testing.T) {
 }
 
 func TestActionTimingHourYear(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2012}, StartTime: "10:01:00"}}}
+	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2022}, StartTime: "10:01:00"}}}
 	st := at.GetNextStartTime(referenceDate)
-	expected := time.Date(2012, 1, 1, 10, 1, 0, 0, time.Local)
+	expected := time.Date(2022, 1, 1, 10, 1, 0, 0, time.Local)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -245,9 +245,9 @@ func TestActionTimingOnlyYears(t *testing.T) {
 }
 
 func TestActionTimingPast(t *testing.T) {
-	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2013}}}}
+	at := &ActionTiming{Timing: &RateInterval{Timing: &RITiming{Years: utils.Years{2023}}}}
 	st := at.GetNextStartTime(referenceDate)
-	expected := time.Date(2013, 1, 1, 0, 0, 0, 0, time.Local)
+	expected := time.Date(2023, 1, 1, 0, 0, 0, 0, time.Local)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
 	}
@@ -411,7 +411,7 @@ func TestActionTimingLogFunction(t *testing.T) {
 func TestActionTimingPriotityListSortByWeight(t *testing.T) {
 	at1 := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
-			Years:     utils.Years{2100},
+			Years:     utils.Years{2020},
 			Months:    utils.Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
 			MonthDays: utils.MonthDays{1},
 			StartTime: "00:00:00",
@@ -420,7 +420,7 @@ func TestActionTimingPriotityListSortByWeight(t *testing.T) {
 	}}
 	at2 := &ActionTiming{Timing: &RateInterval{
 		Timing: &RITiming{
-			Years:     utils.Years{2100},
+			Years:     utils.Years{2020},
 			Months:    utils.Months{time.January, time.February, time.March, time.April, time.May, time.June, time.July, time.August, time.September, time.October, time.November, time.December},
 			MonthDays: utils.MonthDays{2},
 			StartTime: "00:00:00",

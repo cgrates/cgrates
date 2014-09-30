@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/gorhill/cronexpr"
 )
 
 const (
@@ -46,6 +47,29 @@ type ActionTiming struct {
 type ActionPlan []*ActionTiming
 
 func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
+	if !at.stCache.IsZero() {
+		return at.stCache
+	}
+	i := at.Timing
+	if i == nil || i.Timing == nil {
+		return
+	}
+	// Normalize
+	if i.Timing.StartTime == "" {
+		i.Timing.StartTime = "00:00:00"
+	}
+	if len(i.Timing.Years) > 0 && len(i.Timing.Months) == 0 {
+		i.Timing.Months = append(i.Timing.Months, 1)
+	}
+	if len(i.Timing.Months) > 0 && len(i.Timing.MonthDays) == 0 {
+		i.Timing.MonthDays = append(i.Timing.MonthDays, 1)
+	}
+	at.stCache = cronexpr.MustParse(i.Timing.CronString()).Next(now)
+	return at.stCache
+}
+
+// To be deleted after the above solution proves reliable
+func (at *ActionTiming) GetNextStartTimeOld(now time.Time) (t time.Time) {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}

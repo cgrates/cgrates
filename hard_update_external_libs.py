@@ -14,6 +14,7 @@ libs = ('code.google.com/p/goconf/conf',
         'github.com/hoisie/redis'
         'github.com/howeyc/fsnotify',
         'github.com/jinzhu/gorm',
+        'github.com/gorhill/cronexpr',
 )
 
 if __name__ == "__main__":
