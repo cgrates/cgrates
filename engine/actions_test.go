@@ -163,11 +163,11 @@ func TestActionTimingHourMonths(t *testing.T) {
 
 	y, m, d := now.Date()
 	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
+	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	if now.After(testTime) {
 		testTime = testTime.AddDate(0, 0, 1)
 		y, m, d = testTime.Date()
 	}
-	nextMonth := time.Date(y, m, 1, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
 	if now.After(testTime) {
 		m = nextMonth.Month()
 		y = nextMonth.Year()
