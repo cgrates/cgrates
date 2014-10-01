@@ -219,3 +219,18 @@ func (self *ApierV1) SetAccount(attr AttrSetAccount, reply *string) error {
 	*reply = OK // This will mark saving of the account, error still can show up in actionTimingsId
 	return nil
 }
+
+type AttrGetAccounts struct {
+	Page         int
+	ItemsPerPage int
+	SearchTerm   string
+}
+
+func (self *ApierV1) GetAccounts(attr AttrGetAccounts, reply *[]string) error {
+	accountKeys, err := self.AccountDb.GetKeysForPrefix(engine.ACCOUNT_PREFIX)
+	if err != nil {
+		return err
+	}
+	*reply = accountKeys
+	return nil
+}

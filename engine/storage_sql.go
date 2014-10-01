@@ -60,6 +60,10 @@ func (self *SQLStorage) Flush() (err error) {
 	return nil
 }
 
+func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+	return nil, nil
+}
+
 func (self *SQLStorage) CreateTablesFromScript(scriptPath string) error {
 	fileContent, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
@@ -125,7 +129,7 @@ func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDisti
 		qry += fmt.Sprintf(")")
 	}
 	if pagination != nil {
-		limLow, limHigh := pagination.GetLimit()
+		limLow, limHigh := pagination.GetLimits()
 		qry += fmt.Sprintf(" LIMIT %d,%d", limLow, limHigh)
 	}
 
@@ -734,7 +738,7 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // ignoreErr - do not consider cdrs with rating errors
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
 func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
-	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool) ([]*utils.StoredCdr, error) {
+	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool, pagination *utils.TPPagination) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
 	var q *bytes.Buffer // Need to query differently since in case of primary, unmediated CDRs some values will be missing
 	if ignoreDerived {
@@ -1052,6 +1056,10 @@ func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources
 	}
 	if fltr.Len() != 0 {
 		q.WriteString(fmt.Sprintf(" WHERE %s", fltr.String()))
+	}
+	if pagination != nil {
+		limLow, limHigh := pagination.GetLimits()
+		q.WriteString(fmt.Sprintf(" LIMIT %d,%d", limLow, limHigh))
 	}
 	rows, err := self.Db.Query(q.String())
 	if err != nil {

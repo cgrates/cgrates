@@ -187,7 +187,7 @@ func (self *Mediator) RateCdr(storedCdr *utils.StoredCdr, sendToStats bool) erro
 
 func (self *Mediator) RateCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string, orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, rerateErrors, rerateRated, sendToStats bool) error {
 	cdrs, err := self.cdrDb.GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects,
-		orderIdStart, orderIdEnd, timeStart, timeEnd, !rerateErrors, !rerateRated, true)
+		orderIdStart, orderIdEnd, timeStart, timeEnd, !rerateErrors, !rerateRated, true, nil)
 	if err != nil {
 		return err
 	}

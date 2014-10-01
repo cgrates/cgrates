@@ -99,6 +99,9 @@ import (
 type AttrsGetScheduledActions struct {
 	Direction, Tenant, Account string
 	TimeStart, TimeEnd         time.Time // Filter based on next runTime
+	Page                       int
+	ItemsPerPage               int
+	SearchTerm                 string
 }
 
 type ScheduledActions struct {
@@ -112,7 +115,14 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 	if self.Sched == nil {
 		return errors.New("SCHEDULER_NOT_ENABLED")
 	}
-	for _, qActions := range self.Sched.GetQueue() {
+	scheduledActions := self.Sched.GetQueue()
+	paginator := &utils.TPPagination{Page: attrs.Page, ItemsPerPage: attrs.ItemsPerPage, SearchTerm: attrs.SearchTerm}
+	min, max := paginator.GetLimits()
+	if max > len(scheduledActions) {
+		max = len(scheduledActions)
+	}
+	scheduledActions = scheduledActions[min : min+max]
+	for _, qActions := range scheduledActions {
 		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid}
 		sas.NextRunTime = qActions.GetNextStartTime(time.Now())
 		if !attrs.TimeStart.IsZero() && sas.NextRunTime.Before(attrs.TimeStart) {

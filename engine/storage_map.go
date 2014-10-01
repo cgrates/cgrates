@@ -52,6 +52,10 @@ func (ms *MapStorage) Flush() error {
 	return nil
 }
 
+func (ms *MapStorage) GetKeysForPrefix(string) ([]string, error) {
+	return nil, nil
+}
+
 func (ms *MapStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) error {
 	cache2go.BeginTransaction()
 	if dKeys == nil {
