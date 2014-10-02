@@ -55,14 +55,6 @@ var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path h
 var storDbType = flag.String("stordb_type", "mysql", "The type of the storDb database <mysql>")
 var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for rater to start and cache")
 
-func init() {
-	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
-	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
-	if len(cfg.CdrcInstances) > 0 {
-		cdrcCfg = cfg.CdrcInstances[0]
-	}
-}
-
 var fileContent1 = `accid11,prepaid,out,cgrates.org,call,1001,1001,+4986517174963,2013-02-03 19:54:00,62,supplier1,172.16.1.1
 accid12,prepaid,out,cgrates.org,call,1001,1001,+4986517174963,2013-02-03 19:54:00,62,supplier1,172.16.1.1
 dummy_data
@@ -96,6 +88,18 @@ func startEngine() error {
 func stopEngine() error {
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
 	return nil
+}
+
+// Need it here and not in init since Travis has no possibility to load local file
+func TestLoadConfigt(*testing.T) {
+	if !*testLocal {
+		return
+	}
+	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
+	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
+	if len(cfg.CdrcInstances) > 0 {
+		cdrcCfg = cfg.CdrcInstances[0]
+	}
 }
 
 func TestEmptyTables(t *testing.T) {
