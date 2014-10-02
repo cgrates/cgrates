@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/gorhill/cronexpr"
 )
 
 const (
@@ -50,12 +51,45 @@ func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 		return at.stCache
 	}
 	i := at.Timing
+	if i == nil || i.Timing == nil {
+		return
+	}
+	// Normalize
+	if i.Timing.StartTime == "" {
+		i.Timing.StartTime = "00:00:00"
+	}
+	if len(i.Timing.Years) > 0 && len(i.Timing.Months) == 0 {
+		i.Timing.Months = append(i.Timing.Months, 1)
+	}
+	if len(i.Timing.Months) > 0 && len(i.Timing.MonthDays) == 0 {
+		i.Timing.MonthDays = append(i.Timing.MonthDays, 1)
+	}
+	at.stCache = cronexpr.MustParse(i.Timing.CronString()).Next(now)
+	return at.stCache
+}
+
+// To be deleted after the above solution proves reliable
+func (at *ActionTiming) GetNextStartTimeOld(now time.Time) (t time.Time) {
+	if !at.stCache.IsZero() {
+		return at.stCache
+	}
+	i := at.Timing
 	if i == nil {
 		return
 	}
+	// Normalize
+	if i.Timing.StartTime == "" {
+		i.Timing.StartTime = "00:00:00"
+	}
+	if len(i.Timing.Years) > 0 && len(i.Timing.Months) == 0 {
+		i.Timing.Months = append(i.Timing.Months, 1)
+	}
+	if len(i.Timing.Months) > 0 && len(i.Timing.MonthDays) == 0 {
+		i.Timing.MonthDays = append(i.Timing.MonthDays, 1)
+	}
 	y, m, d := now.Date()
 	z, _ := now.Zone()
-	if i.Timing.StartTime != "" && i.Timing.StartTime != ASAP {
+	if i.Timing.StartTime != ASAP {
 		l := fmt.Sprintf("%d-%d-%d %s %s", y, m, d, i.Timing.StartTime, z)
 		var err error
 		t, err = time.Parse(FORMAT, l)
@@ -64,6 +98,9 @@ func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 			at.stCache = t
 			return
 		}
+		if now.After(t) || now.Equal(t) { // Set it to next day this time
+			t = t.AddDate(0, 0, 1)
+		}
 	}
 	// weekdays
 	if i.Timing.WeekDays != nil && len(i.Timing.WeekDays) > 0 {
@@ -71,12 +108,12 @@ func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 		if t.IsZero() {
 			t = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), 0, now.Location())
 		}
-		d := t.Day()
-		for _, j := range []int{0, 1, 2, 3, 4, 5, 6, 7} {
-			t = time.Date(t.Year(), t.Month(), d, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), t.Location()).AddDate(0, 0, j)
+		for j := 0; j < 8; j++ {
+			n := t.AddDate(0, 0, j)
 			for _, wd := range i.Timing.WeekDays {
-				if t.Weekday() == wd && (t.Equal(now) || t.After(now)) {
-					at.stCache = t
+				if n.Weekday() == wd && (n.Equal(now) || n.After(now)) {
+					at.stCache = n
+					t = n
 					return
 				}
 			}
@@ -85,15 +122,13 @@ func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 	// monthdays
 	if i.Timing.MonthDays != nil && len(i.Timing.MonthDays) > 0 {
 		i.Timing.MonthDays.Sort()
-		year := now.Year()
-		month := now
-		x := sort.SearchInts(i.Timing.MonthDays, now.Day())
+		year := t.Year()
+		month := t
+		x := sort.SearchInts(i.Timing.MonthDays, t.Day())
 		d = i.Timing.MonthDays[0]
 		if x < len(i.Timing.MonthDays) {
-			if i.Timing.MonthDays[x] == now.Day() {
+			if i.Timing.MonthDays[x] == t.Day() {
 				if t.Equal(now) || t.After(now) {
-					h, m, s := t.Clock()
-					t = time.Date(now.Year(), now.Month(), now.Day(), h, m, s, 0, time.Local)
 					goto MONTHS
 				}
 				if x+1 < len(i.Timing.MonthDays) { // today was found in the list, jump to the next grater day
@@ -107,11 +142,6 @@ func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 			} else { // today was not found in the list, x is the first greater day
 				d = i.Timing.MonthDays[x]
 			}
-		} else {
-			if len(i.Timing.Months) == 0 {
-				t = time.Date(month.Year(), month.Month(), d, 0, 0, 0, 0, time.Local).AddDate(0, 1, 0)
-				month = t
-			}
 		}
 		h, m, s := t.Clock()
 		t = time.Date(month.Year(), month.Month(), d, h, m, s, 0, time.Local)
@@ -119,22 +149,18 @@ func (at *ActionTiming) GetNextStartTime(now time.Time) (t time.Time) {
 MONTHS:
 	if i.Timing.Months != nil && len(i.Timing.Months) > 0 {
 		i.Timing.Months.Sort()
-		year := now.Year()
-		x := sort.Search(len(i.Timing.Months), func(x int) bool { return i.Timing.Months[x] >= now.Month() })
+		year := t.Year()
+		x := sort.Search(len(i.Timing.Months), func(x int) bool { return i.Timing.Months[x] >= t.Month() })
 		m = i.Timing.Months[0]
 		if x < len(i.Timing.Months) {
-			if i.Timing.Months[x] == now.Month() {
+			if i.Timing.Months[x] == t.Month() {
 				if t.Equal(now) || t.After(now) {
-					//h, m, s := t.Clock()
-					//t = time.Date(now.Year(), now.Month(), t.Day(), h, m, s, 0, time.Local)
 					goto YEARS
 				}
 				if x+1 < len(i.Timing.Months) { // this month was found in the list so jump to next available month
 					m = i.Timing.Months[x+1]
 					// reset the monthday
-					if i.Timing.MonthDays != nil {
-						t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
-					}
+					t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 				} else { // jump to next year
 					//not using now to make sure the next year has the the 1 date
 					//(if today is 31) next month may not have it
@@ -144,18 +170,15 @@ MONTHS:
 			} else { // this month was not found in the list, x is the first greater month
 				m = i.Timing.Months[x]
 				// reset the monthday
-				if i.Timing.MonthDays != nil {
-					t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
-				}
-			}
-		} else {
-			if len(i.Timing.Years) == 0 {
-				t = time.Date(year, m, t.Day(), 0, 0, 0, 0, time.Local).AddDate(1, 0, 0)
-				year = t.Year()
+				t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 			}
 		}
 		h, min, s := t.Clock()
 		t = time.Date(year, m, t.Day(), h, min, s, 0, time.Local)
+	} else {
+		if now.After(t) {
+			t = t.AddDate(0, 1, 0)
+		}
 	}
 YEARS:
 	if i.Timing.Years != nil && len(i.Timing.Years) > 0 {
@@ -177,24 +200,20 @@ YEARS:
 						t = time.Date(t.Year(), i.Timing.Months[0], t.Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 					}
 					// reset the monthday
-					if i.Timing.MonthDays != nil {
-						t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
-					}
+					t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 				}
 			} else { // this year was not found in the list, x is the first greater year
 				y = i.Timing.Years[x]
-				// reset the month
-				if i.Timing.Months != nil {
-					t = time.Date(t.Year(), i.Timing.Months[0], t.Day(), t.Hour(), t.Minute(), t.Second(), 0, t.Location())
-				}
-				// reset the monthday
-				if i.Timing.MonthDays != nil {
-					t = time.Date(t.Year(), t.Month(), i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
-				}
+				// reset the month/monthday
+				t = time.Date(t.Year(), i.Timing.Months[0], i.Timing.MonthDays[0], t.Hour(), t.Minute(), t.Second(), 0, t.Location())
 			}
 		}
 		h, min, s := t.Clock()
 		t = time.Date(y, t.Month(), t.Day(), h, min, s, 0, time.Local)
+	} else {
+		if now.After(t) {
+			t = t.AddDate(1, 0, 0)
+		}
 	}
 	at.stCache = t
 	return

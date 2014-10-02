@@ -67,6 +67,10 @@ func (rs *RedisStorage) Flush() (err error) {
 	return
 }
 
+func (rs *RedisStorage) GetKeysForPrefix(prefix string) ([]string, error) {
+	return rs.db.Keys(prefix + "*")
+}
+
 func (rs *RedisStorage) CacheRating(dKeys, rpKeys, rpfKeys, alsKeys, lcrKeys []string) (err error) {
 	cache2go.BeginTransaction()
 	if dKeys == nil {

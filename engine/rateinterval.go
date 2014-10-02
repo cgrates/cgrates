@@ -45,6 +45,74 @@ type RITiming struct {
 	MonthDays          utils.MonthDays
 	WeekDays           utils.WeekDays
 	StartTime, EndTime string // ##:##:## format
+	cronString         string
+}
+
+func (rit *RITiming) CronString() string {
+	if rit.cronString != "" {
+		return rit.cronString
+	}
+	var sec, min, hour, monthday, month, weekday, year string
+	if len(rit.StartTime) == 0 {
+		hour, min, sec = "*", "*", "*"
+	} else {
+		hms := strings.Split(rit.StartTime, ":")
+		if len(hms) != 3 {
+			hour, min, sec = "*", "*", "*"
+		}
+		hour, min, sec = hms[0], hms[1], hms[2]
+		if strings.HasPrefix(hour, "0") {
+			hour = hour[1:]
+		}
+		if strings.HasPrefix(min, "0") {
+			min = min[1:]
+		}
+		if strings.HasPrefix(sec, "0") {
+			sec = sec[1:]
+		}
+	}
+	if len(rit.MonthDays) == 0 {
+		monthday = "*"
+	} else {
+		for i, md := range rit.MonthDays {
+			if i > 0 {
+				monthday += ","
+			}
+			monthday += strconv.Itoa(md)
+		}
+	}
+	if len(rit.Months) == 0 {
+		month = "*"
+	} else {
+		for i, md := range rit.Months {
+			if i > 0 {
+				month += ","
+			}
+			month += strconv.Itoa(int(md))
+		}
+	}
+	if len(rit.WeekDays) == 0 {
+		weekday = "*"
+	} else {
+		for i, md := range rit.WeekDays {
+			if i > 0 {
+				weekday += ","
+			}
+			weekday += strconv.Itoa(int(md))
+		}
+	}
+	if len(rit.Years) == 0 {
+		year = "*"
+	} else {
+		for i, md := range rit.Years {
+			if i > 0 {
+				year += ","
+			}
+			year += strconv.Itoa(int(md))
+		}
+	}
+	rit.cronString = fmt.Sprintf("%s %s %s %s %s %s %s", sec, min, hour, monthday, month, weekday, year)
+	return rit.cronString
 }
 
 func (rit *RITiming) Stringify() string {

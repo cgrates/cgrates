@@ -532,28 +532,28 @@ func TestLoadRatingPlans(t *testing.T) {
 	expected := &RatingPlan{
 		Id: "STANDARD",
 		Timings: map[string]*RITiming{
-			"14ae6e41": &RITiming{
+			"4c954a4f": &RITiming{
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
 				StartTime: "00:00:00",
 			},
-			"9a6f8e32": &RITiming{
+			"4d593287": &RITiming{
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{1, 2, 3, 4, 5},
 				StartTime: "18:00:00",
 			},
-			"7181e535": &RITiming{
+			"a60bfb13": &RITiming{
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
 				WeekDays:  utils.WeekDays{time.Saturday, time.Sunday},
 				StartTime: "00:00:00",
 			},
-			"96c78ff5": &RITiming{
+			"30eab300": &RITiming{
 				Years:     utils.Years{},
 				Months:    utils.Months{},
 				MonthDays: utils.MonthDays{},
@@ -618,48 +618,48 @@ func TestLoadRatingPlans(t *testing.T) {
 		DestinationRates: map[string]RPRateList{
 			"GERMANY": []*RPRate{
 				&RPRate{
-					Timing: "14ae6e41",
+					Timing: "4c954a4f",
 					Rating: "822a5aef",
 					Weight: 10,
 				},
 				&RPRate{
-					Timing: "9a6f8e32",
+					Timing: "4d593287",
 					Rating: "4a25c533",
 					Weight: 10,
 				},
 				&RPRate{
-					Timing: "7181e535",
+					Timing: "a60bfb13",
 					Rating: "4a25c533",
 					Weight: 10,
 				},
 			},
 			"GERMANY_O2": []*RPRate{
 				&RPRate{
-					Timing: "14ae6e41",
+					Timing: "4c954a4f",
 					Rating: "4a25c533",
 					Weight: 10,
 				},
 				&RPRate{
-					Timing: "9a6f8e32",
+					Timing: "4d593287",
 					Rating: "b05c5f6b",
 					Weight: 10,
 				},
 				&RPRate{
-					Timing: "7181e535",
+					Timing: "a60bfb13",
 					Rating: "b05c5f6b",
 					Weight: 10,
 				},
 			},
 			"GERMANY_PREMIUM": []*RPRate{
 				&RPRate{
-					Timing: "14ae6e41",
+					Timing: "4c954a4f",
 					Rating: "4a25c533",
 					Weight: 10,
 				},
 			},
 			"URG": []*RPRate{
 				&RPRate{
-					Timing: "96c78ff5",
+					Timing: "30eab300",
 					Rating: "9f49ef8e",
 					Weight: 20,
 				},
@@ -667,7 +667,7 @@ func TestLoadRatingPlans(t *testing.T) {
 		},
 	}
 	if !reflect.DeepEqual(rplan, expected) {
-		t.Errorf("Error loading destination rate timing: %+v", rplan.DestinationRates["URG"][0])
+		t.Errorf("Error loading destination rate timing: %+v", rplan.DestinationRates["GERMANY_O2"][0])
 	}
 }
 

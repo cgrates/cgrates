@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
-	"github.com/cgrates/cgrates/utils"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestRateIntervalSimpleContains(t *testing.T) {
@@ -280,6 +281,59 @@ func TestRateStrigyfy(t *testing.T) {
 	}
 	if r1.Stringify() != r2.Stringify() {
 		t.Error("Error in rate stringify: ", r1.Stringify(), r2.Stringify())
+	}
+}
+
+func TestRateIntervalCronAll(t *testing.T) {
+	rit := &RITiming{
+		Years:     utils.Years{2012},
+		Months:    utils.Months{time.February},
+		MonthDays: utils.MonthDays{1},
+		WeekDays:  []time.Weekday{time.Sunday},
+		StartTime: "14:30:00",
+	}
+	expected := "0 30 14 1 2 0 2012"
+	cron := rit.CronString()
+	if cron != expected {
+		t.Errorf("Expected %s was %s", expected, cron)
+	}
+}
+
+func TestRateIntervalCronMultiple(t *testing.T) {
+	rit := &RITiming{
+		Years:     utils.Years{2012, 2014},
+		Months:    utils.Months{time.February, time.January},
+		MonthDays: utils.MonthDays{15, 16},
+		WeekDays:  []time.Weekday{time.Sunday, time.Monday},
+		StartTime: "14:30:00",
+	}
+	expected := "0 30 14 15,16 2,1 0,1 2012,2014"
+	cron := rit.CronString()
+
+	if cron != expected {
+		t.Errorf("Expected %s was %s", expected, cron)
+	}
+}
+
+func TestRateIntervalCronStar(t *testing.T) {
+	rit := &RITiming{
+		StartTime: "*:30:00",
+	}
+	expected := "0 30 * * * * *"
+	cron := rit.CronString()
+
+	if cron != expected {
+		t.Errorf("Expected %s was %s", expected, cron)
+	}
+}
+
+func TestRateIntervalCronEmpty(t *testing.T) {
+	rit := &RITiming{}
+	expected := "* * * * * * *"
+	cron := rit.CronString()
+
+	if cron != expected {
+		t.Errorf("Expected %s was %s", expected, cron)
 	}
 }
 
