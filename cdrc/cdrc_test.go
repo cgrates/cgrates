@@ -19,27 +19,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package cdrc
 
 import (
-	//"bytes"
-	//"encoding/csv"
-	//"fmt"
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	//"io"
 	"reflect"
 	"testing"
 	"time"
-	"unicode/utf8"
 )
 
 func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	cgrConfig.CdrcCdrFields["supplier"] = []*utils.RSRField{&utils.RSRField{Id: "14"}}
-	csvSepRune, _ := utf8.DecodeRune([]byte(cgrConfig.CdrcCsvSep))
-	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrType, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay, csvSepRune,
-		cgrConfig.CdrcCdrFields, new(engine.CDRS), nil}
+	cdrcConfig := cgrConfig.CdrcInstances[0]
+	cdrcConfig.CdrFields = append(cdrcConfig.CdrFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.CDRFIELD, CdrFieldId: "supplier", Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
+	cdrc, err := NewCdrc(cdrcConfig, true, nil)
+	if err != nil {
+		t.Error(err)
+	}
 	cdrRow := []string{"firstField", "secondField"}
-	_, err := cdrc.recordToStoredCdr(cdrRow)
+	_, err = cdrc.recordToStoredCdr(cdrRow)
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
@@ -54,7 +50,7 @@ func TestRecordForkCdr(t *testing.T) {
 		TOR:         cdrRow[2],
 		AccId:       cdrRow[3],
 		CdrHost:     "0.0.0.0", // Got it over internal interface
-		CdrSource:   cgrConfig.CdrcSourceId,
+		CdrSource:   cdrcConfig.CdrSourceId,
 		ReqType:     cdrRow[4],
 		Direction:   cdrRow[5],
 		Tenant:      cdrRow[6],

@@ -28,50 +28,52 @@ import (
 	"time"
 )
 
-var hdrCfgFlds = []*config.CgrXmlCfgCdrField{
-	&config.CgrXmlCfgCdrField{Name: "TypeOfRecord", Type: CONSTANT, Value: "10", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "Filler1", Type: FILLER, Width: 3},
-	&config.CgrXmlCfgCdrField{Name: "DistributorCode", Type: CONSTANT, Value: "VOI", Width: 3},
-	&config.CgrXmlCfgCdrField{Name: "FileSeqNr", Type: METATAG, Value: "export_id", Width: 5, Strip: "right", Padding: "zeroleft"},
-	&config.CgrXmlCfgCdrField{Name: "LastCdr", Type: METATAG, Value: META_LASTCDRATIME, Width: 12, Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "FileCreationfTime", Type: METATAG, Value: "time_now", Width: 12, Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "FileVersion", Type: CONSTANT, Value: "01", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 105},
+var hdrCfgFlds = []*config.XmlCfgCdrField{
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("TypeOfRecord"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("10"), Width: utils.IntPointer(2)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Filler1"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(3)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("DistributorCode"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("VOI"), Width: utils.IntPointer(3)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("FileSeqNr"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer("export_id"), Width: utils.IntPointer(5), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("zeroleft")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("LastCdr"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer(META_LASTCDRATIME), Width: utils.IntPointer(12), Layout: utils.StringPointer("020106150400")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("FileCreationfTime"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer("time_now"), Width: utils.IntPointer(12), Layout: utils.StringPointer("020106150400")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("FileVersion"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("01"), Width: utils.IntPointer(2)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Filler2"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(105)},
 }
 
-var contentCfgFlds = []*config.CgrXmlCfgCdrField{
-	&config.CgrXmlCfgCdrField{Name: "TypeOfRecord", Type: CONSTANT, Value: "20", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "Account", Type: utils.CDRFIELD, Value: utils.ACCOUNT, Width: 12, Strip: "left", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Subject", Type: utils.CDRFIELD, Value: utils.SUBJECT, Width: 5, Strip: "right", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "CLI", Type: utils.CDRFIELD, Value: "cli", Width: 15, Strip: "xright", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Destination", Type: utils.CDRFIELD, Value: utils.DESTINATION, Width: 24, Strip: "xright", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "TOR", Type: CONSTANT, Value: "02", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "SubtypeTOR", Type: CONSTANT, Value: "11", Width: 4, Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "SetupTime", Type: utils.CDRFIELD, Value: utils.SETUP_TIME, Width: 12, Strip: "right", Padding: "right", Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "Duration", Type: utils.CDRFIELD, Value: utils.USAGE, Width: 6, Strip: "right", Padding: "right", Layout: utils.SECONDS},
-	&config.CgrXmlCfgCdrField{Name: "DataVolume", Type: FILLER, Width: 6},
-	&config.CgrXmlCfgCdrField{Name: "TaxCode", Type: CONSTANT, Value: "1", Width: 1},
-	&config.CgrXmlCfgCdrField{Name: "OperatorCode", Type: utils.CDRFIELD, Value: "opercode", Width: 2, Strip: "right", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "ProductId", Type: utils.CDRFIELD, Value: "productid", Width: 5, Strip: "right", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "NetworkId", Type: CONSTANT, Value: "3", Width: 1},
-	&config.CgrXmlCfgCdrField{Name: "CallId", Type: utils.CDRFIELD, Value: utils.ACCID, Width: 16, Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8},
-	&config.CgrXmlCfgCdrField{Name: "Filler", Type: FILLER, Width: 8},
-	&config.CgrXmlCfgCdrField{Name: "TerminationCode", Type: CONCATENATED_CDRFIELD, Value: "operator,product", Width: 5, Strip: "right", Padding: "right"},
-	&config.CgrXmlCfgCdrField{Name: "Cost", Type: utils.CDRFIELD, Value: utils.COST, Width: 9, Padding: "zeroleft"},
-	&config.CgrXmlCfgCdrField{Name: "DestinationPrivacy", Type: METATAG, Value: META_MASKDESTINATION, Width: 1},
+var contentCfgFlds = []*config.XmlCfgCdrField{
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("TypeOfRecord"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("20"), Width: utils.IntPointer(2)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Account"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer(utils.ACCOUNT), Width: utils.IntPointer(12), Strip: utils.StringPointer("left"), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Subject"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer(utils.SUBJECT), Width: utils.IntPointer(5), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("CLI"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer("cli"), Width: utils.IntPointer(15), Strip: utils.StringPointer("xright"), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Destination"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer(utils.DESTINATION), Width: utils.IntPointer(24), Strip: utils.StringPointer("xright"), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("TOR"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("02"), Width: utils.IntPointer(2)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("SubtypeTOR"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("11"), Width: utils.IntPointer(4), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("SetupTime"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer(utils.SETUP_TIME), Width: utils.IntPointer(12), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right"),
+		Layout: utils.StringPointer("020106150400")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Duration"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer(utils.USAGE), Width: utils.IntPointer(6), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right"),
+		Layout: utils.StringPointer(utils.SECONDS)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("DataVolume"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(6)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("TaxCode"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("1"), Width: utils.IntPointer(1)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("OperatorCode"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer("opercode"), Width: utils.IntPointer(2), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("ProductId"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer("productid"), Width: utils.IntPointer(5), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("NetworkId"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("3"), Width: utils.IntPointer(1)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("CallId"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer(utils.ACCID), Width: utils.IntPointer(16), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Filler"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(8)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Filler"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(8)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("TerminationCode"), Type: utils.StringPointer(CONCATENATED_CDRFIELD), Value: utils.StringPointer("operator,product"), Width: utils.IntPointer(5), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("right")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Cost"), Type: utils.StringPointer(utils.CDRFIELD), Value: utils.StringPointer(utils.COST), Width: utils.IntPointer(9), Padding: utils.StringPointer("zeroleft")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("DestinationPrivacy"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer(META_MASKDESTINATION), Width: utils.IntPointer(1)},
 }
 
-var trailerCfgFlds = []*config.CgrXmlCfgCdrField{
-	&config.CgrXmlCfgCdrField{Name: "TypeOfRecord", Type: CONSTANT, Value: "90", Width: 2},
-	&config.CgrXmlCfgCdrField{Name: "Filler1", Type: FILLER, Width: 3},
-	&config.CgrXmlCfgCdrField{Name: "DistributorCode", Type: CONSTANT, Value: "VOI", Width: 3},
-	&config.CgrXmlCfgCdrField{Name: "FileSeqNr", Type: METATAG, Value: META_EXPORTID, Width: 5, Strip: "right", Padding: "zeroleft"},
-	&config.CgrXmlCfgCdrField{Name: "NumberOfRecords", Type: METATAG, Value: META_NRCDRS, Width: 6, Padding: "zeroleft"},
-	&config.CgrXmlCfgCdrField{Name: "CdrsDuration", Type: METATAG, Value: META_DURCDRS, Width: 8, Padding: "zeroleft", Layout: "seconds"},
-	&config.CgrXmlCfgCdrField{Name: "FirstCdrTime", Type: METATAG, Value: META_FIRSTCDRATIME, Width: 12, Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "LastCdrTime", Type: METATAG, Value: META_LASTCDRATIME, Width: 12, Layout: "020106150400"},
-	&config.CgrXmlCfgCdrField{Name: "Filler2", Type: FILLER, Width: 93},
+var trailerCfgFlds = []*config.XmlCfgCdrField{
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("TypeOfRecord"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("90"), Width: utils.IntPointer(2)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Filler1"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(3)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("DistributorCode"), Type: utils.StringPointer(utils.CONSTANT), Value: utils.StringPointer("VOI"), Width: utils.IntPointer(3)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("FileSeqNr"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer(META_EXPORTID), Width: utils.IntPointer(5), Strip: utils.StringPointer("right"), Padding: utils.StringPointer("zeroleft")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("NumberOfRecords"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer(META_NRCDRS), Width: utils.IntPointer(6), Padding: utils.StringPointer("zeroleft")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("CdrsDuration"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer(META_DURCDRS), Width: utils.IntPointer(8), Padding: utils.StringPointer("zeroleft"), Layout: utils.StringPointer(utils.SECONDS)},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("FirstCdrTime"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer(META_FIRSTCDRATIME), Width: utils.IntPointer(12), Layout: utils.StringPointer("020106150400")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("LastCdrTime"), Type: utils.StringPointer(utils.METATAG), Value: utils.StringPointer(META_LASTCDRATIME), Width: utils.IntPointer(12), Layout: utils.StringPointer("020106150400")},
+	&config.XmlCfgCdrField{Tag: utils.StringPointer("Filler2"), Type: utils.StringPointer(utils.FILLER), Width: utils.IntPointer(93)},
 }
 
 // Write one CDR and test it's results only for content buffer
@@ -95,7 +97,11 @@ func TestWriteCdr(t *testing.T) {
 		Usage:      time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 2.34567,
 		ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 	}
-	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, exportTpl.AsCdreConfig(), utils.CDRE_FIXED_WIDTH, ',', "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
+	cdreCfg, err := config.NewCdreConfigFromXmlCdreCfg(exportTpl)
+	if err != nil {
+		t.Error(err)
+	}
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr}, logDb, cdreCfg, utils.CDRE_FIXED_WIDTH, ',', "fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)
 	}
@@ -171,7 +177,11 @@ func TestWriteCdrs(t *testing.T) {
 		ExtraFields: map[string]string{"productnumber": "12344", "fieldextr2": "valextr2"},
 	}
 	cfg, _ := config.NewDefaultCGRConfig()
-	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, exportTpl.AsCdreConfig(), utils.CDRE_FIXED_WIDTH, ',',
+	cdreCfg, err := config.NewCdreConfigFromXmlCdreCfg(exportTpl)
+	if err != nil {
+		t.Error(err)
+	}
+	cdre, err := NewCdrExporter([]*utils.StoredCdr{cdr1, cdr2, cdr3, cdr4}, logDb, cdreCfg, utils.CDRE_FIXED_WIDTH, ',',
 		"fwv_1", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", -1, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error(err)

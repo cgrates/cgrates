@@ -76,6 +76,7 @@ const (
 	FALLBACK_SEP                 = ';'
 	INFIELD_SEP                  = ";"
 	FIELDS_SEP                   = ","
+	STATIC_HDRVAL_SEP            = "::"
 	REGEXP_PREFIX                = "~"
 	JSON                         = "json"
 	GOB                          = "gob"
@@ -105,6 +106,7 @@ const (
 	STATIC_VALUE_PREFIX          = "^"
 	CSV                          = "csv"
 	CDRE_DRYRUN                  = "dry_run"
+	COMBIMED                     = "combimed"
 	INTERNAL                     = "internal"
 	ZERO_RATING_SUBJECT_PREFIX   = "*zero"
 	OK                           = "OK"
@@ -159,6 +161,10 @@ const (
 	CREATE_TARIFFPLAN_TABLES_SQL = "create_tariffplan_tables.sql"
 	TEST_SQL                     = "TEST_SQL"
 	EMPTY                        = "_empty_"
+	CONSTANT                     = "constant"
+	FILLER                       = "filler"
+	METATAG                      = "metatag"
+	HTTP_POST                    = "http_post"
 )
 
 var (

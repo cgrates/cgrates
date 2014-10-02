@@ -51,20 +51,23 @@ func TestCdreGetCombimedCdrFieldVal(t *testing.T) {
 			Category: "call", Account: "1000", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 			Usage: time.Duration(10) * time.Second, MediationRunId: "RETAIL1", Cost: 5.01},
 	}
-
 	cdre, err := NewCdrExporter(cdrs, logDb, cfg.CdreDefaultInstance, cfg.CdreDefaultInstance.CdrFormat, cfg.CdreDefaultInstance.FieldSeparator,
 		"firstexport", 0.0, 0.0, 0, 4, cfg.RoundingDecimals, "", 0, cfg.HttpSkipTlsVerify)
 	if err != nil {
 		t.Error("Unexpected error received: ", err)
 	}
-	fltrRule, _ := utils.NewRSRField("~mediation_runid:s/default/RUN_RTL/")
-	if costVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], fltrRule, &utils.RSRField{Id: "cost"}); err != nil {
+	fltrRule, _ := utils.ParseRSRFields("~mediation_runid:s/default/RUN_RTL/", utils.INFIELD_SEP)
+	val, _ := utils.ParseRSRFields("cost", utils.INFIELD_SEP)
+	cfgCdrFld, _ := config.NewCfgCdrFieldWithDefaults(false, val, fltrRule, nil, nil, nil, nil, nil, nil, nil, nil)
+	if costVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if costVal != "1.01" {
 		t.Error("Expecting: 1.01, received: ", costVal)
 	}
-	fltrRule, _ = utils.NewRSRField("~mediation_runid:s/default/RETAIL1/")
-	if acntVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], fltrRule, &utils.RSRField{Id: "account"}); err != nil {
+	fltrRule, _ = utils.ParseRSRFields("~mediation_runid:s/default/RETAIL1/", utils.INFIELD_SEP)
+	val, _ = utils.ParseRSRFields("account", utils.INFIELD_SEP)
+	cfgCdrFld, _ = config.NewCfgCdrFieldWithDefaults(false, val, fltrRule, nil, nil, nil, nil, nil, nil, nil, nil)
+	if acntVal, err := cdre.getCombimedCdrFieldVal(cdrs[3], cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if acntVal != "1000" {
 		t.Error("Expecting: 1000, received: ", acntVal)
@@ -78,18 +81,24 @@ func TestGetDateTimeFieldVal(t *testing.T) {
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.01,
 		ExtraFields: map[string]string{"stop_time": "2014-06-11 19:19:00 +0000 UTC", "fieldextr2": "valextr2"}}
-	if cdrVal, err := cdreTst.getDateTimeFieldVal(cdrTst, nil, &utils.RSRField{Id: "stop_time"}, "2006-01-02 15:04:05"); err != nil {
+	val, _ := utils.ParseRSRFields("stop_time", utils.INFIELD_SEP)
+	layout := "2006-01-02 15:04:05"
+	cfgCdrFld, _ := config.NewCfgCdrFieldWithDefaults(false, val, nil, nil, nil, nil, nil, &layout, nil, nil, nil)
+	if cdrVal, err := cdreTst.getDateTimeFieldVal(cdrTst, cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if cdrVal != "2014-06-11 19:19:00" {
 		t.Error("Expecting: 2014-06-11 19:19:00, got: ", cdrVal)
 	}
 	// Test filter
-	fltrRule, _ := utils.NewRSRField("~tenant:s/(.+)/itsyscom.com/")
-	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, fltrRule, &utils.RSRField{Id: "stop_time"}, "2006-01-02 15:04:05"); err == nil {
+	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
+	cfgCdrFld, _ = config.NewCfgCdrFieldWithDefaults(false, val, fltr, nil, nil, nil, nil, &layout, nil, nil, nil)
+	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, cfgCdrFld); err == nil {
 		t.Error(err)
 	}
+	val, _ = utils.ParseRSRFields("fieldextr2", utils.INFIELD_SEP)
+	cfgCdrFld, _ = config.NewCfgCdrFieldWithDefaults(false, val, nil, nil, nil, nil, nil, &layout, nil, nil, nil)
 	// Test time parse error
-	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, nil, &utils.RSRField{Id: "fieldextr2"}, "2006-01-02 15:04:05"); err == nil {
+	if _, err := cdreTst.getDateTimeFieldVal(cdrTst, cfgCdrFld); err == nil {
 		t.Error("Should give error here, got none.")
 	}
 }
@@ -100,14 +109,16 @@ func TestCdreCdrFieldValue(t *testing.T) {
 		ReqType: "rated", Direction: "*out", Tenant: "cgrates.org",
 		Category: "call", Account: "1001", Subject: "1001", Destination: "1002", SetupTime: time.Unix(1383813745, 0).UTC(), AnswerTime: time.Unix(1383813746, 0).UTC(),
 		Usage: time.Duration(10) * time.Second, MediationRunId: utils.DEFAULT_RUNID, Cost: 1.01}
-	fltrRule, _ := utils.NewRSRField("~tenant:s/(.+)/cgrates.org/")
-	if val, err := cdre.cdrFieldValue(cdr, fltrRule, &utils.RSRField{Id: "destination"}, ""); err != nil {
+	val, _ := utils.ParseRSRFields("destination", utils.INFIELD_SEP)
+	cfgCdrFld, _ := config.NewCfgCdrFieldWithDefaults(false, val, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	if val, err := cdre.cdrFieldValue(cdr, cfgCdrFld); err != nil {
 		t.Error(err)
 	} else if val != cdr.Destination {
 		t.Errorf("Expecting: %s, received: %s", cdr.Destination, val)
 	}
-	fltrRule, _ = utils.NewRSRField("~tenant:s/(.+)/itsyscom.com/")
-	if _, err := cdre.cdrFieldValue(cdr, fltrRule, &utils.RSRField{Id: "destination"}, ""); err == nil {
+	fltr, _ := utils.ParseRSRFields("~tenant:s/(.+)/itsyscom.com/", utils.INFIELD_SEP)
+	cfgCdrFld, _ = config.NewCfgCdrFieldWithDefaults(false, val, fltr, nil, nil, nil, nil, nil, nil, nil, nil)
+	if _, err := cdre.cdrFieldValue(cdr, cfgCdrFld); err == nil {
 		t.Error("Failed to use filter")
 	}
 }

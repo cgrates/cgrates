@@ -114,11 +114,13 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 			if xmlTemplates := self.Config.XmlCfgDocument.GetCdreCfgs(expTplStr[len(utils.XML_PROFILE_PREFIX):]); xmlTemplates == nil {
 				return fmt.Errorf("%s:ExportTemplate", utils.ERR_NOT_FOUND)
 			} else {
-				exportTemplate = xmlTemplates[expTplStr[len(utils.XML_PROFILE_PREFIX):]].AsCdreConfig()
+				if exportTemplate, err = config.NewCdreConfigFromXmlCdreCfg(xmlTemplates[expTplStr[len(utils.XML_PROFILE_PREFIX):]]); err != nil {
+					return fmt.Errorf("%s:ExportTemplate:%s", utils.ERR_SERVER_ERROR, err.Error())
+				}
 			}
 		} else {
-			exportTemplate, _ = config.NewDefaultCdreConfig()
-			if contentFlds, err := config.NewCdreCdrFieldsFromIds(exportTemplate.CdrFormat == utils.CDRE_FIXED_WIDTH,
+			exportTemplate = config.NewDefaultCdreConfig()
+			if contentFlds, err := config.NewCfgCdrFieldsFromIds(exportTemplate.CdrFormat == utils.CDRE_FIXED_WIDTH,
 				strings.Split(*attr.ExportTemplate, string(utils.CSV_SEP))...); err != nil {
 				return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 			} else {

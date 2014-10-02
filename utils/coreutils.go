@@ -315,3 +315,12 @@ func Unzip(src, dest string) error {
 
 	return nil
 }
+
+// Utilities to provide pointers where we need to define ad-hoc
+func StringPointer(str string) *string {
+	return &str
+}
+
+func IntPointer(i int) *int {
+	return &i
+}

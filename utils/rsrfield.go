@@ -30,12 +30,12 @@ func NewRSRField(fldStr string) (*RSRField, error) {
 	}
 	if strings.HasPrefix(fldStr, STATIC_VALUE_PREFIX) { // Special case when RSR is defined as static header/value
 		var staticHdr, staticVal string
-		if splt := strings.Split(fldStr, "/"); len(splt) == 3 { // Using / as separator since ':' is often use in date/time fields
-			if len(splt[2]) != 0 { // Last split has created empty element
-				return nil, fmt.Errorf("Invalid static header/value combination: %s", fldStr)
-			}
+		if splt := strings.Split(fldStr, STATIC_HDRVAL_SEP); len(splt) == 2 { // Using / as separator since ':' is often use in date/time fields
 			staticHdr, staticVal = splt[0][1:], splt[1] // Strip the / suffix
-		} else if len(splt) == 2 {
+			if strings.HasSuffix(staticVal, "/") {      // If value ends with /, strip it since it is a part of the definition syntax
+				staticVal = staticVal[:len(staticVal)-1]
+			}
+		} else if len(splt) > 2 {
 			return nil, fmt.Errorf("Invalid RSRField string: %s", fldStr)
 		} else {
 			staticHdr, staticVal = splt[0][1:], splt[0][1:] // If no split, header will remain as original, value as header without the prefix
@@ -102,13 +102,13 @@ func (rsrf *RSRField) RegexpMatched() bool { // Investigate whether we had a reg
 }
 
 // Parses list of RSRFields, used for example as multiple filters in derived charging
-func ParseRSRFields(fldsStr, sep string) ([]*RSRField, error) {
+func ParseRSRFields(fldsStr, sep string) (RSRFields, error) {
 	//rsrRlsPattern := regexp.MustCompile(`^(~\w+:s/.+/.*/)|(\^.+(/.+/)?)(;(~\w+:s/.+/.*/)|(\^.+(/.+/)?))*$`) //ToDo:Fix here rule able to confirm the content
 	if len(fldsStr) == 0 {
 		return nil, nil
 	}
 	rulesSplt := strings.Split(fldsStr, sep)
-	rsrFields := make([]*RSRField, len(rulesSplt))
+	rsrFields := make(RSRFields, len(rulesSplt))
 	for idx, ruleStr := range rulesSplt {
 		if rsrField, err := NewRSRField(ruleStr); err != nil {
 			return nil, err
@@ -118,3 +118,5 @@ func ParseRSRFields(fldsStr, sep string) ([]*RSRField, error) {
 	}
 	return rsrFields, nil
 }
+
+type RSRFields []*RSRField

@@ -74,7 +74,7 @@ func TestSearchExtraFieldLast(t *testing.T) {
 func TestSearchExtraField(t *testing.T) {
 	fsCdr, _ := NewFSCdr(body)
 	rsrSt1, _ := utils.NewRSRField("^injected_value")
-	rsrSt2, _ := utils.NewRSRField("^injected_hdr/injected_value/")
+	rsrSt2, _ := utils.NewRSRField("^injected_hdr::injected_value/")
 	cfg.CDRSExtraFields = []*utils.RSRField{&utils.RSRField{Id: "caller_id_name"}, rsrSt1, rsrSt2}
 	extraFields := fsCdr.getExtraFields()
 	if len(extraFields) != 3 || extraFields["caller_id_name"] != "dan" ||

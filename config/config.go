@@ -88,23 +88,15 @@ type CGRConfig struct {
 	RaterBalancer           string             // balancer address host:port
 	BalancerEnabled         bool
 	SchedulerEnabled        bool
-	CDRSEnabled             bool                         // Enable CDR Server service
-	CDRSExtraFields         []*utils.RSRField            // Extra fields to store in CDRs
-	CDRSMediator            string                       // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
-	CDRSStats               string                       // Address where to reach the Mediator. <""|intenal>
-	CDRSStoreDisable        bool                         // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
-	CDRStatsEnabled         bool                         // Enable CDR Stats service
-	CDRStatConfig           *CdrStatsConfig              // Active cdr stats configuration instances
-	CdreDefaultInstance     *CdreConfig                  // Will be used in the case no specific one selected by API
-	CdrcEnabled             bool                         // Enable CDR client functionality
-	CdrcCdrs                string                       // Address where to reach CDR server
-	CdrcRunDelay            time.Duration                // Sleep interval between consecutive runs, 0 to use automation via inotify
-	CdrcCdrType             string                       // CDR file format <csv>.
-	CdrcCsvSep              string                       // Separator used in case of csv files. One character only supported.
-	CdrcCdrInDir            string                       // Absolute path towards the directory where the CDRs are stored.
-	CdrcCdrOutDir           string                       // Absolute path towards the directory where processed CDRs will be moved.
-	CdrcSourceId            string                       // Tag identifying the source of the CDRs within CGRS database.
-	CdrcCdrFields           map[string][]*utils.RSRField // FieldName/RSRField format. Index number in case of .csv cdrs.
+	CDRSEnabled             bool              // Enable CDR Server service
+	CDRSExtraFields         []*utils.RSRField // Extra fields to store in CDRs
+	CDRSMediator            string            // Address where to reach the Mediator. Empty for disabling mediation. <""|internal>
+	CDRSStats               string            // Address where to reach the Mediator. <""|intenal>
+	CDRSStoreDisable        bool              // When true, CDRs will not longer be saved in stordb, useful for cdrstats only scenario
+	CDRStatsEnabled         bool              // Enable CDR Stats service
+	CDRStatConfig           *CdrStatsConfig   // Active cdr stats configuration instances
+	CdreDefaultInstance     *CdreConfig       // Will be used in the case no specific one selected by API
+	CdrcInstances           []*CdrcConfig     // Number of CDRC instances running imports
 	SMEnabled               bool
 	SMSwitchType            string
 	SMRater                 string        // address where to access rater. Can be internal, direct rater address or the address of a balancer
@@ -185,29 +177,8 @@ func (self *CGRConfig) setDefaults() error {
 	self.CDRSStoreDisable = false
 	self.CDRStatsEnabled = false
 	self.CDRStatConfig = NewCdrStatsConfigWithDefaults()
-	self.CdreDefaultInstance, _ = NewDefaultCdreConfig()
-	self.CdrcEnabled = false
-	self.CdrcCdrs = utils.INTERNAL
-	self.CdrcRunDelay = time.Duration(0)
-	self.CdrcCdrType = utils.CSV
-	self.CdrcCsvSep = string(utils.CSV_SEP)
-	self.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
-	self.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
-	self.CdrcSourceId = "csv"
-	self.CdrcCdrFields = map[string][]*utils.RSRField{
-		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "2"}},
-		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "3"}},
-		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "4"}},
-		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "5"}},
-		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "6"}},
-		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "7"}},
-		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "8"}},
-		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "9"}},
-		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "10"}},
-		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "11"}},
-		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "12"}},
-		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "13"}},
-	}
+	self.CdreDefaultInstance = NewDefaultCdreConfig()
+	self.CdrcInstances = []*CdrcConfig{NewDefaultCdrcConfig()} // This instance is just for the sake of defaults, it will be replaced when the file is loaded with the one resulted from there
 	self.MediatorEnabled = false
 	self.MediatorRater = utils.INTERNAL
 	self.MediatorReconnects = 3
@@ -249,15 +220,18 @@ func (self *CGRConfig) setDefaults() error {
 }
 
 func (self *CGRConfig) checkConfigSanity() error {
-	if self.CdrcEnabled {
-		if len(self.CdrcCdrFields) == 0 {
-			return errors.New("CdrC enabled but no fields to be processed defined!")
-		}
-		if self.CdrcCdrType == utils.CSV {
-			for _, rsrFldLst := range self.CdrcCdrFields {
-				for _, rsrFld := range rsrFldLst {
-					if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {
-						return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
+	// CDRC sanity checks
+	for _, cdrcInst := range self.CdrcInstances {
+		if cdrcInst.Enabled == true {
+			if len(cdrcInst.CdrFields) == 0 {
+				return errors.New("CdrC enabled but no fields to be processed defined!")
+			}
+			if cdrcInst.CdrType == utils.CSV {
+				for _, cdrFld := range cdrcInst.CdrFields {
+					for _, rsrFld := range cdrFld.Value {
+						if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {
+							return fmt.Errorf("CDR fields must be indices in case of .csv files, have instead: %s", rsrFld.Id)
+						}
 					}
 				}
 			}
@@ -478,10 +452,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		exportTemplate, _ := c.GetString("cdre", "export_template")
 		if strings.HasPrefix(exportTemplate, utils.XML_PROFILE_PREFIX) {
 			if xmlTemplates := cfg.XmlCfgDocument.GetCdreCfgs(exportTemplate[len(utils.XML_PROFILE_PREFIX):]); xmlTemplates != nil {
-				cfg.CdreDefaultInstance = xmlTemplates[exportTemplate[len(utils.XML_PROFILE_PREFIX):]].AsCdreConfig()
+				if cfg.CdreDefaultInstance, err = NewCdreConfigFromXmlCdreCfg(xmlTemplates[exportTemplate[len(utils.XML_PROFILE_PREFIX):]]); err != nil {
+					return nil, err
+				}
 			}
 		} else { // Not loading out of template
-			if flds, err := NewCdreCdrFieldsFromIds(cfg.CdreDefaultInstance.CdrFormat == utils.CDRE_FIXED_WIDTH,
+			if flds, err := NewCfgCdrFieldsFromIds(cfg.CdreDefaultInstance.CdrFormat == utils.CDRE_FIXED_WIDTH,
 				strings.Split(exportTemplate, string(utils.CSV_SEP))...); err != nil {
 				return nil, err
 			} else {
@@ -492,53 +468,19 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	if hasOpt = c.HasOption("cdre", "export_dir"); hasOpt {
 		cfg.CdreDefaultInstance.ExportDir, _ = c.GetString("cdre", "export_dir")
 	}
-	if hasOpt = c.HasOption("cdrc", "enabled"); hasOpt {
-		cfg.CdrcEnabled, _ = c.GetBool("cdrc", "enabled")
+	// CDRC Default instance parsing
+	if cdrcFileCfgInst, err := NewCdrcConfigFromFileParams(c); err != nil {
+		return nil, err
+	} else {
+		cfg.CdrcInstances = []*CdrcConfig{cdrcFileCfgInst}
 	}
-	if hasOpt = c.HasOption("cdrc", "cdrs"); hasOpt {
-		cfg.CdrcCdrs, _ = c.GetString("cdrc", "cdrs")
-	}
-	if hasOpt = c.HasOption("cdrc", "run_delay"); hasOpt {
-		durStr, _ := c.GetString("cdrc", "run_delay")
-		if cfg.CdrcRunDelay, err = utils.ParseDurationWithSecs(durStr); err != nil {
-			return nil, err
-		}
-	}
-	if hasOpt = c.HasOption("cdrc", "cdr_type"); hasOpt {
-		cfg.CdrcCdrType, _ = c.GetString("cdrc", "cdr_type")
-	}
-	if hasOpt = c.HasOption("cdrc", "csv_separator"); hasOpt {
-		cfg.CdrcCsvSep, _ = c.GetString("cdrc", "csv_separator")
-	}
-	if hasOpt = c.HasOption("cdrc", "cdr_in_dir"); hasOpt {
-		cfg.CdrcCdrInDir, _ = c.GetString("cdrc", "cdr_in_dir")
-	}
-	if hasOpt = c.HasOption("cdrc", "cdr_out_dir"); hasOpt {
-		cfg.CdrcCdrOutDir, _ = c.GetString("cdrc", "cdr_out_dir")
-	}
-	if hasOpt = c.HasOption("cdrc", "cdr_source_id"); hasOpt {
-		cfg.CdrcSourceId, _ = c.GetString("cdrc", "cdr_source_id")
-	}
-	// ParseCdrcCdrFields
-	torIdFld, _ := c.GetString("cdrc", "tor_field")
-	accIdFld, _ := c.GetString("cdrc", "accid_field")
-	reqtypeFld, _ := c.GetString("cdrc", "reqtype_field")
-	directionFld, _ := c.GetString("cdrc", "direction_field")
-	tenantFld, _ := c.GetString("cdrc", "tenant_field")
-	categoryFld, _ := c.GetString("cdrc", "category_field")
-	acntFld, _ := c.GetString("cdrc", "account_field")
-	subjectFld, _ := c.GetString("cdrc", "subject_field")
-	destFld, _ := c.GetString("cdrc", "destination_field")
-	setupTimeFld, _ := c.GetString("cdrc", "setup_time_field")
-	answerTimeFld, _ := c.GetString("cdrc", "answer_time_field")
-	durFld, _ := c.GetString("cdrc", "usage_field")
-	extraFlds, _ := c.GetString("cdrc", "extra_fields")
-	if len(torIdFld) != 0 || len(accIdFld) != 0 || len(reqtypeFld) != 0 || len(directionFld) != 0 || len(tenantFld) != 0 || len(categoryFld) != 0 || len(acntFld) != 0 ||
-		len(subjectFld) != 0 || len(destFld) != 0 || len(setupTimeFld) != 0 || len(answerTimeFld) != 0 || len(durFld) != 0 || len(extraFlds) != 0 {
-		// We overwrite the defaults only if at least one of the fields were defined
-		if cfg.CdrcCdrFields, err = ParseCdrcCdrFields(torIdFld, accIdFld, reqtypeFld, directionFld, tenantFld, categoryFld, acntFld, subjectFld, destFld,
-			setupTimeFld, answerTimeFld, durFld, extraFlds); err != nil {
-			return nil, err
+	if cfg.XmlCfgDocument != nil { // Add the possible configured instances inside xml doc
+		for id, xmlCdrcCfg := range cfg.XmlCfgDocument.GetCdrcCfgs("") {
+			if cdrcInst, err := NewCdrcConfigFromCgrXmlCdrcCfg(id, xmlCdrcCfg); err != nil {
+				return nil, err
+			} else {
+				cfg.CdrcInstances = append(cfg.CdrcInstances, cdrcInst)
+			}
 		}
 	}
 	if hasOpt = c.HasOption("mediator", "enabled"); hasOpt {

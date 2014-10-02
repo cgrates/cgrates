@@ -38,6 +38,68 @@ func ParseCgrXmlConfig(reader io.Reader) (*CgrXmlCfgDocument, error) {
 	return xmlConfig, nil
 }
 
+// XML CDR field, used for both cdrc and cdre
+type XmlCfgCdrField struct {
+	XMLName    xml.Name `xml:"field"`
+	Tag        *string  `xml:"tag,attr"`
+	Type       *string  `xml:"type,attr"`
+	CdrFieldId *string  `xml:"cdr_field,attr"`
+	Value      *string  `xml:"value,attr"`
+	Width      *int     `xml:"width,attr"`     // Field width
+	Strip      *string  `xml:"strip,attr"`     // Strip strategy in case value is bigger than field width <""|left|xleft|right|xright>
+	Padding    *string  `xml:"padding,attr"`   // Padding strategy in case of value is smaller than width <""left|zeroleft|right>
+	Layout     *string  `xml:"layout,attr"`    // Eg. time format layout
+	Filter     *string  `xml:"filter,attr"`    // Eg. combimed filters
+	Mandatory  *bool    `xml:"mandatory,attr"` // If field is mandatory, empty value will be considered as error and CDR will not be exported
+}
+
+// One CDRC Configuration instance
+type CgrXmlCdrcCfg struct {
+	Enabled        *bool             `xml:"enabled"`         // Enable/Disable the
+	CdrsAddress    *string           `xml:"cdrs_address"`    // The address where CDRs can be reached
+	CdrType        *string           `xml:"cdr_type"`        // The type of CDR to process <csv>
+	FieldSeparator *string           `xml:"field_separator"` // The separator to use when reading csvs
+	RunDelay       *int64            `xml:"run_delay"`       // Delay between runs
+	CdrInDir       *string           `xml:"cdr_in_dir"`      // Folder to process CDRs from
+	CdrOutDir      *string           `xml:"cdr_out_dir"`     // Folder to move processed CDRs to
+	CdrSourceId    *string           `xml:"cdr_source_id"`   // Source identifier for the processed CDRs
+	CdrFields      []*XmlCfgCdrField `xml:"fields>field"`
+}
+
+// The CdrExporter configuration instance
+type CgrXmlCdreCfg struct {
+	CdrFormat               *string              `xml:"cdr_format"`
+	FieldSeparator          *string              `xml:"field_separator"`
+	DataUsageMultiplyFactor *float64             `xml:"data_usage_multiply_factor"`
+	CostMultiplyFactor      *float64             `xml:"cost_multiply_factor"`
+	CostRoundingDecimals    *int                 `xml:"cost_rounding_decimals"`
+	CostShiftDigits         *int                 `xml:"cost_shift_digits"`
+	MaskDestId              *string              `xml:"mask_destination_id"`
+	MaskLength              *int                 `xml:"mask_length"`
+	ExportDir               *string              `xml:"export_dir"`
+	Header                  *CgrXmlCfgCdrHeader  `xml:"export_template>header"`
+	Content                 *CgrXmlCfgCdrContent `xml:"export_template>content"`
+	Trailer                 *CgrXmlCfgCdrTrailer `xml:"export_template>trailer"`
+}
+
+// CDR header
+type CgrXmlCfgCdrHeader struct {
+	XMLName xml.Name          `xml:"header"`
+	Fields  []*XmlCfgCdrField `xml:"fields>field"`
+}
+
+// CDR content
+type CgrXmlCfgCdrContent struct {
+	XMLName xml.Name          `xml:"content"`
+	Fields  []*XmlCfgCdrField `xml:"fields>field"`
+}
+
+// CDR trailer
+type CgrXmlCfgCdrTrailer struct {
+	XMLName xml.Name          `xml:"trailer"`
+	Fields  []*XmlCfgCdrField `xml:"fields>field"`
+}
+
 // Define a format for configuration file, one doc contains more configuration instances, identified by section, type and id
 type CgrXmlCfgDocument struct {
 	XMLName        xml.Name               `xml:"document"`
@@ -83,13 +145,6 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdrcCfgs() error {
 		} else if cdrcCfg == nil {
 			return fmt.Errorf("Could not unmarshal config instance: %s", cfgInst.Id)
 		}
-		// Cache rsr fields
-		for _, fld := range cdrcCfg.CdrFields {
-			if err := fld.PopulateRSRFields(); err != nil {
-				return fmt.Errorf("Populating field %s, error: %s", fld.Id, err.Error())
-			}
-		}
-		cdrcCfg.setDefaults()
 		xmlCfg.cdrcs[cfgInst.Id] = cdrcCfg
 	}
 	return nil
@@ -107,39 +162,6 @@ func (xmlCfg *CgrXmlCfgDocument) cacheCdreCfgs() error {
 			return err
 		} else if cdreCfg == nil {
 			return fmt.Errorf("Could not unmarshal CgrXmlCdreCfg: %s", cfgInst.Id)
-		}
-		if cdreCfg.Header != nil {
-			// Cache rsr fields
-			for _, fld := range cdreCfg.Header.Fields {
-				if err := fld.populateRSRField(); err != nil {
-					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
-				}
-				if err := fld.populateFltrRSRField(); err != nil {
-					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
-				}
-			}
-		}
-		if cdreCfg.Content != nil {
-			// Cache rsr fields
-			for _, fld := range cdreCfg.Content.Fields {
-				if err := fld.populateRSRField(); err != nil {
-					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
-				}
-				if err := fld.populateFltrRSRField(); err != nil {
-					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
-				}
-			}
-		}
-		if cdreCfg.Trailer != nil {
-			// Cache rsr fields
-			for _, fld := range cdreCfg.Trailer.Fields {
-				if err := fld.populateRSRField(); err != nil {
-					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
-				}
-				if err := fld.populateFltrRSRField(); err != nil {
-					return fmt.Errorf("Populating field %s, error: %s", fld.Name, err.Error())
-				}
-			}
 		}
 		xmlCfg.cdres[cfgInst.Id] = cdreCfg
 	}

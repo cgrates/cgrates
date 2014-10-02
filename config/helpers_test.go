@@ -100,22 +100,6 @@ usage_fields = test1, test2
 }
 
 func TestParseCdrcCdrFields(t *testing.T) {
-	eFieldsCfg := []byte(`[cdrc]
-cdr_type = test
-tor_field = tor1
-accid_field = accid1
-reqtype_field = reqtype1
-direction_field = direction1
-tenant_field = tenant1
-category_field = category1
-account_field = account1
-subject_field = subject1
-destination_field = destination1
-setup_time_field = setuptime1
-answer_time_field = answertime1
-usage_field = duration1
-extra_fields = extra1:extraval1,extra2:extraval1
-`)
 	eCdrcCdrFlds := map[string][]*utils.RSRField{
 		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "tor1"}},
 		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "accid1"}},
@@ -132,9 +116,10 @@ extra_fields = extra1:extraval1,extra2:extraval1
 		"extra1":          []*utils.RSRField{&utils.RSRField{Id: "extraval1"}},
 		"extra2":          []*utils.RSRField{&utils.RSRField{Id: "extraval1"}},
 	}
-	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
+	if cdrFlds, err := ParseCdrcCdrFields("tor1", "accid1", "reqtype1", "direction1", "tenant1", "category1", "account1", "subject1", "destination1",
+		"setuptime1", "answertime1", "duration1", "extra1:extraval1,extra2:extraval1"); err != nil {
 		t.Error("Could not parse the config", err.Error())
-	} else if !reflect.DeepEqual(cfg.CdrcCdrFields, eCdrcCdrFlds) {
-		t.Errorf("Expecting: %v, received: %v, tor: %v", eCdrcCdrFlds, cfg.CdrcCdrFields, cfg.CdrcCdrFields[utils.TOR])
+	} else if !reflect.DeepEqual(eCdrcCdrFlds, cdrFlds) {
+		t.Errorf("Expecting: %v, received: %v, tor: %v", eCdrcCdrFlds, cdrFlds, cdrFlds[utils.TOR])
 	}
 }

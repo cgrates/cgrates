@@ -96,9 +96,9 @@ func TestCreateCdrDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, cdrcDir := range []string{cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir,
-		cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrInDir, cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrOutDir,
-		cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrInDir, cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrOutDir} {
+	for _, cdrcDir := range []string{cfg.CdrcInstances[0].CdrInDir, cfg.CdrcInstances[0].CdrOutDir,
+		*cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrInDir, *cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrOutDir,
+		*cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrInDir, *cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrOutDir} {
 		if err := os.RemoveAll(cdrcDir); err != nil {
 			t.Fatal("Error removing folder: ", cdrcDir, err)
 		}
@@ -151,7 +151,7 @@ dbafe9c8614c785a65aabd116dd3959c3c56f7f7,default,*voice,dsafdsag,rated,*out,cgra
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent1), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcCdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join(cfg.CdrcInstances[0].CdrInDir, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -169,7 +169,7 @@ func TestHandleCdr2File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join(*cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrInDir, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }
@@ -186,7 +186,7 @@ func TestHandleCdr3File(t *testing.T) {
 	if err := ioutil.WriteFile(tmpFilePath, []byte(fileContent), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := os.Rename(tmpFilePath, path.Join(cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrInDir, fileName)); err != nil {
+	if err := os.Rename(tmpFilePath, path.Join(*cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrInDir, fileName)); err != nil {
 		t.Fatal("Error moving file to processing directory: ", err)
 	}
 }

@@ -79,7 +79,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.RaterBalancer = ""
 	eCfg.BalancerEnabled = false
 	eCfg.SchedulerEnabled = false
-	eCfg.CdreDefaultInstance, _ = NewDefaultCdreConfig()
+	eCfg.CdreDefaultInstance = NewDefaultCdreConfig()
+	eCfg.CdrcInstances = []*CdrcConfig{NewDefaultCdrcConfig()}
 	eCfg.CDRSEnabled = false
 	eCfg.CDRSExtraFields = []*utils.RSRField{}
 	eCfg.CDRSMediator = ""
@@ -87,28 +88,6 @@ func TestDefaults(t *testing.T) {
 	eCfg.CDRSStoreDisable = false
 	eCfg.CDRStatsEnabled = false
 	eCfg.CDRStatConfig = &CdrStatsConfig{Id: utils.META_DEFAULT, QueueLength: 50, TimeWindow: time.Duration(1) * time.Hour, Metrics: []string{"ASR", "ACD", "ACC"}}
-	eCfg.CdrcEnabled = false
-	eCfg.CdrcCdrs = utils.INTERNAL
-	eCfg.CdrcRunDelay = time.Duration(0)
-	eCfg.CdrcCdrType = "csv"
-	eCfg.CdrcCsvSep = string(utils.CSV_SEP)
-	eCfg.CdrcCdrInDir = "/var/log/cgrates/cdrc/in"
-	eCfg.CdrcCdrOutDir = "/var/log/cgrates/cdrc/out"
-	eCfg.CdrcSourceId = "csv"
-	eCfg.CdrcCdrFields = map[string][]*utils.RSRField{
-		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "2"}},
-		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "3"}},
-		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "4"}},
-		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "5"}},
-		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "6"}},
-		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "7"}},
-		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "8"}},
-		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "9"}},
-		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "10"}},
-		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "11"}},
-		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "12"}},
-		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "13"}},
-	}
 	eCfg.MediatorEnabled = false
 	eCfg.MediatorRater = utils.INTERNAL
 	eCfg.MediatorReconnects = 3
@@ -162,20 +141,6 @@ func TestSanityCheck(t *testing.T) {
 	}
 	if err := cfg.checkConfigSanity(); err != nil {
 		t.Error("Invalid defaults: ", err)
-	}
-	cfg = &CGRConfig{}
-	cfg.CdrcEnabled = true
-	if err := cfg.checkConfigSanity(); err == nil {
-		t.Error("Failed to detect missing CDR fields definition")
-	}
-	cfg.CdrcCdrType = utils.CSV
-	cfg.CdrcCdrFields = map[string][]*utils.RSRField{utils.ACCID: []*utils.RSRField{&utils.RSRField{Id: "test"}}}
-	if err := cfg.checkConfigSanity(); err == nil {
-		t.Error("Failed to detect improper use of CDR field names")
-	}
-	cfg.CdrcCdrFields = map[string][]*utils.RSRField{"extra1": []*utils.RSRField{&utils.RSRField{Id: "test"}}}
-	if err := cfg.checkConfigSanity(); err == nil {
-		t.Error("Failed to detect improper use of CDR field names")
 	}
 	cfg = &CGRConfig{}
 	cfg.CDRSStats = utils.INTERNAL
@@ -258,30 +223,32 @@ func TestConfigFromFile(t *testing.T) {
 		MaskDestId:              "test",
 		MaskLength:              99,
 		ExportDir:               "test"}
-	eCfg.CdreDefaultInstance.ContentFields, _ = NewCdreCdrFieldsFromIds(false, "test")
-	eCfg.CdrcEnabled = true
-	eCfg.CdrcCdrs = "test"
-	eCfg.CdrcRunDelay = time.Duration(99) * time.Second
-	eCfg.CdrcCdrType = "test"
-	eCfg.CdrcCsvSep = ";"
-	eCfg.CdrcCdrInDir = "test"
-	eCfg.CdrcCdrOutDir = "test"
-	eCfg.CdrcSourceId = "test"
-	eCfg.CdrcCdrFields = map[string][]*utils.RSRField{
-		utils.TOR:         []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "test"}},
-		"test":            []*utils.RSRField{&utils.RSRField{Id: "test"}},
+	eCfg.CdreDefaultInstance.ContentFields, _ = NewCfgCdrFieldsFromIds(false, "test")
+	cdrcCfg := NewDefaultCdrcConfig()
+	cdrcCfg.Enabled = true
+	cdrcCfg.CdrsAddress = "test"
+	cdrcCfg.RunDelay = time.Duration(99) * time.Second
+	cdrcCfg.CdrType = "test"
+	cdrcCfg.FieldSeparator = ";"
+	cdrcCfg.CdrInDir = "test"
+	cdrcCfg.CdrOutDir = "test"
+	cdrcCfg.CdrSourceId = "test"
+	cdrcCfg.CdrFields = []*CfgCdrField{
+		&CfgCdrField{Tag: utils.TOR, Type: utils.CDRFIELD, CdrFieldId: utils.TOR, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.ACCID, Type: utils.CDRFIELD, CdrFieldId: utils.ACCID, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.REQTYPE, Type: utils.CDRFIELD, CdrFieldId: utils.REQTYPE, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.DIRECTION, Type: utils.CDRFIELD, CdrFieldId: utils.DIRECTION, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.TENANT, Type: utils.CDRFIELD, CdrFieldId: utils.TENANT, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.CATEGORY, Type: utils.CDRFIELD, CdrFieldId: utils.CATEGORY, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.ACCOUNT, Type: utils.CDRFIELD, CdrFieldId: utils.ACCOUNT, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.SUBJECT, Type: utils.CDRFIELD, CdrFieldId: utils.SUBJECT, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.DESTINATION, Type: utils.CDRFIELD, CdrFieldId: utils.DESTINATION, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: utils.SETUP_TIME, Type: utils.CDRFIELD, CdrFieldId: utils.SETUP_TIME, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true, Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{Tag: utils.ANSWER_TIME, Type: utils.CDRFIELD, CdrFieldId: utils.ANSWER_TIME, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true, Layout: "2006-01-02T15:04:05Z07:00"},
+		&CfgCdrField{Tag: utils.USAGE, Type: utils.CDRFIELD, CdrFieldId: utils.USAGE, Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}, Mandatory: true},
+		&CfgCdrField{Tag: "test", Type: utils.CDRFIELD, CdrFieldId: "test", Value: []*utils.RSRField{&utils.RSRField{Id: "test"}}},
 	}
+	eCfg.CdrcInstances = []*CdrcConfig{cdrcCfg}
 	eCfg.MediatorEnabled = true
 	eCfg.MediatorRater = "test"
 	eCfg.MediatorReconnects = 99
@@ -325,6 +292,7 @@ func TestConfigFromFile(t *testing.T) {
 		t.Log(cfg)
 		t.Error("Loading of configuration from file failed!")
 	}
+
 }
 
 func TestCdrsExtraFields(t *testing.T) {
@@ -359,12 +327,10 @@ func TestCdreExtraFields(t *testing.T) {
 cdr_format = csv
 export_template = cgrid,mediation_runid,accid
 `)
-	expectedFlds := []*CdreCdrField{
-		&CdreCdrField{Name: "cgrid", Type: utils.CDRFIELD, Value: "cgrid", valueAsRsrField: &utils.RSRField{Id: "cgrid"}, Mandatory: true},
-		&CdreCdrField{Name: "mediation_runid", Type: utils.CDRFIELD, Value: "mediation_runid", valueAsRsrField: &utils.RSRField{Id: "mediation_runid"},
-			Mandatory: true},
-		&CdreCdrField{Name: "accid", Type: utils.CDRFIELD, Value: "accid", valueAsRsrField: &utils.RSRField{Id: "accid"},
-			Mandatory: true},
+	expectedFlds := []*CfgCdrField{
+		&CfgCdrField{Tag: "cgrid", Type: utils.CDRFIELD, CdrFieldId: "cgrid", Value: []*utils.RSRField{&utils.RSRField{Id: "cgrid"}}, Mandatory: true},
+		&CfgCdrField{Tag: "mediation_runid", Type: utils.CDRFIELD, CdrFieldId: "mediation_runid", Value: []*utils.RSRField{&utils.RSRField{Id: "mediation_runid"}}, Mandatory: true},
+		&CfgCdrField{Tag: "accid", Type: utils.CDRFIELD, CdrFieldId: "accid", Value: []*utils.RSRField{&utils.RSRField{Id: "accid"}}, Mandatory: true},
 	}
 	expCdreCfg := &CdreConfig{CdrFormat: utils.CSV, FieldSeparator: utils.CSV_SEP, CostRoundingDecimals: -1, ExportDir: "/var/log/cgrates/cdre", ContentFields: expectedFlds}
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
@@ -377,10 +343,9 @@ cdr_format = csv
 export_template = cgrid,~effective_caller_id_number:s/(\d+)/+$1/
 `)
 	rsrField, _ := utils.NewRSRField(`~effective_caller_id_number:s/(\d+)/+$1/`)
-	expectedFlds = []*CdreCdrField{
-		&CdreCdrField{Name: "cgrid", Type: utils.CDRFIELD, Value: "cgrid", valueAsRsrField: &utils.RSRField{Id: "cgrid"}, Mandatory: true},
-		&CdreCdrField{Name: `~effective_caller_id_number:s/(\d+)/+$1/`, Type: utils.CDRFIELD, Value: `~effective_caller_id_number:s/(\d+)/+$1/`,
-			valueAsRsrField: rsrField, Mandatory: false}}
+	expectedFlds = []*CfgCdrField{
+		&CfgCdrField{Tag: "cgrid", Type: utils.CDRFIELD, CdrFieldId: "cgrid", Value: []*utils.RSRField{&utils.RSRField{Id: "cgrid"}}, Mandatory: true},
+		&CfgCdrField{Tag: "effective_caller_id_number", Type: utils.CDRFIELD, CdrFieldId: "effective_caller_id_number", Value: []*utils.RSRField{rsrField}, Mandatory: false}}
 	expCdreCfg.ContentFields = expectedFlds
 	if cfg, err := NewCGRConfigFromBytes(eFieldsCfg); err != nil {
 		t.Error("Could not parse the config", err.Error())
@@ -393,17 +358,5 @@ export_template = cgrid,~accid:s/(\d)/$1,runid
 `)
 	if _, err := NewCGRConfigFromBytes(eFieldsCfg); err == nil {
 		t.Error("Failed to detect failed RSRParsing")
-	}
-}
-
-func TestCdrcCdrDefaultFields(t *testing.T) {
-	cdrcCfg := []byte(`[cdrc]
-enabled = true
-`)
-	cfgDefault, _ := NewDefaultCGRConfig()
-	if cfg, err := NewCGRConfigFromBytes(cdrcCfg); err != nil {
-		t.Error("Could not parse the config", err.Error())
-	} else if !reflect.DeepEqual(cfg.CdrcCdrFields, cfgDefault.CdrcCdrFields) {
-		t.Errorf("Unexpected value for CdrcCdrFields: %v", cfg.CdrcCdrFields)
 	}
 }

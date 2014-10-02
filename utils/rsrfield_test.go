@@ -89,7 +89,7 @@ func TestConvertPlusNationalAnd00(t *testing.T) {
 }
 
 func TestRSRParseStatic(t *testing.T) {
-	if rsrField, err := NewRSRField("^static_header/static_value/"); err != nil {
+	if rsrField, err := NewRSRField("^static_header::static_value/"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rsrField, &RSRField{Id: "static_header", staticValue: "static_value"}) {
 		t.Errorf("Unexpected RSRField received: %v", rsrField)
@@ -150,14 +150,14 @@ func TestParseRSRFields(t *testing.T) {
 	rsrFld2, _ := NewRSRField(`~subject:s/^0\d{9}$//`)
 	rsrFld3, _ := NewRSRField(`^destination/+4912345/`)
 	rsrFld4, _ := NewRSRField(`~mediation_runid:s/^default$/default/`)
-	eRSRFields := []*RSRField{rsrFld1, rsrFld2, rsrFld3, rsrFld4}
+	eRSRFields := RSRFields{rsrFld1, rsrFld2, rsrFld3, rsrFld4}
 	if rsrFlds, err := ParseRSRFields(fieldsStr1, INFIELD_SEP); err != nil {
 		t.Error("Unexpected error: ", err)
 	} else if !reflect.DeepEqual(eRSRFields, rsrFlds) {
 		t.Errorf("Expecting: %v, received: %v", eRSRFields, rsrFlds)
 	}
 	fields := `host,~sip_redirected_to:s/sip:\+49(\d+)@/0$1/,destination`
-	expectParsedFields := []*RSRField{
+	expectParsedFields := RSRFields{
 		&RSRField{Id: "host"},
 		&RSRField{Id: "sip_redirected_to",
 			RSRules: []*ReSearchReplace{&ReSearchReplace{SearchRegexp: regexp.MustCompile(`sip:\+49(\d+)@`), ReplaceTemplate: "0$1"}}},

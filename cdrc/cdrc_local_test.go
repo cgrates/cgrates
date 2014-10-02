@@ -48,6 +48,7 @@ README:
 
 var cfgPath string
 var cfg *config.CGRConfig
+var cdrcCfg *config.CdrcConfig
 
 var testLocal = flag.Bool("local", false, "Perform the tests only on local test environment, not by default.") // This flag will be passed here via "go test -local" args
 var dataDir = flag.String("data_dir", "/usr/share/cgrates", "CGR data dir path here")
@@ -57,6 +58,9 @@ var waitRater = flag.Int("wait_rater", 300, "Number of miliseconds to wait for r
 func init() {
 	cfgPath = path.Join(*dataDir, "conf", "samples", "apier_local_test.cfg")
 	cfg, _ = config.NewCGRConfigFromFile(&cfgPath)
+	if len(cfg.CdrcInstances) > 0 {
+		cdrcCfg = cfg.CdrcInstances[0]
+	}
 }
 
 var fileContent1 = `accid11,prepaid,out,cgrates.org,call,1001,1001,+4986517174963,2013-02-03 19:54:00,62,supplier1,172.16.1.1
@@ -125,38 +129,41 @@ func TestCreateCdrFiles(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := os.RemoveAll(cfg.CdrcCdrInDir); err != nil {
-		t.Fatal("Error removing folder: ", cfg.CdrcCdrInDir, err)
+	if cdrcCfg == nil {
+		t.Fatal("Empty default cdrc configuration")
 	}
-	if err := os.MkdirAll(cfg.CdrcCdrInDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", cfg.CdrcCdrInDir, err)
+	if err := os.RemoveAll(cdrcCfg.CdrInDir); err != nil {
+		t.Fatal("Error removing folder: ", cdrcCfg.CdrInDir, err)
 	}
-	if err := os.RemoveAll(cfg.CdrcCdrOutDir); err != nil {
-		t.Fatal("Error removing folder: ", cfg.CdrcCdrInDir, err)
+	if err := os.MkdirAll(cdrcCfg.CdrInDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", cdrcCfg.CdrInDir, err)
 	}
-	if err := os.MkdirAll(cfg.CdrcCdrOutDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", cfg.CdrcCdrOutDir, err)
+	if err := os.RemoveAll(cdrcCfg.CdrOutDir); err != nil {
+		t.Fatal("Error removing folder: ", cdrcCfg.CdrOutDir, err)
 	}
-	if err := ioutil.WriteFile(path.Join(cfg.CdrcCdrInDir, "file1.csv"), []byte(fileContent1), 0644); err != nil {
+	if err := os.MkdirAll(cdrcCfg.CdrOutDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", cdrcCfg.CdrOutDir, err)
+	}
+	if err := ioutil.WriteFile(path.Join(cdrcCfg.CdrInDir, "file1.csv"), []byte(fileContent1), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
-	if err := ioutil.WriteFile(path.Join(cfg.CdrcCdrInDir, "file2.csv"), []byte(fileContent2), 0644); err != nil {
+	if err := ioutil.WriteFile(path.Join(cdrcCfg.CdrInDir, "file2.csv"), []byte(fileContent2), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
+
 }
 
 func TestProcessCdrDir(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if cfg.CdrcCdrs == utils.INTERNAL { // For now we only test over network
-		return
+	if cdrcCfg.CdrsAddress == utils.INTERNAL { // For now we only test over network
+		cdrcCfg.CdrsAddress = "127.0.0.1:2013"
 	}
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cfg.CdrcCdrs, cfg.CdrcCdrType, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.CdrcSourceId, cfg.CdrcRunDelay, cfg.CdrcCsvSep,
-		cfg.CdrcCdrFields, nil)
+	cdrc, err := NewCdrc(cdrcCfg, true, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -171,13 +178,13 @@ func TestCreateCdr3File(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if err := os.RemoveAll(cfg.CdrcCdrInDir); err != nil {
-		t.Fatal("Error removing folder: ", cfg.CdrcCdrInDir, err)
+	if err := os.RemoveAll(cdrcCfg.CdrInDir); err != nil {
+		t.Fatal("Error removing folder: ", cdrcCfg.CdrInDir, err)
 	}
-	if err := os.MkdirAll(cfg.CdrcCdrInDir, 0755); err != nil {
-		t.Fatal("Error creating folder: ", cfg.CdrcCdrInDir, err)
+	if err := os.MkdirAll(cdrcCfg.CdrInDir, 0755); err != nil {
+		t.Fatal("Error creating folder: ", cdrcCfg.CdrInDir, err)
 	}
-	if err := ioutil.WriteFile(path.Join(cfg.CdrcCdrInDir, "file3.csv"), []byte(fileContent3), 0644); err != nil {
+	if err := ioutil.WriteFile(path.Join(cdrcCfg.CdrInDir, "file3.csv"), []byte(fileContent3), 0644); err != nil {
 		t.Fatal(err.Error)
 	}
 }
@@ -186,14 +193,13 @@ func TestProcessCdr3Dir(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if cfg.CdrcCdrs == utils.INTERNAL { // For now we only test over network
-		return
+	if cdrcCfg.CdrsAddress == utils.INTERNAL { // For now we only test over network
+		cdrcCfg.CdrsAddress = "127.0.0.1:2013"
 	}
 	if err := startEngine(); err != nil {
 		t.Fatal(err.Error())
 	}
-	cdrc, err := NewCdrc(cfg.CdrcCdrs, cfg.CdrcCdrType, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.CdrcSourceId, cfg.CdrcRunDelay, ";",
-		cfg.CdrcCdrFields, nil)
+	cdrc, err := NewCdrc(cdrcCfg, true, nil)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

@@ -112,7 +112,7 @@ func TestPassesFieldFilter(t *testing.T) {
 	if pass, _ := cdr.PassesFieldFilter(acntPrefxFltr); pass {
 		t.Error("Passing filter")
 	}
-	torFltr, _ := NewRSRField(`^tor/*voice/`)
+	torFltr, _ := NewRSRField(`^tor::*voice/`)
 	if pass, _ := cdr.PassesFieldFilter(torFltr); !pass {
 		t.Error("Not passing filter")
 	}

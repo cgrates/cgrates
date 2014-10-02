@@ -28,19 +28,13 @@ import (
 	"io"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
 const (
 	COST_DETAILS          = "cost_details"
-	FILLER                = "filler"
-	CONSTANT              = "constant"
-	METATAG               = "metatag"
 	CONCATENATED_CDRFIELD = "concatenated_cdrfield"
-	COMBIMED              = "combimed"
 	DATETIME              = "datetime"
-	HTTP_POST             = "http_post"
 	META_EXPORTID         = "export_id"
 	META_TIMENOW          = "time_now"
 	META_FIRSTCDRATIME    = "first_cdr_atime"
@@ -121,20 +115,25 @@ func (cdre *CdrExporter) getCdrCostDetails(cgrId, runId string) (string, error) 
 	return string(ccJson), nil
 }
 
-func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *utils.StoredCdr, filterRule, fieldRule *utils.RSRField) (string, error) {
-	fltrPass, ftrPassValue := processedCdr.PassesFieldFilter(filterRule)
-	if !fltrPass {
-		return "", nil
-	}
-	for _, cdr := range cdre.cdrs {
-		if cdr.CgrId != processedCdr.CgrId {
-			continue // We only care about cdrs with same primary cdr behind
+func (cdre *CdrExporter) getCombimedCdrFieldVal(processedCdr *utils.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+	var combinedVal string // Will result as combination of the field values, filters must match
+	for _, filterRule := range cfgCdrFld.Filter {
+		fltrPass, ftrPassValue := processedCdr.PassesFieldFilter(filterRule)
+		if !fltrPass {
+			return "", nil
 		}
-		if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == ftrPassValue {
-			return cdr.FieldAsString(fieldRule), nil
+		for _, cdr := range cdre.cdrs {
+			if cdr.CgrId != processedCdr.CgrId {
+				continue // We only care about cdrs with same primary cdr behind
+			}
+			if cdr.FieldAsString(&utils.RSRField{Id: filterRule.Id}) == ftrPassValue { // First CDR with filte
+				for _, rsrRule := range cfgCdrFld.Value {
+					combinedVal += cdr.FieldAsString(rsrRule)
+				}
+			}
 		}
 	}
-	return "", nil
+	return combinedVal, nil
 }
 
 // Check if the destination should be masked in output
@@ -145,17 +144,20 @@ func (cdre *CdrExporter) maskedDestination(destination string) bool {
 	return false
 }
 
-func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, fltrRl, fieldRl *utils.RSRField, layout string) (string, error) {
-	if fieldRl == nil {
+func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+	if len(cfgCdrFld.Value) == 0 {
 		return "", nil
 	}
-	if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
-		return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+	for _, fltrRl := range cfgCdrFld.Filter {
+		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
+			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+		}
 	}
+	layout := cfgCdrFld.Layout
 	if len(layout) == 0 {
 		layout = time.RFC3339
 	}
-	if dtFld, err := utils.ParseTimeDetectLayout(cdr.FieldAsString(fieldRl)); err != nil {
+	if dtFld, err := utils.ParseTimeDetectLayout(cdr.FieldAsString(cfgCdrFld.Value[0])); err != nil { // Only one rule makes sense here
 		return "", err
 	} else {
 		return dtFld.Format(layout), nil
@@ -163,39 +165,43 @@ func (cdre *CdrExporter) getDateTimeFieldVal(cdr *utils.StoredCdr, fltrRl, field
 }
 
 // Extracts the value specified by cfgHdr out of cdr
-func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, fltrRl, rsrFld *utils.RSRField, layout string) (string, error) {
-	if rsrFld == nil {
-		return "", nil
+func (cdre *CdrExporter) cdrFieldValue(cdr *utils.StoredCdr, cfgCdrFld *config.CfgCdrField) (string, error) {
+	for _, fltrRl := range cfgCdrFld.Filter {
+		if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
+			return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
+		}
 	}
-	if fltrPass, _ := cdr.PassesFieldFilter(fltrRl); !fltrPass {
-		return "", fmt.Errorf("Field: %s not matching filter rule %v", fltrRl.Id, fltrRl)
-	}
+	layout := cfgCdrFld.Layout
 	if len(layout) == 0 {
 		layout = time.RFC3339
 	}
-	var cdrVal string
-	switch rsrFld.Id {
-	case COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
-		if cdrVal, err = cdre.getCdrCostDetails(cdr.CgrId, cdr.MediationRunId); err != nil {
-			return "", err
+	var retVal string // Concatenate the resulting values
+	for _, rsrFld := range cfgCdrFld.Value {
+		var cdrVal string
+		switch rsrFld.Id {
+		case COST_DETAILS: // Special case when we need to further extract cost_details out of logDb
+			if cdrVal, err = cdre.getCdrCostDetails(cdr.CgrId, cdr.MediationRunId); err != nil {
+				return "", err
+			}
+		case utils.COST:
+			cdrVal = cdr.FormatCost(cdre.costShiftDigits, cdre.roundDecimals)
+		case utils.USAGE:
+			cdrVal = cdr.FormatUsage(layout)
+		case utils.SETUP_TIME:
+			cdrVal = cdr.SetupTime.Format(layout)
+		case utils.ANSWER_TIME: // Format time based on layout
+			cdrVal = cdr.AnswerTime.Format(layout)
+		case utils.DESTINATION:
+			cdrVal = cdr.FieldAsString(rsrFld)
+			if cdre.maskLen != -1 && cdre.maskedDestination(cdrVal) {
+				cdrVal = MaskDestination(cdrVal, cdre.maskLen)
+			}
+		default:
+			cdrVal = cdr.FieldAsString(rsrFld)
 		}
-	case utils.COST:
-		cdrVal = cdr.FormatCost(cdre.costShiftDigits, cdre.roundDecimals)
-	case utils.USAGE:
-		cdrVal = cdr.FormatUsage(layout)
-	case utils.SETUP_TIME:
-		cdrVal = cdr.SetupTime.Format(layout)
-	case utils.ANSWER_TIME: // Format time based on layout
-		cdrVal = cdr.AnswerTime.Format(layout)
-	case utils.DESTINATION:
-		cdrVal = cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION})
-		if cdre.maskLen != -1 && cdre.maskedDestination(cdrVal) {
-			cdrVal = MaskDestination(cdrVal, cdre.maskLen)
-		}
-	default:
-		cdrVal = cdr.FieldAsString(rsrFld)
+		retVal += cdrVal
 	}
-	return rsrFld.ParseValue(cdrVal), nil
+	return retVal, nil
 }
 
 // Handle various meta functions used in header/trailer
@@ -212,15 +218,12 @@ func (cdre *CdrExporter) metaHandler(tag, arg string) (string, error) {
 	case META_NRCDRS:
 		return strconv.Itoa(cdre.numberOfRecords), nil
 	case META_DURCDRS:
-		//return strconv.FormatFloat(cdre.totalDuration.Seconds(), 'f', -1, 64), nil
 		emulatedCdr := &utils.StoredCdr{TOR: utils.VOICE, Usage: cdre.totalDuration}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_SMSUSAGE:
-		//return strconv.FormatFloat(cdre.totalDuration.Seconds(), 'f', -1, 64), nil
 		emulatedCdr := &utils.StoredCdr{TOR: utils.SMS, Usage: cdre.totalSmsUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_DATAUSAGE:
-		//return strconv.FormatFloat(cdre.totalDuration.Seconds(), 'f', -1, 64), nil
 		emulatedCdr := &utils.StoredCdr{TOR: utils.DATA, Usage: cdre.totalDataUsage}
 		return emulatedCdr.FormatUsage(arg), nil
 	case META_COSTCDRS:
@@ -241,23 +244,27 @@ func (cdre *CdrExporter) composeHeader() error {
 	for _, cfgFld := range cdre.exportTemplate.HeaderFields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER:
-			outVal = cfgFld.Value
+		case utils.FILLER:
+			for _, rsrFld := range cfgFld.Value {
+				outVal += rsrFld.ParseValue("")
+			}
 			cfgFld.Padding = "right"
-		case CONSTANT:
-			outVal = cfgFld.Value
-		case METATAG:
-			outVal, err = cdre.metaHandler(cfgFld.Value, cfgFld.Layout)
+		case utils.CONSTANT:
+			for _, rsrFld := range cfgFld.Value {
+				outVal += rsrFld.ParseValue("")
+			}
+		case utils.METATAG:
+			outVal, err = cdre.metaHandler(cfgFld.CdrFieldId, cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
 		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Name, err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
 		fmtOut := outVal
 		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Name, err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR header, field %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
 		cdre.header = append(cdre.header, fmtOut)
@@ -270,23 +277,27 @@ func (cdre *CdrExporter) composeTrailer() error {
 	for _, cfgFld := range cdre.exportTemplate.TrailerFields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER:
-			outVal = cfgFld.Value
+		case utils.FILLER:
+			for _, rsrFld := range cfgFld.Value {
+				outVal += rsrFld.ParseValue("")
+			}
 			cfgFld.Padding = "right"
-		case CONSTANT:
-			outVal = cfgFld.Value
-		case METATAG:
-			outVal, err = cdre.metaHandler(cfgFld.Value, cfgFld.Layout)
+		case utils.CONSTANT:
+			for _, rsrFld := range cfgFld.Value {
+				outVal += rsrFld.ParseValue("")
+			}
+		case utils.METATAG:
+			outVal, err = cdre.metaHandler(cfgFld.CdrFieldId, cfgFld.Layout)
 		default:
 			return fmt.Errorf("Unsupported field type: %s", cfgFld.Type)
 		}
 		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Name, err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
 		fmtOut := outVal
 		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Name, err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR trailer, field: %s, error: %s", cfgFld.Tag, err.Error()))
 			return err
 		}
 		cdre.trailer = append(cdre.trailer, fmtOut)
@@ -310,38 +321,38 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 	for idx, cfgFld := range cdre.exportTemplate.ContentFields {
 		var outVal string
 		switch cfgFld.Type {
-		case FILLER:
-			outVal = cfgFld.Value
+		case utils.FILLER:
+			for _, rsrFld := range cfgFld.Value {
+				outVal += rsrFld.ParseValue("")
+			}
 			cfgFld.Padding = "right"
-		case CONSTANT:
-			outVal = cfgFld.Value
+		case utils.CONSTANT:
+			for _, rsrFld := range cfgFld.Value {
+				outVal += rsrFld.ParseValue("")
+			}
 		case utils.CDRFIELD:
-			outVal, err = cdre.cdrFieldValue(cdr, cfgFld.Filter, cfgFld.ValueAsRSRField(), cfgFld.Layout)
+			outVal, err = cdre.cdrFieldValue(cdr, cfgFld)
 		case DATETIME:
-			outVal, err = cdre.getDateTimeFieldVal(cdr, cfgFld.Filter, cfgFld.ValueAsRSRField(), cfgFld.Layout)
-		case HTTP_POST:
+			outVal, err = cdre.getDateTimeFieldVal(cdr, cfgFld)
+		case utils.HTTP_POST:
 			var outValByte []byte
-			if outValByte, err = utils.HttpJsonPost(cfgFld.Value, cdre.httpSkipTlsCheck, cdr); err == nil {
+			var httpAddr string
+			for _, rsrFld := range cfgFld.Value {
+				httpAddr += rsrFld.ParseValue("")
+			}
+			if outValByte, err = utils.HttpJsonPost(httpAddr, cdre.httpSkipTlsCheck, cdr); err == nil {
 				outVal = string(outValByte)
 				if len(outVal) == 0 && cfgFld.Mandatory {
-					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Name)
+					err = fmt.Errorf("Empty result for http_post field: %s", cfgFld.Tag)
 				}
 			}
-		case COMBIMED:
-			outVal, err = cdre.getCombimedCdrFieldVal(cdr, cfgFld.Filter, cfgFld.ValueAsRSRField())
-		case CONCATENATED_CDRFIELD:
-			for _, fld := range strings.Split(cfgFld.Value, ",") {
-				if fldOut, err := cdre.cdrFieldValue(cdr, cfgFld.Filter, &utils.RSRField{Id: fld}, cfgFld.Layout); err != nil {
-					break // The error will be reported bellow
-				} else {
-					outVal += fldOut
-				}
-			}
-		case METATAG:
-			if cfgFld.Value == META_MASKDESTINATION {
-				outVal, err = cdre.metaHandler(cfgFld.Value, cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}))
+		case utils.COMBIMED:
+			outVal, err = cdre.getCombimedCdrFieldVal(cdr, cfgFld)
+		case utils.METATAG:
+			if cfgFld.CdrFieldId == META_MASKDESTINATION {
+				outVal, err = cdre.metaHandler(cfgFld.CdrFieldId, cdr.FieldAsString(&utils.RSRField{Id: utils.DESTINATION}))
 			} else {
-				outVal, err = cdre.metaHandler(cfgFld.Value, cfgFld.Layout)
+				outVal, err = cdre.metaHandler(cfgFld.CdrFieldId, cfgFld.Layout)
 			}
 		}
 		if err != nil {
@@ -350,7 +361,7 @@ func (cdre *CdrExporter) processCdr(cdr *utils.StoredCdr) error {
 		}
 		fmtOut := outVal
 		if fmtOut, err = FmtFieldWidth(outVal, cfgFld.Width, cfgFld.Strip, cfgFld.Padding, cfgFld.Mandatory); err != nil {
-			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Name, outVal, err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<CdreFw> Cannot export CDR with cgrid: %s, runid: %s, fieldName: %s, fieldValue: %s, error: %s", cdr.CgrId, cdr.MediationRunId, cfgFld.Tag, outVal, err.Error()))
 			return err
 		}
 		cdrRow[idx] += fmtOut

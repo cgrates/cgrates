@@ -28,21 +28,7 @@ import (
 
 var cfgDocCdrc *CgrXmlCfgDocument // Will be populated by first test
 
-func TestPopulateRSRFIeld(t *testing.T) {
-	cdrcField := CdrcField{Id: "TEST1", Value: `~effective_caller_id_number:s/(\d+)/+$1/`}
-	if err := cdrcField.PopulateRSRFields(); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if cdrcField.rsrFields == nil {
-		t.Error("Failed loading the RSRField")
-	}
-	cdrcField = CdrcField{Id: "TEST2", Value: `99`}
-	if err := cdrcField.PopulateRSRFields(); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if cdrcField.rsrFields == nil {
-		t.Error("Failed loading the RSRField")
-	}
-}
-
+/*
 func TestSetDefaults(t *testing.T) {
 	cfgXmlStr := `<?xml version="1.0" encoding="UTF-8"?>
 <document type="cgrates/xml">
@@ -73,33 +59,34 @@ func TestSetDefaults(t *testing.T) {
 		t.Error("Failed loading default configuration")
 	}
 }
+*/
 
 func TestParseXmlCdrcConfig(t *testing.T) {
 	cfgXmlStr := `<?xml version="1.0" encoding="UTF-8"?>
 <document type="cgrates/xml">
-  <configuration section="cdrc" type="csv" id="CDRC-CSV1">
+  <configuration section="cdrc" id="CDRC-CSV1">
     <enabled>true</enabled>
     <cdrs_address>internal</cdrs_address>
     <cdr_type>csv</cdr_type>
-    <csv_separator>,</csv_separator>
+    <field_separator>,</field_separator>
     <run_delay>0</run_delay>
     <cdr_in_dir>/var/log/cgrates/cdrc/in</cdr_in_dir>
     <cdr_out_dir>/var/log/cgrates/cdrc/out</cdr_out_dir>
     <cdr_source_id>freeswitch_csv</cdr_source_id>
     <fields>
-      <field id="accid" value="0;13" />
-      <field id="reqtype" value="1" />
-      <field id="direction" value="2" />
-      <field id="tenant" value="3" />
-      <field id="category" value="4" />
-      <field id="account" value="5" />
-      <field id="subject" value="6" />
-      <field id="destination" value="7" />
-      <field id="setup_time" value="8" />
-      <field id="answer_time" value="9" />
-      <field id="usage" value="10" />
-      <field id="extr1" value="11" />
-      <field id="extr2" value="12" />
+      <field tag="accid" value="0;13" />
+      <field tag="reqtype" value="1" />
+      <field tag="direction" value="2" />
+      <field tag="tenant" value="3" />
+      <field tag="category" value="4" />
+      <field tag="account" value="5" />
+      <field tag="subject" value="6" />
+      <field tag="destination" value="7" />
+      <field tag="setup_time" value="8" />
+      <field tag="answer_time" value="9" />
+      <field tag="usage" value="10" />
+      <field tag="extr1" value="11" />
+      <field tag="extr2" value="12" />
     </fields>
   </configuration>
 </document>`
@@ -120,52 +107,35 @@ func TestGetCdrcCfgs(t *testing.T) {
 	if cdrcfgs == nil {
 		t.Error("No config instance returned")
 	}
-	expectCdrc := &CgrXmlCdrcCfg{Enabled: true, CdrsAddress: "internal", CdrType: "csv", CsvSeparator: ",",
-		RunDelay: 0, CdrInDir: "/var/log/cgrates/cdrc/in", CdrOutDir: "/var/log/cgrates/cdrc/out", CdrSourceId: "freeswitch_csv"}
-	cdrFlds := []*CdrcField{
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.ACCID, Value: "0;13"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.REQTYPE, Value: "1"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.DIRECTION, Value: "2"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.TENANT, Value: "3"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.CATEGORY, Value: "4"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.ACCOUNT, Value: "5"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.SUBJECT, Value: "6"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.DESTINATION, Value: "7"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.SETUP_TIME, Value: "8"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.ANSWER_TIME, Value: "9"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: utils.USAGE, Value: "10"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: "extr1", Value: "11"},
-		&CdrcField{XMLName: xml.Name{Local: "field"}, Id: "extr2", Value: "12"}}
-	for _, fld := range cdrFlds {
-		fld.PopulateRSRFields()
-	}
+	enabled := true
+	cdrsAddr := "internal"
+	cdrType := "csv"
+	fldSep := ","
+	runDelay := int64(0)
+	cdrInDir := "/var/log/cgrates/cdrc/in"
+	cdrOutDir := "/var/log/cgrates/cdrc/out"
+	cdrSrcId := "freeswitch_csv"
+	expectCdrc := &CgrXmlCdrcCfg{Enabled: &enabled, CdrsAddress: &cdrsAddr, CdrType: &cdrType, FieldSeparator: &fldSep,
+		RunDelay: &runDelay, CdrInDir: &cdrInDir, CdrOutDir: &cdrOutDir, CdrSourceId: &cdrSrcId}
+	accIdTag, reqTypeTag, dirTag, tntTag, categTag, acntTag, subjTag, dstTag, sTimeTag, aTimeTag, usageTag, extr1, extr2 := utils.ACCID,
+		utils.REQTYPE, utils.DIRECTION, utils.TENANT, utils.CATEGORY, utils.ACCOUNT, utils.SUBJECT, utils.DESTINATION, utils.SETUP_TIME, utils.ANSWER_TIME, utils.USAGE, "extr1", "extr2"
+	accIdVal, reqVal, dirVal, tntVal, categVal, acntVal, subjVal, dstVal, sTimeVal, aTimeVal, usageVal, extr1Val, extr2Val := "0;13", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"
+	cdrFlds := []*XmlCfgCdrField{
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &accIdTag, Value: &accIdVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &reqTypeTag, Value: &reqVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &dirTag, Value: &dirVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &tntTag, Value: &tntVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &categTag, Value: &categVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &acntTag, Value: &acntVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &subjTag, Value: &subjVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &dstTag, Value: &dstVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &sTimeTag, Value: &sTimeVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &aTimeTag, Value: &aTimeVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &usageTag, Value: &usageVal},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &extr1, Value: &extr1Val},
+		&XmlCfgCdrField{XMLName: xml.Name{Local: "field"}, Tag: &extr2, Value: &extr2Val}}
 	expectCdrc.CdrFields = cdrFlds
 	if !reflect.DeepEqual(expectCdrc, cdrcfgs["CDRC-CSV1"]) {
 		t.Errorf("Expecting: %v, received: %v", expectCdrc, cdrcfgs["CDRC-CSV1"])
-	}
-}
-
-func TestCdrRSRFields(t *testing.T) {
-	cdrcfgs := cfgDocCdrc.GetCdrcCfgs("CDRC-CSV1")
-	if cdrcfgs == nil {
-		t.Error("No config instance returned")
-	}
-	eRSRFields := map[string][]*utils.RSRField{
-		utils.ACCID:       []*utils.RSRField{&utils.RSRField{Id: "0"}, &utils.RSRField{Id: "13"}},
-		utils.REQTYPE:     []*utils.RSRField{&utils.RSRField{Id: "1"}},
-		utils.DIRECTION:   []*utils.RSRField{&utils.RSRField{Id: "2"}},
-		utils.TENANT:      []*utils.RSRField{&utils.RSRField{Id: "3"}},
-		utils.CATEGORY:    []*utils.RSRField{&utils.RSRField{Id: "4"}},
-		utils.ACCOUNT:     []*utils.RSRField{&utils.RSRField{Id: "5"}},
-		utils.SUBJECT:     []*utils.RSRField{&utils.RSRField{Id: "6"}},
-		utils.DESTINATION: []*utils.RSRField{&utils.RSRField{Id: "7"}},
-		utils.SETUP_TIME:  []*utils.RSRField{&utils.RSRField{Id: "8"}},
-		utils.ANSWER_TIME: []*utils.RSRField{&utils.RSRField{Id: "9"}},
-		utils.USAGE:       []*utils.RSRField{&utils.RSRField{Id: "10"}},
-		"extr1":           []*utils.RSRField{&utils.RSRField{Id: "11"}},
-		"extr2":           []*utils.RSRField{&utils.RSRField{Id: "12"}},
-	}
-	if rsrFields := cdrcfgs["CDRC-CSV1"].CdrRSRFields(); !reflect.DeepEqual(rsrFields, eRSRFields) {
-		t.Errorf("Expecting: %v, received: %v", eRSRFields, rsrFields)
 	}
 }

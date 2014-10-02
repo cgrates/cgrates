@@ -59,7 +59,6 @@ var (
 	raterEnabled    = flag.Bool("rater", false, "Enforce starting of the rater daemon overwriting config")
 	schedEnabled    = flag.Bool("scheduler", false, "Enforce starting of the scheduler daemon .overwriting config")
 	cdrsEnabled     = flag.Bool("cdrs", false, "Enforce starting of the cdrs daemon overwriting config")
-	cdrcEnabled     = flag.Bool("cdrc", false, "Enforce starting of the cdrc service overwriting config")
 	mediatorEnabled = flag.Bool("mediator", false, "Enforce starting of the mediator service overwriting config")
 	pidFile         = flag.String("pid", "", "Write pid file")
 	bal             = balancer2go.NewBalancer()
@@ -125,11 +124,11 @@ func startMediator(responder *engine.Responder, loggerDb engine.LogStorage, cdrD
 }
 
 // Fires up a cdrc instance
-func startCdrc(cdrsChan chan struct{}, cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string][]*utils.RSRField) {
-	if cdrsAddress == utils.INTERNAL {
+func startCdrc(cdrsChan chan struct{}, cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS) {
+	if cdrcCfg.CdrsAddress == utils.INTERNAL {
 		<-cdrsChan // Wait for CDRServer to come up before start processing
 	}
-	cdrc, err := cdrc.NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId, runDelay, csvSep, cdrFields, cdrServer)
+	cdrc, err := cdrc.NewCdrc(cdrcCfg, httpSkipTlsCheck, cdrServer)
 	if err != nil {
 		engine.Logger.Crit(fmt.Sprintf("Cdrc config parsing error: %s", err.Error()))
 		exitChan <- true
@@ -329,9 +328,6 @@ func main() {
 	if *cdrsEnabled {
 		cfg.CDRSEnabled = *cdrsEnabled
 	}
-	if *cdrcEnabled {
-		cfg.CdrcEnabled = *cdrcEnabled
-	}
 	if *mediatorEnabled {
 		cfg.MediatorEnabled = *mediatorEnabled
 	}
@@ -491,19 +487,13 @@ func main() {
 		go shutdownSessionmanagerSingnalHandler()
 	}
 	var cdrcEnabled bool
-	if cfg.CdrcEnabled { // Start default cdrc configured in csv here
-		cdrcEnabled = true
-		go startCdrc(cdrsChan, cfg.CdrcCdrs, cfg.CdrcCdrType, cfg.CdrcCdrInDir, cfg.CdrcCdrOutDir, cfg.CdrcSourceId, cfg.CdrcRunDelay, cfg.CdrcCsvSep, cfg.CdrcCdrFields)
-	}
-	if cfg.XmlCfgDocument != nil {
-		for _, xmlCdrc := range cfg.XmlCfgDocument.GetCdrcCfgs("") {
-			if !xmlCdrc.Enabled {
-				continue
-			}
-			cdrcEnabled = true
-			go startCdrc(cdrsChan, xmlCdrc.CdrsAddress, xmlCdrc.CdrType, xmlCdrc.CdrInDir, xmlCdrc.CdrOutDir,
-				xmlCdrc.CdrSourceId, time.Duration(xmlCdrc.RunDelay), xmlCdrc.CsvSeparator, xmlCdrc.CdrRSRFields())
+	for _, cdrcConfig := range cfg.CdrcInstances {
+		if cdrcConfig.Enabled == false {
+			continue // Ignore not enabled
+		} else if !cdrcEnabled {
+			cdrcEnabled = true // Mark that at least one cdrc service is active
 		}
+		go startCdrc(cdrsChan, cdrcConfig, cfg.HttpSkipTlsVerify, cdrServer)
 	}
 	if cdrcEnabled {
 		engine.Logger.Info("Starting CGRateS CDR client.")

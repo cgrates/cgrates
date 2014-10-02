@@ -19,7 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
-	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"strings"
@@ -27,25 +26,6 @@ import (
 )
 
 var cfgDoc *CgrXmlCfgDocument // Will be populated by first test
-
-func TestXmlCdreCfgPopulateCdreRSRFIeld(t *testing.T) {
-	cdreField := CgrXmlCfgCdrField{Name: "TEST1", Type: "cdrfield", Value: `~effective_caller_id_number:s/(\d+)/+$1/`}
-	if err := cdreField.populateRSRField(); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if cdreField.valueAsRsrField == nil {
-		t.Error("Failed loading the RSRField")
-	}
-	valRSRField, _ := utils.NewRSRField(`~effective_caller_id_number:s/(\d+)/+$1/`)
-	if recv := cdreField.ValueAsRSRField(); !reflect.DeepEqual(valRSRField, recv) {
-		t.Errorf("Expecting %v, received %v", valRSRField, recv)
-	}
-	/*cdreField = CgrXmlCfgCdrField{Name: "TEST1", Type: "constant", Value: `someval`}
-	if err := cdreField.populateRSRField(); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if cdreField.valueAsRsrField != nil {
-		t.Error("Should not load the RSRField")
-	}*/
-}
 
 func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
 	cfgXmlStr := `<?xml version="1.0" encoding="UTF-8"?>
@@ -62,51 +42,51 @@ func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
     <export_template>
       <header>
         <fields>
-          <field name="TypeOfRecord" type="constant" value="10" width="2" />
-          <field name="Filler1" type="filler" width="3" />
-          <field name="DistributorCode" type="constant" value="VOI" width="3" />
-          <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
-          <field name="LastCdr" type="metatag" value="last_cdr_time" layout="020106150400" width="12" />
-          <field name="FileCreationfTime" type="metatag" value="time_now" layout="020106150400" width="12" />
-          <field name="Version" type="constant" value="01" width="2" />
-          <field name="Filler2" type="filler" width="105" />
+          <field tag="TypeOfRecord" type="constant" value="10" width="2" />
+          <field tag="Filler1" type="filler" width="3" />
+          <field tag="DistributorCode" type="constant" value="VOI" width="3" />
+          <field tag="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
+          <field tag="LastCdr" type="metatag" value="last_cdr_time" layout="020106150400" width="12" />
+          <field tag="FileCreationfTime" type="metatag" value="time_now" layout="020106150400" width="12" />
+          <field tag="Version" type="constant" value="01" width="2" />
+          <field tag="Filler2" type="filler" width="105" />
         </fields>
       </header>
       <content>
         <fields>
-          <field name="TypeOfRecord" type="constant" value="20" width="2" />
-          <field name="Account" type="cdrfield" value="cgrid" width="12" mandatory="true" />
-          <field name="Subject" type="cdrfield" value="subject" strip="left" padding="left" width="5" />
-          <field name="CLI" type="cdrfield" value="cli" strip="xright" width="15" />
-          <field name="Destination" type="cdrfield" value="destination" strip="xright" width="24" />
-          <field name="TOR" type="constant" value="02" width="2" />
-          <field name="SubtypeTOR" type="constant" value="11" width="4" />
-          <field name="SetupTime" type="cdrfield" value="start_time" layout="020106150400" width="12" />
-          <field name="Duration" type="cdrfield" value="duration" width="6" multiply_factor_voice="1000" />
-          <field name="DataVolume" type="filler" width="6" />
-          <field name="TaxCode" type="constant" value="1" width="1" />
-          <field name="OperatorCode" type="cdrfield" value="operator" width="2" />
-          <field name="ProductId" type="cdrfield" value="productid" width="5" />
-          <field name="NetworkId" type="constant" value="3" width="1" />
-          <field name="CallId" type="cdrfield" value="accid" width="16" />
-          <field name="Filler" type="filler" width="8" />
-          <field name="Filler" type="filler" width="8" />
-          <field name="TerminationCode" type="cdrfield" value="~cost_details:s/&quot;MatchedDestId&quot;:&quot;.+_(\s\s\s\s\s)&quot;/$1/" width="5" />
-          <field name="Cost" type="cdrfield" value="cost" padding="zeroleft" width="9" />
-          <field name="CalledMask" type="cdrfield" value="calledmask" width="1" />
+          <field tag="TypeOfRecord" type="constant" value="20" width="2" />
+          <field tag="Account" type="cdrfield" value="cgrid" width="12" mandatory="true" />
+          <field tag="Subject" type="cdrfield" value="subject" strip="left" padding="left" width="5" />
+          <field tag="CLI" type="cdrfield" value="cli" strip="xright" width="15" />
+          <field tag="Destination" type="cdrfield" value="destination" strip="xright" width="24" />
+          <field tag="TOR" type="constant" value="02" width="2" />
+          <field tag="SubtypeTOR" type="constant" value="11" width="4" />
+          <field tag="SetupTime" type="cdrfield" value="start_time" layout="020106150400" width="12" />
+          <field tag="Duration" type="cdrfield" value="duration" width="6" multiply_factor_voice="1000" />
+          <field tag="DataVolume" type="filler" width="6" />
+          <field tag="TaxCode" type="constant" value="1" width="1" />
+          <field tag="OperatorCode" type="cdrfield" value="operator" width="2" />
+          <field tag="ProductId" type="cdrfield" value="productid" width="5" />
+          <field tag="NetworkId" type="constant" value="3" width="1" />
+          <field tag="CallId" type="cdrfield" value="accid" width="16" />
+          <field tag="Filler" type="filler" width="8" />
+          <field tag="Filler" type="filler" width="8" />
+          <field tag="TerminationCode" type="cdrfield" value="~cost_details:s/&quot;MatchedDestId&quot;:&quot;.+_(\s\s\s\s\s)&quot;/$1/" width="5" />
+          <field tag="Cost" type="cdrfield" value="cost" padding="zeroleft" width="9" />
+          <field tag="CalledMask" type="cdrfield" value="calledmask" width="1" />
         </fields>
       </content>
       <trailer>
         <fields>
-          <field name="TypeOfRecord" type="constant" value="90" width="2" />
-          <field name="Filler1" type="filler" width="3" />
-          <field name="DistributorCode" type="constant" value="VOI" width="3" />
-          <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
-          <field name="NumberOfRecords" type="metatag" value="cdrs_number" padding="zeroleft" width="6" />
-          <field name="CdrsDuration" type="metatag" value="cdrs_duration" padding="zeroleft" width="8" />
-          <field name="FirstCdrTime" type="metatag" value="first_cdr_time" layout="020106150400" width="12" />
-          <field name="LastCdrTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12" />
-          <field name="Filler1" type="filler" width="93" />
+          <field tag="TypeOfRecord" type="constant" value="90" width="2" />
+          <field tag="Filler1" type="filler" width="3" />
+          <field tag="DistributorCode" type="constant" value="VOI" width="3" />
+          <field tag="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
+          <field tag="NumberOfRecords" type="metatag" value="cdrs_number" padding="zeroleft" width="6" />
+          <field tag="CdrsDuration" type="metatag" value="cdrs_duration" padding="zeroleft" width="8" />
+          <field tag="FirstCdrTime" type="metatag" value="first_cdr_time" layout="020106150400" width="12" />
+          <field tag="LastCdrTime" type="metatag" value="last_cdr_time" layout="020106150400" width="12" />
+          <field tag="Filler1" type="filler" width="93" />
         </fields>
       </trailer>
     </export_template>
@@ -115,12 +95,12 @@ func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
   <export_template>
     <content>
      <fields>
-      <field name="CGRID" type="cdrfield" value="cgrid" width="40"/>
-      <field name="RatingSubject" type="cdrfield" value="subject" width="24" padding="left" strip="xright" mandatory="true"/>
-      <field name="Usage" type="cdrfield" value="usage" layout="seconds" width="6" padding="right" mandatory="true"/>
-      <field name="AccountReference" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" mandatory="true" />
-      <field name="AccountType" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" mandatory="true" />
-      <field name="MultipleMed1" type="combimed" value="cost" strip="xright" padding="left" mandatory="true" filter="~mediation_runid:s/DEFAULT/SECOND_RUN/"/>
+      <field tag="CGRID" type="cdrfield" value="cgrid" width="40"/>
+      <field tag="RatingSubject" type="cdrfield" value="subject" width="24" padding="left" strip="xright" mandatory="true"/>
+      <field tag="Usage" type="cdrfield" value="usage" layout="seconds" width="6" padding="right" mandatory="true"/>
+      <field tag="AccountReference" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" mandatory="true" />
+      <field tag="AccountType" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" mandatory="true" />
+      <field tag="MultipleMed1" type="combimed" value="cost" strip="xright" padding="left" mandatory="true" filter="~mediation_runid:s/DEFAULT/SECOND_RUN/"/>
      </fields>
     </content>
    </export_template>
@@ -162,7 +142,7 @@ func TestXmlCdreCfgGetCdreCfg(t *testing.T) {
 	}
 }
 
-func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
+func TestNewCdreConfigFromXmlCdreCfg(t *testing.T) {
 	cfgXmlStr := `<?xml version="1.0" encoding="UTF-8"?>
 <document type="cgrates/xml">
   <configuration section="cdre" type="fixed_width" id="CDRE-FW2">
@@ -178,23 +158,23 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
     <export_template>
       <header>
         <fields>
-          <field name="TypeOfRecord" type="constant" value="10" width="2" />
-          <field name="LastCdr" type="metatag" value="last_cdr_time" layout="020106150400" width="12" />
+          <field tag="TypeOfRecord" type="constant" value="10" width="2" />
+          <field tag="LastCdr" type="metatag" value="last_cdr_time" layout="020106150400" width="12" />
         </fields>
       </header>
       <content>
         <fields>
-          <field name="OperatorCode" type="cdrfield" value="operator" width="2" />
-          <field name="ProductId" type="cdrfield" value="productid" width="5" />
-          <field name="NetworkId" type="constant" value="3" width="1" />
-          <field name="FromHttpPost1" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" />
-          <field name="CombiMed1" type="combimed" value="cost" width="10" strip="xright" padding="left" filter="~mediation_runid:s/DEFAULT/SECOND_RUN/"/>
+          <field tag="OperatorCode" type="cdrfield" value="operator" width="2" />
+          <field tag="ProductId" type="cdrfield" value="productid" width="5" />
+          <field tag="NetworkId" type="constant" value="3" width="1" />
+          <field tag="FromHttpPost1" type="http_post" value="https://localhost:8000" width="10" strip="xright" padding="left" />
+          <field tag="CombiMed1" type="combimed" value="cost" width="10" strip="xright" padding="left" filter="~mediation_runid:s/DEFAULT/SECOND_RUN/"/>
         </fields>
       </content>
       <trailer>
         <fields>
-          <field name="DistributorCode" type="constant" value="VOI" width="3" />
-          <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
+          <field tag="DistributorCode" type="constant" value="VOI" width="3" />
+          <field tag="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
         </fields>
       </trailer>
     </export_template>
@@ -222,85 +202,99 @@ func TestXmlCdreCfgAsCdreConfig(t *testing.T) {
 		MaskLength:              1,
 		ExportDir:               "/var/log/cgrates/cdre",
 	}
-	fltrCombiMed, _ := utils.NewRSRField("~mediation_runid:s/DEFAULT/SECOND_RUN/")
-	eCdreCfg.HeaderFields = []*CdreCdrField{
-		&CdreCdrField{
-			Name:            "TypeOfRecord",
-			Type:            "constant",
-			Value:           "10",
-			Width:           2,
-			valueAsRsrField: &utils.RSRField{Id: "10"}},
-		&CdreCdrField{
-			Name:            "LastCdr",
-			Type:            "metatag",
-			Value:           "last_cdr_time",
-			Layout:          "020106150400",
-			Width:           12,
-			valueAsRsrField: &utils.RSRField{Id: "last_cdr_time"}},
-	}
-	eCdreCfg.ContentFields = []*CdreCdrField{
-		&CdreCdrField{
-			Name:            "OperatorCode",
-			Type:            "cdrfield",
-			Value:           "operator",
-			Width:           2,
-			valueAsRsrField: &utils.RSRField{Id: "operator"},
+	fltrCombiMed, _ := utils.ParseRSRFields("~mediation_runid:s/DEFAULT/SECOND_RUN/", utils.INFIELD_SEP)
+	torVal, _ := utils.ParseRSRFields("^10", utils.INFIELD_SEP)
+	lastCdrVal, _ := utils.ParseRSRFields("^last_cdr_time", utils.INFIELD_SEP)
+	eCdreCfg.HeaderFields = []*CfgCdrField{
+		&CfgCdrField{
+			Tag:   "TypeOfRecord",
+			Type:  "constant",
+			Value: torVal,
+			Width: 2,
 		},
-		&CdreCdrField{
-			Name:            "ProductId",
-			Type:            "cdrfield",
-			Value:           "productid",
-			Width:           5,
-			valueAsRsrField: &utils.RSRField{Id: "productid"},
-		},
-		&CdreCdrField{
-			Name:            "NetworkId",
-			Type:            "constant",
-			Value:           "3",
-			Width:           1,
-			valueAsRsrField: &utils.RSRField{Id: "3"},
-		},
-		&CdreCdrField{
-			Name:            "FromHttpPost1",
-			Type:            "http_post",
-			Value:           "https://localhost:8000",
-			Width:           10,
-			Strip:           "xright",
-			Padding:         "left",
-			valueAsRsrField: &utils.RSRField{Id: "https://localhost:8000"},
-		},
-		&CdreCdrField{
-			Name:            "CombiMed1",
-			Type:            "combimed",
-			Value:           "cost",
-			Width:           10,
-			Strip:           "xright",
-			Padding:         "left",
-			Filter:          fltrCombiMed,
-			valueAsRsrField: &utils.RSRField{Id: "cost"},
+		&CfgCdrField{
+			Tag:        "LastCdr",
+			Type:       "metatag",
+			CdrFieldId: "last_cdr_time",
+			Value:      lastCdrVal,
+			Layout:     "020106150400",
+			Strip:      "xright",
+			Padding:    "left",
+			Width:      12,
 		},
 	}
-	eCdreCfg.TrailerFields = []*CdreCdrField{
-		&CdreCdrField{
-			Name:            "DistributorCode",
-			Type:            "constant",
-			Value:           "VOI",
-			Width:           3,
-			valueAsRsrField: &utils.RSRField{Id: "VOI"},
+	networkIdVal, _ := utils.ParseRSRFields("^3", utils.INFIELD_SEP)
+	fromHttpPost1Val, _ := utils.ParseRSRFields("^https://localhost:8000", utils.INFIELD_SEP)
+	eCdreCfg.ContentFields = []*CfgCdrField{
+		&CfgCdrField{
+			Tag:        "OperatorCode",
+			Type:       "cdrfield",
+			CdrFieldId: "operator",
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: "operator"}},
+			Width:   2,
+			Strip:   "xright",
+			Padding: "left",
 		},
-		&CdreCdrField{
-			Name:            "FileSeqNr",
-			Type:            "metatag",
-			Value:           "export_id",
-			Width:           5,
-			Padding:         "zeroleft",
-			valueAsRsrField: &utils.RSRField{Id: "export_id"},
+		&CfgCdrField{
+			Tag:        "ProductId",
+			Type:       "cdrfield",
+			CdrFieldId: "productid",
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: "productid"}},
+			Width:   5,
+			Strip:   "xright",
+			Padding: "left",
+		},
+		&CfgCdrField{
+			Tag:   "NetworkId",
+			Type:  "constant",
+			Value: networkIdVal,
+			Width: 1,
+		},
+		&CfgCdrField{
+			Tag:     "FromHttpPost1",
+			Type:    "http_post",
+			Value:   fromHttpPost1Val,
+			Width:   10,
+			Strip:   "xright",
+			Padding: "left",
+		},
+		&CfgCdrField{
+			Tag:        "CombiMed1",
+			Type:       "combimed",
+			CdrFieldId: "cost",
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: "cost"}},
+			Width:     10,
+			Strip:     "xright",
+			Padding:   "left",
+			Filter:    fltrCombiMed,
+			Mandatory: true,
 		},
 	}
-	if rcvCdreCfg := xmlCdreCfgs["CDRE-FW2"].AsCdreConfig(); !reflect.DeepEqual(rcvCdreCfg, eCdreCfg) {
-		for _, fld := range rcvCdreCfg.ContentFields {
-			fmt.Printf("Fld: %+v\n", fld)
-		}
+	distribCodeVal, _ := utils.ParseRSRFields("^VOI", utils.INFIELD_SEP)
+	fileSeqNrVal, _ := utils.ParseRSRFields("^export_id", utils.INFIELD_SEP)
+	eCdreCfg.TrailerFields = []*CfgCdrField{
+		&CfgCdrField{
+			Tag:   "DistributorCode",
+			Type:  "constant",
+			Value: distribCodeVal,
+			Width: 3,
+		},
+		&CfgCdrField{
+			Tag:        "FileSeqNr",
+			Type:       "metatag",
+			CdrFieldId: "export_id",
+			Value:      fileSeqNrVal,
+			Width:      5,
+			Strip:      "xright",
+			Padding:    "zeroleft",
+		},
+	}
+	if rcvCdreCfg, err := NewCdreConfigFromXmlCdreCfg(xmlCdreCfgs["CDRE-FW2"]); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rcvCdreCfg, eCdreCfg) {
 		t.Errorf("Expecting: %v, received: %v", eCdreCfg, rcvCdreCfg)
 	}
 }

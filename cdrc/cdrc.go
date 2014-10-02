@@ -28,10 +28,10 @@ import (
 	"os"
 	"path"
 	"strconv"
-	"strings"
 	"time"
 	"unicode/utf8"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/howeyc/fsnotify"
@@ -42,13 +42,13 @@ const (
 	FS_CSV = "freeswitch_csv"
 )
 
-func NewCdrc(cdrsAddress, cdrType, cdrInDir, cdrOutDir, cdrSourceId string, runDelay time.Duration, csvSep string, cdrFields map[string][]*utils.RSRField, cdrServer *engine.CDRS) (*Cdrc, error) {
-	if len(csvSep) != 1 {
-		return nil, fmt.Errorf("Unsupported csv separator: %s", csvSep)
+func NewCdrc(cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS) (*Cdrc, error) {
+	if len(cdrcCfg.FieldSeparator) != 1 {
+		return nil, fmt.Errorf("Unsupported csv separator: %s", cdrcCfg.FieldSeparator)
 	}
-	csvSepRune, _ := utf8.DecodeRune([]byte(csvSep))
-	cdrc := &Cdrc{cdrsAddress: cdrsAddress, cdrType: cdrType, cdrInDir: cdrInDir, cdrOutDir: cdrOutDir,
-		cdrSourceId: cdrSourceId, runDelay: runDelay, csvSep: csvSepRune, cdrFields: cdrFields, cdrServer: cdrServer}
+	csvSepRune, _ := utf8.DecodeRune([]byte(cdrcCfg.FieldSeparator))
+	cdrc := &Cdrc{cdrsAddress: cdrcCfg.CdrsAddress, cdrType: cdrcCfg.CdrType, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
+		cdrSourceId: cdrcCfg.CdrSourceId, runDelay: cdrcCfg.RunDelay, csvSep: csvSepRune, cdrFields: cdrcCfg.CdrFields, httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer}
 	// Before processing, make sure in and out folders exist
 	for _, dir := range []string{cdrc.cdrInDir, cdrc.cdrOutDir} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
@@ -65,11 +65,12 @@ type Cdrc struct {
 	cdrInDir,
 	cdrOutDir,
 	cdrSourceId string
-	runDelay   time.Duration
-	csvSep     rune
-	cdrFields  map[string][]*utils.RSRField
-	cdrServer  *engine.CDRS // Reference towards internal cdrServer if that is the case
-	httpClient *http.Client
+	runDelay         time.Duration
+	csvSep           rune
+	cdrFields        []*config.CfgCdrField
+	httpSkipTlsCheck bool
+	cdrServer        *engine.CDRS // Reference towards internal cdrServer if that is the case
+	httpClient       *http.Client
 }
 
 // When called fires up folder monitoring, either automated via inotify or manual by sleeping between processing
@@ -77,7 +78,7 @@ func (self *Cdrc) Run() error {
 	if self.runDelay == time.Duration(0) { // Automated via inotify
 		return self.trackCDRFiles()
 	}
-	// No automated, process and sleep approach
+	// Not automated, process and sleep approach
 	for {
 		self.processCdrDir()
 		time.Sleep(self.runDelay)
@@ -88,24 +89,40 @@ func (self *Cdrc) Run() error {
 func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 	storedCdr := &utils.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
-	for cfgFieldName, cfgFieldRSRs := range self.cdrFields {
+	for _, cdrFldCfg := range self.cdrFields {
 		var fieldVal string
 		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cdrType) {
-			for _, cfgFieldRSR := range cfgFieldRSRs {
-				if strings.HasPrefix(cfgFieldRSR.Id, utils.STATIC_VALUE_PREFIX) {
-					fieldVal += cfgFieldRSR.ParseValue("PLACEHOLDER")
-				} else { // Dynamic value extracted using index
-					if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
-						return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cfgFieldName)
-					} else {
-						fieldVal += cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+			if cdrFldCfg.Type == utils.CDRFIELD {
+				for _, cfgFieldRSR := range cdrFldCfg.Value {
+					if cfgFieldRSR.IsStatic() {
+						fieldVal += cfgFieldRSR.ParseValue("")
+					} else { // Dynamic value extracted using index
+						if cfgFieldIdx, _ := strconv.Atoi(cfgFieldRSR.Id); len(record) <= cfgFieldIdx {
+							return nil, fmt.Errorf("Ignoring record: %v - cannot extract field %s", record, cdrFldCfg.Tag)
+						} else {
+							fieldVal += cfgFieldRSR.ParseValue(record[cfgFieldIdx])
+						}
 					}
 				}
+			} else if cdrFldCfg.Type == utils.HTTP_POST {
+				var outValByte []byte
+				var httpAddr string
+				for _, rsrFld := range cdrFldCfg.Value {
+					httpAddr += rsrFld.ParseValue("")
+				}
+				if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, record); err == nil {
+					fieldVal = string(outValByte)
+					if len(fieldVal) == 0 && cdrFldCfg.Mandatory {
+						return nil, fmt.Errorf("MandatoryIeMissing: thEmpty result for http_post field: %s", cdrFldCfg.Tag)
+					}
+				}
+			} else {
+				return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			}
 		} else { // Modify here when we add more supported cdr formats
-			fieldVal = "UNKNOWN"
+			return nil, fmt.Errorf("Unsupported CDR file format: %s", self.cdrType)
 		}
-		switch cfgFieldName {
+		switch cdrFldCfg.CdrFieldId {
 		case utils.TOR:
 			storedCdr.TOR = fieldVal
 		case utils.ACCID:
@@ -137,7 +154,7 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 				return nil, fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
 			}
 		default: // Extra fields will not match predefined so they all show up here
-			storedCdr.ExtraFields[cfgFieldName] = fieldVal
+			storedCdr.ExtraFields[cdrFldCfg.CdrFieldId] = fieldVal
 		}
 
 	}

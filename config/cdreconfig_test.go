@@ -19,55 +19,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package config
 
 import (
+	"fmt"
 	"github.com/cgrates/cgrates/utils"
 	"reflect"
 	"testing"
 )
 
-func TestCdreCfgNewCdreCdrFieldsFromIds(t *testing.T) {
-	expectedFlds := []*CdreCdrField{
-		&CdreCdrField{
-			Name:            utils.CGRID,
-			Type:            utils.CDRFIELD,
-			Value:           utils.CGRID,
-			Width:           40,
-			Strip:           "",
-			Padding:         "",
-			Layout:          "",
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
+func TestNewCfgCdrFieldsFromIds(t *testing.T) {
+	expectedFlds := []*CfgCdrField{
+		&CfgCdrField{
+			Tag:        utils.CGRID,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.CGRID,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.CGRID}},
+			Width:     40,
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            "extra1",
-			Type:            utils.CDRFIELD,
-			Value:           "extra1",
-			Width:           30,
-			Strip:           "xright",
-			Padding:         "left",
-			Layout:          "",
-			Mandatory:       false,
-			valueAsRsrField: &utils.RSRField{Id: "extra1"},
+		&CfgCdrField{
+			Tag:        "extra1",
+			Type:       utils.CDRFIELD,
+			CdrFieldId: "extra1",
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: "extra1"}},
+			Width:     30,
+			Strip:     "xright",
+			Padding:   "left",
+			Mandatory: false,
 		},
 	}
-	if cdreFlds, err := NewCdreCdrFieldsFromIds(true, utils.CGRID, "extra1"); err != nil {
+	if cdreFlds, err := NewCfgCdrFieldsFromIds(true, utils.CGRID, "extra1"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedFlds, cdreFlds) {
 		t.Errorf("Expected: %v, received: %v", expectedFlds, cdreFlds)
-	}
-}
-
-func TestCdreCfgValueAsRSRField(t *testing.T) {
-	cdreCdrFld := &CdreCdrField{
-		Name:            utils.CGRID,
-		Type:            utils.CDRFIELD,
-		Value:           utils.CGRID,
-		Width:           10,
-		Strip:           "xright",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
-	}
-	if rsrVal := cdreCdrFld.ValueAsRSRField(); rsrVal != cdreCdrFld.valueAsRsrField {
-		t.Error("Unexpected value received: ", rsrVal)
 	}
 }
 
@@ -82,402 +66,133 @@ func TestCdreCfgNewDefaultCdreConfig(t *testing.T) {
 	eCdreCfg.MaskDestId = ""
 	eCdreCfg.MaskLength = 0
 	eCdreCfg.ExportDir = "/var/log/cgrates/cdre"
-	eCdreCfg.ContentFields = []*CdreCdrField{
-		&CdreCdrField{
-			Name:            utils.CGRID,
-			Type:            utils.CDRFIELD,
-			Value:           utils.CGRID,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
+	eCdreCfg.ContentFields = []*CfgCdrField{
+		&CfgCdrField{
+			Tag:        utils.CGRID,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.CGRID,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.CGRID}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.MEDI_RUNID,
-			Type:            utils.CDRFIELD,
-			Value:           utils.MEDI_RUNID,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.MEDI_RUNID},
+		&CfgCdrField{
+			Tag:        utils.MEDI_RUNID,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.MEDI_RUNID,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.MEDI_RUNID}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.TOR,
-			Type:            utils.CDRFIELD,
-			Value:           utils.TOR,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.TOR},
+		&CfgCdrField{
+			Tag:        utils.TOR,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.TOR,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.TOR}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.ACCID,
-			Type:            utils.CDRFIELD,
-			Value:           utils.ACCID,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.ACCID},
+		&CfgCdrField{
+			Tag:        utils.ACCID,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.ACCID,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.ACCID}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.REQTYPE,
-			Type:            utils.CDRFIELD,
-			Value:           utils.REQTYPE,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.REQTYPE},
+		&CfgCdrField{
+			Tag:        utils.REQTYPE,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.REQTYPE,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.REQTYPE}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.DIRECTION,
-			Type:            utils.CDRFIELD,
-			Value:           utils.DIRECTION,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.DIRECTION},
+		&CfgCdrField{
+			Tag:        utils.DIRECTION,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.DIRECTION,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.DIRECTION}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.TENANT,
-			Type:            utils.CDRFIELD,
-			Value:           utils.TENANT,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.TENANT},
+		&CfgCdrField{
+			Tag:        utils.TENANT,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.TENANT,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.TENANT}},
+			Mandatory: true},
+		&CfgCdrField{
+			Tag:        utils.CATEGORY,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.CATEGORY,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.CATEGORY}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.CATEGORY,
-			Type:            utils.CDRFIELD,
-			Value:           utils.CATEGORY,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.CATEGORY},
+		&CfgCdrField{
+			Tag:        utils.ACCOUNT,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.ACCOUNT,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.ACCOUNT}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.ACCOUNT,
-			Type:            utils.CDRFIELD,
-			Value:           utils.ACCOUNT,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.ACCOUNT},
+		&CfgCdrField{
+			Tag:        utils.SUBJECT,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.SUBJECT,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.SUBJECT}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.SUBJECT,
-			Type:            utils.CDRFIELD,
-			Value:           utils.SUBJECT,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.SUBJECT},
+		&CfgCdrField{
+			Tag:        utils.DESTINATION,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.DESTINATION,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.DESTINATION}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.DESTINATION,
-			Type:            utils.CDRFIELD,
-			Value:           utils.DESTINATION,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.DESTINATION},
+		&CfgCdrField{
+			Tag:        utils.SETUP_TIME,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.SETUP_TIME,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.SETUP_TIME}},
+			Layout:    "2006-01-02T15:04:05Z07:00",
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.SETUP_TIME,
-			Type:            utils.CDRFIELD,
-			Value:           utils.SETUP_TIME,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.SETUP_TIME},
+		&CfgCdrField{
+			Tag:        utils.ANSWER_TIME,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.ANSWER_TIME,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.ANSWER_TIME}},
+			Layout:    "2006-01-02T15:04:05Z07:00",
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.ANSWER_TIME,
-			Type:            utils.CDRFIELD,
-			Value:           utils.ANSWER_TIME,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.ANSWER_TIME},
+		&CfgCdrField{
+			Tag:        utils.USAGE,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.USAGE,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.USAGE}},
+			Mandatory: true,
 		},
-		&CdreCdrField{
-			Name:            utils.USAGE,
-			Type:            utils.CDRFIELD,
-			Value:           utils.USAGE,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.USAGE},
-		},
-		&CdreCdrField{
-			Name:            utils.COST,
-			Type:            utils.CDRFIELD,
-			Value:           utils.COST,
-			Mandatory:       true,
-			valueAsRsrField: &utils.RSRField{Id: utils.COST},
+		&CfgCdrField{
+			Tag:        utils.COST,
+			Type:       utils.CDRFIELD,
+			CdrFieldId: utils.COST,
+			Value: []*utils.RSRField{
+				&utils.RSRField{Id: utils.COST}},
+			Mandatory: true,
 		},
 	}
-	if cdreCfg, err := NewDefaultCdreConfig(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCfg, cdreCfg) {
+	if cdreCfg := NewDefaultCdreConfig(); !reflect.DeepEqual(eCdreCfg, cdreCfg) {
+		for _, fld := range cdreCfg.ContentFields {
+			fmt.Printf("Have field: %+v\n", fld)
+		}
 		t.Errorf("Expecting: %v, received: %v", eCdreCfg, cdreCfg)
-	}
-}
-
-func TestCdreCfgSetDefaultFieldProperties(t *testing.T) {
-	cdreCdrFld := &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
-	}
-	eCdreCdrFld := &CdreCdrField{
-		Width:           40,
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.CGRID},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.ORDERID},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           11,
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.ORDERID},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.TOR},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           6,
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.TOR},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.ACCID},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           36,
-		Strip:           "left",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.ACCID},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.CDRHOST},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           15,
-		Strip:           "left",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.CDRHOST},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.CDRSOURCE},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           15,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.CDRSOURCE},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.REQTYPE},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           13,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.REQTYPE},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.DIRECTION},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           4,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.DIRECTION},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.TENANT},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           24,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.TENANT},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.CATEGORY},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           10,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.CATEGORY},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.ACCOUNT},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           24,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.ACCOUNT},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.SUBJECT},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           24,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.SUBJECT},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.DESTINATION},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           24,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.DESTINATION},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.SETUP_TIME},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           30,
-		Strip:           "xright",
-		Padding:         "left",
-		Layout:          "2006-01-02T15:04:05Z07:00",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.SETUP_TIME},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.ANSWER_TIME},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           30,
-		Strip:           "xright",
-		Padding:         "left",
-		Layout:          "2006-01-02T15:04:05Z07:00",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.ANSWER_TIME},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.USAGE},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           30,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.USAGE},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.MEDI_RUNID},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           20,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.MEDI_RUNID},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: utils.COST},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           24,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       true,
-		valueAsRsrField: &utils.RSRField{Id: utils.COST},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
-	}
-	cdreCdrFld = &CdreCdrField{
-		valueAsRsrField: &utils.RSRField{Id: "extra_1"},
-	}
-	eCdreCdrFld = &CdreCdrField{
-		Width:           30,
-		Strip:           "xright",
-		Padding:         "left",
-		Mandatory:       false,
-		valueAsRsrField: &utils.RSRField{Id: "extra_1"},
-	}
-	if err := cdreCdrFld.setDefaultFieldProperties(true); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCdreCdrFld, cdreCdrFld) {
-		t.Errorf("Expecting: %v, received: %v", eCdreCdrFld, cdreCdrFld)
 	}
 }
