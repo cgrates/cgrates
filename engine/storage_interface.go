@@ -68,9 +68,7 @@ type Storage interface {
 	GetKeysForPrefix(string) ([]string, error)
 }
 
-/*
-Interface for storage providers.
-*/
+// Interface for storage providers.
 type RatingStorage interface {
 	Storage
 	CacheRating([]string, []string, []string, []string, []string) error

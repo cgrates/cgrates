@@ -20,6 +20,7 @@ package v1
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -124,6 +125,11 @@ func (self *ApierV1) GetScheduledActions(attrs AttrsGetScheduledActions, reply *
 	scheduledActions = scheduledActions[min : min+max]
 	for _, qActions := range scheduledActions {
 		sas := &ScheduledActions{ActionsId: qActions.ActionsId, ActionPlanId: qActions.Id, ActionPlanUuid: qActions.Uuid}
+		if paginator.SearchTerm != "" &&
+			!(strings.Contains(sas.ActionPlanId, paginator.SearchTerm) ||
+				strings.Contains(sas.ActionsId, paginator.SearchTerm)) {
+			continue
+		}
 		sas.NextRunTime = qActions.GetNextStartTime(time.Now())
 		if !attrs.TimeStart.IsZero() && sas.NextRunTime.Before(attrs.TimeStart) {
 			continue // Filter here only requests in the filtered interval
