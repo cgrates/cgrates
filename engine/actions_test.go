@@ -269,15 +269,14 @@ func TestActionTimingHourMonthdaysYear(t *testing.T) {
 
 	y, m, d := now.Date()
 	testTime := time.Date(y, 1, d, 10, 1, 0, 0, time.Local)
-	tomorrow := time.Date(y, m, d, 0, 0, 0, 0, time.Local).AddDate(0, 0, 1)
+	tomorrow := time.Date(y, m, d, 10, 1, 0, 0, time.Local).AddDate(0, 0, 1)
 	nextYear := time.Date(y, 1, 1, 10, 1, 0, 0, time.Local).AddDate(1, 0, 0)
-	nextDay := time.Date(y, 1, 1, 10, 1, 0, 0, time.Local).AddDate(1, 0, 0)
 	expected := testTime
 	if referenceDate.After(testTime) {
-		if referenceDate.After(nextDay) {
+		if referenceDate.After(tomorrow) {
 			expected = nextYear
 		} else {
-			expected = nextDay
+			expected = tomorrow
 		}
 	}
 	at := &ActionTiming{Timing: &RateInterval{
@@ -287,6 +286,7 @@ func TestActionTimingHourMonthdaysYear(t *testing.T) {
 			StartTime: "10:01:00",
 		},
 	}}
+	t.Log(at.Timing.Timing.CronString())
 	st := at.GetNextStartTime(referenceDate)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
