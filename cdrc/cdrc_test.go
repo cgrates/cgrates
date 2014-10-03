@@ -30,12 +30,9 @@ func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcInstances[0]
 	cdrcConfig.CdrFields = append(cdrcConfig.CdrFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.CDRFIELD, CdrFieldId: "supplier", Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
-	cdrc, err := NewCdrc(cdrcConfig, true, nil)
-	if err != nil {
-		t.Error(err)
-	}
+	cdrc := &Cdrc{cdrType: CSV, cdrSourceId: "TEST_CDRC", cdrFields: cdrcConfig.CdrFields}
 	cdrRow := []string{"firstField", "secondField"}
-	_, err = cdrc.recordToStoredCdr(cdrRow)
+	_, err := cdrc.recordToStoredCdr(cdrRow)
 	if err == nil {
 		t.Error("Failed to corectly detect missing fields from record")
 	}
@@ -50,7 +47,7 @@ func TestRecordForkCdr(t *testing.T) {
 		TOR:         cdrRow[2],
 		AccId:       cdrRow[3],
 		CdrHost:     "0.0.0.0", // Got it over internal interface
-		CdrSource:   cdrcConfig.CdrSourceId,
+		CdrSource:   "TEST_CDRC",
 		ReqType:     cdrRow[4],
 		Direction:   cdrRow[5],
 		Tenant:      cdrRow[6],
