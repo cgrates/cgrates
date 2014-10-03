@@ -260,7 +260,7 @@ func (at *ActionTiming) Execute() (err error) {
 				if err != nil {
 					Logger.Warning(fmt.Sprintf("Could not get user balances for this id: %s. Skipping!", ubId))
 					return 0, err
-				} else if ub.Disabled {
+				} else if ub.Disabled && a.ActionType != ENABLE_ACCOUNT {
 					return 0, fmt.Errorf("User %s is disabled", ubId)
 				}
 				//Logger.Info(fmt.Sprintf("Executing %v on %v", a.ActionType, ub.Id))
