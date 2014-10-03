@@ -226,8 +226,12 @@ type AttrGetAccounts struct {
 	SearchTerm   string
 }
 
-func (self *ApierV1) GetAccounts(attr AttrGetAccounts, reply *[]string) error {
-	accountKeys, err := self.AccountDb.GetKeysForPrefix(engine.ACCOUNT_PREFIX)
+func (self *ApierV1) GetAccounts(attrs AttrGetAccounts, reply *[]string) error {
+	prefix := engine.ACCOUNT_PREFIX
+	if attrs.SearchTerm != "" {
+		prefix += "*" + attrs.SearchTerm
+	}
+	accountKeys, err := self.AccountDb.GetKeysForPrefix(prefix)
 	if err != nil {
 		return err
 	}
