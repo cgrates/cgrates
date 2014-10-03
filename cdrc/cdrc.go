@@ -21,6 +21,7 @@ package cdrc
 import (
 	"bufio"
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -110,7 +111,8 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 				for _, rsrFld := range cdrFldCfg.Value {
 					httpAddr += rsrFld.ParseValue("")
 				}
-				if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, record); err == nil {
+				recordJson, _ := json.Marshal(record)
+				if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, recordJson); err == nil {
 					fieldVal = string(outValByte)
 					if len(fieldVal) == 0 && cdrFldCfg.Mandatory {
 						return nil, fmt.Errorf("MandatoryIeMissing: thEmpty result for http_post field: %s", cdrFldCfg.Tag)
