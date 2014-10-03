@@ -64,6 +64,8 @@ func TestDefaults(t *testing.T) {
 	eCfg.StorDBName = "cgrates"
 	eCfg.StorDBUser = "cgrates"
 	eCfg.StorDBPass = "CGRateS.org"
+	eCfg.StorDBMaxOpenConns = 100
+	eCfg.StorDBMaxIdleConns = 10
 	eCfg.DBDataEncoding = utils.MSGPACK
 	eCfg.RPCJSONListen = "127.0.0.1:2012"
 	eCfg.RPCGOBListen = "127.0.0.1:2013"
@@ -187,6 +189,8 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.StorDBName = "test"
 	eCfg.StorDBUser = "test"
 	eCfg.StorDBPass = "test"
+	eCfg.StorDBMaxOpenConns = 99
+	eCfg.StorDBMaxIdleConns = 99
 	eCfg.DBDataEncoding = "test"
 	eCfg.RPCJSONListen = "test"
 	eCfg.RPCGOBListen = "test"

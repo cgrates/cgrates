@@ -54,7 +54,8 @@ func TestTutLclResetDb(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	if db, err := engine.NewMySQLStorage(tutCfg.StorDBHost, tutCfg.StorDBPort, tutCfg.StorDBName, tutCfg.StorDBUser, tutCfg.StorDBPass); err != nil {
+	if db, err := engine.NewMySQLStorage(tutCfg.StorDBHost, tutCfg.StorDBPort, tutCfg.StorDBName, tutCfg.StorDBUser, tutCfg.StorDBPass,
+		tutCfg.StorDBMaxOpenConns, tutCfg.StorDBMaxIdleConns); err != nil {
 		t.Error(err)
 	} else if errFlush := db.Flush(); errFlush != nil {
 		t.Error(err)

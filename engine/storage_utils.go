@@ -86,7 +86,7 @@ func ConfigureAccountingStorage(db_type, host, port, name, user, pass, marshaler
 	return db, nil
 }
 
-func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string) (db LogStorage, err error) {
+func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int) (db LogStorage, err error) {
 	var d Storage
 	switch db_type {
 	/*
@@ -107,7 +107,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 			d, err = NewPostgresStorage(host, port, name, user, pass)
 	*/
 	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass)
+		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	default:
 		err = errors.New("unknown db")
 	}
@@ -117,7 +117,7 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 	return d.(LogStorage), nil
 }
 
-func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string) (db LoadStorage, err error) {
+func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler string, maxConn, maxIdleConn int) (db LoadStorage, err error) {
 	var d Storage
 	switch db_type {
 	/*
@@ -126,7 +126,7 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 			db = d.(LoadStorage)
 	*/
 	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass)
+		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 		db = d.(LoadStorage)
 	default:
 		err = errors.New("unknown db")
@@ -137,7 +137,7 @@ func ConfigureLoadStorage(db_type, host, port, name, user, pass, marshaler strin
 	return db, nil
 }
 
-func ConfigureCdrStorage(db_type, host, port, name, user, pass string) (db CdrStorage, err error) {
+func ConfigureCdrStorage(db_type, host, port, name, user, pass string, maxConn, maxIdleConn int) (db CdrStorage, err error) {
 	var d Storage
 	switch db_type {
 	/*
@@ -146,7 +146,7 @@ func ConfigureCdrStorage(db_type, host, port, name, user, pass string) (db CdrSt
 			db = d.(CdrStorage)
 	*/
 	case utils.MYSQL:
-		d, err = NewMySQLStorage(host, port, name, user, pass)
+		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 		db = d.(CdrStorage)
 	default:
 		err = errors.New("unknown db")

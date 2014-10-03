@@ -364,7 +364,7 @@ func main() {
 		logDb = ratingDb.(engine.LogStorage)
 	} else {
 		logDb, err = engine.ConfigureLogStorage(cfg.StorDBType, cfg.StorDBHost, cfg.StorDBPort,
-			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding)
+			cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.DBDataEncoding, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns)
 		if err != nil { // Cannot configure logger database, show stopper
 			engine.Logger.Crit(fmt.Sprintf("Could not configure logger database: %s exiting!", err))
 			return

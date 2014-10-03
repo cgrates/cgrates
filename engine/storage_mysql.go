@@ -29,7 +29,7 @@ type MySQLStorage struct {
 	*SQLStorage
 }
 
-func NewMySQLStorage(host, port, name, user, password string) (Storage, error) {
+func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (Storage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true", user, password, host, port, name)
 	db, err := gorm.Open("mysql", connectString)
 	if err != nil {
@@ -39,8 +39,8 @@ func NewMySQLStorage(host, port, name, user, password string) (Storage, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.DB().SetMaxIdleConns(10)
-	db.DB().SetMaxOpenConns(100)
+	db.DB().SetMaxIdleConns(maxIdleConn)
+	db.DB().SetMaxOpenConns(maxConn)
 	//db.LogMode(true)
 
 	return &MySQLStorage{&SQLStorage{Db: db.DB(), db: db}}, nil

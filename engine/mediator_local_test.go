@@ -85,7 +85,8 @@ func TestInitStorDb(t *testing.T) {
 	}
 	var mysql *MySQLStorage
 	var err error
-	if cdrStor, err = ConfigureCdrStorage(cgrCfg.StorDBType, cgrCfg.StorDBHost, cgrCfg.StorDBPort, cgrCfg.StorDBName, cgrCfg.StorDBUser, cgrCfg.StorDBPass); err != nil {
+	if cdrStor, err = ConfigureCdrStorage(cgrCfg.StorDBType, cgrCfg.StorDBHost, cgrCfg.StorDBPort, cgrCfg.StorDBName, cgrCfg.StorDBUser, cgrCfg.StorDBPass,
+		cgrCfg.StorDBMaxOpenConns, cgrCfg.StorDBMaxIdleConns); err != nil {
 		t.Fatal("Error on opening database connection: ", err)
 	} else {
 		mysql = cdrStor.(*MySQLStorage)

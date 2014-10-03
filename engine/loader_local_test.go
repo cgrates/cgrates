@@ -95,7 +95,7 @@ func TestCreateStorTpTables(t *testing.T) {
 		return
 	}
 	var db *MySQLStorage
-	if d, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass); err != nil {
+	if d, err := NewMySQLStorage(lCfg.StorDBHost, lCfg.StorDBPort, lCfg.StorDBName, lCfg.StorDBUser, lCfg.StorDBPass, lCfg.StorDBMaxOpenConns, lCfg.StorDBMaxIdleConns); err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
 	} else {

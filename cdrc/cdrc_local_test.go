@@ -110,7 +110,7 @@ func TestEmptyTables(t *testing.T) {
 		t.Fatal("Unsupported storDbType")
 	}
 	var mysql *engine.MySQLStorage
-	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass); err != nil {
+	if d, err := engine.NewMySQLStorage(cfg.StorDBHost, cfg.StorDBPort, cfg.StorDBName, cfg.StorDBUser, cfg.StorDBPass, cfg.StorDBMaxOpenConns, cfg.StorDBMaxIdleConns); err != nil {
 		t.Fatal("Error on opening database connection: ", err)
 	} else {
 		mysql = d.(*engine.MySQLStorage)

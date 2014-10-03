@@ -49,7 +49,8 @@ func TestCreateTables(t *testing.T) {
 		return
 	}
 	cgrConfig, _ := config.NewDefaultCGRConfig()
-	if d, err := NewMySQLStorage(cgrConfig.StorDBHost, cgrConfig.StorDBPort, cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass); err != nil {
+	if d, err := NewMySQLStorage(cgrConfig.StorDBHost, cgrConfig.StorDBPort, cgrConfig.StorDBName, cgrConfig.StorDBUser, cgrConfig.StorDBPass,
+		cgrConfig.StorDBMaxOpenConns, cgrConfig.StorDBMaxIdleConns); err != nil {
 		t.Error("Error on opening database connection: ", err)
 		return
 	} else {

@@ -73,6 +73,8 @@ type CGRConfig struct {
 	StorDBName              string             // The name of the database to connect to.
 	StorDBUser              string             // The user to sign in as.
 	StorDBPass              string             // The user's password.
+	StorDBMaxOpenConns      int                // Maximum database connections opened
+	StorDBMaxIdleConns      int                // Maximum idle connections to keep opened
 	DBDataEncoding          string             // The encoding used to store object data in strings: <msgpack|json>
 	RPCJSONListen           string             // RPC JSON listening address
 	RPCGOBListen            string             // RPC GOB listening address
@@ -155,6 +157,8 @@ func (self *CGRConfig) setDefaults() error {
 	self.StorDBName = "cgrates"
 	self.StorDBUser = "cgrates"
 	self.StorDBPass = "CGRateS.org"
+	self.StorDBMaxOpenConns = 100
+	self.StorDBMaxIdleConns = 10
 	self.DBDataEncoding = utils.MSGPACK
 	self.RPCJSONListen = "127.0.0.1:2012"
 	self.RPCGOBListen = "127.0.0.1:2013"
@@ -345,6 +349,12 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 	}
 	if hasOpt = c.HasOption("global", "stordb_passwd"); hasOpt {
 		cfg.StorDBPass, _ = c.GetString("global", "stordb_passwd")
+	}
+	if hasOpt = c.HasOption("global", "stordb_max_open_conns"); hasOpt {
+		cfg.StorDBMaxOpenConns, _ = c.GetInt("global", "stordb_max_open_conns")
+	}
+	if hasOpt = c.HasOption("global", "stordb_max_idle_conns"); hasOpt {
+		cfg.StorDBMaxIdleConns, _ = c.GetInt("global", "stordb_max_idle_conns")
 	}
 	if hasOpt = c.HasOption("global", "dbdata_encoding"); hasOpt {
 		cfg.DBDataEncoding, _ = c.GetString("global", "dbdata_encoding")
