@@ -74,7 +74,7 @@ const (
 	COMMENT_CHAR                 = '#'
 	CSV_SEP                      = ','
 	FALLBACK_SEP                 = ';'
-	INFIELD_SEP                  = ";;"
+	INFIELD_SEP                  = ";"
 	FIELDS_SEP                   = ","
 	STATIC_HDRVAL_SEP            = "::"
 	REGEXP_PREFIX                = "~"
