@@ -65,6 +65,7 @@ func startEngine() error {
 
 func stopEngine() error {
 	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	return nil
 }
 
@@ -96,14 +97,14 @@ func TestCreateCdrDirs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	for _, cdrcDir := range []string{cfg.CdrcInstances[0].CdrInDir, cfg.CdrcInstances[0].CdrOutDir,
-		*cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrInDir, *cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV2")["CDRC-CSV2"].CdrOutDir,
-		*cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrInDir, *cfg.XmlCfgDocument.GetCdrcCfgs("CDRC-CSV3")["CDRC-CSV3"].CdrOutDir} {
-		if err := os.RemoveAll(cdrcDir); err != nil {
-			t.Fatal("Error removing folder: ", cdrcDir, err)
-		}
-		if err := os.MkdirAll(cdrcDir, 0755); err != nil {
-			t.Fatal("Error creating folder: ", cdrcDir, err)
+	for _, cdrcInst := range cfg.CdrcInstances {
+		for _, dir := range []string{cdrcInst.CdrInDir, cdrcInst.CdrOutDir} {
+			if err := os.RemoveAll(dir); err != nil {
+				t.Fatal("Error removing folder: ", dir, err)
+			}
+			if err := os.MkdirAll(dir, 0755); err != nil {
+				t.Fatal("Error creating folder: ", dir, err)
+			}
 		}
 	}
 }
@@ -114,7 +115,6 @@ func TestRpcConn(t *testing.T) {
 		return
 	}
 	startEngine()
-	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 	var err error
 	rater, err = jsonrpc.Dial("tcp", cfg.RPCJSONListen) // We connect over JSON so we can also troubleshoot if needed
 	if err != nil {

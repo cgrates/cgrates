@@ -48,7 +48,7 @@ func NewCdrc(cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engin
 		return nil, fmt.Errorf("Unsupported csv separator: %s", cdrcCfg.FieldSeparator)
 	}
 	csvSepRune, _ := utf8.DecodeRune([]byte(cdrcCfg.FieldSeparator))
-	cdrc := &Cdrc{cdrsAddress: cdrcCfg.CdrsAddress, cdrType: cdrcCfg.CdrType, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
+	cdrc := &Cdrc{cdrsAddress: cdrcCfg.CdrsAddress, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
 		cdrSourceId: cdrcCfg.CdrSourceId, runDelay: cdrcCfg.RunDelay, csvSep: csvSepRune, cdrFields: cdrcCfg.CdrFields, httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer}
 	// Before processing, make sure in and out folders exist
 	for _, dir := range []string{cdrc.cdrInDir, cdrc.cdrOutDir} {
@@ -62,7 +62,7 @@ func NewCdrc(cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engin
 
 type Cdrc struct {
 	cdrsAddress,
-	cdrType,
+	CdrFormat,
 	cdrInDir,
 	cdrOutDir,
 	cdrSourceId string
@@ -92,7 +92,7 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 	var err error
 	for _, cdrFldCfg := range self.cdrFields {
 		var fieldVal string
-		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.cdrType) {
+		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.CdrFormat) {
 			if cdrFldCfg.Type == utils.CDRFIELD {
 				for _, cfgFieldRSR := range cdrFldCfg.Value {
 					if cfgFieldRSR.IsStatic() {
@@ -122,7 +122,7 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 				return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			}
 		} else { // Modify here when we add more supported cdr formats
-			return nil, fmt.Errorf("Unsupported CDR file format: %s", self.cdrType)
+			return nil, fmt.Errorf("Unsupported CDR file format: %s", self.CdrFormat)
 		}
 		switch cdrFldCfg.CdrFieldId {
 		case utils.TOR:
@@ -169,7 +169,7 @@ func (self *Cdrc) processCdrDir() error {
 	engine.Logger.Info(fmt.Sprintf("<Cdrc> Parsing folder %s for CDR files.", self.cdrInDir))
 	filesInDir, _ := ioutil.ReadDir(self.cdrInDir)
 	for _, file := range filesInDir {
-		if self.cdrType != FS_CSV || path.Ext(file.Name()) != ".csv" {
+		if self.CdrFormat != FS_CSV || path.Ext(file.Name()) != ".csv" {
 			go func() { //Enable async processing here
 				if err := self.processFile(path.Join(self.cdrInDir, file.Name())); err != nil {
 					engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", file, err.Error()))
@@ -195,7 +195,7 @@ func (self *Cdrc) trackCDRFiles() (err error) {
 	for {
 		select {
 		case ev := <-watcher.Event:
-			if ev.IsCreate() && (self.cdrType != FS_CSV || path.Ext(ev.Name) != ".csv") {
+			if ev.IsCreate() && (self.CdrFormat != FS_CSV || path.Ext(ev.Name) != ".csv") {
 				go func() { //Enable async processing here
 					if err = self.processFile(ev.Name); err != nil {
 						engine.Logger.Err(fmt.Sprintf("Processing file %s, error: %s", ev.Name, err.Error()))

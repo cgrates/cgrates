@@ -1,51 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="cgrates/xml">
-  <configuration section="cdrc" type="csv" id="CDRC-CSV2">
+  <configuration section="cdrc" id="CDRC-CSV2">
     <enabled>true</enabled>
     <cdrs_address>internal</cdrs_address>
     <cdr_type>csv</cdr_type>
-    <csv_separator>,</csv_separator>
+    <field_separator>,</field_separator>
     <run_delay>0</run_delay>
     <cdr_in_dir>/tmp/cgrates/cdrc2/in</cdr_in_dir>
     <cdr_out_dir>/tmp/cgrates/cdrc2/out</cdr_out_dir>
     <cdr_source_id>csv2</cdr_source_id>
     <fields>
-      <field id="tor" filter="~7:s/^(voice|data|sms)$/*$1/" />
-      <field id="accid" filter="0" />
-      <field id="reqtype" filter="^rated" />
-      <field id="direction" filter="^*out" />
-      <field id="tenant" filter="^cgrates.org" />
-      <field id="category" filter="~7:s/^voice$/call/" />
-      <field id="account" filter="3" />
-      <field id="subject" filter="3" />
-      <field id="destination" filter="~5:s/^0([1-9]\d+)$/+49$1/" />
-      <field id="setup_time" filter="1" />
-      <field id="answer_time" filter="1" />
-      <field id="usage" filter="~9:s/^(\d+)$/${1}s/" />
+      <field cdr_field="tor" filter="~7:s/^(voice|data|sms)$/*$1/" />
+      <field cdr_field="accid" filter="0" />
+      <field cdr_field="reqtype" filter="^rated" />
+      <field cdr_field="direction" filter="^*out" />
+      <field cdr_field="tenant" filter="^cgrates.org" />
+      <field cdr_field="category" filter="~7:s/^voice$/call/" />
+      <field cdr_field="account" filter="3" />
+      <field cdr_field="subject" filter="3" />
+      <field cdr_field="destination" filter="~5:s/^0([1-9]\d+)$/+49$1/" />
+      <field cdr_field="setup_time" filter="1" />
+      <field cdr_field="answer_time" filter="1" />
+      <field cdr_field="usage" filter="~9:s/^(\d+)$/${1}s/" />
     </fields>
   </configuration>
-  <configuration section="cdrc" type="csv" id="CDRC-CSV3">
+  <configuration section="cdrc" id="CDRC-CSV3">
     <enabled>true</enabled>
     <cdrs_address>internal</cdrs_address>
     <cdr_type>csv</cdr_type>
-    <csv_separator>;</csv_separator>
+    <field_separator>;</field_separator>
     <run_delay>0</run_delay>
     <cdr_in_dir>/tmp/cgrates/cdrc3/in</cdr_in_dir>
     <cdr_out_dir>/tmp/cgrates/cdrc3/out</cdr_out_dir>
     <cdr_source_id>csv3</cdr_source_id>
     <fields>
-      <field id="tor" filter="^*voice" />
-      <field id="accid" filter="~3:s/^(\d{2})\.(\d{2})\.(\d{4})\s{2}(\d{2}):(\d{2}):(\d{2})$/$1$2$3$4$5$6/" />
-      <field id="reqtype" filter="^rated" />
-      <field id="direction" filter="^*out" />
-      <field id="tenant" filter="^cgrates.org" />
-      <field id="category" filter="^call" />
-      <field id="account" filter="~0:s/^([1-9]\d+)$/+$1/" />
-      <field id="subject" filter="~0:s/^([1-9]\d+)$/+$1/" />
-      <field id="destination" filter="~1:s/^([1-9]\d+)$/+$1/" />
-      <field id="setup_time" filter="4" />
-      <field id="answer_time" filter="4" />
-      <field id="usage" filter="~6:s/^(\d+)$/${1}s/" />
+      <field cdr_field="tor" filter="^*voice" />
+      <field cdr_field="accid" filter="~3:s/^(\d{2})\.(\d{2})\.(\d{4})\s{2}(\d{2}):(\d{2}):(\d{2})$/$1$2$3$4$5$6/" />
+      <field cdr_field="reqtype" filter="^rated" />
+      <field cdr_field="direction" filter="^*out" />
+      <field cdr_field="tenant" filter="^cgrates.org" />
+      <field cdr_field="category" filter="^call" />
+      <field cdr_field="account" filter="~0:s/^([1-9]\d+)$/+$1/" />
+      <field cdr_field="subject" filter="~0:s/^([1-9]\d+)$/+$1/" />
+      <field cdr_field="destination" filter="~1:s/^([1-9]\d+)$/+$1/" />
+      <field cdr_field="setup_time" filter="4" />
+      <field cdr_field="answer_time" filter="4" />
+      <field cdr_field="usage" filter="~6:s/^(\d+)$/${1}s/" />
     </fields>
   </configuration>
   <configuration section="cdre" type="fwv" id="CDRE-FW1">
@@ -59,51 +59,51 @@
     <export_template>
       <header>
         <fields>
-          <field name="ToR" type="constant" value="10" width="2" />
-          <field name="Filler1" type="filler" width="3" />
-          <field name="FileType" type="constant" value="SIP" width="3" />
-          <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
-          <field name="LastCdr" type="metatag" value="last_cdr_atime" layout="020106150405" width="12" />
-          <field name="FileCreationfTime" type="metatag" value="time_now" layout="020106150405" width="12" />
-          <field name="FileVersion" type="constant" value="01" width="2" />
-          <field name="Filler2" type="filler" width="105" />
+          <field tag="ToR" type="constant" value="10" width="2" />
+          <field tag="Filler1" type="filler" width="3" />
+          <field tag="FileType" type="constant" value="SIP" width="3" />
+          <field tag="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
+          <field tag="LastCdr" type="metatag" value="last_cdr_atime" layout="020106150405" width="12" />
+          <field tag="FileCreationfTime" type="metatag" value="time_now" layout="020106150405" width="12" />
+          <field tag="FileVersion" type="constant" value="01" width="2" />
+          <field tag="Filler2" type="filler" width="105" />
         </fields>
       </header>
       <content>
         <fields>
-          <field name="ToR" type="constant" value="20" width="2" />
-          <field name="Subject" type="cdrfield" value="subject" width="12" padding="right" mandatory="true" />
-          <field name="ConnectionNumber" type="constant" value="00000" width="5" />
-          <field name="CallerId" type="cdrfield" value="~callerid:s/\+(\d+)/00$1/" strip="xright" width="15" padding="right" />
-          <field name="Destination" type="cdrfield" value="~destination:s/^\+311400(\d+)/$1/:s/^\+311412\d\d112/112/:s/^\+31(\d+)/0$1/:s/^\+(\d+)/00$1/" strip="xright" width="24" padding="right" mandatory="true" />
-          <field name="TypeOfService" type="constant" value="00" width="2" />
-          <field name="ServiceId" type="constant" value="11" width="4" padding="right" />
-          <field name="AnswerTime" type="cdrfield" value="answer_time" layout="020106150405" width="12" mandatory="true" />
-          <field name="Usage" type="cdrfield" value="usage" layout="seconds" width="6" padding="right" mandatory="true" />
-          <field name="DataCounter" type="filler" width="6" />
-          <field name="VatCode" type="constant" value="1" width="1" />
-          <field name="NetworkId" type="constant" value="S1" width="2" />
-          <field name="DestinationSubId" type="cdrfield" value="~cost_details:s/&quot;MatchedDestId&quot;:&quot;.+_(\w{5})&quot;/$1/:s/(\w{6})/$1/" width="5" />
-          <field name="NetworkSubtype" type="constant" value="3" width="1" padding="left" />
-          <field name="CgrId" type="cdrfield" value="cgrid" strip="xleft" width="16" paddingi="right" mandatory="true" />
-          <field name="FillerVolume1" type="filler" width="8" />
-          <field name="FillerVolume2" type="filler" width="8" />
-          <field name="DestinationSubId" type="cdrfield" value="~cost_details:s/&quot;MatchedDestId&quot;:&quot;.+_(\w{5})&quot;/$1/:s/(\w{6})/$1/" width="5" />
-          <field name="Cost" type="cdrfield" value="cost" padding="zeroleft" width="9" />
-          <field name="MaskDestination" type="metatag" value="mask_destination" width="1" />
+          <field tag="ToR" type="constant" value="20" width="2" />
+          <field tag="Subject" type="cdrfield" value="subject" width="12" padding="right" mandatory="true" />
+          <field tag="ConnectionNumber" type="constant" value="00000" width="5" />
+          <field tag="CallerId" type="cdrfield" value="~callerid:s/\+(\d+)/00$1/" strip="xright" width="15" padding="right" />
+          <field tag="Destination" type="cdrfield" value="~destination:s/^\+311400(\d+)/$1/:s/^\+311412\d\d112/112/:s/^\+31(\d+)/0$1/:s/^\+(\d+)/00$1/" strip="xright" width="24" padding="right" mandatory="true" />
+          <field tag="TypeOfService" type="constant" value="00" width="2" />
+          <field tag="ServiceId" type="constant" value="11" width="4" padding="right" />
+          <field tag="AnswerTime" type="cdrfield" value="answer_time" layout="020106150405" width="12" mandatory="true" />
+          <field tag="Usage" type="cdrfield" value="usage" layout="seconds" width="6" padding="right" mandatory="true" />
+          <field tag="DataCounter" type="filler" width="6" />
+          <field tag="VatCode" type="constant" value="1" width="1" />
+          <field tag="NetworkId" type="constant" value="S1" width="2" />
+          <field tag="DestinationSubId" type="cdrfield" value="~cost_details:s/&quot;MatchedDestId&quot;:&quot;.+_(\w{5})&quot;/$1/:s/(\w{6})/$1/" width="5" />
+          <field tag="NetworkSubtype" type="constant" value="3" width="1" padding="left" />
+          <field tag="CgrId" type="cdrfield" value="cgrid" strip="xleft" width="16" paddingi="right" mandatory="true" />
+          <field tag="FillerVolume1" type="filler" width="8" />
+          <field tag="FillerVolume2" type="filler" width="8" />
+          <field tag="DestinationSubId" type="cdrfield" value="~cost_details:s/&quot;MatchedDestId&quot;:&quot;.+_(\w{5})&quot;/$1/:s/(\w{6})/$1/" width="5" />
+          <field tag="Cost" type="cdrfield" value="cost" padding="zeroleft" width="9" />
+          <field tag="MaskDestination" type="metatag" value="mask_destination" width="1" />
         </fields>
       </content>
       <trailer>
         <fields>
-          <field name="ToR" type="constant" value="90" width="2" />
-          <field name="Filler1" type="filler" width="3" />
-          <field name="FileType" type="constant" value="SIP" width="3" />
-          <field name="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
-          <field name="TotalRecords" type="metatag" value="cdrs_number" padding="zeroleft" width="6" />
-          <field name="TotalDuration" type="metatag" value="cdrs_duration" padding="zeroleft" width="8" />
-          <field name="FirstCdrTime" type="metatag" value="first_cdr_atime" layout="020106150405" width="12" />
-          <field name="LastCdrTime" type="metatag" value="last_cdr_atime" layout="020106150405" width="12" />
-          <field name="Filler1" type="filler" width="93" />
+          <field tag="ToR" type="constant" value="90" width="2" />
+          <field tag="Filler1" type="filler" width="3" />
+          <field tag="FileType" type="constant" value="SIP" width="3" />
+          <field tag="FileSeqNr" type="metatag" value="export_id" padding="zeroleft" width="5" />
+          <field tag="TotalRecords" type="metatag" value="cdrs_number" padding="zeroleft" width="6" />
+          <field tag="TotalDuration" type="metatag" value="cdrs_duration" padding="zeroleft" width="8" />
+          <field tag="FirstCdrTime" type="metatag" value="first_cdr_atime" layout="020106150405" width="12" />
+          <field tag="LastCdrTime" type="metatag" value="last_cdr_atime" layout="020106150405" width="12" />
+          <field tag="Filler1" type="filler" width="93" />
         </fields>
       </trailer>
     </export_template>

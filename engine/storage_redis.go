@@ -379,14 +379,14 @@ func (rs *RedisStorage) RemoveRpAliases(tenantRtSubjects []*TenantRatingSubject)
 		return err
 	}
 	for _, key := range alsKeys {
+		alias, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], true)
+		if err != nil {
+			return err
+		}
 		for _, tntRSubj := range tenantRtSubjects {
 			tenantPrfx := RP_ALIAS_PREFIX + tntRSubj.Tenant + utils.CONCATENATED_KEY_SEP
 			if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
 				continue
-			}
-			alias, err := rs.GetRpAlias(key[len(RP_ALIAS_PREFIX):], true)
-			if err != nil {
-				return err
 			}
 			if tntRSubj.Subject != alias {
 				continue
@@ -477,14 +477,14 @@ func (rs *RedisStorage) RemoveAccAliases(tenantAccounts []*TenantAccount) (err e
 		return err
 	}
 	for _, key := range alsKeys {
+		alias, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], true)
+		if err != nil {
+			return err
+		}
 		for _, tntAcnt := range tenantAccounts {
 			tenantPrfx := ACC_ALIAS_PREFIX + tntAcnt.Tenant + utils.CONCATENATED_KEY_SEP
 			if len(key) < len(tenantPrfx) || tenantPrfx != key[:len(tenantPrfx)] { // filter out the tenant for accounts
 				continue
-			}
-			alias, err := rs.GetAccAlias(key[len(ACC_ALIAS_PREFIX):], true)
-			if err != nil {
-				return err
 			}
 			if tntAcnt.Account != alias {
 				continue

@@ -57,7 +57,7 @@ type XmlCfgCdrField struct {
 type CgrXmlCdrcCfg struct {
 	Enabled        *bool             `xml:"enabled"`         // Enable/Disable the
 	CdrsAddress    *string           `xml:"cdrs_address"`    // The address where CDRs can be reached
-	CdrType        *string           `xml:"cdr_type"`        // The type of CDR to process <csv>
+	CdrFormat      *string           `xml:"cdr_format"`      // The type of CDR to process <csv>
 	FieldSeparator *string           `xml:"field_separator"` // The separator to use when reading csvs
 	RunDelay       *int64            `xml:"run_delay"`       // Delay between runs
 	CdrInDir       *string           `xml:"cdr_in_dir"`      // Folder to process CDRs from

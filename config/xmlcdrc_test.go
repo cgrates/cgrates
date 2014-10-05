@@ -50,7 +50,7 @@ func TestSetDefaults(t *testing.T) {
 	dfCfg, _ := NewDefaultCGRConfig()
 	xmlCdrc.setDefaults()
 	if xmlCdrc.CdrsAddress != dfCfg.CdrcCdrs ||
-		xmlCdrc.CdrType != dfCfg.CdrcCdrType ||
+		xmlCdrc.CdrFormat != dfCfg.CdrcCdrType ||
 		xmlCdrc.CsvSeparator != dfCfg.CdrcCsvSep ||
 		xmlCdrc.CdrInDir != dfCfg.CdrcCdrInDir ||
 		xmlCdrc.CdrOutDir != dfCfg.CdrcCdrOutDir ||
@@ -67,7 +67,7 @@ func TestParseXmlCdrcConfig(t *testing.T) {
   <configuration section="cdrc" id="CDRC-CSV1">
     <enabled>true</enabled>
     <cdrs_address>internal</cdrs_address>
-    <cdr_type>csv</cdr_type>
+    <cdr_format>csv</cdr_format>
     <field_separator>,</field_separator>
     <run_delay>0</run_delay>
     <cdr_in_dir>/var/log/cgrates/cdrc/in</cdr_in_dir>
@@ -109,13 +109,13 @@ func TestGetCdrcCfgs(t *testing.T) {
 	}
 	enabled := true
 	cdrsAddr := "internal"
-	cdrType := "csv"
+	cdrFormat := "csv"
 	fldSep := ","
 	runDelay := int64(0)
 	cdrInDir := "/var/log/cgrates/cdrc/in"
 	cdrOutDir := "/var/log/cgrates/cdrc/out"
 	cdrSrcId := "freeswitch_csv"
-	expectCdrc := &CgrXmlCdrcCfg{Enabled: &enabled, CdrsAddress: &cdrsAddr, CdrType: &cdrType, FieldSeparator: &fldSep,
+	expectCdrc := &CgrXmlCdrcCfg{Enabled: &enabled, CdrsAddress: &cdrsAddr, CdrFormat: &cdrFormat, FieldSeparator: &fldSep,
 		RunDelay: &runDelay, CdrInDir: &cdrInDir, CdrOutDir: &cdrOutDir, CdrSourceId: &cdrSrcId}
 	accIdTag, reqTypeTag, dirTag, tntTag, categTag, acntTag, subjTag, dstTag, sTimeTag, aTimeTag, usageTag, extr1, extr2 := utils.ACCID,
 		utils.REQTYPE, utils.DIRECTION, utils.TENANT, utils.CATEGORY, utils.ACCOUNT, utils.SUBJECT, utils.DESTINATION, utils.SETUP_TIME, utils.ANSWER_TIME, utils.USAGE, "extr1", "extr2"

@@ -232,7 +232,7 @@ func TestConfigFromFile(t *testing.T) {
 	cdrcCfg.Enabled = true
 	cdrcCfg.CdrsAddress = "test"
 	cdrcCfg.RunDelay = time.Duration(99) * time.Second
-	cdrcCfg.CdrType = "test"
+	cdrcCfg.CdrFormat = "test"
 	cdrcCfg.FieldSeparator = ";"
 	cdrcCfg.CdrInDir = "test"
 	cdrcCfg.CdrOutDir = "test"

@@ -230,7 +230,7 @@ func (self *CGRConfig) checkConfigSanity() error {
 			if len(cdrcInst.CdrFields) == 0 {
 				return errors.New("CdrC enabled but no fields to be processed defined!")
 			}
-			if cdrcInst.CdrType == utils.CSV {
+			if cdrcInst.CdrFormat == utils.CSV {
 				for _, cdrFld := range cdrcInst.CdrFields {
 					for _, rsrFld := range cdrFld.Value {
 						if _, errConv := strconv.Atoi(rsrFld.Id); errConv != nil {

@@ -31,7 +31,7 @@ func TestNewDefaultCdrcConfig(t *testing.T) {
 		Id:             utils.META_DEFAULT,
 		Enabled:        false,
 		CdrsAddress:    "",
-		CdrType:        utils.CSV,
+		CdrFormat:      utils.CSV,
 		FieldSeparator: utils.FIELDS_SEP,
 		RunDelay:       time.Duration(0),
 		CdrInDir:       "/var/log/cgrates/cdrc/in",

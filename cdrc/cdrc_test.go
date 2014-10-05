@@ -30,7 +30,7 @@ func TestRecordForkCdr(t *testing.T) {
 	cgrConfig, _ := config.NewDefaultCGRConfig()
 	cdrcConfig := cgrConfig.CdrcInstances[0]
 	cdrcConfig.CdrFields = append(cdrcConfig.CdrFields, &config.CfgCdrField{Tag: "SupplierTest", Type: utils.CDRFIELD, CdrFieldId: "supplier", Value: []*utils.RSRField{&utils.RSRField{Id: "14"}}})
-	cdrc := &Cdrc{cdrType: CSV, cdrSourceId: "TEST_CDRC", cdrFields: cdrcConfig.CdrFields}
+	cdrc := &Cdrc{CdrFormat: CSV, cdrSourceId: "TEST_CDRC", cdrFields: cdrcConfig.CdrFields}
 	cdrRow := []string{"firstField", "secondField"}
 	_, err := cdrc.recordToStoredCdr(cdrRow)
 	if err == nil {
@@ -152,7 +152,7 @@ func TestDnTdmCdrs(t *testing.T) {
 		utils.ANSWER_TIME: &utils.RSRField{Id: "4"},
 		utils.USAGE:       usageFld,
 	}
-	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrType, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay, ',',
+	cdrc := &Cdrc{cgrConfig.CdrcCdrs, cgrConfig.CdrcCdrFormat, cgrConfig.CdrcCdrInDir, cgrConfig.CdrcCdrOutDir, cgrConfig.CdrcSourceId, cgrConfig.CdrcRunDelay, ',',
 		cgrConfig.CdrcCdrFields, new(cdrs.CDRS), nil}
 	cdrsContent := bytes.NewReader([]byte(tdmCdrs))
 	csvReader := csv.NewReader(cdrsContent)

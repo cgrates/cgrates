@@ -14,11 +14,13 @@ go test github.com/cgrates/cgrates/config -local
 cfg=$?
 go test github.com/cgrates/cgrates/utils -local
 utl=$?
+go test github.com/cgrates/cgrates/general_tests -local
+gnr=$?
 
 
 
 
 
 
-exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl
+exit $gen && $ap1 && $ap2 && $en && $cdrc && $cfg && $utl && $gnr
 

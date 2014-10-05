@@ -35,8 +35,8 @@ func NewCdrcConfigFromCgrXmlCdrcCfg(id string, xmlCdrcCfg *CgrXmlCdrcCfg) (*Cdrc
 	if xmlCdrcCfg.CdrsAddress != nil {
 		cdrcCfg.CdrsAddress = *xmlCdrcCfg.CdrsAddress
 	}
-	if xmlCdrcCfg.CdrType != nil {
-		cdrcCfg.CdrType = *xmlCdrcCfg.CdrType
+	if xmlCdrcCfg.CdrFormat != nil {
+		cdrcCfg.CdrFormat = *xmlCdrcCfg.CdrFormat
 	}
 	if xmlCdrcCfg.FieldSeparator != nil {
 		cdrcCfg.FieldSeparator = *xmlCdrcCfg.FieldSeparator
@@ -47,6 +47,9 @@ func NewCdrcConfigFromCgrXmlCdrcCfg(id string, xmlCdrcCfg *CgrXmlCdrcCfg) (*Cdrc
 	if xmlCdrcCfg.CdrInDir != nil {
 		cdrcCfg.CdrInDir = *xmlCdrcCfg.CdrInDir
 	}
+	if xmlCdrcCfg.CdrOutDir != nil {
+		cdrcCfg.CdrOutDir = *xmlCdrcCfg.CdrOutDir
+	}
 	if xmlCdrcCfg.CdrSourceId != nil {
 		cdrcCfg.CdrSourceId = *xmlCdrcCfg.CdrSourceId
 	}
@@ -54,7 +57,7 @@ func NewCdrcConfigFromCgrXmlCdrcCfg(id string, xmlCdrcCfg *CgrXmlCdrcCfg) (*Cdrc
 		cdrcCfg.CdrFields = nil // Reinit the fields, so we do not inherit from defaults here
 	}
 	for _, xmlCdrField := range xmlCdrcCfg.CdrFields {
-		if cdrFld, err := NewCfgCdrFieldFromCgrXmlCfgCdrField(xmlCdrField, cdrcCfg.CdrType == utils.CDRE_FIXED_WIDTH); err != nil {
+		if cdrFld, err := NewCfgCdrFieldFromCgrXmlCfgCdrField(xmlCdrField, cdrcCfg.CdrFormat == utils.CDRE_FIXED_WIDTH); err != nil {
 			return nil, err
 		} else {
 			cdrcCfg.CdrFields = append(cdrcCfg.CdrFields, cdrFld)
@@ -82,7 +85,7 @@ func NewDefaultCdrcConfig() *CdrcConfig {
 		Id:             utils.META_DEFAULT,
 		Enabled:        false,
 		CdrsAddress:    "",
-		CdrType:        utils.CSV,
+		CdrFormat:      utils.CSV,
 		FieldSeparator: utils.FIELDS_SEP,
 		RunDelay:       time.Duration(0),
 		CdrInDir:       "/var/log/cgrates/cdrc/in",
@@ -102,11 +105,11 @@ func NewCdrcConfigFromFileParams(c *conf.ConfigFile) (*CdrcConfig, error) {
 	if hasOpt := c.HasOption("cdrc", "cdrs"); hasOpt {
 		cdrcCfg.CdrsAddress, _ = c.GetString("cdrc", "cdrs")
 	}
-	if hasOpt := c.HasOption("cdrc", "cdr_type"); hasOpt {
-		cdrcCfg.CdrType, _ = c.GetString("cdrc", "cdr_type")
+	if hasOpt := c.HasOption("cdrc", "cdr_format"); hasOpt {
+		cdrcCfg.CdrFormat, _ = c.GetString("cdrc", "cdr_format")
 	}
-	if hasOpt := c.HasOption("cdrc", "csv_separator"); hasOpt {
-		cdrcCfg.FieldSeparator, _ = c.GetString("cdrc", "csv_separator")
+	if hasOpt := c.HasOption("cdrc", "field_separator"); hasOpt {
+		cdrcCfg.FieldSeparator, _ = c.GetString("cdrc", "field_separator")
 	}
 	if hasOpt := c.HasOption("cdrc", "run_delay"); hasOpt {
 		durStr, _ := c.GetString("cdrc", "run_delay")
@@ -187,7 +190,7 @@ type CdrcConfig struct {
 	Id             string         // Configuration label
 	Enabled        bool           // Enable/Disable the profile
 	CdrsAddress    string         // The address where CDRs can be reached
-	CdrType        string         // The type of CDR file to process <csv>
+	CdrFormat      string         // The type of CDR file to process <csv>
 	FieldSeparator string         // The separator to use when reading csvs
 	RunDelay       time.Duration  // Delay between runs, 0 for inotify driven requests
 	CdrInDir       string         // Folder to process CDRs from
