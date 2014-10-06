@@ -278,6 +278,9 @@ func HttpJsonPost(url string, skipTlsVerify bool, content interface{}) ([]byte, 
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode > 299 {
+		return respBody, fmt.Errorf("Unexpected status code received: %d", resp.StatusCode)
+	}
 	return respBody, nil
 }
 

@@ -21,7 +21,6 @@ package cdrc
 import (
 	"bufio"
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -165,8 +164,7 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 		for _, rsrFld := range httpFieldCfg.Value {
 			httpAddr += rsrFld.ParseValue("")
 		}
-		cdrJson, _ := json.Marshal(storedCdr)
-		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, cdrJson); err != nil && httpFieldCfg.Mandatory {
+		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, storedCdr); err != nil && httpFieldCfg.Mandatory {
 			return nil, err
 		} else {
 			fieldVal = string(outValByte)
@@ -246,12 +244,12 @@ func (self *Cdrc) processFile(filePath string) error {
 		}
 		procRowNr += 1 // Only increase if not end of file
 		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - csv error: %s", procRowNr, err.Error()))
 			continue // Other csv related errors, ignore
 		}
 		storedCdr, err := self.recordToStoredCdr(record)
 		if err != nil {
-			engine.Logger.Err(fmt.Sprintf("<Cdrc> Error in csv file: %s", err.Error()))
+			engine.Logger.Err(fmt.Sprintf("<Cdrc> Row %d - failed converting to StoredCdr, error: %s", procRowNr, err.Error()))
 			continue
 		}
 		if self.cdrsAddress == utils.INTERNAL {
