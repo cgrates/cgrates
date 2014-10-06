@@ -43,6 +43,46 @@ const (
 	FS_CSV = "freeswitch_csv"
 )
 
+// Populates the
+func populateStoredCdrField(cdr *utils.StoredCdr, fieldId, fieldVal string) error {
+	var err error
+	switch fieldId {
+	case utils.TOR:
+		cdr.TOR = fieldVal
+	case utils.ACCID:
+		cdr.AccId = fieldVal
+	case utils.REQTYPE:
+		cdr.ReqType = fieldVal
+	case utils.DIRECTION:
+		cdr.Direction = fieldVal
+	case utils.TENANT:
+		cdr.Tenant = fieldVal
+	case utils.CATEGORY:
+		cdr.Category = fieldVal
+	case utils.ACCOUNT:
+		cdr.Account = fieldVal
+	case utils.SUBJECT:
+		cdr.Subject = fieldVal
+	case utils.DESTINATION:
+		cdr.Destination = fieldVal
+	case utils.SETUP_TIME:
+		if cdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
+			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
+		}
+	case utils.ANSWER_TIME:
+		if cdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
+			return fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
+		}
+	case utils.USAGE:
+		if cdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
+			return fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
+		}
+	default: // Extra fields will not match predefined so they all show up here
+		cdr.ExtraFields[fieldId] = fieldVal
+	}
+	return nil
+}
+
 func NewCdrc(cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engine.CDRS) (*Cdrc, error) {
 	if len(cdrcCfg.FieldSeparator) != 1 {
 		return nil, fmt.Errorf("Unsupported csv separator: %s", cdrcCfg.FieldSeparator)
@@ -90,6 +130,7 @@ func (self *Cdrc) Run() error {
 func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 	storedCdr := &utils.StoredCdr{CdrHost: "0.0.0.0", CdrSource: self.cdrSourceId, ExtraFields: make(map[string]string), Cost: -1}
 	var err error
+	var lazyHttpFields []*config.CfgCdrField
 	for _, cdrFldCfg := range self.cdrFields {
 		var fieldVal string
 		if utils.IsSliceMember([]string{CSV, FS_CSV}, self.CdrFormat) {
@@ -106,61 +147,37 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 					}
 				}
 			} else if cdrFldCfg.Type == utils.HTTP_POST {
-				var outValByte []byte
-				var httpAddr string
-				for _, rsrFld := range cdrFldCfg.Value {
-					httpAddr += rsrFld.ParseValue("")
-				}
-				recordJson, _ := json.Marshal(record)
-				if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, recordJson); err == nil {
-					fieldVal = string(outValByte)
-					if len(fieldVal) == 0 && cdrFldCfg.Mandatory {
-						return nil, fmt.Errorf("MandatoryIeMissing: thEmpty result for http_post field: %s", cdrFldCfg.Tag)
-					}
-				}
+				lazyHttpFields = append(lazyHttpFields, cdrFldCfg) // Will process later so we can send an estimation of storedCdr to http server
 			} else {
 				return nil, fmt.Errorf("Unsupported field type: %s", cdrFldCfg.Type)
 			}
 		} else { // Modify here when we add more supported cdr formats
 			return nil, fmt.Errorf("Unsupported CDR file format: %s", self.CdrFormat)
 		}
-		switch cdrFldCfg.CdrFieldId {
-		case utils.TOR:
-			storedCdr.TOR = fieldVal
-		case utils.ACCID:
-			storedCdr.AccId = fieldVal
-		case utils.REQTYPE:
-			storedCdr.ReqType = fieldVal
-		case utils.DIRECTION:
-			storedCdr.Direction = fieldVal
-		case utils.TENANT:
-			storedCdr.Tenant = fieldVal
-		case utils.CATEGORY:
-			storedCdr.Category = fieldVal
-		case utils.ACCOUNT:
-			storedCdr.Account = fieldVal
-		case utils.SUBJECT:
-			storedCdr.Subject = fieldVal
-		case utils.DESTINATION:
-			storedCdr.Destination = fieldVal
-		case utils.SETUP_TIME:
-			if storedCdr.SetupTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
-				return nil, fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
-			}
-		case utils.ANSWER_TIME:
-			if storedCdr.AnswerTime, err = utils.ParseTimeDetectLayout(fieldVal); err != nil {
-				return nil, fmt.Errorf("Cannot parse answer time field with value: %s, err: %s", fieldVal, err.Error())
-			}
-		case utils.USAGE:
-			if storedCdr.Usage, err = utils.ParseDurationWithSecs(fieldVal); err != nil {
-				return nil, fmt.Errorf("Cannot parse duration field with value: %s, err: %s", fieldVal, err.Error())
-			}
-		default: // Extra fields will not match predefined so they all show up here
-			storedCdr.ExtraFields[cdrFldCfg.CdrFieldId] = fieldVal
+		if err := populateStoredCdrField(storedCdr, cdrFldCfg.CdrFieldId, fieldVal); err != nil {
+			return nil, err
 		}
-
 	}
 	storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields
+		var outValByte []byte
+		var fieldVal, httpAddr string
+		for _, rsrFld := range httpFieldCfg.Value {
+			httpAddr += rsrFld.ParseValue("")
+		}
+		cdrJson, _ := json.Marshal(storedCdr)
+		if outValByte, err = utils.HttpJsonPost(httpAddr, self.httpSkipTlsCheck, cdrJson); err != nil && httpFieldCfg.Mandatory {
+			return nil, err
+		} else {
+			fieldVal = string(outValByte)
+			if len(fieldVal) == 0 && httpFieldCfg.Mandatory {
+				return nil, fmt.Errorf("MandatoryIeMissing: Empty result for http_post field: %s", httpFieldCfg.Tag)
+			}
+			if err := populateStoredCdrField(storedCdr, httpFieldCfg.CdrFieldId, fieldVal); err != nil {
+				return nil, err
+			}
+		}
+	}
 	return storedCdr, nil
 }
 
