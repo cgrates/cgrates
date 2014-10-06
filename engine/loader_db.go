@@ -688,7 +688,7 @@ func (dbr *DbReader) LoadAccountActions() (err error) {
 func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions) error {
 	accountActions, err := dbr.storDb.GetTpAccountActions(qriedAA)
 	if err != nil {
-		return err
+		return errors.New(err.Error() + ": " + fmt.Sprintf("%+v", qriedAA))
 	}
 	for _, accountAction := range accountActions {
 		id := accountAction.KeyId()
@@ -705,7 +705,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 
 			actionTimingsMap, err := dbr.storDb.GetTPActionTimings(dbr.tpid, accountAction.ActionPlanId)
 			if err != nil {
-				return err
+				return errors.New(err.Error() + " (ActionPlan): " + accountAction.ActionPlanId)
 			} else if len(actionTimingsMap) == 0 {
 				return fmt.Errorf("No ActionTimings with id <%s>", accountAction.ActionPlanId)
 			}
@@ -715,13 +715,13 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				// Check action exists before saving it inside actionTiming key
 				// ToDo: try saving the key after the actions was retrieved in order to save one query here.
 				if actions, err := dbr.storDb.GetTpActions(dbr.tpid, at.ActionsId); err != nil {
-					return err
+					return errors.New(err.Error() + " (Actions): " + at.ActionsId)
 				} else if len(actions) == 0 {
 					return fmt.Errorf("No Action with id <%s>", at.ActionsId)
 				}
 				timingsMap, err := dbr.storDb.GetTpTimings(dbr.tpid, at.TimingId)
 				if err != nil {
-					return err
+					return errors.New(err.Error() + " (Timing): " + at.TimingId)
 				} else if len(timingsMap) == 0 {
 					return fmt.Errorf("No Timing with id <%s>", at.TimingId)
 				}
@@ -759,7 +759,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 			// write action timings
 			err = dbr.accountDb.SetActionTimings(accountAction.ActionPlanId, actionTimings)
 			if err != nil {
-				return err
+				return errors.New(err.Error() + " (SetActionPlan): " + accountAction.ActionPlanId)
 			}
 		}
 		// action triggers
@@ -768,7 +768,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 		if accountAction.ActionTriggersId != "" {
 			apiAtrsMap, err := dbr.storDb.GetTpActionTriggers(dbr.tpid, accountAction.ActionTriggersId)
 			if err != nil {
-				return err
+				return errors.New(err.Error() + " (ActionTriggers): " + accountAction.ActionTriggersId)
 			}
 			atrsMap := make(map[string][]*ActionTrigger)
 			for key, atrsLst := range apiAtrsMap {
