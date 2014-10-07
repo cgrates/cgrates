@@ -23,6 +23,7 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -627,15 +628,16 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	// never override existing account with an empty one
 	// UPDATE: if all balances expired and were clean it makes
 	// sense to write empty balance map
-	/*if len(ub.BalanceMap) == 0 {
-		if ac, err := rs.GetAccount(ub.Id); err == nil {
+	if len(ub.BalanceMap) == 0 {
+		if ac, err := rs.GetAccount(ub.Id); err == nil && !ac.allBalancesExpired() {
 			ac.ActionTriggers = ub.ActionTriggers
 			ac.UnitCounters = ub.UnitCounters
 			ac.AllowNegative = ub.AllowNegative
 			ac.Disabled = ub.Disabled
 			ub = ac
 		}
-	}*/
+	}
+	log.Print("Acc: ", ub)
 	result, err := rs.ms.Marshal(ub)
 	err = rs.db.Set(ACCOUNT_PREFIX+ub.Id, result)
 	return

@@ -1049,6 +1049,8 @@ func TestTopupActionLoaded(t *testing.T) {
 	initialValue := initialUb.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
 	afterValue := afterUb.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
 	if initialValue != 100 || afterValue != 125 {
+		t.Logf("Initial: %+v", initialUb)
+		t.Logf("After: %+v", afterUb)
 		t.Error("Bad topup before and after: ", initialValue, afterValue)
 	}
 }
