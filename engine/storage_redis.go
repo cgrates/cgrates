@@ -625,12 +625,17 @@ func (rs *RedisStorage) GetAccount(key string) (ub *Account, err error) {
 
 func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 	// never override existing account with an empty one
-	if len(ub.BalanceMap) == 0 {
+	// UPDATE: if all balances expired and were clean it makes
+	// sense to write empty balance map
+	/*if len(ub.BalanceMap) == 0 {
 		if ac, err := rs.GetAccount(ub.Id); err == nil {
 			ac.ActionTriggers = ub.ActionTriggers
+			ac.UnitCounters = ub.UnitCounters
+			ac.AllowNegative = ub.AllowNegative
+			ac.Disabled = ub.Disabled
 			ub = ac
 		}
-	}
+	}*/
 	result, err := rs.ms.Marshal(ub)
 	err = rs.db.Set(ACCOUNT_PREFIX+ub.Id, result)
 	return

@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package general_tests
 
 import (
-	"github.com/cgrates/cgrates/engine"
 	"reflect"
 	"testing"
+
+	"github.com/cgrates/cgrates/engine"
 )
 
 var ratingDbAcntActs engine.RatingStorage
@@ -69,9 +70,6 @@ ENABLE_ACNT,*enable_account,,,,,,,,,,,10`
 	}
 }
 
-/*
-//ToDo
-// This test fails due to Disabled which is ignored on SetAccount with partial content. SetAccount should only be called with account when no previous one set in dataDb.
 func TestAcntActsDisableAcnt(t *testing.T) {
 	acnt1Tag := "*out:cgrates.org:1"
 	at := &engine.ActionTiming{
@@ -88,7 +86,6 @@ func TestAcntActsDisableAcnt(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", expectAcnt, acnt)
 	}
 }
-*/
 
 func TestAcntActsEnableAcnt(t *testing.T) {
 	acnt1Tag := "*out:cgrates.org:1"
