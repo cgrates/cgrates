@@ -287,7 +287,7 @@ func TestActionTimingHourMonthdaysYear(t *testing.T) {
 		},
 	}}
 	t.Log(at.Timing.Timing.CronString())
-	t.Log(time.Now())
+	t.Log(time.Now(), referenceDate, referenceDate.After(testTime))
 	st := at.GetNextStartTime(referenceDate)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
