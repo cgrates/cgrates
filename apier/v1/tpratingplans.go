@@ -42,6 +42,7 @@ func (self *ApierV1) SetTPRatingPlan(attrs utils.TPRatingPlan, reply *string) er
 type AttrGetTPRatingPlan struct {
 	TPid         string // Tariff plan id
 	RatingPlanId string // Rate id
+	utils.Paginator
 }
 
 // Queries specific RatingPlan profile on tariff plan
@@ -49,7 +50,7 @@ func (self *ApierV1) GetTPRatingPlan(attrs AttrGetTPRatingPlan, reply *utils.TPR
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "RatingPlanId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if rps, err := self.StorDb.GetTpRatingPlans(attrs.TPid, attrs.RatingPlanId); err != nil {
+	if rps, err := self.StorDb.GetTpRatingPlans(attrs.TPid, attrs.RatingPlanId, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(rps) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -60,10 +61,8 @@ func (self *ApierV1) GetTPRatingPlan(attrs AttrGetTPRatingPlan, reply *utils.TPR
 }
 
 type AttrGetTPRatingPlanIds struct {
-	TPid         string // Tariff plan id
-	Page         int
-	ItemsPerPage int
-	SearchTerm   string
+	TPid string // Tariff plan id
+	utils.Paginator
 }
 
 // Queries RatingPlan identities on specific tariff plan.
@@ -71,7 +70,7 @@ func (self *ApierV1) GetTPRatingPlanIds(attrs AttrGetTPRatingPlanIds, reply *[]s
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATING_PLANS, utils.TPDistinctIds{"id"}, nil, &utils.TPPagination{Page: attrs.Page, ItemsPerPage: attrs.ItemsPerPage, SearchTerm: attrs.SearchTerm}); err != nil {
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_RATING_PLANS, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)

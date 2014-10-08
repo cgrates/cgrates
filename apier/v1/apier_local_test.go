@@ -221,7 +221,7 @@ func TestApierTPTiming(t *testing.T) {
 	// Test getIds
 	var rplyTmIds []string
 	expectedTmIds := []string{"ALWAYS", "ASAP"}
-	if err := rater.Call("ApierV1.GetTPTimingIds", AttrGetTPTimingIds{tmAlways.TPid, 0, 0, ""}, &rplyTmIds); err != nil {
+	if err := rater.Call("ApierV1.GetTPTimingIds", AttrGetTPTimingIds{tmAlways.TPid, utils.Paginator{0, 0, ""}}, &rplyTmIds); err != nil {
 		t.Error("Calling ApierV1.GetTPTimingIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedTmIds, rplyTmIds) {
 		t.Errorf("Calling ApierV1.GetTPTimingIds expected: %v, received: %v", expectedTmIds, rplyTmIds)
@@ -329,7 +329,7 @@ func TestApierTPRate(t *testing.T) {
 	// Test getIds
 	var rplyRtIds []string
 	expectedRtIds := []string{"RT_FS_USERS"}
-	if err := rater.Call("ApierV1.GetTPRateIds", AttrGetTPRateIds{rt.TPid, 0, 0, ""}, &rplyRtIds); err != nil {
+	if err := rater.Call("ApierV1.GetTPRateIds", AttrGetTPRateIds{rt.TPid, utils.Paginator{0, 0, ""}}, &rplyRtIds); err != nil {
 		t.Error("Calling ApierV1.GetTPRateIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRtIds, rplyRtIds) {
 		t.Errorf("Calling ApierV1.GetTPDestinationIds expected: %v, received: %v", expectedRtIds, rplyRtIds)
@@ -372,13 +372,13 @@ func TestApierTPDestinationRate(t *testing.T) {
 	}
 	// Test get
 	var rplyDr2 *utils.TPDestinationRate
-	if err := rater.Call("ApierV1.GetTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId}, &rplyDr2); err != nil {
+	if err := rater.Call("ApierV1.GetTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId, utils.Paginator{}}, &rplyDr2); err != nil {
 		t.Error("Calling ApierV1.GetTPDestinationRate, got error: ", err.Error())
 	} else if !reflect.DeepEqual(dr2, rplyDr2) {
 		t.Errorf("Calling ApierV1.GetTPDestinationRate expected: %v, received: %v", dr2, rplyDr2)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPDestinationRate", AttrGetTPDestinationRate{dr2.TPid, dr2.DestinationRateId, utils.Paginator{}}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPRate, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPRate received: ", reply)
@@ -386,7 +386,7 @@ func TestApierTPDestinationRate(t *testing.T) {
 	// Test getIds
 	var rplyDrIds []string
 	expectedDrIds := []string{"DR_FREESWITCH_USERS"}
-	if err := rater.Call("ApierV1.GetTPDestinationRateIds", AttrTPDestinationRateIds{dr.TPid, 0, 0, ""}, &rplyDrIds); err != nil {
+	if err := rater.Call("ApierV1.GetTPDestinationRateIds", AttrTPDestinationRateIds{dr.TPid, utils.Paginator{0, 0, ""}}, &rplyDrIds); err != nil {
 		t.Error("Calling ApierV1.GetTPDestinationRateIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedDrIds, rplyDrIds) {
 		t.Errorf("Calling ApierV1.GetTPDestinationRateIds expected: %v, received: %v", expectedDrIds, rplyDrIds)
@@ -440,7 +440,7 @@ func TestApierTPRatingPlan(t *testing.T) {
 	// Test getIds
 	var rplyRpIds []string
 	expectedRpIds := []string{"RETAIL1"}
-	if err := rater.Call("ApierV1.GetTPRatingPlanIds", AttrGetTPRatingPlanIds{rp.TPid, 0, 0, ""}, &rplyRpIds); err != nil {
+	if err := rater.Call("ApierV1.GetTPRatingPlanIds", AttrGetTPRatingPlanIds{rp.TPid, utils.Paginator{0, 0, ""}}, &rplyRpIds); err != nil {
 		t.Error("Calling ApierV1.GetTPRatingPlanIds, got error: ", err.Error())
 	} else if !reflect.DeepEqual(expectedRpIds, rplyRpIds) {
 		t.Errorf("Calling ApierV1.GetTPRatingPlanIds expected: %v, received: %v", expectedRpIds, rplyRpIds)
@@ -1396,38 +1396,38 @@ func TestCdrServer(t *testing.T) {
 
 /*
 func TestExportCdrsToFile(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	var reply *utils.ExportedFileCdrs
-	req := utils.AttrExpFileCdrs{}
-	//if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
-	//	t.Error("Failed to detect missing parameter")
-	//}
-	dryRun := utils.CDRE_DRYRUN
-	req.CdrFormat = &dryRun
-	tm1, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:22Z")
-	tm2, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:23Z")
-	expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCgrIds: []string{utils.Sha1("dsafdsaf", tm1.String()),
-		utils.Sha1("adsafdsaf", tm2.String())}}
-	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
-		t.Error(err.Error())
-	} else if !reflect.DeepEqual(reply, expectReply) {
-		t.Errorf("Unexpected reply: %v", reply)
-	}
-	Need to implement temporary file writing in order to test removal from db, not possible on DRYRUN
-	req.RemoveFromDb = true
-	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
-		t.Error(err.Error())
-	} else if !reflect.DeepEqual(reply, expectReply) {
-		t.Errorf("Unexpected reply: %v", reply)
-	}
-	expectReply.NumberOfRecords = 0 // We should have deleted previously
-	if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
-		t.Error(err.Error())
-	} else if !reflect.DeepEqual(reply, expectReply) {
-		t.Errorf("Unexpected reply: %v", reply)
-	}
+    if !*testLocal {
+        return
+    }
+    var reply *utils.ExportedFileCdrs
+    req := utils.AttrExpFileCdrs{}
+    //if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err == nil || !strings.HasPrefix(err.Error(), utils.ERR_MANDATORY_IE_MISSING) {
+    //  t.Error("Failed to detect missing parameter")
+    //}
+    dryRun := utils.CDRE_DRYRUN
+    req.CdrFormat = &dryRun
+    tm1, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:22Z")
+    tm2, _ := utils.ParseTimeDetectLayout("2013-11-07T08:42:23Z")
+    expectReply := &utils.ExportedFileCdrs{ExportedFilePath: utils.CDRE_DRYRUN, TotalRecords: 2, ExportedCgrIds: []string{utils.Sha1("dsafdsaf", tm1.String()),
+        utils.Sha1("adsafdsaf", tm2.String())}}
+    if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
+        t.Error(err.Error())
+    } else if !reflect.DeepEqual(reply, expectReply) {
+        t.Errorf("Unexpected reply: %v", reply)
+    }
+    Need to implement temporary file writing in order to test removal from db, not possible on DRYRUN
+    req.RemoveFromDb = true
+    if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
+        t.Error(err.Error())
+    } else if !reflect.DeepEqual(reply, expectReply) {
+        t.Errorf("Unexpected reply: %v", reply)
+    }
+    expectReply.NumberOfRecords = 0 // We should have deleted previously
+    if err := rater.Call("ApierV1.ExportCdrsToFile", req, &reply); err != nil {
+        t.Error(err.Error())
+    } else if !reflect.DeepEqual(reply, expectReply) {
+        t.Errorf("Unexpected reply: %v", reply)
+    }
 
 }
 */

@@ -105,10 +105,8 @@ func (self *ApierV1) GetTPAccountActions(attrs AttrGetTPAccountActions, reply *u
 }
 
 type AttrGetTPAccountActionIds struct {
-	TPid         string // Tariff plan id
-	Page         int
-	ItemsPerPage int
-	SearchTerm   string
+	TPid string // Tariff plan id
+	utils.Paginator
 }
 
 // Queries AccountActions identities on specific tariff plan.
@@ -116,7 +114,7 @@ func (self *ApierV1) GetTPAccountActionLoadIds(attrs AttrGetTPAccountActionIds, 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TPDistinctIds{"loadid"}, nil, &utils.TPPagination{Page: attrs.Page, ItemsPerPage: attrs.ItemsPerPage, SearchTerm: attrs.SearchTerm}); err != nil {
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TPDistinctIds{"loadid"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -131,7 +129,7 @@ func (self *ApierV1) GetTPAccountActionIds(attrs AttrGetTPAccountActionIds, repl
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TPDistinctIds{"loadid", "direction", "tenant", "account"}, nil, &utils.TPPagination{Page: attrs.Page, ItemsPerPage: attrs.ItemsPerPage, SearchTerm: attrs.SearchTerm}); err != nil {
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TPDistinctIds{"loadid", "direction", "tenant", "account"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)
