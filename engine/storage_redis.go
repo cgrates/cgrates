@@ -23,7 +23,6 @@ import (
 	"compress/zlib"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/cgrates/cgrates/cache2go"
 	"github.com/cgrates/cgrates/utils"
@@ -637,7 +636,6 @@ func (rs *RedisStorage) SetAccount(ub *Account) (err error) {
 			ub = ac
 		}
 	}
-	log.Print("Acc: ", ub)
 	result, err := rs.ms.Marshal(ub)
 	err = rs.db.Set(ACCOUNT_PREFIX+ub.Id, result)
 	return

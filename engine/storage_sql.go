@@ -177,8 +177,8 @@ func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
 }
 
 func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
+	tx := self.db.Begin()
 	if len(table) == 0 { // Remove tpid out of all tables
-		tx := self.db.Begin()
 		for _, tblName := range []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES,
 			utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_LCRS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TBL_TP_DERIVED_CHARGERS} {
 			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
@@ -189,21 +189,23 @@ func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
 		tx.Commit()
 		return nil
 	}
-	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND id='%s'", table, tpid, args[0])
+	// Remove from a single table
+	tx = tx.Table(table).Where("tpid = ?", tpid)
 	switch table {
+	default:
+		tx = tx.Where("id = ?", args[0])
 	case utils.TBL_TP_RATE_PROFILES:
-		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND direction='%s' AND tenant='%s' AND category='%s' AND subject='%s'",
-			table, tpid, args[0], args[1], args[2], args[3], args[4])
+		tx = tx.Where("loadid = ?", args[0]).Where("direction = ?", args[1]).Where("tenant = ?", args[2]).Where("category = ?", args[3]).Where("subject = ?", args[4])
 	case utils.TBL_TP_ACCOUNT_ACTIONS:
-		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND direction='%s' AND tenant='%s' AND account='%s'",
-			table, tpid, args[0], args[1], args[2], args[3])
+		tx = tx.Where("loadid = ?", args[0]).Where("direction = ?", args[1]).Where("tenant = ?", args[2]).Where("account = ?", args[3])
 	case utils.TBL_TP_DERIVED_CHARGERS:
-		q = fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND loadid='%s' AND direction='%s' AND tenant='%s' AND category='%s' AND account='%s' AND subject='%s'",
-			table, tpid, args[0], args[1], args[2], args[3], args[4], args[5])
+		tx = tx.Where("loadid = ?", args[0]).Where("direction = ?", args[1]).Where("tenant = ?", args[2]).Where("category = ?", args[3]).Where("account = ?", args[4]).Where("subject = ?", args[5])
 	}
-	if _, err := self.Db.Exec(q); err != nil {
+	if err := tx.Delete(nil).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
+	tx.Commit()
 	return nil
 }
 
