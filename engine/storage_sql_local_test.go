@@ -133,6 +133,53 @@ func TestRemoveData(t *testing.T) {
 	} else if err.Error() != "Record Not Found" {
 		t.Error(err.Error())
 	}
+	// Create again so we can test complete TP removal
+	if err := mysqlDb.SetTPTiming(TEST_SQL, tm); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Id); err != nil {
+		t.Error(err.Error())
+	} else if len(tmgs) == 0 {
+		t.Error("Could not store TPTiming")
+	}
+	// Create RatingProfile
+	if err := mysqlDb.SetTPRatingProfiles(TEST_SQL, map[string]*utils.TPRatingProfile{rp.KeyId(): rp}); err != nil {
+		t.Error(err.Error())
+	}
+	if rps, err := mysqlDb.GetTpRatingProfiles(rp); err != nil {
+		t.Error(err.Error())
+	} else if len(rps) == 0 {
+		t.Error("Could not store TPRatingProfile")
+	}
+	// Create AccountActions
+	if err := mysqlDb.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+		t.Error(err.Error())
+	}
+	if aas, err := mysqlDb.GetTpAccountActions(aa); err != nil {
+		t.Error(err.Error())
+	} else if len(aas) == 0 {
+		t.Error("Could not create TPAccountActions")
+	}
+	// Remove TariffPlan completely
+	if err := mysqlDb.RemTPData("", TEST_SQL); err != nil {
+		t.Error(err.Error())
+	}
+	// Make sure we have removed it
+	if _, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Id); err == nil {
+		t.Error("Should report error on querying here")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
+	if _, err := mysqlDb.GetTpRatingProfiles(rp); err == nil {
+		t.Error("Should return error in case of record not found from ORM")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
+	if _, err := mysqlDb.GetTpAccountActions(aa); err == nil {
+		t.Error("Should receive error in case of not found")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
 }
 
 func TestSetCdr(t *testing.T) {

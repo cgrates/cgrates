@@ -177,6 +177,18 @@ func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
 }
 
 func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
+	if len(table) == 0 { // Remove tpid out of all tables
+		tx := self.db.Begin()
+		for _, tblName := range []string{utils.TBL_TP_TIMINGS, utils.TBL_TP_DESTINATIONS, utils.TBL_TP_RATES, utils.TBL_TP_DESTINATION_RATES, utils.TBL_TP_RATING_PLANS, utils.TBL_TP_RATE_PROFILES,
+			utils.TBL_TP_SHARED_GROUPS, utils.TBL_TP_CDR_STATS, utils.TBL_TP_LCRS, utils.TBL_TP_ACTIONS, utils.TBL_TP_ACTION_PLANS, utils.TBL_TP_ACTION_TRIGGERS, utils.TBL_TP_ACCOUNT_ACTIONS, utils.TBL_TP_DERIVED_CHARGERS} {
+			if err := tx.Table(tblName).Where("tpid = ?", tpid).Delete(nil).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+		tx.Commit()
+		return nil
+	}
 	q := fmt.Sprintf("DELETE FROM %s WHERE tpid='%s' AND id='%s'", table, tpid, args[0])
 	switch table {
 	case utils.TBL_TP_RATE_PROFILES:
