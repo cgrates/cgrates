@@ -268,9 +268,9 @@ func TestActionTimingHourYears(t *testing.T) {
 func TestActionTimingHourMonthdaysYear(t *testing.T) {
 
 	y, m, d := now.Date()
-	testTime := time.Date(y, 1, d, 10, 1, 0, 0, time.Local)
+	testTime := time.Date(y, m, d, 10, 1, 0, 0, time.Local)
 	tomorrow := time.Date(y, m, d, 10, 1, 0, 0, time.Local).AddDate(0, 0, 1)
-	nextYear := time.Date(y, 1, 1, 10, 1, 0, 0, time.Local).AddDate(1, 0, 0)
+	nextYear := time.Date(y, 1, d, 10, 1, 0, 0, time.Local).AddDate(1, 0, 0)
 	expected := testTime
 	if referenceDate.After(testTime) {
 		if referenceDate.After(tomorrow) {
@@ -287,6 +287,7 @@ func TestActionTimingHourMonthdaysYear(t *testing.T) {
 		},
 	}}
 	t.Log(at.Timing.Timing.CronString())
+	t.Log(time.Now(), referenceDate, referenceDate.After(testTime), referenceDate.After(testTime))
 	st := at.GetNextStartTime(referenceDate)
 	if !st.Equal(expected) {
 		t.Errorf("Expected %v was %v", expected, st)
@@ -1049,6 +1050,8 @@ func TestTopupActionLoaded(t *testing.T) {
 	initialValue := initialUb.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
 	afterValue := afterUb.BalanceMap[CREDIT+OUTBOUND].GetTotalValue()
 	if initialValue != 100 || afterValue != 125 {
+		t.Logf("Initial: %+v", initialUb)
+		t.Logf("After: %+v", afterUb)
 		t.Error("Bad topup before and after: ", initialValue, afterValue)
 	}
 }

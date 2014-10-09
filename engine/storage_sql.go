@@ -113,7 +113,7 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 	return ids, nil
 }
 
-func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, pagination *utils.TPPagination) ([]string, error) {
+func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, pagination *utils.Paginator) ([]string, error) {
 
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
 	for key, value := range filters {
@@ -750,7 +750,7 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 // ignoreErr - do not consider cdrs with rating errors
 // ignoreRated - do not consider cdrs which were already rated, including here the ones with errors
 func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
-	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool, pagination *utils.TPPagination) ([]*utils.StoredCdr, error) {
+	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool, pagination *utils.Paginator) ([]*utils.StoredCdr, error) {
 	var cdrs []*utils.StoredCdr
 	var q *bytes.Buffer // Need to query differently since in case of primary, unmediated CDRs some values will be missing
 	if ignoreDerived {
@@ -1195,12 +1195,17 @@ func (self *SQLStorage) GetTpRates(tpid, tag string) (map[string]*utils.TPRate, 
 	return rts, nil
 }
 
-func (self *SQLStorage) GetTpDestinationRates(tpid, tag string) (map[string]*utils.TPDestinationRate, error) {
+func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *utils.Paginator) (map[string]*utils.TPDestinationRate, error) {
 	rts := make(map[string]*utils.TPDestinationRate)
 	var tpDestinationRates []TpDestinationRate
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
 		q = q.Where("id = ?", tag)
+	}
+	if pagination != nil {
+		limLow, limHigh := pagination.GetLimits()
+		q = q.Offset(limLow)
+		q = q.Limit(limHigh)
 	}
 	if err := q.Find(&tpDestinationRates).Error; err != nil {
 		return nil, err
@@ -1249,7 +1254,7 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.TPTimi
 	return tms, nil
 }
 
-func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.TPRatingPlanBinding, error) {
+func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Paginator) (map[string][]*utils.TPRatingPlanBinding, error) {
 	rpbns := make(map[string][]*utils.TPRatingPlanBinding)
 
 	var tpRatingPlans []TpRatingPlan
@@ -1259,6 +1264,12 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string) (map[string][]*utils.
 	}
 	if err := q.Find(&tpRatingPlans).Error; err != nil {
 		return nil, err
+	}
+
+	if pagination != nil {
+		limLow, limHigh := pagination.GetLimits()
+		q = q.Offset(limLow)
+		q = q.Limit(limHigh)
 	}
 
 	for _, tpRp := range tpRatingPlans {

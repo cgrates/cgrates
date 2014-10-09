@@ -42,6 +42,7 @@ func (self *ApierV1) SetTPDestinationRate(attrs utils.TPDestinationRate, reply *
 type AttrGetTPDestinationRate struct {
 	TPid              string // Tariff plan id
 	DestinationRateId string // Rate id
+	utils.Paginator
 }
 
 // Queries specific DestinationRate profile on tariff plan
@@ -49,7 +50,7 @@ func (self *ApierV1) GetTPDestinationRate(attrs AttrGetTPDestinationRate, reply 
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "DestinationRateId"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if drs, err := self.StorDb.GetTpDestinationRates(attrs.TPid, attrs.DestinationRateId); err != nil {
+	if drs, err := self.StorDb.GetTpDestinationRates(attrs.TPid, attrs.DestinationRateId, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if len(drs) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
@@ -60,10 +61,8 @@ func (self *ApierV1) GetTPDestinationRate(attrs AttrGetTPDestinationRate, reply 
 }
 
 type AttrTPDestinationRateIds struct {
-	TPid         string // Tariff plan id
-	Page         int
-	ItemsPerPage int
-	SearchTerm   string
+	TPid string // Tariff plan id
+	utils.Paginator
 }
 
 // Queries DestinationRate identities on specific tariff plan.
@@ -71,7 +70,7 @@ func (self *ApierV1) GetTPDestinationRateIds(attrs AttrGetTPRateIds, reply *[]st
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid"}); len(missing) != 0 { //Params missing
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_DESTINATION_RATES, utils.TPDistinctIds{"id"}, nil, &utils.TPPagination{Page: attrs.Page, ItemsPerPage: attrs.ItemsPerPage, SearchTerm: attrs.SearchTerm}); err != nil {
+	if ids, err := self.StorDb.GetTPTableIds(attrs.TPid, utils.TBL_TP_DESTINATION_RATES, utils.TPDistinctIds{"id"}, nil, &attrs.Paginator); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else if ids == nil {
 		return errors.New(utils.ERR_NOT_FOUND)

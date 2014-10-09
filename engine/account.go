@@ -479,6 +479,17 @@ func (ub *Account) CleanExpiredBalances() {
 	}
 }
 
+func (ub *Account) allBalancesExpired() bool {
+	for _, bm := range ub.BalanceMap {
+		for i := 0; i < len(bm); i++ {
+			if !bm[i].IsExpired() {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // returns the shared groups that this user balance belnongs to
 func (ub *Account) GetSharedGroups() (groups []string) {
 	for _, balanceChain := range ub.BalanceMap {

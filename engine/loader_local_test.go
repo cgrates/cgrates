@@ -242,7 +242,7 @@ func TestLoadIndividualProfiles(t *testing.T) {
 	}
 	loader := NewDbReader(storDb, ratingDbApier, accountDbApier, TEST_SQL)
 	// Load ratingPlans. This will also set destination keys
-	if ratingPlans, err := storDb.GetTpRatingPlans(TEST_SQL, ""); err != nil {
+	if ratingPlans, err := storDb.GetTpRatingPlans(TEST_SQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")
 	} else {
 		for tag := range ratingPlans {

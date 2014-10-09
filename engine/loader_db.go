@@ -312,7 +312,7 @@ func (dbr *DbReader) LoadRates() (err error) {
 }
 
 func (dbr *DbReader) LoadDestinationRates() (err error) {
-	dbr.destinationRates, err = dbr.storDb.GetTpDestinationRates(dbr.tpid, "")
+	dbr.destinationRates, err = dbr.storDb.GetTpDestinationRates(dbr.tpid, "", nil)
 	if err != nil {
 		return err
 	}
@@ -340,7 +340,7 @@ func (dbr *DbReader) LoadDestinationRates() (err error) {
 }
 
 func (dbr *DbReader) LoadRatingPlans() error {
-	mpRpls, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, "")
+	mpRpls, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, "", nil)
 	if err != nil {
 		return err
 	}
@@ -411,7 +411,7 @@ func (dbr *DbReader) LoadRatingProfiles() error {
 
 // Returns true, nil in case of load success, false, nil in case of RatingPlan  not found in storDb
 func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
-	mpRpls, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, tag)
+	mpRpls, err := dbr.storDb.GetTpRatingPlans(dbr.tpid, tag, nil)
 	if err != nil {
 		return false, err
 	} else if len(mpRpls) == 0 {
@@ -427,7 +427,7 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 				return false, fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
 			}
 			rp.SetTiming(tm[rp.TimingId])
-			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestinationRatesId)
+			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestinationRatesId, nil)
 			if err != nil || len(drm) == 0 {
 				return false, fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
 			}

@@ -34,13 +34,13 @@ func (tpdi TPDistinctIds) String() string {
 }
 
 // To paginate stuff from stordb (e.g. ids)
-type TPPagination struct {
+type Paginator struct {
 	Page         int
 	ItemsPerPage int
 	SearchTerm   string
 }
 
-func (pag *TPPagination) GetLimits() (low, high int) {
+func (pag *Paginator) GetLimits() (low, high int) {
 	if pag.ItemsPerPage == 0 {
 		return 0, math.MaxInt32
 	}
@@ -582,9 +582,7 @@ type AttrGetCdrs struct {
 	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
 	SkipErrors          bool     // Do not export errored CDRs
 	SkipRated           bool     // Do not export rated CDRs
-	Page                int
-	ItemsPerPage        int
-	SearchTerm          string
+	Paginator
 }
 
 type AttrRemCdrs struct {

@@ -116,7 +116,7 @@ type CdrStorage interface {
 	SetCdr(*utils.StoredCdr) error
 	SetRatedCdr(*utils.StoredCdr, string) error
 	GetStoredCdrs([]string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string, []string,
-		int64, int64, time.Time, time.Time, bool, bool, bool, *utils.TPPagination) ([]*utils.StoredCdr, error)
+		int64, int64, time.Time, time.Time, bool, bool, bool, *utils.Paginator) ([]*utils.StoredCdr, error)
 	RemStoredCdrs([]string) error
 }
 
@@ -135,7 +135,7 @@ type LoadStorage interface {
 	// Apier functions
 	RemTPData(string, string, ...string) error
 	GetTPIds() ([]string, error)
-	GetTPTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.TPPagination) ([]string, error)
+	GetTPTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
 
 	SetTPTiming(string, *utils.TPTiming) error
 	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
@@ -147,10 +147,10 @@ type LoadStorage interface {
 	GetTpRates(string, string) (map[string]*utils.TPRate, error)
 
 	SetTPDestinationRates(string, map[string][]*utils.DestinationRate) error
-	GetTpDestinationRates(string, string) (map[string]*utils.TPDestinationRate, error)
+	GetTpDestinationRates(string, string, *utils.Paginator) (map[string]*utils.TPDestinationRate, error)
 
 	SetTPRatingPlans(string, map[string][]*utils.TPRatingPlanBinding) error
-	GetTpRatingPlans(string, string) (map[string][]*utils.TPRatingPlanBinding, error)
+	GetTpRatingPlans(string, string, *utils.Paginator) (map[string][]*utils.TPRatingPlanBinding, error)
 
 	SetTPRatingProfiles(string, map[string]*utils.TPRatingProfile) error
 	GetTpRatingProfiles(*utils.TPRatingProfile) (map[string]*utils.TPRatingProfile, error)
