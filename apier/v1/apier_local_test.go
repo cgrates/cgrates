@@ -426,13 +426,13 @@ func TestApierTPRatingPlan(t *testing.T) {
 	}
 	// Test get
 	var rplyRpTst *utils.TPRatingPlan
-	if err := rater.Call("ApierV1.GetTPRatingPlan", AttrGetTPRatingPlan{rpTst.TPid, rpTst.RatingPlanId}, &rplyRpTst); err != nil {
+	if err := rater.Call("ApierV1.GetTPRatingPlan", AttrGetTPRatingPlan{TPid: rpTst.TPid, RatingPlanId: rpTst.RatingPlanId}, &rplyRpTst); err != nil {
 		t.Error("Calling ApierV1.GetTPRatingPlan, got error: ", err.Error())
 	} else if !reflect.DeepEqual(rpTst, rplyRpTst) {
 		t.Errorf("Calling ApierV1.GetTPRatingPlan expected: %v, received: %v", rpTst, rplyRpTst)
 	}
 	// Test remove
-	if err := rater.Call("ApierV1.RemTPRatingPlan", AttrGetTPRatingPlan{rpTst.TPid, rpTst.RatingPlanId}, &reply); err != nil {
+	if err := rater.Call("ApierV1.RemTPRatingPlan", AttrGetTPRatingPlan{TPid: rpTst.TPid, RatingPlanId: rpTst.RatingPlanId}, &reply); err != nil {
 		t.Error("Calling ApierV1.RemTPRatingPlan, got error: ", err.Error())
 	} else if reply != "OK" {
 		t.Error("Calling ApierV1.RemTPRatingPlan received: ", reply)
