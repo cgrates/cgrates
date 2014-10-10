@@ -216,11 +216,15 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	tx := self.db.Begin()
 	tx.Where("tpid = ?", tpid).Where("id = ?", dest.Id).Delete(TpDestination{})
 	for _, prefix := range dest.Prefixes {
-		tx.Save(TpDestination{
+		db := tx.Save(TpDestination{
 			Tpid:   tpid,
 			Id:     dest.Id,
 			Prefix: prefix,
 		})
+		if db.Error != nil {
+			tx.Rollback()
+			return db.Error
+		}
 	}
 	tx.Commit()
 	return nil
