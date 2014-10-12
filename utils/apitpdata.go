@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -53,12 +54,31 @@ type TPDestination struct {
 	Prefixes      []string // Prefixes attached to this destination
 }
 
+// Convert as slice so we can use it in exports (eg: csv)
+func (self *TPDestination) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.Prefixes))
+	for idx, prefix := range self.Prefixes {
+		retSlice[idx] = []string{self.TPid, self.DestinationId, prefix}
+	}
+	return retSlice
+}
+
 // This file deals with tp_* data definition
 
 type TPRate struct {
 	TPid      string      // Tariff plan id
 	RateId    string      // Rate id
 	RateSlots []*RateSlot // One or more RateSlots
+}
+
+//#TPid,Tag,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+func (self *TPRate) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.RateSlots))
+	for idx, rtSlot := range self.RateSlots {
+		retSlice[idx] = []string{self.TPid, self.RateId,
+			strconv.FormatFloat(rtSlot.ConnectFee, 'f', -1, 64), strconv.FormatFloat(rtSlot.Rate, 'f', -1, 64), rtSlot.RateUnit, rtSlot.RateIncrement, rtSlot.GroupIntervalStart}
+	}
+	return retSlice
 }
 
 // Needed so we make sure we always use SetDurations() on a newly created value
@@ -110,6 +130,15 @@ type TPDestinationRate struct {
 	TPid              string             // Tariff plan id
 	DestinationRateId string             // DestinationRate profile id
 	DestinationRates  []*DestinationRate // Set of destinationid-rateid bindings
+}
+
+//#TPid,Tag,DestinationsTag,RatesTag,RoundingMethod,RoundingDecimals
+func (self *TPDestinationRate) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.DestinationRates))
+	for idx, dstRate := range self.DestinationRates {
+		retSlice[idx] = []string{self.TPid, self.DestinationRateId, dstRate.DestinationId, dstRate.RateId, dstRate.RoundingMethod, strconv.Itoa(dstRate.RoundingDecimals)}
+	}
+	return retSlice
 }
 
 type DestinationRate struct {
