@@ -159,6 +159,13 @@ type ApierTPTiming struct {
 	Time      string // String representing the time this timing starts on
 }
 
+// Keep the ExportSlice interface, although we only need a single slice to be generated
+func (self *ApierTPTiming) AsExportSlice() [][]string {
+	return [][]string{
+		[]string{self.TPid, self.TimingId, self.Years, self.Months, self.MonthDays, self.WeekDays, self.Time},
+	}
+}
+
 type TPTiming struct {
 	Id        string
 	Years     Years
@@ -172,6 +179,14 @@ type TPRatingPlan struct {
 	TPid               string                 // Tariff plan id
 	RatingPlanId       string                 // RatingPlan profile id
 	RatingPlanBindings []*TPRatingPlanBinding // Set of destinationid-rateid bindings
+}
+
+func (self *TPRatingPlan) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.RatingPlanBindings))
+	for idx, rp := range self.RatingPlanBindings {
+		retSlice[idx] = []string{self.TPid, self.RatingPlanId, rp.DestinationRatesId, rp.TimingId, strconv.FormatFloat(rp.Weight, 'f', -1, 64)}
+	}
+	return retSlice
 }
 
 type TPRatingPlanBinding struct {
@@ -203,11 +218,20 @@ func NewTPRatingProfileFromKeyId(tpid, loadId, keyId string) (*TPRatingProfile, 
 type TPRatingProfile struct {
 	TPid                  string                // Tariff plan id
 	LoadId                string                // Gives ability to load specific RatingProfile based on load identifier, hence being able to keep history also in stordb
+	Direction             string                // Traffic direction, OUT is the only one supported for now
 	Tenant                string                // Tenant's Id
 	Category              string                // TypeOfRecord
-	Direction             string                // Traffic direction, OUT is the only one supported for now
 	Subject               string                // Rating subject, usually the same as account
 	RatingPlanActivations []*TPRatingActivation // Activate rate profiles at specific time
+}
+
+//TPid,LoadId,Direction,Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+func (self *TPRatingProfile) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.RatingPlanActivations))
+	for idx, rpln := range self.RatingPlanActivations {
+		retSlice[idx] = []string{self.TPid, self.LoadId, self.Direction, self.Tenant, self.Category, self.Subject, rpln.ActivationTime, rpln.RatingPlanId, rpln.FallbackSubjects}
+	}
+	return retSlice
 }
 
 // Used as key in nosql db (eg: redis)
@@ -275,6 +299,16 @@ type TPActions struct {
 	Actions   []*TPAction // Set of actions this Actions profile will perform
 }
 
+//TPid,ActionsTag[0],Action[1],ExtraParameters[2],BalanceType[3],Direction[4],Category[5],DestinationTag[6],RatingSubject[7],SharedGroup[8],ExpiryTime[9],Units[10],BalanceWeight[11],Weight[12]
+func (self *TPActions) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.Actions))
+	for idx, act := range self.Actions {
+		retSlice[idx] = []string{self.TPid, self.ActionsId, act.Identifier, act.ExtraParameters, act.BalanceType, act.Direction, act.Category, act.DestinationId, act.RatingSubject,
+			act.SharedGroup, act.ExpiryTime, strconv.FormatFloat(act.Units, 'f', -1, 64), strconv.FormatFloat(act.BalanceWeight, 'f', -1, 64), strconv.FormatFloat(act.Weight, 'f', -1, 64)}
+	}
+	return retSlice
+}
+
 type TPAction struct {
 	Identifier      string  // Identifier mapped in the code
 	BalanceType     string  // Type of balance the action will operate on
@@ -296,6 +330,15 @@ type TPSharedGroups struct {
 	SharedGroups   []*TPSharedGroup
 }
 
+// TPid,Id,Account,Strategy,RatingSubject
+func (self *TPSharedGroups) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.SharedGroups))
+	for idx, sg := range self.SharedGroups {
+		retSlice[idx] = []string{self.TPid, self.SharedGroupsId, sg.Account, sg.Strategy, sg.RatingSubject}
+	}
+	return retSlice
+}
+
 type TPSharedGroup struct {
 	Account       string
 	Strategy      string
@@ -306,6 +349,16 @@ type TPLcrRules struct {
 	TPid       string
 	LcrRulesId string
 	LcrRules   []*TPLcrRule
+}
+
+//*in,cgrates.org,*any,EU_LANDLINE,LCR_STANDARD,*static,ivo;dan;rif,2012-01-01T00:00:00Z,10
+func (self *TPLcrRules) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.LcrRules))
+	for idx, rl := range self.LcrRules {
+		retSlice[idx] = []string{self.TPid, self.LcrRulesId, rl.Direction, rl.Tenant, rl.Customer, rl.DestinationId, rl.Category, rl.Strategy,
+			rl.Suppliers, rl.ActivatinTime, strconv.FormatFloat(rl.Weight, 'f', -1, 64)}
+	}
+	return retSlice
 }
 
 type TPLcrRule struct {
@@ -324,6 +377,18 @@ type TPCdrStats struct {
 	TPid       string
 	CdrStatsId string
 	CdrStats   []*TPCdrStat
+}
+
+//TPid,Id,QueueLength,TimeWindow,Metric,SetupInterval,TOR,CdrHost,CdrSource,ReqType,Direction,Tenant,Category,Account,Subject,
+//DestinationPrefix,UsageInterval,MediationRunIds,RatedAccount,RatedSubject,CostInterval,Triggers
+func (self *TPCdrStats) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.CdrStats))
+	for idx, cdrStat := range self.CdrStats {
+		retSlice[idx] = []string{self.TPid, self.CdrStatsId, cdrStat.QueueLength, cdrStat.TimeWindow, cdrStat.Metrics, cdrStat.SetupInterval, cdrStat.TOR, cdrStat.CdrHost, cdrStat.CdrSource,
+			cdrStat.ReqType, cdrStat.Direction, cdrStat.Tenant, cdrStat.Category, cdrStat.Account, cdrStat.Subject, cdrStat.DestinationPrefix, cdrStat.UsageInterval, cdrStat.MediationRunIds,
+			cdrStat.RatedAccount, cdrStat.RatedSubject, cdrStat.CostInterval, cdrStat.ActionTriggers}
+	}
+	return retSlice
 }
 
 type TPCdrStat struct {
@@ -358,6 +423,16 @@ type TPDerivedChargers struct {
 	Account         string
 	Subject         string
 	DerivedChargers []*TPDerivedCharger
+}
+
+//#Direction,Tenant,Category,Account,Subject,RunId,RunFilter,ReqTypeField,DirectionField,TenantField,CategoryField,AccountField,SubjectField,DestinationField,SetupTimeField,AnswerTimeField,UsageField
+func (self *TPDerivedChargers) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.DerivedChargers))
+	for idx, dc := range self.DerivedChargers {
+		retSlice[idx] = []string{self.TPid, self.Loadid, self.Direction, self.Tenant, self.Category, self.Account, self.Subject, dc.RunId, dc.RunFilters, dc.ReqTypeField,
+			dc.DirectionField, dc.TenantField, dc.CategoryField, dc.AccountField, dc.SubjectField, dc.DestinationField, dc.SetupTimeField, dc.AnswerTimeField, dc.UsageField}
+	}
+	return retSlice
 }
 
 // Key used in dataDb to identify DerivedChargers set
@@ -413,6 +488,15 @@ type TPActionPlan struct {
 	TPid       string            // Tariff plan id
 	Id         string            // ActionPlan id
 	ActionPlan []*TPActionTiming // Set of ActionTiming bindings this profile will group
+}
+
+//TPid,Tag,ActionsTag,TimingTag,Weight
+func (self *TPActionPlan) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.ActionPlan))
+	for idx, ap := range self.ActionPlan {
+		retSlice[idx] = []string{self.TPid, self.Id, ap.ActionsId, ap.TimingId, strconv.FormatFloat(ap.Weight, 'f', -1, 64)}
+	}
+	return retSlice
 }
 
 type TPActionTiming struct {
