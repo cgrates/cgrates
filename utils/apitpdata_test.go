@@ -21,6 +21,7 @@ package utils
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestTPDestinationAsExportSlice(t *testing.T) {
@@ -381,7 +382,7 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 	}
 }
 
-func TestTPActionPlanAsExportSlice(t *testing.T) {
+func TestTPActionTriggersAsExportSlice(t *testing.T) {
 	ap := &TPActionPlan{
 		TPid: "TEST_TPID",
 		Id:   "PACKAGE_10",
@@ -401,6 +402,72 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 		[]string{"TEST_TPID", "PACKAGE_10", "TOPUP_RST_5", "ASAP", "20"},
 	}
 	if slc := ap.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
+	}
+}
+
+func TestTPActionPlanAsExportSlice(t *testing.T) {
+	at := &TPActionTriggers{
+		TPid:             "TEST_TPID",
+		ActionTriggersId: "STANDARD_TRIGGERS",
+		ActionTriggers: []*TPActionTrigger{
+			&TPActionTrigger{
+				BalanceType:           "*monetary",
+				Direction:             "*out",
+				ThresholdType:         "*min_balance",
+				ThresholdValue:        2.0,
+				Recurrent:             false,
+				MinSleep:              time.Duration(0),
+				DestinationId:         "",
+				BalanceWeight:         0.0,
+				BalanceExpirationDate: "*never",
+				BalanceRatingSubject:  "special1",
+				BalanceCategory:       "call",
+				BalanceSharedGroup:    "SHARED_1",
+				MinQueuedItems:        0,
+				ActionsId:             "LOG_WARNING",
+				Weight:                10},
+			&TPActionTrigger{
+				BalanceType:           "*monetary",
+				Direction:             "*out",
+				ThresholdType:         "*max_counter",
+				ThresholdValue:        5.0,
+				Recurrent:             false,
+				MinSleep:              time.Duration(0),
+				DestinationId:         "FS_USERS",
+				BalanceWeight:         0.0,
+				BalanceExpirationDate: "*never",
+				BalanceRatingSubject:  "special1",
+				BalanceCategory:       "call",
+				BalanceSharedGroup:    "SHARED_1",
+				MinQueuedItems:        0,
+				ActionsId:             "LOG_WARNING",
+				Weight:                10},
+		},
+	}
+	expectedSlc := [][]string{
+		[]string{"TEST_TPID", "STANDARD_TRIGGERS", "*min_balance", "2", "false", "0", "*monetary", "*out", "call", "", "special1", "SHARED_1", "*never", "0", "0", "LOG_WARNING", "10"},
+		[]string{"TEST_TPID", "STANDARD_TRIGGERS", "*max_counter", "5", "false", "0", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "0", "0", "LOG_WARNING", "10"},
+	}
+	if slc := at.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
+	}
+}
+
+func TestTPAccountActionsAsExportSlice(t *testing.T) {
+	aa := &TPAccountActions{
+		TPid:             "TEST_TPID",
+		LoadId:           "TEST_LOADID",
+		Tenant:           "cgrates.org",
+		Account:          "1001",
+		Direction:        "*out",
+		ActionPlanId:     "PACKAGE_10_SHARED_A_5",
+		ActionTriggersId: "STANDARD_TRIGGERS",
+	}
+	expectedSlc := [][]string{
+		[]string{"TEST_TPID", "TEST_LOADID", "cgrates.org", "1001", "*out", "PACKAGE_10_SHARED_A_5", "STANDARD_TRIGGERS"},
+	}
+	if slc := aa.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
 	}
 }

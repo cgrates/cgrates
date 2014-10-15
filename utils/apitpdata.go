@@ -509,7 +509,18 @@ type TPActionTriggers struct {
 	TPid             string             // Tariff plan id
 	ActionTriggersId string             // Profile id
 	ActionTriggers   []*TPActionTrigger // Set of triggers grouped in this profile
+}
 
+// TPid,Tag[0],ThresholdType[1],ThresholdValue[2],Recurrent[3],MinSleep[4],BalanceType[5],BalanceDirection[6],BalanceCategory[7],BalanceDestinationTag[8],
+// BalanceRatingSubject[9],BalanceSharedGroup[10],BalanceExpiryTime[11],BalanceWeight[12],StatsMinQueuedItems[13],ActionsTag[14],Weight[15]
+func (self *TPActionTriggers) AsExportSlice() [][]string {
+	retSlice := make([][]string, len(self.ActionTriggers))
+	for idx, at := range self.ActionTriggers {
+		retSlice[idx] = []string{self.TPid, self.ActionTriggersId, at.ThresholdType, strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64), strconv.FormatBool(at.Recurrent), strconv.FormatFloat(at.MinSleep.Seconds(), 'f', -1, 64),
+			at.BalanceType, at.Direction, at.BalanceCategory, at.DestinationId, at.BalanceRatingSubject, at.BalanceSharedGroup, at.BalanceExpirationDate,
+			strconv.FormatFloat(at.BalanceWeight, 'f', -1, 64), strconv.Itoa(at.MinQueuedItems), at.ActionsId, strconv.FormatFloat(at.Weight, 'f', -1, 64)}
+	}
+	return retSlice
 }
 
 type TPActionTrigger struct {
@@ -550,6 +561,13 @@ type TPAccountActions struct {
 	Direction        string // Traffic direction
 	ActionPlanId     string // Id of ActionPlan profile to use
 	ActionTriggersId string // Id of ActionTriggers profile to use
+}
+
+//TPid,Tenant,Account,Direction,ActionPlanTag,ActionTriggersTag
+func (self *TPAccountActions) AsExportSlice() [][]string {
+	return [][]string{
+		[]string{self.TPid, self.LoadId, self.Tenant, self.Account, self.Direction, self.ActionPlanId, self.ActionTriggersId},
+	}
 }
 
 // Returns the id used in some nosql dbs (eg: redis)
