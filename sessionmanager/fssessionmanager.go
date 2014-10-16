@@ -262,7 +262,7 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 		dbgLog += ln
 		if loop > 20 {
 			engine.Logger.Debug(dbgLog)
-			dbLog = ""
+			dbgLog = ""
 			loop = 0
 		}
 	}
