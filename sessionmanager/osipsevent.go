@@ -61,7 +61,7 @@ func (osipsev *OsipsEvent) New(evStr string) Event {
 }
 
 func (osipsev *OsipsEvent) String() string {
-	return ""
+	return fmt.Sprintf("%+v", osipsev)
 }
 
 func (osipsev *OsipsEvent) GetName() string {

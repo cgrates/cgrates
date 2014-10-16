@@ -200,9 +200,11 @@ func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
 
 func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error) {
 	durStr := utils.FirstNonEmpty(fsev[fieldName], fsev[DURATION])
+	engine.Logger.Debug(fmt.Sprintf("DurationString before staticChecks: <%s>", durStr))
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		durStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
+	engine.Logger.Debug(fmt.Sprintf("DurationString after staticChecks: <%s>", durStr))
 	return utils.ParseDurationWithSecs(durStr)
 }
 
