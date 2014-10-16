@@ -46,4 +46,5 @@ type Event interface {
 	ParseEventValue(*utils.RSRField) string
 	PassesFieldFilter(*utils.RSRField) (bool, string)
 	AsStoredCdr() *utils.StoredCdr
+	String() string
 }

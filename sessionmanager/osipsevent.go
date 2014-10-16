@@ -60,6 +60,10 @@ func (osipsev *OsipsEvent) New(evStr string) Event {
 	return osipsev
 }
 
+func (osipsev *OsipsEvent) String() string {
+	return ""
+}
+
 func (osipsev *OsipsEvent) GetName() string {
 	return osipsev.osipsEvent.Name
 }

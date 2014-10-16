@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"log/syslog"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
@@ -253,7 +254,12 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	go sm.processCdr(ev.AsStoredCdr())
-	engine.Logger.Debug(fmt.Sprintf("<SessionManager> OnHangup: StoredCdr: <<<%+v>>>, Event <<<%+v>>>", ev.AsStoredCdr(), ev))
+	engine.Logger.Debug(fmt.Sprintf("<SessionManager> OnHangup: StoredCdr: <%+v>", ev.AsStoredCdr()))
+	engine.Logger.Debug("###EVENT_START###")
+	for _, ln := range strings.Split(ev.String(), "\n") {
+		engine.Logger.Debug(ln)
+	}
+	engine.Logger.Debug("###EVENT_END###")
 	s := sm.GetSession(ev.GetUUID())
 	if s == nil { // Not handled by us
 		return
