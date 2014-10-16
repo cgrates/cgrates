@@ -308,6 +308,8 @@ func (fsev FSEvent) AsStoredCdr() *utils.StoredCdr {
 	storCdr.Destination = fsev.GetDestination(utils.META_DEFAULT)
 	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT)
 	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT)
+	usage, err := fsev.GetDuration(utils.META_DEFAULT)
+	engine.Logger.Debug(fmt.Sprintf("DurationString returned: <%v>, error: <%v>", usage, err))
 	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
 	storCdr.ExtraFields = fsev.GetExtraFields()
 	storCdr.Cost = -1
