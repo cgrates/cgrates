@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/fsock"
 )
@@ -201,11 +200,9 @@ func (fsev FSEvent) GetEndTime() (t time.Time, err error) {
 
 func (fsev FSEvent) GetDuration(fieldName string) (dur time.Duration, err error) {
 	durStr := utils.FirstNonEmpty(fsev[fieldName], fsev[DURATION])
-	engine.Logger.Debug(fmt.Sprintf("DurationString before staticChecks: <%s>", durStr))
 	if strings.HasPrefix(fieldName, utils.STATIC_VALUE_PREFIX) { // Static value
 		durStr = fieldName[len(utils.STATIC_VALUE_PREFIX):]
 	}
-	engine.Logger.Debug(fmt.Sprintf("DurationString after staticChecks: <%s>", durStr))
 	return utils.ParseDurationWithSecs(durStr)
 }
 
@@ -308,8 +305,6 @@ func (fsev FSEvent) AsStoredCdr() *utils.StoredCdr {
 	storCdr.Destination = fsev.GetDestination(utils.META_DEFAULT)
 	storCdr.SetupTime, _ = fsev.GetSetupTime(utils.META_DEFAULT)
 	storCdr.AnswerTime, _ = fsev.GetAnswerTime(utils.META_DEFAULT)
-	usage, err := fsev.GetDuration(utils.META_DEFAULT)
-	engine.Logger.Debug(fmt.Sprintf("DurationString returned: <%v>, error: <%v>", usage, err))
 	storCdr.Usage, _ = fsev.GetDuration(utils.META_DEFAULT)
 	storCdr.ExtraFields = fsev.GetExtraFields()
 	storCdr.Cost = -1
