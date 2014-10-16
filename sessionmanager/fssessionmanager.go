@@ -48,7 +48,6 @@ type FSSessionManager struct {
 }
 
 func NewFSSessionManager(cgrCfg *config.CGRConfig, storage engine.LogStorage, rater, cdrs engine.Connector, debitPeriod time.Duration) *FSSessionManager {
-
 	cfg = cgrCfg // make config global
 	return &FSSessionManager{loggerDB: storage, rater: rater, cdrs: cdrs, debitPeriod: debitPeriod}
 }
@@ -256,8 +255,16 @@ func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	go sm.processCdr(ev.AsStoredCdr())
 	engine.Logger.Debug(fmt.Sprintf("<SessionManager> OnHangup: StoredCdr: <%+v>", ev.AsStoredCdr()))
 	engine.Logger.Debug("###EVENT_START###")
+	loop := 0
+	dbgLog := ""
 	for _, ln := range strings.Split(ev.String(), "\n") {
-		engine.Logger.Debug(ln)
+		loop += 1
+		dbgLog += ln
+		if loop > 20 {
+			engine.Logger.Debug(dbgLog)
+			dbLog = ""
+			loop = 0
+		}
 	}
 	engine.Logger.Debug("###EVENT_END###")
 	s := sm.GetSession(ev.GetUUID())
