@@ -253,6 +253,7 @@ func (sm *FSSessionManager) OnChannelAnswer(ev Event) {
 
 func (sm *FSSessionManager) OnChannelHangupComplete(ev Event) {
 	go sm.processCdr(ev.AsStoredCdr())
+	engine.Logger.Debug(fmt.Sprintf("<SessionManager> OnHangup: StoredCdr: <<<%+v>>>, Event <<<%+v>>>", ev.AsStoredCdr(), ev))
 	s := sm.GetSession(ev.GetUUID())
 	if s == nil { // Not handled by us
 		return
@@ -350,6 +351,7 @@ func (sm *FSSessionManager) processCdr(storedCdr *utils.StoredCdr) error {
 		if err := sm.cdrs.ProcessCdr(storedCdr, &reply); err != nil {
 			engine.Logger.Err(fmt.Sprintf("<SM-FreeSWITCH> Failed processing CDR, cgrid: %s, accid: %s, error: <%s>", storedCdr.CgrId, storedCdr.AccId, err.Error()))
 		}
+
 	}
 	return nil
 }
