@@ -31,9 +31,9 @@ func TestTPDestinationAsExportSlice(t *testing.T) {
 		Prefixes:      []string{"49", "49176", "49151"},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_DEST", "49"},
-		[]string{"TEST_TPID", "TEST_DEST", "49176"},
-		[]string{"TEST_TPID", "TEST_DEST", "49151"},
+		[]string{"TEST_DEST", "49"},
+		[]string{"TEST_DEST", "49176"},
+		[]string{"TEST_DEST", "49151"},
 	}
 	if slc := tpDst.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -60,8 +60,8 @@ func TestTPRateAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_RATEID", "0.1", "0.2", "60", "60", "0"},
-		[]string{"TEST_TPID", "TEST_RATEID", "0", "0.1", "1", "60", "60"},
+		[]string{"TEST_RATEID", "0.1", "0.2", "60", "60", "0"},
+		[]string{"TEST_RATEID", "0", "0.1", "1", "60", "60"},
 	}
 	if slc := tpRate.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -86,8 +86,8 @@ func TestTPDestinationRateAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_DSTRATE", "TEST_DEST1", "TEST_RATE1", "*up", "4"},
-		[]string{"TEST_TPID", "TEST_DSTRATE", "TEST_DEST2", "TEST_RATE2", "*up", "4"},
+		[]string{"TEST_DSTRATE", "TEST_DEST1", "TEST_RATE1", "*up", "4"},
+		[]string{"TEST_DSTRATE", "TEST_DEST2", "TEST_RATE2", "*up", "4"},
 	}
 	if slc := tpDstRate.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -105,7 +105,7 @@ func TestApierTPTimingAsExportSlice(t *testing.T) {
 		WeekDays:  "1;2;4",
 		Time:      "00:00:01"}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_TIMING", "*any", "*any", "*any", "1;2;4", "00:00:01"},
+		[]string{"TEST_TIMING", "*any", "*any", "*any", "1;2;4", "00:00:01"},
 	}
 	if slc := tpTiming.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -127,8 +127,8 @@ func TestTPRatingPlanAsExportSlice(t *testing.T) {
 				Weight:             20.0},
 		}}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_RPLAN", "TEST_DSTRATE1", "TEST_TIMING1", "10"},
-		[]string{"TEST_TPID", "TEST_RPLAN", "TEST_DSTRATE2", "TEST_TIMING2", "20"},
+		[]string{"TEST_RPLAN", "TEST_DSTRATE1", "TEST_TIMING1", "10"},
+		[]string{"TEST_RPLAN", "TEST_DSTRATE2", "TEST_TIMING2", "20"},
 	}
 	if slc := tpRpln.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -155,8 +155,8 @@ func TestTPRatingProfileAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_LOADID", OUT, "cgrates.org", "call", "*any", "2014-01-14T00:00:00Z", "TEST_RPLAN1", "subj1;subj2"},
-		[]string{"TEST_TPID", "TEST_LOADID", OUT, "cgrates.org", "call", "*any", "2014-01-15T00:00:00Z", "TEST_RPLAN2", "subj1;subj2"},
+		[]string{OUT, "cgrates.org", "call", "*any", "2014-01-14T00:00:00Z", "TEST_RPLAN1", "subj1;subj2"},
+		[]string{OUT, "cgrates.org", "call", "*any", "2014-01-15T00:00:00Z", "TEST_RPLAN2", "subj1;subj2"},
 	}
 	if slc := tpRpf.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -197,8 +197,8 @@ func TestTPActionsAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_ACTIONS", "*topup_reset", "", "*monetary", OUT, "call", "*any", "special1", "GROUP1", "*never", "5", "10", "10"},
-		[]string{"TEST_TPID", "TEST_ACTIONS", "*http_post", "http://localhost/&param1=value1", "", "", "", "", "", "", "", "0", "0", "20"},
+		[]string{"TEST_ACTIONS", "*topup_reset", "", "*monetary", OUT, "call", "*any", "special1", "GROUP1", "*never", "5", "10", "10"},
+		[]string{"TEST_ACTIONS", "*http_post", "http://localhost/&param1=value1", "", "", "", "", "", "", "", "0", "0", "20"},
 	}
 	if slc := tpActs.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -222,8 +222,8 @@ func TestTPSharedGroupsAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "SHARED_GROUP_TEST", "*any", "*highest", "special1"},
-		[]string{"TEST_TPID", "SHARED_GROUP_TEST", "second", "*highest", "special2"},
+		[]string{"SHARED_GROUP_TEST", "*any", "*highest", "special1"},
+		[]string{"SHARED_GROUP_TEST", "second", "*highest", "special2"},
 	}
 	if slc := tpSGs.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -260,8 +260,8 @@ func TestTPLcrRulesAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_LCR", "*in", "cgrates.org", "*any", "EU_LANDLINE", "LCR_STANDARD", "*static", "ivo;dan;rif", "2012-01-01T00:00:00Z", "20"},
-		[]string{"TEST_TPID", "TEST_LCR", "*in", "cgrates.org", "*any", "*any", "LCR_STANDARD", "*lowest_cost", "", "2012-01-01T00:00:00Z", "10"},
+		[]string{"TEST_LCR", "*in", "cgrates.org", "*any", "EU_LANDLINE", "LCR_STANDARD", "*static", "ivo;dan;rif", "2012-01-01T00:00:00Z", "20"},
+		[]string{"TEST_LCR", "*in", "cgrates.org", "*any", "*any", "LCR_STANDARD", "*lowest_cost", "", "2012-01-01T00:00:00Z", "10"},
 	}
 	if slc := lcr.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -319,9 +319,9 @@ func TestTPCdrStatsAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "CDRST1", "5", "60m", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
+		[]string{"CDRST1", "5", "60m", "ASR;ACD", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
 			"default", "rif", "rif", "0;2", "STANDARD_TRIGGERS"},
-		[]string{"TEST_TPID", "CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
+		[]string{"CDRST1", "5", "60m", "ASR", "2014-07-29T15:00:00Z;2014-07-29T16:00:00Z", "*voice", "87.139.12.167", "FS_JSON", "rated", "*out", "cgrates.org", "call", "dan", "dan", "49", "5m;10m",
 			"default", "dan", "dan", "0;2", "STANDARD_TRIGGERS"},
 	}
 	if slc := cdrStats.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
@@ -372,9 +372,9 @@ func TestTPDerivedChargersAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_LOADID", "*out", "cgrates.org", "call", "1001", "1001",
+		[]string{"*out", "cgrates.org", "call", "1001", "1001",
 			"derived_run1", "", "^rated", "*default", "*default", "*default", "*default", "^1002", "*default", "*default", "*default", "*default"},
-		[]string{"TEST_TPID", "TEST_LOADID", "*out", "cgrates.org", "call", "1001", "1001",
+		[]string{"*out", "cgrates.org", "call", "1001", "1001",
 			"derived_run2", "", "^rated", "*default", "*default", "*default", "^1002", "*default", "*default", "*default", "*default", "*default"},
 	}
 	if slc := dcs.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
@@ -398,8 +398,8 @@ func TestTPActionTriggersAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "PACKAGE_10", "TOPUP_RST_10", "ASAP", "10"},
-		[]string{"TEST_TPID", "PACKAGE_10", "TOPUP_RST_5", "ASAP", "20"},
+		[]string{"PACKAGE_10", "TOPUP_RST_10", "ASAP", "10"},
+		[]string{"PACKAGE_10", "TOPUP_RST_5", "ASAP", "20"},
 	}
 	if slc := ap.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -446,8 +446,8 @@ func TestTPActionPlanAsExportSlice(t *testing.T) {
 		},
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "STANDARD_TRIGGERS", "*min_balance", "2", "false", "0", "*monetary", "*out", "call", "", "special1", "SHARED_1", "*never", "0", "0", "LOG_WARNING", "10"},
-		[]string{"TEST_TPID", "STANDARD_TRIGGERS", "*max_counter", "5", "false", "0", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "0", "0", "LOG_WARNING", "10"},
+		[]string{"STANDARD_TRIGGERS", "*min_balance", "2", "false", "0", "*monetary", "*out", "call", "", "special1", "SHARED_1", "*never", "0", "0", "LOG_WARNING", "10"},
+		[]string{"STANDARD_TRIGGERS", "*max_counter", "5", "false", "0", "*monetary", "*out", "call", "FS_USERS", "special1", "SHARED_1", "*never", "0", "0", "LOG_WARNING", "10"},
 	}
 	if slc := at.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)
@@ -465,7 +465,7 @@ func TestTPAccountActionsAsExportSlice(t *testing.T) {
 		ActionTriggersId: "STANDARD_TRIGGERS",
 	}
 	expectedSlc := [][]string{
-		[]string{"TEST_TPID", "TEST_LOADID", "cgrates.org", "1001", "*out", "PACKAGE_10_SHARED_A_5", "STANDARD_TRIGGERS"},
+		[]string{"cgrates.org", "1001", "*out", "PACKAGE_10_SHARED_A_5", "STANDARD_TRIGGERS"},
 	}
 	if slc := aa.AsExportSlice(); !reflect.DeepEqual(expectedSlc, slc) {
 		t.Errorf("Expecting: %+v, received: %+v", expectedSlc, slc)

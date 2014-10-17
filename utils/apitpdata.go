@@ -48,6 +48,11 @@ func (pag *Paginator) GetLimits() (low, high int) {
 	return pag.Page * pag.ItemsPerPage, pag.ItemsPerPage
 }
 
+// Used on exports (eg: TPExport)
+type ExportedData interface {
+	AsExportSlice() [][]string
+}
+
 type TPDestination struct {
 	TPid          string   // Tariff plan id
 	DestinationId string   // Destination id
@@ -58,7 +63,7 @@ type TPDestination struct {
 func (self *TPDestination) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.Prefixes))
 	for idx, prefix := range self.Prefixes {
-		retSlice[idx] = []string{self.TPid, self.DestinationId, prefix}
+		retSlice[idx] = []string{self.DestinationId, prefix}
 	}
 	return retSlice
 }
@@ -75,8 +80,7 @@ type TPRate struct {
 func (self *TPRate) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.RateSlots))
 	for idx, rtSlot := range self.RateSlots {
-		retSlice[idx] = []string{self.TPid, self.RateId,
-			strconv.FormatFloat(rtSlot.ConnectFee, 'f', -1, 64), strconv.FormatFloat(rtSlot.Rate, 'f', -1, 64), rtSlot.RateUnit, rtSlot.RateIncrement, rtSlot.GroupIntervalStart}
+		retSlice[idx] = []string{self.RateId, strconv.FormatFloat(rtSlot.ConnectFee, 'f', -1, 64), strconv.FormatFloat(rtSlot.Rate, 'f', -1, 64), rtSlot.RateUnit, rtSlot.RateIncrement, rtSlot.GroupIntervalStart}
 	}
 	return retSlice
 }
@@ -136,7 +140,7 @@ type TPDestinationRate struct {
 func (self *TPDestinationRate) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.DestinationRates))
 	for idx, dstRate := range self.DestinationRates {
-		retSlice[idx] = []string{self.TPid, self.DestinationRateId, dstRate.DestinationId, dstRate.RateId, dstRate.RoundingMethod, strconv.Itoa(dstRate.RoundingDecimals)}
+		retSlice[idx] = []string{self.DestinationRateId, dstRate.DestinationId, dstRate.RateId, dstRate.RoundingMethod, strconv.Itoa(dstRate.RoundingDecimals)}
 	}
 	return retSlice
 }
@@ -162,7 +166,7 @@ type ApierTPTiming struct {
 // Keep the ExportSlice interface, although we only need a single slice to be generated
 func (self *ApierTPTiming) AsExportSlice() [][]string {
 	return [][]string{
-		[]string{self.TPid, self.TimingId, self.Years, self.Months, self.MonthDays, self.WeekDays, self.Time},
+		[]string{self.TimingId, self.Years, self.Months, self.MonthDays, self.WeekDays, self.Time},
 	}
 }
 
@@ -184,7 +188,7 @@ type TPRatingPlan struct {
 func (self *TPRatingPlan) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.RatingPlanBindings))
 	for idx, rp := range self.RatingPlanBindings {
-		retSlice[idx] = []string{self.TPid, self.RatingPlanId, rp.DestinationRatesId, rp.TimingId, strconv.FormatFloat(rp.Weight, 'f', -1, 64)}
+		retSlice[idx] = []string{self.RatingPlanId, rp.DestinationRatesId, rp.TimingId, strconv.FormatFloat(rp.Weight, 'f', -1, 64)}
 	}
 	return retSlice
 }
@@ -229,7 +233,7 @@ type TPRatingProfile struct {
 func (self *TPRatingProfile) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.RatingPlanActivations))
 	for idx, rpln := range self.RatingPlanActivations {
-		retSlice[idx] = []string{self.TPid, self.LoadId, self.Direction, self.Tenant, self.Category, self.Subject, rpln.ActivationTime, rpln.RatingPlanId, rpln.FallbackSubjects}
+		retSlice[idx] = []string{self.Direction, self.Tenant, self.Category, self.Subject, rpln.ActivationTime, rpln.RatingPlanId, rpln.FallbackSubjects}
 	}
 	return retSlice
 }
@@ -303,7 +307,7 @@ type TPActions struct {
 func (self *TPActions) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.Actions))
 	for idx, act := range self.Actions {
-		retSlice[idx] = []string{self.TPid, self.ActionsId, act.Identifier, act.ExtraParameters, act.BalanceType, act.Direction, act.Category, act.DestinationId, act.RatingSubject,
+		retSlice[idx] = []string{self.ActionsId, act.Identifier, act.ExtraParameters, act.BalanceType, act.Direction, act.Category, act.DestinationId, act.RatingSubject,
 			act.SharedGroup, act.ExpiryTime, strconv.FormatFloat(act.Units, 'f', -1, 64), strconv.FormatFloat(act.BalanceWeight, 'f', -1, 64), strconv.FormatFloat(act.Weight, 'f', -1, 64)}
 	}
 	return retSlice
@@ -334,7 +338,7 @@ type TPSharedGroups struct {
 func (self *TPSharedGroups) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.SharedGroups))
 	for idx, sg := range self.SharedGroups {
-		retSlice[idx] = []string{self.TPid, self.SharedGroupsId, sg.Account, sg.Strategy, sg.RatingSubject}
+		retSlice[idx] = []string{self.SharedGroupsId, sg.Account, sg.Strategy, sg.RatingSubject}
 	}
 	return retSlice
 }
@@ -355,7 +359,7 @@ type TPLcrRules struct {
 func (self *TPLcrRules) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.LcrRules))
 	for idx, rl := range self.LcrRules {
-		retSlice[idx] = []string{self.TPid, self.LcrRulesId, rl.Direction, rl.Tenant, rl.Customer, rl.DestinationId, rl.Category, rl.Strategy,
+		retSlice[idx] = []string{self.LcrRulesId, rl.Direction, rl.Tenant, rl.Customer, rl.DestinationId, rl.Category, rl.Strategy,
 			rl.Suppliers, rl.ActivatinTime, strconv.FormatFloat(rl.Weight, 'f', -1, 64)}
 	}
 	return retSlice
@@ -384,7 +388,7 @@ type TPCdrStats struct {
 func (self *TPCdrStats) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.CdrStats))
 	for idx, cdrStat := range self.CdrStats {
-		retSlice[idx] = []string{self.TPid, self.CdrStatsId, cdrStat.QueueLength, cdrStat.TimeWindow, cdrStat.Metrics, cdrStat.SetupInterval, cdrStat.TOR, cdrStat.CdrHost, cdrStat.CdrSource,
+		retSlice[idx] = []string{self.CdrStatsId, cdrStat.QueueLength, cdrStat.TimeWindow, cdrStat.Metrics, cdrStat.SetupInterval, cdrStat.TOR, cdrStat.CdrHost, cdrStat.CdrSource,
 			cdrStat.ReqType, cdrStat.Direction, cdrStat.Tenant, cdrStat.Category, cdrStat.Account, cdrStat.Subject, cdrStat.DestinationPrefix, cdrStat.UsageInterval, cdrStat.MediationRunIds,
 			cdrStat.RatedAccount, cdrStat.RatedSubject, cdrStat.CostInterval, cdrStat.ActionTriggers}
 	}
@@ -429,7 +433,7 @@ type TPDerivedChargers struct {
 func (self *TPDerivedChargers) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.DerivedChargers))
 	for idx, dc := range self.DerivedChargers {
-		retSlice[idx] = []string{self.TPid, self.Loadid, self.Direction, self.Tenant, self.Category, self.Account, self.Subject, dc.RunId, dc.RunFilters, dc.ReqTypeField,
+		retSlice[idx] = []string{self.Direction, self.Tenant, self.Category, self.Account, self.Subject, dc.RunId, dc.RunFilters, dc.ReqTypeField,
 			dc.DirectionField, dc.TenantField, dc.CategoryField, dc.AccountField, dc.SubjectField, dc.DestinationField, dc.SetupTimeField, dc.AnswerTimeField, dc.UsageField}
 	}
 	return retSlice
@@ -494,7 +498,7 @@ type TPActionPlan struct {
 func (self *TPActionPlan) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.ActionPlan))
 	for idx, ap := range self.ActionPlan {
-		retSlice[idx] = []string{self.TPid, self.Id, ap.ActionsId, ap.TimingId, strconv.FormatFloat(ap.Weight, 'f', -1, 64)}
+		retSlice[idx] = []string{self.Id, ap.ActionsId, ap.TimingId, strconv.FormatFloat(ap.Weight, 'f', -1, 64)}
 	}
 	return retSlice
 }
@@ -516,7 +520,7 @@ type TPActionTriggers struct {
 func (self *TPActionTriggers) AsExportSlice() [][]string {
 	retSlice := make([][]string, len(self.ActionTriggers))
 	for idx, at := range self.ActionTriggers {
-		retSlice[idx] = []string{self.TPid, self.ActionTriggersId, at.ThresholdType, strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64), strconv.FormatBool(at.Recurrent), strconv.FormatFloat(at.MinSleep.Seconds(), 'f', -1, 64),
+		retSlice[idx] = []string{self.ActionTriggersId, at.ThresholdType, strconv.FormatFloat(at.ThresholdValue, 'f', -1, 64), strconv.FormatBool(at.Recurrent), strconv.FormatFloat(at.MinSleep.Seconds(), 'f', -1, 64),
 			at.BalanceType, at.Direction, at.BalanceCategory, at.DestinationId, at.BalanceRatingSubject, at.BalanceSharedGroup, at.BalanceExpirationDate,
 			strconv.FormatFloat(at.BalanceWeight, 'f', -1, 64), strconv.Itoa(at.MinQueuedItems), at.ActionsId, strconv.FormatFloat(at.Weight, 'f', -1, 64)}
 	}
@@ -566,7 +570,7 @@ type TPAccountActions struct {
 //TPid,Tenant,Account,Direction,ActionPlanTag,ActionTriggersTag
 func (self *TPAccountActions) AsExportSlice() [][]string {
 	return [][]string{
-		[]string{self.TPid, self.LoadId, self.Tenant, self.Account, self.Direction, self.ActionPlanId, self.ActionTriggersId},
+		[]string{self.Tenant, self.Account, self.Direction, self.ActionPlanId, self.ActionTriggersId},
 	}
 }
 
@@ -689,7 +693,6 @@ type ExportedFileCdrs struct {
 	FirstOrderId, LastOrderId int64             // The order id of the last exported CDR
 	ExportedCgrIds            []string          // List of successfuly exported cgrids in the file
 	UnexportedCgrIds          map[string]string // Map of errored CDRs, map key is cgrid, value will be the error string
-
 }
 
 type AttrGetCdrs struct {
@@ -772,4 +775,16 @@ type DirectionTenantAccount struct {
 
 type AttrCDRStatsReloadQueues struct {
 	StatsQueueIds []string
+}
+
+type AttrDirExportTP struct {
+	TPid           *string
+	FileFormat     *string // Format of the exported file <csv>
+	FieldSeparator *string // Separator used between fields
+	ExportDir      *string // If provided it overwrites the configured export directory
+}
+
+type DirExportedTP struct {
+	ExportDir     string   // Full path to the newly generated export file
+	ExportedFiles []string // List of exported files
 }

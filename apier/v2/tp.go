@@ -32,3 +32,7 @@ func (self *ApierV2) RemTP(tpid string, reply *string) error {
 	}
 	return nil
 }
+
+func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *utils.DirExportedTP) error {
+	return nil
+}

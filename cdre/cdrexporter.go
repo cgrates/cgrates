@@ -480,7 +480,7 @@ func (cdre *CdrExporter) WriteToFile(filePath string) error {
 	}
 	defer fileOut.Close()
 	switch cdre.cdrFormat {
-	case utils.CDRE_DRYRUN:
+	case utils.DRYRUN:
 		return nil
 	case utils.CDRE_FIXED_WIDTH:
 		if err := cdre.writeOut(fileOut); err != nil {

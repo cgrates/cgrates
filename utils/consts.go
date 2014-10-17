@@ -105,7 +105,7 @@ const (
 	META_DEFAULT                 = "*default"
 	STATIC_VALUE_PREFIX          = "^"
 	CSV                          = "csv"
-	CDRE_DRYRUN                  = "dry_run"
+	DRYRUN                       = "dry_run"
 	COMBIMED                     = "combimed"
 	INTERNAL                     = "internal"
 	ZERO_RATING_SUBJECT_PREFIX   = "*zero"
@@ -168,6 +168,6 @@ const (
 )
 
 var (
-	CdreCdrFormats   = []string{CSV, CDRE_DRYRUN, CDRE_FIXED_WIDTH}
+	CdreCdrFormats   = []string{CSV, DRYRUN, CDRE_FIXED_WIDTH}
 	PrimaryCdrFields = []string{TOR, ACCID, CDRHOST, CDRSOURCE, REQTYPE, DIRECTION, TENANT, CATEGORY, ACCOUNT, SUBJECT, DESTINATION, SETUP_TIME, ANSWER_TIME, USAGE}
 )

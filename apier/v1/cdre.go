@@ -158,8 +158,8 @@ func (self *ApierV1) ExportCdrsToFile(attr utils.AttrExpFileCdrs, reply *utils.E
 		fileName = *attr.ExportFileName
 	}
 	filePath := path.Join(exportDir, fileName)
-	if cdrFormat == utils.CDRE_DRYRUN {
-		filePath = utils.CDRE_DRYRUN
+	if cdrFormat == utils.DRYRUN {
+		filePath = utils.DRYRUN
 	}
 	dataUsageMultiplyFactor := exportTemplate.DataUsageMultiplyFactor
 	if attr.DataUsageMultiplyFactor != nil && *attr.DataUsageMultiplyFactor != 0.0 {
