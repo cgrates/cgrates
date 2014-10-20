@@ -25,6 +25,7 @@ import (
 // Writer for one line, compatible with csv.Writer interface on Write
 type CgrRecordWriter interface {
 	Write([]string) error
+	Flush()
 }
 
 func NewCgrIORecordWriter(w io.Writer) *CgrIORecordWriter {
@@ -42,4 +43,9 @@ func (self *CgrIORecordWriter) Write(record []string) error {
 		}
 	}
 	return nil
+}
+
+// ToDo: make sure we properly handle this method
+func (self *CgrIORecordWriter) Flush() {
+	return
 }

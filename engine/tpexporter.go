@@ -27,6 +27,7 @@ import (
 	"path"
 	"unicode/utf8"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -37,6 +38,18 @@ var (
 )
 
 func NewTPExporter(storDb LoadStorage, tpID, dir, fileFormat, sep string, dryRunBuff *bytes.Buffer) (*TPExporter, error) {
+	if len(tpID) == 0 {
+		return nil, errors.New("Missing TPid")
+	}
+	if len(dir) == 0 {
+		dir = config.CgrConfig().TpExportDir
+	}
+	if len(fileFormat) == 0 {
+		fileFormat = utils.CSV
+	}
+	if len(sep) == 0 {
+		sep = ","
+	}
 	if !utils.IsSliceMember(TPExportFormats, fileFormat) {
 		return nil, errors.New("Unsupported file format")
 	}
@@ -58,15 +71,17 @@ func NewTPExporter(storDb LoadStorage, tpID, dir, fileFormat, sep string, dryRun
 
 // Export TariffPlan to a folder
 type TPExporter struct {
-	storDb       LoadStorage   // StorDb connection handle
-	tpID         string        // Load data on this tpid
-	dirPath      string        // Directory path to export to
-	fileFormat   string        // The file format <csv>
-	sep          rune          // Separator in the csv file
-	dryRunBuffer *bytes.Buffer // Will be written in case of dryRun so we can read it from tests
+	storDb        LoadStorage   // StorDb connection handle
+	tpID          string        // Load data on this tpid
+	dirPath       string        // Directory path to export to
+	fileFormat    string        // The file format <csv>
+	sep           rune          // Separator in the csv file
+	dryRunBuffer  *bytes.Buffer // Will be written in case of dryRun so we can read it from tests
+	exportedFiles []string
 }
 
 func (self *TPExporter) Run() error {
+	self.removeFiles() // Make sure we clean the folder before starting with new one
 	for _, fHandler := range []func() error{
 		self.exportTimings,
 		self.exportDestinations,
@@ -100,6 +115,9 @@ func (self *TPExporter) removeFiles() error {
 
 // General method to write the content out to a file
 func (self *TPExporter) writeOut(fileName string, tpData []utils.ExportedData) error {
+	if len(tpData) == 0 {
+		return nil
+	}
 	var writerOut utils.CgrRecordWriter
 	if self.fileFormat == utils.DRYRUN {
 		writerOut = utils.NewCgrIORecordWriter(self.dryRunBuffer)
@@ -120,6 +138,7 @@ func (self *TPExporter) writeOut(fileName string, tpData []utils.ExportedData) e
 			}
 		}
 	}
+	writerOut.Flush()
 	return nil
 }
 
@@ -138,6 +157,7 @@ func (self *TPExporter) exportTimings() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -156,6 +176,7 @@ func (self *TPExporter) exportDestinations() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -174,6 +195,7 @@ func (self *TPExporter) exportRates() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -192,6 +214,7 @@ func (self *TPExporter) exportDestinationRates() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -210,6 +233,7 @@ func (self *TPExporter) exportRatingPlans() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -228,6 +252,7 @@ func (self *TPExporter) exportRatingProfiles() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -246,6 +271,7 @@ func (self *TPExporter) exportSharedGroups() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -264,6 +290,7 @@ func (self *TPExporter) exportActions() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -282,6 +309,7 @@ func (self *TPExporter) exportActionPlans() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -300,6 +328,7 @@ func (self *TPExporter) exportActionTriggers() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -318,6 +347,7 @@ func (self *TPExporter) exportAccountActions() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -336,6 +366,7 @@ func (self *TPExporter) exportDerivedChargers() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
 }
 
@@ -354,5 +385,10 @@ func (self *TPExporter) exportCdrStats() error {
 	if err := self.writeOut(fileName, exportedData); err != nil {
 		return err
 	}
+	self.exportedFiles = append(self.exportedFiles, fileName)
 	return nil
+}
+
+func (self *TPExporter) ExportStats() *utils.ExportedTPStats {
+	return &utils.ExportedTPStats{ExportDir: self.dirPath, ExportedFiles: self.exportedFiles}
 }

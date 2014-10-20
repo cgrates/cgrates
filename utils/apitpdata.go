@@ -782,9 +782,10 @@ type AttrDirExportTP struct {
 	FileFormat     *string // Format of the exported file <csv>
 	FieldSeparator *string // Separator used between fields
 	ExportDir      *string // If provided it overwrites the configured export directory
+	Compress       *bool   // If true the folder will be compressed after export performed
 }
 
-type DirExportedTP struct {
+type ExportedTPStats struct {
 	ExportDir     string   // Full path to the newly generated export file
 	ExportedFiles []string // List of exported files
 }
