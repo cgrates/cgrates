@@ -124,4 +124,13 @@ func TestTutLclLoadTariffPlanFromFolder(t *testing.T) {
 		t.Error(reply)
 	}
 	time.Sleep(time.Duration(*waitRater) * time.Millisecond) // Give time for scheduler to execute topups
+
+}
+
+func TestShutdown (t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	exec.Command("pkill", "cgr-engine").Run() // Just to make sure another one is not running, bit brutal maybe we can fine tune it
+	time.Sleep(time.Duration(*waitRater) * time.Millisecond)
 }

@@ -105,10 +105,10 @@ func (self *TPExporter) Run() error {
 			self.removeFiles()
 			return err
 		}
-		if self.compress {
-			if err := self.zipWritter.Close(); err != nil {
-				return err
-			}
+	}
+	if self.compress {
+		if err := self.zipWritter.Close(); err != nil {
+			return err
 		}
 	}
 	return nil
