@@ -67,6 +67,7 @@ func NewDbReader(storDB LoadStorage, ratingDb RatingStorage, accountDb Accountin
 	c.lcrs = make(map[string]*LCR)
 	c.rpAliases = make(map[string]string)
 	c.accAliases = make(map[string]string)
+	c.timings = make(map[string]*utils.TPTiming)
 	c.accountActions = make(map[string]*Account)
 	c.destinations = make(map[string]*Destination)
 	c.cdrStats = make(map[string]*CdrStats)
@@ -302,8 +303,14 @@ func (dbr *DbReader) LoadDestinationByTag(tag string) (bool, error) {
 }
 
 func (dbr *DbReader) LoadTimings() (err error) {
-	dbr.timings, err = dbr.storDb.GetTpTimings(dbr.tpid, "")
-	return err
+	tpTmgs, err := dbr.storDb.GetTpTimings(dbr.tpid, "")
+	if err != nil {
+		return err
+	}
+	for _, tpTm := range tpTmgs {
+		dbr.timings[tpTm.TimingId] = NewTiming(tpTm.TimingId, tpTm.Years, tpTm.Months, tpTm.MonthDays, tpTm.WeekDays, tpTm.Time)
+	}
+	return nil
 }
 
 func (dbr *DbReader) LoadRates() (err error) {
@@ -426,7 +433,8 @@ func (dbr *DbReader) LoadRatingPlanByTag(tag string) (bool, error) {
 			if err != nil || len(tm) == 0 {
 				return false, fmt.Errorf("No Timings profile with id %s: %v", rp.TimingId, err)
 			}
-			rp.SetTiming(tm[rp.TimingId])
+			tpTmng := NewTiming(tm[rp.TimingId].TimingId, tm[rp.TimingId].Years, tm[rp.TimingId].Months, tm[rp.TimingId].MonthDays, tm[rp.TimingId].WeekDays, tm[rp.TimingId].Time)
+			rp.SetTiming(tpTmng)
 			drm, err := dbr.storDb.GetTpDestinationRates(dbr.tpid, rp.DestinationRatesId, nil)
 			if err != nil || len(drm) == 0 {
 				return false, fmt.Errorf("No DestinationRates profile with id %s: %v", rp.DestinationRatesId, err)
@@ -725,7 +733,7 @@ func (dbr *DbReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 				} else if len(timingsMap) == 0 {
 					return fmt.Errorf("No Timing with id <%s>", at.TimingId)
 				}
-				t := timingsMap[at.TimingId]
+				t := NewTiming(timingsMap[at.TimingId].TimingId, timingsMap[at.TimingId].Years, timingsMap[at.TimingId].Months, timingsMap[at.TimingId].MonthDays, timingsMap[at.TimingId].WeekDays, timingsMap[at.TimingId].Time)
 				actTmg := &ActionTiming{
 					Uuid:   utils.GenUUID(),
 					Id:     accountAction.ActionPlanId,

@@ -89,8 +89,8 @@ func (self *TPCSVImporter) importTimings(fn string) error {
 			}
 			continue
 		}
-		tm := NewTiming(record...)
-		if err := self.StorDb.SetTPTiming(self.TPid, tm); err != nil {
+		tm := &utils.ApierTPTiming{TPid: self.TPid, TimingId: record[0], Years: record[1], Months: record[2], MonthDays: record[3], WeekDays: record[4], Time: record[5]}
+		if err := self.StorDb.SetTPTiming(tm); err != nil {
 			if self.Verbose {
 				log.Printf("Ignoring line %d, storDb operational error: <%s> ", lineNr, err.Error())
 			}

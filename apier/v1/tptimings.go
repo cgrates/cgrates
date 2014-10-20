@@ -22,7 +22,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -31,8 +30,7 @@ func (self *ApierV1) SetTPTiming(attrs utils.ApierTPTiming, reply *string) error
 	if missing := utils.MissingStructFields(&attrs, []string{"TPid", "TimingId", "Years", "Months", "MonthDays", "WeekDays", "Time"}); len(missing) != 0 {
 		return fmt.Errorf("%s:%v", utils.ERR_MANDATORY_IE_MISSING, missing)
 	}
-	tm := engine.NewTiming(attrs.TimingId, attrs.Years, attrs.Months, attrs.MonthDays, attrs.WeekDays, attrs.Time)
-	if err := self.StorDb.SetTPTiming(attrs.TPid, tm); err != nil {
+	if err := self.StorDb.SetTPTiming(&attrs); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
 	*reply = "OK"
@@ -54,9 +52,7 @@ func (self *ApierV1) GetTPTiming(attrs AttrGetTPTiming, reply *utils.ApierTPTimi
 	} else if len(tms) == 0 {
 		return errors.New(utils.ERR_NOT_FOUND)
 	} else {
-		tm := tms[attrs.TimingId]
-		*reply = utils.ApierTPTiming{attrs.TPid, tm.Id, tm.Years.Serialize(";"),
-			tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"), tm.WeekDays.Serialize(";"), tm.StartTime}
+		*reply = *tms[attrs.TimingId]
 	}
 	return nil
 }

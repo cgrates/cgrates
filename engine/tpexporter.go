@@ -124,7 +124,20 @@ func (self *TPExporter) writeOut(fileName string, tpData []utils.ExportedData) e
 }
 
 func (self *TPExporter) exportTimings() error {
-	//fileName := exportedFiles[0] // Define it out of group so we make sure it is cleaned up by removeFiles
+	fileName := exportedFiles[0] // Define it out of group so we make sure it is cleaned up by removeFiles
+	storData, err := self.storDb.GetTpTimings(self.tpID, "")
+	if err != nil {
+		return nil
+	}
+	exportedData := make([]utils.ExportedData, len(storData))
+	idx := 0
+	for _, tpItem := range storData {
+		exportedData[idx] = tpItem
+		idx += 1
+	}
+	if err := self.writeOut(fileName, exportedData); err != nil {
+		return err
+	}
 	return nil
 }
 

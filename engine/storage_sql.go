@@ -167,10 +167,13 @@ func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDisti
 	return ids, nil
 }
 
-func (self *SQLStorage) SetTPTiming(tpid string, tm *utils.TPTiming) error {
+func (self *SQLStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
+	if tm == nil {
+		return nil //Nothing to set
+	}
 	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, id, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s') ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
-		utils.TBL_TP_TIMINGS, tpid, tm.Id, tm.Years.Serialize(";"), tm.Months.Serialize(";"), tm.MonthDays.Serialize(";"),
-		tm.WeekDays.Serialize(";"), tm.StartTime)); err != nil {
+		utils.TBL_TP_TIMINGS, tm.TPid, tm.TimingId, tm.Years, tm.Months, tm.MonthDays, tm.WeekDays, tm.Time)); err != nil {
+
 		return err
 	}
 	return nil
@@ -1242,8 +1245,8 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *util
 	return rts, nil
 }
 
-func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.TPTiming, error) {
-	tms := make(map[string]*utils.TPTiming)
+func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.ApierTPTiming, error) {
+	tms := make(map[string]*utils.ApierTPTiming)
 	var tpTimings []TpTiming
 	q := self.db.Where("tpid = ?", tpid)
 	if len(tag) != 0 {
@@ -1252,11 +1255,9 @@ func (self *SQLStorage) GetTpTimings(tpid, tag string) (map[string]*utils.TPTimi
 	if err := q.Find(&tpTimings).Error; err != nil {
 		return nil, err
 	}
-
 	for _, tpTm := range tpTimings {
-		tms[tpTm.Id] = NewTiming(tpTm.Id, tpTm.Years, tpTm.Months, tpTm.MonthDays, tpTm.WeekDays, tpTm.Time)
+		tms[tpTm.Id] = &utils.ApierTPTiming{TPid: tpTm.Tpid, TimingId: tpTm.Id, Years: tpTm.Years, Months: tpTm.Months, MonthDays: tpTm.MonthDays, WeekDays: tpTm.WeekDays, Time: tpTm.Time}
 	}
-
 	return tms, nil
 }
 

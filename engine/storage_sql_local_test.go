@@ -74,20 +74,20 @@ func TestRemoveData(t *testing.T) {
 		return
 	}
 	// Create Timings
-	tm := &utils.TPTiming{Id: "ALWAYS", StartTime: "00:00:00"}
-	if err := mysqlDb.SetTPTiming(TEST_SQL, tm); err != nil {
+	tm := &utils.ApierTPTiming{TPid: TEST_SQL, TimingId: "ALWAYS", Time: "00:00:00"}
+	if err := mysqlDb.SetTPTiming(tm); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Id); err != nil {
+	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	} else if len(tmgs) == 0 {
 		t.Error("Could not store TPTiming")
 	}
 	// Remove Timings
-	if err := mysqlDb.RemTPData(utils.TBL_TP_TIMINGS, TEST_SQL, tm.Id); err != nil {
+	if err := mysqlDb.RemTPData(utils.TBL_TP_TIMINGS, TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	}
-	if _, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Id); err == nil {
+	if _, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err == nil {
 		t.Error("Should report error on querying here")
 	} else if err.Error() != "Record Not Found" {
 		t.Error(err.Error())
@@ -134,10 +134,10 @@ func TestRemoveData(t *testing.T) {
 		t.Error(err.Error())
 	}
 	// Create again so we can test complete TP removal
-	if err := mysqlDb.SetTPTiming(TEST_SQL, tm); err != nil {
+	if err := mysqlDb.SetTPTiming(tm); err != nil {
 		t.Error(err.Error())
 	}
-	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Id); err != nil {
+	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
 		t.Error(err.Error())
 	} else if len(tmgs) == 0 {
 		t.Error("Could not store TPTiming")
@@ -165,7 +165,7 @@ func TestRemoveData(t *testing.T) {
 		t.Error(err.Error())
 	}
 	// Make sure we have removed it
-	if _, err := mysqlDb.GetTpTimings(TEST_SQL, tm.Id); err == nil {
+	if _, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err == nil {
 		t.Error("Should report error on querying here")
 	} else if err.Error() != "Record Not Found" {
 		t.Error(err.Error())

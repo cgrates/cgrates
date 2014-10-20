@@ -137,8 +137,8 @@ type LoadStorage interface {
 	GetTPIds() ([]string, error)
 	GetTPTableIds(string, string, utils.TPDistinctIds, map[string]string, *utils.Paginator) ([]string, error)
 
-	SetTPTiming(string, *utils.TPTiming) error
-	GetTpTimings(string, string) (map[string]*utils.TPTiming, error)
+	SetTPTiming(*utils.ApierTPTiming) error
+	GetTpTimings(string, string) (map[string]*utils.ApierTPTiming, error)
 
 	SetTPDestination(string, *Destination) error
 	GetTpDestinations(string, string) (map[string]*Destination, error)
