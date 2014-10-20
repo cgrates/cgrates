@@ -85,7 +85,7 @@ type CGRConfig struct {
 	DefaultSubject          string             // set default rating subject, useful in case of fallback
 	RoundingDecimals        int                // Number of decimals to round end prices at
 	HttpSkipTlsVerify       bool               // If enabled Http Client will accept any TLS certificate
-	TpExportDir             string             // Path towards export folder for offline Tariff Plans
+	TpExportPath            string             // Path towards export folder for offline Tariff Plans
 	XmlCfgDocument          *CgrXmlCfgDocument // Load additional configuration inside xml document
 	RaterEnabled            bool               // start standalone server (no balancer)
 	RaterBalancer           string             // balancer address host:port
@@ -170,7 +170,7 @@ func (self *CGRConfig) setDefaults() error {
 	self.DefaultSubject = "cgrates"
 	self.RoundingDecimals = 10
 	self.HttpSkipTlsVerify = false
-	self.TpExportDir = "/var/log/cgrates/tpe"
+	self.TpExportPath = "/var/log/cgrates/tpe"
 	self.XmlCfgDocument = nil
 	self.RaterEnabled = false
 	self.RaterBalancer = ""
@@ -389,7 +389,7 @@ func loadConfig(c *conf.ConfigFile) (*CGRConfig, error) {
 		cfg.HttpSkipTlsVerify, _ = c.GetBool("global", "http_skip_tls_veify")
 	}
 	if hasOpt = c.HasOption("global", "tpexport_dir"); hasOpt {
-		cfg.TpExportDir, _ = c.GetString("global", "tpexport_dir")
+		cfg.TpExportPath, _ = c.GetString("global", "tpexport_dir")
 	}
 	// XML config path defined, try loading the document
 	if hasOpt = c.HasOption("global", "xmlcfg_path"); hasOpt {

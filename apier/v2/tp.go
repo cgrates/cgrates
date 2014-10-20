@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package v2
 
 import (
+	"encoding/base64"
 	"fmt"
 
 	"github.com/cgrates/cgrates/engine"
@@ -38,19 +39,23 @@ func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *uti
 	if len(*attrs.TPid) == 0 {
 		return fmt.Errorf("%s:TPid", utils.ERR_MANDATORY_IE_MISSING)
 	}
-	dir := ""
-	if attrs.ExportDir != nil {
-		dir = *attrs.ExportDir
+	dir := self.Config.TpExportPath
+	if attrs.ExportPath != nil {
+		dir = *attrs.ExportPath
 	}
-	fileFormat := ""
+	fileFormat := utils.CSV
 	if attrs.FileFormat != nil {
 		fileFormat = *attrs.FileFormat
 	}
-	sep := ""
+	sep := ","
 	if attrs.FieldSeparator != nil {
 		sep = *attrs.FieldSeparator
 	}
-	tpExporter, err := engine.NewTPExporter(self.StorDb, *attrs.TPid, dir, fileFormat, sep, nil)
+	compress := false
+	if attrs.Compress != nil {
+		compress = *attrs.Compress
+	}
+	tpExporter, err := engine.NewTPExporter(self.StorDb, *attrs.TPid, dir, fileFormat, sep, compress)
 	if err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	}
@@ -60,5 +65,29 @@ func (self *ApierV2) ExportTPToFolder(attrs utils.AttrDirExportTP, exported *uti
 		*exported = *tpExporter.ExportStats()
 	}
 
+	return nil
+}
+
+func (self *ApierV2) ExportTPToZipString(attrs utils.AttrDirExportTP, reply *string) error {
+	if len(*attrs.TPid) == 0 {
+		return fmt.Errorf("%s:TPid", utils.ERR_MANDATORY_IE_MISSING)
+	}
+	dir := ""
+	fileFormat := utils.CSV
+	if attrs.FileFormat != nil {
+		fileFormat = *attrs.FileFormat
+	}
+	sep := ","
+	if attrs.FieldSeparator != nil {
+		sep = *attrs.FieldSeparator
+	}
+	tpExporter, err := engine.NewTPExporter(self.StorDb, *attrs.TPid, dir, fileFormat, sep, true)
+	if err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	if err := tpExporter.Run(); err != nil {
+		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
+	}
+	*reply = base64.StdEncoding.EncodeToString(tpExporter.GetCacheBuffer().Bytes())
 	return nil
 }

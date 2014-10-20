@@ -76,7 +76,7 @@ func TestDefaults(t *testing.T) {
 	eCfg.DefaultSubject = "cgrates"
 	eCfg.RoundingDecimals = 10
 	eCfg.HttpSkipTlsVerify = false
-	eCfg.TpExportDir = "/var/log/cgrates/tpe"
+	eCfg.TpExportPath = "/var/log/cgrates/tpe"
 	eCfg.XmlCfgDocument = nil
 	eCfg.RaterEnabled = false
 	eCfg.RaterBalancer = ""
@@ -202,7 +202,7 @@ func TestConfigFromFile(t *testing.T) {
 	eCfg.DefaultSubject = "test"
 	eCfg.RoundingDecimals = 99
 	eCfg.HttpSkipTlsVerify = true
-	eCfg.TpExportDir = "test"
+	eCfg.TpExportPath = "test"
 	eCfg.RaterEnabled = true
 	eCfg.RaterBalancer = "test"
 	eCfg.BalancerEnabled = true
