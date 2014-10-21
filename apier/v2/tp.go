@@ -27,6 +27,9 @@ import (
 )
 
 func (self *ApierV2) RemTP(tpid string, reply *string) error {
+	if len(tpid) == 0 {
+		return fmt.Errorf("%s:TPid", utils.ERR_MANDATORY_IE_MISSING)
+	}
 	if err := self.StorDb.RemTPData("", tpid); err != nil {
 		return fmt.Errorf("%s:%s", utils.ERR_SERVER_ERROR, err.Error())
 	} else {

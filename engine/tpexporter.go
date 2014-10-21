@@ -24,6 +24,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"unicode/utf8"
@@ -130,23 +131,35 @@ func (self *TPExporter) writeOut(fileName string, tpData []utils.ExportedData) e
 	if len(tpData) == 0 {
 		return nil
 	}
+	var fWriter io.Writer
 	var writerOut utils.CgrRecordWriter
+	var err error
+
 	if self.compress {
-		if f, err := self.zipWritter.Create(fileName); err != nil {
+		if fWriter, err = self.zipWritter.Create(fileName); err != nil {
+			return err
+		}
+	} else if len(self.exportPath) != 0 {
+		if f, err := os.Create(path.Join(self.exportPath, fileName)); err != nil {
 			return err
 		} else {
-			writerOut = utils.NewCgrIORecordWriter(f)
+			fWriter = f
+			defer f.Close()
 		}
-	} else { // For now the only supported here is csv
-		fileOut, err := os.Create(path.Join(self.exportPath, fileName))
-		if err != nil {
-			return err
-		}
-		defer fileOut.Close()
-		csvWriter := csv.NewWriter(fileOut)
+
+	} else {
+		fWriter = new(bytes.Buffer)
+	}
+
+	switch self.fileFormat {
+	case utils.CSV:
+		csvWriter := csv.NewWriter(fWriter)
 		csvWriter.Comma = self.sep
 		writerOut = csvWriter
+	default:
+		writerOut = utils.NewCgrIORecordWriter(fWriter)
 	}
+
 	for _, tpItem := range tpData {
 		for _, record := range tpItem.AsExportSlice() {
 			if err := writerOut.Write(record); err != nil {
