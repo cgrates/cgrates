@@ -51,6 +51,7 @@ func NewTPExporter(storDb LoadStorage, tpID, expPath, fileFormat, sep string, co
 		exportPath: expPath,
 		fileFormat: fileFormat,
 		compress:   compress,
+		cacheBuff:  new(bytes.Buffer),
 	}
 	runeSep, _ := utf8.DecodeRuneInString(sep)
 	if runeSep == utf8.RuneError {
