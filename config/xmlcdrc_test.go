@@ -69,6 +69,7 @@ func TestParseXmlCdrcConfig(t *testing.T) {
     <cdrs_address>internal</cdrs_address>
     <cdr_format>csv</cdr_format>
     <field_separator>,</field_separator>
+    <data_usage_multiply_factor>1024.0</data_usage_multiply_factor>
     <run_delay>0</run_delay>
     <cdr_in_dir>/var/log/cgrates/cdrc/in</cdr_in_dir>
     <cdr_out_dir>/var/log/cgrates/cdrc/out</cdr_out_dir>
@@ -111,11 +112,12 @@ func TestGetCdrcCfgs(t *testing.T) {
 	cdrsAddr := "internal"
 	cdrFormat := "csv"
 	fldSep := ","
+	dataUsageMultiplyFactor := 1024.0
 	runDelay := int64(0)
 	cdrInDir := "/var/log/cgrates/cdrc/in"
 	cdrOutDir := "/var/log/cgrates/cdrc/out"
 	cdrSrcId := "freeswitch_csv"
-	expectCdrc := &CgrXmlCdrcCfg{Enabled: &enabled, CdrsAddress: &cdrsAddr, CdrFormat: &cdrFormat, FieldSeparator: &fldSep,
+	expectCdrc := &CgrXmlCdrcCfg{Enabled: &enabled, CdrsAddress: &cdrsAddr, CdrFormat: &cdrFormat, FieldSeparator: &fldSep, DataUsageMultiplyFactor: &dataUsageMultiplyFactor,
 		RunDelay: &runDelay, CdrInDir: &cdrInDir, CdrOutDir: &cdrOutDir, CdrSourceId: &cdrSrcId}
 	accIdTag, reqTypeTag, dirTag, tntTag, categTag, acntTag, subjTag, dstTag, sTimeTag, aTimeTag, usageTag, extr1, extr2 := utils.ACCID,
 		utils.REQTYPE, utils.DIRECTION, utils.TENANT, utils.CATEGORY, utils.ACCOUNT, utils.SUBJECT, utils.DESTINATION, utils.SETUP_TIME, utils.ANSWER_TIME, utils.USAGE, "extr1", "extr2"

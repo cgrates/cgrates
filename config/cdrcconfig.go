@@ -41,6 +41,9 @@ func NewCdrcConfigFromCgrXmlCdrcCfg(id string, xmlCdrcCfg *CgrXmlCdrcCfg) (*Cdrc
 	if xmlCdrcCfg.FieldSeparator != nil {
 		cdrcCfg.FieldSeparator = *xmlCdrcCfg.FieldSeparator
 	}
+	if xmlCdrcCfg.DataUsageMultiplyFactor != nil {
+		cdrcCfg.DataUsageMultiplyFactor = *xmlCdrcCfg.DataUsageMultiplyFactor
+	}
 	if xmlCdrcCfg.RunDelay != nil {
 		cdrcCfg.RunDelay = time.Duration(*xmlCdrcCfg.RunDelay) * time.Second
 	}
@@ -82,16 +85,17 @@ func NewDefaultCdrcConfig() *CdrcConfig {
 	answerTimeFld, _ := NewCfgCdrFieldWithDefaults(false, []*utils.RSRField{&utils.RSRField{Id: "12"}}, nil, nil, &aTimeTag, nil, nil, nil, nil, nil, nil)
 	usageFld, _ := NewCfgCdrFieldWithDefaults(false, []*utils.RSRField{&utils.RSRField{Id: "13"}}, nil, nil, &usageTag, nil, nil, nil, nil, nil, nil)
 	cdrcCfg := &CdrcConfig{
-		Id:             utils.META_DEFAULT,
-		Enabled:        false,
-		CdrsAddress:    "",
-		CdrFormat:      utils.CSV,
-		FieldSeparator: utils.FIELDS_SEP,
-		RunDelay:       time.Duration(0),
-		CdrInDir:       "/var/log/cgrates/cdrc/in",
-		CdrOutDir:      "/var/log/cgrates/cdrc/out",
-		CdrSourceId:    utils.CSV,
-		CdrFields:      []*CfgCdrField{torFld, accIdFld, reqTypeFld, directionFld, tenantFld, categoryFld, acntFld, subjFld, dstFld, setupTimeFld, answerTimeFld, usageFld},
+		Id:                      utils.META_DEFAULT,
+		Enabled:                 false,
+		CdrsAddress:             "",
+		CdrFormat:               utils.CSV,
+		FieldSeparator:          utils.FIELDS_SEP,
+		DataUsageMultiplyFactor: 1.0,
+		RunDelay:                time.Duration(0),
+		CdrInDir:                "/var/log/cgrates/cdrc/in",
+		CdrOutDir:               "/var/log/cgrates/cdrc/out",
+		CdrSourceId:             utils.CSV,
+		CdrFields:               []*CfgCdrField{torFld, accIdFld, reqTypeFld, directionFld, tenantFld, categoryFld, acntFld, subjFld, dstFld, setupTimeFld, answerTimeFld, usageFld},
 	}
 	return cdrcCfg
 }
@@ -110,6 +114,9 @@ func NewCdrcConfigFromFileParams(c *conf.ConfigFile) (*CdrcConfig, error) {
 	}
 	if hasOpt := c.HasOption("cdrc", "field_separator"); hasOpt {
 		cdrcCfg.FieldSeparator, _ = c.GetString("cdrc", "field_separator")
+	}
+	if hasOpt := c.HasOption("cdrc", "data_usage_multiply_factor"); hasOpt {
+		cdrcCfg.DataUsageMultiplyFactor, _ = c.GetFloat64("cdrc", "data_usage_multiply_factor")
 	}
 	if hasOpt := c.HasOption("cdrc", "run_delay"); hasOpt {
 		durStr, _ := c.GetString("cdrc", "run_delay")
@@ -187,14 +194,15 @@ func NewCdrcConfigFromFileParams(c *conf.ConfigFile) (*CdrcConfig, error) {
 }
 
 type CdrcConfig struct {
-	Id             string         // Configuration label
-	Enabled        bool           // Enable/Disable the profile
-	CdrsAddress    string         // The address where CDRs can be reached
-	CdrFormat      string         // The type of CDR file to process <csv>
-	FieldSeparator string         // The separator to use when reading csvs
-	RunDelay       time.Duration  // Delay between runs, 0 for inotify driven requests
-	CdrInDir       string         // Folder to process CDRs from
-	CdrOutDir      string         // Folder to move processed CDRs to
-	CdrSourceId    string         // Source identifier for the processed CDRs
-	CdrFields      []*CfgCdrField // List of fields to be processed
+	Id                      string         // Configuration label
+	Enabled                 bool           // Enable/Disable the profile
+	CdrsAddress             string         // The address where CDRs can be reached
+	CdrFormat               string         // The type of CDR file to process <csv>
+	FieldSeparator          string         // The separator to use when reading csvs
+	DataUsageMultiplyFactor float64        // Conversion factor for data usage
+	RunDelay                time.Duration  // Delay between runs, 0 for inotify driven requests
+	CdrInDir                string         // Folder to process CDRs from
+	CdrOutDir               string         // Folder to move processed CDRs to
+	CdrSourceId             string         // Source identifier for the processed CDRs
+	CdrFields               []*CfgCdrField // List of fields to be processed
 }

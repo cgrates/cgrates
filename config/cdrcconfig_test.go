@@ -28,15 +28,16 @@ import (
 
 func TestNewDefaultCdrcConfig(t *testing.T) {
 	eDfCdrcConfig := &CdrcConfig{
-		Id:             utils.META_DEFAULT,
-		Enabled:        false,
-		CdrsAddress:    "",
-		CdrFormat:      utils.CSV,
-		FieldSeparator: utils.FIELDS_SEP,
-		RunDelay:       time.Duration(0),
-		CdrInDir:       "/var/log/cgrates/cdrc/in",
-		CdrOutDir:      "/var/log/cgrates/cdrc/out",
-		CdrSourceId:    utils.CSV,
+		Id:                      utils.META_DEFAULT,
+		Enabled:                 false,
+		CdrsAddress:             "",
+		CdrFormat:               utils.CSV,
+		FieldSeparator:          utils.FIELDS_SEP,
+		DataUsageMultiplyFactor: 1.0,
+		RunDelay:                time.Duration(0),
+		CdrInDir:                "/var/log/cgrates/cdrc/in",
+		CdrOutDir:               "/var/log/cgrates/cdrc/out",
+		CdrSourceId:             utils.CSV,
 		CdrFields: []*CfgCdrField{
 			&CfgCdrField{
 				Tag:        utils.TOR,

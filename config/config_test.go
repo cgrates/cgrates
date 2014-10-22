@@ -236,6 +236,7 @@ func TestConfigFromFile(t *testing.T) {
 	cdrcCfg.RunDelay = time.Duration(99) * time.Second
 	cdrcCfg.CdrFormat = "test"
 	cdrcCfg.FieldSeparator = ";"
+	cdrcCfg.DataUsageMultiplyFactor = 99.0
 	cdrcCfg.CdrInDir = "test"
 	cdrcCfg.CdrOutDir = "test"
 	cdrcCfg.CdrSourceId = "test"

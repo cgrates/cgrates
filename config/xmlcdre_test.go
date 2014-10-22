@@ -32,7 +32,7 @@ func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
 <document type="cgrates/xml">
   <configuration section="cdre" id="CDRE-FW1">
     <cdr_format>fwv</cdr_format>
-    <data_usage_multiply_factor>0.0</data_usage_multiply_factor>
+    <data_usage_multiply_factor>1.0</data_usage_multiply_factor>
     <cost_multiply_factor>0.0</cost_multiply_factor>
     <cost_rounding_decimals>-1</cost_rounding_decimals>
     <cost_shift_digits>0</cost_shift_digits>
@@ -62,7 +62,7 @@ func TestXmlCdreCfgParseXmlConfig(t *testing.T) {
           <field tag="TOR" type="constant" value="02" width="2" />
           <field tag="SubtypeTOR" type="constant" value="11" width="4" />
           <field tag="SetupTime" type="cdrfield" value="start_time" layout="020106150400" width="12" />
-          <field tag="Duration" type="cdrfield" value="duration" width="6" multiply_factor_voice="1000" />
+          <field tag="Duration" type="cdrfield" value="duration" width="6" />
           <field tag="DataVolume" type="filler" width="6" />
           <field tag="TaxCode" type="constant" value="1" width="1" />
           <field tag="OperatorCode" type="cdrfield" value="operator" width="2" />

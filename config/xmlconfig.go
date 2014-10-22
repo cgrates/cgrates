@@ -55,15 +55,16 @@ type XmlCfgCdrField struct {
 
 // One CDRC Configuration instance
 type CgrXmlCdrcCfg struct {
-	Enabled        *bool             `xml:"enabled"`         // Enable/Disable the
-	CdrsAddress    *string           `xml:"cdrs_address"`    // The address where CDRs can be reached
-	CdrFormat      *string           `xml:"cdr_format"`      // The type of CDR to process <csv>
-	FieldSeparator *string           `xml:"field_separator"` // The separator to use when reading csvs
-	RunDelay       *int64            `xml:"run_delay"`       // Delay between runs
-	CdrInDir       *string           `xml:"cdr_in_dir"`      // Folder to process CDRs from
-	CdrOutDir      *string           `xml:"cdr_out_dir"`     // Folder to move processed CDRs to
-	CdrSourceId    *string           `xml:"cdr_source_id"`   // Source identifier for the processed CDRs
-	CdrFields      []*XmlCfgCdrField `xml:"fields>field"`
+	Enabled                 *bool             `xml:"enabled"`                    // Enable/Disable the
+	CdrsAddress             *string           `xml:"cdrs_address"`               // The address where CDRs can be reached
+	CdrFormat               *string           `xml:"cdr_format"`                 // The type of CDR to process <csv>
+	FieldSeparator          *string           `xml:"field_separator"`            // The separator to use when reading csvs
+	DataUsageMultiplyFactor *float64          `xml:"data_usage_multiply_factor"` // Conversion factor for data usage
+	RunDelay                *int64            `xml:"run_delay"`                  // Delay between runs
+	CdrInDir                *string           `xml:"cdr_in_dir"`                 // Folder to process CDRs from
+	CdrOutDir               *string           `xml:"cdr_out_dir"`                // Folder to move processed CDRs to
+	CdrSourceId             *string           `xml:"cdr_source_id"`              // Source identifier for the processed CDRs
+	CdrFields               []*XmlCfgCdrField `xml:"fields>field"`
 }
 
 // The CdrExporter configuration instance
