@@ -88,7 +88,7 @@ func NewCdrc(cdrcCfg *config.CdrcConfig, httpSkipTlsCheck bool, cdrServer *engin
 	}
 	csvSepRune, _ := utf8.DecodeRune([]byte(cdrcCfg.FieldSeparator))
 	cdrc := &Cdrc{cdrsAddress: cdrcCfg.CdrsAddress, CdrFormat: cdrcCfg.CdrFormat, cdrInDir: cdrcCfg.CdrInDir, cdrOutDir: cdrcCfg.CdrOutDir,
-		cdrSourceId: cdrcCfg.CdrSourceId, runDelay: cdrcCfg.RunDelay, csvSep: csvSepRune, cdrFields: cdrcCfg.CdrFields, httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer}
+		cdrSourceId: cdrcCfg.CdrSourceId, runDelay: cdrcCfg.RunDelay, csvSep: csvSepRune, duMultiplyFactor: cdrcCfg.DataUsageMultiplyFactor, cdrFields: cdrcCfg.CdrFields, httpSkipTlsCheck: httpSkipTlsCheck, cdrServer: cdrServer}
 	// Before processing, make sure in and out folders exist
 	for _, dir := range []string{cdrc.cdrInDir, cdrc.cdrOutDir} {
 		if _, err := os.Stat(dir); err != nil && os.IsNotExist(err) {
@@ -107,6 +107,7 @@ type Cdrc struct {
 	cdrSourceId string
 	runDelay         time.Duration
 	csvSep           rune
+	duMultiplyFactor int64
 	cdrFields        []*config.CfgCdrField
 	httpSkipTlsCheck bool
 	cdrServer        *engine.CDRS // Reference towards internal cdrServer if that is the case
@@ -158,6 +159,9 @@ func (self *Cdrc) recordToStoredCdr(record []string) (*utils.StoredCdr, error) {
 		}
 	}
 	storedCdr.CgrId = utils.Sha1(storedCdr.AccId, storedCdr.SetupTime.String())
+	if storedCdr.TOR == utils.DATA && self.duMultiplyFactor != 0 {
+		storedCdr.Usage = time.Duration(storedCdr.Usage.Nanoseconds() * self.duMultiplyFactor)
+	}
 	for _, httpFieldCfg := range lazyHttpFields { // Lazy process the http fields
 		var outValByte []byte
 		var fieldVal, httpAddr string

@@ -66,6 +66,56 @@ func TestRecordForkCdr(t *testing.T) {
 	}
 }
 
+func TestDataMultiplyFactor(t *testing.T) {
+	cdrFields := []*config.CfgCdrField{&config.CfgCdrField{Tag: "TORField", Type: utils.CDRFIELD, CdrFieldId: "tor", Value: []*utils.RSRField{&utils.RSRField{Id: "0"}}},
+		&config.CfgCdrField{Tag: "UsageField", Type: utils.CDRFIELD, CdrFieldId: "usage", Value: []*utils.RSRField{&utils.RSRField{Id: "1"}}}}
+	cdrc := &Cdrc{CdrFormat: CSV, cdrSourceId: "TEST_CDRC", cdrFields: cdrFields}
+	cdrRow := []string{"*data", "1"}
+	rtCdr, err := cdrc.recordToStoredCdr(cdrRow)
+	if err != nil {
+		t.Error("Failed to parse CDR in rated cdr", err)
+	}
+	var sTime time.Time
+	expectedCdr := &utils.StoredCdr{
+		CgrId:       utils.Sha1("", sTime.String()),
+		TOR:         cdrRow[0],
+		CdrHost:     "0.0.0.0",
+		CdrSource:   "TEST_CDRC",
+		Usage:       time.Duration(1) * time.Second,
+		ExtraFields: map[string]string{},
+		Cost:        -1,
+	}
+	if !reflect.DeepEqual(expectedCdr, rtCdr) {
+		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
+	}
+	cdrc.duMultiplyFactor = 1024
+	expectedCdr = &utils.StoredCdr{
+		CgrId:       utils.Sha1("", sTime.String()),
+		TOR:         cdrRow[0],
+		CdrHost:     "0.0.0.0",
+		CdrSource:   "TEST_CDRC",
+		Usage:       time.Duration(1024) * time.Second,
+		ExtraFields: map[string]string{},
+		Cost:        -1,
+	}
+	if rtCdr, _ := cdrc.recordToStoredCdr(cdrRow); !reflect.DeepEqual(expectedCdr, rtCdr) {
+		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
+	}
+	cdrRow = []string{"*voice", "1"}
+	expectedCdr = &utils.StoredCdr{
+		CgrId:       utils.Sha1("", sTime.String()),
+		TOR:         cdrRow[0],
+		CdrHost:     "0.0.0.0",
+		CdrSource:   "TEST_CDRC",
+		Usage:       time.Duration(1) * time.Second,
+		ExtraFields: map[string]string{},
+		Cost:        -1,
+	}
+	if rtCdr, _ := cdrc.recordToStoredCdr(cdrRow); !reflect.DeepEqual(expectedCdr, rtCdr) {
+		t.Errorf("Expected: \n%v, \nreceived: \n%v", expectedCdr, rtCdr)
+	}
+}
+
 /*
 func TestDnTdmCdrs(t *testing.T) {
 	tdmCdrs := `

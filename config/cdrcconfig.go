@@ -90,7 +90,7 @@ func NewDefaultCdrcConfig() *CdrcConfig {
 		CdrsAddress:             "",
 		CdrFormat:               utils.CSV,
 		FieldSeparator:          utils.FIELDS_SEP,
-		DataUsageMultiplyFactor: 1.0,
+		DataUsageMultiplyFactor: 1,
 		RunDelay:                time.Duration(0),
 		CdrInDir:                "/var/log/cgrates/cdrc/in",
 		CdrOutDir:               "/var/log/cgrates/cdrc/out",
@@ -116,7 +116,8 @@ func NewCdrcConfigFromFileParams(c *conf.ConfigFile) (*CdrcConfig, error) {
 		cdrcCfg.FieldSeparator, _ = c.GetString("cdrc", "field_separator")
 	}
 	if hasOpt := c.HasOption("cdrc", "data_usage_multiply_factor"); hasOpt {
-		cdrcCfg.DataUsageMultiplyFactor, _ = c.GetFloat64("cdrc", "data_usage_multiply_factor")
+		mf, _ := c.GetInt("cdrc", "data_usage_multiply_factor")
+		cdrcCfg.DataUsageMultiplyFactor = int64(mf)
 	}
 	if hasOpt := c.HasOption("cdrc", "run_delay"); hasOpt {
 		durStr, _ := c.GetString("cdrc", "run_delay")
@@ -199,7 +200,7 @@ type CdrcConfig struct {
 	CdrsAddress             string         // The address where CDRs can be reached
 	CdrFormat               string         // The type of CDR file to process <csv>
 	FieldSeparator          string         // The separator to use when reading csvs
-	DataUsageMultiplyFactor float64        // Conversion factor for data usage
+	DataUsageMultiplyFactor int64          // Conversion factor for data usage
 	RunDelay                time.Duration  // Delay between runs, 0 for inotify driven requests
 	CdrInDir                string         // Folder to process CDRs from
 	CdrOutDir               string         // Folder to move processed CDRs to

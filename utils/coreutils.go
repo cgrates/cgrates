@@ -211,7 +211,7 @@ func CopyHour(src, dest time.Time) time.Time {
 // Parses duration, considers s as time unit if not provided, seconds as float to specify subunits
 func ParseDurationWithSecs(durStr string) (time.Duration, error) {
 	if durSecs, err := strconv.ParseFloat(durStr, 64); err == nil { // Seconds format considered
-		durNanosecs := int(durSecs * 1000000000)
+		durNanosecs := int(durSecs * NANO_MULTIPLIER)
 		return time.Duration(durNanosecs), nil
 	} else {
 		return time.ParseDuration(durStr)

@@ -165,6 +165,7 @@ const (
 	FILLER                       = "filler"
 	METATAG                      = "metatag"
 	HTTP_POST                    = "http_post"
+	NANO_MULTIPLIER              = 1000000000
 )
 
 var (
