@@ -58,7 +58,7 @@ The mechanism of extracting CDR information out of JSON encoded CDR received fro
       - sip_local_network_addr: IP address of the FreeSWITCH box generating the CDR
       - sip_call_id: call id out of SIP protocol
       - cgr_reqtype: request type as understood by the CGRateS
-      - cgr_tor: TypeOfRecord (optional)
+      - cgr_category: call category (optional)
       - cgr_tenant: tenant this call belongs to (optional)
       - cgr_account: account id in CGRateS (optional)
       - cgr_subject: rating subject in CGRateS (optional)
