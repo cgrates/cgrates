@@ -61,19 +61,19 @@ type TpDestinationRate struct {
 	Id               int64
 	Tpid             string
 	Tag              string
-	DestinationsId   string
-	RatesId          string
+	DestinationsTag  string
+	RatesTag         string
 	RoundingMethod   string
 	RoundingDecimals int
 }
 
 type TpRatingPlan struct {
-	Id          int64
-	Tpid        string
-	Tag         string
-	DestratesId string
-	TimingId    string
-	Weight      float64
+	Id           int64
+	Tpid         string
+	Tag          string
+	DestratesTag string
+	TimingTag    string
+	Weight       float64
 }
 
 type TpRatingProfile struct {
@@ -85,7 +85,7 @@ type TpRatingProfile struct {
 	Category         string
 	Subject          string
 	ActivationTime   string
-	RatingPlanId     string
+	RatingPlanTag    string
 	FallbackSubjects string
 }
 
@@ -103,17 +103,17 @@ func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
 }
 
 type TpLcrRules struct {
-	Id            int64
-	Tpid          string
-	Direction     string
-	Tenant        string
-	Customer      string
-	DestinationId string
-	Category      string
-	Strategy      string
-	Suppliers     string
-	ActivatinTime string
-	Weight        float64
+	Id             int64
+	Tpid           string
+	Direction      string
+	Tenant         string
+	Customer       string
+	DestinationTag string
+	Category       string
+	Strategy       string
+	Suppliers      string
+	ActivatinTime  string
+	Weight         float64
 }
 
 type TpAction struct {
@@ -125,7 +125,7 @@ type TpAction struct {
 	Direction       string
 	Units           float64
 	ExpiryTime      string
-	DestinationId   string
+	DestinationTag  string
 	RatingSubject   string
 	Category        string
 	SharedGroup     string
@@ -135,12 +135,12 @@ type TpAction struct {
 }
 
 type TpActionPlan struct {
-	Id        int64
-	Tpid      string
-	Tag       string
-	ActionsId string
-	TimingId  string
-	Weight    float64
+	Id         int64
+	Tpid       string
+	Tag        string
+	ActionsTag string
+	TimingTag  string
+	Weight     float64
 }
 
 type TpActionTrigger struct {
@@ -153,26 +153,26 @@ type TpActionTrigger struct {
 	ThresholdValue       float64
 	Recurrent            int
 	MinSleep             int64
-	DestinationId        string
+	DestinationTag       string
 	BalanceWeight        float64
 	BalanceExpiryTime    string
 	BalanceRatingSubject string
 	BalanceCategory      string
 	BalanceSharedGroup   string
 	MinQueuedItems       int
-	ActionsId            string
+	ActionsTag           string
 	Weight               float64
 }
 
 type TpAccountAction struct {
-	Id               int64
-	Tpid             string
-	Loadid           string
-	Direction        string
-	Tenant           string
-	Account          string
-	ActionPlanId     string
-	ActionTriggersId string
+	Id                int64
+	Tpid              string
+	Loadid            string
+	Direction         string
+	Tenant            string
+	Account           string
+	ActionPlanTag     string
+	ActionTriggersTag string
 }
 
 func (aa *TpAccountAction) SetAccountActionId(id string) error {

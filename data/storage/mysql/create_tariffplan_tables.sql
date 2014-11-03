@@ -14,7 +14,7 @@ CREATE TABLE `tp_timings` (
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_tmid` (`tpid`,`tag`),
-  UNIQUE KEY `tpid_id` (`tpid`,`tag`)
+  UNIQUE KEY `tpid_tag` (`tpid`,`tag`)
 );
 
 --
@@ -62,14 +62,14 @@ CREATE TABLE `tp_destination_rates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
-  `destinations_id` varchar(64) NOT NULL,
-  `rates_id` varchar(64) NOT NULL,
+  `destinations_tag` varchar(64) NOT NULL,
+  `rates_tag` varchar(64) NOT NULL,
   `rounding_method` varchar(255) NOT NULL,
   `rounding_decimals` tinyint(4) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_drid` (`tpid`,`tag`),
-  UNIQUE KEY `tpid_drid_dstid` (`tpid`,`tag`,`destinations_id`)
+  UNIQUE KEY `tpid_drid_dstid` (`tpid`,`tag`,`destinations_tag`)
 );
 
 --
@@ -81,13 +81,13 @@ CREATE TABLE `tp_rating_plans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
-  `destrates_id` varchar(64) NOT NULL,
-  `timing_id` varchar(64) NOT NULL,
+  `destrates_tag` varchar(64) NOT NULL,
+  `timing_tag` varchar(64) NOT NULL,
   `weight` double(8,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_rpl` (`tpid`,`tag`),
-  UNIQUE KEY `tpid_rplid_destrates_timings_weight` (`tpid`,`tag`,`destrates_id`,`timing_id`)
+  UNIQUE KEY `tpid_rplid_destrates_timings_weight` (`tpid`,`tag`,`destrates_tag`,`timing_tag`)
 );
 
 --
@@ -104,7 +104,7 @@ CREATE TABLE `tp_rating_profiles` (
   `category` varchar(16) NOT NULL,
   `subject` varchar(64) NOT NULL,
   `activation_time` varchar(24) NOT NULL,
-  `rating_plan_id` varchar(64) NOT NULL,
+  `rating_plan_tag` varchar(64) NOT NULL,
   `fallback_subjects` varchar(64),
   PRIMARY KEY (`id`),
   KEY `tpid_loadid` (`tpid`, `loadid`),
@@ -142,7 +142,7 @@ CREATE TABLE `tp_actions` (
   `direction` varchar(8) NOT NULL,
   `units` double(20,4) NOT NULL,
   `expiry_time` varchar(24) NOT NULL,
-  `destination_id` varchar(64) NOT NULL,
+  `destination_tag` varchar(64) NOT NULL,
   `rating_subject` varchar(64) NOT NULL,
   `category` varchar(16) NOT NULL,
   `shared_group` varchar(64) NOT NULL,
@@ -151,7 +151,7 @@ CREATE TABLE `tp_actions` (
   `weight` double(8,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_id`,`shared_group`,`balance_weight`,`weight`)
+  UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`shared_group`,`balance_weight`,`weight`)
 );
 
 --
@@ -163,12 +163,12 @@ CREATE TABLE `tp_action_plans` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
-  `actions_id` varchar(64) NOT NULL,
-  `timing_id` varchar(64) NOT NULL,
+  `actions_tag` varchar(64) NOT NULL,
+  `timing_tag` varchar(64) NOT NULL,
   `weight` double(8,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_action_schedule` (`tpid`,`tag`,`actions_id`)
+  UNIQUE KEY `unique_action_schedule` (`tpid`,`tag`,`actions_tag`)
 );
 
 --
@@ -186,18 +186,18 @@ CREATE TABLE `tp_action_triggers` (
   `threshold_value` double(20,4) NOT NULL,
   `recurrent` bool NOT NULL,
   `min_sleep` int(11) NOT NULL,
-  `destination_id` varchar(64) NOT NULL,
+  `destination_tag` varchar(64) NOT NULL,
   `balance_weight` double(8,2) NOT NULL, 
   `balance_expiry_time` varchar(24) NOT NULL, 
   `balance_rating_subject` varchar(64) NOT NULL,
   `balance_category` varchar(16) NOT NULL,
   `balance_shared_group` varchar(64) NOT NULL,
   `min_queued_items` int(11) NOT NULL,
-  `actions_id` varchar(64) NOT NULL,
+  `actions_tag` varchar(64) NOT NULL,
   `weight` double(8,2) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
-  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_type`,`direction`,`threshold_type`,`threshold_value`,`destination_id`,`actions_id`)
+  UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_type`,`direction`,`threshold_type`,`threshold_value`,`destination_tag`,`actions_tag`)
 );
 
 --
@@ -212,8 +212,8 @@ CREATE TABLE `tp_account_actions` (
   `tenant` varchar(64) NOT NULL,
   `account` varchar(64) NOT NULL,
   `direction` varchar(8) NOT NULL,
-  `action_plan_id` varchar(64),
-  `action_triggers_id` varchar(64),
+  `action_plan_tag` varchar(64),
+  `action_triggers_tag` varchar(64),
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_account` (`tpid`,`loadid`,`tenant`,`account`,`direction`)
@@ -230,7 +230,7 @@ CREATE TABLE tp_lcr_rules (
   `direction`	varchar(8) NOT NULL,
   `tenant` varchar(64) NOT NULL,
   `customer` varchar(64) NOT NULL,
-  `destination_id` varchar(64) NOT NULL,
+  `destination_tag` varchar(64) NOT NULL,
   `category` varchar(16) NOT NULL,
   `strategy` varchar(16) NOT NULL,
   `suppliers`	varchar(64) NOT NULL,

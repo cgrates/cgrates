@@ -268,8 +268,8 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 			tx.Save(TpDestinationRate{
 				Tpid:             tpid,
 				Tag:              drId,
-				DestinationsId:   dr.DestinationId,
-				RatesId:          dr.RateId,
+				DestinationsTag:  dr.DestinationId,
+				RatesTag:         dr.RateId,
 				RoundingMethod:   dr.RoundingMethod,
 				RoundingDecimals: dr.RoundingDecimals,
 			})
@@ -288,11 +288,11 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 		tx.Where("tpid = ?", tpid).Where("tag = ?", rpId).Delete(TpRatingPlan{})
 		for _, rp := range rPlans {
 			tx.Save(TpRatingPlan{
-				Tpid:        tpid,
-				Tag:         rpId,
-				DestratesId: rp.DestinationRatesId,
-				TimingId:    rp.TimingId,
-				Weight:      rp.Weight,
+				Tpid:         tpid,
+				Tag:          rpId,
+				DestratesTag: rp.DestinationRatesId,
+				TimingTag:    rp.TimingId,
+				Weight:       rp.Weight,
 			})
 		}
 	}
@@ -323,7 +323,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.
 				Subject:          rpf.Subject,
 				Direction:        rpf.Direction,
 				ActivationTime:   ra.ActivationTime,
-				RatingPlanId:     ra.RatingPlanId,
+				RatingPlanTag:    ra.RatingPlanId,
 				FallbackSubjects: ra.FallbackSubjects,
 			})
 		}
@@ -444,7 +444,7 @@ func (self *SQLStorage) SetTPLCRs(tpid string, lcrs map[string]*LCR) error {
 		return nil //Nothing to set
 	}
 	var buffer bytes.Buffer
-	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,direction,tenant,customer,destination_id,category,strategy,suppliers,activation_time,weight) VALUES ", utils.TBL_TP_LCRS))
+	buffer.WriteString(fmt.Sprintf("INSERT INTO %s (tpid,direction,tenant,customer,destination_tag,category,strategy,suppliers,activation_time,weight) VALUES ", utils.TBL_TP_LCRS))
 	i := 0
 	for _, lcr := range lcrs {
 		for _, act := range lcr.Activations {
@@ -481,7 +481,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 				Direction:       ac.Direction,
 				Units:           ac.Units,
 				ExpiryTime:      ac.ExpiryTime,
-				DestinationId:   ac.DestinationId,
+				DestinationTag:  ac.DestinationId,
 				RatingSubject:   ac.RatingSubject,
 				Category:        ac.Category,
 				SharedGroup:     ac.SharedGroup,
@@ -496,7 +496,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_id,rating_subject,category,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
+	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,category,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
 	if err != nil {
 		return nil, err
 	}
@@ -540,11 +540,11 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 		tx.Where("tpid = ?", tpid).Where("tag = ?", apId).Delete(TpActionPlan{})
 		for _, ap := range aPlans {
 			tx.Save(TpActionPlan{
-				Tpid:      tpid,
-				Tag:       apId,
-				ActionsId: ap.ActionsId,
-				TimingId:  ap.TimingId,
-				Weight:    ap.Weight,
+				Tpid:       tpid,
+				Tag:        apId,
+				ActionsTag: ap.ActionsId,
+				TimingTag:  ap.TimingId,
+				Weight:     ap.Weight,
 			})
 		}
 	}
@@ -565,7 +565,7 @@ func (self *SQLStorage) GetTPActionTimings(tpid, tag string) (map[string][]*util
 	}
 
 	for _, tpAp := range tpActionPlans {
-		ats[tpAp.Tag] = append(ats[tpAp.Tag], &utils.TPActionTiming{ActionsId: tpAp.ActionsId, TimingId: tpAp.TimingId, Weight: tpAp.Weight})
+		ats[tpAp.Tag] = append(ats[tpAp.Tag], &utils.TPActionTiming{ActionsId: tpAp.ActionsTag, TimingId: tpAp.TimingTag, Weight: tpAp.Weight})
 	}
 	return ats, nil
 }
@@ -591,14 +591,14 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 				ThresholdValue:       at.ThresholdValue,
 				Recurrent:            recurrent,
 				MinSleep:             int64(at.MinSleep),
-				DestinationId:        at.DestinationId,
+				DestinationTag:       at.DestinationId,
 				BalanceWeight:        at.BalanceWeight,
 				BalanceExpiryTime:    at.BalanceExpirationDate,
 				BalanceRatingSubject: at.BalanceRatingSubject,
 				BalanceCategory:      at.BalanceCategory,
 				BalanceSharedGroup:   at.BalanceSharedGroup,
 				MinQueuedItems:       at.MinQueuedItems,
-				ActionsId:            at.ActionsId,
+				ActionsTag:           at.ActionsId,
 				Weight:               at.Weight,
 			})
 		}
@@ -623,13 +623,13 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aas map[string]*utils.T
 			Delete(TpAccountAction{})
 
 		tx.Save(TpAccountAction{
-			Tpid:             aa.TPid,
-			Loadid:           aa.LoadId,
-			Tenant:           aa.Tenant,
-			Account:          aa.Account,
-			Direction:        aa.Direction,
-			ActionPlanId:     aa.ActionPlanId,
-			ActionTriggersId: aa.ActionTriggersId,
+			Tpid:              aa.TPid,
+			Loadid:            aa.LoadId,
+			Tenant:            aa.Tenant,
+			Account:           aa.Account,
+			Direction:         aa.Direction,
+			ActionPlanTag:     aa.ActionPlanId,
+			ActionTriggersTag: aa.ActionTriggersId,
 		})
 	}
 	tx.Commit()
@@ -1226,8 +1226,8 @@ func (self *SQLStorage) GetTpDestinationRates(tpid, tag string, pagination *util
 			DestinationRateId: tpDr.Tag,
 			DestinationRates: []*utils.DestinationRate{
 				&utils.DestinationRate{
-					DestinationId:    tpDr.DestinationsId,
-					RateId:           tpDr.RatesId,
+					DestinationId:    tpDr.DestinationsTag,
+					RateId:           tpDr.RatesTag,
 					RoundingMethod:   tpDr.RoundingMethod,
 					RoundingDecimals: tpDr.RoundingDecimals,
 				},
@@ -1281,8 +1281,8 @@ func (self *SQLStorage) GetTpRatingPlans(tpid, tag string, pagination *utils.Pag
 
 	for _, tpRp := range tpRatingPlans {
 		rpb := &utils.TPRatingPlanBinding{
-			DestinationRatesId: tpRp.DestratesId,
-			TimingId:           tpRp.TimingId,
+			DestinationRatesId: tpRp.DestratesTag,
+			TimingId:           tpRp.TimingTag,
 			Weight:             tpRp.Weight,
 		}
 		if _, exists := rpbns[tpRp.Tag]; exists {
@@ -1329,7 +1329,7 @@ func (self *SQLStorage) GetTpRatingProfiles(qryRpf *utils.TPRatingProfile) (map[
 		}
 		ra := &utils.TPRatingActivation{
 			ActivationTime:   tpRpf.ActivationTime,
-			RatingPlanId:     tpRpf.RatingPlanId,
+			RatingPlanId:     tpRpf.RatingPlanTag,
 			FallbackSubjects: tpRpf.FallbackSubjects,
 		}
 		if existingRpf, exists := rpfs[rp.KeyId()]; !exists {
@@ -1526,7 +1526,7 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 			Direction:       tpAc.Direction,
 			Units:           tpAc.Units,
 			ExpiryTime:      tpAc.ExpiryTime,
-			DestinationId:   tpAc.DestinationId,
+			DestinationId:   tpAc.DestinationTag,
 			RatingSubject:   tpAc.RatingSubject,
 			Category:        tpAc.Category,
 			SharedGroup:     tpAc.SharedGroup,
@@ -1559,14 +1559,14 @@ func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*uti
 			ThresholdValue:        tpAt.ThresholdValue,
 			Recurrent:             recurrent,
 			MinSleep:              time.Duration(tpAt.MinSleep),
-			DestinationId:         tpAt.DestinationId,
+			DestinationId:         tpAt.DestinationTag,
 			BalanceWeight:         tpAt.BalanceWeight,
 			BalanceExpirationDate: tpAt.BalanceExpiryTime,
 			BalanceRatingSubject:  tpAt.BalanceRatingSubject,
 			BalanceCategory:       tpAt.BalanceCategory,
 			BalanceSharedGroup:    tpAt.BalanceSharedGroup,
 			Weight:                tpAt.Weight,
-			ActionsId:             tpAt.ActionsId,
+			ActionsId:             tpAt.ActionsTag,
 			MinQueuedItems:        tpAt.MinQueuedItems,
 		}
 		ats[tpAt.Tag] = append(ats[tpAt.Tag], at)
@@ -1600,8 +1600,8 @@ func (self *SQLStorage) GetTpAccountActions(aaFltr *utils.TPAccountActions) (map
 			Tenant:           tpAa.Tenant,
 			Account:          tpAa.Account,
 			Direction:        tpAa.Direction,
-			ActionPlanId:     tpAa.ActionPlanId,
-			ActionTriggersId: tpAa.ActionTriggersId,
+			ActionPlanId:     tpAa.ActionPlanTag,
+			ActionTriggersId: tpAa.ActionTriggersTag,
 		}
 		aas[aacts.KeyId()] = aacts
 	}
