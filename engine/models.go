@@ -29,9 +29,9 @@ import (
 // to be used by gorm orm
 
 type TpTiming struct {
-	Tbid      int64 `gorm:"primary_key:yes"`
+	Id        int64
 	Tpid      string
-	Id        string
+	Tag       string
 	Years     string
 	Months    string
 	MonthDays string
@@ -40,16 +40,16 @@ type TpTiming struct {
 }
 
 type TpDestination struct {
-	Tbid   int64 `gorm:"primary_key:yes"`
+	Id     int64
 	Tpid   string
-	Id     string
+	Tag    string
 	Prefix string
 }
 
 type TpRate struct {
-	Tbid               int64 `gorm:"primary_key:yes"`
+	Id                 int64
 	Tpid               string
-	Id                 string
+	Tag                string
 	ConnectFee         float64
 	Rate               float64
 	RateUnit           string
@@ -58,9 +58,9 @@ type TpRate struct {
 }
 
 type TpDestinationRate struct {
-	Tbid             int64 `gorm:"primary_key:yes"`
+	Id               int64
 	Tpid             string
-	Id               string
+	Tag              string
 	DestinationsId   string
 	RatesId          string
 	RoundingMethod   string
@@ -68,16 +68,16 @@ type TpDestinationRate struct {
 }
 
 type TpRatingPlan struct {
-	Tbid        int64 `gorm:"primary_key:yes"`
+	Id          int64
 	Tpid        string
-	Id          string
+	Tag         string
 	DestratesId string
 	TimingId    string
 	Weight      float64
 }
 
 type TpRatingProfile struct {
-	Tbid             int64 `gorm:"primary_key:yes"`
+	Id               int64
 	Tpid             string
 	Loadid           string
 	Direction        string
@@ -103,7 +103,7 @@ func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
 }
 
 type TpLcrRules struct {
-	Tbid          int64 `gorm:"primary_key:yes"`
+	Id            int64
 	Tpid          string
 	Direction     string
 	Tenant        string
@@ -117,9 +117,9 @@ type TpLcrRules struct {
 }
 
 type TpAction struct {
-	Tbid            int64 `gorm:"primary_key:yes"`
+	Id              int64
 	Tpid            string
-	Id              string
+	Tag             string
 	Action          string
 	BalanceType     string
 	Direction       string
@@ -135,18 +135,18 @@ type TpAction struct {
 }
 
 type TpActionPlan struct {
-	Tbid      int64 `gorm:"primary_key:yes"`
+	Id        int64
 	Tpid      string
-	Id        string
+	Tag       string
 	ActionsId string
 	TimingId  string
 	Weight    float64
 }
 
 type TpActionTrigger struct {
-	Tbid                 int64 `gorm:"primary_key:yes"`
+	Id                   int64
 	Tpid                 string
-	Id                   string
+	Tag                  string
 	BalanceType          string
 	Direction            string
 	ThresholdType        string
@@ -165,7 +165,7 @@ type TpActionTrigger struct {
 }
 
 type TpAccountAction struct {
-	Tbid             int64 `gorm:"primary_key:yes"`
+	Id               int64
 	Tpid             string
 	Loadid           string
 	Direction        string
@@ -188,16 +188,16 @@ func (aa *TpAccountAction) SetAccountActionId(id string) error {
 }
 
 type TpSharedGroup struct {
-	Tbid          int64 `gorm:"primary_key:yes"`
+	Id            int64
 	Tpid          string
-	Id            string
+	Tag           string
 	Account       string
 	Strategy      string
 	RatingSubject string
 }
 
 type TpDerivedCharger struct {
-	Tbid             int64 `gorm:"primary_key:yes"`
+	Id               int64
 	Tpid             string
 	Loadid           string
 	Direction        string
@@ -234,9 +234,9 @@ func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
 }
 
 type TpCdrStat struct {
-	Tbid              int64 `gorm:"primary_key:yes"`
+	Id                int64
 	Tpid              string
-	Id                string
+	Tag               string
 	QueueLength       int
 	TimeWindow        string
 	Metrics           string

@@ -205,3 +205,7 @@ func TestCallCostToDataCost(t *testing.T) {
 		t.Error("Error coverting to data cost: ", string(js))
 	}
 }
+
+/*
+callcost_test.go:205: Error coverting to data cost:  {"Direction":"*out","Category":"data","Tenant":"cgrates.org","Subject":"rif","Account":"","Destination":"*any","TOR":"*data","Cost":65,"DataSpans":[{"DataStart":0,"DataEnd":60,"Cost":60,"RateInterval":{"Timing":{"Years":null,"Months":[],"MonthDays":null,"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"*middle","RoundingDecimals":4,"Rates":[{"GroupIntervalStart":0,"Value":1,"RateIncrement":60000000000,"RateUnit":1000000000},{"GroupIntervalStart":60000000000,"Value":1,"RateIncrement":1000000000,"RateUnit":1000000000}]},"Weight":10},"DataIndex":60,"Increments":[],"MatchedSubject":"","MatchedPrefix":"","MatchedDestId":""},{"DataStart":60,"DataEnd":65,"Cost":5,"RateInterval":{"Timing":{"Years":null,"Months":[],"MonthDays":null,"WeekDays":[],"StartTime":"00:00:00","EndTime":""},"Rating":{"ConnectFee":0,"RoundingMethod":"*middle","RoundingDecimals":4,"Rates":[{"GroupIntervalStart":0,"Value":1,"RateIncrement":60000000000,"RateUnit":1000000000},{"GroupIntervalStart":60000000000,"Value":1,"RateIncrement":1000000000,"RateUnit":1000000000}]},"Weight":10},"DataIndex":65,"Increments":[],"MatchedSubject":"*out:cgrates.org:data:rif","MatchedPrefix":"*any","MatchedDestId":"*any"}]}
+*/
