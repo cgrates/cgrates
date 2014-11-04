@@ -21,6 +21,7 @@ package engine
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -257,4 +258,73 @@ type TpCdrStat struct {
 	RatedSubject      string
 	CostInterval      string
 	ActionTriggers    string
+}
+
+type TblCdrsPrimary struct {
+	Id          int64
+	Cgrid       string
+	Tor         string
+	Accid       string
+	Cdrhost     string
+	Cdrsource   string
+	Reqtype     string
+	Direction   string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	SetupTime   time.Time
+	AnswerTime  time.Time
+	Usage       float64
+}
+
+func (t TblCdrsPrimary) TableName() string {
+	return "cdrs_primary"
+}
+
+type TblCdrsExtra struct {
+	Id          int64
+	Cgrid       string
+	ExtraFields string
+}
+
+func (t TblCdrsExtra) TableName() string {
+	return "cdrs_extra"
+}
+
+type TblCostDetail struct {
+	Id          int64
+	CostTime    time.Time
+	CostSource  string
+	Cgrid       string
+	Runid       string
+	Tor         string
+	Direction   string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	Cost        float64
+	Timespans   string
+}
+
+type TblRatedCdr struct {
+	Id            int64
+	MediationTime time.Time
+	Cgrid         string
+	Runid         string
+	Reqtype       string
+	Direction     string
+	Tenant        string
+	Category      string
+	Account       string
+	Subject       string
+	Destination   string
+	SetupTime     time.Time
+	AnswerTime    time.Time
+	Usage         float64
+	Cost          float64
+	ExtraInfo     string
 }
