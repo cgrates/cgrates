@@ -1,6 +1,6 @@
 /*
 Real-time Charging System for Telecom & ISP environments
-Copyright (C) 2012-2014 ITsysCOM GmbH
+Copyright (C) ITsysCOM GmbH
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -29,22 +29,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-/*
-README:
-
- Enable these tests by passing '-local' to the go test command
-
- Only database supported for now is mysqlDb. Postgres could be easily extended if needed.
-
- It is expected that the data folder of CGRateS exists at path /usr/share/cgrates/data.
-
- Prior running the tests, create database and users by running:
-  mysqlDb -pyourrootpwd < /usr/share/cgrates/storage/mysqlDb/create_mysqlDb_with_users.sql
-*/
-
 var mysqlDb *MySQLStorage
 
-func TestCreateTables(t *testing.T) {
+func TestMySQLCreateTables(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -57,7 +44,7 @@ func TestCreateTables(t *testing.T) {
 		mysqlDb = d.(*MySQLStorage)
 	}
 	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
-		if err := mysqlDb.CreateTablesFromScript(path.Join(*dataDir, "storage", "mysql", scriptName)); err != nil {
+		if err := mysqlDb.CreateTablesFromScript(path.Join(*dataDir, "storage", utils.MYSQL, scriptName)); err != nil {
 			t.Error("Error on mysqlDb creation: ", err.Error())
 			return // No point in going further
 		}

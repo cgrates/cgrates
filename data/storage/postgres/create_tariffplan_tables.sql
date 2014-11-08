@@ -41,7 +41,7 @@ CREATE TABLE tp_rates (
   rate_unit VARCHAR(16) NOT NULL,
   rate_increment VARCHAR(16) NOT NULL,
   group_interval_start VARCHAR(16) NOT NULL,
-  UNIQUE (tpid, tag, group_interval_start),
+  UNIQUE (tpid, tag, group_interval_start)
 );
 
 --
@@ -56,7 +56,7 @@ CREATE TABLE tp_destination_rates (
   destinations_tag VARCHAR(64) NOT NULL,
   rates_tag VARCHAR(64) NOT NULL,
   rounding_method VARCHAR(255) NOT NULL,
-  rounding_decimals SMALLINT(4) NOT NULL,
+  rounding_decimals SMALLINT NOT NULL,
   UNIQUE (tpid, tag , destinations_tag)
 );
 

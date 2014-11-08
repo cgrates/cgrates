@@ -420,7 +420,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 func (csvr *CSVReader) LoadDestinationRates() (err error) {
 	csvReader, fp, err := csvr.readerFunc(csvr.destinationratesFn, csvr.sep, utils.DESTINATION_RATES_NRCOLS)
 	if err != nil {
-		log.Print("Could not load rates file: ", err)
+		log.Print("Could not load destination_rates file: ", err)
 		// allow writing of the other values
 		return nil
 	}

@@ -32,7 +32,7 @@ type PostgresStorage struct {
 	*SQLStorage
 }
 
-func NewPostgresStorage(host, port, name, user, password string) (Storage, error) {
+func NewPostgresStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (Storage, error) {
 	connectString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable", host, port, name, user, password)
 	db, err := gorm.Open("postgres", connectString)
 	if err != nil {
@@ -42,8 +42,8 @@ func NewPostgresStorage(host, port, name, user, password string) (Storage, error
 	if err != nil {
 		return nil, err
 	}
-	db.DB().SetMaxIdleConns(10)
-	db.DB().SetMaxOpenConns(100)
+	db.DB().SetMaxIdleConns(maxIdleConn)
+	db.DB().SetMaxOpenConns(maxConn)
 	//db.LogMode(true)
 
 	return &PostgresStorage{&SQLStorage{Db: db.DB(), db: db}}, nil
