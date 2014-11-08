@@ -52,11 +52,10 @@ const (
 	LOG_CDR                   = "cdr_"
 	LOG_MEDIATED_CDR          = "mcd_"
 	// sources
-	SESSION_MANAGER_SOURCE = "SMR"
-	MEDIATOR_SOURCE        = "MED"
-	SCHED_SOURCE           = "SCH"
-	RATER_SOURCE           = "RAT"
-	// Some consts used in tests
+	SESSION_MANAGER_SOURCE       = "SMR"
+	MEDIATOR_SOURCE              = "MED"
+	SCHED_SOURCE                 = "SCH"
+	RATER_SOURCE                 = "RAT"
 	CREATE_CDRS_TABLES_SQL       = "create_cdrs_tables.sql"
 	CREATE_TARIFFPLAN_TABLES_SQL = "create_tariffplan_tables.sql"
 	TEST_SQL                     = "TEST_SQL"

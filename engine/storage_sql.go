@@ -22,14 +22,13 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
-	"path"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
@@ -46,18 +45,7 @@ func (self *SQLStorage) Close() {
 }
 
 func (self *SQLStorage) Flush() (err error) {
-	cfg := config.CgrConfig()
-	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
-		if err := self.CreateTablesFromScript(path.Join(cfg.DataFolderPath, "storage", "mysql", scriptName)); err != nil {
-			return err
-		}
-	}
-	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
-		if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 from %s", tbl)); err != nil {
-			return err
-		}
-	}
-	return nil
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (self *SQLStorage) GetKeysForPrefix(prefix string) ([]string, error) {
@@ -380,7 +368,7 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 				Subject:           cs.Subject,
 				DestinationPrefix: cs.DestinationPrefix,
 				UsageInterval:     cs.UsageInterval,
-				MediationRunIds:   cs.MediationRunIds,
+				MediationRunids:   cs.MediationRunIds,
 				RatedAccount:      cs.RatedAccount,
 				RatedSubject:      cs.RatedSubject,
 				CostInterval:      cs.CostInterval,
@@ -415,7 +403,7 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 		for _, dc := range dChargers {
 			newDc := TpDerivedCharger{
 				Tpid:             tpid,
-				RunId:            dc.RunId,
+				Runid:            dc.RunId,
 				RunFilters:       dc.RunFilters,
 				ReqTypeField:     dc.ReqTypeField,
 				DirectionField:   dc.DirectionField,
@@ -1394,7 +1382,7 @@ func (self *SQLStorage) GetTpCdrStats(tpid, tag string) (map[string][]*utils.TPC
 			Subject:           tpCs.Subject,
 			DestinationPrefix: tpCs.DestinationPrefix,
 			UsageInterval:     tpCs.UsageInterval,
-			MediationRunIds:   tpCs.MediationRunIds,
+			MediationRunIds:   tpCs.MediationRunids,
 			RatedAccount:      tpCs.RatedAccount,
 			RatedSubject:      tpCs.RatedSubject,
 			CostInterval:      tpCs.CostInterval,
@@ -1437,7 +1425,7 @@ func (self *SQLStorage) GetTpDerivedChargers(dc *utils.TPDerivedChargers) (map[s
 			dcs[tag] = tpDc
 		}
 		dcs[tag].DerivedChargers = append(dcs[tag].DerivedChargers, &utils.TPDerivedCharger{
-			RunId:            tpDcMdl.RunId,
+			RunId:            tpDcMdl.Runid,
 			RunFilters:       tpDcMdl.RunFilters,
 			ReqTypeField:     tpDcMdl.ReqTypeField,
 			DirectionField:   tpDcMdl.DirectionField,

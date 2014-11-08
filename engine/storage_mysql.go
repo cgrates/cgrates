@@ -20,14 +20,13 @@ package engine
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+	"path"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
-
-type MySQLStorage struct {
-	*SQLStorage
-}
 
 func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleConn int) (Storage, error) {
 	connectString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&loc=Local&parseTime=true", user, password, host, port, name)
@@ -44,4 +43,23 @@ func NewMySQLStorage(host, port, name, user, password string, maxConn, maxIdleCo
 	//db.LogMode(true)
 
 	return &MySQLStorage{&SQLStorage{Db: db.DB(), db: db}}, nil
+}
+
+type MySQLStorage struct {
+	*SQLStorage
+}
+
+func (self *MySQLStorage) Flush() (err error) {
+	cfg := config.CgrConfig()
+	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
+		if err := self.CreateTablesFromScript(path.Join(cfg.DataFolderPath, "storage", utils.MYSQL, scriptName)); err != nil {
+			return err
+		}
+	}
+	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
+		if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 FROM %s", tbl)); err != nil {
+			return err
+		}
+	}
+	return nil
 }

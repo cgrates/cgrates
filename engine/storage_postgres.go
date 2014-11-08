@@ -20,6 +20,9 @@ package engine
 
 import (
 	"fmt"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/utils"
+	"path"
 
 	_ "github.com/bmizerany/pq"
 	"github.com/jinzhu/gorm"
@@ -44,4 +47,19 @@ func NewPostgresStorage(host, port, name, user, password string) (Storage, error
 	//db.LogMode(true)
 
 	return &PostgresStorage{&SQLStorage{Db: db.DB(), db: db}}, nil
+}
+
+func (self *PostgresStorage) Flush() (err error) {
+	cfg := config.CgrConfig()
+	for _, scriptName := range []string{CREATE_CDRS_TABLES_SQL, CREATE_TARIFFPLAN_TABLES_SQL} {
+		if err := self.CreateTablesFromScript(path.Join(cfg.DataFolderPath, "storage", utils.POSTGRES, scriptName)); err != nil {
+			return err
+		}
+	}
+	for _, tbl := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA} {
+		if _, err := self.Db.Query(fmt.Sprintf("SELECT 1 FROM %s", tbl)); err != nil {
+			return err
+		}
+	}
+	return nil
 }

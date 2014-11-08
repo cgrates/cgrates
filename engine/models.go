@@ -206,7 +206,7 @@ type TpDerivedCharger struct {
 	Category         string
 	Account          string
 	Subject          string
-	RunId            string
+	Runid            string
 	RunFilters       string
 	ReqTypeField     string
 	DirectionField   string
@@ -253,7 +253,7 @@ type TpCdrStat struct {
 	Subject           string
 	DestinationPrefix string
 	UsageInterval     string
-	MediationRunIds   string
+	MediationRunids   string
 	RatedAccount      string
 	RatedSubject      string
 	CostInterval      string
