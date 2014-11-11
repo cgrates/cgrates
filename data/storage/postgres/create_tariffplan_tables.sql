@@ -161,7 +161,7 @@ CREATE TABLE tp_action_triggers (
   direction VARCHAR(8) NOT NULL,
   threshold_type char(12) NOT NULL,
   threshold_value NUMERIC(20,4) NOT NULL,
-  recurrent bool NOT NULL,
+  recurrent BOOLEAN NOT NULL,
   min_sleep INTEGER NOT NULL,
   destination_tag VARCHAR(64) NOT NULL,
   balance_weight NUMERIC(8,2) NOT NULL, 

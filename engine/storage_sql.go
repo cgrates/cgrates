@@ -101,6 +101,7 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 	return ids, nil
 }
 
+// ToDo: PSQL TEST
 func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, pagination *utils.Paginator) ([]string, error) {
 
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
@@ -156,15 +157,7 @@ func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDisti
 }
 
 func (self *SQLStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
-	if tm == nil {
-		return nil //Nothing to set
-	}
-	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time) VALUES('%s','%s','%s','%s','%s','%s','%s') ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
-		utils.TBL_TP_TIMINGS, tm.TPid, tm.TimingId, tm.Years, tm.Months, tm.MonthDays, tm.WeekDays, tm.Time)); err != nil {
-
-		return err
-	}
-	return nil
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (self *SQLStorage) RemTPData(table, tpid string, args ...string) error {
@@ -205,16 +198,19 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 		return nil
 	}
 	tx := self.db.Begin()
-	tx.Where("tpid = ?", tpid).Where("tag = ?", dest.Id).Delete(TpDestination{})
+	if err := tx.Where(&TpDestination{Tpid: tpid, Tag: dest.Id}).Delete(TpDestination{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
 	for _, prefix := range dest.Prefixes {
-		db := tx.Save(TpDestination{
+		save := tx.Save(TpDestination{
 			Tpid:   tpid,
 			Tag:    dest.Id,
 			Prefix: prefix,
 		})
-		if db.Error != nil {
+		if save.Error != nil {
 			tx.Rollback()
-			return db.Error
+			return save.Error
 		}
 	}
 	tx.Commit()
@@ -227,9 +223,12 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 	}
 	tx := self.db.Begin()
 	for rtId, rSlots := range rts {
-		tx.Where("tpid = ?", tpid).Where("tag = ?", rtId).Delete(TpRate{})
+		if err := tx.Where(&TpRate{Tpid: tpid, Tag: rtId}).Delete(TpRate{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, rs := range rSlots {
-			tx.Save(TpRate{
+			save := tx.Save(TpRate{
 				Tpid:               tpid,
 				Tag:                rtId,
 				ConnectFee:         rs.ConnectFee,
@@ -238,6 +237,11 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 				RateIncrement:      rs.RateIncrement,
 				GroupIntervalStart: rs.GroupIntervalStart,
 			})
+			if save.Error != nil {
+				tx.Rollback()
+				return save.Error
+			}
+
 		}
 	}
 	tx.Commit()
@@ -251,9 +255,12 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 
 	tx := self.db.Begin()
 	for drId, dRates := range drs {
-		tx.Where("tpid = ?", tpid).Where("tag = ?", drId).Delete(TpDestinationRate{})
+		if err := tx.Where(&TpDestinationRate{Tpid: tpid, Tag: drId}).Delete(TpDestinationRate{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, dr := range dRates {
-			tx.Save(TpDestinationRate{
+			saved := tx.Save(TpDestinationRate{
 				Tpid:             tpid,
 				Tag:              drId,
 				DestinationsTag:  dr.DestinationId,
@@ -261,6 +268,10 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 				RoundingMethod:   dr.RoundingMethod,
 				RoundingDecimals: dr.RoundingDecimals,
 			})
+			if saved.Error != nil {
+				tx.Rollback()
+				return saved.Error
+			}
 		}
 	}
 	tx.Commit()
@@ -273,15 +284,22 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 	}
 	tx := self.db.Begin()
 	for rpId, rPlans := range drts {
-		tx.Where("tpid = ?", tpid).Where("tag = ?", rpId).Delete(TpRatingPlan{})
+		if err := tx.Where(&TpRatingPlan{Tpid: tpid, Tag: rpId}).Delete(TpRatingPlan{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, rp := range rPlans {
-			tx.Save(TpRatingPlan{
+			saved := tx.Save(TpRatingPlan{
 				Tpid:         tpid,
 				Tag:          rpId,
 				DestratesTag: rp.DestinationRatesId,
 				TimingTag:    rp.TimingId,
 				Weight:       rp.Weight,
 			})
+			if saved.Error != nil {
+				tx.Rollback()
+				return saved.Error
+			}
 		}
 	}
 	tx.Commit()
@@ -294,16 +312,12 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.
 	}
 	tx := self.db.Begin()
 	for _, rpf := range rpfs {
-		// parse identifiers
-		tx.Where("tpid = ?", tpid).
-			Where("direction = ?", rpf.Direction).
-			Where("tenant = ?", rpf.Tenant).
-			Where("subject = ?", rpf.Subject).
-			Where("category = ?", rpf.Category).
-			Where("loadid = ?", rpf.LoadId).
-			Delete(TpRatingProfile{})
+		if err := tx.Where(&TpRatingProfile{Tpid: tpid, Loadid: rpf.LoadId, Direction: rpf.Direction, Tenant: rpf.Tenant, Category: rpf.Category, Subject: rpf.Subject}).Delete(TpRatingProfile{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, ra := range rpf.RatingPlanActivations {
-			tx.Save(TpRatingProfile{
+			saved := tx.Save(TpRatingProfile{
 				Tpid:             rpf.TPid,
 				Loadid:           rpf.LoadId,
 				Tenant:           rpf.Tenant,
@@ -314,6 +328,10 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.
 				RatingPlanTag:    ra.RatingPlanId,
 				FallbackSubjects: ra.FallbackSubjects,
 			})
+			if saved.Error != nil {
+				tx.Rollback()
+				return saved.Error
+			}
 		}
 	}
 	tx.Commit()
@@ -326,15 +344,22 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string][]*utils.T
 	}
 	tx := self.db.Begin()
 	for sgId, sGroups := range sgs {
-		tx.Where("tpid = ?", tpid).Where("tag = ?", sgId).Delete(TpSharedGroup{})
+		if err := tx.Where(&TpSharedGroup{Tpid: tpid, Tag: sgId}).Delete(TpSharedGroup{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, sg := range sGroups {
-			tx.Save(TpSharedGroup{
+			saved := tx.Save(TpSharedGroup{
 				Tpid:          tpid,
 				Tag:           sgId,
 				Account:       sg.Account,
 				Strategy:      sg.Strategy,
 				RatingSubject: sg.RatingSubject,
 			})
+			if saved.Error != nil {
+				tx.Rollback()
+				return saved.Error
+			}
 		}
 	}
 	tx.Commit()
@@ -347,10 +372,13 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 	}
 	tx := self.db.Begin()
 	for csId, cStats := range css {
-		tx.Where("tpid = ?", tpid).Where("tag = ?", csId).Delete(TpCdrStat{})
+		if err := tx.Where(&TpCdrStat{Tpid: tpid, Tag: csId}).Delete(TpCdrStat{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, cs := range cStats {
 			ql, _ := strconv.Atoi(cs.QueueLength)
-			tx.Save(TpCdrStat{
+			saved := tx.Save(TpCdrStat{
 				Tpid:              tpid,
 				Tag:               csId,
 				QueueLength:       ql,
@@ -374,6 +402,10 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 				CostInterval:      cs.CostInterval,
 				ActionTriggers:    cs.ActionTriggers,
 			})
+			if saved.Error != nil {
+				tx.Rollback()
+				return saved.Error
+			}
 		}
 	}
 	tx.Commit()
@@ -386,20 +418,15 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 	}
 	tx := self.db.Begin()
 	for dcId, dChargers := range sgs {
-		// parse identifiers
-		tmpDc := TpDerivedCharger{}
+		tmpDc := &TpDerivedCharger{}
 		if err := tmpDc.SetDerivedChargersId(dcId); err != nil {
 			tx.Rollback()
 			return err
 		}
-		tx.Where("tpid = ?", tpid).
-			Where("direction = ?", tmpDc.Direction).
-			Where("tenant = ?", tmpDc.Tenant).
-			Where("account = ?", tmpDc.Account).
-			Where("category = ?", tmpDc.Category).
-			Where("subject = ?", tmpDc.Subject).
-			Where("loadid = ?", tmpDc.Loadid).
-			Delete(TpDerivedCharger{})
+		if err := tx.Where(tmpDc).Delete(TpDerivedCharger{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, dc := range dChargers {
 			newDc := TpDerivedCharger{
 				Tpid:             tpid,
@@ -420,7 +447,10 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 				tx.Rollback()
 				return err
 			}
-			tx.Save(newDc)
+			if err := tx.Save(newDc).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 	}
 	tx.Commit()
@@ -459,9 +489,12 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 
 	tx := self.db.Begin()
 	for acId, acs := range acts {
-		tx.Where("tpid = ?", tpid).Where("tag = ?", acId).Delete(TpAction{})
+		if err := tx.Where(&TpAction{Tpid: tpid, Tag: acId}).Delete(TpAction{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, ac := range acs {
-			tx.Save(TpAction{
+			saved := tx.Save(TpAction{
 				Tpid:            tpid,
 				Tag:             acId,
 				Action:          ac.Identifier,
@@ -477,6 +510,10 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 				ExtraParameters: ac.ExtraParameters,
 				Weight:          ac.Weight,
 			})
+			if saved.Error != nil {
+				tx.Rollback()
+				return saved.Error
+			}
 		}
 	}
 	tx.Commit()
@@ -484,36 +521,25 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 }
 
 func (self *SQLStorage) GetTPActions(tpid, actsId string) (*utils.TPActions, error) {
-	rows, err := self.Db.Query(fmt.Sprintf("SELECT action,balance_type,direction,units,expiry_time,destination_tag,rating_subject,category,shared_group,balance_weight,extra_parameters,weight FROM %s WHERE tpid='%s' AND tag='%s'", utils.TBL_TP_ACTIONS, tpid, actsId))
-	if err != nil {
+	acts := &utils.TPActions{TPid: tpid, ActionsId: actsId}
+	var tpActions []*TpAction
+	if err := self.db.Where(&TpAction{Tpid: tpid, Tag: actsId}).Find(&tpActions).Error; err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-	acts := &utils.TPActions{TPid: tpid, ActionsId: actsId}
-	i := 0
-	for rows.Next() {
-		i++ //Keep here a reference so we know we got at least one result
-		var action, balanceId, dir, destId, rateSubject, category, sharedGroup, expTime, extraParameters string
-		var units, balanceWeight, weight float64
-		if err = rows.Scan(&action, &balanceId, &dir, &units, &expTime, &destId, &rateSubject, &category, &sharedGroup, &balanceWeight, &extraParameters, &weight); err != nil {
-			return nil, err
-		}
+	for _, tpAct := range tpActions {
 		acts.Actions = append(acts.Actions, &utils.TPAction{
-			Identifier:      action,
-			BalanceType:     balanceId,
-			Direction:       dir,
-			Units:           units,
-			ExpiryTime:      expTime,
-			DestinationId:   destId,
-			RatingSubject:   rateSubject,
-			Category:        category,
-			BalanceWeight:   balanceWeight,
-			SharedGroup:     sharedGroup,
-			ExtraParameters: extraParameters,
-			Weight:          weight})
-	}
-	if i == 0 {
-		return nil, nil
+			Identifier:      tpAct.Action,
+			BalanceType:     tpAct.BalanceType,
+			Direction:       tpAct.Direction,
+			Units:           tpAct.Units,
+			ExpiryTime:      tpAct.ExpiryTime,
+			DestinationId:   tpAct.DestinationTag,
+			RatingSubject:   tpAct.RatingSubject,
+			Category:        tpAct.Category,
+			BalanceWeight:   tpAct.BalanceWeight,
+			SharedGroup:     tpAct.SharedGroup,
+			ExtraParameters: tpAct.ExtraParameters,
+			Weight:          tpAct.Weight})
 	}
 	return acts, nil
 }
@@ -525,15 +551,22 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 	}
 	tx := self.db.Begin()
 	for apId, aPlans := range ats {
-		tx.Where("tpid = ?", tpid).Where("tag = ?", apId).Delete(TpActionPlan{})
+		if err := tx.Where(&TpActionPlan{Tpid: tpid, Tag: apId}).Delete(TpActionPlan{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, ap := range aPlans {
-			tx.Save(TpActionPlan{
+			saved := tx.Save(TpActionPlan{
 				Tpid:       tpid,
 				Tag:        apId,
 				ActionsTag: ap.ActionsId,
 				TimingTag:  ap.TimingId,
 				Weight:     ap.Weight,
 			})
+			if saved.Error != nil {
+				tx.Rollback()
+				return saved.Error
+			}
 		}
 	}
 	r := tx.Commit()
@@ -542,16 +575,10 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 
 func (self *SQLStorage) GetTPActionTimings(tpid, tag string) (map[string][]*utils.TPActionTiming, error) {
 	ats := make(map[string][]*utils.TPActionTiming)
-
 	var tpActionPlans []TpActionPlan
-	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
-	}
-	if err := q.Find(&tpActionPlans).Error; err != nil {
+	if err := self.db.Where(&TpActionPlan{Tpid: tpid, Tag: tag}).Find(&tpActionPlans).Error; err != nil {
 		return nil, err
 	}
-
 	for _, tpAp := range tpActionPlans {
 		ats[tpAp.Tag] = append(ats[tpAp.Tag], &utils.TPActionTiming{ActionsId: tpAp.ActionsTag, TimingId: tpAp.TimingTag, Weight: tpAp.Weight})
 	}
@@ -564,20 +591,19 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 	}
 	tx := self.db.Begin()
 	for atId, aTriggers := range ats {
-		tx.Where("tpid = ?", tpid).Where("tag = ?", atId).Delete(TpActionTrigger{})
+		if err := tx.Where(&TpActionTrigger{Tpid: tpid, Tag: atId}).Delete(TpActionTrigger{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, at := range aTriggers {
-			recurrent := 0
-			if at.Recurrent {
-				recurrent = 1
-			}
-			tx.Save(TpActionTrigger{
+			saved := tx.Save(TpActionTrigger{
 				Tpid:                 tpid,
 				Tag:                  atId,
 				BalanceType:          at.BalanceType,
 				Direction:            at.Direction,
 				ThresholdType:        at.ThresholdType,
 				ThresholdValue:       at.ThresholdValue,
-				Recurrent:            recurrent,
+				Recurrent:            at.Recurrent,
 				MinSleep:             int64(at.MinSleep),
 				DestinationTag:       at.DestinationId,
 				BalanceWeight:        at.BalanceWeight,
@@ -589,6 +615,10 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 				ActionsTag:           at.ActionsId,
 				Weight:               at.Weight,
 			})
+			if saved.Error != nil {
+				tx.Rollback()
+				return saved.Error
+			}
 		}
 	}
 	tx.Commit()
@@ -1530,22 +1560,16 @@ func (self *SQLStorage) GetTpActions(tpid, tag string) (map[string][]*utils.TPAc
 func (self *SQLStorage) GetTpActionTriggers(tpid, tag string) (map[string][]*utils.TPActionTrigger, error) {
 	ats := make(map[string][]*utils.TPActionTrigger)
 	var tpActionTriggers []TpActionTrigger
-	q := self.db.Where("tpid = ?", tpid)
-	if len(tag) != 0 {
-		q = q.Where("tag = ?", tag)
-	}
-	if err := q.Find(&tpActionTriggers).Error; err != nil {
+	if err := self.db.Where(&TpActionTrigger{Tpid: tpid, Tag: tag}).Find(&tpActionTriggers).Error; err != nil {
 		return nil, err
 	}
-
 	for _, tpAt := range tpActionTriggers {
-		recurrent := tpAt.Recurrent == 1
 		at := &utils.TPActionTrigger{
 			BalanceType:           tpAt.BalanceType,
 			Direction:             tpAt.Direction,
 			ThresholdType:         tpAt.ThresholdType,
 			ThresholdValue:        tpAt.ThresholdValue,
-			Recurrent:             recurrent,
+			Recurrent:             tpAt.Recurrent,
 			MinSleep:              time.Duration(tpAt.MinSleep),
 			DestinationId:         tpAt.DestinationTag,
 			BalanceWeight:         tpAt.BalanceWeight,

@@ -407,7 +407,7 @@ func (csvr *CSVReader) LoadRates() (err error) {
 		if exists {
 			rss := existingRates.RateSlots
 			if err := ValidNextGroup(rss[len(rss)-1], r.RateSlots[0]); err != nil {
-				return err
+				return fmt.Errorf("RatesTag: %s, error: <%s>", tag, err.Error())
 			}
 			csvr.rates[tag].RateSlots = append(csvr.rates[tag].RateSlots, r.RateSlots[0])
 		} else {

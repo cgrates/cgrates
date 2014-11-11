@@ -56,7 +56,255 @@ func TestMySQLCreateTables(t *testing.T) {
 	}
 }
 
-func TestRemoveData(t *testing.T) {
+func TestMySQLSetGetTPTiming(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tm := &utils.ApierTPTiming{TPid: TEST_SQL, TimingId: "ALWAYS", Time: "00:00:00"}
+	if err := mysqlDb.SetTPTiming(tm); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
+		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
+	}
+}
+
+func TestMySQLSetGetTPDestination(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	dst := &Destination{Id: TEST_SQL, Prefixes: []string{"+49", "+49151", "+49176"}}
+	if err := mysqlDb.SetTPDestination(TEST_SQL, dst); err != nil {
+		t.Error(err.Error())
+	}
+	if dsts, err := mysqlDb.GetTpDestinations(TEST_SQL, TEST_SQL); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(dst, dsts[TEST_SQL]) {
+		t.Errorf("Expecting: %+v, received: %+v", dst, dsts[TEST_SQL])
+	}
+}
+
+func TestMySQLSetGetTPRates(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	RT_ID := "RT_1"
+	rtSlots := []*utils.RateSlot{
+		&utils.RateSlot{ConnectFee: 0.02, Rate: 0.01, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s"},
+		&utils.RateSlot{ConnectFee: 0.00, Rate: 0.005, RateUnit: "60s", RateIncrement: "1s", GroupIntervalStart: "60s"},
+	}
+	for _, rs := range rtSlots {
+		rs.SetDurations()
+	}
+	mpRates := map[string][]*utils.RateSlot{RT_ID: rtSlots}
+	expectedTPRate := &utils.TPRate{TPid: TEST_SQL, RateId: RT_ID, RateSlots: rtSlots}
+	if err := mysqlDb.SetTPRates(TEST_SQL, mpRates); err != nil {
+		t.Error(err.Error())
+	}
+	if rts, err := mysqlDb.GetTpRates(TEST_SQL, RT_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(expectedTPRate, rts[RT_ID]) {
+		t.Errorf("Expecting: %+v, received: %+v", expectedTPRate, rts[RT_ID])
+	}
+}
+
+func TestMySQLSetGetTPDestinationRates(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	DR_ID := "DR_1"
+	dr := &utils.DestinationRate{DestinationId: "DST_1", RateId: "RT_1", RoundingMethod: "*up", RoundingDecimals: 4}
+	drs := map[string][]*utils.DestinationRate{DR_ID: []*utils.DestinationRate{dr}}
+	eDrs := &utils.TPDestinationRate{TPid: TEST_SQL, DestinationRateId: DR_ID, DestinationRates: []*utils.DestinationRate{dr}}
+	if err := mysqlDb.SetTPDestinationRates(TEST_SQL, drs); err != nil {
+		t.Error(err.Error())
+	}
+	if drs, err := mysqlDb.GetTpDestinationRates(TEST_SQL, DR_ID, nil); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(eDrs, drs[DR_ID]) {
+		fmt.Printf("Received: %+v\n", drs[DR_ID].DestinationRates[0])
+		t.Errorf("Expecting: %+v, received: %+v", eDrs, drs[DR_ID])
+	}
+}
+
+func TestMySQLSetGetTPRatingPlans(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	RP_ID := "RP_1"
+	rbBinding := &utils.TPRatingPlanBinding{DestinationRatesId: "DR_1", TimingId: "TM_1", Weight: 10.0}
+	drts := map[string][]*utils.TPRatingPlanBinding{RP_ID: []*utils.TPRatingPlanBinding{rbBinding}}
+	if err := mysqlDb.SetTPRatingPlans(TEST_SQL, drts); err != nil {
+		t.Error(err.Error())
+	}
+	if drps, err := mysqlDb.GetTpRatingPlans(TEST_SQL, RP_ID, nil); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(drts, drps) {
+		t.Errorf("Expecting: %+v, received: %+v", drts, drps)
+	}
+}
+
+func TestMySQLSetGetTPRatingProfiles(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RP_1"}}
+	rp := &utils.TPRatingProfile{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
+	setRps := map[string]*utils.TPRatingProfile{rp.KeyId(): rp}
+	if err := mysqlDb.SetTPRatingProfiles(TEST_SQL, setRps); err != nil {
+		t.Error(err.Error())
+	}
+	if rps, err := mysqlDb.GetTpRatingProfiles(rp); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(setRps, rps) {
+		t.Errorf("Expecting: %+v, received: %+v", setRps, rps)
+	}
+
+}
+
+func TestMySQLSetGetTPSharedGroups(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	SG_ID := "SG_1"
+	setSgs := map[string][]*utils.TPSharedGroup{SG_ID: []*utils.TPSharedGroup{&utils.TPSharedGroup{Account: "dan", Strategy: "*lowest_first", RatingSubject: "lowest_rates"}}}
+	if err := mysqlDb.SetTPSharedGroups(TEST_SQL, setSgs); err != nil {
+		t.Error(err.Error())
+	}
+	if sgs, err := mysqlDb.GetTpSharedGroups(TEST_SQL, SG_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(setSgs, sgs) {
+		t.Errorf("Expecting: %+v, received: %+v", setSgs, sgs)
+	}
+}
+
+func TestMySQLSetGetTPCdrStats(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	CS_ID := "CDRSTATS_1"
+	setCS := map[string][]*utils.TPCdrStat{CS_ID: []*utils.TPCdrStat{
+		&utils.TPCdrStat{QueueLength: "10", TimeWindow: "10m", Metrics: "ASR", Tenant: "cgrates.org", Category: "call"},
+	}}
+	if err := mysqlDb.SetTPCdrStats(TEST_SQL, setCS); err != nil {
+		t.Error(err.Error())
+	}
+	if cs, err := mysqlDb.GetTpCdrStats(TEST_SQL, CS_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(setCS, cs) {
+		t.Errorf("Expecting: %+v, received: %+v", setCS, cs)
+	}
+}
+
+func TestMySQLSetGetTPDerivedChargers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	dc := &utils.TPDerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: "^prepaid", AccountField: "^rif", SubjectField: "^rif", UsageField: "cgr_duration"}
+	dcs := &utils.TPDerivedChargers{TPid: TEST_SQL, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: []*utils.TPDerivedCharger{dc}}
+	DCS_ID := dcs.GetDerivedChargesId()
+	setDCs := map[string][]*utils.TPDerivedCharger{DCS_ID: []*utils.TPDerivedCharger{dc}}
+	if err := mysqlDb.SetTPDerivedChargers(TEST_SQL, setDCs); err != nil {
+		t.Error(err.Error())
+	}
+	if rDCs, err := mysqlDb.GetTpDerivedChargers(dcs); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(dcs, rDCs[DCS_ID]) {
+		t.Errorf("Expecting: %+v, received: %+v", dcs, rDCs[DCS_ID])
+	}
+}
+
+func TestMySQLSetGetTPActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	ACTS_ID := "PREPAID_10"
+	acts := []*utils.TPAction{
+		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
+			DestinationId: "*any", BalanceWeight: 10, Weight: 10}}
+	tpActions := &utils.TPActions{TPid: TEST_SQL, ActionsId: ACTS_ID, Actions: acts}
+	if err := mysqlDb.SetTPActions(TEST_SQL, map[string][]*utils.TPAction{ACTS_ID: acts}); err != nil {
+		t.Error(err.Error())
+	}
+	if rTpActs, err := mysqlDb.GetTPActions(TEST_SQL, ACTS_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(tpActions, rTpActs) {
+		t.Errorf("Expecting: %+v, received: %+v", tpActions, rTpActs)
+	}
+}
+
+func TestMySQLTPActionTimings(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	AP_ID := "AP_1"
+	ap := map[string][]*utils.TPActionTiming{AP_ID: []*utils.TPActionTiming{&utils.TPActionTiming{ActionsId: "ACTS_1", TimingId: "TM_1", Weight: 10.0}}}
+	if err := mysqlDb.SetTPActionTimings(TEST_SQL, ap); err != nil {
+		t.Error(err.Error())
+	}
+	if rAP, err := mysqlDb.GetTPActionTimings(TEST_SQL, AP_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(ap, rAP) {
+		t.Errorf("Expecting: %+v, received: %+v", ap, rAP)
+	}
+}
+
+func TestMySQLSetGetTPActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	atrg := &utils.TPActionTrigger{
+		BalanceType:    "*monetary",
+		Direction:      "*out",
+		ThresholdType:  "*min_balance",
+		ThresholdValue: 2.0,
+		Recurrent:      true,
+		DestinationId:  "*any",
+		Weight:         10.0,
+		ActionsId:      "LOG_BALANCE",
+	}
+	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
+	if err := mysqlDb.SetTPActionTriggers(TEST_SQL+"1", mpAtrgs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	if rcvMpAtrgs, err := mysqlDb.GetTpActionTriggers(TEST_SQL+"1", TEST_SQL); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(mpAtrgs, rcvMpAtrgs) {
+		t.Errorf("Expecting: %v, received: %v", mpAtrgs, rcvMpAtrgs)
+	}
+}
+
+func TestMySQLSetGetTpAccountActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	aa := &utils.TPAccountActions{TPid: TEST_SQL, Tenant: "cgrates.org", Account: "1001",
+		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+	if err := mysqlDb.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+		t.Error(err.Error())
+	}
+	if aas, err := mysqlDb.GetTpAccountActions(aa); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(aa, aas[aa.KeyId()]) {
+		t.Errorf("Expecting: %+v, received: %+v", aa, aas[aa.KeyId()])
+	}
+}
+
+func TestMySQLGetTPIds(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	eTPIds := []string{TEST_SQL}
+	if tpIds, err := mysqlDb.GetTPIds(); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(eTPIds, tpIds) {
+		t.Errorf("Expecting: %+v, received: %+v", eTPIds, tpIds)
+	}
+}
+
+func TestMySQLRemoveTPData(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -99,7 +347,6 @@ func TestRemoveData(t *testing.T) {
 	} else if err.Error() != "Record Not Found" {
 		t.Error(err.Error())
 	}
-
 	// Create AccountActions
 	aa := &utils.TPAccountActions{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Account: "1001",
 		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
@@ -169,7 +416,7 @@ func TestRemoveData(t *testing.T) {
 	}
 }
 
-func TestSetCdr(t *testing.T) {
+func TestMySQLSetCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -223,7 +470,7 @@ func TestSetCdr(t *testing.T) {
 	}
 }
 
-func TestSetRatedCdr(t *testing.T) {
+func TestMySQLSetRatedCdr(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -253,7 +500,7 @@ func TestSetRatedCdr(t *testing.T) {
 	}
 }
 
-func TestCallCost(t *testing.T) {
+func TestMySQLCallCost(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -287,7 +534,7 @@ func TestCallCost(t *testing.T) {
 	}
 }
 
-func TestGetStoredCdrs(t *testing.T) {
+func TestMySQLGetStoredCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
@@ -564,30 +811,5 @@ func TestRemStoredCdrs(t *testing.T) {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
-	}
-}
-
-func TestSetGetTPActionTriggers(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	atrg := &utils.TPActionTrigger{
-		BalanceType:    "*monetary",
-		Direction:      "*out",
-		ThresholdType:  "*min_balance",
-		ThresholdValue: 2.0,
-		Recurrent:      true,
-		DestinationId:  "*any",
-		Weight:         10.0,
-		ActionsId:      "LOG_BALANCE",
-	}
-	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
-	if err := mysqlDb.SetTPActionTriggers(TEST_SQL+"1", mpAtrgs); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	}
-	if rcvMpAtrgs, err := mysqlDb.GetTpActionTriggers(TEST_SQL+"1", TEST_SQL); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if !reflect.DeepEqual(mpAtrgs, rcvMpAtrgs) {
-		t.Errorf("Expecting: %v, received: %v", mpAtrgs, rcvMpAtrgs)
 	}
 }

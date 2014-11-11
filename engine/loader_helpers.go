@@ -114,7 +114,7 @@ func NewLoadRate(tag, connectFee, price, ratedUnits, rateIncrements, groupInterv
 
 func ValidNextGroup(present, next *utils.RateSlot) error {
 	if next.GroupIntervalStartDuration() <= present.GroupIntervalStartDuration() {
-		return errors.New(fmt.Sprintf("Next rate group interval start must be heigher than the last one: %#v", next))
+		return errors.New(fmt.Sprintf("Next rate group interval start: %#v must be heigher than the previous one: %#v", next, present))
 	}
 	if math.Mod(next.GroupIntervalStartDuration().Seconds(), present.RateIncrementDuration().Seconds()) != 0 {
 		return errors.New(fmt.Sprintf("GroupIntervalStart of %#v must be a multiple of RateIncrement of %#v", next, present))

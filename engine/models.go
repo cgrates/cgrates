@@ -152,7 +152,7 @@ type TpActionTrigger struct {
 	Direction            string
 	ThresholdType        string
 	ThresholdValue       float64
-	Recurrent            int
+	Recurrent            bool
 	MinSleep             int64
 	DestinationTag       string
 	BalanceWeight        float64

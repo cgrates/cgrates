@@ -21,9 +21,9 @@ package engine
 import (
 	"fmt"
 	"path"
-	//"reflect"
+	"reflect"
 	"testing"
-	//"time"
+	"time"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -55,3 +55,768 @@ func TestPSQLCreateTables(t *testing.T) {
 		}
 	}
 }
+
+func TestPSQLSetGetTPTiming(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	tm := &utils.ApierTPTiming{TPid: TEST_SQL, TimingId: "ALWAYS", Time: "00:00:00"}
+	if err := psqlDb.SetTPTiming(tm); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
+		t.Errorf("Expecting: %+v, received: %+v", tmgs[tm.TimingId])
+	}
+}
+
+func TestPSQLSetGetTPDestination(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	dst := &Destination{Id: TEST_SQL, Prefixes: []string{"+49", "+49151", "+49176"}}
+	if err := psqlDb.SetTPDestination(TEST_SQL, dst); err != nil {
+		t.Error(err.Error())
+	}
+	if dsts, err := psqlDb.GetTpDestinations(TEST_SQL, TEST_SQL); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(dst, dsts[TEST_SQL]) {
+		t.Errorf("Expecting: %+v, received: %+v", dst, dsts[TEST_SQL])
+	}
+}
+
+func TestPSQLSetGetTPRates(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	RT_ID := "RT_1"
+	rtSlots := []*utils.RateSlot{
+		&utils.RateSlot{ConnectFee: 0.02, Rate: 0.01, RateUnit: "60s", RateIncrement: "60s", GroupIntervalStart: "0s"},
+		&utils.RateSlot{ConnectFee: 0.00, Rate: 0.005, RateUnit: "60s", RateIncrement: "1s", GroupIntervalStart: "60s"},
+	}
+	for _, rs := range rtSlots {
+		rs.SetDurations()
+	}
+	mpRates := map[string][]*utils.RateSlot{RT_ID: rtSlots}
+	expectedTPRate := &utils.TPRate{TPid: TEST_SQL, RateId: RT_ID, RateSlots: rtSlots}
+	if err := psqlDb.SetTPRates(TEST_SQL, mpRates); err != nil {
+		t.Error(err.Error())
+	}
+	if rts, err := psqlDb.GetTpRates(TEST_SQL, RT_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(expectedTPRate, rts[RT_ID]) {
+		for _, slot := range rts[RT_ID].RateSlots {
+			fmt.Printf("Rates slot receievd: %+v\n", slot)
+		}
+		t.Errorf("Expecting: %+v, received: %+v", expectedTPRate, rts[RT_ID])
+	}
+}
+
+func TestPSQLSetGetTPDestinationRates(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	DR_ID := "DR_1"
+	dr := &utils.DestinationRate{DestinationId: "DST_1", RateId: "RT_1", RoundingMethod: "*up", RoundingDecimals: 4}
+	drs := map[string][]*utils.DestinationRate{DR_ID: []*utils.DestinationRate{dr}}
+	eDrs := &utils.TPDestinationRate{TPid: TEST_SQL, DestinationRateId: DR_ID, DestinationRates: []*utils.DestinationRate{dr}}
+	if err := psqlDb.SetTPDestinationRates(TEST_SQL, drs); err != nil {
+		t.Error(err.Error())
+	}
+	if drs, err := psqlDb.GetTpDestinationRates(TEST_SQL, DR_ID, nil); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(eDrs, drs[DR_ID]) {
+		fmt.Printf("Received: %+v\n", drs[DR_ID].DestinationRates[0])
+		t.Errorf("Expecting: %+v, received: %+v", eDrs, drs[DR_ID])
+	}
+}
+
+func TestPSQLSetGetTPRatingPlans(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	RP_ID := "RP_1"
+	rbBinding := &utils.TPRatingPlanBinding{DestinationRatesId: "DR_1", TimingId: "TM_1", Weight: 10.0}
+	drts := map[string][]*utils.TPRatingPlanBinding{RP_ID: []*utils.TPRatingPlanBinding{rbBinding}}
+	if err := psqlDb.SetTPRatingPlans(TEST_SQL, drts); err != nil {
+		t.Error(err.Error())
+	}
+	if drps, err := psqlDb.GetTpRatingPlans(TEST_SQL, RP_ID, nil); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(drts, drps) {
+		t.Errorf("Expecting: %+v, received: %+v", drts, drps)
+	}
+}
+
+func TestPSQLSetGetTPRatingProfiles(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RP_1"}}
+	rp := &utils.TPRatingProfile{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
+	setRps := map[string]*utils.TPRatingProfile{rp.KeyId(): rp}
+	if err := psqlDb.SetTPRatingProfiles(TEST_SQL, setRps); err != nil {
+		t.Error(err.Error())
+	}
+	if rps, err := psqlDb.GetTpRatingProfiles(rp); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(setRps, rps) {
+		t.Errorf("Expecting: %+v, received: %+v", setRps, rps)
+	}
+}
+
+func TestPSQLSetGetTPSharedGroups(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	SG_ID := "SG_1"
+	setSgs := map[string][]*utils.TPSharedGroup{SG_ID: []*utils.TPSharedGroup{&utils.TPSharedGroup{Account: "dan", Strategy: "*lowest_first", RatingSubject: "lowest_rates"}}}
+	if err := psqlDb.SetTPSharedGroups(TEST_SQL, setSgs); err != nil {
+		t.Error(err.Error())
+	}
+	if sgs, err := psqlDb.GetTpSharedGroups(TEST_SQL, SG_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(setSgs, sgs) {
+		t.Errorf("Expecting: %+v, received: %+v", setSgs, sgs)
+	}
+}
+
+func TestPSQLSetGetTPCdrStats(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	CS_ID := "CDRSTATS_1"
+	setCS := map[string][]*utils.TPCdrStat{CS_ID: []*utils.TPCdrStat{
+		&utils.TPCdrStat{QueueLength: "10", TimeWindow: "10m", Metrics: "ASR", Tenant: "cgrates.org", Category: "call"},
+	}}
+	if err := psqlDb.SetTPCdrStats(TEST_SQL, setCS); err != nil {
+		t.Error(err.Error())
+	}
+	if cs, err := psqlDb.GetTpCdrStats(TEST_SQL, CS_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(setCS, cs) {
+		t.Errorf("Expecting: %+v, received: %+v", setCS, cs)
+	}
+}
+
+func TestPSQLSetGetTPDerivedChargers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	dc := &utils.TPDerivedCharger{RunId: utils.DEFAULT_RUNID, ReqTypeField: "^prepaid", AccountField: "^rif", SubjectField: "^rif", UsageField: "cgr_duration"}
+	dcs := &utils.TPDerivedChargers{TPid: TEST_SQL, Direction: utils.OUT, Tenant: "cgrates.org", Category: "call", Account: "dan", Subject: "dan", DerivedChargers: []*utils.TPDerivedCharger{dc}}
+	DCS_ID := dcs.GetDerivedChargesId()
+	setDCs := map[string][]*utils.TPDerivedCharger{DCS_ID: []*utils.TPDerivedCharger{dc}}
+	if err := psqlDb.SetTPDerivedChargers(TEST_SQL, setDCs); err != nil {
+		t.Error(err.Error())
+	}
+	if rDCs, err := psqlDb.GetTpDerivedChargers(dcs); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(dcs, rDCs[DCS_ID]) {
+		t.Errorf("Expecting: %+v, received: %+v", dcs, rDCs[DCS_ID])
+	}
+}
+
+func TestPSQLSetGetTPActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	ACTS_ID := "PREPAID_10"
+	acts := []*utils.TPAction{
+		&utils.TPAction{Identifier: "*topup_reset", BalanceType: "*monetary", Direction: "*out", Units: 10, ExpiryTime: "*unlimited",
+			DestinationId: "*any", BalanceWeight: 10, Weight: 10}}
+	tpActions := &utils.TPActions{TPid: TEST_SQL, ActionsId: ACTS_ID, Actions: acts}
+	if err := psqlDb.SetTPActions(TEST_SQL, map[string][]*utils.TPAction{ACTS_ID: acts}); err != nil {
+		t.Error(err.Error())
+	}
+	if rTpActs, err := psqlDb.GetTPActions(TEST_SQL, ACTS_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(tpActions, rTpActs) {
+		t.Errorf("Expecting: %+v, received: %+v", tpActions, rTpActs)
+	}
+}
+
+func TestPSQLTPActionTimings(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	AP_ID := "AP_1"
+	ap := map[string][]*utils.TPActionTiming{AP_ID: []*utils.TPActionTiming{&utils.TPActionTiming{ActionsId: "ACTS_1", TimingId: "TM_1", Weight: 10.0}}}
+	if err := psqlDb.SetTPActionTimings(TEST_SQL, ap); err != nil {
+		t.Error(err.Error())
+	}
+	if rAP, err := psqlDb.GetTPActionTimings(TEST_SQL, AP_ID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(ap, rAP) {
+		t.Errorf("Expecting: %+v, received: %+v", ap, rAP)
+	}
+}
+
+func TestPSQLSetGetTPActionTriggers(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	atrg := &utils.TPActionTrigger{
+		BalanceType:    "*monetary",
+		Direction:      "*out",
+		ThresholdType:  "*min_balance",
+		ThresholdValue: 2.0,
+		Recurrent:      true,
+		DestinationId:  "*any",
+		Weight:         10.0,
+		ActionsId:      "LOG_BALANCE",
+	}
+	mpAtrgs := map[string][]*utils.TPActionTrigger{TEST_SQL: []*utils.TPActionTrigger{atrg}}
+	if err := psqlDb.SetTPActionTriggers(TEST_SQL+"1", mpAtrgs); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	}
+	if rcvMpAtrgs, err := psqlDb.GetTpActionTriggers(TEST_SQL+"1", TEST_SQL); err != nil {
+		t.Error("Unexpected error: ", err.Error())
+	} else if !reflect.DeepEqual(mpAtrgs, rcvMpAtrgs) {
+		t.Errorf("Expecting: %v, received: %v", mpAtrgs, rcvMpAtrgs)
+	}
+}
+
+func TestPSQLSetGetTpAccountActions(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	aa := &utils.TPAccountActions{TPid: TEST_SQL, Tenant: "cgrates.org", Account: "1001",
+		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+	if err := psqlDb.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+		t.Error(err.Error())
+	}
+	if aas, err := psqlDb.GetTpAccountActions(aa); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(aa, aas[aa.KeyId()]) {
+		t.Errorf("Expecting: %+v, received: %+v", aa, aas[aa.KeyId()])
+	}
+}
+
+func TestPSQLGetTPIds(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	eTPIds := []string{TEST_SQL}
+	if tpIds, err := psqlDb.GetTPIds(); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(eTPIds, tpIds) {
+		t.Errorf("Expecting: %+v, received: %+v", eTPIds, tpIds)
+	}
+}
+
+func TestPSQLRemoveTPData(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	// Create Timings
+	tm := &utils.ApierTPTiming{TPid: TEST_SQL, TimingId: "ALWAYS", Time: "00:00:00"}
+	if err := psqlDb.SetTPTiming(tm); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
+		t.Error(err.Error())
+	} else if len(tmgs) == 0 {
+		t.Error("Could not store TPTiming")
+	}
+	// Remove Timings
+	if err := psqlDb.RemTPData(utils.TBL_TP_TIMINGS, TEST_SQL, tm.TimingId); err != nil {
+		t.Error(err.Error())
+	}
+	if _, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err == nil {
+		t.Error("Should report error on querying here")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
+	// Create RatingProfile
+	ras := []*utils.TPRatingActivation{&utils.TPRatingActivation{ActivationTime: "2012-01-01T00:00:00Z", RatingPlanId: "RETAIL1"}}
+	rp := &utils.TPRatingProfile{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Category: "call", Direction: "*out", Subject: "*any", RatingPlanActivations: ras}
+	if err := psqlDb.SetTPRatingProfiles(TEST_SQL, map[string]*utils.TPRatingProfile{rp.KeyId(): rp}); err != nil {
+		t.Error(err.Error())
+	}
+	if rps, err := psqlDb.GetTpRatingProfiles(rp); err != nil {
+		t.Error(err.Error())
+	} else if len(rps) == 0 {
+		t.Error("Could not store TPRatingProfile")
+	}
+	// Remove RatingProfile
+	if err := psqlDb.RemTPData(utils.TBL_TP_RATE_PROFILES, rp.TPid, rp.LoadId, rp.Direction, rp.Tenant, rp.Category, rp.Subject); err != nil {
+		t.Error(err.Error())
+	}
+	if _, err := psqlDb.GetTpRatingProfiles(rp); err == nil {
+		t.Error("Should return error in case of record not found from ORM")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
+	// Create AccountActions
+	aa := &utils.TPAccountActions{TPid: TEST_SQL, LoadId: TEST_SQL, Tenant: "cgrates.org", Account: "1001",
+		Direction: "*out", ActionPlanId: "PREPAID_10", ActionTriggersId: "STANDARD_TRIGGERS"}
+	if err := psqlDb.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+		t.Error(err.Error())
+	}
+	if aas, err := psqlDb.GetTpAccountActions(aa); err != nil {
+		t.Error(err.Error())
+	} else if len(aas) == 0 {
+		t.Error("Could not create TPAccountActions")
+	}
+	// Remove AccountActions
+	if err := psqlDb.RemTPData(utils.TBL_TP_ACCOUNT_ACTIONS, aa.TPid, aa.LoadId, aa.Direction, aa.Tenant, aa.Account); err != nil {
+		t.Error(err.Error())
+	}
+	if _, err := psqlDb.GetTpAccountActions(aa); err == nil {
+		t.Error("Should receive error in case of not found")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
+	// Create again so we can test complete TP removal
+	if err := psqlDb.SetTPTiming(tm); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
+		t.Error(err.Error())
+	} else if len(tmgs) == 0 {
+		t.Error("Could not store TPTiming")
+	}
+	// Create RatingProfile
+	if err := psqlDb.SetTPRatingProfiles(TEST_SQL, map[string]*utils.TPRatingProfile{rp.KeyId(): rp}); err != nil {
+		t.Error(err.Error())
+	}
+	if rps, err := psqlDb.GetTpRatingProfiles(rp); err != nil {
+		t.Error(err.Error())
+	} else if len(rps) == 0 {
+		t.Error("Could not store TPRatingProfile")
+	}
+	// Create AccountActions
+	if err := psqlDb.SetTPAccountActions(aa.TPid, map[string]*utils.TPAccountActions{aa.KeyId(): aa}); err != nil {
+		t.Error(err.Error())
+	}
+	if aas, err := psqlDb.GetTpAccountActions(aa); err != nil {
+		t.Error(err.Error())
+	} else if len(aas) == 0 {
+		t.Error("Could not create TPAccountActions")
+	}
+	// Remove TariffPlan completely
+	if err := psqlDb.RemTPData("", TEST_SQL); err != nil {
+		t.Error(err.Error())
+	}
+	// Make sure we have removed it
+	if _, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err == nil {
+		t.Error("Should report error on querying here")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
+	if _, err := psqlDb.GetTpRatingProfiles(rp); err == nil {
+		t.Error("Should return error in case of record not found from ORM")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
+	if _, err := psqlDb.GetTpAccountActions(aa); err == nil {
+		t.Error("Should receive error in case of not found")
+	} else if err.Error() != "Record Not Found" {
+		t.Error(err.Error())
+	}
+}
+
+func TestPSQLSetCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cgrCdr1 := &utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa1", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
+		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:20Z",
+		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "10s", "field_extr1": "val_extr1", "fieldextr2": "valextr2", utils.CDRSOURCE: TEST_SQL}
+	cgrCdr2 := &utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa2", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "prepaid", utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
+		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "1002", utils.SETUP_TIME: "2013-11-08T08:42:22Z",
+		utils.ANSWER_TIME: "2013-11-08T08:42:26Z", utils.USAGE: "20", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+
+	cgrCdr3 := &utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa3", utils.CDRHOST: "192.168.1.1", utils.REQTYPE: "rated", utils.DIRECTION: "*out", utils.TENANT: "cgrates.org",
+		utils.CATEGORY: "premium_call", utils.ACCOUNT: "1002", utils.SUBJECT: "1002", utils.DESTINATION: "1001", utils.SETUP_TIME: "2013-11-07T08:42:24Z",
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "60s", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+
+	cgrCdr4 := &utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa4", utils.CDRHOST: "192.168.1.2", utils.REQTYPE: "pseudoprepaid", utils.DIRECTION: "*out", utils.TENANT: "itsyscom.com",
+		utils.CATEGORY: "call", utils.ACCOUNT: "1001", utils.SUBJECT: "1001", utils.DESTINATION: "+4986517174964", utils.SETUP_TIME: "2013-11-07T08:42:21Z",
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "1m2s", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+
+	cgrCdr5 := &utils.CgrCdr{utils.TOR: utils.VOICE, utils.ACCID: "aaa5", utils.CDRHOST: "192.168.1.2", utils.REQTYPE: "postpaid", utils.DIRECTION: "*out", utils.TENANT: "itsyscom.com",
+		utils.CATEGORY: "call", utils.ACCOUNT: "1002", utils.SUBJECT: "1002", utils.DESTINATION: "+4986517174963", utils.SETUP_TIME: "2013-11-07T08:42:25Z",
+		utils.ANSWER_TIME: "2013-11-07T08:42:26Z", utils.USAGE: "15s", "field_extr1": "val_extr1", "fieldextr2": "valextr2", "cdrsource": TEST_SQL}
+
+	for _, cdr := range []*utils.CgrCdr{cgrCdr1, cgrCdr2, cgrCdr3, cgrCdr4, cgrCdr5} {
+		if err := psqlDb.SetCdr(cdr.AsStoredCdr()); err != nil {
+			t.Error(err.Error())
+		}
+	}
+	strCdr1 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: "rated",
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr1.CgrId = utils.Sha1(strCdr1.AccId, strCdr1.SetupTime.String())
+	strCdr2 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN2", ReqType: "prepaid",
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(12) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
+	strCdr2.CgrId = utils.Sha1(strCdr2.AccId, strCdr2.SetupTime.String())
+	strCdr3 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: "rated",
+		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1000", Destination: "+4986517174963",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
+
+	for _, cdr := range []*utils.StoredCdr{strCdr1, strCdr2, strCdr3} {
+		if err := psqlDb.SetCdr(cdr); err != nil {
+			t.Error(err.Error())
+		}
+	}
+}
+
+/*
+func TestPSQLSetRatedCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	strCdr1 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: "rated",
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr1.CgrId = utils.Sha1(strCdr1.AccId, strCdr1.SetupTime.String())
+	strCdr2 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN", ReqType: "prepaid",
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(12) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
+	strCdr2.CgrId = utils.Sha1(strCdr2.AccId, strCdr2.SetupTime.String())
+	strCdr3 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: "rated",
+		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1002", Destination: "+4986517174964",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: "wholesale_run", Cost: 1.201}
+	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
+
+	for _, cdr := range []*utils.StoredCdr{strCdr1, strCdr2, strCdr3} {
+		if err := psqlDb.SetRatedCdr(cdr, ""); err != nil {
+			t.Error(err.Error())
+		}
+	}
+}
+
+
+func TestPSQLCallCost(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	cgrId := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	cc := &CallCost{
+		Direction:   "*out",
+		Category:    "call",
+		Tenant:      "cgrates.org",
+		Subject:     "91001",
+		Account:     "8001",
+		Destination: "1002",
+		TOR:         utils.VOICE,
+		Timespans: []*TimeSpan{
+			&TimeSpan{
+				TimeStart: time.Date(2013, 9, 10, 13, 40, 0, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
+			},
+			&TimeSpan{
+				TimeStart: time.Date(2013, 9, 10, 13, 41, 0, 0, time.UTC),
+				TimeEnd:   time.Date(2013, 9, 10, 13, 41, 30, 0, time.UTC),
+			},
+		},
+	}
+	if err := psqlDb.LogCallCost(cgrId, TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
+		t.Error(err.Error())
+	}
+	if ccRcv, err := psqlDb.GetCallCostLog(cgrId, TEST_SQL, utils.DEFAULT_RUNID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(cc, ccRcv) {
+		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
+	}
+}
+
+
+func TestPSQLGetStoredCdrs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var timeStart, timeEnd time.Time
+	// All CDRs, no filter
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on cgrids
+	if storedCdrs, err := psqlDb.GetStoredCdrs([]string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())},
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on cgrids plus reqType
+	if storedCdrs, err := psqlDb.GetStoredCdrs([]string{utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String()),
+		utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())},
+		nil, nil, nil, nil, []string{"prepaid"}, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on runId
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, []string{utils.DEFAULT_RUNID},
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on TOR
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, []string{utils.SMS},
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 0 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple TOR
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, []string{utils.SMS, utils.VOICE},
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on cdrHost
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, []string{"192.168.1.2"},
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple cdrHost
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, []string{"192.168.1.1", "192.168.1.2"}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on cdrSource
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, []string{"UNKNOWN"},
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple cdrSource
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, []string{"UNKNOWN", "UNKNOWN2"},
+		nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on reqType
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, []string{"prepaid"},
+		nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple reqType
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, []string{"prepaid", "pseudoprepaid"}, nil, nil, nil, nil, nil, nil, nil, nil,
+		0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on direction
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, []string{"*out"}, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on tenant
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, []string{"itsyscom.com"}, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple tenants
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, []string{"itsyscom.com", "cgrates.org"}, nil, nil, nil, nil, nil, nil,
+		0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on tor
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, []string{"premium_call"},
+		nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple tor
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, []string{"premium_call", "call"},
+		nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on account
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1002"},
+		nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple account
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1001", "1002"},
+		nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on subject
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1000"},
+		nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple subject
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1000", "1002"},
+		nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on destPrefix
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, nil, nil, []string{"+498651"}, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 3 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on multiple destPrefixes
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, []string{"1001", "+498651"}, nil, nil,
+		0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 4 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on ratedAccount
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, []string{"8001"}, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on ratedSubject
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
+		nil, nil, nil, []string{"91001"}, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on ignoreErr
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, true, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on ignoreRated
+	var orderIdStart, orderIdEnd int64 // Capture also orderIds for the next test
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, true, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 5 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	} else {
+		for _, cdr := range storedCdrs {
+			if cdr.OrderId < orderIdStart {
+				orderIdStart = cdr.OrderId
+			}
+			if cdr.OrderId > orderIdEnd {
+				orderIdEnd = cdr.OrderId
+			}
+		}
+	}
+	// Filter on orderIdStart
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, orderIdStart, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 8 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on orderIdStart and orderIdEnd
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, orderIdStart, orderIdEnd+1, timeStart, timeEnd,
+		false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 5 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on timeStart
+	timeStart = time.Date(2013, 11, 8, 8, 0, 0, 0, time.UTC)
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 5 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on timeStart and timeEnd
+	timeEnd = time.Date(2013, 12, 1, 8, 0, 0, 0, time.UTC)
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Combined filter
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, []string{"rated"}, nil, nil, nil, nil, nil,
+		nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 1 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	// Filter on ignoreDerived
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, true, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 2 { // ToDo: Recheck this value
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+}
+
+func TestRemStoredCdrs(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	var timeStart, timeEnd time.Time
+	cgrIdB1 := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	if err := psqlDb.RemStoredCdrs([]string{cgrIdB1}); err != nil {
+		t.Error(err.Error())
+	}
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 7 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+	tm, _ := utils.ParseTimeDetectLayout("2013-11-08T08:42:20Z")
+	cgrIdA1 := utils.Sha1("aaa1", tm.String())
+	tm, _ = utils.ParseTimeDetectLayout("2013-11-08T08:42:22Z")
+	cgrIdA2 := utils.Sha1("aaa2", tm.String())
+	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:24Z")
+	cgrIdA3 := utils.Sha1("aaa3", tm.String())
+	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:21Z")
+	cgrIdA4 := utils.Sha1("aaa4", tm.String())
+	tm, _ = utils.ParseTimeDetectLayout("2013-11-07T08:42:25Z")
+	cgrIdA5 := utils.Sha1("aaa5", tm.String())
+	cgrIdB2 := utils.Sha1("bbb2", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	cgrIdB3 := utils.Sha1("bbb3", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
+	if err := psqlDb.RemStoredCdrs([]string{cgrIdA1, cgrIdA2, cgrIdA3, cgrIdA4, cgrIdA5,
+		cgrIdB2, cgrIdB3}); err != nil {
+		t.Error(err.Error())
+	}
+	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
+		t.Error(err.Error())
+	} else if len(storedCdrs) != 0 {
+		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
+	}
+}
+
+*/

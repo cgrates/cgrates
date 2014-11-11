@@ -63,3 +63,20 @@ func (self *PostgresStorage) Flush() (err error) {
 	}
 	return nil
 }
+
+func (self *PostgresStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
+	if tm == nil {
+		return nil //Nothing to set
+	}
+	tx := self.db.Begin()
+	if err := tx.Where(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId}).Delete(TpTiming{}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	if err := tx.Save(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId, Years: tm.Years, Months: tm.Months, MonthDays: tm.MonthDays, WeekDays: tm.WeekDays, Time: tm.Time}).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
+	return nil
+}

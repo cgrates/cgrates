@@ -1,6 +1,5 @@
 #! /usr/bin/env sh
 
-export PGPASSWORD="CGRateS.org"
 
 user=$1
 if [ -z "$1" ]; then
@@ -13,6 +12,8 @@ if [ -z "$2" ]; then
 fi
 
 ./create_db_with_users.sh
+
+export PGPASSWORD="CGRateS.org"
 
 psql -U $user -h $host -d cgrates -f create_cdrs_tables.sql
 cdrt=$?
