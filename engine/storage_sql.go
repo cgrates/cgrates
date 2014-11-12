@@ -204,9 +204,10 @@ func (self *SQLStorage) SetTPDestination(tpid string, dest *Destination) error {
 	}
 	for _, prefix := range dest.Prefixes {
 		save := tx.Save(TpDestination{
-			Tpid:   tpid,
-			Tag:    dest.Id,
-			Prefix: prefix,
+			Tpid:      tpid,
+			Tag:       dest.Id,
+			Prefix:    prefix,
+			CreatedAt: time.Now(),
 		})
 		if save.Error != nil {
 			tx.Rollback()
@@ -236,6 +237,7 @@ func (self *SQLStorage) SetTPRates(tpid string, rts map[string][]*utils.RateSlot
 				RateUnit:           rs.RateUnit,
 				RateIncrement:      rs.RateIncrement,
 				GroupIntervalStart: rs.GroupIntervalStart,
+				CreatedAt:          time.Now(),
 			})
 			if save.Error != nil {
 				tx.Rollback()
@@ -267,6 +269,7 @@ func (self *SQLStorage) SetTPDestinationRates(tpid string, drs map[string][]*uti
 				RatesTag:         dr.RateId,
 				RoundingMethod:   dr.RoundingMethod,
 				RoundingDecimals: dr.RoundingDecimals,
+				CreatedAt:        time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -295,6 +298,7 @@ func (self *SQLStorage) SetTPRatingPlans(tpid string, drts map[string][]*utils.T
 				DestratesTag: rp.DestinationRatesId,
 				TimingTag:    rp.TimingId,
 				Weight:       rp.Weight,
+				CreatedAt:    time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -327,6 +331,7 @@ func (self *SQLStorage) SetTPRatingProfiles(tpid string, rpfs map[string]*utils.
 				ActivationTime:   ra.ActivationTime,
 				RatingPlanTag:    ra.RatingPlanId,
 				FallbackSubjects: ra.FallbackSubjects,
+				CreatedAt:        time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -355,6 +360,7 @@ func (self *SQLStorage) SetTPSharedGroups(tpid string, sgs map[string][]*utils.T
 				Account:       sg.Account,
 				Strategy:      sg.Strategy,
 				RatingSubject: sg.RatingSubject,
+				CreatedAt:     time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -401,6 +407,7 @@ func (self *SQLStorage) SetTPCdrStats(tpid string, css map[string][]*utils.TPCdr
 				RatedSubject:      cs.RatedSubject,
 				CostInterval:      cs.CostInterval,
 				ActionTriggers:    cs.ActionTriggers,
+				CreatedAt:         time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -442,6 +449,7 @@ func (self *SQLStorage) SetTPDerivedChargers(tpid string, sgs map[string][]*util
 				SetupTimeField:   dc.SetupTimeField,
 				AnswerTimeField:  dc.AnswerTimeField,
 				UsageField:       dc.UsageField,
+				CreatedAt:        time.Now(),
 			}
 			if err := newDc.SetDerivedChargersId(dcId); err != nil {
 				tx.Rollback()
@@ -509,6 +517,7 @@ func (self *SQLStorage) SetTPActions(tpid string, acts map[string][]*utils.TPAct
 				BalanceWeight:   ac.BalanceWeight,
 				ExtraParameters: ac.ExtraParameters,
 				Weight:          ac.Weight,
+				CreatedAt:       time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -562,6 +571,7 @@ func (self *SQLStorage) SetTPActionTimings(tpid string, ats map[string][]*utils.
 				ActionsTag: ap.ActionsId,
 				TimingTag:  ap.TimingId,
 				Weight:     ap.Weight,
+				CreatedAt:  time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -614,6 +624,7 @@ func (self *SQLStorage) SetTPActionTriggers(tpid string, ats map[string][]*utils
 				MinQueuedItems:       at.MinQueuedItems,
 				ActionsTag:           at.ActionsId,
 				Weight:               at.Weight,
+				CreatedAt:            time.Now(),
 			})
 			if saved.Error != nil {
 				tx.Rollback()
@@ -644,6 +655,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aas map[string]*utils.T
 			Direction:         aa.Direction,
 			ActionPlanTag:     aa.ActionPlanId,
 			ActionTriggersTag: aa.ActionTriggersId,
+			CreatedAt:         time.Now(),
 		})
 		if saved.Error != nil {
 			tx.Rollback()

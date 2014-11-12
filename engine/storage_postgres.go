@@ -23,6 +23,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"path"
+	"time"
 
 	_ "github.com/bmizerany/pq"
 	"github.com/jinzhu/gorm"
@@ -73,7 +74,7 @@ func (self *PostgresStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
 		tx.Rollback()
 		return err
 	}
-	if err := tx.Save(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId, Years: tm.Years, Months: tm.Months, MonthDays: tm.MonthDays, WeekDays: tm.WeekDays, Time: tm.Time}).Error; err != nil {
+	if err := tx.Save(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId, Years: tm.Years, Months: tm.Months, MonthDays: tm.MonthDays, WeekDays: tm.WeekDays, Time: tm.Time, CreatedAt: time.Now()}).Error; err != nil {
 		tx.Rollback()
 		return err
 	}

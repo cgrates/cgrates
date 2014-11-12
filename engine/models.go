@@ -313,7 +313,6 @@ func (t TblCdrsExtra) TableName() string {
 
 type TblCostDetail struct {
 	Id          int64
-	CostTime    time.Time
 	CostSource  string
 	Cgrid       string
 	Runid       string
