@@ -11,6 +11,7 @@ CREATE TABLE `tp_timings` (
   `month_days` varchar(255) NOT NULL,
   `week_days` varchar(255) NOT NULL,
   `time` varchar(16) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_tmid` (`tpid`,`tag`),
@@ -27,6 +28,7 @@ CREATE TABLE `tp_destinations` (
   `tpid` varchar(64) NOT NULL,
   `tag` varchar(64) NOT NULL,
   `prefix` varchar(24) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_dstid` (`tpid`,`tag`),
@@ -47,6 +49,7 @@ CREATE TABLE `tp_rates` (
   `rate_unit` varchar(16) NOT NULL,
   `rate_increment` varchar(16) NOT NULL,
   `group_interval_start` varchar(16) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_tprate` (`tpid`,`tag`,`group_interval_start`),
   KEY `tpid` (`tpid`),
@@ -66,6 +69,7 @@ CREATE TABLE `tp_destination_rates` (
   `rates_tag` varchar(64) NOT NULL,
   `rounding_method` varchar(255) NOT NULL,
   `rounding_decimals` tinyint(4) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_drid` (`tpid`,`tag`),
@@ -84,6 +88,7 @@ CREATE TABLE `tp_rating_plans` (
   `destrates_tag` varchar(64) NOT NULL,
   `timing_tag` varchar(64) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   KEY `tpid_rpl` (`tpid`,`tag`),
@@ -106,6 +111,7 @@ CREATE TABLE `tp_rating_profiles` (
   `activation_time` varchar(24) NOT NULL,
   `rating_plan_tag` varchar(64) NOT NULL,
   `fallback_subjects` varchar(64),
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid_loadid` (`tpid`, `loadid`),
   UNIQUE KEY `tpid_loadid_tenant_category_dir_subj_atime` (`tpid`,`loadid`, `tenant`,`category`,`direction`,`subject`,`activation_time`)
@@ -123,6 +129,7 @@ CREATE TABLE `tp_shared_groups` (
   `account` varchar(24) NOT NULL,
   `strategy` varchar(24) NOT NULL,
   `rating_subject` varchar(24) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_shared_group` (`tpid`,`tag`,`account`,`strategy`,`rating_subject`)
@@ -149,6 +156,7 @@ CREATE TABLE `tp_actions` (
   `balance_weight` DECIMAL(8,2) NOT NULL,
   `extra_parameters` varchar(256) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_action` (`tpid`,`tag`,`action`,`balance_type`,`direction`,`expiry_time`,`destination_tag`,`shared_group`,`balance_weight`,`weight`)
@@ -166,6 +174,7 @@ CREATE TABLE `tp_action_plans` (
   `actions_tag` varchar(64) NOT NULL,
   `timing_tag` varchar(64) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_action_schedule` (`tpid`,`tag`,`actions_tag`)
@@ -195,6 +204,7 @@ CREATE TABLE `tp_action_triggers` (
   `min_queued_items` int(11) NOT NULL,
   `actions_tag` varchar(64) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_trigger_definition` (`tpid`,`tag`,`balance_type`,`direction`,`threshold_type`,`threshold_value`,`destination_tag`,`actions_tag`)
@@ -214,6 +224,7 @@ CREATE TABLE `tp_account_actions` (
   `direction` varchar(8) NOT NULL,
   `action_plan_tag` varchar(64),
   `action_triggers_tag` varchar(64),
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`),
   UNIQUE KEY `unique_tp_account` (`tpid`,`loadid`,`tenant`,`account`,`direction`)
@@ -236,6 +247,7 @@ CREATE TABLE tp_lcr_rules (
   `suppliers`	varchar(64) NOT NULL,
   `activation_time` varchar(24) NOT NULL,
   `weight` DECIMAL(8,2) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );
@@ -266,6 +278,7 @@ CREATE TABLE tp_derived_chargers (
   `setup_time_field`  varchar(24) NOT NULL,
   `answer_time_field`  varchar(24) NOT NULL,
   `usage_field`  varchar(24) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );
@@ -300,6 +313,7 @@ CREATE TABLE tp_cdr_stats (
   `rated_subject` varchar(64) NOT NULL,
   `cost_interval` varchar(24) NOT NULL,
   `action_triggers` varchar(64) NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `tpid` (`tpid`)
 );

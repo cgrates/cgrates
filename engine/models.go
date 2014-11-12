@@ -38,13 +38,15 @@ type TpTiming struct {
 	MonthDays string
 	WeekDays  string
 	Time      string
+	CreatedAt time.Time
 }
 
 type TpDestination struct {
-	Id     int64
-	Tpid   string
-	Tag    string
-	Prefix string
+	Id        int64
+	Tpid      string
+	Tag       string
+	Prefix    string
+	CreatedAt time.Time
 }
 
 type TpRate struct {
@@ -56,6 +58,7 @@ type TpRate struct {
 	RateUnit           string
 	RateIncrement      string
 	GroupIntervalStart string
+	CreatedAt          time.Time
 }
 
 type TpDestinationRate struct {
@@ -66,6 +69,7 @@ type TpDestinationRate struct {
 	RatesTag         string
 	RoundingMethod   string
 	RoundingDecimals int
+	CreatedAt        time.Time
 }
 
 type TpRatingPlan struct {
@@ -75,6 +79,7 @@ type TpRatingPlan struct {
 	DestratesTag string
 	TimingTag    string
 	Weight       float64
+	CreatedAt    time.Time
 }
 
 type TpRatingProfile struct {
@@ -88,6 +93,7 @@ type TpRatingProfile struct {
 	ActivationTime   string
 	RatingPlanTag    string
 	FallbackSubjects string
+	CreatedAt        time.Time
 }
 
 func (rpf *TpRatingProfile) SetRatingProfileId(id string) error {
@@ -115,6 +121,7 @@ type TpLcrRules struct {
 	Suppliers      string
 	ActivatinTime  string
 	Weight         float64
+	CreatedAt      time.Time
 }
 
 type TpAction struct {
@@ -133,6 +140,7 @@ type TpAction struct {
 	BalanceWeight   float64
 	ExtraParameters string
 	Weight          float64
+	CreatedAt       time.Time
 }
 
 type TpActionPlan struct {
@@ -142,6 +150,7 @@ type TpActionPlan struct {
 	ActionsTag string
 	TimingTag  string
 	Weight     float64
+	CreatedAt  time.Time
 }
 
 type TpActionTrigger struct {
@@ -163,6 +172,7 @@ type TpActionTrigger struct {
 	MinQueuedItems       int
 	ActionsTag           string
 	Weight               float64
+	CreatedAt            time.Time
 }
 
 type TpAccountAction struct {
@@ -174,6 +184,7 @@ type TpAccountAction struct {
 	Account           string
 	ActionPlanTag     string
 	ActionTriggersTag string
+	CreatedAt         time.Time
 }
 
 func (aa *TpAccountAction) SetAccountActionId(id string) error {
@@ -195,6 +206,7 @@ type TpSharedGroup struct {
 	Account       string
 	Strategy      string
 	RatingSubject string
+	CreatedAt     time.Time
 }
 
 type TpDerivedCharger struct {
@@ -218,6 +230,7 @@ type TpDerivedCharger struct {
 	SetupTimeField   string
 	AnswerTimeField  string
 	UsageField       string
+	CreatedAt        time.Time
 }
 
 func (tpdc *TpDerivedCharger) SetDerivedChargersId(id string) error {
@@ -258,6 +271,7 @@ type TpCdrStat struct {
 	RatedSubject      string
 	CostInterval      string
 	ActionTriggers    string
+	CreatedAt         time.Time
 }
 
 type TblCdrsPrimary struct {
@@ -277,6 +291,8 @@ type TblCdrsPrimary struct {
 	SetupTime   time.Time
 	AnswerTime  time.Time
 	Usage       float64
+	CreatedAt   time.Time
+	DeletedAt   time.Time
 }
 
 func (t TblCdrsPrimary) TableName() string {
@@ -287,6 +303,8 @@ type TblCdrsExtra struct {
 	Id          int64
 	Cgrid       string
 	ExtraFields string
+	CreatedAt   time.Time
+	DeletedAt   time.Time
 }
 
 func (t TblCdrsExtra) TableName() string {
@@ -308,6 +326,9 @@ type TblCostDetail struct {
 	Destination string
 	Cost        float64
 	Timespans   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   time.Time
 }
 
 type TblRatedCdr struct {
@@ -327,4 +348,7 @@ type TblRatedCdr struct {
 	Usage         float64
 	Cost          float64
 	ExtraInfo     string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     time.Time
 }

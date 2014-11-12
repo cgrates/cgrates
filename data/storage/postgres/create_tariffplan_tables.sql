@@ -11,6 +11,7 @@ CREATE TABLE tp_timings (
   month_days VARCHAR(255) NOT NULL,
   week_days VARCHAR(255) NOT NULL,
   time VARCHAR(16) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE  (tpid, tag)
 );
 
@@ -24,6 +25,7 @@ CREATE TABLE tp_destinations (
   tpid VARCHAR(64) NOT NULL,
   tag VARCHAR(64) NOT NULL,
   prefix VARCHAR(24) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, tag, prefix)
 );
 
@@ -41,6 +43,7 @@ CREATE TABLE tp_rates (
   rate_unit VARCHAR(16) NOT NULL,
   rate_increment VARCHAR(16) NOT NULL,
   group_interval_start VARCHAR(16) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, tag, group_interval_start)
 );
 
@@ -57,6 +60,7 @@ CREATE TABLE tp_destination_rates (
   rates_tag VARCHAR(64) NOT NULL,
   rounding_method VARCHAR(255) NOT NULL,
   rounding_decimals SMALLINT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, tag , destinations_tag)
 );
 
@@ -72,6 +76,7 @@ CREATE TABLE tp_rating_plans (
   destrates_tag VARCHAR(64) NOT NULL,
   timing_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, tag, destrates_tag, timing_tag)
 );
 
@@ -91,6 +96,7 @@ CREATE TABLE tp_rating_profiles (
   activation_time VARCHAR(24) NOT NULL,
   rating_plan_tag VARCHAR(64) NOT NULL,
   fallback_subjects VARCHAR(64),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, loadid, tenant, category, direction, subject, activation_time)
 );
 
@@ -106,6 +112,7 @@ CREATE TABLE tp_shared_groups (
   account VARCHAR(24) NOT NULL,
   strategy VARCHAR(24) NOT NULL,
   rating_subject VARCHAR(24) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, tag, account , strategy , rating_subject)
 );
 
@@ -130,6 +137,7 @@ CREATE TABLE tp_actions (
   balance_weight NUMERIC(8,2) NOT NULL,
   extra_parameters VARCHAR(256) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, tag, action, balance_type, direction, expiry_time, destination_tag, shared_group, balance_weight, weight)
 );
 
@@ -145,6 +153,7 @@ CREATE TABLE tp_action_plans (
   actions_tag VARCHAR(64) NOT NULL,
   timing_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE  (tpid, tag, actions_tag)
 );
 
@@ -172,6 +181,7 @@ CREATE TABLE tp_action_triggers (
   min_queued_items INTEGER NOT NULL,
   actions_tag VARCHAR(64) NOT NULL,
   weight NUMERIC(8,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, tag, balance_type, direction, threshold_type, threshold_value, destination_tag, actions_tag)
 );
 
@@ -189,6 +199,7 @@ CREATE TABLE tp_account_actions (
   direction VARCHAR(8) NOT NULL,
   action_plan_tag VARCHAR(64),
   action_triggers_tag VARCHAR(64),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (tpid, loadid, tenant, account, direction)
 );
 
@@ -208,7 +219,8 @@ CREATE TABLE tp_lcr_rules (
   strategy VARCHAR(16) NOT NULL,
   suppliers	VARCHAR(64) NOT NULL,
   activation_time VARCHAR(24) NOT NULL,
-  weight NUMERIC(8,2) NOT NULL
+  weight NUMERIC(8,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 --
@@ -236,7 +248,8 @@ CREATE TABLE tp_derived_chargers (
   destination_field  VARCHAR(24) NOT NULL,
   setup_time_field  VARCHAR(24) NOT NULL,
   answer_time_field  VARCHAR(24) NOT NULL,
-  usage_field  VARCHAR(24) NOT NULL
+  usage_field  VARCHAR(24) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -268,5 +281,6 @@ CREATE TABLE tp_cdr_stats (
   rated_account VARCHAR(64) NOT NULL,
   rated_subject VARCHAR(64) NOT NULL,
   cost_interval VARCHAR(24) NOT NULL,
-  action_triggers VARCHAR(64) NOT NULL
+  action_triggers VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -101,7 +101,7 @@ func (self *SQLStorage) GetTPIds() ([]string, error) {
 	return ids, nil
 }
 
-// ToDo: PSQL TEST
+// ToDo: TEST
 func (self *SQLStorage) GetTPTableIds(tpid, table string, distinct utils.TPDistinctIds, filters map[string]string, pagination *utils.Paginator) ([]string, error) {
 
 	qry := fmt.Sprintf("SELECT DISTINCT %s FROM %s where tpid='%s'", distinct, table, tpid)
@@ -632,15 +632,11 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aas map[string]*utils.T
 	}
 	tx := self.db.Begin()
 	for _, aa := range aas {
-		// parse identifiers
-		tx.Where("tpid = ?", tpid).
-			Where("direction = ?", aa.Direction).
-			Where("tenant = ?", aa.Tenant).
-			Where("account = ?", aa.Account).
-			Where("loadid = ?", aa.LoadId).
-			Delete(TpAccountAction{})
-
-		tx.Save(TpAccountAction{
+		if err := tx.Where(&TpAccountAction{Tpid: tpid, Loadid: aa.LoadId, Direction: aa.Direction, Tenant: aa.Tenant, Account: aa.Account}).Delete(TpAccountAction{}).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+		saved := tx.Save(TpAccountAction{
 			Tpid:              aa.TPid,
 			Loadid:            aa.LoadId,
 			Tenant:            aa.Tenant,
@@ -649,6 +645,10 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aas map[string]*utils.T
 			ActionPlanTag:     aa.ActionPlanId,
 			ActionTriggersTag: aa.ActionTriggersId,
 		})
+		if saved.Error != nil {
+			tx.Rollback()
+			return saved.Error
+		}
 	}
 	tx.Commit()
 	return nil

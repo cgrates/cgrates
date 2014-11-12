@@ -21,6 +21,8 @@ CREATE TABLE cdrs_primary (
   setup_time TIMESTAMP NOT NULL,
   answer_time TIMESTAMP NOT NULL,
   usage NUMERIC(30,9) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP DEFAULT NULL,
   UNIQUE (cgrid)
 );
 
@@ -33,6 +35,8 @@ CREATE TABLE cdrs_extra (
   id SERIAL PRIMARY KEY,
   cgrid CHAR(40) NOT NULL,
   extra_fields text NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  deleted_at TIMESTAMP DEFAULT NULL,
   UNIQUE (cgrid)
 );
 
@@ -56,6 +60,9 @@ CREATE TABLE cost_details (
   destination VARCHAR(128) NOT NULL,
   cost NUMERIC(20,4) NOT NULL,
   timespans text,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT NULL,
+  deleted_at TIMESTAMP DEFAULT NULL,
   UNIQUE (cgrid, runid)
 );
 
@@ -80,5 +87,8 @@ CREATE TABLE rated_cdrs (
   usage NUMERIC(30,9) NOT NULL,
   cost NUMERIC(20,4) DEFAULT NULL,
   extra_info text,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT NULL,
+  deleted_at TIMESTAMP DEFAULT NULL,
   UNIQUE (cgrid, runid)
 );
