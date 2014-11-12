@@ -21,8 +21,8 @@ CREATE TABLE cdrs_primary (
   setup_time datetime NOT NULL,
   answer_time datetime NOT NULL,
   `usage` DECIMAL(30,9) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP DEFAULT 0,
+  created_at TIMESTAMP,
+  deleted_at TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY cgrid (cgrid)
 );
@@ -36,8 +36,8 @@ CREATE TABLE cdrs_extra (
   id int(11) NOT NULL AUTO_INCREMENT,
   cgrid char(40) NOT NULL,
   extra_fields text NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMP DEFAULT 0,
+  created_at TIMESTAMP,
+  deleted_at TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY cgrid (cgrid)
 );
@@ -62,9 +62,9 @@ CREATE TABLE cost_details (
   cost DECIMAL(20,4) NOT NULL,
   timespans text,
   cost_source varchar(64) NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT 0,
-  deleted_at TIMESTAMP DEFAULT 0,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  deleted_at TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `costid` (`cgrid`,`runid`)
 );
@@ -90,9 +90,9 @@ CREATE TABLE `rated_cdrs` (
   `usage` DECIMAL(30,9) NOT NULL,
   cost DECIMAL(20,4) DEFAULT NULL,
   extra_info text,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT 0,
-  deleted_at TIMESTAMP DEFAULT 0,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  deleted_at TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `costid` (`cgrid`,`runid`)
 );
