@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -70,13 +71,51 @@ func (self *PostgresStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
 		return nil //Nothing to set
 	}
 	tx := self.db.Begin()
-	if err := tx.Where(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId}).Delete(TpTiming{}).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
 	if err := tx.Save(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId, Years: tm.Years, Months: tm.Months, MonthDays: tm.MonthDays, WeekDays: tm.WeekDays, Time: tm.Time, CreatedAt: time.Now()}).Error; err != nil {
 		tx.Rollback()
+		tx = self.db.Begin()
+		updated := tx.Model(TpTiming{}).Where(&TpTiming{Tpid: tm.TPid, Tag: tm.TimingId}).Updates(&TpTiming{Years: tm.Years, Months: tm.Months, MonthDays: tm.MonthDays, WeekDays: tm.WeekDays, Time: tm.Time})
+		if updated.Error != nil {
+			tx.Rollback()
+			return updated.Error
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
+func (self *PostgresStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
+	tss, err := json.Marshal(cc.Timespans)
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
 		return err
+	}
+	tx := self.db.Begin()
+	cd := &TblCostDetail{
+		Cgrid:       cgrid,
+		Runid:       runid,
+		Tor:         cc.TOR,
+		Direction:   cc.Direction,
+		Tenant:      cc.Tenant,
+		Category:    cc.Category,
+		Account:     cc.Account,
+		Subject:     cc.Subject,
+		Destination: cc.Destination,
+		Cost:        cc.Cost,
+		Timespans:   string(tss),
+		CostSource:  source,
+		CreatedAt:   time.Now(),
+	}
+
+	if tx.Save(cd).Error != nil { // Check further since error does not properly reflect duplicates here (sql: no rows in result set)
+		tx.Rollback()
+		tx = self.db.Begin()
+		updated := tx.Model(TblCostDetail{}).Where(&TblCostDetail{Cgrid: cgrid, Runid: runid}).Updates(&TblCostDetail{Tor: cc.TOR, Direction: cc.Direction, Tenant: cc.Tenant, Category: cc.Category,
+			Account: cc.Account, Subject: cc.Subject, Destination: cc.Destination, Cost: cc.Cost, Timespans: string(tss), CostSource: source, UpdatedAt: time.Now()})
+		if updated.Error != nil {
+			tx.Rollback()
+			return updated.Error
+		}
 	}
 	tx.Commit()
 	return nil

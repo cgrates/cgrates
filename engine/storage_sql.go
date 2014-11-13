@@ -647,7 +647,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aas map[string]*utils.T
 			tx.Rollback()
 			return err
 		}
-		saved := tx.Save(TpAccountAction{
+		saved := tx.Save(&TpAccountAction{
 			Tpid:              aa.TPid,
 			Loadid:            aa.LoadId,
 			Tenant:            aa.Tenant,
@@ -668,33 +668,7 @@ func (self *SQLStorage) SetTPAccountActions(tpid string, aas map[string]*utils.T
 }
 
 func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
-	//ToDo: Add cgrid to logCallCost
-	if self.Db == nil {
-		//timespans.Logger.Warning("Cannot write log to database.")
-		return
-	}
-	tss, err := json.Marshal(cc.Timespans)
-	if err != nil {
-		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
-	}
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cost_time,cost_source,cgrid,runid,tor,direction,tenant,category,account,subject,destination,cost,timespans) VALUES (now(),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%f,'%s') ON DUPLICATE KEY UPDATE cost_time=now(),cost_source=values(cost_source),tor=values(tor),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),cost=values(cost),timespans=values(timespans)",
-		utils.TBL_COST_DETAILS,
-		source,
-		cgrid,
-		runid,
-		cc.TOR,
-		cc.Direction,
-		cc.Tenant,
-		cc.Category,
-		cc.Account,
-		cc.Subject,
-		cc.Destination,
-		cc.Cost,
-		tss))
-	if err != nil {
-		Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
-	}
-	return
+	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
 func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
@@ -763,7 +737,7 @@ func (self *SQLStorage) SetCdr(cdr *utils.StoredCdr) (err error) {
 }
 
 func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string) (err error) {
-	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (mediation_time,cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,cost,extra_info) VALUES (now(),'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%v,%f,'%s') ON DUPLICATE KEY UPDATE mediation_time=now(),reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),cost=values(cost),extra_info=values(extra_info)",
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,reqtype,direction,tenant,category,account,subject,destination,setup_time,answer_time,`usage`,cost,extra_info,created_at) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%v,%f,'%s',%d) ON DUPLICATE KEY UPDATE reqtype=values(reqtype),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),setup_time=values(setup_time),answer_time=values(answer_time),`usage`=values(`usage`),cost=values(cost),extra_info=values(extra_info), updated_at=%d",
 		utils.TBL_RATED_CDRS,
 		storedCdr.CgrId,
 		storedCdr.MediationRunId,
@@ -778,7 +752,9 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 		storedCdr.AnswerTime,
 		storedCdr.Usage.Seconds(),
 		storedCdr.Cost,
-		extraInfo))
+		extraInfo,
+		time.Now().Unix(),
+		time.Now().Unix()))
 	if err != nil {
 		Logger.Err(fmt.Sprintf("failed to execute cdr insert statement: %s", err.Error()))
 	}

@@ -69,6 +69,16 @@ func TestMySQLSetGetTPTiming(t *testing.T) {
 	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
 		t.Errorf("Expecting: %+v, received: %+v", tm, tmgs[tm.TimingId])
 	}
+	// Update
+	tm.Time = "00:00:01"
+	if err := mysqlDb.SetTPTiming(tm); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := mysqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
+		t.Errorf("Expecting: %+v, received: %+v", tmgs[tm.TimingId])
+	}
 }
 
 func TestMySQLSetGetTPDestination(t *testing.T) {
@@ -524,6 +534,16 @@ func TestMySQLCallCost(t *testing.T) {
 			},
 		},
 	}
+	if err := mysqlDb.LogCallCost(cgrId, TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
+		t.Error(err.Error())
+	}
+	if ccRcv, err := mysqlDb.GetCallCostLog(cgrId, TEST_SQL, utils.DEFAULT_RUNID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(cc, ccRcv) {
+		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
+	}
+	// UPDATE test here
+	cc.Category = "premium_call"
 	if err := mysqlDb.LogCallCost(cgrId, TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
 		t.Error(err.Error())
 	}

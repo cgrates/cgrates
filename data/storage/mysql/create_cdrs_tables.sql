@@ -49,7 +49,6 @@ CREATE TABLE cdrs_extra (
 DROP TABLE IF EXISTS cost_details;
 CREATE TABLE cost_details (
   id int(11) NOT NULL AUTO_INCREMENT,
-  cost_time datetime NOT NULL,
   cgrid char(40) NOT NULL,
   runid  varchar(64) NOT NULL,
   tor  varchar(16) NOT NULL,
@@ -75,7 +74,6 @@ CREATE TABLE cost_details (
 DROP TABLE IF EXISTS rated_cdrs;
 CREATE TABLE `rated_cdrs` (
   id int(11) NOT NULL AUTO_INCREMENT,
-  mediation_time datetime NOT NULL,
   cgrid char(40) NOT NULL,
   runid  varchar(64) NOT NULL,
   reqtype varchar(24) NOT NULL,

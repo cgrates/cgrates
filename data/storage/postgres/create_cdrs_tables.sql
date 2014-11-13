@@ -47,8 +47,6 @@ CREATE TABLE cdrs_extra (
 DROP TABLE IF EXISTS cost_details;
 CREATE TABLE cost_details (
   id SERIAL PRIMARY KEY,
-  cost_time TIMESTAMP NOT NULL,
-  cost_source VARCHAR(64) NOT NULL,
   cgrid CHAR(40) NOT NULL,
   runid  VARCHAR(64) NOT NULL,
   tor  VARCHAR(16) NOT NULL,
@@ -60,6 +58,7 @@ CREATE TABLE cost_details (
   destination VARCHAR(128) NOT NULL,
   cost NUMERIC(20,4) NOT NULL,
   timespans text,
+  cost_source VARCHAR(64) NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
   deleted_at TIMESTAMP,
@@ -72,7 +71,6 @@ CREATE TABLE cost_details (
 DROP TABLE IF EXISTS rated_cdrs;
 CREATE TABLE rated_cdrs (
   id SERIAL PRIMARY KEY,
-  mediation_time TIMESTAMP NOT NULL,
   cgrid CHAR(40) NOT NULL,
   runid  VARCHAR(64) NOT NULL,
   reqtype VARCHAR(24) NOT NULL,

@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -71,6 +72,35 @@ func (self *MySQLStorage) SetTPTiming(tm *utils.ApierTPTiming) error {
 	}
 	if _, err := self.Db.Exec(fmt.Sprintf("INSERT INTO %s (tpid, tag, years, months, month_days, week_days, time, created_at) VALUES('%s','%s','%s','%s','%s','%s','%s', %d) ON DUPLICATE KEY UPDATE years=values(years), months=values(months), month_days=values(month_days), week_days=values(week_days), time=values(time)",
 		utils.TBL_TP_TIMINGS, tm.TPid, tm.TimingId, tm.Years, tm.Months, tm.MonthDays, tm.WeekDays, tm.Time, time.Now().Unix())); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (self *MySQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (err error) {
+	tss, err := json.Marshal(cc.Timespans)
+	if err != nil {
+		Logger.Err(fmt.Sprintf("Error marshalling timespans to json: %v", err))
+		return err
+	}
+	_, err = self.Db.Exec(fmt.Sprintf("INSERT INTO %s (cgrid,runid,tor,direction,tenant,category,account,subject,destination,cost,timespans,cost_source,created_at) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s',%f,'%s','%s',%d) ON DUPLICATE KEY UPDATE tor=values(tor),direction=values(direction),tenant=values(tenant),category=values(category),account=values(account),subject=values(subject),destination=values(destination),cost=values(cost),timespans=values(timespans),cost_source=values(cost_source),updated_at=%d",
+		utils.TBL_COST_DETAILS,
+		cgrid,
+		runid,
+		cc.TOR,
+		cc.Direction,
+		cc.Tenant,
+		cc.Category,
+		cc.Account,
+		cc.Subject,
+		cc.Destination,
+		cc.Cost,
+		tss,
+		source,
+		time.Now().Unix(),
+		time.Now().Unix()))
+	if err != nil {
+		Logger.Err(fmt.Sprintf("failed to execute insert statement: %v", err))
 		return err
 	}
 	return nil

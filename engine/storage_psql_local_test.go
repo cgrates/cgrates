@@ -69,6 +69,16 @@ func TestPSQLSetGetTPTiming(t *testing.T) {
 	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
 		t.Errorf("Expecting: %+v, received: %+v", tmgs[tm.TimingId])
 	}
+	// Update
+	tm.Time = "00:00:01"
+	if err := psqlDb.SetTPTiming(tm); err != nil {
+		t.Error(err.Error())
+	}
+	if tmgs, err := psqlDb.GetTpTimings(TEST_SQL, tm.TimingId); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(tm, tmgs[tm.TimingId]) {
+		t.Errorf("Expecting: %+v, received: %+v", tmgs[tm.TimingId])
+	}
 }
 
 func TestPSQLSetGetTPDestination(t *testing.T) {
@@ -472,38 +482,6 @@ func TestPSQLSetCdr(t *testing.T) {
 	}
 }
 
-/*
-func TestPSQLSetRatedCdr(t *testing.T) {
-	if !*testLocal {
-		return
-	}
-	strCdr1 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: "rated",
-		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
-	strCdr1.CgrId = utils.Sha1(strCdr1.AccId, strCdr1.SetupTime.String())
-	strCdr2 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN", ReqType: "prepaid",
-		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
-		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(12) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
-	strCdr2.CgrId = utils.Sha1(strCdr2.AccId, strCdr2.SetupTime.String())
-	strCdr3 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: "rated",
-		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1002", Destination: "+4986517174964",
-		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
-		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
-		MediationRunId: "wholesale_run", Cost: 1.201}
-	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
-
-	for _, cdr := range []*utils.StoredCdr{strCdr1, strCdr2, strCdr3} {
-		if err := psqlDb.SetRatedCdr(cdr, ""); err != nil {
-			t.Error(err.Error())
-		}
-	}
-}
-
-
 func TestPSQLCallCost(t *testing.T) {
 	if !*testLocal {
 		return
@@ -536,9 +514,51 @@ func TestPSQLCallCost(t *testing.T) {
 	} else if !reflect.DeepEqual(cc, ccRcv) {
 		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
 	}
+	// UPDATE test here
+	cc.Category = "premium_call"
+	if err := psqlDb.LogCallCost(cgrId, TEST_SQL, utils.DEFAULT_RUNID, cc); err != nil {
+		t.Error(err.Error())
+	}
+	if ccRcv, err := psqlDb.GetCallCostLog(cgrId, TEST_SQL, utils.DEFAULT_RUNID); err != nil {
+		t.Error(err.Error())
+	} else if !reflect.DeepEqual(cc, ccRcv) {
+		t.Errorf("Expecting call cost: %v, received: %v", cc, ccRcv)
+	}
 }
 
+/*
+func TestPSQLSetRatedCdr(t *testing.T) {
+	if !*testLocal {
+		return
+	}
+	strCdr1 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb1", CdrHost: "192.168.1.1", CdrSource: "UNKNOWN", ReqType: "rated",
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 1.201}
+	strCdr1.CgrId = utils.Sha1(strCdr1.AccId, strCdr1.SetupTime.String())
+	strCdr2 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb2", CdrHost: "192.168.1.2", CdrSource: "UNKNOWN", ReqType: "prepaid",
+		Direction: "*out", Tenant: "cgrates.org", Category: "call", Account: "1001", Subject: "1001", Destination: "1002",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(12) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: utils.DEFAULT_RUNID, Cost: 0.201}
+	strCdr2.CgrId = utils.Sha1(strCdr2.AccId, strCdr2.SetupTime.String())
+	strCdr3 := &utils.StoredCdr{TOR: utils.VOICE, AccId: "bbb3", CdrHost: "192.168.1.1", CdrSource: TEST_SQL, ReqType: "rated",
+		Direction: "*out", Tenant: "itsyscom.com", Category: "call", Account: "1002", Subject: "1002", Destination: "+4986517174964",
+		SetupTime: time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC), AnswerTime: time.Date(2013, 12, 7, 8, 42, 26, 0, time.UTC),
+		Usage: time.Duration(10) * time.Second, ExtraFields: map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
+		MediationRunId: "wholesale_run", Cost: 1.201}
+	strCdr3.CgrId = utils.Sha1(strCdr3.AccId, strCdr3.SetupTime.String())
 
+	for _, cdr := range []*utils.StoredCdr{strCdr1, strCdr2, strCdr3} {
+		if err := psqlDb.SetRatedCdr(cdr, ""); err != nil {
+			t.Error(err.Error())
+		}
+	}
+}
+*/
+
+/*
 func TestPSQLGetStoredCdrs(t *testing.T) {
 	if !*testLocal {
 		return

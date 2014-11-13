@@ -296,7 +296,7 @@ type TblCdrsPrimary struct {
 }
 
 func (t TblCdrsPrimary) TableName() string {
-	return "cdrs_primary"
+	return utils.TBL_CDRS_PRIMARY
 }
 
 type TblCdrsExtra struct {
@@ -308,12 +308,11 @@ type TblCdrsExtra struct {
 }
 
 func (t TblCdrsExtra) TableName() string {
-	return "cdrs_extra"
+	return utils.TBL_CDRS_EXTRA
 }
 
 type TblCostDetail struct {
 	Id          int64
-	CostSource  string
 	Cgrid       string
 	Runid       string
 	Tor         string
@@ -325,29 +324,37 @@ type TblCostDetail struct {
 	Destination string
 	Cost        float64
 	Timespans   string
+	CostSource  string
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   time.Time
 }
 
+func (t TblCostDetail) TableName() string {
+	return utils.TBL_COST_DETAILS
+}
+
 type TblRatedCdr struct {
-	Id            int64
-	MediationTime time.Time
-	Cgrid         string
-	Runid         string
-	Reqtype       string
-	Direction     string
-	Tenant        string
-	Category      string
-	Account       string
-	Subject       string
-	Destination   string
-	SetupTime     time.Time
-	AnswerTime    time.Time
-	Usage         float64
-	Cost          float64
-	ExtraInfo     string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	DeletedAt     time.Time
+	Id          int64
+	Cgrid       string
+	Runid       string
+	Reqtype     string
+	Direction   string
+	Tenant      string
+	Category    string
+	Account     string
+	Subject     string
+	Destination string
+	SetupTime   time.Time
+	AnswerTime  time.Time
+	Usage       float64
+	Cost        float64
+	ExtraInfo   string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   time.Time
+}
+
+func (t TblRatedCdr) TableName() string {
+	return utils.TBL_RATED_CDRS
 }
