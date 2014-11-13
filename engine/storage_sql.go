@@ -671,23 +671,27 @@ func (self *SQLStorage) LogCallCost(cgrid, source, runid string, cc *CallCost) (
 	return errors.New(utils.ERR_NOT_IMPLEMENTED)
 }
 
-func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (cc *CallCost, err error) {
-	qry := fmt.Sprintf("SELECT tor,direction,tenant,category,account,subject,destination,cost,timespans FROM %s WHERE cgrid='%s' AND runid='%s'",
-		utils.TBL_COST_DETAILS, cgrid, runid)
-	if len(source) != 0 {
-		qry += fmt.Sprintf(" AND cost_source='%s'", source)
-	}
-	row := self.Db.QueryRow(qry)
-	var timespansJson string
-	cc = &CallCost{Cost: -1}
-	err = row.Scan(&cc.TOR, &cc.Direction, &cc.Tenant, &cc.Category, &cc.Account, &cc.Subject, &cc.Destination, &cc.Cost, &timespansJson)
-	if len(timespansJson) == 0 { // No costs returned
-		return nil, nil
-	}
-	if err = json.Unmarshal([]byte(timespansJson), &cc.Timespans); err != nil {
+func (self *SQLStorage) GetCallCostLog(cgrid, source, runid string) (*CallCost, error) {
+	var tpCostDetail TblCostDetail
+	if err := self.db.Where(&TblCostDetail{Cgrid: cgrid, Runid: runid, CostSource: source}).First(&tpCostDetail).Error; err != nil {
 		return nil, err
 	}
-	return
+	if len(tpCostDetail.Timespans) == 0 {
+		return nil, nil // No costs returned
+	}
+	cc := new(CallCost)
+	cc.TOR = tpCostDetail.Tor
+	cc.Direction = tpCostDetail.Direction
+	cc.Category = tpCostDetail.Category
+	cc.Tenant = tpCostDetail.Tenant
+	cc.Account = tpCostDetail.Account
+	cc.Subject = tpCostDetail.Subject
+	cc.Destination = tpCostDetail.Destination
+	cc.Cost = tpCostDetail.Cost
+	if err = json.Unmarshal([]byte(tpCostDetail.Timespans), &cc.Timespans); err != nil {
+		return nil, err
+	}
+	return cc, nil
 }
 
 func (self *SQLStorage) LogActionTrigger(ubId, source string, at *ActionTrigger, as Actions) (err error) {
