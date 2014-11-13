@@ -526,7 +526,6 @@ func TestPSQLCallCost(t *testing.T) {
 	}
 }
 
-/*
 func TestPSQLSetRatedCdr(t *testing.T) {
 	if !*testLocal {
 		return
@@ -556,9 +555,7 @@ func TestPSQLSetRatedCdr(t *testing.T) {
 		}
 	}
 }
-*/
 
-/*
 func TestPSQLGetStoredCdrs(t *testing.T) {
 	if !*testLocal {
 		return
@@ -802,15 +799,15 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 	}
 }
 
-func TestRemStoredCdrs(t *testing.T) {
+func TestPSQLRemStoredCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
-	var timeStart, timeEnd time.Time
 	cgrIdB1 := utils.Sha1("bbb1", time.Date(2013, 12, 7, 8, 42, 24, 0, time.UTC).String())
 	if err := psqlDb.RemStoredCdrs([]string{cgrIdB1}); err != nil {
 		t.Error(err.Error())
 	}
+	var timeStart, timeEnd time.Time
 	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, false, nil); err != nil {
 		t.Error(err.Error())
 	} else if len(storedCdrs) != 7 {
@@ -837,6 +834,5 @@ func TestRemStoredCdrs(t *testing.T) {
 	} else if len(storedCdrs) != 0 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
-}
 
-*/
+}

@@ -797,7 +797,7 @@ func TestMySQLGetStoredCdrs(t *testing.T) {
 	}
 }
 
-func TestRemStoredCdrs(t *testing.T) {
+func TestMySQLRemStoredCdrs(t *testing.T) {
 	if !*testLocal {
 		return
 	}
