@@ -103,9 +103,9 @@ func ConfigureLogStorage(db_type, host, port, name, user, pass, marshaler string
 			d, err = NewRedisStorage(host, db_nb, pass, marshaler)
 		case utils.MONGO:
 			d, err = NewMongoStorage(host, port, name, user, pass)
-		case utils.POSTGRES:
-			d, err = NewPostgresStorage(host, port, name, user, pass)
 	*/
+	case utils.POSTGRES:
+		d, err = NewPostgresStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	case utils.MYSQL:
 		d, err = NewMySQLStorage(host, port, name, user, pass, maxConn, maxIdleConn)
 	default:
