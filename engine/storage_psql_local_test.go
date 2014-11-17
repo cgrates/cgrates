@@ -738,7 +738,7 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 	// Filter on ignoreErr
 	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, true, false, false, nil); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 8 {
+	} else if len(storedCdrs) != 3 {
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 	// Filter on ignoreRated
@@ -794,7 +794,7 @@ func TestPSQLGetStoredCdrs(t *testing.T) {
 	// Filter on ignoreDerived
 	if storedCdrs, err := psqlDb.GetStoredCdrs(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, 0, 0, timeStart, timeEnd, false, false, true, nil); err != nil {
 		t.Error(err.Error())
-	} else if len(storedCdrs) != 2 { // ToDo: Recheck this value
+	} else if len(storedCdrs) != 0 { // ToDo: Recheck this value
 		t.Error("Unexpected number of StoredCdrs returned: ", storedCdrs)
 	}
 }

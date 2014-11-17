@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
 
@@ -743,7 +744,144 @@ func (self *SQLStorage) SetRatedCdr(storedCdr *utils.StoredCdr, extraInfo string
 
 func (self *SQLStorage) GetStoredCdrs(cgrIds, runIds, tors, cdrHosts, cdrSources, reqTypes, directions, tenants, categories, accounts, subjects, destPrefixes, ratedAccounts, ratedSubjects []string,
 	orderIdStart, orderIdEnd int64, timeStart, timeEnd time.Time, ignoreErr, ignoreRated, ignoreDerived bool, pagination *utils.Paginator) ([]*utils.StoredCdr, error) {
-	return nil, errors.New(utils.ERR_NOT_IMPLEMENTED)
+	var cdrs []*utils.StoredCdr
+	// Select string
+	var selectStr string
+	if ignoreDerived { // We use different tables to query account data in case of derived
+		selectStr = fmt.Sprintf("%s.cgrid,%s.id,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.usage,%s.extra_fields,%s.runid,%s.account,%s.subject,%s.cost",
+			utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY,
+			utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_RATED_CDRS)
+
+	} else {
+		selectStr = fmt.Sprintf("%s.cgrid,%s.id,%s.tor,%s.accid,%s.cdrhost,%s.cdrsource,%s.reqtype,%s.direction,%s.tenant,%s.category,%s.account,%s.subject,%s.destination,%s.setup_time,%s.answer_time,%s.usage,%s.extra_fields,%s.runid,%s.account,%s.subject,%s.cost",
+			utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS,
+			utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS,
+			utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS, utils.TBL_COST_DETAILS, utils.TBL_RATED_CDRS)
+	}
+	// Join string
+	joinStr := fmt.Sprintf("LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid LEFT JOIN %s ON %s.cgrid=%s.cgrid AND %s.runid=%s.runid", utils.TBL_CDRS_EXTRA, utils.TBL_CDRS_PRIMARY,
+		utils.TBL_CDRS_EXTRA, utils.TBL_RATED_CDRS, utils.TBL_CDRS_PRIMARY, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS, utils.TBL_RATED_CDRS, utils.TBL_COST_DETAILS)
+	// Start building query
+	q := self.db.Table(utils.TBL_CDRS_PRIMARY).Select(selectStr).Joins(joinStr)
+	// Where section
+	for _, tblName := range []string{utils.TBL_CDRS_PRIMARY, utils.TBL_CDRS_EXTRA, utils.TBL_COST_DETAILS, utils.TBL_RATED_CDRS} {
+		q = q.Where(fmt.Sprintf("(%s.deleted_at IS NULL OR %s.deleted_at <= '0001-01-02')", tblName, tblName)) // Do not consider soft deletes
+	}
+	// Add filters, use in to replace the high number of ORs
+	if len(cgrIds) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".cgrid in (?)", cgrIds)
+	}
+	if len(runIds) != 0 {
+		q = q.Where(utils.TBL_RATED_CDRS+".runid in (?)", runIds)
+	}
+	if len(tors) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".tor in (?)", tors)
+	}
+	if len(cdrHosts) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".cdrhost in (?)", cdrHosts)
+	}
+	if len(cdrSources) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".cdrsource in (?)", cdrSources)
+	}
+	if len(reqTypes) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".reqtype in (?)", reqTypes)
+	}
+	if len(directions) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".direction in (?)", directions)
+	}
+	if len(tenants) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".tenant in (?)", tenants)
+	}
+	if len(categories) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".category in (?)", categories)
+	}
+	if len(accounts) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".account in (?)", accounts)
+	}
+	if len(subjects) != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".subject in (?)", subjects)
+	}
+	if len(ratedAccounts) != 0 {
+		q = q.Where(utils.TBL_COST_DETAILS+".account in (?)", ratedAccounts)
+	}
+	if len(ratedSubjects) != 0 {
+		q = q.Where(utils.TBL_COST_DETAILS+".subject in (?)", ratedSubjects)
+	}
+	if orderIdStart != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".id >= ?", orderIdStart)
+	}
+	if orderIdEnd != 0 {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".id < ?", orderIdEnd)
+	}
+	if !timeStart.IsZero() {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".answer_time >= ?", timeStart)
+	}
+	if !timeEnd.IsZero() {
+		q = q.Where(utils.TBL_CDRS_PRIMARY+".answer_time < ?", timeEnd)
+	}
+	if ignoreRated { // ToDo: replace here with specific cost query
+		if ignoreErr {
+			q = q.Where(utils.TBL_RATED_CDRS + ".cost IS NULL")
+		} else {
+			q = q.Where(fmt.Sprintf("(%s.cost=-1 OR %s.cost IS NULL)", utils.TBL_RATED_CDRS, utils.TBL_RATED_CDRS))
+		}
+	} else if ignoreErr {
+		q = q.Where(utils.TBL_RATED_CDRS+".cost <> ?", -1)
+	}
+	if ignoreDerived {
+		q = q.Where(utils.TBL_RATED_CDRS+".runid = ?", utils.DEFAULT_RUNID)
+	}
+	if pagination != nil {
+		offset, limit := pagination.GetLimits()
+		q = q.Offset(offset).Limit(limit)
+	}
+	if len(destPrefixes) != 0 { // A bit ugly but still more readable than scopes provided by gorm
+		qIds := bytes.NewBufferString("(")
+		for idx, destPrefix := range destPrefixes {
+			if idx != 0 {
+				qIds.WriteString(" OR")
+			}
+			qIds.WriteString(fmt.Sprintf(" %s.destination LIKE '%s%%'", utils.TBL_CDRS_PRIMARY, destPrefix))
+		}
+		qIds.WriteString(" )")
+		q = q.Where(qIds.String())
+	}
+	// Execute query
+	rows, err := q.Rows()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var cgrid, tor, accid, cdrhost, cdrsrc, reqtype, direction, tenant, category, account, subject, destination, runid, ratedAccount, ratedSubject sql.NullString
+		var extraFields []byte
+		var setupTime, answerTime mysql.NullTime
+		var orderid int64
+		var usage, cost sql.NullFloat64
+		var extraFieldsMp map[string]string
+		if err := rows.Scan(&cgrid, &orderid, &tor, &accid, &cdrhost, &cdrsrc, &reqtype, &direction, &tenant, &category, &account, &subject, &destination, &setupTime, &answerTime, &usage,
+			&extraFields, &runid, &ratedAccount, &ratedSubject, &cost); err != nil {
+			return nil, err
+		}
+		if len(extraFields) != 0 {
+			if err := json.Unmarshal(extraFields, &extraFieldsMp); err != nil {
+				return nil, fmt.Errorf("JSON unmarshal error for cgrid: %s, runid: %v, error: %s", cgrid.String, runid.String, err.Error())
+			}
+		}
+		usageDur, _ := time.ParseDuration(strconv.FormatFloat(usage.Float64, 'f', -1, 64) + "s")
+		storCdr := &utils.StoredCdr{
+			CgrId: cgrid.String, OrderId: orderid, TOR: tor.String, AccId: accid.String, CdrHost: cdrhost.String, CdrSource: cdrsrc.String, ReqType: reqtype.String,
+			Direction: direction.String, Tenant: tenant.String,
+			Category: category.String, Account: account.String, Subject: subject.String, Destination: destination.String,
+			SetupTime: setupTime.Time, AnswerTime: answerTime.Time, Usage: usageDur,
+			ExtraFields: extraFieldsMp, MediationRunId: runid.String, RatedAccount: ratedAccount.String, RatedSubject: ratedSubject.String, Cost: cost.Float64,
+		}
+		if !cost.Valid { //There was no cost provided, will fakely insert 0 if we do not handle it and reflect on re-rating
+			storCdr.Cost = -1
+		}
+		cdrs = append(cdrs, storCdr)
+	}
+	return cdrs, nil
 }
 
 // Remove CDR data out of all CDR tables based on their cgrid
