@@ -129,22 +129,17 @@ func (cs cacheSimpleStore) Put(key string, value interface{}) {
 }
 
 func (cs cacheSimpleStore) Append(key string, value interface{}) {
-	var elements []interface{}
-	if ti, exists := cs.cache[key]; exists {
-		elements = ti.value.([]interface{})
+	var elements map[interface{}]struct{}
+	if v, err := cs.Get(key); err == nil {
+		elements = v.(map[interface{}]struct{})
+	} else {
+		elements = make(map[interface{}]struct{})
 	}
 	// check if the val is already present
-	found := false
-	for _, v := range elements {
-		if value == v {
-			found = true
-			break
-		}
+	if _, found := elements[value]; !found {
+		elements[value] = struct{}{}
 	}
-	if !found {
-		elements = append(elements, value)
-	}
-	cs.Put(key, elements)
+	cache.Put(key, elements)
 }
 
 func (cs cacheSimpleStore) Get(key string) (interface{}, error) {
